@@ -178,7 +178,10 @@ export function MuseumNetworkProposition({
               </h2>
             </div>
             <Link href="/museum/network/collection" className={TEXT_LINK_CLASS}>
-              {t(DEFAULT_LOCALE, "museum.network.proposition.art.action")}
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.proposition.actions.collection"
+              )}
             </Link>
           </div>
           <div className="tw-mt-8 tw-grid tw-gap-x-6 tw-gap-y-10 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
@@ -214,23 +217,15 @@ export function MuseumNetworkProposition({
               "museum.network.proposition.collection.acquisitions"
             )}
           </p>
-          <div className="tw-flex tw-flex-wrap tw-gap-x-6 tw-gap-y-2">
-            <Link href="/museum/network/collection" className={TEXT_LINK_CLASS}>
-              {t(
-                DEFAULT_LOCALE,
-                "museum.network.proposition.collection.action"
-              )}
-            </Link>
-            <Link
-              href="/museum/network/acquisition-programs"
-              className={TEXT_LINK_CLASS}
-            >
-              {t(
-                DEFAULT_LOCALE,
-                "museum.network.proposition.collection.programsAction"
-              )}
-            </Link>
-          </div>
+          <Link
+            href="/museum/network/acquisition-programs"
+            className={TEXT_LINK_CLASS}
+          >
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.proposition.collection.programsAction"
+            )}
+          </Link>
         </div>
       </section>
 
@@ -379,11 +374,11 @@ export function MuseumNetworkProposition({
 
       <section
         aria-labelledby="museum-permanence-title"
-        className="tw-grid tw-gap-8 tw-border-y tw-border-solid tw-border-iron-800 tw-py-10 lg:tw-grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:tw-gap-16"
+        className="tw-grid tw-gap-8 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10 lg:tw-grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:tw-gap-16"
       >
         <h2
           id="museum-permanence-title"
-          className="tw-m-0 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50"
+          className="tw-m-0 tw-max-w-md tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl"
         >
           {t(DEFAULT_LOCALE, "museum.network.proposition.permanence.title")}
         </h2>

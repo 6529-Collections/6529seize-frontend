@@ -167,5 +167,48 @@ describe("MuseumNetworkProposition", () => {
     expect(
       screen.getByRole("heading", { name: "Collection care" })
     ).toBeInTheDocument();
+
+    const collectionLinks = screen
+      .getAllByRole("link")
+      .filter(
+        (link) => link.getAttribute("href") === "/museum/network/collection"
+      );
+    expect(collectionLinks.map((link) => link.textContent)).toEqual([
+      "Explore the Collection",
+      "Explore the Collection",
+    ]);
+  });
+
+  it("separates Collection care with the same top divider as its siblings", () => {
+    render(
+      <MuseumNetworkProposition
+        commit={"a".repeat(40)}
+        missionSourceUrl="https://example.test/mission"
+        openMuseum={document(
+          "open_museum_statement",
+          "docs/open-museum-statement.md"
+        )}
+        transition={document(
+          "onchain_transition",
+          "docs/onchain-transition.md"
+        )}
+      />
+    );
+
+    const care = screen
+      .getByRole("heading", { name: "Collection care" })
+      .closest("section");
+    const scholarship = screen
+      .getByRole("heading", { name: "Scholarship and interpretation" })
+      .closest("section");
+    const dividerClasses = [
+      "tw-border-x-0",
+      "tw-border-b-0",
+      "tw-border-t",
+      "tw-pt-10",
+    ];
+    expect(scholarship).toHaveClass(...dividerClasses);
+    expect(care).toHaveClass(...dividerClasses);
+    expect(care).not.toHaveClass("tw-border-y");
   });
 });
