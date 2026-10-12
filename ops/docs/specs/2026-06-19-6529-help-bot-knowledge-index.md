@@ -35,6 +35,21 @@ scrollable three-row voting window, pagination, compact empty/error states and
 independently persisted collapse preferences. Worth Checking Out comes first
 and retains its own compact preview height.
 
+The `delegation.wallet-checker` record covers linked-wallet reads with a
+six-counterparty cap, pair deduplication, relevant missing-reverse-link
+recommendations, waiting for the active-consolidation request, and partial
+results after a linked-wallet failure. It also explains that absent pairs have
+no recommendation and listed registrations do not themselves establish active
+counted membership or activate four-wallet support.
+
+The primary-address and consolidation records distinguish immediate primary
+selection from the roughly seven-day, 50,400-processed-block rule for profile
+retention after a split. The subscription record covers balance and setting
+merges, manual quantity precedence over All eligible, priority preservation,
+highest-TDH split routing, and finalized-allocation conflicts that need manual
+reconciliation. These remain frontend-owned facts published through the existing
+help-index sync and consumed by the existing backend loader.
+
 ## Problem Statement
 
 Users often ask practical product questions in Waves instead of finding the
