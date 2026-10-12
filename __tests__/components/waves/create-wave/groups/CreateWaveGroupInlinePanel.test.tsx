@@ -559,9 +559,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     });
     expect(configuredRep).toHaveAttribute("data-configured", "true");
     expect(configuredRep).toHaveAttribute("aria-pressed", "true");
-    await user.click(
-      screen.getByRole("button", { name: "Level", exact: true })
-    );
+    await user.click(screen.getByRole("button", { name: "Level" }));
     expect(configuredRep).toHaveAttribute("aria-pressed", "false");
     expect(configuredRep).toHaveAttribute("data-configured", "true");
   });
