@@ -5,12 +5,16 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 let mockCountry: string | undefined = "US";
+let mockIsCountryPending = false;
 let mockPlatform: "ios" | "android" | "web" = "web";
 
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
   __esModule: true,
   CookieConsentProvider: ({ children }: any) => <>{children}</>,
-  useCookieConsent: jest.fn(() => ({ country: mockCountry })),
+  useCookieConsent: jest.fn(() => ({
+    country: mockCountry,
+    isCountryPending: mockIsCountryPending,
+  })),
 }));
 
 jest.mock("@/hooks/useCapacitor", () => ({
@@ -267,6 +271,34 @@ describe("ManifoldMintingConnect purchasing visibility", () => {
     jest.clearAllMocks();
     mockPlatform = "web";
     mockCountry = "US";
+    mockIsCountryPending = false;
+  });
+
+  it("shows the US iOS handoff once a pending country check returns US", () => {
+    const address = "0xabc000000000000000000000000000000000abcd";
+    mockedConnect.mockReturnValue({ address, isConnected: true });
+    mockPlatform = "ios";
+    mockCountry = "";
+    mockIsCountryPending = true;
+    const onMintFor = jest.fn();
+
+    const { rerender } = render(
+      <ManifoldMintingConnect onMintFor={onMintFor} />
+    );
+
+    expect(
+      screen.queryByRole("link", { name: "Mint on 6529.io" })
+    ).not.toBeInTheDocument();
+    expect(onMintFor).not.toHaveBeenCalledWith(address);
+
+    mockCountry = "US";
+    mockIsCountryPending = false;
+    rerender(<ManifoldMintingConnect onMintFor={onMintFor} />);
+
+    expect(
+      screen.getByRole("link", { name: "Mint on 6529.io" })
+    ).toBeInTheDocument();
+    expect(onMintFor).toHaveBeenLastCalledWith(address);
   });
 
   it.each([
@@ -328,4 +360,15 @@ describe("ManifoldMintingConnect purchasing visibility", () => {
       ).not.toBeInTheDocument();
     }
   );
+});
+
+it("renders the connected profile summary from messages", () => {
+  mockPlatform = "web";
+  mockCountry = "US";
+  mockIsCountryPending = false;
+
+  renderConnected();
+
+  expect(screen.getByText("Connected Profile")).toBeInTheDocument();
+  expect(screen.getByText("TDH: 0 - Level: 1")).toBeInTheDocument();
 });

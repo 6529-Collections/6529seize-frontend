@@ -172,3 +172,75 @@ describe("CookieConsentProvider", () => {
     consoleError.mockRestore();
   });
 });
+
+describe("CookieConsentProvider country check state", () => {
+  const CountryConsumer = () => {
+    const { country, isCountryPending } = useCookieConsent();
+    return (
+      <p>
+        Country: {country || "unknown"} / pending: {String(isCountryPending)}
+      </p>
+    );
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (Cookies.get as jest.Mock).mockImplementation(() => undefined);
+  });
+
+  it("stays pending until the lookup returns a country", async () => {
+    const lookup: { resolve?: (value: unknown) => void } = {};
+    (api.commonApiFetch as jest.Mock).mockReturnValue(
+      new Promise((resolve) => {
+        lookup.resolve = resolve;
+      })
+    );
+
+    render(
+      <CookieConsentProvider>
+        <CountryConsumer />
+      </CookieConsentProvider>
+    );
+
+    expect(
+      screen.getByText("Country: unknown / pending: true")
+    ).toBeInTheDocument();
+
+    lookup.resolve?.({ is_eu: true, is_consent: false, country: "US" });
+
+    expect(
+      await screen.findByText("Country: US / pending: false")
+    ).toBeInTheDocument();
+  });
+
+  it("settles as unknown when the lookup fails", async () => {
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    (api.commonApiFetch as jest.Mock).mockRejectedValue(new Error("offline"));
+
+    render(
+      <CookieConsentProvider>
+        <CountryConsumer />
+      </CookieConsentProvider>
+    );
+
+    expect(
+      await screen.findByText("Country: unknown / pending: false")
+    ).toBeInTheDocument();
+    consoleError.mockRestore();
+  });
+
+  it("is never pending when the provider is disabled", () => {
+    render(
+      <CookieConsentProvider disabled>
+        <CountryConsumer />
+      </CookieConsentProvider>
+    );
+
+    expect(
+      screen.getByText("Country: US / pending: false")
+    ).toBeInTheDocument();
+    expect(api.commonApiFetch).not.toHaveBeenCalled();
+  });
+});

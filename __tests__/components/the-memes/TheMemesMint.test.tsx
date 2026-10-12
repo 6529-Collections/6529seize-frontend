@@ -5,6 +5,7 @@ import { renderToString } from "react-dom/server";
 
 let mockPlatform: "ios" | "android" | "web" = "web";
 let mockCountry: string | undefined = "US";
+let mockIsCountryPending = false;
 const mockReplace = jest.fn();
 const mockSetTitle = jest.fn();
 const mockManifoldMinting = jest.fn();
@@ -41,7 +42,10 @@ jest.mock("@/hooks/useCapacitor", () => ({
 }));
 
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
-  useCookieConsent: () => ({ country: mockCountry }),
+  useCookieConsent: () => ({
+    country: mockCountry,
+    isCountryPending: mockIsCountryPending,
+  }),
 }));
 
 jest.mock("next/navigation", () => ({
@@ -61,6 +65,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockPlatform = "web";
   mockCountry = "US";
+  mockIsCountryPending = false;
 });
 
 describe("TheMemesMint purchasing visibility", () => {
@@ -99,6 +104,26 @@ describe("TheMemesMint purchasing visibility", () => {
     expect(mockSetTitle).toHaveBeenCalledWith(
       "Mint #123 | First film | The Memes"
     );
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it("holds a US iOS cold deep link until the country check returns US", () => {
+    mockPlatform = "ios";
+    mockCountry = "";
+    mockIsCountryPending = true;
+
+    const { container, rerender } = render(<TheMemesMint nft={nft} />);
+
+    expect(container).toBeEmptyDOMElement();
+    expect(mockReplace).not.toHaveBeenCalled();
+    expect(mockManifoldMinting).not.toHaveBeenCalled();
+    expect(mockUseDropForgeMintingConfig).not.toHaveBeenCalled();
+
+    mockCountry = "US";
+    mockIsCountryPending = false;
+    rerender(<TheMemesMint nft={nft} />);
+
+    expect(screen.getByTestId("mint-artwork")).toBeInTheDocument();
     expect(mockReplace).not.toHaveBeenCalled();
   });
 

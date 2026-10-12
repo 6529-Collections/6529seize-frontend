@@ -151,6 +151,9 @@
     recipient selection, mint count, or `SEIZE`, and without an unavailable
     message. The server HTML and first hydration render omit the mint flow on
     every platform until the client can check the native platform.
+  - While the iOS country check is still loading, the page stays empty and
+    does not redirect, so a US cold deep link opens the mint page once `US`
+    resolves. A failed or empty country check counts as unknown and redirects.
   - Android and web keep the mint page in every country.
 - `Mint for fren` search starts after 3 typed characters.
 - If `Mint for fren` is selected without a recipient wallet, mint controls stay

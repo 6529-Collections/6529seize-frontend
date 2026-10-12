@@ -16,7 +16,6 @@ import { Time } from "@/helpers/time";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 import { ManifoldClaimStatus, ManifoldPhase } from "@/hooks/useManifoldClaim";
-import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getMemesMintingProofsByAddress } from "@/services/api/memes-minting-claims-api";
@@ -167,7 +166,6 @@ export default function ManifoldMintingWidget(
 ) {
   const connectedAddress = useSeizeConnectContext();
   const locale = useBrowserLocale();
-  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const searchParams = useSearchParams();
   const [mintForAddress, setMintForAddress] = useState<string | null>(null);
   const [copyStatus, setCopyStatus] = useState<"" | "copied" | "failed">("");
@@ -757,11 +755,6 @@ export default function ManifoldMintingWidget(
   useEffect(() => {
     props.setMintForAddress(mintForAddress);
   }, [mintForAddress, props.setMintForAddress]);
-
-  // Restricted iOS omits the recipient, mint count, SEIZE and diagnostics.
-  if (hideNftPurchasing) {
-    return null;
-  }
 
   const transactionModalMessage = getTransactionModalMessage(
     locale,

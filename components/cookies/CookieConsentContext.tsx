@@ -30,6 +30,9 @@ type CookieConsent = boolean | undefined;
 type CookieConsentContextType = {
   showCookieConsent: boolean;
   country: string;
+  // True until the first country lookup settles. A failed or empty lookup
+  // settles with an empty (unknown) country.
+  isCountryPending: boolean;
   performanceConsent: CookieConsent;
   consent: () => void;
   reject: () => void;
@@ -79,6 +82,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   const { setToast } = useAuth();
   const [showCookieConsent, setShowCookieConsent] = useState(false);
   const [country, setCountry] = useState("");
+  const [isCountryPending, setIsCountryPending] = useState(true);
   const [performanceConsent, setPerformanceConsent] =
     useState<CookieConsent>(undefined);
   const performanceScriptsLoadedRef = useRef(false);
@@ -144,6 +148,10 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
         }
       } catch (error) {
         console.error("Failed to fetch cookie consent status", error);
+      } finally {
+        if (isFirstLoad) {
+          setIsCountryPending(false);
+        }
       }
     },
     [loadPerformanceCookies]
@@ -196,6 +204,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
             reject: noopReject,
             showCookieConsent: false,
             country: "US",
+            isCountryPending: false,
             performanceConsent: false as CookieConsent,
           }
         : {
@@ -203,6 +212,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
             reject,
             showCookieConsent,
             country,
+            isCountryPending,
             performanceConsent,
           },
     [
@@ -213,6 +223,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
       reject,
       showCookieConsent,
       country,
+      isCountryPending,
       performanceConsent,
     ]
   );
