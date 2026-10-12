@@ -1,7 +1,7 @@
 import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
 import { commonApiFetch } from "@/services/api/common-api";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 
 let mockIsIos = true;
 const mockReplace = jest.fn();
@@ -62,9 +62,9 @@ describe("NftPurchasingGate with the country check", () => {
     const resolveCountry = deferCountryCheck();
     renderDeepLink();
 
-    expect(fetchMock).toHaveBeenCalledWith({
-      endpoint: "policies/country-check",
-    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.objectContaining({ endpoint: "policies/country-check" })
+    );
     expect(mockMount).not.toHaveBeenCalled();
     expect(mockReplace).not.toHaveBeenCalled();
 
@@ -98,6 +98,31 @@ describe("NftPurchasingGate with the country check", () => {
     await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("/the-memes"));
     expect(mockMount).not.toHaveBeenCalled();
     consoleError.mockRestore();
+  });
+
+  it("redirects iOS when the country check stalls past its timeout", async () => {
+    jest.useFakeTimers();
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    try {
+      fetchMock.mockReturnValue(new Promise(() => {}));
+      renderDeepLink();
+
+      await act(async () => {
+        jest.advanceTimersByTime(4_999);
+      });
+      expect(mockReplace).not.toHaveBeenCalled();
+
+      await act(async () => {
+        jest.advanceTimersByTime(1);
+      });
+      expect(mockReplace).toHaveBeenCalledWith("/the-memes");
+      expect(mockMount).not.toHaveBeenCalled();
+    } finally {
+      consoleError.mockRestore();
+      jest.useRealTimers();
+    }
   });
 
   it("does not make web wait for the country check", () => {
