@@ -1866,6 +1866,8 @@ const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
   complete: "Complete",
   create: "Create",
   createMenuHeader: "Create",
+  curationDescription: "Collect drops in a custom view",
+  subwaveDescription: "Start a separate space within this wave",
   next: "Next",
   newCuration: "New curation",
   newSubwave: "New subwave",

@@ -2,8 +2,13 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import MyStreamWaveCreateActionsMenu from "@/components/brain/my-stream/tabs/MyStreamWaveCreateActionsMenu";
 import { useAuth } from "@/components/auth/Auth";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 
 const createWaveModalMock = jest.fn();
+jest.mock("@/hooks/useIsMobileLayoutViewport", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
@@ -92,13 +97,14 @@ const createWave = ({
 describe("MyStreamWaveCreateActionsMenu", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useIsMobileLayoutViewport).mockReturnValue(false);
     mockedUseAuth.mockReturnValue({
       connectedProfile: { handle: "alice" },
       activeProfileProxy: null,
     });
   });
 
-  it("offers both create actions to an eligible root-wave admin", async () => {
+  it("offers only curation and subwave actions to an eligible root-wave admin", async () => {
     render(
       <MyStreamWaveCreateActionsMenu
         wave={createWave()}
@@ -110,9 +116,12 @@ describe("MyStreamWaveCreateActionsMenu", () => {
       screen.getByRole("button", { name: "Open create menu" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "New curation" })
+      screen.getByRole("button", { name: /^New curation/ })
     ).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: "New subwave" }));
+    expect(
+      screen.queryByRole("button", { name: /^New competition/ })
+    ).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: /^New subwave/ }));
 
     expect(screen.getByTestId("subwave-modal")).toBeInTheDocument();
     expect(createWaveModalMock).toHaveBeenLastCalledWith(
@@ -136,10 +145,16 @@ describe("MyStreamWaveCreateActionsMenu", () => {
         />
       );
 
+      if (variant === "mobile") {
+        await userEvent.click(
+          screen.getByRole("button", { name: "Open create menu" })
+        );
+      }
       await userEvent.click(
-        screen.getByRole("button", { name: "New subwave" })
+        screen.getByRole("button", { name: /^New subwave/ })
       );
 
+      await screen.findByTestId("subwave-modal");
       expect(createWaveModalMock).toHaveBeenLastCalledWith(
         expect.objectContaining({
           isOpen: true,
@@ -164,9 +179,9 @@ describe("MyStreamWaveCreateActionsMenu", () => {
 
     render(<MyStreamWaveCreateActionsMenu wave={wave} onCreated={jest.fn()} />);
 
-    expect(screen.queryByRole("button", { name: "New subwave" })).toBeNull();
+    expect(screen.queryByRole("button", { name: /^New subwave/ })).toBeNull();
     expect(
-      screen.getByRole("button", { name: "New curation" })
+      screen.getByRole("button", { name: /^New curation/ })
     ).toBeInTheDocument();
   });
 
@@ -203,6 +218,26 @@ describe("MyStreamWaveCreateActionsMenu", () => {
 
     expect(
       screen.getByRole("button", { name: "Open create menu" })
-    ).toHaveClass("tw-size-11");
+    ).toHaveClass("tw-min-h-11");
+  });
+
+  it("opens a concise sheet on mobile web and hands off after it closes", async () => {
+    jest.mocked(useIsMobileLayoutViewport).mockReturnValue(true);
+    render(
+      <MyStreamWaveCreateActionsMenu
+        wave={createWave()}
+        onCreated={jest.fn()}
+      />
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "Open create menu" })
+    );
+    expect(screen.getByRole("dialog", { name: "Create" })).toBeInTheDocument();
+    expect(screen.queryByText("Parent Wave")).toBeNull();
+    await userEvent.click(
+      screen.getByRole("button", { name: /^New curation/ })
+    );
+    await screen.findByTestId("curation-dialog");
+    expect(screen.queryByRole("dialog", { name: "Create" })).toBeNull();
   });
 });
