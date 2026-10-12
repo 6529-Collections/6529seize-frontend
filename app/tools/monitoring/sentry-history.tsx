@@ -8,7 +8,7 @@ import { useState } from "react";
 
 import SentryHistoryChart from "./sentry-history-chart";
 
-export const HISTORY_DATE_OPTIONS = {
+const HISTORY_DATE_OPTIONS = {
   month: "short",
   day: "numeric",
   timeZone: "UTC",
