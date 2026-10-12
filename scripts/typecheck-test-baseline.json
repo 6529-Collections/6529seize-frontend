@@ -3,7 +3,7 @@
   "config": "tsconfig.jest.json",
   "toolchain": {
     "typescript_version": "5.9.3",
-    "pnpm_lock_sha256": "ff0c805d2177407be2bd9046d38fc3c571cdee265d4546666a6c16e8224c3b4e",
+    "pnpm_lock_sha256": "e688825735a62e365798503779dee89e6e11a26fde3d1804830aa5f1e8db79f1",
     "jest_tsconfig_sha256": "feda509a89cdd90cbcd9da6eecae28759c34c7aaae3725593ec2b1c022017062",
     "base_tsconfig_sha256": "fdbd8e548aed634324fd228e74d541ea702c1311597aa938741651e50de59c5f"
   },
@@ -772,7 +772,6 @@
     "__tests__/hooks/useWaveCompetitionEntries.test.tsx": 2,
     "__tests__/hooks/useWaveRepAllocation.test.tsx": 2,
     "__tests__/hooks/useWaveTopVoters.test.ts": 2,
-    "__tests__/hooks/useWaveWebSocket.test.ts": 3,
     "__tests__/hooks/waves/useApprovalWaveStatus.test.ts": 1,
     "__tests__/hooks/waves/useSetWavePinnedDrop.test.tsx": 1,
     "__tests__/hooks/waves/useWaveOutcomeDistributionQuery.test.tsx": 1,

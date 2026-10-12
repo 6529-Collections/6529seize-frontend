@@ -4,6 +4,7 @@ import type { CollectedCollectionType } from "@/entities/IProfile";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t as translate } from "@/i18n/messages";
 import type { CollectedHeaderMetric } from "../types";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface CollectedStatsHeaderProps {
   readonly metrics: CollectedHeaderMetric[];
@@ -32,12 +33,33 @@ export function CollectedStatsHeader({
     "user.collected.stats.details.hide"
   );
   const detailsButtonLabel = isDetailsOpen ? hideDetailsLabel : detailsLabel;
+  const metricsScrollRef = useRef<HTMLDivElement>(null);
+  const [showEndFade, setShowEndFade] = useState(false);
+  const updateEndFade = useCallback(() => {
+    const node = metricsScrollRef.current;
+    if (node !== null) {
+      setShowEndFade(node.scrollLeft + node.clientWidth < node.scrollWidth - 1);
+    }
+  }, []);
+
+  useEffect(() => {
+    const frameId = globalThis.requestAnimationFrame(updateEndFade);
+    globalThis.addEventListener("resize", updateEndFade);
+    return () => {
+      globalThis.cancelAnimationFrame(frameId);
+      globalThis.removeEventListener("resize", updateEndFade);
+    };
+  }, [metrics, detailsButtonLabel, updateEndFade]);
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row md:tw-items-start md:tw-justify-between">
-      <div className="tw-min-w-0 tw-flex-1">
+    <div className="tw-flex tw-items-center tw-gap-4 md:tw-items-start md:tw-justify-between">
+      <div className="tw-relative tw-min-w-0 tw-flex-1">
         {metrics.length > 0 && (
-          <div className="tw-overflow-x-auto tw-overflow-y-hidden tw-pb-1 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300 md:tw-overflow-visible md:tw-pb-0">
+          <div
+            ref={metricsScrollRef}
+            onScroll={updateEndFade}
+            className="tw-no-scrollbar tw-overflow-x-auto tw-overflow-y-hidden tw-py-1 md:tw-overflow-visible md:tw-py-0"
+          >
             <div className="tw-flex tw-w-max tw-flex-nowrap tw-items-center tw-gap-4 md:tw-w-auto md:tw-flex-wrap md:tw-gap-6">
               {metrics.map((metric, index) => {
                 const metricCollection = metric.collection;
@@ -130,9 +152,16 @@ export function CollectedStatsHeader({
             </div>
           </div>
         )}
+        {showEndFade && metrics.length > 0 && (
+          <div
+            aria-hidden="true"
+            className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-w-10 tw-bg-gradient-to-r tw-from-transparent tw-via-black/70 tw-to-black md:tw-hidden"
+          />
+        )}
       </div>
 
       <Button
+        data-profile-action={isDetailsOpen ? "Hide details" : "Details"}
         variant={isDetailsOpen ? "primary" : "tertiary"}
         size="sm"
         aria-expanded={isDetailsOpen}

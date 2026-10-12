@@ -646,7 +646,7 @@ describe("BrainMobile", () => {
     }
   );
 
-  it("keeps My Votes unavailable for guests on memes waves", async () => {
+  it("keeps Votes available for guests on memes waves", async () => {
     mockSearchParams.set("wave", "1");
     waveData = createWave(false);
     (useAuth as jest.Mock).mockReturnValue({
@@ -668,8 +668,7 @@ describe("BrainMobile", () => {
     });
 
     await waitFor(() => {
-      expect(screen.queryByTestId("myvotes")).toBeNull();
-      expect(screen.getByText("child")).toBeInTheDocument();
+      expect(screen.getByTestId("myvotes")).toBeInTheDocument();
     });
   });
 

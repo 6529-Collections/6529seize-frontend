@@ -106,6 +106,7 @@ export default function UserPageCollectedCards({
 
               return (
                 <li
+                  data-profile-section-anchor="Artwork"
                   key={`${card.collection}-${card.token_id}`}
                   id={getCollectedCardAnchorId({
                     collection: card.collection,

@@ -19,6 +19,7 @@ and product-impact operations.
 - [Device farm QA](device-farm-qa.md)
 - [Recover a signed profile CMS website](profile-cms-recovery.md)
 - [Product-impact Mixpanel runbook](product-impact-mixpanel-runbook.md)
+- [Wave feature usage pilot](wave-feature-usage-pilot.md)
 
 ## Troubleshooting
 

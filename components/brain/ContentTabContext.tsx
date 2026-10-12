@@ -18,7 +18,8 @@ import {
   rememberHistoryWaveTab,
   useWaveTabPreference,
 } from "@/hooks/useWaveTabPreference";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useWaveTabNavigation } from "@/hooks/useWaveTabNavigation";
 import {
   getCompetitionRoute,
   getCompetitionsRoute,
@@ -87,7 +88,6 @@ interface ContentTabContextType {
 }
 
 const buildMemesTabs = (
-  hasAuthenticatedProfile: boolean,
   votingState: WaveVotingState,
   hasFirstDecisionPassed: boolean,
   hasPolls: boolean,
@@ -102,9 +102,7 @@ const buildMemesTabs = (
   if (hasFirstDecisionPassed) {
     tabs.push(MyStreamWaveTab.WINNERS);
   }
-  if (hasAuthenticatedProfile) {
-    tabs.push(MyStreamWaveTab.MY_VOTES);
-  }
+  tabs.push(MyStreamWaveTab.MY_VOTES);
   if (hasPolls) {
     tabs.push(MyStreamWaveTab.POLLS);
   }
@@ -119,7 +117,6 @@ const buildDefaultTabs = (
   votingState: WaveVotingState,
   hasFirstDecisionPassed: boolean,
   isCurationWave: boolean,
-  hasAuthenticatedProfile: boolean,
   hasPolls: boolean,
   showOutcomeTab: boolean
 ) => {
@@ -138,9 +135,7 @@ const buildDefaultTabs = (
   if (!isCurationWave && showOutcomeTab) {
     tabs.push(MyStreamWaveTab.OUTCOME);
   }
-  if (isCurationWave || hasAuthenticatedProfile) {
-    tabs.push(MyStreamWaveTab.MY_VOTES);
-  }
+  tabs.push(MyStreamWaveTab.MY_VOTES);
   if (hasPolls) {
     tabs.push(MyStreamWaveTab.POLLS);
   }
@@ -149,7 +144,6 @@ const buildDefaultTabs = (
 
 const buildApproveTabs = (
   isCurationWave: boolean,
-  hasAuthenticatedProfile: boolean,
   hasPolls: boolean,
   showOutcomeTab: boolean
 ) => {
@@ -168,13 +162,7 @@ const buildApproveTabs = (
     tabs.push(MyStreamWaveTab.OUTCOME);
   }
 
-  if (isCurationWave) {
-    tabs.push(MyStreamWaveTab.MY_VOTES);
-  }
-
-  if (!isCurationWave && hasAuthenticatedProfile) {
-    tabs.push(MyStreamWaveTab.MY_VOTES);
-  }
+  tabs.push(MyStreamWaveTab.MY_VOTES);
 
   if (hasPolls) {
     tabs.push(MyStreamWaveTab.POLLS);
@@ -202,7 +190,7 @@ export const ContentTabProvider: React.FC<{
   competitionOnly = false,
 }) => {
   const pathname = usePathname();
-  const router = useRouter();
+  const navigateTab = useWaveTabNavigation();
   const search = useSearchParams();
   const { flat, nativeCompetition } = useCompetitionNavigation();
   const isCompetitionRoute =
@@ -275,7 +263,6 @@ export const ContentTabProvider: React.FC<{
         hasCompetitionConfiguration = false,
         defaultCompetitionId = null,
         defaultSelectionEnabled = false,
-        hasAuthenticatedProfile,
         isMemesWave,
         isCurationWave,
         isApproveWave = false,
@@ -292,15 +279,9 @@ export const ContentTabProvider: React.FC<{
           tabs.push(MyStreamWaveTab.POLLS);
         }
       } else if (isApproveWave) {
-        tabs = buildApproveTabs(
-          isCurationWave,
-          hasAuthenticatedProfile,
-          hasPolls,
-          showOutcomeTab
-        );
+        tabs = buildApproveTabs(isCurationWave, hasPolls, showOutcomeTab);
       } else if (isMemesWave) {
         tabs = buildMemesTabs(
-          hasAuthenticatedProfile,
           votingState,
           hasFirstDecisionPassed,
           hasPolls,
@@ -311,7 +292,6 @@ export const ContentTabProvider: React.FC<{
           votingState,
           hasFirstDecisionPassed,
           isCurationWave,
-          hasAuthenticatedProfile,
           hasPolls,
           showOutcomeTab
         );
@@ -325,9 +305,9 @@ export const ContentTabProvider: React.FC<{
         tabs.push(
           MyStreamWaveTab.LEADERBOARD,
           MyStreamWaveTab.WINNERS,
-          MyStreamWaveTab.OUTCOME
+          MyStreamWaveTab.OUTCOME,
+          MyStreamWaveTab.MY_VOTES
         );
-        if (hasAuthenticatedProfile) tabs.push(MyStreamWaveTab.MY_VOTES);
       }
 
       if (competitionOnly) {
@@ -339,7 +319,6 @@ export const ContentTabProvider: React.FC<{
         );
       }
       if (hasCompetitionConfiguration) tabs.push(MyStreamWaveTab.CONFIGURATION);
-      if (!competitionOnly) tabs.push(MyStreamWaveTab.ABOUT);
 
       if (
         transientTabOverrideRef.current !== null &&
@@ -499,7 +478,7 @@ export const ContentTabProvider: React.FC<{
         const params = new URLSearchParams(search.toString());
         params.delete("default");
         params.set("tab", waveCompetitionTabs[tab] ?? tab.toLowerCase());
-        router.push(`${pathname}?${params}`, { scroll: false });
+        navigateTab(`${pathname}?${params}`);
       }
       const competitionTab = waveCompetitionTabs[tab];
       if (
@@ -507,7 +486,7 @@ export const ContentTabProvider: React.FC<{
         isCompetitionRoute &&
         tab === MyStreamWaveTab.COMPETITIONS
       ) {
-        router.push(getCompetitionsRoute(waveId), { scroll: false });
+        navigateTab(getCompetitionsRoute(waveId));
         return true;
       }
       if (
@@ -523,12 +502,12 @@ export const ContentTabProvider: React.FC<{
         const target = selectedId
           ? `${getCompetitionRoute(waveId, selectedId)}?tab=${competitionTab}`
           : `${getWavePathRoute(waveId)}?tab=${tab.toLowerCase()}`;
-        router.push(target, { scroll: false });
+        navigateTab(target);
         return true;
       }
       if (isCompetitionRoute && tab !== MyStreamWaveTab.COMPETITIONS) {
         const target = getSharedWaveTabRoute(pathname, tab);
-        if (target) router.push(target, { scroll: false });
+        if (target) navigateTab(target);
       }
       if (
         waveId &&
@@ -539,11 +518,11 @@ export const ContentTabProvider: React.FC<{
         const params = new URLSearchParams(search.toString());
         params.delete("default");
         params.set("tab", tab.toLowerCase());
-        router.replace(`${pathname}?${params}`, { scroll: false });
+        navigateTab(`${pathname}?${params}`, "replace");
       }
       return false;
     },
-    [competitionOnly, isCompetitionRoute, pathname, router, search]
+    [competitionOnly, isCompetitionRoute, pathname, navigateTab, search]
   );
 
   // Wrapper for setActiveContentTab that validates the tab

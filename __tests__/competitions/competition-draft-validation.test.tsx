@@ -199,12 +199,8 @@ it.each([
     };
     render(<CompetitionDraftEditor wave={parent} onClose={jest.fn()} />);
     // Switching type resets form defaults; review must still read the parent chat.
-    fireEvent.change(
-      screen.getByRole("combobox", { name: "Competition type" }),
-      {
-        target: { value: "APPROVE" },
-      }
-    );
+    fireEvent.click(screen.getByRole("combobox", { name: "Competition type" }));
+    fireEvent.click(screen.getByRole("option", { name: "Approve" }));
     fireEvent.change(
       screen.getByRole("textbox", { name: "Competition name" }),
       {
@@ -236,9 +232,8 @@ it.each([
 it("keeps an incomplete Approve draft locally and validates the threshold before the next step", async () => {
   jest.useFakeTimers();
   render(<CompetitionDraftEditor wave={wave} onClose={jest.fn()} />);
-  fireEvent.change(screen.getByRole("combobox", { name: "Competition type" }), {
-    target: { value: "APPROVE" },
-  });
+  fireEvent.click(screen.getByRole("combobox", { name: "Competition type" }));
+  fireEvent.click(screen.getByRole("option", { name: "Approve" }));
   fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
     target: { value: "Approve test" },
   });
@@ -361,9 +356,8 @@ it("flushes the latest edit when closing without publishing", async () => {
 it("restores incomplete edits after closing and reopening", async () => {
   const onClose = jest.fn();
   const view = render(<CompetitionDraftEditor wave={wave} onClose={onClose} />);
-  fireEvent.change(screen.getByRole("combobox", { name: "Competition type" }), {
-    target: { value: "APPROVE" },
-  });
+  fireEvent.click(screen.getByRole("combobox", { name: "Competition type" }));
+  fireEvent.click(screen.getByRole("option", { name: "Approve" }));
   fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
     target: { value: "Incomplete Approve" },
   });
@@ -376,7 +370,7 @@ it("restores incomplete edits after closing and reopening", async () => {
   );
   expect(
     screen.getByRole("combobox", { name: "Competition type" })
-  ).toHaveValue("APPROVE");
+  ).toHaveTextContent("Approve");
   expect(createCompetition).not.toHaveBeenCalled();
 });
 
@@ -559,10 +553,10 @@ it.each([false, true])(
       const view = render(
         <CompetitionDraftEditor wave={wave} onClose={jest.fn()} />
       );
-      fireEvent.change(
-        screen.getByRole("combobox", { name: "Competition type" }),
-        { target: { value: "APPROVE" } }
+      fireEvent.click(
+        screen.getByRole("combobox", { name: "Competition type" })
       );
+      fireEvent.click(screen.getByRole("option", { name: "Approve" }));
       fireEvent.change(
         screen.getByRole("textbox", { name: "Competition name" }),
         { target: { value: "Unfinished approve draft" } }

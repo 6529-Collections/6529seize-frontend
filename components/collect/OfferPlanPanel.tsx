@@ -1,7 +1,5 @@
 "use client";
 
-import marketplaceFont from "./marketplace-font.module.css";
-
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
@@ -491,7 +489,7 @@ function OfferPlanContents({
   return (
     <section
       aria-labelledby={`${id}-title`}
-      className={`${marketplaceFont["surface"] ?? ""} tw-min-w-0 tw-space-y-5`}
+      className="tw-min-w-0 tw-space-y-5"
     >
       <div>
         <h2

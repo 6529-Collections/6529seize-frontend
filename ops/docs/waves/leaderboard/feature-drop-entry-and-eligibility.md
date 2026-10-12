@@ -89,7 +89,7 @@ Entry behavior differs by wave type:
   including opening or closing dates and submission limits. The Memes
   `How to Submit` helper keeps its desktop label.
 - In ordinary Rank and Approve Chat headers, that details card also shows the
-  submission access group and a `View submission rules` link to Configuration.
+  submission access group and a `View submission rules` link to Settings.
   The rules link preserves a competition selected before entering Chat, including
   when copied or opened in a new tab.
   With competition support enabled, group and signing details use that competition

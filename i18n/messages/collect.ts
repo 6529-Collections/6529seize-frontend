@@ -780,6 +780,8 @@ export const COLLECT_MESSAGES = {
   "collect.goal.searchArtist": "Search artists",
   "collect.goal.selectSet": "Select a set",
   "collect.goal.targetCount": "Copies per NFT",
+  "collect.goal.targetCountHint":
+    "Total copies to hold of each NFT, including copies already in your profile.",
   "collect.goal.budget": "Maximum budget (ETH)",
   "collect.goal.optionalBudget": "Budget cap (ETH, optional)",
   "collect.goal.optionalBudgetHint":

@@ -1,7 +1,12 @@
-import { renderWithAuth } from "@/__tests__/utils/testContexts";
+import { AuthContext } from "@/components/auth/Auth";
+import { commonApiPost } from "@/services/api/common-api";
+import {
+  createMockAuthContext,
+  renderWithAuth,
+} from "@/__tests__/utils/testContexts";
 import MemeSubscriptionRow from "@/components/user/subscriptions/MemeSubscriptionRow";
 import { useQuery } from "@tanstack/react-query";
-import { screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 jest.mock("@tanstack/react-query", () => ({
   useQuery: jest.fn(),
@@ -240,4 +245,117 @@ describe("Upcoming Drops allocation message", () => {
         ).toBeInTheDocument();
     }
   );
+});
+
+describe("Upcoming quantity eligibility changes", () => {
+  const subscription = {
+    consolidation_key: "test-key",
+    contract: "0x123",
+    token_id: 558,
+    subscribed: true,
+    subscribed_count: 11,
+  };
+  const auth = createMockAuthContext({
+    requestAuth: jest.fn(async () => ({ success: true })),
+  });
+  const row = (
+    eligibilityCount: number,
+    subscribedCount = 11,
+    variant: "default" | "compact" = "default"
+  ) => (
+    <AuthContext.Provider value={auth}>
+      <MemeSubscriptionRow
+        profileKey="test-key"
+        title="The Memes"
+        subscription={{ ...subscription, subscribed_count: subscribedCount }}
+        eligibilityCount={eligibilityCount}
+        readonly={false}
+        refresh={jest.fn()}
+        minting_today={false}
+        first={false}
+        date={null}
+        variant={variant}
+      />
+    </AuthContext.Provider>
+  );
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useQueryMock.mockReturnValue({ data: null });
+  });
+
+  it("restores the saved manual quantity after eligibility drops and recovers without posting", () => {
+    const { rerender } = render(row(24));
+    const selector = screen.getByRole("combobox", {
+      name: "Select subscription quantity for The Memes",
+    });
+    expect(selector).toHaveValue("11");
+    rerender(row(10));
+    expect(selector).toHaveValue("10");
+    expect(screen.getAllByRole("option")).toHaveLength(10);
+    rerender(row(12));
+    expect(selector).toHaveValue("11");
+    expect(screen.getAllByRole("option")).toHaveLength(12);
+    expect(commonApiPost).not.toHaveBeenCalled();
+  });
+
+  it("clamps the initial value and follows a refreshed automatic quantity", () => {
+    const { rerender } = render(row(10));
+    const selector = screen.getByRole("combobox");
+    expect(selector).toHaveValue("10");
+    rerender(row(24, 24));
+    expect(selector).toHaveValue("24");
+    expect(commonApiPost).not.toHaveBeenCalled();
+  });
+
+  it.each(["default", "compact"] as const)(
+    "disables the %s quantity selector at zero eligibility and restores the saved request",
+    (variant) => {
+      const { rerender } = render(row(24, 11, variant));
+      const selector = screen.getByRole("combobox");
+      rerender(row(0, 11, variant));
+      expect(selector).toBeDisabled();
+      expect(selector).toHaveValue("0");
+      expect(screen.getAllByRole("option")).toHaveLength(1);
+      rerender(row(12, 11, variant));
+      expect(selector).toBeEnabled();
+      expect(selector).toHaveValue("11");
+      expect(commonApiPost).not.toHaveBeenCalled();
+    }
+  );
+
+  it("posts a real manual selection after the automatic quantity increases", async () => {
+    jest.mocked(commonApiPost).mockResolvedValue({ count: 11 });
+    const { rerender } = render(row(24, 24));
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "11" } });
+    await waitFor(() =>
+      expect(commonApiPost).toHaveBeenCalledWith({
+        endpoint: "subscriptions/test-key/subscription-count",
+        body: { contract: "0x123", token_id: 558, count: 11 },
+      })
+    );
+    await waitFor(() => expect(screen.getByRole("combobox")).toBeEnabled());
+    // A lagging parent refresh must not replace the successful local selection.
+    rerender(row(10, 24));
+    expect(screen.getByRole("combobox")).toHaveValue("10");
+    rerender(row(12, 24));
+    expect(screen.getByRole("combobox")).toHaveValue("11");
+    expect(commonApiPost).toHaveBeenCalledTimes(1);
+  });
+
+  it("restores the capped quantity after a failed manual update", async () => {
+    jest
+      .mocked(commonApiPost)
+      .mockRejectedValue(new Error("Not enough balance"));
+    render(row(10));
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "9" } });
+    await waitFor(() => expect(commonApiPost).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(screen.getByRole("combobox")).toBeEnabled());
+    expect(screen.getByRole("combobox")).toHaveValue("10");
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "subscriptions/test-key/subscription-count",
+      body: { contract: "0x123", token_id: 558, count: 9 },
+    });
+    expect(commonApiPost).toHaveBeenCalledTimes(1);
+  });
 });

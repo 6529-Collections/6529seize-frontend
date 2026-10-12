@@ -5,11 +5,21 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { Dialog, DialogPanel, TransitionChild } from "@headlessui/react";
 import clsx from "clsx";
-import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import type { CSSProperties, ReactNode, RefObject } from "react";
 import MobileWrapperDialogCloseButton from "./MobileWrapperDialogCloseButton";
 import MobileWrapperDialogHeader from "./MobileWrapperDialogHeader";
 import { useMobileDialogDrag } from "./useMobileDialogDrag";
+
+// Browser chrome can resize the viewport slightly without opening a keyboard.
+const BROWSER_KEYBOARD_MIN_INSET = 100;
 
 const MOBILE_DIALOG_KEYBOARD_INSET =
   "var(--mobile-wrapper-dialog-keyboard-inset, 0px)";
@@ -22,6 +32,7 @@ const MOBILE_DIALOG_CONTAINER_STYLE: CSSProperties = {
 };
 
 type MobileWrapperDialogProps = {
+  readonly id?: string | undefined;
   readonly title?: string | undefined;
   readonly ariaLabel?: string | undefined;
   readonly isOpen: boolean;
@@ -33,6 +44,8 @@ type MobileWrapperDialogProps = {
   readonly noPadding?: boolean | undefined;
   readonly tall?: boolean | undefined;
   readonly fixedHeight?: boolean | undefined;
+  /** Also fit the software keyboard viewport in mobile browsers. */
+  readonly fitVisualViewport?: boolean | undefined;
   readonly tabletModal?: boolean | undefined;
   readonly showScrollbar?: boolean | undefined;
   readonly allowOverflow?: boolean | undefined;
@@ -159,7 +172,7 @@ function getDialogHeight({
     `max(0px, calc(${viewportHeight} - 4rem - ` +
     `${MOBILE_DIALOG_KEYBOARD_INSET}))`;
 
-  return `min(${restingHeight}, ${keyboardAvailableHeight})`;
+  return `min(var(--mobile-wrapper-dialog-resting-height, ${restingHeight}), var(--mobile-wrapper-dialog-available-height, ${keyboardAvailableHeight}))`;
 }
 
 function getBeforeLeaveProps(onBeforeLeave?: (() => void) | undefined) {
@@ -386,6 +399,7 @@ function DragHandle({
 }
 
 export default function MobileWrapperDialog({
+  id,
   title,
   ariaLabel,
   isOpen,
@@ -397,6 +411,7 @@ export default function MobileWrapperDialog({
   noPadding,
   tall,
   fixedHeight,
+  fitVisualViewport = false,
   tabletModal,
   showScrollbar,
   allowOverflow,
@@ -494,6 +509,58 @@ export default function MobileWrapperDialog({
   const dialogOpen = isOpen && dialogMount !== null;
   useRetainedDialogFocus(keepMounted, dialogOpen, dialogRef);
 
+  const fitBrowserViewport = useCallback(
+    (container: HTMLDivElement | null) => {
+      const viewport = globalThis.visualViewport;
+      if (!fitVisualViewport || isCapacitor || !container || !viewport) {
+        return;
+      }
+      // Native shells already own this inset. Browsers expose their keyboard
+      // avoidance through the visual viewport instead of native plugin events.
+      const updateInset = () => {
+        const isZoomed = viewport.scale > 1;
+        const inset = isZoomed
+          ? 0
+          : Math.max(
+              0,
+              globalThis.innerHeight - viewport.height - viewport.offsetTop
+            );
+        if (isZoomed) {
+          container.style.removeProperty(
+            "--mobile-wrapper-dialog-available-height"
+          );
+        } else {
+          container.style.setProperty(
+            "--mobile-wrapper-dialog-available-height",
+            `max(0px, calc(${viewport.height}px - 4rem))`
+          );
+        }
+        container.style.setProperty(
+          "--mobile-wrapper-dialog-keyboard-inset",
+          `${inset}px`
+        );
+        container.dataset["mobileDialogKeyboardVisible"] = String(
+          inset > BROWSER_KEYBOARD_MIN_INSET
+        );
+      };
+      updateInset();
+      viewport.addEventListener("resize", updateInset);
+      viewport.addEventListener("scroll", updateInset, { passive: true });
+      return () => {
+        viewport.removeEventListener("resize", updateInset);
+        viewport.removeEventListener("scroll", updateInset);
+        container.style.removeProperty(
+          "--mobile-wrapper-dialog-keyboard-inset"
+        );
+        container.style.removeProperty(
+          "--mobile-wrapper-dialog-available-height"
+        );
+        delete container.dataset["mobileDialogKeyboardVisible"];
+      };
+    },
+    [fitVisualViewport, isCapacitor]
+  );
+
   useEffect(() => {
     if (!dialogOpen || !focusTitleOnOpen) {
       return;
@@ -517,6 +584,7 @@ export default function MobileWrapperDialog({
           The stable callback ref also resets readiness when this surface hides. */}
       <span hidden aria-hidden="true" ref={setDialogMount} />
       <Dialog
+        id={id}
         ref={dialogRef}
         as="div"
         open={dialogOpen}
@@ -558,6 +626,7 @@ export default function MobileWrapperDialog({
             onClick={(e) => e.stopPropagation()}
           >
             <div
+              ref={fitVisualViewport ? fitBrowserViewport : undefined}
               className={containerClassNames}
               style={MOBILE_DIALOG_CONTAINER_STYLE}
             >

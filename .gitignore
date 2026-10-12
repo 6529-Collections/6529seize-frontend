@@ -148,3 +148,6 @@ ops/skills/6529-agent-login/*agent-login*.js
 *storage-state*.json
 *.credentials.json
 *-session-token*
+
+# Generated from the pinned PDF.js dependency before dev/build.
+/public/pdfjs/

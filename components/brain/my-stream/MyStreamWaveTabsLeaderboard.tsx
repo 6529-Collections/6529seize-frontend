@@ -5,6 +5,7 @@ import { BrainView } from "../mobile/brainMobileViews";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
 import { useApproveWaveCustomTabLabels } from "@/hooks/waves/useWaveMetadata";
 import { useCompetitionNavigation } from "@/contexts/CompetitionNavigationContext";
+import TabButton from "@/components/common/TabButton";
 
 type RegisterTabRef = (view: BrainView, el: HTMLButtonElement | null) => void;
 
@@ -66,7 +67,7 @@ const MyStreamWaveTabsLeaderboard: React.FC<
 
   return (
     <>
-      <button
+      <TabButton
         type="button"
         ref={(el) => {
           registerTabRef?.(primaryView, el);
@@ -78,10 +79,10 @@ const MyStreamWaveTabsLeaderboard: React.FC<
         <span className={getButtonTextClasses(isPrimaryActive)}>
           {primaryLabel}
         </span>
-      </button>
+      </TabButton>
       {renderAfterLeaderboard}
       {showWinnersTab && (
-        <button
+        <TabButton
           type="button"
           ref={(el) => {
             registerTabRef?.(BrainView.WINNERS, el);
@@ -95,7 +96,7 @@ const MyStreamWaveTabsLeaderboard: React.FC<
           >
             {winnersLabel}
           </span>
-        </button>
+        </TabButton>
       )}
     </>
   );

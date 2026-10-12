@@ -17,6 +17,7 @@ import { useWaveSettingUpdater } from "./useWaveSettingUpdater";
 interface WaveApprovalThresholdsProps {
   readonly wave: ApiWave;
   readonly display?: "configuration" | "settings" | undefined;
+  readonly onSaved?: (() => void) | undefined;
 }
 
 const MINUTE_IN_MS = 60 * 1000;
@@ -160,6 +161,7 @@ function WaveApprovalThresholdsFieldEditor({
 export default function WaveApprovalThresholds({
   wave,
   display = "settings",
+  onSaved,
 }: WaveApprovalThresholdsProps) {
   const { canEdit, mutating, saveWaveConfigUpdate, setToast } =
     useWaveSettingUpdater(wave);
@@ -202,7 +204,10 @@ export default function WaveApprovalThresholds({
         ...waveConfig,
         winning_threshold: parsedThreshold,
       }),
-      () => invalidateWaveApprovalStatusQueries(queryClient, wave.id)
+      () => {
+        invalidateWaveApprovalStatusQueries(queryClient, wave.id);
+        onSaved?.();
+      }
     );
   };
 
@@ -241,7 +246,10 @@ export default function WaveApprovalThresholds({
         ...waveConfig,
         winning_threshold_min_duration_ms: nextMinDurationMs,
       }),
-      () => invalidateWaveApprovalStatusQueries(queryClient, wave.id)
+      () => {
+        invalidateWaveApprovalStatusQueries(queryClient, wave.id);
+        onSaved?.();
+      }
     );
   };
 

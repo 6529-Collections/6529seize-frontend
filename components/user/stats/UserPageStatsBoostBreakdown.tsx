@@ -25,8 +25,8 @@ const BOOST_VALUE_FORMAT_OPTIONS = {
 } satisfies Intl.NumberFormatOptions;
 
 const BOOST_ROW_HEADER_CLASS =
-  "tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-left tw-font-medium tw-text-iron-400";
-const BOOST_VALUE_CELL_CLASS = `${STATS_TABLE_VALUE_CELL_CLASS} tw-min-w-36`;
+  "tw-whitespace-nowrap tw-px-2 tw-py-2 tw-text-left tw-font-medium tw-text-iron-400 md:tw-px-4 md:tw-py-3";
+const BOOST_VALUE_CELL_CLASS = `${STATS_TABLE_VALUE_CELL_CLASS} md:tw-min-w-36`;
 
 type BoostMessageKey = Extract<
   MessageKey,
@@ -77,7 +77,7 @@ export default function UserPageStatsBoostBreakdown({
   function getMemeRow(name: string, breakdown: TDHBoostBreakdown | undefined) {
     return (
       <tr key={name} className={STATS_TABLE_ROW_CLASS}>
-        <th scope="row" className={`${BOOST_ROW_HEADER_CLASS} tw-pl-8`}>
+        <th scope="row" className={`${BOOST_ROW_HEADER_CLASS} md:tw-pl-8`}>
           {name}
         </th>
         <BoostValueCell
@@ -100,7 +100,7 @@ export default function UserPageStatsBoostBreakdown({
         <th
           scope="rowgroup"
           colSpan={3}
-          className="tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-left tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-300"
+          className="tw-whitespace-nowrap tw-px-2 tw-py-2 tw-text-left tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-300 md:tw-px-4 md:tw-py-3"
         >
           {boostMessage(
             locale,
@@ -194,7 +194,10 @@ export default function UserPageStatsBoostBreakdown({
   }
 
   return (
-    <section aria-labelledby="boost-breakdown-heading" className="tw-space-y-3">
+    <section
+      aria-labelledby="boost-breakdown-heading"
+      className="tw-space-y-2 md:tw-space-y-3"
+    >
       <div className="tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-2">
         <h3
           className={STATS_SECTION_HEADING_CLASS}
@@ -215,7 +218,7 @@ export default function UserPageStatsBoostBreakdown({
       </div>
       <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.02]">
         <UserPageStatsTableScroll label={caption}>
-          <table className={`${STATS_TABLE_CLASS} tw-min-w-[34rem]`}>
+          <table className={`${STATS_TABLE_CLASS} md:tw-min-w-[34rem]`}>
             <caption className="tw-sr-only">{caption}</caption>
             <thead className={STATS_TABLE_HEAD_CLASS}>
               <tr>
@@ -320,7 +323,7 @@ function BoostValueCell({
       }`}
     >
       {hasBoostValue(value) ? (
-        <span className="tw-flex tw-items-center tw-justify-end tw-gap-2">
+        <span className="tw-flex tw-flex-nowrap tw-items-center tw-justify-end tw-gap-1 md:tw-gap-2">
           {formatBoostValue(locale, value)}
           <BoostBreakdownInfo info={info ?? []} locale={locale} />
         </span>
@@ -348,7 +351,7 @@ function BoostBreakdownInfo({
     <>
       <button
         type="button"
-        className="tw-inline-flex tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+        className="tw-inline-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
         aria-label={boostMessage(
           locale,
           "user.collected.stats.boostBreakdown.info.ariaLabel"

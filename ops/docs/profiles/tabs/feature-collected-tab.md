@@ -54,6 +54,8 @@ Transfer mode is part of the Native collected view (not a separate route).
    - If the URL already has `activity=...`, `Details` starts open and the lower
      section selects that tab when the value is recognized.
 2. Review the top stats block:
+   - On mobile, swipe the headline metrics horizontally. A fade at the right
+     edge indicates more metrics; `Details` remains visible beside the row.
    - headline metrics can include `NextGen`, `Meme Sets`, `Memes`,
      `Gradients`, and `Boost`
    - headline metric labels, multiplier values, unique-count copy, and the
@@ -74,6 +76,9 @@ Transfer mode is part of the Native collected view (not a separate route).
      clears the Memes season filter
    - unopened Meme seasons can appear as `Unseized` chips
 3. Click `Details` to expand the integrated stats panel.
+   - On mobile, both `Overview` and both `Memes Breakdown By Season` sections
+     start closed under `Collected` and `Activity Overview`. Tap a section title
+     to open its table. Desktop starts with these sections open.
 4. In `Details`, review:
    - `Collected` totals and per-season Meme tables
      - collected details headings, table headers, row labels, and per-season
@@ -91,6 +96,9 @@ Transfer mode is part of the Native collected view (not a separate route).
    - lower section tabs: `Wallet Activity`, `Distributions`, `TDH History`
      - lower Activity tab labels and the tab-list accessible name are
        message-backed from the source locale
+     - on mobile, lower Activity tabs share available space and keep side padding;
+       labels stay on one line and scroll horizontally when needed
+     - the selected tab stays visible, including when opened from a deep link
      - lower Activity tabs expose tab/panel relationships and support keyboard
        arrow, Home, and End navigation
    - `Wallet Activity`
@@ -105,6 +113,8 @@ Transfer mode is part of the Native collected view (not a separate route).
    - Boost Breakdown static labels and table headings are message-backed from
      the source locale; the table exposes a screen-reader caption, row
      headers, and keyboard-focusable info triggers.
+   - Table labels and values stay on one line. Swipe or use the labelled scroll
+     regions to reach columns that do not fit, including in `Boost Breakdown`.
 5. Choose `View`:
    - `Native` for profile card holdings.
    - `Network` for xTDH token holdings.
@@ -116,6 +126,9 @@ Transfer mode is part of the Native collected view (not a separate route).
    - View, collection, sort, seized, and filter-scroll control names are
      message-backed from the source locale.
 7. Apply sort and browse pages.
+   - Pagination sits below the artwork grid in Native and Network views. Page
+     counts stay on one line; Previous and Next can move below the count on narrow
+     screens.
    - Collection, filter, sort, and pagination changes add browser-history
      entries, so browser Back and Forward restore earlier collected views.
    - Automatic correction of an unavailable page replaces the current history

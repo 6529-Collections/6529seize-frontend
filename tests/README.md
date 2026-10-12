@@ -93,6 +93,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:ui`                                       | —                             | local    | local       | manual                    | 90m     | Playwright UI mode for local debugging.                                                               |
 | `test:e2e:smoke`                                    | —                             | local    | local       | pr-ci, manual             | 15m     | Fast @smoke subset of home, about, and The Memes.                                                     |
 | `test:e2e:critical-shell`                           | —                             | local    | local       | pr-ci, manual             | 15m     | Boot and guarded route-shell resilience pack.                                                         |
+| `test:e2e:wave-feature-usage-sandbox`               | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Wave feature visibility and production SDK privacy with synthetic loopback data.                      |
 | `test:e2e:social-readonly`                          | —                             | readonly | local       | pr-ci, manual             | 15m     | Waves and profile read-only journeys.                                                                 |
 | `test:e2e:input-detection-readonly`                 | —                             | readonly | local       | pr-ci, manual             | 15m     | Windows touch-input detection read-only contract.                                                     |
 | `test:e2e:media-readonly`                           | —                             | readonly | local       | pr-ci, manual             | 15m     | Media and mint detail read-only coverage.                                                             |
@@ -108,10 +109,12 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:search-waves-readonly`                    | —                             | readonly | local       | pr-ci, manual             | 15m     | Global and wave-local search coverage.                                                                |
 | `test:e2e:museum-data-architecture`                 | —                             | readonly | local       | pr-ci, manual             | 30m     | Network Museum data-architecture reading room and machine profile sweep.                              |
 | `test:e2e:museum-institutional-practice`            | —                             | readonly | local       | manual                    | 30m     | Network Museum institutional-practice study route sweep.                                              |
+| `test:e2e:museum-network-ia`                        | —                             | readonly | local       | manual                    | 15m     | Network Museum information-architecture gate across hubs, works, and acquisitions.                    |
 | `test:e2e:museum-about`                             | —                             | readonly | local       | pr-ci, manual             | 15m     | Network Museum About proposition route readability and source contract.                               |
 | `test:e2e:museum-rights`                            | —                             | readonly | local       | pr-ci, manual             | 15m     | Network Museum rights education and object-license route sweep.                                       |
 | `test:e2e:museum-inside-system`                     | —                             | readonly | local       | pr-ci, manual             | 30m     | Network Museum Inside the System project and comparison sweep.                                        |
 | `test:e2e:artwork-documentation-sandbox`            | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Artwork documentation saving and upload recovery through the real editor with isolated HTTP fixtures. |
+| `test:e2e:pdf-attachments-sandbox`                  | —                             | sandbox  | local       | pr-ci, manual             | 15m     | PDF attachment scrolling, recovery and touch layout in WebKit.                                        |
 | `test:e2e:composer-sandbox`                         | —                             | sandbox  | local       | manual                    | 15m     | Waves composer sandbox against the local mock API.                                                    |
 | `test:e2e:public-review-sandbox`                    | —                             | sandbox  | local       | manual                    | 15m     | Stream review feedback sandbox against the local mock API.                                            |
 | `test:e2e:reaction-sandbox`                         | —                             | sandbox  | local       | manual                    | 15m     | Drop reaction sandbox against the local mock API.                                                     |
@@ -143,6 +146,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:staging:network-open-data-readonly`       | network-open-data-readonly    | readonly | staging     | post-deploy, manual       | 15m     | Staging network and open-data read-only pack.                                                         |
 | `test:e2e:staging:museum-data-architecture`         | museum-data-architecture      | readonly | staging     | post-deploy, manual       | 30m     | Staging Network Museum data-architecture reading room and machine profile sweep.                      |
 | `test:e2e:staging:museum-institutional-practice`    | museum-institutional-practice | readonly | staging     | post-deploy, manual       | 15m     | Staging Network Museum institutional-practice deployed route smoke.                                   |
+| `test:e2e:staging:museum-network-ia`                | museum-network-ia             | readonly | staging     | post-deploy, manual       | 15m     | Staging Network Museum information-architecture gate across hubs, works, and acquisitions.            |
 | `test:e2e:staging:museum-about`                     | museum-about                  | readonly | staging     | post-deploy, manual       | 15m     | Staging Network Museum About proposition route smoke.                                                 |
 | `test:e2e:staging:museum-inside-system`             | museum-inside-system          | readonly | staging     | post-deploy, manual       | 30m     | Staging Network Museum Inside the System project and comparison sweep.                                |
 | `test:e2e:staging:museum-rights`                    | museum-rights                 | readonly | staging     | post-deploy, manual       | 15m     | Staging Network Museum rights education and object-license route sweep.                               |
@@ -159,6 +163,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:production:search-waves-readonly`         | search-waves-readonly         | readonly | production  | cron, manual, post-deploy | 15m     | Production search canary.                                                                             |
 | `test:e2e:production:museum-data-architecture`      | museum-data-architecture      | readonly | production  | post-deploy, manual       | 30m     | Production Network Museum data-architecture reading room and machine profile sweep.                   |
 | `test:e2e:production:museum-institutional-practice` | museum-institutional-practice | readonly | production  | cron, post-deploy, manual | 30m     | Production Network Museum institutional-practice deployed route smoke.                                |
+| `test:e2e:production:museum-network-ia`             | museum-network-ia             | readonly | production  | cron, post-deploy, manual | 15m     | Production Network Museum information-architecture gate across hubs, works, and acquisitions.         |
 | `test:e2e:production:museum-about`                  | museum-about                  | readonly | production  | post-deploy, manual       | 15m     | Production Network Museum About proposition route smoke.                                              |
 | `test:e2e:production:museum-inside-system`          | museum-inside-system          | readonly | production  | post-deploy, manual       | 30m     | Production Network Museum Inside the System project and comparison sweep.                             |
 | `test:e2e:production:museum-rights`                 | museum-rights                 | readonly | production  | post-deploy, manual       | 15m     | Production Network Museum rights education and object-license route sweep.                            |
@@ -188,9 +193,8 @@ Choosing the test layer:
   template and required viewport, then test the complete route/content
   inventory with fast static or Jest contracts.
 - Add per-route E2E coverage only when a route has materially different browser
-  behavior or risk. The retained Museum institutional-practice sweep is a
-  scoped exception: its desktop/mobile route coverage runs in an isolated lane
-  only for Museum-impacting PRs and staging changes.
+  behavior or risk. Museum packs run only for the Museum pages a change can
+  affect (see Museum selection below).
 
 Remote read-only defaults:
 
@@ -227,13 +231,18 @@ App PR CI:
   `Installed app checks` job preserves the required branch-protection gate and
   succeeds only when every selected lane succeeds.
 - PR CI retains the risk-selected small smoke and critical route-shell
-  Playwright packs. A separate Museum lane joins the matrix only when the PR
-  changes `app/museum/network/**`, `components/museum/**`, `lib/museum/**`, the
-  Museum server environment adapter, Museum locale messages, or Museum E2E.
+  Playwright packs. A separate Museum lane joins the matrix when a change can
+  affect a Museum page or the Museum lane itself; Museum unit tests and
+  workflows without Museum lanes do not start it.
+- Museum selection: `scripts/museum-release-selection.cjs` maps each changed
+  file to Museum page surfaces through the surface registry and import graph
+  (copy keys and `public/museum` assets map through the sources that name
+  them), then selects the packs whose specs visit those surfaces. Network IA is
+  the PR lane's always-on gate and a separate deployed pack. Lane wiring and
+  dependency changes run only the gate. Publication, shared-shell, and
+  selection-machinery changes, or any file it cannot map, run every pack.
 - Museum publication correctness remains exhaustive in fast Jest contracts.
-  The desktop/mobile route sweep adds browser evidence for Museum-impacting PRs
-  and exact staging changes. Unrelated changes exclude it; explicit manual
-  Museum selection remains available.
+  Explicit manual Museum pack selection remains available.
 - Uploaded PR CI artifacts are short-term debugging evidence. Deployment
   workflows retain their version, health, and validation artifacts in GitHub
   Actions; use approved artifact storage for longer retention, not Git LFS.
@@ -267,6 +276,13 @@ Surface matrix:
   baseline web projects.
 - `test:e2e:social-readonly` runs the public Waves/Profile read-only pack on
   both baseline web projects.
+  Its Main Stage app journey validates live vote Activity against a successful
+  API response: populated responses must render matching drop controls, and an
+  empty response must render the explicit empty state. It does not require live
+  votes or enough rows to overflow. Settings and Activity scrolling are covered
+  by `test:e2e:native-competition-sandbox` with long fixture terms and 30 vote
+  rows for both legacy and native competitions, including the iOS app simulation
+  on the mobile project.
 - `test:e2e:media-readonly` runs the public media, mint, and detail read-only
   pack on both baseline web projects. Exact ReMemes detail assertions are limited
   to the production pack until local and staging have a stable matching fixture.
@@ -329,9 +345,9 @@ Surface matrix:
   staging or production smoke pack.
   A separate Rank fixture also covers public chat with restricted
   submissions, on-demand submission-lock details, and draft preservation through
-  Configuration. It also verifies that available chat has no access panel.
+  Settings. It also verifies that available chat has no access panel.
   Keyboard coverage checks Enter/Space activation, Tab access to links, Escape
-  focus restoration, and focus on Configuration after opening submission rules.
+  focus restoration, and focus on Settings after opening submission rules.
   SSR and client requests receive the same fixture. Only the existing notification
   read acknowledgement is allowed; posting to this fixture still fails closed.
 - `test:e2e:public-review-sandbox` runs the authenticated Stream review
@@ -487,11 +503,11 @@ Large-pack ownership:
   education, museum, OM, news, capital, blog, author, legacy content rendering,
   image/link rendering, route canonicalizing, or read-only mutation guard
   behavior.
-- `test:e2e:museum-institutional-practice` is the Network Museum route sweep
-  owned by changes under `app/museum/network/`, `components/museum/`,
-  `lib/museum/`, `config/museumPublicationEnv.server.ts`, `tests/museum/`, or
-  the Museum locale messages. PR planning and staging selection use the same
-  path contract; manual operators may select the pack directly.
+- `test:e2e:museum-institutional-practice` is the Network Museum
+  institutional-practice route sweep. Selection runs it when a change affects
+  the pages its spec visits (institutional-practice studies, sources, artists,
+  acquisitions, acquisition programs, or works); manual operators may select
+  the pack directly.
 - `test:e2e:authenticated-shells-readonly` is owned by PR or train owners
   changing auth restoration, wallet/profile gating, direct messages,
   subscriptions, profile proxy, profile tab visibility, or the read-only

@@ -231,8 +231,8 @@ describe("CollectedStatsSeasonTile", () => {
       "tw-text-center"
     );
     expect(screen.getByRole("button", { name: /szn2/i })).toHaveClass(
-      "tw-w-[78px]",
-      "sm:tw-w-[88px]",
+      "tw-w-[70px]",
+      "md:tw-w-[88px]",
       "tw-px-2"
     );
   });

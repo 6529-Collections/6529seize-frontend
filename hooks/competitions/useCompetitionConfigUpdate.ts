@@ -25,9 +25,9 @@ export function useCompetitionConfigEditable() {
   const { competition, hub } = useCompetition();
   return (
     isMultiCompetitionEnabled() &&
-    hub.legacy_primary_competition_id !== competition.id &&
     competition.permissions.administer &&
-    (competition.lifecycle === ApiCompetitionLifecycle.Draft ||
+    (hub.legacy_primary_competition_id === competition.id ||
+      competition.lifecycle === ApiCompetitionLifecycle.Draft ||
       competition.lifecycle === ApiCompetitionLifecycle.Published)
   );
 }

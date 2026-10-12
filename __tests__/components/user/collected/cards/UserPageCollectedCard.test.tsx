@@ -378,6 +378,7 @@ describe("UserPageCollectedCard", () => {
 
     const link = screen.getByRole("link");
     expect(link).toHaveAttribute("href", "/the-memes/1");
+    expect(link).toHaveAttribute("data-profile-action", "Open artwork");
   });
 
   it.each([

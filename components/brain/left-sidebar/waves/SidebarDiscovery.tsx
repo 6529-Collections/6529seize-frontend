@@ -10,12 +10,15 @@ import { useWaveDiscoveryViewer } from "@/hooks/useWaveDiscoveryViewer";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { SidebarActiveVotes } from "./SidebarActiveVotes";
+import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
+import { waveFeatureAttributes } from "@/services/analytics/waveFeatureUsage";
 import {
   HighlyRatedWavesToggle,
   type HighlyRatedWavePreviewItem,
 } from "./HighlyRatedWavesToggle";
 
 function DiscoverySection({
+  featureValue,
   label,
   count,
   viewAllHref,
@@ -24,6 +27,7 @@ function DiscoverySection({
   onToggle,
   children,
 }: {
+  readonly featureValue: "recommendations" | "active_votes";
   readonly label: string;
   readonly count?: number | undefined;
   readonly viewAllHref: string;
@@ -42,6 +46,7 @@ function DiscoverySection({
       <div className="tw-relative tw-mx-4 tw-flex tw-min-h-9 tw-items-center tw-gap-2">
         <h3 id={`${id}-heading`} className="tw-m-0 tw-min-w-0 tw-flex-1">
           <button
+            {...waveFeatureAttributes("sidebar_section", featureValue)}
             type="button"
             aria-expanded={!collapsed}
             aria-controls={id}
@@ -68,6 +73,7 @@ function DiscoverySection({
           </button>
         </h3>
         <Link
+          {...waveFeatureAttributes("sidebar_entry", `${featureValue}_all`)}
           href={viewAllHref}
           aria-label={viewAllLabel}
           className="tw-relative tw-z-10 tw-inline-flex tw-min-h-8 tw-shrink-0 tw-items-center tw-rounded-md tw-text-[11px] tw-text-primary-300 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
@@ -104,6 +110,7 @@ export function SidebarDiscovery({
 }) {
   const locale = useBrowserLocale();
   const votes = useActiveWaveVotes();
+  const { ref: featureUsageRef } = useWaveFeatureUsage("sidebar");
   const { canUseCollections } = useWaveDiscoveryViewer();
   const [activePreference, setActivePreference] = useWaveSidebarPreference(
     "wave-discovery-active-collapsed",
@@ -119,10 +126,12 @@ export function SidebarDiscovery({
   return (
     <section
       className="tailwind-scope"
+      ref={featureUsageRef}
       aria-label={t(locale, "waves.discovery.label")}
     >
       <DiscoverySection
         label={t(locale, "waves.discovery.recommendations")}
+        featureValue="recommendations"
         viewAllHref="/discover?view=recommendations&sort=QUALITY"
         viewAllLabel={t(locale, "waves.discovery.viewRecommendations")}
         collapsed={recommendationsCollapsed}
@@ -154,6 +163,7 @@ export function SidebarDiscovery({
       </DiscoverySection>
       <DiscoverySection
         label={t(locale, "waves.discovery.activeVotes")}
+        featureValue="active_votes"
         count={votes.data?.pages[0]?.count}
         viewAllHref="/discover?view=active-votes"
         viewAllLabel={t(locale, "waves.discovery.viewVotes")}
