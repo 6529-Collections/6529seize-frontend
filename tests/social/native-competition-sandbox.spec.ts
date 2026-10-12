@@ -1022,15 +1022,25 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       );
     await page.setViewportSize({ width: app ? 390 : 720, height: 900 });
     await page.goto(`${ROOT}/alpha?tab=rules`);
-    const scroller = page.locator(
-      `[data-wave-tabs-scroll="${app ? "app" : "desktop"}"]`
+    const selected = page.getByRole(app ? "button" : "tab", {
+      name: "Settings",
+      exact: true,
+    });
+    const scroller = page
+      .getByRole(app ? "button" : "tab", { name: "Settings", exact: true })
+      .locator("xpath=ancestor::div[@data-wave-tabs-scroll]");
+    const leftFade = page
+      .getByRole(app ? "button" : "tab", { name: "Settings", exact: true })
+      .locator("xpath=ancestor::div[@data-wave-tabs-scroll]/..")
+      .locator('[data-wave-tabs-fade="left"]');
+    const rightFade = page
+      .getByRole(app ? "button" : "tab", { name: "Settings", exact: true })
+      .locator("xpath=ancestor::div[@data-wave-tabs-scroll]/..")
+      .locator('[data-wave-tabs-fade="right"]');
+    await expect(selected).toHaveAttribute(
+      app ? "aria-current" : "aria-selected",
+      "true"
     );
-    const row = scroller.locator("..");
-    const leftFade = row.locator('[data-wave-tabs-fade="left"]');
-    const rightFade = row.locator('[data-wave-tabs-fade="right"]');
-    const selected = app
-      ? scroller.locator('[aria-current="true"]')
-      : scroller.getByRole("tab", { selected: true });
     await expect(selected).toHaveText("Settings");
     await expect
       .poll(() =>
@@ -1081,6 +1091,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     );
     await expect(leftFade).toHaveCSS("opacity", "1");
     await expect(rightFade).toHaveCSS("opacity", "0");
+    await expect(selected).toHaveAttribute(
+      app ? "aria-current" : "aria-selected",
+      "true"
+    );
     await expect(selected).toHaveText("Settings");
     await create.click();
     await expect(page.getByText("New curation", { exact: true })).toBeVisible();
@@ -1095,6 +1109,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       .toBeLessThanOrEqual(2);
     await expect(leftFade).toHaveCSS("opacity", "0");
     await expect(rightFade).toHaveCSS("opacity", "0");
+    await expect(selected).toHaveAttribute(
+      app ? "aria-current" : "aria-selected",
+      "true"
+    );
     await expect(selected).toHaveText("Settings");
     await expectNoHorizontalOverflow(page);
   });
@@ -1144,12 +1162,19 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     if (app) {
       const viewport = page.viewportSize();
       await page.setViewportSize({ width: 320, height: 780 });
-      const filtersScroller = collection.locator(
-        "[data-competition-filters-scroll]"
-      );
-      const filterFades = filtersScroller.locator("..");
-      const rightFade = filterFades.locator('[data-wave-tabs-fade="right"]');
-      const leftFade = filterFades.locator('[data-wave-tabs-fade="left"]');
+      const filtersScroller = page
+        .getByRole("region", { name: "Competitions", exact: true })
+        .locator("[data-competition-filters-scroll]");
+      const rightFade = page
+        .getByRole("region", { name: "Competitions", exact: true })
+        .locator("[data-competition-filters-scroll]")
+        .locator("..")
+        .locator('[data-wave-tabs-fade="right"]');
+      const leftFade = page
+        .getByRole("region", { name: "Competitions", exact: true })
+        .locator("[data-competition-filters-scroll]")
+        .locator("..")
+        .locator('[data-wave-tabs-fade="left"]');
       await expect(rightFade).toHaveCSS("opacity", "1");
       await expect(rightFade).toHaveCSS("pointer-events", "none");
       await expect(leftFade).toHaveCSS("opacity", "0");
@@ -1253,7 +1278,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(create).toHaveCount(1);
     await expect(create).toHaveText("Create");
     await expect(create).toHaveCSS("height", app ? "44px" : "32px");
-    await expect(create.locator(":scope > span")).toHaveCSS("height", "32px");
+    await expect(
+      page
+        .getByRole("button", { name: "Open create menu", exact: true })
+        .locator(":scope > span")
+    ).toHaveCSS("height", "32px");
     await create.click();
     const createOptions = app
       ? page.getByRole("dialog", { name: "Create", exact: true })
@@ -1271,7 +1300,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(createOptions).toHaveCSS("opacity", "1");
       await expect(createOptions).toBeFocused();
       await expect(createOptions).not.toHaveAttribute("aria-activedescendant");
-      await expect(createOptions.locator("[data-focus]")).toHaveCount(0);
+      await expect(page.getByRole("menu").locator("[data-focus]")).toHaveCount(
+        0
+      );
     }
     await page.screenshot({
       path: testInfo.outputPath("wave-create-menu.png"),
@@ -2369,7 +2400,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         expect(pending?.width).toBe(before?.width);
         expect(pending?.height).toBe(before?.height);
         await expect(
-          leaderboard.locator(':scope > [aria-hidden="true"]')
+          page
+            .getByRole(role, { name: "Leaderboard", exact: true })
+            .locator(':scope > [aria-hidden="true"]')
         ).toHaveCount(0);
         await page.screenshot({ path: testInfo.outputPath("pending-tab.png") });
         releaseNavigation();
