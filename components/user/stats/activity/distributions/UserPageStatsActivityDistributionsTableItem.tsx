@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import ProfileCollectedActivityLink from "@/components/user/collected/ProfileCollectedActivityLink";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import {
   formatDistributionRelativeTime,
@@ -35,7 +35,8 @@ export default function UserPageStatsActivityDistributionsTableItem({
         {collectionLabel}
       </td>
       <td className="tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-right tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-base lg:tw-pl-4">
-        <Link
+        <ProfileCollectedActivityLink
+          activityKey={`distribution-${item.collection}-${item.tokenId}-${item.walletAddress}`}
           aria-label={getDistributionTokenLinkLabel({
             collection: item.collection,
             tokenId: item.tokenId,
@@ -45,7 +46,7 @@ export default function UserPageStatsActivityDistributionsTableItem({
           href={`${getCollectionPath(item.collection)}/${item.tokenId}`}
         >
           # {item.tokenId}
-        </Link>
+        </ProfileCollectedActivityLink>
       </td>
       <td className="tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-sm tw-font-medium tw-text-iron-50 sm:tw-px-6 sm:tw-text-base lg:tw-pl-4">
         {item.name}
