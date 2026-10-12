@@ -1,5 +1,5 @@
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { formatDate } from "@/i18n/format";
+import { formatUtcDate } from "@/i18n/format";
 import MigratedWordPressArticleVideoPlayer from "./MigratedWordPressArticleVideoPlayer";
 import type {
   MigratedWordPressArticleBlock,
@@ -184,7 +184,7 @@ export default function MigratedWordPressArticlePage({
 }: {
   readonly content: MigratedWordPressArticleContent;
 }) {
-  const publishedLabel = formatDate(
+  const publishedLabel = formatUtcDate(
     DEFAULT_LOCALE,
     content.publishedAt,
     ARTICLE_DATE_FORMAT
