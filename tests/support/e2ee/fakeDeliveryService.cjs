@@ -366,6 +366,8 @@ function createFakeDeliveryService(options = {}) {
       fail(400, "E2EE_TOO_LARGE");
     }
     const pool = s.keyPackages.get(deviceKey);
+    // Retention (7.2): KeyPackages are pruned at expiry.
+    pool.oneTime = pool.oneTime.filter((kp) => kp.expires_at > now() / 1000);
     for (const item of items) {
       if (unb64(item.data).length > MAX_KEY_PACKAGE_BYTES) {
         fail(413, "E2EE_TOO_LARGE");
@@ -988,12 +990,18 @@ function createFakeDeliveryService(options = {}) {
   async function handle(method, rawPath, input = {}) {
     const path = rawPath.replace(/^\/?(api\/)?/, "").split("?")[0];
     const profileId = input.profileId;
-    s.requests.push({ method, path, profileId });
+    const record = { method, path, profileId, status: 0, code: null };
+    s.requests.push(record);
     if (!profileId) {
       return { status: 401, body: { error: "unauthorized", code: "UNAUTHORIZED" } };
     }
+    if (s.gate && method === "POST" && s.gate.path.test(path)) {
+      await new Promise((resolve) => s.gate.waiters.push(resolve));
+    }
     const fault = takeFault(method, path);
     if (fault) {
+      record.status = fault.status;
+      record.code = fault.code || null;
       return { status: fault.status, body: { error: fault.code || "fault", code: fault.code || null } };
     }
     for (const [routeMethod, pattern, run] of routes) {
@@ -1003,9 +1011,12 @@ function createFakeDeliveryService(options = {}) {
       }
       try {
         const body = await run({ profileId, body: structuredClone(input.body || {}), query: input.query || {} }, match.slice(1).map(lower));
+        record.status = 200;
         return { status: 200, body: structuredClone(body) };
       } catch (error) {
         if (error instanceof HttpError) {
+          record.status = error.status;
+          record.code = error.code;
           return { status: error.status, body: { error: error.code, code: error.code, ...error.extra } };
         }
         throw error;
@@ -1051,6 +1062,25 @@ function createFakeDeliveryService(options = {}) {
     },
     clearFaults() {
       s.faults = [];
+    },
+    /**
+     * Holds matching POSTs until released (FIFO), to force races such as two
+     * commits for the same epoch.
+     */
+    hold(path) {
+      const gate = { path, waiters: [] };
+      s.gate = gate;
+      return {
+        waiting: () => gate.waiters.length,
+        release() {
+          if (s.gate === gate) {
+            s.gate = null;
+          }
+          for (const resolve of gate.waiters.splice(0)) {
+            resolve();
+          }
+        },
+      };
     },
     /** Rewrites log items before they are served (split-view tests). */
     setTamper(fn) {

@@ -29,7 +29,7 @@ export interface FakeDeliveryService {
     notifyLog: { group: string; sender_profile_id: string; hints: { profile_id: string; kind: string }[] }[];
     wakes: { profile_id: string; reason: string; group: string }[];
     reports: { id: string; verified: boolean; sender_profile_id: string | null; reason: string; body: string }[];
-    requests: { method: string; path: string; profileId: string }[];
+    requests: { method: string; path: string; profileId: string; status: number; code: string | null }[];
     rosterRepairs?: number;
     [key: string]: any;
   };
@@ -41,6 +41,7 @@ export interface FakeDeliveryService {
   subscribe(profileId: string, listener: (event: { type: string; data: unknown }) => void): () => void;
   addFault(fault: FakeFault): () => void;
   clearFaults(): void;
+  hold(path: RegExp): { waiting(): number; release(): void };
   setTamper(fn: ((item: any, context: FakeLogItemContext) => any) | null): void;
   group(g: string): any;
   devicesOf(profileId: string): any[];

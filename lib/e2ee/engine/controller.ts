@@ -141,10 +141,23 @@ export class EngineController {
       }
       const known = lastSeq.get(g);
       const behind = known === undefined || known > runtime.record.cursor;
-      await this.syncGroup(g, { fetch: behind || serverGroups === null });
+      await this.guard(this.syncGroup(g, { fetch: behind || serverGroups === null }));
     }
     if (this.ctx.now() - this.ctx.lastMeAt >= MAINTAIN_EVERY_MS) {
-      await swallowNetwork(this.hooks.refreshMe());
+      await this.guard(this.hooks.refreshMe());
+    }
+  }
+
+  /** One group's (or the pool's) failure must not stop the whole pass. */
+  private async guard(task: Promise<unknown>): Promise<void> {
+    try {
+      await task;
+    } catch (error) {
+      if (this.ctx.disposed) {
+        return;
+      }
+      this.ctx.store.error = error instanceof Error ? error.message : "E2EE_SYNC";
+      this.ctx.store.touch();
     }
   }
 
