@@ -52,8 +52,8 @@ route/layout render boundary fails.
 ## Edge Cases
 
 - `Try Again` appears only when a boundary provides a reset callback. The global
-  error screen always shows it and runs Next.js `unstable_retry`, which refetches
-  the page before re-rendering.
+  error screen always shows it and runs the Next.js retry (`retry`, or
+  `unstable_retry` on Next 16.2), which refetches the page before re-rendering.
 - The global error screen also shows `Go to the 6529 home page`, a plain link
   that reloads the site from `/`.
 - Plain `/error` does not show `Try Again`.

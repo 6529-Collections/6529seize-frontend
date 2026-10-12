@@ -6,6 +6,10 @@
 // shared components that do, and no dependency on the layout's global CSS
 // (it is not guaranteed to be loaded when this boundary takes over).
 
+import {
+  getErrorBoundaryRetry,
+  type ErrorBoundaryRetryProps,
+} from "@/components/error/errorBoundaryRetry";
 import { publicEnv } from "@/config/env";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, tRich } from "@/i18n/messages";
@@ -15,7 +19,9 @@ import { useEffect, useMemo } from "react";
 
 const SUPPORT_EMAIL = "support@6529.io";
 
-// Self-contained stylesheet: the shared Tailwind/global CSS may be absent.
+// Self-contained stylesheet: the shared Tailwind/global CSS may be absent. The
+// stack trace wraps and grows with the page instead of scrolling in a nested
+// box, so it needs no extra tab stop to stay keyboard accessible.
 const GLOBAL_ERROR_CSS = `
 html,body{margin:0;background:#000;color:#fff;font-family:Montserrat,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.5}
 .global-error{box-sizing:border-box;display:flex;align-items:center;justify-content:center;min-height:100vh;min-height:100dvh;padding:24px 16px}
@@ -27,21 +33,21 @@ html,body{margin:0;background:#000;color:#fff;font-family:Montserrat,system-ui,-
 .global-error__actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px 24px}
 .global-error__retry{min-height:44px;padding:10px 24px;border:0;border-radius:8px;background:#395fe4;color:#fff;font:inherit;font-weight:600;cursor:pointer}
 .global-error__retry:hover{background:#3f69fc}
-.global-error__retry:focus-visible,.global-error__link:focus-visible,.global-error__summary:focus-visible,.global-error__trace:focus-visible{outline:2px solid #84adff;outline-offset:3px}
+.global-error__retry:focus-visible,.global-error__link:focus-visible,.global-error__summary:focus-visible{outline:2px solid #84adff;outline-offset:3px}
 .global-error__details{width:100%;margin-top:16px;text-align:left}
 .global-error__summary{cursor:pointer;font-weight:600;text-align:center}
-.global-error__trace{max-height:16rem;margin:8px 0 0;padding:16px;overflow:auto;border-radius:8px;background:#111;color:#cecfd4;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.global-error__trace{margin:8px 0 0;padding:16px;border-radius:8px;background:#111;color:#cecfd4;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
 `;
 
-type GlobalErrorProps = {
+type GlobalErrorProps = ErrorBoundaryRetryProps & {
   readonly error: Error & { digest?: string | undefined };
-  readonly unstable_retry: () => void;
 };
 
 export default function GlobalError({
   error,
-  unstable_retry,
+  ...retryProps
 }: GlobalErrorProps) {
+  const retry = getErrorBoundaryRetry(retryProps);
   // useBrowserLocale only reads navigator (after hydration) and falls back to
   // en-US, so it is safe to use without any provider.
   const locale = useBrowserLocale();
@@ -88,7 +94,7 @@ export default function GlobalError({
               <button
                 type="button"
                 className="global-error__retry"
-                onClick={() => unstable_retry()}
+                onClick={() => retry()}
               >
                 {t(locale, "globalError.retry")}
               </button>
@@ -108,12 +114,7 @@ export default function GlobalError({
                 <summary className="global-error__summary">
                   {t(locale, "globalError.detailsSummary")}
                 </summary>
-                <pre
-                  className="global-error__trace"
-                  role="region"
-                  aria-label={t(locale, "globalError.detailsSummary")}
-                  tabIndex={0}
-                >
+                <pre className="global-error__trace">
                   {digest
                     ? `${t(locale, "globalError.errorId", { digest })}\n\n`
                     : ""}

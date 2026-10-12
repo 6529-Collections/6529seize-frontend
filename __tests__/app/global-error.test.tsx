@@ -60,18 +60,21 @@ const createError = (message = "Root layout exploded", digest?: string) => {
 
 // GlobalError owns <html>/<body>, so it is rendered into the document itself,
 // with no provider wrapper of any kind.
-const renderGlobalError = (
-  props: Partial<Parameters<typeof GlobalError>[0]> = {}
-) => {
-  const unstableRetry = props.unstable_retry ?? jest.fn();
+// By default it renders the 16.3 prop shape; pass retryProps to render another.
+const renderGlobalError = ({
+  error = createError(),
+  retryProps,
+}: {
+  readonly error?: Error & { digest?: string | undefined };
+  readonly retryProps?: Partial<Parameters<typeof GlobalError>[0]>;
+} = {}) => {
+  const retry = jest.fn();
+  const reset = jest.fn();
   const result = render(
-    <GlobalError
-      error={props.error ?? createError()}
-      unstable_retry={unstableRetry}
-    />,
+    <GlobalError error={error} retry={retry} reset={reset} {...retryProps} />,
     { container: document as unknown as HTMLElement }
   );
-  return { ...result, unstableRetry };
+  return { ...result, retry, reset };
 };
 
 describe("GlobalError", () => {
@@ -131,7 +134,8 @@ describe("GlobalError", () => {
     const html = renderToString(
       <GlobalError
         error={createError("Boom", "abc123")}
-        unstable_retry={jest.fn()}
+        retry={jest.fn()}
+        reset={jest.fn()}
       />
     );
 
@@ -147,12 +151,35 @@ describe("GlobalError", () => {
     expect(serverStyles).not.toMatch(/&(?:quot|amp|lt|gt|#x27);/);
   });
 
-  it("calls the retry callback from the Try Again button", () => {
-    const { unstableRetry } = renderGlobalError();
+  it("retries with Next 16.3 `retry` from the Try Again button", () => {
+    const { retry, reset } = renderGlobalError();
+
+    fireEvent.click(screen.getByRole("button", { name: "Try Again" }));
+
+    expect(retry).toHaveBeenCalledTimes(1);
+    expect(reset).not.toHaveBeenCalled();
+  });
+
+  it("retries with Next 16.2 `unstable_retry` when `retry` is absent", () => {
+    const unstableRetry = jest.fn();
+    const reset = jest.fn();
+    renderGlobalError({
+      retryProps: { retry: undefined, unstable_retry: unstableRetry, reset },
+    });
 
     fireEvent.click(screen.getByRole("button", { name: "Try Again" }));
 
     expect(unstableRetry).toHaveBeenCalledTimes(1);
+    expect(reset).not.toHaveBeenCalled();
+  });
+
+  it("falls back to `reset` when no retry function is provided", () => {
+    const reset = jest.fn();
+    renderGlobalError({ retryProps: { retry: undefined, reset } });
+
+    fireEvent.click(screen.getByRole("button", { name: "Try Again" }));
+
+    expect(reset).toHaveBeenCalledTimes(1);
   });
 
   it("brings its own styles instead of relying on the app stylesheet", () => {
@@ -170,17 +197,16 @@ describe("GlobalError", () => {
 
     const summary = screen.getByText("Error details");
     expect(summary.tagName).toBe("SUMMARY");
-    const trace = screen.getByRole("region", { name: "Error details" });
-    expect(trace).toHaveTextContent("Error ID: abc123");
+    const trace = screen.getByText(/Error ID: abc123/);
+    expect(trace.tagName).toBe("PRE");
     expect(trace).toHaveTextContent("RootLayout (layout.tsx:1:1)");
+    expect(trace).not.toHaveAttribute("tabindex");
   });
 
   it("renders without an error ID when the error has no digest", () => {
     renderGlobalError({ error: createError("Boom") });
 
-    expect(
-      screen.getByRole("region", { name: "Error details" })
-    ).not.toHaveTextContent("Error ID");
+    expect(screen.getByText(/at RootLayout/)).not.toHaveTextContent("Error ID");
   });
 
   it("does not report to Sentry when no DSN is configured", () => {
