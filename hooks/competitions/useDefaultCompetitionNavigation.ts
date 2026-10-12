@@ -6,7 +6,9 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import {
   isMultiCompetitionEnabled,
   isCompetitionPathname,
+  getCompetitionIdFromPathname,
   getCompetitionRoute,
+  isCompetitionAccessError,
 } from "@/helpers/competition.helpers";
 import {
   waveCompetitionTabs,
@@ -22,6 +24,10 @@ import {
   useWaveTabPreference,
 } from "@/hooks/useWaveTabPreference";
 import { MyStreamWaveTab } from "@/types/waves.types";
+import {
+  getActiveWaveIdFromUrl,
+  getWavePathRoute,
+} from "@/helpers/navigation.helpers";
 import {
   useCompetitionHub,
   useDefaultCompetition,
@@ -45,10 +51,18 @@ export function useDefaultCompetitionNavigation(
   const pathname = usePathname();
   const search = useSearchParams();
   const router = useRouter();
+  const matchesRoute =
+    wave?.id === getActiveWaveIdFromUrl({ pathname, searchParams: search });
+  const restoringSelection =
+    enabled &&
+    matchesRoute &&
+    isCompetitionPathname(pathname) &&
+    search.get("restore") === "1";
   const resolve =
     enabled &&
     isMultiCompetitionEnabled() &&
     Boolean(wave) &&
+    matchesRoute &&
     !wave?.chat.scope.group?.is_direct_message &&
     shouldResolveDefault(pathname, new URLSearchParams(search.toString()));
   const { tabs } = useWaveTabPreference();
@@ -64,10 +78,54 @@ export function useDefaultCompetitionNavigation(
     wave &&
     !wave.chat.scope.group?.is_direct_message &&
     ordinaryEntry &&
+    matchesRoute &&
     savedTab !== undefined &&
     waveCompetitionTabs[savedTab] !== undefined
   );
-  const selection = useDefaultCompetition(wave?.id ?? "", resolve || restore);
+  const selection = useDefaultCompetition(
+    wave?.id ?? "",
+    resolve || restore || restoringSelection
+  );
+  useEffect(() => {
+    if (!restoringSelection || selection.isFetching) return;
+    const usableCachedSelection =
+      selection.isError &&
+      !isCompetitionAccessError(selection.error) &&
+      selection.data !== undefined;
+    if (!selection.isFetchedAfterMount && !usableCachedSelection) return;
+    if (selection.isError && !usableCachedSelection) return;
+    const params = new URLSearchParams(search.toString());
+    params.delete("restore");
+    if (
+      selection.data?.competition_id !== getCompetitionIdFromPathname(pathname)
+    ) {
+      params.delete("default");
+      params.set("tab", "chat");
+      rememberHistoryWaveTab(wave.id, MyStreamWaveTab.CHAT);
+      router.replace(`${getWavePathRoute(wave.id)}?${params}`, {
+        scroll: false,
+      });
+      return;
+    }
+    // This marker belongs to client restoration, so removing it only commits
+    // the already mounted destination without another server navigation.
+    globalThis.history.replaceState(
+      globalThis.history.state,
+      "",
+      `${pathname}?${params}`
+    );
+  }, [
+    restoringSelection,
+    wave,
+    selection.isFetching,
+    selection.isFetchedAfterMount,
+    selection.isError,
+    selection.error,
+    selection.data,
+    pathname,
+    search,
+    router,
+  ]);
   // Old preferences had no competition identity. They can only name the
   // immutable legacy primary; new preferences always pin their selected ID.
   const legacyHub = useCompetitionHub(
@@ -153,6 +211,7 @@ export function useDefaultCompetitionNavigation(
     !wave.chat.scope.group?.is_direct_message &&
     !isCompetitionPathname(pathname) &&
     search.get("tab") === "configuration" &&
+    matchesRoute &&
     search.get("competition") &&
     !["drop", "entry", "serialNo", "curation", "editPost"].some((key) =>
       search.has(key)
@@ -216,5 +275,8 @@ export function useDefaultCompetitionNavigation(
     search,
     router,
   ]);
-  return { selection, resolve: resolve || explicitConfiguration };
+  return {
+    selection,
+    resolve: resolve || restore || restoringSelection || explicitConfiguration,
+  };
 }

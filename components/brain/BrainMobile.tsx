@@ -146,6 +146,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     null;
   const { data: wave } = useWaveData({
     waveId: waveId,
+    structuredErrors: isCompetitionPathname(pathname),
     onWaveNotFound: () => {
       const params = new URLSearchParams(searchParams.toString() || "");
       params.delete("wave");

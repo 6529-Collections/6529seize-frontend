@@ -24,9 +24,14 @@ import {
   isCompetitionPathname,
   getCompetitionTab,
   getCompetitionsRoute,
+  isMultiCompetitionEnabled,
 } from "@/helpers/competition.helpers";
 import { useCompetitionNavigation } from "@/contexts/CompetitionNavigationContext";
-import { getLegacyCompetitionTab } from "@/helpers/default-competition.helpers";
+import {
+  getLegacyCompetitionTab,
+  waveCompetitionTabs,
+} from "@/helpers/default-competition.helpers";
+import { hasWaveDestination } from "@/hooks/useWaveTabPreference";
 import { useContentTab } from "../ContentTabContext";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 import {
@@ -179,7 +184,11 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     ? (mappedCompetitionTab ?? BrainView.COMPETITIONS)
     : activeContentTab;
   const effectiveActiveView =
-    flat && isCompetitionRoute
+    (flat && isCompetitionRoute) ||
+    (!isCompetitionRoute &&
+      isMultiCompetitionEnabled() &&
+      !hasWaveDestination(searchParams) &&
+      waveCompetitionTabs[activeContentTab] !== undefined)
       ? (selectedLegacyView as unknown as BrainView)
       : activeView;
   const { registerRef } = useLayout();
@@ -285,6 +294,15 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
           Math.abs(element.scrollLeft - previousEnd) <= 1
         ) {
           element.scrollLeft = scrollEnd;
+          // Newly available sections can move the end past the selected tab.
+          // Preserve the end position only while the selected section stays visible.
+          element
+            .querySelector<HTMLElement>('[aria-current="true"]')
+            ?.scrollIntoView({
+              block: "nearest",
+              inline: "nearest",
+              behavior: "instant",
+            });
         }
         previousEnd = scrollEnd;
       });

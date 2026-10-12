@@ -1,9 +1,9 @@
 "use client";
-import WavesLayout from "@/components/waves/layout/WavesLayout";
 import MyStreamWave from "@/components/brain/my-stream/MyStreamWave";
 import CompetitionHub from "./CompetitionHub";
 import CompetitionWaveRoute from "./CompetitionWaveRoute";
 import CompetitionDraftRoute from "./CompetitionDraftRoute";
+import { useCompetitionViewer } from "@/hooks/competitions/useCompetitionQueries";
 
 export default function CompetitionRoute({
   waveId,
@@ -12,6 +12,7 @@ export default function CompetitionRoute({
   readonly waveId: string;
   readonly competitionId?: string;
 }) {
+  const viewer = useCompetitionViewer();
   if (competitionId !== undefined && competitionId !== "new") {
     return (
       <CompetitionWaveRoute waveId={waveId} competitionId={competitionId} />
@@ -19,10 +20,11 @@ export default function CompetitionRoute({
   }
   let content = <CompetitionHub waveId={waveId} embedded />;
   if (competitionId === "new")
-    content = <CompetitionDraftRoute waveId={waveId} />;
-  return (
-    <WavesLayout>
-      <MyStreamWave waveId={waveId} competitionContent={content} />
-    </WavesLayout>
-  );
+    content = (
+      <CompetitionDraftRoute
+        key={`${waveId}:${viewer ?? "anonymous"}`}
+        waveId={waveId}
+      />
+    );
+  return <MyStreamWave waveId={waveId} competitionContent={content} />;
 }

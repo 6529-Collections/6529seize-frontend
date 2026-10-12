@@ -115,6 +115,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   const { updateEligibility } = useWaveEligibility();
   const { data: wave } = useWaveData({
     waveId,
+    structuredErrors: isCompetitionPathname(pathname),
     onWaveNotFound: () => {
       const params = new URLSearchParams(searchParams.toString() || "");
       params.delete("wave");

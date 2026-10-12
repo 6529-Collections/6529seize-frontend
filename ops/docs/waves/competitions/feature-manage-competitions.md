@@ -16,7 +16,7 @@ Open the wave's **Competitions** tab, then **Add competition**, or use
 Where the competition experience is available, creating a wave opens its shared
 chat without creating a competition. Wave administrators can add competitions
 afterward; competition setup is separate from wave creation.
-The **Competitions** tab follows the selected competition's **Settings** tab and precedes named curations. Administrators retain it for management; other viewers see it when there is more than one visible competition. Unknown counts or permissions keep it available.
+The **Competitions** tab follows the selected competition's **Settings** tab and precedes named curations. Administrators retain it for management; other viewers see it when there is more than one visible competition. Unknown counts or permissions keep it hidden until that access or count is established.
 
 ## User Journey
 

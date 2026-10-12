@@ -37,6 +37,9 @@ and loading or refreshing competition data does not override a deliberate Chat
 selection. Remembered competition views retain their competition identity; if
 another competition has become the default, ordinary entry falls back to Chat.
 Explicit destination links and Back/Forward retain their intended section.
+Switching waves keeps the wave list in place and opens the remembered section
+directly. If its data is still loading, the loading state stays in that section
+without opening Chat or Competitions first.
 Selecting a competition tab uses the default competition unless a link or earlier
 explicit selection supplies another competition. See [Wave Content Tabs](../chat/feature-content-tabs.md)
 for the per-wave navigation contract.
@@ -54,11 +57,15 @@ Chat remains shared by the whole wave.
 **Competitions** is hidden for non-administrators when the default is the wave's
 sole visible competition, including for signed-out viewers. The count includes
 current, past and future competitions. Administrators retain it for management.
-Unknown counts or permissions keep it available. Direct collection links remain
+Unknown counts or permissions keep it hidden until administrator access or more
+than one visible competition is established. Direct collection links remain
 readable when the tab is hidden.
 Routine background refreshes keep the established tabs in place. The collection
 tab updates when the refreshed competition data or permissions change, not merely
 because another request starts.
+Temporary refresh failures retain already loaded competition content and the
+selected section. If access is rejected or the competition is no longer
+available, that section shows an error with a retry action.
 
 Wave **About**, **REP**, and **Configuration** belong to the information panel.
 Select the wave name to open About: on desktop it opens the right sidebar; on
