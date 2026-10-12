@@ -56,6 +56,26 @@ No wallet connection is required.
   `Primary Address Changed to`.
 - Open a handle row to jump to the linked profile route.
 
+## Profile Retention When a Consolidation Splits
+
+Changing the primary address takes effect when processed. The maturity rule
+below governs which resulting group keeps the existing profile; it does not
+delay setting the primary address.
+
+- The newest valid primary-address delegation at least 50,400 processed
+  Ethereum blocks old takes priority for profile retention. This is roughly
+  seven days, measured from the last block processed by the delegations loop,
+  rather than an exact wall-clock countdown.
+- If no mature primary-address delegation applies, the group with the highest
+  TDH keeps the profile. A TDH tie falls back to the previous primary address,
+  then stable group-key ordering.
+- A recently selected primary address alone does not guarantee keeping the
+  profile when the group splits.
+- Subscription balances and choices follow separate rules. On a split, they
+  follow the highest-TDH resulting group, which can differ from the group that
+  retains the profile. See
+  [Profile Subscriptions Tab](../tabs/feature-subscriptions-tab.md#consolidation-changes).
+
 ## Visible States
 
 - Loading: `Loading...` on first load without cached data.
