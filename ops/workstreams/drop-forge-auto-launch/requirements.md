@@ -1,5 +1,15 @@
 # Drop Forge Auto Launch — Frontend Requirements Analysis
 
+## Current Research requirement
+
+The existing Launch action timeline and Research completion toggle reflect the
+backend's post-mint step, eligible at 17:15 Europe/Athens the following day.
+Automatic quantity is `max(0, min(310, frozen Craft edition) - on-chain total)`;
+edition 305 with total 287 means 18. Craft/on-chain maximum discrepancies block
+execution; confirmed manual Research reduces the top-up and a satisfied target
+sends no transaction. Wave reports include transaction links and failure alerts.
+Pay Artist remains manual. The editable manual target is not automatic config.
+
 Status: original requirements retained as design context. The companion backend
 and this frontend now implement EMMA Process and Finalize, Craft Launch/Update
 Claim, coordinated manual controls and the @dropforgers6529 group mention.

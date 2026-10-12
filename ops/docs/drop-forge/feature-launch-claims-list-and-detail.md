@@ -130,6 +130,18 @@ has automation controls.
     when live on-chain `totalMax` exists, that value becomes the active cap.
   - Entering a target above the active claim max snaps the field back to that
     cap and shows a toast explaining the limit.
+  - Automatic Research becomes eligible at `17:15 Europe/Athens` the following
+    day, fifteen minutes after Public minting closes. Its target is
+    `min(310, Craft edition size)`, and the quantity subtracts the fresh on-chain
+    total minted, including paid mints and earlier/manual airdrops. Edition 305
+    with 287 minted sends 18 tokens. Craft and the on-chain maximum must match;
+    a discrepancy blocks execution and alerts the operations wave.
+  - If the target is already filled, automation completes Research without a
+    transaction. Confirmed manual Research receipts reduce any remaining top-up.
+    Completion updates the Research toggle and action timeline; transaction
+    links and failures are reported to the dedicated wave. The manual target
+    input remains available for manual work; automation uses the fixed capped
+    target above. Pay Artist remains manual.
 - On-chain actions:
   - If the authorized wallet is not currently connected, selecting an on-chain
     action opens wallet connection and continues that action after connection.
