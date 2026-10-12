@@ -1,0 +1,208 @@
+{
+  "rubric_version": "fe-polish-judge/2.1",
+  "candidate": "mint-progress-modals-review",
+  "coverage": [
+    {
+      "route": "/the-memes/mint",
+      "state": "confirm_wallet",
+      "viewport": "1440x900",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/confirm-wallet-1440x900-01.png"
+    },
+    {
+      "route": "/the-memes/mint",
+      "state": "confirm_wallet",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/confirm-wallet-390x844-01.png"
+    },
+    {
+      "route": "/the-memes/mint",
+      "state": "submitted",
+      "viewport": "1440x900",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/submitted-1440x900-01.png"
+    },
+    {
+      "route": "/the-memes/mint",
+      "state": "submitted",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/submitted-390x844-01.png"
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 9,
+      "evidence": [
+        "evidence/confirm-wallet-1440x900-01.png",
+        "evidence/submitted-1440x900-01.png"
+      ],
+      "findings": [],
+      "note": "Both states lead with the status and the object being minted (artwork, The Memes #547, full title, quantity 3, recipient); the collector always knows what is happening and to what."
+    },
+    "J02": {
+      "score": 9,
+      "evidence": [
+        "evidence/confirm-wallet-1440x900-01.png",
+        "evidence/submitted-1440x900-01.png"
+      ],
+      "findings": [],
+      "note": "Status heading, then artwork and title, then quantity/recipient details, then help or explorer link; the same order carries across both stages so the lifecycle reads as one flow."
+    },
+    "J03": {
+      "score": 9,
+      "evidence": [
+        "evidence/confirm-wallet-1440x900-01.png",
+        "evidence/submitted-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "Heading and artwork dominate; labels are muted, the recovery disclosure and the explorer link recede as secondary."
+    },
+    "J04": {
+      "score": 9,
+      "evidence": [
+        "evidence/confirm-wallet-1440x900-01.png",
+        "evidence/submitted-1440x900-01.png"
+      ],
+      "findings": [],
+      "note": "Dark iron surface, rounded-xl card, small rounded artwork thumbnail, primary-tinted spinner, mono reserved for the address, no celebration or hype; the darker 15px edge strips at 1440 look like a harness/scrollbar-gutter artifact and were not charged."
+    },
+    "J05": {
+      "score": 9,
+      "evidence": [
+        "evidence/confirm-wallet-390x844-01.png",
+        "evidence/submitted-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "Compact modal with related facts grouped under one divider; no filler."
+    },
+    "J06": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/confirm-wallet-1440x900-01.png",
+        "evidence/confirm-wallet-390x844-01.png"
+      ],
+      "findings": ["F-004"],
+      "note": "Consistent label/value roles and a well-wrapped title, but the disclosure uses the browser-default triangle marker and the desktop subtitle leaves 'confirming.' alone on its second line."
+    },
+    "J07": {
+      "score": 9,
+      "evidence": [
+        "evidence/confirm-wallet-1440x900-01.png",
+        "evidence/submitted-1440x900-01.png"
+      ],
+      "findings": [],
+      "note": "Plain, specific operational copy: 'Confirm in your wallet', 'Mint submitted', 'Waiting for network confirmation.', 'View transaction'; no brief leakage or abstraction."
+    },
+    "J09": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/confirm-wallet-1440x900-01.png",
+        "evidence/submitted-1440x900-01.png"
+      ],
+      "findings": ["F-003"],
+      "note": "Both pinned states are deliberate and distinct, with wallet recovery guidance and an explorer fallback; the confirm state shows no visible way to cancel (disclosure contents and dismissal behavior were not observed)."
+    },
+    "J10": {
+      "score": 9,
+      "evidence": [
+        "evidence/confirm-wallet-390x844-01.png",
+        "evidence/submitted-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "At 390 the card keeps a 16px gutter, the title wraps to three lines cleanly, the full address fits on one line, and the disclosure row is a full-width touch target; no overflow."
+    },
+    "J13": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/confirm-wallet-1440x900-01.png",
+        "evidence/submitted-1440x900-01.png",
+        "evidence/submitted-390x844-01.png"
+      ],
+      "findings": ["F-001", "F-002"],
+      "note": "Lifecycle is clear (confirm in wallet, then submitted kept distinct from confirmed), no timing promises, explorer link secondary, wallet recovery offered; the confirm state names no amount to check against the wallet prompt and the recipient is bare hex with no 'your wallet' cue."
+    }
+  },
+  "checks": {
+    "I1": "pass",
+    "I2": "pass",
+    "I3": "pass",
+    "S3": "pass",
+    "S5": "pass",
+    "S6": "pass"
+  },
+  "findings": [
+    {
+      "id": "F-001",
+      "targets": ["J13"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/the-memes/mint · confirm_wallet · 1440x900, 390x844 · en-US",
+      "evidence": "evidence/confirm-wallet-1440x900-01.png",
+      "observation": "The modal tells the user to 'Review the mint details and network fee before confirming' but lists only quantity and recipient; no mint price or total appears.",
+      "consequence": "A newcomer looking at the wallet prompt has no amount in the 6529 UI to compare the wallet's ETH value against while the mint form is hidden behind the modal.",
+      "change": "Add a 'Total' row under Quantity showing the real quantity × unit price in ETH followed by '+ network fee' (message-backed), using the same price data the mint form already shows.",
+      "acceptance_check": "confirm_wallet shows a Total row in ETH that equals quantity × the form's unit price, marked '+ network fee', fitting on one line at 390x844 and 1440x900.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-002",
+      "targets": ["J13"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/the-memes/mint · confirm_wallet, submitted · 1440x900, 390x844 · en-US",
+      "evidence": "evidence/submitted-390x844-01.png",
+      "observation": "Recipient is shown only as a 42-character hex address with no indication whether it is the connected wallet, a delegate, or another address.",
+      "consequence": "A person new to wallets cannot tell at a glance that the cards will arrive in their own wallet.",
+      "change": "When the recipient is the connected wallet, add a short qualifier such as 'Your connected wallet' (or the profile handle/ENS) above the address, keeping the full address below.",
+      "acceptance_check": "When minting to the connected wallet, both states identify the recipient as the user's wallet or profile in words while still showing the full address.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-003",
+      "targets": ["J09"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/the-memes/mint · confirm_wallet · 1440x900, 390x844 · en-US",
+      "evidence": "evidence/confirm-wallet-390x844-01.png",
+      "observation": "The confirm state has no close control and no visible line explaining how to back out; only the collapsed 'Wallet not showing?' disclosure is offered.",
+      "consequence": "A user who changes their mind may not know that rejecting in the wallet cancels the mint and may feel trapped behind the modal.",
+      "change": "Add one muted line, e.g. 'To cancel, reject the request in your wallet.', or a visible Cancel/close control if the flow supports dismissal at this stage.",
+      "acceptance_check": "The confirm_wallet state shows, without expanding the disclosure, how to cancel the mint.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-004",
+      "targets": ["J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/the-memes/mint · confirm_wallet · 1440x900 · en-US",
+      "evidence": "evidence/confirm-wallet-1440x900-01.png",
+      "observation": "'Wallet not showing?' uses the browser-default filled triangle marker, unlike the outlined icon set in the heading; the subtitle wraps so 'confirming.' sits alone on its second line at 1440.",
+      "consequence": "Small finish inconsistencies in an otherwise tight modal.",
+      "change": "Replace the native details marker with the repo's chevron icon (rotating on open) and balance the subtitle wrap (e.g. text-wrap: balance or a slightly wider measure).",
+      "acceptance_check": "The disclosure marker matches the repo icon set and the desktop subtitle no longer leaves a single-word last line.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "Artwork thumbnail with 'The Memes #547' and the full card title in both stages",
+    "Quantity and recipient carried unchanged from confirm_wallet into submitted",
+    "'Mint submitted' with a spinner and 'Waiting for network confirmation.' kept distinct from confirmed; no celebration before confirmation",
+    "'This window updates automatically.' with no invented timing promise",
+    "'View transaction' explorer link as a secondary text link only after submission",
+    "Collapsed 'Wallet not showing?' recovery disclosure in the confirm state",
+    "Plain operational copy with no hype, jargon, or brief leakage",
+    "Dark iron card with rounded-xl frame, mono used only for the address",
+    "390px layout: 16px gutters, cleanly wrapping title, full address on one line, full-width disclosure target"
+  ]
+}

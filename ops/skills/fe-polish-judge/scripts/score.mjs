@@ -18,8 +18,8 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const RUBRIC_VERSION = "fe-polish-judge/2.0";
-const CALIBRATION_STATUS = "uncalibrated";
+const RUBRIC_VERSION = "fe-polish-judge/2.1";
+const CALIBRATION_STATUS = "partially calibrated";
 const FLOOR = 8;
 const TARGET = 8.5;
 const DEFAULT_BUDGET = 6;
@@ -46,6 +46,9 @@ const WEIGHTS = {
 const INTEGRITY_CHECKS = ["I1", "I2", "I3"];
 const CRYPTO_CHECKS = ["S1", "S2", "S3", "S4", "S5", "S6"];
 const MUSEUM_CHECKS = ["M1", "M2", "M3", "M4"];
+// S checks for a lifecycle stage outside the reviewed states may be pinned N/A.
+// I, M, and S6 checks apply to everything a reviewer can see.
+const PINNABLE_CHECKS = new Set(["S1", "S2", "S3", "S4", "S5"]);
 const PROFILES = new Set(["general", "museum"]);
 const MUSEUM_VIEWPORTS = Object.freeze(["1440x1000", "820x1000", "390x844"]);
 const LENS_PREFIXES = Object.freeze({
@@ -163,12 +166,25 @@ function applicableChecks(run) {
   const pinned = pinnedNotApplicable(run);
   const checks = [...INTEGRITY_CHECKS];
   if (!("J13" in pinned)) {
-    checks.push(...CRYPTO_CHECKS);
+    checks.push(...CRYPTO_CHECKS.filter((id) => !(id in pinned)));
   }
   if (isMuseum(run)) {
     checks.push(...MUSEUM_CHECKS);
   }
   return checks;
+}
+
+function notApplicableErrors(run) {
+  const pinned = run.not_applicable ?? {};
+  return Object.entries(pinned).flatMap(([id, reason]) => {
+    if (!(id in WEIGHTS) && !PINNABLE_CHECKS.has(id)) {
+      return [`${id} cannot be pinned N/A; pin dimensions or S1-S5 only`];
+    }
+    if (typeof reason !== "string" || reason.trim() === "") {
+      return [`${id} is pinned N/A without a reason`];
+    }
+    return [];
+  });
 }
 
 function isHalfStep(score) {
@@ -279,6 +295,12 @@ function evaluateChecks(run, output, findings, errors) {
   const applicable = applicableChecks(run);
   const failed = [];
   const unverified = [];
+  for (const id of CRYPTO_CHECKS) {
+    const judged = checks[id] !== undefined && checks[id] !== "not_applicable";
+    if (!applicable.includes(id) && judged && id in (run.not_applicable ?? {})) {
+      errors.push(`${id} is pinned N/A but was judged`);
+    }
+  }
   for (const id of applicable) {
     const value = checks[id];
     if (value === "not_applicable") {
@@ -687,6 +709,10 @@ function main() {
   }
   if (run.profile !== undefined && !PROFILES.has(run.profile)) {
     fail(`run.json profile must be one of: ${[...PROFILES].join(", ")}`);
+  }
+  const pinErrors = notApplicableErrors(run);
+  if (pinErrors.length > 0) {
+    fail(`run.json: ${pinErrors.join("; ")}`);
   }
   if (isMuseum(run)) {
     const errors = museumRunErrors(run);
