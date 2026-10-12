@@ -16,16 +16,21 @@ wave can run at the same time with different participation and voting rules.
 
 Open **Competitions** from an eligible wave, follow a competition link, or open
 a competition notification. The wave header and navigation stay visible. The
-collection and create/edit forms open from **Competitions**.
+collection opens from **Competitions**; open an existing draft from its card.
 The **Competitions** tab shows a count of active and upcoming competitions. The
 badge is hidden when there are none; drafts and completed competitions do not count.
 **Chat** returns to the wave's existing conversation. The collection offers
 **Active and upcoming**, **Completed**, and **All**; wave administrators also
-see **Drafts**. On mobile web and in the app, the filter shows its current
-selection. Open it to choose another filter; dismissing it keeps the selection.
-Desktop uses an underlined filter tab row.
-To create a competition, use **Create** beside the wave tabs, then
-**New competition**. The action appears when you have creation permission.
+see **Drafts**. In the app, compact pills show **Active and upcoming** and
+**More**. More opens the remaining filters and displays the selected filter name.
+Dismissing it keeps the selection. Desktop and mobile web show all available
+filters as compact pills. When the row is too narrow, scroll the pills
+horizontally; an edge fade shows where more controls are off-screen. Selecting
+a filter, including from **More**, scrolls its pill into view.
+To create a competition, select **+ Competition** beside the collection
+filter pills. It opens setup directly and appears only in the Competitions
+view when you have creation permission. The wave tab-row **Create** menu
+contains the eligible curation and subwave actions.
 Cards show the start date and, when set, the end date. Dates in the past use
 **Started** or **Ended**; future dates use **Starts** or **Ends**.
 

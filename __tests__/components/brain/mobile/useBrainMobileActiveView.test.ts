@@ -28,40 +28,6 @@ const createProps = (
 });
 
 describe("useBrainMobileActiveView", () => {
-  it.each([true, false])(
-    "waits to normalize an explicit competition tab until navigation is ready (available: %s)",
-    (hasCompetitions) => {
-      const props = createProps({
-        wave: { id: "wave-1" } as UseBrainMobileActiveViewProps["wave"],
-        searchParams: createSearchParams("tab=competitions"),
-        waveNavigationReady: false,
-      });
-      const { result, rerender } = renderHook(useBrainMobileActiveView, {
-        initialProps: props,
-      });
-      expect(result.current.activeView).toBe(BrainView.COMPETITIONS);
-      rerender({ ...props, waveNavigationReady: true, hasCompetitions });
-      expect(result.current.activeView).toBe(
-        hasCompetitions ? BrainView.COMPETITIONS : BrainView.DEFAULT
-      );
-    }
-  );
-
-  it("keeps a deliberate Chat selection when competition availability arrives", () => {
-    const props = createProps({
-      wave: { id: "wave-1" } as UseBrainMobileActiveViewProps["wave"],
-      restoredView: BrainView.COMPETITIONS,
-      waveNavigationReady: false,
-    });
-    const { result, rerender } = renderHook(useBrainMobileActiveView, {
-      initialProps: props,
-    });
-    expect(result.current.activeView).toBe(BrainView.COMPETITIONS);
-    act(() => result.current.onViewChange(BrainView.DEFAULT));
-    rerender({ ...props, waveNavigationReady: true, hasCompetitions: true });
-    expect(result.current.activeView).toBe(BrainView.DEFAULT);
-  });
-
   it.each([
     ["sales", BrainView.SALES, { isCurationWave: true }],
     ["faq", BrainView.FAQ, { isMemesWave: true }],

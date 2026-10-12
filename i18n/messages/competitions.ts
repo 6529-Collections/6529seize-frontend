@@ -49,6 +49,7 @@ export const COMPETITION_MESSAGES = {
   "competitions.title": "Competitions",
   "competitions.chat": "Shared chat",
   "competitions.new": "New competition",
+  "competitions.createAction": "Competition",
   "competitions.add": "Add competition",
   "competitions.createHub": "Create a wave",
   "competitions.first": "Configure the first competition",
@@ -64,7 +65,6 @@ export const COMPETITION_MESSAGES = {
   "competitions.parallel":
     "Each competition has its own entries, voting credits, and results. All competitions share this wave’s chat.",
   "competitions.active": "Active and upcoming",
-  "competitions.filter": "Show competitions",
   "competitions.history": "Completed",
   "competitions.drafts": "Drafts",
   "competitions.all": "All",

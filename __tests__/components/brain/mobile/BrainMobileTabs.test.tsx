@@ -265,7 +265,7 @@ describe("BrainMobileTabs", () => {
     expect(onViewChange).toHaveBeenCalledWith(BrainView.DEFAULT);
   });
 
-  it("keeps back and Chat usable while the remaining wave sections load", () => {
+  it("keeps the back action visible while wave sections load", () => {
     render(
       <BrainMobileTabs
         activeView={BrainView.DEFAULT}
@@ -285,7 +285,7 @@ describe("BrainMobileTabs", () => {
     expect(
       screen.getByRole("button", { name: /my stream/i })
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^chat$/i })).toBeEnabled();
+    expect(screen.queryByRole("button", { name: /^chat$/i })).toBeNull();
   });
 
   it("keeps the mobile create menu outside the scrollable tabs", async () => {

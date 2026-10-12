@@ -8,7 +8,7 @@ voting, dates, outcomes and display settings belong to each competition.
 
 ## Location in the Site
 
-Open **Create** beside the wave's tabs, then **New competition**, or use
+Open **Competitions**, then **+ Competition** beside its filter pills, or use
 `/waves/{waveId}/competitions/new`. For an existing competition, open **Settings**. The overview card shows the competition type, status, name, description and guidelines. Its edit control changes the name and guidelines in place, plus the description for independent competitions. The legacy primary description is disabled here and remains managed by the pinned wave drop. **Appearance and labels** contains its display controls. Drafts also have **Finish draft setup** for their unpublished execution settings. **Pause decisions** and **Resume decisions** are separate controls in the **Pause history** section.
 
 ## Entry Points
@@ -20,7 +20,7 @@ The **Competitions** tab follows the selected competition's **Settings** tab and
 
 ## User Journey
 
-1. Open **Create**, then **New competition**, with competition creation permission.
+1. Open **Competitions**, then **+ Competition**, with competition creation permission.
 2. Choose Rank or Approve and configure eligibility, dates, submission
    requirements, voting credits, decision rules, outcomes and presentation.
    **Competition type** opens a dropdown on desktop and a bottom sheet on
@@ -83,7 +83,7 @@ The **Competitions** tab follows the selected competition's **Settings** tab and
 ## Failure and Recovery
 
 If draft creation fails after a new hub was created, keep the hub and use
-**Create → New competition** to create the competition. If a lifecycle command fails, reload the
+**Competitions → + Competition** to create the competition. If a lifecycle command fails, reload the
 competition before retrying. Server permissions are checked on every action;
 losing wave-administrator access also removes management authority.
 

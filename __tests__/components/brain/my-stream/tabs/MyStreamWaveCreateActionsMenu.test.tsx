@@ -2,22 +2,9 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import MyStreamWaveCreateActionsMenu from "@/components/brain/my-stream/tabs/MyStreamWaveCreateActionsMenu";
 import { useAuth } from "@/components/auth/Auth";
-import { useCompetitionHub } from "@/hooks/competitions/useCompetitionQueries";
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 
 const createWaveModalMock = jest.fn();
-const mockPush = jest.fn();
-jest.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockPush }),
-}));
-jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
-  useCompetitionHub: jest.fn(),
-}));
-jest.mock("@/helpers/competition.helpers", () => ({
-  ...jest.requireActual("@/helpers/competition.helpers"),
-  isMultiCompetitionEnabled: jest.fn(),
-}));
 jest.mock("@/hooks/useIsMobileLayoutViewport", () => ({
   __esModule: true,
   default: jest.fn(),
@@ -110,12 +97,6 @@ const createWave = ({
 describe("MyStreamWaveCreateActionsMenu", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest
-      .mocked(useCompetitionHub)
-      .mockReturnValue({ data: undefined } as ReturnType<
-        typeof useCompetitionHub
-      >);
-    jest.mocked(isMultiCompetitionEnabled).mockReturnValue(true);
     jest.mocked(useIsMobileLayoutViewport).mockReturnValue(false);
     mockedUseAuth.mockReturnValue({
       connectedProfile: { handle: "alice" },
@@ -123,7 +104,7 @@ describe("MyStreamWaveCreateActionsMenu", () => {
     });
   });
 
-  it("offers both create actions to an eligible root-wave admin", async () => {
+  it("offers only curation and subwave actions to an eligible root-wave admin", async () => {
     render(
       <MyStreamWaveCreateActionsMenu
         wave={createWave()}
@@ -137,6 +118,7 @@ describe("MyStreamWaveCreateActionsMenu", () => {
     expect(
       screen.getByRole("button", { name: /^New curation/ })
     ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^New competition/ })).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: /^New subwave/ }));
 
     expect(screen.getByTestId("subwave-modal")).toBeInTheDocument();
@@ -236,48 +218,6 @@ describe("MyStreamWaveCreateActionsMenu", () => {
       screen.getByRole("button", { name: "Open create menu" })
     ).toHaveClass("tw-min-h-11");
   });
-
-  it("uses competition permissions independently of curation administration", async () => {
-    jest.mocked(useCompetitionHub).mockReturnValue({
-      data: { permissions: { create_competition: true } },
-    } as ReturnType<typeof useCompetitionHub>);
-    render(
-      <MyStreamWaveCreateActionsMenu
-        wave={createWave({ eligible: false })}
-        onCreated={jest.fn()}
-      />
-    );
-    expect(
-      screen.getByRole("button", { name: "Open create menu" })
-    ).toHaveTextContent("Create");
-    expect(screen.queryByRole("button", { name: /^New curation/ })).toBeNull();
-    await userEvent.click(
-      screen.getByRole("button", { name: /^New competition/ })
-    );
-    expect(mockPush).toHaveBeenCalledWith(
-      "/waves/parent-wave/competitions/new"
-    );
-  });
-
-  it.each(["feature disabled", "direct message"])(
-    "omits competition creation for %s",
-    (condition) => {
-      jest.mocked(useCompetitionHub).mockReturnValue({
-        data: { permissions: { create_competition: true } },
-      } as ReturnType<typeof useCompetitionHub>);
-      const wave = createWave();
-      if (condition === "feature disabled")
-        jest.mocked(isMultiCompetitionEnabled).mockReturnValue(false);
-      else wave.chat.scope.group.is_direct_message = true;
-      render(
-        <MyStreamWaveCreateActionsMenu wave={wave} onCreated={jest.fn()} />
-      );
-      expect(useCompetitionHub).toHaveBeenCalledWith(wave.id, false);
-      expect(
-        screen.queryByRole("button", { name: /^New competition/ })
-      ).toBeNull();
-    }
-  );
 
   it("opens a concise sheet on mobile web and hands off after it closes", async () => {
     jest.mocked(useIsMobileLayoutViewport).mockReturnValue(true);

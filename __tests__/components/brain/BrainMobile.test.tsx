@@ -16,13 +16,8 @@ import {
 jest.mock("@/hooks/competitions/useDefaultCompetitionNavigation", () => ({
   useDefaultCompetitionNavigation: jest.fn(),
 }));
-let mockCompetitionsPending = false;
 jest.mock("@/hooks/competitions/useWaveCompetitionsTab", () => ({
-  useWaveCompetitionsTab: () => ({
-    hasCompetitions: false,
-    activeCount: 0,
-    isPending: mockCompetitionsPending,
-  }),
+  useWaveCompetitionsTab: () => ({ hasCompetitions: false, activeCount: 0 }),
 }));
 
 jest.mock("next/image", () => ({
@@ -352,7 +347,6 @@ describe("BrainMobile", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockCompetitionsPending = false;
     localStorage.clear();
     window.history.replaceState(null, "", "/");
     mockSearchParams = new URLSearchParams();
@@ -398,21 +392,6 @@ describe("BrainMobile", () => {
     dropData = { id: "d1" };
     render(<BrainMobile>child</BrainMobile>);
     expect(screen.getByTestId("drop")).toBeInTheDocument();
-  });
-
-  it("waits for competition navigation before revealing the final tabs", () => {
-    mockSearchParams.set("wave", "1");
-    waveData = createWave(false);
-    mockCompetitionsPending = true;
-    const { rerender } = render(<BrainMobile>child</BrainMobile>);
-    expect(latestTabsProps).toEqual(
-      expect.objectContaining({ waveNavigationReady: false })
-    );
-    mockCompetitionsPending = false;
-    rerender(<BrainMobile>child</BrainMobile>);
-    expect(latestTabsProps).toEqual(
-      expect.objectContaining({ waveNavigationReady: true })
-    );
   });
 
   it("shows notifications view when path matches", async () => {

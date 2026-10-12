@@ -91,9 +91,7 @@ export function useWaveCompetitionsTab(wave: ApiWave | null | undefined) {
         (canReadCompetitions &&
           !canCreate &&
           (competitions.isPending ||
-            (competitionIds.size < 2 &&
-              hasMoreCompetitions &&
-              !isCompetitionsError)))),
+            (competitionIds.size < 2 && hasMoreCompetitions)))),
     hideCompetitionsTab,
     defaultSelectionEnabled: enabled,
     defaultCompetitionId:

@@ -1,13 +1,14 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowRightIcon,
   CalendarDaysIcon,
   ClockIcon,
+  PlusIcon,
 } from "@heroicons/react/24/outline";
-import { TabToggle } from "@/components/common/TabToggle";
-import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
+import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow";
+import MobileTabsScrollControls from "@/components/brain/my-stream/MobileTabsScrollControls";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import type { ApiCompetition } from "@/generated/models/ApiCompetition";
@@ -16,7 +17,10 @@ import {
   useCompetitionHub,
   useCompetitionList,
 } from "@/hooks/competitions/useCompetitionQueries";
-import { getCompetitionRoute } from "@/helpers/competition.helpers";
+import {
+  getCompetitionRoute,
+  isMultiCompetitionEnabled,
+} from "@/helpers/competition.helpers";
 import { getWavePathRoute } from "@/helpers/navigation.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -40,19 +44,19 @@ function CompetitionCard({
         href={getCompetitionRoute(competition.wave_id, competition.id)}
         className="tw-group tw-flex tw-h-full tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-iron-600 hover:tw-bg-iron-900/60 hover:tw-text-iron-100 hover:tw-no-underline focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none"
       >
-        <div className="tw-flex-1 tw-p-5">
-          <div className="tw-mb-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2">
-            <span className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-400">
+        <div className="tw-flex-1 tw-px-5 tw-pb-3 tw-pt-4">
+          <div className="tw-mb-3 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2">
+            <span className="tw-inline-flex tw-items-center tw-rounded-full tw-px-2.5 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-400 tw-ring-1 tw-ring-inset tw-ring-iron-700">
               {t(locale, `competitions.type.${competition.type}`)}
             </span>
             <CompetitionPhaseBadge phase={competition.computed_phase} />
           </div>
-          <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
-            <h2 className="tw-m-0 tw-min-w-0 tw-break-words tw-text-xl tw-font-semibold tw-leading-7 tw-text-iron-50">
+          <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
+            <h2 className="tw-m-0 tw-min-w-0 tw-break-words tw-text-lg tw-font-semibold tw-leading-6 tw-tracking-tight tw-text-iron-50">
               {competition.title}
             </h2>
             <ArrowRightIcon
-              className="tw-mt-1 tw-size-5 tw-shrink-0 tw-text-iron-500 group-hover:tw-text-primary-300 group-focus-visible:tw-text-primary-300"
+              className="tw-size-4 tw-shrink-0 tw-text-iron-500 tw-transition group-hover:tw-translate-x-0.5 group-hover:tw-text-primary-300 group-focus-visible:tw-text-primary-300 motion-reduce:tw-transition-none"
               aria-hidden="true"
             />
           </div>
@@ -64,9 +68,9 @@ function CompetitionCard({
         </div>
         {(competition.participation.starts_at !== null ||
           competition.voting.ends_at !== null) && (
-          <div className="tw-space-y-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/70 tw-px-5 tw-py-3.5">
+          <div className="tw-flex tw-flex-col tw-gap-1.5 tw-px-5 tw-pb-4">
             {competition.participation.starts_at !== null && (
-              <p className="tw-m-0 tw-flex tw-items-start tw-gap-2 tw-text-xs tw-leading-5 tw-text-iron-400">
+              <p className="tw-m-0 tw-flex tw-items-start tw-gap-2 tw-text-xs tw-tabular-nums tw-leading-5 tw-text-iron-400">
                 <CalendarDaysIcon
                   className="tw-mt-0.5 tw-size-4 tw-shrink-0 tw-text-iron-500"
                   aria-hidden="true"
@@ -92,7 +96,7 @@ function CompetitionCard({
               </p>
             )}
             {competition.voting.ends_at !== null && (
-              <p className="tw-m-0 tw-flex tw-items-start tw-gap-2 tw-text-xs tw-leading-5 tw-text-iron-300">
+              <p className="tw-m-0 tw-flex tw-items-start tw-gap-2 tw-text-xs tw-tabular-nums tw-leading-5 tw-text-iron-300">
                 <ClockIcon
                   className="tw-mt-0.5 tw-size-4 tw-shrink-0 tw-text-iron-500"
                   aria-hidden="true"
@@ -123,15 +127,48 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
   const locale = useBrowserLocale();
   const { isApp } = useDeviceInfo();
   const isMobileViewport = useIsMobileLayoutViewport();
-  const useFilterDropdown = isApp || isMobileViewport;
+  const canCreateCompetition =
+    isMultiCompetitionEnabled() && hub.permissions.create_competition;
+  const createClassName = `tw-group tw-inline-flex tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-no-underline focus-visible:tw-outline-none hover:tw-no-underline ${isApp || isMobileViewport ? "tw-min-h-11" : "tw-h-8"}`;
+  const createContent = (
+    <span className="tw-inline-flex tw-h-8 tw-items-center tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-text-xs tw-font-semibold tw-text-iron-100 tw-transition-colors group-focus-visible:tw-outline group-focus-visible:tw-outline-2 group-focus-visible:tw-outline-offset-2 group-focus-visible:tw-outline-primary-300 desktop-hover:group-hover:tw-bg-iron-800 motion-reduce:tw-transition-none">
+      <PlusIcon className="-tw-ml-1 tw-size-4 tw-shrink-0" aria-hidden="true" />
+      <span>{t(locale, "competitions.createAction")}</span>
+    </span>
+  );
+  const filtersScrollerRef = useRef<HTMLDivElement | null>(null);
   const [filter, setFilter] = useState<CompetitionCollectionFilter>("active");
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const scroller = filtersScrollerRef.current;
+      if (!scroller) return;
+      const selected =
+        scroller.querySelector<HTMLButtonElement>(
+          '[role="tab"][aria-selected="true"]'
+        ) ??
+        scroller.querySelector<HTMLButtonElement>(
+          'button[aria-haspopup="menu"]'
+        );
+      if (!selected) return;
+      selected.scrollIntoView({
+        block: "nearest",
+        inline: "nearest",
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [filter, isApp]);
+
   const query = useCompetitionList(hub.id, filter);
   const visible = query.data?.pages.flatMap((page) => page.data) ?? [];
-  let results = <CompetitionState />;
+  let results = <CompetitionState padded={false} />;
   if (query.isError)
     results = (
       <CompetitionState
         error
+        padded={false}
         retry={() => {
           void query.refetch();
         }}
@@ -139,13 +176,13 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
     );
   else if (query.data)
     results = visible.length ? (
-      <ul className="tw-grid tw-list-none tw-grid-cols-1 tw-gap-4 tw-p-0 md:tw-grid-cols-2">
+      <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-4 tw-p-0 md:tw-grid-cols-2">
         {visible.map((competition) => (
           <CompetitionCard key={competition.id} competition={competition} />
         ))}
       </ul>
     ) : (
-      <output className="tw-block tw-py-6 tw-text-iron-400">
+      <output className="tw-block tw-text-iron-400">
         {t(locale, "competitions.empty")}
       </output>
     );
@@ -165,41 +202,41 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
   return (
     <>
       <div
-        className={`tw-flex tw-shrink-0 tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-bg-iron-950 ${useFilterDropdown ? "tw-border-white/5 tw-px-4 tw-py-2.5 md:tw-px-6" : "tw-border-iron-800 tw-px-2 sm:tw-px-4"}`}
+        className={`tw-flex tw-shrink-0 tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-bg-iron-950 ${isApp ? "tw-border-white/5" : "tw-border-iron-800"} tw-px-4 tw-py-2.5 md:tw-px-6`}
       >
-        <div
-          className={
-            useFilterDropdown
-              ? "tw-min-w-0 tw-max-w-full"
-              : "tw-min-w-0 tw-flex-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500"
-          }
-        >
-          {useFilterDropdown ? (
-            <CommonDropdown
-              variant="toolbar"
-              items={filters.map((value) => ({
-                key: value,
-                value,
-                label: t(locale, `competitions.${value}`),
-              }))}
-              activeItem={filter}
-              setSelected={setFilter}
-              filterLabel={t(locale, "competitions.filter")}
-            />
-          ) : (
-            <TabToggle
+        <div className="tw-relative tw-min-w-0 tw-flex-1">
+          <div
+            ref={filtersScrollerRef}
+            data-competition-filters-scroll
+            className={`tw-scroll-px-10 tw-overflow-x-auto ${isApp ? "tw-no-scrollbar tw-overscroll-x-contain" : "tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500"}`}
+          >
+            <TabToggleWithOverflow
+              variant="compactPills"
+              maxVisibleTabs={isApp ? 1 : tabOptions.length}
               options={tabOptions}
               activeKey={filter}
               onSelect={selectFilter}
             />
-          )}
+          </div>
+          <MobileTabsScrollControls
+            scrollerRef={filtersScrollerRef}
+            showButtons={false}
+          />
         </div>
+        {canCreateCompetition && (
+          <Link
+            href={getCompetitionRoute(hub.id, "new")}
+            className={createClassName}
+          >
+            {createContent}
+          </Link>
+        )}
       </div>
-      <section
+      <div
         id={panelId}
-        role={useFilterDropdown ? undefined : "tabpanel"}
+        role="tabpanel"
         aria-label={t(locale, `competitions.${filter}`)}
-        className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-p-4 sm:tw-p-6"
+        className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-p-4 sm:tw-px-6"
       >
         <div className="tw-mx-auto tw-max-w-5xl tw-space-y-5">
           {results}
@@ -216,7 +253,7 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
             </button>
           )}
         </div>
-      </section>
+      </div>
     </>
   );
 }
