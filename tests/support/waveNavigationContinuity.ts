@@ -99,21 +99,28 @@ export async function monitorRememberedLeaderboard(
     { targetPath: wavePath, targetTitle: waveTitle }
   );
   return async () => {
-    // Content can become ready before the app header and its next painted frame.
-    // Keep sampling until the target wave is observed, including any detour.
-    await expect
-      .poll(() => monitor.evaluate((state) => state.getFrameCount()), {
-        message: "Expected to observe the returned wave rendering",
-        timeout: 30000,
-      })
-      .toBeGreaterThan(0);
-    const result = await monitor.evaluate(async (state) => {
-      await new Promise<void>((resolve) =>
-        requestAnimationFrame(() => resolve())
-      );
-      return state.stop();
-    });
-    await monitor.dispose();
+    let result: { frames: number; unexpectedViews: string[] };
+    try {
+      // Content can become ready before the app header and its next painted frame.
+      // Keep sampling until the target wave is observed, including any detour.
+      await expect
+        .poll(() => monitor.evaluate((state) => state.getFrameCount()), {
+          message: "Expected to observe the returned wave rendering",
+          timeout: 30000,
+        })
+        .toBeGreaterThan(0);
+      await monitor.evaluate(async () => {
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => resolve())
+        );
+      });
+    } finally {
+      try {
+        result = await monitor.evaluate((state) => state.stop());
+      } finally {
+        await monitor.dispose();
+      }
+    }
     expect(
       result.frames,
       "Expected to observe the returned wave rendering"
