@@ -3,7 +3,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import TabButton from "@/components/common/TabButton";
 
 describe("TabButton", () => {
-  it("shows pending feedback while preserving the committed selection", async () => {
+  it("announces pending navigation without a visible loader or selection change", async () => {
     let ready = false;
     let resolveDestination: () => void = () => {
       throw new Error("Destination has not been initialized");
@@ -39,7 +39,7 @@ describe("TabButton", () => {
     expect(tab).toHaveAttribute("aria-busy", "true");
     expect(tab).toHaveAttribute("aria-selected", "false");
     expect(screen.getByRole("status")).toHaveTextContent("Loading section…");
-    expect(tab.querySelector('[aria-hidden="true"]')).toBeInTheDocument();
+    expect(tab.querySelector('[aria-hidden="true"]')).not.toBeInTheDocument();
     expect(screen.getByText("Current view")).toBeInTheDocument();
     expect(screen.queryByText("Loading view")).not.toBeInTheDocument();
 
