@@ -268,8 +268,8 @@ it("keeps a manual disconnect across activity changes but permits a new wave", (
   );
 });
 
-it("cancels authentication while inactive and reauthenticates on resume", () => {
-  mockToken = "token";
+it("cancels authentication while inactive and reauthenticates with the latest token on resume", () => {
+  mockToken = "first-token";
   const { result, rerender } = renderHook(() => useWaveWebSocket("wave"));
   const first = socket();
   act(() => first.open());
@@ -278,6 +278,13 @@ it("cancels authentication while inactive and reauthenticates on resume", () => 
   rerender();
   expect(first.close).toHaveBeenCalledTimes(1);
   expect(result.current.socket).toBeNull();
+  act(() => changeToken("new-token"));
+  act(() => {
+    first.message({ type: "AUTHENTICATED" });
+    first.onclose?.();
+    jest.advanceTimersByTime(60000);
+  });
+  expect(sockets).toHaveLength(1);
   expect(jest.getTimerCount()).toBe(0);
   mockAppActive = true;
   rerender();
@@ -292,7 +299,7 @@ it("cancels authentication while inactive and reauthenticates on resume", () => 
     socket().message({ type: "AUTHENTICATED" });
   });
   expect(socket().send.mock.calls).toEqual([
-    [JSON.stringify({ type: "AUTHENTICATE", access_token: "token" })],
+    [JSON.stringify({ type: "AUTHENTICATE", access_token: "new-token" })],
     [JSON.stringify({ type: "SUBSCRIBE_TO_WAVE", wave_id: "wave" })],
   ]);
   expect(result.current.socket).toBe(socket());
