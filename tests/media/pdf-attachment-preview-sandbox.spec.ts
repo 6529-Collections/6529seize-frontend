@@ -281,8 +281,15 @@ test.describe("PDF attachment previews @local-only", () => {
         .toBeLessThanOrEqual(1);
       await scroller.focus();
       await page.keyboard.press("Home");
+      await expect
+        .poll(() => scroller.evaluate((element) => element.scrollTop))
+        .toBe(0);
       await expect(
         reader.getByText("Page 1 of 20", { exact: true })
+      ).toBeVisible();
+      await page.keyboard.press("End");
+      await expect(
+        reader.getByText("Page 20 of 20", { exact: true })
       ).toBeVisible();
       await page.keyboard.press("Escape");
       await expect(reader).toHaveCount(0);
@@ -404,6 +411,96 @@ test.describe("PDF attachment previews @local-only", () => {
       ).toBeVisible();
       await reader.getByRole("button", { name: "Close", exact: true }).click();
       await expect.poll(retainedImages).toBe(0);
+    });
+
+    test("opens a long PDF from ranges and loads more only as needed", async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      await installPdfDrop(page, baseURL);
+      const pdf = createImageHeavyPdf(180, true);
+      let downloadedBytes = 0;
+      const ranges: string[] = [];
+      await page.route(`${MEDIA_ROOT}first.pdf`, async (route) => {
+        const range = route.request().headers()["range"];
+        const match = /^bytes=(\d+)-(\d+)$/.exec(range ?? "");
+        // Fail a whole-file request: opening must work before that download.
+        if (!match) {
+          await route.fulfill({ status: 400, headers: CORS_HEADERS });
+          return;
+        }
+        const begin = Number(match[1]);
+        const end = Math.min(Number(match[2]) + 1, pdf.length);
+        ranges.push(match[0]);
+        downloadedBytes += end - begin;
+        expect(route.request().headers()["referer"]).toBeUndefined();
+        await route.fulfill({
+          status: 206,
+          contentType: "application/pdf",
+          // Match the real media host: Content-Range is exposed, Accept-Ranges
+          // is not. No shared CDN configuration change should be required.
+          headers: {
+            ...CORS_HEADERS,
+            "access-control-expose-headers": "Content-Range, Content-Length",
+            "content-range": `bytes ${begin}-${end - 1}/${pdf.length}`,
+            "content-length": String(end - begin),
+          },
+          body: pdf.subarray(begin, end),
+        });
+      });
+      await openWave(page);
+      const started = Date.now();
+      await page.getByRole("button", { name: PREVIEW_BUTTON }).first().click();
+      const reader = page.getByRole("dialog", {
+        name: "first.pdf",
+        exact: true,
+      });
+      await expect(
+        reader
+          .getByRole("region", { name: "PDF pages" })
+          .locator('[data-pdf-page="1"] canvas')
+      ).toBeVisible();
+      await expect(
+        reader.getByText("Raster page 1", { exact: true })
+      ).toBeAttached();
+      const initialBytes = downloadedBytes;
+      const firstPageMs = Date.now() - started;
+      expect(initialBytes).toBeLessThan(pdf.length / 4);
+      expect(ranges[0]).toBe("bytes=0-65535");
+      await expect(
+        reader.getByRole("region", { name: "PDF pages" }).locator("canvas")
+      ).toHaveCount(3);
+      for (const number of [90, 180, 1]) {
+        await reader
+          .getByRole("region", { name: "PDF pages" })
+          .locator(`[data-pdf-page="${number}"]`)
+          .scrollIntoViewIfNeeded();
+        await expect(
+          reader
+            .getByRole("region", { name: "PDF pages" })
+            .locator(`[data-pdf-page="${number}"] canvas`)
+        ).toBeVisible();
+        await expect(
+          reader.getByText(`Raster page ${number}`, { exact: true })
+        ).toBeAttached();
+      }
+      expect(downloadedBytes).toBeGreaterThan(initialBytes);
+      expect(downloadedBytes).toBeLessThan(pdf.length / 2);
+      await testInfo.attach("pdf-range-loading", {
+        body: JSON.stringify(
+          {
+            fileBytes: pdf.length,
+            initialBytes,
+            firstPageMs,
+            downloadedBytes,
+            ranges,
+          },
+          null,
+          2
+        ),
+        contentType: "application/json",
+      });
+      await reader.getByRole("button", { name: "Close", exact: true }).click();
     });
 
     test("opens the reader from the single-drop view", async ({
