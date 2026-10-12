@@ -114,7 +114,7 @@ export default function DropForgeTransactionRecovery({
         ))}
       </ul>
       {recovery.outcome !== undefined ? (
-        <p role="status" className="tw-text-sm">
+        <output className="tw-block tw-text-sm">
           {t(
             locale,
             recovery.outcome === Outcome.Executed
@@ -123,12 +123,12 @@ export default function DropForgeTransactionRecovery({
           )}
           {recovery.supply !== undefined &&
             ` ${t(locale, "dropForge.totalMinted")}: ${recovery.supply}.`}
-        </p>
+        </output>
       ) : (
         recovery.attempts.length > 1 && (
-          <p role="status" className="tw-text-sm">
+          <output className="tw-block tw-text-sm">
             {t(locale, "dropForge.recoveryWaiting")}
-          </p>
+          </output>
         )
       )}
       {recovery.allocations.length > 0 && (

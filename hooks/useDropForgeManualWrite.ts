@@ -1,5 +1,11 @@
 "use client";
-import { useCallback, useEffect, useEffectEvent, useRef } from "react";
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useRef,
+  type RefObject,
+} from "react";
 import { useAuth } from "@/components/auth/Auth";
 import {
   beginForgeManual,
@@ -46,7 +52,6 @@ export function useDropForgeManualWrite(
 ) {
   const { requestAuth, setToast } = useAuth();
   const locale = useBrowserLocale();
-  const client = useQueryClient();
   const attempt = useRef<ManualAttempt | null>(null);
   const volatileProof = useRef<VolatileProof | null>(null);
   const context = useRef({ fingerprint, hash });
@@ -135,6 +140,44 @@ export function useDropForgeManualWrite(
     }
     attempt.current = null;
   }, [hash, key]);
+  useManualProofRecovery(contract, claim, key, hash, volatileProof);
+  const rejectWallet = useEffectEvent((isActive: () => boolean) => {
+    const code =
+      typeof error === "object" && error !== null && "code" in error
+        ? (error as { code?: unknown }).code
+        : undefined;
+    const current = attempt.current;
+    if (!current || (code !== 4001 && code !== "ACTION_REJECTED")) return;
+    void cancel(current).catch((error_: unknown) => {
+      if (!isActive()) return;
+      setToast({
+        type: "error",
+        message:
+          getToastErrorDetails(error_) ??
+          t(locale, "dropForge.manualRecoveryError"),
+      });
+    });
+  });
+  useEffect(() => {
+    let active = true;
+    rejectWallet(() => active);
+    return () => {
+      active = false;
+    };
+  }, [error]);
+  return execute;
+}
+
+function useManualProofRecovery(
+  contract: string,
+  claim: number,
+  key: string,
+  hash: string | undefined,
+  volatileProof: RefObject<VolatileProof | null>
+) {
+  const { setToast } = useAuth();
+  const locale = useBrowserLocale();
+  const client = useQueryClient();
   useEffect(() => {
     let stopped = false;
     let recovering = false;
@@ -195,30 +238,5 @@ export function useDropForgeManualWrite(
       stopped = true;
       clearInterval(timer);
     };
-  }, [contract, claim, key, hash, client, locale, setToast]);
-  const rejectWallet = useEffectEvent((isActive: () => boolean) => {
-    const code =
-      typeof error === "object" && error !== null && "code" in error
-        ? (error as { code?: unknown }).code
-        : undefined;
-    const current = attempt.current;
-    if (!current || (code !== 4001 && code !== "ACTION_REJECTED")) return;
-    void cancel(current).catch((error_: unknown) => {
-      if (!isActive()) return;
-      setToast({
-        type: "error",
-        message:
-          getToastErrorDetails(error_) ??
-          t(locale, "dropForge.manualRecoveryError"),
-      });
-    });
-  });
-  useEffect(() => {
-    let active = true;
-    rejectWallet(() => active);
-    return () => {
-      active = false;
-    };
-  }, [error]);
-  return execute;
+  }, [contract, claim, key, hash, client, locale, setToast, volatileProof]);
 }
