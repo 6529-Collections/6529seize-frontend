@@ -12,11 +12,7 @@ import CreateWaveInlineGroupHeader from "@/components/waves/create-wave/groups/C
 import CreateWaveInlineGroupIdentities from "@/components/waves/create-wave/groups/CreateWaveInlineGroupIdentities";
 import CreateWaveInlineGroupPrivacy from "@/components/waves/create-wave/groups/CreateWaveInlineGroupPrivacy";
 import CreateWaveInlineGroupRuleEditor from "@/components/waves/create-wave/groups/CreateWaveInlineGroupRuleEditor";
-import {
-  CreateWaveInlineGroupIdentityEditorPanel,
-  CreateWaveInlineGroupRuleEditorPanel,
-  CreateWaveInlineGroupRuleList,
-} from "@/components/waves/create-wave/groups/CreateWaveInlineGroupRules";
+import GroupCriteriaEditor from "./GroupCriteriaEditor";
 import CreateWaveInlineGroupSearch from "@/components/waves/create-wave/groups/CreateWaveInlineGroupSearch";
 import CreateWaveInlineGroupActions from "@/components/waves/create-wave/groups/CreateWaveInlineGroupActions";
 import {
@@ -30,7 +26,7 @@ import type { GroupMembersPreviewTarget } from "@/services/api/group-members-api
 type GroupAssignmentPanelStartMode = "actions" | "existing" | "criteria";
 
 type GroupAssignmentPanelProps = CreateWaveGroupInlinePanelProps & {
-  readonly presentation?: "default" | "quiet";
+  readonly presentation?: "default" | "quiet" | "embedded";
   readonly startMode?: GroupAssignmentPanelStartMode;
   readonly showChooseGroup?: boolean;
   readonly showPrivacyControl?: boolean;
@@ -124,99 +120,61 @@ function GroupAssignmentActivePanel({
     displayedBuilder,
     hasUnsavedGroup,
     onCancelPanel,
-    onClearAll,
     onExistingGroupSelect,
     openRule,
     removeExcludedIdentity,
     removeIdentity,
-    returnToCriteria,
     setDraft,
     togglePanel,
-    toggleRule,
     updateExcludedWalletSources,
     updateIncludedWalletSources,
   } = panelState;
-  const showEditorCancel = !isWaveAccessEditor && !quiet;
-  const onEditorClose =
-    quiet && !isWaveAccessEditor ? returnToCriteria : undefined;
-
-  if (displayedBuilder.panel === "identity") {
-    return (
-      <CreateWaveInlineGroupExpandedPanel
-        onCancel={returnToCriteria}
-        showCancel={showEditorCancel}
-        quiet={quiet}
-      >
-        <CreateWaveInlineGroupIdentityEditorPanel
-          draft={displayedBuilder.draft}
-          disabled={disabled}
-          quiet={quiet}
-          onIdentityToggle={returnToCriteria}
-          onRuleToggle={toggleRule}
-          onClose={onEditorClose}
-        >
-          <CreateWaveInlineGroupIdentities
-            includedIdentities={displayedBuilder.identities}
-            quiet={quiet}
-            excludedIdentities={displayedBuilder.excludedIdentities}
-            includedWalletSources={displayedBuilder.includedWalletSources}
-            excludedWalletSources={displayedBuilder.excludedWalletSources}
-            onIncludedIdentitySelect={addIdentity}
-            onIncludedIdentityRemove={removeIdentity}
-            onExcludedIdentitySelect={addExcludedIdentity}
-            onExcludedIdentityRemove={removeExcludedIdentity}
-            onIncludedWalletSourcesChange={updateIncludedWalletSources}
-            onExcludedWalletSourcesChange={updateExcludedWalletSources}
-          />
-        </CreateWaveInlineGroupIdentityEditorPanel>
-      </CreateWaveInlineGroupExpandedPanel>
-    );
-  }
-
-  if (displayedBuilder.panel === "rule-list") {
-    return (
-      <CreateWaveInlineGroupExpandedPanel
-        onCancel={onClearAll}
-        showCancel={false}
-        quiet={quiet}
-      >
-        <CreateWaveInlineGroupRuleList
-          draft={displayedBuilder.draft}
-          disabled={disabled}
-          quiet={quiet}
-          onIdentityOpen={() => togglePanel("identity", false)}
-          onRuleOpen={openRule}
-        />
-      </CreateWaveInlineGroupExpandedPanel>
-    );
-  }
-
   if (
-    displayedBuilder.panel === "rule-editor" &&
-    displayedBuilder.activeRule !== null
+    ["identity", "rule-list", "rule-editor"].includes(displayedBuilder.panel)
   ) {
+    const identityView =
+      displayedBuilder.panel === "identity" ? "identities" : null;
+    const view =
+      displayedBuilder.panel === "rule-editor"
+        ? (displayedBuilder.activeRule ?? "identities")
+        : identityView;
     return (
-      <CreateWaveInlineGroupExpandedPanel
-        onCancel={returnToCriteria}
-        showCancel={showEditorCancel}
-        quiet={quiet}
+      <GroupCriteriaEditor
+        draft={displayedBuilder.draft}
+        view={view}
+        disabled={disabled}
+        onClose={isWaveAccessEditor ? undefined : panelState.returnToCriteria}
+        onViewChange={(next) =>
+          next === "identities"
+            ? togglePanel("identity", false)
+            : openRule(next)
+        }
       >
-        <CreateWaveInlineGroupRuleEditorPanel
-          activeRule={displayedBuilder.activeRule}
-          draft={displayedBuilder.draft}
-          disabled={disabled}
-          quiet={quiet}
-          onIdentityToggle={() => togglePanel("identity", false)}
-          onRuleToggle={toggleRule}
-          onClose={onEditorClose}
-        >
-          <CreateWaveInlineGroupRuleEditor
-            draft={displayedBuilder.draft}
-            activeRule={displayedBuilder.activeRule}
-            onDraftChange={setDraft}
-          />
-        </CreateWaveInlineGroupRuleEditorPanel>
-      </CreateWaveInlineGroupExpandedPanel>
+        {view !== null &&
+          (view === "identities" ? (
+            <CreateWaveInlineGroupIdentities
+              includedIdentities={displayedBuilder.identities}
+              excludedIdentities={displayedBuilder.excludedIdentities}
+              includedWalletSources={displayedBuilder.includedWalletSources}
+              excludedWalletSources={displayedBuilder.excludedWalletSources}
+              onIncludedIdentitySelect={addIdentity}
+              onIncludedIdentityRemove={removeIdentity}
+              onExcludedIdentitySelect={addExcludedIdentity}
+              onExcludedIdentityRemove={removeExcludedIdentity}
+              onIncludedWalletSourcesChange={updateIncludedWalletSources}
+              onExcludedWalletSourcesChange={updateExcludedWalletSources}
+            />
+          ) : (
+            <div className="[&>div]:tw-border-0 [&>div]:tw-bg-transparent [&>div]:tw-p-0 [&>div]:tw-shadow-none">
+              <CreateWaveInlineGroupRuleEditor
+                networkPresentation
+                draft={displayedBuilder.draft}
+                activeRule={view}
+                onDraftChange={setDraft}
+              />
+            </div>
+          ))}
+      </GroupCriteriaEditor>
     );
   }
 
@@ -338,22 +296,29 @@ function SharedGroupAssignmentPanel({
     unsavedGroupSummary,
   } = panelState;
 
+  const isEditingWaveAccess = isWaveAccessEditor && isCriteriaReplacementActive;
+
   return (
     <>
       <div
         ref={panelRef}
         className={
-          quiet
+          quiet || presentation === "embedded"
             ? "tw-relative tw-flex tw-min-w-0 tw-flex-col tw-gap-4"
-            : "tw-relative tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/60 tw-p-4 tw-shadow-none tw-transition-all tw-duration-300"
+            : "tw-relative tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-p-4 tw-shadow-none sm:tw-p-5"
         }
       >
         <div className="tw-relative tw-flex tw-flex-col tw-gap-4">
-          <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-4 lg:tw-flex-row lg:tw-items-start lg:tw-justify-between">
+          <div
+            className={`tw-flex tw-min-w-0 tw-flex-col tw-gap-3 ${isEditingWaveAccess ? "tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-pb-4" : "lg:tw-flex-row lg:tw-items-start lg:tw-justify-between"}`}
+          >
             <CreateWaveInlineGroupHeader
               currentGroupLabel={currentGroupLabel}
               showCurrentGroupTitle={isCriteriaReplacementActive}
               quiet={quiet}
+              flat={isWaveAccessEditor}
+              onCancel={isEditingWaveAccess ? onClearAll : undefined}
+              disabled={disabled || !canReplaceCriteria}
               unsavedGroupDescription={
                 showChooseGroup ? unsavedGroupDescription : null
               }
