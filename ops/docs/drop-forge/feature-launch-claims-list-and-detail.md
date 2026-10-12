@@ -258,3 +258,22 @@ groups in the existing controls. Pause/resume uses revision checks and cannot
 cancel signed transactions. If the wallet outcome is unknown, supply its hash
 or use safe cancellation; do not repeat the airdrop blindly. Transactions sent
 outside these controls require their evidence supplied separately.
+
+## Recover a stuck automatic transaction
+
+The transaction recovery panel shows the operational wallet, nonce, deadline,
+original and replacement transaction links, and the exact action allocations.
+Choose **Speed up transaction** while its execution window remains valid, or
+**Cancel pending transaction**. Review the explanation and confirm the request.
+You can also supply an existing replacement/cancellation hash for verification.
+
+Recovery runs in the background. The wallet stays reserved until finalized chain
+evidence proves which transaction won. A cancellation request can lose to the
+original transaction; a late successful original is credited and never replayed.
+
+A successful cancellation or reverted action leaves allocations outstanding.
+**Retry outstanding action** is available within the original window. After all
+minting closes, **Deliver outstanding allocations after minting** requests a
+reviewed delivery. Neither operation credits recipients until execution is proven.
+Unknown evidence or changed claim configuration keeps the operation blocked.
+Failures are posted to the operations wave and tag `@dropforgers6529`.

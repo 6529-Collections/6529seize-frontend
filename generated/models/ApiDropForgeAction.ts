@@ -11,9 +11,11 @@
  * Do not edit the class manually.
  */
 
+import { ApiDropForgeRecovery } from '../models/ApiDropForgeRecovery';
 import { HttpFile } from '../http/http';
 
 export class ApiDropForgeAction {
+    'recovery'?: ApiDropForgeRecovery;
     'label'?: string;
     'id': string;
     'kind': ApiDropForgeActionKindEnum;
@@ -33,6 +35,12 @@ export class ApiDropForgeAction {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "recovery",
+            "baseName": "recovery",
+            "type": "ApiDropForgeRecovery",
+            "format": ""
+        },
         {
             "name": "label",
             "baseName": "label",
@@ -113,6 +121,7 @@ export enum ApiDropForgeActionStateEnum {
     Reserved = 'RESERVED',
     Signed = 'SIGNED',
     Confirmed = 'CONFIRMED',
-    Failed = 'FAILED'
+    Failed = 'FAILED',
+    Cancelled = 'CANCELLED'
 }
 

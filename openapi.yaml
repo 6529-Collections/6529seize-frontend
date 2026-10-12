@@ -8114,6 +8114,54 @@ paths:
           description: Launch or distribution job not found
         "409":
           description: Revision or existing launch conflict
+  /drop-forge/launches/{contract}/{claim_id}/recovery:
+    post:
+      tags:
+        - Drop Forge
+      operationId: recoverDropForgeLaunch
+      summary: recoverDropForgeLaunch
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge-recovery.handler"
+          name: recoverDropForgeLaunch
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDropForgeRecoveryRequest"
+      responses:
+        "200":
+          description: Current durable state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeLaunch"
+        "400":
+          description: Invalid configuration or unsafe transition
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator access required
+        "404":
+          description: Launch or distribution job not found
+        "409":
+          description: Revision or existing launch conflict
   /drop-forge/distribution-jobs/{contract}/{claim_id}:
     get:
       tags:
@@ -29054,6 +29102,8 @@ components:
         - deadline
         - recipients
       properties:
+        recovery:
+          $ref: "#/components/schemas/ApiDropForgeRecovery"
         label:
           type: string
         id:
@@ -29073,6 +29123,7 @@ components:
             - SIGNED
             - CONFIRMED
             - FAILED
+            - CANCELLED
         phase:
           type: integer
         due:
@@ -29379,6 +29430,105 @@ components:
           type: boolean
         include_team_airdrops:
           type: boolean
+    ApiDropForgeRecovery:
+      type: object
+      required:
+        - nonce
+        - attempts
+        - allocations
+        - cancel_requested
+      properties:
+        nonce:
+          type: integer
+        cancel_requested:
+          type: boolean
+        attempts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropForgeRecoveryAttempt"
+        allocations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropForgeRecoveryAllocation"
+        outcome:
+          type: string
+          enum:
+            - EXECUTED
+            - CANCELLED
+            - REVERTED
+        winner_hash:
+          type: string
+        supply:
+          type: integer
+        block_number:
+          type: integer
+    ApiDropForgeRecoveryAllocation:
+      type: object
+      required:
+        - address
+        - amount
+      properties:
+        address:
+          type: string
+        amount:
+          type: integer
+    ApiDropForgeRecoveryAttempt:
+      type: object
+      required:
+        - id
+        - operation
+        - requested_by
+        - requested_at
+      properties:
+        id:
+          type: string
+        operation:
+          type: string
+          enum:
+            - ORIGINAL
+            - SPEED_UP
+            - CANCEL
+        requested_by:
+          type: string
+        requested_at:
+          type: integer
+          format: int64
+        hash:
+          type: string
+          nullable: true
+    ApiDropForgeRecoveryRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - revision
+        - request_id
+        - action_id
+        - expected_hash
+        - operation
+      properties:
+        transaction_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        revision:
+          type: integer
+          minimum: 1
+        request_id:
+          type: string
+          format: uuid
+        action_id:
+          type: string
+          maxLength: 100
+        expected_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        operation:
+          type: string
+          enum:
+            - SPEED_UP
+            - CANCEL
+            - RETRY
+            - DELIVER_REMAINING
+            - RECORD_WINNER
     ApiDropGroupMention:
       type: string
       enum:

@@ -1,4 +1,5 @@
 "use client";
+import DropForgeTransactionRecovery from "./DropForgeTransactionRecovery";
 import {
   ApiDropForgeActionKindEnum as ActionKind,
   ApiDropForgeActionStateEnum as ActionState,
@@ -27,6 +28,8 @@ const explorers: Partial<Record<number, string>> = {
 };
 function actionLabel(state: ActionState) {
   if (state === ActionState.Confirmed) return "dropForge.actionDone" as const;
+  if (state === ActionState.Cancelled)
+    return "dropForge.actionCancelled" as const;
   if (state === ActionState.Failed) return "dropForge.actionFailed" as const;
   return state === ActionState.Signed
     ? ("dropForge.actionSubmitted" as const)
@@ -135,6 +138,11 @@ export default function DropForgeAutomationStatus({
                 {t(locale, "dropForge.transaction")}
               </a>
             )}
+            <DropForgeTransactionRecovery
+              launch={launch}
+              action={action}
+              onChange={() => query.refetch()}
+            />
           </li>
         ))}
       </ol>

@@ -1,3 +1,4 @@
+import type { ApiDropForgeRecoveryRequest } from "@/generated/models/ApiDropForgeRecoveryRequest";
 import {
   commonApiFetch,
   commonApiPost,
@@ -134,4 +135,15 @@ function manualHint(label: string | undefined): ManualAction | undefined {
   if (phase === "1") return ManualAction.Phase1Airdrop;
   if (phase === "2") return ManualAction.Phase2Airdrop;
   return undefined;
+}
+
+export function requestForgeRecovery(
+  contract: string,
+  claimId: number,
+  body: ApiDropForgeRecoveryRequest
+): Promise<ApiDropForgeLaunch> {
+  return commonApiPost<ApiDropForgeRecoveryRequest, ApiDropForgeLaunch>({
+    endpoint: `drop-forge/launches/${contract}/${claimId}/recovery`,
+    body,
+  });
 }

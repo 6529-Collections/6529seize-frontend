@@ -2949,6 +2949,40 @@ export const EN_US_MESSAGES = {
     "Browser storage is unavailable. Manual transactions require recovery storage.",
   "dropForge.hashStorageError":
     "Unable to save transaction {hash}. Keep this hash for manual recovery.",
+  "dropForge.winnerHash":
+    "Existing replacement or cancellation transaction hash",
+  "dropForge.recordWinner": "Verify existing transaction",
+  "dropForge.recordWinnerExplanation":
+    "Verify this transaction belongs to the exact operational wallet, nonce and action, or is its cancellation. The wallet remains reserved until canonical finality proves the outcome.",
+  "dropForge.transactionRecovery": "Transaction recovery",
+  "dropForge.transactionRecoveryError":
+    "Unable to request transaction recovery",
+  "dropForge.signer": "Operational wallet",
+  "dropForge.nonce": "Nonce",
+  "dropForge.executionDeadline": "Execution deadline (UTC)",
+  "dropForge.totalMinted": "Total minted at the winning block",
+  "dropForge.recoveryQueued": "Queued for signing",
+  "dropForge.recoveryWaiting":
+    "Recovery pending. The wallet remains reserved until the winning transaction is finalized.",
+  "dropForge.recoveryExecuted":
+    "The action executed and is finalized. Its allocations will not be replayed.",
+  "dropForge.recoveryOutstanding":
+    "The action did not execute. Its allocations remain outstanding.",
+  "dropForge.recoveryAllocations": "Inspect action allocations",
+  "dropForge.speedUp": "Speed up transaction",
+  "dropForge.cancelTransaction": "Cancel pending transaction",
+  "dropForge.retryOutstanding": "Retry outstanding action",
+  "dropForge.deliverRemaining": "Deliver outstanding allocations after minting",
+  "dropForge.confirmRecovery": "Confirm recovery request",
+  "dropForge.dismissRecovery": "Dismiss",
+  "dropForge.recoverySubmitting": "Requesting recovery…",
+  "dropForge.actionCancelled": "Transaction cancelled — work outstanding",
+  "dropForge.cancelTransactionExplanation":
+    "Request a cancellation using the same nonce. The original may still win. Undelivered allocations remain owed until delivery is confirmed.",
+  "dropForge.speedUpExplanation":
+    "Increase transaction fees while preserving the original nonce, recipients and quantities. The backend enforces the execution window and gas budget.",
+  "dropForge.retryOutstandingExplanation":
+    "Request delivery of outstanding work only after the backend verifies finalized cancellation or revert evidence. Previously delivered allocations are not replayed.",
   "dropForge.transaction": "View transaction",
 
   "header.menu.open": "Open menu",
