@@ -7,10 +7,8 @@ import {
   NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
   NETWORK_REFERENCE_PAGE_CLASSES,
 } from "@/components/network/networkPageLayoutClasses";
-import {
-  CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS,
-  CONSOLIDATION_WALLET_LIMIT,
-} from "@/constants/consolidation.constants";
+import { CONSOLIDATION_WALLET_LIMIT } from "@/constants/consolidation.constants";
+import { useConsolidationPolicy } from "@/hooks/useConsolidationPolicy";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate, formatInteger } from "@/i18n/format";
@@ -153,8 +151,13 @@ const TABLE_CELL =
   "tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-align-top tw-text-sm tw-leading-6 tw-text-iron-300";
 const LINK = `tw-text-primary-300 ${TDH_FOCUS}`;
 
-function activationDate(locale: SupportedLocale) {
-  return formatDate(locale, CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS, {
+function activationDate(
+  locale: SupportedLocale,
+  activationMs: number | undefined
+) {
+  if (activationMs === undefined)
+    return t(locale, "network.tdhConsolidation.policy.pendingDate");
+  return formatDate(locale, activationMs, {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -170,7 +173,8 @@ export default function TDHConsolidationDesignPage() {
   const locale = useBrowserLocale();
   useSetTitle(t(locale, "network.tdhConsolidation.design.pageTitle"));
   useTDHSectionHashFocus(NAVIGATION_IDS);
-  const date = activationDate(locale);
+  const { policy } = useConsolidationPolicy();
+  const date = activationDate(locale, policy?.activationMs);
   const limit = formatInteger(locale, CONSOLIDATION_WALLET_LIMIT);
 
   return (
@@ -236,7 +240,7 @@ export default function TDHConsolidationDesignPage() {
           title={t(locale, "network.tdhConsolidation.order.title")}
           description={t(locale, "network.tdhConsolidation.order.description")}
         >
-          <ConsolidationOrderSimulator locale={locale} />
+          <ConsolidationOrderSimulator locale={locale} activationDate={date} />
         </TDHSection>
 
         <TDHSection

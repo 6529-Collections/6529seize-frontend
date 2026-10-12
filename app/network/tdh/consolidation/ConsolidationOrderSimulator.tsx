@@ -23,8 +23,10 @@ const BUTTON = `tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg
 
 export default function ConsolidationOrderSimulator({
   locale,
+  activationDate,
 }: {
   readonly locale: SupportedLocale;
+  readonly activationDate: string;
 }) {
   const [order, setOrder] = useState<readonly SimulatedWallet[]>([]);
   const steps = useMemo(() => simulateAddingFourthWallet(order), [order]);
@@ -51,6 +53,11 @@ export default function ConsolidationOrderSimulator({
 
   return (
     <div className={`${TDH_PANEL} tw-space-y-5 tw-p-5`}>
+      <p className={TDH_TEXT}>
+        {t(locale, "network.tdhConsolidation.order.activation", {
+          date: activationDate,
+        })}
+      </p>
       <div className="tw-flex tw-flex-wrap tw-gap-2">
         <button
           type="button"

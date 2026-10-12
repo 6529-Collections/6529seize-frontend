@@ -4,7 +4,7 @@
   "network.tdhConsolidation.title": "Combine your wallets",
   "network.tdhConsolidation.lead": "Most collectors use more than one wallet: a vault that stays cold, a wallet for trading, a hot wallet for signing in. Combining them tells 6529 they all belong to you, so they count as one collector.",
   "network.tdhConsolidation.nothingMoves": "Nothing moves. Your NFTs stay in the wallets they are in.",
-  "network.tdhConsolidation.limit": "Combine up to {limit} wallets. The fourth can be added from {date}.",
+  "network.tdhConsolidation.limit": "Combine up to {limit} wallets. The fourth requires fresh links from {date}; Guided Setup opens signing ten minutes later.",
   "network.tdhConsolidation.cta": "Start guided setup",
   "network.tdhConsolidation.safeCollectingLink": "How your wallets fit together",
   "network.tdhConsolidation.figure.label": "Up to four of your wallets count as one collector",
@@ -110,7 +110,7 @@
   "network.tdhConsolidation.rules.effects.body": "Holdings across the wallets combine for TDH, including full sets, seasons, Genesis/Nakamoto and Gradient boosts, and transfers between them keep their acquisition time. The wallets' profiles merge permanently: the handle and picture come from the profile with the highest CIC, then TDH. Changes reach TDH within minutes and fully at the next 00:00 UTC snapshot.",
   "network.tdhConsolidation.add.title": "Add a wallet in four transactions",
   "network.tdhConsolidation.add.description": "Each wallet signing for itself can batch its links in one transaction. A Delegation Manager sends one transaction per link. Existing wallets sign first and the new wallet signs last; this avoids an intermediate split when the new wallet has no existing return links.",
-  "network.tdhConsolidation.add.step1": "Wallets A, B and C each register one link to D, in any order and at any time. Nothing changes yet.",
+  "network.tdhConsolidation.add.step1": "Wallets A, B and C each register one link to D, in any order, after the activation cutoff. Nothing changes yet.",
   "network.tdhConsolidation.add.step2": "D signs last, with one batch to A, B and C. The group becomes four wallets in one step.",
   "network.tdhConsolidation.add.why": "Signing D first, renewing existing return links or sending D's links as separate manager transactions can split the group temporarily. Each split re-runs the profile merge, and TDH-wave votes above the temporarily lower TDH are reduced and not restored.",
   "network.tdhConsolidation.add.table.caption": "Transactions needed for common consolidation changes",
@@ -212,5 +212,7 @@
   "network.tdhConsolidation.related.checker.title": "Wallet Checker",
   "network.tdhConsolidation.related.checker.description": "See a wallet's consolidation links and any that are incomplete.",
   "network.tdhConsolidation.related.center.title": "Delegation Center",
-  "network.tdhConsolidation.related.center.description": "Register, revoke and manage delegations and consolidations."
+  "network.tdhConsolidation.related.center.description": "Register, revoke and manage delegations and consolidations.",
+  "network.tdhConsolidation.policy.pendingDate": "the activation time shown in Guided Setup",
+  "network.tdhConsolidation.order.activation": "This example models registrations made after {date}, using the activation cutoff for this environment."
 }
