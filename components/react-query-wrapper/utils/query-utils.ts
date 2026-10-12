@@ -120,20 +120,40 @@ type DefaultQueryRetryPolicy<TError> = {
   readonly retryDelay: (failureCount: number) => number;
 };
 
+const DEFAULT_QUERY_RETRY_LIMIT = 3;
+
+/**
+ * A response status in the 4xx range, including 429, is deterministic for the
+ * request that produced it, so repeating the identical request only adds load.
+ * Only errors that expose a numeric status (`errorMode: "structured"` API
+ * errors) can be recognised. Legacy string rejections, network failures and
+ * 5xx responses carry no 4xx status and stay retryable.
+ */
+const isClientErrorQueryError = (error: unknown): boolean => {
+  const status = getQueryErrorStatus(error);
+  return status !== null && status >= 400 && status < 500;
+};
+
+/**
+ * Shared retry decision: up to `DEFAULT_QUERY_RETRY_LIMIT` retries, never for a
+ * client error. `failureCount` is React Query's count of failures so far.
+ */
+export const shouldRetryQuery = (
+  failureCount: number,
+  error: unknown
+): boolean =>
+  failureCount < DEFAULT_QUERY_RETRY_LIMIT && !isClientErrorQueryError(error);
+
 export const getDefaultQueryRetry = <TError = Error>(
   errorCallback?: () => void
 ): DefaultQueryRetryPolicy<TError> => {
   return {
     retry: (failureCount: number, error: TError) => {
-      if (isRateLimitQueryError(error)) {
-        errorCallback?.();
-        return false;
+      if (shouldRetryQuery(failureCount, error)) {
+        return true;
       }
-      if (failureCount >= 3) {
-        errorCallback?.();
-        return false;
-      }
-      return true;
+      errorCallback?.();
+      return false;
     },
     retryDelay: (failureCount: number) => {
       return failureCount * 1000;

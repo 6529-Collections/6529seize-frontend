@@ -3,6 +3,7 @@ import {
   getWaveDropsInitialLimit,
   isRateLimitQueryError,
   isTerminalNotificationAuthQueryError,
+  shouldRetryQuery,
   shouldStopPollingRetry,
   WAVE_DROPS_NATIVE_INITIAL_PARAMS,
   WAVE_DROPS_PARAMS,
@@ -74,5 +75,65 @@ describe("default query retry policy", () => {
     expect(retryPolicy.retry(3, { status: 500 })).toBe(false);
 
     expect(onRetryStopped).toHaveBeenCalledTimes(1);
+  });
+
+  it("stops on any structured client error and reports the stop", () => {
+    const onRetryStopped = jest.fn();
+    const retryPolicy = getDefaultQueryRetry<unknown>(onRetryStopped);
+
+    expect(retryPolicy.retry(0, { status: 404 })).toBe(false);
+    expect(retryPolicy.retry(0, { response: { status: 400 } })).toBe(false);
+
+    expect(onRetryStopped).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("shared query retry decision", () => {
+  const structuredError = (status: number) =>
+    Object.assign(new Error("Request failed"), { name: "ApiError", status });
+
+  it.each([400, 401, 403, 404, 409, 422, 429])(
+    "never retries a structured %i response",
+    (status) => {
+      expect(shouldRetryQuery(0, structuredError(status))).toBe(false);
+      expect(shouldRetryQuery(1, structuredError(status))).toBe(false);
+    }
+  );
+
+  it("reads the status from nested response and cause shapes", () => {
+    expect(shouldRetryQuery(0, { response: { status: 429 } })).toBe(false);
+    expect(shouldRetryQuery(0, { cause: { status: 404 } })).toBe(false);
+  });
+
+  it.each([500, 502, 503, 504])(
+    "retries a structured %i response up to the limit",
+    (status) => {
+      const error = structuredError(status);
+
+      expect(shouldRetryQuery(0, error)).toBe(true);
+      expect(shouldRetryQuery(1, error)).toBe(true);
+      expect(shouldRetryQuery(2, error)).toBe(true);
+      expect(shouldRetryQuery(3, error)).toBe(false);
+    }
+  );
+
+  it("retries network failures up to the limit", () => {
+    const error = new TypeError("Failed to fetch");
+
+    expect(shouldRetryQuery(0, error)).toBe(true);
+    expect(shouldRetryQuery(2, error)).toBe(true);
+    expect(shouldRetryQuery(3, error)).toBe(false);
+  });
+
+  it("keeps the previous behaviour for legacy string rejections", () => {
+    expect(shouldRetryQuery(0, "Too Many Requests")).toBe(true);
+    expect(shouldRetryQuery(2, "Not Found")).toBe(true);
+    expect(shouldRetryQuery(3, "Not Found")).toBe(false);
+  });
+
+  it("does not mistake other values for client errors", () => {
+    expect(shouldRetryQuery(0, undefined)).toBe(true);
+    expect(shouldRetryQuery(0, null)).toBe(true);
+    expect(shouldRetryQuery(0, { status: "404" })).toBe(true);
   });
 });

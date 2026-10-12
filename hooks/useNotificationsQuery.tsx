@@ -1,6 +1,8 @@
 "use client";
 
+import { getNotificationErrorDetails } from "@/components/brain/notifications/utils/getNotificationErrorDetails";
 import { groupReactionNotifications } from "@/components/brain/notifications/utils/groupReactionNotifications";
+import { shouldRetryQuery } from "@/components/react-query-wrapper/utils/query-utils";
 import {
   getIdentityNotificationsInfiniteQueryOptions,
   NOTIFICATIONS_PAGE_LIMIT,
@@ -92,22 +94,11 @@ export function useNotificationsQuery({
 
       return undefined;
     },
-    retry: (failureCount, error: unknown) => {
-      const record = error as {
-        status?: unknown;
-        response?: { status?: unknown };
-        cause?: { status?: unknown };
-      } | null;
-      const status =
-        record?.status ?? record?.response?.status ?? record?.cause?.status;
-      if (status === 401) return false;
-      if (typeof error === "string" && /unauthorized/i.test(error))
-        return false;
-      if (error instanceof Error && /unauthorized/i.test(error.message)) {
-        return false;
-      }
-      return failureCount < 3;
-    },
+    // The fetcher rejects with structured API errors, so any 4xx (including
+    // 401 and 429) stops retrying; session recovery handles unauthorized.
+    retry: (failureCount, error: unknown) =>
+      !getNotificationErrorDetails(error).isUnauthorized &&
+      shouldRetryQuery(failureCount, error),
   });
 
   const rawItems = useMemo(() => {

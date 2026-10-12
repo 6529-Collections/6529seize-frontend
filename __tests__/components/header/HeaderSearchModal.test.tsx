@@ -556,6 +556,7 @@ describe("HeaderSearchModal", () => {
         view: "SEARCH",
       }),
       headers: undefined,
+      errorMode: "structured",
     });
   });
 
