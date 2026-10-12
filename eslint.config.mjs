@@ -609,6 +609,7 @@ export const createEslintConfig = ({
         "config/ethereumRpcEnv.ts",
         "config/museumPublicationEnv.server.ts",
         "config/nextConfig.ts",
+        "config/nextPhase.ts",
         "config/publicReviewDestinationEnv.server.ts",
         "config/reviewbotUsageEnv.ts",
         "config/runtimeConfig.ts",
