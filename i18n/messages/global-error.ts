@@ -1,8 +1,9 @@
 // Copy for app/global-error.tsx, which replaces the root layout and therefore
 // renders without any provider. The en-US strings intentionally match
 // components/error/Error.tsx (heading, title, retry) because the device-farm
-// smoke and Playwright route readiness helpers recognise them. en-GB uses the
-// en-US fallback because the copy is identical.
+// smoke and Playwright route readiness helpers recognise them. en-GB has its own
+// partial dictionary that omits these keys, so t() falls back to this en-US
+// copy, which is identical.
 export const GLOBAL_ERROR_MESSAGES = {
   "globalError.documentTitle": "6529 Error",
   "globalError.title": "Welcome to the 6529 Page of Doom",

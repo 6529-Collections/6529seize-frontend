@@ -4,11 +4,15 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
+import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 
 import GlobalError from "@/app/global-error";
 import { publicEnv } from "@/config/env";
+import { t, type MessageKey } from "@/i18n/messages";
+import { GLOBAL_ERROR_MESSAGES } from "@/i18n/messages/global-error";
 
 const captureExceptionMock = jest.fn();
 
@@ -255,5 +259,97 @@ describe("GlobalError", () => {
       screen.getByRole("button", { name: "Try Again" })
     ).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute("lang", "en-US");
+  });
+
+  it("resolves an en-GB browser to the en-US copy, never to raw message keys", async () => {
+    setNavigatorLanguages(["en-GB"]);
+
+    renderGlobalError();
+
+    await waitFor(() => {
+      expect(document.documentElement).toHaveAttribute("lang", "en-GB");
+    });
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: "Welcome to the 6529 Page of Doom",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Try Again" })
+    ).toBeInTheDocument();
+    expect(document.title).toBe("6529 Error");
+    expect(document.body.textContent).not.toContain("globalError.");
+  });
+
+  it.each(Object.entries(GLOBAL_ERROR_MESSAGES))(
+    "t() resolves %s for en-GB to the en-US copy",
+    (key, enUsCopy) => {
+      const resolved = t("en-GB", key as MessageKey);
+
+      expect(resolved).toBe(enUsCopy);
+      expect(resolved).not.toBe(key);
+    }
+  );
+
+  it("hydrates server markup, then follows browser locale changes without warnings", async () => {
+    const props = {
+      error: createError("Boom", "abc123"),
+      retry: jest.fn(),
+      reset: jest.fn(),
+    };
+    // Server output is always the en-US document, whatever the browser prefers.
+    const serverHtml = renderToString(<GlobalError {...props} />);
+    document.open();
+    document.write(`<!DOCTYPE html>${serverHtml}`);
+    document.close();
+    setNavigatorLanguages(["fr-FR"]);
+
+    // document.write replaced <body>, so the module-level `screen` is stale.
+    let root: ReturnType<typeof hydrateRoot> | undefined;
+    try {
+      await act(async () => {
+        root = hydrateRoot(document, <GlobalError {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(document.documentElement).toHaveAttribute("lang", "fr-FR");
+      });
+      expect(
+        within(document.body).getByRole("heading", {
+          level: 1,
+          name: "Bienvenue sur la Page de la Fatalité de 6529",
+        })
+      ).toBeInTheDocument();
+
+      // The browser language changes after mount.
+      setNavigatorLanguages(["de-DE"]);
+      await act(async () => {
+        globalThis.dispatchEvent(new Event("languagechange"));
+      });
+
+      await waitFor(() => {
+        expect(document.documentElement).toHaveAttribute("lang", "de-DE");
+      });
+      expect(
+        within(document.body).getByRole("heading", {
+          level: 1,
+          name: "Willkommen auf der 6529-Seite des Verderbens",
+        })
+      ).toBeInTheDocument();
+      expect(document.title).toBe("6529 Fehler");
+
+      // extractErrorDetails logs the raw error; anything else on console.error
+      // would be a React hydration or update warning.
+      const unexpected = consoleErrorSpy.mock.calls.filter(
+        ([message]) => !String(message).startsWith("[GLOBAL_ERROR]")
+      );
+      expect(unexpected).toEqual([]);
+    } finally {
+      act(() => root?.unmount());
+      document.open();
+      document.write("<!DOCTYPE html><html><head></head><body></body></html>");
+      document.close();
+    }
   });
 });
