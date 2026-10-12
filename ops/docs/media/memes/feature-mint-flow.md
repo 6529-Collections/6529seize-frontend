@@ -241,9 +241,12 @@
 - Current fallback behavior: wallet confirmation, wallet-request help,
   submitted status, and success confirmation support `en-US`, `en-GB`, `fr-FR`,
   `es-ES`, and `de-DE`, including artwork fallbacks and actions. `SEIZED!` and
-  `The Memes` retain their brand wording in every locale. Mint error titles
-  and status messages fall back to `en-US`; the remaining widget and shared
-  error modal copy is still English-only.
+  `The Memes` retain their brand wording in every locale. The iOS
+  `Mint on 6529.io` handoff, the `Connected Profile` summary, and the
+  `Mint for me` / `Mint for fren` toggles are also localized in all five
+  locales. Mint error titles and status messages fall back to `en-US`; the
+  remaining widget, recipient search, and shared error modal copy is still
+  English-only.
 - User impact: every supported locale has localized wallet-request, submitted,
   and success states, but untranslated mint controls and error details remain
   in English.

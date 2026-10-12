@@ -8,6 +8,7 @@ import { areEqualAddresses } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
+import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { AuthContext } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
@@ -158,7 +159,7 @@ export default function ManifoldMintingConnect(
     return (
       <div className="tw-py-1">
         <span className="tw-text-sm tw-font-light tw-text-iron-300">
-          Connected Profile
+          {t(locale, "theMemes.mint.connect.connectedProfile")}
         </span>
         <div className="tw-mt-2 tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-bg-white/10 tw-px-3 tw-py-2">
           <TransferModalPfp
@@ -171,8 +172,10 @@ export default function ManifoldMintingConnect(
               {profileHandle}
             </div>
             <div className="tw-truncate tw-text-[11px] tw-opacity-60">
-              TDH: {(connectedProfile?.tdh ?? 0).toLocaleString()} - Level:{" "}
-              {connectedProfile?.level ?? 0}
+              {t(locale, "theMemes.mint.connect.profileStats", {
+                tdh: formatInteger(locale, connectedProfile?.tdh ?? 0),
+                level: formatInteger(locale, connectedProfile?.level ?? 0),
+              })}
             </div>
             {showAddress && (
               <div className="tw-truncate tw-text-[11px] tw-opacity-60">
@@ -241,7 +244,7 @@ export default function ManifoldMintingConnect(
               setMintForFren(false);
             }}
           >
-            Mint for me
+            {t(locale, "theMemes.mint.connect.mintForMe")}
           </button>
           <button
             type="button"
@@ -252,7 +255,7 @@ export default function ManifoldMintingConnect(
             }`}
             onClick={() => setMintForFren(true)}
           >
-            Mint for fren
+            {t(locale, "theMemes.mint.connect.mintForFren")}
           </button>
         </div>
       </div>
