@@ -7790,6 +7790,195 @@ paths:
           description: Invalid request
         "403":
           description: Forbidden - not a Subscription Admin
+  /drop-forge/launches/{contract}/{claim_id}/ready:
+    post:
+      tags:
+        - Drop Forge
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge-operations.handlers"
+          name: readyDropForgeLaunch
+      operationId: readyDropForgeLaunch
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Durable operation or read-only result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeLaunch"
+        "400":
+          description: Invalid input or operation not ready
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator permission required
+        "404":
+          description: Operation not found
+        "409":
+          description: Conflicting operation
+  /drop-forge/launches/{contract}/{claim_id}/metadata:
+    post:
+      tags:
+        - Drop Forge
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge-operations.handlers"
+          name: updateDropForgeMetadata
+      operationId: updateDropForgeMetadata
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Durable operation or read-only result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeLaunch"
+        "400":
+          description: Invalid input or operation not ready
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator permission required
+        "404":
+          description: Operation not found
+        "409":
+          description: Conflicting operation
+  /drop-forge/launches/{contract}/{claim_id}/manual:
+    post:
+      tags:
+        - Drop Forge
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge-operations.handlers"
+          name: coordinateDropForgeManualAction
+      operationId: coordinateDropForgeManualAction
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDropForgeManualRequest"
+      responses:
+        "200":
+          description: Durable operation or read-only result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeManualResponse"
+        "400":
+          description: Invalid input or operation not ready
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator permission required
+        "404":
+          description: Operation not found
+        "409":
+          description: Conflicting operation
+  /drop-forge/distribution-jobs/{job_id}/lists/{phase_id}/{list}:
+    get:
+      tags:
+        - Drop Forge
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge-operations.handlers"
+          name: getDropForgeCompletedList
+      operationId: getDropForgeCompletedList
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: phase_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: list
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - airdrops
+              - airdrops_unconsolidated
+              - allowlists
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        "200":
+          description: Durable operation or read-only result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeListPage"
+        "400":
+          description: Invalid input or operation not ready
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator permission required
+        "404":
+          description: Operation not found
+        "409":
+          description: Conflicting operation
   /drop-forge/launches/{contract}/{claim_id}:
     get:
       tags:
@@ -7926,6 +8115,47 @@ paths:
         "409":
           description: Revision or existing launch conflict
   /drop-forge/distribution-jobs/{contract}/{claim_id}:
+    get:
+      tags:
+        - Drop Forge
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge-operations.handlers"
+          name: getLatestDropForgeProcess
+      operationId: getLatestDropForgeProcess
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+        - name: plan_id
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Latest processing job, or null if processing has not started
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiDropForgeJob"
+        "401":
+          description: Authentication required
+        "403":
+          description: Distribution administrator permission required
     post:
       tags:
         - Drop Forge
@@ -28813,6 +29043,8 @@ components:
         - deadline
         - recipients
       properties:
+        label:
+          type: string
         id:
           type: string
         kind:
@@ -28821,6 +29053,7 @@ components:
             - INITIALIZE
             - AIRDROP
             - UPDATE
+            - METADATA
         state:
           type: string
           enum:
@@ -28872,7 +29105,15 @@ components:
         - kind
         - status
         - updated_at
+        - step
       properties:
+        step:
+          type: integer
+          minimum: 0
+        phase_ids:
+          type: array
+          items:
+            type: string
         id:
           type: string
           format: uuid
@@ -28885,6 +29126,7 @@ components:
           enum:
             - PHASE
             - FINALIZE
+            - PROCESS_ALL
         status:
           type: string
           enum:
@@ -28908,6 +29150,12 @@ components:
         - request_id
         - kind
       properties:
+        phase_ids:
+          type: array
+          minItems: 3
+          maxItems: 3
+          items:
+            type: string
         request_id:
           type: string
           format: uuid
@@ -28917,6 +29165,7 @@ components:
           enum:
             - PHASE
             - FINALIZE
+            - PROCESS_ALL
         plan_id:
           type: string
           maxLength: 100
@@ -28940,6 +29189,10 @@ components:
         - actions
         - updated_at
       properties:
+        metadata_location:
+          type: string
+        manual_pending:
+          type: boolean
         id:
           type: string
         revision:
@@ -28980,6 +29233,63 @@ components:
         updated_at:
           type: integer
           format: int64
+    ApiDropForgeListPage:
+      type: object
+      required:
+        - rows
+        - next_offset
+      properties:
+        rows:
+          type: array
+          items:
+            type: object
+            required:
+              - wallet
+              - amount
+            properties:
+              wallet:
+                type: string
+              amount:
+                type: integer
+        next_offset:
+          type: integer
+          nullable: true
+    ApiDropForgeManualRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - operation
+      properties:
+        action:
+          type: string
+          enum:
+            - ARTIST_AIRDROP
+            - TEAM_AIRDROP
+            - PHASE0_AIRDROP
+            - PHASE1_AIRDROP
+            - PHASE2_AIRDROP
+            - PUBLIC_PHASE_AIRDROP
+            - RESEARCH_AIRDROP
+        operation:
+          type: string
+          enum:
+            - BEGIN
+            - SUBMIT
+            - CANCEL
+        lease_id:
+          type: string
+          format: uuid
+        hash:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{64}$
+    ApiDropForgeManualResponse:
+      type: object
+      required:
+        - lease_id
+      properties:
+        lease_id:
+          type: string
+          nullable: true
     ApiDropForgePhase:
       type: object
       required:

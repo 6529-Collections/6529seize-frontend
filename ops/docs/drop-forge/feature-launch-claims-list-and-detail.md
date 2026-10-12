@@ -235,3 +235,14 @@ has automation controls.
 - [Drop Forge Craft-to-Launch Flow](flow-drop-forge-craft-to-launch.md)
 - [Drop Forge Access and Claim Operations](troubleshooting-drop-forge-access-and-claims.md)
 - [Docs Home](../README.md)
+
+## Coordinated automation
+
+The page shows the durable automated action timeline and transaction links.
+Manual writes acquire a backend lease before the wallet prompt. Their hashes
+are registered for confirmed reconciliation; the worker credits completed
+allocations and runs only the remainder. Automation also marks completed airdrop
+groups in the existing controls. Pause/resume uses revision checks and cannot
+cancel signed transactions. If the wallet outcome is unknown, supply its hash
+or use safe cancellation; do not repeat the airdrop blindly. Transactions sent
+outside these controls require their evidence supplied separately.

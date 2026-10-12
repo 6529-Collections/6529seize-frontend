@@ -41,6 +41,13 @@ const NEXTGEN_ADMIN_ACTIONS: readonly RegExp[] = [
 ].map(exactName);
 
 const DROP_FORGE_WRITE_ACTIONS: readonly RegExp[] = [
+  /^Launch$/,
+  /^Update Claim$/,
+  /^Process and Finalize$/,
+  /^Resume automatic execution$/,
+  /^Pause automatic execution$/,
+  /^Record transaction$/,
+  /^Cancel unsubmitted manual operation$/,
   /^Add Admin$/,
   /^Revoke admin /,
   /^Back to Drop Forge$/,

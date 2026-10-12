@@ -29,7 +29,7 @@ The Memes token distribution outputs.
   - get phase-level `Subscription Lists` / `Public Subscriptions` downloads.
   - get footer controls: `Change Token ID`, `Reset Subscriptions`,
     `Artist Airdrops`, `Team Airdrops`, `Distribution Photos`,
-    `Finalize Distribution`, `Publish to GitHub`.
+    `Process and Finalize`, `Publish to GitHub`.
 - Admin users must confirm token ID before footer actions and subscription
   downloads unlock.
 - `Confirm Token ID` is blocking (`backdrop="static"` and `keyboard={false}`).
@@ -40,12 +40,15 @@ The Memes token distribution outputs.
 1. Inspect phase and component rows.
 2. Export baseline results (`JSON` / `CSV` / `Manifold`) for normal rows.
 3. If you are a subscriptions admin, confirm token ID.
-4. Download subscription CSV bundles from phase rows.
-5. Use the footer controls to upload, inspect, or download artist/team
-   airdrops and to upload or inspect distribution photos.
-6. Run `Finalize Distribution` until the status shows `✅`.
-7. Click `Publish to GitHub` when it becomes enabled.
-8. Use the GitHub modal to watch progress, then close or retry.
+4. Use the footer controls to upload artist/team allocations and distribution photos.
+5. Click `Process and Finalize`. One background operation processes the three
+   ordered phase inputs and public subscriptions, then finalizes the distribution.
+6. Watch the loader until completed. Refresh restores durable progress; an
+   interrupted request does not mean processing failed. Correct a reported
+   failure before retrying.
+7. Download subscription CSV bundles from the completed phase rows. Downloads
+   read the stored lists and do not prepare or finalize again.
+8. Click `Publish to GitHub` when it becomes enabled and follow its modal.
 
 ## Subscriptions Action Rules
 
@@ -76,9 +79,14 @@ The Memes token distribution outputs.
   - `Distribution Photos` viewer opens a thumbnail grid for the confirmed token.
   - clicking a thumbnail opens a full-size lightbox; a separate icon opens the
     source image in a new tab.
-- `Finalize Distribution`:
-  - runs normalization for the confirmed token.
-  - button shows `✅` when normalized, `❌` otherwise.
+- `Process and Finalize`:
+  - requires the confirmed token and three ordered phase IDs.
+  - shows processing, completed or failed status from a durable backend job.
+  - snapshot inputs remain consistent across the operation; conflicting uploads
+    and reset requests are rejected while it runs.
+  - changed phase selections or distribution inputs require explicit reset and
+    processing again. Subscription downloads unlock only for completed matching
+    jobs; baseline plan exports retain their existing behavior.
 - `Publish to GitHub`:
   - enabled only when all are true: normalized, photos count > 0, combined
     artist/team airdrops count > 0.
@@ -96,7 +104,9 @@ The Memes token distribution outputs.
   `Download successful`.
 - Airdrop and photo viewers can show inline loading, empty, or error states
   without leaving `Review`.
-- Reset, upload, finalize, and publish failures show toast or modal errors.
+- Reset, upload, process and publish failures show toast or inline errors.
+- A failed process can be retried after correcting its cause. Refresh checks
+  the current job before starting another; completed downloads never retry writes.
 - CSV and image validation errors are shown before upload.
 - If plan run fails, the warning bar shows `Distribution plan building failed`
   with `Run Analysis`. See [EMMA Distribution Plan Operations Flow](flow-emma-distribution-plan-operations.md).

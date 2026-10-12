@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { getMemesMintingClaimActions } from "@/services/api/memes-minting-claims-api";
+import { useDropForgeManualWrite } from "@/hooks/useDropForgeManualWrite";
+import DropForgeAutomationStatus from "@/components/drop-forge/launch/DropForgeAutomationStatus";
+import { useCallback, useState } from "react";
 import {
   useSendTransaction,
   useWaitForTransactionReceipt,
@@ -65,6 +68,20 @@ export default function DropForgeLaunchClaimPageClient({
     refetch: refetchOnChainClaim,
   } = useDropForgeManifoldClaim(claimId);
   const launchClaimState = useLaunchClaimState(claimId);
+  const { setMintingClaimActions } = launchClaimState;
+  const refreshManualView = useCallback(() => {
+    void refetchOnChainClaim().catch(() => undefined);
+    if (canManageClaimActions) {
+      void getMemesMintingClaimActions(claimId)
+        .then(setMintingClaimActions)
+        .catch(() => undefined);
+    }
+  }, [
+    refetchOnChainClaim,
+    canManageClaimActions,
+    claimId,
+    setMintingClaimActions,
+  ]);
   const {
     claim,
     rootsLoading,
@@ -192,6 +209,13 @@ export default function DropForgeLaunchClaimPageClient({
     payArtistResolvedAddressTrimmed,
     payArtistAddressValid,
   ]);
+  const executeManual = useDropForgeManualWrite(
+    forgeMintingContract,
+    claimId,
+    claimWrite.data,
+    claimWrite.error,
+    connectedActionContextFingerprint
+  );
   const runConnectedAction = useConnectedAction({
     contextFingerprint: connectedActionContextFingerprint,
     onContextChanged: () =>
@@ -230,6 +254,7 @@ export default function DropForgeLaunchClaimPageClient({
     setOnChainClaimSpinnerVisible,
     showErrorToast,
     runConnectedAction,
+    executeManual,
     state: launchClaimState,
   });
 
@@ -268,6 +293,7 @@ export default function DropForgeLaunchClaimPageClient({
     payArtistResolvedAddressTrimmed,
     payArtistAddressValid,
     runConnectedAction,
+    executeManual,
   });
 
   if (shouldShowPermissionFallback) {
@@ -283,6 +309,10 @@ export default function DropForgeLaunchClaimPageClient({
 
   return (
     <>
+      <DropForgeAutomationStatus
+        claimId={claimId}
+        onConfirmedWork={refreshManualView}
+      />
       <DropForgeLaunchClaimPageView
         pageTitle={pageTitle}
         craftHref={`/drop-forge/craft/${claimId}`}

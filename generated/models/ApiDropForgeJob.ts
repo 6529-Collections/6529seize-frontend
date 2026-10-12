@@ -14,6 +14,8 @@
 import { HttpFile } from '../http/http';
 
 export class ApiDropForgeJob {
+    'step': number;
+    'phase_ids'?: Array<string>;
     'id': string;
     'contract': string;
     'claim_id': number;
@@ -31,6 +33,18 @@ export class ApiDropForgeJob {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "step",
+            "baseName": "step",
+            "type": "number",
+            "format": ""
+        },
+        {
+            "name": "phase_ids",
+            "baseName": "phase_ids",
+            "type": "Array<string>",
+            "format": ""
+        },
         {
             "name": "id",
             "baseName": "id",
@@ -90,7 +104,8 @@ export class ApiDropForgeJob {
 
 export enum ApiDropForgeJobKindEnum {
     Phase = 'PHASE',
-    Finalize = 'FINALIZE'
+    Finalize = 'FINALIZE',
+    ProcessAll = 'PROCESS_ALL'
 }
 export enum ApiDropForgeJobStatusEnum {
     Pending = 'PENDING',

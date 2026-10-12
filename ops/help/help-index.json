@@ -5075,8 +5075,8 @@
         "The hub links to Craft and Launch sections, with list and detail pages for each.",
         "The creator owner and approved on-chain admins have Drop Forge landing and Launch access alongside configured claims admins. Craft remains restricted to distribution admins.",
         "The Contract Admins card lists the creator owner first and all approved on-chain admins for every wallet with landing access. The creator contract links to Etherscan for the active chain. Each row puts its Owner/Admin badge above the available mainnet ENS name and full wallet address, wrapping on narrow screens. The header's Add Admin button expands an inline wallet or ENS input above the list; Cancel closes and clears it. Refresh shows a spinner while reloading. Add and Revoke controls are shown only to the owner and configured claims admins. The contract itself only permits the owner to approve or revoke admins; configured non-owner calls still fail. These transactions do not change environment admin lists or transfer ownership.",
-        "Launch claim pages can include mint stats and subscription airdrop sections when configured.",
-        "Default launch windows use Europe/Athens with daylight saving: Phase 0 17:40–18:20, Phase 1 18:30–18:50, Phase 2 19:00–19:20, public 19:20–17:00 the next day. Phase 0 allocations precede 17:40; Phase 1 subscribers run in 18:20–18:30; Phase 2 and public subscribers share 18:50–19:00. Windows remain editable, and the Phase 2 tab groups both subscriber lists."
+        "Craft Launch queues initialization immediately after publication and completed EMMA processing. Republished metadata uses Update Claim. Launch shows durable progress and transaction links; manual controls acquire a backend lease and register confirmed transaction hashes for allocation reconciliation.",
+        "Default launch windows use Europe/Athens with daylight saving: Phase 0 17:40–18:20, Phase 1 18:30–18:50, Phase 2 19:00–19:20, public 19:20–17:00 the next day. Phase 0 allocations precede 17:40; Phase 1 subscribers run in 18:20–18:30; Phase 2 and public subscribers share 18:50–19:00. Manual windows remain editable; the automated plan derives fixed calendar windows and the Phase 2 tab groups both subscriber lists."
       ],
       "canonical_path": "/drop-forge",
       "related_paths": ["/drop-forge/craft", "/drop-forge/launch"],
@@ -7873,6 +7873,7 @@
         "tdh"
       ],
       "facts": [
+        "Process and Finalize runs one durable background operation across ordered subscription phases and finalization. Refresh restores status; completed subscription lists are read-only downloads. Correct failures before retrying and reset stale input versions explicitly.",
         "EMMA is the Editor for Managing Multiphase Allowlists and the first reference implementation of Janus.",
         "Opening /emma while signed in goes directly to /emma/plans, including with a restored session and no live wallet connection. A connected wallet alone is not a signed-in session.",
         "Signed-out users at /emma see wallet guidance and a Connect wallet or Sign in action. Opening a plan while signed out preserves that plan destination through sign-in.",
@@ -8130,8 +8131,8 @@
         "Configured claims admins, creator owner, and approved on-chain admins can use Launch completion tracking. The mainnet API checks on-chain-only access fresh for each request and fails closed on RPC errors. Sepolia action tracking remains unsupported.",
         "The signing wallet pays operation gas. Admin approval does not redirect mint revenue. Pay Artist is a direct ETH transfer from the signing wallet's balance plus gas, not a withdrawal from the mint-income wallet or contract.",
         "If the authorized wallet is disconnected, a launch on-chain action opens wallet connection and continues after connection succeeds when its transaction details are unchanged; refreshed details cancel the pending action so the user can review and retry.",
-        "Launch claim pages can include mint stats and subscription airdrop sections when configured.",
-        "Default launch windows use Europe/Athens with daylight saving: Phase 0 17:40–18:20, Phase 1 18:30–18:50, Phase 2 19:00–19:20, public 19:20–17:00 the next day. Phase 0 allocations precede 17:40; Phase 1 subscribers run in 18:20–18:30; Phase 2 and public subscribers share 18:50–19:00. Windows remain editable, and the Phase 2 tab groups both subscriber lists."
+        "Craft Launch queues initialization immediately after publication and completed EMMA processing. Republished metadata uses Update Claim. Launch shows durable progress and transaction links; manual controls acquire a backend lease and register confirmed transaction hashes for allocation reconciliation.",
+        "Default launch windows use Europe/Athens with daylight saving: Phase 0 17:40–18:20, Phase 1 18:30–18:50, Phase 2 19:00–19:20, public 19:20–17:00 the next day. Phase 0 allocations precede 17:40; Phase 1 subscribers run in 18:20–18:30; Phase 2 and public subscribers share 18:50–19:00. Manual windows remain editable; the automated plan derives fixed calendar windows and the Phase 2 tab groups both subscriber lists."
       ],
       "canonical_path": "/drop-forge/launch",
       "related_paths": ["/drop-forge", "/drop-forge/craft"],

@@ -1,15 +1,11 @@
-> Backend implementation is now in the companion PR. This frontend PR also
-> synchronizes its API models and recognizes the `@dropforgers6529` alert token.
-> Launch controls and EMMA job adoption remain requirements only.
-
 # Drop Forge Auto Launch — Frontend Requirements Analysis
 
-Status: requirements analysis plus backend API contract synchronization, 2026-10-09.
-Generated models and the existing mention-rendering helpers recognize the new
-backend contract and alert token. Launch controls, routes, and EMMA buttons remain
-unchanged; their adoption requirements are tracked below.
-
-Companion: [backend requirements PR #2143](https://github.com/6529-Collections/6529seize-backend/pull/2143).
+Status: original requirements retained as design context. The companion backend
+and this frontend now implement EMMA Process and Finalize, Craft Launch/Update
+Claim, coordinated manual controls and the @dropforgers6529 group mention.
+The implemented workflow supersedes earlier configuration/arm-time proposals.
+No deployment is included. Current user behavior is described in the
+[Craft-to-Launch flow](../../docs/drop-forge/flow-drop-forge-craft-to-launch.md).
 
 ## Purpose and confirmed scope
 
@@ -193,3 +189,11 @@ they are deployment inputs, not reasons to hardcode values in the UI.
 No frontend deployment is required by this documentation PR. Future API and
 mention contract changes must be coordinated with backend before dependent UI
 rollout. No desktop/Electron changes are in this scope.
+
+## Implemented workflow
+
+The final workflow uses one EMMA Process and Finalize job and read-only completed
+lists, Craft Launch with immediate initialization, metadata-only Update Claim,
+and coordinated manual transaction evidence. There is no per-drop configuration
+or arm-time picker. See the updated Craft-to-Launch flow for current behavior.
+Workers remain disabled by default and no deployment is included.

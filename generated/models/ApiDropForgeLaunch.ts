@@ -16,6 +16,8 @@ import { ApiDropForgePhase } from '../models/ApiDropForgePhase';
 import { HttpFile } from '../http/http';
 
 export class ApiDropForgeLaunch {
+    'metadata_location'?: string;
+    'manual_pending'?: boolean;
     'id': string;
     'revision': number;
     'state': ApiDropForgeLaunchStateEnum;
@@ -35,6 +37,18 @@ export class ApiDropForgeLaunch {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "metadata_location",
+            "baseName": "metadata_location",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "manual_pending",
+            "baseName": "manual_pending",
+            "type": "boolean",
+            "format": ""
+        },
         {
             "name": "id",
             "baseName": "id",

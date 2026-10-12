@@ -32,6 +32,7 @@ import {
   getGithubUploadTooltip,
   SubscriptionFooterMain,
 } from "./ReviewDistributionPlanTableSubscriptionFooterMain";
+import ProcessAndFinalize from "../ProcessAndFinalize";
 import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription.utils";
 
 function getErrorMessage(error: unknown): string {
@@ -45,7 +46,7 @@ function getErrorMessage(error: unknown): string {
 }
 
 export function ReviewDistributionPlanTableSubscriptionFooter() {
-  const { distributionPlan, confirmedTokenId, setConfirmedTokenId } =
+  const { distributionPlan, phases, confirmedTokenId, setConfirmedTokenId } =
     useContext(DistributionPlanToolContext);
   const { connectedProfile, setToast } = useContext(AuthContext);
   const { seizeSettings } = useSeizeSettings();
@@ -552,6 +553,23 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       onShowViewPhotos={() => handleShowViewPhotos(contract, confirmedTokenId)}
       onDownloadAirdrops={(phase) =>
         handleDownloadAirdrops(contract, confirmedTokenId, phase)
+      }
+      processingControl={
+        <ProcessAndFinalize
+          contract={contract}
+          claim={Number(confirmedTokenId)}
+          plan={distributionPlan?.id ?? ""}
+          phaseIds={[0, 1, 2].flatMap((index) => {
+            const phase = phases.find(
+              (it) =>
+                it.name.replaceAll(/\s/g, "").toLowerCase() === `phase${index}`
+            );
+            return phase ? [phase.id] : [];
+          })}
+          onCompleted={() => {
+            void refreshOverview(contract, confirmedTokenId);
+          }}
+        />
       }
       onFinalize={() => finalizeDistribution(contract, confirmedTokenId)}
       onUploadToGithub={() => uploadToGithub(contract, confirmedTokenId)}

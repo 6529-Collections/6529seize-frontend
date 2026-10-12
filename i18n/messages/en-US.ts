@@ -2907,6 +2907,38 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  "dropForge.actionDone": "Completed",
+  "dropForge.actionFailed": "Failed",
+  "dropForge.actionSubmitted": "Submitted",
+  "dropForge.actionPending": "Pending",
+  "dropForge.manualHash": "Manual transaction hash",
+  "dropForge.recordTransaction": "Record transaction",
+  "dropForge.cancelManual": "Cancel unsubmitted manual operation",
+  "dropForge.resume": "Resume automatic execution",
+  "dropForge.pause": "Pause automatic execution",
+  "dropForge.inputsChanged":
+    "Inputs changed. Reset the distribution before processing again.",
+  "dropForge.launch": "Launch",
+  "dropForge.update": "Update Claim",
+  "dropForge.initializing": "Initializing…",
+  "dropForge.updating": "Updating…",
+  "dropForge.launched": "Launched. Phase operations will run automatically.",
+  "dropForge.manualPending": "Manual transaction in progress.",
+  "dropForge.publishFirst": "Save and publish Craft changes before continuing.",
+  "dropForge.retry": "Retry",
+  "dropForge.processing": "Processing and finalizing…",
+  "dropForge.process": "Process and Finalize",
+  "dropForge.completed": "Completed — lists are ready to download.",
+  "dropForge.inputsMissing":
+    "Complete Phase 0, Phase 1 and Phase 2 in EMMA first.",
+  "dropForge.download": "Download lists",
+  "dropForge.downloading": "Downloading…",
+  "dropForge.pendingLists": "Process and finalize to make lists available.",
+  "dropForge.syncCurrent": "Published metadata is synchronized.",
+  "dropForge.automation": "Automatic launch progress",
+  "dropForge.initialized": "Initialized",
+  "dropForge.transaction": "View transaction",
+
   "header.menu.open": "Open menu",
   "header.menu.close": "Close menu",
   "header.navigation.loading": "Loading navigation…",

@@ -1,5 +1,5 @@
 "use client";
-
+import { ApiDropForgeJobStatusEnum as JobStatus } from "@/generated/models/ApiDropForgeJob";
 import { useContext, useState } from "react";
 import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { AuthContext } from "@/components/auth/Auth";
@@ -7,171 +7,106 @@ import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoade
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import { useDropForgeProcess } from "@/hooks/useDropForgeProcess";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { commonApiFetch } from "@/services/api/common-api";
+import { forgeList } from "@/services/api/drop-forge-api";
 import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
 import {
   ReviewDistributionPlanTableItemType,
   type ReviewDistributionPlanTableItem,
 } from "./ReviewDistributionPlanTable.types";
 import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription.utils";
-
-interface WalletResult {
-  wallet: string;
-  amount: number;
-}
-
-interface SubscriptionResult {
-  airdrops: WalletResult[];
-  airdrops_unconsolidated: WalletResult[];
-  allowlists: WalletResult[];
-}
-
-export function SubscriptionLinks(
-  props: Readonly<{
-    plan: AllowlistDescription;
-    phase: ReviewDistributionPlanTableItem;
-  }>
-) {
+export function SubscriptionLinks({
+  plan,
+  phase,
+}: Readonly<{
+  plan: AllowlistDescription;
+  phase: ReviewDistributionPlanTableItem;
+}>) {
   const { connectedProfile, setToast } = useContext(AuthContext);
   const { confirmedTokenId } = useContext(DistributionPlanToolContext);
   const { seizeSettings } = useSeizeSettings();
-
+  const locale = useBrowserLocale();
+  const operation = useDropForgeProcess(
+    MEMES_CONTRACT,
+    Number(confirmedTokenId),
+    plan.id
+  );
   const [downloading, setDownloading] = useState(false);
-
   if (
     !isSubscriptionsAdmin(
       connectedProfile,
       seizeSettings.distribution_admin_wallets ?? []
     ) ||
-    props.phase.type !== ReviewDistributionPlanTableItemType.PHASE ||
+    phase.type !== ReviewDistributionPlanTableItemType.PHASE ||
     !confirmedTokenId
-  ) {
-    return <></>;
-  }
-
-  const isPublic = props.phase.phaseId === PUBLIC_SUBSCRIPTIONS_PHASE_ID;
-  const contract = MEMES_CONTRACT;
-
-  const handleDownload = async () => {
+  )
+    return null;
+  const isPublic = phase.phaseId === PUBLIC_SUBSCRIPTIONS_PHASE_ID;
+  const completed = operation.data?.status === JobStatus.Completed;
+  async function download() {
+    const job = operation.data;
+    if (job?.status !== JobStatus.Completed || downloading) return;
     setDownloading(true);
     try {
-      const downloadResponse = await download(
-        contract,
-        confirmedTokenId,
-        props.plan.id,
-        isPublic ? "public" : props.phase.id,
-        isPublic ? "public" : props.phase.name
-      );
-      setToast({
-        type: downloadResponse.success ? "success" : "error",
-        title: downloadResponse.success
-          ? "Download ready."
-          : "Couldn't download subscriptions.",
-        description: downloadResponse.success
-          ? downloadResponse.message
-          : "Please try again.",
-        details: downloadResponse.success
-          ? undefined
-          : downloadResponse.message,
-      });
+      const lists: Array<
+        "airdrops" | "airdrops_unconsolidated" | "allowlists"
+      > = isPublic
+        ? ["airdrops"]
+        : ["airdrops", "airdrops_unconsolidated", "allowlists"];
+      for (const list of lists) {
+        const rows = await forgeList(
+          job.id,
+          isPublic ? "public" : phase.id,
+          list
+        );
+        downloadCsv(phase.name, list, rows);
+      }
     } catch (error) {
-      console.error("Download failed", error);
       setToast({
         type: "error",
-        title: "Couldn't download subscriptions.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
+        message:
+          getToastErrorDetails(error) ?? "Unable to download completed lists",
       });
     } finally {
       setDownloading(false);
     }
-  };
-
+  }
   return (
     <button
-      onClick={handleDownload}
-      disabled={downloading}
       type="button"
-      className="tw-group tw-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-blue-500 tw-px-3 tw-text-xs tw-font-medium tw-text-white tw-ring-1 tw-ring-inset tw-ring-iron-500/50 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-blue-500/50"
+      disabled={!completed || downloading}
+      onClick={() => {
+        void download();
+      }}
+      title={!completed ? t(locale, "dropForge.pendingLists") : undefined}
+      aria-busy={downloading}
+      className="tw-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-3 tw-text-xs tw-font-medium tw-text-white disabled:tw-opacity-50"
     >
-      {downloading ? (
-        <span className="tw-flex tw-items-center tw-gap-2">
-          <CircleLoader />
-          <span>Downloading</span>
-        </span>
-      ) : (
-        <>{isPublic ? "Public Subscriptions" : "Subscription Lists"}</>
-      )}
+      {downloading && <CircleLoader />}
+      {t(locale, downloading ? "dropForge.downloading" : "dropForge.download")}
     </button>
   );
 }
-
-const download = async (
-  contract: string,
-  tokenId: string,
-  planId: string,
-  phaseId: string,
-  phaseName: string
-) => {
-  return await commonApiFetch<SubscriptionResult>({
-    endpoint: `subscriptions/allowlists/${contract}/${tokenId}/${planId}/${phaseId}`,
-  })
-    .then((response) => {
-      processResults(phaseName, response);
-      return {
-        success: true,
-        message: "Subscription lists downloaded.",
-      };
-    })
-    .catch((error) => {
-      return {
-        success: false,
-        message: getToastErrorDetails(error) ?? "Download failed.",
-      };
-    });
-};
-
-const processResults = (phaseName: string, results: SubscriptionResult) => {
-  if (phaseName === "public") {
-    downloadCSV(phaseName, results.airdrops, "airdrops");
-  } else {
-    downloadCSV(phaseName, results.airdrops, "airdrops");
-    downloadCSV(
-      phaseName,
-      results.airdrops_unconsolidated,
-      "airdrops_unconsolidated"
-    );
-    downloadCSV(phaseName, results.allowlists, "allowlists");
-  }
-};
-
-function convertToCSV(arr: WalletResult[]): string {
-  const headers = "address,value";
-
-  if (arr.length === 0) {
-    return headers;
-  }
-  const rows = arr.map(({ wallet, amount }) => `${wallet},${amount}`);
-  return [headers, ...rows].join("\n");
-}
-
-function downloadCSV(
-  phaseName: string,
-  results: WalletResult[],
-  filename: string
+export function downloadCsv(
+  phase: string,
+  list: string,
+  rows: Array<{ wallet: string; amount: number }>
 ) {
-  const csv = convertToCSV(results);
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const link = document.createElement("a");
-  const url = URL.createObjectURL(blob);
-  link.href = url;
-  link.setAttribute(
-    "download",
-    `${phaseName.replaceAll(" ", "_").toLowerCase()}_${filename}.csv`
+  const csv = [
+    "address,value",
+    ...rows.map((row) => `${row.wallet},${row.amount}`),
+  ].join("\n");
+  const url = URL.createObjectURL(
+    new Blob([csv], { type: "text/csv;charset=utf-8;" })
   );
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${phase.replaceAll(" ", "_").toLowerCase()}_${list}.csv`;
   document.body.appendChild(link);
   link.click();
-  document.body.removeChild(link);
+  link.remove();
   URL.revokeObjectURL(url);
 }
