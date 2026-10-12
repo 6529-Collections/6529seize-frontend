@@ -1,0 +1,267 @@
+import { asE2eeApiError } from "../api";
+import type { ApiE2eeDevice, ApiE2eeKeyPackageStatus } from "../api-types";
+import { digestBytes, revokeDigest } from "../digests";
+import {
+  buildGrant,
+  buildGrantTypedData,
+  computeGrantId,
+  credentialIdentity,
+} from "../grant";
+import { MlsClient } from "../mls-adapter";
+import type { StoredDevice } from "../records";
+import type { E2eeDeviceInfo } from "../types";
+import { loadDefaultWasm } from "../wasm-loader";
+import { checkpoint, DAY_MS, requireDevice, requireMls, type EngineContext } from "./context";
+import { E2eeError } from "./errors";
+
+/** Contract 2 + 8.8: one wallet prompt per device; KeyPackage pool upkeep. */
+
+export const ONE_TIME_POOL = 30;
+export const ONE_TIME_REFILL_BELOW = 10;
+export const MAX_ONE_TIME = 100;
+export const ONE_TIME_LIFETIME_S = 30 * 86_400;
+export const LAST_RESORT_LIFETIME_S = 90 * 86_400;
+export const LAST_RESORT_ROTATE_MS = 30 * DAY_MS;
+/** Reuse a stored-but-unregistered grant only while it has this much left. */
+const MIN_REUSABLE_GRANT_MS = 7 * DAY_MS;
+
+export async function ensureWasm(ctx: EngineContext): Promise<void> {
+  if (ctx.wasm) {
+    return;
+  }
+  ctx.wasm = await (ctx.options.loadWasm ?? loadDefaultWasm)();
+}
+
+function reusablePending(ctx: EngineContext, device: StoredDevice | null): boolean {
+  return (
+    device !== null &&
+    !device.registered &&
+    device.wallet.toLowerCase() === ctx.options.wallet.toLowerCase() &&
+    device.grant.origin === ctx.options.origin &&
+    device.grant.expires_at * 1000 - ctx.now() > MIN_REUSABLE_GRANT_MS
+  );
+}
+
+/** Creates the device key and obtains the single wallet signature. */
+async function createDevice(ctx: EngineContext): Promise<StoredDevice> {
+  if (!ctx.wasm) {
+    throw new E2eeError("E2EE_NOT_READY");
+  }
+  const mls = MlsClient.create(ctx.wasm);
+  const deviceKey = mls.deviceKey();
+  const grant = buildGrant({
+    wallet: ctx.options.wallet,
+    deviceKey,
+    issuedAtSeconds: Math.floor(ctx.now() / 1000),
+    origin: ctx.options.origin,
+  });
+  let signature: string;
+  try {
+    signature = await ctx.options.signTypedData(buildGrantTypedData(grant));
+  } catch {
+    mls.dispose();
+    throw new E2eeError("E2EE_SIGNATURE_REJECTED");
+  }
+  ctx.mls?.dispose();
+  ctx.mls = mls;
+  const device: StoredDevice = {
+    profileId: ctx.profileId,
+    deviceKey,
+    wallet: grant.wallet,
+    grant,
+    grantId: computeGrantId(grant),
+    walletSignature: signature.toLowerCase(),
+    registered: false,
+    provisioned: false,
+    label: "Device",
+    platform: ctx.options.platform,
+    createdAt: ctx.now(),
+    lastResortAt: null,
+  };
+  ctx.device = device;
+  await checkpoint(ctx, { device });
+  return device;
+}
+
+async function uploadKeyPackages(
+  ctx: EngineContext,
+  count: number,
+  lastResort: boolean
+): Promise<ApiE2eeKeyPackageStatus> {
+  const mls = requireMls(ctx);
+  const device = requireDevice(ctx);
+  const packages = mls.createKeyPackages(
+    count,
+    lastResort,
+    lastResort ? LAST_RESORT_LIFETIME_S : ONE_TIME_LIFETIME_S
+  );
+  // Persist the private halves BEFORE the public halves leave the device.
+  await checkpoint(ctx);
+  const status = await ctx.api.uploadKeyPackages(device.deviceKey, {
+    key_packages: packages.map((item) => ({
+      data: item.data,
+      last_resort: lastResort,
+      expires_at: item.expires_at,
+    })),
+  });
+  if (lastResort) {
+    device.lastResortAt = ctx.now();
+    await checkpoint(ctx, { device, skipWasm: true });
+  }
+  return status;
+}
+
+/** Refills one-time KeyPackages below 10 and rotates the last-resort one. */
+export async function ensureKeyPackages(
+  ctx: EngineContext,
+  status: ApiE2eeKeyPackageStatus | null
+): Promise<void> {
+  const device = requireDevice(ctx);
+  const available = status?.one_time_available ?? 0;
+  if (available < ONE_TIME_REFILL_BELOW) {
+    const count = Math.min(ONE_TIME_POOL - available, MAX_ONE_TIME - available);
+    if (count > 0) {
+      await uploadKeyPackages(ctx, count, false);
+    }
+  }
+  const lastResortMissing =
+    status?.last_resort_expires_at === null || status === null;
+  const lastResortStale =
+    device.lastResortAt === null || ctx.now() - device.lastResortAt >= LAST_RESORT_ROTATE_MS;
+  if (lastResortMissing || lastResortStale) {
+    await uploadKeyPackages(ctx, 1, true);
+  }
+}
+
+async function register(ctx: EngineContext, device: StoredDevice): Promise<boolean> {
+  try {
+    const record = await ctx.api.registerDevice({
+      grant: device.grant,
+      wallet_signature: device.walletSignature,
+      platform: device.platform,
+    });
+    ctx.directory.seed([record]);
+  } catch (error) {
+    if (asE2eeApiError(error)?.code === "E2EE_DEVICE_LIMIT") {
+      ctx.store.status = "device-limit";
+      ctx.store.touch();
+      return false;
+    }
+    throw error;
+  }
+  device.registered = true;
+  await checkpoint(ctx, { device, skipWasm: true });
+  return true;
+}
+
+async function provision(ctx: EngineContext, device: StoredDevice): Promise<void> {
+  const mls = requireMls(ctx);
+  if (mls.credentialIdentity() === null) {
+    mls.setCredential(credentialIdentity(device.wallet, device.grantId));
+    await checkpoint(ctx);
+  }
+  await ensureKeyPackages(ctx, null);
+  device.provisioned = true;
+  await checkpoint(ctx, { device, skipWasm: true });
+}
+
+/**
+ * Enrollment: device key in WASM, ONE signTypedData, register, credential,
+ * KeyPackages. Resumable: a stored grant is reused instead of re-prompting.
+ * Returns true when the device is ready. Runs inside the queue.
+ */
+export async function enrollDevice(ctx: EngineContext): Promise<boolean> {
+  await ensureWasm(ctx);
+  const stored = await ctx.storage.getDevice(ctx.profileId);
+  let device: StoredDevice;
+  if (stored && (stored.registered || reusablePending(ctx, stored))) {
+    device = stored;
+    if (!ctx.mls) {
+      const state = await ctx.storage.getWasmState(ctx.profileId);
+      if (!state || !ctx.wasm) {
+        throw new E2eeError("E2EE_NOT_READY", "missing device state");
+      }
+      ctx.mls = MlsClient.load(ctx.wasm, state);
+      ctx.lastState = state;
+    }
+    ctx.device = device;
+  } else {
+    device = await createDevice(ctx);
+  }
+  if (!device.registered && !(await register(ctx, device))) {
+    return false;
+  }
+  if (!device.provisioned) {
+    await provision(ctx, device);
+  }
+  return true;
+}
+
+export function toDeviceInfo(
+  ctx: EngineContext,
+  record: ApiE2eeDevice,
+  verified: boolean
+): E2eeDeviceInfo {
+  const own = record.device_key.toLowerCase() === ctx.device?.deviceKey;
+  const platform =
+    record.platform === "desktop" || record.platform === "phone" ? record.platform : "web";
+  return {
+    deviceKey: record.device_key.toLowerCase(),
+    label: own && ctx.device ? ctx.device.label : record.label,
+    platform,
+    createdAt: record.created_at,
+    lastSeenAt: record.last_seen_at,
+    expiresAt: record.grant.expires_at * 1000,
+    revokedAt: record.revoked_at,
+    isThisDevice: own,
+    verified,
+  };
+}
+
+/** Refreshes the device list and KeyPackage pool from GET /e2ee/me. */
+export async function refreshMe(
+  ctx: EngineContext
+): Promise<{ ownRevoked: boolean }> {
+  const me = await ctx.api.getMe();
+  ctx.lastMeAt = ctx.now();
+  ctx.directory.seed(me.devices);
+  const infos: E2eeDeviceInfo[] = [];
+  for (const record of me.devices) {
+    const verification = await ctx.directory.verify(record);
+    infos.push(toDeviceInfo(ctx, record, verification.verified));
+  }
+  ctx.store.devices = infos;
+  const ownKey = ctx.device?.deviceKey;
+  const own = me.devices.find((record) => record.device_key.toLowerCase() === ownKey);
+  ctx.store.thisDevice = infos.find((info) => info.isThisDevice) ?? null;
+  ctx.store.touch();
+  if (ctx.device?.registered && (!own || own.revoked_at !== null)) {
+    return { ownRevoked: true };
+  }
+  if (ctx.device?.provisioned) {
+    const status = me.key_packages.find(
+      (item) => item.device_key.toLowerCase() === ownKey
+    );
+    await ctx.queue.run(() => ensureKeyPackages(ctx, status ?? null));
+  }
+  return { ownRevoked: false };
+}
+
+/** Signs and submits a revocation (2.4) with this device's MLS key. */
+export async function submitRevocation(
+  ctx: EngineContext,
+  target: string
+): Promise<ApiE2eeDevice> {
+  const mls = requireMls(ctx);
+  const device = requireDevice(ctx);
+  const revokedAt = Math.floor(ctx.now() / 1000);
+  const digest = revokeDigest(target, device.deviceKey, revokedAt);
+  const signature = mls.signDigest(digestBytes(digest));
+  const record = await ctx.api.revokeDevice(target, {
+    revoker_device_key: device.deviceKey,
+    revoked_at: revokedAt,
+    signature,
+  });
+  ctx.directory.seed([record]);
+  return record;
+}

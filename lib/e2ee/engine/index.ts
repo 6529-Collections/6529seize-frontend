@@ -1,0 +1,527 @@
+import { downloadMedia } from "../media";
+import { MlsClient } from "../mls-adapter";
+import { getDefaultE2eeStorage, isIndexedDbAvailable } from "../storage";
+import type {
+  E2eeEngineExt,
+  E2eeEngineOptions,
+  E2eeEngineStatus,
+  E2eeMessage,
+} from "../types";
+import {
+  checkpoint,
+  requireGroup,
+  requireMls,
+  type EngineContext,
+} from "./context";
+import { EngineController } from "./controller";
+import { DeviceDirectory } from "./directory";
+import {
+  enrollDevice,
+  ensureWasm,
+  refreshMe,
+  submitRevocation,
+} from "./enroll";
+import { E2eeError, errorMessage } from "./errors";
+import { newRuntime } from "./groups";
+import {
+  addMembers,
+  checkEligibility,
+  createConversation,
+  findDm,
+  leave,
+  removeMember,
+  rename,
+  restartTargets,
+  setAdmin,
+} from "./membership";
+import { searchMessages } from "./messages";
+import { createDefaultScheduler, SerialQueue, TaskTracker, TimerSet } from "./runtime";
+import { queueMessage, queueTargeted } from "./send";
+import { EngineStore, toE2eeMessage } from "./store";
+
+/** Contract section 12 engine: framework-agnostic, one instance per profile. */
+
+const OPEN_CONVERSATION_MS = 60_000;
+
+function supported(options: E2eeEngineOptions): boolean {
+  const hasWasm = typeof WebAssembly === "object" || options.loadWasm !== undefined;
+  const hasCrypto = typeof globalThis.crypto === "object" && "subtle" in globalThis.crypto;
+  return hasWasm && hasCrypto && (options.storage !== undefined || isIndexedDbAvailable());
+}
+
+function createContext(options: E2eeEngineOptions): EngineContext {
+  const now = options.now ?? (() => Date.now());
+  const scheduler = options.scheduler ?? createDefaultScheduler();
+  const holder: { ctx: EngineContext | null } = { ctx: null };
+  const directory = new DeviceDirectory({
+    api: options.api,
+    now,
+    verifyContractSignature: options.verifyContractSignature,
+    verifyEd25519: (pub, digest, sig) => holder.ctx?.mls?.verifyEd25519(pub, digest, sig) ?? false,
+  });
+  const ctx: EngineContext = {
+    options,
+    api: options.api,
+    storage: options.storage ?? getDefaultE2eeStorage(),
+    profileId: options.profileId,
+    now,
+    random: options.random ?? Math.random,
+    scheduler,
+    queue: new SerialQueue(),
+    tasks: new TaskTracker(),
+    timers: new TimerSet(scheduler),
+    store: new EngineStore(options.profileId, directory),
+    directory,
+    wasm: null,
+    mls: null,
+    device: null,
+    lastState: null,
+    disposed: false,
+    lastMeAt: 0,
+    lastWakeAt: 0,
+    openConversation: null,
+    openUntil: 0,
+  };
+  holder.ctx = ctx;
+  return ctx;
+}
+
+function setStatus(ctx: EngineContext, status: E2eeEngineStatus, error: string | null = null): void {
+  ctx.store.status = status;
+  ctx.store.error = error;
+  ctx.store.touch();
+}
+
+async function loadGroups(ctx: EngineContext): Promise<void> {
+  const groups = await ctx.storage.listGroups(ctx.profileId);
+  const outbox = await ctx.storage.listOutbox(ctx.profileId);
+  for (const record of groups) {
+    const runtime = newRuntime(record);
+    for (const message of await ctx.storage.listMessages(ctx.profileId, record.g)) {
+      runtime.messages.set(message.id, message);
+    }
+    for (const item of outbox.filter((entry) => entry.g === record.g)) {
+      runtime.outbox.set(item.id, item);
+    }
+    ctx.store.groups.set(record.g, runtime);
+  }
+  const names = new Set(groups.flatMap((record) => record.members.map((m) => m.profileId)));
+  await resolveProfiles(ctx, [...names].filter((id): id is string => id !== null));
+}
+
+async function resolveProfiles(ctx: EngineContext, profileIds: string[]): Promise<void> {
+  const missing = profileIds.filter((id) => !ctx.store.profiles.has(id));
+  if (missing.length === 0) {
+    return;
+  }
+  try {
+    const resolved = await ctx.options.resolveProfiles(missing);
+    for (const [id, info] of Object.entries(resolved)) {
+      ctx.store.profiles.set(id, { handle: info.handle, pfp: info.pfp, wallets: [...info.wallets] });
+    }
+    ctx.store.touch();
+  } catch {
+    // Profiles are cosmetic; retried on the next change.
+  }
+}
+
+/** Loads an enrolled device from storage; false when enrollment is needed. */
+async function restore(ctx: EngineContext): Promise<boolean> {
+  const device = await ctx.storage.getDevice(ctx.profileId);
+  if (!device?.registered || !device.provisioned) {
+    return false;
+  }
+  const state = await ctx.storage.getWasmState(ctx.profileId);
+  if (!state) {
+    return false;
+  }
+  await ensureWasm(ctx);
+  if (!ctx.wasm) {
+    return false;
+  }
+  const mls = MlsClient.load(ctx.wasm, state);
+  if (mls.deviceKey() !== device.deviceKey) {
+    mls.dispose();
+    throw new E2eeError("E2EE_DEVICE_MISMATCH");
+  }
+  ctx.mls = mls;
+  ctx.lastState = state;
+  ctx.device = device;
+  await loadGroups(ctx);
+  return true;
+}
+
+class E2eeEngineImpl implements E2eeEngineExt {
+  private readonly ctx: EngineContext;
+  private readonly controller: EngineController;
+
+  constructor(ctx: EngineContext) {
+    this.ctx = ctx;
+    this.controller = new EngineController(ctx, {
+      refreshMe: () => this.refreshMe(),
+      onOwnRevoked: () => this.wipe(),
+    });
+  }
+
+  async init(): Promise<void> {
+    if (!supported(this.ctx.options)) {
+      setStatus(this.ctx, "unsupported");
+      return;
+    }
+    try {
+      const restored = await restore(this.ctx);
+      if (!restored) {
+        setStatus(this.ctx, "needs-enrollment");
+        return;
+      }
+      setStatus(this.ctx, "ready");
+      this.start();
+    } catch (error) {
+      setStatus(this.ctx, "error", errorMessage(error));
+    }
+  }
+
+  private start(): void {
+    this.controller.startBackground();
+    this.background(async () => {
+      await this.refreshMe();
+      await this.controller.syncAll();
+    });
+  }
+
+  private background(task: () => Promise<void>): void {
+    const promise = task().catch((error: unknown) => {
+      if (!this.ctx.disposed) {
+        this.ctx.store.error = errorMessage(error);
+        this.ctx.store.touch();
+      }
+    });
+    this.ctx.tasks.track(promise);
+  }
+
+  private async refreshMe(): Promise<void> {
+    if (!this.ctx.device?.registered || this.ctx.disposed) {
+      return;
+    }
+    const result = await refreshMe(this.ctx);
+    if (result.ownRevoked) {
+      await this.wipe();
+    }
+  }
+
+  /** This device was revoked: local state is useless; back to enrollment. */
+  private async wipe(): Promise<void> {
+    await this.ctx.queue.run(async () => {
+      this.ctx.timers.dispose();
+      this.ctx.mls?.dispose();
+      this.ctx.mls = null;
+      this.ctx.device = null;
+      this.ctx.lastState = null;
+      this.ctx.store.groups.clear();
+      this.ctx.store.thisDevice = null;
+      await this.ctx.storage.clearProfile(this.ctx.profileId);
+      setStatus(this.ctx, "needs-enrollment");
+    });
+  }
+
+  private onDelayed = (g: string): void => {
+    this.ctx.timers.arm(`retry:${g}`, 5_000, () => {
+      this.background(() => this.controller.syncGroup(g));
+    });
+  };
+
+  private delayedFor(g: string): () => void {
+    return () => {
+      this.onDelayed(g);
+    };
+  }
+
+  // -- state ------------------------------------------------------------------
+
+  getStatus = () => this.ctx.store.status;
+  getError = () => this.ctx.store.error;
+  getThisDevice = () => this.ctx.store.thisDevice;
+  getDevices = () => this.ctx.store.devices;
+  getConversations = () => this.ctx.store.getConversations();
+  getConversation = (g: string) => this.ctx.store.getConversation(g.toLowerCase());
+  getMessages = (g: string) => this.ctx.store.getMessages(g.toLowerCase());
+  subscribe = (listener: () => void) => this.ctx.store.subscribe(listener);
+
+  // -- lifecycle --------------------------------------------------------------
+
+  async enroll(): Promise<void> {
+    const status = this.ctx.store.status;
+    if (status === "ready" || status === "enrolling" || status === "unsupported") {
+      return;
+    }
+    setStatus(this.ctx, "enrolling");
+    try {
+      const ready = await this.ctx.queue.run(() => enrollDevice(this.ctx));
+      if (!ready) {
+        return; // device-limit
+      }
+      await loadGroups(this.ctx);
+      setStatus(this.ctx, "ready");
+      this.start();
+    } catch (error) {
+      const code = errorMessage(error);
+      setStatus(this.ctx, code === "E2EE_SIGNATURE_REJECTED" ? "needs-enrollment" : "error", code);
+      throw error;
+    }
+  }
+
+  async sync(): Promise<void> {
+    if (this.ctx.store.status !== "ready") {
+      return;
+    }
+    await this.controller.syncAll();
+  }
+
+  dispose(): void {
+    this.ctx.disposed = true;
+    this.controller.stopBackground();
+    this.ctx.timers.dispose();
+    void this.ctx.queue.drain().finally(() => {
+      this.ctx.mls?.dispose();
+      this.ctx.mls = null;
+    });
+  }
+
+  setOpenConversation(g: string | null): void {
+    this.ctx.openConversation = g?.toLowerCase() ?? null;
+    this.ctx.openUntil = g === null ? 0 : Number.MAX_SAFE_INTEGER;
+  }
+
+  async idle(): Promise<void> {
+    for (let round = 0; round < 50; round += 1) {
+      await this.ctx.tasks.drain();
+      await this.ctx.queue.drain();
+      if (this.ctx.tasks.size === 0 && this.ctx.queue.size === 0) {
+        return;
+      }
+    }
+  }
+
+  // -- conversations ------------------------------------------------------------
+
+  private requireReady(): void {
+    if (this.ctx.store.status !== "ready" || !this.ctx.mls) {
+      throw new E2eeError("E2EE_NOT_READY");
+    }
+  }
+
+  checkEligibility = async (profileIds: string[]) => {
+    this.requireReady();
+    return checkEligibility(this.ctx, profileIds);
+  };
+
+  async createConversation(input: {
+    profileIds: string[];
+    kind: "dm" | "group";
+    name?: string | null;
+  }): Promise<string> {
+    this.requireReady();
+    const g = await createConversation(this.ctx, input, this.onDelayed);
+    await resolveProfiles(this.ctx, input.profileIds);
+    return g;
+  }
+
+  findDm = (profileId: string) => findDm(this.ctx, profileId);
+
+  async send(
+    g: string,
+    input: { text: string; mentions?: string[]; reply?: string | null; files?: File[] }
+  ): Promise<void> {
+    this.requireReady();
+    await queueMessage(this.ctx, g.toLowerCase(), input);
+    await this.controller.flush(g.toLowerCase());
+  }
+
+  private ownMessage(g: string, id: string) {
+    const message = requireGroup(this.ctx, g).messages.get(id);
+    if (!message || message.kind !== "message") {
+      throw new E2eeError("E2EE_NO_MESSAGE");
+    }
+    return message;
+  }
+
+  async edit(g: string, id: string, text: string): Promise<void> {
+    this.requireReady();
+    const message = this.ownMessage(g, id);
+    if (message.senderProfileId !== this.ctx.profileId || message.deleted) {
+      throw new E2eeError("E2EE_NOT_SENDER");
+    }
+    await queueTargeted(this.ctx, g.toLowerCase(), (base) => ({
+      ...base,
+      t: "edit",
+      target: id,
+      text,
+      mentions: message.mentions,
+    }));
+    await this.controller.flush(g.toLowerCase());
+  }
+
+  async remove(g: string, id: string): Promise<void> {
+    this.requireReady();
+    const message = this.ownMessage(g, id);
+    if (message.senderProfileId !== this.ctx.profileId) {
+      throw new E2eeError("E2EE_NOT_SENDER");
+    }
+    await queueTargeted(this.ctx, g.toLowerCase(), (base) => ({ ...base, t: "del", target: id }));
+    await this.controller.flush(g.toLowerCase());
+  }
+
+  async react(g: string, id: string, reaction: string, on: boolean): Promise<void> {
+    this.requireReady();
+    this.ownMessage(g, id);
+    await queueTargeted(this.ctx, g.toLowerCase(), (base) => ({
+      ...base,
+      t: on ? "react" : "unreact",
+      target: id,
+      r: reaction,
+    }));
+    await this.controller.flush(g.toLowerCase());
+  }
+
+  markRead(g: string): void {
+    const runtime = this.ctx.store.groups.get(g.toLowerCase());
+    if (!runtime) {
+      return;
+    }
+    const latest = Math.max(0, ...[...runtime.messages.values()].map((m) => (m.pending ? 0 : m.seq)));
+    this.ctx.openConversation = runtime.record.g;
+    this.ctx.openUntil = Math.max(this.ctx.openUntil, this.ctx.now() + OPEN_CONVERSATION_MS);
+    if (latest <= runtime.record.readSeq) {
+      return;
+    }
+    runtime.record.readSeq = latest;
+    this.ctx.store.touch(runtime.record.g);
+    this.background(() =>
+      this.ctx.queue.run(() => checkpoint(this.ctx, { groups: [runtime], skipWasm: true }))
+    );
+  }
+
+  async rename(g: string, name: string): Promise<void> {
+    this.requireReady();
+    await rename(this.ctx, g.toLowerCase(), name, this.delayedFor(g.toLowerCase()));
+  }
+
+  async addMembers(g: string, profileIds: string[]) {
+    this.requireReady();
+    const result = await addMembers(this.ctx, g.toLowerCase(), profileIds, this.delayedFor(g.toLowerCase()));
+    await resolveProfiles(this.ctx, profileIds);
+    return result;
+  }
+
+  async removeMember(g: string, profileId: string): Promise<void> {
+    this.requireReady();
+    await removeMember(this.ctx, g.toLowerCase(), profileId, this.delayedFor(g.toLowerCase()));
+  }
+
+  async setAdmin(g: string, profileId: string, admin: boolean): Promise<void> {
+    this.requireReady();
+    await setAdmin(this.ctx, g.toLowerCase(), profileId, admin, this.delayedFor(g.toLowerCase()));
+  }
+
+  async leave(g: string): Promise<void> {
+    this.requireReady();
+    await leave(this.ctx, g.toLowerCase(), this.delayedFor(g.toLowerCase()));
+  }
+
+  async restart(g: string): Promise<string> {
+    this.requireReady();
+    const runtime = requireGroup(this.ctx, g);
+    return this.createConversation({
+      profileIds: restartTargets(this.ctx, runtime),
+      kind: runtime.record.metadata.kind,
+      name: runtime.record.metadata.name,
+    });
+  }
+
+  async report(g: string, id: string, reason: string, notes?: string): Promise<void> {
+    this.requireReady();
+    const message = this.ownMessage(g, id);
+    if (
+      message.body === null ||
+      message.sig === null ||
+      message.epoch === null ||
+      message.senderDeviceKey === null
+    ) {
+      throw new E2eeError("E2EE_REPORT_UNAVAILABLE");
+    }
+    await this.ctx.api.report({
+      group: g.toLowerCase(),
+      epoch: message.epoch,
+      body: message.body,
+      signature: message.sig,
+      sender_device_key: message.senderDeviceKey,
+      reporter_device_key: requireMls(this.ctx).deviceKey(),
+      reason,
+      ...(notes ? { notes: notes.slice(0, 1000) } : {}),
+    });
+  }
+
+  search(query: string, g?: string): Promise<E2eeMessage[]> {
+    const runtimes =
+      g === undefined
+        ? [...this.ctx.store.groups.values()]
+        : [requireGroup(this.ctx, g)];
+    return Promise.resolve(searchMessages(runtimes, query).map(toE2eeMessage));
+  }
+
+  async getAttachment(g: string, id: string, blob: string): Promise<Blob> {
+    this.requireReady();
+    const message = this.ownMessage(g, id);
+    const attachment = message.attachments.find(
+      (att) => att.blob.toLowerCase() === blob.toLowerCase()
+    );
+    if (!attachment) {
+      throw new E2eeError("E2EE_NO_ATTACHMENT");
+    }
+    const bytes = await downloadMedia({
+      api: this.ctx.api,
+      deviceKey: requireMls(this.ctx).deviceKey(),
+      attachment,
+    });
+    return new Blob([bytes.slice().buffer], { type: attachment.mime });
+  }
+
+  // -- devices ----------------------------------------------------------------
+
+  async revokeDevice(deviceKey: string): Promise<void> {
+    this.requireReady();
+    const target = deviceKey.toLowerCase();
+    await submitRevocation(this.ctx, target);
+    if (target === this.ctx.device?.deviceKey) {
+      await this.wipe();
+      return;
+    }
+    await this.refreshMe();
+    for (const g of this.controller.onDeviceEvent(true, this.ctx.profileId, target, false)) {
+      await this.controller.maintain(g);
+    }
+  }
+
+  async renameThisDevice(label: string): Promise<void> {
+    const device = this.ctx.device;
+    if (!device) {
+      throw new E2eeError("E2EE_NOT_READY");
+    }
+    device.label = label.trim().slice(0, 48) || "Device";
+    await this.ctx.queue.run(() => checkpoint(this.ctx, { device, skipWasm: true }));
+    if (this.ctx.store.thisDevice) {
+      this.ctx.store.thisDevice = { ...this.ctx.store.thisDevice, label: device.label };
+      this.ctx.store.devices = this.ctx.store.devices.map((info) =>
+        info.isThisDevice ? { ...info, label: device.label } : info
+      );
+    }
+    this.ctx.store.touch();
+  }
+}
+
+/** Creates the engine for one profile; resolves once local state is loaded. */
+export async function createE2eeEngine(options: E2eeEngineOptions): Promise<E2eeEngineExt> {
+  const engine = new E2eeEngineImpl(createContext(options));
+  await engine.init();
+  return engine;
+}
