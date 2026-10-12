@@ -346,18 +346,15 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
         getShortAddress={(wallet) => formatAddress(getAddress(wallet))}
       />
       <div className="tw-mt-6 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-6">
-        {validation.wallets.length === 4 && !policy && (
-          <div
-            role={policyLoading ? "status" : "alert"}
-            className="tw-mb-4 tw-text-sm tw-text-iron-300"
-          >
-            {t(
-              locale,
-              policyLoading
-                ? "delegation.consolidationBuilder.policy.loading"
-                : "delegation.consolidationBuilder.policy.unavailable"
-            )}
-            {!policyLoading && reloadPolicy && (
+        {validation.wallets.length === 4 && !policy && policyLoading && (
+          <output className="tw-mb-4 tw-block tw-text-sm tw-text-iron-300">
+            {t(locale, "delegation.consolidationBuilder.policy.loading")}
+          </output>
+        )}
+        {validation.wallets.length === 4 && !policy && !policyLoading && (
+          <div role="alert" className="tw-mb-4 tw-text-sm tw-text-iron-300">
+            {t(locale, "delegation.consolidationBuilder.policy.unavailable")}
+            {reloadPolicy && (
               <button
                 type="button"
                 className="tw-ml-2 tw-underline"

@@ -520,6 +520,31 @@ describe("ConsolidationBuilder", () => {
     expect(mockRefetchManagers).toHaveBeenCalled();
   });
 
+  it("announces the four-wallet activation date while it loads", () => {
+    mockPolicyState.policy = null;
+    mockPolicyState.isLoading = true;
+    renderBuilder();
+    addFourthWallet();
+
+    const status = screen.getByText("Loading the four-wallet activation date…");
+    expect(status.tagName).toBe("OUTPUT");
+    expect(screen.queryByRole("button", { name: "Try Again" })).toBeNull();
+  });
+
+  it("alerts and offers a retry when the activation date is unavailable", () => {
+    mockPolicyState.policy = null;
+    mockPolicyState.reload.mockResolvedValue(undefined);
+    renderBuilder();
+    addFourthWallet();
+
+    const alert = screen.getByText(
+      "Couldn’t load the four-wallet activation date. Four-wallet signing is unavailable; try again."
+    );
+    expect(alert).toHaveAttribute("role", "alert");
+    fireEvent.click(within(alert).getByRole("button", { name: "Try Again" }));
+    expect(mockPolicyState.reload).toHaveBeenCalledWith({ reset: true });
+  });
+
   it("holds every step of a four-wallet group until the fourth slot opens", () => {
     jest.spyOn(Date, "now").mockReturnValue(BEFORE_ACTIVATION_MS);
     renderBuilder();
