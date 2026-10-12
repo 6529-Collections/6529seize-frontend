@@ -9,6 +9,10 @@ import BlockPickerResult from "@/components/block-picker/result/BlockPickerResul
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import { publicEnv } from "@/config/env";
 import { useTitle } from "@/contexts/TitleContext";
+import { parseLocalDateTime } from "@/helpers/block-finder.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { useEffect, useState } from "react";
 
 interface PredictBlockNumberRequestApiModel {
@@ -57,9 +61,46 @@ const BlockPickerTimeWindowToMilliseconds = {
   [BlockPickerTimeWindow.TWO_DAYS]: 172800000,
 };
 
+class PredictionRequestError extends Error {
+  readonly reason: string | undefined;
+
+  constructor(reason: string | undefined) {
+    super(
+      reason
+        ? `Failed to predict block numbers: ${reason}`
+        : "Failed to predict block numbers"
+    );
+    this.name = "PredictionRequestError";
+    this.reason = reason;
+  }
+}
+
+async function readApiErrorReason(
+  response: Response
+): Promise<string | undefined> {
+  const errorResponse: unknown = await response.json().catch(() => null);
+  const message = (errorResponse as { message?: unknown } | null)?.message;
+  return typeof message === "string" && message.trim() !== ""
+    ? message
+    : undefined;
+}
+
+function getPredictionFailedMessage(
+  locale: SupportedLocale,
+  error: unknown
+): string {
+  if (error instanceof PredictionRequestError && error.reason) {
+    return t(locale, "tools.blockFinder.toast.predictFailedWithReason", {
+      reason: error.reason,
+    });
+  }
+  return t(locale, "tools.blockFinder.toast.predictFailed");
+}
+
 export default function BlockFinderClient() {
   const { setTitle } = useTitle();
   const { setToast } = useAuth();
+  const locale = useBrowserLocale();
 
   const [date, setDate] = useState<string>("");
   const [time, setTime] = useState<string>("");
@@ -99,13 +140,18 @@ export default function BlockFinderClient() {
       return;
     }
 
+    // The date and time inputs hold the user's LOCAL wall-clock time.
+    const startDate = parseLocalDateTime(date, time);
+    if (!startDate) {
+      setToast({
+        message: t(locale, "tools.blockFinder.toast.invalidDateTime"),
+        type: "error",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      const dateObj = new Date(date);
-      const [hours, minutes] = time.split(":");
-      const startDate = new Date(dateObj);
-      startDate.setHours(parseInt(hours!), parseInt(minutes!), 0, 0);
-
       const minTimestamp = startDate.getTime();
 
       let path;
@@ -144,12 +190,7 @@ export default function BlockFinderClient() {
       );
 
       if (!response.ok) {
-        let message = "Failed to predict block numbers";
-        const errorResponse = await response.json().catch(() => null);
-        if (errorResponse?.message) {
-          message = `${message}: ${errorResponse.message}`;
-        }
-        throw new Error(message);
+        throw new PredictionRequestError(await readApiErrorReason(response));
       }
 
       if (blockNumberIncludes) {
@@ -167,6 +208,10 @@ export default function BlockFinderClient() {
       }
     } catch (error) {
       console.error("Error predicting block numbers:", error);
+      setToast({
+        message: getPredictionFailedMessage(locale, error),
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }

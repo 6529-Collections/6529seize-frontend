@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import BlockPickerDateSelect from '@/components/block-picker/BlockPickerDateSelect';
+import { renderToString } from 'react-dom/server';
 
 describe('BlockPickerDateSelect', () => {
   const mockSetDate = jest.fn();
@@ -426,6 +427,51 @@ describe('BlockPickerDateSelect', () => {
 
       expect(screen.getByDisplayValue('2023-12-31')).toBeInTheDocument();
       expect(screen.getByDisplayValue('23:59:59')).toBeInTheDocument();
+    });
+  });
+
+  describe('minimum selectable date', () => {
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    // Built from local components, so every expectation holds in every time zone
+    // and differs from the UTC date for part of the day outside UTC.
+    it.each([
+      ['late evening', new Date(2025, 8, 26, 23, 30, 0), '2025-09-26'],
+      ['just after midnight', new Date(2025, 8, 26, 0, 30, 0), '2025-09-26'],
+      ['the last second of a year', new Date(2025, 11, 31, 23, 59, 59), '2025-12-31'],
+      ['the first second of a year', new Date(2026, 0, 1, 0, 0, 1), '2026-01-01'],
+    ])('limits the date input to the local date at %s', (_label, now, expectedMin) => {
+      jest.useFakeTimers().setSystemTime(now);
+
+      render(
+        <BlockPickerDateSelect
+          date=""
+          setDate={mockSetDate}
+          time=""
+          setTime={mockSetTime}
+        />
+      );
+
+      expect(document.getElementById('block-picker-date')).toHaveAttribute(
+        'min',
+        expectedMin
+      );
+    });
+
+    it('renders no min on the server, where the local date is unknown', () => {
+      const html = renderToString(
+        <BlockPickerDateSelect
+          date=""
+          setDate={mockSetDate}
+          time=""
+          setTime={mockSetTime}
+        />
+      );
+
+      expect(html).toContain('id="block-picker-date"');
+      expect(html).not.toMatch(/\smin=/);
     });
   });
 });

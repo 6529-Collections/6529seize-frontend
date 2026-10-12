@@ -31,7 +31,6 @@
     "__tests__/app/rememes/contract-id.test.tsx": 1,
     "__tests__/app/rememesMetadataPages.test.tsx": 9,
     "__tests__/app/the-memes/theMemesMint.test.tsx": 1,
-    "__tests__/app/tools/block-finder/page.client.test.tsx": 2,
     "__tests__/app/tools/block-finder/page.test.tsx": 1,
     "__tests__/app/wavesPage.test.tsx": 1,
     "__tests__/app/wavesPageShared.redirect.test.tsx": 1,
