@@ -43,7 +43,7 @@ describe("TDHConsolidationPage (collector's guide)", () => {
       "Sets count across wallets",
       "Keep the TDH of old wallets",
       "List your wallets",
-      "Sign once per wallet",
+      "Follow the signing steps",
     ]) {
       expect(
         screen.getByRole("heading", { level: 3, name: heading })
