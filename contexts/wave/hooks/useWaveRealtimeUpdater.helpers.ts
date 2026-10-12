@@ -278,18 +278,29 @@ const getPreservedRepliesCount = (
   return repliesCount === undefined ? {} : { replies_count: repliesCount };
 };
 
-// Realtime payloads drop viewer-specific eligibility; keep what we know.
-const getPreservedReplyEligibility = (
+// Realtime payloads drop viewer-specific reply flags; keep what we know.
+const getPreservedReplyPermissions = (
   drop: ApiDrop,
   existingDrop: ExtendedDrop | null
-): { readonly authenticated_user_eligible_to_reply?: boolean } => {
-  const eligible =
-    existingDrop === null
-      ? drop.wave.authenticated_user_eligible_to_reply
-      : existingDrop.wave.authenticated_user_eligible_to_reply;
-  return eligible === undefined
-    ? {}
-    : { authenticated_user_eligible_to_reply: eligible };
+): {
+  readonly authenticated_user_eligible_to_reply?: boolean;
+  readonly authenticated_user_can_delete_replies?: boolean;
+} => {
+  const wave = existingDrop === null ? drop.wave : existingDrop.wave;
+  return {
+    ...(wave.authenticated_user_eligible_to_reply === undefined
+      ? {}
+      : {
+          authenticated_user_eligible_to_reply:
+            wave.authenticated_user_eligible_to_reply,
+        }),
+    ...(wave.authenticated_user_can_delete_replies === undefined
+      ? {}
+      : {
+          authenticated_user_can_delete_replies:
+            wave.authenticated_user_can_delete_replies,
+        }),
+  };
 };
 
 const buildOptimisticDrop = ({
@@ -346,7 +357,7 @@ const buildOptimisticDrop = ({
         existingDrop === null
           ? reconciledDrop.wave.authenticated_user_eligible_to_chat
           : existingDrop.wave.authenticated_user_eligible_to_chat,
-      ...getPreservedReplyEligibility(reconciledDrop, existingDrop),
+      ...getPreservedReplyPermissions(reconciledDrop, existingDrop),
       authenticated_user_admin:
         existingDrop === null
           ? reconciledDrop.wave.authenticated_user_admin

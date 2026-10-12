@@ -8,7 +8,7 @@ Wave admins can choose who may reply in a wave and where replies appear.
   even if they are not in the wave's chat group. Starting a new drop still
   needs chat access.
 - **Collapsed replies**: replies stay out of the main chat. Each drop with
-  replies shows an `N replies` control that opens its thread underneath.
+  replies shows a `Show N replies` control that opens its thread underneath.
 
 Both settings are off by default. Turning on both suits announcement-style
 waves: a small group posts, everyone else can respond without filling the
@@ -29,6 +29,8 @@ main chat.
   `Collapse replies under each drop`, then select `Save`.
 - Viewers who may reply use the drop's `Reply` action (hover actions on
   desktop, long-press menu on touch devices).
+- Wave admins and chat members remove unwanted replies with the reply's
+  `Delete` action.
 
 ## User Journey
 
@@ -37,7 +39,7 @@ main chat.
    `Only chat members can start new drops here. You can reply to any drop.`
 2. They select `Reply` on a drop. The composer opens with the reply target.
 3. After sending, the composer returns to the reply-only message.
-4. In a wave with collapsed replies, the drop shows `N replies`. Selecting it
+4. In a wave with collapsed replies, the drop shows `Show N replies`. Selecting it
    opens the thread under the drop, oldest reply first. A new reply opens its
    parent's thread automatically for the person who sent it.
 5. `Hide replies` closes the thread. Long threads show
@@ -47,6 +49,10 @@ main chat.
 
 - Slow mode and disabled links apply to replies from non-admins, including
   open repliers.
+- In a wave with open replies, people who can start drops there (the chat
+  group) and the wave's admins and creator can delete anyone's replies from
+  the drop's `Delete` action. Top-level drops keep the wave's normal admin
+  deletion setting.
 - Emoji reactions stay open to everyone who can see the wave, as before.
 - Replies can answer other replies inside a thread. The thread shows every
   reply under the top drop.

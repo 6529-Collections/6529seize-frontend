@@ -28,12 +28,14 @@ describe("fetchDropReplyThreadTarget", () => {
     );
   });
 
-  it("returns null for top-level drops and unknown serials", async () => {
+  it("returns null for top-level drops", async () => {
     commonApiFetchMock.mockResolvedValueOnce({ data: [{ id: "root" }] });
     await expect(
       fetchDropReplyThreadTarget({ serialNo: 41 })
     ).resolves.toBeNull();
+  });
 
+  it("returns null for unknown serials", async () => {
     commonApiFetchMock.mockResolvedValueOnce({ data: [] });
     await expect(
       fetchDropReplyThreadTarget({ serialNo: 999 })

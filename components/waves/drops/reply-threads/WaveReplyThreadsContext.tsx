@@ -80,7 +80,7 @@ function useLiveReplyCounts(waveId: string, enabled: boolean) {
           enabled &&
           drop.wave.id === waveId &&
           !!parentDropId &&
-          !drop.updated_at &&
+          drop.updated_at === null &&
           drop.created_at >= mountedAt &&
           !countedReplyIdsRef.current.has(drop.id);
         if (!isNewReply) {

@@ -34,6 +34,10 @@ export class ApiWaveMin {
     * Whether the authenticated user may reply to drops in this wave. Waves with open replies allow this outside the chat group.
     */
     'authenticated_user_eligible_to_reply'?: boolean;
+    /**
+    * Whether the authenticated user may delete other people\'s replies in this wave. With open replies, the wave creator, admins and chat group members can.
+    */
+    'authenticated_user_can_delete_replies'?: boolean;
     'authenticated_user_admin': boolean;
     'visibility_group_id': string | null;
     'participation_group_id': string | null;
@@ -112,6 +116,12 @@ export class ApiWaveMin {
         {
             "name": "authenticated_user_eligible_to_reply",
             "baseName": "authenticated_user_eligible_to_reply",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "authenticated_user_can_delete_replies",
+            "baseName": "authenticated_user_can_delete_replies",
             "type": "boolean",
             "format": ""
         },

@@ -2,8 +2,12 @@
 
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
+import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
+import { useIsFetching } from "@tanstack/react-query";
 import { useId, type ReactNode } from "react";
 import WaveDropReplyThreadList from "./WaveDropReplyThreadList";
 import {
@@ -22,11 +26,11 @@ interface WaveDropReplyThreadProps {
   readonly renderReply: RenderThreadReply;
 }
 
-const formatReplyCount = (locale: SupportedLocale, count: number): string =>
+const getShowRepliesLabel = (locale: SupportedLocale, count: number): string =>
   count === 1
-    ? t(locale, "waves.chat.replyThread.countOne")
-    : t(locale, "waves.chat.replyThread.countMany", {
-        count: new Intl.NumberFormat(locale).format(count),
+    ? t(locale, "waves.chat.replyThread.showOne")
+    : t(locale, "waves.chat.replyThread.showMany", {
+        count: formatInteger(locale, count),
       });
 
 export default function WaveDropReplyThread({
@@ -38,6 +42,17 @@ export default function WaveDropReplyThread({
   const expanded = useReplyThreadExpanded(threads, drop.id);
   const listId = useId();
   const repliesCount = drop.replies_count ?? 0;
+  // Same key as useDropMessages, which loads the open thread.
+  const fetchingThreadQueries = useIsFetching({
+    queryKey: [
+      QueryKey.DROPS,
+      {
+        waveId: threads?.waveId,
+        limit: WAVE_DROPS_PARAMS.limit,
+        dropId: drop.id,
+      },
+    ],
+  });
 
   if (threads === null || (repliesCount === 0 && !expanded)) {
     return null;
@@ -71,8 +86,14 @@ export default function WaveDropReplyThread({
           </svg>
           {expanded
             ? t(locale, "waves.chat.replyThread.hide")
-            : formatReplyCount(locale, repliesCount)}
+            : getShowRepliesLabel(locale, repliesCount)}
         </button>
+        {/* Always mounted so the loading message is announced on open. */}
+        <span role="status" className="tw-sr-only">
+          {expanded && fetchingThreadQueries > 0
+            ? t(locale, "waves.chat.replyThread.loading")
+            : ""}
+        </span>
         {expanded && (
           <WaveDropReplyThreadList
             id={listId}

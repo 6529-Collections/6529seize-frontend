@@ -102,7 +102,7 @@ describe("WaveDropReplyThread", () => {
     const user = userEvent.setup();
     render(<Harness drop={makeDrop("root", 10, { replies_count: 2 })} />);
 
-    const toggle = screen.getByRole("button", { name: "2 replies" });
+    const toggle = screen.getByRole("button", { name: "Show 2 replies" });
     expect(toggle).toHaveAttribute("aria-expanded", "false");
     expect(useDropMessagesMock).not.toHaveBeenCalled();
 
@@ -125,10 +125,31 @@ describe("WaveDropReplyThread", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("announces loading through a live region that exists before opening", async () => {
+    const user = userEvent.setup();
+    useDropMessagesMock.mockReturnValue({
+      drops: [],
+      fetchNextPage: jest.fn().mockResolvedValue(undefined),
+      hasNextPage: false,
+      isFetching: true,
+      isFetchingNextPage: false,
+    });
+    render(<Harness drop={makeDrop("root", 10, { replies_count: 2 })} />);
+
+    const status = screen.getByRole("status");
+    expect(status).toBeEmptyDOMElement();
+
+    await user.click(screen.getByRole("button", { name: "Show 2 replies" }));
+
+    expect(screen.getByRole("group")).toHaveTextContent("Loading replies…");
+  });
+
   it("uses singular wording for one reply", () => {
     render(<Harness drop={makeDrop("root", 10, { replies_count: 1 })} />);
 
-    expect(screen.getByRole("button", { name: "1 reply" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Show 1 reply" })
+    ).toBeInTheDocument();
   });
 
   it("loads earlier replies on request", async () => {
@@ -143,7 +164,7 @@ describe("WaveDropReplyThread", () => {
     });
     render(<Harness drop={makeDrop("root", 10, { replies_count: 60 })} />);
 
-    await user.click(screen.getByRole("button", { name: "60 replies" }));
+    await user.click(screen.getByRole("button", { name: "Show 60 replies" }));
     await user.click(
       screen.getByRole("button", { name: "Show earlier replies" })
     );

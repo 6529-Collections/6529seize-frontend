@@ -37761,6 +37761,7 @@ components:
         - open
         - collapsed
         - authenticated_user_eligible
+        - authenticated_user_can_delete
       properties:
         open:
           description: >-
@@ -37775,6 +37776,12 @@ components:
           type: boolean
         authenticated_user_eligible:
           description: Whether the authenticated user may reply in this wave
+          type: boolean
+        authenticated_user_can_delete:
+          description: >-
+            Whether the authenticated user may delete other people's replies.
+            With open replies, the wave creator, admins and chat group members
+            can.
           type: boolean
     ApiWaveConfig:
       type: object
@@ -38352,6 +38359,12 @@ components:
             Whether the authenticated user may reply to drops in this wave.
             Waves with open replies allow this outside the chat group.
           type: boolean
+        authenticated_user_can_delete_replies:
+          description: >-
+            Whether the authenticated user may delete other people's replies in
+            this wave. With open replies, the wave creator, admins and chat
+            group members can.
+          type: boolean
         authenticated_user_admin:
           type: boolean
         visibility_group_id:
@@ -38566,6 +38579,12 @@ components:
           description: >-
             Whether the profile may reply to drops in this wave. Waves with open
             replies allow this outside the chat group.
+          type: boolean
+        can_delete_replies:
+          description: >-
+            Whether the profile may delete other people's replies in this wave.
+            With open replies, the wave creator, admins and chat group members
+            can.
           type: boolean
         next_drop_allowed:
           type: integer

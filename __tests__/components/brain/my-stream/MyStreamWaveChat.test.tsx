@@ -439,6 +439,41 @@ describe("MyStreamWaveChat", () => {
     expect(mockFetchAroundSerialNo).toHaveBeenCalledWith("10", 4);
   });
 
+  it("keeps the original target when a collapsed-wave link is not a reply", async () => {
+    searchParamsMock.get.mockImplementation((key: string) =>
+      key === "serialNo" ? "5" : null
+    );
+    searchParamsMock.toString.mockReturnValue("serialNo=5");
+    mockFetchDropReplyThreadTarget.mockResolvedValue(null);
+
+    await act(async () => {
+      renderWithProvider(
+        <MyStreamWaveChat
+          wave={{
+            ...wave,
+            chat: {
+              replies: {
+                open: true,
+                collapsed: true,
+                authenticated_user_eligible: true,
+                authenticated_user_can_delete: false,
+              },
+            },
+          }}
+          firstUnreadSerialNo={null}
+          viewMode="chat"
+          onDropClick={mockOnDropClick}
+        />
+      );
+    });
+
+    await waitFor(() => {
+      expect(mockFetchDropReplyThreadTarget).toHaveBeenCalled();
+    });
+    expect(capturedPropsHolder.current.initialDrop).toBe(5);
+    expect(mockFetchAroundSerialNo).not.toHaveBeenCalledWith("10", 4);
+  });
+
   it("does not resolve reply targets in waves that keep replies inline", async () => {
     searchParamsMock.get.mockImplementation((key: string) =>
       key === "serialNo" ? "5" : null

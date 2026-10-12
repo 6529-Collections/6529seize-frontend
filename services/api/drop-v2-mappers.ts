@@ -102,6 +102,8 @@ export const mapApiWaveOverviewToApiWaveMin = (
     wave.context_profile_context?.can_reply ??
     wave.context_profile_context?.can_chat ??
     true,
+  authenticated_user_can_delete_replies:
+    wave.context_profile_context?.can_delete_replies ?? false,
   authenticated_user_admin: false,
   visibility_group_id: wave.is_private ? "private" : null,
   participation_group_id: null,
@@ -131,6 +133,7 @@ export const createFallbackWaveMin = (waveId: string): ApiWaveMin => ({
   authenticated_user_eligible_to_participate: true,
   authenticated_user_eligible_to_chat: true,
   authenticated_user_eligible_to_reply: true,
+  authenticated_user_can_delete_replies: false,
   authenticated_user_admin: false,
   visibility_group_id: null,
   participation_group_id: null,

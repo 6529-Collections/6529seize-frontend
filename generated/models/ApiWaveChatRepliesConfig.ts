@@ -26,6 +26,10 @@ export class ApiWaveChatRepliesConfig {
     * Whether the authenticated user may reply in this wave
     */
     'authenticated_user_eligible': boolean;
+    /**
+    * Whether the authenticated user may delete other people\'s replies. With open replies, the wave creator, admins and chat group members can.
+    */
+    'authenticated_user_can_delete': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -47,6 +51,12 @@ export class ApiWaveChatRepliesConfig {
         {
             "name": "authenticated_user_eligible",
             "baseName": "authenticated_user_eligible",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "authenticated_user_can_delete",
+            "baseName": "authenticated_user_can_delete",
             "type": "boolean",
             "format": ""
         }    ];

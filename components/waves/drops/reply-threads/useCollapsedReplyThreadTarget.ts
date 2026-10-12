@@ -40,7 +40,7 @@ export function useCollapsedReplyThreadTarget({
   const { data } = useQuery({
     queryKey: [
       QueryKey.DROP_REPLY_THREAD_TARGET,
-      { serial_no: requestedSerialNo },
+      { wave_id: waveId, serial_no: requestedSerialNo },
     ],
     queryFn: ({ signal }) =>
       fetchDropReplyThreadTarget({

@@ -67,10 +67,7 @@ export default function WaveDropReplyThreadList({
         </div>
       ))}
       {replies.length === 0 && (
-        <p
-          role="status"
-          className="tw-m-0 tw-py-1 tw-pl-3 tw-text-xs tw-text-iron-400"
-        >
+        <p className="tw-m-0 tw-py-1 tw-pl-3 tw-text-xs tw-text-iron-400">
           {isFetching
             ? t(locale, "waves.chat.replyThread.loading")
             : t(locale, "waves.chat.replyThread.empty")}

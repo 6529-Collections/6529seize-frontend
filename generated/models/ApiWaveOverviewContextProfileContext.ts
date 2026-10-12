@@ -21,6 +21,10 @@ export class ApiWaveOverviewContextProfileContext {
     * Whether the profile may reply to drops in this wave. Waves with open replies allow this outside the chat group.
     */
     'can_reply'?: boolean;
+    /**
+    * Whether the profile may delete other people\'s replies in this wave. With open replies, the wave creator, admins and chat group members can.
+    */
+    'can_delete_replies'?: boolean;
     'next_drop_allowed'?: number;
     'unread_drops': number;
     'first_unread_drop_serial_no'?: number;
@@ -60,6 +64,12 @@ export class ApiWaveOverviewContextProfileContext {
         {
             "name": "can_reply",
             "baseName": "can_reply",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "can_delete_replies",
+            "baseName": "can_delete_replies",
             "type": "boolean",
             "format": ""
         },

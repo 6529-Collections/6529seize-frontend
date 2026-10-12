@@ -92,6 +92,8 @@ export const getOptimisticDrop = (
       authenticated_user_eligible_to_chat:
         wave.chat.authenticated_user_eligible,
       authenticated_user_eligible_to_reply: getWaveReplyEligibility(wave.chat),
+      authenticated_user_can_delete_replies:
+        wave.chat.replies?.authenticated_user_can_delete ?? false,
       voting_credit_type: wave.voting.credit_type,
       voting_credit_scope: wave.voting.credit_scope,
       voting_period_start: wave.voting.period?.min ?? null,
