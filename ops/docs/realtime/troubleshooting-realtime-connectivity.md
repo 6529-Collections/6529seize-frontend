@@ -62,8 +62,8 @@ stale, stop arriving, or do not recover after auth changes.
   and/or periodic health checks.
 - If both cookie events and `BroadcastChannel` support are unavailable, auth
   convergence depends on periodic checks only (`10s` cadence).
-- Reconnect timing is deterministic (no jitter), so multiple tabs can retry in
-  near lockstep.
+- Reconnect delays carry +/-25% random jitter, so tabs and devices retry at
+  slightly different times instead of in lockstep, and exact retry timings vary.
 
 ## Failure and Recovery
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { zeroAddress } from "viem";
 import { useReadContracts } from "wagmi";
 import { CREATOR_ADMIN_ABI } from "@/components/drop-forge/contract-admins/creator-admin-abi";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -43,7 +42,7 @@ export function useIsDropForgeAdmin({
         chainId: chain.id,
         abi: CREATOR_ADMIN_ABI,
         functionName: "isAdmin",
-        args: [(address ?? zeroAddress) as `0x${string}`],
+        args: address ? [address as `0x${string}`] : undefined,
       },
     ],
     query: { enabled: isEnabled, staleTime: DROP_FORGE_ADMIN_STALE_TIME_MS },

@@ -69,14 +69,14 @@ updates. When auth is missing, the session disconnects and push updates pause.
   on periodic checks only (`10s`).
 - Background tabs can apply retries and auth-change handling later due to
   browser scheduling.
-- Reconnect timing is deterministic (no jitter), so multiple tabs can retry in
-  near lockstep.
+- Reconnect delays carry +/-25% random jitter, so tabs and devices retry at
+  slightly different times instead of in lockstep, and exact retry timings vary.
 
 ## Failure and Recovery
 
 - Unexpected closes (non-`1000`) with a valid token trigger automatic retries.
 - Retry scheduling allows up to `20` attempts by default (`2s`, `3s`, `4.5s`,
-  capped at `30s`).
+  capped at `30s`, each +/-25% jittered).
 - After the cap is reached, scheduled reconnect retries stop; periodic health
   checks (`10s`) still attempt reconnect while token+status require it.
 - If auth is missing or invalid, the session stays disconnected until

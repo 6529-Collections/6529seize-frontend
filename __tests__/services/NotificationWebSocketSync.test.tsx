@@ -324,28 +324,50 @@ describe("NotificationWebSocketSync", () => {
       expect(sendMock).not.toHaveBeenCalled();
     });
 
-    it("lets a token change sync right away instead of waiting out the stagger", () => {
-      const { rerender, unmount } = render(<Subject />);
-      sendMock.mockClear();
+    it.each(["auth-token-changed", "wallet-accounts-updated"])(
+      "syncs immediately on %s inside the stagger window, without a duplicate or a re-delay",
+      (eventName) => {
+        const { rerender, unmount } = render(<Subject />);
+        sendMock.mockClear();
 
-      reconnect(rerender);
-      getAuthJwtMock.mockReturnValue("rotated-jwt");
-      getConnectedWalletAccountsMock.mockReturnValue([{ jwt: "rotated-jwt" }]);
-      act(() => {
-        window.dispatchEvent(new Event("auth-token-changed"));
-      });
+        reconnect(rerender);
+        getAuthJwtMock.mockReturnValue("rotated-jwt");
+        getConnectedWalletAccountsMock.mockReturnValue([
+          { jwt: "rotated-jwt" },
+        ]);
+        act(() => {
+          window.dispatchEvent(new Event(eventName));
+        });
 
-      expect(sendMock).toHaveBeenCalledTimes(1);
-      expect(sendMock).toHaveBeenLastCalledWith(
-        WsMessageType.SYNC_NOTIFICATION_IDENTITIES,
-        { access_tokens: ["rotated-jwt"] }
-      );
-      act(() => {
-        jest.advanceTimersByTime(3000);
-      });
-      expect(sendMock).toHaveBeenCalledTimes(1);
-      unmount();
-    });
+        // The change is not treated as another reconnect: no stagger delay.
+        expect(sendMock).toHaveBeenCalledTimes(1);
+        expect(sendMock).toHaveBeenLastCalledWith(
+          WsMessageType.SYNC_NOTIFICATION_IDENTITIES,
+          { access_tokens: ["rotated-jwt"] }
+        );
+
+        // The pending staggered sync was cancelled, so it never double-sends.
+        act(() => {
+          jest.advanceTimersByTime(3000);
+        });
+        expect(sendMock).toHaveBeenCalledTimes(1);
+
+        // A later change is still immediate.
+        getAuthJwtMock.mockReturnValue("rotated-again-jwt");
+        getConnectedWalletAccountsMock.mockReturnValue([
+          { jwt: "rotated-again-jwt" },
+        ]);
+        act(() => {
+          window.dispatchEvent(new Event(eventName));
+        });
+        expect(sendMock).toHaveBeenCalledTimes(2);
+        expect(sendMock).toHaveBeenLastCalledWith(
+          WsMessageType.SYNC_NOTIFICATION_IDENTITIES,
+          { access_tokens: ["rotated-again-jwt"] }
+        );
+        unmount();
+      }
+    );
   });
 
   it("catches up the active profile when a sync ack omits it", () => {

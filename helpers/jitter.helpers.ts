@@ -14,7 +14,11 @@ function getRandomUnit(): number {
   }
 }
 
-/** Scales `baseDelayMs` by a uniform factor in [1 - ratio, 1 + ratio). */
+/**
+ * Scales `baseDelayMs` by a uniform factor drawn from the half-open range
+ * [1 - ratio, 1 + ratio), then rounds to whole milliseconds (so the rounded
+ * result can equal either bound).
+ */
 export function applyDelayJitter(baseDelayMs: number, ratio: number): number {
   return Math.round(baseDelayMs * (1 - ratio + getRandomUnit() * ratio * 2));
 }
