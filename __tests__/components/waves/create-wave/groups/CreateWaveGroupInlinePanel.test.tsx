@@ -438,9 +438,8 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(screen.getByText("Everyone")).toBeInTheDocument();
     expect(screen.getByText("After editing")).toBeInTheDocument();
     expect(screen.getByText("No criteria selected")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Cancel" })).toHaveAttribute(
-      "aria-pressed",
-      "true"
+    expect(screen.getByRole("button", { name: "Cancel" })).not.toHaveAttribute(
+      "aria-pressed"
     );
     expect(
       screen.queryByRole("button", { name: "Choose group" })
@@ -454,6 +453,33 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(
       screen.queryByRole("button", { name: "Close" })
     ).not.toBeInTheDocument();
+  });
+
+  it("keeps identity and rule editors open when clicking outside the panel", async () => {
+    const user = userEvent.setup();
+    const onCreateGroup = jest.fn();
+    const onCriteriaReplacementChange = jest.fn();
+    renderInlinePanel({ onCreateGroup, onCriteriaReplacementChange });
+
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    await user.click(screen.getByRole("button", { name: "include identity" }));
+    await user.click(document.body);
+
+    expect(screen.getByTestId("identities-panel")).toBeVisible();
+    expect(
+      screen.getByTestId("restored-included-identities")
+    ).toHaveTextContent("0xABC");
+
+    await user.click(screen.getByRole("button", { name: "Rep" }));
+    await user.click(screen.getByRole("button", { name: "set rep min" }));
+    await user.click(document.body);
+
+    expect(screen.getByTestId("rule-rep")).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Rep Configured" })
+    ).toHaveAttribute("aria-current", "true");
+    expect(onCriteriaReplacementChange.mock.calls).toEqual([[true]]);
+    expect(onCreateGroup).not.toHaveBeenCalled();
   });
 
   it("cancels the criteria replacement from the header action", async () => {
@@ -506,7 +532,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
     expect(screen.getByTestId("identities-panel")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Identities" })).toHaveAttribute(
-      "aria-pressed",
+      "aria-current",
       "true"
     );
     expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
@@ -528,10 +554,13 @@ describe("CreateWaveGroupInlinePanel", () => {
     await user.click(screen.getByRole("button", { name: "set rep min" }));
 
     const configuredRep = screen.getByRole("button", {
-      name: "Rep, Configured",
+      name: "Rep Configured",
     });
     expect(configuredRep).toHaveAttribute("data-configured", "true");
-    expect(configuredRep).toHaveClass("tw-bg-primary-600");
+    expect(configuredRep).toHaveAttribute("aria-current", "true");
+    await user.click(screen.getByRole("button", { name: "Level" }));
+    expect(configuredRep).not.toHaveAttribute("aria-current");
+    expect(configuredRep).toHaveAttribute("data-configured", "true");
   });
 
   it("shows all criteria buttons without a more-rules step", async () => {
@@ -647,8 +676,8 @@ describe("CreateWaveGroupInlinePanel", () => {
     ).toBeGreaterThan(0);
 
     expect(
-      screen.getByRole("button", { name: "Identities, Configured" })
-    ).toHaveAttribute("aria-pressed", "true");
+      screen.getByRole("button", { name: "Identities Configured" })
+    ).toHaveAttribute("aria-current", "true");
 
     expect(
       screen.getByTestId("restored-included-identities")
@@ -898,7 +927,7 @@ describe("CreateWaveGroupInlinePanel", () => {
       screen.getByRole("button", { name: "exclude CSV wallets" })
     );
     await user.click(
-      screen.getByRole("button", { name: "Identities, Configured" })
+      screen.getByRole("button", { name: "Identities Configured" })
     );
 
     expect(

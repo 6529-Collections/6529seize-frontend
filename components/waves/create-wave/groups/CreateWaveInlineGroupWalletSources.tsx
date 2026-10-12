@@ -83,8 +83,7 @@ function SourceCount({
 function getWalletSourceClasses(quiet: boolean, networkPresentation: boolean) {
   if (networkPresentation) {
     return {
-      section:
-        "tw-min-w-0 tw-rounded-xl tw-bg-iron-900/50 tw-p-4 lg:tw-row-span-5 lg:tw-grid lg:tw-grid-rows-subgrid",
+      section: "tw-min-w-0 lg:tw-row-span-5 lg:tw-grid lg:tw-grid-rows-subgrid",
       input: "[&_input]:tw-h-11 [&_input]:tw-py-0",
       title: "tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100",
       description:
@@ -487,7 +486,7 @@ export default function CreateWaveInlineGroupWalletSources(
   let gridClasses = `tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 ${props.quiet ? "tw-gap-4" : "tw-gap-3"}`;
   if (props.networkPresentation) {
     gridClasses =
-      "tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-2 lg:tw-gap-y-0";
+      "tw-grid tw-grid-cols-1 tw-gap-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4 lg:tw-grid-cols-2 lg:tw-gap-x-6 lg:tw-gap-y-0";
   }
   return (
     <div className={gridClasses}>
