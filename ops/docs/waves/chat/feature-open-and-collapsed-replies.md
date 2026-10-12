@@ -66,8 +66,9 @@ main chat.
   every drop. The author of the replied-to drop and mentioned profiles are
   still notified.
 - Curated views of a wave keep showing curated replies.
-- The reply count on a drop updates live for new replies and refreshes from
-  the server when the drop reloads.
+- The reply count includes replies to replies anywhere in the thread. Live
+  updates refresh the original drop's count from the server for both direct
+  and nested replies; duplicate events do not add extra replies.
 
 ## Failure and Recovery
 

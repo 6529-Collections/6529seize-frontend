@@ -3659,6 +3659,7 @@
         "With `Anyone who can see this wave can reply` on, everyone who can see the wave can reply to its drops, even outside the chat group. New top-level drops still need chat access.",
         "Viewers who can only reply see `Only chat members can start new drops here. You can reply to any drop.` and use the drop's Reply action to open the composer.",
         "With `Collapse replies under each drop` on, replies stay out of the main chat. A drop with replies shows `Show N replies`; selecting it opens the thread under the drop, oldest first, and `Hide replies` closes it.",
+        "The reply count includes replies to replies throughout the thread. Direct and nested replies refresh the original drop's count live; duplicate updates do not add extra replies.",
         "Slow mode and disabled links still apply to replies from non-admins. Emoji reactions stay open to everyone who can see the wave.",
         "Collapsed replies do not count as unread and do not notify followers subscribed to every drop; the replied-to author and mentioned profiles are still notified.",
         "Links and notifications to a collapsed reply jump to its parent drop and open that thread.",

@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
+import { useState } from "react";
 import userEvent from "@testing-library/user-event";
 import WaveDropReplyThread from "@/components/waves/drops/reply-threads/WaveDropReplyThread";
 import {
@@ -9,6 +10,8 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { DropSize, type ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropMessages } from "@/hooks/useDropMessages";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
+import { fetchDropByIdBatched } from "@/services/api/drop-api";
+import { WsMessageType } from "@/helpers/Types";
 
 const mockApplyOptimisticDropUpdate = jest.fn();
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
@@ -22,9 +25,13 @@ jest.mock("@/services/websocket/useWebSocketMessage", () => ({
 jest.mock("@/hooks/useDropMessages", () => ({
   useDropMessages: jest.fn(),
 }));
+jest.mock("@/services/api/drop-api", () => ({
+  fetchDropByIdBatched: jest.fn(),
+}));
 
 const useDropMessagesMock = useDropMessages as jest.Mock;
 const useWebSocketMessageMock = useWebSocketMessage as jest.Mock;
+const fetchDropMock = fetchDropByIdBatched as jest.Mock;
 
 const wave = { id: "wave-1" } as ApiWave;
 
@@ -65,8 +72,21 @@ function Harness({
   );
 }
 
+function LiveHarness() {
+  const [drop, setDrop] = useState(() =>
+    makeDrop("root", 10, { replies_count: 1 })
+  );
+  mockApplyOptimisticDropUpdate.mockImplementation(({ dropId, update }) => {
+    if (dropId === "root") setDrop((current) => update(current) ?? current);
+    return null;
+  });
+  return <Harness drop={drop} />;
+}
+
 describe("WaveDropReplyThread", () => {
   beforeEach(() => {
+    mockApplyOptimisticDropUpdate.mockReset();
+    fetchDropMock.mockReset();
     useDropMessagesMock.mockReturnValue({
       drops: [makeDrop("reply-2", 12), makeDrop("reply-1", 11)],
       fetchNextPage: jest.fn().mockResolvedValue(undefined),
@@ -175,10 +195,10 @@ describe("WaveDropReplyThread", () => {
   });
 
   describe("live reply counts", () => {
-    const getDropUpdateHandler = () =>
-      useWebSocketMessageMock.mock.calls.at(-1)?.[1] as (
-        drop: Record<string, unknown>
-      ) => void;
+    const getHandler = (type: WsMessageType = WsMessageType.DROP_UPDATE) =>
+      useWebSocketMessageMock.mock.calls.find(
+        ([messageType]) => messageType === type
+      )?.[1] as (drop: Record<string, unknown>) => void;
 
     const newReply = (overrides: Record<string, unknown> = {}) => ({
       id: "new-reply",
@@ -189,14 +209,19 @@ describe("WaveDropReplyThread", () => {
       ...overrides,
     });
 
-    it("bumps the parent count once per new reply", () => {
+    it("uses the server count without double-counting duplicate events", async () => {
+      fetchDropMock.mockResolvedValue(
+        makeDrop("root", 10, { replies_count: 2 })
+      );
       render(<Harness drop={makeDrop("root", 10, { replies_count: 1 })} />);
-      const handle = getDropUpdateHandler();
+      const handle = getHandler();
 
       handle(newReply());
       handle(newReply());
 
-      expect(mockApplyOptimisticDropUpdate).toHaveBeenCalledTimes(1);
+      await waitFor(() =>
+        expect(mockApplyOptimisticDropUpdate).toHaveBeenCalled()
+      );
       const { waveId, dropId, update } =
         mockApplyOptimisticDropUpdate.mock.calls[0][0];
       expect({ waveId, dropId }).toEqual({ waveId: "wave-1", dropId: "root" });
@@ -205,16 +230,70 @@ describe("WaveDropReplyThread", () => {
       });
     });
 
-    it("ignores edits, older replies, other waves and top-level drops", () => {
-      render(<Harness drop={makeDrop("root", 10, { replies_count: 1 })} />);
-      const handle = getDropUpdateHandler();
+    it("updates the original badge when replying to a reply", async () => {
+      fetchDropMock.mockImplementation(async (id: string) =>
+        id === "reply-1"
+          ? makeDrop("reply-1", 11, {
+              reply_to: { drop_id: "root", drop_part_id: 1, is_deleted: false },
+              replies_count: 1,
+            })
+          : makeDrop("root", 10, { replies_count: 2 })
+      );
+      render(<LiveHarness />);
+      expect(
+        screen.getByRole("button", { name: "Show 1 reply" })
+      ).toBeInTheDocument();
+      act(() => getHandler()(newReply({ reply_to: { drop_id: "reply-1" } })));
+      await screen.findByRole("button", { name: "Show 2 replies" });
+      expect(fetchDropMock).toHaveBeenCalledWith("reply-1");
+      expect(fetchDropMock).toHaveBeenCalledWith("root");
+    });
 
-      handle(newReply({ updated_at: Date.now() }));
-      handle(newReply({ id: "old", created_at: 0 }));
+    it("reconciles compact WebSocket events as well as full events", async () => {
+      fetchDropMock.mockImplementation(async (id: string) =>
+        id === "new-reply"
+          ? newReply()
+          : makeDrop("root", 10, { replies_count: 2 })
+      );
+      render(<LiveHarness />);
+      act(() =>
+        getHandler(WsMessageType.DROP_UPDATE_REF)({
+          drop_id: "new-reply",
+          wave_id: "wave-1",
+          author_id: "author",
+          serial_no: 12,
+          update_type: WsMessageType.DROP_UPDATE,
+        })
+      );
+      await screen.findByRole("button", { name: "Show 2 replies" });
+    });
+
+    it("reconciles delayed or edited replies without adding to the count", async () => {
+      fetchDropMock.mockResolvedValue(
+        makeDrop("root", 10, { replies_count: 2 })
+      );
+      render(<LiveHarness />);
+      act(() =>
+        getHandler()(newReply({ created_at: 0, updated_at: Date.now() }))
+      );
+      await screen.findByRole("button", { name: "Show 2 replies" });
+    });
+
+    it("ignores other waves and top-level drops", () => {
+      render(<Harness drop={makeDrop("root", 10, { replies_count: 1 })} />);
+      const handle = getHandler();
+
       handle(newReply({ id: "other-wave", wave: { id: "wave-2" } }));
       handle(newReply({ id: "top-level", reply_to: undefined }));
 
       expect(mockApplyOptimisticDropUpdate).not.toHaveBeenCalled();
+      expect(fetchDropMock).not.toHaveBeenCalled();
+    });
+
+    it("does not fetch reply counts when collapse is disabled", () => {
+      render(<Harness drop={makeDrop("root", 10)} enabled={false} />);
+      getHandler()(newReply());
+      expect(fetchDropMock).not.toHaveBeenCalled();
     });
   });
 });
