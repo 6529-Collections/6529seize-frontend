@@ -4,7 +4,6 @@ import {
   render,
   screen,
   waitFor,
-  within,
 } from "@testing-library/react";
 import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
@@ -79,6 +78,33 @@ const renderGlobalError = ({
     { container: document as unknown as HTMLElement }
   );
   return { ...result, retry, reset };
+};
+
+// Stand-in for the server-rendered document the browser parsed before
+// hydrating: copy its <html> attributes and <head>/<body> children into the
+// live jsdom document without writing HTML through document.write or
+// innerHTML.
+const loadServerDocument = (serverHtml: string) => {
+  const serverDocument = new DOMParser().parseFromString(
+    serverHtml,
+    "text/html"
+  );
+  const importChildren = (parent: HTMLElement) =>
+    Array.from(parent.childNodes, (node) => document.importNode(node, true));
+
+  for (const { name, value } of Array.from(
+    serverDocument.documentElement.attributes
+  )) {
+    document.documentElement.setAttribute(name, value);
+  }
+  document.head.replaceChildren(...importChildren(serverDocument.head));
+  document.body.replaceChildren(...importChildren(serverDocument.body));
+};
+
+const resetDocument = () => {
+  document.documentElement.removeAttribute("lang");
+  document.head.replaceChildren();
+  document.body.replaceChildren();
 };
 
 describe("GlobalError", () => {
@@ -300,12 +326,9 @@ describe("GlobalError", () => {
     };
     // Server output is always the en-US document, whatever the browser prefers.
     const serverHtml = renderToString(<GlobalError {...props} />);
-    document.open();
-    document.write(`<!DOCTYPE html>${serverHtml}`);
-    document.close();
+    loadServerDocument(serverHtml);
     setNavigatorLanguages(["fr-FR"]);
 
-    // document.write replaced <body>, so the module-level `screen` is stale.
     let root: ReturnType<typeof hydrateRoot> | undefined;
     try {
       await act(async () => {
@@ -316,7 +339,7 @@ describe("GlobalError", () => {
         expect(document.documentElement).toHaveAttribute("lang", "fr-FR");
       });
       expect(
-        within(document.body).getByRole("heading", {
+        screen.getByRole("heading", {
           level: 1,
           name: "Bienvenue sur la Page de la Fatalité de 6529",
         })
@@ -332,7 +355,7 @@ describe("GlobalError", () => {
         expect(document.documentElement).toHaveAttribute("lang", "de-DE");
       });
       expect(
-        within(document.body).getByRole("heading", {
+        screen.getByRole("heading", {
           level: 1,
           name: "Willkommen auf der 6529-Seite des Verderbens",
         })
@@ -347,9 +370,7 @@ describe("GlobalError", () => {
       expect(unexpected).toEqual([]);
     } finally {
       act(() => root?.unmount());
-      document.open();
-      document.write("<!DOCTYPE html><html><head></head><body></body></html>");
-      document.close();
+      resetDocument();
     }
   });
 });
