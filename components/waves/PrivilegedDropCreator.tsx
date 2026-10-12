@@ -77,6 +77,24 @@ function getProfileModerationPlaceholder({
   return null;
 }
 
+/**
+ * Open replies let people outside the chat group answer a drop, so the chat
+ * composer opens for them only while a reply target is active.
+ */
+const getChatComposerAccess = (
+  chat: ApiWave["chat"],
+  activeDrop: ActiveDropState | null
+): { readonly canChat: boolean; readonly canReplyWithoutChat: boolean } => {
+  const canReplyWithoutChat =
+    !chat.authenticated_user_eligible && getWaveReplyEligibility(chat);
+  const isReplying = activeDrop?.action === ActiveDropAction.REPLY;
+  return {
+    canChat:
+      chat.authenticated_user_eligible || (canReplyWithoutChat && isReplying),
+    canReplyWithoutChat,
+  };
+};
+
 export default function PrivilegedDropCreator({
   activeDrop,
   onCancelReplyQuote,
@@ -135,19 +153,15 @@ export default function PrivilegedDropCreator({
       ? `/${address.toLowerCase()}`
       : undefined;
 
-  // Open replies let people outside the chat group answer a drop, so the
-  // composer opens for them only while a reply target is active.
-  const canReplyWithoutChat =
-    !wave.chat.authenticated_user_eligible &&
-    getWaveReplyEligibility(wave.chat);
-  const isReplying = activeDrop?.action === ActiveDropAction.REPLY;
+  const { canChat, canReplyWithoutChat } = getChatComposerAccess(
+    wave.chat,
+    activeDrop
+  );
   const { submissionRestriction, chatRestriction } = useDropPrivileges({
     isLoggedIn: hasProfile || isProfileLoadingForWallet,
     needsProfile: shouldOfferProfileSetup,
     isProxy: !!activeProfileProxy,
-    canChat:
-      wave.chat.authenticated_user_eligible ||
-      (canReplyWithoutChat && isReplying),
+    canChat,
     canDrop: wave.participation.authenticated_user_eligible,
     chatDisabled: !wave.chat.enabled,
     slowModeCooldownMs: wave.chat.slow_mode_cooldown_ms ?? null,

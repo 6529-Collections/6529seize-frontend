@@ -15,14 +15,12 @@ const CHECKBOX_CLASS_NAME =
   "tw-mt-0.5 tw-h-4 tw-w-4 tw-shrink-0 tw-rounded tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-900 tw-text-primary-500 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50";
 
 function ReplySettingCheckbox({
-  autoFocus = false,
   checked,
   description,
   disabled,
   label,
   onCheckedChange,
 }: {
-  readonly autoFocus?: boolean | undefined;
   readonly checked: boolean;
   readonly description: string;
   readonly disabled: boolean;
@@ -36,7 +34,6 @@ function ReplySettingCheckbox({
       <input
         id={inputId}
         type="checkbox"
-        autoFocus={autoFocus}
         aria-describedby={descriptionId}
         checked={checked}
         disabled={disabled}
@@ -74,7 +71,6 @@ export default function WaveChatRepliesEditorForm({
       }}
     >
       <ReplySettingCheckbox
-        autoFocus
         checked={settings.open}
         disabled={disabled}
         label={waveRightPanelText(

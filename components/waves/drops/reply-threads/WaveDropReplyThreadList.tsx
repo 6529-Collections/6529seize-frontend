@@ -38,9 +38,6 @@ export default function WaveDropReplyThreadList({
   return (
     <div
       id={id}
-      role="group"
-      aria-label={t(locale, "waves.chat.replyThread.regionLabel")}
-      aria-busy={isFetching}
       className="tw-mt-1 tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-800"
     >
       {hasNextPage && (
@@ -57,15 +54,21 @@ export default function WaveDropReplyThreadList({
           </button>
         </div>
       )}
-      {replies.map((reply, index) => (
-        <div key={reply.stableKey}>
-          {renderReply({
-            reply,
-            previousReply: replies[index - 1] ?? null,
-            nextReply: replies[index + 1] ?? null,
-          })}
-        </div>
-      ))}
+      <ul
+        aria-label={t(locale, "waves.chat.replyThread.regionLabel")}
+        aria-busy={isFetching}
+        className="tw-m-0 tw-list-none tw-p-0"
+      >
+        {replies.map((reply, index) => (
+          <li key={reply.stableKey}>
+            {renderReply({
+              reply,
+              previousReply: replies[index - 1] ?? null,
+              nextReply: replies[index + 1] ?? null,
+            })}
+          </li>
+        ))}
+      </ul>
       {replies.length === 0 && (
         <p className="tw-m-0 tw-py-1 tw-pl-3 tw-text-xs tw-text-iron-400">
           {isFetching

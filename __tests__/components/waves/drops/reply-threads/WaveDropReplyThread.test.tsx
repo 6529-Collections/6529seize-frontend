@@ -112,7 +112,7 @@ describe("WaveDropReplyThread", () => {
       screen.getByRole("button", { name: "Hide replies" })
     ).toHaveAttribute("aria-expanded", "true");
     expect(useDropMessagesMock).toHaveBeenCalledWith("wave-1", "root", wave);
-    const group = screen.getByRole("group", { name: "Replies to this drop" });
+    const group = screen.getByRole("list", { name: "Replies to this drop" });
     expect(group).toHaveTextContent("reply-1 after start");
     expect(group).toHaveTextContent("reply-2 after reply-1");
     expect(group.textContent?.indexOf("reply-1")).toBeLessThan(
@@ -121,7 +121,7 @@ describe("WaveDropReplyThread", () => {
 
     await user.click(screen.getByRole("button", { name: "Hide replies" }));
     expect(
-      screen.queryByRole("group", { name: "Replies to this drop" })
+      screen.queryByRole("list", { name: "Replies to this drop" })
     ).not.toBeInTheDocument();
   });
 
@@ -141,7 +141,9 @@ describe("WaveDropReplyThread", () => {
 
     await user.click(screen.getByRole("button", { name: "Show 2 replies" }));
 
-    expect(screen.getByRole("group")).toHaveTextContent("Loading replies…");
+    // The live region is driven by the real query; the mocked hook shows the
+    // visible loading text instead.
+    expect(screen.getByText("Loading replies…")).toBeInTheDocument();
   });
 
   it("uses singular wording for one reply", () => {

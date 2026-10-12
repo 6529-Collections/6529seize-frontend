@@ -101,8 +101,10 @@ function useLiveReplyCounts(waveId: string, enabled: boolean) {
   );
 }
 
-export const useExpandedReplyThreadsStore = (): ExpandedReplyThreadsStore =>
-  useState(createExpandedReplyThreadsStore)[0];
+export const useExpandedReplyThreadsStore = (): ExpandedReplyThreadsStore => {
+  const [store] = useState(createExpandedReplyThreadsStore);
+  return store;
+};
 
 /** Provides reply threads only while `enabled`; children never remount. */
 export function WaveReplyThreadsProvider({

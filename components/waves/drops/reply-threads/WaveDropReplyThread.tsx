@@ -89,11 +89,11 @@ export default function WaveDropReplyThread({
             : getShowRepliesLabel(locale, repliesCount)}
         </button>
         {/* Always mounted so the loading message is announced on open. */}
-        <span role="status" className="tw-sr-only">
+        <output className="tw-sr-only">
           {expanded && fetchingThreadQueries > 0
             ? t(locale, "waves.chat.replyThread.loading")
             : ""}
-        </span>
+        </output>
         {expanded && (
           <WaveDropReplyThreadList
             id={listId}
