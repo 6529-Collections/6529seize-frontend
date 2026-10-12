@@ -44,6 +44,8 @@ import ContentModerationDropActions from "@/components/content-moderation/Conten
 import ReportDropModal from "@/components/content-moderation/ReportDropModal";
 import WaveDropMobileMenuReactionPicker from "./WaveDropMobileMenuReactionPicker";
 import WaveDropDocumentationAction from "./WaveDropDocumentationAction";
+import DropSignatureDialog from "./signature/DropSignatureDialog";
+import DropSignatureMenuItem from "./signature/DropSignatureMenuItem";
 
 export interface WaveDropMobileMenuProps {
   readonly drop: ApiDrop;
@@ -120,6 +122,7 @@ function WaveDropMobileMenuAuthenticatedActions({
   closeMenu,
   showVoting,
   onReport,
+  onShowSignature,
   showOnlyQuickRemove,
 }: {
   readonly extendedDrop: ExtendedDrop;
@@ -146,6 +149,7 @@ function WaveDropMobileMenuAuthenticatedActions({
   readonly closeMenu: () => void;
   readonly showVoting: boolean;
   readonly onReport: () => void;
+  readonly onShowSignature: () => void;
   readonly showOnlyQuickRemove: boolean;
 }) {
   const locale = useBrowserLocale();
@@ -277,6 +281,12 @@ function WaveDropMobileMenuAuthenticatedActions({
 
       <WaveDropDocumentationAction drop={drop} onSelected={closeMenu} mobile />
 
+      <DropSignatureMenuItem
+        dropId={drop.id}
+        onSelect={onShowSignature}
+        mobile
+      />
+
       {quickAddCuration && (
         <button
           type="button"
@@ -388,6 +398,7 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
     useState<WaveDropMobileMenuView>("actions");
   const reactionButtonRef = useRef<HTMLButtonElement>(null);
   const [isReportOpen, setIsReportOpen] = useState(false);
+  const [isSignatureOpen, setIsSignatureOpen] = useState(false);
   const curationsDialogTimeoutRef = useRef<ReturnType<
     typeof setTimeout
   > | null>(null);
@@ -558,6 +569,10 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
                     closeMenu();
                     setIsReportOpen(true);
                   }}
+                  onShowSignature={() => {
+                    closeMenu();
+                    setIsSignatureOpen(true);
+                  }}
                   showOnlyQuickRemove={showOnlyQuickRemove}
                 />
               )}
@@ -583,6 +598,11 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
         drop={drop}
         isOpen={isReportOpen}
         onClose={() => setIsReportOpen(false)}
+      />
+      <DropSignatureDialog
+        dropId={drop.id}
+        isOpen={isSignatureOpen}
+        onClose={() => setIsSignatureOpen(false)}
       />
     </>
   );
