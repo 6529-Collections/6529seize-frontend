@@ -1,5 +1,5 @@
 import { defineWaveImageLayoutTests } from "../media/imageArtworkLayoutCases";
-import type { Page, Route } from "@playwright/test";
+import type { Page, Route, WebSocketRoute } from "@playwright/test";
 import { defineWaveImagePreviewTests } from "../media/waveImagePreviewCases";
 import { defineWaveVideoLayoutTests } from "../media/waveVideoLayoutCases";
 
@@ -52,6 +52,85 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
   defineWaveVideoLayoutTests();
   defineWaveImageLayoutTests();
   defineWaveImagePreviewTests();
+
+  test("authenticates the wave listener before receiving and sending typing", async ({
+    baseURL,
+    page,
+  }) => {
+    const waveSockets = new Set<WebSocketRoute>();
+    let anonymousWaveSubscriptions = 0;
+    let deliveredTyping = 0;
+    const apiOrigin = new URL(getSandboxApiOrigin(baseURL));
+    await page.routeWebSocket(
+      (url) => url.protocol === "ws:" && url.host === apiOrigin.host,
+      (ws) => {
+        let authenticated = false;
+        ws.onMessage((payload) => {
+          if (typeof payload !== "string") return;
+          const message = JSON.parse(payload) as {
+            type: string;
+            access_token?: string;
+            wave_id?: string;
+          };
+          if (message.type === "AUTHENTICATE" && message.access_token) {
+            authenticated = true;
+            ws.send(JSON.stringify({ type: "AUTHENTICATED" }));
+          }
+          if (message.type === "SUBSCRIBE_TO_WAVE") {
+            if (authenticated) waveSockets.add(ws);
+            else anonymousWaveSubscriptions += 1;
+          }
+          if (
+            message.type === "USER_IS_TYPING" &&
+            authenticated &&
+            waveSockets.size > 0
+          ) {
+            deliveredTyping += 1;
+          }
+        });
+        ws.onClose(() => waveSockets.delete(ws));
+      }
+    );
+    await gotoSandboxWave(page);
+    await expect.poll(() => waveSockets.size).toBe(1);
+    expect(anonymousWaveSubscriptions).toBe(0);
+    const sendTypers = (handles: readonly string[]) => {
+      for (const ws of waveSockets) {
+        for (const handle of handles)
+          ws.send(
+            JSON.stringify({
+              type: "USER_IS_TYPING",
+              data: { wave_id: SANDBOX_WAVE_ID, profile: { handle, level: 1 } },
+            })
+          );
+      }
+    };
+    sendTypers(["typing-alice"]);
+    await expect(
+      page.getByText("typing-alice is typing", { exact: true })
+    ).toBeVisible();
+    sendTypers(["typing-alice", "typing-bob"]);
+    await expect(
+      page.getByText("typing-alice, typing-bob are typing", { exact: true })
+    ).toBeVisible();
+    sendTypers(["typing-alice", "typing-bob", "typing-carol"]);
+    await expect(
+      page.getByText("typing-alice, typing-bob and 1 more people are typing", {
+        exact: true,
+      })
+    ).toBeVisible();
+    await page
+      .getByRole("textbox", { name: "Write a chat message" })
+      .last()
+      .fill("Typing without posting");
+    await expect.poll(() => deliveredTyping).toBeGreaterThan(0);
+    await expect(
+      page.getByText("typing-alice, typing-bob and 1 more people are typing", {
+        exact: true,
+      })
+    ).toBeHidden({ timeout: 10000 });
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
 
   test("queues and removes an attachment without upload or submit", async ({
     baseURL,

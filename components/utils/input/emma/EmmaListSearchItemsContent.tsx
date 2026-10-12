@@ -6,20 +6,20 @@ export default function EmmaListSearchItemsContent({
   loading,
   items,
   onSelect,
-  loadingLabel = "Loading...",
-  noResultsLabel = "No results",
+  loadingLabel,
+  noResultsLabel,
 }: {
   readonly selectedId: string | null;
   readonly loading: boolean;
   readonly items: AllowlistDescription[];
   readonly onSelect: (item: AllowlistDescription) => void;
-  readonly loadingLabel?: string;
-  readonly noResultsLabel?: string;
+  readonly loadingLabel: string;
+  readonly noResultsLabel: string;
 }) {
   if (loading) {
     return (
       <li className="tw-relative tw-flex tw-h-full tw-w-full tw-select-none tw-items-center tw-justify-between tw-rounded-lg tw-px-2 tw-py-2 tw-text-sm tw-font-medium tw-text-white">
-        {loadingLabel}
+        <span role="status">{loadingLabel}</span>
       </li>
     );
   }
@@ -41,7 +41,7 @@ export default function EmmaListSearchItemsContent({
 
   return (
     <li className="tw-relative tw-flex tw-h-full tw-w-full tw-select-none tw-items-center tw-justify-between tw-rounded-lg tw-px-2 tw-py-2 tw-text-sm tw-font-medium tw-text-white">
-      {noResultsLabel}
+      <span role="status">{noResultsLabel}</span>
     </li>
   );
 }

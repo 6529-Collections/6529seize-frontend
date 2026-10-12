@@ -264,6 +264,9 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
     "Memes submissions require {amount} REP in {category}.",
   "grant.submissionLookalikeInfo":
     '"{category}" is a separate category. Only {submissionCategory} counts for submissions.',
+  "grant.amountLabel": "REP amount",
+  "grant.availableRepLabel": "Your available REP:",
+  "grant.assignedRepLabel": "Your REP assigned to {name}:",
   "grant.availableRep": "Your available REP: {amount}",
   "grant.assignedRep": "Your REP assigned to {name}: {amount}",
   "grant.actions.grant": "Grant REP",
@@ -471,6 +474,11 @@ const TITLE_CONTEXT_MESSAGES = objectMessages("titleContext", {
 } as const);
 
 const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
+  chat: "Chat",
+  sales: "Sales",
+  myStream: "My Stream",
+  polls: "Polls",
+  loadingSection: "Loading section…",
   about: "About",
   waveSections: "Wave sections",
   appSections: "App sections",
@@ -715,6 +723,25 @@ const WAVE_VOTE_DETAILS_MESSAGES = objectMessages("waves.voteDetails", {
   title: "Votes",
   "trigger.one": "View voters and vote log for {count} voter",
   "trigger.other": "View voters and vote log for {count} voters",
+  "trigger.unavailable":
+    "View vote history; historical voter count unavailable",
+  "voters.unavailable": "Voters unavailable",
+  "voters.unavailableExplanation":
+    "The voter list at the time this winner was decided was not saved. The final score is available. Open {voteLogTab} to view any recorded changes.",
+  "voters.one": "{count} voter",
+  "voters.other": "{count} voters",
+  "voters.tab": "Voters",
+  "logs.tab": "Vote log",
+  "voters.empty": "No voters yet.",
+  "voters.loading": "Loading voters...",
+  "voters.error": "Could not load voters.",
+  "logs.empty": "No vote changes yet.",
+  "logs.loading": "Loading vote log...",
+  "logs.error": "Could not load vote log.",
+  retry: "Try again",
+  close: "Close votes",
+  tabsLabel: "Vote details",
+  total: "{value} {unit} total",
 } as const);
 
 const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
@@ -2187,6 +2214,18 @@ const NETWORK_GROUP_INSPECTION_MESSAGES = objectMessages(
     bulkRep: "REP everyone matching criteria",
     bulkNic: "NIC everyone matching criteria",
     bulkActionsLabel: "Bulk rating actions",
+    add: "Add",
+    subtract: "Subtract",
+    grant: "Grant",
+    cancel: "Cancel",
+    repCategory: "Rep Category",
+    clearCategory: "Clear category",
+    repCategoryRequired: "Please enter rep category",
+    creditSummary:
+      "You can grant up to {credit} {matter} to each of {count} members of the group.",
+    progress: "{matter} Progress",
+    keepOpen:
+      "Keep this window open while we distribute credits across the group.",
     bulkRepSuccess: "REP distributed.",
     bulkNicSuccess: "NIC distributed.",
     source: "Source: filters + optional manual list",
@@ -2197,7 +2236,22 @@ const NETWORK_GROUP_INSPECTION_MESSAGES = objectMessages(
   } as const
 );
 
+const NETWORK_HEADER_ACTION_MESSAGES = objectMessages("network.actions", {
+  openFilters: "Open group filters",
+  openSort: "Open sort options",
+  openNerd: "Open Nerd view",
+} as const);
+
 const NETWORK_GROUP_FILTER_MESSAGES = objectMessages("network.groupFilter", {
+  filter: "Filter",
+  all: "All filters",
+  level: "Level",
+  tdh: "TDH",
+  nic: "NIC",
+  rep: "Rep",
+  nfts: "Required NFTs",
+  collections: "Collection Access",
+  xtdhGrant: "xTDH Grant",
   title: "Filter Network",
   suggestedName: "Network filter",
   defaultLabel: "All Network members",
@@ -2538,6 +2592,25 @@ const REVIEWBOT_USAGE_MESSAGES = objectMessages("reviewbotUsage", {
 } as const);
 
 const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
+  ["pdf.pages", "PDF pages"],
+  ["pdf.pageHeading", "Page {page}"],
+  ["pdf.loading", "Loading PDF…"],
+  ["pdf.loadingPage", "Loading page…"],
+  [
+    "pdf.error",
+    "This PDF could not be previewed. Try again or open the full PDF.",
+  ],
+  [
+    "pdf.tooLarge",
+    "This PDF is too large for this preview. Open the full PDF to read it.",
+  ],
+  [
+    "pdf.password",
+    "This PDF requires a password. Open the full PDF to read it.",
+  ],
+  ["pdf.open", "Open full PDF"],
+  ["pdf.retry", "Try again"],
+  ["pdf.page", "Page {page} of {total}"],
   ["safety.ariaLabel", "Scanned and validated attachment"],
   ["safety.badge", "Scanned and validated"],
   ["safety.heading", "Attachment safety"],
@@ -2834,6 +2907,10 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  "header.menu.open": "Open menu",
+  "header.menu.close": "Close menu",
+  "header.navigation.loading": "Loading navigation…",
+  "waves.information.open": "About {name}",
   ...EN_SUBMISSION_DISCOVERY_MESSAGES,
   ...waveCreationMessages,
   ...COMPETITION_MESSAGES,
@@ -4214,6 +4291,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_CHAT_SETTINGS_MESSAGES,
   ...NETWORK_GROUP_INSPECTION_MESSAGES,
   ...NETWORK_GROUP_FILTER_MESSAGES,
+  ...NETWORK_HEADER_ACTION_MESSAGES,
   ...WAVE_LOADING_MESSAGES,
   ...WAVE_DROPS_SEARCH_MODAL_MESSAGES,
   ...WAVE_GIF_PICKER_MESSAGES,

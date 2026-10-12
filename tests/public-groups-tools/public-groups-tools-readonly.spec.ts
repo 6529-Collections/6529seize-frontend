@@ -71,11 +71,16 @@ function resolveApiEndpoint(baseURL: string): string {
 }
 
 async function getStagingApiHeaders(
-  page: Page
+  page: Page,
+  apiEndpoint: string
 ): Promise<Record<string, string>> {
-  const apiAuth = (await page.context().cookies()).find(
-    (cookie) => cookie.name === "x-6529-auth"
-  )?.value;
+  if (new URL(apiEndpoint).hostname !== "api.staging.6529.io") {
+    return {};
+  }
+  const apiAuth =
+    (await page.context().cookies()).find(
+      (cookie) => cookie.name === "x-6529-auth"
+    )?.value ?? process.env["STAGING_API_KEY"];
 
   return apiAuth ? { "x-6529-auth": apiAuth } : {};
 }
@@ -135,11 +140,167 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await gotoReady(page, "/network");
 
     await openGroupFilters(page);
+    const filter = page.getByRole("dialog", { name: "Filter Network" });
+    const narrowFilter = await page.evaluate(
+      () => window.matchMedia("(max-width: 1023px)").matches
+    );
+    const choices = filter.getByRole("group", {
+      name: "Filter Network",
+      includeHidden: true,
+    });
+    const allFilters = filter.getByRole("button", { name: "All filters" });
+    const openCriterion = async (name: string | RegExp) => {
+      if (narrowFilter && (await allFilters.isVisible())) {
+        await allFilters.click();
+      }
+      await choices.getByRole("button", { name, exact: true }).click();
+    };
+    const levelInput = filter.getByRole("spinbutton", {
+      name: "Level at least",
+    });
+    await expect(levelInput).toBeHidden();
+    const criteria = [
+      "Identities",
+      "Level",
+      "TDH",
+      "NIC",
+      "Rep",
+      "Required NFTs",
+      "Collection Access",
+      "xTDH Grant",
+    ];
+    await expect(choices.getByRole("button")).toHaveText(criteria);
+    if (narrowFilter) {
+      await expect(
+        filter.getByRole("region", { name: "Identities" })
+      ).toBeHidden();
+    } else {
+      await expect(
+        filter.getByRole("region", { name: "Identities" })
+      ).toBeVisible();
+    }
+    for (const name of criteria) {
+      await expect(
+        filter.getByRole("button", { name, exact: true })
+      ).toBeInViewport();
+    }
     await expect(
-      page
-        .getByRole("button", { name: "Edit criteria" })
-        .filter({ visible: true })
-    ).toBeVisible({ timeout: 30000 });
+      filter.getByRole("button", { name: "Edit criteria" })
+    ).toHaveCount(0);
+    const apply = filter.getByRole("button", {
+      name: "Create and use new group",
+    });
+    await expect(apply).toBeDisabled();
+    await expect(apply).toBeInViewport({ ratio: 1 });
+    await expect(filter.getByText("After editing")).toBeInViewport();
+    const restingHeight = await choices.evaluate(
+      (element) =>
+        element.closest(".mobile-wrapper-dialog")?.getBoundingClientRect()
+          .height
+    );
+    if (narrowFilter) {
+      const availableHeight = await page.evaluate(
+        () => window.innerHeight - 64
+      );
+      expect(restingHeight).toBeCloseTo(Math.min(640, availableHeight), 0);
+      const emptySpace = await choices.evaluate(
+        (element) =>
+          element.getBoundingClientRect().bottom -
+          (element.lastElementChild?.getBoundingClientRect().bottom ?? 0)
+      );
+      expect(emptySpace).toBeLessThan(80);
+    }
+    if (narrowFilter) {
+      const widths = await apply.evaluate((element) => ({
+        button: element.getBoundingClientRect().width,
+        content: element.parentElement
+          ? element.parentElement.getBoundingClientRect().width -
+            Number.parseFloat(
+              getComputedStyle(element.parentElement).paddingLeft
+            ) -
+            Number.parseFloat(
+              getComputedStyle(element.parentElement).paddingRight
+            )
+          : 0,
+      }));
+      expect(widths.button).toBeCloseTo(widths.content ?? 0, 0);
+    }
+    for (const name of [
+      "Identities",
+      "Required NFTs",
+      "Collection Access",
+      "xTDH Grant",
+    ]) {
+      await openCriterion(name);
+      await expect(filter.getByRole("region", { name })).toBeVisible();
+      await expect
+        .poll(() =>
+          choices.evaluate(
+            (element) =>
+              element.closest(".mobile-wrapper-dialog")?.getBoundingClientRect()
+                .height
+          )
+        )
+        .toBeCloseTo(restingHeight ?? 0, 0);
+      if (narrowFilter) {
+        await expect(allFilters).toBeInViewport();
+      } else {
+        await expect(
+          filter.getByRole("button", { name: "Level", exact: true })
+        ).toBeInViewport();
+        await expect(
+          filter.getByRole("button", { name: "xTDH Grant", exact: true })
+        ).toBeInViewport();
+      }
+    }
+    await openCriterion("Level");
+    await levelInput.fill("10");
+    await openCriterion("Identities");
+    await expect(
+      filter.getByText("No identities are explicitly included.")
+    ).toBeVisible();
+    const identityModes = filter.getByRole("tablist", {
+      name: "Identity treatment",
+    });
+    await expect(
+      identityModes.getByRole("tab", { name: "Included", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+    await identityModes
+      .getByRole("tab", { name: "Excluded", exact: true })
+      .click();
+    await expect(
+      identityModes.getByRole("tab", { name: "Excluded", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(
+      filter.getByText("No identities are explicitly excluded.")
+    ).toBeVisible();
+    await openCriterion(/^Level(?: Configured)?$/);
+    await expect(levelInput).toHaveValue("10");
+    await expect(apply).toBeEnabled();
+    await expect(apply).toBeInViewport({ ratio: 1 });
+    await openCriterion("TDH");
+    await filter
+      .getByRole("spinbutton", { name: "TDH + xTDH at least" })
+      .fill("1000");
+    await openCriterion("Collection Access");
+    for (const name of ["Gradients", "Memes", "Memelab", "Nextgen"]) {
+      await filter
+        .getByRole("region", { name: "Collection Access", exact: true })
+        .getByRole("button", { name, exact: true })
+        .click();
+    }
+    const criteriaTags = filter.getByRole("list").filter({
+      has: page.getByText("Level at least 10", { exact: true }),
+    });
+    await expect(criteriaTags.getByRole("listitem")).toHaveCount(6);
+    await expect(
+      criteriaTags.getByText("TDH + xTDH at least 1,000", { exact: true })
+    ).toBeVisible();
+    await expect(apply).toBeInViewport({ ratio: 1 });
+    await expectNoHorizontalOverflow(page);
+    await expect(
+      filter.getByRole("button", { name: "View members" })
+    ).toBeInViewport();
     await expect(
       page
         .getByRole("button", { name: "Choose group" })
@@ -147,12 +308,18 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     ).toHaveCount(0);
     await expect(page.getByText("Hide criteria and members")).toHaveCount(0);
 
+    await filter.getByRole("button", { name: "Close", exact: true }).click();
+    await expect(filter).toBeHidden();
+    await expect(
+      page.getByRole("button", { name: "Open group filters" })
+    ).toBeFocused();
+
     // Resolve a real group id read-only so the deep-link behavior remains
     // portable across local, staging, and production data sets.
-    const groupsResponse = await page.request.get(
-      `${resolveApiEndpoint(baseURL ?? "http://localhost:3001")}/api/groups`,
-      { headers: await getStagingApiHeaders(page) }
-    );
+    const apiEndpoint = resolveApiEndpoint(baseURL ?? "http://localhost:3001");
+    const groupsResponse = await page.request.get(`${apiEndpoint}/api/groups`, {
+      headers: await getStagingApiHeaders(page, apiEndpoint),
+    });
     expect(groupsResponse.ok()).toBe(true);
     const groupsPayload = (await groupsResponse.json()) as
       | { readonly id?: string; readonly name?: string }[]
@@ -198,6 +365,100 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     );
 
     await expectNoHorizontalOverflow(page);
+  });
+
+  test("keeps All filters and Close visible while a narrow editor scrolls", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 620 });
+    await gotoReady(page, "/network");
+    await openGroupFilters(page);
+    const filter = page.getByRole("dialog", { name: "Filter Network" });
+    const choices = filter.getByRole("group", { name: "Filter Network" });
+    const back = filter.getByRole("button", {
+      name: "All filters",
+      exact: true,
+    });
+    const level = filter.getByRole("spinbutton", { name: "Level at least" });
+    await choices.getByRole("button", { name: "Level", exact: true }).click();
+    await level.fill("10");
+    await back.click();
+    await choices
+      .getByRole("button", { name: "Identities", exact: true })
+      .click();
+    const identities = filter.getByRole("region", {
+      name: "Identities",
+      exact: true,
+    });
+    const backBeforeScroll = await back.boundingBox();
+    // Mobile WebKit does not support mouse.wheel. Scroll the real editor
+    // directly and keep the same rendered-position and navigation guarantees.
+    await identities.evaluate((element) => {
+      const editor = element.parentElement;
+      if (!editor) throw new Error("Expected the criterion scroll container");
+      editor.scrollTo({ top: editor.scrollHeight });
+    });
+    await expect
+      .poll(() =>
+        identities.evaluate((element) => element.parentElement?.scrollTop)
+      )
+      .toBeGreaterThan(0);
+    await expect(back).toBeInViewport({ ratio: 1 });
+    await expect
+      .poll(async () => (await back.boundingBox())?.y)
+      .toBeCloseTo(backBeforeScroll?.y ?? 0, 0);
+    await expect(
+      filter.getByRole("button", { name: "Close", exact: true })
+    ).toBeInViewport({ ratio: 1 });
+    await expect(
+      filter.getByRole("button", { name: "Create and use new group" })
+    ).toBeInViewport({ ratio: 1 });
+    await back.click();
+    await expect(
+      choices.getByRole("button", { name: "Identities", exact: true })
+    ).toBeFocused();
+    await choices
+      .getByRole("button", { name: "Level Configured", exact: true })
+      .click();
+    await expect(level).toHaveValue("10");
+  });
+
+  test("keeps the Network filter as a sheet at tablet and touch widths", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 820, height: 900 });
+    await gotoReady(page, "/network");
+    await openGroupFilters(page);
+    const sheet = page
+      .getByRole("dialog", { name: "Filter Network" })
+      .locator(".mobile-wrapper-dialog");
+    // A compact sheet need not start near the top. Its bottom anchoring and
+    // stable height distinguish it from the centered desktop modal.
+    await expect
+      .poll(async () => {
+        const bounds = await sheet.boundingBox();
+        return bounds ? bounds.y + bounds.height : null;
+      })
+      .toBeCloseTo(900, 0);
+    const tabletBounds = await sheet.boundingBox();
+    expect(tabletBounds).not.toBeNull();
+    expect(tabletBounds?.y).toBeGreaterThanOrEqual(0);
+    expect(tabletBounds?.height).toBeGreaterThan(0);
+
+    if (
+      await page.evaluate(() => matchMedia("(any-pointer: coarse)").matches)
+    ) {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await expect
+        .poll(async () => {
+          const bounds = await sheet.boundingBox();
+          return bounds ? bounds.y + bounds.height : null;
+        })
+        .toBeCloseTo(900, 0);
+      const touchBounds = await sheet.boundingBox();
+      expect(touchBounds?.y).toBeGreaterThanOrEqual(0);
+      expect(touchBounds?.height).toBeCloseTo(tabletBounds?.height ?? 0, 0);
+    }
   });
 
   test("renders the subscriptions report read-only and keeps download actions explicit", async ({

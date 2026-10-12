@@ -7,6 +7,7 @@ import {
   dedupeInlineIdentities,
   getInlineGroupConfiguredRules,
   getInlineGroupDraftSummary,
+  getInlineGroupDraftSummaryDetails,
   getInlineIdentityAddresses,
   getInlineGroupRuleCount,
   CreateWaveInlineGroupRuleType,
@@ -111,6 +112,27 @@ describe("createWaveInlineGroupBuilder", () => {
         identityCount: 0,
       })
     ).toBe("Selected xTDH grant");
+  });
+
+  it("keeps numbers and grant names with punctuation intact as separate criteria", () => {
+    const draft = createEmptyInlineGroupPayload();
+    draft.group.tdh.min = 1000;
+    draft.group.is_beneficiary_of_grant_id = "grant-1";
+
+    const summary = getInlineGroupDraftSummaryDetails({
+      draft,
+      identityCount: 2,
+      beneficiaryGrantCollectionName: "Art, Light and Life",
+    });
+
+    expect(summary.parts).toEqual([
+      "TDH + xTDH at least 1,000",
+      "xTDH grant for Art, Light and Life",
+      "2 explicitly included users",
+    ]);
+    expect(summary.text).toBe(
+      "TDH + xTDH at least 1,000, xTDH grant for Art, Light and Life, and 2 explicitly included users"
+    );
   });
 
   it("dedupes and serializes inline identities by selected wallet", () => {

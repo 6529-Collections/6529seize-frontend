@@ -1,9 +1,19 @@
 import type { Locator, Page } from "@playwright/test";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
-import { RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
+import { expectCompetitionScroll } from "../support/competitionScroll";
+import {
+  gotoDocumentWithTransientRetry,
+  gotoReadyWithApiResponse,
+  RESPONSE_TIMEOUT_MS,
+} from "../support/routeReadiness";
 
 import { EN_US_MESSAGES } from "../../i18n/messages/en-US";
-import { expect, test } from "../testHelpers";
+import {
+  expect,
+  expectNoHorizontalOverflow,
+  test,
+  waitForRouteReady,
+} from "../testHelpers";
 import {
   expectProfileShell,
   expectProfileTabLinks,
@@ -19,6 +29,8 @@ const PROFILE_FEED_DESCRIPTION =
 const APP_SECTIONS_LABEL =
   englishMessages["wave.navigation.appSections"] ?? "App sections";
 const PROFILE_FEED_TITLE = "Latest From Profile Waves";
+const EMPTY_COMPETITION_ACTIVITY =
+  englishMessages["competitions.emptyResource"] ?? "Nothing to show yet.";
 
 const PROFILE_TAB_PATHS = [
   {
@@ -51,11 +63,8 @@ async function getFirstWaveId(page: Page) {
     .getByRole("region", {
       name: /All recent waves list|Regular waves list/,
     })
-    .locator('a[href^="/waves/"]');
-  await waveLinks.first().waitFor({
-    state: "visible",
-    timeout: RESPONSE_TIMEOUT_MS,
-  });
+    .locator('a[href^="/waves/"]')
+    .filter({ visible: true });
   let href: string | null = null;
   await expect
     .poll(
@@ -74,11 +83,14 @@ async function getFirstWaveId(page: Page) {
         );
         return href !== null;
       },
-      { message: "Expected wave list to contain a wave detail link" }
+      {
+        timeout: RESPONSE_TIMEOUT_MS,
+        message: "Expected wave list to contain a rendered wave detail link",
+      }
     )
     .toBe(true);
   const pathname = href ? new URL(href, page.url()).pathname : "";
-  const match = pathname.match(/^\/waves\/([^/]+)$/);
+  const match = pathname.match(/^\/waves\/([0-9a-f-]{36})$/i);
 
   expect(
     match,
@@ -94,6 +106,97 @@ function getProfileFeed(page: Page): Locator {
 }
 
 test.describe("Waves and profile read-only coverage @surface @medium @large @readonly", () => {
+  test("scrolls Main Stage Settings and validates live vote Activity in the app", async ({
+    page,
+  }, testInfo) => {
+    test.setTimeout(120000);
+    test.skip(
+      testInfo.project.name !== "web-mobile-chromium",
+      "The native app layout uses the mobile viewport."
+    );
+    await installSurfaceSimulation(
+      page.context(),
+      "capacitor-ios-sim",
+      testInfo.project.use.baseURL
+    );
+    const settingsResponse = page.waitForResponse(
+      (response) => new URL(response.url()).pathname === "/api/settings"
+    );
+    await gotoReady(page, "/waves");
+    const settings = await (await settingsResponse).json();
+    expect(settings.memes_wave_id).toMatch(/^[0-9a-f-]{36}$/i);
+    await gotoReady(page, `/waves/${settings.memes_wave_id}`);
+    await page
+      .getByRole("navigation", { name: "Wave sections" })
+      .getByRole("button", { name: "Settings", exact: true })
+      .click();
+    const rules = page
+      .getByRole("main")
+      .locator('section[id^="competition-"][id$="-rules"]');
+    await expect(
+      rules.getByRole("heading", { name: "Participation", exact: true })
+    ).toBeVisible();
+    await expectCompetitionScroll(
+      page,
+      page
+        .getByRole("main")
+        .locator('section[id^="competition-"][id$="-rules"]')
+        .locator(".."),
+      page
+        .getByRole("main")
+        .locator('section[id^="competition-"][id$="-rules"]')
+        .locator("dl > div")
+        .last()
+    );
+    await testInfo.attach("main-stage-settings-scrolled", {
+      body: await page.screenshot(),
+      contentType: "image/png",
+    });
+    const competitionPath = new URL(page.url()).pathname;
+    expect(competitionPath).toMatch(/\/competitions\/[^/]+$/);
+    const activityResponse = await gotoReadyWithApiResponse(
+      page,
+      `${competitionPath}?tab=votes&voteTab=activity`,
+      (url) =>
+        url.pathname === `/api/v3${competitionPath}/activity` &&
+        url.searchParams.get("offset") === "0"
+    );
+    const logs: readonly unknown[] = await activityResponse.json();
+    expect(Array.isArray(logs), "Vote Activity must return an array").toBe(
+      true
+    );
+    const activity = page.getByRole("tabpanel", {
+      name: "Activity",
+      exact: true,
+    });
+    await expect(activity).toBeVisible();
+    await expect(activity.getByRole("alert")).toHaveCount(0);
+    const dropControls = activity.getByRole("button", {
+      name: "View drop in chat",
+      exact: true,
+    });
+    const emptyState = activity.getByText(EMPTY_COMPETITION_ACTIVITY, {
+      exact: true,
+    });
+    await expect(dropControls).toHaveCount(logs.length);
+    if (logs.length === 0) {
+      await expect(activity.getByRole("status")).toHaveText(
+        EMPTY_COMPETITION_ACTIVITY
+      );
+      await expect(emptyState).toBeVisible();
+    } else {
+      await expect(emptyState).toHaveCount(0);
+      await expect(dropControls.first()).toBeVisible();
+    }
+    // Live competitions can have no votes or too few rows to overflow. The
+    // native-competition sandbox exercises scrolling with 30 fixture rows.
+    await expectNoHorizontalOverflow(page);
+    await testInfo.attach("main-stage-live-activity", {
+      body: await page.screenshot(),
+      contentType: "image/png",
+    });
+  });
+
   for (const surface of ["web", "app"] as const) {
     test(`remembers Main Stage Leaderboard and another wave's Chat (${surface})`, async ({
       page,
@@ -234,33 +337,51 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       testInfo.project.use.baseURL
     );
     const settingsResponse = page.waitForResponse(
-      (response) => new URL(response.url()).pathname === "/api/settings"
+      (response) =>
+        response.request().method() === "GET" &&
+        new URL(response.url()).pathname === "/api/settings",
+      { timeout: RESPONSE_TIMEOUT_MS }
     );
     await gotoReady(page, "/waves");
-    const settings = await (await settingsResponse).json();
+    const settingsResult = await settingsResponse;
+    expect(
+      settingsResult.ok(),
+      `Main Stage settings returned HTTP ${settingsResult.status()}`
+    ).toBe(true);
+    const settings = await settingsResult.json();
     expect(settings.memes_wave_id).toMatch(/^[0-9a-f-]{36}$/i);
-    const leaderboardResponse = page.waitForResponse((response) => {
-      const url = new URL(response.url());
-      return (
-        url.pathname ===
-          `/api/v2/waves/${settings.memes_wave_id}/leaderboard` &&
-        url.searchParams.get("sort") === "RANK"
-      );
-    });
     await gotoReady(page, `/waves/${settings.memes_wave_id}`);
     const navigation = page.getByRole("navigation", { name: "Wave sections" });
     await expect(
       navigation.getByRole("button", { name: /^(Chat|Leaderboard|Winners)$/ })
-    ).toHaveText(["Chat", "Leaderboard", "Winners"]);
+    ).toHaveText(["Chat", "Leaderboard", "Winners"], {
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
     await testInfo.attach("main-stage-chat-first-app-tabs", {
       body: await page.screenshot(),
       contentType: "image/png",
     });
-    await navigation
-      .getByRole("button", { name: "Leaderboard", exact: true })
-      .click();
-    const response = await leaderboardResponse;
-    expect(response.ok()).toBe(true);
+    const [response] = await Promise.all([
+      page.waitForResponse(
+        (candidate) => {
+          const url = new URL(candidate.url());
+          return (
+            candidate.request().method() === "GET" &&
+            url.pathname ===
+              `/api/v2/waves/${settings.memes_wave_id}/leaderboard` &&
+            url.searchParams.get("sort") === "RANK"
+          );
+        },
+        { timeout: RESPONSE_TIMEOUT_MS }
+      ),
+      navigation
+        .getByRole("button", { name: "Leaderboard", exact: true })
+        .click(),
+    ]);
+    expect(
+      response.ok(),
+      `Main Stage leaderboard returned HTTP ${response.status()}`
+    ).toBe(true);
     const data = await response.json();
     expect(data.wave.id).toBe(settings.memes_wave_id);
     await testInfo.attach("main-stage-leaderboard-counts", {
@@ -752,18 +873,22 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
   test("handles legacy wave query links without mutation", async ({ page }) => {
     const waveId = await getFirstWaveId(page);
 
-    await gotoReady(page, `/waves?wave=${waveId}&serialNo=1`);
+    await gotoDocumentWithTransientRetry(
+      page,
+      `/waves?wave=${waveId}&serialNo=1`
+    );
+    // Next can emit the redirect in the streamed document. The initial shell
+    // is visible before that navigation destroys its execution context.
+    await page.waitForURL((url) => url.pathname === `/waves/${waveId}`, {
+      waitUntil: "domcontentloaded",
+      timeout: 45_000,
+    });
+    await waitForRouteReady(page);
+    await expectNoHorizontalOverflow(page);
 
     const url = new URL(page.url());
-    if (url.pathname === "/waves") {
-      await expect(url.searchParams.get("wave")).toBe(waveId);
-    } else {
-      await expect(url.pathname).toBe(`/waves/${waveId}`);
-      const serialNo = url.searchParams.get("serialNo");
-      if (serialNo !== null) {
-        await expect(serialNo).toBe("1");
-      }
-    }
+    expect(url.searchParams.get("wave")).toBeNull();
+    expect(url.searchParams.get("serialNo")).toBe("1");
   });
 
   test("renders the stable public profile shell read-only", async ({

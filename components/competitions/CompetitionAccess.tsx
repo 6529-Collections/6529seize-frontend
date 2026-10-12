@@ -76,9 +76,9 @@ export default function CompetitionAccess({
         };
   const editable =
     isMultiCompetitionEnabled() &&
-    hub.legacy_primary_competition_id !== competition.id &&
     competition.permissions.administer &&
-    (competition.lifecycle === ApiCompetitionLifecycle.Draft ||
+    (hub.legacy_primary_competition_id === competition.id ||
+      competition.lifecycle === ApiCompetitionLifecycle.Draft ||
       competition.lifecycle === ApiCompetitionLifecycle.Published);
   const groupLabel = t(
     locale,

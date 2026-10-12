@@ -17,6 +17,8 @@ import MyStreamWaveCreateActionsMenu from "../my-stream/tabs/MyStreamWaveCreateA
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { TabCountBadge } from "@/components/common/TabCountBadge";
+import TabButton from "@/components/common/TabButton";
+import { useWaveTabNavigation } from "@/hooks/useWaveTabNavigation";
 import {
   COMPETITION_TABS,
   isCompetitionPathname,
@@ -42,6 +44,13 @@ const BASE_TAB_BUTTON_CLASS_NAME =
   "tw-group -tw-mb-px tw-flex tw-min-h-10 tw-shrink-0 tw-items-center tw-justify-center tw-gap-1 tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-px-3 tw-py-2 tw-no-underline tw-transition-colors tw-duration-150 tw-ease-out motion-reduce:tw-transition-none focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-300";
 const BASE_TAB_TEXT_CLASS_NAME =
   "tw-max-w-36 tw-truncate tw-whitespace-nowrap tw-text-sm tw-font-medium sm:tw-max-w-44";
+
+// Wave and competition pages can remount this row during a section change.
+let lastWaveTabScroll: {
+  waveId: string;
+  left: number;
+  atEnd: boolean;
+} | null = null;
 
 const WAVE_TAB_SKELETONS = [
   { id: "chat", widthClassName: "tw-w-14" },
@@ -126,6 +135,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   isApp,
 }) => {
   const router = useRouter();
+  const navigateTab = useWaveTabNavigation();
+  const ChatButton = waveActive ? TabButton : "button";
   const pathname = usePathname();
   const isCompetitionRoute = isCompetitionPathname(pathname);
   const searchParams = useSearchParams();
@@ -151,7 +162,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     }
     return t(
       locale,
-      tab === "rules" ? "competitions.configuration" : `competitions.${tab}`
+      tab === "rules" ? "competitions.settings" : `competitions.${tab}`
     );
   };
   const requestedCompetitionTab = getCompetitionTab(
@@ -174,7 +185,6 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   const { registerRef } = useLayout();
   const { connectedProfile, isAuthenticated } = useAuth();
   const hasValidNotificationAuth = isAuthenticated === true;
-  const hasAuthenticatedProfile = Boolean(connectedProfile?.handle);
   const shouldShowCurationTabs = Boolean(isApp && waveActive && wave?.id);
   const activeCurationId = shouldShowCurationTabs
     ? searchParams.get("curation")
@@ -208,7 +218,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     isRankWave || isApproveWave || hasDefaultCompetition;
   const supportsOutcomeView =
     isCompetitionWave && !isCurationWave && outcomesVisible;
-  const canShowMyVotesTab = isCurationWave || hasAuthenticatedProfile;
+  const canShowMyVotesTab = isCompetitionWave || Boolean(nativeCompetition);
 
   // Get unread indicator for messages
   const { hasUnread: hasUnreadMessages } = useUnreadIndicator({
@@ -233,7 +243,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
 
       element?.scrollIntoView({
         behavior: prefersReducedMotion ? "auto" : "smooth",
-        inline: "center",
+        inline: "nearest",
         block: "nearest",
       });
     },
@@ -241,12 +251,62 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   );
 
   const getActiveButtonRef = useCallback(
-    (isActive: boolean) => (element: HTMLButtonElement | null) => {
-      if (isActive) {
-        scrollActiveButtonIntoView(element);
-      }
-    },
+    (isActive: boolean) => (isActive ? scrollActiveButtonIntoView : null),
     [scrollActiveButtonIntoView]
+  );
+
+  const waveId = wave?.id;
+
+  const restoreTabRowScroll = useCallback(
+    (element: HTMLDivElement | null) => {
+      if (!element || !waveActive || !waveId) return;
+      if (lastWaveTabScroll?.waveId === waveId) {
+        element.scrollTo({
+          left: lastWaveTabScroll.atEnd
+            ? element.scrollWidth
+            : lastWaveTabScroll.left,
+          behavior: "instant",
+        });
+      }
+      element
+        .querySelector<HTMLElement>('[aria-current="true"]')
+        ?.scrollIntoView({
+          block: "nearest",
+          inline: "nearest",
+          behavior: "instant",
+        });
+      let previousEnd = element.scrollWidth - element.clientWidth;
+      // A child can add a tab after its own data arrives (for example Winners).
+      const observer = new MutationObserver(() => {
+        const scrollEnd = element.scrollWidth - element.clientWidth;
+        if (
+          previousEnd > 0 &&
+          scrollEnd !== previousEnd &&
+          Math.abs(element.scrollLeft - previousEnd) <= 1
+        ) {
+          element.scrollLeft = scrollEnd;
+        }
+        previousEnd = scrollEnd;
+      });
+      observer.observe(element, { childList: true });
+      return () => {
+        observer.disconnect();
+        // A short loading row must not replace the previous scroll position.
+        if (
+          element.clientWidth === 0 ||
+          element.scrollWidth <= element.clientWidth
+        )
+          return;
+        lastWaveTabScroll = {
+          waveId,
+          left: element.scrollLeft,
+          atEnd:
+            element.scrollLeft > 0 &&
+            element.scrollWidth - element.clientWidth - element.scrollLeft <= 1,
+        };
+      };
+    },
+    [waveActive, waveId]
   );
 
   const updateSelectedCuration = useCallback(
@@ -357,7 +417,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
 
   const salesTabButton =
     waveActive && wave && isCurationWave ? (
-      <button
+      <TabButton
         {...getTabStateProps(activeView === BrainView.SALES)}
         ref={getActiveButtonRef(activeView === BrainView.SALES)}
         onClick={() => handleWaveViewChange(BrainView.SALES)}
@@ -368,9 +428,9 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             isActive: activeView === BrainView.SALES,
           })}
         >
-          Sales
+          {t(locale, "wave.navigation.sales")}
         </span>
-      </button>
+      </TabButton>
     ) : null;
   const createActionsMenu =
     isApp && wave && canManageCurations ? (
@@ -417,7 +477,11 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
         </div>
       ) : (
         <div className="tw-flex tw-min-h-12 tw-w-full tw-min-w-0 tw-items-stretch tw-gap-1.5 tw-px-0.5">
-          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-stretch tw-justify-start tw-gap-1.5 tw-overflow-x-auto tw-overflow-y-hidden tw-scrollbar-none">
+          <div
+            ref={restoreTabRowScroll}
+            data-wave-tabs-scroll="app"
+            className="tw-flex tw-min-w-0 tw-flex-1 tw-items-stretch tw-justify-start tw-gap-1.5 tw-overflow-x-auto tw-overflow-y-hidden tw-scrollbar-none"
+          >
             {streamBackButton}
             {!waveActive && showWavesTab && (
               <button
@@ -459,18 +523,23 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                 </span>
               </button>
             )}
-            <button
+            <ChatButton
               {...getTabStateProps(isChatActive)}
               ref={getActiveButtonRef(isChatActive)}
               onClick={onChatClick}
               className={getTabButtonClassName(isChatActive)}
             >
               <span className={getTabTextClassName({ isActive: isChatActive })}>
-                {waveActive ? "Chat" : "My Stream"}
+                {t(
+                  locale,
+                  waveActive
+                    ? "wave.navigation.chat"
+                    : "wave.navigation.myStream"
+                )}
               </span>
-            </button>
+            </ChatButton>
             {waveActive && wave && hasPolls && (
-              <button
+              <TabButton
                 {...getTabStateProps(activeView === BrainView.POLLS)}
                 ref={getActiveButtonRef(activeView === BrainView.POLLS)}
                 onClick={() => handleWaveViewChange(BrainView.POLLS)}
@@ -483,9 +552,9 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                     isActive: activeView === BrainView.POLLS,
                   })}
                 >
-                  Polls
+                  {t(locale, "wave.navigation.polls")}
                 </span>
-              </button>
+              </TabButton>
             )}
             {!isCompetitionRoute && !isCompetitionWave && salesTabButton}
             {flat &&
@@ -499,21 +568,19 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
               ).map((tab) => {
                 const selected = selectedCompetitionTab === tab;
                 return (
-                  <button
+                  <TabButton
                     key={tab}
                     {...getTabStateProps(selected)}
                     ref={getActiveButtonRef(selected)}
                     className={getTabButtonClassName(selected)}
-                    onClick={() =>
-                      router.push(`${pathname}?tab=${tab}`, { scroll: false })
-                    }
+                    onClick={() => navigateTab(`${pathname}?tab=${tab}`)}
                   >
                     <span
                       className={getTabTextClassName({ isActive: selected })}
                     >
                       {nativeTabLabel(tab)}
                     </span>
-                  </button>
+                  </TabButton>
                 );
               })}
             {(!isCompetitionRoute || (flat && !nativeCompetition)) &&
@@ -529,7 +596,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                   />
                   {canShowMyVotesTab && (
                     <>
-                      <button
+                      <TabButton
                         {...getTabStateProps(
                           effectiveActiveView === BrainView.MY_VOTES
                         )}
@@ -547,13 +614,13 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                               effectiveActiveView === BrainView.MY_VOTES,
                           })}
                         >
-                          {t(locale, "wave.navigation.myVotes")}
+                          {t(locale, "competitions.votes")}
                         </span>
-                      </button>
+                      </TabButton>
                     </>
                   )}
                   {supportsOutcomeView && (
-                    <button
+                    <TabButton
                       {...getTabStateProps(
                         effectiveActiveView === BrainView.OUTCOME
                       )}
@@ -572,10 +639,10 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                       >
                         {t(locale, "wave.navigation.outcome")}
                       </span>
-                    </button>
+                    </TabButton>
                   )}
                   {isMemesWave && (
-                    <button
+                    <TabButton
                       {...getTabStateProps(
                         effectiveActiveView === BrainView.FAQ
                       )}
@@ -594,40 +661,37 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                       >
                         {t(locale, "wave.navigation.faq")}
                       </span>
-                    </button>
+                    </TabButton>
                   )}
                 </>
               )}
-            {shouldShowCurationTabs &&
-              curationTabs.map((curation) => {
-                const isActive =
-                  activeView === BrainView.DEFAULT &&
-                  curation.id === activeCurationId;
-
-                return (
-                  <button
-                    key={curation.id}
-                    type="button"
-                    data-curation-id={curation.id}
-                    aria-current={isActive ? "true" : undefined}
-                    ref={getActiveButtonRef(isActive)}
-                    onClick={() => onCurationClick(curation.id)}
-                    className={getTabButtonClassName(isActive)}
+            {waveActive &&
+              wave &&
+              (isCompetitionWave || Boolean(flat && nativeCompetition)) &&
+              (!isCompetitionRoute || flat) && (
+                <TabButton
+                  {...getTabStateProps(
+                    effectiveActiveView === BrainView.CONFIGURATION
+                  )}
+                  ref={getActiveButtonRef(
+                    effectiveActiveView === BrainView.CONFIGURATION
+                  )}
+                  onClick={() => handleWaveViewChange(BrainView.CONFIGURATION)}
+                  className={getTabButtonClassName(
+                    effectiveActiveView === BrainView.CONFIGURATION
+                  )}
+                >
+                  <span
+                    className={getTabTextClassName({
+                      isActive: effectiveActiveView === BrainView.CONFIGURATION,
+                    })}
                   >
-                    <span
-                      className={getTabTextClassName({
-                        isActive,
-                        additionalClasses:
-                          "tw-max-w-28 tw-truncate sm:tw-max-w-36",
-                      })}
-                    >
-                      {curation.name}
-                    </span>
-                  </button>
-                );
-              })}
+                    {t(locale, "competitions.settings")}
+                  </span>
+                </TabButton>
+              )}
             {waveActive && hasCompetitions && !hideCompetitionsTab && (
-              <button
+              <TabButton
                 {...getTabStateProps(
                   !flat && activeView === BrainView.COMPETITIONS
                 )}
@@ -653,51 +717,36 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                   {t(locale, "competitions.title")}
                 </span>
                 <TabCountBadge count={activeCompetitionCount} />
-              </button>
+              </TabButton>
             )}
-            {waveActive &&
-              wave &&
-              (isCompetitionWave || Boolean(flat && nativeCompetition)) &&
-              (!isCompetitionRoute || flat) && (
-                <button
-                  {...getTabStateProps(
-                    effectiveActiveView === BrainView.CONFIGURATION
-                  )}
-                  ref={getActiveButtonRef(
-                    effectiveActiveView === BrainView.CONFIGURATION
-                  )}
-                  onClick={() => handleWaveViewChange(BrainView.CONFIGURATION)}
-                  className={getTabButtonClassName(
-                    effectiveActiveView === BrainView.CONFIGURATION
-                  )}
-                >
-                  <span
-                    className={getTabTextClassName({
-                      isActive: effectiveActiveView === BrainView.CONFIGURATION,
-                    })}
+            {shouldShowCurationTabs &&
+              curationTabs.map((curation) => {
+                const isActive =
+                  activeView === BrainView.DEFAULT &&
+                  curation.id === activeCurationId;
+
+                return (
+                  <TabButton
+                    key={curation.id}
+                    type="button"
+                    data-curation-id={curation.id}
+                    aria-current={isActive ? "true" : undefined}
+                    ref={getActiveButtonRef(isActive)}
+                    onClick={() => onCurationClick(curation.id)}
+                    className={getTabButtonClassName(isActive)}
                   >
-                    {t(locale, "competitions.configuration")}
-                  </span>
-                </button>
-              )}
-            {waveActive && (
-              <button
-                {...getTabStateProps(activeView === BrainView.ABOUT)}
-                ref={getActiveButtonRef(activeView === BrainView.ABOUT)}
-                onClick={() => handleWaveViewChange(BrainView.ABOUT)}
-                className={getTabButtonClassName(
-                  activeView === BrainView.ABOUT
-                )}
-              >
-                <span
-                  className={getTabTextClassName({
-                    isActive: activeView === BrainView.ABOUT,
-                  })}
-                >
-                  {t(locale, "wave.navigation.about")}
-                </span>
-              </button>
-            )}
+                    <span
+                      className={getTabTextClassName({
+                        isActive,
+                        additionalClasses:
+                          "tw-max-w-28 tw-truncate sm:tw-max-w-36",
+                      })}
+                    >
+                      {curation.name}
+                    </span>
+                  </TabButton>
+                );
+              })}
             {!isApp && !waveActive && (
               <button
                 {...getTabStateProps(activeView === BrainView.NOTIFICATIONS)}

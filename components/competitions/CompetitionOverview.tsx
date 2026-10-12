@@ -25,7 +25,8 @@ function OverviewForm({
   readonly guidelines: string;
   readonly onClose: () => void;
 }) {
-  const { competition } = useCompetition();
+  const { competition, hub } = useCompetition();
+  const legacy = hub.legacy_primary_competition_id === competition.id;
   const locale = useBrowserLocale();
   const [title, setTitle] = useState(competition.title);
   const [description, setDescription] = useState(competition.description ?? "");
@@ -38,7 +39,7 @@ function OverviewForm({
       (config) => ({
         ...config,
         title: title.trim(),
-        description: description.trim() || null,
+        description: legacy ? config.description : description.trim() || null,
         presentation: [
           ...config.presentation.filter(
             (item) => item.data_key !== WAVE_DISPLAY_METADATA_KEYS.customRules
@@ -96,6 +97,7 @@ function OverviewForm({
             className={`${COMPETITION_INPUT} tw-resize-y tw-text-base sm:tw-text-sm`}
             rows={3}
             maxLength={50000}
+            disabled={legacy}
             value={description}
             onChange={(event) => setDescription(event.target.value)}
           />
@@ -128,7 +130,8 @@ function OverviewForm({
 }
 
 export default function CompetitionOverview() {
-  const { competition } = useCompetition();
+  const { competition, hub } = useCompetition();
+  const legacy = hub.legacy_primary_competition_id === competition.id;
   const editable = useCompetitionConfigEditable();
   const locale = useBrowserLocale();
   const [editing, setEditing] = useState(false);
@@ -139,6 +142,11 @@ export default function CompetitionOverview() {
   return (
     <section className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950">
       <div className="tw-space-y-4 tw-p-4 sm:tw-p-5">
+        {legacy && (
+          <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+            {t(locale, "competitions.legacySettingsNotice")}
+          </p>
+        )}
         <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
             <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-400">

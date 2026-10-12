@@ -130,6 +130,49 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
     restoreResizeObserver = null;
   });
 
+  it("shows unavailable history instead of zero voters and keeps the vote log accessible", async () => {
+    const user = userEvent.setup();
+    render(
+      <ParticipationDropVoteDetailsTrigger
+        drop={{ ...drop, raters_count: 0, voters_count_available: false }}
+      />
+    );
+    const trigger = screen.getByRole("button", {
+      name: "View vote history; historical voter count unavailable",
+    });
+    expect(trigger).toHaveTextContent("Voters unavailable");
+    expect(screen.queryByText("0 voters")).not.toBeInTheDocument();
+    await user.click(trigger);
+    expect(
+      screen.getByText(
+        /The voter list at the time this winner was decided was not saved/
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText("No voters yet.")).not.toBeInTheDocument();
+    expect(mockUseDropVoters).toHaveBeenLastCalledWith({
+      dropId: drop.id,
+      enabled: false,
+    });
+    await user.click(screen.getByRole("tab", { name: "Vote log" }));
+    expect(mockUseDropVoteLogs).toHaveBeenLastCalledWith({
+      dropId: drop.id,
+      enabled: true,
+    });
+  });
+
+  it("retains a genuine zero voter count when records are available", () => {
+    render(
+      <ParticipationDropVoteDetailsTrigger
+        drop={{ ...drop, raters_count: 0, voters_count_available: true }}
+      />
+    );
+    expect(
+      screen.getByRole("button", {
+        name: "View voters and vote log for 0 voters",
+      })
+    ).toHaveTextContent("0 voters");
+  });
+
   it("renders the vote details trigger as an openable chip", async () => {
     const user = userEvent.setup();
 

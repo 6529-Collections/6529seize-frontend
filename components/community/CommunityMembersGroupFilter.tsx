@@ -2,7 +2,7 @@
 
 import { useContext } from "react";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
-import GroupAssignmentPanel from "@/components/groups/assignment/GroupAssignmentPanel";
+import CommunityMembersFilterPanel from "./CommunityMembersFilterPanel";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
@@ -87,27 +87,22 @@ export default function CommunityMembersGroupFilter({
   }
 
   return (
-    <div className="tw-p-4 sm:tw-p-6">
-      <GroupAssignmentPanel
-        key={currentCriteria.criteria.group?.id ?? "all-network-members"}
-        presentation="quiet"
-        suggestedName={t(locale, "network.groupFilter.suggestedName")}
-        defaultLabel={t(locale, "network.groupFilter.defaultLabel")}
-        selectedGroup={currentCriteria.criteria.group}
-        selectedGroupIncludedWallets={currentCriteria.criteria.includedWallets}
-        selectedGroupExcludedWallets={currentCriteria.criteria.excludedWallets}
-        allowGroupClear
-        collapseOnClickAway={false}
-        startMode="criteria"
-        showChooseGroup={false}
-        showPrivacyControl={false}
-        membersRoleLabel={t(locale, "network.groupFilter.membersRoleLabel")}
-        onChange={(group) => {
-          onGroupChange(group);
-          return true;
-        }}
-        onCreateGroup={createAndFilter}
-      />
-    </div>
+    <CommunityMembersFilterPanel
+      key={currentCriteria.criteria.group?.id ?? "all-network-members"}
+      suggestedName={t(locale, "network.groupFilter.suggestedName")}
+      defaultLabel={t(locale, "network.groupFilter.defaultLabel")}
+      selectedGroup={currentCriteria.criteria.group}
+      selectedGroupIncludedWallets={currentCriteria.criteria.includedWallets}
+      selectedGroupExcludedWallets={currentCriteria.criteria.excludedWallets}
+      allowGroupClear
+      collapseOnClickAway={false}
+      startMode="criteria"
+      membersRoleLabel={t(locale, "network.groupFilter.membersRoleLabel")}
+      onChange={(group) => {
+        onGroupChange(group);
+        return true;
+      }}
+      onCreateGroup={createAndFilter}
+    />
   );
 }

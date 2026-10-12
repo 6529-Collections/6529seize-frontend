@@ -12,18 +12,6 @@ jest.mock("@/components/auth/Auth", () => ({
 jest.mock("@/helpers/waves/waves.helpers", () => ({
   canEditWave: jest.fn(),
 }));
-jest.mock("@/components/waves/specs/WaveProposalCardSettings", () => ({
-  __esModule: true,
-  default: ({ display }: { readonly display?: string }) => (
-    <div data-testid="proposal-cards" data-display={display} />
-  ),
-}));
-jest.mock("@/components/waves/specs/WaveApproveTabLabels", () => ({
-  __esModule: true,
-  default: ({ display }: { readonly display?: string }) => (
-    <div data-testid="approval-tabs" data-display={display} />
-  ),
-}));
 jest.mock("@/components/waves/groups/WaveConfigurationCurations", () => ({
   __esModule: true,
   default: () => <div data-testid="curations" />,
@@ -52,20 +40,14 @@ describe("WaveConfigurationAdminSettings", () => {
     expect(screen.queryByTestId("curations")).not.toBeInTheDocument();
   });
 
-  it("shows the shared controls with configuration variants to administrators", () => {
+  it("shows wave curations while competition appearance lives in Settings", () => {
     const wave = makeWave(ApiWaveType.Approve);
     mockCanEditWave.mockReturnValue(true);
 
     render(<WaveConfigurationAdminSettings wave={wave} />);
 
-    expect(screen.getByTestId("proposal-cards")).toHaveAttribute(
-      "data-display",
-      "configuration"
-    );
-    expect(screen.getByTestId("approval-tabs")).toHaveAttribute(
-      "data-display",
-      "configuration"
-    );
+    expect(screen.queryByTestId("proposal-cards")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("approval-tabs")).not.toBeInTheDocument();
     expect(screen.getByTestId("curations")).toBeInTheDocument();
     expect(mockCanEditWave).toHaveBeenCalledWith({
       connectedProfile,
@@ -81,7 +63,7 @@ describe("WaveConfigurationAdminSettings", () => {
       <WaveConfigurationAdminSettings wave={makeWave(ApiWaveType.Rank)} />
     );
 
-    expect(screen.getByTestId("proposal-cards")).toBeInTheDocument();
+    expect(screen.queryByTestId("proposal-cards")).not.toBeInTheDocument();
     expect(screen.queryByTestId("approval-tabs")).not.toBeInTheDocument();
     expect(screen.getByTestId("curations")).toBeInTheDocument();
   });

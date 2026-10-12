@@ -125,6 +125,36 @@ describe("Playwright read-only mutation guard", () => {
     });
   });
 
+  it("allows draft membership queries while still blocking group writes", () => {
+    for (const host of ["api.6529.io", "api.staging.6529.io"]) {
+      expect(
+        decideReadonlyRequest({
+          baseURL: "https://6529.io",
+          method: "POST",
+          url: `https://${host}/api/groups/preview-members?page=1`,
+          readonly: true,
+        })
+      ).toEqual({ action: "allow", reason: "first-party-readonly-api-proxy" });
+      for (const path of ["/api/groups", "/api/groups/example/visible"]) {
+        expect(
+          decideReadonlyRequest({
+            baseURL: "https://6529.io",
+            method: "POST",
+            url: `https://${host}${path}`,
+            readonly: true,
+          }).action
+        ).toBe("block");
+      }
+    }
+    expect(
+      decideReadonlyRequest({
+        method: "POST",
+        url: "https://example.com/api/groups/preview-members",
+        readonly: true,
+      }).action
+    ).toBe("block");
+  });
+
   it("allows first-party read-only alchemy proxy POST lookups", () => {
     for (const url of [
       "https://api.6529.io/alchemy-proxy/contracts",

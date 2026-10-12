@@ -15,7 +15,7 @@ import {
   createInlineGroupBuilderStateFromSavedGroup,
   createInitialInlineGroupBuilderState,
   dedupeInlineIdentities,
-  getInlineGroupDraftSummary,
+  getInlineGroupDraftSummaryDetails,
   getInlineGroupRuleCount,
 } from "./createWaveInlineGroupBuilder";
 import type {
@@ -99,9 +99,9 @@ function useCreateWaveGroupInlinePanelViewState({
     builder,
     disabled,
   });
-  const draftSummary = useMemo(
+  const { text: draftSummary, parts: draftSummaryParts } = useMemo(
     () =>
-      getInlineGroupDraftSummary({
+      getInlineGroupDraftSummaryDetails({
         draft: builder.draft,
         identityCount: builder.draft.group.identity_addresses?.length ?? 0,
         beneficiaryGrantCollectionName:
@@ -158,6 +158,7 @@ function useCreateWaveGroupInlinePanelViewState({
     currentGroupLabel,
     displayedBuilder,
     draftSummary,
+    draftSummaryParts,
     hasUnsavedGroup,
     isCriteriaReplacementActive: builder.criteriaReplacementActive,
     isDraftValid: validation.valid,
@@ -616,6 +617,7 @@ export function useCreateWaveGroupInlinePanel({
     currentGroupLabel,
     displayedBuilder,
     draftSummary,
+    draftSummaryParts,
     hasUnsavedGroup,
     isCriteriaReplacementActive,
     isDraftValid,
@@ -686,6 +688,7 @@ export function useCreateWaveGroupInlinePanel({
     currentGroupLabel,
     displayedBuilder,
     draftSummary,
+    draftSummaryParts,
     hasUnsavedGroup,
     isCreating,
     isCriteriaReplacementActive,

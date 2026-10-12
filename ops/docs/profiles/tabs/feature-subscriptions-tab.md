@@ -126,7 +126,19 @@ or an unavailable page. US iOS, web, and Android retain their existing behavior.
     profile; a phase-less finalized record remains pending, and no message
     appears for unsubscribed rows, unpublished distribution, or failed lookups
   - phase and publication details refresh once per minute while the tab is visible
-  - subscribed rows show a quantity selector capped by eligibility count
+  - subscribed rows keep the numeric quantity selector with every value from 1
+    through current eligibility when eligibility is positive; at zero eligibility,
+    it shows a single `0` option and is disabled without changing the saved request
+  - untouched automatic rows in Automatic / All eligible mode follow eligibility
+    increases and decreases when consolidated balances are refreshed
+  - choosing a quantity saves a manual override for that card, including later
+    future cards; automatic eligibility updates never overwrite it
+  - a saved manual quantity above eligibility is displayed at the eligibility
+    limit without changing the saved request: manual 11 displays `10 / 10` at
+    eligibility 10, then `11 / 12` after eligibility recovers to 12 and data is
+    refreshed
+  - final quantities are capped by eligibility and available balance; refreshing
+    upcoming quantities does not change historical finalized allocations
 - `Subscription History`:
   - `Redeemed Subscriptions`
   - `Log History`

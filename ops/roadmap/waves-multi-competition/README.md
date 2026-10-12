@@ -5,12 +5,15 @@
 This is the master technical roadmap for separating competitions from waves.
 It records shipped functionality, remaining architecture work and acceptance
 gates. The [2026-10-01 production assessment](./native-delivery/production-status-2026-10-01.md)
-is the current evidence index: the native foundation, context, creation,
+records the dated native-release evidence: the native foundation, context, creation,
 runtime and discovery are in production. Existing competitions still use the
-legacy engine; data migration and retirement have not started.
+legacy engine. The Phase 5 migration tooling is now implemented for delivery
+Phase 2 review; no production migration or retirement has occurred. See the
+[current migration evidence](./native-delivery/legacy-migration-delivery.md).
 
-The [default-competition experience](./default-competition.md) is implemented on development branches;
-delivery Phase 2 review and CI are tracked in the linked PRs, and it is not merged or deployed. It is a Phase 6 follow-up that can ship during coexistence.
+The [default-competition experience](./default-competition.md) merged and its
+frontend production deployment succeeded on 2026-10-02; the linked delivery
+evidence records the separate production E2E failure and its scope. It is a Phase 6 follow-up shipped during coexistence.
 Use the [decision register](./phase-0/decision-register.md) for current product
 policy and the [Phase 0 package](./phase-0/README.md) for the frozen baseline.
 
@@ -237,7 +240,9 @@ decision register. The additional approved [default competition](./default-compe
 selects the wave landing competition: one eligible; otherwise earliest-starting active;
 otherwise soonest upcoming; otherwise most recently ended. Paused decisions
 still count as active, drafts are excluded, and archived completed competitions
-remain eligible for the ended fallback. This navigation work is not yet shipped.
+remain eligible for the ended fallback. This navigation work is merged and its
+frontend is deployed; the linked delivery evidence records a separate production
+E2E failure.
 
 ## Cross-Phase Engineering Rules
 
@@ -316,16 +321,16 @@ leaderboard, notification, or claim worker is unaware of them.
 Use `Not started`, `In progress`, `Blocked`, or `Complete` for phase status.
 Update this table and the phase's tracking section together.
 
-| Phase | Milestone | Status | Shipped scope / remaining work |
-| --- | --- | --- | --- |
-| [0](./phase-0-contract-and-baseline.md) | Contract and baseline | Complete | Frozen baseline retained; product decisions amended to match the release and approved default selection. |
-| [1](./phase-1-additive-backend-foundation.md) | Additive backend foundation | In progress | Shipped, including independent credit comparison; production parity/performance acceptance still open. |
-| [2](./phase-2-frontend-competition-context.md) | Frontend competition context | In progress | Routes, scoped context and native views shipped; original-primary path retained, final acceptance and default navigation follow-up remain. |
-| [3](./phase-3-separate-creation-flows.md) | Separate hub and competition creation | In progress | Hub/draft/publication/admin flows shipped; original shortcut requirement and final product/device acceptance remain open. |
-| [4](./phase-4-native-competition-runtime.md) | Native competition execution | In progress | Rank/Approve runtime shipped and enabled; production-native completion/observability evidence and migration compatibility remain open. |
-| [5](./phase-5-legacy-data-migration.md) | Legacy data migration | Not started | Next migration project: old-API routing/projection, backfill, catch-up, parity, guarded cutover and rollback. |
-| [6](./phase-6-progressive-rollout.md) | Progressive rollout | In progress | Discovery/creation enabled in production; default competition is implemented on development branches with PR review/CI tracked in delivery evidence; rollout/monitoring closeout is still open. |
-| [7](./phase-7-retire-wave-coupling.md) | Retire internal legacy coupling | Not started | Legacy creation, execution and storage remain; permanent GET contracts survive retirement. |
+| Phase                                          | Milestone                             | Status      | Shipped scope / remaining work                                                                                                                                                                                |
+| ---------------------------------------------- | ------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [0](./phase-0-contract-and-baseline.md)        | Contract and baseline                 | Complete    | Frozen baseline retained; product decisions amended to match the release and approved default selection.                                                                                                      |
+| [1](./phase-1-additive-backend-foundation.md)  | Additive backend foundation           | In progress | Shipped, including independent credit comparison; production parity/performance acceptance still open.                                                                                                        |
+| [2](./phase-2-frontend-competition-context.md) | Frontend competition context          | In progress | Routes, scoped context and native views shipped; original-primary path retained and default navigation shipped; final acceptance remains.                                                                     |
+| [3](./phase-3-separate-creation-flows.md)      | Separate hub and competition creation | In progress | Hub/draft/publication/admin flows shipped; original shortcut requirement and final product/device acceptance remain open.                                                                                     |
+| [4](./phase-4-native-competition-runtime.md)   | Native competition execution          | In progress | Rank/Approve runtime shipped and enabled; production-native completion/observability evidence and migration compatibility remain open.                                                                        |
+| [5](./phase-5-legacy-data-migration.md)        | Legacy data migration                 | In progress | Migration tooling implemented under delivery Phase 2 review; production lifecycle/SLO evidence and one-at-a-time migration acceptance remain pending.                                                         |
+| [6](./phase-6-progressive-rollout.md)          | Progressive rollout                   | In progress | Discovery/creation enabled in production; default competition is merged with frontend deployment and separate production E2E failure tracked in delivery evidence; rollout/monitoring closeout is still open. |
+| [7](./phase-7-retire-wave-coupling.md)         | Retire internal legacy coupling       | Not started | Legacy creation, execution and storage remain; permanent GET contracts survive retirement.                                                                                                                    |
 
 Use the [production assessment and open gates](./native-delivery/production-status-2026-10-01.md)
 for current status, the [native implementation record](./native-delivery/implementation-evidence.md)

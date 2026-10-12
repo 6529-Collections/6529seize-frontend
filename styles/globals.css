@@ -280,14 +280,15 @@ body {
   overflow: auto;
 }
 
-.mobile-wrapper-dialog input,
+/* Rating amounts own their typography, above the iOS zoom threshold. */
+.mobile-wrapper-dialog input:not([data-rating-input]),
 .mobile-wrapper-dialog textarea,
 .mobile-wrapper-dialog select {
   font-size: 16px;
   touch-action: manipulation;
 }
 
-body.capacitor-native input,
+body.capacitor-native input:not([data-rating-input]),
 body.capacitor-native textarea,
 body.capacitor-native select,
 body.capacitor-native [contenteditable="true"] {

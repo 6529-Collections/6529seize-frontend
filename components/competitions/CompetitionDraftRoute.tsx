@@ -9,6 +9,8 @@ import {
 import { CompetitionState } from "./CompetitionState";
 import CompetitionDraftEditor from "./CompetitionDraftEditor";
 import CompetitionBackLink from "./CompetitionBackLink";
+import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 export default function CompetitionDraftRoute({
   waveId,
@@ -16,6 +18,8 @@ export default function CompetitionDraftRoute({
   readonly waveId: string;
 }) {
   const router = useRouter();
+  const { isApp } = useDeviceInfo();
+  const { waveViewStyle } = useLayout();
   const hub = useCompetitionHub(waveId);
   const wave = useWaveData({ waveId, onWaveNotFound: () => undefined });
   let content = <CompetitionState />;
@@ -31,7 +35,10 @@ export default function CompetitionDraftRoute({
       <CompetitionState error />
     );
   return (
-    <section className="tw-h-full tw-min-h-0 tw-overflow-y-auto tw-p-4 sm:tw-p-6">
+    <section
+      className="tw-h-full tw-min-h-0 tw-scroll-pb-24 tw-overflow-y-auto tw-px-4 tw-pt-4 sm:tw-px-6 sm:tw-pt-6"
+      style={isApp ? waveViewStyle : undefined}
+    >
       <div className="tw-mx-auto tw-max-w-4xl tw-space-y-5">
         <CompetitionBackLink waveId={waveId} />
         {content}

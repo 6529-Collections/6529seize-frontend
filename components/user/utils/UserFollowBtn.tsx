@@ -49,7 +49,7 @@ export const FOLLOW_BUTTON_SIZES: Record<UserFollowBtnSize, ButtonSize> = {
 
 const DIRECT_MESSAGE_BUTTON_CLASSES: Record<UserFollowBtnSize, string> = {
   [UserFollowBtnSize.SMALL]: "tw-size-8",
-  [UserFollowBtnSize.MEDIUM]: "tw-size-9 md:tw-size-10",
+  [UserFollowBtnSize.MEDIUM]: "tw-size-9",
 };
 
 const DIRECT_MESSAGE_ICON_CLASSES: Record<UserFollowBtnSize, string> = {

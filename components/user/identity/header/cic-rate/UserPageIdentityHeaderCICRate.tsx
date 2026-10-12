@@ -21,17 +21,7 @@ import UserPageIdentityHeaderCICRateStats from "./UserPageIdentityHeaderCICRateS
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
-const CIC_SPAN_CLASS_NAME =
-  "tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-black/40 tw-rounded-l-lg tw-border tw-border-solid tw-border-white/[0.15] tw-px-3";
-
-const CIC_FOCUS_RING_CLASS_NAME =
-  "focus:tw-border-emerald-500 focus:tw-ring-1 focus:tw-ring-emerald-500/30";
-
-const CIC_INPUT_TOOLTIP_CLASS_NAME =
-  "tw-max-w-[12rem] -tw-ml-0.5 tw-appearance-none tw-block tw-rounded-l-none tw-rounded-r-lg tw-border tw-border-solid tw-border-white/[0.15] tw-py-3 tw-px-3 tw-bg-black/40 focus:tw-bg-black/60 tw-text-white tw-font-semibold tw-caret-emerald-400 tw-shadow-inner hover:tw-border-white/30 placeholder:tw-text-iron-500 focus:tw-outline-none tw-text-base sm:tw-text-sm tw-transition tw-duration-300 tw-ease-out";
-
-const CIC_INPUT_FULL_CLASS_NAME =
-  "tw-w-full -tw-ml-0.5 tw-appearance-none tw-block tw-rounded-l-none tw-rounded-r-lg tw-border tw-border-solid tw-border-white/[0.15] tw-py-3.5 tw-px-4 tw-bg-black/40 focus:tw-bg-black/60 tw-text-white tw-font-semibold tw-caret-emerald-400 tw-shadow-inner hover:tw-border-white/30 placeholder:tw-text-iron-500 focus:tw-outline-none tw-text-base sm:tw-text-sm tw-transition tw-duration-300 tw-ease-out";
+const CIC_FOCUS_RING_CLASS_NAME = "focus:tw-ring-primary-400";
 
 export default function UserPageIdentityHeaderCICRate({
   profile,
@@ -221,7 +211,9 @@ export default function UserPageIdentityHeaderCICRate({
   const rateInput = (
     <div
       className={`tw-relative tw-flex tw-w-full ${
-        isTooltip ? "tw-mt-1.5" : "tw-mb-2"
+        isTooltip
+          ? "tw-mt-2 tw-max-w-[12rem]"
+          : "tw-mt-2"
       }`}
     >
       <UserPageRateInput
@@ -229,10 +221,7 @@ export default function UserPageIdentityHeaderCICRate({
         onChange={setAdjustedRatingStr}
         minMax={minMaxValues}
         isProxy={isProxy}
-        spanClassName={CIC_SPAN_CLASS_NAME}
-        inputClassName={
-          isTooltip ? CIC_INPUT_TOOLTIP_CLASS_NAME : CIC_INPUT_FULL_CLASS_NAME
-        }
+        variant={isTooltip ? "compact" : "form"}
         inputId="nic-rating-input"
         focusRingClassName={CIC_FOCUS_RING_CLASS_NAME}
         required
@@ -242,7 +231,8 @@ export default function UserPageIdentityHeaderCICRate({
 
   const adjustmentHelper = (
     <UserRateAdjustmentHelper
-      inLineValues={isTooltip}
+      inLineValues={true}
+      valueLayout="inline"
       originalValue={originalRating}
       adjustedValue={newRating}
       adjustmentType="NIC"
@@ -263,10 +253,10 @@ export default function UserPageIdentityHeaderCICRate({
         {isTooltip ? (
           <>
             <div className="tw-flex tw-items-end tw-gap-3">
-              <div className="tw-w-full sm:tw-w-auto">
+              <div className="tw-min-w-0 tw-flex-1">
                 <label
                   htmlFor="nic-rating-input"
-                  className="tw-block tw-max-w-[12rem] tw-text-sm tw-font-normal tw-text-iron-200"
+                  className="tw-block tw-max-w-[12rem] tw-text-sm tw-font-normal tw-text-iron-400"
                 >
                   Your total NIC Rating of{" "}
                   <span className="tw-whitespace-nowrap">{profile.query}:</span>
@@ -280,7 +270,7 @@ export default function UserPageIdentityHeaderCICRate({
                     disabled={isSaveDisabled}
                     loading={mutating}
                     variant="success"
-                    size="lg"
+                    size="xl"
                     fullWidth
                     className="sm:tw-w-auto"
                   >
@@ -295,7 +285,7 @@ export default function UserPageIdentityHeaderCICRate({
           <>
             <label
               htmlFor="nic-rating-input"
-              className="tw-mb-2 tw-block tw-text-sm tw-font-medium tw-text-iron-400"
+              className="tw-mb-2 tw-block tw-text-sm tw-font-normal tw-text-iron-400"
             >
               Your total NIC Rating of{" "}
               <span className="tw-whitespace-nowrap">{profile.query}</span>
@@ -304,26 +294,19 @@ export default function UserPageIdentityHeaderCICRate({
 
             {adjustmentHelper}
 
-            <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-3 md:tw-flex-row-reverse">
+            <div className="tw-mt-7 tw-flex tw-flex-col tw-gap-1">
               <Button
                 type="submit"
                 disabled={isSaveDisabled}
                 loading={mutating}
                 variant="success"
-                size="lg"
+                size="xl"
                 fullWidth
-                className="md:tw-w-auto md:tw-flex-1"
               >
                 Rate
               </Button>
               {onCancel && (
-                <Button
-                  onClick={onCancel}
-                  variant="secondary"
-                  size="lg"
-                  fullWidth
-                  className="md:tw-w-auto md:tw-flex-1"
-                >
+                <Button onClick={onCancel} variant="ghost" size="lg" fullWidth>
                   Cancel
                 </Button>
               )}

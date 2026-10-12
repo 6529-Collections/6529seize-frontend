@@ -78,6 +78,7 @@ const redirectMappings = [
 const STATIC_PATH_PREFIXES = [
   "/api",
   "/_next",
+  "/pdfjs/",
   "/sitemap",
   "/robots.txt",
   "/error",

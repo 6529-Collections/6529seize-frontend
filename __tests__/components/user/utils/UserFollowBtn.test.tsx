@@ -243,10 +243,10 @@ describe("UserFollowBtn", () => {
 
     expect(dmButton).toHaveClass(
       "tw-size-9",
-      "md:tw-size-10",
       "tw-bg-iron-800",
       "tw-ring-iron-700"
     );
+    expect(dmButton).not.toHaveClass("md:tw-size-10");
     expect(dmButton).not.toHaveClass("tw-min-w-[4.75rem]");
     expect(dmButton.querySelector("svg")).toHaveClass(
       "tw-size-3.5",

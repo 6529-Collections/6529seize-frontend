@@ -2,10 +2,14 @@
 
 [Approved contract](../default-competition.md) · [Master roadmap](../README.md)
 
-Status: implemented on development branches. Delivery Phase 2 bot review and CI
-are tracked in [backend PR #2131](https://github.com/6529-Collections/6529seize-backend/pull/2131)
-and [frontend PR #4147](https://github.com/6529-Collections/6529seize-frontend/pull/4147). Not merged or deployed. This delivery phase is separate from roadmap
-Phase 2 and makes no production-release claim.
+Status as audited on 2026-10-02: merged. Review and CI are tracked in [backend PR #2131](https://github.com/6529-Collections/6529seize-backend/pull/2131)
+and [frontend PR #4147](https://github.com/6529-Collections/6529seize-frontend/pull/4147).
+[Frontend production deployment](https://github.com/6529-Collections/6529seize-frontend/actions/runs/37003539308)
+succeeded at `4bd1c80f05c9f845779b75abd5b92d737cc1c6aa`.
+[Related production E2E](https://github.com/6529-Collections/6529seize-frontend/actions/runs/37005453102)
+failed in the Museum collection pack; native-competition and social packs passed.
+This deployment evidence does not establish legacy migration acceptance or claim
+a green aggregate production E2E run.
 
 ## Read and navigation boundary
 
@@ -62,7 +66,7 @@ Chat intent is recorded even from a bare wave URL.
   Chat URL expectations now retain explicit selection to prevent default reentry;
   competition-tab URLs now retain view to satisfy reload/Back/Forward requirements.
 - Product docs and canonical/generated help corpus describe the implemented UX.
-  Roadmap status remains unmerged and undeployed until a separate release.
+  Current merge/deployment evidence is recorded above; this does not close migration gates.
 - Stable-tab follow-up: 79 focused tests cover route transitions, direct detail
   reload without default data, explicit competition precedence and bare-URL Chat
   intent and a visible collection tab before hub availability loads. The
@@ -77,7 +81,7 @@ Chat intent is recorded even from a bare wave URL.
   110 tests, including preservation of legacy competition views on serial-target
   entry links.
 
-## Future zero-downtime release
+## Zero-downtime release order
 
 1. Backend `dbMigrationsLoop`: apply the additive online legacy-decision index,
    verify it exists. The migration refuses blocking fallback and preserves the
@@ -88,4 +92,4 @@ Chat intent is recorded even from a bare wave URL.
 
 No native decision/leaderboard worker, consumer or legacy data cutover is needed.
 Rollback frontend navigation before rolling back its endpoint; keep the index
-and competition data. Phase 2 work stops at reviewed green PRs.
+and competition data. Future delivery Phase 2 changes stop at reviewed green PRs.

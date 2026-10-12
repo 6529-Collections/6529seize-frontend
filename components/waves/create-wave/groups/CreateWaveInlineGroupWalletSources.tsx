@@ -28,6 +28,7 @@ interface InlineWalletSourcesProps {
   readonly sources: CreateWaveInlineGroupWalletSources;
   readonly onChange: (update: WalletSourcesUpdate) => void;
   readonly quiet?: boolean;
+  readonly networkPresentation?: boolean;
 }
 
 function RemoveSourceButton({
@@ -79,10 +80,39 @@ function SourceCount({
   );
 }
 
+function getWalletSourceClasses(quiet: boolean, networkPresentation: boolean) {
+  if (networkPresentation) {
+    return {
+      section:
+        "tw-min-w-0 tw-rounded-xl tw-bg-iron-900/50 tw-p-4 lg:tw-row-span-5 lg:tw-grid lg:tw-grid-rows-subgrid",
+      input: "[&_input]:tw-h-11 [&_input]:tw-py-0",
+      title: "tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100",
+      description:
+        "tw-mb-3 tw-mt-2 tw-text-xxs tw-font-normal tw-leading-5 tw-text-iron-350",
+      status:
+        "tw-flex tw-justify-between tw-gap-3 tw-mt-2 tw-items-start lg:tw-row-start-5",
+      empty: "tw-m-0 tw-text-xs tw-text-iron-500 tw-font-normal",
+    };
+  }
+  return {
+    section: quiet
+      ? "tw-min-w-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4"
+      : "tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/60 tw-p-3 sm:tw-p-4",
+    input: "",
+    title: "tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100",
+    description:
+      "tw-mb-3 tw-mt-1 tw-text-xs tw-leading-relaxed tw-text-iron-500",
+    status:
+      "tw-flex tw-justify-between tw-gap-3 tw-mt-3 tw-min-h-9 tw-items-center",
+    empty: "tw-m-0 tw-text-xs tw-text-iron-500 tw-font-medium",
+  };
+}
+
 function EmmaWalletSource({
   sources,
   onChange,
   quiet = false,
+  networkPresentation = false,
 }: Omit<InlineWalletSourcesProps, "direction">) {
   const locale = useBrowserLocale();
   const { connectedProfile, requestAuth } = useAuth();
@@ -158,25 +188,21 @@ function EmmaWalletSource({
     sources.emmaWallets === null &&
     !!connectedProfile?.handle &&
     loadState === "loading";
+  const sourceClasses = getWalletSourceClasses(quiet, networkPresentation);
 
   return (
-    <section
-      className={
-        quiet
-          ? "tw-min-w-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4"
-          : "tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/60 tw-p-3 sm:tw-p-4"
-      }
-    >
-      <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+    <section className={`${sourceClasses.section} ${sourceClasses.input}`}>
+      <h3 className={sourceClasses.title}>
         {t(locale, "waves.create.groups.inlineIdentities.sources.emma.title")}
       </h3>
-      <p className="tw-mb-3 tw-mt-1 tw-text-xs tw-leading-relaxed tw-text-iron-500">
+      <p className={sourceClasses.description}>
         {t(
           locale,
           "waves.create.groups.inlineIdentities.sources.emma.description"
         )}
       </p>
       <EmmaListSearch
+        resultsLayout={networkPresentation ? "inline" : "popover"}
         selectedId={selectedId}
         selectedName={sources.selectedAllowlist?.name ?? null}
         onSelect={onSelect}
@@ -193,9 +219,9 @@ function EmmaWalletSource({
           "waves.create.groups.inlineIdentities.sources.emma.searchEmpty"
         )}
       />
-      <div className="tw-mt-3 tw-flex tw-min-h-9 tw-items-center tw-justify-between tw-gap-3">
+      <div className={sourceClasses.status}>
         {selectedId === null ? (
-          <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-500">
+          <p className={sourceClasses.empty}>
             {t(
               locale,
               "waves.create.groups.inlineIdentities.sources.emma.empty"
@@ -278,6 +304,7 @@ function CsvWalletSource({
   sources,
   onChange,
   quiet = false,
+  networkPresentation = false,
 }: InlineWalletSourcesProps) {
   const locale = useBrowserLocale();
   const inputId = useId();
@@ -352,19 +379,20 @@ function CsvWalletSource({
   if (isDragging) {
     dropzoneStateClasses = "tw-border-primary-400 tw-bg-primary-500/10";
   }
+  let dropzoneLayoutClasses = quiet
+    ? "tw-min-h-20 tw-flex-col tw-p-3"
+    : "tw-min-h-24 tw-flex-col tw-p-3";
+  if (networkPresentation) {
+    dropzoneLayoutClasses = "tw-min-h-11 tw-flex-row tw-px-2 tw-py-2";
+  }
+  const sourceClasses = getWalletSourceClasses(quiet, networkPresentation);
 
   return (
-    <section
-      className={
-        quiet
-          ? "tw-min-w-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4"
-          : "tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/60 tw-p-3 sm:tw-p-4"
-      }
-    >
-      <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+    <section className={sourceClasses.section}>
+      <h3 className={sourceClasses.title}>
         {t(locale, "waves.create.groups.inlineIdentities.sources.csv.title")}
       </h3>
-      <p className="tw-mb-3 tw-mt-1 tw-text-xs tw-leading-relaxed tw-text-iron-500">
+      <p className={sourceClasses.description}>
         {t(
           locale,
           "waves.create.groups.inlineIdentities.sources.csv.description"
@@ -382,13 +410,15 @@ function CsvWalletSource({
           event.preventDefault();
           setIsDragging(false);
         }}
-        className={`tw-flex tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-dashed tw-p-3 tw-text-center tw-transition focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${quiet ? "tw-min-h-20 tw-border" : "tw-min-h-24 tw-border-2"} ${dropzoneStateClasses}`}
+        className={`tw-flex tw-cursor-pointer tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-dashed tw-text-center tw-transition focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${quiet ? "tw-border" : "tw-border-2"} ${dropzoneLayoutClasses} ${dropzoneStateClasses}`}
       >
         <ArrowUpTrayIcon
           aria-hidden="true"
           className="tw-size-5 tw-text-iron-300"
         />
-        <span className="tw-text-xs tw-font-medium tw-leading-relaxed tw-text-iron-300">
+        <span
+          className={`tw-text-xs tw-font-medium tw-leading-relaxed tw-text-iron-300 ${networkPresentation ? "tw-text-balance" : ""}`}
+        >
           {t(
             locale,
             "waves.create.groups.inlineIdentities.sources.csv.dropLabel"
@@ -422,9 +452,9 @@ function CsvWalletSource({
           {errorMessage}
         </p>
       ) : null}
-      <div className="tw-mt-3 tw-flex tw-min-h-9 tw-items-center tw-justify-between tw-gap-3">
+      <div className={sourceClasses.status}>
         {sources.uploadedWallets === null ? (
-          <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-500">
+          <p className={sourceClasses.empty}>
             {t(
               locale,
               "waves.create.groups.inlineIdentities.sources.csv.empty"
@@ -454,14 +484,18 @@ function CsvWalletSource({
 export default function CreateWaveInlineGroupWalletSources(
   props: InlineWalletSourcesProps
 ) {
+  let gridClasses = `tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 ${props.quiet ? "tw-gap-4" : "tw-gap-3"}`;
+  if (props.networkPresentation) {
+    gridClasses =
+      "tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-2 lg:tw-gap-y-0";
+  }
   return (
-    <div
-      className={`tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 ${props.quiet ? "tw-gap-4" : "tw-gap-3"}`}
-    >
+    <div className={gridClasses}>
       <EmmaWalletSource
         sources={props.sources}
         onChange={props.onChange}
         quiet={props.quiet ?? false}
+        networkPresentation={props.networkPresentation ?? false}
       />
       <CsvWalletSource {...props} />
     </div>

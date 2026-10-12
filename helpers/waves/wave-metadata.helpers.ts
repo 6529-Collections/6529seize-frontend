@@ -152,7 +152,7 @@ const getEffectiveTabLabel = ({
   return normalized;
 };
 
-export const getEffectiveApproveWaveTabLabels = (
+const getEffectiveApproveWaveTabLabels = (
   labels?: ApproveWaveLabelInput | null
 ): ApproveWaveTabLabels => ({
   approvals: getEffectiveTabLabel({
@@ -320,7 +320,7 @@ export const getCreateWaveDisplayMetadataRequests = ({
   return [...requests, ...approveRequests];
 };
 
-export const getApproveWaveDisplayMetadataRows = ({
+const getApproveWaveDisplayMetadataRows = ({
   metadata,
   dataKey,
 }: {

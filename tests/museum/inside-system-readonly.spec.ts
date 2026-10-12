@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import type { Page, Request } from "@playwright/test";
 
 import {
   expect,
@@ -14,6 +14,7 @@ import {
 import { installLocalMuseumCountryCheck } from "../support/localMuseumCountryCheck";
 import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
 import { MUSEUM_SETTINGS_FETCH_ERROR_PATTERN } from "../support/museumConsoleDiagnostics";
+import { expectMuseumPath } from "../support/museumNavigation";
 
 const MOBILE_PROJECT = "web-mobile-chromium";
 const MOBILE_VIEWPORT = { width: 390, height: 844 } as const;
@@ -49,7 +50,7 @@ async function openStudy(page: Page, slug: string, title: string) {
     const response = await gotoDocumentWithTransientRetry(page, path);
     expect(response?.status()).toBe(200);
     await waitForRouteReady(page);
-    await expect(page).toHaveURL((url) => url.pathname === path, {
+    await expectMuseumPath(page, path, {
       timeout: STUDY_READY_TIMEOUT_MS,
     });
     await studyHeading.or(notFoundHeading).waitFor({
@@ -99,6 +100,25 @@ test.describe("Museum Inside the System @surface @readonly", () => {
 
   test("publishes all five project-owned studies", async ({ page }) => {
     const diagnostics = attachPageDiagnostics(page);
+    const pendingCountryChecks = new Set<Request>();
+    const trackCountryCheck = (request: Request) => {
+      const url = new URL(request.url());
+      if (
+        request.method() === "GET" &&
+        ["https://api.6529.io", "https://api.staging.6529.io"].includes(
+          url.origin
+        ) &&
+        url.pathname === "/api/policies/country-check"
+      ) {
+        pendingCountryChecks.add(request);
+      }
+    };
+    const finishCountryCheck = (request: Request) => {
+      pendingCountryChecks.delete(request);
+    };
+    page.on("request", trackCountryCheck);
+    page.on("requestfinished", finishCountryCheck);
+    page.on("requestfailed", finishCountryCheck);
     try {
       for (const project of PROJECTS) {
         await openStudy(page, project.slug, project.title);
@@ -118,8 +138,19 @@ test.describe("Museum Inside the System @surface @readonly", () => {
             exact: true,
           })
         ).toBeVisible();
+        // Leave this document after its started policy lookup settles. The
+        // study's client-ready marker does not cover shell response bodies.
+        await expect
+          .poll(() => pendingCountryChecks.size, {
+            timeout: STUDY_READY_TIMEOUT_MS,
+            message: `Country-check requests must settle before leaving the ${project.slug} study`,
+          })
+          .toBe(0);
       }
     } finally {
+      page.off("request", trackCountryCheck);
+      page.off("requestfinished", finishCountryCheck);
+      page.off("requestfailed", finishCountryCheck);
       assertNoConsoleErrors(diagnostics, {
         allowedConsoleErrorPatterns: SHELL_ALLOWED_CONSOLE_ERROR_PATTERNS,
       });
@@ -169,9 +200,9 @@ test.describe("Museum Inside the System @surface @readonly", () => {
         .getByRole("navigation", { name: "Browse filtered results" })
         .getByRole("button", { name: "Next results", exact: true })
         .click();
-      await expect(page).toHaveURL(
-        (url) => url.searchParams.get("page") === "2"
-      );
+      await expect
+        .poll(() => new URL(page.url()).searchParams.get("page"))
+        .toBe("2");
       await expect(page.getByText(/Showing 13–24 of/u)).toBeVisible();
       await page
         .getByRole("button", { name: "Random from filter", exact: true })
@@ -220,13 +251,16 @@ test.describe("Museum Inside the System @surface @readonly", () => {
         page.getByRole("button", { name: "New variation", exact: true })
       ).toBeVisible();
       await page.getByLabel("Palette").selectOption("C");
-      await expect(page).toHaveURL((url) => {
-        return (
-          url.searchParams.get("modelVersion") === "1" &&
-          url.searchParams.get("mPalette") === "C"
-        );
-      });
-      await page.reload();
+      await expect
+        .poll(() => {
+          const url = new URL(page.url());
+          return {
+            modelVersion: url.searchParams.get("modelVersion"),
+            mPalette: url.searchParams.get("mPalette"),
+          };
+        })
+        .toEqual({ modelVersion: "1", mPalette: "C" });
+      await page.reload({ waitUntil: "domcontentloaded" });
       await waitForRouteReady(page);
       await expect(
         page.getByRole("button", { name: "Try a variation", exact: true })
@@ -312,13 +346,20 @@ test.describe("Museum Inside the System @surface @readonly", () => {
         () => performance.timeOrigin
       );
       await link.click();
-      await expect(page).toHaveURL((url) => {
-        return (
-          url.pathname === "/museum/network/projects/century/system" &&
-          url.searchParams.get("work") === "6529NM.2026.001.01" &&
-          url.hash === "#possibility-space"
-        );
-      });
+      await expect
+        .poll(() => {
+          const url = new URL(page.url());
+          return {
+            pathname: url.pathname,
+            work: url.searchParams.get("work"),
+            hash: url.hash,
+          };
+        })
+        .toEqual({
+          pathname: "/museum/network/projects/century/system",
+          work: "6529NM.2026.001.01",
+          hash: "#possibility-space",
+        });
       await expect(
         page.getByRole("button", { name: "#31", exact: true })
       ).toHaveAttribute("aria-pressed", "true");

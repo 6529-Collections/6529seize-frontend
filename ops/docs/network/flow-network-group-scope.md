@@ -37,8 +37,14 @@ no standalone Network Groups page.
 ## User Journey
 
 1. Open `/network` and select `Filter`.
-2. Build and save criteria. Network's criteria editor does not offer saved-group
-   search or the `Hide criteria and members` setting.
+2. Choose `Identities`, `Level`, `TDH`, `NIC`, `Rep`, `Required NFTs`,
+   `Collection Access`, or `xTDH Grant` from the visible list. On narrow
+   screens, `All filters` stays above the scrolling editor and returns to the
+   list. The current criterion stays beside it, and `Close` dismisses the sheet.
+   Check the criteria tags under `After editing`
+   and `View members`, then select `Create and use new group`. Network's
+   criteria editor does not offer saved-group search or the
+   `Hide criteria and members` setting.
 3. `/network` applies the selected scope and stores its group id in the URL.
    Group links shared from supported app surfaces can also open
    `/network?group={groupId}` directly.
@@ -87,7 +93,7 @@ no standalone Network Groups page.
 
 ## Failure and Recovery
 
-- If `/network/activity` looks unexpectedly scoped, open `/network`, clear scope in `Filter`, then reopen `/network/activity`.
+- If `/network/activity` looks unexpectedly scoped, open `/network`, use `Clear selected group` above the results, then reopen `/network/activity`.
 - If a deep link scope is stale, open `/network` and reselect or clear scope.
 - If URL edits do not change scope, apply scope through `/network` `Filter`.
 - If the selected group's criteria cannot be loaded, use `Try again` in the

@@ -12,7 +12,6 @@ import {
   useCompetitionDetail,
   useCompetitionHub,
   useCompetitionViewer,
-  useDefaultCompetition,
 } from "@/hooks/competitions/useCompetitionQueries";
 import { useWaveData } from "@/hooks/useWaveData";
 import WavesLayout from "@/components/waves/layout/WavesLayout";
@@ -20,6 +19,7 @@ import MyStreamWave from "@/components/brain/my-stream/MyStreamWave";
 import CompetitionDetail, {
   NativeCompetitionContent,
 } from "./CompetitionDetail";
+import { getCompetitionTab } from "@/helpers/competition.helpers";
 import { CompetitionState } from "./CompetitionState";
 
 function SelectedCompetitionWave({
@@ -36,13 +36,16 @@ function SelectedCompetitionWave({
   // Keep the mounted layout stable when the server default changes. Commands
   // and explicit URLs remain scoped to this competition until navigation.
   const [flat] = useState(initialFlat);
+  const search = useSearchParams();
+  const tab = getCompetitionTab(search.get("tab"));
   const legacy = hub.legacy_primary_competition_id === competition.id;
   let content;
   if (!flat)
     content = (
       <CompetitionDetail waveId={wave.id} competitionId={competition.id} />
     );
-  else if (!legacy) content = <NativeCompetitionContent embedded />;
+  else if (!legacy || tab === "rules" || tab === "votes")
+    content = <NativeCompetitionContent embedded />;
   return (
     <CompetitionProvider value={{ wave, hub, competition }}>
       <CompetitionNavigationContext.Provider
@@ -63,21 +66,12 @@ export default function CompetitionWaveRoute({
   readonly waveId: string;
   readonly competitionId: string;
 }) {
-  const search = useSearchParams();
   const viewer = useCompetitionViewer();
   const wave = useWaveData({ waveId, onWaveNotFound: () => undefined });
   const hub = useCompetitionHub(waveId);
   const competition = useCompetitionDetail({ waveId, competitionId });
-  const selection = useDefaultCompetition(waveId);
-  const implicit = search.get("default") === "1";
   const error = wave.isError || hub.isError || competition.isError;
-  if (
-    error ||
-    !wave.data ||
-    !hub.data ||
-    !competition.data ||
-    (!implicit && selection.isPending && !selection.isFetched)
-  ) {
+  if (error || !wave.data || !hub.data || !competition.data) {
     return (
       <WavesLayout>
         <MyStreamWave
@@ -89,7 +83,6 @@ export default function CompetitionWaveRoute({
                 void wave.refetch();
                 void hub.refetch();
                 void competition.refetch();
-                void selection.refetch();
               }}
             />
           }
@@ -103,12 +96,7 @@ export default function CompetitionWaveRoute({
       wave={wave.data}
       hub={hub.data}
       competition={competition.data}
-      initialFlat={
-        competition.data.lifecycle !== ApiCompetitionLifecycle.Draft &&
-        (implicit ||
-          (!selection.isError &&
-            selection.data?.competition_id === competitionId))
-      }
+      initialFlat={competition.data.lifecycle !== ApiCompetitionLifecycle.Draft}
     />
   );
 }

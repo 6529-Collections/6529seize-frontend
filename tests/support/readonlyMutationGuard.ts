@@ -60,6 +60,7 @@ const FIRST_PARTY_READONLY_API_HOSTS = new Set([
 const FIRST_PARTY_READONLY_API_POST_PATHS = new Set([
   "/alchemy-proxy/contracts",
   "/alchemy-proxy/token-metadata",
+  "/api/groups/preview-members",
 ]);
 
 const IGNORED_EXTERNAL_MUTATION_HOSTS = [

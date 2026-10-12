@@ -22,7 +22,7 @@ const draft = { name: "Network filter", group: {} } as ApiCreateGroup;
 
 let assignmentPanelProps: any = null;
 
-jest.mock("@/components/groups/assignment/GroupAssignmentPanel", () => ({
+jest.mock("@/components/community/CommunityMembersFilterPanel", () => ({
   __esModule: true,
   default: (props: any) => {
     assignmentPanelProps = props;
@@ -107,7 +107,7 @@ describe("CommunityMembersGroupFilter", () => {
     useGroupMutationsMock.mockReturnValue({ submit });
   });
 
-  it("opens directly in the shared criteria builder", () => {
+  it("opens the Network criteria presentation with the shared draft configuration", () => {
     renderFilter();
 
     expect(screen.getByTestId("group-assignment-panel")).toBeInTheDocument();
@@ -119,8 +119,6 @@ describe("CommunityMembersGroupFilter", () => {
         startMode: "criteria",
         allowGroupClear: true,
         defaultLabel: "All Network members",
-        showChooseGroup: false,
-        showPrivacyControl: false,
       })
     );
   });

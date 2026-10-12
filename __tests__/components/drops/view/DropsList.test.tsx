@@ -1,6 +1,8 @@
 import DropsList from "@/components/drops/view/DropsList";
-import { DropSize } from "@/helpers/waves/drop.helpers";
+import { DropSize, type ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import { fireEvent, render, screen } from "@testing-library/react";
+import type { ComponentProps } from "react";
 
 jest.mock("@/components/content-moderation/ContentModerationDropGate", () => ({
   __esModule: true,
@@ -161,6 +163,86 @@ describe("DropsList", () => {
 
     expect(wrapperProps).toHaveLength(1);
     expect(wrapperProps[0].suspendLightDropHydration).toBe(false);
+  });
+
+  it("only re-renders the old and new reply or quote targets", () => {
+    const drops = Array.from(
+      { length: 50 },
+      (_, index) =>
+        ({
+          id: `drop-${index}`,
+          stableKey: `drop-${index}`,
+          stableHash: `drop-${index}`,
+          serial_no: index + 1,
+          type: DropSize.FULL,
+          wave: { id: "w" },
+        }) as ExtendedDrop
+    );
+    const firstDrop = drops[0]!;
+    const secondDrop = drops[1]!;
+    const props: ComponentProps<typeof DropsList> = {
+      scrollContainerRef: { current: null },
+      drops,
+      showWaveInfo: false,
+      activeDrop: null,
+      showReplyAndQuote: true,
+      onReply: jest.fn(),
+      onReplyClick: jest.fn(),
+      serialNo: null,
+      targetDropRef: null,
+      onQuoteClick: jest.fn(),
+      dropViewDropId: null,
+    };
+    const { rerender } = render(<DropsList {...props} />);
+    expect(dropProps).toHaveLength(50);
+
+    dropProps = [];
+    const reply = {
+      action: ActiveDropAction.REPLY,
+      drop: firstDrop,
+      partId: 0,
+    };
+    rerender(<DropsList {...props} activeDrop={reply} />);
+    expect(dropProps).toEqual([
+      expect.objectContaining({ drop: firstDrop, activeDrop: reply }),
+    ]);
+
+    dropProps = [];
+    const quote = {
+      action: ActiveDropAction.QUOTE,
+      drop: secondDrop,
+      partId: 1,
+    };
+    rerender(<DropsList {...props} activeDrop={quote} />);
+    expect(dropProps).toHaveLength(2);
+    expect(dropProps).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ drop: firstDrop, activeDrop: null }),
+        expect.objectContaining({ drop: secondDrop, activeDrop: quote }),
+      ])
+    );
+
+    dropProps = [];
+    const nextPart = { ...quote, partId: 2 };
+    rerender(<DropsList {...props} activeDrop={nextPart} />);
+    expect(dropProps).toEqual([
+      expect.objectContaining({ drop: secondDrop, activeDrop: nextPart }),
+    ]);
+
+    dropProps = [];
+    rerender(<DropsList {...props} />);
+    expect(dropProps).toEqual([
+      expect.objectContaining({ drop: secondDrop, activeDrop: null }),
+    ]);
+
+    dropProps = [];
+    rerender(
+      <DropsList
+        {...props}
+        activeDrop={{ ...reply, drop: { ...firstDrop, id: "outside-window" } }}
+      />
+    );
+    expect(dropProps).toHaveLength(0);
   });
 
   it("passes approve wave state to full drops", () => {

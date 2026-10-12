@@ -6,6 +6,8 @@ import { useAuth } from "@/components/auth/Auth";
 import GroupCreateIdentitySelectedItems from "@/components/groups/page/create/config/GroupCreateIdentitySelectedItems";
 import GroupCreateIdentitiesSearch from "@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearch";
 import type { GroupCreateIdentitiesSearchResultsLayout } from "@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItems";
+import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -27,6 +29,7 @@ type InlineIdentityMode = "included" | "excluded";
 
 interface CreateWaveInlineGroupIdentitiesProps {
   readonly quiet?: boolean;
+  readonly networkPresentation?: boolean;
   readonly includedIdentities: readonly CommunityMemberMinimal[];
   readonly excludedIdentities: readonly CommunityMemberMinimal[];
   readonly includedWalletSources: InlineGroupWalletSources;
@@ -115,8 +118,7 @@ function includesCurrentUser({
   if (!currentUserIdentity) {
     return false;
   }
-  const wallets =
-    getInlineIdentityAddresses(identities, walletSources) ?? [];
+  const wallets = getInlineIdentityAddresses(identities, walletSources) ?? [];
   return wallets.some((wallet) =>
     areEqualAddresses(wallet, currentUserIdentity.wallet)
   );
@@ -197,6 +199,7 @@ function IdentityControlsRow({
   includeMeLabel,
   isCurrentUserIncluded,
   isIncludedMode,
+  networkPresentation,
   onCurrentUserToggle,
   onRemove,
   quiet,
@@ -208,6 +211,7 @@ function IdentityControlsRow({
   readonly includeMeLabel: string;
   readonly isCurrentUserIncluded: boolean;
   readonly isIncludedMode: boolean;
+  readonly networkPresentation: boolean;
   readonly onCurrentUserToggle: (checked: boolean) => void;
   readonly onRemove: (wallet: string) => void;
   readonly quiet: boolean;
@@ -231,7 +235,9 @@ function IdentityControlsRow({
         />
       )}
       {selectedWalletCount === 0 && (
-        <p className="tw-m-0 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500">
+        <p
+          className={`tw-m-0 tw-font-normal tw-text-iron-500 ${networkPresentation ? "tw-text-xs" : "tw-text-sm tw-leading-relaxed"}`}
+        >
           {emptyText}
         </p>
       )}
@@ -257,8 +263,7 @@ function IdentityStatus({
   readonly quiet: boolean;
   readonly totalText: string;
 }) {
-  let toneClasses =
-    "tw-border-white/5 tw-bg-iron-950/60 tw-text-iron-300";
+  let toneClasses = "tw-border-white/5 tw-bg-iron-950/60 tw-text-iron-300";
   if (quiet) {
     toneClasses = "tw-text-iron-400";
   }
@@ -292,6 +297,7 @@ export default function CreateWaveInlineGroupIdentities(
     onIncludedIdentityRemove,
     resultsLayout = "popover",
     quiet = false,
+    networkPresentation = false,
   } = props;
   const { connectedProfile } = useAuth();
   const locale = useBrowserLocale();
@@ -338,49 +344,97 @@ export default function CreateWaveInlineGroupIdentities(
     count: formatInteger(locale, selectedWallets.length),
   });
   const limitText = isOverIdentityLimit
-    ? t(
-        locale,
-        getIdentityLimitMessageKey(mode),
-        { limit: formatInteger(locale, identityLimit) }
-      )
+    ? t(locale, getIdentityLimitMessageKey(mode), {
+        limit: formatInteger(locale, identityLimit),
+      })
     : null;
+  const includedLabel = t(
+    locale,
+    "waves.create.groups.inlineIdentities.included.label"
+  );
+  const excludedLabel = t(
+    locale,
+    "waves.create.groups.inlineIdentities.excluded.label"
+  );
+  const modeItems: CommonSelectItem<InlineIdentityMode>[] = [
+    {
+      label: includedLabel,
+      value: "included",
+      key: "included",
+    },
+    {
+      label: excludedLabel,
+      value: "excluded",
+      key: "excluded",
+    },
+  ];
+  let containerClasses = quiet ? "tw-space-y-4" : "tw-space-y-5";
+  let searchSectionClasses = quiet ? "tw-space-y-3" : "tw-space-y-4";
+  let searchInputClasses = quiet
+    ? ""
+    : "tw-border-white/10 tw-bg-iron-950 tw-ring-white/10 desktop-hover:hover:tw-ring-white/15 desktop-hover:hover:focus:tw-ring-primary-400 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-ring-primary-400";
+  if (networkPresentation) {
+    containerClasses = "tw-space-y-4";
+    searchSectionClasses =
+      "tw-space-y-3 tw-rounded-xl tw-bg-iron-900/50 tw-p-4";
+    searchInputClasses =
+      "focus:!tw-ring-1 desktop-hover:hover:focus:tw-ring-primary-400";
+  }
 
   return (
-    <div className={quiet ? "tw-space-y-4" : "tw-space-y-5"}>
-      <div
-        role="group"
-        aria-label={t(locale, "waves.create.groups.inlineIdentities.modeLabel")}
-        className={
-          quiet
-            ? "tw-relative tw-isolate tw-inline-flex tw-min-h-11 tw-w-fit tw-items-center tw-rounded-lg tw-bg-transparent tw-p-0 before:tw-pointer-events-none before:tw-absolute before:-tw-z-10 before:tw-inset-x-0 before:tw-inset-y-1 before:tw-rounded-lg before:tw-bg-iron-900 before:tw-ring-1 before:tw-ring-inset before:tw-ring-iron-800 before:tw-content-['']"
-            : "tw-flex tw-flex-wrap tw-gap-1.5"
-        }
-      >
-        <DraftChipButton
-          label={t(
+    <div className={containerClasses}>
+      {networkPresentation ? (
+        <div className="tw-w-fit">
+          <CommonTabs<InlineIdentityMode>
+            items={modeItems}
+            activeItem={mode}
+            setSelected={setMode}
+            filterLabel={t(
+              locale,
+              "waves.create.groups.inlineIdentities.modeLabel"
+            )}
+            fill={false}
+            size="sm"
+          />
+        </div>
+      ) : (
+        <div
+          role="group"
+          aria-label={t(
             locale,
-            "waves.create.groups.inlineIdentities.included.label"
+            "waves.create.groups.inlineIdentities.modeLabel"
           )}
-          active={isIncludedMode}
-          quiet={quiet}
-          quietStyle="segment"
-          isToggle={true}
-          onClick={() => setMode("included")}
-        />
-        <DraftChipButton
-          label={t(
-            locale,
-            "waves.create.groups.inlineIdentities.excluded.label"
-          )}
-          active={!isIncludedMode}
-          quiet={quiet}
-          quietStyle="segment"
-          isToggle={true}
-          onClick={() => setMode("excluded")}
-        />
-      </div>
+          className={
+            quiet
+              ? "tw-relative tw-isolate tw-inline-flex tw-min-h-11 tw-w-fit tw-items-center tw-rounded-lg tw-bg-transparent tw-p-0 before:tw-pointer-events-none before:tw-absolute before:tw-inset-x-0 before:tw-inset-y-1 before:-tw-z-10 before:tw-rounded-lg before:tw-bg-iron-900 before:tw-ring-1 before:tw-ring-inset before:tw-ring-iron-800 before:tw-content-['']"
+              : "tw-flex tw-flex-wrap tw-gap-1.5"
+          }
+        >
+          <DraftChipButton
+            label={includedLabel}
+            active={isIncludedMode}
+            quiet={quiet}
+            quietStyle="segment"
+            isToggle={true}
+            onClick={() => setMode("included")}
+          />
+          <DraftChipButton
+            label={excludedLabel}
+            active={!isIncludedMode}
+            quiet={quiet}
+            quietStyle="segment"
+            isToggle={true}
+            onClick={() => setMode("excluded")}
+          />
+        </div>
+      )}
 
-      <div className={quiet ? "tw-space-y-3" : "tw-space-y-4"}>
+      <div className={searchSectionClasses}>
+        {networkPresentation && (
+          <h3 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
+            {searchLabel}
+          </h3>
+        )}
         <GroupCreateIdentitiesSearch
           key={mode}
           selectedWallets={selectedWallets}
@@ -389,11 +443,7 @@ export default function CreateWaveInlineGroupIdentities(
           placeholder={searchPlaceholder}
           hideLabel={true}
           inputAppearance={quiet ? "modal" : "default"}
-          inputClassName={
-            quiet
-              ? ""
-              : "tw-border-white/10 tw-bg-iron-950 tw-ring-white/10 desktop-hover:hover:tw-ring-white/15 desktop-hover:hover:focus:tw-ring-primary-400 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-ring-primary-400"
-          }
+          inputClassName={searchInputClasses}
           iconClassName="tw-text-iron-500"
           resultsLayout={resultsLayout}
           sort="level"
@@ -408,6 +458,7 @@ export default function CreateWaveInlineGroupIdentities(
           )}
           isCurrentUserIncluded={isCurrentUserIncluded}
           isIncludedMode={isIncludedMode}
+          networkPresentation={networkPresentation}
           onCurrentUserToggle={(checked) =>
             updateCurrentUserSelection({
               checked,
@@ -427,6 +478,7 @@ export default function CreateWaveInlineGroupIdentities(
         sources={activeWalletSources}
         onChange={onWalletSourcesChange}
         quiet={quiet}
+        networkPresentation={networkPresentation}
       />
       <IdentityStatus
         isOverIdentityLimit={isOverIdentityLimit}

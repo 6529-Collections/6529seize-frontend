@@ -99,7 +99,6 @@ This page owns both so users can map configured outcomes to per-rank results.
 ## Related Pages
 
 - [Wave Content Tabs](chat/feature-content-tabs.md)
-- [Wave Right Sidebar Leaderboard](sidebars/feature-right-sidebar-leaderboard.md)
 - [Wave Leaderboard Drop States](leaderboard/feature-drop-states.md)
 - [Wave Leaderboards Index](leaderboard/README.md)
 - [Wave Winners Tab](leaderboard/feature-winners-tab.md)

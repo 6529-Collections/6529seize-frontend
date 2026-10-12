@@ -8,6 +8,9 @@ review date. Update it in the same change as any custom signal.
 See [Homepage tracking](homepage.md) for section visibility, main clicks, and
 next-page reports with simple labels.
 
+See [Collected tracking](collected.md) for Profile sections, buttons and filters,
+with separate own-profile and visitor groups.
+
 ## Provider ownership
 
 - AWS RUM owns real-user browser performance: Core Web Vitals,
@@ -27,6 +30,13 @@ temporary or compatibility destination needs a replacement/removal plan and a
 dated review.
 
 ## Current policy
+
+The [Wave feature usage pilot](../docs/developer/wave-feature-usage-pilot.md)
+adds foreground control exposure and deliberate-use events for a bounded subset
+of sidebar controls, tabs and leaderboard sorts. Its SDK privacy boundary also
+removes automatic and previously persisted URL/referrer attribution after
+enrichment. Existing event contracts remain; dashboards using the removed SDK
+attribution fields need migration. Live usage remains unverified.
 
 The repo Mixpanel runbook names the auth and Wave feed events, but live
 dashboard use could not be verified. Mixpanel therefore keeps every existing

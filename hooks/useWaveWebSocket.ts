@@ -1,118 +1,191 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
-import { useEffect, useRef, useState } from "react";
 import { WsMessageType } from "@/helpers/Types";
+import {
+  AUTH_TOKEN_CHANGED_EVENT,
+  getAuthJwt,
+  isAuthJwtUsable,
+} from "@/services/auth/auth.utils";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 interface UseWaveWebSocketResult {
-  socket: WebSocket | null;
-  readyState: number;
-  /**
-   * Manually disconnects the WebSocket and prevents further reconnect attempts.
-   */
-  disconnect: () => void;
+  readonly socket: WebSocket | null;
+  readonly readyState: number;
+  readonly disconnect: () => void;
+}
+
+interface WaveConnectionState {
+  readonly waveId: string;
+  readonly token: string | null;
+  readonly socket: WebSocket | null;
+  readonly readyState: number;
 }
 
 const RECONNECT_DELAY = 2000;
 const MAX_RECONNECT_ATTEMPTS = 20;
+const AUTHENTICATION_TIMEOUT_MS = 8000;
+const AUTH_BROADCAST_CHANNEL = "auth-token-updates";
 
-/**
- * Custom hook to connect to a WebSocket for a given waveId.
- * Automatically reconnects on disconnect, up to MAX_RECONNECT_ATTEMPTS,
- * with a delay of RECONNECT_DELAY ms between attempts.
- * Sends a subscription message upon successful connection.
- *
- * @param waveId - The wave ID to subscribe to. Pass empty string to disable.
+function subscribeToAuthChanges(onChange: () => void): () => void {
+  window.addEventListener(AUTH_TOKEN_CHANGED_EVENT, onChange);
+  window.addEventListener("focus", onChange);
+  window.addEventListener("storage", onChange);
+  const channel =
+    typeof BroadcastChannel === "undefined"
+      ? null
+      : new BroadcastChannel(AUTH_BROADCAST_CHANNEL);
+  channel?.addEventListener("message", onChange);
+  return () => {
+    window.removeEventListener(AUTH_TOKEN_CHANGED_EVENT, onChange);
+    window.removeEventListener("focus", onChange);
+    window.removeEventListener("storage", onChange);
+    channel?.removeEventListener("message", onChange);
+    channel?.close();
+  };
+}
+
+const getServerToken = (): null => null;
+
+function messageType(event: MessageEvent<unknown>): string | null {
+  if (typeof event.data !== "string") return null;
+  try {
+    const message: unknown = JSON.parse(event.data);
+    if (typeof message !== "object" || message === null) return null;
+    const type: unknown = Reflect.get(message, "type");
+    return typeof type === "string" ? type : null;
+  } catch {
+    return null;
+  }
+}
+
+/** A wave-scoped listener, independent of the global feed/notification socket.
+ * Signed-in listeners authenticate before subscribing so private-wave recipient
+ * filtering and the typing sender's active-wave membership check can succeed.
  */
 export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
+  const token = useSyncExternalStore(
+    subscribeToAuthChanges,
+    getAuthJwt,
+    getServerToken
+  );
   const socketRef = useRef<WebSocket | null>(null);
-  const [readyState, setReadyState] = useState<number>(WebSocket.CLOSED);
-  const reconnectAttemptsRef = useRef<number>(0);
-  const reconnectTimeoutRef = useRef<number | null>(null);
-  const shouldReconnectRef = useRef<boolean>(true);
+  const stopRef = useRef<() => void>(() => undefined);
+  const [connection, setConnection] = useState<WaveConnectionState>({
+    waveId: "",
+    token: null,
+    socket: null,
+    readyState: WebSocket.CLOSED,
+  });
 
   useEffect(() => {
-    if (!waveId) {
-      if (socketRef.current) {
-        socketRef.current.close();
-        socketRef.current = null;
-      }
-      setReadyState(WebSocket.CLOSED);
-      return;
-    }
+    if (!waveId || (token && !isAuthJwtUsable(token))) return;
 
-    shouldReconnectRef.current = true;
+    let disposed = false;
+    let shouldReconnect = true;
+    let reconnectAttempts = 0;
+    let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+    let authenticationTimeout: ReturnType<typeof setTimeout> | null = null;
     const url =
       publicEnv.WS_ENDPOINT ??
       publicEnv.API_ENDPOINT?.replace("https://api", "wss://ws") ??
       "wss://default-fallback-url";
 
+    const clearAuthenticationTimeout = () => {
+      if (authenticationTimeout !== null) {
+        clearTimeout(authenticationTimeout);
+        authenticationTimeout = null;
+      }
+    };
+    const publish = (socket: WebSocket | null, readyState: number) => {
+      setConnection({ waveId, token, socket, readyState });
+    };
+    const stop = () => {
+      shouldReconnect = false;
+      if (reconnectTimeout !== null) clearTimeout(reconnectTimeout);
+      clearAuthenticationTimeout();
+      const socket = socketRef.current;
+      socketRef.current = null;
+      socket?.close();
+    };
+    stopRef.current = () => {
+      stop();
+      publish(null, WebSocket.CLOSED);
+    };
+
     function connect() {
+      if (disposed || !shouldReconnect || getAuthJwt() !== token) return;
+      if (token && !isAuthJwtUsable(token)) return;
       const ws = new WebSocket(url);
       socketRef.current = ws;
-      setReadyState(ws.readyState);
-
-      ws.onopen = () => {
-        setReadyState(ws.readyState);
-        reconnectAttemptsRef.current = 0;
+      publish(null, WebSocket.CONNECTING);
+      const isCurrent = () =>
+        !disposed && socketRef.current === ws && getAuthJwt() === token;
+      let subscribed = false;
+      const subscribe = () => {
+        if (!isCurrent() || subscribed || ws.readyState !== WebSocket.OPEN)
+          return;
+        subscribed = true;
+        clearAuthenticationTimeout();
         ws.send(
           JSON.stringify({
             type: WsMessageType.SUBSCRIBE_TO_WAVE,
             wave_id: waveId,
           })
         );
+        reconnectAttempts = 0;
+        publish(ws, WebSocket.OPEN);
       };
 
-      ws.onclose = () => {
-        setReadyState(WebSocket.CLOSED);
-        // only reconnect if allowed
-        if (
-          shouldReconnectRef.current &&
-          reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS
-        ) {
-          reconnectAttemptsRef.current += 1;
-          reconnectTimeoutRef.current = window.setTimeout(
-            connect,
-            RECONNECT_DELAY
-          );
+      ws.onopen = () => {
+        if (!isCurrent()) return;
+        if (!token) {
+          subscribe();
+          return;
+        }
+        authenticationTimeout = setTimeout(() => {
+          if (isCurrent()) ws.close(4011, "Authentication timeout");
+        }, AUTHENTICATION_TIMEOUT_MS);
+        ws.send(JSON.stringify({ type: "AUTHENTICATE", access_token: token }));
+      };
+      ws.onmessage = (event) => {
+        if (!isCurrent() || !token) return;
+        const type = messageType(event);
+        if (type === "AUTHENTICATED") subscribe();
+        if (type === "AUTHENTICATION_FAILED") {
+          shouldReconnect = false;
+          clearAuthenticationTimeout();
+          publish(null, WebSocket.CLOSED);
+          ws.close(4008, "Authentication failed");
         }
       };
-
+      ws.onclose = () => {
+        if (!isCurrent()) return;
+        clearAuthenticationTimeout();
+        socketRef.current = null;
+        publish(null, WebSocket.CLOSED);
+        if (shouldReconnect && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+          reconnectAttempts += 1;
+          reconnectTimeout = setTimeout(connect, RECONNECT_DELAY);
+        }
+      };
       ws.onerror = () => {
-        ws.close();
+        if (isCurrent()) ws.close();
       };
     }
 
     connect();
-
     return () => {
-      // disable future reconnects on cleanup
-      shouldReconnectRef.current = false;
-      if (reconnectTimeoutRef.current != null) {
-        clearTimeout(reconnectTimeoutRef.current);
-      }
-      if (socketRef.current) {
-        socketRef.current.close();
-      }
+      disposed = true;
+      stop();
+      stopRef.current = () => undefined;
     };
-  }, [waveId]);
+  }, [waveId, token]);
 
-  // manual disconnect function
-  const disconnect = () => {
-    // disable future reconnects
-    shouldReconnectRef.current = false;
-    // stop any pending reconnect
-    if (reconnectTimeoutRef.current !== null) {
-      clearTimeout(reconnectTimeoutRef.current);
-      reconnectTimeoutRef.current = null;
-    }
-    // close existing socket
-    if (socketRef.current) {
-      socketRef.current.close();
-      socketRef.current = null;
-    }
-    setReadyState(WebSocket.CLOSED);
+  const isCurrent = connection.waveId === waveId && connection.token === token;
+  return {
+    socket: isCurrent ? connection.socket : null,
+    readyState: isCurrent ? connection.readyState : WebSocket.CLOSED,
+    disconnect: () => stopRef.current(),
   };
-
-  return { socket: socketRef.current, readyState, disconnect };
 }

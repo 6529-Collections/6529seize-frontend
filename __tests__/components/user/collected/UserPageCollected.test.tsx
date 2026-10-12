@@ -26,6 +26,15 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
 }));
 
+const mockTrackAction = jest.fn();
+jest.mock("@/components/user/collected/useCollectedTracking", () => ({
+  useCollectedTracking: () => ({
+    rootRef: { current: null },
+    onClickCapture: jest.fn(),
+    trackAction: mockTrackAction,
+  }),
+}));
+
 jest.mock(
   "@/components/user/collected/filters/UserPageCollectedFilters",
   () =>
@@ -418,6 +427,10 @@ describe("UserPageCollected", () => {
     expect(params.get("subcollection")).toBeNull();
     expect(params.get("sort-by")).toBeNull();
     expect(params.get("sort-direction")).toBeNull();
+    expect(mockTrackAction).toHaveBeenCalledWith(
+      "Collection summary",
+      "Change collection"
+    );
   });
 
   it("adds each user-selected collection filter to browser history", async () => {
@@ -439,6 +452,10 @@ describe("UserPageCollected", () => {
       { scroll: false }
     );
     expect(routerReplace).not.toHaveBeenCalled();
+    expect(mockTrackAction.mock.calls).toEqual([
+      ["Collection summary", "Change collection"],
+      ["Filters", "Change collection"],
+    ]);
   });
 
   it("replaces automatic invalid-page corrections", async () => {
@@ -455,6 +472,7 @@ describe("UserPageCollected", () => {
       });
     });
     expect(routerPush).not.toHaveBeenCalled();
+    expect(mockTrackAction).not.toHaveBeenCalled();
   });
 
   it("replaces automatic overflow-page corrections", async () => {
@@ -480,6 +498,7 @@ describe("UserPageCollected", () => {
       });
     });
     expect(routerPush).not.toHaveBeenCalled();
+    expect(mockTrackAction).not.toHaveBeenCalled();
   });
 
   it("applies season shortcuts through the existing url filter flow", async () => {

@@ -15,9 +15,11 @@ const COLLECTIONS = [
 export default function GroupCreateCollections({
   nfts,
   setNfts,
+  singleRowOnDesktop = false,
 }: {
   readonly nfts: ApiCreateGroupDescription["owns_nfts"];
   readonly setNfts: (nfts: ApiCreateGroupDescription["owns_nfts"]) => void;
+  readonly singleRowOnDesktop?: boolean;
 }) {
   const toggleCollection = (collection: ApiGroupOwnsNftNameEnum) => {
     const existingCollection = nfts.find((n) => n.name === collection);
@@ -46,7 +48,9 @@ export default function GroupCreateCollections({
         </p>
       </div>
       <div className="tw-mt-2 sm:tw-mt-4">
-        <div className="tw-grid tw-grid-cols-2 tw-gap-3">
+        <div
+          className={`tw-grid tw-grid-cols-2 tw-gap-3 ${singleRowOnDesktop ? "lg:tw-grid-cols-4" : ""}`}
+        >
           {COLLECTIONS.map((collection) => {
             const existingCollection = nfts.find(
               (n) => n.name === collection.enum

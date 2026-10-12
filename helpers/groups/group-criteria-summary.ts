@@ -54,14 +54,16 @@ const RANGE_MESSAGE_KEYS = {
   Record<FormattedRange["kind"], MessageKey>
 >;
 
-type GroupCriteriaSummary =
+export type GroupCriteriaSummary =
   | {
       readonly status: "available";
       readonly text: string | null;
+      readonly parts: readonly string[];
     }
   | {
       readonly status: "unavailable";
       readonly text: null;
+      readonly parts: readonly string[];
     };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -297,7 +299,7 @@ export const getGroupCriteriaSummary = ({
   readonly identityLabels?: GroupCriteriaIdentityLabels | undefined;
 }): GroupCriteriaSummary => {
   if (!hasReadableCriteria(group)) {
-    return { status: "unavailable", text: null };
+    return { status: "unavailable", text: null, parts: [] };
   }
 
   const parts: string[] = [];
@@ -419,5 +421,6 @@ export const getGroupCriteriaSummary = ({
   return {
     status: "available",
     text: parts.length ? formatList(locale, parts) : null,
+    parts,
   };
 };
