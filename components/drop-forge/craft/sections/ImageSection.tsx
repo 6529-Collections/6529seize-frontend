@@ -156,8 +156,7 @@ export default function ImageSection({
         {hasImage && (
           <button
             type="button"
-            disabled={saving}
-            disabled={!!claim.collaboration_credit?.collab}
+            disabled={saving || !!claim.collaboration_credit?.collab}
             onClick={() => imageInputRef.current?.click()}
             className={`${BTN_PRIMARY} tw-w-fit tw-self-center`}
           >

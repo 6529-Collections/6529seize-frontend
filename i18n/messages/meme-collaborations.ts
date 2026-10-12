@@ -13,7 +13,7 @@ export const MEME_COLLABORATION_MESSAGES = {
   "memes.collaborations.decline": "Decline",
   "memes.collaborations.cancel": "Cancel invitation",
   "memes.collaborations.confirm":
-    "I have reviewed this artwork and agree to the collaboration acceptance and submission terms below.",
+    "I have reviewed this artwork and agree to the collaboration acceptance and submission terms shown here.",
   "memes.collaborations.final":
     "Acceptance is final. The artwork and agreed artist credits cannot be changed after acceptance.",
   "memes.collaborations.terms": "Submission and minting terms",

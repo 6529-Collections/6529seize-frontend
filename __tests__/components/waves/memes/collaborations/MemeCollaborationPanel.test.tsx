@@ -126,8 +126,10 @@ it("requires fresh confirmation after the artwork or terms change", async () => 
       artwork_hash: "c".repeat(64),
     });
   });
-  expect(screen.getByRole("checkbox")).not.toBeChecked();
-  expect(accept).toBeDisabled();
+  await waitFor(() => {
+    expect(screen.getByRole("checkbox")).not.toBeChecked();
+    expect(accept).toBeDisabled();
+  });
   expect(postMock).not.toHaveBeenCalled();
 });
 
