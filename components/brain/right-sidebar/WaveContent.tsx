@@ -44,7 +44,7 @@ export const WaveContentTabs: React.FC<WaveContentTabsProps> = ({
   activeTab,
   setActiveTab,
   maxVisibleTabs,
-  variant = "underline",
+  variant = "compactPills",
   aboutTabLabel,
 }) => {
   const options: TabOption[] = [
@@ -91,7 +91,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
   activeTab,
   setActiveTab,
   maxVisibleTabs,
-  tabVariant = "underline",
+  tabVariant = "compactPills",
   aboutTabLabel,
   showTabs = true,
 }) => {

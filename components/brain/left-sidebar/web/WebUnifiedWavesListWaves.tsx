@@ -151,7 +151,11 @@ function CreateWaveButton({
           : "tw-h-8 tw-gap-2 tw-rounded-lg tw-px-3 tw-py-0 tw-text-xs touch-only:tw-h-11"
       }
     >
-      <FontAwesomeIcon icon={faPlus} className="tw-size-4" aria-hidden="true" />
+      <FontAwesomeIcon
+        icon={faPlus}
+        className={compact ? "tw-size-4" : "-tw-ml-1 tw-size-4"}
+        aria-hidden="true"
+      />
       {!compact && <span>{label}</span>}
     </Button>
   );
