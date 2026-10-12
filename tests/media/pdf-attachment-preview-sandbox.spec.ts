@@ -281,8 +281,15 @@ test.describe("PDF attachment previews @local-only", () => {
         .toBeLessThanOrEqual(1);
       await scroller.focus();
       await page.keyboard.press("Home");
+      await expect
+        .poll(() => scroller.evaluate((element) => element.scrollTop))
+        .toBe(0);
       await expect(
         reader.getByText("Page 1 of 20", { exact: true })
+      ).toBeVisible();
+      await page.keyboard.press("End");
+      await expect(
+        reader.getByText("Page 20 of 20", { exact: true })
       ).toBeVisible();
       await page.keyboard.press("Escape");
       await expect(reader).toHaveCount(0);

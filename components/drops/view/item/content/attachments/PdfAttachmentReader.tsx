@@ -269,6 +269,14 @@ function PdfReaderSession({
       <div
         ref={observeContainer}
         onScroll={(event) => updateCurrentPage(event.currentTarget)}
+        onKeyDown={(event) => {
+          if (event.target !== event.currentTarget) return;
+          if (event.key !== "Home" && event.key !== "End") return;
+          // Keep keyboard boundary jumps immediate while pages mount lazily.
+          event.preventDefault();
+          event.currentTarget.scrollTop =
+            event.key === "Home" ? 0 : event.currentTarget.scrollHeight;
+        }}
         role="region"
         aria-label={t(DEFAULT_LOCALE, "attachment.pdf.pages")}
         tabIndex={0}
