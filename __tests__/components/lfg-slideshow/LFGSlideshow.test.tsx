@@ -6,6 +6,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import React from "react";
+import * as videoConfig from "@/components/drops/view/item/content/media/SeizeVideoPlayer.config";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import { commonApiFetch } from "@/services/api/common-api";
 
@@ -20,6 +21,9 @@ const mockFetch = commonApiFetch as jest.Mock;
 
 describe("LFGSlideshow", () => {
   beforeEach(() => {
+    // Source selection is asserted for the opened, visible slideshow.
+    jest.spyOn(videoConfig, "useElementInView").mockReturnValue(true);
+    jest.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
     mockFetch.mockResolvedValue([{ id: "1", image: "img.png", animation: "" }]);
   });
 
@@ -27,6 +31,7 @@ describe("LFGSlideshow", () => {
     jest.useRealTimers();
     document.body.style.overflow = "";
     mockFetch.mockReset();
+    jest.restoreAllMocks();
   });
 
   it("opens slideshow on button click", async () => {
