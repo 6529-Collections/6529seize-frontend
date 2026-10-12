@@ -906,9 +906,9 @@ describe("E2E runner CLI resolution", () => {
   });
 
   it.each([
-    ["staging", "post-deploy", 17],
-    ["production", "cron", 11],
-    ["production", "post-deploy", 16],
+    ["staging", "post-deploy", 18],
+    ["production", "cron", 12],
+    ["production", "post-deploy", 17],
   ])(
     "lists %s/%s as a non-empty deterministic pack set",
     (env, trigger, count) => {
@@ -983,7 +983,7 @@ describe("E2E runner CLI resolution", () => {
   it("classifies every dedicated Museum pack across local and deployed environments", () => {
     const museumPacks = PACKS.filter((pack) => pack.changeScope === "museum");
 
-    expect(museumPacks).toHaveLength(15);
+    expect(museumPacks).toHaveLength(18);
     expect(
       museumPacks.every(
         (pack) =>
@@ -993,12 +993,31 @@ describe("E2E runner CLI resolution", () => {
     ).toBe(true);
     expect(
       museumPacks.filter((pack) => pack.environments[0] === "local")
-    ).toHaveLength(5);
+    ).toHaveLength(6);
     expect(
       museumPacks.filter((pack) => pack.environments[0] === "staging")
-    ).toHaveLength(5);
+    ).toHaveLength(6);
     expect(
       museumPacks.filter((pack) => pack.environments[0] === "production")
-    ).toHaveLength(5);
+    ).toHaveLength(6);
+  });
+
+  it("runs Network IA as its own Museum pack so selection can target it", () => {
+    const networkIaPacks = PACKS.filter((pack) =>
+      pack.specs?.includes("tests/museum/network-ia-readonly.spec.ts")
+    ).filter((pack) => pack.scriptKey !== "test:e2e:production:readonly");
+
+    expect(networkIaPacks.map((pack) => pack.scriptKey)).toEqual([
+      "test:e2e:museum-network-ia",
+      "test:e2e:staging:museum-network-ia",
+      "test:e2e:production:museum-network-ia",
+    ]);
+    expect(networkIaPacks.every((pack) => pack.specs?.length === 1)).toBe(true);
+    expect(networkIaPacks[0]?.triggers).toEqual(["manual"]);
+    expect(networkIaPacks[2]?.triggers).toEqual([
+      "cron",
+      "post-deploy",
+      "manual",
+    ]);
   });
 });

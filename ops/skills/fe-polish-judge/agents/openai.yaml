@@ -1,0 +1,4 @@
+interface:
+  display_name: "FE Polish Judge"
+  short_description: "Score a 6529 surface with an independent judge and repair it to the 8.5 bar."
+  default_prompt: "Use $fe-polish-judge to pin a run record for the touched frontend surface, judge it in a fresh context against the 6529 polish rubric, and repair required findings until the scoring script accepts or stops."

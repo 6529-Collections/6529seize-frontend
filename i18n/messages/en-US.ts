@@ -723,6 +723,25 @@ const WAVE_VOTE_DETAILS_MESSAGES = objectMessages("waves.voteDetails", {
   title: "Votes",
   "trigger.one": "View voters and vote log for {count} voter",
   "trigger.other": "View voters and vote log for {count} voters",
+  "trigger.unavailable":
+    "View vote history; historical voter count unavailable",
+  "voters.unavailable": "Voters unavailable",
+  "voters.unavailableExplanation":
+    "The voter list at the time this winner was decided was not saved. The final score is available. Open {voteLogTab} to view any recorded changes.",
+  "voters.one": "{count} voter",
+  "voters.other": "{count} voters",
+  "voters.tab": "Voters",
+  "logs.tab": "Vote log",
+  "voters.empty": "No voters yet.",
+  "voters.loading": "Loading voters...",
+  "voters.error": "Could not load voters.",
+  "logs.empty": "No vote changes yet.",
+  "logs.loading": "Loading vote log...",
+  "logs.error": "Could not load vote log.",
+  retry: "Try again",
+  close: "Close votes",
+  tabsLabel: "Vote details",
+  total: "{value} {unit} total",
 } as const);
 
 const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
