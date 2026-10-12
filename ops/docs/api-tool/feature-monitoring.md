@@ -52,6 +52,8 @@ If the source has not been configured, approved members see **Sentry is not
 connected yet.** This state does not claim that there are no errors. A successful
 snapshot with no matching issues says **No matching errors in this window.**
 
-While the snapshot and access are checked, the page shows **Checking access…**.
-If either is unavailable, select **Try again**. Changing wallets or a failed
-access recheck hides the previous snapshot. There are no operational controls.
+While the initial snapshot and access are checked, the page shows
+**Checking access…**. Background refreshes keep the selected history metric and
+expanded details in place. If access or the snapshot becomes unavailable,
+select **Try again**. Changing wallets or a failed access recheck hides the
+previous snapshot. There are no operational controls.

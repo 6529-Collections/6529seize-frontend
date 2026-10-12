@@ -1,7 +1,14 @@
 import { ApiMonitoringSentryOverviewStatusEnum } from "@/generated/models/ApiMonitoringSentryOverview";
 import MonitoringPageClient from "@/app/tools/monitoring/page.client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import {
   ApiMonitoringSentryIssueLevelEnum,
   ApiMonitoringSentryIssuePriorityEnum,
@@ -18,6 +25,7 @@ import {
 } from "@/generated/models/ApiMonitoringSentryHistory";
 import { SUPPORTED_LOCALES } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 
 const mockAuth = {
   connectedProfile: { id: "member" } as { id: string } | null,
@@ -150,6 +158,82 @@ describe("monitoring entry access", () => {
       await screen.findByRole("heading", { name: "Access restricted" })
     ).toBeInTheDocument();
   });
+
+  it.each([
+    QueryKey.MONITORING_SENTRY_OVERVIEW,
+    QueryKey.MONITORING_SENTRY_HISTORY,
+  ])(
+    "preserves chart choices and open details while refreshing %s",
+    async (key) => {
+      const overview = {
+        status: ApiMonitoringSentryOverviewStatusEnum.Ready,
+        environment: "production",
+        period: "24h" as const,
+        projects: [],
+      };
+      const history = {
+        status: ApiMonitoringSentryHistoryStatusEnum.Ready,
+        environment: "production",
+        period: ApiMonitoringSentryHistoryPeriodEnum._30d,
+        timezone: ApiMonitoringSentryHistoryTimezoneEnum.Utc,
+        projects: [],
+      };
+      jest.mocked(fetchMonitoringSentryOverview).mockResolvedValue(overview);
+      jest.mocked(fetchMonitoringSentryHistory).mockResolvedValue(history);
+      render(page());
+      const metric = await screen.findByRole("button", {
+        name: "Distinct issues",
+      });
+      fireEvent.click(metric);
+      const summary = screen.getByText("All issue details");
+      fireEvent.click(summary);
+      const details = summary.parentElement;
+      expect(details).toHaveAttribute("open");
+
+      let completeRefresh: (() => void) | undefined;
+      const refresh = new Promise<void>((resolve) => {
+        completeRefresh = resolve;
+      });
+      if (key === QueryKey.MONITORING_SENTRY_OVERVIEW) {
+        jest
+          .mocked(fetchMonitoringSentryOverview)
+          .mockImplementationOnce(async () => {
+            await refresh;
+            return overview;
+          });
+      } else {
+        jest
+          .mocked(fetchMonitoringSentryHistory)
+          .mockImplementationOnce(async () => {
+            await refresh;
+            return history;
+          });
+      }
+      act(() => {
+        void client.invalidateQueries({ queryKey: [key] });
+      });
+      await waitFor(() =>
+        expect(client.isFetching({ queryKey: [key] })).toBe(1)
+      );
+      expect(metric).toBeInTheDocument();
+      expect(metric).toHaveAttribute("aria-pressed", "true");
+      expect(details).toBeInTheDocument();
+      expect(details).toHaveAttribute("open");
+      expect(screen.queryByText("Checking access…")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("Loading daily history…")
+      ).not.toBeInTheDocument();
+      await act(async () => {
+        completeRefresh?.();
+        await refresh;
+      });
+      await waitFor(() =>
+        expect(client.isFetching({ queryKey: [key] })).toBe(0)
+      );
+      expect(metric).toHaveAttribute("aria-pressed", "true");
+      expect(details).toHaveAttribute("open");
+    }
+  );
 
   it("does not retain a previous grant when revalidation fails", async () => {
     render(page());

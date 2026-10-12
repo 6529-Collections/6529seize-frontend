@@ -99,8 +99,7 @@ export default function MonitoringPageClient() {
   const signInRequired = !hasSession || status === 401;
   const restricted =
     hasSession && (!isDirectSession || !connectedProfile?.id || status === 403);
-  const checking =
-    pending || (enabled && (query.isPending || query.isFetching));
+  const checking = pending || (enabled && query.isPending);
   const allowed =
     enabled &&
     query.isSuccess &&
@@ -148,7 +147,7 @@ export default function MonitoringPageClient() {
       <SentryOverview overview={query.data} locale={locale}>
         <SentryHistory
           history={historyQuery.data}
-          loading={historyQuery.isPending || historyQuery.isFetching}
+          loading={historyQuery.isPending}
           unavailable={historyQuery.isError}
           locale={locale}
           onRetry={() => {
