@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { ApiWaveChatRepliesConfig } from '../models/ApiWaveChatRepliesConfig';
 import { ApiWaveScope } from '../models/ApiWaveScope';
 import { HttpFile } from '../http/http';
 
@@ -21,6 +22,7 @@ export class ApiWaveChatConfig {
     'authenticated_user_eligible': boolean;
     'next_drop_allowed'?: number;
     'slow_mode_cooldown_ms'?: number;
+    'replies'?: ApiWaveChatRepliesConfig;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -62,6 +64,12 @@ export class ApiWaveChatConfig {
             "baseName": "slow_mode_cooldown_ms",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "replies",
+            "baseName": "replies",
+            "type": "ApiWaveChatRepliesConfig",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {

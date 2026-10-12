@@ -30,8 +30,9 @@ Transfer mode is part of the Native collected view (not a separate route).
   - `sort-direction=<asc|desc>`: shared links can omit the default active sort
     (`token_id desc` in Native, `xtdh desc` in Network).
   - `activity=wallet-activity|distributions|tdh-history`: Details-panel lower
-    section. Any present value opens `Details` on first render. Missing or
-    unknown values default to `wallet-activity`.
+    section. A non-empty value opens `Details` unless `details=closed`. Missing
+    or unknown values default to `wallet-activity`.
+  - `details=open|closed`: remembers whether the Details panel is expanded.
   - `wallet-activity=all|airdrops|mints|sales|purchases|transfers|burns`:
     Wallet Activity filter. Missing or unknown values default to `all`.
   - `page=<n>`: current page for the main collected list. Canonical links omit
@@ -51,7 +52,7 @@ Transfer mode is part of the Native collected view (not a separate route).
 ## User Journey
 
 1. Open `/{user}/collected`.
-   - If the URL already has `activity=...`, `Details` starts open and the lower
+   - If the URL has `activity=...` without `details=closed`, `Details` starts open and the lower
      section selects that tab when the value is recognized.
 2. Review the top stats block:
    - On mobile, swipe the headline metrics horizontally. A fade at the right
@@ -76,6 +77,8 @@ Transfer mode is part of the Native collected view (not a separate route).
      clears the Memes season filter
    - unopened Meme seasons can appear as `Unseized` chips
 3. Click `Details` to expand the integrated stats panel.
+   - Closing Details keeps its selected activity tab, filters, and page. It stays
+     closed when returning from artwork; reopening restores those selections.
    - On mobile, both `Overview` and both `Memes Breakdown By Season` sections
      start closed under `Collected` and `Activity Overview`. Tap a section title
      to open its table. Desktop starts with these sections open.
@@ -128,7 +131,8 @@ Transfer mode is part of the Native collected view (not a separate route).
 7. Apply sort and browse pages.
    - Pagination sits below the artwork grid in Native and Network views. Page
      counts stay on one line; Previous and Next can move below the count on narrow
-     screens.
+     screens. After the selected page loads, the view moves to the first artwork
+     row and keyboard focus moves to the results. Page controls pause while loading.
    - Collection, filter, sort, and pagination changes add browser-history
      entries, so browser Back and Forward restore earlier collected views.
    - Automatic correction of an unavailable page replaces the current history
@@ -145,6 +149,9 @@ Transfer mode is part of the Native collected view (not a separate route).
      The native and mobile-web profile-return actions restore the originating
      Collected filters and page, then return keyboard focus and scroll position
      to the opened card when it is still on that page.
+   - Artwork links in Wallet Activity and Distributions also provide a profile
+     return action on mobile web and in the native app. Returning preserves
+     Details, both pagination selections, and the originating activity link.
 9. In network view, review xTDH token holdings:
    - Network card results render as a labelled `Collected network cards` list
      with one list item per token for assistive technologies.
@@ -180,8 +187,8 @@ Transfer mode is part of the Native collected view (not a separate route).
 
 ## Edge Cases
 
-- Any non-empty `activity` query opens `Details` immediately on first render.
-- If `activity` is unknown, `Details` still opens and the lower section falls
+- A non-empty `activity` query opens `Details` unless `details=closed`.
+- If `activity` is unknown and Details is open, the lower section falls
   back to `Wallet Activity`.
 - The top stats block still renders on `Network`; if an `address` query is
   already present, it continues to scope both the stats block and Network
@@ -225,6 +232,17 @@ Transfer mode is part of the Native collected view (not a separate route).
 ## Failure and Recovery
 
 - Initial load shows skeleton placeholders.
+- Empty filtered results show `No artwork matches these filters` and a
+  `Clear filters` button. Clearing returns to page 1 with all addresses and
+  collections in the current Native or Network view, preserving sorting and
+  Details selections. The existing full-set congratulations remain when the
+  Unseized filter finds no missing cards; `Clear filters` is available there too.
+- Recovery controls are shown only for a successful response for the current
+  page, and disabled while it refreshes. An unfiltered empty collection has
+  no redundant `Clear filters` button.
+- Recovery messages use the source-locale dictionary. Other supported locales
+  currently fall back to English for this copy; translation remains follow-up
+  work under the progressive localization standard.
 - If native collected data fails, the tab falls back to empty-state copy
   (for example `No cards to display`). Empty-state copy is message-backed from
   the source locale and announced as status text for assistive technologies.

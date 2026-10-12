@@ -148,6 +148,47 @@ describe("WaveDropActionsReply", () => {
     });
   });
 
+  it("lets people outside the chat group reply when replies are open", async () => {
+    const user = userEvent.setup();
+    const drop = {
+      ...baseDrop,
+      wave: {
+        ...baseDrop.wave,
+        authenticated_user_eligible_to_chat: false,
+        authenticated_user_eligible_to_reply: true,
+      },
+    };
+    const { onReply, setToast } = renderReply({
+      drop,
+      eligibility: makeEligibility({
+        authenticated_user_eligible_to_chat: false,
+        authenticated_user_eligible_to_reply: true,
+        authenticated_user_chat_restriction: ChatRestriction.NO_PERMISSION,
+      }),
+    });
+
+    const btn = await screen.findByRole("button", { name: "Reply to drop" });
+    await user.click(btn);
+    expect(onReply).toHaveBeenCalledTimes(1);
+    expect(setToast).not.toHaveBeenCalled();
+  });
+
+  it("falls back to the drop's reply eligibility before the wave loads", async () => {
+    const user = userEvent.setup();
+    const drop = {
+      ...baseDrop,
+      wave: {
+        ...baseDrop.wave,
+        authenticated_user_eligible_to_chat: false,
+        authenticated_user_eligible_to_reply: true,
+      },
+    };
+    const { onReply } = renderReply({ drop });
+
+    await user.click(screen.getByRole("button", { name: "Reply to drop" }));
+    expect(onReply).toHaveBeenCalledTimes(1);
+  });
+
   it("disables reply for temporary drop during slow mode", async () => {
     const user = userEvent.setup();
     const drop = {
