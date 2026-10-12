@@ -6328,6 +6328,7 @@
       "keywords": ["waves", "attachment", "PDF", "iPhone", "iPad", "preview"],
       "facts": [
         "Use the PDF attachment eye button to open its preview. On iPhone and iPad, including the iOS app, the reader fills the screen and shows the page count. Scroll through the pages and pinch to zoom. Close the reader to return to the wave.",
+        "On supported hosts, the iOS reader fetches PDF data as needed and loads nearby pages. Some documents or hosts still require the whole file before pages appear.",
         "The wave stays in place while the PDF reader is open. Close it to return to the attachment list and open another document.",
         "Loading PDF and Loading page show progress states. If the PDF fails or times out, choose Try again or Open full PDF. Password-protected and oversized previews need Open full PDF.",
         "Desktop keeps the browser PDF viewer. Download and Copy link remain in the attachment options menu. Restricted media-interaction views do not expose the reader."
