@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import BackButton from "@/components/navigation/BackButton";
@@ -58,6 +58,7 @@ function setup(
     isDm?: boolean | undefined;
     activeWaveId?: string | null | undefined;
     returnTo?: string | null | undefined;
+    pathname?: string | undefined;
   } = {}
 ) {
   const replace = jest.fn();
@@ -69,7 +70,9 @@ function setup(
 
   (useRouter as jest.Mock).mockReturnValue({ replace, back, prefetch });
   (useSearchParams as jest.Mock).mockReturnValue(searchParams);
-  (usePathname as jest.Mock).mockReturnValue("/test");
+  const pathname = opts.pathname ?? "/test";
+  (usePathname as jest.Mock).mockReturnValue(pathname);
+  window.history.replaceState(null, "", `${pathname}?${searchParams}`);
   (useWaveData as jest.Mock).mockReturnValue({ data: opts.wave });
   (useWave as jest.Mock).mockReturnValue({ isDm: opts.isDm ?? false });
   (useMyStreamOptional as jest.Mock).mockReturnValue({
@@ -84,7 +87,73 @@ function setup(
 }
 
 describe("BackButton", () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => {
+    jest.clearAllMocks();
+    window.history.replaceState(null, "", "/");
+  });
+
+  it.each([
+    "/waves/w1/competitions",
+    "/waves/w1/competitions/alpha",
+    "/waves/w1/competitions/new",
+  ])("keeps a missing competition recoverable on %s", (pathname) => {
+    const { replace, setActiveWave } = setup({}, { pathname });
+    const options = useWaveData.mock.calls.at(-1)[0];
+    expect(options.onWaveNotFound).toBeUndefined();
+    expect(replace).not.toHaveBeenCalled();
+    expect(setActiveWave).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["/waves/w1", "/waves"],
+    ["/waves", "/waves"],
+    ["/messages/w1", "/messages"],
+    ["/messages", "/messages"],
+  ])(
+    "clears a current ordinary missing wave on %s",
+    (pathname, destination) => {
+      const { replace, setActiveWave } = setup(
+        { wave: "w1", serialNo: "23" },
+        { pathname }
+      );
+      const callback = useWaveData.mock.calls.at(-1)[0].onWaveNotFound;
+      // The pending request must preserve parameters changed since it began.
+      window.history.replaceState(null, "", `${pathname}?wave=w1&serialNo=24`);
+      act(() => callback());
+      expect(setActiveWave).toHaveBeenCalledWith(null);
+      expect(replace).toHaveBeenCalledWith(`${destination}?serialNo=24`, {
+        scroll: false,
+      });
+    }
+  );
+
+  it.each([
+    "/waves/w1/competitions/alpha?tab=leaderboard",
+    "/waves/w2?tab=chat",
+    "/network?wave=w1",
+  ])(
+    "ignores a captured missing-wave callback after moving to %s",
+    (target) => {
+      const { replace, setActiveWave } = setup({}, { pathname: "/waves/w1" });
+      const callback = useWaveData.mock.calls.at(-1)[0].onWaveNotFound;
+      window.history.replaceState(null, "", target);
+      act(() => callback());
+      expect(replace).not.toHaveBeenCalled();
+      expect(setActiveWave).not.toHaveBeenCalled();
+    }
+  );
+
+  it("still lets the user explicitly leave a competition", async () => {
+    const { setActiveWave } = setup(
+      {},
+      { pathname: "/waves/w1/competitions/alpha", activeWaveId: "w1" }
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Back" }));
+    expect(mockClearLastVisited).toHaveBeenCalledWith("wave");
+    expect(setActiveWave).toHaveBeenCalledWith(null, {
+      isDirectMessage: false,
+    });
+  });
 
   it("removes drop param and replaces route", async () => {
     const { replace } = setup({ drop: "123" });

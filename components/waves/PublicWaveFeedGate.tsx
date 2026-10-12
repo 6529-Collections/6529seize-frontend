@@ -1,12 +1,10 @@
 "use client";
 
-import {
-  type ReactNode,
-  useCallback,
-  useSyncExternalStore,
-} from "react";
+import { type ReactNode, useCallback, useSyncExternalStore } from "react";
 
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useContentTab } from "@/components/brain/ContentTabContext";
+import { MyStreamWaveTab } from "@/types/waves.types";
 
 const subscribeToHydration = () => () => {};
 const getHydratedSnapshot = () => true;
@@ -22,6 +20,7 @@ export default function PublicWaveFeedGate({
   readonly waveId: string;
 }) {
   const myStream = useMyStreamOptional();
+  const { activeContentTab } = useContentTab();
   const store = myStream?.waveMessagesStore;
   const hydrated = useSyncExternalStore(
     subscribeToHydration,
@@ -57,7 +56,10 @@ export default function PublicWaveFeedGate({
   const hasInteractiveFeed =
     waveMessages !== undefined && !waveMessages.isLoading;
 
-  const showFallback = !hasMismatchedActiveWave && !hasInteractiveFeed;
+  const showFallback =
+    !hasMismatchedActiveWave &&
+    !hasInteractiveFeed &&
+    (!hydrated || activeContentTab === MyStreamWaveTab.CHAT);
 
   return (
     <div className="tailwind-scope tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">

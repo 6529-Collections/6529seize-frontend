@@ -2,7 +2,10 @@
 
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useEffect } from "react";
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
+import {
+  isMultiCompetitionEnabled,
+  isCompetitionAccessError,
+} from "@/helpers/competition.helpers";
 import {
   useCompetitionHub,
   useCompetitionList,
@@ -17,9 +20,12 @@ export function useWaveCompetitionsTab(wave: ApiWave | null | undefined) {
   const waveId = wave?.id ?? "";
   const defaultCompetition = useDefaultCompetition(waveId, enabled);
   const hub = useCompetitionHub(waveId, enabled);
-  const canReadCompetitions = enabled && hub.isSuccess;
-  const canCreate = hub.data?.permissions.create_competition === true;
-  const canAdminister = hub.data?.permissions.administer === true;
+  const canReadCompetitions =
+    enabled && Boolean(hub.data) && !isCompetitionAccessError(hub.error);
+  const canCreate =
+    canReadCompetitions && hub.data?.permissions.create_competition === true;
+  const canAdminister =
+    canReadCompetitions && hub.data?.permissions.administer === true;
   const competitions = useCompetitionList(
     waveId,
     "all",
@@ -67,21 +73,16 @@ export function useWaveCompetitionsTab(wave: ApiWave | null | undefined) {
     isCompetitionsError,
     fetchMoreCompetitions,
   ]);
-  // Successful cached data still describes the tabs during a background refresh.
-  const hideCompetitionsTab = Boolean(
-    canReadCompetitions &&
-    hub.data.permissions.administer === false &&
-    competitions.isSuccess &&
-    !isCompetitionsError &&
-    !hasMoreCompetitions &&
-    // A missing next cursor is not proof of completeness: fail open if has_more disagrees.
-    competitions.data.pages.at(-1)?.has_more === false &&
-    competitionIds.size === 1 &&
-    !defaultCompetition.isError &&
-    defaultCompetition.isSuccess &&
-    defaultCompetition.data.competition_id !== null &&
-    competitionIds.has(defaultCompetition.data.competition_id)
-  );
+  // Unknown/failed reads cannot expose the collection. Cached visible records
+  // keep its classification stable during a transient background failure.
+  const hideCompetitionsTab =
+    enabled &&
+    !canAdminister &&
+    !(
+      canReadCompetitions &&
+      competitionIds.size >= 2 &&
+      !isCompetitionAccessError(competitions.error)
+    );
 
   return {
     isPending:
@@ -94,10 +95,9 @@ export function useWaveCompetitionsTab(wave: ApiWave | null | undefined) {
             (competitionIds.size < 2 && hasMoreCompetitions)))),
     hideCompetitionsTab,
     defaultSelectionEnabled: enabled,
-    defaultCompetitionId:
-      !defaultCompetition.isError && defaultCompetition.isSuccess
-        ? defaultCompetition.data.competition_id
-        : null,
+    defaultCompetitionId: !isCompetitionAccessError(defaultCompetition.error)
+      ? (defaultCompetition.data?.competition_id ?? null)
+      : null,
     hasCompetitions:
       enabled &&
       (canCreate ||

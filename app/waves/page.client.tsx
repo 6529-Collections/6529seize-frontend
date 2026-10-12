@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 
-import WavesLayout from "@/components/waves/layout/WavesLayout";
 import PublicWaveFeedGate from "@/components/waves/PublicWaveFeedGate";
 import WavesView from "@/components/waves/WavesView";
 
@@ -14,7 +13,7 @@ export default function WavesPageClient({
   readonly publicFeedWaveId?: string | null;
 }) {
   return (
-    <WavesLayout>
+    <>
       {publicFeedFallback !== null && publicFeedWaveId !== null ? (
         <PublicWaveFeedGate
           fallback={publicFeedFallback}
@@ -25,6 +24,6 @@ export default function WavesPageClient({
       ) : (
         <WavesView />
       )}
-    </WavesLayout>
+    </>
   );
 }
