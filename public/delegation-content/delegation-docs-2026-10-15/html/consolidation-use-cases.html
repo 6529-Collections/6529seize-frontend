@@ -61,9 +61,10 @@
   <ul>
     <li>
       Adding Address D to an existing group of Addresses A, B and C: A, B and C
-      each register one link to D first, in any order and at any time. Nothing
-      changes yet. D signs last, with one batch to A, B and C, and the group
-      becomes four addresses in one step.
+      each register one link to D first, in any order after the fourth-address
+      start time. If D has no existing return links, nothing changes yet. D
+      signs last, with one batch to A, B and C, and the group becomes four
+      addresses in one step.
     </li>
     <li>
       Creating a new group of four: each address sends one batch to the other
@@ -78,6 +79,8 @@
       A delegation manager (use case 998 on Any Collection) can register and
       revoke consolidations for the address that appointed it. There is no
       batch for managers, so a manager sends one transaction per link.
+      If a manager signs for the new address, its links arrive separately and
+      the group can split temporarily even when the new address goes last.
     </li>
   </ul>
   <h3>Why the Order Matters</h3>
@@ -85,8 +88,12 @@
     If the new address signs before the existing members, the group splits
     temporarily while the remaining links arrive. Each split re-runs the profile
     split and merge, and TDH-wave votes above the temporarily lower TDH are
-    reduced and are not restored. Signing with the existing members first and
-    the new address last avoids this.
+    reduced and are not restored. Existing members first and the new address's
+    batch last avoids this when the new address has no existing return links.
+    Old return links can complete a pair before the final batch and cause a
+    temporary split too. Manager transactions sent one at a time have the same
+    risk; sending them back to back reduces the gap but does not make them
+    atomic.
   </p>
   <h3>Removing an Address</h3>
   <ul>

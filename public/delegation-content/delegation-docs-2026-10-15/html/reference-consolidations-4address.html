@@ -93,9 +93,12 @@
   </li>
 </ol>
 <p>
-  Steps 1 to 3 can happen in any order and at any time, and nothing changes
-  until Address D signs. When Address D's batch confirms, the group becomes four
-  addresses in one step.
+  Steps 1 to 3 can happen in any order after 15 October 2026 00:00 UTC. If
+  Address D has no existing return links, nothing changes until Address D
+  signs. When Address D's batch confirms, the group becomes four addresses in
+  one step. Old return links can complete a pair during an earlier step and
+  temporarily split the group, even though they still need to be registered
+  again after the start time to qualify for the fourth slot.
 </p>
 <p>
   Do not let the new address sign first. If it signs before the existing
@@ -172,6 +175,11 @@
   consolidations for the address that appointed it. There is no batch for
   managers, so a manager sends one transaction per link. Keep the same order:
   links from the existing members first, links from the new address last.
+  If the new address is managed, its three return links arrive separately.
+  The group can split temporarily between those transactions even when this
+  order is followed, reducing TDH-wave votes as described above. Send the
+  transactions back to back, but do not expect the one-step transition of a
+  single batch.
 </p>
 <h2>Remove an Address</h2>
 <ul>

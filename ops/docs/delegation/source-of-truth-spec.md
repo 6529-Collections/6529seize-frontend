@@ -48,8 +48,12 @@ text, docs, and tests.
 - Consolidation transactions: each wallet can register all of its links in one
   `batchDelegations` transaction (up to 5 links). When adding a wallet to an
   existing group, the existing members register their links to it first and
-  the new wallet signs last. The wrong order temporarily splits the group,
-  re-runs profile merges, and reduces TDH-wave votes, which are not restored.
+  the new wallet signs last with one batch. This avoids a temporary split only
+  when the new wallet has no existing return links. Old return links or a
+  manager sending the new wallet's links individually can split the group even
+  in that order. Temporary splits re-run profile merges and reduce TDH-wave
+  votes, which are not restored. All links needed to qualify for the fourth
+  slot must be registered in both directions after the start time.
   To replace a wallet without dropping below three, add the new wallet as the
   fourth, then remove the old one.
 - Delegation Manager: use case `#998`, also known as Sub-Delegation or

@@ -372,7 +372,7 @@
       "path": "html/consolidation-use-cases.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/consolidation-use-cases.html",
       "sourceUri": null,
-      "sha256": "c1eb53a463dd30dc61d4cf48de984017f760f5b5c810b3ff043a6902788add1d"
+      "sha256": "5845bb962a93403c64bfdfc2944e3fa63ac0e3e02d331a60e821b99e6f58553a"
     },
     "register-delegation": {
       "title": "How to Register a Delegation?",
@@ -453,7 +453,7 @@
       "path": "html/reference-consolidations-4address.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-consolidations-4address.html",
       "sourceUri": null,
-      "sha256": "a9154b559cb70e9f5fbddbb100e5d9c902a4884bee48263b0643f78ae171ce8a"
+      "sha256": "3fe21f180d6f2a99fb866232354993e17ebfbaecfa87531bab087f66a977980e"
     },
     "using-safe": {
       "title": "How to Delegate using SAFE (formerly GNOSIS)?",
