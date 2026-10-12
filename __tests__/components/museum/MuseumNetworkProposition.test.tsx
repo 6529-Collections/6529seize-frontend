@@ -104,6 +104,10 @@ describe("MuseumNetworkProposition", () => {
     expect(
       screen.getByRole("heading", { name: "Collection and acquisition" })
     ).toBeInTheDocument();
+    // The program's selection count lives in the publication, not this copy.
+    expect(
+      screen.getByText(/Its selected photographs have not yet been minted/u)
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Scholarship and interpretation" })
     ).toBeInTheDocument();
