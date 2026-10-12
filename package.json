@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build:env-schema": "node scripts/require-6529-command.cjs && node scripts/build-env-schema.cjs",
+    "build:mls-wasm": "node scripts/require-6529-command.cjs && node scripts/build-mls-wasm.cjs",
     "guard:no-package-lock": "node scripts/require-6529-command.cjs && node scripts/assert-no-package-lock.cjs",
     "preinstall": "node scripts/enforce-package-manager.cjs",
     "export-mint-page": "node scripts/require-6529-command.cjs && pnpm run build:env-schema && node standalone/standalone-memes-mint/scripts/export-mint-page.cjs",
