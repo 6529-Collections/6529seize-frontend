@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { MenuItem } from "@headlessui/react";
 import Link from "next/link";
 import type { CompactMenuActionItem } from "../types";
 import {
@@ -11,7 +12,6 @@ import {
 interface CompactMenuItemButtonProps {
   readonly item: CompactMenuActionItem;
   readonly isActive: boolean;
-  readonly menuActive: boolean;
   readonly onClick: () => void;
   readonly itemClassName?: string | undefined;
   readonly activeItemClassName?: string | undefined;
@@ -23,7 +23,6 @@ interface CompactMenuItemButtonProps {
 export function CompactMenuItemButton({
   item,
   isActive,
-  menuActive,
   onClick,
   itemClassName,
   activeItemClassName,
@@ -45,28 +44,32 @@ export function CompactMenuItemButton({
     ? clsx(activeDefaultClasses, activeItemClassName)
     : clsx(inactiveDefaultClasses, inactiveItemClassName);
 
-  const focusClasses =
-    menuActive && !item.disabled && !isActive
-      ? clsx(focusDefaultClasses, focusItemClassName)
-      : undefined;
-
   const role = item.role ?? "menuitem";
-  const className = clsx(
-    unstyledItems ? undefined : DEFAULT_ITEM_CLASSES,
-    stateClasses,
-    focusClasses,
-    itemClassName,
-    item.className,
-    item.disabled &&
-      !unstyledItems &&
-      "tw-cursor-not-allowed tw-text-iron-500 tw-opacity-60"
-  );
+  const className = ({ focus }: { readonly focus: boolean }) =>
+    clsx(
+      unstyledItems ? undefined : DEFAULT_ITEM_CLASSES,
+      stateClasses,
+      focus &&
+        !item.disabled &&
+        !isActive &&
+        clsx(focusDefaultClasses, focusItemClassName),
+      itemClassName,
+      item.className,
+      item.disabled &&
+        !unstyledItems &&
+        "tw-cursor-not-allowed tw-text-iron-500 tw-opacity-60"
+    );
   const showIcon =
     item.icon !== undefined && item.icon !== null && item.icon !== false;
   const contents = (
     <>
       {showIcon && (
-        <span className="tw-flex tw-shrink-0 tw-items-center tw-justify-center">
+        <span
+          className={
+            item.iconClassName ??
+            "tw-flex tw-shrink-0 tw-items-center tw-justify-center"
+          }
+        >
           {item.icon}
         </span>
       )}
@@ -74,42 +77,43 @@ export function CompactMenuItemButton({
     </>
   );
 
-  if (item.href !== undefined && !item.disabled) {
-    return (
-      <Link
-        href={item.href}
-        role={role}
-        aria-selected={item.ariaSelected}
-        aria-label={item.ariaLabel}
-        data-compact-menu-item="true"
-        data-menu-item-id={item.id}
-        data-active={isActive ? "true" : "false"}
-        data-disabled="false"
-        data-testid={item["data-testid"]}
-        onClick={onClick}
-        className={className}
-      >
-        {contents}
-      </Link>
-    );
-  }
-
   return (
-    <button
-      type="button"
-      role={role}
-      aria-selected={item.ariaSelected}
-      aria-label={item.ariaLabel}
-      disabled={item.disabled}
-      data-compact-menu-item="true"
-      data-menu-item-id={item.id}
-      data-active={isActive ? "true" : "false"}
-      data-disabled={item.disabled ? "true" : "false"}
-      data-testid={item["data-testid"]}
-      onClick={onClick}
-      className={className}
-    >
-      {contents}
-    </button>
+    <MenuItem disabled={Boolean(item.disabled)}>
+      {({ focus }) =>
+        item.href !== undefined && !item.disabled ? (
+          <Link
+            href={item.href}
+            role={role}
+            aria-selected={item.ariaSelected}
+            aria-label={item.ariaLabel}
+            data-compact-menu-item="true"
+            data-menu-item-id={item.id}
+            data-active={isActive ? "true" : "false"}
+            data-testid={item["data-testid"]}
+            onClick={onClick}
+            className={className({ focus })}
+          >
+            {contents}
+          </Link>
+        ) : (
+          <button
+            type="button"
+            role={role}
+            aria-selected={item.ariaSelected}
+            aria-label={item.ariaLabel}
+            disabled={item.disabled}
+            data-compact-menu-item="true"
+            data-menu-item-id={item.id}
+            data-active={isActive ? "true" : "false"}
+            data-disabled={item.disabled ? "true" : undefined}
+            data-testid={item["data-testid"]}
+            onClick={onClick}
+            className={className({ focus })}
+          >
+            {contents}
+          </button>
+        )
+      }
+    </MenuItem>
   );
 }
