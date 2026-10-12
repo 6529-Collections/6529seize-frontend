@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useEffectEvent, useRef } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import {
   beginForgeManual,
@@ -8,6 +8,28 @@ import {
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useQueryClient } from "@tanstack/react-query";
 import { forgeLaunchKey } from "@/hooks/drop-forge-query-keys";
+type PendingManual = {
+  attempt_id?: string;
+  lease?: string | null;
+  hash?: string;
+  action?: string;
+};
+type ManualAttempt = {
+  id: string;
+  key: string;
+  lease: string | null;
+  action: string | undefined;
+  baselineHash: string | undefined;
+};
+function pendingManual(key: string): PendingManual | null {
+  const raw = localStorage.getItem(key);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as PendingManual;
+  } catch {
+    return null;
+  }
+}
 export function useDropForgeManualWrite(
   contract: string,
   claim: number,
@@ -17,74 +39,103 @@ export function useDropForgeManualWrite(
 ) {
   const { requestAuth, setToast } = useAuth();
   const client = useQueryClient();
-  const lease = useRef<string | null>(null);
-  const action = useRef<string | undefined>(undefined);
-  const fingerprintRef = useRef(fingerprint);
+  const attempt = useRef<ManualAttempt | null>(null);
+  const context = useRef({ fingerprint, hash });
   useEffect(() => {
-    fingerprintRef.current = fingerprint;
-  }, [fingerprint]);
+    context.current = { fingerprint, hash };
+  }, [fingerprint, hash]);
   const key = `drop-forge-manual:${contract.toLowerCase()}:${claim}`;
+  const cancel = useCallback(
+    async (current: ManualAttempt) => {
+      await finishForgeManual(contract, claim, current.lease);
+      if (attempt.current?.id === current.id) attempt.current = null;
+      if (pendingManual(current.key)?.attempt_id === current.id)
+        localStorage.removeItem(current.key);
+    },
+    [contract, claim]
+  );
   const execute = useCallback(
     async (write: () => void, label?: string) => {
-      const captured = fingerprintRef.current;
-      if (!(await requestAuth()).success || fingerprintRef.current !== captured)
+      const captured = context.current.fingerprint;
+      if (
+        !(await requestAuth()).success ||
+        context.current.fingerprint !== captured
+      )
         return;
+      if (pendingManual(key)?.hash)
+        throw new Error(
+          "Reconcile the previous manual transaction before starting another"
+        );
       const granted = await beginForgeManual(contract, claim, label);
-      lease.current = granted.lease_id;
-      action.current = label;
-      if (granted.lease_id)
+      // A null lease explicitly permits the legacy/unmanaged flow. Conflicts on
+      // managed launches reject BEGIN rather than returning null.
+      const current: ManualAttempt = {
+        id: crypto.randomUUID(),
+        key,
+        lease: granted.lease_id,
+        action: label,
+        baselineHash: context.current.hash,
+      };
+      attempt.current = current;
+      try {
         localStorage.setItem(
           key,
-          JSON.stringify({ lease: granted.lease_id, action: label })
+          JSON.stringify({
+            attempt_id: current.id,
+            lease: current.lease,
+            action: label,
+          })
         );
-      try {
-        if (fingerprintRef.current !== captured) {
-          await finishForgeManual(contract, claim, lease.current);
+        if (context.current.fingerprint !== captured) {
+          await cancel(current);
           return;
         }
         write();
-      } catch (e) {
-        await finishForgeManual(contract, claim, lease.current).catch(
-          () => undefined
-        );
-        throw e;
+      } catch (error_) {
+        await cancel(current).catch(() => undefined);
+        throw error_;
       }
     },
-    [requestAuth, contract, claim, key]
+    [requestAuth, contract, claim, key, cancel]
   );
   useEffect(() => {
-    if (!hash) return;
-    localStorage.setItem(
-      key,
-      JSON.stringify({ lease: lease.current, hash, action: action.current })
-    );
+    const current = attempt.current;
+    if (!hash || current?.key !== key || hash === current.baselineHash) return;
+    const saved = pendingManual(key);
+    if (saved?.attempt_id !== current.id || saved.lease !== current.lease)
+      return;
+    localStorage.setItem(key, JSON.stringify({ ...saved, hash }));
+    attempt.current = null;
   }, [hash, key]);
   useEffect(() => {
     let stopped = false;
+    let recovering = false;
+    function acknowledge(raw: string) {
+      if (!stopped && localStorage.getItem(key) === raw)
+        localStorage.removeItem(key);
+    }
     async function recover() {
+      if (stopped || recovering) return;
       const raw = localStorage.getItem(key);
-      if (!raw) return;
+      const saved = pendingManual(key);
+      if (!raw || !saved?.hash) return;
+      recovering = true;
       try {
-        const pending = JSON.parse(raw) as {
-          lease?: string | null;
-          hash?: string;
-          action?: string;
-        };
-        if (!pending.hash) return;
         await finishForgeManual(
           contract,
           claim,
-          pending.lease ?? null,
-          pending.hash,
-          pending.action
+          saved.lease ?? null,
+          saved.hash,
+          saved.action
         );
-        if (!stopped && localStorage.getItem(key) === raw)
-          localStorage.removeItem(key);
+        acknowledge(raw);
         await client.invalidateQueries({
           queryKey: forgeLaunchKey(contract, claim),
         });
       } catch {
-        /* Persisted hash retries until its chain evidence is available. */
+        /* Retain the exact proof for retry; never acquire a new lease. */
+      } finally {
+        recovering = false;
       }
     }
     void recover();
@@ -96,25 +147,28 @@ export function useDropForgeManualWrite(
       clearInterval(timer);
     };
   }, [contract, claim, key, hash, client]);
-  useEffect(() => {
-    if (error === null || error === undefined) return;
+  const rejectWallet = useEffectEvent((isActive: () => boolean) => {
     const code =
-      typeof error === "object" && "code" in error
+      typeof error === "object" && error !== null && "code" in error
         ? (error as { code?: unknown }).code
         : undefined;
-    if (code !== 4001 && code !== "ACTION_REJECTED") return;
-    void finishForgeManual(contract, claim, lease.current)
-      .then(() => {
-        localStorage.removeItem(key);
-        lease.current = null;
-      })
-      .catch((e: unknown) => {
-        setToast({
-          type: "error",
-          message:
-            getToastErrorDetails(e) ?? "Manual operation requires recovery",
-        });
+    const current = attempt.current;
+    if (!current || (code !== 4001 && code !== "ACTION_REJECTED")) return;
+    void cancel(current).catch((error_: unknown) => {
+      if (!isActive()) return;
+      setToast({
+        type: "error",
+        message:
+          getToastErrorDetails(error_) ?? "Manual operation requires recovery",
       });
-  }, [error, contract, claim, key, setToast]);
+    });
+  });
+  useEffect(() => {
+    let active = true;
+    rejectWallet(() => active);
+    return () => {
+      active = false;
+    };
+  }, [error]);
   return execute;
 }

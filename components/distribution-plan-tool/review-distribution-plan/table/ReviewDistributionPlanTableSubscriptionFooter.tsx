@@ -32,6 +32,7 @@ import {
   getGithubUploadTooltip,
   SubscriptionFooterMain,
 } from "./ReviewDistributionPlanTableSubscriptionFooterMain";
+import { getForgePhaseIds } from "@/services/api/drop-forge-process-inputs";
 import ProcessAndFinalize from "../ProcessAndFinalize";
 import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription.utils";
 
@@ -559,13 +560,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
           contract={contract}
           claim={Number(confirmedTokenId)}
           plan={distributionPlan?.id ?? ""}
-          phaseIds={[0, 1, 2].flatMap((index) => {
-            const phase = phases.find(
-              (it) =>
-                it.name.replaceAll(/\s/g, "").toLowerCase() === `phase${index}`
-            );
-            return phase ? [phase.id] : [];
-          })}
+          phaseIds={getForgePhaseIds(phases)}
           onCompleted={() => {
             void refreshOverview(contract, confirmedTokenId);
           }}

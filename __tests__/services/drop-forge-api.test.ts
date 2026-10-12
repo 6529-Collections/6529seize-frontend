@@ -33,3 +33,25 @@ it("declares the subscription phase for wallets that appear in multiple lists", 
     body: { operation: "BEGIN", action: "PHASE1_AIRDROP" },
   });
 });
+
+it.each([
+  ["phase0", "PHASE0_AIRDROP"],
+  ["phase1", "PHASE1_AIRDROP"],
+  ["phase2", "PHASE2_AIRDROP"],
+  ["publicphase", "PUBLIC_PHASE_AIRDROP"],
+])(
+  "maps the actual subscription section category %s",
+  async (label, action) => {
+    await beginForgeManual("creator", 123, label);
+    expect(commonApiPost).toHaveBeenLastCalledWith({
+      endpoint: "drop-forge/launches/creator/123/manual",
+      body: { operation: "BEGIN", action },
+    });
+  }
+);
+it("rejects a first page that does not advance its offset", async () => {
+  jest.mocked(commonApiFetch).mockResolvedValue({ rows: [], next_offset: 0 });
+  await expect(forgeList("job", "p0", "allowlists")).rejects.toThrow(
+    "pagination"
+  );
+});

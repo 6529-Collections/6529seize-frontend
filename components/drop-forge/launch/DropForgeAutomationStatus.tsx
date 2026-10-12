@@ -3,7 +3,7 @@ import {
   ApiDropForgeActionKindEnum as ActionKind,
   ApiDropForgeActionStateEnum as ActionState,
 } from "@/generated/models/ApiDropForgeAction";
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
@@ -49,9 +49,10 @@ export default function DropForgeAutomationStatus({
       .filter((action) => action.state === ActionState.Confirmed)
       .map((action) => `${action.id}:${action.hash ?? "observed"}`)
       .join(",") ?? "";
+  const confirmedWork = useEffectEvent(onConfirmedWork);
   useEffect(() => {
-    if (confirmed) onConfirmedWork();
-  }, [confirmed, onConfirmedWork]);
+    if (confirmed) confirmedWork();
+  }, [confirmed]);
   if (!launch) return null;
   async function control(resume: boolean) {
     if (!launch) return;

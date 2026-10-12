@@ -14,6 +14,9 @@
 import { HttpFile } from '../http/http';
 
 export class ApiDropForgeManualResponse {
+    /**
+    * Null explicitly permits legacy manual work when automation is disabled or the claim is unmanaged. Conflicts on a managed claim reject BEGIN with 409.
+    */
     'lease_id': string | null;
 
     static readonly discriminator: string | undefined = undefined;

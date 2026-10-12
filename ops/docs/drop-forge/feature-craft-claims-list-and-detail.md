@@ -89,10 +89,12 @@ The craft surface combines:
 - Metadata editing:
   - Update artwork title, description, external URL, and traits.
   - Save or revert pending metadata edits.
-- Arweave publishing
-- asynchronous `Launch` and metadata-only `Update Claim` controls:
+- Arweave publishing:
   - Publish image, animation, and metadata after saving draft changes.
   - Copy or open the resulting Arweave links once they exist.
+- Claim controls:
+  - `Launch` queues initialization immediately after publication and completed EMMA processing.
+  - `Update Claim` synchronizes republished metadata while retaining mint settings and completed allocations.
 - Distribution review:
   - Inspect distribution photos and grouped phase summaries while preparing the
     claim for launch.
@@ -143,16 +145,14 @@ The craft surface combines:
 ## Limitations / Notes
 
 - Craft access is limited to distribution-admin wallets.
-- Arweave publishing
-- asynchronous `Launch` and metadata-only `Update Claim` controls is a separate step after editing; saving metadata alone
-  does not publish the claim.
+- Arweave publishing is a separate step after editing; saving metadata alone does not publish the claim.
+- `Launch` and `Update Claim` become available against published metadata and track asynchronous backend execution.
 - Media-detail checks do not require all editable draft fields to be complete.
   HTML animation details remain format-only, and GLB does not require video
   dimensions, duration, or codecs.
 - The craft editor is section-based. Different sections can have independent
   dirty state and save actions.
-- Published links are informational only; launch initialization happens from the
-  separate launch route family.
+- Published links are informational. Craft `Launch` queues initialization; the Launch route retains coordinated manual operations and the execution timeline.
 
 ## Related Pages
 

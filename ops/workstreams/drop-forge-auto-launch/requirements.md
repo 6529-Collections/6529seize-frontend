@@ -20,7 +20,7 @@ supplied profile-ID list; and investigation/fixes for reported EMMA phase
 download and finalize timeouts. Those values need not be collected in a new UI.
 Exact UI layout, endpoints, and several operational policies remain proposals.
 
-## Current code evidence
+## Historical code evidence (2026-10-09)
 
 - [Launch writes](../../../components/drop-forge/launch/useLaunchClaimWrites.ts)
   submit `initializeClaim`, `updateClaim`, and `airdrop` using the connected
@@ -178,7 +178,7 @@ flows for configuration, refresh recovery, manual takeover, and mention display.
 This proposal performs no application tests or browser execution because no
 runtime behavior changes.
 
-## Dependencies and decisions before implementation
+## Historical dependencies and design proposals (2026-10-09)
 
 Backend EMMA diagnosis and durable execution contracts precede frontend controls.
 Confirm automation permissions, takeover UX, missed-window wording, airdrop

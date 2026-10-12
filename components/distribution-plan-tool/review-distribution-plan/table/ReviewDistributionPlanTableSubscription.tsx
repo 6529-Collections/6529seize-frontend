@@ -11,6 +11,10 @@ import { useDropForgeProcess } from "@/hooks/useDropForgeProcess";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import {
+  forgeProcessInputsMatch,
+  getForgePhaseIds,
+} from "@/services/api/drop-forge-process-inputs";
 import { forgeList } from "@/services/api/drop-forge-api";
 import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
 import {
@@ -26,7 +30,7 @@ export function SubscriptionLinks({
   phase: ReviewDistributionPlanTableItem;
 }>) {
   const { connectedProfile, setToast } = useContext(AuthContext);
-  const { confirmedTokenId } = useContext(DistributionPlanToolContext);
+  const { confirmedTokenId, phases } = useContext(DistributionPlanToolContext);
   const { seizeSettings } = useSeizeSettings();
   const locale = useBrowserLocale();
   const operation = useDropForgeProcess(
@@ -45,10 +49,18 @@ export function SubscriptionLinks({
   )
     return null;
   const isPublic = phase.phaseId === PUBLIC_SUBSCRIPTIONS_PHASE_ID;
-  const completed = operation.data?.status === JobStatus.Completed;
+  const phaseIds = getForgePhaseIds(phases);
+  const completed =
+    operation.data?.status === JobStatus.Completed &&
+    forgeProcessInputsMatch(operation.data, phaseIds);
   async function download() {
     const job = operation.data;
-    if (job?.status !== JobStatus.Completed || downloading) return;
+    if (
+      job?.status !== JobStatus.Completed ||
+      !forgeProcessInputsMatch(job, phaseIds) ||
+      downloading
+    )
+      return;
     setDownloading(true);
     try {
       const lists: Array<
@@ -56,14 +68,15 @@ export function SubscriptionLinks({
       > = isPublic
         ? ["airdrops"]
         : ["airdrops", "airdrops_unconsolidated", "allowlists"];
-      for (const list of lists) {
-        const rows = await forgeList(
-          job.id,
-          isPublic ? "public" : phase.id,
-          list
-        );
-        downloadCsv(phase.name, list, rows);
-      }
+      const savedLists = await Promise.all(
+        lists.map(async (list) => ({
+          list,
+          rows: await forgeList(job.id, isPublic ? "public" : phase.id, list),
+        }))
+      );
+      savedLists.forEach(({ list, rows }) =>
+        downloadCsv(phase.name, list, rows)
+      );
     } catch (error) {
       setToast({
         type: "error",
@@ -90,7 +103,7 @@ export function SubscriptionLinks({
     </button>
   );
 }
-export function downloadCsv(
+function downloadCsv(
   phase: string,
   list: string,
   rows: Array<{ wallet: string; amount: number }>

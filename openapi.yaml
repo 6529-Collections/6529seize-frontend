@@ -8145,7 +8145,9 @@ paths:
             type: string
       responses:
         "200":
-          description: Latest processing job, or null if processing has not started
+          description: >-
+            Latest processing job as a single-element array; empty array if
+            processing has not started
           content:
             application/json:
               schema:
@@ -29290,6 +29292,10 @@ components:
         lease_id:
           type: string
           nullable: true
+          description: >-
+            Null explicitly permits legacy manual work when automation is
+            disabled or the claim is unmanaged. Conflicts on a managed claim
+            reject BEGIN with 409.
     ApiDropForgePhase:
       type: object
       required:

@@ -156,6 +156,7 @@ it("runs one Process and Finalize operation and restores its completed state on 
   jest.mocked(latestForgeProcess).mockResolvedValue({
     ...job,
     status: "COMPLETED",
+    phase_ids: ["p0", "p1", "p2"],
     step: 4,
   } as ApiDropForgeJob);
   renderUI(
@@ -177,7 +178,7 @@ it("runs one Process and Finalize operation and restores its completed state on 
 it("refreshes the existing manual view only when another action confirms", async () => {
   jest.mocked(getForgeLaunch).mockResolvedValue(launch(false));
   const refresh = jest.fn();
-  const { client } = renderUI(
+  const { client, rerender } = renderUI(
     <DropForgeAutomationStatus claimId={123} onConfirmedWork={refresh} />
   );
   await screen.findByRole("heading", { name: "Automatic launch progress" });
@@ -193,28 +194,33 @@ it("refreshes the existing manual view only when another action confirms", async
     });
   });
   expect(refresh).toHaveBeenCalledTimes(1);
+  const nextCallback = jest.fn();
+  rerender(
+    <QueryClientProvider client={client}>
+      <DropForgeAutomationStatus claimId={123} onConfirmedWork={nextCallback} />
+    </QueryClientProvider>
+  );
+  expect(nextCallback).not.toHaveBeenCalled();
 });
 
 it("allows a newer publication to replace a blocked unsigned metadata request", async () => {
-  jest
-    .mocked(getForgeLaunch)
-    .mockResolvedValue({
-      ...launch(true, "old"),
-      state: "BLOCKED",
-      error: "A newer Craft publication exists; request its metadata update",
-      actions: [
-        ...launch(true).actions,
-        {
-          id: "metadata-old",
-          kind: "METADATA",
-          state: "PENDING",
-          phase: 0,
-          due: 1,
-          deadline: 100,
-          recipients: 0,
-        },
-      ],
-    } as ApiDropForgeLaunch);
+  jest.mocked(getForgeLaunch).mockResolvedValue({
+    ...launch(true, "old"),
+    state: "BLOCKED",
+    error: "A newer Craft publication exists; request its metadata update",
+    actions: [
+      ...launch(true).actions,
+      {
+        id: "metadata-old",
+        kind: "METADATA",
+        state: "PENDING",
+        phase: 0,
+        due: 1,
+        deadline: 100,
+        recipients: 0,
+      },
+    ],
+  } as ApiDropForgeLaunch);
   jest.mocked(requestForgeLaunch).mockResolvedValue(launch(true, "latest"));
   renderUI(
     <CraftLaunchActions claimId={123} metadata="latest" dirty={false} />
@@ -226,4 +232,27 @@ it("allows a newer publication to replace a blocked unsigned metadata request", 
   await waitFor(() =>
     expect(requestForgeLaunch).toHaveBeenCalledWith("0xcreator", 123, true)
   );
+});
+
+it("requires exact phase evidence before marking a saved job completed", async () => {
+  jest.mocked(latestForgeProcess).mockResolvedValue({
+    id: "job",
+    status: "COMPLETED",
+    kind: "PROCESS_ALL",
+    step: 5,
+  } as ApiDropForgeJob);
+  renderUI(
+    <ProcessAndFinalize
+      contract="creator"
+      claim={123}
+      plan="plan"
+      phaseIds={["p0", "p1", "p2"]}
+    />
+  );
+  await screen.findByText(
+    "Inputs changed. Reset the distribution before processing again."
+  );
+  expect(
+    screen.getByRole("button", { name: "Process and Finalize" })
+  ).toBeEnabled();
 });

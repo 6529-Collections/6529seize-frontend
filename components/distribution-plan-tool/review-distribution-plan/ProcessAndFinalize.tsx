@@ -10,6 +10,7 @@ import {
 } from "@/hooks/useDropForgeProcess";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { forgeProcessInputsMatch } from "@/services/api/drop-forge-process-inputs";
 import { startForgeProcess } from "@/services/api/drop-forge-api";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 export default function ProcessAndFinalize({
@@ -34,9 +35,7 @@ export default function ProcessAndFinalize({
   const [error, setError] = useState<string | null>(null);
   const job = operation.data;
   const pending = submitting || job?.status === JobStatus.Pending;
-  const inputsMatch =
-    !job?.phase_ids ||
-    JSON.stringify(job.phase_ids) === JSON.stringify(phaseIds);
+  const inputsMatch = !job || forgeProcessInputsMatch(job, phaseIds);
   const completed = job?.status === JobStatus.Completed && inputsMatch;
   const completion = useRef<string | null>(null);
   useEffect(() => {
