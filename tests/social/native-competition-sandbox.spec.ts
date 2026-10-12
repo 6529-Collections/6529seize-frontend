@@ -1361,6 +1361,22 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       includeHidden: true,
     });
     await expect(trigger).toHaveText("Rank");
+    const name = page.getByLabel("Competition name", { exact: true });
+    await name.focus();
+    await page.keyboard.press("Tab");
+    await expect(trigger).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(page.getByLabel("Description", { exact: true })).toBeFocused();
+    await expect
+      .poll(async () => {
+        const nameBox = await name.boundingBox();
+        const typeBox = await trigger.boundingBox();
+        if (!nameBox || !typeBox) return false;
+        return app
+          ? typeBox.y >= nameBox.y + nameBox.height
+          : Math.abs(typeBox.y - nameBox.y) <= 1;
+      })
+      .toBe(true);
     await expect(trigger).toHaveAttribute(
       "aria-haspopup",
       app ? "dialog" : "listbox"

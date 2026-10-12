@@ -39,7 +39,7 @@ export default function CompetitionDraftRoute({
       className="tw-h-full tw-min-h-0 tw-scroll-pb-24 tw-overflow-y-auto tw-px-4 tw-pt-4 sm:tw-px-6 sm:tw-pt-6"
       style={isApp ? waveViewStyle : undefined}
     >
-      <div className="tw-mx-auto tw-max-w-4xl tw-space-y-5">
+      <div className="tw-mx-auto tw-w-full tw-max-w-[680px] tw-space-y-5">
         <CompetitionBackLink waveId={waveId} />
         {content}
       </div>
