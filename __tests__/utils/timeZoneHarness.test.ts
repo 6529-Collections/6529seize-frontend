@@ -1,3 +1,6 @@
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import {
   EXTREME_TIME_ZONES,
   runInTimeZone,
@@ -66,6 +69,65 @@ describe("runInTimeZone", () => {
     );
     // Auckland is UTC+13 on that date: still the 12th, and not the pinned zone.
     expect(zone).toBe("Oct 12, 2026");
+  });
+});
+
+describe("runInTimeZone module shapes", () => {
+  let directory: string;
+
+  beforeAll(() => {
+    directory = mkdtempSync(join(tmpdir(), "time-zone-harness-"));
+  });
+
+  afterAll(() => {
+    rmSync(directory, { recursive: true, force: true });
+  });
+
+  it("calls an export of a CommonJS-shaped module", () => {
+    // Assigned through a variable, the exports are not statically detectable,
+    // so an ESM import sees { default: module.exports } only. That is also what
+    // tsx produces for a TypeScript module on Node 22.
+    const file = join(directory, "commonjs-shape.cjs");
+    writeFileSync(
+      file,
+      [
+        "const api = {};",
+        'api["greet"] = (name) => "hello " + name;',
+        "module.exports = api;",
+        "",
+      ].join("\n")
+    );
+
+    expect(runInTimeZone<string>("UTC", file, "greet", [["a"], ["b"]])).toEqual(
+      ["hello a", "hello b"]
+    );
+  });
+
+  it("calls an export of an ES module", () => {
+    const file = join(directory, "esm-shape.mjs");
+    writeFileSync(
+      file,
+      'export function greet(name) { return "hi " + name; }\n'
+    );
+
+    expect(runInTimeZone<string>("UTC", file, "greet", [["a"]])).toEqual([
+      "hi a",
+    ]);
+  });
+
+  it("still rejects a name the module does not export", () => {
+    const file = join(directory, "commonjs-missing.cjs");
+    writeFileSync(
+      file,
+      [
+        "const api = {};",
+        'api["greet"] = () => "x";',
+        "module.exports = api;",
+        "",
+      ].join("\n")
+    );
+
+    expect(() => runInTimeZone("UTC", file, "other", [[]])).toThrow();
   });
 });
 

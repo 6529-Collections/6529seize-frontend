@@ -42,7 +42,12 @@ import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 const request = JSON.parse(readFileSync(0, "utf8"));
 const loaded = await import(pathToFileURL(request.modulePath).href);
-const target = loaded[request.exportName];
+// tsx loads a TypeScript module as ESM on some Node versions and as CommonJS on
+// others (Node 22 exposes only { default: module.exports }), so accept both.
+const target =
+  loaded[request.exportName] ??
+  loaded.default?.[request.exportName] ??
+  loaded["module.exports"]?.[request.exportName];
 if (typeof target !== "function") {
   throw new Error(request.exportName + " is not an exported function");
 }
