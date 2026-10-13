@@ -33,6 +33,7 @@ describe("Ethereum mainnet client", () => {
     );
     expect(viem.createPublicClient).toHaveBeenCalledTimes(1);
     expect(viem.createPublicClient).toHaveBeenCalledWith({
+      ccipRead: { request: expect.any(Function) },
       chain: { id: 1 },
       transport: {
         options: { retryCount: 0, timeout: 5_000 },
