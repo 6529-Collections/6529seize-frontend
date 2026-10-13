@@ -1477,6 +1477,10 @@ const WAVE_JOIN_MESSAGES = objectMessages("waves.join", {
   signInTooltip: "Connect a wallet to join this wave",
   joinErrorTitle: "Couldn't join this wave.",
   leaveErrorTitle: "Couldn't leave this wave.",
+  allMessagesErrorTitle:
+    "Joined, but notifications for every message couldn't be turned on.",
+  allMessagesErrorDescription:
+    "Turn them on from the bell menu in the wave's About panel.",
   errorDescription: PLEASE_TRY_AGAIN,
 } as const);
 

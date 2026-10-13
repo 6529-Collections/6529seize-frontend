@@ -102,6 +102,36 @@ describe("useWaveJoin", () => {
     });
   });
 
+  it("keeps the join when the all-messages subscription fails", async () => {
+    mockedPost
+      .mockResolvedValueOnce({ actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS })
+      .mockRejectedValueOnce(new Error("notifications down"));
+    const { result } = renderHook(
+      () => useWaveJoin(notJoinedWave, { subscribeToAllDrops: true }),
+      { wrapper: createWrapper() }
+    );
+
+    let joined = false;
+    await act(async () => {
+      joined = await result.current.join();
+    });
+
+    expect(joined).toBe(true);
+    expect(onWaveFollowChange).toHaveBeenCalledWith({
+      waveId: "wave-1",
+      following: true,
+    });
+    expect(setToast).toHaveBeenCalledTimes(1);
+    expect(setToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title:
+          "Joined, but notifications for every message couldn't be turned on.",
+        description:
+          "Turn them on from the bell menu in the wave's About panel.",
+      })
+    );
+  });
+
   it("leaves with the same actions and reports the change", async () => {
     const { result } = renderHook(() => useWaveJoin(joinedWave), {
       wrapper: createWrapper(),

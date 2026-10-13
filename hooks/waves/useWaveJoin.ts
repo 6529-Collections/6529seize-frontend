@@ -53,12 +53,20 @@ export function useWaveJoin(
   const isJoined = wave.subscribed_actions.length > 0;
 
   const showError =
-    (titleKey: "waves.join.joinErrorTitle" | "waves.join.leaveErrorTitle") =>
+    (
+      titleKey:
+        | "waves.join.joinErrorTitle"
+        | "waves.join.leaveErrorTitle"
+        | "waves.join.allMessagesErrorTitle",
+      descriptionKey:
+        | "waves.join.errorDescription"
+        | "waves.join.allMessagesErrorDescription" = "waves.join.errorDescription"
+    ) =>
     (error: unknown) => {
       setToast({
         type: "error",
         title: t(locale, titleKey),
-        description: t(locale, "waves.join.errorDescription"),
+        description: t(locale, descriptionKey),
         details: getToastErrorDetails(error),
       });
     };
@@ -72,15 +80,22 @@ export function useWaveJoin(
         endpoint: getSubscriptionEndpoint(wave.id),
         body: { actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS },
       });
-      if (subscribeToAllDrops) {
-        await commonApiPost({
-          endpoint: `notifications/wave-subscription/${wave.id}`,
-          body: {},
-        });
-      }
-    },
-    onSuccess: () => {
+      // The join is recorded as soon as the server accepts it; the optional
+      // all-messages subscription below must not undo or misreport it.
       onWaveFollowChange({ waveId: wave.id, following: true });
+      if (subscribeToAllDrops) {
+        try {
+          await commonApiPost({
+            endpoint: `notifications/wave-subscription/${wave.id}`,
+            body: {},
+          });
+        } catch (error) {
+          showError(
+            "waves.join.allMessagesErrorTitle",
+            "waves.join.allMessagesErrorDescription"
+          )(error);
+        }
+      }
     },
     onError: showError("waves.join.joinErrorTitle"),
   });
