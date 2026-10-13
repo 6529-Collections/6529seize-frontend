@@ -22,6 +22,7 @@ import {
   persistBakedArtifacts,
 } from "@/config/runtimeConfig";
 import { sharedConfig } from "@/config/nextConfig";
+import { getMissingNextAssetRewriteConfig } from "@/lib/proxy/plainResponses";
 const require = createRequire(import.meta.url);
 const sentryEnabled = Boolean(process.env["SENTRY_DSN"]);
 
@@ -136,6 +137,8 @@ const nextConfigFactory = (phase: string): NextConfig => {
       async generateBuildId() {
         return VERSION;
       },
+      // Production builds only; runs after real files, before dynamic routes.
+      ...getMissingNextAssetRewriteConfig(phase),
     };
   }
 
