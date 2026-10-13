@@ -103,6 +103,7 @@ it("returns explicit unmanaged invitation state for ordinary sandbox drops", () 
     artwork_hash: "",
     terms_version: "",
     acceptance_copy: "",
+    terms: null,
     collaborators: [],
     invitations: [],
   });

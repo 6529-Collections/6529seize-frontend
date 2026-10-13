@@ -2596,6 +2596,7 @@ const mockApiPatternReadRoutes = [
       artwork_hash: "",
       terms_version: "",
       acceptance_copy: "",
+      terms: null,
       collaborators: [],
       invitations: [],
     }),
