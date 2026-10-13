@@ -67,7 +67,7 @@ export const SingleWaveDropInfoPanel = ({
             )}
 
             <WaveDropMetaRow drop={drop} isWinner={isWinner} />
-            {drop.submission_artist !== undefined && (
+            {drop.moderation?.can_view !== false && (
               <MemeCollaborationPanel
                 key={drop.id}
                 dropId={drop.id}

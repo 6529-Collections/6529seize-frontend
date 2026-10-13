@@ -140,7 +140,7 @@ export const MemesSingleWaveDropInfoPanel = ({
           onVoteClick={handleOpenVoting}
         />
 
-        {drop.submission_artist !== undefined && (
+        {drop.moderation?.can_view !== false && (
           <div className="tw-mx-auto tw-max-w-3xl tw-px-4">
             <MemeCollaborationPanel
               key={drop.id}

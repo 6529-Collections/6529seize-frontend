@@ -4,6 +4,26 @@ import { MemesSingleWaveDropInfoPanel } from "@/components/waves/drop/MemesSingl
 import { ApiDropType } from "@/generated/models/ApiDropType";
 
 const mockUseDropInteractionRules = jest.fn();
+
+jest.mock(
+  "@/components/waves/memes/collaborations/MemeCollaborationPanel",
+  () => ({
+    MemeCollaborationPanel: ({
+      dropId,
+      authorId,
+    }: {
+      dropId: string;
+      authorId: string;
+    }) => (
+      <div
+        data-testid="collaboration-panel"
+        data-drop-id={dropId}
+        data-author-id={authorId}
+      />
+    ),
+  })
+);
+
 const mockUseWaveRankReward = jest.fn(() => ({
   nicTotal: 0,
   repTotal: 0,
@@ -107,6 +127,7 @@ jest.mock("@/hooks/waves/useWaveRankReward", () => ({
 
 const baseDrop: any = {
   id: "drop-1",
+  author: { id: "A" },
   drop_type: ApiDropType.Participatory,
   rank: 1,
   rating: 10,
@@ -143,6 +164,36 @@ describe("MemesSingleWaveDropInfoPanel", () => {
       canShowVote: false,
       isVotingEnded: true,
     });
+  });
+
+  it.each([undefined, ""])(
+    "mounts invitation controls without requiring original artist metadata (%s)",
+    (submission_artist) => {
+      render(
+        <MemesSingleWaveDropInfoPanel
+          drop={{ ...baseDrop, submission_artist }}
+          wave={null}
+        />
+      );
+      expect(screen.getByTestId("collaboration-panel")).toHaveAttribute(
+        "data-drop-id",
+        "drop-1"
+      );
+      expect(screen.getByTestId("collaboration-panel")).toHaveAttribute(
+        "data-author-id",
+        "A"
+      );
+    }
+  );
+
+  it("does not mount invitation controls for restricted artwork", () => {
+    render(
+      <MemesSingleWaveDropInfoPanel
+        drop={{ ...baseDrop, moderation: { can_view: false } }}
+        wave={null}
+      />
+    );
+    expect(screen.queryByTestId("collaboration-panel")).not.toBeInTheDocument();
   });
 
   it("renders drop info and delete button", () => {
