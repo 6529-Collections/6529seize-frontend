@@ -5,15 +5,7 @@ import { Time } from "@/helpers/time";
 import CommonInput from "../input/CommonInput";
 import type { CommonSelectItem } from "../select/CommonSelect";
 import CommonDropdown from "../select/dropdown/CommonDropdown";
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-
-enum TimeMode {
-  MINUTES = "MINUTES",
-  HOURS = "HOURS",
-  DAYS = "DAYS",
-  WEEKS = "WEEKS",
-  MONTHS = "MONTHS",
-}
+import { getExpiryMillis, TimeMode } from "./common-time-select.helpers";
 
 const TIME_MODE_LABEL: Record<TimeMode, string> = {
   [TimeMode.MINUTES]: "Minutes",
@@ -50,36 +42,14 @@ export default function CommonTimeSelect({
     key: mode,
   }));
 
-  const getMillis = (): number => {
-    const now = new Date();
-    switch (timeMode) {
-      case TimeMode.MINUTES:
-        now.setMinutes(now.getMinutes() + value);
-        break;
-      case TimeMode.HOURS:
-        now.setHours(now.getHours() + value);
-        break;
-      case TimeMode.DAYS:
-        now.setDate(now.getDate() + value);
-        break;
-      case TimeMode.WEEKS:
-        now.setDate(now.getDate() + value * 7);
-        break;
-      case TimeMode.MONTHS:
-        now.setMonth(now.getMonth() + value);
-        break;
-      default:
-        assertUnreachable(timeMode);
-    }
-    return now.getTime();
-  };
+  const getMillis = (): number => getExpiryMillis(timeMode, value);
 
   const getExpiresAt = (): string => {
     const millis = getMillis();
     return new Date(millis).toLocaleString();
   };
 
-  const [expiresAt, setExpiresAt] = useState<string>(getExpiresAt());
+  const [expiresAt, setExpiresAt] = useState<string>(() => getExpiresAt());
   useEffect(() => {
     onMillis(getMillis());
     setExpiresAt(getExpiresAt());

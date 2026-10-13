@@ -2904,6 +2904,12 @@ const OPEN_DATA_DOWNLOAD_MESSAGES = objectMessages("openData.downloads", {
   "columns.tokenId": "Token ID",
 } as const);
 
+const DATE_PICKER_MESSAGES = objectMessages("datePicker", {
+  utcNote:
+    "Dates are in UTC. The latest date you can select is today in UTC.",
+  afterTodayError: "Dates cannot be later than today in UTC.",
+} as const);
+
 const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
   "heading.gas": "Meme Gas",
   "heading.accounting": "Meme Accounting",
@@ -4423,6 +4429,7 @@ export const EN_US_MESSAGES = {
   ...COMMON_MESSAGES,
   ...EN_US_PAGINATION_MESSAGES,
   ...OPEN_DATA_DOWNLOAD_MESSAGES,
+  ...DATE_PICKER_MESSAGES,
   ...MEME_DATA_TABLE_MESSAGES,
   ...HEADER_SEARCH_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,

@@ -3,10 +3,23 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
 import { WaveWinnersEmpty } from "./WaveWinnersEmpty";
-import { format } from "date-fns";
 import { WaveWinnersTimelineLoading } from "./WaveWinnersTimelineLoading";
 import { WaveWinnersDrops } from "./drops/WaveWinnersDrops";
 import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatDate, formatTime } from "@/i18n/format";
+
+// Decision times are instants shown in the viewer's own time zone.
+const DECISION_DATE_FORMAT = {
+  weekday: "short",
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+} satisfies Intl.DateTimeFormatOptions;
+const DECISION_TIME_FORMAT = {
+  hour: "numeric",
+  minute: "2-digit",
+} satisfies Intl.DateTimeFormatOptions;
 
 interface WaveWinnersTimelineProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
@@ -25,6 +38,8 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
   contentPresentation,
   outcomesVisible = true,
 }) => {
+  const locale = useBrowserLocale();
+
   if (isLoading) {
     return <WaveWinnersTimelineLoading />;
   }
@@ -52,9 +67,16 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
 
         <div className="tw-space-y-6">
           {sortedDisplayPoints.map((point) => {
-            const date = new Date(point.decision_time);
-            const formattedDate = format(date, "EEE, MMM d, yyyy");
-            const formattedTime = format(date, "h:mm a");
+            const formattedDate = formatDate(
+              locale,
+              point.decision_time,
+              DECISION_DATE_FORMAT
+            );
+            const formattedTime = formatTime(
+              locale,
+              point.decision_time,
+              DECISION_TIME_FORMAT
+            );
 
             return (
               <div
