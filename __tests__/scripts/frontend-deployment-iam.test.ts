@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
-describe.each(["staging", "production"])(
+describe.each(["staging", "production", "delegation-docs"])(
   "%s deployment IAM manifest",
   (environment) => {
     it("matches the exact compact policy document", () => {

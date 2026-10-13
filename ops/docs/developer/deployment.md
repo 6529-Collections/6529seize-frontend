@@ -29,6 +29,13 @@ validate the role ARN, check the assumed account, and require successful
 authentication; they have no static-key fallback. Build and verification jobs
 receive no AWS deployment credentials or OIDC token permission.
 
+The optional delegation-docs CDN publisher uses its own `delegation-docs`
+environment, restricted to `main`, with a separate `AWS_DEPLOY_ROLE_ARN` and
+OIDC subject. Its role accesses only `6529bucket/delegation-content/` in
+`eu-west-1`. A dry run verifies AWS authentication and read-only CDN access,
+then builds a receipt without publishing content. IPFS credentials are exposed
+only to the publishing step. See [publisher permissions](../../iam/frontend-delegation-docs/README.md).
+
 Sessions last 90 minutes to cover the 75-minute deployment job timeout and
 staging's artifact download window. Their names include the GitHub run ID:
 `frontend-staging-<run ID>` and `frontend-production-<run ID>`.

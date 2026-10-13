@@ -196,9 +196,12 @@
       }
     },
     {
-      "Sid": "BeanstalkTargetHealth",
+      "Sid": "BeanstalkLoadBalancerMetadata",
       "Effect": "Allow",
-      "Action": ["elasticloadbalancing:DescribeTargetHealth"],
+      "Action": [
+        "elasticloadbalancing:DescribeTargetHealth",
+        "elasticloadbalancing:DescribeLoadBalancers"
+      ],
       "Resource": ["*"],
       "Condition": {
         "StringEquals": {
