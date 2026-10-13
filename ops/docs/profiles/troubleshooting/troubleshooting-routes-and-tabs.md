@@ -109,6 +109,9 @@ Scope:
     checking whether the profile belongs to you. On direct `/{user}/brain`
     links, the fallback also waits for client hydration, wallet reconnection,
     or connected-profile restoration to decide whether Waves is available.
+    On iOS, `/{user}/subscriptions` waits for the country check; a non-US,
+    unknown, failed, or slow check then falls back to `/{user}`, while `US`
+    keeps the `Subscriptions` tab.
   - Action: switch context or use a visible tab URL.
 
 - Symptom: followers stat does not open `/{user}/followers`.

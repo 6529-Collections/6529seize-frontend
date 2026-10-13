@@ -12,12 +12,7 @@ import {
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  useParams,
-  usePathname,
-  useRouter,
-  useSearchParams,
-} from "next/navigation";
+import { useParams, usePathname, useSearchParams } from "next/navigation";
 import {
   useCallback,
   useEffect,
@@ -35,12 +30,16 @@ import {
   type UserPageVisibilityContext,
   getUserPageTabByRoute,
 } from "./userTabs.config";
-import { shouldHideSubscriptions } from "./userPageVisibility";
+import {
+  isAwaitingIosCountryCheck,
+  shouldHideSubscriptions,
+} from "./userPageVisibility";
 import {
   shouldDelayUserPageBrainRedirect,
   shouldDelayUserPageOwnerTabRedirect,
 } from "./userPageBrainAccess";
 import { getUserProfileTabsMessage } from "./user-tabs.messages";
+import { useUserPageTabFallbackRedirect } from "./useUserPageTabFallbackRedirect";
 import { useUserPageTabIndicator } from "./useUserPageTabIndicator";
 
 const DEFAULT_TAB = DEFAULT_USER_PAGE_TAB;
@@ -85,13 +84,12 @@ export default function UserPageTabs({
   readonly initialProfile: ApiIdentity;
 }) {
   const pathname = usePathname();
-  const router = useRouter();
   const params = useParams();
   const handleOrWallet = params["user"]?.toString() ?? "";
   const searchParams = useSearchParams();
   const searchString = searchParams.toString();
   const capacitor = useCapacitor();
-  const { country } = useCookieConsent();
+  const { country, isCountryPending } = useCookieConsent();
   const { showWaves, connectedProfile, fetchingProfile } = useAuth();
   const { address, connectionState } = useSeizeConnectContext();
   const { profile: viewedProfile } = useIdentity({
@@ -159,6 +157,14 @@ export default function UserPageTabs({
       isClientHydrated,
     });
   const preserveOwnerTabWhileOwnershipLoads = shouldSuppressOwnerTabRedirect;
+  // iOS keeps the Subscriptions tab and panel hidden while the first country
+  // lookup is pending, but must not redirect a US deep link before it resolves.
+  const shouldSuppressSubscriptionsRedirect =
+    resolvedTabFromPath === USER_PAGE_TAB_IDS.SUBSCRIPTIONS &&
+    isAwaitingIosCountryCheck({
+      capacitorIsIos: capacitor.isIos,
+      isCountryPending,
+    });
 
   const visibleTabs = useMemo(
     () =>
@@ -193,7 +199,9 @@ export default function UserPageTabs({
   );
 
   const activeTab = useMemo<UserPageTabKey>(() => {
-    if (resolvedTabIsVisible) {
+    // While the redirect is deferred the URL stays on the hidden tab, so no
+    // other tab is highlighted as current.
+    if (resolvedTabIsVisible || shouldSuppressSubscriptionsRedirect) {
       return resolvedTabFromPath;
     }
 
@@ -201,50 +209,24 @@ export default function UserPageTabs({
     // Note: If no tabs are visible, defaults to DEFAULT_TAB.
     // This is safe since rendering iterates visibleTabs (which would be empty).
     return firstVisibleTab ?? DEFAULT_TAB;
-  }, [resolvedTabFromPath, resolvedTabIsVisible, visibleTabs]);
-
-  // Redirect to the first visible tab whenever the resolved tab becomes
-  // hidden because the visibility context changed (country, feature flags,
-  // etc.). For access-dependent tabs, delay the redirect until the client has
-  // mounted and wallet/profile restoration has settled.
-  useEffect(() => {
-    if (
-      !visibleTabs.length ||
-      resolvedTabIsVisible ||
-      !handleOrWallet ||
-      shouldSuppressBrainRedirect ||
-      shouldSuppressOwnerTabRedirect
-    ) {
-      return;
-    }
-
-    const fallbackTab = visibleTabs[0];
-    if (!fallbackTab) {
-      return;
-    }
-
-    const fallbackPath = fallbackTab.route
-      ? `/${handleOrWallet}/${fallbackTab.route}`
-      : `/${handleOrWallet}`;
-
-    if (fallbackPath === pathname) {
-      return;
-    }
-
-    const nextUrl = searchString
-      ? `${fallbackPath}?${searchString}`
-      : fallbackPath;
-    router.replace(nextUrl);
   }, [
-    handleOrWallet,
-    pathname,
+    resolvedTabFromPath,
     resolvedTabIsVisible,
-    router,
-    searchString,
-    shouldSuppressBrainRedirect,
-    shouldSuppressOwnerTabRedirect,
+    shouldSuppressSubscriptionsRedirect,
     visibleTabs,
   ]);
+
+  useUserPageTabFallbackRedirect({
+    handleOrWallet,
+    isRedirectSuppressed:
+      shouldSuppressBrainRedirect ||
+      shouldSuppressOwnerTabRedirect ||
+      shouldSuppressSubscriptionsRedirect,
+    pathname,
+    resolvedTabIsVisible,
+    searchString,
+    visibleTabs,
+  });
 
   const checkScroll = useCallback(() => {
     const container = scrollContainerRef.current;

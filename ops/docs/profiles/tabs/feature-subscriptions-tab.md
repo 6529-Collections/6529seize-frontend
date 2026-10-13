@@ -21,7 +21,10 @@ are documented in
 On native iOS when the detected country is not `US` or is unknown, the tab and
 subscription actions are hidden. Direct links (including native deep links)
 return to the profile's Identity tab without displaying subscription content
-or an unavailable page. US iOS, web, and Android retain their existing behavior.
+or an unavailable page. On iOS the return waits for the country check: the tab
+and content stay hidden while it loads, a US deep link then opens the
+`Subscriptions` tab in place, and a non-US, unknown, failed, or slow (over five
+seconds) check redirects. Web and Android never wait.
 
 - Open `/{user}/subscriptions` directly.
 - Open a profile and choose the `Subscriptions` tab.

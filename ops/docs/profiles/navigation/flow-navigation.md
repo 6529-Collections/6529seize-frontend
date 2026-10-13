@@ -46,6 +46,8 @@ valid across tabs and contexts.
    - `Proxy` only on your own profile.
 6. If the current tab is hidden, the app replaces the URL with the first
    visible tab and keeps the full query string.
+   - Direct `/{user}/subscriptions` links on iOS delay that fallback while the
+     country check is loading, then stay put for `US` and fall back otherwise.
    - Direct `/{user}/brain` links delay that fallback while client hydration,
      wallet reconnection, or connected-profile restoration is still resolving
      Brain access.

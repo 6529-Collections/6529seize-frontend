@@ -1,7 +1,10 @@
 "use client";
 
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
+import {
+  isAwaitingIosCountryCheck,
+  shouldHideSubscriptions,
+} from "@/components/user/layout/userPageVisibility";
 import { useSyncExternalStore } from "react";
 import useCapacitor from "./useCapacitor";
 
@@ -23,7 +26,10 @@ export function useNftPurchasingVisibility() {
   });
   // iOS keeps purchasing hidden but does not redirect until the country check
   // settles, so a US cold deep link stays put. Android and web never wait.
-  const isAwaitingIosCountry = isIos && isCountryPending;
+  const isAwaitingIosCountry = isAwaitingIosCountryCheck({
+    capacitorIsIos: isIos,
+    isCountryPending,
+  });
 
   return {
     // The server cannot identify the native shell. Keep purchasing content out
