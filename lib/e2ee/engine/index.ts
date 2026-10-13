@@ -137,6 +137,18 @@ async function loadGroups(ctx: EngineContext): Promise<void> {
   );
 }
 
+function memberProfileIds(ctx: EngineContext): string[] {
+  const ids = new Set<string>();
+  for (const runtime of ctx.store.groups.values()) {
+    for (const member of runtime.record.members) {
+      if (member.profileId !== null) {
+        ids.add(member.profileId);
+      }
+    }
+  }
+  return [...ids];
+}
+
 async function resolveProfiles(
   ctx: EngineContext,
   profileIds: string[]
@@ -195,6 +207,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
     this.controller = new EngineController(ctx, {
       refreshMe: () => this.refreshMe(),
       onOwnRevoked: () => this.onOwnRejected(),
+      afterSync: () => resolveProfiles(this.ctx, memberProfileIds(this.ctx)),
     });
   }
 

@@ -51,6 +51,8 @@ export interface ControllerHooks {
   refreshMe: () => Promise<void>;
   /** Called when the server reports this device revoked. */
   onOwnRevoked: () => Promise<void>;
+  /** Called after every sync pass (e.g. resolve new members' profiles). */
+  afterSync: () => Promise<void>;
 }
 
 export class EngineController {
@@ -163,6 +165,7 @@ export class EngineController {
     if (this.ctx.now() - this.ctx.lastMeAt >= MAINTAIN_EVERY_MS) {
       await this.guard(this.hooks.refreshMe());
     }
+    await this.guard(this.hooks.afterSync());
   }
 
   /** One group's (or the pool's) failure must not stop the whole pass. */

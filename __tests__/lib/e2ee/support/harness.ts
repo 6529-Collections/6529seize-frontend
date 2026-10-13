@@ -139,6 +139,8 @@ export async function startDevice(
     storage?: E2eeStorage;
     enroll?: boolean;
     extra?: Partial<E2eeEngineOptions>;
+    /** No WebSocket hints: the engine must rely on polling. */
+    noWake?: boolean;
   } = {}
 ): Promise<TestDevice> {
   const storage = options.storage ?? createMemoryE2eeStorage();
@@ -169,6 +171,9 @@ export async function startDevice(
     isBlocked: (other) => world.ds.state.blocks.has(`${profileId}>${other}`),
     ...options.extra,
   };
+  if (options.noWake === true) {
+    delete engineOptions.onWake;
+  }
   device.options = engineOptions;
   device.engine = await createE2eeEngine(engineOptions);
   if (
@@ -184,16 +189,15 @@ export async function startDevice(
 export async function addUser(
   world: World,
   profileId: string,
-  extra?: Partial<E2eeEngineOptions>
+  extra?: Partial<E2eeEngineOptions>,
+  flags: { noWake?: boolean } = {}
 ): Promise<TestUser> {
   const account = privateKeyToAccount(generatePrivateKey());
   world.ds.setWallets(profileId, [account.address]);
-  const primary = await startDevice(
-    world,
-    profileId,
-    account,
-    extra ? { extra } : {}
-  );
+  const primary = await startDevice(world, profileId, account, {
+    ...(extra ? { extra } : {}),
+    ...flags,
+  });
   const user: TestUser = { profileId, account, devices: [primary], primary };
   world.users.set(profileId, user);
   return user;
@@ -216,7 +220,7 @@ export function stopDevice(world: World, device: TestDevice): void {
   }
 }
 
-const realSleep = (ms: number) =>
+export const realSleep = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
 const writes = (world: World): number =>

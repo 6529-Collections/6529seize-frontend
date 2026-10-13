@@ -40,6 +40,9 @@ describe("E2EE engine: direct messages", () => {
       name: null,
     });
     expect(b.findDm("alice")).toBe(g);
+    expect(
+      b.getConversation(g)?.members.find((m) => m.profileId === "alice")
+    ).toMatchObject({ handle: "alice", isAdmin: true });
     expect(a.getConversation(g)?.safetyCode).toBe(
       b.getConversation(g)?.safetyCode
     );
