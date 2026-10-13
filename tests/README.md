@@ -76,7 +76,10 @@ drop navigation. Changes under `components/waves/leaderboard/` or its
 `__tests__/components/waves/leaderboard/` tests therefore select this pack, as
 do the desktop `components/waves/drops/WaveDropActionsOpen.tsx` and mobile
 `components/waves/drops/WaveDropMobileMenuOpen.tsx` actions and their focused
-tests.
+tests. The pack also owns the wave header Join call to action
+(`components/waves/header/WaveJoinCta.tsx`) and the sidebar row pin tooltip
+layering (`components/brain/left-sidebar/waves/BrainLeftSidebarWavePin.tsx`),
+so changes to either select it.
 Keep those ownership rules covered in
 `__tests__/scripts/app-pr-ci-effective-plan.test.ts`; merely registering a
 pack here does not make a product-only PR select it.
@@ -208,11 +211,24 @@ Remote read-only defaults:
   registered first-party mutations.
 - WalletConnect RPC POSTs are body-classified: known read-only JSON-RPC methods
   may continue, while unsafe, unknown, or unparseable calls fail the run.
+
 - For staging, the shared `context` fixture installs the read-only mutation
   guard before the `page` fixture unlocks the access gate. The current access
   gate uses safe GET requests plus a browser cookie.
 - Traces are disabled for staging and production by default because they can
   retain credentials or private page state.
+
+Readiness checks must follow the behavior under test. A visible `main` can
+precede hydration, wallet restoration, and API-backed content. Give the
+specific rendered data or resolved wallet state the bounded data-readiness
+budget. Wait for an API response only when that response is itself part of
+the contract; rendered rows may also come from cached data. Use the existing
+hydration-ready marker when checking the transition from server HTML to
+interactive chrome.
+Use `expectUrlState` from `support/urlState.ts` for route/query predicates;
+Playwright's predicate-based `toHaveURL` also waits for the page load event,
+which pending media can delay even after the correct URL is committed. Keep
+destination content, focus, scroll restoration, and media assertions separate.
 
 App PR CI:
 

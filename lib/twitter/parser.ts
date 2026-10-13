@@ -52,13 +52,11 @@ const findMediaLink = (
   $: ReturnType<typeof cheerio.load>
 ): string | undefined => {
   const anchors = $("blockquote p a").toArray();
-  const mediaAnchor = anchors.find(
-    (element: ReturnType<typeof $.root>[number]) => {
-      const href = $(element).attr("href") ?? "";
-      const text = $(element).text();
-      return isPicTwitterUrl(href) || (isTcoUrl(href) && isPicTwitterUrl(text));
-    }
-  );
+  const mediaAnchor = anchors.find((element) => {
+    const href = $(element).attr("href") ?? "";
+    const text = $(element).text();
+    return isPicTwitterUrl(href) || (isTcoUrl(href) && isPicTwitterUrl(text));
+  });
 
   if (!mediaAnchor) {
     return undefined;

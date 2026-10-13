@@ -229,7 +229,8 @@ function isSuspiciousIpFormat(host: string): boolean {
   return false;
 }
 
-function isForbiddenAddress(address: string): boolean {
+/** True for anything other than a publicly routable unicast IP address. */
+export function isForbiddenAddress(address: string): boolean {
   const ipType = isIP(address);
 
   if (ipType === 4) {
