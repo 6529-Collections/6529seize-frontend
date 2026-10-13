@@ -3,7 +3,9 @@ jest.mock("undici", () => ({
   fetch: jest.fn(),
 }));
 
-jest.mock("sharp", () => jest.fn());
+// The route blocks a libvips loader for the whole process at import. Keep that
+// on the mock: the native block would outlive this file inside the worker.
+jest.mock("sharp", () => Object.assign(jest.fn(), { block: jest.fn() }));
 
 jest.mock("@/lib/security/urlGuard", () => {
   const actual = jest.requireActual("@/lib/security/urlGuard");
@@ -282,20 +284,38 @@ describe("/api/og-metadata/image", () => {
     expect(response.status).toBe(502);
   });
 
-  it("sniffs and rasterizes SVG without enlarging small artwork", async () => {
-    const svg = Buffer.from(
-      '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="12"><rect width="24" height="12" fill="red"/></svg>'
-    );
-    mockImageResponse(svg.byteLength, "application/octet-stream", svg);
-
-    const response = await GET(createRequest("https://cdn.test/art"));
-    const metadata = await actualSharp(
-      Buffer.from(await response.arrayBuffer())
-    ).metadata();
-
-    expect(response.status).toBe(200);
-    expect(metadata).toMatchObject({ format: "png", width: 24, height: 12 });
+  it("disables Sharp's SVG loader for the process", () => {
+    expect(mockSharp.block).toHaveBeenCalledWith({
+      operation: ["VipsForeignLoadSvg"],
+    });
   });
+
+  it.each([
+    [
+      "SVG",
+      '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="12"><rect width="24" height="12" fill="red"/></svg>',
+      "image/svg+xml",
+    ],
+    [
+      "XML",
+      '<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"/>',
+      "application/octet-stream",
+    ],
+  ])(
+    "rejects %s documents without decoding them",
+    async (_label, document, contentType) => {
+      const svg = Buffer.from(document);
+      mockImageResponse(svg.byteLength, contentType, svg);
+
+      const response = await GET(createRequest("https://cdn.test/art.svg"));
+
+      expect(response.status).toBe(502);
+      await expect(response.json()).resolves.toEqual({
+        error: "Failed to normalize image",
+      });
+      expect(mockSharp).not.toHaveBeenCalled();
+    }
+  );
 
   it("preserves ordinary external GIF animation only when explicitly requested", async () => {
     mockImageResponse(GIF_2_FRAME.byteLength, "image/gif", GIF_2_FRAME);
