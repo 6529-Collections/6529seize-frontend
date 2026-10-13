@@ -354,6 +354,97 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("scrolls the wave form with the pointer inside Admins", async ({
+    page,
+    baseURL,
+  }) => {
+    await installExternalDataFixtures(page);
+    await page.goto("/waves?create=wave", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await expect(
+      page.getByRole("heading", { name: "Create Wave", exact: true })
+    ).toBeVisible();
+    await dismissNextDevTools(page);
+    await openOptionalSettings(page);
+    await page
+      .getByRole("button", { name: /Customize other permissions/ })
+      .click();
+    const admins = page.getByRole("group", { name: "Admins", exact: true });
+    await admins.getByRole("button", { name: "Edit", exact: true }).click();
+    const criteria = admins.getByRole("group", {
+      name: "Group criteria",
+      exact: true,
+    });
+    const choices = criteria.getByRole("button");
+    const desktopCriteria = await page.evaluate(
+      () => window.matchMedia("(min-width: 1024px)").matches
+    );
+    const positions = await choices.evaluateAll((buttons) =>
+      buttons.map((button) => {
+        const bounds = button.getBoundingClientRect();
+        return { x: bounds.x, y: bounds.y };
+      })
+    );
+    const alignedPositions = positions.map((position) =>
+      desktopCriteria ? position.x : position.y
+    );
+    expect(
+      Math.max(...alignedPositions) - Math.min(...alignedPositions)
+    ).toBeLessThan(1);
+    if (desktopCriteria) {
+      expect(positions.at(-1)!.y).toBeGreaterThan(positions[0]!.y);
+      const criteriaBounds = await criteria.boundingBox();
+      const editorBounds = await admins
+        .getByRole("region", { name: "Identities", exact: true })
+        .boundingBox();
+      expect(editorBounds!.x).toBeGreaterThanOrEqual(
+        criteriaBounds!.x + criteriaBounds!.width
+      );
+    }
+    const lastCriterion = choices.last();
+    await lastCriterion.focus();
+    await expect(lastCriterion).toBeInViewport({ ratio: 1 });
+    const horizontalScroll = await criteria.evaluate((element) => ({
+      left: element.scrollLeft,
+      width: element.clientWidth,
+      contentWidth: element.scrollWidth,
+    }));
+    if (horizontalScroll.contentWidth > horizontalScroll.width) {
+      expect(horizontalScroll.left).toBeGreaterThan(0);
+    }
+    await choices.first().focus();
+    const included = admins.getByRole("tab", { name: "Included", exact: true });
+    await included.scrollIntoViewIfNeeded();
+    const scrollPosition = () =>
+      included.evaluate((element) => {
+        for (
+          let parent = element.parentElement;
+          parent;
+          parent = parent.parentElement
+        ) {
+          if (
+            getComputedStyle(parent).overflowY === "auto" &&
+            parent.scrollHeight > parent.clientHeight
+          ) {
+            return parent.scrollTop;
+          }
+        }
+        throw new Error("Expected a scrollable wave form");
+      });
+    const before = await scrollPosition();
+    // The compact desktop editor can already be near the form's bottom.
+    // Scroll toward the earlier fields to test propagation with room to move.
+    expect(before).toBeGreaterThan(50);
+    await included.hover();
+    await page.mouse.wheel(0, -260);
+    await expect.poll(scrollPosition).toBeLessThan(before - 50);
+    await expect(
+      page.getByRole("heading", { name: "Create Wave", exact: true })
+    ).toBeInViewport();
+    await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("creates, attaches, and restores a rule-based access group", async ({
     baseURL,
     page,
@@ -370,10 +461,21 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     });
     await accessGroup.getByRole("button", { name: "Edit" }).click();
     await expect(accessGroup.getByText("Before editing")).toBeVisible();
+    await page
+      .getByRole("button", { name: /Customize other permissions/ })
+      .click();
+    await expect(
+      accessGroup.getByRole("region", { name: "Identities", exact: true })
+    ).toBeVisible();
     await accessGroup
       .getByRole("button", { name: "Level", exact: true })
       .click();
     await accessGroup.getByLabel("Level at least").fill("3");
+    await page.getByRole("heading", { name: "Access", exact: true }).click();
+    await expect(accessGroup.getByLabel("Level at least")).toHaveValue("3");
+    await expect(
+      accessGroup.getByRole("region", { name: "Level", exact: true })
+    ).toBeVisible();
     await accessGroup.getByRole("button", { name: "Save changes" }).click();
 
     await expect(page.getByText("Group created and attached.")).toBeVisible({
@@ -383,6 +485,51 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expect(
       accessGroup.getByRole("button", { name: "View members" })
     ).toBeVisible();
+    await accessGroup
+      .getByRole("button", { name: "Edit", exact: true })
+      .click();
+    await expect(
+      accessGroup.getByRole("button", { name: /Remove playwright, wallet/ })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    const configuredLevel = accessGroup.getByRole("button", {
+      name: /Level.*Configured/,
+    });
+    const cancel = accessGroup.getByRole("button", {
+      name: "Cancel",
+      exact: true,
+    });
+    const cancelBounds = await cancel.boundingBox();
+    const beforeEditing = accessGroup.getByText("Before editing", {
+      exact: true,
+    });
+    const beforeEditingBounds = await beforeEditing.boundingBox();
+    const headerContentRight = await beforeEditing.evaluate((element) => {
+      const header = element.parentElement!;
+      const style = getComputedStyle(header);
+      return (
+        header.getBoundingClientRect().right -
+        Number.parseFloat(style.paddingRight) -
+        Number.parseFloat(style.borderRightWidth)
+      );
+    });
+    expect(cancelBounds).not.toBeNull();
+    expect(beforeEditingBounds).not.toBeNull();
+    expect(cancelBounds!.x + cancelBounds!.width).toBeCloseTo(
+      headerContentRight,
+      0
+    );
+    expect(cancelBounds!.y + cancelBounds!.height / 2).toBeCloseTo(
+      beforeEditingBounds!.y + beforeEditingBounds!.height / 2,
+      0
+    );
+    await expect(configuredLevel).not.toHaveAttribute("aria-current");
+    await configuredLevel.click();
+    await expect(accessGroup.getByLabel("Level at least")).toHaveValue("3");
+    await expect(configuredLevel).toHaveAttribute("aria-current", "true");
+    await accessGroup
+      .getByRole("button", { name: "Cancel", exact: true })
+      .click();
 
     await expect
       .poll(

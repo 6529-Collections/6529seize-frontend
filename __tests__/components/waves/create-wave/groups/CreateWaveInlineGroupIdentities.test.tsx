@@ -52,7 +52,7 @@ jest.mock(
 );
 
 jest.mock(
-  "@/components/groups/page/create/config/GroupCreateIdentitySelectedItems",
+  "@/components/groups/assignment/GroupIdentitySelectedList",
   () =>
     function MockGroupCreateIdentitySelectedItems() {
       return <div data-testid="selected-identities" />;
@@ -247,7 +247,7 @@ describe("CreateWaveInlineGroupIdentities", () => {
     );
     expect(screen.getByTestId("wallet-sources")).toHaveTextContent("included");
 
-    await user.click(screen.getByRole("button", { name: "Excluded" }));
+    await user.click(screen.getByRole("tab", { name: "Excluded" }));
 
     expect(screen.getByTestId("identities-search")).toHaveTextContent(
       "0xexcluded"
@@ -348,7 +348,7 @@ describe("CreateWaveInlineGroupIdentities", () => {
     const user = userEvent.setup();
     const { onExcludedIdentitySelect } = renderWithProfile();
 
-    await user.click(screen.getByRole("button", { name: "Excluded" }));
+    await user.click(screen.getByRole("tab", { name: "Excluded" }));
     await user.click(
       screen.getByRole("button", { name: "Select searched identity" })
     );
@@ -364,7 +364,7 @@ describe("CreateWaveInlineGroupIdentities", () => {
       excludedIdentities: [selectedCurrentUserIdentity],
     });
 
-    await user.click(screen.getByRole("button", { name: "Excluded" }));
+    await user.click(screen.getByRole("tab", { name: "Excluded" }));
 
     expect(
       screen.getByText(/You are not included in this group/)

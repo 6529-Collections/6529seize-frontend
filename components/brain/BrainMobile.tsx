@@ -13,6 +13,7 @@ import {
 } from "@/hooks/useWaveTabPreference";
 import { useDefaultCompetitionNavigation } from "@/hooks/competitions/useDefaultCompetitionNavigation";
 import { useWaveTabNavigation } from "@/hooks/useWaveTabNavigation";
+import { getMissingWaveNavigationRoute } from "@/helpers/waves/missing-wave-navigation.helpers";
 
 import type { ReactNode } from "react";
 import React, {
@@ -146,18 +147,22 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     null;
   const { data: wave } = useWaveData({
     waveId: waveId,
-    onWaveNotFound: () => {
-      const params = new URLSearchParams(searchParams.toString() || "");
-      params.delete("wave");
-      const basePath = getWaveHomeRoute({
-        isDirectMessage: pathname.startsWith("/messages"),
-        isApp,
-      });
-      const newUrl = params.toString()
-        ? `${basePath}?${params.toString()}`
-        : basePath || getHomeRoute();
-      router.push(newUrl, { scroll: false });
-    },
+    onWaveNotFound: isCompetitionPathname(pathname)
+      ? undefined
+      : () => {
+          const route = getMissingWaveNavigationRoute(waveId);
+          if (!route) return;
+          const params = route.searchParams;
+          params.delete("wave");
+          const basePath = getWaveHomeRoute({
+            isDirectMessage: route.pathname.startsWith("/messages"),
+            isApp,
+          });
+          const newUrl = params.toString()
+            ? `${basePath}?${params.toString()}`
+            : basePath || getHomeRoute();
+          router.push(newUrl, { scroll: false });
+        },
   });
 
   const { isMemesWave, isCurationWave, isRankWave, isApproveWave } =

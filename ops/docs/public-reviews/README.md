@@ -311,6 +311,11 @@ category, suspected severity, and any exact code provenance. The category
 the same public pre-deployment review destination: Stream is not live, and
 finding those issues before finalization is the purpose of this review.
 
+In production, the server-resolved destination is the public top-level
+`6529 Tech Feedback` Wave, so review posts appear there beside general 6529
+tech feedback. Staging uses its own review Wave. The ledger ignores posts in
+that Wave that carry no review metadata.
+
 For Solidity feedback, start and end line fields are the keyboard selection
 controls and the source itself is one focusable scroll region. Changing the
 range keeps the written draft in place while the new snippet checksum is

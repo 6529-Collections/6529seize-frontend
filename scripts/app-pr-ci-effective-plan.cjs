@@ -129,6 +129,8 @@ function applyEffectiveAppPrCiPlan(plan) {
         "__tests__/components/waves/drops/WaveDropActionsOpen.test.tsx",
         "components/waves/drops/WaveDropMobileMenuOpen.tsx",
         "__tests__/components/waves/drops/WaveDropMobileMenuOpen.test.tsx",
+        "components/waves/header/WaveJoinCta.tsx",
+        "components/brain/left-sidebar/waves/BrainLeftSidebarWavePin.tsx",
         "tests/packs.manifest.cjs",
         "openapi.yaml",
         ".github/workflows/app-pr-ci.yml",

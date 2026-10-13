@@ -39,7 +39,8 @@ the `1200x630` image dimensions and `summary_large_image` Twitter card.
   images to PNG for card rendering. Images retain their aspect ratio and fit
   within the requested width (at most 1,200 pixels) and 12,000 pixels high,
   without cropping or enlarging smaller originals. GIF previews use the first
-  frame, and SVG artwork is supported.
+  frame. Only JPEG, PNG, GIF, and WebP sources are normalized; SVG and other
+  XML documents are not rasterized, so a card renders without that image.
   - Source downloads are limited to 50 MiB. Larger GIFs can still produce a
     preview when the source supports a partial download of the first 8 MiB.
   - Each processed frame must be at most 512 million pixels, with neither

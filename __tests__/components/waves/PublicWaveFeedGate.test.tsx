@@ -1,6 +1,12 @@
 import { act, render, screen } from "@testing-library/react";
 
 import PublicWaveFeedGate from "@/components/waves/PublicWaveFeedGate";
+import { MyStreamWaveTab } from "@/types/waves.types";
+
+let mockContentTab = MyStreamWaveTab.CHAT;
+jest.mock("@/components/brain/ContentTabContext", () => ({
+  useContentTab: () => ({ activeContentTab: mockContentTab }),
+}));
 
 type TestWaveMessages = {
   readonly isLoading: boolean;
@@ -38,6 +44,7 @@ const publishMessages = (nextMessages: TestWaveMessages | undefined) => {
 describe("PublicWaveFeedGate", () => {
   beforeEach(() => {
     mockActiveWaveId = "wave-1";
+    mockContentTab = MyStreamWaveTab.CHAT;
     mockWaveMessages = undefined;
     mockListeners.clear();
     jest.clearAllMocks();
@@ -105,5 +112,21 @@ describe("PublicWaveFeedGate", () => {
       screen.getByText("Interactive feed").parentElement;
     expect(interactiveSurface).not.toHaveAttribute("inert");
     expect(interactiveSurface).toHaveAttribute("aria-hidden", "false");
+  });
+
+  it("does not cover a remembered Leaderboard with the server Chat fallback while its feed is pending", () => {
+    mockContentTab = MyStreamWaveTab.LEADERBOARD;
+    render(
+      <PublicWaveFeedGate
+        fallback={<div>Server public feed</div>}
+        waveId="wave-1"
+      >
+        <div>Leaderboard loading</div>
+      </PublicWaveFeedGate>
+    );
+    expect(screen.queryByText("Server public feed")).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Leaderboard loading").parentElement
+    ).not.toHaveAttribute("inert");
   });
 });

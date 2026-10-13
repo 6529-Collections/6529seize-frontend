@@ -13,6 +13,8 @@ import BrainMobileWaves from "./BrainMobileWaves";
 import { BrainView } from "./brainMobileViews";
 import { useLayout } from "../my-stream/layout/LayoutContext";
 import { SidebarTab } from "../right-sidebar/BrainRightSidebarTypes";
+import { waveCompetitionTabs } from "@/helpers/default-competition.helpers";
+import type { MyStreamWaveTab } from "@/types/waves.types";
 
 const ignoreAboutTabChange = (_tab: SidebarTab): void => undefined;
 
@@ -287,6 +289,15 @@ export default function BrainMobileViewContent({
   const isCompetitionRoute = isCompetitionPathname(usePathname());
   const search = useSearchParams();
   const isCompetitionWave = isRankWave || isApproveWave;
+
+  // Implicit competition sections resolve in the shared wave content. Rendering
+  // a legacy mobile view here first would expose the wrong content and controls.
+  if (
+    !isCompetitionRoute &&
+    isMultiCompetitionEnabled() &&
+    waveCompetitionTabs[activeView as unknown as MyStreamWaveTab] !== undefined
+  )
+    return children;
 
   switch (activeView) {
     case BrainView.DEFAULT:

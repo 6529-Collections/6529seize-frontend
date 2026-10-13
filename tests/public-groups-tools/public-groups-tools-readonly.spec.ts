@@ -148,11 +148,7 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       name: "Filter Network",
       includeHidden: true,
     });
-    const allFilters = filter.getByRole("button", { name: "All filters" });
     const openCriterion = async (name: string | RegExp) => {
-      if (narrowFilter && (await allFilters.isVisible())) {
-        await allFilters.click();
-      }
       await choices.getByRole("button", { name, exact: true }).click();
     };
     const levelInput = filter.getByRole("spinbutton", {
@@ -170,20 +166,32 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       "xTDH Grant",
     ];
     await expect(choices.getByRole("button")).toHaveText(criteria);
-    if (narrowFilter) {
-      await expect(
-        filter.getByRole("region", { name: "Identities" })
-      ).toBeHidden();
-    } else {
-      await expect(
-        filter.getByRole("region", { name: "Identities" })
-      ).toBeVisible();
+    await expect(
+      filter.getByRole("region", { name: "Identities" })
+    ).toBeVisible();
+    if (!narrowFilter) {
+      const navigationBounds = await choices.boundingBox();
+      const editorBounds = await filter
+        .getByRole("region", { name: "Identities", exact: true })
+        .boundingBox();
+      expect(editorBounds!.x).toBeGreaterThanOrEqual(
+        navigationBounds!.x + navigationBounds!.width
+      );
+      const positions = await choices
+        .getByRole("button")
+        .evaluateAll((buttons) =>
+          buttons.map((button) => button.getBoundingClientRect().x)
+        );
+      expect(Math.max(...positions) - Math.min(...positions)).toBeLessThan(1);
     }
     for (const name of criteria) {
-      await expect(
-        filter.getByRole("button", { name, exact: true })
-      ).toBeInViewport();
+      const choice = choices.getByRole("button", { name, exact: true });
+      await choice.scrollIntoViewIfNeeded();
+      await expect(choice).toBeInViewport();
     }
+    await choices
+      .getByRole("button", { name: "Identities", exact: true })
+      .scrollIntoViewIfNeeded();
     await expect(
       filter.getByRole("button", { name: "Edit criteria" })
     ).toHaveCount(0);
@@ -242,16 +250,7 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
           )
         )
         .toBeCloseTo(restingHeight ?? 0, 0);
-      if (narrowFilter) {
-        await expect(allFilters).toBeInViewport();
-      } else {
-        await expect(
-          filter.getByRole("button", { name: "Level", exact: true })
-        ).toBeInViewport();
-        await expect(
-          filter.getByRole("button", { name: "xTDH Grant", exact: true })
-        ).toBeInViewport();
-      }
+      await expect(choices).toBeInViewport({ ratio: 1 });
     }
     await openCriterion("Level");
     await levelInput.fill("10");
@@ -367,7 +366,7 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expectNoHorizontalOverflow(page);
   });
 
-  test("keeps All filters and Close visible while a narrow editor scrolls", async ({
+  test("keeps criteria and Close visible while a narrow editor scrolls", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 620 });
@@ -375,14 +374,9 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await openGroupFilters(page);
     const filter = page.getByRole("dialog", { name: "Filter Network" });
     const choices = filter.getByRole("group", { name: "Filter Network" });
-    const back = filter.getByRole("button", {
-      name: "All filters",
-      exact: true,
-    });
     const level = filter.getByRole("spinbutton", { name: "Level at least" });
     await choices.getByRole("button", { name: "Level", exact: true }).click();
     await level.fill("10");
-    await back.click();
     await choices
       .getByRole("button", { name: "Identities", exact: true })
       .click();
@@ -390,7 +384,7 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       name: "Identities",
       exact: true,
     });
-    const backBeforeScroll = await back.boundingBox();
+    const choicesBeforeScroll = await choices.boundingBox();
     // Mobile WebKit does not support mouse.wheel. Scroll the real editor
     // directly and keep the same rendered-position and navigation guarantees.
     await identities.evaluate((element) => {
@@ -403,17 +397,16 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
         identities.evaluate((element) => element.parentElement?.scrollTop)
       )
       .toBeGreaterThan(0);
-    await expect(back).toBeInViewport({ ratio: 1 });
+    await expect(choices).toBeInViewport({ ratio: 1 });
     await expect
-      .poll(async () => (await back.boundingBox())?.y)
-      .toBeCloseTo(backBeforeScroll?.y ?? 0, 0);
+      .poll(async () => (await choices.boundingBox())?.y)
+      .toBeCloseTo(choicesBeforeScroll?.y ?? 0, 0);
     await expect(
       filter.getByRole("button", { name: "Close", exact: true })
     ).toBeInViewport({ ratio: 1 });
     await expect(
       filter.getByRole("button", { name: "Create and use new group" })
     ).toBeInViewport({ ratio: 1 });
-    await back.click();
     await expect(
       choices.getByRole("button", { name: "Identities", exact: true })
     ).toBeFocused();
