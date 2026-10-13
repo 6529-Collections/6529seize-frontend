@@ -121,28 +121,6 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
               "user.profile.identity.statements.consolidatedAddresses"
             )}
           </span>
-          <button
-            type="button"
-            aria-label={t(locale, "user.profile.identity.statements.help")}
-            className="tw-inline-flex tw-h-11 tw-w-11 tw-appearance-none tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-white/5 hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-h-8 lg:tw-w-8"
-            data-tooltip-id="statements-help"
-          >
-            <svg
-              className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-400"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
         </div>
         {headerAction}
       </div>

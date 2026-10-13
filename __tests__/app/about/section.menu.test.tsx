@@ -119,6 +119,9 @@ describe("About contents dropdown", () => {
     openContentsMenu();
 
     expect(screen.queryByText("Subscription Minting")).toBeNull();
+    expect(
+      screen.queryByRole("menuitem", { name: /prenodes/i })
+    ).not.toBeInTheDocument();
   });
 
   it("shows subscriptions row for iOS users in the US", async () => {
@@ -230,8 +233,8 @@ describe("About contents dropdown", () => {
       screen.getByRole("menuitem", { name: /go to page: network nerd/i })
     ).toHaveAttribute("href", "/network/nerd");
     expect(
-      screen.getByRole("menuitem", { name: /go to page: prenodes/i })
-    ).toHaveAttribute("href", "/network/prenodes");
+      screen.queryByRole("menuitem", { name: /go to page: prenodes/i })
+    ).not.toBeInTheDocument();
     expect(
       screen.getByRole("menuitem", {
         name: /go to page: tdh historic boosts/i,

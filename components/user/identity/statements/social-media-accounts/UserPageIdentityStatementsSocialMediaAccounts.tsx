@@ -20,6 +20,9 @@ export default function UserPageIdentityStatementsSocialMediaAccounts({
       <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
         {t(locale, "user.profile.identity.statements.socialMediaAccounts")}
       </span>
+      <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-300">
+        {t(locale, "user.profile.identity.statements.socialAccountsDisclaimer")}
+      </p>
       <UserPageIdentityStatementsStatementsList
         statements={statements}
         profile={profile}
