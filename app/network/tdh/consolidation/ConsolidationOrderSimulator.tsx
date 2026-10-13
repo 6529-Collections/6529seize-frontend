@@ -60,9 +60,9 @@ export default function ConsolidationOrderSimulator({
 
   if (!limits)
     return (
-      <p role="status" className={TDH_TEXT}>
+      <output className={`tw-block ${TDH_TEXT}`}>
         {t(locale, "network.tdhConsolidation.policy.pendingLimits")}
-      </p>
+      </output>
     );
 
   return (
@@ -164,7 +164,7 @@ export default function ConsolidationOrderSimulator({
         </ol>
       )}
 
-      <div role="status" aria-live="polite" className={TDH_TEXT}>
+      <output aria-live="polite" className={`tw-block ${TDH_TEXT}`}>
         {lastStep && (
           <span className="tw-sr-only">
             {t(locale, "network.tdhConsolidation.order.stepAnnouncement", {
@@ -181,7 +181,7 @@ export default function ConsolidationOrderSimulator({
                 count: formatInteger(locale, splitCount),
                 total: formatInteger(locale, steps.length),
               }))}
-      </div>
+      </output>
 
       <p className="tw-m-0 tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-600 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-400">
         {t(locale, "network.tdhConsolidation.order.note")}
