@@ -1966,7 +1966,43 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       animations: "disabled",
       path: testInfo.outputPath("compact-appearance-options.png"),
     });
-    await expectNoHorizontalOverflow(page);
+    const viewport = page.viewportSize();
+    if (!viewport) throw new Error("Viewport missing");
+    for (const width of app ? [viewport.width] : [viewport.width, 639, 640]) {
+      await page.setViewportSize({ ...viewport, width });
+      for (const options of [ranking, appearance]) {
+        await expect
+          .poll(() =>
+            options.getByRole("radio").evaluateAll(
+              (radios, stacked) =>
+                radios.every((radio) => {
+                  const preview = radio.closest("label")?.firstElementChild;
+                  const content = radio.parentElement;
+                  if (!preview || !content) return false;
+                  const previewBox = preview.getBoundingClientRect();
+                  const contentBox = content.getBoundingClientRect();
+                  return stacked
+                    ? previewBox.bottom <= contentBox.top
+                    : previewBox.right <= contentBox.left;
+                }),
+              width < 640
+            )
+          )
+          .toBe(true);
+      }
+      await expectNoHorizontalOverflow(page);
+      if (width === 639 || width === 640) {
+        await ranking.screenshot({
+          animations: "disabled",
+          path: testInfo.outputPath(`ranking-options-${width}px.png`),
+        });
+        await appearance.screenshot({
+          animations: "disabled",
+          path: testInfo.outputPath(`appearance-options-${width}px.png`),
+        });
+      }
+    }
+    await page.setViewportSize(viewport);
   });
 
   test("protects an unfinished draft when browser storage is unavailable", async ({
