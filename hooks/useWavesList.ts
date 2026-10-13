@@ -21,6 +21,7 @@ import {
   getWaveSubwavesQueryOptions,
   useWaveSubwavesMap,
 } from "./useWaveSubwaves";
+import { useWavesListRefetch } from "./useWavesListRefetch";
 import { useShowFollowingWaves } from "./useShowFollowingWaves";
 import type { SidebarWave } from "@/types/waves.types";
 import { useQueryClient } from "@tanstack/react-query";
@@ -121,6 +122,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     isLoading: isPinnedWavesLoadingServer,
     isError: hasPinnedWavesErrorServer,
     refetch: refetchPinnedWaves,
+    refetchIfStale: refetchPinnedWavesIfStale,
   } = usePinnedWavesServer({ enabled: isEnabled });
   const [following] = useShowFollowingWaves();
   const announcementsWaveId = normalizeOptionalWaveId(
@@ -160,6 +162,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     waves: highlyRatedWaves,
     isFetching: isHighlyRatedWavesFetching,
     refetch: highlyRatedWavesRefetch,
+    refetchIfStale: highlyRatedWavesRefetchIfStale,
   } = useWavesV2({
     overviewType: WAVE_SCORE_DISCOVERY_PARAMS.overviewType,
     pageSize: HIGHLY_RATED_QUERY_PAGE_SIZE,
@@ -182,6 +185,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     fetchNextPage: fetchNextAllActivityWavesPage,
     status: allActivityWavesStatus,
     refetch: allActivityWavesRefetch,
+    refetchIfStale: allActivityWavesRefetchIfStale,
   } = useWavesV2({
     overviewType: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
     pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
@@ -204,6 +208,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     fetchNextPage: fetchNextFollowedActivityWavesPage,
     status: followedActivityWavesStatus,
     refetch: followedActivityWavesRefetch,
+    refetchIfStale: followedActivityWavesRefetchIfStale,
   } = useWavesV2({
     overviewType: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
     pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
@@ -612,34 +617,35 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     [loadedSubwaveParentIds, subwavesByParentId]
   );
 
-  // Function to refetch all waves (main, pinned, announcements, subwaves)
-  const refetchAllWaves = useCallback(() => {
-    if (!shouldLoadMainWaves) {
-      return;
-    }
-
-    if (isJoinedMode) {
-      followedActivityWavesRefetch();
-    } else {
-      allActivityWavesRefetch();
-    }
-    highlyRatedWavesRefetch();
-    void refetchPinnedWaves();
-    refetchSubwaves();
-    if (shouldFetchAnnouncementWave) {
-      void announcementRefetch();
-    }
-  }, [
-    allActivityWavesRefetch,
-    highlyRatedWavesRefetch,
-    followedActivityWavesRefetch,
-    isJoinedMode,
-    refetchPinnedWaves,
-    refetchSubwaves,
-    announcementRefetch,
-    shouldFetchAnnouncementWave,
+  // Refresh all sources (main, pinned, announcements, subwaves): forced, or
+  // stale-only for reconnect and tab-resume resyncs.
+  const { refetchAllWaves, refreshStaleWaves } = useWavesListRefetch({
     shouldLoadMainWaves,
-  ]);
+    isJoinedMode,
+    highlyRated: {
+      refetch: highlyRatedWavesRefetch,
+      refetchIfStale: highlyRatedWavesRefetchIfStale,
+    },
+    allActivity: {
+      refetch: allActivityWavesRefetch,
+      refetchIfStale: allActivityWavesRefetchIfStale,
+    },
+    followedActivity: {
+      refetch: followedActivityWavesRefetch,
+      refetchIfStale: followedActivityWavesRefetchIfStale,
+    },
+    pinned: {
+      refetch: refetchPinnedWaves,
+      refetchIfStale: refetchPinnedWavesIfStale,
+    },
+    refetchSubwaves,
+    loadedSubwaveParentIds,
+    viewerIdentityKey,
+    announcementWaveId: shouldFetchAnnouncementWave
+      ? announcementsWaveId
+      : null,
+    refetchAnnouncementWave: announcementRefetch,
+  });
 
   const topSectionWaveIds = useMemo(() => {
     const ids = new Set<string>();
@@ -740,6 +746,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       mainWavesRefetch: shouldLoadMainWaves ? mainWavesRefetch : noopListAction,
       // Refetch all waves including main and pinned
       refetchAllWaves,
+      refreshStaleWaves,
       loadSubwavesForParent,
       prefetchSubwavesForParent,
       loadingSubwaveParentIds,
@@ -766,6 +773,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       missingPinnedIds,
       mainWavesRefetch,
       refetchAllWaves,
+      refreshStaleWaves,
       loadSubwavesForParent,
       prefetchSubwavesForParent,
       loadingSubwaveParentIds,

@@ -211,8 +211,14 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const isDirectMessageDetailRoute =
     pathname?.startsWith("/messages/") ?? false;
   const hasMountedActiveWaveRegistrationRef = useRef(false);
-  const shouldDeferMainWavesList =
+  // Native wave detail defers the main list until it is requested or the
+  // route goes idle. Web (and the server render) waits for a surface that
+  // shows the list, so other routes never fetch or poll it. Once requested,
+  // the list stays enabled for the session.
+  const shouldDeferNativeMainWavesList =
     isCapacitor && isWaveDetailRoute && !isDirectMessagesRoute;
+  const shouldDeferMainWavesList =
+    !isCapacitor || shouldDeferNativeMainWavesList;
   const [hasMainWavesListBeenRequested, setHasMainWavesListBeenRequested] =
     useState(false);
   const hasMainWavesListBeenRequestedRef = useRef(false);
@@ -298,6 +304,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   );
   const refetchAllMainWaves = wavesHookData.refetchAllWaves;
   const refetchAllDmWaves = dmWavesHookData.refetchAllWaves;
+  const refreshStaleMainWaves = mainWavesData.refreshStaleWaves;
+  const refreshStaleDmWaves = dmWavesData.refreshStaleWaves;
   const resetAllMainWavesNewDropsCount =
     wavesHookData.resetAllWavesNewDropsCount;
   const resetAllDmWavesNewDropsCount =
@@ -333,13 +341,17 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   }, []);
 
   useEffect(() => {
-    if (!shouldDeferMainWavesList || isMainWavesListEnabled) {
+    if (!shouldDeferNativeMainWavesList || isMainWavesListEnabled) {
       return;
     }
 
     markMobileLaunchStep("main_waves_list_deferred");
     return scheduleAfterRouteIdle(enableMainWavesList);
-  }, [enableMainWavesList, isMainWavesListEnabled, shouldDeferMainWavesList]);
+  }, [
+    enableMainWavesList,
+    isMainWavesListEnabled,
+    shouldDeferNativeMainWavesList,
+  ]);
 
   const wavesRef = useRef(wavesHookData.waves);
   const dmWavesRef = useRef(dmWavesHookData.waves);
@@ -389,15 +401,35 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     [registerWave, setActiveWave]
   );
 
-  const syncActiveWaveAndRefetch = useEffectEvent(() => {
+  const syncActiveWave = useEffectEvent(() => {
     if (activeWaveId) {
       registerWave(activeWaveId, true, {
         skipInitialBackfill: hasActiveWaveDropTarget,
       });
     }
+  });
+
+  // Native resume and reconnect reset the live new-drop counters, so they
+  // keep a full refetch of the lists that replace those counts.
+  const syncActiveWaveAndRefetch = useEffectEvent(() => {
+    syncActiveWave();
     refetchAllMainWaves();
     if (isDirectMessagesListEnabled) {
       refetchAllDmWaves();
+    }
+  });
+
+  // Web reconnect and tab resume skip lists no surface has requested and
+  // refresh only data past its staleTime, reusing in-flight requests. These
+  // flags only pre-filter: each hook's own load guard (auth and profile
+  // readiness) stays the source of truth and no-ops while it is not ready.
+  const syncActiveWaveAndRefreshStaleLists = useEffectEvent(() => {
+    syncActiveWave();
+    if (isMainWavesListEnabled) {
+      refreshStaleMainWaves();
+    }
+    if (isDirectMessagesListEnabled) {
+      refreshStaleDmWaves();
     }
   });
 
@@ -414,17 +446,19 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     }
 
     lastBrowserResumeSyncAtRef.current = now;
-    syncActiveWaveAndRefetch();
+    syncActiveWaveAndRefreshStaleLists();
   });
 
   const handleConnectedWebSocket = useEffectEvent(() => {
-    syncActiveWaveAndRefetch();
+    if (!isCapacitor) {
+      syncActiveWaveAndRefreshStaleLists();
+      return;
+    }
 
-    if (isCapacitor) {
-      resetAllMainWavesNewDropsCount();
-      if (isDirectMessagesListEnabled) {
-        resetAllDmWavesNewDropsCount();
-      }
+    syncActiveWaveAndRefetch();
+    resetAllMainWavesNewDropsCount();
+    if (isDirectMessagesListEnabled) {
+      resetAllDmWavesNewDropsCount();
     }
   });
 
@@ -520,7 +554,9 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     const waves: WavesContextData = {
       isPinnedWavesLoading: mainWavesData.isPinnedWavesLoading,
       list: wavesHookData.waves,
-      isFetching: wavesHookData.isFetching,
+      // A list still waiting for its first request reads as loading, so the
+      // server render and first client frame show the loader, not "empty".
+      isFetching: isMainWavesListEnabled ? wavesHookData.isFetching : true,
       isFetchingNextPage: wavesHookData.isFetchingNextPage,
       hasNextPage: wavesHookData.hasNextPage,
       fetchNextPage: wavesHookData.fetchNextPage,
@@ -589,6 +625,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   }, [
     wavesHookData.waves,
     mainWavesData.isPinnedWavesLoading,
+    isMainWavesListEnabled,
     wavesHookData.isFetching,
     wavesHookData.isFetchingNextPage,
     wavesHookData.hasNextPage,

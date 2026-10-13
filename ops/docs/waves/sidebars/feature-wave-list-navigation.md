@@ -217,6 +217,13 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
 - Row metadata (`Last drop`, badges, tooltips) is owned by the row-metadata
   page.
 - Pin and mute controls are owned by their sidebar control pages.
+- In the browser, the Waves list loads the first time a Waves page opens in a
+  session. Other pages, such as `/about` or `/messages`, do not load or refresh
+  it before then; after that it keeps refreshing for the rest of the session.
+- Returning to the tab or reconnecting refreshes only list data that is out of
+  date, rather than reloading every list each time.
+- The desktop quick direct messages panel loads conversations only while it
+  is open. Its launcher badge keeps showing the unread count without them.
 
 ## Related Pages
 
