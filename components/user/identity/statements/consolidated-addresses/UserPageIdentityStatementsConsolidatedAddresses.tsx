@@ -203,11 +203,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
           )}
           <AnimatePresence mode="wait" initial={false}>
             {showDelegationCenter && (
-              <ButtonLink
-                href="/delegation/delegation-center"
-                variant="secondary"
-                size="xs"
-              >
+              <ButtonLink href="/safe-collecting" variant="secondary" size="xs">
                 {t(locale, "user.profile.identity.statements.delegationCenter")}
               </ButtonLink>
             )}

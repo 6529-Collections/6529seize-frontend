@@ -119,16 +119,14 @@ async function expectWalletCanonical(page: Page, address = "") {
 }
 
 test.describe("Delegation read-only coverage @surface @medium @large @readonly", () => {
-  test("Delegation Center exposes disconnected-safe choices and references", async ({
+  test("Safe Collecting exposes disconnected-safe choices and references", async ({
     page,
   }) => {
-    await gotoReady(page, "/delegation/delegation-center");
+    await gotoReady(page, "/safe-collecting");
 
-    await expect(page).toHaveTitle("Delegation Center | 6529.io");
-    await expectHeading(page, "Delegation Center");
-    await expect(
-      page.getByText("These actions do not transfer NFTs.")
-    ).toBeVisible();
+    await expect(page).toHaveTitle("Safe Collecting | 6529.io");
+    await expectHeading(page, "Safe Collecting");
+    await expect(page.locator("#safe-tools-heading")).toHaveText("All tools");
 
     for (const action of DELEGATION_ACTIONS) {
       await expect(
@@ -161,6 +159,37 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
       "href",
       "https://github.com/6529-Collections/nftdelegation"
     );
+  });
+
+  test("legacy hub links preserve queries and focus their section after redirect", async ({
+    page,
+  }) => {
+    await gotoReady(
+      page,
+      "/delegation/delegation-center?utm_source=legacy#safe-setup"
+    );
+    await expect(page).toHaveURL(
+      /\/safe-collecting\?utm_source=legacy#safe-setup$/
+    );
+    await expectHeading(page, "Safe Collecting");
+    await expect(page.locator("#safe-setup-heading")).toBeFocused();
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      new URL("/safe-collecting", page.url()).toString()
+    );
+
+    const navigation = page.getByRole("navigation", {
+      name: "Safe collecting sections",
+    });
+    await navigation
+      .getByRole("button", { name: "Wallet Checker", exact: true })
+      .click();
+    await expect(page).toHaveURL(/\/delegation\/wallet-checker$/);
+    await navigation
+      .getByRole("button", { name: "Safe Collecting", exact: true })
+      .click();
+    await expect(page).toHaveURL(/\/safe-collecting$/);
+    await expectHeading(page, "Safe Collecting");
   });
 
   for (const article of ARTICLE_ROUTES) {

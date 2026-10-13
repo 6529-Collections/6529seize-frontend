@@ -7,7 +7,7 @@ verify the result in Wallet Checker.
 
 ## Location in the Site
 
-- `/delegation/delegation-center`
+- `/safe-collecting`
 - `/delegation/register-delegation`
 - `/delegation/register-consolidation`
 - `/delegation/register-sub-delegation`
@@ -24,7 +24,7 @@ verify the result in Wallet Checker.
 - Direct URLs to write or collection routes
 - Profile consolidated-addresses panel links:
   - `/delegation/wallet-checker?address=<primary-wallet>`
-  - `/delegation/delegation-center` (shown when consolidation state affects the
+  - `/safe-collecting` (shown when consolidation state affects the
     viewing wallet)
 
 ## Before You Start
@@ -36,7 +36,7 @@ verify the result in Wallet Checker.
 
 ## User Journey
 
-1. Open `/delegation/delegation-center`.
+1. Open `/safe-collecting`.
 2. Pick an action path:
    - center cards:
      - `Register Delegation` -> `/delegation/register-delegation`

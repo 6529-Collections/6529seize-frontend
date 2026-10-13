@@ -93,9 +93,7 @@ describe("Delegation page component", () => {
 
     fireEvent.click(screen.getByTestId("delegation-center-menu"));
 
-    expect(push).toHaveBeenCalledWith(
-      `/delegation/${DelegationCenterSection.CENTER}`
-    );
+    expect(push).toHaveBeenCalledWith("/safe-collecting");
     expect(replace).not.toHaveBeenCalled();
   });
 
@@ -139,6 +137,26 @@ describe("Delegation page component", () => {
     );
     expect(screen.getByTestId("address-query")).toHaveTextContent(address);
     expect(replace).not.toHaveBeenCalled();
+  });
+
+  it("preserves forwarded queries and section anchors on the Safe Collecting hub", () => {
+    window.history.replaceState(
+      {},
+      "",
+      "/safe-collecting?utm_source=old-link#safe-setup"
+    );
+    render(
+      <DelegationPage
+        section={DelegationCenterSection.CENTER}
+        addressQuery=""
+        collectionQuery=""
+        useCaseQuery={0}
+      />
+    );
+    expect(replace).not.toHaveBeenCalled();
+    expect(window.location.search).toBe("?utm_source=old-link");
+    expect(window.location.hash).toBe("#safe-setup");
+    window.history.replaceState({}, "", "/");
   });
 
   it.each(["", "name.eth", "0x0000000000000000000000000000000000000529"])(

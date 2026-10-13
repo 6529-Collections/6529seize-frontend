@@ -216,7 +216,7 @@ Core route titles:
 
 | Route                                 | Title                            |
 | ------------------------------------- | -------------------------------- |
-| `/delegation/delegation-center`       | Delegation Center                |
+| `/safe-collecting`                   | Safe Collecting                  |
 | `/delegation/wallet-architecture`     | The Three Address Protocol (TAP) |
 | `/delegation/delegation-faq`          | Delegation FAQ                   |
 | `/delegation/consolidation-use-cases` | Consolidation Use Cases          |

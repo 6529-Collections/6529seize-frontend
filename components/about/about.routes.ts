@@ -173,11 +173,7 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
     aboutSectionItem(AboutSection.GDRC1, "gdrc"),
     aboutSectionItem(AboutSection.NFT_DELEGATION, "nftDelegation"),
     aboutSectionItem(AboutSection.PRIMARY_ADDRESS, "primaryAddress"),
-    aboutRouteItem(
-      "delegation-center",
-      "/delegation/delegation-center",
-      "delegationCenter"
-    ),
+    aboutRouteItem("delegation-center", "/safe-collecting", "delegationCenter"),
     aboutRouteItem(
       "wallet-architecture",
       "/delegation/wallet-architecture",

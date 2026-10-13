@@ -34,7 +34,7 @@ const TOOLS_CONTENTS_NAV_GROUPS = [
     items: [
       {
         id: "delegation-center",
-        href: "/delegation/delegation-center",
+        href: "/safe-collecting",
         labelKey: "tools.contents.pages.delegationCenter",
       },
       {

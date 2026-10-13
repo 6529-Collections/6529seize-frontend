@@ -8,6 +8,6 @@ describe("AboutNFTDelegation", () => {
       screen.getByRole("heading", { name: /NFT.*Delegation/i })
     ).toBeInTheDocument();
     const link = screen.getByRole("link", { name: /safe collecting/i });
-    expect(link).toHaveAttribute("href", "/delegation/delegation-center");
+    expect(link).toHaveAttribute("href", "/safe-collecting");
   });
 });

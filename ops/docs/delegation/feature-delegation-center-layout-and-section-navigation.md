@@ -1,6 +1,6 @@
 # Delegation Center Layout and Section Navigation
 
-The landing page at `/delegation/delegation-center` is now Safe Collecting; see
+The landing page at `/safe-collecting` is now Safe Collecting; see
 [Safe Collecting](feature-safe-collecting.md) for its content.
 
 ## Overview
@@ -19,13 +19,13 @@ state.
 ## Entry Points
 
 - Sidebar: `About -> Delegation & Wallets`
-  - `/delegation/delegation-center` (Safe Collecting)
+  - `/safe-collecting` (Safe Collecting)
   - `/delegation/wallet-architecture`
   - `/delegation/delegation-faq`
   - `/delegation/consolidation-use-cases`
   - `/delegation/wallet-checker`
 - Direct URL to any `/delegation/<section>` route.
-- From `/delegation/delegation-center` (Safe Collecting): setup steps, common
+- From `/safe-collecting` (Safe Collecting): setup steps, common
   tasks and learn links, plus the All tools cards:
   - action routes: `/delegation/register-delegation`,
     `/delegation/register-consolidation`,
@@ -42,7 +42,7 @@ state.
   `The Three Address Protocol (TAP) | 6529.io`).
 - It leads with one rule: never connect a wallet that holds your NFTs to a link
   you saw on X or Discord. `Set up your wallets` opens
-  `/delegation/delegation-center#safe-setup`; `Combine your wallets` opens
+  `/safe-collecting#safe-setup`; `Combine your wallets` opens
   `/network/tdh/consolidation`.
 - Sections: the three wallet roles (vault, transaction wallet, social wallet),
   the optional fourth wallet for old or exposed addresses, hardware wallets vs
@@ -91,7 +91,7 @@ state.
 
 ## Failure and Recovery
 
-- If section state looks stale, navigate to `/delegation/delegation-center` and
+- If section state looks stale, navigate to `/safe-collecting` and
   re-enter the section from menu links.
 - If a fallback HTML route fails, open a known section from the menu and retry.
 - For write-route failures after navigation, use:

@@ -85,7 +85,7 @@ standalone row after `About`.
   use the standalone row after `About` when the current wallet can access the
   landing route.
 - Open About tool routes:
-  `/delegation/delegation-center`, `/delegation/wallet-architecture`,
+  `/safe-collecting`, `/delegation/wallet-architecture`,
   `/delegation/delegation-faq`, `/delegation/consolidation-use-cases`,
   `/delegation/wallet-checker`, `/tools/subscriptions-report`,
   `/meme-accounting`, `/meme-gas`, `/tools/api`, `/emma`,

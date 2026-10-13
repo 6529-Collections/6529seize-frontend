@@ -123,7 +123,7 @@ const SECTION_IDS = [
 ] as const;
 
 // Scrolls to and focuses the section named in the URL hash, so links such as
-// /delegation/delegation-center#safe-setup land on the right heading.
+// /safe-collecting#safe-setup land on the right heading.
 function useSectionHashFocus() {
   useEffect(() => {
     const focus = () => {

@@ -4,7 +4,7 @@ Parent: [Delegation](README.md)
 
 ## Overview
 
-`/delegation/delegation-center` is **Safe Collecting**, the landing page for
+`/safe-collecting` is **Safe Collecting**, the landing page for
 6529's wallet safety system. It replaces the old contract-centred "Delegation
 Center" landing with a collector-centred page that explains the whole system
 and links to the tool for each step.
@@ -15,7 +15,9 @@ subscriptions keep working as if every wallet were one.
 
 ## Location in the Site
 
-- Route: `/delegation/delegation-center` (unchanged, so existing links work)
+- Route: `/safe-collecting`
+- `/delegation/delegation-center` permanently redirects here, preserving query
+  parameters and section anchors such as `#safe-setup`.
 - Page heading and browser title: `Safe Collecting`
 - Top tab in the delegation menu, the About contents and sidebar, the Tools
   index and the About NFT Delegation page all label it `Safe Collecting`.

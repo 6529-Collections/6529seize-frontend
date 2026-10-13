@@ -163,7 +163,7 @@ describe("useSidebarSections", () => {
       { name: "GDRC", href: "/about/gdrc1" },
       { name: "NFT Delegation", href: "/about/nft-delegation" },
       { name: "Primary Address", href: "/about/primary-address" },
-      { name: "Safe Collecting", href: "/delegation/delegation-center" },
+      { name: "Safe Collecting", href: "/safe-collecting" },
       {
         name: "TAP Guide",
         href: "/delegation/wallet-architecture",

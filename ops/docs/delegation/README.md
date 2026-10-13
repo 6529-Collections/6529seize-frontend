@@ -6,7 +6,7 @@ diagnostics.
 
 ## Overview
 
-- Start from `/delegation/delegation-center` (Safe Collecting) for most flows.
+- Start from `/safe-collecting` (Safe Collecting) for most flows.
 - Bare `/delegation` is not a valid page route.
 - Use this area for section routing, write actions, collection routes, manager
   actions, lock controls, and Wallet Checker checks.
@@ -50,7 +50,7 @@ diagnostics.
 
 ## Route Coverage
 
-- Section routes: `/delegation/delegation-center`,
+- Section routes: `/safe-collecting`,
   `/delegation/wallet-architecture` (`TAP Guide`), `/delegation/delegation-faq`,
   `/delegation/consolidation-use-cases`, `/delegation/wallet-checker`
 - Write routes: `/delegation/register-delegation`,

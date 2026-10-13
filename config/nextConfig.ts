@@ -65,6 +65,15 @@ export function sharedConfig(
       qualities: [100, 75],
     },
     poweredByHeader: false,
+    async redirects() {
+      return [
+        {
+          source: "/delegation/delegation-center",
+          destination: "/safe-collecting",
+          permanent: true,
+        },
+      ];
+    },
     logging: {
       incomingRequests: false,
     },

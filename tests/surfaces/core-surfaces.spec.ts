@@ -232,17 +232,15 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     await expectLinkHref(page, "Levels", "/network/levels");
   });
 
-  test("Delegation Center renders disconnected-safe choices", async ({
+  test("Safe Collecting renders disconnected-safe choices", async ({
     page,
   }) => {
-    await gotoReady(page, "/delegation/delegation-center");
+    await gotoReady(page, "/safe-collecting");
 
     await expect(
-      page.getByRole("heading", { level: 1, name: "Delegation Center" })
+      page.getByRole("heading", { level: 1, name: "Safe Collecting" })
     ).toBeVisible();
-    await expect(
-      page.getByText("These actions do not transfer NFTs.")
-    ).toBeVisible();
+    await expect(page.locator("#safe-tools-heading")).toBeVisible();
     for (const name of REQUIRED_DELEGATION_ACTIONS) {
       await expect(
         page.getByRole("button", { name, exact: true })

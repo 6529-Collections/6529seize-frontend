@@ -65,7 +65,7 @@ describe("TapGuide", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Set up your wallets" })
-    ).toHaveAttribute("href", "/delegation/delegation-center#safe-setup");
+    ).toHaveAttribute("href", "/safe-collecting#safe-setup");
     expect(
       screen.getByRole("link", { name: "Combine your wallets" })
     ).toHaveAttribute("href", "/network/tdh/consolidation");
@@ -121,7 +121,7 @@ describe("TapGuide", () => {
       ["Start guided setup", "/delegation/build-consolidation"],
       ["Appoint a manager", "/delegation/register-sub-delegation"],
       ["Register a delegation", "/delegation/register-delegation"],
-      ["See the setup steps", "/delegation/delegation-center#safe-setup"],
+      ["See the setup steps", "/safe-collecting#safe-setup"],
     ] as const) {
       expect(screen.getByRole("link", { name })).toHaveAttribute("href", href);
     }

@@ -53,7 +53,7 @@ describe("Tools index page", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /open tool: safe collecting/i })
-    ).toHaveAttribute("href", "/delegation/delegation-center");
+    ).toHaveAttribute("href", "/safe-collecting");
     expect(
       screen.getByRole("link", { name: /open tool: subscriptions report/i })
     ).toHaveAttribute("href", "/tools/subscriptions-report");

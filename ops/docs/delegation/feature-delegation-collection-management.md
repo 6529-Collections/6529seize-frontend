@@ -12,7 +12,7 @@ delegations for one collection scope.
 - `/delegation/meme-lab`
 - `/delegation/6529-gradient`
 - Delegation Center entry: `Manage by Collection` cards on
-  `/delegation/delegation-center`
+  `/safe-collecting`
 
 ## Entry Points
 

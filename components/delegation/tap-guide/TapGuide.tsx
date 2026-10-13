@@ -34,7 +34,7 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 
 type Icon = ComponentType<SVGProps<SVGSVGElement>>;
 
-const TAP_GUIDE_SETUP_HREF = "/delegation/delegation-center#safe-setup";
+const TAP_GUIDE_SETUP_HREF = "/safe-collecting#safe-setup";
 const COMBINE_GUIDE_HREF = "/network/tdh/consolidation";
 
 const LINK = `tw-inline-flex tw-items-center tw-gap-1.5 tw-py-2 tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline tw-underline-offset-4 hover:tw-underline ${TDH_FOCUS}`;
