@@ -34,7 +34,8 @@ with both executions included in the failure count. Recovered retries and
 flaky tests are excluded. Notification jobs download the run's retained E2E
 artifact and read only the final pack attempt's Playwright failure summary in
 `output.log`, selected through `evidence.json`; they never include assertion
-bodies, URLs, or diagnostic logs in the wave message.
+bodies or diagnostic logs in the wave message. URLs embedded in test names are
+replaced with `[URL omitted]`. Ambiguous names retain their suite context.
 Artifact names include the run ID and attempt so a workflow rerun cannot reuse
 failure evidence from an earlier attempt.
 

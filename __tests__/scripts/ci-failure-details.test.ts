@@ -6,7 +6,12 @@ import path from "node:path";
 const details = require("../../scripts/ci-failure-details.cjs") as {
   parsePlaywrightFailures: (output: string) => {
     count: number;
-    tests: Array<{ name: string; project: string; location: string }>;
+    tests: Array<{
+      name: string;
+      title: string;
+      project: string;
+      location: string;
+    }>;
   } | null;
   summarizeE2E: (root: string) => string | null;
   getFailureDescription: (options: {
@@ -74,12 +79,58 @@ describe("CI failure details", () => {
       tests: [
         {
           name: "returns to its distribution row",
+          title: "Profile coverage › returns to its distribution row",
           project: "web-desktop-chromium",
           location: "tests/social/profile.spec.ts:531:7",
         },
       ],
     });
   });
+
+  it("keeps later failures after an unexpected line and stops before flaky tests", () => {
+    const output =
+      "  2 failed\n" +
+      "    [web-desktop-chromium] › tests/a.spec.ts:1:1 › Suite A › first failure\n" +
+      "      unexpected annotation\n" +
+      "    [web-mobile-chromium] › tests/a.spec.ts:2:1 › Suite A › second failure\n" +
+      "  1 flaky\n    [web-mobile-chromium] › tests/a.spec.ts:3:1 › recovered test\n";
+    expect(
+      details.parsePlaywrightFailures(output)?.tests.map((test) => test.name)
+    ).toEqual(["first failure", "second failure"]);
+  });
+
+  it("disambiguates identical leaf names using their full suite titles", () => {
+    fs.writeFileSync(
+      evidence(),
+      "  2 failed\n" +
+        "    [web-desktop-chromium] › tests/a.spec.ts:1:1 › Suite A › same name\n" +
+        "    [web-desktop-chromium] › tests/a.spec.ts:2:1 › Suite B › same name\n"
+    );
+    const summary = details.summarizeE2E(root);
+    expect(summary).toContain("- Suite A › same name");
+    expect(summary).toContain("- Suite B › same name");
+  });
+
+  it.each([{ results: "broken" }, { results: [{ status: "failed" }] }])(
+    "explicitly reports malformed test evidence",
+    async (invalid) => {
+      fs.writeFileSync(
+        path.join(root, "evidence.json"),
+        JSON.stringify({
+          schema_version: "deployment-e2e-packs.v1",
+          ...invalid,
+        })
+      );
+      expect(
+        await details.getFailureDescription({
+          artifactRoot: root,
+          repository: "6529-Collections/6529seize-frontend",
+          runId: "123",
+          runAttempt: 1,
+        })
+      ).toContain("Test failure evidence unavailable");
+    }
+  );
 
   it("groups shared test names across desktop and mobile", () => {
     fs.writeFileSync(
@@ -141,6 +192,45 @@ describe("CI failure details", () => {
     const summary = details.summarizeE2E(root)!;
     expect(summary.length).toBeLessThanOrEqual(4800);
     expect(summary).toContain("Additional details omitted");
+  });
+
+  it("omits URLs embedded in failed test names", () => {
+    fs.writeFileSync(
+      evidence(),
+      failedList(
+        ["web-mobile-chromium"],
+        "visits https://example.com/path?token=secret safely"
+      )
+    );
+    const summary = details.summarizeE2E(root);
+    expect(summary).toContain("- visits [URL omitted] safely");
+    expect(summary).not.toContain("https://");
+    expect(summary).not.toContain("token=secret");
+  });
+
+  it("looks up failed setup steps when failed packs have no recovered names", async () => {
+    evidence();
+    const fetchImpl = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        jobs: [
+          {
+            name: "Staging E2E packs",
+            steps: [{ name: "Install Playwright", conclusion: "failure" }],
+          },
+        ],
+      }),
+    });
+    const description = await details.getFailureDescription({
+      artifactRoot: root,
+      repository: "6529-Collections/6529seize-frontend",
+      runId: "123",
+      runAttempt: 1,
+      token: "test-token",
+      fetchImpl,
+    });
+    expect(description).toContain("Test results unavailable");
+    expect(description).toContain("Staging E2E packs — Install Playwright");
   });
 
   it("identifies failed workflow steps in the current attempt for either repo", async () => {

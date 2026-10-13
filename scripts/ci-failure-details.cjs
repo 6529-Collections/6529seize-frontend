@@ -11,6 +11,7 @@ const PROJECT_LABELS = {
 
 function plainText(value) {
   return String(value)
+    .replaceAll(/\b[A-Za-z][A-Za-z0-9+.-]*:\/\/\S+/g, "[URL omitted]")
     .replaceAll(/\s+/g, " ")
     .replaceAll(/[@\\`*_]/g, (character) =>
       character === "@" ? "＠" : `\\${character}`
@@ -44,13 +45,16 @@ function parsePlaywrightFailures(output) {
   const tests = [];
   for (const line of lines.slice(index + 1)) {
     if (!line.trim()) continue;
+    if (/^\s*\d+ (?:flaky|skipped|passed|did not run)\b/.test(line)) break;
     const match = /^\s*\[([^\]]+)\] › (.+?:\d+:\d+) › (.+?)\s*$/.exec(line);
-    if (!match) break;
+    if (!match) continue;
     tests.push({
       project: match[1],
       location: match[2],
       name: match[3].split(" › ").at(-1),
+      title: match[3],
     });
+    if (tests.length === count) break;
   }
   return { count, tests };
 }
@@ -67,8 +71,13 @@ function readFailedPack(root, result) {
   ];
   try {
     const file = path.join(...parts);
-    if (fs.statSync(file).size > 32 * 1024 * 1024) return null;
-    return parsePlaywrightFailures(fs.readFileSync(file, "utf8"));
+    const descriptor = fs.openSync(file, "r");
+    try {
+      if (fs.fstatSync(descriptor).size > 32 * 1024 * 1024) return null;
+      return parsePlaywrightFailures(fs.readFileSync(descriptor, "utf8"));
+    } finally {
+      fs.closeSync(descriptor);
+    }
   } catch {
     return null;
   }
@@ -77,17 +86,29 @@ function readFailedPack(root, result) {
 function groupedTestLines(pack) {
   const tests = new Map();
   for (const test of pack.failures.tests) {
-    const key = `${test.location}\n${test.name}`;
-    const entry = tests.get(key) ?? { name: test.name, projects: new Set() };
+    const key = `${test.location}\n${test.title}`;
+    const entry = tests.get(key) ?? {
+      name: test.name,
+      title: test.title,
+      projects: new Set(),
+    };
     entry.projects.add(test.project);
     tests.set(key, entry);
   }
   const groups = new Map();
+  const titlesByName = new Map();
+  for (const test of tests.values()) {
+    const titles = titlesByName.get(test.name) ?? new Set();
+    titles.add(test.title);
+    titlesByName.set(test.name, titles);
+  }
   for (const test of tests.values()) {
     const projects = [...test.projects].sort((a, b) => a.localeCompare(b));
     const key = projects.join(",");
     const group = groups.get(key) ?? { projects, tests: [] };
-    group.tests.push(test.name);
+    group.tests.push(
+      titlesByName.get(test.name).size > 1 ? test.title : test.name
+    );
     groups.set(key, group);
   }
   const lines = [];
@@ -95,6 +116,7 @@ function groupedTestLines(pack) {
     const projects = group.projects.map(
       (project) => PROJECT_LABELS[project] ?? plainText(project)
     );
+    // A group contains only tests with the same set of failed projects.
     const count = group.tests.length * group.projects.length;
     lines.push(
       "",
@@ -112,13 +134,24 @@ function groupedTestLines(pack) {
   return lines;
 }
 
-function summarizeE2E(root) {
+function collectE2EFailures(root) {
   if (!root) return null;
   try {
     const evidence = JSON.parse(
       fs.readFileSync(path.join(root, "evidence.json"), "utf8")
     );
     if (evidence.schema_version !== "deployment-e2e-packs.v1") return null;
+    if (
+      !Array.isArray(evidence.results) ||
+      !evidence.results.every(
+        (result) =>
+          result &&
+          typeof result.script_key === "string" &&
+          result.script_key.length > 0 &&
+          (result.attempts === undefined || Array.isArray(result.attempts))
+      )
+    )
+      return null;
     const packs = evidence.results
       .filter((result) => result.status === "failed")
       .map((result) => ({
@@ -147,10 +180,20 @@ function summarizeE2E(root) {
           "Test results unavailable; inspect setup and run logs."
         );
     }
-    return boundedDescription(lines);
+    return {
+      description: boundedDescription(lines),
+      nameCount: packs.reduce(
+        (total, pack) => total + (pack.failures?.tests.length ?? 0),
+        0
+      ),
+    };
   } catch {
     return null;
   }
+}
+
+function summarizeE2E(root) {
+  return collectE2EFailures(root)?.description ?? null;
 }
 
 async function summarizeWorkflowSteps({
@@ -194,8 +237,17 @@ async function getFailureDescription({
   token,
   fetchImpl = fetch,
 }) {
-  const tests = summarizeE2E(artifactRoot);
-  if (tests) return tests;
+  const tests = collectE2EFailures(artifactRoot);
+  if (tests?.nameCount > 0) return tests.description;
+  const fallback = [
+    ...(description ? [description] : []),
+    ...(artifactRoot
+      ? [
+          tests?.description ??
+            "Test failure evidence unavailable; inspect setup and run logs.",
+        ]
+      : []),
+  ].join("\n\n");
   try {
     const steps = await summarizeWorkflowSteps({
       repository,
@@ -205,14 +257,15 @@ async function getFailureDescription({
       fetchImpl,
     });
     if (steps)
-      return boundedDescription([
-        ...(description ? [description, ""] : []),
-        steps,
-      ]);
+      return boundedDescription([...(fallback ? [fallback, ""] : []), steps]);
   } catch {
     // Notification enrichment must never prevent the original alert.
   }
-  return description || "Failure details unavailable; inspect the linked run.";
+  return boundedDescription(
+    (fallback || "Failure details unavailable; inspect the linked run.").split(
+      "\n"
+    )
+  );
 }
 
 module.exports = {
