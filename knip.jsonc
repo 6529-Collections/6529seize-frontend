@@ -109,6 +109,9 @@
       // The world time-zone map generator exposes its pure geometry helpers
       // to a focused Jest contract; Knip excludes test consumers.
       "scripts/generate-world-time-zones.cjs": ["exports"],
+      // Failure-summary parsers are exposed to focused CLI contract tests;
+      // Knip intentionally excludes those Jest consumers from its usage graph.
+      "scripts/ci-failure-details.cjs": ["exports"],
       // The production artifact CLI exposes pure safety helpers to a focused
       // adversarial Jest contract, which Knip excludes from its usage graph.
       "ops/scripts/verify-production-artifact.cjs": ["exports"],
