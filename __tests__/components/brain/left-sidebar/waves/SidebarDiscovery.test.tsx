@@ -275,17 +275,17 @@ it("tracks the current wave in Active Votes when selection changes elsewhere", (
   const quorum = screen.getByRole("link", { name: /QUORUM/ });
   const rarePepe = screen.getByRole("link", { name: /Rare Pepe/ });
   expect(quorum).toHaveAttribute("aria-current", "page");
-  expect(quorum.parentElement).toHaveClass("tw-bg-iron-700/50");
+  expect(quorum.parentElement).toHaveClass("tw-bg-iron-800/70");
   expect(rarePepe).not.toHaveAttribute("aria-current");
 
   mockActiveWaveId = "Rare Pepe acquisition";
   rerender(<SidebarDiscovery previewItems={[]} isTouchPreview={false} />);
   expect(rarePepe).toHaveAttribute("aria-current", "page");
   expect(quorum).not.toHaveAttribute("aria-current");
-  expect(quorum.parentElement).not.toHaveClass("tw-bg-iron-700/50");
+  expect(quorum.parentElement).not.toHaveClass("tw-bg-iron-800/70");
 
   mockActiveWaveId = null;
   rerender(<SidebarDiscovery previewItems={[]} isTouchPreview={false} />);
   expect(rarePepe).not.toHaveAttribute("aria-current");
-  expect(rarePepe.parentElement).not.toHaveClass("tw-bg-iron-700/50");
+  expect(rarePepe.parentElement).not.toHaveClass("tw-bg-iron-800/70");
 });
