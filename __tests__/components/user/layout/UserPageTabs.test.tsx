@@ -3,6 +3,7 @@ import { getUserProfileTabsMessage } from "@/components/user/layout/user-tabs.me
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { render, screen, waitFor } from "@testing-library/react";
+import type { ReactElement } from "react";
 import {
   useParams,
   usePathname,
@@ -69,6 +70,7 @@ const renderTabs = ({
   showWaves,
   isIos,
   country = "US",
+  isCountryPending = false,
   connectedProfile = null,
   fetchingProfile = false,
   pathname = "/[user]",
@@ -78,6 +80,7 @@ const renderTabs = ({
   showWaves: boolean;
   isIos: boolean;
   country?: string;
+  isCountryPending?: boolean;
   connectedProfile?: any;
   fetchingProfile?: boolean;
   pathname?: string;
@@ -98,6 +101,7 @@ const renderTabs = ({
   (useCookieConsent as jest.Mock).mockReturnValue({
     showCookieConsent: false,
     country,
+    isCountryPending,
     consent: jest.fn(),
     reject: jest.fn(),
   });
@@ -341,5 +345,85 @@ describe("UserPageTabs", () => {
     await waitFor(() => {
       expect(router.replace).toHaveBeenCalledWith("/testuser");
     });
+  });
+});
+
+describe("UserPageTabs iOS country check", () => {
+  const subscriptionsPath = "/testuser/subscriptions";
+
+  const settleCountry = (
+    rerender: (ui: ReactElement) => void,
+    country: string
+  ) => {
+    (useCookieConsent as jest.Mock).mockReturnValue({
+      showCookieConsent: false,
+      country,
+      isCountryPending: false,
+      consent: jest.fn(),
+      reject: jest.fn(),
+    });
+    rerender(<UserPageTabs initialProfile={initialProfile} />);
+  };
+
+  const renderPendingIosDeepLink = () =>
+    renderTabs({
+      showWaves: true,
+      isIos: true,
+      country: "",
+      isCountryPending: true,
+      pathname: subscriptionsPath,
+    });
+
+  it("keeps the subscriptions URL hidden but in place while the lookup is pending", () => {
+    const { router } = renderPendingIosDeepLink();
+
+    expect(getTabIds()).not.toContain(USER_PAGE_TAB_IDS.SUBSCRIPTIONS);
+    expect(getActiveTabIds()).toEqual([]);
+    expect(router.replace).not.toHaveBeenCalled();
+  });
+
+  it("shows the subscriptions tab in place when the lookup settles to US", async () => {
+    const { rerender, router } = renderPendingIosDeepLink();
+
+    settleCountry(rerender, "US");
+
+    await waitFor(() => {
+      expect(getTabIds()).toContain(USER_PAGE_TAB_IDS.SUBSCRIPTIONS);
+      expect(getActiveTabIds()).toEqual([USER_PAGE_TAB_IDS.SUBSCRIPTIONS]);
+    });
+    expect(router.replace).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["a non-US country", "FR"],
+    ["an unknown country", ""],
+  ])(
+    "redirects to Identity when the lookup settles with %s",
+    async (_label, country) => {
+      const { rerender, router } = renderPendingIosDeepLink();
+      expect(router.replace).not.toHaveBeenCalled();
+
+      settleCountry(rerender, country);
+
+      await waitFor(() => {
+        expect(router.replace).toHaveBeenCalledWith("/testuser");
+      });
+      expect(getTabIds()).not.toContain(USER_PAGE_TAB_IDS.SUBSCRIPTIONS);
+      expect(getActiveTabIds()).toEqual([USER_PAGE_TAB_IDS.REP]);
+    }
+  );
+
+  it("does not make Android or web wait for the lookup", () => {
+    const { router } = renderTabs({
+      showWaves: true,
+      isIos: false,
+      country: "",
+      isCountryPending: true,
+      pathname: subscriptionsPath,
+    });
+
+    expect(getTabIds()).toContain(USER_PAGE_TAB_IDS.SUBSCRIPTIONS);
+    expect(getActiveTabIds()).toEqual([USER_PAGE_TAB_IDS.SUBSCRIPTIONS]);
+    expect(router.replace).not.toHaveBeenCalled();
   });
 });
