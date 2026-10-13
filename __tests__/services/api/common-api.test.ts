@@ -25,6 +25,20 @@ describe("response body parsing", () => {
     await expect(commonApiFetch({ endpoint: "a" })).rejects.toBe(abortError);
   });
 
+  it("preserves a server-render deadline that expires while reading the body", async () => {
+    const timeoutError = new DOMException(
+      "The 6529 API did not respond within 4500ms.",
+      "TimeoutError"
+    );
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: jest.fn().mockRejectedValue(timeoutError),
+    });
+
+    await expect(commonApiFetch({ endpoint: "a" })).rejects.toBe(timeoutError);
+  });
+
   it("retains the URL and cause message for malformed JSON", async () => {
     fetchMock.mockResolvedValue({
       ok: true,
