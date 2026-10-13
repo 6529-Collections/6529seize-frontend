@@ -1,10 +1,6 @@
 import { safetyCodeFromFp } from "../digests";
 import type { PayloadAttachment } from "../payload";
-import type {
-  StoredGroup,
-  StoredMessage,
-  StoredOutboxItem,
-} from "../records";
+import type { StoredGroup, StoredMessage, StoredOutboxItem } from "../records";
 import type {
   E2eeAttachment,
   E2eeConversation,
@@ -257,7 +253,10 @@ export class EngineStore {
       if (message.kind === "message") {
         last = message;
       }
-      if (isCountable(message, this.ownProfileId) && message.seq > record.readSeq) {
+      if (
+        isCountable(message, this.ownProfileId) &&
+        message.seq > record.readSeq
+      ) {
         unread += 1;
         if (message.mentions.includes(this.ownProfileId)) {
           mentions += 1;

@@ -64,9 +64,9 @@ export interface ReactPayload extends PayloadBase {
 export type Payload = MsgPayload | EditPayload | DelPayload | ReactPayload;
 
 export const newMessageId = (): string =>
-  Array.from(randomBytes(16), (byte) => byte.toString(16).padStart(2, "0")).join(
-    ""
-  );
+  Array.from(randomBytes(16), (byte) =>
+    byte.toString(16).padStart(2, "0")
+  ).join("");
 
 export const isMessageId = (value: unknown): value is string =>
   typeof value === "string" && ID_PATTERN.test(value);
@@ -191,7 +191,11 @@ function parseMsg(base: PayloadBase, json: Json): MsgPayload | null {
   return out;
 }
 
-function parseTargeted(base: PayloadBase, t: string, json: Json): Payload | null {
+function parseTargeted(
+  base: PayloadBase,
+  t: string,
+  json: Json
+): Payload | null {
   const target = json["target"];
   if (!isMessageId(target)) {
     return null;
@@ -211,7 +215,10 @@ function parseTargeted(base: PayloadBase, t: string, json: Json): Payload | null
   if (typeof r !== "string" || r.length === 0) {
     return null;
   }
-  if (charLength(r) > MAX_REACTION_CHARS || (t !== "react" && t !== "unreact")) {
+  if (
+    charLength(r) > MAX_REACTION_CHARS ||
+    (t !== "react" && t !== "unreact")
+  ) {
     return null;
   }
   return { ...base, t, target, r };

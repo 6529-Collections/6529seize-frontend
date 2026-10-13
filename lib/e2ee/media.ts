@@ -77,14 +77,19 @@ export interface EncryptedMedia {
   chunks: Uint8Array[];
 }
 
-export async function encryptMedia(plaintext: Uint8Array): Promise<EncryptedMedia> {
+export async function encryptMedia(
+  plaintext: Uint8Array
+): Promise<EncryptedMedia> {
   if (ciphertextSize(plaintext.length) > MAX_BLOB_BYTES) {
     throw new MediaError("E2EE_TOO_LARGE");
   }
   const key = randomBytes(32);
   const nonce = randomBytes(12);
   const cryptoKey = await importKey(key, "encrypt");
-  const count = Math.max(1, Math.ceil(plaintext.length / PLAINTEXT_CHUNK_BYTES));
+  const count = Math.max(
+    1,
+    Math.ceil(plaintext.length / PLAINTEXT_CHUNK_BYTES)
+  );
   const chunks: Uint8Array[] = [];
   for (let index = 0; index < count; index += 1) {
     const part = plaintext.subarray(
@@ -204,7 +209,8 @@ export async function downloadMedia(input: {
   return plaintext;
 }
 
-const INLINE_MIME = /^(?:image\/[a-z0-9.+-]+|video\/mp4|audio\/[a-z0-9.+-]+|application\/pdf|text\/plain)$/u;
+const INLINE_MIME =
+  /^(?:image\/[a-z0-9.+-]+|video\/mp4|audio\/[a-z0-9.+-]+|application\/pdf|text\/plain)$/u;
 
 /** Contract 6: only these types render inline; everything else downloads. */
 export const isInlineMime = (mime: string): boolean =>
@@ -213,7 +219,10 @@ export const isInlineMime = (mime: string): boolean =>
 async function imageSize(
   file: File
 ): Promise<{ width?: number; height?: number }> {
-  if (!file.type.startsWith("image/") || typeof createImageBitmap !== "function") {
+  if (
+    !file.type.startsWith("image/") ||
+    typeof createImageBitmap !== "function"
+  ) {
     return {};
   }
   try {

@@ -1,7 +1,10 @@
 /**
  * @jest-environment node
  */
-import { createFakeApiClient, createFakeDeliveryService } from "@/tests/support/e2ee/fakeDeliveryService.cjs";
+import {
+  createFakeApiClient,
+  createFakeDeliveryService,
+} from "@/tests/support/e2ee/fakeDeliveryService.cjs";
 
 import { base64ToBytes, randomBytes } from "@/lib/e2ee/bytes";
 import {
@@ -31,7 +34,9 @@ describe("media (contract 6)", () => {
 
   it("builds the AAD", () => {
     const aad = chunkAad(2, 5);
-    expect(new TextDecoder().decode(aad.slice(0, 17))).toBe("6529-e2ee-blob-v1");
+    expect(new TextDecoder().decode(aad.slice(0, 17))).toBe(
+      "6529-e2ee-blob-v1"
+    );
     expect([...aad.slice(17)]).toEqual([0, 0, 0, 2, 0, 0, 0, 5]);
   });
 
@@ -42,7 +47,9 @@ describe("media (contract 6)", () => {
     for (const chunk of sealed.chunks) {
       expect(chunk.length).toBeLessThanOrEqual(BLOB_CHUNK_BYTES);
     }
-    expect(sealed.chunks.reduce((sum, c) => sum + c.length, 0)).toBe(ciphertextSize(plaintext.length));
+    expect(sealed.chunks.reduce((sum, c) => sum + c.length, 0)).toBe(
+      ciphertextSize(plaintext.length)
+    );
     const opened = await decryptMedia(sealed.chunks, sealed.key, sealed.nonce);
     expect(opened).toEqual(plaintext);
   });
@@ -50,11 +57,15 @@ describe("media (contract 6)", () => {
   it("detects reordered or tampered chunks", async () => {
     const sealed = await encryptMedia(randomBytes(PLAINTEXT_CHUNK_BYTES + 10));
     await expect(
-      decryptMedia([sealed.chunks[1]!, sealed.chunks[0]!], sealed.key, sealed.nonce)
+      decryptMedia(
+        [sealed.chunks[1]!, sealed.chunks[0]!],
+        sealed.key,
+        sealed.nonce
+      )
     ).rejects.toThrow("E2EE_MEDIA_DECRYPT");
-    await expect(decryptMedia([sealed.chunks[0]!], sealed.key, sealed.nonce)).rejects.toThrow(
-      "E2EE_MEDIA_DECRYPT"
-    );
+    await expect(
+      decryptMedia([sealed.chunks[0]!], sealed.key, sealed.nonce)
+    ).rejects.toThrow("E2EE_MEDIA_DECRYPT");
     const tampered = new Uint8Array(sealed.chunks[0]!);
     tampered[5] = (tampered[5] ?? 0) ^ 1;
     await expect(
@@ -65,10 +76,12 @@ describe("media (contract 6)", () => {
   it("encrypts empty files as one chunk and refuses files over 25 MiB", async () => {
     const sealed = await encryptMedia(new Uint8Array(0));
     expect(sealed.chunks).toHaveLength(1);
-    await expect(decryptMedia(sealed.chunks, sealed.key, sealed.nonce)).resolves.toEqual(
-      new Uint8Array(0)
+    await expect(
+      decryptMedia(sealed.chunks, sealed.key, sealed.nonce)
+    ).resolves.toEqual(new Uint8Array(0));
+    await expect(encryptMedia(new Uint8Array(MAX_BLOB_BYTES))).rejects.toThrow(
+      "E2EE_TOO_LARGE"
     );
-    await expect(encryptMedia(new Uint8Array(MAX_BLOB_BYTES))).rejects.toThrow("E2EE_TOO_LARGE");
   });
 
   it("classifies inline types", () => {
@@ -93,7 +106,11 @@ describe("media (contract 6)", () => {
       revoked_at: null,
     });
     const g = `0x${"cd".repeat(32)}`;
-    await api.createGroup({ group: g, commit_key: `0x${"ef".repeat(32)}`, creator_device_key: deviceKey });
+    await api.createGroup({
+      group: g,
+      commit_key: `0x${"ef".repeat(32)}`,
+      creator_device_key: deviceKey,
+    });
     const bytes = randomBytes(PLAINTEXT_CHUNK_BYTES + 99);
     const attachment = await uploadMedia({
       api,
@@ -101,10 +118,18 @@ describe("media (contract 6)", () => {
       deviceKey,
       media: { bytes, mime: "image/png", name: "x.png", width: 2, height: 1 },
     });
-    expect(attachment).toMatchObject({ chunks: 2, mime: "image/png", size: bytes.length, w: 2, h: 1 });
+    expect(attachment).toMatchObject({
+      chunks: 2,
+      mime: "image/png",
+      size: bytes.length,
+      w: 2,
+      h: 1,
+    });
     expect(base64ToBytes(attachment.k)).toHaveLength(32);
     expect(base64ToBytes(attachment.n)).toHaveLength(12);
-    await expect(downloadMedia({ api, deviceKey, attachment })).resolves.toEqual(bytes);
+    await expect(
+      downloadMedia({ api, deviceKey, attachment })
+    ).resolves.toEqual(bytes);
     await expect(
       downloadMedia({ api, deviceKey, attachment: { ...attachment, size: 1 } })
     ).rejects.toThrow("E2EE_MEDIA_SIZE");

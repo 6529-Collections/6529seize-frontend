@@ -50,7 +50,10 @@ export interface RequiredChanges {
 
 export function isStrictRemoval(
   deviceKey: string,
-  input: Pick<RequiredChangesInput, "now" | "leaving" | "badGrants" | "deviceStatus">
+  input: Pick<
+    RequiredChangesInput,
+    "now" | "leaving" | "badGrants" | "deviceStatus"
+  >
 ): boolean {
   if (input.leaving.has(deviceKey) || input.badGrants.has(deviceKey)) {
     return true;
@@ -79,7 +82,7 @@ export function mayBeIdle(
   activity: LeafActivity | undefined,
   atMs: number
 ): boolean {
-  if (activity === undefined || !activity.known) {
+  if (activity?.known !== true) {
     return true;
   }
   return atMs - activity.at >= T_IDLE_MS - IDLE_SKEW_MS;
@@ -154,7 +157,8 @@ export function computeRequiredChanges(
       .map((add) => add.deviceKey),
     otherAdds: adds.filter((add) => add.profileId !== input.ownProfileId),
     selfUpdateDue:
-      input.selfUpdateRequested || input.now - input.lastSelfUpdateAt >= T_PCS_MS,
+      input.selfUpdateRequested ||
+      input.now - input.lastSelfUpdateAt >= T_PCS_MS,
   };
 }
 

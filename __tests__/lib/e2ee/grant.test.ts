@@ -33,13 +33,16 @@ const VECTOR = {
   statement:
     "Let this device send and read end-to-end encrypted messages as you until 2026-04-10 12:00 UTC (device key d75a9801...f707511a). 6529 cannot read these messages. This signature cannot move funds, change your handle or act as an admin, and it does not create a blockchain transaction or cost gas.",
   checksummed_wallet: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
-  grant_id: "0x071474c69e205b3bb03834c8d99c99b2b826caad6eec914c233e67eaca3b2200",
+  grant_id:
+    "0x071474c69e205b3bb03834c8d99c99b2b826caad6eec914c233e67eaca3b2200",
   signature:
     "0xa280cc8335dfaf00e13a7b6b83a2c7f217398dde4d0649b560b3cb3c5e6a9a665bf3d84f35540243c0f462cedbe96153e00db006627f0a3fe75257c219c495f31b",
   verify_at_seconds: 1760274000,
 } as const;
 
-const deviceRecord = (overrides: Partial<ApiE2eeDevice> = {}): ApiE2eeDevice => ({
+const deviceRecord = (
+  overrides: Partial<ApiE2eeDevice> = {}
+): ApiE2eeDevice => ({
   device_key: VECTOR.grant.device_key,
   profile_id: "profile-1",
   grant: { ...VECTOR.grant },
@@ -63,14 +66,18 @@ describe("grant (contract 2.1)", () => {
   });
 
   it("computes the 180-day minute-aligned expiry", () => {
-    expect(grantExpiresAt(VECTOR.grant.issued_at)).toBe(VECTOR.grant.expires_at);
-    expect(grantExpiresAt(VECTOR.grant.issued_at + 59)).toBe(VECTOR.grant.expires_at);
+    expect(grantExpiresAt(VECTOR.grant.issued_at)).toBe(
+      VECTOR.grant.expires_at
+    );
+    expect(grantExpiresAt(VECTOR.grant.issued_at + 59)).toBe(
+      VECTOR.grant.expires_at
+    );
   });
 
   it("renders the exact statement", () => {
-    expect(renderGrantStatement(VECTOR.grant.device_key, VECTOR.grant.expires_at)).toBe(
-      VECTOR.statement
-    );
+    expect(
+      renderGrantStatement(VECTOR.grant.device_key, VECTOR.grant.expires_at)
+    ).toBe(VECTOR.statement);
   });
 
   it("builds the grant and typed data of the vector", () => {
@@ -107,19 +114,28 @@ describe("grant (contract 2.1)", () => {
   it("signs exactly the vector signature with viem", async () => {
     const account = privateKeyToAccount(VECTOR.wallet_private_key);
     expect(account.address.toLowerCase()).toBe(VECTOR.grant.wallet);
-    const signature = await account.signTypedData(buildGrantTypedData(VECTOR.grant));
+    const signature = await account.signTypedData(
+      buildGrantTypedData(VECTOR.grant)
+    );
     expect(signature).toBe(VECTOR.signature);
   });
 
   it("maps credentials to and from wallet + grant_id (2.3)", () => {
-    const identity = credentialIdentity(VECTOR.checksummed_wallet, VECTOR.grant_id);
-    expect(identity).toBe(`6529-e2ee-v1:${VECTOR.grant.wallet}:${VECTOR.grant_id}`);
+    const identity = credentialIdentity(
+      VECTOR.checksummed_wallet,
+      VECTOR.grant_id
+    );
+    expect(identity).toBe(
+      `6529-e2ee-v1:${VECTOR.grant.wallet}:${VECTOR.grant_id}`
+    );
     expect(parseCredentialIdentity(identity)).toEqual({
       wallet: VECTOR.grant.wallet,
       grantId: VECTOR.grant_id,
     });
     expect(parseCredentialIdentity("6529-e2ee-v2:0x00:0x00")).toBeNull();
-    expect(parseCredentialIdentity(`6529-e2ee-v1:${VECTOR.grant.wallet}`)).toBeNull();
+    expect(
+      parseCredentialIdentity(`6529-e2ee-v1:${VECTOR.grant.wallet}`)
+    ).toBeNull();
   });
 });
 
@@ -142,7 +158,10 @@ describe("verifyGrant (contract 2.2)", () => {
 
   it("rejects a grant longer than 181 days or not minute aligned", async () => {
     const long = deviceRecord({
-      grant: { ...VECTOR.grant, issued_at: VECTOR.grant.issued_at - 2 * 86_400 },
+      grant: {
+        ...VECTOR.grant,
+        issued_at: VECTOR.grant.issued_at - 2 * 86_400,
+      },
     });
     await expect(verifyGrant(long, { atMs })).resolves.toMatchObject({
       ok: false,
@@ -158,7 +177,9 @@ describe("verifyGrant (contract 2.2)", () => {
   });
 
   it("rejects a changed field (statement rebuilt, grant_id differs)", async () => {
-    const changed = deviceRecord({ grant: { ...VECTOR.grant, origin: "6529.io" } });
+    const changed = deviceRecord({
+      grant: { ...VECTOR.grant, origin: "6529.io" },
+    });
     await expect(verifyGrant(changed, { atMs })).resolves.toMatchObject({
       ok: false,
       reason: "grant-id-mismatch",
@@ -169,7 +190,9 @@ describe("verifyGrant (contract 2.2)", () => {
     const other = privateKeyToAccount(
       "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba"
     );
-    const signature = await other.signTypedData(buildGrantTypedData(VECTOR.grant));
+    const signature = await other.signTypedData(
+      buildGrantTypedData(VECTOR.grant)
+    );
     await expect(
       verifyGrant(deviceRecord({ wallet_signature: signature }), { atMs })
     ).resolves.toMatchObject({ ok: false, reason: "bad-signature" });
@@ -177,7 +200,9 @@ describe("verifyGrant (contract 2.2)", () => {
 
   it("rejects a record whose device key differs from the grant", async () => {
     await expect(
-      verifyGrant(deviceRecord({ device_key: `0x${"ab".repeat(32)}` }), { atMs })
+      verifyGrant(deviceRecord({ device_key: `0x${"ab".repeat(32)}` }), {
+        atMs,
+      })
     ).resolves.toMatchObject({ ok: false, reason: "device-key-mismatch" });
   });
 
@@ -189,15 +214,30 @@ describe("verifyGrant (contract 2.2)", () => {
 
   it("verifies contract wallets through the injected EIP-1271 verifier", async () => {
     const verifier = jest.fn().mockResolvedValue(true);
-    const record = deviceRecord({ wallet_signature: "0x", verified_via: "eip1271" });
+    const record = deviceRecord({
+      wallet_signature: "0x",
+      verified_via: "eip1271",
+    });
     await expect(
       verifyGrant(record, { atMs, verifyContractSignature: verifier })
-    ).resolves.toEqual({ ok: true, verified: true, via: "eip1271", reason: null });
-    expect(verifier).toHaveBeenCalledWith(VECTOR.grant.wallet, VECTOR.grant_id, "0x");
+    ).resolves.toEqual({
+      ok: true,
+      verified: true,
+      via: "eip1271",
+      reason: null,
+    });
+    expect(verifier).toHaveBeenCalledWith(
+      VECTOR.grant.wallet,
+      VECTOR.grant_id,
+      "0x"
+    );
   });
 
   it("falls back to the server's word without an RPC (verified false)", async () => {
-    const record = deviceRecord({ wallet_signature: "0x", verified_via: "eip1271" });
+    const record = deviceRecord({
+      wallet_signature: "0x",
+      verified_via: "eip1271",
+    });
     await expect(verifyGrant(record, { atMs })).resolves.toEqual({
       ok: true,
       verified: false,
@@ -210,7 +250,10 @@ describe("verifyGrant (contract 2.2)", () => {
   });
 
   it("rejects when the EIP-1271 verifier says no", async () => {
-    const record = deviceRecord({ wallet_signature: "0x", verified_via: "eip1271" });
+    const record = deviceRecord({
+      wallet_signature: "0x",
+      verified_via: "eip1271",
+    });
     await expect(
       verifyGrant(record, { atMs, verifyContractSignature: async () => false })
     ).resolves.toMatchObject({ ok: false, reason: "bad-signature" });

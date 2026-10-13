@@ -111,7 +111,9 @@ function applyReaction(
   if (on === has) {
     return false;
   }
-  const next = on ? [...current, profileId] : current.filter((id) => id !== profileId);
+  const next = on
+    ? [...current, profileId]
+    : current.filter((id) => id !== profileId);
   const reactions = { ...target.reactions };
   if (next.length > 0) {
     reactions[reaction] = next;
@@ -128,7 +130,7 @@ function applyTargeted(
   meta: PayloadMeta
 ): boolean {
   const target = runtime.messages.get(payload.target);
-  if (!target || target.kind !== "message") {
+  if (target?.kind !== "message") {
     return false;
   }
   let changed = false;
@@ -192,7 +194,9 @@ export function searchMessages(
   for (const runtime of runtimes) {
     for (const message of runtime.messages.values()) {
       const searchable =
-        message.kind === "message" && !message.deleted && !message.undecryptable;
+        message.kind === "message" &&
+        !message.deleted &&
+        !message.undecryptable;
       if (searchable && message.text.toLocaleLowerCase().includes(needle)) {
         out.push(message);
       }

@@ -1,7 +1,11 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { generatePrivateKey, privateKeyToAccount, type PrivateKeyAccount } from "viem/accounts";
+import {
+  generatePrivateKey,
+  privateKeyToAccount,
+  type PrivateKeyAccount,
+} from "viem/accounts";
 
 import { createE2eeEngine } from "@/lib/e2ee/engine";
 import { createMemoryE2eeStorage, type E2eeStorage } from "@/lib/e2ee/storage";
@@ -84,7 +88,9 @@ let wasmPromise: Promise<WasmModule> | null = null;
 
 export function loadTestWasm(): Promise<WasmModule> {
   wasmPromise ??= loadMlsWasm({
-    bytes: new Uint8Array(readFileSync(join(process.cwd(), "public", MLS_WASM_MANIFEST.file))),
+    bytes: new Uint8Array(
+      readFileSync(join(process.cwd(), "public", MLS_WASM_MANIFEST.file))
+    ),
   });
   return wasmPromise;
 }
@@ -129,7 +135,11 @@ export async function startDevice(
   world: World,
   profileId: string,
   account: PrivateKeyAccount,
-  options: { storage?: E2eeStorage; enroll?: boolean; extra?: Partial<E2eeEngineOptions> } = {}
+  options: {
+    storage?: E2eeStorage;
+    enroll?: boolean;
+    extra?: Partial<E2eeEngineOptions>;
+  } = {}
 ): Promise<TestDevice> {
   const storage = options.storage ?? createMemoryE2eeStorage();
   const device = { profileId, storage, signCalls: 0 } as TestDevice;
@@ -140,11 +150,15 @@ export async function startDevice(
     platform: "web",
     signTypedData: async (td) => {
       device.signCalls += 1;
-      return account.signTypedData(td as Parameters<PrivateKeyAccount["signTypedData"]>[0]);
+      return account.signTypedData(
+        td as Parameters<PrivateKeyAccount["signTypedData"]>[0]
+      );
     },
     api: createFakeApiClient(world.ds, profileId),
     resolveProfiles: async (ids) =>
-      Object.fromEntries(ids.map((id) => [id, { handle: id, pfp: null, wallets: [] }])),
+      Object.fromEntries(
+        ids.map((id) => [id, { handle: id, pfp: null, wallets: [] }])
+      ),
     onWake: (listener) => world.ds.subscribe(profileId, listener),
     now: world.clock.now,
     scheduler: world.scheduler,
@@ -157,7 +171,10 @@ export async function startDevice(
   };
   device.options = engineOptions;
   device.engine = await createE2eeEngine(engineOptions);
-  if (options.enroll !== false && device.engine.getStatus() === "needs-enrollment") {
+  if (
+    options.enroll !== false &&
+    device.engine.getStatus() === "needs-enrollment"
+  ) {
     await device.engine.enroll();
   }
   world.devices.push(device);
@@ -171,13 +188,21 @@ export async function addUser(
 ): Promise<TestUser> {
   const account = privateKeyToAccount(generatePrivateKey());
   world.ds.setWallets(profileId, [account.address]);
-  const primary = await startDevice(world, profileId, account, extra ? { extra } : {});
+  const primary = await startDevice(
+    world,
+    profileId,
+    account,
+    extra ? { extra } : {}
+  );
   const user: TestUser = { profileId, account, devices: [primary], primary };
   world.users.set(profileId, user);
   return user;
 }
 
-export async function addDevice(world: World, user: TestUser): Promise<TestDevice> {
+export async function addDevice(
+  world: World,
+  user: TestUser
+): Promise<TestDevice> {
   const device = await startDevice(world, user.profileId, user.account);
   user.devices.push(device);
   return device;
@@ -191,7 +216,8 @@ export function stopDevice(world: World, device: TestDevice): void {
   }
 }
 
-const realSleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const realSleep = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
 const writes = (world: World): number =>
   world.ds.state.requests.filter((r) => r.method !== "GET").length;
@@ -219,7 +245,9 @@ export async function settle(world: World, rounds = 40): Promise<void> {
 }
 
 export const texts = (messages: E2eeMessage[]): string[] =>
-  messages.filter((m) => m.kind === "message" && !m.undecryptable).map((m) => m.text);
+  messages
+    .filter((m) => m.kind === "message" && !m.undecryptable)
+    .map((m) => m.text);
 
 export const notices = (messages: E2eeMessage[]): string[] =>
   messages.filter((m) => m.kind === "notice").map((m) => m.notice?.type ?? "");

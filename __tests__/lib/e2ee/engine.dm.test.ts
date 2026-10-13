@@ -3,7 +3,13 @@
  *
  * Integration: real OpenMLS WASM + fake delivery service. 1:1 DMs.
  */
-import { addUser, createWorld, notices, settle, texts } from "./support/harness";
+import {
+  addUser,
+  createWorld,
+  notices,
+  settle,
+  texts,
+} from "./support/harness";
 
 jest.setTimeout(120_000);
 
@@ -14,18 +20,29 @@ describe("E2EE engine: direct messages", () => {
     const bob = await addUser(world, "bob");
     expect(alice.primary.engine.getStatus()).toBe("ready");
     expect(bob.primary.engine.getStatus()).toBe("ready");
-    expect(alice.primary.engine.getThisDevice()).toMatchObject({ isThisDevice: true, verified: true });
+    expect(alice.primary.engine.getThisDevice()).toMatchObject({
+      isThisDevice: true,
+      verified: true,
+    });
 
     const a = alice.primary.engine;
     const b = bob.primary.engine;
     const g = await a.createConversation({ profileIds: ["bob"], kind: "dm" });
     expect(a.findDm("bob")).toBe(g);
-    await expect(a.createConversation({ profileIds: ["bob"], kind: "dm" })).resolves.toBe(g);
+    await expect(
+      a.createConversation({ profileIds: ["bob"], kind: "dm" })
+    ).resolves.toBe(g);
     await settle(world);
 
-    expect(b.getConversation(g)).toMatchObject({ kind: "dm", status: "active", name: null });
+    expect(b.getConversation(g)).toMatchObject({
+      kind: "dm",
+      status: "active",
+      name: null,
+    });
     expect(b.findDm("alice")).toBe(g);
-    expect(a.getConversation(g)?.safetyCode).toBe(b.getConversation(g)?.safetyCode);
+    expect(a.getConversation(g)?.safetyCode).toBe(
+      b.getConversation(g)?.safetyCode
+    );
     expect(notices(b.getMessages(g))).toEqual(["created"]);
 
     await a.send(g, { text: "hello bob" });
@@ -33,7 +50,11 @@ describe("E2EE engine: direct messages", () => {
     expect(texts(b.getMessages(g))).toEqual(["hello bob"]);
     expect(texts(a.getMessages(g))).toEqual(["hello bob"]);
     const sent = b.getMessages(g).find((m) => m.text === "hello bob");
-    expect(sent).toMatchObject({ senderProfileId: "alice", sigOk: true, pending: false });
+    expect(sent).toMatchObject({
+      senderProfileId: "alice",
+      sigOk: true,
+      pending: false,
+    });
     expect(b.getConversation(g)?.unread).toBe(1);
     b.markRead(g);
     expect(b.getConversation(g)?.unread).toBe(0);
@@ -54,7 +75,9 @@ describe("E2EE engine: direct messages", () => {
       text: "hello bob (edited)",
       reactions: { ":fire:": ["bob"] },
     });
-    await expect(b.edit(g, sent!.id, "not mine")).rejects.toThrow("E2EE_NOT_SENDER");
+    await expect(b.edit(g, sent!.id, "not mine")).rejects.toThrow(
+      "E2EE_NOT_SENDER"
+    );
 
     await b.react(g, sent!.id, ":fire:", false);
     await a.remove(g, sent!.id);

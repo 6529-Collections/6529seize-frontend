@@ -65,7 +65,10 @@ export function requireGroup(ctx: EngineContext, g: string): GroupRuntime {
   return runtime;
 }
 
-export function requireActiveGroup(ctx: EngineContext, g: string): GroupRuntime {
+export function requireActiveGroup(
+  ctx: EngineContext,
+  g: string
+): GroupRuntime {
   const runtime = requireGroup(ctx, g);
   if (runtime.record.status !== "active") {
     throw new E2eeError("E2EE_CONVERSATION_INACTIVE");
@@ -89,20 +92,11 @@ export interface CheckpointExtra {
  * changed messages in one atomic write. Called BEFORE submitting anything the
  * WASM produced (8.7) and after processing log items.
  */
-export async function checkpoint(
-  ctx: EngineContext,
-  extra: CheckpointExtra = {}
-): Promise<void> {
-  const batch: E2eeStorageBatch = {};
-  let state: Uint8Array | null = null;
-  if (ctx.mls && extra.skipWasm !== true) {
-    state = ctx.mls.exportState();
-    batch.wasmState = state;
-  }
+function groupWrites(runtimes: readonly GroupRuntime[]): E2eeStorageBatch {
   const groups: StoredGroup[] = [];
-  const messages: StoredMessage[] = [...(extra.messages ?? [])];
+  const messages: StoredMessage[] = [];
   const deleteMessages: { g: string; id: string }[] = [];
-  for (const runtime of extra.groups ?? []) {
+  for (const runtime of runtimes) {
     groups.push(runtime.record);
     for (const id of runtime.dirty) {
       const message = runtime.messages.get(id);
@@ -114,36 +108,71 @@ export async function checkpoint(
       deleteMessages.push({ g: runtime.record.g, id });
     }
   }
-  if (groups.length > 0) {
-    batch.groups = groups;
+  return { groups, messages, deleteMessages };
+}
+
+/** Drops empty lists so a batch only touches what changed. */
+function compact(batch: E2eeStorageBatch): E2eeStorageBatch {
+  const out: E2eeStorageBatch = {};
+  if (batch.device) {
+    out.device = batch.device;
   }
-  if (messages.length > 0) {
-    batch.messages = messages;
+  if (batch.wasmState) {
+    out.wasmState = batch.wasmState;
   }
-  if (deleteMessages.length > 0) {
-    batch.deleteMessages = deleteMessages;
+  const lists = [
+    "groups",
+    "deleteGroups",
+    "messages",
+    "deleteMessages",
+    "outbox",
+    "deleteOutbox",
+  ] as const;
+  for (const key of lists) {
+    const value = batch[key];
+    if (value !== undefined && value.length > 0) {
+      Object.assign(out, { [key]: value });
+    }
   }
-  if (extra.deleteGroups?.length) {
-    batch.deleteGroups = extra.deleteGroups;
-  }
-  if (extra.outbox?.length) {
-    batch.outbox = extra.outbox;
-  }
-  if (extra.deleteOutbox?.length) {
-    batch.deleteOutbox = extra.deleteOutbox;
-  }
-  if (extra.device) {
-    batch.device = extra.device;
-  }
+  return out;
+}
+
+/**
+ * Persists the WASM state together with the given group records and their
+ * changed messages in one atomic write. Called BEFORE submitting anything the
+ * WASM produced (8.7) and after processing log items.
+ */
+export async function checkpoint(
+  ctx: EngineContext,
+  extra: CheckpointExtra = {}
+): Promise<void> {
+  const runtimes = extra.groups ?? [];
+  const state =
+    ctx.mls && extra.skipWasm !== true ? ctx.mls.exportState() : null;
+  const writes = groupWrites(runtimes);
+  const batch = compact({
+    ...writes,
+    messages: [...(extra.messages ?? []), ...(writes.messages ?? [])],
+    ...(state ? { wasmState: state } : {}),
+    ...(extra.device ? { device: extra.device } : {}),
+    ...(extra.deleteGroups ? { deleteGroups: extra.deleteGroups } : {}),
+    ...(extra.outbox ? { outbox: extra.outbox } : {}),
+    ...(extra.deleteOutbox ? { deleteOutbox: extra.deleteOutbox } : {}),
+  });
   await ctx.storage.writeBatch(ctx.profileId, batch);
   if (state) {
     ctx.lastState = state;
   }
-  for (const runtime of extra.groups ?? []) {
+  for (const runtime of runtimes) {
     runtime.dirty.clear();
     runtime.deleted.clear();
   }
 }
+
+/** Status check that also defeats stale narrowing across awaits. */
+export const isActive = (
+  runtime: GroupRuntime | undefined
+): runtime is GroupRuntime => runtime?.record.status === "active";
 
 /**
  * Restores the WASM state and group records of the last checkpoint after a

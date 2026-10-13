@@ -123,7 +123,8 @@ export async function finalizeOwnCommit(
     metadataBefore,
     metadataAfter: input.summary.metadata,
     leaving: new Set(record.leaving),
-    creation: input.pending.epoch === 0 && metadataBefore.created_by === ctx.profileId,
+    creation:
+      input.pending.epoch === 0 && metadataBefore.created_by === ctx.profileId,
   });
   record.pendingCommit = null;
   touchActivity(
@@ -189,8 +190,11 @@ export async function submitCommit(
     runtime.record.pendingCommit = null;
     await checkpoint(ctx, { groups: [runtime] });
     const conflict =
-      apiError.code === "E2EE_EPOCH_CONFLICT" || apiError.code === "E2EE_EPOCH_STALE";
-    return conflict ? { kind: "conflict" } : { kind: "rejected", code: apiError.code };
+      apiError.code === "E2EE_EPOCH_CONFLICT" ||
+      apiError.code === "E2EE_EPOCH_STALE";
+    return conflict
+      ? { kind: "conflict" }
+      : { kind: "rejected", code: apiError.code };
   }
 }
 

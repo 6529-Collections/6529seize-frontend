@@ -38,9 +38,9 @@ function guard<T>(operation: () => T): T {
   }
 }
 
-function parse<T>(json: string): T {
+function parse(json: string): unknown {
   try {
-    return JSON.parse(json) as T;
+    return JSON.parse(json) as unknown;
   } catch {
     throw new MlsError("MLS module returned malformed JSON");
   }
@@ -57,11 +57,17 @@ export class MlsClient {
   }
 
   static create(module: WasmModule): MlsClient {
-    return new MlsClient(module, guard(() => module.MlsDevice.create()));
+    return new MlsClient(
+      module,
+      guard(() => module.MlsDevice.create())
+    );
   }
 
   static load(module: WasmModule, state: Uint8Array): MlsClient {
-    return new MlsClient(module, guard(() => module.MlsDevice.load(state)));
+    return new MlsClient(
+      module,
+      guard(() => module.MlsDevice.load(state))
+    );
   }
 
   exportState(): Uint8Array {
@@ -92,18 +98,20 @@ export class MlsClient {
     lifetimeSecs: number
   ): WasmKeyPackage[] {
     return parse(
-      guard(() => this.handle.createKeyPackages(count, lastResort, lifetimeSecs))
-    );
+      guard(() =>
+        this.handle.createKeyPackages(count, lastResort, lifetimeSecs)
+      )
+    ) as WasmKeyPackage[];
   }
 
   createGroup(g: string, metadata: GroupMetadata): WasmGroupSummary {
     return parse(
       guard(() => this.handle.createGroup(g, JSON.stringify(metadata)))
-    );
+    ) as WasmGroupSummary;
   }
 
   groupSummary(g: string): WasmGroupSummary {
-    return parse(guard(() => this.handle.groupSummary(g)));
+    return parse(guard(() => this.handle.groupSummary(g))) as WasmGroupSummary;
   }
 
   hasGroup(g: string): boolean {
@@ -117,11 +125,13 @@ export class MlsClient {
   }
 
   createCommit(g: string, ops: WasmCommitOps): WasmCommitResult {
-    return parse(guard(() => this.handle.createCommit(g, JSON.stringify(ops))));
+    return parse(
+      guard(() => this.handle.createCommit(g, JSON.stringify(ops)))
+    ) as WasmCommitResult;
   }
 
   mergePending(g: string): WasmGroupSummary {
-    return parse(guard(() => this.handle.mergePending(g)));
+    return parse(guard(() => this.handle.mergePending(g))) as WasmGroupSummary;
   }
 
   discardPending(g: string): void {
@@ -133,15 +143,17 @@ export class MlsClient {
   proposeRemove(g: string, deviceKeys: string[]): WasmEntryOut[] {
     return parse(
       guard(() => this.handle.proposeRemove(g, JSON.stringify(deviceKeys)))
-    );
+    ) as WasmEntryOut[];
   }
 
   processEntry(g: string, item: object): WasmProcessResult {
-    return parse(guard(() => this.handle.processEntry(g, JSON.stringify(item))));
+    return parse(
+      guard(() => this.handle.processEntry(g, JSON.stringify(item)))
+    ) as WasmProcessResult;
   }
 
   acceptStaged(g: string): WasmGroupSummary {
-    return parse(guard(() => this.handle.acceptStaged(g)));
+    return parse(guard(() => this.handle.acceptStaged(g))) as WasmGroupSummary;
   }
 
   rejectStaged(g: string): void {
@@ -157,11 +169,13 @@ export class MlsClient {
   ): WasmWelcomeSummary {
     const welcome = base64ToBytes(welcomeB64);
     const tree = ratchetTreeB64 ? base64ToBytes(ratchetTreeB64) : null;
-    return parse(guard(() => this.handle.joinWelcome(g, welcome, tree)));
+    return parse(
+      guard(() => this.handle.joinWelcome(g, welcome, tree))
+    ) as WasmWelcomeSummary;
   }
 
   acceptWelcome(g: string): WasmGroupSummary {
-    return parse(guard(() => this.handle.acceptWelcome(g)));
+    return parse(guard(() => this.handle.acceptWelcome(g))) as WasmGroupSummary;
   }
 
   rejectWelcome(g: string): void {
@@ -171,13 +185,15 @@ export class MlsClient {
   }
 
   encryptMessage(g: string, body: Uint8Array): WasmEncrypted {
-    return parse(guard(() => this.handle.encryptMessage(g, body)));
+    return parse(
+      guard(() => this.handle.encryptMessage(g, body))
+    ) as WasmEncrypted;
   }
 
   decryptMessage(g: string, item: object): WasmDecrypted {
     return parse(
       guard(() => this.handle.decryptMessage(g, JSON.stringify(item)))
-    );
+    ) as WasmDecrypted;
   }
 
   /** Drops pending Remove proposals targeting `deviceKey` (if supported). */
@@ -189,7 +205,7 @@ export class MlsClient {
   signRoster(g: string, deviceKeys: string[]): WasmRosterSignature {
     return parse(
       guard(() => this.handle.signRoster(g, JSON.stringify(deviceKeys)))
-    );
+    ) as WasmRosterSignature;
   }
 
   verifyEd25519(pub: string, digest32: Uint8Array, sig: string): boolean {

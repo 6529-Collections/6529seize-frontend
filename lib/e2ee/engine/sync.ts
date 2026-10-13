@@ -1,10 +1,15 @@
 import { asE2eeApiError } from "../api";
-import type { ApiE2eeGroup, ApiE2eeWelcome } from "../api-types";
+import type {
+  ApiE2eeGroup,
+  ApiE2eeLogItem,
+  ApiE2eeWelcome,
+} from "../api-types";
 import { MlsError } from "../mls-adapter";
 import type { WasmWelcomeSummary } from "../wasm-types";
 import { discardPendingCommit } from "./commit";
 import {
   checkpoint,
+  isActive,
   ownDeviceKey,
   requireMls,
   rollback,
@@ -36,7 +41,9 @@ const isNetworkish = (error: unknown): boolean => {
 };
 
 function rosterHasDevice(group: ApiE2eeGroup, deviceKey: string): boolean {
-  return group.roster.some((entry) => entry.device_key.toLowerCase() === deviceKey);
+  return group.roster.some(
+    (entry) => entry.device_key.toLowerCase() === deviceKey
+  );
 }
 
 async function afterPage(
@@ -46,11 +53,11 @@ async function afterPage(
   caughtUp: boolean
 ): Promise<void> {
   const record = runtime.record;
-  if (!caughtUp || record.status !== "active") {
+  if (!caughtUp || !isActive(runtime)) {
     return;
   }
   // Our commit was never sequenced if the server is still at its epoch.
-  if (record.pendingCommit && group.epoch === record.pendingCommit.epoch) {
+  if (record.pendingCommit?.epoch === group.epoch) {
     await discardPendingCommit(ctx, runtime);
   }
   if (!rosterHasDevice(group, ownDeviceKey(ctx))) {
@@ -75,6 +82,36 @@ async function fetchPage(ctx: EngineContext, runtime: GroupRuntime) {
   }
 }
 
+/** Applies one page of log items; checkpoints after every entry (8.7). */
+async function processPage(
+  ctx: EngineContext,
+  runtime: GroupRuntime,
+  items: readonly ApiE2eeLogItem[]
+): Promise<boolean> {
+  let changed = false;
+  for (const item of items) {
+    if (item.seq <= runtime.record.cursor) {
+      continue;
+    }
+    try {
+      await processLogItem(ctx, runtime, item);
+    } catch (error) {
+      await rollback(ctx);
+      throw error;
+    }
+    runtime.record.cursor = item.seq;
+    changed = true;
+    const stillActive = isActive(runtime);
+    if (item.type === "entry" || !stillActive) {
+      await checkpoint(ctx, { groups: [runtime] });
+    }
+    if (!stillActive) {
+      break;
+    }
+  }
+  return changed;
+}
+
 /**
  * Processes the group's log strictly in seq order until caught up. Must run
  * inside the serial queue. Returns whether anything was processed.
@@ -84,39 +121,22 @@ export async function catchUpGroup(
   runtime: GroupRuntime
 ): Promise<boolean> {
   let changed = false;
-  while (runtime.record.status === "active") {
+  while (isActive(runtime)) {
     const page = await fetchPage(ctx, runtime);
     if (!page) {
       return true;
     }
-    for (const item of page.items) {
-      if (item.seq <= runtime.record.cursor) {
-        continue;
-      }
-      try {
-        await processLogItem(ctx, runtime, item);
-      } catch (error) {
-        await rollback(ctx);
-        throw error;
-      }
-      runtime.record.cursor = item.seq;
-      changed = true;
-      if (item.type === "entry" || runtime.record.status !== "active") {
-        await checkpoint(ctx, { groups: [runtime] });
-      }
-      if (runtime.record.status !== "active") {
-        break;
-      }
+    const pageChanged = await processPage(ctx, runtime, page.items);
+    changed = changed || pageChanged;
+    const next = page.next_after_seq;
+    if (next !== null && next > runtime.record.cursor) {
+      runtime.record.cursor = next;
     }
-    if (page.next_after_seq !== null && page.next_after_seq > runtime.record.cursor) {
-      runtime.record.cursor = page.next_after_seq;
-    }
-    if (changed) {
+    if (pageChanged) {
       await checkpoint(ctx, { groups: [runtime] });
     }
-    const caughtUp = page.next_after_seq === null;
-    await afterPage(ctx, runtime, page.group, caughtUp);
-    if (caughtUp) {
+    await afterPage(ctx, runtime, page.group, next === null);
+    if (next === null) {
       break;
     }
   }
@@ -159,7 +179,11 @@ async function senderBlocked(
     return false;
   }
   for (const profileId of profileIds) {
-    if (profileId !== null && profileId !== ctx.profileId && (await check(profileId))) {
+    if (
+      profileId !== null &&
+      profileId !== ctx.profileId &&
+      (await check(profileId))
+    ) {
       return true;
     }
   }
@@ -194,7 +218,10 @@ async function commitKeyMatches(
 ): Promise<boolean> {
   try {
     const group = await ctx.api.getGroup(summary.g, ownDeviceKey(ctx));
-    return group.epoch !== summary.epoch || group.commit_key.toLowerCase() === summary.commit_key.toLowerCase();
+    return (
+      group.epoch !== summary.epoch ||
+      group.commit_key.toLowerCase() === summary.commit_key.toLowerCase()
+    );
   } catch {
     return true;
   }
@@ -204,13 +231,22 @@ async function acceptJoin(
   ctx: EngineContext,
   welcome: ApiE2eeWelcome,
   staged: WasmWelcomeSummary,
-  checks: { badGrants: string[]; splitView: boolean; senderProfileId: string | null }
+  checks: {
+    badGrants: string[];
+    splitView: boolean;
+    senderProfileId: string | null;
+  }
 ): Promise<GroupRuntime> {
   const g = welcome.group.toLowerCase();
   const summary = requireMls(ctx).acceptWelcome(g);
   const now = ctx.now();
   const existing = ctx.store.groups.get(g);
-  const record = newGroupRecord({ summary, now, joinedAt: now, createdAt: welcome.created_at });
+  const record = newGroupRecord({
+    summary,
+    now,
+    joinedAt: now,
+    createdAt: welcome.created_at,
+  });
   record.cursor = existing?.record.cursor ?? 0;
   record.readSeq = existing?.record.readSeq ?? 0;
   record.badGrants = checks.badGrants;
@@ -224,7 +260,9 @@ async function acceptJoin(
   }
   const senderKey = staged.sender.device_key.toLowerCase();
   record.activity[senderKey] = { at: welcome.created_at, known: true };
-  const creation = welcome.epoch === 1 && checks.senderProfileId === summary.metadata.created_by;
+  const creation =
+    welcome.epoch === 1 &&
+    checks.senderProfileId === summary.metadata.created_by;
   addNotices(
     runtime,
     [
@@ -268,11 +306,14 @@ export async function handleWelcome(
     return null;
   }
   try {
-    const metadataOk = isValidMetadata(staged.metadata) && staged.metadata.g.toLowerCase() === g;
+    const metadataOk =
+      isValidMetadata(staged.metadata) && staged.metadata.g.toLowerCase() === g;
     const checks = await checkWelcomeMembers(ctx, staged);
     const senderProfileId = await profileOfLeaf(ctx, staged.sender.device_key);
     const refused =
-      !metadataOk || !checks.senderOk || (await senderBlocked(ctx, [senderProfileId]));
+      !metadataOk ||
+      !checks.senderOk ||
+      (await senderBlocked(ctx, [senderProfileId]));
     if (refused) {
       mls.rejectWelcome(g);
       await checkpoint(ctx);
@@ -294,7 +335,9 @@ export async function handleWelcome(
 }
 
 /** Pulls pending Welcomes (oldest first). Must run inside the queue. */
-export async function processInbox(ctx: EngineContext): Promise<GroupRuntime[]> {
+export async function processInbox(
+  ctx: EngineContext
+): Promise<GroupRuntime[]> {
   const welcomes = await ctx.api.getWelcomes(ownDeviceKey(ctx));
   const joined: GroupRuntime[] = [];
   for (const welcome of welcomes) {

@@ -17,8 +17,18 @@ import {
   type EngineContext,
 } from "./context";
 import { E2eeError } from "./errors";
-import { addNotices, applySummary, markGone, newGroupRecord, newRuntime } from "./groups";
-import { MAX_LEAVES_PER_COMMIT, runGroupCommit, type Planner } from "./maintenance";
+import {
+  addNotices,
+  applySummary,
+  markGone,
+  newGroupRecord,
+  newRuntime,
+} from "./groups";
+import {
+  MAX_LEAVES_PER_COMMIT,
+  runGroupCommit,
+  type Planner,
+} from "./maintenance";
 import type { GroupRuntime } from "./store";
 import { catchUpGroup } from "./sync";
 import { MAX_GROUP_NAME } from "./validate";
@@ -58,7 +68,8 @@ export function findDm(ctx: EngineContext, profileId: string): string | null {
       continue;
     }
     const principals = principalsOf(runtime);
-    const peers = principals.size > 1 ? principals : new Set(record.metadata.admins);
+    const peers =
+      principals.size > 1 ? principals : new Set(record.metadata.admins);
     if (peers.has(profileId) && peers.has(ctx.profileId) && peers.size === 2) {
       return record.g;
     }
@@ -88,10 +99,16 @@ async function commitAdds(
   packages: readonly ClaimedPackage[],
   onDelayed: () => void
 ): Promise<string | null> {
-  for (let offset = 0; offset < packages.length; offset += MAX_LEAVES_PER_COMMIT) {
+  for (
+    let offset = 0;
+    offset < packages.length;
+    offset += MAX_LEAVES_PER_COMMIT
+  ) {
     const batch = packages.slice(offset, offset + MAX_LEAVES_PER_COMMIT);
-    const planner: Planner = async (runtime) => {
-      const leaves = new Set(runtime.record.members.map((member) => member.deviceKey));
+    const planner: Planner = (runtime) => {
+      const leaves = new Set(
+        runtime.record.members.map((member) => member.deviceKey)
+      );
       const remaining = batch.filter(
         (item) => !leaves.has(item.device.device_key.toLowerCase())
       );
@@ -134,7 +151,9 @@ async function createLocalGroup(
     const mls = requireMls(ctx);
     const summary = mls.createGroup(metadata.g, metadata);
     const now = ctx.now();
-    const runtime = newRuntime(newGroupRecord({ summary, now, joinedAt: now, createdAt: now }));
+    const runtime = newRuntime(
+      newGroupRecord({ summary, now, joinedAt: now, createdAt: now })
+    );
     await applySummary(ctx, runtime, summary);
     await checkpoint(ctx, { groups: [runtime] });
     try {
@@ -167,12 +186,54 @@ async function discardLocalGroup(ctx: EngineContext, g: string): Promise<void> {
   });
 }
 
+function creationMetadata(
+  ctx: EngineContext,
+  input: { kind: "dm" | "group"; name?: string | null | undefined },
+  peer: string | undefined
+): GroupMetadata {
+  const dm = input.kind === "dm";
+  return {
+    v: 1,
+    g: randomHex(32),
+    kind: input.kind,
+    name: dm ? null : normalizeName(input.name),
+    admins: dm && peer !== undefined ? [ctx.profileId, peer] : [ctx.profileId],
+    created_by: ctx.profileId,
+    history: "from_join",
+  };
+}
+
+/** Claims every target's KeyPackages (plus our siblings') before creating. */
+async function claimForCreation(
+  ctx: EngineContext,
+  targets: string[],
+  kind: "dm" | "group"
+): Promise<ClaimedPackage[]> {
+  const siblings = await ownSiblingDevices(ctx);
+  const claim = await claimKeyPackages(ctx, [
+    ...targets.map((profile_id) => ({ profile_id })),
+    ...(siblings.length > 0
+      ? [{ profile_id: ctx.profileId, device_keys: siblings }]
+      : []),
+  ]);
+  const statuses = targets.map((id) => claim.status.get(id) ?? "NO_DEVICES");
+  const refused = statuses.find((status) => status !== "OK");
+  const allRefused =
+    statuses.length > 0 && statuses.every((status) => status !== "OK");
+  if (refused && (kind === "dm" || allRefused)) {
+    throw new E2eeError(policyCode(refused));
+  }
+  return claim.packages;
+}
+
 export async function createConversation(
   ctx: EngineContext,
   input: { profileIds: string[]; kind: "dm" | "group"; name?: string | null },
   onDelayed: (g: string) => void
 ): Promise<string> {
-  const targets = [...new Set(input.profileIds)].filter((id) => id !== ctx.profileId);
+  const targets = [...new Set(input.profileIds)].filter(
+    (id) => id !== ctx.profileId
+  );
   const peer = targets[0];
   if (input.kind === "dm") {
     if (targets.length !== 1 || peer === undefined) {
@@ -183,35 +244,20 @@ export async function createConversation(
       return existing;
     }
   }
-  const g = randomHex(32);
-  const metadata: GroupMetadata = {
-    v: 1,
-    g,
-    kind: input.kind,
-    name: input.kind === "group" ? normalizeName(input.name) : null,
-    admins: input.kind === "dm" && peer !== undefined ? [ctx.profileId, peer] : [ctx.profileId],
-    created_by: ctx.profileId,
-    history: "from_join",
-  };
-  const siblings = await ownSiblingDevices(ctx);
-  const claim = await claimKeyPackages(ctx, [
-    ...targets.map((profile_id) => ({ profile_id })),
-    ...(siblings.length > 0 ? [{ profile_id: ctx.profileId, device_keys: siblings }] : []),
-  ]);
-  const refused = targets
-    .map((id) => claim.status.get(id) ?? "NO_DEVICES")
-    .find((status) => status !== "OK");
-  const allRefused = targets.length > 0 && targets.every((id) => claim.status.get(id) !== "OK");
-  if (refused && (input.kind === "dm" || allRefused)) {
-    throw new E2eeError(policyCode(refused));
-  }
+  const metadata = creationMetadata(ctx, input, peer);
+  const g = metadata.g;
+  const packages = await claimForCreation(ctx, targets, input.kind);
   const runtime = await createLocalGroup(ctx, metadata);
-  const failure = await commitAdds(ctx, g, claim.packages, () => {
+  const failure = await commitAdds(ctx, g, packages, () => {
     onDelayed(g);
   });
-  if (failure && failure !== "E2EE_COMMIT_DELAYED" && runtime.record.epoch === 0) {
+  const fatal = failure !== null && failure !== "E2EE_COMMIT_DELAYED";
+  if (fatal && runtime.record.epoch === 0) {
     await discardLocalGroup(ctx, g);
-    throw new E2eeError(failure === "E2EE_BLOCKED" ? "E2EE_BLOCKED" : "E2EE_POLICY", failure);
+    throw new E2eeError(
+      failure === "E2EE_BLOCKED" ? "E2EE_BLOCKED" : "E2EE_POLICY",
+      failure
+    );
   }
   return g;
 }
@@ -243,14 +289,28 @@ export async function addMembers(
   );
   const claim =
     fresh.length > 0
-      ? await claimKeyPackages(ctx, fresh.map((profile_id) => ({ profile_id })), runtime.record.g)
+      ? await claimKeyPackages(
+          ctx,
+          fresh.map((profile_id) => ({ profile_id })),
+          runtime.record.g
+        )
       : null;
-  const failure = claim ? await commitAdds(ctx, runtime.record.g, claim.packages, onDelayed) : null;
+  const failure = claim
+    ? await commitAdds(ctx, runtime.record.g, claim.packages, onDelayed)
+    : null;
   return [...new Set(profileIds)].map((profileId) => {
     let status: ApiE2eePolicyStatus = claim?.status.get(profileId) ?? "OK";
-    if (status === "OK" && failure === "E2EE_BLOCKED" && fresh.includes(profileId)) {
+    if (
+      status === "OK" &&
+      failure === "E2EE_BLOCKED" &&
+      fresh.includes(profileId)
+    ) {
       status = "BLOCKED";
-    } else if (status === "OK" && failure === "E2EE_POLICY" && fresh.includes(profileId)) {
+    } else if (
+      status === "OK" &&
+      failure === "E2EE_POLICY" &&
+      fresh.includes(profileId)
+    ) {
       status = "POLICY";
     }
     return { profileId, status };
@@ -283,11 +343,13 @@ export async function removeMember(
   await commitOrThrow(
     ctx,
     runtime.record.g,
-    async (current) => {
+    (current) => {
       const keys = current.record.members
         .filter((member) => member.profileId === profileId)
         .map((member) => member.deviceKey);
-      return keys.length > 0 ? { ops: { remove_device_keys: keys }, claimed: new Map() } : null;
+      return keys.length > 0
+        ? { ops: { remove_device_keys: keys }, claimed: new Map() }
+        : null;
     },
     onDelayed
   );
@@ -296,7 +358,7 @@ export async function removeMember(
 function metadataPlanner(
   change: (metadata: GroupMetadata) => GroupMetadata | null
 ): Planner {
-  return async (runtime) => {
+  return (runtime) => {
     const next = change(runtime.record.metadata);
     return next ? { ops: { metadata: next }, claimed: new Map() } : null;
   };
@@ -315,7 +377,9 @@ export async function rename(
   await commitOrThrow(
     ctx,
     runtime.record.g,
-    metadataPlanner((meta) => (meta.name === next ? null : { ...meta, name: next })),
+    metadataPlanner((meta) =>
+      meta.name === next ? null : { ...meta, name: next }
+    ),
     onDelayed
   );
 }
@@ -360,12 +424,23 @@ async function handOverAdmin(
   onDelayed: () => void
 ): Promise<void> {
   const meta = runtime.record.metadata;
-  const others = [...principalsOf(runtime)].filter((id) => id !== ctx.profileId);
-  const remainingAdmins = meta.admins.filter((id) => id !== ctx.profileId && others.includes(id));
-  if (meta.kind !== "group" || !meta.admins.includes(ctx.profileId) || others.length === 0 || remainingAdmins.length > 0) {
+  const others = [...principalsOf(runtime)].filter(
+    (id) => id !== ctx.profileId
+  );
+  const remainingAdmins = meta.admins.filter(
+    (id) => id !== ctx.profileId && others.includes(id)
+  );
+  if (
+    meta.kind !== "group" ||
+    !meta.admins.includes(ctx.profileId) ||
+    others.length === 0 ||
+    remainingAdmins.length > 0
+  ) {
     return;
   }
-  const heir = others.includes(meta.created_by) ? meta.created_by : [...others].sort()[0];
+  const heir = others.includes(meta.created_by)
+    ? meta.created_by
+    : [...others].sort()[0];
   if (heir === undefined) {
     return;
   }
@@ -373,13 +448,18 @@ async function handOverAdmin(
     ctx,
     runtime.record.g,
     metadataPlanner((current) =>
-      current.admins.includes(heir) ? null : { ...current, admins: [...current.admins, heir] }
+      current.admins.includes(heir)
+        ? null
+        : { ...current, admins: [...current.admins, heir] }
     ),
     onDelayed
   );
 }
 
-async function proposeLeave(ctx: EngineContext, runtime: GroupRuntime): Promise<boolean> {
+async function proposeLeave(
+  ctx: EngineContext,
+  runtime: GroupRuntime
+): Promise<boolean> {
   return ctx.queue.run(async () => {
     await catchUpGroup(ctx, runtime);
     if (runtime.record.status !== "active") {
@@ -414,7 +494,13 @@ async function proposeLeave(ctx: EngineContext, runtime: GroupRuntime): Promise<
     }
     addNotices(
       runtime,
-      [{ type: "left", actorProfileId: ctx.profileId, targetProfileIds: [ctx.profileId] }],
+      [
+        {
+          type: "left",
+          actorProfileId: ctx.profileId,
+          targetProfileIds: [ctx.profileId],
+        },
+      ],
       runtime.record.cursor + 1,
       ctx.now()
     );
@@ -438,7 +524,10 @@ export async function leave(
   throw new E2eeError("E2EE_COMMIT_FAILED", "leave");
 }
 
-export function restartTargets(ctx: EngineContext, runtime: GroupRuntime): string[] {
+export function restartTargets(
+  ctx: EngineContext,
+  runtime: GroupRuntime
+): string[] {
   const principals = principalsOf(runtime);
   if (runtime.record.metadata.kind === "dm") {
     for (const admin of runtime.record.metadata.admins) {

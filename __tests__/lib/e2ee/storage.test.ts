@@ -1,8 +1,16 @@
 /**
  * @jest-environment node
  */
-import type { StoredDevice, StoredGroup, StoredMessage, StoredOutboxItem } from "@/lib/e2ee/records";
-import { createMemoryE2eeStorage, hasStoredE2eeDevice } from "@/lib/e2ee/storage";
+import type {
+  StoredDevice,
+  StoredGroup,
+  StoredMessage,
+  StoredOutboxItem,
+} from "@/lib/e2ee/records";
+import {
+  createMemoryE2eeStorage,
+  hasStoredE2eeDevice,
+} from "@/lib/e2ee/storage";
 
 const device = (profileId: string): StoredDevice => ({
   profileId,
@@ -50,9 +58,14 @@ describe("memory storage", () => {
     expect(await storage.getDevice("p1")).toEqual(device("p1"));
     expect(await storage.getDevice("p2")).toBeNull();
     expect(await storage.getWasmState("p1")).toEqual(new Uint8Array([1, 2, 3]));
-    expect((await storage.listGroups("p1")).map((g) => g.g).sort()).toEqual(["g1", "g2"]);
+    expect((await storage.listGroups("p1")).map((g) => g.g).sort()).toEqual([
+      "g1",
+      "g2",
+    ]);
     expect((await storage.listGroups("p2")).map((g) => g.g)).toEqual(["g9"]);
-    expect((await storage.listMessages("p1", "g1")).map((m) => m.id).sort()).toEqual(["m1", "m2"]);
+    expect(
+      (await storage.listMessages("p1", "g1")).map((m) => m.id).sort()
+    ).toEqual(["m1", "m2"]);
     expect((await storage.listOutbox("p1")).map((o) => o.id)).toEqual(["o1"]);
   });
 
@@ -68,15 +81,23 @@ describe("memory storage", () => {
     copy!.cursor = 99;
     expect((await storage.listGroups("p1"))[0]!.cursor).toBe(3);
 
-    await storage.writeBatch("p1", { deleteMessages: [{ g: "g1", id: "m1" }], deleteOutbox: ["o1"] });
-    expect((await storage.listMessages("p1", "g1")).map((m) => m.id)).toEqual(["m2"]);
+    await storage.writeBatch("p1", {
+      deleteMessages: [{ g: "g1", id: "m1" }],
+      deleteOutbox: ["o1"],
+    });
+    expect((await storage.listMessages("p1", "g1")).map((m) => m.id)).toEqual([
+      "m2",
+    ]);
     expect(await storage.listOutbox("p1")).toEqual([]);
 
     await storage.writeBatch("p1", { deleteGroups: ["g1"] });
     expect(await storage.listGroups("p1")).toEqual([]);
     expect(await storage.listMessages("p1", "g1")).toEqual([]);
 
-    await storage.writeBatch("p1", { device: device("p1"), groups: [group("g3")] });
+    await storage.writeBatch("p1", {
+      device: device("p1"),
+      groups: [group("g3")],
+    });
     await storage.clearProfile("p1");
     expect(await storage.getDevice("p1")).toBeNull();
     expect(await storage.getWasmState("p1")).toBeNull();

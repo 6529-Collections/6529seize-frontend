@@ -91,7 +91,9 @@ const RANDOM_CHUNK = 65_536;
 export function randomBytes(length: number): Uint8Array {
   const out = new Uint8Array(length);
   for (let offset = 0; offset < length; offset += RANDOM_CHUNK) {
-    globalThis.crypto.getRandomValues(out.subarray(offset, offset + RANDOM_CHUNK));
+    globalThis.crypto.getRandomValues(
+      out.subarray(offset, offset + RANDOM_CHUNK)
+    );
   }
   return out;
 }

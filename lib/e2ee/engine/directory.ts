@@ -74,8 +74,7 @@ export class DeviceDirectory {
       const key = record.device_key.toLowerCase();
       const previous = this.devices.get(key)?.record;
       const changed =
-        !previous ||
-        previous.revoked_at !== record.revoked_at ||
+        previous?.revoked_at !== record.revoked_at ||
         previous.grant_id !== record.grant_id ||
         previous.label !== record.label;
       if (changed) {
@@ -172,14 +171,16 @@ export class DeviceDirectory {
   }
 
   /** Grant verification at `atMs` (cached per device/grant when "now"). */
-  async verify(record: ApiE2eeDevice, atMs?: number): Promise<GrantVerification> {
+  async verify(
+    record: ApiE2eeDevice,
+    atMs?: number
+  ): Promise<GrantVerification> {
     const key = `${record.device_key.toLowerCase()}:${record.grant_id}`;
     const at = atMs ?? this.deps.now();
     const cached = this.verifications.get(key);
-    if (cached && atMs === undefined && cached.ok) {
-      if (record.grant.expires_at * 1000 > at) {
-        return cached;
-      }
+    const fresh = cached?.ok === true && record.grant.expires_at * 1000 > at;
+    if (cached && atMs === undefined && fresh) {
+      return cached;
     }
     const result = await verifyGrant(record, {
       atMs: at,
@@ -253,14 +254,18 @@ export class DeviceDirectory {
     if (!credential) {
       return fail("credential", null);
     }
-    const record = await this.getDevice(leaf.device_key);
+    const matches = (candidate: ApiE2eeDevice) =>
+      candidate.grant.wallet.toLowerCase() === credential.wallet &&
+      candidate.grant_id.toLowerCase() === credential.grantId;
+    let record = await this.getDevice(leaf.device_key);
+    if (record && !matches(record)) {
+      // The grant may have been renewed since we cached the record.
+      record = await this.getDevice(leaf.device_key, 0);
+    }
     if (!record) {
       return fail("unknown-device", null);
     }
-    if (
-      record.grant.wallet.toLowerCase() !== credential.wallet ||
-      record.grant_id.toLowerCase() !== credential.grantId
-    ) {
+    if (!matches(record)) {
       return fail("credential-mismatch", record);
     }
     const verification = await this.verify(record, atMs);

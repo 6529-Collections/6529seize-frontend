@@ -166,7 +166,10 @@ export interface E2eeEngineDeps {
   resolveProfiles: (
     profileIds: string[]
   ) => Promise<
-    Record<string, { handle: string | null; pfp: string | null; wallets: string[] }>
+    Record<
+      string,
+      { handle: string | null; pfp: string | null; wallets: string[] }
+    >
   >;
   verifyContractSignature?: (
     wallet: string,

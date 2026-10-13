@@ -43,8 +43,7 @@ export function H(name: string, fields: readonly DigestField[]): Hex {
 }
 
 /** fp(x): first 8 bytes of keccak256(x) as 16 lowercase hex chars, no 0x. */
-export const fp = (bytes: Uint8Array): string =>
-  keccak256(bytes).slice(2, 18);
+export const fp = (bytes: Uint8Array): string => keccak256(bytes).slice(2, 18);
 
 export interface EntryDigestInput {
   readonly g: string;

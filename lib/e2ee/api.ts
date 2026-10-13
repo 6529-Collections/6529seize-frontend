@@ -224,7 +224,9 @@ const post = <T>(endpoint: string, body: object) =>
   );
 
 const put = <T>(endpoint: string, body: object) =>
-  call(() => commonApiPut<object, T>({ endpoint, body, errorMode: "structured" }));
+  call(() =>
+    commonApiPut<object, T>({ endpoint, body, errorMode: "structured" })
+  );
 
 /** REST client bound to the signed-in profile via the common API helpers. */
 export function createE2eeApiClient(): E2eeApiClient {

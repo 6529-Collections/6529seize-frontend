@@ -9,7 +9,11 @@ export interface MlsDeviceHandle {
   setCredential(identity: string): void;
   credentialIdentity(): string | undefined;
   signDigest(digest32: Uint8Array): string;
-  createKeyPackages(count: number, lastResort: boolean, lifetimeSecs: number): string;
+  createKeyPackages(
+    count: number,
+    lastResort: boolean,
+    lifetimeSecs: number
+  ): string;
   createGroup(g: string, metadataJson: string): string;
   groupSummary(g: string): string;
   hasGroup(g: string): boolean;
@@ -49,7 +53,11 @@ export interface WasmModule {
   hTag(name: string): string;
   verifyEd25519(pub: string, digest32: Uint8Array, sig: string): boolean;
   messageDigest(g: string, epoch: number, body: Uint8Array): string;
-  revokeDigest(target: string, revoker: string, revokedAtSecs: bigint | number): string;
+  revokeDigest(
+    target: string,
+    revoker: string,
+    revokedAtSecs: bigint | number
+  ): string;
   /** Module additions (cross-checks of the TS digests). */
   entryDigest?(
     g: string,
@@ -142,6 +150,8 @@ export interface WasmStagedSummary {
   new_epoch_fp: string | null;
   /** Null when `self_removed`. */
   declared_ok: boolean | null;
+  /** Module addition: the committer's leaf after its update path, if any. */
+  sender_leaf_after?: WasmLeaf | null;
 }
 
 export interface WasmProposalSummary {

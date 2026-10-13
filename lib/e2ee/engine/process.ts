@@ -72,7 +72,14 @@ async function requiredRemovalAt(
       },
     ],
   ]);
-  if (isStrictRemoval(deviceKey, { now: atMs, leaving, badGrants, deviceStatus: status })) {
+  if (
+    isStrictRemoval(deviceKey, {
+      now: atMs,
+      leaving,
+      badGrants,
+      deviceStatus: status,
+    })
+  ) {
     return true;
   }
   return mayBeIdle(record.activity[deviceKey], atMs);
@@ -87,7 +94,8 @@ async function requiredRemovals(
 ): Promise<Set<string>> {
   const out = new Set<string>();
   for (const leaf of removed) {
-    const own = leaf.profileId !== null && leaf.profileId === committer.profileId;
+    const own =
+      leaf.profileId !== null && leaf.profileId === committer.profileId;
     if (!own && (await requiredRemovalAt(ctx, runtime, leaf.deviceKey, atMs))) {
       out.add(leaf.deviceKey);
     }
@@ -112,7 +120,10 @@ async function checkAddedLeaves(
   return out;
 }
 
-const sameKeys = (left: readonly string[], right: readonly string[]): boolean => {
+const sameKeys = (
+  left: readonly string[],
+  right: readonly string[]
+): boolean => {
   const a = new Set(left.map((key) => key.toLowerCase()));
   const b = new Set(right.map((key) => key.toLowerCase()));
   return a.size === b.size && [...a].every((key) => b.has(key));
@@ -124,9 +135,37 @@ function noteSiblingRemoval(
   removed: readonly MemberRef[]
 ): void {
   const own = ownDeviceKey(ctx);
-  if (removed.some((leaf) => leaf.profileId === ctx.profileId && leaf.deviceKey !== own)) {
+  if (
+    removed.some(
+      (leaf) => leaf.profileId === ctx.profileId && leaf.deviceKey !== own
+    )
+  ) {
     runtime.record.selfUpdateRequested = true;
   }
+}
+
+/**
+ * The committer's leaf after an update path (credential renewal, 8.8) keeps
+ * its signature key and must carry a valid credential.
+ */
+async function senderLeafOk(
+  ctx: EngineContext,
+  staged: WasmStagedSummary,
+  atMs: number
+): Promise<boolean> {
+  const after = staged.sender_leaf_after;
+  if (!after) {
+    return true;
+  }
+  if (
+    after.device_key.toLowerCase() !== staged.sender.device_key.toLowerCase()
+  ) {
+    return false;
+  }
+  if (after.identity === staged.sender.identity) {
+    return true;
+  }
+  return (await ctx.directory.checkLeaf(after, atMs)).ok;
 }
 
 async function handleStagedCommit(
@@ -142,6 +181,7 @@ async function handleStagedCommit(
   let removed: MemberRef[];
   let committer: MemberRef;
   let required: Set<string>;
+  let senderOk: boolean;
   try {
     committer = {
       deviceKey: staged.sender.device_key.toLowerCase(),
@@ -149,12 +189,26 @@ async function handleStagedCommit(
     };
     added = await checkAddedLeaves(ctx, staged, item.created_at);
     removed = await leafRefs(ctx, staged.removed);
-    required = await requiredRemovals(ctx, runtime, removed, committer, item.created_at);
+    required = await requiredRemovals(
+      ctx,
+      runtime,
+      removed,
+      committer,
+      item.created_at
+    );
+    senderOk = await senderLeafOk(ctx, staged, item.created_at);
   } catch (error) {
     mls.rejectStaged(g);
-    throw error instanceof RetryableError ? error : new RetryableError("validation");
+    throw error instanceof RetryableError
+      ? error
+      : new RetryableError("validation");
   }
   const membersBefore = memberRefs(record);
+  if (!senderOk) {
+    mls.rejectStaged(g);
+    markInvalid(ctx, runtime, "bad-sender-leaf", false);
+    return;
+  }
   const validation = validateCommit({
     entryEpoch: item.epoch,
     committer,
@@ -175,7 +229,13 @@ async function handleStagedCommit(
   if (staged.self_removed) {
     addNotices(
       runtime,
-      [{ type: "removed", actorProfileId: committer.profileId, targetProfileIds: [ctx.profileId] }],
+      [
+        {
+          type: "removed",
+          actorProfileId: committer.profileId,
+          targetProfileIds: [ctx.profileId],
+        },
+      ],
       item.seq,
       item.created_at
     );
@@ -190,13 +250,25 @@ async function handleStagedCommit(
     metadataBefore: staged.metadata_before,
     metadataAfter: staged.metadata_after,
     leaving: new Set(record.leaving),
-    creation: item.epoch === 0 && committer.profileId === staged.metadata_before.created_by,
+    creation:
+      item.epoch === 0 &&
+      committer.profileId === staged.metadata_before.created_by,
   });
-  touchActivity(record, [committer.deviceKey, ...added.map((leaf) => leaf.deviceKey)], item.created_at);
+  touchActivity(
+    record,
+    [committer.deviceKey, ...added.map((leaf) => leaf.deviceKey)],
+    item.created_at
+  );
   noteSiblingRemoval(ctx, runtime, removed);
   const declaredRoster =
-    sameKeys(item.roster_add, added.map((leaf) => leaf.deviceKey)) &&
-    sameKeys(item.roster_remove, removed.map((leaf) => leaf.deviceKey));
+    sameKeys(
+      item.roster_add,
+      added.map((leaf) => leaf.deviceKey)
+    ) &&
+    sameKeys(
+      item.roster_remove,
+      removed.map((leaf) => leaf.deviceKey)
+    );
   if (!declaredRoster) {
     record.rosterCheckNeeded = true;
   }
@@ -266,7 +338,10 @@ async function processEntryItem(
     markInvalid(ctx, runtime, "epoch-gap", false);
     return;
   }
-  if (item.kind === "commit" && (await resolvePendingFromLog(ctx, runtime, item))) {
+  if (
+    item.kind === "commit" &&
+    (await resolvePendingFromLog(ctx, runtime, item))
+  ) {
     return;
   }
   await prefetchDevices(ctx, item.roster_add);
@@ -335,7 +410,10 @@ async function processMessageItem(
     record.sentSeqs.splice(sentIndex, 1);
     return null;
   }
-  if (markOutboxSent(ctx, runtime, item) || runtime.messages.has(undecryptableId(item.seq))) {
+  if (
+    markOutboxSent(ctx, runtime, item) ||
+    runtime.messages.has(undecryptableId(item.seq))
+  ) {
     return null;
   }
   const placeholder = () => {

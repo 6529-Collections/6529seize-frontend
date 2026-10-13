@@ -18,7 +18,10 @@ import { DeviceDirectory } from "./directory";
 import {
   enrollDevice,
   ensureWasm,
+  grantExpired,
   refreshMe,
+  renewalDue,
+  renewGrant,
   submitRevocation,
 } from "./enroll";
 import { E2eeError, errorMessage } from "./errors";
@@ -35,18 +38,30 @@ import {
   setAdmin,
 } from "./membership";
 import { searchMessages } from "./messages";
-import { createDefaultScheduler, SerialQueue, TaskTracker, TimerSet } from "./runtime";
+import {
+  createDefaultScheduler,
+  SerialQueue,
+  TaskTracker,
+  TimerSet,
+} from "./runtime";
 import { queueMessage, queueTargeted } from "./send";
 import { EngineStore, toE2eeMessage } from "./store";
 
 /** Contract section 12 engine: framework-agnostic, one instance per profile. */
 
 const OPEN_CONVERSATION_MS = 60_000;
+const NEEDS_ENROLLMENT = "needs-enrollment" satisfies E2eeEngineStatus;
 
 function supported(options: E2eeEngineOptions): boolean {
-  const hasWasm = typeof WebAssembly === "object" || options.loadWasm !== undefined;
-  const hasCrypto = typeof globalThis.crypto === "object" && "subtle" in globalThis.crypto;
-  return hasWasm && hasCrypto && (options.storage !== undefined || isIndexedDbAvailable());
+  const hasWasm =
+    typeof WebAssembly === "object" || options.loadWasm !== undefined;
+  const hasCrypto =
+    typeof globalThis.crypto === "object" && "subtle" in globalThis.crypto;
+  return (
+    hasWasm &&
+    hasCrypto &&
+    (options.storage !== undefined || isIndexedDbAvailable())
+  );
 }
 
 function createContext(options: E2eeEngineOptions): EngineContext {
@@ -57,7 +72,8 @@ function createContext(options: E2eeEngineOptions): EngineContext {
     api: options.api,
     now,
     verifyContractSignature: options.verifyContractSignature,
-    verifyEd25519: (pub, digest, sig) => holder.ctx?.mls?.verifyEd25519(pub, digest, sig) ?? false,
+    verifyEd25519: (pub, digest, sig) =>
+      holder.ctx?.mls?.verifyEd25519(pub, digest, sig) ?? false,
   });
   const ctx: EngineContext = {
     options,
@@ -86,7 +102,11 @@ function createContext(options: E2eeEngineOptions): EngineContext {
   return ctx;
 }
 
-function setStatus(ctx: EngineContext, status: E2eeEngineStatus, error: string | null = null): void {
+function setStatus(
+  ctx: EngineContext,
+  status: E2eeEngineStatus,
+  error: string | null = null
+): void {
   ctx.store.status = status;
   ctx.store.error = error;
   ctx.store.touch();
@@ -97,7 +117,10 @@ async function loadGroups(ctx: EngineContext): Promise<void> {
   const outbox = await ctx.storage.listOutbox(ctx.profileId);
   for (const record of groups) {
     const runtime = newRuntime(record);
-    for (const message of await ctx.storage.listMessages(ctx.profileId, record.g)) {
+    for (const message of await ctx.storage.listMessages(
+      ctx.profileId,
+      record.g
+    )) {
       runtime.messages.set(message.id, message);
     }
     for (const item of outbox.filter((entry) => entry.g === record.g)) {
@@ -105,11 +128,19 @@ async function loadGroups(ctx: EngineContext): Promise<void> {
     }
     ctx.store.groups.set(record.g, runtime);
   }
-  const names = new Set(groups.flatMap((record) => record.members.map((m) => m.profileId)));
-  await resolveProfiles(ctx, [...names].filter((id): id is string => id !== null));
+  const names = new Set(
+    groups.flatMap((record) => record.members.map((m) => m.profileId))
+  );
+  await resolveProfiles(
+    ctx,
+    [...names].filter((id): id is string => id !== null)
+  );
 }
 
-async function resolveProfiles(ctx: EngineContext, profileIds: string[]): Promise<void> {
+async function resolveProfiles(
+  ctx: EngineContext,
+  profileIds: string[]
+): Promise<void> {
   const missing = profileIds.filter((id) => !ctx.store.profiles.has(id));
   if (missing.length === 0) {
     return;
@@ -117,7 +148,11 @@ async function resolveProfiles(ctx: EngineContext, profileIds: string[]): Promis
   try {
     const resolved = await ctx.options.resolveProfiles(missing);
     for (const [id, info] of Object.entries(resolved)) {
-      ctx.store.profiles.set(id, { handle: info.handle, pfp: info.pfp, wallets: [...info.wallets] });
+      ctx.store.profiles.set(id, {
+        handle: info.handle,
+        pfp: info.pfp,
+        wallets: [...info.wallets],
+      });
     }
     ctx.store.touch();
   } catch {
@@ -159,7 +194,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
     this.ctx = ctx;
     this.controller = new EngineController(ctx, {
       refreshMe: () => this.refreshMe(),
-      onOwnRevoked: () => this.wipe(),
+      onOwnRevoked: () => this.onOwnRejected(),
     });
   }
 
@@ -171,7 +206,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
     try {
       const restored = await restore(this.ctx);
       if (!restored) {
-        setStatus(this.ctx, "needs-enrollment");
+        setStatus(this.ctx, NEEDS_ENROLLMENT);
         return;
       }
       setStatus(this.ctx, "ready");
@@ -190,13 +225,17 @@ class E2eeEngineImpl implements E2eeEngineExt {
   }
 
   private background(task: () => Promise<void>): void {
-    const promise = task().catch((error: unknown) => {
-      if (!this.ctx.disposed) {
-        this.ctx.store.error = errorMessage(error);
-        this.ctx.store.touch();
+    const run = async () => {
+      try {
+        await task();
+      } catch (error) {
+        if (!this.ctx.disposed) {
+          this.ctx.store.error = errorMessage(error);
+          this.ctx.store.touch();
+        }
       }
-    });
-    this.ctx.tasks.track(promise);
+    };
+    void this.ctx.tasks.track(run());
   }
 
   private async refreshMe(): Promise<void> {
@@ -207,6 +246,20 @@ class E2eeEngineImpl implements E2eeEngineExt {
     if (result.ownRevoked) {
       await this.wipe();
     }
+  }
+
+  /**
+   * The server no longer accepts this device. An expired grant keeps the
+   * state for a renewal through enroll(); a revocation wipes it.
+   */
+  private async onOwnRejected(): Promise<void> {
+    const device = this.ctx.device;
+    if (device && grantExpired(this.ctx, device)) {
+      this.controller.stopBackground();
+      setStatus(this.ctx, NEEDS_ENROLLMENT);
+      return;
+    }
+    await this.wipe();
   }
 
   /** This device was revoked: local state is useless; back to enrollment. */
@@ -220,7 +273,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
       this.ctx.store.groups.clear();
       this.ctx.store.thisDevice = null;
       await this.ctx.storage.clearProfile(this.ctx.profileId);
-      setStatus(this.ctx, "needs-enrollment");
+      setStatus(this.ctx, NEEDS_ENROLLMENT);
     });
   }
 
@@ -243,7 +296,8 @@ class E2eeEngineImpl implements E2eeEngineExt {
   getThisDevice = () => this.ctx.store.thisDevice;
   getDevices = () => this.ctx.store.devices;
   getConversations = () => this.ctx.store.getConversations();
-  getConversation = (g: string) => this.ctx.store.getConversation(g.toLowerCase());
+  getConversation = (g: string) =>
+    this.ctx.store.getConversation(g.toLowerCase());
   getMessages = (g: string) => this.ctx.store.getMessages(g.toLowerCase());
   subscribe = (listener: () => void) => this.ctx.store.subscribe(listener);
 
@@ -251,7 +305,11 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   async enroll(): Promise<void> {
     const status = this.ctx.store.status;
-    if (status === "ready" || status === "enrolling" || status === "unsupported") {
+    if (status === "ready") {
+      await this.renew();
+      return;
+    }
+    if (status === "enrolling" || status === "unsupported") {
       return;
     }
     setStatus(this.ctx, "enrolling");
@@ -262,11 +320,38 @@ class E2eeEngineImpl implements E2eeEngineExt {
       }
       await loadGroups(this.ctx);
       setStatus(this.ctx, "ready");
+      try {
+        await this.refreshMe();
+      } catch {
+        // Retried by the background pass.
+      }
       this.start();
     } catch (error) {
       const code = errorMessage(error);
-      setStatus(this.ctx, code === "E2EE_SIGNATURE_REJECTED" ? "needs-enrollment" : "error", code);
+      setStatus(
+        this.ctx,
+        code === "E2EE_SIGNATURE_REJECTED" ? NEEDS_ENROLLMENT : "error",
+        code
+      );
       throw error;
+    }
+  }
+
+  /** 8.8: in the grant's last 14 days, enroll() renews it (one prompt). */
+  private async renew(): Promise<void> {
+    const device = this.ctx.device;
+    if (!device || !renewalDue(this.ctx, device)) {
+      return;
+    }
+    await this.ctx.queue.run(() => renewGrant(this.ctx));
+    for (const runtime of this.ctx.store.groups.values()) {
+      runtime.record.selfUpdateRequested = true;
+    }
+    await this.refreshMe();
+    for (const [g, runtime] of this.ctx.store.groups) {
+      if (runtime.record.status === "active") {
+        await this.controller.maintain(g);
+      }
     }
   }
 
@@ -330,7 +415,12 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   async send(
     g: string,
-    input: { text: string; mentions?: string[]; reply?: string | null; files?: File[] }
+    input: {
+      text: string;
+      mentions?: string[];
+      reply?: string | null;
+      files?: File[];
+    }
   ): Promise<void> {
     this.requireReady();
     await queueMessage(this.ctx, g.toLowerCase(), input);
@@ -339,7 +429,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   private ownMessage(g: string, id: string) {
     const message = requireGroup(this.ctx, g).messages.get(id);
-    if (!message || message.kind !== "message") {
+    if (message?.kind !== "message") {
       throw new E2eeError("E2EE_NO_MESSAGE");
     }
     return message;
@@ -367,11 +457,20 @@ class E2eeEngineImpl implements E2eeEngineExt {
     if (message.senderProfileId !== this.ctx.profileId) {
       throw new E2eeError("E2EE_NOT_SENDER");
     }
-    await queueTargeted(this.ctx, g.toLowerCase(), (base) => ({ ...base, t: "del", target: id }));
+    await queueTargeted(this.ctx, g.toLowerCase(), (base) => ({
+      ...base,
+      t: "del",
+      target: id,
+    }));
     await this.controller.flush(g.toLowerCase());
   }
 
-  async react(g: string, id: string, reaction: string, on: boolean): Promise<void> {
+  async react(
+    g: string,
+    id: string,
+    reaction: string,
+    on: boolean
+  ): Promise<void> {
     this.requireReady();
     this.ownMessage(g, id);
     await queueTargeted(this.ctx, g.toLowerCase(), (base) => ({
@@ -388,39 +487,68 @@ class E2eeEngineImpl implements E2eeEngineExt {
     if (!runtime) {
       return;
     }
-    const latest = Math.max(0, ...[...runtime.messages.values()].map((m) => (m.pending ? 0 : m.seq)));
+    const latest = Math.max(
+      0,
+      ...[...runtime.messages.values()].map((m) => (m.pending ? 0 : m.seq))
+    );
     this.ctx.openConversation = runtime.record.g;
-    this.ctx.openUntil = Math.max(this.ctx.openUntil, this.ctx.now() + OPEN_CONVERSATION_MS);
+    this.ctx.openUntil = Math.max(
+      this.ctx.openUntil,
+      this.ctx.now() + OPEN_CONVERSATION_MS
+    );
     if (latest <= runtime.record.readSeq) {
       return;
     }
     runtime.record.readSeq = latest;
     this.ctx.store.touch(runtime.record.g);
     this.background(() =>
-      this.ctx.queue.run(() => checkpoint(this.ctx, { groups: [runtime], skipWasm: true }))
+      this.ctx.queue.run(() =>
+        checkpoint(this.ctx, { groups: [runtime], skipWasm: true })
+      )
     );
   }
 
   async rename(g: string, name: string): Promise<void> {
     this.requireReady();
-    await rename(this.ctx, g.toLowerCase(), name, this.delayedFor(g.toLowerCase()));
+    await rename(
+      this.ctx,
+      g.toLowerCase(),
+      name,
+      this.delayedFor(g.toLowerCase())
+    );
   }
 
   async addMembers(g: string, profileIds: string[]) {
     this.requireReady();
-    const result = await addMembers(this.ctx, g.toLowerCase(), profileIds, this.delayedFor(g.toLowerCase()));
+    const result = await addMembers(
+      this.ctx,
+      g.toLowerCase(),
+      profileIds,
+      this.delayedFor(g.toLowerCase())
+    );
     await resolveProfiles(this.ctx, profileIds);
     return result;
   }
 
   async removeMember(g: string, profileId: string): Promise<void> {
     this.requireReady();
-    await removeMember(this.ctx, g.toLowerCase(), profileId, this.delayedFor(g.toLowerCase()));
+    await removeMember(
+      this.ctx,
+      g.toLowerCase(),
+      profileId,
+      this.delayedFor(g.toLowerCase())
+    );
   }
 
   async setAdmin(g: string, profileId: string, admin: boolean): Promise<void> {
     this.requireReady();
-    await setAdmin(this.ctx, g.toLowerCase(), profileId, admin, this.delayedFor(g.toLowerCase()));
+    await setAdmin(
+      this.ctx,
+      g.toLowerCase(),
+      profileId,
+      admin,
+      this.delayedFor(g.toLowerCase())
+    );
   }
 
   async leave(g: string): Promise<void> {
@@ -438,7 +566,12 @@ class E2eeEngineImpl implements E2eeEngineExt {
     });
   }
 
-  async report(g: string, id: string, reason: string, notes?: string): Promise<void> {
+  async report(
+    g: string,
+    id: string,
+    reason: string,
+    notes?: string
+  ): Promise<void> {
     this.requireReady();
     const message = this.ownMessage(g, id);
     if (
@@ -497,7 +630,12 @@ class E2eeEngineImpl implements E2eeEngineExt {
       return;
     }
     await this.refreshMe();
-    for (const g of this.controller.onDeviceEvent(true, this.ctx.profileId, target, false)) {
+    for (const g of this.controller.onDeviceEvent(
+      true,
+      this.ctx.profileId,
+      target,
+      false
+    )) {
       await this.controller.maintain(g);
     }
   }
@@ -508,9 +646,14 @@ class E2eeEngineImpl implements E2eeEngineExt {
       throw new E2eeError("E2EE_NOT_READY");
     }
     device.label = label.trim().slice(0, 48) || "Device";
-    await this.ctx.queue.run(() => checkpoint(this.ctx, { device, skipWasm: true }));
+    await this.ctx.queue.run(() =>
+      checkpoint(this.ctx, { device, skipWasm: true })
+    );
     if (this.ctx.store.thisDevice) {
-      this.ctx.store.thisDevice = { ...this.ctx.store.thisDevice, label: device.label };
+      this.ctx.store.thisDevice = {
+        ...this.ctx.store.thisDevice,
+        label: device.label,
+      };
       this.ctx.store.devices = this.ctx.store.devices.map((info) =>
         info.isThisDevice ? { ...info, label: device.label } : info
       );
@@ -520,7 +663,9 @@ class E2eeEngineImpl implements E2eeEngineExt {
 }
 
 /** Creates the engine for one profile; resolves once local state is loaded. */
-export async function createE2eeEngine(options: E2eeEngineOptions): Promise<E2eeEngineExt> {
+export async function createE2eeEngine(
+  options: E2eeEngineOptions
+): Promise<E2eeEngineExt> {
   const engine = new E2eeEngineImpl(createContext(options));
   await engine.init();
   return engine;

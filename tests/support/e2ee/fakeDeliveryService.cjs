@@ -22,7 +22,9 @@ const {
   toBytes,
 } = require("viem");
 
-const ENTRY_BUCKETS = [2048, 8192, 32768, 131072, 262144, 524288, 1048576, 2097152];
+const ENTRY_BUCKETS = [
+  2048, 8192, 32768, 131072, 262144, 524288, 1048576, 2097152,
+];
 const MESSAGE_BUCKETS = [512, 1024, 4096, 16384, 65536];
 const MAX_DEVICES = 10;
 const MAX_ONE_TIME = 100;
@@ -36,7 +38,11 @@ const GRANT_MAX_LIFETIME_S = 181 * 86_400;
 const ZERO32 = `0x${"0".repeat(64)}`;
 
 const E2EE_SALT = keccak256(toBytes("6529 Network pre-genesis interim 1"));
-const GRANT_DOMAIN = { name: "6529 Encrypted Messages", version: "1", salt: E2EE_SALT };
+const GRANT_DOMAIN = {
+  name: "6529 Encrypted Messages",
+  version: "1",
+  salt: E2EE_SALT,
+};
 const GRANT_TYPES = {
   MlsDeviceGrant: [
     { name: "statement", type: "string" },
@@ -56,9 +62,12 @@ const GRANT_TYPES = {
 const isHex = (value, bytes) =>
   typeof value === "string" &&
   /^0x[0-9a-f]*$/.test(value) &&
-  (bytes === undefined ? value.length % 2 === 0 : value.length === 2 + bytes * 2);
+  (bytes === undefined
+    ? value.length % 2 === 0
+    : value.length === 2 + bytes * 2);
 
-const lower = (value) => (typeof value === "string" ? value.toLowerCase() : value);
+const lower = (value) =>
+  typeof value === "string" ? value.toLowerCase() : value;
 const b64 = (bytes) => Buffer.from(bytes).toString("base64");
 const unb64 = (value) => new Uint8Array(Buffer.from(value, "base64"));
 const hexBytes = (hex) => Buffer.from(hex.slice(2), "hex");
@@ -73,7 +82,15 @@ function H(name, fields) {
   );
 }
 
-const entryDigest = (g, epoch, kind, entryHash, commitment, nextKey, paddedLen) =>
+const entryDigest = (
+  g,
+  epoch,
+  kind,
+  entryHash,
+  commitment,
+  nextKey,
+  paddedLen
+) =>
   H("6529.MlsEntry.v1", [
     ["bytes32", g],
     ["uint32", epoch],
@@ -115,10 +132,19 @@ function verifyEd25519(publicKeyHex, digestHex, signatureHex) {
   }
   try {
     const key = crypto.createPublicKey({
-      key: { kty: "OKP", crv: "Ed25519", x: hexBytes(lower(publicKeyHex)).toString("base64url") },
+      key: {
+        kty: "OKP",
+        crv: "Ed25519",
+        x: hexBytes(lower(publicKeyHex)).toString("base64url"),
+      },
       format: "jwk",
     });
-    return crypto.verify(null, hexBytes(digestHex), key, hexBytes(lower(signatureHex)));
+    return crypto.verify(
+      null,
+      hexBytes(digestHex),
+      key,
+      hexBytes(lower(signatureHex))
+    );
   } catch {
     return false;
   }
@@ -217,10 +243,14 @@ function createFakeDeliveryService(options = {}) {
   // -- devices ----------------------------------------------------------------
 
   const isActive = (device) =>
-    device !== undefined && device.revoked_at === null && device.grant.expires_at * 1000 > now();
+    device !== undefined &&
+    device.revoked_at === null &&
+    device.grant.expires_at * 1000 > now();
 
   const activeDevicesOf = (profileId) =>
-    [...s.devices.values()].filter((d) => d.profile_id === profileId && isActive(d));
+    [...s.devices.values()].filter(
+      (d) => d.profile_id === profileId && isActive(d)
+    );
 
   function requireOwnDevice(profileId, deviceKey) {
     const device = s.devices.get(lower(deviceKey));
@@ -231,15 +261,28 @@ function createFakeDeliveryService(options = {}) {
   }
 
   async function verifyGrant(profileId, grant, signature) {
-    if (!grant || !isHex(lower(grant.device_key), 32) || !isHex(lower(grant.wallet), 20)) {
+    if (
+      !grant ||
+      !isHex(lower(grant.device_key), 32) ||
+      !isHex(lower(grant.wallet), 20)
+    ) {
       fail(400, "E2EE_BAD_GRANT");
     }
     const lifetime = grant.expires_at - grant.issued_at;
     const aligned = grant.expires_at % 60 === 0;
-    if (grant.ciphersuite !== 1 || lifetime <= 0 || lifetime > GRANT_MAX_LIFETIME_S || !aligned) {
+    if (
+      grant.ciphersuite !== 1 ||
+      lifetime <= 0 ||
+      lifetime > GRANT_MAX_LIFETIME_S ||
+      !aligned
+    ) {
       fail(400, "E2EE_BAD_GRANT");
     }
-    if (grant.expires_at * 1000 <= now() || typeof grant.origin !== "string" || grant.origin.length > 64) {
+    if (
+      grant.expires_at * 1000 <= now() ||
+      typeof grant.origin !== "string" ||
+      grant.origin.length > 64
+    ) {
       fail(400, "E2EE_BAD_GRANT");
     }
     const allowed = s.wallets.get(profileId);
@@ -274,25 +317,41 @@ function createFakeDeliveryService(options = {}) {
   }
 
   async function registerDevice(profileId, body) {
-    const grantId = await verifyGrant(profileId, body.grant, body.wallet_signature);
+    const grantId = await verifyGrant(
+      profileId,
+      body.grant,
+      body.wallet_signature
+    );
     const key = lower(body.grant.device_key);
     const existing = s.devices.get(key);
-    if (existing && (existing.profile_id !== profileId || existing.revoked_at !== null)) {
+    if (
+      existing &&
+      (existing.profile_id !== profileId || existing.revoked_at !== null)
+    ) {
       fail(409, "E2EE_DEVICE_EXISTS");
     }
     if (!existing && activeDevicesOf(profileId).length >= MAX_DEVICES) {
       fail(409, "E2EE_DEVICE_LIMIT");
     }
-    const label = String(body.label || "Device").replace(/[^A-Za-z0-9 ._()-]/g, "").slice(0, 48) || "Device";
+    const label =
+      String(body.label || "Device")
+        .replace(/[^A-Za-z0-9 ._()-]/g, "")
+        .slice(0, 48) || "Device";
     const device = {
       device_key: key,
       profile_id: profileId,
-      grant: { ...body.grant, wallet: lower(body.grant.wallet), device_key: key },
+      grant: {
+        ...body.grant,
+        wallet: lower(body.grant.wallet),
+        device_key: key,
+      },
       grant_id: lower(grantId),
       wallet_signature: lower(body.wallet_signature),
       verified_via: "eoa",
       label,
-      platform: ["web", "desktop", "phone"].includes(body.platform) ? body.platform : "web",
+      platform: ["web", "desktop", "phone"].includes(body.platform)
+        ? body.platform
+        : "web",
       created_at: existing ? existing.created_at : now(),
       last_seen_at: now(),
       revoked_at: null,
@@ -302,10 +361,19 @@ function createFakeDeliveryService(options = {}) {
     if (!s.keyPackages.has(key)) {
       s.keyPackages.set(key, { oneTime: [], lastResort: null });
     }
-    emit([profileId, ...rosterProfilesSharing(activeDevicesOf(profileId).map((d) => d.device_key))], "E2EE_DEVICE_ADDED", {
-      profile_id: profileId,
-      device_key: key,
-    });
+    emit(
+      [
+        profileId,
+        ...rosterProfilesSharing(
+          activeDevicesOf(profileId).map((d) => d.device_key)
+        ),
+      ],
+      "E2EE_DEVICE_ADDED",
+      {
+        profile_id: profileId,
+        device_key: key,
+      }
+    );
     return device;
   }
 
@@ -322,13 +390,22 @@ function createFakeDeliveryService(options = {}) {
     }
     const revoker = lower(body.revoker_device_key);
     const revokerDevice = s.devices.get(revoker);
-    if (revoker !== target && (!isActive(revokerDevice) || revokerDevice.profile_id !== profileId)) {
+    if (
+      revoker !== target &&
+      (!isActive(revokerDevice) || revokerDevice.profile_id !== profileId)
+    ) {
       fail(403, "E2EE_NOT_YOUR_DEVICE");
     }
     if (Math.abs(body.revoked_at * 1000 - now()) > 10 * 60_000) {
       fail(400, "E2EE_BAD_SIGNATURE");
     }
-    if (!verifyEd25519(revoker, revokeDigest(target, revoker, body.revoked_at), body.signature)) {
+    if (
+      !verifyEd25519(
+        revoker,
+        revokeDigest(target, revoker, body.revoked_at),
+        body.signature
+      )
+    ) {
       fail(400, "E2EE_BAD_SIGNATURE");
     }
     const sharing = rosterProfilesSharing([target]);
@@ -345,17 +422,25 @@ function createFakeDeliveryService(options = {}) {
     }
     s.keyPackages.set(target, { oneTime: [], lastResort: null });
     s.deliveries.delete(target);
-    emit([profileId, ...sharing], "E2EE_DEVICE_REVOKED", { profile_id: profileId, device_key: target });
+    emit([profileId, ...sharing], "E2EE_DEVICE_REVOKED", {
+      profile_id: profileId,
+      device_key: target,
+    });
     return device;
   }
 
   function keyPackageStatus(deviceKey) {
-    const pool = s.keyPackages.get(deviceKey) || { oneTime: [], lastResort: null };
+    const pool = s.keyPackages.get(deviceKey) || {
+      oneTime: [],
+      lastResort: null,
+    };
     const t = now() / 1000;
     return {
       device_key: deviceKey,
       one_time_available: pool.oneTime.filter((kp) => kp.expires_at > t).length,
-      last_resort_expires_at: pool.lastResort ? pool.lastResort.expires_at : null,
+      last_resort_expires_at: pool.lastResort
+        ? pool.lastResort.expires_at
+        : null,
     };
   }
 
@@ -386,12 +471,16 @@ function createFakeDeliveryService(options = {}) {
 
   function getMe(profileId) {
     const devices = [...s.devices.values()].filter(
-      (d) => d.profile_id === profileId && (d.revoked_at === null || now() - d.revoked_at <= REVOKED_VISIBLE_MS)
+      (d) =>
+        d.profile_id === profileId &&
+        (d.revoked_at === null || now() - d.revoked_at <= REVOKED_VISIBLE_MS)
     );
     return {
       profile_id: profileId,
       devices,
-      key_packages: devices.filter(isActive).map((d) => keyPackageStatus(d.device_key)),
+      key_packages: devices
+        .filter(isActive)
+        .map((d) => keyPackageStatus(d.device_key)),
       max_devices: MAX_DEVICES,
     };
   }
@@ -402,14 +491,20 @@ function createFakeDeliveryService(options = {}) {
     if (callerProfileId === targetProfileId) {
       return activeDevicesOf(targetProfileId).length > 0 ? "OK" : "NO_DEVICES";
     }
-    if (s.blocks.has(`${targetProfileId}>${callerProfileId}`) || s.blocks.has(`${callerProfileId}>${targetProfileId}`)) {
+    if (
+      s.blocks.has(`${targetProfileId}>${callerProfileId}`) ||
+      s.blocks.has(`${callerProfileId}>${targetProfileId}`)
+    ) {
       return "BLOCKED";
     }
     const dm = s.dmPolicy.get(targetProfileId) || "EVERYONE";
     if (dm === "NOBODY") {
       return "POLICY";
     }
-    if (dm === "PEOPLE_I_FOLLOW" && !s.follows.has(`${targetProfileId}>${callerProfileId}`)) {
+    if (
+      dm === "PEOPLE_I_FOLLOW" &&
+      !s.follows.has(`${targetProfileId}>${callerProfileId}`)
+    ) {
       return "POLICY";
     }
     return activeDevicesOf(targetProfileId).length > 0 ? "OK" : "NO_DEVICES";
@@ -433,17 +528,29 @@ function createFakeDeliveryService(options = {}) {
   }
 
   function claim(profileId, body) {
-    const claimer = requireOwnDevice(profileId, body.claimer_device_key).device_key;
+    const claimer = requireOwnDevice(
+      profileId,
+      body.claimer_device_key
+    ).device_key;
     const group = body.group ? s.groups.get(lower(body.group)) : null;
     const claimerInGroup = group ? group.roster.has(claimer) : false;
     const results = (body.targets || []).map((target) => {
       const inRoster =
-        claimerInGroup && [...group.roster.values()].some((entry) => entry.profile_id === target.profile_id);
-      const status = inRoster ? (activeDevicesOf(target.profile_id).length > 0 ? "OK" : "NO_DEVICES") : policy(profileId, target.profile_id);
+        claimerInGroup &&
+        [...group.roster.values()].some(
+          (entry) => entry.profile_id === target.profile_id
+        );
+      const status = inRoster
+        ? activeDevicesOf(target.profile_id).length > 0
+          ? "OK"
+          : "NO_DEVICES"
+        : policy(profileId, target.profile_id);
       if (status !== "OK") {
         return { profile_id: target.profile_id, status, key_packages: [] };
       }
-      const wanted = target.device_keys ? new Set(target.device_keys.map(lower)) : null;
+      const wanted = target.device_keys
+        ? new Set(target.device_keys.map(lower))
+        : null;
       const keyPackages = [];
       for (const device of activeDevicesOf(target.profile_id)) {
         if (wanted && !wanted.has(device.device_key)) {
@@ -451,10 +558,18 @@ function createFakeDeliveryService(options = {}) {
         }
         const kp = popKeyPackage(device.device_key);
         if (kp) {
-          keyPackages.push({ device, key_package: kp.data, last_resort: kp.last_resort });
+          keyPackages.push({
+            device,
+            key_package: kp.data,
+            last_resort: kp.last_resort,
+          });
         }
       }
-      return { profile_id: target.profile_id, status, key_packages: keyPackages };
+      return {
+        profile_id: target.profile_id,
+        status,
+        key_packages: keyPackages,
+      };
     });
     return { results };
   }
@@ -472,7 +587,11 @@ function createFakeDeliveryService(options = {}) {
   // -- groups -------------------------------------------------------------------
 
   function addToRoster(group, deviceKey, profileId, joinedEpoch) {
-    group.roster.set(deviceKey, { device_key: deviceKey, profile_id: profileId, joined_epoch: joinedEpoch });
+    group.roster.set(deviceKey, {
+      device_key: deviceKey,
+      profile_id: profileId,
+      joined_epoch: joinedEpoch,
+    });
     const periods = group.history.get(deviceKey) || [];
     periods.push({ joined_epoch: joinedEpoch, removed_epoch: null });
     group.history.set(deviceKey, periods);
@@ -494,7 +613,9 @@ function createFakeDeliveryService(options = {}) {
     last_seq: group.items.length,
     created_at: group.createdAt,
     updated_at: group.updatedAt,
-    roster: includeRoster ? [...group.roster.values()].map((entry) => ({ ...entry })) : [],
+    roster: includeRoster
+      ? [...group.roster.values()].map((entry) => ({ ...entry }))
+      : [],
   });
 
   function requireGroup(g) {
@@ -505,7 +626,9 @@ function createFakeDeliveryService(options = {}) {
     return group;
   }
 
-  const rosterProfiles = (group) => [...new Set([...group.roster.values()].map((e) => e.profile_id))];
+  const rosterProfiles = (group) => [
+    ...new Set([...group.roster.values()].map((e) => e.profile_id)),
+  ];
 
   function createGroup(profileId, body) {
     const creator = requireOwnDevice(profileId, body.creator_device_key);
@@ -514,7 +637,9 @@ function createFakeDeliveryService(options = {}) {
       fail(400, "E2EE_BAD_SIGNATURE");
     }
     if (s.groups.has(g)) {
-      fail(409, "E2EE_EPOCH_CONFLICT", { current_epoch: s.groups.get(g).epoch });
+      fail(409, "E2EE_EPOCH_CONFLICT", {
+        current_epoch: s.groups.get(g).epoch,
+      });
     }
     const group = {
       g,
@@ -547,7 +672,11 @@ function createFakeDeliveryService(options = {}) {
 
   function checkEntryShape(group, body) {
     if (body.epoch !== group.epoch) {
-      fail(409, body.kind === "commit" ? "E2EE_EPOCH_CONFLICT" : "E2EE_EPOCH_STALE", { current_epoch: group.epoch });
+      fail(
+        409,
+        body.kind === "commit" ? "E2EE_EPOCH_CONFLICT" : "E2EE_EPOCH_STALE",
+        { current_epoch: group.epoch }
+      );
     }
     const data = unb64(body.data || "");
     if (!ENTRY_BUCKETS.includes(data.length)) {
@@ -565,10 +694,16 @@ function createFakeDeliveryService(options = {}) {
       lower(body.next_commit_key),
       data.length
     );
-    if (!verifyEd25519(group.commitKeys.get(group.epoch), digest, body.signature)) {
+    if (
+      !verifyEd25519(group.commitKeys.get(group.epoch), digest, body.signature)
+    ) {
       fail(400, "E2EE_BAD_SIGNATURE");
     }
-    if (body.kind === "proposal" && (lower(body.epoch_commitment) !== ZERO32 || lower(body.next_commit_key) !== ZERO32)) {
+    if (
+      body.kind === "proposal" &&
+      (lower(body.epoch_commitment) !== ZERO32 ||
+        lower(body.next_commit_key) !== ZERO32)
+    ) {
       fail(400, "E2EE_BAD_SIGNATURE");
     }
     return data;
@@ -625,7 +760,10 @@ function createFakeDeliveryService(options = {}) {
 
   function submitEntry(profileId, g, body) {
     const group = requireGroup(g);
-    const sender = requireOwnDevice(profileId, body.sender_device_key).device_key;
+    const sender = requireOwnDevice(
+      profileId,
+      body.sender_device_key
+    ).device_key;
     if (!group.roster.has(sender)) {
       fail(404, "E2EE_NOT_MEMBER");
     }
@@ -636,15 +774,21 @@ function createFakeDeliveryService(options = {}) {
     if (body.kind === "commit" && group.commits.has(group.epoch)) {
       fail(409, "E2EE_EPOCH_CONFLICT", { current_epoch: group.epoch });
     }
-    if (body.kind === "proposal" && (group.proposals.get(group.epoch) || 0) >= MAX_PROPOSALS_PER_EPOCH) {
+    if (
+      body.kind === "proposal" &&
+      (group.proposals.get(group.epoch) || 0) >= MAX_PROPOSALS_PER_EPOCH
+    ) {
       fail(429, "E2EE_RATE_LIMITED");
     }
-    const adds = body.kind === "commit" ? (body.roster_add || []).map(lower) : [];
+    const adds =
+      body.kind === "commit" ? (body.roster_add || []).map(lower) : [];
     const removes = (body.roster_remove || []).map(lower);
     checkRosterAdds(profileId, group, adds);
     const before = rosterProfiles(group);
     const welcome =
-      body.kind === "commit" ? storeWelcome(profileId, sender, group, body.welcome, adds) : { targets: [], welcomeId: null };
+      body.kind === "commit"
+        ? storeWelcome(profileId, sender, group, body.welcome, adds)
+        : { targets: [], welcomeId: null };
     const n = group.epoch;
     const item = {
       seq: group.items.length + 1,
@@ -679,18 +823,35 @@ function createFakeDeliveryService(options = {}) {
       group.proposals.set(n, (group.proposals.get(n) || 0) + 1);
       for (const key of removes) {
         const device = s.devices.get(key);
-        if (group.roster.has(key) && device && device.profile_id === profileId) {
+        if (
+          group.roster.has(key) &&
+          device &&
+          device.profile_id === profileId
+        ) {
           removeFromRoster(group, key, n);
         }
       }
     }
     const after = rosterProfiles(group);
-    emit([...before, ...after], "E2EE_GROUP_EVENT", { group: group.g, seq: item.seq, epoch: n, type: "entry" });
+    emit([...before, ...after], "E2EE_GROUP_EVENT", {
+      group: group.g,
+      seq: item.seq,
+      epoch: n,
+      type: "entry",
+    });
     for (const key of welcome.targets) {
       const device = s.devices.get(key);
-      emit([device.profile_id], "E2EE_WELCOME", { device_key: key, welcome_id: welcome.welcomeId, group: group.g });
+      emit([device.profile_id], "E2EE_WELCOME", {
+        device_key: key,
+        welcome_id: welcome.welcomeId,
+        group: group.g,
+      });
     }
-    const added = new Set(adds.map((key) => s.devices.get(key).profile_id).filter((p) => !before.includes(p)));
+    const added = new Set(
+      adds
+        .map((key) => s.devices.get(key).profile_id)
+        .filter((p) => !before.includes(p))
+    );
     for (const target of added) {
       s.wakes.push({ profile_id: target, reason: "added", group: group.g });
     }
@@ -700,7 +861,9 @@ function createFakeDeliveryService(options = {}) {
   function visibleTo(group, deviceKey, item) {
     const periods = group.history.get(deviceKey) || [];
     return periods.some(
-      (p) => item.epoch >= p.joined_epoch && (p.removed_epoch === null || item.epoch < p.removed_epoch)
+      (p) =>
+        item.epoch >= p.joined_epoch &&
+        (p.removed_epoch === null || item.epoch < p.removed_epoch)
     );
   }
 
@@ -712,10 +875,14 @@ function createFakeDeliveryService(options = {}) {
     }
     const after = Number(query.after_seq || 0);
     const limit = Math.min(200, Math.max(1, Number(query.limit || 100)));
-    const visible = group.items.filter((item) => item.seq > after && visibleTo(group, device.device_key, item));
+    const visible = group.items.filter(
+      (item) => item.seq > after && visibleTo(group, device.device_key, item)
+    );
     const page = visible.slice(0, limit).map((item) => {
       const copy = structuredClone(item);
-      return s.tamper ? s.tamper(copy, { profileId, deviceKey: device.device_key }) : copy;
+      return s.tamper
+        ? s.tamper(copy, { profileId, deviceKey: device.device_key })
+        : copy;
     });
     const more = visible.length > limit;
     return {
@@ -727,7 +894,10 @@ function createFakeDeliveryService(options = {}) {
 
   function sendMessage(profileId, g, body) {
     const group = requireGroup(g);
-    const sender = requireOwnDevice(profileId, body.sender_device_key).device_key;
+    const sender = requireOwnDevice(
+      profileId,
+      body.sender_device_key
+    ).device_key;
     if (!group.roster.has(sender)) {
       fail(404, "E2EE_NOT_MEMBER");
     }
@@ -738,7 +908,10 @@ function createFakeDeliveryService(options = {}) {
     if (!MESSAGE_BUCKETS.includes(data.length)) {
       fail(413, "E2EE_TOO_LARGE");
     }
-    if (typeof body.epoch_fp !== "string" || !/^[0-9a-f]{16}$/.test(body.epoch_fp)) {
+    if (
+      typeof body.epoch_fp !== "string" ||
+      !/^[0-9a-f]{16}$/.test(body.epoch_fp)
+    ) {
       fail(400, "E2EE_BAD_SIGNATURE");
     }
     const notify = (body.notify || []).slice(0, 200);
@@ -759,20 +932,36 @@ function createFakeDeliveryService(options = {}) {
     };
     group.items.push(item);
     group.updatedAt = now();
-    s.notifyLog.push({ group: group.g, sender_profile_id: profileId, hints: structuredClone(notify) });
+    s.notifyLog.push({
+      group: group.g,
+      sender_profile_id: profileId,
+      hints: structuredClone(notify),
+    });
     const roster = new Set(rosterProfiles(group));
     for (const hint of notify) {
       if (roster.has(hint.profile_id) && hint.profile_id !== profileId) {
-        s.wakes.push({ profile_id: hint.profile_id, reason: "message", group: group.g });
+        s.wakes.push({
+          profile_id: hint.profile_id,
+          reason: "message",
+          group: group.g,
+        });
       }
     }
-    emit(rosterProfiles(group), "E2EE_GROUP_EVENT", { group: group.g, seq: item.seq, epoch: item.epoch, type: "message" });
+    emit(rosterProfiles(group), "E2EE_GROUP_EVENT", {
+      group: group.g,
+      seq: item.seq,
+      epoch: item.epoch,
+      type: "message",
+    });
     return { seq: item.seq, created_at: item.created_at };
   }
 
   function repairRoster(profileId, g, body) {
     const group = requireGroup(g);
-    const requester = requireOwnDevice(profileId, body.requester_device_key).device_key;
+    const requester = requireOwnDevice(
+      profileId,
+      body.requester_device_key
+    ).device_key;
     if (!group.roster.has(requester)) {
       fail(404, "E2EE_NOT_MEMBER");
     }
@@ -780,7 +969,13 @@ function createFakeDeliveryService(options = {}) {
       fail(409, "E2EE_EPOCH_STALE", { current_epoch: group.epoch });
     }
     const keys = (body.device_keys || []).map(lower);
-    if (!verifyEd25519(group.commitKeys.get(group.epoch), rosterDigest(group.g, group.epoch, keys), body.signature)) {
+    if (
+      !verifyEd25519(
+        group.commitKeys.get(group.epoch),
+        rosterDigest(group.g, group.epoch, keys),
+        body.signature
+      )
+    ) {
       fail(400, "E2EE_BAD_SIGNATURE");
     }
     const wanted = new Set(keys);
@@ -795,7 +990,10 @@ function createFakeDeliveryService(options = {}) {
       addToRoster(group, key, s.devices.get(key).profile_id, group.epoch);
     }
     s.rosterRepairs = (s.rosterRepairs || 0) + 1;
-    emit(rosterProfiles(group), "E2EE_ROSTER_CHANGED", { group: group.g, epoch: group.epoch });
+    emit(rosterProfiles(group), "E2EE_ROSTER_CHANGED", {
+      group: group.g,
+      epoch: group.epoch,
+    });
     return groupView(group, true);
   }
 
@@ -809,7 +1007,10 @@ function createFakeDeliveryService(options = {}) {
 
   function ackWelcome(profileId, deviceKey, welcomeId) {
     requireOwnDevice(profileId, deviceKey);
-    s.deliveries.set(deviceKey, (s.deliveries.get(deviceKey) || []).filter((wid) => wid !== welcomeId));
+    s.deliveries.set(
+      deviceKey,
+      (s.deliveries.get(deviceKey) || []).filter((wid) => wid !== welcomeId)
+    );
     return {};
   }
 
@@ -829,7 +1030,10 @@ function createFakeDeliveryService(options = {}) {
   // -- blobs --------------------------------------------------------------------
 
   function createBlob(profileId, body) {
-    const uploader = requireOwnDevice(profileId, body.uploader_device_key).device_key;
+    const uploader = requireOwnDevice(
+      profileId,
+      body.uploader_device_key
+    ).device_key;
     const group = requireGroup(body.group);
     if (!group.roster.has(uploader)) {
       fail(404, "E2EE_NOT_MEMBER");
@@ -885,7 +1089,10 @@ function createFakeDeliveryService(options = {}) {
   function completeBlob(profileId, blobId) {
     const blob = requireBlob(blobId);
     requireOwnDevice(profileId, blob.uploader);
-    const total = [...blob.chunks.values()].reduce((sum, data) => sum + unb64(data).length, 0);
+    const total = [...blob.chunks.values()].reduce(
+      (sum, data) => sum + unb64(data).length,
+      0
+    );
     if (blob.chunks.size !== blob.chunk_count || total !== blob.size) {
       fail(400, "E2EE_TOO_LARGE");
     }
@@ -910,7 +1117,10 @@ function createFakeDeliveryService(options = {}) {
   // -- reports ------------------------------------------------------------------
 
   function report(profileId, body) {
-    const reporter = requireOwnDevice(profileId, body.reporter_device_key).device_key;
+    const reporter = requireOwnDevice(
+      profileId,
+      body.reporter_device_key
+    ).device_key;
     const group = requireGroup(body.group);
     if (!group.history.has(reporter)) {
       fail(404, "E2EE_NOT_MEMBER");
@@ -928,7 +1138,13 @@ function createFakeDeliveryService(options = {}) {
       sender_profile_id: verified && sender ? sender.profile_id : null,
       created_at: now(),
     };
-    s.reports.push({ ...record, reporter_profile_id: profileId, reason: body.reason, notes: body.notes || null, body: body.body });
+    s.reports.push({
+      ...record,
+      reporter_profile_id: profileId,
+      reason: body.reason,
+      notes: body.notes || null,
+      body: body.body,
+    });
     return record;
   }
 
@@ -937,45 +1153,99 @@ function createFakeDeliveryService(options = {}) {
   const routes = [
     ["GET", /^e2ee\/me$/, (c) => getMe(c.profileId)],
     ["POST", /^e2ee\/devices$/, (c) => registerDevice(c.profileId, c.body)],
-    ["GET", /^e2ee\/devices\/(0x[0-9a-f]+)$/, (c, [key]) => s.devices.get(key) || fail(404, "E2EE_NOT_FOUND")],
+    [
+      "GET",
+      /^e2ee\/devices\/(0x[0-9a-f]+)$/,
+      (c, [key]) => s.devices.get(key) || fail(404, "E2EE_NOT_FOUND"),
+    ],
     [
       "GET",
       /^e2ee\/profiles\/([^/]+)\/devices$/,
       (c, [pid]) =>
         [...s.devices.values()].filter(
-          (d) => d.profile_id === decodeURIComponent(pid) && (d.revoked_at === null || now() - d.revoked_at <= REVOKED_VISIBLE_MS)
+          (d) =>
+            d.profile_id === decodeURIComponent(pid) &&
+            (d.revoked_at === null ||
+              now() - d.revoked_at <= REVOKED_VISIBLE_MS)
         ),
     ],
-    ["POST", /^e2ee\/devices\/(0x[0-9a-f]+)\/revoke$/, (c, [key]) => revokeDevice(c.profileId, key, c.body)],
-    ["POST", /^e2ee\/devices\/(0x[0-9a-f]+)\/key-packages$/, (c, [key]) => uploadKeyPackages(c.profileId, key, c.body)],
+    [
+      "POST",
+      /^e2ee\/devices\/(0x[0-9a-f]+)\/revoke$/,
+      (c, [key]) => revokeDevice(c.profileId, key, c.body),
+    ],
+    [
+      "POST",
+      /^e2ee\/devices\/(0x[0-9a-f]+)\/key-packages$/,
+      (c, [key]) => uploadKeyPackages(c.profileId, key, c.body),
+    ],
     ["POST", /^e2ee\/key-packages\/claim$/, (c) => claim(c.profileId, c.body)],
     ["POST", /^e2ee\/eligibility$/, (c) => eligibility(c.profileId, c.body)],
     ["POST", /^e2ee\/groups$/, (c) => createGroup(c.profileId, c.body)],
-    ["GET", /^e2ee\/groups\/(0x[0-9a-f]+)$/, (c, [g]) => getGroup(c.profileId, g, lower(c.query.device_key))],
-    ["POST", /^e2ee\/groups\/(0x[0-9a-f]+)\/entries$/, (c, [g]) => submitEntry(c.profileId, g, c.body)],
-    ["GET", /^e2ee\/groups\/(0x[0-9a-f]+)\/log$/, (c, [g]) => getLog(c.profileId, g, c.query)],
-    ["POST", /^e2ee\/groups\/(0x[0-9a-f]+)\/messages$/, (c, [g]) => sendMessage(c.profileId, g, c.body)],
-    ["POST", /^e2ee\/groups\/(0x[0-9a-f]+)\/roster$/, (c, [g]) => repairRoster(c.profileId, g, c.body)],
-    ["GET", /^e2ee\/devices\/(0x[0-9a-f]+)\/welcomes$/, (c, [key]) => getWelcomes(c.profileId, key)],
+    [
+      "GET",
+      /^e2ee\/groups\/(0x[0-9a-f]+)$/,
+      (c, [g]) => getGroup(c.profileId, g, lower(c.query.device_key)),
+    ],
+    [
+      "POST",
+      /^e2ee\/groups\/(0x[0-9a-f]+)\/entries$/,
+      (c, [g]) => submitEntry(c.profileId, g, c.body),
+    ],
+    [
+      "GET",
+      /^e2ee\/groups\/(0x[0-9a-f]+)\/log$/,
+      (c, [g]) => getLog(c.profileId, g, c.query),
+    ],
+    [
+      "POST",
+      /^e2ee\/groups\/(0x[0-9a-f]+)\/messages$/,
+      (c, [g]) => sendMessage(c.profileId, g, c.body),
+    ],
+    [
+      "POST",
+      /^e2ee\/groups\/(0x[0-9a-f]+)\/roster$/,
+      (c, [g]) => repairRoster(c.profileId, g, c.body),
+    ],
+    [
+      "GET",
+      /^e2ee\/devices\/(0x[0-9a-f]+)\/welcomes$/,
+      (c, [key]) => getWelcomes(c.profileId, key),
+    ],
     [
       "POST",
       /^e2ee\/devices\/(0x[0-9a-f]+)\/welcomes\/([^/]+)\/ack$/,
       (c, [key, wid]) => ackWelcome(c.profileId, key, decodeURIComponent(wid)),
     ],
-    ["GET", /^e2ee\/devices\/(0x[0-9a-f]+)\/groups$/, (c, [key]) => deviceGroups(c.profileId, key)],
+    [
+      "GET",
+      /^e2ee\/devices\/(0x[0-9a-f]+)\/groups$/,
+      (c, [key]) => deviceGroups(c.profileId, key),
+    ],
     ["POST", /^e2ee\/blobs$/, (c) => createBlob(c.profileId, c.body)],
-    ["PUT", /^e2ee\/blobs\/(0x[0-9a-f]+)\/chunks\/(\d+)$/, (c, [blob, index]) => putChunk(c.profileId, blob, Number(index), c.body)],
-    ["POST", /^e2ee\/blobs\/(0x[0-9a-f]+)\/complete$/, (c, [blob]) => completeBlob(c.profileId, blob)],
+    [
+      "PUT",
+      /^e2ee\/blobs\/(0x[0-9a-f]+)\/chunks\/(\d+)$/,
+      (c, [blob, index]) => putChunk(c.profileId, blob, Number(index), c.body),
+    ],
+    [
+      "POST",
+      /^e2ee\/blobs\/(0x[0-9a-f]+)\/complete$/,
+      (c, [blob]) => completeBlob(c.profileId, blob),
+    ],
     [
       "GET",
       /^e2ee\/blobs\/(0x[0-9a-f]+)\/chunks\/(\d+)$/,
-      (c, [blob, index]) => getChunk(c.profileId, blob, Number(index), lower(c.query.device_key)),
+      (c, [blob, index]) =>
+        getChunk(c.profileId, blob, Number(index), lower(c.query.device_key)),
     ],
     ["POST", /^e2ee\/reports$/, (c) => report(c.profileId, c.body)],
   ];
 
   function takeFault(method, path) {
-    const index = s.faults.findIndex((f) => f.method === method && f.path.test(path) && f.times !== 0);
+    const index = s.faults.findIndex(
+      (f) => f.method === method && f.path.test(path) && f.times !== 0
+    );
     if (index < 0) {
       return null;
     }
@@ -993,7 +1263,10 @@ function createFakeDeliveryService(options = {}) {
     const record = { method, path, profileId, status: 0, code: null };
     s.requests.push(record);
     if (!profileId) {
-      return { status: 401, body: { error: "unauthorized", code: "UNAUTHORIZED" } };
+      return {
+        status: 401,
+        body: { error: "unauthorized", code: "UNAUTHORIZED" },
+      };
     }
     if (s.gate && method === "POST" && s.gate.path.test(path)) {
       await new Promise((resolve) => s.gate.waiters.push(resolve));
@@ -1002,7 +1275,10 @@ function createFakeDeliveryService(options = {}) {
     if (fault) {
       record.status = fault.status;
       record.code = fault.code || null;
-      return { status: fault.status, body: { error: fault.code || "fault", code: fault.code || null } };
+      return {
+        status: fault.status,
+        body: { error: fault.code || "fault", code: fault.code || null },
+      };
     }
     for (const [routeMethod, pattern, run] of routes) {
       const match = routeMethod === method ? pattern.exec(path) : null;
@@ -1010,19 +1286,32 @@ function createFakeDeliveryService(options = {}) {
         continue;
       }
       try {
-        const body = await run({ profileId, body: structuredClone(input.body || {}), query: input.query || {} }, match.slice(1).map(lower));
+        const body = await run(
+          {
+            profileId,
+            body: structuredClone(input.body || {}),
+            query: input.query || {},
+          },
+          match.slice(1).map(lower)
+        );
         record.status = 200;
         return { status: 200, body: structuredClone(body) };
       } catch (error) {
         if (error instanceof HttpError) {
           record.status = error.status;
           record.code = error.code;
-          return { status: error.status, body: { error: error.code, code: error.code, ...error.extra } };
+          return {
+            status: error.status,
+            body: { error: error.code, code: error.code, ...error.extra },
+          };
         }
         throw error;
       }
     }
-    return { status: 404, body: { error: "not found", code: "E2EE_NOT_FOUND" } };
+    return {
+      status: 404,
+      body: { error: "not found", code: "E2EE_NOT_FOUND" },
+    };
   }
 
   return {
@@ -1100,11 +1389,14 @@ function createFakeDeliveryService(options = {}) {
 // ---------------------------------------------------------------------------
 
 function apiError(status, body) {
-  const error = new Error(body && body.error ? String(body.error) : `HTTP ${status}`);
+  const error = new Error(
+    body && body.error ? String(body.error) : `HTTP ${status}`
+  );
   error.name = "E2eeApiError";
   error.status = status;
   error.code = body && typeof body.code === "string" ? body.code : null;
-  error.currentEpoch = body && typeof body.current_epoch === "number" ? body.current_epoch : null;
+  error.currentEpoch =
+    body && typeof body.current_epoch === "number" ? body.current_epoch : null;
   return error;
 }
 
@@ -1121,32 +1413,49 @@ function createFakeApiClient(ds, profileId) {
     getMe: () => call("GET", "e2ee/me"),
     registerDevice: (body) => call("POST", "e2ee/devices", body),
     getDevice: (key) => call("GET", `e2ee/devices/${enc(key)}`),
-    getProfileDevices: (pid) => call("GET", `e2ee/profiles/${enc(pid)}/devices`),
-    revokeDevice: (key, body) => call("POST", `e2ee/devices/${enc(key)}/revoke`, body),
-    uploadKeyPackages: (key, body) => call("POST", `e2ee/devices/${enc(key)}/key-packages`, body),
+    getProfileDevices: (pid) =>
+      call("GET", `e2ee/profiles/${enc(pid)}/devices`),
+    revokeDevice: (key, body) =>
+      call("POST", `e2ee/devices/${enc(key)}/revoke`, body),
+    uploadKeyPackages: (key, body) =>
+      call("POST", `e2ee/devices/${enc(key)}/key-packages`, body),
     claimKeyPackages: (body) => call("POST", "e2ee/key-packages/claim", body),
     checkEligibility: (body) => call("POST", "e2ee/eligibility", body),
     createGroup: (body) => call("POST", "e2ee/groups", body),
-    getGroup: (g, deviceKey) => call("GET", `e2ee/groups/${enc(g)}`, undefined, { device_key: deviceKey }),
-    submitEntry: (g, body) => call("POST", `e2ee/groups/${enc(g)}/entries`, body),
+    getGroup: (g, deviceKey) =>
+      call("GET", `e2ee/groups/${enc(g)}`, undefined, {
+        device_key: deviceKey,
+      }),
+    submitEntry: (g, body) =>
+      call("POST", `e2ee/groups/${enc(g)}/entries`, body),
     getLog: (g, query) =>
       call("GET", `e2ee/groups/${enc(g)}/log`, undefined, {
         device_key: query.deviceKey,
         after_seq: String(query.afterSeq),
         limit: String(query.limit || 100),
       }),
-    sendMessage: (g, body) => call("POST", `e2ee/groups/${enc(g)}/messages`, body),
-    repairRoster: (g, body) => call("POST", `e2ee/groups/${enc(g)}/roster`, body),
+    sendMessage: (g, body) =>
+      call("POST", `e2ee/groups/${enc(g)}/messages`, body),
+    repairRoster: (g, body) =>
+      call("POST", `e2ee/groups/${enc(g)}/roster`, body),
     getWelcomes: (key) => call("GET", `e2ee/devices/${enc(key)}/welcomes`),
     ackWelcome: async (key, wid) => {
-      await call("POST", `e2ee/devices/${enc(key)}/welcomes/${enc(wid)}/ack`, {});
+      await call(
+        "POST",
+        `e2ee/devices/${enc(key)}/welcomes/${enc(wid)}/ack`,
+        {}
+      );
     },
     getDeviceGroups: (key) => call("GET", `e2ee/devices/${enc(key)}/groups`),
     createBlob: (body) => call("POST", "e2ee/blobs", body),
-    putBlobChunk: (blob, index, body) => call("PUT", `e2ee/blobs/${enc(blob)}/chunks/${index}`, body),
-    completeBlob: (blob) => call("POST", `e2ee/blobs/${enc(blob)}/complete`, {}),
+    putBlobChunk: (blob, index, body) =>
+      call("PUT", `e2ee/blobs/${enc(blob)}/chunks/${index}`, body),
+    completeBlob: (blob) =>
+      call("POST", `e2ee/blobs/${enc(blob)}/complete`, {}),
     getBlobChunk: (blob, index, deviceKey) =>
-      call("GET", `e2ee/blobs/${enc(blob)}/chunks/${index}`, undefined, { device_key: deviceKey }),
+      call("GET", `e2ee/blobs/${enc(blob)}/chunks/${index}`, undefined, {
+        device_key: deviceKey,
+      }),
     report: (body) => call("POST", "e2ee/reports", body),
   };
 }

@@ -105,12 +105,15 @@ export class TimerSet {
       }
       this.scheduler.clearTimeout(existing);
     }
-    const handle = this.scheduler.setTimeout(() => {
-      this.timers.delete(key);
-      if (!this.disposed) {
-        fire();
-      }
-    }, Math.max(0, ms));
+    const handle = this.scheduler.setTimeout(
+      () => {
+        this.timers.delete(key);
+        if (!this.disposed) {
+          fire();
+        }
+      },
+      Math.max(0, ms)
+    );
     this.timers.set(key, handle);
   }
 

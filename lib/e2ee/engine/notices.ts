@@ -30,7 +30,9 @@ const principalsOf = (members: readonly MemberRef[]): Map<string, number> => {
 function membersAfter(change: CommitChange): MemberRef[] {
   const removedKeys = new Set(change.removed.map((member) => member.deviceKey));
   return [
-    ...change.membersBefore.filter((member) => !removedKeys.has(member.deviceKey)),
+    ...change.membersBefore.filter(
+      (member) => !removedKeys.has(member.deviceKey)
+    ),
     ...change.added,
   ];
 }
@@ -42,7 +44,9 @@ function departureNotices(
   const left: string[] = [];
   const removed: string[] = [];
   for (const profileId of gone) {
-    const leaves = change.removed.filter((member) => member.profileId === profileId);
+    const leaves = change.removed.filter(
+      (member) => member.profileId === profileId
+    );
     const voluntary =
       profileId === change.committerProfileId ||
       leaves.every((member) => change.leaving.has(member.deviceKey));
@@ -50,7 +54,11 @@ function departureNotices(
   }
   const notices: StoredNotice[] = [];
   for (const profileId of left) {
-    notices.push({ type: "left", actorProfileId: profileId, targetProfileIds: [profileId] });
+    notices.push({
+      type: "left",
+      actorProfileId: profileId,
+      targetProfileIds: [profileId],
+    });
   }
   if (removed.length > 0) {
     notices.push({

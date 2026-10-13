@@ -138,7 +138,8 @@ function checkRemovals(
   committerIsAdmin: boolean
 ): CommitValidation | null {
   for (const leaf of input.removed) {
-    const own = leaf.profileId !== null && leaf.profileId === input.committer.profileId;
+    const own =
+      leaf.profileId !== null && leaf.profileId === input.committer.profileId;
     if (own || committerIsAdmin) {
       continue;
     }

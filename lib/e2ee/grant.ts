@@ -11,7 +11,9 @@ import { isHex } from "./bytes";
 
 /** Contract section 2: wallet-signed EIP-712 device grants. */
 
-export const E2EE_SALT = keccak256(toBytes("6529 Network pre-genesis interim 1"));
+export const E2EE_SALT = keccak256(
+  toBytes("6529 Network pre-genesis interim 1")
+);
 export const E2EE_CIPHERSUITE = 1;
 export const GRANT_LIFETIME_SECONDS = 15_552_000; // 180 days
 export const GRANT_MAX_LIFETIME_SECONDS = 181 * 86_400;
@@ -176,7 +178,10 @@ function checkGrantFields(
   if (grant.ciphersuite !== E2EE_CIPHERSUITE) {
     return "ciphersuite";
   }
-  if (!Number.isInteger(grant.issued_at) || !Number.isInteger(grant.expires_at)) {
+  if (
+    !Number.isInteger(grant.issued_at) ||
+    !Number.isInteger(grant.expires_at)
+  ) {
     return "times";
   }
   if (grant.expires_at % 60 !== 0) {

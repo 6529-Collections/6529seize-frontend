@@ -29,8 +29,25 @@ const attachment = {
 describe("payload codec (contract 6)", () => {
   it("round-trips every payload type", () => {
     const payloads: Payload[] = [
-      { v: 1, t: "msg", id: ID, ts: 1, text: "hi", mentions: ["p2"], reply: ID2, att: [attachment] },
-      { v: 1, t: "edit", id: ID, ts: 2, target: ID2, text: "edited", mentions: [] },
+      {
+        v: 1,
+        t: "msg",
+        id: ID,
+        ts: 1,
+        text: "hi",
+        mentions: ["p2"],
+        reply: ID2,
+        att: [attachment],
+      },
+      {
+        v: 1,
+        t: "edit",
+        id: ID,
+        ts: 2,
+        target: ID2,
+        text: "edited",
+        mentions: [],
+      },
       { v: 1, t: "del", id: ID, ts: 3, target: ID2 },
       { v: 1, t: "react", id: ID, ts: 4, target: ID2, r: ":fire:" },
       { v: 1, t: "unreact", id: ID, ts: 5, target: ID2, r: "🔥" },
@@ -41,8 +58,22 @@ describe("payload codec (contract 6)", () => {
   });
 
   it("ignores unknown fields and defaults optional ones", () => {
-    const parsed = parsePayload({ v: 1, t: "msg", id: ID, ts: 1, text: "x", extra: true });
-    expect(parsed).toEqual({ v: 1, t: "msg", id: ID, ts: 1, text: "x", mentions: [] });
+    const parsed = parsePayload({
+      v: 1,
+      t: "msg",
+      id: ID,
+      ts: 1,
+      text: "x",
+      extra: true,
+    });
+    expect(parsed).toEqual({
+      v: 1,
+      t: "msg",
+      id: ID,
+      ts: 1,
+      text: "x",
+      mentions: [],
+    });
   });
 
   it("rejects bad versions, ids, types and limits", () => {
@@ -55,9 +86,30 @@ describe("payload codec (contract 6)", () => {
       { v: 1, t: "nope", id: ID, ts: 1, target: ID2 },
       { v: 1, t: "msg", id: ID, ts: 1, text: "x".repeat(10_001) },
       { v: 1, t: "msg", id: ID, ts: 1, text: "", reply: "short" },
-      { v: 1, t: "msg", id: ID, ts: 1, text: "", att: new Array(11).fill(attachment) },
-      { v: 1, t: "msg", id: ID, ts: 1, text: "", att: [{ ...attachment, blob: "0x12" }] },
-      { v: 1, t: "msg", id: ID, ts: 1, text: "", att: [{ ...attachment, w: -1 }] },
+      {
+        v: 1,
+        t: "msg",
+        id: ID,
+        ts: 1,
+        text: "",
+        att: new Array(11).fill(attachment),
+      },
+      {
+        v: 1,
+        t: "msg",
+        id: ID,
+        ts: 1,
+        text: "",
+        att: [{ ...attachment, blob: "0x12" }],
+      },
+      {
+        v: 1,
+        t: "msg",
+        id: ID,
+        ts: 1,
+        text: "",
+        att: [{ ...attachment, w: -1 }],
+      },
       { v: 1, t: "edit", id: ID, ts: 1, target: ID2 },
       { v: 1, t: "del", id: ID, ts: 1 },
       { v: 1, t: "react", id: ID, ts: 1, target: ID2, r: "" },
@@ -71,8 +123,19 @@ describe("payload codec (contract 6)", () => {
 
   it("counts text and reactions in characters, not UTF-16 units", () => {
     const emoji = "😀".repeat(10_000);
-    expect(parsePayload({ v: 1, t: "msg", id: ID, ts: 1, text: emoji })).not.toBeNull();
-    expect(parsePayload({ v: 1, t: "react", id: ID, ts: 1, target: ID2, r: "😀".repeat(64) })).not.toBeNull();
+    expect(
+      parsePayload({ v: 1, t: "msg", id: ID, ts: 1, text: emoji })
+    ).not.toBeNull();
+    expect(
+      parsePayload({
+        v: 1,
+        t: "react",
+        id: ID,
+        ts: 1,
+        target: ID2,
+        r: "😀".repeat(64),
+      })
+    ).not.toBeNull();
   });
 
   it("decodes only valid UTF-8 JSON within the size limit", () => {
@@ -82,7 +145,9 @@ describe("payload codec (contract 6)", () => {
   });
 
   it("refuses to encode invalid or oversized payloads", () => {
-    expect(() => encodePayload({ v: 1, t: "del", id: "x", ts: 1, target: ID2 })).toThrow(PayloadError);
+    expect(() =>
+      encodePayload({ v: 1, t: "del", id: "x", ts: 1, target: ID2 })
+    ).toThrow(PayloadError);
     const big: Payload = {
       v: 1,
       t: "msg",

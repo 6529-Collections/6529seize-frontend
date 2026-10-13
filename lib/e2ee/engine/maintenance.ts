@@ -4,6 +4,7 @@ import type { WasmCommitOps } from "../wasm-types";
 import { claimedDevices, claimKeyPackages, isUsableDevice } from "./claims";
 import { submitCommit, type CommitIntent, type CommitOutcome } from "./commit";
 import {
+  isActive,
   ownDeviceKey,
   requireMls,
   type EngineContext,
@@ -33,7 +34,10 @@ const isNetworkish = (error: unknown): boolean => {
     return true;
   }
   const apiError = asE2eeApiError(error);
-  return apiError !== null && (apiError.status === 0 || apiError.status >= 500 || apiError.status === 429);
+  return (
+    apiError !== null &&
+    (apiError.status === 0 || apiError.status >= 500 || apiError.status === 429)
+  );
 };
 
 async function deviceStatuses(
@@ -44,7 +48,11 @@ async function deviceStatuses(
   for (const member of runtime.record.members) {
     const device = await ctx.directory.getDevice(member.deviceKey);
     if (!device) {
-      statuses.set(member.deviceKey, { revoked: false, expiresAt: null, badGrant: true });
+      statuses.set(member.deviceKey, {
+        revoked: false,
+        expiresAt: null,
+        badGrant: true,
+      });
       continue;
     }
     const revoked =
@@ -68,7 +76,9 @@ async function activeDevices(
   const principals = new Set(
     runtime.record.members
       .map((member) => member.profileId)
-      .filter((id): id is string => id !== null && (!onlyOwn || id === ctx.profileId))
+      .filter(
+        (id): id is string => id !== null && (!onlyOwn || id === ctx.profileId)
+      )
   );
   for (const profileId of principals) {
     const keys: string[] = [];
@@ -103,7 +113,9 @@ export async function groupChanges(
   });
 }
 
-export type Planner = (runtime: GroupRuntime) => Promise<CommitIntent | null>;
+export type Planner = (
+  runtime: GroupRuntime
+) => CommitIntent | null | Promise<CommitIntent | null>;
 
 /**
  * Planner for required changes: removals, adds (own always; others when
@@ -122,17 +134,26 @@ export function requiredChangesPlanner(options: {
     const removals = [...changes.strictRemovals, ...changes.idleRemovals];
     const addTargets = new Map<string, string[]>();
     const adds = [
-      ...changes.ownAdds.map((deviceKey) => ({ profileId: ctx.profileId, deviceKey })),
+      ...changes.ownAdds.map((deviceKey) => ({
+        profileId: ctx.profileId,
+        deviceKey,
+      })),
       ...(options.includeOtherAdds ? changes.otherAdds : []),
     ].slice(0, MAX_LEAVES_PER_COMMIT);
     for (const add of adds) {
-      addTargets.set(add.profileId, [...(addTargets.get(add.profileId) ?? []), add.deviceKey]);
+      addTargets.set(add.profileId, [
+        ...(addTargets.get(add.profileId) ?? []),
+        add.deviceKey,
+      ]);
     }
     const claimed =
       addTargets.size > 0
         ? await claimKeyPackages(
             ctx,
-            [...addTargets].map(([profile_id, device_keys]) => ({ profile_id, device_keys })),
+            [...addTargets].map(([profile_id, device_keys]) => ({
+              profile_id,
+              device_keys,
+            })),
             runtime.record.g
           )
         : null;
@@ -162,7 +183,10 @@ export type CommitRun =
   | { kind: "delayed" }
   | { kind: "rejected"; code: string | null };
 
-export function clearStallFor(ctx: EngineContext, runtime: GroupRuntime | undefined): void {
+export function clearStallFor(
+  ctx: EngineContext,
+  runtime: GroupRuntime | undefined
+): void {
   if (!runtime) {
     return;
   }
@@ -182,16 +206,18 @@ async function commitAttempt(
 ): Promise<AttemptOutcome> {
   return ctx.queue.run(async () => {
     const runtime = ctx.store.groups.get(g);
-    if (runtime?.record.status !== "active") {
+    if (!isActive(runtime)) {
       return { kind: "noop" };
     }
     try {
       await catchUpGroup(ctx, runtime);
-      if (runtime.record.status !== "active") {
+      if (!isActive(runtime)) {
         return { kind: "noop" };
       }
       const intent = await planner(runtime);
-      return intent ? await submitCommit(ctx, runtime, intent) : { kind: "noop" };
+      return intent
+        ? await submitCommit(ctx, runtime, intent)
+        : { kind: "noop" };
     } catch (error) {
       if (isNetworkish(error)) {
         return { kind: "failed" };
@@ -205,7 +231,10 @@ const backoffMs = (ctx: EngineContext, attempt: number): number =>
   Math.min(STALL_RETRY_MS, 250 * 2 ** attempt) * (0.5 + ctx.random() / 2);
 
 /** Notes a failed attempt; returns true once the 20 s stall rule trips. */
-export function noteStallFor(ctx: EngineContext, runtime: GroupRuntime | undefined): boolean {
+export function noteStallFor(
+  ctx: EngineContext,
+  runtime: GroupRuntime | undefined
+): boolean {
   if (!runtime) {
     return false;
   }
@@ -263,9 +292,12 @@ export async function runGroupCommit(
 // Roster repair (8.5)
 // ---------------------------------------------------------------------------
 
-export async function repairRoster(ctx: EngineContext, runtime: GroupRuntime): Promise<void> {
+export async function repairRoster(
+  ctx: EngineContext,
+  runtime: GroupRuntime
+): Promise<void> {
   const record = runtime.record;
-  if (record.status !== "active" || record.pendingCommit) {
+  if (!isActive(runtime) || record.pendingCommit) {
     return;
   }
   record.rosterCheckNeeded = false;
@@ -279,8 +311,11 @@ export async function repairRoster(ctx: EngineContext, runtime: GroupRuntime): P
   const leaves = record.members
     .map((member) => member.deviceKey)
     .filter((key) => !excluded.has(key));
-  const server = new Set(group.roster.map((entry) => entry.device_key.toLowerCase()));
-  const matches = leaves.length === server.size && leaves.every((key) => server.has(key));
+  const server = new Set(
+    group.roster.map((entry) => entry.device_key.toLowerCase())
+  );
+  const matches =
+    leaves.length === server.size && leaves.every((key) => server.has(key));
   if (matches) {
     return;
   }

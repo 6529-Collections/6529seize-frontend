@@ -63,15 +63,20 @@ async function claimBatch(
     if (result.status !== "OK") {
       continue;
     }
-    const wanted = targets.find((target) => target.profile_id === result.profile_id);
+    const wanted = targets.find(
+      (target) => target.profile_id === result.profile_id
+    );
     for (const claimed of result.key_packages) {
       const device = claimed.device;
       const key = device.device_key.toLowerCase();
       const allowed =
         key !== own &&
         device.profile_id === result.profile_id &&
-        (wanted?.device_keys === undefined || wanted.device_keys.includes(key)) &&
-        !out.packages.some((item) => item.device.device_key.toLowerCase() === key);
+        (wanted?.device_keys === undefined ||
+          wanted.device_keys.includes(key)) &&
+        !out.packages.some(
+          (item) => item.device.device_key.toLowerCase() === key
+        );
       ctx.directory.seed([device]);
       if (allowed && (await isUsableDevice(ctx, device))) {
         out.packages.push({ keyPackage: claimed.key_package, device });
@@ -86,8 +91,17 @@ export async function claimKeyPackages(
   group?: string
 ): Promise<ClaimedPackages> {
   const out = emptyClaim();
-  for (let offset = 0; offset < targets.length; offset += MAX_TARGETS_PER_CLAIM) {
-    await claimBatch(ctx, targets.slice(offset, offset + MAX_TARGETS_PER_CLAIM), group, out);
+  for (
+    let offset = 0;
+    offset < targets.length;
+    offset += MAX_TARGETS_PER_CLAIM
+  ) {
+    await claimBatch(
+      ctx,
+      targets.slice(offset, offset + MAX_TARGETS_PER_CLAIM),
+      group,
+      out
+    );
   }
   return out;
 }

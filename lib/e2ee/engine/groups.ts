@@ -1,4 +1,9 @@
-import type { LeafActivity, StoredGroup, StoredMember, StoredNotice } from "../records";
+import type {
+  LeafActivity,
+  StoredGroup,
+  StoredMember,
+  StoredNotice,
+} from "../records";
 import type { WasmGroupSummary, WasmLeaf } from "../wasm-types";
 import { checkpoint, type EngineContext } from "./context";
 import { collapsibleSafetyNotice, noticeMessage } from "./notices";
@@ -122,7 +127,9 @@ export async function applySummary(
     .map(Number)
     .sort((a, b) => b - a)
     .slice(0, MAX_EPOCH_FPS);
-  record.epochFps = Object.fromEntries(keep.map((epoch) => [String(epoch), fps[String(epoch)] ?? ""]));
+  record.epochFps = Object.fromEntries(
+    keep.map((epoch) => [String(epoch), fps[String(epoch)] ?? ""])
+  );
   const leafKeys = new Set(members.map((member) => member.deviceKey));
   record.leaving = record.leaving.filter((key) => leafKeys.has(key));
   record.badGrants = record.badGrants.filter((key) => leafKeys.has(key));
@@ -166,7 +173,13 @@ export function addNotices(
     }
   }
   notices.forEach((notice, index) => {
-    const message = noticeMessage({ g: runtime.record.g, seq, index, serverTs, notice });
+    const message = noticeMessage({
+      g: runtime.record.g,
+      seq,
+      index,
+      serverTs,
+      notice,
+    });
     runtime.messages.set(message.id, message);
     runtime.dirty.add(message.id);
   });

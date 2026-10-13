@@ -23,22 +23,48 @@ export interface FakeDeliveryService {
   handle(
     method: string,
     path: string,
-    input?: { profileId?: string; body?: unknown; query?: Record<string, string> }
+    input?: {
+      profileId?: string;
+      body?: unknown;
+      query?: Record<string, string>;
+    }
   ): Promise<FakeResponse>;
   state: {
-    notifyLog: { group: string; sender_profile_id: string; hints: { profile_id: string; kind: string }[] }[];
+    notifyLog: {
+      group: string;
+      sender_profile_id: string;
+      hints: { profile_id: string; kind: string }[];
+    }[];
     wakes: { profile_id: string; reason: string; group: string }[];
-    reports: { id: string; verified: boolean; sender_profile_id: string | null; reason: string; body: string }[];
-    requests: { method: string; path: string; profileId: string; status: number; code: string | null }[];
+    reports: {
+      id: string;
+      verified: boolean;
+      sender_profile_id: string | null;
+      reason: string;
+      body: string;
+    }[];
+    requests: {
+      method: string;
+      path: string;
+      profileId: string;
+      status: number;
+      code: string | null;
+    }[];
     rosterRepairs?: number;
     [key: string]: any;
   };
-  setDmPolicy(profileId: string, value: "EVERYONE" | "PEOPLE_I_FOLLOW" | "NOBODY"): void;
+  setDmPolicy(
+    profileId: string,
+    value: "EVERYONE" | "PEOPLE_I_FOLLOW" | "NOBODY"
+  ): void;
   follow(subscriber: string, target: string): void;
   block(blocker: string, blocked: string): void;
   unblock(blocker: string, blocked: string): void;
   setWallets(profileId: string, wallets: string[]): void;
-  subscribe(profileId: string, listener: (event: { type: string; data: unknown }) => void): () => void;
+  subscribe(
+    profileId: string,
+    listener: (event: { type: string; data: unknown }) => void
+  ): () => void;
   addFault(fault: FakeFault): () => void;
   clearFaults(): void;
   hold(path: RegExp): { waiting(): number; release(): void };
@@ -47,9 +73,18 @@ export interface FakeDeliveryService {
   devicesOf(profileId: string): any[];
 }
 
-export function createFakeDeliveryService(options?: { now?: () => number }): FakeDeliveryService;
-export function createFakeApiClient(ds: FakeDeliveryService, profileId: string): E2eeApiClient;
-export function verifyEd25519(publicKey: string, digest: string, signature: string): boolean;
+export function createFakeDeliveryService(options?: {
+  now?: () => number;
+}): FakeDeliveryService;
+export function createFakeApiClient(
+  ds: FakeDeliveryService,
+  profileId: string
+): E2eeApiClient;
+export function verifyEd25519(
+  publicKey: string,
+  digest: string,
+  signature: string
+): boolean;
 export function entryDigest(
   g: string,
   epoch: number,
@@ -59,8 +94,20 @@ export function entryDigest(
   nextCommitKey: string,
   paddedLen: number
 ): string;
-export function rosterDigest(g: string, epoch: number, deviceKeys: string[]): string;
-export function revokeDigest(target: string, revoker: string, revokedAt: number): string;
-export function messageDigest(g: string, epoch: number, body: Uint8Array): string;
+export function rosterDigest(
+  g: string,
+  epoch: number,
+  deviceKeys: string[]
+): string;
+export function revokeDigest(
+  target: string,
+  revoker: string,
+  revokedAt: number
+): string;
+export function messageDigest(
+  g: string,
+  epoch: number,
+  body: Uint8Array
+): string;
 export function grantStatement(deviceKey: string, expiresAt: number): string;
 export function grantTypedData(grant: unknown): unknown;

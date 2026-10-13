@@ -11,7 +11,13 @@ import { MlsClient } from "../mls-adapter";
 import type { StoredDevice } from "../records";
 import type { E2eeDeviceInfo } from "../types";
 import { loadDefaultWasm } from "../wasm-loader";
-import { checkpoint, DAY_MS, requireDevice, requireMls, type EngineContext } from "./context";
+import {
+  checkpoint,
+  DAY_MS,
+  requireDevice,
+  requireMls,
+  type EngineContext,
+} from "./context";
 import { E2eeError } from "./errors";
 
 /** Contract 2 + 8.8: one wallet prompt per device; KeyPackage pool upkeep. */
@@ -24,6 +30,16 @@ export const LAST_RESORT_LIFETIME_S = 90 * 86_400;
 export const LAST_RESORT_ROTATE_MS = 30 * DAY_MS;
 /** Reuse a stored-but-unregistered grant only while it has this much left. */
 const MIN_REUSABLE_GRANT_MS = 7 * DAY_MS;
+/** 8.8: renewal is offered in the grant's last 14 days. */
+export const RENEWAL_WINDOW_MS = 14 * DAY_MS;
+
+export const renewalDue = (ctx: EngineContext, device: StoredDevice): boolean =>
+  device.grant.expires_at * 1000 - ctx.now() <= RENEWAL_WINDOW_MS;
+
+export const grantExpired = (
+  ctx: EngineContext,
+  device: StoredDevice
+): boolean => device.grant.expires_at * 1000 <= ctx.now();
 
 export async function ensureWasm(ctx: EngineContext): Promise<void> {
   if (ctx.wasm) {
@@ -32,7 +48,10 @@ export async function ensureWasm(ctx: EngineContext): Promise<void> {
   ctx.wasm = await (ctx.options.loadWasm ?? loadDefaultWasm)();
 }
 
-function reusablePending(ctx: EngineContext, device: StoredDevice | null): boolean {
+function reusablePending(
+  ctx: EngineContext,
+  device: StoredDevice | null
+): boolean {
   return (
     device !== null &&
     !device.registered &&
@@ -42,6 +61,26 @@ function reusablePending(ctx: EngineContext, device: StoredDevice | null): boole
   );
 }
 
+async function signGrant(
+  ctx: EngineContext,
+  deviceKey: string
+): Promise<{ grant: ReturnType<typeof buildGrant>; signature: string }> {
+  const grant = buildGrant({
+    wallet: ctx.options.wallet,
+    deviceKey,
+    issuedAtSeconds: Math.floor(ctx.now() / 1000),
+    origin: ctx.options.origin,
+  });
+  try {
+    const signature = await ctx.options.signTypedData(
+      buildGrantTypedData(grant)
+    );
+    return { grant, signature: signature.toLowerCase() };
+  } catch {
+    throw new E2eeError("E2EE_SIGNATURE_REJECTED");
+  }
+}
+
 /** Creates the device key and obtains the single wallet signature. */
 async function createDevice(ctx: EngineContext): Promise<StoredDevice> {
   if (!ctx.wasm) {
@@ -49,19 +88,14 @@ async function createDevice(ctx: EngineContext): Promise<StoredDevice> {
   }
   const mls = MlsClient.create(ctx.wasm);
   const deviceKey = mls.deviceKey();
-  const grant = buildGrant({
-    wallet: ctx.options.wallet,
-    deviceKey,
-    issuedAtSeconds: Math.floor(ctx.now() / 1000),
-    origin: ctx.options.origin,
-  });
-  let signature: string;
+  let signed: Awaited<ReturnType<typeof signGrant>>;
   try {
-    signature = await ctx.options.signTypedData(buildGrantTypedData(grant));
-  } catch {
+    signed = await signGrant(ctx, deviceKey);
+  } catch (error) {
     mls.dispose();
-    throw new E2eeError("E2EE_SIGNATURE_REJECTED");
+    throw error;
   }
+  const { grant, signature } = signed;
   ctx.mls?.dispose();
   ctx.mls = mls;
   const device: StoredDevice = {
@@ -70,7 +104,7 @@ async function createDevice(ctx: EngineContext): Promise<StoredDevice> {
     wallet: grant.wallet,
     grant,
     grantId: computeGrantId(grant),
-    walletSignature: signature.toLowerCase(),
+    walletSignature: signature,
     registered: false,
     provisioned: false,
     label: "Device",
@@ -127,13 +161,17 @@ export async function ensureKeyPackages(
   const lastResortMissing =
     status?.last_resort_expires_at === null || status === null;
   const lastResortStale =
-    device.lastResortAt === null || ctx.now() - device.lastResortAt >= LAST_RESORT_ROTATE_MS;
+    device.lastResortAt === null ||
+    ctx.now() - device.lastResortAt >= LAST_RESORT_ROTATE_MS;
   if (lastResortMissing || lastResortStale) {
     await uploadKeyPackages(ctx, 1, true);
   }
 }
 
-async function register(ctx: EngineContext, device: StoredDevice): Promise<boolean> {
+async function register(
+  ctx: EngineContext,
+  device: StoredDevice
+): Promise<boolean> {
   try {
     const record = await ctx.api.registerDevice({
       grant: device.grant,
@@ -154,7 +192,10 @@ async function register(ctx: EngineContext, device: StoredDevice): Promise<boole
   return true;
 }
 
-async function provision(ctx: EngineContext, device: StoredDevice): Promise<void> {
+async function provision(
+  ctx: EngineContext,
+  device: StoredDevice
+): Promise<void> {
   const mls = requireMls(ctx);
   if (mls.credentialIdentity() === null) {
     mls.setCredential(credentialIdentity(device.wallet, device.grantId));
@@ -163,6 +204,31 @@ async function provision(ctx: EngineContext, device: StoredDevice): Promise<void
   await ensureKeyPackages(ctx, null);
   device.provisioned = true;
   await checkpoint(ctx, { device, skipWasm: true });
+}
+
+/**
+ * 8.8 renewal: one new signature for the same device key; the server
+ * updates the grant, the MLS credential is replaced (groups pick it up with
+ * a self-update) and fresh KeyPackages carry the new credential.
+ */
+export async function renewGrant(ctx: EngineContext): Promise<void> {
+  const device = requireDevice(ctx);
+  const mls = requireMls(ctx);
+  const { grant, signature } = await signGrant(ctx, device.deviceKey);
+  const record = await ctx.api.registerDevice({
+    grant,
+    wallet_signature: signature,
+    platform: device.platform,
+  });
+  ctx.directory.seed([record]);
+  device.wallet = grant.wallet;
+  device.grant = grant;
+  device.grantId = computeGrantId(grant);
+  device.walletSignature = signature;
+  mls.setCredential(credentialIdentity(device.wallet, device.grantId));
+  await checkpoint(ctx, { device });
+  await uploadKeyPackages(ctx, ONE_TIME_POOL, false);
+  await uploadKeyPackages(ctx, 1, true);
 }
 
 /**
@@ -193,6 +259,8 @@ export async function enrollDevice(ctx: EngineContext): Promise<boolean> {
   }
   if (!device.provisioned) {
     await provision(ctx, device);
+  } else if (renewalDue(ctx, device)) {
+    await renewGrant(ctx);
   }
   return true;
 }
@@ -204,7 +272,9 @@ export function toDeviceInfo(
 ): E2eeDeviceInfo {
   const own = record.device_key.toLowerCase() === ctx.device?.deviceKey;
   const platform =
-    record.platform === "desktop" || record.platform === "phone" ? record.platform : "web";
+    record.platform === "desktop" || record.platform === "phone"
+      ? record.platform
+      : "web";
   return {
     deviceKey: record.device_key.toLowerCase(),
     label: own && ctx.device ? ctx.device.label : record.label,
@@ -232,10 +302,12 @@ export async function refreshMe(
   }
   ctx.store.devices = infos;
   const ownKey = ctx.device?.deviceKey;
-  const own = me.devices.find((record) => record.device_key.toLowerCase() === ownKey);
+  const own = me.devices.find(
+    (record) => record.device_key.toLowerCase() === ownKey
+  );
   ctx.store.thisDevice = infos.find((info) => info.isThisDevice) ?? null;
   ctx.store.touch();
-  if (ctx.device?.registered && (!own || own.revoked_at !== null)) {
+  if (ctx.device?.registered === true && own?.revoked_at !== null) {
     return { ownRevoked: true };
   }
   if (ctx.device?.provisioned) {

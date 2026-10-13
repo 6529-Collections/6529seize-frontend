@@ -1,6 +1,6 @@
 import { asE2eeApiError } from "../api";
 import type { ApiE2eeDeviceGroup } from "../api-types";
-import { type EngineContext, ownDeviceKey } from "./context";
+import { type EngineContext, isActive, ownDeviceKey } from "./context";
 import { RetryableError } from "./errors";
 import {
   groupChanges,
@@ -30,7 +30,10 @@ const isNetworkish = (error: unknown): boolean => {
     return true;
   }
   const apiError = asE2eeApiError(error);
-  return apiError !== null && (apiError.status === 0 || apiError.status >= 500 || apiError.status === 429);
+  return (
+    apiError !== null &&
+    (apiError.status === 0 || apiError.status >= 500 || apiError.status === 429)
+  );
 };
 
 const swallowNetwork = async (task: Promise<unknown>): Promise<void> => {
@@ -66,8 +69,16 @@ export class EngineController {
     this.hooks = hooks;
   }
 
-  private get ready(): boolean {
-    return !this.ctx.disposed && this.ctx.store.status === "ready" && this.ctx.mls !== null;
+  private isReady(): boolean {
+    return (
+      !this.ctx.disposed &&
+      this.ctx.store.status === "ready" &&
+      this.ctx.mls !== null
+    );
+  }
+
+  private syncRepeat(): boolean {
+    return this.syncAgain && this.isReady();
   }
 
   /** Background work is tracked (idle()) and never throws. */
@@ -77,12 +88,13 @@ export class EngineController {
         await task();
       } catch (error) {
         if (!this.ctx.disposed) {
-          this.ctx.store.error = error instanceof Error ? error.message : "E2EE_BACKGROUND";
+          this.ctx.store.error =
+            error instanceof Error ? error.message : "E2EE_BACKGROUND";
           this.ctx.store.touch();
         }
       }
     })();
-    this.ctx.tasks.track(promise);
+    void this.ctx.tasks.track(promise);
   }
 
   // -------------------------------------------------------------------------
@@ -98,7 +110,7 @@ export class EngineController {
       do {
         this.syncAgain = false;
         await this.syncOnce();
-      } while (this.syncAgain && this.ready);
+      } while (this.syncRepeat());
     })().finally(() => {
       this.syncRun = null;
     });
@@ -123,25 +135,30 @@ export class EngineController {
   }
 
   private async syncOnce(): Promise<void> {
-    if (!this.ready) {
+    if (!this.isReady()) {
       return;
     }
     this.lastFullSyncAt = this.ctx.now();
     await this.pullInbox();
     const serverGroups = await this.deviceGroups();
-    if (!this.ready) {
+    if (!this.isReady()) {
       return;
     }
     const lastSeq = new Map(
-      (serverGroups ?? []).map((item) => [item.group.toLowerCase(), item.last_seq])
+      (serverGroups ?? []).map((item) => [
+        item.group.toLowerCase(),
+        item.last_seq,
+      ])
     );
     for (const [g, runtime] of [...this.ctx.store.groups]) {
-      if (runtime.record.status !== "active") {
+      if (!isActive(runtime)) {
         continue;
       }
       const known = lastSeq.get(g);
       const behind = known === undefined || known > runtime.record.cursor;
-      await this.guard(this.syncGroup(g, { fetch: behind || serverGroups === null }));
+      await this.guard(
+        this.syncGroup(g, { fetch: behind || serverGroups === null })
+      );
     }
     if (this.ctx.now() - this.ctx.lastMeAt >= MAINTAIN_EVERY_MS) {
       await this.guard(this.hooks.refreshMe());
@@ -156,22 +173,26 @@ export class EngineController {
       if (this.ctx.disposed) {
         return;
       }
-      this.ctx.store.error = error instanceof Error ? error.message : "E2EE_SYNC";
+      this.ctx.store.error =
+        error instanceof Error ? error.message : "E2EE_SYNC";
       this.ctx.store.touch();
     }
   }
 
   private async pullInbox(): Promise<void> {
-    if (!this.ready) {
+    if (!this.isReady()) {
       return;
     }
     await swallowNetwork(this.ctx.queue.run(() => processInbox(this.ctx)));
   }
 
   /** Catch up one group, then run due maintenance and flush its outbox. */
-  async syncGroup(g: string, options: { fetch: boolean } = { fetch: true }): Promise<void> {
+  async syncGroup(
+    g: string,
+    options: { fetch: boolean } = { fetch: true }
+  ): Promise<void> {
     const runtime = this.ctx.store.groups.get(g);
-    if (!this.ready || runtime?.record.status !== "active") {
+    if (!this.isReady() || !isActive(runtime)) {
       return;
     }
     const changed = options.fetch
@@ -182,10 +203,10 @@ export class EngineController {
       runtime.record.selfUpdateRequested ||
       runtime.record.rosterCheckNeeded ||
       this.ctx.now() - (this.maintainedAt.get(g) ?? 0) >= MAINTAIN_EVERY_MS;
-    if (due && runtime.record.status === "active") {
+    if (due && isActive(runtime)) {
       await this.maintain(g);
     }
-    if (runtime.outbox.size > 0 && runtime.record.status === "active") {
+    if (runtime.outbox.size > 0 && isActive(runtime)) {
       await this.flush(g);
     }
   }
@@ -205,14 +226,18 @@ export class EngineController {
 
   async maintain(g: string): Promise<void> {
     const runtime = this.ctx.store.groups.get(g);
-    if (!this.ready || runtime?.record.status !== "active") {
+    if (!this.isReady() || !isActive(runtime)) {
       return;
     }
     this.maintainedAt.set(g, this.ctx.now());
     await runGroupCommit(
       this.ctx,
       g,
-      requiredChangesPlanner({ ctx: this.ctx, includeOtherAdds: false, allowSelfUpdate: true }),
+      requiredChangesPlanner({
+        ctx: this.ctx,
+        includeOtherAdds: false,
+        allowSelfUpdate: true,
+      }),
       () => {
         this.armRetry(g);
       }
@@ -222,7 +247,7 @@ export class EngineController {
 
   private async scheduleFollowUps(g: string): Promise<void> {
     const runtime = this.ctx.store.groups.get(g);
-    if (!this.ready || runtime?.record.status !== "active") {
+    if (!this.isReady() || !isActive(runtime)) {
       return;
     }
     let otherAdds = 0;
@@ -250,13 +275,17 @@ export class EngineController {
 
   /** 8.4: other members' devices after the random delay, re-checked. */
   async addOtherDevices(g: string): Promise<void> {
-    if (!this.ready) {
+    if (!this.isReady()) {
       return;
     }
     await runGroupCommit(
       this.ctx,
       g,
-      requiredChangesPlanner({ ctx: this.ctx, includeOtherAdds: true, allowSelfUpdate: false }),
+      requiredChangesPlanner({
+        ctx: this.ctx,
+        includeOtherAdds: true,
+        allowSelfUpdate: false,
+      }),
       () => {
         this.armRetry(g);
       }
@@ -271,13 +300,13 @@ export class EngineController {
 
   async rosterCheck(g: string): Promise<void> {
     const runtime = this.ctx.store.groups.get(g);
-    if (!this.ready || runtime?.record.status !== "active") {
+    if (!this.isReady() || !isActive(runtime)) {
       return;
     }
     await swallowNetwork(
       this.ctx.queue.run(async () => {
         await tryCatchUp(this.ctx, runtime);
-        if (runtime.record.status === "active") {
+        if (isActive(runtime)) {
           await repairRoster(this.ctx, runtime);
         }
       })
@@ -298,7 +327,7 @@ export class EngineController {
       do {
         this.flushAgain.delete(g);
         await this.flushOnce(g);
-      } while (this.flushAgain.has(g) && this.ready);
+      } while (this.flushAgain.has(g) && this.isReady());
     })().finally(() => {
       this.flushes.delete(g);
     });
@@ -308,15 +337,19 @@ export class EngineController {
 
   private async flushOnce(g: string): Promise<void> {
     let attempt = 0;
-    while (this.ready) {
+    while (this.isReady()) {
       const runtime = this.ctx.store.groups.get(g);
-      if (runtime?.record.status !== "active" || runtime.outbox.size === 0) {
+      if (!isActive(runtime) || runtime.outbox.size === 0) {
         return;
       }
       const commit = await runGroupCommit(
         this.ctx,
         g,
-        requiredChangesPlanner({ ctx: this.ctx, includeOtherAdds: false, allowSelfUpdate: false }),
+        requiredChangesPlanner({
+          ctx: this.ctx,
+          includeOtherAdds: false,
+          allowSelfUpdate: false,
+        }),
         () => {
           this.armRetry(g);
         }
@@ -330,7 +363,10 @@ export class EngineController {
           this.armRetry(g);
           return;
         }
-        await sleep(this.ctx.scheduler, Math.min(STALL_RETRY_MS, 250 * 2 ** attempt));
+        await sleep(
+          this.ctx.scheduler,
+          Math.min(STALL_RETRY_MS, 250 * 2 ** attempt)
+        );
         attempt += 1;
         continue;
       }
@@ -390,7 +426,7 @@ export class EngineController {
   }
 
   private async pollOnce(open: string | null): Promise<void> {
-    if (!this.ready) {
+    if (!this.isReady()) {
       return;
     }
     if (open && this.ctx.now() - this.lastFullSyncAt < POLL_IDLE_MS) {
@@ -407,32 +443,43 @@ export class EngineController {
   }
 
   onWake(event: { type: string; data: unknown }): void {
-    if (!this.ready) {
+    if (!this.isReady()) {
       return;
     }
     this.ctx.lastWakeAt = this.ctx.now();
-    const data = (typeof event.data === "object" && event.data !== null ? event.data : {}) as Record<string, unknown>;
-    const group = typeof data["group"] === "string" ? data["group"].toLowerCase() : null;
-    const profileId = typeof data["profile_id"] === "string" ? data["profile_id"] : null;
-    const deviceKey = typeof data["device_key"] === "string" ? data["device_key"].toLowerCase() : null;
+    const data = (
+      typeof event.data === "object" && event.data !== null ? event.data : {}
+    ) as Record<string, unknown>;
+    const group =
+      typeof data["group"] === "string" ? data["group"].toLowerCase() : null;
+    const profileId =
+      typeof data["profile_id"] === "string" ? data["profile_id"] : null;
+    const deviceKey =
+      typeof data["device_key"] === "string"
+        ? data["device_key"].toLowerCase()
+        : null;
     switch (event.type) {
       case "E2EE_GROUP_EVENT":
       case "E2EE_ROSTER_CHANGED":
         if (group) {
           this.debounce(`sync:${group}`, () => this.syncGroup(group));
         }
-        return;
+        break;
       case "E2EE_WELCOME":
         this.debounce("inbox", () => this.syncAll());
-        return;
+        break;
       case "E2EE_DEVICE_ADDED":
       case "E2EE_DEVICE_REVOKED":
         if (profileId && deviceKey) {
-          this.onDeviceEvent(event.type === "E2EE_DEVICE_REVOKED", profileId, deviceKey);
+          this.onDeviceEvent(
+            event.type === "E2EE_DEVICE_REVOKED",
+            profileId,
+            deviceKey
+          );
         }
-        return;
+        break;
       default:
-        return;
+        break;
     }
   }
 
@@ -458,8 +505,10 @@ export class EngineController {
     }
     const affected: string[] = [];
     for (const [g, runtime] of this.ctx.store.groups) {
-      const member = runtime.record.members.some((leaf) => leaf.profileId === profileId);
-      if (runtime.record.status !== "active" || !member) {
+      const member = runtime.record.members.some(
+        (leaf) => leaf.profileId === profileId
+      );
+      if (!isActive(runtime) || !member) {
         continue;
       }
       if (revoked && profileId === this.ctx.profileId) {

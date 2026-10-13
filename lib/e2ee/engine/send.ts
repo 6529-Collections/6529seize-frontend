@@ -12,6 +12,7 @@ import {
 import type { StoredMessage, StoredOutboxItem } from "../records";
 import {
   checkpoint,
+  isActive,
   ownDeviceKey,
   requireActiveGroup,
   requireMls,
@@ -31,7 +32,10 @@ const isNetworkish = (error: unknown): boolean => {
     return true;
   }
   const apiError = asE2eeApiError(error);
-  return apiError !== null && (apiError.status === 0 || apiError.status >= 500 || apiError.status === 429);
+  return (
+    apiError !== null &&
+    (apiError.status === 0 || apiError.status >= 500 || apiError.status === 429)
+  );
 };
 
 function hintKind(
@@ -147,7 +151,11 @@ async function enqueue(
       });
     }
     runtime.outbox.set(item.id, item);
-    await checkpoint(ctx, { groups: [runtime], outbox: [item], skipWasm: true });
+    await checkpoint(ctx, {
+      groups: [runtime],
+      outbox: [item],
+      skipWasm: true,
+    });
     ctx.store.touch(runtime.record.g);
   });
 }
@@ -155,7 +163,12 @@ async function enqueue(
 export async function queueMessage(
   ctx: EngineContext,
   g: string,
-  input: { text: string; mentions?: string[]; reply?: string | null; files?: File[] }
+  input: {
+    text: string;
+    mentions?: string[];
+    reply?: string | null;
+    files?: File[];
+  }
 ): Promise<void> {
   const runtime = requireActiveGroup(ctx, g);
   const attachments: PayloadAttachment[] = [];
@@ -192,7 +205,11 @@ export async function queueTargeted(
   build: (base: { v: 1; id: string; ts: number }) => Payload
 ): Promise<void> {
   const runtime = requireActiveGroup(ctx, g);
-  await enqueue(ctx, runtime, build({ v: 1, id: newMessageId(), ts: ctx.now() }));
+  await enqueue(
+    ctx,
+    runtime,
+    build({ v: 1, id: newMessageId(), ts: ctx.now() })
+  );
 }
 
 export type SendStep =
@@ -222,8 +239,15 @@ async function markSent(
     echo.serverTs = sent.created_at;
     runtime.dirty.add(echo.id);
   }
-  runtime.record.updatedAt = Math.max(runtime.record.updatedAt, sent.created_at);
-  await checkpoint(ctx, { groups: [runtime], deleteOutbox: [item.id], skipWasm: true });
+  runtime.record.updatedAt = Math.max(
+    runtime.record.updatedAt,
+    sent.created_at
+  );
+  await checkpoint(ctx, {
+    groups: [runtime],
+    deleteOutbox: [item.id],
+    skipWasm: true,
+  });
   ctx.store.touch(runtime.record.g);
 }
 
@@ -234,13 +258,20 @@ async function dropItem(
   code: string | null
 ): Promise<void> {
   runtime.outbox.delete(item.id);
-  if (item.payload.t === "msg" && runtime.messages.get(item.id)?.pending === true) {
+  if (
+    item.payload.t === "msg" &&
+    runtime.messages.get(item.id)?.pending === true
+  ) {
     runtime.messages.delete(item.id);
     runtime.dirty.delete(item.id);
     runtime.deleted.add(item.id);
   }
   ctx.store.error = code ?? "E2EE_SEND_FAILED";
-  await checkpoint(ctx, { groups: [runtime], deleteOutbox: [item.id], skipWasm: true });
+  await checkpoint(ctx, {
+    groups: [runtime],
+    deleteOutbox: [item.id],
+    skipWasm: true,
+  });
   ctx.store.touch(runtime.record.g);
 }
 
@@ -249,7 +280,7 @@ export async function sendNext(
   ctx: EngineContext,
   runtime: GroupRuntime
 ): Promise<SendStep> {
-  if (runtime.record.status !== "active") {
+  if (!isActive(runtime)) {
     return "inactive";
   }
   try {
@@ -261,14 +292,21 @@ export async function sendNext(
     throw error;
   }
   const item = oldestOutbox(runtime);
-  if (runtime.record.status !== "active") {
+  if (!isActive(runtime)) {
     return "inactive";
   }
   if (!item) {
     return "empty";
   }
-  const sealed = requireMls(ctx).encryptMessage(runtime.record.g, encodePayload(item.payload));
-  item.sealed = { epoch: sealed.epoch, data: sealed.data, epochFp: sealed.epoch_fp };
+  const sealed = requireMls(ctx).encryptMessage(
+    runtime.record.g,
+    encodePayload(item.payload)
+  );
+  item.sealed = {
+    epoch: sealed.epoch,
+    data: sealed.data,
+    epochFp: sealed.epoch_fp,
+  };
   await checkpoint(ctx, { groups: [runtime], outbox: [item] });
   try {
     const sent = await ctx.api.sendMessage(runtime.record.g, {
@@ -287,7 +325,11 @@ export async function sendNext(
     }
     item.sealed = null;
     if (apiError.code === "E2EE_EPOCH_STALE") {
-      await checkpoint(ctx, { groups: [runtime], outbox: [item], skipWasm: true });
+      await checkpoint(ctx, {
+        groups: [runtime],
+        outbox: [item],
+        skipWasm: true,
+      });
       return "stale";
     }
     await dropItem(ctx, runtime, item, apiError.code);

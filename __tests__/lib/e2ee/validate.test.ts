@@ -1,4 +1,8 @@
-import { isValidMetadata, validateCommit, type CommitValidationInput } from "@/lib/e2ee/engine/validate";
+import {
+  isValidMetadata,
+  validateCommit,
+  type CommitValidationInput,
+} from "@/lib/e2ee/engine/validate";
 import type { GroupMetadata } from "@/lib/e2ee/wasm-types";
 
 const G = `0x${"aa".repeat(32)}`;
@@ -13,7 +17,9 @@ const meta = (overrides: Partial<GroupMetadata> = {}): GroupMetadata => ({
   ...overrides,
 });
 
-const input = (overrides: Partial<CommitValidationInput> = {}): CommitValidationInput => ({
+const input = (
+  overrides: Partial<CommitValidationInput> = {}
+): CommitValidationInput => ({
   entryEpoch: 3,
   committer: { deviceKey: "a1", profileId: "alice" },
   membersBefore: [
@@ -45,7 +51,9 @@ describe("commit validation (contract 8.1)", () => {
   });
 
   it("unknown committer is invalid", () => {
-    expect(validateCommit(input({ committer: { deviceKey: "x", profileId: null } }))).toMatchObject({
+    expect(
+      validateCommit(input({ committer: { deviceKey: "x", profileId: null } }))
+    ).toMatchObject({
       ok: false,
       reason: "unknown-committer",
     });
@@ -55,10 +63,21 @@ describe("commit validation (contract 8.1)", () => {
     const carol = { deviceKey: "c1", profileId: "carol", ok: true };
     expect(validateCommit(input({ added: [carol] }))).toEqual({ ok: true });
     expect(
-      validateCommit(input({ committer: { deviceKey: "b1", profileId: "bob" }, added: [carol] }))
+      validateCommit(
+        input({
+          committer: { deviceKey: "b1", profileId: "bob" },
+          added: [carol],
+        })
+      )
     ).toMatchObject({ ok: false, reason: "add-not-admin" });
     expect(
-      validateCommit(input({ metadataBefore: meta({ kind: "dm" }), metadataAfter: meta({ kind: "dm" }), added: [carol] }))
+      validateCommit(
+        input({
+          metadataBefore: meta({ kind: "dm" }),
+          metadataAfter: meta({ kind: "dm" }),
+          added: [carol],
+        })
+      )
     ).toMatchObject({ ok: false, reason: "dm-new-principal" });
   });
 
@@ -97,7 +116,11 @@ describe("commit validation (contract 8.1)", () => {
       added: [{ deviceKey: "a2", profileId: "alice", ok: true }],
     });
     expect(validateCommit(bobAdds)).toEqual({ ok: true });
-    expect(validateCommit(input({ added: [{ deviceKey: "a2", profileId: "alice", ok: false }] }))).toMatchObject({
+    expect(
+      validateCommit(
+        input({ added: [{ deviceKey: "a2", profileId: "alice", ok: false }] })
+      )
+    ).toMatchObject({
       ok: false,
       reason: "bad-leaf",
     });
@@ -112,13 +135,22 @@ describe("commit validation (contract 8.1)", () => {
       reason: "remove-not-admin",
     });
     expect(
-      validateCommit(input({ ...byBob, ...removeAlice, isRequiredRemoval: (key) => key === "a1" }))
+      validateCommit(
+        input({
+          ...byBob,
+          ...removeAlice,
+          isRequiredRemoval: (key) => key === "a1",
+        })
+      )
     ).toEqual({ ok: true });
     expect(
       validateCommit(
         input({
           ...byBob,
-          membersBefore: [...input().membersBefore, { deviceKey: "b2", profileId: "bob" }],
+          membersBefore: [
+            ...input().membersBefore,
+            { deviceKey: "b2", profileId: "bob" },
+          ],
           removed: [{ deviceKey: "b2", profileId: "bob" }],
         })
       )
@@ -126,19 +158,32 @@ describe("commit validation (contract 8.1)", () => {
   });
 
   it("metadata changes need an admin and keep g, kind and an admin", () => {
-    expect(validateCommit(input({ metadataAfter: meta({ name: "x" }) }))).toEqual({ ok: true });
     expect(
-      validateCommit(input({ committer: { deviceKey: "b1", profileId: "bob" }, metadataAfter: meta({ name: "x" }) }))
+      validateCommit(input({ metadataAfter: meta({ name: "x" }) }))
+    ).toEqual({ ok: true });
+    expect(
+      validateCommit(
+        input({
+          committer: { deviceKey: "b1", profileId: "bob" },
+          metadataAfter: meta({ name: "x" }),
+        })
+      )
     ).toMatchObject({ ok: false, reason: "metadata-not-admin" });
-    expect(validateCommit(input({ metadataAfter: meta({ kind: "dm" }) }))).toMatchObject({
+    expect(
+      validateCommit(input({ metadataAfter: meta({ kind: "dm" }) }))
+    ).toMatchObject({
       ok: false,
       reason: "metadata-identity",
     });
-    expect(validateCommit(input({ metadataAfter: meta({ admins: [] }) }))).toMatchObject({
+    expect(
+      validateCommit(input({ metadataAfter: meta({ admins: [] }) }))
+    ).toMatchObject({
       ok: false,
       reason: "metadata-no-admin",
     });
-    expect(validateCommit(input({ metadataAfter: meta({ name: "n".repeat(101) }) }))).toMatchObject({
+    expect(
+      validateCommit(input({ metadataAfter: meta({ name: "n".repeat(101) }) }))
+    ).toMatchObject({
       ok: false,
       reason: "metadata-shape",
     });
