@@ -85,6 +85,9 @@ describe("CollectionDelegation utility functions", () => {
   });
 
   it("treats an expiry equal to now as expired, as the contract does", () => {
+    // nftdelegation smart_contracts/DelegationManagement.sol,
+    // retrieveActiveDelegations and retrieveActiveDelegators: a delegation is
+    // active only `if (allExpirations[y] > _date)`, so expiry == now is not.
     const nowSeconds = 1_791_000_000;
     const nowSpy = jest.spyOn(Date, "now").mockReturnValue(nowSeconds * 1000);
     try {

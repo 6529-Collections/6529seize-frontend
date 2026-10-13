@@ -1,3 +1,4 @@
+import { NEVER_DATE } from "@/constants/constants";
 import { formatDate } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -58,7 +59,17 @@ interface CalendarDate {
 
 /** The viewer's IANA time zone, for example `America/Los_Angeles`. */
 export function getViewerTimeZone(): string {
+  // The picker, preview and expiry displays all read this, so the UTC
+  // fallback stays self-consistent: values resolve and display in one zone.
   return new Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+}
+
+/**
+ * On-chain expiry values that mean "never expires": 0 and `NEVER_DATE`
+ * (year 4000) or later.
+ */
+export function isNonExpiringDelegationExpiry(expiresAt: number): boolean {
+  return expiresAt === 0 || expiresAt >= NEVER_DATE;
 }
 
 function parseDateInput(value: string): CalendarDate | null {
@@ -176,16 +187,23 @@ export function getMinDelegationExpiryDate(
   return `${date.year}-${pad(date.month)}-${pad(date.day)}`;
 }
 
-/** The submit error for an expiry choice, or null when it can be sent. */
+/**
+ * The error for an expiry choice, or null when it can be sent. Without
+ * `submittedAtMs` (render-time gating) only presence is checked; the submit
+ * handler passes the click time, so the lead time is measured from submit.
+ */
 export function getDelegationExpiryError(
   locale: SupportedLocale,
   expiresAt: number | null,
-  nowMs: number
+  submittedAtMs?: number
 ): string | null {
   if (expiresAt === null) {
     return t(locale, "delegation.expiry.error.missing");
   }
-  if (expiresAt * SECOND_MS <= nowMs + DELEGATION_EXPIRY_MIN_LEAD_MS) {
+  if (
+    submittedAtMs !== undefined &&
+    expiresAt * SECOND_MS <= submittedAtMs + DELEGATION_EXPIRY_MIN_LEAD_MS
+  ) {
     return t(locale, "delegation.expiry.error.tooSoon");
   }
   return null;

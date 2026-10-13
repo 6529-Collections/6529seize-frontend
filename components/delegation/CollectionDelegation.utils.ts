@@ -1,5 +1,5 @@
 import { DELEGATION_ABI } from "@/abis/abis";
-import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants/constants";
+import { DELEGATION_CONTRACT } from "@/constants/constants";
 import type { Abi } from "viem";
 import type { DelegationUseCase } from "./delegation-constants";
 import {
@@ -8,6 +8,7 @@ import {
   PRIMARY_ADDRESS_USE_CASE,
   SUB_DELEGATION_USE_CASE,
 } from "./delegation-constants";
+import { isNonExpiringDelegationExpiry } from "./delegation-expiry";
 
 /**
  * Expiry state of an on-chain delegation. `expiresAt` is the raw Unix-seconds
@@ -119,13 +120,13 @@ function getContractDelegationExpiry(
 ): ContractDelegationExpiry {
   if (
     useCase >= PRIMARY_ADDRESS_USE_CASE.use_case ||
-    expiresAt === 0 ||
-    expiresAt >= NEVER_DATE
+    isNonExpiringDelegationExpiry(expiresAt)
   ) {
     return { status: "nonExpiring" };
   }
-  // The contract treats a delegation as active while its expiry is later
-  // than the queried instant.
+  // Matches the contract: DelegationManagement.sol retrieveActiveDelegations
+  // and retrieveActiveDelegators count a delegation as active only
+  // `if (allExpirations[y] > _date)`, so expiry == now is already expired.
   return Date.now() / 1000 < expiresAt
     ? { status: "active", expiresAt }
     : { status: "expired" };

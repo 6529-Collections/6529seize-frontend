@@ -119,7 +119,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
     setGasError(undefined);
   }
 
-  function validate() {
+  function validate(submittedAtMs?: number) {
     const newErrors: string[] = [];
     if (!newDelegationCollection || newDelegationCollection === "0") {
       newErrors.push("Missing or invalid Collection");
@@ -142,7 +142,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
       ? getDelegationExpiryError(
           locale,
           newDelegationExpiry.expiresAt,
-          Date.now()
+          submittedAtMs
         )
       : null;
     if (expiryError) {

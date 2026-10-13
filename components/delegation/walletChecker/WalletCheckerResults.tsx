@@ -1,5 +1,4 @@
 import Address from "@/components/address/Address";
-import { NEVER_DATE } from "@/constants/constants";
 import type { Delegation } from "@/entities/IDelegation";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -18,6 +17,7 @@ import { ALL_USE_CASES, SUPPORTED_COLLECTIONS } from "../delegation-constants";
 import {
   formatDelegationExpiryLocal,
   getViewerTimeZone,
+  isNonExpiringDelegationExpiry,
 } from "../delegation-expiry";
 import { DELEGATION_CARD_CLASS_NAME } from "../delegation-ui";
 
@@ -86,7 +86,8 @@ function getConsolidationKey(
 }
 
 function getDateDisplay(myDate: number, locale: SupportedLocale) {
-  if (myDate === NEVER_DATE) {
+  // 0 shares the "never" meaning, so it can never render as 1 Jan 1970.
+  if (isNonExpiringDelegationExpiry(myDate)) {
     return t(locale, "delegation.collection.walletChecker.never");
   }
   return formatDelegationExpiryLocal(locale, myDate, getViewerTimeZone());

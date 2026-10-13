@@ -222,6 +222,13 @@ describe("getDelegationExpiryError", () => {
     expect(getDelegationExpiryError("en-US", leadBoundary, now)).toBe(tooSoon);
   });
 
+  it("checks only presence for render-time gating without a submit time", () => {
+    expect(getDelegationExpiryError("en-US", now / SECOND_MS - 60)).toBeNull();
+    expect(getDelegationExpiryError("en-US", null)).toBe(
+      "Missing or invalid Expiry"
+    );
+  });
+
   it("accepts an expiry after the lead time", () => {
     expect(getDelegationExpiryError("en-US", leadBoundary + 1, now)).toBeNull();
   });

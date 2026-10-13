@@ -98,13 +98,17 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
       validate().length === 0 ? "updateDelegationAddress" : undefined,
   };
 
-  function validate() {
+  function validate(submittedAtMs?: number) {
     const newErrors: string[] = [];
     if (!delegationToAddress || !isValidEthAddress(delegationToAddress)) {
       newErrors.push("Missing or invalid New Address");
     }
     const expiryError = showExpiryCalendar
-      ? getDelegationExpiryError(locale, delegationExpiry.expiresAt, Date.now())
+      ? getDelegationExpiryError(
+          locale,
+          delegationExpiry.expiresAt,
+          submittedAtMs
+        )
       : null;
     if (expiryError) {
       newErrors.push(expiryError);

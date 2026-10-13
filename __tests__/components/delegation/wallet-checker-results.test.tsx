@@ -144,6 +144,26 @@ describe("WalletCheckerResults", () => {
     expect(matches).toHaveLength(2);
   });
 
+  it("shows a zero expiry as never, not as 1 January 1970", () => {
+    render(
+      <WalletCheckerResults
+        fetchedAddress={CHECKED_ADDRESS}
+        delegationsLoaded
+        delegations={[createDelegation({ expiry: 0 })]}
+        subDelegations={[]}
+        activeDelegation={undefined}
+        consolidationsLoaded={false}
+        consolidations={[]}
+        consolidatedWallets={[]}
+        consolidationActions={[]}
+      />
+    );
+
+    const row = screen.getAllByRole("row")[1];
+    expect(row).toHaveTextContent("Never");
+    expect(row).not.toHaveTextContent("1970");
+  });
+
   it("does not leak a zero expiry value into the active delegation output", () => {
     render(
       <WalletCheckerResults

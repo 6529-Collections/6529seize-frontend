@@ -11,10 +11,12 @@ const TOO_SOON_ERROR =
   "Choose a later expiry date. The delegation must stay active for at least 1 hour after you submit.";
 const DELEGATE = "0x2222222222222222222222222222222222222222";
 
+type FormValidate = (submittedAtMs?: number) => string[];
+
 const submitProps: {
   current?: {
     writeParams: DelegationWriteParams;
-    validate: () => string[];
+    validate: FormValidate;
   };
 } = {};
 
@@ -81,7 +83,7 @@ jest.mock("@/components/delegation/DelegationFormParts", () => {
     ),
     DelegationSubmitGroups: (props: {
       writeParams: DelegationWriteParams;
-      validate: () => string[];
+      validate: FormValidate;
     }) => {
       submitProps.current = props;
       return null;
@@ -97,15 +99,8 @@ function latestSubmit() {
 }
 
 describe("delegation expiry submit validation", () => {
-  let nowSpy: jest.SpyInstance<number, []>;
-
   beforeEach(() => {
-    nowSpy = jest.spyOn(Date, "now").mockReturnValue(NOW_MS);
     delete submitProps.current;
-  });
-
-  afterEach(() => {
-    nowSpy.mockRestore();
   });
 
   it("refuses a new delegation that would expire within the lead time", () => {
@@ -120,26 +115,30 @@ describe("delegation expiry submit validation", () => {
       />
     );
     fireEvent.click(screen.getByRole("button", { name: "set delegate" }));
-    expect(latestSubmit().validate()).toEqual([]);
+    expect(latestSubmit().validate(NOW_MS)).toEqual([]);
     expect(latestSubmit().writeParams.args[2]).toBe(NEVER_DATE);
 
     fireEvent.click(screen.getByRole("radio", { name: "Select Date" }));
-    expect(latestSubmit().validate()).toEqual(["Missing or invalid Expiry"]);
-
-    fireEvent.click(screen.getByRole("button", { name: "pick too soon" }));
-    expect(latestSubmit().validate()).toEqual([TOO_SOON_ERROR]);
+    expect(latestSubmit().validate(NOW_MS)).toEqual([
+      "Missing or invalid Expiry",
+    ]);
     expect(latestSubmit().writeParams.functionName).toBeUndefined();
 
-    fireEvent.click(screen.getByRole("button", { name: "pick valid" }));
+    fireEvent.click(screen.getByRole("button", { name: "pick too soon" }));
+    expect(latestSubmit().validate(NOW_MS)).toEqual([TOO_SOON_ERROR]);
+    // Render-time gating checks presence only and never reads the clock;
+    // the submit handler passes the click time, which blocks the write.
     expect(latestSubmit().validate()).toEqual([]);
+
+    fireEvent.click(screen.getByRole("button", { name: "pick valid" }));
+    expect(latestSubmit().validate(NOW_MS)).toEqual([]);
     expect(latestSubmit().writeParams.functionName).toBe(
       "registerDelegationAddress"
     );
     expect(latestSubmit().writeParams.args[2]).toBe(NOW_SECONDS + 3601);
 
-    // A form left open re-checks the expiry against the time of submit.
-    nowSpy.mockReturnValue(NOW_MS + 2000);
-    expect(latestSubmit().validate()).toEqual([TOO_SOON_ERROR]);
+    // A form left open is checked against the time of the submit click.
+    expect(latestSubmit().validate(NOW_MS + 2000)).toEqual([TOO_SOON_ERROR]);
   });
 
   it("sends the selected expiry on a manager-registered delegation", () => {
@@ -196,11 +195,10 @@ describe("delegation expiry submit validation", () => {
     fireEvent.click(screen.getByRole("radio", { name: "Select Date" }));
 
     fireEvent.click(screen.getByRole("button", { name: "pick too soon" }));
-    expect(latestSubmit().validate()).toEqual([TOO_SOON_ERROR]);
-    expect(latestSubmit().writeParams.functionName).toBeUndefined();
+    expect(latestSubmit().validate(NOW_MS)).toEqual([TOO_SOON_ERROR]);
 
     fireEvent.click(screen.getByRole("button", { name: "pick valid" }));
-    expect(latestSubmit().validate()).toEqual([]);
+    expect(latestSubmit().validate(NOW_MS)).toEqual([]);
     expect(latestSubmit().writeParams.functionName).toBe(
       "updateDelegationAddress"
     );

@@ -391,7 +391,8 @@ export function DelegationSubmitGroups(
     gasError?: string | undefined;
     onWriteSettled?: DelegationWriteSettledHandler | undefined;
     isDestructive?: boolean | undefined;
-    validate: () => string[];
+    /** Receives the submit time, so time-based checks use the click, not render. */
+    validate: (submittedAtMs: number) => string[];
     onHide: () => void;
     onSetToast: (toast: DelegationToastState) => void;
     submitBtnLabel?: string | undefined;
@@ -420,15 +421,15 @@ export function DelegationSubmitGroups(
   });
 
   function submitDelegation() {
-    const newErrors = validate();
+    const newErrors = validate(Date.now());
     setErrors(newErrors);
     if (newErrors.length > 0) {
       window.scrollBy(0, 100);
     } else {
       const { functionName } = writeParams;
       if (!functionName) {
-        // Unreachable: submission is gated by the same validate() predicate
-        // the form components use to decide whether functionName is set.
+        // Unreachable: submit-time validate() runs every check the form
+        // components use to decide whether functionName is set.
         return;
       }
       const contractParams = { ...writeParams, functionName };
