@@ -11,7 +11,10 @@ route/layout render boundary fails.
 - Missing profile route -> profile not-found fallback
   (`app/[user]/not-found.tsx`).
 - Route-segment render failure -> route error boundary (`app/error.tsx`).
-- Global render failure -> global error boundary (`app/global-error.tsx`).
+- Global render failure (the root layout itself fails) -> global error boundary
+  (`app/global-error.tsx`), a standalone screen with its own `<html>`/`<body>`,
+  inline styles and copy resolved from the browser language; it does not use
+  the shared error component.
 - App-shell client render failure -> layout fallback
   (`components/providers/LayoutErrorFallback.tsx`).
 - Manual diagnostics screen -> `/error` (`app/error/page.tsx`), supports
@@ -48,7 +51,11 @@ route/layout render boundary fails.
 
 ## Edge Cases
 
-- `Try Again` appears only when a boundary provides a reset callback.
+- `Try Again` appears only when a boundary provides a reset callback. The global
+  error screen always shows it and runs the Next.js retry (`retry`, or
+  `unstable_retry` on Next 16.2), which refetches the page before re-rendering.
+- The global error screen also shows `Go to the 6529 home page`, a plain link
+  that reloads the site from `/`.
 - Plain `/error` does not show `Try Again`.
 - `Show Stacktrace` appears only when stack text or digest exists.
 - Expanded diagnostics show digest first (if present), then stack text.
@@ -58,6 +65,8 @@ route/layout render boundary fails.
 - Digest appears only when the failure payload exposes a string digest.
 - `Copy` appears only while diagnostics are expanded.
 - `Copy` payload is plain text: digest + stack text, and the button flips to `Copied` briefly.
+- The global error screen shows the digest and stack under `Error details`, a
+  native disclosure, and has no `Copy` button.
 
 ## Failure and Recovery
 

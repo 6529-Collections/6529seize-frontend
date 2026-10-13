@@ -53,6 +53,7 @@ import { EN_US_RECEIPT_MESSAGES } from "@/i18n/messages/collect-receipts";
 import { CONTENT_MODERATION_MESSAGES } from "@/i18n/messages/content-moderation";
 import { MODERATION_CHECK_MESSAGES } from "@/i18n/messages/moderation-checks";
 import { EULA_MESSAGES } from "@/i18n/messages/eula";
+import { GLOBAL_ERROR_MESSAGES } from "@/i18n/messages/global-error";
 import { PROFILE_CURATION_MESSAGES } from "@/i18n/messages/profile-curation";
 import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-documentation";
 import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artwork-documentation-integration";
@@ -4389,6 +4390,7 @@ export const EN_US_MESSAGES = {
   ...NAVIGATION_MESSAGES,
   ...PUBLIC_REVIEW_MESSAGES,
   ...EULA_MESSAGES,
+  ...GLOBAL_ERROR_MESSAGES,
   ...TITLE_CONTEXT_MESSAGES,
   ...WAVE_NAVIGATION_MESSAGES,
   ...MY_STREAM_CURATION_MESSAGES,

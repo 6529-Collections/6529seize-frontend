@@ -8,6 +8,7 @@ import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUplo
 import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.fr-FR.json";
 import { FR_FR_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { FR_FR_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
+import { FR_FR_GLOBAL_ERROR_MESSAGES } from "@/i18n/messages/global-error";
 import { FR_FR_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { FR_FR_CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
 import { FR_FR_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
@@ -632,6 +633,7 @@ export const FR_FR_MESSAGES = {
   ...FR_FR_QR_SCANNER_MESSAGES,
   ...FR_FR_CAPACITOR_CONNECT_MESSAGES,
   ...FR_FR_NEW_VERSION_TOAST_MESSAGES,
+  ...FR_FR_GLOBAL_ERROR_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel":
     "Zone d'envoi de fichiers du chat de wave",
   "waves.chat.guidelinesDialog.title": "Directives de la wave",
