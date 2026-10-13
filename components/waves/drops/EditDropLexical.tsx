@@ -554,6 +554,9 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
                   style={{
                     fontFamily: "inherit",
                     lineHeight: "1.4",
+                    userSelect: "text",
+                    WebkitUserSelect: "text",
+                    WebkitTouchCallout: "default",
                   }}
                 />
                 <CreateDropEmojiPicker top="tw-top-1" />

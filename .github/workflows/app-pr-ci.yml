@@ -229,6 +229,13 @@ jobs:
           if (waveCreationBrowserRequired) {
             corePlaywrightLanes.push({ lane: "playwright-wave-creation", label: "Wave creation desktop and mobile", runner: defaultRunner });
           }
+          const dropEditingBrowserRequired = plan.changed_files.some((file) =>
+            /^(?:components\/waves\/drops\/|contexts\/EditingDropContext\.tsx|hooks\/useLongPressClickSuppression\.ts|tests\/social\/wave-edit-drop-sandbox\.spec\.ts)/.test(file) ||
+            ["services/api/common-api.ts", "services/api/submission-request-key.ts", "styles/globals.css", "tests/packs.manifest.cjs", "tests/support/composerSandboxServer.cjs", ".github/workflows/app-pr-ci.yml"].includes(file)
+          );
+          if (dropEditingBrowserRequired) {
+            corePlaywrightLanes.push({ lane: "playwright-drop-editing", label: "Drop editing desktop and mobile", runner: defaultRunner });
+          }
           if (plan.checks.playwright_critical_shell.required) {
             corePlaywrightLanes.push({
               lane: "playwright-critical-shell",
@@ -447,6 +454,13 @@ jobs:
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/wave-creation"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/wave-creation"
         run: ./bin/6529 run test:e2e:wave-creation-sandbox
+
+      - name: Run drop editing browser regression pack
+        if: matrix.lane == 'playwright-drop-editing'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/drop-editing"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/drop-editing"
+        run: ./bin/6529 run test:e2e:edit-drop-sandbox
 
       # One `next dev` session that compiles every critical-shell route grows
       # Turbopack's native memory past the 16 GB runner, and the OOM killer

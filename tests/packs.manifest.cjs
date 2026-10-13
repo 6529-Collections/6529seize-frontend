@@ -430,7 +430,8 @@ const PACKS = [
     "test:e2e:edit-drop-sandbox",
     "Drop edit sandbox against the local mock API.",
     ["tests/social/wave-edit-drop-sandbox.spec.ts"],
-    COMPOSER_SANDBOX_ENV
+    COMPOSER_SANDBOX_ENV,
+    [DESKTOP, MOBILE]
   ),
   {
     ...sandboxPack(
