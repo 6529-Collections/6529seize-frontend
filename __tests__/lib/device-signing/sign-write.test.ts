@@ -177,6 +177,20 @@ describe("device-signed drop writes", () => {
     expect(mockRecords.get(ADDRESS)?.lastSeq).toBe(signature.seq);
   });
 
+  it("signs a top-level drop with empty refs", async () => {
+    await setUpGrant();
+    const { reply_to: _reply, ...topLevel } = createBody();
+    await postDrop(topLevel as Parameters<typeof postDrop>[0]);
+
+    const signature = sentSignature(postMock)!;
+    await expectVerifies({
+      signature,
+      kind: 1,
+      refs: [],
+      body: topLevel,
+    });
+  });
+
   it("signs edits, deletes and both reaction directions", async () => {
     await setUpGrant();
     const target = { dropId: DROP_ID, waveId: WAVE_ID };

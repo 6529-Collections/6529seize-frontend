@@ -152,5 +152,9 @@ describe("device key store", () => {
     expect(
       getDeviceGrantStatus({ ...grant, revoked_at: NOW } as ApiDeviceGrant, NOW)
     ).toBe("none");
+    const { revoked_at: _missing, ...withoutRevokedAt } = grant;
+    expect(
+      getDeviceGrantStatus(withoutRevokedAt as unknown as ApiDeviceGrant, NOW)
+    ).toBe("active");
   });
 });
