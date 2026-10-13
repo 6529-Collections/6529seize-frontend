@@ -12,6 +12,18 @@ export const SIMULATED_SIGNERS: readonly SimulatedWallet[] = [
 const EXISTING_MEMBERS: readonly SimulatedWallet[] = ["A", "B", "C"];
 const JOINING_WALLET: SimulatedWallet = "D";
 
+/**
+ * Whether the limits are the ones this fixed scenario models: three members
+ * that count without the fresh-link gate, and a fourth wallet joining them.
+ * Other limits would make the A, B, C and D walkthrough misleading.
+ */
+export function matchesSimulatedScenario(limits: ConsolidationLimits): boolean {
+  return (
+    limits.ungatedMaxWallets === EXISTING_MEMBERS.length &&
+    limits.maxWallets === SIMULATED_SIGNERS.length
+  );
+}
+
 interface Registration {
   readonly block: number;
   readonly afterStart: boolean;
@@ -141,7 +153,8 @@ function joiningWallet(
  * The scenario is fixed: three members and one joining wallet. It models the
  * current policy (`ungatedMaxWallets` 3, `maxWallets` 4); the limits only
  * decide which of these groups the backend would count. A different maximum
- * needs a new scenario, not just new limits.
+ * needs a new scenario, not just new limits, so the simulator is not shown
+ * unless matchesSimulatedScenario holds.
  */
 export function simulateAddingFourthWallet(
   order: readonly SimulatedWallet[],

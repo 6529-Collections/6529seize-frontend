@@ -316,6 +316,7 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
 
   test("guided consolidation plans without a wallet and signs nothing", async ({
     page,
+    isMobile,
   }) => {
     await gotoReady(page, "/safe-collecting/build-consolidation");
     const main = pageMain(page);
@@ -380,7 +381,7 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
     await expect(tooltip).toBeVisible();
     await expect(
       tooltip.getByText("Cancel Consolidation", { exact: true })
-    ).toHaveCSS("font-size", "14px");
+    ).toHaveCSS("font-size", isMobile ? "13px" : "14px");
     await close.click();
     await expect(page).toHaveURL(/\/safe-collecting\/?$/);
     await expect(
