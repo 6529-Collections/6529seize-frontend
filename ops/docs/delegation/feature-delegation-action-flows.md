@@ -38,6 +38,12 @@ and submit/recovery behavior.
 
 ## Route Requirements
 
+Registration and primary-address pages show `Back to Safe Collecting` while
+the wallet connection is restoring and when disconnected. The link returns to
+`/safe-collecting` without requiring a wallet connection, including when a
+profile is still signed in. Connected forms have a close button with the
+standard tooltip, available on hover and keyboard focus.
+
 - `register-delegation`
   - Required: `Collection`, `Use Case`, `Delegate Address`
   - Optional: `Expiry Date` (`Never` or `Select Date`)

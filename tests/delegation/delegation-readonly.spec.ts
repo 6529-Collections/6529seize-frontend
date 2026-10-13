@@ -368,6 +368,18 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
       main.getByRole("button", { name: /^Sign (Step|for) / })
     ).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
+    const close = main.getByRole("button", { name: "Cancel Consolidation" });
+    await close.focus();
+    const tooltip = page.getByRole("tooltip");
+    await expect(tooltip).toBeVisible();
+    await expect(
+      tooltip.getByText("Cancel Consolidation", { exact: true })
+    ).toHaveCSS("font-size", "14px");
+    await close.click();
+    await expect(page).toHaveURL(/\/safe-collecting\/?$/);
+    await expect(
+      main.getByRole("heading", { name: "Safe Collecting", exact: true })
+    ).toBeVisible();
   });
 
   for (const route of WRITE_GUARD_ROUTES) {
@@ -386,6 +398,14 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
       await expect(
         main.getByRole("button", { name: /^Register|^Assign/ })
       ).toHaveCount(0);
+      const back = main.getByRole("link", { name: "Back to Safe Collecting" });
+      await expect(back).toBeVisible();
+      await expect(back).toHaveAttribute("href", "/safe-collecting");
+      await back.click();
+      await expect(page).toHaveURL(/\/safe-collecting\/?$/);
+      await expect(
+        main.getByRole("heading", { name: "Safe Collecting", exact: true })
+      ).toBeVisible();
     });
   }
 

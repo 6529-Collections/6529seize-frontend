@@ -8438,7 +8438,8 @@
       "facts": [
         "Delegation write action routes are documented under Delegation docs.",
         "Routes have input, validation, query-parameter, feedback, and transaction-state rules.",
-        "Users should start from Safe Collecting when unsure which delegation action to take."
+        "Users should start from Safe Collecting when unsure which delegation action to take.",
+        "Registration and primary-address pages show Back to Safe Collecting while the wallet connection restores and when disconnected, including when a profile is still signed in. The link returns to /safe-collecting without requiring a wallet connection. Connected forms have a close button with a tooltip available on hover and keyboard focus."
       ],
       "canonical_path": "/safe-collecting",
       "related_paths": ["/delegation-mapping-tool"],

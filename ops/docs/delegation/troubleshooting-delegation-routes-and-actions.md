@@ -33,8 +33,10 @@ collection actions stay blocked, or Wallet Checker output looks wrong.
   `404 | PAGE NOT FOUND`: fallback HTML could not load. Reopen from menu and
   retry later. The `TAP Guide` (`/safe-collecting/tap-guide`) is a native
   page and does not load article HTML.
-- Clicking a Delegation Center card while disconnected does not navigate:
-  wallet connect was canceled or closed before a successful connect.
+- A registration or primary-address page asks to connect a wallet:
+  a signed-in profile does not supply a live wallet connection. Use
+  `Connect Wallet` to continue, or `Back to Safe Collecting` to leave. The
+  return link is also available while the wallet connection is restoring.
 - Collection tables stay on `Fetching incoming ...` / `Fetching outgoing ...`:
   wallet is disconnected, so collection reads do not run.
 - Manager actions do not open a form:
