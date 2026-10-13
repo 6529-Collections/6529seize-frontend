@@ -131,8 +131,10 @@ Backend production also carries release-note inputs:
   create a release note, with PR/group metadata omitted and publish left false.
 
 The autonomous bot owns release-note writing and publication. Preserve its
-metadata and final signal. CI wave notifications are best effort and use deploy
-run IDs to correlate E2E replies.
+metadata and final signal. Per-deploy frontend and backend notes post to the
+`Deploys · Production` wave; `6529 Releases` receives one AI-written daily
+digest plus individual Desktop and mobile app release notes. CI wave
+notifications are best effort and use deploy run IDs to correlate E2E replies.
 
 ## Failure and rollback
 

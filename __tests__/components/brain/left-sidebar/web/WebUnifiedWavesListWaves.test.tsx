@@ -577,6 +577,7 @@ it("expands regular subwaves and keeps child rows unpinned", async () => {
         hasSubwaves: true,
         createdAt: 10,
         unreadDropsCount: 1,
+        isFollowing: true,
       }),
     ],
   });
@@ -641,6 +642,7 @@ it("hides expanded child rows immediately while the sidebar is collapsed", async
       parentWaveId: "parent",
       createdAt: 10,
       unreadDropsCount: 1,
+      isFollowing: true,
     }),
   ];
   const sentinelRef = React.createRef<HTMLDivElement>();

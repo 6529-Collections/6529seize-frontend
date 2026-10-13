@@ -1,33 +1,25 @@
 import { getEthereumMainnetClient } from "@/lib/ethereum/mainnetClient";
-import { createPublicClient, http, type PublicClient } from "viem";
+import { createServerPublicClient } from "@/lib/ethereum/serverPublicClient";
+import type { PublicClient } from "viem";
 import { hoodi, mainnet, sepolia } from "viem/chains";
 
 import type { EtherscanNetwork } from "@/lib/link-preview/etherscan/types";
 
 const RPC_TIMEOUT_MS = 2500;
 
-const sepoliaClient = createPublicClient({
+const sepoliaClient = createServerPublicClient({
   chain: sepolia,
-  transport: http(undefined, {
-    retryCount: 0,
-    timeout: RPC_TIMEOUT_MS,
-  }),
+  timeoutMs: RPC_TIMEOUT_MS,
 });
 
-const hoodiClient = createPublicClient({
+const hoodiClient = createServerPublicClient({
   chain: hoodi,
-  transport: http(undefined, {
-    retryCount: 0,
-    timeout: RPC_TIMEOUT_MS,
-  }),
+  timeoutMs: RPC_TIMEOUT_MS,
 });
 
-const sepoliaEnsClient = createPublicClient({
+const sepoliaEnsClient = createServerPublicClient({
   chain: sepolia,
-  transport: http(undefined, {
-    retryCount: 0,
-    timeout: RPC_TIMEOUT_MS,
-  }),
+  timeoutMs: RPC_TIMEOUT_MS,
 });
 
 const CLIENTS_BY_CHAIN_ID = new Map<number, PublicClient>([

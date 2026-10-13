@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 interface StreamRouteLoadingShellProps {
   readonly ariaLabel: string;
   readonly variant: "waves" | "messages";
+  readonly showSidebar?: boolean;
 }
 
 const sidebarRows = [68, 54, 74, 62, 48, 70] as const;
@@ -30,6 +31,7 @@ const SkeletonBlock = ({
 export default function StreamRouteLoadingShell({
   ariaLabel,
   variant,
+  showSidebar = true,
 }: StreamRouteLoadingShellProps) {
   const primaryWidth = variant === "messages" ? "56%" : "68%";
   const secondaryWidth = variant === "messages" ? "42%" : "50%";
@@ -48,35 +50,40 @@ export default function StreamRouteLoadingShell({
         className="tw-flex tw-overflow-hidden"
         style={routeLoadingMinHeightStyle}
       >
-        <aside className="tw-hidden tw-w-80 tw-shrink-0 tw-border-r tw-border-iron-900 tw-bg-iron-950 md:tw-flex md:tw-flex-col">
-          <div className="tw-border-b tw-border-iron-900 tw-px-4 tw-py-4">
-            <SkeletonBlock className="tw-h-5" style={{ width: primaryWidth }} />
-            <SkeletonBlock
-              className="tw-mt-3 tw-h-3"
-              style={{ width: secondaryWidth }}
-            />
-          </div>
-          <div className="tw-space-y-3 tw-p-3">
-            {sidebarRows.map((width, index) => (
-              <div
-                key={width}
-                className="tw-flex tw-items-center tw-gap-3 tw-rounded-md tw-bg-iron-900/55 tw-p-3"
-              >
-                <SkeletonBlock className="tw-size-10 tw-shrink-0 tw-rounded-full" />
-                <div className="tw-min-w-0 tw-flex-1">
-                  <SkeletonBlock
-                    className="tw-h-3"
-                    style={{ width: `${width}%` }}
-                  />
-                  <SkeletonBlock
-                    className="tw-mt-3 tw-h-2.5"
-                    style={{ width: `${sidebarRows.at(index - 2) ?? 44}%` }}
-                  />
+        {showSidebar && (
+          <aside className="tw-hidden tw-w-80 tw-shrink-0 tw-border-r tw-border-iron-900 tw-bg-iron-950 md:tw-flex md:tw-flex-col">
+            <div className="tw-border-b tw-border-iron-900 tw-px-4 tw-py-4">
+              <SkeletonBlock
+                className="tw-h-5"
+                style={{ width: primaryWidth }}
+              />
+              <SkeletonBlock
+                className="tw-mt-3 tw-h-3"
+                style={{ width: secondaryWidth }}
+              />
+            </div>
+            <div className="tw-space-y-3 tw-p-3">
+              {sidebarRows.map((width, index) => (
+                <div
+                  key={width}
+                  className="tw-flex tw-items-center tw-gap-3 tw-rounded-md tw-bg-iron-900/55 tw-p-3"
+                >
+                  <SkeletonBlock className="tw-size-10 tw-shrink-0 tw-rounded-full" />
+                  <div className="tw-min-w-0 tw-flex-1">
+                    <SkeletonBlock
+                      className="tw-h-3"
+                      style={{ width: `${width}%` }}
+                    />
+                    <SkeletonBlock
+                      className="tw-mt-3 tw-h-2.5"
+                      style={{ width: `${sidebarRows.at(index - 2) ?? 44}%` }}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </aside>
+              ))}
+            </div>
+          </aside>
+        )}
 
         <main className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-bg-iron-950">
           <div className="tw-flex tw-items-center tw-gap-3 tw-border-b tw-border-iron-900 tw-px-4 tw-py-3">

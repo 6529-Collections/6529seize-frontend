@@ -8,6 +8,9 @@ type SortableSubwaveActivity = {
         readonly latestDropTimestamp?: number | null | undefined;
       }
     | undefined;
+  // Enhanced sidebar rows expose isMuted; raw SidebarWave data uses muted.
+  readonly isMuted?: boolean | undefined;
+  readonly muted?: boolean | undefined;
 };
 
 const getSubwaveActivityTimestamp = (wave: SortableSubwaveActivity) => {
@@ -18,11 +21,12 @@ const getSubwaveActivityTimestamp = (wave: SortableSubwaveActivity) => {
   );
 };
 
-export const compareSubwavesByLatestActivity = <
-  T extends SortableSubwaveActivity,
->(
-  a: T,
-  b: T
+const isSubwaveMuted = (wave: SortableSubwaveActivity) =>
+  wave.isMuted ?? wave.muted ?? false;
+
+const compareSubwavesByLatestActivity = (
+  a: SortableSubwaveActivity,
+  b: SortableSubwaveActivity
 ) => {
   const activityDelta =
     getSubwaveActivityTimestamp(b) - getSubwaveActivityTimestamp(a);
@@ -42,4 +46,22 @@ export const compareSubwavesByLatestActivity = <
   }
 
   return a.id.localeCompare(b.id);
+};
+
+/**
+ * Display order for subwaves under a parent: unmuted subwaves first, then
+ * muted ones, each group newest activity first. Mirrors the muted-last rule
+ * used for top-level sidebar rows.
+ */
+export const compareSubwavesForDisplay = <T extends SortableSubwaveActivity>(
+  a: T,
+  b: T
+) => {
+  const mutedDelta = Number(isSubwaveMuted(a)) - Number(isSubwaveMuted(b));
+
+  if (mutedDelta !== 0) {
+    return mutedDelta;
+  }
+
+  return compareSubwavesByLatestActivity(a, b);
 };
