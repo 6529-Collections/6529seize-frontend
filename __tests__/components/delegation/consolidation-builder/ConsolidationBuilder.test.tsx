@@ -914,6 +914,7 @@ test("uses the settings maximum for wallet rows and does not invent one while un
   mockPolicyState.limits = null;
   mockPolicyState.policy = null;
   view.rerenderWith({});
+  expect(screen.getByText("Entered wallets: 3")).toBeInTheDocument();
   expect(
     screen.queryByRole("button", { name: /Sign Step/ })
   ).not.toBeInTheDocument();

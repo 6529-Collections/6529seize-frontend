@@ -30,6 +30,8 @@ export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
     "Safes sign through a manager here. Appoint a Delegation Manager for this Safe on Any Collection, then connect the manager to sign these links.",
   "delegation.consolidationBuilder.safe.faqLink": "Using a SAFE",
   "delegation.consolidationBuilder.wallets.title": "Wallets",
+  "delegation.consolidationBuilder.wallets.countPending":
+    "Entered wallets: {count}",
   "delegation.consolidationBuilder.wallets.count": "{count} of {limit} wallets",
   "delegation.consolidationBuilder.wallets.label": "Wallet {position}",
   "delegation.consolidationBuilder.wallets.inputLabel":
