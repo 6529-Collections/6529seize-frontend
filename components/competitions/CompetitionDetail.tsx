@@ -254,7 +254,9 @@ export default function CompetitionDetail({
       style={isApp && isDraft ? waveViewStyle : undefined}
       className={`tw-h-full tw-min-h-0 tw-overflow-y-auto tw-px-4 tw-pt-4 sm:tw-px-6 sm:tw-pt-6 ${isDraft ? "tw-scroll-pb-24" : "tw-pb-4 sm:tw-pb-6"}`}
     >
-      <div className="tw-mx-auto tw-max-w-5xl tw-space-y-5">
+      <div
+        className={`tw-mx-auto tw-max-w-5xl ${isDraft ? "tw-flex tw-min-h-full tw-flex-col tw-gap-5" : "tw-space-y-5"}`}
+      >
         <header className="tw-space-y-3">
           <nav>
             <CompetitionBackLink waveId={waveId} />

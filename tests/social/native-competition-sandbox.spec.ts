@@ -1602,6 +1602,83 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     }
   });
 
+  test("keeps the draft footer at the bottom when proposal appearance changes", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page);
+    const viewport = page.viewportSize();
+    if (!viewport) throw new Error("Viewport missing");
+    await page.setViewportSize({ ...viewport, height: 1600 });
+    await page.goto(`${ROOT}/new`);
+    const name = page.getByLabel("Competition name", { exact: true });
+    await name.fill("Appearance layout draft");
+    await expect.poll(() => sandbox.requests.length).toBe(1);
+    const footer = page
+      .getByRole("button", { name: "Close editor", exact: true })
+      .locator("..");
+
+    for (const draft of ["new", "reopened"]) {
+      if (draft === "reopened") {
+        await page.goto(`${ROOT}/draft`);
+        await expect(name).toHaveValue("Appearance layout draft");
+      }
+      await page
+        .getByRole("button", { name: /^Appearance and labels/ })
+        .click();
+      for (const mode of ["Full proposal", "Summary card", "Full proposal"]) {
+        await page.getByText(mode, { exact: true }).click();
+        await expect(
+          page.getByRole("radio", { name: new RegExp(`^${mode}`) })
+        ).toBeChecked();
+        // Sample throughout the height animation so a passing initial position
+        // cannot hide a footer jump after the appearance controls settle.
+        const largestGap = await footer.evaluate(async (element) => {
+          let container = element.parentElement;
+          while (
+            container &&
+            !/(auto|scroll)/.test(getComputedStyle(container).overflowY)
+          ) {
+            container = container.parentElement;
+          }
+          if (!container) throw new Error("Draft scroll container missing");
+          const scrollContainer = container;
+          return new Promise<number>((resolve) => {
+            const startedAt = performance.now();
+            let maximum = 0;
+            const sample = () => {
+              maximum = Math.max(
+                maximum,
+                Math.abs(
+                  scrollContainer.getBoundingClientRect().bottom -
+                    element.getBoundingClientRect().bottom
+                )
+              );
+              if (performance.now() - startedAt >= 750) resolve(maximum);
+              else requestAnimationFrame(sample);
+            };
+            requestAnimationFrame(sample);
+          });
+        });
+        expect(largestGap).toBeLessThanOrEqual(1);
+        await expect(
+          footer.getByRole("button", { name: "Next", exact: true })
+        ).toBeInViewport({ ratio: 1 });
+        await page
+          .getByRole("group", { name: "Proposal card appearance", exact: true })
+          .screenshot({
+            path: testInfo.outputPath(
+              `${draft}-${mode === "Full proposal" ? "full" : "summary"}-appearance.png`
+            ),
+            animations: "disabled",
+          });
+      }
+      await page.screenshot({
+        path: testInfo.outputPath(`${draft}-appearance-footer.png`),
+      });
+      await expectNoHorizontalOverflow(page);
+    }
+  });
+
   test("keeps competition fields above the app keyboard and restores the footer", async ({
     page,
   }, testInfo) => {

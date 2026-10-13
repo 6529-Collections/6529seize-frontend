@@ -63,19 +63,27 @@ const getApproveErrorMessage = (
 
 function ProposalCardAppearancePreview({
   mode,
+  isSelected,
 }: {
   readonly mode: CreateWaveProposalCardMode;
+  readonly isSelected: boolean;
 }) {
+  const accentClass = isSelected ? "tw-bg-primary-400/80" : "tw-bg-iron-650";
+  const detailClass = isSelected ? "tw-bg-primary-400/30" : "tw-bg-iron-800";
   return (
     <div aria-hidden="true" className={CREATE_WAVE_OPTION_STYLES.preview}>
       {mode === "standard" ? (
         <div className="tw-flex tw-h-full tw-flex-col tw-justify-center">
           <div className="tw-flex tw-items-center tw-gap-1.5">
-            <span className="tw-size-1.5 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-650" />
-            <span className="tw-h-1 tw-w-6 tw-rounded-full tw-bg-iron-650" />
+            <span
+              className={`tw-size-1.5 tw-flex-shrink-0 tw-rounded-full ${accentClass}`}
+            />
+            <span className={`tw-h-1 tw-w-6 tw-rounded-full ${accentClass}`} />
           </div>
           <div className="tw-mt-1.5 tw-space-y-1">
-            <span className="tw-block tw-h-0.5 tw-w-full tw-rounded-full tw-bg-iron-800" />
+            <span
+              className={`tw-block tw-h-0.5 tw-w-full tw-rounded-full ${detailClass}`}
+            />
             <span className="tw-block tw-h-0.5 tw-w-11/12 tw-rounded-full tw-bg-iron-800" />
             <span className="tw-block tw-h-0.5 tw-w-full tw-rounded-full tw-bg-iron-800" />
             <span className="tw-block tw-h-0.5 tw-w-3/4 tw-rounded-full tw-bg-iron-800" />
@@ -84,10 +92,14 @@ function ProposalCardAppearancePreview({
       ) : (
         <div className="tw-flex tw-h-full tw-items-center tw-gap-2">
           <div className="tw-min-w-0 tw-flex-1">
-            <span className="tw-block tw-h-1 tw-w-2/3 tw-rounded-full tw-bg-iron-650" />
+            <span
+              className={`tw-block tw-h-1 tw-w-2/3 tw-rounded-full ${accentClass}`}
+            />
             <span className="tw-mt-1.5 tw-block tw-h-0.5 tw-w-4/5 tw-rounded-full tw-bg-iron-800" />
           </div>
-          <span className="tw-size-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800" />
+          <span
+            className={`tw-size-6 tw-flex-shrink-0 tw-rounded-md ${detailClass}`}
+          />
         </div>
       )}
     </div>
@@ -324,7 +336,10 @@ export default function CreateWaveDisplaySettings({
                     : CREATE_WAVE_OPTION_STYLES.unselected
                 }`}
               >
-                <ProposalCardAppearancePreview mode={mode} />
+                <ProposalCardAppearancePreview
+                  mode={mode}
+                  isSelected={isSelected}
+                />
                 <div className={CREATE_WAVE_OPTION_STYLES.content}>
                   <input
                     id={mode}

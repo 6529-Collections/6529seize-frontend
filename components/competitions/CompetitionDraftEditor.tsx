@@ -443,7 +443,7 @@ function DraftForm({
   return (
     <section
       ref={formRef}
-      className="tw-mx-auto tw-w-full tw-max-w-[680px] tw-space-y-6"
+      className="tw-mx-auto tw-flex tw-w-full tw-max-w-[680px] tw-flex-1 tw-flex-col tw-gap-6"
       aria-labelledby="competition-draft-title"
     >
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
@@ -455,7 +455,7 @@ function DraftForm({
         </h1>
         <output className="tw-text-xs tw-text-iron-400">{saveStatus}</output>
       </div>
-      <p className="tw-text-sm tw-text-iron-400">
+      <p className="tw-m-0 tw-text-sm tw-text-iron-400">
         {t(locale, "competitions.overlap")}
       </p>
       <fieldset
@@ -475,12 +475,12 @@ function DraftForm({
         )}
       </fieldset>
       {visibleErrors.length > 0 && invalid && (
-        <p role="alert" className="tw-text-red">
+        <p role="alert" className="tw-m-0 tw-text-red">
           {t(locale, "competitions.required")}
         </p>
       )}
       {displayedError && (
-        <p role="alert" className="tw-text-red">
+        <p role="alert" className="tw-m-0 tw-text-red">
           {t(
             locale,
             displayedError === "conflict"
@@ -492,7 +492,7 @@ function DraftForm({
       {persistence.error === "failure" && (
         <button
           type="button"
-          className={COMPETITION_BUTTON}
+          className={`${COMPETITION_BUTTON} tw-self-start`}
           disabled={busy || persistence.busy}
           onClick={() => {
             void persistence.save();
@@ -504,7 +504,7 @@ function DraftForm({
       {displayedError === "conflict" && (
         <button
           type="button"
-          className={COMPETITION_BUTTON}
+          className={`${COMPETITION_BUTTON} tw-self-start`}
           disabled={busy}
           onClick={() => {
             void saveConflictCopy();
@@ -516,7 +516,7 @@ function DraftForm({
       {displayedError === "conflict" && (
         <button
           type="button"
-          className={COMPETITION_BUTTON}
+          className={`${COMPETITION_BUTTON} tw-self-start`}
           onClick={() => {
             persistence.clear();
             globalThis.location.reload();
@@ -525,7 +525,7 @@ function DraftForm({
           {t(locale, "competitions.reload")}
         </button>
       )}
-      <div className="tw-sticky tw-bottom-0 tw-z-20 tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-black tw-py-4 tw-pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <div className="tw-sticky tw-bottom-0 tw-z-20 tw-mt-auto tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-black tw-py-4 tw-pb-[max(1rem,env(safe-area-inset-bottom))]">
         <button
           type="button"
           className={`${EDITOR_BUTTON} tw-mr-auto tw-border-transparent tw-bg-transparent tw-text-iron-400 enabled:hover:tw-bg-iron-900 enabled:hover:tw-text-iron-50`}
