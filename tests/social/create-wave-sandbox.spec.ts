@@ -1277,7 +1277,7 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
 
   test("keeps optional Overview settings collapsed and reveals hidden errors", async ({
     page,
-  }) => {
+  }, testInfo) => {
     await gotoCreateWave(page);
     await expect(page.getByText("Click to upload")).toBeHidden();
 
@@ -1298,6 +1298,17 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     const submissionLabel = page.getByLabel("Submission button label");
     await page.getByText("Full proposal", { exact: true }).click();
     await expect(fullProposal).toBeChecked();
+    await submissionLabel.locator("..").screenshot({
+      animations: "disabled",
+      path: testInfo.outputPath("submission-label-input.png"),
+    });
+    await page
+      .getByRole("heading", { name: "Tab labels", exact: true })
+      .locator("..")
+      .screenshot({
+        animations: "disabled",
+        path: testInfo.outputPath("approval-label-inputs.png"),
+      });
     await submissionLabel.fill("Submit idea");
 
     await advancedSettings.click();

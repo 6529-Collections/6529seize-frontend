@@ -1913,6 +1913,26 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(page.getByText("Ranking mode", { exact: true })).toHaveCount(
       0
     );
+    const appearanceSettings = page.getByRole("button", {
+      name: /^Appearance and labels/,
+    });
+    await appearanceSettings.click();
+    await page
+      .getByLabel("Submission button label", { exact: true })
+      .locator("..")
+      .screenshot({
+        animations: "disabled",
+        path: testInfo.outputPath("submission-label-input.png"),
+      });
+    await page
+      .getByRole("heading", { name: "Tab labels", exact: true })
+      .locator("..")
+      .screenshot({
+        animations: "disabled",
+        path: testInfo.outputPath("approval-label-inputs.png"),
+      });
+    await appearanceSettings.click();
+    await trigger.focus();
     await trigger.click();
     await expect(
       choices.getByRole("option", { name: "Approve", exact: true })
