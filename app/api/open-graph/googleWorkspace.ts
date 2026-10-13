@@ -1,5 +1,4 @@
-import { load } from "cheerio";
-
+import { loadHtmlMetadata } from "@/lib/security/htmlMetadata";
 import { fetchPublicUrl } from "@/lib/security/urlGuard";
 import type {
   GoogleDocsLinkPreview,
@@ -404,7 +403,7 @@ function buildTitleCandidates(html: string | null): Array<string | undefined> {
   if (!html) {
     return [];
   }
-  const $ = load(html);
+  const $ = loadHtmlMetadata(html);
 
   return [extractFirstMetaContent($, TITLE_KEYS), extractTitleTag($)];
 }

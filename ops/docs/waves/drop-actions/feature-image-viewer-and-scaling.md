@@ -74,9 +74,11 @@ on touch devices. The initial artwork and popup share the selected quality.
   hidden.
 - Scaled URL rewriting applies to supported hosted raster image URLs
   (`gif`, `webp`, `jpg`, `jpeg`, `png`, `avif` under supported media prefixes).
-  External HTTPS images use the site's guarded image-preview service. Ordinary
-  GIFs remain animated when processing limits allow; legacy and external
-  over-budget previews may be stills. Original-file actions retain the source.
+  External HTTPS images use the site's guarded image-preview service, which
+  accepts JPEG, PNG, GIF, and WebP sources; SVG images show
+  `Preview unavailable`. Ordinary GIFs remain animated when processing limits
+  allow; legacy and external over-budget previews may be stills. Original-file
+  actions retain the source.
 - Fullscreen is requested on the current rendered image element, which can differ
   between attachment and markdown rendering paths.
 
