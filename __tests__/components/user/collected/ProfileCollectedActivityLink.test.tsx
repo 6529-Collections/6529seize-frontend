@@ -1,6 +1,23 @@
 import ProfileCollectedActivityLink from "@/components/user/collected/ProfileCollectedActivityLink";
 import { render, screen } from "@testing-library/react";
 import { usePathname, useSearchParams } from "next/navigation";
+import type { ComponentProps } from "react";
+
+type NavigateEvent = { preventDefault: () => void };
+let mockNavigate: ((event: NavigateEvent) => void) | undefined;
+
+jest.mock("next/link", () => ({
+  __esModule: true,
+  default: ({
+    onNavigate,
+    ...props
+  }: ComponentProps<"a"> & {
+    onNavigate?: (event: NavigateEvent) => void;
+  }) => {
+    mockNavigate = onNavigate;
+    return <a {...props} />;
+  },
+}));
 
 jest.mock("next/navigation", () => ({
   usePathname: jest.fn(),
@@ -9,6 +26,8 @@ jest.mock("next/navigation", () => ({
 
 describe("ProfileCollectedActivityLink", () => {
   beforeEach(() => {
+    mockNavigate = undefined;
+    globalThis.history.replaceState(null, "", "/");
     jest.mocked(usePathname).mockReturnValue("/Shelby/collected");
     jest
       .mocked(useSearchParams)
@@ -17,6 +36,50 @@ describe("ProfileCollectedActivityLink", () => {
           "activity=distributions&details=open&distribution-page=2&page=3&secret=value"
         ) as ReturnType<typeof useSearchParams>
       );
+  });
+
+  it("saves the activity anchor in the existing history entry before navigation", () => {
+    const state = { __NA: true, tree: { route: "collected" } };
+    const source =
+      "/Shelby/collected?activity=distributions&page=3&distribution-page=2&details=open";
+    globalThis.history.replaceState(state, "", source);
+    const entries = globalThis.history.length;
+    render(
+      <ProfileCollectedActivityLink
+        href="/the-memes/42"
+        activityKey="wallet-42"
+      >
+        Artwork
+      </ProfileCollectedActivityLink>
+    );
+    mockNavigate!({ preventDefault: jest.fn() });
+    expect(globalThis.location.pathname + globalThis.location.search).toBe(
+      source
+    );
+    expect(globalThis.location.hash).toBe("#collected-activity-wallet-42");
+    expect(globalThis.history.state).toEqual(state);
+    expect(globalThis.history.length).toBe(entries);
+  });
+
+  it("leaves history untouched when a caller cancels navigation", () => {
+    globalThis.history.replaceState(
+      null,
+      "",
+      "/Shelby/collected?page=3#previous"
+    );
+    const preventDefault = jest.fn();
+    render(
+      <ProfileCollectedActivityLink
+        href="/the-memes/42"
+        activityKey="wallet-42"
+        onNavigate={(event) => event.preventDefault()}
+      >
+        Artwork
+      </ProfileCollectedActivityLink>
+    );
+    mockNavigate!({ preventDefault });
+    expect(preventDefault).toHaveBeenCalledTimes(1);
+    expect(globalThis.location.hash).toBe("#previous");
   });
 
   it("returns to the same activity row and preserves both page selections", () => {
@@ -77,6 +140,8 @@ describe("ProfileCollectedActivityLink", () => {
         </ProfileCollectedActivityLink>
       );
       expect(screen.getByRole("link")).toHaveAttribute("href", "/the-memes/42");
+      mockNavigate!({ preventDefault: jest.fn() });
+      expect(globalThis.location.hash).toBe("");
     }
   );
 });
