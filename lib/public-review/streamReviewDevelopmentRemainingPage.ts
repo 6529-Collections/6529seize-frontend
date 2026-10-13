@@ -359,7 +359,9 @@ function getBlockersAndQuestions(): readonly string[] {
     "",
     copy("publicReview.development.editorial.remaining.findings.production"),
     "",
-    copy("publicReview.development.editorial.remaining.findings.activation"),
+    copy(
+      "publicReview.development.editorial.remaining.findings.environmentIsolation"
+    ),
     "",
     `## ${copy("publicReview.development.editorial.remaining.questions.heading")}`,
     "",
