@@ -152,6 +152,7 @@ Transfer mode is part of the Native collected view (not a separate route).
    - Artwork links in Wallet Activity and Distributions also provide a profile
      return action on mobile web and in the native app. Returning preserves
      Details, both pagination selections, and the originating activity link.
+     Desktop browser Back also restores focus and scroll to that activity row.
 9. In network view, review xTDH token holdings:
    - Network card results render as a labelled `Collected network cards` list
      with one list item per token for assistive technologies.
