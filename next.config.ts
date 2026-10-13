@@ -75,6 +75,13 @@ const nextConfigFactory = (phase: string): NextConfig => {
       phase === PHASE_DEVELOPMENT_SERVER
         ? process.env["NEXT_DEV_DIST_DIR"]?.trim()
         : undefined;
+    // CI browser lanes boot `next dev` from a fresh checkout, so Turbopack's
+    // dev filesystem cache is never reused there. Its background persistence
+    // writes ~10 GB and adds multi-GB memory spikes on 16 GB runners.
+    const disableDevFileSystemCache =
+      phase === PHASE_DEVELOPMENT_SERVER &&
+      process.env["NEXT_DEV_TURBOPACK_FS_CACHE"]?.trim() === "0";
+    const baseConfig = sharedConfig(publicEnv, assetPrefix);
 
     // Dev-only: hosts (e.g. a LAN IP for phone testing) allowed to load
     // /_next/* dev assets; without this Next 403s them and pages render as
@@ -85,12 +92,20 @@ const nextConfigFactory = (phase: string): NextConfig => {
       .filter(Boolean);
 
     return {
-      ...sharedConfig(publicEnv, assetPrefix),
+      ...baseConfig,
       ...standaloneOutput,
       ...(phase === PHASE_DEVELOPMENT_SERVER && allowedDevOrigins?.length
         ? { allowedDevOrigins }
         : {}),
       ...(developmentDistDir ? { distDir: developmentDistDir } : {}),
+      ...(disableDevFileSystemCache
+        ? {
+            experimental: {
+              ...baseConfig.experimental,
+              turbopackFileSystemCacheForDev: false,
+            },
+          }
+        : {}),
       env: {
         PUBLIC_RUNTIME: JSON.stringify(publicEnv),
         API_ENDPOINT: publicEnv.API_ENDPOINT,
