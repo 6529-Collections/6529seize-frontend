@@ -99,7 +99,8 @@ Scope:
 - Symptom: tab is missing on one device/session but visible on another.
   - Meaning:
     - `Brain` needs Waves enabled.
-    - `Subscriptions` is hidden on iOS when consent country is not `US`.
+    - `Subscriptions` is hidden on iOS when consent country is not `US`, and it
+      is added a moment after the page loads on every other platform.
     - `Proxy` is visible only on your own profile.
   - Action: retest with expected account, device, and country context.
 

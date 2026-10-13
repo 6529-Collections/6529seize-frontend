@@ -1,7 +1,4 @@
-import {
-  isAwaitingIosCountryCheck,
-  shouldHideSubscriptions,
-} from "@/components/user/layout/userPageVisibility";
+import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 
 describe("shouldHideSubscriptions", () => {
   it.each([
@@ -24,18 +21,5 @@ describe("shouldHideSubscriptions", () => {
     expect(
       shouldHideSubscriptions({ capacitorIsIos: false, country: "FR" })
     ).toBe(false);
-  });
-});
-
-describe("isAwaitingIosCountryCheck", () => {
-  it.each([
-    ["iOS while the lookup is pending", true, true, true],
-    ["iOS once the lookup settled", true, false, false],
-    ["Android or web while the lookup is pending", false, true, false],
-    ["Android or web once the lookup settled", false, false, false],
-  ] as const)("%s", (_label, capacitorIsIos, isCountryPending, expected) => {
-    expect(
-      isAwaitingIosCountryCheck({ capacitorIsIos, isCountryPending })
-    ).toBe(expected);
   });
 });

@@ -24,7 +24,14 @@ return to the profile's Identity tab without displaying subscription content
 or an unavailable page. On iOS the return waits for the country check: the tab
 and content stay hidden while it loads, a US deep link then opens the
 `Subscriptions` tab in place, and a non-US, unknown, failed, or slow (over five
-seconds) check redirects. Web and Android never wait.
+seconds) check redirects. Web and Android never wait for the country check.
+
+On every platform the `Subscriptions` tab, the profile-header subscription
+status, and their requests are left out of the server HTML and the first
+render, because the page cannot yet tell whether it is the iOS app. They appear
+right after the page loads where subscriptions are allowed. A direct
+`/{user}/subscriptions` link stays selected and does not redirect during that
+first render.
 
 - Open `/{user}/subscriptions` directly.
 - Open a profile and choose the `Subscriptions` tab.

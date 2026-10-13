@@ -1,11 +1,10 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { isOwnProfileRoute } from "@/helpers/ProfileHelpers";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useIdentity } from "@/hooks/useIdentity";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
   faChevronLeft,
@@ -31,10 +30,6 @@ import {
   getUserPageTabByRoute,
 } from "./userTabs.config";
 import {
-  isAwaitingIosCountryCheck,
-  shouldHideSubscriptions,
-} from "./userPageVisibility";
-import {
   shouldDelayUserPageBrainRedirect,
   shouldDelayUserPageOwnerTabRedirect,
 } from "./userPageBrainAccess";
@@ -46,30 +41,6 @@ const DEFAULT_TAB = DEFAULT_USER_PAGE_TAB;
 const subscribeToClientRender = () => () => undefined;
 const getClientRenderSnapshot = () => true;
 const getServerRenderSnapshot = () => false;
-
-const getVisibilityContext = ({
-  showWaves,
-  hasProfileWave,
-  capacitorIsIos,
-  country,
-  isOwnProfile,
-}: {
-  readonly showWaves: boolean;
-  readonly hasProfileWave: boolean;
-  readonly capacitorIsIos: boolean;
-  readonly country: string | null | undefined;
-  readonly isOwnProfile: boolean;
-}): UserPageVisibilityContext => {
-  return {
-    showWaves,
-    hasProfileWave,
-    hideSubscriptions: shouldHideSubscriptions({
-      capacitorIsIos,
-      country,
-    }),
-    isOwnProfile,
-  };
-};
 
 const resolveTabFromPath = (pathname: string): UserPageTabKey => {
   const segments = pathname.split("/").filter(Boolean);
@@ -88,8 +59,11 @@ export default function UserPageTabs({
   const handleOrWallet = params["user"]?.toString() ?? "";
   const searchParams = useSearchParams();
   const searchString = searchParams.toString();
-  const capacitor = useCapacitor();
-  const { country, isCountryPending } = useCookieConsent();
+  // Subscriptions is omitted from the server HTML and the first hydration
+  // render (the server cannot identify the native shell), and on iOS until the
+  // country check allows purchasing.
+  const { hideNftPurchasing, shouldRedirect: mayRedirectFromHiddenTab } =
+    useNftPurchasingVisibility();
   const { showWaves, connectedProfile, fetchingProfile } = useAuth();
   const { address, connectionState } = useSeizeConnectContext();
   const { profile: viewedProfile } = useIdentity({
@@ -107,16 +81,14 @@ export default function UserPageTabs({
 
   const hasProfileWave = Boolean(resolvedViewedProfile.profile_wave_id);
 
-  const visibilityContext = useMemo(
-    () =>
-      getVisibilityContext({
-        showWaves,
-        hasProfileWave,
-        capacitorIsIos: capacitor.isIos,
-        country,
-        isOwnProfile,
-      }),
-    [capacitor.isIos, country, hasProfileWave, isOwnProfile, showWaves]
+  const visibilityContext = useMemo<UserPageVisibilityContext>(
+    () => ({
+      showWaves,
+      hasProfileWave,
+      hideSubscriptions: hideNftPurchasing,
+      isOwnProfile,
+    }),
+    [hasProfileWave, hideNftPurchasing, isOwnProfile, showWaves]
   );
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -157,14 +129,13 @@ export default function UserPageTabs({
       isClientHydrated,
     });
   const preserveOwnerTabWhileOwnershipLoads = shouldSuppressOwnerTabRedirect;
-  // iOS keeps the Subscriptions tab and panel hidden while the first country
-  // lookup is pending, but must not redirect a US deep link before it resolves.
+  // A Subscriptions deep link stays put while the tab is only hidden because
+  // the platform or country is not known yet: before hydration, and on iOS
+  // until the country check settles. A restricted result still redirects.
   const shouldSuppressSubscriptionsRedirect =
     resolvedTabFromPath === USER_PAGE_TAB_IDS.SUBSCRIPTIONS &&
-    isAwaitingIosCountryCheck({
-      capacitorIsIos: capacitor.isIos,
-      isCountryPending,
-    });
+    hideNftPurchasing &&
+    !mayRedirectFromHiddenTab;
 
   const visibleTabs = useMemo(
     () =>
