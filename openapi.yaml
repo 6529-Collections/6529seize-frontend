@@ -3213,6 +3213,35 @@ paths:
           description: >-
             Backward-compatible request field. Session challenges are issued for
             the backend-configured auth chain, not this client-supplied value.
+        - name: device_key
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+          description: >-
+            Web only. Raw 32-byte Ed25519 public key of a browser-held device
+            key, as 0x + 64 lowercase hex. When present, the SIWE message also
+            grants this key the right to sign drop writes for 180 days (one
+            device-grant URN resource and a matching statement). Sending any
+            device parameter with a native or desktop client type returns 400.
+        - name: device_key_type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ed25519
+          description: Required when device_key is present.
+        - name: device_scopes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: >-
+            Optional comma separated list from post, edit, delete, react, vote.
+            Defaults to post,edit,delete,react. Must include post; duplicates
+            are rejected. The grant stores the scopes in canonical order.
       x-6529-query-schema:
         $ref: "#/components/schemas/ApiSessionNonceQuery"
       responses:
@@ -3224,6 +3253,79 @@ paths:
                 $ref: "#/components/schemas/ApiSessionNonceResponse"
         "400":
           description: Invalid request
+  /device-grants:
+    get:
+      tags:
+        - Authentication
+      summary: List the device signing grants of the authenticated profile
+      description: >-
+        Returns active, expired and revoked device grants (newest first, at most
+        100) whose wallet belongs to the authenticated profile, or to the
+        authenticated wallet when it has no profile. Not available to proxies.
+      operationId: getDeviceGrants
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: device-signing
+        handler:
+          import: "@/api/device-signing/device-signing.handlers"
+          name: handleGetDeviceGrants
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiDeviceGrant"
+        "401":
+          description: Authentication required
+        "403":
+          description: Not available to proxies
+  /device-grants/{grantId}/revoke:
+    post:
+      tags:
+        - Authentication
+      summary: Revoke a device signing grant
+      description: >-
+        Revokes a grant whose wallet belongs to the authenticated profile (or
+        equals the authenticated wallet when it has no profile). Idempotent:
+        revoking an already revoked grant keeps the first revocation time and
+        returns the grant. Not available to proxies.
+      operationId: revokeDeviceGrant
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: device-signing
+        handler:
+          import: "@/api/device-signing/device-signing.handlers"
+          name: handleRevokeDeviceGrant
+      parameters:
+        - name: grantId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDeviceGrant"
+        "401":
+          description: Authentication required
+        "403":
+          description: Not available to proxies
+        "404":
+          description: Grant not found
   /auth/session-login:
     post:
       tags:
@@ -8374,9 +8476,19 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDeviceSignedWriteRequest"
       responses:
         "201":
           description: successful operation
+        "400":
+          description: >-
+            Invalid request. A rejected device_signature returns a message
+            starting with "Invalid device signature:".
         "404":
           description: Drop not found
   /drops/{dropId}/ratings:
@@ -8513,6 +8625,42 @@ paths:
       responses:
         "201":
           description: successful operation
+  /drops/{dropId}/signed-events:
+    get:
+      tags:
+        - Drops
+      summary: Get the device signed events of a drop
+      description: >-
+        Returns every stored device signed event that authorized a write to this
+        drop (oldest first), together with the wallet signed grants they
+        reference, so anyone can verify them without trusting 6529.io.
+        current_event_id is the event whose body is the drop's current content,
+        or null when the current content is not author signed. Returns 404 when
+        the caller cannot read the drop.
+      operationId: getDropSignedEvents
+      x-6529-router:
+        enabled: true
+        auth: optional
+        cache: false
+        typeImportGroup: device-signing
+        handler:
+          import: "@/api/device-signing/device-signing.handlers"
+          name: handleGetDropSignedEvents
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropSignedEvents"
+        "404":
+          description: Drop not found
   /drops/{dropId}/subscriptions:
     post:
       tags:
@@ -19498,6 +19646,8 @@ components:
       properties:
         reaction:
           type: string
+        device_signature:
+          $ref: "#/components/schemas/ApiDeviceSignature"
     ApiAggregatedActivity:
       type: object
       required:
@@ -27339,6 +27489,8 @@ components:
             hidden. Omit or set to false to leave previews visible.
             Signature-required drops must include this field in the signed
             payload when present.
+        device_signature:
+          $ref: "#/components/schemas/ApiDeviceSignature"
     ApiCreateGroup:
       type: object
       required:
@@ -28255,6 +28407,192 @@ components:
             null when the pinned drop was not authored by the caller.
           type: string
           nullable: true
+    ApiDeviceGrant:
+      type: object
+      description: >-
+        A wallet signed grant that lets a browser-held Ed25519 device key sign
+        drop writes. Its id is the EIP-191 hash of the exact SIWE message the
+        wallet signed.
+      required:
+        - id
+        - wallet
+        - key_type
+        - device_key
+        - scopes
+        - device_label
+        - domain
+        - issued_at
+        - expires_at
+        - created_at
+        - revoked_at
+        - last_used_at
+      properties:
+        id:
+          type: string
+          pattern: ^0x[0-9a-f]{64}$
+        wallet:
+          type: string
+          description: Lowercase 0x address that signed the grant.
+        key_type:
+          type: string
+          example: ed25519
+        device_key:
+          type: string
+          pattern: ^0x[0-9a-f]{64}$
+        scopes:
+          type: array
+          description: Canonical order post, edit, delete, react, vote.
+          items:
+            type: string
+        device_label:
+          type: string
+        domain:
+          type: string
+          description: SIWE domain the grant was signed for, e.g. 6529.io.
+        issued_at:
+          type: integer
+          format: int64
+          description: SIWE Issued At, epoch milliseconds.
+        expires_at:
+          type: integer
+          format: int64
+          description: Grant expiry, epoch milliseconds.
+        created_at:
+          type: integer
+          format: int64
+        revoked_at:
+          type: integer
+          format: int64
+          nullable: true
+        last_used_at:
+          type: integer
+          format: int64
+          nullable: true
+    ApiDeviceGrantProof:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/ApiDeviceGrant"
+      required:
+        - message
+        - wallet_signature
+        - chain_id
+      properties:
+        message:
+          type: string
+          description: Exact SIWE message signed by the wallet.
+        wallet_signature:
+          type: string
+        chain_id:
+          type: integer
+          format: int64
+    ApiDeviceSignature:
+      type: object
+      additionalProperties: false
+      description: >-
+        Ed25519 signature by a granted device key over the EIP-712 event id of
+        the write. A rejected signature returns 400 with a message starting with
+        "Invalid device signature:"; the write is then not performed.
+      required:
+        - grant_id
+        - seq
+        - claimed_time
+        - signature
+      properties:
+        grant_id:
+          type: string
+          pattern: ^0x[0-9a-f]{64}$
+        seq:
+          type: integer
+          format: int64
+          minimum: 1
+          maximum: 9007199254740991
+          description: Unique per device key; a reused value is rejected.
+        claimed_time:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 9007199254740991
+          description: >-
+            Author clock in epoch milliseconds, within 10 minutes of server
+            time.
+        signature:
+          type: string
+          pattern: ^0x[0-9a-f]{128}$
+    ApiDeviceSignedEvent:
+      type: object
+      required:
+        - id
+        - kind
+        - kind_version
+        - wave
+        - author
+        - key_type
+        - device_key
+        - auth_ref
+        - seq
+        - anchor
+        - claimed_time
+        - refs
+        - body
+        - body_hash
+        - body_size
+        - signature
+        - created_at
+      properties:
+        id:
+          type: string
+          description: EIP-712 event id, 0x + 64 hex.
+        kind:
+          type: integer
+          description: 1 POST, 2 EDIT, 3 TOMBSTONE, 4 REACT.
+        kind_version:
+          type: integer
+        wave:
+          type: string
+        author:
+          type: string
+          description: Lowercase grant wallet.
+        key_type:
+          type: integer
+          description: 2 for Ed25519.
+        device_key:
+          type: string
+        auth_ref:
+          type: string
+          description: Grant id.
+        seq:
+          type: integer
+          format: int64
+        anchor:
+          type: integer
+          format: int64
+        claimed_time:
+          type: integer
+          format: int64
+        refs:
+          type: array
+          items:
+            type: string
+        body:
+          type: string
+          nullable: true
+          description: Canonical JSON exactly as hashed, null when the event has no body.
+        body_hash:
+          type: string
+        body_size:
+          type: integer
+        signature:
+          type: string
+          description: 0x + 128 hex, the 64-byte Ed25519 signature.
+        created_at:
+          type: integer
+          format: int64
+          description: Server receive time, epoch milliseconds.
+    ApiDeviceSignedWriteRequest:
+      type: object
+      properties:
+        device_signature:
+          $ref: "#/components/schemas/ApiDeviceSignature"
     ApiDistributionAirdropsCsvUploadRequest:
       type: object
       required:
@@ -29042,6 +29380,30 @@ components:
         - FIND_OLDER
         - FIND_NEWER
         - FIND_BOTH
+    ApiDropSignedEvents:
+      type: object
+      required:
+        - drop_id
+        - current_event_id
+        - events
+        - grants
+      properties:
+        drop_id:
+          type: string
+        current_event_id:
+          type: string
+          nullable: true
+          description: >-
+            Event whose body is the drop's current content, or null when the
+            current content is not author signed.
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDeviceSignedEvent"
+        grants:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDeviceGrantProof"
     ApiDropsLeaderboardPage:
       type: object
       required:
@@ -36285,6 +36647,15 @@ components:
             Optional 6529 session-signature protocol compatibility field. This
             is not the ERC-4361 SIWE Version field; SIWE messages always use
             Version 1.
+        device_label:
+          type: string
+          maxLength: 64
+          description: >-
+            Optional human readable name for the device key granted by a web
+            SIWE message, for example "Chrome on macOS". The server keeps only
+            letters, digits, spaces and ._()- characters, collapses spaces,
+            trims, truncates to 48 characters and uses "Browser" when empty.
+            Ignored when the signed message carries no device grant.
     ApiSessionLogoutNativeRequest:
       type: object
       required:
@@ -36375,6 +36746,22 @@ components:
           description: >-
             Backward-compatible request field. Session challenges are issued for
             the backend-configured auth chain, not this client-supplied value.
+        device_key:
+          type: string
+          pattern: ^0x[0-9a-f]{64}$
+          description: >-
+            Web only. Raw 32-byte Ed25519 public key (0x + 64 lowercase hex) to
+            grant signing rights to in the SIWE message.
+        device_key_type:
+          type: string
+          enum:
+            - ed25519
+          description: Required when device_key is present.
+        device_scopes:
+          type: string
+          description: >-
+            Optional comma separated list from post, edit, delete, react, vote.
+            Defaults to post,edit,delete,react. Must include post.
     ApiSessionNonceResponse:
       type: object
       required:
@@ -36451,6 +36838,8 @@ components:
           type: string
           enum:
             - web
+        device_grant:
+          $ref: "#/components/schemas/ApiDeviceGrant"
     ApiSetCompetitionVoteRequest:
       type: object
       additionalProperties: false
@@ -37350,6 +37739,9 @@ components:
       type: object
       allOf:
         - $ref: "#/components/schemas/ApiCreateWaveDropRequest"
+      properties:
+        device_signature:
+          $ref: "#/components/schemas/ApiDeviceSignature"
     ApiUpdateProfileNotificationCategories:
       type: object
       additionalProperties: false

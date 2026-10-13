@@ -632,6 +632,8 @@ export const commonApiDelete = async (param: {
   headers?: Record<string, string> | undefined;
   signal?: AbortSignal | undefined;
   errorMode?: ApiErrorMode | undefined;
+  /** Optional JSON body, for example a device signature. */
+  body?: object | undefined;
 }): Promise<void> => {
   const url = buildUrl(param.endpoint);
 
@@ -639,6 +641,7 @@ export const commonApiDelete = async (param: {
     url,
     method: "DELETE",
     headers: getHeaders(param.headers),
+    body: param.body === undefined ? undefined : JSON.stringify(param.body),
     signal: param.signal,
     parseJson: false,
     errorMode: param.errorMode ?? "legacy-string",

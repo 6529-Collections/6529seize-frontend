@@ -13,10 +13,10 @@ import {
   ReactQueryWrapperContext,
 } from "../react-query-wrapper/ReactQueryWrapper";
 import {
-  commonApiPost,
   getStructuredApiErrorCode,
   getStructuredApiErrorStatus,
 } from "@/services/api/common-api";
+import { postDrop } from "@/services/api/signed-drop-writes";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiContentModerationProfileStatusResponse } from "@/generated/models/ApiContentModerationProfileStatusResponse";
@@ -442,13 +442,8 @@ export default function CreateDrop({
   );
 
   const addDropMutation = useMutation({
-    mutationFn: async (body: QueuedDropMutationBody) => {
-      return commonApiPost<ApiCreateDropRequest, ApiDrop>({
-        endpoint: `drops`,
-        body: body.drop,
-        errorMode: "structured",
-      });
-    },
+    mutationFn: async (body: QueuedDropMutationBody) =>
+      await postDrop(body.drop, { errorMode: "structured" }),
     onSuccess: (serverDrop, body) => {
       if (body.dropId) {
         if (isWaveRepliesCollapsed(wave))
