@@ -32,21 +32,24 @@ function SafetyCode({ code }: { readonly code: string }) {
   return (
     <section>
       <h3 className={SECTION_HEADING}>{t(locale, "e2ee.info.safetyCode")}</h3>
-      <p
-        className="tw-m-0 tw-flex tw-flex-wrap tw-gap-2 tw-font-mono tw-text-lg tw-tracking-wider tw-text-iron-50"
-        aria-label={t(locale, "e2ee.info.safetyCodeAria", {
-          code: groups.join(" "),
-        })}
-      >
-        {groups.map((group, index) => (
-          // Positions are fixed: four groups of four characters.
-          <span
-            key={`${index}-${group}`}
-            className="tw-rounded-md tw-bg-iron-900 tw-px-2 tw-py-1"
-          >
-            {group}
-          </span>
-        ))}
+      <p className="tw-m-0">
+        <span className="tw-sr-only">
+          {t(locale, "e2ee.info.safetyCodeAria", { code: groups.join(" ") })}
+        </span>
+        <span
+          aria-hidden="true"
+          className="tw-flex tw-flex-wrap tw-gap-2 tw-font-mono tw-text-lg tw-tracking-wider tw-text-iron-50"
+        >
+          {groups.map((group, index) => (
+            // Positions are fixed: four groups of four characters.
+            <span
+              key={`${index}-${group}`}
+              className="tw-rounded-md tw-bg-iron-900 tw-px-2 tw-py-1"
+            >
+              {group}
+            </span>
+          ))}
+        </span>
       </p>
       <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400">
         {t(locale, "e2ee.info.safetyCodeHelp")}

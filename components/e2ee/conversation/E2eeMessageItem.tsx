@@ -367,26 +367,10 @@ function NoticeItem({
   );
 }
 
-function MessageMeta({
-  message,
-  name,
-}: {
-  readonly message: E2eeMessage;
-  readonly name: string;
-}) {
+function MessageMarkers({ message }: { readonly message: E2eeMessage }) {
   const locale = useBrowserLocale();
   return (
-    <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2">
-      <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
-        {name}
-      </span>
-      <time
-        dateTime={new Date(message.ts).toISOString()}
-        title={formatE2eeDateTime(locale, message.ts)}
-        className="tw-text-xs tw-text-iron-500"
-      >
-        {formatE2eeTimestamp(locale, message.ts)}
-      </time>
+    <>
       {message.editedAt !== null && !message.deleted ? (
         <span className="tw-text-xs tw-text-iron-500">
           ({t(locale, "e2ee.message.edited")})
@@ -403,6 +387,54 @@ function MessageMeta({
           {t(locale, "e2ee.message.unverified")}
         </span>
       ) : null}
+    </>
+  );
+}
+
+const hasMarkers = (message: E2eeMessage) =>
+  (message.editedAt !== null && !message.deleted) ||
+  message.pending ||
+  (!message.sigOk && !message.undecryptable);
+
+/**
+ * Sender, time and state markers. Grouped (compact) rows keep the sender
+ * for screen readers and still show edited / sending / unverified states.
+ */
+function MessageMeta({
+  message,
+  name,
+  compact,
+}: {
+  readonly message: E2eeMessage;
+  readonly name: string;
+  readonly compact: boolean;
+}) {
+  const locale = useBrowserLocale();
+  if (compact) {
+    return (
+      <>
+        <span className="tw-sr-only">{name}</span>
+        {hasMarkers(message) ? (
+          <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2">
+            <MessageMarkers message={message} />
+          </div>
+        ) : null}
+      </>
+    );
+  }
+  return (
+    <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2">
+      <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
+        {name}
+      </span>
+      <time
+        dateTime={new Date(message.ts).toISOString()}
+        title={formatE2eeDateTime(locale, message.ts)}
+        className="tw-text-xs tw-text-iron-500"
+      >
+        {formatE2eeTimestamp(locale, message.ts)}
+      </time>
+      <MessageMarkers message={message} />
     </div>
   );
 }
@@ -453,11 +485,7 @@ function E2eeMessageItemComponent({
         )}
       </div>
       <div className="tw-min-w-0 tw-flex-1">
-        {compact ? (
-          <span className="tw-sr-only">{name}</span>
-        ) : (
-          <MessageMeta message={message} name={name} />
-        )}
+        <MessageMeta message={message} name={name} compact={compact} />
         {message.reply ? (
           <ReplyPreview
             replyId={message.reply}
