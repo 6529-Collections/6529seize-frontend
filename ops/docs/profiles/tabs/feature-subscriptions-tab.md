@@ -153,6 +153,8 @@ first render.
   - `Redeemed Subscriptions`
   - `Log History`
   - `Top Up History`
+  - sections start closed on phones and open on larger screens; opening or closing
+    a section keeps that choice while data refreshes or the window is resized
   - pagination when a section has more than 10 rows
 
 ## Consolidation Changes

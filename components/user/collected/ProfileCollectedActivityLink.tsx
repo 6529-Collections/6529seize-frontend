@@ -7,7 +7,9 @@ import {
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, type ComponentProps } from "react";
+import { restoreCollectedActivityLink } from "./restoreCollectedActivityLink";
 
+/** Preserve the Collected return context and restore the matching activity row. */
 export default function ProfileCollectedActivityLink({
   href,
   activityKey,
@@ -32,9 +34,8 @@ export default function ProfileCollectedActivityLink({
       : href;
 
   useEffect(() => {
-    if (globalThis.location.hash !== `#${anchor}`) return;
-    linkRef.current?.focus({ preventScroll: true });
-    linkRef.current?.scrollIntoView({ block: "center" });
+    const link = linkRef.current;
+    return link ? restoreCollectedActivityLink(link) : undefined;
   }, [anchor]);
 
   return (

@@ -302,7 +302,7 @@ export default function SubscriptionCoverageSummary({
             </div>
           ) : null}
 
-          <div className="tw-mt-[21px] tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-[13px]">
+          <div className="tw-mt-[21px] tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-[13px] max-sm:tw-hidden">
             <span className="tw-font-medium tw-text-iron-100">
               {getSubscriptionModeLabel(locale, coverage.mode)}
             </span>

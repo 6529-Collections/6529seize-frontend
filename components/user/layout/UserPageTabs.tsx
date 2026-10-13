@@ -267,7 +267,7 @@ export default function UserPageTabs({
       aria-label={getUserProfileTabsMessage(
         "user.profile.tabs.navigationLabel"
       )}
-      className="tw-relative tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700"
+      className="tw-relative tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10"
     >
       <div
         ref={scrollContainerRef}
@@ -276,7 +276,7 @@ export default function UserPageTabs({
       >
         <div
           ref={contentContainerRef}
-          className="tw-relative -tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4"
+          className="tw-relative -tw-mb-px tw-flex tw-min-w-max tw-gap-x-5 lg:tw-gap-x-6"
         >
           {visibleTabs.map((tabConfig) => (
             <UserPageTab
