@@ -110,7 +110,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
     } = useLongPressClickSuppression();
 
     useEffect(() => {
-      if (hasTouch) {
+      if (hasTouch && !isEditing) {
         return;
       }
 
@@ -120,7 +120,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
       }
       setLongPressTriggered(false);
       clearSuppression();
-    }, [hasTouch, clearSuppression, setLongPressTriggered]);
+    }, [hasTouch, isEditing, clearSuppression, setLongPressTriggered]);
 
     useEffect(() => {
       return () => {
@@ -132,7 +132,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
     }, []);
 
     const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-      if (isTemporaryDrop || !hasTouch) return;
+      if (isTemporaryDrop || !hasTouch || isEditing) return;
 
       touchStartX.current = e.touches[0]!.clientX;
       touchStartY.current = e.touches[0]!.clientY;
