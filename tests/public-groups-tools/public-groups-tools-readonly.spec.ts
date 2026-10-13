@@ -388,14 +388,10 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     // Mobile WebKit does not support mouse.wheel. Scroll the real editor
     // directly and keep the same rendered-position and navigation guarantees.
     await identities.evaluate((element) => {
-      const editor = element.parentElement;
-      if (!editor) throw new Error("Expected the criterion scroll container");
-      editor.scrollTo({ top: editor.scrollHeight });
+      element.scrollTo({ top: element.scrollHeight });
     });
     await expect
-      .poll(() =>
-        identities.evaluate((element) => element.parentElement?.scrollTop)
-      )
+      .poll(() => identities.evaluate((element) => element.scrollTop))
       .toBeGreaterThan(0);
     await expect(choices).toBeInViewport({ ratio: 1 });
     await expect
