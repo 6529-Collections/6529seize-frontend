@@ -3,7 +3,11 @@ import {
   getStructuredApiErrorCode,
   getStructuredApiErrorStatus,
 } from "@/services/api/common-api";
-import { getWalletAddress, getWalletRole } from "@/services/auth/auth.utils";
+import { isDirectProfileAuthSession } from "@/components/auth/auth-session-scope";
+import {
+  getConnectedWalletAccounts,
+  getWalletAddress,
+} from "@/services/auth/auth.utils";
 import { canonicalizeBody } from "./canonical-json";
 import { allocateDeviceSeq, forgetDeviceGrant } from "./device-key-store";
 import { signEventId } from "./ed25519";
@@ -50,13 +54,33 @@ const GRANT_UNUSABLE_REASONS: readonly string[] = [
   "signature does not verify",
 ];
 
+/**
+ * Whether the active session acts as the wallet's own profile. The server
+ * returns the caller's own profile id as the session role, so a role alone
+ * does not mean a proxy; a proxy session's role is another profile's id.
+ * Unknown profile ids fail safe: the write goes unsigned.
+ */
+function isOwnProfileSession(address: string): boolean {
+  const account = getConnectedWalletAccounts().find(
+    (candidate) => candidate.address.toLowerCase() === address.toLowerCase()
+  );
+  return (
+    account !== undefined &&
+    isDirectProfileAuthSession({
+      authRole: account.role,
+      profileId: account.profileId,
+      hasActiveProxy: false,
+    })
+  );
+}
+
 async function signWrite(
   write: DeviceSignedWrite
 ): Promise<SignedEnvelope | null> {
   try {
     const address = getWalletAddress();
     // Proxy sessions act for another profile and never sign as the wallet.
-    if (!address || getWalletRole()) {
+    if (!address || !isOwnProfileSession(address)) {
       return null;
     }
     const allocation = await allocateDeviceSeq(address, Date.now());

@@ -19,11 +19,23 @@ jest.mock("@/lib/device-signing/feature", () => ({
   isSignedMessagesEnabled: () => mockEnabled,
 }));
 
+const OWN_PROFILE_ID = "own-profile";
 let mockWalletAddress: string | null = null;
-let mockWalletRole: string | null = null;
+// Sessions report the caller's own profile id as their role.
+let mockWalletRole: string | null = OWN_PROFILE_ID;
+let mockProfileId: string | null = OWN_PROFILE_ID;
 jest.mock("@/services/auth/auth.utils", () => ({
   getWalletAddress: () => mockWalletAddress,
-  getWalletRole: () => mockWalletRole,
+  getConnectedWalletAccounts: () =>
+    mockWalletAddress
+      ? [
+          {
+            address: mockWalletAddress,
+            role: mockWalletRole,
+            profileId: mockProfileId,
+          },
+        ]
+      : [],
 }));
 
 jest.mock("@/services/api/common-api", () => ({
@@ -145,7 +157,8 @@ describe("device-signed drop writes", () => {
     mockRecords.clear();
     mockEnabled = true;
     mockWalletAddress = ADDRESS;
-    mockWalletRole = null;
+    mockWalletRole = OWN_PROFILE_ID;
+    mockProfileId = OWN_PROFILE_ID;
     postMock.mockReset().mockResolvedValue({ id: "drop" });
     deleteMock.mockReset().mockResolvedValue(undefined);
   });
@@ -259,12 +272,28 @@ describe("device-signed drop writes", () => {
     expect(deleteMock).toHaveBeenCalledWith({ endpoint: `drops/${DROP_ID}` });
   });
 
+  it("signs when the session role is the wallet's own profile id", async () => {
+    // Regression: the server returns the caller's own profile id as the
+    // session role, which must not be mistaken for a proxy session.
+    mockWalletRole = OWN_PROFILE_ID;
+    await setUpGrant();
+    await postDrop(createBody());
+    expect(sentSignature(postMock)).toBeDefined();
+  });
+
   it("never signs for a proxy role, without a grant or outside the grant's scopes", async () => {
     mockWalletRole = "proxy-profile";
     await setUpGrant(["post"]);
     await postDrop(createBody());
     expect(sentSignature(postMock, 0)).toBeUndefined();
 
+    // An unknown own profile id fails safe: no signature.
+    mockWalletRole = OWN_PROFILE_ID;
+    mockProfileId = null;
+    await postDrop(createBody());
+    expect(sentSignature(postMock, 1)).toBeUndefined();
+
+    mockProfileId = OWN_PROFILE_ID;
     mockWalletRole = null;
     await sendDropReaction({
       dropId: DROP_ID,
@@ -277,7 +306,7 @@ describe("device-signed drop writes", () => {
 
     mockRecords.clear();
     await postDrop(createBody());
-    expect(sentSignature(postMock, 1)).toBeUndefined();
+    expect(sentSignature(postMock, 2)).toBeUndefined();
   });
 
   it.each([
