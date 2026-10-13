@@ -15,6 +15,14 @@ import { HttpFile } from '../http/http';
 
 export class ApiConsolidationPolicy {
     /**
+    * Maximum effective consolidation group size, fixed by backend code.
+    */
+    'max_wallets': number;
+    /**
+    * Largest group size eligible without post-cutoff reciprocal consent, fixed by backend code.
+    */
+    'ungated_max_wallets': number;
+    /**
     * Inclusive UTC block timestamp cutoff for fourth-wallet consent in this environment.
     */
     'four_wallet_activation_at': string;
@@ -28,6 +36,18 @@ export class ApiConsolidationPolicy {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "max_wallets",
+            "baseName": "max_wallets",
+            "type": "number",
+            "format": ""
+        },
+        {
+            "name": "ungated_max_wallets",
+            "baseName": "ungated_max_wallets",
+            "type": "number",
+            "format": ""
+        },
         {
             "name": "four_wallet_activation_at",
             "baseName": "four_wallet_activation_at",

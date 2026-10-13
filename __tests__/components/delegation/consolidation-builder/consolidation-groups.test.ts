@@ -31,16 +31,16 @@ describe("parseConsolidationGroup", () => {
 
 describe("getPrefillWallets", () => {
   it("puts the connected wallet first, followed by its consolidation", () => {
-    expect(getPrefillWallets(B, [A, B, C])).toEqual([B, A, C]);
+    expect(getPrefillWallets(B, [A, B, C], 4)).toEqual([B, A, C]);
   });
 
   it("uses only the connected wallet when it is not consolidated", () => {
-    expect(getPrefillWallets(A, [])).toEqual([A]);
-    expect(getPrefillWallets(A, [B, C])).toEqual([A]);
+    expect(getPrefillWallets(A, [], 4)).toEqual([A]);
+    expect(getPrefillWallets(A, [B, C], 4)).toEqual([A]);
   });
 
   it("never prefills more than the wallet limit", () => {
-    expect(getPrefillWallets(A, [A, B, C, D, E])).toEqual([A, B, C, D]);
+    expect(getPrefillWallets(A, [A, B, C, D, E], 4)).toEqual([A, B, C, D]);
   });
 });
 

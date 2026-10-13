@@ -1,3 +1,9 @@
+jest.mock("@/hooks/useConsolidationPolicy", () => ({
+  useConsolidationPolicy: () => ({
+    limits: { maxWallets: 4, ungatedMaxWallets: 3 },
+  }),
+}));
+
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import NewConsolidationComponent from "@/components/delegation/NewConsolidation";

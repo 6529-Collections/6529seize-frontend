@@ -15,7 +15,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { useQueries } from "@tanstack/react-query";
 import { AnimatePresence } from "framer-motion";
 import UserPageIdentityStatementsConsolidatedAddressesItem from "./UserPageIdentityStatementsConsolidatedAddressesItem";
-import { CONSOLIDATION_WALLET_LIMIT } from "@/constants/consolidation.constants";
+import { useConsolidationPolicy } from "@/hooks/useConsolidationPolicy";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
@@ -75,15 +75,16 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
   readonly headerAction?: ReactNode;
 }) {
   const locale = useBrowserLocale();
+  const { limits } = useConsolidationPolicy();
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy } = useContext(AuthContext);
   const canEdit = amIUser({ profile, address }) && !activeProfileProxy;
   const primaryAddress = getPrimaryAddress(profile);
   const walletCount = profile.wallets?.length ?? 0;
-  const atWalletLimit = walletCount >= CONSOLIDATION_WALLET_LIMIT;
+  const atWalletLimit = !!limits && walletCount >= limits.maxWallets;
   const canAddWallet = canEdit && primaryAddress !== null;
-  const showAddWallet = canAddWallet && !atWalletLimit;
-  const walletLimit = formatInteger(locale, CONSOLIDATION_WALLET_LIMIT);
+  const showAddWallet = canAddWallet && !!limits && !atWalletLimit;
+  const walletLimit = limits ? formatInteger(locale, limits.maxWallets) : "";
   const sortedByPrimary = useMemo(
     () => sortByPrimary(profile.wallets ?? [], primaryAddress),
     [primaryAddress, profile.wallets]
@@ -152,10 +153,12 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
           </button>
           {walletCount > 0 && (
             <span className="tw-text-xs tw-text-iron-400">
-              {t(locale, "user.profile.identity.statements.walletCount", {
-                count: formatInteger(locale, walletCount),
-                limit: walletLimit,
-              })}
+              {limits
+                ? t(locale, "user.profile.identity.statements.walletCount", {
+                    count: formatInteger(locale, walletCount),
+                    limit: walletLimit,
+                  })
+                : formatInteger(locale, walletCount)}
             </span>
           )}
         </div>

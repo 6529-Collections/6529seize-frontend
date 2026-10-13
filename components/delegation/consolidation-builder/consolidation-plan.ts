@@ -1,4 +1,4 @@
-import { CONSOLIDATION_WALLET_LIMIT } from "@/constants/consolidation.constants";
+import type { ConsolidationLimits } from "@/helpers/consolidationPolicy";
 import { isAddress, zeroAddress } from "viem";
 
 /**
@@ -20,8 +20,6 @@ import { isAddress, zeroAddress } from "viem";
  * therefore require every direction touching a joining wallet to be fresh,
  * and register an older direction again in its signer's step.
  */
-
-const FOURTH_SLOT_GROUP_SIZE = 4;
 
 export type ConsolidationWalletIssue = "invalid" | "duplicate";
 
@@ -158,8 +156,11 @@ export function getDirectedWalletPairs(
 }
 
 /** Whether a group of this many wallets uses the fourth slot. */
-export function requiresFourthSlot(walletCount: number): boolean {
-  return walletCount >= FOURTH_SLOT_GROUP_SIZE;
+export function requiresFourthSlot(
+  walletCount: number,
+  ungatedMaxWallets: number
+): boolean {
+  return walletCount > ungatedMaxWallets;
 }
 
 function isValidWallet(value: string): boolean {
@@ -167,7 +168,8 @@ function isValidWallet(value: string): boolean {
 }
 
 export function validateConsolidationWallets(
-  entries: readonly string[]
+  entries: readonly string[],
+  limits: ConsolidationLimits | null
 ): ConsolidationWalletValidation {
   const seen = new Set<string>();
   const wallets: string[] = [];
@@ -189,14 +191,14 @@ export function validateConsolidationWallets(
   });
   const hasIssue = issues.some((issue) => issue !== undefined);
   const tooFew = wallets.length < 2;
-  const tooMany = wallets.length > CONSOLIDATION_WALLET_LIMIT;
+  const tooMany = limits !== null && wallets.length > limits.maxWallets;
 
   return {
     issues,
     wallets,
     tooFew,
     tooMany,
-    isValid: !hasIssue && !tooFew && !tooMany,
+    isValid: limits !== null && !hasIssue && !tooFew && !tooMany,
   };
 }
 
@@ -206,13 +208,14 @@ export function validateConsolidationWallets(
  */
 function getFreshWallets(
   wallets: readonly string[],
-  existing: ReadonlySet<string>
+  existing: ReadonlySet<string>,
+  ungatedMaxWallets: number
 ): string[] {
-  if (!requiresFourthSlot(wallets.length)) {
+  if (!requiresFourthSlot(wallets.length, ungatedMaxWallets)) {
     return [];
   }
   const members = wallets.filter((wallet) => existing.has(wallet));
-  return members.length >= FOURTH_SLOT_GROUP_SIZE - 1
+  return members.length >= ungatedMaxWallets
     ? wallets.filter((wallet) => !existing.has(wallet))
     : [...wallets];
 }
@@ -262,6 +265,7 @@ function isOutOfOrder(
 }
 
 export function buildConsolidationPlan(input: {
+  readonly limits: ConsolidationLimits;
   readonly wallets: readonly string[];
   readonly existingMembers: readonly string[];
   readonly isRegistered: DirectedLinkLookup;
@@ -275,7 +279,11 @@ export function buildConsolidationPlan(input: {
       .map(toWalletKey)
       .filter((member) => wallets.includes(member))
   );
-  const freshWallets = getFreshWallets(wallets, existing);
+  const freshWallets = getFreshWallets(
+    wallets,
+    existing,
+    input.limits.ungatedMaxWallets
+  );
   const freshSet = new Set(freshWallets);
   const pendingSteps = wallets
     .map((signer) => {
@@ -297,7 +305,10 @@ export function buildConsolidationPlan(input: {
     })
     .filter((step) => step.targets.length > 0);
   const steps = orderSteps(pendingSteps);
-  const needsFourthSlot = requiresFourthSlot(wallets.length);
+  const needsFourthSlot = requiresFourthSlot(
+    wallets.length,
+    input.limits.ungatedMaxWallets
+  );
   const beforeFourthSlotActivation =
     input.signingOpensMs === null || input.nowMs < input.signingOpensMs;
 
