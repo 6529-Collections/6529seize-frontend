@@ -1,4 +1,6 @@
 import { isValidEthAddress } from "@/helpers/addressFormatting";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { DelegationCenterSection } from "@/types/enums";
 import {
   getDelegationArticle,
@@ -53,6 +55,14 @@ const SECTION_METADATA: Readonly<
     title: "Register Consolidation",
     navLabel: "Register Consolidation",
     description: "Connect wallets you control for 6529 collection metrics.",
+  },
+  [DelegationCenterSection.BUILD_CONSOLIDATION]: {
+    title: t(DEFAULT_LOCALE, "delegation.consolidationBuilder.title"),
+    navLabel: t(DEFAULT_LOCALE, "delegation.consolidationBuilder.title"),
+    description: t(
+      DEFAULT_LOCALE,
+      "delegation.consolidationBuilder.metadataDescription"
+    ),
   },
   [DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS]: {
     title: "Assign Primary Address",

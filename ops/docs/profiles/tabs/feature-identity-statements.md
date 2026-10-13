@@ -51,8 +51,12 @@ identity statements` when the public-visibility notes are needed.
    independent copy icon to copy its value; eligible owners can also delete it.
 8. On non-primary wallet rows, use `Set primary` when available.
 9. To link another wallet you control, select `Add another wallet` beside
-   `Wallet Checker`. This opens the existing
-   [Register Consolidation form](../../delegation/feature-delegation-action-flows.md).
+   `Wallet Checker`. This opens the guided setup at
+   `/delegation/build-consolidation`. Each wallet signs one transaction for
+   its links: a single registration for one link, or one batch for several. A
+   Delegation Manager signing for a cold vault sends one transaction per link
+   instead (see
+   [Delegation Write Action Routes](../../delegation/feature-delegation-action-flows.md)).
 
 ## Statement Types in Add Sheet or Dialog
 
@@ -92,11 +96,16 @@ OpenSea` actions. Desktop retains compact external-link actions.
 - `Primary` badge marks the active primary wallet.
 - `Wallet Checker` is shown when the profile has a primary or consolidated
   wallet address.
+- The `Consolidated Addresses` header shows the wallet count against the
+  4-wallet limit, for example `2 of 4 wallets`.
 - `Add another wallet` is shown beside `Wallet Checker` only when the connected
-  wallet belongs to the viewed profile, no proxy profile is active, and a
-  primary or consolidated wallet address is available. It opens
-  `/delegation/register-consolidation` without preselecting a collection or
-  target address. This is separate from `Add`, which adds identity statements.
+  wallet belongs to the viewed profile, no proxy profile is active, a primary
+  or consolidated wallet address is available, and the profile has fewer than
+  4 wallets. It opens the guided `Build a Consolidation` setup at
+  `/delegation/build-consolidation`, prefilled with the connected wallet and
+  its current consolidation. At 4 wallets the owner sees
+  `This consolidation has the maximum of 4 wallets.` instead. This is separate
+  from `Add`, which adds identity statements.
 - `Delegation Center` link is shown only when the connected wallet appears in
   at least one consolidation relationship for that profile.
 - Statement rows are grouped by section and sorted newest first in each section.

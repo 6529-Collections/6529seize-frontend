@@ -135,6 +135,9 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
         page.getByRole("button", { name: action, exact: true })
       ).toBeVisible();
     }
+    await expect(
+      page.getByRole("link", { name: "Guided Setup", exact: true })
+    ).toBeVisible();
 
     await expect(
       page.getByRole("heading", { name: "Manage by Collection" })
@@ -253,6 +256,57 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
       )
     ).toBeVisible({ timeout: 20000 });
     await expectWalletCanonical(page, SYNTHETIC_EMPTY_WALLET);
+  });
+
+  test("guided consolidation plans without a wallet and signs nothing", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/delegation/build-consolidation");
+    const main = pageMain(page);
+
+    await expect(page).toHaveTitle("Build a Consolidation | 6529.io");
+    await expect(
+      main.getByRole("heading", { level: 2, name: "Build a Consolidation" })
+    ).toBeVisible();
+    await expect(
+      main.getByRole("link", { name: "How consolidation affects TDH" })
+    ).toHaveAttribute("href", "/network/tdh/consolidation");
+    await expect(
+      main.getByRole("link", { name: "Appoint a Delegation Manager" })
+    ).toHaveAttribute("href", "/delegation/register-sub-delegation");
+
+    const firstWallet = main.getByRole("textbox", {
+      name: "Wallet 1 address",
+    });
+    await expect(firstWallet).toHaveValue("");
+    await firstWallet.fill("not-a-wallet");
+    await expect(firstWallet).toHaveAttribute("aria-invalid", "true");
+    await expect(
+      main.getByText(
+        "Enter a wallet address: 0x followed by 40 hexadecimal characters."
+      )
+    ).toBeVisible();
+    await expect(
+      main.getByText("Enter at least two valid wallets to see the steps.")
+    ).toBeVisible();
+
+    await main.getByRole("button", { name: "Add Wallet" }).click();
+    await main.getByRole("button", { name: "Add Wallet" }).click();
+    await expect(
+      main.getByRole("textbox", { name: "Wallet 4 address" })
+    ).toBeVisible();
+    await expect(main.getByRole("button", { name: "Add Wallet" })).toHaveCount(
+      0
+    );
+    await expect(
+      main.getByText("A consolidation can hold up to 4 wallets.")
+    ).toBeVisible();
+    // Neither a signer's own step button nor the manager's "Sign for ..."
+    // button may appear without a connected wallet.
+    await expect(
+      main.getByRole("button", { name: /^Sign (Step|for) / })
+    ).toHaveCount(0);
+    await expectNoHorizontalOverflow(page);
   });
 
   for (const route of WRITE_GUARD_ROUTES) {

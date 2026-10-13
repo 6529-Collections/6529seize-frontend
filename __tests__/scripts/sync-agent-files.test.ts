@@ -329,7 +329,7 @@ describe("sync-agent-files", () => {
         expect(consolidationUseCaseRecord?.facts).toEqual(
           expect.arrayContaining([
             "6529 recognizes up to 4 addresses as one consolidation group, and every pair of addresses in the group must register consolidation use case #999 with each other in both directions.",
-            "The fourth address counts only for links registered on or after 15 October 2026 00:00 UTC: a group of 4 counts when one of its addresses has all three of its links registered in both directions from then. Before then, groups count at most 3 addresses; groups of 2 or 3 are unchanged and older registrations stay valid.",
+            "The fourth address counts only for links registered on or after the current environment’s activation cutoff: a group of 4 counts when one of its addresses has all three of its links registered in both directions from then. Before then, groups count at most 3 addresses; groups of 2 or 3 are unchanged and older registrations stay valid.",
             "Registration capacity and effective counted group size are different: users can create records involving more addresses, but no more than 4 addresses count together, and when links conflict the newest confirmed link wins.",
           ])
         );

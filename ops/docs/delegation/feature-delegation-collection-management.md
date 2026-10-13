@@ -49,7 +49,7 @@ delegations for one collection scope.
 - Row status covers one pair of wallets. A consolidation group has up to 4
   wallets and counts only when every pair in it is linked in both directions;
   a fourth wallet counts only for links registered on or after
-  2026-10-15 00:00 UTC. When links conflict, the newest confirmed link wins.
+  the activation cutoff supplied by this environment’s settings. When links conflict, the newest confirmed link wins.
 - 6529 ignores expiry for consolidations, so consolidation links do not expire.
 - To remove a wallet from a group while it still has its key, connect that
   wallet, open the collection route where its links were registered, select its

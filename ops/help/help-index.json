@@ -4323,8 +4323,7 @@
         "register consolidation form",
         "open register consolidation",
         "where is register consolidation",
-        "register a consolidation form",
-        "add another wallet"
+        "register a consolidation form"
       ],
       "keywords": [
         "consolidation",
@@ -4341,8 +4340,8 @@
       "facts": [
         "The Register Consolidation form is the Delegation Center action for connecting wallets you control for supported 6529 metrics.",
         "The form requires a connected wallet, Collection, and Consolidating With address.",
-        "Profile owners can open this form from Add another wallet beside Wallet Checker in ID Statements / Consolidated Addresses; the entry is hidden while a proxy profile is active.",
-        "The normal form explains registering from the connected wallet, then connecting the other wallet and registering the return link. Each wallet needs ETH for gas; the link is public and existing profile data may be combined. NFTs stay in their wallets.",
+        "Add another wallet in ID Statements / Consolidated Addresses opens the guided Build a Consolidation setup at /delegation/build-consolidation, not this form.",
+        "The normal form explains that a consolidation holds up to 4 wallets and every pair of wallets registers a link in both directions, so every wallet signs and needs ETH for gas; the link is public and existing profile data may be combined. NFTs stay in their wallets. It links to the guided setup.",
         "For TDH consolidation, use Any Collection or The Memes."
       ],
       "canonical_path": "/delegation/register-consolidation",
@@ -4359,6 +4358,59 @@
         "ops/docs/delegation/flow-delegation-center-to-onchain-actions.md",
         "ops/docs/delegation/source-of-truth-spec.md"
       ]
+    },
+    {
+      "id": "delegation.build-consolidation",
+      "kind": "workflow",
+      "title": "Build a Consolidation (guided setup)",
+      "link_label": "Build a Consolidation",
+      "aliases": [
+        "build a consolidation",
+        "guided consolidation",
+        "guided setup",
+        "consolidate four wallets",
+        "add a fourth wallet",
+        "add another wallet",
+        "add a wallet to my consolidation",
+        "consolidation signing order",
+        "one transaction per wallet",
+        "consolidate a cold vault",
+        "sign consolidation as delegation manager"
+      ],
+      "keywords": [
+        "consolidation",
+        "consolidate",
+        "guided",
+        "wallets",
+        "batch",
+        "order",
+        "fourth",
+        "sign",
+        "999"
+      ],
+      "facts": [
+        "Guided Setup reads its wallet limits and activation/signing-open times from the selected backend. Missing wallet limits pause guided signing and adding wallet rows; Try Again reloads settings. With valid limits but unavailable activation dates, two- and three-wallet plans continue while four-wallet signing waits.",
+        "Build a Consolidation is the Delegation Center's guided setup for linking up to 4 wallets you control. Open it from Guided Setup on the Consolidations card, from Add another wallet in ID Statements / Consolidated Addresses, or from the link in the Register Consolidation form.",
+        "Every pair of wallets in a consolidation registers use case 999 in both directions. The guide reads which directions are already registered on-chain (Any Collection or The Memes) and plans one transaction per wallet: a single registration for one missing link, or one batch for several.",
+        "The connected wallet and its current consolidation are prefilled. Wallets already in that consolidation sign first and new wallets sign last; signing out of order temporarily splits the consolidation and can reduce TDH-wave votes.",
+        "Each step can be signed only by its own wallet or by that wallet's Delegation Manager, and only after every earlier step is confirmed on-chain. Switch the connected wallet between steps; the wallet list stays in place.",
+        "A vault never has to connect: if the connected wallet is the vault's Delegation Manager on Any Collection (use case 998), the vault's step shows Sign for Wallet N as its manager and the manager registers each of the vault's links as a separate transaction (Link n of total). When a manager signs for a joining wallet with several links, the consolidation can be split until the last link confirms, which can reduce TDH-wave votes, so the step asks to send them back to back. A manager appointed only for The Memes cannot sign these links. Appoint one from the tip in Before you start (/delegation/register-sub-delegation).",
+        "A connected Safe cannot sign its own step here, because a Safe confirms a transaction only after its co-signers approve; appoint a Delegation Manager for the Safe on Any Collection and connect the manager to sign the Safe's links (see Using a SAFE at /delegation/delegation-faq/using-safe).",
+        "A four-wallet consolidation counts only when one member has all three of its links registered in both directions from the current environment’s activation cutoff. Every step of a four-wallet plan waits until ten minutes after that cutoff, as shown in Guided Setup; staging can open before production; groups of two or three are not held.",
+        "For a four-wallet plan the guide also checks when 6529 recorded each link. A joining wallet's older links are registered again in the signer's step so they count. After a step confirms, a link 6529 has not recorded yet shows Waiting for 6529 to record this link (usually about a minute) instead of asking for another signature.",
+        "Every wallet in a consolidation can sign in as the profile and act for it, so only consolidate wallets you control. Profiles merge permanently, the profile with the highest CIC keeps its handle, and a wallet already in another consolidation leaves it."
+      ],
+      "canonical_path": "/delegation/build-consolidation",
+      "related_paths": [
+        "/delegation/register-consolidation",
+        "/delegation/delegation-faq/register-consolidation",
+        "/delegation/delegation-center",
+        "/delegation/wallet-checker",
+        "/delegation/register-sub-delegation",
+        "/delegation/delegation-faq/using-safe"
+      ],
+      "tags": ["delegation", "consolidation", "wallet"],
+      "source_refs": ["ops/docs/delegation/feature-delegation-action-flows.md"]
     },
     {
       "id": "delegation.wallet-architecture",
@@ -4401,7 +4453,7 @@
         "The docs call this the Three Address Protocol, or TAP, and explain how separate wallets reduce phishing, malware, and malicious-site risk.",
         "A higher-security version can use SAFE, formerly Gnosis Safe, as the vault wallet, while a more convenient minting wallet can be a hot or mobile wallet.",
         "Use the consolidation docs and Register Consolidation form when you want those wallets treated together for supported 6529 metrics.",
-        "For consolidation metrics, 6529 recognizes up to 4 addresses as one consolidation group when every pair is linked in both directions; a fourth address counts only for links registered on or after 15 October 2026 00:00 UTC."
+        "For consolidation metrics, 6529 recognizes up to 4 addresses as one consolidation group when every pair is linked in both directions; a fourth address counts only for links registered on or after the current environment’s activation cutoff."
       ],
       "canonical_path": "/delegation/wallet-architecture",
       "related_paths": [
@@ -4478,7 +4530,7 @@
       "facts": [
         "Consolidations help 6529 treat multiple wallets controlled by one collector together for metrics such as total cards, unique cards, TDH, and related collection metrics.",
         "6529 recognizes up to 4 addresses as one consolidation group, and every pair of addresses in the group must register consolidation use case #999 with each other in both directions.",
-        "The fourth address counts only for links registered on or after 15 October 2026 00:00 UTC: a group of 4 counts when one of its addresses has all three of its links registered in both directions from then. Before then, groups count at most 3 addresses; groups of 2 or 3 are unchanged and older registrations stay valid.",
+        "The fourth address counts only for links registered on or after the current environment’s activation cutoff: a group of 4 counts when one of its addresses has all three of its links registered in both directions from then. Before then, groups count at most 3 addresses; groups of 2 or 3 are unchanged and older registrations stay valid.",
         "Registration capacity and effective counted group size are different: users can create records involving more addresses, but no more than 4 addresses count together, and when links conflict the newest confirmed link wins.",
         "Each wallet signing for itself can register all of its links in one transaction with batchDelegations; a Delegation Manager sends one transaction per link. When adding a wallet to an existing group, the existing members register their links to it first and the new wallet sends its batch last. This avoids a temporary split when the new wallet has no existing return links. Old return links, signing out of order, or a manager sending the new wallet's links individually can temporarily split the group, re-run profile merges, and reduce TDH-wave votes above the lower TDH; those votes are not restored.",
         "To replace a wallet without dropping below three, add the new wallet as the fourth, then remove the old one: if it still has its key, it sends one batch revocation to all the others; if the key is lost, each remaining wallet revokes its link to it.",
@@ -5943,7 +5995,7 @@
         "On mobile, the add-statements sheet presents four compact statement groups, keeps public-visibility notes under About identity statements, and provides header close, back, backdrop, Escape, and swipe-down dismissal paths.",
         "On mobile web and Capacitor, deeper add-statement forms stay above the software keyboard and keep their focused fields and Save/Cancel actions reachable by scrolling.",
         "Consolidated wallet rows expand to show the full address and ENS name when available as full-field copy controls, plus labeled mobile links to Etherscan and OpenSea.",
-        "Add another wallet appears beside Wallet Checker for the connected profile owner when no proxy profile is active and a primary or consolidated wallet address is available. It opens /delegation/register-consolidation without prefilling Collection or Consolidating With; it is separate from Add for identity statements.",
+        "Consolidated Addresses shows how many of the 4 allowed wallets the profile has. Add another wallet appears beside Wallet Checker for the connected profile owner when no proxy profile is active, a primary or consolidated wallet address is available, and the profile has fewer than 4 wallets; it opens the guided Build a Consolidation flow at /delegation/build-consolidation. At 4 wallets the owner sees a maximum-reached note instead. It is separate from Add for identity statements.",
         "URL-capable statement rows open from the row and show a right-aligned external-link cue; Copy remains an independent inline action that does not open the destination, while eligible owners can also Delete.",
         "NFT Accounts includes Ninfa and Other. Other asks for a display name such as AOTM and a secure HTTPS URL, then shows the display name with the destination hostname.",
         "New NFT account links must use HTTPS, cannot contain URL credentials, reject duplicate normalized URLs, and are limited to 20 per profile; Ninfa links must use ninfa.io or a ninfa.io subdomain.",
@@ -5954,7 +6006,7 @@
       "related_paths": [
         "/{user}/identity",
         "/delegation/wallet-checker",
-        "/delegation/register-consolidation"
+        "/delegation/build-consolidation"
       ],
       "tags": ["profiles", "identity", "statements"],
       "source_refs": ["ops/docs/profiles/tabs/feature-identity-statements.md"]

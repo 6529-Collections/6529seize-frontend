@@ -15,8 +15,11 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { useQueries } from "@tanstack/react-query";
 import { AnimatePresence } from "framer-motion";
 import UserPageIdentityStatementsConsolidatedAddressesItem from "./UserPageIdentityStatementsConsolidatedAddressesItem";
+import { useConsolidationPolicy } from "@/hooks/useConsolidationPolicy";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
+import { DelegationCenterSection } from "@/types/enums";
 
 /** Returns the primary wallet, falling back to the highest-TDH wallet. */
 function getPrimaryAddress(profile: ApiIdentity): string | null {
@@ -72,11 +75,16 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
   readonly headerAction?: ReactNode;
 }) {
   const locale = useBrowserLocale();
+  const { limits } = useConsolidationPolicy();
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy } = useContext(AuthContext);
   const canEdit = amIUser({ profile, address }) && !activeProfileProxy;
   const primaryAddress = getPrimaryAddress(profile);
-  const showAddWallet = canEdit && primaryAddress !== null;
+  const walletCount = profile.wallets?.length ?? 0;
+  const atWalletLimit = !!limits && walletCount >= limits.maxWallets;
+  const canAddWallet = canEdit && primaryAddress !== null;
+  const showAddWallet = canAddWallet && !!limits && !atWalletLimit;
+  const walletLimit = limits ? formatInteger(locale, limits.maxWallets) : "";
   const sortedByPrimary = useMemo(
     () => sortByPrimary(profile.wallets ?? [], primaryAddress),
     [primaryAddress, profile.wallets]
@@ -114,7 +122,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
   return (
     <div>
       <div className="tw-flex tw-items-center tw-justify-between">
-        <div className="tw-flex tw-items-center tw-gap-1">
+        <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1">
           <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
             {t(
               locale,
@@ -143,6 +151,16 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
               />
             </svg>
           </button>
+          {walletCount > 0 && (
+            <span className="tw-text-xs tw-text-iron-400">
+              {limits
+                ? t(locale, "user.profile.identity.statements.walletCount", {
+                    count: formatInteger(locale, walletCount),
+                    limit: walletLimit,
+                  })
+                : formatInteger(locale, walletCount)}
+            </span>
+          )}
         </div>
         {headerAction}
       </div>
@@ -176,7 +194,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
           )}
           {showAddWallet && (
             <ButtonLink
-              href="/delegation/register-consolidation"
+              href={`/delegation/${DelegationCenterSection.BUILD_CONSOLIDATION}`}
               variant="primary"
               size="xs"
             >
@@ -199,6 +217,13 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
       {showAddWallet && (
         <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-300">
           {t(locale, "user.profile.identity.statements.addWalletDescription")}
+        </p>
+      )}
+      {canAddWallet && atWalletLimit && (
+        <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-300">
+          {t(locale, "user.profile.identity.statements.walletLimitReached", {
+            limit: walletLimit,
+          })}
         </p>
       )}
     </div>
