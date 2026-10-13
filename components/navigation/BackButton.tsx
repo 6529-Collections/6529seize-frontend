@@ -17,6 +17,8 @@ import {
 import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
 import { useExitActiveWave } from "./useExitActiveWave";
+import { isCompetitionPathname } from "@/helpers/competition.helpers";
+import { getMissingWaveNavigationRoute } from "@/helpers/waves/missing-wave-navigation.helpers";
 
 export default function BackButton({
   returnTo,
@@ -54,19 +56,23 @@ export default function BackButton({
   // Fetch wave to determine if it is DM
   const { data: wave } = useWaveData({
     waveId: waveId,
-    onWaveNotFound: () => {
-      myStream?.activeWave.set(null);
-      const params = new URLSearchParams(searchParamsString || "");
-      params.delete("wave");
-      const basePath = getWaveHomeRoute({
-        isDirectMessage: isInMessagesContext,
-        isApp,
-      });
-      const newUrl = params.toString()
-        ? `${basePath}?${params.toString()}`
-        : basePath;
-      router.replace(newUrl, { scroll: false });
-    },
+    onWaveNotFound: isCompetitionPathname(pathname)
+      ? undefined
+      : () => {
+          const route = getMissingWaveNavigationRoute(waveId);
+          if (!route) return;
+          myStream?.activeWave.set(null);
+          const params = route.searchParams;
+          params.delete("wave");
+          const basePath = getWaveHomeRoute({
+            isDirectMessage: route.pathname.startsWith("/messages"),
+            isApp,
+          });
+          const newUrl = params.toString()
+            ? `${basePath}?${params.toString()}`
+            : basePath;
+          router.replace(newUrl, { scroll: false });
+        },
   });
 
   const { isDm } = useWave(wave);
@@ -127,7 +133,7 @@ export default function BackButton({
       aria-busy={loading}
       disabled={loading}
       onClick={handleClick}
-      className="tw-flex tw-size-11 tw-touch-manipulation tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 active:tw-bg-white/[0.08] desktop-hover:hover:tw-bg-white/[0.06] disabled:tw-cursor-default disabled:tw-opacity-70"
+      className="tw-flex tw-size-11 tw-touch-manipulation tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 active:tw-bg-white/[0.08] disabled:tw-cursor-default disabled:tw-opacity-70 desktop-hover:hover:tw-bg-white/[0.06]"
     >
       {loading && !returnTo ? (
         <Spinner />

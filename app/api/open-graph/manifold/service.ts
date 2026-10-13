@@ -7,7 +7,10 @@ import { asNonEmptyString } from "../opensea/shared";
 const MANIFOLD_CACHE_TTL_MS = 5 * 60 * 1000;
 const MANIFOLD_HOST = "manifold.xyz";
 const LISTING_PATH_PATTERN = /^\/@([^/]+)\/id\/([^/?#]+)\/?$/i;
-const HYDRATE_WORK_PATTERN = /hydrateWorkPage\(\s*(\{[\s\S]*?\})\s*\);?/g;
+const HYDRATE_WORK_CALL = "hydrateWorkPage(";
+// Optional whitespace and the "{" that opens a payload, right after the call.
+const HYDRATE_WORK_PAYLOAD_START_PATTERN = /\s*\{/y;
+const HYDRATE_WORK_PAYLOAD_END_PATTERN = /\}\s*\)/g;
 
 type FetchHtmlResult = {
   readonly html: string;
@@ -68,25 +71,73 @@ const asNumberishString = (value: unknown): string | undefined => {
   return asNonEmptyString(value);
 };
 
+const parseHydratePayload = (
+  rawPayload: string
+): ManifoldHydratePayload | null => {
+  try {
+    return JSON.parse(rawPayload) as ManifoldHydratePayload;
+  } catch {
+    return null;
+  }
+};
+
+/** Returns the index of the "{" that opens a call's payload, or -1. */
+const findPayloadStart = (html: string, afterCall: number): number => {
+  HYDRATE_WORK_PAYLOAD_START_PATTERN.lastIndex = afterCall;
+  return HYDRATE_WORK_PAYLOAD_START_PATTERN.test(html)
+    ? HYDRATE_WORK_PAYLOAD_START_PATTERN.lastIndex - 1
+    : -1;
+};
+
+/**
+ * Returns the first "})" at or after `from`. `previous` was the first one at
+ * or after an earlier position, so it is reused while it is not behind `from`.
+ */
+const findPayloadEnd = (
+  html: string,
+  from: number,
+  previous: RegExpExecArray | null
+): RegExpExecArray | null => {
+  if (previous && previous.index >= from) {
+    return previous;
+  }
+  HYDRATE_WORK_PAYLOAD_END_PATTERN.lastIndex = from;
+  return HYDRATE_WORK_PAYLOAD_END_PATTERN.exec(html);
+};
+
+/**
+ * Collects `hydrateWorkPage({...})` payloads. A payload ends at the first "}"
+ * followed by ")". A payload that runs into the next call is unclosed, so it
+ * is skipped and the next call is still read. Every search moves forward and
+ * parsed payloads never overlap, so the scan stays linear in the page size.
+ */
 const extractHydratePayloads = (
   html: string
 ): readonly ManifoldHydratePayload[] => {
   const payloads: ManifoldHydratePayload[] = [];
-  HYDRATE_WORK_PATTERN.lastIndex = 0;
-  let match: RegExpExecArray | null;
+  let payloadEnd: RegExpExecArray | null = null;
+  let callIndex = html.indexOf(HYDRATE_WORK_CALL);
 
-  while ((match = HYDRATE_WORK_PATTERN.exec(html))) {
-    const rawPayload = match[1];
-    if (!rawPayload) {
-      continue;
-    }
+  while (callIndex !== -1) {
+    const afterCall = callIndex + HYDRATE_WORK_CALL.length;
+    const nextCall = html.indexOf(HYDRATE_WORK_CALL, afterCall);
+    const payloadStart = findPayloadStart(html, afterCall);
+    if (payloadStart !== -1) {
+      payloadEnd = findPayloadEnd(html, payloadStart + 1, payloadEnd);
+      if (!payloadEnd) {
+        // No "})" follows, so no later payload can close either.
+        break;
+      }
 
-    try {
-      const parsed = JSON.parse(rawPayload) as ManifoldHydratePayload;
-      payloads.push(parsed);
-    } catch {
-      continue;
+      const closed = nextCall === -1 || nextCall > payloadEnd.index;
+      const payload = closed
+        ? parseHydratePayload(html.slice(payloadStart, payloadEnd.index + 1))
+        : null;
+      if (payload) {
+        payloads.push(payload);
+      }
     }
+    callIndex = nextCall;
   }
 
   return payloads;

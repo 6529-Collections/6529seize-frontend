@@ -23,6 +23,9 @@ wave navigation restores that choice, including after a reload or reopening the
 app. Main Stage can remember Leaderboard while Maybes Bar independently remembers
 Chat. A wave with no valid remembered choice opens Chat. Background competition
 loading does not change a deliberate selection.
+The wave list stays in place when switching waves. The remembered section opens
+directly; pending data uses that section's loading state without opening Chat or
+Competitions first.
 Explicit tab, competition, curation and message links retain their destinations.
 Browser Back/Forward and native app Back restore the section from that visit
 when it is still available, ahead of the wave's latest remembered choice.
@@ -34,14 +37,24 @@ when it is still available, ahead of the wave's latest remembered choice.
 - On desktop and mobile web, tabs appear below the wave header and above the
   main content panel.
 - In the native app, curations appear alongside the main wave navigation tabs.
+- A soft edge fade marks tabs that are off-screen. Scroll horizontally to reveal
+  them; the fade disappears at that end of the row. The `Create` action stays
+  outside the scrolling area.
 
 ## Entry Points
 
 - Open a wave from waves lists, profile wave links, or a shared wave URL.
 - Open a direct message thread with a selected wave.
 - Select a tab from the wave tab strip.
-- Eligible wave admins can use the tab-row `+` menu on web and in the app to
-  create a curation or, on root non-direct-message waves, create a subwave.
+- The tab-row `Create` menu offers `New curation` and `New subwave` according
+  to your permissions. It opens a bottom sheet in the app and on mobile web,
+  or a menu on desktop. Clicking Create on desktop opens the menu without
+  highlighting an action; keyboard opening and arrow keys highlight options
+  for selection. Each action has a short description. Subwave creation
+  is available only on eligible root waves outside direct messages.
+- In `Competitions`, the separate `+ Competition` action sits beside the
+  collection filter pills and opens setup directly when you have creation
+  permission. It is absent from other wave tabs.
 
 ## User Journey
 
@@ -55,13 +68,13 @@ when it is still available, ahead of the wave's latest remembered choice.
      or a visit without a valid saved choice, opens `Chat`, including Memes and
      completed competition waves on web and in the native app.
    - Loading or refreshing the default competition does not change deliberate
-     Chat selections. A remembered competition view waits for its identity and
-     availability to be checked before opening.
+     Chat selections. A remembered competition view keeps its section selected
+     while its identity and availability are checked.
    - Explicit tab and competition links open their requested section. Native
      app Back restores the section from that visit when it is still available.
-4. Select a tab to switch sections. If opening the section takes time, the
-   tapped tab shows a small loading indicator. It clears when that view opens;
-   fast switches do not require a loading screen or a minimum waiting time.
+4. Select a tab to switch sections. The tab row stays visually steady while
+   the destination opens, and screen readers announce loading when needed.
+   Fast switches do not require a loading screen or a minimum waiting time.
 5. The main content panel updates. Competition views retain their competition
    ID and selected tab in the URL so reload and Back/Forward restore the view.
    When switching to a competition route, its controls appear after navigation
@@ -79,7 +92,7 @@ when it is still available, ahead of the wave's latest remembered choice.
    when present, and media interactions stay disabled in the row.
 8. If the active tab is no longer valid when entering a new wave, the active tab
    resets to Chat.
-9. Eligible admins can open the `+` menu and select `New subwave`. The new
+9. Eligible admins can open `Create` and select `New subwave`. The new
    subwave starts with the parent wave's admin group, which can still be changed
    in the `Groups` step before submission.
 10. Select a named curation tab to show its posts. Select another curation to
@@ -111,9 +124,10 @@ when it is still available, ahead of the wave's latest remembered choice.
 - Eligible readers can use `View results` on an open unanswered poll to inspect
   counts and percentages before voting, then return to `Vote` while the poll is
   still open.
-- On mobile, the fixed `+` control stays outside the horizontally scrolling tab
-  list so both `New curation` and `New subwave` remain reachable on narrow
-  screens.
+- On mobile, `Create` stays outside the horizontally scrolling tab list so
+  creation actions remain reachable on narrow screens. Selecting an action
+  closes the sheet before opening its form; dismissing the sheet leaves the
+  current view unchanged.
 - On narrow web layouts, an edge fade and chevron appear when additional tabs
   are available off-screen. The cue follows the current scroll position and can
   be tapped to move through the tab row.

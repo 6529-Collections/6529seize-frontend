@@ -52,7 +52,8 @@ behavior across thread header controls and sidebar wave rows.
 
 - Muted rows show a bell-slash badge on the wave avatar.
 - Muted rows suppress unread-count badges.
-- Muted waves sort after non-muted waves in wave and DM lists.
+- Muted waves sort after non-muted waves in wave and DM lists, including
+  subwave rows under an expanded parent and in the mobile subwave bar.
 - Muted waves skip websocket unread/new-drop accumulation.
 - Open muted threads still receive realtime drop updates, so visible content
   stays current without a refresh.

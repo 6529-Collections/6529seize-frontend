@@ -41,6 +41,7 @@ import MyStreamActionTooltip from "../MyStreamActionTooltip";
 import { useSidebarState } from "../../../../hooks/useSidebarState";
 import WaveParentNavigation from "@/components/waves/header/WaveParentNavigation";
 import WaveRepButton from "@/components/waves/header/rep/WaveRepButton";
+import WaveJoinCta from "@/components/waves/header/WaveJoinCta";
 import CompactWaveActions from "./CompactWaveActions";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 import { BRAIN_RIGHT_SIDEBAR_ID } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
@@ -489,6 +490,7 @@ export default function MyStreamWaveTabsHeader({
           />
         </div>
         <div className={actionsClassName}>
+          <WaveJoinCta wave={wave} tooltipId={headerActionsTooltipId} />
           {renderLeadingActions?.(actionContext)}
           {showWaveRepAction && <WaveRepButton wave={wave} variant="compact" />}
           {renderTrailingActions?.(actionContext)}

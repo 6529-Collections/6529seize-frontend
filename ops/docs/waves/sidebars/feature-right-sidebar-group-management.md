@@ -49,7 +49,7 @@ Users can:
 6. Editors can select a Configuration access-row gear to open the group editor
    directly. There is no intermediate action menu.
 7. The modal opens on `Identities` in the same criteria editor used during wave creation,
-   including the privacy row, configured criteria chips, matching
+   including the privacy row, configured criteria rows, matching
    `Before editing` and `After editing` summaries, and `Save changes`. Wave
    access editors do not offer `Choose group`. The
    selected row's rules, included and excluded identities, NFT requirements,

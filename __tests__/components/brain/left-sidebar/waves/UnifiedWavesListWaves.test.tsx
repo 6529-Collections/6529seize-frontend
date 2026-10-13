@@ -964,6 +964,7 @@ it("expands regular subwaves and keeps child rows unpinned", async () => {
           hasSubwaves: true,
           createdAt: 10,
           unreadDropsCount: 1,
+          isFollowing: true,
         }),
       ]}
       onHover={jest.fn()}

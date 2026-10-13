@@ -65,6 +65,7 @@ const useBrainRightSidebarState = (
       }
       return commonApiFetch<ApiWave>({
         endpoint: `waves/${waveId}`,
+        errorMode: "structured",
       });
     },
     enabled: Boolean(waveId && isOpen),

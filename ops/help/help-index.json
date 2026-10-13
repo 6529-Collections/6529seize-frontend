@@ -69,15 +69,15 @@
         "Competition links use /waves/{waveId}/competitions/{competitionId}; an entry link adds ?entry={entryId}. Explicit competition and entry links preserve that competition across tabs, reload and Back/Forward even when another competition becomes the default.",
         "In competition setup, Competition type offers Rank and Approve in a desktop dropdown or a bottom sheet on smaller screens, including the app. The current choice is marked. Selecting a type closes the picker; dismissing it leaves the choice unchanged.",
         "In the app, the competition setup editor keeps the focused name or description field above the keyboard and action bar. Closing the keyboard restores the editor's full height.",
-        "In the native app, the competition collection filters and Votes subtabs use the same compact pills as wave information. More opens remaining collection choices and shows the selected choice's name after selection. Dismissing More leaves the selection unchanged. Desktop and mobile web retain underlined tabs; published competitions keep the shared wave-level navigation.",
+        "In the native app, the competition collection filters and Votes subtabs use the same compact pills as wave information. More opens remaining collection choices and shows the selected choice's name after selection. Dismissing More leaves the selection unchanged. Desktop and mobile web also use compact pills for collection filters, with all available filters visible. Votes subtabs retain underlined styling on web; published competitions keep the shared wave-level navigation.",
         "When switching to a competition route, its controls appear after navigation completes, so a newly opened sort sheet or form stays in that view.",
         "A wave link targeting a specific chat message remains in Chat even when the link also names another section. The message target takes priority over that conflicting destination.",
-        "Ordinary wave navigation restores each wave’s last selected valid tab in the same browser or app, including after reloads or app restarts. Main Stage can remember Leaderboard while Maybes Bar independently remembers Chat. With no valid remembered choice, Chat is the fallback, including Memes and completed waves. Loading or refreshing competition data does not override deliberate Chat selections. Remembered competition views retain their competition identity; if the default changes, ordinary entry falls back to Chat. Explicit tab and competition links retain their destination. Competition tabs use the default unless an explicit selection supplies another competition. One eligible competition wins; otherwise the earliest-starting running competition wins, including paused decisions. With none running, the soonest upcoming wins over history; otherwise the most recently ended wins, including archived completed history. Drafts, archived never-published drafts and cancelled competitions are excluded. With none eligible, shared chat remains usable. Chat and every selected published competition share one wave-level row: Chat, competition views, Votes, Settings, then Competitions when available, then curations. Votes contains My Votes, All votes and Activity, scoped to the selected competition. Settings renders its access, rules, appearance and pause history, including original competitions stored in wave settings. About and wave Configuration live in the information panel. Select the wave name to open it; mobile Close or Back returns to the original competition, tab, curation and scroll. Administrators retain Competitions; other viewers see it for more than one visible competition. Unknown counts or permissions keep it available. Direct collection links remain readable. Explicit competition choices and open forms keep their original competition.",
+        "Ordinary wave navigation restores each wave’s last selected valid tab in the same browser or app, including after reloads or app restarts. Main Stage can remember Leaderboard while Maybes Bar independently remembers Chat. Switching waves keeps the wave list in place and opens the remembered section directly; pending competition data loads in that section without opening Chat or Competitions first. With no valid remembered choice, Chat is the fallback, including Memes and completed waves. Loading or refreshing competition data does not override deliberate Chat selections. Remembered competition views retain their competition identity; if the default changes, ordinary entry falls back to Chat. Explicit tab and competition links retain their destination. Competition tabs use the default unless an explicit selection supplies another competition. One eligible competition wins; otherwise the earliest-starting running competition wins, including paused decisions. With none running, the soonest upcoming wins over history; otherwise the most recently ended wins, including archived completed history. Drafts, archived never-published drafts and cancelled competitions are excluded. With none eligible, shared chat remains usable. Chat and every selected published competition share one wave-level row: Chat, competition views, Votes, Settings, then Competitions when available, then curations. Votes contains My Votes, All votes and Activity, scoped to the selected competition. Settings renders its access, rules, appearance and pause history, including original competitions stored in wave settings. About and wave Configuration live in the information panel. Select the wave name to open it; mobile Close or Back returns to the original competition, tab, curation and scroll. Administrators retain Competitions; other viewers see it for more than one visible competition. Unknown counts or permissions keep it hidden until administrator access or more than one visible competition is established. Direct collection links remain readable. Temporary refresh failures retain loaded competition content and its selected section; rejected access or an unavailable competition shows a retryable error in that section. Explicit competition choices and open forms keep their original competition.",
         "Routine background competition refreshes keep established tabs in place. The Competitions tab updates when refreshed competition data or permissions change, not merely because another request starts.",
-        "Where the competition experience is available, creating a wave opens shared chat without creating a competition. The Competitions tab is available to wave administrators for management, and to other viewers with accessible competitions except for the logged-in sole-default case described above. Administrators open that tab and use Add competition to configure competitions afterward.",
+        "Where the competition experience is available, creating a wave opens shared chat without creating a competition. The Competitions tab is available to wave administrators for management, and to other viewers only when more than one visible competition is established. Users with competition creation permission open Competitions, then + Competition beside the collection filter pills, to configure a competition afterward.",
         "Wave administrators can create Rank or Approve drafts and publish them. Drafts are visible only to wave administrators. Approve requires a whole-number approval threshold greater than zero. The competition setup editor saves changes automatically. Incomplete input is retained on this device; valid drafts sync to the server. Next highlights invalid voting settings. Opening a draft goes directly to the setup wizard with saved settings prefilled. Close editor returns to the competition list and preserves the draft without publishing. The final step has Previous, Close editor and Publish; Publish saves the latest edits before publication. Whole competition means one voting budget across that competition’s entries. Competition guidelines apply to its entries and voting; chat guidelines belong to the shared wave. Published types cannot change; after the first entry, credit, signing, submission, timing, decision and outcome rules are fixed. Participation and voting access groups, title, description and presentation can still be updated while published.",
         "Each entry creates a dedicated competition drop that belongs to exactly one competition. Chat messages cannot become competition entries, and competition drops cannot be reused in another competition. Competition submissions cannot be edited, including unsigned submissions. Delete removes the entry from all competition views and direct entry links. There are no Withdraw or Disqualify actions. Existing drop-deletion permissions apply.",
-        "The wave header and tabs stay visible. Every selected published competition renders directly under the single wave tab row. The collection and create/edit forms open from Competitions. The Competitions tab shows a badge counting active and upcoming competitions, hidden at zero; drafts and completed competitions do not count. The collection has a second tab row for Active and upcoming, Completed, Drafts for administrators, and All. Add competition sits alongside these tabs for users who can create competitions. Competition cards show the start date and any configured end date, using Starts or Ends for future dates and Started or Ended for past dates. Competition views include Leaderboard, Winners, Outcomes, Votes and Settings. Votes has My Votes, All votes and Activity subtabs scoped to the chosen competition. The leaderboard uses the familiar schedule or approval-status bar, list/grid controls, sorting and rich drop cards with the Drop action. Winners use Rank podium/timeline or Approve result cards; Outcomes use expandable reward cards; My votes uses editable rows and reset controls; All votes shows profile rows and vote totals. Open Settings for an overview with the competition type, status, name, description and guidelines, followed by Participation, Voting and Winners settings cards. Administrators can use Edit competition details on the overview card to edit the name, description and guidelines together in place, then Save changes or Cancel. Published competitions no longer open a separate editing wizard. Administrators can use the gear beside Participation or Voting Access to edit its criteria, including after entries have been submitted. Access changes preserve existing entries, votes, outcomes and decision progress. Administrators can expand Appearance and labels below these cards to edit the submission button label, proposal card display, Approve tab labels and outcome visibility, with Save changes and Cancel in that section. Approve competitions default to Proposals and Approved; custom tab labels apply to that competition. Drafts also have Finish draft setup for unpublished execution settings. Select Chat to return to the conversation. Competition drop cards in shared chat show the competition name beneath the author, linked to that competition, plus the entry’s current total, your vote, rank, and voter count. The voter dropdown shows the entry’s voters and vote history. Voting credit is independent per competition. Voting on a competition drop from shared chat uses that entry’s competition credit type, available budget, and rules. A budget can be shared across that competition or apply per entry. Zero removes a vote; negative values depend on the rules. Winning or deleting an entry releases its active voting spend. Deleted entries and their votes no longer appear in competition views.",
+        "The wave header and tabs stay visible. Every selected published competition renders directly under the single wave tab row. The collection opens from Competitions. + Competition beside the collection filter pills opens setup directly; existing drafts open from their collection cards. The Competitions tab shows a badge counting active and upcoming competitions, hidden at zero; drafts and completed competitions do not count. The collection offers Active and upcoming, Completed, Drafts for administrators, and All. The app uses compact pills with More for remaining filters; desktop and mobile web show all available collection filters as compact pills. Create beside the wave tabs contains eligible New curation and New subwave actions. On desktop, mouse opening leaves actions unhighlighted; keyboard opening and arrow keys highlight options for selection. The separate + Competition action appears only in the Competitions collection for users with competition creation permission. Mobile uses a bottom sheet with short action descriptions; selecting an action closes the sheet before its form opens. Competition cards show the start date and any configured end date, using Starts or Ends for future dates and Started or Ended for past dates. Competition views include Leaderboard, Winners, Outcomes, Votes and Settings. Votes has My Votes, All votes and Activity subtabs scoped to the chosen competition. The leaderboard uses the familiar schedule or approval-status bar, list/grid controls, sorting and rich drop cards with the Drop action. Winners use Rank podium/timeline or Approve result cards; Outcomes use expandable reward cards; My votes uses editable rows and reset controls; All votes shows profile rows and vote totals. Open Settings for an overview with the competition type, status, name, description and guidelines, followed by Participation, Voting and Winners settings cards. Administrators can use Edit competition details on the overview card to edit the name, description and guidelines together in place, then Save changes or Cancel. Published competitions no longer open a separate editing wizard. Administrators can use the gear beside Participation or Voting Access to edit its criteria, including after entries have been submitted. Access changes preserve existing entries, votes, outcomes and decision progress. Administrators can expand Appearance and labels below these cards to edit the submission button label, proposal card display, Approve tab labels and outcome visibility, with Save changes and Cancel in that section. Approve competitions default to Proposals and Approved; custom tab labels apply to that competition. Drafts also have Finish draft setup for unpublished execution settings. Select Chat to return to the conversation. Competition drop cards in shared chat show the competition name beneath the author, linked to that competition, plus the entry’s current total, your vote, rank, and voter count. The voter dropdown shows the entry’s voters and vote history. Voting credit is independent per competition. Voting on a competition drop from shared chat uses that entry’s competition credit type, available budget, and rules. A budget can be shared across that competition or apply per entry. Zero removes a vote; negative values depend on the rules. Winning or deleting an entry releases its active voting spend. Deleted entries and their votes no longer appear in competition views.",
         "Competition winner notifications link to the relevant competition or entry. Competition status changes and entry deletion do not send notifications or appear in the notification feed.",
         "Pause decisions stops winner selection while otherwise eligible entries and votes remain available. In Settings, Pause decisions and Resume decisions sit beside Pause history, alongside the other Settings sections. Pausing requires a non-blank reason in the confirmation dialog. Anyone who can view the competition can see each pause’s dates and reason in Pause history, including after resuming. Older pauses without a reason show No reason recorded. Approve may finalize accepted votes after voting closes when a hold or pause finishes. Competitions complete through their configured rules; administrators cannot manually end or cancel them. Archive moves a draft or completed competition into history. Terminal competitions can be cloned into new drafts but cannot reopen.",
         "Main Stage privileges belong only to an explicitly designated competition. Other competitions in the same wave do not inherit them. A wave containing native competition history cannot be deleted, and ordinary chat-history deletion preserves competition content.",
@@ -1091,6 +1091,7 @@
       ],
       "facts": [
         "Every Stream editorial and technical reference page has one structured feedback composer connected to the server-resolved Stream review Wave destination.",
+        "In production, Stream review feedback posts to the public top-level 6529 Tech Feedback wave; the earlier Stream Feedback subwave is archived read-only. Staging uses its own review wave.",
         "Editorial pages place the current page's loaded comments and composer in one collapsible rail; closing and reopening it preserves the current draft, and the browser remembers the open or closed preference.",
         "The page-comments rail reads the most recent 50 Wave messages for the exact review version, shows entries attached to the current page, and can load older 50-message pages on request.",
         "Editorial feedback can reference a stable page section; technical feedback can reference an exact Solidity file and line range.",
@@ -1722,7 +1723,7 @@
       "facts": [
         "The Tech Updates page lives at /about/tech.",
         "It is a longer-form area for 6529 tech updates, repo work, bot notes, release context, and build reports.",
-        "Shorter live repo activity still belongs in Follow The Repo.",
+        "Follow The Repo is the dev team's live chat. Anyone can read it, and its subwaves carry the deploy and GitHub PR feeds; the Tech Updates page is the linkable longer-form shelf beside it.",
         "The page links active technical notes such as the wallet authentication upgrade and indexes longer tech reports."
       ],
       "canonical_path": "/about/tech",
@@ -1733,6 +1734,97 @@
       ],
       "tags": ["about", "tech", "reports"],
       "source_refs": ["components/about/tech/AboutTech.tsx"]
+    },
+    {
+      "id": "waves.tech-feedback-and-dev-team",
+      "kind": "workflow",
+      "title": "Report bugs, send suggestions, and follow 6529 development",
+      "link_label": "6529 Tech Feedback",
+      "aliases": [
+        "report a bug",
+        "where do i report bugs",
+        "give feedback",
+        "app feature request",
+        "6529 tech feedback",
+        "follow the repo",
+        "dev team chat",
+        "6529 releases",
+        "release notes",
+        "deploys production",
+        "github pr feed"
+      ],
+      "keywords": [
+        "bug",
+        "feedback",
+        "tech",
+        "dev",
+        "team",
+        "repo",
+        "releases",
+        "deploys",
+        "github",
+        "waves"
+      ],
+      "facts": [
+        "Report 6529 bugs, app feature requests, and other tech feedback in 6529 Tech Feedback, a public top-level wave.",
+        "Send general, non-technical suggestions about the community, The Memes and other collections, the Network Museum, events, programs, or policies to 6529 Suggestion Box, a top-level wave that is open for anyone to post and moderated by the dev team.",
+        "Follow The Repo is the 6529 dev team's live chat. Anyone can read it; the dev team posts there.",
+        "Follow The Repo's subwaves are bot feeds: Deploys · Production, Deploys · Staging, and GitHub PR Feed.",
+        "Per-deploy frontend and backend release notes post to Deploys · Production.",
+        "6529 Releases is a top-level wave that receives one AI-written daily release digest plus individual Desktop and mobile app release notes; /about/release-notes opens it.",
+        "Dev Team Chat, PR Summaries, and Stream Feedback are archived read-only waves outside Follow The Repo.",
+        "For suspected security vulnerabilities in 6529 apps or services, use private reporting under the repository security policy instead of a public wave."
+      ],
+      "canonical_path": "/waves/e933d8d6-0c78-4e8f-aa12-f67d8c11b4dc",
+      "related_paths": [
+        "/waves/1853ebd4-d620-42b8-b091-854afd37ed8d",
+        "/waves/49f0e595-ec7c-4235-8695-a527f61b69f4",
+        "/waves/05b14183-e153-4e47-bc66-42a0f49102d4",
+        "/about/tech"
+      ],
+      "tags": ["waves", "feedback", "dev-team", "releases"],
+      "source_refs": [
+        "components/about/tech/reports.ts",
+        "app/about/release-notes/route.ts",
+        "ops/docs/developer/deployment.md",
+        "SECURITY.md"
+      ]
+    },
+    {
+      "id": "waves.suggestion-box",
+      "kind": "workflow",
+      "title": "Send a suggestion to 6529",
+      "link_label": "6529 Suggestion Box",
+      "aliases": [
+        "suggestion box",
+        "6529 suggestion box",
+        "make a suggestion",
+        "where do i send suggestions",
+        "community suggestion",
+        "idea for 6529"
+      ],
+      "keywords": [
+        "suggestion",
+        "idea",
+        "community",
+        "memes",
+        "museum",
+        "events",
+        "programs",
+        "policies",
+        "waves"
+      ],
+      "facts": [
+        "6529 Suggestion Box is a top-level wave for general, non-technical suggestions: the community, The Memes and other collections, the Network Museum, events, programs, and policies.",
+        "It is open for anyone to post, and the dev team moderates it.",
+        "Bugs and app feature requests go to 6529 Tech Feedback instead."
+      ],
+      "canonical_path": "/waves/1853ebd4-d620-42b8-b091-854afd37ed8d",
+      "related_paths": [
+        "/waves/e933d8d6-0c78-4e8f-aa12-f67d8c11b4dc",
+        "/waves"
+      ],
+      "tags": ["waves", "feedback", "suggestions"]
     },
     {
       "id": "navigation.search",
@@ -2993,9 +3085,10 @@
       ],
       "keywords": ["waves", "subwaves", "unread", "new", "badge", "sidebar"],
       "facts": [
-        "The new badge beside a parent wave's subwave control totals unread drops across visible, unmuted subwaves where read state is available.",
-        "A subwave contributes to the parent badge whether or not the viewer has joined or followed it.",
-        "The total excludes the viewer's own drops and drops from muted profiles; muting the parent hides the aggregate."
+        "The new badge beside a parent wave's subwave control totals unread drops across visible subwaves that the viewer follows and has not muted.",
+        "Subwaves the viewer has not joined or followed do not add to the parent badge; muting a subwave removes its contribution.",
+        "The total excludes the viewer's own drops and drops from muted profiles; muting the parent hides the aggregate.",
+        "Expanded subwave lists and the mobile subwave bar show unmuted subwaves first and muted subwaves last, each group ordered by newest activity."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
@@ -3018,7 +3111,7 @@
       ],
       "keywords": ["waves", "subwaves", "create", "admin", "mobile", "plus"],
       "facts": [
-        "Eligible admins can open the + menu in a root wave's tab row and select New subwave on web or in the app.",
+        "Eligible admins can open Create in a root wave's tab row and select New subwave on web or in the app.",
         "New subwave is hidden in direct messages, inside an existing subwave, while using a profile proxy, when the parent has no reusable admin group, or when the profile cannot administer the parent.",
         "Subwave creation shows Create subwave of the parent wave name in both the modal header and Setup heading. Its first-step labels are Subwave Name, Subwave Profile Picture, and Subwave Type. Saved Drafts is hidden during subwave creation.",
         "A new subwave starts with the parent wave's exact access group. Chat and, for Rank and Approve waves, submission and voting default to that same group. A public parent's subwaves start public. Changing the wave type restores these defaults, but inherited groups are editable and do not have to match the parent's groups.",
@@ -3102,14 +3195,14 @@
         "Optional sections are named for their contents instead of repeating Advanced settings. They show Customized for non-default values and open automatically when a hidden field needs attention.",
         "The Access step initially shows one Who can access this wave control. By default, that group can also chat and, for Rank and Approve waves, submit and vote; only the creator can administer the wave.",
         "Customize other permissions expands the separate chat, submission, voting, and admin group controls when a wave needs different access rules.",
-        "Each Access row offers one Edit action with a pencil icon and no Choose group action. Edit opens Identities immediately alongside the rule choices, supports explicitly included and excluded identities, and Next or Review wave stays disabled until the pending replacement is saved or cancelled.",
+        "Each Access row offers one Edit action with a pencil icon and no Choose group action. Edit opens Identities immediately alongside the rule choices, supports explicitly included and excluded identities, and Next or Review wave stays disabled until the pending replacement is saved or cancelled. Clicking elsewhere in the Create Wave modal keeps the open criteria editor and its draft available; cancelling is not needed to return to the filters. Cancel sits at the far right of the Before editing header row, including on mobile, and discards the pending edit.",
         "The inline criteria editor includes a Hide criteria and members switch. Its tooltip explains that the criteria and member list remain visible to group members but are hidden from everyone else. The switch starts off for a new inline group, preserves the setting copied from the current assignment, and applies the current setting when Save changes is selected.",
         "The inline Identities editor can add either included or excluded identities through profile search, an authenticated EMMA allowlist, or a dragged or selected CSV file. Source wallets are normalized and deduplicated, source choices persist while the group remains an unsaved draft, and the latest include or exclude action wins when the same wallet appears on both sides.",
         "Inline group identity search ranks exact, prefix, and substring profile-handle matches before ENS-only matches, then orders each match group by profile level, highest first.",
         "An empty access, drop, vote, or chat scope is labeled Everyone. During editing, matching Before editing and After editing summaries compare the applied and proposed audiences.",
         "A selected saved access group shows its current eligible identity count; View members opens a paginated, searchable member browser without leaving wave creation.",
         "A valid draft exposes View members from its After editing summary; there is no separate Preview matches, Close, or Discard draft action.",
-        "The currently open criterion has a solid blue button with an underlined label and is announced as pressed. A dot plus an accessible Configured state marks criteria with values independently of which editor is open.",
+        "Criteria appear in a left-side list on desktop in Create Wave, Configuration access editors, and Network Filter. On smaller screens they stay in one horizontal row above the fields; scroll sideways when the options do not fit. Keyboard focus brings each option into view. The open criterion has a calm filled background and is announced as pressed. A check plus an accessible Configured state marks criteria with values independently of which editor is open. Scrolling over an inline access editor scrolls the surrounding Create Wave form.",
         "Make wave public changes access to Everyone and also changes chat, submission, or voting only when that row still matched access at click time; independently customized rows and Admins remain unchanged.",
         "A chat, submission, or voting row that differs from access offers Match wave access to copy the current access group and resume default synchronization.",
         "Group membership previews use current profile, reputation, and ownership data, so the matching identities can change over time.",
@@ -3257,7 +3350,7 @@
         "sidebar"
       ],
       "facts": [
-        "Desktop wave information sections live in the right sidebar in this order: About, REP, and Configuration. Open them with the Show right sidebar icon in the conversation header.",
+        "Desktop wave information sections live in the right sidebar in this order: About, REP, and Configuration. Open them with the Show right sidebar icon in the conversation header. These sections use the same compact pill styling on desktop and mobile.",
         "About shows the creator’s avatar and profile link, and the creation date on one line below the title, followed by the current pinned drop with its content and media. The pinned drop replaces the voting overview block and updates when an administrator uses Set as pinned drop.",
         "On desktop and tablet web, Add REP or Edit REP appears to the left of the conversation header icon buttons. It is also available in the right sidebar's About section, which is the REP entry point on compact web. The action appears for connected non-author, non-proxy profiles and is absent for DMs. A small shield and number beside the desktop wave name opens Wave Score details and Learn more.",
         "Wave Configuration contains wave access, chat availability, links, slow mode, curations, chat history deletion and personal display preferences. Selected competition access, rules, appearance and pauses belong to Settings in the main row.",
@@ -3720,9 +3813,10 @@
       ],
       "facts": [
         "Selecting an access-row gear in Wave Configuration opens the group editor directly without an intermediate context menu.",
-        "The Configuration modal opens on Identities in the same criteria editor as wave creation, including the privacy row, configured criteria chips, Before editing and After editing summaries, Cancel, and Save changes. Wave access editors do not offer Choose group. It preloads the row's rules, included and excluded identities, NFT and grant requirements, and criteria/member privacy setting.",
+        "The Configuration modal opens on Identities in the same criteria editor as wave creation, including the privacy row, configured criteria rows, Before editing and After editing summaries, Cancel, and Save changes. Wave access editors do not offer Choose group. It preloads the row's rules, included and excluded identities, NFT and grant requirements, and criteria/member privacy setting.",
         "A public access row starts a new criteria draft with the editor's primary wallet explicitly included by default; Include me can be turned off from Identities.",
         "An already restricted row keeps its saved included and excluded identities and does not add the editor automatically.",
+        "Included and Excluded use segmented tabs across Create Wave, Edit access, and Network Filter. Saved wallets resolve to profile pictures and handles, with ENS or a shortened wallet address for wallets without profiles. Each saved wallet remains independently removable and is labelled to distinguish multiple wallets belonging to one profile. Long lists show 20 wallets per page. Loading or failed lookups do not block editing or saving; Retry profile lookup retries a failed lookup.",
         "Saving edited criteria creates a separate group and normally updates only the selected access row; it does not mutate the original group or other access rows that use it.",
         "When Visibility, Drop, Vote, and Chat access are all public, assigning a Visibility group assigns that same group to all four non-admin access rows in one save and leaves Admins unchanged.",
         "The Visibility cascade does not run when any non-admin access row is already restricted; in that case only Visibility changes and normal containment validation applies.",
@@ -6268,7 +6362,7 @@
       ],
       "facts": [
         "Wave content tabs organize the visible wave content area. App tabs and their content share the same availability rules. An unavailable legacy competition section opens Leaderboard, or Submissions after voting ends, and selects that visible tab.",
-        "If opening a section takes time, the tapped wave tab shows a small loading indicator until that view opens. Fast switches have no minimum waiting time or required loading screen. Switching only the section within the same page does not reload the page; the section can still show its own loading state when its data is not available. Competition controls become active after their destination opens, so sort sheets and forms stay in the selected view.",
+        "While a section opens, the tab row stays visually steady and screen readers announce loading when needed. Fast switches have no minimum waiting time or required loading screen. Switching only the section within the same page does not reload the page; the section can still show its own loading state when its data is not available. Competition controls become active after their destination opens, so sort sheets and forms stay in the selected view.",
         "Memes wave tabs start with Chat, followed by Leaderboard or Submissions after voting ends, Winners when available, and Votes, with My Votes, All votes and Activity subtabs. Other available sections follow these tabs.",
         "Some waves can switch between chat and gallery-style views.",
         "Available tabs depend on wave type, state, and content.",
@@ -6598,16 +6692,24 @@
     {
       "id": "waves.composer.body-length-limits",
       "kind": "business_rule",
-      "title": "Wave drop body length limits and storm rules",
+      "title": "Wave drop text and payload limits",
       "aliases": [
         "drop length limit",
         "body limit",
         "storm rules",
-        "too long drop"
+        "too long drop",
+        "drop payload limits",
+        "too many parts",
+        "too many mentions"
       ],
       "keywords": ["waves", "composer", "length", "limit", "storm", "drop"],
       "facts": [
         "A Wave drop part is limited to 25,000 UTF-16 code units and 65,535 UTF-8 bytes. A complete Storm is limited to 50,000 UTF-16 code units across all parts.",
+        "The server accepts at most 250 parts per drop, 20 media items and 20 attachments per part, and 100 media items and 100 attachments across all parts. The composer file tray still allows eight files across all Storm parts.",
+        "A drop may contain at most 100 metadata entries, 500 user mentions, 100 wave mentions, and 500 NFT references.",
+        "Media URLs allow up to 2,000 characters; MIME types, media upload IDs, and attachment IDs allow 100; NFT tokens allow 250; NFT names allow 500; and mentioned wave names allow 250.",
+        "Payload limits apply to new drops and edits, including wave description drops and competition submissions. Requests above a limit are rejected before saving. Existing drops remain readable, but edits must fit the current limits.",
+        "If a payload-limit error prevents posting, reduce the field named in the error and retry, or split a large Storm into separate posts.",
         "The composer should give feedback when content exceeds supported rules.",
         "Limits can affect submission even before backend posting succeeds."
       ],
@@ -6662,12 +6764,47 @@
         "Wave header controls are documented in the Wave Header area.",
         "Available controls depend on permissions and the current wave state.",
         "Unavailable submission actions use a lock icon at every width. Hover, focus, or select the lock for the full restriction reason; the Memes How to Submit helper keeps its desktop label and opens nomination guidance.",
-        "Wave picture edit and link sharing are separate header features."
+        "Wave picture edit and link sharing are separate header features.",
+        "A wave you have not joined shows a Join button first in the conversation header's top-right controls."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
       "tags": ["waves", "header"],
       "source_refs": ["ops/docs/waves/header/feature-wave-header-controls.md"]
+    },
+    {
+      "id": "waves.join",
+      "kind": "workflow",
+      "title": "Join or leave a wave",
+      "aliases": [
+        "join wave",
+        "join a wave",
+        "how do I join a wave",
+        "follow wave",
+        "leave wave",
+        "unjoin wave",
+        "joined waves"
+      ],
+      "keywords": ["waves", "join", "joined", "leave", "follow", "header"],
+      "facts": [
+        "Open a wave you have not joined and select Join, the first control in the top-right of the conversation header on desktop, compact web, and the native app.",
+        "After joining, the header shows a short Joined confirmation and then returns to its usual controls; the wave appears in the sidebar's Joined collection.",
+        "The right sidebar About panel also has Join; on a joined wave it shows Joined, and selecting Joined there leaves the wave.",
+        "Joining asks you to confirm your session first. If the request fails or the session check is cancelled, you stay unjoined and can retry.",
+        "Signed-out visitors who select Join are taken to the wallet connect flow; after signing in, select Join again.",
+        "The header Join is not shown for direct messages, proxy sessions, or connected wallets whose profile has not loaded.",
+        "A subwave is joined separately from its parent wave.",
+        "Joined waves offer the bell notification menu; muting is separate from joining."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves"],
+      "tags": ["waves", "join", "header"],
+      "source_refs": [
+        "components/waves/header/WaveJoinCta.tsx",
+        "components/waves/header/WaveHeaderFollow.tsx",
+        "hooks/waves/useWaveJoin.ts",
+        "ops/docs/waves/header/feature-wave-header-controls.md"
+      ]
     },
     {
       "id": "waves.notification-controls",
@@ -7163,7 +7300,7 @@
         "controls"
       ],
       "facts": [
-        "Filter opens Filter Network with all eight criteria visible in one list: Identities, Level, TDH, NIC, Rep, Required NFTs, Collection Access, and xTDH Grant. Wide screens start with the Identities editor beside the list; narrow screens open an editor after one selection. All filters and the current criterion stay above the scrolling fields; All filters returns to the list, and Close dismisses the sheet. Switching criteria preserves the draft. The mobile sheet keeps a compact, consistent height between criteria, and Create and use new group fills the content width on narrow screens. Editors and EMMA allow-list results scroll above the keyboard. While typing, Before editing and After editing visually collapse to leave room for the fields; keyboard focus reveals member-preview controls, and status text stays available to screen readers.",
+        "Filter opens Filter Network on Identities with all eight criteria available: Identities, Level, TDH, NIC, Rep, Required NFTs, Collection Access, and xTDH Grant. Criteria form a left-side list on desktop. On smaller screens they stay in one horizontal row above the scrolling fields and scroll sideways when they do not fit. Close dismisses the sheet. Switching criteria preserves the draft. The mobile sheet keeps a compact, consistent height between criteria, and Create and use new group fills the content width on narrow screens. Editors and EMMA allow-list results scroll above the keyboard. While typing, Before editing and After editing visually collapse to leave room for the fields; keyboard focus reveals member-preview controls, and status text stays available to screen readers.",
         "After editing shows selected criteria as separate tags and View members for valid criteria. Long tag lists scroll while the preview and create action remain visible. Incomplete criteria show Not ready yet. and its guidance directly. Before editing shows the current scope and, with a selected group, its criteria, count, and View members without an extra disclosure step. Create and use new group saves the criteria as a new group and immediately applies it to the Network member list. Clear selected group above the results clears the scope.",
         "When a group is already active, reopening the filter prefills its criteria and identity lists. Saving edits creates a new group without mutating the original.",
         "Signed-in users with active Network criteria can use REP everyone matching criteria or NIC everyone matching criteria below the selected Network filter name to grant credits to every matching member.",

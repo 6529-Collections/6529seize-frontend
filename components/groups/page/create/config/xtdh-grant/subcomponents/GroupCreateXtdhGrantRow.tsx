@@ -49,7 +49,7 @@ const getStateClasses = (
   quiet: boolean
 ): string => {
   if (quiet && !isSelected) {
-    return `tw-border-transparent tw-bg-iron-900/50 ${interactive ? "tw-cursor-pointer desktop-hover:hover:tw-bg-iron-900" : ""}`;
+    return `tw-border-transparent tw-bg-iron-800/60 ${interactive ? "tw-cursor-pointer desktop-hover:hover:tw-bg-iron-800" : ""}`;
   }
   if (interactive && isSelected) {
     return "tw-cursor-pointer tw-border-primary-400 tw-bg-primary-500/10";
