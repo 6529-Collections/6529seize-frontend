@@ -191,8 +191,9 @@ async function openHeaderSearch(page: Page) {
   await expect(searchButton).toBeEnabled({ timeout: NAVIGATION_TIMEOUT_MS });
   await searchButton.click();
   const searchInput = page.locator("#header-search-input");
-  await expect(searchInput).toBeVisible();
-  await expect(searchInput).toBeFocused();
+  // The search modal loads on demand, so the first open waits for its chunk.
+  await expect(searchInput).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+  await expect(searchInput).toBeFocused({ timeout: NAVIGATION_TIMEOUT_MS });
   return { searchButton, searchInput };
 }
 
@@ -310,8 +311,9 @@ async function openLocalWaveSearchModal(page: Page) {
     })
     .click();
   const searchInput = page.locator("#wave-drops-search-input");
-  await expect(searchInput).toBeVisible();
-  await expect(searchInput).toBeFocused();
+  // The search modal loads on demand, so the first open waits for its chunk.
+  await expect(searchInput).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+  await expect(searchInput).toBeFocused({ timeout: NAVIGATION_TIMEOUT_MS });
 
   return {
     expectedQueryWaveId: LOCAL_ACTIVE_WAVE_ID,
@@ -369,8 +371,12 @@ async function openSearchOnFirstWaveWithSearch(page: Page) {
     if (hasWaveSearch) {
       await searchMessagesButton.click();
       const searchInput = page.locator("#wave-drops-search-input");
-      await expect(searchInput).toBeVisible();
-      await expect(searchInput).toBeFocused();
+      await expect(searchInput).toBeVisible({
+        timeout: NAVIGATION_TIMEOUT_MS,
+      });
+      await expect(searchInput).toBeFocused({
+        timeout: NAVIGATION_TIMEOUT_MS,
+      });
       return { searchInput, wavePath };
     }
   }

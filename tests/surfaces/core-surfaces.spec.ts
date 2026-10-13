@@ -39,7 +39,8 @@ async function forceExpandedDesktopSidebar(page: Page) {
 async function openWaveScoreFromSearch(page: Page, searchButton: Locator) {
   await searchButton.click();
   const searchInput = page.locator("#header-search-input");
-  await expect(searchInput).toBeVisible();
+  // The search modal loads on demand, so the first open waits for its chunk.
+  await expect(searchInput).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
   await searchInput.fill("wave score");
   const result = page.getByRole("option", { name: WAVE_SCORE_RESULT }).first();
   await expect(result).toBeVisible();
