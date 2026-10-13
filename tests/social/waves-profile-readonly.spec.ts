@@ -931,7 +931,10 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expectProfileTabLinks(page);
     const statements = page.getByRole("button", { name: /ID Statements/i });
     if (await statements.isVisible()) {
+      // The count replaces the server placeholder after this section hydrates.
+      await expect(statements).toHaveAccessibleName(/^\d[\d,]* ID Statements$/);
       await statements.click();
+      await expect(statements).toHaveAttribute("aria-pressed", "true");
     }
     await expect(
       page.getByRole("link", { name: "Wallet Checker" })
