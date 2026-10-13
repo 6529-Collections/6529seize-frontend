@@ -1501,12 +1501,16 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
 
     if (!app) {
       // The first row sits directly under the sticky All/Pinned/Joined filter.
-      const firstRow = page.locator("[data-sidebar-wave-id]").first();
-      await firstRow.hover();
-      const pin = firstRow.getByRole("button", { name: /^(Pin|Unpin) wave$/ });
+      const waveList = page.getByRole("region", {
+        name: /^(All recent waves list|Following waves list|Pinned)$/,
+      });
+      await waveList.getByRole("link").first().hover();
+      const pin = waveList
+        .getByRole("button", { name: /^(Pin|Unpin) wave$/ })
+        .first();
       await pin.hover();
       const tooltip = page
-        .locator(".react-tooltip")
+        .getByRole("tooltip")
         .filter({ hasText: /^(Pin|Unpin)$/ });
       await expect(tooltip).toBeVisible();
       await expect
