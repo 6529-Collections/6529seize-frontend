@@ -219,9 +219,12 @@ Remote read-only defaults:
   retain credentials or private page state.
 
 Readiness checks must follow the behavior under test. A visible `main` can
-precede hydration and API-backed content. Await the relevant successful API
-response before asserting data rows, and use the existing hydration-ready
-marker when checking the transition from server HTML to interactive chrome.
+precede hydration, wallet restoration, and API-backed content. Give the
+specific rendered data or resolved wallet state the bounded data-readiness
+budget. Wait for an API response only when that response is itself part of
+the contract; rendered rows may also come from cached data. Use the existing
+hydration-ready marker when checking the transition from server HTML to
+interactive chrome.
 Use `expectUrlState` from `support/urlState.ts` for route/query predicates;
 Playwright's predicate-based `toHaveURL` also waits for the page load event,
 which pending media can delay even after the correct URL is committed. Keep

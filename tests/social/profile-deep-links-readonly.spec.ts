@@ -10,10 +10,7 @@ import {
   PROFILE_HANDLE,
 } from "./profileReadonlyHelpers";
 
-import {
-  gotoReadyWithApiResponse,
-  RESPONSE_TIMEOUT_MS,
-} from "../support/routeReadiness";
+import { RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
 import { expectUrlState } from "../support/urlState";
 
 test.describe("Profile deep-link read-only coverage @surface @medium @large @readonly", () => {
@@ -392,7 +389,7 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       page
         .getByRole("status")
         .filter({ hasText: "No artwork matches these filters." })
-    ).toBeVisible();
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     for (const width of [375, 440, 1280]) {
       await page.setViewportSize({ width, height: 900 });
       await clear.scrollIntoViewIfNeeded();
@@ -494,7 +491,7 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     );
     await expect(
       page.getByRole("list", { name: "Collected cards", exact: true })
-    ).toBeVisible();
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await page
       .getByRole("button", { name: "Hide Details", exact: true })
       .click();
@@ -535,26 +532,10 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     page,
     isMobile,
   }) => {
-    const response = await gotoReadyWithApiResponse(
+    await gotoReady(
       page,
-      `/${PROFILE_HANDLE}/collected?collection=memes&page=2&activity=distributions&distribution-page=2`,
-      (url) =>
-        url.pathname === "/api/distributions" &&
-        url.searchParams.get("page") === "2"
+      `/${PROFILE_HANDLE}/collected?collection=memes&page=2&activity=distributions&distribution-page=2`
     );
-    expect(
-      response.headers()["content-type"],
-      "Expected /api/distributions to return JSON"
-    ).toContain("application/json");
-    const distributions: { readonly data?: unknown } | null =
-      await response.json();
-    if (!Array.isArray(distributions?.data)) {
-      throw new Error("Expected /api/distributions to return a data array");
-    }
-    expect(
-      distributions.data.length,
-      "Expected the distribution fixture's fifth row"
-    ).toBeGreaterThanOrEqual(5);
     const panel = page.getByRole("tabpanel", {
       name: "Distributions",
       exact: true,
@@ -565,6 +546,9 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     await expect(artwork).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     const href = await artwork.getAttribute("href");
     expect(href).toContain("returnTo=");
+    const returnTo = new URL(href!, page.url()).searchParams.get("returnTo");
+    expect(returnTo).not.toBeNull();
+    const returnUrl = new URL(returnTo!, page.url());
     await artwork.click();
     await expectUrlState(page, (url) => url.pathname.startsWith("/the-memes/"));
     if (isMobile) {
@@ -578,13 +562,16 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     await expectUrlState(
       page,
       (url) =>
+        url.pathname === returnUrl.pathname &&
         url.searchParams.get("page") === "2" &&
-        url.searchParams.get("distribution-page") === "2"
+        url.searchParams.get("distribution-page") === "2" &&
+        url.hash === returnUrl.hash
     );
     await expect(
       page.getByRole("button", { name: "Hide Details", exact: true })
     ).toHaveAttribute("aria-expanded", "true");
     await expect(artwork).toHaveAttribute("href", href!);
+    await expect(artwork).toBeFocused();
     await expect(artwork).toBeInViewport();
   });
 
