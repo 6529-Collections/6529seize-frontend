@@ -146,7 +146,7 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
         ))}
       </ul>
     ) : (
-      <output className="tw-block tw-py-6 tw-text-iron-400">
+      <output className="tw-block tw-py-6 tw-text-sm tw-text-iron-400">
         {t(locale, "competitions.empty")}
       </output>
     );
