@@ -89,10 +89,10 @@ export default function UserPageXtdhGrantValidity({
   return (
     <div className="tw-flex tw-flex-col tw-gap-4">
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
-        <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+        <h3 className="tw-m-0 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-400">
           Validity
         </h3>
-        <label className="tw-inline-flex tw-items-center tw-gap-2 tw-text-xs tw-font-medium tw-text-iron-200">
+        <label className="tw-inline-flex tw-min-h-8 tw-items-center tw-gap-2 tw-text-[13px] tw-font-medium tw-text-iron-300">
           <input
             type="checkbox"
             className="tw-h-4 tw-w-4 tw-rounded tw-border-iron-600 tw-bg-iron-900 focus:tw-ring-primary-400"
