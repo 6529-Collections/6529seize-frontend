@@ -1,9 +1,9 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import BrainMobileAbout from "@/components/brain/mobile/BrainMobileAbout";
 import { useQuery } from "@tanstack/react-query";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
+import { commonApiFetch } from "@/services/api/common-api";
 import {
   Mode,
   SidebarTab,
@@ -33,6 +33,10 @@ jest.mock("@/components/brain/right-sidebar/WaveContent", () => ({
 
 jest.mock("@tanstack/react-query");
 jest.mock("@/components/brain/my-stream/layout/LayoutContext");
+jest.mock("@/services/api/common-api", () => ({
+  ...jest.requireActual("@/services/api/common-api"),
+  commonApiFetch: jest.fn(),
+}));
 
 const mockUseQuery = useQuery as jest.Mock;
 const mockUseLayout = useLayout as jest.Mock;
@@ -60,6 +64,26 @@ test("renders the shared right-panel content without a nested tab row", () => {
     "false"
   );
   expect(container.firstElementChild).toHaveClass("tw-bg-iron-950");
+});
+
+test("keeps HTTP status on the shared mobile About wave query", async () => {
+  mockUseQuery.mockReturnValue({ data: wave });
+  jest.mocked(commonApiFetch).mockResolvedValue(wave);
+  render(
+    <BrainMobileAbout
+      activeWaveId="1"
+      activeTab={SidebarTab.ABOUT}
+      setActiveTab={setActiveTab}
+    />
+  );
+  const { queryFn } = mockUseQuery.mock.calls[0][0] as {
+    queryFn: () => Promise<unknown>;
+  };
+  await expect(queryFn()).resolves.toBe(wave);
+  expect(commonApiFetch).toHaveBeenCalledWith({
+    endpoint: "waves/1",
+    errorMode: "structured",
+  });
 });
 
 test("toggles to followers view and back", async () => {

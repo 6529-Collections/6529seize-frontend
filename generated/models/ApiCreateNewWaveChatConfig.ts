@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { ApiCreateNewWaveChatRepliesConfig } from '../models/ApiCreateNewWaveChatRepliesConfig';
 import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
 import { HttpFile } from '../http/http';
 
@@ -19,6 +20,7 @@ export class ApiCreateNewWaveChatConfig {
     'enabled': boolean;
     'slow_mode_cooldown_ms'?: number;
     'links_disabled'?: boolean;
+    'replies'?: ApiCreateNewWaveChatRepliesConfig;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -47,6 +49,12 @@ export class ApiCreateNewWaveChatConfig {
             "name": "links_disabled",
             "baseName": "links_disabled",
             "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "replies",
+            "baseName": "replies",
+            "type": "ApiCreateNewWaveChatRepliesConfig",
             "format": ""
         }    ];
 

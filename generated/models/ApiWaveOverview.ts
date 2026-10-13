@@ -30,6 +30,10 @@ export class ApiWaveOverview {
     'has_competition': boolean;
     'is_dm_wave': boolean;
     'links_disabled': boolean;
+    /**
+    * When true, replies are left out of the wave\'s main drop feed and are shown as a thread under the drop they reply to.
+    */
+    'replies_collapsed'?: boolean;
     'description_drop': ApiWaveOverviewDescriptionDrop;
     'total_drops_count': number;
     'is_private': boolean;
@@ -102,6 +106,12 @@ export class ApiWaveOverview {
         {
             "name": "links_disabled",
             "baseName": "links_disabled",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "replies_collapsed",
+            "baseName": "replies_collapsed",
             "type": "boolean",
             "format": ""
         },

@@ -1,8 +1,8 @@
 "use client";
 
-import { type ComponentProps, useSyncExternalStore } from "react";
-import { createPortal } from "react-dom";
-import { Tooltip } from "react-tooltip";
+import type { ComponentProps } from "react";
+import type { Tooltip } from "react-tooltip";
+import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
 
 interface MyStreamActionTooltipProps {
   readonly id: string;
@@ -27,25 +27,13 @@ export default function MyStreamActionTooltip({
   id,
   place = "top",
 }: MyStreamActionTooltipProps) {
-  const hydrated = useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false
-  );
-
-  if (!hydrated) {
-    return null;
-  }
-
-  return createPortal(
-    <Tooltip
+  return (
+    <BodyPortalTooltip
       id={id}
       place={place}
       offset={8}
       opacity={1}
-      positionStrategy="fixed"
       style={tooltipStyle}
-    />,
-    document.body
+    />
   );
 }

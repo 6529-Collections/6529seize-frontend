@@ -1,5 +1,6 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import WaveChatReplies from "@/components/waves/specs/WaveChatReplies";
 import WaveChatStatus from "@/components/waves/specs/WaveChatStatus";
 import WaveDisableLinks from "@/components/waves/specs/WaveDisableLinks";
 import WaveSlowMode from "@/components/waves/specs/WaveSlowMode";
@@ -46,6 +47,7 @@ export default function WaveConfigurationSections({
               <>
                 <WaveDisableLinks wave={wave} display="configuration" />
                 <WaveSlowMode wave={wave} display="configuration" />
+                <WaveChatReplies wave={wave} />
               </>
             )}
           </div>

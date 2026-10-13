@@ -17,11 +17,19 @@ export class ApiWaveOverviewContextProfileContext {
     'subscribed': boolean;
     'pinned': boolean;
     'can_chat': boolean;
+    /**
+    * Whether the profile may reply to drops in this wave. Waves with open replies allow this outside the chat group.
+    */
+    'can_reply'?: boolean;
+    /**
+    * Whether the profile may delete other people\'s replies in this wave. With open replies, the wave creator, admins and chat group members can.
+    */
+    'can_delete_replies'?: boolean;
     'next_drop_allowed'?: number;
     'unread_drops': number;
     'first_unread_drop_serial_no'?: number;
     /**
-    * Unread drops across all visible subwaves, independent of whether the authenticated profile follows each subwave.
+    * Unread drops across visible subwaves that the authenticated profile follows and has not muted.
     */
     'subwave_unread_drops'?: number;
     'followed_subwaves_count'?: number;
@@ -50,6 +58,18 @@ export class ApiWaveOverviewContextProfileContext {
         {
             "name": "can_chat",
             "baseName": "can_chat",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "can_reply",
+            "baseName": "can_reply",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "can_delete_replies",
+            "baseName": "can_delete_replies",
             "type": "boolean",
             "format": ""
         },

@@ -41,7 +41,6 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { createBreakpoint } from "react-use";
 import {
-  getHomeRoute,
   getWaveHomeRoute,
   getWavePathRoute,
 } from "@/helpers/navigation.helpers";
@@ -75,6 +74,8 @@ import {
   getChatSubmitDropRestrictionMessage,
   getMemesHeaderDropActionState,
 } from "./waveDropAction.helpers";
+import { getWaveReplyEligibility } from "@/helpers/waves/wave-chat-replies.helpers";
+import { getMissingWaveNavigationRoute } from "@/helpers/waves/missing-wave-navigation.helpers";
 
 export interface MyStreamWaveProps {
   readonly waveId: string;
@@ -114,18 +115,22 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   const { updateEligibility } = useWaveEligibility();
   const { data: wave } = useWaveData({
     waveId,
-    onWaveNotFound: () => {
-      const params = new URLSearchParams(searchParams.toString() || "");
-      params.delete("wave");
-      const basePath = getWaveHomeRoute({
-        isDirectMessage: pathname.startsWith("/messages"),
-        isApp,
-      });
-      const newUrl = params.toString()
-        ? `${basePath}?${params.toString()}`
-        : basePath || getHomeRoute();
-      router.push(newUrl, { scroll: false });
-    },
+    onWaveNotFound: isCompetitionPathname(pathname)
+      ? undefined
+      : () => {
+          const route = getMissingWaveNavigationRoute(waveId);
+          if (!route) return;
+          const params = route.searchParams;
+          params.delete("wave");
+          const basePath = getWaveHomeRoute({
+            isDirectMessage: route.pathname.startsWith("/messages"),
+            isApp,
+          });
+          const newUrl = params.toString()
+            ? `${basePath}?${params.toString()}`
+            : basePath;
+          router.push(newUrl, { scroll: false });
+        },
   });
   const metadataWaveId = wave?.id;
   useWaveContentTabRegistration(wave, competitionOnly);
@@ -156,6 +161,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     updateEligibility(wave.id, {
       authenticated_user_eligible_to_chat:
         wave.chat.authenticated_user_eligible,
+      authenticated_user_eligible_to_reply: getWaveReplyEligibility(wave.chat),
       authenticated_user_eligible_to_vote:
         wave.voting.authenticated_user_eligible,
       authenticated_user_eligible_to_participate:
@@ -529,7 +535,9 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
 
   // Early return if no wave data - all hooks must be called before this
   if (!wave) {
-    return null;
+    return isCompetitionPathname(pathname)
+      ? (competitionContent ?? null)
+      : null;
   }
 
   const activeChatSubmitDropState: ChatSubmitDropState | null =

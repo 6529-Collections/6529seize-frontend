@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiFetch } from "@/services/api/common-api";
 import { getWaveQueryKey } from "@/services/api/wave-query";
+import { isCompetitionAccessError } from "@/helpers/competition.helpers";
 
 interface UseWaveByIdOptions {
   readonly enabled?: boolean | undefined;
@@ -27,11 +28,14 @@ export function useWaveById(
 
       return await commonApiFetch<ApiWave>({
         endpoint: `waves/${waveId}`,
+        errorMode: "structured",
       });
     },
     enabled: Boolean(enabled && waveId),
     staleTime: 60000,
     placeholderData: (prev) => prev,
+    retry: (failureCount, queryError) =>
+      !isCompetitionAccessError(queryError) && failureCount < 3,
   });
 
   return {

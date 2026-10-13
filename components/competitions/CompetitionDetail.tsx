@@ -25,6 +25,7 @@ import {
   getCompetitionTab,
   getCompetitionsRoute,
   isMultiCompetitionEnabled,
+  isCompetitionAccessError,
 } from "@/helpers/competition.helpers";
 import { ContentTabProvider } from "@/components/brain/ContentTabContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -199,11 +200,20 @@ export default function CompetitionDetail({
   const { waveViewStyle } = useLayout();
   const search = useSearchParams();
   const tab = getCompetitionTab(search.get("tab"));
-  const wave = useWaveData({ waveId, onWaveNotFound: () => undefined });
+  const wave = useWaveData({
+    waveId,
+    onWaveNotFound: () => undefined,
+  });
   const hub = useCompetitionHub(waveId);
   const competition = useCompetitionDetail({ waveId, competitionId });
   const isDraft = competition.data?.lifecycle === ApiCompetitionLifecycle.Draft;
-  const error = hub.isError || competition.isError || wave.isError;
+  const hasCachedContent = Boolean(hub.data && competition.data && wave.data);
+  const accessRejected = [hub.error, competition.error, wave.error].some(
+    isCompetitionAccessError
+  );
+  const error =
+    accessRejected ||
+    (!hasCachedContent && (hub.isError || competition.isError || wave.isError));
   let content = <CompetitionState />;
   if (error)
     content = (
@@ -249,7 +259,8 @@ export default function CompetitionDetail({
           <nav>
             <CompetitionBackLink waveId={waveId} />
           </nav>
-          {competition.data &&
+          {!error &&
+            competition.data &&
             !isDraft &&
             hub.data &&
             hub.data.legacy_primary_competition_id !== competitionId && (

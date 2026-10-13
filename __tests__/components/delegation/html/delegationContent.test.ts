@@ -6,6 +6,7 @@ import {
   delegationContentManifest,
   fetchDelegationArticleHtml,
   getDelegationArticle,
+  isDelegationFaqChildArticle,
   loadDelegationArticleHtml,
   MAX_DELEGATION_ARTICLE_BYTES,
   resolveDelegationArticleAssetUrls,
@@ -69,16 +70,20 @@ function splitInsideFirstMultibyteCharacter(bytes: Uint8Array) {
 }
 
 describe("delegationContent", () => {
+  // A new package version is served from the same-origin bundle (rootCid null)
+  // until it is published to IPFS and its root CID is recorded in the manifest.
   const publishedRootCid = delegationContentManifest.canonicalStorage.rootCid;
-  if (!publishedRootCid) {
-    throw new Error("Expected delegation content manifest to define rootCid");
-  }
   const publishedCloudFrontBaseUrl =
     delegationContentManifest.acceleration.cloudFrontBaseUrl;
-  if (!publishedCloudFrontBaseUrl) {
-    throw new Error("Expected delegation content manifest to define CDN URL");
-  }
-  const publishedGatewayBaseUrl = `https://ipfs.6529.io/ipfs/${publishedRootCid}`;
+  const localBundleBaseUrl = delegationContentManifest.localBasePath;
+  const remoteBundleBaseUrls = publishedRootCid
+    ? [
+        ...(publishedCloudFrontBaseUrl ? [publishedCloudFrontBaseUrl] : []),
+        `https://ipfs.6529.io/ipfs/${publishedRootCid}`,
+        `https://ipfs.io/ipfs/${publishedRootCid}`,
+      ]
+    : [];
+  const firstBundleBaseUrl = remoteBundleBaseUrls[0] ?? localBundleBaseUrl;
 
   it("keeps the reviewed source manifest and public mirror in sync", async () => {
     const publicManifestPath = path.join(
@@ -96,6 +101,9 @@ describe("delegationContent", () => {
     ]);
 
     expect(JSON.parse(publicManifest)).toEqual(JSON.parse(sourceManifest));
+    expect(localBundleBaseUrl).toBe(
+      `/delegation-content/${delegationContentManifest.version}`
+    );
   });
 
   it("publishes article images with alt text", async () => {
@@ -120,24 +128,85 @@ describe("delegationContent", () => {
     expect(missingAlt).toEqual([]);
   });
 
-  it("uses CloudFront, CID-addressed IPFS gateways, then the local bundle", () => {
+  it("tries published CID sources before the local versioned bundle", () => {
     const article = getDelegationArticle("delegation-faq");
 
     expect(article).toBeDefined();
     expect(buildDelegationArticleUrls(article!)).toEqual([
-      `${publishedCloudFrontBaseUrl}/html/delegation-faq.html`,
-      `${publishedGatewayBaseUrl}/html/delegation-faq.html`,
-      `https://ipfs.io/ipfs/${publishedRootCid}/html/delegation-faq.html`,
-      "/delegation-content/delegation-docs-2026-06-16/html/delegation-faq.html",
+      ...remoteBundleBaseUrls.map(
+        (baseUrl) => `${baseUrl}/html/delegation-faq.html`
+      ),
+      `${localBundleBaseUrl}/html/delegation-faq.html`,
     ]);
   });
 
-  it("records each article source URI under the canonical CID", () => {
+  it("orders CloudFront, the primary gateway, fallbacks, then the local bundle once a CID is recorded", () => {
+    const article = getDelegationArticle("delegation-faq");
+    const syntheticCid = "bafybeigdyrsyntheticrootcidfortests";
+    const manifest = {
+      ...delegationContentManifest,
+      canonicalStorage: {
+        ...delegationContentManifest.canonicalStorage,
+        rootCid: syntheticCid,
+      },
+      acceleration: {
+        ...delegationContentManifest.acceleration,
+        cloudFrontBaseUrl: "https://cdn.example.test/delegation",
+      },
+    };
+
+    expect(article).toBeDefined();
+    expect(buildDelegationArticleUrls(article!, manifest)).toEqual([
+      "https://cdn.example.test/delegation/html/delegation-faq.html",
+      `${manifest.acceleration.primaryGatewayBaseUrl}/${syntheticCid}/html/delegation-faq.html`,
+      ...manifest.acceleration.fallbackGatewayBaseUrls.map(
+        (gateway) => `${gateway}/${syntheticCid}/html/delegation-faq.html`
+      ),
+      `${localBundleBaseUrl}/html/delegation-faq.html`,
+    ]);
+  });
+
+  it("keeps the build, publish, and workflow defaults on the manifest version", async () => {
+    const version = delegationContentManifest.version;
+    const sources = await Promise.all(
+      [
+        "ops/scripts/build-delegation-docs-content.mjs",
+        "ops/scripts/publish-delegation-docs-content.mjs",
+        ".github/workflows/publish-delegation-docs-content.yml",
+      ].map((file) => readFile(path.join(process.cwd(), file), "utf8"))
+    );
+
+    for (const source of sources) {
+      expect(source).toContain(`"${version}"`);
+    }
+  });
+
+  it("records article source URIs under the canonical CID once published", () => {
     for (const article of Object.values(delegationContentManifest.articles)) {
       expect(article.sourceUri).toBe(
-        `ipfs://${publishedRootCid}/${article.path}`
+        publishedRootCid ? `ipfs://${publishedRootCid}/${article.path}` : null
       );
     }
+  });
+
+  it("links every FAQ child article from the Delegation FAQ index", async () => {
+    const faqArticle = getDelegationArticle("delegation-faq");
+    const html = await readFile(getReviewedArticlePath(faqArticle!), "utf8");
+    const template = document.createElement("template");
+    template.innerHTML = html;
+    const linkedSlugs = new Set(
+      Array.from(
+        template.content.querySelectorAll(
+          'a[href^="/delegation/delegation-faq/"]'
+        )
+      ).map((link) => link.getAttribute("href")?.split("/").pop())
+    );
+    const childSlugs = Object.keys(delegationContentManifest.articles).filter(
+      (slug) => isDelegationFaqChildArticle(slug)
+    );
+
+    expect(childSlugs).toContain("reference-consolidations-4address");
+    expect(childSlugs.filter((slug) => !linkedSlugs.has(slug))).toEqual([]);
   });
 
   it("prefers the CDN and IPFS gateways when a root CID is configured", () => {
@@ -162,7 +231,7 @@ describe("delegationContent", () => {
       "https://cdn.6529.io/delegation-content/bafydelegationdocs/html/delegation-faq.html",
       "https://ipfs.6529.io/ipfs/bafydelegationdocs/html/delegation-faq.html",
       "https://ipfs.io/ipfs/bafydelegationdocs/html/delegation-faq.html",
-      "/delegation-content/delegation-docs-2026-06-16/html/delegation-faq.html",
+      `${localBundleBaseUrl}/html/delegation-faq.html`,
     ]);
   });
 
@@ -183,9 +252,7 @@ describe("delegationContent", () => {
             "https://cdn.6529.io/delegation-content/bafydelegationdocs",
         },
       })
-    ).toEqual([
-      "/delegation-content/delegation-docs-2026-06-16/html/delegation-faq.html",
-    ]);
+    ).toEqual([`${localBundleBaseUrl}/html/delegation-faq.html`]);
   });
 
   it("loads article html only when the manifest hash matches", async () => {
@@ -202,7 +269,7 @@ describe("delegationContent", () => {
     ).resolves.toMatchObject({
       article,
       html,
-      url: `${publishedCloudFrontBaseUrl}/html/delegation-faq.html`,
+      url: `${firstBundleBaseUrl}/html/delegation-faq.html`,
     });
   });
 
@@ -218,9 +285,9 @@ describe("delegationContent", () => {
     await expect(
       fetchDelegationArticleHtml("using-safe", fetchArticle)
     ).resolves.toMatchObject({
-      url: `${publishedCloudFrontBaseUrl}/html/using-safe.html`,
+      url: `${firstBundleBaseUrl}/html/using-safe.html`,
       html: expect.stringContaining(
-        `src="${publishedCloudFrontBaseUrl}/assets/screenshots/safe1.png"`
+        `src="${firstBundleBaseUrl}/assets/screenshots/safe1.png"`
       ),
     });
   });
@@ -234,18 +301,14 @@ describe("delegationContent", () => {
         '<a href="#toc">TOC</a>',
         '<a href="/delegation/delegation-faq">FAQ</a>',
       ].join(""),
-      "/delegation-content/delegation-docs-2026-06-16/html/using-safe.html"
+      `${localBundleBaseUrl}/html/using-safe.html`
     );
 
     expect(html).toContain(
-      'src="/delegation-content/delegation-docs-2026-06-16/assets/screenshots/safe1.png"'
+      `src="${localBundleBaseUrl}/assets/screenshots/safe1.png"`
     );
-    expect(html).toContain(
-      'src="/delegation-content/delegation-docs-2026-06-16/html/assets/local.png"'
-    );
-    expect(html).toContain(
-      'href="/delegation-content/delegation-docs-2026-06-16/html/next.html"'
-    );
+    expect(html).toContain(`src="${localBundleBaseUrl}/html/assets/local.png"`);
+    expect(html).toContain(`href="${localBundleBaseUrl}/html/next.html"`);
     expect(html).toContain('href="#toc"');
     expect(html).toContain('href="/delegation/delegation-faq"');
   });
@@ -266,7 +329,7 @@ describe("delegationContent", () => {
       fetchDelegationArticleHtml("register-delegation", fetchArticle)
     ).resolves.toMatchObject({
       article,
-      url: `${publishedCloudFrontBaseUrl}/html/register-delegation.html`,
+      url: `${firstBundleBaseUrl}/html/register-delegation.html`,
     });
     expect(text).not.toHaveBeenCalled();
   });

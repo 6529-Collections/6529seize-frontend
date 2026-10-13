@@ -212,6 +212,7 @@ const CreateDropWrapper = forwardRef<
       queryFn: async () =>
         await commonApiFetch<ApiWave>({
           endpoint: `waves/${waveProps?.id}`,
+          errorMode: "structured",
         }),
       enabled: !!waveProps?.id,
     });
