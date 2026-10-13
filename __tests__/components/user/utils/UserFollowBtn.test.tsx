@@ -221,8 +221,8 @@ describe("UserFollowBtn", () => {
 
     expect(dmButton).toHaveClass(
       "tw-size-8",
-      "tw-bg-iron-800",
-      "tw-ring-iron-700"
+      "tw-bg-iron-900",
+      "tw-ring-white/5"
     );
     expect(dmButton).not.toHaveClass("tw-min-w-[4rem]");
     expect(dmButton.querySelector("svg")).toHaveClass("tw-size-3");
@@ -243,8 +243,8 @@ describe("UserFollowBtn", () => {
 
     expect(dmButton).toHaveClass(
       "tw-size-9",
-      "tw-bg-iron-800",
-      "tw-ring-iron-700"
+      "tw-bg-iron-900",
+      "tw-ring-white/5"
     );
     expect(dmButton).not.toHaveClass("md:tw-size-10");
     expect(dmButton).not.toHaveClass("tw-min-w-[4.75rem]");

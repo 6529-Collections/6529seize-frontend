@@ -21,14 +21,19 @@ export default function UserPageXtdhGrantAmount({
   let maxGrantMessage;
   if (isMaxGrantLoading) {
     maxGrantMessage = (
-      <span className="tw-inline-flex tw-items-center tw-gap-1 tw-animate-pulse">
-        <span className="tw-h-2 tw-w-2 tw-rounded-full tw-bg-iron-500" aria-hidden />
-        {" "}Fetching max available…
+      <span className="tw-inline-flex tw-animate-pulse tw-items-center tw-gap-1">
+        <span
+          className="tw-h-2 tw-w-2 tw-rounded-full tw-bg-iron-500"
+          aria-hidden
+        />{" "}
+        Fetching max available…
       </span>
     );
   } else if (isMaxGrantError || maxGrantRate === null) {
     maxGrantMessage = (
-      <span className="tw-text-iron-400">Unable to load your max available grant amount.</span>
+      <span className="tw-text-iron-400">
+        Unable to load your max available grant amount.
+      </span>
     );
   } else {
     maxGrantMessage = (
@@ -42,7 +47,8 @@ export default function UserPageXtdhGrantAmount({
     <div className="tw-flex tw-flex-col tw-gap-2">
       <label
         htmlFor="xtdh-grant-amount"
-        className="tw-text-sm tw-font-medium tw-text-iron-100">
+        className="tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-400"
+      >
         Total amount
       </label>
       <input
@@ -70,9 +76,12 @@ export default function UserPageXtdhGrantAmount({
 
           onAmountChange(parsedValue);
         }}
-        className="tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-font-medium tw-text-iron-100 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
+        className="tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-font-medium tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-white/[0.06] focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
       />
-      <p id="xtdh-grant-status" className="tw-text-xs tw-font-medium tw-text-iron-300">
+      <p
+        id="xtdh-grant-status"
+        className="tw-text-xs tw-font-medium tw-text-iron-300"
+      >
         {maxGrantMessage}
       </p>
     </div>

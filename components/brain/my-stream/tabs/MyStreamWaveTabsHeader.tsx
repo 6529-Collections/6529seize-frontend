@@ -503,7 +503,7 @@ export default function MyStreamWaveTabsHeader({
             aria-label={searchMessagesLabel}
             data-tooltip-id={headerActionsTooltipId}
             data-tooltip-content={searchMessagesLabel}
-            className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.05] tw-text-iron-200 tw-transition-colors tw-duration-150 hover:tw-border-white/10 hover:tw-bg-white/[0.08] hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-200 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-ring-white/10"
           >
             <MagnifyingGlassIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
           </button>
@@ -514,7 +514,7 @@ export default function MyStreamWaveTabsHeader({
             data-tooltip-content={
               isCompact ? rightSidebarCompactLabel : rightSidebarActionLabel
             }
-            className="tw-group tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.05] tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-white/[0.08]"
+            className="tw-group tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-ring-white/10"
             aria-label={
               isCompact ? rightSidebarCompactLabel : rightSidebarActionLabel
             }

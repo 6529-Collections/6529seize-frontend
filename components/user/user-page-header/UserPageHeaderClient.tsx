@@ -286,7 +286,7 @@ function ProfileHeaderContent({
 
   return (
     <div className="tw-relative tw-z-20 tw-bg-black">
-      <div className="tw-relative tw-z-10 tw-px-4 sm:tw-px-6 md:tw-px-8 lg:tw-grid lg:tw-grid-cols-[minmax(0,1fr)_auto] lg:tw-gap-x-6">
+      <div className="tw-relative tw-z-10 tw-px-4 tw-pt-3.5 sm:tw-px-6 md:tw-px-8 lg:tw-grid lg:tw-grid-cols-[minmax(0,1fr)_auto] lg:tw-gap-x-6">
         <div className="tw-relative tw-mb-6 tw-flex tw-flex-col tw-items-start tw-gap-4 sm:tw-mb-4 md:tw-flex-row md:tw-justify-between md:tw-gap-6 lg:tw-contents">
           <div
             className={`tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-gap-3 sm:tw-relative sm:tw-min-h-16 sm:tw-flex-row sm:tw-items-end sm:tw-gap-4 sm:tw-pt-16 md:tw-flex-1 md:tw-gap-5 lg:tw-col-start-1 lg:tw-row-start-1 lg:tw-pl-[132px] lg:tw-pt-0 ${identityPaddingClass}`}
