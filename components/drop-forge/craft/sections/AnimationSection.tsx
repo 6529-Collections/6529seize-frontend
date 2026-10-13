@@ -257,24 +257,13 @@ export default function AnimationSection({
   }, [onPendingChange]);
 
   const showAddFlow =
-    !claim.collaboration_credit?.collab &&
-    !hasAnimation &&
-    !hasPendingAnimationChange &&
-    !hasPendingAnimationUpload;
-  const showAnimationPreview =
-    hasAnimation || hasPendingAnimationChange || hasPendingAnimationUpload;
+    !hasAnimation && !hasPendingAnimationChange && !hasPendingAnimationUpload;
   const showAnimationControls =
-    !claim.collaboration_credit?.collab && showAnimationPreview;
+    hasAnimation || hasPendingAnimationChange || hasPendingAnimationUpload;
   const showAddChoice = showAddFlow && replaceMode === "choose";
-  const showAddLink =
-    !claim.collaboration_credit?.collab &&
-    showAddFlow &&
-    replaceMode === "link";
+  const showAddLink = showAddFlow && replaceMode === "link";
   const showReplaceLink =
-    !claim.collaboration_credit?.collab &&
-    showAnimationControls &&
-    !showAddFlow &&
-    replaceMode === "link";
+    showAnimationControls && !showAddFlow && replaceMode === "link";
   const animationActionLabel =
     pendingAnimation === null ? "Add animation" : "Replace";
   const linkEditor = (
@@ -376,7 +365,7 @@ export default function AnimationSection({
             </div>
           </div>
         )}
-        {showAnimationPreview && (
+        {showAnimationControls && (
           <>
             {animationDisplayUrl && animationPreviewMimeType && (
               <div className="tw-relative tw-flex tw-aspect-video tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800">
@@ -435,11 +424,7 @@ export default function AnimationSection({
           <div className="tw-grid tw-grid-cols-2 tw-gap-2">
             <button
               type="submit"
-              disabled={
-                !!claim.collaboration_credit?.collab ||
-                saving ||
-                !hasPendingChanges
-              }
+              disabled={saving || !hasPendingChanges}
               className={`${BTN_SAVE} tw-w-full`}
             >
               {saving ? (

@@ -2,7 +2,7 @@ export const MEME_COLLABORATION_MESSAGES = {
   "memes.collaborations.title": "Collaborators",
   "memes.collaborations.search": "Invite a collaborating artist",
   "memes.collaborations.hint":
-    "Voting starts immediately. Collaborators appear publicly after they accept. Only artists who accept before mint selection receive mint credit.",
+    "Voting starts immediately. Collaborators appear publicly after they accept. Artists who accept before mint selection are included in the initial claim credits.",
   "memes.collaborations.remove": "Remove invitation for {handle}",
   "memes.collaborations.invalid":
     "Choose a different profile with a handle. You can invite up to 20 collaborators.",
@@ -15,7 +15,7 @@ export const MEME_COLLABORATION_MESSAGES = {
   "memes.collaborations.confirm":
     "I have reviewed this artwork and agree to the collaboration acceptance and submission terms shown here.",
   "memes.collaborations.final":
-    "Acceptance is final. The artwork and agreed artist credits cannot be changed after acceptance.",
+    "Acceptance is final and cannot be withdrawn. The submitter cannot replace the accepted artwork. Admins can edit the final mint artwork and credits in Drop Forge.",
   "memes.collaborations.terms": "Submission and minting terms",
   "memes.collaborations.pending": "Pending acceptance",
   "memes.collaborations.accepted": "Accepted",
@@ -26,7 +26,7 @@ export const MEME_COLLABORATION_MESSAGES = {
   "memes.collaborations.saveError":
     "Couldn't update the invitation. Review the artwork and try again.",
   "memes.collaborations.forge":
-    "Artist credits were fixed at mint selection. Pending invitations were excluded. Accepted collaboration artwork is locked.",
+    "Claims Builder populated the initial credits from artists who accepted before mint selection. Admins can edit the final artwork and credits here.",
   "memes.collaborations.invitedNotification":
     "You were invited to collaborate on an artwork.",
   "memes.collaborations.acceptedNotification":

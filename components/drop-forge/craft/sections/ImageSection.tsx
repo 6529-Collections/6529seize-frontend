@@ -133,7 +133,6 @@ export default function ImageSection({
         ) : (
           <button
             type="button"
-            disabled={!!claim.collaboration_credit?.collab}
             onClick={() => imageInputRef.current?.click()}
             className="tw-relative tw-flex tw-aspect-video tw-w-full tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-500 tw-ring-1 tw-ring-iron-800"
           >
@@ -156,7 +155,7 @@ export default function ImageSection({
         {hasImage && (
           <button
             type="button"
-            disabled={saving || !!claim.collaboration_credit?.collab}
+            disabled={saving}
             onClick={() => imageInputRef.current?.click()}
             className={`${BTN_PRIMARY} tw-w-fit tw-self-center`}
           >
@@ -178,11 +177,7 @@ export default function ImageSection({
         <div className="tw-grid tw-grid-cols-2 tw-gap-2">
           <button
             type="submit"
-            disabled={
-              !!claim.collaboration_credit?.collab ||
-              saving ||
-              !hasPendingChanges
-            }
+            disabled={saving || !hasPendingChanges}
             className={`${BTN_SAVE} tw-w-full`}
           >
             {saving ? (
@@ -196,9 +191,7 @@ export default function ImageSection({
           </button>
           <button
             type="button"
-            disabled={
-              !!claim.collaboration_credit?.collab || !hasPendingChanges
-            }
+            disabled={!hasPendingChanges}
             onClick={clearPendingImageSelection}
             className={`${BTN_DANGER} tw-w-full disabled:tw-opacity-50`}
           >

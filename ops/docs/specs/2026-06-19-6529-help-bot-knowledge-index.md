@@ -680,7 +680,8 @@ mobile homepage images without reserved gaps, and stable Meme image frame.
 
 The Memes submission record covers multiple profile invitations, final consent,
 private pending names, accepted collaborator profile attribution, and the
-next-mint selection cutoff. The Craft documentation covers immutable managed
-artist credits and accepted artwork at publication. The frontend corpus records
+next-mint selection cutoff. The Craft documentation covers accepted collaborators as initial claim
+credits, admin editing of final mint artwork and traits, and Arweave publication
+of the saved claim without invitation checks. The frontend corpus records
 that pending invitations never delay voting or minting, and that attribution
 confers neither editing rights nor payment/airdrop arrangements.

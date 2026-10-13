@@ -157,14 +157,16 @@ The craft surface combines:
 
 ## Managed collaborator credits
 
-Claims from new artwork submissions carry the artist roster saved at next-mint
-selection. Only accepted collaborators are credited; unanswered invitations do
-not block claim creation or publication. Artist, SEIZE Artist Profile, and Collab
-are read-only for these claims. Claims with accepted collaborators also lock the
-artwork, title and description reviewed during acceptance. Operational fields,
-including season and edition size, remain editable.
+Claims from new artwork submissions carry the initial artist roster saved at
+next-mint selection. Claims Builder includes only accepted collaborators;
+unanswered invitations do not block claim creation or publication.
 
-The existing comma-separated SEIZE Artist Profile format is preserved for card
-links, metadata and announcements. Arweave publication verifies the saved
-credits and accepted artwork. Older claims without managed collaboration
-records retain their existing editing behavior.
+Admins can edit Artist, SEIZE Artist Profile, Collab, title, description and
+media in Craft, just as they edit other claim traits. The existing
+comma-separated artist and profile format is preserved. Arweave publication
+uses the saved claim values with normal metadata and media validation; it does
+not check invitations or compare the claim with the initial collaborator roster.
+
+An admin can add an artist who did not accept an invitation. This changes the
+final mint metadata only: it does not accept the invitation or add the
+submission to that profile's accepted-collaboration lists.

@@ -151,19 +151,14 @@ export default function MetadataSection({
           {t(locale, "memes.collaborations.forge")}
         </p>
       )}
-      <fieldset
-        disabled={!!claim.collaboration_credit?.collab}
-        className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0"
-      >
-        <ArtworkDetails
-          title={traits.title}
-          description={traits.description}
-          onTitleChange={(title) => setTraits((prev) => ({ ...prev, title }))}
-          onDescriptionChange={(description) =>
-            setTraits((prev) => ({ ...prev, description }))
-          }
-        />
-      </fieldset>
+      <ArtworkDetails
+        title={traits.title}
+        description={traits.description}
+        onTitleChange={(title) => setTraits((prev) => ({ ...prev, title }))}
+        onDescriptionChange={(description) =>
+          setTraits((prev) => ({ ...prev, description }))
+        }
+      />
       <div className="tw-group tw-relative tw-mt-2">
         <div className="tw-relative">
           <label
@@ -196,13 +191,7 @@ export default function MetadataSection({
             setTraits((prev) => ({ ...prev, ...partial }))
           }
           showTitle={false}
-          readOnlyOverrides={{
-            seizeArtistProfile: !!claim.collaboration_credit,
-            artist: !!claim.collaboration_credit,
-            collab: !!claim.collaboration_credit,
-            title: !!claim.collaboration_credit?.collab,
-            description: !!claim.collaboration_credit?.collab,
-          }}
+          readOnlyOverrides={{ seizeArtistProfile: false }}
         />
       </div>
       {traitsError && (

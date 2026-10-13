@@ -1,5 +1,6 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import AnimationSection from "@/components/drop-forge/craft/sections/AnimationSection";
+import { patchClaim } from "@/services/api/memes-minting-claims-api";
 import type { MintingClaim } from "@/generated/models/MintingClaim";
 
 jest.mock("@/components/auth/Auth", () => ({
@@ -87,7 +88,7 @@ describe("AnimationSection file picker", () => {
   });
 });
 
-it("keeps a collaborative claim's saved animation and source visible with no replacement controls", () => {
+it("lets an admin remove a collaborative claim's saved animation", async () => {
   renderAnimation("https://example.com/animation.mp4", true);
   expect(screen.getByTestId("animation-preview")).toHaveTextContent(
     "https://example.com/animation.mp4"
@@ -95,10 +96,13 @@ it("keeps a collaborative claim's saved animation and source visible with no rep
   expect(screen.getByTestId("animation-source")).toHaveTextContent(
     "https://example.com/animation.mp4"
   );
-  expect(
-    screen.queryByRole("button", { name: "Replace" })
-  ).not.toBeInTheDocument();
-  expect(
-    screen.queryByRole("button", { name: "Remove animation" })
-  ).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Replace" })).toBeEnabled();
+  jest.mocked(patchClaim).mockResolvedValue({ claim_id: 1 } as MintingClaim);
+  fireEvent.click(screen.getByRole("button", { name: "Remove animation" }));
+  const save = screen.getByRole("button", { name: "Save" });
+  expect(save).toBeEnabled();
+  fireEvent.click(save);
+  await waitFor(() =>
+    expect(patchClaim).toHaveBeenCalledWith(1, { animation_url: null })
+  );
 });

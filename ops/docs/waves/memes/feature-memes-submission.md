@@ -192,9 +192,9 @@ The submitter can see every invitation and cancel a pending invitation. Each
 invitee can review the submitted artwork, the final acceptance wording, and the
 submission/minting terms from **Notifications → Invites** or artwork details.
 They can accept or decline using their own profile; proxies cannot consent.
-Acceptance is final, with no withdrawal. The artwork and agreed artist credits
-are locked after acceptance; replacing the artwork requires a new submission
-and fresh invitations.
+Acceptance is final, with no withdrawal. The submitter cannot replace the
+accepted artwork or original artist name; replacing the submission requires
+fresh invitations. Admins can edit the final mint artwork and credits in Craft.
 
 Public submission cards and details show only accepted collaborators. Pending
 names are private to the submitter and their own invitee. Accepted submissions
@@ -204,10 +204,13 @@ not gain editing rights or consume another submission allowance. Attribution
 does not establish payment splits or change airdrop allocations.
 
 When the artwork is selected as the next mint, the accepted artist roster is
-saved and unanswered invitations close. Minting proceeds with the submitter and
-only the collaborators who accepted before selection. Later responses cannot
-change the saved mint credits. The `Collab` trait follows confirmed credit,
-rather than merely sending an invitation.
+saved and unanswered invitations close. Claims Builder populates initial mint credits with the submitter and
+collaborators who accepted before selection. Later responses cannot change this
+initial roster. Admins can edit the saved claim in Drop Forge, including adding
+an artist who did not accept. Arweave publishes these final saved values. Such
+edits do not change invitation status or accepted-submission profile lists.
+The submission `Collab` trait follows confirmed collaboration, rather than
+merely sending an invitation.
 
 Resubmission starts a new invitation set and restores the original submitter's
 artist credit. Deleting an unminted submission closes its pending invitations.
