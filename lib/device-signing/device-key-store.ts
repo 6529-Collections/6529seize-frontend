@@ -45,8 +45,9 @@ export function getDeviceGrantStatus(
   grant: ApiDeviceGrant | null,
   nowMs: number
 ): DeviceGrantStatus {
-  // A missing revoked_at (an older or partial record) is not a revocation.
-  if (!grant || grant.revoked_at != null) {
+  // Only a revocation time revokes; a missing value (an older or partial
+  // record) does not.
+  if (!grant || typeof grant.revoked_at === "number") {
     return "none";
   }
   if (grant.expires_at <= nowMs) {
@@ -63,7 +64,7 @@ function getUsableGrant(
   nowMs: number
 ): ApiDeviceGrant | null {
   const grant = record.grant;
-  if (!grant || grant.revoked_at != null) {
+  if (!grant || typeof grant.revoked_at === "number") {
     return null;
   }
   if (grant.expires_at <= nowMs + SIGNING_EXPIRY_MARGIN_MS) {
