@@ -1,4 +1,4 @@
-import { CONSOLIDATION_WALLET_LIMIT } from "@/constants/consolidation.constants";
+import type { ConsolidationLimits } from "@/helpers/consolidationPolicy";
 
 export type SimulatedWallet = "A" | "B" | "C" | "D";
 
@@ -11,8 +11,6 @@ export const SIMULATED_SIGNERS: readonly SimulatedWallet[] = [
 
 const EXISTING_MEMBERS: readonly SimulatedWallet[] = ["A", "B", "C"];
 const JOINING_WALLET: SimulatedWallet = "D";
-// Groups of up to this size form without the fourth-wallet start date.
-const UNGATED_LIMIT = 3;
 
 interface Registration {
   readonly block: number;
@@ -70,7 +68,8 @@ function confirmedLinks(
  * all the others were registered after the start date.
  */
 function groupSimulatedWallets(
-  links: readonly ConfirmedLink[]
+  links: readonly ConfirmedLink[],
+  limits: ConsolidationLimits
 ): SimulatedWallet[][] {
   const ordered = [...links].sort(
     (a, b) => b.block - a.block || compareCodeUnits(a.key, b.key)
@@ -86,7 +85,8 @@ function groupSimulatedWallets(
     );
   const canJoin = (group: SimulatedWallet[], wallet: SimulatedWallet) =>
     group.every((member) => byKey.has(pairKey(member, wallet))) &&
-    (group.length < UNGATED_LIMIT || hasAfterStartMember([...group, wallet]));
+    (group.length < limits.ungatedMaxWallets ||
+      hasAfterStartMember([...group, wallet]));
 
   const used = new Set<SimulatedWallet>();
   const groups: SimulatedWallet[][] = [];
@@ -106,7 +106,7 @@ function groupSimulatedWallets(
     const group: SimulatedWallet[] = [first, second];
     for (
       let join = nextJoin(group);
-      join && group.length < CONSOLIDATION_WALLET_LIMIT;
+      join && group.length < limits.maxWallets;
       join = nextJoin(group)
     ) {
       group.push(join.next);
@@ -138,7 +138,8 @@ function joiningWallet(
  * C. Returns the groups after each transaction, in the given signing order.
  */
 export function simulateAddingFourthWallet(
-  order: readonly SimulatedWallet[]
+  order: readonly SimulatedWallet[],
+  limits: ConsolidationLimits
 ): SimulatedStep[] {
   const registrations = new Map<string, Registration>();
   EXISTING_MEMBERS.forEach((from, i) =>
@@ -156,7 +157,7 @@ export function simulateAddingFourthWallet(
     targets.forEach((target) =>
       registrations.set(`${signer}>${target}`, registration)
     );
-    const groups = groupSimulatedWallets(confirmedLinks(registrations));
+    const groups = groupSimulatedWallets(confirmedLinks(registrations), limits);
     return {
       signer,
       groups,

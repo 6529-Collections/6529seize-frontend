@@ -1,3 +1,4 @@
+import { limits } from "@/__tests__/helpers/consolidation-policy.fixture";
 import ConsolidationOrderSimulator from "@/app/network/tdh/consolidation/ConsolidationOrderSimulator";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -7,6 +8,7 @@ describe("ConsolidationOrderSimulator", () => {
     const user = userEvent.setup();
     render(
       <ConsolidationOrderSimulator
+        limits={limits}
         activationDate="12 October 2026, 00:00 UTC"
         locale="en-US"
       />
@@ -29,6 +31,7 @@ describe("ConsolidationOrderSimulator", () => {
     const user = userEvent.setup();
     render(
       <ConsolidationOrderSimulator
+        limits={limits}
         activationDate="12 October 2026, 00:00 UTC"
         locale="en-US"
       />
@@ -50,6 +53,7 @@ describe("ConsolidationOrderSimulator", () => {
     const user = userEvent.setup();
     render(
       <ConsolidationOrderSimulator
+        limits={limits}
         activationDate="12 October 2026, 00:00 UTC"
         locale="en-US"
       />
@@ -74,4 +78,20 @@ describe("ConsolidationOrderSimulator", () => {
     expect(screen.getByText("Signing order so far: none")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Start again" })).toBeDisabled();
   });
+});
+
+test("does not simulate groups before backend limits are available", () => {
+  render(
+    <ConsolidationOrderSimulator
+      locale="en-US"
+      activationDate="pending"
+      limits={null}
+    />
+  );
+  expect(
+    screen.queryByRole("button", { name: "D signs last" })
+  ).not.toBeInTheDocument();
+  expect(screen.getByRole("status")).toHaveTextContent(
+    "Wallet limits are loading"
+  );
 });

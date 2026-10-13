@@ -1,5 +1,7 @@
 "use client";
 
+import type { ConsolidationLimits } from "@/helpers/consolidationPolicy";
+
 import { useMemo, useState } from "react";
 import { formatInteger, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -24,12 +26,17 @@ const BUTTON = `tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg
 export default function ConsolidationOrderSimulator({
   locale,
   activationDate,
+  limits,
 }: {
   readonly locale: SupportedLocale;
   readonly activationDate: string;
+  readonly limits: ConsolidationLimits | null;
 }) {
   const [order, setOrder] = useState<readonly SimulatedWallet[]>([]);
-  const steps = useMemo(() => simulateAddingFourthWallet(order), [order]);
+  const steps = useMemo(
+    () => (limits ? simulateAddingFourthWallet(order, limits) : []),
+    [order, limits]
+  );
   const remaining = SIMULATED_SIGNERS.filter(
     (signer) => !order.includes(signer)
   );
@@ -50,6 +57,13 @@ export default function ConsolidationOrderSimulator({
       ? t(locale, "network.tdhConsolidation.order.together")
       : t(locale, "network.tdhConsolidation.order.split");
   const lastStep = steps.at(-1);
+
+  if (!limits)
+    return (
+      <p role="status" className={TDH_TEXT}>
+        {t(locale, "network.tdhConsolidation.policy.pendingLimits")}
+      </p>
+    );
 
   return (
     <div className={`${TDH_PANEL} tw-space-y-5 tw-p-5`}>

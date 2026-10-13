@@ -2407,7 +2407,7 @@
         "simulator"
       ],
       "facts": [
-        "The How Wallet Consolidation Works page at /network/tdh/consolidation/design sets out the exact rules behind 6529 wallet consolidation, an interactive signing-order simulator and the tested security analysis of the four-wallet design. The simulator models transactions after the displayed environment cutoff.",
+        "The How Wallet Consolidation Works page at /network/tdh/consolidation/design sets out the exact rules behind 6529 wallet consolidation, an interactive signing-order simulator and the tested security analysis of the four-wallet design. The simulator models transactions after the displayed environment cutoff, uses the backend wallet limits, and waits when those limits are unavailable.",
         "Every pair of wallets in a consolidation registers a Consolidation (use case 999) in both directions on the NFTDelegation contract, on Any Collection or The Memes. Two wallets need 2 registrations, three need 6 and four need 12; with batchDelegations each wallet signing for itself signs one transaction; managers send one transaction per link.",
         "A fourth wallet counts only when its links to the other three were registered in both directions on or after the activation cutoff supplied by this environment’s backend settings. Wallets are grouped from confirmed links, newest first, so completing a link with a new wallet moves a member out of its group.",
         "The page compares the full-mesh rule with cheaper alternatives and shows that only full mesh stops any subset of a collector's wallets from adding an outside wallet."

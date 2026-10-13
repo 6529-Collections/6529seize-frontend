@@ -116,4 +116,4 @@ Two pages explain wallet consolidation:
 - Shared rule constants: `constants/consolidation.constants.ts`
 - Backend grouping: `6529seize-backend` `src/consolidation-tools.ts`
 
-The guide and design page show the current environment’s cutoff; staging can open before production. Guided signing opens ten minutes later. If settings are unavailable, the pages refer visitors to Guided Setup for the activation time without substituting a production date. The simulator models post-cutoff transactions and labels that assumption with the same date.
+The guide and design page read the wallet maximum and ungated boundary from the existing backend settings response and show the current environment’s cutoff; staging can open before production. Guided signing opens ten minutes later. If settings are unavailable, the pages refer visitors to Guided Setup for the activation time without substituting a production date. The simulator models post-cutoff transactions and labels that assumption with the same date. It uses the shared backend limits and waits for valid limits before showing simulated groups; neither page substitutes a local maximum when limits are unavailable.
