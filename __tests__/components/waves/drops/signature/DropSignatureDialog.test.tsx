@@ -15,6 +15,10 @@ jest.mock("@/services/api/device-grants-api", () => ({
   fetchDropSignedEvents: (...args: unknown[]) => mockFetchSignedEvents(...args),
 }));
 
+jest.mock("wagmi", () => ({
+  usePublicClient: () => undefined,
+}));
+
 const mockVerify = jest.fn();
 jest.mock("@/lib/device-signing/verify-signed-events", () => ({
   verifyDropSignedEvents: (...args: unknown[]) => mockVerify(...args),
@@ -74,7 +78,9 @@ describe("drop signature details", () => {
       DROP_ID,
       expect.any(AbortSignal)
     );
-    expect(mockVerify).toHaveBeenCalledWith(signedEvents);
+    expect(mockVerify).toHaveBeenCalledWith(signedEvents, {
+      verifyContractSignature: undefined,
+    });
     expect(screen.getByText("0x1111…1111")).toBeVisible();
     expect(screen.getByText("d75a9801...f707511a")).toBeVisible();
     expect(screen.getByText("Verified in your browser")).toBeVisible();

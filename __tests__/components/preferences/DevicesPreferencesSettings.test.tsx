@@ -107,6 +107,7 @@ describe("DevicesPreferencesSettings", () => {
   beforeEach(() => {
     mockAccount = ADDRESS;
     mockLocalGrant = null;
+    mockGrantsAddress = undefined;
     mockAuth = {
       activeProfileProxy: null,
       isAuthenticated: true,
@@ -159,8 +160,14 @@ describe("DevicesPreferencesSettings", () => {
     expect(within(rows[1]!).queryByText("This device")).toBeNull();
     expect(within(rows[1]!).getByText(/Not used yet/)).toBeVisible();
     expect(within(rows[2]!).getByText("Expired")).toBeVisible();
+    expect(
+      within(rows[2]!).queryByRole("button", { name: /^Revoke / })
+    ).toBeNull();
     expect(within(rows[3]!).getByText("Revoked")).toBeVisible();
     expect(within(rows[3]!).getByText(/Revoked Oct/)).toBeVisible();
+    expect(
+      within(rows[3]!).queryByRole("button", { name: /^Revoke / })
+    ).toBeNull();
     expect(
       screen
         .getAllByRole("button", { name: /^Revoke / })

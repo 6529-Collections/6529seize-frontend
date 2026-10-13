@@ -12,6 +12,7 @@ import { getDeviceKeyFingerprint } from "@/lib/device-signing/grant-message";
 import {
   verifyDropSignedEvents,
   type DropSignatureVerdict,
+  type ContractSignatureVerifier,
 } from "@/lib/device-signing/verify-signed-events";
 import { fetchDropSignedEvents } from "@/services/api/device-grants-api";
 import {
@@ -27,6 +28,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
+import { usePublicClient } from "wagmi";
 
 interface DropSignatureDialogProps {
   readonly dropId: string;
@@ -145,10 +147,31 @@ function DropSignatureDialogContent({
   onClose,
 }: DropSignatureDialogProps) {
   const locale = useBrowserLocale();
+  const publicClient = usePublicClient({ chainId: 1 });
+  // Contract-wallet grants (EIP-1271) are checked on Ethereum from the browser.
+  const verifyContractSignature: ContractSignatureVerifier | undefined =
+    publicClient
+      ? async ({ address, message, signature, chainId }) => {
+          if (chainId !== 1) {
+            // No client for this chain: keep the labelled sign-in check.
+            throw new Error(`No Ethereum client for chain ${chainId}`);
+          }
+          return await publicClient.verifyMessage({
+            address,
+            message,
+            signature,
+          });
+        }
+      : undefined;
   const query = useQuery({
     queryKey: [QueryKey.DROP_SIGNED_EVENTS, dropId],
     queryFn: async ({ signal }) =>
-      await verifyDropSignedEvents(await fetchDropSignedEvents(dropId, signal)),
+      await verifyDropSignedEvents(
+        await fetchDropSignedEvents(dropId, signal),
+        {
+          verifyContractSignature,
+        }
+      ),
     enabled: isOpen,
     staleTime: 60_000,
     retry: 1,
