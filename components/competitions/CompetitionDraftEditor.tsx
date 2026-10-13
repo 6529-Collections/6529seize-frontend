@@ -52,14 +52,11 @@ import { useAuth } from "@/components/auth/Auth";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import Button from "@/components/utils/button/Button";
 import { CompetitionState, COMPETITION_BUTTON } from "./CompetitionState";
 
 const EDITOR_INPUT =
   "tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-base tw-text-iron-50 hover:tw-border-iron-600 focus:tw-border-primary-400 focus:tw-outline focus:tw-outline-2 focus:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 sm:tw-text-sm";
-const EDITOR_BUTTON =
-  "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-2 tw-text-sm tw-font-semibold focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50";
-const EDITOR_PRIMARY_BUTTON = `${EDITOR_BUTTON} tw-border-primary-500 tw-bg-primary-500 tw-text-white enabled:hover:tw-border-primary-600 enabled:hover:tw-bg-primary-600`;
-
 const subscribeHydration = () => () => undefined;
 
 const STEPS = [
@@ -526,47 +523,52 @@ function DraftForm({
         </button>
       )}
       <div className="tw-sticky tw-bottom-0 tw-z-20 tw-mt-auto tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-black tw-py-4 tw-pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <button
+        <Button
           type="button"
-          className={`${EDITOR_BUTTON} tw-mr-auto tw-border-transparent tw-bg-transparent tw-text-iron-400 enabled:hover:tw-bg-iron-900 enabled:hover:tw-text-iron-50`}
+          variant="ghost"
+          size="md"
+          className="tw-mr-auto"
           disabled={busy}
           onClick={() => {
             void close();
           }}
         >
           {t(locale, "competitions.cancelEdit")}
-        </button>
+        </Button>
         {index > 0 && (
-          <button
+          <Button
             type="button"
-            className={COMPETITION_BUTTON}
+            variant="secondary"
+            size="md"
             disabled={busy}
             onClick={() => move("backward")}
           >
             {t(locale, "competitions.previous")}
-          </button>
+          </Button>
         )}
         {index < steps.length - 1 && (
-          <button
+          <Button
             type="button"
-            className={EDITOR_PRIMARY_BUTTON}
+            variant="action"
+            size="md"
             disabled={busy}
             onClick={() => move("forward")}
           >
             {t(locale, "competitions.next")}
-          </button>
+          </Button>
         )}
         {index === steps.length - 1 && !published && (
-          <button
+          <Button
             type="button"
-            className={EDITOR_PRIMARY_BUTTON}
+            variant="action"
+            size="md"
             disabled={busy || displayedError === "conflict"}
             onClick={() => {
               void publish();
             }}
           >
             {t(locale, "competitions.publish")}
-          </button>
+          </Button>
         )}
       </div>
     </section>
