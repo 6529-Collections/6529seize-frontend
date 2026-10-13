@@ -12,6 +12,7 @@ import type {
 import { getMemberName } from "../e2eeFormat";
 import { getScrollBehavior } from "../e2eeMotion";
 import { type E2eeMessageActions, E2eeMessageItem } from "./E2eeMessageItem";
+import { useE2eeDisplayMembers } from "./useE2eeDisplayMembers";
 
 const GROUP_WINDOW_MS = 5 * 60 * 1000;
 const NEAR_BOTTOM_PX = 120;
@@ -105,6 +106,15 @@ export function E2eeTimeline({
     () => new Map(messages.map((message) => [message.id, message])),
     [messages]
   );
+  // People who left or were removed still get their names in the timeline.
+  const members = useE2eeDisplayMembers(conversation, messages);
+  const displayConversation = useMemo(
+    () =>
+      members === conversation.members
+        ? conversation
+        : { ...conversation, members },
+    [conversation, members]
+  );
 
   // Announce only messages that arrive after the first render of this chat.
   const maxSeq = getSequencedMax(messages);
@@ -119,7 +129,7 @@ export function E2eeTimeline({
         : getIncomingAnnouncement({
             locale,
             messages,
-            members: conversation.members,
+            members,
             selfProfileId,
             afterSeq: announcement.seq,
           });
@@ -170,7 +180,7 @@ export function E2eeTimeline({
             <E2eeMessageItem
               key={message.id}
               message={message}
-              conversation={conversation}
+              conversation={displayConversation}
               engine={engine}
               selfProfileId={selfProfileId}
               replyTarget={

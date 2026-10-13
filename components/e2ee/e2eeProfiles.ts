@@ -21,7 +21,7 @@ const UNKNOWN_PROFILE: E2eeResolvedProfile = {
 export const getE2eeProfileQueryKey = (profileId: string) =>
   [QueryKey.PROFILE, "e2ee-profile-id", profileId] as const;
 
-const toResolvedProfile = (
+export const toResolvedProfile = (
   profileId: string,
   identity: ApiIdentity
 ): E2eeResolvedProfile => {
@@ -46,16 +46,19 @@ const toResolvedProfile = (
   };
 };
 
+/** Shared by the engine's resolver and UI lookups, so both hit one cache. */
+export const getE2eeProfileQueryOptions = (profileId: string) => ({
+  queryKey: getE2eeProfileQueryKey(profileId),
+  queryFn: ({ signal }: { readonly signal: AbortSignal }) =>
+    commonApiFetch<ApiIdentity>({
+      endpoint: `identities/${encodeURIComponent(profileId)}`,
+      signal,
+    }),
+  staleTime: PROFILE_STALE_TIME_MS,
+});
+
 const fetchProfile = (queryClient: QueryClient, profileId: string) =>
-  queryClient.fetchQuery({
-    queryKey: getE2eeProfileQueryKey(profileId),
-    queryFn: ({ signal }) =>
-      commonApiFetch<ApiIdentity>({
-        endpoint: `identities/${encodeURIComponent(profileId)}`,
-        signal,
-      }),
-    staleTime: PROFILE_STALE_TIME_MS,
-  });
+  queryClient.fetchQuery(getE2eeProfileQueryOptions(profileId));
 
 /**
  * Resolves profile ids to display data and wallets for the engine. There is
