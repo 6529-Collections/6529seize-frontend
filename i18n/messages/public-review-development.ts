@@ -502,9 +502,9 @@ export const PUBLIC_REVIEW_DEVELOPMENT_MESSAGES = {
   "publicReview.development.editorial.remaining.findings.staging":
     "Staging uses Wave 19d4bbf5-86ec-4053-a5f2-bb28d7a2f780, named Stream review (staging).",
   "publicReview.development.editorial.remaining.findings.production":
-    "The planned production Wave is 06e69198-eea7-40c5-95d3-7c1bf5051aba. Production review routes are still disabled.",
-  "publicReview.development.editorial.remaining.findings.activation":
-    "Before production feedback is enabled, the reviewed environment must bind that exact Wave and a second person must read the mapping back.",
+    "Production review routes are enabled. Production feedback is posted to the public 6529 Tech Feedback Wave, e933d8d6-0c78-4e8f-aa12-f67d8c11b4dc.",
+  "publicReview.development.editorial.remaining.findings.environmentIsolation":
+    "Each environment resolves its own feedback Wave on the server, and one Wave cannot be configured for more than one environment, so staging feedback cannot post to the production Wave.",
   "publicReview.development.editorial.remaining.questions.heading":
     "Questions for reviewers",
   "publicReview.development.editorial.remaining.questions.progress":
