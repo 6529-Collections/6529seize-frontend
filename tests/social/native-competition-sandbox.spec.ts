@@ -1470,6 +1470,72 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     expect(sandbox.requests).toHaveLength(0);
   });
 
+  test("offers Join in the wave header and keeps the first row pin tooltip above the list filter", async ({
+    page,
+  }, testInfo) => {
+    const app = testInfo.project.name === "web-mobile-chromium";
+    const sandbox = await installCompetitionApi(page);
+    if (app)
+      await installSurfaceSimulation(
+        page.context(),
+        "capacitor-ios-sim",
+        testInfo.project.use.baseURL
+      );
+    await page.goto(`/waves/${WAVE}`);
+
+    // The sandbox profile has not joined this wave, so Join is the header CTA
+    // in both the web header and the native app header.
+    const join = page
+      .getByRole("button", {
+        name: "Join Local Composer Sandbox Wave",
+        exact: true,
+      })
+      .filter({ visible: true });
+    await expect(join).toBeVisible({ timeout: 30000 });
+    await expect(join).toHaveText("Join");
+    await expect(join).toBeInViewport({ ratio: 1 });
+    const joinBox = await join.boundingBox();
+    expect(joinBox?.height).toBeGreaterThanOrEqual(24);
+    expect(joinBox?.width).toBeGreaterThanOrEqual(24);
+    await expectNoHorizontalOverflow(page);
+
+    if (!app) {
+      // The first row sits directly under the sticky All/Pinned/Joined filter.
+      const waveList = page.getByRole("region", {
+        name: /^(All recent waves list|Following waves list|Pinned)$/,
+      });
+      await waveList.getByRole("link").first().hover();
+      const pin = waveList
+        .getByRole("button", { name: /^(Pin|Unpin) wave$/ })
+        .first();
+      await pin.hover();
+      const tooltip = page
+        .getByRole("tooltip")
+        .filter({ hasText: /^(Pin|Unpin)$/ });
+      await expect(tooltip).toBeVisible();
+      await expect
+        .poll(() =>
+          tooltip.evaluate((element) => {
+            const box = element.getBoundingClientRect();
+            const previous = (element as HTMLElement).style.pointerEvents;
+            // Tooltips ignore the pointer; enable hit-testing briefly.
+            (element as HTMLElement).style.pointerEvents = "auto";
+            const hits = [0.15, 0.5, 0.85].map((fraction) => {
+              const hit = document.elementFromPoint(
+                box.left + box.width * fraction,
+                box.top + box.height / 2
+              );
+              return hit !== null && element.contains(hit);
+            });
+            (element as HTMLElement).style.pointerEvents = previous;
+            return hits.every(Boolean);
+          })
+        )
+        .toBe(true);
+    }
+    expect(sandbox.requests).toHaveLength(0);
+  });
+
   test("keeps the draft editor footer flush with its scroll container", async ({
     page,
   }, testInfo) => {

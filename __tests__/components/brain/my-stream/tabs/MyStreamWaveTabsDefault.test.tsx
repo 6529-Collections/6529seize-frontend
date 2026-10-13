@@ -40,6 +40,12 @@ jest.mock("react-use", () => {
 
 const useContentTab = jest.fn();
 
+// The Join CTA owns its auth/query wiring and has dedicated tests.
+jest.mock("@/components/waves/header/WaveJoinCta", () => ({
+  __esModule: true,
+  default: () => null,
+}));
+
 jest.mock("@/components/brain/my-stream/MyStreamWaveDesktopTabs", () => ({
   __esModule: true,
   default: ({ activeTab, setActiveTab }: any) => (
