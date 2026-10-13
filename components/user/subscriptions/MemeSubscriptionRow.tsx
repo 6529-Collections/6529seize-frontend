@@ -391,7 +391,7 @@ export default function MemeSubscriptionRow(
       <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-4 max-sm:tw-gap-2">
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-2">
           <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
-            <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
+            <span className="tw-break-words tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100 sm:tw-whitespace-nowrap">
               {props.title} #{props.subscription.token_id}
             </span>
             {props.date && (

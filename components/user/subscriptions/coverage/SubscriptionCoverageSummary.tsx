@@ -302,17 +302,17 @@ export default function SubscriptionCoverageSummary({
             </div>
           ) : null}
 
-          <div className="tw-mt-[21px] tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-[13px] max-sm:tw-hidden">
-            <span className="tw-font-medium tw-text-iron-100">
+          <div className="tw-mt-[21px] tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-[13px]">
+            <span className="tw-font-medium tw-text-iron-100 max-sm:tw-hidden">
               {getSubscriptionModeLabel(locale, coverage.mode)}
             </span>
-            <span aria-hidden="true" className="tw-text-iron-700">
+            <span aria-hidden="true" className="tw-text-iron-700 max-sm:tw-hidden">
               ·
             </span>
-            <span className="tw-font-medium tw-text-iron-100">
+            <span className="tw-font-medium tw-text-iron-100 max-sm:tw-hidden">
               {formatSubscriptionEth(locale, coverage.balance_eth)} ETH
             </span>
-            <span aria-hidden="true" className="tw-text-iron-700">
+            <span aria-hidden="true" className="tw-text-iron-700 max-sm:tw-hidden">
               ·
             </span>
             <span className="tw-text-iron-400">
@@ -322,10 +322,10 @@ export default function SubscriptionCoverageSummary({
                     count: formatInteger(locale, coverage.eligibility_count),
                   })}
             </span>
-            <span aria-hidden="true" className="tw-text-iron-700">
+            <span aria-hidden="true" className="tw-text-iron-700 max-sm:tw-hidden">
               ·
             </span>
-            <span className="tw-text-iron-400">{editionsLabel}</span>
+            <span className="tw-text-iron-400 max-sm:tw-hidden">{editionsLabel}</span>
           </div>
 
           {coverage.next_unfunded?.top_up_deadline ? (

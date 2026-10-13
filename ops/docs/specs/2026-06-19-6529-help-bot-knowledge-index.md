@@ -49,7 +49,9 @@ merges, manual quantity precedence over All eligible, priority preservation,
 highest-TDH split routing, and finalized-allocation conflicts that need manual
 reconciliation. The subscriptions overview also explains that profile history
 sections start closed on phones and preserve user toggles during resizing or
-data refreshes. These remain frontend-owned facts published through the existing
+data refreshes. The profile subscription record also explains how tapping,
+hovering, or focusing the address reveals its full value on compact layouts.
+These remain frontend-owned facts published through the existing
 help-index sync and consumed by the existing backend loader.
 
 ## Problem Statement
