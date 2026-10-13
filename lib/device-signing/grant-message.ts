@@ -51,6 +51,14 @@ const formatUtcMinute = (expiresAtSeconds: number): string =>
     .slice(0, 16)
     .replace("T", " ");
 
+/**
+ * The wallet-signed grant statement. Intentionally not localized: the server
+ * renders the same bytes into the Sign-In with Ethereum challenge, the wallet
+ * signs them, and both sides compare them byte for byte, so this text is a
+ * signed commitment, not UI copy. Changing it needs a coordinated backend and
+ * frontend rule change (see the i18n exception in
+ * ops/docs/waves/drop-actions/feature-signed-messages.md).
+ */
 export function renderDeviceGrantStatement({
   deviceKeyHex,
   scopes,
