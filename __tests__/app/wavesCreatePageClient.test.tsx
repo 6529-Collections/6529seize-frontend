@@ -87,6 +87,19 @@ jest.mock("@/components/user/utils/set-up-profile/UserSetUpProfileCta", () => ({
 }));
 
 import WavesCreatePageClient from "@/app/waves/create/page.client";
+import WavesRouteLayout from "@/app/waves/layout";
+
+jest.mock("@/contexts/CompetitionRouteContext", () => ({
+  CompetitionRouteProvider: ({ children }: { readonly children: ReactNode }) =>
+    children,
+}));
+
+const renderCreatePage = () =>
+  render(
+    <WavesRouteLayout>
+      <WavesCreatePageClient />
+    </WavesRouteLayout>
+  );
 
 describe("WavesCreatePageClient", () => {
   beforeEach(() => {
@@ -101,7 +114,7 @@ describe("WavesCreatePageClient", () => {
       contentState: "not-authenticated",
     });
 
-    render(<WavesCreatePageClient />);
+    renderCreatePage();
 
     expect(screen.getByTestId("waves-mobile")).toContainElement(
       screen.getByTestId("connect-wallet")
@@ -122,7 +135,7 @@ describe("WavesCreatePageClient", () => {
       contentState: "ready",
     });
 
-    render(<WavesCreatePageClient />);
+    renderCreatePage();
 
     expect(screen.getByTestId("waves-mobile")).toContainElement(
       screen.getByTestId("create-wave")
@@ -147,7 +160,7 @@ it.each(["initializing", "connecting"])(
       contentState: "not-authenticated",
     });
     mockUseDeviceInfo.mockReturnValue({ isApp: true, isMobileDevice: true });
-    render(<WavesCreatePageClient />);
+    renderCreatePage();
     expect(screen.getByRole("status")).toBeInTheDocument();
     expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
     expect(screen.queryByTestId("setup-profile")).not.toBeInTheDocument();

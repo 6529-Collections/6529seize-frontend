@@ -3,7 +3,7 @@
   "config": "tsconfig.jest.json",
   "toolchain": {
     "typescript_version": "5.9.3",
-    "pnpm_lock_sha256": "e688825735a62e365798503779dee89e6e11a26fde3d1804830aa5f1e8db79f1",
+    "pnpm_lock_sha256": "e309074dd9d0b352ae0ac6b93cdc5ec17e8b08b9ec4f69494ceca5c824dbe4cd",
     "jest_tsconfig_sha256": "feda509a89cdd90cbcd9da6eecae28759c34c7aaae3725593ec2b1c022017062",
     "base_tsconfig_sha256": "fdbd8e548aed634324fd228e74d541ea702c1311597aa938741651e50de59c5f"
   },
@@ -66,7 +66,6 @@
     "__tests__/components/brain/left-sidebar/waves/UnifiedWavesListWaves.test.tsx": 2,
     "__tests__/components/brain/left-sidebar/web/ExpandedWave.test.tsx": 1,
     "__tests__/components/brain/left-sidebar/web/WebUnifiedWavesListWaves.test.tsx": 1,
-    "__tests__/components/brain/mobile/BrainMobileAbout.test.tsx": 1,
     "__tests__/components/brain/mobile/BrainMobileMessages.test.tsx": 1,
     "__tests__/components/brain/mobile/BrainMobileTabs.test.tsx": 1,
     "__tests__/components/brain/mobile/BrainMobileViewContent.test.tsx": 9,
@@ -96,7 +95,6 @@
     "__tests__/components/brain/notifications/NotificationsFollowBtn.test.tsx": 2,
     "__tests__/components/brain/notifications/priority-alert/NotificationPriorityAlert.test.tsx": 3,
     "__tests__/components/brain/NotificationsWrapper.test.tsx": 1,
-    "__tests__/components/brain/right-sidebar/BrainRightSidebar.test.tsx": 1,
     "__tests__/components/brain/right-sidebar/BrainRightSidebarFollowers.test.tsx": 1,
     "__tests__/components/client-only/ClientOnly.test.tsx": 1,
     "__tests__/components/CollectionDelegationComponent.test.tsx": 2,
@@ -206,7 +204,6 @@
     "__tests__/components/drops/create/lexical/transformers/ImageTransformer.test.ts": 2,
     "__tests__/components/drops/create/lexical/transformers/MentionTransformer.test.ts": 3,
     "__tests__/components/drops/create/utils/CreateDropContent.component.test.tsx": 1,
-    "__tests__/components/drops/create/utils/CreateDropWrapper.test.tsx": 1,
     "__tests__/components/drops/create/utils/file/CreateDropSelectedFilePreview.test.tsx": 1,
     "__tests__/components/drops/create/utils/storm/CreateDropContentMissingMediaWarning.test.tsx": 1,
     "__tests__/components/drops/create/utils/storm/CreateDropContentMissingMetadataWarning.test.tsx": 1,

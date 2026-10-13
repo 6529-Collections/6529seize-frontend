@@ -132,6 +132,8 @@ describe("effective App PR CI plan", () => {
     "__tests__/components/waves/drops/WaveDropActionsOpen.test.tsx",
     "components/waves/drops/WaveDropMobileMenuOpen.tsx",
     "__tests__/components/waves/drops/WaveDropMobileMenuOpen.test.tsx",
+    "components/waves/header/WaveJoinCta.tsx",
+    "components/brain/left-sidebar/waves/BrainLeftSidebarWavePin.tsx",
     "components\\waves\\leaderboard\\MySubmissionsDialog.tsx",
   ])(
     "selects native competition browser evidence for shared surface %s",

@@ -1,63 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import { useSearchParams } from "next/navigation";
-import type { ApiCompetition } from "@/generated/models/ApiCompetition";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import type { ApiWaveV3 } from "@/generated/models/ApiWaveV3";
-import { ApiCompetitionLifecycle } from "@/generated/models/ApiCompetitionLifecycle";
-import { CompetitionProvider } from "@/contexts/CompetitionContext";
-import { CompetitionNavigationContext } from "@/contexts/CompetitionNavigationContext";
-import {
-  useCompetitionDetail,
-  useCompetitionHub,
-  useCompetitionViewer,
-} from "@/hooks/competitions/useCompetitionQueries";
-import { useWaveData } from "@/hooks/useWaveData";
-import WavesLayout from "@/components/waves/layout/WavesLayout";
+import { useCompetitionRoute } from "@/contexts/CompetitionRouteContext";
 import MyStreamWave from "@/components/brain/my-stream/MyStreamWave";
 import CompetitionDetail, {
   NativeCompetitionContent,
 } from "./CompetitionDetail";
 import { getCompetitionTab } from "@/helpers/competition.helpers";
 import { CompetitionState } from "./CompetitionState";
-
-function SelectedCompetitionWave({
-  wave,
-  hub,
-  competition,
-  initialFlat,
-}: {
-  readonly wave: ApiWave;
-  readonly hub: ApiWaveV3;
-  readonly competition: ApiCompetition;
-  readonly initialFlat: boolean;
-}) {
-  // Keep the mounted layout stable when the server default changes. Commands
-  // and explicit URLs remain scoped to this competition until navigation.
-  const [flat] = useState(initialFlat);
-  const search = useSearchParams();
-  const tab = getCompetitionTab(search.get("tab"));
-  const legacy = hub.legacy_primary_competition_id === competition.id;
-  let content;
-  if (!flat)
-    content = (
-      <CompetitionDetail waveId={wave.id} competitionId={competition.id} />
-    );
-  else if (!legacy || tab === "rules" || tab === "votes")
-    content = <NativeCompetitionContent embedded />;
-  return (
-    <CompetitionProvider value={{ wave, hub, competition }}>
-      <CompetitionNavigationContext.Provider
-        value={{ flat, nativeCompetition: legacy ? null : competition }}
-      >
-        <WavesLayout>
-          <MyStreamWave waveId={wave.id} competitionContent={content} />
-        </WavesLayout>
-      </CompetitionNavigationContext.Provider>
-    </CompetitionProvider>
-  );
-}
 
 export default function CompetitionWaveRoute({
   waveId,
@@ -66,37 +16,30 @@ export default function CompetitionWaveRoute({
   readonly waveId: string;
   readonly competitionId: string;
 }) {
-  const viewer = useCompetitionViewer();
-  const wave = useWaveData({ waveId, onWaveNotFound: () => undefined });
-  const hub = useCompetitionHub(waveId);
-  const competition = useCompetitionDetail({ waveId, competitionId });
-  const error = wave.isError || hub.isError || competition.isError;
-  if (error || !wave.data || !hub.data || !competition.data) {
-    return (
-      <WavesLayout>
-        <MyStreamWave
-          waveId={waveId}
-          competitionContent={
-            <CompetitionState
-              error={error}
-              retry={() => {
-                void wave.refetch();
-                void hub.refetch();
-                void competition.refetch();
-              }}
-            />
-          }
-        />
-      </WavesLayout>
+  const search = useSearchParams();
+  const route = useCompetitionRoute();
+  const ready =
+    route.waveId === waveId && route.competitionId === competitionId
+      ? route.value
+      : null;
+  let content;
+  if (ready === null)
+    content = <CompetitionState error={route.error} retry={route.retry} />;
+  else if (!route.flat)
+    content = (
+      <CompetitionDetail waveId={waveId} competitionId={competitionId} />
     );
+  else {
+    const legacy = ready.hub.legacy_primary_competition_id === competitionId;
+    const tab = getCompetitionTab(search.get("tab"));
+    if (!legacy || tab === "rules" || tab === "votes")
+      content = <NativeCompetitionContent embedded />;
   }
   return (
-    <SelectedCompetitionWave
-      key={`${waveId}:${competitionId}:${viewer ?? "anonymous"}`}
-      wave={wave.data}
-      hub={hub.data}
-      competition={competition.data}
-      initialFlat={competition.data.lifecycle !== ApiCompetitionLifecycle.Draft}
+    <MyStreamWave
+      key={`${waveId}:${competitionId}:${route.viewer ?? "anonymous"}`}
+      waveId={waveId}
+      competitionContent={content}
     />
   );
 }

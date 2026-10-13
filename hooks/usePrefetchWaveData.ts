@@ -16,6 +16,7 @@ export const usePrefetchWaveData = () => {
             queryFn: async () =>
               await commonApiFetch<ApiWave>({
                 endpoint: `waves/${waveId}`,
+                errorMode: "structured",
               }),
             staleTime: 60000,
           });
