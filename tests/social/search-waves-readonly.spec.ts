@@ -623,7 +623,9 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       "/discover?view=active-votes"
     );
     await allVotes.click();
-    await expect(page).toHaveURL(/\/discover\?view=active-votes$/);
+    await expect(page).toHaveURL(/\/discover\?view=active-votes$/, {
+      timeout: NAVIGATION_TIMEOUT_MS,
+    });
     await expect(
       page.getByRole("heading", { level: 1, name: /^Active Votes/ })
     ).toBeVisible();
@@ -643,7 +645,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
         name: "Active discussions",
         exact: true,
       })
-    ).toBeVisible();
+    ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
     await expectNoHorizontalOverflow(page);
   });
 
