@@ -19,11 +19,13 @@ const createSubwave = ({
   id,
   createdAt = 0,
   latestDropTimestamp = null,
+  muted = false,
   name = id,
 }: {
   readonly id: string;
   readonly createdAt?: number | undefined;
   readonly latestDropTimestamp?: number | null | undefined;
+  readonly muted?: boolean | undefined;
   readonly name?: string | undefined;
 }) =>
   ({
@@ -31,6 +33,7 @@ const createSubwave = ({
     name,
     createdAt,
     latestDropTimestamp,
+    muted,
   }) as SidebarWave;
 
 describe("fetchAllWaveSubwaves", () => {
@@ -106,6 +109,44 @@ describe("fetchAllWaveSubwaves", () => {
     expect(subwaves.map((wave) => wave.id)).toEqual([
       "newer-empty-child",
       "older-empty-child",
+    ]);
+  });
+
+  it("returns muted subwaves after unmuted ones, newest activity first in each group", async () => {
+    fetchWaveSubwavesPageMock.mockResolvedValueOnce({
+      waves: [
+        createSubwave({
+          id: "muted-newest",
+          latestDropTimestamp: 400,
+          muted: true,
+        }),
+        createSubwave({
+          id: "unmuted-older",
+          latestDropTimestamp: 100,
+        }),
+        createSubwave({
+          id: "muted-older",
+          latestDropTimestamp: 50,
+          muted: true,
+        }),
+        createSubwave({
+          id: "unmuted-newer",
+          latestDropTimestamp: 300,
+        }),
+      ],
+      page: 1,
+      next: false,
+    });
+
+    const subwaves = await fetchAllWaveSubwaves({
+      parentWaveId: "parent-wave",
+    });
+
+    expect(subwaves.map((wave) => wave.id)).toEqual([
+      "unmuted-newer",
+      "unmuted-older",
+      "muted-newest",
+      "muted-older",
     ]);
   });
 

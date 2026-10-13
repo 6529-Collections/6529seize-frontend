@@ -62,7 +62,7 @@ function makeDrop(serialNo: number, id = `drop-${serialNo}`): ApiDropV2 {
     drop_type: ApiDropMainType.Chat,
     reactions: [{ reaction: "👍", count: 3 }],
     boosts: 0,
-    content: "Rendered feedback",
+    content: "Rendered feedback\n\n**Review:** Stream Contract (v1)",
   } as unknown as ApiDropV2;
 }
 
@@ -132,6 +132,34 @@ describe("public review ledger projection", () => {
     expect(page.records).toEqual([]);
     expect(page.nextCursor).toBe(99);
     expect(page.rawDropCount).toBe(2);
+  });
+
+  it("skips posts without the review marker in a shared feedback Wave", async () => {
+    const metadata = jest.fn(async () => {
+      throw new Error("should not be requested");
+    });
+    const api = makeApi({
+      drops: [
+        {
+          ...makeDrop(100),
+          content: "The proxy rep button does nothing on my profile.",
+        } as ApiDropV2,
+        { ...makeDrop(99), content: undefined } as unknown as ApiDropV2,
+      ],
+      metadata,
+    });
+
+    const page = await fetchPublicReviewLedgerPage({
+      api,
+      config,
+      destination,
+      limit: 2,
+    });
+
+    expect(metadata).not.toHaveBeenCalled();
+    expect(page.records).toEqual([]);
+    expect(page.warnings).toEqual([]);
+    expect(page.nextCursor).toBe(99);
   });
 
   it("warns and omits failures to hydrate full metadata", async () => {
