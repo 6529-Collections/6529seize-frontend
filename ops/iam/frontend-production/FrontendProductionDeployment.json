@@ -32,7 +32,11 @@
     {
       "Sid": "BeanstalkRegionalStorageBucket",
       "Effect": "Allow",
-      "Action": ["s3:CreateBucket", "s3:PutBucketOwnershipControls"],
+      "Action": [
+        "s3:CreateBucket",
+        "s3:PutBucketOwnershipControls",
+        "s3:ListBucket"
+      ],
       "Resource": ["arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142"],
       "Condition": {
         "StringEquals": {

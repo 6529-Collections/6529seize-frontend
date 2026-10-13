@@ -1,5 +1,5 @@
 {
-  "recorded_at": "2026-10-13T16:11:34.627424+00:00",
+  "recorded_at": "2026-10-13T16:16:17.523176+00:00",
   "role_arn": "arn:aws:iam::987989283142:role/gha-frontend-deploy-production",
   "trust_verified": true,
   "policies_verified": [
@@ -10,8 +10,8 @@
   "access_analyzer_findings": 0,
   "simulation_summary": {
     "access_analyzer_findings": 0,
-    "positive_cases": 32,
-    "negative_cases": 48,
+    "positive_cases": 33,
+    "negative_cases": 50,
     "status": "passed"
   },
   "read_only_checks": [
@@ -33,6 +33,135 @@
     }
   ],
   "temporary_role_deleted": true,
-  "policy_version": "v5",
-  "policy_update_verified": true
+  "policy_version": "v6",
+  "policy_update_verified": true,
+  "storage_simulation_cases": [
+    {
+      "action": "s3:CreateBucket",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142",
+      "expected": "allowed",
+      "decision": "allowed",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:ListBucket",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142",
+      "expected": "allowed",
+      "decision": "allowed",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:ListBucket",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:PutBucketOwnershipControls",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142",
+      "expected": "allowed",
+      "decision": "allowed",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:PutBucketOwnershipControls",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:CreateBucket",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:CreateBucket",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:DeleteBucket",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:GetObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/example",
+      "expected": "allowed",
+      "decision": "allowed",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:GetObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-other/_runtime/example",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:GetObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/example",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:PutObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/example",
+      "expected": "allowed",
+      "decision": "allowed",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:PutObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-other/_runtime/example",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:PutObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/example",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:AbortMultipartUpload",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/example",
+      "expected": "allowed",
+      "decision": "allowed",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:AbortMultipartUpload",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-other/_runtime/example",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:AbortMultipartUpload",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/example",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:DeleteObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/example",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "via_aws_service": "true"
+    }
+  ],
+  "bucket_ownership_before": "ObjectWriter"
 }

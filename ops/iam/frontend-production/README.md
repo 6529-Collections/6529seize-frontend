@@ -35,7 +35,7 @@ They remain restricted to this environment's resources and `us-east-1`.
 Required regional EC2/Auto Scaling metadata calls cannot be resource-scoped;
 they carry the same service-delegation restriction.
 
-Elastic Beanstalk also requires `s3:CreateBucket` and
+Elastic Beanstalk also requires `s3:CreateBucket`, `s3:ListBucket`, and
 `s3:PutBucketOwnershipControls` for its existing regional
 storage bucket, `elasticbeanstalk-us-east-1-987989283142`, when updating the
 environment. This is limited to that exact bucket, `us-east-1`, and AWS forward
@@ -44,6 +44,12 @@ This bucket is shared by the account's Elastic Beanstalk environments; the
 ownership-control permission applies at bucket level and cannot be limited to
 an environment prefix. The production deployment observed its existing
 `ObjectWriter` ownership configuration; the workflow does not change it.
+IAM cannot constrain the ownership mode in `PutBucketOwnershipControls`:
+S3 does not support the `s3:x-amz-object-ownership` condition key for that action.
+Service-delegation scoping does not prove that an AWS service cannot change the
+mode. Verify `ObjectWriter` remains unchanged after deployment. Bucket listing
+is needed to distinguish a missing runtime object from an access denial; it is
+also restricted to AWS service calls, but is not scoped to an object prefix.
 Runtime configuration objects may be read/written, and failed multipart uploads
 aborted, only under `resources/environments/e-8bsbxqrikc/` in that bucket and only
 through AWS forward access sessions. Other environment prefixes and object
