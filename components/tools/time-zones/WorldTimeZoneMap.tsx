@@ -84,7 +84,7 @@ function getNextIndex(key: string, index: number, count: number) {
 function getZoneIdFromEvent(event: SyntheticEvent): string | null {
   const target = event.target;
   return target instanceof Element
-    ? (target.closest("[data-zone-id]")?.getAttribute("data-zone-id") ?? null)
+    ? (target.closest<SVGElement>("[data-zone-id]")?.dataset["zoneId"] ?? null)
     : null;
 }
 
