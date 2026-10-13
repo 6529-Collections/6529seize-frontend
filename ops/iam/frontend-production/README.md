@@ -44,6 +44,10 @@ This bucket is shared by the account's Elastic Beanstalk environments; the
 ownership-control permission applies at bucket level and cannot be limited to
 an environment prefix. The production deployment observed its existing
 `ObjectWriter` ownership configuration; the workflow does not change it.
+Runtime configuration objects may be read/written, and failed multipart uploads
+aborted, only under `resources/environments/e-8bsbxqrikc/` in that bucket and only
+through AWS forward access sessions. Other environment prefixes and object
+deletion are excluded.
 
 Normal rolling deployments may update capacity and launch-template versions.
 Creating a different environment, replacing networking/resources, changing IAM

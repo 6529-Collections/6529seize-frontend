@@ -7,8 +7,8 @@
     {
       "name": "FrontendProductionDeployment",
       "file": "FrontendProductionDeployment.json",
-      "characters": 4760,
-      "sha256": "1787e2a3ad3b0f24b3ca98cce590ec34882b37aaba4f5ab7b8b1bfea5b82f93b"
+      "characters": 5096,
+      "sha256": "d7a90b9b24b6e602aed02b315dec8f499942143d5fbd72269620130c0caae91a"
     }
   ]
 }
