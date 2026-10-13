@@ -92,13 +92,11 @@ export default function UserPageXtdhGrantedList({
   const showLoadMore = hasNextPage && !isError;
 
   return (
-    <div className="tw-rounded-b-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950">
-      <div className="tw-flex tw-flex-col tw-justify-between tw-gap-4 tw-px-6 tw-pb-4 tw-pt-6 md:tw-flex-row md:tw-items-center">
-        <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
-          Granted xTDH
-        </h2>
+    <div className="tw-space-y-4">
+      <div className="tw-flex tw-flex-col tw-gap-4">
+        <h2 className="tw-sr-only">Granted xTDH</h2>
 
-        <div className="tw-flex tw-flex-col tw-justify-between tw-gap-4 tw-border-b tw-border-iron-800 sm:tw-flex-row sm:tw-items-center">
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
           <div className="tw-min-w-0 tw-flex-1">
             <UserPageXtdhGrantedListTabs
               activeTab={activeTab}
@@ -108,7 +106,7 @@ export default function UserPageXtdhGrantedList({
             />
           </div>
           {activeTab === "ACTIVE" && (
-            <div className="tw-w-full sm:tw-w-auto">
+            <div className="tw-w-auto tw-shrink-0 [&_button[aria-haspopup]:not(:focus)]:tw-ring-0 [&_button[aria-haspopup]]:tw-h-8 [&_button[aria-haspopup]]:tw-border [&_button[aria-haspopup]]:tw-border-solid [&_button[aria-haspopup]]:tw-border-white/[0.06] [&_button[aria-haspopup]]:tw-bg-transparent [&_button[aria-haspopup]]:tw-py-1 [&_button[aria-haspopup]]:tw-text-[13px] [&_button[aria-haspopup]]:tw-font-medium [&_button[aria-haspopup]]:tw-text-iron-300 [&_button[aria-haspopup]]:tw-shadow-none">
               <UserPageXtdhGrantedListSubFilters
                 activeSubFilter={activeSubFilter}
                 onSubFilterChange={handleSubFilterChange}
