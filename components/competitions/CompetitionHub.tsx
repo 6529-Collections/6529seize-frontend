@@ -182,7 +182,7 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
         ))}
       </ul>
     ) : (
-      <output className="tw-block tw-text-iron-400">
+      <output className="tw-block tw-text-sm tw-text-iron-400">
         {t(locale, "competitions.empty")}
       </output>
     );
@@ -236,7 +236,7 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
         id={panelId}
         role="tabpanel"
         aria-label={t(locale, `competitions.${filter}`)}
-        className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-p-4 sm:tw-px-6"
+        className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-p-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 hover:tw-scrollbar-thumb-white/15 sm:tw-px-6"
       >
         <div className="tw-mx-auto tw-max-w-5xl tw-space-y-5">
           {results}
