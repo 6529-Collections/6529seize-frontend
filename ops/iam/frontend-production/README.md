@@ -35,6 +35,16 @@ They remain restricted to this environment's resources and `us-east-1`.
 Required regional EC2/Auto Scaling metadata calls cannot be resource-scoped;
 they carry the same service-delegation restriction.
 
+Elastic Beanstalk also requires `s3:CreateBucket` and
+`s3:PutBucketOwnershipControls` for its existing regional
+storage bucket, `elasticbeanstalk-us-east-1-987989283142`, when updating the
+environment. This is limited to that exact bucket, `us-east-1`, and AWS forward
+access sessions. It does not grant bucket deletion or access to other buckets.
+This bucket is shared by the account's Elastic Beanstalk environments; the
+ownership-control permission applies at bucket level and cannot be limited to
+an environment prefix. The production deployment observed its existing
+`ObjectWriter` ownership configuration; the workflow does not change it.
+
 Normal rolling deployments may update capacity and launch-template versions.
 Creating a different environment, replacing networking/resources, changing IAM
 policies, or provisioning additional services requires administrative review and
