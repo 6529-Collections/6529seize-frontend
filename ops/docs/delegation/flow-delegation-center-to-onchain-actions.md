@@ -20,7 +20,7 @@ verify the result in Wallet Checker.
 
 ## Entry Points
 
-- Sidebar: `About -> Safe Collecting & Wallets -> Delegation Center`
+- Sidebar: `About -> Safe Collecting -> Delegation Center`
 - Direct URLs to write or collection routes
 - Profile consolidated-addresses panel links:
   - `/safe-collecting/wallet-checker?address=<primary-wallet>`

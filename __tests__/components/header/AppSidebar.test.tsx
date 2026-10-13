@@ -175,7 +175,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
             section: true,
           }),
           expect.objectContaining({
-            label: "Safe Collecting & Wallets",
+            label: "Safe Collecting",
             section: true,
           }),
           expect.objectContaining({
@@ -220,7 +220,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         ])
       );
       expect(
-        getChildGroup(aboutChildren, "Safe Collecting & Wallets").children
+        getChildGroup(aboutChildren, "Safe Collecting").children
       ).toEqual(
         expect.arrayContaining([
           { label: "Safe Collecting", path: "/safe-collecting" },

@@ -222,7 +222,7 @@ const defaultSidebarSections: SidebarSection[] = [
         ],
       },
       {
-        name: "Safe Collecting & Wallets",
+        name: "Safe Collecting",
         items: [{ name: "Delegation Center", href: "/safe-collecting" }],
       },
     ],
@@ -1000,7 +1000,7 @@ describe("HeaderSearchModal", () => {
             name: "About",
             icon: () => null,
             items: [],
-            subsections: [{ name: "Safe Collecting & Wallets", items: pages }],
+            subsections: [{ name: "Safe Collecting", items: pages }],
           },
         ],
         queryImpl: () => ({

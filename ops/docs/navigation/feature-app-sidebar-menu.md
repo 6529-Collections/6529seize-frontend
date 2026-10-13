@@ -84,7 +84,7 @@ standalone row after `About`.
 - Open `Drop Forge`:
   use the standalone row after `About` when the current wallet can access the
   landing route.
-- About groups these pages under `Safe Collecting & Wallets`; `Primary Address`
+- About groups these pages under `Safe Collecting`; `Primary Address`
   is last, after `App Wallets` when supported. `GDRC` is the last item in
   `Collections & Minting`.
 - Open About tool routes:
@@ -124,7 +124,7 @@ standalone row after `About`.
   shows the `6529` home link instead.
 - `NFTs`, `Waves`, and `About` are collapsible; `Museum` is a direct row. About
   group headers are nested disclosure controls, not links.
-- `App Wallets` appears inside `About > Safe Collecting & Wallets` only when
+- `App Wallets` appears inside `About > Safe Collecting` only when
   app-wallet support is available.
 - `Scan QR Code` appears only when running in Capacitor with scanner support.
 - `Push Notifications` appears only when connected and opens an in-app modal.

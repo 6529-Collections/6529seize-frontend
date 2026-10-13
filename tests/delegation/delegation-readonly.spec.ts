@@ -345,14 +345,16 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
     const openingNote = main.getByText(/^Four-wallet signing opens /);
     if (await openingNote.count()) {
       await expect(openingNote).toHaveCSS("font-size", "12px");
+      if (!isMobile) {
+        await expect(openingNote).toHaveJSProperty("clientHeight", 20);
+      }
     }
+    await expect(firstWallet).toHaveAttribute("placeholder", "0x… or ENS");
     await expect(firstWallet).toHaveValue("");
     await firstWallet.fill("not-a-wallet");
     await expect(firstWallet).toHaveAttribute("aria-invalid", "true");
     await expect(
-      main.getByText(
-        "Enter a wallet address: 0x followed by 40 hexadecimal characters."
-      )
+      main.getByText("Enter a valid Ethereum address or a resolvable ENS name.")
     ).toBeVisible();
     await expect(
       main.getByText("Enter at least two valid wallets to see the steps.")

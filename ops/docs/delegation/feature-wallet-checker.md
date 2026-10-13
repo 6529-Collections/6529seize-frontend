@@ -8,7 +8,7 @@ It checks delegations, delegation managers, and consolidation relationships.
 ## Location in the Site
 
 - Route: `/safe-collecting/wallet-checker`
-- App navigation: `About -> Safe Collecting & Wallets -> Wallet Checker`
+- App navigation: `About -> Safe Collecting -> Wallet Checker`
 - Profile identity panel link: `/safe-collecting/wallet-checker?address=<primary-wallet>`
 
 ## Entry Points

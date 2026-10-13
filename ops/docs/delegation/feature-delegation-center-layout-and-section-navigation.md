@@ -18,7 +18,7 @@ state.
 
 ## Entry Points
 
-- Sidebar: `About -> Safe Collecting & Wallets`
+- Sidebar: `About -> Safe Collecting`
   - `/safe-collecting` (Safe Collecting)
   - `/safe-collecting/tap-guide`
   - `/safe-collecting/faq`
