@@ -2,6 +2,7 @@ import ProfileCollectedActivityLink from "@/components/user/collected/ProfileCol
 import { render, screen } from "@testing-library/react";
 import { usePathname, useSearchParams } from "next/navigation";
 import type { ComponentProps } from "react";
+import * as activityRestoration from "@/components/user/collected/restoreCollectedActivityLink";
 
 type NavigateEvent = { preventDefault: () => void };
 let mockNavigate: ((event: NavigateEvent) => void) | undefined;
@@ -111,7 +112,11 @@ describe("ProfileCollectedActivityLink", () => {
       </ProfileCollectedActivityLink>
     );
     expect(screen.getByRole("link")).toHaveFocus();
-    expect(scroll).toHaveBeenCalledWith({ block: "center" });
+    expect(scroll).toHaveBeenCalledWith({
+      behavior: "instant",
+      block: "center",
+      inline: "nearest",
+    });
     screen.getByRole("link").blur();
     view.rerender(
       <ProfileCollectedActivityLink
@@ -123,8 +128,28 @@ describe("ProfileCollectedActivityLink", () => {
     );
     expect(screen.getByRole("link")).not.toHaveFocus();
     expect(scroll).toHaveBeenCalledTimes(1);
+    view.unmount();
     globalThis.history.replaceState(null, "", "/");
     Element.prototype.scrollIntoView = originalScroll;
+  });
+
+  it("cleans up pending restoration when the link unmounts", () => {
+    const cleanup = jest.fn();
+    const restore = jest
+      .spyOn(activityRestoration, "restoreCollectedActivityLink")
+      .mockReturnValue(cleanup);
+    const view = render(
+      <ProfileCollectedActivityLink
+        href="/the-memes/42"
+        activityKey="wallet-42"
+      >
+        Artwork
+      </ProfileCollectedActivityLink>
+    );
+    expect(restore).toHaveBeenCalledWith(screen.getByRole("link"));
+    view.unmount();
+    expect(cleanup).toHaveBeenCalledTimes(1);
+    restore.mockRestore();
   });
 
   it.each(["/Shelby/identity", "/%2F/collected"])(
