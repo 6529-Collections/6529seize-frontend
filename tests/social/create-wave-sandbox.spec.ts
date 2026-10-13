@@ -765,7 +765,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
   test("creates a perpetual rank wave after choosing the mode on the overview", async ({
     baseURL,
     page,
-  }) => {
+  }, testInfo) => {
     await gotoCreateWave(page);
 
     await page.getByLabel(/Wave Name/).fill(SANDBOX_PERPETUAL_WAVE_NAME);
@@ -823,6 +823,24 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expect(perpetualRadio).toBeVisible();
     await page.getByText("Perpetual Ranking", { exact: true }).click();
     await expect(perpetualRadio).toBeChecked();
+    await page
+      .getByRole("group", { name: "Ranking mode", exact: true })
+      .screenshot({
+        animations: "disabled",
+        path: testInfo.outputPath("compact-ranking-options.png"),
+      });
+    const appearanceToggle = page.getByRole("button", {
+      name: /^Appearance and labels/,
+    });
+    await appearanceToggle.click();
+    await page
+      .getByRole("group", { name: "Proposal card appearance", exact: true })
+      .screenshot({
+        animations: "disabled",
+        path: testInfo.outputPath("compact-appearance-options.png"),
+      });
+    await expectNoHorizontalOverflow(page);
+    await appearanceToggle.click();
     await nextStepButton(page).click();
     await expect(
       page.getByRole("heading", { name: "Access", level: 2 })

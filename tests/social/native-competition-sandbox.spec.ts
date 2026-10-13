@@ -1849,6 +1849,26 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await choices.getByRole("option", { name: "Rank", exact: true }).click();
     await expect(trigger).toHaveText("Rank");
     await expect(choices).toBeHidden();
+    await page.getByText("Perpetual Ranking", { exact: true }).click();
+    const ranking = page.getByRole("group", {
+      name: "Ranking mode",
+      exact: true,
+    });
+    await ranking.screenshot({
+      animations: "disabled",
+      path: testInfo.outputPath("compact-ranking-options.png"),
+    });
+    await page
+      .getByRole("button", { name: "Appearance and labels", exact: true })
+      .click();
+    const appearance = page.getByRole("group", {
+      name: "Proposal card appearance",
+      exact: true,
+    });
+    await appearance.screenshot({
+      animations: "disabled",
+      path: testInfo.outputPath("compact-appearance-options.png"),
+    });
     await expectNoHorizontalOverflow(page);
   });
 

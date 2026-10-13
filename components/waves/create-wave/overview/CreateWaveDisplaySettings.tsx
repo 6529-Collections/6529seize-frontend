@@ -1,6 +1,9 @@
 import CommonAnimationHeight from "@/components/utils/animation/CommonAnimationHeight";
 import CreateWaveAdvancedSection from "@/components/waves/create-wave/utils/CreateWaveAdvancedSection";
-import { CREATE_WAVE_FORM_STYLES } from "@/components/waves/create-wave/utils/createWaveFormStyles";
+import {
+  CREATE_WAVE_FORM_STYLES,
+  CREATE_WAVE_OPTION_STYLES,
+} from "@/components/waves/create-wave/utils/createWaveFormStyles";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import {
   DEFAULT_PROPOSAL_CARD_RECIPE,
@@ -64,31 +67,27 @@ function ProposalCardAppearancePreview({
   readonly mode: CreateWaveProposalCardMode;
 }) {
   return (
-    <div
-      aria-hidden="true"
-      className="tw-mb-2 tw-h-16 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-2 sm:tw-mb-3 sm:tw-h-24 sm:tw-p-3"
-    >
+    <div aria-hidden="true" className={CREATE_WAVE_OPTION_STYLES.preview}>
       {mode === "standard" ? (
         <div className="tw-flex tw-h-full tw-flex-col tw-justify-center">
-          <div className="tw-flex tw-items-center tw-gap-1.5 sm:tw-gap-2">
-            <span className="tw-size-3 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-650 sm:tw-size-4" />
-            <span className="tw-h-1 tw-w-10 tw-rounded-full tw-bg-iron-650 sm:tw-h-1.5 sm:tw-w-16" />
+          <div className="tw-flex tw-items-center tw-gap-1.5">
+            <span className="tw-size-1.5 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-650" />
+            <span className="tw-h-1 tw-w-6 tw-rounded-full tw-bg-iron-650" />
           </div>
-          <div className="tw-mt-1.5 tw-space-y-1 sm:tw-mt-2 sm:tw-space-y-1.5">
-            <span className="tw-block tw-h-1 tw-w-full tw-rounded-full tw-bg-iron-800 sm:tw-h-1.5" />
-            <span className="tw-block tw-h-1 tw-w-11/12 tw-rounded-full tw-bg-iron-800 sm:tw-h-1.5" />
-            <span className="tw-block tw-h-1 tw-w-full tw-rounded-full tw-bg-iron-800 sm:tw-h-1.5" />
-            <span className="tw-block tw-h-1 tw-w-3/4 tw-rounded-full tw-bg-iron-800 sm:tw-h-1.5" />
-            <span className="tw-block tw-h-1 tw-w-5/6 tw-rounded-full tw-bg-iron-800 sm:tw-h-1.5" />
+          <div className="tw-mt-1.5 tw-space-y-1">
+            <span className="tw-block tw-h-0.5 tw-w-full tw-rounded-full tw-bg-iron-800" />
+            <span className="tw-block tw-h-0.5 tw-w-11/12 tw-rounded-full tw-bg-iron-800" />
+            <span className="tw-block tw-h-0.5 tw-w-full tw-rounded-full tw-bg-iron-800" />
+            <span className="tw-block tw-h-0.5 tw-w-3/4 tw-rounded-full tw-bg-iron-800" />
           </div>
         </div>
       ) : (
-        <div className="tw-flex tw-h-full tw-items-center tw-gap-2 sm:tw-gap-3">
+        <div className="tw-flex tw-h-full tw-items-center tw-gap-2">
           <div className="tw-min-w-0 tw-flex-1">
-            <span className="tw-block tw-h-1.5 tw-w-2/3 tw-rounded-full tw-bg-iron-650 sm:tw-h-2" />
-            <span className="tw-mt-1.5 tw-block tw-h-1 tw-w-4/5 tw-rounded-full tw-bg-iron-800 sm:tw-mt-2 sm:tw-h-1.5" />
+            <span className="tw-block tw-h-1 tw-w-2/3 tw-rounded-full tw-bg-iron-650" />
+            <span className="tw-mt-1.5 tw-block tw-h-0.5 tw-w-4/5 tw-rounded-full tw-bg-iron-800" />
           </div>
-          <span className="tw-size-8 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800 sm:tw-size-11 sm:tw-rounded-lg" />
+          <span className="tw-size-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800" />
         </div>
       )}
     </div>
@@ -299,7 +298,7 @@ export default function CreateWaveDisplaySettings({
         <legend className={CREATE_WAVE_FORM_STYLES.fieldLabel}>
           {t(locale, "waves.proposalCard.appearanceLabel")}
         </legend>
-        <div className="tw-mt-3 tw-grid tw-grid-cols-2 tw-gap-3">
+        <div className={`tw-mt-3 ${CREATE_WAVE_OPTION_STYLES.grid}`}>
           {(["standard", "custom"] as const).map((mode) => {
             const isSelected = proposalCards.mode === mode;
             const isStandard = mode === "standard";
@@ -319,14 +318,14 @@ export default function CreateWaveDisplaySettings({
             return (
               <label
                 key={mode}
-                className={`tw-group tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-p-2 tw-transition tw-duration-300 tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 sm:tw-p-3 ${
+                className={`${CREATE_WAVE_OPTION_STYLES.card} ${
                   isSelected
-                    ? "tw-border-primary-500/60 tw-bg-primary-500/5"
-                    : "tw-border-white/5 tw-bg-iron-950 hover:tw-border-white/10"
+                    ? CREATE_WAVE_OPTION_STYLES.selected
+                    : CREATE_WAVE_OPTION_STYLES.unselected
                 }`}
               >
                 <ProposalCardAppearancePreview mode={mode} />
-                <div className="tw-flex tw-items-start tw-gap-2 sm:tw-gap-3">
+                <div className={CREATE_WAVE_OPTION_STYLES.content}>
                   <input
                     id={mode}
                     type="radio"
@@ -337,19 +336,19 @@ export default function CreateWaveDisplaySettings({
                   />
                   <span
                     aria-hidden="true"
-                    className={`tw-mt-0.5 tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out ${
+                    className={`tw-order-last tw-mt-0.5 tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition-colors motion-reduce:tw-transition-none ${
                       isSelected
                         ? "tw-border-primary-400 tw-bg-primary-500/10"
                         : "tw-border-iron-600 tw-bg-transparent group-hover:tw-border-iron-500"
                     }`}
                   >
                     <span
-                      className={`tw-size-2 tw-rounded-full tw-bg-primary-400 tw-transition tw-duration-200 ${
+                      className={`tw-size-2 tw-rounded-full tw-bg-primary-400 tw-transition tw-duration-200 motion-reduce:tw-transition-none ${
                         isSelected ? "tw-scale-100" : "tw-scale-0"
                       }`}
                     />
                   </span>
-                  <div className="tw-min-w-0 tw-whitespace-normal">
+                  <div className="tw-min-w-0 tw-flex-1 tw-whitespace-normal">
                     <span
                       className={`tw-block tw-text-sm tw-font-medium ${
                         isSelected
@@ -377,7 +376,7 @@ export default function CreateWaveDisplaySettings({
             <div className="tw-pt-3">
               <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2">
                 <div className="tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-4">
-                  <div className="tw-flex tw-min-h-10 tw-flex-col tw-items-start tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between">
+                  <div className="tw-flex tw-min-h-10 tw-flex-wrap tw-items-center tw-gap-3">
                     <label
                       htmlFor="create-wave-proposal-card-excerpt-length"
                       className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300"
