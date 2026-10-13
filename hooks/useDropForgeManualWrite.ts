@@ -1,4 +1,5 @@
 "use client";
+import { v4 as uuidv4 } from "uuid";
 import {
   useCallback,
   useEffect,
@@ -93,7 +94,7 @@ export function useDropForgeManualWrite(
       // A null lease explicitly permits the legacy/unmanaged flow. Conflicts on
       // managed launches reject BEGIN rather than returning null.
       const current: ManualAttempt = {
-        id: crypto.randomUUID(),
+        id: uuidv4(),
         key,
         lease: granted.lease_id,
         action: label,

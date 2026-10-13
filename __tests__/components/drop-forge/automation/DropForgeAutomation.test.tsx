@@ -292,3 +292,57 @@ it("requires exact phase evidence before marking a saved job completed", async (
     screen.getByRole("button", { name: "Process and Finalize" })
   ).toBeEnabled();
 });
+
+it("queues processing with a UUID even when the browser lacks randomUUID", async () => {
+  const descriptor = Object.getOwnPropertyDescriptor(
+    globalThis.crypto,
+    "randomUUID"
+  );
+  Object.defineProperty(globalThis.crypto, "randomUUID", {
+    configurable: true,
+    value: undefined,
+  });
+  try {
+    jest.mocked(latestForgeProcess).mockResolvedValue(null);
+    jest.mocked(startForgeProcess).mockResolvedValue({
+      id: "job",
+      contract: "creator",
+      claim_id: 123,
+      kind: "PROCESS_ALL",
+      status: "PENDING",
+      step: 0,
+      updated_at: 1,
+    } as ApiDropForgeJob);
+    renderUI(
+      <ProcessAndFinalize
+        contract="creator"
+        claim={123}
+        plan="plan"
+        phaseIds={["p0", "p1", "p2"]}
+      />
+    );
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Process and Finalize" })
+      ).toBeEnabled()
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Process and Finalize" })
+    );
+    await waitFor(() =>
+      expect(startForgeProcess).toHaveBeenCalledWith(
+        "creator",
+        123,
+        "plan",
+        ["p0", "p1", "p2"],
+        expect.stringMatching(
+          /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
+        )
+      )
+    );
+  } finally {
+    if (descriptor)
+      Object.defineProperty(globalThis.crypto, "randomUUID", descriptor);
+    else Reflect.deleteProperty(globalThis.crypto, "randomUUID");
+  }
+});

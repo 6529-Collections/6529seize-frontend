@@ -1,4 +1,5 @@
 "use client";
+import { v4 as uuidv4 } from "uuid";
 import { ApiDropForgeActionKindEnum as Kind } from "@/generated/models/ApiDropForgeAction";
 import { ApiDropForgeRecoveryOutcomeEnum as Outcome } from "@/generated/models/ApiDropForgeRecovery";
 import { useEffect, useRef, useState } from "react";
@@ -62,7 +63,7 @@ export default function DropForgeTransactionRecovery({
       if (!(await requestAuth()).success) return;
       pendingRequest.current ??= {
         revision: launch.revision,
-        request_id: crypto.randomUUID(),
+        request_id: uuidv4(),
         action_id: action.id,
         expected_hash: action.hash,
         operation,

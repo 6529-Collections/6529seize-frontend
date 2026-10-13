@@ -76,8 +76,7 @@ export async function forgeList(
   list: "airdrops" | "airdrops_unconsolidated" | "allowlists"
 ): Promise<Array<{ wallet: string; amount: number }>> {
   const rows: Array<{ wallet: string; amount: number }> = [];
-  let offset: number | null = 0;
-  while (offset !== null) {
+  async function readPage(offset: number): Promise<void> {
     const page: ApiDropForgeListPage = await commonApiFetch({
       endpoint: `drop-forge/distribution-jobs/${job}/lists/${encodeURIComponent(phase)}/${list}`,
       params: { offset: String(offset) },
@@ -85,8 +84,9 @@ export async function forgeList(
     rows.push(...page.rows);
     if (page.next_offset !== null && page.next_offset <= offset)
       throw new Error("Invalid list pagination");
-    offset = page.next_offset;
+    if (page.next_offset !== null) await readPage(page.next_offset);
   }
+  await readPage(0);
   return rows;
 }
 export function beginForgeManual(

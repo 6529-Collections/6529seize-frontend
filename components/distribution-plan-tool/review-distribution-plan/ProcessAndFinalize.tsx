@@ -1,4 +1,5 @@
 "use client";
+import { v4 as uuidv4 } from "uuid";
 import { ApiDropForgeJobStatusEnum as JobStatus } from "@/generated/models/ApiDropForgeJob";
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -52,7 +53,7 @@ export default function ProcessAndFinalize({
       if (!(await requestAuth()).success) return;
       const key = JSON.stringify([contract, claim, plan, phaseIds]);
       if (request.current?.key !== key || job?.status === JobStatus.Failed)
-        request.current = { key, id: crypto.randomUUID() };
+        request.current = { key, id: uuidv4() };
       const saved = await startForgeProcess(
         contract,
         claim,

@@ -1,4 +1,5 @@
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import type { ApiDropForgeListPage } from "@/generated/models/ApiDropForgeListPage";
 import { beginForgeManual, forgeList } from "@/services/api/drop-forge-api";
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
@@ -54,4 +55,42 @@ it("rejects a first page that does not advance its offset", async () => {
   await expect(forgeList("job", "p0", "allowlists")).rejects.toThrow(
     "pagination"
   );
+});
+
+it("waits for the server cursor before requesting the next saved page", async () => {
+  jest.clearAllMocks();
+  let releaseFirst!: (page: ApiDropForgeListPage) => void;
+  const firstPage = new Promise<ApiDropForgeListPage>((resolve) => {
+    releaseFirst = resolve;
+  });
+  jest
+    .mocked(commonApiFetch)
+    .mockReturnValueOnce(firstPage)
+    .mockResolvedValueOnce({
+      rows: [{ wallet: "b", amount: 2 }],
+      next_offset: null,
+    });
+  const downloading = forgeList("job", "p0", "airdrops");
+  expect(commonApiFetch).toHaveBeenCalledTimes(1);
+  releaseFirst({ rows: [{ wallet: "a", amount: 1 }], next_offset: 1000 });
+  await expect(downloading).resolves.toEqual([
+    { wallet: "a", amount: 1 },
+    { wallet: "b", amount: 2 },
+  ]);
+  expect(commonApiFetch).toHaveBeenCalledTimes(2);
+});
+
+it("rejects a stalled later cursor without requesting another page", async () => {
+  jest.clearAllMocks();
+  jest
+    .mocked(commonApiFetch)
+    .mockResolvedValueOnce({
+      rows: [{ wallet: "a", amount: 1 }],
+      next_offset: 1000,
+    })
+    .mockResolvedValueOnce({ rows: [], next_offset: 1000 });
+  await expect(forgeList("job", "p0", "allowlists")).rejects.toThrow(
+    "pagination"
+  );
+  expect(commonApiFetch).toHaveBeenCalledTimes(2);
 });
