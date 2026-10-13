@@ -1602,6 +1602,80 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     }
   });
 
+  test("keeps the editor in place when option cards receive focus", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page);
+    const viewport = page.viewportSize();
+    if (!viewport) throw new Error("Viewport missing");
+    await page.setViewportSize({
+      width: Math.min(viewport.width, 730),
+      height: 800,
+    });
+    await page.goto(`${ROOT}/new`);
+    const name = page.getByLabel("Competition name", { exact: true });
+    await name.fill("Option focus draft");
+    await expect.poll(() => sandbox.requests.length).toBe(1);
+    const footer = page
+      .getByRole("button", { name: "Close editor", exact: true })
+      .locator("..");
+    for (const draft of ["new", "reopened"]) {
+      if (draft === "reopened") {
+        await page.goto(`${ROOT}/draft`);
+        await expect(name).toHaveValue("Option focus draft");
+      }
+      const restingBottom = await footer.evaluate(
+        (element) => element.getBoundingClientRect().bottom
+      );
+      await page.getByText("Perpetual Ranking", { exact: true }).click();
+      await page
+        .getByRole("button", { name: /^Appearance and labels/ })
+        .click();
+      for (const action of [
+        "Summary card",
+        "Full proposal",
+        "ArrowDown",
+        "ArrowUp",
+      ]) {
+        const mode =
+          action === "ArrowDown"
+            ? "Summary card"
+            : action === "ArrowUp"
+              ? "Full proposal"
+              : action;
+        if (action.startsWith("Arrow")) await page.keyboard.press(action);
+        else await page.getByText(mode, { exact: true }).click();
+        const radio = page.getByRole("radio", { name: new RegExp(`^${mode}`) });
+        await expect(radio).toBeChecked();
+        await expect(radio).toBeFocused();
+        // Compare with the resting viewport position, not the scroll container:
+        // an out-of-bounds radio can scroll a hidden ancestor and move both.
+        const largestDrift = await footer.evaluate(
+          async (element, bottom) =>
+            new Promise<number>((resolve) => {
+              const startedAt = performance.now();
+              let maximum = 0;
+              const sample = () => {
+                maximum = Math.max(
+                  maximum,
+                  Math.abs(element.getBoundingClientRect().bottom - bottom)
+                );
+                if (performance.now() - startedAt >= 750) resolve(maximum);
+                else requestAnimationFrame(sample);
+              };
+              requestAnimationFrame(sample);
+            }),
+          restingBottom
+        );
+        expect(largestDrift).toBeLessThanOrEqual(1);
+      }
+      await page.screenshot({
+        path: testInfo.outputPath(`${draft}-option-focus-footer.png`),
+      });
+      await expectNoHorizontalOverflow(page);
+    }
+  });
+
   test("keeps the draft footer at the bottom when proposal appearance changes", async ({
     page,
   }, testInfo) => {

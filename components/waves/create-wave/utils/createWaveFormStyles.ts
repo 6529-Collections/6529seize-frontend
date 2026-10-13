@@ -19,7 +19,8 @@ export const CREATE_WAVE_OPTION_STYLES = {
   unselected: "tw-border-white/5 tw-bg-iron-950 hover:tw-border-white/10",
   preview:
     "tw-h-16 tw-w-full tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-2 sm:tw-h-14",
-  content: "tw-flex tw-min-w-0 tw-items-center tw-gap-4",
+  // Contain the sr-only radio so focusing it cannot scroll an outer layout.
+  content: "tw-relative tw-flex tw-min-w-0 tw-items-center tw-gap-4",
 } as const;
 
 export const CREATE_WAVE_FORM_CONTROL_SCOPE_STYLES =
