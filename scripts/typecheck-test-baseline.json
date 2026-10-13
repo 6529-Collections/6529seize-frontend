@@ -3,7 +3,7 @@
   "config": "tsconfig.jest.json",
   "toolchain": {
     "typescript_version": "5.9.3",
-    "pnpm_lock_sha256": "e688825735a62e365798503779dee89e6e11a26fde3d1804830aa5f1e8db79f1",
+    "pnpm_lock_sha256": "f8628eefcc7d23ffe1909dee07e201caf89d6b8c150a77a811a4648ae6787a7d",
     "jest_tsconfig_sha256": "feda509a89cdd90cbcd9da6eecae28759c34c7aaae3725593ec2b1c022017062",
     "base_tsconfig_sha256": "fdbd8e548aed634324fd228e74d541ea702c1311597aa938741651e50de59c5f"
   },
@@ -730,7 +730,6 @@
     "__tests__/contexts/wave/hooks/useWavePagination.test.ts": 2,
     "__tests__/contexts/wave/MyStreamContext.resume.test.tsx": 2,
     "__tests__/contracts/waves-multi-competition-phase-1.test.ts": 7,
-    "__tests__/helpers/time.test.ts": 2,
     "__tests__/helpers/touch-first-pointer-latch.test.ts": 5,
     "__tests__/helpers/waves/create-wave.helpers.extra.test.ts": 6,
     "__tests__/helpers/waves/create-wave.helpers.test.ts": 11,

@@ -1,6 +1,8 @@
 "use client";
 
 import Button from "@/components/utils/button/Button";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useId, useRef, useState } from "react";
@@ -28,9 +30,30 @@ interface Props {
 const datePickerInputClass =
   "tw-form-input tw-block tw-w-full tw-rounded-none tw-border tw-border-solid tw-border-iron-650 tw-bg-white tw-px-3 tw-py-2 tw-text-base tw-text-iron-950 tw-shadow-none tw-transition placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-bg-white focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400";
 
+// The picker works in UTC calendar days: both fields hold "YYYY-MM-DD" strings
+// (never full ISO timestamps, so they compare correctly as plain strings) and
+// applying emits each day as 00:00 UTC, which is how API date filters read it.
+function toUtcDateString(date: Date): string {
+  return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
+}
+
+// Holds one "YYYY-MM-DD" field. It starts from the initial date and is seeded
+// again whenever the initial day changes, without an effect round trip.
+function useUtcDateField(initial: Date | undefined) {
+  const initialDay = initial ? toUtcDateString(initial) : undefined;
+  const [value, setValue] = useState<string>(initialDay ?? "");
+  const [seededFrom, setSeededFrom] = useState<string | undefined>(initialDay);
+  if (initialDay !== seededFrom) {
+    setSeededFrom(initialDay);
+    if (initialDay !== undefined) setValue(initialDay);
+  }
+  return [value, setValue] as const;
+}
+
 export default function DatePickerModal(props: Readonly<Props>) {
-  const [fromDate, setFromDate] = useState<string>("");
-  const [toDate, setToDate] = useState<string>("");
+  const locale = useBrowserLocale();
+  const [fromDate, setFromDate] = useUtcDateField(props.initial_from_date);
+  const [toDate, setToDate] = useUtcDateField(props.initial_to_date);
 
   const [fromBlock, setFromBlock] = useState("");
   const [toBlock, setToBlock] = useState("");
@@ -39,6 +62,7 @@ export default function DatePickerModal(props: Readonly<Props>) {
   const modalRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const errorId = useId();
+  const utcNoteId = useId();
   const startInputId = useId();
   const endInputId = useId();
 
@@ -67,15 +91,6 @@ export default function DatePickerModal(props: Readonly<Props>) {
       props.onHide();
     }
   });
-
-  useEffect(() => {
-    if (props.initial_from_date)
-      setFromDate(props.initial_from_date.toISOString());
-  }, [props.initial_from_date]);
-
-  useEffect(() => {
-    if (props.initial_to_date) setToDate(props.initial_to_date.toISOString());
-  }, [props.initial_to_date]);
 
   useEffect(() => {
     if (props.initial_from_block)
@@ -124,6 +139,11 @@ export default function DatePickerModal(props: Readonly<Props>) {
     return null;
   }
 
+  // The latest selectable day is today in UTC, matching the UTC day the API
+  // filters on; the note below tells people that the days are UTC.
+  const maxDate = toUtcDateString(new Date());
+  const dateDescribedBy = error ? `${utcNoteId} ${errorId}` : utcNoteId;
+
   return createPortal(
     <div className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1055] tw-cursor-default">
       <div className="tw-absolute tw-inset-0 tw-bg-black/50" />
@@ -160,15 +180,13 @@ export default function DatePickerModal(props: Readonly<Props>) {
                 {props.mode === "date" ? (
                   <input
                     id={startInputId}
-                    value={
-                      fromDate && new Date(fromDate)?.toISOString().slice(0, 10)
-                    }
-                    max={new Date().toISOString().slice(0, 10)}
+                    value={fromDate}
+                    max={maxDate}
                     type="date"
                     placeholder="Start Date"
                     className={datePickerInputClass}
                     aria-invalid={Boolean(error)}
-                    aria-describedby={error ? errorId : undefined}
+                    aria-describedby={dateDescribedBy}
                     onChange={(e) => {
                       const value = e.target.value;
                       if (value && value.length === 10) {
@@ -211,15 +229,13 @@ export default function DatePickerModal(props: Readonly<Props>) {
                 {props.mode === "date" ? (
                   <input
                     id={endInputId}
-                    value={
-                      toDate && new Date(toDate)?.toISOString().slice(0, 10)
-                    }
-                    max={new Date().toISOString().slice(0, 10)}
+                    value={toDate}
+                    max={maxDate}
                     className={datePickerInputClass}
                     type="date"
                     placeholder="End Date"
                     aria-invalid={Boolean(error)}
-                    aria-describedby={error ? errorId : undefined}
+                    aria-describedby={dateDescribedBy}
                     onChange={(e) => {
                       const value = e.target.value;
                       if (value && value.length === 10) {
@@ -252,6 +268,14 @@ export default function DatePickerModal(props: Readonly<Props>) {
                   />
                 )}
               </div>
+              {props.mode === "date" && (
+                <p
+                  id={utcNoteId}
+                  className="tw-m-0 tw-text-sm tw-text-iron-300"
+                >
+                  {t(locale, "datePicker.utcNote")}
+                </p>
+              )}
             </div>
           </div>
           <div className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-650 tw-p-4">
