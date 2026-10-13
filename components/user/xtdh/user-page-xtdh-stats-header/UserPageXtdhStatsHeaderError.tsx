@@ -10,12 +10,8 @@ export function UserPageXtdhStatsHeaderError({
   onRetry,
 }: Readonly<UserPageXtdhStatsHeaderErrorProps>) {
   return (
-    <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-900 tw-p-5 sm:tw-p-6">
-      <p
-        className="tw-m-0 tw-text-[13px] tw-text-iron-300"
-        role="alert"
-        aria-live="polite"
-      >
+    <section className="tw-rounded-2xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-5 tw-text-center tw-shadow-md tw-shadow-black/30">
+      <p className="tw-text-sm tw-text-red-400" role="alert" aria-live="polite">
         {message}
       </p>
       <Button

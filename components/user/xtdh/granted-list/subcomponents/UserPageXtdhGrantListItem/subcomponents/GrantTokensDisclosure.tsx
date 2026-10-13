@@ -144,8 +144,8 @@ function GrantTokensErrorState({
   onRetry,
 }: Readonly<{ message: string; onRetry: () => void }>) {
   return (
-    <div className="tw-rounded-lg tw-border tw-border-white/[0.04] tw-bg-iron-900/50 tw-p-4">
-      <p className="tw-m-0 tw-text-sm tw-text-iron-300">{message}</p>
+    <div className="tw-border-red-500/40 tw-bg-red-500/5 tw-rounded-lg tw-border tw-p-4">
+      <p className="tw-text-red-300 tw-m-0 tw-text-sm">{message}</p>
       <Button
         variant="tertiary"
         size="sm"

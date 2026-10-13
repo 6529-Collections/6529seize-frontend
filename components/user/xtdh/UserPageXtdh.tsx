@@ -151,10 +151,10 @@ export default function UserPageXtdh({ profile }: UserPageXtdhProps) {
                 <button
                   key={tab.key}
                   onClick={() => handleFilterChange(tab.key)}
-                  className={`tw-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-xl tw-font-semibold tw-tracking-tight tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black ${
+                  className={`tw-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-xl tw-tracking-tight tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black ${
                     isActive
-                      ? "tw-text-iron-100"
-                      : "tw-text-iron-500 desktop-hover:hover:tw-text-iron-400"
+                      ? "tw-font-semibold tw-text-iron-100"
+                      : "tw-font-medium tw-text-iron-500 desktop-hover:hover:tw-text-iron-400"
                   }`}
                 >
                   <Icon className="tw-size-4 tw-shrink-0 tw-opacity-50" />
