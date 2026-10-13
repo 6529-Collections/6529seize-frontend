@@ -1,6 +1,6 @@
 import { sha256 } from "js-sha256";
-import { v4 as uuidv4 } from "uuid";
 import { omitDeviceSignature } from "@/lib/device-signing/device-signature-body";
+import { v4 as uuidv4 } from "uuid";
 
 const pendingKeys = new Map<string, string>();
 const MAX_PENDING_SUBMISSIONS = 128;

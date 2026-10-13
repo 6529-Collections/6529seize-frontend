@@ -269,6 +269,11 @@ export async function verifyDropSignedEvents(
   const current = currentEventId
     ? verified.find(({ event }) => same(event.id, currentEventId))
     : undefined;
+  if (currentEventId && !current) {
+    // The server claims the current content is signed but that event does not
+    // verify: never fall back to an older signed version.
+    return { status: "invalid" };
+  }
   const shown = current ?? verified.at(-1);
   if (!shown) {
     return { status: "invalid" };
