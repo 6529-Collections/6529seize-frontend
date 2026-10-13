@@ -101,3 +101,37 @@ describe("getExpiryMillis days and weeks", () => {
     );
   });
 });
+
+describe("getExpiryMillis zero amounts in a repeated fall-back hour", () => {
+  // Both occurrences of a repeated local time in five zones. In a zone other
+  // than the host these are ordinary instants; in the matching host zone the
+  // second occurrence used to snap back to the first (one hour in the past).
+  const instants = [
+    "2026-11-01T08:30:00Z", // Los Angeles 01:30 PDT
+    "2026-11-01T09:30:00Z", // Los Angeles 01:30 PST
+    "2026-10-25T00:30:00Z", // London 01:30 BST
+    "2026-10-25T01:30:00Z", // London 01:30 GMT
+    "2026-04-04T13:30:00Z", // Auckland 02:30 NZDT
+    "2026-04-04T14:30:00Z", // Auckland 02:30 NZST
+    "2026-04-04T14:45:00Z", // Lord Howe 01:45 LHDT
+    "2026-04-04T15:15:00Z", // Lord Howe 01:45 LHST
+    "2026-11-01T04:00:00Z", // St John's 01:30 NDT
+    "2026-11-01T05:00:00Z", // St John's 01:30 NST
+  ].map((iso) => Date.parse(iso));
+
+  it.each([TimeMode.MONTHS, TimeMode.DAYS, TimeMode.WEEKS])(
+    "keeps the exact instant for zero %s",
+    (mode) => {
+      for (const instant of instants) {
+        expect(getExpiryMillis(mode, 0, new Date(instant))).toBe(instant);
+      }
+    }
+  );
+
+  it("does not mutate the date it was given", () => {
+    const now = new Date(instants[1]!);
+    getExpiryMillis(TimeMode.MONTHS, 0, now);
+    getExpiryMillis(TimeMode.DAYS, 0, now);
+    expect(now.getTime()).toBe(instants[1]);
+  });
+});

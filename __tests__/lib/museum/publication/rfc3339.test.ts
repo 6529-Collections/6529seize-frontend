@@ -76,6 +76,51 @@ describe("parseRfc3339DateTime", () => {
   });
 });
 
+describe("parseRfc3339DateTime fractional seconds", () => {
+  const base = Date.UTC(2026, 7, 12, 7, 37, 56);
+
+  it.each([
+    ["no fraction", "2026-08-12T07:37:56Z", base],
+    ["1 digit", "2026-08-12T07:37:56.9Z", base + 900],
+    ["2 digits", "2026-08-12T07:37:56.98Z", base + 980],
+    ["3 digits", "2026-08-12T07:37:56.984Z", base + 984],
+    ["6 digits (the producer format)", "2026-08-12T07:37:56.984246Z", base + 984],
+    ["9 digits", "2026-08-12T07:37:56.123456789Z", base + 123],
+    // Truncated like Date itself, never rounded up into the next second.
+    ["6 digits that would round up", "2026-08-12T07:37:56.999999Z", base + 999],
+    ["6 digits below one millisecond", "2026-08-12T07:37:56.000001Z", base],
+    ["6 digits with trailing zeros", "2026-08-12T07:37:56.500000Z", base + 500],
+    ["6 digits and a positive offset", "2026-08-12T09:37:56.984246+02:00", base + 984],
+    ["6 digits and a negative offset", "2026-08-12T00:07:56.984246-07:30", base + 984],
+  ])("parses %s", (_name, value, instant) => {
+    expect(parseRfc3339DateTime(value)).toBe(instant);
+  });
+
+  it("hands Date.parse at most three fractional digits", () => {
+    const parse = jest.spyOn(Date, "parse");
+    try {
+      parseRfc3339DateTime("2026-08-12T07:37:56.984246Z");
+      parseRfc3339DateTime("2026-08-12T07:37:56.9+02:00");
+      parseRfc3339DateTime("2026-08-12T07:37:56Z");
+      expect(parse.mock.calls.map(([argument]) => argument)).toEqual([
+        "2026-08-12T07:37:56.984Z",
+        "2026-08-12T07:37:56.900+02:00",
+        // Without a fraction the value is passed through unchanged.
+        "2026-08-12T07:37:56Z",
+      ]);
+    } finally {
+      parse.mockRestore();
+    }
+  });
+
+  it("still rejects a fraction on an otherwise invalid value", () => {
+    expect(parseRfc3339DateTime("2026-08-12T07:37:56.984246")).toBeNull();
+    expect(parseRfc3339DateTime("2026-02-30T07:37:56.984246Z")).toBeNull();
+    expect(parseRfc3339DateTime("2026-08-12T07:37:56.Z")).toBeNull();
+    expect(parseRfc3339DateTime("2026-08-12T07:37:56,984Z")).toBeNull();
+  });
+});
+
 describe("assertDateTime", () => {
   it("accepts strict RFC 3339 values", () => {
     expect(() =>

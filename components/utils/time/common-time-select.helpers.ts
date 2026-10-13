@@ -17,8 +17,11 @@ const DAYS_PER_WEEK = 7;
  * clamping the day to the end of the target month (Jan 31 + 1 month is the
  * last day of February, never early March). The result is built in one step
  * from local parts so no intermediate date can overflow or hit a DST gap.
+ * Zero months returns the same instant: rebuilding from local parts would map
+ * the second occurrence of a repeated fall-back hour onto the first one.
  */
 function addCalendarMonths(date: Date, months: number): Date {
+  if (months === 0) return new Date(date);
   const firstOfTargetMonth = new Date(
     date.getFullYear(),
     date.getMonth() + months,
@@ -65,7 +68,9 @@ export function getExpiryMillis(
 }
 
 function addCalendarDays(date: Date, days: number): Date {
-  const result = new Date(date.getTime());
+  // Same reason as zero months: setDate would re-resolve a repeated local hour.
+  if (days === 0) return new Date(date);
+  const result = new Date(date);
   result.setDate(result.getDate() + days);
   return result;
 }

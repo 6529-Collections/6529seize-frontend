@@ -2869,6 +2869,7 @@ const OPEN_DATA_DOWNLOAD_MESSAGES = objectMessages("openData.downloads", {
 const DATE_PICKER_MESSAGES = objectMessages("datePicker", {
   utcNote:
     "Dates are in UTC. The latest date you can select is today in UTC.",
+  afterTodayError: "Dates cannot be later than today in UTC.",
 } as const);
 
 const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {

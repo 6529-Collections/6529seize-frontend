@@ -37,6 +37,11 @@ function toUtcDateString(date: Date): string {
   return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
 }
 
+// The latest selectable day: today in UTC, read fresh on every use.
+function getLatestSelectableDate(): string {
+  return toUtcDateString(new Date());
+}
+
 // Holds one "YYYY-MM-DD" field. It starts from the initial date and is seeded
 // again whenever the initial day changes, without an effect round trip.
 function useUtcDateField(initial: Date | undefined) {
@@ -108,6 +113,12 @@ export default function DatePickerModal(props: Readonly<Props>) {
         return;
       }
     }
+    // The input's `max` does not stop a typed later date from reaching Apply.
+    const latestDate = getLatestSelectableDate();
+    if (fromDate > latestDate || toDate > latestDate) {
+      setError(t(locale, "datePicker.afterTodayError"));
+      return;
+    }
     props.onApplyDate?.(new Date(fromDate), new Date(toDate));
     props.onHide();
   }
@@ -141,7 +152,7 @@ export default function DatePickerModal(props: Readonly<Props>) {
 
   // The latest selectable day is today in UTC, matching the UTC day the API
   // filters on; the note below tells people that the days are UTC.
-  const maxDate = toUtcDateString(new Date());
+  const maxDate = getLatestSelectableDate();
   const dateDescribedBy = error ? `${utcNoteId} ${errorId}` : utcNoteId;
 
   return createPortal(

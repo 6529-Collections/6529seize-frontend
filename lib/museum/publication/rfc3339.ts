@@ -5,7 +5,10 @@
 // The fractional seconds are an alternation with an empty branch rather than
 // `(...)?`, which keeps the pattern provably linear-time.
 const RFC_3339_DATE_TIME =
-  /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+|)(?:Z|[+-](\d{2}):(\d{2}))$/u;
+  /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d+)|)(Z|[+-](\d{2}):(\d{2}))$/u;
+// "YYYY-MM-DDTHH:MM:SS" is a fixed-width prefix of every accepted value.
+const SECONDS_END = 19;
+const MILLISECOND_DIGITS = 3;
 
 const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] as const;
 
@@ -34,11 +37,27 @@ function isValidTimeOfDay(
   return hour <= 23 && minute <= 59 && second <= 59;
 }
 
+// ECMAScript only specifies exactly three fractional digits for Date.parse, so
+// a longer producer fraction (for example microseconds) is reduced to
+// milliseconds first, truncating the way Date itself does. A value without a
+// fraction is parsed unchanged.
+function toEcmaScriptDateTime(
+  value: string,
+  fraction: string | undefined,
+  zone: string
+): string {
+  if (fraction === undefined) return value;
+  const milliseconds = fraction
+    .slice(0, MILLISECOND_DIGITS)
+    .padEnd(MILLISECOND_DIGITS, "0");
+  return `${value.slice(0, SECONDS_END)}.${milliseconds}${zone}`;
+}
+
 /**
  * Parses an RFC 3339 date-time that carries an explicit `Z` or numeric UTC
  * offset and returns its instant in epoch milliseconds, or `null` when the
  * value is not a string, is not in that exact shape, or names a date or time
- * that does not exist.
+ * that does not exist. Fractional seconds beyond milliseconds are truncated.
  */
 export function parseRfc3339DateTime(value: unknown): number | null {
   if (typeof value !== "string") return null;
@@ -53,8 +72,10 @@ export function parseRfc3339DateTime(value: unknown): number | null {
   ) {
     return null;
   }
-  const offsetHour = match[7];
-  const offsetMinute = match[8];
+  const fraction = match[7];
+  const zone = match[8] ?? "Z";
+  const offsetHour = match[9];
+  const offsetMinute = match[10];
   if (
     offsetHour !== undefined &&
     offsetMinute !== undefined &&
@@ -62,7 +83,7 @@ export function parseRfc3339DateTime(value: unknown): number | null {
   ) {
     return null;
   }
-  const instant = Date.parse(value);
+  const instant = Date.parse(toEcmaScriptDateTime(value, fraction, zone));
   return Number.isFinite(instant) ? instant : null;
 }
 
