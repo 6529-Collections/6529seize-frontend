@@ -74,7 +74,7 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
 - Empty Active Votes shows `No active TDH votes right now.` in a compact area.
   Loading and request failures are separate states; failed pages can be retried
   without discarding previously loaded votes. Both view-all links remain available.
-- Each heading toggles only its own section. The chevron points down when open
+- Each heading toggles only its own section. The chevron beside the title points down when open
   and right when closed. Both collapse preferences persist locally in this browser
   across visits, including signed-out visits, and are shared across profiles on
   the same browser/device. The old shared tab preference is no longer used.
@@ -84,7 +84,7 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
   with score shields overlapping the bottom-right corner of each avatar.
   The section keeps its own compact height independently of the vote list.
 - Create wave has a visible label in the expanded desktop Waves panel and mobile Waves list, including signed-out visits. The collapsed sidebar keeps the plus icon and accessible Create wave name.
-- Each heading has a separate `View all` link before the chevron, available
+- Each heading has a separate `View all` link aligned to the right, available
   even when collapsed. Active Votes opens `/discover?view=active-votes`;
   Worth Checking Out opens `/discover?view=recommendations&sort=QUALITY`.
   Selecting the link navigates without toggling the section.
