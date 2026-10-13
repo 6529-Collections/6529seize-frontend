@@ -17,11 +17,29 @@ import {
 } from "./interim-event";
 
 /**
- * "verified": the wallet's sign-in signature recovers in this browser.
- * "contract-wallet": it does not recover to the wallet (for example an
- * EIP-1271 contract wallet), so the grant rests on 6529.io's sign-in check.
+ * "verified": the wallet's sign-in signature was checked in this browser,
+ * either by ECDSA recovery or, for a contract wallet, by its EIP-1271 check
+ * read from Ethereum.
+ * "contract-wallet": it does not recover to the wallet and no Ethereum read
+ * was available, so the grant rests on 6529.io's sign-in check.
  */
 type WalletSignatureCheck = "verified" | "contract-wallet";
+
+/** Checks a contract wallet's signature on Ethereum (EIP-1271), if available. */
+export type ContractSignatureVerifier = (args: {
+  readonly address: Hex;
+  readonly message: string;
+  readonly signature: Hex;
+  readonly chainId: number;
+}) => Promise<boolean>;
+
+interface VerifyOptions {
+  readonly verifyContractSignature?: ContractSignatureVerifier | undefined;
+}
+
+const HEX_DIGITS = /^0x[0-9a-fA-F]+$/;
+/** 0x plus a 65-byte ECDSA signature. */
+const ECDSA_SIGNATURE_HEX_LENGTH = 132;
 
 interface VerifiedDropSignature {
   readonly eventId: string;
@@ -70,21 +88,66 @@ const isGrantMessageConsistent = (grant: ApiDeviceGrantProof): boolean => {
   );
 };
 
-async function checkGrant(
-  grant: ApiDeviceGrantProof
-): Promise<WalletSignatureCheck | null> {
+async function recoversToWallet(grant: ApiDeviceGrantProof): Promise<boolean> {
   try {
-    if (!isGrantMessageConsistent(grant)) {
-      return null;
-    }
     const recovered = await recoverMessageAddress({
       message: grant.message,
       signature: grant.wallet_signature as Hex,
     });
-    return same(recovered, grant.wallet) ? "verified" : "contract-wallet";
+    return same(recovered, grant.wallet);
   } catch {
+    return false;
+  }
+}
+
+async function checkContractWalletSignature(
+  grant: ApiDeviceGrantProof,
+  verifyContractSignature: ContractSignatureVerifier | undefined
+): Promise<WalletSignatureCheck | null> {
+  if (!verifyContractSignature) {
     return "contract-wallet";
   }
+  try {
+    const valid = await verifyContractSignature({
+      address: grant.wallet as Hex,
+      message: grant.message,
+      signature: grant.wallet_signature as Hex,
+      chainId: grant.chain_id,
+    });
+    return valid ? "verified" : null;
+  } catch {
+    // Ethereum unreachable: fall back to the labelled sign-in check.
+    return "contract-wallet";
+  }
+}
+
+async function checkGrant(
+  grant: ApiDeviceGrantProof,
+  { verifyContractSignature }: VerifyOptions
+): Promise<WalletSignatureCheck | null> {
+  let consistent = false;
+  try {
+    consistent = isGrantMessageConsistent(grant);
+  } catch {
+    consistent = false;
+  }
+  if (!consistent) {
+    return null;
+  }
+  // A value that is not hex bytes cannot be attributed to any wallet.
+  const signature = grant.wallet_signature;
+  if (!HEX_DIGITS.test(signature) || signature.length % 2 !== 0) {
+    return null;
+  }
+  if (
+    signature.length === ECDSA_SIGNATURE_HEX_LENGTH &&
+    (await recoversToWallet(grant))
+  ) {
+    return "verified";
+  }
+  // Not the wallet's own ECDSA signature: only a contract wallet (EIP-1271)
+  // can have signed it, so check that on Ethereum where possible.
+  return await checkContractWalletSignature(grant, verifyContractSignature);
 }
 
 const isBodyConsistent = (event: ApiDeviceSignedEvent): boolean => {
@@ -154,7 +217,8 @@ async function verifyEvent(
 }
 
 async function verifyContentEvents(
-  data: ApiDropSignedEvents
+  data: ApiDropSignedEvents,
+  options: VerifyOptions
 ): Promise<VerifiedEvent[]> {
   const grants = new Map(
     data.grants.map((grant) => [grant.id.toLowerCase(), grant])
@@ -171,7 +235,7 @@ async function verifyContentEvents(
         }
         let grantCheck = grantChecks.get(grantId);
         if (!grantCheck) {
-          grantCheck = checkGrant(grant);
+          grantCheck = checkGrant(grant, options);
           grantChecks.set(grantId, grantCheck);
         }
         const walletSignature = await grantCheck;
@@ -191,7 +255,8 @@ async function verifyContentEvents(
  * against the wallet signature.
  */
 export async function verifyDropSignedEvents(
-  data: ApiDropSignedEvents
+  data: ApiDropSignedEvents,
+  options: VerifyOptions = {}
 ): Promise<DropSignatureVerdict> {
   const hasContentEvents = data.events.some((event) =>
     CONTENT_KINDS.has(event.kind)
@@ -199,7 +264,7 @@ export async function verifyDropSignedEvents(
   if (!hasContentEvents) {
     return { status: "unsigned" };
   }
-  const verified = await verifyContentEvents(data);
+  const verified = await verifyContentEvents(data, options);
   const currentEventId = data.current_event_id;
   const current = currentEventId
     ? verified.find(({ event }) => same(event.id, currentEventId))
