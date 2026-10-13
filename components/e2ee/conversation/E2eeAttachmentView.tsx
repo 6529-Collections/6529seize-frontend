@@ -6,12 +6,13 @@ import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoade
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatNumber } from "@/i18n/format";
 import { t } from "@/i18n/messages";
+import { isSafeInlineImageMime } from "@/lib/e2ee/media";
 import type { E2eeAttachment, E2eeEngine } from "@/lib/e2ee/types";
 
 const MAX_IMAGE_HEIGHT_PX = 320;
 
 const isInlineImage = (attachment: E2eeAttachment) =>
-  attachment.mime.startsWith("image/");
+  isSafeInlineImageMime(attachment.mime);
 
 function formatFileSize(
   locale: ReturnType<typeof useBrowserLocale>,

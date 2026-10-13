@@ -216,6 +216,20 @@ const INLINE_MIME =
 export const isInlineMime = (mime: string): boolean =>
   INLINE_MIME.test(mime.toLowerCase());
 
+const SAFE_IMAGE_MIME = /^image\/(?:png|jpeg|gif|webp|avif|bmp)$/u;
+
+/** Raster image types that may render inline from a local object URL. */
+export const isSafeInlineImageMime = (mime: string): boolean =>
+  SAFE_IMAGE_MIME.test(mime.toLowerCase());
+
+/**
+ * Type for the local Blob of a decrypted attachment. The sender chooses the
+ * declared type, and an object URL runs in this origin, so anything but a
+ * raster image (HTML, SVG, scripts) becomes an opaque download.
+ */
+export const localBlobType = (mime: string): string =>
+  isSafeInlineImageMime(mime) ? mime.toLowerCase() : "application/octet-stream";
+
 async function imageSize(
   file: File
 ): Promise<{ width?: number; height?: number }> {

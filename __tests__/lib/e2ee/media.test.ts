@@ -16,6 +16,8 @@ import {
   downloadMedia,
   encryptMedia,
   isInlineMime,
+  isSafeInlineImageMime,
+  localBlobType,
   MAX_BLOB_BYTES,
   MediaError,
   PLAINTEXT_CHUNK_BYTES,
@@ -133,5 +135,23 @@ describe("media (contract 6)", () => {
     await expect(
       downloadMedia({ api, deviceKey, attachment: { ...attachment, size: 1 } })
     ).rejects.toThrow("E2EE_MEDIA_SIZE");
+  });
+});
+
+describe("local blob types for decrypted attachments", () => {
+  it("keeps raster image types and neutralises everything else", () => {
+    expect(localBlobType("image/png")).toBe("image/png");
+    expect(localBlobType("IMAGE/JPEG")).toBe("image/jpeg");
+    for (const risky of [
+      "text/html",
+      "image/svg+xml",
+      "application/javascript",
+      "application/xhtml+xml",
+      "text/plain",
+      "application/pdf",
+    ]) {
+      expect(localBlobType(risky)).toBe("application/octet-stream");
+      expect(isSafeInlineImageMime(risky)).toBe(false);
+    }
   });
 });

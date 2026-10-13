@@ -1,4 +1,4 @@
-import { downloadMedia } from "../media";
+import { downloadMedia, localBlobType } from "../media";
 import { MlsClient } from "../mls-adapter";
 import { getDefaultE2eeStorage, isIndexedDbAvailable } from "../storage";
 import type {
@@ -638,7 +638,9 @@ class E2eeEngineImpl implements E2eeEngineExt {
       deviceKey: requireMls(this.ctx).deviceKey(),
       attachment,
     });
-    return new Blob([bytes.slice().buffer], { type: attachment.mime });
+    return new Blob([bytes.slice().buffer], {
+      type: localBlobType(attachment.mime),
+    });
   }
 
   // -- devices ----------------------------------------------------------------
