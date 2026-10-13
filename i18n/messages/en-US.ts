@@ -2286,6 +2286,7 @@ const NETWORK_GROUP_FILTER_MESSAGES = objectMessages("network.groupFilter", {
 
 const WAVE_LOADING_MESSAGES = objectMessages("waves", {
   loadingStatus: "Loading waves",
+  "drops.editorLoadingStatus": "Loading editor",
 } as const);
 
 const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
