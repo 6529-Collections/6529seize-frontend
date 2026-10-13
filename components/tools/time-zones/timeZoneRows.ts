@@ -146,9 +146,11 @@ function parseOffsetTerm(term: string): OffsetTerm | null {
   const prefix =
     OFFSET_TERM_PREFIXES.find((candidate) => term.startsWith(candidate)) ?? "";
   const clock = parseSignedClock(term.slice(prefix.length));
-  return clock === null || clock.seconds !== null
-    ? null
-    : { sign: clock.sign, hours: clock.hours, minutes: clock.minutes };
+  // Search terms take hours and optional minutes; anything else is text.
+  if (clock?.seconds !== null) {
+    return null;
+  }
+  return { sign: clock.sign, hours: clock.hours, minutes: clock.minutes };
 }
 
 // "+5" matches +05:00, +05:30 and +05:45; "+5:30" matches only +05:30.

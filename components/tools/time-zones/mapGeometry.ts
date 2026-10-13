@@ -132,10 +132,27 @@ function meridianPoints(
   return points;
 }
 
-// SVG path covering the part of the globe where the sun is below the
-// horizon, in projected map coordinates.
-export function buildNightPath(date: Date, scale: number): string {
+function toPath(
+  points: ReadonlyArray<readonly [number, number]>,
+  scale: number,
+  close: boolean
+): string {
   const project = createMapProjector(scale);
+  const [start, ...rest] = points.map(([longitude, latitude]) =>
+    project(longitude, latitude)
+  );
+  if (!start) {
+    return "";
+  }
+  return `M${formatPoint(start)}L${rest.map(formatPoint).join(" ")}${close ? "Z" : ""}`;
+}
+
+// SVG paths, in projected map coordinates, for the part of the globe where
+// the sun is below the horizon and for the day/night line itself.
+export function buildNightView(
+  date: Date,
+  scale: number
+): { readonly area: string; readonly terminator: string } {
   const subsolar = getSubsolarPoint(date);
   const declination =
     Math.sign(subsolar.latitude || 1) *
@@ -163,13 +180,10 @@ export function buildNightPath(date: Date, scale: number): string {
     [-180, nightPole] as const,
     ...meridianPoints(-180, nightPole, westLatitude),
   ];
-  const [start, ...rest] = outline.map(([longitude, latitude]) =>
-    project(longitude, latitude)
-  );
-  if (!start) {
-    return "";
-  }
-  return `M${formatPoint(start)}L${rest.map(formatPoint).join(" ")}Z`;
+  return {
+    area: toPath(outline, scale, true),
+    terminator: toPath(curve, scale, false),
+  };
 }
 
 // Diverging scale: zones behind UTC run from the neutral midpoint through
@@ -197,6 +211,9 @@ const EAST_RAMP = [
 ] as const;
 const MAX_OFFSET_MINUTES = 14 * 60;
 export const UNKNOWN_ZONE_COLOR = "#26272b";
+// Open ocean keeps only a faint trace of its offset hue so land zones lead.
+const OCEAN_BASE_COLOR = "#17171c";
+const OCEAN_MUTE_RATIO = 0.78;
 
 function hexToRgb(hex: string): [number, number, number] {
   const value = Number.parseInt(hex.slice(1), 16);
@@ -221,6 +238,15 @@ export function getOffsetColor(offsetMinutes: number): string {
   const lower = ramp[lowerIndex] ?? NEUTRAL_MIDPOINT;
   const upper = ramp[Math.min(lowerIndex + 1, ramp.length - 1)] ?? lower;
   return mixHex(lower, upper, position - lowerIndex);
+}
+
+// Muted color for open ocean (nautical Etc/GMT time) at the same offset.
+export function getOceanOffsetColor(offsetMinutes: number): string {
+  return mixHex(
+    getOffsetColor(offsetMinutes),
+    OCEAN_BASE_COLOR,
+    OCEAN_MUTE_RATIO
+  );
 }
 
 export const OFFSET_LEGEND_HOURS = Array.from(

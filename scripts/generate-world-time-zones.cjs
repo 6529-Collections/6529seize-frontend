@@ -12,9 +12,9 @@
 //     covers the whole globe.
 //   - timezone-names-with-oceans-Now.json: the IANA zones each merged zone
 //     stands for.
-//   - timezones-now.geojson.zip (optional --land): land-only zones, drawn as
-//     a light land tint so coastlines stay readable where land and ocean share
-//     one merged zone.
+//   - timezones-now.geojson.zip (optional --land): land-only zones, the mask
+//     that draws land in full color and open ocean muted, since land and ocean
+//     share one merged zone.
 //
 //   node scripts/generate-world-time-zones.cjs \
 //     --geojson <dir>/combined-with-oceans-now.json \

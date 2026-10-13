@@ -48,7 +48,7 @@ function refreshSnapshots(now: number) {
 }
 
 function notify(listeners: ReadonlySet<Listener>) {
-  for (const listener of [...listeners]) {
+  for (const listener of listeners) {
     listener();
   }
 }

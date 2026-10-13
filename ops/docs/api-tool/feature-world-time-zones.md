@@ -49,10 +49,16 @@ saving rules, and it makes no API requests.
   and Madrid share one polygon. `Selected zone` names the representative IANA
   zone and the number of other zones that share its clock.
 - Ocean areas use nautical `Etc/GMT±N` zones, so the whole globe is covered.
-  Land is drawn with a light tint so coastlines stay visible.
+  Open ocean is drawn in a muted shade of the same colors (`Open ocean
+(muted)` in the legend). Land zones use the full colors with darker
+  borders, so boundaries on land, including half- and quarter-hour zones such
+  as India and Nepal, stand out. Open ocean stays hoverable and focusable.
 - Colors: zones behind UTC are blue, zones ahead of UTC are red, and UTC itself
   is neutral gray. Lighter colors are farther from UTC.
-- The night side is computed from the sun's current position.
+- The selected zone has a white outline on a dark halo; your own zone has a
+  dashed outline.
+- The night side is computed from the sun's current position and shaded, with
+  a thin line marking the day/night boundary.
 
 ## Search and Sort Rules
 
@@ -70,13 +76,19 @@ saving rules, and it makes no API requests.
 
 ## Keyboard and Screen Reader Use
 
-- The map is one tab stop. When it has focus, the arrow keys move between zones
-  from west to east, and `Home` and `End` jump to the first and last zone.
-  Each zone is announced with its name and UTC offset.
+- The map is a single-select list of zones and one tab stop. When it has
+  focus, the arrow keys select the next zone west or east, and `Home` and
+  `End` jump to the first and last zone. Movement always starts from the
+  selected zone; hovering never moves it. The selected zone is announced with
+  its name and UTC offset, and its outline gets heavier while the map has
+  keyboard focus.
+- After the arrow keys pause, screen readers also hear the selected zone's
+  local time once.
 - The table is the full text alternative to the map. Sortable headers announce
   their sort direction.
 - After typing in the search field pauses, screen readers hear the updated
-  result count. Time updates are not announced.
+  result count. Minute-by-minute time updates are never announced.
+- `Data sources` links open in a new tab and say so to screen readers.
 
 ## Live Updates
 

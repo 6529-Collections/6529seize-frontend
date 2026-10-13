@@ -12,8 +12,9 @@
   "tools.timeZones.offset.value": "UTC{offset}",
   "tools.timeZones.map.heading": "Time zone map",
   "tools.timeZones.map.ariaLabel": "Time zones on the world map",
-  "tools.timeZones.map.instructions": "Colors show each zone's current UTC offset. Hover, tap or focus a zone to see its details. When the map has keyboard focus, the arrow keys move from west to east between zones.",
+  "tools.timeZones.map.instructions": "Colors show each zone's current UTC offset, with open ocean muted so land zones stand out. Hover, tap or focus a zone to see its details. When the map has keyboard focus, the arrow keys move from west to east between zones.",
   "tools.timeZones.map.zoneLabel": "{name}, {offset}",
+  "tools.timeZones.map.selectionAnnouncement": "{name}: {time} local time",
   "tools.timeZones.map.unknownZoneLabel": "{zone}, not available in this browser",
   "tools.timeZones.map.loading": "Loading the map…",
   "tools.timeZones.map.error": "The map could not load. The list of time zones below still works.",
@@ -22,6 +23,7 @@
   "tools.timeZones.map.legend.label": "UTC offset color scale",
   "tools.timeZones.map.legend.behind": "Behind UTC",
   "tools.timeZones.map.legend.ahead": "Ahead of UTC",
+  "tools.timeZones.map.legend.ocean": "Open ocean (muted)",
   "tools.timeZones.map.legend.yourZone": "Your time zone",
   "tools.timeZones.map.legend.night": "Night",
   "tools.timeZones.details.heading": "Selected zone",
@@ -74,5 +76,6 @@
   "tools.timeZones.attribution.derived": "The simplified map data used on this page is a derivative database, also available under the ODbL with its {generator}.",
   "tools.timeZones.attribution.derivedLink": "generator and source details",
   "tools.timeZones.attribution.times": "Times, offsets and zone names: the {iana}, read through your browser.",
-  "tools.timeZones.attribution.ianaLink": "IANA Time Zone Database"
+  "tools.timeZones.attribution.ianaLink": "IANA Time Zone Database",
+  "tools.timeZones.attribution.opensInNewTab": "(opens in a new tab)"
 }

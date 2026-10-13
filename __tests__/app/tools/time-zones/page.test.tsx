@@ -18,6 +18,10 @@ async function renderLoadedPage() {
   return { map };
 }
 
+function escapeRegExp(value: string): string {
+  return value.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
+}
+
 describe("World Time Zones page", () => {
   it("exposes app metadata", () => {
     expect(metadata.title).toBe("World Time Zones | Tools");
@@ -34,20 +38,32 @@ describe("World Time Zones page", () => {
     ).toBeInTheDocument();
     const options = within(map).getAllByRole("option");
     expect(options.length).toBeGreaterThan(60);
-    // One roving tab stop for the whole map.
-    expect(
-      options.filter((option) => option.getAttribute("tabindex") === "0")
-    ).toHaveLength(1);
+    // APG listbox: the listbox is the single tab stop and points at the
+    // selected option with aria-activedescendant; options never take focus.
+    expect(map).toHaveAttribute("tabindex", "0");
+    expect(options.some((option) => option.hasAttribute("tabindex"))).toBe(
+      false
+    );
 
-    const firstOption = options[0];
-    if (!firstOption) {
+    const [firstOption, secondOption, thirdOption] = options;
+    if (!firstOption || !secondOption || !thirdOption) {
       throw new Error("Expected map options");
     }
-    fireEvent.focus(firstOption);
+    fireEvent.click(firstOption);
+    fireEvent.focus(map);
+    expect(firstOption).toHaveAttribute("aria-selected", "true");
+    expect(map).toHaveAttribute("aria-activedescendant", firstOption.id);
+
+    fireEvent.keyDown(map, { key: "ArrowLeft" });
     expect(firstOption).toHaveAttribute("aria-selected", "true");
     fireEvent.keyDown(map, { key: "ArrowRight" });
-    expect(options[1]).toHaveAttribute("aria-selected", "true");
-    expect(options[1]).toHaveAttribute("tabindex", "0");
+    expect(secondOption).toHaveAttribute("aria-selected", "true");
+    expect(firstOption).toHaveAttribute("aria-selected", "false");
+    expect(map).toHaveAttribute("aria-activedescendant", secondOption.id);
+    fireEvent.keyDown(map, { key: "End" });
+    expect(options.at(-1)).toHaveAttribute("aria-selected", "true");
+    fireEvent.click(thirdOption);
+    expect(map).toHaveAttribute("aria-activedescendant", thirdOption.id);
     expect(
       screen.getByRole("region", { name: "Selected zone" })
     ).toHaveTextContent(/UTC/);
@@ -64,6 +80,39 @@ describe("World Time Zones page", () => {
     expect(within(table).getAllByRole("row").length).toBeGreaterThan(300);
     expect(
       screen.getByRole("button", { name: "Show fewer time zones" })
+    ).toBeInTheDocument();
+  });
+
+  it("moves from the focused option, not a hovered one, and announces keyboard moves", async () => {
+    const { map } = await renderLoadedPage();
+    const [zoneA, zoneB, zoneC, zoneD] = within(map).getAllByRole("option");
+    if (!zoneA || !zoneB || !zoneC || !zoneD) {
+      throw new Error("Expected map options");
+    }
+
+    // Focus zone A with the keyboard.
+    fireEvent.focus(map);
+    fireEvent.keyDown(map, { key: "Home" });
+    expect(map).toHaveAttribute("aria-activedescendant", zoneA.id);
+
+    // Hovering zone C previews it but leaves the focused option on A.
+    fireEvent.pointerOver(zoneC, { pointerType: "mouse" });
+    fireEvent.keyDown(map, { key: "ArrowRight" });
+    expect(map).toHaveAttribute("aria-activedescendant", zoneB.id);
+
+    // Clicking zone C moves focus there, so the next key starts from C.
+    fireEvent.click(zoneC);
+    expect(map).toHaveAttribute("aria-activedescendant", zoneC.id);
+    fireEvent.keyDown(map, { key: "ArrowRight" });
+    expect(map).toHaveAttribute("aria-activedescendant", zoneD.id);
+    expect(zoneD).toHaveAttribute("aria-selected", "true");
+
+    // Keyboard moves are announced once, after the keys pause, with the time.
+    const zoneName = zoneD.getAttribute("aria-label")?.split(", UTC")[0] ?? "";
+    expect(
+      await screen.findByText(
+        new RegExp(String.raw`^${escapeRegExp(zoneName)}: .+ local time$`)
+      )
     ).toBeInTheDocument();
   });
 
@@ -98,7 +147,7 @@ describe("World Time Zones page", () => {
     ).toBeInTheDocument();
   });
 
-  it("credits the open data sources", async () => {
+  it("credits the open data sources in new tabs", async () => {
     await renderLoadedPage();
     const sources = screen.getByRole("region", { name: "Data sources" });
     for (const name of [
@@ -107,10 +156,11 @@ describe("World Time Zones page", () => {
       "Open Database License (ODbL)",
       "IANA Time Zone Database",
     ]) {
-      expect(within(sources).getByRole("link", { name })).toHaveAttribute(
-        "rel",
-        "noopener noreferrer"
-      );
+      const link = within(sources).getByRole("link", {
+        name: `${name} (opens in a new tab)`,
+      });
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(link).toHaveAttribute("rel", "noopener noreferrer");
     }
     expect(sources).toHaveTextContent("© OpenStreetMap contributors");
   });

@@ -131,14 +131,24 @@ function SortableHeader({
   );
 }
 
-function SkeletonRows() {
-  return SKELETON_ROW_IDS.map((id) => (
-    <tr key={id} aria-hidden="true">
+// One real row while loading: screen readers hear the loading text, and the
+// decorative skeleton bars inside it reserve the table's space.
+function LoadingRow({ label }: { readonly label: string }) {
+  return (
+    <tr>
       <td colSpan={COLUMN_COUNT} className={CELL_CLASS_NAME}>
-        <div className="tw-h-9 tw-animate-pulse tw-rounded-md tw-bg-iron-800/80 motion-reduce:tw-animate-none" />
+        <span className="tw-sr-only">{label}</span>
+        <div aria-hidden="true" className="tw-space-y-5 tw-py-2">
+          {SKELETON_ROW_IDS.map((id) => (
+            <div
+              key={id}
+              className="tw-h-9 tw-animate-pulse tw-rounded-md tw-bg-iron-800/80 motion-reduce:tw-animate-none"
+            />
+          ))}
+        </div>
       </td>
     </tr>
-  ));
+  );
 }
 
 function ZoneRow({
@@ -387,7 +397,9 @@ export default function WorldTimeZoneTable({
             </tr>
           </thead>
           <tbody>
-            {visibleRows === null ? <SkeletonRows /> : null}
+            {visibleRows === null ? (
+              <LoadingRow label={t(locale, "tools.timeZones.table.loading")} />
+            ) : null}
             {displayedRows?.map((row) => (
               <ZoneRow
                 key={row.id}
@@ -413,11 +425,6 @@ export default function WorldTimeZoneTable({
             ) : null}
           </tbody>
         </table>
-        {visibleRows === null ? (
-          <p className="tw-sr-only">
-            {t(locale, "tools.timeZones.table.loading")}
-          </p>
-        ) : null}
       </div>
       {canToggleRows ? (
         <button

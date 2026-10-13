@@ -1,6 +1,7 @@
 import {
-  buildNightPath,
+  buildNightView,
   createMapProjector,
+  getOceanOffsetColor,
   getOffsetColor,
   getSubsolarPoint,
   OFFSET_LEGEND_HOURS,
@@ -35,9 +36,15 @@ describe("getSubsolarPoint", () => {
   });
 });
 
-describe("buildNightPath", () => {
-  it("returns a closed path inside the map", () => {
-    const path = buildNightPath(new Date(Date.UTC(2026, 9, 12, 18)), SCALE);
+describe("buildNightView", () => {
+  it("returns a closed night area and an open terminator line inside the map", () => {
+    const { area: path, terminator } = buildNightView(
+      new Date(Date.UTC(2026, 9, 12, 18)),
+      SCALE
+    );
+    expect(terminator.startsWith("M")).toBe(true);
+    expect(terminator.endsWith("Z")).toBe(false);
+    expect(path.startsWith(terminator)).toBe(true);
     expect(path).toMatch(/^M[\d.]+ [\d.]+L/);
     expect(path.endsWith("Z")).toBe(true);
     const numbers = path.match(/-?\d+(?:\.\d+)?/g)?.map(Number) ?? [];
@@ -46,9 +53,14 @@ describe("buildNightPath", () => {
   });
 
   it("stays finite at an equinox", () => {
-    const path = buildNightPath(new Date(Date.UTC(2026, 2, 20, 14, 46)), SCALE);
-    expect(path).not.toContain("NaN");
-    expect(path).not.toContain("Infinity");
+    const { area, terminator } = buildNightView(
+      new Date(Date.UTC(2026, 2, 20, 14, 46)),
+      SCALE
+    );
+    for (const path of [area, terminator]) {
+      expect(path).not.toContain("NaN");
+      expect(path).not.toContain("Infinity");
+    }
   });
 });
 
@@ -67,6 +79,25 @@ describe("getOffsetColor", () => {
     expect(lightness(-12 * 60)).toBeGreaterThan(lightness(-6 * 60));
     expect(lightness(14 * 60)).toBeGreaterThan(lightness(6 * 60));
     expect(getOffsetColor(20 * 60)).toBe(getOffsetColor(14 * 60));
+  });
+
+  it("mutes open-ocean colors toward a dark neutral while keeping the hue side", () => {
+    const spread = (hex: string) => {
+      const channels = hexChannels(hex);
+      return Math.max(...channels) - Math.min(...channels);
+    };
+    for (const minutes of [-9 * 60, -3 * 60, 330, 12 * 60]) {
+      const land = hexChannels(getOffsetColor(minutes));
+      const ocean = hexChannels(getOceanOffsetColor(minutes));
+      expect(ocean.reduce((sum, value) => sum + value)).toBeLessThan(
+        land.reduce((sum, value) => sum + value)
+      );
+      expect(spread(getOceanOffsetColor(minutes))).toBeLessThan(
+        spread(getOffsetColor(minutes))
+      );
+    }
+    const [westRed, , westBlue] = hexChannels(getOceanOffsetColor(-6 * 60));
+    expect(westBlue).toBeGreaterThan(westRed);
   });
 
   it("covers every whole-hour offset in the legend", () => {

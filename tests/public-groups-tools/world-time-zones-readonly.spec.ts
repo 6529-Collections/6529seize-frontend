@@ -26,6 +26,22 @@ test.describe("World Time Zones tool @surface @medium @large @readonly", () => {
     const map = page.getByRole("listbox", { name: "Time zone map" });
     await expect(map).toBeVisible({ timeout: 30000 });
     expect(await map.getByRole("option").count()).toBeGreaterThan(60);
+
+    // APG listbox: focus stays on the map and aria-activedescendant follows
+    // the selected option as the keys move west to east.
+    await map.focus();
+    await page.keyboard.press("Home");
+    const firstId = await map.getAttribute("aria-activedescendant");
+    expect(firstId).toBeTruthy();
+    await page.keyboard.press("ArrowRight");
+    await expect(map).toBeFocused();
+    await expect(map).not.toHaveAttribute("aria-activedescendant", firstId!);
+    const selected = map.getByRole("option", { selected: true });
+    await expect(selected).toHaveCount(1);
+    await expect(map).toHaveAttribute(
+      "aria-activedescendant",
+      (await selected.getAttribute("id")) ?? ""
+    );
     await expect(
       page.getByRole("region", { name: "Selected zone" })
     ).toContainText("UTC");

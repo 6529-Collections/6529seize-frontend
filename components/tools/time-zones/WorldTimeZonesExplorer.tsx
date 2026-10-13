@@ -14,7 +14,8 @@ import { t } from "@/i18n/messages";
 
 import { useMinuteNow } from "./liveClock";
 import {
-  buildNightPath,
+  buildNightView,
+  getOceanOffsetColor,
   getOffsetColor,
   UNKNOWN_ZONE_COLOR,
   type WorldTimeZoneMapData,
@@ -43,8 +44,12 @@ import WorldTimeZoneDetails, {
   type ZoneDetailsView,
 } from "./WorldTimeZoneDetails";
 import WorldTimeZoneLegend from "./WorldTimeZoneLegend";
-import WorldTimeZoneMap, { type MapZoneView } from "./WorldTimeZoneMap";
+import WorldTimeZoneMap, {
+  type MapSelectionSource,
+  type MapZoneView,
+} from "./WorldTimeZoneMap";
 import WorldTimeZoneTable from "./WorldTimeZoneTable";
+import { useZoneSelectionAnnouncement } from "./useZoneSelectionAnnouncement";
 
 type MapDataState =
   | { readonly status: "loading" }
@@ -106,6 +111,7 @@ function toMapZoneView(
       tzid: zone.tzid,
       d: zone.d,
       fill: UNKNOWN_ZONE_COLOR,
+      oceanFill: UNKNOWN_ZONE_COLOR,
       label: t(locale, "tools.timeZones.map.unknownZoneLabel", {
         zone: zone.tzid,
       }),
@@ -115,6 +121,7 @@ function toMapZoneView(
     tzid: zone.tzid,
     d: zone.d,
     fill: getOffsetColor(offsetMinutes),
+    oceanFill: getOceanOffsetColor(offsetMinutes),
     label: t(locale, "tools.timeZones.map.zoneLabel", {
       name: snapshot.name,
       offset: formatOffsetLabel(locale, offsetMinutes),
@@ -247,11 +254,11 @@ export default function WorldTimeZonesExplorer() {
         : findMapZoneForTimeZone(mapData.zones, viewerTimeZone, now),
     [mapData, now, viewerTimeZone]
   );
-  const nightPath = useMemo(
+  const night = useMemo(
     () =>
       mapData === null || now === null || !showNight
         ? null
-        : buildNightPath(now, mapData.projection.scale),
+        : buildNightView(now, mapData.projection.scale),
     [mapData, now, showNight]
   );
   const rowBases = useMemo(() => getRowBases(mapState), [mapState]);
@@ -261,6 +268,20 @@ export default function WorldTimeZonesExplorer() {
         ? null
         : buildRows(rowBases, locale, now),
     [rowBases, locale, now]
+  );
+
+  const { announcement, announceZone } = useZoneSelectionAnnouncement(
+    zoneSnapshots,
+    locale
+  );
+  const handleSelect = useCallback(
+    (zoneId: string, source: MapSelectionSource) => {
+      setSelectedZoneId(zoneId);
+      if (source === "keyboard") {
+        announceZone(zoneId);
+      }
+    },
+    [announceZone]
   );
 
   const effectiveSelectedId = selectedZoneId ?? viewerZoneId;
@@ -314,11 +335,11 @@ export default function WorldTimeZonesExplorer() {
                 selectedZoneId={effectiveSelectedId}
                 previewZoneId={previewZoneId}
                 viewerZoneId={viewerZoneId}
-                nightPath={nightPath}
+                night={night}
                 labelledBy={MAP_HEADING_ID}
                 describedBy={MAP_INSTRUCTIONS_ID}
                 onPreview={setPreviewZoneId}
-                onSelect={setSelectedZoneId}
+                onSelect={handleSelect}
               />
             ) : (
               <MapPlaceholder
@@ -329,6 +350,9 @@ export default function WorldTimeZonesExplorer() {
             )}
           </div>
           <div className="tw-flex tw-flex-col tw-gap-4">
+            <p className="tw-sr-only" aria-live="polite" aria-atomic="true">
+              {announcement}
+            </p>
             <WorldTimeZoneDetails locale={locale} zone={details} />
             <WorldTimeZoneLegend locale={locale} />
           </div>

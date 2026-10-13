@@ -24,8 +24,17 @@ function SourceLink({
   readonly labelKey: MessageKey;
 }): ReactNode {
   return (
-    <a href={href} rel="noopener noreferrer" className={LINK_CLASS_NAME}>
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={LINK_CLASS_NAME}
+    >
       {t(locale, labelKey)}
+      <span className="tw-sr-only">
+        {" "}
+        {t(locale, "tools.timeZones.attribution.opensInNewTab")}
+      </span>
     </a>
   );
 }

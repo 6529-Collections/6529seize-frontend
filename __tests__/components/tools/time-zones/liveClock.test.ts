@@ -7,6 +7,8 @@ import {
 
 const START = Date.UTC(2026, 9, 12, 10, 15, 42, 500);
 
+// Shadows Document.prototype's getter with an own property on `document`;
+// afterEach deletes it so later suites see jsdom's real visibilityState.
 function setVisibility(state: DocumentVisibilityState) {
   Object.defineProperty(document, "visibilityState", {
     configurable: true,
@@ -24,6 +26,13 @@ describe("liveClock", () => {
 
   afterEach(() => {
     jest.useRealTimers();
+    Reflect.deleteProperty(document, "visibilityState");
+  });
+
+  it("restores jsdom's own visibilityState after each test", () => {
+    Reflect.deleteProperty(document, "visibilityState");
+    expect(Object.hasOwn(document, "visibilityState")).toBe(false);
+    expect(document.visibilityState).toBe("visible");
     setVisibility("visible");
   });
 

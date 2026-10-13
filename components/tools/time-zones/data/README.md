@@ -16,16 +16,16 @@ loaded `/_next/static` chunk. Do not edit it by hand; regenerate it with
 | --------------------------------------- | ------------------------------------------------------------------ | -------------------------------------- |
 | `timezones-with-oceans-now.geojson.zip` | `4807d56a629c4ade3648f49843376e7f41d32e90f9621d146d2682bbb5e20021` | Zone polygons (`zones[].d`)            |
 | `timezone-names-with-oceans-Now.json`   | `3cadd8f4d19546681d043c0c65406fceba506a41c084fc889a1bc6b1ae000cdc` | IANA zones per merged zone (`members`) |
-| `timezones-now.geojson.zip`             | `a46516d04c43b32f5c527a2e5a3d5ad0308e65144730a57f04eec66c49ce59d0` | Land tint (`land`)                     |
+| `timezones-now.geojson.zip`             | `a46516d04c43b32f5c527a2e5a3d5ad0308e65144730a57f04eec66c49ce59d0` | Land mask (`land`)                     |
 
 The digests match the ones GitHub publishes for each release asset.
 
 "now" files merge zones whose clocks agree from the release date on, so the
 map has one polygon per distinct current clock (66 in `2026e`) and `members`
 lists the IANA zones each polygon stands for. "with-oceans" adds the nautical
-`Etc/GMT±N` zones so the whole globe is covered. The land-only file is drawn as
-a light tint so coastlines stay visible where land and ocean share one merged
-zone.
+`Etc/GMT±N` zones so the whole globe is covered. The land-only file is the mask
+that draws land in full color and open ocean muted, since land and ocean share
+one merged zone.
 
 ## Regenerating
 
