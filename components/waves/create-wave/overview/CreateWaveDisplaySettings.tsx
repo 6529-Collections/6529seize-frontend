@@ -421,7 +421,7 @@ export default function CreateWaveDisplaySettings({
                         className={`${inputClasses({
                           hasError: hasProposalCardExcerptError,
                           hasValue: false,
-                        })} !tw-h-9 !tw-w-20 !tw-bg-iron-950 !tw-px-3 !tw-py-1 focus:!tw-bg-iron-950`}
+                        })} !tw-h-9 !tw-w-20 !tw-px-3 !tw-py-1`}
                       />
                       <span className="tw-text-xs tw-leading-4 tw-text-iron-400">
                         {t(locale, "waves.proposalCard.characters")}
