@@ -139,7 +139,9 @@ export default function AppWalletImport() {
 function AppWalletImportMnemonic() {
   const inputRef = useRef<HTMLInputElement>(null);
   const { setToast } = useAuth();
-  const [phrase, setPhrase] = useState<string[]>(() => Array(12).fill(""));
+  const [phrase, setPhrase] = useState<string[]>(() =>
+    new Array<string>(12).fill("")
+  );
   const [currentFocus, setCurrentFocus] = useState(0);
   const { isReadonly, error, validatedWallet, resetValidation, validate } =
     useImportedWalletValidation();
