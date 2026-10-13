@@ -42,6 +42,7 @@ function SafetyCode({ code }: { readonly code: string }) {
         >
           {groups.map((group, index) => (
             // Positions are fixed: four groups of four characters.
+            // react-doctor-disable-next-line react-doctor/no-array-index-as-key fixed positions in a code that never reorders.
             <span
               key={`${index}-${group}`}
               className="tw-rounded-md tw-bg-iron-900 tw-px-2 tw-py-1"
