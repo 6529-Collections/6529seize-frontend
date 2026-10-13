@@ -427,6 +427,8 @@ export * from '../models/ApiE2eeCreateGroupRequest';
 export * from '../models/ApiE2eeDevice';
 export * from '../models/ApiE2eeDeviceGrant';
 export * from '../models/ApiE2eeDeviceGroup';
+export * from '../models/ApiE2eeDeviceLookupRequest';
+export * from '../models/ApiE2eeDeviceLookupResponse';
 export * from '../models/ApiE2eeDevicePlatform';
 export * from '../models/ApiE2eeDeviceRevocation';
 export * from '../models/ApiE2eeEligibility';
@@ -1360,6 +1362,8 @@ import { ApiE2eeCreateGroupRequest } from '../models/ApiE2eeCreateGroupRequest';
 import { ApiE2eeDevice     , ApiE2eeDeviceVerifiedViaEnum         } from '../models/ApiE2eeDevice';
 import { ApiE2eeDeviceGrant } from '../models/ApiE2eeDeviceGrant';
 import { ApiE2eeDeviceGroup } from '../models/ApiE2eeDeviceGroup';
+import { ApiE2eeDeviceLookupRequest } from '../models/ApiE2eeDeviceLookupRequest';
+import { ApiE2eeDeviceLookupResponse } from '../models/ApiE2eeDeviceLookupResponse';
 import { ApiE2eeDevicePlatform } from '../models/ApiE2eeDevicePlatform';
 import { ApiE2eeDeviceRevocation } from '../models/ApiE2eeDeviceRevocation';
 import { ApiE2eeEligibility    } from '../models/ApiE2eeEligibility';
@@ -2553,6 +2557,8 @@ let typeMap: {[index: string]: any} = {
     "ApiE2eeDevice": ApiE2eeDevice,
     "ApiE2eeDeviceGrant": ApiE2eeDeviceGrant,
     "ApiE2eeDeviceGroup": ApiE2eeDeviceGroup,
+    "ApiE2eeDeviceLookupRequest": ApiE2eeDeviceLookupRequest,
+    "ApiE2eeDeviceLookupResponse": ApiE2eeDeviceLookupResponse,
     "ApiE2eeDeviceRevocation": ApiE2eeDeviceRevocation,
     "ApiE2eeEligibility": ApiE2eeEligibility,
     "ApiE2eeEligibilityRequest": ApiE2eeEligibilityRequest,

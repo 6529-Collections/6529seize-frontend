@@ -9747,6 +9747,49 @@ paths:
           description: Payload too large (E2EE_TOO_LARGE)
         "429":
           description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/devices/lookup:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Look up encrypted-messaging devices in bulk
+      description: >-
+        Returns the devices of the given profiles (active, and revoked or
+        expired within 90 days) and the records of the given device keys, so a
+        client can verify every member's grants in one request. At most 200
+        profile ids and 500 device keys; at least one of the two. Requires a
+        profile; proxies are rejected; 404 E2EE_DISABLED while the feature flag
+        is off.
+      operationId: e2eeLookupDevices
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeLookupDevices
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeDeviceLookupRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeDeviceLookupResponse"
+        "400":
+          description: Invalid request (E2EE_BAD_REQUEST)
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN)
+        "404":
+          description: Disabled (E2EE_DISABLED)
   /e2ee/devices/{device_key}:
     get:
       tags:
@@ -10677,9 +10720,12 @@ paths:
         - Encrypted Messages
       summary: Start an encrypted attachment upload
       description: >-
-        The uploader device must be in the group's current roster. Requires a
-        profile; proxies are rejected; 404 E2EE_DISABLED while the feature flag
-        is off.
+        The uploader device must be in the group's current roster. At most 25
+        chunks; each uploading profile may declare at most 200 MiB per rolling
+        24 hours (429 E2EE_RATE_LIMITED) and keep at most 1 GiB of attachments
+        (413 E2EE_TOO_LARGE). Incomplete uploads are deleted after 24 hours.
+        Requires a profile; proxies are rejected; 404 E2EE_DISABLED while the
+        feature flag is off.
       operationId: e2eeCreateBlob
       security:
         - bearerAuth: []
@@ -31136,6 +31182,28 @@ components:
           type: integer
           format: int64
           description: Unix milliseconds
+    ApiE2eeDeviceLookupRequest:
+      type: object
+      properties:
+        profile_ids:
+          type: array
+          maxItems: 200
+          items:
+            type: string
+        device_keys:
+          type: array
+          maxItems: 500
+          items:
+            type: string
+    ApiE2eeDeviceLookupResponse:
+      type: object
+      required:
+        - devices
+      properties:
+        devices:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiE2eeDevice"
     ApiE2eeDevicePlatform:
       type: string
       enum:
