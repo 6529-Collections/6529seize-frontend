@@ -215,9 +215,8 @@ if (
   (alertType === "web_e2e" || process.env.CI_PIPELINES_FAILURE_ARTIFACT_ROOT)
 ) {
   try {
-    const { default: failureDetails } =
-      await import("./ci-failure-details.cjs");
-    description = await failureDetails.getFailureDescription({
+    const { getFailureDescription } = await import("./ci-failure-details.cjs");
+    description = await getFailureDescription({
       artifactRoot: process.env.CI_PIPELINES_FAILURE_ARTIFACT_ROOT,
       description: CI_PIPELINES_DESCRIPTION,
       repository,
