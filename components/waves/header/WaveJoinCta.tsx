@@ -224,11 +224,11 @@ export default function WaveJoinCta({
       className={clsx("tw-flex tw-flex-shrink-0 tw-items-center", className)}
     >
       {renderControl()}
-      <span role="status" className="tw-sr-only">
+      <output aria-live="polite" className="tw-sr-only">
         {state === "joined"
           ? t(locale, "waves.join.joinedAnnouncement", { waveName })
           : ""}
-      </span>
+      </output>
     </div>
   );
 }
