@@ -49,11 +49,11 @@ it.each(["staging", "production"])(
       const post = notification.steps.find((step) =>
         step.name.startsWith("Post ")
       )!;
-      expect(notification.permissions.actions).toBe("read");
-      expect(download.with?.name).toBe(upload.with.name);
+      expect(notification.permissions["actions"]).toBe("read");
+      expect(download.with?.["name"]).toBe(upload.with.name);
       expect(download["continue-on-error"]).toBe(true);
-      expect(post.env?.CI_PIPELINES_FAILURE_ARTIFACT_ROOT).toBe(
-        download.with?.path
+      expect(post.env?.["CI_PIPELINES_FAILURE_ARTIFACT_ROOT"]).toBe(
+        download.with?.["path"]
       );
       expect(checkout.with?.["sparse-checkout"]).toContain(
         "scripts/ci-failure-details.cjs"

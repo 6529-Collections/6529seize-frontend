@@ -92,7 +92,7 @@ describe("notify-ci-wave payload", () => {
           notifierFile
         );
         expect(result.code).toBe(0);
-        expect(result.payload?.description).toBe("existing description");
+        expect(result.payload?.["description"]).toBe("existing description");
       } finally {
         fs.rmSync(root, { recursive: true, force: true });
       }
@@ -111,7 +111,7 @@ describe("notify-ci-wave payload", () => {
       GH_TOKEN: "",
     });
     expect(result.code).toBe(0);
-    expect(result.payload?.description).toBe(description);
+    expect(result.payload?.["description"]).toBe(description);
   });
 
   it("keeps successful E2E descriptions empty without enrichment", async () => {
@@ -125,7 +125,7 @@ describe("notify-ci-wave payload", () => {
       GH_TOKEN: "",
     });
     expect(result.code).toBe(0);
-    expect(result.payload?.description).toBeNull();
+    expect(result.payload?.["description"]).toBeNull();
   });
 
   it("sends canonical contributors and the deployed SHA", async () => {
