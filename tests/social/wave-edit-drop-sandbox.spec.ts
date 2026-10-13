@@ -42,10 +42,36 @@ test.describe("Wave drop edit local sandbox @auth @medium @local-only", () => {
     hasTouch,
     browserName,
   }, testInfo) => {
+    if (hasTouch) {
+      await page.addInitScript(() => {
+        // Seed only the unrelated wallet SDK telemetry IDs: their initializers
+        // also require randomUUID. The submission API must still work without it.
+        for (const key of ["cbwsdk.store", "base-acc-sdk.store"]) {
+          localStorage.setItem(
+            key,
+            JSON.stringify({
+              state: {
+                config: { deviceId: "00000000-0000-4000-8000-000000000529" },
+              },
+              version: 0,
+            })
+          );
+        }
+      });
+    }
     await gotoSandboxWave(
       page,
       isCapacitorSimulationProject(testInfo.project.name)
     );
+    if (hasTouch) {
+      // Model the HTTP LAN origin's crypto API before submitting or editing.
+      await page.evaluate(() => {
+        Object.defineProperty(globalThis.crypto, "randomUUID", {
+          configurable: true,
+          value: undefined,
+        });
+      });
+    }
 
     // Submit the sandbox drop we will edit: own-authored and inside the edit window.
     const composer = page
@@ -66,6 +92,7 @@ test.describe("Wave drop edit local sandbox @auth @medium @local-only", () => {
 
     // Escape cancels edit mode without any mutation reaching the API.
     await openDropEditor(page, submittedDrop, hasTouch);
+    await expect(dropEditor(submittedDrop)).toBeFocused();
     await page.keyboard.press("Escape");
     await expect(dropEditor(submittedDrop)).toBeHidden({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,

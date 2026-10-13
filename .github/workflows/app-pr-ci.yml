@@ -231,7 +231,7 @@ jobs:
           }
           const dropEditingBrowserRequired = plan.changed_files.some((file) =>
             /^(?:components\/waves\/drops\/|contexts\/EditingDropContext\.tsx|hooks\/useLongPressClickSuppression\.ts|tests\/social\/wave-edit-drop-sandbox\.spec\.ts)/.test(file) ||
-            ["styles/globals.css", "tests/packs.manifest.cjs", "tests/support/composerSandboxServer.cjs", ".github/workflows/app-pr-ci.yml"].includes(file)
+            ["services/api/common-api.ts", "services/api/submission-request-key.ts", "styles/globals.css", "tests/packs.manifest.cjs", "tests/support/composerSandboxServer.cjs", ".github/workflows/app-pr-ci.yml"].includes(file)
           );
           if (dropEditingBrowserRequired) {
             corePlaywrightLanes.push({ lane: "playwright-drop-editing", label: "Drop editing desktop and mobile", runner: defaultRunner });
