@@ -7,8 +7,15 @@
     {
       "name": "FrontendProductionDeployment",
       "file": "FrontendProductionDeployment.json",
-      "characters": 4472,
-      "sha256": "43076c6d8941cdeda240e5226ec07dcef97c228b089857e4fdc21eb55d92395f"
+      "characters": 4210,
+      "sha256": "c5cfa2cc64e6bee41ea020b60f7e87774ab7488467d36be0fd887b26dd5c6a7a"
+    },
+    {
+      "name": "FrontendProductionStorage",
+      "file": "FrontendProductionStorage.json",
+      "characters": 3410,
+      "sha256": "ea20c5449b38e25c9c78f44ae161d635309cbb95e90a8b8d7328158fc704021f"
     }
-  ]
+  ],
+  "recovery_source_commit": "6a2bf8685b473f4da8962dec5b6c1969162a46ce"
 }

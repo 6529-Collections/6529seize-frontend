@@ -2,34 +2,6 @@
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "ProductionArtifactObjects",
-      "Effect": "Allow",
-      "Action": ["s3:PutObject", "s3:GetObject", "s3:AbortMultipartUpload"],
-      "Resource": [
-        "arn:aws:s3:::seize-web/web_build/????????????????????????????????????????/*",
-        "arn:aws:s3:::seize-web/web_build/current-production-version.json"
-      ],
-      "Condition": {
-        "StringEquals": {
-          "aws:RequestedRegion": "us-east-1"
-        }
-      }
-    },
-    {
-      "Sid": "ProductionArtifactBucketMetadata",
-      "Effect": "Allow",
-      "Action": ["s3:GetBucketLocation", "s3:GetBucketPolicy"],
-      "Resource": ["arn:aws:s3:::seize-web"],
-      "Condition": {
-        "StringEquals": {
-          "aws:RequestedRegion": "us-east-1"
-        },
-        "Bool": {
-          "aws:ViaAWSService": "true"
-        }
-      }
-    },
-    {
       "Sid": "ProductionApplicationVersions",
       "Effect": "Allow",
       "Action": [
@@ -85,7 +57,8 @@
         "cloudformation:DescribeStackResources",
         "cloudformation:ListStackResources",
         "cloudformation:GetTemplate",
-        "cloudformation:UpdateStack"
+        "cloudformation:UpdateStack",
+        "cloudformation:CancelUpdateStack"
       ],
       "Resource": [
         "arn:aws:cloudformation:us-east-1:987989283142:stack/awseb-e-8bsbxqrikc-stack/*"
@@ -136,7 +109,8 @@
         "ec2:DescribeLaunchTemplateVersions",
         "ec2:DescribeSecurityGroups",
         "ec2:DescribeSubnets",
-        "ec2:DescribeVpcs"
+        "ec2:DescribeVpcs",
+        "logs:DescribeLogGroups"
       ],
       "Resource": ["*"],
       "Condition": {
@@ -218,6 +192,23 @@
             "elasticbeanstalk.amazonaws.com",
             "ec2.amazonaws.com"
           ]
+        }
+      }
+    },
+    {
+      "Sid": "BeanstalkLoadBalancerMetadata",
+      "Effect": "Allow",
+      "Action": [
+        "elasticloadbalancing:DescribeTargetHealth",
+        "elasticloadbalancing:DescribeLoadBalancers"
+      ],
+      "Resource": ["*"],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        },
+        "Bool": {
+          "aws:ViaAWSService": "true"
         }
       }
     }
