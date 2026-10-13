@@ -1,10 +1,9 @@
-import { isIP } from "node:net";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
-import { isTrustedVercelRuntime } from "@/config/deploymentEnv";
 import { isValidEthAddress } from "@/helpers/Helpers";
+import { createClientRateLimiter } from "@/lib/security/clientRateLimit";
 import { fetchPublicJson, UrlGuardError } from "@/lib/security/urlGuard";
 import { normaliseAddress, resolveNetwork } from "@/services/alchemy/utils";
 import type { SupportedChain } from "@/types/nft";
@@ -16,9 +15,6 @@ const MAX_TOKENS_PER_REQUEST = 100;
 const MAX_BODY_BYTES = 32 * 1024;
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const MAX_CACHE_ENTRIES = 500;
-const RATE_LIMIT_WINDOW_MS = 60 * 1000;
-const REQUEST_RATE_LIMIT = 20;
-const MAX_RATE_LIMIT_BUCKETS = 1000;
 const TOKEN_ID_DECIMAL_PATTERN = /^(0|[1-9]\d{0,77})$/;
 const TOKEN_ID_HEX_PATTERN = /^0x[\da-fA-F]{1,64}$/;
 
@@ -31,14 +27,18 @@ type TokenMetadataRequestBody = {
 
 type TokenToFetch = { contractAddress: string; tokenId: string };
 type BatchCacheEntry = { expiresAt: number; tokens: unknown[] };
-type RateLimitEntry = { count: number; resetAt: number };
 
 type ParseResult =
   | { ok: true; tokens: TokenToFetch[]; chain: SupportedChain }
   | { ok: false; response: NextResponse };
 
 const batchCache = new Map<string, BatchCacheEntry>();
-const rateLimitBuckets = new Map<string, RateLimitEntry>();
+
+const enforceRateLimit = createClientRateLimiter({
+  limit: 120,
+  windowMs: 60 * 1000,
+  errorMessage: "Too many token metadata requests",
+});
 
 function jsonError(message: string, status = 400): NextResponse {
   return NextResponse.json(
@@ -223,110 +223,6 @@ function parseRequestBody(body: TokenMetadataRequestBody): ParseResult {
   };
 }
 
-function normaliseIpAddress(value: string | null): string | null {
-  const ipAddress = value?.trim().toLowerCase();
-  if (!ipAddress || isIP(ipAddress) === 0) {
-    return null;
-  }
-  return ipAddress;
-}
-
-function getClosestForwardedAddress(value: string | null): string | null {
-  const forwardedAddresses =
-    value
-      ?.split(",")
-      .map(normaliseIpAddress)
-      .filter((ipAddress): ipAddress is string => ipAddress !== null) ?? [];
-
-  return forwardedAddresses.at(-1) ?? null;
-}
-
-function hasTrustedProxyMarker(request: NextRequest): boolean {
-  return (
-    isTrustedVercelRuntime() &&
-    Boolean(request.headers.get("x-vercel-id")?.trim())
-  );
-}
-
-function getClientAddress(request: NextRequest): string | null {
-  if (!hasTrustedProxyMarker(request)) {
-    return null;
-  }
-
-  return (
-    getClosestForwardedAddress(request.headers.get("x-forwarded-for")) ??
-    normaliseIpAddress(request.headers.get("x-real-ip"))
-  );
-}
-
-function fingerprint(value: string): string {
-  // Avoid storing raw IP headers in rate-limit map keys.
-  let hash = 0x811c9dc5;
-  for (let i = 0; i < value.length; i += 1) {
-    hash ^= value.codePointAt(i) ?? 0;
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return `${value.length.toString(36)}:${(hash >>> 0).toString(36)}`;
-}
-
-function getRateLimitKey(request: NextRequest): string {
-  const clientAddress = getClientAddress(request);
-  return clientAddress
-    ? `client:${fingerprint(clientAddress)}`
-    : "client:unknown";
-}
-
-function pruneRateLimitBuckets(now = Date.now()): void {
-  if (rateLimitBuckets.size < MAX_RATE_LIMIT_BUCKETS) {
-    return;
-  }
-
-  rateLimitBuckets.forEach((entry, key) => {
-    if (entry.resetAt <= now) {
-      rateLimitBuckets.delete(key);
-    }
-  });
-
-  while (rateLimitBuckets.size >= MAX_RATE_LIMIT_BUCKETS) {
-    const oldestBucket = rateLimitBuckets.keys().next();
-    if (oldestBucket.done) {
-      break;
-    }
-    rateLimitBuckets.delete(oldestBucket.value);
-  }
-}
-
-function enforceRateLimit(request: NextRequest): NextResponse | null {
-  const now = Date.now();
-  pruneRateLimitBuckets(now);
-
-  const key = getRateLimitKey(request);
-  const existing = rateLimitBuckets.get(key);
-  const entry =
-    existing && existing.resetAt > now
-      ? existing
-      : { count: 0, resetAt: now + RATE_LIMIT_WINDOW_MS };
-
-  entry.count += 1;
-  rateLimitBuckets.set(key, entry);
-
-  if (entry.count <= REQUEST_RATE_LIMIT) {
-    return null;
-  }
-
-  const retryAfter = Math.max(1, Math.ceil((entry.resetAt - now) / 1000));
-  return NextResponse.json(
-    { error: "Too many token metadata requests" },
-    {
-      status: 429,
-      headers: {
-        ...NO_STORE_HEADERS,
-        "Retry-After": retryAfter.toString(),
-      },
-    }
-  );
-}
-
 function getBatchCacheKey(
   chain: SupportedChain,
   tokens: readonly TokenToFetch[]
@@ -411,11 +307,6 @@ async function fetchAlchemyBatch({
 }
 
 export async function POST(request: NextRequest) {
-  const rateLimitResponse = enforceRateLimit(request);
-  if (rateLimitResponse) {
-    return rateLimitResponse;
-  }
-
   const bodyResult = await readJsonBody<TokenMetadataRequestBody>({
     request,
     maxBodyBytes: MAX_BODY_BYTES,
@@ -428,6 +319,11 @@ export async function POST(request: NextRequest) {
   const parseResult = parseRequestBody(bodyResult.body);
   if (!parseResult.ok) {
     return parseResult.response;
+  }
+
+  const rateLimitResponse = enforceRateLimit(request);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   const { tokens: tokensToFetch, chain } = parseResult;

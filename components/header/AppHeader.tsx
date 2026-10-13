@@ -65,6 +65,7 @@ import {
 } from "./app-header-wave-preview";
 import WaveHeaderRestrictionButton from "@/components/waves/header/WaveHeaderRestrictionButton";
 import WaveParentNavigation from "@/components/waves/header/WaveParentNavigation";
+import WaveJoinCta from "@/components/waves/header/WaveJoinCta";
 import MainStageNominationPopover from "@/components/brain/my-stream/tabs/MainStageNominationPopover";
 import { useProfileDoubleActivate } from "./useProfileDoubleActivate";
 
@@ -716,6 +717,13 @@ export default function AppHeader() {
           />
         </div>
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-x-0.5">
+          {activeWave && isInsideWave && (
+            <WaveJoinCta
+              wave={activeWave}
+              variant="app-header"
+              className="tw-mr-1"
+            />
+          )}
           <HeaderDropActionButton action={headerDropAction} />
           {isHomeRoute && (
             <NetworkHealthCTA
