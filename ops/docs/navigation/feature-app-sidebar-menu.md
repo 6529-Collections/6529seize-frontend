@@ -89,7 +89,8 @@ standalone row after `About`.
   `/delegation/delegation-faq`, `/delegation/consolidation-use-cases`,
   `/delegation/wallet-checker`, `/tools/subscriptions-report`,
   `/meme-accounting`, `/meme-gas`, `/tools/api`, `/emma`,
-  `/tools/block-finder`, `/open-data`, `/open-data/rememes` (`ReMemes Data`),
+  `/tools/block-finder`, `/tools/time-zones` (`World Time Zones`),
+  `/open-data`, `/open-data/rememes` (`ReMemes Data`),
   and `/open-data/team` (`Team Data`).
 - Open about routes:
   `/about/the-memes`, `/about/subscriptions`, `/about/meme-lab`,
