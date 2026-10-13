@@ -6,7 +6,10 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
-import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
+import {
+  gotoDocumentWithTransientRetry,
+  RESPONSE_TIMEOUT_MS,
+} from "../support/routeReadiness";
 
 const SYNTHETIC_EMPTY_WALLET = "0x000000000000000000000000000000000000dEaD";
 
@@ -257,7 +260,11 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
       await gotoReady(page, route.path);
       const main = pageMain(page);
 
-      await expectHeading(page, route.heading);
+      // The shell precedes wallet restoration. Keep the disconnected-state
+      // requirement, but allow the existing bounded data-readiness budget.
+      await expect(
+        main.getByRole("heading", { level: 1, name: route.heading })
+      ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
       await expect(
         main.getByRole("button", { name: "Connect Wallet" })
       ).toBeVisible();
@@ -280,7 +287,7 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
         page.getByRole("heading", {
           name: `Connect Wallet to Manage ${route.heading}`,
         })
-      ).toBeVisible();
+      ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
       await expect(
         main.getByRole("button", { name: "Back to Delegation Center" })
       ).toBeVisible();

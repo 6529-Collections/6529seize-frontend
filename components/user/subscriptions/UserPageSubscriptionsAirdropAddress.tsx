@@ -73,7 +73,7 @@ export default function UserPageSubscriptionsAirdropAddress(
                   type="button"
                   data-tooltip-id={addressTooltipId}
                   aria-describedby={addressTooltipId}
-                  className={`tw-block tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-leading-5 ${
+                  className={`tw-block tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-leading-5 max-sm:tw-truncate ${
                     airdropAddress.ens
                       ? "tw-text-xs tw-text-iron-500"
                       : "tw-text-sm tw-text-iron-200"
@@ -83,6 +83,7 @@ export default function UserPageSubscriptionsAirdropAddress(
                 </button>
                 <Tooltip
                   id={addressTooltipId}
+                  openEvents={{ mouseover: true, focus: true, click: true }}
                   place="top"
                   positionStrategy="fixed"
                   offset={8}

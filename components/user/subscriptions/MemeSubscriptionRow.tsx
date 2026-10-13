@@ -387,11 +387,11 @@ export default function MemeSubscriptionRow(
   }
 
   return (
-    <div className="tw-rounded-xl tw-p-4 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-bg-iron-900/40 motion-reduce:tw-transition-none">
-      <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-4">
+    <div className="tw-rounded-xl tw-p-4 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-bg-iron-900/40 motion-reduce:tw-transition-none max-sm:tw-p-3">
+      <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-4 max-sm:tw-gap-2">
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-2">
           <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
-            <span className="tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
+            <span className="tw-break-words tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100 sm:tw-whitespace-nowrap">
               {props.title} #{props.subscription.token_id}
             </span>
             {props.date && (
@@ -431,7 +431,7 @@ export default function MemeSubscriptionRow(
             </span>
           )}
         </div>
-        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-3">
+        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-3 max-sm:tw-gap-2">
           {isSubmitting && <Spinner />}
           {renderCountSelector({
             disableWhenSingleOption: true,
