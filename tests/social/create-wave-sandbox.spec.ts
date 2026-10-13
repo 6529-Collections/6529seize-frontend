@@ -1298,10 +1298,13 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     const submissionLabel = page.getByLabel("Submission button label");
     await page.getByText("Full proposal", { exact: true }).click();
     await expect(fullProposal).toBeChecked();
-    await submissionLabel.locator("..").screenshot({
-      animations: "disabled",
-      path: testInfo.outputPath("submission-label-input.png"),
-    });
+    await page
+      .getByLabel("Submission button label")
+      .locator("..")
+      .screenshot({
+        animations: "disabled",
+        path: testInfo.outputPath("submission-label-input.png"),
+      });
     await page
       .getByRole("heading", { name: "Tab labels", exact: true })
       .locator("..")
