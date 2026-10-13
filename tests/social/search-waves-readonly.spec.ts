@@ -665,19 +665,17 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     ] as const) {
       const result = page
         .getByRole("option")
-        .filter({ has: page.locator(`a[href="${path}"]`) });
+        .and(page.locator(`a[href="${path}"]`));
       await expect(result).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
       await expect(result).toContainText(title);
     }
     await expect(
-      page
-        .getByRole("option")
-        .filter({ has: page.locator('a[href^="/delegation/"]') })
+      page.getByRole("option").and(page.locator('a[href^="/delegation/"]'))
     ).toHaveCount(0);
     await expect(
       page
         .getByRole("option")
-        .filter({ has: page.locator('a[href="/about/nft-delegation"]') })
+        .and(page.locator('a[href="/about/nft-delegation"]'))
     ).toHaveCount(0);
   });
 

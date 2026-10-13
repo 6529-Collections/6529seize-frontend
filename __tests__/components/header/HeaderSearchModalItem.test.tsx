@@ -30,8 +30,8 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 
 jest.mock("next/link", () => ({
   __esModule: true,
-  default: ({ href, children, onClick }: any) => (
-    <a href={href} onClick={onClick} data-testid="link">
+  default: ({ href, children, onClick, role }: any) => (
+    <a href={href} onClick={onClick} role={role} data-testid="link">
       {children}
     </a>
   ),
@@ -115,7 +115,9 @@ const renderComponent = (
         isSelected={isSelected}
         onHover={onHover}
         onClose={onClose}
-        onWaveSelect={options.onWaveSelect}
+        {...(options.onWaveSelect
+          ? { onWaveSelect: options.onWaveSelect }
+          : {})}
       />
     </QueryClientProvider>
   );
@@ -269,7 +271,7 @@ describe("HeaderSearchModalItem", () => {
     expect(isHeaderSearchWaveDirectMessage({} as ApiWave)).toBe(false);
   });
 
-  it("renders page item and shows breadcrumbs", () => {
+  it("renders the page option as its canonical link with breadcrumbs", () => {
     useHoverDirty.mockReturnValue(false);
     mockUsePathname.mockReturnValue("/safe-collecting/faq");
     const PageIcon = ({ className }: { className?: string | undefined }) => (
@@ -283,7 +285,9 @@ describe("HeaderSearchModalItem", () => {
       icon: PageIcon,
     };
     renderComponent(page, "delegation", false);
-    const link = screen.getByTestId("link");
+    const link = screen.getByRole("option");
+    expect(link.tagName).toBe("A");
+    expect(link.querySelector("a")).toBeNull();
     expect(link).toHaveAttribute("href", "/safe-collecting/faq");
     expect(link.textContent).toContain("FAQ");
     expect(link.textContent).toContain("Tools • Safe Collecting");
