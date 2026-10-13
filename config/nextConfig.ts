@@ -65,8 +65,8 @@ export function sharedConfig(
       qualities: [100, 75],
     },
     poweredByHeader: false,
-    async redirects() {
-      return [
+    redirects() {
+      return Promise.resolve([
         {
           source: "/delegation/delegation-center",
           destination: "/safe-collecting",
@@ -92,7 +92,7 @@ export function sharedConfig(
           destination: "/safe-collecting",
           permanent: true,
         },
-      ];
+      ]);
     },
     logging: {
       incomingRequests: false,

@@ -117,6 +117,15 @@ function useConsolidationClock(
   return nowMs;
 }
 
+function getPreActivationSigningDate(
+  activationMs: number | undefined,
+  nowMs: number,
+  signingOpensDate: string
+): string | null {
+  if (activationMs === undefined || nowMs >= activationMs) return null;
+  return signingOpensDate;
+}
+
 function getGroupLookupState(
   walletCount: number,
   groups: { readonly isPending: boolean; readonly isError: boolean }
@@ -334,9 +343,11 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
       <ConsolidationBuilderWallets
         locale={locale}
         maxWallets={limits?.maxWallets ?? null}
-        preActivationSigningDate={
-          policy && nowMs < policy.activationMs ? signingOpensDate : null
-        }
+        preActivationSigningDate={getPreActivationSigningDate(
+          policy?.activationMs,
+          nowMs,
+          signingOpensDate
+        )}
         entries={entries}
         issues={validation.issues}
         validCount={validation.wallets.length}
