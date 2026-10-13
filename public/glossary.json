@@ -66,33 +66,6 @@
       ]
     },
     {
-      "id": "delegation.overview",
-      "term": "Delegation center",
-      "aliases": [
-        "delegation",
-        "delegate",
-        "delegations",
-        "delegation center",
-        "delegation manager"
-      ],
-      "facts": [
-        "Delegation lets one wallet authorize another wallet for supported 6529 uses.",
-        "The delegation center provides wallet checking, action flows, collection management, and section navigation.",
-        "Delegation is useful for vault/hot-wallet patterns and airdrop-related workflows."
-      ],
-      "canonical_path": "/delegation/delegation-center",
-      "related_paths": [
-        "/delegation/wallet-checker",
-        "/delegation-mapping-tool",
-        "/consolidation-mapping-tool"
-      ],
-      "tags": [
-        "delegation",
-        "wallet",
-        "glossary"
-      ]
-    },
-    {
       "id": "waves.drop",
       "term": "Drop",
       "aliases": [
@@ -485,7 +458,7 @@
       "canonical_path": "/{user}/proxy",
       "related_paths": [
         "/{user}/proxy",
-        "/delegation/delegation-center"
+        "/safe-collecting"
       ],
       "tags": [
         "profiles",
@@ -575,6 +548,45 @@
         "rep",
         "cic",
         "network",
+        "glossary"
+      ]
+    },
+    {
+      "id": "delegation.overview",
+      "term": "Safe Collecting",
+      "aliases": [
+        "safe collecting",
+        "collect safely",
+        "delegation center",
+        "delegation",
+        "delegate",
+        "delegations",
+        "delegation manager",
+        "vault setup",
+        "wallet setup",
+        "tap setup",
+        "keep my vault cold"
+      ],
+      "facts": [
+        "Safe Collecting at /safe-collecting (formerly the Delegation Center) explains and sets up 6529's safe collecting system: keep NFTs in a vault that never connects to anything, and use 6529 from a hot wallet, while TDH, delegations, airdrops and subscriptions keep working as if every wallet were one.",
+        "The former /delegation/delegation-center URL permanently redirects to /safe-collecting, preserving query parameters and section anchors. Individual delegation tool URLs are unchanged.",
+        "It follows the Three Address Protocol (TAP): a vault (ideally a SAFE with hardware-wallet signers, or a hardware wallet) that holds NFTs and never connects; a transaction wallet on a hardware wallet that buys, sells and trades and acts as the vault's Delegation Manager; a hot social wallet that signs in to 6529, votes, posts, mints and pays for subscriptions and holds no NFTs; and optionally an old, burned or exposed address kept combined for its TDH.",
+        "The recommended setup for new collectors: the vault signs once to set its ENS name and appoint the transaction wallet as Delegation Manager (use case 998) on Any Collection; the guided setup combines the wallets with the manager signing for the vault; optionally the manager delegates minting to the social wallet; airdrops without a delegation go to the wallet with the most TDH, usually the vault.",
+        "When a wallet is connected, the Your setup section lists the profile's wallets with TDH, primary and connected badges, which wallet manages which, minting and airdrop delegations, and a checklist with links to fix missing steps.",
+        "The page links to every tool: guided consolidation, appointing a manager, minting and airdrop delegations, primary address, locks, revoking, and the Wallet Checker. The original delegation, consolidation and Delegation Manager forms and Manage by Collection are under All tools.",
+        "A Delegation Manager cannot move NFTs but can register anything in the vault's name, including consolidations and more managers; an expiry date does not limit it, only revoking does, and revoking it does not undo what it registered."
+      ],
+      "canonical_path": "/safe-collecting",
+      "related_paths": [
+        "/delegation/wallet-architecture",
+        "/delegation/build-consolidation",
+        "/delegation/register-sub-delegation",
+        "/delegation/wallet-checker",
+        "/network/tdh/consolidation"
+      ],
+      "tags": [
+        "delegation",
+        "wallet",
         "glossary"
       ]
     },

@@ -350,7 +350,7 @@ export default function TDHConsolidationDesignPage() {
                 ["/network/tdh/consolidation", "consolidationGuide"],
                 ["/network/tdh", "tdh"],
                 ["/delegation/wallet-checker", "checker"],
-                ["/delegation/delegation-center", "center"],
+                ["/safe-collecting", "center"],
               ] as const
             ).map(([href, key]) => ({
               href,

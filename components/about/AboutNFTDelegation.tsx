@@ -15,9 +15,9 @@ export default function AboutNFTDelegation() {
             Visit our{" "}
             <Link
               className="hover:tw-text-primary-200 tw-rounded-sm tw-font-medium tw-text-primary-300 tw-underline tw-decoration-primary-400/50 tw-underline-offset-4 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-              href="/delegation/delegation-center"
+              href="/safe-collecting"
             >
-              Delegation Center
+              Safe Collecting
             </Link>{" "}
             to get started
           </p>

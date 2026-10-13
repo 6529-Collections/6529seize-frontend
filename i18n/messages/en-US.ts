@@ -36,9 +36,11 @@ import networkMetricsMessages from "@/i18n/messages/networkMetrics.en-US.json";
 import networkTdhMessages from "@/i18n/messages/networkTdh.en-US.json";
 import networkTdhExplainerMessages from "@/i18n/messages/networkTdhExplainer.en-US.json";
 import networkTdhConsolidationMessages from "@/i18n/messages/networkTdhConsolidation.en-US.json";
+import safeCollectingMessages from "@/i18n/messages/safeCollecting.en-US.json";
 import networkTdhExampleMessages from "@/i18n/messages/networkTdhExample.en-US.json";
 import networkTdhProfileMessages from "@/i18n/messages/networkTdhProfile.en-US.json";
 import networkTdhRulesMessages from "@/i18n/messages/networkTdhRules.en-US.json";
+import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import worldTimeZonesMessages from "@/i18n/messages/worldTimeZones.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
@@ -1133,7 +1135,7 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     walletCount: "{count} of {limit} wallets",
     walletLimitReached:
       "This consolidation has the maximum of {limit} wallets.",
-    delegationCenter: "Delegation Center",
+    delegationCenter: "Safe Collecting",
     primary: "Primary",
     setPrimary: "Set primary",
     settingPrimary: "Setting primary",
@@ -2712,7 +2714,7 @@ const COLLECTION_DELEGATION_MESSAGES = objectMessages("delegation.collection", {
   "scope.memeLab": "Records here apply only to Meme Lab.",
   "scope.gradient": "Records here apply only to 6529 Gradient.",
   "scope.selected": "Records here apply to the selected collection scope.",
-  "navigation.back": "Back to Delegation Center",
+  "navigation.back": "Back to Safe Collecting",
   "connect.title": "Connect Wallet to Manage {collection}",
   "connect.description":
     "Connect the wallet whose outgoing and incoming records you want to review.",
@@ -4426,9 +4428,11 @@ export const EN_US_MESSAGES = {
   ...networkTdhMessages,
   ...networkTdhExplainerMessages,
   ...networkTdhConsolidationMessages,
+  ...safeCollectingMessages,
   ...networkTdhExampleMessages,
   ...networkTdhProfileMessages,
   ...networkTdhRulesMessages,
+  ...delegationTapGuideMessages,
   ...toolsMessages,
   ...worldTimeZonesMessages,
   ...ABOUT_TECH_MESSAGES,

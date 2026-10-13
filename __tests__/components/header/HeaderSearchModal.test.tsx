@@ -223,9 +223,7 @@ const defaultSidebarSections: SidebarSection[] = [
       },
       {
         name: "Delegation & Wallets",
-        items: [
-          { name: "Delegation Center", href: "/delegation/delegation-center" },
-        ],
+        items: [{ name: "Delegation Center", href: "/safe-collecting" }],
       },
     ],
   },

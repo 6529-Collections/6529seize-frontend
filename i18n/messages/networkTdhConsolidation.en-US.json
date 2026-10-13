@@ -211,8 +211,8 @@
   "network.tdhConsolidation.related.guide.description": "Step-by-step use cases for registering and changing consolidations.",
   "network.tdhConsolidation.related.checker.title": "Wallet Checker",
   "network.tdhConsolidation.related.checker.description": "See a wallet's consolidation links and any that are incomplete.",
-  "network.tdhConsolidation.related.center.title": "Delegation Center",
-  "network.tdhConsolidation.related.center.description": "Register, revoke and manage delegations and consolidations.",
+  "network.tdhConsolidation.related.center.title": "Safe Collecting",
+  "network.tdhConsolidation.related.center.description": "Keep your vault cold and set up your wallets step by step.",
   "network.tdhConsolidation.policy.pendingLimits": "Wallet limits are loading from the selected backend. Check Guided Setup if settings are unavailable.",
   "network.tdhConsolidation.policy.pendingDate": "the activation time shown in Guided Setup",
   "network.tdhConsolidation.order.activation": "This example models registrations made after {date}, using the activation cutoff for this environment."

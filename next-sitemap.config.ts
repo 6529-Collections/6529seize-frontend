@@ -39,6 +39,7 @@ export const STATIC_INDEXABLE_PATHS = [
   "/the-memes/mint",
   "/tools/api",
   "/tools/time-zones",
+  "/safe-collecting",
   "/blog/from-fibonacci-to-fidenza",
   "/blog/disney-deekay-their-secret-to-animation",
   "/blog/a-tale-of-two-artists",

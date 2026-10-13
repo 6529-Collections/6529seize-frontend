@@ -6,6 +6,8 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import Button from "@/components/utils/button/Button";
 import { DELEGATION_CONTRACT } from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { DelegationCenterSection } from "@/types/enums";
 import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -17,7 +19,6 @@ import { useEnsName } from "wagmi";
 import { sepolia } from "wagmi/chains";
 import CollectionDelegationComponent from "./CollectionDelegation";
 import ConsolidationBuilder from "./consolidation-builder/ConsolidationBuilder";
-import DelegationCenterComponent from "./DelegationCenter";
 import { DelegationToast, useDelegationToast } from "./DelegationToast";
 import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
 import NewConsolidationComponent from "./NewConsolidation";
@@ -30,6 +31,8 @@ import {
   MEME_LAB_COLLECTION,
 } from "./delegation-constants";
 import DelegationHTML from "./html/DelegationHTML";
+import SafeCollecting from "./safe-collecting/SafeCollecting";
+import TapGuide from "./tap-guide/TapGuide";
 import WalletCheckerComponent from "./walletChecker/WalletChecker";
 import {
   DELEGATION_CARD_CLASS_NAME,
@@ -44,11 +47,11 @@ const DELEGATION_MENU_ITEMS: ReadonlyArray<{
 }> = [
   {
     section: DelegationCenterSection.CENTER,
-    label: "Delegation Center",
+    label: t(DEFAULT_LOCALE, "safeCollecting.navLabel"),
   },
   {
     section: DelegationCenterSection.WALLET_ARCHITECTURE,
-    label: "Wallet Architecture",
+    label: t(DEFAULT_LOCALE, "delegation.tapGuide.navLabel"),
   },
   {
     section: DelegationCenterSection.FAQ,
@@ -136,7 +139,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
     switch (props.section) {
       case DelegationCenterSection.CENTER:
         return (
-          <DelegationCenterComponent
+          <SafeCollecting
             setSection={(section) => props.setActiveSection(section)}
           />
         );
@@ -273,12 +276,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
           />
         );
       case DelegationCenterSection.WALLET_ARCHITECTURE:
-        return (
-          <DelegationHTML
-            title="Wallet Architecture"
-            path="reference-overview-wallet-architecture"
-          />
-        );
+        return <TapGuide />;
       case DelegationCenterSection.FAQ:
         return <DelegationHTML title="Delegation FAQ" path="delegation-faq" />;
       case DelegationCenterSection.CONSOLIDATION_USE_CASES:
@@ -346,7 +344,10 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
   return (
     <div className={DELEGATION_PAGE_CONTAINER_CLASS_NAME}>
       {showNavigation && (
-        <nav aria-label="Delegation center" className="tw-mb-7 sm:tw-mb-8">
+        <nav
+          aria-label={t(DEFAULT_LOCALE, "safeCollecting.menuLabel")}
+          className="tw-mb-7 sm:tw-mb-8"
+        >
           <div className="tw-mb-3 tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-2 sm:tw-justify-end">
             {printExternalLinkRows()}
           </div>

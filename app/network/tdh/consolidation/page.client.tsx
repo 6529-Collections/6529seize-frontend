@@ -34,7 +34,7 @@ import TDHSection, { TDH_FOCUS, TDH_PANEL, TDH_TEXT } from "../TDHSection";
 type Icon = ComponentType<SVGProps<SVGSVGElement>>;
 
 const GUIDED_SETUP_HREF = "/delegation/build-consolidation";
-const SAFE_COLLECTING_HREF = "/delegation/delegation-center";
+const SAFE_COLLECTING_HREF = "/safe-collecting";
 const DESIGN_HREF = "/network/tdh/consolidation/design";
 
 const BENEFITS = [

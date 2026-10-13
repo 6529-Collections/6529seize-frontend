@@ -7,9 +7,10 @@ jest.mock("next/image", () => ({
   default: (props: ComponentProps<"img">) => <img {...props} />,
 }));
 
-jest.mock("@/components/delegation/DelegationCenter", () => () => (
-  <div data-testid="center" />
-));
+jest.mock(
+  "@/components/delegation/safe-collecting/SafeCollecting",
+  () => () => <div data-testid="center" />
+);
 jest.mock("@/components/delegation/walletChecker/WalletChecker", () => () => (
   <div />
 ));
@@ -51,7 +52,12 @@ jest.mock(
     };
   }
 );
-jest.mock("@/components/delegation/html/DelegationHTML", () => () => <div />);
+jest.mock("@/components/delegation/html/DelegationHTML", () => () => (
+  <div data-testid="delegation-html" />
+));
+jest.mock("@/components/delegation/tap-guide/TapGuide", () => () => (
+  <div data-testid="tap-guide" />
+));
 
 let mockConnectedAddress = "0xabc";
 let mockWalletPending = false;
@@ -117,6 +123,36 @@ describe("DelegationCenterMenu links", () => {
     );
   });
 
+  it("opens the TAP guide from its tab", async () => {
+    const mod = await import("@/components/delegation/DelegationCenterMenu");
+    const DelegationCenterMenu = mod.default;
+    render(<DelegationCenterMenu {...props} />);
+    fireEvent.click(screen.getByRole("button", { name: "TAP Guide" }));
+    expect(props.setActiveSection).toHaveBeenCalledWith(
+      DelegationCenterSection.WALLET_ARCHITECTURE
+    );
+    expect(
+      screen.queryByRole("button", { name: "Wallet Architecture" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders the native TAP guide instead of the legacy article", async () => {
+    const mod = await import("@/components/delegation/DelegationCenterMenu");
+    const DelegationCenterMenu = mod.default;
+    render(
+      <DelegationCenterMenu
+        {...props}
+        section={DelegationCenterSection.WALLET_ARCHITECTURE}
+      />
+    );
+    expect(screen.getByTestId("tap-guide")).toBeInTheDocument();
+    expect(screen.queryByTestId("delegation-html")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "TAP Guide" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    );
+  });
+
   it.each([
     DelegationCenterSection.REGISTER_DELEGATION,
     DelegationCenterSection.REGISTER_SUB_DELEGATION,
@@ -130,7 +166,7 @@ describe("DelegationCenterMenu links", () => {
     render(<DelegationCenterMenu {...props} section={section} />);
 
     expect(
-      screen.queryByRole("navigation", { name: "Delegation center" })
+      screen.queryByRole("navigation", { name: "Safe collecting" })
     ).not.toBeInTheDocument();
   });
 

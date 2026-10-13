@@ -16,7 +16,7 @@ and submit/recovery behavior.
 
 ## Entry Points
 
-- From `/delegation/delegation-center` action cards:
+- From `/safe-collecting` action cards:
   - `Register Delegation` -> `/delegation/register-delegation`
   - `Register Consolidation` -> `/delegation/register-consolidation`
   - `Guided Setup` on the `Consolidations` card ->

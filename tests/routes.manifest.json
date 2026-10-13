@@ -327,9 +327,13 @@
       "classification": "fixture",
       "family": "tools",
       "fixture": {
-        "staging": "/delegation/delegation-center",
-        "production": "/delegation/delegation-center"
+        "staging": "/delegation/wallet-architecture",
+        "production": "/delegation/wallet-architecture"
       }
+    },
+    "/safe-collecting": {
+      "classification": "crawlable",
+      "family": "tools"
     },
     "/discover": {
       "classification": "crawlable",

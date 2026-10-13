@@ -8,7 +8,7 @@ collection actions stay blocked, or Wallet Checker output looks wrong.
 ## Location in the Site
 
 - Route handler: `/delegation/[...section]`
-- Section routes: `/delegation/delegation-center`, `/delegation/wallet-architecture`,
+- Section routes: `/safe-collecting`, `/delegation/wallet-architecture`,
   `/delegation/delegation-faq`, `/delegation/consolidation-use-cases`, `/delegation/wallet-checker`
 - Write routes: `/delegation/register-delegation`,
   `/delegation/register-consolidation`, `/delegation/register-sub-delegation`,
@@ -19,7 +19,7 @@ collection actions stay blocked, or Wallet Checker output looks wrong.
 
 ## Quick Triage
 
-1. Start from `/delegation/delegation-center`, then reopen the route you need.
+1. Start from `/safe-collecting`, then reopen the route you need.
 2. Confirm wallet prerequisites: connected wallet, expected account, expected chain.
 3. For manager-driven actions, open incoming `Delegation Managers` and select one row.
 4. Retry once and read the latest inline `Errors` or toast text.
@@ -28,10 +28,11 @@ collection actions stay blocked, or Wallet Checker output looks wrong.
 ## Symptom -> Fix
 
 - `/delegation` opens not-found:
-  use `/delegation/delegation-center`. Bare `/delegation` is not a valid page.
-- HTML-backed sections (`Delegation FAQ`, `Wallet Architecture`,
-  `Consolidation Use Cases`) show `404 | PAGE NOT FOUND`: fallback HTML could
-  not load. Reopen from menu and retry later.
+  use `/safe-collecting`. Bare `/delegation` is not a valid page.
+- HTML-backed sections (`Delegation FAQ`, `Consolidation Use Cases`) show
+  `404 | PAGE NOT FOUND`: fallback HTML could not load. Reopen from menu and
+  retry later. The `TAP Guide` (`/delegation/wallet-architecture`) is a native
+  page and does not load article HTML.
 - Clicking a Delegation Center card while disconnected does not navigate:
   wallet connect was canceled or closed before a successful connect.
 - Collection tables stay on `Fetching incoming ...` / `Fetching outgoing ...`:
