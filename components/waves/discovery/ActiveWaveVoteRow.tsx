@@ -58,7 +58,7 @@ export function ActiveWaveVoteRow({
           </span>
           <span
             title={compact ? deadlineLabel : undefined}
-            className={`${compact ? "tw-mt-0.5 tw-truncate tw-text-[11px] tw-leading-4" : "tw-mt-1 tw-text-xs"} tw-block tw-text-iron-500 desktop-hover:group-hover/vote:tw-text-iron-400`}
+            className={`${compact ? "tw-mt-0.5 tw-truncate tw-text-[11px] tw-leading-4" : "tw-mt-1 tw-text-xs"} tw-block ${isActive ? "tw-text-iron-400" : "tw-text-iron-500"} desktop-hover:group-hover/vote:tw-text-iron-400`}
           >
             {deadlineLabel}
           </span>
