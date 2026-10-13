@@ -331,7 +331,7 @@ export const useCreateDropDraftState = ({
   };
 
   const refreshState = () => {
-    createDropInputRef.current?.clearEditorState();
+    createDropInputRef.current?.clearEditorState({ resetHistory: true });
     setEditorState(null);
     setMetadata(initialMetadata);
     setPollDraftState(null);

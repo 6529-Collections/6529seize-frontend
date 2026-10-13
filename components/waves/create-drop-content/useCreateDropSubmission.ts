@@ -520,8 +520,10 @@ export const useCreateDropSubmission = ({
     });
   };
 
+  const submissionInFlightRef = useRef(false);
+
   const prepareAndSubmitDrop = async (dropRequest: CreateDropConfig) => {
-    if (submitting) {
+    if (submitting || submissionInFlightRef.current) {
       return;
     }
 
@@ -537,6 +539,7 @@ export const useCreateDropSubmission = ({
 
     const submittedDraftState = getDraftStateSnapshot();
 
+    submissionInFlightRef.current = true;
     setSubmitting(true);
     try {
       const { success } = await requestAuth();
@@ -678,6 +681,7 @@ export const useCreateDropSubmission = ({
         details: getToastErrorDetails(error),
       });
     } finally {
+      submissionInFlightRef.current = false;
       setSubmitting(false);
     }
   };

@@ -46,6 +46,8 @@ type MobileWrapperDialogProps = {
   readonly fixedHeight?: boolean | undefined;
   /** Also fit the software keyboard viewport in mobile browsers. */
   readonly fitVisualViewport?: boolean | undefined;
+  /** Action-only sheets enter at their final position while the keyboard closes. */
+  readonly avoidKeyboard?: boolean | undefined;
   readonly tabletModal?: boolean | undefined;
   readonly showScrollbar?: boolean | undefined;
   readonly allowOverflow?: boolean | undefined;
@@ -412,6 +414,7 @@ export default function MobileWrapperDialog({
   tall,
   fixedHeight,
   fitVisualViewport = false,
+  avoidKeyboard = true,
   tabletModal,
   showScrollbar,
   allowOverflow,
@@ -512,7 +515,13 @@ export default function MobileWrapperDialog({
   const fitBrowserViewport = useCallback(
     (container: HTMLDivElement | null) => {
       const viewport = globalThis.visualViewport;
-      if (!fitVisualViewport || isCapacitor || !container || !viewport) {
+      if (
+        !avoidKeyboard ||
+        !fitVisualViewport ||
+        isCapacitor ||
+        !container ||
+        !viewport
+      ) {
         return;
       }
       // Native shells already own this inset. Browsers expose their keyboard
@@ -558,7 +567,7 @@ export default function MobileWrapperDialog({
         delete container.dataset["mobileDialogKeyboardVisible"];
       };
     },
-    [fitVisualViewport, isCapacitor]
+    [avoidKeyboard, fitVisualViewport, isCapacitor]
   );
 
   useEffect(() => {
@@ -628,7 +637,14 @@ export default function MobileWrapperDialog({
             <div
               ref={fitVisualViewport ? fitBrowserViewport : undefined}
               className={containerClassNames}
-              style={MOBILE_DIALOG_CONTAINER_STYLE}
+              style={
+                avoidKeyboard
+                  ? MOBILE_DIALOG_CONTAINER_STYLE
+                  : ({
+                      ...MOBILE_DIALOG_CONTAINER_STYLE,
+                      "--mobile-wrapper-dialog-keyboard-inset": "0px",
+                    } as CSSProperties)
+              }
             >
               <TransitionChild
                 as={Fragment}
