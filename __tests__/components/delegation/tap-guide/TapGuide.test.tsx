@@ -1,4 +1,7 @@
-import { policy } from "@/__tests__/helpers/consolidation-policy.fixture";
+import {
+  limits,
+  policy,
+} from "@/__tests__/helpers/consolidation-policy.fixture";
 import TapGuide from "@/components/delegation/tap-guide/TapGuide";
 import { render, screen, within } from "@testing-library/react";
 
@@ -10,15 +13,21 @@ jest.mock("@/hooks/useNftPurchasingVisibility", () => ({
   }),
 }));
 
+let mockLimits: typeof limits | null = limits;
 let mockPolicy: typeof policy | null = policy;
 jest.mock("@/hooks/useConsolidationPolicy", () => ({
-  useConsolidationPolicy: () => ({ policy: mockPolicy, isLoading: false }),
+  useConsolidationPolicy: () => ({
+    policy: mockPolicy,
+    limits: mockLimits,
+    isLoading: false,
+  }),
 }));
 
 describe("TapGuide", () => {
   beforeEach(() => {
     mockHideNftPurchasing = false;
     mockPolicy = policy;
+    mockLimits = limits;
   });
 
   it("dates the fourth wallet from the backend consolidation settings", () => {
@@ -154,4 +163,13 @@ describe("TapGuide", () => {
       expect(icon).toHaveAttribute("aria-hidden", "true");
     }
   });
+});
+
+test("does not display an invented wallet maximum when backend limits are missing", () => {
+  mockLimits = null;
+  render(<TapGuide />);
+  expect(screen.getByText(/Wallet limits are loading/)).toBeInTheDocument();
+  expect(
+    screen.queryByText(/You can combine up to 4 wallets/)
+  ).not.toBeInTheDocument();
 });

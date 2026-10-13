@@ -24,7 +24,6 @@ import TDHSection, {
   TDH_TEXT,
 } from "@/app/network/tdh/TDHSection";
 import ButtonLink from "@/components/utils/button/ButtonLink";
-import { CONSOLIDATION_WALLET_LIMIT } from "@/constants/consolidation.constants";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useConsolidationPolicy } from "@/hooks/useConsolidationPolicy";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
@@ -145,7 +144,7 @@ const LEARN_LINKS = [
 export default function TapGuide() {
   const locale = useBrowserLocale();
   const { hideNftPurchasing } = useNftPurchasingVisibility();
-  const { policy } = useConsolidationPolicy();
+  const { policy, limits } = useConsolidationPolicy();
 
   return (
     <article
@@ -221,10 +220,12 @@ export default function TapGuide() {
               {t(locale, "delegation.tapGuide.old.retire.body")}
             </p>
             <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
-              {t(locale, "delegation.tapGuide.old.retire.limit", {
-                limit: formatInteger(locale, CONSOLIDATION_WALLET_LIMIT),
-                date: fourthWalletDate(locale, policy?.activationMs),
-              })}
+              {limits
+                ? t(locale, "delegation.tapGuide.old.retire.limit", {
+                    limit: formatInteger(locale, limits.maxWallets),
+                    date: fourthWalletDate(locale, policy?.activationMs),
+                  })
+                : t(locale, "network.tdhConsolidation.policy.pendingLimits")}
             </p>
           </IconPanel>
           <IconPanel
