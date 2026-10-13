@@ -13,13 +13,13 @@ export const CREATE_WAVE_FORM_STYLES = {
 } as const;
 
 export const CREATE_WAVE_OPTION_STYLES = {
-  grid: "tw-grid tw-grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] tw-gap-3",
-  card: "tw-group tw-grid tw-min-w-0 tw-grid-cols-[72px_minmax(0,1fr)] tw-items-start tw-gap-3 tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-p-3 tw-transition-colors focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 motion-reduce:tw-transition-none",
+  grid: "tw-grid tw-grid-cols-1 tw-gap-3",
+  card: "tw-group tw-grid tw-min-w-0 tw-grid-cols-[72px_minmax(0,1fr)] tw-items-center tw-gap-4 tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-p-3 tw-transition-colors focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 motion-reduce:tw-transition-none",
   selected: "tw-border-primary-500/60 tw-bg-primary-500/5",
   unselected: "tw-border-white/5 tw-bg-iron-950 hover:tw-border-white/10",
   preview:
     "tw-h-14 tw-w-full tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-2",
-  content: "tw-flex tw-min-w-0 tw-items-start tw-gap-3",
+  content: "tw-flex tw-min-w-0 tw-items-center tw-gap-4",
 } as const;
 
 export const CREATE_WAVE_FORM_CONTROL_SCOPE_STYLES =

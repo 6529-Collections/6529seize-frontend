@@ -160,7 +160,7 @@ export default function RankScheduleModeSelector({
                 />
                 <span
                   aria-hidden="true"
-                  className={`tw-order-last tw-mt-0.5 tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition-colors motion-reduce:tw-transition-none ${
+                  className={`tw-order-last tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition-colors motion-reduce:tw-transition-none ${
                     isSelected
                       ? "tw-border-primary-400 tw-bg-primary-500/10"
                       : "tw-border-iron-600 tw-bg-transparent group-hover:tw-border-iron-500"
