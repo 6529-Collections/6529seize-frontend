@@ -230,6 +230,9 @@ Use `expectUrlState` from `support/urlState.ts` for route/query predicates;
 Playwright's predicate-based `toHaveURL` also waits for the page load event,
 which pending media can delay even after the correct URL is committed. Keep
 destination content, focus, scroll restoration, and media assertions separate.
+The distribution return coverage also expands its panel after focus returns to
+exercise late layout changes. It retains the original URL, focus, and viewport
+assertions; the test never scrolls the returned row into view itself.
 
 App PR CI:
 

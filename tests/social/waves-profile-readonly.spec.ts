@@ -787,7 +787,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
 
   test("keeps wave identity compact and sharing reachable through details", async ({
     page,
-  }) => {
+  }, testInfo) => {
     const waveId = await getFirstWaveId(page);
     await gotoReady(page, `/waves/${waveId}`);
 
@@ -832,24 +832,48 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         exact: true,
       });
       if (await description.count()) {
-        await expect
-          .poll(() =>
-            description.evaluate((button) => {
-              const preview = button.querySelector("span > span");
-              const identity = button.parentElement;
-              if (!preview || !identity) {
-                return false;
+        let descriptionGeometry: unknown;
+        try {
+          await expect
+            .poll(
+              async () => {
+                descriptionGeometry = await description.evaluate((button) => {
+                  const preview = button.querySelector("span > span");
+                  const identity = button.parentElement;
+                  if (!preview || !identity) {
+                    return { fitsIdentity: false, hasTruncationCue: false };
+                  }
+                  const buttonBox = button.getBoundingClientRect();
+                  const identityBox = identity.getBoundingClientRect();
+                  const isTruncated =
+                    preview.scrollWidth > preview.clientWidth + 1;
+                  return {
+                    fitsIdentity: buttonBox.right <= identityBox.right + 1,
+                    hasTruncationCue:
+                      !isTruncated || button.querySelector("svg") !== null,
+                    buttonRight: buttonBox.right,
+                    identityRight: identityBox.right,
+                    previewWidth: preview.clientWidth,
+                    previewScrollWidth: preview.scrollWidth,
+                    fonts: document.fonts.status,
+                  };
+                });
+                return descriptionGeometry;
+              },
+              {
+                message:
+                  "Wave description must fit its identity and indicate truncation",
               }
-              const buttonBox = button.getBoundingClientRect();
-              const identityBox = identity.getBoundingClientRect();
-              const isTruncated = preview.scrollWidth > preview.clientWidth + 1;
-              return (
-                buttonBox.right <= identityBox.right + 1 &&
-                (!isTruncated || button.querySelector("svg") !== null)
-              );
-            })
-          )
-          .toBe(true);
+            )
+            .toMatchObject({ fitsIdentity: true, hasTruncationCue: true });
+        } finally {
+          await testInfo.attach("wave-description-geometry", {
+            body: Buffer.from(
+              JSON.stringify(descriptionGeometry ?? null, null, 2)
+            ),
+            contentType: "application/json",
+          });
+        }
       }
       if (await score.count()) {
         const headingBox = await header
