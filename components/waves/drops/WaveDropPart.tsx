@@ -84,7 +84,8 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
     const haveNextPart = activePartIndex < drop.parts.length - 1;
 
     const isTemporaryDrop = drop.id.startsWith("temp-");
-    const isInteractive = !isTemporaryDrop && !!onDropContentClick;
+    const isInteractive =
+      !isTemporaryDrop && !isEditing && !!onDropContentClick;
     const hasProposalCardTextFooter =
       contentPresentation === "proposalCard" &&
       !isEditing &&
@@ -179,7 +180,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
       if (selection?.toString()) {
         return;
       }
-      if (isTemporaryDrop || !onDropContentClick) return;
+      if (isTemporaryDrop || isEditing || !onDropContentClick) return;
 
       event.stopPropagation();
       onDropContentClick(drop);

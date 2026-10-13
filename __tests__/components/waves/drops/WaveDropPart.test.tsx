@@ -219,6 +219,25 @@ describe("WaveDropPart", () => {
       expect(parentOnClick).not.toHaveBeenCalled();
     });
 
+    it("leaves clicks and typing to the editor until editing ends", () => {
+      const { rerender } = render(<WaveDropPart {...defaultProps} isEditing />);
+      const container = getDropContainer();
+
+      fireEvent.click(screen.getByTestId("drop-id"));
+      for (const key of ["Enter", " "]) {
+        const event = createEvent.keyDown(container, { key, cancelable: true });
+        fireEvent(container, event);
+        expect(event.defaultPrevented).toBe(false);
+      }
+      expect(mockOnDropContentClick).not.toHaveBeenCalled();
+      expect(container).not.toHaveAttribute("role", "button");
+      expect(container).not.toHaveAttribute("tabindex");
+
+      rerender(<WaveDropPart {...defaultProps} />);
+      fireEvent.click(container);
+      expect(mockOnDropContentClick).toHaveBeenCalledWith(mockSinglePartDrop);
+    });
+
     it("does not call onDropContentClick for temporary drops", async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       render(<WaveDropPart {...defaultProps} drop={mockTemporaryDrop} />);
