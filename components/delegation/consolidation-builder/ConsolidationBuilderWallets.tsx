@@ -138,10 +138,16 @@ export function ConsolidationBuilderWallets(
           {t(locale, "delegation.consolidationBuilder.wallets.title")}
         </h3>
         <span className="tw-text-sm tw-text-iron-400">
-          {t(locale, "delegation.consolidationBuilder.wallets.count", {
-            count: formatInteger(locale, props.validCount),
-            limit,
-          })}
+          {t(
+            locale,
+            props.maxWallets === null
+              ? "delegation.consolidationBuilder.wallets.countPending"
+              : "delegation.consolidationBuilder.wallets.count",
+            {
+              count: formatInteger(locale, props.validCount),
+              limit,
+            }
+          )}
         </span>
       </div>
       <ol className="tw-m-0 tw-list-none tw-space-y-4 tw-p-0">
