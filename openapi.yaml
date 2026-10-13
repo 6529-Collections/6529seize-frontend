@@ -40789,8 +40789,8 @@ components:
           type: integer
           format: int64
           description: >-
-            Unread drops across all visible subwaves, independent of whether the
-            authenticated profile follows each subwave.
+            Unread drops across visible subwaves that the authenticated profile
+            follows and has not muted.
         followed_subwaves_count:
           type: integer
           format: int64
