@@ -386,8 +386,17 @@ class E2eeEngineImpl implements E2eeEngineExt {
   }
 
   setOpenConversation(g: string | null): void {
-    this.ctx.openConversation = g?.toLowerCase() ?? null;
-    this.ctx.openUntil = g === null ? 0 : Number.MAX_SAFE_INTEGER;
+    const key = g?.toLowerCase() ?? null;
+    const changed = key !== this.ctx.openConversation;
+    this.ctx.openConversation = key;
+    this.ctx.openUntil = key === null ? 0 : Number.MAX_SAFE_INTEGER;
+    if (key !== null && changed && this.ctx.store.status === "ready") {
+      // 8.4 reconciliation on open: catch up, then look for missing devices.
+      this.background(async () => {
+        await this.controller.syncGroup(key);
+        await this.controller.maintain(key);
+      });
+    }
   }
 
   async idle(): Promise<void> {

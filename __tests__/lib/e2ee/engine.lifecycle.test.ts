@@ -18,6 +18,36 @@ jest.setTimeout(240_000);
 const DAY = 86_400_000;
 
 describe("E2EE engine: lifecycle", () => {
+  it("keeps a pool of 30 one-time KeyPackages and rotates the last-resort one", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    const key = alice.primary.engine.getThisDevice()!.deviceKey;
+    const pool = () => world.ds.state["keyPackages"].get(key);
+    expect(pool().oneTime).toHaveLength(30);
+    const firstLastResort = pool().lastResort.data;
+
+    // Claims drain the pool below 10; the next refresh refills it to 30.
+    for (let index = 0; index < 25; index += 1) {
+      pool().oneTime.shift();
+    }
+    world.clock.advance(11 * 60_000);
+    await settle(world);
+    expect(pool().oneTime.length).toBe(30);
+
+    // After 30 days the last-resort package rotates and the expired
+    // one-time packages are replaced. (OpenMLS stamps lifetimes from the real
+    // clock, so expiry is not compared against the virtual clock here.)
+    const uploads = () =>
+      world.ds.state.requests.filter(
+        (r) => r.path.endsWith("/key-packages") && r.status === 200
+      ).length;
+    const before = uploads();
+    world.clock.advance(31 * DAY);
+    await settle(world);
+    expect(uploads()).toBeGreaterThanOrEqual(before + 2);
+    expect(pool().lastResort.data).not.toBe(firstLastResort);
+  });
+
   it("stops at the device limit and resumes without a second prompt", async () => {
     const world = await createWorld();
     const alice = await addUser(world, "alice");
