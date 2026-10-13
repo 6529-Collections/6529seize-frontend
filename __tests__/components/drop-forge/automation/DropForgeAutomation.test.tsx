@@ -17,7 +17,11 @@ import {
 } from "@/services/api/drop-forge-api";
 import type { ApiDropForgeLaunch } from "@/generated/models/ApiDropForgeLaunch";
 import { forgeLaunchKey } from "@/hooks/drop-forge-query-keys";
-import type { ApiDropForgeJob } from "@/generated/models/ApiDropForgeJob";
+import {
+  ApiDropForgeJobKindEnum as JobKind,
+  ApiDropForgeJobStatusEnum as JobStatus,
+  type ApiDropForgeJob,
+} from "@/generated/models/ApiDropForgeJob";
 jest.mock("@/services/api/drop-forge-api", () => ({
   getForgeLaunch: jest.fn(),
   requestForgeLaunch: jest.fn(),
@@ -355,16 +359,16 @@ it("reauthenticates and resumes the existing job after refresh without generatin
     id: "11111111-1111-4111-8111-111111111111",
     contract: "creator",
     claim_id: 123,
-    kind: "PROCESS_ALL",
+    kind: JobKind.ProcessAll,
     phase_ids: ["p0", "p1", "p2"],
-    status: "AWAITING_AUTH",
+    status: JobStatus.AwaitingAuth,
     step: 0,
     updated_at: 1,
   };
   jest.mocked(latestForgeProcess).mockResolvedValue(waiting);
   jest
     .mocked(startForgeProcess)
-    .mockResolvedValue({ ...waiting, status: "PENDING" });
+    .mockResolvedValue({ ...waiting, status: JobStatus.Pending });
   renderUI(
     <ProcessAndFinalize
       contract="creator"
@@ -395,9 +399,9 @@ it("leaves the waiting job intact when the operator cancels authentication", asy
     id: "job",
     contract: "creator",
     claim_id: 123,
-    kind: "PROCESS_ALL",
+    kind: JobKind.ProcessAll,
     phase_ids: ["p0", "p1", "p2"],
-    status: "AWAITING_AUTH",
+    status: JobStatus.AwaitingAuth,
     step: 0,
     updated_at: 1,
   });
