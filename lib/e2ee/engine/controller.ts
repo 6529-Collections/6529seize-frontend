@@ -142,6 +142,9 @@ export class EngineController {
     }
     this.lastFullSyncAt = this.ctx.now();
     await this.pullInbox();
+    if (!this.isReady()) {
+      return;
+    }
     const serverGroups = await this.deviceGroups();
     if (!this.isReady()) {
       return;
@@ -186,7 +189,17 @@ export class EngineController {
     if (!this.isReady()) {
       return;
     }
-    await swallowNetwork(this.ctx.queue.run(() => processInbox(this.ctx)));
+    try {
+      await swallowNetwork(this.ctx.queue.run(() => processInbox(this.ctx)));
+    } catch (error) {
+      // Revoked from another device before its WS hint arrived: the inbox is
+      // the first own-device call of a pass, so handle it here, not as an error.
+      if (asE2eeApiError(error)?.code === "E2EE_NOT_YOUR_DEVICE") {
+        await this.hooks.onOwnRevoked();
+        return;
+      }
+      throw error;
+    }
   }
 
   /** Catch up one group, then run due maintenance and flush its outbox. */

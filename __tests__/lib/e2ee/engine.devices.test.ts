@@ -123,6 +123,27 @@ describe("E2EE engine: devices", () => {
     ]);
   });
 
+  it("a revoked device that missed the WS hint handles it on its next sync", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    const bob = await addUser(world, "bob");
+    const laptop = await startDevice(world, "bob", bob.account, {
+      noWake: true,
+    });
+    bob.devices.push(laptop);
+    await settle(world);
+    await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "dm",
+    });
+    await settle(world);
+    const laptopKey = laptop.engine.getThisDevice()!.deviceKey;
+
+    await bob.primary.engine.revokeDevice(laptopKey);
+    await expect(laptop.engine.sync()).resolves.toBeUndefined();
+    expect(laptop.engine.getStatus()).toBe("needs-enrollment");
+  });
+
   it("lost device: a new enrollment is re-added and the old one is revoked", async () => {
     const world = await createWorld();
     const alice = await addUser(world, "alice");
