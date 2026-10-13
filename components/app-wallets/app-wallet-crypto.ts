@@ -28,6 +28,8 @@ function deriveKey(
       iterations,
       APP_WALLET_ENCRYPTION_KEY_BYTES,
       "sha256",
+      // pbkdf2 is callback-based; pbkdf2Sync would block the UI thread.
+      // eslint-disable-next-line promise/prefer-await-to-callbacks -- see above
       (err, derivedKey) => {
         if (err) {
           reject(new Error(err.message || "Error deriving key"));

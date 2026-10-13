@@ -29,6 +29,22 @@ export interface AppWalletEncryptedEnvelopeV2 {
   ciphertext: string;
 }
 
+// Parsed JSON is untrusted until every field has been checked.
+interface EnvelopeCandidate {
+  version?: unknown;
+  algorithm?: unknown;
+  kdf?: {
+    name?: unknown;
+    hash?: unknown;
+    iterations?: unknown;
+    salt?: unknown;
+    key_length?: unknown;
+  } | null;
+  iv?: unknown;
+  auth_tag?: unknown;
+  ciphertext?: unknown;
+}
+
 function isHex(value: unknown): value is string {
   return typeof value === "string" && HEX_PATTERN.test(value);
 }
@@ -48,7 +64,7 @@ function isValidKdfIterations(value: unknown): value is number {
   );
 }
 
-function isValidKdf(kdf: AppWalletEncryptedEnvelopeV2["kdf"] | undefined) {
+function isValidKdf(kdf: EnvelopeCandidate["kdf"]): boolean {
   return (
     kdf?.name === "pbkdf2" &&
     kdf.hash === "sha256" &&
@@ -59,9 +75,7 @@ function isValidKdf(kdf: AppWalletEncryptedEnvelopeV2["kdf"] | undefined) {
   );
 }
 
-function isValidCipherFields(
-  envelope: Partial<AppWalletEncryptedEnvelopeV2>
-): boolean {
+function isValidCipherFields(envelope: EnvelopeCandidate): boolean {
   return (
     isHex(envelope.iv) &&
     hexByteLength(envelope.iv) === APP_WALLET_CURRENT_IV_BYTES &&
@@ -71,24 +85,25 @@ function isValidCipherFields(
   );
 }
 
+function isEnvelopeV2(
+  candidate: EnvelopeCandidate
+): candidate is AppWalletEncryptedEnvelopeV2 {
+  return (
+    candidate.version === APP_WALLET_CURRENT_ENCRYPTION_VERSION &&
+    candidate.algorithm === APP_WALLET_ENCRYPTION_ALGORITHM &&
+    isValidKdf(candidate.kdf) &&
+    isValidCipherFields(candidate)
+  );
+}
+
 export function parseAppWalletEnvelope(
   encryptedData: string
 ): AppWalletEncryptedEnvelopeV2 | null {
   try {
-    const parsed = JSON.parse(
-      encryptedData
-    ) as Partial<AppWalletEncryptedEnvelopeV2>;
-
-    if (
-      parsed.version !== APP_WALLET_CURRENT_ENCRYPTION_VERSION ||
-      parsed.algorithm !== APP_WALLET_ENCRYPTION_ALGORITHM ||
-      !isValidKdf(parsed.kdf) ||
-      !isValidCipherFields(parsed)
-    ) {
-      return null;
-    }
-
-    return parsed as AppWalletEncryptedEnvelopeV2;
+    // JSON.parse may yield null or a primitive; reading a field of null
+    // throws and is treated as "not an envelope".
+    const parsed = JSON.parse(encryptedData) as EnvelopeCandidate;
+    return isEnvelopeV2(parsed) ? parsed : null;
   } catch {
     return null;
   }

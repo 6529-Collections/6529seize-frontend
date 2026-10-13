@@ -70,9 +70,9 @@ function useImportedWalletValidation() {
       if (run === validationRunRef.current) {
         setValidatedWallet(wallet);
       }
-    } catch (error: unknown) {
+    } catch (validationError: unknown) {
       if (run === validationRunRef.current) {
-        setError(`Error: ${getErrorMessage(error)}`);
+        setError(`Error: ${getErrorMessage(validationError)}`);
       }
     }
   };
@@ -139,7 +139,7 @@ export default function AppWalletImport() {
 function AppWalletImportMnemonic() {
   const inputRef = useRef<HTMLInputElement>(null);
   const { setToast } = useAuth();
-  const [phrase, setPhrase] = useState<string[]>(Array(12).fill(""));
+  const [phrase, setPhrase] = useState<string[]>(() => Array(12).fill(""));
   const [currentFocus, setCurrentFocus] = useState(0);
   const { isReadonly, error, validatedWallet, resetValidation, validate } =
     useImportedWalletValidation();
