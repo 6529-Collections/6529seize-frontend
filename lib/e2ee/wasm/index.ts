@@ -66,8 +66,11 @@ async function fetchModule(url: string): Promise<Uint8Array<ArrayBuffer>> {
 }
 
 async function verifyModule(bytes: Uint8Array<ArrayBuffer>): Promise<void> {
-  const subtle = globalThis.crypto?.subtle;
-  if (!subtle) {
+  // Typed as optional: older WebViews and plain-HTTP origins lack WebCrypto.
+  const subtle: SubtleCrypto | undefined = (
+    globalThis as { crypto?: Crypto }
+  ).crypto?.subtle;
+  if (subtle === undefined) {
     throw new Error(`${LOAD_ERROR}: WebCrypto is not available`);
   }
   if (bytes.byteLength !== MLS_WASM_MANIFEST.bytes) {
@@ -111,9 +114,17 @@ async function instantiate(
 export function loadMlsWasm(
   options: LoadMlsWasmOptions = {}
 ): Promise<MlsWasmExports> {
-  loading ??= instantiate(options).catch((error: unknown) => {
+  loading ??= instantiateOnce(options);
+  return loading;
+}
+
+async function instantiateOnce(
+  options: LoadMlsWasmOptions
+): Promise<MlsWasmExports> {
+  try {
+    return await instantiate(options);
+  } catch (error: unknown) {
     loading = null;
     throw error;
-  });
-  return loading;
+  }
 }
