@@ -95,3 +95,14 @@ test("does not simulate groups before backend limits are available", () => {
     "Wallet limits are loading"
   );
 });
+
+test("hides the walkthrough when the limits do not match its four-wallet scenario", () => {
+  const { container } = render(
+    <ConsolidationOrderSimulator
+      locale="en-US"
+      activationDate="12 October 2026, 00:00 UTC"
+      limits={{ maxWallets: 5, ungatedMaxWallets: 4 }}
+    />
+  );
+  expect(container).toBeEmptyDOMElement();
+});
