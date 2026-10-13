@@ -621,6 +621,7 @@
       "related_paths": [
         "/network/definitions",
         "/network/tdh/historic-boosts",
+        "/network/tdh/consolidation",
         "/network/health/network-tdh",
         "/network/levels"
       ],
