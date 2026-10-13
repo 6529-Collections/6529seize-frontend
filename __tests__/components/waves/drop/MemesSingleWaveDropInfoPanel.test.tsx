@@ -166,12 +166,21 @@ describe("MemesSingleWaveDropInfoPanel", () => {
     });
   });
 
-  it.each([undefined, ""])(
-    "mounts invitation controls without requiring original artist metadata (%s)",
-    (submission_artist) => {
+  it.each([
+    { submission_artist: "", collaborators: [] },
+    { submission_artist: "Artist A", collaborators: [] },
+    {
+      submission_artist: undefined,
+      collaborators: [
+        { id: "B", handle: "artistB", display: "artistB", pfp: null },
+      ],
+    },
+  ])(
+    "mounts managed invitation controls with credit marker $submission_artist and accepted profiles $collaborators",
+    (collaboration) => {
       render(
         <MemesSingleWaveDropInfoPanel
-          drop={{ ...baseDrop, submission_artist }}
+          drop={{ ...baseDrop, ...collaboration }}
           wave={null}
         />
       );
@@ -186,10 +195,30 @@ describe("MemesSingleWaveDropInfoPanel", () => {
     }
   );
 
+  it.each([undefined, []])(
+    "does not load invitations for ordinary artwork with collaborators %s",
+    (collaborators) => {
+      render(
+        <MemesSingleWaveDropInfoPanel
+          drop={{ ...baseDrop, collaborators }}
+          wave={null}
+        />
+      );
+      expect(
+        screen.queryByTestId("collaboration-panel")
+      ).not.toBeInTheDocument();
+    }
+  );
+
   it("does not mount invitation controls for restricted artwork", () => {
     render(
       <MemesSingleWaveDropInfoPanel
-        drop={{ ...baseDrop, moderation: { can_view: false } }}
+        drop={{
+          ...baseDrop,
+          submission_artist: "",
+          collaborators: [{ id: "B", handle: "artistB" }],
+          moderation: { can_view: false },
+        }}
         wave={null}
       />
     );
