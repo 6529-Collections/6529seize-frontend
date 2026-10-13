@@ -1,4 +1,5 @@
 import LruTtlCache from "@/lib/cache/lruTtl";
+import { readLimitedText } from "@/lib/fetch/limitedBody";
 import { parseTwitterOEmbed } from "./parser";
 import { extractMetaImage } from "./meta";
 import type { TweetPreview, TwitterOEmbedResponse } from "./types";
@@ -16,6 +17,7 @@ const TWITTER_PREVIEW_CACHE_TTL_MS = 10 * 60 * 1000;
 const TWITTER_PREVIEW_CACHE_MAX_ITEMS = 500;
 const TWITTER_PREVIEW_FETCH_TIMEOUT_MS = 8000;
 const TWITTER_MEDIA_FETCH_TIMEOUT_MS = 5000;
+const TWITTER_PAGE_MAX_BYTES = 2 * 1024 * 1024;
 
 const previewCache = new LruTtlCache<string, Promise<TweetPreview>>({
   max: TWITTER_PREVIEW_CACHE_MAX_ITEMS,
@@ -138,7 +140,9 @@ async function fetchTweetPageMetaImageUrl(
     return undefined;
   }
 
-  return extractMetaImage(await response.text());
+  return extractMetaImage(
+    await readLimitedText(response, TWITTER_PAGE_MAX_BYTES)
+  );
 }
 
 async function resolveTweetMediaImageUrl(

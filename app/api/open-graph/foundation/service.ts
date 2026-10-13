@@ -1,5 +1,6 @@
 import type { PreviewPlan } from "@/app/api/open-graph/compound/service";
 import { buildResponse } from "@/app/api/open-graph/utils";
+import { loadHtmlMetadata } from "@/lib/security/htmlMetadata";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import { asNonEmptyString } from "../opensea/shared";
@@ -8,8 +9,6 @@ const FOUNDATION_CACHE_TTL_MS = 5 * 60 * 1000;
 const FOUNDATION_HOST = "foundation.app";
 const FOUNDATION_MINT_PATH_PATTERN =
   /^\/mint\/([^/]+)\/(0x[a-f0-9]{40})\/([^/?#]+)\/?$/i;
-const NEXT_DATA_SCRIPT_PATTERN =
-  /<script id=["']__NEXT_DATA__["'][^>]*>([\s\S]*?)<\/script>/i;
 
 const FOUNDATION_CHAIN_IDS: Record<string, number> = {
   eth: 1,
@@ -123,8 +122,14 @@ const extractFoundationContext = (url: URL): FoundationContext | null => {
 };
 
 const extractNextData = (html: string): FoundationNextData | null => {
-  const match = NEXT_DATA_SCRIPT_PATTERN.exec(html);
-  const rawPayload = match?.[1];
+  // deps.fetchHtml (the open-graph route's capped reader) already limited the
+  // page to its byte cap, and Next.js renders __NEXT_DATA__ at the end of the
+  // body, so scan all of it.
+  const rawPayload = loadHtmlMetadata(html, { maxChars: html.length })(
+    "script#__NEXT_DATA__"
+  )
+    .first()
+    .text();
   if (!rawPayload) {
     return null;
   }

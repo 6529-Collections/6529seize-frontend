@@ -684,6 +684,13 @@ The destination is a Chat subwave. Each feedback item is a top-level Chat drop,
 with normal Wave replies and reactions beneath it. The initial review does not
 introduce ranking, winner, threshold, or competition semantics.
 
+> Update (2026-10-12): Production Stream review feedback now posts to the
+> public top-level `6529 Tech Feedback` Wave
+> (`e933d8d6-0c78-4e8f-aa12-f67d8c11b4dc`) instead of a subwave. The earlier
+> `Stream Feedback` subwave (`06e69198-eea7-40c5-95d3-7c1bf5051aba`) is archived
+> read-only. Staging keeps its own environment-specific destination, and one
+> Wave still cannot serve more than one environment.
+
 ### Submission Record
 
 Every feedback drop contains readable Markdown and structured metadata. The

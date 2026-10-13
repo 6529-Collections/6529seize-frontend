@@ -1091,6 +1091,7 @@
       ],
       "facts": [
         "Every Stream editorial and technical reference page has one structured feedback composer connected to the server-resolved Stream review Wave destination.",
+        "In production, Stream review feedback posts to the public top-level 6529 Tech Feedback wave; the earlier Stream Feedback subwave is archived read-only. Staging uses its own review wave.",
         "Editorial pages place the current page's loaded comments and composer in one collapsible rail; closing and reopening it preserves the current draft, and the browser remembers the open or closed preference.",
         "The page-comments rail reads the most recent 50 Wave messages for the exact review version, shows entries attached to the current page, and can load older 50-message pages on request.",
         "Editorial feedback can reference a stable page section; technical feedback can reference an exact Solidity file and line range.",
@@ -1722,7 +1723,7 @@
       "facts": [
         "The Tech Updates page lives at /about/tech.",
         "It is a longer-form area for 6529 tech updates, repo work, bot notes, release context, and build reports.",
-        "Shorter live repo activity still belongs in Follow The Repo.",
+        "Follow The Repo is the dev team's live chat. Anyone can read it, and its subwaves carry the deploy and GitHub PR feeds; the Tech Updates page is the linkable longer-form shelf beside it.",
         "The page links active technical notes such as the wallet authentication upgrade and indexes longer tech reports."
       ],
       "canonical_path": "/about/tech",
@@ -1733,6 +1734,97 @@
       ],
       "tags": ["about", "tech", "reports"],
       "source_refs": ["components/about/tech/AboutTech.tsx"]
+    },
+    {
+      "id": "waves.tech-feedback-and-dev-team",
+      "kind": "workflow",
+      "title": "Report bugs, send suggestions, and follow 6529 development",
+      "link_label": "6529 Tech Feedback",
+      "aliases": [
+        "report a bug",
+        "where do i report bugs",
+        "give feedback",
+        "app feature request",
+        "6529 tech feedback",
+        "follow the repo",
+        "dev team chat",
+        "6529 releases",
+        "release notes",
+        "deploys production",
+        "github pr feed"
+      ],
+      "keywords": [
+        "bug",
+        "feedback",
+        "tech",
+        "dev",
+        "team",
+        "repo",
+        "releases",
+        "deploys",
+        "github",
+        "waves"
+      ],
+      "facts": [
+        "Report 6529 bugs, app feature requests, and other tech feedback in 6529 Tech Feedback, a public top-level wave.",
+        "Send general, non-technical suggestions about the community, The Memes and other collections, the Network Museum, events, programs, or policies to 6529 Suggestion Box, a top-level wave that is open for anyone to post and moderated by the dev team.",
+        "Follow The Repo is the 6529 dev team's live chat. Anyone can read it; the dev team posts there.",
+        "Follow The Repo's subwaves are bot feeds: Deploys · Production, Deploys · Staging, and GitHub PR Feed.",
+        "Per-deploy frontend and backend release notes post to Deploys · Production.",
+        "6529 Releases is a top-level wave that receives one AI-written daily release digest plus individual Desktop and mobile app release notes; /about/release-notes opens it.",
+        "Dev Team Chat, PR Summaries, and Stream Feedback are archived read-only waves outside Follow The Repo.",
+        "For suspected security vulnerabilities in 6529 apps or services, use private reporting under the repository security policy instead of a public wave."
+      ],
+      "canonical_path": "/waves/e933d8d6-0c78-4e8f-aa12-f67d8c11b4dc",
+      "related_paths": [
+        "/waves/1853ebd4-d620-42b8-b091-854afd37ed8d",
+        "/waves/49f0e595-ec7c-4235-8695-a527f61b69f4",
+        "/waves/05b14183-e153-4e47-bc66-42a0f49102d4",
+        "/about/tech"
+      ],
+      "tags": ["waves", "feedback", "dev-team", "releases"],
+      "source_refs": [
+        "components/about/tech/reports.ts",
+        "app/about/release-notes/route.ts",
+        "ops/docs/developer/deployment.md",
+        "SECURITY.md"
+      ]
+    },
+    {
+      "id": "waves.suggestion-box",
+      "kind": "workflow",
+      "title": "Send a suggestion to 6529",
+      "link_label": "6529 Suggestion Box",
+      "aliases": [
+        "suggestion box",
+        "6529 suggestion box",
+        "make a suggestion",
+        "where do i send suggestions",
+        "community suggestion",
+        "idea for 6529"
+      ],
+      "keywords": [
+        "suggestion",
+        "idea",
+        "community",
+        "memes",
+        "museum",
+        "events",
+        "programs",
+        "policies",
+        "waves"
+      ],
+      "facts": [
+        "6529 Suggestion Box is a top-level wave for general, non-technical suggestions: the community, The Memes and other collections, the Network Museum, events, programs, and policies.",
+        "It is open for anyone to post, and the dev team moderates it.",
+        "Bugs and app feature requests go to 6529 Tech Feedback instead."
+      ],
+      "canonical_path": "/waves/1853ebd4-d620-42b8-b091-854afd37ed8d",
+      "related_paths": [
+        "/waves/e933d8d6-0c78-4e8f-aa12-f67d8c11b4dc",
+        "/waves"
+      ],
+      "tags": ["waves", "feedback", "suggestions"]
     },
     {
       "id": "navigation.search",
@@ -2993,9 +3085,10 @@
       ],
       "keywords": ["waves", "subwaves", "unread", "new", "badge", "sidebar"],
       "facts": [
-        "The new badge beside a parent wave's subwave control totals unread drops across visible, unmuted subwaves where read state is available.",
-        "A subwave contributes to the parent badge whether or not the viewer has joined or followed it.",
-        "The total excludes the viewer's own drops and drops from muted profiles; muting the parent hides the aggregate."
+        "The new badge beside a parent wave's subwave control totals unread drops across visible subwaves that the viewer follows and has not muted.",
+        "Subwaves the viewer has not joined or followed do not add to the parent badge; muting a subwave removes its contribution.",
+        "The total excludes the viewer's own drops and drops from muted profiles; muting the parent hides the aggregate.",
+        "Expanded subwave lists and the mobile subwave bar show unmuted subwaves first and muted subwaves last, each group ordered by newest activity."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
@@ -6678,12 +6771,47 @@
         "Wave header controls are documented in the Wave Header area.",
         "Available controls depend on permissions and the current wave state.",
         "Unavailable submission actions use a lock icon at every width. Hover, focus, or select the lock for the full restriction reason; the Memes How to Submit helper keeps its desktop label and opens nomination guidance.",
-        "Wave picture edit and link sharing are separate header features."
+        "Wave picture edit and link sharing are separate header features.",
+        "A wave you have not joined shows a Join button first in the conversation header's top-right controls."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
       "tags": ["waves", "header"],
       "source_refs": ["ops/docs/waves/header/feature-wave-header-controls.md"]
+    },
+    {
+      "id": "waves.join",
+      "kind": "workflow",
+      "title": "Join or leave a wave",
+      "aliases": [
+        "join wave",
+        "join a wave",
+        "how do I join a wave",
+        "follow wave",
+        "leave wave",
+        "unjoin wave",
+        "joined waves"
+      ],
+      "keywords": ["waves", "join", "joined", "leave", "follow", "header"],
+      "facts": [
+        "Open a wave you have not joined and select Join, the first control in the top-right of the conversation header on desktop, compact web, and the native app.",
+        "After joining, the header shows a short Joined confirmation and then returns to its usual controls; the wave appears in the sidebar's Joined collection.",
+        "The right sidebar About panel also has Join; on a joined wave it shows Joined, and selecting Joined there leaves the wave.",
+        "Joining asks you to confirm your session first. If the request fails or the session check is cancelled, you stay unjoined and can retry.",
+        "Signed-out visitors who select Join are taken to the wallet connect flow; after signing in, select Join again.",
+        "The header Join is not shown for direct messages, proxy sessions, or connected wallets whose profile has not loaded.",
+        "A subwave is joined separately from its parent wave.",
+        "Joined waves offer the bell notification menu; muting is separate from joining."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves"],
+      "tags": ["waves", "join", "header"],
+      "source_refs": [
+        "components/waves/header/WaveJoinCta.tsx",
+        "components/waves/header/WaveHeaderFollow.tsx",
+        "hooks/waves/useWaveJoin.ts",
+        "ops/docs/waves/header/feature-wave-header-controls.md"
+      ]
     },
     {
       "id": "waves.notification-controls",

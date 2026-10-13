@@ -9,6 +9,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import {
   decodePublicReviewFeedbackMetadata,
   hasPublicReviewMetadata,
+  PUBLIC_REVIEW_FEEDBACK_REVIEW_MARKER,
 } from "./feedback-codec";
 import type {
   PublicReviewDiscussionDestination,
@@ -288,8 +289,14 @@ export async function fetchPublicReviewLedgerPage({
     );
   }
 
+  // The destination can be a shared feedback Wave, so only drops whose text
+  // carries the composer's review marker are hydrated; other posts never
+  // trigger per-drop metadata requests or ledger warnings.
   const candidateDrops = feed.drops.filter(
-    (drop) => drop.drop_type === ApiDropMainType.Chat && isTopLevelDrop(drop)
+    (drop) =>
+      drop.drop_type === ApiDropMainType.Chat &&
+      isTopLevelDrop(drop) &&
+      (drop.content ?? "").includes(PUBLIC_REVIEW_FEEDBACK_REVIEW_MARKER)
   );
   const hydrated = await hydrateLedgerDrops({
     api,
