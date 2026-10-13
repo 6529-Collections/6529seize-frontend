@@ -1087,6 +1087,7 @@
       ],
       "facts": [
         "Every Stream editorial and technical reference page has one structured feedback composer connected to the server-resolved Stream review Wave destination.",
+        "In production, Stream review feedback posts to the public top-level 6529 Tech Feedback wave; the earlier Stream Feedback subwave is archived read-only. Staging uses its own review wave.",
         "Editorial pages place the current page's loaded comments and composer in one collapsible rail; closing and reopening it preserves the current draft, and the browser remembers the open or closed preference.",
         "The page-comments rail reads the most recent 50 Wave messages for the exact review version, shows entries attached to the current page, and can load older 50-message pages on request.",
         "Editorial feedback can reference a stable page section; technical feedback can reference an exact Solidity file and line range.",
@@ -1715,7 +1716,7 @@
       "facts": [
         "The Tech Updates page lives at /about/tech.",
         "It is a longer-form area for 6529 tech updates, repo work, bot notes, release context, and build reports.",
-        "Shorter live repo activity still belongs in Follow The Repo.",
+        "Follow The Repo is the dev team's live chat. Anyone can read it, and its subwaves carry the deploy and GitHub PR feeds; the Tech Updates page is the linkable longer-form shelf beside it.",
         "The page links active technical notes such as the wallet authentication upgrade and indexes longer tech reports."
       ],
       "canonical_path": "/about/tech",
@@ -1726,6 +1727,97 @@
       ],
       "tags": ["about", "tech", "reports"],
       "source_refs": ["components/about/tech/AboutTech.tsx"]
+    },
+    {
+      "id": "waves.tech-feedback-and-dev-team",
+      "kind": "workflow",
+      "title": "Report bugs, send suggestions, and follow 6529 development",
+      "link_label": "6529 Tech Feedback",
+      "aliases": [
+        "report a bug",
+        "where do i report bugs",
+        "give feedback",
+        "app feature request",
+        "6529 tech feedback",
+        "follow the repo",
+        "dev team chat",
+        "6529 releases",
+        "release notes",
+        "deploys production",
+        "github pr feed"
+      ],
+      "keywords": [
+        "bug",
+        "feedback",
+        "tech",
+        "dev",
+        "team",
+        "repo",
+        "releases",
+        "deploys",
+        "github",
+        "waves"
+      ],
+      "facts": [
+        "Report 6529 bugs, app feature requests, and other tech feedback in 6529 Tech Feedback, a public top-level wave.",
+        "Send general, non-technical suggestions about the community, The Memes and other collections, the Network Museum, events, programs, or policies to 6529 Suggestion Box, a top-level wave that is open for anyone to post and moderated by the dev team.",
+        "Follow The Repo is the 6529 dev team's live chat. Anyone can read it; the dev team posts there.",
+        "Follow The Repo's subwaves are bot feeds: Deploys · Production, Deploys · Staging, and GitHub PR Feed.",
+        "Per-deploy frontend and backend release notes post to Deploys · Production.",
+        "6529 Releases is a top-level wave that receives one AI-written daily release digest plus individual Desktop and mobile app release notes; /about/release-notes opens it.",
+        "Dev Team Chat, PR Summaries, and Stream Feedback are archived read-only waves outside Follow The Repo.",
+        "For suspected security vulnerabilities in 6529 apps or services, use private reporting under the repository security policy instead of a public wave."
+      ],
+      "canonical_path": "/waves/e933d8d6-0c78-4e8f-aa12-f67d8c11b4dc",
+      "related_paths": [
+        "/waves/1853ebd4-d620-42b8-b091-854afd37ed8d",
+        "/waves/49f0e595-ec7c-4235-8695-a527f61b69f4",
+        "/waves/05b14183-e153-4e47-bc66-42a0f49102d4",
+        "/about/tech"
+      ],
+      "tags": ["waves", "feedback", "dev-team", "releases"],
+      "source_refs": [
+        "components/about/tech/reports.ts",
+        "app/about/release-notes/route.ts",
+        "ops/docs/developer/deployment.md",
+        "SECURITY.md"
+      ]
+    },
+    {
+      "id": "waves.suggestion-box",
+      "kind": "workflow",
+      "title": "Send a suggestion to 6529",
+      "link_label": "6529 Suggestion Box",
+      "aliases": [
+        "suggestion box",
+        "6529 suggestion box",
+        "make a suggestion",
+        "where do i send suggestions",
+        "community suggestion",
+        "idea for 6529"
+      ],
+      "keywords": [
+        "suggestion",
+        "idea",
+        "community",
+        "memes",
+        "museum",
+        "events",
+        "programs",
+        "policies",
+        "waves"
+      ],
+      "facts": [
+        "6529 Suggestion Box is a top-level wave for general, non-technical suggestions: the community, The Memes and other collections, the Network Museum, events, programs, and policies.",
+        "It is open for anyone to post, and the dev team moderates it.",
+        "Bugs and app feature requests go to 6529 Tech Feedback instead."
+      ],
+      "canonical_path": "/waves/1853ebd4-d620-42b8-b091-854afd37ed8d",
+      "related_paths": [
+        "/waves/e933d8d6-0c78-4e8f-aa12-f67d8c11b4dc",
+        "/waves"
+      ],
+      "tags": ["waves", "feedback", "suggestions"]
     },
     {
       "id": "navigation.search",
@@ -2035,6 +2127,7 @@
         "On native iOS when the detected country is not US or is unknown, subscription controls stay hidden and direct or deep-linked visits return to the profile Identity tab without showing subscription content.",
         "The tab leads with subscription coverage: status, consecutive intended drops funded, funded-through and next-unfunded Meme context, and an authoritative top-up deadline only when one is available.",
         "The tab also shows exact ETH balance, raw mint capacity, airdrop address, manual or automatic mode, edition preference, upcoming drops, and history when subscriptions are available.",
+        "Tap, hover, or focus the Airdrop Address to read its full value when the phone layout truncates it.",
         "Owners can update settings, including airdrop address and mode, and top up; read-only viewers can inspect visible subscription information.",
         "The owner profile header and connected Home subscription row show a compact coverage status with a contextual setup, manage, choose-drops, or top-up action.",
         "Subscription changes and top-ups must be received by 00:00 UTC on the day before a Meme Card mint. Once a card is closed, enabling Automatic mode or making a first top-up does not subscribe you to that card. Its saved subscription choice is retained; Automatic mode applies to later cards.",
@@ -2986,9 +3079,10 @@
       ],
       "keywords": ["waves", "subwaves", "unread", "new", "badge", "sidebar"],
       "facts": [
-        "The new badge beside a parent wave's subwave control totals unread drops across visible, unmuted subwaves where read state is available.",
-        "A subwave contributes to the parent badge whether or not the viewer has joined or followed it.",
-        "The total excludes the viewer's own drops and drops from muted profiles; muting the parent hides the aggregate."
+        "The new badge beside a parent wave's subwave control totals unread drops across visible subwaves that the viewer follows and has not muted.",
+        "Subwaves the viewer has not joined or followed do not add to the parent badge; muting a subwave removes its contribution.",
+        "The total excludes the viewer's own drops and drops from muted profiles; muting the parent hides the aggregate.",
+        "Expanded subwave lists and the mobile subwave bar show unmuted subwaves first and muted subwaves last, each group ordered by newest activity."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
@@ -4750,6 +4844,7 @@
         "The setup path is: connect a wallet, open the profile Subscriptions tab, add a completely non-refundable ETH balance, choose Automatic or Manual mode, and select or skip upcoming eligible cards.",
         "The /about/subscriptions primary action says Connect to Subscribe when a wallet or profile handoff is needed and Manage when the user can continue to their profile subscription settings.",
         "Users manage their subscription mode, balance, airdrop address, top-ups, upcoming drops, and history under their profile Subscriptions tab.",
+        "On phones, Redeemed Subscriptions, Log History, and Top Up History start closed; select a history row to expand it. Larger screens start with these sections open. A user’s open or closed choice is preserved while data refreshes or the window is resized.",
         "Automatic mode mints eligible cards until the balance is used unless the user opts out; Manual mode only mints cards the user opts into.",
         "Automatic mode does not expire when the balance is insufficient; coverage describes what the current balance funds, not an expiration date for the mode.",
         "Coverage counts consecutive fully funded intended drops from the immediate next intended drop and accounts for mode, eligibility, edition preference, selections, opt-outs, balance, and the published schedule.",
@@ -5977,7 +6072,7 @@
         "On mobile, swipe the headline statistics horizontally; a right-edge fade indicates more statistics, and Details stays visible beside the row.",
         "The expandable Details panel can show holdings totals, wallet activity, distributions, TDH history, and boost breakdown.",
         "Closing Details preserves its activity tab, filters and page and keeps it closed when returning from artwork. Reopening restores those selections. Previous and Next below the artwork move to the start of the new results once loading finishes, with keyboard focus on the results.",
-        "Artwork links in Wallet Activity and Distributions include the mobile-web and native-app profile return action. It restores Details, the main grid page, the activity page and the originating activity link.",
+        "Artwork links in Wallet Activity and Distributions include the mobile-web and native-app profile return action. It restores Details, the main grid page, the activity page and the originating activity link. Desktop browser Back restores focus and scroll to the originating activity row too. Brief scroll restoration keeps the row visible as Details settles and ends when you interact with the page.",
         "On mobile, both Overview and both Memes Breakdown By Season sections in Details start closed; tap their titles to open the tables. Desktop starts with these sections open.",
         "Wallet Activity, Distributions, and TDH History tab labels stay on one line and scroll horizontally when needed. The selected tab stays visible, including when opened from a deep link.",
         "Details table text stays on one line; tables scroll horizontally when their columns do not fit, including Boost Breakdown. The first label column of wide holdings and activity overview tables stays visible while scrolling.",
@@ -6218,7 +6313,7 @@
       ],
       "facts": [
         "Worth Checking Out comes first and Active Votes follows as separate collapsible sections in the Waves sidebar, each with its own description and view-all link, including for signed-out visitors.",
-        "Active Votes shows ongoing TDH votes in a scrollable window three compact rows tall. Scroll to load additional pages, or use Load more. The total count stays visible when collapsed. The currently open wave is highlighted here, even when it is also highlighted in the collection list. Its compact header includes a separate View all link before the chevron, available even when collapsed; the link opens /discover?view=active-votes without toggling the section. Direct messages and their subwaves are excluded even when readable. Each wave sets its own voting rules.",
+        "Active Votes shows ongoing TDH votes in a scrollable window three compact rows tall. Scroll to load additional pages, or use Load more. The total count stays visible when collapsed. The currently open wave is highlighted here, even when it is also highlighted in the collection list. Its compact header includes a separate View all link aligned to the right, with the collapse chevron beside the title, available even when collapsed; the link opens /discover?view=active-votes without toggling the section. Direct messages and their subwaves are excluded even when readable. Each wave sets its own voting rules.",
         "Worth Checking Out shows up to six highly rated waves, excluding followed waves for signed-in personal viewers, with fewer previews on narrow screens. Its sidebar description is Highly rated waves for signed-out visitors, without following language. The full discovery page uses Active discussions for signed-out visitors and Newest waves for the Newest sort. It has its own compact height. The header’s separate View all link stays available when collapsed and opens /discover?view=recommendations&sort=QUALITY.",
         "If there are no active votes, Active Votes shows No active TDH votes right now in a compact area. Its heading, zero count and view-all link remain available. Loading and request errors are distinct from empty results; retrying a failed next page keeps previously loaded votes.",
         "Both sidebar discovery sections start expanded. Each heading toggles only its own content, and each collapsed state is saved locally in this browser across visits. The chevron points down when expanded and right when collapsed. The former shared tab and collapse preferences are no longer used.",
@@ -6664,12 +6759,47 @@
         "Wave header controls are documented in the Wave Header area.",
         "Available controls depend on permissions and the current wave state.",
         "Unavailable submission actions use a lock icon at every width. Hover, focus, or select the lock for the full restriction reason; the Memes How to Submit helper keeps its desktop label and opens nomination guidance.",
-        "Wave picture edit and link sharing are separate header features."
+        "Wave picture edit and link sharing are separate header features.",
+        "A wave you have not joined shows a Join button first in the conversation header's top-right controls."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
       "tags": ["waves", "header"],
       "source_refs": ["ops/docs/waves/header/feature-wave-header-controls.md"]
+    },
+    {
+      "id": "waves.join",
+      "kind": "workflow",
+      "title": "Join or leave a wave",
+      "aliases": [
+        "join wave",
+        "join a wave",
+        "how do I join a wave",
+        "follow wave",
+        "leave wave",
+        "unjoin wave",
+        "joined waves"
+      ],
+      "keywords": ["waves", "join", "joined", "leave", "follow", "header"],
+      "facts": [
+        "Open a wave you have not joined and select Join, the first control in the top-right of the conversation header on desktop, compact web, and the native app.",
+        "After joining, the header shows a short Joined confirmation and then returns to its usual controls; the wave appears in the sidebar's Joined collection.",
+        "The right sidebar About panel also has Join; on a joined wave it shows Joined, and selecting Joined there leaves the wave.",
+        "Joining asks you to confirm your session first. If the request fails or the session check is cancelled, you stay unjoined and can retry.",
+        "Signed-out visitors who select Join are taken to the wallet connect flow; after signing in, select Join again.",
+        "The header Join is not shown for direct messages, proxy sessions, or connected wallets whose profile has not loaded.",
+        "A subwave is joined separately from its parent wave.",
+        "Joined waves offer the bell notification menu; muting is separate from joining."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves"],
+      "tags": ["waves", "join", "header"],
+      "source_refs": [
+        "components/waves/header/WaveJoinCta.tsx",
+        "components/waves/header/WaveHeaderFollow.tsx",
+        "hooks/waves/useWaveJoin.ts",
+        "ops/docs/waves/header/feature-wave-header-controls.md"
+      ]
     },
     {
       "id": "waves.notification-controls",
@@ -6899,6 +7029,7 @@
       "keywords": ["waves", "drop", "touch", "long", "press", "menu", "mobile"],
       "facts": [
         "Wave drop touch menu behavior covers long-press and touch action button entry points.",
+        "While editing a chat drop in a wave or direct message, pressing and holding inside the editor keeps the edit open and preserves unsaved text. Use normal cursor placement, text selection and paste gestures; the drop actions sheet stays closed. This also applies to the active part of a storm drop.",
         "In the native mobile app on a touchscreen, a short tap on a Memes leaderboard List or artwork Grid card opens the drop, including taps on its media. The List username opens the author's profile, while the List avatar and author badges open the submission; the Grid username opens the submission. A long press still opens the action sheet without also opening the drop on release. Explicit vote, rating, and other action buttons stay independent.",
         "Scrolling gestures, cancelled touches, and touches that stop ongoing scrolling do not open native-app leaderboard cards; tap normally once scrolling settles. Browser views, including mobile browsers, retain their own profile-link and media behavior.",
         "Menu entries depend on device, drop state, and available actions.",

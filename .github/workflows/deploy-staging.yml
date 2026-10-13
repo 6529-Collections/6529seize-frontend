@@ -199,8 +199,22 @@ jobs:
     permissions:
       contents: read
       deployments: write
+      id-token: write
 
     steps:
+      - name: Validate deployment OIDC configuration
+        id: deploy_role
+        shell: bash
+        env:
+          AWS_DEPLOY_ROLE_ARN: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+        run: |
+          set -euo pipefail
+          if ! [[ "$AWS_DEPLOY_ROLE_ARN" =~ ^arn:aws:iam::([0-9]{12}):role/[A-Za-z0-9_+=,.@/-]+$ ]]; then
+            echo "::error::Set AWS_DEPLOY_ROLE_ARN to a valid IAM role ARN in this GitHub environment."
+            exit 1
+          fi
+          printf 'account_id=%s\n' "${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+
       - name: Checkout staging branch
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
@@ -256,18 +270,12 @@ jobs:
 
       - name: Validate staging configuration
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           INSTANCE_ID: ${{ secrets.STAGING_INSTANCE_ID }}
         run: |
           set -euo pipefail
 
-          test -n "$AWS_ACCESS_KEY_ID" || {
-            echo "Missing AWS_ACCESS_KEY_ID secret." >&2
-            exit 1
-          }
-          test -n "$AWS_SECRET_ACCESS_KEY" || {
-            echo "Missing AWS_SECRET_ACCESS_KEY secret." >&2
+          test "$ARTIFACT_BUCKET_REGION" = us-east-1 || {
+            echo "The deployment role permits staging artifacts only in us-east-1." >&2
             exit 1
           }
           test -n "$INSTANCE_ID" || {
@@ -287,12 +295,21 @@ jobs:
             exit 1
           }
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials through OIDC
+        id: aws_credentials
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          allowed-account-ids: ${{ steps.deploy_role.outputs.account_id }}
+          role-session-name: frontend-staging-${{ github.run_id }}
+          role-duration-seconds: 5400
+          unset-current-credentials: true
           aws-region: ${{ env.AWS_REGION }}
+
+      - name: Require successful AWS authentication
+        env:
+          AWS_CREDENTIALS_OUTCOME: ${{ steps.aws_credentials.outcome }}
+        run: test "$AWS_CREDENTIALS_OUTCOME" = success
 
       - name: Stage exact artifact for the managed instance
         id: staged-artifact
@@ -309,6 +326,9 @@ jobs:
             "s3://${ARTIFACT_BUCKET}/${object_key}" \
             --region "$ARTIFACT_BUCKET_REGION" \
             --metadata "sha256=${PACKAGE_DIGEST},source-sha=${EXPECTED_SHA}"
+          # STS caps this URL at session expiry. The 90-minute session starts
+          # inside this 75-minute deploy job, leaving at least 15 minutes of
+          # credential lifetime beyond the job's entire download/deploy window.
           url="$(aws s3 presign "s3://${ARTIFACT_BUCKET}/${object_key}" \
             --region "$ARTIFACT_BUCKET_REGION" \
             --expires-in 5400)"

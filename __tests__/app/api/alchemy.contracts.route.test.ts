@@ -1,3 +1,4 @@
+/** @jest-environment node */
 const mockNextResponseJson = jest.fn((body: unknown, init?: ResponseInit) => ({
   body,
   headers: init?.headers,
@@ -19,6 +20,7 @@ const CONTRACT_ONE = "0x0000000000000000000000000000000000000001";
 const CONTRACT_TWO = "0x0000000000000000000000000000000000000002";
 const CONTRACT_THREE = "0x0000000000000000000000000000000000000003";
 const CONTRACT_FOUR = "0x0000000000000000000000000000000000000004";
+const CONTRACT_FIVE = "0x0000000000000000000000000000000000000005";
 
 type MockBodyReadResult =
   | { readonly done: false; readonly value: Uint8Array }
@@ -40,7 +42,7 @@ type RouteResponse = {
   readonly status: number;
 };
 
-function requestFor(body: unknown): NextRequest {
+function requestFor(body: unknown, clientIp?: string): NextRequest {
   const rawBody = typeof body === "string" ? body : JSON.stringify(body);
   const encodedBody = new TextEncoder().encode(rawBody);
   let bodyRead = false;
@@ -59,18 +61,24 @@ function requestFor(body: unknown): NextRequest {
         };
       },
     },
-    headers: new Headers({ "content-type": "application/json" }),
+    headers: new Headers({
+      "content-type": "application/json",
+      ...(clientIp === undefined ? {} : { "x-forwarded-for": clientIp }),
+    }),
     signal: new AbortController().signal,
   };
   return request as unknown as NextRequest;
 }
 
-function jsonResponse<T>(body: T, status = 200): Response {
-  return {
-    ok: status >= 200 && status < 300,
+function contractAddress(index: number): string {
+  return `0x${(0x1000 + index).toString(16).padStart(40, "0")}`;
+}
+
+function jsonResponse(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
     status,
-    json: async () => body,
-  } as Response;
+    headers: { "content-type": "application/json" },
+  });
 }
 
 describe("app/api/alchemy/contracts route", () => {
@@ -195,5 +203,81 @@ describe("app/api/alchemy/contracts route", () => {
         },
       ],
     });
+  });
+
+  it("reports oversized upstream metadata as a failed entry", async () => {
+    mockFetch.mockResolvedValueOnce(
+      new Response(`{"name":"${"x".repeat(256 * 1024)}"}`)
+    );
+
+    const response = (await POST(
+      requestFor({ contracts: [{ address: CONTRACT_FIVE }] })
+    )) as RouteResponse;
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      contracts: [
+        {
+          address: CONTRACT_FIVE,
+          chain: "ethereum",
+          metadata: null,
+          error: "Failed to fetch contract metadata",
+          status: 502,
+        },
+      ],
+    });
+  });
+
+  it("caps concurrent upstream lookups within one request", async () => {
+    let active = 0;
+    let maxActive = 0;
+    mockFetch.mockImplementation(async () => {
+      active += 1;
+      maxActive = Math.max(maxActive, active);
+      await new Promise((resolve) => setTimeout(resolve, 1));
+      active -= 1;
+      return jsonResponse({ contractMetadata: { name: "Collection" } });
+    });
+
+    const response = (await POST(
+      requestFor({
+        contracts: Array.from({ length: 25 }, (_, index) => ({
+          address: contractAddress(index),
+        })),
+      })
+    )) as RouteResponse;
+
+    expect(response.status).toBe(200);
+    expect(mockFetch).toHaveBeenCalledTimes(25);
+    expect(maxActive).toBeLessThanOrEqual(10);
+  });
+
+  it("rate limits each client by the number of contracts requested", async () => {
+    mockFetch.mockImplementation(async () =>
+      jsonResponse({ contractMetadata: { name: "Collection" } })
+    );
+    const body = {
+      contracts: Array.from({ length: 50 }, (_, index) => ({
+        address: contractAddress(100 + index),
+      })),
+    };
+
+    for (let index = 0; index < 12; index += 1) {
+      const allowed = (await POST(
+        requestFor(body, "8.8.4.4")
+      )) as RouteResponse;
+      expect(allowed.status).toBe(200);
+    }
+    const limited = (await POST(requestFor(body, "8.8.4.4"))) as RouteResponse;
+
+    expect(limited.status).toBe(429);
+    expect(limited.body).toEqual({
+      error: "Too many contract metadata requests",
+    });
+    expect(limited.headers).toEqual(
+      expect.objectContaining({ "Retry-After": expect.any(String) })
+    );
+    // Repeated lookups are served from the shared contract metadata cache.
+    expect(mockFetch).toHaveBeenCalledTimes(50);
   });
 });

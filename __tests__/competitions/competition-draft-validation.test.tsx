@@ -393,7 +393,7 @@ it("resolves a lost update response before reverting to the last saved values", 
   expect(onClose).toHaveBeenCalledTimes(1);
 });
 
-it("offers Previous, Close editor and Publish on review and publishes the saved version", async () => {
+it("offers Close editor, Previous and Publish on review and publishes the saved version", async () => {
   const form = renderHook(() =>
     useWaveConfig({ initialWaveType: ApiWaveType.Rank })
   );
@@ -423,7 +423,7 @@ it("offers Previous, Close editor and Publish on review and publishes the saved 
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
   expect(
     screen.getAllByRole("button").map((button) => button.textContent)
-  ).toEqual(["Previous", "Close editor", "Publish"]);
+  ).toEqual(["Close editor", "Previous", "Publish"]);
   fireEvent.click(screen.getByRole("button", { name: "Publish" }));
   await waitFor(() =>
     expect(performCompetitionAction).toHaveBeenCalledWith(

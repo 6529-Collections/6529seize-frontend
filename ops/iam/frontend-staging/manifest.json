@@ -1,0 +1,14 @@
+{
+  "account_id": "987989283142",
+  "role_name": "gha-frontend-deploy-staging",
+  "source_commit": "e6f863add81de02e8b76f177067b2df4014de9d7",
+  "max_session_duration": 5400,
+  "policies": [
+    {
+      "name": "FrontendStagingDeployment",
+      "file": "FrontendStagingDeployment.json",
+      "characters": 956,
+      "sha256": "4d52eb3b01194bba832ac3b60ce0f478915c09208192dbfbc30338e5c8f2a0aa"
+    }
+  ]
+}

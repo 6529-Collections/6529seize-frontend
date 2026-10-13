@@ -2,6 +2,7 @@
 
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { CREATE_WAVE_OPTION_STYLES } from "../../utils/createWaveFormStyles";
 
 type RankScheduleMode = "ANNOUNCE_WINNERS" | "PERPETUAL_RANKING";
 
@@ -50,12 +51,9 @@ function RankScheduleModePreview({
   ] as const;
 
   return (
-    <div
-      aria-hidden="true"
-      className="tw-h-16 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-2 sm:tw-h-20 sm:tw-p-3"
-    >
+    <div aria-hidden="true" className={CREATE_WAVE_OPTION_STYLES.preview}>
       {mode === "ANNOUNCE_WINNERS" ? (
-        <div className="tw-flex tw-h-full tw-items-center tw-rounded-md tw-bg-iron-900 tw-px-2 sm:tw-px-3">
+        <div className="tw-flex tw-h-full tw-items-center tw-rounded-md tw-bg-iron-900 tw-px-2 sm:tw-bg-transparent sm:tw-px-0">
           <div className="tw-relative tw-grid tw-w-full tw-grid-cols-3">
             <span className="tw-absolute tw-left-[16.66%] tw-right-[16.66%] tw-top-[3px] tw-h-px tw-bg-white/10" />
             {RANK_PREVIEW_ITEMS.map((item) => (
@@ -66,28 +64,28 @@ function RankScheduleModePreview({
                 <span
                   className={`tw-size-2 tw-rounded-full ${timelineDotClasses[item]}`}
                 />
-                <span className="tw-mt-2 tw-h-1 tw-w-5 tw-rounded-full tw-bg-iron-700 sm:tw-w-7" />
-                <span className="tw-mt-1 tw-h-0.5 tw-w-3 tw-rounded-full tw-bg-iron-800 sm:tw-w-4" />
+                <span className="tw-mt-2 tw-h-1 tw-w-5 tw-rounded-full tw-bg-iron-700 sm:tw-w-3" />
+                <span className="tw-mt-1 tw-h-0.5 tw-w-3 tw-rounded-full tw-bg-iron-800 sm:tw-w-2" />
               </span>
             ))}
           </div>
         </div>
       ) : (
-        <div className="tw-flex tw-h-full tw-flex-col tw-justify-center tw-gap-1 sm:tw-gap-1.5">
+        <div className="tw-flex tw-h-full tw-flex-col tw-justify-center tw-gap-1">
           {RANK_PREVIEW_ITEMS.map((item) => (
             <span
               key={item}
-              className="tw-flex tw-h-3 tw-items-center tw-gap-1.5 tw-rounded-sm tw-bg-iron-900 tw-px-1.5 sm:tw-h-4 sm:tw-gap-2 sm:tw-px-2"
+              className="tw-flex tw-h-3 tw-items-center tw-gap-1.5 tw-rounded-sm tw-bg-iron-900 tw-px-1.5 sm:tw-h-2.5 sm:tw-gap-1 sm:tw-px-1"
             >
               <span
-                className={`tw-size-1.5 tw-flex-shrink-0 tw-rounded-full sm:tw-size-2 ${
+                className={`tw-size-1.5 tw-flex-shrink-0 tw-rounded-full sm:tw-size-1 ${
                   item === 0 ? accentClass : "tw-bg-iron-700"
                 }`}
               />
               <span
                 className={`tw-h-1 tw-rounded-full tw-bg-iron-700 ${leaderboardLineWidthClasses[item]}`}
               />
-              <span className="tw-ml-auto tw-h-1 tw-w-3 tw-rounded-full tw-bg-iron-800 sm:tw-w-4" />
+              <span className="tw-ml-auto tw-h-1 tw-w-3 tw-rounded-full tw-bg-iron-800 sm:tw-w-2" />
             </span>
           ))}
         </div>
@@ -130,25 +128,27 @@ export default function RankScheduleModeSelector({
       >
         {t(DEFAULT_LOCALE, "waves.create.rank.mode.legend")}
       </p>
-      <div className="tw-grid tw-grid-cols-2 tw-gap-3">
+      <div className={CREATE_WAVE_OPTION_STYLES.grid}>
         {RANK_SCHEDULE_MODES.map(({ mode, title, description }) => {
           const isSelected = selectedScheduleMode === mode;
           const titleColorClass = isSelected
-            ? "tw-text-white"
+            ? "tw-text-primary-400"
             : "tw-text-iron-300 group-hover:tw-text-white";
-          const descriptionColorClass = "tw-text-iron-400";
+          const descriptionColorClass = isSelected
+            ? "tw-text-iron-300"
+            : "tw-text-iron-400";
 
           return (
             <label
               key={mode}
-              className={`tw-group tw-min-w-0 tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-p-2 tw-transition tw-duration-300 tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 sm:tw-p-3 ${
+              className={`${CREATE_WAVE_OPTION_STYLES.card} ${
                 isSelected
-                  ? "tw-border-primary-500/60 tw-bg-iron-900 tw-shadow-inner"
-                  : "tw-border-white/5 tw-bg-iron-900/60 hover:tw-border-white/10 hover:tw-bg-iron-900"
+                  ? CREATE_WAVE_OPTION_STYLES.selected
+                  : CREATE_WAVE_OPTION_STYLES.unselected
               }`}
             >
               <RankScheduleModePreview mode={mode} isSelected={isSelected} />
-              <div className="tw-mt-2 tw-flex tw-min-w-0 tw-items-start tw-gap-2 sm:tw-mt-3 sm:tw-gap-3">
+              <div className={CREATE_WAVE_OPTION_STYLES.content}>
                 <input
                   id={`rank-schedule-mode-${mode.toLowerCase()}`}
                   type="radio"
@@ -160,21 +160,21 @@ export default function RankScheduleModeSelector({
                 />
                 <span
                   aria-hidden="true"
-                  className={`tw-mt-0.5 tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out ${
+                  className={`tw-order-last tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition-colors motion-reduce:tw-transition-none ${
                     isSelected
                       ? "tw-border-primary-400 tw-bg-primary-500/10"
                       : "tw-border-iron-600 tw-bg-transparent group-hover:tw-border-iron-500"
                   }`}
                 >
                   <span
-                    className={`tw-size-2 tw-rounded-full tw-bg-primary-400 tw-transition tw-duration-200 ${
+                    className={`tw-size-2 tw-rounded-full tw-bg-primary-400 tw-transition tw-duration-200 motion-reduce:tw-transition-none ${
                       isSelected ? "tw-scale-100" : "tw-scale-0"
                     }`}
                   />
                 </span>
-                <span className="tw-min-w-0 tw-whitespace-normal">
+                <span className="tw-min-w-0 tw-flex-1 tw-whitespace-normal">
                   <span
-                    className={`tw-flex tw-min-h-4 tw-items-center tw-text-xs tw-font-medium sm:tw-text-sm ${titleColorClass}`}
+                    className={`tw-block tw-text-sm tw-font-medium ${titleColorClass}`}
                   >
                     {title}
                   </span>
