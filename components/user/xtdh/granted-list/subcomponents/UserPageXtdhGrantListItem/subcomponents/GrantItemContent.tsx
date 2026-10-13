@@ -19,8 +19,8 @@ export function GrantItemContent({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-4">
-      <header className="tw-flex tw-flex-col md:tw-flex-row tw-items-start tw-justify-between tw-gap-4">
-        <div className="tw-flex tw-items-center tw-gap-3">
+      <header className="tw-flex tw-flex-col tw-items-start tw-justify-between tw-gap-4 md:tw-flex-row">
+        <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-3">
           <div className="tw-relative tw-h-16 tw-w-16 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800">
             {contract.imageUrl ? (
               <Image
@@ -36,8 +36,8 @@ export function GrantItemContent({
               </div>
             )}
           </div>
-          <div className="tw-flex tw-flex-col tw-gap-0.5">
-            <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
+          <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
+            <p className="tw-m-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-100">
               {name}
             </p>
             <p className="tw-m-0 tw-text-xs tw-text-iron-500">
@@ -45,8 +45,10 @@ export function GrantItemContent({
             </p>
           </div>
         </div>
-        <div className="tw-flex tw-items-center tw-gap-3">
-          <GrantExpiryBadge validUntil={typeof validTo === "number" ? validTo : null} />
+        <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-3">
+          <GrantExpiryBadge
+            validUntil={typeof validTo === "number" ? validTo : null}
+          />
           <StatusBadge
             status={status}
             validFrom={validFrom}

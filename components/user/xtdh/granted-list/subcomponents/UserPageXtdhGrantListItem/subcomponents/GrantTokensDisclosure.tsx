@@ -45,7 +45,7 @@ export function GrantTokensDisclosure({
   const body = renderGrantTokensDisclosureBody(disclosureState);
 
   return (
-    <div className="tw-mt-4 tw-rounded-lg tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950">
+    <div className="tw-mt-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-900">
       <button
         type="button"
         className={clsx(
@@ -73,7 +73,7 @@ export function GrantTokensDisclosure({
       {isOpen ? (
         <div
           id={panelId}
-          className="tw-border-t tw-border-iron-800 tw-bg-iron-950 tw-p-3"
+          className="tw-border-t tw-border-white/[0.04] tw-bg-iron-900 tw-p-3"
         >
           {body}
         </div>
@@ -144,8 +144,8 @@ function GrantTokensErrorState({
   onRetry,
 }: Readonly<{ message: string; onRetry: () => void }>) {
   return (
-    <div className="tw-border-red-500/40 tw-bg-red-500/5 tw-rounded-lg tw-border tw-p-4">
-      <p className="tw-text-red-300 tw-m-0 tw-text-sm">{message}</p>
+    <div className="tw-rounded-lg tw-border tw-border-white/[0.04] tw-bg-iron-900/50 tw-p-4">
+      <p className="tw-m-0 tw-text-sm tw-text-iron-300">{message}</p>
       <Button
         variant="tertiary"
         size="sm"
@@ -160,7 +160,7 @@ function GrantTokensErrorState({
 
 function GrantTokensEmptyState() {
   return (
-    <div className="tw-bg-iron-925 tw-rounded-lg tw-border tw-border-iron-800 tw-p-4">
+    <div className="tw-rounded-lg tw-border tw-border-white/[0.04] tw-bg-iron-900 tw-p-4">
       <p className="tw-m-0 tw-text-sm tw-text-iron-300">
         No specific token IDs were returned for this grant.
       </p>
@@ -170,7 +170,7 @@ function GrantTokensEmptyState() {
 
 function GrantTokensLoadingMore() {
   return (
-    <div className="tw-flex tw-items-center tw-justify-center tw-border-t tw-border-iron-800 tw-bg-iron-900 tw-py-2 tw-text-xs tw-text-iron-300">
+    <div className="tw-flex tw-items-center tw-justify-center tw-border-t tw-border-white/[0.04] tw-bg-iron-900 tw-py-2 tw-text-xs tw-text-iron-300">
       <Spinner />
       <span className="tw-ml-2">Loading more tokens…</span>
     </div>
