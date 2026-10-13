@@ -44,7 +44,10 @@ function parsePlaywrightFailures(output) {
   if (!Number.isSafeInteger(count) || count < 1) return null;
   const tests = [];
   for (const line of lines.slice(index + 1)) {
-    if (!line.trim()) continue;
+    if (!line.trim()) {
+      if (tests.length > 0) break;
+      continue;
+    }
     if (/^\s*\d+ (?:flaky|skipped|passed|did not run)\b/.test(line)) break;
     const match = /^\s*\[([^\]]+)\] › (.+?:\d+:\d+) › (.+?)\s*$/.exec(line);
     if (!match) continue;

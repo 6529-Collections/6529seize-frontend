@@ -99,6 +99,16 @@ describe("CI failure details", () => {
     ).toEqual(["first failure", "second failure"]);
   });
 
+  it("stops a partial failure list before unrelated lines after a blank boundary", () => {
+    const output =
+      "  2 failed\n" +
+      "    [web-desktop-chromium] › tests/a.spec.ts:1:1 › first failure\n\n" +
+      "    [web-mobile-chromium] › tests/a.spec.ts:2:1 › unrelated diagnostic\n";
+    expect(
+      details.parsePlaywrightFailures(output)?.tests.map((test) => test.name)
+    ).toEqual(["first failure"]);
+  });
+
   it("disambiguates identical leaf names using their full suite titles", () => {
     fs.writeFileSync(
       evidence(),

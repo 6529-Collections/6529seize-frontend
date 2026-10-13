@@ -114,6 +114,20 @@ describe("notify-ci-wave payload", () => {
     expect(result.payload?.description).toBe(description);
   });
 
+  it("keeps successful E2E descriptions empty without enrichment", async () => {
+    const result = await runNotifier({
+      CI_PIPELINES_STATUS: "success",
+      CI_PIPELINES_ALERT_TYPE: "web_e2e",
+      CI_PIPELINES_PARENT_DEPLOY_RUN_ID: "100",
+      CI_PIPELINES_VALIDATION_PACK: "all",
+      CI_PIPELINES_DESCRIPTION: "",
+      CI_PIPELINES_FAILURE_ARTIFACT_ROOT: "",
+      GH_TOKEN: "",
+    });
+    expect(result.code).toBe(0);
+    expect(result.payload?.description).toBeNull();
+  });
+
   it("sends canonical contributors and the deployed SHA", async () => {
     const expectedSha = "b".repeat(40);
     const result = await runNotifier({
