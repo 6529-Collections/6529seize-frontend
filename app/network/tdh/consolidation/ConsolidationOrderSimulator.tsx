@@ -8,6 +8,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { TDH_FOCUS, TDH_PANEL, TDH_TEXT } from "../TDHSection";
 import {
+  matchesSimulatedScenario,
   SIMULATED_SIGNERS,
   type SimulatedWallet,
   simulateAddingFourthWallet,
@@ -64,6 +65,8 @@ export default function ConsolidationOrderSimulator({
         {t(locale, "network.tdhConsolidation.policy.pendingLimits")}
       </output>
     );
+  // The walkthrough is written for three members and a fourth wallet.
+  if (!matchesSimulatedScenario(limits)) return null;
 
   return (
     <div className={`${TDH_PANEL} tw-space-y-5 tw-p-5`}>
