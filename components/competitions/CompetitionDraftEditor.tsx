@@ -52,12 +52,11 @@ import { useAuth } from "@/components/auth/Auth";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import {
-  CompetitionState,
-  COMPETITION_BUTTON,
-  COMPETITION_INPUT,
-} from "./CompetitionState";
+import Button from "@/components/utils/button/Button";
+import { CompetitionState, COMPETITION_BUTTON } from "./CompetitionState";
 
+const EDITOR_INPUT =
+  "tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-base tw-text-iron-50 hover:tw-border-iron-600 focus:tw-border-primary-400 focus:tw-outline focus:tw-outline-2 focus:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 sm:tw-text-sm";
 const subscribeHydration = () => () => undefined;
 
 const STEPS = [
@@ -323,56 +322,58 @@ function DraftForm({
   let content;
   if (step === CreateWaveStep.OVERVIEW)
     content = (
-      <div className="tw-space-y-4">
-        <label className="tw-block tw-space-y-2 tw-text-sm tw-text-iron-300">
-          <span>{t(locale, "competitions.titleLabel")}</span>
-          <input
-            required
-            maxLength={250}
-            className={`${COMPETITION_INPUT} tw-text-base sm:tw-text-sm`}
-            value={config.overview.name}
-            onChange={(event) =>
-              controller.setOverview({
-                ...config.overview,
-                name: event.target.value,
-              })
-            }
-          />
-        </label>
-        <label className="tw-block tw-space-y-2 tw-text-sm tw-text-iron-300">
+      <div className="tw-space-y-6">
+        <div className="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-[minmax(0,1fr)_190px]">
+          <label className="tw-block tw-min-w-0 tw-space-y-2 tw-text-sm tw-font-medium tw-text-iron-300">
+            <span>{t(locale, "competitions.titleLabel")}</span>
+            <input
+              required
+              maxLength={250}
+              className={EDITOR_INPUT}
+              value={config.overview.name}
+              onChange={(event) =>
+                controller.setOverview({
+                  ...config.overview,
+                  name: event.target.value,
+                })
+              }
+            />
+          </label>
+          <div className="tw-min-w-0 tw-space-y-2 tw-text-sm tw-font-medium tw-text-iron-300">
+            <span>{t(locale, "competitions.type")}</span>
+            <CreateWaveDropdown
+              mobileSheet
+              ariaLabel={t(locale, "competitions.type")}
+              disabled={published || busy || displayedError === "conflict"}
+              value={config.overview.type}
+              options={[
+                {
+                  value: ApiWaveType.Rank,
+                  label: t(locale, "competitions.rank"),
+                },
+                {
+                  value: ApiWaveType.Approve,
+                  label: t(locale, "competitions.approve"),
+                },
+              ]}
+              onChange={(type) =>
+                controller.setOverview({
+                  ...config.overview,
+                  type,
+                })
+              }
+            />
+          </div>
+        </div>
+        <label className="tw-block tw-space-y-2 tw-text-sm tw-font-medium tw-text-iron-300">
           <span>{t(locale, "competitions.description")}</span>
           <textarea
             rows={4}
-            className={`${COMPETITION_INPUT} tw-text-base sm:tw-text-sm`}
+            className={`${EDITOR_INPUT} tw-resize-y`}
             value={description}
             onChange={(event) => setDescription(event.target.value)}
           />
         </label>
-        <div className="tw-space-y-2 tw-text-sm tw-text-iron-300">
-          <span>{t(locale, "competitions.type")}</span>
-          <CreateWaveDropdown
-            mobileSheet
-            ariaLabel={t(locale, "competitions.type")}
-            disabled={published || busy || displayedError === "conflict"}
-            value={config.overview.type}
-            options={[
-              {
-                value: ApiWaveType.Rank,
-                label: t(locale, "competitions.rank"),
-              },
-              {
-                value: ApiWaveType.Approve,
-                label: t(locale, "competitions.approve"),
-              },
-            ]}
-            onChange={(type) =>
-              controller.setOverview({
-                ...config.overview,
-                type,
-              })
-            }
-          />
-        </div>
         {!lockedRules && config.overview.type === ApiWaveType.Rank && (
           <RankScheduleModeSelector
             isCompetition
@@ -439,46 +440,44 @@ function DraftForm({
   return (
     <section
       ref={formRef}
-      className="tw-space-y-5"
+      className="tw-mx-auto tw-flex tw-w-full tw-max-w-[680px] tw-flex-1 tw-flex-col tw-gap-6"
       aria-labelledby="competition-draft-title"
     >
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
         <h1
           id="competition-draft-title"
-          className="tw-text-xl tw-font-semibold tw-text-iron-100"
+          className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-title tw-text-iron-50 sm:tw-text-[28px] sm:tw-leading-[34px]"
         >
           {t(locale, published ? "competitions.edit" : "competitions.new")}
         </h1>
         <output className="tw-text-xs tw-text-iron-400">{saveStatus}</output>
       </div>
-      <p className="tw-text-sm tw-text-iron-400">
+      <p className="tw-m-0 tw-text-sm tw-text-iron-400">
         {t(locale, "competitions.overlap")}
       </p>
       <fieldset
         disabled={busy || displayedError === "conflict"}
         className="tw-min-w-0 tw-border-0 tw-p-0"
       >
-        <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-4">
-          {content}
-          {step === CreateWaveStep.VOTING && (
-            <label className="tw-mt-4 tw-flex tw-min-h-11 tw-items-center tw-gap-3 tw-text-sm tw-text-iron-200">
-              <input
-                type="checkbox"
-                checked={voteSignature}
-                onChange={(event) => setVoteSignature(event.target.checked)}
-              />
-              {t(locale, "competitions.requireVoteSignature")}
-            </label>
-          )}
-        </div>
+        {content}
+        {step === CreateWaveStep.VOTING && (
+          <label className="tw-mt-4 tw-flex tw-min-h-11 tw-items-center tw-gap-3 tw-text-sm tw-text-iron-200">
+            <input
+              type="checkbox"
+              checked={voteSignature}
+              onChange={(event) => setVoteSignature(event.target.checked)}
+            />
+            {t(locale, "competitions.requireVoteSignature")}
+          </label>
+        )}
       </fieldset>
       {visibleErrors.length > 0 && invalid && (
-        <p role="alert" className="tw-text-red">
+        <p role="alert" className="tw-m-0 tw-text-red">
           {t(locale, "competitions.required")}
         </p>
       )}
       {displayedError && (
-        <p role="alert" className="tw-text-red">
+        <p role="alert" className="tw-m-0 tw-text-red">
           {t(
             locale,
             displayedError === "conflict"
@@ -490,7 +489,7 @@ function DraftForm({
       {persistence.error === "failure" && (
         <button
           type="button"
-          className={COMPETITION_BUTTON}
+          className={`${COMPETITION_BUTTON} tw-self-start`}
           disabled={busy || persistence.busy}
           onClick={() => {
             void persistence.save();
@@ -502,7 +501,7 @@ function DraftForm({
       {displayedError === "conflict" && (
         <button
           type="button"
-          className={COMPETITION_BUTTON}
+          className={`${COMPETITION_BUTTON} tw-self-start`}
           disabled={busy}
           onClick={() => {
             void saveConflictCopy();
@@ -514,7 +513,7 @@ function DraftForm({
       {displayedError === "conflict" && (
         <button
           type="button"
-          className={COMPETITION_BUTTON}
+          className={`${COMPETITION_BUTTON} tw-self-start`}
           onClick={() => {
             persistence.clear();
             globalThis.location.reload();
@@ -523,48 +522,53 @@ function DraftForm({
           {t(locale, "competitions.reload")}
         </button>
       )}
-      <div className="tw-sticky tw-bottom-0 tw-flex tw-flex-wrap tw-gap-2 tw-bg-iron-950 tw-py-4 tw-pb-[max(1rem,env(safe-area-inset-bottom))]">
-        {index > 0 && (
-          <button
-            type="button"
-            className={COMPETITION_BUTTON}
-            disabled={busy}
-            onClick={() => move("backward")}
-          >
-            {t(locale, "competitions.previous")}
-          </button>
-        )}
-        {index < steps.length - 1 && (
-          <button
-            type="button"
-            className={COMPETITION_BUTTON}
-            disabled={busy}
-            onClick={() => move("forward")}
-          >
-            {t(locale, "competitions.next")}
-          </button>
-        )}
-        <button
+      <div className="tw-sticky tw-bottom-0 tw-z-20 tw-mt-auto tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-black tw-py-4 tw-pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <Button
           type="button"
-          className={COMPETITION_BUTTON}
+          variant="ghost"
+          size="md"
+          className="tw-mr-auto"
           disabled={busy}
           onClick={() => {
             void close();
           }}
         >
           {t(locale, "competitions.cancelEdit")}
-        </button>
-        {index === steps.length - 1 && !published && (
-          <button
+        </Button>
+        {index > 0 && (
+          <Button
             type="button"
-            className={COMPETITION_BUTTON}
+            variant="secondary"
+            size="md"
+            disabled={busy}
+            onClick={() => move("backward")}
+          >
+            {t(locale, "competitions.previous")}
+          </Button>
+        )}
+        {index < steps.length - 1 && (
+          <Button
+            type="button"
+            variant="action"
+            size="md"
+            disabled={busy}
+            onClick={() => move("forward")}
+          >
+            {t(locale, "competitions.next")}
+          </Button>
+        )}
+        {index === steps.length - 1 && !published && (
+          <Button
+            type="button"
+            variant="action"
+            size="md"
             disabled={busy || displayedError === "conflict"}
             onClick={() => {
               void publish();
             }}
           >
             {t(locale, "competitions.publish")}
-          </button>
+          </Button>
         )}
       </div>
     </section>
