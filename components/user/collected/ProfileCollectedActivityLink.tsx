@@ -7,6 +7,7 @@ import {
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, type ComponentProps } from "react";
+import { restoreCollectedActivityLink } from "./restoreCollectedActivityLink";
 
 export default function ProfileCollectedActivityLink({
   href,
@@ -32,9 +33,8 @@ export default function ProfileCollectedActivityLink({
       : href;
 
   useEffect(() => {
-    if (globalThis.location.hash !== `#${anchor}`) return;
-    linkRef.current?.focus({ preventScroll: true });
-    linkRef.current?.scrollIntoView({ block: "center" });
+    const link = linkRef.current;
+    return link ? restoreCollectedActivityLink(link) : undefined;
   }, [anchor]);
 
   return (
