@@ -218,9 +218,11 @@ function indicatorProblem(classes: string): string | null {
       ? "ring uses Tailwind's default 50% blue (below 3:1)"
       : null;
   }
+  // "unknown" marks mechanisms that cannot be measured. An explicit colour
+  // token that does not resolve (e.g. an rgba() arbitrary value) fails, so a
+  // faint indicator cannot slip through unmeasured.
   const visible = candidates.some(
-    (c) =>
-      c === "unknown" || (contrastOnSurface(c) ?? MIN_CONTRAST) >= MIN_CONTRAST
+    (c) => c === "unknown" || (contrastOnSurface(c) ?? 0) >= MIN_CONTRAST
   );
   return visible
     ? null
@@ -525,6 +527,18 @@ describe("indicator detection", () => {
       findHits(button("focus:tw-outline-none focus-visible:tw-ring-2"))
     ).toEqual([
       expect.objectContaining({ problem: expect.stringContaining("default") }),
+    ]);
+  });
+
+  it("fails explicit ring colours it cannot measure", () => {
+    expect(
+      findHits(
+        button(
+          "focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[rgba(255,255,255,0.1)]"
+        )
+      )
+    ).toEqual([
+      expect.objectContaining({ problem: expect.stringContaining("faint") }),
     ]);
   });
 
