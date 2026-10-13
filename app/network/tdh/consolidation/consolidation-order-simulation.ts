@@ -64,8 +64,9 @@ function confirmedLinks(
 /**
  * Groups wallets the way the backend does (src/consolidation-tools.ts):
  * newest confirmed link first, a wallet joins only when it is linked with
- * every member, and a group grows past three only when one member's links to
- * all the others were registered after the start date.
+ * every member, and a group grows past `limits.ungatedMaxWallets` (three
+ * today) only when one member's links to all the others were registered
+ * after the start date.
  */
 function groupSimulatedWallets(
   links: readonly ConfirmedLink[],
@@ -136,6 +137,11 @@ function joiningWallet(
  * A, B and C are consolidated with links registered before the start date.
  * A, B and C each register one link to D, and D sends one batch to A, B and
  * C. Returns the groups after each transaction, in the given signing order.
+ *
+ * The scenario is fixed: three members and one joining wallet. It models the
+ * current policy (`ungatedMaxWallets` 3, `maxWallets` 4); the limits only
+ * decide which of these groups the backend would count. A different maximum
+ * needs a new scenario, not just new limits.
  */
 export function simulateAddingFourthWallet(
   order: readonly SimulatedWallet[],
