@@ -20,7 +20,7 @@ export default async function SafeCollectingPage({
     typeof query["collection"] === "string" ? query["collection"] : "";
   const useCase =
     typeof query["use_case"] === "string"
-      ? parseInt(query["use_case"]) || 0
+      ? Number.parseInt(query["use_case"], 10) || 0
       : 0;
 
   return (
