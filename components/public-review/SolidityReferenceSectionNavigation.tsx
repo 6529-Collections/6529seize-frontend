@@ -60,7 +60,7 @@ type SolidityReferencePanels = Readonly<
 >;
 
 const TAB_CLASSES =
-  "tw-m-0 tw-flex tw-min-h-11 tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1.5 tw-pb-3 tw-pt-2.5 tw-text-sm tw-font-medium tw-leading-5 tw-transition-colors tw-duration-150 tw-ease-out motion-reduce:tw-transition-none focus:tw-outline-none focus-visible:tw-rounded-sm focus-visible:tw-bg-white/10";
+  "tw-m-0 tw-flex tw-min-h-11 tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1.5 tw-pb-3 tw-pt-2.5 tw-text-sm tw-font-medium tw-leading-5 tw-transition-colors tw-duration-150 tw-ease-out motion-reduce:tw-transition-none focus:tw-outline-none focus-visible:tw-rounded-sm focus-visible:tw-bg-white/10 focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400";
 
 function getSectionFromHash(hash: string): SolidityReferenceSectionId {
   const sectionId = hash.startsWith("#") ? hash.slice(1) : hash;

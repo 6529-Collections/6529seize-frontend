@@ -91,7 +91,7 @@ export function NftContractHeader({
         <button
           type="button"
           onClick={onClear}
-          className="tw-ml-auto tw-flex tw-h-8 tw-w-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-500 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-200 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/50"
+          className="tw-ml-auto tw-flex tw-h-8 tw-w-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-500 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-200 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/50 focus-visible:tw-ring-primary-400"
           aria-label="Clear selection"
         >
           <svg
