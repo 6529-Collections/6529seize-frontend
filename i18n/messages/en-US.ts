@@ -2515,7 +2515,7 @@ const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
   "index.longUpdates":
     "Long updates, repo analysis, bot context, and links back into the wave conversation.",
   "index.liveActivity":
-    "Shorter live repo activity still belongs in {followTheRepo}. This page is the linkable longer-form shelf beside it.",
+    "{followTheRepo} is the dev team's live chat. Anyone can read it, and its subwaves carry the deploy and GitHub PR feeds. This page is the linkable longer-form shelf beside it.",
   "index.followTheRepo": "Follow The Repo",
   "index.activeTechnicalNotes": "Active Technical Notes",
   "index.authChanges": "Auth changes",
@@ -2533,6 +2533,8 @@ const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
   "report.daily": "Daily",
   "report.prCount": "{count} PRs",
   "report.repoSummary": "{focus}. {count} PRs, {stateSummary}.",
+  "report.liveActivity":
+    "For live updates, see {followTheRepo}, the dev team's live chat. Anyone can read it, and its subwaves carry the deploy and GitHub PR feeds.",
   "report.tocDescription":
     "This report is split by repository. Use this index to jump directly to the area you want, or read through from the frontend app work into backend, Stream contracts, Safe app hardening, and review bot updates.",
   "walletAuth.metadata.title": "Wallet Authentication Update",
