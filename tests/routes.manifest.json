@@ -323,12 +323,12 @@
       "classification": "crawlable",
       "family": "tools"
     },
-    "/delegation/[...section]": {
+    "/safe-collecting/[...section]": {
       "classification": "fixture",
       "family": "tools",
       "fixture": {
-        "staging": "/delegation/wallet-architecture",
-        "production": "/delegation/wallet-architecture"
+        "staging": "/safe-collecting/tap-guide",
+        "production": "/safe-collecting/tap-guide"
       }
     },
     "/safe-collecting": {
@@ -2335,6 +2335,14 @@
       "classification": "exempt",
       "family": "social",
       "exemptReason": "Native competition rollout requires scoped competition fixtures."
+    },
+    "/delegation/[...section]": {
+      "classification": "fixture",
+      "family": "tools",
+      "fixture": {
+        "staging": "/delegation/wallet-architecture",
+        "production": "/delegation/wallet-architecture"
+      }
     }
   }
 }

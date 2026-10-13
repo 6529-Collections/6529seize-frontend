@@ -94,7 +94,7 @@ describe("SafeCollecting", () => {
     ).toBeVisible();
     expect(
       screen.getByRole("link", { name: "Appoint a manager" })
-    ).toHaveAttribute("href", "/delegation/register-sub-delegation");
+    ).toHaveAttribute("href", "/safe-collecting/register-sub-delegation");
 
     fireEvent.click(screen.getByRole("tab", { name: "Already collecting" }));
     expect(
@@ -180,7 +180,10 @@ describe("SafeCollecting", () => {
       .closest("section") as HTMLElement;
     expect(
       within(setupPanel).getByRole("link", { name: "Register a delegation" })
-    ).toHaveAttribute("href", "/delegation/register-delegation?use_case=2");
+    ).toHaveAttribute(
+      "href",
+      "/safe-collecting/register-delegation?use_case=2"
+    );
   });
 
   it("keeps the full tool list under All tools", () => {

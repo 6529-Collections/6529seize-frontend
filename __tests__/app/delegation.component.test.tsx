@@ -73,7 +73,7 @@ describe("Delegation page component", () => {
     );
     fireEvent.click(screen.getByTestId("menu"));
     expect(push).toHaveBeenCalledWith(
-      `/delegation/${DelegationCenterSection.CHECKER}`
+      `/safe-collecting/${DelegationCenterSection.CHECKER}`
     );
   });
 
@@ -186,9 +186,12 @@ describe("Delegation page component", () => {
     const { rerender } = render(<DelegationPage {...props} />);
     fireEvent.click(screen.getByRole("button", { name: "Clear wallet" }));
     expect(replace).toHaveBeenCalledTimes(1);
-    expect(replace).toHaveBeenLastCalledWith("/delegation/wallet-checker", {
-      scroll: false,
-    });
+    expect(replace).toHaveBeenLastCalledWith(
+      "/safe-collecting/wallet-checker",
+      {
+        scroll: false,
+      }
+    );
 
     rerender(<DelegationPage {...props} addressQuery="" />);
     expect(replace).toHaveBeenCalledTimes(1);
@@ -198,7 +201,7 @@ describe("Delegation page component", () => {
     const nextAddress = "0x0000000000000000000000000000000000000529";
     expect(replace).toHaveBeenCalledTimes(2);
     expect(replace).toHaveBeenLastCalledWith(
-      `/delegation/wallet-checker?address=${nextAddress}`,
+      `/safe-collecting/wallet-checker?address=${nextAddress}`,
       { scroll: false }
     );
 

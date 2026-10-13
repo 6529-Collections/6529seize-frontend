@@ -1,5 +1,7 @@
 "use client";
 
+import { getSafeCollectingSectionPath } from "@/components/delegation/safe-collecting-routes";
+
 import Image from "next/image";
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -211,7 +213,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                 </PrimaryButton>
                 {"guidedSection" in card && (
                   <ButtonLink
-                    href={`/delegation/${card.guidedSection}`}
+                    href={getSafeCollectingSectionPath(card.guidedSection)}
                     variant="secondary"
                     size="lg"
                     fullWidth

@@ -72,6 +72,26 @@ export function sharedConfig(
           destination: "/safe-collecting",
           permanent: true,
         },
+        {
+          source: "/delegation/wallet-architecture",
+          destination: "/safe-collecting/tap-guide",
+          permanent: true,
+        },
+        {
+          source: "/delegation/delegation-faq/:path*",
+          destination: "/safe-collecting/faq/:path*",
+          permanent: true,
+        },
+        {
+          source: "/delegation/:path*",
+          destination: "/safe-collecting/:path*",
+          permanent: true,
+        },
+        {
+          source: "/about/nft-delegation",
+          destination: "/safe-collecting",
+          permanent: true,
+        },
       ];
     },
     logging: {

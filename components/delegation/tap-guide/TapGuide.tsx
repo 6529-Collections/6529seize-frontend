@@ -111,14 +111,18 @@ const PLATFORM_ITEMS = [
   {
     key: "combine",
     icon: UserGroupIcon,
-    href: "/delegation/build-consolidation",
+    href: "/safe-collecting/build-consolidation",
   },
   {
     key: "manager",
     icon: KeyIcon,
-    href: "/delegation/register-sub-delegation",
+    href: "/safe-collecting/register-sub-delegation",
   },
-  { key: "mint", icon: SparklesIcon, href: "/delegation/register-delegation" },
+  {
+    key: "mint",
+    icon: SparklesIcon,
+    href: "/safe-collecting/register-delegation",
+  },
   { key: "airdrops", icon: GiftIcon, href: TAP_GUIDE_SETUP_HREF },
 ] as const satisfies readonly {
   readonly key: string;
@@ -136,9 +140,9 @@ const CAVEATS = [
 ] as const;
 
 const LEARN_LINKS = [
-  { key: "safe", href: "/delegation/delegation-faq/using-safe" },
-  { key: "faq", href: "/delegation/delegation-faq" },
-  { key: "checker", href: "/delegation/wallet-checker" },
+  { key: "safe", href: "/safe-collecting/faq/using-safe" },
+  { key: "faq", href: "/safe-collecting/faq" },
+  { key: "checker", href: "/safe-collecting/wallet-checker" },
 ] as const;
 
 export default function TapGuide() {

@@ -202,13 +202,14 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(addWallet).toBeVisible();
     await expect(addWallet).toHaveAttribute(
       "href",
-      "/delegation/build-consolidation"
+      "/safe-collecting/build-consolidation"
     );
     await addWallet.click();
 
     await expect(page).toHaveURL(
       (url) =>
-        url.pathname === "/delegation/build-consolidation" && url.search === ""
+        url.pathname === "/safe-collecting/build-consolidation" &&
+        url.search === ""
     );
     await expect(
       page.getByRole("heading", { name: "Build a Consolidation", exact: true })
@@ -226,7 +227,7 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     );
     await expectNoHorizontalOverflow(page);
 
-    await gotoReady(page, "/delegation/register-consolidation");
+    await gotoReady(page, "/safe-collecting/register-consolidation");
     await expect(
       page.getByRole("heading", { name: "Register Consolidation", exact: true })
     ).toBeVisible();
@@ -237,7 +238,7 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     ).toBeVisible();
     await expect(
       page.getByRole("link", { name: /^Use guided setup/ })
-    ).toHaveAttribute("href", "/delegation/build-consolidation");
+    ).toHaveAttribute("href", "/safe-collecting/build-consolidation");
     await expect(page.getByLabel("Collection", { exact: true })).toHaveValue(
       "0"
     );

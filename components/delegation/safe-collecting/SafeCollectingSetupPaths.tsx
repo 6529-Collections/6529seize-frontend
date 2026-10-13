@@ -1,5 +1,7 @@
 "use client";
 
+import { getSafeCollectingSectionPath } from "@/components/delegation/safe-collecting-routes";
+
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -13,7 +15,7 @@ type Path = "fresh" | "existing";
 
 const PATHS: readonly Path[] = ["fresh", "existing"];
 
-const section = (value: DelegationCenterSection) => `/delegation/${value}`;
+const section = getSafeCollectingSectionPath;
 
 interface StepAction {
   readonly key: string;
@@ -42,7 +44,7 @@ const SAFE_COLLECTING_STEPS: Record<Path, readonly Step[]> = {
       primary: { key: "action", href: MANAGER },
       secondary: {
         key: "safe",
-        href: "/delegation/delegation-faq/using-safe",
+        href: "/safe-collecting/faq/using-safe",
       },
     },
     { key: "combine", primary: { key: "action", href: GUIDED_SETUP } },

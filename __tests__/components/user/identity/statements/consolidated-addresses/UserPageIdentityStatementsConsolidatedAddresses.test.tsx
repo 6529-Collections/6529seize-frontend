@@ -66,7 +66,7 @@ describe("UserPageIdentityStatementsConsolidatedAddresses", () => {
 
     expect(
       screen.getByRole("link", { name: "Add another wallet" })
-    ).toHaveAttribute("href", "/delegation/build-consolidation");
+    ).toHaveAttribute("href", "/safe-collecting/build-consolidation");
     expect(
       screen.getByText(
         "Link another wallet you control. Your NFTs stay in their wallets."
@@ -97,7 +97,7 @@ describe("UserPageIdentityStatementsConsolidatedAddresses", () => {
     expect(screen.getByText("3 of 4 wallets")).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Add another wallet" })
-    ).toHaveAttribute("href", "/delegation/build-consolidation");
+    ).toHaveAttribute("href", "/safe-collecting/build-consolidation");
   });
 
   it("replaces the wallet entry with a limit note at four wallets", () => {
@@ -211,7 +211,7 @@ describe("UserPageIdentityStatementsConsolidatedAddresses", () => {
     expect(firstItem).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Wallet Checker" })
-    ).toHaveAttribute("href", "/delegation/wallet-checker?address=0x2");
+    ).toHaveAttribute("href", "/safe-collecting/wallet-checker?address=0x2");
   });
 
   it("omits wallet actions when the profile has no wallets", () => {

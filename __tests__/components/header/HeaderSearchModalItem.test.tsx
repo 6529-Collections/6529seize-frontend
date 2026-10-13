@@ -271,22 +271,22 @@ describe("HeaderSearchModalItem", () => {
 
   it("renders page item and shows breadcrumbs", () => {
     useHoverDirty.mockReturnValue(false);
-    mockUsePathname.mockReturnValue("/delegation/delegation-faq");
+    mockUsePathname.mockReturnValue("/safe-collecting/faq");
     const PageIcon = ({ className }: { className?: string | undefined }) => (
       <div data-testid="page-icon" className={className} />
     );
     const page: any = {
       type: "PAGE",
-      title: "Delegation FAQ",
-      href: "/delegation/delegation-faq",
-      breadcrumbs: ["Tools", "NFT Delegation"],
+      title: "FAQ",
+      href: "/safe-collecting/faq",
+      breadcrumbs: ["Tools", "Safe Collecting"],
       icon: PageIcon,
     };
     renderComponent(page, "delegation", false);
     const link = screen.getByTestId("link");
-    expect(link).toHaveAttribute("href", "/delegation/delegation-faq");
-    expect(link.textContent).toContain("Delegation FAQ");
-    expect(link.textContent).toContain("Tools • NFT Delegation");
+    expect(link).toHaveAttribute("href", "/safe-collecting/faq");
+    expect(link.textContent).toContain("FAQ");
+    expect(link.textContent).toContain("Tools • Safe Collecting");
     expect(screen.getByTestId("page-icon")).toBeInTheDocument();
   });
 });

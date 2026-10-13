@@ -95,8 +95,8 @@ const SECTION_METADATA: Readonly<
     description: t(DEFAULT_LOCALE, "delegation.tapGuide.metadataDescription"),
   },
   [DelegationCenterSection.FAQ]: {
-    title: "Delegation FAQ",
-    navLabel: "Delegation FAQ",
+    title: "FAQ",
+    navLabel: "FAQ",
     description: "Find delegation help articles and setup references.",
     articleSlug: "delegation-faq",
   },
@@ -156,9 +156,9 @@ export function getDelegationRouteMetadata(
   }
 
   return {
-    title: finalSegment ? titleCaseSlug(finalSegment) : "Delegation",
-    navLabel: "Delegation",
-    description: "NFT Delegation",
+    title: finalSegment ? titleCaseSlug(finalSegment) : "Safe Collecting",
+    navLabel: "Safe Collecting",
+    description: "Wallet setup and Safe Collecting tools.",
     isFaqChildArticle: false,
   };
 }
@@ -191,7 +191,7 @@ export function getDelegationArticleNavigation(
     return {
       slug: candidateSlug,
       title: article.title,
-      href: `/delegation/delegation-faq/${candidateSlug}`,
+      href: `/safe-collecting/faq/${candidateSlug}`,
     };
   }
 
@@ -204,7 +204,7 @@ export function getDelegationArticleNavigation(
 export function getWalletCheckerCanonicalPath(
   address: string | string[] | undefined
 ): string {
-  const path = "/delegation/wallet-checker";
+  const path = "/safe-collecting/wallet-checker";
   if (typeof address !== "string" || !address) {
     return path;
   }

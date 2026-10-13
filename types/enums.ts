@@ -71,7 +71,6 @@ export enum AboutSection {
   APPLY = "apply",
   DATA_DECENTR = "data-decentralization",
   GDRC1 = "gdrc1",
-  NFT_DELEGATION = "nft-delegation",
   PRIMARY_ADDRESS = "primary-address",
   ENS = "ens",
   SUBSCRIPTIONS = "subscriptions",

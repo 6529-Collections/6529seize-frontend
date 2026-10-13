@@ -1216,8 +1216,8 @@
       ],
       "facts": [
         "The About index page lives at /about.",
-        "It groups About pages into About 6529, Collections & Minting, Network & Reputation, Delegation & Wallets, Data & Developer Tools, and Legal link cards with right-arrow affordances.",
-        "Collections & Minting includes About The Memes, Subscription Minting, Meme Lab, 6529 Gradient, and Minting links.",
+        "It groups About pages into About 6529, Collections & Minting, Network & Reputation, Safe Collecting & Wallets, Data & Developer Tools, and Legal link cards with right-arrow affordances.",
+        "Collections & Minting includes About The Memes, Subscription Minting, Meme Lab, 6529 Gradient, Minting and GDRC, with GDRC last. Safe Collecting & Wallets contains Safe Collecting, TAP Guide, FAQ, Consolidation Use Cases, Wallet Checker, App Wallets when supported, and Primary Address last.",
         "Network & Reputation includes TDH, xTDH Overview, xTDH Allocations Dashboard, Network Health, Network Definitions, Levels, Network TDH Stats, Network Nerd, Prenodes, and TDH Historic Boosts links.",
         "Data & Developer Tools includes API, EMMA, Block Finder, Open Data, ReMemes Data, Team Data, royalties, network metrics, and subscription-gated data links.",
         "Use the About index when users want to browse all About pages or find the right policy, collection, minting, delegation, wallet, network, open-data, or technical page."
@@ -1620,7 +1620,7 @@
         "GDRC is separate from NFT Delegation and is not the Global Delegation Rights Contract.",
         "The page states that 6529 supports the Global Digital Rights Charter 1.",
         "The page links to digitalrightscharter.org and displays the full text of GDRC1.",
-        "The About index lists GDRC under Delegation & Wallets."
+        "The About index lists GDRC as the final item under Collections & Minting."
       ],
       "canonical_path": "/about/gdrc1",
       "related_paths": ["/about/faq"],
@@ -1629,33 +1629,6 @@
         "components/about/AboutGDRC1.tsx",
         "components/about/about.routes.ts"
       ]
-    },
-    {
-      "id": "about.nft-delegation",
-      "kind": "route",
-      "title": "NFT Delegation",
-      "aliases": [
-        "nft delegation",
-        "about nft delegation",
-        "delegation about page",
-        "where do i start delegation"
-      ],
-      "keywords": [
-        "nft",
-        "delegation",
-        "delegate",
-        "wallet",
-        "center",
-        "about"
-      ],
-      "facts": [
-        "The NFT Delegation about page lives at /about/nft-delegation.",
-        "The page sends users to Safe Collecting to get started with delegation."
-      ],
-      "canonical_path": "/about/nft-delegation",
-      "related_paths": ["/safe-collecting", "/delegation/delegation-faq"],
-      "tags": ["about", "delegation"],
-      "source_refs": ["components/about/AboutNFTDelegation.tsx"]
     },
     {
       "id": "about.ens",
@@ -2363,17 +2336,17 @@
         "Combining (consolidating) up to four wallets a collector owns makes them count as one collector: TDH adds up, cards spread over several wallets count toward full sets, seasons and the Genesis, Nakamoto and Gradient boosts, and moving a card between combined wallets keeps its holding time.",
         "Combined wallets share one profile; any of them can sign in. Cards are counted together on the profile, on the collector leaderboards and for Meme Card subscriptions. Nothing moves: NFTs stay in the wallets they are in.",
         "The recommended safe collecting setup gives each wallet one job: a vault (ideally a SAFE or hardware wallet) that holds NFTs and never connects, a transaction wallet for buying, selling and trading, and a hot social wallet that signs in to 6529, votes, posts, mints and pays for subscriptions. Three wallets is enough to start; the optional fourth is usually a burned or exposed old address combined only so its TDH keeps counting.",
-        "The guided setup at /delegation/build-consolidation shows which wallet signs next. Each wallet signing for itself can register its links in one transaction; a Delegation Manager signs one transaction per link while the vault stays disconnected. The guide shows the current environment’s activation cutoff from backend settings. Guided signing opens ten minutes later; staging can open before production.",
+        "The guided setup at /safe-collecting/build-consolidation shows which wallet signs next. Each wallet signing for itself can register its links in one transaction; a Delegation Manager signs one transaction per link while the vault stays disconnected. The guide shows the current environment’s activation cutoff from backend settings. Guided signing opens ten minutes later; staging can open before production.",
         "Every combined wallet can sign in as the profile, change the primary address and choose where airdrops go, so only a collector's own wallets should be combined. Profiles merge permanently; the handle and picture come from the profile with the highest CIC.",
         "Signing out of order, renewing old return links or sending a joining wallet's links as separate manager transactions can temporarily split the wallets and reduce TDH-wave votes. The guided setup enforces signing order but cannot make separate manager transactions atomic.",
         "The technical rules and the analysis behind the four-wallet design are on a separate page, /network/tdh/consolidation/design."
       ],
       "canonical_path": "/network/tdh/consolidation",
       "related_paths": [
-        "/delegation/build-consolidation",
+        "/safe-collecting/build-consolidation",
         "/network/tdh/consolidation/design",
         "/network/tdh",
-        "/delegation/wallet-checker",
+        "/safe-collecting/wallet-checker",
         "/safe-collecting"
       ],
       "tags": ["network", "tdh", "consolidation", "delegation"],
@@ -2413,7 +2386,7 @@
       "related_paths": [
         "/network/tdh/consolidation",
         "/network/tdh",
-        "/delegation/build-consolidation"
+        "/safe-collecting/build-consolidation"
       ],
       "tags": ["network", "tdh", "consolidation", "delegation"],
       "source_refs": ["ops/docs/network/feature-tdh-consolidation.md"]
@@ -4250,7 +4223,7 @@
       ],
       "facts": [
         "Safe Collecting at /safe-collecting (formerly the Delegation Center) explains and sets up 6529's safe collecting system: keep NFTs in a vault that never connects to anything, and use 6529 from a hot wallet, while TDH, delegations, airdrops and subscriptions keep working as if every wallet were one.",
-        "The former /delegation/delegation-center URL permanently redirects to /safe-collecting, preserving query parameters and section anchors. Individual delegation tool URLs are unchanged.",
+        "The former /delegation URLs permanently redirect to the equivalent /safe-collecting pages, preserving query parameters and section anchors. Wallet Architecture is now /safe-collecting/tap-guide, and the FAQ and its articles are under /safe-collecting/faq.",
         "It follows the Three Address Protocol (TAP): a vault (ideally a SAFE with hardware-wallet signers, or a hardware wallet) that holds NFTs and never connects; a transaction wallet on a hardware wallet that buys, sells and trades and acts as the vault's Delegation Manager; a hot social wallet that signs in to 6529, votes, posts, mints and pays for subscriptions and holds no NFTs; and optionally an old, burned or exposed address kept combined for its TDH.",
         "The recommended setup for new collectors: the vault signs once to set its ENS name and appoint the transaction wallet as Delegation Manager (use case 998) on Any Collection; the guided setup combines the wallets with the manager signing for the vault; optionally the manager delegates minting to the social wallet; airdrops without a delegation go to the wallet with the most TDH, usually the vault.",
         "When a wallet is connected, the Your setup section lists the profile's wallets with TDH, primary and connected badges, which wallet manages which, minting and airdrop delegations, and a checklist with links to fix missing steps.",
@@ -4259,10 +4232,10 @@
       ],
       "canonical_path": "/safe-collecting",
       "related_paths": [
-        "/delegation/wallet-architecture",
-        "/delegation/build-consolidation",
-        "/delegation/register-sub-delegation",
-        "/delegation/wallet-checker",
+        "/safe-collecting/tap-guide",
+        "/safe-collecting/build-consolidation",
+        "/safe-collecting/register-sub-delegation",
+        "/safe-collecting/wallet-checker",
         "/network/tdh/consolidation"
       ],
       "tags": ["delegation", "wallet", "glossary"],
@@ -4320,7 +4293,7 @@
         "partial results"
       ],
       "facts": [
-        "Wallet Checker lives at /delegation/wallet-checker.",
+        "Wallet Checker lives at /safe-collecting/wallet-checker.",
         "Wallet Checker is a read-only diagnostics page for one wallet.",
         "It checks delegations, delegation managers, and consolidation relationships for an entered Ethereum address or .eth ENS.",
         "It can show Delegations, Active Minting Delegation for The Memes, Delegation Managers, Consolidations, Active Consolidation, and Incomplete Consolidation.",
@@ -4330,10 +4303,10 @@
         "Recommendations wait until the separately loaded active-consolidation request settles. A failed linked-wallet request keeps the successfully loaded records, so partial results do not prove that every link was checked.",
         "Wallet Checker does not invent links: if a pair is entirely absent in both directions, it produces no recommendation for that pair. The six-linked-wallet cap can also limit coverage for a wallet with many stray links. Listed registrations are distinct from the backend's active counted consolidation; the checker neither registers links nor activates four-wallet support."
       ],
-      "canonical_path": "/delegation/wallet-checker",
+      "canonical_path": "/safe-collecting/wallet-checker",
       "related_paths": [
-        "/delegation/wallet-architecture",
-        "/delegation/consolidation-use-cases",
+        "/safe-collecting/tap-guide",
+        "/safe-collecting/consolidation-use-cases",
         "/safe-collecting"
       ],
       "tags": ["delegation", "wallet", "checker", "diagnostics"],
@@ -4395,12 +4368,12 @@
         "Each wallet signing for itself can register all of its links in one transaction with the NFTDelegation batchDelegations function (up to 5 links per call). A Delegation Manager sends one transaction per link. When adding a wallet to an existing group, the existing wallets register their links to it first and the new wallet sends its batch last. Existing return links or a manager sending the new wallet's links individually can still cause a temporary split and reduce TDH-wave votes.",
         "A consolidation is not a delegation of NFT utility, but every wallet in it is a full key to the profile, so only consolidate your own wallets."
       ],
-      "canonical_path": "/delegation/delegation-faq/register-consolidation",
+      "canonical_path": "/safe-collecting/faq/register-consolidation",
       "related_paths": [
-        "/delegation/wallet-architecture",
-        "/delegation/consolidation-use-cases",
-        "/delegation/delegation-faq/reference-consolidations-4address",
-        "/delegation/register-consolidation"
+        "/safe-collecting/tap-guide",
+        "/safe-collecting/consolidation-use-cases",
+        "/safe-collecting/faq/reference-consolidations-4address",
+        "/safe-collecting/register-consolidation"
       ],
       "tags": ["delegation", "consolidation", "wallet", "faq"],
       "source_refs": [
@@ -4435,17 +4408,17 @@
       "facts": [
         "The Register Consolidation form is a Safe Collecting action for connecting wallets you control for supported 6529 metrics.",
         "The form requires a connected wallet, Collection, and Consolidating With address.",
-        "Add another wallet in ID Statements / Consolidated Addresses opens the guided Build a Consolidation setup at /delegation/build-consolidation, not this form.",
+        "Add another wallet in ID Statements / Consolidated Addresses opens the guided Build a Consolidation setup at /safe-collecting/build-consolidation, not this form.",
         "The normal form explains that a consolidation holds up to 4 wallets and every pair of wallets registers a link in both directions, so every wallet signs and needs ETH for gas; the link is public and existing profile data may be combined. NFTs stay in their wallets. It links to the guided setup.",
         "For TDH consolidation, use Any Collection or The Memes."
       ],
-      "canonical_path": "/delegation/register-consolidation",
+      "canonical_path": "/safe-collecting/register-consolidation",
       "related_paths": [
-        "/delegation/delegation-faq/register-consolidation",
-        "/delegation/wallet-architecture",
-        "/delegation/consolidation-use-cases",
+        "/safe-collecting/faq/register-consolidation",
+        "/safe-collecting/tap-guide",
+        "/safe-collecting/consolidation-use-cases",
         "/safe-collecting",
-        "/delegation/assign-primary-address"
+        "/safe-collecting/assign-primary-address"
       ],
       "tags": ["delegation", "consolidation", "wallet"],
       "source_refs": [
@@ -4489,20 +4462,20 @@
         "Every pair of wallets in a consolidation registers use case 999 in both directions. The guide reads which directions are already registered on-chain (Any Collection or The Memes) and plans one transaction per wallet: a single registration for one missing link, or one batch for several.",
         "The connected wallet and its current consolidation are prefilled. Wallets already in that consolidation sign first and new wallets sign last; signing out of order temporarily splits the consolidation and can reduce TDH-wave votes.",
         "Each step can be signed only by its own wallet or by that wallet's Delegation Manager, and only after every earlier step is confirmed on-chain. Switch the connected wallet between steps; the wallet list stays in place.",
-        "A vault never has to connect: if the connected wallet is the vault's Delegation Manager on Any Collection (use case 998), the vault's step shows Sign for Wallet N as its manager and the manager registers each of the vault's links as a separate transaction (Link n of total). When a manager signs for a joining wallet with several links, the consolidation can be split until the last link confirms, which can reduce TDH-wave votes, so the step asks to send them back to back. A manager appointed only for The Memes cannot sign these links. Appoint one from the tip in Before you start (/delegation/register-sub-delegation).",
-        "A connected Safe cannot sign its own step here, because a Safe confirms a transaction only after its co-signers approve; appoint a Delegation Manager for the Safe on Any Collection and connect the manager to sign the Safe's links (see Using a SAFE at /delegation/delegation-faq/using-safe).",
+        "A vault never has to connect: if the connected wallet is the vault's Delegation Manager on Any Collection (use case 998), the vault's step shows Sign for Wallet N as its manager and the manager registers each of the vault's links as a separate transaction (Link n of total). When a manager signs for a joining wallet with several links, the consolidation can be split until the last link confirms, which can reduce TDH-wave votes, so the step asks to send them back to back. A manager appointed only for The Memes cannot sign these links. Appoint one from the tip in Before you start (/safe-collecting/register-sub-delegation).",
+        "A connected Safe cannot sign its own step here, because a Safe confirms a transaction only after its co-signers approve; appoint a Delegation Manager for the Safe on Any Collection and connect the manager to sign the Safe's links (see Using a SAFE at /safe-collecting/faq/using-safe).",
         "A four-wallet consolidation counts only when one member has all three of its links registered in both directions from the current environment’s activation cutoff. Every step of a four-wallet plan waits until ten minutes after that cutoff, as shown in Guided Setup; staging can open before production; groups of two or three are not held.",
         "For a four-wallet plan the guide also checks when 6529 recorded each link. A joining wallet's older links are registered again in the signer's step so they count. After a step confirms, a link 6529 has not recorded yet shows Waiting for 6529 to record this link (usually about a minute) instead of asking for another signature.",
         "Every wallet in a consolidation can sign in as the profile and act for it, so only consolidate wallets you control. Profiles merge permanently, the profile with the highest CIC keeps its handle, and a wallet already in another consolidation leaves it."
       ],
-      "canonical_path": "/delegation/build-consolidation",
+      "canonical_path": "/safe-collecting/build-consolidation",
       "related_paths": [
-        "/delegation/register-consolidation",
-        "/delegation/delegation-faq/register-consolidation",
+        "/safe-collecting/register-consolidation",
+        "/safe-collecting/faq/register-consolidation",
         "/safe-collecting",
-        "/delegation/wallet-checker",
-        "/delegation/register-sub-delegation",
-        "/delegation/delegation-faq/using-safe"
+        "/safe-collecting/wallet-checker",
+        "/safe-collecting/register-sub-delegation",
+        "/safe-collecting/faq/using-safe"
       ],
       "tags": ["delegation", "consolidation", "wallet"],
       "source_refs": ["ops/docs/delegation/feature-delegation-action-flows.md"]
@@ -4554,7 +4527,7 @@
         "drainer"
       ],
       "facts": [
-        "/delegation/wallet-architecture is the TAP Guide tab of the delegation pages: a plain-language guide titled The Three Address Protocol (TAP), the way to never have your grail NFTs phished. It works with any wallet app.",
+        "/safe-collecting/tap-guide is the TAP Guide tab of the delegation pages: a plain-language guide titled The Three Address Protocol (TAP), the way to never have your grail NFTs phished. It works with any wallet app.",
         "The one rule: never connect a wallet that holds your NFTs to a link you saw on X or Discord.",
         "TAP gives three wallets three jobs. The vault (ice-cold; ideally a SAFE with hardware-wallet signers, or a hardware wallet) holds the NFTs you are not trading and never connects to anything, not even 6529; if you mint from it, it is not a vault. The transaction wallet (warm; a hardware wallet) holds NFTs you are buying, selling or trading and only connects to recognized marketplaces. The social wallet (hot; any wallet app; older guides call it the minting wallet) holds no NFTs and only a little ETH and is used for signing in to 6529, voting, posting and minting.",
         "An optional fourth wallet is an old or exposed address, such as a burned hot wallet or a doxxed vault: stop using it and combine it with your other wallets so its TDH keeps counting. Creators should create new work from a dedicated hardware-wallet address.",
@@ -4562,20 +4535,20 @@
         "Good TAP: a wallet app address as the social wallet and two hardware wallet addresses as the transaction wallet and vault. Great TAP uses a SAFE multisig vault, for example 2-of-3 with hardware-wallet signers; Great TAP is how 6529 runs.",
         "On 6529, combining the wallets makes them one collector (TDH, sets, one profile) and any of them can sign in, so the vault never has to. The vault signs once to appoint the transaction wallet as its Delegation Manager, which then registers everything for it; a minting delegation lets the social wallet mint with the vault's eligibility; with no delegation, airdrops go to the wallet with the most TDH, usually the vault.",
         "A Delegation Manager cannot move NFTs but can register anything in the vault's name and revoke its entries; revoking the manager does not undo what it registered, and a manager's expiry date is ignored. A vault that locks consolidation for Any Collection cannot be linked to new wallets, even with a stolen manager key, until the vault itself unlocks.",
-        "The page's primary button, Set up your wallets, opens /safe-collecting#safe-setup; it also links to /network/tdh/consolidation, the guided setup, Register Delegation Manager, Register Delegation, Using a SAFE, the Delegation FAQ and Wallet Checker. The earlier long-form Wallet Architecture article remains at /delegation/delegation-faq/reference-overview-wallet-architecture.",
+        "The page's primary button, Set up your wallets, opens /safe-collecting#safe-setup; it also links to /network/tdh/consolidation, the guided setup, Register Delegation Manager, Register Delegation, Using a SAFE, the FAQ and Wallet Checker. The earlier long-form Wallet Architecture article remains at /safe-collecting/faq/reference-overview-wallet-architecture.",
         "For consolidation metrics, 6529 recognizes up to 4 addresses as one consolidation group when every pair is linked in both directions; a fourth address counts only for links registered on or after the current environment’s activation cutoff."
       ],
-      "canonical_path": "/delegation/wallet-architecture",
+      "canonical_path": "/safe-collecting/tap-guide",
       "related_paths": [
         "/safe-collecting",
         "/network/tdh/consolidation",
-        "/delegation/build-consolidation",
-        "/delegation/register-sub-delegation",
-        "/delegation/register-delegation",
-        "/delegation/delegation-faq/using-safe",
-        "/delegation/delegation-faq",
-        "/delegation/wallet-checker",
-        "/delegation/delegation-faq/reference-overview-wallet-architecture"
+        "/safe-collecting/build-consolidation",
+        "/safe-collecting/register-sub-delegation",
+        "/safe-collecting/register-delegation",
+        "/safe-collecting/faq/using-safe",
+        "/safe-collecting/faq",
+        "/safe-collecting/wallet-checker",
+        "/safe-collecting/faq/reference-overview-wallet-architecture"
       ],
       "tags": ["delegation", "wallet", "security", "architecture", "tap"],
       "source_refs": [
@@ -4653,13 +4626,13 @@
         "Every wallet in a consolidation is a full key to the profile: it can sign in as the profile, set the primary address, and redirect airdrops. Consolidations are for one person's wallets, not for multiple individuals, and consolidation registrations do not expire.",
         "When a consolidation splits, profile retention uses a mature primary-address delegation (50,400 processed blocks, roughly seven days) before TDH fallback. This does not delay primary-address changes. Subscription balances and upcoming choices have separate merge rules; on a split, subscriptions follow the highest-TDH resulting group rather than the profile-retention winner."
       ],
-      "canonical_path": "/delegation/consolidation-use-cases",
+      "canonical_path": "/safe-collecting/consolidation-use-cases",
       "related_paths": [
-        "/delegation/wallet-architecture",
-        "/delegation/delegation-faq/register-consolidation",
-        "/delegation/delegation-faq/reference-consolidations-4address",
-        "/delegation/register-consolidation",
-        "/delegation/delegation-faq",
+        "/safe-collecting/tap-guide",
+        "/safe-collecting/faq/register-consolidation",
+        "/safe-collecting/faq/reference-consolidations-4address",
+        "/safe-collecting/register-consolidation",
+        "/safe-collecting/faq",
         "/consolidation-mapping-tool"
       ],
       "tags": ["delegation", "consolidation", "wallet", "tdh"],
@@ -4675,7 +4648,7 @@
     {
       "id": "delegation.faq",
       "kind": "route",
-      "title": "Delegation FAQ",
+      "title": "FAQ",
       "aliases": [
         "delegation faq",
         "delegation how to",
@@ -4702,11 +4675,11 @@
         "It indexes how-to articles for registering delegations, delegation managers, consolidations, SAFE transaction-builder flows, supported use cases, viewing records, updating, revoking, locking, and unlocking wallets.",
         "Use it when users ask broad Safe Collecting how-to questions or ask where the delegation docs live."
       ],
-      "canonical_path": "/delegation/delegation-faq",
+      "canonical_path": "/safe-collecting/faq",
       "related_paths": [
         "/safe-collecting",
-        "/delegation/wallet-architecture",
-        "/delegation/consolidation-use-cases"
+        "/safe-collecting/tap-guide",
+        "/safe-collecting/consolidation-use-cases"
       ],
       "tags": ["delegation", "faq", "docs"],
       "source_refs": [
@@ -4736,9 +4709,9 @@
       ],
       "canonical_path": "/safe-collecting",
       "related_paths": [
-        "/delegation/delegation-faq/manage-revoke",
-        "/delegation/delegation-faq/manage-update",
-        "/delegation/delegation-faq/register-consolidation"
+        "/safe-collecting/faq/manage-revoke",
+        "/safe-collecting/faq/manage-update",
+        "/safe-collecting/faq/register-consolidation"
       ],
       "tags": ["delegation", "wallet", "consolidation", "management"],
       "source_refs": [
@@ -4785,11 +4758,11 @@
         "On the Manage/View Collection page, find the address or record you want to revoke and click Revoke.",
         "Execute the transaction to remove the delegation, manager permission, or consolidation record."
       ],
-      "canonical_path": "/delegation/delegation-faq/manage-revoke",
+      "canonical_path": "/safe-collecting/faq/manage-revoke",
       "related_paths": [
         "/safe-collecting",
-        "/delegation/delegation-faq",
-        "/delegation/delegation-faq/revoke-delegation-using-sub-delegation"
+        "/safe-collecting/faq",
+        "/safe-collecting/faq/revoke-delegation-using-sub-delegation"
       ],
       "tags": ["delegation", "workflow", "faq", "revoke"],
       "source_refs": [
@@ -4832,8 +4805,8 @@
         "Find the address or record you want to update, click Update, adjust the delegated wallet, expiry, or token scope, then submit.",
         "Execute the transaction to apply the update."
       ],
-      "canonical_path": "/delegation/delegation-faq/manage-update",
-      "related_paths": ["/safe-collecting", "/delegation/delegation-faq"],
+      "canonical_path": "/safe-collecting/faq/manage-update",
+      "related_paths": ["/safe-collecting", "/safe-collecting/faq"],
       "tags": ["delegation", "workflow", "faq", "update"],
       "source_refs": [
         "public/delegation-content/delegation-docs-2026-10-15/html/manage-update.html"
@@ -4866,11 +4839,11 @@
         "A delegation lets another wallet use NFT utility without moving the NFT from the delegator wallet.",
         "Ordinary minting and airdrop delegations are checked against their expiry by 6529 readers. A token-specific delegation is distinct from an all-token delegation. Safe and batch registrations retain their individual expiry and token scope; review Tokens and Expiry in Wallet Checker."
       ],
-      "canonical_path": "/delegation/delegation-faq/register-delegation",
+      "canonical_path": "/safe-collecting/faq/register-delegation",
       "related_paths": [
-        "/delegation/register-delegation",
+        "/safe-collecting/register-delegation",
         "/safe-collecting",
-        "/delegation/wallet-architecture"
+        "/safe-collecting/tap-guide"
       ],
       "tags": ["delegation", "workflow", "faq"],
       "source_refs": [
@@ -4907,11 +4880,11 @@
         "The docs describe registering a manager from the vault wallet to a delegated wallet, then using that delegated wallet to register future delegations or consolidations.",
         "A manager can register consolidations and additional managers within its authorized collection scope. Its expiry date does not end its contract authority: revoke the manager permission to remove it. Revoking a manager does not undo records it already created; review those separately."
       ],
-      "canonical_path": "/delegation/delegation-faq/register-sub-delegation",
+      "canonical_path": "/safe-collecting/faq/register-sub-delegation",
       "related_paths": [
-        "/delegation/register-sub-delegation",
-        "/delegation/delegation-faq/register-delegation-using-sub-delegation",
-        "/delegation/delegation-faq/revoke-delegation-using-sub-delegation"
+        "/safe-collecting/register-sub-delegation",
+        "/safe-collecting/faq/register-delegation-using-sub-delegation",
+        "/safe-collecting/faq/revoke-delegation-using-sub-delegation"
       ],
       "tags": ["delegation", "manager", "wallet", "faq"],
       "source_refs": [
@@ -4947,10 +4920,10 @@
         "The docs show using the SAFE Transaction Builder with the NFTDelegation.com contract to register delegation manager rights.",
         "The SAFE flow uses the Any Collection value, no-expiry value, use case 998 for Delegation Management, allTokens true, tokenId 0, then creates and sends the batch transaction."
       ],
-      "canonical_path": "/delegation/delegation-faq/using-safe",
+      "canonical_path": "/safe-collecting/faq/using-safe",
       "related_paths": [
-        "/delegation/wallet-architecture",
-        "/delegation/delegation-faq/register-sub-delegation"
+        "/safe-collecting/tap-guide",
+        "/safe-collecting/faq/register-sub-delegation"
       ],
       "tags": ["delegation", "safe", "wallet", "faq"],
       "source_refs": [
@@ -4983,7 +4956,7 @@
       "canonical_path": "/delegation-mapping-tool",
       "related_paths": [
         "/consolidation-mapping-tool",
-        "/delegation/wallet-checker"
+        "/safe-collecting/wallet-checker"
       ],
       "tags": ["delegation", "tools"],
       "source_refs": ["ops/docs/delegation/feature-wallet-checker.md"]
@@ -6112,7 +6085,7 @@
         "On mobile, the add-statements sheet presents four compact statement groups, keeps public-visibility notes under About identity statements, and provides header close, back, backdrop, Escape, and swipe-down dismissal paths.",
         "On mobile web and Capacitor, deeper add-statement forms stay above the software keyboard and keep their focused fields and Save/Cancel actions reachable by scrolling.",
         "Consolidated wallet rows expand to show the full address and ENS name when available as full-field copy controls, plus labeled mobile links to Etherscan and OpenSea.",
-        "Consolidated Addresses shows how many of the 4 allowed wallets the profile has. Add another wallet appears beside Wallet Checker for the connected profile owner when no proxy profile is active, a primary or consolidated wallet address is available, and the profile has fewer than 4 wallets; it opens the guided Build a Consolidation flow at /delegation/build-consolidation. At 4 wallets the owner sees a maximum-reached note instead. It is separate from Add for identity statements.",
+        "Consolidated Addresses shows how many of the 4 allowed wallets the profile has. Add another wallet appears beside Wallet Checker for the connected profile owner when no proxy profile is active, a primary or consolidated wallet address is available, and the profile has fewer than 4 wallets; it opens the guided Build a Consolidation flow at /safe-collecting/build-consolidation. At 4 wallets the owner sees a maximum-reached note instead. It is separate from Add for identity statements.",
         "URL-capable statement rows open from the row and show a right-aligned external-link cue; Copy remains an independent inline action that does not open the destination, while eligible owners can also Delete.",
         "NFT Accounts includes Ninfa and Other. Other asks for a display name such as AOTM and a secure HTTPS URL, then shows the display name with the destination hostname.",
         "New NFT account links must use HTTPS, cannot contain URL credentials, reject duplicate normalized URLs, and are limited to 20 per profile; Ninfa links must use ninfa.io or a ninfa.io subdomain.",
@@ -6122,8 +6095,8 @@
       "canonical_path": "/{user}",
       "related_paths": [
         "/{user}/identity",
-        "/delegation/wallet-checker",
-        "/delegation/build-consolidation"
+        "/safe-collecting/wallet-checker",
+        "/safe-collecting/build-consolidation"
       ],
       "tags": ["profiles", "identity", "statements"],
       "source_refs": ["ops/docs/profiles/tabs/feature-identity-statements.md"]
@@ -6167,7 +6140,7 @@
         "If no mature primary-address delegation applies, profile retention falls back to the resulting group with the highest TDH, then the previous primary address for a tie, then stable group-key ordering. A recently selected primary address alone does not guarantee retaining the profile."
       ],
       "canonical_path": "/about/primary-address",
-      "related_paths": ["/{user}", "/delegation/assign-primary-address"],
+      "related_paths": ["/{user}", "/safe-collecting/assign-primary-address"],
       "tags": ["profiles", "identity", "wallet"],
       "source_refs": [
         "ops/docs/profiles/about/feature-primary-address-reference-table.md",
@@ -8240,7 +8213,7 @@
       ],
       "facts": [
         "The Tools index page lives at /tools as a direct secondary route, not a primary sidebar or app drawer destination.",
-        "It groups label-only tool cards with right-arrow affordances into NFT Delegation, The Memes Tools, Builder Tools, and Open Data.",
+        "It groups label-only tool cards with right-arrow affordances into Safe Collecting, The Memes Tools, Builder Tools, and Open Data.",
         "The Tools index links to delegation utilities, Subscriptions Report, Meme Accounting, Meme Gas, App Wallets when supported, API, EMMA, Block Finder, and Open Data routes.",
         "Subscription-only links are hidden in restricted iOS contexts, and App Wallets is hidden when app-wallet support is unavailable.",
         "Private operator routes and local-only tools are not listed on the public Tools index.",
@@ -10181,7 +10154,7 @@
       ],
       "facts": [
         "6529 Desktop wallets are stored in the installed 6529 Desktop application and its 6529 Desktop wallet controls are not available in 6529 Mobile or an ordinary browser.",
-        "6529 Mobile has separate App Wallets stored in the native app environment. Use Connect > App Wallets or open App Wallets under About > Delegation & Wallets when app-wallet support is enabled.",
+        "6529 Mobile has separate App Wallets stored in the native app environment. Use Connect > App Wallets or open App Wallets under About > Safe Collecting & Wallets when app-wallet support is enabled.",
         "A 6529 Desktop wallet does not automatically appear on mobile. Do not send a recovery phrase, private key, or password to the help bot."
       ],
       "canonical_path": "/tools/app-wallets",
@@ -10224,7 +10197,7 @@
       ],
       "facts": [
         "App Wallets are wallets stored in the 6529 Mobile environment using native secure storage. They are separate from 6529 Desktop wallets in 6529 Desktop and from external wallets offered through the External Wallets connection flow.",
-        "Open About > Delegation & Wallets > App Wallets, or open Connect > App Wallets to choose an existing app-local wallet or start Create App Wallet. The App Wallets menu appears only when native app-wallet support is available.",
+        "Open About > Safe Collecting & Wallets > App Wallets, or open Connect > App Wallets to choose an existing app-local wallet or start Create App Wallet. The App Wallets menu appears only when native app-wallet support is available.",
         "The App Wallets page lists locally stored wallets and provides Create Wallet, Import Wallet, and wallet-detail actions. Never send a wallet password, mnemonic, or private key to the help bot."
       ],
       "canonical_path": "/tools/app-wallets",

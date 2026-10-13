@@ -41,7 +41,7 @@ Two pages explain wallet consolidation:
 1. Header: the promise (several wallets count as one collector; nothing moves),
    the four-wallet limit and the fourth wallet's start date
    (loaded from the current environment’s settings), a `Start guided setup` button to
-   `/delegation/build-consolidation`, and a link to the safe collecting setup.
+   `/safe-collecting/build-consolidation`, and a link to the safe collecting setup.
    A figure shows the vault, transaction, social and old wallets becoming one
    collector.
 2. `Why combine`: the vault stays cold; TDH adds up; sets count across wallets;

@@ -222,7 +222,7 @@ const defaultSidebarSections: SidebarSection[] = [
         ],
       },
       {
-        name: "Delegation & Wallets",
+        name: "Safe Collecting & Wallets",
         items: [{ name: "Delegation Center", href: "/safe-collecting" }],
       },
     ],
@@ -951,8 +951,8 @@ describe("HeaderSearchModal", () => {
               name: "Delegation",
               items: [
                 {
-                  name: "Delegation FAQ",
-                  href: "/delegation/delegation-faq",
+                  name: "Wallet FAQ",
+                  href: "/safe-collecting/faq",
                 },
               ],
             },
@@ -976,8 +976,54 @@ describe("HeaderSearchModal", () => {
 
     const items = await screen.findAllByTestId("item");
     expect(items[0]?.textContent).toContain('"title":"FAQ"');
-    expect(items[1]?.textContent).toContain('"title":"Delegation FAQ"');
+    expect(items[1]?.textContent).toContain('"title":"Wallet FAQ"');
   });
+
+  it.each(["delegation", "delegations"])(
+    "finds all Safe Collecting pages through the legacy search alias %s",
+    async (query) => {
+      const pages = [
+        { name: "Safe Collecting", href: "/safe-collecting" },
+        { name: "TAP Guide", href: "/safe-collecting/tap-guide" },
+        { name: "FAQ", href: "/safe-collecting/faq" },
+        {
+          name: "Consolidation Use Cases",
+          href: "/safe-collecting/consolidation-use-cases",
+        },
+        { name: "Wallet Checker", href: "/safe-collecting/wallet-checker" },
+      ];
+      setup({
+        selectedCategory: "PAGES",
+        sidebarSections: [
+          {
+            key: "about",
+            name: "About",
+            icon: () => null,
+            items: [],
+            subsections: [{ name: "Safe Collecting & Wallets", items: pages }],
+          },
+        ],
+        queryImpl: () => ({
+          isFetching: false,
+          data: [],
+          error: undefined,
+          refetch: jest.fn(() => Promise.resolve()),
+        }),
+      });
+      fireEvent.change(getSearchInput(), { target: { value: query } });
+      const items = await screen.findAllByTestId("item");
+      expect(items).toHaveLength(5);
+      for (const page of pages) {
+        expect(
+          items.some(
+            (item) =>
+              item.textContent?.includes(`"href":"${page.href}"`) &&
+              item.textContent?.includes(`"title":"${page.name}"`)
+          )
+        ).toBe(true);
+      }
+    }
+  );
 
   it("renders result categories in deterministic order in All view", async () => {
     const profiles = [

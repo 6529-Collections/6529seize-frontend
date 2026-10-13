@@ -1,5 +1,7 @@
 "use client";
 
+import { getSafeCollectingSectionPath } from "@/components/delegation/safe-collecting-routes";
+
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import Button from "@/components/utils/button/Button";
 import ButtonLink from "@/components/utils/button/ButtonLink";
@@ -211,7 +213,9 @@ function Checklist({
           })
         : t(locale, "safeCollecting.yourSetup.check.combined.todo"),
       action: t(locale, "safeCollecting.yourSetup.check.combined.action"),
-      href: `/delegation/${DelegationCenterSection.BUILD_CONSOLIDATION}`,
+      href: getSafeCollectingSectionPath(
+        DelegationCenterSection.BUILD_CONSOLIDATION
+      ),
     },
     {
       key: "manager",
@@ -223,7 +227,9 @@ function Checklist({
             })
           : t(locale, "safeCollecting.yourSetup.check.manager.todo"),
       action: t(locale, "safeCollecting.yourSetup.check.manager.action"),
-      href: `/delegation/${DelegationCenterSection.REGISTER_SUB_DELEGATION}`,
+      href: getSafeCollectingSectionPath(
+        DelegationCenterSection.REGISTER_SUB_DELEGATION
+      ),
     },
     {
       key: "mint",
@@ -235,7 +241,7 @@ function Checklist({
             })
           : t(locale, "safeCollecting.yourSetup.check.mint.todo"),
       action: t(locale, "safeCollecting.yourSetup.check.mint.action"),
-      href: `/delegation/${DelegationCenterSection.REGISTER_DELEGATION}?use_case=2`,
+      href: `${getSafeCollectingSectionPath(DelegationCenterSection.REGISTER_DELEGATION)}?use_case=2`,
     },
   ];
 

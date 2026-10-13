@@ -55,7 +55,7 @@ const DELEGATION_MENU_ITEMS: ReadonlyArray<{
   },
   {
     section: DelegationCenterSection.FAQ,
-    label: "Delegation FAQ",
+    label: "FAQ",
   },
   {
     section: DelegationCenterSection.CONSOLIDATION_USE_CASES,
@@ -278,7 +278,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
       case DelegationCenterSection.WALLET_ARCHITECTURE:
         return <TapGuide />;
       case DelegationCenterSection.FAQ:
-        return <DelegationHTML title="Delegation FAQ" path="delegation-faq" />;
+        return <DelegationHTML title="FAQ" path="delegation-faq" />;
       case DelegationCenterSection.CONSOLIDATION_USE_CASES:
         return (
           <DelegationHTML
@@ -308,7 +308,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
       props.section === section ||
       (section === DelegationCenterSection.FAQ &&
         props.section === DelegationCenterSection.HTML &&
-        pathname?.startsWith("/delegation/delegation-faq/"))
+        pathname.startsWith("/safe-collecting/faq/"))
     );
   }
 

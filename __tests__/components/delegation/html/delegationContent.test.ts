@@ -189,16 +189,14 @@ describe("delegationContent", () => {
     }
   });
 
-  it("links every FAQ child article from the Delegation FAQ index", async () => {
+  it("links every FAQ child article from the FAQ index", async () => {
     const faqArticle = getDelegationArticle("delegation-faq");
     const html = await readFile(getReviewedArticlePath(faqArticle!), "utf8");
     const template = document.createElement("template");
     template.innerHTML = html;
     const linkedSlugs = new Set(
       Array.from(
-        template.content.querySelectorAll(
-          'a[href^="/delegation/delegation-faq/"]'
-        )
+        template.content.querySelectorAll('a[href^="/safe-collecting/faq/"]')
       ).map((link) => link.getAttribute("href")?.split("/").pop())
     );
     const childSlugs = Object.keys(delegationContentManifest.articles).filter(
@@ -299,7 +297,7 @@ describe("delegationContent", () => {
         '<img src="./assets/local.png">',
         '<a href="./next.html">Next</a>',
         '<a href="#toc">TOC</a>',
-        '<a href="/delegation/delegation-faq">FAQ</a>',
+        '<a href="/safe-collecting/faq">FAQ</a>',
       ].join(""),
       `${localBundleBaseUrl}/html/using-safe.html`
     );
@@ -310,7 +308,7 @@ describe("delegationContent", () => {
     expect(html).toContain(`src="${localBundleBaseUrl}/html/assets/local.png"`);
     expect(html).toContain(`href="${localBundleBaseUrl}/html/next.html"`);
     expect(html).toContain('href="#toc"');
-    expect(html).toContain('href="/delegation/delegation-faq"');
+    expect(html).toContain('href="/safe-collecting/faq"');
   });
 
   it("loads hash-verified article html from a multi-chunk stream", async () => {

@@ -349,7 +349,7 @@ export default function TDHConsolidationDesignPage() {
               [
                 ["/network/tdh/consolidation", "consolidationGuide"],
                 ["/network/tdh", "tdh"],
-                ["/delegation/wallet-checker", "checker"],
+                ["/safe-collecting/wallet-checker", "checker"],
                 ["/safe-collecting", "center"],
               ] as const
             ).map(([href, key]) => ({
@@ -449,7 +449,7 @@ function AddWalletSection({ locale }: { readonly locale: SupportedLocale }) {
         </div>
         <Link
           className={`${LINK} tw-text-sm`}
-          href="/delegation/build-consolidation"
+          href="/safe-collecting/build-consolidation"
         >
           {t(locale, "network.tdhConsolidation.add.cta")}
         </Link>

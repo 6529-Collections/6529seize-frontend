@@ -64,13 +64,13 @@ private `/tools/6529bot/admin` operator page.
   - `About -> Data & Developer Tools -> API`
   - `About -> Data & Developer Tools -> Block Finder`
   - `About -> Data & Developer Tools -> Subscriptions Report`
-  - `About -> Delegation & Wallets -> App Wallets` (only when app-wallet
+  - `About -> Safe Collecting & Wallets -> App Wallets` (only when app-wallet
     support is enabled)
 - Native app sidebar paths:
   - `About -> Data & Developer Tools -> API`
   - `About -> Data & Developer Tools -> Block Finder`
   - `About -> Data & Developer Tools -> Subscriptions Report`
-  - `About -> Delegation & Wallets -> App Wallets` (only when app-wallet
+  - `About -> Safe Collecting & Wallets -> App Wallets` (only when app-wallet
     support is enabled)
 - When app-wallet support is unavailable, direct `/tools/app-wallets*` routes
   still load but show an unsupported message panel instead of wallet controls.

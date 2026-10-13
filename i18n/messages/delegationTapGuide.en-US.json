@@ -94,7 +94,7 @@
   "delegation.tapGuide.learn.title": "Learn more",
   "delegation.tapGuide.learn.safe.title": "Using a SAFE",
   "delegation.tapGuide.learn.safe.description": "Appoint a Delegation Manager from a SAFE vault, step by step.",
-  "delegation.tapGuide.learn.faq.title": "Delegation FAQ",
+  "delegation.tapGuide.learn.faq.title": "FAQ",
   "delegation.tapGuide.learn.faq.description": "Help for registering, checking, revoking and locking.",
   "delegation.tapGuide.learn.checker.title": "Wallet Checker",
   "delegation.tapGuide.learn.checker.description": "See the delegations, managers and combined wallets of any address."

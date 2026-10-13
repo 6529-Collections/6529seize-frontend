@@ -281,10 +281,7 @@ describe("ConsolidationBuilder", () => {
     ).toHaveAttribute("href", "/network/tdh/consolidation");
     expect(
       screen.getByRole("link", { name: "Consolidation guide" })
-    ).toHaveAttribute(
-      "href",
-      "/delegation/delegation-faq/register-consolidation"
-    );
+    ).toHaveAttribute("href", "/safe-collecting/faq/register-consolidation");
   });
 
   it("suggests appointing a Delegation Manager to keep a vault cold", () => {
@@ -297,7 +294,7 @@ describe("ConsolidationBuilder", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Appoint a Delegation Manager" })
-    ).toHaveAttribute("href", "/delegation/register-sub-delegation");
+    ).toHaveAttribute("href", "/safe-collecting/register-sub-delegation");
   });
 
   it("prefills the connected wallet and its current consolidation", () => {
@@ -358,10 +355,10 @@ describe("ConsolidationBuilder", () => {
     expect(step(1).getByText(SAFE_GUIDANCE)).toBeInTheDocument();
     expect(
       step(1).getByRole("link", { name: "Appoint a Delegation Manager" })
-    ).toHaveAttribute("href", "/delegation/register-sub-delegation");
+    ).toHaveAttribute("href", "/safe-collecting/register-sub-delegation");
     expect(step(1).getByRole("link", { name: "Using a SAFE" })).toHaveAttribute(
       "href",
-      "/delegation/delegation-faq/using-safe"
+      "/safe-collecting/faq/using-safe"
     );
     // Once in the step and once above the wallet list.
     expect(screen.getAllByText(SAFE_GUIDANCE)).toHaveLength(2);

@@ -31,7 +31,10 @@ describe("TDHConsolidationPage (collector's guide)", () => {
     });
     expect(setupLinks.length).toBeGreaterThan(0);
     for (const link of setupLinks) {
-      expect(link).toHaveAttribute("href", "/delegation/build-consolidation");
+      expect(link).toHaveAttribute(
+        "href",
+        "/safe-collecting/build-consolidation"
+      );
     }
     expect(
       screen.getByRole("figure", {

@@ -252,10 +252,8 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     await expect(page.getByRole("button", { name: /The Memes/ })).toBeVisible();
   });
 
-  test("Delegation FAQ child article renders article navigation", async ({
-    page,
-  }) => {
-    await gotoReady(page, "/delegation/delegation-faq/register-delegation");
+  test("FAQ child article renders article navigation", async ({ page }) => {
+    await gotoReady(page, "/safe-collecting/faq/register-delegation");
 
     await expect(
       page.getByRole("navigation", { name: "Breadcrumb" })
@@ -265,10 +263,10 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     ).toBeVisible();
     await expect(
       page.getByRole("link", { name: "All FAQ topics" })
-    ).toHaveAttribute("href", "/delegation/delegation-faq");
+    ).toHaveAttribute("href", "/safe-collecting/faq");
     await expect(
       page.getByRole("navigation", {
-        name: "Delegation FAQ article navigation",
+        name: "FAQ article navigation",
       })
     ).toBeVisible();
   });

@@ -38,7 +38,7 @@ describe("DelegationCenterComponent", () => {
     render(<DelegationCenterComponent setSection={setSection} />);
     expect(screen.getByRole("link", { name: "Guided Setup" })).toHaveAttribute(
       "href",
-      `/delegation/${DelegationCenterSection.BUILD_CONSOLIDATION}`
+      `/safe-collecting/${DelegationCenterSection.BUILD_CONSOLIDATION}`
     );
     expect(seizeCtx.seizeConnect).not.toHaveBeenCalled();
   });

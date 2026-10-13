@@ -61,7 +61,7 @@ describe("TDHConsolidationDesignPage", () => {
     ).toHaveAttribute("href", "/network/tdh/consolidation");
     expect(
       screen.getByRole("link", { name: "Open the guided setup" })
-    ).toHaveAttribute("href", "/delegation/build-consolidation");
+    ).toHaveAttribute("href", "/safe-collecting/build-consolidation");
   });
 
   it("links every on-page navigation item to a section", () => {

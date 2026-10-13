@@ -104,7 +104,7 @@ describe("NewConsolidationComponent", () => {
         screen.getByRole("link", {
           name: "Use guided setup: one transaction per wallet, in the safe order",
         })
-      ).toHaveAttribute("href", "/delegation/build-consolidation");
+      ).toHaveAttribute("href", "/safe-collecting/build-consolidation");
       expect(
         screen.getByText(
           "The link is public. Existing profile data may be combined."
