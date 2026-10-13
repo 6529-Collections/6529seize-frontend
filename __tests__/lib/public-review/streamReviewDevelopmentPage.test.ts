@@ -88,4 +88,18 @@ describe("getCurrentDevelopmentEditorialMarkdown", () => {
       "#public-conduct-and-sensitive-information"
     );
   });
+
+  it("names the enabled production feedback Wave", async () => {
+    const currentMarkdown = getCurrentDevelopmentEditorialMarkdown(
+      await loadDevelopmentEditorial()
+    );
+
+    expect(currentMarkdown).toContain(
+      "Production feedback is posted to the public 6529 Tech Feedback Wave, e933d8d6-0c78-4e8f-aa12-f67d8c11b4dc."
+    );
+    expect(currentMarkdown).not.toContain(
+      "06e69198-eea7-40c5-95d3-7c1bf5051aba"
+    );
+    expect(currentMarkdown).not.toContain("still disabled");
+  });
 });

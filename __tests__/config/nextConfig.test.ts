@@ -12,6 +12,12 @@ describe("shared Next config", () => {
     expect(sharedConfig(publicEnv, "").reactStrictMode).toBe(false);
   });
 
+  it("keeps the build type check on the TypeScript API checker that skips test files", () => {
+    expect(sharedConfig(publicEnv, "").experimental?.useTypeScriptCli).toBe(
+      false
+    );
+  });
+
   it("does not publish production browser source maps by default", () => {
     expect(
       sharedConfig(publicEnv, "").productionBrowserSourceMaps
