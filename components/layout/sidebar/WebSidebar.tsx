@@ -6,7 +6,7 @@ import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useKey } from "react-use";
 import BellIcon from "@/components/common/icons/BellIcon";
-import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
+import LazyHeaderSearchModal from "@/components/header/header-search/LazyHeaderSearchModal";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
@@ -232,7 +232,10 @@ function WebSidebar({
         </div>
       </div>
       {isSearchOpen && (
-        <HeaderSearchModal onClose={() => setIsSearchOpen(false)} wave={null} />
+        <LazyHeaderSearchModal
+          onClose={() => setIsSearchOpen(false)}
+          wave={null}
+        />
       )}
       {!isTouchScreen && (
         <ReactTooltip
