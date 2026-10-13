@@ -82,5 +82,5 @@ metrics.
 - [Network Activity Feed](feature-network-activity-feed.md)
 - [Health Dashboard](feature-health-dashboard.md)
 - [Network Stats](feature-network-stats.md)
-- [Prenodes Status](feature-prenodes-status.md)
+- [Prenodes Deprecation](feature-prenodes-status.md)
 - [xTDH Network Overview](feature-xtdh-network-overview.md)

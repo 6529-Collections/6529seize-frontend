@@ -77,7 +77,6 @@ Two shared variants are used across the app:
 - [Shared Index](README.md)
 - [NFT Activity Feed](../realtime/feature-nft-activity-feed.md)
 - [Memes Subscriptions Report](../api-tool/feature-memes-subscriptions-report.md)
-- [Prenodes Status](../network/feature-prenodes-status.md)
 - [Network Metrics Downloads](../open-data/feature-network-metrics-downloads.md)
 - [Rememes Downloads](../open-data/feature-rememes-uploads.md)
 - [Royalties Downloads](../open-data/feature-royalties-uploads.md)
