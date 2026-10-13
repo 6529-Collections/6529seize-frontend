@@ -91,7 +91,7 @@ const loadModule = async ({
       NODE_ENV: nodeEnv,
     },
   }));
-  jest.doMock("mixpanel-browser", () => ({
+  jest.doMock("mixpanel-browser/dist/mixpanel-core.cjs.js", () => ({
     __esModule: true,
     default: mixpanelMock,
   }));
