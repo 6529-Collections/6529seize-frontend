@@ -26621,9 +26621,21 @@ components:
     ApiConsolidationPolicy:
       type: object
       required:
+        - max_wallets
+        - ungated_max_wallets
         - four_wallet_activation_at
         - four_wallet_signing_opens_at
       properties:
+        max_wallets:
+          type: integer
+          minimum: 2
+          description: Maximum effective consolidation group size, fixed by backend code.
+        ungated_max_wallets:
+          type: integer
+          minimum: 2
+          description: >-
+            Largest group size eligible without post-cutoff reciprocal consent,
+            fixed by backend code.
         four_wallet_activation_at:
           type: string
           description: >-
@@ -38638,7 +38650,8 @@ components:
           format: int64
           description: >-
             Unread drops across visible subwaves that the authenticated profile
-            follows and has not muted.
+            follows and has not muted. Unfollowed or muted subwaves, and all
+            subwaves of a muted parent, contribute 0.
         followed_subwaves_count:
           type: integer
           format: int64
@@ -38648,9 +38661,16 @@ components:
         hidden_followed_subwave_unread_drops:
           type: integer
           format: int64
+          description: >-
+            Unread drops across followed, unmuted visible subwaves, which are
+            folded into this parent container in followed wave lists. Same value
+            as subwave_unread_drops; kept for backward compatibility.
         first_hidden_followed_subwave_unread_drop_serial_no:
           type: integer
           format: int64
+          description: >-
+            Lowest drop serial number among the unread drops counted by
+            subwave_unread_drops, when there is one.
         muted:
           type: boolean
     ApiWaveOverviewContributor:

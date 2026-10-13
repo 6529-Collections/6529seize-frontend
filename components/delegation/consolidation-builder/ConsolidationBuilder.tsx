@@ -2,7 +2,6 @@
 
 import { useConsolidationPolicy } from "@/hooks/useConsolidationPolicy";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { CONSOLIDATION_WALLET_LIMIT } from "@/constants/consolidation.constants";
 import { formatAddress } from "@/helpers/addressFormatting";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate, formatInteger } from "@/i18n/format";
@@ -163,6 +162,7 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
   const queryClient = useQueryClient();
   const {
     policy,
+    limits,
     isLoading: policyLoading,
     reload: reloadPolicy,
   } = useConsolidationPolicy();
@@ -180,8 +180,12 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
   );
   const entries = (draft ?? defaultDraft).entries;
   const validation = useMemo(
-    () => validateConsolidationWallets(entries.map((entry) => entry.value)),
-    [entries]
+    () =>
+      validateConsolidationWallets(
+        entries.map((entry) => entry.value),
+        limits
+      ),
+    [entries, limits]
   );
   const walletsKey = validation.wallets.join(",");
   const wallets = useMemo(
@@ -192,10 +196,14 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
   const groupData = useConsolidationGroups(wallets);
   const { groups } = groupData;
   const connectedGroup = connectedKey ? groups.get(connectedKey) : undefined;
-  if (draft === null && connectedKey && connectedGroup) {
+  if (draft === null && connectedKey && connectedGroup && limits) {
     // Prefill once with the connected wallet's current consolidation; later
     // wallet switches keep the list so each signer can connect in turn.
-    setDraft(createDraft(getPrefillWallets(connectedKey, connectedGroup)));
+    setDraft(
+      createDraft(
+        getPrefillWallets(connectedKey, connectedGroup, limits.maxWallets)
+      )
+    );
   }
 
   const groupsReady =
@@ -218,6 +226,7 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
     existingMembers,
     nowMs,
     policy,
+    limits,
   });
   const { plan, registeredLinkKeys, freshLinkKeys } = planState;
   const managers = useConsolidationManagedWallets(
@@ -295,9 +304,13 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
   return (
     <DelegationFormShell
       title={t(locale, "delegation.consolidationBuilder.title")}
-      description={t(locale, "delegation.consolidationBuilder.description", {
-        limit: formatInteger(locale, CONSOLIDATION_WALLET_LIMIT),
-      })}
+      description={
+        limits
+          ? t(locale, "delegation.consolidationBuilder.description", {
+              limit: formatInteger(locale, limits.maxWallets),
+            })
+          : t(locale, "delegation.consolidationBuilder.metadataDescription")
+      }
       closeTitle={t(locale, "delegation.consolidationBuilder.closeTitle")}
       onHide={props.onHide}
     >
@@ -308,6 +321,7 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
       />
       <ConsolidationBuilderWallets
         locale={locale}
+        maxWallets={limits?.maxWallets ?? null}
         entries={entries}
         issues={validation.issues}
         validCount={validation.wallets.length}
@@ -346,27 +360,31 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
         getShortAddress={(wallet) => formatAddress(getAddress(wallet))}
       />
       <div className="tw-mt-6 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-6">
-        {validation.wallets.length === 4 && !policy && policyLoading && (
-          <output className="tw-mb-4 tw-block tw-text-sm tw-text-iron-300">
-            {t(locale, "delegation.consolidationBuilder.policy.loading")}
-          </output>
-        )}
-        {validation.wallets.length === 4 && !policy && !policyLoading && (
-          <div role="alert" className="tw-mb-4 tw-text-sm tw-text-iron-300">
-            {t(locale, "delegation.consolidationBuilder.policy.unavailable")}
-            {reloadPolicy && (
-              <button
-                type="button"
-                className="tw-ml-2 tw-underline"
-                onClick={() => {
-                  void reloadPolicy({ reset: true }).catch(() => undefined);
-                }}
-              >
-                {t(locale, "delegation.consolidationBuilder.retry")}
-              </button>
-            )}
-          </div>
-        )}
+        {(!limits || validation.wallets.length > limits.ungatedMaxWallets) &&
+          !policy &&
+          policyLoading && (
+            <output className="tw-mb-4 tw-block tw-text-sm tw-text-iron-300">
+              {t(locale, "delegation.consolidationBuilder.policy.loading")}
+            </output>
+          )}
+        {(!limits || validation.wallets.length > limits.ungatedMaxWallets) &&
+          !policy &&
+          !policyLoading && (
+            <div role="alert" className="tw-mb-4 tw-text-sm tw-text-iron-300">
+              {t(locale, "delegation.consolidationBuilder.policy.unavailable")}
+              {reloadPolicy && (
+                <button
+                  type="button"
+                  className="tw-ml-2 tw-underline"
+                  onClick={() => {
+                    void reloadPolicy({ reset: true }).catch(() => undefined);
+                  }}
+                >
+                  {t(locale, "delegation.consolidationBuilder.retry")}
+                </button>
+              )}
+            </div>
+          )}
         <ConsolidationBuilderSteps
           locale={locale}
           state={getStepsState({

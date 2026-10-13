@@ -156,9 +156,7 @@ wallet, in a safe order.
   four-wallet consolidations count only for links registered from the cutoff,
   and every step opens ten minutes later, a few minutes later, so no link can land
   before the start.
-- The page loads the cutoff from this environment’s settings. Staging may
-  open before production. While settings are loading or unavailable, four-wallet
-  signing is unavailable and can be retried; two- and three-wallet plans continue.
+- The page reads the maximum (4), ungated boundary (3) and cutoff from this environment’s settings. Both limits are fixed backend policy, not user-editable settings. Staging may open before production. Missing wallet limits pause guided signing and adding wallet rows until settings load or are retried. If limits are available but the cutoff is unavailable, two- and three-wallet plans continue while four-wallet signing waits.
 - After a step confirms in the session, a link that 6529 has not recorded yet
   shows `Recording` and
   `Waiting for 6529 to record this link (usually about a minute).` instead of

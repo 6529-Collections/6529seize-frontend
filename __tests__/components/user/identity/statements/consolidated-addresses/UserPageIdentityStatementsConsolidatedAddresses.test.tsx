@@ -1,3 +1,9 @@
+jest.mock("@/hooks/useConsolidationPolicy", () => ({
+  useConsolidationPolicy: () => ({
+    limits: { maxWallets: 4, ungatedMaxWallets: 3 },
+  }),
+}));
+
 import { fireEvent, render, screen } from "@testing-library/react";
 import UserPageIdentityStatementsConsolidatedAddresses from "@/components/user/identity/statements/consolidated-addresses/UserPageIdentityStatementsConsolidatedAddresses";
 import { AuthContext, type AuthContextType } from "@/components/auth/Auth";

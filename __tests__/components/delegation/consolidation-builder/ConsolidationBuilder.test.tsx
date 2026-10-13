@@ -9,11 +9,20 @@ import type { ComponentProps, ReactNode } from "react";
 import { getAddress } from "viem";
 
 const mockPolicyState: {
-  policy: { activationMs: number; signingOpensMs: number } | null;
+  policy: {
+    activationMs: number;
+    signingOpensMs: number;
+    maxWallets: number;
+    ungatedMaxWallets: number;
+  } | null;
+  limits: { maxWallets: number; ungatedMaxWallets: number } | null;
   isLoading: boolean;
   reload: jest.Mock;
 } = {
+  limits: { maxWallets: 4, ungatedMaxWallets: 3 },
   policy: {
+    maxWallets: 4,
+    ungatedMaxWallets: 3,
     activationMs: CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS,
     signingOpensMs: FOURTH_SLOT_SIGNING_OPENS_MS,
   },
@@ -210,7 +219,10 @@ function addFourthWallet() {
 }
 
 beforeEach(() => {
+  mockPolicyState.limits = { maxWallets: 4, ungatedMaxWallets: 3 };
   mockPolicyState.policy = {
+    maxWallets: 4,
+    ungatedMaxWallets: 3,
     activationMs: CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS,
     signingOpensMs: FOURTH_SLOT_SIGNING_OPENS_MS,
   };
@@ -526,7 +538,7 @@ describe("ConsolidationBuilder", () => {
     renderBuilder();
     addFourthWallet();
 
-    const status = screen.getByText("Loading the four-wallet activation date…");
+    const status = screen.getByText("Loading consolidation settings…");
     expect(status.tagName).toBe("OUTPUT");
     expect(screen.queryByRole("button", { name: "Try Again" })).toBeNull();
   });
@@ -538,7 +550,7 @@ describe("ConsolidationBuilder", () => {
     addFourthWallet();
 
     const alert = screen.getByText(
-      "Couldn’t load the four-wallet activation date. Four-wallet signing is unavailable; try again."
+      "Couldn’t load consolidation settings. Signing that requires unavailable settings is paused; try again."
     );
     expect(alert).toHaveAttribute("role", "alert");
     fireEvent.click(within(alert).getByRole("button", { name: "Try Again" }));
@@ -852,8 +864,8 @@ test.each([true, false])(
     expect(
       screen.getByText(
         isLoading
-          ? "Loading the four-wallet activation date…"
-          : "Couldn’t load the four-wallet activation date. Four-wallet signing is unavailable; try again."
+          ? "Loading consolidation settings…"
+          : "Couldn’t load consolidation settings. Signing that requires unavailable settings is paused; try again."
       )
     ).toBeInTheDocument();
   }
@@ -875,6 +887,8 @@ test("changing the cutoff replans the stale links in an open session", () => {
     screen.queryByRole("button", { name: /Sign Step/ })
   ).not.toBeInTheDocument();
   mockPolicyState.policy = {
+    maxWallets: 4,
+    ungatedMaxWallets: 3,
     activationMs: AFTER_ACTIVATION_MS + 1000,
     signingOpensMs: AFTER_ACTIVATION_MS + 601000,
   };
@@ -885,5 +899,25 @@ test("changing the cutoff replans the stale links in an open session", () => {
   ).toBeInTheDocument();
   expect(
     screen.queryByRole("button", { name: /Sign Step/ })
+  ).not.toBeInTheDocument();
+});
+
+test("uses the settings maximum for wallet rows and does not invent one while unavailable", () => {
+  mockPolicyState.limits = { maxWallets: 3, ungatedMaxWallets: 3 };
+  const view = renderBuilder();
+  expect(
+    screen.queryByRole("button", { name: "Add Wallet" })
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByText("A consolidation can hold up to 3 wallets.")
+  ).toBeInTheDocument();
+  mockPolicyState.limits = null;
+  mockPolicyState.policy = null;
+  view.rerenderWith({});
+  expect(
+    screen.queryByRole("button", { name: /Sign Step/ })
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("A consolidation can hold up to 3 wallets.")
   ).not.toBeInTheDocument();
 });

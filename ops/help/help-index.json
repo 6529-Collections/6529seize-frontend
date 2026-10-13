@@ -4479,7 +4479,7 @@
         "999"
       ],
       "facts": [
-        "Guided Setup uses the activation and signing-open times from the selected backend. Four-wallet signing waits when these settings are loading or unavailable; Try Again reloads them. Two- and three-wallet plans are unaffected.",
+        "Guided Setup reads its wallet limits and activation/signing-open times from the selected backend. Missing wallet limits pause guided signing and adding wallet rows; Try Again reloads settings. With valid limits but unavailable activation dates, two- and three-wallet plans continue while four-wallet signing waits.",
         "Build a Consolidation is the Delegation Center's guided setup for linking up to 4 wallets you control. Open it from Guided Setup on the Consolidations card, from Add another wallet in ID Statements / Consolidated Addresses, or from the link in the Register Consolidation form.",
         "Every pair of wallets in a consolidation registers use case 999 in both directions. The guide reads which directions are already registered on-chain (Any Collection or The Memes) and plans one transaction per wallet: a single registration for one missing link, or one batch for several.",
         "The connected wallet and its current consolidation are prefilled. Wallets already in that consolidation sign first and new wallets sign last; signing out of order temporarily splits the consolidation and can reduce TDH-wave votes.",
@@ -6219,7 +6219,7 @@
         "On mobile, swipe the headline statistics horizontally; a right-edge fade indicates more statistics, and Details stays visible beside the row.",
         "The expandable Details panel can show holdings totals, wallet activity, distributions, TDH history, and boost breakdown.",
         "Closing Details preserves its activity tab, filters and page and keeps it closed when returning from artwork. Reopening restores those selections. Previous and Next below the artwork move to the start of the new results once loading finishes, with keyboard focus on the results.",
-        "Artwork links in Wallet Activity and Distributions include the mobile-web and native-app profile return action. It restores Details, the main grid page, the activity page and the originating activity link.",
+        "Artwork links in Wallet Activity and Distributions include the mobile-web and native-app profile return action. It restores Details, the main grid page, the activity page and the originating activity link. Desktop browser Back restores focus and scroll to the originating activity row too.",
         "On mobile, both Overview and both Memes Breakdown By Season sections in Details start closed; tap their titles to open the tables. Desktop starts with these sections open.",
         "Wallet Activity, Distributions, and TDH History tab labels stay on one line and scroll horizontally when needed. The selected tab stays visible, including when opened from a deep link.",
         "Details table text stays on one line; tables scroll horizontally when their columns do not fit, including Boost Breakdown. The first label column of wide holdings and activity overview tables stays visible while scrolling.",
