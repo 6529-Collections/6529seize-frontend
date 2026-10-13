@@ -1,0 +1,36 @@
+{
+  "recorded_at": "2026-10-13T15:00:04.244063+00:00",
+  "role_arn": "arn:aws:iam::987989283142:role/gha-frontend-deploy-production",
+  "trust_verified": true,
+  "policies_verified": [
+    "arn:aws:iam::987989283142:policy/FrontendProductionDeployment"
+  ],
+  "inline_policies": [],
+  "max_session_duration": 5400,
+  "access_analyzer_findings": 0,
+  "simulation_summary": {
+    "access_analyzer_findings": 0,
+    "positive_cases": 27,
+    "negative_cases": 35,
+    "status": "passed"
+  },
+  "read_only_checks": [
+    {
+      "name": "production_environment",
+      "status": "passed"
+    },
+    {
+      "name": "production_versions",
+      "status": "passed"
+    },
+    {
+      "name": "announcement_object",
+      "status": "passed"
+    },
+    {
+      "name": "announcement_distribution",
+      "status": "passed"
+    }
+  ],
+  "temporary_role_deleted": true
+}
