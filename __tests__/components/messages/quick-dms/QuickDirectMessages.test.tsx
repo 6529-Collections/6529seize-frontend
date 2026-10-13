@@ -116,6 +116,8 @@ describe("QuickDirectMessages", () => {
     expect(
       screen.getByRole("button", { name: /Open quick direct messages/ })
     ).toBeInTheDocument();
+    // The closed launcher keeps its unread badge without the DM list.
+    expect(screen.getByText("3")).toBeInTheDocument();
     expect(mockReleaseDirectMessagesList).toHaveBeenCalledTimes(1);
     expect(mockRequestDirectMessagesList).toHaveBeenCalledTimes(1);
   });
