@@ -26,6 +26,8 @@ Legacy tooltip-only links should resolve here.
 - Web expanded rows keep names inline and show a tooltip only when the name is
   truncated.
 - Truncation is re-measured when row width or viewport size changes.
+- Name tooltips render above the sidebar, so they stay fully readable beside
+  subwave rows and at the sidebar's right edge.
 - Direct-message rows follow the same web tooltip rules as wave rows.
 - Direct-message names that include wallet IDs are shown with shortened address
   formatting.
