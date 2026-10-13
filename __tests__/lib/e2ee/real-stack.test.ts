@@ -10,7 +10,8 @@
  *   E2EE_REAL_STACK_USERS       JSON [{"profileId": "...", "privateKey": "0x..."}] x4,
  *                               wallets already linked to those profiles
  * Optional: E2EE_REAL_STACK_WS (e.g. ws://localhost:3000) to receive the API's
- * WebSocket hints, as browsers do.
+ * WebSocket hints, as browsers do; E2EE_REAL_STACK_LARGE=1 with at least 90
+ * users adds 15- and 87-person groups.
  * Each user's access token is minted locally for its wallet, the way the API's
  * issueAccessToken does (HS256, sub = lowercase wallet).
  */
@@ -32,7 +33,7 @@ const WS = process.env.E2EE_REAL_STACK_WS ?? "";
 const enabled = API !== "" && SECRET !== "" && USERS_JSON !== "";
 const describeStack = enabled ? describe : describe.skip;
 
-jest.setTimeout(240_000);
+jest.setTimeout(900_000);
 
 const b64url = (input: Buffer | string) =>
   Buffer.from(input).toString("base64url");
@@ -405,6 +406,52 @@ describeStack("E2EE engine against a real backend", () => {
       ).rejects.toBeDefined();
     } finally {
       await setDmPolicy(carol, "EVERYONE");
+    }
+  });
+
+  const itLarge =
+    process.env.E2EE_REAL_STACK_LARGE === "1" && users.length >= 90
+      ? it
+      : it.skip;
+
+  itLarge("runs 15- and 87-person groups", async () => {
+    const alice = users[0];
+    const a = devices.find((d) => d.user === alice)!;
+    const members: StackDevice[] = [];
+    for (const user of users.slice(4, 90)) {
+      members.push(await startDevice(user));
+    }
+    for (const size of [15, 87]) {
+      const others = members.slice(0, size - 1);
+      const started = Date.now();
+      const g = await a.engine.createConversation({
+        profileIds: others.map((d) => d.user.profileId),
+        kind: "group",
+        name: `group of ${size}`,
+      });
+      const created = Date.now() - started;
+      await a.engine.send(g, { text: `hello ${size}` });
+      await settle(3);
+      for (const device of others) {
+        expect(texts(device.engine.getMessages(g))).toContain(`hello ${size}`);
+      }
+      // One member leaves, the creator removes another; the rest still talk.
+      await others[0].engine.leave(g);
+      await a.engine.removeMember(g, others[1].user.profileId);
+      await settle(3);
+      await others[2].engine.send(g, { text: `after changes ${size}` });
+      await settle(3);
+      expect(texts(a.engine.getMessages(g))).toContain(`after changes ${size}`);
+      expect(texts(others[1].engine.getMessages(g))).not.toContain(
+        `after changes ${size}`
+      );
+      expect(a.engine.getConversation(g)?.safetyCode).toBe(
+        others.at(-1)!.engine.getConversation(g)?.safetyCode
+      );
+      process.stderr.write(
+        `[real-stack] ${size}-person group created and delivered in ${created} ms
+`
+      );
     }
   });
 });
