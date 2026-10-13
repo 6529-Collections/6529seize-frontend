@@ -40,7 +40,8 @@ delegations for one collection scope.
 - Review row details:
   - wallet label (ENS + address when ENS resolves)
   - token scope (`all tokens` or `token ID`)
-  - expiry (`active - non-expiring`, `active - expires YYYY-MM-DD`, `expired`)
+  - expiry (`active - non-expiring`, `active - expires <date, time and time
+    zone>` in your local time, `expired`)
 - For consolidations, check status:
   - `consolidation active`
   - `consolidation incomplete` with tooltip (`Incoming consolidation missing` or
