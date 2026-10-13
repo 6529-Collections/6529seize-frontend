@@ -107,7 +107,7 @@ describe("useSidebarSections", () => {
       "Overview",
       "Collections & Minting",
       "Network & Reputation",
-      "Delegation & Wallets",
+      "Safe Collecting & Wallets",
       "Data & Developer Tools",
       "Legal",
     ]);
@@ -127,6 +127,7 @@ describe("useSidebarSections", () => {
       { name: "Meme Lab", href: "/about/meme-lab" },
       { name: "6529 Gradient", href: "/about/6529-gradient" },
       { name: "Minting", href: "/about/minting" },
+      { name: "GDRC", href: "/about/gdrc1" },
     ]);
     expect(aboutSection?.subsections[2]?.items).toEqual([
       { name: "Identities", href: "/network" },
@@ -160,20 +161,18 @@ describe("useSidebarSections", () => {
       },
     ]);
     expect(aboutSection?.subsections[3]?.items).toEqual([
-      { name: "GDRC", href: "/about/gdrc1" },
-      { name: "NFT Delegation", href: "/about/nft-delegation" },
-      { name: "Primary Address", href: "/about/primary-address" },
       { name: "Safe Collecting", href: "/safe-collecting" },
       {
         name: "TAP Guide",
-        href: "/delegation/wallet-architecture",
+        href: "/safe-collecting/tap-guide",
       },
-      { name: "Delegation FAQ", href: "/delegation/delegation-faq" },
+      { name: "FAQ", href: "/safe-collecting/faq" },
       {
         name: "Consolidation Use Cases",
-        href: "/delegation/consolidation-use-cases",
+        href: "/safe-collecting/consolidation-use-cases",
       },
-      { name: "Wallet Checker", href: "/delegation/wallet-checker" },
+      { name: "Wallet Checker", href: "/safe-collecting/wallet-checker" },
+      { name: "Primary Address", href: "/about/primary-address" },
     ]);
     expect(aboutSection?.subsections[4]?.items).toEqual([
       { name: "Tech", href: "/about/tech" },
@@ -218,7 +217,7 @@ describe("useSidebarSections", () => {
       (section) => section.key === "about"
     );
     const delegationWallets = aboutSection?.subsections.find(
-      (subsection) => subsection.name === "Delegation & Wallets"
+      (subsection) => subsection.name === "Safe Collecting & Wallets"
     );
 
     expect(delegationWallets?.items).toEqual(

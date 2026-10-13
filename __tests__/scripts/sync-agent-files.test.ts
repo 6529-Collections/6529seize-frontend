@@ -384,8 +384,8 @@ describe("sync-agent-files", () => {
         );
         expect(record?.related_paths).toEqual(
           expect.arrayContaining([
-            "/delegation/delegation-faq/manage-revoke",
-            "/delegation/delegation-faq/manage-update",
+            "/safe-collecting/faq/manage-revoke",
+            "/safe-collecting/faq/manage-update",
           ])
         );
       });

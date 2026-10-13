@@ -18,6 +18,9 @@ subscriptions keep working as if every wallet were one.
 - Route: `/safe-collecting`
 - `/delegation/delegation-center` permanently redirects here, preserving query
   parameters and section anchors such as `#safe-setup`.
+- All tools and FAQ articles use `/safe-collecting/...`; old `/delegation/...`
+  URLs permanently redirect to their corresponding new pages. The former
+  `/about/nft-delegation` landing also redirects to this hub.
 - Page heading and browser title: `Safe Collecting`
 - Top tab in the delegation menu, the About contents and sidebar, the Tools
   index and the About NFT Delegation page all label it `Safe Collecting`.
@@ -62,7 +65,7 @@ subscriptions keep working as if every wallet were one.
    registered), what expiry dates mean, and that every combined wallet can
    sign in as the profile.
 7. **Learn more** (`#safe-learn`): the Three Address Protocol guide, the
-   consolidation guide, Using a SAFE, and the Delegation FAQ.
+   consolidation guide, Using a SAFE, and the FAQ.
 8. **All tools** (`#safe-tools`): the original Delegations, Consolidations
    (with Guided Setup) and Delegation Management cards, and Manage by
    Collection.

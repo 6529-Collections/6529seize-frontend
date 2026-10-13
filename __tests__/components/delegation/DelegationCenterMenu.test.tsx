@@ -62,12 +62,13 @@ jest.mock("@/components/delegation/tap-guide/TapGuide", () => () => (
 let mockConnectedAddress = "0xabc";
 let mockWalletPending = false;
 let mockIsSafeWallet = false;
+let mockIsConnected = true;
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({
     address: mockConnectedAddress,
     isSafeWallet: mockIsSafeWallet,
     isWalletConnectionPending: mockWalletPending,
-    isConnected: true,
+    isConnected: mockIsConnected,
     seizeConnect: jest.fn(),
   }),
 }));
@@ -96,7 +97,33 @@ describe("DelegationCenterMenu links", () => {
     mockConnectedAddress = "0xabc";
     mockWalletPending = false;
     mockIsSafeWallet = false;
+    mockIsConnected = true;
   });
+
+  it.each([
+    DelegationCenterSection.REGISTER_DELEGATION,
+    DelegationCenterSection.REGISTER_SUB_DELEGATION,
+    DelegationCenterSection.REGISTER_CONSOLIDATION,
+    DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS,
+  ])(
+    "offers a return link without a live signing connection on %s",
+    async (section) => {
+      const { default: Menu } =
+        await import("@/components/delegation/DelegationCenterMenu");
+      // A remembered identity/address does not supply a wallet signing connection.
+      mockIsConnected = false;
+      render(<Menu {...props} section={section} />);
+      expect(
+        screen.getByRole("button", { name: "Connect Wallet" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "Back to Safe Collecting" })
+      ).toHaveAttribute("href", "/safe-collecting");
+      expect(
+        screen.queryByLabelText("Mock delegation address")
+      ).not.toBeInTheDocument();
+    }
+  );
 
   it("renders resource links", async () => {
     const mod = await import("@/components/delegation/DelegationCenterMenu");
@@ -117,7 +144,7 @@ describe("DelegationCenterMenu links", () => {
     const mod = await import("@/components/delegation/DelegationCenterMenu");
     const DelegationCenterMenu = mod.default;
     render(<DelegationCenterMenu {...props} />);
-    fireEvent.click(screen.getAllByText("Wallet Checker")[0]);
+    fireEvent.click(screen.getByRole("button", { name: "Wallet Checker" }));
     expect(props.setActiveSection).toHaveBeenCalledWith(
       DelegationCenterSection.CHECKER
     );
@@ -373,6 +400,9 @@ it.each([
   const { rerender } = render(<Menu {...props} section={section} />);
   expect(screen.getByRole("status")).toBeInTheDocument();
   expect(
+    screen.getByRole("link", { name: "Back to Safe Collecting" })
+  ).toHaveAttribute("href", "/safe-collecting");
+  expect(
     screen.queryByRole("button", { name: "Connect Wallet" })
   ).not.toBeInTheDocument();
   mockWalletPending = false;
@@ -380,4 +410,7 @@ it.each([
   expect(
     screen.getByRole("button", { name: "Connect Wallet" })
   ).toBeInTheDocument();
+  expect(
+    screen.getByRole("link", { name: "Back to Safe Collecting" })
+  ).toHaveAttribute("href", "/safe-collecting");
 });

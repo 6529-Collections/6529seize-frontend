@@ -9,10 +9,9 @@ import type { ConsolidationDeparture } from "./consolidation-groups";
 import type { ConsolidationPlan } from "./consolidation-plan";
 
 const CONSOLIDATION_TDH_EXPLAINER_PATH = "/network/tdh/consolidation";
-const CONSOLIDATION_GUIDE_PATH =
-  "/delegation/delegation-faq/register-consolidation";
-const REGISTER_MANAGER_PATH = "/delegation/register-sub-delegation";
-const USING_SAFE_PATH = "/delegation/delegation-faq/using-safe";
+const CONSOLIDATION_GUIDE_PATH = "/safe-collecting/faq/register-consolidation";
+const REGISTER_MANAGER_PATH = "/safe-collecting/register-sub-delegation";
+const USING_SAFE_PATH = "/safe-collecting/faq/using-safe";
 
 const CONSOLIDATION_NOTICE_CLASS_NAME =
   "tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-400/10 tw-p-4 tw-text-sm tw-leading-6 tw-text-amber-100";

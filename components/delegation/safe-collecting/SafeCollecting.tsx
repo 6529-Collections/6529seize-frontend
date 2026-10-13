@@ -1,5 +1,7 @@
 "use client";
 
+import { getSafeCollectingSectionPath } from "@/components/delegation/safe-collecting-routes";
+
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -47,7 +49,7 @@ type Icon = ComponentType<SVGProps<SVGSVGElement>>;
 
 const SAFE_SETUP_ANCHOR = "safe-setup";
 
-const delegation = (value: DelegationCenterSection) => `/delegation/${value}`;
+const delegation = getSafeCollectingSectionPath;
 
 const BENEFITS = [
   { key: "cold", icon: ShieldCheckIcon },
@@ -108,7 +110,7 @@ const TASKS = [
 const LEARN = [
   { key: "tap", href: delegation(DelegationCenterSection.WALLET_ARCHITECTURE) },
   { key: "combine", href: "/network/tdh/consolidation" },
-  { key: "safe", href: "/delegation/delegation-faq/using-safe" },
+  { key: "safe", href: "/safe-collecting/faq/using-safe" },
   { key: "faq", href: delegation(DelegationCenterSection.FAQ) },
 ] as const;
 

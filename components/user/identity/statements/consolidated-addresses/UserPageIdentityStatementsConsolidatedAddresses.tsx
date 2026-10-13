@@ -1,5 +1,7 @@
 "use client";
 
+import { getSafeCollectingSectionPath } from "@/components/delegation/safe-collecting-routes";
+
 import type { WalletConsolidationState } from "@/entities/IProfile";
 import { useContext, useMemo, useState, type ReactNode } from "react";
 
@@ -185,7 +187,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
         <div className="tw-flex tw-flex-wrap tw-gap-2 tw-pt-4">
           {primaryAddress && (
             <ButtonLink
-              href={`/delegation/wallet-checker?address=${primaryAddress}`}
+              href={`/safe-collecting/wallet-checker?address=${primaryAddress}`}
               variant="secondary"
               size="xs"
             >
@@ -194,7 +196,9 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
           )}
           {showAddWallet && (
             <ButtonLink
-              href={`/delegation/${DelegationCenterSection.BUILD_CONSOLIDATION}`}
+              href={getSafeCollectingSectionPath(
+                DelegationCenterSection.BUILD_CONSOLIDATION
+              )}
               variant="primary"
               size="xs"
             >

@@ -25,7 +25,7 @@ export default function UserPageSubscriptionsAirdropAddress(
 ) {
   const airdropAddress = props.airdrop?.airdrop_address;
   const addressTooltipId = `airdrop-address-${airdropAddress?.address ?? "unavailable"}`;
-  const editHref = `/delegation/register-delegation?collection=${MEMES_CONTRACT}&use_case=${AIRDROPS_USE_CASE.use_case}`;
+  const editHref = `/safe-collecting/register-delegation?collection=${MEMES_CONTRACT}&use_case=${AIRDROPS_USE_CASE.use_case}`;
 
   return (
     <div className="tw-min-w-0">

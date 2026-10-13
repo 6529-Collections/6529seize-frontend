@@ -655,6 +655,38 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     await expectNoHorizontalOverflow(page);
   });
 
+  test("delegation page search discovers the Safe Collecting family without legacy titles", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/");
+    const { searchInput } = await openHeaderSearch(page);
+    await searchInput.fill("delegation");
+    await page.getByRole("tab", { name: /^Pages/ }).click();
+    for (const [title, path] of [
+      ["Safe Collecting", "/safe-collecting"],
+      ["TAP Guide", "/safe-collecting/tap-guide"],
+      ["FAQ", "/safe-collecting/faq"],
+      ["Consolidation Use Cases", "/safe-collecting/consolidation-use-cases"],
+      ["Wallet Checker", "/safe-collecting/wallet-checker"],
+    ] as const) {
+      const result = page
+        .getByRole("option")
+        .filter({ has: page.locator(`a[href="${path}"]`) });
+      await expect(result).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+      await expect(result).toContainText(title);
+    }
+    await expect(
+      page
+        .getByRole("option")
+        .filter({ has: page.locator('a[href^="/delegation/"]') })
+    ).toHaveCount(0);
+    await expect(
+      page
+        .getByRole("option")
+        .filter({ has: page.locator('a[href="/about/nft-delegation"]') })
+    ).toHaveCount(0);
+  });
+
   test("global header search preserves keyboard flow and page navigation", async ({
     page,
   }) => {

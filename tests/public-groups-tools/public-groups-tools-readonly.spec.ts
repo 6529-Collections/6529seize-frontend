@@ -86,6 +86,52 @@ async function getStagingApiHeaders(
 }
 
 test.describe("Public tools, calendar, and removed Groups route coverage @surface @medium @large @readonly", () => {
+  test("About groups Safe Collecting pages and keeps GDRC and Primary Address last", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/about");
+    const main = page.locator("main").first();
+    const wallets = main.getByRole("region", {
+      name: "Safe Collecting & Wallets",
+      exact: true,
+    });
+    const collections = main.getByRole("region", {
+      name: "Collections & Minting",
+      exact: true,
+    });
+    await expect(wallets).toBeVisible();
+    await expect(wallets.getByRole("link").last()).toHaveAttribute(
+      "href",
+      "/about/primary-address"
+    );
+    await expect(collections.getByRole("link").last()).toHaveAttribute(
+      "href",
+      "/about/gdrc1"
+    );
+    await expect(main.locator('a[href="/about/nft-delegation"]')).toHaveCount(
+      0
+    );
+    await expect(wallets.locator('a[href="/about/gdrc1"]')).toHaveCount(0);
+    for (const path of [
+      "/safe-collecting",
+      "/safe-collecting/tap-guide",
+      "/safe-collecting/faq",
+      "/safe-collecting/consolidation-use-cases",
+      "/safe-collecting/wallet-checker",
+    ]) {
+      await expect(wallets.locator(`a[href="${path}"]`)).toHaveCount(1);
+    }
+    await wallets
+      .getByRole("link", { name: "Open page: FAQ", exact: true })
+      .click();
+    await expect(page).toHaveURL(
+      (url) => url.pathname === "/safe-collecting/faq"
+    );
+    await expect(
+      page.getByRole("heading", { level: 1, name: "FAQ", exact: true })
+    ).toBeVisible();
+  });
+
   test("renders the Tools index with grouped utility links", async ({
     page,
   }) => {
@@ -96,7 +142,9 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expect(
       page.getByRole("heading", { level: 1, name: "6529 Tools" })
     ).toBeVisible();
-    await expect(page.getByText("NFT Delegation")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Safe Collecting", exact: true })
+    ).toBeVisible();
     await expect(page.getByText("The Memes Tools")).toBeVisible();
     await expect(page.getByText("Builder Tools")).toBeVisible();
     await expect(

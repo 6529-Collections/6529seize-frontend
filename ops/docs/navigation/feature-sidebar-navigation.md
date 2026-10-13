@@ -102,7 +102,7 @@ On web layouts, route switching is sidebar-first.
    `Join 6529` rows for direct navigation.
 5. In collapsed mode, hover a group row with a mouse or activate it by tap,
    click, or keyboard to open an anchored flyout submenu. The flyout preserves
-   subsection labels such as `Network & Reputation`, `Delegation & Wallets`, or
+   subsection labels such as `Network & Reputation`, `Safe Collecting & Wallets`, or
    `Data & Developer Tools`.
 6. Select a destination and watch active state update.
 7. In overlay mode, sidebar closes after route change.
@@ -136,7 +136,7 @@ On web layouts, route switching is sidebar-first.
 - Open `Drop Forge` from its standalone row after `About` when the current
   wallet has landing access.
 - Open `About` tool routes:
-  delegation pages under `Delegation & Wallets`, `/meme-accounting`,
+  delegation pages under `Safe Collecting & Wallets`, `/meme-accounting`,
   `/meme-gas`, optional `/tools/subscriptions-report`, optional
   `/tools/app-wallets`, `/tools/api`, `/emma`, `/tools/block-finder`,
   `/tools/time-zones`, `/open-data`, `/open-data/6529bot`, `/open-data/network-metrics`,
@@ -145,7 +145,7 @@ On web layouts, route switching is sidebar-first.
   `/open-data/royalties`.
 - Use collapsed-rail flyouts for grouped destinations:
   `NFTs` keeps collection and NFT activity links, and `About` keeps subsection
-  labels such as `Network & Reputation`, `Delegation & Wallets`, and
+  labels such as `Network & Reputation`, `Safe Collecting & Wallets`, and
   `Data & Developer Tools` instead of flattening every route into one list.
   `Museum`, `Waves`, and `Join 6529` remain direct rows in collapsed mode.
 - Open `About` and `6529 Capital` routes from grouped links.
@@ -200,7 +200,7 @@ On web layouts, route switching is sidebar-first.
   mobile-device web contexts. Supported mobile pages expose Share from the
   header instead. The route rules are documented in
   [Page Sharing and Device Connection](feature-share-modal.md).
-- `App Wallets` appears inside `About > Delegation & Wallets` only when
+- `App Wallets` appears inside `About > Safe Collecting & Wallets` only when
   app-wallet support is enabled.
 - On iOS, subscription-related rows show only when country resolves to `US`:
   `Subscriptions Report`, `Open Data > Meme Subscriptions Data`,

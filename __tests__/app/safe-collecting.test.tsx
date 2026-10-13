@@ -2,8 +2,76 @@ import SafeCollectingPage, {
   generateMetadata,
 } from "@/app/safe-collecting/page";
 import { DelegationCenterSection } from "@/types/enums";
+import SafeCollectingSectionPage, {
+  generateMetadata as generateSectionMetadata,
+} from "@/app/safe-collecting/[...section]/page";
+import { getSafeCollectingSectionPath } from "@/components/delegation/safe-collecting-routes";
 
 describe("Safe Collecting route", () => {
+  it.each([
+    [
+      "tap-guide",
+      DelegationCenterSection.WALLET_ARCHITECTURE,
+      "The Three Address Protocol (TAP)",
+    ],
+    ["faq", DelegationCenterSection.FAQ, "FAQ"],
+    [
+      "consolidation-use-cases",
+      DelegationCenterSection.CONSOLIDATION_USE_CASES,
+      "Consolidation Use Cases",
+    ],
+    ["wallet-checker", DelegationCenterSection.CHECKER, "Wallet Checker"],
+    [
+      "build-consolidation",
+      DelegationCenterSection.BUILD_CONSOLIDATION,
+      "Build a Consolidation",
+    ],
+  ])("renders %s with canonical metadata", async (slug, section, title) => {
+    const params = Promise.resolve({ section: [slug] });
+    const element = await SafeCollectingSectionPage({
+      params,
+      searchParams: Promise.resolve({}),
+    });
+    expect(element.props.section).toBe(section);
+    const metadata = await generateSectionMetadata({ params });
+    expect(metadata.title).toBe(`${title} | 6529.io`);
+    expect(metadata.alternates?.canonical).toBe(
+      `https://test.6529.io/safe-collecting/${slug}`
+    );
+  });
+
+  it("renders an FAQ article without changing its action title", async () => {
+    const params = Promise.resolve({ section: ["faq", "register-delegation"] });
+    const element = await SafeCollectingSectionPage({
+      params,
+      searchParams: Promise.resolve({}),
+    });
+    expect(element.props).toMatchObject({
+      section: DelegationCenterSection.HTML,
+      path: ["delegation-faq", "register-delegation"],
+    });
+    const metadata = await generateSectionMetadata({ params });
+    expect(metadata.title).toBe("How to Register a Delegation? | 6529.io");
+    expect(metadata.alternates?.canonical).toBe(
+      "https://test.6529.io/safe-collecting/faq/register-delegation"
+    );
+  });
+
+  it("keeps every action and collection route in the Safe Collecting family", async () => {
+    for (const section of Object.values(DelegationCenterSection).filter(
+      (value) =>
+        value !== DelegationCenterSection.HTML &&
+        value !== DelegationCenterSection.CENTER
+    )) {
+      const path = getSafeCollectingSectionPath(section);
+      const element = await SafeCollectingSectionPage({
+        params: Promise.resolve({ section: path.split("/").slice(2) }),
+        searchParams: Promise.resolve({}),
+      });
+      expect(path).toMatch(/^\/safe-collecting\//);
+      expect(element.props.section).toBe(section);
+    }
+  });
   it("renders the hub with legacy query prefill available to its tools", async () => {
     const element = await SafeCollectingPage({
       searchParams: Promise.resolve({

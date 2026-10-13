@@ -97,7 +97,7 @@ describe("Wallet Checker canonicals", () => {
         params: Promise.resolve({ section: ["wallet-checker"] }),
         searchParams: Promise.resolve(searchParams),
       });
-      const canonical = `https://test.6529.io/delegation/wallet-checker${query}`;
+      const canonical = `https://test.6529.io/safe-collecting/wallet-checker${query}`;
       expect(metadata.alternates?.canonical).toBe(canonical);
       expect(metadata.openGraph?.url).toBe(canonical);
     }

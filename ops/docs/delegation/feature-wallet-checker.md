@@ -2,20 +2,20 @@
 
 ## Overview
 
-`/delegation/wallet-checker` is a read-only diagnostics page for one wallet.
+`/safe-collecting/wallet-checker` is a read-only diagnostics page for one wallet.
 It checks delegations, delegation managers, and consolidation relationships.
 
 ## Location in the Site
 
-- Route: `/delegation/wallet-checker`
-- App navigation: `About -> Delegation & Wallets -> Wallet Checker`
-- Profile identity panel link: `/delegation/wallet-checker?address=<primary-wallet>`
+- Route: `/safe-collecting/wallet-checker`
+- App navigation: `About -> Safe Collecting & Wallets -> Wallet Checker`
+- Profile identity panel link: `/safe-collecting/wallet-checker?address=<primary-wallet>`
 
 ## Entry Points
 
 - Open `Wallet Checker` from the Delegation menu.
-- Open `/delegation/wallet-checker` directly.
-- Open deep links such as `/delegation/wallet-checker?address=<wallet-or-ens>`.
+- Open `/safe-collecting/wallet-checker` directly.
+- Open deep links such as `/safe-collecting/wallet-checker?address=<wallet-or-ens>`.
 
 ## What It Shows
 

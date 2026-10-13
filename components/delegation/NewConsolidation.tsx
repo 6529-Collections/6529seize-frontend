@@ -143,7 +143,7 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
             {t(locale, "delegation.consolidation.instructions.publicLink")}
           </p>
           <Link
-            href={`/delegation/${DelegationCenterSection.BUILD_CONSOLIDATION}`}
+            href={`/safe-collecting/${DelegationCenterSection.BUILD_CONSOLIDATION}`}
             className={`${DELEGATION_INLINE_LINK_CLASS_NAME} tw-text-sm tw-leading-6`}
           >
             {t(locale, "delegation.consolidation.instructions.guided")}
@@ -187,7 +187,7 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
             Note: For TDH Consolidation use either &apos;Any Collection&apos; or
             &apos;The Memes&apos;
             <Link
-              href={`/delegation/delegation-faq/register-consolidation`}
+              href={`/safe-collecting/faq/register-consolidation`}
               target="_blank"
               rel="noopener noreferrer"
             >

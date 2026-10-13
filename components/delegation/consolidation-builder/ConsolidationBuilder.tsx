@@ -3,8 +3,10 @@
 import { useConsolidationPolicy } from "@/hooks/useConsolidationPolicy";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { formatAddress } from "@/helpers/addressFormatting";
+import type { ConsolidationPolicy } from "@/helpers/consolidationPolicy";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate, formatInteger } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
@@ -85,17 +87,26 @@ function createDraft(values: readonly string[]): WalletDraft {
 }
 
 /**
- * Current time, refreshed when the fourth slot activates. Waits longer than
+ * Current time, refreshed at the cutoff and signing opening. Waits longer than
  * the browser's timer limit are chained, so a long-open tab still flips.
  */
-function useFourthSlotClock(signingOpensMs: number | undefined): number {
+function useConsolidationClock(
+  activationMs: number | undefined,
+  signingOpensMs: number | undefined
+): number {
   const [nowMs, setNowMs] = useState(() => Date.now());
 
   useEffect(() => {
-    if (signingOpensMs === undefined || nowMs >= signingOpensMs) {
+    const nextDeadline = Math.min(
+      ...[activationMs, signingOpensMs].filter(
+        (deadline): deadline is number =>
+          deadline !== undefined && deadline > nowMs
+      )
+    );
+    if (!Number.isFinite(nextDeadline)) {
       return undefined;
     }
-    const remainingMs = Math.max(0, signingOpensMs - Date.now());
+    const remainingMs = Math.max(0, nextDeadline - Date.now());
     const timer = globalThis.setTimeout(
       () => {
         setNowMs(Date.now());
@@ -103,7 +114,7 @@ function useFourthSlotClock(signingOpensMs: number | undefined): number {
       Math.min(remainingMs, MAX_TIMER_DELAY_MS)
     );
     return () => globalThis.clearTimeout(timer);
-  }, [nowMs, signingOpensMs]);
+  }, [activationMs, nowMs, signingOpensMs]);
 
   return nowMs;
 }
@@ -152,6 +163,43 @@ function hasUnfinishedStep(
 }
 
 /**
+ * Formatted activation and signing-open times, empty until the policy loads.
+ * The wallet list shows when signing opens only before the cutoff.
+ */
+function getPolicyDates(
+  locale: SupportedLocale,
+  policy: ConsolidationPolicy | null,
+  nowMs: number
+): {
+  activationDate: string;
+  signingOpensDate: string;
+  preActivationSigningDate: string | null;
+} {
+  if (!policy) {
+    return {
+      activationDate: "",
+      signingOpensDate: "",
+      preActivationSigningDate: null,
+    };
+  }
+  const signingOpensDate = formatDate(
+    locale,
+    policy.signingOpensMs,
+    ACTIVATION_DATE_FORMAT
+  );
+  return {
+    activationDate: formatDate(
+      locale,
+      policy.activationMs,
+      ACTIVATION_DATE_FORMAT
+    ),
+    signingOpensDate,
+    preActivationSigningDate:
+      nowMs < policy.activationMs ? signingOpensDate : null,
+  };
+}
+
+/**
  * Guided consolidation: plans one transaction per wallet in the safe order
  * and lets each step's signer submit it once every earlier step confirms.
  * A wallet's Delegation Manager can sign its step instead, one link at a
@@ -166,7 +214,10 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
     isLoading: policyLoading,
     reload: reloadPolicy,
   } = useConsolidationPolicy();
-  const nowMs = useFourthSlotClock(policy?.signingOpensMs);
+  const nowMs = useConsolidationClock(
+    policy?.activationMs,
+    policy?.signingOpensMs
+  );
   const connectedKey =
     !props.walletResolving && props.connectedAddress
       ? toWalletKey(props.connectedAddress)
@@ -294,12 +345,8 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
         });
   }
 
-  const activationDate = policy
-    ? formatDate(locale, policy.activationMs, ACTIVATION_DATE_FORMAT)
-    : "";
-  const signingOpensDate = policy
-    ? formatDate(locale, policy.signingOpensMs, ACTIVATION_DATE_FORMAT)
-    : "";
+  const { activationDate, signingOpensDate, preActivationSigningDate } =
+    getPolicyDates(locale, policy, nowMs);
 
   return (
     <DelegationFormShell
@@ -322,6 +369,7 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
       <ConsolidationBuilderWallets
         locale={locale}
         maxWallets={limits?.maxWallets ?? null}
+        preActivationSigningDate={preActivationSigningDate}
         entries={entries}
         issues={validation.issues}
         validCount={validation.wallets.length}

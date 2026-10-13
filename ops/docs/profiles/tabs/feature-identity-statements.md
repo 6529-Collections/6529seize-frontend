@@ -52,7 +52,7 @@ identity statements` when the public-visibility notes are needed.
 8. On non-primary wallet rows, use `Set primary` when available.
 9. To link another wallet you control, select `Add another wallet` beside
    `Wallet Checker`. This opens the guided setup at
-   `/delegation/build-consolidation`. Each wallet signs one transaction for
+   `/safe-collecting/build-consolidation`. Each wallet signs one transaction for
    its links: a single registration for one link, or one batch for several. A
    Delegation Manager signing for a cold vault sends one transaction per link
    instead (see
@@ -102,7 +102,7 @@ OpenSea` actions. Desktop retains compact external-link actions.
   wallet belongs to the viewed profile, no proxy profile is active, a primary
   or consolidated wallet address is available, and the profile has fewer than
   4 wallets. It opens the guided `Build a Consolidation` setup at
-  `/delegation/build-consolidation`, prefilled with the connected wallet and
+  `/safe-collecting/build-consolidation`, prefilled with the connected wallet and
   its current consolidation. At 4 wallets the owner sees
   `This consolidation has the maximum of 4 wallets.` instead. This is separate
   from `Add`, which adds identity statements.

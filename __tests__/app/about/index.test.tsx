@@ -48,7 +48,7 @@ describe("About index page", () => {
     ).toHaveAttribute("href", "/about/6529-apps");
     expect(screen.getByText("Collections & Minting")).toBeInTheDocument();
     expect(screen.getByText("Network & Reputation")).toBeInTheDocument();
-    expect(screen.getByText("Delegation & Wallets")).toBeInTheDocument();
+    expect(screen.getByText("Safe Collecting & Wallets")).toBeInTheDocument();
     expect(screen.getByText("Data & Developer Tools")).toBeInTheDocument();
     expect(screen.getByText("Legal")).toBeInTheDocument();
     expect(

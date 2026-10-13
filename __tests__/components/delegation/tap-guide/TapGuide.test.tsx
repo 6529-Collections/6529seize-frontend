@@ -118,17 +118,17 @@ describe("TapGuide", () => {
     render(<TapGuide />);
 
     for (const [name, href] of [
-      ["Start guided setup", "/delegation/build-consolidation"],
-      ["Appoint a manager", "/delegation/register-sub-delegation"],
-      ["Register a delegation", "/delegation/register-delegation"],
+      ["Start guided setup", "/safe-collecting/build-consolidation"],
+      ["Appoint a manager", "/safe-collecting/register-sub-delegation"],
+      ["Register a delegation", "/safe-collecting/register-delegation"],
       ["See the setup steps", "/safe-collecting#safe-setup"],
     ] as const) {
       expect(screen.getByRole("link", { name })).toHaveAttribute("href", href);
     }
     for (const [name, href] of [
-      [/Using a SAFE/, "/delegation/delegation-faq/using-safe"],
-      [/Delegation FAQ/, "/delegation/delegation-faq"],
-      [/Wallet Checker/, "/delegation/wallet-checker"],
+      [/Using a SAFE/, "/safe-collecting/faq/using-safe"],
+      [/FAQ/, "/safe-collecting/faq"],
+      [/Wallet Checker/, "/safe-collecting/wallet-checker"],
     ] as const) {
       expect(screen.getByRole("link", { name })).toHaveAttribute("href", href);
     }

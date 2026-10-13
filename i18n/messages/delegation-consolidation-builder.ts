@@ -33,6 +33,8 @@ export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
   "delegation.consolidationBuilder.wallets.countPending":
     "Entered wallets: {count}",
   "delegation.consolidationBuilder.wallets.count": "{count} of {limit} wallets",
+  "delegation.consolidationBuilder.wallets.signingOpens":
+    "Four-wallet signing opens {date}.",
   "delegation.consolidationBuilder.wallets.label": "Wallet {position}",
   "delegation.consolidationBuilder.wallets.inputLabel":
     "Wallet {position} address",

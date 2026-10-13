@@ -2,41 +2,47 @@
 
 ## Overview
 
-Write action routes under `/delegation/*` register delegation state onchain.
+Write action routes under `/safe-collecting/*` register delegation state onchain.
 Use this page for required inputs, query prefills, manager-launched variants,
 and submit/recovery behavior.
 
 ## Location in the Site
 
-- `/delegation/register-delegation`
-- `/delegation/register-consolidation`
-- `/delegation/build-consolidation` (guided consolidation setup)
-- `/delegation/register-sub-delegation`
-- `/delegation/assign-primary-address`
+- `/safe-collecting/register-delegation`
+- `/safe-collecting/register-consolidation`
+- `/safe-collecting/build-consolidation` (guided consolidation setup)
+- `/safe-collecting/register-sub-delegation`
+- `/safe-collecting/assign-primary-address`
 
 ## Entry Points
 
 - From `/safe-collecting` action cards:
-  - `Register Delegation` -> `/delegation/register-delegation`
-  - `Register Consolidation` -> `/delegation/register-consolidation`
+  - `Register Delegation` -> `/safe-collecting/register-delegation`
+  - `Register Consolidation` -> `/safe-collecting/register-consolidation`
   - `Guided Setup` on the `Consolidations` card ->
-    `/delegation/build-consolidation`
-  - `Register Delegation Manager` -> `/delegation/register-sub-delegation`
+    `/safe-collecting/build-consolidation`
+  - `Register Delegation Manager` -> `/safe-collecting/register-sub-delegation`
 - Open write routes directly by URL.
 - Profile owners can select `Add another wallet` beside `Wallet Checker` in
   `ID Statements` → `Consolidated Addresses` to open
-  `/delegation/build-consolidation`. This entry is hidden while a proxy
+  `/safe-collecting/build-consolidation`. This entry is hidden while a proxy
   profile is active and once the profile has 4 wallets.
 - The normal `register-consolidation` form links to the guided setup.
 - Open prefilled links such as
-  `/delegation/register-delegation?collection=<contract>&use_case=<id>`.
-- From collection routes (`/delegation/any-collection`, `/delegation/the-memes`,
-  `/delegation/meme-lab`, `/delegation/6529-gradient`), open incoming
+  `/safe-collecting/register-delegation?collection=<contract>&use_case=<id>`.
+- From collection routes (`/safe-collecting/any-collection`, `/safe-collecting/the-memes`,
+  `/safe-collecting/meme-lab`, `/safe-collecting/6529-gradient`), open incoming
   `Delegation Managers`, select one delegator, then launch manager actions.
 - `assign-primary-address` has no Delegation Center action card. Open it by URL
   or from manager actions on supported collection routes.
 
 ## Route Requirements
+
+Registration and primary-address pages show `Back to Safe Collecting` while
+the wallet connection is restoring and when disconnected. The link returns to
+`/safe-collecting` without requiring a wallet connection, including when a
+profile is still signed in. Connected forms have a close button with the
+standard tooltip, available on hover and keyboard focus.
 
 - `register-delegation`
   - Required: `Collection`, `Use Case`, `Delegate Address`
@@ -89,7 +95,7 @@ and submit/recovery behavior.
 
 ## Guided Consolidation Setup
 
-`/delegation/build-consolidation` (`Build a Consolidation`) plans the fewest
+`/safe-collecting/build-consolidation` (`Build a Consolidation`) plans the fewest
 transactions for building or extending a consolidation: one transaction per
 wallet, in a safe order.
 
@@ -101,7 +107,7 @@ wallet, in a safe order.
   appointing a Delegation Manager on `Any Collection` first to keep a vault
   cold. It links to the TDH consolidation explainer, the consolidation FAQ
   article, and `Appoint a Delegation Manager`
-  (`/delegation/register-sub-delegation`).
+  (`/safe-collecting/register-sub-delegation`).
 - The connected wallet is prefilled, followed by the rest of its current
   consolidation from the 6529 API. Up to 4 rows are allowed. Invalid and
   duplicate addresses are flagged per row. Rows can be removed down to two.
@@ -147,7 +153,7 @@ wallet, in a safe order.
   only arrives after its co-signers approve; the page shows
   `Safes sign through a manager here. ...` above the wallet list and in that
   step, with links to `Appoint a Delegation Manager` and `Using a SAFE`
-  (`/delegation/delegation-faq/using-safe`).
+  (`/safe-collecting/faq/using-safe`).
 - Groups of 2 or 3 wallets use the on-chain status only.
 - A group of 4 counts only when one member has all three of its links
   registered in both directions from the activation cutoff shown for the current environment. For 4-wallet
@@ -164,6 +170,10 @@ wallet, in a safe order.
   four-wallet consolidations count only for links registered from the cutoff,
   and every step opens ten minutes later, a few minutes later, so no link can land
   before the start.
+- Before the activation cutoff, a small note under the wallet counter gives
+  the current environment's four-wallet signing opening time in UTC. You can
+  prepare a plan in advance. The note disappears at the cutoff, including in
+  an open tab; the step-level signing hold still lasts until the opening time.
 - The page reads the maximum (4), ungated boundary (3) and cutoff from this environment’s settings. Both limits are fixed backend policy, not user-editable settings. Staging may open before production. Missing wallet limits pause guided signing and adding wallet rows until settings load or are retried. If limits are available but the cutoff is unavailable, two- and three-wallet plans continue while four-wallet signing waits.
 - After a step confirms in the session, a link that 6529 has not recorded yet
   shows `Recording` and

@@ -2,15 +2,15 @@
 
 ## Overview
 
-`/delegation/<collection>` routes let a connected wallet review and manage
+`/safe-collecting/<collection>` routes let a connected wallet review and manage
 delegations for one collection scope.
 
 ## Location in the Site
 
-- `/delegation/any-collection`
-- `/delegation/the-memes`
-- `/delegation/meme-lab`
-- `/delegation/6529-gradient`
+- `/safe-collecting/any-collection`
+- `/safe-collecting/the-memes`
+- `/safe-collecting/meme-lab`
+- `/safe-collecting/6529-gradient`
 - Delegation Center entry: `Manage by Collection` cards on
   `/safe-collecting`
 
@@ -88,7 +88,7 @@ delegations for one collection scope.
 - If current collection wallet is locked, use-case controls are disabled until
   wallet unlock.
 - On scoped routes, global `Any Collection` wallet lock blocks local lock
-  controls and shows `*` notes linked to `/delegation/any-collection`.
+  controls and shows `*` notes linked to `/safe-collecting/any-collection`.
 - On scoped routes, if a use case is globally locked in `Any Collection`, local
   lock/unlock is replaced by an `Unlock use case in All Collections` note.
 
@@ -107,7 +107,7 @@ delegations for one collection scope.
 - If manager action clicks appear to do nothing, select one incoming
   `Delegation Managers` row first.
 - If `Batch Revoke` is disabled, select at least 2 outgoing rows.
-- If lock controls show `*` notes, unlock from `/delegation/any-collection`
+- If lock controls show `*` notes, unlock from `/safe-collecting/any-collection`
   first.
 - If a write fails, use toast error text, fix wallet/network/input state, and
   retry.

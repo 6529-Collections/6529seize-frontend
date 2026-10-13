@@ -2,6 +2,7 @@
 
 import Button from "@/components/utils/button/Button";
 import TooltipIconButton from "@/components/common/TooltipIconButton";
+import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import { DELEGATION_ALL_ADDRESS } from "@/constants/constants";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { areEqualAddresses } from "@/helpers/Helpers";
@@ -9,6 +10,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useEnsResolution } from "@/hooks/useEnsResolution";
 import { t } from "@/i18n/messages";
 import { faInfoCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   useEffect,
   useEffectEvent,
@@ -638,15 +640,19 @@ function DelegationCloseButton(
   props: Readonly<{ title: string; onHide: () => void }>
 ) {
   return (
-    <TooltipIconButton
-      aria-label={`Cancel ${props.title}`}
-      buttonShapeClassName="tw-rounded-lg"
-      buttonSizeClassName="tw-size-10"
-      className="tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.05] hover:tw-text-white"
-      icon={faTimesCircle}
-      iconClassName="tw-size-5 tw-text-current"
-      onClick={props.onHide}
-      tooltipText={`Cancel ${props.title}`}
-    />
+    <CustomTooltip content={`Cancel ${props.title}`}>
+      <button
+        type="button"
+        aria-label={`Cancel ${props.title}`}
+        className="tw-flex tw-size-10 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.05] hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+        onClick={props.onHide}
+      >
+        <FontAwesomeIcon
+          icon={faTimesCircle}
+          className="tw-size-5 tw-text-current"
+          aria-hidden="true"
+        />
+      </button>
+    </CustomTooltip>
   );
 }

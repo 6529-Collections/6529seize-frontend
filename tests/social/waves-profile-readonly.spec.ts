@@ -922,6 +922,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
 
   test("renders the stable public profile shell read-only", async ({
     page,
+    isMobile,
   }) => {
     await gotoReady(page, `/${PROFILE_HANDLE}`);
 
@@ -929,13 +930,21 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(page).toHaveTitle(new RegExp(PROFILE_HANDLE, "i"));
     await expectProfileShell(page);
     await expectProfileTabLinks(page);
-    const statements = page.getByRole("button", { name: /ID Statements/i });
-    if (await statements.isVisible()) {
+    if (isMobile) {
+      const statements = page.getByRole("button", { name: /ID Statements/i });
+      await expect(statements).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
       await statements.click();
+      await expect(statements).toHaveAttribute("aria-pressed", "true");
     }
     await expect(
       page.getByRole("link", { name: "Wallet Checker" })
-    ).toBeVisible();
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    await expect(
+      page.getByRole("link", { name: "Wallet Checker" })
+    ).toHaveAttribute(
+      "href",
+      /^\/safe-collecting\/wallet-checker\?address=0x[0-9a-fA-F]{40}$/
+    );
     await expect(
       page.getByRole("link", { name: "Add another wallet" })
     ).toHaveCount(0);

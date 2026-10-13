@@ -1,6 +1,10 @@
 "use client";
 
 import DelegationCenterMenu from "@/components/delegation/DelegationCenterMenu";
+import {
+  getSafeCollectingArticlePath,
+  getSafeCollectingSectionPath,
+} from "@/components/delegation/safe-collecting-routes";
 import { DELEGATION_PAGE_MAIN_CLASS_NAME } from "@/components/delegation/delegation-ui";
 import {
   getDelegationAppTitle,
@@ -67,10 +71,7 @@ export default function DelegationPageClient(props: {
     s: DelegationCenterSection,
     params: { [key: string]: string | number }
   ): string => {
-    const pathname =
-      s === DelegationCenterSection.CENTER
-        ? "/safe-collecting"
-        : `/delegation/${s}`;
+    const pathname = getSafeCollectingSectionPath(s);
     const url = new URL(pathname, window.location.origin);
     Object.entries(params).forEach(([k, v]) =>
       url.searchParams.set(k, String(v))
@@ -81,7 +82,7 @@ export default function DelegationPageClient(props: {
   const updatePath = (s: DelegationCenterSection) => {
     if (s) {
       if (s === DelegationCenterSection.HTML && props.path) {
-        router.push(`/delegation/${props.path.join("/")}`);
+        router.push(getSafeCollectingArticlePath(props.path));
       } else {
         const queryParams = getQueryParams(s);
         router.push(buildUrl(s, queryParams));

@@ -33,7 +33,7 @@ import TDHSection, { TDH_FOCUS, TDH_PANEL, TDH_TEXT } from "../TDHSection";
 
 type Icon = ComponentType<SVGProps<SVGSVGElement>>;
 
-const GUIDED_SETUP_HREF = "/delegation/build-consolidation";
+const GUIDED_SETUP_HREF = "/safe-collecting/build-consolidation";
 const SAFE_COLLECTING_HREF = "/safe-collecting";
 const DESIGN_HREF = "/network/tdh/consolidation/design";
 
@@ -322,8 +322,8 @@ export default function TDHConsolidationPage() {
               ...(
                 [
                   ["/network/tdh", "tdh"],
-                  ["/delegation/consolidation-use-cases", "guide"],
-                  ["/delegation/wallet-checker", "checker"],
+                  ["/safe-collecting/consolidation-use-cases", "guide"],
+                  ["/safe-collecting/wallet-checker", "checker"],
                   [SAFE_COLLECTING_HREF, "center"],
                 ] as const
               ).map(([href, key]) => ({

@@ -85,7 +85,7 @@ March 19, 2026.
   `/messages/encrypted/devices`, `/messages/encrypted/{chat}`
 - [Realtime](realtime/README.md): `/nft-activity`
 - [Network](network/README.md): `/network/*`, `/network/xtdh`, `/xtdh`
-- [Delegation](delegation/README.md): `/delegation` and `/delegation/{param+}`
+- [Safe Collecting](delegation/README.md): `/safe-collecting` and `/safe-collecting/{param+}`
 - [NextGen](nextgen/README.md): `/nextgen` and `/nextgen/{param*}`
 - [API Tool](api-tool/README.md): `/tools`, `/tools/api`, `/tools/block-finder`,
   `/tools/time-zones`, `/tools/subscriptions-report`, `/tools/app-wallets`,
@@ -147,8 +147,8 @@ Route patterns use normalized placeholders: `{param}` for one segment,
   `/network/health`, `/network/health/network-tdh`, `/network/levels`,
   `/network/nerd/{param*}`, `/network/prenodes`, `/network/tdh`,
   `/network/tdh/historic-boosts`, `/network/xtdh`, `/xtdh`
-- Delegation:
-  `/delegation` and `/delegation/{param+}`
+- Safe Collecting:
+  `/safe-collecting` and `/safe-collecting/{param+}`
 - NextGen:
   `/nextgen/{param*}`, including `/nextgen/manager`,
   `/nextgen/collection/{collection}/{param*}`, and

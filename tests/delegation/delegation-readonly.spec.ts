@@ -21,22 +21,22 @@ const DELEGATION_ACTIONS = [
 
 const ARTICLE_ROUTES = [
   {
-    path: "/delegation/wallet-architecture",
+    path: "/safe-collecting/tap-guide",
     heading: "The Three Address Protocol",
     title: "The Three Address Protocol (TAP) | 6529.io",
   },
   {
-    path: "/delegation/delegation-faq",
-    heading: "Delegation FAQ",
-    title: "Delegation FAQ | 6529.io",
+    path: "/safe-collecting/faq",
+    heading: "FAQ",
+    title: "FAQ | 6529.io",
   },
   {
-    path: "/delegation/consolidation-use-cases",
+    path: "/safe-collecting/consolidation-use-cases",
     heading: "Consolidation Use Cases",
     title: "Consolidation Use Cases | 6529.io",
   },
   {
-    path: "/delegation/delegation-faq/use-cases-overview",
+    path: "/safe-collecting/faq/use-cases-overview",
     heading: "Which Use Cases are Supported?",
     title: "Which Use Cases are Supported? | 6529.io",
   },
@@ -44,41 +44,41 @@ const ARTICLE_ROUTES = [
 
 const WRITE_GUARD_ROUTES = [
   {
-    path: "/delegation/register-delegation?collection=0x33FD426905F149f8376e227d0C9D3340AaD17aF1&use_case=2",
+    path: "/safe-collecting/register-delegation?collection=0x33FD426905F149f8376e227d0C9D3340AaD17aF1&use_case=2",
     heading: "Connect Wallet to Register a Delegation",
   },
   {
-    path: "/delegation/register-consolidation",
+    path: "/safe-collecting/register-consolidation",
     heading: "Connect Wallet to Register a Consolidation",
   },
   {
-    path: "/delegation/register-sub-delegation",
+    path: "/safe-collecting/register-sub-delegation",
     heading: "Connect Wallet to Register a Delegation Manager",
   },
   {
-    path: "/delegation/assign-primary-address",
+    path: "/safe-collecting/assign-primary-address",
     heading: "Connect Wallet to Assign a Primary Address",
   },
 ] as const;
 
 const COLLECTION_ROUTES = [
   {
-    path: "/delegation/any-collection",
+    path: "/safe-collecting/any-collection",
     heading: "Any Collection",
     intro: "Records here apply across every supported delegation collection.",
   },
   {
-    path: "/delegation/the-memes",
+    path: "/safe-collecting/the-memes",
     heading: "The Memes",
     intro: "Records here apply only to The Memes collection.",
   },
   {
-    path: "/delegation/meme-lab",
+    path: "/safe-collecting/meme-lab",
     heading: "Meme Lab",
     intro: "Records here apply only to Meme Lab.",
   },
   {
-    path: "/delegation/6529-gradient",
+    path: "/safe-collecting/6529-gradient",
     heading: "6529 Gradient",
     intro: "Records here apply only to 6529 Gradient.",
   },
@@ -100,7 +100,7 @@ function pageMain(page: Page) {
 }
 
 async function expectWalletCanonical(page: Page, address = "") {
-  const canonical = new URL("/delegation/wallet-checker", page.url());
+  const canonical = new URL("/safe-collecting/wallet-checker", page.url());
   if (address) {
     canonical.searchParams.set("address", address.toLowerCase());
   }
@@ -181,10 +181,19 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
     const navigation = page.getByRole("navigation", {
       name: "Safe collecting sections",
     });
+    for (const [tab, path] of [
+      ["TAP Guide", "/safe-collecting/tap-guide"],
+      ["FAQ", "/safe-collecting/faq"],
+      ["Consolidation Use Cases", "/safe-collecting/consolidation-use-cases"],
+    ] as const) {
+      await navigation.getByRole("button", { name: tab, exact: true }).click();
+      await expect(page).toHaveURL((url) => url.pathname === path);
+      await waitForRouteReady(page);
+    }
     await navigation
       .getByRole("button", { name: "Wallet Checker", exact: true })
       .click();
-    await expect(page).toHaveURL(/\/delegation\/wallet-checker$/);
+    await expect(page).toHaveURL(/\/safe-collecting\/wallet-checker$/);
     await navigation
       .getByRole("button", { name: "Safe Collecting", exact: true })
       .click();
@@ -192,18 +201,36 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
     await expectHeading(page, "Safe Collecting");
   });
 
+  test("legacy FAQ article links reach the canonical article and return to FAQ", async ({
+    page,
+  }) => {
+    await gotoReady(
+      page,
+      "/delegation/delegation-faq/register-delegation?utm_source=legacy#instructions"
+    );
+    await expect(page).toHaveURL(
+      /\/safe-collecting\/faq\/register-delegation\?utm_source=legacy#instructions$/
+    );
+    await expectHeading(page, "How to Register a Delegation?");
+    const back = page.getByRole("link", { name: "All FAQ topics" });
+    await expect(back).toHaveAttribute("href", "/safe-collecting/faq");
+    await back.click();
+    await expect(page).toHaveURL(/\/safe-collecting\/faq$/);
+    await expectHeading(page, "FAQ");
+  });
+
   for (const article of ARTICLE_ROUTES) {
     test(`article route renders ${article.heading}`, async ({ page }) => {
       await gotoReady(page, article.path);
 
       await expect(page).toHaveTitle(article.title);
-      if (article.path.includes("/delegation-faq/")) {
+      if (article.path.includes("/faq/")) {
         await expect(
           page.getByRole("navigation", { name: "Breadcrumb" })
         ).toHaveCount(0);
         await expect(
           page.getByRole("link", { name: "All FAQ topics" })
-        ).toHaveAttribute("href", "/delegation/delegation-faq");
+        ).toHaveAttribute("href", "/safe-collecting/faq");
       }
       await expectHeading(page, article.heading);
       await expect(
@@ -213,7 +240,7 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
   }
 
   test("Wallet Checker validates malformed input", async ({ page }) => {
-    await gotoReady(page, "/delegation/wallet-checker");
+    await gotoReady(page, "/safe-collecting/wallet-checker");
 
     await expect(page).toHaveTitle("Wallet Checker | 6529.io");
     await expectHeading(page, "Wallet Checker");
@@ -240,7 +267,7 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
   test("Wallet Checker returns a public empty state", async ({ page }) => {
     await gotoReady(
       page,
-      `/delegation/wallet-checker?address=${SYNTHETIC_EMPTY_WALLET}&utm_source=metadata-regression`
+      `/safe-collecting/wallet-checker?address=${SYNTHETIC_EMPTY_WALLET}&utm_source=metadata-regression`
     );
     await expect(page.getByText("Checking delegation records...")).toBeHidden({
       timeout: 20000,
@@ -290,7 +317,7 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
   test("guided consolidation plans without a wallet and signs nothing", async ({
     page,
   }) => {
-    await gotoReady(page, "/delegation/build-consolidation");
+    await gotoReady(page, "/safe-collecting/build-consolidation");
     const main = pageMain(page);
 
     await expect(page).toHaveTitle("Build a Consolidation | 6529.io");
@@ -302,11 +329,22 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
     ).toHaveAttribute("href", "/network/tdh/consolidation");
     await expect(
       main.getByRole("link", { name: "Appoint a Delegation Manager" })
-    ).toHaveAttribute("href", "/delegation/register-sub-delegation");
+    ).toHaveAttribute("href", "/safe-collecting/register-sub-delegation");
 
     const firstWallet = main.getByRole("textbox", {
       name: "Wallet 1 address",
     });
+    // The settings-backed count only appears after hydration. Editing the
+    // server-rendered field earlier can lose the value when React takes over.
+    await expect(main.getByText("0 of 4 wallets", { exact: true })).toBeVisible(
+      { timeout: RESPONSE_TIMEOUT_MS }
+    );
+    // Before cutoff the optional counter note uses quiet, small copy. The
+    // exact time boundary and absent-policy cases are covered in component tests.
+    const openingNote = main.getByText(/^Four-wallet signing opens /);
+    if (await openingNote.count()) {
+      await expect(openingNote).toHaveCSS("font-size", "12px");
+    }
     await expect(firstWallet).toHaveValue("");
     await firstWallet.fill("not-a-wallet");
     await expect(firstWallet).toHaveAttribute("aria-invalid", "true");
@@ -336,6 +374,18 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
       main.getByRole("button", { name: /^Sign (Step|for) / })
     ).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
+    const close = main.getByRole("button", { name: "Cancel Consolidation" });
+    await close.focus();
+    const tooltip = page.getByRole("tooltip");
+    await expect(tooltip).toBeVisible();
+    await expect(
+      tooltip.getByText("Cancel Consolidation", { exact: true })
+    ).toHaveCSS("font-size", "14px");
+    await close.click();
+    await expect(page).toHaveURL(/\/safe-collecting\/?$/);
+    await expect(
+      main.getByRole("heading", { name: "Safe Collecting", exact: true })
+    ).toBeVisible();
   });
 
   for (const route of WRITE_GUARD_ROUTES) {
@@ -354,6 +404,14 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
       await expect(
         main.getByRole("button", { name: /^Register|^Assign/ })
       ).toHaveCount(0);
+      const back = main.getByRole("link", { name: "Back to Safe Collecting" });
+      await expect(back).toBeVisible();
+      await expect(back).toHaveAttribute("href", "/safe-collecting");
+      await back.click();
+      await expect(page).toHaveURL(/\/safe-collecting\/?$/);
+      await expect(
+        main.getByRole("heading", { name: "Safe Collecting", exact: true })
+      ).toBeVisible();
     });
   }
 
@@ -372,7 +430,7 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
         })
       ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
       await expect(
-        main.getByRole("button", { name: "Back to Delegation Center" })
+        main.getByRole("button", { name: "Back to Safe Collecting" })
       ).toBeVisible();
       await expect(
         main.getByRole("button", { name: "Connect Wallet" })

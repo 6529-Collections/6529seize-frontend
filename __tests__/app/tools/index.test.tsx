@@ -45,7 +45,9 @@ describe("Tools index page", () => {
     expect(
       screen.getByRole("heading", { name: "6529 Tools" })
     ).toBeInTheDocument();
-    expect(screen.getByText("NFT Delegation")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Safe Collecting", exact: true })
+    ).toBeInTheDocument();
     expect(screen.getByText("The Memes Tools")).toBeInTheDocument();
     expect(screen.getByText("Builder Tools")).toBeInTheDocument();
     expect(

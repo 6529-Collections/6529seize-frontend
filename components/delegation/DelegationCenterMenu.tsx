@@ -4,12 +4,16 @@ import { isWalletConnectionResolving } from "@/components/auth/authResolution";
 import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import Button from "@/components/utils/button/Button";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import { DELEGATION_CONTRACT } from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { DelegationCenterSection } from "@/types/enums";
-import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowLeft,
+  faArrowUpRightFromSquare,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
@@ -55,7 +59,7 @@ const DELEGATION_MENU_ITEMS: ReadonlyArray<{
   },
   {
     section: DelegationCenterSection.FAQ,
-    label: "Delegation FAQ",
+    label: "FAQ",
   },
   {
     section: DelegationCenterSection.CONSOLIDATION_USE_CASES,
@@ -135,7 +139,12 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
       ].includes(props.section) &&
       isWalletConnectionResolving(accountResolution)
     )
-      return <AuthLoadingPlaceholder />;
+      return (
+        <>
+          <SafeCollectingBackLink />
+          <AuthLoadingPlaceholder />
+        </>
+      );
     switch (props.section) {
       case DelegationCenterSection.CENTER:
         return (
@@ -278,7 +287,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
       case DelegationCenterSection.WALLET_ARCHITECTURE:
         return <TapGuide />;
       case DelegationCenterSection.FAQ:
-        return <DelegationHTML title="Delegation FAQ" path="delegation-faq" />;
+        return <DelegationHTML title="FAQ" path="delegation-faq" />;
       case DelegationCenterSection.CONSOLIDATION_USE_CASES:
         return (
           <DelegationHTML
@@ -308,7 +317,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
       props.section === section ||
       (section === DelegationCenterSection.FAQ &&
         props.section === DelegationCenterSection.HTML &&
-        pathname?.startsWith("/delegation/delegation-faq/"))
+        pathname.startsWith("/safe-collecting/faq/"))
     );
   }
 
@@ -424,6 +433,24 @@ function GithubLink() {
   );
 }
 
+function SafeCollectingBackLink() {
+  return (
+    <ButtonLink
+      href="/safe-collecting"
+      variant="secondary"
+      size="sm"
+      className="tw-mb-4"
+    >
+      <FontAwesomeIcon
+        icon={faArrowLeft}
+        className="tw-size-3"
+        aria-hidden="true"
+      />
+      Back to Safe Collecting
+    </ButtonLink>
+  );
+}
+
 function DelegationConnectWalletState(
   props: Readonly<{
     title: string;
@@ -432,29 +459,32 @@ function DelegationConnectWalletState(
   }>
 ) {
   return (
-    <section
-      className={`${DELEGATION_CARD_CLASS_NAME} tw-p-5 sm:tw-p-6`}
-      aria-labelledby="connect-wallet-heading"
-    >
-      <h1
-        id="connect-wallet-heading"
-        className={DELEGATION_PAGE_TITLE_CLASS_NAME}
+    <>
+      <SafeCollectingBackLink />
+      <section
+        className={`${DELEGATION_CARD_CLASS_NAME} tw-p-5 sm:tw-p-6`}
+        aria-labelledby="connect-wallet-heading"
       >
-        {props.title}
-      </h1>
-      <p className={`${DELEGATION_PAGE_DESCRIPTION_CLASS_NAME} tw-mb-5`}>
-        {props.body}
-      </p>
-      <Button
-        type="button"
-        variant="primary"
-        size="lg"
-        onClick={() => {
-          props.onConnect();
-        }}
-      >
-        Connect Wallet
-      </Button>
-    </section>
+        <h1
+          id="connect-wallet-heading"
+          className={DELEGATION_PAGE_TITLE_CLASS_NAME}
+        >
+          {props.title}
+        </h1>
+        <p className={`${DELEGATION_PAGE_DESCRIPTION_CLASS_NAME} tw-mb-5`}>
+          {props.body}
+        </p>
+        <Button
+          type="button"
+          variant="primary"
+          size="lg"
+          onClick={() => {
+            props.onConnect();
+          }}
+        >
+          Connect Wallet
+        </Button>
+      </section>
+    </>
   );
 }

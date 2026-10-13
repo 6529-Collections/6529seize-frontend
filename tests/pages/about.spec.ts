@@ -17,7 +17,7 @@ test.describe("About Pages @smoke @medium @large", () => {
       page.getByRole("heading", { level: 1, name: "About 6529" })
     ).toBeVisible();
     await expect(
-      page.locator("main").getByText("Delegation & Wallets")
+      page.locator("main").getByText("Safe Collecting & Wallets")
     ).toBeVisible();
     await expect(
       page.getByRole("link", { name: "Open page: GDRC" })
@@ -77,7 +77,7 @@ test.describe("About Pages @smoke @medium @large", () => {
       contentsMenu.getByText("About", { exact: true })
     ).toBeVisible();
     await expect(
-      contentsMenu.getByText("Delegation & Wallets", { exact: true })
+      contentsMenu.getByText("Safe Collecting & Wallets", { exact: true })
     ).toBeVisible();
     await expect(
       contentsMenu.getByRole("menuitem", { name: /Go to page: GDRC/i })

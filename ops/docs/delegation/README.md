@@ -1,6 +1,6 @@
 # Delegation
 
-Delegation docs cover user-facing behavior under `/delegation/*`: route
+Delegation docs cover user-facing behavior under `/safe-collecting/*`: route
 switching, onchain write actions, collection management, and Wallet Checker
 diagnostics.
 
@@ -51,13 +51,13 @@ diagnostics.
 ## Route Coverage
 
 - Section routes: `/safe-collecting`,
-  `/delegation/wallet-architecture` (`TAP Guide`), `/delegation/delegation-faq`,
-  `/delegation/consolidation-use-cases`, `/delegation/wallet-checker`
-- Write routes: `/delegation/register-delegation`,
-  `/delegation/register-consolidation`, `/delegation/register-sub-delegation`,
-  `/delegation/assign-primary-address`
-- Collection routes: `/delegation/any-collection`, `/delegation/the-memes`,
-  `/delegation/meme-lab`, `/delegation/6529-gradient`
+  `/safe-collecting/tap-guide` (`TAP Guide`), `/safe-collecting/faq`,
+  `/safe-collecting/consolidation-use-cases`, `/safe-collecting/wallet-checker`
+- Write routes: `/safe-collecting/register-delegation`,
+  `/safe-collecting/register-consolidation`, `/safe-collecting/register-sub-delegation`,
+  `/safe-collecting/assign-primary-address`
+- Collection routes: `/safe-collecting/any-collection`, `/safe-collecting/the-memes`,
+  `/safe-collecting/meme-lab`, `/safe-collecting/6529-gradient`
 - Bare route: `/delegation` resolves to not-found (no page route).
 - Unknown or multi-segment delegation paths use manifest-backed HTML fallback by
   final segment.
