@@ -9,6 +9,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, type ComponentProps } from "react";
 import { restoreCollectedActivityLink } from "./restoreCollectedActivityLink";
 
+/** Preserve the Collected return context and restore the matching activity row. */
 export default function ProfileCollectedActivityLink({
   href,
   activityKey,
