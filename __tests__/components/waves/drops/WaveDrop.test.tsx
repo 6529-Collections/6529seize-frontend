@@ -6,7 +6,10 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import { EditingDropProvider } from "@/contexts/EditingDropContext";
+import {
+  EditingDropProvider,
+  useEditingDrop,
+} from "@/contexts/EditingDropContext";
 import WaveDrop from "@/components/waves/drops/WaveDrop";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useHasTouchInput from "@/hooks/useHasTouchInput";
@@ -616,6 +619,47 @@ describe("WaveDrop", () => {
 
     expect(mobileMenuProps.isOpen).toBe(true);
     expect(onDropContentClick).not.toHaveBeenCalled();
+  });
+
+  it("cancels pending row holds and ignores child long presses while editing", () => {
+    jest.useFakeTimers();
+    hasTouchInputMock.mockReturnValue(true);
+    isTouchDeviceMock.mockReturnValue(true);
+    setHoverSupport(false);
+    setViewportWidth(800);
+    function StartEditing() {
+      const { setEditingDropId } = useEditingDrop();
+      return (
+        <button onClick={() => setEditingDropId(drop.id)}>Start editing</button>
+      );
+    }
+    renderWithEditingDropProvider(
+      <>
+        <StartEditing />
+        <WaveDrop
+          drop={drop}
+          previousDrop={null}
+          nextDrop={null}
+          showWaveInfo={false}
+          activeDrop={null}
+          showReplyAndQuote={true}
+          location={DropLocation.WAVE}
+          dropViewDropId={null}
+          onReply={jest.fn()}
+          onReplyClick={jest.fn()}
+          onQuoteClick={jest.fn()}
+        />
+      </>
+    );
+    fireEvent.touchStart(screen.getByTestId("content"), {
+      touches: [{ clientX: 0, clientY: 0 }],
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Start editing" }));
+    act(() => jest.advanceTimersByTime(1000));
+    expect(getLastMockProps(mockWaveDropContent).isEditing).toBe(true);
+    act(() => getLastMockProps(mockWaveDropContent).onLongPress());
+    expect(getLastMockProps(mockWaveDropContent).isEditing).toBe(true);
+    expect(screen.queryByTestId("mobile")).not.toBeInTheDocument();
   });
 
   it("keeps normal short clicks on touch layouts", () => {
