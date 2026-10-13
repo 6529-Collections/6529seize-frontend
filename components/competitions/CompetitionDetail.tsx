@@ -116,7 +116,7 @@ export function NativeCompetitionContent({
       style={embedded && isApp ? waveViewStyle : undefined}
       className={
         embedded
-          ? "tw-h-full tw-min-h-0 tw-space-y-5 tw-overflow-y-auto tw-p-4 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+          ? "tw-h-full tw-min-h-0 tw-space-y-5 tw-overflow-y-auto tw-p-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 hover:tw-scrollbar-thumb-white/15"
           : "tw-space-y-5"
       }
     >
@@ -252,7 +252,7 @@ export default function CompetitionDetail({
     <section
       data-competition-detail
       style={isApp && isDraft ? waveViewStyle : undefined}
-      className={`tw-h-full tw-min-h-0 tw-overflow-y-auto tw-px-4 tw-pt-4 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300 sm:tw-px-6 sm:tw-pt-6 ${isDraft ? "tw-scroll-pb-24" : "tw-pb-4 sm:tw-pb-6"}`}
+      className={`tw-h-full tw-min-h-0 tw-overflow-y-auto tw-px-4 tw-pt-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 hover:tw-scrollbar-thumb-white/15 sm:tw-px-6 sm:tw-pt-6 ${isDraft ? "tw-scroll-pb-24" : "tw-pb-4 sm:tw-pb-6"}`}
     >
       <div
         className={`tw-mx-auto tw-max-w-5xl ${isDraft ? "tw-flex tw-min-h-full tw-flex-col tw-gap-5" : "tw-space-y-5"}`}
