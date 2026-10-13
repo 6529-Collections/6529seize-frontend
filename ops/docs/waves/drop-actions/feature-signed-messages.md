@@ -106,6 +106,30 @@ Signed drops carry no badge in the feed.
 - Copy is available in en-US; other locales fall back to en-US while the
   feature is staged.
 
+## Localization exceptions
+
+### Wallet-signed grant statement
+
+| Field                     | Current exception                                                                                                                                                                |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Route or component        | Sign-in challenge built by the backend and checked in `lib/device-signing/grant-message.ts` (`renderDeviceGrantStatement`, `buildDeviceGrantUrn`)                                |
+| Untranslated surface      | The statement the wallet shows ("Sign in to 6529 and let this device post as you until ...") and the device-grant resource line                                                  |
+| Current fallback behavior | Always English, with a fixed UTC date format, in every locale                                                                                                                    |
+| User impact               | Wallet users in other locales read the grant statement in English                                                                                                                |
+| Owner or follow-up        | Frontend and backend maintainers jointly; the text is a signed commitment that both sides render and compare byte for byte, so it is not translatable through the message system |
+| Expected remediation      | If localized statements are wanted, add them as new versioned statement templates on both sides (with vectors), never by interpolating translated copy into the current one      |
+
+### Signed messages UI
+
+| Field                     | Current exception                                                                                                                                                      |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Route or component        | `components/device-signing/SignedMessagesNotice.tsx`, Preferences Devices tab (`/preferences?tab=devices`), `components/waves/drops/signature/DropSignatureDialog.tsx` |
+| Untranslated surface      | All copy in `i18n/messages/signed-messages.ts` (notice, Devices tab, signature dialog)                                                                                 |
+| Current fallback behavior | Keys exist only in `en-US`; other locales fall back to `en-US`. Dates and lists already use `formatDate` and `formatList`                                              |
+| User impact               | Users of other locales see English copy for this staging-flagged feature                                                                                               |
+| Owner or follow-up        | Frontend localization maintainers; translate before the signed messages flag is enabled in production                                                                  |
+| Expected remediation      | Add en-GB, fr-FR, es-ES and de-DE entries for the `signedMessages.*` and `preferences.tabs.devices` keys with fallback tests                                           |
+
 ## Related Pages
 
 - [Profile Privacy and Notification Preferences](../../notifications/feature-profile-preferences.md)
