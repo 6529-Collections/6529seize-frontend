@@ -11,11 +11,11 @@ import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { BaseNFT, NFT } from "@/entities/INFT";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import { formatMintDate } from "@/helpers/mint-date.helpers";
 import { getFileMimeTypeFromMetadata } from "@/helpers/nft.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import useCapacitor from "@/hooks/useCapacitor";
 import {
-  formatDate,
   formatInteger,
   formatNumber,
   formatPercent as formatLocalePercent,
@@ -55,13 +55,6 @@ const MARKET_OVERVIEW_ROW_CLASS =
   "tw-flex tw-flex-wrap tw-items-start tw-gap-x-6 tw-gap-y-6 xl:tw-gap-x-8";
 const MARKET_GRID_ITEM_CLASS =
   "tw-min-w-0 tw-basis-[calc(50%-0.75rem)] lg:tw-basis-[calc(33.333%-1rem)] xl:tw-basis-[calc(33.333%-1.334rem)]";
-const MEME_MINT_DATE_FORMAT: Intl.DateTimeFormatOptions = {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-  timeZone: "UTC",
-};
-
 export function MemeCollectorsStats({
   nftMeta,
   locale = DEFAULT_LOCALE,
@@ -426,7 +419,7 @@ function getMintDateParts(
   locale: SupportedLocale
 ) {
   return {
-    date: formatDate(locale, date, MEME_MINT_DATE_FORMAT),
+    date: formatMintDate(locale, date),
   };
 }
 
