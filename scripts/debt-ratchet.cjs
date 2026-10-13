@@ -71,7 +71,15 @@ const SCAN_DIRS = [
 ];
 const TEST_SCAN_DIRS = ["__tests__", "__mocks__", "tests", "e2e"];
 
-const EXCLUDED_DIR_NAMES = new Set(["__tests__", "__mocks__", "node_modules"]);
+// "generated" holds tool output inside a source tree (the wasm-bindgen glue in
+// lib/e2ee/wasm/generated); like the top-level generated/ models it is not
+// hand-written source.
+const EXCLUDED_DIR_NAMES = new Set([
+  "__tests__",
+  "__mocks__",
+  "node_modules",
+  "generated",
+]);
 const TEST_EXCLUDED_DIR_NAMES = new Set(["node_modules"]);
 const EXCLUDED_FILE_PATTERNS = [
   /\.test\.[cm]?[jt]sx?$/,
