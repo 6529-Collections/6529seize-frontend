@@ -341,6 +341,30 @@ const mapDropVoteContext = (context: ApiNotificationAdditionalContextV2) => ({
 const mapNotificationV2 = (
   notification: ApiNotificationV2
 ): TypedNotification[] => {
+  if (notification.cause === ApiNotificationCause.MemeCollaboration) {
+    const context = notification.additional_context;
+    if (
+      !context.wave_id ||
+      !context.drop_id ||
+      !context.invitation_id ||
+      !context.event_type
+    )
+      return [];
+    return [
+      {
+        id: notification.id,
+        created_at: notification.created_at,
+        read_at: notification.read_at,
+        cause: ApiNotificationCause.MemeCollaboration,
+        additional_context: {
+          event_type: context.event_type,
+          wave_id: context.wave_id,
+          drop_id: context.drop_id,
+          invitation_id: context.invitation_id,
+        },
+      },
+    ];
+  }
   if (notification.cause === ApiNotificationCause.SubscriptionCoverage) {
     return mapSubscriptionCoverageNotification(notification);
   }

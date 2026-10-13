@@ -181,3 +181,37 @@ reached), select the header restriction control to see the reason, then use
 - [Wave Leaderboard Drop Entry and Eligibility](../leaderboard/feature-drop-entry-and-eligibility.md)
 - [Wave Drop Content Display](../drop-actions/feature-content-display.md)
 - [Interactive HTML Media Rendering](../../media/rendering/feature-interactive-html-rendering.md)
+
+## Collaborator invitations
+
+In Basic Information, use **Invite a collaborating artist** to select up to 20
+other profiles. Selected profiles receive an invitation when the artwork is
+submitted. Voting starts immediately and does not wait for their replies.
+
+The submitter can see every invitation and cancel a pending invitation. Each
+invitee can review the submitted artwork, the final acceptance wording, and the
+submission/minting terms from **Notifications → Invites** or artwork details.
+They can accept or decline using their own profile; proxies cannot consent.
+Acceptance is final, with no withdrawal. The submitter cannot replace the
+accepted artwork or original artist name; replacing the submission requires
+fresh invitations. Admins can edit the final mint artwork and credits in Craft.
+
+Public submission cards and details show only accepted collaborators. Pending
+names are private to the submitter and their own invitee. Accepted submissions
+appear on each collaborating artist's profile with the same active/winner
+status, votes and result. There is one entry and one submitter; collaborators do
+not gain editing rights or consume another submission allowance. Attribution
+does not establish payment splits or change airdrop allocations.
+
+When the artwork is selected as the next mint, the accepted artist roster is
+saved and unanswered invitations close. Claims Builder populates initial mint credits with the submitter and
+collaborators who accepted before selection. Later responses cannot change this
+initial roster. Admins can edit the saved claim in Drop Forge, including adding
+an artist who did not accept. Arweave publishes these final saved values. Such
+edits do not change invitation status or accepted-submission profile lists.
+The submission `Collab` trait follows confirmed collaboration, rather than
+merely sending an invitation.
+
+Resubmission starts a new invitation set and restores the original submitter's
+artist credit. Deleting an unminted submission closes its pending invitations.
+Existing cards and claims retain their historical artist credits.

@@ -22,6 +22,8 @@ import { HttpFile } from '../http/http';
 * Notification-specific additional context. For DROP_REACTED notifications this includes reaction and reactors, where each reactor only has handle, pfp, and subscribed. COMPETITION_LIFECYCLE always includes event_id, event_type, wave_id, competition_id and competition_title; winner events also include entry_id and drop_id. These identify the native competition destination independently of the shared drop\'s legacy projection.
 */
 export class ApiNotificationAdditionalContextV2 {
+    'invitation_id'?: string;
+    'actor_id'?: string;
     /**
     * Stable idempotency identifier for COMPETITION_LIFECYCLE.
     */
@@ -68,6 +70,18 @@ export class ApiNotificationAdditionalContextV2 {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "invitation_id",
+            "baseName": "invitation_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "actor_id",
+            "baseName": "actor_id",
+            "type": "string",
+            "format": ""
+        },
         {
             "name": "event_id",
             "baseName": "event_id",

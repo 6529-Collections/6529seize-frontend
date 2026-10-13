@@ -2595,6 +2595,20 @@ const mockApiExactReadRoutes = new Map([
 ]);
 
 const mockApiPatternReadRoutes = [
+  // Current sandbox artworks have no managed collaboration record.
+  {
+    pattern: /^\/api\/drops\/[^/]+\/collaborations$/,
+    response: () => ({
+      managed: false,
+      closed: false,
+      artwork_hash: "",
+      terms_version: "",
+      acceptance_copy: "",
+      terms: null,
+      collaborators: [],
+      invitations: [],
+    }),
+  },
   { pattern: /^\/api\/waves\/[^/]+$/, response: () => localWave },
   {
     pattern: /^\/api\/v2\/waves\/[^/]+\/drops$/,

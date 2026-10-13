@@ -4079,7 +4079,11 @@
         "quick",
         "vote",
         "additional",
-        "info"
+        "info",
+        "collaborator",
+        "collab",
+        "invitation",
+        "acceptance"
       ],
       "facts": [
         "Memes wave docs cover submission, preview/submit states, additional info fields, and quick voting.",
@@ -4100,7 +4104,10 @@
         "On The Memes Main Stage, the desktop How to Submit control and native app lock both open Unlock submissions with the current 50,000 MemesNominee REP requirement, live progress, and a Get nominated action.",
         "Main Stage file uploads accept PNG, JPG/JPEG, GIF, MP4/MOV, and binary GLB models up to 250 MB (250,000,000 bytes); the upload area shows Max 250 MB beside the format badges; JSON .gltf files are not accepted, and the service verifies the stored file size when the submission is created.",
         "An oversized file, unsupported format, or invalid GLB shows an inline error immediately without Try Again. Use Select Art or drag and drop another file into the upload area to replace the rejected file.",
-        "Use the wave composer and Memes-specific submission surfaces when participating in Memes waves."
+        "Use the wave composer and Memes-specific submission surfaces when participating in Memes waves.",
+        "Invite up to 20 collaborating profiles in the Artwork step. Voting starts immediately. Pending invitations are visible only to the submitter and their own invitee; only accepted collaborators appear publicly and share the submission on their profiles.",
+        "Collaborators accept or decline from Notifications → Invites or artwork details using their own profile. Acceptance is final. The submitter cannot replace the accepted artwork or original artist name; admins can edit final mint artwork and credits in Drop Forge. Collaborators do not gain editing rights, extra submission entries, payment splits, or airdrop allocations.",
+        "Next-mint selection saves the accepted artist roster and closes unanswered invitations. Claims Builder excludes unaccepted collaborators, so pending invitations do not delay minting. Admins can edit all final claim credits, traits and artwork in Drop Forge. Arweave publishes the saved claim without checking invitations. Manually adding an unaccepted artist changes mint metadata only, not invitation status or accepted-submission profile lists. Resubmission requires fresh invitations."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/the-memes"],

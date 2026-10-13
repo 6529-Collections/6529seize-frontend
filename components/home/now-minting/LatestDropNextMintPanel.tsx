@@ -1,4 +1,5 @@
 "use client";
+import { MemeCollaboratorCredits } from "@/components/waves/memes/collaborations/MemeCollaboratorCredits";
 
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
@@ -239,6 +240,7 @@ export default function LatestDropNextMintPanel({
                 />
               </div>
 
+              <MemeCollaboratorCredits collaborators={drop.collaborators} />
               {nextMintCardId && (
                 <div className="tw-mt-8 tw-flex tw-flex-col tw-gap-3">
                   {hasMappedMemeCard ? (
