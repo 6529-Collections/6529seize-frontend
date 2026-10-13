@@ -323,7 +323,7 @@ export default function UserPageTabs({
       >
         <div
           ref={contentContainerRef}
-          className="tw-relative -tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4"
+          className="tw-relative -tw-mb-px tw-flex tw-min-w-max tw-gap-x-5 lg:tw-gap-x-6"
         >
           {visibleTabs.map((tabConfig) => (
             <UserPageTab

@@ -333,6 +333,7 @@ export default function UserFollowBtn({
               : "primary"
           }
           size={FOLLOW_BUTTON_SIZES[size]}
+          className="!tw-text-[13px]"
         >
           <FollowStateIcon
             loading={actionLoading}

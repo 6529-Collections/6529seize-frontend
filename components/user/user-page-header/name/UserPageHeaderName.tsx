@@ -61,7 +61,7 @@ export default function UserPageHeaderName({
               </ProfileNameWithAiMarker>
             </h1>
           </UserPageHeaderNameWrapper>
-          <div className="tw-flex tw-h-5 tw-flex-shrink-0 tw-items-center tw-gap-1.5">
+          <div className="tw-flex tw-h-5 tw-flex-shrink-0 tw-items-center tw-gap-1.5 [&_button]:tw-size-5 [&_button]:tw-overflow-hidden [&_button]:tw-rounded-full [&_button]:tw-border-0 [&_button]:tw-bg-iron-900 [&_button]:tw-ring-1 [&_button]:tw-ring-inset [&_button]:tw-ring-white/10 [&_button_svg]:tw-size-3 [&_button_img]:tw-size-full [&_button_img]:tw-object-cover [&_.tw-rounded-full]:tw-border-transparent [&_.tw-rounded-full]:tw-bg-iron-900 [&_.tw-rounded-full]:tw-ring-1 [&_.tw-rounded-full]:tw-ring-inset [&_.tw-rounded-full]:tw-ring-white/10">
             {profile.handle && (
               <div className="tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center [&_svg]:tw-block">
                 <UserCICTypeIconWrapper profile={profile} />
@@ -81,7 +81,7 @@ export default function UserPageHeaderName({
             canEdit={canEdit}
             profileLabel={displayName}
           >
-            <div className="tw-block tw-text-[13px] tw-font-medium tw-leading-4 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out desktop-hover:group-hover:tw-text-iron-50">
+            <div className="tw-block tw-text-[13px] tw-font-normal tw-leading-4 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out desktop-hover:group-hover:tw-text-iron-200">
               {CLASSIFICATIONS[profile.classification].title}
             </div>
           </UserPageClassificationWrapper>
