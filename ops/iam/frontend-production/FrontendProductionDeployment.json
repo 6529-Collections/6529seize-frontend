@@ -50,9 +50,30 @@
     {
       "Sid": "BeanstalkEnvironmentStorageObjects",
       "Effect": "Allow",
-      "Action": ["s3:GetObject", "s3:PutObject", "s3:AbortMultipartUpload"],
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:AbortMultipartUpload",
+        "s3:GetObjectAcl"
+      ],
       "Resource": [
         "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        },
+        "Bool": {
+          "aws:ViaAWSService": "true"
+        }
+      }
+    },
+    {
+      "Sid": "BeanstalkArtifactObjectMetadata",
+      "Effect": "Allow",
+      "Action": ["s3:GetObjectAcl"],
+      "Resource": [
+        "arn:aws:s3:::seize-web/web_build/????????????????????????????????????????/*"
       ],
       "Condition": {
         "StringEquals": {

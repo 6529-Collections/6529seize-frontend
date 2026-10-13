@@ -54,6 +54,9 @@ Runtime configuration objects may be read/written, and failed multipart uploads
 aborted, only under `resources/environments/e-8bsbxqrikc/` in that bucket and only
 through AWS forward access sessions. Other environment prefixes and object
 deletion are excluded.
+Elastic Beanstalk may read object ACLs within that prefix and within the
+versioned `seize-web/web_build/<40-character version>/` artifact prefixes,
+through AWS service calls only. Changing ACLs is not granted.
 
 Normal rolling deployments may update capacity and launch-template versions.
 Creating a different environment, replacing networking/resources, changing IAM
