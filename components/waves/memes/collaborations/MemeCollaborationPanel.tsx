@@ -205,10 +205,7 @@ export function MemeCollaborationPanel({
           </label>
         </>
       )}
-      <ul
-        aria-live="polite"
-        className="tw-m-0 tw-list-none tw-space-y-3 tw-p-0"
-      >
+      <ul className="tw-m-0 tw-list-none tw-space-y-3 tw-p-0">
         {data.invitations.map((invitation) => (
           <li
             key={invitation.id}
@@ -217,7 +214,13 @@ export function MemeCollaborationPanel({
             <span className="tw-text-sm tw-text-iron-100">
               @{invitation.profile.handle}
             </span>
-            <span className="tw-text-sm tw-text-iron-300">
+            <span
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+              className="tw-text-sm tw-text-iron-300"
+            >
+              <span className="tw-sr-only">@{invitation.profile.handle}: </span>
               {t(locale, STATUS_MESSAGES[invitation.status])}
             </span>
             {!data.closed &&

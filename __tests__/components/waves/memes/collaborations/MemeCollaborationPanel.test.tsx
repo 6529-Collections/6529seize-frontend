@@ -4,6 +4,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -209,4 +210,47 @@ it("offers response actions only for the connected invitee even if another pendi
     screen.getAllByRole("button", { name: "Accept collaboration" })
   ).toHaveLength(1);
   expect(screen.getAllByRole("button", { name: "Decline" })).toHaveLength(1);
+});
+
+it("announces only the changed invitation status and keeps controls outside live regions", async () => {
+  viewer = "A";
+  const otherInvitation = {
+    ...pendingInvitation,
+    id: "other",
+    profile: { ...profile, id: "C", handle: "artistC" },
+  };
+  const { client } = mount({
+    ...pending,
+    invitations: [pendingInvitation, otherInvitation],
+  });
+  const statuses = await screen.findAllByRole("status");
+  expect(statuses).toHaveLength(2);
+  expect(statuses[0]).toHaveTextContent("@artistB: Pending acceptance");
+  expect(statuses[1]).toHaveTextContent("@artistC: Pending acceptance");
+  for (const status of statuses) {
+    expect(status).toHaveAttribute("aria-live", "polite");
+    expect(status).toHaveAttribute("aria-atomic", "true");
+    expect(within(status).queryByRole("button")).not.toBeInTheDocument();
+  }
+  expect(screen.getByRole("list")).not.toHaveAttribute("aria-live");
+  for (const button of screen.getAllByRole("button")) {
+    expect(button.closest("[aria-live]")).toBeNull();
+  }
+  await act(async () => {
+    client.setQueryData([QueryKey.DROP, "collaborations", "drop", "A"], {
+      ...pending,
+      invitations: [
+        {
+          ...pendingInvitation,
+          status: ApiMemeCollaborationInvitationStatusEnum.Accepted,
+        },
+        otherInvitation,
+      ],
+    });
+  });
+  await waitFor(() =>
+    expect(statuses[0]).toHaveTextContent("@artistB: Accepted")
+  );
+  expect(screen.getAllByRole("status")).toEqual(statuses);
+  expect(statuses[1]).toHaveTextContent("@artistC: Pending acceptance");
 });
