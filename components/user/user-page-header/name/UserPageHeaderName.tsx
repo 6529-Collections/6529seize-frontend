@@ -61,13 +61,15 @@ export default function UserPageHeaderName({
               </ProfileNameWithAiMarker>
             </h1>
           </UserPageHeaderNameWrapper>
-          <div className="tw-flex tw-h-5 tw-flex-shrink-0 tw-items-center tw-gap-1.5 [&_button]:tw-size-5 [&_button]:tw-overflow-hidden [&_button]:tw-rounded-full [&_button]:tw-border-0 [&_button]:tw-bg-iron-900 [&_button]:tw-ring-1 [&_button]:tw-ring-inset [&_button]:tw-ring-white/10 [&_button_svg]:tw-size-3 [&_button_img]:tw-size-full [&_button_img]:tw-object-cover [&_.tw-rounded-full]:tw-border-transparent [&_.tw-rounded-full]:tw-bg-iron-900 [&_.tw-rounded-full]:tw-ring-1 [&_.tw-rounded-full]:tw-ring-inset [&_.tw-rounded-full]:tw-ring-white/10">
+          <div className="tw-flex tw-h-5 tw-flex-shrink-0 tw-items-center tw-gap-1.5">
             {profile.handle && (
-              <div className="tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center [&_svg]:tw-block">
+              <div className="tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center [&_button]:tw-bg-iron-900 [&_button]:tw-ring-1 [&_button]:tw-ring-inset [&_button]:tw-ring-white/10 [&_svg]:tw-block [&_svg]:tw-size-3">
                 <UserCICTypeIconWrapper profile={profile} />
               </div>
             )}
-            <UserCICAndLevel level={level} size={UserCICAndLevelSize.SMALL} />
+            <div className="tw-flex [&_.tw-rounded-full]:tw-border-transparent [&_.tw-rounded-full]:tw-bg-iron-900 [&_.tw-rounded-full]:tw-ring-1 [&_.tw-rounded-full]:tw-ring-inset [&_.tw-rounded-full]:tw-ring-white/10">
+              <UserCICAndLevel level={level} size={UserCICAndLevelSize.SMALL} />
+            </div>
             <ProfileCurationBadge profile={profile} />
           </div>
           {titleAccessory}

@@ -314,7 +314,7 @@ export default function UserPageTabs({
       aria-label={getUserProfileTabsMessage(
         "user.profile.tabs.navigationLabel"
       )}
-      className="tw-relative tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700"
+      className="tw-relative tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10"
     >
       <div
         ref={scrollContainerRef}

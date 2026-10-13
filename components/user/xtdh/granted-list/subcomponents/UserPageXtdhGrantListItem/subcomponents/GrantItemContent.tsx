@@ -18,10 +18,10 @@ export function GrantItemContent({
   const name = contract.name ?? shortenAddress(contract.address);
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-4">
+    <div className="tw-flex tw-flex-col tw-gap-4 [&>dl>div]:tw-min-w-0 max-sm:[&>dl]:tw-grid-cols-2 [&>dl_dd>div>span]:tw-whitespace-normal [&>dl_dd>div]:tw-flex-wrap [&>dl_dd>div]:tw-gap-y-1 [&>dl_dd]:tw-break-words">
       <header className="tw-flex tw-flex-col tw-items-start tw-justify-between tw-gap-4 md:tw-flex-row">
         <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-3">
-          <div className="tw-relative tw-h-16 tw-w-16 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800">
+          <div className="tw-relative tw-h-12 tw-w-12 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800 sm:tw-h-16 sm:tw-w-16">
             {contract.imageUrl ? (
               <Image
                 src={contract.imageUrl}

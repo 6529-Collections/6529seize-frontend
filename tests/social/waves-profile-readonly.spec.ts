@@ -111,6 +111,45 @@ function getProfileFeed(page: Page): Locator {
 }
 
 test.describe("Waves and profile read-only coverage @surface @medium @large @readonly", () => {
+  test("keeps subscription history defaults responsive and preserves user toggles", async ({
+    page,
+  }) => {
+    await gotoReadyWithApiResponse(
+      page,
+      `/${PROFILE_HANDLE}/subscriptions`,
+      (url) => url.pathname.includes("/subscriptions/consolidation/logs/")
+    );
+    await expectProfileShell(page, "Subscriptions");
+    const isPhone = (page.viewportSize()?.width ?? 0) < 640;
+    const history = page.getByRole("region", {
+      name: "Subscription History",
+      exact: true,
+    });
+    const disclosures = history.locator("details");
+    await expect(disclosures).toHaveCount(3);
+    for (const disclosure of await disclosures.all()) {
+      await expect(disclosure).toHaveJSProperty("open", !isPhone);
+      await expect(disclosure).toHaveAttribute("aria-busy", "false");
+    }
+    const logs = disclosures.filter({ hasText: "Log History" });
+    const summary = logs.locator("summary");
+    await summary.click();
+    await expect(logs).toHaveJSProperty("open", isPhone);
+    const viewport = page.viewportSize()!;
+    await page.setViewportSize({
+      width: isPhone ? 900 : 390,
+      height: viewport.height,
+    });
+    await expect(logs).toHaveJSProperty("open", isPhone);
+    await page.setViewportSize(viewport);
+    await expect(logs).toHaveJSProperty("open", isPhone);
+    await summary.press("Enter");
+    await expect(logs).toHaveJSProperty("open", !isPhone);
+    await summary.press("Space");
+    await expect(logs).toHaveJSProperty("open", isPhone);
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("scrolls Main Stage Settings and validates live vote Activity in the app", async ({
     page,
   }, testInfo) => {
