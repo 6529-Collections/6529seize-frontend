@@ -33,7 +33,7 @@ describe("turn on signed messages", () => {
       authRequestGuard: guard,
       deviceGrantMode: "required",
     });
-    expect(deps.setAuthLoadingState.mock.calls).toEqual([
+    expect(jest.mocked(deps.setAuthLoadingState).mock.calls).toEqual([
       ["signing"],
       ["idle"],
     ]);

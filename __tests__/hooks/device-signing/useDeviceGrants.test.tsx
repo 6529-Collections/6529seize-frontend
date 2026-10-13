@@ -67,7 +67,10 @@ describe("device grant hooks", () => {
 
     const { result, rerender } = renderHook(
       ({ address }: { address: string | null }) => useDeviceGrants(address),
-      { wrapper: createWrapper(client), initialProps: { address: null } }
+      {
+        wrapper: createWrapper(client),
+        initialProps: { address: null as string | null },
+      }
     );
     expect(mockFetchGrants).not.toHaveBeenCalled();
 
