@@ -72,7 +72,7 @@ route/layout render boundary fails.
 - Route and global error boundaries capture exceptions only when `SENTRY_DSN` is set.
 - Sentry initialization is disabled when `SENTRY_DSN` is not set.
 - Payload sanitization removes request cookies/body/query data, strips URL query/hash, and redacts sensitive headers and secret-like fields.
-- Session Replay is enabled only when `NODE_ENV=production` and `SENTRY_REPLAY_ENABLED=true`.
+- Session Replay is enabled only when `NODE_ENV=production` and `SENTRY_REPLAY_ENABLED=true`. The flag is read at build time: builds without it do not ship the Replay SDK, so changing it requires a new build.
 - If Sentry is blocked by network/policy, fallback screens still render.
 - On `/sentry-example-page`, `Throw Sample Error` is disabled when Sentry connectivity reports `sentry-unreachable`.
 
