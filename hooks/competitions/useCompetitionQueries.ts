@@ -5,6 +5,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import {
   competitionQueryKey,
+  defaultCompetitionQueryKey,
   competitionScope,
   fetchCompetition,
   fetchDefaultCompetition,
@@ -38,9 +39,9 @@ export function useCompetitionHub(waveId: string, enabled = true) {
 export function useDefaultCompetition(waveId: string, enabled = true) {
   const viewer = useCompetitionViewer();
   return useQuery({
-    queryKey: [QueryKey.DEFAULT_COMPETITION, { wave_id: waveId, viewer }],
+    queryKey: defaultCompetitionQueryKey(waveId, viewer),
     queryFn: ({ signal }) => fetchDefaultCompetition(waveId, signal),
-    enabled,
+    enabled: enabled && Boolean(waveId),
     retry: false,
     staleTime: 0,
     refetchInterval: (query) => {
@@ -93,7 +94,10 @@ export function useCompetitionPauseState(identity: CompetitionIdentity) {
   });
 }
 
-export function useCompetitionDetail(identity: CompetitionIdentity) {
+export function useCompetitionDetail(
+  identity: CompetitionIdentity,
+  enabled = true
+) {
   const viewer = useCompetitionViewer();
   return useQuery({
     queryKey: competitionQueryKey(identity, viewer),
@@ -101,6 +105,7 @@ export function useCompetitionDetail(identity: CompetitionIdentity) {
     retry: false,
     staleTime: 15_000,
     refetchInterval: 30_000,
+    enabled,
   });
 }
 

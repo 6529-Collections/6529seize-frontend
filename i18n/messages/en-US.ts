@@ -1475,6 +1475,22 @@ const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
   "postLabel.other": "Posts",
 } as const);
 
+const WAVE_JOIN_MESSAGES = objectMessages("waves.join", {
+  action: "Join",
+  actionAriaLabel: "Join {waveName}",
+  actionTooltip: "Add this wave to your Joined list",
+  joined: "Joined",
+  joinedAnnouncement: "You joined {waveName}.",
+  signInTooltip: "Connect a wallet to join this wave",
+  joinErrorTitle: "Couldn't join this wave.",
+  leaveErrorTitle: "Couldn't leave this wave.",
+  allMessagesErrorTitle:
+    "Joined, but notifications for every message couldn't be turned on.",
+  allMessagesErrorDescription:
+    "Turn them on from the bell menu in the wave's About panel.",
+  errorDescription: PLEASE_TRY_AGAIN,
+} as const);
+
 const WAVE_DROP_ELIGIBILITY_MESSAGES = objectMessages("waves.dropEligibility", {
   loginRequired: "Please log in to make submissions",
 } as const);
@@ -1610,6 +1626,16 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "validation.invalidTitle": "Some access groups need attention.",
   "validation.invalidDescription":
     "Every Drop, Vote, Chat, and Admins group member must also belong to the Visibility group.",
+  criteriaLabel: "Group criteria",
+  "inlineIdentities.loadingProfiles": "Loading profiles…",
+  "inlineIdentities.profileError":
+    "Some profiles could not be loaded. You can still edit their wallets.",
+  "inlineIdentities.retryProfiles": "Retry profile lookup",
+  "inlineIdentities.walletLabel": "Wallet {wallet}",
+  "inlineIdentities.removeWallet": "Remove {name}, wallet {wallet}",
+  "inlineIdentities.page": "Wallets {start}–{end} of {total}",
+  "inlineIdentities.previous": "Previous wallets",
+  "inlineIdentities.next": "Next wallets",
   "inlineIdentities.modeLabel": "Identity treatment",
   "inlineIdentities.included.label": "Included",
   "inlineIdentities.included.searchLabel": "Find an identity to include",
@@ -2508,7 +2534,7 @@ const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
   "index.longUpdates":
     "Long updates, repo analysis, bot context, and links back into the wave conversation.",
   "index.liveActivity":
-    "Shorter live repo activity still belongs in {followTheRepo}. This page is the linkable longer-form shelf beside it.",
+    "{followTheRepo} is the dev team's live chat. Anyone can read it, and its subwaves carry the deploy and GitHub PR feeds. This page is the linkable longer-form shelf beside it.",
   "index.followTheRepo": "Follow The Repo",
   "index.activeTechnicalNotes": "Active Technical Notes",
   "index.authChanges": "Auth changes",
@@ -2526,6 +2552,8 @@ const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
   "report.daily": "Daily",
   "report.prCount": "{count} PRs",
   "report.repoSummary": "{focus}. {count} PRs, {stateSummary}.",
+  "report.liveActivity":
+    "For live updates, see {followTheRepo}, the dev team's live chat. Anyone can read it, and its subwaves carry the deploy and GitHub PR feeds.",
   "report.tocDescription":
     "This report is split by repository. Use this index to jump directly to the area you want, or read through from the frontend app work into backend, Stream contracts, Safe app hardening, and review bot updates.",
   "walletAuth.metadata.title": "Wallet Authentication Update",
@@ -4321,6 +4349,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_DROPS_SEARCH_MODAL_MESSAGES,
   ...WAVE_GIF_PICKER_MESSAGES,
   ...WAVE_HEADER_MESSAGES,
+  ...WAVE_JOIN_MESSAGES,
   ...WAVE_DROP_ELIGIBILITY_MESSAGES,
   ...WAVE_NOTIFICATION_SETTINGS_MESSAGES,
   ...WAVE_CREATE_ACTIONS_MESSAGES,

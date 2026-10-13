@@ -42,6 +42,17 @@ export default function CreateWaveInlineGroupDraftSummary({
     return null;
   }
 
+  let summaryClassName =
+    "tw-flex tw-w-fit tw-max-w-full tw-flex-col tw-items-start tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.04] tw-px-3 tw-py-2 md:tw-max-w-sm";
+  if (quiet) {
+    summaryClassName =
+      "tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/40 tw-p-3";
+  }
+  if (saveChangesLabel) {
+    summaryClassName =
+      "tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-0.5 sm:tw-col-span-full";
+  }
+
   return (
     <div
       className={`tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-pt-5 ${quiet ? "tw-border-iron-800" : "tw-border-white/5"}`}
@@ -56,14 +67,10 @@ export default function CreateWaveInlineGroupDraftSummary({
           </span>
         </p>
       )}
-      <div className="tw-flex tw-flex-col tw-gap-4">
-        <div
-          className={
-            quiet
-              ? "tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/40 tw-p-3"
-              : "tw-flex tw-w-fit tw-max-w-full tw-flex-col tw-items-start tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.04] tw-px-3 tw-py-2 md:tw-max-w-sm"
-          }
-        >
+      <div
+        className={`tw-flex tw-flex-col tw-gap-4 ${saveChangesLabel ? "sm:tw-grid sm:tw-grid-cols-[minmax(0,1fr)_auto] sm:tw-items-end" : ""}`}
+      >
+        <div className={summaryClassName}>
           <p
             className={
               quiet
@@ -85,7 +92,9 @@ export default function CreateWaveInlineGroupDraftSummary({
           )}
         </div>
         {privacyControl}
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2 tw-self-start">
+        <div
+          className={`tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2 ${saveChangesLabel ? "tw-self-end sm:tw-col-start-2 sm:tw-justify-self-end" : "tw-self-start"}`}
+        >
           <Button
             variant="action"
             size="md"

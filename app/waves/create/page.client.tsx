@@ -4,7 +4,6 @@ import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { isAuthResolving } from "@/components/auth/authResolution";
 import ConnectWallet from "@/components/common/ConnectWallet";
-import WavesLayout from "@/components/waves/layout/WavesLayout";
 import CreateWave from "@/components/waves/create-wave/CreateWave";
 import CreateWaveProfileRequiredModal from "@/components/waves/create-wave/CreateWaveProfileRequiredModal";
 import { useAuth } from "@/components/auth/Auth";
@@ -49,5 +48,5 @@ export default function WavesCreatePageClient() {
     );
   }
 
-  return <WavesLayout>{content}</WavesLayout>;
+  return content;
 }

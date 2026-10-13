@@ -812,9 +812,6 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await input.focus();
     await expect.poll(summaryIsCompact).toBe(true);
     await filter
-      .getByRole("button", { name: "All filters", exact: true })
-      .click();
-    await filter
       .getByRole("group", { name: "Filter Network", exact: true })
       .getByRole("button", { name: "Identities", exact: true })
       .click();
@@ -842,18 +839,18 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         })
       )
       .toBe(true);
-    const back = filter.getByRole("button", {
-      name: "All filters",
+    const criteria = filter.getByRole("group", {
+      name: "Filter Network",
       exact: true,
     });
-    await expect(back).toBeInViewport({ ratio: 1 });
-    const backBounds = await back.boundingBox();
+    await expect(criteria).toBeInViewport({ ratio: 1 });
+    const criteriaBounds = await criteria.boundingBox();
     const editorTop = await allowlists.evaluate(
       (element) =>
         element.closest("[tabindex='-1']")?.getBoundingClientRect().top
     );
     expect(
-      (backBounds?.y ?? 0) + (backBounds?.height ?? 0)
+      (criteriaBounds?.y ?? 0) + (criteriaBounds?.height ?? 0)
     ).toBeLessThanOrEqual(editorTop ?? 0);
     await page.screenshot({
       path: testInfo.outputPath("network-keyboard.png"),
@@ -874,9 +871,6 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await allowlists.blur();
     await allowlists.focus();
     await expect(allowlists).toHaveValue("keyboard-test-no-match");
-    await filter
-      .getByRole("button", { name: "All filters", exact: true })
-      .click();
     await filter
       .getByRole("group", { name: "Filter Network", exact: true })
       .getByRole("button", { name: /^Level(?: Configured)?$/, exact: true })

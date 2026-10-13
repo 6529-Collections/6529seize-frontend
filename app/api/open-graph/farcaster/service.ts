@@ -1,4 +1,4 @@
-import { load } from "cheerio";
+import { loadHtmlMetadata } from "@/lib/security/htmlMetadata";
 
 import type {
   FarcasterEmbedKind,
@@ -7,7 +7,8 @@ import type {
   LinkPreviewResponse,
 } from "@/services/api/link-preview-api";
 
-type LoadedHtml = ReturnType<typeof load>;
+type LoadedHtml = ReturnType<typeof loadHtmlMetadata>;
+type HtmlNode = Parameters<LoadedHtml>[0];
 
 interface BuildFarcasterEmbedOptions {
   readonly assertPublicUrl: (url: URL) => Promise<void>;
@@ -76,7 +77,7 @@ function readString(value: unknown, maxChars = TEXT_MAX_CHARS): string | null {
 
 function getMetaIdentifier(
   $: LoadedHtml,
-  element: unknown
+  element: HtmlNode
 ): string | undefined {
   const tag = $(element);
   return normalizeWhitespace(
@@ -91,7 +92,7 @@ function getFirstMetaContent(
   const keySet = new Set(keys.map((key) => key.toLowerCase()));
   let result: string | undefined;
 
-  $("meta").each((_index: number, element: unknown) => {
+  $("meta").each((_index: number, element: HtmlNode) => {
     if (result) {
       return;
     }
@@ -392,7 +393,7 @@ export async function buildFarcasterEmbedResponse(
   basePreview: LinkPreviewResponse,
   options: BuildFarcasterEmbedOptions
 ): Promise<FarcasterEmbedLinkPreview | null> {
-  const $ = load(html);
+  const $ = loadHtmlMetadata(html);
   const miniAppMetadata = parseMiniAppMetadata(
     getFirstMetaContent($, MINIAPP_META_KEYS)
   );

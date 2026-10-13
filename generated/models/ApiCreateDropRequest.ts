@@ -35,7 +35,7 @@ export class ApiCreateDropRequest {
     'hide_link_preview'?: boolean;
     'title'?: string | null;
     /**
-    * Across all parts, runtime validation allows at most 50,000 JavaScript UTF-16 code units. Each part is also subject to the per-part UTF-16 and UTF-8 limits documented on ApiCreateDropPart.
+    * Across all parts, runtime validation allows at most 50,000 JavaScript UTF-16 code units. Each part is also subject to the per-part UTF-16 and UTF-8 limits documented on ApiCreateDropPart. A drop may have at most 250 parts, and at most 100 media items and 100 attachments in total across all parts.
     */
     'parts': Array<ApiCreateDropPart>;
     'referenced_nfts': Array<ApiDropReferencedNFT>;

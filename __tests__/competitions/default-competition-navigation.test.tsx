@@ -17,6 +17,10 @@ let mockEnabled = true;
 let mockId: string | null = "alpha";
 let mockError = false;
 let mockSuccess = true;
+let mockFetching = false;
+let mockFetchedAfterMount = true;
+let mockFailure: unknown = null;
+let mockHasSelection = true;
 let mockTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.LEADERBOARD];
 let mockLegacyPrimaryId: string | null | undefined = "alpha";
 jest.mock("next/navigation", () => ({
@@ -36,7 +40,12 @@ jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useDefaultCompetition: jest.fn(() => ({
     isSuccess: mockSuccess,
     isError: mockError,
-    data: { competition_id: mockId, evaluated_at: 100, next_refresh_at: 200 },
+    isFetching: mockFetching,
+    isFetchedAfterMount: mockFetchedAfterMount,
+    error: mockFailure,
+    data: mockHasSelection
+      ? { competition_id: mockId, evaluated_at: 100, next_refresh_at: 200 }
+      : undefined,
   })),
 }));
 jest.mock("@/components/brain/ContentTabContext", () => ({
@@ -54,6 +63,10 @@ beforeEach(() => {
   mockId = "alpha";
   mockError = false;
   mockSuccess = true;
+  mockFetching = false;
+  mockFetchedAfterMount = true;
+  mockFailure = null;
+  mockHasSelection = true;
   jest.clearAllMocks();
 });
 
@@ -184,6 +197,141 @@ it.each(["data-competition-command", "role"])(
   }
 );
 
+it.each([
+  ["/waves", "tab=leaderboard"],
+  ["/waves/other-wave", "tab=leaderboard"],
+  ["/my-stream", "wave=other-wave&tab=leaderboard"],
+  ["/waves/other-wave", "tab=configuration&competition=alpha"],
+  ["/waves/other-wave/competitions/alpha", "tab=leaderboard&default=1"],
+  ["/waves/other-wave/competitions/alpha", "tab=leaderboard&restore=1"],
+])(
+  "ignores stale wave data when the committed URL is %s?%s",
+  (pathname, search) => {
+    mockPathname = pathname;
+    mockSearch = new URLSearchParams(search);
+    const { result } = renderHook(() =>
+      useDefaultCompetitionNavigation(wave, true)
+    );
+    expect(useDefaultCompetition).toHaveBeenLastCalledWith("wave", false);
+    expect(mockReplace).not.toHaveBeenCalled();
+    expect(result.current.resolve).toBe(false);
+  }
+);
+
+it("does not restore an old wave's remembered tab after returning to the wave list", () => {
+  localStorage.setItem(
+    "memes_wave_last_tab_by_id",
+    JSON.stringify({ wave: { tab: "LEADERBOARD", competitionId: "alpha" } })
+  );
+  mockPathname = "/waves";
+  renderHook(() => useDefaultCompetitionNavigation(wave, true));
+  expect(useDefaultCompetition).toHaveBeenLastCalledWith("wave", false);
+  expect(mockReplace).not.toHaveBeenCalled();
+});
+
+function setMarkedRestoreUrl(search = "tab=leaderboard&restore=1") {
+  mockPathname = "/waves/wave/competitions/alpha";
+  mockSearch = new URLSearchParams(search);
+  window.history.replaceState(
+    { retained: "history-value" },
+    "",
+    `${mockPathname}?${search}`
+  );
+}
+
+it("waits for a fresh marked restoration and commits it without another route request", () => {
+  setMarkedRestoreUrl("tab=leaderboard&restore=1&divider=42");
+  mockFetchedAfterMount = false;
+  mockFetching = true;
+  const replaceState = jest.spyOn(window.history, "replaceState");
+  const { rerender } = renderHook(() =>
+    useDefaultCompetitionNavigation(wave, true)
+  );
+  expect(useDefaultCompetition).toHaveBeenLastCalledWith("wave", true);
+  expect(replaceState).not.toHaveBeenCalled();
+  mockFetching = false;
+  rerender();
+  expect(replaceState).not.toHaveBeenCalled();
+  mockFetchedAfterMount = true;
+  rerender();
+  expect(replaceState).toHaveBeenCalledWith(
+    { retained: "history-value" },
+    "",
+    "/waves/wave/competitions/alpha?tab=leaderboard&divider=42"
+  );
+  expect(mockReplace).not.toHaveBeenCalled();
+  replaceState.mockRestore();
+});
+
+it.each(["beta", null])(
+  "returns a marked remembered visit to Chat when the fresh default is %s",
+  (defaultId) => {
+    setMarkedRestoreUrl();
+    mockId = defaultId;
+    renderHook(() => useDefaultCompetitionNavigation(wave, true));
+    expect(mockReplace).toHaveBeenCalledWith("/waves/wave?tab=chat", {
+      scroll: false,
+    });
+    expect(getHistoryWaveTab("wave")).toBe(MyStreamWaveTab.CHAT);
+  }
+);
+
+it.each([401, 403, 404])(
+  "does not commit matching cached restoration after a selection denial (%s)",
+  (status) => {
+    setMarkedRestoreUrl();
+    mockError = true;
+    mockSuccess = false;
+    mockFailure = { status };
+    const replaceState = jest.spyOn(window.history, "replaceState");
+    renderHook(() => useDefaultCompetitionNavigation(wave, true));
+    expect(replaceState).not.toHaveBeenCalled();
+    expect(mockReplace).not.toHaveBeenCalled();
+    expect(window.location.search).toContain("restore=1");
+    replaceState.mockRestore();
+  }
+);
+
+it("commits same-ID cached restoration after a transient selection failure", () => {
+  setMarkedRestoreUrl();
+  mockError = true;
+  mockSuccess = false;
+  mockFetchedAfterMount = false;
+  mockFailure = { status: 503 };
+  renderHook(() => useDefaultCompetitionNavigation(wave, true));
+  expect(window.location.search).toBe("?tab=leaderboard");
+  expect(mockReplace).not.toHaveBeenCalled();
+});
+
+it("keeps a marked restoration pending when a transient failure has no cached selection", () => {
+  setMarkedRestoreUrl();
+  mockError = true;
+  mockSuccess = false;
+  mockHasSelection = false;
+  mockFailure = { status: 503 };
+  renderHook(() => useDefaultCompetitionNavigation(wave, true));
+  expect(window.location.search).toContain("restore=1");
+  expect(mockReplace).not.toHaveBeenCalled();
+});
+
+it("ignores a fresh old-wave restoration after native Back commits the list URL", () => {
+  setMarkedRestoreUrl();
+  mockFetchedAfterMount = false;
+  mockFetching = true;
+  const { rerender } = renderHook(() =>
+    useDefaultCompetitionNavigation(wave, true)
+  );
+  mockPathname = "/waves";
+  mockSearch = new URLSearchParams();
+  window.history.replaceState(null, "", "/waves");
+  mockFetchedAfterMount = true;
+  mockFetching = false;
+  rerender();
+  expect(useDefaultCompetition).toHaveBeenLastCalledWith("wave", false);
+  expect(window.location.pathname).toBe("/waves");
+  expect(mockReplace).not.toHaveBeenCalled();
+});
+
 it("does not navigate on selection errors, disabled rollout or direct messages", () => {
   mockError = true;
   const { rerender } = renderHook(() =>
@@ -225,16 +373,23 @@ it("maps the familiar legacy tabs and retains view parameters on implicit naviga
   ).toBe("/waves/wave/competitions/alpha?tab=votes&default=1");
 });
 
-it.each([
-  "/waves/wave/competitions",
-  "/waves/wave/competitions/new",
-  "/waves/wave/competitions/draft",
-])(
+it.each(["/waves/wave/competitions", "/waves/wave/competitions/new"])(
   "never resolves collection/editor routes even with an implicit marker (%s)",
   (pathname) => {
     expect(
       shouldResolveDefault(pathname, new URLSearchParams("default=1"))
     ).toBe(false);
+  }
+);
+
+it.each(["alpha", "draft"])(
+  "resolves the selected ID %s only when its URL explicitly requests default selection",
+  (competitionId) => {
+    const pathname = `/waves/wave/competitions/${competitionId}`;
+    expect(
+      shouldResolveDefault(pathname, new URLSearchParams("default=1"))
+    ).toBe(true);
+    expect(shouldResolveDefault(pathname, new URLSearchParams())).toBe(false);
   }
 );
 
