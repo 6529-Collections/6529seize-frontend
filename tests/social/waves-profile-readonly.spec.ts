@@ -111,6 +111,74 @@ function getProfileFeed(page: Page): Locator {
 }
 
 test.describe("Waves and profile read-only coverage @surface @medium @large @readonly", () => {
+  test("keeps the full subscription airdrop address available on touch and keyboard", async ({
+    page,
+    isMobile,
+  }) => {
+    await gotoReady(page, `/${PROFILE_HANDLE}/subscriptions`);
+    await expectProfileShell(page, "Subscriptions");
+    const address = page.getByRole("button", {
+      name: /^0x[0-9a-fA-F]{40}$/,
+    });
+    await expect(address).toBeVisible();
+    const fullAddress = (await address.textContent())!.trim();
+    if (isMobile) {
+      await address.tap();
+    } else {
+      await address.focus();
+    }
+    await expect(
+      page.getByRole("tooltip", { name: fullAddress })
+    ).toBeVisible();
+    await page
+      .getByRole("heading", { name: "Airdrop Address", exact: true })
+      .click();
+    await expect(page.getByRole("tooltip", { name: fullAddress })).toHaveCount(
+      0
+    );
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test("keeps subscription history defaults responsive and preserves user toggles", async ({
+    page,
+  }) => {
+    await gotoReadyWithApiResponse(
+      page,
+      `/${PROFILE_HANDLE}/subscriptions`,
+      (url) => url.pathname.includes("/subscriptions/consolidation/logs/")
+    );
+    await expectProfileShell(page, "Subscriptions");
+    const isPhone = (page.viewportSize()?.width ?? 0) < 640;
+    const disclosures = page
+      .getByRole("region", { name: "Subscription History", exact: true })
+      .locator("details");
+    await expect(disclosures).toHaveCount(3);
+    for (const disclosure of await disclosures.all()) {
+      await expect(disclosure).toHaveJSProperty("open", !isPhone);
+      await expect(disclosure).toHaveAttribute("aria-busy", "false");
+    }
+    const logs = disclosures.filter({ hasText: "Log History" });
+    const summary = page
+      .getByRole("region", { name: "Subscription History", exact: true })
+      .locator("summary")
+      .filter({ hasText: "Log History" });
+    await summary.click();
+    await expect(logs).toHaveJSProperty("open", isPhone);
+    const viewport = page.viewportSize()!;
+    await page.setViewportSize({
+      width: isPhone ? 900 : 390,
+      height: viewport.height,
+    });
+    await expect(logs).toHaveJSProperty("open", isPhone);
+    await page.setViewportSize(viewport);
+    await expect(logs).toHaveJSProperty("open", isPhone);
+    await summary.press("Enter");
+    await expect(logs).toHaveJSProperty("open", !isPhone);
+    await summary.press("Space");
+    await expect(logs).toHaveJSProperty("open", isPhone);
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("scrolls Main Stage Settings and validates live vote Activity in the app", async ({
     page,
   }, testInfo) => {
@@ -954,17 +1022,16 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(page).toHaveTitle(new RegExp(PROFILE_HANDLE, "i"));
     await expectProfileShell(page);
     await expectProfileTabLinks(page);
+    const statements = page.getByRole("button", { name: /ID Statements/i });
     if (isMobile) {
-      const statements = page.getByRole("button", { name: /ID Statements/i });
       await expect(statements).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
-      // Its numeric count is published only after this streamed component
-      // hydrates and its statement query resolves. Visibility alone can precede
-      // the click handler; the server renders an em dash during that interval.
+    }
+    if (await statements.isVisible()) {
+      // Its numeric count replaces the server placeholder only after this
+      // streamed section hydrates and its statement query resolves.
       await expect(statements).toHaveAccessibleName(
         /^\d[\d,]* ID Statements$/,
-        {
-          timeout: RESPONSE_TIMEOUT_MS,
-        }
+        { timeout: RESPONSE_TIMEOUT_MS }
       );
       await statements.click();
       await expect(statements).toHaveAttribute("aria-pressed", "true");
