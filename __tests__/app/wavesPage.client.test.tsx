@@ -1,6 +1,15 @@
 import { render, screen } from "@testing-library/react";
 
 import WavesPageClient from "@/app/waves/page.client";
+import WavesRouteLayout from "@/app/waves/layout";
+
+jest.mock("@/contexts/CompetitionRouteContext", () => ({
+  CompetitionRouteProvider: ({
+    children,
+  }: {
+    readonly children: React.ReactNode;
+  }) => children,
+}));
 
 jest.mock("@/components/waves/layout/WavesLayout", () => ({
   __esModule: true,
@@ -34,7 +43,11 @@ jest.mock("@/components/waves/PublicWaveFeedGate", () => ({
 
 describe("WavesPageClient", () => {
   it("preserves the existing interactive view when no public fallback is supplied", () => {
-    render(<WavesPageClient />);
+    render(
+      <WavesRouteLayout>
+        <WavesPageClient />
+      </WavesRouteLayout>
+    );
 
     expect(screen.getByTestId("waves-layout")).toBeInTheDocument();
     expect(screen.getByTestId("waves-view")).toBeInTheDocument();

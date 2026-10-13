@@ -25,9 +25,7 @@ export function getCompetitionIdFromPathname(
   if (!isCompetitionPathname(pathname)) return null;
   const segments = (pathname ?? "").split("/").filter(Boolean);
   const competitionId = segments[3];
-  return competitionId && !["new", "draft"].includes(competitionId)
-    ? competitionId
-    : null;
+  return competitionId && competitionId !== "new" ? competitionId : null;
 }
 
 export const COMPETITION_TABS = [
@@ -57,4 +55,9 @@ export function isRejectedCompetitionCommand(error: unknown) {
     status !== 408 &&
     status !== 429
   );
+}
+
+export function isCompetitionAccessError(error: unknown) {
+  const status = getStructuredApiErrorStatus(error);
+  return status === 401 || status === 403 || status === 404;
 }

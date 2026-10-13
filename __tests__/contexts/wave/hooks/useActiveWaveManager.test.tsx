@@ -1,6 +1,19 @@
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useActiveWaveManager } from "@/contexts/wave/hooks/useActiveWaveManager";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { defaultCompetitionQueryKey } from "@/services/api/competitions-api";
+
+const mockQueryData = jest.fn();
+jest.mock("@tanstack/react-query", () => ({
+  useQueryClient: () => ({ getQueryData: mockQueryData }),
+}));
+jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
+  useCompetitionViewer: () => "member:self",
+}));
+jest.mock("@/helpers/competition.helpers", () => ({
+  ...jest.requireActual("@/helpers/competition.helpers"),
+  isMultiCompetitionEnabled: () => true,
+}));
 
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
@@ -24,6 +37,8 @@ jest.mock("next/navigation", () => ({
 describe("useActiveWaveManager", () => {
   beforeEach(() => {
     jest.restoreAllMocks();
+    localStorage.clear();
+    mockQueryData.mockReset();
     globalThis.history.replaceState(null, "", "http://localhost/");
   });
 
@@ -98,7 +113,8 @@ describe("useActiveWaveManager", () => {
 
     expect(push).toHaveBeenCalledWith("/waves/def?divider=42");
     expect(pushStateSpy).not.toHaveBeenCalled();
-    expect(result.current.activeWaveId).toBe("def");
+    // Keep the visible source wave until the route-owned destination commits.
+    expect(result.current.activeWaveId).toBe("abc");
   });
 
   it("uses route navigation when deselecting a wave from competitions", () => {
@@ -134,6 +150,86 @@ describe("useActiveWaveManager", () => {
       null,
       "",
       "/waves/wave-xyz?serialNo=99"
+    );
+  });
+
+  it("opens a remembered competition directly without changing the visible wave before the route commits", async () => {
+    globalThis.history.replaceState(null, "", "/waves/chat");
+    (usePathname as jest.Mock).mockReturnValue("/waves/chat");
+    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
+    localStorage.setItem(
+      "memes_wave_last_tab_by_id",
+      JSON.stringify({
+        stage: { tab: "LEADERBOARD", competitionId: "primary" },
+      })
+    );
+    mockQueryData.mockReturnValue({ competition_id: "primary" });
+    const push = jest.fn();
+    (useRouter as jest.Mock).mockReturnValue({ push, replace: jest.fn() });
+    const pushStateSpy = jest.spyOn(globalThis.history, "pushState");
+    const { result, rerender } = renderHook(() => useActiveWaveManager());
+    act(() => result.current.setActiveWave("stage", { divider: 42 }));
+    expect(mockQueryData).toHaveBeenLastCalledWith(
+      defaultCompetitionQueryKey("stage", "member:self")
+    );
+    expect(push).toHaveBeenCalledWith(
+      "/waves/stage/competitions/primary?tab=leaderboard&restore=1&divider=42"
+    );
+    expect(pushStateSpy).not.toHaveBeenCalled();
+    expect(result.current.activeWaveId).toBe("chat");
+    globalThis.history.replaceState(
+      null,
+      "",
+      "/waves/stage/competitions/primary?tab=leaderboard&divider=42"
+    );
+    (usePathname as jest.Mock).mockReturnValue(
+      "/waves/stage/competitions/primary"
+    );
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams("tab=leaderboard&divider=42")
+    );
+    rerender();
+    await waitFor(() => expect(result.current.activeWaveId).toBe("stage"));
+  });
+
+  it.each([undefined, { competition_id: "new-default" }])(
+    "resolves a remembered competition through its wave when the cached default does not agree (%j)",
+    (selection) => {
+      globalThis.history.replaceState(null, "", "/waves/chat");
+      (usePathname as jest.Mock).mockReturnValue("/waves/chat");
+      (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
+      localStorage.setItem(
+        "memes_wave_last_tab_by_id",
+        JSON.stringify({
+          stage: { tab: "LEADERBOARD", competitionId: "primary" },
+        })
+      );
+      mockQueryData.mockReturnValue(selection);
+      const pushStateSpy = jest.spyOn(globalThis.history, "pushState");
+      const { result } = renderHook(() => useActiveWaveManager());
+      act(() => result.current.setActiveWave("stage"));
+      expect(pushStateSpy).toHaveBeenCalledWith(null, "", "/waves/stage");
+    }
+  );
+
+  it("preserves explicit serial-message targets ahead of a remembered competition", () => {
+    globalThis.history.replaceState(null, "", "/waves/chat");
+    (usePathname as jest.Mock).mockReturnValue("/waves/chat");
+    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
+    localStorage.setItem(
+      "memes_wave_last_tab_by_id",
+      JSON.stringify({
+        stage: { tab: "LEADERBOARD", competitionId: "primary" },
+      })
+    );
+    mockQueryData.mockReturnValue({ competition_id: "primary" });
+    const pushStateSpy = jest.spyOn(globalThis.history, "pushState");
+    const { result } = renderHook(() => useActiveWaveManager());
+    act(() => result.current.setActiveWave("stage", { serialNo: 9 }));
+    expect(pushStateSpy).toHaveBeenCalledWith(
+      null,
+      "",
+      "/waves/stage?serialNo=9"
     );
   });
 });

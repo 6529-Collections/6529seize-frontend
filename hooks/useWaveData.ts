@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { commonApiFetch } from "@/services/api/common-api";
+import {
+  commonApiFetch,
+  getStructuredApiErrorStatus,
+} from "@/services/api/common-api";
 import { getWaveQueryKey } from "@/services/api/wave-query";
 
 interface UseWaveDataProps {
@@ -22,6 +25,7 @@ export const useWaveData = ({
       }
       return await commonApiFetch<ApiWave>({
         endpoint: `waves/${waveId}`,
+        errorMode: "structured",
       });
     },
 
@@ -32,10 +36,15 @@ export const useWaveData = ({
       if (error?.message === "Attempted fetch with null waveId") {
         return false; // Don't retry our artificial error
       }
-      if ((error as unknown) === `Wave ${waveId} not found`) {
+      const status = getStructuredApiErrorStatus(error);
+      if (
+        (error as unknown) === `Wave ${waveId ?? ""} not found` ||
+        status === 404
+      ) {
         onWaveNotFound();
         return false;
       }
+      if (status === 401 || status === 403) return false;
       return failureCount < 3;
     },
     retryDelay(failureCount) {

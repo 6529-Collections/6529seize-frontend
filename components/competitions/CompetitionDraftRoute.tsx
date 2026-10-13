@@ -5,6 +5,7 @@ import { useWaveData } from "@/hooks/useWaveData";
 import {
   getCompetitionsRoute,
   isMultiCompetitionEnabled,
+  isCompetitionAccessError,
 } from "@/helpers/competition.helpers";
 import { CompetitionState } from "./CompetitionState";
 import CompetitionDraftEditor from "./CompetitionDraftEditor";
@@ -21,9 +22,17 @@ export default function CompetitionDraftRoute({
   const { isApp } = useDeviceInfo();
   const { waveViewStyle } = useLayout();
   const hub = useCompetitionHub(waveId);
-  const wave = useWaveData({ waveId, onWaveNotFound: () => undefined });
+  const wave = useWaveData({
+    waveId,
+    onWaveNotFound: () => undefined,
+  });
   let content = <CompetitionState />;
-  if (hub.isError || wave.isError || !isMultiCompetitionEnabled())
+  const accessRejected = [hub.error, wave.error].some(isCompetitionAccessError);
+  if (
+    accessRejected ||
+    (!(hub.data && wave.data) && (hub.isError || wave.isError)) ||
+    !isMultiCompetitionEnabled()
+  )
     content = <CompetitionState error />;
   else if (hub.data && wave.data)
     content = hub.data.permissions.create_competition ? (
