@@ -3,6 +3,11 @@
 import dynamic from "next/dynamic";
 import { useState, type ComponentProps } from "react";
 
+import {
+  CancelOnEscapeWhileLoading,
+  EscapeWhileLoadingProvider,
+} from "@/components/utils/lazy-load/EscapeWhileLoading";
+
 import type WaveDropsSearchModalComponent from "./WaveDropsSearchModal";
 
 type WaveDropsSearchModalProps = ComponentProps<
@@ -19,14 +24,16 @@ export const preloadWaveDropsSearchModal = (): void => {
 
 const DynamicWaveDropsSearchModal = dynamic<WaveDropsSearchModalProps>(
   loadWaveDropsSearchModal,
-  { ssr: false, loading: () => null }
+  { ssr: false, loading: () => <CancelOnEscapeWhileLoading /> }
 );
 
 // The search modal pulls in the markdown preview pipeline, so it is neither
 // fetched nor mounted until the first open. After that it stays mounted, as it
 // did when it was imported statically, so the query and filters survive a
 // close and reopen. The modal focuses its input once it mounts open, so a
-// shortcut pressed before the chunk arrives still lands focus on load.
+// shortcut pressed before the chunk arrives still lands focus on load. While
+// the chunk is still loading, Escape closes the open search instead of being
+// swallowed; once the modal mounts it owns Escape again.
 export default function LazyWaveDropsSearchModal(
   props: Readonly<WaveDropsSearchModalProps>
 ) {
@@ -40,5 +47,11 @@ export default function LazyWaveDropsSearchModal(
     return null;
   }
 
-  return <DynamicWaveDropsSearchModal {...props} />;
+  return (
+    <EscapeWhileLoadingProvider
+      onEscape={props.isOpen ? props.onClose : undefined}
+    >
+      <DynamicWaveDropsSearchModal {...props} />
+    </EscapeWhileLoadingProvider>
+  );
 }
