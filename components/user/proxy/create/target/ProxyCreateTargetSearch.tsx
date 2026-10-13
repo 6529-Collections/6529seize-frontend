@@ -99,7 +99,7 @@ export default function ProxyCreateTargetSearch({
               type="button"
               aria-label="Remove selected profile"
               onClick={() => onTargetSelect(null)}
-              className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none"
+              className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
             >
               <svg
                 className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-red"
