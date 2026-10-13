@@ -7,7 +7,7 @@ type TypedDataInput = {
   readonly message: object;
 };
 
-export type E2eeTestSigner = (typedData: TypedDataInput) => Promise<string>;
+type E2eeTestSigner = (typedData: TypedDataInput) => Promise<string>;
 
 /** Name of the page global a local browser test may install. */
 export const E2EE_TEST_SIGNER_GLOBAL = "__e2eeTestSignTypedData";

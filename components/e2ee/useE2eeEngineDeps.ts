@@ -94,7 +94,7 @@ export async function verifyE2eeContractSignature(
   });
 }
 
-export interface E2eeEngineDepsInput {
+interface E2eeEngineDepsInput {
   readonly profileId: string;
   readonly wallet: string;
   readonly api: E2eeApiClient;

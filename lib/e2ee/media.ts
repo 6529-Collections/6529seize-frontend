@@ -19,7 +19,7 @@ import type { PayloadAttachment } from "./payload";
  * decrypt each chunk independently, so the split size is not part of the format.
  */
 export const BLOB_CHUNK_BYTES = 1024 * 1024;
-export const GCM_TAG_BYTES = 16;
+const GCM_TAG_BYTES = 16;
 export const PLAINTEXT_CHUNK_BYTES = BLOB_CHUNK_BYTES - GCM_TAG_BYTES;
 export const MAX_BLOB_BYTES = 25 * 1024 * 1024;
 
@@ -71,7 +71,7 @@ export const ciphertextSize = (plaintextBytes: number): number => {
   return plaintextBytes + chunks * GCM_TAG_BYTES;
 };
 
-export interface EncryptedMedia {
+interface EncryptedMedia {
   key: Uint8Array;
   nonce: Uint8Array;
   chunks: Uint8Array[];
@@ -138,7 +138,7 @@ export async function decryptMedia(
   return concatBytes(...parts);
 }
 
-export interface MediaInput {
+interface MediaInput {
   bytes: Uint8Array;
   mime: string;
   name: string;

@@ -25,7 +25,7 @@ export interface GroupRuntime {
   stallSince: number | null;
 }
 
-export interface ProfileInfo {
+interface ProfileInfo {
   handle: string | null;
   pfp: string | null;
   wallets: string[];
@@ -102,7 +102,7 @@ export function compareMessages(a: StoredMessage, b: StoredMessage): number {
   return a.id < b.id ? -1 : 1;
 }
 
-export const isCountable = (message: StoredMessage, own: string): boolean =>
+const isCountable = (message: StoredMessage, own: string): boolean =>
   message.kind === "message" &&
   !message.pending &&
   !message.deleted &&

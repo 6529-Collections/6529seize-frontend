@@ -4,7 +4,7 @@ import type { MemberRef } from "./required-changes";
 /** Contract 8.1 policy validation of a staged commit (pure). */
 
 export const MAX_GROUP_NAME = 100;
-export const MAX_ADMINS = 200;
+const MAX_ADMINS = 200;
 
 export interface AddedLeafRef extends MemberRef {
   /** Credential/grant/revocation checks passed (2.2, 2.3). */
@@ -24,7 +24,7 @@ export interface CommitValidationInput {
   isRequiredRemoval: (deviceKey: string) => boolean;
 }
 
-export type CommitValidation =
+type CommitValidation =
   | { ok: true }
   | { ok: false; reason: string; splitView: boolean };
 
@@ -60,7 +60,7 @@ export function isValidMetadata(value: unknown): value is GroupMetadata {
 }
 
 /** Field comparison (v and history are fixed by the shape check). */
-export const metadataEqual = (a: GroupMetadata, b: GroupMetadata): boolean =>
+const metadataEqual = (a: GroupMetadata, b: GroupMetadata): boolean =>
   a.g.toLowerCase() === b.g.toLowerCase() &&
   a.kind === b.kind &&
   a.name === b.name &&

@@ -22,16 +22,16 @@ import { E2eeError } from "./errors";
 
 /** Contract 2 + 8.8: one wallet prompt per device; KeyPackage pool upkeep. */
 
-export const ONE_TIME_POOL = 30;
-export const ONE_TIME_REFILL_BELOW = 10;
-export const MAX_ONE_TIME = 100;
-export const ONE_TIME_LIFETIME_S = 30 * 86_400;
-export const LAST_RESORT_LIFETIME_S = 90 * 86_400;
-export const LAST_RESORT_ROTATE_MS = 30 * DAY_MS;
+const ONE_TIME_POOL = 30;
+const ONE_TIME_REFILL_BELOW = 10;
+const MAX_ONE_TIME = 100;
+const ONE_TIME_LIFETIME_S = 30 * 86_400;
+const LAST_RESORT_LIFETIME_S = 90 * 86_400;
+const LAST_RESORT_ROTATE_MS = 30 * DAY_MS;
 /** Reuse a stored-but-unregistered grant only while it has this much left. */
 const MIN_REUSABLE_GRANT_MS = 7 * DAY_MS;
 /** 8.8: renewal is offered in the grant's last 14 days. */
-export const RENEWAL_WINDOW_MS = 14 * DAY_MS;
+const RENEWAL_WINDOW_MS = 14 * DAY_MS;
 
 export const renewalDue = (ctx: EngineContext, device: StoredDevice): boolean =>
   device.grant.expires_at * 1000 - ctx.now() <= RENEWAL_WINDOW_MS;
@@ -146,7 +146,7 @@ async function uploadKeyPackages(
 }
 
 /** Refills one-time KeyPackages below 10 and rotates the last-resort one. */
-export async function ensureKeyPackages(
+async function ensureKeyPackages(
   ctx: EngineContext,
   status: ApiE2eeKeyPackageStatus | null
 ): Promise<void> {
@@ -265,7 +265,7 @@ export async function enrollDevice(ctx: EngineContext): Promise<boolean> {
   return true;
 }
 
-export function toDeviceInfo(
+function toDeviceInfo(
   ctx: EngineContext,
   record: ApiE2eeDevice,
   verified: boolean

@@ -38,7 +38,7 @@ const getSequencedMax = (messages: readonly E2eeMessage[]): number => {
 };
 
 /** "New message from X" for the newest incoming message after `afterSeq`. */
-export function getIncomingAnnouncement({
+function getIncomingAnnouncement({
   locale,
   messages,
   members,

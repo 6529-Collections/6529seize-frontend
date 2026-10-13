@@ -57,7 +57,7 @@ function findNewDevices(
   );
 }
 
-export interface E2eeNewDevices {
+interface E2eeNewDevices {
   /** Active devices of this profile the user has not been told about. */
   readonly newDevices: readonly E2eeDeviceInfo[];
   readonly acknowledge: (deviceKey: string) => void;

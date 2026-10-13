@@ -83,7 +83,7 @@ export interface ApiE2eeClaimKeyPackagesRequest {
   claimer_device_key: string;
 }
 
-export interface ApiE2eeClaimedKeyPackage {
+interface ApiE2eeClaimedKeyPackage {
   device: ApiE2eeDevice;
   key_package: string;
   last_resort: boolean;

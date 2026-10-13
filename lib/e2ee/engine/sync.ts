@@ -30,7 +30,7 @@ import { isValidMetadata } from "./validate";
 
 /** Log catch-up and Welcome inbox (contract 8.1 order, 4.2 windows). */
 
-export const LOG_PAGE_LIMIT = 200;
+const LOG_PAGE_LIMIT = 200;
 
 const isNetworkish = (error: unknown): boolean => {
   if (error instanceof RetryableError) {
@@ -281,7 +281,7 @@ async function acceptJoin(
 }
 
 /** Validates and joins one Welcome; returns the joined group, if any. */
-export async function handleWelcome(
+async function handleWelcome(
   ctx: EngineContext,
   welcome: ApiE2eeWelcome
 ): Promise<GroupRuntime | null> {

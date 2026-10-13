@@ -14,18 +14,18 @@ import { isHex } from "./bytes";
 export const E2EE_SALT = keccak256(
   toBytes("6529 Network pre-genesis interim 1")
 );
-export const E2EE_CIPHERSUITE = 1;
-export const GRANT_LIFETIME_SECONDS = 15_552_000; // 180 days
-export const GRANT_MAX_LIFETIME_SECONDS = 181 * 86_400;
-export const CREDENTIAL_PREFIX = "6529-e2ee-v1";
+const E2EE_CIPHERSUITE = 1;
+const GRANT_LIFETIME_SECONDS = 15_552_000; // 180 days
+const GRANT_MAX_LIFETIME_SECONDS = 181 * 86_400;
+const CREDENTIAL_PREFIX = "6529-e2ee-v1";
 
-export const GRANT_DOMAIN = {
+const GRANT_DOMAIN = {
   name: "6529 Encrypted Messages",
   version: "1",
   salt: E2EE_SALT,
 } as const;
 
-export const GRANT_TYPES = {
+const GRANT_TYPES = {
   MlsDeviceGrant: [
     { name: "statement", type: "string" },
     { name: "wallet", type: "address" },
@@ -37,9 +37,9 @@ export const GRANT_TYPES = {
   ],
 } as const;
 
-export const GRANT_PRIMARY_TYPE = "MlsDeviceGrant";
+const GRANT_PRIMARY_TYPE = "MlsDeviceGrant";
 
-export interface GrantMessage {
+interface GrantMessage {
   statement: string;
   wallet: `0x${string}`;
   deviceKey: `0x${string}`;
@@ -49,7 +49,7 @@ export interface GrantMessage {
   origin: string;
 }
 
-export interface GrantTypedData {
+interface GrantTypedData {
   domain: typeof GRANT_DOMAIN;
   types: typeof GRANT_TYPES;
   primaryType: typeof GRANT_PRIMARY_TYPE;
@@ -62,7 +62,7 @@ export const grantExpiresAt = (issuedAtSeconds: number): number =>
 
 const pad2 = (value: number): string => String(value).padStart(2, "0");
 
-export function formatGrantExpiry(expiresAtSeconds: number): string {
+function formatGrantExpiry(expiresAtSeconds: number): string {
   const date = new Date(expiresAtSeconds * 1000);
   const day = `${date.getUTCFullYear()}-${pad2(date.getUTCMonth() + 1)}-${pad2(date.getUTCDate())}`;
   return `${day} ${pad2(date.getUTCHours())}:${pad2(date.getUTCMinutes())}`;
@@ -161,7 +161,7 @@ const failed = (reason: string): GrantVerification => ({
   reason,
 });
 
-export interface VerifyGrantOptions {
+interface VerifyGrantOptions {
   /** Unix ms; the time at which the grant must be valid. */
   atMs: number;
   verifyContractSignature?:

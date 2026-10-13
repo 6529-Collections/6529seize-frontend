@@ -12,7 +12,6 @@ import {
 import { RetryableError } from "./errors";
 import {
   computeRequiredChanges,
-  hasOverdueChanges,
   type DeviceStatus,
   type RequiredChanges,
 } from "./required-changes";
@@ -22,7 +21,7 @@ import { catchUpGroup } from "./sync";
 
 /** 8.2-8.5: required changes, stalls, self-updates, device adds, roster repair. */
 
-export const STALL_MS = 20_000;
+const STALL_MS = 20_000;
 export const STALL_RETRY_MS = 5_000;
 export const MAX_LEAVES_PER_COMMIT = 200;
 const OTHER_ADD_MIN_MS = 5_000;
@@ -178,7 +177,7 @@ export function requiredChangesPlanner(options: {
   };
 }
 
-export type CommitRun =
+type CommitRun =
   | { kind: "done"; seq: number | null }
   | { kind: "delayed" }
   | { kind: "rejected"; code: string | null };
@@ -348,6 +347,3 @@ export const otherAddDelayMs = (ctx: EngineContext): number =>
 
 export const rosterDelayMs = (ctx: EngineContext): number =>
   Math.floor(ctx.random() * ROSTER_SPAN_MS);
-
-export const needsImmediateWork = (changes: RequiredChanges): boolean =>
-  hasOverdueChanges(changes) || changes.selfUpdateDue;

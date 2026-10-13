@@ -99,7 +99,7 @@ interface E2eeDeviceRowProps {
   readonly onRevoke?: ((device: E2eeDeviceInfo) => void) | undefined;
 }
 
-export function E2eeDeviceRow({ device, onRevoke }: E2eeDeviceRowProps) {
+function E2eeDeviceRow({ device, onRevoke }: E2eeDeviceRowProps) {
   const locale = useBrowserLocale();
   const Icon = PLATFORM_ICONS[device.platform];
   const isActive = device.revokedAt === null;

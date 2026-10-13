@@ -15,13 +15,13 @@ export interface ClaimedPackage {
   device: ApiE2eeDevice;
 }
 
-export interface ClaimedPackages {
+interface ClaimedPackages {
   status: Map<string, ApiE2eePolicyStatus>;
   /** One usable KeyPackage per device, in claim order. */
   packages: ClaimedPackage[];
 }
 
-export const emptyClaim = (): ClaimedPackages => ({
+const emptyClaim = (): ClaimedPackages => ({
   status: new Map(),
   packages: [],
 });

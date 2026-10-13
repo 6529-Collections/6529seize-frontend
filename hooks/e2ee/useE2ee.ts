@@ -103,7 +103,7 @@ export function useE2ee(): UseE2eeResult {
   );
 }
 
-export interface UseE2eeConversationResult {
+interface UseE2eeConversationResult {
   readonly conversation: E2eeConversation | null;
   readonly messages: readonly E2eeMessage[];
 }
@@ -129,7 +129,7 @@ export function useE2eeConversation(
   };
 }
 
-export interface E2eeUnreadSummary {
+interface E2eeUnreadSummary {
   readonly unread: number;
   readonly mentions: number;
   readonly hasUnread: boolean;

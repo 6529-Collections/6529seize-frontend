@@ -5,7 +5,7 @@ import type { LeafActivity } from "../records";
 export const T_IDLE_MS = 60 * 86_400_000;
 export const T_PCS_MS = 14 * 86_400_000;
 /** Tolerance when judging someone else's idle removal (clock skew). */
-export const IDLE_SKEW_MS = 86_400_000;
+const IDLE_SKEW_MS = 86_400_000;
 
 export interface MemberRef {
   deviceKey: string;
@@ -66,7 +66,7 @@ export function isStrictRemoval(
   return status.revoked || status.badGrant || expired;
 }
 
-export function isIdle(
+function isIdle(
   activity: LeafActivity | undefined,
   now: number
 ): boolean {

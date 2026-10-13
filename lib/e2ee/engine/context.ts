@@ -76,7 +76,7 @@ export function requireActiveGroup(
   return runtime;
 }
 
-export interface CheckpointExtra {
+interface CheckpointExtra {
   groups?: readonly GroupRuntime[];
   deleteGroups?: string[];
   outbox?: StoredOutboxItem[];

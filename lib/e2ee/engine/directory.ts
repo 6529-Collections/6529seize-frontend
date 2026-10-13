@@ -11,8 +11,8 @@ import { RetryableError } from "./errors";
 
 /** Device records fetched from the delivery service plus client verification. */
 
-export const DEVICE_TTL_MS = 5 * 60_000;
-export const PROFILE_DEVICES_TTL_MS = 5 * 60_000;
+const DEVICE_TTL_MS = 5 * 60_000;
+const PROFILE_DEVICES_TTL_MS = 5 * 60_000;
 
 interface CachedDevice {
   record: ApiE2eeDevice;
@@ -24,9 +24,9 @@ interface CachedProfileDevices {
   fetchedAt: number;
 }
 
-export type RevocationState = "none" | "verified" | "unverified";
+type RevocationState = "none" | "verified" | "unverified";
 
-export interface LeafCheck {
+interface LeafCheck {
   ok: boolean;
   profileId: string | null;
   record: ApiE2eeDevice | null;
@@ -34,7 +34,7 @@ export interface LeafCheck {
   reason: string | null;
 }
 
-export interface DirectoryDeps {
+interface DirectoryDeps {
   api: E2eeApiClient;
   now: () => number;
   verifyEd25519: (pub: string, digest32: Uint8Array, sig: string) => boolean;

@@ -18,7 +18,7 @@ export const DEV_AUTH_TEST_OVERRIDE_KEYS = {
 const LOCAL_TEST_HOSTNAMES = new Set(["localhost", "127.0.0.1"]);
 const DEV_LIKE_NODE_ENVS = new Set(["development", "test", "local"]);
 
-export interface DevAuthTestOverride {
+interface DevAuthTestOverride {
   readonly wallet: string;
   readonly jwt: string;
 }

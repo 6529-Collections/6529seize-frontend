@@ -6,19 +6,17 @@ import { concatBytes, hexToBytes, isHex, utf8Encode } from "./bytes";
  * `H(name, f1..fk) = keccak256(abi.encode(bytes32 TAG(name), f1..fk))`.
  */
 
-export type Hex = `0x${string}`;
+type Hex = `0x${string}`;
 
-export type DigestField =
+type DigestField =
   | { readonly type: "bytes32"; readonly value: string }
   | { readonly type: "uint8" | "uint32"; readonly value: number }
   | { readonly type: "uint64"; readonly value: number | bigint };
 
-export const ZERO32: Hex = `0x${"0".repeat(64)}`;
+const ENTRY_KIND_COMMIT = 1;
+const ENTRY_KIND_PROPOSAL = 2;
 
-export const ENTRY_KIND_COMMIT = 1;
-export const ENTRY_KIND_PROPOSAL = 2;
-
-export const entryKindCode = (kind: "commit" | "proposal"): number =>
+const entryKindCode = (kind: "commit" | "proposal"): number =>
   kind === "commit" ? ENTRY_KIND_COMMIT : ENTRY_KIND_PROPOSAL;
 
 export const TAG = (name: string): Hex => keccak256(utf8Encode(name));
@@ -31,7 +29,7 @@ const assertBytes32 = (value: string): Hex => {
   return normalized as Hex;
 };
 
-export function H(name: string, fields: readonly DigestField[]): Hex {
+function H(name: string, fields: readonly DigestField[]): Hex {
   const types = [{ type: "bytes32" }, ...fields.map((f) => ({ type: f.type }))];
   const values: (Hex | number | bigint)[] = [TAG(name)];
   for (const field of fields) {
@@ -45,7 +43,7 @@ export function H(name: string, fields: readonly DigestField[]): Hex {
 /** fp(x): first 8 bytes of keccak256(x) as 16 lowercase hex chars, no 0x. */
 export const fp = (bytes: Uint8Array): string => keccak256(bytes).slice(2, 18);
 
-export interface EntryDigestInput {
+interface EntryDigestInput {
   readonly g: string;
   readonly epoch: number;
   readonly kind: "commit" | "proposal";
@@ -138,9 +136,7 @@ export function rosterDigest(
 export const digestBytes = (digest: string): Uint8Array =>
   hexToBytes(assertBytes32(digest));
 
-export const keccakHex = (bytes: Uint8Array): Hex => keccak256(bytes);
-
-export function compareAscii(left: string, right: string): number {
+function compareAscii(left: string, right: string): number {
   if (left === right) {
     return 0;
   }

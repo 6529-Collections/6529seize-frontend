@@ -13,7 +13,7 @@ import type {
   E2eeMessage,
 } from "@/lib/e2ee/types";
 
-export interface PluralKeys {
+interface PluralKeys {
   readonly one: MessageKey;
   readonly other: MessageKey;
 }

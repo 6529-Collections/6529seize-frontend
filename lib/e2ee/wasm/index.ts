@@ -39,7 +39,7 @@ export interface MlsWasmExports {
   readonly moduleInfo: typeof moduleInfo;
 }
 
-export interface LoadMlsWasmOptions {
+interface LoadMlsWasmOptions {
   /** Module bytes supplied by the caller (tests, desktop). Still hash-checked. */
   readonly bytes?: Uint8Array;
   /** URL to fetch instead of the manifest path (for example a CDN prefix). */

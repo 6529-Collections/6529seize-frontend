@@ -34,7 +34,7 @@ export interface E2eeContextValue {
 
 const noop = () => undefined;
 
-export const DISABLED_E2EE_CONTEXT: E2eeContextValue = {
+const DISABLED_E2EE_CONTEXT: E2eeContextValue = {
   availability: "disabled",
   profileId: null,
   engine: null,

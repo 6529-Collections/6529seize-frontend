@@ -50,7 +50,7 @@ function hintKind(
 }
 
 /** Content-free hints: profile ids and a kind only, never text (7.3). */
-export function computeNotify(
+function computeNotify(
   ctx: EngineContext,
   runtime: GroupRuntime,
   payload: Payload
@@ -212,7 +212,7 @@ export async function queueTargeted(
   );
 }
 
-export type SendStep =
+type SendStep =
   | "sent"
   | "empty"
   | "stale"

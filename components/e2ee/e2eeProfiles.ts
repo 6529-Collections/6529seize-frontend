@@ -3,7 +3,7 @@ import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
 
-export interface E2eeResolvedProfile {
+interface E2eeResolvedProfile {
   readonly handle: string | null;
   readonly pfp: string | null;
   readonly wallets: string[];
@@ -18,7 +18,7 @@ const UNKNOWN_PROFILE: E2eeResolvedProfile = {
   wallets: [],
 };
 
-export const getE2eeProfileQueryKey = (profileId: string) =>
+const getE2eeProfileQueryKey = (profileId: string) =>
   [QueryKey.PROFILE, "e2ee-profile-id", profileId] as const;
 
 export const toResolvedProfile = (

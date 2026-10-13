@@ -11,7 +11,7 @@ import { E2eeBanner } from "../ui/E2eeBanner";
 import { useE2eeNow } from "../useE2eeNow";
 
 /** Renewal opens in the grant's last 14 days (contract 8.8). */
-export const E2EE_RENEWAL_WINDOW_MS = 14 * 24 * 60 * 60 * 1000;
+const E2EE_RENEWAL_WINDOW_MS = 14 * 24 * 60 * 60 * 1000;
 
 /**
  * Non-modal renewal prompt for this device's grant. Callers render it only

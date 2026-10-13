@@ -12,7 +12,7 @@ export const utf8Encode = (value: string): Uint8Array =>
 export const utf8Decode = (bytes: Uint8Array): string =>
   new TextDecoder("utf-8", { fatal: true }).decode(bytes);
 
-export function bytesToHex(bytes: Uint8Array): `0x${string}` {
+function bytesToHex(bytes: Uint8Array): `0x${string}` {
   let out = "0x";
   for (const byte of bytes) {
     out += byte.toString(16).padStart(2, "0");
@@ -106,15 +106,4 @@ export function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
   const copy = new Uint8Array(bytes.length);
   copy.set(bytes);
   return copy.buffer;
-}
-
-export function bytesEqual(left: Uint8Array, right: Uint8Array): boolean {
-  if (left.length !== right.length) {
-    return false;
-  }
-  let diff = 0;
-  for (let index = 0; index < left.length; index += 1) {
-    diff |= (left[index] ?? 0) ^ (right[index] ?? 0);
-  }
-  return diff === 0;
 }

@@ -1,6 +1,6 @@
 import { Capacitor } from "@capacitor/core";
 
-export type E2eePlatform = "web" | "desktop" | "phone";
+type E2eePlatform = "web" | "desktop" | "phone";
 
 const DESKTOP_GRANT_ORIGIN = "6529 Desktop";
 

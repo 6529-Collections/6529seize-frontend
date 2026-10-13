@@ -20,7 +20,7 @@ import { isPlaintextDmWave, resolveDmParticipants } from "./dmParticipants";
  * One tap from a plaintext DM to `/messages/encrypted/new`, prefilled with
  * the same people. History is not migrated; the new chat starts empty.
  */
-export function useStartEncryptedChatFromDm(wave: ApiWave | null) {
+function useStartEncryptedChatFromDm(wave: ApiWave | null) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const locale = useBrowserLocale();

@@ -33,23 +33,6 @@ import type {
   ApiE2eeWelcome,
 } from "./api-types";
 
-/** Contract section 4 error codes. */
-export type E2eeApiErrorCode =
-  | "E2EE_DISABLED"
-  | "E2EE_NOT_YOUR_DEVICE"
-  | "E2EE_DEVICE_LIMIT"
-  | "E2EE_DEVICE_EXISTS"
-  | "E2EE_BAD_GRANT"
-  | "E2EE_BAD_SIGNATURE"
-  | "E2EE_EPOCH_CONFLICT"
-  | "E2EE_EPOCH_STALE"
-  | "E2EE_NOT_MEMBER"
-  | "E2EE_POLICY"
-  | "E2EE_BLOCKED"
-  | "E2EE_TOO_LARGE"
-  | "E2EE_RATE_LIMITED"
-  | "E2EE_NOT_FOUND";
-
 /**
  * Typed REST error. `status` 0 means the request never produced an HTTP
  * response (network failure); the outcome of a write is then unknown.

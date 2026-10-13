@@ -20,8 +20,8 @@ import { processInbox, tryCatchUp } from "./sync";
 /** Orchestration: sync passes, maintenance, outbox flushing, timers, wakes. */
 
 export const POLL_OPEN_MS = 5_000;
-export const POLL_IDLE_MS = 30_000;
-export const MAINTAIN_EVERY_MS = 10 * 60_000;
+const POLL_IDLE_MS = 30_000;
+const MAINTAIN_EVERY_MS = 10 * 60_000;
 const WAKE_DEBOUNCE_MS = 50;
 const WS_QUIET_MS = 60_000;
 
@@ -46,7 +46,7 @@ const swallowNetwork = async (task: Promise<unknown>): Promise<void> => {
   }
 };
 
-export interface ControllerHooks {
+interface ControllerHooks {
   /** Refreshes /e2ee/me (devices + KeyPackage pool). */
   refreshMe: () => Promise<void>;
   /** Called when the server reports this device revoked. */

@@ -2,7 +2,7 @@
  * Engine errors carry a stable code; the UI maps codes to copy (contract 12:
  * the engine never returns user-visible strings).
  */
-export type E2eeErrorCode =
+type E2eeErrorCode =
   | "E2EE_NOT_READY"
   | "E2EE_UNSUPPORTED"
   | "E2EE_NO_CONVERSATION"

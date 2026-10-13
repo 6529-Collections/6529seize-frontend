@@ -10,10 +10,10 @@ import {
 } from "./e2eeMentions";
 
 export const E2EE_MAX_TEXT_LENGTH = 10_000;
-export const E2EE_MAX_FILES = 10;
+const E2EE_MAX_FILES = 10;
 /** Blob limit is 25 MiB of ciphertext; keep headroom for per-chunk tags. */
-export const E2EE_MAX_FILE_BYTES = 25 * 1024 * 1024 - 64 * 1024;
-export const E2EE_MAX_FILE_MB_LABEL = 25;
+const E2EE_MAX_FILE_BYTES = 25 * 1024 * 1024 - 64 * 1024;
+const E2EE_MAX_FILE_MB_LABEL = 25;
 
 export interface ComposerError {
   readonly key: MessageKey;
@@ -47,7 +47,7 @@ export function addComposerFiles(
   return { files, error };
 }
 
-export interface MentionPicker {
+interface MentionPicker {
   readonly query: ActiveMentionQuery | null;
   readonly candidates: readonly E2eeMember[];
   readonly open: boolean;

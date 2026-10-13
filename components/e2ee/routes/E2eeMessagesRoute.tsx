@@ -11,7 +11,7 @@ import { E2eeConversationListPage } from "../list/E2eeConversationListPage";
 import { E2eeNewConversation } from "../new/E2eeNewConversation";
 import { E2eePageShell } from "../ui/E2eePageShell";
 
-export type E2eeRouteView =
+type E2eeRouteView =
   | { readonly kind: "list" }
   | { readonly kind: "new" }
   | { readonly kind: "devices" }

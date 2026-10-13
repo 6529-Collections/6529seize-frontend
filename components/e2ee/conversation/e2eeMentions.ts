@@ -3,7 +3,7 @@ import type { E2eeMember } from "@/lib/e2ee/types";
 const MENTION_TOKEN = /@([A-Za-z0-9_.-]+)/g;
 const MENTION_QUERY_BEFORE_CARET = /(?:^|\s)@([A-Za-z0-9_.-]{0,32})$/;
 
-export type MentionSegment =
+type MentionSegment =
   | { readonly kind: "text"; readonly start: number; readonly value: string }
   | {
       readonly kind: "mention";

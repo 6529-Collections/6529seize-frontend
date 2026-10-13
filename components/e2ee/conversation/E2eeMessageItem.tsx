@@ -29,7 +29,7 @@ import { E2eeAvatar } from "../ui/E2eeAvatar";
 import { E2eeAttachmentView } from "./E2eeAttachmentView";
 import { splitMentions } from "./e2eeMentions";
 
-export const QUICK_REACTIONS = ["👍", "❤️", "😂", "🔥", "👀", "🎉"] as const;
+const QUICK_REACTIONS = ["👍", "❤️", "😂", "🔥", "👀", "🎉"] as const;
 
 export const getMessageDomId = (id: string) => `e2ee-message-${id}`;
 

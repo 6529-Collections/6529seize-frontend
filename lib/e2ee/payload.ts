@@ -2,12 +2,12 @@ import { isHex, randomBytes, utf8Decode, utf8Encode } from "./bytes";
 
 /** Contract section 6: the JSON payload inside MLS application messages. */
 
-export const PAYLOAD_VERSION = 1;
-export const MAX_TEXT_CHARS = 10_000;
-export const MAX_REACTION_CHARS = 64;
-export const MAX_ATTACHMENTS = 10;
-export const MAX_MENTIONS = 200;
-export const MAX_NAME_CHARS = 255;
+const PAYLOAD_VERSION = 1;
+const MAX_TEXT_CHARS = 10_000;
+const MAX_REACTION_CHARS = 64;
+const MAX_ATTACHMENTS = 10;
+const MAX_MENTIONS = 200;
+const MAX_NAME_CHARS = 255;
 /**
  * The largest MESSAGE bucket is 64 KiB; the wrap header, the inner framing,
  * the sender signature and the MLS PrivateMessage overhead must fit too.
@@ -68,7 +68,7 @@ export const newMessageId = (): string =>
     byte.toString(16).padStart(2, "0")
   ).join("");
 
-export const isMessageId = (value: unknown): value is string =>
+const isMessageId = (value: unknown): value is string =>
   typeof value === "string" && ID_PATTERN.test(value);
 
 type Json = Record<string, unknown>;
@@ -125,7 +125,7 @@ function isAttachmentCore(value: Json): boolean {
   );
 }
 
-export function parseAttachment(value: unknown): PayloadAttachment | null {
+function parseAttachment(value: unknown): PayloadAttachment | null {
   if (!isRecord(value) || !isAttachmentCore(value)) {
     return null;
   }

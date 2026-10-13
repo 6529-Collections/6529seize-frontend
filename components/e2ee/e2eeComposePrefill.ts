@@ -11,7 +11,7 @@ export interface E2eePrefillPerson {
   readonly wallet: string | null;
 }
 
-export interface E2eeComposePrefill {
+interface E2eeComposePrefill {
   readonly people: readonly E2eePrefillPerson[];
   readonly source: "dm";
 }
