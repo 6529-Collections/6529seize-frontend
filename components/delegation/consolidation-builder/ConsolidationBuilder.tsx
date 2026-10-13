@@ -3,8 +3,10 @@
 import { useConsolidationPolicy } from "@/hooks/useConsolidationPolicy";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { formatAddress } from "@/helpers/addressFormatting";
+import type { ConsolidationPolicy } from "@/helpers/consolidationPolicy";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate, formatInteger } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
@@ -117,15 +119,6 @@ function useConsolidationClock(
   return nowMs;
 }
 
-function getPreActivationSigningDate(
-  activationMs: number | undefined,
-  nowMs: number,
-  signingOpensDate: string
-): string | null {
-  if (activationMs === undefined || nowMs >= activationMs) return null;
-  return signingOpensDate;
-}
-
 function getGroupLookupState(
   walletCount: number,
   groups: { readonly isPending: boolean; readonly isError: boolean }
@@ -167,6 +160,43 @@ function hasUnfinishedStep(
   progress: readonly ConsolidationStepProgress[] | undefined
 ): boolean {
   return progress?.some((step) => step.status !== "complete") === true;
+}
+
+/**
+ * Formatted activation and signing-open times, empty until the policy loads.
+ * The wallet list shows when signing opens only before the cutoff.
+ */
+function getPolicyDates(
+  locale: SupportedLocale,
+  policy: ConsolidationPolicy | null,
+  nowMs: number
+): {
+  activationDate: string;
+  signingOpensDate: string;
+  preActivationSigningDate: string | null;
+} {
+  if (!policy) {
+    return {
+      activationDate: "",
+      signingOpensDate: "",
+      preActivationSigningDate: null,
+    };
+  }
+  const signingOpensDate = formatDate(
+    locale,
+    policy.signingOpensMs,
+    ACTIVATION_DATE_FORMAT
+  );
+  return {
+    activationDate: formatDate(
+      locale,
+      policy.activationMs,
+      ACTIVATION_DATE_FORMAT
+    ),
+    signingOpensDate,
+    preActivationSigningDate:
+      nowMs < policy.activationMs ? signingOpensDate : null,
+  };
 }
 
 /**
@@ -315,12 +345,8 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
         });
   }
 
-  const activationDate = policy
-    ? formatDate(locale, policy.activationMs, ACTIVATION_DATE_FORMAT)
-    : "";
-  const signingOpensDate = policy
-    ? formatDate(locale, policy.signingOpensMs, ACTIVATION_DATE_FORMAT)
-    : "";
+  const { activationDate, signingOpensDate, preActivationSigningDate } =
+    getPolicyDates(locale, policy, nowMs);
 
   return (
     <DelegationFormShell
@@ -343,11 +369,7 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
       <ConsolidationBuilderWallets
         locale={locale}
         maxWallets={limits?.maxWallets ?? null}
-        preActivationSigningDate={getPreActivationSigningDate(
-          policy?.activationMs,
-          nowMs,
-          signingOpensDate
-        )}
+        preActivationSigningDate={preActivationSigningDate}
         entries={entries}
         issues={validation.issues}
         validCount={validation.wallets.length}
