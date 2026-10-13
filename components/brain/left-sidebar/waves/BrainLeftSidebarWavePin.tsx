@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
-import { Tooltip } from "react-tooltip";
 import { useAuth } from "@/components/auth/Auth";
+import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
 import {
   usePinnedWavesServer,
   MAX_PINNED_WAVES,
@@ -194,14 +194,17 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
           filled={isPinned}
         />
       </button>
-      <Tooltip
-        id={`wave-pin-${waveId}`}
-        place="top"
-        offset={8}
-        opacity={1}
-        positionStrategy="fixed"
-        style={TOOLTIP_STYLES}
-      />
+      {/* Portalled so the sticky list filter and row stacking contexts cannot
+          cover it. Touch devices have no hover, so they skip the tooltip. */}
+      {!isTouchDevice && tooltipContent !== null && (
+        <BodyPortalTooltip
+          id={`wave-pin-${waveId}`}
+          place="top"
+          offset={8}
+          opacity={1}
+          style={TOOLTIP_STYLES}
+        />
+      )}
     </>
   );
 };

@@ -6764,12 +6764,47 @@
         "Wave header controls are documented in the Wave Header area.",
         "Available controls depend on permissions and the current wave state.",
         "Unavailable submission actions use a lock icon at every width. Hover, focus, or select the lock for the full restriction reason; the Memes How to Submit helper keeps its desktop label and opens nomination guidance.",
-        "Wave picture edit and link sharing are separate header features."
+        "Wave picture edit and link sharing are separate header features.",
+        "A wave you have not joined shows a Join button first in the conversation header's top-right controls."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
       "tags": ["waves", "header"],
       "source_refs": ["ops/docs/waves/header/feature-wave-header-controls.md"]
+    },
+    {
+      "id": "waves.join",
+      "kind": "workflow",
+      "title": "Join or leave a wave",
+      "aliases": [
+        "join wave",
+        "join a wave",
+        "how do I join a wave",
+        "follow wave",
+        "leave wave",
+        "unjoin wave",
+        "joined waves"
+      ],
+      "keywords": ["waves", "join", "joined", "leave", "follow", "header"],
+      "facts": [
+        "Open a wave you have not joined and select Join, the first control in the top-right of the conversation header on desktop, compact web, and the native app.",
+        "After joining, the header shows a short Joined confirmation and then returns to its usual controls; the wave appears in the sidebar's Joined collection.",
+        "The right sidebar About panel also has Join; on a joined wave it shows Joined, and selecting Joined there leaves the wave.",
+        "Joining asks you to confirm your session first. If the request fails or the session check is cancelled, you stay unjoined and can retry.",
+        "Signed-out visitors who select Join are taken to the wallet connect flow; after signing in, select Join again.",
+        "The header Join is not shown for direct messages, proxy sessions, or connected wallets whose profile has not loaded.",
+        "A subwave is joined separately from its parent wave.",
+        "Joined waves offer the bell notification menu; muting is separate from joining."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves"],
+      "tags": ["waves", "join", "header"],
+      "source_refs": [
+        "components/waves/header/WaveJoinCta.tsx",
+        "components/waves/header/WaveHeaderFollow.tsx",
+        "hooks/waves/useWaveJoin.ts",
+        "ops/docs/waves/header/feature-wave-header-controls.md"
+      ]
     },
     {
       "id": "waves.notification-controls",

@@ -7,6 +7,7 @@ let mockIsRightSidebarOpen = false;
 const mockToggleRightSidebar = jest.fn();
 let mockConnectedProfile: { handle: string } | null = { handle: "alice" };
 let mockActiveProfileProxy: { created_by: { handle: string } } | null = null;
+let mockShowJoinCta = false;
 
 jest.mock("next/navigation", () => ({
   usePathname: () => "/waves/wave-1",
@@ -86,6 +87,26 @@ jest.mock("@/components/waves/header/rep/WaveRepButton", () => () => (
   <button type="button">Add REP</button>
 ));
 
+jest.mock("@/components/waves/header/WaveJoinCta", () => ({
+  __esModule: true,
+  default: ({
+    wave,
+    tooltipId,
+  }: {
+    readonly wave: { readonly name: string };
+    readonly tooltipId: string;
+  }) =>
+    mockShowJoinCta ? (
+      <button
+        type="button"
+        aria-label={`Join ${wave.name}`}
+        data-tooltip-id={tooltipId}
+      >
+        Join
+      </button>
+    ) : null,
+}));
+
 const wave = {
   id: "wave-1",
   name: "Follow The Repo",
@@ -104,6 +125,7 @@ describe("MyStreamWaveTabsHeader", () => {
     mockToggleRightSidebar.mockClear();
     mockConnectedProfile = { handle: "alice" };
     mockActiveProfileProxy = null;
+    mockShowJoinCta = false;
   });
 
   it("can expand Wave search into the site-wide search", () => {
@@ -193,6 +215,62 @@ describe("MyStreamWaveTabsHeader", () => {
     expect(dropButton.parentElement?.firstElementChild).toBe(dropButton);
     expect(dropButton.nextElementSibling).toBe(repButton);
     expect(repButton.nextElementSibling).toBe(galleryButton);
+  });
+
+  it("leads the header actions with Join for a wave the viewer has not joined", () => {
+    mockShowJoinCta = true;
+    render(
+      <MyStreamWaveTabsHeader
+        wave={wave}
+        activeContentTab={MyStreamWaveTab.CHAT}
+        setActiveContentTab={jest.fn()}
+        onSelectCuration={jest.fn()}
+        isCompact={false}
+        showBackButton={false}
+        headerActionsTooltipId="header-actions"
+        headerClassName="tw-flex"
+        actionsClassName="tw-flex"
+        renderLeadingActions={() => (
+          <button type="button" aria-label="Submit drop">
+            Drop
+          </button>
+        )}
+      />
+    );
+
+    const joinButton = screen.getByRole("button", {
+      name: "Join Follow The Repo",
+    });
+    expect(joinButton.parentElement?.firstElementChild).toBe(joinButton);
+    expect(joinButton.nextElementSibling).toBe(
+      screen.getByRole("button", { name: "Submit drop" })
+    );
+    expect(joinButton).toHaveAttribute("data-tooltip-id", "header-actions");
+  });
+
+  it("keeps Join reachable in the compact mobile header", () => {
+    mockShowJoinCta = true;
+    render(
+      <MyStreamWaveTabsHeader
+        wave={wave}
+        activeContentTab={MyStreamWaveTab.CHAT}
+        setActiveContentTab={jest.fn()}
+        onSelectCuration={jest.fn()}
+        isCompact
+        showBackButton
+        headerActionsTooltipId="header-actions"
+        headerClassName="tw-flex"
+        actionsClassName="tw-flex"
+      />
+    );
+
+    const joinButton = screen.getByRole("button", {
+      name: "Join Follow The Repo",
+    });
+    expect(joinButton.parentElement).toBe(
+      screen.getByRole("button", { name: "Search messages in this wave" })
+        .parentElement
+    );
   });
 
   it.each(["logged out", "author", "proxy", "DM"])(

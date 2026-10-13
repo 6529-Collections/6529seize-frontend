@@ -76,7 +76,10 @@ drop navigation. Changes under `components/waves/leaderboard/` or its
 `__tests__/components/waves/leaderboard/` tests therefore select this pack, as
 do the desktop `components/waves/drops/WaveDropActionsOpen.tsx` and mobile
 `components/waves/drops/WaveDropMobileMenuOpen.tsx` actions and their focused
-tests.
+tests. The pack also owns the wave header Join call to action
+(`components/waves/header/WaveJoinCta.tsx`) and the sidebar row pin tooltip
+layering (`components/brain/left-sidebar/waves/BrainLeftSidebarWavePin.tsx`),
+so changes to either select it.
 Keep those ownership rules covered in
 `__tests__/scripts/app-pr-ci-effective-plan.test.ts`; merely registering a
 pack here does not make a product-only PR select it.
