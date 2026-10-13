@@ -111,6 +111,34 @@ function getProfileFeed(page: Page): Locator {
 }
 
 test.describe("Waves and profile read-only coverage @surface @medium @large @readonly", () => {
+  test("keeps the full subscription airdrop address available on touch and keyboard", async ({
+    page,
+    isMobile,
+  }) => {
+    await gotoReady(page, `/${PROFILE_HANDLE}/subscriptions`);
+    await expectProfileShell(page, "Subscriptions");
+    const address = page.getByRole("button", {
+      name: /^0x[0-9a-fA-F]{40}$/,
+    });
+    await expect(address).toBeVisible();
+    const fullAddress = (await address.textContent())!.trim();
+    if (isMobile) {
+      await address.tap();
+    } else {
+      await address.focus();
+    }
+    await expect(
+      page.getByRole("tooltip", { name: fullAddress })
+    ).toBeVisible();
+    await page
+      .getByRole("heading", { name: "Airdrop Address", exact: true })
+      .click();
+    await expect(page.getByRole("tooltip", { name: fullAddress })).toHaveCount(
+      0
+    );
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("keeps subscription history defaults responsive and preserves user toggles", async ({
     page,
   }) => {
@@ -121,18 +149,19 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     );
     await expectProfileShell(page, "Subscriptions");
     const isPhone = (page.viewportSize()?.width ?? 0) < 640;
-    const history = page.getByRole("region", {
-      name: "Subscription History",
-      exact: true,
-    });
-    const disclosures = history.locator("details");
+    const disclosures = page
+      .getByRole("region", { name: "Subscription History", exact: true })
+      .locator("details");
     await expect(disclosures).toHaveCount(3);
     for (const disclosure of await disclosures.all()) {
       await expect(disclosure).toHaveJSProperty("open", !isPhone);
       await expect(disclosure).toHaveAttribute("aria-busy", "false");
     }
     const logs = disclosures.filter({ hasText: "Log History" });
-    const summary = logs.locator("summary");
+    const summary = page
+      .getByRole("region", { name: "Subscription History", exact: true })
+      .locator("summary")
+      .filter({ hasText: "Log History" });
     await summary.click();
     await expect(logs).toHaveJSProperty("open", isPhone);
     const viewport = page.viewportSize()!;

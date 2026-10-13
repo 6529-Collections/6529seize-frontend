@@ -71,7 +71,7 @@ first render.
    - exact recommended top-up and its projected runway when available
 3. Review `Minting settings`:
    - `Subscription balance` (exact ETH and raw mint capacity)
-   - `Airdrop Address`
+   - `Airdrop Address`; tap, hover, or focus the address to read it in full
    - `Mode` (`Manual` or `Automatic`)
    - `Edition Preference` (`One edition` or `All eligible`)
 4. In owner mode:

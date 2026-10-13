@@ -83,6 +83,7 @@ export default function UserPageSubscriptionsAirdropAddress(
                 </button>
                 <Tooltip
                   id={addressTooltipId}
+                  openEvents={{ mouseover: true, focus: true, click: true }}
                   place="top"
                   positionStrategy="fixed"
                   offset={8}

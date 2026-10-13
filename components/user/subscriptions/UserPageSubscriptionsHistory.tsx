@@ -262,7 +262,7 @@ function LogEntry(
             {props.log.log}
           </div>
           {props.log.additional_info && (
-            <div className="tw-break-words tw-text-xs tw-text-iron-500 max-sm:tw-line-clamp-1 max-sm:tw-break-all">
+            <div className="tw-break-words tw-text-xs tw-text-iron-500 max-sm:tw-break-all">
               {props.log.additional_info}
             </div>
           )}
