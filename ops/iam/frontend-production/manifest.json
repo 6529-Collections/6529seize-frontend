@@ -1,0 +1,14 @@
+{
+  "account_id": "987989283142",
+  "role_name": "gha-frontend-deploy-production",
+  "source_commit": "e6f863add81de02e8b76f177067b2df4014de9d7",
+  "max_session_duration": 5400,
+  "policies": [
+    {
+      "name": "FrontendProductionDeployment",
+      "file": "FrontendProductionDeployment.json",
+      "characters": 4443,
+      "sha256": "391bc4523c1ec213d30709f38dec6ac4cb435f23abf741a89f292edbf939d26b"
+    }
+  ]
+}
