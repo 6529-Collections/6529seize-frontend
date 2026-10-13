@@ -60,18 +60,21 @@ const GRANT_UNUSABLE_REASONS: readonly string[] = [
  * does not mean a proxy; a proxy session's role is another profile's id.
  * Unknown profile ids fail safe: the write goes unsigned.
  */
-function isOwnProfileSession(address: string): boolean {
+function isOwnProfileSession(
+  address: string,
+  ownProfileId: string | null | undefined
+): boolean {
   const account = getConnectedWalletAccounts().find(
     (candidate) => candidate.address.toLowerCase() === address.toLowerCase()
   );
-  return (
-    account !== undefined &&
-    isDirectProfileAuthSession({
-      authRole: account.role,
-      profileId: account.profileId,
-      hasActiveProxy: false,
-    })
-  );
+  if (account === undefined) {
+    return false;
+  }
+  return isDirectProfileAuthSession({
+    authRole: account.role,
+    profileId: account.profileId ?? ownProfileId,
+    hasActiveProxy: false,
+  });
 }
 
 async function signWrite(
@@ -79,8 +82,7 @@ async function signWrite(
 ): Promise<SignedEnvelope | null> {
   try {
     const address = getWalletAddress();
-    // Proxy sessions act for another profile and never sign as the wallet.
-    if (!address || !isOwnProfileSession(address)) {
+    if (!address) {
       return null;
     }
     const allocation = await allocateDeviceSeq(address, Date.now());
@@ -88,6 +90,11 @@ async function signWrite(
       return null;
     }
     const { grant, record, seq } = allocation;
+    // Proxy sessions act for another profile and never sign as the wallet.
+    // An unused sequence number is a harmless gap.
+    if (!isOwnProfileSession(address, record.ownProfileId)) {
+      return null;
+    }
     if (!grant.scopes.includes(DEVICE_EVENT_KIND_SCOPE[write.kind])) {
       return null;
     }

@@ -112,13 +112,15 @@ export const isDeviceGrantChallenge = (
 /** Stores the grant returned by session-login. Never throws. */
 export async function storeLoginDeviceGrant(
   grant: LoginDeviceGrant,
-  deviceGrant: ApiDeviceGrant | undefined
+  deviceGrant: ApiDeviceGrant | undefined,
+  /** The session role of this sign-in, which requested no proxy role. */
+  ownProfileId: string | null = null
 ): Promise<boolean> {
   if (!deviceGrant) {
     return false;
   }
   try {
-    return await saveDeviceGrant(grant.address, deviceGrant);
+    return await saveDeviceGrant(grant.address, deviceGrant, ownProfileId);
   } catch {
     return false;
   }

@@ -9,6 +9,12 @@ export interface StoredDeviceKey {
   readonly publicKeyHex: string;
   readonly grant: ApiDeviceGrant | null;
   readonly lastSeq: number;
+  /**
+   * The wallet's own profile id, from the session role returned by the
+   * grant-carrying sign-in (which never acts through a proxy). Absent on
+   * records created before it was stored.
+   */
+  readonly ownProfileId?: string | null | undefined;
 }
 
 const DATABASE_NAME = "6529-device-keys";

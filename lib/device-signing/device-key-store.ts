@@ -108,7 +108,8 @@ export async function ensureDeviceKey(
 /** Stores a grant returned at sign-in when it grants this device's key. */
 export async function saveDeviceGrant(
   address: string,
-  grant: ApiDeviceGrant
+  grant: ApiDeviceGrant,
+  ownProfileId: string | null = null
 ): Promise<boolean> {
   const normalized = normalizeAddress(address);
   const saved = await withDeviceKeyLock(normalized, async () => {
@@ -119,7 +120,11 @@ export async function saveDeviceGrant(
     if (!record || !grantsThisKey) {
       return false;
     }
-    await deviceKeyStorage.write({ ...record, grant });
+    await deviceKeyStorage.write({
+      ...record,
+      grant,
+      ownProfileId: ownProfileId ?? record.ownProfileId ?? null,
+    });
     return true;
   });
   if (saved) {

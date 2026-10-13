@@ -186,7 +186,13 @@ const createSignInSession = async ({
   if (deviceGrant && sessionResponse.client_type === "web") {
     // The server stored the grant once the login signature verified; keeping
     // the local copy is best effort and never delays sign-in.
-    void storeLoginDeviceGrant(deviceGrant, sessionResponse.device_grant);
+    // A grant sign-in never requests a proxy role, so the session role the
+    // server returns is the wallet's own profile id.
+    void storeLoginDeviceGrant(
+      deviceGrant,
+      sessionResponse.device_grant,
+      sessionResponse.role ?? null
+    );
   }
   return isAuthRequestStale(authRequestGuard) ? null : sessionResponse;
 };
