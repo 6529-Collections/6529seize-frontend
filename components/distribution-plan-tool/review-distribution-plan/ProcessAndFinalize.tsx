@@ -35,6 +35,7 @@ export default function ProcessAndFinalize({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const job = operation.data;
+  const awaitingAuth = job?.status === JobStatus.AwaitingAuth;
   const pending = submitting || job?.status === JobStatus.Pending;
   const inputsMatch = !job || forgeProcessInputsMatch(job, phaseIds);
   const completed = job?.status === JobStatus.Completed && inputsMatch;
@@ -50,9 +51,15 @@ export default function ProcessAndFinalize({
     setSubmitting(true);
     setError(null);
     try {
-      if (!(await requestAuth()).success) return;
+      if (
+        !(
+          await requestAuth(awaitingAuth ? { serverRejected: true } : undefined)
+        ).success
+      )
+        return;
       const key = JSON.stringify([contract, claim, plan, phaseIds]);
-      if (request.current?.key !== key || job?.status === JobStatus.Failed)
+      if (awaitingAuth && inputsMatch) request.current = { key, id: job.id };
+      else if (request.current?.key !== key || job?.status === JobStatus.Failed)
         request.current = { key, id: uuidv4() };
       const saved = await startForgeProcess(
         contract,
@@ -72,9 +79,11 @@ export default function ProcessAndFinalize({
   let label:
     | "dropForge.process"
     | "dropForge.completed"
+    | "dropForge.resumeAuth"
     | "dropForge.processing" = "dropForge.process";
   if (pending) label = "dropForge.processing";
   if (completed) label = "dropForge.completed";
+  if (awaitingAuth && !pending) label = "dropForge.resumeAuth";
   const failure = error ?? job?.error ?? getToastErrorDetails(operation.error);
   return (
     <div className="tw-flex tw-flex-col tw-items-end tw-gap-2">
@@ -100,6 +109,7 @@ export default function ProcessAndFinalize({
         {pending && `${Math.min((job?.step ?? 0) + 1, 5)} / 5`}
         {phaseIds.length !== 3 && t(locale, "dropForge.inputsMissing")}
         {!inputsMatch && t(locale, "dropForge.inputsChanged")}
+        {awaitingAuth && t(locale, "dropForge.authRequired")}
       </div>
       {failure && (
         <p role="alert" className="tw-max-w-lg tw-text-sm tw-text-error">

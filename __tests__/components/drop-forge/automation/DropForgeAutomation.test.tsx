@@ -25,8 +25,9 @@ jest.mock("@/services/api/drop-forge-api", () => ({
   startForgeProcess: jest.fn(),
 }));
 jest.mock("@/components/auth/Auth", () => ({
-  useAuth: () => ({ requestAuth: async () => ({ success: true }) }),
+  useAuth: () => ({ requestAuth: mockRequestAuth }),
 }));
+const mockRequestAuth = jest.fn().mockResolvedValue({ success: true });
 jest.mock("@/components/drop-forge/drop-forge-config", () => ({
   useDropForgeMintingConfig: () => ({ contract: "0xcreator" }),
 }));
@@ -76,7 +77,10 @@ const launch = (initialized: boolean, metadata = "published") =>
       },
     ],
   }) as ApiDropForgeLaunch;
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockRequestAuth.mockResolvedValue({ success: true });
+});
 it.each([
   [1, "https://etherscan.io"],
   [11155111, "https://sepolia.etherscan.io"],
@@ -345,4 +349,73 @@ it("queues processing with a UUID even when the browser lacks randomUUID", async
       Object.defineProperty(globalThis.crypto, "randomUUID", descriptor);
     else Reflect.deleteProperty(globalThis.crypto, "randomUUID");
   }
+});
+it("reauthenticates and resumes the existing job after refresh without generating another operation", async () => {
+  const waiting: ApiDropForgeJob = {
+    id: "11111111-1111-4111-8111-111111111111",
+    contract: "creator",
+    claim_id: 123,
+    kind: "PROCESS_ALL",
+    phase_ids: ["p0", "p1", "p2"],
+    status: "AWAITING_AUTH",
+    step: 0,
+    updated_at: 1,
+  };
+  jest.mocked(latestForgeProcess).mockResolvedValue(waiting);
+  jest
+    .mocked(startForgeProcess)
+    .mockResolvedValue({ ...waiting, status: "PENDING" });
+  renderUI(
+    <ProcessAndFinalize
+      contract="creator"
+      claim={123}
+      plan="plan"
+      phaseIds={["p0", "p1", "p2"]}
+    />
+  );
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Sign in to resume" })
+  );
+  await waitFor(() =>
+    expect(startForgeProcess).toHaveBeenCalledWith(
+      "creator",
+      123,
+      "plan",
+      ["p0", "p1", "p2"],
+      waiting.id
+    )
+  );
+  expect(mockRequestAuth).toHaveBeenCalledWith({ serverRejected: true });
+  expect(
+    await screen.findByRole("button", { name: "Processing and finalizing…" })
+  ).toBeDisabled();
+});
+it("leaves the waiting job intact when the operator cancels authentication", async () => {
+  jest.mocked(latestForgeProcess).mockResolvedValue({
+    id: "job",
+    contract: "creator",
+    claim_id: 123,
+    kind: "PROCESS_ALL",
+    phase_ids: ["p0", "p1", "p2"],
+    status: "AWAITING_AUTH",
+    step: 0,
+    updated_at: 1,
+  });
+  mockRequestAuth.mockResolvedValue({ success: false });
+  renderUI(
+    <ProcessAndFinalize
+      contract="creator"
+      claim={123}
+      plan="plan"
+      phaseIds={["p0", "p1", "p2"]}
+    />
+  );
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Sign in to resume" })
+  );
+  await waitFor(() => expect(mockRequestAuth).toHaveBeenCalled());
+  expect(startForgeProcess).not.toHaveBeenCalled();
+  expect(
+    screen.getByRole("button", { name: "Sign in to resume" })
+  ).toBeEnabled();
 });

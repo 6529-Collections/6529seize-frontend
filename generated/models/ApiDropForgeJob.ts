@@ -110,6 +110,7 @@ export enum ApiDropForgeJobKindEnum {
 export enum ApiDropForgeJobStatusEnum {
     Pending = 'PENDING',
     Completed = 'COMPLETED',
-    Failed = 'FAILED'
+    Failed = 'FAILED',
+    AwaitingAuth = 'AWAITING_AUTH'
 }
 

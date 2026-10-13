@@ -45,7 +45,9 @@ The Memes token distribution outputs.
    ordered phase inputs and public subscriptions, then finalizes the distribution.
 6. Watch the loader until completed. Refresh restores durable progress; an
    interrupted request does not mean processing failed. Correct a reported
-   failure before retrying.
+   failure before retrying. Your current authorization is used to capture EMMA
+   inputs. If access expires or is denied before capture, click `Sign in to resume`
+   to refresh access and continue the same job without losing saved progress.
 7. Download subscription CSV bundles from the completed phase rows. Downloads
    read the stored lists and do not prepare or finalize again.
 8. Click `Publish to GitHub` when it becomes enabled and follow its modal.
@@ -81,7 +83,10 @@ The Memes token distribution outputs.
     source image in a new tab.
 - `Process and Finalize`:
   - requires the confirmed token and three ordered phase IDs.
-  - shows processing, completed or failed status from a durable backend job.
+  - shows processing, completed, failed or sign-in-required status from a durable backend job.
+  - `Sign in to resume` renews the current admin's authorization for the same job.
+    Captured inputs and completed checkpoints are preserved. Once inputs are
+    saved, later processing and finalization continue without the login token.
   - snapshot inputs remain consistent across the operation; conflicting uploads
     and reset requests are rejected while it runs.
   - changed phase selections or distribution inputs require explicit reset and

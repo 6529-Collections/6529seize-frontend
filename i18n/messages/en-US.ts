@@ -2969,6 +2969,9 @@ export const EN_US_MESSAGES = {
   "dropForge.retry": "Retry",
   "dropForge.processing": "Processing and finalizing…",
   "dropForge.process": "Process and Finalize",
+  "dropForge.resumeAuth": "Sign in to resume",
+  "dropForge.authRequired":
+    "EMMA access expired or was denied. Sign in to resume the same job; saved progress is preserved.",
   "dropForge.completed": "Completed — lists are ready to download.",
   "dropForge.inputsMissing":
     "Complete Phase 0, Phase 1 and Phase 2 in EMMA first.",
