@@ -38,6 +38,7 @@ import {
   isSendKey,
   useMentionPicker,
 } from "./useE2eeComposerParts";
+import { isSafeInlineImageMime } from "@/lib/e2ee/media";
 
 const TEXTAREA_MAX_HEIGHT_PX = 200;
 const ICON_BUTTON =
@@ -51,7 +52,8 @@ function FilePreview({
   readonly onRemove: () => void;
 }) {
   const locale = useBrowserLocale();
-  const isImage = file.type.startsWith("image/");
+  // Raster images only, the same rule as received attachments.
+  const isImage = isSafeInlineImageMime(file.type);
   const url = useMemo(
     () => (isImage ? URL.createObjectURL(file) : null),
     [file, isImage]

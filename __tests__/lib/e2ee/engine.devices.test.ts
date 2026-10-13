@@ -148,7 +148,7 @@ describe("E2EE engine: devices", () => {
     const world = await createWorld();
     const alice = await addUser(world, "alice");
     const bob = await addUser(world, "bob");
-    const carol = await addUser(world, "carol");
+    await addUser(world, "carol");
     const g = await alice.primary.engine.createConversation({
       profileIds: ["bob", "carol"],
       kind: "group",
