@@ -13,8 +13,8 @@ use `frontend-production-<run ID>` for CloudTrail correlation.
 version>/`, plus the exact `web_build/current-production-version.json` object.
   IAM's `?` wildcard checks directory length, not hexadecimal syntax; the
   workflow independently requires an exact hexadecimal Git commit SHA.
-  Failed multipart uploads may be aborted; object and bucket deletion are not
-  granted. The bucket uses SSE-S3, requiring no KMS permission.
+  Failed multipart uploads may be aborted; original artifacts and their bucket
+  cannot be deleted. The bucket uses SSE-S3, requiring no KMS permission.
 - Describe/create application versions for `seize app`; describe/update only
   `seizeapp-env-node22` in `us-east-1`.
 - Read and invalidate only the existing announcement distribution `EKB17CMB021J6`.
@@ -35,7 +35,8 @@ They remain restricted to this environment's resources and `us-east-1`.
 Required regional EC2/Auto Scaling metadata calls cannot be resource-scoped;
 they carry the same service-delegation restriction.
 
-Elastic Beanstalk also requires `s3:CreateBucket`, `s3:ListBucket`, and
+Elastic Beanstalk also requires `s3:CreateBucket`, `s3:ListBucket`,
+`s3:GetBucketLocation`, and
 `s3:PutBucketOwnershipControls` for its existing regional
 storage bucket, `elasticbeanstalk-us-east-1-987989283142`, when updating the
 environment. This is limited to that exact bucket, `us-east-1`, and AWS forward
@@ -54,9 +55,30 @@ Runtime configuration objects may be read/written, and failed multipart uploads
 aborted, only under `resources/environments/e-8bsbxqrikc/` in that bucket and only
 through AWS forward access sessions. Other environment prefixes and object
 deletion are excluded.
-Elastic Beanstalk may read object ACLs within that prefix and within the
-versioned `seize-web/web_build/<40-character version>/` artifact prefixes,
-through AWS service calls only. Changing ACLs is not granted.
+Object ACLs may be read across the exact Elastic Beanstalk storage bucket and
+within the versioned `seize-web/web_build/<40-character version>/` artifact
+prefixes, through AWS service calls only. The environment-prefix ACL grant
+failed Elastic Beanstalk's check; allowing direct reads did not resolve it and
+was removed. This metadata permission covers other environment prefixes in the
+shared bucket; object contents and writes remain scoped to production.
+
+Elastic Beanstalk may set ACLs and delete runtime version objects only at
+`resources/environments/e-8bsbxqrikc/_runtime/_versions/seize app/<40-character version>`
+through AWS service calls. This supports version preparation and failed-version
+cleanup. Other runtime objects, other environments, and the original artifacts
+cannot have their ACLs changed or be deleted by this role.
+
+The application-level embedded-extension cache at
+`resources/_runtime/_embedded_extensions/seize app/` may be read/written, have
+ACLs set, and have failed multipart uploads aborted through AWS service calls.
+Elastic Beanstalk writes this cache outside the environment directory. It is
+scoped to this application, may be shared by its environments, and cannot be
+deleted by this role. Other applications' caches remain inaccessible.
+
+`FrontendProductionStorage` contains S3 permissions;
+`FrontendProductionDeployment` contains the remaining deployment permissions.
+Both are attached to the same OIDC role. Splitting avoids AWS's 6,144-character
+limit for an individual managed policy; it does not widen resource scope.
 
 Normal rolling deployments may update capacity and launch-template versions.
 Creating a different environment, replacing networking/resources, changing IAM
