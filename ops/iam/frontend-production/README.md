@@ -10,13 +10,18 @@ use `frontend-production-<run ID>` for CloudTrail correlation.
 ## Scope
 
 - Upload and read versioned artifacts under `seize-web/web_build/<40-character
-commit>/`, plus the exact `web_build/current-production-version.json` object.
+version>/`, plus the exact `web_build/current-production-version.json` object.
+  IAM's `?` wildcard checks directory length, not hexadecimal syntax; the
+  workflow independently requires an exact hexadecimal Git commit SHA.
   Failed multipart uploads may be aborted; object and bucket deletion are not
   granted. The bucket uses SSE-S3, requiring no KMS permission.
 - Describe/create application versions for `seize app`; describe/update only
   `seizeapp-env-node22` in `us-east-1`.
-- Invalidate only the existing announcement distribution `EKB17CMB021J6`.
+- Read and invalidate only the existing announcement distribution `EKB17CMB021J6`.
   The workflow uses its known ID instead of listing all distributions.
+  Before publishing, it requires the distribution domain to match the
+  announcement endpoint. A lookup, mismatch, or invalidation failure fails the
+  job instead of silently claiming publication success.
 - Get/pass only the existing `ec2-seize-prod` role and read its instance
   profile. Passing is limited to Elastic Beanstalk and EC2. No IAM policy,
   credential, trust, service-linked-role, or identity writes are allowed.

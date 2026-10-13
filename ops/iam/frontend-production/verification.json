@@ -1,5 +1,5 @@
 {
-  "recorded_at": "2026-10-13T14:34:31.871845+00:00",
+  "recorded_at": "2026-10-13T15:00:04.244063+00:00",
   "role_arn": "arn:aws:iam::987989283142:role/gha-frontend-deploy-production",
   "trust_verified": true,
   "policies_verified": [
@@ -10,7 +10,7 @@
   "access_analyzer_findings": 0,
   "simulation_summary": {
     "access_analyzer_findings": 0,
-    "positive_cases": 26,
+    "positive_cases": 27,
     "negative_cases": 35,
     "status": "passed"
   },
@@ -25,6 +25,10 @@
     },
     {
       "name": "announcement_object",
+      "status": "passed"
+    },
+    {
+      "name": "announcement_distribution",
       "status": "passed"
     }
   ],

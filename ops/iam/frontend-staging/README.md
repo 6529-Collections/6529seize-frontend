@@ -5,6 +5,11 @@ OIDC for `repo:6529-Collections/6529seize-frontend:environment:staging`, with
 audience `sts.amazonaws.com`. The existing GitHub environment permits only
 `1a-staging`. Set its `AWS_DEPLOY_ROLE_ARN` variable to the role's ARN.
 The workflow uses `frontend-staging-<run ID>` sessions lasting 5,400 seconds.
+Temporary credentials cap the signed artifact URL's validity at session expiry.
+The deployment job lasts at most 75 minutes; the session begins inside that job
+and lasts 90 minutes. Its download/deploy window therefore finishes before
+credential expiry, with at least a 15-minute margin. The workflow explicitly
+rejects an artifact bucket region other than the approved `us-east-1`.
 
 ## Scope
 

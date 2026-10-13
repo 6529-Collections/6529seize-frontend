@@ -371,6 +371,15 @@ jobs:
             exit 1
           fi
 
+          announced_host="$(node -e 'process.stdout.write(new URL(process.env.ANNOUNCED_VERSION_ENDPOINT).hostname)')"
+          distribution_host="$(aws cloudfront get-distribution \
+            --id "$ANNOUNCED_VERSION_DISTRIBUTION_ID" \
+            --query Distribution.DomainName --output text)"
+          if [ "$distribution_host" != "$announced_host" ]; then
+            echo "::error::The announcement distribution does not match its configured endpoint."
+            exit 1
+          fi
+
           announcement_file="current-production-version.json"
           published_at="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
           jq -n \
@@ -384,7 +393,7 @@ jobs:
             --content-type "application/json"
           aws cloudfront create-invalidation \
             --distribution-id "$ANNOUNCED_VERSION_DISTRIBUTION_ID" \
-            --paths "/${ANNOUNCED_VERSION_OBJECT_KEY}" || true
+            --paths "/${ANNOUNCED_VERSION_OBJECT_KEY}"
 
       - name: Upload exact production version evidence
         if: always()

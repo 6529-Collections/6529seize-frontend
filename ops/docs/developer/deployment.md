@@ -32,6 +32,9 @@ receive no AWS deployment credentials or OIDC token permission.
 Sessions last 90 minutes to cover the 75-minute deployment job timeout and
 staging's artifact download window. Their names include the GitHub run ID:
 `frontend-staging-<run ID>` and `frontend-production-<run ID>`.
+Staging's signed artifact URL is capped by STS expiry. Authentication starts
+inside the 75-minute deployment job, so its 90-minute session outlasts that
+job's full download/deploy window by at least 15 minutes.
 
 Staging permissions cover its artifact prefix in `seize-web` in `us-east-1`
 and commands on its existing SSM-managed server in `eu-west-1`. Production

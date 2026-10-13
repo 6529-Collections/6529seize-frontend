@@ -65,7 +65,7 @@
     {
       "Sid": "ProductionVersionInvalidation",
       "Effect": "Allow",
-      "Action": ["cloudfront:CreateInvalidation"],
+      "Action": ["cloudfront:GetDistribution", "cloudfront:CreateInvalidation"],
       "Resource": [
         "arn:aws:cloudfront::987989283142:distribution/EKB17CMB021J6"
       ],

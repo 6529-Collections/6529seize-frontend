@@ -63,6 +63,9 @@ describe("frontend deployment workflow contract", () => {
         "role-duration-seconds": 5400,
         "unset-current-credentials": true,
       });
+      expect(credentials.with["role-duration-seconds"]).toBeGreaterThan(
+        job["timeout-minutes"] * 60
+      );
       expect(credentials["continue-on-error"]).toBeUndefined();
       expect(credentials.with["force-skip-oidc"]).toBeUndefined();
       expect(source).not.toMatch(
@@ -154,6 +157,110 @@ describe("frontend deployment workflow contract", () => {
     );
     expect(production.source).toContain(
       '--distribution-id "$ANNOUNCED_VERSION_DISTRIBUTION_ID"'
+    );
+  });
+
+  it.each(["us-east-1", "eu-west-1"])(
+    "checks the staging artifact region before authentication: %s",
+    (region) => {
+      const workflow = readWorkflow("deploy-staging.yml").workflow;
+      const job = workflow.jobs["deploy-staging"];
+      const configuration = job.steps.find(
+        (step: { name?: string }) =>
+          step.name === "Validate staging configuration"
+      );
+      const credentials = job.steps.find(
+        (step: { id?: string }) => step.id === "aws_credentials"
+      );
+      expect(job.steps.indexOf(configuration)).toBeLessThan(
+        job.steps.indexOf(credentials)
+      );
+      const result = childProcess.spawnSync("bash", ["-c", configuration.run], {
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          ARTIFACT_BUCKET_REGION: region,
+          AWS_REGION: "eu-west-1",
+          INSTANCE_ID: "i-test",
+          STAGING_REPO_DIR: "/srv/frontend",
+          STAGING_RUN_AS: "ubuntu",
+          AWS_ACCESS_KEY_ID: "",
+          AWS_SECRET_ACCESS_KEY: "",
+        },
+      });
+      expect(result.status === 0).toBe(region === "us-east-1");
+    }
+  );
+
+  describe("production announcement publication", () => {
+    let temporaryDirectory: string;
+    const workflow = readWorkflow("build-upload-deploy-prod.yml").workflow;
+    const publish = workflow.jobs["build-upload-deploy"].steps.find(
+      (step: { name?: string }) =>
+        step.name === "Publish announced production version"
+    );
+
+    beforeEach(() => {
+      temporaryDirectory = fs.mkdtempSync(
+        path.join(os.tmpdir(), "announcement-oidc-")
+      );
+    });
+    afterEach(() => {
+      fs.rmSync(temporaryDirectory, { recursive: true, force: true });
+    });
+
+    it.each([
+      ["dnclu2fna0b2b.cloudfront.net", "0", true, ["upload", "invalidate"]],
+      ["wrong.cloudfront.net", "0", false, []],
+      ["dnclu2fna0b2b.cloudfront.net", "42", false, ["upload", "invalidate"]],
+    ])(
+      "checks the distribution and requires invalidation success: %s / %s",
+      (domain, invalidationExit, succeeds, expectedCalls) => {
+        const calls = path.join(temporaryDirectory, "calls");
+        const mockAws = `
+aws() {
+  case "$1:$2" in
+    elasticbeanstalk:describe-environments) printf '%s\\n' "$COMMIT_SHA" ;;
+    cloudfront:get-distribution) printf '%s\\n' "$TEST_DISTRIBUTION_DOMAIN" ;;
+    s3:cp) printf 'upload\\n' >> "$TEST_CALLS" ;;
+    cloudfront:create-invalidation)
+      printf 'invalidate\\n' >> "$TEST_CALLS"
+      return "$TEST_INVALIDATION_EXIT"
+      ;;
+    *) return 99 ;;
+  esac
+}
+`;
+        const result = childProcess.spawnSync(
+          "bash",
+          ["-c", `${mockAws}\n${publish.run}`],
+          {
+            encoding: "utf8",
+            cwd: temporaryDirectory,
+            env: {
+              ...process.env,
+              COMMIT_SHA: "a".repeat(40),
+              BEANSTALK_ENV_NAME: "test-environment",
+              AWS_BUCKET: "test-bucket",
+              ANNOUNCED_VERSION_ENDPOINT:
+                workflow.env.ANNOUNCED_VERSION_ENDPOINT,
+              ANNOUNCED_VERSION_DISTRIBUTION_ID:
+                workflow.env.ANNOUNCED_VERSION_DISTRIBUTION_ID,
+              ANNOUNCED_VERSION_OBJECT_KEY:
+                workflow.env.ANNOUNCED_VERSION_OBJECT_KEY,
+              RUN_URL: "https://example.test/deploy",
+              TEST_DISTRIBUTION_DOMAIN: String(domain),
+              TEST_INVALIDATION_EXIT: String(invalidationExit),
+              TEST_CALLS: calls,
+            },
+          }
+        );
+        expect(result.status === 0).toBe(succeeds);
+        const actualCalls = fs.existsSync(calls)
+          ? fs.readFileSync(calls, "utf8").trim().split("\n")
+          : [];
+        expect(actualCalls).toEqual(expectedCalls);
+      }
     );
   });
 
