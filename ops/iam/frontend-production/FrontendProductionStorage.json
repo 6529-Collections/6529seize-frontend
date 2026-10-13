@@ -118,6 +118,54 @@
           "aws:ViaAWSService": "true"
         }
       }
+    },
+    {
+      "Sid": "BeanstalkRuntimeVersionManifestCleanup",
+      "Effect": "Allow",
+      "Action": ["s3:DeleteObject"],
+      "Resource": [
+        "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/versions/manifest_*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        },
+        "Bool": {
+          "aws:ViaAWSService": "true"
+        }
+      }
+    },
+    {
+      "Sid": "BeanstalkCompiledEnvironmentTemplate",
+      "Effect": "Allow",
+      "Action": ["s3:GetObjectVersion"],
+      "Resource": [
+        "arn:aws:s3:::elasticbeanstalk-us-east-1/environments/688dc432-0cb2-4981-9908-9cea07a3a977/compiledEnvironmentTemplates/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        },
+        "Bool": {
+          "aws:ViaAWSService": "true"
+        }
+      }
+    },
+    {
+      "Sid": "BeanstalkEnvironmentExtensionCleanup",
+      "Effect": "Allow",
+      "Action": ["s3:DeleteObject"],
+      "Resource": [
+        "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/_embedded_extensions/seize app/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        },
+        "Bool": {
+          "aws:ViaAWSService": "true"
+        }
+      }
     }
   ]
 }

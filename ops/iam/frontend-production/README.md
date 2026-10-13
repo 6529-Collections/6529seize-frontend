@@ -32,8 +32,14 @@ log groups are inventoried from the live environment and deployment calls.
 Those operations are allowed only through AWS forward access sessions
 (`aws:ViaAWSService=true`), excluding direct calls from the deployment role.
 They remain restricted to this environment's resources and `us-east-1`.
-Required regional EC2/Auto Scaling metadata calls cannot be resource-scoped;
+Required regional EC2/Auto Scaling/log-group metadata calls cannot be resource-scoped;
 they carry the same service-delegation restriction.
+The role can cancel an update of this same stack for deployment abort/rollback.
+Target-health reads require AWS service calls in `us-east-1`. This action does
+not support target-group resource scoping, so its resource is `*`, like other
+unscopable metadata reads. Other regional target groups can be inspected through
+AWS service delegation; direct calls and other regions remain excluded. The
+observed production group is `awseb-AWSEB-0EB9JDZV4K5Z/0747acd561b5c588`.
 
 Elastic Beanstalk also requires `s3:CreateBucket`, `s3:ListBucket`,
 `s3:GetBucketLocation`, and
@@ -67,6 +73,12 @@ Elastic Beanstalk may set ACLs and delete runtime version objects only at
 through AWS service calls. This supports version preparation and failed-version
 cleanup. Other runtime objects, other environments, and the original artifacts
 cannot have their ACLs changed or be deleted by this role.
+The sole additional deletion scope is old runtime version manifests at
+`resources/environments/e-8bsbxqrikc/_runtime/versions/manifest_*`, through AWS
+service calls. Elastic Beanstalk removes these during deployment preparation;
+configuration directories and other environments' manifests remain excluded.
+Old cached embedded extensions may also be deleted under this environment's
+`_runtime/_embedded_extensions/seize app/` prefix during normal cleanup.
 
 The application-level embedded-extension cache at
 `resources/_runtime/_embedded_extensions/seize app/` may be read/written, have
@@ -74,6 +86,14 @@ ACLs set, and have failed multipart uploads aborted through AWS service calls.
 Elastic Beanstalk writes this cache outside the environment directory. It is
 scoped to this application, may be shared by its environments, and cannot be
 deleted by this role. Other applications' caches remain inaccessible.
+
+CloudFormation may read versions of compiled templates in the AWS-owned
+`elasticbeanstalk-us-east-1` bucket only under
+`environments/688dc432-0cb2-4981-9908-9cea07a3a977/compiledEnvironmentTemplates/`.
+`s3:GetObjectVersion` is required because its fetch specifies an object version.
+This grant requires AWS service delegation. This internal prefix was correlated with this
+environment's existing stack and successful deployment trace. Other internal
+environment prefixes and direct reads remain denied.
 
 `FrontendProductionStorage` contains S3 permissions;
 `FrontendProductionDeployment` contains the remaining deployment permissions.
