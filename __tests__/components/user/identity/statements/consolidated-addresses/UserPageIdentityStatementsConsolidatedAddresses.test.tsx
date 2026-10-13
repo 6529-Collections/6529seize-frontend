@@ -4,7 +4,7 @@ jest.mock("@/hooks/useConsolidationPolicy", () => ({
   }),
 }));
 
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import UserPageIdentityStatementsConsolidatedAddresses from "@/components/user/identity/statements/consolidated-addresses/UserPageIdentityStatementsConsolidatedAddresses";
 import { AuthContext, type AuthContextType } from "@/components/auth/Auth";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -78,6 +78,28 @@ describe("UserPageIdentityStatementsConsolidatedAddresses", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("still offers a fourth wallet when the profile already has three", () => {
+    render(
+      <AuthContext.Provider
+        value={{ activeProfileProxy: null } as AuthContextType}
+      >
+        <UserPageIdentityStatementsConsolidatedAddresses
+          profile={{
+            ...profile,
+            wallets: [
+              ...profile.wallets!,
+              { wallet: "0x3", display: "c.eth", tdh: 3 },
+            ],
+          }}
+        />
+      </AuthContext.Provider>
+    );
+    expect(screen.getByText("3 of 4 wallets")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Add another wallet" })
+    ).toHaveAttribute("href", "/delegation/build-consolidation");
+  });
+
   it("replaces the wallet entry with a limit note at four wallets", () => {
     const fullProfile = {
       ...profile,
@@ -99,6 +121,17 @@ describe("UserPageIdentityStatementsConsolidatedAddresses", () => {
     );
 
     expect(screen.getByText("4 of 4 wallets")).toBeInTheDocument();
+    const walletRows = within(screen.getByRole("list")).getAllByRole(
+      "listitem"
+    );
+    expect(walletRows).toHaveLength(4);
+    for (const wallet of fullProfile.wallets!) {
+      expect(
+        within(screen.getByRole("list")).getByTestId(`item-${wallet.wallet}`)
+      ).toBeInTheDocument();
+    }
+    fireEvent.click(screen.getByRole("button", { name: "toggle-0x4" }));
+    expect(screen.getByTestId("state-0x4")).toHaveTextContent("open");
     expect(
       screen.queryByRole("link", { name: "Add another wallet" })
     ).not.toBeInTheDocument();
@@ -132,6 +165,10 @@ describe("UserPageIdentityStatementsConsolidatedAddresses", () => {
     );
 
     expect(screen.getByText("4 of 4 wallets")).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("list")).getAllByRole("listitem")
+    ).toHaveLength(4);
+    expect(screen.getByTestId("item-0x4")).toBeInTheDocument();
     expect(
       screen.queryByText("This consolidation has the maximum of 4 wallets.")
     ).not.toBeInTheDocument();
