@@ -494,7 +494,6 @@
     "__tests__/components/utils/tooltip/WaveProfileTooltipWrapper.test.tsx": 2,
     "__tests__/components/voting/MobileVotingModal.test.tsx": 1,
     "__tests__/components/voting/VotingModal.test.tsx": 1,
-    "__tests__/components/walletChecker.test.tsx": 1,
     "__tests__/components/waves/approval/ApprovalStatusBadge.test.tsx": 1,
     "__tests__/components/waves/ArtBlocksTokenCard.test.tsx": 3,
     "__tests__/components/waves/CompoundPreview.test.tsx": 1,
