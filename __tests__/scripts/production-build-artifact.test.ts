@@ -44,6 +44,8 @@ describe("production exact-artifact deployment contract", () => {
     expect(installStep.env).not.toHaveProperty("NODE_AUTH_TOKEN");
     expect(serialized).not.toContain("AWS_ACCESS_KEY_ID");
     expect(serialized).not.toContain("configure-aws-credentials");
+    // Encrypted DMs (D109) stay off in production builds.
+    expect(buildSource).not.toContain("NEXT_PUBLIC_E2EE_DM_ENABLED");
     expect(buildSource).toContain(
       'git merge-base --is-ancestor "$TARGET_SHA" "$main_sha"'
     );

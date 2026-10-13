@@ -67,6 +67,7 @@ import WaveHeaderRestrictionButton from "@/components/waves/header/WaveHeaderRes
 import WaveParentNavigation from "@/components/waves/header/WaveParentNavigation";
 import MainStageNominationPopover from "@/components/brain/my-stream/tabs/MainStageNominationPopover";
 import { useProfileDoubleActivate } from "./useProfileDoubleActivate";
+import { PlaintextDmEncryptionNotice } from "@/components/e2ee/plaintext/PlaintextDmEncryptionNotice";
 
 const COLLECTION_TITLES: Record<string, string> = {
   "the-memes": "The Memes",
@@ -296,6 +297,10 @@ const HeaderTitleContent = ({
           </div>
         </>
       )}
+      {/* Plaintext DMs (D109): one tap to an encrypted chat. */}
+      {activeWave !== null && isDm ? (
+        <PlaintextDmEncryptionNotice wave={activeWave} variant="icon" appOnly />
+      ) : null}
     </div>
   );
 };

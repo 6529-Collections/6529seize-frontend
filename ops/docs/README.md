@@ -23,6 +23,8 @@ March 19, 2026.
   [Waves Discovery](waves/discovery/README.md),
   [Waves Chat](waves/chat/README.md)
 - Create a wave or direct message: [Waves Create](waves/create/README.md)
+- Use end-to-end encrypted direct messages and groups (staging only):
+  [Encrypted Messages](encrypted-messages.md)
 - Write or edit a drop: [Waves Composer](waves/composer/README.md)
 - Vote, react, curate, or share a drop:
   [Waves Drop Actions](waves/drop-actions/README.md)
@@ -78,6 +80,9 @@ March 19, 2026.
 - [Notifications](notifications/README.md): `/notifications`
 - [Content Moderation](content-moderation.md): `/preferences`,
   `/content-preferences`, and authorized `/content-moderation`
+- [Encrypted Messages](encrypted-messages.md): staging-only
+  `/messages/encrypted`, `/messages/encrypted/new`,
+  `/messages/encrypted/devices`, `/messages/encrypted/{chat}`
 - [Realtime](realtime/README.md): `/nft-activity`
 - [Network](network/README.md): `/network/*`, `/network/xtdh`, `/xtdh`
 - [Delegation](delegation/README.md): `/delegation` and `/delegation/{param+}`
@@ -128,6 +133,9 @@ Route patterns use normalized placeholders: `{param}` for one segment,
   `/stream`, `/reviews/6529-stream`, `/reviews/6529-stream/{page}`,
   `/reviews/6529-stream/versions/{version}`,
   `/reviews/6529-stream/versions/{version}/{page}`
+- Encrypted messages, on builds with the encrypted-messages flag (staging):
+  `/messages/encrypted`, `/messages/encrypted/new`,
+  `/messages/encrypted/devices`, `/messages/encrypted/{chat}`
 - Drop Forge:
   `/drop-forge`, `/drop-forge/craft`, `/drop-forge/craft/{id}`,
   `/drop-forge/launch`, `/drop-forge/launch/{id}`
