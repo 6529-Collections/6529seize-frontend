@@ -391,6 +391,8 @@ class E2eeEngineImpl implements E2eeEngineExt {
     this.ctx.openConversation = key;
     this.ctx.openUntil = key === null ? 0 : Number.MAX_SAFE_INTEGER;
     if (key !== null && changed && this.ctx.store.status === "ready") {
+      // Contract 12: an open conversation polls every 5 s, starting now.
+      this.controller.restartPolling();
       // 8.4 reconciliation on open: catch up, then look for missing devices.
       this.background(async () => {
         await this.controller.syncGroup(key);

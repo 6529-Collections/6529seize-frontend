@@ -413,6 +413,17 @@ export class EngineController {
     this.unsubscribeWake = null;
   }
 
+  /**
+   * Re-arms the poll timer now, at the cadence for the current state. Called
+   * when a conversation opens so its 5 s polling starts at once instead of
+   * after the idle 30 s timer armed earlier.
+   */
+  restartPolling(): void {
+    if (this.isReady()) {
+      this.armPoll();
+    }
+  }
+
   private armPoll(): void {
     if (this.ctx.options.polling === false || this.ctx.disposed) {
       return;

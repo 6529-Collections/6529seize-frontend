@@ -228,6 +228,7 @@ async function handleStagedCommit(
   const summary = mls.acceptStaged(g);
   if (staged.self_removed) {
     addNotices(
+      ctx,
       runtime,
       [
         {
@@ -273,7 +274,7 @@ async function handleStagedCommit(
     record.rosterCheckNeeded = true;
   }
   await applySummary(ctx, runtime, summary);
-  addNotices(runtime, notices, item.seq, item.created_at);
+  addNotices(ctx, runtime, notices, item.seq, item.created_at);
 }
 
 async function handleProposal(

@@ -138,7 +138,7 @@ export async function finalizeOwnCommit(
   }
   record.rosterCheckNeeded = true;
   await applySummary(ctx, runtime, input.summary);
-  addNotices(runtime, notices, input.seq, input.serverTs);
+  addNotices(ctx, runtime, notices, input.seq, input.serverTs);
 }
 
 const isUnknownOutcome = (status: number): boolean =>

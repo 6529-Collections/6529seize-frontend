@@ -4,6 +4,7 @@
  * Integration: real OpenMLS WASM + fake delivery service. WebSocket hints,
  * polling fallback, stale-epoch re-encryption, roster repair and snapshots.
  */
+import { POLL_OPEN_MS } from "@/lib/e2ee/engine/controller";
 import {
   addUser,
   createWorld,
@@ -64,6 +65,40 @@ describe("E2EE engine: sync paths", () => {
       texts(bob.primary.engine.getMessages(g)).includes("polled")
     );
     bob.primary.engine.dispose();
+  });
+
+  it("polls an opened conversation every 5 s at once, not after the idle poll", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    const armed: number[] = [];
+    const scheduler = {
+      setTimeout: (fire: () => void, ms: number) => {
+        armed.push(ms);
+        return world.scheduler.setTimeout(fire, ms);
+      },
+      clearTimeout: world.scheduler.clearTimeout,
+    };
+    const bob = await addUser(
+      world,
+      "bob",
+      { polling: true, scheduler },
+      { noWake: true }
+    );
+    const g = await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "dm",
+    });
+    try {
+      await waitFor(
+        () => bob.primary.engine.getConversation(g)?.status === "active"
+      );
+      armed.length = 0;
+      bob.primary.engine.setOpenConversation(g);
+      // Re-armed at once at the open-conversation cadence (contract 12).
+      expect(armed).toContain(POLL_OPEN_MS);
+    } finally {
+      bob.primary.engine.dispose();
+    }
   });
 
   it("re-encrypts a message that lost the race with a commit (409 STALE)", async () => {

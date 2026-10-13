@@ -264,6 +264,7 @@ async function acceptJoin(
     welcome.epoch === 1 &&
     checks.senderProfileId === summary.metadata.created_by;
   addNotices(
+    ctx,
     runtime,
     [
       {

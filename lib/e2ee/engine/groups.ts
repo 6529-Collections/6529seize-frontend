@@ -154,8 +154,14 @@ export function touchActivity(
   }
 }
 
-/** Appends notices for the entry at `seq`, collapsing key-only updates. */
+/**
+ * Appends notices for the entry at `seq`, collapsing key-only updates, and
+ * invalidates the timeline snapshot: callers add notices after
+ * `applySummary`, whose store notification may already have re-cached the
+ * timeline without them.
+ */
 export function addNotices(
+  ctx: EngineContext,
   runtime: GroupRuntime,
   notices: readonly StoredNotice[],
   seq: number,
@@ -184,6 +190,7 @@ export function addNotices(
     runtime.dirty.add(message.id);
   });
   runtime.record.updatedAt = Math.max(runtime.record.updatedAt, serverTs);
+  ctx.store.touch(runtime.record.g);
 }
 
 export function markInvalid(

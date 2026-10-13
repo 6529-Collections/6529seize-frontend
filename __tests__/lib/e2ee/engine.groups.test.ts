@@ -62,6 +62,35 @@ async function groupRoundTrip(size: number): Promise<void> {
 }
 
 describe("E2EE engine: groups", () => {
+  it("publishes the actor's own change notices to a subscribed timeline", async () => {
+    const world = await createWorld();
+    const [alice, bob, carol] = await users(world, 3, "n");
+    const a = alice!.primary.engine;
+    const g = await a.createConversation({
+      profileIds: ["n1"],
+      kind: "group",
+      name: "Before",
+    });
+    await settle(world);
+    // Like the UI: every store notification re-reads the timeline snapshot.
+    const unsubscribe = a.subscribe(() => {
+      a.getMessages(g);
+    });
+    await a.rename(g, "After");
+    await Promise.resolve();
+    expect(notices(a.getMessages(g))).toEqual(["created", "renamed"]);
+    await a.addMembers(g, [carol!.profileId]);
+    await Promise.resolve();
+    expect(notices(a.getMessages(g))).toEqual(["created", "renamed", "joined"]);
+    unsubscribe();
+    await settle(world);
+    expect(notices(bob!.primary.engine.getMessages(g))).toEqual([
+      "created",
+      "renamed",
+      "joined",
+    ]);
+  });
+
   it("3 members: rename, add, remove, leave, with notices", async () => {
     const world = await createWorld();
     const [alice, bob, carol, dave] = await users(world, 4, "p");
