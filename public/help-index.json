@@ -8067,7 +8067,7 @@
       "facts": [
         "The Tools index page lives at /tools as a direct secondary route, not a primary sidebar or app drawer destination.",
         "It groups label-only tool cards with right-arrow affordances into NFT Delegation, The Memes Tools, Builder Tools, and Open Data.",
-        "The Tools index links to delegation utilities, Subscriptions Report, Meme Accounting, Meme Gas, App Wallets when supported, API, EMMA, Block Finder, and Open Data routes.",
+        "The Tools index links to delegation utilities, Subscriptions Report, Meme Accounting, Meme Gas, App Wallets when supported, API, EMMA, Block Finder, World Time Zones, and Open Data routes.",
         "Subscription-only links are hidden in restricted iOS contexts, and App Wallets is hidden when app-wallet support is unavailable.",
         "Private operator routes and local-only tools are not listed on the public Tools index.",
         "Primary menu discovery for user-facing tools, developer routes, and Open Data remains under About."
@@ -8078,6 +8078,7 @@
         "/tools/subscriptions-report",
         "/tools/api",
         "/tools/block-finder",
+        "/tools/time-zones",
         "/emma",
         "/open-data"
       ],
@@ -8268,6 +8269,45 @@
       "source_refs": [
         "app/tools/block-finder/page.tsx",
         "ops/docs/api-tool/feature-block-finder.md"
+      ]
+    },
+    {
+      "id": "tools.time-zones",
+      "kind": "route",
+      "title": "World Time Zones",
+      "aliases": [
+        "world time zones",
+        "time zone map",
+        "timezone map",
+        "world clock",
+        "utc offset",
+        "what time is it in"
+      ],
+      "keywords": [
+        "tools",
+        "time zone",
+        "timezone",
+        "utc",
+        "offset",
+        "daylight saving",
+        "map",
+        "clock"
+      ],
+      "facts": [
+        "World Time Zones lives at /tools/time-zones and is listed under Builder Tools on /tools and under About -> Data & Developer Tools.",
+        "It shows a live UTC clock, the viewer's own time zone, a world map with one dot per IANA time zone at its principal city colored by the zone's current UTC offset, optional night-side shading, and a searchable, sortable table of every IANA time zone.",
+        "Hover, tap or focus a map dot to see its city, zone name, IANA zone, local time, UTC offset and daylight saving status. With the map focused, arrow keys move between zones from west to east. Alias zones such as Europe/Amsterdam and Etc zones are in the table without a dot.",
+        "Table search matches city, IANA zone, region, zone name, or a numeric offset such as +5:30; the unfiltered list starts with 40 rows and Show all expands it.",
+        "Times, offsets, zone names and daylight saving status come from the browser's IANA Time Zone Database through Intl; the page makes no API requests and pauses updates while the tab is hidden.",
+        "The map uses public-domain data: Natural Earth land outlines and zone locations from the IANA Time Zone Database. The page credits both in a Data sources section."
+      ],
+      "canonical_path": "/tools/time-zones",
+      "related_paths": ["/tools", "/tools/block-finder"],
+      "tags": ["tools", "time-zones"],
+      "source_refs": [
+        "app/tools/time-zones/page.tsx",
+        "components/tools/time-zones/WorldTimeZonesExplorer.tsx",
+        "ops/docs/api-tool/feature-world-time-zones.md"
       ]
     },
     {

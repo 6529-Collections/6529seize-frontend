@@ -183,6 +183,7 @@ describe("useSidebarSections", () => {
       { name: "API", href: "/tools/api" },
       { name: "EMMA", href: "/emma" },
       { name: "Block Finder", href: "/tools/block-finder" },
+      { name: "World Time Zones", href: "/tools/time-zones" },
       { name: "Open Data", href: "/open-data" },
       { name: "6529bot Data", href: "/open-data/6529bot" },
       { name: "Network Metrics", href: "/open-data/network-metrics" },

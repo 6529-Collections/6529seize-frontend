@@ -139,7 +139,7 @@ On web layouts, route switching is sidebar-first.
   delegation pages under `Delegation & Wallets`, `/meme-accounting`,
   `/meme-gas`, optional `/tools/subscriptions-report`, optional
   `/tools/app-wallets`, `/tools/api`, `/emma`, `/tools/block-finder`,
-  `/open-data`, `/open-data/6529bot`, `/open-data/network-metrics`,
+  `/tools/time-zones`, `/open-data`, `/open-data/6529bot`, `/open-data/network-metrics`,
   optional `/open-data/meme-subscriptions`, `/open-data/rememes`
   (`ReMemes Data`), `/open-data/team` (`Team Data`), and
   `/open-data/royalties`.

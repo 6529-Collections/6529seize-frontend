@@ -2293,6 +2293,10 @@
       "classification": "crawlable",
       "family": "tools"
     },
+    "/tools/time-zones": {
+      "classification": "crawlable",
+      "family": "tools"
+    },
     "/waves": {
       "classification": "crawlable",
       "family": "social"
