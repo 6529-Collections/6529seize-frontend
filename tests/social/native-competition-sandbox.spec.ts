@@ -571,6 +571,22 @@ async function installCompetitionApi(
   };
 }
 
+async function openAppearanceDraft(
+  page: Page,
+  viewport: { width: number; height: number }
+) {
+  const sandbox = await installCompetitionApi(page);
+  await page.setViewportSize(viewport);
+  await page.goto(`${ROOT}/new`);
+  const name = page.getByLabel("Competition name", { exact: true });
+  await name.fill("Appearance layout draft");
+  await expect.poll(() => sandbox.requests.length).toBe(1);
+  const footer = page
+    .getByRole("button", { name: "Close editor", exact: true })
+    .locator("..");
+  return { name, footer };
+}
+
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
   test.afterEach(async ({ page }, testInfo) => {
     if (testInfo.status !== testInfo.expectedStatus) {
@@ -1605,24 +1621,16 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
   test("keeps the editor in place when option cards receive focus", async ({
     page,
   }, testInfo) => {
-    const sandbox = await installCompetitionApi(page);
     const viewport = page.viewportSize();
     if (!viewport) throw new Error("Viewport missing");
-    await page.setViewportSize({
+    const { name, footer } = await openAppearanceDraft(page, {
       width: Math.min(viewport.width, 730),
       height: 800,
     });
-    await page.goto(`${ROOT}/new`);
-    const name = page.getByLabel("Competition name", { exact: true });
-    await name.fill("Option focus draft");
-    await expect.poll(() => sandbox.requests.length).toBe(1);
-    const footer = page
-      .getByRole("button", { name: "Close editor", exact: true })
-      .locator("..");
     for (const draft of ["new", "reopened"]) {
       if (draft === "reopened") {
         await page.goto(`${ROOT}/draft`);
-        await expect(name).toHaveValue("Option focus draft");
+        await expect(name).toHaveValue("Appearance layout draft");
       }
       const restingBottom = await footer.evaluate(
         (element) => element.getBoundingClientRect().bottom
@@ -1631,19 +1639,13 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await page
         .getByRole("button", { name: /^Appearance and labels/ })
         .click();
-      for (const action of [
-        "Summary card",
-        "Full proposal",
-        "ArrowDown",
-        "ArrowUp",
+      for (const { mode, key } of [
+        { mode: "Summary card", key: null },
+        { mode: "Full proposal", key: null },
+        { mode: "Summary card", key: "ArrowDown" },
+        { mode: "Full proposal", key: "ArrowUp" },
       ]) {
-        const mode =
-          action === "ArrowDown"
-            ? "Summary card"
-            : action === "ArrowUp"
-              ? "Full proposal"
-              : action;
-        if (action.startsWith("Arrow")) await page.keyboard.press(action);
+        if (key) await page.keyboard.press(key);
         else await page.getByText(mode, { exact: true }).click();
         const radio = page.getByRole("radio", { name: new RegExp(`^${mode}`) });
         await expect(radio).toBeChecked();
@@ -1679,17 +1681,12 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
   test("keeps the draft footer at the bottom when proposal appearance changes", async ({
     page,
   }, testInfo) => {
-    const sandbox = await installCompetitionApi(page);
     const viewport = page.viewportSize();
     if (!viewport) throw new Error("Viewport missing");
-    await page.setViewportSize({ ...viewport, height: 1600 });
-    await page.goto(`${ROOT}/new`);
-    const name = page.getByLabel("Competition name", { exact: true });
-    await name.fill("Appearance layout draft");
-    await expect.poll(() => sandbox.requests.length).toBe(1);
-    const footer = page
-      .getByRole("button", { name: "Close editor", exact: true })
-      .locator("..");
+    const { name, footer } = await openAppearanceDraft(page, {
+      ...viewport,
+      height: 1600,
+    });
 
     for (const draft of ["new", "reopened"]) {
       if (draft === "reopened") {
