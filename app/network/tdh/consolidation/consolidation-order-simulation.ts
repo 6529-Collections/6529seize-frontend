@@ -64,8 +64,9 @@ function confirmedLinks(
 /**
  * Groups wallets the way the backend does (src/consolidation-tools.ts):
  * newest confirmed link first, a wallet joins only when it is linked with
- * every member, and a group grows past three only when one member's links to
- * all the others were registered after the start date.
+ * every member, and a group grows past `limits.ungatedMaxWallets` (three
+ * today) only when one member's links to all the others were registered
+ * after the start date.
  */
 function groupSimulatedWallets(
   links: readonly ConfirmedLink[],
