@@ -1237,7 +1237,6 @@
         "/network/levels",
         "/network/health/network-tdh",
         "/network/nerd",
-        "/network/prenodes",
         "/network/tdh/historic-boosts"
       ],
       "tags": ["about", "navigation", "getting-started"],

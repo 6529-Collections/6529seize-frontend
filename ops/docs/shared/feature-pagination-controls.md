@@ -15,7 +15,7 @@ Two shared variants are used across the app:
 ## Location in the Site
 
 - Numbered pagination appears on routes such as:
-  `/nft-activity`, `/tools/subscriptions-report`, `/network/prenodes`,
+  `/nft-activity`, `/tools/subscriptions-report`,
   `/open-data/network-metrics`, `/open-data/rememes`, `/open-data/royalties`,
   `/open-data/meme-subscriptions`, and `/the-memes/{id}/distribution`.
 - Table pagination appears on routes such as:
