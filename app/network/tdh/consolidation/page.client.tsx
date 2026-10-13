@@ -22,7 +22,6 @@ import {
   NETWORK_REFERENCE_PAGE_CLASSES,
 } from "@/components/network/networkPageLayoutClasses";
 import ButtonLink from "@/components/utils/button/ButtonLink";
-import { CONSOLIDATION_WALLET_LIMIT } from "@/constants/consolidation.constants";
 import { useConsolidationPolicy } from "@/hooks/useConsolidationPolicy";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -97,9 +96,13 @@ function activationDate(
 export default function TDHConsolidationPage() {
   const locale = useBrowserLocale();
   useSetTitle(t(locale, "network.tdhConsolidation.pageTitle"));
-  const { policy } = useConsolidationPolicy();
+  const { policy, limits } = useConsolidationPolicy();
   const date = activationDate(locale, policy?.activationMs);
-  const limit = formatInteger(locale, CONSOLIDATION_WALLET_LIMIT);
+  const limit = limits ? formatInteger(locale, limits.maxWallets) : "";
+  const pendingLimits = t(
+    locale,
+    "network.tdhConsolidation.policy.pendingLimits"
+  );
 
   return (
     <div className={NETWORK_REFERENCE_PAGE_CLASSES}>
@@ -120,7 +123,9 @@ export default function TDHConsolidationPage() {
             </p>
             <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
               {t(locale, "network.tdhConsolidation.nothingMoves")}{" "}
-              {t(locale, "network.tdhConsolidation.limit", { limit, date })}
+              {limits
+                ? t(locale, "network.tdhConsolidation.limit", { limit, date })
+                : pendingLimits}
             </p>
             <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-center tw-gap-x-6 tw-gap-y-3">
               <ButtonLink href={GUIDED_SETUP_HREF} variant="primary" size="lg">
@@ -224,9 +229,15 @@ export default function TDHConsolidationPage() {
                     {t(locale, `network.tdhConsolidation.steps.${step}.title`)}
                   </h3>
                   <p className={`${TDH_TEXT} tw-mt-1`}>
-                    {t(locale, `network.tdhConsolidation.steps.${step}.body`, {
-                      limit,
-                    })}
+                    {!limits && step === "list"
+                      ? pendingLimits
+                      : t(
+                          locale,
+                          `network.tdhConsolidation.steps.${step}.body`,
+                          {
+                            limit,
+                          }
+                        )}
                   </p>
                 </div>
               </li>
@@ -282,10 +293,12 @@ export default function TDHConsolidationPage() {
                 {t(locale, `network.tdhConsolidation.faq.${key}.title`)}
               </summary>
               <p className={`${TDH_TEXT} tw-pb-5`}>
-                {t(locale, `network.tdhConsolidation.faq.${key}.body`, {
-                  date,
-                  limit,
-                })}
+                {!limits && key === "limit"
+                  ? pendingLimits
+                  : t(locale, `network.tdhConsolidation.faq.${key}.body`, {
+                      date,
+                      limit,
+                    })}
               </p>
             </details>
           ))}

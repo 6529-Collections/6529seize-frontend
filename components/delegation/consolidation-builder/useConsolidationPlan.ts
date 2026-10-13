@@ -1,6 +1,9 @@
 "use client";
 
-import type { ConsolidationPolicy } from "@/helpers/consolidationPolicy";
+import type {
+  ConsolidationLimits,
+  ConsolidationPolicy,
+} from "@/helpers/consolidationPolicy";
 
 import { useMemo, useState } from "react";
 import {
@@ -78,13 +81,24 @@ export function useConsolidationPlan(input: {
   readonly existingMembers: readonly string[];
   readonly nowMs: number;
   readonly policy: ConsolidationPolicy | null;
+  readonly limits: ConsolidationLimits | null;
 }) {
-  const { wallets, isValid, groupsReady, existingMembers, nowMs, policy } =
-    input;
-  const walletsKey = `${wallets.join(",")}:${policy?.activationMs ?? "unavailable"}`;
+  const {
+    wallets,
+    isValid,
+    groupsReady,
+    existingMembers,
+    nowMs,
+    policy,
+    limits,
+  } = input;
+  const walletsKey = `${wallets.join(",")}:${policy?.activationMs ?? "unavailable"}:${limits?.maxWallets ?? "unavailable"}:${limits?.ungatedMaxWallets ?? "unavailable"}`;
   const linkStatus = useConsolidationLinkStatus(isValid ? wallets : NO_WALLETS);
   // Only four-wallet plans depend on when each direction was registered.
-  const needsFreshLinks = isValid && requiresFourthSlot(wallets.length);
+  const needsFreshLinks =
+    isValid &&
+    !!limits &&
+    requiresFourthSlot(wallets.length, limits.ungatedMaxWallets);
   const freshLinks = useConsolidationFreshLinks(
     needsFreshLinks && policy ? wallets : NO_WALLETS,
     policy?.activationMs ?? null
@@ -113,8 +127,9 @@ export function useConsolidationPlan(input: {
 
   const plan = useMemo<ConsolidationPlan | undefined>(
     () =>
-      activeBaseline
+      activeBaseline && limits
         ? buildConsolidationPlan({
+            limits,
             wallets,
             existingMembers: activeBaseline.existingMembers,
             isRegistered: createDirectedLinkLookup(
@@ -125,7 +140,7 @@ export function useConsolidationPlan(input: {
             signingOpensMs: policy?.signingOpensMs ?? null,
           })
         : undefined,
-    [activeBaseline, nowMs, policy, wallets]
+    [activeBaseline, limits, nowMs, policy, wallets]
   );
 
   return {

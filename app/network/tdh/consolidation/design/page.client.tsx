@@ -7,7 +7,6 @@ import {
   NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
   NETWORK_REFERENCE_PAGE_CLASSES,
 } from "@/components/network/networkPageLayoutClasses";
-import { CONSOLIDATION_WALLET_LIMIT } from "@/constants/consolidation.constants";
 import { useConsolidationPolicy } from "@/hooks/useConsolidationPolicy";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -173,9 +172,13 @@ export default function TDHConsolidationDesignPage() {
   const locale = useBrowserLocale();
   useSetTitle(t(locale, "network.tdhConsolidation.design.pageTitle"));
   useTDHSectionHashFocus(NAVIGATION_IDS);
-  const { policy } = useConsolidationPolicy();
+  const { policy, limits } = useConsolidationPolicy();
   const date = activationDate(locale, policy?.activationMs);
-  const limit = formatInteger(locale, CONSOLIDATION_WALLET_LIMIT);
+  const limit = limits ? formatInteger(locale, limits.maxWallets) : "";
+  const pendingLimits = t(
+    locale,
+    "network.tdhConsolidation.policy.pendingLimits"
+  );
 
   return (
     <div className={NETWORK_REFERENCE_PAGE_CLASSES}>
@@ -191,10 +194,12 @@ export default function TDHConsolidationDesignPage() {
             {t(locale, "network.tdhConsolidation.design.title")}
           </h1>
           <p className="tw-mb-0 tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-200">
-            {t(locale, "network.tdhConsolidation.design.intro", {
-              date,
-              limit,
-            })}
+            {limits
+              ? t(locale, "network.tdhConsolidation.design.intro", {
+                  date,
+                  limit,
+                })
+              : pendingLimits}
           </p>
           <p className="tw-mb-0 tw-mt-3 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
             {t(locale, "network.tdhConsolidation.design.guideNote")}{" "}
@@ -223,10 +228,12 @@ export default function TDHConsolidationDesignPage() {
                   {t(locale, `network.tdhConsolidation.rules.${rule}.title`)}
                 </h3>
                 <p className={`${TDH_TEXT} tw-mt-2`}>
-                  {t(locale, `network.tdhConsolidation.rules.${rule}.body`, {
-                    date,
-                    limit,
-                  })}
+                  {!limits && rule === "limit"
+                    ? pendingLimits
+                    : t(locale, `network.tdhConsolidation.rules.${rule}.body`, {
+                        date,
+                        limit,
+                      })}
                 </p>
               </li>
             ))}
@@ -240,7 +247,11 @@ export default function TDHConsolidationDesignPage() {
           title={t(locale, "network.tdhConsolidation.order.title")}
           description={t(locale, "network.tdhConsolidation.order.description")}
         >
-          <ConsolidationOrderSimulator locale={locale} activationDate={date} />
+          <ConsolidationOrderSimulator
+            locale={locale}
+            activationDate={date}
+            limits={limits}
+          />
         </TDHSection>
 
         <TDHSection

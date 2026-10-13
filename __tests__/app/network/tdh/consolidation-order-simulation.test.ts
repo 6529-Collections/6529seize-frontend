@@ -1,3 +1,4 @@
+import { limits } from "@/__tests__/helpers/consolidation-policy.fixture";
 import {
   SIMULATED_SIGNERS,
   type SimulatedWallet,
@@ -19,7 +20,7 @@ const ALL_ORDERS = permutations(SIMULATED_SIGNERS);
 
 describe("simulateAddingFourthWallet", () => {
   it("keeps A, B and C together at every step when D signs last", () => {
-    const steps = simulateAddingFourthWallet(["B", "A", "C", "D"]);
+    const steps = simulateAddingFourthWallet(["B", "A", "C", "D"], limits);
     expect(steps.map((step) => step.existingMembersTogether)).toEqual([
       true,
       true,
@@ -30,7 +31,7 @@ describe("simulateAddingFourthWallet", () => {
   });
 
   it("splits the group while D's links arrive when D signs first", () => {
-    const steps = simulateAddingFourthWallet(["D", "A", "B", "C"]);
+    const steps = simulateAddingFourthWallet(["D", "A", "B", "C"], limits);
     expect(steps.map((step) => step.groups)).toEqual([
       [["A", "B", "C"], ["D"]],
       [
@@ -47,7 +48,7 @@ describe("simulateAddingFourthWallet", () => {
 
   it("is safe in exactly the six orders where D signs last", () => {
     const safe = ALL_ORDERS.filter((order) =>
-      simulateAddingFourthWallet(order).every(
+      simulateAddingFourthWallet(order, limits).every(
         (step) => step.existingMembersTogether
       )
     );
@@ -58,14 +59,14 @@ describe("simulateAddingFourthWallet", () => {
 
   it("always ends with all four wallets in one group", () => {
     for (const order of ALL_ORDERS) {
-      expect(simulateAddingFourthWallet(order).at(-1)?.groups).toEqual([
+      expect(simulateAddingFourthWallet(order, limits).at(-1)?.groups).toEqual([
         ["A", "B", "C", "D"],
       ]);
     }
   });
 
   it("returns one step per signature so far", () => {
-    expect(simulateAddingFourthWallet([])).toEqual([]);
-    expect(simulateAddingFourthWallet(["A", "B"])).toHaveLength(2);
+    expect(simulateAddingFourthWallet([], limits)).toEqual([]);
+    expect(simulateAddingFourthWallet(["A", "B"], limits)).toHaveLength(2);
   });
 });

@@ -1,4 +1,3 @@
-import { CONSOLIDATION_WALLET_LIMIT } from "@/constants/consolidation.constants";
 import { isAddress } from "viem";
 import { toWalletKey } from "./consolidation-plan";
 
@@ -46,17 +45,15 @@ export function parseConsolidationGroup(response: unknown): string[] {
  */
 export function getPrefillWallets(
   connectedAddress: string,
-  connectedGroup: readonly string[]
+  connectedGroup: readonly string[],
+  maxWallets: number
 ): string[] {
   const connected = toWalletKey(connectedAddress);
   const others = connectedGroup
     .map(toWalletKey)
     .filter((wallet) => wallet !== connected);
   const isMember = others.length < connectedGroup.length;
-  return [connected, ...(isMember ? others : [])].slice(
-    0,
-    CONSOLIDATION_WALLET_LIMIT
-  );
+  return [connected, ...(isMember ? others : [])].slice(0, maxWallets);
 }
 
 /**

@@ -1,6 +1,31 @@
-export interface ConsolidationPolicy {
+export interface ConsolidationLimits {
+  readonly maxWallets: number;
+  readonly ungatedMaxWallets: number;
+}
+
+export interface ConsolidationPolicy extends ConsolidationLimits {
   readonly activationMs: number;
   readonly signingOpensMs: number;
+}
+
+/** Wallet limits are usable independently of the signing cutoff. */
+export function parseConsolidationLimits(
+  value: unknown
+): ConsolidationLimits | null {
+  if (value === null || typeof value !== "object") return null;
+  const maxWallets: unknown = Reflect.get(value, "max_wallets");
+  const ungatedMaxWallets: unknown = Reflect.get(value, "ungated_max_wallets");
+  if (
+    typeof maxWallets !== "number" ||
+    !Number.isSafeInteger(maxWallets) ||
+    maxWallets < 2 ||
+    typeof ungatedMaxWallets !== "number" ||
+    !Number.isSafeInteger(ungatedMaxWallets) ||
+    ungatedMaxWallets < 2 ||
+    ungatedMaxWallets > maxWallets
+  )
+    return null;
+  return { maxWallets, ungatedMaxWallets };
 }
 
 function parseUtc(value: unknown): number | null {
@@ -24,6 +49,8 @@ export function parseConsolidationPolicy(
   value: unknown
 ): ConsolidationPolicy | null {
   if (value === null || typeof value !== "object") return null;
+  const limits = parseConsolidationLimits(value);
+  if (!limits) return null;
   const activationMs = parseUtc(
     Reflect.get(value, "four_wallet_activation_at")
   );
@@ -36,5 +63,5 @@ export function parseConsolidationPolicy(
     signingOpensMs <= activationMs
   )
     return null;
-  return { activationMs, signingOpensMs };
+  return { ...limits, activationMs, signingOpensMs };
 }

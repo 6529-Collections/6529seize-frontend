@@ -1,7 +1,6 @@
 "use client";
 
 import Button from "@/components/utils/button/Button";
-import { CONSOLIDATION_WALLET_LIMIT } from "@/constants/consolidation.constants";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -103,10 +102,11 @@ function GroupLookupStatus(
   return null;
 }
 
-/** Editable list of up to CONSOLIDATION_WALLET_LIMIT wallet addresses. */
+/** Editable list of up to the backend wallet limit wallet addresses. */
 export function ConsolidationBuilderWallets(
   props: Readonly<{
     locale: SupportedLocale;
+    maxWallets: number | null;
     entries: readonly ConsolidationWalletEntry[];
     issues: readonly (ConsolidationWalletIssue | undefined)[];
     validCount: number;
@@ -120,8 +120,9 @@ export function ConsolidationBuilderWallets(
   }>
 ) {
   const { locale, entries, issues } = props;
-  const limit = formatInteger(locale, CONSOLIDATION_WALLET_LIMIT);
-  const canAdd = entries.length < CONSOLIDATION_WALLET_LIMIT;
+  const limit =
+    props.maxWallets === null ? "" : formatInteger(locale, props.maxWallets);
+  const canAdd = props.maxWallets !== null && entries.length < props.maxWallets;
   const canRemove = entries.length > MIN_WALLET_ROWS;
 
   return (
@@ -137,10 +138,16 @@ export function ConsolidationBuilderWallets(
           {t(locale, "delegation.consolidationBuilder.wallets.title")}
         </h3>
         <span className="tw-text-sm tw-text-iron-400">
-          {t(locale, "delegation.consolidationBuilder.wallets.count", {
-            count: formatInteger(locale, props.validCount),
-            limit,
-          })}
+          {t(
+            locale,
+            props.maxWallets === null
+              ? "delegation.consolidationBuilder.wallets.countPending"
+              : "delegation.consolidationBuilder.wallets.count",
+            {
+              count: formatInteger(locale, props.validCount),
+              limit,
+            }
+          )}
         </span>
       </div>
       <ol className="tw-m-0 tw-list-none tw-space-y-4 tw-p-0">
@@ -226,7 +233,7 @@ export function ConsolidationBuilderWallets(
         })}
       </ol>
       <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-        {canAdd ? (
+        {canAdd && (
           <Button
             type="button"
             variant="secondary"
@@ -240,7 +247,8 @@ export function ConsolidationBuilderWallets(
             />
             {t(locale, "delegation.consolidationBuilder.wallets.add")}
           </Button>
-        ) : (
+        )}
+        {!canAdd && props.maxWallets !== null && (
           <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-400">
             {t(locale, "delegation.consolidationBuilder.wallets.limitReached", {
               limit,

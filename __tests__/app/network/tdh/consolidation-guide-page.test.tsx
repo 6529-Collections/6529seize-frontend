@@ -1,5 +1,6 @@
 jest.mock("@/hooks/useConsolidationPolicy", () => ({
   useConsolidationPolicy: () => ({
+    limits: { maxWallets: 4, ungatedMaxWallets: 3 },
     policy: {
       activationMs: Date.parse("2026-10-12T00:00:00Z"),
       signingOpensMs: Date.parse("2026-10-12T00:10:00Z"),

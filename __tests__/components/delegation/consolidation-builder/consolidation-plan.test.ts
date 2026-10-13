@@ -1,16 +1,17 @@
 import {
   CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS,
   FOURTH_SLOT_SIGNING_OPENS_MS,
+  limits,
 } from "@/__tests__/helpers/consolidation-policy.fixture";
 import {
   buildConsolidationPlan,
   createDirectedLinkLookup,
   getDirectedWalletPairs,
+  requiresFourthSlot,
   resolveConsolidationProgress,
   toDirectedLinkKey,
   validateConsolidationWallets,
 } from "@/components/delegation/consolidation-builder/consolidation-plan";
-import { CONSOLIDATION_WALLET_LIMIT } from "@/constants/consolidation.constants";
 
 const A = `0x${"a".repeat(40)}`;
 const B = `0x${"b".repeat(40)}`;
@@ -45,6 +46,7 @@ function plan(input: {
   nowMs?: number;
 }) {
   return buildConsolidationPlan({
+    limits,
     wallets: input.wallets,
     existingMembers: input.existingMembers ?? [],
     isRegistered: lookup(input.links ?? []),
@@ -63,7 +65,10 @@ function summarize(
 describe("validateConsolidationWallets", () => {
   it("accepts two to four distinct wallets and lowercases them", () => {
     const checksummed = "0x52908400098527886E0F7030069857D2E4169EE7";
-    const result = validateConsolidationWallets([` ${checksummed} `, B, ""]);
+    const result = validateConsolidationWallets(
+      [` ${checksummed} `, B, ""],
+      limits
+    );
 
     expect(result).toEqual({
       issues: [undefined, undefined, undefined],
@@ -76,12 +81,15 @@ describe("validateConsolidationWallets", () => {
 
   it("flags malformed, zero, and bad-checksum addresses as invalid", () => {
     const badChecksum = "0xAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-    const result = validateConsolidationWallets([
-      "not-a-wallet",
-      "0x0000000000000000000000000000000000000000",
-      badChecksum,
-      A,
-    ]);
+    const result = validateConsolidationWallets(
+      [
+        "not-a-wallet",
+        "0x0000000000000000000000000000000000000000",
+        badChecksum,
+        A,
+      ],
+      limits
+    );
 
     expect(result.issues).toEqual(["invalid", "invalid", "invalid", undefined]);
     expect(result.wallets).toEqual([A]);
@@ -91,18 +99,18 @@ describe("validateConsolidationWallets", () => {
 
   it("flags case-insensitive duplicates after the first entry", () => {
     const checksummed = "0x52908400098527886E0F7030069857D2E4169EE7";
-    const result = validateConsolidationWallets([
-      checksummed,
-      checksummed.toLowerCase(),
-    ]);
+    const result = validateConsolidationWallets(
+      [checksummed, checksummed.toLowerCase()],
+      limits
+    );
 
     expect(result.issues).toEqual([undefined, "duplicate"]);
     expect(result.wallets).toEqual([checksummed.toLowerCase()]);
     expect(result.isValid).toBe(false);
   });
 
-  it(`rejects more than ${CONSOLIDATION_WALLET_LIMIT} wallets`, () => {
-    const result = validateConsolidationWallets([A, B, C, D, E]);
+  it(`rejects more than ${limits.maxWallets} wallets`, () => {
+    const result = validateConsolidationWallets([A, B, C, D, E], limits);
 
     expect(result.wallets).toHaveLength(5);
     expect(result.tooMany).toBe(true);
@@ -110,7 +118,7 @@ describe("validateConsolidationWallets", () => {
   });
 
   it("requires at least two wallets and ignores blank rows", () => {
-    const result = validateConsolidationWallets([A, " ", ""]);
+    const result = validateConsolidationWallets([A, " ", ""], limits);
 
     expect(result.issues).toEqual([undefined, undefined, undefined]);
     expect(result.tooFew).toBe(true);
@@ -850,6 +858,7 @@ describe("resolveConsolidationProgress", () => {
 
 test("uses staging's signing time independently of the production fixture", () => {
   const input = {
+    limits,
     wallets: [A, B, C, D],
     existingMembers: [A, B, C],
     isRegistered: lookup([]),
@@ -871,4 +880,17 @@ test("uses staging's signing time independently of the production fixture", () =
   expect(
     buildConsolidationPlan({ ...input, signingOpensMs: null }).fourthSlotWait
   ).toBe("all-steps");
+});
+
+test("uses the supplied limits for validation and the consent boundary", () => {
+  expect(
+    validateConsolidationWallets([A, B, C, D], {
+      maxWallets: 3,
+      ungatedMaxWallets: 3,
+    }).tooMany
+  ).toBe(true);
+  expect(validateConsolidationWallets([A, B], null).isValid).toBe(false);
+  expect(requiresFourthSlot(3, 3)).toBe(false);
+  expect(requiresFourthSlot(4, 3)).toBe(true);
+  expect(requiresFourthSlot(3, 2)).toBe(true);
 });

@@ -1,6 +1,4 @@
-import { CONSOLIDATION_WALLET_LIMIT } from "@/constants/consolidation.constants";
 import { isValidEthAddress } from "@/helpers/addressFormatting";
-import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { DelegationCenterSection } from "@/types/enums";
@@ -63,8 +61,7 @@ const SECTION_METADATA: Readonly<
     navLabel: t(DEFAULT_LOCALE, "delegation.consolidationBuilder.title"),
     description: t(
       DEFAULT_LOCALE,
-      "delegation.consolidationBuilder.metadataDescription",
-      { limit: formatInteger(DEFAULT_LOCALE, CONSOLIDATION_WALLET_LIMIT) }
+      "delegation.consolidationBuilder.metadataDescription"
     ),
   },
   [DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS]: {

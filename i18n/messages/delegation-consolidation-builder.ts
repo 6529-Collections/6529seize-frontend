@@ -1,11 +1,11 @@
 export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
   "delegation.consolidationBuilder.policy.loading":
-    "Loading the four-wallet activation date…",
+    "Loading consolidation settings…",
   "delegation.consolidationBuilder.policy.unavailable":
-    "Couldn’t load the four-wallet activation date. Four-wallet signing is unavailable; try again.",
+    "Couldn’t load consolidation settings. Signing that requires unavailable settings is paused; try again.",
   "delegation.consolidationBuilder.title": "Build a Consolidation",
   "delegation.consolidationBuilder.metadataDescription":
-    "Plan and sign the links between up to {limit} wallets you control, one transaction per wallet. A manager signing for a cold vault sends one per link.",
+    "Plan and sign the links between wallets you control, one transaction per wallet. A manager signing for a cold vault sends one per link.",
   "delegation.consolidationBuilder.description":
     "Every pair of wallets in a consolidation registers a link in both directions. Enter up to {limit} wallets you control, then sign one transaction per wallet in the order shown. A Delegation Manager signing for a cold vault sends one transaction per link instead.",
   "delegation.consolidationBuilder.closeTitle": "Consolidation",
@@ -30,6 +30,8 @@ export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
     "Safes sign through a manager here. Appoint a Delegation Manager for this Safe on Any Collection, then connect the manager to sign these links.",
   "delegation.consolidationBuilder.safe.faqLink": "Using a SAFE",
   "delegation.consolidationBuilder.wallets.title": "Wallets",
+  "delegation.consolidationBuilder.wallets.countPending":
+    "Entered wallets: {count}",
   "delegation.consolidationBuilder.wallets.count": "{count} of {limit} wallets",
   "delegation.consolidationBuilder.wallets.label": "Wallet {position}",
   "delegation.consolidationBuilder.wallets.inputLabel":
