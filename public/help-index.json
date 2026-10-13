@@ -7079,6 +7079,7 @@
       "keywords": ["waves", "drop", "touch", "long", "press", "menu", "mobile"],
       "facts": [
         "Wave drop touch menu behavior covers long-press and touch action button entry points.",
+        "While editing a chat drop in a wave or direct message, pressing and holding inside the editor keeps the edit open and preserves unsaved text. Use normal cursor placement, text selection and paste gestures; the drop actions sheet stays closed. This also applies to the active part of a storm drop.",
         "In the native mobile app on a touchscreen, a short tap on a Memes leaderboard List or artwork Grid card opens the drop, including taps on its media. The List username opens the author's profile, while the List avatar and author badges open the submission; the Grid username opens the submission. A long press still opens the action sheet without also opening the drop on release. Explicit vote, rating, and other action buttons stay independent.",
         "Scrolling gestures, cancelled touches, and touches that stop ongoing scrolling do not open native-app leaderboard cards; tap normally once scrolling settles. Browser views, including mobile browsers, retain their own profile-link and media behavior.",
         "Menu entries depend on device, drop state, and available actions.",
