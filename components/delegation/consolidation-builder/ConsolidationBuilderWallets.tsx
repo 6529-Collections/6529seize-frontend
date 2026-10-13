@@ -107,6 +107,7 @@ export function ConsolidationBuilderWallets(
   props: Readonly<{
     locale: SupportedLocale;
     maxWallets: number | null;
+    preActivationSigningDate: string | null;
     entries: readonly ConsolidationWalletEntry[];
     issues: readonly (ConsolidationWalletIssue | undefined)[];
     validCount: number;
@@ -137,18 +138,31 @@ export function ConsolidationBuilderWallets(
         >
           {t(locale, "delegation.consolidationBuilder.wallets.title")}
         </h3>
-        <span className="tw-text-sm tw-text-iron-400">
-          {t(
-            locale,
-            props.maxWallets === null
-              ? "delegation.consolidationBuilder.wallets.countPending"
-              : "delegation.consolidationBuilder.wallets.count",
-            {
-              count: formatInteger(locale, props.validCount),
-              limit,
-            }
+        <div className="tw-ml-auto tw-flex tw-max-w-full tw-flex-col tw-items-end tw-gap-1">
+          <span className="tw-text-sm tw-text-iron-400">
+            {t(
+              locale,
+              props.maxWallets === null
+                ? "delegation.consolidationBuilder.wallets.countPending"
+                : "delegation.consolidationBuilder.wallets.count",
+              {
+                count: formatInteger(locale, props.validCount),
+                limit,
+              }
+            )}
+          </span>
+          {props.preActivationSigningDate && (
+            <p className="tw-m-0 tw-max-w-xs tw-text-right tw-text-xs tw-leading-5 tw-text-iron-400">
+              {t(
+                locale,
+                "delegation.consolidationBuilder.wallets.signingOpens",
+                {
+                  date: props.preActivationSigningDate,
+                }
+              )}
+            </p>
           )}
-        </span>
+        </div>
       </div>
       <ol className="tw-m-0 tw-list-none tw-space-y-4 tw-p-0">
         {entries.map((entry, index) => {

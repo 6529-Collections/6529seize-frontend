@@ -339,6 +339,12 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
     await expect(main.getByText("0 of 4 wallets", { exact: true })).toBeVisible(
       { timeout: RESPONSE_TIMEOUT_MS }
     );
+    // Before cutoff the optional counter note uses quiet, small copy. The
+    // exact time boundary and absent-policy cases are covered in component tests.
+    const openingNote = main.getByText(/^Four-wallet signing opens /);
+    if (await openingNote.count()) {
+      await expect(openingNote).toHaveCSS("font-size", "12px");
+    }
     await expect(firstWallet).toHaveValue("");
     await firstWallet.fill("not-a-wallet");
     await expect(firstWallet).toHaveAttribute("aria-invalid", "true");

@@ -538,6 +538,9 @@ describe("ConsolidationBuilder", () => {
     const status = screen.getByText("Loading consolidation settings…");
     expect(status.tagName).toBe("OUTPUT");
     expect(screen.queryByRole("button", { name: "Try Again" })).toBeNull();
+    expect(
+      screen.queryByText(/^Four-wallet signing opens /)
+    ).not.toBeInTheDocument();
   });
 
   it("alerts and offers a retry when the activation date is unavailable", () => {
@@ -572,6 +575,70 @@ describe("ConsolidationBuilder", () => {
     ).not.toBeInTheDocument();
   });
 
+  it.each([
+    [CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS - 1, true],
+    [CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS, false],
+    [CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS + 1, false],
+    [FOURTH_SLOT_SIGNING_OPENS_MS, false],
+  ] as const)(
+    "shows the counter opening note only before the cutoff (now=%s)",
+    (nowMs, visible) => {
+      jest.spyOn(Date, "now").mockReturnValue(nowMs);
+      renderBuilder();
+      const note = screen.queryByText(
+        `Four-wallet signing opens ${SIGNING_OPENS_TEXT}.`
+      );
+      if (visible) expect(note).toBeInTheDocument();
+      else expect(note).not.toBeInTheDocument();
+    }
+  );
+
+  it("uses the selected environment's opening time in the counter note", () => {
+    mockPolicyState.policy = {
+      maxWallets: 4,
+      ungatedMaxWallets: 3,
+      activationMs: Date.parse("2026-10-14T00:00:00Z"),
+      signingOpensMs: Date.parse("2026-10-14T00:10:00Z"),
+    };
+    jest.spyOn(Date, "now").mockReturnValue(Date.parse("2026-10-13T23:59:00Z"));
+    renderBuilder();
+    expect(
+      screen.getByText(
+        "Four-wallet signing opens October 14, 2026 at 00:10 UTC."
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("removes the counter note at cutoff in an open tab while signing stays held", () => {
+    jest.useFakeTimers();
+    try {
+      jest.setSystemTime(CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS - 1000);
+      renderBuilder();
+      addFourthWallet();
+      expect(
+        screen.getByText(`Four-wallet signing opens ${SIGNING_OPENS_TEXT}.`)
+      ).toBeInTheDocument();
+      act(() => jest.advanceTimersByTime(1000));
+      expect(
+        screen.queryByText(`Four-wallet signing opens ${SIGNING_OPENS_TEXT}.`)
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /^Sign Step/ })
+      ).not.toBeInTheDocument();
+      act(() =>
+        jest.advanceTimersByTime(
+          FOURTH_SLOT_SIGNING_OPENS_MS -
+            CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS
+        )
+      );
+      expect(
+        step(1).getByRole("button", { name: "Sign Step 1" })
+      ).toBeEnabled();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it("opens a held group when activation passes in an open tab", () => {
     jest.useFakeTimers();
     try {
@@ -591,8 +658,21 @@ describe("ConsolidationBuilder", () => {
         screen.queryByRole("button", { name: /^Sign Step/ })
       ).not.toBeInTheDocument();
       act(() => {
-        jest.advanceTimersByTime(30 * DAY_MS - MAX_TIMER_DELAY_MS);
+        jest.advanceTimersByTime(
+          CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS -
+            startMs -
+            MAX_TIMER_DELAY_MS
+        );
       });
+      expect(
+        screen.queryByRole("button", { name: /^Sign Step/ })
+      ).not.toBeInTheDocument();
+      act(() =>
+        jest.advanceTimersByTime(
+          FOURTH_SLOT_SIGNING_OPENS_MS -
+            CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS
+        )
+      );
       expect(
         step(1).getByRole("button", { name: "Sign Step 1" })
       ).toBeEnabled();

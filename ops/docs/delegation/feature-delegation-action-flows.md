@@ -162,6 +162,10 @@ wallet, in a safe order.
   four-wallet consolidations count only for links registered from the cutoff,
   and every step opens ten minutes later, a few minutes later, so no link can land
   before the start.
+- Before the activation cutoff, a small note under the wallet counter gives
+  the current environment's four-wallet signing opening time in UTC. You can
+  prepare a plan in advance. The note disappears at the cutoff, including in
+  an open tab; the step-level signing hold still lasts until the opening time.
 - The page reads the maximum (4), ungated boundary (3) and cutoff from this environment’s settings. Both limits are fixed backend policy, not user-editable settings. Staging may open before production. Missing wallet limits pause guided signing and adding wallet rows until settings load or are retried. If limits are available but the cutoff is unavailable, two- and three-wallet plans continue while four-wallet signing waits.
 - After a step confirms in the session, a link that 6529 has not recorded yet
   shows `Recording` and
