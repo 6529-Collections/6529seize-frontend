@@ -1,5 +1,6 @@
 import { limits } from "@/__tests__/helpers/consolidation-policy.fixture";
 import {
+  matchesSimulatedScenario,
   SIMULATED_SIGNERS,
   type SimulatedWallet,
   simulateAddingFourthWallet,
@@ -68,5 +69,18 @@ describe("simulateAddingFourthWallet", () => {
   it("returns one step per signature so far", () => {
     expect(simulateAddingFourthWallet([], limits)).toEqual([]);
     expect(simulateAddingFourthWallet(["A", "B"], limits)).toHaveLength(2);
+  });
+});
+
+describe("matchesSimulatedScenario", () => {
+  it("accepts the four-wallet policy the walkthrough models", () => {
+    expect(matchesSimulatedScenario(limits)).toBe(true);
+  });
+
+  it.each([
+    { maxWallets: 5, ungatedMaxWallets: 3 },
+    { maxWallets: 4, ungatedMaxWallets: 2 },
+  ])("rejects other limits (%o)", (other) => {
+    expect(matchesSimulatedScenario(other)).toBe(false);
   });
 });
