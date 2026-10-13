@@ -10435,6 +10435,52 @@
       "brief_answer": "For the **{{percentage}}%** recovery range in **6529 Desktop**, check the TDH worker **Logs** and share the redacted error. Let any active work finish; do not widen reconciliation or start a reset because calculation failed. Once calculation completes successfully, do TDH and Merkle Root now match 6529.io at the same Last Block?\n\nRange: {{percentage}}% of blocks {{minimum_block}}–{{checkpoint}}.",
       "reconciliation_min_block": 13360860,
       "answer_links": []
+    },
+    {
+      "id": "waves.signed-messages",
+      "kind": "workflow",
+      "title": "Signed messages and the Devices tab",
+      "aliases": [
+        "signed messages",
+        "turn on signed messages",
+        "device signature",
+        "devices tab",
+        "can now post as you",
+        "revoke device",
+        "signed by its author",
+        "not signed by its author"
+      ],
+      "keywords": [
+        "waves",
+        "signature",
+        "device",
+        "grant",
+        "revoke",
+        "verify",
+        "ed25519",
+        "preferences"
+      ],
+      "facts": [
+        "Signed messages are staged behind a flag (on for staging, off in production). With them on, a web browser holds a non-extractable Ed25519 key per wallet; one wallet signature grants it the right to sign your posts, edits, deletes and reactions for 180 days. There is no wallet prompt per message and chat behaves as before.",
+        "The grant rides on the ordinary web sign-in. A logged-in user without a grant in this browser sees Turn on signed messages (one signature) above the empty wave composer; Turn on asks for one signature and the notice can be dismissed for 30 days. In a grant's last 14 days the notice offers Renew; after expiry writes go unsigned until renewed.",
+        "Signing never blocks or delays a write. If signing fails or a signature is rejected, the drop, edit, delete or reaction is sent unsigned exactly as before.",
+        "Preferences > Devices at /preferences?tab=devices lists every browser that can post as you with its label, This device marker, scopes, wallet, added, expiry and last-used dates and status (Active, Expired, Revoked). Revoke asks for confirmation; earlier signatures stay verifiable. Proxies cannot manage devices.",
+        "When a new browser gains a grant for your profile, other browsers show {label} can now post as you. Not you? with Revoke above the composer. The check runs when a wave opens and at most every 10 minutes while the tab is visible.",
+        "The Signature item in a drop's More menu (or touch menu) verifies the drop in your browser and reports Signed by its author, Not signed by its author, or The signature could not be verified, with wallet, device key fingerprint, grant expiry and whether the current content is the signed version. Contract wallets show Contract wallet: verified by 6529.io at sign-in. Signed drops carry no badge.",
+        "Signed messages are web only: the mobile and desktop apps, proxy sessions and browsers without Ed25519 support sign in and post exactly as before. Votes and ratings are not signed yet."
+      ],
+      "canonical_path": "/preferences?tab=devices",
+      "link_label": "Devices",
+      "related_paths": ["/preferences", "/waves"],
+      "tags": ["waves", "privacy", "security", "preferences"],
+      "source_refs": [
+        "ops/docs/waves/drop-actions/feature-signed-messages.md",
+        "ops/docs/notifications/feature-profile-preferences.md",
+        "components/device-signing/SignedMessagesNotice.tsx",
+        "components/preferences/DevicesPreferencesSettings.tsx",
+        "components/waves/drops/signature/DropSignatureDialog.tsx",
+        "lib/device-signing/sign-write.ts"
+      ]
     }
   ]
 }
