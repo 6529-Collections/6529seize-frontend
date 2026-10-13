@@ -11,7 +11,10 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
-import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
+import {
+  gotoDocumentWithTransientRetry,
+  RESPONSE_TIMEOUT_MS,
+} from "../support/routeReadiness";
 import { MEMES_MINT_TITLE_PATTERN } from "../support/mintTitle";
 
 async function gotoReady(page: Page, path: string) {
@@ -188,15 +191,17 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
   }) => {
     await gotoReady(page, "/meme-lab/1?focus=activity&locale=de-DE");
 
-    await expect(page).toHaveTitle(
-      "Spread the Memes | Meme Lab #1 | Card Activity"
-    );
+    // The route shell and server title precede the client card data. Wait for
+    // the named card before asserting its final activity title.
     await expect(
       page.getByRole("heading", {
         level: 1,
         name: "Meme Lab Card 1 - Spread the Memes",
       })
-    ).toBeVisible();
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    await expect(page).toHaveTitle(
+      "Spread the Memes | Meme Lab #1 | Card Activity"
+    );
     await expect(
       page.getByRole("link", { name: "Back to Meme Lab" })
     ).toHaveAttribute("href", "/meme-lab?locale=de-DE");
