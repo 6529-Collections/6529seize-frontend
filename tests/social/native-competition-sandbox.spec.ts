@@ -1982,7 +1982,8 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
                   const previewBox = preview.getBoundingClientRect();
                   const contentBox = content.getBoundingClientRect();
                   return stacked
-                    ? previewBox.bottom <= contentBox.top
+                    ? previewBox.bottom <= contentBox.top &&
+                        Math.abs(previewBox.width - contentBox.width) <= 1
                     : previewBox.right <= contentBox.left;
                 }),
               width < 640

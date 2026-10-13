@@ -53,7 +53,7 @@ function RankScheduleModePreview({
   return (
     <div aria-hidden="true" className={CREATE_WAVE_OPTION_STYLES.preview}>
       {mode === "ANNOUNCE_WINNERS" ? (
-        <div className="tw-flex tw-h-full tw-items-center">
+        <div className="tw-flex tw-h-full tw-items-center tw-rounded-md tw-bg-iron-900 tw-px-2 sm:tw-bg-transparent sm:tw-px-0">
           <div className="tw-relative tw-grid tw-w-full tw-grid-cols-3">
             <span className="tw-absolute tw-left-[16.66%] tw-right-[16.66%] tw-top-[3px] tw-h-px tw-bg-white/10" />
             {RANK_PREVIEW_ITEMS.map((item) => (
@@ -64,8 +64,8 @@ function RankScheduleModePreview({
                 <span
                   className={`tw-size-2 tw-rounded-full ${timelineDotClasses[item]}`}
                 />
-                <span className="tw-mt-2 tw-h-1 tw-w-3 tw-rounded-full tw-bg-iron-700" />
-                <span className="tw-mt-1 tw-h-0.5 tw-w-2 tw-rounded-full tw-bg-iron-800" />
+                <span className="tw-mt-2 tw-h-1 tw-w-5 tw-rounded-full tw-bg-iron-700 sm:tw-w-3" />
+                <span className="tw-mt-1 tw-h-0.5 tw-w-3 tw-rounded-full tw-bg-iron-800 sm:tw-w-2" />
               </span>
             ))}
           </div>
@@ -75,17 +75,17 @@ function RankScheduleModePreview({
           {RANK_PREVIEW_ITEMS.map((item) => (
             <span
               key={item}
-              className="tw-flex tw-h-2.5 tw-items-center tw-gap-1 tw-rounded-sm tw-bg-iron-900 tw-px-1"
+              className="tw-flex tw-h-3 tw-items-center tw-gap-1.5 tw-rounded-sm tw-bg-iron-900 tw-px-1.5 sm:tw-h-2.5 sm:tw-gap-1 sm:tw-px-1"
             >
               <span
-                className={`tw-size-1 tw-flex-shrink-0 tw-rounded-full ${
+                className={`tw-size-1.5 tw-flex-shrink-0 tw-rounded-full sm:tw-size-1 ${
                   item === 0 ? accentClass : "tw-bg-iron-700"
                 }`}
               />
               <span
                 className={`tw-h-1 tw-rounded-full tw-bg-iron-700 ${leaderboardLineWidthClasses[item]}`}
               />
-              <span className="tw-ml-auto tw-h-1 tw-w-2 tw-rounded-full tw-bg-iron-800" />
+              <span className="tw-ml-auto tw-h-1 tw-w-3 tw-rounded-full tw-bg-iron-800 sm:tw-w-2" />
             </span>
           ))}
         </div>

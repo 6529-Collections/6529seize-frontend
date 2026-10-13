@@ -18,7 +18,7 @@ export const CREATE_WAVE_OPTION_STYLES = {
   selected: "tw-border-primary-500/60 tw-bg-primary-500/5",
   unselected: "tw-border-white/5 tw-bg-iron-950 hover:tw-border-white/10",
   preview:
-    "tw-h-14 tw-w-[72px] tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-2",
+    "tw-h-16 tw-w-full tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-2 sm:tw-h-14",
   content: "tw-flex tw-min-w-0 tw-items-center tw-gap-4",
 } as const;
 

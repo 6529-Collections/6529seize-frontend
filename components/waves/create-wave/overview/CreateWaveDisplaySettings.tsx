@@ -76,29 +76,32 @@ function ProposalCardAppearancePreview({
         <div className="tw-flex tw-h-full tw-flex-col tw-justify-center">
           <div className="tw-flex tw-items-center tw-gap-1.5">
             <span
-              className={`tw-size-1.5 tw-flex-shrink-0 tw-rounded-full ${accentClass}`}
+              className={`tw-size-3 tw-flex-shrink-0 tw-rounded-full sm:tw-size-1.5 ${accentClass}`}
             />
-            <span className={`tw-h-1 tw-w-6 tw-rounded-full ${accentClass}`} />
+            <span
+              className={`tw-h-1 tw-w-10 tw-rounded-full sm:tw-w-6 ${accentClass}`}
+            />
           </div>
           <div className="tw-mt-1.5 tw-space-y-1">
             <span
-              className={`tw-block tw-h-0.5 tw-w-full tw-rounded-full ${detailClass}`}
+              className={`tw-block tw-h-1 tw-w-full tw-rounded-full sm:tw-h-0.5 ${detailClass}`}
             />
-            <span className="tw-block tw-h-0.5 tw-w-11/12 tw-rounded-full tw-bg-iron-800" />
-            <span className="tw-block tw-h-0.5 tw-w-full tw-rounded-full tw-bg-iron-800" />
-            <span className="tw-block tw-h-0.5 tw-w-3/4 tw-rounded-full tw-bg-iron-800" />
+            <span className="tw-block tw-h-1 tw-w-11/12 tw-rounded-full tw-bg-iron-800 sm:tw-h-0.5" />
+            <span className="tw-block tw-h-1 tw-w-full tw-rounded-full tw-bg-iron-800 sm:tw-h-0.5" />
+            <span className="tw-block tw-h-1 tw-w-3/4 tw-rounded-full tw-bg-iron-800 sm:tw-h-0.5" />
+            <span className="tw-block tw-h-1 tw-w-5/6 tw-rounded-full tw-bg-iron-800 sm:tw-hidden" />
           </div>
         </div>
       ) : (
         <div className="tw-flex tw-h-full tw-items-center tw-gap-2">
           <div className="tw-min-w-0 tw-flex-1">
             <span
-              className={`tw-block tw-h-1 tw-w-2/3 tw-rounded-full ${accentClass}`}
+              className={`tw-block tw-h-1.5 tw-w-2/3 tw-rounded-full sm:tw-h-1 ${accentClass}`}
             />
-            <span className="tw-mt-1.5 tw-block tw-h-0.5 tw-w-4/5 tw-rounded-full tw-bg-iron-800" />
+            <span className="tw-mt-1.5 tw-block tw-h-1 tw-w-4/5 tw-rounded-full tw-bg-iron-800 sm:tw-h-0.5" />
           </div>
           <span
-            className={`tw-size-6 tw-flex-shrink-0 tw-rounded-md ${detailClass}`}
+            className={`tw-size-8 tw-flex-shrink-0 tw-rounded-md sm:tw-size-6 ${detailClass}`}
           />
         </div>
       )}
