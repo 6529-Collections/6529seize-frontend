@@ -116,7 +116,10 @@ const messageDigest = (g, epoch, body) =>
   ]);
 
 function rosterDigest(g, epoch, deviceKeys) {
-  const sorted = [...deviceKeys].map(lower).sort();
+  // Byte order of the 32-byte keys equals code-unit order of lowercase hex.
+  const sorted = [...deviceKeys]
+    .map(lower)
+    .sort((a, b) => (a < b ? -1 : Number(a > b)));
   const concat = Buffer.concat(sorted.map((key) => hexBytes(key)));
   return H("6529.MlsRoster.v1", [
     ["bytes32", g],

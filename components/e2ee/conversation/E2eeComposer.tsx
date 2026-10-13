@@ -156,6 +156,13 @@ function MentionList({
           // Keep focus in the textarea while choosing with the pointer.
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => onPick(member)}
+          // Arrow keys and Enter are handled by the textarea (active
+          // descendant); this covers assistive tech that sends keys here.
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              onPick(member);
+            }
+          }}
           className={`tw-flex tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-lg tw-px-2 tw-py-1.5 tw-text-sm ${
             index === activeIndex
               ? "tw-bg-iron-800 tw-text-iron-50"

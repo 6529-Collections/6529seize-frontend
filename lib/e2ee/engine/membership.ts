@@ -440,7 +440,7 @@ async function handOverAdmin(
   }
   const heir = others.includes(meta.created_by)
     ? meta.created_by
-    : [...others].sort()[0];
+    : [...others].sort((a, b) => a.localeCompare(b))[0];
   if (heir === undefined) {
     return;
   }
@@ -493,6 +493,7 @@ async function proposeLeave(
       throw error;
     }
     addNotices(
+      ctx,
       runtime,
       [
         {
