@@ -571,6 +571,22 @@ async function installCompetitionApi(
   };
 }
 
+async function openAppearanceDraft(
+  page: Page,
+  viewport: { width: number; height: number }
+) {
+  const sandbox = await installCompetitionApi(page);
+  await page.setViewportSize(viewport);
+  await page.goto(`${ROOT}/new`);
+  const name = page.getByLabel("Competition name", { exact: true });
+  await name.fill("Appearance layout draft");
+  await expect.poll(() => sandbox.requests.length).toBe(1);
+  const footer = page
+    .getByRole("button", { name: "Close editor", exact: true })
+    .locator("..");
+  return { name, footer };
+}
+
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
   test.afterEach(async ({ page }, testInfo) => {
     if (testInfo.status !== testInfo.expectedStatus) {
@@ -1602,6 +1618,138 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     }
   });
 
+  test("keeps the editor in place when option cards receive focus", async ({
+    page,
+  }, testInfo) => {
+    const viewport = page.viewportSize();
+    if (!viewport) throw new Error("Viewport missing");
+    const { name, footer } = await openAppearanceDraft(page, {
+      width: Math.min(viewport.width, 730),
+      height: 800,
+    });
+    for (const draft of ["new", "reopened"]) {
+      if (draft === "reopened") {
+        await page.goto(`${ROOT}/draft`);
+        await expect(name).toHaveValue("Appearance layout draft");
+      }
+      const restingBottom = await footer.evaluate(
+        (element) => element.getBoundingClientRect().bottom
+      );
+      await page.getByText("Perpetual Ranking", { exact: true }).click();
+      await page
+        .getByRole("button", { name: /^Appearance and labels/ })
+        .click();
+      for (const { mode, key } of [
+        { mode: "Summary card", key: null },
+        { mode: "Full proposal", key: null },
+        { mode: "Summary card", key: "ArrowDown" },
+        { mode: "Full proposal", key: "ArrowUp" },
+      ]) {
+        if (key) await page.keyboard.press(key);
+        else await page.getByText(mode, { exact: true }).click();
+        const radio = page.getByRole("radio", { name: new RegExp(`^${mode}`) });
+        await expect(radio).toBeChecked();
+        await expect(radio).toBeFocused();
+        // Compare with the resting viewport position, not the scroll container:
+        // an out-of-bounds radio can scroll a hidden ancestor and move both.
+        const largestDrift = await footer.evaluate(
+          async (element, bottom) =>
+            new Promise<number>((resolve) => {
+              const startedAt = performance.now();
+              let maximum = 0;
+              const sample = () => {
+                maximum = Math.max(
+                  maximum,
+                  Math.abs(element.getBoundingClientRect().bottom - bottom)
+                );
+                if (performance.now() - startedAt >= 750) resolve(maximum);
+                else requestAnimationFrame(sample);
+              };
+              requestAnimationFrame(sample);
+            }),
+          restingBottom
+        );
+        expect(largestDrift).toBeLessThanOrEqual(1);
+      }
+      await page.screenshot({
+        path: testInfo.outputPath(`${draft}-option-focus-footer.png`),
+      });
+      await expectNoHorizontalOverflow(page);
+    }
+  });
+
+  test("keeps the draft footer at the bottom when proposal appearance changes", async ({
+    page,
+  }, testInfo) => {
+    const viewport = page.viewportSize();
+    if (!viewport) throw new Error("Viewport missing");
+    const { name, footer } = await openAppearanceDraft(page, {
+      ...viewport,
+      height: 1600,
+    });
+
+    for (const draft of ["new", "reopened"]) {
+      if (draft === "reopened") {
+        await page.goto(`${ROOT}/draft`);
+        await expect(name).toHaveValue("Appearance layout draft");
+      }
+      await page
+        .getByRole("button", { name: /^Appearance and labels/ })
+        .click();
+      for (const mode of ["Full proposal", "Summary card", "Full proposal"]) {
+        await page.getByText(mode, { exact: true }).click();
+        await expect(
+          page.getByRole("radio", { name: new RegExp(`^${mode}`) })
+        ).toBeChecked();
+        // Sample throughout the height animation so a passing initial position
+        // cannot hide a footer jump after the appearance controls settle.
+        const largestGap = await footer.evaluate(async (element) => {
+          let container = element.parentElement;
+          while (
+            container &&
+            !/(auto|scroll)/.test(getComputedStyle(container).overflowY)
+          ) {
+            container = container.parentElement;
+          }
+          if (!container) throw new Error("Draft scroll container missing");
+          const scrollContainer = container;
+          return new Promise<number>((resolve) => {
+            const startedAt = performance.now();
+            let maximum = 0;
+            const sample = () => {
+              maximum = Math.max(
+                maximum,
+                Math.abs(
+                  scrollContainer.getBoundingClientRect().bottom -
+                    element.getBoundingClientRect().bottom
+                )
+              );
+              if (performance.now() - startedAt >= 750) resolve(maximum);
+              else requestAnimationFrame(sample);
+            };
+            requestAnimationFrame(sample);
+          });
+        });
+        expect(largestGap).toBeLessThanOrEqual(1);
+        await expect(
+          footer.getByRole("button", { name: "Next", exact: true })
+        ).toBeInViewport({ ratio: 1 });
+        await page
+          .getByRole("group", { name: "Proposal card appearance", exact: true })
+          .screenshot({
+            path: testInfo.outputPath(
+              `${draft}-${mode === "Full proposal" ? "full" : "summary"}-appearance.png`
+            ),
+            animations: "disabled",
+          });
+      }
+      await page.screenshot({
+        path: testInfo.outputPath(`${draft}-appearance-footer.png`),
+      });
+      await expectNoHorizontalOverflow(page);
+    }
+  });
+
   test("keeps competition fields above the app keyboard and restores the footer", async ({
     page,
   }, testInfo) => {
@@ -1740,6 +1888,22 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       includeHidden: true,
     });
     await expect(trigger).toHaveText("Rank");
+    const name = page.getByLabel("Competition name", { exact: true });
+    await name.focus();
+    await page.keyboard.press("Tab");
+    await expect(trigger).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(page.getByLabel("Description", { exact: true })).toBeFocused();
+    await expect
+      .poll(async () => {
+        const nameBox = await name.boundingBox();
+        const typeBox = await trigger.boundingBox();
+        if (!nameBox || !typeBox) return false;
+        return app
+          ? typeBox.y >= nameBox.y + nameBox.height
+          : Math.abs(typeBox.y - nameBox.y) <= 1;
+      })
+      .toBe(true);
     await expect(trigger).toHaveAttribute(
       "aria-haspopup",
       app ? "dialog" : "listbox"
@@ -1820,6 +1984,26 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(page.getByText("Ranking mode", { exact: true })).toHaveCount(
       0
     );
+    const appearanceSettings = page.getByRole("button", {
+      name: /^Appearance and labels/,
+    });
+    await appearanceSettings.click();
+    await page
+      .getByLabel("Submission button label", { exact: true })
+      .locator("..")
+      .screenshot({
+        animations: "disabled",
+        path: testInfo.outputPath("submission-label-input.png"),
+      });
+    await page
+      .getByRole("heading", { name: "Tab labels", exact: true })
+      .locator("..")
+      .screenshot({
+        animations: "disabled",
+        path: testInfo.outputPath("approval-label-inputs.png"),
+      });
+    await appearanceSettings.click();
+    await trigger.focus();
     await trigger.click();
     await expect(
       choices.getByRole("option", { name: "Approve", exact: true })
@@ -1833,7 +2017,64 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await choices.getByRole("option", { name: "Rank", exact: true }).click();
     await expect(trigger).toHaveText("Rank");
     await expect(choices).toBeHidden();
-    await expectNoHorizontalOverflow(page);
+    await page.getByText("Perpetual Ranking", { exact: true }).click();
+    const ranking = page.getByRole("group", {
+      name: "Ranking mode",
+      exact: true,
+    });
+    await ranking.screenshot({
+      animations: "disabled",
+      path: testInfo.outputPath("compact-ranking-options.png"),
+    });
+    await page
+      .getByRole("button", { name: "Appearance and labels", exact: true })
+      .click();
+    const appearance = page.getByRole("group", {
+      name: "Proposal card appearance",
+      exact: true,
+    });
+    await appearance.screenshot({
+      animations: "disabled",
+      path: testInfo.outputPath("compact-appearance-options.png"),
+    });
+    const viewport = page.viewportSize();
+    if (!viewport) throw new Error("Viewport missing");
+    for (const width of app ? [viewport.width] : [viewport.width, 639, 640]) {
+      await page.setViewportSize({ ...viewport, width });
+      for (const options of [ranking, appearance]) {
+        await expect
+          .poll(() =>
+            options.getByRole("radio").evaluateAll(
+              (radios, stacked) =>
+                radios.every((radio) => {
+                  const preview = radio.closest("label")?.firstElementChild;
+                  const content = radio.parentElement;
+                  if (!preview || !content) return false;
+                  const previewBox = preview.getBoundingClientRect();
+                  const contentBox = content.getBoundingClientRect();
+                  return stacked
+                    ? previewBox.bottom <= contentBox.top &&
+                        Math.abs(previewBox.width - contentBox.width) <= 1
+                    : previewBox.right <= contentBox.left;
+                }),
+              width < 640
+            )
+          )
+          .toBe(true);
+      }
+      await expectNoHorizontalOverflow(page);
+      if (width === 639 || width === 640) {
+        await ranking.screenshot({
+          animations: "disabled",
+          path: testInfo.outputPath(`ranking-options-${width}px.png`),
+        });
+        await appearance.screenshot({
+          animations: "disabled",
+          path: testInfo.outputPath(`appearance-options-${width}px.png`),
+        });
+      }
+    }
+    await page.setViewportSize(viewport);
   });
 
   test("protects an unfinished draft when browser storage is unavailable", async ({
