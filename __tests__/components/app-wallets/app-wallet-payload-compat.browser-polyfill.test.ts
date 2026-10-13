@@ -17,9 +17,11 @@ const { passphrase } = fixture;
 const walletAddress = fixture.v1.address.salt;
 
 describe("app-wallet payload compatibility through crypto-browserify", () => {
-  const polyfill = jest.requireActual<{ pbkdf2: (...args: unknown[]) => void }>(
-    "next/dist/compiled/crypto-browserify"
-  );
+  // The mocked `crypto` module is the polyfill instance the code under test
+  // receives; spying on it proves the polyfill really derived the keys.
+  const polyfill = jest.requireMock<{
+    pbkdf2: (...args: unknown[]) => void;
+  }>("crypto");
   const pbkdf2Spy = jest.spyOn(polyfill, "pbkdf2");
 
   afterEach(() => {
