@@ -19,6 +19,8 @@ function setup() {
   const gate = deferred<{ default: typeof Greeting }>();
   const importer = jest.fn(() => gate.promise);
   const loader = createLazyComponentLoader<GreetingProps>(importer);
+  // Every committed-or-not render of a probe records what it asked for.
+  const frames: string[] = [];
 
   function Probe({
     enabled = true,
@@ -28,6 +30,7 @@ function setup() {
     readonly onError?: () => void;
   }) {
     const isReady = loader.useIsReady({ enabled, onError });
+    frames.push(isReady ? "ready" : "pending");
     return isReady ? (
       <loader.Loaded name="6529" />
     ) : (
@@ -43,6 +46,7 @@ function setup() {
   return {
     importer,
     loader,
+    frames,
     Probe,
     IdleProbe,
     arrive: () => act(async () => gate.resolve({ default: Greeting })),
@@ -75,21 +79,24 @@ describe("createLazyComponentLoader", () => {
   });
 
   it("renders a cached module in the first pass of a later mount, with no pending frame", async () => {
-    const { Probe, importer, arrive } = setup();
+    const { Probe, importer, frames, arrive } = setup();
     const first = render(<Probe />);
     await arrive();
     first.unmount();
+    frames.length = 0;
 
     render(<Probe />);
 
-    // No awaiting: nothing suspends and nothing waits for an effect.
+    // No awaiting: nothing suspends and nothing waits for an effect, so the
+    // very first render already has the component.
+    expect(frames).toEqual(["ready"]);
     expect(screen.getByTestId("greeting")).toBeInTheDocument();
     expect(screen.queryByTestId("pending")).toBeNull();
     expect(importer).toHaveBeenCalledTimes(1);
   });
 
   it("lets an instance that mounted before the chunk arrived render it at once when it is next needed", async () => {
-    const { Probe, loader, arrive } = setup();
+    const { Probe, loader, frames, arrive } = setup();
     const { rerender } = render(<Probe enabled={false} />);
     expect(screen.getByTestId("pending")).toBeInTheDocument();
 
@@ -98,8 +105,10 @@ describe("createLazyComponentLoader", () => {
     // Still pending: this instance is disabled and has not re-rendered.
     expect(screen.getByTestId("pending")).toBeInTheDocument();
 
+    frames.length = 0;
     rerender(<Probe enabled />);
 
+    expect(frames).toEqual(["ready"]);
     expect(screen.getByTestId("greeting")).toBeInTheDocument();
     expect(screen.queryByTestId("pending")).toBeNull();
   });
