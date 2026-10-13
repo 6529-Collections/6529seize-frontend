@@ -83,7 +83,10 @@ const invalidSignatureError = (reason = "grant was revoked") => {
   });
 };
 
-async function setUpGrant(scopes = ["post", "edit", "delete", "react"]) {
+async function setUpGrant(
+  scopes = ["post", "edit", "delete", "react"],
+  ownProfileId: string | null = null
+) {
   const record = await ensureDeviceKey(ADDRESS);
   const now = Date.now();
   const grant = {
@@ -100,7 +103,7 @@ async function setUpGrant(scopes = ["post", "edit", "delete", "react"]) {
     revoked_at: null,
     last_used_at: null,
   } as ApiDeviceGrant;
-  await saveDeviceGrant(ADDRESS, grant);
+  await saveDeviceGrant(ADDRESS, grant, ownProfileId);
   return { record, grant };
 }
 
@@ -279,6 +282,21 @@ describe("device-signed drop writes", () => {
     await setUpGrant();
     await postDrop(createBody());
     expect(sentSignature(postMock)).toBeDefined();
+  });
+
+  it("signs right after sign-in, before the account's profile id is synced", async () => {
+    // Regression: the stored account's profileId can stay unset for a while
+    // after sign-in; the own profile id recorded with the grant is enough.
+    mockWalletRole = OWN_PROFILE_ID;
+    mockProfileId = null;
+    await setUpGrant(undefined, OWN_PROFILE_ID);
+    await postDrop(createBody());
+    expect(sentSignature(postMock)).toBeDefined();
+
+    // A proxy role still never signs, whatever the recorded profile id.
+    mockWalletRole = "proxy-profile";
+    await postDrop(createBody());
+    expect(sentSignature(postMock, 1)).toBeUndefined();
   });
 
   it("never signs for a proxy role, without a grant or outside the grant's scopes", async () => {
