@@ -14,6 +14,7 @@ import {
 } from "./e2eeErrors";
 import { detectE2eePlatform, getE2eeGrantOrigin } from "./e2eePlatform";
 import { resolveE2eeProfiles } from "./e2eeProfiles";
+import { getE2eeTestSigner } from "./e2eeTestSigner";
 
 /** Content-free wake hints the engine listens to (contract 5). */
 export const E2EE_WAKE_MESSAGE_TYPES: readonly WsMessageType[] = [
@@ -38,6 +39,11 @@ export async function signE2eeTypedData(
   signTypedDataAsync: SignTypedDataAsync,
   typedData: TypedDataInput
 ): Promise<string> {
+  // Local multi-user browser tests only; null outside dev auth on localhost.
+  const testSigner = getE2eeTestSigner();
+  if (testSigner) {
+    return await testSigner(typedData);
+  }
   try {
     // The engine builds the exact EIP-712 grant (contract 2.1); pass it
     // through unchanged so the signed digest is the grant id.
