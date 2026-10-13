@@ -92,7 +92,7 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await gotoReady(page, "/about");
     const main = page.locator("main").first();
     const wallets = main.getByRole("region", {
-      name: "Safe Collecting & Wallets",
+      name: "Safe Collecting",
       exact: true,
     });
     const collections = main.getByRole("region", {

@@ -107,7 +107,7 @@ describe("useSidebarSections", () => {
       "Overview",
       "Collections & Minting",
       "Network & Reputation",
-      "Safe Collecting & Wallets",
+      "Safe Collecting",
       "Data & Developer Tools",
       "Legal",
     ]);
@@ -217,7 +217,7 @@ describe("useSidebarSections", () => {
       (section) => section.key === "about"
     );
     const delegationWallets = aboutSection?.subsections.find(
-      (subsection) => subsection.name === "Safe Collecting & Wallets"
+      (subsection) => subsection.name === "Safe Collecting"
     );
 
     expect(delegationWallets?.items).toEqual(

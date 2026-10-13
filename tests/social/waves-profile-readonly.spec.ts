@@ -1022,17 +1022,16 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(page).toHaveTitle(new RegExp(PROFILE_HANDLE, "i"));
     await expectProfileShell(page);
     await expectProfileTabLinks(page);
+    const statements = page.getByRole("button", { name: /ID Statements/i });
     if (isMobile) {
-      const statements = page.getByRole("button", { name: /ID Statements/i });
       await expect(statements).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
-      // Its numeric count is published only after this streamed component
-      // hydrates and its statement query resolves. Visibility alone can precede
-      // the click handler; the server renders an em dash during that interval.
+    }
+    if (await statements.isVisible()) {
+      // Its numeric count replaces the server placeholder only after this
+      // streamed section hydrates and its statement query resolves.
       await expect(statements).toHaveAccessibleName(
         /^\d[\d,]* ID Statements$/,
-        {
-          timeout: RESPONSE_TIMEOUT_MS,
-        }
+        { timeout: RESPONSE_TIMEOUT_MS }
       );
       await statements.click();
       await expect(statements).toHaveAttribute("aria-pressed", "true");

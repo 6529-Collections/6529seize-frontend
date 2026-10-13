@@ -1216,8 +1216,8 @@
       ],
       "facts": [
         "The About index page lives at /about.",
-        "It groups About pages into About 6529, Collections & Minting, Network & Reputation, Safe Collecting & Wallets, Data & Developer Tools, and Legal link cards with right-arrow affordances.",
-        "Collections & Minting includes About The Memes, Subscription Minting, Meme Lab, 6529 Gradient, Minting and GDRC, with GDRC last. Safe Collecting & Wallets contains Safe Collecting, TAP Guide, FAQ, Consolidation Use Cases, Wallet Checker, App Wallets when supported, and Primary Address last.",
+        "It groups About pages into About 6529, Collections & Minting, Network & Reputation, Safe Collecting, Data & Developer Tools, and Legal link cards with right-arrow affordances.",
+        "Collections & Minting includes About The Memes, Subscription Minting, Meme Lab, 6529 Gradient, Minting and GDRC, with GDRC last. Safe Collecting contains Safe Collecting, TAP Guide, FAQ, Consolidation Use Cases, Wallet Checker, App Wallets when supported, and Primary Address last.",
         "Network & Reputation includes TDH, xTDH Overview, xTDH Allocations Dashboard, Network Health, Network Definitions, Levels, Network TDH Stats, Network Nerd, Prenodes, and TDH Historic Boosts links.",
         "Data & Developer Tools includes API, EMMA, Block Finder, Open Data, ReMemes Data, Team Data, royalties, network metrics, and subscription-gated data links.",
         "Use the About index when users want to browse all About pages or find the right policy, collection, minting, delegation, wallet, network, open-data, or technical page."
@@ -2337,7 +2337,7 @@
         "Combining (consolidating) up to four wallets a collector owns makes them count as one collector: TDH adds up, cards spread over several wallets count toward full sets, seasons and the Genesis, Nakamoto and Gradient boosts, and moving a card between combined wallets keeps its holding time.",
         "Combined wallets share one profile; any of them can sign in. Cards are counted together on the profile, on the collector leaderboards and for Meme Card subscriptions. Nothing moves: NFTs stay in the wallets they are in.",
         "The recommended safe collecting setup gives each wallet one job: a vault (ideally a SAFE or hardware wallet) that holds NFTs and never connects, a transaction wallet for buying, selling and trading, and a hot social wallet that signs in to 6529, votes, posts, mints and pays for subscriptions. Three wallets is enough to start; the optional fourth is usually a burned or exposed old address combined only so its TDH keeps counting.",
-        "The guided setup at /safe-collecting/build-consolidation shows which wallet signs next. Each wallet signing for itself can register its links in one transaction; a Delegation Manager signs one transaction per link while the vault stays disconnected. The guide shows the current environment’s activation cutoff from backend settings. Guided signing opens ten minutes later; staging can open before production.",
+        "The guided setup at /safe-collecting/build-consolidation accepts Ethereum addresses or ENS names and shows which wallet signs next. ENS names resolve to mainnet addresses before planning; unresolved names and duplicate wallets block the plan. Each wallet signing for itself can register its links in one transaction; a Delegation Manager signs one transaction per link while the vault stays disconnected. The guide shows the current environment’s activation cutoff from backend settings. Guided signing opens ten minutes later; staging can open before production.",
         "Every combined wallet can sign in as the profile, change the primary address and choose where airdrops go, so only a collector's own wallets should be combined. Profiles merge permanently; the handle and picture come from the profile with the highest CIC.",
         "Signing out of order, renewing old return links or sending a joining wallet's links as separate manager transactions can temporarily split the wallets and reduce TDH-wave votes. The guided setup enforces signing order but cannot make separate manager transactions atomic.",
         "The technical rules and the analysis behind the four-wallet design are on a separate page, /network/tdh/consolidation/design."
@@ -10214,7 +10214,7 @@
       ],
       "facts": [
         "6529 Desktop wallets are stored in the installed 6529 Desktop application and its 6529 Desktop wallet controls are not available in 6529 Mobile or an ordinary browser.",
-        "6529 Mobile has separate App Wallets stored in the native app environment. Use Connect > App Wallets or open App Wallets under About > Safe Collecting & Wallets when app-wallet support is enabled.",
+        "6529 Mobile has separate App Wallets stored in the native app environment. Use Connect > App Wallets or open App Wallets under About > Safe Collecting when app-wallet support is enabled.",
         "A 6529 Desktop wallet does not automatically appear on mobile. Do not send a recovery phrase, private key, or password to the help bot."
       ],
       "canonical_path": "/tools/app-wallets",
@@ -10257,7 +10257,7 @@
       ],
       "facts": [
         "App Wallets are wallets stored in the 6529 Mobile environment using native secure storage. They are separate from 6529 Desktop wallets in 6529 Desktop and from external wallets offered through the External Wallets connection flow.",
-        "Open About > Safe Collecting & Wallets > App Wallets, or open Connect > App Wallets to choose an existing app-local wallet or start Create App Wallet. The App Wallets menu appears only when native app-wallet support is available.",
+        "Open About > Safe Collecting > App Wallets, or open Connect > App Wallets to choose an existing app-local wallet or start Create App Wallet. The App Wallets menu appears only when native app-wallet support is available.",
         "The App Wallets page lists locally stored wallets and provides Create Wallet, Import Wallet, and wallet-detail actions. Never send a wallet password, mnemonic, or private key to the help bot."
       ],
       "canonical_path": "/tools/app-wallets",

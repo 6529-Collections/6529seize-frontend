@@ -38,7 +38,7 @@ export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
   "delegation.consolidationBuilder.wallets.label": "Wallet {position}",
   "delegation.consolidationBuilder.wallets.inputLabel":
     "Wallet {position} address",
-  "delegation.consolidationBuilder.wallets.placeholder": "0x…",
+  "delegation.consolidationBuilder.wallets.placeholder": "0x… or ENS",
   "delegation.consolidationBuilder.wallets.connected": "Connected",
   "delegation.consolidationBuilder.wallets.member": "In current consolidation",
   "delegation.consolidationBuilder.wallets.remove": "Remove wallet {position}",
@@ -50,7 +50,7 @@ export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
   "delegation.consolidationBuilder.wallets.groupError":
     "Couldn’t load the current consolidations of these wallets.",
   "delegation.consolidationBuilder.wallets.invalid":
-    "Enter a wallet address: 0x followed by 40 hexadecimal characters.",
+    "Enter a valid Ethereum address or a resolvable ENS name.",
   "delegation.consolidationBuilder.wallets.duplicate":
     "This wallet is already listed.",
   "delegation.consolidationBuilder.wallets.departure":

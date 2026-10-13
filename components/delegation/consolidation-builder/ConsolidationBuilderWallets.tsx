@@ -1,15 +1,13 @@
 "use client";
 
 import Button from "@/components/utils/button/Button";
+import EnsAddressInput from "@/components/utils/input/ens-address/EnsAddressInput";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { faPlus, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  DELEGATION_FIELD_CLASS_NAME,
-  DELEGATION_FIELD_LABEL_CLASS_NAME,
-} from "../delegation-ui";
+import { DELEGATION_FIELD_LABEL_CLASS_NAME } from "../delegation-ui";
 import {
   toWalletKey,
   type ConsolidationWalletIssue,
@@ -18,6 +16,16 @@ import {
 export interface ConsolidationWalletEntry {
   readonly id: string;
   readonly value: string;
+  readonly address?: string;
+}
+
+/** Keep unresolved nonempty names invalid rather than silently omitting a row. */
+export function getConsolidationWalletValue(
+  entry: ConsolidationWalletEntry
+): string {
+  return entry.address === undefined || entry.address === ""
+    ? entry.value
+    : entry.address;
 }
 
 export type ConsolidationGroupLookupState = "ready" | "loading" | "error";
@@ -115,6 +123,7 @@ export function ConsolidationBuilderWallets(
     existingMembers: ReadonlySet<string>;
     groupLookupState: ConsolidationGroupLookupState;
     onChange: (id: string, value: string) => void;
+    onAddressChange: (id: string, address: string) => void;
     onRemove: (id: string) => void;
     onAdd: () => void;
     onRetryGroups: () => void;
@@ -152,7 +161,7 @@ export function ConsolidationBuilderWallets(
             )}
           </span>
           {props.preActivationSigningDate && (
-            <p className="tw-m-0 tw-max-w-xs tw-text-right tw-text-xs tw-leading-5 tw-text-iron-400">
+            <p className="tw-m-0 tw-max-w-full tw-text-right tw-text-xs tw-leading-5 tw-text-iron-400">
               {t(
                 locale,
                 "delegation.consolidationBuilder.wallets.signingOpens",
@@ -170,7 +179,7 @@ export function ConsolidationBuilderWallets(
           const inputId = `consolidation-wallet-${entry.id}`;
           const errorId = `${inputId}-error`;
           const issue = issues[index];
-          const key = toWalletKey(entry.value);
+          const key = toWalletKey(getConsolidationWalletValue(entry));
           return (
             <li key={entry.id}>
               <div className="tw-mb-1.5 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
@@ -189,29 +198,27 @@ export function ConsolidationBuilderWallets(
                 />
               </div>
               <div className="tw-flex tw-items-start tw-gap-2">
-                <input
+                <EnsAddressInput
                   id={inputId}
-                  type="text"
-                  inputMode="text"
-                  autoComplete="off"
-                  autoCapitalize="off"
-                  spellCheck={false}
-                  aria-label={t(
+                  requireEnsResolution
+                  variant="dark"
+                  ariaLabel={t(
                     locale,
                     "delegation.consolidationBuilder.wallets.inputLabel",
                     { position }
                   )}
-                  aria-invalid={issue ? true : undefined}
-                  aria-describedby={issue ? errorId : undefined}
+                  ariaInvalid={issue ? true : undefined}
+                  ariaDescribedBy={issue ? errorId : undefined}
                   placeholder={t(
                     locale,
                     "delegation.consolidationBuilder.wallets.placeholder"
                   )}
                   value={entry.value}
-                  onChange={(event) =>
-                    props.onChange(entry.id, event.target.value)
+                  onValueChange={(value) => props.onChange(entry.id, value)}
+                  onAddressChange={(address) =>
+                    props.onAddressChange(entry.id, address)
                   }
-                  className={`${DELEGATION_FIELD_CLASS_NAME} tw-font-mono tw-text-sm`}
+                  className="tw-flex-1 tw-font-mono tw-text-sm"
                 />
                 {canRemove && (
                   <Button

@@ -37,6 +37,7 @@ import {
 } from "./ConsolidationBuilderSteps";
 import {
   ConsolidationBuilderWallets,
+  getConsolidationWalletValue,
   type ConsolidationGroupLookupState,
   type ConsolidationWalletEntry,
 } from "./ConsolidationBuilderWallets";
@@ -195,7 +196,12 @@ function getPolicyDates(
     ),
     signingOpensDate,
     preActivationSigningDate:
-      nowMs < policy.activationMs ? signingOpensDate : null,
+      nowMs < policy.activationMs
+        ? formatDate(locale, policy.signingOpensMs, {
+            ...ACTIVATION_DATE_FORMAT,
+            month: "short",
+          }).replace(/\sUTC$/, "\u00a0UTC")
+        : null,
   };
 }
 
@@ -233,7 +239,7 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
   const validation = useMemo(
     () =>
       validateConsolidationWallets(
-        entries.map((entry) => entry.value),
+        entries.map(getConsolidationWalletValue),
         limits
       ),
     [entries, limits]
@@ -331,12 +337,33 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
   );
 
   function updateDraft(update: (current: WalletDraft) => WalletDraft) {
-    setDraft((current) => update(current ?? defaultDraft));
+    setDraft((current) => {
+      const initial = current ?? defaultDraft;
+      const updated = update(initial);
+      return updated === initial ? current : updated;
+    });
+  }
+
+  function updateWallet(id: string, field: "value" | "address", value: string) {
+    updateDraft((current) => {
+      const target = current.entries.find((entry) => entry.id === id);
+      const previous =
+        field === "address"
+          ? (target?.address ?? target?.value)
+          : target?.value;
+      if (!target || previous === value) return current;
+      return {
+        ...current,
+        entries: current.entries.map((entry) =>
+          entry.id === id ? { ...entry, [field]: value } : entry
+        ),
+      };
+    });
   }
 
   function getWalletLabel(wallet: string): string {
     const index = entries.findIndex(
-      (entry) => toWalletKey(entry.value) === wallet
+      (entry) => toWalletKey(getConsolidationWalletValue(entry)) === wallet
     );
     return index < 0
       ? formatAddress(getAddress(wallet))
@@ -376,14 +403,8 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
         connectedKey={connectedKey}
         existingMembers={new Set(existingMembers)}
         groupLookupState={getGroupLookupState(wallets.length, groupData)}
-        onChange={(id, value) =>
-          updateDraft((current) => ({
-            ...current,
-            entries: current.entries.map((entry) =>
-              entry.id === id ? { ...entry, value } : entry
-            ),
-          }))
-        }
+        onChange={(id, value) => updateWallet(id, "value", value)}
+        onAddressChange={(id, address) => updateWallet(id, "address", address)}
         onRemove={(id) =>
           updateDraft((current) => ({
             ...current,

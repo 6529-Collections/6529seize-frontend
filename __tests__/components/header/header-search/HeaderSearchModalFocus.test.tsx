@@ -112,7 +112,7 @@ const defaultSidebarSections = [
     items: [],
     subsections: [
       {
-        name: "Safe Collecting & Wallets",
+        name: "Safe Collecting",
         items: [{ name: "Delegation Center", href: "/safe-collecting" }],
       },
     ],

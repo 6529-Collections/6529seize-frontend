@@ -58,7 +58,15 @@ jest.mock("next/link", () => ({
   ),
 }));
 
-jest.mock("wagmi", () => ({}));
+const mockEnsAddresses: Record<string, string | undefined> = {};
+jest.mock("wagmi", () => ({
+  useEnsName: () => ({ data: null, isLoading: false }),
+  useEnsAddress: ({ name }: { name?: string }) => ({
+    data: name ? (mockEnsAddresses[name] ?? null) : null,
+    isLoading: false,
+    isError: false,
+  }),
+}));
 
 const mockInvalidateQueries = jest.fn();
 jest.mock("@tanstack/react-query", () => ({
@@ -219,6 +227,9 @@ function addFourthWallet() {
 }
 
 beforeEach(() => {
+  Object.keys(mockEnsAddresses).forEach(
+    (name) => delete mockEnsAddresses[name]
+  );
   mockPolicyState.limits = { maxWallets: 4, ungatedMaxWallets: 3 };
   mockPolicyState.policy = {
     maxWallets: 4,
@@ -586,7 +597,7 @@ describe("ConsolidationBuilder", () => {
       jest.spyOn(Date, "now").mockReturnValue(nowMs);
       renderBuilder();
       const note = screen.queryByText(
-        `Four-wallet signing opens ${SIGNING_OPENS_TEXT}.`
+        "Four-wallet signing opens Oct 15, 2026, 00:10 UTC."
       );
       if (visible) expect(note).toBeInTheDocument();
       else expect(note).not.toBeInTheDocument();
@@ -603,9 +614,7 @@ describe("ConsolidationBuilder", () => {
     jest.spyOn(Date, "now").mockReturnValue(Date.parse("2026-10-13T23:59:00Z"));
     renderBuilder();
     expect(
-      screen.getByText(
-        "Four-wallet signing opens October 14, 2026 at 00:10 UTC."
-      )
+      screen.getByText("Four-wallet signing opens Oct 14, 2026, 00:10 UTC.")
     ).toBeInTheDocument();
   });
 
@@ -616,11 +625,11 @@ describe("ConsolidationBuilder", () => {
       renderBuilder();
       addFourthWallet();
       expect(
-        screen.getByText(`Four-wallet signing opens ${SIGNING_OPENS_TEXT}.`)
+        screen.getByText("Four-wallet signing opens Oct 15, 2026, 00:10 UTC.")
       ).toBeInTheDocument();
       act(() => jest.advanceTimersByTime(1000));
       expect(
-        screen.queryByText(`Four-wallet signing opens ${SIGNING_OPENS_TEXT}.`)
+        screen.queryByText("Four-wallet signing opens Oct 15, 2026, 00:10 UTC.")
       ).not.toBeInTheDocument();
       expect(
         screen.queryByRole("button", { name: /^Sign Step/ })
@@ -810,7 +819,7 @@ describe("ConsolidationBuilder", () => {
     expect(walletInput(1)).toHaveAttribute("aria-invalid", "true");
     expect(
       screen.getByText(
-        "Enter a wallet address: 0x followed by 40 hexadecimal characters."
+        "Enter a valid Ethereum address or a resolvable ENS name."
       )
     ).toBeInTheDocument();
 
@@ -821,6 +830,66 @@ describe("ConsolidationBuilder", () => {
     ).toBeInTheDocument();
     expect(stepHeadings()).toEqual([]);
   });
+
+  it("builds a four-wallet plan from resolved ENS names", () => {
+    mockData.groups = new Map();
+    for (const [name, address] of [
+      ["vault.eth", A],
+      ["trade.eth", B],
+      ["social.eth", C],
+      ["old.eth", D],
+    ] as const) {
+      mockEnsAddresses[name] = address;
+    }
+    renderBuilder({ connectedAddress: undefined });
+    fireEvent.change(walletInput(1), { target: { value: "vault.eth" } });
+    fireEvent.change(walletInput(2), { target: { value: "trade.eth" } });
+    fireEvent.click(screen.getByRole("button", { name: "Add Wallet" }));
+    fireEvent.change(walletInput(3), { target: { value: "social.eth" } });
+    fireEvent.click(screen.getByRole("button", { name: "Add Wallet" }));
+    fireEvent.change(walletInput(4), { target: { value: "old.eth" } });
+    expect(walletInput(1)).toHaveValue(`vault.eth - ${A}`);
+    expect(screen.getByText("4 of 4 wallets")).toBeInTheDocument();
+    expect(stepHeadings()).toEqual([
+      "Wallet 1 signs",
+      "Wallet 2 signs",
+      "Wallet 3 signs",
+      "Wallet 4 signs",
+    ]);
+  });
+
+  it("detects duplicate ENS aliases and raw addresses", () => {
+    mockData.groups = new Map();
+    mockEnsAddresses["vault.eth"] = A;
+    mockEnsAddresses["alias.eth"] = A;
+    renderBuilder({ connectedAddress: undefined });
+    fireEvent.change(walletInput(1), { target: { value: "vault.eth" } });
+    for (const value of [A, "alias.eth"]) {
+      fireEvent.change(walletInput(2), { target: { value } });
+      expect(
+        screen.getByText("This wallet is already listed.")
+      ).toBeInTheDocument();
+      expect(stepHeadings()).toEqual([]);
+    }
+  });
+
+  it.each(["unresolved.eth", `unresolved.eth - ${C}`])(
+    "blocks unresolved names and unverified display suffixes (%s)",
+    (value) => {
+      mockData.groups = new Map();
+      mockEnsAddresses["social.eth"] = C;
+      renderBuilder({ connectedAddress: undefined });
+      fireEvent.change(walletInput(1), { target: { value: A } });
+      fireEvent.change(walletInput(2), { target: { value: B } });
+      fireEvent.click(screen.getByRole("button", { name: "Add Wallet" }));
+      fireEvent.change(walletInput(3), { target: { value: "social.eth" } });
+      expect(screen.getByText("3 of 4 wallets")).toBeInTheDocument();
+      fireEvent.change(walletInput(3), { target: { value } });
+      expect(walletInput(3)).toHaveAttribute("aria-invalid", "true");
+      expect(screen.getByText("2 of 4 wallets")).toBeInTheDocument();
+      expect(stepHeadings()).toEqual([]);
+    }
+  );
 
   it("offers to connect the first signer while disconnected", () => {
     mockData.groups = new Map();

@@ -52,7 +52,7 @@ Two pages explain wallet consolidation:
    (buys, sells and trades; can manage the vault), social wallet (the hot
    wallet that signs in to 6529), and an optional old wallet (a burned or
    exposed address kept for its TDH). Three wallets is enough to start.
-4. `How to set it up`: list your wallets and follow the signing steps. A wallet signing for itself
+4. `How to set it up`: list your wallets by Ethereum address or ENS name and follow the signing steps. ENS names resolve to mainnet addresses before planning; unresolved names block the plan, and names resolving to the same address count as duplicates. A wallet signing for itself
    batches its links; a Delegation Manager sends one transaction per link
    while the vault stays disconnected. A note on signing
    order and a second `Start guided setup` button.
