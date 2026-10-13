@@ -149,6 +149,35 @@ describe("drop signature verification in the browser", () => {
     });
   });
 
+  it("reports invalid when the claimed current event does not verify", async () => {
+    const grant = await createGrant();
+    const post = await createEvent(grant, {
+      kind: 1,
+      seq: 1_760_000_000_000,
+      body: { parts: [{ content: "gm" }] },
+    });
+    const edit = await createEvent(grant, {
+      kind: 2,
+      seq: 1_760_000_000_001,
+      body: { parts: [{ content: "gm, edited" }] },
+    });
+    const tamperedEdit = {
+      ...edit,
+      body: '{"parts":[{"content":"tampered"}]}',
+    };
+    await expect(
+      verifyDropSignedEvents(
+        signedEvents([post, tamperedEdit], [grant], tamperedEdit.id)
+      )
+    ).resolves.toEqual({ status: "invalid" });
+    // An unknown current event id is treated the same way.
+    await expect(
+      verifyDropSignedEvents(
+        signedEvents([post], [grant], `0x${"9".repeat(64)}`)
+      )
+    ).resolves.toEqual({ status: "invalid" });
+  });
+
   it("rejects tampered bodies, ids and signatures", async () => {
     const grant = await createGrant();
     const post = await createEvent(grant, {
