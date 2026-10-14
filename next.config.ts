@@ -148,6 +148,9 @@ const nextConfigFactory = (phase: string): NextConfig => {
         PEPE_CACHE_MAX_ITEMS: publicEnv.PEPE_CACHE_MAX_ITEMS,
         FARCASTER_WARPCAST_API_BASE: publicEnv.FARCASTER_WARPCAST_API_BASE,
         FARCASTER_WARPCAST_API_KEY: publicEnv.FARCASTER_WARPCAST_API_KEY,
+        // Inlined into the client bundle so Sentry Replay is compiled out unless opted in.
+        SENTRY_REPLAY_ENABLED:
+          publicEnv.SENTRY_REPLAY_ENABLED === "true" ? "true" : "false",
       },
       async generateBuildId() {
         return VERSION;
