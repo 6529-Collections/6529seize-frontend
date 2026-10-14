@@ -14,6 +14,7 @@ import {
 
 import { EN_US_MESSAGES } from "../../i18n/messages/en-US";
 import {
+  captureSafeScreenshot,
   expect,
   expectNoHorizontalOverflow,
   test,
@@ -111,6 +112,188 @@ function getProfileFeed(page: Page): Locator {
 }
 
 test.describe("Waves and profile read-only coverage @surface @medium @large @readonly", () => {
+  test("keeps received collection loading rows aligned with loaded content", async ({
+    page,
+  }) => {
+    let releaseCollections: () => void;
+    const collectionsReady = new Promise<void>((resolve) => {
+      releaseCollections = resolve;
+    });
+    await page.route("**/api/xtdh/collections?**", async (route) => {
+      await collectionsReady;
+      await route.continue();
+    });
+    await gotoReady(page, `/${PROFILE_HANDLE}/xtdh?tab=received`);
+    const section = page
+      .getByRole("heading", { name: "xTDH Collections", exact: true })
+      .locator("xpath=ancestor::section[1]");
+    const controls = section.getByRole("region", {
+      name: "Sort and search received collections",
+    });
+    const skeleton = section.getByTestId("xtdh-collection-skeleton").first();
+    const measureCard = (element: HTMLElement) => {
+      const rect = element.getBoundingClientRect();
+      const sectionRect = element.closest("section")!.getBoundingClientRect();
+      const grid = element.lastElementChild!;
+      return {
+        x: rect.x,
+        y: rect.y - sectionRect.y,
+        width: rect.width,
+        columns: getComputedStyle(grid).gridTemplateColumns,
+        gridOffset: grid.getBoundingClientRect().x - rect.x,
+      };
+    };
+    let loadingLayout: ReturnType<typeof measureCard>;
+    try {
+      await expect(skeleton).toBeVisible();
+      await expect(controls.getByRole("textbox")).toBeDisabled();
+      const sortControl = controls
+        .getByRole("button", {
+          name: "Sort collections by: xTDH",
+          exact: true,
+        })
+        .or(controls.getByRole("tab", { name: "xTDH", exact: true }));
+      await expect(sortControl).toHaveCount(1);
+      await expect(sortControl).toBeDisabled();
+      loadingLayout = await skeleton.evaluate(measureCard);
+      await expectNoHorizontalOverflow(page);
+      await captureSafeScreenshot(
+        page,
+        test.info(),
+        "received-collections-loading"
+      );
+    } finally {
+      releaseCollections!();
+    }
+    await expect(skeleton).toHaveCount(0);
+    await expect(controls.getByRole("textbox")).toBeEnabled();
+    const card = section
+      .getByRole("list")
+      .getByRole("button")
+      .first()
+      .locator(":scope > div");
+    await expect(card).toBeVisible();
+    const loadedLayout = await card.evaluate(measureCard);
+    expect(loadedLayout.width).toBeCloseTo(loadingLayout.width, 1);
+    expect(loadedLayout.x).toBeCloseTo(loadingLayout.x, 1);
+    expect(loadedLayout.y).toBeCloseTo(loadingLayout.y, 1);
+    expect(loadedLayout.columns).toBe(loadingLayout.columns);
+    expect(loadedLayout.gridOffset).toBeCloseTo(loadingLayout.gridOffset, 1);
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(
+      page,
+      test.info(),
+      "received-collections-loaded"
+    );
+  });
+
+  test("renders grant thumbnails from both Alchemy CDNs with an intentional failure fallback", async ({
+    page,
+  }) => {
+    const alchemyThumbnail =
+      "https://nft2-cdn.alchemy.com/cdn-cgi/image/width=250,height=250,fit=scale-down/eth-mainnet/a3062b74e1b4d79fdab0ca1ec5a92615";
+    const cloudinaryThumbnail =
+      "https://res.cloudinary.com/alchemyapi/image/upload/thumbnailv2/eth-mainnet/136dc79022a5b971800cf8405adb5cea_ea0b833e";
+    const thumbnails = [alchemyThumbnail, cloudinaryThumbnail, null];
+    let releaseMetadata: () => void;
+    const metadataReady = new Promise<void>((resolve) => {
+      releaseMetadata = resolve;
+    });
+    // Keep the real profile, grant disclosure, virtualization and image optimizer.
+    // Only metadata is controlled so changing NFT ownership cannot remove a CDN case.
+    await page.route("**/api/alchemy/token-metadata", async (route) => {
+      await metadataReady;
+      const body = route.request().postDataJSON() as { tokenIds: string[] };
+      await route.fulfill({
+        json: {
+          tokens: body.tokenIds.map((tokenId, index) => ({
+            tokenId,
+            name: `Thumbnail fixture ${index}`,
+            image: { thumbnailUrl: thumbnails[index % thumbnails.length] },
+          })),
+        },
+      });
+    });
+    await gotoReady(page, `/${PROFILE_HANDLE}/xtdh?tab=granted`);
+    await page
+      .getByRole("button", { name: /^Show [\d,]+ tokens$/ })
+      .first()
+      .click();
+    const tokenList = page.getByRole("list", { name: "Selected tokens" });
+    try {
+      await expect(
+        tokenList.getByLabel("Loading thumbnail").first()
+      ).toBeVisible();
+      await captureSafeScreenshot(page, test.info(), "grant-thumbnail-loading");
+    } finally {
+      releaseMetadata!();
+    }
+    for (const name of ["Thumbnail fixture 0", "Thumbnail fixture 1"]) {
+      const image = tokenList.getByRole("img", { name, exact: true });
+      await image.scrollIntoViewIfNeeded();
+      await expect(image).toBeVisible();
+      await expect
+        .poll(
+          () =>
+            image.evaluate(
+              (element: HTMLImageElement) =>
+                element.complete && element.naturalWidth > 0
+            ),
+          { timeout: 30000 }
+        )
+        .toBe(true);
+    }
+    const source = await tokenList
+      .getByRole("img", { name: "Thumbnail fixture 0", exact: true })
+      .getAttribute("src");
+    expect(new URL(source!, page.url()).pathname).toBe("/_next/image");
+    await expectNoHorizontalOverflow(page);
+
+    await captureSafeScreenshot(page, test.info(), "grant-thumbnail-artwork");
+
+    // A fresh browser load must also replace a real image-network failure.
+    await page.route("**/_next/image?**", async (route) => {
+      const sourceUrl = new URL(route.request().url()).searchParams.get("url");
+      if (sourceUrl === alchemyThumbnail) {
+        await route.abort("failed");
+      } else {
+        await route.fallback();
+      }
+    });
+    await page.reload();
+    await waitForRouteReady(page);
+    await page
+      .getByRole("button", { name: /^Show [\d,]+ tokens$/ })
+      .first()
+      .click();
+    await expect(
+      tokenList.getByRole("img", { name: "Failed to load thumbnail" }).first()
+    ).toBeVisible();
+    await expect(
+      tokenList.getByRole("img", { name: "Thumbnail fixture 0", exact: true })
+    ).toHaveCount(0);
+    await expect(
+      tokenList.getByText("Thumbnail fixture 0", { exact: true })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(page, test.info(), "grant-thumbnail-error");
+
+    await page.route("**/api/xtdh/grants/*/tokens?**", (route) =>
+      route.fulfill({ json: { data: [], count: 0, page: 1, next: false } })
+    );
+    await page.reload();
+    await waitForRouteReady(page);
+    await page
+      .getByRole("button", { name: /^Show [\d,]+ tokens$/ })
+      .first()
+      .click();
+    await expect(
+      page.getByText("No specific token IDs were returned for this grant.")
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(page, test.info(), "grant-token-empty");
+  });
+
   test("keeps the full subscription airdrop address available on touch and keyboard", async ({
     page,
     isMobile,
@@ -1034,6 +1217,21 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(
       page.getByRole("link", { name: "Add another wallet" })
     ).toHaveCount(0);
+    const walletCount = page.getByText(/^\d of 4 wallets$/).first();
+    await expect(walletCount).toBeVisible();
+    await expect
+      .poll(() =>
+        walletCount.evaluate((counter) => {
+          const row = counter.parentElement;
+          if (!row) return Number.POSITIVE_INFINITY;
+          return Math.abs(
+            row.getBoundingClientRect().right -
+              counter.getBoundingClientRect().right
+          );
+        })
+      )
+      .toBeLessThanOrEqual(2);
+    await expectNoHorizontalOverflow(page);
   });
 
   for (const tab of PROFILE_TAB_PATHS) {
