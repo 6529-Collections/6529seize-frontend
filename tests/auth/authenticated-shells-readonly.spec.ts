@@ -1,6 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 
 import {
+  captureSafeScreenshot,
   expect,
   expectNoHorizontalOverflow,
   test,
@@ -214,14 +215,39 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(addressesHeading).toBeVisible();
     await expect(statementsHeading).toBeVisible();
     await expect(addStatement).toBeVisible();
+    await expect(addressesHeading).toHaveCSS("font-size", "18px");
+    await expect(statementsHeading).toHaveCSS("font-size", "18px");
+    const statementHelp = page.getByRole("button", {
+      name: "About identity statements",
+      exact: true,
+    });
+    await expect(statementHelp).toBeVisible();
+    await expect(
+      page
+        .getByRole("button", { name: "About identity statements", exact: true })
+        .locator("svg")
+    ).toHaveCSS("width", "18px");
+    await expect(
+      page
+        .getByRole("button", { name: "About identity statements", exact: true })
+        .locator("svg")
+    ).toHaveCSS("height", "18px");
+    await expect(statementHelp).toHaveCSS("width", "32px");
+    await expect(statementHelp).toHaveCSS("height", "32px");
     const checkerBox = await walletChecker.boundingBox();
     const addWalletBox = await addWallet.boundingBox();
     const statementHeadingBox = await statementsHeading.boundingBox();
     const addStatementBox = await addStatement.boundingBox();
+    const helpBox = await statementHelp.boundingBox();
     expect(checkerBox).not.toBeNull();
     expect(addWalletBox).not.toBeNull();
     expect(statementHeadingBox).not.toBeNull();
     expect(addStatementBox).not.toBeNull();
+    expect(helpBox).not.toBeNull();
+    expect(
+      statementHeadingBox!.x + statementHeadingBox!.width
+    ).toBeLessThanOrEqual(helpBox!.x);
+    expect(helpBox!.x + helpBox!.width).toBeLessThanOrEqual(addStatementBox!.x);
     expect(
       Math.abs(checkerBox!.width - addWalletBox!.width)
     ).toBeLessThanOrEqual(1);
@@ -236,6 +262,8 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       )
     ).toBeLessThanOrEqual(1);
     await expectNoHorizontalOverflow(page);
+
+    await captureSafeScreenshot(page, test.info(), "profile-identity-headings");
 
     await addStatement.click();
     const addDialog = page.getByRole("dialog");

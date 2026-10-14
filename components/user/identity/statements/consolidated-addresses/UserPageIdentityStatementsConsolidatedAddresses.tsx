@@ -116,7 +116,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
   return (
     <div>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-        <h3 className="tw-m-0 tw-min-w-0 tw-break-words tw-text-lg tw-font-semibold tw-text-iron-100 sm:tw-text-xl">
+        <h3 className="tw-m-0 tw-min-w-0 tw-break-words tw-text-lg tw-font-semibold tw-text-iron-100">
           {t(locale, "user.profile.identity.statements.addressesHeading", {
             name: createPossessionStr(profile.handle ?? null),
           })}
