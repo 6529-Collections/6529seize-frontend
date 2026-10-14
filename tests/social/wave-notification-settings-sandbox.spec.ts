@@ -164,6 +164,9 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
         })
       ).toHaveAttribute("aria-expanded", "true");
       await expectReachable(page, "checkbox");
+      await expect(choices.getByRole("list").getByRole("listitem")).toHaveCount(
+        2
+      );
       await expect(page.getByRole("tooltip")).toHaveCount(0);
       await page.screenshot({
         path: testInfo.outputPath(`notification-choices-${surface}.png`),
@@ -237,15 +240,23 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
       const bell = page.getByRole("button", {
         name: "Open notification settings",
       });
+      await expect(bell).toHaveAttribute("aria-haspopup", "menu");
+      await expect(bell).toHaveAttribute("aria-expanded", "false");
       await bell.focus();
       await page.keyboard.press("Enter");
       const menu = page.getByRole("menu");
       await expect(menu).toBeVisible();
+      await expect(bell).toHaveAttribute("aria-expanded", "true");
+      await expect(bell).toHaveAttribute(
+        "aria-controls",
+        (await menu.getAttribute("id")) ?? ""
+      );
       await expectReachable(page, "menuitemcheckbox");
       await page.keyboard.press("ArrowDown");
       await expect(menu).toHaveAttribute("aria-activedescendant", /.+/);
       await page.keyboard.press("Escape");
       await expect(menu).toHaveCount(0);
+      await expect(bell).toHaveAttribute("aria-expanded", "false");
       await expect(bell).toBeFocused();
     }
   });

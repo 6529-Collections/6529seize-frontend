@@ -21,6 +21,7 @@ export function useNotificationSettingsDialog(id: string) {
     setIsOpen(false);
   }, [ownsEntry]);
   const open = () => {
+    if (openedUrl.current !== null) return;
     openedUrl.current = globalThis.location.href;
     globalThis.history.pushState(
       { ...globalThis.history.state, waveNotificationSettings: id },
@@ -40,7 +41,11 @@ export function useNotificationSettingsDialog(id: string) {
     globalThis.addEventListener("popstate", onBack);
     return () => {
       globalThis.removeEventListener("popstate", onBack);
-      if (ownsEntry()) globalThis.history.back();
+      // Remove only this still-active, same-URL entry (for example on resize).
+      // Navigation elsewhere and an already-dismissed sheet must never go Back.
+      const shouldGoBack = ownsEntry();
+      openedUrl.current = null;
+      if (shouldGoBack) globalThis.history.back();
     };
   }, [ownsEntry]);
 

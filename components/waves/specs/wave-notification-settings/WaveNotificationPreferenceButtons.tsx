@@ -119,7 +119,7 @@ function NotificationMenuItem({
     </Button>
   );
   return (
-    <li role="none" className="tw-list-none">
+    <li role={mobile ? "listitem" : "none"} className="tw-list-none">
       {mobile ? (
         button
       ) : (
@@ -205,7 +205,7 @@ function NotificationPreferences({
   );
   const choices = (close: () => void) => (
     <ul
-      role="none"
+      role={mobile ? "list" : "none"}
       className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 tw-px-2"
     >
       <NotificationMenuItem
