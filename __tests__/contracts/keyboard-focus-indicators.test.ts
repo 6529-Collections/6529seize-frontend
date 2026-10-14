@@ -58,6 +58,14 @@ const AUDITED_EXCEPTIONS: readonly AuditedException[] = [
       "f4e4cbd54777b1e6872a0eaa61f6c0cfd07b9e59fb478187b3deb41d7db9e450",
     reason: MENU_CONTAINER_REASON,
   },
+  {
+    file: "components/waves/specs/wave-notification-settings/WaveNotificationPreferenceButtons.tsx",
+    marker: "tw-ring-white/10 focus:tw-outline-none",
+    literalHash:
+      "a908df2dc19dfa7d6083f72e8f56f77ce69648e86ed5a5cb93d675cf2e0f429f",
+    reason:
+      "Headless UI MenuItems container: focus stays on the menu element while the active item is highlighted through its data-[focus] background.",
+  },
 ];
 
 // ---------------------------------------------------------------- colour ----
