@@ -59,6 +59,7 @@ export async function generateMetadata({
       resolvedView
     ),
     title,
+    view: String(resolvedView),
   });
 }
 

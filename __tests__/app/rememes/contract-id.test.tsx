@@ -169,9 +169,8 @@ describe("ReMeme generateMetadata", () => {
     expect(result.description).toContain("ReMemes");
     const imageUrl = getImageUrl(result);
     expect(imageUrl.pathname).toBe("/api/og-metadata/nfts/0x123abc/456");
-    expect(imageUrl.searchParams.get("image")).toBe(
-      "https://test.6529.io/custom-image.png"
-    );
+    // Card text and artwork come from backend data, never from the query.
+    expect(imageUrl.search).toBe("");
   });
 
   it("encodes reserved route params before fetching metadata", async () => {
@@ -203,7 +202,7 @@ describe("ReMeme generateMetadata", () => {
     expect(result.title).toBe("0x123...abc #456 | ReMemes");
     const imageUrl = getImageUrl(result);
     expect(imageUrl.pathname).toBe("/api/og-metadata/nfts/0x123abc/456");
-    expect(imageUrl.searchParams.get("image")).toBeNull();
+    expect(imageUrl.search).toBe("");
   });
 
   it("returns default metadata when API returns null", async () => {
@@ -216,7 +215,7 @@ describe("ReMeme generateMetadata", () => {
     expect(result.title).toBe("0x123...abc #456 | ReMemes");
     const imageUrl = getImageUrl(result);
     expect(imageUrl.pathname).toBe("/api/og-metadata/nfts/0x123abc/456");
-    expect(imageUrl.searchParams.get("image")).toBeNull();
+    expect(imageUrl.search).toBe("");
   });
 
   it("handles data with partial metadata", async () => {
@@ -237,9 +236,7 @@ describe("ReMeme generateMetadata", () => {
     expect(result.title).toBe("0x123...abc #456 | ReMemes");
     const imageUrl = getImageUrl(result);
     expect(imageUrl.pathname).toBe("/api/og-metadata/nfts/0x123abc/456");
-    expect(imageUrl.searchParams.get("image")).toBe(
-      "https://test.com/partial-image.png"
-    );
+    expect(imageUrl.search).toBe("");
   });
 
   it("uses fallback ogImage when image is null", async () => {
@@ -259,6 +256,6 @@ describe("ReMeme generateMetadata", () => {
 
     const imageUrl = getImageUrl(result);
     expect(imageUrl.pathname).toBe("/api/og-metadata/nfts/0x123abc/456");
-    expect(imageUrl.searchParams.get("image")).toBeNull();
+    expect(imageUrl.search).toBe("");
   });
 });
