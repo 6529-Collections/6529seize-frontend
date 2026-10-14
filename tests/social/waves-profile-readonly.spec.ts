@@ -1356,6 +1356,65 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     expect(url.searchParams.get("serialNo")).toBe("1");
   });
 
+  test("keeps profile statistics natural and activity loading compact", async ({
+    page,
+  }) => {
+    let releaseLogs: () => void = () => {};
+    const logsReady = new Promise<void>((resolve) => {
+      releaseLogs = resolve;
+    });
+    await page.route("**/api/profile-logs?**", async (route) => {
+      await logsReady;
+      await route.continue();
+    });
+    try {
+      await gotoReady(page, `/${PROFILE_HANDLE}`);
+      const loading = page.getByRole("status", {
+        name: "Loading activity log",
+      });
+      await expect(loading).toBeVisible();
+      const loadingBox = await loading.boundingBox();
+      expect(loadingBox).not.toBeNull();
+      expect(loadingBox!.height).toBeLessThan(300);
+      const stats = page.getByRole("link", {
+        name: new RegExp(`View ${PROFILE_HANDLE}'s collected TDH:`),
+      });
+      const numericStyles = await stats.evaluate((element) => {
+        const value = element.firstElementChild ?? element;
+        return {
+          family: getComputedStyle(value).fontFamily,
+          variant: getComputedStyle(value).fontVariantNumeric,
+        };
+      });
+      expect(numericStyles.family).toContain("Montserrat");
+      expect(numericStyles.variant).toBe("normal");
+      await expectNoHorizontalOverflow(page);
+      await loading.scrollIntoViewIfNeeded();
+      await expect
+        .poll(() =>
+          loading.evaluate((element) => {
+            let ancestor: Element | null = element;
+            while (ancestor) {
+              if (Number(getComputedStyle(ancestor).opacity) < 1) return false;
+              ancestor = ancestor.parentElement;
+            }
+            return true;
+          })
+        )
+        .toBe(true);
+      await captureSafeScreenshot(
+        page,
+        test.info(),
+        "profile-activity-loading"
+      );
+    } finally {
+      releaseLogs();
+    }
+    await expect(
+      page.getByRole("status", { name: "Loading activity log" })
+    ).toHaveCount(0);
+  });
+
   test("renders the stable public profile shell read-only", async ({
     page,
   }) => {

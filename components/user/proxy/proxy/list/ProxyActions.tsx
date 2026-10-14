@@ -27,7 +27,7 @@ export default function ProxyActions({
     return d.start_time - a.start_time;
   });
   return (
-    <div className="tw-space-y-2.5 tw-mt-3">
+    <div className="tw-mt-2.5 tw-flex tw-flex-col tw-gap-2">
       {actions.map((action) => (
         <ProxyActionRow
           key={action.id}

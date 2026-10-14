@@ -325,29 +325,158 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     page,
   }) => {
     const path = `${PROFILE_BASE_PATH}/proxy`;
+    // Synthetic rows exercise narrow layouts and owner controls without writes.
+    await page.route(
+      (url) => /\/proxies(?:\/|$)/.test(url.pathname),
+      async (route) => {
+        if (route.request().method() !== "GET") {
+          await route.abort("blockedbyclient");
+          return;
+        }
+        const url = new URL(route.request().url());
+        if (!/\/profiles\/[^/]+\/proxies\/?$/.test(url.pathname)) {
+          await route.fallback();
+          return;
+        }
+        url.pathname = url.pathname.replace(
+          /\/profiles\/[^/]+\/proxies\/?$/,
+          `/identities/${encodeURIComponent(PROFILE_HANDLE)}`
+        );
+        const identityResponse = await route.fetch({ url: url.toString() });
+        expect(identityResponse.ok()).toBe(true);
+        const identity: { id: string } = await identityResponse.json();
+        expect(typeof identity.id).toBe("string");
+        const owner = { id: identity.id, handle: PROFILE_HANDLE, pfp: null };
+        const peer = {
+          id: "proxy-layout-peer",
+          handle: "proxy_layout_fixture",
+          pfp: null,
+        };
+        const startTime = Date.now() - 86400000;
+        const fixtures = [
+          { id: "proxy-layout-received", created_by: peer, granted_to: owner },
+          { id: "proxy-layout-granted", created_by: owner, granted_to: peer },
+        ].map((proxy) => ({
+          ...proxy,
+          created_at: startTime,
+          actions: [
+            {
+              id: `${proxy.id}-action`,
+              proxy_id: proxy.id,
+              action_type: "ALLOCATE_REP",
+              credit_amount: 123456789,
+              credit_spent: 12345678,
+              start_time: startTime,
+              end_time: startTime + 2592000000,
+              created_at: startTime,
+              accepted_at: null,
+              rejected_at: null,
+              revoked_at: null,
+              is_active: true,
+            },
+          ],
+        }));
+        await route.fulfill({ json: fixtures });
+      }
+    );
 
     await gotoReady(page, path);
 
     await expectProfileShell(page, "Proxy");
-    await expectAnyVisible(
-      [
-        {
-          label: "desktop proxy type tabs",
-          locator: page.getByRole("tablist", { name: "Proxy Type" }),
-        },
-        {
-          label: "mobile proxy type menu",
-          locator: page.getByRole("button", { name: /Proxy Type: All/i }),
-        },
-      ],
-      "the proxy type controls"
-    );
+    const filters = page.getByRole("tablist", { name: "Proxy Type" });
+    await expect(filters).toBeVisible();
+    for (const name of ["All", "Received", "Granted"]) {
+      const tab = filters.getByRole("tab", { name, exact: true });
+      await expect(tab).toBeInViewport({ ratio: 1 });
+      await expect(tab).toHaveCSS("font-size", "13px");
+    }
+    await expect(
+      filters.getByRole("tab", { name: "All", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
     await expect(
       page.getByText("Received proxies", { exact: true })
     ).toBeVisible();
     await expect(
       page.getByText("Granted proxies", { exact: true })
     ).toBeVisible();
+    await filters.getByRole("tab", { name: "Received", exact: true }).click();
+    await expect(
+      page.getByText("Received proxies", { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByText("Granted proxies", { exact: true })
+    ).toHaveCount(0);
+    await filters
+      .getByRole("tab", { name: "Received", exact: true })
+      .press("ArrowRight");
+    await expect(
+      filters.getByRole("tab", { name: "Granted", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(
+      page.getByText("Granted proxies", { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByText("Received proxies", { exact: true })
+    ).toHaveCount(0);
+    await filters
+      .getByRole("tab", { name: "Granted", exact: true })
+      .press("Home");
+    await expect(
+      page.getByText("Received proxies", { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByText("Granted proxies", { exact: true })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    const rows = page.getByRole("main").locator("[data-proxy-action-row]");
+    await expect(rows).toHaveCount(2);
+    const initialViewport = page.viewportSize()!;
+    for (const width of [390, 768, 1024, 1280, 1440]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await expectNoHorizontalOverflow(page);
+      for (const key of ["Home", "End", "Home"]) {
+        await filters.getByRole("tab", { selected: true }).press(key);
+        const focused = filters.getByRole("tab").locator(":scope:focus");
+        await expect
+          .poll(() =>
+            focused.evaluate((element) => {
+              const style = getComputedStyle(element);
+              const rect = element.getBoundingClientRect();
+              const clip = element
+                .closest('[role="tablist"]')!
+                .getBoundingClientRect();
+              const extent = Math.max(
+                0,
+                parseFloat(style.outlineWidth) + parseFloat(style.outlineOffset)
+              );
+              return (
+                style.outlineStyle !== "none" &&
+                extent > 0 &&
+                rect.left - extent >= clip.left &&
+                rect.top - extent >= clip.top &&
+                rect.right + extent <= clip.right &&
+                rect.bottom + extent <= clip.bottom
+              );
+            })
+          )
+          .toBe(true);
+      }
+      for (const row of await rows.all()) {
+        await expect
+          .poll(() =>
+            row.evaluate((element) => {
+              const cells = Array.from(element.children).filter(
+                (cell): cell is HTMLElement => cell instanceof HTMLElement
+              );
+              return cells.every(
+                (cell) => cell.scrollWidth <= cell.clientWidth + 1
+              );
+            })
+          )
+          .toBe(true);
+      }
+    }
+    await page.setViewportSize(initialViewport);
   });
 
   // Plans now require a session; retain the layout contract in the authenticated pack.

@@ -451,7 +451,7 @@ function UserPageStatsActivityOverviewMemes({
           </table>
         </UserPageStatsTableScroll>
       ) : (
-        <p className="tw-mb-0 tw-px-4 tw-py-5 tw-text-sm tw-text-iron-500">
+        <p className="tw-mb-0 tw-px-4 tw-py-5 tw-text-[15px]/5 tw-font-normal tw-text-iron-300">
           {activityMessage(
             locale,
             "user.collected.stats.activityOverview.tables.memesBySeasonEmpty"

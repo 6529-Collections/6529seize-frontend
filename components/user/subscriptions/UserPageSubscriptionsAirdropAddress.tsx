@@ -65,7 +65,7 @@ export default function UserPageSubscriptionsAirdropAddress(
             {airdropAddress && (
               <span className="tw-break-all">
                 {airdropAddress.ens && (
-                  <span className="tw-mb-1 tw-block tw-text-sm tw-font-medium tw-text-iron-200">
+                  <span className="tw-mb-1 tw-block tw-text-sm tw-font-medium tw-text-iron-100">
                     {airdropAddress.ens}
                   </span>
                 )}
@@ -97,7 +97,7 @@ export default function UserPageSubscriptionsAirdropAddress(
             )}
             {!airdropAddress && (
               <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
-                <span className="tw-text-sm tw-text-iron-400">
+                <span className="tw-text-meta tw-font-normal tw-text-iron-500">
                   No airdrop address found
                 </span>
                 {props.show_edit && (

@@ -95,7 +95,7 @@ export default function UserPageSubscriptionsBalance(
         ) : (
           <span className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1">
             <span className="tw-flex tw-items-baseline tw-gap-2">
-              <b className="tw-text-2xl tw-font-medium tw-leading-none tw-tracking-tight tw-text-iron-100 sm:tw-text-3xl">
+              <b className="tw-text-2xl tw-font-medium tw-tabular-nums tw-leading-none tw-tracking-tight tw-text-iron-100 md:tw-text-3xl">
                 {formatSubscriptionEth(locale, balance)}
               </b>
               <span className="tw-inline-flex tw-h-5 tw-w-3 tw-flex-shrink-0 tw-self-center tw-text-iron-500">
@@ -106,7 +106,7 @@ export default function UserPageSubscriptionsBalance(
               </span>
             </span>
             {numericBalance > 0 && (
-              <span className="tw-text-sm tw-text-iron-400">
+              <span className="tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
                 ({mintCapacityLabel})
               </span>
             )}

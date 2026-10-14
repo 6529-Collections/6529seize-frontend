@@ -58,6 +58,8 @@ Use this page to:
 ## Current Tab Behavior
 
 - Default list filter is `All`.
+- `All`, `Received`, and `Granted` are visible tabs on phone, tablet, and desktop.
+  Use the arrow keys to switch tabs, or `Home` / `End` to select the first / last tab.
 - Loading/empty states:
   - `Loading proxies...`
   - `No received proxies`

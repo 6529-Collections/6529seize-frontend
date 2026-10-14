@@ -49,7 +49,7 @@ export default function UserPageIdentityStatementsStatementsList({
       ))}
 
       {!statements.length && (
-        <li className="tw-text-xs tw-font-normal tw-text-iron-500">
+        <li className="tw-text-meta/4 tw-font-normal tw-text-iron-500">
           {noItemsMessage}
         </li>
       )}
