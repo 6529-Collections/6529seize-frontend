@@ -29,12 +29,18 @@ export class ApiWaveOverviewContextProfileContext {
     'unread_drops': number;
     'first_unread_drop_serial_no'?: number;
     /**
-    * Unread drops across visible subwaves that the authenticated profile follows and has not muted.
+    * Unread drops across visible subwaves that the authenticated profile follows and has not muted. Unfollowed or muted subwaves, and all subwaves of a muted parent, contribute 0.
     */
     'subwave_unread_drops'?: number;
     'followed_subwaves_count'?: number;
     'latest_followed_subwave_activity_timestamp'?: number;
+    /**
+    * Unread drops across followed, unmuted visible subwaves, which are folded into this parent container in followed wave lists. Same value as subwave_unread_drops; kept for backward compatibility.
+    */
     'hidden_followed_subwave_unread_drops'?: number;
+    /**
+    * Lowest drop serial number among the unread drops counted by subwave_unread_drops, when there is one.
+    */
     'first_hidden_followed_subwave_unread_drop_serial_no'?: number;
     'muted': boolean;
 
