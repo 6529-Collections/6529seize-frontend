@@ -26,8 +26,11 @@ behavior across thread header controls and sidebar wave rows.
 ## Notification Modes
 
 - The bell button opens notification preferences.
-- On phone layouts, the choices open in a sheet above `About`. Choose a mode,
-  tap outside, use the phone’s Back action or Close, or press Escape to return to `About`.
+- On phone layouts, the choices replace the content inside the same `About`
+  sheet, keeping its height stable. Choose a mode, use Back (including the phone’s
+  Back action), or press Escape to return to `About` with focus on the bell.
+- Close or tapping outside dismisses the whole sheet. Returning from notification
+  settings preserves the `About` content and scroll position.
 - Desktop and tablet sidebars show an anchored menu. Arrow keys move between
   its choices; Escape closes it and returns focus to the bell.
 - Bell and mute tooltips appear with a mouse; touch users can tap the controls

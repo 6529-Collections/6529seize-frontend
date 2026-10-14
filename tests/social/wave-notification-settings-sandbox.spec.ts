@@ -142,6 +142,14 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
           .toBeLessThanOrEqual(1);
       }
       const about = await openAbout(page);
+      const originalHeight = await about
+        .getByRole("heading", { name: `About ${TITLE}`, exact: true })
+        .evaluate(
+          (heading) =>
+            heading.closest(".mobile-wrapper-dialog")?.getBoundingClientRect()
+              .height
+        );
+      expect(originalHeight).toBeGreaterThan(0);
       const bell = about.getByRole("button", {
         name: "Open notification settings",
       });
@@ -164,6 +172,19 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
         })
       ).toHaveAttribute("aria-expanded", "true");
       await expectReachable(page, "checkbox");
+      await expect(page.getByRole("dialog")).toHaveCount(1);
+      expect(
+        await choices
+          .getByRole("heading", { name: "Notification settings", exact: true })
+          .evaluate(
+            (heading) =>
+              heading.closest(".mobile-wrapper-dialog")?.getBoundingClientRect()
+                .height
+          )
+      ).toBe(originalHeight);
+      await expect(
+        choices.getByRole("button", { name: "Back", exact: true })
+      ).toBeVisible();
       await expect(choices.getByRole("list").getByRole("listitem")).toHaveCount(
         2
       );
@@ -185,15 +206,20 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
       ).toBeVisible();
       await expect(bell).toBeFocused();
       await bell.tap();
+      await choices.getByRole("button", { name: "Back", exact: true }).tap();
+      await expect(choices).toHaveCount(0);
+      await expect(bell).toBeFocused();
+      await bell.tap();
       await choices.getByRole("button", { name: "Close", exact: true }).tap();
       await expect(choices).toHaveCount(0);
+      await expect(about).toHaveCount(0);
+      await openAbout(page);
       await bell.tap();
       await choices.getByRole("checkbox").first().click({ trial: true });
-      await page.touchscreen.tap(8, 140);
+      await page.touchscreen.tap(8, 12);
       await expect(choices).toHaveCount(0);
-      await expect(
-        about.getByRole("heading", { name: `About ${TITLE}`, exact: true })
-      ).toBeVisible();
+      await expect(about).toHaveCount(0);
+      await openAbout(page);
       await bell.tap();
       api.delayUpdate();
       await choices.getByRole("checkbox", { name: ALL }).tap();
@@ -285,8 +311,11 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
         name: "Open notification settings",
       });
       await bell.tap();
-      await expectReachable(page, "checkbox");
-      const choice = page.getByRole("checkbox", { name: BROADCAST });
+      // The phone uses About; the tablet retains its Wave details sidebar.
+      const choiceRole = width === 390 ? "checkbox" : "menuitemcheckbox";
+      await expect(page.getByRole("dialog")).toHaveCount(1);
+      await expectReachable(page, choiceRole);
+      const choice = page.getByRole(choiceRole, { name: BROADCAST });
       const box = await choice.boundingBox();
       expect(box).not.toBeNull();
       if (!box) throw new Error("Notification choice has no touch target.");

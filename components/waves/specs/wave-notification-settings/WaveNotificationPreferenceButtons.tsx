@@ -1,12 +1,11 @@
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTooltip";
-import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
-import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
+import { WaveInformationNotificationsContext } from "@/components/brain/mobile/WaveInformationNotificationsContext";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { AtSymbolIcon, BellIcon, CheckIcon } from "@heroicons/react/24/outline";
 import type { ComponentProps, ComponentType, SVGProps } from "react";
-import { Fragment, useId, useRef } from "react";
-import { useNotificationSettingsDialog } from "./useNotificationSettingsDialog";
+import { Fragment, useContext, useEffect, useId, useRef } from "react";
+import { createPortal } from "react-dom";
 import { waveNotificationSettingsMessage } from "./waveNotificationSettings.messages";
 import type { WaveNotificationSettingsState } from "./useWaveNotificationSettings";
 
@@ -131,31 +130,29 @@ function NotificationMenuItem({
   );
 }
 
-export default function WaveNotificationPreferenceButtons(
-  props: WaveNotificationPreferenceButtonsProps
-) {
-  const mobile = useIsMobileLayoutViewport();
-  return (
-    <NotificationPreferences
-      key={mobile ? "mobile" : "desktop"}
-      {...props}
-      mobile={mobile}
-    />
-  );
-}
-
-function NotificationPreferences({
+export default function WaveNotificationPreferenceButtons({
   waveId,
   settings,
   compact = false,
-  mobile,
-}: WaveNotificationPreferenceButtonsProps & { readonly mobile: boolean }) {
+}: WaveNotificationPreferenceButtonsProps) {
+  const sheet = useContext(WaveInformationNotificationsContext);
+  const mobile = sheet !== null;
   const instanceId = useId();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const tooltipId = `wave-notification-actions-${waveId}-${instanceId}`;
   const triggerId = `${tooltipId}-trigger`;
   const menuId = `${tooltipId}-menu`;
-  const dialog = useNotificationSettingsDialog(menuId);
+  const wasOpen = useRef(false);
+  const isOpen = sheet?.isOpen ?? false;
+  useEffect(() => {
+    const restoreFocus = wasOpen.current && !isOpen;
+    wasOpen.current = isOpen;
+    if (!restoreFocus) return;
+    const frame = globalThis.requestAnimationFrame(() =>
+      buttonRef.current?.focus({ preventScroll: true })
+    );
+    return () => globalThis.cancelAnimationFrame(frame);
+  }, [isOpen]);
   const triggerActive =
     settings.broadcastMentionsEnabled || settings.allDropsEnabled;
   const triggerSizeClass = compact
@@ -173,7 +170,7 @@ function NotificationPreferences({
       aria-disabled={settings.loading}
       onClick={(event) => {
         if (settings.loading) event.preventDefault();
-        else if (mobile) dialog.open();
+        else sheet?.open();
       }}
       onKeyDown={(event) => {
         if (
@@ -190,9 +187,8 @@ function NotificationPreferences({
       )}
       {...(mobile
         ? {
-            "aria-expanded": dialog.isOpen,
-            "aria-haspopup": "dialog" as const,
-            "aria-controls": dialog.isOpen ? menuId : undefined,
+            "aria-expanded": isOpen,
+            "aria-controls": sheet.contentId,
           }
         : {})}
     >
@@ -254,18 +250,9 @@ function NotificationPreferences({
       {mobile ? (
         <>
           {trigger}
-          <MobileWrapperDialog
-            id={menuId}
-            title={title}
-            isOpen={dialog.isOpen}
-            onClose={dialog.close}
-            zIndexClassName="tw-z-[1020]"
-            onAfterLeave={() =>
-              buttonRef.current?.focus({ preventScroll: true })
-            }
-          >
-            {choices(dialog.close)}
-          </MobileWrapperDialog>
+          {sheet.isOpen &&
+            sheet.container &&
+            createPortal(choices(sheet.back), sheet.container)}
         </>
       ) : (
         <Menu>
