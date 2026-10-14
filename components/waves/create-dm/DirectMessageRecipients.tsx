@@ -95,6 +95,20 @@ export default function DirectMessageRecipients({
     refetchOnWindowFocus: false,
   });
   const selectedKeys = new Set(selected.map(recipientKey));
+  let searchStatus = "";
+  if (canSearch) {
+    if (isFetching) {
+      searchStatus = t(locale, "quickDm.recipientLoading");
+    } else if (isError) {
+      searchStatus = t(locale, "quickDm.recipientSearchError");
+    } else if (data) {
+      searchStatus = data.length
+        ? t(locale, "quickDm.recipientResults", {
+            count: formatNumber(locale, data.length),
+          })
+        : t(locale, "quickDm.recipientEmpty", { query: search });
+    }
+  }
 
   return (
     <>
@@ -164,11 +178,11 @@ export default function DirectMessageRecipients({
           className="tw-h-[34px] tw-min-w-[90px] tw-flex-1 tw-border-0 tw-bg-transparent tw-p-0 tw-text-base tw-font-medium tw-text-iron-50 tw-caret-primary-300 tw-shadow-none tw-outline-none tw-ring-0 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-ring-0"
         />
       </div>
+      <output aria-live="polite" aria-atomic="true" className="tw-sr-only">
+        {searchStatus}
+      </output>
       {canSearch && isFetching && (
-        <div role="status" className="tw-mt-5">
-          <span className="tw-sr-only">
-            {t(locale, "quickDm.recipientLoading")}
-          </span>
+        <div className="tw-mt-5">
           {[0, 1, 2].map((index) => (
             <div
               key={index}
@@ -186,7 +200,7 @@ export default function DirectMessageRecipients({
       )}
       {canSearch && !isFetching && isError && (
         <div className="tw-py-8 tw-text-center tw-text-sm tw-text-iron-400">
-          <p role="alert">{t(locale, "quickDm.recipientSearchError")}</p>
+          <p>{t(locale, "quickDm.recipientSearchError")}</p>
           <button
             type="button"
             onClick={() => void refetch()}
@@ -197,10 +211,7 @@ export default function DirectMessageRecipients({
         </div>
       )}
       {canSearch && !isFetching && !isError && data?.length === 0 && (
-        <p
-          role="status"
-          className="tw-m-0 tw-break-words tw-px-2 tw-py-8 tw-text-center tw-text-sm tw-text-iron-400"
-        >
+        <p className="tw-m-0 tw-break-words tw-px-2 tw-py-8 tw-text-center tw-text-sm tw-text-iron-400">
           {t(locale, "quickDm.recipientEmpty", { query: search })}
         </p>
       )}

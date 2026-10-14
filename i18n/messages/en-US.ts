@@ -1398,6 +1398,7 @@ const QUICK_DM_MESSAGES = objectMessages("quickDm", {
   recipientRemove: "Remove {name}",
   recipientPeople: "People",
   recipientLoading: "Searching for people",
+  recipientResults: "People found: {count}",
   recipientEmpty: "No one found for “{query}”",
   recipientSearchError: "Couldn't search for people. Please try again.",
   recipientRetry: "Retry search",

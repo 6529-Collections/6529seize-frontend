@@ -109,6 +109,11 @@ identities.
 - New message copy uses the app message dictionary. Locales without translated
   messages currently fall back to English; levels, counts, and TDH use the
   browser locale. Translation coverage for this screen remains incomplete.
+- Translation follow-up: frontend maintainers own the new `quickDm.*` creation
+  and recipient-search messages on `/messages/create` and `create=dm`.
+  `en-GB`, `fr-FR`, `es-ES`, and `de-DE` currently show the English fallback for
+  this surface. Complete those dictionaries and repeat layout and accessible-name
+  checks in each locale; no localized routes are required for this follow-up.
 - This page owns direct-message creation form behavior.
 - Route-shell behavior for `/messages/create` (header and back rules) is
   documented in Navigation docs.

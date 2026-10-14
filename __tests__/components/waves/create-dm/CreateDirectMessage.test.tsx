@@ -215,16 +215,22 @@ it("shows empty and failed search states with retry", async () => {
     .mockResolvedValue([alice]);
   const user = userEvent.setup();
   const { input } = setup();
+  const status = screen.getByRole("status");
   await user.type(input, "zzz");
-  expect(await screen.findByText("No one found for “zzz”")).toBeVisible();
+  expect(
+    await screen.findByText("No one found for “zzz”", { selector: "p" })
+  ).toBeVisible();
+  expect(status).toHaveTextContent("No one found for “zzz”");
   await user.type(input, "z");
-  expect(await screen.findByRole("alert")).toHaveTextContent(
-    "Couldn't search for people."
+  await waitFor(() =>
+    expect(status).toHaveTextContent("Couldn't search for people.")
   );
   await user.click(screen.getByRole("button", { name: "Retry search" }));
   expect(
     await screen.findByRole("button", { name: /alice Level/ })
   ).toBeVisible();
+  expect(status).toBe(screen.getByRole("status"));
+  expect(status).toHaveTextContent("People found: 1");
 });
 
 it("preserves page back and Escape handling without submitting from the search input", async () => {

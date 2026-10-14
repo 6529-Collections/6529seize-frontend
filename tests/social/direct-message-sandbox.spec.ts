@@ -126,6 +126,7 @@ test.describe("Direct message local sandbox @auth @medium @local-only", () => {
         .getByRole("dialog", { name: "New message" })
         .locator(".mobile-wrapper-dialog");
       await expect(emptyPanel).toBeVisible();
+      await expect(emptyPanel).toHaveCSS("opacity", "1");
       expect((await emptyPanel.boundingBox())!.height).toBeLessThan(280);
       await expect(
         form.getByRole("button", { name: "Message", exact: true })
