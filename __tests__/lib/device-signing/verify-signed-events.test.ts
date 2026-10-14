@@ -4,7 +4,10 @@ import type { ApiDropSignedEvents } from "@/generated/models/ApiDropSignedEvents
 import { canonicalizeBody } from "@/lib/device-signing/canonical-json";
 import { signEventId } from "@/lib/device-signing/ed25519";
 import { computeInterimEventId } from "@/lib/device-signing/interim-event";
-import { verifyDropSignedEvents } from "@/lib/device-signing/verify-signed-events";
+import {
+  verifyDropSignedEvents,
+  toDisplayedDropContent,
+} from "@/lib/device-signing/verify-signed-events";
 import { hashMessage } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import {
@@ -146,6 +149,55 @@ describe("drop signature verification in the browser", () => {
       status: "signed",
       currentContentSigned: false,
       signature: { eventId: post.id },
+    });
+  });
+
+  it("checks the current signed body against the content shown", async () => {
+    const grant = await createGrant();
+    const post = await createEvent(grant, {
+      kind: 1,
+      seq: 1_760_000_000_000,
+      body: { title: null, parts: [{ content: "gm", media: [] }] },
+    });
+    const data = signedEvents([post], [grant], post.id);
+    const shown = (content: string, mediaCount = 0) => ({
+      title: null,
+      parts: [{ content, mediaCount, attachmentCount: 0 }],
+    });
+
+    await expect(
+      verifyDropSignedEvents(data, { displayed: shown("gm") })
+    ).resolves.toMatchObject({ status: "signed", currentContentSigned: true });
+    await expect(
+      verifyDropSignedEvents(data, {
+        displayed: shown("gm, swapped by a host"),
+      })
+    ).resolves.toEqual({ status: "invalid" });
+    await expect(
+      verifyDropSignedEvents(data, { displayed: shown("gm", 1) })
+    ).resolves.toEqual({ status: "invalid" });
+    // Without the shown content the verdict rests on the signed events alone.
+    await expect(verifyDropSignedEvents(data)).resolves.toMatchObject({
+      status: "signed",
+      currentContentSigned: true,
+    });
+  });
+
+  it("builds the shown content from a drop", () => {
+    expect(
+      toDisplayedDropContent({
+        title: "t",
+        parts: [
+          { content: "a", media: [{}, {}], attachments: [{}] },
+          { content: null, media: [] },
+        ],
+      } as unknown as Parameters<typeof toDisplayedDropContent>[0])
+    ).toEqual({
+      title: "t",
+      parts: [
+        { content: "a", mediaCount: 2, attachmentCount: 1 },
+        { content: null, mediaCount: 0, attachmentCount: 0 },
+      ],
     });
   });
 

@@ -1,4 +1,5 @@
 import type { ApiDeviceGrantProof } from "@/generated/models/ApiDeviceGrantProof";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDeviceSignedEvent } from "@/generated/models/ApiDeviceSignedEvent";
 import type { ApiDropSignedEvents } from "@/generated/models/ApiDropSignedEvents";
 import { hashMessage, recoverMessageAddress, type Hex } from "viem";
@@ -33,8 +34,83 @@ export type ContractSignatureVerifier = (args: {
   readonly chainId: number;
 }) => Promise<boolean>;
 
+/**
+ * What the reader is shown for the drop, compared with the signed body. Media
+ * and attachments are compared by count: requests may reference uploads by id
+ * while the drop shows their resolved URLs.
+ */
+export interface DisplayedDropContent {
+  readonly title: string | null;
+  readonly parts: readonly {
+    readonly content: string | null;
+    readonly mediaCount: number;
+    readonly attachmentCount: number;
+  }[];
+}
+
 interface VerifyOptions {
   readonly verifyContractSignature?: ContractSignatureVerifier | undefined;
+  /** When given, the current content is "signed" only if it matches. */
+  readonly displayed?: DisplayedDropContent | undefined;
+}
+
+const countOf = (value: unknown): number =>
+  Array.isArray(value) ? value.length : 0;
+
+export const toDisplayedDropContent = (
+  drop: Pick<ApiDrop, "title" | "parts">
+): DisplayedDropContent => ({
+  title: drop.title ?? null,
+  parts: drop.parts.map((part) => ({
+    content: part.content ?? null,
+    mediaCount: countOf(part.media),
+    attachmentCount: countOf(part.attachments),
+  })),
+});
+
+const asText = (value: unknown): string =>
+  typeof value === "string" ? value : "";
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+function parseSignedBody(event: ApiDeviceSignedEvent): unknown {
+  if (event.body === null) {
+    return null;
+  }
+  try {
+    return JSON.parse(event.body) as unknown;
+  } catch {
+    return null;
+  }
+}
+
+/** Whether the signed post or edit body is what the reader is shown. */
+function matchesDisplayed(
+  event: ApiDeviceSignedEvent,
+  displayed: DisplayedDropContent
+): boolean {
+  const body = parseSignedBody(event);
+  if (!isRecord(body)) {
+    return false;
+  }
+  const parts = Array.isArray(body["parts"]) ? body["parts"] : [];
+  if (
+    asText(body["title"]) !== asText(displayed.title) ||
+    parts.length !== displayed.parts.length
+  ) {
+    return false;
+  }
+  return parts.every((part: unknown, index) => {
+    const shown = displayed.parts[index];
+    return (
+      shown !== undefined &&
+      isRecord(part) &&
+      asText(part["content"]) === asText(shown.content) &&
+      countOf(part["media"]) === shown.mediaCount &&
+      countOf(part["attachments"]) === shown.attachmentCount
+    );
+  });
 }
 
 const HEX_DIGITS = /^0x[0-9a-fA-F]+$/;
@@ -272,6 +348,15 @@ export async function verifyDropSignedEvents(
   if (currentEventId && !current) {
     // The server claims the current content is signed but that event does not
     // verify: never fall back to an older signed version.
+    return { status: "invalid" };
+  }
+  if (
+    current &&
+    options.displayed &&
+    !matchesDisplayed(current.event, options.displayed)
+  ) {
+    // A valid signature over content other than what is shown proves nothing
+    // about the shown content.
     return { status: "invalid" };
   }
   const shown = current ?? verified.at(-1);
