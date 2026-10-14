@@ -6354,6 +6354,7 @@
       ],
       "facts": [
         "The xTDH received view has documented collection, token, contributor, and grant detail steps.",
+        "While collections first load, full-width placeholder rows appear and the search and sort controls remain visible but disabled.",
         "State can persist across the received-view step flow.",
         "Use /{user}/xtdh for profile-specific xTDH received information."
       ],
@@ -6375,6 +6376,7 @@
       "keywords": ["xtdh", "granted", "grant", "create", "profile", "owner"],
       "facts": [
         "The xTDH granted view lists grants and documents grant actions.",
+        "Open a grant's Show tokens disclosure to view its token artwork. Missing artwork shows the token ID; a failed thumbnail shows Load Error while the token details remain visible. Close and reopen the disclosure to retry the image.",
         "A create-new-grant flow is available where owner permissions allow it.",
         "Use profile xTDH for profile-specific grants and Network xTDH for global context."
       ],

@@ -49,6 +49,13 @@ export function sharedConfig(
     images: {
       loader: "default",
       remotePatterns: [
+        {
+          protocol: "https",
+          hostname: "nft2-cdn.alchemy.com",
+          port: "",
+          pathname: "/cdn-cgi/image/*/eth-mainnet/*",
+          search: "",
+        },
         ...STATIC_ALLOWED_IMAGE_HOSTNAMES.map((hostname) => ({
           protocol: "https" as const,
           hostname,

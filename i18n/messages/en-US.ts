@@ -2704,6 +2704,7 @@ const IDENTITY_FILTER_MESSAGES = objectMessages("identityFilter", {
 } as const);
 
 const XTDH_COLLECTION_MESSAGES = objectMessages("xtdh.collections", {
+  loading: "Loading collections",
   "search.emptyDescription":
     "Try another collection name or clear the search to see all collections.",
   "search.emptyTitle": "No collections found for “{query}”",
@@ -2992,6 +2993,10 @@ export const EN_US_MESSAGES = {
   "network.prenodes.deprecation":
     "6529 Prenodes have been deprecated. Use the 6529 Desktop app to calculate TDH.",
   "network.prenodes.desktopLink": "Explore 6529 Desktop",
+  "tokenList.thumbnail.loading": "Loading thumbnail",
+  "tokenList.thumbnail.failed": "Failed to load thumbnail",
+  "tokenList.thumbnail.error": "Load Error",
+  "tokenList.thumbnail.tokenId": "#{tokenId}",
   "header.menu.open": "Open menu",
   "header.menu.close": "Close menu",
   "header.navigation.loading": "Loading navigation…",
