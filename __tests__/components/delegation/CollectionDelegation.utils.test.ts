@@ -39,15 +39,17 @@ describe("CollectionDelegation utility functions", () => {
   it("getDelegationsFromData parses delegations", () => {
     const data = [{ result: [["0x4"], [NEVER_DATE + 1], [true], [1]] }];
     const res = getDelegationsFromData(data);
-    expect(res[0]?.wallets[0].expiry).toContain("active - non-expiring");
+    expect(res[0]?.wallets[0].expiry).toEqual({ status: "nonExpiring" });
   });
 
-  it("includes formatted expiry date for active delegations", () => {
+  it("keeps the exact expiry instant for active delegations", () => {
     const future = NEVER_DATE - 12345;
-    const data = [{ result: [["0x9"], [future], [true], [1]] }];
+    const data = [{ result: [["0x9"], [BigInt(future)], [true], [1]] }];
     const res = getDelegationsFromData(data);
-    const expected = new Date(future * 1000).toISOString().slice(0, 10);
-    expect(res[0]?.wallets[0].expiry).toBe(`active - expires ${expected}`);
+    expect(res[0]?.wallets[0].expiry).toEqual({
+      status: "active",
+      expiresAt: future,
+    });
   });
 
   it("returns empty when no result present", () => {
@@ -79,7 +81,33 @@ describe("CollectionDelegation utility functions", () => {
     const past = Math.floor(Date.now() / 1000) - 100;
     const data = [{ result: [["0x1"], [past], [false], [1]] }];
     const res = getDelegationsFromData(data);
-    expect(res[0]?.wallets[0].expiry).toContain("expired");
+    expect(res[0]?.wallets[0].expiry).toEqual({ status: "expired" });
+  });
+
+  it("treats an expiry equal to now as expired, as the contract does", () => {
+    // nftdelegation smart_contracts/DelegationManagement.sol,
+    // retrieveActiveDelegations and retrieveActiveDelegators: a delegation is
+    // active only `if (allExpirations[y] > _date)`, so expiry == now is not.
+    const nowSeconds = 1_791_000_000;
+    const nowSpy = jest.spyOn(Date, "now").mockReturnValue(nowSeconds * 1000);
+    try {
+      const res = getDelegationsFromData([
+        {
+          result: [
+            ["0x1", "0x2"],
+            [nowSeconds, nowSeconds + 1],
+            [true, true],
+            [0, 0],
+          ],
+        },
+      ]);
+      expect(res[0]?.wallets.map((wallet) => wallet.expiry)).toEqual([
+        { status: "expired" },
+        { status: "active", expiresAt: nowSeconds + 1 },
+      ]);
+    } finally {
+      nowSpy.mockRestore();
+    }
   });
 
   it("treats primary and higher reserved use cases as non-expiring", () => {
@@ -111,8 +139,8 @@ describe("CollectionDelegation utility functions", () => {
       (d) => d.useCase.use_case === CONSOLIDATION_USE_CASE.use_case
     );
 
-    expect(primary?.wallets[0].expiry).toBe("active - non-expiring");
-    expect(subDelegation?.wallets[0].expiry).toBe("active - non-expiring");
-    expect(consolidation?.wallets[0].expiry).toBe("active - non-expiring");
+    expect(primary?.wallets[0].expiry).toEqual({ status: "nonExpiring" });
+    expect(subDelegation?.wallets[0].expiry).toEqual({ status: "nonExpiring" });
+    expect(consolidation?.wallets[0].expiry).toEqual({ status: "nonExpiring" });
   });
 });
