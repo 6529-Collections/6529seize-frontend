@@ -102,13 +102,13 @@ describe("createClientRateLimiter", () => {
 
     expect(
       allowedCount(enforce, [
-        "2001:db8::abcd:1",
-        "2001:db8:0:0:1::",
-        "2001:0DB8:0000:0000:ffff:ffff:ffff:ffff",
+        "2a00:1450::abcd:1",
+        "2a00:1450:0:0:1::",
+        "2A00:1450:0000:0000:ffff:ffff:ffff:ffff",
       ])
     ).toBe(1);
     expect(
-      allowedCount(enforce, ["2001:db8:0:1::1", "2001:db8:1::1", "2001:db9::"])
+      allowedCount(enforce, ["2a00:1450:0:1::1", "2a00:1450:1::1", "2a00:1451::"])
     ).toBe(3);
   });
 
@@ -129,10 +129,10 @@ describe("createClientRateLimiter", () => {
 
     expect(
       allowedCount(enforce, [
-        "2001:db8:5::1, ::1",
-        "2001:db8:5::2, 0000:0000:0000:0000:0000:0000:0000:0001",
-        "2001:db8:5::3, fe80::1",
-        "2001:db8:5::4, fd00::1",
+        "2a00:1450:5::1, ::1",
+        "2a00:1450:5::2, 0000:0000:0000:0000:0000:0000:0000:0001",
+        "2a00:1450:5::3, fe80::1",
+        "2a00:1450:5::4, fd00::1",
       ])
     ).toBe(1);
   });
@@ -145,7 +145,7 @@ describe("createClientRateLimiter", () => {
       "::1",
       "10.0.0.1, 192.168.1.10",
       "8.8.8.8, not-an-address",
-      "2001:db8::1%eth0",
+      "2a00:1450::1%eth0",
     ];
 
     expect(
