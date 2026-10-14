@@ -32,7 +32,7 @@ export default function UserCICTypeIconWrapper({
         type="button"
         data-tooltip-id={tooltipId}
         aria-label={t(DEFAULT_LOCALE, "user.cicType.details")}
-        className="tw-inline-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-0 tw-cursor-help focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+        className="tw-inline-flex tw-size-5 tw-cursor-help tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
       >
         <UserCICTypeIcon cic={profile.cic} />
       </button>
@@ -42,17 +42,19 @@ export default function UserCICTypeIconWrapper({
           <Tooltip
             id={tooltipId}
             clickable={true}
+            className="max-sm:!tw-left-1/2 max-sm:-tw-translate-x-1/2"
+            classNameArrow="max-sm:tw-hidden"
             place="right"
             positionStrategy="fixed"
             opacity={1}
             style={{
               ...TOOLTIP_STYLES,
               padding: "0",
-              maxWidth: "360px",
+              maxWidth: "min(360px, calc(100vw - 16px))",
               pointerEvents: "auto",
             }}
           >
-            <div className="tailwind-scope">
+            <div className="tailwind-scope tw-max-h-[calc(100dvh-1rem)] tw-overflow-y-auto">
               <UserCICTypeIconTooltip profile={profile} />
             </div>
           </Tooltip>,

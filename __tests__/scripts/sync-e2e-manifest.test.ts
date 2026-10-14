@@ -91,7 +91,10 @@ describe("E2E pack manifest", () => {
       safety: "sandbox",
       environments: ["local"],
       triggers: ["pr-ci", "manual"],
-      specs: ["tests/social/native-competition-sandbox.spec.ts"],
+      specs: [
+        "tests/social/native-competition-sandbox.spec.ts",
+        "tests/social/wave-notification-settings-sandbox.spec.ts",
+      ],
       projects: ["web-desktop-chromium", "web-mobile-chromium"],
       env: {
         NEXT_PUBLIC_FEATURE_MULTI_COMPETITION: "true",

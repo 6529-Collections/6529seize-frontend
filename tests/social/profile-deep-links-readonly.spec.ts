@@ -10,6 +10,9 @@ import {
   PROFILE_HANDLE,
 } from "./profileReadonlyHelpers";
 
+import { RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
+import { expectUrlState } from "../support/urlState";
+
 test.describe("Profile deep-link read-only coverage @surface @medium @large @readonly", () => {
   test("keeps Collected statistics, tabs and tables readable on compact screens", async ({
     page,
@@ -107,6 +110,10 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     await expect(page.getByRole("button", { name: /^SZN1 / })).toBeVisible();
 
     await details.click();
+    await expectUrlState(
+      page,
+      (url) => url.searchParams.get("details") === "open"
+    );
     await expect(
       page.getByRole("button", { name: "Hide Details", exact: true })
     ).toHaveAttribute("aria-expanded", "true");
@@ -382,7 +389,7 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       page
         .getByRole("status")
         .filter({ hasText: "No artwork matches these filters." })
-    ).toBeVisible();
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     for (const width of [375, 440, 1280]) {
       await page.setViewportSize({ width, height: 900 });
       await clear.scrollIntoViewIfNeeded();
@@ -391,7 +398,8 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       await expectNoHorizontalOverflow(page);
     }
     await clear.click();
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) =>
         !url.searchParams.has("collection") &&
         !url.searchParams.has("seized") &&
@@ -407,7 +415,8 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     await expect(cards.getByRole("link").first()).toBeInViewport();
     await page.goBack();
     await expect(clear).toBeVisible();
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) => url.searchParams.get("collection") === "gradients"
     );
   });
@@ -445,7 +454,8 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       await expectNoHorizontalOverflow(page);
     }
     await next.click();
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) =>
         url.searchParams.get("page") === "3" &&
         url.searchParams.get("collection") === "memes"
@@ -463,7 +473,8 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     await expect(cards.getByRole("link").first()).toBeFocused();
     await expect(cards.getByRole("link").first()).toBeInViewport();
     await expect(nativeCount).toBeVisible();
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) =>
         url.searchParams.get("page") === "2" &&
         url.searchParams.get("collection") === "memes"
@@ -480,11 +491,12 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     );
     await expect(
       page.getByRole("list", { name: "Collected cards", exact: true })
-    ).toBeVisible();
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await page
       .getByRole("button", { name: "Hide Details", exact: true })
       .click();
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) => url.searchParams.get("details") === "closed"
     );
     const card = page
@@ -494,9 +506,7 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     const href = await card.getAttribute("href");
     expect(href).not.toBeNull();
     await card.click();
-    await expect(page).toHaveURL((url) =>
-      url.pathname.startsWith("/the-memes/")
-    );
+    await expectUrlState(page, (url) => url.pathname.startsWith("/the-memes/"));
     if (isMobile) {
       await page
         .getByRole("link", { name: `Back to ${PROFILE_HANDLE}'s collected` })
@@ -508,7 +518,8 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     await expect(
       page.getByRole("button", { name: "Details", exact: true })
     ).toHaveAttribute("aria-expanded", "false");
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) =>
         url.searchParams.get("page") === "2" &&
         url.searchParams.get("activity") === "distributions"
@@ -517,47 +528,94 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     await expect(card).toBeInViewport();
   });
 
-  test("returns from a Details artwork to its distribution page and row", async ({
-    page,
-    isMobile,
-  }) => {
-    await gotoReady(
-      page,
-      `/${PROFILE_HANDLE}/collected?collection=memes&page=2&activity=distributions&distribution-page=2`
+  for (const shiftsAfterReturn of [false, true]) {
+    test(
+      shiftsAfterReturn
+        ? "keeps the returned distribution row visible after Details expands late"
+        : "returns from a Details artwork to its distribution page and row",
+      async ({ page, isMobile }) => {
+        await gotoReady(
+          page,
+          `/${PROFILE_HANDLE}/collected?collection=memes&page=2&activity=distributions&distribution-page=2`
+        );
+        const panel = page.getByRole("tabpanel", {
+          name: "Distributions",
+          exact: true,
+        });
+        const artwork = panel
+          .getByRole("link", { name: /View The Memes token/ })
+          .nth(4);
+        await expect(artwork).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+        const href = await artwork.getAttribute("href");
+        expect(href).toContain("returnTo=");
+        const returnTo = new URL(href!, page.url()).searchParams.get(
+          "returnTo"
+        );
+        expect(returnTo).not.toBeNull();
+        const returnUrl = new URL(returnTo!, page.url());
+        await artwork.click();
+        await expectUrlState(page, (url) =>
+          url.pathname.startsWith("/the-memes/")
+        );
+        if (shiftsAfterReturn) {
+          // Reproduce a late Details height change after the row has received focus.
+          // Neither the test nor this callback scrolls the row into view.
+          await page.evaluate((anchor) => {
+            const deadline = performance.now() + 10_000;
+            const waitForReturn = () => {
+              const target = document.getElementById(anchor);
+              if (
+                location.hash === `#${anchor}` &&
+                target === document.activeElement
+              ) {
+                requestAnimationFrame(() => {
+                  const returnedPanel =
+                    target?.closest<HTMLElement>('[role="tabpanel"]');
+                  if (returnedPanel) {
+                    returnedPanel.style.paddingTop = "1200px";
+                    returnedPanel.dataset["returnLayoutShift"] = "applied";
+                  }
+                });
+              } else if (performance.now() < deadline) {
+                requestAnimationFrame(waitForReturn);
+              }
+            };
+            requestAnimationFrame(waitForReturn);
+          }, returnUrl.hash.slice(1));
+        }
+        if (isMobile) {
+          await page
+            .getByRole("link", {
+              name: `Back to ${PROFILE_HANDLE}'s collected`,
+            })
+            .click();
+          await expect(artwork).toBeFocused();
+        } else {
+          await page.goBack();
+        }
+        await expectUrlState(
+          page,
+          (url) =>
+            url.pathname === returnUrl.pathname &&
+            url.searchParams.get("page") === "2" &&
+            url.searchParams.get("distribution-page") === "2" &&
+            url.hash === returnUrl.hash
+        );
+        await expect(
+          page.getByRole("button", { name: "Hide Details", exact: true })
+        ).toHaveAttribute("aria-expanded", "true");
+        await expect(artwork).toHaveAttribute("href", href!);
+        await expect(artwork).toBeFocused();
+        if (shiftsAfterReturn) {
+          await expect(panel).toHaveAttribute(
+            "data-return-layout-shift",
+            "applied"
+          );
+        }
+        await expect(artwork).toBeInViewport();
+      }
     );
-    const panel = page.getByRole("tabpanel", {
-      name: "Distributions",
-      exact: true,
-    });
-    const artwork = panel
-      .getByRole("link", { name: /View The Memes token/ })
-      .nth(4);
-    await expect(artwork).toBeVisible();
-    const href = await artwork.getAttribute("href");
-    expect(href).toContain("returnTo=");
-    await artwork.click();
-    await expect(page).toHaveURL((url) =>
-      url.pathname.startsWith("/the-memes/")
-    );
-    if (isMobile) {
-      await page
-        .getByRole("link", { name: `Back to ${PROFILE_HANDLE}'s collected` })
-        .click();
-      await expect(artwork).toBeFocused();
-    } else {
-      await page.goBack();
-    }
-    await expect(page).toHaveURL(
-      (url) =>
-        url.searchParams.get("page") === "2" &&
-        url.searchParams.get("distribution-page") === "2"
-    );
-    await expect(
-      page.getByRole("button", { name: "Hide Details", exact: true })
-    ).toHaveAttribute("aria-expanded", "true");
-    await expect(artwork).toHaveAttribute("href", href!);
-    await expect(artwork).toBeInViewport();
-  });
+  }
 
   test("centers the Token ID sort arrows without changing selection behavior", async ({
     page,
@@ -633,6 +691,7 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
         const label = row.querySelector("span")!.getBoundingClientRect();
         const center = label.y + label.height / 2;
         return {
+          cssHeight: Number.parseFloat(getComputedStyle(row).height),
           rowHeight: row.getBoundingClientRect().height,
           offsets: Array.from(row.querySelectorAll("svg")).map((icon) => {
             const bounds = icon.getBoundingClientRect();
@@ -640,7 +699,9 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
           }),
         };
       });
-      expect(alignment.rowHeight).toBeGreaterThanOrEqual(44);
+      // Chromium can report a 44px row as 43.99993896484375 after transforms.
+      expect(alignment.cssHeight).toBeGreaterThanOrEqual(44);
+      expect(alignment.rowHeight).toBeGreaterThanOrEqual(44 - 0.001);
       expect(alignment.offsets.every((offset) => offset <= 1)).toBe(true);
     }
     await sortPanel.press("Escape");
@@ -649,7 +710,8 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     await expectAxeClean(page, { include: ["main button[aria-haspopup]"] });
     await sort.click();
     await page.getByRole("menuitem", { name: "Token ID", exact: true }).click();
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) => url.searchParams.get("sort-direction") === "asc"
     );
     await expect(sort).toHaveAttribute("aria-expanded", "false");
@@ -659,7 +721,8 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     });
     await view.press("Enter");
     await page.getByRole("menuitem", { name: "Network", exact: true }).click();
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) => url.searchParams.get("collection") === "network"
     );
     const networkView = page.getByRole("button", {
@@ -719,7 +782,8 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
         })
       )
       .toBe(true);
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) => url.searchParams.get("activity") === "tdh-history"
     );
   });
@@ -729,7 +793,7 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
   }) => {
     await gotoReady(page, `/${PROFILE_HANDLE}?source=e2e&view=legacy`);
 
-    await expect(page).toHaveURL((url) => {
+    await expectUrlState(page, (url) => {
       return (
         url.pathname === `/${PROFILE_HANDLE}` &&
         url.searchParams.get("source") === "e2e" &&
@@ -744,7 +808,7 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
   }) => {
     await gotoReady(page, `/${PROFILE_HANDLE}/waves?source=e2e&serialNo=1`);
 
-    await expect(page).toHaveURL((url) => {
+    await expectUrlState(page, (url) => {
       return (
         [`/${PROFILE_HANDLE}`, `/${PROFILE_HANDLE}/curations`].includes(
           url.pathname
@@ -767,7 +831,7 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     }) => {
       await gotoReady(page, `/${PROFILE_HANDLE}/${legacyPath}?source=e2e`);
 
-      await expect(page).toHaveURL((url) => {
+      await expectUrlState(page, (url) => {
         return (
           url.pathname === `/${PROFILE_HANDLE}` &&
           !url.searchParams.has("source")

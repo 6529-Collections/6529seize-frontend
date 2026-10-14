@@ -13,6 +13,7 @@ import {
 import { gateSidebarHydration } from "../support/sidebarHydration";
 import { installSectionTrackingFixture } from "../support/sectionTrackingFixture";
 import { installReadonlyMutationGuard } from "../support/readonlyMutationGuard";
+import { RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
 
 test.describe("Home Page @smoke @medium @large", () => {
   test.beforeEach(async ({ page }) => {
@@ -40,7 +41,7 @@ test.describe("Home Page @smoke @medium @large", () => {
     ).toBeVisible();
 
     const waveLink = page.getByRole("link", { name: /^View wave / }).first();
-    await expect(waveLink).toBeVisible();
+    await expect(waveLink).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
   });
 
   test("should expose the network health route", async ({ page }) => {
@@ -116,6 +117,7 @@ test("mobile web starts with its header and full-width content before hydration 
     await expectNoHorizontalOverflow(page);
     await hydration.waitForDownloads();
     hydration.release();
+    await hydration.waitForReady();
     await expect(page.getByRole("main").first().locator("..")).toHaveAttribute(
       "data-small",
       "true"

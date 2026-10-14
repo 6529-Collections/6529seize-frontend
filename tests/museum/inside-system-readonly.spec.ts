@@ -347,14 +347,21 @@ test.describe("Museum Inside the System @surface @readonly", () => {
       );
       await link.click();
       await expect
-        .poll(() => {
-          const url = new URL(page.url());
-          return {
-            pathname: url.pathname,
-            work: url.searchParams.get("work"),
-            hash: url.hash,
-          };
-        })
+        .poll(
+          () => {
+            const url = new URL(page.url());
+            return {
+              pathname: url.pathname,
+              work: url.searchParams.get("work"),
+              hash: url.hash,
+            };
+          },
+          {
+            timeout: STUDY_READY_TIMEOUT_MS,
+            message:
+              "Expected the accession's full-system route and work anchor",
+          }
+        )
         .toEqual({
           pathname: "/museum/network/projects/century/system",
           work: "6529NM.2026.001.01",

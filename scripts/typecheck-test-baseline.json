@@ -3,7 +3,7 @@
   "config": "tsconfig.jest.json",
   "toolchain": {
     "typescript_version": "5.9.3",
-    "pnpm_lock_sha256": "c4e5f7cbc523e12c8adce040e81bf62a23bc3c0b9e0fd638e3ce26d594f62372",
+    "pnpm_lock_sha256": "9e0b967a9ebd9c254b3404a2bd1db07ddbe5b7a95038c403cd6cd140c211a8bb",
     "jest_tsconfig_sha256": "feda509a89cdd90cbcd9da6eecae28759c34c7aaae3725593ec2b1c022017062",
     "base_tsconfig_sha256": "fdbd8e548aed634324fd228e74d541ea702c1311597aa938741651e50de59c5f"
   },
@@ -239,7 +239,6 @@
     "__tests__/components/groups/page/create/config/GroupCreateCIC.test.tsx": 1,
     "__tests__/components/groups/page/create/config/GroupCreateRep.test.tsx": 1,
     "__tests__/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItems.test.tsx": 1,
-    "__tests__/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSelect.test.tsx": 1,
     "__tests__/components/groups/page/create/config/nfts/GroupCreateCollections.test.tsx": 1,
     "__tests__/components/groups/page/create/config/nfts/GroupCreateNftSearch.test.tsx": 1,
     "__tests__/components/groups/page/create/config/nfts/GroupCreateNftSearchItems.test.tsx": 1,
@@ -261,7 +260,6 @@
     "__tests__/components/header/AppSidebarUserInfo.test.tsx": 1,
     "__tests__/components/header/AppSidebarUserStats.test.tsx": 4,
     "__tests__/components/header/AppUserConnect.test.tsx": 1,
-    "__tests__/components/header/header-search/HeaderSearchButton.test.tsx": 1,
     "__tests__/components/header/header-search/HeaderSearchModalItemMedia.test.tsx": 1,
     "__tests__/components/header/HeaderPlaceholderComponent.test.tsx": 2,
     "__tests__/components/header/HeaderSearchModal.test.tsx": 1,

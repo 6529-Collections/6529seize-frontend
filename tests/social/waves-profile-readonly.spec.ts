@@ -1,4 +1,11 @@
 import type { Locator, Page } from "@playwright/test";
+import { ApiProfileClassification } from "../../generated/models/ApiProfileClassification";
+import type { ApiXTdhGrantsPage } from "../../generated/models/ApiXTdhGrantsPage";
+import { ApiXTdhGrantStatus } from "../../generated/models/ApiXTdhGrantStatus";
+import { ApiXTdhGrantTargetChain } from "../../generated/models/ApiXTdhGrantTargetChain";
+import { ApiXTdhGrantTargetTokenMode } from "../../generated/models/ApiXTdhGrantTargetTokenMode";
+import type { ApiXTdhGrantTokensPage } from "../../generated/models/ApiXTdhGrantTokensPage";
+import { expectUrlState } from "../support/urlState";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import { expectCompetitionScroll } from "../support/competitionScroll";
 import {
@@ -13,6 +20,7 @@ import {
 
 import { EN_US_MESSAGES } from "../../i18n/messages/en-US";
 import {
+  captureSafeScreenshot,
   expect,
   expectNoHorizontalOverflow,
   test,
@@ -110,6 +118,320 @@ function getProfileFeed(page: Page): Locator {
 }
 
 test.describe("Waves and profile read-only coverage @surface @medium @large @readonly", () => {
+  test("keeps received collection loading rows aligned with loaded content", async ({
+    page,
+  }) => {
+    let releaseCollections: () => void;
+    const collectionsReady = new Promise<void>((resolve) => {
+      releaseCollections = resolve;
+    });
+    await page.route("**/api/xtdh/collections?**", async (route) => {
+      await collectionsReady;
+      await route.continue();
+    });
+    await gotoReady(page, `/${PROFILE_HANDLE}/xtdh?tab=received`);
+    const section = page
+      .getByRole("heading", { name: "xTDH Collections", exact: true })
+      .locator("xpath=ancestor::section[1]");
+    const controls = section.getByRole("region", {
+      name: "Sort and search received collections",
+    });
+    const skeleton = section.getByTestId("xtdh-collection-skeleton").first();
+    const measureCard = (element: HTMLElement) => {
+      const rect = element.getBoundingClientRect();
+      const sectionRect = element.closest("section")!.getBoundingClientRect();
+      const grid = element.lastElementChild!;
+      return {
+        x: rect.x,
+        y: rect.y - sectionRect.y,
+        width: rect.width,
+        columns: getComputedStyle(grid).gridTemplateColumns,
+        gridOffset: grid.getBoundingClientRect().x - rect.x,
+      };
+    };
+    let loadingLayout: ReturnType<typeof measureCard>;
+    try {
+      await expect(skeleton).toBeVisible();
+      await expect(controls.getByRole("textbox")).toBeDisabled();
+      const sortControl = controls
+        .getByRole("button", {
+          name: "Sort collections by: xTDH",
+          exact: true,
+        })
+        .or(controls.getByRole("tab", { name: "xTDH", exact: true }));
+      await expect(sortControl).toHaveCount(1);
+      await expect(sortControl).toBeDisabled();
+      loadingLayout = await skeleton.evaluate(measureCard);
+      await expectNoHorizontalOverflow(page);
+      await captureSafeScreenshot(
+        page,
+        test.info(),
+        "received-collections-loading"
+      );
+    } finally {
+      releaseCollections!();
+    }
+    await expect(skeleton).toHaveCount(0);
+    await expect(controls.getByRole("textbox")).toBeEnabled();
+    const card = section
+      .getByRole("list")
+      .getByRole("button")
+      .first()
+      .locator(":scope > div");
+    await expect(card).toBeVisible();
+    const loadedLayout = await card.evaluate(measureCard);
+    expect(loadedLayout.width).toBeCloseTo(loadingLayout.width, 1);
+    expect(loadedLayout.x).toBeCloseTo(loadingLayout.x, 1);
+    expect(loadedLayout.y).toBeCloseTo(loadingLayout.y, 1);
+    expect(loadedLayout.columns).toBe(loadingLayout.columns);
+    expect(loadedLayout.gridOffset).toBeCloseTo(loadingLayout.gridOffset, 1);
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(
+      page,
+      test.info(),
+      "received-collections-loaded"
+    );
+  });
+
+  test("renders grant thumbnails from both Alchemy CDNs with an intentional failure fallback", async ({
+    page,
+  }) => {
+    const alchemyThumbnail =
+      "https://nft2-cdn.alchemy.com/cdn-cgi/image/width=250,height=250,fit=scale-down/eth-mainnet/a3062b74e1b4d79fdab0ca1ec5a92615";
+    const cloudinaryThumbnail =
+      "https://res.cloudinary.com/alchemyapi/image/upload/thumbnailv2/eth-mainnet/136dc79022a5b971800cf8405adb5cea_ea0b833e";
+    const thumbnails = [alchemyThumbnail, cloudinaryThumbnail, null];
+    let releaseMetadata: () => void;
+    const metadataReady = new Promise<void>((resolve) => {
+      releaseMetadata = resolve;
+    });
+    // Production and staging can have different (or no) grants for this profile.
+    // Control grant/token data while exercising the deployed disclosure, grid,
+    // real CDN responses and image optimizer in both environments.
+    const grantId = "thumbnail-fixture";
+    const tokens = ["1", "2", "3"].map((token) => ({ token, xtdh: 1 }));
+    const grantsPage: ApiXTdhGrantsPage = {
+      data: [
+        {
+          id: grantId,
+          grantor: {
+            id: "thumbnail-grantor",
+            handle: PROFILE_HANDLE,
+            primary_address: "0x0000000000000000000000000000000000000001",
+            pfp: null,
+            banner1_color: null,
+            banner2_color: null,
+            cic: 0,
+            rep: 0,
+            tdh: 0,
+            tdh_rate: 0,
+            xtdh: 0,
+            xtdh_rate: 0,
+            level: 0,
+            classification: ApiProfileClassification.Pseudonym,
+            sub_classification: null,
+            subscribed_actions: [],
+            archived: false,
+            active_main_stage_submission_ids: [],
+            winner_main_stage_drop_ids: [],
+            artist_of_prevote_cards: [],
+            profile_wave_id: null,
+            is_wave_creator: false,
+          },
+          target_chain: ApiXTdhGrantTargetChain.EthereumMainnet,
+          target_contract: "0x0c58ef43ff3032005e472cb5709f8908acb00205",
+          target_token_mode: ApiXTdhGrantTargetTokenMode.Include,
+          target_tokens_count: tokens.length,
+          target_collection_name: "Thumbnail fixture collection",
+          created_at: 1_760_000_000_000,
+          updated_at: 1_760_000_000_000,
+          valid_from: 1_760_000_000_000,
+          valid_to: null,
+          rate: 3,
+          error_details: null,
+          status: ApiXTdhGrantStatus.Granted,
+          is_irrevocable: false,
+          total_granted: 3,
+        },
+      ],
+      count: 1,
+      page: 1,
+      next: false,
+    };
+    const tokensPage: ApiXTdhGrantTokensPage = {
+      data: tokens,
+      count: tokens.length,
+      page: 1,
+      next: false,
+    };
+    await page.route("**/api/xtdh/grants?**", (route) =>
+      route.fulfill({ json: grantsPage })
+    );
+    const tokensRoute = `**/api/xtdh/grants/${grantId}/tokens?**`;
+    await page.route(tokensRoute, (route) =>
+      route.fulfill({ json: tokensPage })
+    );
+    await page.route("**/api/alchemy/token-metadata", async (route) => {
+      await metadataReady;
+      const body = route.request().postDataJSON() as { tokenIds: string[] };
+      await route.fulfill({
+        json: {
+          tokens: body.tokenIds.map((tokenId, index) => ({
+            tokenId,
+            name: `Thumbnail fixture ${index}`,
+            image: { thumbnailUrl: thumbnails[index % thumbnails.length] },
+          })),
+        },
+      });
+    });
+    await gotoReady(page, `/${PROFILE_HANDLE}/xtdh?tab=granted`);
+    await page
+      .getByRole("button", { name: /^Show [\d,]+ tokens$/ })
+      .first()
+      .click();
+    const tokenList = page.getByRole("list", { name: "Selected tokens" });
+    try {
+      await expect(
+        tokenList.getByLabel("Loading thumbnail").first()
+      ).toBeVisible();
+      await captureSafeScreenshot(page, test.info(), "grant-thumbnail-loading");
+    } finally {
+      releaseMetadata!();
+    }
+    for (const name of ["Thumbnail fixture 0", "Thumbnail fixture 1"]) {
+      const image = tokenList.getByRole("img", { name, exact: true });
+      await image.scrollIntoViewIfNeeded();
+      await expect(image).toBeVisible();
+      await expect
+        .poll(
+          () =>
+            image.evaluate(
+              (element: HTMLImageElement) =>
+                element.complete && element.naturalWidth > 0
+            ),
+          { timeout: 30000 }
+        )
+        .toBe(true);
+    }
+    const source = await tokenList
+      .getByRole("img", { name: "Thumbnail fixture 0", exact: true })
+      .getAttribute("src");
+    expect(new URL(source!, page.url()).pathname).toBe("/_next/image");
+    await expectNoHorizontalOverflow(page);
+
+    await captureSafeScreenshot(page, test.info(), "grant-thumbnail-artwork");
+
+    // A fresh browser load must also replace a real image-network failure.
+    await page.route("**/_next/image?**", async (route) => {
+      const sourceUrl = new URL(route.request().url()).searchParams.get("url");
+      if (sourceUrl === alchemyThumbnail) {
+        await route.abort("failed");
+      } else {
+        await route.fallback();
+      }
+    });
+    await page.reload();
+    await waitForRouteReady(page);
+    await page
+      .getByRole("button", { name: /^Show [\d,]+ tokens$/ })
+      .first()
+      .click();
+    await expect(
+      tokenList.getByRole("img", { name: "Failed to load thumbnail" }).first()
+    ).toBeVisible();
+    await expect(
+      tokenList.getByRole("img", { name: "Thumbnail fixture 0", exact: true })
+    ).toHaveCount(0);
+    await expect(
+      tokenList.getByText("Thumbnail fixture 0", { exact: true })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(page, test.info(), "grant-thumbnail-error");
+
+    await page.route(tokensRoute, (route) =>
+      route.fulfill({ json: { data: [], count: 0, page: 1, next: false } })
+    );
+    await page.reload();
+    await waitForRouteReady(page);
+    await page
+      .getByRole("button", { name: /^Show [\d,]+ tokens$/ })
+      .first()
+      .click();
+    await expect(
+      page.getByText("No specific token IDs were returned for this grant.")
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(page, test.info(), "grant-token-empty");
+  });
+
+  test("keeps the full subscription airdrop address available on touch and keyboard", async ({
+    page,
+    isMobile,
+  }) => {
+    await gotoReady(page, `/${PROFILE_HANDLE}/subscriptions`);
+    await expectProfileShell(page, "Subscriptions");
+    const address = page.getByRole("button", {
+      name: /^0x[0-9a-fA-F]{40}$/,
+    });
+    await expect(address).toBeVisible();
+    const fullAddress = (await address.textContent())!.trim();
+    if (isMobile) {
+      await address.tap();
+    } else {
+      await address.focus();
+    }
+    await expect(
+      page.getByRole("tooltip", { name: fullAddress })
+    ).toBeVisible();
+    await page
+      .getByRole("heading", { name: "Airdrop Address", exact: true })
+      .click();
+    await expect(page.getByRole("tooltip", { name: fullAddress })).toHaveCount(
+      0
+    );
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test("keeps subscription history defaults responsive and preserves user toggles", async ({
+    page,
+  }) => {
+    await gotoReadyWithApiResponse(
+      page,
+      `/${PROFILE_HANDLE}/subscriptions`,
+      (url) => url.pathname.includes("/subscriptions/consolidation/logs/")
+    );
+    await expectProfileShell(page, "Subscriptions");
+    const isPhone = (page.viewportSize()?.width ?? 0) < 640;
+    const disclosures = page
+      .getByRole("region", { name: "Subscription History", exact: true })
+      .locator("details");
+    await expect(disclosures).toHaveCount(3);
+    for (const disclosure of await disclosures.all()) {
+      await expect(disclosure).toHaveJSProperty("open", !isPhone);
+      await expect(disclosure).toHaveAttribute("aria-busy", "false");
+    }
+    const logs = disclosures.filter({ hasText: "Log History" });
+    const summary = page
+      .getByRole("region", { name: "Subscription History", exact: true })
+      .locator("summary")
+      .filter({ hasText: "Log History" });
+    await summary.click();
+    await expect(logs).toHaveJSProperty("open", isPhone);
+    const viewport = page.viewportSize()!;
+    await page.setViewportSize({
+      width: isPhone ? 900 : 390,
+      height: viewport.height,
+    });
+    await expect(logs).toHaveJSProperty("open", isPhone);
+    await page.setViewportSize(viewport);
+    await expect(logs).toHaveJSProperty("open", isPhone);
+    await summary.press("Enter");
+    await expect(logs).toHaveJSProperty("open", !isPhone);
+    await summary.press("Space");
+    await expect(logs).toHaveJSProperty("open", isPhone);
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("scrolls Main Stage Settings and validates live vote Activity in the app", async ({
     page,
   }, testInfo) => {
@@ -285,7 +607,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
             .filter({ visible: true })
             .first()
             .click();
-        await expect(page).toHaveURL((url) => url.pathname === "/waves");
+        await expectUrlState(page, (url) => url.pathname === "/waves");
       };
       await gotoReady(page, "/waves");
       const desktopSidebar =
@@ -549,7 +871,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const winners = page.getByRole("tabpanel");
     await expect(
       winners.getByRole("link", { name: /^The Memes #\d+$/ }).first()
-    ).toBeVisible();
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await expect(
       winners.getByText("Mint date:", { exact: true }).first()
     ).toBeVisible();
@@ -568,7 +890,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
   }) => {
     await gotoReady(page, "/waves");
 
-    await expect(page).toHaveURL((url) => url.pathname === "/waves");
+    await expectUrlState(page, (url) => url.pathname === "/waves");
     await expect(page).toHaveTitle(/Waves/i);
 
     const viewport = page.viewportSize();
@@ -613,7 +935,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       page.getByRole("region", {
         name: /All recent waves list|Regular waves list/,
       })
-    ).toBeVisible();
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     // Global navigation can still expose Waves here. The list header is plain
     // text on web, so scope its navigation invariant to main without a heading.
     await expect(
@@ -634,7 +956,8 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     );
     await profileFeedLink.click();
 
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) =>
         url.pathname === "/waves" &&
         url.searchParams.get("view") === "profile-feed"
@@ -686,14 +1009,16 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const visibleFeedPost = feedPostButtons.nth(visibleFeedPostIndex);
     await visibleFeedPost.focus();
     await visibleFeedPost.press("Enter");
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) =>
         /^\/waves\/[0-9a-f-]{36}$/i.test(url.pathname) &&
         Boolean(url.searchParams.get("serialNo"))
     );
 
     await page.goBack();
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) =>
         url.pathname === "/waves" &&
         url.searchParams.get("view") === "profile-feed"
@@ -710,7 +1035,8 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       .toBeGreaterThan(0);
 
     await page.goBack();
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) => url.pathname === "/waves" && !url.search
     );
     await expect(
@@ -739,9 +1065,10 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       `Expected a link for Wave ${waveId}`
     ).not.toBeNull();
     await matchingWaveLink!.click();
-    await expect(page).toHaveURL((url) => url.pathname === `/waves/${waveId}`);
+    await expectUrlState(page, (url) => url.pathname === `/waves/${waveId}`);
     await page.goBack();
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) => url.pathname === "/waves" && !url.search
     );
 
@@ -781,7 +1108,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
 
   test("keeps wave identity compact and sharing reachable through details", async ({
     page,
-  }) => {
+  }, testInfo) => {
     const waveId = await getFirstWaveId(page);
     await gotoReady(page, `/waves/${waveId}`);
 
@@ -826,24 +1153,48 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         exact: true,
       });
       if (await description.count()) {
-        await expect
-          .poll(() =>
-            description.evaluate((button) => {
-              const preview = button.querySelector("span > span");
-              const identity = button.parentElement;
-              if (!preview || !identity) {
-                return false;
+        let descriptionGeometry: unknown;
+        try {
+          await expect
+            .poll(
+              async () => {
+                descriptionGeometry = await description.evaluate((button) => {
+                  const preview = button.querySelector("span > span");
+                  const identity = button.parentElement;
+                  if (!preview || !identity) {
+                    return { fitsIdentity: false, hasTruncationCue: false };
+                  }
+                  const buttonBox = button.getBoundingClientRect();
+                  const identityBox = identity.getBoundingClientRect();
+                  const isTruncated =
+                    preview.scrollWidth > preview.clientWidth + 1;
+                  return {
+                    fitsIdentity: buttonBox.right <= identityBox.right + 1,
+                    hasTruncationCue:
+                      !isTruncated || button.querySelector("svg") !== null,
+                    buttonRight: buttonBox.right,
+                    identityRight: identityBox.right,
+                    previewWidth: preview.clientWidth,
+                    previewScrollWidth: preview.scrollWidth,
+                    fonts: document.fonts.status,
+                  };
+                });
+                return descriptionGeometry;
+              },
+              {
+                message:
+                  "Wave description must fit its identity and indicate truncation",
               }
-              const buttonBox = button.getBoundingClientRect();
-              const identityBox = identity.getBoundingClientRect();
-              const isTruncated = preview.scrollWidth > preview.clientWidth + 1;
-              return (
-                buttonBox.right <= identityBox.right + 1 &&
-                (!isTruncated || button.querySelector("svg") !== null)
-              );
-            })
-          )
-          .toBe(true);
+            )
+            .toMatchObject({ fitsIdentity: true, hasTruncationCue: true });
+        } finally {
+          await testInfo.attach("wave-description-geometry", {
+            body: Buffer.from(
+              JSON.stringify(descriptionGeometry ?? null, null, 2)
+            ),
+            contentType: "application/json",
+          });
+        }
       }
       if (await score.count()) {
         const headingBox = await header
@@ -919,15 +1270,16 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
   }) => {
     await gotoReady(page, `/${PROFILE_HANDLE}`);
 
-    await expect(page).toHaveURL(
-      (url) => url.pathname === `/${PROFILE_HANDLE}`
-    );
+    await expectUrlState(page, (url) => url.pathname === `/${PROFILE_HANDLE}`);
     await expect(page).toHaveTitle(new RegExp(PROFILE_HANDLE, "i"));
     await expectProfileShell(page);
     await expectProfileTabLinks(page);
     const statements = page.getByRole("button", { name: /ID Statements/i });
     if (await statements.isVisible()) {
+      // The count replaces the server placeholder after this section hydrates.
+      await expect(statements).toHaveAccessibleName(/^\d[\d,]* ID Statements$/);
       await statements.click();
+      await expect(statements).toHaveAttribute("aria-pressed", "true");
     }
     await expect(
       page.getByRole("link", { name: "Wallet Checker" })
@@ -941,7 +1293,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     test(`renders ${tab.path} read-only`, async ({ page }) => {
       await gotoReady(page, tab.path);
 
-      await expect(page).toHaveURL((url) => url.pathname === tab.path);
+      await expectUrlState(page, (url) => url.pathname === tab.path);
       await expect(page).toHaveTitle(tab.title);
       await expectProfileShell(page, tab.activeTab);
       await expectProfileTabLinks(page);

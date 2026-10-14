@@ -73,3 +73,45 @@ it("forgets unresolved request keys on identity scope reset", () => {
     prepareSubmissionRequestKey("drops", {}, () => "wallet:profile")?.key
   ).not.toBe(first?.key);
 });
+
+it("creates retry-safe v4 keys when randomUUID is unavailable on an HTTP device origin", () => {
+  const descriptor = Object.getOwnPropertyDescriptor(
+    globalThis.crypto,
+    "randomUUID"
+  );
+  Object.defineProperty(globalThis.crypto, "randomUUID", {
+    configurable: true,
+    value: undefined,
+  });
+  try {
+    const first = prepareSubmissionRequestKey(
+      "drops",
+      { text: "same" },
+      () => "wallet:profile"
+    );
+    expect(first?.key).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+    );
+    expect(
+      prepareSubmissionRequestKey(
+        "drops",
+        { text: "same" },
+        () => "wallet:profile"
+      )?.key
+    ).toBe(first?.key);
+    first?.complete();
+    expect(
+      prepareSubmissionRequestKey(
+        "drops",
+        { text: "same" },
+        () => "wallet:profile"
+      )?.key
+    ).not.toBe(first?.key);
+  } finally {
+    if (descriptor) {
+      Object.defineProperty(globalThis.crypto, "randomUUID", descriptor);
+    } else {
+      Reflect.deleteProperty(globalThis.crypto, "randomUUID");
+    }
+  }
+});

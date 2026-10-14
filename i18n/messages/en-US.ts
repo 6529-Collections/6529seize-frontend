@@ -1392,7 +1392,26 @@ const QUICK_DM_MESSAGES = objectMessages("quickDm", {
   chatTitleFallback: "Messages",
   closeAriaLabel: "Close quick direct messages",
   newDirectMessageAriaLabel: "New direct message",
-  createModalTitle: "New Direct Message",
+  createModalTitle: "New message",
+  recipientLabel: "To:",
+  recipientAddMore: "Add more",
+  recipientRemove: "Remove {name}",
+  recipientPeople: "People",
+  recipientLoading: "Searching for people",
+  recipientResults: "People found: {count}",
+  recipientEmpty: "No one found for “{query}”",
+  recipientSearchError: "Couldn't search for people. Please try again.",
+  recipientRetry: "Retry search",
+  recipientLevel: "Level {level}",
+  recipientLevelTdh: "Level {level} · {tdh} TDH",
+  recipientOption: "{name} {details}",
+  createMessage: "Message",
+  createMessagePerson: "Message {name}",
+  createMessagePeople: "Message {count} people",
+  creating: "Creating...",
+  createSelfIncluded: "You are already included in this direct message.",
+  createSelfRemove: "You can't remove yourself from this direct message.",
+  createError: "Couldn't create this direct message.",
   createModalCloseAriaLabel: "Close new direct message modal",
   backAriaLabel: "Back to direct message list",
   backUnreadAriaLabel: "Back to direct message list, unread messages available",
@@ -2686,6 +2705,7 @@ const IDENTITY_FILTER_MESSAGES = objectMessages("identityFilter", {
 } as const);
 
 const XTDH_COLLECTION_MESSAGES = objectMessages("xtdh.collections", {
+  loading: "Loading collections",
   "search.emptyDescription":
     "Try another collection name or clear the search to see all collections.",
   "search.emptyTitle": "No collections found for “{query}”",
@@ -2954,6 +2974,10 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  "tokenList.thumbnail.loading": "Loading thumbnail",
+  "tokenList.thumbnail.failed": "Failed to load thumbnail",
+  "tokenList.thumbnail.error": "Load Error",
+  "tokenList.thumbnail.tokenId": "#{tokenId}",
   "header.menu.open": "Open menu",
   "header.menu.close": "Close menu",
   "header.navigation.loading": "Loading navigation…",
