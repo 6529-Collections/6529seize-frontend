@@ -53,17 +53,9 @@ shell after running it, or activate it immediately in the current shell:
 source <(./bin/6529 bootstrap --print-export)
 ```
 
-### Public release-request package
+### Public package policy
 
-`@6529-collections/release-request` is installed from public npm at the exact
-version in `package.json` and `pnpm-lock.yaml`. Developers and CI do not need a
-package token, a private registry, or operating-system credential setup.
-
-The package is allowed to bypass the normal seven-day dependency-age delay
-because it comes from the trusted 6529 Coordinator repository and npm records
-its GitHub provenance. Every version still needs a reviewed frontend pull
-request, an exact version pin, and the expected lockfile integrity before it is
-used here.
+Dependencies come from public npm; no package token or private registry is required.
 
 `6529 ci` is the normal deterministic installation path. It runs the secure
 pnpm install with `--frozen-lockfile`, so routine setup cannot change
@@ -72,11 +64,17 @@ are ambiguous between frozen setup and dependency mutation. The redundant
 `6529 install:frozen` alias is also rejected so `6529 ci` remains the single
 frozen-install vocabulary.
 
-The public-package policy checks the committed `.npmrc`, the exact Coordinator
-package version and integrity, the age exception, package command arguments,
-and package-manager environment overrides before pnpm starts. It rejects
+The public-package policy checks the committed `.npmrc`, public lockfile
+resolutions and integrity, the seven-day dependency-age rule, package command
+arguments, and package-manager environment overrides before pnpm starts. It rejects
 registry, credential, proxy, TLS, hook, and project-root overrides. Package
 traffic stays behind Socket Firewall; no registry bypass is needed.
+
+The removed release-request CLI has no special package pin, exemption or ban.
+Any future addition follows the ordinary public dependency policy and review
+process. Lockfile resolutions still require integrity hashes and public npm
+tarballs, and this repository requires the `importers`, `packages` and
+`snapshots` mappings. The seven-day age rule permits no package exceptions.
 
 To report or apply audit fixes, use the same secure wrapper path:
 
@@ -90,10 +88,6 @@ For an intentional dependency update, use:
 ```bash
 6529 update [package]
 ```
-
-Coordinator package upgrades remain deliberate. The exact package version,
-policy constants, and lockfile integrity must change together in a reviewed
-pull request.
 
 After bootstrap, prefer the bare `6529` command for day-to-day work while you
 are inside this repository. Outside the repo, `6529` should remain unavailable.
