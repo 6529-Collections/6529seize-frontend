@@ -1,6 +1,8 @@
 # Unify profile typography across phone, tablet, and desktop
 
-**Draft implementation plan; no application changes yet.** Audit date: 13 October 2026. This draft records the audit and proposed mapping for review before implementation.
+**Audit baseline: 13 October 2026.** The measurements and initial mapping below were recorded before implementation. The approved implementation now covers the header and Identity, Brain, Curation, Collected, xTDH, Subscriptions, and Proxy views.
+
+The final review retained the existing responsive profile name, badges, post content, and Collected chart typography. Identity score numbers remain semibold and Rep remains blue. Empty-state copy uses subdued supporting text. Existing buttons remain unchanged except for the explicitly requested Rep category action placement/compact size and Proxy tab presentation. These approved exceptions take precedence over the initial proposal below. Browser implementation checks cover 390, 768, and 1280px; native screenshots below remain baseline evidence, not a post-change native verification.
 
 [Mapping](#consolidated-audit-and-migration-map) · [Risks](#inconsistency-and-mobile-risk-register) · [Implementation](#implementation-recommendation-and-expected-footprint) · [Screenshots](#before-screenshot-index) · [Measured inventory](#detailed-measured-audit-and-role-mapping)
 
