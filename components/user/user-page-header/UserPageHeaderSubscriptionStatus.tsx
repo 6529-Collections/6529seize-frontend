@@ -277,7 +277,7 @@ function SubscriptionSubtle({
           </span>
           <span
             className={clsx(
-              "tw-inline-flex tw-flex-none tw-items-center tw-gap-1 tw-text-xs tw-font-medium tw-transition-colors",
+              "tw-inline-flex tw-flex-none tw-items-center tw-gap-1 tw-text-meta tw-font-medium tw-leading-4 tw-transition-colors",
               isUrgentTopUp
                 ? "group-focus-visible:tw-text-primary-200 desktop-hover:group-hover:tw-text-primary-200 tw-text-primary-300"
                 : "tw-text-iron-500 group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white"

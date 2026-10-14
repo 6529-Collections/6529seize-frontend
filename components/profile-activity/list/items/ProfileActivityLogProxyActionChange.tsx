@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  PROFILE_ACTIVITY_BODY,
+  PROFILE_ACTIVITY_EMPHASIS,
+} from "@/components/profile-activity/profileActivityTypography";
+
 import { useSearchParams } from "next/navigation";
 import type { ProfileActivityLogProxyActionChanged } from "@/entities/IProfile";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
@@ -50,14 +55,18 @@ export default function ProfileActivityLogProxyActionChange({
         handleOrWallet={handleOrWallet}
         isCurrentUser={isCurrentUser}
         tabTarget={tabTarget}
-        textClassName="tw-text-sm lg:tw-text-base tw-font-semibold tw-text-iron-100"
+        textClassName={`tw-text-sm lg:tw-text-base tw-font-semibold tw-text-iron-100 ${PROFILE_ACTIVITY_EMPHASIS}`}
       />
       <ProfileActivityLogItemAction action="proxy" />
-      <span className="tw-whitespace-nowrap tw-text-sm lg:tw-text-base tw-font-medium tw-text-iron-300">
+      <span
+        className={`tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300 lg:tw-text-base ${PROFILE_ACTIVITY_BODY}`}
+      >
         {PROFILE_PROXY_ACTION_LABELS[log.contents.type]}
       </span>
       <ProfileActivityLogItemAction action={getChangedParamName()} />
-      <span className="tw-whitespace-nowrap tw-text-sm lg:tw-text-base tw-font-medium tw-text-iron-300">
+      <span
+        className={`tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300 lg:tw-text-base ${PROFILE_ACTIVITY_BODY}`}
+      >
         {getChangeParamValue()}
       </span>
     </>

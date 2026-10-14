@@ -134,7 +134,10 @@ export default function UserPageXtdh({ profile }: UserPageXtdhProps) {
   }, [activeFilter, handleFilterChange]);
 
   return (
-    <div className="tailwind-scope tw-flex tw-flex-col tw-gap-6">
+    <div
+      className="tailwind-scope tw-group/profile-xtdh tw-flex tw-flex-col tw-gap-6"
+      data-typography="profile"
+    >
       <UserXtdhTestModeBanner />
       <UserPageXtdhStatsHeader
         profileId={statsProfileId}

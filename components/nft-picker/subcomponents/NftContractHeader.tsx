@@ -43,7 +43,7 @@ export function NftContractHeader({
 
       <div className="tw-flex tw-flex-col tw-gap-0.5 tw-overflow-hidden">
         <div className="tw-flex tw-items-center tw-gap-2">
-          <span className="tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
+          <span className="tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100 group-data-[typography=profile]/profile-xtdh:tw-text-[15px]">
             {contract.name ?? shortenAddress(contract.address)}
           </span>
           {contract.tokenType && (
@@ -53,7 +53,7 @@ export function NftContractHeader({
           )}
         </div>
 
-        <div className="tw-flex tw-items-center tw-gap-1.5 tw-truncate tw-text-xs tw-text-iron-400">
+        <div className="tw-flex tw-items-center tw-gap-1.5 tw-truncate tw-text-xs tw-text-iron-400 group-data-[typography=profile]/profile-xtdh:tw-text-meta group-data-[typography=profile]/profile-xtdh:tw-font-normal group-data-[typography=profile]/profile-xtdh:tw-text-iron-500 group-data-[typography=profile]/profile-xtdh:tw-tabular-nums">
           <span className="tw-font-mono">
             {shortenAddress(contract.address)}
           </span>

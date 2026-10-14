@@ -2156,6 +2156,7 @@
       ],
       "facts": [
         "The Profile Proxy tab exposes profile proxy relationships and actions.",
+        "All, Received, and Granted filters remain visible as tabs on phone, tablet, and desktop. Arrow keys switch tabs; Home and End select the first and last tab.",
         "Proxy features help a profile allow another account to perform supported actions without handing over the primary wallet.",
         "Current proxy action creation supports Allocate Rep and Allocate NIC actions with a granted Credit amount and read-only Spent total.",
         "Proxy action availability and profile rating behavior depend on whether the active proxy has the relevant Allocate Rep or Allocate NIC permission.",
@@ -6191,6 +6192,7 @@
       ],
       "facts": [
         "The profile Identity tab includes activity logs for REP and NIC where data is available.",
+        "Activity logs show three compact row placeholders while loading and No Activity Log when no entries match.",
         "Desktop activity logs support matter filters such as All, REP, and NIC plus direction filters such as All, Incoming, and Outgoing.",
         "Mobile splits REP activity under the Rep subview and NIC activity under the Identity subview."
       ],

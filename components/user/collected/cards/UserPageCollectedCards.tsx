@@ -84,9 +84,10 @@ export default function UserPageCollectedCards({
         <div className="tw-flow-root">
           <ul
             {...COLLECTED_CARDS_LIST_COMPATIBILITY_PROPS}
+            data-typography="collected"
             aria-label={listLabel}
             tabIndex={-1}
-            className={COLLECTED_CARDS_LIST_CLASS}
+            className={`tw-group/collected-cards ${COLLECTED_CARDS_LIST_CLASS}`}
           >
             {cards.map((card) => {
               const selKey = buildTransferKey({

@@ -127,7 +127,7 @@ function ProfileCurationPicker({
         type="button"
         onClick={onClick}
         disabled={isAnySubmitting || isSelected}
-        className={`tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-3 tw-rounded-xl tw-border-0 tw-text-left tw-font-medium tw-text-white tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 disabled:tw-cursor-default ${rowPadding} ${
+        className={`tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-3 tw-rounded-xl tw-border-0 tw-text-left tw-font-medium tw-text-iron-100 tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 disabled:tw-cursor-default ${rowPadding} ${
           isSelected
             ? "tw-bg-transparent"
             : "tw-bg-transparent desktop-hover:hover:tw-bg-white/5"
@@ -145,7 +145,7 @@ function ProfileCurationPicker({
   if (isLoading) {
     content = (
       <div
-        className={`tw-flex tw-items-center tw-gap-2 tw-py-3 tw-text-sm tw-text-iron-500 ${messagePadding}`}
+        className={`tw-flex tw-items-center tw-gap-2 tw-py-3 tw-text-meta tw-font-normal tw-text-iron-500 ${messagePadding}`}
       >
         <CircleLoader />
         <span>Loading curations...</span>
@@ -154,7 +154,7 @@ function ProfileCurationPicker({
   } else if (isError) {
     content = (
       <div
-        className={`tw-flex tw-flex-col tw-items-start tw-gap-3 tw-py-3 tw-text-sm tw-text-iron-500 ${messagePadding}`}
+        className={`tw-flex tw-flex-col tw-items-start tw-gap-3 tw-py-3 tw-text-meta tw-font-normal tw-text-iron-500 ${messagePadding}`}
       >
         <span>Unable to load curations.</span>
         <RetryButton isLoading={isFetching} onClick={onRetry} />
@@ -163,7 +163,7 @@ function ProfileCurationPicker({
   } else if (curations.length === 0) {
     content = (
       <p
-        className={`tw-mb-0 tw-py-3 tw-text-sm tw-text-iron-500 ${messagePadding}`}
+        className={`tw-mb-0 tw-py-3 tw-text-meta tw-font-normal tw-text-iron-500 ${messagePadding}`}
       >
         This wave has no curations yet.
       </p>
@@ -188,7 +188,7 @@ function ProfileCurationPicker({
     <section className={wrapperClassName}>
       <div className={`tw-flex tw-flex-col tw-gap-1 ${contentInset}`}>
         {!isMobileSheet && (
-          <p className="tw-mb-0 tw-px-3 tw-pb-1 tw-pt-2 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
+          <p className="tw-mb-0 tw-px-3 tw-pb-1 tw-pt-2 tw-text-label tw-font-medium tw-uppercase tw-text-iron-500">
             Profile curation
           </p>
         )}
@@ -216,6 +216,7 @@ function ProfileCurationPickerDialog({
   return (
     <MobileWrapperDialog
       title="Choose another Curation"
+      titleClassName="!tw-text-lg tw-font-semibold !tw-text-iron-100 md:!tw-text-xl"
       isOpen={isOpen}
       onClose={onClose}
       tabletModal
@@ -459,6 +460,8 @@ export default function UserPageProfileWave({
           }
         />
         <MobileWrapperConfirmationDialog
+          titleClassName="!tw-text-lg tw-font-semibold !tw-text-iron-100 md:!tw-text-xl"
+          messageClassName="tw-text-md tw-font-normal tw-leading-6 tw-text-iron-300"
           isOpen={isDisconnectOpen}
           onClose={() => setIsDisconnectOpen(false)}
           onConfirm={() => void removeOfficialWave()}
@@ -531,6 +534,7 @@ export default function UserPageProfileWave({
       {canManageOwnOfficialWave && (
         <MobileWrapperDialog
           title="Use another source Wave"
+          titleClassName="!tw-text-lg tw-font-semibold !tw-text-iron-100 md:!tw-text-xl"
           isOpen={isChangeWaveOpen}
           onClose={() => setIsChangeWaveOpen(false)}
           tabletModal
@@ -606,6 +610,8 @@ export default function UserPageProfileWave({
       )}
 
       <MobileWrapperConfirmationDialog
+        titleClassName="!tw-text-lg tw-font-semibold !tw-text-iron-100 md:!tw-text-xl"
+        messageClassName="tw-text-md tw-font-normal tw-leading-6 tw-text-iron-300"
         isOpen={isDisconnectOpen}
         onClose={() => setIsDisconnectOpen(false)}
         onConfirm={() => void removeOfficialWave()}
