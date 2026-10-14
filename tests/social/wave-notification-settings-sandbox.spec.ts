@@ -181,7 +181,7 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
               heading.closest(".mobile-wrapper-dialog")?.getBoundingClientRect()
                 .height
           )
-      ).toBe(originalHeight);
+      ).toBeLessThan(originalHeight / 2);
       await expect(
         choices.getByRole("button", { name: "Back", exact: true })
       ).toBeVisible();
@@ -198,6 +198,15 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
         about.getByRole("heading", { name: `About ${TITLE}`, exact: true })
       ).toBeVisible();
       await expect(bell).toBeFocused();
+      expect(
+        await about
+          .getByRole("heading", { name: `About ${TITLE}`, exact: true })
+          .evaluate(
+            (heading) =>
+              heading.closest(".mobile-wrapper-dialog")?.getBoundingClientRect()
+                .height
+          )
+      ).toBeCloseTo(originalHeight ?? 0, 0);
       await bell.tap();
       await page.goBack();
       await expect(choices).toHaveCount(0);

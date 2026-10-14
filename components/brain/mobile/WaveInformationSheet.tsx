@@ -55,7 +55,7 @@ export default function WaveInformationSheet({
       focusTitleOnOpen={notificationsOpen}
       showHeaderDivider={false}
       tall
-      fixedHeight
+      fixedHeight={!notificationsOpen}
       noPadding
       headerClassName="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-py-4"
     >

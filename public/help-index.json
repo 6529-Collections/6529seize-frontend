@@ -6835,7 +6835,7 @@
       ],
       "facts": [
         "The bell button opens wave notification preferences after a connected non-proxy profile has joined the wave.",
-        "On phone layouts, notification choices open as a subview inside the same About sheet without changing its height. Selecting an option, Back, the phone’s Back action, or Escape returns to About and restores focus to the bell. Close or tapping outside dismisses the whole sheet. About keeps its content and scroll position.",
+        "On phone layouts, notification choices open as a subview inside the same About sheet, which shrinks to fit the two options. Selecting an option, Back, the phone’s Back action, or Escape returns to About and restores focus to the bell. Close or tapping outside dismisses the whole sheet. Returning to About restores its full height, content, and scroll position.",
         "Desktop and tablet sidebars use an anchored notification menu with arrow-key navigation and Escape to return to the bell.",
         "The notification menu has a Broadcast mentions option with an @ icon; it controls notifications for both @all and @contributors.",
         "The notification menu has an All messages option for every-message notifications.",
