@@ -262,6 +262,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await gotoReady(page, `/${PROFILE_HANDLE}/xtdh?tab=granted`);
     const response = await fallbackResponse;
     expect(response.status()).toBe(200);
+    // The picker converts the lowercase grant address to its EIP-55 checksum.
     expect(response.request().postDataJSON()).toEqual({
       contracts: [
         {

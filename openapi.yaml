@@ -163,7 +163,9 @@ paths:
       description: >-
         Read-only fallback for desktop and web clients. Returns one entry per
         unique contract, preserving successful metadata when another lookup
-        fails. This legacy proxy is mounted outside the /api prefix.
+        fails. Lookups have a 20-second scheduling budget; entries that cannot
+        be scheduled receive per-contract errors. This legacy proxy is mounted
+        outside the /api prefix.
       operationId: getAlchemyContractMetadataBatch
       requestBody:
         required: true
@@ -183,7 +185,7 @@ paths:
         "413":
           description: More than 50 contracts requested
         "429":
-          description: API request limit exceeded
+          description: Global API request rate limit exceeded before route execution
         "500":
           description: Contract metadata provider configuration is unavailable
   /artwork-documentation/contexts/{id}/museum-records:
