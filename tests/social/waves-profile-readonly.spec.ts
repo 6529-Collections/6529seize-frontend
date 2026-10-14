@@ -111,6 +111,74 @@ function getProfileFeed(page: Page): Locator {
 }
 
 test.describe("Waves and profile read-only coverage @surface @medium @large @readonly", () => {
+  test("keeps the full subscription airdrop address available on touch and keyboard", async ({
+    page,
+    isMobile,
+  }) => {
+    await gotoReady(page, `/${PROFILE_HANDLE}/subscriptions`);
+    await expectProfileShell(page, "Subscriptions");
+    const address = page.getByRole("button", {
+      name: /^0x[0-9a-fA-F]{40}$/,
+    });
+    await expect(address).toBeVisible();
+    const fullAddress = (await address.textContent())!.trim();
+    if (isMobile) {
+      await address.tap();
+    } else {
+      await address.focus();
+    }
+    await expect(
+      page.getByRole("tooltip", { name: fullAddress })
+    ).toBeVisible();
+    await page
+      .getByRole("heading", { name: "Airdrop Address", exact: true })
+      .click();
+    await expect(page.getByRole("tooltip", { name: fullAddress })).toHaveCount(
+      0
+    );
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test("keeps subscription history defaults responsive and preserves user toggles", async ({
+    page,
+  }) => {
+    await gotoReadyWithApiResponse(
+      page,
+      `/${PROFILE_HANDLE}/subscriptions`,
+      (url) => url.pathname.includes("/subscriptions/consolidation/logs/")
+    );
+    await expectProfileShell(page, "Subscriptions");
+    const isPhone = (page.viewportSize()?.width ?? 0) < 640;
+    const disclosures = page
+      .getByRole("region", { name: "Subscription History", exact: true })
+      .locator("details");
+    await expect(disclosures).toHaveCount(3);
+    for (const disclosure of await disclosures.all()) {
+      await expect(disclosure).toHaveJSProperty("open", !isPhone);
+      await expect(disclosure).toHaveAttribute("aria-busy", "false");
+    }
+    const logs = disclosures.filter({ hasText: "Log History" });
+    const summary = page
+      .getByRole("region", { name: "Subscription History", exact: true })
+      .locator("summary")
+      .filter({ hasText: "Log History" });
+    await summary.click();
+    await expect(logs).toHaveJSProperty("open", isPhone);
+    const viewport = page.viewportSize()!;
+    await page.setViewportSize({
+      width: isPhone ? 900 : 390,
+      height: viewport.height,
+    });
+    await expect(logs).toHaveJSProperty("open", isPhone);
+    await page.setViewportSize(viewport);
+    await expect(logs).toHaveJSProperty("open", isPhone);
+    await summary.press("Enter");
+    await expect(logs).toHaveJSProperty("open", !isPhone);
+    await summary.press("Space");
+    await expect(logs).toHaveJSProperty("open", isPhone);
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("scrolls Main Stage Settings and validates live vote Activity in the app", async ({
     page,
   }, testInfo) => {
@@ -787,7 +855,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
 
   test("keeps wave identity compact and sharing reachable through details", async ({
     page,
-  }) => {
+  }, testInfo) => {
     const waveId = await getFirstWaveId(page);
     await gotoReady(page, `/waves/${waveId}`);
 
@@ -832,24 +900,48 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         exact: true,
       });
       if (await description.count()) {
-        await expect
-          .poll(() =>
-            description.evaluate((button) => {
-              const preview = button.querySelector("span > span");
-              const identity = button.parentElement;
-              if (!preview || !identity) {
-                return false;
+        let descriptionGeometry: unknown;
+        try {
+          await expect
+            .poll(
+              async () => {
+                descriptionGeometry = await description.evaluate((button) => {
+                  const preview = button.querySelector("span > span");
+                  const identity = button.parentElement;
+                  if (!preview || !identity) {
+                    return { fitsIdentity: false, hasTruncationCue: false };
+                  }
+                  const buttonBox = button.getBoundingClientRect();
+                  const identityBox = identity.getBoundingClientRect();
+                  const isTruncated =
+                    preview.scrollWidth > preview.clientWidth + 1;
+                  return {
+                    fitsIdentity: buttonBox.right <= identityBox.right + 1,
+                    hasTruncationCue:
+                      !isTruncated || button.querySelector("svg") !== null,
+                    buttonRight: buttonBox.right,
+                    identityRight: identityBox.right,
+                    previewWidth: preview.clientWidth,
+                    previewScrollWidth: preview.scrollWidth,
+                    fonts: document.fonts.status,
+                  };
+                });
+                return descriptionGeometry;
+              },
+              {
+                message:
+                  "Wave description must fit its identity and indicate truncation",
               }
-              const buttonBox = button.getBoundingClientRect();
-              const identityBox = identity.getBoundingClientRect();
-              const isTruncated = preview.scrollWidth > preview.clientWidth + 1;
-              return (
-                buttonBox.right <= identityBox.right + 1 &&
-                (!isTruncated || button.querySelector("svg") !== null)
-              );
-            })
-          )
-          .toBe(true);
+            )
+            .toMatchObject({ fitsIdentity: true, hasTruncationCue: true });
+        } finally {
+          await testInfo.attach("wave-description-geometry", {
+            body: Buffer.from(
+              JSON.stringify(descriptionGeometry ?? null, null, 2)
+            ),
+            contentType: "application/json",
+          });
+        }
       }
       if (await score.count()) {
         const headingBox = await header
@@ -931,7 +1023,10 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expectProfileTabLinks(page);
     const statements = page.getByRole("button", { name: /ID Statements/i });
     if (await statements.isVisible()) {
+      // The count replaces the server placeholder after this section hydrates.
+      await expect(statements).toHaveAccessibleName(/^\d[\d,]* ID Statements$/);
       await statements.click();
+      await expect(statements).toHaveAttribute("aria-pressed", "true");
     }
     await expect(
       page.getByRole("link", { name: "Wallet Checker" })
