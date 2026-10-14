@@ -159,9 +159,7 @@
       "ts-jest",
       "ts-morph",
       "baseline-browser-mapping",
-      "react-doctor",
-      // Invoked as a repository CLI through `6529 exec`, not imported by app code.
-      "@6529-collections/release-request"
+      "react-doctor"
     ],
 
     // Disable Jest and Playwright plugins so test-only usages are reported
