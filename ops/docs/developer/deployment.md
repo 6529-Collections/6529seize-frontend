@@ -4,11 +4,9 @@ Agents and developers deploy with ordinary merges and the repository's GitHub
 Actions workflows. Use the phase authorized by the user; a staging request does
 not authorize production.
 
-For a new staging or direct production release intent that includes frontend,
-follow [Coordinator release recording](../../skills/deploy-6529/SKILL.md#coordinator-release-recording)
-after authorization, scope, and exact release inputs are established, before any
-merge or deployment. Use the same recording outcome for retries, resumes, and
-promotion; the skill defines submission and failure handling.
+Frontend-only, backend-only, and coupled releases use the direct workflows below
+without submitting a Coordinator request or waiting for its recording workflow.
+Keep existing `.release-coordinator/` run and outbox records as historical evidence.
 
 | Target     | Frontend                                                                       | Backend                                                                                                         |
 | ---------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |

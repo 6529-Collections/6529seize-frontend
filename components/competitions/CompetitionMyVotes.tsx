@@ -115,7 +115,7 @@ export default function CompetitionMyVotes() {
 
   if (!viewer)
     return (
-      <p className="tw-p-4 tw-text-sm tw-text-iron-400">
+      <p className="tw-p-4 tw-text-sm tw-italic tw-text-iron-400">
         {t(locale, "competitions.signIn")}
       </p>
     );
@@ -151,7 +151,7 @@ export default function CompetitionMyVotes() {
         }
       />
       {!votes.length && (
-        <p className="tw-py-10 tw-text-center tw-text-sm tw-text-iron-500">
+        <p className="tw-py-10 tw-text-center tw-text-sm tw-italic tw-text-iron-500">
           {t(locale, "waves.myVotes.empty")}
         </p>
       )}

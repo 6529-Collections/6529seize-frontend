@@ -209,14 +209,17 @@ describe("navigation.helpers", () => {
       );
     });
 
-    it("keeps the dock on list routes and the messages/create route", () => {
+    it("keeps the dock on list routes", () => {
       expect(hidesMobileBottomNavigation({ pathname: "/waves" })).toBe(false);
       expect(hidesMobileBottomNavigation({ pathname: "/messages" })).toBe(
         false
       );
+    });
+
+    it("hides the dock while composing a new direct message", () => {
       expect(
         hidesMobileBottomNavigation({ pathname: "/messages/create" })
-      ).toBe(false);
+      ).toBe(true);
     });
   });
 

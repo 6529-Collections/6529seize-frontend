@@ -11,7 +11,7 @@ export function UserPageXtdhStatsHeaderError({
 }: Readonly<UserPageXtdhStatsHeaderErrorProps>) {
   return (
     <section className="tw-rounded-2xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-5 tw-text-center tw-shadow-md tw-shadow-black/30">
-      <p className="tw-text-sm tw-text-red-400" role="alert" aria-live="polite">
+      <p className="tw-text-[15px] tw-font-normal tw-text-red-400" role="alert" aria-live="polite">
         {message}
       </p>
       <Button

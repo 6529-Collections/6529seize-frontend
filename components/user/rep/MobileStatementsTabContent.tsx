@@ -29,7 +29,7 @@ export default function MobileStatementsTabContent({
             canEditStatements ? (
               <UserPageIdentityStatementsAddButton
                 profile={profile}
-                size="sm"
+                size="xs"
               />
             ) : undefined
           }

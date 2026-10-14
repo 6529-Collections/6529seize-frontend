@@ -30,7 +30,7 @@ export function GrantedListEmptyState({
   );
 
   return (
-    <div className="[&>div>span:first-child]:tw-text-sm [&>div>span:first-child]:tw-font-medium [&>div>span:first-child]:tw-text-iron-400 [&>div>span:last-child]:tw-text-[13px] [&>div>span:last-child]:tw-italic [&>div>span:last-child]:tw-text-iron-500 [&>div]:tw-items-start [&>div]:tw-border-0 [&>div]:tw-bg-iron-900/50 [&>div]:tw-p-6 [&>div]:tw-text-left">
+    <div className="[&>div>span:first-child]:tw-text-sm [&>div>span:first-child]:tw-font-medium [&>div>span:first-child]:tw-text-iron-400 [&>div>span:last-child]:tw-text-meta [&>div>span:last-child]:tw-font-normal [&>div>span:last-child]:tw-text-iron-500 [&>div]:tw-items-start [&>div]:tw-border-0 [&>div]:tw-bg-iron-900/50 [&>div]:tw-p-6 [&>div]:tw-text-left">
       <EmptyState title={title} message={message} />
     </div>
   );

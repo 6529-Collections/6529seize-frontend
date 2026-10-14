@@ -13,7 +13,7 @@ export function GrantedListError({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-2">
-      <p className="tw-text-sm tw-text-red-400 tw-m-0" role="alert">
+      <p className="tw-text-sm tw-text-red-400 tw-m-0 group-data-[typography=profile]/profile-xtdh:tw-text-[15px] group-data-[typography=profile]/profile-xtdh:tw-font-normal" role="alert">
         {displayMessage}
       </p>
       <Button

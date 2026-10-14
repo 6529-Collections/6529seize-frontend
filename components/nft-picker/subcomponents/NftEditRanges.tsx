@@ -139,12 +139,22 @@ export function NftEditRanges({
     <div className="tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-primary-500/30 tw-bg-primary-500/5 tw-p-4">
       <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-flex-wrap sm:tw-items-start sm:tw-justify-between">
         <div className="tw-flex tw-w-full tw-flex-col tw-gap-2">
-          <span className="tw-text-base tw-font-semibold tw-text-white">
+          <span
+            className={`tw-text-base tw-font-semibold tw-text-white ${
+              hasTokens
+                ? ""
+                : "group-data-[typography=profile]/profile-xtdh:tw-text-sm group-data-[typography=profile]/profile-xtdh:tw-font-medium group-data-[typography=profile]/profile-xtdh:tw-text-iron-400"
+            }`}
+          >
             {selectionLabel}
           </span>
           <div className="tw-flex tw-flex-col tw-gap-2 lg:tw-flex-row lg:tw-items-center">
             <span
               className={`tw-flex-1 tw-break-words ${
+                hasTokens
+                  ? ""
+                  : "group-data-[typography=profile]/profile-xtdh:tw-text-meta group-data-[typography=profile]/profile-xtdh:tw-font-normal group-data-[typography=profile]/profile-xtdh:tw-text-iron-500"
+              } ${
                 isFlat
                   ? "tw-text-sm tw-font-medium tw-text-iron-100"
                   : "tw-font-mono tw-text-xs tw-text-iron-200"

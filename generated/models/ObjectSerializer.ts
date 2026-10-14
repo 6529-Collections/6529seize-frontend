@@ -10,6 +10,10 @@ export * from '../models/ApiAddReactionToDropRequest';
 export * from '../models/ApiAggregatedActivity';
 export * from '../models/ApiAggregatedActivityMemes';
 export * from '../models/ApiAggregatedActivityPage';
+export * from '../models/ApiAlchemyContractMetadataBatchRequest';
+export * from '../models/ApiAlchemyContractMetadataBatchResponse';
+export * from '../models/ApiAlchemyContractMetadataRequest';
+export * from '../models/ApiAlchemyContractMetadataResult';
 export * from '../models/ApiArchiveProfileCmsPackageRequest';
 export * from '../models/ApiArtistNameItem';
 export * from '../models/ApiArtworkAssetC2paResult';
@@ -272,6 +276,7 @@ export * from '../models/ApiConsolidatedTdhMetricsContent';
 export * from '../models/ApiConsolidatedTdhMetricsPage';
 export * from '../models/ApiConsolidatedTdhMetricsSort';
 export * from '../models/ApiConsolidatedTdhView';
+export * from '../models/ApiConsolidationPolicy';
 export * from '../models/ApiContentModerationAuditEntry';
 export * from '../models/ApiContentModerationBlockActivityItem';
 export * from '../models/ApiContentModerationDropDecisionRequest';
@@ -905,6 +910,10 @@ import { ApiAddReactionToDropRequest } from '../models/ApiAddReactionToDropReque
 import { ApiAggregatedActivity } from '../models/ApiAggregatedActivity';
 import { ApiAggregatedActivityMemes } from '../models/ApiAggregatedActivityMemes';
 import { ApiAggregatedActivityPage } from '../models/ApiAggregatedActivityPage';
+import { ApiAlchemyContractMetadataBatchRequest } from '../models/ApiAlchemyContractMetadataBatchRequest';
+import { ApiAlchemyContractMetadataBatchResponse } from '../models/ApiAlchemyContractMetadataBatchResponse';
+import { ApiAlchemyContractMetadataRequest , ApiAlchemyContractMetadataRequestChainEnum   } from '../models/ApiAlchemyContractMetadataRequest';
+import { ApiAlchemyContractMetadataResult , ApiAlchemyContractMetadataResultChainEnum      } from '../models/ApiAlchemyContractMetadataResult';
 import { ApiArchiveProfileCmsPackageRequest } from '../models/ApiArchiveProfileCmsPackageRequest';
 import { ApiArtistNameItem } from '../models/ApiArtistNameItem';
 import { ApiArtworkAssetC2paResult, ApiArtworkAssetC2paResultStatusEnum        , ApiArtworkAssetC2paResultTrustEnum      , ApiArtworkAssetC2paResultIntegrityEnum   } from '../models/ApiArtworkAssetC2paResult';
@@ -1167,6 +1176,7 @@ import { ApiConsolidatedTdhMetricsContent } from '../models/ApiConsolidatedTdhMe
 import { ApiConsolidatedTdhMetricsPage } from '../models/ApiConsolidatedTdhMetricsPage';
 import { ApiConsolidatedTdhMetricsSort } from '../models/ApiConsolidatedTdhMetricsSort';
 import { ApiConsolidatedTdhView } from '../models/ApiConsolidatedTdhView';
+import { ApiConsolidationPolicy } from '../models/ApiConsolidationPolicy';
 import { ApiContentModerationAuditEntry } from '../models/ApiContentModerationAuditEntry';
 import { ApiContentModerationBlockActivityItem , ApiContentModerationBlockActivityItemActionEnum           } from '../models/ApiContentModerationBlockActivityItem';
 import { ApiContentModerationDropDecisionRequest, ApiContentModerationDropDecisionRequestDecisionEnum    } from '../models/ApiContentModerationDropDecisionRequest';
@@ -1803,6 +1813,8 @@ let primitives = [
 
 let enumsMap: Set<string> = new Set<string>([
     "AcceptActionRequestActionEnum",
+    "ApiAlchemyContractMetadataRequestChainEnum",
+    "ApiAlchemyContractMetadataResultChainEnum",
     "ApiArtworkAssetC2paResultStatusEnum",
     "ApiArtworkAssetC2paResultTrustEnum",
     "ApiArtworkAssetC2paResultIntegrityEnum",
@@ -2086,6 +2098,10 @@ let typeMap: {[index: string]: any} = {
     "ApiAggregatedActivity": ApiAggregatedActivity,
     "ApiAggregatedActivityMemes": ApiAggregatedActivityMemes,
     "ApiAggregatedActivityPage": ApiAggregatedActivityPage,
+    "ApiAlchemyContractMetadataBatchRequest": ApiAlchemyContractMetadataBatchRequest,
+    "ApiAlchemyContractMetadataBatchResponse": ApiAlchemyContractMetadataBatchResponse,
+    "ApiAlchemyContractMetadataRequest": ApiAlchemyContractMetadataRequest,
+    "ApiAlchemyContractMetadataResult": ApiAlchemyContractMetadataResult,
     "ApiArchiveProfileCmsPackageRequest": ApiArchiveProfileCmsPackageRequest,
     "ApiArtistNameItem": ApiArtistNameItem,
     "ApiArtworkAssetC2paResult": ApiArtworkAssetC2paResult,
@@ -2326,6 +2342,7 @@ let typeMap: {[index: string]: any} = {
     "ApiConsolidatedTdh": ApiConsolidatedTdh,
     "ApiConsolidatedTdhMetrics": ApiConsolidatedTdhMetrics,
     "ApiConsolidatedTdhMetricsPage": ApiConsolidatedTdhMetricsPage,
+    "ApiConsolidationPolicy": ApiConsolidationPolicy,
     "ApiContentModerationAuditEntry": ApiContentModerationAuditEntry,
     "ApiContentModerationBlockActivityItem": ApiContentModerationBlockActivityItem,
     "ApiContentModerationDropDecisionRequest": ApiContentModerationDropDecisionRequest,

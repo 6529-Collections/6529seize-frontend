@@ -70,8 +70,8 @@ Profile access stays in the app drawer/account surfaces.
   `/meme-lab`, and `/rememes`.
 - `Home` is active only on `/` when no `wave`/`view` override is active.
 - `Notifications` is active only on `/notifications`.
-- `Messages` is active on `/messages` and `/messages/*` (for example
-  `/messages/create`).
+- `Messages` is active on the `/messages` list. The focused `/messages/create`
+  screen hides the bar so the recipient picker and bottom action have room.
 - `Messages` and `Notifications` unread dots show only when a connected profile
   has unread items.
 - On non-stream routes (for example `/network`, `/the-memes`),

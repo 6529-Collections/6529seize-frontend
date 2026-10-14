@@ -577,7 +577,7 @@ export default function UserPageSubscriptionsTopUp({
                   placeholder="count"
                   aria-label="Custom card count"
                   value={memeCount}
-                  className="tw-pointer-events-auto tw-min-h-10 tw-w-36 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-black/30 tw-px-2.5 tw-py-1 tw-text-sm tw-text-iron-100 tw-transition [color-scheme:dark] placeholder:tw-text-iron-600 placeholder:tw-opacity-100 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/25"
+                  className="tw-pointer-events-auto tw-min-h-10 tw-w-36 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-black/30 tw-px-2.5 tw-py-1 tw-text-base tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-100 md:desktop-hover:tw-text-sm tw-transition [color-scheme:dark] placeholder:tw-text-iron-600 placeholder:tw-opacity-100 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/25"
                   onFocus={() => {
                     setSelectedOption("other");
                   }}
