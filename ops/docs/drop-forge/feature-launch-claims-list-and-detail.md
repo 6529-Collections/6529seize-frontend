@@ -277,3 +277,23 @@ minting closes, **Deliver outstanding allocations after minting** requests a
 reviewed delivery. Neither operation credits recipients until execution is proven.
 Unknown evidence or changed claim configuration keeps the operation blocked.
 Failures are posted to the operations wave and tag `@dropforgers6529`.
+
+## Automatic phase groups
+
+The automatic timeline groups opening initialization, artist/team and Phase 0
+airdrops together, then each phase update with its subscriber airdrops. Public
+configuration, metadata updates and post-mint Research have separate groups.
+Every action checks its own readiness: matching on-chain configuration and
+confirmed manual deliveries show **Skipped — already completed on-chain**.
+A failed funding, permission or initialization check shows the error on that
+action and retries automatically while its execution window remains open.
+An earlier failed or expired action does not stop later groups from checking
+readiness. Outstanding deliveries remain visible and are never assumed complete.
+
+Wave reports include successful transactions and their links, each failed attempt
+and error, and detected-complete skips. Missed windows are reported once and
+need operator reconciliation. An uncertain signed transaction still holds the
+operational nonce until its winner is proved; explicit Pause still stops new
+work. Research waits for outstanding fixed allocations to be reconciled.
+Manual airdrop completion requires actual confirmed mint events matching the
+recipient addresses and quantities; toggles or total supply alone are not proof.

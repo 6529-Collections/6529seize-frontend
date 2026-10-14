@@ -15,6 +15,17 @@ import { ApiDropForgeRecovery } from '../models/ApiDropForgeRecovery';
 import { HttpFile } from '../http/http';
 
 export class ApiDropForgeAction {
+    /**
+    * Scheduled phase group, metadata, or research; completion remains per action
+    */
+    'group'?: string;
+    'attempt_count'?: number;
+    'attempt_error'?: string | null;
+    'retry_at'?: number | null;
+    /**
+    * Completed work detected on-chain and skipped without another transaction
+    */
+    'observed'?: boolean;
     'recovery'?: ApiDropForgeRecovery;
     'label'?: string;
     'id': string;
@@ -35,6 +46,36 @@ export class ApiDropForgeAction {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "group",
+            "baseName": "group",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "attempt_count",
+            "baseName": "attempt_count",
+            "type": "number",
+            "format": ""
+        },
+        {
+            "name": "attempt_error",
+            "baseName": "attempt_error",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "retry_at",
+            "baseName": "retry_at",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "observed",
+            "baseName": "observed",
+            "type": "boolean",
+            "format": ""
+        },
         {
             "name": "recovery",
             "baseName": "recovery",

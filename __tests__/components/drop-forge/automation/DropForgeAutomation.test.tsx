@@ -1,4 +1,8 @@
 import {
+  ApiDropForgeActionKindEnum as ActionKind,
+  ApiDropForgeActionStateEnum as ActionState,
+} from "@/generated/models/ApiDropForgeAction";
+import {
   act,
   fireEvent,
   render,
@@ -422,4 +426,58 @@ it("leaves the waiting job intact when the operator cancels authentication", asy
   expect(
     screen.getByRole("button", { name: "Sign in to resume" })
   ).toBeEnabled();
+});
+
+it("groups phase actions and shows independent errors, skips and later pending work", async () => {
+  const current = launch(true);
+  const initialized = current.actions[0];
+  if (!initialized) throw new Error("Initialization fixture missing");
+  initialized.group = "phase-0";
+  initialized.observed = true;
+  current.phases = [
+    { name: "Phase 0", start: 10, end: 20, root: "root", price_wei: "0" },
+    { name: "Phase 1", start: 30, end: 40, root: "next", price_wei: "0" },
+  ];
+  current.actions.push(
+    {
+      ...initialized,
+      id: "airdrop-0",
+      label: "Phase 0 subscriber airdrops",
+      kind: ActionKind.Airdrop,
+      state: ActionState.Pending,
+      observed: false,
+      attempt_error: "Insufficient gas funds",
+      attempt_count: 1,
+    },
+    {
+      ...initialized,
+      id: "phase-1",
+      kind: ActionKind.Update,
+      state: ActionState.Pending,
+      group: "phase-1",
+      phase: 1,
+      observed: false,
+    }
+  );
+  jest.mocked(getForgeLaunch).mockResolvedValue(current);
+  renderUI(
+    <DropForgeAutomationStatus
+      claimId={123}
+      onConfirmedWork={() => undefined}
+    />
+  );
+  expect(
+    await screen.findByRole("region", {
+      name: "Opening: initialization and Phase 0 airdrops",
+    })
+  ).toBeInTheDocument();
+  expect(screen.getByRole("region", { name: "Phase 1" })).toBeInTheDocument();
+  expect(
+    screen.getByText("Skipped — already completed on-chain")
+  ).toBeInTheDocument();
+  expect(screen.getByRole("alert")).toHaveTextContent("Insufficient gas funds");
+  expect(screen.getByText("Pending")).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Pause automatic execution" })
+  ).toBeInTheDocument();
 });

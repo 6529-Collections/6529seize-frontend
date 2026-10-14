@@ -1,9 +1,6 @@
 "use client";
-import DropForgeTransactionRecovery from "./DropForgeTransactionRecovery";
-import {
-  ApiDropForgeActionKindEnum as ActionKind,
-  ApiDropForgeActionStateEnum as ActionState,
-} from "@/generated/models/ApiDropForgeAction";
+import DropForgeActionGroups from "./DropForgeActionGroups";
+import { ApiDropForgeActionStateEnum as ActionState } from "@/generated/models/ApiDropForgeAction";
 import { useEffect, useEffectEvent, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
@@ -22,19 +19,6 @@ import type { ApiDropForgeLaunch } from "@/generated/models/ApiDropForgeLaunch";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-const explorers: Partial<Record<number, string>> = {
-  1: "https://etherscan.io",
-  11155111: "https://sepolia.etherscan.io",
-};
-function actionLabel(state: ActionState) {
-  if (state === ActionState.Confirmed) return "dropForge.actionDone" as const;
-  if (state === ActionState.Cancelled)
-    return "dropForge.actionCancelled" as const;
-  if (state === ActionState.Failed) return "dropForge.actionFailed" as const;
-  return state === ActionState.Signed
-    ? ("dropForge.actionSubmitted" as const)
-    : ("dropForge.actionPending" as const);
-}
 export default function DropForgeAutomationStatus({
   claimId,
   onConfirmedWork,
@@ -61,7 +45,6 @@ export default function DropForgeAutomationStatus({
     if (confirmed) confirmedWork();
   }, [confirmed]);
   if (!launch) return null;
-  const explorer = explorers[launch.chain_id];
   async function control(resume: boolean) {
     if (!launch) return;
     setBusy(true);
@@ -115,37 +98,7 @@ export default function DropForgeAutomationStatus({
           {error ?? launch.error}
         </p>
       )}
-      <ol className="tw-list-none tw-space-y-2 tw-p-0">
-        {launch.actions.map((action) => (
-          <li
-            key={action.id}
-            className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-sm tw-text-iron-200"
-          >
-            <span>
-              {action.label ??
-                (action.kind === ActionKind.Initialize
-                  ? t(locale, "dropForge.initialized")
-                  : launch.phases[action.phase]?.name)}
-            </span>
-            <span>{t(locale, actionLabel(action.state))}</span>
-            {action.hash && explorer && (
-              <a
-                target="_blank"
-                rel="noopener noreferrer"
-                className="tw-text-primary-300"
-                href={`${explorer}/tx/${action.hash}`}
-              >
-                {t(locale, "dropForge.transaction")}
-              </a>
-            )}
-            <DropForgeTransactionRecovery
-              launch={launch}
-              action={action}
-              onChange={() => query.refetch()}
-            />
-          </li>
-        ))}
-      </ol>
+      <DropForgeActionGroups launch={launch} onChange={() => query.refetch()} />
       {launch.manual_pending && (
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
           <label>

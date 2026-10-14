@@ -29136,6 +29136,25 @@ components:
         - deadline
         - recipients
       properties:
+        group:
+          type: string
+          description: >-
+            Scheduled phase group, metadata, or research; completion remains per
+            action
+        attempt_count:
+          type: integer
+        attempt_error:
+          type: string
+          nullable: true
+        retry_at:
+          type: integer
+          format: int64
+          nullable: true
+        observed:
+          type: boolean
+          description: >-
+            Completed work detected on-chain and skipped without another
+            transaction
         recovery:
           $ref: "#/components/schemas/ApiDropForgeRecovery"
         label:

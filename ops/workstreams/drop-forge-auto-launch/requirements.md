@@ -207,3 +207,12 @@ lists, Craft Launch with immediate initialization, metadata-only Update Claim,
 and coordinated manual transaction evidence. There is no per-drop configuration
 or arm-time picker. See the updated Craft-to-Launch flow for current behavior.
 Workers remain disabled by default and no deployment is included.
+
+## Grouped Launch status
+
+Render opening, later phase, Public, metadata and Research groups while retaining
+per-action progress, transaction links, readiness errors and confirmed manual
+skips. Funding/permission failures retry automatically within the action window;
+earlier failed groups do not require Resume before later groups become eligible.
+Explicit Pause, manual leases and uncertain signed nonce recovery retain their
+safety boundaries. The wave reports execution, failed attempts and detected skips.
