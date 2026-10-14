@@ -2250,7 +2250,10 @@
         "tdh meaning",
         "tdh rate",
         "hodl rate",
-        "total dynamic head"
+        "total dynamic head",
+        "tdh rank ties",
+        "tdh tie-break",
+        "same TDH different ranks"
       ],
       "keywords": [
         "tdh",
@@ -2269,7 +2272,11 @@
         "category",
         "sets",
         "leaderboard",
-        "levels"
+        "levels",
+        "rank",
+        "ranking",
+        "ties",
+        "tie-break"
       ],
       "facts": [
         "TDH means Total Days Held.",
@@ -2295,7 +2302,13 @@
         "Distinct Gradients add the configured per-token bonus up to the configured count limit. The page derives the eventual rounded multiplier ceiling from the full season schedule, additional-set series and Gradient limit.",
         "The displayed future ceiling is conditional: future cards must become eligible and can make a previously complete collection incomplete.",
         "Rates are rounded before wallet and token-level TDH rounding; consolidated wallets preserve qualifying internal-transfer ages, recompute the boost, and sum per-token rounded final contributions.",
-        "TDH is used throughout the network, including profiles, leaderboards, Levels, groups, Network views, Waves voting and eligibility, and public data."
+        "TDH is used throughout the network, including profiles, leaderboards, Levels, groups, Network views, Waves voting and eligibility, and public data.",
+        "TDH ranks are consecutive positions starting at 1; equal displayed TDH does not give wallets or consolidations a shared rank.",
+        "Overall TDH ranks compare boosted TDH, unboosted TDH, Gradients TDH and NextGen TDH, in that order, highest first.",
+        "Memes, Gradients and NextGen collection ranks compare that collection's boosted TDH, unboosted TDH and NFT balance, then total NFT balance, highest first. Owners of an individual Meme card compare that card's TDH, then total boosted TDH, highest first.",
+        "A complete tie uses the lowercase wallet address in ascending order, or the consolidation key made from lowercase wallet addresses sorted in ascending order and joined with hyphens. Backend and native 6529 Desktop use the same ranking rules; tie-breaks change positions without changing holdings, TDH scores or boosts.",
+        "Individual Gradient and NextGen token rankings compare token TDH highest first, then numeric token ID lowest first.",
+        "A collection rank of -1 means there is no positive boosted TDH for that collection. Empty singleton wallets are omitted from TDH rankings; wallets with eligible NFTs or membership in a multi-wallet consolidation remain included even when TDH is zero."
       ],
       "canonical_path": "/network/tdh",
       "related_paths": [
@@ -6105,7 +6118,7 @@
         "On mobile, the add-statements sheet presents four compact statement groups, keeps an optional and permanently public notice visible throughout the Add flow, and provides header close, back, backdrop, Escape, and swipe-down dismissal paths.",
         "On mobile web and Capacitor, deeper add-statement forms stay above the software keyboard and keep their focused fields and Save/Cancel actions reachable by scrolling.",
         "Consolidated wallet rows expand to show the full address and ENS name when available as full-field copy controls, plus labeled mobile links to Etherscan and OpenSea.",
-        "The Addresses heading shows a right-aligned count of how many of the 4 allowed wallets the profile has. Add another wallet shares an equal-width row with Wallet Checker for the connected profile owner when no proxy profile is active, a primary or consolidated wallet address is available, and the profile has fewer than 4 wallets; it opens the guided Build a Consolidation flow at /safe-collecting/build-consolidation. At 4 wallets the owner sees a maximum-reached note instead. It is separate from Add for identity statements.",
+        "The profile’s Addresses heading shows a right-aligned count of how many of the 4 allowed wallets the profile has. Add another wallet shares an equal-width row with Wallet Checker for the connected profile owner when no proxy profile is active, a primary or consolidated wallet address is available, and the profile has fewer than 4 wallets; it opens the guided Build a Consolidation flow at /safe-collecting/build-consolidation. At 4 wallets the owner sees a maximum-reached note instead. It is separate from Add for identity statements.",
         "URL-capable statement rows open from the row and show a right-aligned external-link cue; Copy remains an independent inline action that does not open the destination, while eligible owners can also Delete.",
         "NFT Accounts includes Ninfa and Other. Other asks for a display name such as AOTM and a secure HTTPS URL, then shows the display name with the destination hostname.",
         "New NFT account links must use HTTPS, cannot contain URL credentials, reject duplicate normalized URLs, and are limited to 20 per profile; Ninfa links must use ninfa.io or a ninfa.io subdomain.",

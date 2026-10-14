@@ -72,7 +72,9 @@ jest.mock("@/components/header/header-search/HeaderSearchModal", () => () => (
 
 jest.mock("@/components/waves/header/WaveDescriptionPopover", () => ({
   __esModule: true,
-  default: ({ children }: { children: ReactNode }) => <>{children}</>,
+  default: ({ children }: { children: ReactNode }) => (
+    <span data-testid="wave-description-preview">{children}</span>
+  ),
 }));
 
 jest.mock("@/components/waves/WaveTrustSignals", () => ({
@@ -394,5 +396,70 @@ describe("MyStreamWaveTabsHeader", () => {
     expect(openToggle).toHaveAttribute("aria-expanded", "true");
     expect(openToggle).toHaveAttribute("aria-pressed", "true");
     expect(openToggle).toHaveAttribute("aria-controls", "brain-right-sidebar");
+  });
+
+  it.each([
+    [
+      "an image",
+      "![Seize](https://d3lqz0a4bldqgf.cloudfront.net/drops/author_x/y/image.png)",
+    ],
+    [
+      "a 6529 drop link",
+      "https://test.6529.io/waves/da16201a-f4d0-40cf-b888-9f3a4a86a894?serialNo=1518681",
+    ],
+  ])(
+    "hides the description preview when the pinned drop is only %s",
+    (_label, content) => {
+      render(
+        <MyStreamWaveTabsHeader
+          wave={{
+            ...wave,
+            description_drop: { id: "drop-1", parts: [{ content }] },
+          }}
+          activeContentTab={MyStreamWaveTab.CHAT}
+          setActiveContentTab={jest.fn()}
+          onSelectCuration={jest.fn()}
+          isCompact={false}
+          showBackButton={false}
+          headerActionsTooltipId="header-actions"
+          headerClassName="tw-flex"
+          actionsClassName="tw-flex"
+        />
+      );
+
+      expect(screen.queryByTestId("wave-description-preview")).toBeNull();
+      expect(screen.queryByText(/https?:/)).toBeNull();
+    }
+  );
+
+  it("shows the readable text of a pinned drop without its image URL", () => {
+    render(
+      <MyStreamWaveTabsHeader
+        wave={{
+          ...wave,
+          description_drop: {
+            id: "drop-1",
+            parts: [
+              {
+                content:
+                  "Validator costs ![Seize](https://d3lqz0a4bldqgf.cloudfront.net/drops/author_x/y/image.png)",
+              },
+            ],
+          },
+        }}
+        activeContentTab={MyStreamWaveTab.CHAT}
+        setActiveContentTab={jest.fn()}
+        onSelectCuration={jest.fn()}
+        isCompact={false}
+        showBackButton={false}
+        headerActionsTooltipId="header-actions"
+        headerClassName="tw-flex"
+        actionsClassName="tw-flex"
+      />
+    );
+
+    expect(screen.getByTestId("wave-description-preview")).toHaveTextContent(
+      /^Validator costs$/
+    );
   });
 });

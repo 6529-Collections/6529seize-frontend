@@ -2243,7 +2243,10 @@
         "tdh meaning",
         "tdh rate",
         "hodl rate",
-        "total dynamic head"
+        "total dynamic head",
+        "tdh rank ties",
+        "tdh tie-break",
+        "same TDH different ranks"
       ],
       "keywords": [
         "tdh",
@@ -2262,7 +2265,11 @@
         "category",
         "sets",
         "leaderboard",
-        "levels"
+        "levels",
+        "rank",
+        "ranking",
+        "ties",
+        "tie-break"
       ],
       "facts": [
         "TDH means Total Days Held.",
@@ -2288,7 +2295,13 @@
         "Distinct Gradients add the configured per-token bonus up to the configured count limit. The page derives the eventual rounded multiplier ceiling from the full season schedule, additional-set series and Gradient limit.",
         "The displayed future ceiling is conditional: future cards must become eligible and can make a previously complete collection incomplete.",
         "Rates are rounded before wallet and token-level TDH rounding; consolidated wallets preserve qualifying internal-transfer ages, recompute the boost, and sum per-token rounded final contributions.",
-        "TDH is used throughout the network, including profiles, leaderboards, Levels, groups, Network views, Waves voting and eligibility, and public data."
+        "TDH is used throughout the network, including profiles, leaderboards, Levels, groups, Network views, Waves voting and eligibility, and public data.",
+        "TDH ranks are consecutive positions starting at 1; equal displayed TDH does not give wallets or consolidations a shared rank.",
+        "Overall TDH ranks compare boosted TDH, unboosted TDH, Gradients TDH and NextGen TDH, in that order, highest first.",
+        "Memes, Gradients and NextGen collection ranks compare that collection's boosted TDH, unboosted TDH and NFT balance, then total NFT balance, highest first. Owners of an individual Meme card compare that card's TDH, then total boosted TDH, highest first.",
+        "A complete tie uses the lowercase wallet address in ascending order, or the consolidation key made from lowercase wallet addresses sorted in ascending order and joined with hyphens. Backend and native 6529 Desktop use the same ranking rules; tie-breaks change positions without changing holdings, TDH scores or boosts.",
+        "Individual Gradient and NextGen token rankings compare token TDH highest first, then numeric token ID lowest first.",
+        "A collection rank of -1 means there is no positive boosted TDH for that collection. Empty singleton wallets are omitted from TDH rankings; wallets with eligible NFTs or membership in a multi-wallet consolidation remain included even when TDH is zero."
       ],
       "canonical_path": "/network/tdh",
       "related_paths": [
@@ -6098,7 +6111,7 @@
         "On mobile, the add-statements sheet presents four compact statement groups, keeps an optional and permanently public notice visible throughout the Add flow, and provides header close, back, backdrop, Escape, and swipe-down dismissal paths.",
         "On mobile web and Capacitor, deeper add-statement forms stay above the software keyboard and keep their focused fields and Save/Cancel actions reachable by scrolling.",
         "Consolidated wallet rows expand to show the full address and ENS name when available as full-field copy controls, plus labeled mobile links to Etherscan and OpenSea.",
-        "The Addresses heading shows a right-aligned count of how many of the 4 allowed wallets the profile has. Add another wallet shares an equal-width row with Wallet Checker for the connected profile owner when no proxy profile is active, a primary or consolidated wallet address is available, and the profile has fewer than 4 wallets; it opens the guided Build a Consolidation flow at /safe-collecting/build-consolidation. At 4 wallets the owner sees a maximum-reached note instead. It is separate from Add for identity statements.",
+        "The profile’s Addresses heading shows a right-aligned count of how many of the 4 allowed wallets the profile has. Add another wallet shares an equal-width row with Wallet Checker for the connected profile owner when no proxy profile is active, a primary or consolidated wallet address is available, and the profile has fewer than 4 wallets; it opens the guided Build a Consolidation flow at /safe-collecting/build-consolidation. At 4 wallets the owner sees a maximum-reached note instead. It is separate from Add for identity statements.",
         "URL-capable statement rows open from the row and show a right-aligned external-link cue; Copy remains an independent inline action that does not open the destination, while eligible owners can also Delete.",
         "NFT Accounts includes Ninfa and Other. Other asks for a display name such as AOTM and a secure HTTPS URL, then shows the display name with the destination hostname.",
         "New NFT account links must use HTTPS, cannot contain URL credentials, reject duplicate normalized URLs, and are limited to 20 per profile; Ninfa links must use ninfa.io or a ninfa.io subdomain.",
@@ -10778,52 +10791,6 @@
       "brief_answer": "For the **{{percentage}}%** recovery range in **6529 Desktop**, check the TDH worker **Logs** and share the redacted error. Let any active work finish; do not widen reconciliation or start a reset because calculation failed. Once calculation completes successfully, do TDH and Merkle Root now match 6529.io at the same Last Block?\n\nRange: {{percentage}}% of blocks {{minimum_block}}–{{checkpoint}}.",
       "reconciliation_min_block": 13360860,
       "answer_links": []
-    },
-    {
-      "id": "waves.signed-messages",
-      "kind": "workflow",
-      "title": "Signed messages and the Devices tab",
-      "aliases": [
-        "signed messages",
-        "turn on signed messages",
-        "device signature",
-        "devices tab",
-        "can now post as you",
-        "revoke device",
-        "signed by its author",
-        "not signed by its author"
-      ],
-      "keywords": [
-        "waves",
-        "signature",
-        "device",
-        "grant",
-        "revoke",
-        "verify",
-        "ed25519",
-        "preferences"
-      ],
-      "facts": [
-        "Signed messages are staged behind a flag (on for staging, off in production). With them on, a web browser holds a non-extractable Ed25519 key per wallet; one wallet signature grants it the right to sign your posts, edits, deletes and reactions for 180 days. There is no wallet prompt per message and chat behaves as before.",
-        "The grant rides on the ordinary web sign-in. A logged-in user without a grant in this browser sees Turn on signed messages (one signature) above the empty wave composer; Turn on asks for one signature and the notice can be dismissed for 30 days. In a grant's last 14 days the notice offers Renew; after expiry writes go unsigned until renewed.",
-        "Signing never blocks or delays a write. If signing fails or a signature is rejected, the drop, edit, delete or reaction is sent unsigned exactly as before.",
-        "Preferences > Devices at /preferences?tab=devices lists every browser that can post as you with its label, This device marker, scopes, wallet, added, expiry and last-used dates and status (Active, Expired, Revoked). Revoke asks for confirmation; earlier signatures stay verifiable. Proxies cannot manage devices.",
-        "When a new browser gains a grant for your profile, other browsers show {label} can now post as you. Not you? with Revoke above the composer. The check runs when a wave opens and at most every 10 minutes while the tab is visible.",
-        "The Signature item in a drop's More menu (or touch menu) verifies the drop in your browser and reports Signed by its author, Not signed by its author, or The signature could not be verified, with wallet, device key fingerprint, grant expiry and whether the current content is the signed version. Contract wallets show Contract wallet: verified by 6529.io at sign-in. Signed drops carry no badge.",
-        "Signed messages are web only: the mobile and desktop apps, proxy sessions and browsers without Ed25519 support sign in and post exactly as before. Votes and ratings are not signed yet."
-      ],
-      "canonical_path": "/preferences?tab=devices",
-      "link_label": "Devices",
-      "related_paths": ["/preferences", "/waves"],
-      "tags": ["waves", "privacy", "security", "preferences"],
-      "source_refs": [
-        "ops/docs/waves/drop-actions/feature-signed-messages.md",
-        "ops/docs/notifications/feature-profile-preferences.md",
-        "components/device-signing/SignedMessagesNotice.tsx",
-        "components/preferences/DevicesPreferencesSettings.tsx",
-        "components/waves/drops/signature/DropSignatureDialog.tsx",
-        "lib/device-signing/sign-write.ts"
-      ]
     },
     {
       "id": "desktop.delegation-index-upgrade",

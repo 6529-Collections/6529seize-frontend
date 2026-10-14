@@ -223,9 +223,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
           (item) => item.path === "/network/prenodes"
         )
       ).toBe(false);
-      expect(
-        getChildGroup(aboutChildren, "Safe Collecting").children
-      ).toEqual(
+      expect(getChildGroup(aboutChildren, "Safe Collecting").children).toEqual(
         expect.arrayContaining([
           { label: "Safe Collecting", path: "/safe-collecting" },
           { label: "App Wallets", path: "/tools/app-wallets" },

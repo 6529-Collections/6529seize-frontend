@@ -106,8 +106,8 @@ OpenSea` actions. Desktop retains compact external-link actions.
 - `Primary` badge marks the active primary wallet.
 - `Wallet Checker` is shown when the profile has a primary or consolidated
   wallet address.
-- The `Addresses` header shows the right-aligned wallet count against the
-  4-wallet limit, for example `2 of 4 wallets`.
+- The personalized `Addresses` header shows the right-aligned wallet count
+  against the 4-wallet limit, for example `2 of 4 wallets`.
 - `Wallet Checker` and `Add another wallet` share equal-width columns when both
   are available. The wallet helper sentence wraps naturally with the available
   width.
