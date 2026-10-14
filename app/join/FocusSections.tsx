@@ -179,7 +179,7 @@ function ThingCard({
     <Link
       className={cx(
         BENTO_PANEL_CLASS,
-        "tw-group tw-flex tw-min-h-[190px] tw-flex-col tw-items-start tw-overflow-hidden tw-p-7 tw-no-underline hover:tw-no-underline focus:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/25 lg:tw-p-8",
+        "tw-group tw-flex tw-min-h-[190px] tw-flex-col tw-items-start tw-overflow-hidden tw-p-7 tw-no-underline hover:tw-no-underline focus:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 lg:tw-p-8",
         className
       )}
       href={resolveHref(item.href, links)}
