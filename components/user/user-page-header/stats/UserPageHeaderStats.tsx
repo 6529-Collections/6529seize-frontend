@@ -51,7 +51,6 @@ export default function UserPageHeaderStats({
         followersCount={followersCount}
         onFollowersClick={() => setIsFollowersModalOpen(true)}
         size={UserStatsRowSize.MEDIUM}
-        className="tw-tabular-nums"
         rateClassName="tw-text-meta tw-leading-4"
       />
       <UserPageFollowersModal

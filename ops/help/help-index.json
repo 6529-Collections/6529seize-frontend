@@ -6035,6 +6035,7 @@
       ],
       "facts": [
         "The profile Identity tab includes activity logs for REP and NIC where data is available.",
+        "Activity logs show three compact row placeholders while loading and No Activity Log when no entries match.",
         "Desktop activity logs support matter filters such as All, REP, and NIC plus direction filters such as All, Incoming, and Outgoing.",
         "Mobile splits REP activity under the Rep subview and NIC activity under the Identity subview."
       ],
