@@ -2686,6 +2686,7 @@ const IDENTITY_FILTER_MESSAGES = objectMessages("identityFilter", {
 } as const);
 
 const XTDH_COLLECTION_MESSAGES = objectMessages("xtdh.collections", {
+  loading: "Loading collections",
   "search.emptyDescription":
     "Try another collection name or clear the search to see all collections.",
   "search.emptyTitle": "No collections found for “{query}”",
@@ -2948,6 +2949,10 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  "tokenList.thumbnail.loading": "Loading thumbnail",
+  "tokenList.thumbnail.failed": "Failed to load thumbnail",
+  "tokenList.thumbnail.error": "Load Error",
+  "tokenList.thumbnail.tokenId": "#{tokenId}",
   "header.menu.open": "Open menu",
   "header.menu.close": "Close menu",
   "header.navigation.loading": "Loading navigation…",
