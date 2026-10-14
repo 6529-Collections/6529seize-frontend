@@ -70,6 +70,7 @@ const createSeizeSettingsContext = (
       structured_signatures_required: false,
       session_v2_migration_deadline: null,
     },
+    consolidation: null,
   },
   isMemesWave: () => false,
   isCurationWave: () => false,

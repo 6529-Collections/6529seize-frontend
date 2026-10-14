@@ -27,7 +27,7 @@ destination; primary discovery for these routes lives under About.
 
 ## Common Scenarios
 
-- Use `NFT Delegation` for Delegation Center, wallet architecture, delegation
+- Use `NFT Delegation` for Safe Collecting (formerly Delegation Center), wallet architecture, delegation
   FAQ, consolidation use cases, and wallet checker routes.
 - Use `The Memes Tools` for Subscriptions Report, Meme Accounting, and Meme Gas.
 - Use `Builder Tools` for App Wallets when supported, API docs, EMMA, and Block

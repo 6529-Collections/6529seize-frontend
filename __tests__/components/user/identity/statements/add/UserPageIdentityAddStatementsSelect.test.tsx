@@ -21,11 +21,15 @@ describe("UserPageIdentityAddStatementsSelect", () => {
     );
   });
 
-  it("keeps statement caveats in a mobile disclosure", () => {
+  it("keeps the social disclaimer in a mobile disclosure", () => {
     render(<UserPageIdentityAddStatementsSelect onViewChange={jest.fn()} />);
 
     expect(screen.getByText("About identity statements")).toBeInTheDocument();
-    expect(screen.getAllByText("All statements are optional.")).toHaveLength(2);
+    const disclaimers = screen.getAllByText(
+      "6529 does not connect to social media accounts or verify posts."
+    );
+    expect(disclaimers).toHaveLength(2);
+    expect(disclaimers[0]?.closest("details")).not.toBeNull();
   });
 
   it("uses compact mobile typography while preserving desktop sizing", () => {

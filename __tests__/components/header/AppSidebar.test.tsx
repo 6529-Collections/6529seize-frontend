@@ -175,7 +175,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
             section: true,
           }),
           expect.objectContaining({
-            label: "Delegation & Wallets",
+            label: "Safe Collecting",
             section: true,
           }),
           expect.objectContaining({
@@ -201,6 +201,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         { label: "Meme Lab", path: "/about/meme-lab" },
         { label: "6529 Gradient", path: "/about/6529-gradient" },
         { label: "Minting", path: "/about/minting" },
+        { label: "GDRC", path: "/about/gdrc1" },
       ]);
       expect(
         getChildGroup(aboutChildren, "Network & Reputation").children
@@ -211,7 +212,6 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
           { label: "xTDH Allocations Dashboard", path: "/xtdh" },
           { label: "Wave Score", path: "/network/wave-score" },
           { label: "Network Nerd", path: "/network/nerd" },
-          { label: "Prenodes", path: "/network/prenodes" },
           {
             label: "TDH Historic Boosts",
             path: "/network/tdh/historic-boosts",
@@ -219,11 +219,15 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         ])
       );
       expect(
-        getChildGroup(aboutChildren, "Delegation & Wallets").children
-      ).toEqual(
+        flattenMenuChildren(aboutChildren).some(
+          (item) => item.path === "/network/prenodes"
+        )
+      ).toBe(false);
+      expect(getChildGroup(aboutChildren, "Safe Collecting").children).toEqual(
         expect.arrayContaining([
-          { label: "Delegation Center", path: "/delegation/delegation-center" },
+          { label: "Safe Collecting", path: "/safe-collecting" },
           { label: "App Wallets", path: "/tools/app-wallets" },
+          { label: "Primary Address", path: "/about/primary-address" },
         ])
       );
       expect(

@@ -122,7 +122,7 @@ export default function UserPageXtdhGrantSubmit({
 
       {isAmountExceeded && (
         <p
-          className="tw-text-red-400 tw-m-0 tw-text-sm tw-font-medium"
+          className="tw-text-red-400 tw-m-0 tw-text-[15px] tw-font-normal"
           role="alert"
         >
           Amount exceeds your available grant rate (
@@ -132,7 +132,7 @@ export default function UserPageXtdhGrantSubmit({
 
       {errorMessage && (
         <p
-          className="tw-text-red-400 tw-m-0 tw-text-sm tw-font-medium"
+          className="tw-text-red-400 tw-m-0 tw-text-[15px] tw-font-normal"
           role="alert"
         >
           {errorMessage}
@@ -140,7 +140,7 @@ export default function UserPageXtdhGrantSubmit({
       )}
 
       {!errorMessage && successMessage && (
-        <output className="tw-m-0 tw-block tw-text-sm tw-font-medium tw-text-emerald-400">
+        <output className="tw-m-0 tw-block tw-text-[15px] tw-font-normal tw-text-emerald-400">
           {successMessage}
         </output>
       )}

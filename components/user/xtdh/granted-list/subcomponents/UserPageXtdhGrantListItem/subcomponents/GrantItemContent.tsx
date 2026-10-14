@@ -37,10 +37,10 @@ export function GrantItemContent({
             )}
           </div>
           <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
-            <p className="tw-m-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-100">
+            <p className="tw-m-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-100 group-data-[typography=profile]/profile-xtdh:tw-text-[15px] group-data-[typography=profile]/profile-xtdh:tw-font-semibold">
               {name}
             </p>
-            <p className="tw-m-0 tw-text-xs tw-text-iron-500">
+            <p className="tw-m-0 tw-text-xs tw-text-iron-500 group-data-[typography=profile]/profile-xtdh:tw-text-meta group-data-[typography=profile]/profile-xtdh:tw-font-normal group-data-[typography=profile]/profile-xtdh:tw-tabular-nums">
               {shortenAddress(contract.address)}
             </p>
           </div>

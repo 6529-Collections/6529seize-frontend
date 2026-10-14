@@ -1,3 +1,4 @@
+import { PROFILE_ACTIVITY_BODY } from "@/components/profile-activity/profileActivityTypography";
 import type { ProfileActivityLogArchived } from "@/entities/IProfile";
 
 export default function ProfileActivityLogProfileArchived({
@@ -7,13 +8,19 @@ export default function ProfileActivityLogProfileArchived({
 }) {
   return (
     <>
-      <span className="tw-whitespace-nowrap tw-text-sm lg:tw-text-base tw-text-iron-300 tw-font-medium">
+      <span
+        className={`tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300 lg:tw-text-base ${PROFILE_ACTIVITY_BODY}`}
+      >
         profile
       </span>
-      <span className="tw-whitespace-nowrap tw-text-sm lg:tw-text-base tw-font-medium tw-text-iron-300">
+      <span
+        className={`tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300 lg:tw-text-base ${PROFILE_ACTIVITY_BODY}`}
+      >
         {log.contents.handle}
       </span>
-      <span className="tw-whitespace-nowrap tw-text-sm lg:tw-text-base tw-text-iron-300 tw-font-medium">
+      <span
+        className={`tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300 lg:tw-text-base ${PROFILE_ACTIVITY_BODY}`}
+      >
         archived
       </span>
     </>

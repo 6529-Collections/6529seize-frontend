@@ -35,9 +35,12 @@ import museumMessages from "@/i18n/messages/museum.en-US.json";
 import networkMetricsMessages from "@/i18n/messages/networkMetrics.en-US.json";
 import networkTdhMessages from "@/i18n/messages/networkTdh.en-US.json";
 import networkTdhExplainerMessages from "@/i18n/messages/networkTdhExplainer.en-US.json";
+import networkTdhConsolidationMessages from "@/i18n/messages/networkTdhConsolidation.en-US.json";
+import safeCollectingMessages from "@/i18n/messages/safeCollecting.en-US.json";
 import networkTdhExampleMessages from "@/i18n/messages/networkTdhExample.en-US.json";
 import networkTdhProfileMessages from "@/i18n/messages/networkTdhProfile.en-US.json";
 import networkTdhRulesMessages from "@/i18n/messages/networkTdhRules.en-US.json";
+import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
@@ -59,6 +62,7 @@ import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artw
 import { COLLECT_MESSAGES } from "@/i18n/messages/collect";
 import { COLLECT_TDH_TARGET_MESSAGES } from "@/i18n/messages/collect-tdh-target";
 import { DROP_FORGE_ADMIN_MESSAGES } from "@/i18n/messages/drop-forge-admins";
+import { DELEGATION_CONSOLIDATION_BUILDER_MESSAGES } from "@/i18n/messages/delegation-consolidation-builder";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -1088,8 +1092,9 @@ const USER_PROFILE_IDENTITY_STATEMENT_MESSAGES = objectMessages(
     verificationDialogTitle: "Add verification post",
     desktopTitle: "Add Statements About Your Identity",
     mobileDescription: "Choose a type to add to your public profile.",
+    privacyNotice: "Statements are optional and fully and permanently public.",
     desktopDescription:
-      "Seize users can make statements asserting their identity (eponymous, pseudonymous or organizational). It is up to the community to evaluate if they are accurate.",
+      "6529 users can make statements asserting their identity (eponymous, pseudonymous or organizational).",
     socialTitle: "Social Media Accounts",
     socialDescription: "Your handle on social media platforms.",
     nftTitle: "NFT Accounts",
@@ -1102,7 +1107,7 @@ const USER_PROFILE_IDENTITY_STATEMENT_MESSAGES = objectMessages(
     caveatOptional: "All statements are optional.",
     caveatPublic: "All statements are fully and permanently public.",
     caveatNoVerification:
-      "Seize does not connect to social media accounts or verify posts.",
+      "6529 does not connect to social media accounts or verify posts.",
     caveatCommunityRates: "The community will rate the accuracy of statements.",
   } as const
 );
@@ -1111,6 +1116,7 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
   "user.profile.identity.statements",
   {
     heading: "{name} ID Statements",
+    addressesHeading: "{name} Addresses",
     description: "Public identity links and consolidated wallet addresses.",
     consolidatedAddresses: "Consolidated addresses",
     help: "About identity statements",
@@ -1122,7 +1128,10 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     addWallet: "Add another wallet",
     addWalletDescription:
       "Link another wallet you control. Your NFTs stay in their wallets.",
-    delegationCenter: "Delegation Center",
+    walletCount: "{count} of {limit} wallets",
+    walletLimitReached:
+      "This consolidation has the maximum of {limit} wallets.",
+    delegationCenter: "Safe Collecting",
     primary: "Primary",
     setPrimary: "Set primary",
     settingPrimary: "Setting primary",
@@ -1151,6 +1160,8 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     deleteStatement: "Delete",
     copied: "Copied!",
     socialMediaAccounts: "Social media accounts",
+    socialAccountsDisclaimer:
+      "Social accounts are self-declared. 6529 does not connect to social media accounts or verify account ownership or posts.",
     nftAccounts: "NFT accounts",
     contact: "Contact",
     verificationPosts: "Social media verification posts",
@@ -1160,7 +1171,7 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     noVerificationPosts: "No verification posts added yet.",
     addTitle: "Add an ID statement",
     addDescription:
-      "Choose what you want to add. Every statement is public and the community decides whether it is accurate.",
+      "Choose what you want to add. Statements are optional and fully and permanently public.",
     addSocialTitle: "Social media account",
     addSocialDescription: "Share your profile on a social platform.",
     addNftTitle: "NFT account",
@@ -1189,7 +1200,7 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     optional: "All statements are optional.",
     permanentlyPublic: "All statements are fully and permanently public.",
     noVerification:
-      "Seize does not connect to social media accounts or verify posts.",
+      "6529 does not connect to social media accounts or verify posts.",
     communityRates: "The community will rate statement accuracy.",
     addSuccess: "ID statement added.",
     addErrorTitle: "Couldn’t add this ID statement.",
@@ -2720,7 +2731,7 @@ const COLLECTION_DELEGATION_MESSAGES = objectMessages("delegation.collection", {
   "scope.memeLab": "Records here apply only to Meme Lab.",
   "scope.gradient": "Records here apply only to 6529 Gradient.",
   "scope.selected": "Records here apply to the selected collection scope.",
-  "navigation.back": "Back to Delegation Center",
+  "navigation.back": "Back to Safe Collecting",
   "connect.title": "Connect Wallet to Manage {collection}",
   "connect.description":
     "Connect the wallet whose outgoing and incoming records you want to review.",
@@ -3057,6 +3068,11 @@ export const EN_US_MESSAGES = {
     "Request delivery of outstanding work only after the backend verifies finalized cancellation or revert evidence. Previously delivered allocations are not replayed.",
   "dropForge.transaction": "View transaction",
 
+  "network.prenodes.title": "Prenodes",
+  "network.prenodes.pageTitle": "Prenodes | Network",
+  "network.prenodes.deprecation":
+    "6529 Prenodes have been deprecated. Use the 6529 Desktop app to calculate TDH.",
+  "network.prenodes.desktopLink": "Explore 6529 Desktop",
   "tokenList.thumbnail.loading": "Loading thumbnail",
   "tokenList.thumbnail.failed": "Failed to load thumbnail",
   "tokenList.thumbnail.error": "Load Error",
@@ -3070,10 +3086,13 @@ export const EN_US_MESSAGES = {
   ...COMPETITION_MESSAGES,
   ...EN_DROP_REQUIREMENT_MESSAGES,
   ...EN_US_DROP_METADATA_MESSAGES,
+  ...DELEGATION_CONSOLIDATION_BUILDER_MESSAGES,
   "delegation.consolidation.instructions.title":
-    "Two wallets · two registrations",
+    "Every pair of wallets · both directions",
   "delegation.consolidation.instructions.steps":
-    "Register from this wallet, then connect the other wallet and register the return link. Each wallet needs ETH for gas.",
+    "A consolidation holds up to {limit} wallets. Each wallet registers a link to every other wallet, so every wallet signs and needs ETH for gas.",
+  "delegation.consolidation.instructions.guided":
+    "Use guided setup: one transaction per wallet, in the safe order",
   "delegation.consolidation.instructions.publicLink":
     "The link is public. Existing profile data may be combined.",
   "drop.composer.image": "Image",
@@ -4488,6 +4507,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_REP_MODAL_MESSAGES,
   ...WAVE_REP_DETAILS_MESSAGES,
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
+  "profileActivity.loading": "Loading activity log",
   ...USER_RATE_MESSAGES,
   ...aboutMessages,
   ...emmaSnapshotsMessages,
@@ -4496,9 +4516,12 @@ export const EN_US_MESSAGES = {
   ...networkMetricsMessages,
   ...networkTdhMessages,
   ...networkTdhExplainerMessages,
+  ...networkTdhConsolidationMessages,
+  ...safeCollectingMessages,
   ...networkTdhExampleMessages,
   ...networkTdhProfileMessages,
   ...networkTdhRulesMessages,
+  ...delegationTapGuideMessages,
   ...toolsMessages,
   ...ABOUT_TECH_MESSAGES,
   ...REVIEWBOT_USAGE_MESSAGES,

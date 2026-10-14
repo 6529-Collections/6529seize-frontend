@@ -176,7 +176,7 @@ function HistoryLoadingState({ title }: Readonly<{ title: string }>) {
 function HistoryEmptyState({ children }: { readonly children: ReactNode }) {
   return (
     <div className="tw-flex tw-min-h-[68px] tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-950/50 tw-p-6 tw-text-center tw-ring-1 tw-ring-white/[0.02]">
-      <span className="tw-text-sm tw-text-iron-600">{children}</span>
+      <span className="tw-text-meta tw-font-normal tw-text-iron-500">{children}</span>
     </div>
   );
 }
@@ -215,13 +215,13 @@ function TopUpEntry(
     <div className={HISTORY_ENTRY_CLASS}>
       <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
         <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1 sm:tw-flex-row sm:tw-items-center sm:tw-gap-3">
-          <span className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap tw-text-sm tw-text-iron-200">
-            <b>+ {props.topUp.amount}</b>
+          <span className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap tw-text-sm tw-text-iron-100">
+            <b className="tw-font-semibold tw-tabular-nums">+ {props.topUp.amount}</b>
             <span className="tw-flex tw-h-4 tw-w-2.5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-500">
               <EthereumIcon />
             </span>
           </span>
-          <span className="tw-break-all tw-text-xs tw-text-iron-500 max-sm:tw-line-clamp-1">
+          <span className="tw-break-all tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500 max-sm:tw-line-clamp-1">
             <span aria-hidden="true" className="tw-hidden sm:tw-inline">
               —{" "}
             </span>
@@ -229,7 +229,7 @@ function TopUpEntry(
           </span>
         </div>
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-3">
-          <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-600 max-sm:tw-text-xs">
+          <span className="tw-whitespace-nowrap tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
             {getDateDisplay(new Date(props.topUp.transaction_date))}
           </span>
           <a
@@ -258,17 +258,17 @@ function LogEntry(
     <div className={HISTORY_ENTRY_CLASS}>
       <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
         <div className="tw-min-w-0 tw-space-y-1">
-          <div className="tw-break-words tw-text-sm tw-text-iron-200">
+          <div className="tw-break-words tw-text-[15px] tw-font-normal tw-tabular-nums tw-text-iron-300">
             {props.log.log}
           </div>
           {props.log.additional_info && (
-            <div className="tw-break-words tw-text-xs tw-text-iron-500 max-sm:tw-break-all">
+            <div className="tw-break-words tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500 max-sm:tw-break-all">
               {props.log.additional_info}
             </div>
           )}
         </div>
         {props.log.created_at && (
-          <span className="tw-flex-shrink-0 tw-whitespace-nowrap tw-text-sm tw-text-iron-600 max-sm:tw-text-xs">
+          <span className="tw-flex-shrink-0 tw-whitespace-nowrap tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
             {getDateDisplay(new Date(props.log.created_at))}
           </span>
         )}
@@ -292,18 +292,18 @@ function RedeemedEntry(
     <div className={HISTORY_ENTRY_CLASS}>
       <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
         <div className="tw-min-w-0 tw-space-y-1">
-          <div className="tw-break-words tw-text-sm tw-text-iron-200">
+          <div className="tw-break-words tw-text-[15px] tw-font-normal tw-tabular-nums tw-text-iron-300">
             Redeemed Subscription for {contractName} #{props.redeem.token_id} x
             {props.redeem.count}
           </div>
-          <div className="tw-break-words tw-text-xs tw-text-iron-500">
+          <div className="tw-break-words tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
             Airdrop Address: {formatAddress(props.redeem.address)} - Balance
             after redemption: {props.redeem.balance_after} ETH
           </div>
         </div>
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-3">
           {transactionDate && (
-            <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-600 max-sm:tw-text-xs">
+            <span className="tw-whitespace-nowrap tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
               {getDateDisplay(new Date(transactionDate))}
             </span>
           )}
