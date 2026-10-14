@@ -115,7 +115,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
     <div>
       <div className="tw-flex tw-items-center tw-justify-between">
         <div className="tw-flex tw-items-center tw-gap-1">
-          <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+          <span className="tw-text-[11px]/4 tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
             {t(
               locale,
               "user.profile.identity.statements.consolidatedAddresses"

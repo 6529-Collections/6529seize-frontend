@@ -254,11 +254,11 @@ function CurationGroupRow({
           )}
         </div>
         <div className="tw-min-w-0 tw-flex-1">
-          <p className="tw-mb-1 tw-mt-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-50">
+          <p className="tw-mb-1 tw-mt-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-50 group-data-[profile-typography=true]/curation-dialog:tw-font-medium group-data-[profile-typography=true]/curation-dialog:tw-text-iron-100">
             {group.name}
           </p>
-          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-text-[11px]">
-            <span className="tw-inline-block tw-min-w-0 tw-max-w-[8rem] tw-truncate tw-font-medium tw-text-iron-400">
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-text-[11px] group-data-[profile-typography=true]/curation-dialog:tw-text-meta group-data-[profile-typography=true]/curation-dialog:tw-font-normal group-data-[profile-typography=true]/curation-dialog:tw-tabular-nums">
+            <span className="tw-inline-block tw-min-w-0 tw-max-w-[8rem] tw-truncate tw-font-medium tw-text-iron-400 group-data-[profile-typography=true]/curation-dialog:tw-font-normal group-data-[profile-typography=true]/curation-dialog:tw-text-iron-500">
               {getGroupCreatorLabel(group)}
             </span>
             {timeAgo && (
@@ -359,7 +359,7 @@ function CurationGroupSearchState({
   if (isSearchingGroups) {
     content = (
       <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/60 tw-px-4 tw-py-4">
-        <div className="tw-flex tw-items-center tw-gap-3 tw-text-sm tw-text-iron-400">
+        <div className="tw-flex tw-items-center tw-gap-3 tw-text-sm tw-text-iron-400 group-data-[profile-typography=true]/curation-dialog:tw-text-meta group-data-[profile-typography=true]/curation-dialog:tw-font-normal group-data-[profile-typography=true]/curation-dialog:tw-text-iron-500">
           <CircleLoader size={CircleLoaderSize.SMALL} />
           <span>{loadingMessage}</span>
         </div>
@@ -381,7 +381,9 @@ function CurationGroupSearchState({
   } else {
     content = (
       <div className="tw-rounded-xl tw-border tw-border-dashed tw-border-white/[0.08] tw-bg-iron-950/60 tw-px-4 tw-py-5">
-        <p className="tw-mb-0 tw-text-sm tw-text-iron-400">No groups found.</p>
+        <p className="tw-mb-0 tw-text-sm tw-text-iron-400 group-data-[profile-typography=true]/curation-dialog:tw-text-meta group-data-[profile-typography=true]/curation-dialog:tw-font-normal group-data-[profile-typography=true]/curation-dialog:tw-text-iron-500">
+          No groups found.
+        </p>
       </div>
     );
   }
@@ -389,14 +391,14 @@ function CurationGroupSearchState({
   return (
     <div className="tw-space-y-3">
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-        <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-300">
+        <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-300 group-data-[profile-typography=true]/curation-dialog:tw-text-iron-100">
           Choose another group
         </p>
         {canCloseGroupSearch && (
           <button
             type="button"
             onClick={onCloseGroupSearch}
-            className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition desktop-hover:hover:tw-text-iron-200"
+            className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition group-data-[profile-typography=true]/curation-dialog:tw-text-meta desktop-hover:hover:tw-text-iron-200"
           >
             Back
           </button>
@@ -405,18 +407,20 @@ function CurationGroupSearchState({
 
       {shouldShowDefaultGroupError && (
         <div className="tw-rounded-xl tw-border tw-border-solid tw-border-rose-500/20 tw-bg-rose-500/10 tw-px-4 tw-py-4">
-          <p className="tw-mb-0 tw-text-sm tw-text-rose-300">
+          <p className="tw-mb-0 tw-text-sm tw-text-rose-300 group-data-[profile-typography=true]/curation-dialog:tw-text-md group-data-[profile-typography=true]/curation-dialog:tw-font-normal">
             Failed to load the current curator group. Choose another group
             below.
           </p>
         </div>
       )}
 
-      <SelectGroupModalSearchName
-        filterName={groupSearchName}
-        setFilterName={setGroupSearchName}
-        autoFocus={true}
-      />
+      <div className="group-data-[profile-typography=true]/curation-dialog:[&_input]:tw-text-base group-data-[profile-typography=true]/curation-dialog:[&_input]:tw-font-normal md:desktop-hover:group-data-[profile-typography=true]/curation-dialog:[&_input]:tw-text-sm group-data-[profile-typography=true]/curation-dialog:[&_label]:!tw-scale-100 group-data-[profile-typography=true]/curation-dialog:[&_label]:tw-text-meta">
+        <SelectGroupModalSearchName
+          filterName={groupSearchName}
+          setFilterName={setGroupSearchName}
+          autoFocus={true}
+        />
+      </div>
 
       {content}
     </div>
@@ -435,7 +439,7 @@ function CurationGroupSummaryState({
   if (selectedGroup === null && isInitialGroupLoading) {
     return (
       <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/70 tw-px-4 tw-py-4">
-        <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
+        <p className="tw-mb-0 tw-text-sm tw-text-iron-400 group-data-[profile-typography=true]/curation-dialog:tw-text-meta group-data-[profile-typography=true]/curation-dialog:tw-font-normal group-data-[profile-typography=true]/curation-dialog:tw-text-iron-500">
           Loading selected group...
         </p>
       </div>
@@ -463,7 +467,7 @@ function CurationGroupSummaryState({
   return (
     <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/70 tw-px-4 tw-py-4">
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-        <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
+        <p className="tw-mb-0 tw-text-sm tw-text-iron-400 group-data-[profile-typography=true]/curation-dialog:tw-text-meta group-data-[profile-typography=true]/curation-dialog:tw-font-normal group-data-[profile-typography=true]/curation-dialog:tw-text-iron-500">
           No group selected yet.
         </p>
         <Button
@@ -698,6 +702,11 @@ export default function MyStreamWaveCurationCreateDialog({
   return (
     <MobileWrapperDialog
       title={dialogTitle}
+      titleClassName={
+        permissionMode === "profile"
+          ? "!tw-text-lg tw-font-semibold !tw-text-iron-100 md:!tw-text-xl"
+          : undefined
+      }
       isOpen={isOpen}
       onClose={onClose}
       noPadding
@@ -706,13 +715,16 @@ export default function MyStreamWaveCurationCreateDialog({
       maxWidthClass="md:tw-max-w-lg"
       headerClassName="tw-mb-0 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-white/[0.06] tw-py-4"
     >
-      <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
+      <div
+        className="tw-group/curation-dialog tw-flex tw-min-h-0 tw-flex-1 tw-flex-col"
+        data-profile-typography={permissionMode === "profile"}
+      >
         <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
           <div className="tw-flex tw-flex-col tw-gap-8 tw-px-4 tw-py-6 sm:tw-px-6">
             <div className="tw-space-y-4">
               <label
                 htmlFor="curation-name"
-                className="tw-block tw-text-sm tw-font-medium tw-text-iron-300"
+                className="tw-block tw-text-sm tw-font-medium tw-text-iron-300 group-data-[profile-typography=true]/curation-dialog:tw-text-iron-100"
               >
                 Name
               </label>
@@ -727,7 +739,7 @@ export default function MyStreamWaveCurationCreateDialog({
                       onClick={() => handlePresetSelect(preset)}
                       aria-pressed={isSelected}
                       className={clsx(
-                        "tw-inline-flex tw-appearance-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-shadow-sm tw-transition-all tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20",
+                        "tw-inline-flex tw-appearance-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-shadow-sm tw-transition-all tw-duration-300 group-data-[profile-typography=true]/curation-dialog:tw-text-meta focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20",
                         isSelected
                           ? "tw-border-white/20 tw-bg-iron-800 tw-text-iron-100"
                           : "tw-border-white/10 tw-bg-iron-900 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50"
@@ -748,18 +760,18 @@ export default function MyStreamWaveCurationCreateDialog({
                   maxLength={50}
                   autoComplete="off"
                   placeholder="Create your own custom..."
-                  className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-100 tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-sm placeholder:tw-text-iron-500 hover:tw-ring-iron-650 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
+                  className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-100 tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-sm placeholder:tw-text-iron-500 group-data-[profile-typography=true]/curation-dialog:tw-text-base group-data-[profile-typography=true]/curation-dialog:tw-font-normal group-data-[profile-typography=true]/curation-dialog:placeholder:tw-text-base hover:tw-ring-iron-650 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 md:desktop-hover:group-data-[profile-typography=true]/curation-dialog:tw-text-sm md:desktop-hover:group-data-[profile-typography=true]/curation-dialog:placeholder:tw-text-sm"
                 />
               </div>
             </div>
 
             {permissionMode === "profile" ? (
               <details className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/60 tw-px-4 tw-py-3">
-                <summary className="tw-cursor-pointer tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400">
+                <summary className="tw-cursor-pointer tw-text-meta tw-font-medium tw-text-iron-300 group-data-[profile-typography=true]/curation-dialog:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400">
                   {t(locale, "profileCuration.permissions.advanced")}
                 </summary>
                 <div className="tw-mt-4 tw-space-y-4">
-                  <p className="tw-mb-0 tw-text-xs tw-leading-5 tw-text-iron-500">
+                  <p className="tw-mb-0 tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-500">
                     {t(locale, "profileCuration.permissions.description")}
                   </p>
                   <div className="tw-space-y-3.5">{groupPickerContent}</div>
@@ -767,7 +779,7 @@ export default function MyStreamWaveCurationCreateDialog({
               </details>
             ) : (
               <div className="tw-space-y-4">
-                <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-300">
+                <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-300 group-data-[profile-typography=true]/curation-dialog:tw-text-iron-100">
                   Who can curate?
                 </span>
                 <div className="tw-space-y-3.5">{groupPickerContent}</div>

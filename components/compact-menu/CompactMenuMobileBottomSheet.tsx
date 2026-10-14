@@ -15,6 +15,7 @@ interface MobileBottomSheetTriggerProps {
 
 interface CompactMenuMobileBottomSheetProps {
   readonly title: string;
+  readonly titleClassName?: string | undefined;
   readonly ariaLabel: string;
   readonly items: readonly CompactMenuItem[];
   readonly trigger: ReactNode;
@@ -29,6 +30,7 @@ interface CompactMenuMobileBottomSheetProps {
 
 export default function CompactMenuMobileBottomSheet({
   title,
+  titleClassName = "tw-text-lg tw-font-semibold",
   ariaLabel,
   items,
   trigger,
@@ -81,7 +83,7 @@ export default function CompactMenuMobileBottomSheet({
       )}
       <MobileWrapperDialog
         title={title}
-        titleClassName="tw-text-lg tw-font-semibold"
+        titleClassName={titleClassName}
         isOpen={isOpen}
         onClose={close}
         onAfterLeave={runPendingAction}

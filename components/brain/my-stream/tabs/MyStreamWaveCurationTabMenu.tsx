@@ -310,6 +310,23 @@ export default function MyStreamWaveCurationTabMenu({
     },
     onDelete: () => setIsDeleteOpen(true),
   });
+  const styledMenuItems =
+    permissionMode === "profile"
+      ? menuItems.map((item) => ({
+          ...item,
+          label: (
+            <span
+              className={
+                item.kind === "section"
+                  ? "tw-text-label tw-font-medium"
+                  : "tw-text-sm tw-font-medium"
+              }
+            >
+              {item.label}
+            </span>
+          ),
+        }))
+      : menuItems;
   const shouldUseMobileBottomSheet =
     hasProfileActions && isMobileLayoutViewport;
   const isMenuDisabled =
@@ -335,8 +352,13 @@ export default function MyStreamWaveCurationTabMenu({
       {shouldUseMobileBottomSheet ? (
         <CompactMenuMobileBottomSheet
           title={triggerLabel ?? t(locale, "profileCuration.header.manage")}
+          titleClassName={
+            permissionMode === "profile"
+              ? "!tw-text-lg tw-font-semibold !tw-text-iron-100 md:!tw-text-xl"
+              : undefined
+          }
           ariaLabel={t(locale, "profileCuration.manage.menuAria")}
-          items={menuItems}
+          items={styledMenuItems}
           trigger={triggerContent}
           renderTriggerButton={({
             ariaLabel,
@@ -376,7 +398,7 @@ export default function MyStreamWaveCurationTabMenu({
               ? triggerAriaLabel
               : t(locale, "profileCuration.manage.menuAria")
           }
-          items={menuItems}
+          items={styledMenuItems}
           itemsWrapperClassName={hasProfileActions ? "tw-pt-2" : undefined}
           menuWidthClassName={isConfiguration ? "tw-w-52" : "tw-w-64"}
           disabled={isMenuDisabled}
@@ -395,6 +417,16 @@ export default function MyStreamWaveCurationTabMenu({
       )}
 
       <MobileWrapperConfirmationDialog
+        titleClassName={
+          permissionMode === "profile"
+            ? "!tw-text-lg tw-font-semibold !tw-text-iron-100 md:!tw-text-xl"
+            : undefined
+        }
+        messageClassName={
+          permissionMode === "profile"
+            ? "tw-text-md tw-font-normal tw-leading-6 tw-text-iron-300"
+            : undefined
+        }
         isOpen={isDeleteOpen}
         onClose={() => setIsDeleteOpen(false)}
         onConfirm={() => deleteMutation.mutate()}

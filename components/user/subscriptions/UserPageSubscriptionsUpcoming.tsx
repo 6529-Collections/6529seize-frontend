@@ -87,7 +87,7 @@ export default function UserPageSubscriptionsUpcoming(
           className="tw-size-6 tw-text-iron-500"
           aria-hidden="true"
         />
-        <span className="tw-text-sm tw-text-iron-400">
+        <span className="tw-text-meta tw-font-normal tw-text-iron-500">
           No upcoming drops found
         </span>
       </div>

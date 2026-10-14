@@ -2,9 +2,7 @@
 
 import { useState } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import UserStatsRow, {
-  UserStatsRowSize,
-} from "../../utils/stats/UserStatsRow";
+import UserStatsRow, { UserStatsRowSize } from "../../utils/stats/UserStatsRow";
 import UserPageFollowersModal from "../../followers/UserPageFollowersModal";
 
 const SAFE_ROUTE_SEGMENT_PATTERN = /^[a-zA-Z0-9._-]+$/;
@@ -53,6 +51,8 @@ export default function UserPageHeaderStats({
         followersCount={followersCount}
         onFollowersClick={() => setIsFollowersModalOpen(true)}
         size={UserStatsRowSize.MEDIUM}
+        className="tw-tabular-nums"
+        rateClassName="tw-text-meta tw-leading-4"
       />
       <UserPageFollowersModal
         profileId={profile.id}

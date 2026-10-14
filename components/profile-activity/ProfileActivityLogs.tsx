@@ -1,5 +1,7 @@
 "use client";
 
+import { PROFILE_ACTIVITY_META } from "./profileActivityTypography";
+
 import type { ProfileActivityLog } from "@/entities/IProfile";
 import type { CountlessPage } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -275,7 +277,7 @@ export default function ProfileActivityLogs({
               <span
                 className={`${
                   initialParams.handleOrWallet ? "tw-px-2 sm:tw-px-3" : ""
-                } tw-text-sm tw-font-normal tw-italic tw-text-iron-500`}
+                } tw-text-sm tw-font-normal tw-italic tw-text-iron-500 ${PROFILE_ACTIVITY_META}`}
               >
                 No Activity Log
               </span>

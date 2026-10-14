@@ -37,9 +37,7 @@ export default function UserPageXtdhGrantAmount({
     );
   } else {
     maxGrantMessage = (
-      <span className="tw-text-iron-200">
-        Max available: {formattedMax} xTDH/day
-      </span>
+      <span>Max available: {formattedMax} xTDH/day</span>
     );
   }
 
@@ -47,7 +45,7 @@ export default function UserPageXtdhGrantAmount({
     <div className="tw-flex tw-flex-col tw-gap-2">
       <label
         htmlFor="xtdh-grant-amount"
-        className="tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-400"
+        className="tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500"
       >
         Total amount
       </label>
@@ -76,11 +74,11 @@ export default function UserPageXtdhGrantAmount({
 
           onAmountChange(parsedValue);
         }}
-        className="tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-font-medium tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-white/[0.06] focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
+        className="tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-[16px] tw-font-normal tw-tabular-nums tw-text-iron-100 md:desktop-hover:tw-text-[14px] tw-ring-1 tw-ring-inset tw-ring-white/[0.06] focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
       />
       <p
         id="xtdh-grant-status"
-        className="tw-text-xs tw-font-medium tw-text-iron-300"
+        className="tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500"
       >
         {maxGrantMessage}
       </p>
