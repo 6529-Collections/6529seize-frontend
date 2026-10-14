@@ -89,17 +89,17 @@ export default function UserPageIdentityStatements({
   return (
     <div className="tw-px-4 tw-pt-4 lg:tw-border-x-0 lg:tw-border-b-0 lg:tw-border-t lg:tw-border-solid lg:tw-border-white/10 lg:tw-px-6 lg:tw-pt-6">
       <div>
-        <UserPageIdentityAddStatementsHeader profile={profile} />
-        <div className="tw-scroll-py-3 tw-overflow-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700 desktop-hover:hover:tw-scrollbar-thumb-iron-500 lg:tw-mt-4">
+        <UserPageIdentityStatementsConsolidatedAddresses profile={profile} />
+      </div>
+      <div className="tw-mt-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-5">
+        <UserPageIdentityAddStatementsHeader
+          profile={profile}
+          headerAction={headerAction}
+        />
+        <div className="tw-mt-3 tw-scroll-py-3 tw-overflow-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
           <div className="tw-relative tw-mx-auto tw-grid tw-grid-cols-1 tw-pb-6 lg:tw-mx-0 lg:tw-pb-8 xl:tw-grid-cols-5 xl:tw-gap-x-8 xl:tw-gap-y-2">
             <div className="tw-col-span-full tw-space-y-6 md:tw-space-y-8">
               <div className="tw-grid tw-grid-cols-1 tw-gap-y-6">
-                <div>
-                  <UserPageIdentityStatementsConsolidatedAddresses
-                    profile={profile}
-                    headerAction={headerAction}
-                  />
-                </div>
                 {isError && (
                   <div
                     role="alert"
