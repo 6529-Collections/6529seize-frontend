@@ -149,6 +149,7 @@ Statement ownership in this tab:
 - Mobile:
   - `Total Rep` subview uses REP log with direction tabs
   - `NIC` subview uses NIC log with direction tabs and NIC log-type filter
+- Loading uses three compact row placeholders before the activity entries appear.
 - Empty results show `No Activity Log`.
 
 ## Permissions and Visibility Rules

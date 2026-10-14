@@ -9,7 +9,7 @@ import {
   WaveInformationProvider,
   useWaveInformation,
 } from "@/contexts/WaveInformationContext";
-import { useEffect } from "react";
+import { StrictMode, useEffect } from "react";
 
 jest.mock("next/navigation", () => ({
   usePathname: () => window.location.pathname,
@@ -35,6 +35,15 @@ function Harness() {
       {information.request && (
         <div role="dialog">
           <button onClick={information.close}>Close</button>
+          <button onClick={information.openNotifications}>
+            Open notifications
+          </button>
+          {information.request.view === "notifications" && (
+            <>
+              <span>Notification view</span>
+              <button onClick={information.back}>Back</button>
+            </>
+          )}
         </div>
       )}
     </>
@@ -211,4 +220,100 @@ it("uses one navigation entry when leaving information and preserves Back and Fo
   expect(window.history.state).toMatchObject({ nextTree: "profile" });
   expect(window.history.state).not.toHaveProperty("waveInformation");
   expect(screen.queryByRole("dialog")).toBeNull();
+});
+
+it("navigates inside one information request and restores its parent with Back", async () => {
+  window.history.replaceState({ original: "kept" }, "", "/waves/wave");
+  render(
+    <StrictMode>
+      <WaveInformationProvider>
+        <Harness />
+      </WaveInformationProvider>
+    </StrictMode>
+  );
+  fireEvent.click(screen.getByText("Open mobile information"));
+  const length = window.history.length;
+  const input = screen.getByLabelText("Unfinished message");
+  fireEvent.click(screen.getByText("Open notifications"));
+  fireEvent.click(screen.getByText("Open notifications"));
+  expect(window.history.length).toBe(length + 1);
+  expect(screen.getAllByRole("dialog")).toHaveLength(1);
+  expect(screen.getByText("Notification view")).toBeVisible();
+  fireEvent.click(screen.getByText("Back"));
+  await waitFor(() =>
+    expect(screen.queryByText("Notification view")).toBeNull()
+  );
+  expect(screen.getByLabelText("Unfinished message")).toBe(input);
+  expect(input).toHaveValue("keep me");
+  fireEvent.click(screen.getByText("Open notifications"));
+  window.history.back();
+  await waitFor(() =>
+    expect(screen.queryByText("Notification view")).toBeNull()
+  );
+  expect(screen.getByRole("dialog")).toBeVisible();
+  fireEvent.click(screen.getByText("Close"));
+  await waitFor(() =>
+    expect(window.history.state).toEqual({ original: "kept" })
+  );
+});
+
+it("Close removes both notification and About entries without leaving a phantom Back step", async () => {
+  window.history.replaceState({ original: "kept" }, "", "/waves/wave");
+  render(
+    <WaveInformationProvider>
+      <Harness />
+    </WaveInformationProvider>
+  );
+  fireEvent.click(screen.getByText("Open mobile information"));
+  fireEvent.click(screen.getByText("Open notifications"));
+  fireEvent.click(screen.getByText("Close"));
+  expect(screen.queryByRole("dialog")).toBeNull();
+  await waitFor(() =>
+    expect(window.history.state).toEqual({ original: "kept" })
+  );
+  expect(window.location.pathname).toBe("/waves/wave");
+});
+
+it("recovers when route navigation interrupts a pending sheet traversal", () => {
+  window.history.replaceState({}, "", "/waves/wave");
+  const { rerender } = render(
+    <WaveInformationProvider>
+      <Harness />
+    </WaveInformationProvider>
+  );
+  fireEvent.click(screen.getByText("Open mobile information"));
+  fireEvent.click(screen.getByText("Open notifications"));
+  const back = jest.spyOn(window.history, "back").mockImplementation(() => {});
+  try {
+    fireEvent.click(screen.getByText("Back"));
+    window.history.pushState({}, "", "/profiles/creator");
+    rerender(
+      <WaveInformationProvider>
+        <Harness />
+      </WaveInformationProvider>
+    );
+    fireEvent.click(screen.getByText("Open mobile information"));
+    expect(screen.getByRole("dialog")).toBeVisible();
+    fireEvent.click(screen.getByText("Open notifications"));
+    expect(screen.getByText("Notification view")).toBeVisible();
+  } finally {
+    back.mockRestore();
+  }
+});
+
+it("starts a fresh About view when opening from a stale Forward history entry", () => {
+  window.history.replaceState(
+    { waveInformation: "old-sheet", waveInformationView: "notifications" },
+    "",
+    "/waves/wave"
+  );
+  render(
+    <WaveInformationProvider>
+      <Harness />
+    </WaveInformationProvider>
+  );
+  fireEvent.click(screen.getByText("Open mobile information"));
+  expect(screen.queryByText("Notification view")).toBeNull();
+  fireEvent.click(screen.getByText("Open notifications"));
+  expect(screen.getByText("Notification view")).toBeVisible();
 });

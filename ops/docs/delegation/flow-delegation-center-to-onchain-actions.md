@@ -7,48 +7,48 @@ verify the result in Wallet Checker.
 
 ## Location in the Site
 
-- `/delegation/delegation-center`
-- `/delegation/register-delegation`
-- `/delegation/register-consolidation`
-- `/delegation/register-sub-delegation`
-- `/delegation/assign-primary-address`
-- `/delegation/any-collection`
-- `/delegation/the-memes`
-- `/delegation/meme-lab`
-- `/delegation/6529-gradient`
-- `/delegation/wallet-checker`
+- `/safe-collecting`
+- `/safe-collecting/register-delegation`
+- `/safe-collecting/register-consolidation`
+- `/safe-collecting/register-sub-delegation`
+- `/safe-collecting/assign-primary-address`
+- `/safe-collecting/any-collection`
+- `/safe-collecting/the-memes`
+- `/safe-collecting/meme-lab`
+- `/safe-collecting/6529-gradient`
+- `/safe-collecting/wallet-checker`
 
 ## Entry Points
 
-- Sidebar: `About -> Delegation & Wallets -> Delegation Center`
+- Sidebar: `About -> Safe Collecting -> Delegation Center`
 - Direct URLs to write or collection routes
 - Profile consolidated-addresses panel links:
-  - `/delegation/wallet-checker?address=<primary-wallet>`
-  - `/delegation/delegation-center` (shown when consolidation state affects the
+  - `/safe-collecting/wallet-checker?address=<primary-wallet>`
+  - `/safe-collecting` (shown when consolidation state affects the
     viewing wallet)
 
 ## Before You Start
 
 - Connect a wallet before write or collection actions.
 - Use the chain required by the delegation contract.
-- For `/delegation/assign-primary-address`, the wallet needs a consolidation key
+- For `/safe-collecting/assign-primary-address`, the wallet needs a consolidation key
   with more than one wallet.
 
 ## User Journey
 
-1. Open `/delegation/delegation-center`.
+1. Open `/safe-collecting`.
 2. Pick an action path:
    - center cards:
-     - `Register Delegation` -> `/delegation/register-delegation`
-     - `Register Consolidation` -> `/delegation/register-consolidation`
-     - `Register Delegation Manager` -> `/delegation/register-sub-delegation`
+     - `Register Delegation` -> `/safe-collecting/register-delegation`
+     - `Register Consolidation` -> `/safe-collecting/register-consolidation`
+     - `Register Delegation Manager` -> `/safe-collecting/register-sub-delegation`
    - collection cards:
-     - `/delegation/any-collection`
-     - `/delegation/the-memes`
-     - `/delegation/meme-lab`
-     - `/delegation/6529-gradient`
+     - `/safe-collecting/any-collection`
+     - `/safe-collecting/the-memes`
+     - `/safe-collecting/meme-lab`
+     - `/safe-collecting/6529-gradient`
    - `assign-primary-address`:
-     - open `/delegation/assign-primary-address` directly, or
+     - open `/safe-collecting/assign-primary-address` directly, or
      - open manager action from incoming `Delegation Managers` rows on
        `Any Collection` or `The Memes`
 3. If disconnected, wallet connect opens first. Navigation continues only after
@@ -63,7 +63,7 @@ verify the result in Wallet Checker.
    - `Confirm in your wallet...`
    - `Transaction submitted...` with a `view` explorer link
    - `Transaction Successful!`
-7. Verify results in `/delegation/wallet-checker`:
+7. Verify results in `/safe-collecting/wallet-checker`:
    - check delegations and delegation managers
    - confirm consolidation status or incomplete-direction recommendations
 

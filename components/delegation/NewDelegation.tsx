@@ -273,7 +273,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
             Note: The currently supported use cases on 6529.io are: #1 - All, #2
             - Minting/Allowlist, #3 - Airdrops{" "}
             <Link
-              href={`/delegation/delegation-faq/use-cases-overview`}
+              href={`/safe-collecting/faq/use-cases-overview`}
               target="_blank"
               rel="noopener noreferrer"
             >

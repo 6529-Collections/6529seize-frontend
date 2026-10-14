@@ -270,11 +270,11 @@ export default function UserPageMentionShortcuts({
               ref={viewHeadingRef}
               id="quick-tags-heading"
               tabIndex={-1}
-              className="tw-m-0 tw-text-sm tw-font-bold tw-tracking-wide tw-text-iron-50 focus:tw-outline-none"
+              className="tw-m-0 tw-text-[15px]/5 tw-font-semibold tw-tracking-wide tw-text-iron-100 focus:tw-outline-none"
             >
               {t(locale, "user.mentionShortcuts.title")}
             </h3>
-            <p className="tw-mb-0 tw-mt-0.5 tw-max-w-2xl tw-text-sm tw-leading-5 tw-text-iron-400">
+            <p className="tw-mb-0 tw-mt-0.5 tw-max-w-2xl tw-text-[15px] tw-font-normal tw-leading-5 tw-text-iron-300">
               {t(locale, "user.mentionShortcuts.summaryDescription")}
             </p>
           </div>
@@ -293,7 +293,7 @@ export default function UserPageMentionShortcuts({
           {isPending && (
             <p
               aria-live="polite"
-              className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-400"
+              className="tw-m-0 tw-text-[15px] tw-font-normal tw-leading-5 tw-text-iron-300"
             >
               {t(locale, LOADING_MESSAGE_KEY)}
             </p>
@@ -369,7 +369,7 @@ export default function UserPageMentionShortcuts({
               ref={viewHeadingRef}
               id="quick-tags-manager-title"
               tabIndex={-1}
-              className="tw-m-0 tw-truncate tw-text-sm tw-font-bold tw-tracking-wide tw-text-iron-50 focus:tw-outline-none"
+              className="tw-m-0 tw-truncate tw-text-[15px]/5 tw-font-semibold tw-tracking-wide tw-text-iron-100 focus:tw-outline-none"
             >
               {t(locale, "user.mentionShortcuts.title")}
             </h3>
@@ -383,7 +383,7 @@ export default function UserPageMentionShortcuts({
             {t(locale, "user.mentionShortcuts.newShort")}
           </button>
         </div>
-        <p className="tw-mb-0 tw-mt-1 tw-max-w-2xl tw-text-sm tw-leading-5 tw-text-iron-400">
+        <p className="tw-mb-0 tw-mt-1 tw-max-w-2xl tw-text-[15px] tw-font-normal tw-leading-5 tw-text-iron-300">
           {t(locale, "user.mentionShortcuts.description")}
         </p>
 
@@ -395,14 +395,14 @@ export default function UserPageMentionShortcuts({
             {isPending && (
               <p
                 aria-live="polite"
-                className="tw-m-0 tw-py-3 tw-text-sm tw-text-iron-400"
+                className="tw-m-0 tw-py-3 tw-text-meta/5 tw-font-normal tw-text-iron-500"
               >
                 {t(locale, LOADING_MESSAGE_KEY)}
               </p>
             )}
             {isError && <QuickTagsLoadError onRetry={() => void refetch()} />}
             {!isPending && !isError && sortedAliases.length === 0 && (
-              <div className="tw-rounded-xl tw-border tw-border-dashed tw-border-white/10 tw-p-4 tw-text-center tw-text-sm tw-text-iron-400">
+              <div className="tw-rounded-xl tw-border tw-border-dashed tw-border-white/10 tw-p-4 tw-text-center tw-text-meta/5 tw-font-normal tw-text-iron-500">
                 {t(locale, "user.mentionShortcuts.empty")}
               </div>
             )}

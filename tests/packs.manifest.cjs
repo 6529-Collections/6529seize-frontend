@@ -425,7 +425,10 @@ const PACKS = [
     ...sandboxPack(
       "test:e2e:native-competition-sandbox",
       "Native competition context, parallel budgets and navigation against the local mock API.",
-      ["tests/social/native-competition-sandbox.spec.ts"],
+      [
+        "tests/social/native-competition-sandbox.spec.ts",
+        "tests/social/wave-notification-settings-sandbox.spec.ts",
+      ],
       {
         ...AUTH_SANDBOX_ENV,
         NEXT_PUBLIC_FEATURE_MULTI_COMPETITION: "true",

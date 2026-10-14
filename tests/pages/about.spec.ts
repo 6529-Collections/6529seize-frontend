@@ -10,12 +10,19 @@ test.describe("About Pages @smoke @medium @large", () => {
     await page.goto("/about", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
     await expect(page).toHaveTitle("About");
+    await expect(
+      page
+        .getByRole("main")
+        .getByRole("link", { name: /prenodes/i, includeHidden: true })
+    ).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
     await expect(
       page.getByRole("heading", { level: 1, name: "About 6529" })
     ).toBeVisible();
     await expect(
-      page.locator("main").getByText("Delegation & Wallets")
+      page
+        .getByRole("main")
+        .getByRole("heading", { level: 2, name: "Safe Collecting" })
     ).toBeVisible();
     await expect(
       page.getByRole("link", { name: "Open page: GDRC" })
@@ -72,10 +79,13 @@ test.describe("About Pages @smoke @medium @large", () => {
       .click();
     const contentsMenu = page.getByRole("menu");
     await expect(
+      contentsMenu.getByRole("menuitem", { name: /prenodes/i })
+    ).toHaveCount(0);
+    await expect(
       contentsMenu.getByText("About", { exact: true })
     ).toBeVisible();
     await expect(
-      contentsMenu.getByText("Delegation & Wallets", { exact: true })
+      contentsMenu.getByRole("group", { name: "Safe Collecting", exact: true })
     ).toBeVisible();
     await expect(
       contentsMenu.getByRole("menuitem", { name: /Go to page: GDRC/i })

@@ -104,9 +104,7 @@ export const getMessageIdFromPathname = (
   }
 };
 
-const isWaveCreatePathname = (
-  pathname: string | null | undefined
-): boolean => {
+const isWaveCreatePathname = (pathname: string | null | undefined): boolean => {
   if (!pathname?.startsWith("/waves/")) {
     return false;
   }
@@ -119,9 +117,10 @@ export const hidesMobileBottomNavigation = ({
 }: {
   pathname: string | null | undefined;
 }): boolean =>
-  // The create-wave route is a focused full-screen flow with its own sticky
-  // footer; hide the floating dock so it doesn't overlap Prev/Next.
+  // Creation routes own their bottom actions; hide the floating dock so it
+  // doesn't overlap those controls.
   isWaveCreatePathname(pathname) ||
+  pathname === "/messages/create" ||
   getWaveIdFromPathname(pathname) !== null ||
   getMessageIdFromPathname(pathname) !== null;
 
