@@ -35,6 +35,7 @@ import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import LazyWaveDropsSearchModal, {
   preloadWaveDropsSearchModal,
+  useWaveDropsSearchModalIdlePreload,
 } from "@/components/waves/drops/search/LazyWaveDropsSearchModal";
 import WaveDescriptionPopover from "@/components/waves/header/WaveDescriptionPopover";
 import WavePicture from "../../../waves/WavePicture";
@@ -304,6 +305,10 @@ export default function MyStreamWaveTabsHeader({
   const { isApp } = useDeviceInfo();
   const { connectedProfile, activeProfileProxy } = useAuth();
   const [openSearch, setOpenSearch] = useState<OpenSearch>(null);
+
+  // Warm the wave search modal once the page is idle, so the first open does
+  // not wait on the network. The chunk stays out of first-load JS.
+  useWaveDropsSearchModalIdlePreload();
   const descriptionPreviewRef = useRef<HTMLSpanElement>(null);
   const [isDescriptionPreviewTruncated, setIsDescriptionPreviewTruncated] =
     useState(false);

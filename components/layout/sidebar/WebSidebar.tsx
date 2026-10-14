@@ -6,7 +6,10 @@ import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useKey } from "react-use";
 import BellIcon from "@/components/common/icons/BellIcon";
-import LazyHeaderSearchModal from "@/components/header/header-search/LazyHeaderSearchModal";
+import LazyHeaderSearchModal, {
+  preloadHeaderSearchModal,
+  useHeaderSearchModalIdlePreload,
+} from "@/components/header/header-search/LazyHeaderSearchModal";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
@@ -54,6 +57,10 @@ function WebSidebar({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const showDesktopSearch = !isMobile;
+
+  // Warm the search modal once the page is idle, so the first open does not
+  // wait on the network. The chunk stays out of first-load JS.
+  useHeaderSearchModalIdlePreload(showDesktopSearch);
 
   useKey(
     (event) => event.key === "k",
@@ -194,6 +201,8 @@ function WebSidebar({
                           event?.stopPropagation();
                           setIsSearchOpen(true);
                         }}
+                        onPointerEnter={preloadHeaderSearchModal}
+                        onFocus={preloadHeaderSearchModal}
                         icon={MagnifyingGlassIcon}
                         active={false}
                         collapsed={shouldShowCollapsed}
