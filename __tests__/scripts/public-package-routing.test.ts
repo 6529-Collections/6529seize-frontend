@@ -44,16 +44,29 @@ describe("public package policy", () => {
 
     const manifest = JSON.parse(
       fs.readFileSync(path.join(repositoryRoot, "package.json"), "utf8")
-    ) as { devDependencies: Record<string, string> };
+    ) as Record<string, unknown>;
     const npmrc = fs.readFileSync(path.join(repositoryRoot, ".npmrc"), "utf8");
     const lockfile = fs.readFileSync(
       path.join(repositoryRoot, "pnpm-lock.yaml"),
       "utf8"
     );
 
-    expect(manifest.devDependencies).not.toHaveProperty(
-      "@6529-collections/release-request"
+    for (const section of [
+      "dependencies",
+      "devDependencies",
+      "peerDependencies",
+      "optionalDependencies",
+    ]) {
+      expect(manifest[section] ?? {}).not.toHaveProperty(
+        "@6529-collections/release-request"
+      );
+    }
+    const workspace = fs.readFileSync(
+      path.join(repositoryRoot, "pnpm-workspace.yaml"),
+      "utf8"
     );
+    expect(workspace).not.toContain("minimumReleaseAgeExclude");
+    expect(lockfile).not.toContain("@6529-collections/release-request");
     expect(npmrc).not.toContain("_authToken");
     expect(npmrc).not.toContain("npm.pkg.github.com");
     expect(lockfile).not.toContain("npm.pkg.github.com");
@@ -226,6 +239,28 @@ describe("public package policy", () => {
     ).toThrow("package.json direct dependency source is not allowed: sharp");
   });
 
+  it.each([
+    "dependencies",
+    "devDependencies",
+    "peerDependencies",
+    "optionalDependencies",
+  ])(
+    "applies ordinary public package rules to the removed CLI in %s",
+    (section) => {
+      const manifest = JSON.parse(
+        fs.readFileSync(path.join(repositoryRoot, "package.json"), "utf8")
+      ) as Record<string, unknown>;
+      expect(() =>
+        policy.validatePackageJson(
+          JSON.stringify({
+            ...manifest,
+            [section]: { "@6529-collections/release-request": "0.0.5" },
+          })
+        )
+      ).not.toThrow();
+    }
+  );
+
   it("preserves the age rule and rejects new exceptions", () => {
     const workspace = fs.readFileSync(
       path.join(repositoryRoot, "pnpm-workspace.yaml"),
@@ -234,6 +269,11 @@ describe("public package policy", () => {
 
     expect(() =>
       policy.validateWorkspace(workspace.replace("10080", "0"))
+    ).toThrow("must keep the seven-day package age rule");
+    expect(() =>
+      policy.validateWorkspace(
+        `# minimumReleaseAge: 10080\n${workspace.replace("minimumReleaseAge: 10080", "minimumReleaseAge: 0")}`
+      )
     ).toThrow("must keep the seven-day package age rule");
     expect(() =>
       policy.validateWorkspace(
@@ -290,7 +330,7 @@ describe("public package policy", () => {
     ).toThrow("overrides must use registry package versions only");
   });
 
-  it("rejects changes to the reviewed lockfile resolution", () => {
+  it("rejects unsafe lockfile resolutions", () => {
     const lockfile = fs.readFileSync(
       path.join(repositoryRoot, "pnpm-lock.yaml"),
       "utf8"
@@ -354,9 +394,11 @@ describe("public package policy", () => {
         )
       )
     ).toThrow("duplicate key: duplicate@1.0.0");
-    expect(() =>
-      policy.validateLockfile(lockfile.replace("snapshots:\n", "other:\n"))
-    ).toThrow("missing or invalid mapping");
+    for (const section of ["importers", "packages", "snapshots"]) {
+      expect(() =>
+        policy.validateLockfile(lockfile.replace(`${section}:\n`, "other:\n"))
+      ).toThrow("missing or invalid mapping");
+    }
   });
 
   const itWithSymlinkSupport = process.platform === "win32" ? it.skip : it;

@@ -70,6 +70,12 @@ arguments, and package-manager environment overrides before pnpm starts. It reje
 registry, credential, proxy, TLS, hook, and project-root overrides. Package
 traffic stays behind Socket Firewall; no registry bypass is needed.
 
+The removed release-request CLI has no special package pin, exemption or ban.
+Any future addition follows the ordinary public dependency policy and review
+process. Lockfile resolutions still require integrity hashes and public npm
+tarballs, and this repository requires the `importers`, `packages` and
+`snapshots` mappings. The seven-day age rule permits no package exceptions.
+
 To report or apply audit fixes, use the same secure wrapper path:
 
 ```bash
