@@ -3469,7 +3469,9 @@
       "keywords": ["direct", "message", "messages", "dm", "private", "wave"],
       "facts": [
         "Direct-message waves live under /messages and individual message threads use /messages/{waveId}.",
-        "A direct-message creation flow is available at /messages/create.",
+        "New message opens at /messages/create in the app or with create=dm on web. Web uses a bottom sheet below 768px and a centered dialog on larger screens. It starts compactly and grows with search results; resizing preserves the query and selected people. The app screen has a back action and hides the floating tab bar.",
+        "In the To: field, search by handle with at least 3 characters. Results stay visible after the keyboard closes, show level and positive TDH, and have selection circles. Tap a result to toggle it; selected people appear as removable avatar chips inside the field. Backspace in an empty field removes the last person.",
+        "The bottom action reads Message followed by the person's handle, or Message followed by the number of people for a group. It reads Message and stays disabled with no recipients, then reads Creating... during submission. Failures preserve recipients for retry; a failed search offers Retry search.",
         "Direct-message recipient search ranks exact, prefix, and substring handle matches before ENS or auto-wallet matches, then orders each match group from highest to lowest profile level.",
         "Direct messages use wave mechanics but are surfaced separately from standard public wave routes.",
         "Direct-message content stays gated until wallet and profile prerequisites are resolved."
