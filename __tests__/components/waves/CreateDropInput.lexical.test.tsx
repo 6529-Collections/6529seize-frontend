@@ -27,6 +27,29 @@ import CreateDropInput, {
 
 jest.unmock("lexical");
 
+const originalRangeRect = Object.getOwnPropertyDescriptor(
+  Range.prototype,
+  "getBoundingClientRect"
+);
+beforeAll(() => {
+  // jsdom has no range layout; Lexical reads this when scrolling the caret.
+  Object.defineProperty(Range.prototype, "getBoundingClientRect", {
+    configurable: true,
+    value: () => new DOMRect(),
+  });
+});
+afterAll(() => {
+  if (originalRangeRect) {
+    Object.defineProperty(
+      Range.prototype,
+      "getBoundingClientRect",
+      originalRangeRect
+    );
+  } else {
+    Reflect.deleteProperty(Range.prototype, "getBoundingClientRect");
+  }
+});
+
 jest.mock("@/components/waves/CreateDropEmojiPicker", () => () => null);
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
@@ -338,4 +361,50 @@ it("does not submit an unfinished IME composition", async () => {
     completed: false,
   });
   composing.mockRestore();
+});
+
+it("does not reapply Lexical focus to an already focused input", async () => {
+  const ref = createRef<CreateDropInputHandles>();
+  renderInput(ref);
+  await waitFor(() => expect(mockLexicalEditor).not.toBeNull());
+  const editor = mockLexicalEditor!;
+  await act(async () =>
+    editor.update(
+      () => {
+        $getRoot()
+          .clear()
+          .append($createParagraphNode().append($createTextNode("Draft text")));
+      },
+      { discrete: true }
+    )
+  );
+  // WebKit focuses the editing host when a DOM selection moves into it.
+  // JSDOM lacks that side effect; retain the real selection update here.
+  const selection = window.getSelection()!;
+  const setBaseAndExtent = selection.setBaseAndExtent.bind(selection);
+  const selectionFocus = jest
+    .spyOn(selection, "setBaseAndExtent")
+    .mockImplementation((...args) => {
+      setBaseAndExtent(...args);
+      const root = editor.getRootElement();
+      if (root?.contains(args[0])) root.focus({ preventScroll: true });
+    });
+  const focus = jest.spyOn(editor, "focus");
+  try {
+    await act(async () => ref.current?.focus());
+    expect(screen.getByRole("textbox")).toHaveFocus();
+    expect(focus).toHaveBeenCalledTimes(1);
+    focus.mockClear();
+    await act(async () => ref.current?.focus());
+    expect(screen.getByRole("textbox")).toHaveFocus();
+    expect(focus).not.toHaveBeenCalled();
+    await act(async () => ref.current?.blur());
+    expect(screen.getByRole("textbox")).not.toHaveFocus();
+    await act(async () => ref.current?.focus());
+    await waitFor(() => expect(screen.getByRole("textbox")).toHaveFocus());
+    expect(focus).toHaveBeenCalledTimes(1);
+  } finally {
+    focus.mockRestore();
+    selectionFocus.mockRestore();
+  }
 });

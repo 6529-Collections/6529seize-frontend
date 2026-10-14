@@ -14,7 +14,7 @@ import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { getMentionedGroupsFromParts } from "@/helpers/waves/drop-group-mentions";
 import type { EditorState } from "lexical";
 import type { Dispatch, SetStateAction } from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   mergeMentionedUsers,
   type EditorMentionedUser,
@@ -57,7 +57,6 @@ export const useCreateDropDraftState = ({
   currentPartMentionedUsers,
   currentPartMentionedWaves,
   currentPartReferencedNfts,
-  submitting,
   setDrop,
   setFiles,
   setEditorState,
@@ -94,7 +93,6 @@ export const useCreateDropDraftState = ({
   readonly currentPartMentionedWaves: MentionedWave[];
   /** NFT references restored from the editor, including contract and token. */
   readonly currentPartReferencedNfts: ReferencedNft[];
-  readonly submitting: boolean;
   readonly setDrop: Dispatch<SetStateAction<CreateDropConfig | null>>;
   readonly setFiles: Dispatch<SetStateAction<File[]>>;
   readonly setEditorState: Dispatch<SetStateAction<EditorState | null>>;
@@ -116,7 +114,6 @@ export const useCreateDropDraftState = ({
   const [mentionedWaves, setMentionedWaves] = useState<MentionedWave[]>([]);
   const [dropEditorRefreshKey, setDropEditorRefreshKey] = useState(0);
   const createDropInputRef = useRef<CreateDropInputHandles | null>(null);
-  const shouldRefocusAfterChatSubmitRef = useRef(false);
 
   const onReferencedNft = useCallback((newNft: ReferencedNft) => {
     setReferencedNfts((current) => [
@@ -346,22 +343,8 @@ export const useCreateDropDraftState = ({
     setDropEditorRefreshKey((prev) => prev + 1);
   };
 
-  useEffect(() => {
-    if (!shouldRefocusAfterChatSubmitRef.current || submitting) {
-      return;
-    }
-
-    shouldRefocusAfterChatSubmitRef.current = false;
-    const frameId = requestAnimationFrame(() => {
-      createDropInputRef.current?.focus();
-    });
-
-    return () => cancelAnimationFrame(frameId);
-  }, [dropEditorRefreshKey, submitting]);
-
   return {
     createDropInputRef,
-    shouldRefocusAfterChatSubmitRef,
     dropEditorRefreshKey,
     onReferencedNft,
     onMentionedUser,

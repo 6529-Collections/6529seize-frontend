@@ -102,7 +102,11 @@ const EditorCommandsPlugin = forwardRef<EditorCommandsPluginHandles>(
     useImperativeHandle(
       ref,
       () => ({
-        focus: () => editor.focus(),
+        focus: () => {
+          if (editor.getRootElement() !== document.activeElement) {
+            editor.focus();
+          }
+        },
         blur: () => editor.blur(),
         isComposing: () => editor.isComposing(),
         getEditorState: () => editor.getEditorState(),
