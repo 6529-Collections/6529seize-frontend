@@ -10,6 +10,7 @@ import { t } from "@/i18n/messages";
 import { useCompetitionDropNavigation } from "@/hooks/competitions/useCompetitionDropNavigation";
 import { useCompetitionViewer } from "@/hooks/competitions/useCompetitionQueries";
 import MyStreamWaveMyVotes from "@/components/brain/my-stream/votes/MyStreamWaveMyVotes";
+import HeaderUserConnect from "@/components/header/user/HeaderUserConnect";
 import CompetitionMyVotes from "./CompetitionMyVotes";
 import CompetitionVoters from "./CompetitionVoters";
 import CompetitionVoteActivity from "./CompetitionVoteActivity";
@@ -23,9 +24,12 @@ function CompetitionPersonalVotes() {
   const navigateDrop = useCompetitionDropNavigation();
   if (!viewer)
     return (
-      <p className="tw-p-4 tw-text-sm tw-text-iron-400">
-        {t(locale, "competitions.signIn")}
-      </p>
+      <div className="tw-flex tw-flex-col tw-items-start tw-gap-3 tw-p-4">
+        <p className="tw-m-0 tw-text-sm tw-italic tw-text-iron-400">
+          {t(locale, "competitions.signIn")}
+        </p>
+        <HeaderUserConnect label={t(locale, "competitions.connectWallet")} />
+      </div>
     );
   return hub.legacy_primary_competition_id === competition.id ? (
     <MyStreamWaveMyVotes wave={wave} onDropClick={navigateDrop} />
@@ -51,7 +55,7 @@ export default function CompetitionVotes() {
     activity: t(locale, "competitions.voteActivity"),
   };
   return (
-    <div className="tw-space-y-4" key={competition.id}>
+    <div className="tw-space-y-4 [&_[role=status]_p]:tw-italic" key={competition.id}>
       <Tabs
         transition
         variant="compactPills"
