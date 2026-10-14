@@ -25,7 +25,7 @@ function CompetitionPersonalVotes() {
   if (!viewer)
     return (
       <div className="tw-flex tw-flex-col tw-items-start tw-gap-3 tw-p-4">
-        <p className="tw-m-0 tw-text-sm tw-text-iron-400">
+        <p className="tw-m-0 tw-text-sm tw-italic tw-text-iron-400">
           {t(locale, "competitions.signIn")}
         </p>
         <HeaderUserConnect label={t(locale, "competitions.connectWallet")} />
@@ -55,7 +55,7 @@ export default function CompetitionVotes() {
     activity: t(locale, "competitions.voteActivity"),
   };
   return (
-    <div className="tw-space-y-4" key={competition.id}>
+    <div className="tw-space-y-4 [&_[role=status]_p]:tw-italic" key={competition.id}>
       <Tabs
         transition
         variant="compactPills"
