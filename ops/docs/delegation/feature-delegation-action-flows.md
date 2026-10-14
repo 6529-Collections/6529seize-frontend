@@ -24,7 +24,7 @@ and submit/recovery behavior.
   - `Register Delegation Manager` -> `/safe-collecting/register-sub-delegation`
 - Open write routes directly by URL.
 - Profile owners can select `Add another wallet` beside `Wallet Checker` in
-  `ID Statements` → `Consolidated Addresses` to open
+  the profile’s `Wallet` section to open
   `/safe-collecting/build-consolidation`. This entry is hidden while a proxy
   profile is active and once the profile has 4 wallets.
 - The normal `register-consolidation` form links to the guided setup.
