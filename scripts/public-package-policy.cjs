@@ -3,15 +3,6 @@ const path = require("node:path");
 
 const NO_FOLLOW = fs.constants.O_NOFOLLOW ?? 0;
 
-const RELEASE_PACKAGE = "@6529-collections/release-request";
-const RELEASE_VERSION = "0.0.5";
-const RELEASE_REFERENCE = `${RELEASE_PACKAGE}@${RELEASE_VERSION}`;
-const RELEASE_INTEGRITY =
-  "sha512-oTnQnQdarXPu6cMj71NHCQxKwfpxem94axmBRsFW+ze3WUx5oKRlWw8jNtLcNkm13n4EOPQrt+gFr1zdbXPf9w==";
-const RELEASE_DEPENDENCIES = new Map([
-  ["ajv", "8.20.0"],
-  ["ajv-formats", "3.0.1(ajv@8.20.0)"],
-]);
 const ALLOWED_BUILD_DEPENDENCIES = new Set([
   "@nestjs/core",
   "@openapitools/openapi-generator-cli",
@@ -28,7 +19,6 @@ const ALLOWED_BUILD_DEPENDENCIES = new Set([
 const ALLOWED_WORKSPACE_KEYS = new Set([
   "allowBuilds",
   "minimumReleaseAge",
-  "minimumReleaseAgeExclude",
   "overrides",
 ]);
 const SECURE_REPOSITORY_ROOT_ARGUMENT = "--seize-secure-repository-root";
@@ -38,12 +28,6 @@ const ALLOWED_COMMANDS = new Set([
   "audit",
   "install",
   "rebuild",
-  "remove",
-  "update",
-]);
-const PACKAGE_MUTATION_COMMANDS = new Set([
-  "add",
-  "install",
   "remove",
   "update",
 ]);
@@ -129,11 +113,6 @@ function validatePackageJson(text) {
   if (manifest.packageManager !== "pnpm@10.33.0") {
     throw policyError("packageManager must remain pnpm@10.33.0");
   }
-  if (manifest.devDependencies?.[RELEASE_PACKAGE] !== RELEASE_VERSION) {
-    throw policyError(
-      `${RELEASE_PACKAGE} must be an exact ${RELEASE_VERSION} dev dependency`
-    );
-  }
   for (const section of [
     "dependencies",
     "devDependencies",
@@ -141,24 +120,9 @@ function validatePackageJson(text) {
     "peerDependencies",
   ]) {
     const dependencies = manifest[section];
-    if (
-      section !== "devDependencies" &&
-      dependencies?.[RELEASE_PACKAGE] !== undefined
-    ) {
-      throw policyError(`${RELEASE_PACKAGE} may exist only in devDependencies`);
-    }
     for (const [dependencyName, dependencySpec] of Object.entries(
       dependencies ?? {}
     )) {
-      if (
-        dependencyName !== RELEASE_PACKAGE &&
-        typeof dependencySpec === "string" &&
-        dependencySpec.includes(RELEASE_PACKAGE)
-      ) {
-        throw policyError(
-          `${RELEASE_PACKAGE} cannot be referenced through another dependency`
-        );
-      }
       if (
         typeof dependencySpec === "string" &&
         isDirectDependencySource(dependencySpec)
@@ -181,14 +145,20 @@ function validateWorkspace(text) {
   const topLevelKeys = new Set();
   for (const rawLine of text.split(/\r?\n/)) {
     const trimmedLine = rawLine.trim();
-    if (trimmedLine === "" || trimmedLine.startsWith("#") || /^\s/.test(rawLine)) {
+    if (
+      trimmedLine === "" ||
+      trimmedLine.startsWith("#") ||
+      /^\s/.test(rawLine)
+    ) {
       continue;
     }
     const keyMatch = rawLine.match(
       /^(?:"([^"\r\n]+)"|'([^'\r\n]+)'|([A-Za-z0-9_.@/+\-]+))\s*:/
     );
     if (!keyMatch) {
-      throw policyError("pnpm-workspace.yaml has an unsupported top-level line");
+      throw policyError(
+        "pnpm-workspace.yaml has an unsupported top-level line"
+      );
     }
     const quotedKey = keyMatch[1] ?? keyMatch[2];
     if (quotedKey?.includes("\\")) {
@@ -211,26 +181,10 @@ function validateWorkspace(text) {
     }
   }
   if (!/^minimumReleaseAge:\s*10080\s*$/m.test(text)) {
-    throw policyError("pnpm-workspace.yaml must keep the seven-day package age rule");
-  }
-  const exceptionBlock = text.match(
-    /^minimumReleaseAgeExclude:\s*(?:\r?\n|$)((?:(?:[ \t]+[^\r\n]*|[ \t]*)\r?\n?)*)/m
-  );
-  const exceptions = (exceptionBlock?.[1] ?? "")
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line !== "" && !line.startsWith("#"));
-  if (
-    exceptions.length !== 1 ||
-    !new RegExp(
-      `^-\\s*["']?${RELEASE_REFERENCE.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["']?$`
-    ).test(exceptions[0])
-  ) {
     throw policyError(
-      `minimumReleaseAgeExclude must contain only ${RELEASE_REFERENCE}`
+      "pnpm-workspace.yaml must keep the seven-day package age rule"
     );
   }
-
   const allowBuildsBlock = text.match(
     /^allowBuilds:\s*(?:\r?\n|$)((?:(?:[ \t]+[^\r\n]*|[ \t]*)\r?\n?)*)/m
   );
@@ -274,7 +228,9 @@ function validateWorkspace(text) {
       /^(?:"([^"\\\r\n]+)"|'([^'\\\r\n]+)'|([^:'"\\\r\n][^:\r\n]*?))\s*:\s*(?:"([^"\\\r\n]+)"|'([^'\\\r\n]+)'|([^#\r\n]+?))\s*$/
     );
     if (!entry) {
-      throw policyError("overrides must use simple package selectors and versions");
+      throw policyError(
+        "overrides must use simple package selectors and versions"
+      );
     }
     const selector = (entry[1] ?? entry[2] ?? entry[3]).trim();
     const version = (entry[4] ?? entry[5] ?? entry[6]).trim();
@@ -282,17 +238,9 @@ function validateWorkspace(text) {
       selector === "<<" ||
       /^[&*!]/.test(version) ||
       !/^[A-Za-z0-9_.@/+<>=~^|*\- ]+$/.test(selector) ||
-      !/^(?:\$[A-Za-z0-9_.@/+\-]+|[0-9A-Za-z.*<>=~^|+\- ]+)$/.test(
-        version
-      )
+      !/^(?:\$[A-Za-z0-9_.@/+\-]+|[0-9A-Za-z.*<>=~^|+\- ]+)$/.test(version)
     ) {
       throw policyError("overrides must use registry package versions only");
-    }
-    if (
-      selector.includes(RELEASE_PACKAGE) ||
-      version.includes(RELEASE_PACKAGE)
-    ) {
-      throw policyError(`${RELEASE_PACKAGE} cannot be changed by overrides`);
     }
     if (overrides.has(selector)) {
       throw policyError(`duplicate package override: ${selector}`);
@@ -354,7 +302,7 @@ function readYamlMapping(lines, start, end, indentation) {
 function findUniqueYamlBlock(lines, start, end, indentation, key) {
   const values = readYamlMapping(lines, start, end, indentation);
   if (!values.has(key) || values.get(key) !== "") {
-    throw policyError("pnpm-lock.yaml does not pin the reviewed public package");
+    throw policyError("pnpm-lock.yaml has a missing or invalid mapping");
   }
 
   let blockStart = -1;
@@ -366,7 +314,7 @@ function findUniqueYamlBlock(lines, start, end, indentation, key) {
     }
   }
   if (blockStart < 0) {
-    throw policyError("pnpm-lock.yaml does not pin the reviewed public package");
+    throw policyError("pnpm-lock.yaml has a missing or invalid mapping");
   }
 
   let blockEnd = end;
@@ -393,7 +341,9 @@ function validateLockfile(text) {
   if (
     /(?:^|[^a-z0-9.-])npm\.pkg\.github\.com(?=[:/]|[^a-z0-9.-]|$)/i.test(text)
   ) {
-    throw policyError("pnpm-lock.yaml cannot resolve packages from GitHub Packages");
+    throw policyError(
+      "pnpm-lock.yaml cannot resolve packages from GitHub Packages"
+    );
   }
   for (const rawLine of text.split(/\r?\n/)) {
     const line = rawLine.trim();
@@ -408,7 +358,9 @@ function validateLockfile(text) {
       /:\s*[&*][A-Za-z0-9_-]+(?:\s|$)/.test(line) ||
       /^-\s*[&*][A-Za-z0-9_-]+(?:\s|$)/.test(line)
     ) {
-      throw policyError("pnpm-lock.yaml aliases and merge keys are not supported");
+      throw policyError(
+        "pnpm-lock.yaml aliases and merge keys are not supported"
+      );
     }
     if (!/^(?:resolution|"resolution"|'resolution')\s*:/.test(line)) {
       continue;
@@ -421,12 +373,19 @@ function validateLockfile(text) {
     for (const rawField of resolution[1].split(",")) {
       const separator = rawField.indexOf(":");
       if (separator < 1) {
-        throw policyError("pnpm-lock.yaml has an unsupported package resolution");
+        throw policyError(
+          "pnpm-lock.yaml has an unsupported package resolution"
+        );
       }
       const key = rawField.slice(0, separator).trim();
-      const value = rawField.slice(separator + 1).trim().replace(/^["']|["']$/g, "");
+      const value = rawField
+        .slice(separator + 1)
+        .trim()
+        .replace(/^["']|["']$/g, "");
       if (fields.has(key) || (key !== "integrity" && key !== "tarball")) {
-        throw policyError("pnpm-lock.yaml has an unsupported package resolution");
+        throw policyError(
+          "pnpm-lock.yaml has an unsupported package resolution"
+        );
       }
       fields.set(key, value);
     }
@@ -441,98 +400,9 @@ function validateLockfile(text) {
       throw policyError("pnpm-lock.yaml cannot resolve a non-public tarball");
     }
   }
-  if (text.includes(`${RELEASE_PACKAGE}@0.0.3`)) {
-    throw policyError("pnpm-lock.yaml still references private version 0.0.3");
-  }
-  for (const suffix of text.split(`${RELEASE_PACKAGE}@`).slice(1)) {
-    const referencedVersion = suffix.match(/^[0-9A-Za-z.+-]+/)?.[0];
-    if (referencedVersion !== RELEASE_VERSION) {
-      throw policyError("pnpm-lock.yaml references an unreviewed package version");
-    }
-  }
-
-  const importers = findUniqueYamlBlock(lines, 0, lines.length, 0, "importers");
-  const rootImporter = findUniqueYamlBlock(
-    lines,
-    importers.start,
-    importers.end,
-    2,
-    "."
-  );
-  const devDependencies = findUniqueYamlBlock(
-    lines,
-    rootImporter.start,
-    rootImporter.end,
-    4,
-    "devDependencies"
-  );
-  const releaseImporter = findUniqueYamlBlock(
-    lines,
-    devDependencies.start,
-    devDependencies.end,
-    6,
-    RELEASE_PACKAGE
-  );
-  const importerValues = readYamlMapping(
-    lines,
-    releaseImporter.start,
-    releaseImporter.end,
-    8
-  );
-
-  const packages = findUniqueYamlBlock(lines, 0, lines.length, 0, "packages");
-  const releaseKey = `${RELEASE_PACKAGE}@${RELEASE_VERSION}`;
-  const releasePackage = findUniqueYamlBlock(
-    lines,
-    packages.start,
-    packages.end,
-    2,
-    releaseKey
-  );
-  const packageValues = readYamlMapping(
-    lines,
-    releasePackage.start,
-    releasePackage.end,
-    4
-  );
-  const expectedResolution = `{integrity: ${RELEASE_INTEGRITY}}`;
-  const expectedTarballResolution = `{integrity: ${RELEASE_INTEGRITY}, tarball: https://registry.npmjs.org/${RELEASE_PACKAGE}/-/${RELEASE_PACKAGE.split("/")[1]}-${RELEASE_VERSION}.tgz}`;
-
-  const snapshots = findUniqueYamlBlock(lines, 0, lines.length, 0, "snapshots");
-  const releaseSnapshot = findUniqueYamlBlock(
-    lines,
-    snapshots.start,
-    snapshots.end,
-    2,
-    releaseKey
-  );
-  const snapshotDependencies = findUniqueYamlBlock(
-    lines,
-    releaseSnapshot.start,
-    releaseSnapshot.end,
-    4,
-    "dependencies"
-  );
-  const snapshotValues = readYamlMapping(
-    lines,
-    snapshotDependencies.start,
-    snapshotDependencies.end,
-    6
-  );
-
-  if (
-    importerValues.size !== 2 ||
-    importerValues.get("specifier") !== RELEASE_VERSION ||
-    importerValues.get("version") !== RELEASE_VERSION ||
-    (packageValues.get("resolution") !== expectedResolution &&
-      packageValues.get("resolution") !== expectedTarballResolution) ||
-    snapshotValues.size !== RELEASE_DEPENDENCIES.size ||
-    [...RELEASE_DEPENDENCIES].some(
-      ([dependencyName, dependencyVersion]) =>
-        snapshotValues.get(dependencyName) !== dependencyVersion
-    )
-  ) {
-    throw policyError("pnpm-lock.yaml does not pin the reviewed public package");
+  for (const key of ["importers", "packages", "snapshots"]) {
+    const block = findUniqueYamlBlock(lines, 0, lines.length, 0, key);
+    readYamlMapping(lines, block.start, block.end, 2);
   }
 }
 
@@ -561,14 +431,6 @@ function validateArguments(args) {
   }
   const allowedOptions = ALLOWED_OPTIONS_BY_COMMAND.get(args[0]) ?? new Set();
   for (const argument of args.slice(1)) {
-    if (
-      PACKAGE_MUTATION_COMMANDS.has(args[0]) &&
-      (argument === RELEASE_PACKAGE || argument.startsWith(`${RELEASE_PACKAGE}@`))
-    ) {
-      throw policyError(
-        `${RELEASE_PACKAGE} cannot be changed by a package command`
-      );
-    }
     if (argument.startsWith("-")) {
       if (!allowedOptions.has(argument)) {
         throw policyError(`pnpm option is not allowed: ${argument}`);
@@ -596,7 +458,10 @@ function validateEnvironment(environment) {
     }
     const name = normalizedKey.slice("npmconfig".length);
     if (name === "storedir") {
-      if (typeof environment[key] !== "string" || !path.isAbsolute(environment[key])) {
+      if (
+        typeof environment[key] !== "string" ||
+        !path.isAbsolute(environment[key])
+      ) {
         throw policyError(`package store directory must be absolute: ${key}`);
       }
       continue;
@@ -644,9 +509,6 @@ function validateRepositoryPolicy({
 }
 
 module.exports = {
-  RELEASE_INTEGRITY,
-  RELEASE_PACKAGE,
-  RELEASE_VERSION,
   SECURE_PNPM_BINARY_ARGUMENT,
   SECURE_REPOSITORY_ROOT_ARGUMENT,
   validateArguments,

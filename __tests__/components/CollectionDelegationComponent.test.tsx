@@ -197,7 +197,7 @@ describe("CollectionDelegationComponent", () => {
     );
     expect(screen.getByText("Test Collection")).toBeInTheDocument();
 
-    const back = screen.getAllByText(/Back to Delegation Center/i)[0];
+    const back = screen.getAllByText(/Back to Safe Collecting/i)[0];
     fireEvent.click(back);
     expect(setSection).toHaveBeenCalledWith(DelegationCenterSection.CENTER);
   });
@@ -215,7 +215,7 @@ describe("CollectionDelegationComponent", () => {
       level: 1,
     });
     const topBackButton = screen.getAllByRole("button", {
-      name: /Back to Delegation Center/i,
+      name: /Back to Safe Collecting/i,
     })[0];
 
     expect(

@@ -8,10 +8,6 @@
   question, follow [Verify GitHub authority](ops/skills/deploy-6529/SKILL.md#verify-github-authority).
   Check the authenticated account, repo permissions, actual required team and
   effective rules; preserve existing explicit authorization for the release.
-- For new staging or direct production release intents that include frontend,
-  follow the skill's [Coordinator release recording](ops/skills/deploy-6529/SKILL.md#coordinator-release-recording)
-  step before release merges or deployments. Preserve this current integration
-  when changing deployment instructions; keep its details in the skill.
 - For staging, merge the development branch into the latest `1a-staging` and
   push. Frontend changes automatically start `Web Deploy - STAGING`; backend
   changes require dispatching `Deploy a service` for the required services.
