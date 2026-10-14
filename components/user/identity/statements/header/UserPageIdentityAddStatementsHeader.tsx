@@ -61,7 +61,7 @@ export default function UserPageIdentityAddStatementsHeader({
   return (
     <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3">
       <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1">
-        <h3 className="tw-m-0 tw-min-w-0 tw-break-words tw-text-lg tw-font-semibold tw-text-iron-100 sm:tw-text-xl">
+        <h3 className="tw-m-0 tw-min-w-0 tw-break-words tw-text-lg tw-font-semibold tw-text-iron-100">
           {t(locale, "user.profile.identity.statements.heading", {
             name: possessionName,
           })}
@@ -75,7 +75,7 @@ export default function UserPageIdentityAddStatementsHeader({
           className="tw-inline-flex tw-h-8 tw-w-8 tw-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-white/5 hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
         >
           <svg
-            className="tw-h-4 tw-w-4"
+            className="tw-h-[18px] tw-w-[18px]"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"

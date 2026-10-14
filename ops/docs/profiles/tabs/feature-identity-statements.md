@@ -16,7 +16,9 @@ statements card. Desktop shows the same content in the right side of the
 combined Identity layout. The profile’s personalized `Addresses` heading comes
 first, with its wallet rows and actions directly below. A divider introduces the
 profile’s `ID Statements` heading, information button, and compact owner-only
-`Add` action. There is no separate `Consolidated Addresses` label.
+`Add` action. Both section headings use the same compact 18px type on desktop
+and mobile, with natural wrapping for longer names. There is no separate
+`Consolidated Addresses` label.
 
 The information button beside `ID Statements` opens a tooltip on hover, keyboard
 focus, or tap. It explains that statements are optional and permanently public,
