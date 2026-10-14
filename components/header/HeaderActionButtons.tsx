@@ -3,17 +3,18 @@
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import { usePathname, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect } from "react";
 import { getActiveViewFromUrl } from "../navigation/ViewContext";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 
 function HeaderActionButtonsContent() {
+  const router = useRouter();
   const pathname = usePathname();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
-  const { openWave, openDirectMessage } = useCreateModalState();
+  const { openWave, openDirectMessage, isApp } = useCreateModalState();
 
   const baseButtonClasses =
     "tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-black tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-iron-800";
@@ -31,6 +32,14 @@ function HeaderActionButtonsContent() {
   const showWaveButton =
     !isOnWaveCreateRoute && (isOnWavesRoute || isWaveContext);
   const showMessagesButton = isOnMessagesRoute || isMessagesContext;
+  const shouldPrefetchDirectMessage =
+    isApp && showMessagesButton && !showWaveButton;
+
+  useEffect(() => {
+    if (shouldPrefetchDirectMessage) {
+      router.prefetch("/messages/create");
+    }
+  }, [router, shouldPrefetchDirectMessage]);
 
   if (showWaveButton) {
     const onCreateWave = openWave;

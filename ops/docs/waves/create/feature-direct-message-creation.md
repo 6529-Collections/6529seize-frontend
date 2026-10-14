@@ -71,6 +71,9 @@ identities.
 - Selecting your own identity shows
   `You are already included in this direct message.` and does not add a
   recipient chip.
+- In the app, the header prepares the new-message route in the background while
+  its create button is visible. Opening can still show a loading state if the
+  route or account is not ready.
 - Search requests do not run until at least 3 characters are typed.
 - Before 3 characters, no results or instructional paragraph appears.
 - Selecting the same recipient again removes them, including wallet aliases.
