@@ -18,7 +18,8 @@ describe("WaveLeaderboardRightSidebarVoter", () => {
         creditType={ApiWaveCreditType.Rep}
       />
     );
-    expect(screen.getByText("+2")).toHaveClass("tw-text-emerald-400");
+    expect(screen.getByText("+2")).toHaveClass("tw-text-green");
+    expect(screen.getByText("+2").closest("a")).toBeNull();
     expect(screen.queryByText("-1")).not.toBeInTheDocument();
   });
 
@@ -31,7 +32,8 @@ describe("WaveLeaderboardRightSidebarVoter", () => {
         creditType={ApiWaveCreditType.Rep}
       />
     );
-    expect(screen.getByText("-1")).toHaveClass("tw-text-rose-400");
+    expect(screen.getByText("-1")).toHaveClass("tw-text-red");
+    expect(screen.getByText("-1").closest("a")).toBeNull();
   });
 
   it("uses the primary address when the voter has no handle", () => {
