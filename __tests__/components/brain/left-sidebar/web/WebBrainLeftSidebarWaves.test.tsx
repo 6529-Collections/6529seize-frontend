@@ -61,13 +61,19 @@ describe("WebBrainLeftSidebarWaves", () => {
   });
 
   it("loads the next page only while the list is idle", () => {
-    render(<WebBrainLeftSidebarWaves scrollContainerRef={{ current: null }} />);
+    const { rerender } = render(
+      <WebBrainLeftSidebarWaves scrollContainerRef={{ current: null }} />
+    );
     fireEvent.click(screen.getByTestId("list"));
     expect(fetchNextPage).toHaveBeenCalledTimes(1);
 
     mockStream(true);
-    render(<WebBrainLeftSidebarWaves scrollContainerRef={{ current: null }} />);
-    fireEvent.click(screen.getAllByTestId("list")[1]!);
+    rerender(
+      <WebBrainLeftSidebarWaves scrollContainerRef={{ current: null }} />
+    );
+    const list = screen.getByTestId("list");
+    expect(list).toHaveAttribute("data-fetching", "true");
+    fireEvent.click(list);
     expect(fetchNextPage).toHaveBeenCalledTimes(1);
   });
 });
