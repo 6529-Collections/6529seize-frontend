@@ -1123,6 +1123,7 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
   "user.profile.identity.statements",
   {
     heading: "{name} ID Statements",
+    addressesHeading: "{name} Addresses",
     description: "Public identity links and consolidated wallet addresses.",
     consolidatedAddresses: "Consolidated addresses",
     help: "About identity statements",

@@ -191,9 +191,8 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       await statements.click();
     }
 
-    await expect(
-      page.getByRole("link", { name: "Wallet Checker" })
-    ).toBeVisible();
+    const walletChecker = page.getByRole("link", { name: "Wallet Checker" });
+    await expect(walletChecker).toBeVisible();
     await expect(page.getByText(/^\d of 4 wallets$/).first()).toBeVisible();
     const addWallet = page.getByRole("link", {
       name: "Add another wallet",
@@ -204,6 +203,53 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       "href",
       "/safe-collecting/build-consolidation"
     );
+    const addressesHeading = page.getByRole("heading", {
+      name: /Addresses$/,
+      level: 3,
+    });
+    const statementsHeading = page.getByRole("heading", {
+      name: /ID Statements$/,
+      level: 3,
+    });
+    const addStatement = page.getByRole("button", { name: "Add", exact: true });
+    await expect(addressesHeading).toBeVisible();
+    await expect(statementsHeading).toBeVisible();
+    await expect(addStatement).toBeVisible();
+    const checkerBox = await walletChecker.boundingBox();
+    const addWalletBox = await addWallet.boundingBox();
+    const statementHeadingBox = await statementsHeading.boundingBox();
+    const addStatementBox = await addStatement.boundingBox();
+    expect(checkerBox).not.toBeNull();
+    expect(addWalletBox).not.toBeNull();
+    expect(statementHeadingBox).not.toBeNull();
+    expect(addStatementBox).not.toBeNull();
+    expect(
+      Math.abs(checkerBox!.width - addWalletBox!.width)
+    ).toBeLessThanOrEqual(1);
+    expect(Math.abs(checkerBox!.y - addWalletBox!.y)).toBeLessThanOrEqual(1);
+    expect(addWalletBox!.y).toBeLessThan(statementHeadingBox!.y);
+    expect(addStatementBox!.height).toBeLessThan(addWalletBox!.height);
+    expect(
+      Math.abs(
+        statementHeadingBox!.y +
+          statementHeadingBox!.height / 2 -
+          (addStatementBox!.y + addStatementBox!.height / 2)
+      )
+    ).toBeLessThanOrEqual(1);
+    await expectNoHorizontalOverflow(page);
+
+    await addStatement.click();
+    const addDialog = page.getByRole("dialog");
+    await expect(addDialog).toBeVisible();
+    await expect(
+      addDialog.getByText(
+        "Statements are optional and fully and permanently public.",
+        { exact: true }
+      )
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(addDialog).toBeHidden();
+    await expect(addStatement).toBeFocused();
     await addWallet.click();
 
     await expect(page).toHaveURL(

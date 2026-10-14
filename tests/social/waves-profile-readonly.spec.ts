@@ -1246,6 +1246,46 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       )
       .toBeLessThanOrEqual(2);
     await expectNoHorizontalOverflow(page);
+    const addressesHeading = page.getByRole("heading", {
+      name: /Addresses$/,
+      level: 3,
+    });
+    const statementsHeading = page.getByRole("heading", {
+      name: /ID Statements$/,
+      level: 3,
+    });
+    await expect(addressesHeading).toBeVisible();
+    await expect(statementsHeading).toBeVisible();
+    const addressesBox = await addressesHeading.boundingBox();
+    const statementsBox = await statementsHeading.boundingBox();
+    expect(addressesBox).not.toBeNull();
+    expect(statementsBox).not.toBeNull();
+    expect(addressesBox!.y).toBeLessThan(statementsBox!.y);
+    await expect(
+      page.getByText("Consolidated Addresses", { exact: true })
+    ).toHaveCount(0);
+    await page
+      .getByRole("button", { name: "About identity statements", exact: true })
+      .click();
+    const guidance = page.getByRole("tooltip");
+    await expect(guidance).toBeVisible();
+    await expect(guidance.getByRole("listitem")).toHaveCount(4);
+    await expect(guidance).toContainText("All statements are optional.");
+    await expect(guidance).toContainText(
+      "All statements are fully and permanently public."
+    );
+    await expect(guidance).toContainText("Social accounts are self-declared.");
+    await expect(guidance).toContainText(
+      "The community will rate statement accuracy."
+    );
+    await page.keyboard.press("Escape");
+    await expect(guidance).toBeHidden();
+    await page
+      .getByRole("button", { name: "About identity statements", exact: true })
+      .click();
+    await expect(guidance).toBeVisible();
+    await addressesHeading.click();
+    await expect(guidance).toBeHidden();
   });
 
   for (const tab of PROFILE_TAB_PATHS) {

@@ -22,13 +22,12 @@ describe("UserPageIdentityStatementsSocialMediaAccounts", () => {
         loading={false}
       />
     );
-    const disclaimer = screen.getByText(
-      "Social accounts are self-declared. 6529 does not connect to social media accounts or verify account ownership or posts."
-    );
     expect(
-      disclaimer.compareDocumentPosition(screen.getByTestId("list")) &
-        Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeTruthy();
+      screen.queryByText(
+        "Social accounts are self-declared. 6529 does not connect to social media accounts or verify account ownership or posts."
+      )
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("Social media accounts")).toBeInTheDocument();
     expect(listProps.statements).toBe(statements);
     expect(listProps.profile).toBe(profile);
     expect(listProps.noItemsMessage).toBe(

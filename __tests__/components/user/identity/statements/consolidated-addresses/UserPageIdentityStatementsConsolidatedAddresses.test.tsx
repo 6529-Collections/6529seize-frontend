@@ -36,6 +36,8 @@ jest.mock("@tanstack/react-query", () => ({ useQueries: () => [] }));
 jest.mock("@/helpers/Helpers", () => ({
   amIUser: () => mockIsOwner,
   formatNumberWithCommasOrDash: (x: number) => String(x),
+  createPossessionStr:
+    jest.requireActual("@/helpers/Helpers").createPossessionStr,
 }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({ address: mockAddress }),
@@ -48,6 +50,7 @@ describe("UserPageIdentityStatementsConsolidatedAddresses", () => {
   });
 
   const profile: ApiIdentity = {
+    handle: "alice",
     primary_wallet: null,
     wallets: [
       { wallet: "0x1", tdh: 1 } as any,
@@ -66,6 +69,12 @@ describe("UserPageIdentityStatementsConsolidatedAddresses", () => {
 
     expect(
       screen.queryByRole("button", { name: "About identity statements" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "alice's Addresses" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("Consolidated Addresses")
     ).not.toBeInTheDocument();
     expect(
       document.querySelector('[data-tooltip-id="statements-help"]')

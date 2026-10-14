@@ -3,7 +3,8 @@
 import { getSafeCollectingSectionPath } from "@/components/delegation/safe-collecting-routes";
 
 import type { WalletConsolidationState } from "@/entities/IProfile";
-import { useContext, useMemo, useState, type ReactNode } from "react";
+import { useContext, useMemo, useState } from "react";
+import clsx from "clsx";
 
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -11,7 +12,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiWallet } from "@/generated/models/ApiWallet";
-import { amIUser } from "@/helpers/Helpers";
+import { amIUser, createPossessionStr } from "@/helpers/Helpers";
 import type { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQueries } from "@tanstack/react-query";
@@ -22,6 +23,9 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { DelegationCenterSection } from "@/types/enums";
+
+const WALLET_ACTION_CLASSES =
+  "tw-min-h-10 tw-min-w-0 !tw-whitespace-normal tw-px-2.5 tw-py-2 tw-text-xs";
 
 /** Returns the primary wallet, falling back to the highest-TDH wallet. */
 function getPrimaryAddress(profile: ApiIdentity): string | null {
@@ -71,10 +75,8 @@ function sortByPrimary(
  */
 export default function UserPageIdentityStatementsConsolidatedAddresses({
   profile,
-  headerAction,
 }: {
   readonly profile: ApiIdentity;
-  readonly headerAction?: ReactNode;
 }) {
   const locale = useBrowserLocale();
   const { limits } = useConsolidationPolicy();
@@ -124,15 +126,11 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
   return (
     <div>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-        <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1">
-          <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-            {t(
-              locale,
-              "user.profile.identity.statements.consolidatedAddresses"
-            )}
-          </span>
-        </div>
-        {headerAction}
+        <h3 className="tw-m-0 tw-min-w-0 tw-break-words tw-text-lg tw-font-semibold tw-text-iron-100 sm:tw-text-xl">
+          {t(locale, "user.profile.identity.statements.addressesHeading", {
+            name: createPossessionStr(profile.handle ?? null),
+          })}
+        </h3>
         {walletCount > 0 && (
           <span className="tw-ml-auto tw-shrink-0 tw-whitespace-nowrap tw-text-right tw-text-xs tw-text-iron-400">
             {limits
@@ -144,7 +142,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
           </span>
         )}
       </div>
-      <ul className="tw-mb-0 tw-mt-1 tw-list-none tw-space-y-2 tw-pl-0">
+      <ul className="tw-mb-0 tw-mt-3 tw-list-none tw-space-y-2 tw-pl-0">
         {sortedByPrimary.map((wallet) => (
           <UserPageIdentityStatementsConsolidatedAddressesItem
             key={wallet.wallet}
@@ -162,12 +160,17 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
         ))}
       </ul>
       {(primaryAddress !== null || showDelegationCenter) && (
-        <div className="tw-flex tw-flex-wrap tw-gap-2 tw-pt-4">
+        <div className="tw-grid tw-grid-cols-2 tw-gap-2 tw-pt-4">
           {primaryAddress && (
             <ButtonLink
               href={`/safe-collecting/wallet-checker?address=${primaryAddress}`}
               variant="secondary"
-              size="xs"
+              size={null}
+              fullWidth
+              className={clsx(
+                WALLET_ACTION_CLASSES,
+                !showAddWallet && "tw-col-span-2"
+              )}
             >
               {t(locale, "user.profile.identity.statements.walletChecker")}
             </ButtonLink>
@@ -178,14 +181,22 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
                 DelegationCenterSection.BUILD_CONSOLIDATION
               )}
               variant="primary"
-              size="xs"
+              size={null}
+              fullWidth
+              className={WALLET_ACTION_CLASSES}
             >
               {t(locale, "user.profile.identity.statements.addWallet")}
             </ButtonLink>
           )}
           <AnimatePresence mode="wait" initial={false}>
             {showDelegationCenter && (
-              <ButtonLink href="/safe-collecting" variant="secondary" size="xs">
+              <ButtonLink
+                href="/safe-collecting"
+                variant="secondary"
+                size={null}
+                fullWidth
+                className={clsx(WALLET_ACTION_CLASSES, "tw-col-span-2")}
+              >
                 {t(locale, "user.profile.identity.statements.delegationCenter")}
               </ButtonLink>
             )}
