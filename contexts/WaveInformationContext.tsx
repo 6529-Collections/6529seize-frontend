@@ -46,6 +46,10 @@ export function WaveInformationProvider({
   const pathname = usePathname();
   const search = useSearchParams();
   const route = `${pathname}?${search.toString()}`;
+  useEffect(() => {
+    // A route change ends any pending traversal owned by the previous sheet.
+    traversing.current = false;
+  }, [route]);
   const registerDesktopHandler = useCallback(
     (handler: (waveId: string) => void) => {
       desktopHandler.current = handler;
@@ -75,7 +79,11 @@ export function WaveInformationProvider({
         browserCrypto?.randomUUID?.() ??
         `wave-information-${Date.now()}-${++requestSequence.current}`;
       window.history.pushState(
-        { ...window.history.state, waveInformation: id },
+        {
+          ...window.history.state,
+          waveInformation: id,
+          waveInformationView: "about",
+        },
         "",
         window.location.href
       );

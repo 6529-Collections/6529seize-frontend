@@ -273,3 +273,47 @@ it("Close removes both notification and About entries without leaving a phantom 
   );
   expect(window.location.pathname).toBe("/waves/wave");
 });
+
+it("recovers when route navigation interrupts a pending sheet traversal", () => {
+  window.history.replaceState({}, "", "/waves/wave");
+  const { rerender } = render(
+    <WaveInformationProvider>
+      <Harness />
+    </WaveInformationProvider>
+  );
+  fireEvent.click(screen.getByText("Open mobile information"));
+  fireEvent.click(screen.getByText("Open notifications"));
+  const back = jest.spyOn(window.history, "back").mockImplementation(() => {});
+  try {
+    fireEvent.click(screen.getByText("Back"));
+    window.history.pushState({}, "", "/profiles/creator");
+    rerender(
+      <WaveInformationProvider>
+        <Harness />
+      </WaveInformationProvider>
+    );
+    fireEvent.click(screen.getByText("Open mobile information"));
+    expect(screen.getByRole("dialog")).toBeVisible();
+    fireEvent.click(screen.getByText("Open notifications"));
+    expect(screen.getByText("Notification view")).toBeVisible();
+  } finally {
+    back.mockRestore();
+  }
+});
+
+it("starts a fresh About view when opening from a stale Forward history entry", () => {
+  window.history.replaceState(
+    { waveInformation: "old-sheet", waveInformationView: "notifications" },
+    "",
+    "/waves/wave"
+  );
+  render(
+    <WaveInformationProvider>
+      <Harness />
+    </WaveInformationProvider>
+  );
+  fireEvent.click(screen.getByText("Open mobile information"));
+  expect(screen.queryByText("Notification view")).toBeNull();
+  fireEvent.click(screen.getByText("Open notifications"));
+  expect(screen.getByText("Notification view")).toBeVisible();
+});
