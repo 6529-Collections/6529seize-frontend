@@ -1,5 +1,7 @@
 "use client";
 
+import { PROFILE_ACTIVITY_META } from "./profileActivityTypography";
+
 import type { ProfileActivityLog } from "@/entities/IProfile";
 import type { CountlessPage } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -7,6 +9,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import ProfileActivityLogsFilter from "./filter/ProfileActivityLogsFilter";
 import ProfileActivityLogsList from "./list/ProfileActivityLogsList";
+import ProfileActivityLogsSkeleton from "./ProfileActivityLogsSkeleton";
 
 import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
@@ -16,7 +19,6 @@ import {
   RateMatter,
 } from "@/types/enums";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
-import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
 import type { CommonSelectItem } from "../utils/select/CommonSelect";
 import CommonTabs from "../utils/select/tabs/CommonTabs";
 import CommonTablePagination from "../utils/table/paginator/CommonTablePagination";
@@ -275,7 +277,7 @@ export default function ProfileActivityLogs({
               <span
                 className={`${
                   initialParams.handleOrWallet ? "tw-px-2 sm:tw-px-3" : ""
-                } tw-text-sm tw-font-normal tw-italic tw-text-iron-500`}
+                } tw-text-sm tw-font-normal tw-italic tw-text-iron-500 ${PROFILE_ACTIVITY_META}`}
               >
                 No Activity Log
               </span>
@@ -283,9 +285,7 @@ export default function ProfileActivityLogs({
           )}
         </div>
       ) : (
-        <div className="tw-h-screen tw-w-full">
-          <CommonCardSkeleton />
-        </div>
+        <ProfileActivityLogsSkeleton />
       )}
     </div>
   );

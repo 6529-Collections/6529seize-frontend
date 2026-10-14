@@ -34,7 +34,7 @@ describe("staging-only indexing policy", () => {
     "/access",
     "/restricted",
     "/error",
-    "/delegation/wallet-checker?address=0x1",
+    "/safe-collecting/wallet-checker?address=0x1",
     "/nextgen/collection/pebbles/art",
     "/robots.txt",
     "/sitemap.xml",

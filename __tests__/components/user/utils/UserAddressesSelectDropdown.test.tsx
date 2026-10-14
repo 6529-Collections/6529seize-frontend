@@ -11,23 +11,23 @@ jest.mock("next/navigation", () => ({
 
 jest.mock(
   "@/components/utils/select/dropdown/CommonDropdown",
-  () => (props: any) =>
-    (
-      <div>
-        <button data-testid="all" onClick={() => props.setSelected(null)}>
-          all
+  () => (props: any) => (
+    <div>
+      <button data-testid="all" onClick={() => props.setSelected(null)}>
+        all
+      </button>
+      {props.items.slice(1).map((i: any) => (
+        <button
+          key={i.key}
+          data-testid={i.key}
+          onClick={() => props.setSelected(i.value)}
+        >
+          {i.label}
         </button>
-        {props.items.slice(1).map((i: any) => (
-          <button
-            key={i.key}
-            data-testid={i.key}
-            onClick={() => props.setSelected(i.value)}>
-            {i.label}
-          </button>
-        ))}
-        <span data-testid="active">{String(props.activeItem)}</span>
-      </div>
-    )
+      ))}
+      <span data-testid="active">{String(props.activeItem)}</span>
+    </div>
+  )
 );
 
 describe("UserAddressesSelectDropdown", () => {
@@ -66,5 +66,29 @@ describe("UserAddressesSelectDropdown", () => {
     );
     await userEvent.click(screen.getByTestId("0x1"));
     expect(cb).toHaveBeenLastCalledWith("0x1");
+  });
+
+  it("lists every wallet in a four-wallet profile and selects the fourth", async () => {
+    const wallets = ["0x1", "0x2", "0x3", "0x4"].map((wallet, index) => ({
+      wallet,
+      display: `wallet-${index + 1}.eth`,
+      tdh: index + 1,
+    }));
+    const onActiveAddress = jest.fn();
+    render(
+      <UserAddressesSelectDropdown
+        wallets={wallets}
+        onActiveAddress={onActiveAddress}
+      />
+    );
+
+    for (const wallet of wallets) {
+      expect(
+        screen.getByRole("button", { name: wallet.display })
+      ).toBeInTheDocument();
+    }
+    await userEvent.click(screen.getByRole("button", { name: "wallet-4.eth" }));
+    expect(onActiveAddress).toHaveBeenLastCalledWith("0x4");
+    expect(push).toHaveBeenLastCalledWith("/u?address=0x4", { scroll: false });
   });
 });

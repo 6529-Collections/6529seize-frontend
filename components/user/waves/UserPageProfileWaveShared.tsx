@@ -12,7 +12,10 @@ export function LoadingPanel({ label }: { readonly label: string }) {
   return (
     <section aria-label={label}>
       <div className="tw-p-6 sm:tw-p-8">
-        <SpinnerLoader text={label} />
+        <SpinnerLoader
+          text={label}
+          textClassName="tw-text-meta tw-font-normal tw-text-iron-500"
+        />
       </div>
     </section>
   );
@@ -31,10 +34,10 @@ export function InfoPanel({
     <section>
       <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-p-6 tw-text-center sm:tw-p-8">
         <div className="tw-max-w-2xl">
-          <h2 className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50">
+          <h2 className="tw-mb-0 tw-text-md tw-font-semibold tw-text-iron-100">
             {title}
           </h2>
-          <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <p className="tw-mb-0 tw-mt-3 tw-text-md tw-font-normal tw-leading-6 tw-text-iron-300">
             {message}
           </p>
         </div>
@@ -92,10 +95,10 @@ export function CurationEmptyPanel({
         </div>
 
         <div className="tw-mt-6 tw-max-w-xl md:tw-mt-8">
-          <h2 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100 md:tw-text-xl">
+          <h2 className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-400">
             {title}
           </h2>
-          <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500 md:tw-mt-3">
+          <p className="tw-mb-0 tw-mt-2 tw-text-meta tw-font-normal tw-leading-relaxed tw-text-iron-500 md:tw-mt-3">
             {message}
           </p>
         </div>
@@ -146,12 +149,12 @@ export function OfficialWaveSummary({
   return (
     <div className="tw-flex tw-flex-col tw-gap-3 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-6">
       <div className="tw-min-w-0 tw-flex-1">
-        <h2 className="tw-m-0 tw-min-w-0 tw-max-w-full tw-text-xl tw-font-semibold tw-text-iron-100">
+        <h2 className="tw-m-0 tw-min-w-0 tw-max-w-full tw-text-lg tw-font-semibold tw-text-iron-100 md:tw-text-xl">
           {profileCurationLabel ??
             t(locale, "profileCuration.header.fallbackTitle")}
         </h2>
 
-        <div className="tw-mt-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-sm tw-leading-6">
+        <div className="tw-mt-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-meta tw-font-normal tw-leading-6">
           <button
             type="button"
             onClick={onOpenWave}
@@ -159,9 +162,9 @@ export function OfficialWaveSummary({
             aria-label={t(locale, "profileCuration.header.openSourceAria", {
               waveName,
             })}
-            className="desktop-hover:hover:tw-text-primary-100 tw-group -tw-ml-1 tw-inline-flex tw-min-h-8 tw-min-w-0 tw-max-w-full tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1 tw-py-0 tw-text-left tw-text-primary-300 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-white/5"
+            className="desktop-hover:hover:tw-text-primary-100 tw-group -tw-ml-1 tw-inline-flex tw-min-h-8 tw-min-w-0 tw-max-w-full tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1 tw-py-0 tw-text-left tw-text-meta tw-font-normal tw-text-primary-300 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-white/5"
           >
-            <span className="tw-flex-shrink-0 tw-text-iron-400">
+            <span className="tw-flex-shrink-0 tw-text-iron-500">
               {t(locale, "profileCuration.header.source")}
             </span>
             <span className="tw-min-w-0 tw-truncate tw-font-medium tw-leading-6 tw-no-underline">
@@ -173,7 +176,9 @@ export function OfficialWaveSummary({
             />
           </button>
           <span className="tw-text-iron-600">•</span>
-          <span className="tw-text-iron-500">{metadataLabel}</span>
+          <span className="tw-tabular-nums tw-text-iron-500">
+            {metadataLabel}
+          </span>
         </div>
       </div>
 

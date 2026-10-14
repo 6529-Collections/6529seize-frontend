@@ -17,11 +17,18 @@ interface WaveInformationRequest {
   readonly overlay: boolean;
   readonly id: string;
   readonly route: string;
+  readonly view: "about" | "notifications";
+}
+interface WaveInformationHistoryState {
+  readonly waveInformation?: unknown;
+  readonly waveInformationView?: unknown;
 }
 interface WaveInformationState {
   readonly request: WaveInformationRequest | null;
   readonly open: (waveId: string, overlay?: boolean) => void;
   readonly close: () => void;
+  readonly openNotifications: () => void;
+  readonly back: () => void;
   readonly registerDesktopHandler: (
     handler: (waveId: string) => void
   ) => () => void;
@@ -35,9 +42,14 @@ export function WaveInformationProvider({
 }) {
   const desktopHandler = useRef<((waveId: string) => void) | null>(null);
   const requestSequence = useRef(0);
+  const traversing = useRef(false);
   const pathname = usePathname();
   const search = useSearchParams();
   const route = `${pathname}?${search.toString()}`;
+  useEffect(() => {
+    // A route change ends any pending traversal owned by the previous sheet.
+    traversing.current = false;
+  }, [route]);
   const registerDesktopHandler = useCallback(
     (handler: (waveId: string) => void) => {
       desktopHandler.current = handler;
@@ -57,6 +69,7 @@ export function WaveInformationProvider({
   const request = storedRequest?.route === route ? storedRequest : null;
   const open = useCallback(
     (waveId: string, overlay = true) => {
+      if (traversing.current) return;
       if (!overlay) {
         desktopHandler.current?.(waveId);
         return;
@@ -66,21 +79,55 @@ export function WaveInformationProvider({
         browserCrypto?.randomUUID?.() ??
         `wave-information-${Date.now()}-${++requestSequence.current}`;
       window.history.pushState(
-        { ...window.history.state, waveInformation: id },
+        {
+          ...window.history.state,
+          waveInformation: id,
+          waveInformationView: "about",
+        },
         "",
         window.location.href
       );
-      setStoredRequest({ waveId, overlay, id, route });
+      setStoredRequest({ waveId, overlay, id, route, view: "about" });
     },
     [route]
   );
-  const close = useCallback(() => {
+  const openNotifications = useCallback(() => {
+    if (!request?.overlay || traversing.current) return;
+    const state = window.history.state as WaveInformationHistoryState | null;
     if (
-      request?.overlay &&
-      (window.history.state as { waveInformation?: unknown } | null)
-        ?.waveInformation === request.id
+      state?.waveInformation !== request.id ||
+      state.waveInformationView === "notifications"
     )
-      window.history.back();
+      return;
+    window.history.pushState(
+      { ...state, waveInformationView: "notifications" },
+      "",
+      window.location.href
+    );
+    setStoredRequest({ ...request, view: "notifications" });
+  }, [request]);
+  const back = useCallback(() => {
+    const state = window.history.state as WaveInformationHistoryState | null;
+    if (
+      traversing.current ||
+      !request?.overlay ||
+      state?.waveInformation !== request.id ||
+      state.waveInformationView !== "notifications"
+    )
+      return;
+    traversing.current = true;
+    window.history.back();
+  }, [request]);
+  const close = useCallback(() => {
+    if (traversing.current) return;
+    const state = window.history.state as WaveInformationHistoryState | null;
+    if (request?.overlay && state?.waveInformation === request.id) {
+      traversing.current = true;
+      // Close dismisses the whole sheet, including its optional subview entry.
+      window.history.go(
+        state.waveInformationView === "notifications" ? -2 : -1
+      );
+    }
     setStoredRequest(null);
   }, [request]);
   useEffect(() => {
@@ -114,6 +161,10 @@ export function WaveInformationProvider({
         ) {
           const stateWithoutInformation = { ...data };
           Reflect.deleteProperty(stateWithoutInformation, "waveInformation");
+          Reflect.deleteProperty(
+            stateWithoutInformation,
+            "waveInformationView"
+          );
           nextState = stateWithoutInformation;
         }
         originalReplace(nextState, unused, url);
@@ -129,17 +180,36 @@ export function WaveInformationProvider({
   }, [request]);
   useEffect(() => {
     const onBack = (event: PopStateEvent) => {
-      const state = event.state as { waveInformation?: unknown } | null;
+      traversing.current = false;
+      const state = event.state as {
+        waveInformation?: unknown;
+        waveInformationView?: unknown;
+      } | null;
       setStoredRequest((current) =>
-        current && state?.waveInformation === current.id ? current : null
+        current && state?.waveInformation === current.id
+          ? {
+              ...current,
+              view:
+                state.waveInformationView === "notifications"
+                  ? "notifications"
+                  : "about",
+            }
+          : null
       );
     };
     window.addEventListener("popstate", onBack);
     return () => window.removeEventListener("popstate", onBack);
   }, []);
   const value = useMemo(
-    () => ({ request, open, close, registerDesktopHandler }),
-    [request, open, close, registerDesktopHandler]
+    () => ({
+      request,
+      open,
+      close,
+      openNotifications,
+      back,
+      registerDesktopHandler,
+    }),
+    [request, open, close, openNotifications, back, registerDesktopHandler]
   );
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
