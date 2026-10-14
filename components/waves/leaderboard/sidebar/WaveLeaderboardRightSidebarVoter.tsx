@@ -83,7 +83,7 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
           </span>
         </div>
       </Link>
-      <div className="tw-flex tw-max-w-[45%] tw-flex-shrink-0 tw-flex-col tw-items-end tw-gap-x-1.5 tw-text-right sm:tw-flex-row sm:tw-flex-wrap sm:tw-items-baseline sm:tw-justify-end">
+      <div className="tw-flex tw-max-w-[45%] tw-flex-shrink-0 tw-flex-wrap tw-items-baseline tw-justify-end tw-gap-x-1.5 tw-text-right">
         <span className="tw-break-all tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-100">
           {formatNumberWithCommas(voter.absolute_votes_summed)}
         </span>

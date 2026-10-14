@@ -685,6 +685,17 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(voters.getByText("-1,000", { exact: true })).toBeVisible();
       const totals = voters.getByText("123,456,789", { exact: true });
       await expect(totals).toBeInViewport();
+      const totalBox = await voters
+        .getByText("1,000", { exact: true })
+        .boundingBox();
+      const totalLabelBox = await voters
+        .getByText("TDH Total", { exact: true })
+        .nth(1)
+        .boundingBox();
+      expect(totalBox).not.toBeNull();
+      expect(totalLabelBox).not.toBeNull();
+      expect(Math.abs(totalBox!.y - totalLabelBox!.y)).toBeLessThanOrEqual(2);
+      expect(totalLabelBox!.x).toBeGreaterThan(totalBox!.x + totalBox!.width);
       await expectNoHorizontalOverflow(page);
       await page.screenshot({
         path: testInfo.outputPath("all-votes-layout.png"),

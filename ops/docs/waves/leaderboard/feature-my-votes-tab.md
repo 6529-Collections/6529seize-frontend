@@ -14,8 +14,8 @@ Signed-out viewers can inspect public All votes and Activity; personal votes
 require a connected profile.
 
 All votes places each voter's rank, avatar, name, and signed vote amounts on
-the left, with the total on the right. On phones, the credit label sits below
-the total. Activity aligns the voter, vote change, drop creator, and time across
+the left, with the total and credit label inline on the right. Activity aligns
+the voter, vote change, drop creator, and time across
 wide views. On narrow views, the vote change and creator sit below the voter;
 the time and **View drop in chat** button stay on the first line. Both lists
 use subtle row dividers and keep **Load more** below the rows.
