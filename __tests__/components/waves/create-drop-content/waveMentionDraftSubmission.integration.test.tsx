@@ -31,6 +31,7 @@ describe("restored wave mention submission", () => {
           },
         ],
         currentPartReferencedNfts: [],
+        submitting: false,
         setDrop: jest.fn(),
         setFiles: jest.fn(),
         setEditorState: jest.fn(),

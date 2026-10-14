@@ -1,4 +1,3 @@
-import { observeComposerFocus } from "../support/observeComposerFocus";
 import type { Locator, Page } from "@playwright/test";
 
 import {
@@ -79,7 +78,6 @@ test.describe("Wave drop edit local sandbox @auth @medium @local-only", () => {
       .getByRole("textbox", { name: "Write a chat message" })
       .last();
     await composer.fill(SANDBOX_CHAT_DROP_CONTENT);
-    const expectContinuousFocus = await observeComposerFocus(composer);
     // Real pointer click on purpose: regression coverage for the quick-DM
     // launcher overlaying the Post button (WaveComposerDockVisibility).
     await page.getByRole("button", { name: "Post" }).last().click();
@@ -91,7 +89,8 @@ test.describe("Wave drop edit local sandbox @auth @medium @local-only", () => {
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     await expect(submittedDrop).toContainText(SANDBOX_CHAT_DROP_CONTENT);
-    await expectContinuousFocus();
+    await expect(composer).toBeFocused();
+    await expect(composer).toHaveText("");
 
     // Escape cancels edit mode without any mutation reaching the API.
     await openDropEditor(page, submittedDrop, hasTouch);

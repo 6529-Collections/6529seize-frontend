@@ -168,7 +168,7 @@ export default function CreateDropComposer({
         />
         <CreateDropInput
           waveId={wave.id}
-          key={isDropMode ? dropEditorRefreshKey : "chat"}
+          key={dropEditorRefreshKey}
           ref={createDropInputRef}
           editorState={editorState}
           initialEditorStateJson={initialDraftJson}

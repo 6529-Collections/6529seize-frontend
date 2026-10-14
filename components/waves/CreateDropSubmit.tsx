@@ -25,16 +25,6 @@ export const CreateDropSubmit: React.FC<CreateDropSubmitProps> = ({
 
   const button = (
     <Button
-      onPointerDown={(event) => {
-        // A pointer submission should not move focus off the chat input.
-        if (
-          !isDropMode &&
-          document.activeElement instanceof HTMLElement &&
-          document.activeElement.isContentEditable
-        ) {
-          event.preventDefault();
-        }
-      }}
       onClick={onDrop}
       loading={submitting}
       disabled={!canSubmit}

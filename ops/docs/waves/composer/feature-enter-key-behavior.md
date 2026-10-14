@@ -47,9 +47,6 @@ The thread composer uses `Enter` for submit and `Shift+Enter` for line breaks.
 ## Common Scenarios
 
 - Send a short draft quickly with `Enter`.
-- Sending a chat message keeps the composer focused and the mobile keyboard open
-  for the next message. The sent draft clears without closing and reopening the
-  keyboard. Undo does not restore a sent message.
 - Write multi-line content with repeated `Shift+Enter`.
 - Select mention/hashtag/wave suggestions with `Enter` while typeahead is open.
 - Keep adding storm parts with `Enter` until ready to submit.
