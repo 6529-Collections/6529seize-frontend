@@ -133,6 +133,11 @@ describe("effective App PR CI plan", () => {
     "components/waves/drops/WaveDropMobileMenuOpen.tsx",
     "__tests__/components/waves/drops/WaveDropMobileMenuOpen.test.tsx",
     "components/waves/header/WaveJoinCta.tsx",
+    "components/waves/specs/wave-notification-settings/WaveNotificationPreferenceButtons.tsx",
+    "components/waves/specs/wave-notification-settings/useNotificationSettingsDialog.ts",
+    "components/brain/my-stream/MyStreamActionTooltip.tsx",
+    "tests/social/wave-notification-settings-sandbox.spec.ts",
+    "components/header/AppHeader.tsx",
     "components/brain/left-sidebar/waves/BrainLeftSidebarWavePin.tsx",
     "components\\waves\\leaderboard\\MySubmissionsDialog.tsx",
   ])(

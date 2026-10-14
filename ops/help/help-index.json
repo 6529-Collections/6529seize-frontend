@@ -6840,9 +6840,10 @@
       ],
       "facts": [
         "The bell button opens wave notification preferences after a connected non-proxy profile has joined the wave.",
+        "On phone layouts, notification choices open above the About sheet. Selecting an option, tapping outside, the phone’s Back action, Close, or Escape closes only the choices and returns to About.",
+        "Desktop and tablet sidebars use an anchored notification menu with arrow-key navigation and Escape to return to the bell.",
         "The notification menu has a Broadcast mentions option with an @ icon; it controls notifications for both @all and @contributors.",
         "The notification menu has an All messages option for every-message notifications.",
-        "When all-message notifications are over the follower limit, the notification menu shows an inline follower-limit note; if the option is already enabled, users can still turn it off.",
         "The speaker control mutes waves before or after joining.",
         "When a wave is muted, the red speaker-muted Muted control unmutes it.",
         "Muted waves suppress unread indicators and realtime unread accumulation but can still be opened manually.",
