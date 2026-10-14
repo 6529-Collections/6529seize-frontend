@@ -1428,8 +1428,26 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await page
       .getByRole("button", { name: "About identity statements", exact: true })
       .click();
+    await expect(
+      page.getByRole("button", {
+        name: "About identity statements",
+        exact: true,
+      })
+    ).toHaveAttribute("aria-expanded", "true");
     const guidance = page.getByRole("tooltip");
     await expect(guidance).toBeVisible();
+    const guidanceBox = await guidance.boundingBox();
+    expect(guidanceBox).not.toBeNull();
+    const viewport = page.viewportSize();
+    expect(viewport).not.toBeNull();
+    expect(guidanceBox!.x).toBeGreaterThanOrEqual(0);
+    expect(guidanceBox!.y).toBeGreaterThanOrEqual(0);
+    expect(guidanceBox!.x + guidanceBox!.width).toBeLessThanOrEqual(
+      viewport!.width
+    );
+    expect(guidanceBox!.y + guidanceBox!.height).toBeLessThanOrEqual(
+      viewport!.height
+    );
     await expect(guidance.getByRole("listitem")).toHaveCount(4);
     await expect(guidance).toContainText("All statements are optional.");
     await expect(guidance).toContainText(

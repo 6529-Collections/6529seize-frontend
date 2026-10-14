@@ -7,6 +7,7 @@ import {
   within,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { renderToString } from "react-dom/server";
 import UserPageIdentityAddStatementsHeader from "@/components/user/identity/statements/header/UserPageIdentityAddStatementsHeader";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -128,12 +129,10 @@ describe("UserPageIdentityAddStatementsHeader", () => {
 
       for (let cycle = 0; cycle < 3; cycle += 1) {
         fireEvent.click(button);
-        await act(async () => jest.advanceTimersByTime(100));
         expect(button).toHaveAttribute("aria-expanded", "true");
-        expect(screen.getByRole("tooltip")).toBeInTheDocument();
+        expect(screen.getByRole("tooltip")).toBeVisible();
 
         fireEvent.keyDown(window, { key: "Escape" });
-        await act(async () => jest.advanceTimersByTime(10));
         expect(button).toHaveAttribute("aria-expanded", "false");
         expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
         await act(async () => jest.advanceTimersByTime(100));
@@ -141,6 +140,102 @@ describe("UserPageIdentityAddStatementsHeader", () => {
       }
     } finally {
       jest.useRealTimers();
+    }
+  });
+
+  it("opens and reopens from server-rendered markup in a fresh visitor session", async () => {
+    mockedUseSeize.mockReturnValue({ address: undefined });
+    const header = <UserPageIdentityAddStatementsHeader profile={profile} />;
+    const container = document.createElement("div");
+    container.innerHTML = renderToString(header);
+    document.body.appendChild(container);
+    render(header, { container, hydrate: true });
+    const user = userEvent.setup();
+    const button = screen.getByRole("button", {
+      name: "About identity statements",
+    });
+
+    for (let cycle = 0; cycle < 3; cycle += 1) {
+      await user.click(button);
+      const tooltip = screen.getByRole("tooltip");
+      expect(tooltip).toBeVisible();
+      expect(button).toHaveAttribute("aria-describedby", tooltip.id);
+      await user.keyboard("{Escape}");
+      await expectGuidanceDismissed(button);
+    }
+  });
+
+  it("keeps guidance open when moving onto it and cancels a pending close on reopen", () => {
+    jest.useFakeTimers();
+    try {
+      mockedUseSeize.mockReturnValue({ address: undefined });
+      const { unmount } = render(
+        <UserPageIdentityAddStatementsHeader profile={profile} />
+      );
+      const button = screen.getByRole("button", {
+        name: "About identity statements",
+      });
+      fireEvent.mouseEnter(button);
+      const tooltip = screen.getByRole("tooltip");
+      fireEvent.mouseLeave(button);
+      fireEvent.mouseEnter(tooltip);
+      fireEvent.blur(button);
+      act(() => jest.advanceTimersByTime(200));
+      expect(tooltip).toBeVisible();
+      fireEvent.mouseLeave(tooltip);
+      fireEvent.keyDown(window, { key: "Escape" });
+      fireEvent.click(button);
+      act(() => jest.advanceTimersByTime(200));
+      expect(screen.getByRole("tooltip")).toBeVisible();
+      fireEvent.mouseLeave(button);
+      unmount();
+      expect(jest.getTimerCount()).toBe(0);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("closes on page scroll and can open again", () => {
+    mockedUseSeize.mockReturnValue({ address: undefined });
+    render(<UserPageIdentityAddStatementsHeader profile={profile} />);
+    const button = screen.getByRole("button", {
+      name: "About identity statements",
+    });
+    fireEvent.click(button);
+    fireEvent.scroll(window);
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    fireEvent.click(button);
+    expect(screen.getByRole("tooltip")).toBeVisible();
+  });
+
+  it("positions the portal inside a narrow viewport and flips below a high trigger", () => {
+    const width = jest.replaceProperty(window, "innerWidth", 390);
+    const height = jest.replaceProperty(window, "innerHeight", 844);
+    const bounds = jest
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockImplementation(function (this: HTMLElement) {
+        return this.getAttribute("role") === "tooltip"
+          ? new DOMRect(0, 0, 320, 220)
+          : new DOMRect(280, 100, 32, 32);
+      });
+    try {
+      mockedUseSeize.mockReturnValue({ address: undefined });
+      render(<UserPageIdentityAddStatementsHeader profile={profile} />);
+      fireEvent.click(
+        screen.getByRole("button", { name: "About identity statements" })
+      );
+      const tooltip = screen.getByRole("tooltip");
+      expect(tooltip.parentElement).toBe(document.body);
+      expect(tooltip.style.position).toBe("fixed");
+      expect(tooltip.style.left).toBe("62px");
+      expect(tooltip.style.top).toBe("140px");
+      expect(tooltip.style.visibility).toBe("visible");
+      fireEvent.scroll(within(tooltip).getByRole("list"));
+      expect(tooltip).toBeVisible();
+    } finally {
+      bounds.mockRestore();
+      width.restore();
+      height.restore();
     }
   });
 });
