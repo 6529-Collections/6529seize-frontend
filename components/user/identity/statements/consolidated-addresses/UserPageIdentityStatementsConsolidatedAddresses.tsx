@@ -121,7 +121,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
 
   return (
     <div>
-      <div className="tw-flex tw-items-center tw-justify-between">
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
         <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1">
           <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
             {t(
@@ -151,18 +151,18 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
               />
             </svg>
           </button>
-          {walletCount > 0 && (
-            <span className="tw-text-xs tw-text-iron-400">
-              {limits
-                ? t(locale, "user.profile.identity.statements.walletCount", {
-                    count: formatInteger(locale, walletCount),
-                    limit: walletLimit,
-                  })
-                : formatInteger(locale, walletCount)}
-            </span>
-          )}
         </div>
         {headerAction}
+        {walletCount > 0 && (
+          <span className="tw-ml-auto tw-shrink-0 tw-whitespace-nowrap tw-text-right tw-text-xs tw-text-iron-400">
+            {limits
+              ? t(locale, "user.profile.identity.statements.walletCount", {
+                  count: formatInteger(locale, walletCount),
+                  limit: walletLimit,
+                })
+              : formatInteger(locale, walletCount)}
+          </span>
+        )}
       </div>
       <ul className="tw-mb-0 tw-mt-1 tw-list-none tw-space-y-2 tw-pl-0">
         {sortedByPrimary.map((wallet) => (
