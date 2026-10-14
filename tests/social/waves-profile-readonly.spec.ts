@@ -1537,6 +1537,22 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     // A scroll-into-view event can arrive after the opening click. It must
     // not dismiss guidance when the trigger has already reached its position.
     await page.evaluate(() => document.dispatchEvent(new Event("scroll")));
+    // Production also adjusted page scroll by 3px after guidance opened. A
+    // programmatic adjustment must reposition the popup instead of closing it.
+    const adjusted = await page.evaluate(async () => {
+      const scroller = document.scrollingElement;
+      if (!scroller) return false;
+      const before = scroller.scrollTop;
+      scroller.scrollBy({
+        top: before >= 3 ? -3 : 3,
+        behavior: "instant",
+      });
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+      );
+      return scroller.scrollTop !== before;
+    });
+    expect(adjusted).toBe(true);
     await page.mouse.move(0, 0);
     await expect(
       page.getByRole("button", {
