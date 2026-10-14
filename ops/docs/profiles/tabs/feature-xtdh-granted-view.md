@@ -66,6 +66,10 @@ Grant token panel:
 - specific-token grants show a `Show/Hide` disclosure panel.
 - disclosure first load shows spinner, then token grid.
 - first-load fetch failure shows inline `Retry`.
+- token cards display available artwork; missing artwork shows the token ID.
+- if thumbnail metadata or the image cannot load, its tile shows `Load Error`.
+  The token name, ID, and xTDH remain visible. Close and reopen the disclosure
+  to retry a failed image.
 
 ## Grant Actions
 
