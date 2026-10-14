@@ -15,6 +15,53 @@ const parse = (file: string) => {
   return { source, workflow: YAML.parse(source) };
 };
 
+it.each(["staging", "production"])(
+  "%s failure notifications use evidence from the same run attempt",
+  (environment) => {
+    const { workflow } = parse(`${environment}-e2e.yml`);
+    const packJob =
+      workflow.jobs[environment === "staging" ? "staging-packs" : "readonly"];
+    const upload = packJob.steps.find(
+      (step: { name: string }) => step.name === "Upload Playwright evidence"
+    );
+    const notificationJobs = Object.entries(workflow.jobs).filter(([name]) =>
+      name.startsWith("notify-")
+    );
+    expect(upload.with.name).toBe(
+      `${environment}-e2e-artifacts-\${{ github.run_id }}-attempt-\${{ github.run_attempt }}`
+    );
+    for (const [, job] of notificationJobs) {
+      const notification = job as {
+        permissions: Record<string, string>;
+        steps: Array<{
+          name: string;
+          with?: Record<string, string>;
+          env?: Record<string, string>;
+          "continue-on-error"?: boolean;
+        }>;
+      };
+      const download = notification.steps.find(
+        (step) => step.name === "Download failed validation evidence"
+      )!;
+      const checkout = notification.steps.find(
+        (step) => step.name === "Check out CI wave notifier"
+      )!;
+      const post = notification.steps.find((step) =>
+        step.name.startsWith("Post ")
+      )!;
+      expect(notification.permissions["actions"]).toBe("read");
+      expect(download.with?.["name"]).toBe(upload.with.name);
+      expect(download["continue-on-error"]).toBe(true);
+      expect(post.env?.["CI_PIPELINES_FAILURE_ARTIFACT_ROOT"]).toBe(
+        download.with?.["path"]
+      );
+      expect(checkout.with?.["sparse-checkout"]).toContain(
+        "scripts/ci-failure-details.cjs"
+      );
+    }
+  }
+);
+
 const museumPacks = [
   "museum-data-architecture",
   "museum-institutional-practice",

@@ -1,0 +1,1038 @@
+{
+  "recorded_at": "2026-10-13T17:55:39.549837+00:00",
+  "role_arn": "arn:aws:iam::987989283142:role/gha-frontend-deploy-production",
+  "trust_verified": true,
+  "policies_verified": [
+    "arn:aws:iam::987989283142:policy/FrontendProductionDeployment",
+    "arn:aws:iam::987989283142:policy/FrontendProductionStorage"
+  ],
+  "inline_policies": [],
+  "max_session_duration": 5400,
+  "access_analyzer_findings": 0,
+  "simulation_summary": {
+    "access_analyzer_findings": 0,
+    "positive_cases": 56,
+    "negative_cases": 110,
+    "status": "passed",
+    "policy_sha256": {
+      "FrontendStagingDeployment.json": "4d52eb3b01194bba832ac3b60ce0f478915c09208192dbfbc30338e5c8f2a0aa",
+      "FrontendProductionDeployment.json": "c5cfa2cc64e6bee41ea020b60f7e87774ab7488467d36be0fd887b26dd5c6a7a",
+      "FrontendProductionStorage.json": "ea20c5449b38e25c9c78f44ae161d635309cbb95e90a8b8d7328158fc704021f",
+      "FrontendDelegationDocsPublish.json": "16b9ab3bb76a865eafbd895d9d870ba8eedcadc4f93202f48cf817d49a29b485"
+    }
+  },
+  "read_only_checks": [
+    {
+      "name": "production_environment",
+      "status": "passed"
+    },
+    {
+      "name": "production_versions",
+      "status": "passed"
+    },
+    {
+      "name": "announcement_object",
+      "status": "passed"
+    },
+    {
+      "name": "announcement_distribution",
+      "status": "passed"
+    }
+  ],
+  "temporary_role_deleted": true,
+  "policy_versions": {
+    "FrontendProductionDeployment": "v15",
+    "FrontendProductionStorage": "v6"
+  },
+  "policy_update_verified": true,
+  "bucket_ownership_before": "ObjectWriter",
+  "deployment_simulation_cases": [
+    {
+      "action": "s3:PutObject",
+      "resource": "arn:aws:s3:::seize-web/web_build/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/package.zip",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:GetObject",
+      "resource": "arn:aws:s3:::seize-web/web_build/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/package.zip",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:AbortMultipartUpload",
+      "resource": "arn:aws:s3:::seize-web/web_build/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/package.zip",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:PutObject",
+      "resource": "arn:aws:s3:::seize-web/web_build/current-production-version.json",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:GetBucketPolicy",
+      "resource": "arn:aws:s3:::seize-web",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:GetObjectAcl",
+      "resource": "arn:aws:s3:::seize-web/web_build/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/package.zip",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:GetObjectAcl",
+      "resource": "arn:aws:s3:::seize-web/web_build/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/package.zip",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:GetObjectAcl",
+      "resource": "arn:aws:s3:::seize-web/staging/package.zip",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:CreateBucket",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:ListBucket",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:GetBucketLocation",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:GetBucketPolicy",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:GetBucketPolicy",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:GetBucketPolicy",
+      "resource": "arn:aws:s3:::unrelated-bucket",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:GetBucketLocation",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:GetBucketLocation",
+      "resource": "arn:aws:s3:::unrelated-bucket",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:ListBucket",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:ListBucket",
+      "resource": "arn:aws:s3:::unrelated-bucket",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:PutBucketOwnershipControls",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:PutBucketOwnershipControls",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:PutBucketOwnershipControls",
+      "resource": "arn:aws:s3:::unrelated-bucket",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:CreateBucket",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:CreateBucket",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "eu-west-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:CreateBucket",
+      "resource": "arn:aws:s3:::unrelated-bucket",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:DeleteBucket",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:GetObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/example",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:GetObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-other/_runtime/example",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:GetObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/example",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:PutObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/example",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:PutObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-other/_runtime/example",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:PutObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/example",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:AbortMultipartUpload",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/example",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:AbortMultipartUpload",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-other/_runtime/example",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:AbortMultipartUpload",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/example",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:GetObjectAcl",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/example",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:GetObjectAcl",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-other/_runtime/example",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:GetObjectAcl",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/example",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:DeleteObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/example",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "elasticbeanstalk:CreateApplicationVersion",
+      "resource": "arn:aws:elasticbeanstalk:us-east-1:987989283142:application/seize app",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "elasticbeanstalk:CreateApplicationVersion",
+      "resource": "arn:aws:elasticbeanstalk:us-east-1:987989283142:applicationversion/seize app/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "elasticbeanstalk:DescribeApplicationVersions",
+      "resource": "arn:aws:elasticbeanstalk:us-east-1:987989283142:applicationversion/seize app/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "elasticbeanstalk:DescribeEnvironments",
+      "resource": "arn:aws:elasticbeanstalk:us-east-1:987989283142:environment/seize app/seizeapp-env-node22",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "elasticbeanstalk:UpdateEnvironment",
+      "resource": "arn:aws:elasticbeanstalk:us-east-1:987989283142:environment/seize app/seizeapp-env-node22",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "cloudfront:CreateInvalidation",
+      "resource": "arn:aws:cloudfront::987989283142:distribution/EKB17CMB021J6",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "cloudfront:GetDistribution",
+      "resource": "arn:aws:cloudfront::987989283142:distribution/EKB17CMB021J6",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "cloudformation:UpdateStack",
+      "resource": "arn:aws:cloudformation:us-east-1:987989283142:stack/awseb-e-8bsbxqrikc-stack/example",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "autoscaling:UpdateAutoScalingGroup",
+      "resource": "arn:aws:autoscaling:us-east-1:987989283142:autoScalingGroup:example:autoScalingGroupName/awseb-e-8bsbxqrikc-stack-AWSEBAutoScalingGroup-M1O0h8b6NYK0",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "ec2:DescribeInstances",
+      "resource": "*",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "ec2:CreateLaunchTemplateVersion",
+      "resource": "arn:aws:ec2:us-east-1:987989283142:launch-template/lt-0676ae03c840db014",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "logs:PutRetentionPolicy",
+      "resource": "arn:aws:logs:us-east-1:987989283142:log-group:/aws/elasticbeanstalk/seizeapp-env-node22/var/log/web.stdout.log",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "iam:PassRole",
+      "resource": "arn:aws:iam::987989283142:role/ec2-seize-prod",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false",
+      "passed_to_service": "elasticbeanstalk.amazonaws.com"
+    },
+    {
+      "action": "cloudformation:UpdateStack",
+      "resource": "arn:aws:cloudformation:us-east-1:987989283142:stack/awseb-e-8bsbxqrikc-stack/example",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "autoscaling:UpdateAutoScalingGroup",
+      "resource": "arn:aws:autoscaling:us-east-1:987989283142:autoScalingGroup:example:autoScalingGroupName/awseb-e-8bsbxqrikc-stack-AWSEBAutoScalingGroup-M1O0h8b6NYK0",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "ec2:DescribeInstances",
+      "resource": "*",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "logs:PutRetentionPolicy",
+      "resource": "arn:aws:logs:us-east-1:987989283142:log-group:/aws/elasticbeanstalk/seizeapp-env-node22/test",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "cloudformation:UpdateStack",
+      "resource": "arn:aws:cloudformation:us-east-1:987989283142:stack/unrelated-stack/example",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "autoscaling:UpdateAutoScalingGroup",
+      "resource": "arn:aws:autoscaling:us-east-1:987989283142:autoScalingGroup:example:autoScalingGroupName/other-environment-AWSEBAutoScalingGroup-M1O0h8b6NYK0",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "elasticbeanstalk:UpdateEnvironment",
+      "resource": "arn:aws:elasticbeanstalk:us-east-1:987989283142:environment/seize app/other-environment",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:PutObject",
+      "resource": "arn:aws:s3:::seize-web/staging/package.zip",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:PutObject",
+      "resource": "arn:aws:s3:::seize-web/web_build/not-a-commit/package.zip",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:DeleteObject",
+      "resource": "arn:aws:s3:::seize-web/web_build/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/package.zip",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "cloudfront:CreateInvalidation",
+      "resource": "arn:aws:cloudfront::987989283142:distribution/E1RI37JRN0ZK6J",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "iam:PassRole",
+      "resource": "arn:aws:iam::987989283142:role/ec2-seize-prod",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false",
+      "passed_to_service": "lambda.amazonaws.com"
+    },
+    {
+      "action": "iam:PassRole",
+      "resource": "arn:aws:iam::987989283142:role/gha-backend-deploy-production",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false",
+      "passed_to_service": "elasticbeanstalk.amazonaws.com"
+    },
+    {
+      "action": "iam:CreateUser",
+      "resource": "arn:aws:iam::987989283142:user/unrelated",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "iam:PutRolePolicy",
+      "resource": "arn:aws:iam::987989283142:role/gha-frontend-deploy-production",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "iam:UpdateAssumeRolePolicy",
+      "resource": "arn:aws:iam::987989283142:role/gha-frontend-deploy-production",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "iam:CreateAccessKey",
+      "resource": "arn:aws:iam::987989283142:user/gelato",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "secretsmanager:GetSecretValue",
+      "resource": "arn:aws:secretsmanager:us-east-1:987989283142:secret:prod/lambdas-example",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "lambda:UpdateFunctionCode",
+      "resource": "arn:aws:lambda:us-east-1:987989283142:function:seizeAPI",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:DeleteBucket",
+      "resource": "arn:aws:s3:::seize-web",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:PutObject",
+      "resource": "arn:aws:s3:::unrelated-bucket/file",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "ec2:TerminateInstances",
+      "resource": "arn:aws:ec2:us-east-1:987989283142:instance/i-0123456789abcdef0",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:GetObjectAcl",
+      "resource": "arn:aws:s3:::unrelated-bucket/file",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:PutObjectAcl",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/_versions/seize app/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:PutObjectAcl",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/_versions/seize app/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:PutObjectAcl",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-other/_runtime/_versions/seize app/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:PutObjectAcl",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/config",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:PutObjectAcl",
+      "resource": "arn:aws:s3:::seize-web/web_build/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/package.zip",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:DeleteObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/_versions/seize app/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:DeleteObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/_versions/seize app/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:DeleteObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-other/_runtime/_versions/seize app/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:DeleteObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/config",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:DeleteObject",
+      "resource": "arn:aws:s3:::seize-web/web_build/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/package.zip",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:GetObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/_runtime/_embedded_extensions/seize app/checksum",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:GetObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/_runtime/_embedded_extensions/seize app/checksum",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:GetObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/_runtime/_embedded_extensions/another app/checksum",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:PutObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/_runtime/_embedded_extensions/seize app/checksum",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:PutObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/_runtime/_embedded_extensions/seize app/checksum",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:PutObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/_runtime/_embedded_extensions/another app/checksum",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:AbortMultipartUpload",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/_runtime/_embedded_extensions/seize app/checksum",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:AbortMultipartUpload",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/_runtime/_embedded_extensions/seize app/checksum",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:AbortMultipartUpload",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/_runtime/_embedded_extensions/another app/checksum",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:PutObjectAcl",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/_runtime/_embedded_extensions/seize app/checksum",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:PutObjectAcl",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/_runtime/_embedded_extensions/seize app/checksum",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:PutObjectAcl",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/_runtime/_embedded_extensions/another app/checksum",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:DeleteObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/_runtime/_embedded_extensions/seize app/checksum",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:DeleteObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/versions/manifest_1791877113219",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:DeleteObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/versions/manifest_1791877113219",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:DeleteObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-other/_runtime/versions/manifest_1791877113219",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:DeleteObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/config/manifest_1791877113219",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:PutObjectAcl",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/versions/manifest_1791877113219",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:GetObjectVersion",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1/environments/688dc432-0cb2-4981-9908-9cea07a3a977/compiledEnvironmentTemplates/template.json",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:GetObjectVersion",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1/environments/688dc432-0cb2-4981-9908-9cea07a3a977/compiledEnvironmentTemplates/template.json",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:GetObjectVersion",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1/environments/another-environment/compiledEnvironmentTemplates/template.json",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:GetObjectVersion",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1/environments/688dc432-0cb2-4981-9908-9cea07a3a977/compiledEnvironmentTemplates/template.json",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "eu-west-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:DeleteObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/_embedded_extensions/seize app/checksum",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:DeleteObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/_embedded_extensions/seize app/checksum",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "s3:DeleteObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-other/_runtime/_embedded_extensions/seize app/checksum",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:DeleteObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/_embedded_extensions/another app/checksum",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "s3:DeleteObject",
+      "resource": "arn:aws:s3:::elasticbeanstalk-us-east-1-987989283142/resources/environments/e-8bsbxqrikc/_runtime/configuration/seize app/checksum",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "logs:DescribeLogGroups",
+      "resource": "*",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "logs:DescribeLogGroups",
+      "resource": "*",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "logs:DescribeLogGroups",
+      "resource": "*",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "eu-west-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "cloudformation:CancelUpdateStack",
+      "resource": "arn:aws:cloudformation:us-east-1:987989283142:stack/awseb-e-8bsbxqrikc-stack/example",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "cloudformation:CancelUpdateStack",
+      "resource": "arn:aws:cloudformation:us-east-1:987989283142:stack/awseb-e-8bsbxqrikc-stack/example",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "cloudformation:CancelUpdateStack",
+      "resource": "arn:aws:cloudformation:us-east-1:987989283142:stack/another-stack/example",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "elasticloadbalancing:DescribeTargetHealth",
+      "resource": "*",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "elasticloadbalancing:DescribeTargetHealth",
+      "resource": "*",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "elasticloadbalancing:DescribeTargetHealth",
+      "resource": "*",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "eu-west-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "elasticloadbalancing:DescribeLoadBalancers",
+      "resource": "*",
+      "expected": "allowed",
+      "decision": "allowed",
+      "requested_region": "us-east-1",
+      "via_aws_service": "true"
+    },
+    {
+      "action": "elasticloadbalancing:DescribeLoadBalancers",
+      "resource": "*",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "us-east-1",
+      "via_aws_service": "false"
+    },
+    {
+      "action": "elasticloadbalancing:DescribeLoadBalancers",
+      "resource": "*",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "requested_region": "eu-west-1",
+      "via_aws_service": "true"
+    }
+  ]
+}
