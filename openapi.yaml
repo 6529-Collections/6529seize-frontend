@@ -184,6 +184,8 @@ paths:
           description: More than 50 contracts requested
         "429":
           description: API request limit exceeded
+        "500":
+          description: Contract metadata provider configuration is unavailable
   /artwork-documentation/contexts/{id}/museum-records:
     get:
       tags:
