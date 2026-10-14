@@ -1,3 +1,4 @@
+import { hasRemoteMatch } from "next/dist/shared/lib/match-remote-pattern";
 import { sharedConfig } from "@/config/nextConfig";
 import type { PublicEnv } from "@/config/env.schema";
 
@@ -8,6 +9,14 @@ const publicEnv = {
 } as PublicEnv;
 
 describe("shared Next config", () => {
+  it("permanently redirects the former Delegation Center to Safe Collecting", async () => {
+    expect(await sharedConfig(publicEnv, "").redirects?.()).toContainEqual({
+      source: "/delegation/delegation-center",
+      destination: "/safe-collecting",
+      permanent: true,
+    });
+  });
+
   it("keeps React Strict Mode disabled by explicit migration policy", () => {
     expect(sharedConfig(publicEnv, "").reactStrictMode).toBe(false);
   });
@@ -49,5 +58,30 @@ describe("shared Next config", () => {
     expect(sharedConfig(stagingEnv, "").outputFileTracingExcludes).toEqual({
       "/*": ["content/public-reviews/**/*", "public/review-data/**/*"],
     });
+  });
+});
+
+describe("Alchemy image optimization policy", () => {
+  const thumbnailPath =
+    "/cdn-cgi/image/width=250,height=250,fit=scale-down/eth-mainnet/a3062b74e1b4d79fdab0ca1ec5a92615";
+  const patterns = sharedConfig(publicEnv, "").images?.remotePatterns ?? [];
+
+  it.each([
+    `https://nft2-cdn.alchemy.com${thumbnailPath}`,
+    "https://res.cloudinary.com/alchemyapi/image/upload/thumbnailv2/eth-mainnet/example",
+  ])("allows the supported thumbnail source %s", (url) => {
+    expect(hasRemoteMatch([], patterns, new URL(url))).toBe(true);
+  });
+
+  it.each([
+    `http://nft2-cdn.alchemy.com${thumbnailPath}`,
+    `https://nft2-cdn.alchemy.com:8443${thumbnailPath}`,
+    `https://nft2-cdn.alchemy.com.evil.example${thumbnailPath}`,
+    `https://other.alchemy.com${thumbnailPath}`,
+    `https://nft2-cdn.alchemy.com${thumbnailPath}?url=https://example.com`,
+    "https://nft2-cdn.alchemy.com/unrelated/image.png",
+    "https://nft2-cdn.alchemy.com/cdn-cgi/image/width=250/https://example.com/image.png",
+  ])("rejects sources outside the Alchemy thumbnail rule: %s", (url) => {
+    expect(hasRemoteMatch([], patterns, new URL(url))).toBe(false);
   });
 });

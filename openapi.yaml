@@ -153,6 +153,41 @@ paths:
                   $ref: "#/components/schemas/ApiAggregatedActivityMemes"
         "404":
           description: Memes Aggregated Activity for consolidation key not found
+  /alchemy-proxy/contracts:
+    servers:
+      - url: /
+    post:
+      tags:
+        - Alchemy
+      summary: Get contract metadata for a batch of Ethereum collections
+      description: >-
+        Read-only fallback for desktop and web clients. Returns one entry per
+        unique contract, preserving successful metadata when another lookup
+        fails. Lookups have a 20-second scheduling budget; entries that cannot
+        be scheduled receive per-contract errors. This legacy proxy is mounted
+        outside the /api prefix.
+      operationId: getAlchemyContractMetadataBatch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiAlchemyContractMetadataBatchRequest"
+      responses:
+        "200":
+          description: Metadata or a per-contract lookup error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiAlchemyContractMetadataBatchResponse"
+        "400":
+          description: Invalid contract address, chain, or request shape
+        "413":
+          description: More than 50 contracts requested
+        "429":
+          description: Global API request rate limit exceeded before route execution
+        "500":
+          description: Contract metadata provider configuration is unavailable
   /artwork-documentation/contexts/{id}/museum-records:
     get:
       tags:
@@ -19933,6 +19968,63 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiAggregatedActivity"
+    ApiAlchemyContractMetadataBatchRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - contracts
+      properties:
+        contracts:
+          type: array
+          maxItems: 50
+          items:
+            $ref: "#/components/schemas/ApiAlchemyContractMetadataRequest"
+    ApiAlchemyContractMetadataBatchResponse:
+      type: object
+      required:
+        - contracts
+      properties:
+        contracts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiAlchemyContractMetadataResult"
+    ApiAlchemyContractMetadataRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - address
+      properties:
+        address:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        chain:
+          type: string
+          enum:
+            - ethereum
+          default: ethereum
+    ApiAlchemyContractMetadataResult:
+      type: object
+      required:
+        - address
+        - chain
+        - metadata
+      properties:
+        address:
+          type: string
+        chain:
+          type: string
+          enum:
+            - ethereum
+        metadata:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: Unmodified Alchemy V3 contract metadata with an added _checksum.
+        error:
+          type: string
+        status:
+          type: integer
+          description: Upstream failure status, or 502 for an unavailable lookup.
     ApiArchiveProfileCmsPackageRequest:
       type: object
       properties:
@@ -26768,6 +26860,32 @@ components:
       enum:
         - boosted
         - unboosted
+    ApiConsolidationPolicy:
+      type: object
+      required:
+        - max_wallets
+        - ungated_max_wallets
+        - four_wallet_activation_at
+        - four_wallet_signing_opens_at
+      properties:
+        max_wallets:
+          type: integer
+          minimum: 2
+          description: Maximum effective consolidation group size, fixed by backend code.
+        ungated_max_wallets:
+          type: integer
+          minimum: 2
+          description: >-
+            Largest group size eligible without post-cutoff reciprocal consent,
+            fixed by backend code.
+        four_wallet_activation_at:
+          type: string
+          description: >-
+            Inclusive UTC block timestamp cutoff for fourth-wallet consent in
+            this environment.
+        four_wallet_signing_opens_at:
+          type: string
+          description: Guided signing opens ten minutes after the activation cutoff.
     ApiContentModerationAuditEntry:
       type: object
       required:
@@ -36572,6 +36690,7 @@ components:
         - announcements_wave_id
         - quorum_wave_id
         - auth
+        - consolidation
       properties:
         rememes_submission_tdh_threshold:
           type: integer
@@ -36598,6 +36717,8 @@ components:
           nullable: true
         auth:
           $ref: "#/components/schemas/ApiAuthSettings"
+        consolidation:
+          $ref: "#/components/schemas/ApiConsolidationPolicy"
     ApiSessionLoginRequest:
       type: object
       additionalProperties: false
@@ -39013,7 +39134,8 @@ components:
           format: int64
           description: >-
             Unread drops across visible subwaves that the authenticated profile
-            follows and has not muted.
+            follows and has not muted. Unfollowed or muted subwaves, and all
+            subwaves of a muted parent, contribute 0.
         followed_subwaves_count:
           type: integer
           format: int64
@@ -39023,9 +39145,16 @@ components:
         hidden_followed_subwave_unread_drops:
           type: integer
           format: int64
+          description: >-
+            Unread drops across followed, unmuted visible subwaves, which are
+            folded into this parent container in followed wave lists. Same value
+            as subwave_unread_drops; kept for backward compatibility.
         first_hidden_followed_subwave_unread_drop_serial_no:
           type: integer
           format: int64
+          description: >-
+            Lowest drop serial number among the unread drops counted by
+            subwave_unread_drops, when there is one.
         muted:
           type: boolean
     ApiWaveOverviewContributor:

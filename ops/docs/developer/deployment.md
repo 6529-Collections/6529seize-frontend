@@ -4,11 +4,9 @@ Agents and developers deploy with ordinary merges and the repository's GitHub
 Actions workflows. Use the phase authorized by the user; a staging request does
 not authorize production.
 
-For a new staging or direct production release intent that includes frontend,
-follow [Coordinator release recording](../../skills/deploy-6529/SKILL.md#coordinator-release-recording)
-after authorization, scope, and exact release inputs are established, before any
-merge or deployment. Use the same recording outcome for retries, resumes, and
-promotion; the skill defines submission and failure handling.
+Frontend-only, backend-only, and coupled releases use the direct workflows below
+without submitting a Coordinator request or waiting for its recording workflow.
+Keep existing `.release-coordinator/` run and outbox records as historical evidence.
 
 | Target     | Frontend                                                                       | Backend                                                                                                         |
 | ---------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
@@ -18,6 +16,41 @@ promotion; the skill defines submission and failure handling.
 Frontend staging retains its existing `ops/**`-only push exclusion. Dispatch
 `deploy-staging.yml` on `1a-staging` when an authorized ops-only change needs an
 actual deployment.
+
+## AWS deployment credentials
+
+Frontend deployment jobs use GitHub OIDC and separate scoped IAM roles. Set
+`AWS_DEPLOY_ROLE_ARN` as an environment variable in each existing GitHub
+environment: `staging` accepts only `1a-staging`, and `production` accepts only
+`main`. Preserve their application configuration secrets. The deployment jobs
+validate the role ARN, check the assumed account, and require successful
+authentication; they have no static-key fallback. Build and verification jobs
+receive no AWS deployment credentials or OIDC token permission.
+
+The optional delegation-docs CDN publisher uses its own `delegation-docs`
+environment, restricted to `main`, with a separate `AWS_DEPLOY_ROLE_ARN` and
+OIDC subject. Its role accesses only `6529bucket/delegation-content/` in
+`eu-west-1`. A dry run verifies AWS authentication and read-only CDN access,
+then builds a receipt without publishing content. IPFS credentials are exposed
+only to the publishing step. See [publisher permissions](../../iam/frontend-delegation-docs/README.md).
+
+Sessions last 90 minutes to cover the 75-minute deployment job timeout and
+staging's artifact download window. Their names include the GitHub run ID:
+`frontend-staging-<run ID>` and `frontend-production-<run ID>`.
+Staging's signed artifact URL is capped by STS expiry. Authentication starts
+inside the 75-minute deployment job, so its 90-minute session outlasts that
+job's full download/deploy window by at least 15 minutes.
+
+Staging permissions cover its artifact prefix in `seize-web` in `us-east-1`
+and commands on its existing SSM-managed server in `eu-west-1`. Production
+permissions cover its versioned artifact prefix, the existing Elastic Beanstalk
+environment and deployment resources, and its announcement distribution.
+IAM roles are global. Infrastructure or resource replacements require an
+administrative policy review; deployment roles cannot edit their own policies.
+
+See the [staging IAM runbook](../../iam/frontend-staging/README.md) and
+[production IAM runbook](../../iam/frontend-production/README.md) for exact
+policies, trust, validation, and runtime permission boundaries.
 
 Every frontend build resolves, verifies, and packages one complete Network
 Museum publication. A missing, partial, or invalid publication fails the build

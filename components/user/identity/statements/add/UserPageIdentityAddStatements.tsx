@@ -84,6 +84,9 @@ export default function UserPageIdentityAddStatements({
             : "tw-px-4 tw-pb-4 sm:tw-px-6 md:tw-pb-6 md:tw-pt-6 lg:tw-px-8 lg:tw-pb-8"
         }
       >
+        <p className="tw-mb-4 tw-mt-0 tw-text-sm tw-leading-5 tw-text-iron-300">
+          {t(locale, "user.profile.identity.statements.add.privacyNotice")}
+        </p>
         <UserPageIdentityAddStatementsViews
           profile={profile}
           activeView={activeView}

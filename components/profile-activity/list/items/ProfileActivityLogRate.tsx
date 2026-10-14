@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  PROFILE_ACTIVITY_BODY,
+  PROFILE_ACTIVITY_EMPHASIS,
+} from "@/components/profile-activity/profileActivityTypography";
+
 import { SystemAdjustmentPill } from "@/components/common/SystemAdjustmentPill";
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import CommonProfileLink from "@/components/user/utils/CommonProfileLink";
@@ -101,7 +106,7 @@ export default function ProfileActivityLogRate({
       {!!proxyHandle && isSelfProxy && (
         <Link
           href={`/${proxyHandle}`}
-          className="tw-whitespace-nowrap tw-text-sm tw-font-normal tw-text-iron-500 tw-no-underline sm:tw-text-base"
+          className={`tw-whitespace-nowrap tw-text-sm tw-font-normal tw-text-iron-500 tw-no-underline sm:tw-text-base ${PROFILE_ACTIVITY_BODY}`}
         >
           (Proxy for {proxyHandle})
         </Link>
@@ -110,22 +115,26 @@ export default function ProfileActivityLogRate({
       <span
         className={`${
           isChangePositive ? "tw-text-emerald-400" : "tw-text-rose-400"
-        } tw-text-sm tw-font-semibold sm:tw-text-base`}
+        } tw-text-sm tw-font-semibold sm:tw-text-base ${PROFILE_ACTIVITY_EMPHASIS}`}
       >
         {changeStr}
       </span>
       <span
-        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-sm tw-font-semibold sm:tw-text-base`}
+        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-sm tw-font-semibold sm:tw-text-base ${PROFILE_ACTIVITY_EMPHASIS}`}
       >
         (total {newRatingStr})
       </span>
       {(log.contents.rating_matter === RateMatter.REP ||
         log.contents.rating_matter === RateMatter.WAVE_REP) && (
-        <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300 sm:tw-text-base">
+        <span
+          className={`tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300 sm:tw-text-base ${PROFILE_ACTIVITY_BODY}`}
+        >
           {log.contents.rating_category}
         </span>
       )}
-      <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300 empty:tw-hidden sm:tw-text-base">
+      <span
+        className={`tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300 empty:tw-hidden sm:tw-text-base ${PROFILE_ACTIVITY_BODY}`}
+      >
         {LOG_MATTER_STR[log.contents.rating_matter]}
       </span>
 
@@ -134,13 +143,13 @@ export default function ProfileActivityLogRate({
         handleOrWallet={handleOrWallet}
         isCurrentUser={isCurrentUser}
         tabTarget={tabTarget}
-        textClassName="tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-100"
+        textClassName={`tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-100 ${PROFILE_ACTIVITY_EMPHASIS}`}
       />
 
       {!!proxyHandle && !isSelfProxy && (
         <Link
           href={`/${proxyHandle}`}
-          className="tw-whitespace-nowrap tw-text-sm tw-font-normal tw-text-iron-500 tw-no-underline sm:tw-text-base"
+          className={`tw-whitespace-nowrap tw-text-sm tw-font-normal tw-text-iron-500 tw-no-underline sm:tw-text-base ${PROFILE_ACTIVITY_BODY}`}
         >
           (Proxy: {proxyHandle})
         </Link>

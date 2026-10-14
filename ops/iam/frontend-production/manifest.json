@@ -1,0 +1,21 @@
+{
+  "account_id": "987989283142",
+  "role_name": "gha-frontend-deploy-production",
+  "source_commit": "e6f863add81de02e8b76f177067b2df4014de9d7",
+  "max_session_duration": 5400,
+  "policies": [
+    {
+      "name": "FrontendProductionDeployment",
+      "file": "FrontendProductionDeployment.json",
+      "characters": 4210,
+      "sha256": "c5cfa2cc64e6bee41ea020b60f7e87774ab7488467d36be0fd887b26dd5c6a7a"
+    },
+    {
+      "name": "FrontendProductionStorage",
+      "file": "FrontendProductionStorage.json",
+      "characters": 3410,
+      "sha256": "ea20c5449b38e25c9c78f44ae161d635309cbb95e90a8b8d7328158fc704021f"
+    }
+  ],
+  "recovery_source_commit": "6a2bf8685b473f4da8962dec5b6c1969162a46ce"
+}

@@ -312,20 +312,20 @@ export default function UserPageCollectedCard({
       {/* Content */}
       <div className="tw-flex tw-flex-col tw-gap-1.5 tw-p-4">
         <div className="tw-flex tw-items-center tw-justify-between">
-          <span className="tw-mr-2 tw-truncate tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-500">
+          <span className="tw-mr-2 tw-truncate tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-500 group-data-[typography=collected]/collected-cards:tw-text-[11px] group-data-[typography=collected]/collected-cards:tw-font-medium">
             {collectionMeta.label}
           </span>
-          <span className="tw-font-mono tw-text-[11px] tw-font-medium tw-text-iron-500">
+          <span className="tw-font-mono tw-text-[11px] tw-font-medium tw-text-iron-500 group-data-[typography=collected]/collected-cards:tw-text-meta group-data-[typography=collected]/collected-cards:tw-font-normal group-data-[typography=collected]/collected-cards:tw-tabular-nums">
             #{card.token_id}
           </span>
         </div>
 
         <div className="tw-flex tw-justify-between tw-gap-x-2">
-          <h3 className="tw-m-0 tw-line-clamp-1 tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100 tw-transition-colors group-hover:tw-text-white">
+          <h3 className="tw-m-0 tw-line-clamp-1 tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100 tw-transition-colors group-hover:tw-text-white group-data-[typography=collected]/collected-cards:tw-text-[15px] group-data-[typography=collected]/collected-cards:tw-leading-[19.25px]">
             {card.token_name}
           </h3>
           {showSeizedCount && (
-            <span className="tw-flex tw-items-center tw-gap-0.5 tw-whitespace-nowrap tw-text-[11px] tw-font-medium tw-text-iron-500">
+            <span className="tw-flex tw-items-center tw-gap-0.5 tw-whitespace-nowrap tw-text-[11px] tw-font-medium tw-text-iron-500 group-data-[typography=collected]/collected-cards:tw-text-meta group-data-[typography=collected]/collected-cards:tw-font-normal group-data-[typography=collected]/collected-cards:tw-tabular-nums">
               {getSeizedCountDisplay()}x
               {hasBalanceMismatch && (
                 <>
@@ -349,12 +349,12 @@ export default function UserPageCollectedCard({
         </div>
 
         {showDataRow && (
-          <div className="tw-mt-2 tw-flex tw-items-center tw-justify-between tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-2.5">
+          <div className="tw-mt-2 tw-flex tw-items-center tw-justify-between group-data-[typography=collected]/collected-cards:tw-flex-wrap group-data-[typography=collected]/collected-cards:tw-gap-x-2 group-data-[typography=collected]/collected-cards:tw-gap-y-1 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-2.5">
             <div className="tw-flex tw-items-baseline tw-gap-1.5">
-              <span className="tw-text-[13px] tw-font-semibold tw-text-iron-300">
+              <span className="tw-text-[13px] tw-font-semibold tw-text-iron-300 group-data-[typography=collected]/collected-cards:tw-font-medium group-data-[typography=collected]/collected-cards:tw-text-iron-100 group-data-[typography=collected]/collected-cards:tw-tabular-nums">
                 {getTdhDisplay()}
               </span>
-              <span className="tw-text-[13px] tw-font-semibold tw-text-iron-600">
+              <span className="tw-text-[13px] tw-font-semibold tw-text-iron-600 group-data-[typography=collected]/collected-cards:tw-font-normal group-data-[typography=collected]/collected-cards:tw-text-iron-500">
                 {translate(locale, "transfer.card.tdh")}
               </span>
             </div>

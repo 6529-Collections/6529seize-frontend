@@ -327,7 +327,8 @@ jobs:
       needs.plan.outputs.core_playwright_required == 'true' &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 20
+    # The complete native pack needs room for its dev-server bootstrap and tests.
+    timeout-minutes: ${{ matrix.lane == 'playwright-native-competition' && 30 || 20 }}
     permissions:
       contents: read
       issues: read
@@ -653,6 +654,8 @@ jobs:
           ./bin/6529 run test:no-coverage --runInBand --runTestsByPath \
             __tests__/scripts/app-pr-ci-effective-plan.test.ts \
             __tests__/scripts/ci-wave-web-validation.test.ts \
+            __tests__/scripts/ci-failure-details.test.ts \
+            __tests__/scripts/notify-ci-wave.test.ts \
             __tests__/scripts/deploy-staging-artifact.test.ts \
             __tests__/scripts/e2e-packs.test.ts \
             __tests__/scripts/frontend-deployment-workflows.test.ts \

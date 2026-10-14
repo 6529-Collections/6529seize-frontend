@@ -66,33 +66,6 @@
       ]
     },
     {
-      "id": "delegation.overview",
-      "term": "Delegation center",
-      "aliases": [
-        "delegation",
-        "delegate",
-        "delegations",
-        "delegation center",
-        "delegation manager"
-      ],
-      "facts": [
-        "Delegation lets one wallet authorize another wallet for supported 6529 uses.",
-        "The delegation center provides wallet checking, action flows, collection management, and section navigation.",
-        "Delegation is useful for vault/hot-wallet patterns and airdrop-related workflows."
-      ],
-      "canonical_path": "/delegation/delegation-center",
-      "related_paths": [
-        "/delegation/wallet-checker",
-        "/delegation-mapping-tool",
-        "/consolidation-mapping-tool"
-      ],
-      "tags": [
-        "delegation",
-        "wallet",
-        "glossary"
-      ]
-    },
-    {
       "id": "waves.drop",
       "term": "Drop",
       "aliases": [
@@ -477,6 +450,7 @@
       ],
       "facts": [
         "The Profile Proxy tab exposes profile proxy relationships and actions.",
+        "All, Received, and Granted filters remain visible as tabs on phone, tablet, and desktop. Arrow keys switch tabs; Home and End select the first and last tab.",
         "Proxy features help a profile allow another account to perform supported actions without handing over the primary wallet.",
         "Current proxy action creation supports Allocate Rep and Allocate NIC actions with a granted Credit amount and read-only Spent total.",
         "Proxy action availability and profile rating behavior depend on whether the active proxy has the relevant Allocate Rep or Allocate NIC permission.",
@@ -485,7 +459,7 @@
       "canonical_path": "/{user}/proxy",
       "related_paths": [
         "/{user}/proxy",
-        "/delegation/delegation-center"
+        "/safe-collecting"
       ],
       "tags": [
         "profiles",
@@ -579,6 +553,45 @@
       ]
     },
     {
+      "id": "delegation.overview",
+      "term": "Safe Collecting",
+      "aliases": [
+        "safe collecting",
+        "collect safely",
+        "delegation center",
+        "delegation",
+        "delegate",
+        "delegations",
+        "delegation manager",
+        "vault setup",
+        "wallet setup",
+        "tap setup",
+        "keep my vault cold"
+      ],
+      "facts": [
+        "Safe Collecting at /safe-collecting (formerly the Delegation Center) explains and sets up 6529's safe collecting system: keep NFTs in a vault that never connects to anything, and use 6529 from a hot wallet, while TDH, delegations, airdrops and subscriptions keep working as if every wallet were one.",
+        "The former /delegation URLs permanently redirect to the equivalent /safe-collecting pages, preserving query parameters and section anchors. Wallet Architecture is now /safe-collecting/tap-guide, and the FAQ and its articles are under /safe-collecting/faq.",
+        "It follows the Three Address Protocol (TAP): a vault (ideally a SAFE with hardware-wallet signers, or a hardware wallet) that holds NFTs and never connects; a transaction wallet on a hardware wallet that buys, sells and trades and acts as the vault's Delegation Manager; a hot social wallet that signs in to 6529, votes, posts, mints and pays for subscriptions and holds no NFTs; and optionally an old, burned or exposed address kept combined for its TDH.",
+        "The recommended setup for new collectors: the vault signs once to set its ENS name and appoint the transaction wallet as Delegation Manager (use case 998) on Any Collection; the guided setup combines the wallets with the manager signing for the vault; optionally the manager delegates minting to the social wallet; airdrops without a delegation go to the wallet with the most TDH, usually the vault.",
+        "When a wallet is connected, the Your setup section lists the profile's wallets with TDH, primary and connected badges, which wallet manages which, minting and airdrop delegations, and a checklist with links to fix missing steps.",
+        "The page links to every tool: guided consolidation, appointing a manager, minting and airdrop delegations, primary address, locks, revoking, and the Wallet Checker. The original delegation, consolidation and Delegation Manager forms and Manage by Collection are under All tools.",
+        "A Delegation Manager cannot move NFTs but can register anything in the vault's name, including consolidations and more managers; an expiry date does not limit it, only revoking does, and revoking it does not undo what it registered."
+      ],
+      "canonical_path": "/safe-collecting",
+      "related_paths": [
+        "/safe-collecting/tap-guide",
+        "/safe-collecting/build-consolidation",
+        "/safe-collecting/register-sub-delegation",
+        "/safe-collecting/wallet-checker",
+        "/network/tdh/consolidation"
+      ],
+      "tags": [
+        "delegation",
+        "wallet",
+        "glossary"
+      ]
+    },
+    {
       "id": "network.tdh",
       "term": "TDH",
       "aliases": [
@@ -589,7 +602,10 @@
         "tdh meaning",
         "tdh rate",
         "hodl rate",
-        "total dynamic head"
+        "total dynamic head",
+        "tdh rank ties",
+        "tdh tie-break",
+        "same TDH different ranks"
       ],
       "facts": [
         "TDH means Total Days Held.",
@@ -615,12 +631,19 @@
         "Distinct Gradients add the configured per-token bonus up to the configured count limit. The page derives the eventual rounded multiplier ceiling from the full season schedule, additional-set series and Gradient limit.",
         "The displayed future ceiling is conditional: future cards must become eligible and can make a previously complete collection incomplete.",
         "Rates are rounded before wallet and token-level TDH rounding; consolidated wallets preserve qualifying internal-transfer ages, recompute the boost, and sum per-token rounded final contributions.",
-        "TDH is used throughout the network, including profiles, leaderboards, Levels, groups, Network views, Waves voting and eligibility, and public data."
+        "TDH is used throughout the network, including profiles, leaderboards, Levels, groups, Network views, Waves voting and eligibility, and public data.",
+        "TDH ranks are consecutive positions starting at 1; equal displayed TDH does not give wallets or consolidations a shared rank.",
+        "Overall TDH ranks compare boosted TDH, unboosted TDH, Gradients TDH and NextGen TDH, in that order, highest first.",
+        "Memes, Gradients and NextGen collection ranks compare that collection's boosted TDH, unboosted TDH and NFT balance, then total NFT balance, highest first. Owners of an individual Meme card compare that card's TDH, then total boosted TDH, highest first.",
+        "A complete tie uses the lowercase wallet address in ascending order, or the consolidation key made from lowercase wallet addresses sorted in ascending order and joined with hyphens. Backend and native 6529 Desktop use the same ranking rules; tie-breaks change positions without changing holdings, TDH scores or boosts.",
+        "Individual Gradient and NextGen token rankings compare token TDH highest first, then numeric token ID lowest first.",
+        "A collection rank of -1 means there is no positive boosted TDH for that collection. Empty singleton wallets are omitted from TDH rankings; wallets with eligible NFTs or membership in a multi-wallet consolidation remain included even when TDH is zero."
       ],
       "canonical_path": "/network/tdh",
       "related_paths": [
         "/network/definitions",
         "/network/tdh/historic-boosts",
+        "/network/tdh/consolidation",
         "/network/health/network-tdh",
         "/network/levels"
       ],
@@ -728,6 +751,7 @@
         "The setup path is: connect a wallet, open the profile Subscriptions tab, add a completely non-refundable ETH balance, choose Automatic or Manual mode, and select or skip upcoming eligible cards.",
         "The /about/subscriptions primary action says Connect to Subscribe when a wallet or profile handoff is needed and Manage when the user can continue to their profile subscription settings.",
         "Users manage their subscription mode, balance, airdrop address, top-ups, upcoming drops, and history under their profile Subscriptions tab.",
+        "On phones, Redeemed Subscriptions, Log History, and Top Up History start closed; select a history row to expand it. Larger screens start with these sections open. A user’s open or closed choice is preserved while data refreshes or the window is resized.",
         "Automatic mode mints eligible cards until the balance is used unless the user opts out; Manual mode only mints cards the user opts into.",
         "Automatic mode does not expire when the balance is insufficient; coverage describes what the current balance funds, not an expiration date for the mode.",
         "Coverage counts consecutive fully funded intended drops from the immediate next intended drop and accounts for mode, eligibility, edition preference, selections, opt-outs, balance, and the published schedule.",

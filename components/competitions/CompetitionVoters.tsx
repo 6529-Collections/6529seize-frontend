@@ -8,6 +8,10 @@ import type { ApiCompetitionVoter } from "@/generated/models/ApiCompetitionVoter
 import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { CompetitionLoadMore } from "./CompetitionLoadMore";
 import { CompetitionState } from "./CompetitionState";
+import {
+  CompetitionVoterSkeleton,
+  CompetitionVotesSkeleton,
+} from "./CompetitionVotesSkeleton";
 
 function Voter({
   voter,
@@ -22,7 +26,7 @@ function Voter({
     ...getIdentityQueryOptions({ handleOrWallet: voter.profile_id }),
     retry: false,
   });
-  if (query.isPending) return <CompetitionState />;
+  if (query.isPending) return <CompetitionVoterSkeleton />;
   if (query.isError)
     return <CompetitionState error retry={() => void query.refetch()} />;
   const profile = query.data;
@@ -50,12 +54,12 @@ export default function CompetitionVoters() {
     { waveId: competition.wave_id, competitionId: competition.id },
     "voters"
   );
-  if (query.isPending) return <CompetitionState />;
+  if (query.isPending) return <CompetitionVotesSkeleton variant="voters" />;
   if (query.isError)
     return <CompetitionState error retry={() => void query.refetch()} />;
   const voters = query.data.pages.flatMap((page) => page.data);
   return (
-    <div className="tw-mx-auto tw-w-full tw-max-w-2xl tw-space-y-2">
+    <div className="tw-w-full tw-max-w-6xl">
       {!voters.length && <CompetitionState empty />}
       {voters.map((voter, index) => (
         <Voter
@@ -65,7 +69,9 @@ export default function CompetitionVoters() {
           creditType={competition.voting.credit_type as ApiWaveCreditType}
         />
       ))}
-      <CompetitionLoadMore query={query} />
+      <div className="tw-pt-4">
+        <CompetitionLoadMore query={query} />
+      </div>
     </div>
   );
 }

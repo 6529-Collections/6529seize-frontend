@@ -72,7 +72,7 @@ export const WAVES_HREF = "/waves";
 
 const ABOUT_SUBSCRIPTIONS_HREF = "/about/subscriptions";
 const COLLECTIONS_HREF = "/the-memes";
-const DELEGATION_HREF = "/delegation/delegation-center";
+const DELEGATION_HREF = "/safe-collecting";
 const JOIN_STEP_ID_PREFIX = "join-step";
 const LICENSE_HREF = "/about/license";
 const MEME_MINT_HREF = "/the-memes/mint";
