@@ -64,7 +64,6 @@ describe("mention alias submission", () => {
         currentPartMentionedUsers: [],
         currentPartMentionedWaves: [],
         currentPartReferencedNfts: [],
-        submitting: false,
         setDrop,
         setFiles: jest.fn(),
         setEditorState: jest.fn(),

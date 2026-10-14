@@ -1,3 +1,4 @@
+import { observeComposerFocus } from "../support/observeComposerFocus";
 import { defineWaveImageLayoutTests } from "../media/imageArtworkLayoutCases";
 import type { Page, Route, WebSocketRoute } from "@playwright/test";
 import { defineWaveImagePreviewTests } from "../media/waveImagePreviewCases";
@@ -498,6 +499,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       .getByRole("textbox", { name: "Write a chat message" })
       .last();
     await composer.fill(SANDBOX_CHAT_DROP_CONTENT);
+    const expectContinuousFocus = await observeComposerFocus(composer);
     await expect(
       page.getByRole("button", { name: "Post" }).last()
     ).toBeEnabled();
@@ -566,6 +568,12 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     await expect(submittedDrop).toContainText(SANDBOX_CHAT_DROP_CONTENT);
+    await expect(composer).toBeFocused();
+    await expect(composer).toHaveText("");
+    await expectContinuousFocus();
+    // Sending ends this draft's undo history; Undo must not revive a sent post.
+    await composer.press("ControlOrMeta+z");
+    await expect(composer).toHaveText("");
 
     const requests = await fetchSandboxRequests(baseURL);
     expect(

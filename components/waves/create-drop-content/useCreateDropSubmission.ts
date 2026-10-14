@@ -196,24 +196,16 @@ const hideAndroidKeyboard = async () => {
 };
 
 const updateFocusAfterAcceptedSubmit = ({
-  getMarkdown,
   shouldKeepChatFocused,
   isApp,
   createDropInputRef,
-  shouldRefocusAfterChatSubmitRef,
 }: {
-  readonly getMarkdown: string | null;
   readonly shouldKeepChatFocused: boolean;
   readonly isApp: boolean;
   readonly createDropInputRef: MutableCurrentRef<CreateDropInputHandles | null>;
-  readonly shouldRefocusAfterChatSubmitRef: MutableCurrentRef<boolean>;
 }) => {
-  if (getMarkdown?.length) {
-    createDropInputRef.current?.clearEditorState();
-  }
-
   if (shouldKeepChatFocused) {
-    shouldRefocusAfterChatSubmitRef.current = true;
+    createDropInputRef.current?.focus();
     return;
   }
 
@@ -303,7 +295,6 @@ export const useCreateDropSubmission = ({
   setIsStormMode,
   setMetadataOpenState,
   createDropInputRef,
-  shouldRefocusAfterChatSubmitRef,
 }: {
   readonly activeDrop: ActiveDropState | null;
   readonly wave: ApiWave;
@@ -360,7 +351,6 @@ export const useCreateDropSubmission = ({
     SetStateAction<ScopedValueState<boolean> | null>
   >;
   readonly createDropInputRef: MutableCurrentRef<CreateDropInputHandles | null>;
-  readonly shouldRefocusAfterChatSubmitRef: MutableCurrentRef<boolean>;
 }) => {
   const {
     locale,
@@ -520,8 +510,10 @@ export const useCreateDropSubmission = ({
     });
   };
 
+  const submissionInFlightRef = useRef(false);
+
   const prepareAndSubmitDrop = async (dropRequest: CreateDropConfig) => {
-    if (submitting) {
+    if (submitting || submissionInFlightRef.current) {
       return;
     }
 
@@ -537,6 +529,7 @@ export const useCreateDropSubmission = ({
 
     const submittedDraftState = getDraftStateSnapshot();
 
+    submissionInFlightRef.current = true;
     setSubmitting(true);
     try {
       const { success } = await requestAuth();
@@ -657,19 +650,17 @@ export const useCreateDropSubmission = ({
         addOptimisticDrop,
         processIncomingDrop,
       });
-      updateFocusAfterAcceptedSubmit({
-        getMarkdown,
-        shouldKeepChatFocused,
-        isApp,
-        createDropInputRef,
-        shouldRefocusAfterChatSubmitRef,
-      });
       setFiles([]);
       if (isIdentityPickerAllowed) {
         disableIdentityPickerAutoOpen();
       }
       setIsStormMode(false);
       refreshState();
+      updateFocusAfterAcceptedSubmit({
+        shouldKeepChatFocused,
+        isApp,
+        createDropInputRef,
+      });
     } catch (error) {
       setToast({
         type: "error",
@@ -678,6 +669,7 @@ export const useCreateDropSubmission = ({
         details: getToastErrorDetails(error),
       });
     } finally {
+      submissionInFlightRef.current = false;
       setSubmitting(false);
     }
   };
