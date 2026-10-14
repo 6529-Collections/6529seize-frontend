@@ -28,6 +28,27 @@ original deploy initiator when distinct. Failed deploys and failed production
 WEB E2E add `cc @devs6529`; failed staging WEB E2E keeps the initiator mentions
 but no longer adds `cc @devs6529`.
 
+Failed E2E validation also lists final failed test names by pack and browser.
+Shared desktop/mobile names appear once under a heading naming both browsers,
+with both executions included in the failure count. Recovered retries and
+flaky tests are excluded. Notification jobs download the run's retained E2E
+artifact and read only the final pack attempt's Playwright failure summary in
+`output.log`, selected through `evidence.json`; they never include assertion
+bodies or diagnostic logs in the wave message. URLs embedded in test names are
+replaced with `[URL omitted]`. Ambiguous names retain their suite context.
+Artifact names include the run ID and attempt so a workflow rerun cannot reuse
+failure evidence from an earlier attempt.
+
+The summary describes app validation regardless of whether a frontend or
+backend PR caused the failure. Previously-published messages are not modified.
+E2E failures without test evidence identify failed workflow steps from the
+current run attempt. Unavailable evidence or GitHub
+lookup failure is reported explicitly, retaining the run link. This enrichment
+uses the existing `description` field, stays below its length limit, and remains
+best effort. Backend `api` must be deployed first to preserve multiline
+descriptions in WEB E2E replies; then enable the frontend E2E sender workflow
+revisions. No database or worker deployment is required.
+
 ## Correlation And Reruns
 
 1. A successful WEB deploy notification includes its GitHub deployment run ID.

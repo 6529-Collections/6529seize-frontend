@@ -1,0 +1,28 @@
+{
+  "recorded_at": "2026-10-13T14:33:56.529941+00:00",
+  "role_arn": "arn:aws:iam::987989283142:role/gha-frontend-deploy-staging",
+  "trust_verified": true,
+  "policies_verified": [
+    "arn:aws:iam::987989283142:policy/FrontendStagingDeployment"
+  ],
+  "inline_policies": [],
+  "max_session_duration": 5400,
+  "access_analyzer_findings": 0,
+  "simulation_summary": {
+    "access_analyzer_findings": 0,
+    "positive_cases": 26,
+    "negative_cases": 35,
+    "status": "passed"
+  },
+  "read_only_checks": [
+    {
+      "name": "artifact_bucket",
+      "status": "passed"
+    },
+    {
+      "name": "staging_ssm",
+      "status": "passed"
+    }
+  ],
+  "temporary_role_deleted": true
+}
