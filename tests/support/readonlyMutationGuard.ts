@@ -178,8 +178,8 @@ function isSentryIngestPost(method: string, url: URL) {
     url.port === "" &&
     url.username === "" &&
     url.password === "" &&
-    /^o[0-9]+\.ingest(?:\.(?:us|de))?\.sentry\.io$/.test(url.hostname) &&
-    /^\/api\/[0-9]+\/(?:envelope|security)\/$/.test(url.pathname)
+    /^o\d+\.ingest(?:\.(?:us|de))?\.sentry\.io$/.test(url.hostname) &&
+    /^\/api\/\d+\/(?:envelope|security)\/$/.test(url.pathname)
   );
 }
 
