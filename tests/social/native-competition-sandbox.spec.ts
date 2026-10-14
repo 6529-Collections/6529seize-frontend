@@ -607,6 +607,140 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     "PLAYWRIGHT_AUTH_SANDBOX",
     "Native competition tests require an isolated local mock API."
   );
+  for (const app of [false, true]) {
+    test(`keeps vote lists readable in the ${app ? "app" : "web"} layout`, async ({
+      page,
+    }, testInfo) => {
+      const mobile = testInfo.project.name === "web-mobile-chromium";
+      test.skip(app && !mobile, "The app variant uses the mobile viewport.");
+      if (!mobile) await page.setViewportSize({ width: 1728, height: 1000 });
+      const sandbox = await installCompetitionApi(page, false, false);
+      if (app)
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      const profiles = [
+        {
+          id: "layout-positive",
+          handle: "long-voter-handle-for-layout-checks",
+        },
+        { id: "layout-negative", handle: "downvoter" },
+      ];
+      for (const profile of profiles) {
+        await page.route(`**/identities/${profile.id}`, (route) =>
+          route.fulfill({
+            json: { ...profile, pfp: null, primary_wallet: null },
+          })
+        );
+      }
+      await page.route("**/v3/waves/*/competitions/alpha/voters?**", (route) =>
+        route.fulfill({
+          json: pageResult([
+            {
+              profile_id: profiles[0]!.id,
+              votes: 123456789,
+              credit_spent: 123456789,
+            },
+            { profile_id: profiles[1]!.id, votes: -1000, credit_spent: 1000 },
+          ]),
+        })
+      );
+      await page.route(
+        "**/v3/waves/*/competitions/alpha/activity?**",
+        (route) =>
+          route.fulfill({
+            json: [0, 5000, -1000].map((value, index) => ({
+              id: `layout-log-${index}`,
+              action: "DROP_VOTE_EDIT",
+              wave_id: WAVE,
+              drop_id: entryDropId("alpha"),
+              invoker: { ...profiles[0], pfp: null },
+              drop_author: {
+                id: "creator",
+                handle: "long-drop-creator-handle",
+                pfp: null,
+              },
+              created_at: Date.now(),
+              contents: {
+                oldVote: value,
+                newVote: index ? -1234567 : 1234567,
+                reason: index === 2 ? "CREDIT_OVERSPENT" : null,
+              },
+            })),
+          })
+      );
+      await page.goto(`${ROOT}/alpha?tab=votes&voteTab=all`);
+      const voters = page.getByRole("tabpanel", {
+        name: "All votes",
+        exact: true,
+      });
+      await expect(
+        voters.getByRole("link", { name: profiles[0]!.handle, exact: true })
+      ).toBeVisible();
+      await expect(
+        voters.getByText("+123,456,789", { exact: true })
+      ).toBeVisible();
+      await expect(voters.getByText("-1,000", { exact: true })).toBeVisible();
+      const totals = voters.getByText("123,456,789", { exact: true });
+      await expect(totals).toBeInViewport();
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("all-votes-layout.png"),
+        animations: "disabled",
+      });
+
+      await page.getByRole("tab", { name: "Activity", exact: true }).click();
+      const activity = page.getByRole("tabpanel", {
+        name: "Activity",
+        exact: true,
+      });
+      const voter = activity
+        .getByRole("link", { name: profiles[0]!.handle, exact: true })
+        .first();
+      const creator = activity
+        .getByRole("link", { name: "long-drop-creator-handle", exact: true })
+        .first();
+      const viewDrop = activity
+        .getByRole("button", { name: "View drop in chat", exact: true })
+        .first();
+      await expect(voter).toBeVisible();
+      await expect(creator).toBeVisible();
+      await expect(
+        activity.getByText("System Adjustment", { exact: true })
+      ).toBeVisible();
+      const voterBox = await voter.boundingBox();
+      const creatorBox = await creator.boundingBox();
+      const buttonBox = await viewDrop.boundingBox();
+      expect(voterBox).not.toBeNull();
+      expect(creatorBox).not.toBeNull();
+      expect(buttonBox?.width).toBeGreaterThanOrEqual(40);
+      expect(buttonBox?.height).toBeGreaterThanOrEqual(40);
+      if (mobile)
+        expect(creatorBox!.y).toBeGreaterThan(voterBox!.y + voterBox!.height);
+      else
+        expect(
+          Math.abs(
+            creatorBox!.y +
+              creatorBox!.height / 2 -
+              voterBox!.y -
+              voterBox!.height / 2
+          )
+        ).toBeLessThanOrEqual(1);
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("activity-layout.png"),
+        animations: "disabled",
+      });
+      await viewDrop.focus();
+      await expect(viewDrop).toBeFocused();
+      await page.keyboard.press("Enter");
+      await expect(page).toHaveURL(new RegExp(`drop=${entryDropId("alpha")}`));
+      expect(sandbox.requests).toHaveLength(0);
+    });
+  }
+
   for (const legacy of [false, true]) {
     test(`scrolls overflowing ${legacy ? "legacy" : "native"} Settings and vote Activity`, async ({
       page,

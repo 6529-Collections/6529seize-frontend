@@ -39,49 +39,56 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
     ]) ?? voter.voter.id.trim();
 
   return (
-    <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-1 tw-py-2.5">
-      <div className="tw-flex tw-items-center tw-gap-3">
-        <span className="tw-flex tw-w-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-[0.625rem] tw-font-semibold tw-text-iron-500">
-          {position}
+    <div className="tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-900 tw-py-3">
+      <span
+        className={`tw-w-5 tw-flex-shrink-0 tw-text-xs tw-font-medium tw-tabular-nums ${position <= 3 ? "tw-text-iron-300" : "tw-text-iron-400"}`}
+      >
+        {position}
+      </span>
+      <Link
+        href={`/${voterProfile}`}
+        aria-label={voterProfile}
+        className="tw-group tw-flex tw-min-h-11 tw-min-w-0 tw-flex-1 tw-items-center tw-gap-3 tw-rounded-sm tw-no-underline tw-transition-opacity tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-opacity-80"
+      >
+        {voter.voter.pfp ? (
+          <Image
+            src={resolveIpfsUrlSync(voter.voter.pfp)}
+            alt=""
+            width={28}
+            height={28}
+            className="tw-size-7 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-object-cover tw-ring-1 tw-ring-inset tw-ring-white/10"
+          />
+        ) : (
+          <div className="tw-size-7 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/10" />
+        )}
+        <div className="tw-min-w-0 tw-flex-1">
+          <div className="tw-flex tw-min-w-0 tw-max-w-full tw-items-center">
+            <UserProfileTooltipWrapper user={voterProfile}>
+              <span className="tw-block tw-min-w-0 tw-truncate tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-100 desktop-hover:group-hover:tw-underline">
+                {voterProfile}
+              </span>
+            </UserProfileTooltipWrapper>
+          </div>
+          <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-0.5 tw-text-xs tw-font-medium tw-tabular-nums tw-leading-5">
+            {hasPositiveVotes && (
+              <span className="tw-break-all tw-text-green">
+                +{formatNumberWithCommas(voter.positive_votes_summed)}
+              </span>
+            )}
+            {hasNegativeVotes && (
+              <span className="tw-break-all tw-text-red">
+                -{formatNumberWithCommas(voter.negative_votes_summed)}
+              </span>
+            )}
+          </span>
+        </div>
+      </Link>
+      <div className="tw-flex tw-max-w-[45%] tw-flex-shrink-0 tw-flex-col tw-items-end tw-gap-x-1.5 tw-text-right sm:tw-flex-row sm:tw-flex-wrap sm:tw-items-baseline sm:tw-justify-end">
+        <span className="tw-break-all tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-100">
+          {formatNumberWithCommas(voter.absolute_votes_summed)}
         </span>
-        <Link
-          href={`/${voterProfile}`}
-          className="tw-group tw-flex tw-min-w-0 tw-max-w-full tw-flex-1 tw-items-center tw-gap-2 tw-no-underline tw-transition-all tw-duration-300 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-underline desktop-hover:hover:tw-opacity-80"
-        >
-          {voter.voter.pfp ? (
-            <Image
-              src={resolveIpfsUrlSync(voter.voter.pfp)}
-              alt=""
-              width={24}
-              height={24}
-              className="tw-size-6 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-object-cover tw-ring-1 tw-ring-inset tw-ring-white/10"
-            />
-          ) : (
-            <div className="tw-size-6 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/10" />
-          )}
-          <UserProfileTooltipWrapper user={voterProfile}>
-            <span className="tw-block tw-min-w-0 tw-truncate tw-text-sm tw-font-medium tw-text-iron-200 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-opacity-80">
-              {voterProfile}
-            </span>
-          </UserProfileTooltipWrapper>
-        </Link>
-      </div>
-      <div className="tw-mt-1.5 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1">
-        <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
-          {formatNumberWithCommas(voter.absolute_votes_summed)}{" "}
+        <span className="tw-text-xs tw-leading-5 tw-text-iron-400">
           {WAVE_VOTING_LABELS[creditType]} {WAVE_VOTE_STATS_LABELS.TOTAL}
-        </span>
-        <span className="tw-ml-auto tw-flex tw-items-center tw-gap-2 tw-text-xs tw-font-semibold tw-tabular-nums">
-          {hasPositiveVotes && (
-            <span className="tw-whitespace-nowrap tw-text-emerald-400">
-              +{formatNumberWithCommas(voter.positive_votes_summed)}
-            </span>
-          )}
-          {hasNegativeVotes && (
-            <span className="tw-whitespace-nowrap tw-text-rose-400">
-              -{formatNumberWithCommas(voter.negative_votes_summed)}
-            </span>
-          )}
         </span>
       </div>
     </div>
