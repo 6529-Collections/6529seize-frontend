@@ -64,7 +64,7 @@ export default function UserPageCollectedCardsNoCards({
     <div className="tw-flex tw-flex-col tw-items-start tw-gap-4 tw-py-4">
       <output
         tabIndex={-1}
-        className="tw-block tw-text-sm tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+        className="tw-block tw-text-meta/5 tw-font-normal tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
       >
         {msg}
       </output>

@@ -31,7 +31,7 @@ export default function ProfileProxyEndTime({
 
   return (
     <div className="tw-flex tw-items-center">
-      <span className="tw-whitespace-nowrap tw-text-iron-300 tw-text-md tw-font-normal">
+      <span className="tw-whitespace-nowrap tw-text-iron-300 tw-text-meta tw-font-normal tw-tabular-nums tw-leading-5">
         {profileProxyAction.end_time
           ? getTimeUntil(profileProxyAction.end_time)
           : "Not set"}

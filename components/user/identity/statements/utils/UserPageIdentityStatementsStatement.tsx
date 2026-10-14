@@ -111,10 +111,10 @@ export default function UserPageIdentityStatementsStatement({
         <SocialStatementIcon statementType={statement.statement_type} />
       </div>
       <div className="tw-min-w-0 tw-flex-1">
-        <div className="tw-text-xs tw-font-semibold tw-leading-none tw-text-iron-500">
+        <div className="tw-text-meta tw-font-normal tw-leading-3 tw-text-iron-500">
           {presentation.title}
         </div>
-        <div className="tw-mt-1.5 tw-truncate tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-100">
+        <div className="tw-mt-1.5 tw-truncate tw-text-sm tw-font-medium tw-leading-4 tw-text-iron-100">
           {isTouchScreen && copied ? (
             <span
               aria-hidden="true"
