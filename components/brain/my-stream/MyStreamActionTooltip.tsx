@@ -2,6 +2,7 @@
 
 import type { ComponentProps } from "react";
 import type { Tooltip } from "react-tooltip";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
 
 interface MyStreamActionTooltipProps {
@@ -27,11 +28,16 @@ export default function MyStreamActionTooltip({
   id,
   place = "top",
 }: MyStreamActionTooltipProps) {
+  const isTouchDevice = useIsTouchDevice();
+  if (isTouchDevice) return null;
+
   return (
     <BodyPortalTooltip
       id={id}
       place={place}
       offset={8}
+      globalCloseEvents={{ clickOutsideAnchor: true, scroll: true }}
+      closeEvents={{ mouseleave: true, blur: true, click: true }}
       opacity={1}
       style={tooltipStyle}
     />

@@ -916,6 +916,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         /^About Local Composer Sandbox Wave/
       );
       await expect(
+        dialog.getByRole("button", { name: "Back", exact: true })
+      ).toHaveCount(0);
+      await expect(
         dialog.getByRole("tab", { name: "About", exact: true })
       ).toBeVisible();
       await expect(page).toHaveURL(destination);
