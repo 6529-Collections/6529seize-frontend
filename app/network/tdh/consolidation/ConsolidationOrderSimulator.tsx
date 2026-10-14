@@ -65,8 +65,14 @@ export default function ConsolidationOrderSimulator({
         {t(locale, "network.tdhConsolidation.policy.pendingLimits")}
       </output>
     );
-  // The walkthrough is written for three members and a fourth wallet.
-  if (!matchesSimulatedScenario(limits)) return null;
+  // The walkthrough is written for three members and a fourth wallet. With
+  // other limits it would mislead, so the section says why it is not shown.
+  if (!matchesSimulatedScenario(limits))
+    return (
+      <p className={TDH_TEXT}>
+        {t(locale, "network.tdhConsolidation.order.unavailable")}
+      </p>
+    );
 
   return (
     <div className={`${TDH_PANEL} tw-space-y-5 tw-p-5`}>
