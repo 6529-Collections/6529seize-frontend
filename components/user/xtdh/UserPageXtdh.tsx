@@ -69,9 +69,16 @@ export default function UserPageXtdh({ profile }: UserPageXtdhProps) {
     const profileHandle = profile.handle?.toLowerCase() ?? null;
     return (
       connectedProfile.consolidation_key === profile.consolidation_key ||
-      (!!connectedHandle && !!profileHandle && connectedHandle === profileHandle)
+      (!!connectedHandle &&
+        !!profileHandle &&
+        connectedHandle === profileHandle)
     );
-  }, [activeProfileProxy, connectedProfile, profile.consolidation_key, profile.handle]);
+  }, [
+    activeProfileProxy,
+    connectedProfile,
+    profile.consolidation_key,
+    profile.handle,
+  ]);
 
   useEffect(() => {
     if (!pathname) return;
@@ -127,16 +134,19 @@ export default function UserPageXtdh({ profile }: UserPageXtdhProps) {
   }, [activeFilter, handleFilterChange]);
 
   return (
-    <div className="tailwind-scope tw-flex tw-flex-col tw-gap-6">
+    <div
+      className="tailwind-scope tw-group/profile-xtdh tw-flex tw-flex-col tw-gap-6"
+      data-typography="profile"
+    >
       <UserXtdhTestModeBanner />
       <UserPageXtdhStatsHeader
         profileId={statsProfileId}
         onOutboundClick={canGrant ? handleOutboundClick : undefined}
       />
 
-      <div className="tw-mt-4">
-        <div className="tw-flex tw-flex-col tw-items-stretch tw-justify-between tw-overflow-hidden tw-rounded-t-xl tw-border tw-border-b-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950/80 tw-p-1 md:tw-flex-row md:tw-items-center">
-          <div className="tw-grid tw-w-full tw-grid-cols-2 tw-gap-1 md:tw-flex md:tw-w-auto">
+      <div className="tw-mt-2">
+        <div className="tw-mb-3 tw-flex tw-items-center">
+          <div className="tw-flex tw-flex-wrap tw-gap-x-6 tw-gap-y-2">
             {XTDH_TAB_CONFIG.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeFilter === tab.key;
@@ -144,13 +154,13 @@ export default function UserPageXtdh({ profile }: UserPageXtdhProps) {
                 <button
                   key={tab.key}
                   onClick={() => handleFilterChange(tab.key)}
-                  className={`tw-relative tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-t-0 tw-border-x-0 tw-border-b-2 tw-px-3 tw-py-3 tw-text-sm tw-font-medium tw-transition-all tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 sm:tw-px-8 md:tw-w-auto ${
+                  className={`tw-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-xl tw-tracking-tight tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black ${
                     isActive
-                      ? "tw-text-white tw-bg-iron-900 tw-border-b-primary-400"
-                      : "tw-text-iron-400 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-bg-iron-800/50 tw-border-b-transparent tw-bg-transparent"
+                      ? "tw-font-semibold tw-text-iron-100"
+                      : "tw-font-medium tw-text-iron-500 desktop-hover:hover:tw-text-iron-400"
                   }`}
                 >
-                  <Icon className="tw-size-4 tw-shrink-0" />
+                  <Icon className="tw-size-4 tw-shrink-0 tw-opacity-50" />
                   {tab.label}
                 </button>
               );

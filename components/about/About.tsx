@@ -27,7 +27,6 @@ import AboutMemeLab from "./AboutMemeLab";
 import AboutMemes from "./AboutMemes";
 import AboutMinting from "./AboutMinting";
 import AboutNakamotoThreshold from "./AboutNakamotoThreshold";
-import AboutNFTDelegation from "./AboutNFTDelegation";
 import AboutPrimaryAddress from "./AboutPrimaryAddress";
 import AboutPrivacyPolicy from "./AboutPrivacyPolicy";
 import AboutSubscriptions from "./AboutSubscriptions";
@@ -147,8 +146,6 @@ function AboutSectionContent({ section }: { readonly section: AboutSection }) {
       return <AboutDataDecentral />;
     case AboutSection.GDRC1:
       return <AboutGDRC1 />;
-    case AboutSection.NFT_DELEGATION:
-      return <AboutNFTDelegation />;
     case AboutSection.SUBSCRIPTIONS:
       return <AboutSubscriptions />;
     case AboutSection.NAKAMOTO_THRESHOLD:

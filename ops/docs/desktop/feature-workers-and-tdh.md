@@ -18,6 +18,19 @@ TDH is coordinated with NFT/delegation work and transaction repairs. Respect a b
 
 An interrupted transaction reconciliation resumes from its saved range on restart with an active provider. An interrupted TDH calculation reruns from scratch on restart; it does not continue a partially calculated result.
 
+## Native four-wallet delegation-index upgrade
+
+Desktop builds with native four-wallet indexing automatically replay NFTDelegation
+history to recover directional registration times and Safe/batch token scope.
+The previous live rows and displayed TDH remain available while replay runs.
+TDH waits for replay completion, even if the old checkpoint was caught up.
+
+Replay progress is saved and resumes after interruption. Keep NFTDelegation
+enabled and an archive-capable Ethereum RPC active. After replay finishes,
+run `Recalculate TDH Now` or allow the normal scheduled calculation; displayed
+TDH can remain stale until then. A website renderer sync alone does not update
+an older installed native index.
+
 ## Location in the Site
 
 These controls live inside the installed desktop application under the
@@ -49,15 +62,15 @@ If the app closes during TDH work, an active provider allows a fresh rerun on re
 
 ## Common Scenarios
 
-| Observation | Meaning and next step |
-| --- | --- |
-| Idle/Completed between runs | Normal scheduled operation; inspect the last completion. |
-| Disabled | Check that an RPC provider is Active. |
-| Waiting for Transactions/NFTDelegation | That checkpoint must reach the displayed target block. |
-| Waiting for another worker | The scheduler is avoiding incompatible concurrent work. |
-| Different Last Block | Compare equivalent snapshots before diagnosing a TDH mismatch. |
-| Reference Merkle Root N/A | Missing reference evidence, not a confirmed local mismatch. |
-| Transaction history changed | Finish the repair and recalculate TDH. |
+| Observation                            | Meaning and next step                                          |
+| -------------------------------------- | -------------------------------------------------------------- |
+| Idle/Completed between runs            | Normal scheduled operation; inspect the last completion.       |
+| Disabled                               | Check that an RPC provider is Active.                          |
+| Waiting for Transactions/NFTDelegation | That checkpoint must reach the displayed target block.         |
+| Waiting for another worker             | The scheduler is avoiding incompatible concurrent work.        |
+| Different Last Block                   | Compare equivalent snapshots before diagnosing a TDH mismatch. |
+| Reference Merkle Root N/A              | Missing reference evidence, not a confirmed local mismatch.    |
+| Transaction history changed            | Finish the repair and recalculate TDH.                         |
 
 ## Edge Cases
 
@@ -86,3 +99,7 @@ RPC URLs. Use the installed app's confirmation text before a recovery action.
 - [Get started](flow-getting-started.md)
 - [Sync and recovery](troubleshooting-sync-and-recovery.md)
 - [Wallets, IPFS, and About](feature-wallets-ipfs-and-about.md)
+
+### Waiting for consolidation settings
+
+Four-wallet native TDH uses the activation cutoff from the selected backend. If TDH reports that it is waiting for valid consolidation settings, prior results remain displayed. Check connectivity and that this backend exposes its consolidation policy, then retry `Recalculate TDH Now`. This is separate from an Ethereum archive RPC replay error. A changed cutoff or backend makes the next incremental calculation rebuild all groups under the new policy.

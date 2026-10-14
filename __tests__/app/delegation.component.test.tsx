@@ -73,7 +73,7 @@ describe("Delegation page component", () => {
     );
     fireEvent.click(screen.getByTestId("menu"));
     expect(push).toHaveBeenCalledWith(
-      `/delegation/${DelegationCenterSection.CHECKER}`
+      `/safe-collecting/${DelegationCenterSection.CHECKER}`
     );
   });
 
@@ -93,9 +93,7 @@ describe("Delegation page component", () => {
 
     fireEvent.click(screen.getByTestId("delegation-center-menu"));
 
-    expect(push).toHaveBeenCalledWith(
-      `/delegation/${DelegationCenterSection.CENTER}`
-    );
+    expect(push).toHaveBeenCalledWith("/safe-collecting");
     expect(replace).not.toHaveBeenCalled();
   });
 
@@ -141,6 +139,26 @@ describe("Delegation page component", () => {
     expect(replace).not.toHaveBeenCalled();
   });
 
+  it("preserves forwarded queries and section anchors on the Safe Collecting hub", () => {
+    window.history.replaceState(
+      {},
+      "",
+      "/safe-collecting?utm_source=old-link#safe-setup"
+    );
+    render(
+      <DelegationPage
+        section={DelegationCenterSection.CENTER}
+        addressQuery=""
+        collectionQuery=""
+        useCaseQuery={0}
+      />
+    );
+    expect(replace).not.toHaveBeenCalled();
+    expect(window.location.search).toBe("?utm_source=old-link");
+    expect(window.location.hash).toBe("#safe-setup");
+    window.history.replaceState({}, "", "/");
+  });
+
   it.each(["", "name.eth", "0x0000000000000000000000000000000000000529"])(
     "does not replay server metadata on wallet checker mount: %s",
     (address) => {
@@ -168,7 +186,12 @@ describe("Delegation page component", () => {
     const { rerender } = render(<DelegationPage {...props} />);
     fireEvent.click(screen.getByRole("button", { name: "Clear wallet" }));
     expect(replace).toHaveBeenCalledTimes(1);
-    expect(replace).toHaveBeenLastCalledWith("/delegation/wallet-checker");
+    expect(replace).toHaveBeenLastCalledWith(
+      "/safe-collecting/wallet-checker",
+      {
+        scroll: false,
+      }
+    );
 
     rerender(<DelegationPage {...props} addressQuery="" />);
     expect(replace).toHaveBeenCalledTimes(1);
@@ -178,7 +201,8 @@ describe("Delegation page component", () => {
     const nextAddress = "0x0000000000000000000000000000000000000529";
     expect(replace).toHaveBeenCalledTimes(2);
     expect(replace).toHaveBeenLastCalledWith(
-      `/delegation/wallet-checker?address=${nextAddress}`
+      `/safe-collecting/wallet-checker?address=${nextAddress}`,
+      { scroll: false }
     );
 
     rerender(<DelegationPage {...props} addressQuery={nextAddress} />);

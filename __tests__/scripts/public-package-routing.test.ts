@@ -3,9 +3,6 @@ import os from "node:os";
 import path from "node:path";
 
 type PublicPolicy = {
-  RELEASE_INTEGRITY: string;
-  RELEASE_PACKAGE: string;
-  RELEASE_VERSION: string;
   validateArguments: (args: string[]) => void;
   validateEnvironment: (environment: NodeJS.ProcessEnv) => void;
   validateLockfile: (text: string) => void;
@@ -41,23 +38,35 @@ const runner =
 
 const repositoryRoot = process.cwd();
 
-describe("public Coordinator package policy", () => {
-  it("pins the reviewed public package without GitHub Packages", () => {
+describe("public package policy", () => {
+  it("validates public dependencies without a required release CLI", () => {
     expect(() => policy.validateRepositoryFiles(repositoryRoot)).not.toThrow();
 
     const manifest = JSON.parse(
       fs.readFileSync(path.join(repositoryRoot, "package.json"), "utf8")
-    ) as { devDependencies: Record<string, string> };
+    ) as Record<string, unknown>;
     const npmrc = fs.readFileSync(path.join(repositoryRoot, ".npmrc"), "utf8");
     const lockfile = fs.readFileSync(
       path.join(repositoryRoot, "pnpm-lock.yaml"),
       "utf8"
     );
 
-    expect(manifest.devDependencies[policy.RELEASE_PACKAGE]).toBe(
-      policy.RELEASE_VERSION
+    for (const section of [
+      "dependencies",
+      "devDependencies",
+      "peerDependencies",
+      "optionalDependencies",
+    ]) {
+      expect(manifest[section] ?? {}).not.toHaveProperty(
+        "@6529-collections/release-request"
+      );
+    }
+    const workspace = fs.readFileSync(
+      path.join(repositoryRoot, "pnpm-workspace.yaml"),
+      "utf8"
     );
-    expect(lockfile).toContain(policy.RELEASE_INTEGRITY);
+    expect(workspace).not.toContain("minimumReleaseAgeExclude");
+    expect(lockfile).not.toContain("@6529-collections/release-request");
     expect(npmrc).not.toContain("_authToken");
     expect(npmrc).not.toContain("npm.pkg.github.com");
     expect(lockfile).not.toContain("npm.pkg.github.com");
@@ -120,10 +129,7 @@ describe("public Coordinator package policy", () => {
       policy.validateArguments(["add", "package@//packages.example/pkg.tgz"])
     ).toThrow("direct dependency source is not allowed");
     expect(() =>
-      policy.validateArguments([
-        "add",
-        `alias@npm:${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}`,
-      ])
+      policy.validateArguments(["add", "alias@npm:package@1.2.3"])
     ).toThrow("direct dependency source is not allowed");
     for (const source of [
       "owner/repository",
@@ -143,16 +149,6 @@ describe("public Coordinator package policy", () => {
     for (const option of ["--latest", "-L"]) {
       expect(() => policy.validateArguments(["update", option])).toThrow(
         "pnpm option is not allowed"
-      );
-    }
-    for (const args of [
-      ["add", policy.RELEASE_PACKAGE],
-      ["install", `${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}`],
-      ["remove", policy.RELEASE_PACKAGE],
-      ["update", `${policy.RELEASE_PACKAGE}@latest`],
-    ]) {
-      expect(() => policy.validateArguments(args)).toThrow(
-        "cannot be changed by a package command"
       );
     }
     expect(() =>
@@ -201,19 +197,9 @@ describe("public Coordinator package policy", () => {
       peerDependencies?: Record<string, string>;
     };
 
-    manifest.devDependencies[policy.RELEASE_PACKAGE] =
-      `^${policy.RELEASE_VERSION}`;
-    expect(() => policy.validatePackageJson(JSON.stringify(manifest))).toThrow(
-      `must be an exact ${policy.RELEASE_VERSION} dev dependency`
-    );
-
-    manifest.devDependencies[policy.RELEASE_PACKAGE] = policy.RELEASE_VERSION;
-    manifest.peerDependencies = { [policy.RELEASE_PACKAGE]: "*" };
-    expect(() => policy.validatePackageJson(JSON.stringify(manifest))).toThrow(
-      "may exist only in devDependencies"
-    );
-
-    delete manifest.peerDependencies;
+    expect(() =>
+      policy.validatePackageJson(JSON.stringify(manifest))
+    ).not.toThrow();
     const manifestWithPnpm = {
       ...manifest,
       pnpm: { configDependencies: { "hook-package": "1.0.0" } },
@@ -233,12 +219,14 @@ describe("public Coordinator package policy", () => {
     const manifestWithAlias = {
       ...manifest,
       dependencies: {
-        "coordinator-next": `npm:${policy.RELEASE_PACKAGE}@0.0.6`,
+        "package-alias": "npm:package@1.2.3",
       },
     };
     expect(() =>
       policy.validatePackageJson(JSON.stringify(manifestWithAlias))
-    ).toThrow("cannot be referenced through another dependency");
+    ).toThrow(
+      "package.json direct dependency source is not allowed: package-alias"
+    );
 
     const manifestWithDirectSource = {
       ...manifest,
@@ -251,28 +239,47 @@ describe("public Coordinator package policy", () => {
     ).toThrow("package.json direct dependency source is not allowed: sharp");
   });
 
-  it("rejects changes to the reviewed age exception", () => {
+  it.each([
+    "dependencies",
+    "devDependencies",
+    "peerDependencies",
+    "optionalDependencies",
+  ])(
+    "applies ordinary public package rules to the removed CLI in %s",
+    (section) => {
+      const manifest = JSON.parse(
+        fs.readFileSync(path.join(repositoryRoot, "package.json"), "utf8")
+      ) as Record<string, unknown>;
+      expect(() =>
+        policy.validatePackageJson(
+          JSON.stringify({
+            ...manifest,
+            [section]: { "@6529-collections/release-request": "0.0.5" },
+          })
+        )
+      ).not.toThrow();
+    }
+  );
+
+  it("preserves the age rule and rejects new exceptions", () => {
     const workspace = fs.readFileSync(
       path.join(repositoryRoot, "pnpm-workspace.yaml"),
       "utf8"
     );
 
     expect(() =>
-      policy.validateWorkspace(
-        workspace.replace(
-          `"${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}"`,
-          `"${policy.RELEASE_PACKAGE}"`
-        )
-      )
-    ).toThrow("must contain only");
+      policy.validateWorkspace(workspace.replace("10080", "0"))
+    ).toThrow("must keep the seven-day package age rule");
     expect(() =>
       policy.validateWorkspace(
-        workspace.replace(
-          `"${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}"`,
-          `"${policy.RELEASE_PACKAGE}@0.0.6"`
-        )
+        `# minimumReleaseAge: 10080\n${workspace.replace("minimumReleaseAge: 10080", "minimumReleaseAge: 0")}`
       )
-    ).toThrow("must contain only");
+    ).toThrow("must keep the seven-day package age rule");
+    expect(() =>
+      policy.validateWorkspace(
+        `${workspace}\nminimumReleaseAgeExclude:\n  - unreviewed-package\n`
+      )
+    ).toThrow("setting is not allowed: minimumReleaseAgeExclude");
     expect(() =>
       policy.validateWorkspace(`${workspace}\nregistry: https://example.com\n`)
     ).toThrow("setting is not allowed: registry");
@@ -312,14 +319,6 @@ describe("public Coordinator package policy", () => {
       policy.validateWorkspace(
         workspace.replace(
           "overrides:\n",
-          `overrides:\n  "${policy.RELEASE_PACKAGE}": "0.0.6"\n`
-        )
-      )
-    ).toThrow("cannot be changed by overrides");
-    expect(() =>
-      policy.validateWorkspace(
-        workspace.replace(
-          "overrides:\n",
           "overrides:\n  sharp: https://example.invalid/sharp.tgz\n"
         )
       )
@@ -329,35 +328,17 @@ describe("public Coordinator package policy", () => {
         workspace.replace("overrides:\n", "overrides:\n  <<: *defaults\n")
       )
     ).toThrow("overrides must use registry package versions only");
-    expect(() =>
-      policy.validateWorkspace(
-        workspace.replace(
-          `  - "${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}"`,
-          `  - "${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}"\n  - "unreviewed-package"`
-        )
-      )
-    ).toThrow("must contain only");
   });
 
-  it("rejects changes to the reviewed lockfile resolution", () => {
+  it("rejects unsafe lockfile resolutions", () => {
     const lockfile = fs.readFileSync(
       path.join(repositoryRoot, "pnpm-lock.yaml"),
       "utf8"
     );
 
     expect(() =>
-      policy.validateLockfile(
-        lockfile.replace(policy.RELEASE_INTEGRITY, "sha512-wrong")
-      )
-    ).toThrow("does not pin the reviewed public package");
-    expect(() =>
       policy.validateLockfile(`${lockfile}\n# npm.pkg.github.com\n`)
     ).toThrow("cannot resolve packages from GitHub Packages");
-    expect(() =>
-      policy.validateLockfile(
-        `${lockfile}\n# npm:${policy.RELEASE_PACKAGE}@0.0.6\n`
-      )
-    ).toThrow("references an unreviewed package version");
     expect(() =>
       policy.validateLockfile(
         `${lockfile}\n  malicious@1.0.0:\n    resolution: {integrity: sha512-safe, tarball: https://packages.example/malicious.tgz}\n`
@@ -380,7 +361,7 @@ describe("public Coordinator package policy", () => {
     ).toThrow("escape sequences are not supported");
     expect(() =>
       policy.validateLockfile(
-        `${lockfile}\n  "@6529-collections/release-reque\\u0073t@0.0.6":\n    resolution: {integrity: sha512-unreviewed}\n`
+        `${lockfile}\n  "unreviewed-pa\\u0063kage@1.0.0":\n    resolution: {integrity: sha512-unreviewed}\n`
       )
     ).toThrow("escape sequences are not supported");
     expect(() =>
@@ -400,29 +381,24 @@ describe("public Coordinator package policy", () => {
     ).not.toThrow();
   });
 
-  it("checks parsed Coordinator lockfile nodes instead of YAML block text", () => {
+  it("rejects duplicate package mappings and missing lockfile sections", () => {
     const lockfile = fs.readFileSync(
       path.join(repositoryRoot, "pnpm-lock.yaml"),
       "utf8"
     );
-    const packageKey = `'${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}'`;
-    const tampered = lockfile
-      .replace(
-        `'${policy.RELEASE_PACKAGE}':\n        specifier: ${policy.RELEASE_VERSION}\n        version: ${policy.RELEASE_VERSION}`,
-        `'${policy.RELEASE_PACKAGE}':\n        specifier: 0.0.6\n        version: 0.0.6`
+    expect(() =>
+      policy.validateLockfile(
+        lockfile.replace(
+          "packages:\n",
+          "packages:\n  duplicate@1.0.0: {}\n  duplicate@1.0.0: {}\n"
+        )
       )
-      .replace(
-        `${packageKey}:\n    resolution: {integrity: ${policy.RELEASE_INTEGRITY}}`,
-        `${packageKey}:\n    resolution: {integrity: sha512-wrong, tarball: https://registry.npmjs.org/other/-/other-1.0.0.tgz}`
-      )
-      .replace(
-        `${packageKey}:\n    dependencies:`,
-        `${packageKey}:\n    dependencies:\n      ajv: 8.20.0\n      ajv-formats: 3.0.1(ajv@8.20.0)\n      unreviewed: 1.0.0\n\ncoordinator-importer-decoy: |-\n  '${policy.RELEASE_PACKAGE}':\n        specifier: ${policy.RELEASE_VERSION}\n        version: ${policy.RELEASE_VERSION}\ncoordinator-package-decoy: |-\n  ${packageKey}:\n    resolution: {integrity: ${policy.RELEASE_INTEGRITY}}\ncoordinator-snapshot-decoy: |-\n  ${packageKey}:\n    dependencies:`
-      );
-
-    expect(() => policy.validateLockfile(tampered)).toThrow(
-      "does not pin the reviewed public package"
-    );
+    ).toThrow("duplicate key: duplicate@1.0.0");
+    for (const section of ["importers", "packages", "snapshots"]) {
+      expect(() =>
+        policy.validateLockfile(lockfile.replace(`${section}:\n`, "other:\n"))
+      ).toThrow("missing or invalid mapping");
+    }
   });
 
   const itWithSymlinkSupport = process.platform === "win32" ? it.skip : it;

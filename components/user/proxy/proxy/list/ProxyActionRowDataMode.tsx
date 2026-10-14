@@ -38,16 +38,23 @@ export default function ProxyActionRowDataMode({
   });
 
   return (
-    <div className="tw-relative tw-grid tw-w-full tw-grid-cols-[repeat(15,minmax(0,1fr))] tw-justify-between tw-gap-x-4 tw-gap-y-3 tw-px-4 tw-py-4 lg:tw-items-center xl:tw-h-14 xl:tw-py-0">
-      <div className="tw-col-span-full md:tw-col-span-2">
+    <div
+      data-proxy-action-row
+      className={`tw-relative tw-grid tw-w-full tw-grid-cols-2 tw-gap-x-4 tw-gap-y-3 tw-px-4 tw-py-3.5 @[38rem]/proxy-row:tw-items-center @[64rem]/proxy-row:tw-min-h-14 @[64rem]/proxy-row:tw-grid-cols-[minmax(9.5rem,1.1fr)_13.5rem_minmax(7.5rem,0.8fr)_minmax(7rem,0.8fr)_minmax(15rem,1.7fr)] @[64rem]/proxy-row:tw-gap-x-5 @[64rem]/proxy-row:tw-py-2.5 ${
+        isSelf
+          ? "@[72rem]/proxy-row:tw-grid-cols-[minmax(9.5rem,1.1fr)_13.5rem_minmax(7.5rem,0.8fr)_minmax(7rem,0.8fr)_minmax(15rem,1.7fr)_auto]"
+          : ""
+      }`}
+    >
+      <div className="tw-col-span-full tw-min-w-0 @[38rem]/proxy-row:tw-col-span-1 @[64rem]/proxy-row:tw-col-auto">
         <div className="tw-flex tw-items-center tw-gap-x-3">
-          <p className="tw-mb-0 tw-text-md tw-font-medium tw-text-iron-50">
+          <p className="tw-m-0 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-50">
             {PROFILE_PROXY_ACTION_LABELS[action.action_type]}
           </p>
         </div>
       </div>
-      <div className="tw-col-span-full md:tw-col-span-3">
-        <div className="tw-flex tw-gap-3 md:tw-flex-col lg:tw-flex-row">
+      <div className="tw-col-span-full tw-min-w-0 @[38rem]/proxy-row:tw-col-span-1 @[64rem]/proxy-row:tw-col-auto">
+        <div className="tw-flex tw-flex-row tw-flex-wrap tw-items-center tw-gap-3">
           <ProxyActionRowStatus
             status={grantorStatus}
             statusOwnerProfile={profileProxy.created_by}
@@ -60,7 +67,7 @@ export default function ProxyActionRowDataMode({
           />
         </div>
       </div>
-      <div className="tw-col-span-full md:tw-col-span-2">
+      <div className="tw-col-span-full tw-min-w-0 @[38rem]/proxy-row:tw-col-span-1 @[64rem]/proxy-row:tw-col-auto">
         {PROFILE_PROXY_ACTION_HAVE_CREDIT[action.action_type] && (
           <ProfileProxyCredit
             profileProxy={profileProxy}
@@ -71,21 +78,21 @@ export default function ProxyActionRowDataMode({
           />
         )}
       </div>
-      <div className="tw-col-span-full md:tw-col-span-2">
+      <div className="tw-col-span-full tw-min-w-0 @[38rem]/proxy-row:tw-col-span-1 @[64rem]/proxy-row:tw-col-auto">
         {PROFILE_PROXY_ACTION_HAVE_CREDIT[action.action_type] && (
           <ProfileProxyCreditSpent profileProxyAction={action} />
         )}
       </div>
-      <div className="tw-col-span-full md:tw-col-span-4">
-        <div className="tw-flex tw-gap-x-6 tw-gap-y-3 md:tw-flex-col lg:tw-flex-row">
-          <p className="tw-mb-0 tw-flex tw-items-center tw-space-x-1 tw-whitespace-nowrap tw-text-md tw-font-normal tw-leading-6 tw-text-iron-500">
+      <div className="tw-col-span-full tw-min-w-0 @[64rem]/proxy-row:tw-col-auto">
+        <div className="tw-flex tw-flex-row tw-flex-wrap tw-items-center tw-gap-x-6 tw-gap-y-2">
+          <p className="tw-m-0 tw-flex tw-items-center tw-space-x-1 tw-whitespace-nowrap tw-text-meta tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-500">
             <span>Start:</span>
             <span className="tw-font-normal tw-text-iron-300">
               {getTimeAgo(action.start_time)}
             </span>
           </p>
           <div className="tw-flex tw-items-center tw-space-x-1">
-            <span className="tw-text-md tw-font-normal tw-text-iron-500">
+            <span className="tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-500">
               End:
             </span>
             <ProfileProxyEndTime
@@ -98,15 +105,15 @@ export default function ProxyActionRowDataMode({
           </div>
         </div>
       </div>
-      <div className="tw-col-span-full md:tw-col-span-2">
-        {isSelf && (
+      {isSelf && (
+        <div className="tw-col-span-full tw-min-w-0 @[72rem]/proxy-row:tw-col-auto">
           <ProxyActionAcceptanceButton
             action={action}
             profile={profile}
             profileProxy={profileProxy}
           />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

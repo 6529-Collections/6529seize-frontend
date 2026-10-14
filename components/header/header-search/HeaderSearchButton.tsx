@@ -102,13 +102,16 @@ export default function HeaderSearchButton({ wave }: HeaderSearchButtonProps) {
         onPointerEnter={preloadContextSearch}
         onFocus={preloadContextSearch}
         className={clsx(
-          "tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-text-iron-300 tw-shadow-sm tw-transition tw-duration-200 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400",
+          "tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-text-iron-300 tw-shadow-sm tw-transition tw-duration-200 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400",
           isApp
-            ? "tw-size-9 tw-bg-black"
-            : "tw-size-10 tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700"
+            ? "tw-bg-black"
+            : "tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700"
         )}
       >
-        <MagnifyingGlassIcon className="tw-size-5 tw-flex-shrink-0" />
+        <MagnifyingGlassIcon
+          className="tw-size-5 tw-flex-shrink-0"
+          strokeWidth={isApp ? 2 : 1.5}
+        />
       </button>
 
       {wave && (

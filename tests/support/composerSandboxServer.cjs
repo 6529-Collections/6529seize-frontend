@@ -951,7 +951,7 @@ function corsHeaders() {
     "Access-Control-Allow-Credentials": "true",
     "Access-Control-Expose-Headers": "Retry-After",
     "Access-Control-Allow-Headers":
-      "authorization, content-type, x-6529-auth, x-api-key",
+      "authorization, content-type, idempotency-key, x-6529-auth, x-api-key",
     "Access-Control-Allow-Methods":
       "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS",
     "Access-Control-Max-Age": "600",
