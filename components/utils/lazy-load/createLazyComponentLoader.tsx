@@ -1,11 +1,13 @@
 "use client";
 
 import {
+  createElement,
   useEffect,
   useReducer,
   useRef,
+  type Attributes,
   type ComponentType,
-  type JSX,
+  type ReactElement,
 } from "react";
 
 import { runWhenIdle } from "./runWhenIdle";
@@ -30,7 +32,7 @@ interface LazyComponentLoader<P extends object> {
   // commits in a single pass.
   readonly useIsReady: (options?: UseLazyReadyOptions) => boolean;
   // Renders the loaded component. Render it only when useIsReady is true.
-  readonly Loaded: (props: P) => JSX.Element | null;
+  readonly Loaded: (props: P) => ReactElement | null;
 }
 
 // A small state-based alternative to next/dynamic for surfaces that open on
@@ -68,15 +70,15 @@ export function createLazyComponentLoader<P extends object>(
     load().catch(() => undefined);
   };
 
-  const preloadWhenIdle = (): void => {
-    if (loaded || idleScheduled) return;
+  const preloadWhenIdle = (enabled: boolean): void => {
+    if (!enabled || loaded || idleScheduled) return;
     idleScheduled = true;
     runWhenIdle(preload);
   };
 
   const usePreloadWhenIdle = (enabled = true): void => {
     useEffect(() => {
-      if (enabled) preloadWhenIdle();
+      preloadWhenIdle(enabled);
     }, [enabled]);
   };
 
@@ -116,12 +118,12 @@ export function createLazyComponentLoader<P extends object>(
     return loaded !== undefined;
   };
 
-  const Loaded = (props: P): JSX.Element | null => {
-    const Component = loaded;
-    return Component ? (
-      <Component {...(props as P & JSX.IntrinsicAttributes)} />
-    ) : null;
-  };
+  // createElement rather than JSX on purpose. The React Compiler inlines a
+  // lowercase alias such as `const Component = loaded` into the tag, and a
+  // lowercase JSX tag compiles to a DOM element: `<loaded>` rendered nothing,
+  // so the modal never opened. A createElement call has no tag to mangle.
+  const Loaded = (props: P): ReactElement | null =>
+    loaded ? createElement(loaded, props as P & Attributes) : null;
 
   return { preload, usePreloadWhenIdle, useIsReady, Loaded };
 }
