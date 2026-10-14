@@ -12,6 +12,8 @@ vote changes. Each uses the selected competition, including the original
 competition in an older wave. Switching competition changes all three views.
 Signed-out viewers can inspect public All votes and Activity; personal votes
 require a connected profile.
+In My Votes, signed-out viewers can select **Connect Wallet** below the
+connection message to open the usual wallet connection flow.
 
 All votes places each voter's rank, avatar, name, and signed vote amounts on
 the left, with the total and credit label inline on the right. Activity aligns
