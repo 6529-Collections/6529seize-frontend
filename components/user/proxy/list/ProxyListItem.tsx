@@ -90,7 +90,8 @@ export default function ProxyListItem({
               <div className="tw-h-[22px] tw-w-[22px] tw-flex-none tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/[0.08]"></div>
             )}
             <p className="tw-m-0 tw-min-w-0 tw-break-all tw-flex-auto tw-font-semibold tw-text-iron-50 hover:tw-text-iron-400 tw-text-sm tw-leading-5 tw-transition tw-duration-300 tw-ease-out">
-              {profileProxy.created_by.handle}
+              {profileProxy.created_by.handle ??
+                profileProxy.created_by.primary_address}
             </p>
           </div>
         </Link>
@@ -125,7 +126,8 @@ export default function ProxyListItem({
                 <div className="tw-h-[22px] tw-w-[22px] tw-flex-none tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/[0.08]"></div>
               )}
               <p className="tw-m-0 tw-min-w-0 tw-break-all tw-flex-auto tw-font-semibold tw-text-iron-50 tw-text-sm tw-leading-5 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
-                {profileProxy.granted_to.handle}
+                {profileProxy.granted_to.handle ??
+                  profileProxy.granted_to.primary_address}
               </p>
             </div>
           </Link>
