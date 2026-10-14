@@ -124,6 +124,17 @@ export default function CurationOrganize({
   readonly axis?: "horizontal" | "vertical";
   readonly profileTypography?: boolean;
 }) {
+  const typography = profileTypography
+    ? {
+        title: "tw-font-medium",
+        message: "tw-text-meta tw-font-normal",
+        error: "tw-text-md tw-font-normal",
+      }
+    : {
+        title: "tw-font-semibold",
+        message: "tw-text-xs",
+        error: "tw-text-sm",
+      };
   const locale = useBrowserLocale();
   const instructionsId = useId();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -347,12 +358,12 @@ export default function CurationOrganize({
             <div className="tw-flex tw-h-[50px] tw-items-center tw-gap-2">
               <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-baseline">
                 <span
-                  className={`tw-flex-shrink-0 tw-text-sm tw-text-iron-100 ${profileTypography ? "tw-font-medium" : "tw-font-semibold"}`}
+                  className={`tw-flex-shrink-0 tw-text-sm tw-text-iron-100 ${typography.title}`}
                 >
                   {t(locale, "profileCuration.order.organizing")}
                 </span>
                 <span
-                  className={`tw-ml-2 tw-min-w-0 tw-truncate tw-text-iron-500 ${profileTypography ? "tw-text-meta tw-font-normal" : "tw-text-xs"} ${showToolbarMessageOnMobile ? "tw-inline" : "tw-hidden sm:tw-inline"}`}
+                  className={`tw-ml-2 tw-min-w-0 tw-truncate tw-text-iron-500 ${typography.message} ${showToolbarMessageOnMobile ? "tw-inline" : "tw-hidden sm:tw-inline"}`}
                 >
                   {toolbarMessage}
                 </span>
@@ -384,7 +395,7 @@ export default function CurationOrganize({
             {hasSessionFeedback && order.error && (
               <p
                 role="alert"
-                className={`tw-mb-0 tw-mt-2 tw-text-red ${profileTypography ? "tw-text-md tw-font-normal" : "tw-text-sm"}`}
+                className={`tw-mb-0 tw-mt-2 tw-text-red ${typography.error}`}
               >
                 {order.error}
               </p>

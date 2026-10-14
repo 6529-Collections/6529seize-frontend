@@ -192,6 +192,14 @@ export default function MyStreamWaveCurationTabMenu({
   onReorderPosts,
   isProfileActionPending = false,
 }: MyStreamWaveCurationTabMenuProps) {
+  const dialogTypography =
+    permissionMode === "profile"
+      ? {
+          title:
+            "!tw-text-lg tw-font-semibold !tw-text-iron-100 md:!tw-text-xl",
+          message: "tw-text-md tw-font-normal tw-leading-6 tw-text-iron-300",
+        }
+      : undefined;
   const queryClient = useQueryClient();
   const { connectedProfile, requestAuth, setToast } = useAuth();
   const locale = useBrowserLocale();
@@ -352,11 +360,7 @@ export default function MyStreamWaveCurationTabMenu({
       {shouldUseMobileBottomSheet ? (
         <CompactMenuMobileBottomSheet
           title={triggerLabel ?? t(locale, "profileCuration.header.manage")}
-          titleClassName={
-            permissionMode === "profile"
-              ? "!tw-text-lg tw-font-semibold !tw-text-iron-100 md:!tw-text-xl"
-              : undefined
-          }
+          titleClassName={dialogTypography?.title}
           ariaLabel={t(locale, "profileCuration.manage.menuAria")}
           items={styledMenuItems}
           trigger={triggerContent}
@@ -417,16 +421,8 @@ export default function MyStreamWaveCurationTabMenu({
       )}
 
       <MobileWrapperConfirmationDialog
-        titleClassName={
-          permissionMode === "profile"
-            ? "!tw-text-lg tw-font-semibold !tw-text-iron-100 md:!tw-text-xl"
-            : undefined
-        }
-        messageClassName={
-          permissionMode === "profile"
-            ? "tw-text-md tw-font-normal tw-leading-6 tw-text-iron-300"
-            : undefined
-        }
+        titleClassName={dialogTypography?.title}
+        messageClassName={dialogTypography?.message}
         isOpen={isDeleteOpen}
         onClose={() => setIsDeleteOpen(false)}
         onConfirm={() => deleteMutation.mutate()}

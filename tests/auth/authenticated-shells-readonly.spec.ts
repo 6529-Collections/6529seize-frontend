@@ -354,15 +354,15 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       page.getByText("Granted proxies", { exact: true })
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
-    const rows = page.locator("[data-proxy-action-row]");
+    const rows = page.getByRole("main").locator("[data-proxy-action-row]");
     await expect(rows).toHaveCount(2);
     const initialViewport = page.viewportSize()!;
     for (const width of [390, 768, 1024, 1280, 1440]) {
       await page.setViewportSize({ width, height: 1000 });
       await expectNoHorizontalOverflow(page);
       for (const key of ["Home", "End", "Home"]) {
-        await filters.locator('[role="tab"][aria-selected="true"]').press(key);
-        const focused = filters.locator('[role="tab"]:focus');
+        await filters.getByRole("tab", { selected: true }).press(key);
+        const focused = filters.getByRole("tab").locator(":scope:focus");
         await expect
           .poll(() =>
             focused.evaluate((element) => {
