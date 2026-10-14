@@ -1,4 +1,10 @@
 import type { Locator, Page } from "@playwright/test";
+import { ApiProfileClassification } from "../../generated/models/ApiProfileClassification";
+import type { ApiXTdhGrantsPage } from "../../generated/models/ApiXTdhGrantsPage";
+import { ApiXTdhGrantStatus } from "../../generated/models/ApiXTdhGrantStatus";
+import { ApiXTdhGrantTargetChain } from "../../generated/models/ApiXTdhGrantTargetChain";
+import { ApiXTdhGrantTargetTokenMode } from "../../generated/models/ApiXTdhGrantTargetTokenMode";
+import type { ApiXTdhGrantTokensPage } from "../../generated/models/ApiXTdhGrantTokensPage";
 import { expectUrlState } from "../support/urlState";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import { expectCompetitionScroll } from "../support/competitionScroll";
@@ -14,6 +20,7 @@ import {
 
 import { EN_US_MESSAGES } from "../../i18n/messages/en-US";
 import {
+  captureSafeScreenshot,
   expect,
   expectNoHorizontalOverflow,
   test,
@@ -111,6 +118,252 @@ function getProfileFeed(page: Page): Locator {
 }
 
 test.describe("Waves and profile read-only coverage @surface @medium @large @readonly", () => {
+  test("keeps received collection loading rows aligned with loaded content", async ({
+    page,
+  }) => {
+    let releaseCollections: () => void;
+    const collectionsReady = new Promise<void>((resolve) => {
+      releaseCollections = resolve;
+    });
+    await page.route("**/api/xtdh/collections?**", async (route) => {
+      await collectionsReady;
+      await route.continue();
+    });
+    await gotoReady(page, `/${PROFILE_HANDLE}/xtdh?tab=received`);
+    const section = page
+      .getByRole("heading", { name: "xTDH Collections", exact: true })
+      .locator("xpath=ancestor::section[1]");
+    const controls = section.getByRole("region", {
+      name: "Sort and search received collections",
+    });
+    const skeleton = section.getByTestId("xtdh-collection-skeleton").first();
+    const measureCard = (element: HTMLElement) => {
+      const rect = element.getBoundingClientRect();
+      const sectionRect = element.closest("section")!.getBoundingClientRect();
+      const grid = element.lastElementChild!;
+      return {
+        x: rect.x,
+        y: rect.y - sectionRect.y,
+        width: rect.width,
+        columns: getComputedStyle(grid).gridTemplateColumns,
+        gridOffset: grid.getBoundingClientRect().x - rect.x,
+      };
+    };
+    let loadingLayout: ReturnType<typeof measureCard>;
+    try {
+      await expect(skeleton).toBeVisible();
+      await expect(controls.getByRole("textbox")).toBeDisabled();
+      const sortControl = controls
+        .getByRole("button", {
+          name: "Sort collections by: xTDH",
+          exact: true,
+        })
+        .or(controls.getByRole("tab", { name: "xTDH", exact: true }));
+      await expect(sortControl).toHaveCount(1);
+      await expect(sortControl).toBeDisabled();
+      loadingLayout = await skeleton.evaluate(measureCard);
+      await expectNoHorizontalOverflow(page);
+      await captureSafeScreenshot(
+        page,
+        test.info(),
+        "received-collections-loading"
+      );
+    } finally {
+      releaseCollections!();
+    }
+    await expect(skeleton).toHaveCount(0);
+    await expect(controls.getByRole("textbox")).toBeEnabled();
+    const card = section
+      .getByRole("list")
+      .getByRole("button")
+      .first()
+      .locator(":scope > div");
+    await expect(card).toBeVisible();
+    const loadedLayout = await card.evaluate(measureCard);
+    expect(loadedLayout.width).toBeCloseTo(loadingLayout.width, 1);
+    expect(loadedLayout.x).toBeCloseTo(loadingLayout.x, 1);
+    expect(loadedLayout.y).toBeCloseTo(loadingLayout.y, 1);
+    expect(loadedLayout.columns).toBe(loadingLayout.columns);
+    expect(loadedLayout.gridOffset).toBeCloseTo(loadingLayout.gridOffset, 1);
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(
+      page,
+      test.info(),
+      "received-collections-loaded"
+    );
+  });
+
+  test("renders grant thumbnails from both Alchemy CDNs with an intentional failure fallback", async ({
+    page,
+  }) => {
+    const alchemyThumbnail =
+      "https://nft2-cdn.alchemy.com/cdn-cgi/image/width=250,height=250,fit=scale-down/eth-mainnet/a3062b74e1b4d79fdab0ca1ec5a92615";
+    const cloudinaryThumbnail =
+      "https://res.cloudinary.com/alchemyapi/image/upload/thumbnailv2/eth-mainnet/136dc79022a5b971800cf8405adb5cea_ea0b833e";
+    const thumbnails = [alchemyThumbnail, cloudinaryThumbnail, null];
+    let releaseMetadata: () => void;
+    const metadataReady = new Promise<void>((resolve) => {
+      releaseMetadata = resolve;
+    });
+    // Production and staging can have different (or no) grants for this profile.
+    // Control grant/token data while exercising the deployed disclosure, grid,
+    // real CDN responses and image optimizer in both environments.
+    const grantId = "thumbnail-fixture";
+    const tokens = ["1", "2", "3"].map((token) => ({ token, xtdh: 1 }));
+    const grantsPage: ApiXTdhGrantsPage = {
+      data: [
+        {
+          id: grantId,
+          grantor: {
+            id: "thumbnail-grantor",
+            handle: PROFILE_HANDLE,
+            primary_address: "0x0000000000000000000000000000000000000001",
+            pfp: null,
+            banner1_color: null,
+            banner2_color: null,
+            cic: 0,
+            rep: 0,
+            tdh: 0,
+            tdh_rate: 0,
+            xtdh: 0,
+            xtdh_rate: 0,
+            level: 0,
+            classification: ApiProfileClassification.Pseudonym,
+            sub_classification: null,
+            subscribed_actions: [],
+            archived: false,
+            active_main_stage_submission_ids: [],
+            winner_main_stage_drop_ids: [],
+            artist_of_prevote_cards: [],
+            profile_wave_id: null,
+            is_wave_creator: false,
+          },
+          target_chain: ApiXTdhGrantTargetChain.EthereumMainnet,
+          target_contract: "0x0c58ef43ff3032005e472cb5709f8908acb00205",
+          target_token_mode: ApiXTdhGrantTargetTokenMode.Include,
+          target_tokens_count: tokens.length,
+          target_collection_name: "Thumbnail fixture collection",
+          created_at: 1_760_000_000_000,
+          updated_at: 1_760_000_000_000,
+          valid_from: 1_760_000_000_000,
+          valid_to: null,
+          rate: 3,
+          error_details: null,
+          status: ApiXTdhGrantStatus.Granted,
+          is_irrevocable: false,
+          total_granted: 3,
+        },
+      ],
+      count: 1,
+      page: 1,
+      next: false,
+    };
+    const tokensPage: ApiXTdhGrantTokensPage = {
+      data: tokens,
+      count: tokens.length,
+      page: 1,
+      next: false,
+    };
+    await page.route("**/api/xtdh/grants?**", (route) =>
+      route.fulfill({ json: grantsPage })
+    );
+    const tokensRoute = `**/api/xtdh/grants/${grantId}/tokens?**`;
+    await page.route(tokensRoute, (route) =>
+      route.fulfill({ json: tokensPage })
+    );
+    await page.route("**/api/alchemy/token-metadata", async (route) => {
+      await metadataReady;
+      const body = route.request().postDataJSON() as { tokenIds: string[] };
+      await route.fulfill({
+        json: {
+          tokens: body.tokenIds.map((tokenId, index) => ({
+            tokenId,
+            name: `Thumbnail fixture ${index}`,
+            image: { thumbnailUrl: thumbnails[index % thumbnails.length] },
+          })),
+        },
+      });
+    });
+    await gotoReady(page, `/${PROFILE_HANDLE}/xtdh?tab=granted`);
+    await page
+      .getByRole("button", { name: /^Show [\d,]+ tokens$/ })
+      .first()
+      .click();
+    const tokenList = page.getByRole("list", { name: "Selected tokens" });
+    try {
+      await expect(
+        tokenList.getByLabel("Loading thumbnail").first()
+      ).toBeVisible();
+      await captureSafeScreenshot(page, test.info(), "grant-thumbnail-loading");
+    } finally {
+      releaseMetadata!();
+    }
+    for (const name of ["Thumbnail fixture 0", "Thumbnail fixture 1"]) {
+      const image = tokenList.getByRole("img", { name, exact: true });
+      await image.scrollIntoViewIfNeeded();
+      await expect(image).toBeVisible();
+      await expect
+        .poll(
+          () =>
+            image.evaluate(
+              (element: HTMLImageElement) =>
+                element.complete && element.naturalWidth > 0
+            ),
+          { timeout: 30000 }
+        )
+        .toBe(true);
+    }
+    const source = await tokenList
+      .getByRole("img", { name: "Thumbnail fixture 0", exact: true })
+      .getAttribute("src");
+    expect(new URL(source!, page.url()).pathname).toBe("/_next/image");
+    await expectNoHorizontalOverflow(page);
+
+    await captureSafeScreenshot(page, test.info(), "grant-thumbnail-artwork");
+
+    // A fresh browser load must also replace a real image-network failure.
+    await page.route("**/_next/image?**", async (route) => {
+      const sourceUrl = new URL(route.request().url()).searchParams.get("url");
+      if (sourceUrl === alchemyThumbnail) {
+        await route.abort("failed");
+      } else {
+        await route.fallback();
+      }
+    });
+    await page.reload();
+    await waitForRouteReady(page);
+    await page
+      .getByRole("button", { name: /^Show [\d,]+ tokens$/ })
+      .first()
+      .click();
+    await expect(
+      tokenList.getByRole("img", { name: "Failed to load thumbnail" }).first()
+    ).toBeVisible();
+    await expect(
+      tokenList.getByRole("img", { name: "Thumbnail fixture 0", exact: true })
+    ).toHaveCount(0);
+    await expect(
+      tokenList.getByText("Thumbnail fixture 0", { exact: true })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(page, test.info(), "grant-thumbnail-error");
+
+    await page.route(tokensRoute, (route) =>
+      route.fulfill({ json: { data: [], count: 0, page: 1, next: false } })
+    );
+    await page.reload();
+    await waitForRouteReady(page);
+    await page
+      .getByRole("button", { name: /^Show [\d,]+ tokens$/ })
+      .first()
+      .click();
+    await expect(
+      page.getByText("No specific token IDs were returned for this grant.")
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(page, test.info(), "grant-token-empty");
+  });
+
   test("keeps the full subscription airdrop address available on touch and keyboard", async ({
     page,
     isMobile,
