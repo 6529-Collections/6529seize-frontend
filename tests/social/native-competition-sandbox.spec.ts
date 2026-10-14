@@ -722,11 +722,13 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(
         voters.getByRole("link", { name: profiles[0]!.handle, exact: true })
       ).toBeVisible();
-      const loadedVoter = voters.getByRole("link", {
-        name: profiles[0]!.handle,
-        exact: true,
-      });
-      expect((await loadedVoter.locator("../..").boundingBox())!.height).toBe(
+      const loadedVoterRow = voters
+        .getByRole("link", {
+          name: profiles[0]!.handle,
+          exact: true,
+        })
+        .locator("../..");
+      expect((await loadedVoterRow.boundingBox())!.height).toBe(
         pendingVoterHeight
       );
       await expect(
@@ -783,7 +785,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         .getByRole("button", { name: "View drop in chat", exact: true })
         .first();
       await expect(voter).toBeVisible();
-      expect((await voter.locator("..").boundingBox())!.height).toBe(
+      const activityRow = activity
+        .getByRole("link", { name: profiles[0]!.handle, exact: true })
+        .first()
+        .locator("..");
+      expect((await activityRow.boundingBox())!.height).toBe(
         pendingActivityHeight
       );
       await expect(activity.getByRole("status")).toHaveCount(0);
