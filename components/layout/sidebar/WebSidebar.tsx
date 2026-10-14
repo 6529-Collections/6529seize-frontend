@@ -127,8 +127,8 @@ function WebSidebar({
           type="button"
           className={
             isMobile
-              ? "tw-fixed tw-inset-0 tw-z-[70] tw-border-0 tw-bg-gray-600 tw-bg-opacity-50 focus:tw-outline-none"
-              : "tw-fixed tw-inset-0 tw-z-30 tw-border-0 tw-bg-gray-600 tw-bg-opacity-50 focus:tw-outline-none"
+              ? "tw-fixed tw-inset-0 tw-z-[70] tw-border-0 tw-bg-gray-600 tw-bg-opacity-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
+              : "tw-fixed tw-inset-0 tw-z-30 tw-border-0 tw-bg-gray-600 tw-bg-opacity-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
           }
           onClick={onCloseOffcanvas}
           aria-label="Close menu overlay"
