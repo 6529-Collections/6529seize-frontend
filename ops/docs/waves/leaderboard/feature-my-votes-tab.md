@@ -16,8 +16,9 @@ require a connected profile.
 All votes places each voter's rank, avatar, name, and signed vote amounts on
 the left, with the total and credit label inline on the right. Activity aligns
 the voter, vote change, drop creator, and time across
-wide views. On narrow views, the vote change and creator sit below the voter;
-the time and **View drop in chat** button stay on the first line. Both lists
+wide views. On narrow views, the vote change and creator use separate lines
+below the voter, with a bent arrow beside the creator. The time and
+**View drop in chat** button stay on the first line. Both lists
 use subtle row dividers and keep **Load more** below the rows.
 
 ## Location in the Site

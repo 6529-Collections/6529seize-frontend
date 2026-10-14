@@ -54,7 +54,7 @@ export default function CompetitionVoteActivity() {
   const logs = query.data.pages.flat();
   if (!logs.length) return <CompetitionState empty />;
   return (
-    <div className="tw-w-full tw-max-w-6xl tw-@container">
+    <div className="tw-w-full tw-max-w-6xl">
       {logs.map((log) => (
         <WaveLeaderboardRightSidebarActivityLog
           key={log.id}

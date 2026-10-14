@@ -722,15 +722,20 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         activity.getByText("System Adjustment", { exact: true })
       ).toBeVisible();
       const voterBox = await voter.boundingBox();
+      const voteBox = await activity
+        .getByText("1,234,567 TDH", { exact: true })
+        .boundingBox();
       const creatorBox = await creator.boundingBox();
       const buttonBox = await viewDrop.boundingBox();
       expect(voterBox).not.toBeNull();
+      expect(voteBox).not.toBeNull();
       expect(creatorBox).not.toBeNull();
       expect(buttonBox?.width).toBeGreaterThanOrEqual(40);
       expect(buttonBox?.height).toBeGreaterThanOrEqual(40);
-      if (mobile)
-        expect(creatorBox!.y).toBeGreaterThan(voterBox!.y + voterBox!.height);
-      else
+      if (mobile) {
+        expect(voteBox!.y).toBeGreaterThan(voterBox!.y + voterBox!.height);
+        expect(creatorBox!.y).toBeGreaterThan(voteBox!.y + voteBox!.height);
+      } else
         expect(
           Math.abs(
             creatorBox!.y +
@@ -744,6 +749,38 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         path: testInfo.outputPath("activity-layout.png"),
         animations: "disabled",
       });
+      if (!mobile) {
+        for (const width of [639, 640]) {
+          await page.setViewportSize({ width, height: 1000 });
+          const responsiveVoter = await voter.boundingBox();
+          const responsiveCreator = await creator.boundingBox();
+          expect(responsiveVoter).not.toBeNull();
+          expect(responsiveCreator).not.toBeNull();
+          if (width < 640) {
+            const responsiveVote = await activity
+              .getByText("1,234,567 TDH", { exact: true })
+              .boundingBox();
+            expect(responsiveVote).not.toBeNull();
+            expect(responsiveCreator!.y).toBeGreaterThan(
+              responsiveVote!.y + responsiveVote!.height
+            );
+          } else {
+            expect(
+              Math.abs(
+                responsiveCreator!.y +
+                  responsiveCreator!.height / 2 -
+                  responsiveVoter!.y -
+                  responsiveVoter!.height / 2
+              )
+            ).toBeLessThanOrEqual(1);
+          }
+          await expectNoHorizontalOverflow(page);
+          await page.screenshot({
+            path: testInfo.outputPath(`activity-${width}.png`),
+            animations: "disabled",
+          });
+        }
+      }
       await viewDrop.focus();
       await expect(viewDrop).toBeFocused();
       await page.keyboard.press("Enter");
