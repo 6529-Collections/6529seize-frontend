@@ -1,4 +1,10 @@
 import type { Locator, Page } from "@playwright/test";
+import { ApiProfileClassification } from "../../generated/models/ApiProfileClassification";
+import type { ApiXTdhGrantsPage } from "../../generated/models/ApiXTdhGrantsPage";
+import { ApiXTdhGrantStatus } from "../../generated/models/ApiXTdhGrantStatus";
+import { ApiXTdhGrantTargetChain } from "../../generated/models/ApiXTdhGrantTargetChain";
+import { ApiXTdhGrantTargetTokenMode } from "../../generated/models/ApiXTdhGrantTargetTokenMode";
+import type { ApiXTdhGrantTokensPage } from "../../generated/models/ApiXTdhGrantTokensPage";
 import { expectUrlState } from "../support/urlState";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import { expectCompetitionScroll } from "../support/competitionScroll";
@@ -199,8 +205,72 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const metadataReady = new Promise<void>((resolve) => {
       releaseMetadata = resolve;
     });
-    // Keep the real profile, grant disclosure, virtualization and image optimizer.
-    // Only metadata is controlled so changing NFT ownership cannot remove a CDN case.
+    // Production and staging can have different (or no) grants for this profile.
+    // Control grant/token data while exercising the deployed disclosure, grid,
+    // real CDN responses and image optimizer in both environments.
+    const grantId = "thumbnail-fixture";
+    const tokens = ["1", "2", "3"].map((token) => ({ token, xtdh: 1 }));
+    const grantsPage: ApiXTdhGrantsPage = {
+      data: [
+        {
+          id: grantId,
+          grantor: {
+            id: "thumbnail-grantor",
+            handle: PROFILE_HANDLE,
+            primary_address: "0x0000000000000000000000000000000000000001",
+            pfp: null,
+            banner1_color: null,
+            banner2_color: null,
+            cic: 0,
+            rep: 0,
+            tdh: 0,
+            tdh_rate: 0,
+            xtdh: 0,
+            xtdh_rate: 0,
+            level: 0,
+            classification: ApiProfileClassification.Pseudonym,
+            sub_classification: null,
+            subscribed_actions: [],
+            archived: false,
+            active_main_stage_submission_ids: [],
+            winner_main_stage_drop_ids: [],
+            artist_of_prevote_cards: [],
+            profile_wave_id: null,
+            is_wave_creator: false,
+          },
+          target_chain: ApiXTdhGrantTargetChain.EthereumMainnet,
+          target_contract: "0x0c58ef43ff3032005e472cb5709f8908acb00205",
+          target_token_mode: ApiXTdhGrantTargetTokenMode.Include,
+          target_tokens_count: tokens.length,
+          target_collection_name: "Thumbnail fixture collection",
+          created_at: 1_760_000_000_000,
+          updated_at: 1_760_000_000_000,
+          valid_from: 1_760_000_000_000,
+          valid_to: null,
+          rate: 3,
+          error_details: null,
+          status: ApiXTdhGrantStatus.Granted,
+          is_irrevocable: false,
+          total_granted: 3,
+        },
+      ],
+      count: 1,
+      page: 1,
+      next: false,
+    };
+    const tokensPage: ApiXTdhGrantTokensPage = {
+      data: tokens,
+      count: tokens.length,
+      page: 1,
+      next: false,
+    };
+    await page.route("**/api/xtdh/grants?**", (route) =>
+      route.fulfill({ json: grantsPage })
+    );
+    const tokensRoute = `**/api/xtdh/grants/${grantId}/tokens?**`;
+    await page.route(tokensRoute, (route) =>
+      route.fulfill({ json: tokensPage })
+    );
     await page.route("**/api/alchemy/token-metadata", async (route) => {
       await metadataReady;
       const body = route.request().postDataJSON() as { tokenIds: string[] };
@@ -278,7 +348,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expectNoHorizontalOverflow(page);
     await captureSafeScreenshot(page, test.info(), "grant-thumbnail-error");
 
-    await page.route("**/api/xtdh/grants/*/tokens?**", (route) =>
+    await page.route(tokensRoute, (route) =>
       route.fulfill({ json: { data: [], count: 0, page: 1, next: false } })
     );
     await page.reload();
