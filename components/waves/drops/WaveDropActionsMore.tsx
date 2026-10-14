@@ -318,6 +318,7 @@ export default function WaveDropActionsMore({
       />
       <DropSignatureDialog
         dropId={drop.id}
+        drop={drop}
         isOpen={isSignatureOpen}
         onClose={() => setIsSignatureOpen(false)}
       />

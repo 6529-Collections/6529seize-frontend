@@ -13,6 +13,7 @@ import {
   verifyDropSignedEvents,
   type DropSignatureVerdict,
   type ContractSignatureVerifier,
+  toDisplayedDropContent,
 } from "@/lib/device-signing/verify-signed-events";
 import { fetchDropSignedEvents } from "@/services/api/device-grants-api";
 import {
@@ -27,11 +28,14 @@ import {
   ShieldCheckIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useQuery } from "@tanstack/react-query";
 import { usePublicClient } from "wagmi";
 
 interface DropSignatureDialogProps {
   readonly dropId: string;
+  /** The drop as shown; its content is checked against the signed body. */
+  readonly drop?: Pick<ApiDrop, "title" | "parts"> | undefined;
   readonly isOpen: boolean;
   readonly onClose: () => void;
 }
@@ -143,6 +147,7 @@ function VerdictView({
 
 function DropSignatureDialogContent({
   dropId,
+  drop,
   isOpen,
   onClose,
 }: DropSignatureDialogProps) {
@@ -163,13 +168,15 @@ function DropSignatureDialogContent({
           });
         }
       : undefined;
+  const content = drop ? toDisplayedDropContent(drop) : undefined;
   const query = useQuery({
-    queryKey: [QueryKey.DROP_SIGNED_EVENTS, dropId],
+    queryKey: [QueryKey.DROP_SIGNED_EVENTS, dropId, content ?? null],
     queryFn: async ({ signal }) =>
       await verifyDropSignedEvents(
         await fetchDropSignedEvents(dropId, signal),
         {
           verifyContractSignature,
+          displayed: content,
         }
       ),
     enabled: isOpen,

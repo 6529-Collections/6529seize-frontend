@@ -602,6 +602,7 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
       />
       <DropSignatureDialog
         dropId={drop.id}
+        drop={drop}
         isOpen={isSignatureOpen}
         onClose={() => setIsSignatureOpen(false)}
       />

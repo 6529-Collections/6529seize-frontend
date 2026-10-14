@@ -80,6 +80,7 @@ describe("drop signature details", () => {
     );
     expect(mockVerify).toHaveBeenCalledWith(signedEvents, {
       verifyContractSignature: undefined,
+      displayed: undefined,
     });
     expect(screen.getByText("0x1111…1111")).toBeVisible();
     expect(screen.getByText("d75a9801...f707511a")).toBeVisible();
