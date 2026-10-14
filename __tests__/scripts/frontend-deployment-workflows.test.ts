@@ -1,4 +1,6 @@
 import fs from "node:fs";
+import childProcess from "node:child_process";
+import os from "node:os";
 import path from "node:path";
 import YAML from "yaml";
 
@@ -12,6 +14,256 @@ const readWorkflow = (name: string) => {
 };
 
 describe("frontend deployment workflow contract", () => {
+  describe.each([
+    ["staging", "deploy-staging.yml", "deploy-staging"],
+    ["production", "build-upload-deploy-prod.yml", "build-upload-deploy"],
+  ])("%s AWS authentication", (environment, file, deployJob) => {
+    const { source, workflow } = readWorkflow(file);
+    const job = workflow.jobs[deployJob];
+    const validation = job.steps.find(
+      (step: { id?: string }) => step.id === "deploy_role"
+    );
+    const credentials = job.steps.find(
+      (step: { id?: string }) => step.id === "aws_credentials"
+    );
+    let temporaryDirectory: string;
+
+    beforeEach(() => {
+      temporaryDirectory = fs.mkdtempSync(
+        path.join(os.tmpdir(), "deploy-oidc-")
+      );
+    });
+
+    afterEach(() => {
+      fs.rmSync(temporaryDirectory, { recursive: true, force: true });
+    });
+
+    it("uses the environment role and restricts OIDC permission to deployment", () => {
+      expect(job.permissions["id-token"]).toBe("write");
+      expect(workflow.permissions["id-token"]).toBeUndefined();
+      for (const [name, otherJob] of Object.entries(workflow.jobs)) {
+        if (name !== deployJob) {
+          expect(
+            (otherJob as { permissions?: Record<string, string> })
+              .permissions?.["id-token"]
+          ).toBeUndefined();
+        }
+      }
+      expect(job.steps[0]).toBe(validation);
+      expect(validation.env.AWS_DEPLOY_ROLE_ARN).toBe(
+        "${{ vars.AWS_DEPLOY_ROLE_ARN }}"
+      );
+      expect(credentials.uses).toMatch(
+        /^aws-actions\/configure-aws-credentials@/u
+      );
+      expect(credentials.with).toMatchObject({
+        "role-to-assume": "${{ vars.AWS_DEPLOY_ROLE_ARN }}",
+        "allowed-account-ids": "${{ steps.deploy_role.outputs.account_id }}",
+        "role-session-name": `frontend-${environment}-\${{ github.run_id }}`,
+        "role-duration-seconds": 5400,
+        "unset-current-credentials": true,
+      });
+      expect(credentials.with["role-duration-seconds"]).toBeGreaterThan(
+        job["timeout-minutes"] * 60
+      );
+      expect(credentials["continue-on-error"]).toBeUndefined();
+      expect(credentials.with["force-skip-oidc"]).toBeUndefined();
+      expect(source).not.toMatch(
+        /secrets\.(AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY)/u
+      );
+    });
+
+    it.each([
+      "arn:aws:iam::987989283142:role/deployment",
+      "arn:aws:iam::987989283142:role/team/frontend-deploy_+=,.@",
+    ])("validates a role ARN and exports its account: %s", (arn) => {
+      const output = path.join(temporaryDirectory, "output");
+      const result = childProcess.spawnSync("bash", ["-c", validation.run], {
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          AWS_DEPLOY_ROLE_ARN: arn,
+          GITHUB_OUTPUT: output,
+        },
+      });
+      expect(result.status).toBe(0);
+      expect(fs.readFileSync(output, "utf8")).toBe("account_id=987989283142\n");
+    });
+
+    it.each([
+      "",
+      "987989283142",
+      "arn:aws:iam::987989283142:user/deployment",
+      "arn:aws:iam::123:role/deployment",
+      "arn:aws:iam::987989283142:role/",
+      "arn:aws:iam::987989283142:role/deployment\naccount_id=123456789012",
+    ])("fails before authentication for invalid configuration: %s", (arn) => {
+      const output = path.join(temporaryDirectory, "output");
+      const result = childProcess.spawnSync("bash", ["-c", validation.run], {
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          AWS_DEPLOY_ROLE_ARN: arn,
+          GITHUB_OUTPUT: output,
+        },
+      });
+      expect(result.status).not.toBe(0);
+      expect(fs.existsSync(output)).toBe(false);
+    });
+
+    it("treats role configuration as data instead of executing it", () => {
+      const marker = path.join(temporaryDirectory, "injected");
+      const result = childProcess.spawnSync("bash", ["-c", validation.run], {
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          AWS_DEPLOY_ROLE_ARN: `arn:aws:iam::987989283142:role/deploy$(touch ${marker})`,
+          GITHUB_OUTPUT: path.join(temporaryDirectory, "output"),
+        },
+      });
+      expect(result.status).not.toBe(0);
+      expect(fs.existsSync(marker)).toBe(false);
+    });
+
+    it.each(["success", "failure", "skipped", "cancelled", ""])(
+      "requires successful authentication before AWS operations: %s",
+      (outcome) => {
+        const guard = job.steps.find(
+          (step: { name?: string }) =>
+            step.name === "Require successful AWS authentication"
+        );
+        expect(job.steps.indexOf(guard)).toBe(
+          job.steps.indexOf(credentials) + 1
+        );
+        expect(guard.env.AWS_CREDENTIALS_OUTCOME).toBe(
+          "${{ steps.aws_credentials.outcome }}"
+        );
+        const result = childProcess.spawnSync("bash", ["-c", guard.run], {
+          encoding: "utf8",
+          env: { ...process.env, AWS_CREDENTIALS_OUTCOME: outcome },
+        });
+        expect(result.status === 0).toBe(outcome === "success");
+      }
+    );
+  });
+
+  it("invalidates only the known production announcement distribution", () => {
+    const production = readWorkflow("build-upload-deploy-prod.yml");
+    expect(production.workflow.env.ANNOUNCED_VERSION_DISTRIBUTION_ID).toBe(
+      "EKB17CMB021J6"
+    );
+    expect(production.source).not.toContain(
+      "aws cloudfront list-distributions"
+    );
+    expect(production.source).toContain(
+      '--distribution-id "$ANNOUNCED_VERSION_DISTRIBUTION_ID"'
+    );
+  });
+
+  it.each(["us-east-1", "eu-west-1"])(
+    "checks the staging artifact region before authentication: %s",
+    (region) => {
+      const workflow = readWorkflow("deploy-staging.yml").workflow;
+      const job = workflow.jobs["deploy-staging"];
+      const configuration = job.steps.find(
+        (step: { name?: string }) =>
+          step.name === "Validate staging configuration"
+      );
+      const credentials = job.steps.find(
+        (step: { id?: string }) => step.id === "aws_credentials"
+      );
+      expect(job.steps.indexOf(configuration)).toBeLessThan(
+        job.steps.indexOf(credentials)
+      );
+      const result = childProcess.spawnSync("bash", ["-c", configuration.run], {
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          ARTIFACT_BUCKET_REGION: region,
+          AWS_REGION: "eu-west-1",
+          INSTANCE_ID: "i-test",
+          STAGING_REPO_DIR: "/srv/frontend",
+          STAGING_RUN_AS: "ubuntu",
+          AWS_ACCESS_KEY_ID: "",
+          AWS_SECRET_ACCESS_KEY: "",
+        },
+      });
+      expect(result.status === 0).toBe(region === "us-east-1");
+    }
+  );
+
+  describe("production announcement publication", () => {
+    let temporaryDirectory: string;
+    const workflow = readWorkflow("build-upload-deploy-prod.yml").workflow;
+    const publish = workflow.jobs["build-upload-deploy"].steps.find(
+      (step: { name?: string }) =>
+        step.name === "Publish announced production version"
+    );
+
+    beforeEach(() => {
+      temporaryDirectory = fs.mkdtempSync(
+        path.join(os.tmpdir(), "announcement-oidc-")
+      );
+    });
+    afterEach(() => {
+      fs.rmSync(temporaryDirectory, { recursive: true, force: true });
+    });
+
+    it.each([
+      ["dnclu2fna0b2b.cloudfront.net", "0", true, ["upload", "invalidate"]],
+      ["wrong.cloudfront.net", "0", false, []],
+      ["dnclu2fna0b2b.cloudfront.net", "42", false, ["upload", "invalidate"]],
+    ])(
+      "checks the distribution and requires invalidation success: %s / %s",
+      (domain, invalidationExit, succeeds, expectedCalls) => {
+        const calls = path.join(temporaryDirectory, "calls");
+        const mockAws = `
+aws() {
+  case "$1:$2" in
+    elasticbeanstalk:describe-environments) printf '%s\\n' "$COMMIT_SHA" ;;
+    cloudfront:get-distribution) printf '%s\\n' "$TEST_DISTRIBUTION_DOMAIN" ;;
+    s3:cp) printf 'upload\\n' >> "$TEST_CALLS" ;;
+    cloudfront:create-invalidation)
+      printf 'invalidate\\n' >> "$TEST_CALLS"
+      return "$TEST_INVALIDATION_EXIT"
+      ;;
+    *) return 99 ;;
+  esac
+}
+`;
+        const result = childProcess.spawnSync(
+          "bash",
+          ["-c", `${mockAws}\n${publish.run}`],
+          {
+            encoding: "utf8",
+            cwd: temporaryDirectory,
+            env: {
+              ...process.env,
+              COMMIT_SHA: "a".repeat(40),
+              BEANSTALK_ENV_NAME: "test-environment",
+              AWS_BUCKET: "test-bucket",
+              ANNOUNCED_VERSION_ENDPOINT:
+                workflow.env.ANNOUNCED_VERSION_ENDPOINT,
+              ANNOUNCED_VERSION_DISTRIBUTION_ID:
+                workflow.env.ANNOUNCED_VERSION_DISTRIBUTION_ID,
+              ANNOUNCED_VERSION_OBJECT_KEY:
+                workflow.env.ANNOUNCED_VERSION_OBJECT_KEY,
+              RUN_URL: "https://example.test/deploy",
+              TEST_DISTRIBUTION_DOMAIN: String(domain),
+              TEST_INVALIDATION_EXIT: String(invalidationExit),
+              TEST_CALLS: calls,
+            },
+          }
+        );
+        expect(result.status === 0).toBe(succeeds);
+        const actualCalls = fs.existsSync(calls)
+          ? fs.readFileSync(calls, "utf8").trim().split("\n")
+          : [];
+        expect(actualCalls).toEqual(expectedCalls);
+      }
+    );
+  });
+
   it("keeps standalone connections alive beyond the load balancer idle timeout", () => {
     const procfile = fs.readFileSync(path.join(ROOT, "Procfile"), "utf8");
     const configuredTimeout = procfile.match(/\bKEEP_ALIVE_TIMEOUT=(\d+)\b/);

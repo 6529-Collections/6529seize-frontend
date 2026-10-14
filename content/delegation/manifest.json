@@ -357,13 +357,13 @@
       "sha256": "f6837483a872cf36cd92bf7fb9a6d5418d09b0d34a97354c2b1bfee4a78cb6a1"
     },
     "delegation-faq": {
-      "title": "Delegation FAQ",
+      "title": "FAQ",
       "summary": "Index of the registration, viewing, management, lock, and unlock help articles.",
       "group": "Reference",
       "path": "html/delegation-faq.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/delegation-faq.html",
       "sourceUri": null,
-      "sha256": "322b9678eaefa1fb24373506b34b3d1a0fa0c84dffadd68680d36bb5a09c04de"
+      "sha256": "e2e7e321113f83f1bd908ce93fda4f7e450830a68ec9cb0e765bf2cd86448bc8"
     },
     "consolidation-use-cases": {
       "title": "Consolidation Use Cases",
@@ -372,7 +372,7 @@
       "path": "html/consolidation-use-cases.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/consolidation-use-cases.html",
       "sourceUri": null,
-      "sha256": "5845bb962a93403c64bfdfc2944e3fa63ac0e3e02d331a60e821b99e6f58553a"
+      "sha256": "7a00f73ae26b051234869eb4bc7b2597d5c58c6a4219ce114c7e3cd4bcd35773"
     },
     "register-delegation": {
       "title": "How to Register a Delegation?",
@@ -399,7 +399,7 @@
       "path": "html/register-consolidation.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/register-consolidation.html",
       "sourceUri": null,
-      "sha256": "74ee77cddae25be06bc2d84aa46fd92a812f257e070639ee6a49d3ad348119ef"
+      "sha256": "4582efd64b9b4c56b3f9d83d2aef1c12566bd107f74ede328c280f73b7512856"
     },
     "reference-delegations-2address-del-manager": {
       "title": "How to Register Delegations (2-Address Architecture) with Delegation Manager?",
@@ -417,7 +417,7 @@
       "path": "html/reference-delegations-3address-del-manager.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-delegations-3address-del-manager.html",
       "sourceUri": null,
-      "sha256": "9fa7669db4c87684e971f93ba311965c6a9d74ecbd7b8695599e1f7c756752c7"
+      "sha256": "b3a864bd393e870e7e6edbdf20f324be8be899ea89b0a1fb2445f9ea67942249"
     },
     "reference-consolidations-2address": {
       "title": "How to Register Consolidations (2-Address Architecture)?",
@@ -426,7 +426,7 @@
       "path": "html/reference-consolidations-2address.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-consolidations-2address.html",
       "sourceUri": null,
-      "sha256": "770e0985e7b48e43c2939dbad03c8d2cc9d24bdd38255787ac02750a9a98e5ad"
+      "sha256": "ee3fe634f9e7445c58d86b673094b88bd8a5f4f4295aec5bdd32ea0827593948"
     },
     "reference-consolidations-3address": {
       "title": "How to Register Consolidations (TAP)?",
@@ -435,7 +435,7 @@
       "path": "html/reference-consolidations-3address.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-consolidations-3address.html",
       "sourceUri": null,
-      "sha256": "c98b997ddee9d3a1409646617692e9c0b134b6018b8a8d526002f3780c332727"
+      "sha256": "0648ec71ea3c378944ee8f463f354866d4cde4921e86c7669bb9708cdea8c137"
     },
     "reference-consolidations-3address-del-manager": {
       "title": "How to Register Consolidations (TAP) with Delegation Manager?",
@@ -444,7 +444,7 @@
       "path": "html/reference-consolidations-3address-del-manager.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-consolidations-3address-del-manager.html",
       "sourceUri": null,
-      "sha256": "e1026012cfaed2f528c7e47794d55b08ed3ffc39b8b225cf711ff4bb59b15ed6"
+      "sha256": "30cff70212bce7f18e96996218885ae4e556aea5f6e87b3df1be27b1eaf670b7"
     },
     "reference-consolidations-4address": {
       "title": "How to Register Consolidations (4 Addresses)?",
@@ -453,7 +453,7 @@
       "path": "html/reference-consolidations-4address.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-consolidations-4address.html",
       "sourceUri": null,
-      "sha256": "3fe21f180d6f2a99fb866232354993e17ebfbaecfa87531bab087f66a977980e"
+      "sha256": "a4f6bee09cc6b482160706848a351c47b438c92dff5c958e5207e853ecb97c8a"
     },
     "using-safe": {
       "title": "How to Delegate using SAFE (formerly GNOSIS)?",
@@ -471,7 +471,7 @@
       "path": "html/use-cases-overview.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/use-cases-overview.html",
       "sourceUri": null,
-      "sha256": "5d6f0f17a5b2c2670da128d8489e06596f0f112c00c07e732f0e0941cf6ba1f5"
+      "sha256": "eba93b9c7dbd04ab65846faf1ddb7004daedb95d0f4a5e9ca9e9e052b2d37cac"
     },
     "view-delegations": {
       "title": "How to View Your Delegations?",
@@ -525,7 +525,7 @@
       "path": "html/register-delegation-using-sub-delegation.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/register-delegation-using-sub-delegation.html",
       "sourceUri": null,
-      "sha256": "e21a8bcb7c13c445a04bf73766fce3b388cd916f2d6827eb3adf462c2a42b83b"
+      "sha256": "6556ebb0e65e9181ccfdbc07fe43cb54c62bd8568ca3b201646399f969d13bdc"
     },
     "revoke-delegation-using-sub-delegation": {
       "title": "How to Revoke a Delegation Using Delegation Management Rights?",
@@ -543,7 +543,7 @@
       "path": "html/lock-global.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/lock-global.html",
       "sourceUri": null,
-      "sha256": "31e9df83cdd10c533a2358a555151b25e430686fde760a537e901b7998183426"
+      "sha256": "e8379c82660b92a4aa918d8a16b007f355e9b69c14f07e79de0e0605a60ba9f2"
     },
     "lock-collection": {
       "title": "How to Lock Your Wallet for a Specific Collection?",
@@ -552,7 +552,7 @@
       "path": "html/lock-collection.html",
       "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/lock-collection.html",
       "sourceUri": null,
-      "sha256": "1d9320f328d6b9cc206cec998eefe427b13754ebd313a31c6a107b60dda459e1"
+      "sha256": "7f93aeee32b87443d48c2a2471da49cf76b276097c669fdc9b4211e7ed86a0ea"
     },
     "lock-use-case": {
       "title": "How to Lock Your Wallet for a Specific Use Case on a Collection?",

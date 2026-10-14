@@ -266,10 +266,41 @@ describe("createSecurityHeaders CSP", () => {
     expect(permissionsPolicy).not.toContain("execution-while-out-of-viewport");
   });
 
-  it("allows same-origin system sharing", () => {
+  it("omits the web-share token that Chromium does not recognize", () => {
+    expect(getPermissionsPolicy()).not.toContain("web-share");
+  });
+
+  it("allows same-origin autoplay for muted in-app video", () => {
     const permissionsPolicy = getPermissionsPolicy();
 
-    expect(permissionsPolicy).toContain("web-share=(self)");
-    expect(permissionsPolicy).not.toContain("web-share=()");
+    expect(permissionsPolicy).toContain("autoplay=(self)");
+    expect(permissionsPolicy).not.toContain("autoplay=()");
+  });
+
+  it("pins the exact Permissions-Policy header", () => {
+    expect(getPermissionsPolicy()).toBe(
+      [
+        "accelerometer=()",
+        "autoplay=(self)",
+        "camera=()",
+        "cross-origin-isolated=()",
+        "display-capture=()",
+        "encrypted-media=()",
+        "fullscreen=(self)",
+        "geolocation=()",
+        "gyroscope=()",
+        "keyboard-map=()",
+        "magnetometer=()",
+        "microphone=()",
+        "midi=()",
+        "payment=()",
+        "picture-in-picture=()",
+        "publickey-credentials-get=()",
+        "screen-wake-lock=()",
+        "sync-xhr=()",
+        "usb=()",
+        "xr-spatial-tracking=()",
+      ].join(", ")
+    );
   });
 });

@@ -83,13 +83,13 @@ export default function UserPageBrainSidebarWaveItem({
                 </span>
               </>
             )}
-            <span className="tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition-colors desktop-hover:group-hover:tw-text-iron-50">
+            <span className="tw-truncate tw-text-[15px]/5 tw-font-semibold tw-text-iron-100 tw-transition-colors desktop-hover:group-hover:tw-text-iron-50">
               {wave.name}
             </span>
           </div>
         </div>
 
-        <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-font-medium tw-text-iron-500">
+        <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-meta/4 tw-font-normal tw-tabular-nums tw-text-iron-500">
           {hasLatestPost ? (
             <time
               dateTime={new Date(wave.latestPostTimestamp).toISOString()}

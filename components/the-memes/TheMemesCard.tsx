@@ -8,9 +8,9 @@ import { getTheMemesDetailHref } from "@/components/the-memes/theMemesRouteParam
 import { getVolumeTypeLabel } from "@/components/the-memes/theMemesI18n";
 import { VolumeType } from "@/entities/INFT";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
+import { formatMintDate } from "@/helpers/mint-date.helpers";
 import { getNftMimeType } from "@/helpers/nft.helpers";
 import {
-  formatDate,
   formatInteger,
   formatNumber,
   formatPercent,
@@ -61,7 +61,7 @@ function getNftMetricText(
   switch (sort) {
     case MemesSort.AGE:
     case MemesSort.MEME:
-      return formatDate(locale, nft.mint_date);
+      return formatMintDate(locale, nft.mint_date);
     case MemesSort.EDITION_SIZE:
       return t(locale, "theMemes.card.metric.editionSize", {
         value: formatInteger(locale, nft.supply),

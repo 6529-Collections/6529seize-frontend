@@ -64,8 +64,7 @@ Open a new shell, or activate the wrapper in the current shell:
 source <(./bin/6529 bootstrap --print-export)
 ```
 
-Dependencies, including `@6529-collections/release-request`, come from public
-npm. No package token or private-registry setup is required. Install the exact
+Dependencies come from public npm. No package token or private-registry setup is required. Install the exact
 lockfile through the existing secure wrapper:
 
 ```bash

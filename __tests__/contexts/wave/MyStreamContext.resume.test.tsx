@@ -1,4 +1,5 @@
 import { act, render } from "@testing-library/react";
+import WebBrainLeftSidebarWaves from "@/components/brain/left-sidebar/web/WebBrainLeftSidebarWaves";
 import { MyStreamProvider, useMyStream } from "@/contexts/wave/MyStreamContext";
 import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 
@@ -9,6 +10,7 @@ const mockFetchNextPage = jest.fn();
 const mockFetchAroundSerialNo = jest.fn();
 const mockCancelWaveDataFetch = jest.fn();
 const mockCancelPaginationFetch = jest.fn();
+const mockResetAllWavesNewDropsCount = jest.fn();
 
 jest.mock("@/components/notifications/NotificationsContext", () => ({
   useNotificationsContext: jest.fn(() => ({
@@ -41,6 +43,11 @@ jest.mock("@/services/websocket/useWebSocketMessage", () => ({
 
 jest.mock("@/services/dm-unread/DmUnreadStateProvider", () => ({
   useDmUnreadConversations: jest.fn(() => ({})),
+}));
+
+jest.mock("@/components/brain/left-sidebar/web/WebUnifiedWavesList", () => ({
+  __esModule: true,
+  default: () => null,
 }));
 
 jest.mock("@/hooks/useMarkWaveNotificationsRead", () => ({
@@ -117,7 +124,7 @@ jest.mock("@/contexts/wave/hooks/useEnhancedWavesListCore", () => ({
     prefetchSubwavesForParent: wavesData.prefetchSubwavesForParent,
     loadingSubwaveParentIds: [],
     refetchAllWaves: wavesData.refetchAllWaves,
-    resetAllWavesNewDropsCount: jest.fn(),
+    resetAllWavesNewDropsCount: mockResetAllWavesNewDropsCount,
     markWaveRead: jest.fn(),
     restoreWaveUnreadCount: jest.fn(),
   })),
@@ -161,7 +168,10 @@ type IdleWindow = Window & {
   cancelIdleCallback?: (handle: number) => void;
 };
 
-const createListData = (refetchAllWaves: jest.Mock) => ({
+const createListData = (
+  refetchAllWaves: jest.Mock,
+  refreshStaleWaves: jest.Mock
+) => ({
   waves: [],
   isFetching: false,
   isFetchingNextPage: false,
@@ -169,6 +179,7 @@ const createListData = (refetchAllWaves: jest.Mock) => ({
   fetchNextPage: jest.fn(),
   mainWavesRefetch: jest.fn(),
   refetchAllWaves,
+  refreshStaleWaves,
   addPinnedWave: jest.fn(),
   removePinnedWave: jest.fn(),
   loadSubwavesForParent: jest.fn(),
@@ -185,9 +196,37 @@ const CaptureMyStream = ({
   return null;
 };
 
+const renderWithContext = () => {
+  let context: ReturnType<typeof useMyStream> | null = null;
+  // A fresh element per render so the provider re-reads its mocked hooks.
+  const createTree = () => (
+    <MyStreamProvider>
+      <CaptureMyStream
+        onContext={(nextContext) => {
+          context = nextContext;
+        }}
+      />
+    </MyStreamProvider>
+  );
+  const view = render(createTree());
+
+  return {
+    ...view,
+    getContext: () => {
+      if (!context) {
+        throw new Error("Expected MyStream context");
+      }
+      return context;
+    },
+    rerenderTree: () => view.rerender(createTree()),
+  };
+};
+
 describe("MyStreamProvider resume sync", () => {
   const mainRefetch = jest.fn();
   const dmRefetch = jest.fn();
+  const mainRefreshStale = jest.fn();
+  const dmRefreshStale = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -207,8 +246,12 @@ describe("MyStreamProvider resume sync", () => {
       activeWaveId: "wave-1",
       setActiveWave: mockSetActiveWave,
     });
-    useWavesListMock.mockReturnValue(createListData(mainRefetch));
-    useDmWavesListMock.mockReturnValue(createListData(dmRefetch));
+    useWavesListMock.mockReturnValue(
+      createListData(mainRefetch, mainRefreshStale)
+    );
+    useDmWavesListMock.mockReturnValue(
+      createListData(dmRefetch, dmRefreshStale)
+    );
   });
 
   it("does not let an old profile refresh cancel or restart the current profile's fetches", () => {
@@ -305,61 +348,171 @@ describe("MyStreamProvider resume sync", () => {
   });
 
   it("does not refetch DMs when the browser comes online and no DM list is active", () => {
-    render(
-      <MyStreamProvider>
-        <div />
-      </MyStreamProvider>
-    );
+    const { getContext } = renderWithContext();
+    act(() => {
+      getContext().requestMainWavesList();
+    });
 
     act(() => {
       window.dispatchEvent(new Event("online"));
     });
 
-    expect(mainRefetch).toHaveBeenCalledTimes(1);
+    expect(mainRefreshStale).toHaveBeenCalledTimes(1);
+    expect(dmRefreshStale).not.toHaveBeenCalled();
+    expect(mainRefetch).not.toHaveBeenCalled();
     expect(dmRefetch).not.toHaveBeenCalled();
     expect(useDmWavesListMock).toHaveBeenLastCalledWith({ enabled: false });
     expect(useWavesListMock).toHaveBeenLastCalledWith({ enabled: true });
   });
 
   it("syncs the active wave on the first websocket connection and reconnect", () => {
-    const { rerender } = render(
-      <MyStreamProvider>
-        <div />
-      </MyStreamProvider>
-    );
+    const { getContext, rerenderTree } = renderWithContext();
+    act(() => {
+      getContext().requestMainWavesList();
+    });
     mockRegisterWave.mockClear();
-    mainRefetch.mockClear();
 
     useWebsocketStatusMock.mockReturnValue("connected");
-    rerender(
-      <MyStreamProvider>
-        <div />
-      </MyStreamProvider>
-    );
+    rerenderTree();
 
     expect(mockRegisterWave).toHaveBeenCalledWith("wave-1", true, {
       skipInitialBackfill: undefined,
     });
-    expect(mainRefetch).toHaveBeenCalledTimes(1);
+    expect(mainRefreshStale).toHaveBeenCalledTimes(1);
 
     useWebsocketStatusMock.mockReturnValue("disconnected");
-    rerender(
-      <MyStreamProvider>
-        <div />
-      </MyStreamProvider>
-    );
+    rerenderTree();
     useWebsocketStatusMock.mockReturnValue("connected");
-    rerender(
-      <MyStreamProvider>
-        <div />
-      </MyStreamProvider>
-    );
+    rerenderTree();
 
     expect(mockRegisterWave).toHaveBeenCalledTimes(2);
     expect(mockRegisterWave).toHaveBeenNthCalledWith(2, "wave-1", true, {
       skipInitialBackfill: undefined,
     });
-    expect(mainRefetch).toHaveBeenCalledTimes(2);
+    expect(mainRefreshStale).toHaveBeenCalledTimes(2);
+    // Web reconnects never force-refetch fresh list data.
+    expect(mainRefetch).not.toHaveBeenCalled();
+    expect(mockResetAllWavesNewDropsCount).not.toHaveBeenCalled();
+  });
+
+  it("keeps the main Waves list idle on web routes until a surface requests it", () => {
+    jest.useFakeTimers();
+    usePathnameMock.mockReturnValue("/about");
+
+    try {
+      const { getContext, rerenderTree } = renderWithContext();
+
+      expect(useWavesListMock).toHaveBeenLastCalledWith({ enabled: false });
+      expect(useEnhancedWavesListCoreMock).toHaveBeenCalledWith(
+        "wave-1",
+        expect.anything(),
+        expect.objectContaining({ enabled: false, supportsPinning: true })
+      );
+      // Sidebars that render before their request read the list as loading.
+      expect(getContext().waves.isFetching).toBe(true);
+
+      useWebsocketStatusMock.mockReturnValue("connected");
+      rerenderTree();
+      act(() => {
+        window.dispatchEvent(new Event("focus"));
+        window.dispatchEvent(new Event("online"));
+        document.dispatchEvent(new Event("visibilitychange"));
+        jest.advanceTimersByTime(10_000);
+      });
+
+      expect(mainRefreshStale).not.toHaveBeenCalled();
+      expect(mainRefetch).not.toHaveBeenCalled();
+      expect(useWavesListMock).toHaveBeenLastCalledWith({ enabled: false });
+      expect(markMobileLaunchStepMock).not.toHaveBeenCalledWith(
+        "main_waves_list_deferred"
+      );
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("keeps a requested main Waves list enabled after leaving Waves", () => {
+    const { getContext, rerenderTree } = renderWithContext();
+
+    act(() => {
+      getContext().requestMainWavesList();
+    });
+    expect(useWavesListMock).toHaveBeenLastCalledWith({ enabled: true });
+    expect(getContext().waves.isFetching).toBe(false);
+
+    usePathnameMock.mockReturnValue("/about");
+    rerenderTree();
+
+    expect(useWavesListMock).toHaveBeenLastCalledWith({ enabled: true });
+  });
+
+  it("keeps the forced refetch and counter reset on native reconnect", () => {
+    useCapacitorMock.mockReturnValue({ isCapacitor: true, isActive: true });
+    const { rerenderTree } = renderWithContext();
+
+    expect(useWavesListMock).toHaveBeenLastCalledWith({ enabled: true });
+
+    useWebsocketStatusMock.mockReturnValue("connected");
+    rerenderTree();
+
+    expect(mainRefetch).toHaveBeenCalledTimes(1);
+    expect(mainRefreshStale).not.toHaveBeenCalled();
+    expect(mockResetAllWavesNewDropsCount).toHaveBeenCalled();
+  });
+
+  it("lets the real web sidebar request the list through the real provider", () => {
+    let context: ReturnType<typeof useMyStream> | null = null;
+    const renderTree = () => (
+      <MyStreamProvider>
+        <WebBrainLeftSidebarWaves scrollContainerRef={{ current: null }} />
+        <CaptureMyStream
+          onContext={(nextContext) => {
+            context = nextContext;
+          }}
+        />
+      </MyStreamProvider>
+    );
+
+    const getContext = () => {
+      if (!context) {
+        throw new Error("Expected MyStream context");
+      }
+      return context;
+    };
+
+    const { rerender } = render(renderTree());
+
+    expect(useWavesListMock).toHaveBeenLastCalledWith({ enabled: true });
+    const firstContext = getContext();
+    // Surfaces return these from effects, so each must return a cleanup function.
+    expect(typeof firstContext.requestMainWavesList()).toBe("function");
+    let releaseDirectMessagesList: unknown;
+    act(() => {
+      releaseDirectMessagesList = firstContext.requestDirectMessagesList();
+    });
+    expect(typeof releaseDirectMessagesList).toBe("function");
+
+    rerender(renderTree());
+
+    // Stable identities keep surface effects from re-requesting or releasing.
+    expect(getContext().requestMainWavesList).toBe(
+      firstContext.requestMainWavesList
+    );
+    expect(getContext().requestDirectMessagesList).toBe(
+      firstContext.requestDirectMessagesList
+    );
+  });
+
+  it("keeps loading the main Waves list on native non-detail routes without a request", () => {
+    useCapacitorMock.mockReturnValue({ isCapacitor: true, isActive: true });
+    usePathnameMock.mockReturnValue("/about");
+
+    renderWithContext();
+
+    expect(useWavesListMock).toHaveBeenLastCalledWith({ enabled: true });
+    expect(markMobileLaunchStepMock).not.toHaveBeenCalledWith(
+      "main_waves_list_deferred"
+    );
   });
 
   it.each(["/waves/wave-1", "/messages/wave-1"])(
@@ -488,7 +641,7 @@ describe("MyStreamProvider resume sync", () => {
     }).not.toThrow();
     expect(useWavesListMock).toHaveBeenLastCalledWith({
       activeWave,
-      enabled: true,
+      enabled: false,
     });
   });
 
@@ -505,7 +658,7 @@ describe("MyStreamProvider resume sync", () => {
       </MyStreamProvider>
     );
 
-    expect(useWavesListMock).toHaveBeenLastCalledWith({ enabled: true });
+    expect(useWavesListMock).toHaveBeenLastCalledWith({ enabled: false });
   });
 
   it("treats a null pathname as a non-messages route", () => {
@@ -521,7 +674,8 @@ describe("MyStreamProvider resume sync", () => {
       window.dispatchEvent(new Event("online"));
     });
 
-    expect(mainRefetch).toHaveBeenCalledTimes(1);
+    expect(mainRefreshStale).not.toHaveBeenCalled();
+    expect(dmRefreshStale).not.toHaveBeenCalled();
     expect(dmRefetch).not.toHaveBeenCalled();
     expect(useDmWavesListMock).toHaveBeenLastCalledWith({ enabled: false });
   });
@@ -539,8 +693,10 @@ describe("MyStreamProvider resume sync", () => {
       window.dispatchEvent(new Event("online"));
     });
 
-    expect(mainRefetch).toHaveBeenCalledTimes(1);
-    expect(dmRefetch).toHaveBeenCalledTimes(1);
+    // Messages pages do not request the main list; only stale DMs refresh.
+    expect(mainRefreshStale).not.toHaveBeenCalled();
+    expect(dmRefreshStale).toHaveBeenCalledTimes(1);
+    expect(dmRefetch).not.toHaveBeenCalled();
     expect(useDmWavesListMock).toHaveBeenLastCalledWith({ enabled: true });
   });
 
@@ -571,8 +727,9 @@ describe("MyStreamProvider resume sync", () => {
       window.dispatchEvent(new Event("online"));
     });
 
-    expect(mainRefetch).toHaveBeenCalledTimes(1);
-    expect(dmRefetch).toHaveBeenCalledTimes(1);
+    expect(mainRefreshStale).not.toHaveBeenCalled();
+    expect(dmRefreshStale).toHaveBeenCalledTimes(1);
+    expect(dmRefetch).not.toHaveBeenCalled();
 
     act(() => {
       releaseDirectMessagesList?.();
@@ -596,5 +753,7 @@ describe("MyStreamProvider resume sync", () => {
 
     expect(mainRefetch).not.toHaveBeenCalled();
     expect(dmRefetch).not.toHaveBeenCalled();
+    expect(mainRefreshStale).not.toHaveBeenCalled();
+    expect(dmRefreshStale).not.toHaveBeenCalled();
   });
 });

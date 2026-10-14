@@ -117,13 +117,13 @@ function CoveragePoint({
       <div className="tw-mt-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-x-1.5 tw-gap-y-0.5">
         <Link
           href={`/the-memes/${tokenId}`}
-          className="tw-font-semibold tw-text-iron-100 tw-no-underline focus-visible:tw-rounded-sm focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-primary-300"
+          className="tw-text-[15px] tw-font-semibold tw-tabular-nums tw-text-iron-100 tw-no-underline focus-visible:tw-rounded-sm focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-primary-300"
         >
           {t(locale, "subscriptions.coverage.memeToken", {
             token: formatInteger(locale, tokenId),
           })}
         </Link>
-        <span className="tw-text-sm tw-text-iron-500">
+        <span className="tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
           · {formatSubscriptionCoverageDate(locale, date)}
         </span>
       </div>
@@ -169,10 +169,10 @@ function CoverageUnavailable({
           aria-hidden="true"
         />
         <div className="tw-min-w-0 tw-flex-1">
-          <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
+          <h3 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-400">
             {t(locale, "subscriptions.coverage.status.unknown")}
           </h3>
-          <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-leading-5 tw-text-iron-400">
+          <p className="tw-mb-0 tw-mt-1 tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-500">
             {t(locale, "subscriptions.coverage.unavailable")}
           </p>
         </div>
@@ -275,13 +275,22 @@ export default function SubscriptionCoverageSummary({
 
           <h3
             className={clsx(
-              "tw-mb-0 tw-mt-[13px] tw-text-xl tw-font-medium tw-leading-6 tw-tracking-tight",
-              showFundedCount ? tone.text : "tw-text-iron-100"
+              "tw-mb-0 tw-mt-[13px] tw-font-medium tw-tabular-nums tw-leading-6 tw-tracking-tight",
+              showFundedCount
+                ? `tw-text-xl ${tone.text}`
+                : "tw-text-sm tw-text-iron-400"
             )}
           >
             {headline}
           </h3>
-          <p className="tw-mb-0 tw-mt-2 tw-max-w-2xl tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-400 sm:tw-text-[15px]">
+          <p
+            className={clsx(
+              "tw-mb-0 tw-mt-2 tw-max-w-2xl tw-text-pretty tw-font-normal tw-leading-6",
+              showFundedCount
+                ? "tw-text-[15px] tw-text-iron-300"
+                : "tw-text-meta tw-text-iron-500"
+            )}
+          >
             {t(locale, getDescriptionKey(coverage.status))}
           </p>
           {isError ? (
@@ -289,7 +298,9 @@ export default function SubscriptionCoverageSummary({
               role="status"
               className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-text-amber-200"
             >
-              <span>{t(locale, "subscriptions.coverage.stale")}</span>
+              <span className="tw-text-meta tw-font-normal">
+                {t(locale, "subscriptions.coverage.stale")}
+              </span>
               {isOwner ? (
                 <button
                   type="button"
@@ -302,17 +313,17 @@ export default function SubscriptionCoverageSummary({
             </div>
           ) : null}
 
-          <div className="tw-mt-[21px] tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-[13px]">
-            <span className="tw-font-medium tw-text-iron-100">
+          <div className="tw-mt-[21px] tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-meta tw-tabular-nums">
+            <span className="tw-font-medium tw-text-iron-100 max-sm:tw-hidden">
               {getSubscriptionModeLabel(locale, coverage.mode)}
             </span>
-            <span aria-hidden="true" className="tw-text-iron-700">
+            <span aria-hidden="true" className="tw-text-iron-700 max-sm:tw-hidden">
               ·
             </span>
-            <span className="tw-font-medium tw-text-iron-100">
+            <span className="tw-font-medium tw-text-iron-100 max-sm:tw-hidden">
               {formatSubscriptionEth(locale, coverage.balance_eth)} ETH
             </span>
-            <span aria-hidden="true" className="tw-text-iron-700">
+            <span aria-hidden="true" className="tw-text-iron-700 max-sm:tw-hidden">
               ·
             </span>
             <span className="tw-text-iron-400">
@@ -322,14 +333,14 @@ export default function SubscriptionCoverageSummary({
                     count: formatInteger(locale, coverage.eligibility_count),
                   })}
             </span>
-            <span aria-hidden="true" className="tw-text-iron-700">
+            <span aria-hidden="true" className="tw-text-iron-700 max-sm:tw-hidden">
               ·
             </span>
-            <span className="tw-text-iron-400">{editionsLabel}</span>
+            <span className="tw-text-iron-400 max-sm:tw-hidden">{editionsLabel}</span>
           </div>
 
           {coverage.next_unfunded?.top_up_deadline ? (
-            <div className="tw-mt-3 tw-flex tw-items-start tw-gap-2 tw-rounded-lg tw-bg-black/20 tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 tw-text-iron-300 tw-ring-1 tw-ring-white/[0.06]">
+            <div className="tw-mt-3 tw-flex tw-items-start tw-gap-2 tw-rounded-lg tw-bg-black/20 tw-px-3 tw-py-2.5 tw-text-[15px] tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-300 tw-ring-1 tw-ring-white/[0.06]">
               <ExclamationTriangleIcon
                 className={clsx("tw-mt-0.5 tw-size-4 tw-flex-none", tone.text)}
                 aria-hidden="true"
@@ -348,13 +359,13 @@ export default function SubscriptionCoverageSummary({
               </span>
             </div>
           ) : coverage.next_unfunded ? (
-            <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-500">
+            <p className="tw-mb-0 tw-mt-3 tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-500">
               {t(locale, "subscriptions.coverage.noDeadline")}
             </p>
           ) : null}
 
           {coverage.recommended_top_up ? (
-            <p className="tw-mb-0 tw-mt-2.5 tw-text-sm tw-leading-5 tw-text-iron-300">
+            <p className="tw-mb-0 tw-mt-2.5 tw-text-[15px] tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-300">
               {t(locale, "subscriptions.coverage.recommendedThrough", {
                 amount: formatSubscriptionEth(
                   locale,
@@ -410,12 +421,12 @@ export default function SubscriptionCoverageSummary({
               <div className="tw-col-span-2 tw-mb-2 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
                 {t(locale, "subscriptions.coverage.capacity")}
               </div>
-              <div className="tw-break-words tw-text-2xl tw-font-medium tw-leading-none tw-tracking-tight tw-text-iron-100 sm:tw-text-3xl">
+              <div className="tw-break-words tw-text-2xl tw-font-medium tw-tabular-nums tw-leading-none tw-tracking-tight tw-text-iron-100 md:tw-text-3xl">
                 {coverage.mint_capacity === null
                   ? "—"
                   : formatInteger(locale, coverage.mint_capacity)}
               </div>
-              <div className="tw-self-baseline tw-text-xs tw-leading-none tw-text-iron-500 sm:tw-text-sm">
+              <div className="tw-self-baseline tw-text-sm tw-font-normal tw-leading-none tw-text-iron-500">
                 {t(locale, "subscriptions.coverage.capacityUnit")}
               </div>
             </div>
@@ -423,15 +434,15 @@ export default function SubscriptionCoverageSummary({
               <div className="tw-col-span-2 tw-mb-2 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
                 {t(locale, "subscriptions.coverage.allocated")}
               </div>
-              <div className="tw-break-words tw-text-2xl tw-font-medium tw-leading-none tw-tracking-tight tw-text-iron-100 sm:tw-text-3xl">
+              <div className="tw-break-words tw-text-2xl tw-font-medium tw-tabular-nums tw-leading-none tw-tracking-tight tw-text-iron-100 md:tw-text-3xl">
                 {formatInteger(locale, coverage.allocated_mints)}
               </div>
-              <div className="tw-self-baseline tw-text-xs tw-leading-none tw-text-iron-500 sm:tw-text-sm">
+              <div className="tw-self-baseline tw-text-sm tw-font-normal tw-leading-none tw-text-iron-500">
                 {t(locale, "subscriptions.coverage.allocatedUnit")}
               </div>
             </div>
           </div>
-          <p className="tw-m-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.04] tw-pt-4 tw-text-pretty tw-text-xs tw-leading-5 tw-text-iron-500">
+          <p className="tw-m-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.04] tw-pt-4 tw-text-pretty tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-500">
             {t(locale, "subscriptions.coverage.basis")}
           </p>
         </div>

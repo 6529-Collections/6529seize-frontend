@@ -42,8 +42,7 @@ Open a new shell, or activate the wrapper in the current shell:
 source <(./bin/6529 bootstrap --print-export)
 ```
 
-Dependencies, including `@6529-collections/release-request`, come from public
-npm. No package token or private-registry setup is required. Install the exact
+Dependencies come from public npm. No package token or private-registry setup is required. Install the exact
 lockfile through the existing secure wrapper:
 
 ```bash
@@ -163,6 +162,42 @@ an unchanged toolchain result, lock the result into the same PR:
 
 The update command refuses any per-file increase or a newly affected file.
 Fix new diagnostics instead of widening the baseline.
+
+### Time Zones In Tests
+
+Jest is pinned to UTC (`jest.config.js` sets `TZ` before it forks workers), so
+a result never depends on the machine that ran it. A pinned zone cannot catch
+zone bugs by itself, so test date code in other zones on purpose:
+
+- `runInTimeZone` in `__tests__/utils/timeZoneHarness.ts` runs an exported
+  function in a fresh Node process in any IANA zone and returns the results.
+  It is the authoritative check, because `Date`, `toLocale*String` and
+  `Intl` all follow the real zone. Batch many inputs into one call.
+- `withHostTimeZone` in the same file makes `Intl.DateTimeFormat` default to
+  a zone inside a callback, for rendering components in-process. It does not
+  change `Date` getters or `toLocale*String`.
+- `TEST_TIME_ZONES` (UTC, Los Angeles, Auckland) and `EXTREME_TIME_ZONES`
+  (UTC-11, UTC+14) are the zones to cover. Assigning `process.env.TZ` inside a
+  test does nothing: Jest gives each test a copy of the environment.
+
+To run a suite or file in another zone, set `JEST_TZ` to an IANA zone name. A
+plain `TZ` is ignored on purpose, because shells often set it. In PowerShell:
+
+```powershell
+$env:JEST_TZ = "America/Los_Angeles"
+node_modules\.bin\jest.cmd <test path> --coverage=false
+Remove-Item Env:JEST_TZ
+```
+
+In Git Bash, prefix the command instead:
+`JEST_TZ=Pacific/Auckland node_modules/.bin/jest.cmd <test path> --coverage=false`.
+Do not use `TZ=` there: on Windows, Git Bash drops a `TZ` value that contains a
+slash (such as `America/Los_Angeles`) before Node starts.
+`runInTimeZone` sets the zone through the process API and works from any shell.
+
+Playwright is not pinned. A spec that depends on the browser zone must set
+`test.use({ timezoneId })` itself, as
+`tests/critical-shell/public-hydration-readonly.spec.ts` does.
 
 ## Generated Files
 

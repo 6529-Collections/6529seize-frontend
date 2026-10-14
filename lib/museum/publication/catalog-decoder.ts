@@ -19,6 +19,7 @@ import {
   requiredSha,
   requiredString,
 } from "./catalog-json";
+import { isRfc3339DateTime } from "./rfc3339";
 import { MUSEUM_MANIFEST_PATH } from "./security";
 
 type DecodedCatalogRoot = {
@@ -114,10 +115,8 @@ function decodeCatalogRoot(value: unknown): DecodedCatalogRoot {
   if (
     catalogId !== `6529NM-PUBCAT-${sourceCommit}` ||
     payload.state !== "immutable_binding" ||
-    !Number.isFinite(
-      Date.parse(
-        requiredString(payload, "created_at", "publication_catalog_payload")
-      )
+    !isRfc3339DateTime(
+      requiredString(payload, "created_at", "publication_catalog_payload")
     ) ||
     payload.activation_policy !== "frontend_activates_only_verified_catalog"
   ) {

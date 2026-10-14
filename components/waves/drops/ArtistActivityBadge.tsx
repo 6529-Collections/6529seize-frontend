@@ -1,6 +1,9 @@
 "use client";
 
 import React, { useId } from "react";
+import AuthorBadgeButton, {
+  type AuthorBadgeSize,
+} from "@/components/common/profile/AuthorBadgeButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPalette, faTrophy } from "@fortawesome/free-solid-svg-icons";
 import { Tooltip } from "react-tooltip";
@@ -9,32 +12,12 @@ import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import type { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
 
-const PALETTE_BUTTON_CLASS =
-  "tw-relative tw-inline-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-blue-400/20 tw-bg-blue-500/10 tw-text-blue-400 tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-blue-400/30 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-blue-300/30 desktop-hover:hover:tw-bg-blue-500/15 desktop-hover:hover:tw-text-blue-300";
-
-const TROPHY_BUTTON_CLASS =
-  "tw-relative tw-inline-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-yellow-500/20 tw-bg-yellow-500/10 tw-text-[#ffc107] tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-yellow-500/20 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-yellow-400/30 desktop-hover:hover:tw-bg-yellow-500/15 desktop-hover:hover:tw-text-yellow-300";
-
-const PALETTE_ICON_CLASS =
-  "tw-h-2.5 tw-w-2.5 tw-flex-shrink-0 tw-text-blue-400";
-const TROPHY_ICON_CLASS =
-  "tw-h-2.5 tw-w-2.5 tw-flex-shrink-0 tw-text-[#ffc107]";
+const PALETTE_ICON_CLASS = "tw-flex-shrink-0 tw-text-blue-400";
+const TROPHY_ICON_CLASS = "tw-flex-shrink-0 tw-text-[#ffc107]";
 const BOTH_STATE_DOT_CLASS =
-  "tw-pointer-events-none tw-absolute -tw-right-1 -tw-top-1 tw-h-2 tw-w-2 tw-rounded-full tw-border tw-border-solid tw-border-black tw-bg-[#4285f4] tw-shadow-[0_0_4px_rgba(66,133,244,0.6)]";
+  "tw-pointer-events-none tw-absolute -tw-right-px -tw-top-px tw-h-2 tw-w-2 tw-rounded-full tw-border tw-border-solid tw-border-black tw-bg-[#4285f4] tw-shadow-[0_0_4px_rgba(66,133,244,0.6)]";
 
 type BadgeState = "none" | "active" | "winners" | "both";
-type ArtistActivityBadgeSize = "default" | "compact";
-
-const BUTTON_CLASS_BY_SIZE: Record<ArtistActivityBadgeSize, string> = {
-  default: "tw-h-5 tw-w-5",
-  compact: "tw-h-[18px] tw-w-[18px]",
-};
-
-const ICON_CLASS_BY_SIZE: Record<ArtistActivityBadgeSize, string> = {
-  default: "tw-h-2.5 tw-w-2.5",
-  compact: "tw-h-[9px] tw-w-[9px]",
-};
-
 function getBadgeState(
   submissionCount: number,
   trophyCount: number
@@ -52,26 +35,22 @@ const BADGE_CONFIG: Record<
   Exclude<BadgeState, "none">,
   {
     readonly icon: typeof faPalette;
-    readonly buttonClassName: string;
     readonly showDot: boolean;
     readonly initialTab: ArtistPreviewTab;
   }
 > = {
   active: {
     icon: faPalette,
-    buttonClassName: PALETTE_BUTTON_CLASS,
     showDot: false,
     initialTab: "active",
   },
   winners: {
     icon: faTrophy,
-    buttonClassName: TROPHY_BUTTON_CLASS,
     showDot: false,
     initialTab: "winners",
   },
   both: {
     icon: faTrophy,
-    buttonClassName: TROPHY_BUTTON_CLASS,
     showDot: true,
     initialTab: "active",
   },
@@ -105,7 +84,7 @@ interface ArtistActivityBadgeProps {
   readonly trophyCount: number;
   readonly onBadgeClick: (tab: ArtistPreviewTab) => void;
   readonly tooltipId?: string | undefined;
-  readonly size?: ArtistActivityBadgeSize | undefined;
+  readonly size?: AuthorBadgeSize | undefined;
 }
 
 export const ArtistActivityBadge: React.FC<ArtistActivityBadgeProps> = ({
@@ -132,19 +111,14 @@ export const ArtistActivityBadge: React.FC<ArtistActivityBadgeProps> = ({
   const tooltipContent = getTooltipContent(state, submissionCount, trophyCount);
   const ariaLabel = tooltipContent;
   const isPaletteIcon = config.icon === faPalette;
-  const sizeButtonClassName = BUTTON_CLASS_BY_SIZE[size];
-  const sizeIconClassName = ICON_CLASS_BY_SIZE[size];
-  const iconBaseClassName = isPaletteIcon
-    ? PALETTE_ICON_CLASS
-    : TROPHY_ICON_CLASS;
-  const iconClassName = `${iconBaseClassName} ${sizeIconClassName}`;
+  const iconClassName = isPaletteIcon ? PALETTE_ICON_CLASS : TROPHY_ICON_CLASS;
   const describedById =
     showTooltip && isTooltipOpen ? uniqueTooltipId : undefined;
 
   return (
     <>
-      <button
-        type="button"
+      <AuthorBadgeButton
+        size={size}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -153,7 +127,6 @@ export const ArtistActivityBadge: React.FC<ArtistActivityBadgeProps> = ({
         }}
         onMouseEnter={() => setIsTooltipOpen(true)}
         onMouseLeave={() => setIsTooltipOpen(false)}
-        className={`${config.buttonClassName} ${sizeButtonClassName}`}
         aria-label={ariaLabel}
         aria-describedby={describedById}
         {...(dataTooltipId && { "data-tooltip-id": dataTooltipId })}
@@ -163,7 +136,7 @@ export const ArtistActivityBadge: React.FC<ArtistActivityBadgeProps> = ({
         {config.showDot && (
           <span className={BOTH_STATE_DOT_CLASS} aria-hidden="true" />
         )}
-      </button>
+      </AuthorBadgeButton>
 
       {showTooltip && (
         <Tooltip

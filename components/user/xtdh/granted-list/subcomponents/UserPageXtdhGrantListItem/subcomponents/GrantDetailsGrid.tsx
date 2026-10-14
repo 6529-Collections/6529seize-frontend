@@ -20,7 +20,7 @@ export function GrantDetailsGrid({
             <span>{details.tdhRateLabel}</span>
             {details.tdhRatePerTokenLabel ? (
               <span
-                className="tw-text-xs tw-font-semibold tw-text-iron-400 tw-whitespace-nowrap"
+                className="tw-text-xs tw-font-semibold tw-text-iron-400 tw-whitespace-nowrap group-data-[typography=profile]/profile-xtdh:tw-text-meta group-data-[typography=profile]/profile-xtdh:tw-font-normal group-data-[typography=profile]/profile-xtdh:tw-text-iron-500 group-data-[typography=profile]/profile-xtdh:tw-tabular-nums"
                 title={details.tdhRatePerTokenHint ?? undefined}
               >
                 ({details.tdhRatePerTokenLabel}/token)

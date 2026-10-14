@@ -323,13 +323,17 @@
       "classification": "crawlable",
       "family": "tools"
     },
-    "/delegation/[...section]": {
+    "/safe-collecting/[...section]": {
       "classification": "fixture",
       "family": "tools",
       "fixture": {
-        "staging": "/delegation/delegation-center",
-        "production": "/delegation/delegation-center"
+        "staging": "/safe-collecting/tap-guide",
+        "production": "/safe-collecting/tap-guide"
       }
+    },
+    "/safe-collecting": {
+      "classification": "crawlable",
+      "family": "tools"
     },
     "/discover": {
       "classification": "crawlable",
@@ -1830,6 +1834,14 @@
       "classification": "crawlable",
       "family": "network"
     },
+    "/network/tdh/consolidation": {
+      "classification": "crawlable",
+      "family": "network"
+    },
+    "/network/tdh/consolidation/design": {
+      "classification": "crawlable",
+      "family": "network"
+    },
     "/network/tdh/historic-boosts": {
       "classification": "crawlable",
       "family": "network"
@@ -2293,6 +2305,10 @@
       "classification": "crawlable",
       "family": "tools"
     },
+    "/tools/time-zones": {
+      "classification": "crawlable",
+      "family": "tools"
+    },
     "/waves": {
       "classification": "crawlable",
       "family": "social"
@@ -2323,6 +2339,14 @@
       "classification": "exempt",
       "family": "social",
       "exemptReason": "Native competition rollout requires scoped competition fixtures."
+    },
+    "/delegation/[...section]": {
+      "classification": "fixture",
+      "family": "tools",
+      "fixture": {
+        "staging": "/delegation/wallet-architecture",
+        "production": "/delegation/wallet-architecture"
+      }
     }
   }
 }

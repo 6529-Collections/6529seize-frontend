@@ -3,13 +3,15 @@
 ## Overview
 
 Wave header controls let users manage the active wave from `About` without
-leaving the thread.
+leaving the thread. Waves the viewer has not joined also show a `Join` call to
+action in the conversation header.
 
 Users can:
 
 - Add or edit Wave REP when eligible
 - Share or copy a non-DM wave link
-- Follow or unfollow (`Join` / `Joined`)
+- Join from the conversation header when not yet a member
+- Follow or unfollow (`Join` / `Joined`) from `About`
 - Use the bell notification menu after following
 - Mute or unmute waves from the speaker-muted control
 - Open wave description from the info button
@@ -38,6 +40,11 @@ These surfaces show the tile even when Announcements has a saved wave picture.
 3. Use header controls near the wave title, avatar, and metadata.
 4. Open the owner options menu (`⋮`) when available.
 
+On phones, select the wave name to open `About`. Use `Close`, tap outside,
+press Escape, or use the device’s Back action to return to the thread.
+The main `About` sheet has a Close control; Back controls inside subviews return
+to their parent view.
+
 ## Conversation Header
 
 At desktop and tablet widths (768px and above), the conversation header groups
@@ -46,7 +53,8 @@ identity block. The small shield and number beside the name show Wave Score
 when available. Hover, click, or use the keyboard to open its details card and
 `Learn more` link. No score space is left for waves without a score or for DMs.
 
-The top-right controls start with Add REP for eligible viewers, followed by the
+The top-right controls start with `Join` when the viewer has not joined the
+wave, then Add REP for eligible viewers, followed by the
 create/submit action when available, chat/gallery toggle when supported, search,
 and the right-sidebar toggle. Add REP is also available in the right sidebar's
 `About` section, alongside the full trust information and sharing. Existing
@@ -57,11 +65,35 @@ Unavailable submission actions show a lock icon at every width. Hover, focus,
 or select the lock to read the full restriction reason. The Memes `How to Submit`
 helper keeps its desktop label and opens nomination guidance.
 
+### Join Call to Action
+
+- `Join` is a white primary button with a plus icon. It is the first top-right
+  control on desktop, tablet, and compact web, and it leads the native app
+  header's right-hand actions.
+- Selecting `Join` checks the session, joins the wave, and shows a short
+  `Joined` confirmation in the same place. Screen readers hear
+  `You joined {wave}.` The confirmation then returns the header to its member
+  controls. If you joined with the keyboard, focus stays on the confirmation
+  until you move it.
+- Joined waves do not show the header button. Leave, notification, and mute
+  controls stay in `About`, where `Joined` leaves the wave.
+- Signed-out visitors see `Join`; it opens the wallet connect flow. After
+  signing in, select `Join` again so the wave is joined with the profile you
+  chose.
+- The header button is not shown for direct messages, proxy sessions, or a
+  connected wallet whose profile has not loaded.
+- Subwaves have their own `Join`; joining a subwave does not join its parent.
+- The header and `About` buttons use the same join request and update the
+  wave list immediately, including the `Joined` collection.
+
 ## Permission Rules
 
 - Anyone viewing the header can open description and followers, and share a non-DM wave.
 - Add/Edit REP requires a connected non-author, non-proxy profile. DMs do not offer REP.
-- `Join`, notification settings, and pin require a connected non-proxy profile.
+- `About` `Join` / `Joined`, notification settings, and pin require a connected
+  non-proxy profile.
+- The conversation-header `Join` follows the rules in Join Call to Action:
+  signed-out visitors can use it to start signing in.
 - Rename and picture edit require a non-DM wave plus `canEditWave` eligibility:
   author or admin-eligible, connected, and non-proxy.
 - Owner options menu is only shown when the connected handle matches the wave
@@ -69,8 +101,9 @@ helper keeps its desktop label and opens nomination guidance.
 
 ## User Journey
 
-1. Open `About` in an active wave.
-2. Select `Join` to follow (or `Joined` to unfollow).
+1. Open a wave you have not joined and select `Join` in the conversation
+   header, or open `About` in an active wave.
+2. In `About`, select `Join` to follow (or `Joined` to unfollow).
 3. If followed, open the bell button to choose `@ALL` mention notifications
    or `Notify for all messages`.
 4. Use the speaker-muted button to mute the wave before or after joining, or
@@ -99,13 +132,12 @@ helper keeps its desktop label and opens nomination guidance.
 
 ## Edge Cases
 
-- Signed-out users and proxy sessions do not get follow, notification, pin,
-  edit, or owner controls.
+- Signed-out users and proxy sessions do not get `About` follow, notification,
+  pin, edit, or owner controls. Signed-out visitors still see the header `Join`,
+  which starts signing in instead of joining.
+- Leaving from `About` brings the header `Join` back.
 - The bell notification menu renders only when the wave is followed; the
   speaker-muted control can render before joining.
-- All-message notifications can be unavailable for high-follower waves unless
-  already enabled; the unavailable all-message row stays disabled in the
-  notification menu.
 - When muted, the bell notification menu is replaced by a speaker-muted `Muted`
   control that unmutes the wave.
 - Direct-message waves never show rename or picture-edit pencils, even when the

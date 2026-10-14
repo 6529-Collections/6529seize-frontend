@@ -215,13 +215,13 @@ export function AliasEditor({
   };
 
   let searchResultsContent: ReactNode = (
-    <p className="tw-m-0 tw-px-3 tw-py-3 tw-text-sm tw-text-iron-400">
+    <p className="tw-m-0 tw-px-3 tw-py-3 tw-text-[15px]/5 tw-font-normal tw-text-iron-300">
       {t(locale, "user.mentionShortcuts.searchResults", { count: 0 })}
     </p>
   );
   if (profileSearchQuery.isFetching) {
     searchResultsContent = (
-      <p className="tw-m-0 tw-px-3 tw-py-3 tw-text-sm tw-text-iron-400">
+      <p className="tw-m-0 tw-px-3 tw-py-3 tw-text-[15px]/5 tw-font-normal tw-text-iron-300">
         {t(locale, LOADING_MESSAGE_KEY)}
       </p>
     );
@@ -270,7 +270,7 @@ export function AliasEditor({
             ref={headingRef}
             id="quick-tag-editor-title"
             tabIndex={-1}
-            className="tw-m-0 tw-text-sm tw-font-bold tw-tracking-wide tw-text-iron-50 focus:tw-outline-none"
+            className="tw-m-0 tw-text-[15px]/5 tw-font-semibold tw-tracking-wide tw-text-iron-100 focus:tw-outline-none"
           >
             {isEditing
               ? t(locale, "user.mentionShortcuts.edit")
@@ -278,7 +278,7 @@ export function AliasEditor({
           </h3>
         </div>
       )}
-      <p className="tw-mb-0 tw-mt-2 tw-max-w-lg tw-text-pretty tw-text-sm tw-leading-5 tw-text-iron-300">
+      <p className="tw-mb-0 tw-mt-2 tw-max-w-lg tw-text-pretty tw-text-[15px] tw-font-normal tw-leading-5 tw-text-iron-300">
         {t(locale, "user.mentionShortcuts.editorDescription")}
       </p>
 
@@ -286,7 +286,7 @@ export function AliasEditor({
         <div>
           <label
             htmlFor={nameInputId}
-            className="tw-block tw-text-xs tw-font-semibold tw-text-iron-400"
+            className="tw-block tw-text-meta/4 tw-font-normal tw-text-iron-500"
           >
             <span>{t(locale, "user.mentionShortcuts.name")}</span>
             <div
@@ -311,7 +311,7 @@ export function AliasEditor({
                 }
                 maxLength={15}
                 autoComplete="off"
-                className="tw-min-h-11 tw-w-full tw-border-0 tw-bg-transparent tw-px-1.5 tw-py-2.5 tw-text-sm tw-font-medium tw-text-white tw-outline-none placeholder:tw-text-iron-600"
+                className="tw-min-h-11 tw-w-full tw-border-0 tw-bg-transparent tw-px-1.5 tw-py-2.5 tw-text-base/5 tw-font-normal tw-text-iron-100 md:desktop-hover:tw-text-sm/5 tw-outline-none placeholder:tw-text-iron-600"
               />
             </div>
           </label>
@@ -319,7 +319,7 @@ export function AliasEditor({
             <p
               id={nameErrorId}
               role="alert"
-              className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-error"
+              className="tw-mb-0 tw-mt-2 tw-text-[15px]/4 tw-font-normal tw-text-error"
             >
               {t(locale, "user.mentionShortcuts.nameError")}
             </p>
@@ -328,7 +328,7 @@ export function AliasEditor({
             <p
               id={reservedErrorId}
               role="alert"
-              className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-error"
+              className="tw-mb-0 tw-mt-2 tw-text-[15px]/4 tw-font-normal tw-text-error"
             >
               {t(locale, "user.mentionShortcuts.reservedError")}
             </p>
@@ -338,7 +338,7 @@ export function AliasEditor({
         <div>
           <label
             htmlFor={searchInputId}
-            className="tw-block tw-text-xs tw-font-semibold tw-text-iron-400"
+            className="tw-block tw-text-meta/4 tw-font-normal tw-text-iron-500"
           >
             {t(locale, "user.mentionShortcuts.addProfiles", {
               count: members.length,
@@ -382,7 +382,7 @@ export function AliasEditor({
                 )}
                 disabled={members.length >= MAX_MEMBERS}
                 autoComplete="off"
-                className="tw-min-h-11 tw-w-full tw-border-0 tw-bg-transparent tw-px-2 tw-py-2.5 tw-text-sm tw-text-white tw-outline-none placeholder:tw-text-iron-600 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+                className="tw-min-h-11 tw-w-full tw-border-0 tw-bg-transparent tw-px-2 tw-py-2.5 tw-text-base/5 tw-font-normal tw-text-iron-100 md:desktop-hover:tw-text-sm/5 tw-outline-none placeholder:tw-text-iron-600 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
               />
             </div>
 

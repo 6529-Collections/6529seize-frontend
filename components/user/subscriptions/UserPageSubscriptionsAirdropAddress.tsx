@@ -25,7 +25,7 @@ export default function UserPageSubscriptionsAirdropAddress(
 ) {
   const airdropAddress = props.airdrop?.airdrop_address;
   const addressTooltipId = `airdrop-address-${airdropAddress?.address ?? "unavailable"}`;
-  const editHref = `/delegation/register-delegation?collection=${MEMES_CONTRACT}&use_case=${AIRDROPS_USE_CASE.use_case}`;
+  const editHref = `/safe-collecting/register-delegation?collection=${MEMES_CONTRACT}&use_case=${AIRDROPS_USE_CASE.use_case}`;
 
   return (
     <div className="tw-min-w-0">
@@ -65,7 +65,7 @@ export default function UserPageSubscriptionsAirdropAddress(
             {airdropAddress && (
               <span className="tw-break-all">
                 {airdropAddress.ens && (
-                  <span className="tw-mb-1 tw-block tw-text-sm tw-font-medium tw-text-iron-200">
+                  <span className="tw-mb-1 tw-block tw-text-sm tw-font-medium tw-text-iron-100">
                     {airdropAddress.ens}
                   </span>
                 )}
@@ -73,7 +73,7 @@ export default function UserPageSubscriptionsAirdropAddress(
                   type="button"
                   data-tooltip-id={addressTooltipId}
                   aria-describedby={addressTooltipId}
-                  className={`tw-block tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-leading-5 ${
+                  className={`tw-block tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-leading-5 max-sm:tw-truncate ${
                     airdropAddress.ens
                       ? "tw-text-xs tw-text-iron-500"
                       : "tw-text-sm tw-text-iron-200"
@@ -83,6 +83,7 @@ export default function UserPageSubscriptionsAirdropAddress(
                 </button>
                 <Tooltip
                   id={addressTooltipId}
+                  openEvents={{ mouseover: true, focus: true, click: true }}
                   place="top"
                   positionStrategy="fixed"
                   offset={8}
@@ -96,7 +97,7 @@ export default function UserPageSubscriptionsAirdropAddress(
             )}
             {!airdropAddress && (
               <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
-                <span className="tw-text-sm tw-text-iron-400">
+                <span className="tw-text-meta tw-font-normal tw-text-iron-500">
                   No airdrop address found
                 </span>
                 {props.show_edit && (

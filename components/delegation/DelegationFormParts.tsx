@@ -2,14 +2,19 @@
 
 import Button from "@/components/utils/button/Button";
 import TooltipIconButton from "@/components/common/TooltipIconButton";
+import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import { DELEGATION_ALL_ADDRESS } from "@/constants/constants";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useEnsResolution } from "@/hooks/useEnsResolution";
+import { t } from "@/i18n/messages";
 import { faInfoCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   useEffect,
   useEffectEvent,
+  useId,
   useState,
   type ComponentPropsWithoutRef,
   type ReactNode,
@@ -17,6 +22,13 @@ import {
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import type { DelegationCollection } from "./delegation-constants";
 import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
+import {
+  formatDelegationExpiryPreview,
+  getMinDelegationExpiryDate,
+  getViewerTimeZone,
+  getZonedDateEndEpochSeconds,
+  type DelegationExpirySelection,
+} from "./delegation-expiry";
 import type {
   DelegationWriteParams,
   DelegationWriteSettledHandler,
@@ -381,7 +393,8 @@ export function DelegationSubmitGroups(
     gasError?: string | undefined;
     onWriteSettled?: DelegationWriteSettledHandler | undefined;
     isDestructive?: boolean | undefined;
-    validate: () => string[];
+    /** Receives the submit time, so time-based checks use the click, not render. */
+    validate: (submittedAtMs: number) => string[];
     onHide: () => void;
     onSetToast: (toast: DelegationToastState) => void;
     submitBtnLabel?: string | undefined;
@@ -410,15 +423,15 @@ export function DelegationSubmitGroups(
   });
 
   function submitDelegation() {
-    const newErrors = validate();
+    const newErrors = validate(Date.now());
     setErrors(newErrors);
     if (newErrors.length > 0) {
       window.scrollBy(0, 100);
     } else {
       const { functionName } = writeParams;
       if (!functionName) {
-        // Unreachable: submission is gated by the same validate() predicate
-        // the form components use to decide whether functionName is set.
+        // Unreachable: submit-time validate() runs every check the form
+        // components use to decide whether functionName is set.
         return;
       }
       const contractParams = { ...writeParams, functionName };
@@ -536,27 +549,63 @@ export function DelegationSubmitGroups(
   );
 }
 
+/**
+ * Calendar date in the viewer's own time zone. The delegation expires at the
+ * end of that local day; the exact instant is previewed before signing.
+ */
 export function DelegationExpiryCalendar(
   props: Readonly<{
-    setDelegationDate: (date: Date | undefined) => void;
+    value: DelegationExpirySelection;
+    onChange: (value: DelegationExpirySelection) => void;
   }>
 ) {
+  const { value, onChange } = props;
+  const locale = useBrowserLocale();
+  const id = useId();
+  // Fixed for the life of the field so the input, preview and submitted
+  // value all use one zone and one minimum date.
+  const [{ timeZone, minDate }] = useState(() => {
+    const viewerTimeZone = getViewerTimeZone();
+    return {
+      timeZone: viewerTimeZone,
+      minDate: getMinDelegationExpiryDate(Date.now(), viewerTimeZone),
+    };
+  });
+  const zoneId = `${id}-zone`;
+  const previewId = `${id}-preview`;
+
   return (
-    <div className="tw-mt-3 tw-w-full sm:tw-max-w-xs">
+    <div className="tw-mt-3 tw-w-full">
       <DelegationFormInput
-        aria-label="Expiry Date"
-        min={new Date().toISOString().slice(0, 10)}
+        aria-label={t(locale, "delegation.expiry.inputLabel")}
+        aria-describedby={`${zoneId} ${previewId}`}
+        className="[color-scheme:dark] sm:tw-max-w-xs"
+        min={minDate}
         type="date"
-        placeholder="Expiry Date"
+        value={value.date}
         onChange={(e) => {
-          const value = e.target.value;
-          if (value) {
-            props.setDelegationDate(new Date(value));
-          } else {
-            props.setDelegationDate(undefined);
-          }
+          const date = e.target.value;
+          onChange({
+            date,
+            expiresAt: getZonedDateEndEpochSeconds(date, timeZone),
+          });
         }}
       />
+      <p
+        id={zoneId}
+        className="tw-mb-0 tw-mt-2 tw-break-words tw-text-sm tw-leading-5 tw-text-iron-400"
+      >
+        {t(locale, "delegation.expiry.timeZone", { zone: timeZone })}
+      </p>
+      <p
+        id={previewId}
+        aria-live="polite"
+        className="tw-mb-0 tw-mt-1 tw-break-words tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100"
+      >
+        {value.expiresAt === null
+          ? t(locale, "delegation.expiry.previewEmpty")
+          : formatDelegationExpiryPreview(locale, value.expiresAt, timeZone)}
+      </p>
     </div>
   );
 }
@@ -591,15 +640,19 @@ function DelegationCloseButton(
   props: Readonly<{ title: string; onHide: () => void }>
 ) {
   return (
-    <TooltipIconButton
-      aria-label={`Cancel ${props.title}`}
-      buttonShapeClassName="tw-rounded-lg"
-      buttonSizeClassName="tw-size-10"
-      className="tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.05] hover:tw-text-white"
-      icon={faTimesCircle}
-      iconClassName="tw-size-5 tw-text-current"
-      onClick={props.onHide}
-      tooltipText={`Cancel ${props.title}`}
-    />
+    <CustomTooltip content={`Cancel ${props.title}`}>
+      <button
+        type="button"
+        aria-label={`Cancel ${props.title}`}
+        className="tw-flex tw-size-10 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.05] hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+        onClick={props.onHide}
+      >
+        <FontAwesomeIcon
+          icon={faTimesCircle}
+          className="tw-size-5 tw-text-current"
+          aria-hidden="true"
+        />
+      </button>
+    </CustomTooltip>
   );
 }

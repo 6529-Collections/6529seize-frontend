@@ -70,6 +70,7 @@ const READONLY_SPECS = {
   collections: ["tests/collections/nextgen-collections-readonly.spec.ts"],
   publicGroupsTools: [
     "tests/public-groups-tools/public-groups-tools-readonly.spec.ts",
+    "tests/public-groups-tools/world-time-zones-readonly.spec.ts",
   ],
   adminGuards: ["tests/admin/admin-destructive-guards-readonly.spec.ts"],
   publicContent: ["tests/content/public-content-readonly.spec.ts"],
@@ -417,13 +418,17 @@ const PACKS = [
     "test:e2e:edit-drop-sandbox",
     "Drop edit sandbox against the local mock API.",
     ["tests/social/wave-edit-drop-sandbox.spec.ts"],
-    COMPOSER_SANDBOX_ENV
+    COMPOSER_SANDBOX_ENV,
+    [DESKTOP, MOBILE]
   ),
   {
     ...sandboxPack(
       "test:e2e:native-competition-sandbox",
       "Native competition context, parallel budgets and navigation against the local mock API.",
-      ["tests/social/native-competition-sandbox.spec.ts"],
+      [
+        "tests/social/native-competition-sandbox.spec.ts",
+        "tests/social/wave-notification-settings-sandbox.spec.ts",
+      ],
       {
         ...AUTH_SANDBOX_ENV,
         NEXT_PUBLIC_FEATURE_MULTI_COMPETITION: "true",

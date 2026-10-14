@@ -140,7 +140,7 @@ const CreateDropFullDesktop = forwardRef<
           }}
           type="button"
           disabled={loading}
-          className="tw-relative tw-ml-auto tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-900 hover:tw-text-iron-400 focus:tw-outline-none"
+          className="tw-relative tw-ml-auto tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-900 hover:tw-text-iron-400 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         >
           <span className="tw-sr-only tw-text-sm">Cancel</span>
           <svg

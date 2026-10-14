@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect } from "react";
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import {
   NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
@@ -16,7 +14,12 @@ import TDHCalculationDetails from "./TDHCalculationDetails";
 import TDHCurrentRules from "./TDHCurrentRules";
 import TDHExample from "./TDHExample";
 import TDHProfile from "./TDHProfile";
-import TDHSection, { TDH_FOCUS, TDH_PANEL, TDH_TEXT } from "./TDHSection";
+import {
+  TDHRelatedLinks,
+  TDHSectionNavigation,
+  useTDHSectionHashFocus,
+} from "./TDHPageNavigation";
+import TDHSection, { TDH_PANEL, TDH_TEXT } from "./TDHSection";
 
 const NAVIGATION = [
   { id: "tdh-reference", key: "reference" },
@@ -25,8 +28,10 @@ const NAVIGATION = [
   { id: "tdh-1-4", key: "rules" },
   { id: "tdh-exact", key: "details" },
 ] as const;
+const NAVIGATION_IDS = NAVIGATION.map((item) => item.id);
 const STEPS = ["days", "weight", "boost"] as const;
 const RELATED = [
+  { href: "/network/tdh/consolidation", key: "consolidation" },
   { href: "/network/health/network-tdh", key: "stats" },
   { href: "/network/levels", key: "levels" },
 ] as const;
@@ -35,23 +40,7 @@ export default function TDHMainPage() {
   const locale = useBrowserLocale();
   useSetTitle(t(locale, "network.tdh.explainer.pageTitle"));
 
-  useEffect(() => {
-    const focusAnchor = () => {
-      const id = globalThis.location.hash.slice(1);
-      if (!NAVIGATION.some((item) => item.id === id)) return;
-      globalThis.requestAnimationFrame(() => {
-        globalThis.document
-          .getElementById(id)
-          ?.scrollIntoView({ block: "start" });
-        globalThis.document
-          .getElementById(`${id}-heading`)
-          ?.focus({ preventScroll: true });
-      });
-    };
-    focusAnchor();
-    globalThis.addEventListener("hashchange", focusAnchor);
-    return () => globalThis.removeEventListener("hashchange", focusAnchor);
-  }, []);
+  useTDHSectionHashFocus(NAVIGATION_IDS);
 
   return (
     <div className={NETWORK_REFERENCE_PAGE_CLASSES}>
@@ -72,20 +61,13 @@ export default function TDHMainPage() {
           <p className={`${TDH_TEXT} tw-mt-3 tw-max-w-3xl`}>
             {t(locale, "network.tdh.explainer.eligible")}
           </p>
-          <nav
-            aria-label={t(locale, "network.tdh.explainer.nav")}
-            className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-2"
-          >
-            {NAVIGATION.map(({ id, key }) => (
-              <a
-                key={id}
-                href={`#${id}`}
-                className={`tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-px-3 tw-py-2.5 tw-text-sm tw-font-medium tw-text-iron-200 tw-no-underline hover:tw-bg-iron-800 hover:tw-text-iron-50 ${TDH_FOCUS}`}
-              >
-                {t(locale, `network.tdh.explainer.nav.${key}`)}
-              </a>
-            ))}
-          </nav>
+          <TDHSectionNavigation
+            label={t(locale, "network.tdh.explainer.nav")}
+            items={NAVIGATION.map(({ id, key }) => ({
+              id,
+              label: t(locale, `network.tdh.explainer.nav.${key}`),
+            }))}
+          />
         </header>
         <TDHSection
           id="tdh-reference"
@@ -112,22 +94,13 @@ export default function TDHMainPage() {
           id="tdh-explore"
           title={t(locale, "network.tdh.explainer.related")}
         >
-          <div className="tw-grid tw-gap-4 sm:tw-grid-cols-2">
-            {RELATED.map(({ href, key }) => (
-              <Link
-                key={href}
-                href={href}
-                className={`${TDH_PANEL} tw-block tw-p-5 tw-no-underline hover:tw-border-iron-600 ${TDH_FOCUS}`}
-              >
-                <span className="tw-block tw-text-base tw-font-medium tw-text-iron-100">
-                  {t(locale, `network.tdh.related.${key}.title`)}
-                </span>
-                <span className="tw-mt-2 tw-block tw-text-sm tw-leading-6 tw-text-iron-400">
-                  {t(locale, `network.tdh.related.${key}.description`)}
-                </span>
-              </Link>
-            ))}
-          </div>
+          <TDHRelatedLinks
+            links={RELATED.map(({ href, key }) => ({
+              href,
+              title: t(locale, `network.tdh.related.${key}.title`),
+              description: t(locale, `network.tdh.related.${key}.description`),
+            }))}
+          />
         </TDHSection>
       </article>
     </div>

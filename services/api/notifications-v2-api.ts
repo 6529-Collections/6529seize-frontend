@@ -571,6 +571,7 @@ export const fetchNotificationsV2 = async ({
     signal,
     headers,
     cache: "no-store",
+    errorMode: "structured",
   });
 
   return mapNotificationsV2Response(response);

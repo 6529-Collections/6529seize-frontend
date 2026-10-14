@@ -623,7 +623,9 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       "/discover?view=active-votes"
     );
     await allVotes.click();
-    await expect(page).toHaveURL(/\/discover\?view=active-votes$/);
+    await expect(page).toHaveURL(/\/discover\?view=active-votes$/, {
+      timeout: NAVIGATION_TIMEOUT_MS,
+    });
     await expect(
       page.getByRole("heading", { level: 1, name: /^Active Votes/ })
     ).toBeVisible();
@@ -643,8 +645,41 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
         name: "Active discussions",
         exact: true,
       })
-    ).toBeVisible();
+    ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
     await expectNoHorizontalOverflow(page);
+  });
+
+  test("delegation page search discovers the Safe Collecting family without legacy titles", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/");
+    const { searchInput } = await openHeaderSearch(page);
+    await searchInput.fill("delegation");
+    await page.getByRole("tab", { name: /^Pages/ }).click();
+    for (const [title, path] of [
+      ["Safe Collecting", "/safe-collecting"],
+      ["TAP Guide", "/safe-collecting/tap-guide"],
+      ["FAQ", "/safe-collecting/faq"],
+      ["Consolidation Use Cases", "/safe-collecting/consolidation-use-cases"],
+      ["Wallet Checker", "/safe-collecting/wallet-checker"],
+    ] as const) {
+      // Options that are themselves links to this path.
+      const result = page
+        .getByRole("option")
+        .locator(`xpath=self::a[@href="${path}"]`);
+      await expect(result).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+      await expect(result).toContainText(title);
+    }
+    await expect(
+      page
+        .getByRole("option")
+        .locator('xpath=self::a[starts-with(@href, "/delegation/")]')
+    ).toHaveCount(0);
+    await expect(
+      page
+        .getByRole("option")
+        .locator('xpath=self::a[@href="/about/nft-delegation"]')
+    ).toHaveCount(0);
   });
 
   test("global header search preserves keyboard flow and page navigation", async ({

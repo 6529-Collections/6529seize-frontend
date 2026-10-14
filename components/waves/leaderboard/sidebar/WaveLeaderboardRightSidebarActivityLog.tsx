@@ -9,7 +9,10 @@ import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { SystemAdjustmentPill } from "@/components/common/SystemAdjustmentPill";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
-import { ArrowTurnDownRightIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowRightIcon,
+  ArrowTurnDownRightIcon,
+} from "@heroicons/react/24/outline";
 import {
   getWaveRightPanelProfileIdentifier,
   waveRightPanelText,
@@ -81,94 +84,96 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
   );
 
   return (
-    <div className="tw-relative tw-min-w-0">
-      <div className="tw-min-w-0 tw-space-y-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-1 tw-py-[13px]">
-        <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-[13px]">
-          <Link
-            href={`/${voterProfile}`}
-            className="tw-group tw-flex tw-min-h-6 tw-min-w-0 tw-items-center tw-gap-2 tw-no-underline tw-transition-opacity tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-opacity-80"
-            title={waveRightPanelText(
-              "waves.sidebar.rightPanel.activity.voterTitle",
-              { profile: voterProfile }
-            )}
-          >
-            {log.invoker.pfp ? (
-              <Image
-                src={resolveIpfsUrlSync(log.invoker.pfp)}
-                alt=""
-                width={20}
-                height={20}
-                className="tw-size-5 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-white/10"
-              />
-            ) : (
-              <div className="tw-size-5 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-white/10" />
-            )}
-            <span className="tw-min-w-0">
-              <UserProfileTooltipWrapper user={voterProfile}>
-                <span className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200">
-                  {voterProfile}
-                </span>
-              </UserProfileTooltipWrapper>
+    <div className="tw-grid tw-min-w-0 tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-3 tw-gap-y-1 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-900 tw-py-3 sm:tw-grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1fr)_auto] sm:tw-gap-x-5">
+      <Link
+        href={`/${voterProfile}`}
+        className="tw-group tw-col-start-1 tw-row-start-1 tw-flex tw-min-h-8 tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-sm tw-no-underline tw-transition-opacity tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-opacity-80"
+        title={waveRightPanelText(
+          "waves.sidebar.rightPanel.activity.voterTitle",
+          { profile: voterProfile }
+        )}
+      >
+        {log.invoker.pfp ? (
+          <Image
+            src={resolveIpfsUrlSync(log.invoker.pfp)}
+            alt=""
+            width={24}
+            height={24}
+            className="tw-size-6 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-object-cover tw-ring-1 tw-ring-white/10"
+          />
+        ) : (
+          <div className="tw-size-6 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-white/10" />
+        )}
+        <span className="tw-min-w-0">
+          <UserProfileTooltipWrapper user={voterProfile}>
+            <span className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
+              {voterProfile}
             </span>
-          </Link>
+          </UserProfileTooltipWrapper>
+        </span>
+      </Link>
 
-          <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
-            <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
-              {getTimeAgoShort(new Date(log.created_at).getTime())}
+      <div className="tw-col-start-2 tw-row-start-1 tw-flex tw-items-center tw-justify-end tw-gap-1 sm:tw-col-start-4">
+        <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-tabular-nums tw-text-iron-400">
+          {getTimeAgoShort(new Date(log.created_at).getTime())}
+        </span>
+        {onDropClick && (
+          <WaveLeaderboardRightSidebarActivityLogDrop
+            onDropClick={onDropClick}
+          />
+        )}
+      </div>
+
+      <div className="tw-col-span-2 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-y-2 tw-pl-8 sm:tw-contents">
+        <div className="tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 sm:tw-col-start-2 sm:tw-row-start-1">
+          {oldVote === 0 ? (
+            <span className="tw-text-xs tw-text-iron-400 sm:tw-text-sm">
+              {waveRightPanelText("waves.sidebar.rightPanel.activity.voted")}
             </span>
-            {onDropClick && (
-              <WaveLeaderboardRightSidebarActivityLogDrop
-                onDropClick={onDropClick}
-              />
-            )}
-          </div>
+          ) : (
+            <span className="tw-break-all tw-text-xs tw-tabular-nums tw-text-iron-400 sm:tw-text-sm">
+              {formatNumberWithCommas(oldVote)} →
+            </span>
+          )}
+          <span
+            className={`tw-max-w-full tw-break-words tw-rounded-md tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-tabular-nums sm:tw-text-sm ${
+              newVote > 0
+                ? "tw-bg-green/10 tw-text-green"
+                : "tw-bg-red/10 tw-text-red"
+            }`}
+          >
+            {formatNumberWithCommas(newVote)} {WAVE_VOTING_LABELS[creditType]}
+          </span>
+          {log.contents["reason"] === "CREDIT_OVERSPENT" && (
+            <SystemAdjustmentPill />
+          )}
         </div>
 
-        <div className="tw-min-w-0 tw-space-y-2 tw-pl-7">
-          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-[5px]">
-            {oldVote === 0 ? (
-              <span className="tw-text-sm tw-text-iron-400">
-                {waveRightPanelText("waves.sidebar.rightPanel.activity.voted")}
-              </span>
-            ) : (
-              <span className="tw-whitespace-nowrap tw-font-mono tw-text-sm tw-tabular-nums tw-text-iron-400">
-                {formatNumberWithCommas(oldVote)} →
-              </span>
-            )}
-            <span
-              className={`tw-whitespace-nowrap tw-font-mono tw-text-sm tw-font-semibold tw-tabular-nums ${
-                newVote > 0 ? "tw-text-green" : "tw-text-red"
-              }`}
+        <div className="tw-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2 sm:tw-col-start-3 sm:tw-row-start-1">
+          <ArrowTurnDownRightIcon
+            aria-hidden="true"
+            className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-500 sm:tw-hidden"
+          />
+          <ArrowRightIcon
+            aria-hidden="true"
+            className="tw-hidden tw-size-3.5 tw-flex-shrink-0 tw-text-iron-500 sm:tw-block"
+          />
+          {dropCreatorProfile ? (
+            <Link
+              href={`/${dropCreatorProfile}`}
+              className="tw-group tw-flex tw-min-h-6 tw-min-w-0 tw-items-center tw-gap-2 tw-no-underline tw-transition-opacity tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-opacity-80"
+              title={dropCreatorTitle}
             >
-              {formatNumberWithCommas(newVote)} {WAVE_VOTING_LABELS[creditType]}
-            </span>
-            {log.contents["reason"] === "CREDIT_OVERSPENT" && (
-              <SystemAdjustmentPill />
-            )}
-          </div>
-
-          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
-            <ArrowTurnDownRightIcon
-              aria-hidden="true"
-              className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-500"
-            />
-            {dropCreatorProfile ? (
-              <Link
-                href={`/${dropCreatorProfile}`}
-                className="tw-group tw-flex tw-min-h-6 tw-min-w-0 tw-items-center tw-gap-2 tw-no-underline tw-transition-opacity tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-opacity-80"
-                title={dropCreatorTitle}
-              >
-                {dropCreatorContent}
-              </Link>
-            ) : (
-              <div
-                className="tw-flex tw-min-h-6 tw-min-w-0 tw-items-center tw-gap-2"
-                title={dropCreatorTitle}
-              >
-                {dropCreatorContent}
-              </div>
-            )}
-          </div>
+              {dropCreatorContent}
+            </Link>
+          ) : (
+            <div
+              className="tw-flex tw-min-h-6 tw-min-w-0 tw-items-center tw-gap-2"
+              title={dropCreatorTitle}
+            >
+              {dropCreatorContent}
+            </div>
+          )}
         </div>
       </div>
     </div>
