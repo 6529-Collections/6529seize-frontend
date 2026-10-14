@@ -1311,14 +1311,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     ).toBeVisible();
     await aboutPanel.getByRole("tab", { name: "About", exact: true }).click();
     await expect(page.getByText("Created by", { exact: true })).toHaveCount(0);
-    const creationDate = page
-      .getByRole("complementary", { name: "Wave details" })
-      .locator("time[datetime]")
-      .or(
-        page
-          .getByRole("dialog", { name: "Wave details" })
-          .locator("time[datetime]")
-      );
+    // Pinned drops can render their own dates inside link previews. Select the
+    // wave's creation date explicitly instead of every date in the panel.
+    const creationDate = aboutPanel.getByTestId("wave-creation-date");
     await expect(creationDate).toBeVisible();
     await expect(creationDate).toHaveAttribute(
       "datetime",
@@ -1415,6 +1410,45 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     ).toHaveCount(0);
   });
 
+  test("waits for identity guidance hydration before accepting activation", async ({
+    page,
+  }) => {
+    test.skip(
+      (page.viewportSize()?.width ?? 1280) < 1024,
+      "The mobile statements panel requires hydrated tab navigation."
+    );
+    let releaseScripts: () => void = () => undefined;
+    const scriptsReady = new Promise<void>((resolve) => {
+      releaseScripts = resolve;
+    });
+    await page.route("**/_next/static/chunks/**", async (route) => {
+      if (new URL(route.request().url()).pathname.endsWith(".js")) {
+        await scriptsReady;
+      }
+      await route.continue();
+    });
+    const guidanceButton = page.getByRole("button", {
+      name: "About identity statements",
+      exact: true,
+    });
+    try {
+      // Commit waits for the document response, allowing inspection of server
+      // markup while client scripts remain held at the browser boundary.
+      await page.goto(`/${PROFILE_HANDLE}`, { waitUntil: "commit" });
+      await expect(guidanceButton).toBeVisible();
+      await expect(guidanceButton).toBeDisabled();
+    } finally {
+      releaseScripts();
+    }
+    await expect(guidanceButton).toBeEnabled();
+    await guidanceButton.click();
+    await expect(guidanceButton).toHaveAttribute("aria-expanded", "true");
+    await expect(page.getByRole("tooltip")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(guidanceButton).toHaveAttribute("aria-expanded", "false");
+    await expect(page.getByRole("tooltip")).toHaveCount(0);
+  });
+
   test("renders the stable public profile shell read-only", async ({
     page,
   }) => {
@@ -1455,9 +1489,13 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(
       page.getByText("Consolidated Addresses", { exact: true })
     ).toHaveCount(0);
-    await page
-      .getByRole("button", { name: "About identity statements", exact: true })
-      .click();
+    const guidanceButton = page.getByRole("button", {
+      name: "About identity statements",
+      exact: true,
+    });
+    await expect(guidanceButton).toBeEnabled();
+    await guidanceButton.scrollIntoViewIfNeeded();
+    await guidanceButton.click();
     await expect(
       page.getByRole("button", {
         name: "About identity statements",

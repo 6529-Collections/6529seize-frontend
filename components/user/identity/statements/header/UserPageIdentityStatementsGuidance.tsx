@@ -7,6 +7,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -18,9 +19,18 @@ import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
+const subscribeToHydration = () => () => undefined;
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
+
 /** Keeps guidance interactions and portal visibility under one React state. */
 export default function UserPageIdentityStatementsGuidance() {
   const locale = useBrowserLocale();
+  const hydrated = useSyncExternalStore(
+    subscribeToHydration,
+    getClientSnapshot,
+    getServerSnapshot
+  );
   const tooltipId = useId();
   const [isOpen, setIsOpen] = useState(false);
   const [layout, setLayout] = useState<ReturnType<
@@ -137,6 +147,7 @@ export default function UserPageIdentityStatementsGuidance() {
       <button
         ref={buttonRef}
         type="button"
+        disabled={!hydrated}
         aria-label={t(locale, "user.profile.identity.statements.help")}
         aria-expanded={isOpen}
         aria-describedby={isOpen ? tooltipId : undefined}

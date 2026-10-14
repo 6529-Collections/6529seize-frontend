@@ -202,6 +202,7 @@ export default function WaveHeader({
             ·
           </span>
           <time
+            data-testid="wave-creation-date"
             dateTime={createdAt.toISOString()}
             className="tw-shrink-0 tw-text-iron-500"
           >
