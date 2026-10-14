@@ -90,11 +90,20 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     page,
   }) => {
     await gotoReady(page, "/about");
-    const main = page.locator("main").first();
+    const main = page.getByRole("main").first();
     const wallets = main.getByRole("region", {
       name: "Safe Collecting",
       exact: true,
     });
+    // Links by exact href, scoped under accessible queries.
+    const mainLinkTo = (href: string) =>
+      page.getByRole("main").first().locator(`a[href="${href}"]`);
+    const walletLinkTo = (href: string) =>
+      page
+        .getByRole("main")
+        .first()
+        .getByRole("region", { name: "Safe Collecting", exact: true })
+        .locator(`a[href="${href}"]`);
     const collections = main.getByRole("region", {
       name: "Collections & Minting",
       exact: true,
@@ -108,10 +117,8 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       "href",
       "/about/gdrc1"
     );
-    await expect(main.locator('a[href="/about/nft-delegation"]')).toHaveCount(
-      0
-    );
-    await expect(wallets.locator('a[href="/about/gdrc1"]')).toHaveCount(0);
+    await expect(mainLinkTo("/about/nft-delegation")).toHaveCount(0);
+    await expect(walletLinkTo("/about/gdrc1")).toHaveCount(0);
     for (const path of [
       "/safe-collecting",
       "/safe-collecting/tap-guide",
@@ -119,7 +126,7 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       "/safe-collecting/consolidation-use-cases",
       "/safe-collecting/wallet-checker",
     ]) {
-      await expect(wallets.locator(`a[href="${path}"]`)).toHaveCount(1);
+      await expect(walletLinkTo(path)).toHaveCount(1);
     }
     await wallets
       .getByRole("link", { name: "Open page: FAQ", exact: true })

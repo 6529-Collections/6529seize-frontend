@@ -96,13 +96,20 @@ test("does not simulate groups before backend limits are available", () => {
   );
 });
 
-test("hides the walkthrough when the limits do not match its four-wallet scenario", () => {
-  const { container } = render(
+test("explains the hidden walkthrough when the limits do not match its four-wallet scenario", () => {
+  render(
     <ConsolidationOrderSimulator
       locale="en-US"
       activationDate="12 October 2026, 00:00 UTC"
       limits={{ maxWallets: 5, ungatedMaxWallets: 4 }}
     />
   );
-  expect(container).toBeEmptyDOMElement();
+  expect(
+    screen.queryByRole("button", { name: "D signs last" })
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByText(
+      /This walkthrough shows a fourth wallet joining a group of three/
+    )
+  ).toBeInTheDocument();
 });

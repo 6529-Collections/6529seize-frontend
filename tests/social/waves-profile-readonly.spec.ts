@@ -1231,6 +1231,21 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(
       page.getByRole("link", { name: "Add another wallet" })
     ).toHaveCount(0);
+    const walletCount = page.getByText(/^\d of 4 wallets$/).first();
+    await expect(walletCount).toBeVisible();
+    await expect
+      .poll(() =>
+        walletCount.evaluate((counter) => {
+          const row = counter.parentElement;
+          if (!row) return Number.POSITIVE_INFINITY;
+          return Math.abs(
+            row.getBoundingClientRect().right -
+              counter.getBoundingClientRect().right
+          );
+        })
+      )
+      .toBeLessThanOrEqual(2);
+    await expectNoHorizontalOverflow(page);
   });
 
   for (const tab of PROFILE_TAB_PATHS) {

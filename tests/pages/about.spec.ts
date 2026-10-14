@@ -23,7 +23,7 @@ test.describe("About Pages @smoke @medium @large", () => {
     ).toBeVisible();
     await expect(
       page
-        .locator("main")
+        .getByRole("main")
         .getByRole("heading", { level: 2, name: "Safe Collecting" })
     ).toBeVisible();
     await expect(
