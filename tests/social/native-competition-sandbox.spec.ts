@@ -628,29 +628,47 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         },
         { id: "layout-negative", handle: "downvoter" },
       ];
+      let releaseVoters!: () => void;
+      let releaseProfile!: () => void;
+      let releaseActivity!: () => void;
+      const votersGate = new Promise<void>((resolve) => {
+        releaseVoters = resolve;
+      });
+      const profileGate = new Promise<void>((resolve) => {
+        releaseProfile = resolve;
+      });
+      const activityGate = new Promise<void>((resolve) => {
+        releaseActivity = resolve;
+      });
       for (const profile of profiles) {
-        await page.route(`**/identities/${profile.id}`, (route) =>
-          route.fulfill({
+        await page.route(`**/identities/${profile.id}`, async (route) => {
+          if (profile.id === profiles[0]!.id) await profileGate;
+          await route.fulfill({
             json: { ...profile, pfp: null, primary_wallet: null },
-          })
-        );
+          });
+        });
       }
-      await page.route("**/v3/waves/*/competitions/alpha/voters?**", (route) =>
-        route.fulfill({
-          json: pageResult([
-            {
-              profile_id: profiles[0]!.id,
-              votes: 123456789,
-              credit_spent: 123456789,
-            },
-            { profile_id: profiles[1]!.id, votes: -1000, credit_spent: 1000 },
-          ]),
-        })
+      await page.route(
+        "**/v3/waves/*/competitions/alpha/voters?**",
+        async (route) => {
+          await votersGate;
+          await route.fulfill({
+            json: pageResult([
+              {
+                profile_id: profiles[0]!.id,
+                votes: 123456789,
+                credit_spent: 123456789,
+              },
+              { profile_id: profiles[1]!.id, votes: -1000, credit_spent: 1000 },
+            ]),
+          });
+        }
       );
       await page.route(
         "**/v3/waves/*/competitions/alpha/activity?**",
-        (route) =>
-          route.fulfill({
+        async (route) => {
+          await activityGate;
+          await route.fulfill({
             json: [0, 5000, -1000].map((value, index) => ({
               id: `layout-log-${index}`,
               action: "DROP_VOTE_EDIT",
@@ -669,16 +687,48 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
                 reason: index === 2 ? "CREDIT_OVERSPENT" : null,
               },
             })),
-          })
+          });
+        }
       );
-      await page.goto(`${ROOT}/alpha?tab=votes&voteTab=all`);
       const voters = page.getByRole("tabpanel", {
         name: "All votes",
         exact: true,
       });
+      let pendingVoterHeight = 0;
+      try {
+        await page.goto(`${ROOT}/alpha?tab=votes&voteTab=all`);
+        await expect(voters.getByRole("status")).toHaveText(
+          "Loading competition…"
+        );
+        const skeletons = voters.getByTestId("competition-voter-skeleton");
+        await expect(skeletons).toHaveCount(6);
+        await page.emulateMedia({ reducedMotion: "reduce" });
+        await expect(skeletons.first()).toHaveCSS("animation-name", "none");
+        await expectNoHorizontalOverflow(page);
+        await page.screenshot({
+          path: testInfo.outputPath("all-votes-loading.png"),
+        });
+        releaseVoters();
+        await expect(
+          voters.getByRole("link", { name: profiles[1]!.handle, exact: true })
+        ).toBeVisible();
+        await expect(skeletons).toHaveCount(1);
+        pendingVoterHeight = (await skeletons.first().boundingBox())!.height;
+        await expect(voters.getByRole("status")).toHaveCount(0);
+      } finally {
+        releaseVoters();
+        releaseProfile();
+      }
       await expect(
         voters.getByRole("link", { name: profiles[0]!.handle, exact: true })
       ).toBeVisible();
+      const loadedVoter = voters.getByRole("link", {
+        name: profiles[0]!.handle,
+        exact: true,
+      });
+      expect((await loadedVoter.locator("../..").boundingBox())!.height).toBe(
+        pendingVoterHeight
+      );
       await expect(
         voters.getByText("+123,456,789", { exact: true })
       ).toBeVisible();
@@ -702,11 +752,27 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         animations: "disabled",
       });
 
-      await page.getByRole("tab", { name: "Activity", exact: true }).click();
       const activity = page.getByRole("tabpanel", {
         name: "Activity",
         exact: true,
       });
+      let pendingActivityHeight = 0;
+      try {
+        await page.getByRole("tab", { name: "Activity", exact: true }).click();
+        await expect(activity.getByRole("status")).toHaveText(
+          "Loading competition…"
+        );
+        const skeletons = activity.getByTestId("competition-activity-skeleton");
+        await expect(skeletons).toHaveCount(6);
+        await expect(skeletons.first()).toHaveCSS("animation-name", "none");
+        pendingActivityHeight = (await skeletons.first().boundingBox())!.height;
+        await expectNoHorizontalOverflow(page);
+        await page.screenshot({
+          path: testInfo.outputPath("activity-loading.png"),
+        });
+      } finally {
+        releaseActivity();
+      }
       const voter = activity
         .getByRole("link", { name: profiles[0]!.handle, exact: true })
         .first();
@@ -717,6 +783,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         .getByRole("button", { name: "View drop in chat", exact: true })
         .first();
       await expect(voter).toBeVisible();
+      expect((await voter.locator("..").boundingBox())!.height).toBe(
+        pendingActivityHeight
+      );
+      await expect(activity.getByRole("status")).toHaveCount(0);
       await expect(creator).toBeVisible();
       await expect(
         activity.getByText("System Adjustment", { exact: true })

@@ -13,6 +13,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { CompetitionState, COMPETITION_BUTTON } from "./CompetitionState";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { CompetitionVotesSkeleton } from "./CompetitionVotesSkeleton";
 
 export default function CompetitionVoteActivity() {
   const { competition } = useCompetition();
@@ -41,7 +42,7 @@ export default function CompetitionVoteActivity() {
         : undefined,
     refetchInterval: 30_000,
   });
-  if (query.isPending) return <CompetitionState />;
+  if (query.isPending) return <CompetitionVotesSkeleton variant="activity" />;
   if (query.isError)
     return (
       <CompetitionState

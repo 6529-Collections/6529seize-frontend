@@ -22,6 +22,9 @@ wide views. On narrow views, the vote change and creator use separate lines
 below the voter, with a bent arrow beside the creator. The time and
 **View drop in chat** button stay on the first line. Both lists
 use subtle row dividers and keep **Load more** below the rows.
+While loading, both lists show placeholders that match their rows. All votes
+also keeps a row placeholder while that voter's profile loads. The placeholders
+stay still when reduced motion is enabled.
 
 ## Location in the Site
 
