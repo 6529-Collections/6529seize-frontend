@@ -58,7 +58,10 @@ function getConfiguredIpfsGatewaySource(
 }
 
 // The DSN key, hostname and project id are validated so a malformed DSN can
-// never inject extra directives or headers into the generated values.
+// never inject extra directives or headers into the generated values. Keep the
+// accepted ingest hosts in sync with isSentryIngestPost in
+// tests/support/readonlyMutationGuard.ts, which lets read-only E2E runs ignore
+// the browser's CSP report POSTs.
 const SENTRY_PUBLIC_KEY_PATTERN = /^[A-Za-z0-9]{16,64}$/;
 const SENTRY_HOSTNAME_PATTERN = /^[a-z0-9.-]+$/i;
 const SENTRY_PROJECT_PATH_PATTERN = /^\/(\d+)$/;
@@ -77,6 +80,7 @@ function getSentrySecurityReportEndpoint(dsn: string | undefined): string {
     const projectId = SENTRY_PROJECT_PATH_PATTERN.exec(parsedUrl.pathname)?.[1];
     if (
       parsedUrl.protocol !== "https:" ||
+      parsedUrl.port !== "" ||
       !projectId ||
       !SENTRY_PUBLIC_KEY_PATTERN.test(parsedUrl.username) ||
       !SENTRY_HOSTNAME_PATTERN.test(parsedUrl.hostname)
@@ -84,7 +88,7 @@ function getSentrySecurityReportEndpoint(dsn: string | undefined): string {
       return "";
     }
 
-    return `https://${parsedUrl.host}/api/${projectId}/security/?sentry_key=${parsedUrl.username}`;
+    return `https://${parsedUrl.hostname}/api/${projectId}/security/?sentry_key=${parsedUrl.username}`;
   } catch {
     return "";
   }

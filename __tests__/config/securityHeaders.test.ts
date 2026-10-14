@@ -219,6 +219,7 @@ describe("createSecurityHeaders CSP", () => {
     "https://short@o123.ingest.us.sentry.io/456",
     `https://${SENTRY_PUBLIC_KEY};x@o123.ingest.us.sentry.io/456`,
     `https://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io;script-src/456`,
+    `https://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io:8443/456`,
   ])(
     "ignores a Sentry DSN that cannot form a safe report endpoint: %s",
     (dsn) => {
