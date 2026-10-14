@@ -1,7 +1,8 @@
 import UserPageIdentityStatements from "@/components/user/identity/statements/UserPageIdentityStatements";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { useQuery } from "@tanstack/react-query";
-import { act, render } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { renderToString } from "react-dom/server";
 import { hydrateRoot } from "react-dom/client";
 import { useParams } from "next/navigation";
@@ -16,7 +17,10 @@ jest.mock(
 );
 jest.mock(
   "@/components/user/identity/statements/header/UserPageIdentityAddStatementsHeader",
-  () => () => <div data-testid="header" />
+  () =>
+    ({ headerAction }: { headerAction?: ReactNode }) => (
+      <div data-testid="header">{headerAction}</div>
+    )
 );
 jest.mock(
   "@/components/user/identity/statements/social-media-accounts/UserPageIdentityStatementsSocialMediaAccounts",
@@ -53,6 +57,32 @@ jest.mock("@tanstack/react-query");
 const useQueryMock = useQuery as jest.Mock;
 
 describe("UserPageIdentityStatements", () => {
+  it("places addresses before the statement heading and statement groups", () => {
+    render(<UserPageIdentityStatements profile={profile} />);
+    const addresses = screen.getByTestId("consolidated");
+    const header = screen.getByTestId("header");
+    expect(
+      addresses.compareDocumentPosition(header) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      header.compareDocumentPosition(screen.getByTestId("social")) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
+  it("keeps the mobile Add action with the statement heading", () => {
+    render(
+      <UserPageIdentityStatements
+        profile={profile}
+        headerAction={<button>Add statement</button>}
+      />
+    );
+    const action = screen.getByRole("button", { name: "Add statement" });
+    expect(screen.getByTestId("header")).toContainElement(action);
+    expect(screen.getByTestId("consolidated")).not.toContainElement(action);
+  });
+
   it("hydrates the server loading snapshot even if another section already populated the cache", async () => {
     useQueryMock.mockReturnValue({
       isLoading: true,

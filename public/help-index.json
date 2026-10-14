@@ -1218,7 +1218,7 @@
         "The About index page lives at /about.",
         "It groups About pages into About 6529, Collections & Minting, Network & Reputation, Delegation & Wallets, Data & Developer Tools, and Legal link cards with right-arrow affordances.",
         "Collections & Minting includes About The Memes, Subscription Minting, Meme Lab, 6529 Gradient, and Minting links.",
-        "Network & Reputation includes TDH, xTDH Overview, xTDH Allocations Dashboard, Network Health, Network Definitions, Levels, Network TDH Stats, Network Nerd, Prenodes, and TDH Historic Boosts links.",
+        "Network & Reputation includes TDH, xTDH Overview, xTDH Allocations Dashboard, Network Health, Network Definitions, Levels, Network TDH Stats, Network Nerd, and TDH Historic Boosts links.",
         "Data & Developer Tools includes API, EMMA, Block Finder, Open Data, ReMemes Data, Team Data, royalties, network metrics, and subscription-gated data links.",
         "Use the About index when users want to browse all About pages or find the right policy, collection, minting, delegation, wallet, network, open-data, or technical page."
       ],
@@ -1237,7 +1237,6 @@
         "/network/levels",
         "/network/health/network-tdh",
         "/network/nerd",
-        "/network/prenodes",
         "/network/tdh/historic-boosts"
       ],
       "tags": ["about", "navigation", "getting-started"],
@@ -4337,7 +4336,7 @@
       "facts": [
         "The Register Consolidation form is the Delegation Center action for connecting wallets you control for supported 6529 metrics.",
         "The form requires a connected wallet, Collection, and Consolidating With address.",
-        "Profile owners can open this form from Add another wallet beside Wallet Checker in ID Statements / Consolidated Addresses; the entry is hidden while a proxy profile is active.",
+        "Profile owners can open this form from Add another wallet beside Wallet Checker in the profile’s Addresses section; the entry is hidden while a proxy profile is active.",
         "The normal form explains registering from the connected wallet, then connecting the other wallet and registering the return link. Each wallet needs ETH for gas; the link is public and existing profile data may be combined. NFTs stay in their wallets.",
         "For TDH consolidation, use Any Collection or The Memes."
       ],
@@ -5933,14 +5932,15 @@
       ],
       "facts": [
         "Identity statements are managed from profile identity surfaces on /{user}.",
-        "On mobile, select the ID Statements score card to open a compact statements card without repeating the profile heading or description; eligible owners see Add at the right of the Consolidated Addresses header.",
-        "Statement sections include Consolidated Addresses, Social Media Accounts, NFT Accounts, Contact, and Social Media Verification Posts.",
+        "On mobile, select the ID Statements score card to open the addresses and statements card. The personalized Addresses heading and wallet controls come first; below a divider, the ID Statements heading has an information button and compact Add action for eligible owners.",
+        "The profile’s Addresses section precedes ID Statements. Statement groups include Social Media Accounts, NFT Accounts, Contact, and Social Media Verification Posts; there is no separate Consolidated Addresses label.",
+        "The information tooltip beside ID Statements explains that statements are optional and permanently public, social accounts are self-declared and 6529 does not connect to them or verify account ownership or posts, and the community rates statement accuracy. Open it on hover, keyboard focus or tap; Escape or an outside click dismisses it.",
         "Eligible profile owners use Add to open a bottom sheet on mobile or a dialog on desktop, choose a statement group and platform, and can return with Back to statement types before saving.",
         "Social Media Accounts, NFT Accounts, and Contact use compact icon rows for platform selection; pointer hover and keyboard focus reveal each platform name, and the selected option has a stronger outline.",
-        "On mobile, the add-statements sheet presents four compact statement groups, keeps public-visibility notes under About identity statements, and provides header close, back, backdrop, Escape, and swipe-down dismissal paths.",
+        "On mobile, the add-statements sheet presents four compact statement groups, keeps an optional and permanently public notice visible throughout the Add flow, and provides header close, back, backdrop, Escape, and swipe-down dismissal paths.",
         "On mobile web and Capacitor, deeper add-statement forms stay above the software keyboard and keep their focused fields and Save/Cancel actions reachable by scrolling.",
         "Consolidated wallet rows expand to show the full address and ENS name when available as full-field copy controls, plus labeled mobile links to Etherscan and OpenSea.",
-        "Add another wallet appears beside Wallet Checker for the connected profile owner when no proxy profile is active and a primary or consolidated wallet address is available. It opens /delegation/register-consolidation without prefilling Collection or Consolidating With; it is separate from Add for identity statements.",
+        "Add another wallet shares an equal-width row with Wallet Checker in Addresses for the connected profile owner when no proxy profile is active and a primary or consolidated wallet address is available. It opens /delegation/register-consolidation without prefilling Collection or Consolidating With; it is separate from Add for identity statements.",
         "URL-capable statement rows open from the row and show a right-aligned external-link cue; Copy remains an independent inline action that does not open the destination, while eligible owners can also Delete.",
         "NFT Accounts includes Ninfa and Other. Other asks for a display name such as AOTM and a secure HTTPS URL, then shows the display name with the destination hostname.",
         "New NFT account links must use HTTPS, cannot contain URL credentials, reject duplicate normalized URLs, and are limited to 20 per profile; Ninfa links must use ninfa.io or a ninfa.io subdomain.",
@@ -7396,13 +7396,13 @@
     {
       "id": "network.prenodes",
       "kind": "route",
-      "title": "Prenodes status",
+      "title": "Prenodes deprecation",
       "aliases": ["prenodes", "prenode", "prenodes status", "node status"],
       "keywords": ["network", "prenodes", "status", "node"],
       "facts": [
-        "Prenodes status lives at /network/prenodes.",
-        "The page documents loading, empty, error, access, and permission behavior.",
-        "Use it when users ask where prenode status information is displayed."
+        "6529 Prenodes have been deprecated. Use the 6529 Desktop app to calculate TDH.",
+        "The existing /network/prenodes URL remains available with a deprecation notice and a link to /about/6529-apps.",
+        "Prenodes is no longer listed in About navigation. The page no longer displays or requests the registry."
       ],
       "canonical_path": "/network/prenodes",
       "related_paths": ["/network"],
