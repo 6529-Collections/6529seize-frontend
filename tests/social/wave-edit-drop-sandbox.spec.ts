@@ -256,13 +256,9 @@ async function openDropEditor(
       submittedDrop.getByText(SANDBOX_CHAT_DROP_CONTENT, { exact: true }),
       "touchCancel"
     );
-    const menu = page.getByRole("dialog", {
-      name: "Drop actions",
-      exact: true,
-    });
-    const container = menu.locator(
-      ".tw-pointer-events-none.tw-fixed.tw-inset-x-0"
-    );
+    const container = page
+      .getByRole("dialog", { name: "Drop actions", exact: true })
+      .locator(".tw-pointer-events-none.tw-fixed.tw-inset-x-0");
     await expect(container).toHaveCSS("transform", "matrix(1, 0, 0, 1, 0, 0)");
     await page.evaluate((previous) => {
       const style = document.documentElement.style;
