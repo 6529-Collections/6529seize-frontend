@@ -164,7 +164,6 @@ const getHeaderTitle = ({
   readonly pathSegments: string[];
 }): ReactNode => {
   if (pathname === "/waves/create") return "Waves";
-  if (pathname === "/messages/create") return "Messages";
   if (isWavesRoute && !waveId) return "Waves";
   if (isMessagesRoute && !waveId) return "Messages";
   if (waveId) {
@@ -480,6 +479,7 @@ const switchToNextConnectedAccount = ({
 };
 
 export default function AppHeader() {
+  const locale = useBrowserLocale();
   const [menuOpen, setMenuOpen] = useState(false);
   const myStream = useMyStreamOptional();
   const { waveDropAction } = useHeaderContext();
@@ -712,50 +712,65 @@ export default function AppHeader() {
             isInsideWave ? "tw-justify-start" : "tw-justify-center"
           )}
         >
-          <HeaderTitleContent
-            displayWave={headerWavePreview}
-            activeWave={activeWave}
-            isDm={isDm}
-            directMessageProfileHref={directMessageProfileHref}
-            previewText={previewText}
-            finalTitle={finalTitle}
-          />
+          {pathname === "/messages/create" ? (
+            <h1 className="tw-m-0 tw-text-base tw-font-semibold tw-tracking-tight">
+              {t(locale, "quickDm.createModalTitle")}
+            </h1>
+          ) : (
+            <HeaderTitleContent
+              displayWave={headerWavePreview}
+              activeWave={activeWave}
+              isDm={isDm}
+              directMessageProfileHref={directMessageProfileHref}
+              previewText={previewText}
+              finalTitle={finalTitle}
+            />
+          )}
         </div>
-        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-x-0.5">
-          {activeWave && isInsideWave && (
-            <WaveJoinCta
-              wave={activeWave}
-              variant="app-header"
-              className="tw-mr-1"
-            />
-          )}
-          <HeaderDropActionButton action={headerDropAction} />
-          {isHomeRoute && (
-            <NetworkHealthCTA
-              className={isCapacitor ? undefined : "md:tw-hidden"}
-            />
-          )}
-          <div className="tw-flex-shrink-0">
-            <HeaderActionButtons />
-          </div>
-          {showPageShareAction && (
-            <div className="tw-flex-shrink-0">
-              <HeaderPageShareButton isCapacitor={isCapacitor} />
-            </div>
-          )}
-          {!isCreateRoute && (
-            <div className="tw-flex-shrink-0">
-              <HeaderSearchButton
-                wave={
-                  isInsideWave && (isWavesRoute || isMessagesRoute)
-                    ? activeWave
-                    : null
-                }
+        {pathname === "/messages/create" ? (
+          <span aria-hidden="true" className="tw-w-10 tw-flex-shrink-0" />
+        ) : (
+          <div
+            className={clsx(
+              "tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end",
+              isMessagesRoute && !isInsideWave ? "tw-gap-x-2" : "tw-gap-x-0.5"
+            )}
+          >
+            {activeWave && isInsideWave && (
+              <WaveJoinCta
+                wave={activeWave}
+                variant="app-header"
+                className="tw-mr-1"
               />
+            )}
+            <HeaderDropActionButton action={headerDropAction} />
+            {isHomeRoute && (
+              <NetworkHealthCTA
+                className={isCapacitor ? undefined : "md:tw-hidden"}
+              />
+            )}
+            <div className="tw-flex-shrink-0">
+              <HeaderActionButtons />
             </div>
-          )}
-          <HeaderMoreMenu items={appHeaderMoreMenuItems} />
-        </div>
+            {showPageShareAction && (
+              <div className="tw-flex-shrink-0">
+                <HeaderPageShareButton isCapacitor={isCapacitor} />
+              </div>
+            )}
+            {!isCreateRoute && (
+              <div className="tw-flex-shrink-0">
+                <HeaderSearchButton
+                  wave={
+                    isInsideWave && (isWavesRoute || isMessagesRoute)
+                      ? activeWave
+                      : null
+                  }
+                />
+              </div>
+            )}
+            <HeaderMoreMenu items={appHeaderMoreMenuItems} />
+          </div>
+        )}
       </div>
       <AppSidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
     </div>
