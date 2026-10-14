@@ -41,7 +41,9 @@ Users can:
   wave/drop link, only the label is kept.
 - Markdown images, bare media URLs (6529 media CDN or image/video file links),
   and bare 6529 wave/drop links are left out of the preview text, because the
-  popover renders them as media or embedded cards. Other bare URLs stay.
+  full description renders them as media or embedded cards. Other bare URLs
+  stay. If nothing readable remains, the preview line is hidden (see
+  Availability Rules).
 - Common markdown formatting is stripped to plain text and whitespace is
   collapsed.
 
@@ -61,6 +63,9 @@ Users can:
 4. Review the full pinned description drop in the popover.
 5. Close with trigger reselect, outside click/tap, or `Escape`.
 6. Continue thread actions without route or tab changes.
+
+When no preview line is shown, select the wave name to open the wave details
+panel; its `About` tab shows the full pinned description drop.
 
 ## Edge Cases
 

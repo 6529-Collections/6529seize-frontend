@@ -128,6 +128,27 @@ describe("getWaveDescriptionPreviewText", () => {
     expect(
       previewOf("See [the banner](https://d3lqz0a4bldqgf.cloudfront.net/x.png)")
     ).toBe("See the banner");
+    expect(
+      previewOf("See [](https://d3lqz0a4bldqgf.cloudfront.net/x.png)")
+    ).toBe("See");
+  });
+
+  it("leaves no stray emphasis markers around an omitted URL", () => {
+    expect(
+      previewOf(
+        "Costs **https://d3lqz0a4bldqgf.cloudfront.net/x.png** and *https://example.com/y.gif*"
+      )
+    ).toBe("Costs and");
+  });
+
+  it("handles long punctuation runs after a URL", () => {
+    const punctuation = ".".repeat(5000);
+    expect(previewOf(`Clip https://example.com/a.mp4${punctuation}x`)).toBe(
+      `Clip https://example.com/a.mp4${punctuation}x`
+    );
+    expect(previewOf(`Clip https://example.com/a.mp4${punctuation}`)).toBe(
+      "Clip"
+    );
   });
 
   it("keeps external URLs", () => {

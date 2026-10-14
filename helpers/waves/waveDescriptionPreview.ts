@@ -10,7 +10,21 @@ const DEFAULT_MEDIA_CDN_ORIGIN = "https://d3lqz0a4bldqgf.cloudfront.net";
 const MEDIA_PATH_EXTENSION_REGEX =
   /\.(?:avif|gif|jpe?g|m4v|mov|mp4|png|svg|webm|webp)$/i;
 const BARE_URL_REGEX = /https?:\/\/[^\s<>"'`]+/gi;
-const TRAILING_URL_PUNCTUATION_REGEX = /[.,!?;:)\]]+$/;
+// Sentence punctuation and closing markdown delimiters that can follow a URL.
+const URL_TRAILING_CHARACTERS = new Set([
+  ".",
+  ",",
+  "!",
+  "?",
+  ";",
+  ":",
+  ")",
+  "]",
+  "*",
+  "_",
+  "~",
+]);
+const NON_CLOSING_DELIMITER_REGEX = /[^)\]*_~]/g;
 
 interface MarkdownLinkMatch {
   readonly isImage: boolean;
@@ -123,10 +137,18 @@ const omitBareUrls = (
   }
 
   return text.replaceAll(BARE_URL_REGEX, (match) => {
-    const trailing = TRAILING_URL_PUNCTUATION_REGEX.exec(match)?.[0] ?? "";
-    const url = match.slice(0, match.length - trailing.length);
-    // Keep closing brackets so surrounding text stays balanced.
-    return omitUrl(url) ? trailing.replaceAll(/[^)\]]/g, "") : match;
+    let urlEnd = match.length;
+    while (
+      urlEnd > 0 &&
+      URL_TRAILING_CHARACTERS.has(match.charAt(urlEnd - 1))
+    ) {
+      urlEnd -= 1;
+    }
+    const url = match.slice(0, urlEnd);
+    // Keep closing brackets and emphasis markers so their openers still pair.
+    return omitUrl(url)
+      ? match.slice(urlEnd).replaceAll(NON_CLOSING_DELIMITER_REGEX, "")
+      : match;
   });
 };
 
