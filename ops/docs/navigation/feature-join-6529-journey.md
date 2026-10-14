@@ -57,7 +57,7 @@ The compact focus area links users to:
   route when a connected profile identity is available, with
   `/open-data/meme-subscriptions` as the wallet-only or logged-out information
   fallback.
-- Delegation at `/delegation/delegation-center`.
+- Delegation at `/safe-collecting`.
 - Public Waves for asking `@help6529`.
 
 ## Notes

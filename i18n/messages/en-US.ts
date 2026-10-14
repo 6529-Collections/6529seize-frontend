@@ -35,9 +35,12 @@ import museumMessages from "@/i18n/messages/museum.en-US.json";
 import networkMetricsMessages from "@/i18n/messages/networkMetrics.en-US.json";
 import networkTdhMessages from "@/i18n/messages/networkTdh.en-US.json";
 import networkTdhExplainerMessages from "@/i18n/messages/networkTdhExplainer.en-US.json";
+import networkTdhConsolidationMessages from "@/i18n/messages/networkTdhConsolidation.en-US.json";
+import safeCollectingMessages from "@/i18n/messages/safeCollecting.en-US.json";
 import networkTdhExampleMessages from "@/i18n/messages/networkTdhExample.en-US.json";
 import networkTdhProfileMessages from "@/i18n/messages/networkTdhProfile.en-US.json";
 import networkTdhRulesMessages from "@/i18n/messages/networkTdhRules.en-US.json";
+import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
@@ -59,6 +62,7 @@ import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artw
 import { COLLECT_MESSAGES } from "@/i18n/messages/collect";
 import { COLLECT_TDH_TARGET_MESSAGES } from "@/i18n/messages/collect-tdh-target";
 import { DROP_FORGE_ADMIN_MESSAGES } from "@/i18n/messages/drop-forge-admins";
+import { DELEGATION_CONSOLIDATION_BUILDER_MESSAGES } from "@/i18n/messages/delegation-consolidation-builder";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -1124,7 +1128,10 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     addWallet: "Add another wallet",
     addWalletDescription:
       "Link another wallet you control. Your NFTs stay in their wallets.",
-    delegationCenter: "Delegation Center",
+    walletCount: "{count} of {limit} wallets",
+    walletLimitReached:
+      "This consolidation has the maximum of {limit} wallets.",
+    delegationCenter: "Safe Collecting",
     primary: "Primary",
     setPrimary: "Set primary",
     settingPrimary: "Setting primary",
@@ -2724,7 +2731,7 @@ const COLLECTION_DELEGATION_MESSAGES = objectMessages("delegation.collection", {
   "scope.memeLab": "Records here apply only to Meme Lab.",
   "scope.gradient": "Records here apply only to 6529 Gradient.",
   "scope.selected": "Records here apply to the selected collection scope.",
-  "navigation.back": "Back to Delegation Center",
+  "navigation.back": "Back to Safe Collecting",
   "connect.title": "Connect Wallet to Manage {collection}",
   "connect.description":
     "Connect the wallet whose outgoing and incoming records you want to review.",
@@ -2990,10 +2997,13 @@ export const EN_US_MESSAGES = {
   ...COMPETITION_MESSAGES,
   ...EN_DROP_REQUIREMENT_MESSAGES,
   ...EN_US_DROP_METADATA_MESSAGES,
+  ...DELEGATION_CONSOLIDATION_BUILDER_MESSAGES,
   "delegation.consolidation.instructions.title":
-    "Two wallets · two registrations",
+    "Every pair of wallets · both directions",
   "delegation.consolidation.instructions.steps":
-    "Register from this wallet, then connect the other wallet and register the return link. Each wallet needs ETH for gas.",
+    "A consolidation holds up to {limit} wallets. Each wallet registers a link to every other wallet, so every wallet signs and needs ETH for gas.",
+  "delegation.consolidation.instructions.guided":
+    "Use guided setup: one transaction per wallet, in the safe order",
   "delegation.consolidation.instructions.publicLink":
     "The link is public. Existing profile data may be combined.",
   "drop.composer.image": "Image",
@@ -4417,9 +4427,12 @@ export const EN_US_MESSAGES = {
   ...networkMetricsMessages,
   ...networkTdhMessages,
   ...networkTdhExplainerMessages,
+  ...networkTdhConsolidationMessages,
+  ...safeCollectingMessages,
   ...networkTdhExampleMessages,
   ...networkTdhProfileMessages,
   ...networkTdhRulesMessages,
+  ...delegationTapGuideMessages,
   ...toolsMessages,
   ...ABOUT_TECH_MESSAGES,
   ...REVIEWBOT_USAGE_MESSAGES,

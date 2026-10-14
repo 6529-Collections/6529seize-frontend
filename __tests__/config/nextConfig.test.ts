@@ -9,6 +9,14 @@ const publicEnv = {
 } as PublicEnv;
 
 describe("shared Next config", () => {
+  it("permanently redirects the former Delegation Center to Safe Collecting", async () => {
+    expect(await sharedConfig(publicEnv, "").redirects?.()).toContainEqual({
+      source: "/delegation/delegation-center",
+      destination: "/safe-collecting",
+      permanent: true,
+    });
+  });
+
   it("keeps React Strict Mode disabled by explicit migration policy", () => {
     expect(sharedConfig(publicEnv, "").reactStrictMode).toBe(false);
   });

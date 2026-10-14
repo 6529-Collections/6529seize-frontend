@@ -1,5 +1,7 @@
 "use client";
 
+import { getSafeCollectingSectionPath } from "@/components/delegation/safe-collecting-routes";
+
 import type { WalletConsolidationState } from "@/entities/IProfile";
 import { useContext, useMemo, useState } from "react";
 import clsx from "clsx";
@@ -16,8 +18,11 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { useQueries } from "@tanstack/react-query";
 import { AnimatePresence } from "framer-motion";
 import UserPageIdentityStatementsConsolidatedAddressesItem from "./UserPageIdentityStatementsConsolidatedAddressesItem";
+import { useConsolidationPolicy } from "@/hooks/useConsolidationPolicy";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
+import { DelegationCenterSection } from "@/types/enums";
 
 const WALLET_ACTION_CLASSES =
   "tw-min-h-10 tw-min-w-0 !tw-whitespace-normal tw-px-2.5 tw-py-2 tw-text-xs";
@@ -74,11 +79,16 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
   readonly profile: ApiIdentity;
 }) {
   const locale = useBrowserLocale();
+  const { limits } = useConsolidationPolicy();
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy } = useContext(AuthContext);
   const canEdit = amIUser({ profile, address }) && !activeProfileProxy;
   const primaryAddress = getPrimaryAddress(profile);
-  const showAddWallet = canEdit && primaryAddress !== null;
+  const walletCount = profile.wallets?.length ?? 0;
+  const atWalletLimit = !!limits && walletCount >= limits.maxWallets;
+  const canAddWallet = canEdit && primaryAddress !== null;
+  const showAddWallet = canAddWallet && !!limits && !atWalletLimit;
+  const walletLimit = limits ? formatInteger(locale, limits.maxWallets) : "";
   const sortedByPrimary = useMemo(
     () => sortByPrimary(profile.wallets ?? [], primaryAddress),
     [primaryAddress, profile.wallets]
@@ -121,6 +131,16 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
             name: createPossessionStr(profile.handle ?? null),
           })}
         </h3>
+        {walletCount > 0 && (
+          <span className="tw-ml-auto tw-shrink-0 tw-whitespace-nowrap tw-text-right tw-text-xs tw-text-iron-400">
+            {limits
+              ? t(locale, "user.profile.identity.statements.walletCount", {
+                  count: formatInteger(locale, walletCount),
+                  limit: walletLimit,
+                })
+              : formatInteger(locale, walletCount)}
+          </span>
+        )}
       </div>
       <ul className="tw-mb-0 tw-mt-3 tw-list-none tw-space-y-2 tw-pl-0">
         {sortedByPrimary.map((wallet) => (
@@ -143,7 +163,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
         <div className="tw-grid tw-grid-cols-2 tw-gap-2 tw-pt-4">
           {primaryAddress && (
             <ButtonLink
-              href={`/delegation/wallet-checker?address=${primaryAddress}`}
+              href={`/safe-collecting/wallet-checker?address=${primaryAddress}`}
               variant="secondary"
               size={null}
               fullWidth
@@ -157,7 +177,9 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
           )}
           {showAddWallet && (
             <ButtonLink
-              href="/delegation/register-consolidation"
+              href={getSafeCollectingSectionPath(
+                DelegationCenterSection.BUILD_CONSOLIDATION
+              )}
               variant="primary"
               size={null}
               fullWidth
@@ -169,7 +191,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
           <AnimatePresence mode="wait" initial={false}>
             {showDelegationCenter && (
               <ButtonLink
-                href="/delegation/delegation-center"
+                href="/safe-collecting"
                 variant="secondary"
                 size={null}
                 fullWidth
@@ -184,6 +206,13 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
       {showAddWallet && (
         <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-300">
           {t(locale, "user.profile.identity.statements.addWalletDescription")}
+        </p>
+      )}
+      {canAddWallet && atWalletLimit && (
+        <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-300">
+          {t(locale, "user.profile.identity.statements.walletLimitReached", {
+            limit: walletLimit,
+          })}
         </p>
       )}
     </div>
