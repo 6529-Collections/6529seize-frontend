@@ -136,6 +136,18 @@ describe("WaveLeaderboardRightSidebarActivityLog", () => {
     expect(mockOnDropClick).toHaveBeenCalledWith();
   });
 
+  it("preserves keyboard order from voter to drop button to creator", async () => {
+    const user = userEvent.setup();
+    renderComponent();
+
+    await user.tab();
+    expect(screen.getByTitle("Voter: voter_user")).toHaveFocus();
+    await user.tab();
+    expect(screen.getByTestId("drop-click-button")).toHaveFocus();
+    await user.tab();
+    expect(screen.getByTitle("Drop creator: author_user")).toHaveFocus();
+  });
+
   it("displays voter information with profile picture", () => {
     renderComponent();
 

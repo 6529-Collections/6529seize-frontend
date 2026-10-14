@@ -113,6 +113,17 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
         </span>
       </Link>
 
+      <div className="tw-col-start-2 tw-row-start-1 tw-flex tw-items-center tw-justify-end tw-gap-1 sm:tw-col-start-4">
+        <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-tabular-nums tw-text-iron-400">
+          {getTimeAgoShort(new Date(log.created_at).getTime())}
+        </span>
+        {onDropClick && (
+          <WaveLeaderboardRightSidebarActivityLogDrop
+            onDropClick={onDropClick}
+          />
+        )}
+      </div>
+
       <div className="tw-col-span-2 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-y-2 tw-pl-8 sm:tw-contents">
         <div className="tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 sm:tw-col-start-2 sm:tw-row-start-1">
           {oldVote === 0 ? (
@@ -164,16 +175,6 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
             </div>
           )}
         </div>
-      </div>
-      <div className="tw-col-start-2 tw-row-start-1 tw-flex tw-items-center tw-justify-end tw-gap-1 sm:tw-col-start-4">
-        <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-tabular-nums tw-text-iron-400">
-          {getTimeAgoShort(new Date(log.created_at).getTime())}
-        </span>
-        {onDropClick && (
-          <WaveLeaderboardRightSidebarActivityLogDrop
-            onDropClick={onDropClick}
-          />
-        )}
       </div>
     </div>
   );

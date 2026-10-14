@@ -45,44 +45,41 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
       >
         {position}
       </span>
-      <Link
-        href={`/${voterProfile}`}
-        aria-label={voterProfile}
-        className="tw-group tw-flex tw-min-h-11 tw-min-w-0 tw-flex-1 tw-items-center tw-gap-3 tw-rounded-sm tw-no-underline tw-transition-opacity tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-opacity-80"
-      >
-        {voter.voter.pfp ? (
-          <Image
-            src={resolveIpfsUrlSync(voter.voter.pfp)}
-            alt=""
-            width={28}
-            height={28}
-            className="tw-size-7 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-object-cover tw-ring-1 tw-ring-inset tw-ring-white/10"
-          />
-        ) : (
-          <div className="tw-size-7 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/10" />
-        )}
-        <div className="tw-min-w-0 tw-flex-1">
-          <div className="tw-flex tw-min-w-0 tw-max-w-full tw-items-center">
-            <UserProfileTooltipWrapper user={voterProfile}>
-              <span className="tw-block tw-min-w-0 tw-truncate tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-100 desktop-hover:group-hover:tw-underline">
-                {voterProfile}
-              </span>
-            </UserProfileTooltipWrapper>
-          </div>
-          <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-0.5 tw-text-xs tw-font-medium tw-tabular-nums tw-leading-5">
-            {hasPositiveVotes && (
-              <span className="tw-break-all tw-text-green">
-                +{formatNumberWithCommas(voter.positive_votes_summed)}
-              </span>
-            )}
-            {hasNegativeVotes && (
-              <span className="tw-break-all tw-text-red">
-                -{formatNumberWithCommas(voter.negative_votes_summed)}
-              </span>
-            )}
-          </span>
-        </div>
-      </Link>
+      <div className="tw-relative tw-flex tw-min-h-11 tw-min-w-0 tw-flex-1 tw-flex-col tw-justify-center">
+        <Link
+          href={`/${voterProfile}`}
+          className="tw-group tw-flex tw-min-h-6 tw-min-w-0 tw-items-center tw-rounded-sm tw-pl-10 tw-no-underline tw-transition-opacity tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-opacity-80"
+        >
+          {voter.voter.pfp ? (
+            <Image
+              src={resolveIpfsUrlSync(voter.voter.pfp)}
+              alt=""
+              width={28}
+              height={28}
+              className="tw-absolute tw-left-0 tw-top-1/2 tw-size-7 -tw-translate-y-1/2 tw-rounded-full tw-bg-iron-800 tw-object-cover tw-ring-1 tw-ring-inset tw-ring-white/10"
+            />
+          ) : (
+            <div className="tw-absolute tw-left-0 tw-top-1/2 tw-size-7 -tw-translate-y-1/2 tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/10" />
+          )}
+          <UserProfileTooltipWrapper user={voterProfile}>
+            <span className="tw-block tw-min-w-0 tw-truncate tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-100 desktop-hover:group-hover:tw-underline">
+              {voterProfile}
+            </span>
+          </UserProfileTooltipWrapper>
+        </Link>
+        <span className="tw-ml-10 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-0.5 tw-text-xs tw-font-medium tw-tabular-nums tw-leading-5">
+          {hasPositiveVotes && (
+            <span className="tw-break-all tw-text-green">
+              +{formatNumberWithCommas(voter.positive_votes_summed)}
+            </span>
+          )}
+          {hasNegativeVotes && (
+            <span className="tw-break-all tw-text-red">
+              -{formatNumberWithCommas(voter.negative_votes_summed)}
+            </span>
+          )}
+        </span>
+      </div>
       <div className="tw-flex tw-max-w-[45%] tw-flex-shrink-0 tw-flex-wrap tw-items-baseline tw-justify-end tw-gap-x-1.5 tw-text-right">
         <span className="tw-break-all tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-100">
           {formatNumberWithCommas(voter.absolute_votes_summed)}
