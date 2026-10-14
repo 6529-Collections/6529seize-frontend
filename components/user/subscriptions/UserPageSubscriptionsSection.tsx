@@ -23,7 +23,7 @@ export default function UserPageSubscriptionsSection({
       <div className="tw-mb-5 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2">
         <h2
           id={titleId}
-          className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-100"
+          className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-7 md:tw-text-xl tw-tracking-tight tw-text-iron-100"
         >
           {title}
         </h2>

@@ -112,7 +112,7 @@ export default function UserPageStatsActivityDistributionsTable({
         <tr>
           <th
             scope="col"
-            className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pr-4"
+            className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-300 sm:tw-px-6 sm:tw-leading-6 lg:tw-pr-4"
           >
             {getDistributionsMessage(
               "user.collected.stats.distributions.columns.collection",
@@ -122,7 +122,7 @@ export default function UserPageStatsActivityDistributionsTable({
           </th>
           <th
             scope="col"
-            className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
+            className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-300 sm:tw-px-6 sm:tw-leading-6 lg:tw-pl-4"
           >
             {getDistributionsMessage(
               "user.collected.stats.distributions.columns.token",
@@ -132,7 +132,7 @@ export default function UserPageStatsActivityDistributionsTable({
           </th>
           <th
             scope="col"
-            className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
+            className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-300 sm:tw-px-6 sm:tw-leading-6 lg:tw-pl-4"
           >
             {getDistributionsMessage(
               "user.collected.stats.distributions.columns.name",
@@ -143,7 +143,7 @@ export default function UserPageStatsActivityDistributionsTable({
 
           <th
             scope="col"
-            className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
+            className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-300 sm:tw-px-6 sm:tw-leading-6 lg:tw-pl-4"
           >
             {getDistributionsMessage(
               "user.collected.stats.distributions.columns.wallet",
@@ -155,14 +155,14 @@ export default function UserPageStatsActivityDistributionsTable({
             <th
               key={phase}
               scope="col"
-              className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
+              className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-300 sm:tw-px-6 sm:tw-leading-6 lg:tw-pl-4"
             >
               {getDistributionPhaseLabel(phase, locale)}
             </th>
           ))}
           <th
             scope="col"
-            className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
+            className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-300 sm:tw-px-6 sm:tw-leading-6 lg:tw-pl-4"
           >
             {getDistributionsMessage(
               "user.collected.stats.distributions.columns.minted",
@@ -172,7 +172,7 @@ export default function UserPageStatsActivityDistributionsTable({
           </th>
           <th
             scope="col"
-            className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
+            className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-300 sm:tw-px-6 sm:tw-leading-6 lg:tw-pl-4"
           >
             {getDistributionsMessage(
               "user.collected.stats.distributions.columns.total",
@@ -182,7 +182,7 @@ export default function UserPageStatsActivityDistributionsTable({
           </th>
           <th
             scope="col"
-            className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
+            className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-300 sm:tw-px-6 sm:tw-leading-6 lg:tw-pl-4"
           >
             {loading ? (
               <div>

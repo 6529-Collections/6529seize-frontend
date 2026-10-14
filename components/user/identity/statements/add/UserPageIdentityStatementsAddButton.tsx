@@ -28,7 +28,12 @@ export default function UserPageIdentityStatementsAddButton({
         onClick={() => setIsAddStatementsOpen(true)}
       >
         <svg
-          className="-tw-ml-1 tw-h-5 tw-w-5"
+          className={
+            size === "xs"
+              ? "-tw-ml-0.5 tw-h-4 tw-w-4"
+              : "-tw-ml-1 tw-h-5 tw-w-5"
+          }
+          aria-hidden="true"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"

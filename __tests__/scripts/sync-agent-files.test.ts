@@ -238,10 +238,7 @@ describe("sync-agent-files", () => {
 
     it("publishes natural multi-wallet consolidation language", () => {
       const source = JSON.parse(
-        fs.readFileSync(
-          path.join(repoRoot, "ops/help/help-index.json"),
-          "utf8"
-        )
+        fs.readFileSync(path.join(repoRoot, "ops/help/help-index.json"), "utf8")
       );
       const published = JSON.parse(
         fs.readFileSync(path.join(repoRoot, "public/help-index.json"), "utf8")
@@ -329,7 +326,7 @@ describe("sync-agent-files", () => {
         expect(consolidationUseCaseRecord?.facts).toEqual(
           expect.arrayContaining([
             "6529 recognizes up to 4 addresses as one consolidation group, and every pair of addresses in the group must register consolidation use case #999 with each other in both directions.",
-            "The fourth address counts only for links registered on or after 15 October 2026 00:00 UTC: a group of 4 counts when one of its addresses has all three of its links registered in both directions from then. Before then, groups count at most 3 addresses; groups of 2 or 3 are unchanged and older registrations stay valid.",
+            "The fourth address counts only for links registered on or after the current environment’s activation cutoff: a group of 4 counts when one of its addresses has all three of its links registered in both directions from then. Before then, groups count at most 3 addresses; groups of 2 or 3 are unchanged and older registrations stay valid.",
             "Registration capacity and effective counted group size are different: users can create records involving more addresses, but no more than 4 addresses count together, and when links conflict the newest confirmed link wins.",
           ])
         );
@@ -381,14 +378,14 @@ describe("sync-agent-files", () => {
           expect.arrayContaining([
             "Connecting another wallet to the site is different from consolidating wallets so 6529 treats them together for supported metrics.",
             "Removing or replacing the currently connected wallet is different from changing an on-chain consolidation record.",
-            "If the goal is to stop wallets being treated together, open View/Manage in the Delegation Center and revoke the relevant consolidation record.",
+            "If the goal is to stop wallets being treated together, open Safe Collecting, go to All tools, Manage by Collection, and revoke the relevant consolidation record.",
             "If the goal is to replace an address on an existing consolidation record, use Update in View/Manage.",
           ])
         );
         expect(record?.related_paths).toEqual(
           expect.arrayContaining([
-            "/delegation/delegation-faq/manage-revoke",
-            "/delegation/delegation-faq/manage-update",
+            "/safe-collecting/faq/manage-revoke",
+            "/safe-collecting/faq/manage-update",
           ])
         );
       });

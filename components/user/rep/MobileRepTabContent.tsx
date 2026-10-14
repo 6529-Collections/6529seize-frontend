@@ -135,7 +135,7 @@ function RepEmptyState({
     );
   }
   return (
-    <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-font-normal tw-text-iron-500">
+    <p className="tw-mb-0 tw-mt-4 tw-text-meta/5 tw-font-normal tw-text-iron-500">
       {t(
         locale,
         repDirection === "given"

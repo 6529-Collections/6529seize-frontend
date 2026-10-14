@@ -54,6 +54,10 @@ hovering, or focusing the address reveals its full value on compact layouts.
 These remain frontend-owned facts published through the existing
 help-index sync and consumed by the existing backend loader.
 
+The `waves.notification-controls` record describes the notification subview inside the About sheet
+on phone layouts, dismissal back to About, and the anchored keyboard-accessible
+menu in desktop and tablet sidebars.
+
 ## Problem Statement
 
 Users often ask practical product questions in Waves instead of finding the
@@ -83,6 +87,12 @@ drop's header, including the artist-badge preview entry path. It describes
 system sharing, confirmed clipboard fallback, silent cancellation, temporary
 drop availability, and the existing Main Stage, Quorum, and direct-message URL
 rules. Sharing a direct-message URL does not grant conversation access.
+
+The direct-message record covers **New message**, its responsive web bottom sheet
+and desktop dialog, its **To** recipient field,
+search results that remain visible after keyboard dismissal, removable recipient
+chips, selection circles, and the **Message** action for one person or a group.
+It also describes retry behavior and the native screen's hidden tab bar.
 
 The Memes submission profile and wallet signing record covers the EIP-712
 **Submit a Meme Card to The Memes** action, readable artwork and destination,

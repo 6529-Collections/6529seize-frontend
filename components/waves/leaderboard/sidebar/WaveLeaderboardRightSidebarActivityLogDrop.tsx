@@ -23,7 +23,7 @@ export const WaveLeaderboardRightSidebarActivityLogDrop: FC<
       onClick={handleClick}
       title={openDropLabel}
       aria-label={openDropLabel}
-      className="tw-flex tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-none tw-bg-transparent tw-p-1 tw-text-iron-400 tw-transition-colors tw-duration-200 hover:tw-text-iron-300 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+      className="tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-transparent tw-text-iron-400 tw-transition-colors tw-duration-200 hover:tw-bg-iron-900 hover:tw-text-iron-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
     >
       <svg
         className="tw-size-4"

@@ -59,20 +59,20 @@ function buildRouteByArticleSlug(articleDefinitions) {
     articleDefinitions.map(({ slug }) => [
       slug,
       slug === "reference-overview-wallet-architecture"
-        ? "/delegation/wallet-architecture"
+        ? "/safe-collecting/tap-guide"
         : slug === "delegation-faq"
-          ? "/delegation/delegation-faq"
+          ? "/safe-collecting/faq"
           : slug === "consolidation-use-cases"
-            ? "/delegation/consolidation-use-cases"
-            : `/delegation/delegation-faq/${slug}`,
+            ? "/safe-collecting/consolidation-use-cases"
+            : `/safe-collecting/faq/${slug}`,
     ])
   );
 }
 
 const ROUTE_ALIASES = {
-  "wallet-architecture": "/delegation/wallet-architecture",
-  "delegation-faq": "/delegation/delegation-faq",
-  "consolidation-use-cases": "/delegation/consolidation-use-cases",
+  "wallet-architecture": "/safe-collecting/tap-guide",
+  "delegation-faq": "/safe-collecting/faq",
+  "consolidation-use-cases": "/safe-collecting/consolidation-use-cases",
 };
 
 function assertInsideRepo(targetPath) {
