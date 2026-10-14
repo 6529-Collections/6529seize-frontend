@@ -138,6 +138,7 @@ describe("effective App PR CI plan", () => {
     "components/brain/my-stream/MyStreamActionTooltip.tsx",
     "tests/social/wave-notification-settings-sandbox.spec.ts",
     "components/header/AppHeader.tsx",
+    "components/brain/mobile/WaveInformationSheet.tsx",
     "components/brain/left-sidebar/waves/BrainLeftSidebarWavePin.tsx",
     "components\\waves\\leaderboard\\MySubmissionsDialog.tsx",
   ])(

@@ -123,6 +123,7 @@ function applyEffectiveAppPrCiPlan(plan) {
         "tests/social/native-competition-sandbox.spec.ts",
         "tests/social/wave-notification-settings-sandbox.spec.ts",
         "components/header/AppHeader.tsx",
+        "components/brain/mobile/WaveInformationSheet.tsx",
         "components/waves/specs/WaveNotificationSettings.tsx",
         "components/waves/specs/wave-notification-settings/WaveNotificationPreferenceButtons.tsx",
         "components/waves/specs/wave-notification-settings/useNotificationSettingsDialog.ts",

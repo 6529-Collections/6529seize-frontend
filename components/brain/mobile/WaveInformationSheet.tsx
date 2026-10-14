@@ -24,10 +24,10 @@ export default function WaveInformationSheet({
       isOpen
       title={t(locale, "waves.information.open", { name: wave.name })}
       onClose={onClose}
-      onBack={onClose}
       tall
       fixedHeight
       noPadding
+      headerClassName="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-py-4"
     >
       <WaveDeleteFlowProvider>
         <WaveContent
