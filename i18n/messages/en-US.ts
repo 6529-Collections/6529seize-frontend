@@ -2686,6 +2686,7 @@ const IDENTITY_FILTER_MESSAGES = objectMessages("identityFilter", {
 } as const);
 
 const XTDH_COLLECTION_MESSAGES = objectMessages("xtdh.collections", {
+  loading: "Loading collections",
   "search.emptyDescription":
     "Try another collection name or clear the search to see all collections.",
   "search.emptyTitle": "No collections found for “{query}”",

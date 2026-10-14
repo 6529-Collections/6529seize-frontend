@@ -112,6 +112,81 @@ function getProfileFeed(page: Page): Locator {
 }
 
 test.describe("Waves and profile read-only coverage @surface @medium @large @readonly", () => {
+  test("keeps received collection loading rows aligned with loaded content", async ({
+    page,
+    isMobile,
+  }) => {
+    let releaseCollections: () => void;
+    const collectionsReady = new Promise<void>((resolve) => {
+      releaseCollections = resolve;
+    });
+    await page.route("**/api/xtdh/collections?**", async (route) => {
+      await collectionsReady;
+      await route.continue();
+    });
+    await gotoReady(page, `/${PROFILE_HANDLE}/xtdh?tab=received`);
+    const section = page
+      .getByRole("heading", { name: "xTDH Collections", exact: true })
+      .locator("xpath=ancestor::section[1]");
+    const controls = section.getByRole("region", {
+      name: "Sort and search received collections",
+    });
+    const skeleton = section.getByTestId("xtdh-collection-skeleton").first();
+    const measureCard = (element: HTMLElement) => {
+      const rect = element.getBoundingClientRect();
+      const sectionRect = element.closest("section")!.getBoundingClientRect();
+      const grid = element.lastElementChild!;
+      return {
+        x: rect.x,
+        y: rect.y - sectionRect.y,
+        width: rect.width,
+        columns: getComputedStyle(grid).gridTemplateColumns,
+        gridOffset: grid.getBoundingClientRect().x - rect.x,
+      };
+    };
+    let loadingLayout: ReturnType<typeof measureCard>;
+    try {
+      await expect(skeleton).toBeVisible();
+      await expect(controls.getByRole("textbox")).toBeDisabled();
+      const sortControl = isMobile
+        ? controls.getByRole("button", {
+            name: "Sort collections by: xTDH",
+            exact: true,
+          })
+        : controls.getByRole("tab", { name: "xTDH", exact: true });
+      await expect(sortControl).toBeDisabled();
+      loadingLayout = await skeleton.evaluate(measureCard);
+      await expectNoHorizontalOverflow(page);
+      await captureSafeScreenshot(
+        page,
+        test.info(),
+        "received-collections-loading"
+      );
+    } finally {
+      releaseCollections!();
+    }
+    await expect(skeleton).toHaveCount(0);
+    await expect(controls.getByRole("textbox")).toBeEnabled();
+    const card = section
+      .getByRole("list")
+      .getByRole("button")
+      .first()
+      .locator(":scope > div");
+    await expect(card).toBeVisible();
+    const loadedLayout = await card.evaluate(measureCard);
+    expect(loadedLayout.width).toBeCloseTo(loadingLayout.width, 1);
+    expect(loadedLayout.x).toBeCloseTo(loadingLayout.x, 1);
+    expect(loadedLayout.y).toBeCloseTo(loadingLayout.y, 1);
+    expect(loadedLayout.columns).toBe(loadingLayout.columns);
+    expect(loadedLayout.gridOffset).toBeCloseTo(loadingLayout.gridOffset, 1);
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(
+      page,
+      test.info(),
+      "received-collections-loaded"
+    );
+  });
+
   test("renders grant thumbnails from both Alchemy CDNs with an intentional failure fallback", async ({
     page,
   }) => {
