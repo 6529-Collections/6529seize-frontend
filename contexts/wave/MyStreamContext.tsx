@@ -19,6 +19,7 @@ import React, {
   useContext,
   useEffect,
   useEffectEvent,
+  useInsertionEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -76,11 +77,10 @@ interface WaveMessagesStoreData {
   readonly unsubscribe: (key: string, listener: WaveMessagesListener) => void;
 }
 
-// Define the type for our context using nested structures
-interface MyStreamContextType {
-  readonly waves: WavesContextData;
-  readonly directMessages: WavesContextData;
-  readonly activeWave: ActiveWaveContextData;
+// Stream actions keep the same identity while stream data changes (incoming
+// drops, unread counts, wave lists), so per-drop rows that only call actions
+// do not re-render on every drop. Read them with useMyStreamActions.
+interface MyStreamActionsContextType {
   readonly waveMessagesStore: WaveMessagesStoreData;
   readonly requestMainWavesList: () => () => void;
   readonly requestDirectMessagesList: () => () => void;
@@ -137,6 +137,14 @@ interface MyStreamContextType {
   }) => { rollback: () => void } | null;
 }
 
+// The full context adds stream data to the actions and changes whenever that
+// data changes.
+interface MyStreamContextType extends MyStreamActionsContextType {
+  readonly waves: WavesContextData;
+  readonly directMessages: WavesContextData;
+  readonly activeWave: ActiveWaveContextData;
+}
+
 interface MyStreamProviderProps {
   readonly children: ReactNode;
 }
@@ -191,8 +199,11 @@ const scheduleAfterRouteIdle = (runTask: () => void): (() => void) => {
   };
 };
 
-// Create the context
+// Create the contexts
 const MyStreamContext = createContext<MyStreamContextType | null>(null);
+const MyStreamActionsContext = createContext<MyStreamActionsContextType | null>(
+  null
+);
 
 // Create a provider component
 export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
@@ -389,6 +400,17 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     isWaveMuted,
   });
 
+  // processIncomingDrop is rebuilt when the active wave, its mute state or
+  // wave eligibility changes. Expose a stable wrapper that always calls the
+  // latest implementation, so callers holding it never use a stale closure.
+  const processIncomingDropRef = useRef(processIncomingDrop);
+  useInsertionEffect(() => {
+    processIncomingDropRef.current = processIncomingDrop;
+  }, [processIncomingDrop]);
+  const stableProcessIncomingDrop = useCallback<
+    MyStreamActionsContextType["processIncomingDrop"]
+  >((drop, type) => processIncomingDropRef.current(drop, type), []);
+
   const setActiveWaveAndRegister = useCallback<ActiveWaveContextData["set"]>(
     (waveId, options) => {
       if (waveId) {
@@ -544,6 +566,61 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     };
   }, [isCapacitor]);
 
+  // Actions depend only on stable store and data-manager callbacks, so this
+  // value keeps its identity when drops arrive or wave lists change. The
+  // destructive store callbacks still rebind on a profile switch, so a caller
+  // holding an old one cannot change the new profile's cache.
+  const actionsValue = useMemo<MyStreamActionsContextType>(
+    () => ({
+      // Prepare the store data for the context (only read/subscribe parts)
+      waveMessagesStore: {
+        getData: waveMessagesStore.getData,
+        subscribe: waveMessagesStore.subscribe,
+        unsubscribe: waveMessagesStore.unsubscribe,
+      },
+      requestMainWavesList,
+      requestDirectMessagesList,
+      registerWave,
+      serverFeedSeed: {
+        registerPending: waveMessagesStore.registerPendingServerFeedSeed,
+        clearPending: waveMessagesStore.clearPendingServerFeedSeed,
+        replacePending: waveMessagesStore.replacePendingServerFeedSeed,
+        expire: waveMessagesStore.expireServerFeedSeed,
+        apply: waveMessagesStore.applyServerFeedSeed,
+        completeInitialRegistration:
+          waveMessagesStore.completeInitialServerFeedRegistration,
+      },
+      fetchNextPageForWave: fetchNextPage,
+      fetchAroundSerialNo,
+      processIncomingDrop: stableProcessIncomingDrop,
+      processDropRemoved,
+      processDropsRemoved: waveMessagesStore.removeDrops,
+      refreshWaveMessages,
+      applyOptimisticDropUpdate: waveMessagesStore.optimisticUpdateDrop,
+    }),
+    [
+      waveMessagesStore.getData,
+      waveMessagesStore.subscribe,
+      waveMessagesStore.unsubscribe,
+      requestMainWavesList,
+      requestDirectMessagesList,
+      registerWave,
+      waveMessagesStore.registerPendingServerFeedSeed,
+      waveMessagesStore.clearPendingServerFeedSeed,
+      waveMessagesStore.replacePendingServerFeedSeed,
+      waveMessagesStore.expireServerFeedSeed,
+      waveMessagesStore.applyServerFeedSeed,
+      waveMessagesStore.completeInitialServerFeedRegistration,
+      fetchNextPage,
+      fetchAroundSerialNo,
+      stableProcessIncomingDrop,
+      processDropRemoved,
+      waveMessagesStore.removeDrops,
+      refreshWaveMessages,
+      waveMessagesStore.optimisticUpdateDrop,
+    ]
+  );
+
   // Create the context value using the nested structure
   const contextValue = useMemo<MyStreamContextType>(() => {
     const activeWaveParentId =
@@ -590,39 +667,14 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       set: setActiveWaveAndRegister,
     };
 
-    // Prepare the store data for the context (only read/subscribe parts)
-    const waveMessagesStoreData: WaveMessagesStoreData = {
-      getData: waveMessagesStore.getData,
-      subscribe: waveMessagesStore.subscribe,
-      unsubscribe: waveMessagesStore.unsubscribe,
-    };
-
     return {
+      ...actionsValue,
       waves,
       directMessages,
       activeWave,
-      waveMessagesStore: waveMessagesStoreData,
-      requestMainWavesList,
-      requestDirectMessagesList,
-      registerWave,
-      serverFeedSeed: {
-        registerPending: waveMessagesStore.registerPendingServerFeedSeed,
-        clearPending: waveMessagesStore.clearPendingServerFeedSeed,
-        replacePending: waveMessagesStore.replacePendingServerFeedSeed,
-        expire: waveMessagesStore.expireServerFeedSeed,
-        apply: waveMessagesStore.applyServerFeedSeed,
-        completeInitialRegistration:
-          waveMessagesStore.completeInitialServerFeedRegistration,
-      },
-      fetchNextPageForWave: fetchNextPage,
-      fetchAroundSerialNo,
-      processIncomingDrop,
-      processDropRemoved,
-      processDropsRemoved: waveMessagesStore.removeDrops,
-      refreshWaveMessages,
-      applyOptimisticDropUpdate: waveMessagesStore.optimisticUpdateDrop,
     };
   }, [
+    actionsValue,
     wavesHookData.waves,
     mainWavesData.isPinnedWavesLoading,
     isMainWavesListEnabled,
@@ -652,31 +704,14 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     activeWaveId,
     resolvedActiveWaveData,
     setActiveWaveAndRegister,
-    requestMainWavesList,
-    requestDirectMessagesList,
-    waveMessagesStore.getData,
-    waveMessagesStore.subscribe,
-    waveMessagesStore.unsubscribe,
-    registerWave,
-    waveMessagesStore.registerPendingServerFeedSeed,
-    waveMessagesStore.clearPendingServerFeedSeed,
-    waveMessagesStore.replacePendingServerFeedSeed,
-    waveMessagesStore.expireServerFeedSeed,
-    waveMessagesStore.applyServerFeedSeed,
-    waveMessagesStore.completeInitialServerFeedRegistration,
-    fetchNextPage,
-    fetchAroundSerialNo,
-    processIncomingDrop,
-    processDropRemoved,
-    waveMessagesStore.removeDrops,
-    refreshWaveMessages,
-    waveMessagesStore.optimisticUpdateDrop,
   ]);
 
   return (
-    <MyStreamContext.Provider value={contextValue}>
-      {children}
-    </MyStreamContext.Provider>
+    <MyStreamActionsContext.Provider value={actionsValue}>
+      <MyStreamContext.Provider value={contextValue}>
+        {children}
+      </MyStreamContext.Provider>
+    </MyStreamActionsContext.Provider>
   );
 };
 
@@ -693,11 +728,29 @@ export const useMyStreamOptional = (): MyStreamContextType | null => {
   return useContext(MyStreamContext);
 };
 
+// Prefer these over useMyStream when a component only calls stream actions:
+// the actions value does not change when drops arrive, so callers skip the
+// re-render that every stream data change causes for useMyStream consumers.
+export const useMyStreamActions = (): MyStreamActionsContextType => {
+  const context = useContext(MyStreamActionsContext);
+  if (!context) {
+    throw new Error(
+      "useMyStreamActions must be used within a MyStreamProvider"
+    );
+  }
+  return context;
+};
+
+export const useMyStreamActionsOptional =
+  (): MyStreamActionsContextType | null => {
+    return useContext(MyStreamActionsContext);
+  };
+
 // Create the selector hook for wave messages
 export function useMyStreamWaveMessages(
   waveId: string | null | undefined
 ): WaveMessages | undefined {
-  const { waveMessagesStore } = useMyStream();
+  const { waveMessagesStore } = useMyStreamActions();
   const { getData, subscribe, unsubscribe } = waveMessagesStore;
 
   const getSnapshot = useCallback(

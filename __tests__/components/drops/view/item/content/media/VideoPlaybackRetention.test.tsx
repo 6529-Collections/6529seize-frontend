@@ -23,7 +23,7 @@ let mockSetInView: React.Dispatch<React.SetStateAction<boolean>>;
 const mockFetchAround = jest.fn();
 const mockVisibilityListeners = new Set<() => void>();
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: () => ({ fetchAroundSerialNo: mockFetchAround }),
+  useMyStreamActions: () => ({ fetchAroundSerialNo: mockFetchAround }),
 }));
 jest.mock("@/hooks/useDeviceInfo", () => () => ({ isApp: mockIsApp }));
 jest.mock("@/hooks/useInView", () => ({

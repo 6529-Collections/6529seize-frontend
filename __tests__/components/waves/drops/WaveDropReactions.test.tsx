@@ -25,7 +25,7 @@ const mockQueryCacheFindAll = jest.fn(() => []);
 const mockSetQueryData = jest.fn();
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: jest.fn(() => ({
+  useMyStreamActions: jest.fn(() => ({
     applyOptimisticDropUpdate: jest.fn(() => ({ rollback: jest.fn() })),
   })),
 }));
@@ -354,9 +354,9 @@ describe("WaveDropReactions", () => {
   const getMyStreamMock = () =>
     (
       require("@/contexts/wave/MyStreamContext") as {
-        useMyStream: jest.Mock;
+        useMyStreamActions: jest.Mock;
       }
-    ).useMyStream;
+    ).useMyStreamActions;
 
   beforeEach(() => {
     // Reset call history without removing default implementations
