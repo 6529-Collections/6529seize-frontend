@@ -64,8 +64,8 @@ export function CompetitionVotesSkeleton({
       ? CompetitionVoterSkeleton
       : CompetitionActivitySkeleton;
   return (
-    <div className="tw-w-full tw-max-w-6xl" role="status">
-      <span className="tw-sr-only">{t(locale, "competitions.loading")}</span>
+    <div className="tw-w-full tw-max-w-6xl">
+      <output className="tw-sr-only">{t(locale, "competitions.loading")}</output>
       {[0, 1, 2, 3, 4, 5].map((row) => (
         <Row key={row} />
       ))}
