@@ -44,6 +44,25 @@ const sanitizeHtml = (value: string): string => {
     .trim();
 };
 
+// The card text is localized, so cached cards are scoped to the language list.
+const buildCacheKey = (url: string, languages: readonly string[]): string =>
+  `${languages.join(",")}|${url}`;
+
+const respondWithCard = (card: WikimediaCardResponse): NextResponse =>
+  NextResponse.json(card, { headers: { Vary: "Accept-Language" } });
+
+// Metadata-supplied links are only rendered when they are plain http(s) URLs.
+const toHttpUrl = (value: string | undefined): string | null => {
+  if (!value) {
+    return null;
+  }
+  try {
+    return parsePublicUrl(value.trim()).toString();
+  } catch {
+    return null;
+  }
+};
+
 const buildSummaryCard = async (
   target: SummaryTarget,
   languages: readonly string[]
@@ -290,7 +309,7 @@ const buildCommonsCard = async (
     const credit = getMeta("Credit");
     const artist = getMeta("Artist");
     const licenseName = getMeta("LicenseShortName") ?? getMeta("UsageTerms");
-    const licenseUrl = metadata["LicenseUrl"]?.value ?? null;
+    const licenseUrl = toHttpUrl(metadata["LicenseUrl"]?.value);
     const requiresAttribution =
       (metadata["AttributionRequired"]?.value ?? "").toLowerCase() === "true";
 
@@ -696,13 +715,12 @@ export async function GET(request: NextRequest) {
     return respondWithGuardError(error, "The provided URL is not allowed.");
   }
 
-  const cacheKey = sanitizeCacheKey(targetUrl);
+  const languages = parseAcceptLanguage(request.headers.get("accept-language"));
+  const cacheKey = buildCacheKey(sanitizeCacheKey(targetUrl), languages);
   const cached = cache.get(cacheKey);
   if (cached) {
-    return NextResponse.json(cached);
+    return respondWithCard(cached);
   }
-
-  const languages = parseAcceptLanguage(request.headers.get("accept-language"));
 
   let target: NormalizedTarget;
   try {
@@ -717,9 +735,9 @@ export async function GET(request: NextRequest) {
   const ttl = TTL_BY_KIND[card.kind] ?? TTL_BY_KIND.unavailable;
 
   cache.set(cacheKey, card, ttl);
-  cache.set(card.canonicalUrl, card, ttl);
+  cache.set(buildCacheKey(card.canonicalUrl, languages), card, ttl);
 
-  return NextResponse.json(card);
+  return respondWithCard(card);
 }
 
 export const dynamic = "force-dynamic";
