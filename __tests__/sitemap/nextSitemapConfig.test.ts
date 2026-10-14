@@ -411,6 +411,7 @@ describe("next-sitemap config", () => {
         "/open-data",
         "/the-memes/mint",
         "/tools/api",
+        "/safe-collecting",
       ])
     );
     expect(shouldExcludeSitemapPath("/the-memes/mint")).toBe(false);

@@ -2,38 +2,41 @@
 
 ## Overview
 
-Use this page when `/delegation/*` routes fail to open, writes do not submit,
+Use this page when `/safe-collecting/*` routes fail to open, writes do not submit,
 collection actions stay blocked, or Wallet Checker output looks wrong.
 
 ## Location in the Site
 
-- Route handler: `/delegation/[...section]`
-- Section routes: `/delegation/delegation-center`, `/delegation/wallet-architecture`,
-  `/delegation/delegation-faq`, `/delegation/consolidation-use-cases`, `/delegation/wallet-checker`
-- Write routes: `/delegation/register-delegation`,
-  `/delegation/register-consolidation`, `/delegation/register-sub-delegation`,
-  `/delegation/assign-primary-address`
-- Collection routes: `/delegation/any-collection`, `/delegation/the-memes`,
-  `/delegation/meme-lab`, `/delegation/6529-gradient`
+- Route handler: `/safe-collecting/[...section]`
+- Section routes: `/safe-collecting`, `/safe-collecting/tap-guide`,
+  `/safe-collecting/faq`, `/safe-collecting/consolidation-use-cases`, `/safe-collecting/wallet-checker`
+- Write routes: `/safe-collecting/register-delegation`,
+  `/safe-collecting/register-consolidation`, `/safe-collecting/register-sub-delegation`,
+  `/safe-collecting/assign-primary-address`
+- Collection routes: `/safe-collecting/any-collection`, `/safe-collecting/the-memes`,
+  `/safe-collecting/meme-lab`, `/safe-collecting/6529-gradient`
 - Bare `/delegation` has no page route (not-found)
 
 ## Quick Triage
 
-1. Start from `/delegation/delegation-center`, then reopen the route you need.
+1. Start from `/safe-collecting`, then reopen the route you need.
 2. Confirm wallet prerequisites: connected wallet, expected account, expected chain.
 3. For manager-driven actions, open incoming `Delegation Managers` and select one row.
 4. Retry once and read the latest inline `Errors` or toast text.
-5. Verify outcome in `/delegation/wallet-checker` when needed.
+5. Verify outcome in `/safe-collecting/wallet-checker` when needed.
 
 ## Symptom -> Fix
 
 - `/delegation` opens not-found:
-  use `/delegation/delegation-center`. Bare `/delegation` is not a valid page.
-- HTML-backed sections (`Delegation FAQ`, `Wallet Architecture`,
-  `Consolidation Use Cases`) show `404 | PAGE NOT FOUND`: fallback HTML could
-  not load. Reopen from menu and retry later.
-- Clicking a Delegation Center card while disconnected does not navigate:
-  wallet connect was canceled or closed before a successful connect.
+  use `/safe-collecting`. Bare `/delegation` is not a valid page.
+- HTML-backed sections (`FAQ`, `Consolidation Use Cases`) show
+  `404 | PAGE NOT FOUND`: fallback HTML could not load. Reopen from menu and
+  retry later. The `TAP Guide` (`/safe-collecting/tap-guide`) is a native
+  page and does not load article HTML.
+- A registration or primary-address page asks to connect a wallet:
+  a signed-in profile does not supply a live wallet connection. Use
+  `Connect Wallet` to continue, or `Back to Safe Collecting` to leave. The
+  return link is also available while the wallet connection is restoring.
 - Collection tables stay on `Fetching incoming ...` / `Fetching outgoing ...`:
   wallet is disconnected, so collection reads do not run.
 - Manager actions do not open a form:

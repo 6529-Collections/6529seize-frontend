@@ -163,7 +163,9 @@ describe("About contents dropdown", () => {
     expect(screen.getByText("Overview")).toBeInTheDocument();
     expect(screen.getByText("Collections & Minting")).toBeInTheDocument();
     expect(screen.getByText("Network & Reputation")).toBeInTheDocument();
-    expect(screen.getByText("Delegation & Wallets")).toBeInTheDocument();
+    expect(
+      screen.getByRole("group", { name: "Safe Collecting" })
+    ).toBeInTheDocument();
     expect(screen.getByText("Data & Developer Tools")).toBeInTheDocument();
     expect(screen.getByText("Legal")).toBeInTheDocument();
     expect(screen.queryByText("Mission")).toBeNull();

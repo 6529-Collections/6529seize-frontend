@@ -182,7 +182,7 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     );
   });
 
-  test("opens the existing consolidation form from the own-profile wallet entry", async ({
+  test("opens the guided consolidation flow from the own-profile wallet entry", async ({
     page,
   }) => {
     await gotoReady(page, PROFILE_BASE_PATH);
@@ -194,6 +194,7 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
 
     const walletChecker = page.getByRole("link", { name: "Wallet Checker" });
     await expect(walletChecker).toBeVisible();
+    await expect(page.getByText(/^\d of 4 wallets$/).first()).toBeVisible();
     const addWallet = page.getByRole("link", {
       name: "Add another wallet",
       exact: true,
@@ -201,7 +202,7 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(addWallet).toBeVisible();
     await expect(addWallet).toHaveAttribute(
       "href",
-      "/delegation/register-consolidation"
+      "/safe-collecting/build-consolidation"
     );
     const addressesHeading = page.getByRole("heading", {
       name: /Addresses$/,
@@ -281,15 +282,37 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
 
     await expect(page).toHaveURL(
       (url) =>
-        url.pathname === "/delegation/register-consolidation" &&
+        url.pathname === "/safe-collecting/build-consolidation" &&
         url.search === ""
     );
+    await expect(
+      page.getByRole("heading", { name: "Build a Consolidation", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Before you start" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("textbox", { name: "Wallet 1 address", exact: true })
+    ).toHaveValue(
+      new RegExp(
+        `^${escapeRegExp(process.env["DEV_MODE_WALLET_ADDRESS"] ?? "")}$`,
+        "i"
+      )
+    );
+    await expectNoHorizontalOverflow(page);
+
+    await gotoReady(page, "/safe-collecting/register-consolidation");
     await expect(
       page.getByRole("heading", { name: "Register Consolidation", exact: true })
     ).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Two wallets · two registrations" })
+      page.getByRole("heading", {
+        name: "Every pair of wallets · both directions",
+      })
     ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /^Use guided setup/ })
+    ).toHaveAttribute("href", "/safe-collecting/build-consolidation");
     await expect(page.getByLabel("Collection", { exact: true })).toHaveValue(
       "0"
     );
