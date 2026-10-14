@@ -1218,7 +1218,7 @@
         "The About index page lives at /about.",
         "It groups About pages into About 6529, Collections & Minting, Network & Reputation, Safe Collecting, Data & Developer Tools, and Legal link cards with right-arrow affordances.",
         "Collections & Minting includes About The Memes, Subscription Minting, Meme Lab, 6529 Gradient, Minting and GDRC, with GDRC last. Safe Collecting contains Safe Collecting, TAP Guide, FAQ, Consolidation Use Cases, Wallet Checker, App Wallets when supported, and Primary Address last.",
-        "Network & Reputation includes TDH, xTDH Overview, xTDH Allocations Dashboard, Network Health, Network Definitions, Levels, Network TDH Stats, Network Nerd, Prenodes, and TDH Historic Boosts links.",
+        "Network & Reputation includes TDH, xTDH Overview, xTDH Allocations Dashboard, Network Health, Network Definitions, Levels, Network TDH Stats, Network Nerd, and TDH Historic Boosts links.",
         "Data & Developer Tools includes API, EMMA, Block Finder, Open Data, ReMemes Data, Team Data, royalties, network metrics, and subscription-gated data links.",
         "Use the About index when users want to browse all About pages or find the right policy, collection, minting, delegation, wallet, network, open-data, or technical page."
       ],
@@ -1237,7 +1237,6 @@
         "/network/levels",
         "/network/health/network-tdh",
         "/network/nerd",
-        "/network/prenodes",
         "/network/tdh/historic-boosts",
         "/network/tdh/consolidation"
       ],
@@ -6090,9 +6089,10 @@
         "Identity statements are managed from profile identity surfaces on /{user}.",
         "On mobile, select the ID Statements score card to open a compact statements card without repeating the profile heading or description; eligible owners see Add at the right of the Consolidated Addresses header.",
         "Statement sections include Consolidated Addresses, Social Media Accounts, NFT Accounts, Contact, and Social Media Verification Posts.",
+        "Social accounts are self-declared. 6529 does not connect to social media accounts or verify account ownership or posts; this disclaimer appears above social-account entries.",
         "Eligible profile owners use Add to open a bottom sheet on mobile or a dialog on desktop, choose a statement group and platform, and can return with Back to statement types before saving.",
         "Social Media Accounts, NFT Accounts, and Contact use compact icon rows for platform selection; pointer hover and keyboard focus reveal each platform name, and the selected option has a stronger outline.",
-        "On mobile, the add-statements sheet presents four compact statement groups, keeps public-visibility notes under About identity statements, and provides header close, back, backdrop, Escape, and swipe-down dismissal paths.",
+        "On mobile, the add-statements sheet presents four compact statement groups, keeps an optional and permanently public notice visible throughout the Add flow, and provides header close, back, backdrop, Escape, and swipe-down dismissal paths.",
         "On mobile web and Capacitor, deeper add-statement forms stay above the software keyboard and keep their focused fields and Save/Cancel actions reachable by scrolling.",
         "Consolidated wallet rows expand to show the full address and ENS name when available as full-field copy controls, plus labeled mobile links to Etherscan and OpenSea.",
         "Consolidated Addresses shows how many of the 4 allowed wallets the profile has. Add another wallet appears beside Wallet Checker for the connected profile owner when no proxy profile is active, a primary or consolidated wallet address is available, and the profile has fewer than 4 wallets; it opens the guided Build a Consolidation flow at /safe-collecting/build-consolidation. At 4 wallets the owner sees a maximum-reached note instead. It is separate from Add for identity statements.",
@@ -7555,13 +7555,13 @@
     {
       "id": "network.prenodes",
       "kind": "route",
-      "title": "Prenodes status",
+      "title": "Prenodes deprecation",
       "aliases": ["prenodes", "prenode", "prenodes status", "node status"],
       "keywords": ["network", "prenodes", "status", "node"],
       "facts": [
-        "Prenodes status lives at /network/prenodes.",
-        "The page documents loading, empty, error, access, and permission behavior.",
-        "Use it when users ask where prenode status information is displayed."
+        "6529 Prenodes have been deprecated. Use the 6529 Desktop app to calculate TDH.",
+        "The existing /network/prenodes URL remains available with a deprecation notice and a link to /about/6529-apps.",
+        "Prenodes is no longer listed in About navigation. The page no longer displays or requests the registry."
       ],
       "canonical_path": "/network/prenodes",
       "related_paths": ["/network"],
@@ -10770,52 +10770,6 @@
       "brief_answer": "For the **{{percentage}}%** recovery range in **6529 Desktop**, check the TDH worker **Logs** and share the redacted error. Let any active work finish; do not widen reconciliation or start a reset because calculation failed. Once calculation completes successfully, do TDH and Merkle Root now match 6529.io at the same Last Block?\n\nRange: {{percentage}}% of blocks {{minimum_block}}–{{checkpoint}}.",
       "reconciliation_min_block": 13360860,
       "answer_links": []
-    },
-    {
-      "id": "waves.signed-messages",
-      "kind": "workflow",
-      "title": "Signed messages and the Devices tab",
-      "aliases": [
-        "signed messages",
-        "turn on signed messages",
-        "device signature",
-        "devices tab",
-        "can now post as you",
-        "revoke device",
-        "signed by its author",
-        "not signed by its author"
-      ],
-      "keywords": [
-        "waves",
-        "signature",
-        "device",
-        "grant",
-        "revoke",
-        "verify",
-        "ed25519",
-        "preferences"
-      ],
-      "facts": [
-        "Signed messages are staged behind a flag (on for staging, off in production). With them on, a web browser holds a non-extractable Ed25519 key per wallet; one wallet signature grants it the right to sign your posts, edits, deletes and reactions for 180 days. There is no wallet prompt per message and chat behaves as before.",
-        "The grant rides on the ordinary web sign-in. A logged-in user without a grant in this browser sees Turn on signed messages (one signature) above the empty wave composer; Turn on asks for one signature and the notice can be dismissed for 30 days. In a grant's last 14 days the notice offers Renew; after expiry writes go unsigned until renewed.",
-        "Signing never blocks or delays a write. If signing fails or a signature is rejected, the drop, edit, delete or reaction is sent unsigned exactly as before.",
-        "Preferences > Devices at /preferences?tab=devices lists every browser that can post as you with its label, This device marker, scopes, wallet, added, expiry and last-used dates and status (Active, Expired, Revoked). Revoke asks for confirmation; earlier signatures stay verifiable. Proxies cannot manage devices.",
-        "When a new browser gains a grant for your profile, other browsers show {label} can now post as you. Not you? with Revoke above the composer. The check runs when a wave opens and at most every 10 minutes while the tab is visible.",
-        "The Signature item in a drop's More menu (or touch menu) verifies the drop in your browser and reports Signed by its author, Not signed by its author, or The signature could not be verified, with wallet, device key fingerprint, grant expiry and whether the current content is the signed version. Contract wallets show Contract wallet: verified by 6529.io at sign-in. Signed drops carry no badge.",
-        "Signed messages are web only: the mobile and desktop apps, proxy sessions and browsers without Ed25519 support sign in and post exactly as before. Votes and ratings are not signed yet."
-      ],
-      "canonical_path": "/preferences?tab=devices",
-      "link_label": "Devices",
-      "related_paths": ["/preferences", "/waves"],
-      "tags": ["waves", "privacy", "security", "preferences"],
-      "source_refs": [
-        "ops/docs/waves/drop-actions/feature-signed-messages.md",
-        "ops/docs/notifications/feature-profile-preferences.md",
-        "components/device-signing/SignedMessagesNotice.tsx",
-        "components/preferences/DevicesPreferencesSettings.tsx",
-        "components/waves/drops/signature/DropSignatureDialog.tsx",
-        "lib/device-signing/sign-write.ts"
-      ]
     },
     {
       "id": "desktop.delegation-index-upgrade",

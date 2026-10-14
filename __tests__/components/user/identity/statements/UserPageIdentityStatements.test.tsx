@@ -53,6 +53,15 @@ jest.mock("@tanstack/react-query");
 const useQueryMock = useQuery as jest.Mock;
 
 describe("UserPageIdentityStatements", () => {
+  it("does not mount generic statement guidance as a wallet tooltip", () => {
+    useQueryMock.mockReturnValue({ isLoading: false, data: [] });
+    const { container } = render(
+      <UserPageIdentityStatements profile={profile} />
+    );
+    expect(container.querySelector("#statements-help")).toBeNull();
+    expect(container).not.toHaveTextContent("All statements are optional.");
+  });
+
   it("hydrates the server loading snapshot even if another section already populated the cache", async () => {
     useQueryMock.mockReturnValue({
       isLoading: true,

@@ -3,13 +3,11 @@
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useMemo, type ReactNode } from "react";
-import { Tooltip } from "react-tooltip";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
@@ -172,28 +170,6 @@ export default function UserPageIdentityStatements({
             </div>
           </div>
         </div>
-        <Tooltip
-          id="statements-help"
-          place="top"
-          positionStrategy="fixed"
-          offset={8}
-          opacity={1}
-          style={TOOLTIP_STYLES}
-          className="!tw-w-72 !tw-max-w-[calc(100vw-11rem)] tw-whitespace-normal tw-text-left tw-leading-4 lg:!tw-max-w-none"
-        >
-          <ul className="tw-m-0 tw-list-disc tw-space-y-1 tw-py-2 tw-pl-4 tw-font-normal tw-text-iron-300">
-            <li>{t(locale, "user.profile.identity.statements.optional")}</li>
-            <li>
-              {t(locale, "user.profile.identity.statements.permanentlyPublic")}
-            </li>
-            <li>
-              {t(locale, "user.profile.identity.statements.noVerification")}
-            </li>
-            <li>
-              {t(locale, "user.profile.identity.statements.communityRates")}
-            </li>
-          </ul>
-        </Tooltip>
       </div>
     </div>
   );

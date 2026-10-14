@@ -158,7 +158,6 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
     aboutRouteItem("network-nerd", "/network/nerd", "networkNerd", {
       activePathPrefixes: ["/network/nerd/"],
     }),
-    aboutRouteItem("network-prenodes", "/network/prenodes", "prenodes"),
     aboutRouteItem(
       "network-tdh-historic-boosts",
       "/network/tdh/historic-boosts",

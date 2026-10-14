@@ -1099,8 +1099,9 @@ const USER_PROFILE_IDENTITY_STATEMENT_MESSAGES = objectMessages(
     verificationDialogTitle: "Add verification post",
     desktopTitle: "Add Statements About Your Identity",
     mobileDescription: "Choose a type to add to your public profile.",
+    privacyNotice: "Statements are optional and fully and permanently public.",
     desktopDescription:
-      "Seize users can make statements asserting their identity (eponymous, pseudonymous or organizational). It is up to the community to evaluate if they are accurate.",
+      "6529 users can make statements asserting their identity (eponymous, pseudonymous or organizational).",
     socialTitle: "Social Media Accounts",
     socialDescription: "Your handle on social media platforms.",
     nftTitle: "NFT Accounts",
@@ -1113,7 +1114,7 @@ const USER_PROFILE_IDENTITY_STATEMENT_MESSAGES = objectMessages(
     caveatOptional: "All statements are optional.",
     caveatPublic: "All statements are fully and permanently public.",
     caveatNoVerification:
-      "Seize does not connect to social media accounts or verify posts.",
+      "6529 does not connect to social media accounts or verify posts.",
     caveatCommunityRates: "The community will rate the accuracy of statements.",
   } as const
 );
@@ -1165,6 +1166,8 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     deleteStatement: "Delete",
     copied: "Copied!",
     socialMediaAccounts: "Social media accounts",
+    socialAccountsDisclaimer:
+      "Social accounts are self-declared. 6529 does not connect to social media accounts or verify account ownership or posts.",
     nftAccounts: "NFT accounts",
     contact: "Contact",
     verificationPosts: "Social media verification posts",
@@ -1174,7 +1177,7 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     noVerificationPosts: "No verification posts added yet.",
     addTitle: "Add an ID statement",
     addDescription:
-      "Choose what you want to add. Every statement is public and the community decides whether it is accurate.",
+      "Choose what you want to add. Statements are optional and fully and permanently public.",
     addSocialTitle: "Social media account",
     addSocialDescription: "Share your profile on a social platform.",
     addNftTitle: "NFT account",
@@ -1203,7 +1206,7 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     optional: "All statements are optional.",
     permanentlyPublic: "All statements are fully and permanently public.",
     noVerification:
-      "Seize does not connect to social media accounts or verify posts.",
+      "6529 does not connect to social media accounts or verify posts.",
     communityRates: "The community will rate statement accuracy.",
     addSuccess: "ID statement added.",
     addErrorTitle: "Couldn’t add this ID statement.",
@@ -2984,6 +2987,11 @@ const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
   ...MEME_COLLABORATION_MESSAGES,
+  "network.prenodes.title": "Prenodes",
+  "network.prenodes.pageTitle": "Prenodes | Network",
+  "network.prenodes.deprecation":
+    "6529 Prenodes have been deprecated. Use the 6529 Desktop app to calculate TDH.",
+  "network.prenodes.desktopLink": "Explore 6529 Desktop",
   "header.menu.open": "Open menu",
   "header.menu.close": "Close menu",
   "header.navigation.loading": "Loading navigation…",

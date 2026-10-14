@@ -65,6 +65,12 @@ describe("UserPageIdentityStatementsConsolidatedAddresses", () => {
     );
 
     expect(
+      screen.queryByRole("button", { name: "About identity statements" })
+    ).not.toBeInTheDocument();
+    expect(
+      document.querySelector('[data-tooltip-id="statements-help"]')
+    ).toBeNull();
+    expect(
       screen.getByRole("link", { name: "Add another wallet" })
     ).toHaveAttribute("href", "/safe-collecting/build-consolidation");
     expect(
