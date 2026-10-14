@@ -1493,6 +1493,16 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         exact: true,
       })
     ).toHaveAttribute("aria-expanded", "true");
+    // A scroll-into-view event can arrive after the opening click. It must
+    // not dismiss guidance when the trigger has already reached its position.
+    await page.evaluate(() => document.dispatchEvent(new Event("scroll")));
+    await page.mouse.move(0, 0);
+    await expect(
+      page.getByRole("button", {
+        name: "About identity statements",
+        exact: true,
+      })
+    ).toHaveAttribute("aria-expanded", "true");
     const guidance = page.getByRole("tooltip");
     await expect(guidance).toBeVisible();
     const guidanceBox = await guidance.boundingBox();
