@@ -212,7 +212,6 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
           { label: "xTDH Allocations Dashboard", path: "/xtdh" },
           { label: "Wave Score", path: "/network/wave-score" },
           { label: "Network Nerd", path: "/network/nerd" },
-          { label: "Prenodes", path: "/network/prenodes" },
           {
             label: "TDH Historic Boosts",
             path: "/network/tdh/historic-boosts",
@@ -220,8 +219,11 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         ])
       );
       expect(
-        getChildGroup(aboutChildren, "Safe Collecting").children
-      ).toEqual(
+        flattenMenuChildren(aboutChildren).some(
+          (item) => item.path === "/network/prenodes"
+        )
+      ).toBe(false);
+      expect(getChildGroup(aboutChildren, "Safe Collecting").children).toEqual(
         expect.arrayContaining([
           { label: "Safe Collecting", path: "/safe-collecting" },
           { label: "App Wallets", path: "/tools/app-wallets" },

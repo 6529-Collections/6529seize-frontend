@@ -94,32 +94,27 @@ describe("WaveLeaderboardRightSidebarActivityLog", () => {
 
     const activityRow = container.querySelector(".tw-border-b");
     expect(activityRow).toBeInTheDocument();
-    expect(activityRow).toHaveClass(
-      "tw-border-white/5",
-      "tw-px-1",
-      "tw-py-[13px]"
-    );
+    expect(activityRow).toHaveClass("tw-border-iron-900", "tw-py-3");
   });
 
   it("keeps the timestamp beside the voter without uppercase styling", () => {
     renderComponent();
 
     const timestamp = screen.getByText("5m");
-    const header = screen.getByTitle("Voter: voter_user").parentElement;
-    expect(header).toContainElement(timestamp);
-    expect(header).toHaveClass("tw-items-center", "tw-justify-between");
+    const controls = screen.getByTestId("drop-click-button").parentElement;
+    expect(controls).toContainElement(timestamp);
     expect(timestamp).toHaveClass("tw-text-xs", "tw-text-iron-400");
     expect(timestamp).not.toHaveClass("tw-uppercase");
   });
 
-  it("indents the recipient below the vote details with a decorative arrow", () => {
+  it("groups the recipient with the vote details and a decorative arrow", () => {
     renderComponent();
 
     const recipientRow = screen.getByTitle(
       "Drop creator: author_user"
     ).parentElement;
     const arrow = recipientRow?.querySelector("svg");
-    expect(recipientRow?.parentElement).toHaveClass("tw-pl-7");
+    expect(recipientRow?.parentElement).toHaveClass("tw-pl-8");
     expect(arrow).toHaveAttribute("aria-hidden", "true");
     expect(arrow).toHaveClass("tw-size-3.5", "tw-text-iron-500");
   });
@@ -141,6 +136,18 @@ describe("WaveLeaderboardRightSidebarActivityLog", () => {
     expect(mockOnDropClick).toHaveBeenCalledWith();
   });
 
+  it("preserves keyboard order from voter to drop button to creator", async () => {
+    const user = userEvent.setup();
+    renderComponent();
+
+    await user.tab();
+    expect(screen.getByTitle("Voter: voter_user")).toHaveFocus();
+    await user.tab();
+    expect(screen.getByTestId("drop-click-button")).toHaveFocus();
+    await user.tab();
+    expect(screen.getByTitle("Drop creator: author_user")).toHaveFocus();
+  });
+
   it("displays voter information with profile picture", () => {
     renderComponent();
 
@@ -154,7 +161,7 @@ describe("WaveLeaderboardRightSidebarActivityLog", () => {
       "src",
       expect.stringContaining("voter.jpg")
     );
-    expect(voterPfp).toHaveClass("tw-size-5", "tw-rounded-full");
+    expect(voterPfp).toHaveClass("tw-size-6", "tw-rounded-full");
   });
 
   it("displays voter information without profile picture", () => {
@@ -166,7 +173,7 @@ describe("WaveLeaderboardRightSidebarActivityLog", () => {
     renderComponent({ log: logWithoutVoterPfp });
 
     const voterLink = screen.getByTitle("Voter: voter_user");
-    const placeholderDiv = voterLink.querySelector("div.tw-size-5");
+    const placeholderDiv = voterLink.querySelector("div.tw-size-6");
     expect(placeholderDiv).toBeInTheDocument();
     expect(placeholderDiv).toHaveClass("tw-bg-iron-800");
   });
@@ -325,16 +332,16 @@ describe("WaveLeaderboardRightSidebarActivityLog", () => {
 
     const oldVoteSpan = screen.getByText("1,000 →");
     expect(oldVoteSpan).toHaveClass(
-      "tw-text-sm",
+      "tw-text-xs",
       "tw-text-iron-400",
-      "tw-whitespace-nowrap"
+      "tw-tabular-nums"
     );
 
     const newVoteSpan = getByExactTextContent("1,000 Rep");
     expect(newVoteSpan).toHaveClass(
-      "tw-text-sm",
+      "tw-text-xs",
       "tw-font-semibold",
-      "tw-whitespace-nowrap"
+      "tw-tabular-nums"
     );
   });
 

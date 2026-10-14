@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import React from "react";
 import UserPageIdentityStatementsSocialMediaAccounts from "@/components/user/identity/statements/social-media-accounts/UserPageIdentityStatementsSocialMediaAccounts";
 
@@ -22,6 +22,12 @@ describe("UserPageIdentityStatementsSocialMediaAccounts", () => {
         loading={false}
       />
     );
+    expect(
+      screen.queryByText(
+        "Social accounts are self-declared. 6529 does not connect to social media accounts or verify account ownership or posts."
+      )
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("Social media accounts")).toBeInTheDocument();
     expect(listProps.statements).toBe(statements);
     expect(listProps.profile).toBe(profile);
     expect(listProps.noItemsMessage).toBe(

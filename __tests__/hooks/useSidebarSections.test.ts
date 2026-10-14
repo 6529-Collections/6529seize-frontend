@@ -150,7 +150,6 @@ describe("useSidebarSections", () => {
         href: "/network/nerd",
         activePathPrefixes: ["/network/nerd/"],
       },
-      { name: "Prenodes", href: "/network/prenodes" },
       {
         name: "TDH Historic Boosts",
         href: "/network/tdh/historic-boosts",

@@ -5,17 +5,25 @@
 Identity statements are managed inside the combined `Identity` tab on `/{user}`.
 This surface includes:
 
-- `Consolidated Addresses`
+- The profile’s `Addresses` section, followed by its `ID Statements` heading
 - `Social Media Accounts`
 - `NFT Accounts`
 - `Contact`
 - `Social Media Verification Posts`
 
-On mobile, selecting the `ID Statements` score card opens a compact statements
-card without repeating the profile heading or description. Owners who can edit
-see a compact `Add` action at the right of the `Consolidated Addresses` header.
-Desktop keeps the statements heading and surface in the right side of the
-combined Identity layout.
+On mobile, selecting the `ID Statements` score card opens the addresses and
+statements card. Desktop shows the same content in the right side of the
+combined Identity layout. The profile’s personalized `Addresses` heading comes
+first, with its wallet rows and actions directly below. A divider introduces the
+profile’s `ID Statements` heading, information button, and compact owner-only
+`Add` action. Both section headings use the same compact 18px type on desktop
+and mobile, with natural wrapping for longer names. There is no separate
+`Consolidated Addresses` label.
+
+The information button beside `ID Statements` opens a tooltip on hover, keyboard
+focus, or tap. It explains that statements are optional and permanently public,
+that social accounts are self-declared and unverified by 6529, and that the
+community rates statement accuracy. Escape or clicking outside dismisses it.
 
 ## Location in the Site
 
@@ -35,11 +43,13 @@ combined Identity layout.
 ## User Journey
 
 1. Open `/{user}` and show the `ID Statements` surface.
-2. Review `Consolidated Addresses` and statement sections.
+2. Review the profile’s `Addresses`, then its `ID Statements` sections.
 3. If `Add` is visible, open the add-statements sheet on mobile or dialog on
    desktop.
-4. Choose one of the four compact statement groups. On mobile, expand `About
-identity statements` when the public-visibility notes are needed.
+4. Review the visible note that statements are optional and fully and permanently
+   public, then choose one of the four compact statement groups. The note stays
+   visible in the entry forms. On mobile, `About identity statements` also
+   contains the social-account connection and verification disclaimer.
 5. Choose a platform or statement type, enter a value, then select `Save`.
    For `Other` NFT accounts, enter both a short display name and a secure HTTPS
    URL.
@@ -96,8 +106,11 @@ OpenSea` actions. Desktop retains compact external-link actions.
 - `Primary` badge marks the active primary wallet.
 - `Wallet Checker` is shown when the profile has a primary or consolidated
   wallet address.
-- The `Consolidated Addresses` header shows the wallet count against the
+- The personalized `Addresses` header shows the wallet count against the
   4-wallet limit, for example `2 of 4 wallets`.
+- `Wallet Checker` and `Add another wallet` share equal-width columns when both
+  are available. The wallet helper sentence wraps naturally with the available
+  width.
 - `Add another wallet` is shown beside `Wallet Checker` only when the connected
   wallet belongs to the viewed profile, no proxy profile is active, a primary
   or consolidated wallet address is available, and the profile has fewer than
@@ -185,7 +198,9 @@ in your wallet...`, then confirmation or error). On success, a success toast
 
 - All statements are optional.
 - All statements are fully and permanently public.
-- Seize does not connect to social media accounts or verify posts.
+- Social accounts are self-declared. The information tooltip beside the
+  `ID Statements` heading explains that 6529 does not connect to social media
+  accounts or verify account ownership or posts.
 - The community rates statement accuracy.
 - The statements interface uses canonical `en-US` messages. Locales without
   translated statement keys currently show English fallback copy while the

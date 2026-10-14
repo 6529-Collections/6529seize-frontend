@@ -1,6 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 
 import {
+  captureSafeScreenshot,
   expect,
   expectNoHorizontalOverflow,
   test,
@@ -191,9 +192,8 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       await statements.click();
     }
 
-    await expect(
-      page.getByRole("link", { name: "Wallet Checker" })
-    ).toBeVisible();
+    const walletChecker = page.getByRole("link", { name: "Wallet Checker" });
+    await expect(walletChecker).toBeVisible();
     await expect(page.getByText(/^\d of 4 wallets$/).first()).toBeVisible();
     const addWallet = page.getByRole("link", {
       name: "Add another wallet",
@@ -204,6 +204,80 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       "href",
       "/safe-collecting/build-consolidation"
     );
+    const addressesHeading = page.getByRole("heading", {
+      name: /Addresses$/,
+      level: 3,
+    });
+    const statementsHeading = page.getByRole("heading", {
+      name: /ID Statements$/,
+      level: 3,
+    });
+    const addStatement = page.getByRole("button", { name: "Add", exact: true });
+    await expect(addressesHeading).toBeVisible();
+    await expect(statementsHeading).toBeVisible();
+    await expect(addStatement).toBeVisible();
+    await expect(addressesHeading).toHaveCSS("font-size", "18px");
+    await expect(statementsHeading).toHaveCSS("font-size", "18px");
+    const statementHelp = page.getByRole("button", {
+      name: "About identity statements",
+      exact: true,
+    });
+    await expect(statementHelp).toBeVisible();
+    await expect(
+      page
+        .getByRole("button", { name: "About identity statements", exact: true })
+        .locator("svg")
+    ).toHaveCSS("width", "18px");
+    await expect(
+      page
+        .getByRole("button", { name: "About identity statements", exact: true })
+        .locator("svg")
+    ).toHaveCSS("height", "18px");
+    await expect(statementHelp).toHaveCSS("width", "32px");
+    await expect(statementHelp).toHaveCSS("height", "32px");
+    const checkerBox = await walletChecker.boundingBox();
+    const addWalletBox = await addWallet.boundingBox();
+    const statementHeadingBox = await statementsHeading.boundingBox();
+    const addStatementBox = await addStatement.boundingBox();
+    const helpBox = await statementHelp.boundingBox();
+    expect(checkerBox).not.toBeNull();
+    expect(addWalletBox).not.toBeNull();
+    expect(statementHeadingBox).not.toBeNull();
+    expect(addStatementBox).not.toBeNull();
+    expect(helpBox).not.toBeNull();
+    expect(
+      statementHeadingBox!.x + statementHeadingBox!.width
+    ).toBeLessThanOrEqual(helpBox!.x);
+    expect(helpBox!.x + helpBox!.width).toBeLessThanOrEqual(addStatementBox!.x);
+    expect(
+      Math.abs(checkerBox!.width - addWalletBox!.width)
+    ).toBeLessThanOrEqual(1);
+    expect(Math.abs(checkerBox!.y - addWalletBox!.y)).toBeLessThanOrEqual(1);
+    expect(addWalletBox!.y).toBeLessThan(statementHeadingBox!.y);
+    expect(addStatementBox!.height).toBeLessThan(addWalletBox!.height);
+    expect(
+      Math.abs(
+        statementHeadingBox!.y +
+          statementHeadingBox!.height / 2 -
+          (addStatementBox!.y + addStatementBox!.height / 2)
+      )
+    ).toBeLessThanOrEqual(1);
+    await expectNoHorizontalOverflow(page);
+
+    await captureSafeScreenshot(page, test.info(), "profile-identity-headings");
+
+    await addStatement.click();
+    const addDialog = page.getByRole("dialog");
+    await expect(addDialog).toBeVisible();
+    await expect(
+      addDialog.getByText(
+        "Statements are optional and fully and permanently public.",
+        { exact: true }
+      )
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(addDialog).toBeHidden();
+    await expect(addStatement).toBeFocused();
     await addWallet.click();
 
     await expect(page).toHaveURL(
