@@ -39,7 +39,7 @@ export type ContractSignatureVerifier = (args: {
  * and attachments are compared by count: requests may reference uploads by id
  * while the drop shows their resolved URLs.
  */
-export interface DisplayedDropContent {
+interface DisplayedDropContent {
   readonly title: string | null;
   readonly parts: readonly {
     readonly content: string | null;
