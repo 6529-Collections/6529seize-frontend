@@ -82,8 +82,13 @@ describe("About index page", () => {
       screen.getByRole("link", { name: /open page: network nerd/i })
     ).toHaveAttribute("href", "/network/nerd");
     expect(
-      screen.getByRole("link", { name: /open page: prenodes/i })
-    ).toHaveAttribute("href", "/network/prenodes");
+      screen.queryByRole("link", { name: /open page: prenodes/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen
+        .getAllByRole("link", { hidden: true })
+        .every((link) => link.getAttribute("href") !== "/network/prenodes")
+    ).toBe(true);
   });
 
   it("does not render the sticky contents dropdown", () => {
@@ -102,5 +107,8 @@ describe("About index page", () => {
     render(<AboutIndexPage />);
 
     expect(screen.queryByText("Subscription Minting")).toBeNull();
+    expect(
+      screen.queryByRole("link", { name: /prenodes/i })
+    ).not.toBeInTheDocument();
   });
 });

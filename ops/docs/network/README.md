@@ -31,7 +31,7 @@ reference routes.
 - [Network Stats](feature-network-stats.md)
 - [Network Definitions](feature-network-definitions.md)
 - [Network Levels](feature-network-levels.md)
-- [Prenodes Status](feature-prenodes-status.md)
+- [Prenodes Deprecation](feature-prenodes-status.md)
 
 ### TDH and xTDH
 
