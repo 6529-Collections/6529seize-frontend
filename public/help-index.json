@@ -8482,11 +8482,11 @@
       ],
       "facts": [
         "World Time Zones lives at /tools/time-zones and is listed under Builder Tools on /tools and under About -> Data & Developer Tools.",
-        "It shows a live UTC clock, the viewer's own time zone, a world map colored by each zone's current UTC offset with optional night-side shading, and a searchable, sortable table of every IANA time zone.",
-        "Hover, tap or focus a map zone to see its name, IANA zone, local time, UTC offset, daylight saving status, and how many other zones share its clock. With the map focused, arrow keys move between zones from west to east.",
+        "It shows a live UTC clock, the viewer's own time zone, a world map with one dot per IANA time zone at its principal city colored by the zone's current UTC offset, optional night-side shading, and a searchable, sortable table of every IANA time zone.",
+        "Hover, tap or focus a map dot to see its city, zone name, IANA zone, local time, UTC offset and daylight saving status. With the map focused, arrow keys move between zones from west to east. Alias zones such as Europe/Amsterdam and Etc zones are in the table without a dot.",
         "Table search matches city, IANA zone, region, zone name, or a numeric offset such as +5:30; the unfiltered list starts with 40 rows and Show all expands it.",
         "Times, offsets, zone names and daylight saving status come from the browser's IANA Time Zone Database through Intl; the page makes no API requests and pauses updates while the tab is hidden.",
-        "Zone boundaries come from timezone-boundary-builder (OpenStreetMap data, ODbL); the page credits its sources in a Data sources section."
+        "The map uses public-domain data: Natural Earth land outlines and zone locations from the IANA Time Zone Database. The page credits both in a Data sources section."
       ],
       "canonical_path": "/tools/time-zones",
       "related_paths": ["/tools", "/tools/block-finder"],

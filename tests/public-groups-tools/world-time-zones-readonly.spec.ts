@@ -25,7 +25,8 @@ test.describe("World Time Zones tool @surface @medium @large @readonly", () => {
 
     const map = page.getByRole("listbox", { name: "Time zone map" });
     await expect(map).toBeVisible({ timeout: 30000 });
-    expect(await map.getByRole("option").count()).toBeGreaterThan(60);
+    // One dot per zone in tzdata zone1970.tab.
+    expect(await map.getByRole("option").count()).toBeGreaterThan(300);
 
     // APG listbox: focus stays on the map and aria-activedescendant follows
     // the selected option as the keys move west to east.

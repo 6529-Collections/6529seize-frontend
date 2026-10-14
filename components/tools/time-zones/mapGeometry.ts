@@ -2,18 +2,23 @@
 // projection the data generator uses (scripts/generate-world-time-zones.cjs),
 // a solar day/night terminator, and the offset color scale.
 
+// One IANA zone at its principal location (zone1970.tab), projected.
 export type WorldTimeZoneMapZone = {
   readonly tzid: string;
-  readonly members: readonly string[];
-  readonly d: string;
+  readonly x: number;
+  readonly y: number;
 };
 
 export type WorldTimeZoneMapData = {
   readonly viewBox: string;
   readonly projection: { readonly name: string; readonly scale: number };
-  readonly source: { readonly release: string };
+  readonly source: { readonly naturalEarth: string; readonly tzdata: string };
+  readonly sphere: string;
+  readonly graticule: string;
   readonly land: string;
   readonly zones: readonly WorldTimeZoneMapZone[];
+  // IANA alias name -> mapped zone, from tzdata's `backward` file.
+  readonly links: Readonly<Record<string, string>>;
 };
 
 type Point = readonly [number, number];
@@ -186,34 +191,32 @@ export function buildNightView(
   };
 }
 
-// Diverging scale: zones behind UTC run from the neutral midpoint through
-// blue, zones ahead of UTC through red, with equal steps per hour on both
-// arms. Derived from a dark-surface blue ramp and a red ramp matched to the
-// same OKLCH lightness steps.
-const NEUTRAL_MIDPOINT = "#383835";
+// Diverging scale for zone dots: UTC is a light neutral, zones behind UTC
+// run through blue and zones ahead of UTC through red, with equal steps per
+// hour on both arms. The blue ramp and the red ramp share the same OKLCH
+// lightness steps, so both arms darken at the same rate. Dots carry a light
+// ring, so every step stays visible on the dark map.
+const NEUTRAL_MIDPOINT = "#d4d4cf";
 const WEST_RAMP = [
   NEUTRAL_MIDPOINT,
-  "#104281",
-  "#1c5cab",
-  "#2a78d6",
-  "#5598e7",
-  "#86b6ef",
   "#b7d3f6",
+  "#86b6ef",
+  "#5598e7",
+  "#2a78d6",
+  "#1c5cab",
+  "#104281",
 ] as const;
 const EAST_RAMP = [
   NEUTRAL_MIDPOINT,
-  "#762319",
-  "#9e3528",
-  "#c74a3a",
-  "#dc7262",
-  "#ea9b8e",
   "#f4c3ba",
+  "#ea9b8e",
+  "#dc7262",
+  "#c74a3a",
+  "#9e3528",
+  "#762319",
 ] as const;
 const MAX_OFFSET_MINUTES = 14 * 60;
-export const UNKNOWN_ZONE_COLOR = "#26272b";
-// Open ocean keeps only a faint trace of its offset hue so land zones lead.
-const OCEAN_BASE_COLOR = "#17171c";
-const OCEAN_MUTE_RATIO = 0.78;
+export const UNKNOWN_ZONE_COLOR = "#60606c";
 
 function hexToRgb(hex: string): [number, number, number] {
   const value = Number.parseInt(hex.slice(1), 16);
@@ -238,15 +241,6 @@ export function getOffsetColor(offsetMinutes: number): string {
   const lower = ramp[lowerIndex] ?? NEUTRAL_MIDPOINT;
   const upper = ramp[Math.min(lowerIndex + 1, ramp.length - 1)] ?? lower;
   return mixHex(lower, upper, position - lowerIndex);
-}
-
-// Muted color for open ocean (nautical Etc/GMT time) at the same offset.
-export function getOceanOffsetColor(offsetMinutes: number): string {
-  return mixHex(
-    getOffsetColor(offsetMinutes),
-    OCEAN_BASE_COLOR,
-    OCEAN_MUTE_RATIO
-  );
 }
 
 export const OFFSET_LEGEND_HOURS = Array.from(

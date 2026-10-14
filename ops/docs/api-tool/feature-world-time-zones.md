@@ -6,8 +6,8 @@
 world.
 
 - A live UTC clock and the viewer's own time zone.
-- A world map with every time-zone polygon colored by its current UTC offset,
-  with an optional night-side shading.
+- A world map with one dot per IANA time zone at its principal city, colored
+  by the zone's current UTC offset, with an optional night-side shading.
 - A searchable, sortable table of every IANA time zone with its region, UTC
   offset, local time and daylight saving status.
 
@@ -32,10 +32,9 @@ saving rules, and it makes no API requests.
 
 1. Read the UTC clock (updates every second) and `Your time zone` (local time,
    zone name, UTC offset and IANA ID).
-2. On the map, hover, tap or focus a zone. `Selected zone` shows its name, IANA
-   zone, local time and date, UTC offset, daylight saving status, and how many
-   other IANA zones share the same clock. The viewer's zone is selected by
-   default and has a dashed outline.
+2. On the map, hover, tap or focus a dot. `Selected zone` shows its city, zone
+   name, IANA zone, local time and date, UTC offset and daylight saving
+   status. The viewer's zone is selected by default and has a dashed ring.
 3. Optional: turn `Shade the night side` on or off.
 4. In `All time zones`, search by city, IANA zone, region, zone name, or
    offset, or sort by `Zone`, `Region` or `UTC offset`.
@@ -44,19 +43,24 @@ saving rules, and it makes no API requests.
 
 ## Map Details
 
-- One polygon per distinct current clock. The boundary release merges zones
-  whose clocks agree from its release date on, so, for example, Paris, Berlin
-  and Madrid share one polygon. `Selected zone` names the representative IANA
-  zone and the number of other zones that share its clock.
-- Ocean areas use nautical `Etc/GMT±N` zones, so the whole globe is covered.
-  Open ocean is drawn in a muted shade of the same colors (`Open ocean
-(muted)` in the legend). Land zones use the full colors with darker
-  borders, so boundaries on land, including half- and quarter-hour zones such
-  as India and Nepal, stand out. Open ocean stays hoverable and focusable.
-- Colors: zones behind UTC are blue, zones ahead of UTC are red, and UTC itself
-  is neutral gray. Lighter colors are farther from UTC.
-- The selected zone has a white outline on a dark halo; your own zone has a
-  dashed outline.
+- The map shows land outlines in an Equal Earth projection, with faint lines at
+  the edges of the 24 nautical time-zone bands.
+- Each dot is one IANA zone at its principal location from the time-zone
+  database (`zone1970.tab`), for example Kolkata for `Asia/Kolkata`. Dot colors
+  follow the zone's current UTC offset and change on their own when daylight
+  saving starts or ends.
+- Zones without a location of their own, such as `Etc/` zones and alias names
+  like `Europe/Amsterdam`, appear in the table and clocks but have no dot. A
+  viewer whose browser reports an alias is matched to the dot of the zone it
+  links to.
+- Colors: UTC is light gray, zones behind UTC are blue and zones ahead of UTC
+  are red, darker the farther they are from UTC. Every dot has a light ring so
+  it stays visible on land, sea and the night side.
+- Hover or tap picks the nearest dot within reach, so dots stay easy to hit
+  where they are close together. In dense areas, such as Indiana or Argentina,
+  the table and the keyboard reach every zone.
+- The selected zone has a white ring on a dark halo; your own zone has a dashed
+  ring.
 - The night side is computed from the sun's current position and shaded, with
   a thin line marking the day/night boundary.
 
@@ -103,19 +107,20 @@ saving rules, and it makes no API requests.
 - While the map data loads, the map area shows `Loading the map…`.
 - If the map data fails to load, the map area shows an error with `Try again`.
   The table still works, using the browser's own list of time zones.
-- Zones the browser's time-zone database does not include are shown in gray on
-  the map, and their details explain that their time cannot be shown. The table
+- Zones the browser's time-zone database does not include are shown as gray
+  dots, and their details explain that their time cannot be shown. The table
   leaves them out and states how many were skipped.
 - If the browser does not report a time zone, `Your time zone` says so.
 
-## Data Sources and License
+## Data Sources
 
-- Time-zone boundaries: [timezone-boundary-builder](https://github.com/evansiroky/timezone-boundary-builder),
-  derived from OpenStreetMap data, © OpenStreetMap contributors, available
-  under the Open Database License (ODbL) 1.0. The page credits the sources in
-  its `Data sources` section.
+- Land outline: [Natural Earth](https://www.naturalearthdata.com/) 1:50m land,
+  public domain.
+- Zone locations and alias names: the
+  [IANA Time Zone Database](https://www.iana.org/time-zones), public domain.
+- The page credits both in its `Data sources` section.
 - The simplified map data is bundled with the site and loaded only by this
-  page. Its release, checksums, and regeneration steps are recorded in
+  page. Its versions, checksums and regeneration steps are recorded in
   `components/tools/time-zones/data/README.md`.
 
 ## Limitations / Notes
@@ -123,8 +128,7 @@ saving rules, and it makes no API requests.
 - City names come from IANA zone IDs (for example `Sao Paulo` from
   `America/Sao_Paulo`); zone names, times and dates are localized by the
   browser.
-- The map has one polygon per current clock, not one per IANA zone; the table
-  lists every zone.
+- The map marks each zone's principal city, not its boundaries.
 - Browsers may report a legacy zone ID (such as `Asia/Calcutta`). The page
   matches it to the current IANA name on the map and in the table.
 

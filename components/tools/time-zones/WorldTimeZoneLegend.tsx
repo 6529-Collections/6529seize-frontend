@@ -4,17 +4,9 @@ import { formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
-import {
-  getOceanOffsetColor,
-  getOffsetColor,
-  OFFSET_LEGEND_HOURS,
-} from "./mapGeometry";
+import { getOffsetColor, OFFSET_LEGEND_HOURS } from "./mapGeometry";
 
 const LABELLED_HOURS = new Set([-12, -6, 0, 6, 14]);
-// Open ocean uses the same scale, muted: the chip shows that muted range.
-const OCEAN_SWATCH_GRADIENT = `linear-gradient(90deg, ${[-12, -6, 0, 6, 14]
-  .map((hour) => getOceanOffsetColor(hour * 60))
-  .join(", ")})`;
 
 export default function WorldTimeZoneLegend({
   locale,
@@ -66,15 +58,15 @@ export default function WorldTimeZoneLegend({
         <li className="tw-flex tw-items-center tw-gap-2">
           <span
             aria-hidden="true"
-            className="tw-inline-block tw-h-3 tw-w-5 tw-rounded-sm tw-ring-1 tw-ring-white/10"
-            style={{ backgroundImage: OCEAN_SWATCH_GRADIENT }}
+            className="tw-inline-block tw-size-2.5 tw-rounded-full tw-border tw-border-solid tw-border-white/90"
+            style={{ backgroundColor: getOffsetColor(0) }}
           />
-          {t(locale, "tools.timeZones.map.legend.ocean")}
+          {t(locale, "tools.timeZones.map.legend.zoneDot")}
         </li>
         <li className="tw-flex tw-items-center tw-gap-2">
           <span
             aria-hidden="true"
-            className="tw-inline-block tw-h-3 tw-w-5 tw-rounded-sm tw-border tw-border-dashed tw-border-white"
+            className="tw-inline-block tw-size-3.5 tw-rounded-full tw-border tw-border-dashed tw-border-white"
           />
           {t(locale, "tools.timeZones.map.legend.yourZone")}
         </li>

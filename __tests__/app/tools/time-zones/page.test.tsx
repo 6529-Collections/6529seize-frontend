@@ -26,7 +26,7 @@ describe("World Time Zones page", () => {
   it("exposes app metadata", () => {
     expect(metadata.title).toBe("World Time Zones | Tools");
     expect(metadata.description).toBe(
-      `Live world map of every time zone with its current local time and UTC offset. | ${domain}`
+      `Live world map of time zones with the current local time and UTC offset in every IANA time zone. | ${domain}`
     );
   });
 
@@ -37,7 +37,12 @@ describe("World Time Zones page", () => {
       screen.getByRole("heading", { level: 1, name: "World Time Zones" })
     ).toBeInTheDocument();
     const options = within(map).getAllByRole("option");
-    expect(options.length).toBeGreaterThan(60);
+    // One dot per zone in tzdata's zone1970.tab.
+    expect(options.length).toBeGreaterThan(300);
+    expect(options[0]).toHaveAttribute(
+      "aria-label",
+      expect.stringMatching(/^.+, .+, UTC/)
+    );
     // APG listbox: the listbox is the single tab stop and points at the
     // selected option with aria-activedescendant; options never take focus.
     expect(map).toHaveAttribute("tabindex", "0");
@@ -108,10 +113,10 @@ describe("World Time Zones page", () => {
     expect(zoneD).toHaveAttribute("aria-selected", "true");
 
     // Keyboard moves are announced once, after the keys pause, with the time.
-    const zoneName = zoneD.getAttribute("aria-label")?.split(", UTC")[0] ?? "";
+    const city = zoneD.getAttribute("aria-label")?.split(", ")[0] ?? "";
     expect(
       await screen.findByText(
-        new RegExp(String.raw`^${escapeRegExp(zoneName)}: .+ local time$`)
+        new RegExp(String.raw`^${escapeRegExp(city)} \(.+\): .+ local time$`)
       )
     ).toBeInTheDocument();
   });
@@ -147,21 +152,18 @@ describe("World Time Zones page", () => {
     ).toBeInTheDocument();
   });
 
-  it("credits the open data sources in new tabs", async () => {
+  it("credits the public-domain data sources in new tabs", async () => {
     await renderLoadedPage();
     const sources = screen.getByRole("region", { name: "Data sources" });
-    for (const name of [
-      "timezone-boundary-builder",
-      "OpenStreetMap",
-      "Open Database License (ODbL)",
-      "IANA Time Zone Database",
-    ]) {
+    for (const name of ["Natural Earth", "IANA Time Zone Database"]) {
       const link = within(sources).getByRole("link", {
         name: `${name} (opens in a new tab)`,
       });
       expect(link).toHaveAttribute("target", "_blank");
       expect(link).toHaveAttribute("rel", "noopener noreferrer");
     }
-    expect(sources).toHaveTextContent("© OpenStreetMap contributors");
+    expect(sources).toHaveTextContent(
+      /^Data sourcesLand outline: Natural Earth.*\(public domain\)\. Zone locations: IANA Time Zone Database.*\(public domain\)\./
+    );
   });
 });

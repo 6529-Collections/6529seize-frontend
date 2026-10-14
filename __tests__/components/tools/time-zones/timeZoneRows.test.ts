@@ -1,6 +1,5 @@
 import {
-  buildRowBasesFromIds,
-  buildRowBasesFromMapZones,
+  buildRowBases,
   buildTimeZoneRow,
   filterTimeZoneRows,
   getCityName,
@@ -78,15 +77,16 @@ describe("zone naming", () => {
     expect(getRegionKey("UTC")).toBe("other");
   });
 
-  it("lists each member zone once and leaves out nautical Etc zones", () => {
-    const bases = buildRowBasesFromMapZones([
-      {
-        tzid: "Asia/Kolkata",
-        members: ["Asia/Kolkata", "Asia/Colombo"],
-        d: "M0 0z",
-      },
-      { tzid: "Etc/GMT+12", members: ["Etc/GMT+12"], d: "M0 0z" },
-    ]);
+  it("lists mapped zones, then browser zones that are not the same zone", () => {
+    const bases = buildRowBases(
+      [
+        { tzid: "Asia/Kolkata", x: 1400, y: 380 },
+        { tzid: "Europe/Brussels", x: 1010, y: 210 },
+      ],
+      // A legacy name for a mapped zone, a tzdata alias, an Etc zone and an
+      // exact duplicate.
+      ["Asia/Calcutta", "Europe/Amsterdam", "Etc/GMT-3", "Europe/Brussels"]
+    );
     expect(bases).toEqual([
       {
         id: "Asia/Kolkata",
@@ -95,15 +95,31 @@ describe("zone naming", () => {
         mapZoneId: "Asia/Kolkata",
       },
       {
-        id: "Asia/Colombo",
-        city: "Colombo",
-        regionKey: "asia",
-        mapZoneId: "Asia/Kolkata",
+        id: "Europe/Brussels",
+        city: "Brussels",
+        regionKey: "europe",
+        mapZoneId: "Europe/Brussels",
+      },
+      {
+        id: "Europe/Amsterdam",
+        city: "Amsterdam",
+        regionKey: "europe",
+        mapZoneId: null,
+      },
+      {
+        id: "Etc/GMT-3",
+        city: "GMT-3",
+        regionKey: "other",
+        mapZoneId: null,
       },
     ]);
-    expect(
-      ids(buildRowBasesFromIds(["UTC", "Etc/GMT-3", "Asia/Tokyo"]))
-    ).toEqual(["Asia/Tokyo"]);
+  });
+
+  it("uses the browser's list when there is no map data", () => {
+    expect(ids(buildRowBases([], ["Asia/Tokyo", "UTC"]))).toEqual([
+      "Asia/Tokyo",
+      "UTC",
+    ]);
   });
 
   it("skips zones the browser does not know", () => {

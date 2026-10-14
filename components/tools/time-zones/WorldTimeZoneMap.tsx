@@ -2,22 +2,22 @@
 
 import {
   memo,
+  useEffect,
+  useRef,
   useState,
   type FocusEvent,
   type KeyboardEvent,
+  type MouseEvent,
   type PointerEvent,
-  type SyntheticEvent,
 } from "react";
 
 export type MapSelectionSource = "keyboard" | "pointer";
 
 export type MapZoneView = {
   readonly tzid: string;
-  readonly d: string;
-  // Full offset color, drawn on land.
+  readonly x: number;
+  readonly y: number;
   readonly fill: string;
-  // Muted offset color for open ocean (nautical Etc/GMT time).
-  readonly oceanFill: string;
   readonly label: string;
 };
 
@@ -28,6 +28,8 @@ type MapNightView = {
 
 type WorldTimeZoneMapProps = {
   readonly viewBox: string;
+  readonly sphere: string;
+  readonly graticule: string;
   readonly land: string;
   // Ordered west to east by current offset; this is the arrow-key order.
   readonly zones: readonly MapZoneView[];
@@ -42,19 +44,35 @@ type WorldTimeZoneMapProps = {
   readonly onSelect: (zoneId: string, source: MapSelectionSource) => void;
 };
 
-// Merged boundary zones mix land and open ocean, so each zone is drawn
-// twice: a muted ocean fill that carries the listbox option and pointer
-// input, then the full offset color clipped to land, where real IANA borders
-// matter.
-const LAND_CLIP_ID = "world-time-zones-land-clip";
-const OCEAN_BORDER_COLOR = "#0d0d0f";
-const LAND_BORDER_COLOR = "#050506";
-// Outlines pair a dark halo with a white line, so one of the two contrasts at
-// least 3:1 with any zone color, light or dark, land or ocean.
+const OPTION_ID_PREFIX = "world-time-zone-option-";
+// Dot sizes in CSS pixels, kept constant as the map scales.
+const DOT_RADIUS_PX = 4.5;
+const COMPACT_DOT_RADIUS_PX = 3.25;
+const COMPACT_MAP_WIDTH_PX = 600;
+// A pointer or tap selects the nearest dot within this distance, so each dot
+// owns the area around it rather than only its few drawn pixels.
+const HIT_RADIUS_PX = 22;
+const DEFAULT_PIXELS_PER_UNIT = 0.43;
+const DOT_RING_COLOR = "#f5f5f5";
+// Outlines pair a dark halo with a white ring, so one of the two contrasts at
+// least 3:1 with the dot, the land, the ocean and the night shading.
 const OUTLINE_HALO_COLOR = "#000000";
 const OUTLINE_COLOR = "#ffffff";
 
-const OPTION_ID_PREFIX = "world-time-zone-option-";
+type OutlineVariant = "viewer" | "preview" | "selected" | "focused";
+
+const OUTLINE_GAPS_PX: Record<OutlineVariant, number> = {
+  viewer: 4,
+  preview: 3,
+  selected: 4,
+  focused: 5,
+};
+const OUTLINE_WIDTHS_PX: Record<OutlineVariant, number> = {
+  viewer: 1.5,
+  preview: 1.5,
+  selected: 2.5,
+  focused: 3.5,
+};
 
 // Stable, unique element ids for aria-activedescendant ("Etc/GMT+12" and
 // "Etc/GMT-12" must not collide).
@@ -81,129 +99,57 @@ function getNextIndex(key: string, index: number, count: number) {
   }
 }
 
-function getZoneIdFromEvent(event: SyntheticEvent): string | null {
-  const target = event.target;
-  return target instanceof Element
+function parseViewBox(viewBox: string): { width: number; height: number } {
+  const [, , width = 1, height = 1] = viewBox.split(" ").map(Number);
+  return { width, height };
+}
+
+function findNearestZone(
+  zones: readonly MapZoneView[],
+  x: number,
+  y: number,
+  maxDistance: number
+): MapZoneView | null {
+  let nearest: MapZoneView | null = null;
+  let nearestDistance = maxDistance * maxDistance;
+  for (const zone of zones) {
+    const distance = (zone.x - x) ** 2 + (zone.y - y) ** 2;
+    if (distance <= nearestDistance) {
+      nearest = zone;
+      nearestDistance = distance;
+    }
+  }
+  return nearest;
+}
+
+function getDirectZoneId(target: EventTarget): string | null {
+  return target instanceof SVGElement
     ? (target.closest<SVGElement>("[data-zone-id]")?.dataset["zoneId"] ?? null)
     : null;
 }
 
-// Options never take DOM focus: the listbox keeps focus and points at the
-// selected option with aria-activedescendant.
-function ZonePathView({
-  zone,
-  isSelected,
-}: {
-  readonly zone: MapZoneView;
-  readonly isSelected: boolean;
-}) {
-  return (
-    <path
-      id={getOptionId(zone.tzid)}
-      data-zone-id={zone.tzid}
-      d={zone.d}
-      fill={zone.oceanFill}
-      fillRule="evenodd"
-      stroke={OCEAN_BORDER_COLOR}
-      strokeOpacity={0.6}
-      strokeWidth={0.5}
-      vectorEffect="non-scaling-stroke"
-      role="option"
-      aria-selected={isSelected}
-      aria-label={zone.label}
-      className="tw-cursor-pointer tw-transition-[fill] tw-duration-300 motion-reduce:tw-transition-none"
-    />
-  );
-}
+// Tracks how many CSS pixels one map unit spans, so dots, rings and hit
+// areas keep their on-screen size at every width.
+function usePixelsPerUnit(viewBoxWidth: number) {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [pixelsPerUnit, setPixelsPerUnit] = useState(DEFAULT_PIXELS_PER_UNIT);
 
-// A zone re-renders only when its own fill, label or selection changes.
-const ZonePath = memo(ZonePathView);
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg || typeof ResizeObserver === "undefined") {
+      return;
+    }
+    const observer = new ResizeObserver(([entry]) => {
+      const width = entry?.contentRect.width ?? 0;
+      if (width > 0) {
+        setPixelsPerUnit(width / viewBoxWidth);
+      }
+    });
+    observer.observe(svg);
+    return () => observer.disconnect();
+  }, [viewBoxWidth]);
 
-// Full-color land fills with darker zone borders, clipped to the land mask.
-function LandLayerView({
-  land,
-  zones,
-}: {
-  readonly land: string;
-  readonly zones: readonly MapZoneView[];
-}) {
-  return (
-    <>
-      <defs>
-        <clipPath id={LAND_CLIP_ID}>
-          <path d={land} />
-        </clipPath>
-      </defs>
-      <g clipPath={`url(#${LAND_CLIP_ID})`}>
-        {zones.map((zone) => (
-          <path
-            key={zone.tzid}
-            d={zone.d}
-            fill={zone.fill}
-            fillRule="evenodd"
-            stroke={LAND_BORDER_COLOR}
-            strokeWidth={0.75}
-            vectorEffect="non-scaling-stroke"
-            className="tw-transition-[fill] tw-duration-300 motion-reduce:tw-transition-none"
-          />
-        ))}
-      </g>
-      <path
-        d={land}
-        fill="none"
-        stroke="#ffffff"
-        strokeOpacity={0.28}
-        strokeWidth={0.5}
-        vectorEffect="non-scaling-stroke"
-      />
-    </>
-  );
-}
-
-const LandLayer = memo(LandLayerView);
-
-type OutlineVariant = "viewer" | "preview" | "selected" | "focused";
-
-// White line widths per state; the dark halo is always wider, so the pair
-// keeps at least 3:1 against any zone color, ocean or night shading. The
-// keyboard-focused option gets the heaviest outline.
-const OUTLINE_WIDTHS: Record<OutlineVariant, number> = {
-  viewer: 1.5,
-  preview: 1.5,
-  selected: 2.5,
-  focused: 3.5,
-};
-
-function ZoneOutline({
-  zone,
-  variant,
-}: {
-  readonly zone: MapZoneView;
-  readonly variant: OutlineVariant;
-}) {
-  const width = OUTLINE_WIDTHS[variant];
-  return (
-    <>
-      <path
-        d={zone.d}
-        fill="none"
-        fillRule="evenodd"
-        stroke={OUTLINE_HALO_COLOR}
-        strokeOpacity={0.9}
-        strokeWidth={width + (variant === "focused" ? 3 : 2)}
-        vectorEffect="non-scaling-stroke"
-      />
-      <path
-        d={zone.d}
-        fill="none"
-        fillRule="evenodd"
-        stroke={OUTLINE_COLOR}
-        strokeWidth={width}
-        strokeDasharray={variant === "viewer" ? "5 3" : undefined}
-        vectorEffect="non-scaling-stroke"
-      />
-    </>
-  );
+  return { svgRef, pixelsPerUnit };
 }
 
 function matchesFocusVisible(element: Element): boolean {
@@ -214,6 +160,118 @@ function matchesFocusVisible(element: Element): boolean {
   }
 }
 
+// Options never take DOM focus: the listbox keeps focus and points at the
+// selected option with aria-activedescendant.
+function ZoneDotView({
+  zone,
+  radius,
+  ringWidth,
+  isSelected,
+}: {
+  readonly zone: MapZoneView;
+  readonly radius: number;
+  readonly ringWidth: number;
+  readonly isSelected: boolean;
+}) {
+  return (
+    <circle
+      id={getOptionId(zone.tzid)}
+      data-zone-id={zone.tzid}
+      cx={zone.x}
+      cy={zone.y}
+      r={radius}
+      fill={zone.fill}
+      stroke={DOT_RING_COLOR}
+      strokeOpacity={0.9}
+      strokeWidth={ringWidth}
+      role="option"
+      aria-selected={isSelected}
+      aria-label={zone.label}
+      className="tw-transition-[fill] tw-duration-300 motion-reduce:tw-transition-none"
+    />
+  );
+}
+
+// A dot re-renders only when its own color, label, size or selection changes.
+const ZoneDot = memo(ZoneDotView);
+
+function ZoneOutline({
+  zone,
+  variant,
+  dotRadius,
+  pixelsPerUnit,
+}: {
+  readonly zone: MapZoneView;
+  readonly variant: OutlineVariant;
+  readonly dotRadius: number;
+  readonly pixelsPerUnit: number;
+}) {
+  const radius = dotRadius + OUTLINE_GAPS_PX[variant] / pixelsPerUnit;
+  const width = OUTLINE_WIDTHS_PX[variant];
+  const haloWidth = width + (variant === "focused" ? 3 : 2);
+  return (
+    <>
+      <circle
+        cx={zone.x}
+        cy={zone.y}
+        r={radius}
+        fill="none"
+        stroke={OUTLINE_HALO_COLOR}
+        strokeOpacity={0.9}
+        strokeWidth={haloWidth / pixelsPerUnit}
+      />
+      <circle
+        cx={zone.x}
+        cy={zone.y}
+        r={radius}
+        fill="none"
+        stroke={OUTLINE_COLOR}
+        strokeWidth={width / pixelsPerUnit}
+        strokeDasharray={
+          variant === "viewer"
+            ? `${3 / pixelsPerUnit} ${2 / pixelsPerUnit}`
+            : undefined
+        }
+      />
+    </>
+  );
+}
+
+// Static land, ocean and band lines; memoized so live updates skip them.
+function BaseMapView({
+  sphere,
+  graticule,
+  land,
+}: {
+  readonly sphere: string;
+  readonly graticule: string;
+  readonly land: string;
+}) {
+  return (
+    <>
+      <path d={sphere} fill="#141418" />
+      <path
+        d={graticule}
+        fill="none"
+        stroke="#ffffff"
+        strokeOpacity={0.07}
+        strokeWidth={1}
+        vectorEffect="non-scaling-stroke"
+      />
+      <path
+        d={land}
+        fill="#2b2b33"
+        fillRule="evenodd"
+        stroke="#4c4c55"
+        strokeWidth={0.6}
+        vectorEffect="non-scaling-stroke"
+      />
+    </>
+  );
+}
+
+const BaseMap = memo(BaseMapView);
+
 function findZone(zones: readonly MapZoneView[], zoneId: string | null) {
   return zoneId === null
     ? undefined
@@ -222,6 +280,8 @@ function findZone(zones: readonly MapZoneView[], zoneId: string | null) {
 
 export default function WorldTimeZoneMap({
   viewBox,
+  sphere,
+  graticule,
   land,
   zones,
   selectedZoneId,
@@ -233,10 +293,33 @@ export default function WorldTimeZoneMap({
   onPreview,
   onSelect,
 }: WorldTimeZoneMapProps) {
+  const viewBoxSize = parseViewBox(viewBox);
+  const { svgRef, pixelsPerUnit } = usePixelsPerUnit(viewBoxSize.width);
   const [hasKeyboardFocus, setHasKeyboardFocus] = useState(false);
   const selectedZone = findZone(zones, selectedZoneId);
   const previewZone = findZone(zones, previewZoneId);
   const viewerZone = findZone(zones, viewerZoneId);
+  const isCompact = pixelsPerUnit * viewBoxSize.width < COMPACT_MAP_WIDTH_PX;
+  const dotRadius =
+    (isCompact ? COMPACT_DOT_RADIUS_PX : DOT_RADIUS_PX) / pixelsPerUnit;
+  const ringWidth = 1 / pixelsPerUnit;
+
+  // The zone under a pointer: the dot itself, or the nearest dot in reach.
+  const getZoneAtPointer = (event: MouseEvent<SVGSVGElement>) => {
+    const directZoneId = getDirectZoneId(event.target);
+    if (directZoneId !== null) {
+      return directZoneId;
+    }
+    const rect = event.currentTarget.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) {
+      return null;
+    }
+    const x = ((event.clientX - rect.left) / rect.width) * viewBoxSize.width;
+    const y = ((event.clientY - rect.top) / rect.height) * viewBoxSize.height;
+    return (
+      findNearestZone(zones, x, y, HIT_RADIUS_PX / pixelsPerUnit)?.tzid ?? null
+    );
+  };
 
   // The focused option is always the aria-activedescendant, which is the
   // selected zone: hover previews never move it, and a click moves both.
@@ -264,22 +347,25 @@ export default function WorldTimeZoneMap({
     }
   };
 
-  const handleClick = (event: SyntheticEvent) => {
-    const zoneId = getZoneIdFromEvent(event);
+  const handleClick = (event: MouseEvent<SVGSVGElement>) => {
+    const zoneId = getZoneAtPointer(event);
     if (zoneId !== null) {
       setHasKeyboardFocus(false);
       onSelect(zoneId, "pointer");
     }
   };
 
-  const handlePointerOver = (event: PointerEvent<SVGSVGElement>) => {
+  const handlePointerMove = (event: PointerEvent<SVGSVGElement>) => {
     if (event.pointerType === "mouse") {
-      onPreview(getZoneIdFromEvent(event));
+      onPreview(getZoneAtPointer(event));
     }
   };
 
+  const outlineProps = { dotRadius, pixelsPerUnit };
+
   return (
     <svg
+      ref={svgRef}
       viewBox={viewBox}
       role="listbox"
       tabIndex={0}
@@ -289,44 +375,51 @@ export default function WorldTimeZoneMap({
       aria-activedescendant={
         selectedZone ? getOptionId(selectedZone.tzid) : undefined
       }
-      className="tw-block tw-h-auto tw-w-full tw-touch-manipulation tw-select-none tw-outline-none"
+      className={`tw-block tw-h-auto tw-w-full tw-touch-manipulation tw-select-none tw-outline-none ${previewZone ? "tw-cursor-pointer" : "tw-cursor-default"}`}
       onKeyDown={handleKeyDown}
       onFocus={handleFocus}
       onBlur={() => setHasKeyboardFocus(false)}
       onClick={handleClick}
-      onPointerOver={handlePointerOver}
+      onPointerMove={handlePointerMove}
       onPointerLeave={() => onPreview(null)}
     >
-      {zones.map((zone) => (
-        <ZonePath
-          key={zone.tzid}
-          zone={zone}
-          isSelected={zone.tzid === selectedZone?.tzid}
-        />
-      ))}
       <g aria-hidden="true" pointerEvents="none">
-        <LandLayer land={land} zones={zones} />
+        <BaseMap sphere={sphere} graticule={graticule} land={land} />
         {night ? (
           <g className="tw-transition-opacity tw-duration-500 motion-reduce:tw-transition-none">
-            <path d={night.area} fill="#000000" fillOpacity={0.4} />
+            <path d={night.area} fill="#000000" fillOpacity={0.42} />
             <path
               d={night.terminator}
               fill="none"
               stroke="#ffffff"
-              strokeOpacity={0.55}
+              strokeOpacity={0.5}
               strokeWidth={1}
               vectorEffect="non-scaling-stroke"
             />
           </g>
         ) : null}
-        {viewerZone ? <ZoneOutline zone={viewerZone} variant="viewer" /> : null}
+      </g>
+      {zones.map((zone) => (
+        <ZoneDot
+          key={zone.tzid}
+          zone={zone}
+          radius={dotRadius}
+          ringWidth={ringWidth}
+          isSelected={zone.tzid === selectedZone?.tzid}
+        />
+      ))}
+      <g aria-hidden="true" pointerEvents="none">
+        {viewerZone ? (
+          <ZoneOutline zone={viewerZone} variant="viewer" {...outlineProps} />
+        ) : null}
         {previewZone && previewZone !== selectedZone ? (
-          <ZoneOutline zone={previewZone} variant="preview" />
+          <ZoneOutline zone={previewZone} variant="preview" {...outlineProps} />
         ) : null}
         {selectedZone ? (
           <ZoneOutline
             zone={selectedZone}
             variant={hasKeyboardFocus ? "focused" : "selected"}
+            {...outlineProps}
           />
         ) : null}
       </g>

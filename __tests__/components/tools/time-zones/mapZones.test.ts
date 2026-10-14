@@ -5,45 +5,54 @@ import {
 import type { WorldTimeZoneMapZone } from "@/components/tools/time-zones/mapGeometry";
 
 const ZONES: readonly WorldTimeZoneMapZone[] = [
-  { tzid: "Asia/Kolkata", members: ["Asia/Kolkata", "Asia/Colombo"], d: "" },
-  { tzid: "Europe/Paris", members: ["Europe/Paris", "Europe/Berlin"], d: "" },
-  { tzid: "Africa/Lagos", members: ["Africa/Lagos"], d: "" },
-  { tzid: "Mars/Olympus_Mons", members: ["Mars/Olympus_Mons"], d: "" },
-  { tzid: "America/Sao_Paulo", members: ["America/Sao_Paulo"], d: "" },
+  { tzid: "Asia/Kolkata", x: 1400, y: 380 },
+  { tzid: "Europe/Brussels", x: 1010, y: 210 },
+  { tzid: "Europe/Paris", x: 1005, y: 220 },
+  { tzid: "Africa/Lagos", x: 1010, y: 450 },
+  { tzid: "Mars/Olympus_Mons", x: 10, y: 10 },
+  { tzid: "America/Sao_Paulo", x: 700, y: 640 },
 ];
+const LINKS = { "Europe/Amsterdam": "Europe/Brussels" };
 
 const JULY = new Date(Date.UTC(2026, 6, 15, 12));
 
 describe("findMapZoneForTimeZone", () => {
-  it("prefers exact membership", () => {
-    expect(findMapZoneForTimeZone(ZONES, "Europe/Berlin", JULY)).toBe(
+  it("prefers the zone's own dot", () => {
+    expect(findMapZoneForTimeZone(ZONES, LINKS, "Europe/Paris", JULY)).toBe(
       "Europe/Paris"
     );
   });
 
-  it("matches a browser alias by its clock across the year", () => {
-    expect(findMapZoneForTimeZone(ZONES, "Asia/Calcutta", JULY)).toBe(
+  it("follows tzdata alias links", () => {
+    expect(findMapZoneForTimeZone(ZONES, LINKS, "Europe/Amsterdam", JULY)).toBe(
+      "Europe/Brussels"
+    );
+  });
+
+  it("matches a legacy browser name to its current IANA name", () => {
+    expect(findMapZoneForTimeZone(ZONES, LINKS, "Asia/Calcutta", JULY)).toBe(
       "Asia/Kolkata"
     );
   });
 
-  it("does not match a zone that agrees only today", () => {
-    // Lagos and Paris differ in summer; Algiers matches Lagos all year.
-    expect(findMapZoneForTimeZone(ZONES, "Africa/Algiers", JULY)).toBe(
+  it("falls back to a dot whose clock matches all year", () => {
+    // Algiers matches Lagos all year; Paris differs in summer.
+    expect(findMapZoneForTimeZone(ZONES, LINKS, "Africa/Algiers", JULY)).toBe(
       "Africa/Lagos"
     );
-    expect(findMapZoneForTimeZone(ZONES, "Asia/Tokyo", JULY)).toBeNull();
-    expect(findMapZoneForTimeZone(ZONES, "Not/AZone", JULY)).toBeNull();
+    expect(findMapZoneForTimeZone(ZONES, LINKS, "Asia/Tokyo", JULY)).toBeNull();
+    expect(findMapZoneForTimeZone(ZONES, LINKS, "Not/AZone", JULY)).toBeNull();
   });
 });
 
 describe("buildMapZoneSnapshots", () => {
-  it("orders zones west to east and puts unknown zones last", () => {
+  it("orders dots west to east by offset, then position, and puts unknown zones last", () => {
     const snapshots = buildMapZoneSnapshots(ZONES, "en-US", JULY);
     expect(snapshots.map((snapshot) => snapshot.zone.tzid)).toEqual([
       "America/Sao_Paulo",
       "Africa/Lagos",
       "Europe/Paris",
+      "Europe/Brussels",
       "Asia/Kolkata",
       "Mars/Olympus_Mons",
     ]);

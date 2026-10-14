@@ -1,7 +1,6 @@
 import {
   buildNightView,
   createMapProjector,
-  getOceanOffsetColor,
   getOffsetColor,
   getSubsolarPoint,
   OFFSET_LEGEND_HOURS,
@@ -66,38 +65,21 @@ describe("buildNightView", () => {
 
 describe("getOffsetColor", () => {
   it("uses a neutral midpoint for UTC and separate hues for each side", () => {
-    expect(getOffsetColor(0)).toBe("#383835");
+    expect(getOffsetColor(0)).toBe("#d4d4cf");
     const [westRed, , westBlue] = hexChannels(getOffsetColor(-6 * 60));
     const [eastRed, , eastBlue] = hexChannels(getOffsetColor(6 * 60));
     expect(westBlue).toBeGreaterThan(westRed);
     expect(eastRed).toBeGreaterThan(eastBlue);
   });
 
-  it("gets lighter with distance from UTC on both arms", () => {
+  it("gets darker with distance from UTC on both arms", () => {
     const lightness = (minutes: number) =>
       hexChannels(getOffsetColor(minutes)).reduce((sum, value) => sum + value);
-    expect(lightness(-12 * 60)).toBeGreaterThan(lightness(-6 * 60));
-    expect(lightness(14 * 60)).toBeGreaterThan(lightness(6 * 60));
+    expect(lightness(-12 * 60)).toBeLessThan(lightness(-6 * 60));
+    expect(lightness(-6 * 60)).toBeLessThan(lightness(0));
+    expect(lightness(14 * 60)).toBeLessThan(lightness(6 * 60));
+    expect(lightness(6 * 60)).toBeLessThan(lightness(0));
     expect(getOffsetColor(20 * 60)).toBe(getOffsetColor(14 * 60));
-  });
-
-  it("mutes open-ocean colors toward a dark neutral while keeping the hue side", () => {
-    const spread = (hex: string) => {
-      const channels = hexChannels(hex);
-      return Math.max(...channels) - Math.min(...channels);
-    };
-    for (const minutes of [-9 * 60, -3 * 60, 330, 12 * 60]) {
-      const land = hexChannels(getOffsetColor(minutes));
-      const ocean = hexChannels(getOceanOffsetColor(minutes));
-      expect(ocean.reduce((sum, value) => sum + value)).toBeLessThan(
-        land.reduce((sum, value) => sum + value)
-      );
-      expect(spread(getOceanOffsetColor(minutes))).toBeLessThan(
-        spread(getOffsetColor(minutes))
-      );
-    }
-    const [westRed, , westBlue] = hexChannels(getOceanOffsetColor(-6 * 60));
-    expect(westBlue).toBeGreaterThan(westRed);
   });
 
   it("covers every whole-hour offset in the legend", () => {

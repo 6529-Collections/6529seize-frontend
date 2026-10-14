@@ -146,7 +146,7 @@ export function isSupportedTimeZone(timeZone: string): boolean {
 // The browser's canonical form of a zone ID. V8 maps current IANA names to
 // CLDR's legacy IDs ("Asia/Kolkata" -> "Asia/Calcutta"); other engines keep
 // the ID as given. Comparing canonical forms matches either way.
-function getCanonicalTimeZone(timeZone: string): string | null {
+export function getCanonicalTimeZone(timeZone: string): string | null {
   return (
     getFormatter(OFFSET_PARSE_LOCALE, timeZone, "offset")?.resolvedOptions()
       .timeZone ?? null

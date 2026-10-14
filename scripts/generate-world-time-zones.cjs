@@ -1,47 +1,42 @@
 #!/usr/bin/env node
 
-// Builds the compact world time-zone map used by /tools/time-zones.
+// Builds the compact world map used by /tools/time-zones from public-domain
+// sources only:
 //
-// Input: one timezone-boundary-builder release (IANA zone polygons derived
-// from OpenStreetMap, ODbL 1.0). Download these release assets into their own
-// directory, verify the SHA-256 digests published with the release, unzip, and
-// pass the paths explicitly:
+//   - Natural Earth land polygons (naturalearthdata.com, public domain), from
+//     the tagged GeoJSON in the official nvkelso/natural-earth-vector
+//     repository, for example geojson/ne_50m_land.geojson at v5.1.2.
+//   - The IANA Time Zone Database (public domain): zone1970.tab gives each
+//     zone's principal location as ISO 6709 coordinates, and the `backward`
+//     file maps alias names to those zones.
 //
-//   - timezones-with-oceans-now.geojson.zip: the zones drawn on the map. "now"
-//     merges zones whose clocks agree from the release date on; "with-oceans"
-//     covers the whole globe.
-//   - timezone-names-with-oceans-Now.json: the IANA zones each merged zone
-//     stands for.
-//   - timezones-now.geojson.zip (optional --land): land-only zones, the mask
-//     that draws land in full color and open ocean muted, since land and ocean
-//     share one merged zone.
+// Download each source into its own directory, verify it (see the data
+// README), unpack tzdata, and pass the paths explicitly:
 //
 //   node scripts/generate-world-time-zones.cjs \
-//     --geojson <dir>/combined-with-oceans-now.json \
-//     --names <dir>/timezone-names-with-oceans-Now.json \
-//     --land <dir>/combined-now.json \
-//     --release 2026e \
+//     --land <dir>/ne_50m_land.geojson \
+//     --zone1970 <dir>/zone1970.tab \
+//     --backward <dir>/backward \
+//     --natural-earth v5.1.2 \
+//     --tzdata 2026e \
 //     --out components/tools/time-zones/data/world-time-zones.generated.json
 //
-// Pipeline (plain Node, no dependencies):
-//   1. densify long edges in longitude/latitude so straight ocean-zone
-//      meridians follow the projected graticule;
-//   2. project with Equal Earth (Šavrič, Patterson & Jenny, 2018), a
-//      pseudo-cylindrical equal-area projection with a closed-form forward
-//      formula;
-//   3. simplify each ring with Douglas–Peucker in projected units;
-//   4. quantize to an integer grid and encode compact relative SVG paths.
-//
-// The output keeps every zone (tiny island zones fall back to a minimal ring)
-// so each IANA zone in the release stays visible and selectable.
+// Pipeline (plain Node, no dependencies): densify long edges, project with
+// Equal Earth (Šavrič, Patterson & Jenny, 2018), simplify rings with
+// Douglas–Peucker in projected units, quantize to an integer grid, and encode
+// compact relative SVG paths. Zone locations are projected to integer points.
 
 const fs = require("node:fs");
 const path = require("node:path");
 
 const DEFAULT_WIDTH = 2000;
-const DEFAULT_TOLERANCE = 0.35;
-const DEFAULT_MIN_RING_AREA = 1.5;
+const DEFAULT_TOLERANCE = 0.45;
+const DEFAULT_MIN_RING_AREA = 2;
 const DENSIFY_STEP_DEGREES = 1;
+const GRATICULE_STEP_DEGREES = 15;
+// Nautical time-zone bands are centred on multiples of 15°, so their edges
+// sit at ±7.5° from those meridians.
+const GRATICULE_OFFSET_DEGREES = 7.5;
 
 // Equal Earth coefficients.
 const A1 = 1.340264;
@@ -160,6 +155,18 @@ function simplifyDouglasPeucker(points, tolerance) {
   return points.filter((_, index) => keep[index] === 1);
 }
 
+function isClosedRing(ring) {
+  const first = ring[0];
+  const last = ring.at(-1);
+  return (
+    ring.length > 1 &&
+    first !== undefined &&
+    last !== undefined &&
+    first[0] === last[0] &&
+    first[1] === last[1]
+  );
+}
+
 function squaredDistance(left, right) {
   const dx = left[0] - right[0];
   const dy = left[1] - right[1];
@@ -194,18 +201,6 @@ function simplifyRing(ring, tolerance) {
   return [...firstHalf, ...secondHalf.slice(1, -1)];
 }
 
-function isClosedRing(ring) {
-  const first = ring[0];
-  const last = ring.at(-1);
-  return (
-    ring.length > 1 &&
-    first !== undefined &&
-    last !== undefined &&
-    first[0] === last[0] &&
-    first[1] === last[1]
-  );
-}
-
 // Rounds to an integer grid and removes consecutive duplicates (including a
 // duplicate closing point).
 function quantizeRing(ring) {
@@ -229,51 +224,41 @@ function quantizeRing(ring) {
   return output;
 }
 
-function signedRingArea(ring) {
+function ringArea(ring) {
   let twiceArea = 0;
   for (let index = 0; index < ring.length; index += 1) {
     const current = ring[index];
     const next = ring[(index + 1) % ring.length];
     twiceArea += current[0] * next[1] - next[0] * current[1];
   }
-  return twiceArea / 2;
+  return Math.abs(twiceArea) / 2;
 }
 
-function ringArea(ring) {
-  return Math.abs(signedRingArea(ring));
+function encodePolyline(points, close) {
+  const [start, ...rest] = points;
+  let previous = start;
+  const steps = rest.map((point) => {
+    const pair = `${point[0] - previous[0]} ${point[1] - previous[1]}`;
+    previous = point;
+    return pair;
+  });
+  const line = steps.length > 0 ? `l${steps.join(" ")}` : "";
+  return `M${start[0]} ${start[1]}${line}${close ? "z" : ""}`.replaceAll(
+    " -",
+    "-"
+  );
 }
 
 // Encodes integer rings as one SVG path: absolute move, relative lines,
 // close. Negative numbers need no separator.
 function encodeRings(rings) {
-  return rings
-    .map((ring) => {
-      const [start, ...rest] = ring;
-      let previous = start;
-      const steps = rest.map((point) => {
-        const pair = `${point[0] - previous[0]} ${point[1] - previous[1]}`;
-        previous = point;
-        return pair;
-      });
-      const line = steps.length > 0 ? `l${steps.join(" ")}` : "";
-      return `M${start[0]} ${start[1]}${line}z`.replaceAll(" -", "-");
-    })
-    .join("");
+  return rings.map((ring) => encodePolyline(ring, true)).join("");
 }
 
-function fallbackRing(ring) {
-  const xs = ring.map((point) => Math.round(point[0]));
-  const ys = ring.map((point) => Math.round(point[1]));
-  const minX = Math.min(...xs);
-  const minY = Math.min(...ys);
-  const maxX = Math.max(...xs, minX + 1);
-  const maxY = Math.max(...ys, minY + 1);
-  return [
-    [minX, minY],
-    [maxX, minY],
-    [maxX, maxY],
-    [minX, maxY],
-  ];
+function projectRing(ring, projector) {
+  return densifyRing(ring).map(([longitude, latitude]) =>
+    projector.project(longitude, latitude)
+  );
 }
 
 function getPolygons(geometry) {
@@ -286,97 +271,139 @@ function getPolygons(geometry) {
   throw new Error(`Unsupported geometry type: ${geometry.type}`);
 }
 
-function projectRing(ring, projector) {
-  return densifyRing(ring).map(([longitude, latitude]) =>
-    projector.project(longitude, latitude)
-  );
-}
-
-function buildZoneRings(geometry, projector, options) {
-  const kept = [];
-  let largest = null;
-  for (const polygon of getPolygons(geometry)) {
-    for (const ring of polygon) {
-      const projected = projectRing(ring, projector);
-      const simplified = quantizeRing(
-        simplifyRing(projected, options.tolerance)
-      );
-      const area = simplified.length >= 3 ? ringArea(simplified) : 0;
-      if (!largest || area > largest.area) {
-        largest = { area, projected, simplified };
-      }
-      if (simplified.length >= 3 && area >= options.minRingArea) {
-        kept.push(simplified);
-      }
-    }
-  }
-  if (kept.length === 0 && largest) {
-    kept.push(
-      largest.simplified.length >= 3 && largest.area > 0
-        ? largest.simplified
-        : fallbackRing(largest.projected)
-    );
-  }
-  return kept;
-}
-
-// One land path from the exterior rings of the land-only release. Exteriors
-// share one winding direction so the nonzero fill paints their union once;
-// enclave holes are dropped because the enclosed zone's own exterior covers
-// the same land.
+// One land path, drawn with the evenodd fill rule so lake holes stay open.
 function buildLandPath(landCollection, projector, options) {
   const rings = [];
   for (const feature of landCollection.features) {
-    for (const [exterior] of getPolygons(feature.geometry)) {
-      const simplified = quantizeRing(
-        simplifyRing(projectRing(exterior, projector), options.tolerance)
-      );
-      if (
-        simplified.length >= 3 &&
-        ringArea(simplified) >= options.minRingArea
-      ) {
-        rings.push(
-          signedRingArea(simplified) < 0 ? simplified.reverse() : simplified
+    for (const polygon of getPolygons(feature.geometry)) {
+      for (const ring of polygon) {
+        const simplified = quantizeRing(
+          simplifyRing(projectRing(ring, projector), options.tolerance)
         );
+        if (
+          simplified.length >= 3 &&
+          ringArea(simplified) >= options.minRingArea
+        ) {
+          rings.push(simplified);
+        }
       }
     }
   }
   return encodeRings(rings);
 }
 
-function buildWorldTimeZones(
-  featureCollection,
-  zoneNames,
-  options,
-  landCollection = null
-) {
+function meridian(longitude) {
+  return densifyRing([
+    [longitude, 90],
+    [longitude, -90],
+  ]);
+}
+
+// The outline of the whole globe in this projection.
+function buildSpherePath(projector, options) {
+  const outline = [...meridian(-180), ...meridian(180).reverse(), [-180, 90]];
+  const simplified = quantizeRing(
+    simplifyRing(
+      outline.map(([longitude, latitude]) =>
+        projector.project(longitude, latitude)
+      ),
+      options.tolerance
+    )
+  );
+  return encodeRings([simplified]);
+}
+
+// Faint meridians at the edges of the 24 nautical time-zone bands.
+function buildGraticulePath(projector, options) {
+  const lines = [];
+  for (
+    let longitude = -180 + GRATICULE_OFFSET_DEGREES;
+    longitude < 180;
+    longitude += GRATICULE_STEP_DEGREES
+  ) {
+    const projected = meridian(longitude).map(([lon, lat]) =>
+      projector.project(lon, lat)
+    );
+    lines.push(
+      encodePolyline(
+        quantizeRing(simplifyDouglasPeucker(projected, options.tolerance)),
+        false
+      )
+    );
+  }
+  return lines.join("");
+}
+
+const ISO_6709_PATTERN =
+  /^([+-])(\d{2})(\d{2})(\d{2})?([+-])(\d{3})(\d{2})(\d{2})?$/;
+
+function toDegrees(sign, degrees, minutes, seconds) {
+  const value =
+    Number(degrees) + Number(minutes) / 60 + Number(seconds ?? 0) / 3600;
+  return sign === "-" ? -value : value;
+}
+
+// ISO 6709 as used by zone1970.tab: ±DDMM±DDDMM or ±DDMMSS±DDDMMSS.
+function parseIso6709(text) {
+  const match = ISO_6709_PATTERN.exec(text);
+  if (!match) {
+    throw new Error(`Invalid ISO 6709 coordinates: ${text}`);
+  }
+  const [, latSign, latDeg, latMin, latSec, lonSign, lonDeg, lonMin, lonSec] =
+    match;
+  return {
+    latitude: toDegrees(latSign, latDeg, latMin, latSec),
+    longitude: toDegrees(lonSign, lonDeg, lonMin, lonSec),
+  };
+}
+
+function parseZone1970(text) {
+  return text
+    .split(/\r?\n/)
+    .filter((line) => line.trim() !== "" && !line.startsWith("#"))
+    .map((line) => {
+      const [countries, coordinates, tzid] = line.split("\t");
+      if (!countries || !coordinates || !tzid) {
+        throw new Error(`Malformed zone1970.tab line: ${line}`);
+      }
+      return { tzid, ...parseIso6709(coordinates) };
+    });
+}
+
+// "Link TARGET LINK-NAME" lines; only links to mapped zones are kept.
+function parseLinks(text, zoneIds) {
+  const links = {};
+  for (const line of text.split(/\r?\n/)) {
+    const [keyword, target, name] = line.trim().split(/\s+/);
+    if (keyword === "Link" && target && name && zoneIds.has(target)) {
+      links[name] = target;
+    }
+  }
+  return Object.fromEntries(
+    Object.entries(links).sort(([left], [right]) =>
+      left.localeCompare(right, "en")
+    )
+  );
+}
+
+function buildWorldTimeZones(sources, options) {
   const projector = createProjector(options.width);
-  const zones = featureCollection.features.map((feature) => {
-    const tzid = feature.properties?.tzid;
-    if (typeof tzid !== "string" || tzid.length === 0) {
-      throw new Error("Every feature needs a string tzid property");
-    }
-    // Zones that merged nothing (for example the open-ocean Etc/GMT+12) may
-    // be absent from the release's name map; they represent only themselves.
-    const members = zoneNames[tzid] ?? [];
-    if (!Array.isArray(members)) {
-      throw new Error(`Member zones for ${tzid} must be an array`);
-    }
-    return {
-      tzid,
-      members: [...new Set([tzid, ...members])],
-      d: encodeRings(buildZoneRings(feature.geometry, projector, options)),
-    };
-  });
-  zones.sort((left, right) => left.tzid.localeCompare(right.tzid, "en"));
+  const zones = parseZone1970(sources.zone1970)
+    .map(({ tzid, latitude, longitude }) => {
+      const [x, y] = projector.project(longitude, latitude);
+      return { tzid, x: Math.round(x), y: Math.round(y) };
+    })
+    .sort((left, right) => left.tzid.localeCompare(right.tzid, "en"));
+  const zoneIds = new Set(zones.map((zone) => zone.tzid));
   return {
     viewBox: `0 0 ${projector.width} ${projector.height}`,
     projection: { name: "equal-earth", scale: projector.scale },
-    source: { release: options.release },
-    land: landCollection
-      ? buildLandPath(landCollection, projector, options)
-      : "",
+    source: { naturalEarth: options.naturalEarth, tzdata: options.tzdata },
+    sphere: buildSpherePath(projector, options),
+    graticule: buildGraticulePath(projector, options),
+    land: buildLandPath(sources.land, projector, options),
     zones,
+    links: parseLinks(sources.backward, zoneIds),
   };
 }
 
@@ -398,7 +425,14 @@ function parseArgs(argv) {
       .replaceAll(/-([a-z])/g, (_, letter) => letter.toUpperCase());
     args[key] = numeric.has(key) ? Number(value) : value;
   }
-  for (const required of ["geojson", "names", "release", "out"]) {
+  for (const required of [
+    "land",
+    "zone1970",
+    "backward",
+    "naturalEarth",
+    "tzdata",
+    "out",
+  ]) {
     if (!args[required]) {
       throw new Error(`Missing --${required}`);
     }
@@ -406,22 +440,24 @@ function parseArgs(argv) {
   return args;
 }
 
-function readJson(filePath) {
-  return JSON.parse(fs.readFileSync(path.resolve(filePath), "utf8"));
+function readText(filePath) {
+  return fs.readFileSync(path.resolve(filePath), "utf8");
 }
 
 function main() {
   const args = parseArgs(process.argv.slice(2));
   const output = buildWorldTimeZones(
-    readJson(args.geojson),
-    readJson(args.names),
-    args,
-    args.land ? readJson(args.land) : null
+    {
+      land: JSON.parse(readText(args.land)),
+      zone1970: readText(args.zone1970),
+      backward: readText(args.backward),
+    },
+    args
   );
   const serialized = `${JSON.stringify(output)}\n`;
   fs.writeFileSync(path.resolve(args.out), serialized);
   console.log(
-    `Wrote ${output.zones.length} zones and ${output.land.length} land path characters (${serialized.length} bytes) to ${args.out}`
+    `Wrote ${output.zones.length} zone points, ${Object.keys(output.links).length} links and ${output.land.length} land path characters (${serialized.length} bytes) to ${args.out}`
   );
 }
 
@@ -434,7 +470,9 @@ module.exports = {
   createProjector,
   densifyRing,
   encodeRings,
-  equalEarth,
+  parseIso6709,
+  parseLinks,
+  parseZone1970,
   quantizeRing,
   ringArea,
   simplifyDouglasPeucker,

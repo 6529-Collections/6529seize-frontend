@@ -6,6 +6,7 @@ import {
   formatZoneTime,
   getDstStatus,
   getGenericZoneName,
+  getCanonicalTimeZone,
   getOffsetMinutes,
   parseSignedClock,
   type DstStatus,
@@ -48,8 +49,6 @@ export type TimeZoneSortKey = "zone" | "region" | "offset";
 export type TimeZoneSortDirection = "ascending" | "descending";
 
 const KNOWN_REGION_KEYS = new Set<string>(TIME_ZONE_REGION_KEYS);
-// Etc/* zones are fixed-offset nautical zones; the UTC clock covers UTC.
-const NAUTICAL_ZONE_PREFIX = "Etc/";
 const OFFSET_TERM_PREFIXES = ["utc", "gmt"] as const;
 const UTC_TERMS = new Set(["utc", "gmt", "z"]);
 const MINUTES_PER_HOUR = 60;
@@ -72,23 +71,27 @@ function toRowBase(id: string, mapZoneId: string | null): TimeZoneRowBase {
   return { id, city: getCityName(id), regionKey: getRegionKey(id), mapZoneId };
 }
 
-export function buildRowBasesFromMapZones(
-  zones: readonly WorldTimeZoneMapZone[]
+// Every mapped zone (zone1970.tab), plus each zone the browser lists that is
+// not the same zone under another name: tzdata aliases such as
+// "Europe/Amsterdam", and Etc/* zones. Those rows have no map dot. A legacy
+// browser name for a mapped zone ("Asia/Calcutta") is not listed twice.
+// Without map data, the browser's own list is the whole table.
+export function buildRowBases(
+  zones: readonly WorldTimeZoneMapZone[],
+  browserIds: readonly string[]
 ): TimeZoneRowBase[] {
-  return zones.flatMap((zone) =>
-    zone.members
-      .filter((member) => !member.startsWith(NAUTICAL_ZONE_PREFIX))
-      .map((member) => toRowBase(member, zone.tzid))
-  );
-}
-
-// Fallback when the map data cannot load: the browser's own zone list.
-export function buildRowBasesFromIds(
-  ids: readonly string[]
-): TimeZoneRowBase[] {
-  return ids
-    .filter((id) => !id.startsWith(NAUTICAL_ZONE_PREFIX) && id !== "UTC")
+  const mapped = zones.map((zone) => toRowBase(zone.tzid, zone.tzid));
+  const covered = new Set<string>();
+  for (const zone of zones) {
+    covered.add(zone.tzid);
+    covered.add(getCanonicalTimeZone(zone.tzid) ?? zone.tzid);
+  }
+  const unmapped = browserIds
+    .filter(
+      (id) => !covered.has(id) && !covered.has(getCanonicalTimeZone(id) ?? id)
+    )
     .map((id) => toRowBase(id, null));
+  return [...mapped, ...unmapped];
 }
 
 export function getBrowserTimeZoneIds(): string[] {

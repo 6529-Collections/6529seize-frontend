@@ -32,11 +32,13 @@ function compareSnapshots(left: MapZoneSnapshot, right: MapZoneSnapshot) {
   }
   return (
     left.offsetMinutes - right.offsetMinutes ||
+    left.zone.x - right.zone.x ||
     left.zone.tzid.localeCompare(right.zone.tzid, "en")
   );
 }
 
-// West-to-east by current offset; zones the browser cannot resolve go last.
+// West to east by current offset, then by map position; zones the browser
+// cannot resolve go last.
 export function buildMapZoneSnapshots(
   zones: readonly WorldTimeZoneMapZone[],
   locale: SupportedLocale,
@@ -54,22 +56,44 @@ export function buildMapZoneSnapshots(
     .sort(compareSnapshots);
 }
 
-// The browser may report an alias or a legacy name (for example
-// "Asia/Calcutta") that the boundary release lists under its current IANA
-// name. Exact or canonical membership wins; otherwise pick the zone with the
-// same current offset whose clock also matches across the year.
+function findAliasTarget(
+  links: Readonly<Record<string, string>>,
+  timeZone: string
+): string | null {
+  const direct = links[timeZone];
+  if (direct !== undefined) {
+    return direct;
+  }
+  const alias = Object.keys(links).find((candidate) =>
+    isSameTimeZone(candidate, timeZone)
+  );
+  return alias === undefined ? null : (links[alias] ?? null);
+}
+
+// The map dot for a browser-reported zone. The browser may report the
+// mapped zone itself, a tzdata alias such as "Europe/Amsterdam" (shown at
+// "Europe/Brussels"), or a legacy name such as "Asia/Calcutta". As a last
+// resort, pick a dot with the same current offset whose clock also matches
+// across the year.
 export function findMapZoneForTimeZone(
   zones: readonly WorldTimeZoneMapZone[],
+  links: Readonly<Record<string, string>>,
   timeZone: string,
   date: Date
 ): string | null {
-  const member =
-    zones.find((zone) => zone.members.includes(timeZone)) ??
-    zones.find((zone) =>
-      zone.members.some((candidate) => isSameTimeZone(candidate, timeZone))
-    );
-  if (member) {
-    return member.tzid;
+  const zoneIds = new Set(zones.map((zone) => zone.tzid));
+  if (zoneIds.has(timeZone)) {
+    return timeZone;
+  }
+  const aliasTarget = findAliasTarget(links, timeZone);
+  if (aliasTarget !== null && zoneIds.has(aliasTarget)) {
+    return aliasTarget;
+  }
+  const canonicalMatch = zones.find((zone) =>
+    isSameTimeZone(zone.tzid, timeZone)
+  );
+  if (canonicalMatch) {
+    return canonicalMatch.tzid;
   }
   const currentOffset = getOffsetMinutes(timeZone, date);
   if (currentOffset === null) {

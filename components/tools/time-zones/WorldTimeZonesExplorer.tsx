@@ -15,7 +15,6 @@ import { t } from "@/i18n/messages";
 import { useMinuteNow } from "./liveClock";
 import {
   buildNightView,
-  getOceanOffsetColor,
   getOffsetColor,
   UNKNOWN_ZONE_COLOR,
   type WorldTimeZoneMapData,
@@ -32,10 +31,10 @@ import {
   getRegionLabel,
 } from "./timeZoneLabels";
 import {
-  buildRowBasesFromIds,
-  buildRowBasesFromMapZones,
+  buildRowBases,
   buildTimeZoneRow,
   getBrowserTimeZoneIds,
+  getCityName,
   type TimeZoneRow,
   type TimeZoneRowBase,
 } from "./timeZoneRows";
@@ -69,7 +68,7 @@ function getServerTimeZone(): null {
   return null;
 }
 
-// Loads the boundary data only on this page, as its own lazily loaded chunk.
+// Loads the map data only on this page, as its own lazily loaded chunk.
 function useWorldTimeZoneMapData() {
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<MapDataState>({ status: "loading" });
@@ -106,23 +105,21 @@ function toMapZoneView(
   locale: SupportedLocale
 ): MapZoneView {
   const { zone, offsetMinutes } = snapshot;
+  const position = { tzid: zone.tzid, x: zone.x, y: zone.y };
   if (offsetMinutes === null) {
     return {
-      tzid: zone.tzid,
-      d: zone.d,
+      ...position,
       fill: UNKNOWN_ZONE_COLOR,
-      oceanFill: UNKNOWN_ZONE_COLOR,
       label: t(locale, "tools.timeZones.map.unknownZoneLabel", {
         zone: zone.tzid,
       }),
     };
   }
   return {
-    tzid: zone.tzid,
-    d: zone.d,
+    ...position,
     fill: getOffsetColor(offsetMinutes),
-    oceanFill: getOceanOffsetColor(offsetMinutes),
     label: t(locale, "tools.timeZones.map.zoneLabel", {
+      city: getCityName(zone.tzid),
       name: snapshot.name,
       offset: formatOffsetLabel(locale, offsetMinutes),
     }),
@@ -137,6 +134,7 @@ function toDetailsView(
   const { zone, offsetMinutes, dst } = snapshot;
   return {
     tzid: zone.tzid,
+    city: getCityName(zone.tzid),
     supported: offsetMinutes !== null,
     name: snapshot.name,
     offsetLabel:
@@ -144,17 +142,18 @@ function toDetailsView(
     time: snapshot.time ?? "",
     date: snapshot.date ?? "",
     dstLabel: dst === null ? "" : getDstLabel(locale, dst),
-    sharedCount: Math.max(zone.members.length - 1, 0),
     isViewerZone: zone.tzid === viewerZoneId,
   };
 }
 
+// Mapped zones plus the browser's unmapped ones; without map data, the
+// browser's own list keeps the table working.
 function getRowBases(state: MapDataState): TimeZoneRowBase[] | null {
   if (state.status === "ready") {
-    return buildRowBasesFromMapZones(state.data.zones);
+    return buildRowBases(state.data.zones, getBrowserTimeZoneIds());
   }
   if (state.status === "error") {
-    return buildRowBasesFromIds(getBrowserTimeZoneIds());
+    return buildRowBases([], getBrowserTimeZoneIds());
   }
   return null;
 }
@@ -251,7 +250,12 @@ export default function WorldTimeZonesExplorer() {
     () =>
       mapData === null || now === null || viewerTimeZone === null
         ? null
-        : findMapZoneForTimeZone(mapData.zones, viewerTimeZone, now),
+        : findMapZoneForTimeZone(
+            mapData.zones,
+            mapData.links,
+            viewerTimeZone,
+            now
+          ),
     [mapData, now, viewerTimeZone]
   );
   const night = useMemo(
@@ -330,6 +334,8 @@ export default function WorldTimeZonesExplorer() {
             {mapData !== null && mapZones !== undefined ? (
               <WorldTimeZoneMap
                 viewBox={mapData.viewBox}
+                sphere={mapData.sphere}
+                graticule={mapData.graticule}
                 land={mapData.land}
                 zones={mapZones}
                 selectedZoneId={effectiveSelectedId}

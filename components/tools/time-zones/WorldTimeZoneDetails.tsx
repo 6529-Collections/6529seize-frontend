@@ -2,17 +2,16 @@
 
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { formatInteger, selectPluralCategory } from "@/i18n/format";
 
 export type ZoneDetailsView = {
   readonly tzid: string;
+  readonly city: string;
   readonly supported: boolean;
   readonly name: string;
   readonly offsetLabel: string;
   readonly time: string;
   readonly date: string;
   readonly dstLabel: string;
-  readonly sharedCount: number;
   readonly isViewerZone: boolean;
 };
 
@@ -64,11 +63,6 @@ export default function WorldTimeZoneDetails({
   locale,
   zone,
 }: WorldTimeZoneDetailsProps) {
-  const sharedClockKey =
-    selectPluralCategory(locale, zone?.sharedCount ?? 0) === "one"
-      ? "tools.timeZones.details.sharedClock.one"
-      : "tools.timeZones.details.sharedClock.other";
-
   return (
     <section
       aria-labelledby="world-time-zone-details-heading"
@@ -86,6 +80,9 @@ export default function WorldTimeZoneDetails({
         <div className="tw-space-y-3">
           <div>
             <p className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-50">
+              {zone.city}
+            </p>
+            <p className="tw-m-0 tw-mt-0.5 tw-text-sm tw-text-iron-200">
               {zone.name}
             </p>
             <p className="tw-m-0 tw-mt-1 tw-break-all tw-font-mono tw-text-xs tw-text-iron-400">
@@ -121,13 +118,6 @@ export default function WorldTimeZoneDetails({
               {t(locale, "tools.timeZones.details.unknownZone")}
             </p>
           )}
-          {zone.sharedCount > 0 ? (
-            <p className="tw-m-0 tw-text-xs tw-text-iron-400">
-              {t(locale, sharedClockKey, {
-                count: formatInteger(locale, zone.sharedCount),
-              })}
-            </p>
-          ) : null}
         </div>
       )}
     </section>

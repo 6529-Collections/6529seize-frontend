@@ -6,6 +6,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
 import type { MapZoneSnapshot } from "./mapZones";
+import { getCityName } from "./timeZoneRows";
 
 // Wait for the arrow keys to pause before speaking.
 const ANNOUNCEMENT_DELAY_MS = 600;
@@ -31,6 +32,7 @@ export function useZoneSelectionAnnouncement(
       if (snapshot?.time) {
         setAnnouncement(
           t(locale, "tools.timeZones.map.selectionAnnouncement", {
+            city: getCityName(snapshot.zone.tzid),
             name: snapshot.name,
             time: snapshot.time,
           })
