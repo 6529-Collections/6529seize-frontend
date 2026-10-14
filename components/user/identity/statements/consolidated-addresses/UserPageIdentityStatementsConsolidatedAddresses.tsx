@@ -20,7 +20,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
 const WALLET_ACTION_CLASSES =
-  "tw-min-h-10 tw-min-w-0 tw-whitespace-normal tw-px-2.5 tw-py-2 tw-text-xs";
+  "tw-min-h-10 tw-min-w-0 !tw-whitespace-normal tw-px-2.5 tw-py-2 tw-text-xs";
 
 /** Returns the primary wallet, falling back to the highest-TDH wallet. */
 function getPrimaryAddress(profile: ApiIdentity): string | null {
