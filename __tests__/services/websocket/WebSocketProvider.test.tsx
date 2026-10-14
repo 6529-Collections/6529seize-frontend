@@ -13,6 +13,7 @@ import {
   WsMessageType,
 } from "@/helpers/Types";
 import * as authUtils from "@/services/auth/auth.utils";
+import { mockRandomUnit } from "../../helpers/mockRandomUnit";
 
 jest.mock("@/services/auth/session-readiness", () => ({
   ensureActiveSession: jest.fn(),
@@ -93,6 +94,7 @@ class MockWebSocket {
 describe("WebSocketProvider", () => {
   let originalWs: any;
   let mockGetAuthJwt: jest.MockedFunction<typeof authUtils.getAuthJwt>;
+  let randomUnitSpy: jest.SpyInstance;
 
   beforeEach(() => {
     originalWs = globalThis.WebSocket;
@@ -111,9 +113,13 @@ describe("WebSocketProvider", () => {
     shouldAutoAuthenticate = true;
 
     jest.clearAllMocks();
+    // A 0.5 draw is a neutral jitter multiplier (exactly 1.0), so the backoff
+    // assertions below see the base delays. Jitter bounds have their own tests.
+    randomUnitSpy = mockRandomUnit(0.5);
   });
 
   afterEach(() => {
+    randomUnitSpy.mockRestore();
     (globalThis as any).WebSocket = originalWs;
     jest.useRealTimers();
   });
@@ -713,6 +719,64 @@ describe("WebSocketProvider", () => {
       });
 
       expect(globalThis.WebSocket).toHaveBeenCalledTimes(3);
+    });
+
+    const connectThenDropSocket = (config: WebSocketConfig) => {
+      mockGetAuthJwt.mockReturnValue("fresh-token");
+      const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
+        wrapper: createWrapper(config),
+      });
+      act(() => {
+        result.current.connect("token");
+      });
+      // The suite replaces globalThis.WebSocket with a jest.fn that builds MockWebSocket.
+      const ws = (globalThis.WebSocket as unknown as jest.Mock<MockWebSocket>)
+        .mock.results[0]?.value as MockWebSocket;
+      act(() => {
+        ws.triggerOpen();
+      });
+      act(() => {
+        ws.triggerClose(1006, "Connection lost");
+      });
+    };
+
+    it.each([
+      ["lower", 0, 1500],
+      ["upper", 0.999999, 2500],
+    ])(
+      "jitters the reconnect delay by +/-25%% (%s bound: %p -> %p ms)",
+      (_bound, unit, delayMs) => {
+        randomUnitSpy.mockRestore();
+        randomUnitSpy = mockRandomUnit(unit);
+        connectThenDropSocket({ url: "ws://test", reconnectDelay: 2000 });
+
+        act(() => {
+          jest.advanceTimersByTime(delayMs - 1);
+        });
+        expect(globalThis.WebSocket).toHaveBeenCalledTimes(1);
+
+        act(() => {
+          jest.advanceTimersByTime(1);
+        });
+        expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
+      }
+    );
+
+    it("jitters the capped maximum delay so saturated clients still spread out", () => {
+      randomUnitSpy.mockRestore();
+      randomUnitSpy = mockRandomUnit(0);
+      // 40s would exceed the 30s cap; 30s - 25% = 22.5s proves jitter follows the cap.
+      connectThenDropSocket({ url: "ws://test", reconnectDelay: 40000 });
+
+      act(() => {
+        jest.advanceTimersByTime(22499);
+      });
+      expect(globalThis.WebSocket).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        jest.advanceTimersByTime(1);
+      });
+      expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
     });
 
     it("stops reconnecting after max attempts", () => {
