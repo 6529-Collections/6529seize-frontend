@@ -65,6 +65,21 @@ describe("XtdhReceivedSection", () => {
     expect(screen.getByTestId("xtdh-collections-list")).toBeInTheDocument();
   });
 
+  it("keeps controls mounted while the initial collections load", () => {
+    mockUseXtdhCollectionsQuery.mockReturnValue({
+      collections: [],
+      isLoading: true,
+      isError: false,
+      isEnabled: true,
+      hasNextPage: false,
+    });
+
+    render(<XtdhReceivedSection profileId="0x123" />);
+
+    expect(screen.getByTestId("xtdh-collections-controls")).toBeInTheDocument();
+    expect(screen.getByTestId("xtdh-collections-list")).toBeInTheDocument();
+  });
+
   it("does NOT render controls when collections are empty", () => {
     mockUseXtdhCollectionsQuery.mockReturnValue({
       collections: [],

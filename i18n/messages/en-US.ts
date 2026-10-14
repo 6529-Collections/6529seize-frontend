@@ -2686,6 +2686,7 @@ const IDENTITY_FILTER_MESSAGES = objectMessages("identityFilter", {
 } as const);
 
 const XTDH_COLLECTION_MESSAGES = objectMessages("xtdh.collections", {
+  loading: "Loading collections",
   "search.emptyDescription":
     "Try another collection name or clear the search to see all collections.",
   "search.emptyTitle": "No collections found for “{query}”",
@@ -3037,6 +3038,10 @@ export const EN_US_MESSAGES = {
     "Request delivery of outstanding work only after the backend verifies finalized cancellation or revert evidence. Previously delivered allocations are not replayed.",
   "dropForge.transaction": "View transaction",
 
+  "tokenList.thumbnail.loading": "Loading thumbnail",
+  "tokenList.thumbnail.failed": "Failed to load thumbnail",
+  "tokenList.thumbnail.error": "Load Error",
+  "tokenList.thumbnail.tokenId": "#{tokenId}",
   "header.menu.open": "Open menu",
   "header.menu.close": "Close menu",
   "header.navigation.loading": "Loading navigation…",
