@@ -28,6 +28,7 @@ export default function UserPageIdentityStatementsGuidance() {
   > | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  const openingBounds = useRef<DOMRect | null>(null);
   const isPointerOverTooltip = useRef(false);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined
@@ -40,18 +41,24 @@ export default function UserPageIdentityStatementsGuidance() {
 
   const open = () => {
     cancelHide();
+    openingBounds.current = buttonRef.current?.getBoundingClientRect() ?? null;
     setIsOpen(true);
   };
 
   const close = useCallback(() => {
     cancelHide();
+    openingBounds.current = null;
     isPointerOverTooltip.current = false;
     setIsOpen(false);
   }, [cancelHide]);
 
   const hideAfterPointerLeaves = () => {
     cancelHide();
-    if (isPointerOverTooltip.current) return;
+    if (
+      isPointerOverTooltip.current ||
+      document.activeElement === buttonRef.current
+    )
+      return;
     hideTimer.current = setTimeout(close, 150);
   };
 
@@ -103,6 +110,17 @@ export default function UserPageIdentityStatementsGuidance() {
       if (
         event.target instanceof Node &&
         tooltipRef.current?.contains(event.target)
+      )
+        return;
+      const currentBounds = buttonRef.current?.getBoundingClientRect();
+      const initialBounds = openingBounds.current;
+      // Scrolling the trigger into view can dispatch its queued scroll event
+      // after the click. Dismiss only when scrolling moves it after opening.
+      if (
+        currentBounds &&
+        initialBounds &&
+        currentBounds.x === initialBounds.x &&
+        currentBounds.y === initialBounds.y
       )
         return;
       close();

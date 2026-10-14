@@ -201,11 +201,48 @@ describe("UserPageIdentityAddStatementsHeader", () => {
     const button = screen.getByRole("button", {
       name: "About identity statements",
     });
+    const bounds = jest
+      .spyOn(button, "getBoundingClientRect")
+      .mockReturnValue(new DOMRect(200, 300, 32, 32));
     fireEvent.click(button);
+    bounds.mockReturnValue(new DOMRect(200, 200, 32, 32));
     fireEvent.scroll(window);
     expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
     fireEvent.click(button);
     expect(screen.getByRole("tooltip")).toBeVisible();
+    bounds.mockRestore();
+  });
+
+  it("ignores a queued scroll-into-view event and unrelated scrollers after a click", () => {
+    mockedUseSeize.mockReturnValue({ address: undefined });
+    render(<UserPageIdentityAddStatementsHeader profile={profile} />);
+    const button = screen.getByRole("button", {
+      name: "About identity statements",
+    });
+    fireEvent.click(button);
+    fireEvent.scroll(document);
+    fireEvent.scroll(screen.getByRole("heading"));
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("tooltip")).toBeVisible();
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+  });
+
+  it("keeps focused guidance open after the pointer leaves and closes on blur", async () => {
+    mockedUseSeize.mockReturnValue({ address: undefined });
+    const user = userEvent.setup();
+    render(<UserPageIdentityAddStatementsHeader profile={profile} />);
+    const button = screen.getByRole("button", {
+      name: "About identity statements",
+    });
+    await user.click(button);
+    await user.unhover(button);
+    expect(button).toHaveFocus();
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("tooltip")).toBeVisible();
+    await user.tab();
+    await expectGuidanceDismissed(button);
   });
 
   it("positions the portal inside a narrow viewport and flips below a high trigger", () => {
