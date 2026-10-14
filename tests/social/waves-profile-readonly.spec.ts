@@ -1413,6 +1413,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
   test("waits for identity guidance hydration before accepting activation", async ({
     page,
   }) => {
+    // Desktop-only SSR check: mobile requires hydrated tab navigation to reveal
+    // this panel, so it cannot expose the button while scripts are held. The
+    // existing profile-shell test still covers mobile guidance activation.
     test.skip(
       (page.viewportSize()?.width ?? 1280) < 1024,
       "The mobile statements panel requires hydrated tab navigation."

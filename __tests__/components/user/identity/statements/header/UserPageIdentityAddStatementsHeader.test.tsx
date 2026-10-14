@@ -154,7 +154,11 @@ describe("UserPageIdentityAddStatementsHeader", () => {
     });
     expect(serverButton).toBeDisabled();
     render(header, { container, hydrate: true });
-    await waitFor(() => expect(serverButton).toBeEnabled());
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "About identity statements" })
+      ).toBeEnabled()
+    );
     const user = userEvent.setup();
     const button = screen.getByRole("button", {
       name: "About identity statements",
