@@ -61,7 +61,7 @@ or an unavailable page. US iOS, web, and Android retain their existing behavior.
    - exact recommended top-up and its projected runway when available
 3. Review `Minting settings`:
    - `Subscription balance` (exact ETH and raw mint capacity)
-   - `Airdrop Address`
+   - `Airdrop Address`; tap, hover, or focus the address to read it in full
    - `Mode` (`Manual` or `Automatic`)
    - `Edition Preference` (`One edition` or `All eligible`)
 4. In owner mode:
@@ -143,6 +143,8 @@ or an unavailable page. US iOS, web, and Android retain their existing behavior.
   - `Redeemed Subscriptions`
   - `Log History`
   - `Top Up History`
+  - sections start closed on phones and open on larger screens; opening or closing
+    a section keeps that choice while data refreshes or the window is resized
   - pagination when a section has more than 10 rows
 
 ## Consolidation Changes

@@ -218,7 +218,7 @@ const WaveDropInner = ({
   }, []);
 
   const handleLongPress = useCallback(() => {
-    if (!allowLongPress) return;
+    if (!allowLongPress || isEditing) return;
     markNextClickForSuppression();
     // Cancel any active edit mode first
     if (editingDropId) {
@@ -228,6 +228,7 @@ const WaveDropInner = ({
     setIsSlideUp(true);
   }, [
     allowLongPress,
+    isEditing,
     editingDropId,
     setEditingDropId,
     markNextClickForSuppression,
@@ -569,7 +570,7 @@ const WaveDropInner = ({
   }, []);
 
   useEffect(() => {
-    if (canUseMobileActionsSheet) {
+    if (canUseMobileActionsSheet && !isEditing) {
       return;
     }
 
@@ -582,6 +583,7 @@ const WaveDropInner = ({
     clearSuppression();
   }, [
     canUseMobileActionsSheet,
+    isEditing,
     clearSuppression,
     mobileMenu,
     resetTimestampSwipe,

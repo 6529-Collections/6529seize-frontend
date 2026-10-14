@@ -23,7 +23,7 @@ export function UserPageXtdhGrantedListTabs({
   }));
 
   return (
-    <div>
+    <div className="[&_[role=tab][aria-selected=false]]:tw-bg-transparent [&_[role=tab][aria-selected=true]]:tw-bg-iron-900 [&_[role=tab]]:tw-min-h-8 [&_[role=tab]]:tw-px-2 [&_[role=tab]]:tw-text-[13px] [&_[role=tablist]>div]:tw-bg-transparent [&_[role=tablist]>div]:tw-p-0 [&_[role=tablist]>div]:tw-ring-0">
       <CommonTabs<GrantedTab>
         items={items}
         activeItem={activeTab}

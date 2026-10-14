@@ -1,5 +1,7 @@
 import { spawn } from "node:child_process";
+import fs from "node:fs";
 import { createServer } from "node:http";
+import os from "node:os";
 import path from "node:path";
 
 type RunResult = {
@@ -9,7 +11,8 @@ type RunResult = {
 };
 
 async function runNotifier(
-  overrides: Record<string, string> = {}
+  overrides: Record<string, string> = {},
+  notifierFile = path.join(process.cwd(), "scripts/notify-ci-wave.mjs")
 ): Promise<RunResult> {
   let payload: Record<string, unknown> | null = null;
   let requestError: Error | null = null;
@@ -37,28 +40,24 @@ async function runNotifier(
   if (!address || typeof address === "string") {
     throw new Error("missing port");
   }
-  const child = spawn(
-    process.execPath,
-    [path.join(process.cwd(), "scripts/notify-ci-wave.mjs")],
-    {
-      env: {
-        ...process.env,
-        CI_PIPELINES_ALERT_URL: `http://127.0.0.1:${address.port}`,
-        CI_PIPELINES_ALERT_SECRET: "test-secret",
-        CI_PIPELINES_TARGET_ENV: "prod",
-        CI_PIPELINES_STATUS: "success",
-        CI_PIPELINES_TITLE: "Deploy complete",
-        CI_PIPELINES_SERVICE: "web",
-        GITHUB_REPOSITORY: "6529-Collections/6529seize-frontend",
-        GITHUB_WORKFLOW: "Web Deploy - PROD",
-        GITHUB_RUN_ID: "123",
-        GITHUB_RUN_NUMBER: "45",
-        GITHUB_SHA: "a".repeat(40),
-        GITHUB_REF_NAME: "main",
-        ...overrides,
-      },
-    }
-  );
+  const child = spawn(process.execPath, [notifierFile], {
+    env: {
+      ...process.env,
+      CI_PIPELINES_ALERT_URL: `http://127.0.0.1:${address.port}`,
+      CI_PIPELINES_ALERT_SECRET: "test-secret",
+      CI_PIPELINES_TARGET_ENV: "prod",
+      CI_PIPELINES_STATUS: "success",
+      CI_PIPELINES_TITLE: "Deploy complete",
+      CI_PIPELINES_SERVICE: "web",
+      GITHUB_REPOSITORY: "6529-Collections/6529seize-frontend",
+      GITHUB_WORKFLOW: "Web Deploy - PROD",
+      GITHUB_RUN_ID: "123",
+      GITHUB_RUN_NUMBER: "45",
+      GITHUB_SHA: "a".repeat(40),
+      GITHUB_REF_NAME: "main",
+      ...overrides,
+    },
+  });
   let stderr = "";
   child.stderr.on("data", (chunk: Buffer) => {
     stderr += chunk.toString("utf8");
@@ -74,6 +73,61 @@ async function runNotifier(
 }
 
 describe("notify-ci-wave payload", () => {
+  it.each(["success", "failure"])(
+    "keeps deployment %s alerts working with the existing sparse checkout",
+    async (status) => {
+      const root = fs.mkdtempSync(path.join(os.tmpdir(), "ci-notifier-"));
+      const notifierFile = path.join(root, "notify-ci-wave.mjs");
+      fs.copyFileSync(
+        path.join(process.cwd(), "scripts/notify-ci-wave.mjs"),
+        notifierFile
+      );
+      try {
+        const result = await runNotifier(
+          {
+            CI_PIPELINES_ALERT_TYPE: "deploy",
+            CI_PIPELINES_STATUS: status,
+            CI_PIPELINES_DESCRIPTION: "existing description",
+          },
+          notifierFile
+        );
+        expect(result.code).toBe(0);
+        expect(result.payload?.["description"]).toBe("existing description");
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
+    }
+  );
+
+  it("forwards multiline failure descriptions using the existing contract", async () => {
+    const description =
+      "**1 failed test across 1 pack**\n\n**social-readonly — mobile Chromium**\n\n- renders the public profile";
+    const result = await runNotifier({
+      CI_PIPELINES_STATUS: "failure",
+      CI_PIPELINES_ALERT_TYPE: "web_e2e",
+      CI_PIPELINES_PARENT_DEPLOY_RUN_ID: "100",
+      CI_PIPELINES_VALIDATION_PACK: "all",
+      CI_PIPELINES_DESCRIPTION: description,
+      GH_TOKEN: "",
+    });
+    expect(result.code).toBe(0);
+    expect(result.payload?.["description"]).toBe(description);
+  });
+
+  it("keeps successful E2E descriptions empty without enrichment", async () => {
+    const result = await runNotifier({
+      CI_PIPELINES_STATUS: "success",
+      CI_PIPELINES_ALERT_TYPE: "web_e2e",
+      CI_PIPELINES_PARENT_DEPLOY_RUN_ID: "100",
+      CI_PIPELINES_VALIDATION_PACK: "all",
+      CI_PIPELINES_DESCRIPTION: "",
+      CI_PIPELINES_FAILURE_ARTIFACT_ROOT: "",
+      GH_TOKEN: "",
+    });
+    expect(result.code).toBe(0);
+    expect(result.payload?.["description"]).toBeNull();
+  });
+
   it("sends canonical contributors and the deployed SHA", async () => {
     const expectedSha = "b".repeat(40);
     const result = await runNotifier({

@@ -1,4 +1,5 @@
 import type { Locator, Page } from "@playwright/test";
+import { expectUrlState } from "../support/urlState";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import { expectCompetitionScroll } from "../support/competitionScroll";
 import {
@@ -110,6 +111,74 @@ function getProfileFeed(page: Page): Locator {
 }
 
 test.describe("Waves and profile read-only coverage @surface @medium @large @readonly", () => {
+  test("keeps the full subscription airdrop address available on touch and keyboard", async ({
+    page,
+    isMobile,
+  }) => {
+    await gotoReady(page, `/${PROFILE_HANDLE}/subscriptions`);
+    await expectProfileShell(page, "Subscriptions");
+    const address = page.getByRole("button", {
+      name: /^0x[0-9a-fA-F]{40}$/,
+    });
+    await expect(address).toBeVisible();
+    const fullAddress = (await address.textContent())!.trim();
+    if (isMobile) {
+      await address.tap();
+    } else {
+      await address.focus();
+    }
+    await expect(
+      page.getByRole("tooltip", { name: fullAddress })
+    ).toBeVisible();
+    await page
+      .getByRole("heading", { name: "Airdrop Address", exact: true })
+      .click();
+    await expect(page.getByRole("tooltip", { name: fullAddress })).toHaveCount(
+      0
+    );
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test("keeps subscription history defaults responsive and preserves user toggles", async ({
+    page,
+  }) => {
+    await gotoReadyWithApiResponse(
+      page,
+      `/${PROFILE_HANDLE}/subscriptions`,
+      (url) => url.pathname.includes("/subscriptions/consolidation/logs/")
+    );
+    await expectProfileShell(page, "Subscriptions");
+    const isPhone = (page.viewportSize()?.width ?? 0) < 640;
+    const disclosures = page
+      .getByRole("region", { name: "Subscription History", exact: true })
+      .locator("details");
+    await expect(disclosures).toHaveCount(3);
+    for (const disclosure of await disclosures.all()) {
+      await expect(disclosure).toHaveJSProperty("open", !isPhone);
+      await expect(disclosure).toHaveAttribute("aria-busy", "false");
+    }
+    const logs = disclosures.filter({ hasText: "Log History" });
+    const summary = page
+      .getByRole("region", { name: "Subscription History", exact: true })
+      .locator("summary")
+      .filter({ hasText: "Log History" });
+    await summary.click();
+    await expect(logs).toHaveJSProperty("open", isPhone);
+    const viewport = page.viewportSize()!;
+    await page.setViewportSize({
+      width: isPhone ? 900 : 390,
+      height: viewport.height,
+    });
+    await expect(logs).toHaveJSProperty("open", isPhone);
+    await page.setViewportSize(viewport);
+    await expect(logs).toHaveJSProperty("open", isPhone);
+    await summary.press("Enter");
+    await expect(logs).toHaveJSProperty("open", !isPhone);
+    await summary.press("Space");
+    await expect(logs).toHaveJSProperty("open", isPhone);
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("scrolls Main Stage Settings and validates live vote Activity in the app", async ({
     page,
   }, testInfo) => {
@@ -285,7 +354,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
             .filter({ visible: true })
             .first()
             .click();
-        await expect(page).toHaveURL((url) => url.pathname === "/waves");
+        await expectUrlState(page, (url) => url.pathname === "/waves");
       };
       await gotoReady(page, "/waves");
       const desktopSidebar =
@@ -549,7 +618,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const winners = page.getByRole("tabpanel");
     await expect(
       winners.getByRole("link", { name: /^The Memes #\d+$/ }).first()
-    ).toBeVisible();
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await expect(
       winners.getByText("Mint date:", { exact: true }).first()
     ).toBeVisible();
@@ -568,7 +637,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
   }) => {
     await gotoReady(page, "/waves");
 
-    await expect(page).toHaveURL((url) => url.pathname === "/waves");
+    await expectUrlState(page, (url) => url.pathname === "/waves");
     await expect(page).toHaveTitle(/Waves/i);
 
     const viewport = page.viewportSize();
@@ -613,7 +682,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       page.getByRole("region", {
         name: /All recent waves list|Regular waves list/,
       })
-    ).toBeVisible();
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     // Global navigation can still expose Waves here. The list header is plain
     // text on web, so scope its navigation invariant to main without a heading.
     await expect(
@@ -634,7 +703,8 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     );
     await profileFeedLink.click();
 
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) =>
         url.pathname === "/waves" &&
         url.searchParams.get("view") === "profile-feed"
@@ -686,14 +756,16 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const visibleFeedPost = feedPostButtons.nth(visibleFeedPostIndex);
     await visibleFeedPost.focus();
     await visibleFeedPost.press("Enter");
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) =>
         /^\/waves\/[0-9a-f-]{36}$/i.test(url.pathname) &&
         Boolean(url.searchParams.get("serialNo"))
     );
 
     await page.goBack();
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) =>
         url.pathname === "/waves" &&
         url.searchParams.get("view") === "profile-feed"
@@ -710,7 +782,8 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       .toBeGreaterThan(0);
 
     await page.goBack();
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) => url.pathname === "/waves" && !url.search
     );
     await expect(
@@ -739,9 +812,10 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       `Expected a link for Wave ${waveId}`
     ).not.toBeNull();
     await matchingWaveLink!.click();
-    await expect(page).toHaveURL((url) => url.pathname === `/waves/${waveId}`);
+    await expectUrlState(page, (url) => url.pathname === `/waves/${waveId}`);
     await page.goBack();
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) => url.pathname === "/waves" && !url.search
     );
 
@@ -781,7 +855,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
 
   test("keeps wave identity compact and sharing reachable through details", async ({
     page,
-  }) => {
+  }, testInfo) => {
     const waveId = await getFirstWaveId(page);
     await gotoReady(page, `/waves/${waveId}`);
 
@@ -826,24 +900,48 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         exact: true,
       });
       if (await description.count()) {
-        await expect
-          .poll(() =>
-            description.evaluate((button) => {
-              const preview = button.querySelector("span > span");
-              const identity = button.parentElement;
-              if (!preview || !identity) {
-                return false;
+        let descriptionGeometry: unknown;
+        try {
+          await expect
+            .poll(
+              async () => {
+                descriptionGeometry = await description.evaluate((button) => {
+                  const preview = button.querySelector("span > span");
+                  const identity = button.parentElement;
+                  if (!preview || !identity) {
+                    return { fitsIdentity: false, hasTruncationCue: false };
+                  }
+                  const buttonBox = button.getBoundingClientRect();
+                  const identityBox = identity.getBoundingClientRect();
+                  const isTruncated =
+                    preview.scrollWidth > preview.clientWidth + 1;
+                  return {
+                    fitsIdentity: buttonBox.right <= identityBox.right + 1,
+                    hasTruncationCue:
+                      !isTruncated || button.querySelector("svg") !== null,
+                    buttonRight: buttonBox.right,
+                    identityRight: identityBox.right,
+                    previewWidth: preview.clientWidth,
+                    previewScrollWidth: preview.scrollWidth,
+                    fonts: document.fonts.status,
+                  };
+                });
+                return descriptionGeometry;
+              },
+              {
+                message:
+                  "Wave description must fit its identity and indicate truncation",
               }
-              const buttonBox = button.getBoundingClientRect();
-              const identityBox = identity.getBoundingClientRect();
-              const isTruncated = preview.scrollWidth > preview.clientWidth + 1;
-              return (
-                buttonBox.right <= identityBox.right + 1 &&
-                (!isTruncated || button.querySelector("svg") !== null)
-              );
-            })
-          )
-          .toBe(true);
+            )
+            .toMatchObject({ fitsIdentity: true, hasTruncationCue: true });
+        } finally {
+          await testInfo.attach("wave-description-geometry", {
+            body: Buffer.from(
+              JSON.stringify(descriptionGeometry ?? null, null, 2)
+            ),
+            contentType: "application/json",
+          });
+        }
       }
       if (await score.count()) {
         const headingBox = await header
@@ -919,15 +1017,16 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
   }) => {
     await gotoReady(page, `/${PROFILE_HANDLE}`);
 
-    await expect(page).toHaveURL(
-      (url) => url.pathname === `/${PROFILE_HANDLE}`
-    );
+    await expectUrlState(page, (url) => url.pathname === `/${PROFILE_HANDLE}`);
     await expect(page).toHaveTitle(new RegExp(PROFILE_HANDLE, "i"));
     await expectProfileShell(page);
     await expectProfileTabLinks(page);
     const statements = page.getByRole("button", { name: /ID Statements/i });
     if (await statements.isVisible()) {
+      // The count replaces the server placeholder after this section hydrates.
+      await expect(statements).toHaveAccessibleName(/^\d[\d,]* ID Statements$/);
       await statements.click();
+      await expect(statements).toHaveAttribute("aria-pressed", "true");
     }
     await expect(
       page.getByRole("link", { name: "Wallet Checker" })
@@ -941,7 +1040,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     test(`renders ${tab.path} read-only`, async ({ page }) => {
       await gotoReady(page, tab.path);
 
-      await expect(page).toHaveURL((url) => url.pathname === tab.path);
+      await expectUrlState(page, (url) => url.pathname === tab.path);
       await expect(page).toHaveTitle(tab.title);
       await expectProfileShell(page, tab.activeTab);
       await expectProfileTabLinks(page);

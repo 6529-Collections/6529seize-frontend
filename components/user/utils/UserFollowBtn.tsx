@@ -288,7 +288,7 @@ export default function UserFollowBtn({
             disabled={isDirectMessagePending}
             type="button"
             aria-label="Send direct message"
-            className={`${DIRECT_MESSAGE_BUTTON_CLASSES[size]} tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-font-semibold tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out enabled:tw-cursor-pointer enabled:hover:tw-bg-iron-700 enabled:hover:tw-ring-iron-600 disabled:tw-cursor-default disabled:tw-opacity-70`}
+            className={`${DIRECT_MESSAGE_BUTTON_CLASSES[size]} tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-font-semibold tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition tw-duration-300 tw-ease-out enabled:tw-cursor-pointer enabled:hover:tw-bg-iron-800 enabled:hover:tw-ring-white/10 disabled:tw-cursor-default disabled:tw-opacity-70`}
             data-tooltip-id={directMessageTooltipId}
           >
             {isDirectMessagePending ? (
@@ -333,6 +333,7 @@ export default function UserFollowBtn({
               : "primary"
           }
           size={FOLLOW_BUTTON_SIZES[size]}
+          className="!tw-text-[13px]"
         >
           <FollowStateIcon
             loading={actionLoading}

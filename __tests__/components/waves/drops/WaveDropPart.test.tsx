@@ -219,6 +219,25 @@ describe("WaveDropPart", () => {
       expect(parentOnClick).not.toHaveBeenCalled();
     });
 
+    it("leaves clicks and typing to the editor until editing ends", () => {
+      const { rerender } = render(<WaveDropPart {...defaultProps} isEditing />);
+      const container = getDropContainer();
+
+      fireEvent.click(screen.getByTestId("drop-id"));
+      for (const key of ["Enter", " "]) {
+        const event = createEvent.keyDown(container, { key, cancelable: true });
+        fireEvent(container, event);
+        expect(event.defaultPrevented).toBe(false);
+      }
+      expect(mockOnDropContentClick).not.toHaveBeenCalled();
+      expect(container).not.toHaveAttribute("role", "button");
+      expect(container).not.toHaveAttribute("tabindex");
+
+      rerender(<WaveDropPart {...defaultProps} />);
+      fireEvent.click(container);
+      expect(mockOnDropContentClick).toHaveBeenCalledWith(mockSinglePartDrop);
+    });
+
     it("does not call onDropContentClick for temporary drops", async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       render(<WaveDropPart {...defaultProps} drop={mockTemporaryDrop} />);
@@ -303,6 +322,59 @@ describe("WaveDropPart", () => {
   });
 
   describe("Long Press Handling", () => {
+    it.each([
+      ["single-part", mockSinglePartDrop, 0],
+      ["storm", mockMultiPartDrop, 1],
+    ])(
+      "leaves an edited %s drop's touch gestures alone",
+      (_, drop, activePartIndex) => {
+        render(
+          <WaveDropPart
+            {...defaultProps}
+            drop={drop}
+            activePartIndex={activePartIndex}
+            isEditing
+          />
+        );
+        const container = getDropContainer();
+        const touchStart = createEvent.touchStart(container, {
+          touches: [{ clientX: 100, clientY: 100 }],
+          cancelable: true,
+        });
+        fireEvent(container, touchStart);
+        act(() => jest.advanceTimersByTime(1000));
+        fireEvent.touchEnd(container);
+
+        expect(mockOnLongPress).not.toHaveBeenCalled();
+        expect(mockSetLongPressTriggered).not.toHaveBeenCalledWith(true);
+        expect(touchStart.defaultPrevented).toBe(false);
+        const click = createEvent.click(screen.getByTestId("quote-button"), {
+          cancelable: true,
+        });
+        fireEvent(screen.getByTestId("quote-button"), click);
+        expect(click.defaultPrevented).toBe(false);
+        expect(mockOnQuoteClick).toHaveBeenCalledWith(drop);
+      }
+    );
+
+    it("cancels a pending hold when editing starts and restores holds after editing", () => {
+      const { rerender } = render(<WaveDropPart {...defaultProps} />);
+      fireEvent.touchStart(getDropContainer(), {
+        touches: [{ clientX: 100, clientY: 100 }],
+      });
+      act(() => jest.advanceTimersByTime(250));
+      rerender(<WaveDropPart {...defaultProps} isEditing />);
+      act(() => jest.advanceTimersByTime(500));
+      expect(mockOnLongPress).not.toHaveBeenCalled();
+
+      rerender(<WaveDropPart {...defaultProps} />);
+      fireEvent.touchStart(getDropContainer(), {
+        touches: [{ clientX: 100, clientY: 100 }],
+      });
+      act(() => jest.advanceTimersByTime(500));
+      expect(mockOnLongPress).toHaveBeenCalledTimes(1);
+    });
+
     it("triggers long press after timeout", () => {
       render(<WaveDropPart {...defaultProps} />);
 
