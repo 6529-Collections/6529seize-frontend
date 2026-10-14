@@ -1,6 +1,6 @@
 import {
   fireEvent,
-  createEvent,
+  act,
   render,
   screen,
   waitFor,
@@ -27,19 +27,12 @@ const mockedUseSeize = useSeizeConnectContext as jest.Mock;
 
 const profile = { handle: "alice", wallets: [{ wallet: "0x1" }] } as any;
 
-async function expectGuidanceDismissed(
-  button: HTMLElement,
-  tooltip: HTMLElement
-) {
+async function expectGuidanceDismissed(button: HTMLElement) {
   await waitFor(() => {
     expect(button).toHaveAttribute("aria-expanded", "false");
     expect(button).not.toHaveAttribute("aria-describedby");
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
   });
-  // JSDOM does not run the browser's opacity transition.
-  const fadeOut = createEvent.transitionEnd(tooltip);
-  Object.defineProperty(fadeOut, "propertyName", { value: "opacity" });
-  fireEvent(tooltip, fadeOut);
-  expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
 }
 
 describe("UserPageIdentityAddStatementsHeader", () => {
@@ -96,7 +89,7 @@ describe("UserPageIdentityAddStatementsHeader", () => {
     expect(
       screen.getByRole("button", { name: "About identity statements" })
     ).toHaveFocus();
-    const tooltip = await screen.findByRole("tooltip");
+    await screen.findByRole("tooltip");
     const button = screen.getByRole("button", {
       name: "About identity statements",
     });
@@ -104,7 +97,7 @@ describe("UserPageIdentityAddStatementsHeader", () => {
       expect(button).toHaveAttribute("aria-expanded", "true")
     );
     await user.keyboard("{Escape}");
-    await expectGuidanceDismissed(button, tooltip);
+    await expectGuidanceDismissed(button);
   });
 
   it("supports a tap without hover and closes on an outside click", async () => {
@@ -113,7 +106,7 @@ describe("UserPageIdentityAddStatementsHeader", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "About identity statements" })
     );
-    const tooltip = await screen.findByRole("tooltip");
+    await screen.findByRole("tooltip");
     const button = screen.getByRole("button", {
       name: "About identity statements",
     });
@@ -121,6 +114,33 @@ describe("UserPageIdentityAddStatementsHeader", () => {
       expect(button).toHaveAttribute("aria-expanded", "true")
     );
     fireEvent.pointerDown(document.body);
-    await expectGuidanceDismissed(button, tooltip);
+    await expectGuidanceDismissed(button);
+  });
+
+  it("removes the tooltip on Escape without waiting for an animation to finish", async () => {
+    jest.useFakeTimers();
+    try {
+      mockedUseSeize.mockReturnValue({ address: "0x2" });
+      render(<UserPageIdentityAddStatementsHeader profile={profile} />);
+      const button = screen.getByRole("button", {
+        name: "About identity statements",
+      });
+
+      for (let cycle = 0; cycle < 3; cycle += 1) {
+        fireEvent.click(button);
+        await act(async () => jest.advanceTimersByTime(100));
+        expect(button).toHaveAttribute("aria-expanded", "true");
+        expect(screen.getByRole("tooltip")).toBeInTheDocument();
+
+        fireEvent.keyDown(window, { key: "Escape" });
+        await act(async () => jest.advanceTimersByTime(10));
+        expect(button).toHaveAttribute("aria-expanded", "false");
+        expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+        await act(async () => jest.advanceTimersByTime(100));
+        expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+      }
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });

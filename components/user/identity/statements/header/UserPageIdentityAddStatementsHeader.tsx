@@ -101,6 +101,7 @@ export default function UserPageIdentityAddStatementsHeader({
         opacity={1}
         style={{ ...TOOLTIP_STYLES, pointerEvents: "auto" }}
         isOpen={isGuidanceOpen}
+        hidden={!isGuidanceOpen}
         setIsOpen={setIsGuidanceOpen}
         clickable
         delayHide={150}
