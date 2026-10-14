@@ -137,6 +137,30 @@ also remove a set or Gradient component from the boost applied to the remaining
 cards. Historic versions are available at
 [`/network/tdh/historic-boosts`](feature-tdh-historic-boosts.md).
 
+## Ranks and Tied Scores
+
+TDH ranks are consecutive positions starting at 1. Equal displayed TDH does
+not give wallets or consolidations a shared rank: the remaining criteria are
+compared before resolving a complete tie.
+
+| Ranking                         | Criteria, highest first                                                           |
+| ------------------------------- | --------------------------------------------------------------------------------- |
+| Overall wallet or consolidation | Boosted TDH, unboosted TDH, Gradients TDH, NextGen TDH                            |
+| Memes, Gradients or NextGen     | That collection's boosted TDH, unboosted TDH, NFT balance, then total NFT balance |
+| Owners of one Meme card         | TDH for that card, then total boosted TDH                                         |
+
+If all those criteria tie, the lowercase wallet address sorts in ascending
+order. For a consolidation, the same comparison uses its consolidation key:
+its lowercase wallet addresses sorted in ascending order and joined with
+hyphens. Backend and native 6529 Desktop use the same ordering. A tie-break
+changes rank positions, not holdings, TDH scores or boosts.
+
+Individual Gradient and NextGen token rankings compare token TDH highest first,
+then numeric token ID lowest first. A collection rank of `-1` means there is no
+positive boosted TDH for that collection. Empty singleton wallets are omitted
+from TDH rankings; wallets with eligible NFTs or membership in a multi-wallet
+consolidation remain included even when their TDH is zero.
+
 ## Failure and Recovery
 
 If a profile lookup cannot find the identity, check the spelling and submit
