@@ -187,6 +187,96 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     );
   });
 
+  test("loads granted collection metadata through the desktop batch proxy fallback", async ({
+    page,
+  }) => {
+    const address = "0xa94161fbe69e08ff5a36dfafa61bdf29dd2fb928";
+    // Keep grants stable without creating any real grant. Metadata uses the real
+    // backend in deployed environments; local/PR coverage controls that boundary.
+    await page.route("**/api/xtdh/grants?**", (route) =>
+      route.fulfill({
+        json: {
+          count: 1,
+          page: 1,
+          next: false,
+          data: [
+            {
+              id: "alchemy-proxy-regression",
+              grantor: { handle: PROFILE_HANDLE },
+              target_chain: "ETHEREUM_MAINNET",
+              target_contract: address,
+              target_token_mode: "ALL",
+              target_tokens_count: 274,
+              rate: 3,
+              status: "GRANTED",
+              error_details: null,
+              created_at: 1791642831943,
+              updated_at: 1791642976046,
+              valid_from: 1791642976046,
+              valid_to: null,
+              is_irrevocable: false,
+              total_granted: 11,
+            },
+          ],
+        },
+      })
+    );
+    await page.route("**/api/alchemy/contracts", (route) =>
+      route.fulfill({ status: 500, json: { error: "Required" } })
+    );
+    const deployedEnvironment = ["staging", "production"].includes(
+      process.env["PLAYWRIGHT_ENV"] ?? "local"
+    );
+    if (!deployedEnvironment) {
+      await page.route("**/alchemy-proxy/contracts", (route) =>
+        route.fulfill({
+          json: {
+            contracts: [
+              {
+                address,
+                chain: "ethereum",
+                metadata: {
+                  address,
+                  _checksum: address,
+                  name: "Voxelglyph",
+                  tokenType: "ERC721",
+                  totalSupply: "273",
+                },
+              },
+            ],
+          },
+        })
+      );
+    }
+    const fallbackResponse = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === "/alchemy-proxy/contracts" &&
+        response.request().method() === "POST"
+    );
+    await gotoReady(page, `/${PROFILE_HANDLE}/xtdh?tab=granted`);
+    const response = await fallbackResponse;
+    expect(response.status()).toBe(200);
+    expect(response.request().postDataJSON()).toEqual({
+      contracts: [
+        {
+          address: "0xA94161fBE69E08fF5a36DfAfa61BdF29DD2Fb928",
+          chain: "ethereum",
+        },
+      ],
+    });
+    await expect(page.getByText("Voxelglyph", { exact: true })).toBeVisible();
+    await expect(page.getByText("ERC721", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("Contract details unavailable", { exact: true })
+    ).toHaveCount(0);
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(
+      page,
+      test.info(),
+      "granted-metadata-proxy-fallback"
+    );
+  });
+
   test("renders grant thumbnails from both Alchemy CDNs with an intentional failure fallback", async ({
     page,
   }) => {
