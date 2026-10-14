@@ -16,7 +16,7 @@ function HeaderActionButtonsContent() {
   const { openWave, openDirectMessage } = useCreateModalState();
 
   const baseButtonClasses =
-    "tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-black tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-iron-800";
+    "tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-black tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-iron-800";
 
   const waveParam = getActiveWaveIdFromUrl({ pathname, searchParams });
   const activeView = getActiveViewFromUrl({
@@ -61,7 +61,7 @@ function HeaderActionButtonsContent() {
       >
         <FontAwesomeIcon
           icon={faPaperPlane}
-          className="tw-h-4 tw-w-4 tw-flex-shrink-0"
+          className="tw-size-[18px] tw-flex-shrink-0"
         />
       </button>
     );
