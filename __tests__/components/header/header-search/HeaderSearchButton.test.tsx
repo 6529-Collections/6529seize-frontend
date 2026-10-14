@@ -1,4 +1,3 @@
-import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import HeaderSearchButton from "@/components/header/header-search/HeaderSearchButton";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -122,11 +121,12 @@ describe("HeaderSearchButton", () => {
     expect(await screen.findByTestId("modal")).toBeInTheDocument();
   });
 
-  it("uses larger icon when app mode is true", () => {
+  it("uses a stronger icon stroke when app mode is true", () => {
     useDeviceInfoMock.mockReturnValue({ isApp: true } as any);
     render(<HeaderSearchButton wave={null} />);
     const icon = screen.getByTestId("icon");
     expect(icon).toHaveClass("tw-size-5");
+    expect(icon).toHaveAttribute("stroke-width", "2");
   });
 
   it("opens the scoped message search in a wave and can switch to site search", async () => {
