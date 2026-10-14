@@ -114,7 +114,6 @@ function getProfileFeed(page: Page): Locator {
 test.describe("Waves and profile read-only coverage @surface @medium @large @readonly", () => {
   test("keeps received collection loading rows aligned with loaded content", async ({
     page,
-    isMobile,
   }) => {
     let releaseCollections: () => void;
     const collectionsReady = new Promise<void>((resolve) => {
@@ -148,12 +147,13 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     try {
       await expect(skeleton).toBeVisible();
       await expect(controls.getByRole("textbox")).toBeDisabled();
-      const sortControl = isMobile
-        ? controls.getByRole("button", {
-            name: "Sort collections by: xTDH",
-            exact: true,
-          })
-        : controls.getByRole("tab", { name: "xTDH", exact: true });
+      const sortControl = controls
+        .getByRole("button", {
+          name: "Sort collections by: xTDH",
+          exact: true,
+        })
+        .or(controls.getByRole("tab", { name: "xTDH", exact: true }));
+      await expect(sortControl).toHaveCount(1);
       await expect(sortControl).toBeDisabled();
       loadingLayout = await skeleton.evaluate(measureCard);
       await expectNoHorizontalOverflow(page);

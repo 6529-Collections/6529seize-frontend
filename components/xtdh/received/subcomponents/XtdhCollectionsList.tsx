@@ -123,10 +123,10 @@ function CollectionsSkeleton() {
   const locale = useBrowserLocale();
 
   return (
-    <div role="status">
-      <span className="tw-sr-only">
+    <div>
+      <output className="tw-sr-only" aria-live="polite">
         {t(locale, "xtdh.collections.loading")}
-      </span>
+      </output>
       <ul
         aria-hidden="true"
         className="tw-m-0 tw-flex tw-flex-col tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800 tw-p-0"
