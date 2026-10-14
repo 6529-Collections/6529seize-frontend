@@ -38,6 +38,7 @@ export const STATIC_INDEXABLE_PATHS = [
   "/open-data",
   "/the-memes/mint",
   "/tools/api",
+  "/tools/time-zones",
   "/safe-collecting",
   "/safe-collecting/tap-guide",
   "/safe-collecting/faq",
