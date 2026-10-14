@@ -1350,12 +1350,31 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     );
     await page.keyboard.press("Escape");
     await expect(guidance).toBeHidden();
+    await expect(guidance).toHaveCount(0);
     await page
       .getByRole("button", { name: "About identity statements", exact: true })
       .click();
     await expect(guidance).toBeVisible();
     await addressesHeading.click();
     await expect(guidance).toBeHidden();
+    await expect(guidance).toHaveCount(0);
+
+    const helpButton = page.getByRole("button", {
+      name: "About identity statements",
+      exact: true,
+    });
+    for (const interaction of ["focus", "click"] as const) {
+      await addressesHeading.click();
+      if (interaction === "focus") {
+        await helpButton.focus();
+      } else {
+        await helpButton.click();
+      }
+      await expect(guidance).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(helpButton).toHaveAttribute("aria-expanded", "false");
+      await expect(guidance).toHaveCount(0);
+    }
   });
 
   for (const tab of PROFILE_TAB_PATHS) {
