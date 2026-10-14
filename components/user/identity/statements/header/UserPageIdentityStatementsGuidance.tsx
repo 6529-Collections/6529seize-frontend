@@ -117,13 +117,10 @@ export default function UserPageIdentityStatementsGuidance() {
       // Scrolling the trigger into view can dispatch its queued scroll event
       // after the click. Dismiss only when scrolling moves it after opening.
       if (
-        currentBounds &&
-        initialBounds &&
-        currentBounds.x === initialBounds.x &&
-        currentBounds.y === initialBounds.y
+        currentBounds?.x !== initialBounds?.x ||
+        currentBounds?.y !== initialBounds?.y
       )
-        return;
-      close();
+        close();
     };
     window.addEventListener("keydown", handleEscape, true);
     window.addEventListener("scroll", handleScroll, true);
