@@ -7,6 +7,7 @@ import {
   sanitizeEndpointGroup,
   sanitizeRouteFamily,
 } from "./monitoring/mobileLaunchTimingSanitizers";
+import { redactSensitiveQueryParams } from "./monitoring/sensitiveQueryParams";
 
 const REDACTED = "[Filtered]";
 const THIRD_PARTY = "third-party";
@@ -61,6 +62,14 @@ type SanitizableSentryEvent<T extends Event> = Omit<
 };
 
 type SentryPathKind = "auto" | "endpoint" | "route";
+
+type SentryExceptionValue = NonNullable<
+  NonNullable<Event["exception"]>["values"]
+>[number];
+
+type SentryStackFrame = NonNullable<
+  NonNullable<SentryExceptionValue["stacktrace"]>["frames"]
+>[number];
 
 function isFirstPartyHost(hostname: string): boolean {
   const normalized = hostname.toLowerCase();
@@ -383,6 +392,7 @@ function sanitizeString(value: string): string {
   sanitized = sanitized.replace(STRIPE_KEY_PATTERN, REDACTED);
   sanitized = sanitized.replace(BEARER_PATTERN, "Bearer " + REDACTED);
   sanitized = sanitized.replace(BASIC_PATTERN, "Basic " + REDACTED);
+  sanitized = redactSensitiveQueryParams(sanitized);
   return sanitized.length > 2048 ? sanitized.slice(0, 2048) : sanitized;
 }
 
@@ -721,6 +731,38 @@ export function sanitizeSentrySpan<T extends SanitizableSentrySpan>(
   return next;
 }
 
+function sanitizeStackFrame(frame: SentryStackFrame): SentryStackFrame {
+  const next = { ...frame };
+  // Inline-script frames use the document URL, including its query string.
+  if (typeof next.filename === "string") {
+    next.filename = redactSensitiveQueryParams(next.filename);
+  }
+  if (typeof next.abs_path === "string") {
+    next.abs_path = redactSensitiveQueryParams(next.abs_path);
+  }
+  return next;
+}
+
+function sanitizeExceptionValue(
+  exception: SentryExceptionValue
+): SentryExceptionValue {
+  const value = { ...exception };
+  if (typeof value.value === "string") {
+    value.value = sanitizeString(value.value);
+  }
+  if (typeof value.type === "string") {
+    value.type = sanitizeString(value.type);
+  }
+  const frames = value.stacktrace?.frames;
+  if (Array.isArray(frames)) {
+    value.stacktrace = {
+      ...value.stacktrace,
+      frames: frames.map(sanitizeStackFrame),
+    };
+  }
+  return value;
+}
+
 export function sanitizeSentryEvent<T extends Event>(event: T): T {
   // Avoid mutating the original reference in case Sentry reuses it.
   const next = { ...event } as unknown as SanitizableSentryEvent<T>;
@@ -761,16 +803,7 @@ export function sanitizeSentryEvent<T extends Event>(event: T): T {
   if (next.exception?.values) {
     next.exception = {
       ...next.exception,
-      values: next.exception.values.map((v) => {
-        const value = { ...v };
-        if (typeof value.value === "string") {
-          value.value = sanitizeString(value.value);
-        }
-        if (typeof value.type === "string") {
-          value.type = sanitizeString(value.type);
-        }
-        return value;
-      }),
+      values: next.exception.values.map(sanitizeExceptionValue),
     };
   }
 
