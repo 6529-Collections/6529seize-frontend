@@ -126,7 +126,9 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
 
     await expect(page).toHaveTitle("Safe Collecting | 6529.io");
     await expectHeading(page, "Safe Collecting");
-    await expect(page.locator("#safe-tools-heading")).toHaveText("All tools");
+    await expect(
+      page.getByRole("heading", { name: "All tools", exact: true })
+    ).toBeVisible();
 
     for (const action of DELEGATION_ACTIONS) {
       await expect(
@@ -172,11 +174,17 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
       /\/safe-collecting\?utm_source=legacy#safe-setup$/
     );
     await expectHeading(page, "Safe Collecting");
-    await expect(page.locator("#safe-setup-heading")).toBeFocused();
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
-      "href",
-      new URL("/safe-collecting", page.url()).toString()
-    );
+    await expect(
+      page.getByRole("heading", { name: "Set it up", exact: true })
+    ).toBeFocused();
+    // The canonical link is document metadata with no accessible locator.
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          document.querySelector('link[rel="canonical"]')?.getAttribute("href")
+        )
+      )
+      .toBe(new URL("/safe-collecting", page.url()).toString());
 
     const navigation = page.getByRole("navigation", {
       name: "Safe collecting sections",

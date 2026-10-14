@@ -663,19 +663,22 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       ["Consolidation Use Cases", "/safe-collecting/consolidation-use-cases"],
       ["Wallet Checker", "/safe-collecting/wallet-checker"],
     ] as const) {
+      // Options that are themselves links to this path.
       const result = page
         .getByRole("option")
-        .and(page.locator(`a[href="${path}"]`));
+        .locator(`xpath=self::a[@href="${path}"]`);
       await expect(result).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
       await expect(result).toContainText(title);
     }
     await expect(
-      page.getByRole("option").and(page.locator('a[href^="/delegation/"]'))
+      page
+        .getByRole("option")
+        .locator('xpath=self::a[starts-with(@href, "/delegation/")]')
     ).toHaveCount(0);
     await expect(
       page
         .getByRole("option")
-        .and(page.locator('a[href="/about/nft-delegation"]'))
+        .locator('xpath=self::a[@href="/about/nft-delegation"]')
     ).toHaveCount(0);
   });
 

@@ -240,7 +240,9 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     await expect(
       page.getByRole("heading", { level: 1, name: "Safe Collecting" })
     ).toBeVisible();
-    await expect(page.locator("#safe-tools-heading")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "All tools", exact: true })
+    ).toBeVisible();
     for (const name of REQUIRED_DELEGATION_ACTIONS) {
       await expect(
         page.getByRole("button", { name, exact: true })
