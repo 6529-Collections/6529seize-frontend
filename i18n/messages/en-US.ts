@@ -2334,6 +2334,7 @@ const NETWORK_GROUP_FILTER_MESSAGES = objectMessages("network.groupFilter", {
 
 const WAVE_LOADING_MESSAGES = objectMessages("waves", {
   loadingStatus: "Loading waves",
+  "drops.editorLoadingStatus": "Loading editor",
 } as const);
 
 const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
@@ -3715,6 +3716,11 @@ export const EN_US_MESSAGES = {
   "theMemes.description.collections": "Collections",
   "theMemes.mint.metadata.description":
     "View the latest mint from The Memes collection.",
+  "theMemes.mint.openWebMint": "Mint on 6529.io",
+  "theMemes.mint.connect.connectedProfile": "Connected Profile",
+  "theMemes.mint.connect.profileStats": "TDH: {tdh} - Level: {level}",
+  "theMemes.mint.connect.mintForMe": "Mint for me",
+  "theMemes.mint.connect.mintForFren": "Mint for fren",
   "theMemes.title": "The Memes",
   "theMemes.sorting.regionLabel": "Meme sorting",
   "theMemes.sorting.sortBy": "Sort by",

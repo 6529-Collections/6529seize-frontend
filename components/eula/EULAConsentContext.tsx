@@ -14,43 +14,25 @@ import type { ApiEulaConsent } from "@/generated/models/ApiEulaConsent";
 import type { ApiSaveEulaConsentRequest } from "@/generated/models/ApiSaveEulaConsentRequest";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import LogoIcon from "@/components/common/icons/LogoIcon";
+import { EULAConsentContext } from "./useEULAConsent";
 import { Device } from "@capacitor/device";
 import Cookies from "js-cookie";
+import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import React, {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import EULAModal from "./EULAModal";
 
 type EULAConsentState =
   | "checking"
   | "acceptance-required"
   | "accepted"
   | "error";
-
-type EULAConsentContextType = {
-  readonly consent: () => Promise<void>;
-  readonly isSaving: boolean;
-  readonly saveError: string | null;
-};
-
-const EULAConsentContext = createContext<EULAConsentContextType | undefined>(
-  undefined
-);
-
-export const useEULAConsent = () => {
-  const context = useContext(EULAConsentContext);
-  if (!context)
-    throw new Error("useEULAConsent must be used within a EULAConsentProvider");
-  return context;
-};
 
 const getBackendConsentExpiration = (
   consent: ApiEulaConsent,
@@ -100,11 +82,18 @@ const getAccessControlRoute = (error: unknown): string | null => {
   return null;
 };
 
-const EULACheckingScreen = ({ label }: { readonly label: string }) => {
-  const [showLogo, setShowLogo] = useState(false);
+const EULACheckingScreen = ({
+  label,
+  showLogoImmediately = false,
+}: {
+  readonly label: string;
+  readonly showLogoImmediately?: boolean;
+}) => {
+  const [logoRevealed, setLogoRevealed] = useState(false);
+  const showLogo = showLogoImmediately || logoRevealed;
 
   useEffect(() => {
-    const revealLogo = globalThis.setTimeout(() => setShowLogo(true), 250);
+    const revealLogo = globalThis.setTimeout(() => setLogoRevealed(true), 250);
     return () => globalThis.clearTimeout(revealLogo);
   }, []);
 
@@ -156,6 +145,24 @@ const EULABlockingScreen = ({
     </main>
   );
 };
+
+// Only iOS devices without a current acceptance ever render the agreement, so
+// the text stays out of the shared app shell bundle. While its chunk loads the
+// app is still gated behind the same full-screen checking state.
+const EULAModalLoadingScreen = () => {
+  const locale = useBrowserLocale();
+  return (
+    <EULACheckingScreen
+      label={t(locale, "eula.checking")}
+      showLogoImmediately
+    />
+  );
+};
+
+const EULAModal = dynamic(() => import("./EULAModal"), {
+  ssr: false,
+  loading: () => <EULAModalLoadingScreen />,
+});
 
 export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
   children,
