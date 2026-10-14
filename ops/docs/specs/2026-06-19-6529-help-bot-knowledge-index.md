@@ -54,6 +54,10 @@ hovering, or focusing the address reveals its full value on compact layouts.
 These remain frontend-owned facts published through the existing
 help-index sync and consumed by the existing backend loader.
 
+The `waves.notification-controls` record describes the notification subview inside the About sheet
+on phone layouts, dismissal back to About, and the anchored keyboard-accessible
+menu in desktop and tablet sidebars.
+
 ## Problem Statement
 
 Users often ask practical product questions in Waves instead of finding the

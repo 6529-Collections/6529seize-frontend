@@ -597,7 +597,7 @@ describe("testing strategy CI plan", () => {
           needs?: string | string[];
           strategy?: { matrix?: string };
           "runs-on"?: string;
-          "timeout-minutes"?: number;
+          "timeout-minutes"?: number | string;
           container?: { image?: string; options?: string };
           defaults?: { run?: { shell?: string } };
           steps?: Array<{
@@ -641,7 +641,8 @@ describe("testing strategy CI plan", () => {
     expect(parsed.jobs["core-playwright-checks"]).toMatchObject({
       if: "needs.plan.outputs.core_playwright_required == 'true' && github.event.pull_request.head.repo.full_name == github.repository",
       "runs-on": "${{ matrix.runner }}",
-      "timeout-minutes": 20,
+      "timeout-minutes":
+        "${{ matrix.lane == 'playwright-native-competition' && 30 || 20 }}",
       container: {
         image:
           "mcr.microsoft.com/playwright:v1.61.1-noble@sha256:5b8f294aff9041b7191c34a4bab3ac270157a28774d4b0660e9743297b697e48",
