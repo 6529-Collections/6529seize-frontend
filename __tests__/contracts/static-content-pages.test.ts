@@ -9,7 +9,9 @@ const STATIC_CONTENT_RENDERER =
   /from\s+["']@\/components\/migrated-wordpress\/(?:createMigratedWordPressStaticPage|MigratedWordPressStaticPage|MigratedWordPressArticlePage)["']/;
 const FORCE_STATIC_EXPORT = /^export const dynamic = "force-static";$/m;
 // force-static hides request data and caches fetches at build time, so these
-// pages must not read either.
+// pages must not read either. This is a source-text guard on the page files
+// only: it cannot see request or fetch calls inside imported helpers or
+// aliased imports. Review new imports in these pages with that in mind.
 const REQUEST_OR_DATA_ACCESS = [
   /\bcookies\(/,
   /\bheaders\(/,

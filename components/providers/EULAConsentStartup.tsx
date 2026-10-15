@@ -9,8 +9,11 @@ import { Capacitor } from "@capacitor/core";
 import Cookies from "js-cookie";
 import { useState, useSyncExternalStore, type ReactNode } from "react";
 
-// Read once per document. Accepting the EULA later writes the cookie, and
-// that must not restart the application a second time.
+// Read once per document and never re-read. The value selects the provider's
+// key, so it describes how this document started, not current consent.
+// Accepting the EULA writes the cookie; re-reading it would flip the key and
+// remount the accepted app. The mounted provider still owns the live consent
+// state across client navigations, and a full reload starts a new document.
 let nativeIosCheckRequired: boolean | undefined;
 
 const subscribe = () => () => undefined;

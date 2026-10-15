@@ -233,6 +233,16 @@ it("opens a prerendered native iOS page once after restored acceptance", async (
       initialConsentVersion: CURRENT_EULA_VERSION,
     });
     expect(result.commits).toEqual(["mount", "unmount", "mount"]);
+
+    // Moving on to another prerendered page carries empty server cookies
+    // again. The accepted app stays mounted and is not checked again.
+    await result.rerender({ initialIsIos: false });
+    expect(result.commits).toEqual(["mount", "unmount", "mount"]);
+    expect(result.container.querySelector("h1")?.textContent).toBe(
+      "Museum page"
+    );
+    expect(result.container.querySelector('main[aria-busy="true"]')).toBeNull();
+    expect(commonApiFetch).toHaveBeenCalledTimes(1);
   } finally {
     await result.cleanup();
   }
