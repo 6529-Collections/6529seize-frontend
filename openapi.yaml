@@ -7849,6 +7849,35 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiMemeCollaborationState"
+    post:
+      operationId: inviteMemeCollaborators
+      tags:
+        - Drops
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/meme-collaborations/meme-collaborations.handlers"
+          name: inviteMemeCollaborators
+      parameters:
+        - in: path
+          name: drop_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMemeCollaborationInviteRequest"
+      responses:
+        "200":
+          description: Invitations appended to the active Main Stage submission.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMemeCollaborationState"
   /drops/{drop_id}/collaborations/{invitation_id}/response:
     post:
       operationId: respondToMemeCollaboration
@@ -32376,6 +32405,17 @@ components:
             - DECLINED
             - CANCELLED
             - CLOSED
+    ApiMemeCollaborationInviteRequest:
+      type: object
+      required:
+        - collaborator_ids
+      properties:
+        collaborator_ids:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items:
+            type: string
     ApiMemeCollaborationResponseRequest:
       type: object
       required:
@@ -32405,6 +32445,11 @@ components:
         - collaborators
         - invitations
       properties:
+        can_invite:
+          type: boolean
+          description: >-
+            Whether this viewer can append invitations to this active Memes Main
+            Stage artwork.
         artwork:
           $ref: "#/components/schemas/ApiMemeCollaborationArtwork"
         managed:
