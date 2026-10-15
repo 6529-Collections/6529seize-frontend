@@ -534,6 +534,7 @@ export function useWaveDataFetching({
     (waveId: string) => {
       clearInitialBackfillTimeout(waveId);
       clearLoadingState(waveId);
+      trackedCacheSuccessWaveIdsRef.current.delete(waveId);
       cancelFetch(waveId, "wave_deactivated");
       cancelFetch(`${waveId}-initial-backfill`, "wave_deactivated");
       cancelFetch(getNewestSyncAbortKey(waveId), "wave_deactivated");
