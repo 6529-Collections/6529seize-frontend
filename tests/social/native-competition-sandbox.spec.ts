@@ -791,6 +791,27 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         await page.screenshot({
           path: testInfo.outputPath("activity-loading.png"),
         });
+        if (!mobile) {
+          for (const width of [640, 767, 768]) {
+            await page.setViewportSize({ width, height: 1000 });
+            await expect
+              .poll(() =>
+                skeletons
+                  .first()
+                  .evaluate(
+                    (element) =>
+                      getComputedStyle(element).gridTemplateColumns.split(" ")
+                        .length
+                  )
+              )
+              .toBe(width < 768 ? 2 : 4);
+            await expectNoHorizontalOverflow(page);
+            await page.screenshot({
+              path: testInfo.outputPath(`activity-loading-${width}.png`),
+            });
+          }
+          await page.setViewportSize({ width: 1728, height: 1000 });
+        }
       } finally {
         releaseActivity();
       }
@@ -845,13 +866,13 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         animations: "disabled",
       });
       if (!mobile) {
-        for (const width of [639, 640]) {
+        for (const width of [639, 640, 767, 768]) {
           await page.setViewportSize({ width, height: 1000 });
           const responsiveVoter = await voter.boundingBox();
           const responsiveCreator = await creator.boundingBox();
           expect(responsiveVoter).not.toBeNull();
           expect(responsiveCreator).not.toBeNull();
-          if (width < 640) {
+          if (width < 768) {
             const responsiveVote = await activity
               .getByText("1,234,567 TDH", { exact: true })
               .boundingBox();

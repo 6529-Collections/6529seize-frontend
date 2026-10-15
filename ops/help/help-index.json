@@ -7385,7 +7385,7 @@
         "Click a row outside its controls or use the checkbox beside the artwork to select or deselect its vote for reset. Use its artwork or title buttons to open the drop; these buttons support Enter and Space. Vote controls and profile links keep their own actions. Selecting text does not toggle the row. Select all selects loaded rows for reset. Row selection is disabled during reset and when voting is closed.",
         "Reset votes opens a confirmation showing the selected count. Confirming sets those votes to zero; cancelling leaves votes unchanged.",
         "Rows can include an Explain action that opens a normal drop reply prefilled with a vote rationale prefix without submitting or changing the vote.",
-        "Open Votes, then My Votes. All votes and Activity are its other subtabs. These three views use compact rounded pills below the main wave tabs on desktop, mobile web, and the app. My Votes rows span the full wave content pane, with padding inside each row for its controls. All three follow the chosen competition, and voteTab preserves the selected subtab in a link."
+        "Open Votes, then My Votes. All votes and Activity are its other subtabs. These three views use compact rounded pills below the main wave tabs on desktop, mobile web, and the app. My Votes rows span the full wave content pane, with padding inside each row for its controls. All three follow the chosen competition, and voteTab preserves the selected subtab in a link. Activity keeps the vote change and drop creator below the voter on screens narrower than 768px, with the time and View drop in chat action on the first line."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
