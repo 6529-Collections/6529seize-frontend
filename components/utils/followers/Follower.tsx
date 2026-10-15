@@ -10,6 +10,7 @@ import UserFollowBtn, {
   UserFollowBtnSize,
 } from "@/components/user/utils/UserFollowBtn";
 import { getFollowersMessage } from "./followers.messages";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 const FOLLOW_STATUS_PREFETCH_MARGIN = "360px";
 
@@ -91,7 +92,10 @@ export default function Follower({
                   {follower.identity.pfp ? (
                     // Profile avatars can come from arbitrary remote hosts, so this stays unoptimized.
                     <Image
-                      src={follower.identity.pfp}
+                      src={getScaledImageUri(
+                        follower.identity.pfp,
+                        ImageScale.W_AUTO_H_50
+                      )}
                       alt={profileImageAlt}
                       fill
                       unoptimized

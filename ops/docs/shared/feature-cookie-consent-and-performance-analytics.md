@@ -95,6 +95,11 @@ performance-tracking behavior tied to that choice.
   Google Analytics.
 - Browser cookie clearing can cause the country check and consent flow to run
   again on the next visit.
+- After a completed country check the app also stores a layout-only marker in
+  browser local storage (`6529:us-country-hint`, set when the country was US and
+  removed for any other answer). It only lets the iOS app keep blank space for
+  the Memes subscription row during the next check; it never enables
+  purchasing UI, and the app works without it when storage is unavailable.
 
 ## Failure and Recovery
 

@@ -24,6 +24,12 @@ import {
   waitFor,
 } from "@testing-library/react";
 import type { ReactElement, ReactNode } from "react";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
 
 let mockConnectedProfileId: string | null = "viewer-1";
 
@@ -494,6 +500,30 @@ describe("ContentModerationDropGate", () => {
     expect(
       screen.getByTestId("content-moderation-tombstone-blocked")
     ).toBeInTheDocument();
+  });
+
+  it("requests the AUTOx50 derivative of a blocked author's profile picture", () => {
+    setProfileBlockedOverride("viewer-1", "author-1", true);
+    const drop = createDrop({
+      moderation: {
+        status: ApiDropModerationStatus.Visible,
+        can_view: true,
+      },
+    });
+    renderGate(
+      <ContentModerationDropGate
+        drop={{ ...drop, author: { ...drop.author, pfp: CDN_AVATAR_URL } }}
+      >
+        <p>Blocked post</p>
+      </ContentModerationDropGate>
+    );
+
+    const tombstone = screen.getByTestId(
+      "content-moderation-tombstone-blocked"
+    );
+    expect(getRequestedImageSrc(tombstone.querySelector("img"))).toContain(
+      scaledAvatarPath(ImageScale.W_AUTO_H_50)
+    );
   });
 
   it("unblocks every mounted post by an author immediately", async () => {

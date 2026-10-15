@@ -1,17 +1,11 @@
 "use client";
 
 import { useMemo, type FC } from "react";
-import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
-import {
-  resolveWaveParticipationVariant,
-  type WaveParticipationVariant,
-} from "@/helpers/waves/wave-participation-presentation.helpers";
+import type { WaveParticipationVariant } from "@/helpers/waves/wave-participation-presentation.helpers";
 import MemeParticipationDrop from "@/components/memes/drops/MemeParticipationDrop";
-import { DefaultSingleWaveDrop } from "@/components/waves/drop/DefaultSingleWaveDrop";
-import { MemesSingleWaveDrop } from "@/components/waves/drop/MemesSingleWaveDrop";
-import { QuorumSingleWaveDrop } from "@/components/waves/drop/QuorumSingleWaveDrop";
 import QuorumParticipationDrop from "@/components/waves/quorum/QuorumParticipationDrop";
 import DefaultParticipationDrop from "./DefaultParticipationDrop";
+import { useWaveParticipationVariant } from "@/hooks/waves/useWaveParticipationVariant";
 import { useWaveProposalCardPresentation } from "@/hooks/waves/useWaveProposalCardPresentation";
 import type {
   ResolvedWaveParticipationRendererSet,
@@ -19,30 +13,24 @@ import type {
   WaveParticipationRendererSet,
 } from "./participationRenderer.types";
 
-// Use this for one-off waves that should opt into a custom renderer before
-// the API exposes a presentation variant.
-const WAVE_PARTICIPATION_VARIANT_OVERRIDES: Readonly<
-  Partial<Record<string, WaveParticipationVariant>>
-> = {};
-
+// List renderers only. The single drop view renderers live in
+// `components/waves/drop/singleWaveDropRendererRegistry`, so importing this
+// registry (every drop in a list, every link preview) does not pull in the
+// single drop view's chat composer and GIF picker.
 const WAVE_PARTICIPATION_RENDERERS: Readonly<
   Record<WaveParticipationVariant, WaveParticipationRendererSet>
 > = {
   default: {
     ParticipationDrop: DefaultParticipationDrop,
-    SingleWaveDrop: DefaultSingleWaveDrop,
   },
   memes: {
     ParticipationDrop: MemeParticipationDrop,
-    SingleWaveDrop: MemesSingleWaveDrop,
   },
   curation: {
     ParticipationDrop: DefaultParticipationDrop,
-    SingleWaveDrop: DefaultSingleWaveDrop,
   },
   quorum: {
     ParticipationDrop: QuorumParticipationDrop,
-    SingleWaveDrop: QuorumSingleWaveDrop,
   },
 };
 
@@ -53,18 +41,10 @@ const ProposalCardParticipationDrop: FC<ParticipationDropProps> = (props) => (
 export const useWaveParticipationRendererSet = (
   waveId: string | null | undefined
 ): ResolvedWaveParticipationRendererSet => {
-  const { isMemesWave, isCurationWave, isQuorumWave } = useSeizeSettings();
+  const variant = useWaveParticipationVariant(waveId);
   const proposalCardPresentation = useWaveProposalCardPresentation(waveId);
 
   return useMemo(() => {
-    const variant = resolveWaveParticipationVariant({
-      waveId,
-      overrides: WAVE_PARTICIPATION_VARIANT_OVERRIDES,
-      isMemesWave,
-      isCurationWave,
-      isQuorumWave,
-    });
-
     const rendererSet = WAVE_PARTICIPATION_RENDERERS[variant];
 
     if (variant === "default" && proposalCardPresentation === "proposalCard") {
@@ -79,11 +59,5 @@ export const useWaveParticipationRendererSet = (
       variant,
       ...rendererSet,
     };
-  }, [
-    isMemesWave,
-    isCurationWave,
-    isQuorumWave,
-    proposalCardPresentation,
-    waveId,
-  ]);
+  }, [variant, proposalCardPresentation]);
 };

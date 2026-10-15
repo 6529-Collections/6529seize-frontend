@@ -23,6 +23,7 @@ import React, {
 import { useAuth } from "../auth/Auth";
 import CookiesBanner from "./CookiesBanner";
 import { scheduleGoogleAnalytics } from "./googleAnalytics";
+import { rememberCountryHint } from "./usCountryHint";
 
 type CookieConsent = boolean | undefined;
 
@@ -177,6 +178,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
           return;
         }
         setCountry(response.country);
+        rememberCountryHint(response.country);
         if (response.is_eu) {
           setShowCookieConsent(
             essentialCookies == undefined && performanceCookies == undefined
