@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo } from "react";
 import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
+import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
 import type {
   ArweaveMetadata,
@@ -19,13 +20,20 @@ const ManifoldMinting = dynamic(
   }
 );
 
-export default function TheMemesMint({
-  nft,
-  standalone = false,
-}: {
+interface TheMemesMintProps {
   readonly nft: ApiMemesExtendedData;
   readonly standalone?: boolean;
-}) {
+}
+
+export default function TheMemesMint(props: TheMemesMintProps) {
+  return (
+    <NftPurchasingGate redirectTo="/the-memes">
+      <TheMemesMintContent {...props} />
+    </NftPurchasingGate>
+  );
+}
+
+function TheMemesMintContent({ nft, standalone = false }: TheMemesMintProps) {
   const { setTitle } = useTitle();
 
   useEffect(() => {

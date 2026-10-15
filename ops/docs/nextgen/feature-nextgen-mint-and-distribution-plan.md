@@ -49,7 +49,9 @@ Use these collection routes to mint and review distribution data:
   and `BURN TO MINT` actions are hidden. Direct mint links return to the
   collection page without showing mint controls. Countdown information and
   distribution data remain available. US iOS, web, and Android keep their
-  existing mint behavior.
+  existing mint behavior. On iOS the return waits for the country check, so a
+  US deep link stays on the mint page; a failed or empty check counts as
+  unknown.
 
 - Public phase `LIVE` always uses the standard mint widget.
 - Outside public phase `LIVE`, mint widget type comes from merkle config.

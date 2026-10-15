@@ -130,7 +130,7 @@ describe("MyStreamWaveTabsHeader", () => {
     mockShowJoinCta = false;
   });
 
-  it("can expand Wave search into the site-wide search", () => {
+  it("can expand Wave search into the site-wide search", async () => {
     render(
       <MyStreamWaveTabsHeader
         wave={wave}
@@ -148,11 +148,15 @@ describe("MyStreamWaveTabsHeader", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "Search messages in this wave" })
     );
-    expect(screen.getByTestId("wave-drops-search-modal")).toBeInTheDocument();
+    expect(
+      await screen.findByTestId("wave-drops-search-modal")
+    ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Search all 6529" }));
     expect(screen.queryByTestId("wave-drops-search-modal")).toBeNull();
-    expect(screen.getByTestId("header-search-modal")).toBeInTheDocument();
+    expect(
+      await screen.findByTestId("header-search-modal")
+    ).toBeInTheDocument();
   });
 
   it("keeps the score in the identity and REP beside the header icon buttons", () => {
