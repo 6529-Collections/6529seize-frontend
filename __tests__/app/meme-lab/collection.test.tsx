@@ -71,6 +71,27 @@ describe("Meme Lab collection route", () => {
     expect(mockFetchUrl).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ["a null data field", { data: null }],
+    ["a missing data field", {}],
+    ["a non-array data field", { data: "oops" }],
+    ["an empty response body", null],
+  ])(
+    "keeps rendering for %s instead of treating it as a missing collection",
+    async (_label, payload) => {
+      mockFetchUrl.mockResolvedValue(payload);
+
+      render(await renderPage("Pepe-Wizard"));
+
+      expect(screen.getByTestId("meme-lab-collection")).toHaveTextContent(
+        "Pepe Wizard"
+      );
+      await expect(getMetadata("Pepe-Wizard")).resolves.toMatchObject({
+        title: expect.stringContaining("Pepe Wizard"),
+      });
+    }
+  );
+
   it("keeps rendering when the API is unavailable so the client can retry", async () => {
     mockFetchUrl.mockRejectedValue(new Error("HTTP error! status: 503"));
     jest.spyOn(console, "warn").mockImplementation(() => undefined);

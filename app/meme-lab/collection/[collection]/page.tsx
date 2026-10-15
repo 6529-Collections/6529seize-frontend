@@ -17,12 +17,15 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
-// Collections are named by the URL, so an empty result is the only "missing"
-// signal; transient API failures keep rendering and let the client retry.
-const isMemeLabCollectionMissing = cache(
-  async (collectionName: string): Promise<boolean> => {
+type MemeLabCollectionResolution = "published" | "missing" | "unavailable";
+
+// Collections are named by the URL, so a successful, well-formed empty result
+// is the only "missing" signal. A failed request or a malformed payload is
+// "unavailable" and keeps rendering so the client page can retry.
+const resolveMemeLabCollection = cache(
+  async (collectionName: string): Promise<MemeLabCollectionResolution> => {
     if (collectionName.length === 0) {
-      return true;
+      return "missing";
     }
 
     try {
@@ -30,13 +33,17 @@ const isMemeLabCollectionMissing = cache(
         `${publicEnv.API_ENDPOINT}/api/lab_extended_data?collection=${encodeURIComponent(collectionName)}&page_size=1`,
         { cache: "no-store" }
       );
-      return Array.isArray(response.data) && response.data.length === 0;
+      const data: unknown = (response as { data?: unknown } | null)?.data;
+      if (!Array.isArray(data)) {
+        return "unavailable";
+      }
+      return data.length === 0 ? "missing" : "published";
     } catch (error) {
       console.warn("Failed to resolve Meme Lab collection", {
         collectionName,
         error,
       });
-      return false;
+      return "unavailable";
     }
   }
 );
@@ -52,7 +59,7 @@ export default async function MemeLabCollectionPage({
   const resolvedSearchParams = (await searchParams) ?? {};
   const locale = getMemeLabRouteLocale(resolvedSearchParams);
   const collectionName = getMemeLabCollectionName(collection);
-  if (await isMemeLabCollectionMissing(collectionName)) {
+  if ((await resolveMemeLabCollection(collectionName)) === "missing") {
     notFound();
   }
 
@@ -80,7 +87,7 @@ export async function generateMetadata({
   const { collection } = await params;
   const locale = getMemeLabRouteLocale((await searchParams) ?? {});
   const collectionName = getMemeLabCollectionName(collection);
-  if (await isMemeLabCollectionMissing(collectionName)) {
+  if ((await resolveMemeLabCollection(collectionName)) === "missing") {
     notFound();
   }
   return getAppMetadata({
