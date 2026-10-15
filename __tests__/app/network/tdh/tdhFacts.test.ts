@@ -1,4 +1,5 @@
-import { LEAN_BUILD } from "@/app/network/tdh/formal/leanResults";
+import { BUNDLED_FORMAL_MANIFEST } from "@/lib/tdh/formal/bundledManifest";
+import { formalManifestSchema } from "@/lib/tdh/formal/manifest";
 import {
   VECTOR_COUNT,
   VECTOR_SET,
@@ -12,8 +13,9 @@ import verify from "@/i18n/messages/networkTdhVerify.en-US.json";
 
 /**
  * Guards for the dated facts the TDH pages repeat in many places: the
- * conformance vector set of P26 at 6529chain 16d70d0 (61 vectors, 01 to 60
- * and 12b), the Lean model at 83d0338, and the privacy of the daily feed.
+ * conformance vector set the implementations page pins (P26 at 6529chain
+ * 16d70d0: 61 vectors, 01 to 60 and 12b), the Lean model's proof manifest
+ * (6529chain 7bf579a: 68 vectors), and the privacy of the daily feed.
  */
 const MESSAGES: Record<string, string> = {
   ...explainer,
@@ -28,8 +30,6 @@ describe("TDH page facts", () => {
   it("counts P26's 61 conformance vectors everywhere", () => {
     expect(VECTOR_COUNT).toBe(61);
     expect(VECTOR_SET.specCommit).toBe("16d70d0");
-    expect(LEAN_BUILD.vectorsTotal).toBe(VECTOR_COUNT);
-    expect(LEAN_BUILD.vectorChecks).toBe(1_094);
     for (const [key, text] of Object.entries(MESSAGES)) {
       expect([key, text]).not.toEqual([
         key,
@@ -40,6 +40,21 @@ describe("TDH page facts", () => {
       expect([key, text]).not.toEqual([
         key,
         expect.stringMatching(/\b976 checks\b/),
+      ]);
+    }
+  });
+
+  it("takes the formal model's vector counts from its proof manifest", () => {
+    const manifest = formalManifestSchema.parse(BUNDLED_FORMAL_MANIFEST);
+    const p26 = manifest.vectors.find((run) => run.id === "p26");
+    expect(p26).toMatchObject({ passed: 68, total: 68, checks: 1_190 });
+    expect(manifest.facts.checks).toBe(21);
+    for (const [key, text] of Object.entries(formal)) {
+      expect([key, text]).not.toEqual([
+        key,
+        expect.stringMatching(
+          /\b61 (conformance )?vectors\b|\b1,094\b|\b16 (numeric )?checks\b/
+        ),
       ]);
     }
   });
@@ -59,7 +74,9 @@ describe("TDH page facts", () => {
     for (const [key, text] of Object.entries(MESSAGES)) {
       expect([key, text]).not.toEqual([
         key,
-        expect.stringMatching(/cannot change TDH|changes no value/),
+        expect.stringMatching(
+          /cannot change TDH|changes no value|and so no balance|stacks, balances and raw days only|order in which logs arrive/
+        ),
       ]);
     }
   });

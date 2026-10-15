@@ -89,14 +89,19 @@ export const verificationIndexSchema = z.object({
   cutover: nullish(cutover),
 });
 
-const hexCommit = z.string().regex(/^[0-9a-f]{7,40}$/);
+/**
+ * A code version as the job writes it (`publish_feed.py` COMMIT): a full
+ * commit, a commit with `+wip` when the tree had local changes, or
+ * `unknown`. Shorter plain commits are accepted too.
+ */
+const codeCommit = z.string().regex(/^(?:[0-9a-f]{7,40}(?:\+wip)?|unknown)$/);
 const hash32 = z.string().regex(/^0x[0-9a-f]{64}$/);
 const sha256 = z.string().regex(/^[0-9a-f]{64}$/);
 const arweaveSource = z.string().regex(/^arweave:[A-Za-z0-9_-]{43}$/);
 const ruleVersion = z.string().regex(/^tdh-v\d{1,3}\.\d{1,3}$/);
 
 const implementation = z.object({
-  commit: nullish(hexCommit),
+  commit: nullish(codeCommit),
   totalTdh: tdhValue,
   identities: count,
   wallets: count,
@@ -140,17 +145,24 @@ const agreement = z
 export const DIFFERENCE_CLASSES = ["A", "B", "C", "D"] as const;
 export type DifferenceClass = (typeof DIFFERENCE_CLASSES)[number];
 
-const ITEM_ID = /^[A-Z]{2,8}-\d{1,4}$/;
+/**
+ * A known entry's cause: an item of P26's deviation list (`DEV-n`), a legacy
+ * defect (`BUG-n`) or another P26 item kind, exactly as the job's
+ * `publish_feed.py` CAUSE pattern allows.
+ */
+export const CAUSE_ITEM = /^(?:DEV|BUG|SD|MS|CN|RP)-\d+$/;
+const CAUSE_KEY_MAX = 64;
 
 /**
- * A cause as the job writes it: a known entry's id (`DEV-2`), several joined
- * by commas (`BUG-15,DEV-2`), `rust-python` or `unexplained`.
+ * A cause as the job writes it: a known entry's cause (`DEV-2`), several
+ * joined by commas (`BUG-15,DEV-2`), `rust-python` or `unexplained`.
  */
 export function isDifferenceCause(value: string): boolean {
   return (
     value === "rust-python" ||
     value === "unexplained" ||
-    value.split(",").every((part) => ITEM_ID.test(part))
+    (value.length <= CAUSE_KEY_MAX &&
+      value.split(",").every((part) => CAUSE_ITEM.test(part)))
   );
 }
 
@@ -163,7 +175,7 @@ const differenceSummary = z.object({
   /** The same records counted by cause; only the causes seen that day. */
   byCause: z
     .record(
-      z.string().max(64).refine(isDifferenceCause, "invalid cause"),
+      z.string().max(CAUSE_KEY_MAX).refine(isDifferenceCause, "invalid cause"),
       count
     )
     .refine((value) => Object.keys(value).length <= 32, "too many causes"),
@@ -172,6 +184,24 @@ const differenceSummary = z.object({
     pythonVsLive: nullish(signedTdh),
   }),
 });
+
+const sum = (values: readonly number[]) =>
+  values.reduce((total, value) => total + value, 0);
+
+/**
+ * The job's own invariant: the class counts, and the cause counts, each add
+ * up to the differing identity and wallet records.
+ */
+const consistentDifferenceSummary = differenceSummary.refine(
+  (value) => {
+    const records = value.identities + value.wallets;
+    return (
+      sum(Object.values(value.byClass)) === records &&
+      sum(Object.values(value.byCause)) === records
+    );
+  },
+  { message: "class or cause counts do not add up to the differing records" }
+);
 
 export const verificationDaySchema = z
   .object({
@@ -193,7 +223,7 @@ export const verificationDaySchema = z
       rustVsPython: nullish(agreement),
       rustVsLive: nullish(agreement),
     }),
-    differenceSummary: nullish(differenceSummary),
+    differenceSummary: nullish(consistentDifferenceSummary),
     verdict,
   })
   .refine((day) => cycleDayOfDate(day.date) === day.cycleDay, {

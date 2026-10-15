@@ -57,12 +57,15 @@ guards the vector count, the Lean build and the feed's privacy wording.
   "Switched on" only when the feed says the cutover is done.
 - The feed could add SHA-256s of the canonical input and of the Rust and
   Python record files, so anyone can compare files, not just roots.
-- The Formal model page reads its results from
-  `app/network/tdh/formal/leanResults.ts` (model at `83d0338`); update it with
-  each new build of the model.
-- Set `NEXT_PUBLIC_TDH_VERIFICATION_BASE` in production once the daily job
-  publishes; until then production shows "Daily reports start on 16 October
-  2026" and non-production shows the labelled sample.
+- The Formal model page takes its statuses from the proof manifest
+  (`formal/manifest.json` on the feed), falling back to the bundled copy
+  (`lib/tdh/formal/bundledManifest.ts`, model at `7bf579a`); refresh the copy
+  and `leanResults.ts` with each new build of the model.
+- Set `NEXT_PUBLIC_TDH_VERIFICATION_BASE=https://d379duzqnomz3w.cloudfront.net` in the production
+  deploy configuration (the feed is live, with days 20,740 and 20,741 and the
+  manifest); until then production shows "Daily reports start on 16 October
+  2026" and the bundled manifest, and non-production shows the labelled
+  sample.
 - The Playwright spec `tests/pages/network-tdh-explained.spec.ts` is not yet
   registered in a pack; `tests/pages/` specs run with the full E2E suite.
 - I18n fallback debt: [network TDH pages](../i18n-fallbacks/tdh-explained-and-verified.md).

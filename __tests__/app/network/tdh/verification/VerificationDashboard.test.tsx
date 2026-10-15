@@ -132,7 +132,7 @@ describe("VerificationDashboard", () => {
     expect(
       screen.getByText(/Individual records are never published/)
     ).toBeInTheDocument();
-    expect(screen.getAllByText("validator@db72daa").length).toBeGreaterThan(1);
+    expect(screen.getAllByText("validator@e127676").length).toBeGreaterThan(1);
     expect(screen.getAllByText("6529chain@0621ed4").length).toBeGreaterThan(1);
     expect(
       screen.getByText(

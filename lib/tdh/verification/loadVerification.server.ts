@@ -21,13 +21,27 @@ import {
  *
  * Production is decided by the app's host (6529.io), not by NODE_ENV,
  * because staging builds also run with NODE_ENV=production.
+ *
+ * The feed is served by CloudFront from a private bucket (Origin Access
+ * Control), which answers 403, not 404, for a file that does not exist yet.
+ * Both mean "not yet published": a missing index is `awaiting`, a missing day
+ * `not-found`.
  */
 
 export const INDEX_REVALIDATE_SECONDS = 600;
 export const LATEST_DAY_REVALIDATE_SECONDS = 600;
 export const OLDER_DAY_REVALIDATE_SECONDS = 3_600;
+/** The Lean proof manifest changes only with a new build of the model. */
+export const FORMAL_MANIFEST_REVALIDATE_SECONDS = 3_600;
 const FETCH_TIMEOUT_MS = 8_000;
 const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "[::1]"]);
+/** What the feed answers for a file it does not hold (yet). */
+const NOT_PUBLISHED_STATUSES = new Set([403, 404]);
+
+/** Whether an HTTP status from the feed means "not yet published". */
+export function isNotPublishedStatus(status: number | undefined): boolean {
+  return status !== undefined && NOT_PUBLISHED_STATUSES.has(status);
+}
 
 export type VerificationErrorReason = "config" | "network" | "http" | "invalid";
 
@@ -102,7 +116,7 @@ export function resolveVerificationSource(
   return { kind: "remote", base: url };
 }
 
-type FetchResult =
+export type FeedFetchResult =
   | { readonly ok: true; readonly json: unknown }
   | {
       readonly ok: false;
@@ -110,11 +124,11 @@ type FetchResult =
       readonly status?: number;
     };
 
-async function fetchJson(
+export async function fetchFeedJson(
   fetchImpl: typeof fetch,
   url: URL,
   revalidate: number
-): Promise<FetchResult> {
+): Promise<FeedFetchResult> {
   let response: Response;
   try {
     response = await fetchImpl(url.toString(), {
@@ -175,9 +189,15 @@ export function createVerificationLoader(options: VerificationLoaderOptions) {
       };
     }
     const url = new URL("index.json", source.base);
-    const result = await fetchJson(fetchImpl, url, INDEX_REVALIDATE_SECONDS);
+    const result = await fetchFeedJson(
+      fetchImpl,
+      url,
+      INDEX_REVALIDATE_SECONDS
+    );
     if (!result.ok) {
-      return { status: "error", reason: result.reason };
+      return isNotPublishedStatus(result.status)
+        ? { status: "awaiting" }
+        : { status: "error", reason: result.reason };
     }
     const parsed = parseVerificationIndex(result.json);
     if (!parsed.success) {
@@ -216,9 +236,9 @@ export function createVerificationLoader(options: VerificationLoaderOptions) {
         : { status: "not-found" };
     }
     const url = new URL(`days/${cycleDay}.json`, source.base);
-    const result = await fetchJson(fetchImpl, url, revalidate);
+    const result = await fetchFeedJson(fetchImpl, url, revalidate);
     if (!result.ok) {
-      return result.status === 404
+      return isNotPublishedStatus(result.status)
         ? { status: "not-found" }
         : { status: "error", reason: result.reason };
     }

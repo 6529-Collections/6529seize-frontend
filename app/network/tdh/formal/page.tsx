@@ -1,7 +1,12 @@
+import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { getAppMetadata } from "@/components/providers/metadata";
-import { formatInteger } from "@/i18n/format";
+import { formatInteger, formatUtcDate } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import {
+  loadFormalManifest,
+  type FormalManifestLoad,
+} from "@/lib/tdh/formal/loadFormalManifest.server";
 import TdhPageShell from "../shared/TdhPageShell";
 import TdhPager from "../shared/TdhPager";
 import TdhRuleBlock from "../shared/TdhRuleBlock";
@@ -11,6 +16,7 @@ import TdhStatusPill from "../shared/TdhStatusPill";
 import {
   TDH_CAPTION,
   TDH_CARD,
+  TDH_LINK,
   TDH_TABLE,
   TDH_TABLE_FRAME,
   TDH_TD_NUM,
@@ -18,11 +24,16 @@ import {
   TDH_TH,
   TDH_TH_NUM,
 } from "../shared/tdhStyles";
-import { formatCycleDate } from "../verification/components/verificationFormat";
 import AssuranceLayers from "./AssuranceLayers";
 import {
+  checkStatements,
+  manifestFigures,
+  type ManifestFigures,
+  type StatementCheck,
+} from "./formalStatus";
+import {
   FIRST_RULE_CASES,
-  LEAN_BUILD,
+  LEAN_RUNS,
   LEAN_STATEMENTS,
   MODEL_MODULES,
   NETTING_DEFINITIONS,
@@ -34,42 +45,52 @@ const PROSE =
   "tw-m-0 tw-max-w-3xl tw-text-[15px] tw-leading-7 tw-text-iron-200";
 const NOT_KEYS = ["english", "programs", "inputs", "rule", "lean"] as const;
 const FEATURED = LEAN_STATEMENTS.find((row) => row.id === "netting");
+const LONG_DATE = { day: "numeric", month: "long", year: "numeric" } as const;
 
-function SummaryBand({ locale }: { readonly locale: SupportedLocale }) {
-  const proved = LEAN_STATEMENTS.filter(
-    (row) => row.status === "proved" && row.group === "p26"
-  );
-  const provedP53 = LEAN_STATEMENTS.filter(
-    (row) => row.status === "proved" && row.group === "p53"
-  );
-  const shownFalse = LEAN_STATEMENTS.filter(
-    (row) => row.status === "shownFalse"
-  );
+/** A number from the manifest, or a dash where it has none. */
+function figure(locale: SupportedLocale, value: number | null): string {
+  return value === null ? "–" : formatInteger(locale, value);
+}
+
+function SummaryBand({
+  locale,
+  figures,
+  checks,
+}: {
+  readonly locale: SupportedLocale;
+  readonly figures: ManifestFigures;
+  readonly checks: Readonly<Record<string, StatementCheck>>;
+}) {
+  const count = (group: "p26" | "p53", status: StatementCheck["status"]) =>
+    LEAN_STATEMENTS.filter(
+      (row) => row.group === group && checks[row.id]?.status === status
+    ).length;
+  const shownFalse = count("p26", "shownFalse") + count("p53", "shownFalse");
   const items = [
     {
       key: "proved",
-      value: formatInteger(locale, proved.length),
+      value: formatInteger(locale, count("p26", "proved")),
       body: t(locale, "network.tdh.formal.summary.provedBody", {
-        p53: formatInteger(locale, provedP53.length),
+        p53: formatInteger(locale, count("p53", "proved")),
       }),
     },
     {
       key: "false",
-      value: formatInteger(locale, shownFalse.length),
+      value: formatInteger(locale, shownFalse),
       body: t(locale, "network.tdh.formal.summary.falseBody"),
     },
     {
       key: "vectors",
-      value: `${formatInteger(locale, LEAN_BUILD.vectorsPassed)} / ${formatInteger(locale, LEAN_BUILD.vectorsTotal)}`,
+      value: `${figure(locale, figures.vectorsPassed)} / ${figure(locale, figures.vectorsTotal)}`,
       body: t(locale, "network.tdh.formal.summary.vectorsBody", {
-        checks: formatInteger(locale, LEAN_BUILD.vectorChecks),
+        checks: figure(locale, figures.vectorChecks),
       }),
     },
     {
       key: "day",
-      value: formatInteger(locale, LEAN_BUILD.fullDayRecords),
+      value: formatInteger(locale, LEAN_RUNS.fullDayRecords),
       body: t(locale, "network.tdh.formal.summary.dayBody", {
-        total: formatInteger(locale, LEAN_BUILD.fullDayTotal),
+        total: formatInteger(locale, LEAN_RUNS.fullDayTotal),
       }),
     },
   ] as const;
@@ -102,16 +123,67 @@ function SummaryBand({ locale }: { readonly locale: SupportedLocale }) {
       </ul>
       <p className="tw-m-0 tw-mt-3 tw-max-w-4xl tw-text-xs tw-leading-5 tw-text-iron-400">
         {t(locale, "network.tdh.formal.summary.theorems", {
-          tdh: formatInteger(locale, LEAN_BUILD.theoremsTdh),
-          p53: formatInteger(locale, LEAN_BUILD.theoremsP53),
-        })}{" "}
-        {t(locale, "network.tdh.formal.build", {
-          date: formatCycleDate(locale, LEAN_BUILD.date),
-          version: LEAN_BUILD.leanVersion,
-          commit: LEAN_BUILD.commit,
-          spec: LEAN_BUILD.specCommit,
+          tdh: formatInteger(locale, figures.theoremsTdh),
+          p53: formatInteger(locale, figures.theoremsP53),
         })}
       </p>
+    </div>
+  );
+}
+
+/**
+ * Where the statuses come from: the manifest published with the daily feed,
+ * or the copy bundled with the page, with the build it records.
+ */
+function ManifestSource({
+  locale,
+  load,
+  figures,
+}: {
+  readonly locale: SupportedLocale;
+  readonly load: FormalManifestLoad;
+  readonly figures: ManifestFigures;
+}) {
+  const build = t(locale, "network.tdh.formal.manifest.build", {
+    commit: figures.commit.slice(0, 7),
+    date: formatUtcDate(locale, figures.commitDate, LONG_DATE),
+    version: figures.leanVersion,
+  });
+  const spec =
+    figures.specCommit === null
+      ? null
+      : t(locale, "network.tdh.formal.manifest.spec", {
+          spec: figures.specCommit.slice(0, 7),
+        });
+  return (
+    <div className="tw-mt-4 tw-flex tw-max-w-4xl tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-px-4 tw-py-3">
+      <TdhStatusPill
+        pill={load.status === "published" ? "checkedBuild" : "bundled"}
+        locale={locale}
+        size="sm"
+      />
+      <p
+        className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-xs tw-leading-5 tw-text-iron-300"
+        data-tdh-manifest={load.status}
+      >
+        {load.status === "published"
+          ? t(locale, "network.tdh.formal.manifest.published")
+          : t(
+              locale,
+              `network.tdh.formal.manifest.bundled.${load.reason}`
+            )}{" "}
+        {build}
+        {spec && ` ${spec}`}
+      </p>
+      {load.status === "published" && (
+        <a
+          href={load.url}
+          className={`${TDH_LINK} tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-text-xs`}
+        >
+          <ArrowDownTrayIcon aria-hidden="true" className="tw-size-4" />
+          {t(locale, "network.tdh.formal.manifest.json")}
+        </a>
+      )}
     </div>
   );
 }
@@ -183,8 +255,11 @@ function FirstRuleCases({ locale }: { readonly locale: SupportedLocale }) {
   );
 }
 
-export default function TdhFormalPage() {
+export default async function TdhFormalPage() {
   const locale = DEFAULT_LOCALE;
+  const load = await loadFormalManifest();
+  const checks = checkStatements(LEAN_STATEMENTS, load.manifest);
+  const figures = manifestFigures(load.manifest);
   const p26 = LEAN_STATEMENTS.filter((row) => row.group === "p26");
   const p53 = LEAN_STATEMENTS.filter((row) => row.group === "p53");
 
@@ -205,7 +280,12 @@ export default function TdhFormalPage() {
           </p>
         </>
       }
-      headerExtra={<SummaryBand locale={locale} />}
+      headerExtra={
+        <>
+          <SummaryBand locale={locale} figures={figures} checks={checks} />
+          <ManifestSource locale={locale} load={load} figures={figures} />
+        </>
+      }
     >
       <TdhSection
         id="why"
@@ -291,8 +371,18 @@ export default function TdhFormalPage() {
             <StatementsTable
               locale={locale}
               rows={p26}
+              checks={checks}
               caption={t(locale, "network.tdh.formal.statements.p26")}
-              extra={{ firstRule: <FirstRuleCases locale={locale} /> }}
+              extra={{
+                firstRule: <FirstRuleCases locale={locale} />,
+                facts: (
+                  <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+                    {t(locale, "network.tdh.formal.st.facts.count", {
+                      checks: formatInteger(locale, figures.facts),
+                    })}
+                  </p>
+                ),
+              }}
             />
           </div>
           <div className="tw-space-y-3">
@@ -302,6 +392,7 @@ export default function TdhFormalPage() {
             <StatementsTable
               locale={locale}
               rows={p53}
+              checks={checks}
               caption={t(locale, "network.tdh.formal.statements.p53")}
             />
           </div>
@@ -320,10 +411,14 @@ export default function TdhFormalPage() {
           </p>
           <p className={PROSE}>
             {t(locale, "network.tdh.formal.contains.runs", {
-              checks: formatInteger(locale, LEAN_BUILD.vectorChecks),
-              seconds: formatInteger(locale, LEAN_BUILD.fullDaySeconds),
-              total: formatInteger(locale, LEAN_BUILD.fullDayTotal),
-              randomChecks: formatInteger(locale, LEAN_BUILD.randomChecks),
+              vectors: figure(locale, figures.vectorsTotal),
+              checks: figure(locale, figures.vectorChecks),
+              seconds: formatInteger(locale, LEAN_RUNS.fullDaySeconds),
+              total: formatInteger(locale, LEAN_RUNS.fullDayTotal),
+              records: formatInteger(locale, LEAN_RUNS.fullDayRecords),
+              randomInputs: formatInteger(locale, LEAN_RUNS.randomInputs),
+              randomChecks: formatInteger(locale, LEAN_RUNS.randomChecks),
+              readme: LEAN_RUNS.readmeCommit,
             })}
             <TdhSource refs={["P26 §13"]} locale={locale} />
           </p>
@@ -399,7 +494,10 @@ export default function TdhFormalPage() {
                 <strong className="tw-font-semibold tw-text-iron-50">
                   {t(locale, `network.tdh.formal.not.${key}.title`)}
                 </strong>{" "}
-                {t(locale, `network.tdh.formal.not.${key}.body`)}
+                {t(locale, `network.tdh.formal.not.${key}.body`, {
+                  vectors: figure(locale, figures.vectorsTotal),
+                  facts: formatInteger(locale, figures.facts),
+                })}
                 {key === "inputs" && (
                   <TdhSource refs={["D118", "D119"]} locale={locale} />
                 )}
@@ -428,7 +526,13 @@ export default function TdhFormalPage() {
           <p className={PROSE}>{t(locale, "network.tdh.formal.check.body")}</p>
           <div className="tw-w-full">
             <TdhRuleBlock
-              code={t(locale, "network.tdh.formal.check.commands")}
+              code={t(locale, "network.tdh.formal.check.commands", {
+                passed: figure(locale, figures.vectorsPassed),
+                total: figure(locale, figures.vectorsTotal),
+                checks: figure(locale, figures.vectorChecks),
+                nettingPassed: figure(locale, figures.nettingPassed),
+                nettingTotal: figure(locale, figures.nettingTotal),
+              })}
               locale={locale}
               title={t(locale, "network.tdh.formal.check.title")}
               label={t(locale, "network.tdh.formal.check.title")}

@@ -1,0 +1,137 @@
+import {
+  conformanceRun,
+  findFormalEntry,
+  type FormalManifest,
+  type FormalStatus,
+} from "@/lib/tdh/formal/manifest";
+import type { LeanStatement, StatementStatus } from "./leanResults";
+
+/** One manifest entry behind a statement, as the statement's details show it. */
+export interface CheckedEntry {
+  /** The name the page uses: a theorem's short name or a case's id. */
+  readonly name: string;
+  /** What the statement needs it to be. */
+  readonly expected: FormalStatus;
+  /** What the manifest says; null when the manifest does not have it. */
+  readonly status: FormalStatus | null;
+  readonly leanName: string | null;
+  readonly axioms: readonly string[] | null;
+  /** `kernel` for a theorem, `evaluation` for a #guard check. */
+  readonly checkedBy: string | null;
+  /** How many #guard checks a counterexample case has. */
+  readonly checks: number | null;
+  readonly file: string | null;
+  readonly line: number | null;
+}
+
+export interface StatementCheck {
+  readonly id: string;
+  /** The statement's own status when the manifest confirms it. */
+  readonly status: StatementStatus;
+  readonly entries: readonly CheckedEntry[];
+  /** Entries the manifest lacks or gives another status. */
+  readonly unconfirmed: readonly string[];
+}
+
+function checkEntry(
+  manifest: FormalManifest,
+  name: string,
+  expected: FormalStatus
+): CheckedEntry {
+  const entry = findFormalEntry(manifest, name);
+  return {
+    name,
+    expected,
+    status: entry?.status ?? null,
+    leanName: entry?.leanName ?? null,
+    axioms: entry?.axioms ?? null,
+    checkedBy: entry?.checkedBy ?? null,
+    checks: entry?.checks ?? null,
+    file: entry?.file ?? null,
+    line: entry?.line ?? null,
+  };
+}
+
+/**
+ * A statement checked against the manifest: its status stands only when every
+ * theorem it rests on is proved, every counterexample it cites is one and
+ * every claim it calls unproved is deferred. P26's stated facts need the
+ * build's facts to have run. Anything else shows as unverified.
+ */
+export function checkStatement(
+  statement: LeanStatement,
+  manifest: FormalManifest
+): StatementCheck {
+  const entries = [
+    ...statement.proved.map((name) => checkEntry(manifest, name, "proved")),
+    ...statement.counterexamples.map((name) =>
+      checkEntry(manifest, name, "counterexample")
+    ),
+    ...statement.deferred.map((name) => checkEntry(manifest, name, "deferred")),
+  ];
+  const unconfirmed = entries
+    .filter((entry) => entry.status !== entry.expected)
+    .map((entry) => entry.name);
+  const factsRan =
+    statement.status !== "checkedBuild" || manifest.facts.checks > 0;
+  return {
+    id: statement.id,
+    status:
+      unconfirmed.length === 0 && factsRan ? statement.status : "unverified",
+    entries,
+    unconfirmed,
+  };
+}
+
+export function checkStatements(
+  statements: readonly LeanStatement[],
+  manifest: FormalManifest
+): Readonly<Record<string, StatementCheck>> {
+  return Object.fromEntries(
+    statements.map((statement) => [
+      statement.id,
+      checkStatement(statement, manifest),
+    ])
+  );
+}
+
+/** The numbers the page's summary and commands take from the manifest. */
+export interface ManifestFigures {
+  readonly commit: string;
+  readonly commitDate: string;
+  readonly generatedAt: string;
+  readonly leanVersion: string;
+  /** The last change to P26 at the manifest's commit, when recorded. */
+  readonly specCommit: string | null;
+  readonly vectorsPassed: number | null;
+  readonly vectorsTotal: number | null;
+  readonly vectorChecks: number | null;
+  readonly reasonChecks: number | null;
+  readonly nettingPassed: number | null;
+  readonly nettingTotal: number | null;
+  readonly facts: number;
+  readonly theoremsTdh: number;
+  readonly theoremsP53: number;
+}
+
+export function manifestFigures(manifest: FormalManifest): ManifestFigures {
+  const p26 = conformanceRun(manifest, "p26");
+  const reasons = conformanceRun(manifest, "p26-reasons");
+  const netting = conformanceRun(manifest, "netting");
+  return {
+    commit: manifest.source.commit,
+    commitDate: manifest.source.commitDate,
+    generatedAt: manifest.generatedAt,
+    leanVersion: manifest.lean.version,
+    specCommit: manifest.documents?.specification?.lastChange ?? null,
+    vectorsPassed: p26?.passed ?? null,
+    vectorsTotal: p26?.total ?? null,
+    vectorChecks: p26?.checks ?? null,
+    reasonChecks: reasons?.checks ?? null,
+    nettingPassed: netting?.passed ?? null,
+    nettingTotal: netting?.total ?? null,
+    facts: manifest.facts.checks,
+    theoremsTdh: manifest.summary.auditedTdh,
+    theoremsP53: manifest.summary.auditedP53,
+  };
+}

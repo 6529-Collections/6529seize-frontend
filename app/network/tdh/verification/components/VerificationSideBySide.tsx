@@ -17,7 +17,11 @@ import {
   TDH_TH,
   TDH_SERIES,
 } from "../../shared/tdhStyles";
-import { formatInteger, middleTruncate } from "./verificationFormat";
+import {
+  formatInteger,
+  middleTruncate,
+  shortCommit,
+} from "./verificationFormat";
 import { arweaveTransactionUrl } from "./verificationLinks";
 
 type RootKey = "cycleRoot" | "walletRoot" | "historyRoot";
@@ -193,7 +197,7 @@ export default function VerificationSideBySide({
         locale={locale}
         value={impl.commit}
         name={repository}
-        display={`${repository}@${impl.commit.slice(0, 7)}`}
+        display={`${repository}@${shortCommit(impl.commit)}`}
       />
     );
   };

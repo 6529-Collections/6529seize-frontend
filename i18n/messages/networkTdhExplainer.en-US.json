@@ -40,7 +40,7 @@
   "network.tdh.explainer.verified.point.programs.title": "Written more than once",
   "network.tdh.explainer.verified.point.programs.body": "The validators’ Rust core, a separately written program B and the Python reference each compute the same written rule, and each is tested against the specification’s 61 conformance vectors.",
   "network.tdh.explainer.verified.point.formal.title": "Specified in Lean",
-  "network.tdh.explainer.verified.point.formal.body": "A formal model, still a proposal, reproduced all 21,410 records of a real day. Machine-checked proofs show that the inner steps of a transaction cannot change anyone’s holdings, and a checked counterexample shows where that stops: a mint and its burn can still change rates.",
+  "network.tdh.explainer.verified.point.formal.body": "A formal model, still a proposal, reproduced all 21,410 records of a real day. Machine-checked proofs show that the inner steps of a transaction cannot change anyone’s holdings, and checked counterexamples show where that stops: a mint and its burn can still make a token count, and so change balances, rates and other holders’ TDH.",
   "network.tdh.explainer.verified.point.daily.title": "Compared every day",
   "network.tdh.explainer.verified.point.daily.body": "From 16 October 2026 the Rust core and the Python reference run beside 6529.io, and every difference is counted and classed in public. About 23 October 6529.io switches to the Rust core.",
   "network.tdh.explainer.verified.summary": "{date}: {equal} of {total} collectors equal between the Rust core and 6529.io.",

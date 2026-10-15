@@ -19,17 +19,20 @@ describe("verification schema", () => {
     }
   });
 
-  it("keeps the daily job's published feed as the sample: verdict OK, everything equal", () => {
+  it("keeps the public feed as the sample: verdict OK, everything equal", () => {
     const day = SAMPLE_VERIFICATION_DAYS[20_741];
     expect(day?.verdict).toBe("OK");
     expect(day?.implementations.rust.commit).toBe(
-      "db72daab2fc3112909ed0523637c8cf40908f141"
+      "e1276762ec5cf014bfb30efcb081f940d3d02154"
     );
     expect(day?.implementations.python?.commit).toBe(
       "0621ed4651e7a3be37bfa1862648d0d0291215d5"
     );
-    expect(day?.implementations.rust.runtimeMs).toBe(816_881);
-    expect(day?.implementations.python?.runtimeMs).toBe(37_848);
+    expect(day?.implementations.rust.runtimeMs).toBe(815_909);
+    expect(day?.implementations.python?.runtimeMs).toBe(12_105);
+    expect(SAMPLE_VERIFICATION_DAYS[20_740]?.implementations.rust.commit).toBe(
+      "2b172160e6daa50761ec054a5f53ba4c755cfbcc"
+    );
     expect(day?.implementations.live?.source).toBe(
       "arweave:4mTqQxjtPpArwMw4UzLvJbzsawWoWDPN7OJrncpEuQE"
     );
@@ -105,15 +108,35 @@ describe("verification schema", () => {
   });
 
   it("accepts the causes the job writes and nothing that could carry free text", () => {
+    // publish_feed.py's CAUSE: (DEV|BUG|SD|MS|CN|RP)-[0-9]+ joined by commas,
+    // unexplained or rust-python.
     for (const cause of [
       "DEV-2",
       "BUG-15,DEV-2",
+      "SD-3",
+      "MS-1",
+      "CN-12",
+      "RP-4",
+      "DEV-12345",
+      "BUG-15,CN-2,DEV-2",
       "rust-python",
       "unexplained",
     ]) {
       expect(isDifferenceCause(cause)).toBe(true);
     }
-    for (const cause of ["see 0xabc", "holder-1", "DEV-2, BUG-15", ""]) {
+    for (const cause of [
+      "see 0xabc",
+      "holder-1",
+      "DEV-2, BUG-15",
+      "DEV-2,",
+      "dev-2",
+      "XYZ-1",
+      "DEV-",
+      "DEV-2a",
+      "Unexplained",
+      `DEV-${"1".repeat(70)}`,
+      "",
+    ]) {
       expect(isDifferenceCause(cause)).toBe(false);
     }
     const day = syntheticDay();
@@ -210,5 +233,58 @@ describe("verification schema", () => {
     expect(parseVerificationDay(syntheticDay({ verdict: "" })).success).toBe(
       false
     );
+  });
+
+  it("accepts every code version the job writes, and only those", () => {
+    const day = syntheticDay();
+    const withCommit = (commit: string) =>
+      parseVerificationDay({
+        ...day,
+        implementations: {
+          ...day.implementations,
+          rust: { ...day.implementations.rust, commit },
+        },
+      }).success;
+    for (const commit of [
+      "e1276762ec5cf014bfb30efcb081f940d3d02154",
+      "e127676+wip",
+      "e1276762ec5cf014bfb30efcb081f940d3d02154+wip",
+      "unknown",
+    ]) {
+      expect(withCommit(commit)).toBe(true);
+    }
+    for (const commit of ["main", "E127676", "e12", "e127676+dirty", ""]) {
+      expect(withCommit(commit)).toBe(false);
+    }
+  });
+
+  it("rejects a summary whose class or cause counts do not add up to its records", () => {
+    const day = syntheticDay();
+    const summary = day.differenceSummary;
+    if (!summary) {
+      throw new Error("fixture has a summary");
+    }
+    expect(
+      parseVerificationDay({
+        ...day,
+        differenceSummary: { ...summary, byClass: { A: 0, B: 0, C: 0, D: 1 } },
+      }).success
+    ).toBe(false);
+    expect(
+      parseVerificationDay({
+        ...day,
+        differenceSummary: { ...summary, byCause: { unexplained: 3 } },
+      }).success
+    ).toBe(false);
+    expect(
+      parseVerificationDay({
+        ...day,
+        differenceSummary: {
+          ...summary,
+          byClass: { A: 1, B: 0, C: 0, D: 1 },
+          byCause: { "BUG-15,DEV-2": 1, unexplained: 1 },
+        },
+      }).success
+    ).toBe(true);
   });
 });

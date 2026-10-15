@@ -1,46 +1,55 @@
 /**
- * The Lean 4 model of TDH-v1 and its results, as recorded in the model's
- * README and PROOFS.md in 6529's design repository at commit 83d0338
- * (15 October 2026, Lean 4.35.0), which follows P26 as clarified at 16d70d0.
- * Lean statements are quoted verbatim, without their proofs. Updating them is
- * a deliberate content change reviewed against a new build of the model.
+ * The formal model page's statements about the Lean 4 model of TDH-v1, and
+ * the results its proof manifest does not carry.
+ *
+ * Each statement names the manifest entries it rests on: the theorems that
+ * prove it, the counterexamples that refute a claim, and the claims the
+ * model's PROOFS.md names as not proved. The page takes every status from
+ * the manifest (`formal/manifest.json` on the TDH feed, or the copy bundled
+ * with the page), and a statement whose entries the manifest does not
+ * confirm shows as unverified. Lean statements are quoted verbatim from the
+ * model at 6529chain 7bf579a, without their proofs.
  */
 
-export const LEAN_BUILD = {
-  commit: "83d0338",
-  specCommit: "16d70d0",
-  date: "2026-10-15",
-  leanVersion: "4.35.0",
-  vectorsPassed: 61,
-  vectorsTotal: 61,
-  vectorChecks: 1_094,
+/**
+ * Results of runs the manifest does not repeat, from the model's README at
+ * 6529chain 237c997 ("Results, 2026-10-15").
+ */
+export const LEAN_RUNS = {
+  readmeCommit: "237c997",
+  /** The 2026-10-11 cycle from 414,007 raw logs. */
   fullDayRecords: 21_410,
   fullDayTotal: 2_061_888_816,
+  /** About 15 s to read and parse the input, 30 s to compute. */
+  fullDaySeconds: 45,
   /** Random differential inputs, seeds 6529 and 7, each under both rules. */
   randomInputs: 6_000,
   randomVectors: 12_000,
-  randomChecks: 1_352_776,
-  facts: 16,
-  theoremsTdh: 40,
-  theoremsP53: 30,
-  /** Seconds for the 2026-10-11 cycle from 414,007 raw logs. */
-  fullDaySeconds: 56,
+  randomChecks: 1_272_930,
 } as const;
 
+/** A statement's status as the page shows it. */
 export type StatementStatus =
   | "proved"
   | "byDefinition"
   | "checkedBuild"
-  | "shownFalse";
+  | "shownFalse"
+  | "deferred"
+  | "unverified";
 
 export interface LeanStatement {
   /** Message key suffix: `network.tdh.formal.st.<id>.*`. */
   readonly id: string;
   readonly group: "p26" | "p53";
   readonly refs: readonly string[];
-  readonly status: StatementStatus;
-  /** Theorem names, as in the model. */
-  readonly names: readonly string[];
+  /** The status the statement claims, once the manifest confirms it. */
+  readonly status: Exclude<StatementStatus, "unverified">;
+  /** Theorems the statement rests on; the manifest must say each is proved. */
+  readonly proved: readonly string[];
+  /** Counterexamples: theorems, or #guard cases by id (`1.case-H`). */
+  readonly counterexamples: readonly string[];
+  /** Claims PROOFS.md names as not proved here, by manifest id. */
+  readonly deferred: readonly string[];
   /** Where the statement lives in the model. */
   readonly file: string;
   /** The Lean statement, verbatim, without its proof. */
@@ -48,6 +57,7 @@ export interface LeanStatement {
 }
 
 const COUNTEREXAMPLES_FILE = "Tdh/Proofs/Counterexamples.lean";
+const NONE: readonly string[] = [];
 
 export const LEAN_STATEMENTS: readonly LeanStatement[] = [
   {
@@ -55,12 +65,26 @@ export const LEAN_STATEMENTS: readonly LeanStatement[] = [
     group: "p26",
     refs: ["P26 §7.1", "D131"],
     status: "proved",
-    names: [
+    proved: [
       "replayHoldings_invariance",
+      "replay_invariance",
+      "net_invariance",
       "netPairs_eq_of_net",
       "reorder_invariance",
       "roundTrip_invariance",
+      "netChange_perm",
+      "netChange_add_outAndBack",
+      "netMovements_netChange",
+      "netMovements_oneWay",
+      "netMovements_token",
+      "netTransaction_single",
+      "applyTransfer_of_effect",
+      "applyTransfer_local",
+      "applyTransfer_frame",
+      "replay_project",
     ],
+    counterexamples: NONE,
+    deferred: NONE,
     file: "Tdh/Proofs/NetInvariance.lean, Tdh/Proofs/Netting.lean",
     lean: `theorem replayHoldings_invariance (p : Params) (cm : ClusterMap) (c₁ c₂ : Array Transfer)
     (hg : Corresponds (groupByTransaction c₁) (groupByTransaction c₂))
@@ -70,11 +94,35 @@ export const LEAN_STATEMENTS: readonly LeanStatement[] = [
     ∀ k w, h₁.stack k w = h₂.stack k w`,
   },
   {
+    id: "beyondStacks",
+    group: "p26",
+    refs: ["P26 §7.1", "P26 §5"],
+    status: "shownFalse",
+    proved: NONE,
+    counterexamples: ["1.case-H", "1.case-I"],
+    deferred: NONE,
+    file: COUNTEREXAMPLES_FILE,
+    lean: null,
+  },
+  {
+    id: "balanceRaw",
+    group: "p26",
+    refs: ["P26 §7.1", "P26 §7.2"],
+    status: "deferred",
+    proved: NONE,
+    counterexamples: NONE,
+    deferred: ["1.balance-raw-same-eligibility"],
+    file: "PROOFS.md",
+    lean: null,
+  },
+  {
     id: "replay",
     group: "p26",
     refs: ["P26 §7.1"],
     status: "proved",
-    names: ["replay_ok", "run_netTransactions", "netting_keeps_sizes"],
+    proved: ["replay_ok", "run_netTransactions", "netting_keeps_sizes"],
+    counterexamples: NONE,
+    deferred: NONE,
     file: "Tdh/Proofs/Replay.lean",
     lean: `theorem replay_ok (p : Params) (v : Variant) (cm : ClusterMap) (canonical : Array Transfer)
     (counts : Counts) (hU : underflowCounts p canonical = .ok counts)
@@ -87,7 +135,9 @@ export const LEAN_STATEMENTS: readonly LeanStatement[] = [
     group: "p26",
     refs: ["P26 §3.4", "P26 §7.1"],
     status: "proved",
-    names: ["held_eq_inflow_sub_outflow"],
+    proved: ["held_eq_inflow_sub_outflow"],
+    counterexamples: NONE,
+    deferred: NONE,
     file: "Tdh/Proofs/Replay.lean",
     lean: `theorem held_eq_inflow_sub_outflow (p : Params) (v : Variant) (cm : ClusterMap)
     (canonical : Array Transfer) (counts : Counts) (h : Holdings)
@@ -103,11 +153,16 @@ export const LEAN_STATEMENTS: readonly LeanStatement[] = [
     group: "p26",
     refs: ["P26 §7.3"],
     status: "proved",
-    names: [
+    proved: [
       "computeCycle_identity_sums",
       "computeRecords_identity_sums",
       "computeRecords_wallet_identity",
+      "makeRecord_ok",
+      "tableOf_sum",
+      "tableOf_getD",
     ],
+    counterexamples: NONE,
+    deferred: NONE,
     file: "Tdh/Proofs/Records.lean",
     lean: `theorem computeCycle_identity_sums (p : Params) (v : Variant) (input : CycleInput) (out : CycleOutput)
     (h : computeCycle p v input = .ok out) :
@@ -126,29 +181,30 @@ export const LEAN_STATEMENTS: readonly LeanStatement[] = [
     group: "p26",
     refs: ["P26 §3.1", "P26 §3.3", "P26 §6.1"],
     status: "proved",
-    names: [
+    proved: [
       "computeCycle_perm",
       "canonicalTransfers_perm",
       "checkPositions_perm",
       "keptEvents_perm",
     ],
+    counterexamples: NONE,
+    deferred: ["4.raw-log-order"],
     file: "Tdh/Proofs/Order.lean",
     lean: `theorem computeCycle_perm (p : Params) (v : Variant) (input : CycleInput)
-    (ts : List Transfer) (es : List DelegationEvent)
-    (hts : ts.Perm input.transfers) (hes : es.Perm input.delegationEvents) :
-    computeCycle p v { input with transfers := ts, delegationEvents := es } = computeCycle p v input`,
+    (ts : List Transfer) (es : List DelegationEvent) (is : List Position)
+    (hts : ts.Perm input.transfers) (hes : es.Perm input.delegationEvents)
+    (his : is.Perm input.ignoredLogs) :
+    computeCycle p v { input with transfers := ts, delegationEvents := es, ignoredLogs := is } =
+      computeCycle p v input`,
   },
   {
     id: "lifo",
     group: "p26",
     refs: ["P26 §7.1"],
     status: "proved",
-    names: [
-      "Stack.toList_push",
-      "Stack.takeLast_some",
-      "Stack.takeLast_none",
-      "Stack.size_eq_length",
-    ],
+    proved: ["Stack.toList_push", "Stack.takeLast_some", "Stack.takeLast_none"],
+    counterexamples: NONE,
+    deferred: NONE,
     file: "Tdh/Theorems.lean",
     lean: `theorem Stack.takeLast_some (s : Stack) (n : Nat) (moved : List Run) (rest : Stack)
     (h : s.takeLast n = some (moved, rest)) :
@@ -162,7 +218,9 @@ theorem Stack.takeLast_none (s : Stack) (n : Nat) (h : s.takeLast n = none) :
     group: "p26",
     refs: ["P26 §8.5", "P26 §8.7"],
     status: "byDefinition",
-    names: ["computeCycle_totals"],
+    proved: ["computeCycle_totals", "cycleTotals_eq"],
+    counterexamples: NONE,
+    deferred: NONE,
     file: "Tdh/Proofs/Totals.lean",
     lean: `theorem computeCycle_totals (p : Params) (v : Variant) (input : CycleInput) (out : CycleOutput)
     (h : computeCycle p v input = .ok out) :
@@ -176,19 +234,19 @@ theorem Stack.takeLast_none (s : Stack) (n : Nat) (h : s.takeLast n = none) :
   {
     id: "facts",
     group: "p26",
-    refs: ["P26 §8.1", "P26 §8.3", "P26 §8.4", "P26 §10"],
+    refs: [
+      "P26 §3.1",
+      "P26 §7.1",
+      "P26 §8.1",
+      "P26 §8.3",
+      "P26 §8.4",
+      "P26 §10",
+    ],
     status: "checkedBuild",
-    names: [],
+    proved: NONE,
+    counterexamples: NONE,
+    deferred: NONE,
     file: "Tdh/Facts.lean",
-    lean: null,
-  },
-  {
-    id: "beyondStacks",
-    group: "p26",
-    refs: ["P26 §7.1", "P26 §5"],
-    status: "shownFalse",
-    names: [],
-    file: COUNTEREXAMPLES_FILE,
     lean: null,
   },
   {
@@ -196,7 +254,9 @@ theorem Stack.takeLast_none (s : Stack) (n : Nat) (h : s.takeLast n = none) :
     group: "p26",
     refs: ["P26 §3.4"],
     status: "shownFalse",
-    names: [],
+    proved: NONE,
+    counterexamples: ["2.case-G"],
+    deferred: NONE,
     file: COUNTEREXAMPLES_FILE,
     lean: null,
   },
@@ -205,7 +265,9 @@ theorem Stack.takeLast_none (s : Stack) (n : Nat) (h : s.takeLast n = none) :
     group: "p26",
     refs: ["P26 §7.3", "P26 §8.5"],
     status: "shownFalse",
-    names: [],
+    proved: NONE,
+    counterexamples: ["3.case-F"],
+    deferred: NONE,
     file: COUNTEREXAMPLES_FILE,
     lean: null,
   },
@@ -214,7 +276,15 @@ theorem Stack.takeLast_none (s : Stack) (n : Nat) (h : s.takeLast n = none) :
     group: "p26",
     refs: ["P26 §7.1", "D131"],
     status: "shownFalse",
-    names: [],
+    proved: NONE,
+    counterexamples: [
+      "firstRule_reorder",
+      "firstRule_sinks",
+      "firstRule_trigger",
+      "firstRule_insert",
+      "firstRule_mintBurn",
+    ],
+    deferred: NONE,
     file: COUNTEREXAMPLES_FILE,
     lean: null,
   },
@@ -223,12 +293,24 @@ theorem Stack.takeLast_none (s : Stack) (n : Nat) (h : s.takeLast n = none) :
     group: "p53",
     refs: ["P53 §6.2", "P53 §6.3"],
     status: "proved",
-    names: [
+    proved: [
       "roster_cap_live",
+      "live_hasKeys",
+      "roster_cap",
+      "roster_total",
       "cap_bound",
+      "level_bound",
       "waterFill_spec",
+      "capLevel_eq",
       "largestRemainder_sum",
+      "largestRemainder_slice",
+      "groupSplit_sum",
+      "partySlices_sum",
+      "sixPasses_six",
+      "sixPasses_level",
     ],
+    counterexamples: ["fivePasses_wrong"],
+    deferred: ["5a.inputs-taken-as-given"],
     file: "P53/Cap.lean",
     lean: `theorem roster_cap_live (r : Roster) (h6 : 6 ≤ (sortedWeights r.live.weights).length) :
     ∀ x ∈ r.live,
@@ -239,12 +321,24 @@ theorem Stack.takeLast_none (s : Stack) (n : Nat) (h : s.takeLast n = none) :
     group: "p53",
     refs: ["P53 §13"],
     status: "proved",
-    names: [
+    proved: [
       "steps_keep_exclusions",
+      "steps_prefix",
+      "step_joins",
+      "step_during_exclusion",
       "step_opens_after",
+      "ladder_values",
+      "batch_order",
       "pruning_keeps_exclusions",
-      "pruned_recompute_shortens",
+      "pruning_keeps_records",
+      "run_eq_prune",
+      "step_prune",
+      "steps_prune",
+      "prune_excluded",
+      "pruneExample_kept_records",
     ],
+    counterexamples: ["pruned_recompute_shortens"],
+    deferred: ["5b.not-covered"],
     file: "P53/Incidents.lean",
     lean: `theorem steps_keep_exclusions (incs : List Incident) (fs : List Fault) (c : Nat)
     (h : excluded incs c) : excluded (fs.foldl step incs) c

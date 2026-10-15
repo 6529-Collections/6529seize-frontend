@@ -18,6 +18,9 @@ export type TdhPill =
   | "checkedBuild"
   | "checkedVectors"
   | "shownFalse"
+  | "deferred"
+  | "unverified"
+  | "bundled"
   | "sample"
   | "unchecked"
   | "checked"
@@ -40,6 +43,9 @@ const PILL_TONE: Record<TdhPill, PillTone> = {
   checkedBuild: "primary",
   checkedVectors: "neutral",
   shownFalse: "warning",
+  deferred: "neutral",
+  unverified: "warning",
+  bundled: "neutral",
   sample: "warning",
   unchecked: "warning",
   checked: "success",

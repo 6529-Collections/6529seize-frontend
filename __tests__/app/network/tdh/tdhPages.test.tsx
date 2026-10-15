@@ -187,16 +187,28 @@ describe("TDH sub-pages", () => {
     expect(
       container.querySelectorAll('[data-tdh-pill="byDefinition"]')
     ).toHaveLength(1);
+    expect(
+      container.querySelectorAll('[data-tdh-pill="deferred"]')
+    ).toHaveLength(1);
+    expect(
+      container.querySelectorAll('[data-tdh-pill="unverified"]')
+    ).toHaveLength(0);
     expect(screen.getAllByText("Proposal, not adopted").length).toBeGreaterThan(
       0
     );
-    expect(screen.getByText("61 / 61")).toBeInTheDocument();
+    expect(screen.getByText("68 / 68")).toBeInTheDocument();
     expect(container.textContent).not.toMatch(/cannot change TDH/);
+    expect(container.textContent).not.toMatch(/and so no balance/);
     expect(container.textContent).toMatch(/It stops there/);
     expect(screen.getByText("21,410")).toBeInTheDocument();
     expect(
       screen.getAllByText(/theorem replayHoldings_invariance/).length
     ).toBeGreaterThan(0);
+    // Outside production without a feed, the statuses come from the bundled
+    // copy of the manifest, and the page says so.
+    expect(
+      container.querySelector('[data-tdh-manifest="bundled"]')?.textContent
+    ).toMatch(/bundled with this page:.*model at commit 7bf579a/);
     const toggle = screen.getByRole("button", {
       name: "Show the details of The first netting rule",
     });
@@ -205,6 +217,18 @@ describe("TDH sub-pages", () => {
     expect(
       screen.getByText("The first netting rule against the current one")
     ).toBeInTheDocument();
+    expect(screen.getByText("firstRule_reorder")).toBeInTheDocument();
+    expect(screen.getByText("In the proof manifest (5)")).toBeInTheDocument();
+    const netting = screen.getByRole("button", {
+      name: "Show the details of Netting invariance",
+    });
+    await user.click(netting);
+    expect(screen.getByText("replayHoldings_invariance")).toBeInTheDocument();
+    expect(
+      screen.getAllByText(
+        "Checked by Lean’s kernel; axioms: propext, Classical.choice, Quot.sound"
+      ).length
+    ).toBeGreaterThan(0);
   });
 
   it("renders the implementations with the vector browser and the latest agreement", async () => {

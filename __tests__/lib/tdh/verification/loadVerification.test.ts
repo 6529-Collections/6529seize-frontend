@@ -158,6 +158,36 @@ describe("createVerificationLoader", () => {
     ).resolves.toEqual({ status: "error", reason: "invalid" });
   });
 
+  it("reads 403 and 404 as not yet published: the feed's origin answers 403 for a missing file", async () => {
+    for (const status of [403, 404]) {
+      const loader = createVerificationLoader({
+        base: BASE,
+        isProduction: true,
+        fetchImpl: fetchFrom({
+          [`${BASE}/index.json`]: async () =>
+            jsonResponse({ error: "AccessDenied" }, status),
+          [`${BASE}/days/20742.json`]: async () =>
+            jsonResponse({ error: "AccessDenied" }, status),
+        }),
+      });
+      await expect(loader.loadIndex()).resolves.toEqual({ status: "awaiting" });
+      await expect(loader.loadDay(20_742)).resolves.toEqual({
+        status: "not-found",
+      });
+    }
+    const forbidden = createVerificationLoader({
+      base: BASE,
+      isProduction: true,
+      fetchImpl: fetchFrom({
+        [`${BASE}/index.json`]: async () => jsonResponse({}, 401),
+      }),
+    });
+    await expect(forbidden.loadIndex()).resolves.toEqual({
+      status: "error",
+      reason: "http",
+    });
+  });
+
   it("maps a missing day to not-found and a mislabelled day to invalid", async () => {
     const fetchImpl = fetchFrom({
       [`${BASE}/days/20740.json`]: async () => jsonResponse(syntheticDay()),

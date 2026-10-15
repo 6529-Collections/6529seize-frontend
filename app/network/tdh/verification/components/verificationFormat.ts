@@ -51,3 +51,16 @@ export function middleTruncate(value: string, keep = 8): string {
     ? value
     : `${value.slice(0, keep)}…${value.slice(-keep)}`;
 }
+
+/**
+ * A code version as the feed gives it, shortened: "db72daa", "db72daa+wip"
+ * (built from a tree with local changes) or "unknown".
+ */
+export function shortCommit(commit: string): string {
+  if (commit === "unknown") {
+    return commit;
+  }
+  const wip = commit.endsWith("+wip");
+  const hex = wip ? commit.slice(0, -4) : commit;
+  return `${hex.slice(0, 7)}${wip ? "+wip" : ""}`;
+}

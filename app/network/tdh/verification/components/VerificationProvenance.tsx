@@ -16,7 +16,11 @@ import {
   arweaveTransactionUrl,
   etherscanBlockUrl,
 } from "./verificationLinks";
-import { formatInteger, middleTruncate } from "./verificationFormat";
+import {
+  formatInteger,
+  middleTruncate,
+  shortCommit,
+} from "./verificationFormat";
 
 const DT =
   "tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400";
@@ -87,7 +91,7 @@ export function CommitLine({
       <span className="tw-text-iron-300">{program}</span>
       <span className="tw-inline-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
         <code className="tw-font-mono tw-text-xs tw-text-iron-200">
-          {repository}@{commit.slice(0, 7)}
+          {repository}@{shortCommit(commit)}
         </code>
         <TdhCopyButton
           value={commit}

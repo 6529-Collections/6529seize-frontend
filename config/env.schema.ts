@@ -130,10 +130,14 @@ export const publicEnvSchema = z.object({
   VITE_FEATURE_AB_CARD: z.string().optional(),
 
   /**
-   * Public base URL of the daily TDH verification files (`index.json`,
-   * `days/{cycleDay}.json`). HTTPS, or http://localhost outside production;
-   * the loader enforces the production rule. Unset: bundled sample data
-   * outside production, "reports start soon" in production.
+   * Public base URL of the TDH feed: the daily verification files
+   * (`index.json`, `days/{cycleDay}.json`) and the Lean proof manifest
+   * (`formal/manifest.json`). Production: `https://d379duzqnomz3w.cloudfront.net`
+   * (6529's daily job, served by CloudFront; a file not yet published answers
+   * 403). HTTPS, or http://localhost outside production; the loader enforces
+   * the production rule. Unset: bundled sample data outside production,
+   * "reports start soon" in production; the formal model page then shows the
+   * manifest bundled with it.
    */
   NEXT_PUBLIC_TDH_VERIFICATION_BASE: z.preprocess(
     (value) =>

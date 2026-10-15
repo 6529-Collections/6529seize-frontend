@@ -5,7 +5,7 @@ import { Fragment, useId, useState, type ReactNode } from "react";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
-import TdhStatusPill from "../shared/TdhStatusPill";
+import TdhStatusPill, { type TdhPill } from "../shared/TdhStatusPill";
 import {
   TDH_CHIP_BUTTON,
   TDH_CHIP_OFF,
@@ -15,16 +15,122 @@ import {
   TDH_TD_STACK_MD,
   TDH_TH,
 } from "../shared/tdhStyles";
+import type { CheckedEntry, StatementCheck } from "./formalStatus";
 import type { LeanStatement, StatementStatus } from "./leanResults";
 
 type Filter = StatementStatus | "all";
+
+const NO_EXTRA: Readonly<Record<string, ReactNode>> = {};
 
 const ORDER: readonly StatementStatus[] = [
   "proved",
   "byDefinition",
   "checkedBuild",
   "shownFalse",
+  "deferred",
+  "unverified",
 ];
+
+/** A manifest entry's status as a pill; anything unexpected is unverified. */
+function entryPill(entry: CheckedEntry): TdhPill {
+  if (entry.status !== entry.expected) {
+    return "unverified";
+  }
+  if (entry.status === "counterexample") {
+    return "shownFalse";
+  }
+  return entry.status;
+}
+
+/** "Case H" for a #guard case, "PROOFS.md §1" for a deferred claim. */
+function entryName(locale: SupportedLocale, entry: CheckedEntry): string {
+  const caseMatch = /^\d+[a-z]?\.case-([A-Z])$/.exec(entry.name);
+  if (caseMatch) {
+    return t(locale, "network.tdh.formal.entry.case", {
+      letter: caseMatch[1] ?? "",
+    });
+  }
+  if (entry.expected === "deferred") {
+    return t(locale, "network.tdh.formal.entry.proofsSection", {
+      section: entry.name.split(".")[0] ?? "",
+    });
+  }
+  return entry.name;
+}
+
+function entryEvidence(locale: SupportedLocale, entry: CheckedEntry): string {
+  if (entry.status === null) {
+    return t(locale, "network.tdh.formal.entry.missing");
+  }
+  if (entry.status === "deferred") {
+    return t(locale, "network.tdh.formal.entry.deferred");
+  }
+  if (entry.checkedBy === "evaluation") {
+    return t(locale, "network.tdh.formal.entry.evaluation", {
+      checks: formatInteger(locale, entry.checks ?? 0),
+    });
+  }
+  const axioms = entry.axioms ?? [];
+  return axioms.length === 0
+    ? t(locale, "network.tdh.formal.entry.noAxioms")
+    : t(locale, "network.tdh.formal.entry.axioms", {
+        axioms: axioms.join(", "),
+      });
+}
+
+function entryPlace(entry: CheckedEntry): string | null {
+  if (entry.file === null || entry.file === "PROOFS.md") {
+    return null;
+  }
+  const file = entry.file.split("/").at(-1) ?? entry.file;
+  return entry.line === null ? file : `${file}:${entry.line}`;
+}
+
+function ManifestEntries({
+  locale,
+  entries,
+}: {
+  readonly locale: SupportedLocale;
+  readonly entries: readonly CheckedEntry[];
+}) {
+  return (
+    <div>
+      <p className="tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
+        {t(locale, "network.tdh.formal.entry.heading", {
+          count: formatInteger(locale, entries.length),
+        })}
+      </p>
+      <ul className="tw-m-0 tw-mt-2 tw-list-none tw-p-0">
+        {entries.map((entry) => {
+          const place = entryPlace(entry);
+          return (
+            <li
+              key={entry.name}
+              className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-py-1.5 first:tw-border-t-0"
+            >
+              <code className="tw-min-w-0 tw-break-all tw-font-mono tw-text-xs tw-text-iron-100">
+                {entryName(locale, entry)}
+              </code>
+              <TdhStatusPill
+                pill={entryPill(entry)}
+                locale={locale}
+                size="sm"
+              />
+              <span className="tw-text-xs tw-text-iron-400">
+                {entryEvidence(locale, entry)}
+              </span>
+              {place && (
+                <span className="tw-font-mono tw-text-[11px] tw-text-iron-500">
+                  {place}
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
 
 /**
  * The model's statements with their status. A row opens to its scope, the
@@ -34,23 +140,30 @@ const ORDER: readonly StatementStatus[] = [
 export default function StatementsTable({
   locale,
   rows,
+  checks,
   caption,
-  extra = {},
+  extra = NO_EXTRA,
 }: {
   readonly locale: SupportedLocale;
   readonly rows: readonly LeanStatement[];
+  /** Each row checked against the proof manifest, by row id. */
+  readonly checks: Readonly<Record<string, StatementCheck>>;
   readonly caption: string;
   readonly extra?: Readonly<Record<string, ReactNode>>;
 }) {
   const baseId = useId();
   const [filter, setFilter] = useState<Filter>("all");
   const [open, setOpen] = useState<string | null>(null);
+  const statusOf = (row: LeanStatement): StatementStatus =>
+    checks[row.id]?.status ?? "unverified";
   const present = ORDER.filter((status) =>
-    rows.some((row) => row.status === status)
+    rows.some((row) => statusOf(row) === status)
   );
   const filters: readonly Filter[] =
     present.length > 1 ? ["all", ...present] : [];
-  const shown = rows.filter((row) => filter === "all" || row.status === filter);
+  const shown = rows.filter(
+    (row) => filter === "all" || statusOf(row) === filter
+  );
   const text = (row: LeanStatement, part: "title" | "plain" | "scope") =>
     t(locale, `network.tdh.formal.st.${row.id}.${part}` as MessageKey);
 
@@ -78,7 +191,7 @@ export default function StatementsTable({
                   locale,
                   option === "all"
                     ? rows.length
-                    : rows.filter((row) => row.status === option).length
+                    : rows.filter((row) => statusOf(row) === option).length
                 )}
               </span>
             </button>
@@ -148,7 +261,7 @@ export default function StatementsTable({
                     </td>
                     <td className={`${TDH_TD_STACK_MD} tw-pt-1 md:tw-pt-3`}>
                       <TdhStatusPill
-                        pill={row.status}
+                        pill={statusOf(row)}
                         locale={locale}
                         size="sm"
                       />
@@ -173,17 +286,13 @@ export default function StatementsTable({
                           {text(row, "scope")}
                         </p>
                         {extra[row.id]}
-                        {row.names.length > 0 && (
-                          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-                            {t(locale, "network.tdh.formal.statements.names", {
-                              names: row.names.join(", "),
-                            })}
-                            {" · "}
-                            {t(locale, "network.tdh.formal.statements.where", {
-                              file: row.file,
-                            })}
-                          </p>
-                        )}
+                        {isOpen &&
+                          (checks[row.id]?.entries.length ?? 0) > 0 && (
+                            <ManifestEntries
+                              locale={locale}
+                              entries={checks[row.id]?.entries ?? []}
+                            />
+                          )}
                         {row.lean && (
                           <pre
                             tabIndex={0}

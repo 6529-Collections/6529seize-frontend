@@ -80,7 +80,12 @@ days return the standard not-found page.
 
 - `NEXT_PUBLIC_TDH_VERIFICATION_BASE` names the public base URL of
   `index.json` and `days/{cycleDay}.json`, as the daily job's
-  `publish_feed.py` writes them. The job publishes once a day after its
+  `publish_feed.py` writes them. In production it is
+  `https://d379duzqnomz3w.cloudfront.net`, set in the deploy configuration. The feed is
+  served by CloudFront from a private bucket, which answers 403 (not 404)
+  for a file that does not exist yet: the page reads 403 and 404 alike as
+  "not yet published" (no index yet: reports start soon; a missing day: not
+  found). The job publishes once a day after its
   00:40 UTC run and fetches a late 6529.io file again at 06:00 and 12:00 UTC;
   the page rechecks the files every 10 minutes (day permalinks hourly).
 - The feed's verdicts are `OK`, `RUST_PYTHON_MISMATCH`, `LIVE_UNAVAILABLE`
@@ -92,11 +97,15 @@ days return the standard not-found page.
   `rootsNote`) are shown when present.
 - Unset in production: the page says daily reports start on 16 October 2026,
   and from 17 October that they are not yet connected.
-- Unset outside production: a verbatim copy of the daily job's published
-  feed for 14 and 15 October 2026, from test runs made on 15 October, under
-  a `Sample` banner.
-- A file that fails validation, or whose cause could carry anything but a
-  DEV or BUG item, `rust-python` or `unexplained`, is rejected whole.
+- Unset outside production: a verbatim copy of the public feed as the daily
+  job published it on 15 October 2026 (cycles 20,740 and 20,741), under a
+  `Sample` banner.
+- A file that fails validation is rejected whole: among other checks, a
+  cause must be what the job writes (`DEV-n`, `BUG-n`, `SD-n`, `MS-n`,
+  `CN-n` or `RP-n`, several joined by commas, `rust-python` or
+  `unexplained`), the class and cause counts must add up to the differing
+  records, and a code version must be a commit, a commit with `+wip`, or
+  `unknown`.
 
 ## Failure and Recovery
 
