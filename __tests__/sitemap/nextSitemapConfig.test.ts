@@ -2,11 +2,13 @@ import sitemapConfig, {
   buildAdditionalSitemapPaths,
   fetchCursorPaginatedData,
   getNftSitemapPaths,
+  getProfilePaths,
   getPublicWavePaths,
   MUSEUM_STATIC_CANONICAL_PATHS,
   STATIC_INDEXABLE_PATHS,
   shouldExcludeSitemapPath,
 } from "@/next-sitemap.config";
+import { getVisibleToolsNavGroups } from "@/components/tools/tools.routes";
 import type {
   MuseumPublication,
   MuseumPublicationLoadState,
@@ -25,6 +27,9 @@ const makeFetchJson =
     return response;
   };
 
+const PROFILES_PAGE_1_URL =
+  "https://api.6529.io/api/community-members/top?sort=level&sort_direction=DESC&page_size=100&page=1";
+
 const ZERO_FLOORS = {
   memes: 0,
   "meme-lab": 0,
@@ -32,6 +37,7 @@ const ZERO_FLOORS = {
   "nextgen-tokens": 0,
   "nextgen-collections": 0,
   "public-waves": 0,
+  profiles: 0,
 } as const;
 
 type BuildOptions = NonNullable<
@@ -511,6 +517,16 @@ describe("next-sitemap config", () => {
           ],
           next: false,
         },
+      [PROFILES_PAGE_1_URL]: {
+        data: [
+          {
+            detail_view_key: "punk6529",
+            level: 100,
+            last_activity: 1791966707000,
+          },
+        ],
+        next: false,
+      },
     });
 
     const paths = await buildAdditionalSitemapPaths(
@@ -528,6 +544,7 @@ describe("next-sitemap config", () => {
     expect(locations).toContain("/nextgen/collection/pebbles");
     expect(locations).toContain("/nextgen/collection/pebbles/art");
     expect(locations).toContain("/waves/5f207393-5418-4a75-8738-e40edb44a94d");
+    expect(locations).toContain("/punk6529");
     expect(locations).toContain("/museum/network/acquisitions");
     expect(locations).toContain("/museum/network/research");
     expect(locations).toContain(
@@ -916,6 +933,10 @@ const healthyFeedResponses = (): Record<string, unknown> => ({
   [FEED_URLS.nextgenTokens]: { data: [10000000000], next: null },
   [FEED_URLS.nextgenCollections]: { data: ["Pebbles"], next: null },
   [FEED_URLS.waves]: { data: [], next: false },
+  [PROFILES_PAGE_1_URL]: {
+    data: [{ detail_view_key: "punk6529", level: 100, last_activity: null }],
+    next: false,
+  },
 });
 
 // Fails each listed URL for its first N requests, like a flaky API.
@@ -983,6 +1004,7 @@ describe("next-sitemap resilience", () => {
     expect(locations).toContain("/the-memes/1");
     expect(locations).toContain("/meme-lab/10");
     expect(locations).toContain("/nextgen/token/10000000000");
+    expect(locations).toContain("/tools/block-finder");
     expect(locations).toContain("/museum/network/works/6529NM-W-0001");
     expect(warn).toHaveBeenCalledWith(
       expect.stringContaining("gradient section skipped")
@@ -1045,6 +1067,25 @@ describe("next-sitemap resilience", () => {
     ).rejects.toThrow("Sitemap memes inventory fell below its required floor");
   });
 
+  it("never fails a build because the optional profile feed is unavailable", async () => {
+    const { fetchJson } = createFlakyFetchJson(healthyFeedResponses(), {
+      [PROFILES_PAGE_1_URL]: 99,
+    });
+    const warn = jest.fn();
+
+    const paths = await buildAdditionalSitemapPaths(
+      fetchJson,
+      museumBundle,
+      testOptions({ failurePolicy: "fail", warn })
+    );
+
+    expect(paths.map((path) => path.loc)).toContain("/the-memes/1");
+    expect(paths.map((path) => path.loc)).not.toContain("/punk6529");
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("profiles section skipped")
+    );
+  });
+
   it("keeps the in-repo Museum publication a hard requirement under the fallback policy", async () => {
     await expect(
       buildAdditionalSitemapPaths(
@@ -1063,5 +1104,152 @@ describe("next-sitemap resilience", () => {
         testOptions({ failurePolicy: "fallback" })
       )
     ).rejects.toThrow("Museum sitemap publication unavailable");
+  });
+});
+
+describe("next-sitemap profile pages", () => {
+  const member = (
+    detailViewKey: string,
+    lastActivity?: number | null
+  ): Record<string, unknown> => ({
+    detail_view_key: detailViewKey,
+    level: 50,
+    ...(lastActivity === undefined ? {} : { last_activity: lastActivity }),
+  });
+
+  it("lists user-chosen handles and skips wallet-only and conflicting identities", async () => {
+    const fetchJson = makeFetchJson({
+      [PROFILES_PAGE_1_URL]: {
+        data: [
+          member("punk6529", 1791966707000),
+          member("6529Museum", null),
+          member("id-0x7c741ed01ee259feba4b7f9cac114f48bcafacf3"),
+          member("0x7c741ed01ee259feba4b7f9cac114f48bcafacf3"),
+          member("PUNK6529"),
+          member("waves"),
+          member("museum"),
+          member("bad/handle"),
+          member("has space"),
+          member("a.html"),
+          member("___"),
+        ],
+        next: false,
+      },
+    });
+
+    const paths = await getProfilePaths(fetchJson);
+
+    expect(paths).toEqual([
+      {
+        loc: "/punk6529",
+        changefreq: "weekly",
+        priority: 0.5,
+        lastmod: "2026-10-14T08:31:47.000Z",
+      },
+      { loc: "/6529Museum", changefreq: "weekly", priority: 0.5 },
+      { loc: "/___", changefreq: "weekly", priority: 0.5 },
+    ]);
+  });
+
+  it("requests the public level-ranked feed and stops at the page cap", async () => {
+    const requested: string[] = [];
+    const fetchJson = async (url: string): Promise<unknown> => {
+      requested.push(url);
+      const page = Number(new URL(url).searchParams.get("page"));
+      return { data: [member(`member${page}`)], next: true };
+    };
+
+    const paths = await getProfilePaths(fetchJson);
+
+    expect(requested).toHaveLength(10);
+    expect(requested[0]).toBe(PROFILES_PAGE_1_URL);
+    expect(paths.map((path) => path.loc)).toEqual(
+      Array.from({ length: 10 }, (_, index) => `/member${index + 1}`)
+    );
+  });
+
+  it("rejects garbled feed items", async () => {
+    await expect(
+      getProfilePaths(
+        makeFetchJson({
+          [PROFILES_PAGE_1_URL]: { data: [{ level: 5 }], next: false },
+        })
+      )
+    ).rejects.toThrow("Invalid profile sitemap item");
+  });
+});
+
+describe("next-sitemap tool pages", () => {
+  const LISTED_TOOL_PAGES = [
+    "/tools",
+    "/tools/api",
+    "/tools/api/authentication",
+    "/tools/block-finder",
+    "/tools/time-zones",
+    "/meme-accounting",
+    "/meme-gas",
+    "/open-data",
+    "/open-data/network-metrics",
+    "/open-data/6529bot",
+    "/open-data/rememes",
+    "/open-data/team",
+    "/open-data/royalties",
+  ] as const;
+
+  // Reviewed tool routes that are intentionally not listed: wallet-gated,
+  // subscription-gated, or noindex surfaces.
+  const GATED_OR_NOINDEX_TOOL_PAGES = [
+    "/tools/app-wallets",
+    "/tools/agent-login",
+    "/tools/subscriptions-report",
+    "/open-data/meme-subscriptions",
+    "/emma",
+  ] as const;
+
+  it("lists the stable public tool pages", () => {
+    expect(STATIC_INDEXABLE_PATHS).toEqual(
+      expect.arrayContaining([...LISTED_TOOL_PAGES])
+    );
+    for (const path of LISTED_TOOL_PAGES) {
+      expect(shouldExcludeSitemapPath(path)).toBe(false);
+    }
+  });
+
+  it("keeps gated and noindex tool pages out of the sitemap", () => {
+    for (const path of GATED_OR_NOINDEX_TOOL_PAGES) {
+      expect(STATIC_INDEXABLE_PATHS).not.toContain(path);
+    }
+  });
+
+  it("requires a sitemap decision for every page in the tools registry", () => {
+    const reviewed = new Set<string>([
+      ...LISTED_TOOL_PAGES,
+      ...GATED_OR_NOINDEX_TOOL_PAGES,
+      // Safe Collecting tools are listed through their own route family.
+      ...STATIC_INDEXABLE_PATHS.filter((path) =>
+        path.startsWith("/safe-collecting")
+      ),
+    ]);
+    const registeredHrefs = getVisibleToolsNavGroups({
+      appWalletsSupported: true,
+      hideSubscriptions: false,
+    }).flatMap((group) => group.items.map((item) => item.href));
+
+    expect(registeredHrefs.length).toBeGreaterThan(0);
+    for (const href of registeredHrefs) {
+      expect(reviewed.has(href)).toBe(true);
+    }
+  });
+
+  it.each([
+    "/tools",
+    "/tools/block-finder",
+    "/tools/api",
+    "/meme-gas",
+    "/open-data/team",
+  ] as const)("gives %s utility-page sitemap metadata", async (path) => {
+    await expect(
+      sitemapConfig.transform!(sitemapConfig, path)
+    ).resolves.toEqual({ loc: path, changefreq: "monthly", priority: 0.45 });
   });
 });

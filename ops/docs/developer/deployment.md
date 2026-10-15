@@ -177,7 +177,8 @@ feed is still unavailable or fails its minimum-size floor, production deploy
 builds (GitHub Actions with `VERSION` set to the exact commit) fail rather than
 publish a truncated sitemap; rerun the build once the API is healthy. Pull
 request and local builds skip only that section, print a loud warning (and a
-GitHub annotation in CI), and still emit the static pages. Set `SITEMAP_FAILURE_POLICY=fail` or `fallback` to
+GitHub annotation in CI), and still emit the static pages. The optional profile
+sample never fails a build. Set `SITEMAP_FAILURE_POLICY=fail` or `fallback` to
 override the detection.
 
 ## Failure and rollback
