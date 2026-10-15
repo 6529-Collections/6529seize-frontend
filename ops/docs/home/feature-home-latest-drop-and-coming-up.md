@@ -118,9 +118,15 @@ Use this page for visibility rules, state switches, and route targets.
   routes), a blank, invisible space of the row's height is reserved so the
   content below does not jump, and the row replaces it right after the page
   loads on web and Android. As soon as the page identifies the iOS app the space
-  is removed and nothing is shown while the country check loads; a US result
-  then inserts the row, and a non-US, unknown, or failed result leaves nothing.
-  The space holds no text, icons, links, or controls.
+  is removed and nothing is shown while the country check loads, except on a
+  device whose last completed country check was US: there the blank space stays
+  through the check, so a US result swaps the row in without a shift, and a
+  non-US or unknown result removes the space. Without a US result remembered
+  (first launch, another country, a failed check, or unavailable browser
+  storage) nothing is shown while the check loads; a US result then inserts the
+  row, and a non-US, unknown, or failed result leaves nothing. The remembered
+  result only keeps the blank space; the row and its requests always wait for
+  the current check. The space holds no text, icons, links, or controls.
 - Latest Drop and mapped Next Drop cards always show `Your allowance`. Before a
   wallet is connected, the row prompts the user to connect to view it. Once
   connected, compact wrapping pills list each nonzero Phase 0, Phase 1, Phase 2,
