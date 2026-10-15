@@ -464,7 +464,8 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const address = page.getByRole("button", {
       name: /^0x[0-9a-fA-F]{40}$/,
     });
-    await expect(address).toBeVisible();
+    // The address comes from the subscriptions API after the shell renders.
+    await expect(address).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     const fullAddress = (await address.textContent())!.trim();
     if (isMobile) {
       await address.tap();
@@ -924,7 +925,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       .click();
     await expect(
       page.getByRole("button", { name: "Toggle decision timeline" })
-    ).toBeVisible();
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await expect(waveTabs.filter({ visible: true })).toHaveCount(1);
     await expect(
       page.getByRole("main").locator("[data-competition-detail]")

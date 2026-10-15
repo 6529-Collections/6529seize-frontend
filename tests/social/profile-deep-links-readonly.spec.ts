@@ -34,8 +34,12 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       .locator(":scope > div[aria-hidden='true']");
 
     await expect(details).toBeVisible();
-    await expect(metrics.getByRole("button").first()).toBeVisible();
-    await expect(fade).toBeVisible();
+    // The shell precedes the API-backed statistics, so those controls get the
+    // bounded data-readiness budget. The layout checks below stay strict.
+    await expect(metrics.getByRole("button").first()).toBeVisible({
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
+    await expect(fade).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     for (const width of [430, 520, 640, 767, 390]) {
       await page.setViewportSize({ width, height: 844 });
       await expect
@@ -291,8 +295,12 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       exact: true,
     });
     const history = activityTabs.getByRole("tab", { name: "TDH History" });
+    // Tab selection is URL state: it commits after a client navigation, which
+    // slower runners can take longer than the default assertion timeout.
     await walletActivity.press("End");
-    await expect(history).toHaveAttribute("aria-selected", "true");
+    await expect(history).toHaveAttribute("aria-selected", "true", {
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
     await expect(history).toBeFocused();
     await expect
       .poll(() =>
@@ -306,7 +314,9 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       )
       .toBe(true);
     await history.press("Home");
-    await expect(walletActivity).toHaveAttribute("aria-selected", "true");
+    await expect(walletActivity).toHaveAttribute("aria-selected", "true", {
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
     await expect(walletActivity).toBeFocused();
 
     await page.setViewportSize({ width: 1280, height: 900 });
@@ -345,7 +355,7 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       name: "Collected network cards",
     });
     const networkCount = page.getByText(/^Page 1 of \d+$/, { exact: true });
-    await expect(networkCards).toBeVisible();
+    await expect(networkCards).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await expect(networkCount).toBeVisible();
 
     for (const width of [320, 390, 768, 1280]) {
@@ -458,7 +468,7 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       `/${PROFILE_HANDLE}/collected?collection=memes&page=2`
     );
     const nativeCount = page.getByText(/^Page 2 of \d+$/, { exact: true });
-    await expect(nativeCount).toBeVisible();
+    await expect(nativeCount).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     const previous = page.getByRole("button", {
       name: "Previous",
       exact: true,
@@ -490,15 +500,20 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     );
     await expect(
       page.getByText(/^Page 3 of \d+$/, { exact: true })
-    ).toBeVisible();
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     const cards = page.getByRole("list", {
       name: "Collected cards",
       exact: true,
     });
-    await expect(cards.getByRole("link").first()).toBeFocused();
+    // Focus moves to the first card once the new page's cards have rendered.
+    await expect(cards.getByRole("link").first()).toBeFocused({
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
     await expect(cards.getByRole("link").first()).toBeInViewport();
     await previous.click();
-    await expect(cards.getByRole("link").first()).toBeFocused();
+    await expect(cards.getByRole("link").first()).toBeFocused({
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
     await expect(cards.getByRole("link").first()).toBeInViewport();
     await expect(nativeCount).toBeVisible();
     await expectUrlState(
