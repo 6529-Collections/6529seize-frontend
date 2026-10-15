@@ -62,7 +62,8 @@ jest.mock('@/components/user/subscriptions/UserPageSubscriptionsHistory', () => 
   __esModule: true,
   default: ({ topups, redeemed, logs, setRedeemedPage, setTopUpPage, setLogsPage }: any) => (
     <div data-testid="subscriptions-history">
-      History Component
+      History Component - TopUps: {topups?.data?.length ?? 0}, Redeemed:{' '}
+      {redeemed?.data?.length ?? 0}, Logs: {logs?.data?.length ?? 0}
       <button onClick={() => setTopUpPage(2)}>Load TopUp Page 2</button>
       <button onClick={() => setRedeemedPage(2)}>Load Redeemed Page 2</button>
       <button onClick={() => setLogsPage(2)}>Load Logs Page 2</button>
@@ -427,6 +428,48 @@ describe('UserPageSubscriptions', () => {
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint: 'subscriptions/consolidation/details/new-key',
         });
+      });
+    });
+
+    it('should clear history and upcoming memes when their requests fail after a profile change', async () => {
+      const page = { count: 1, page: 1, next: false, data: [{ id: 1 }] };
+      mockCommonApiFetch.mockImplementation(async ({ endpoint }) => {
+        if (endpoint.includes('new-key')) {
+          throw new Error('API Error');
+        }
+        if (endpoint.includes('upcoming-memes')) {
+          return [{ id: 1 }];
+        }
+        return page;
+      });
+
+      const { rerender } = renderWithAuth(
+        <UserPageSubscriptions profile={mockProfile} />,
+        { connectedProfile: null }
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('subscriptions-history')).toHaveTextContent(
+          'TopUps: 1, Redeemed: 1, Logs: 1'
+        );
+        expect(screen.getByTestId('subscriptions-upcoming')).toHaveTextContent(
+          'Memes: 1'
+        );
+      });
+
+      rerender(
+        <UserPageSubscriptions
+          profile={{ ...mockProfile, consolidation_key: 'new-key' } as ApiIdentity}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('subscriptions-history')).toHaveTextContent(
+          'TopUps: 0, Redeemed: 0, Logs: 0'
+        );
+        expect(screen.getByTestId('subscriptions-upcoming')).toHaveTextContent(
+          'Memes: 0'
+        );
       });
     });
 

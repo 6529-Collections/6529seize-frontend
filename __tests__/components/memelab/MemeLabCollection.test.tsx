@@ -467,4 +467,55 @@ describe("MemeLabCollection", () => {
       screen.queryByRole("button", { name: "Next page" })
     ).not.toBeInTheDocument();
   });
+
+  it("shows a retryable error instead of a blank page when the collection fails to load", async () => {
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    (fetchAllPages as jest.Mock)
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValueOnce([{ id: 1, website: "", name: "meta" }])
+      .mockResolvedValueOnce([
+        { id: 1, contract: "0x", name: "Recovered NFT", artist: "artist" },
+      ]);
+
+    renderComponent();
+
+    const error = await screen.findByRole("alert");
+    expect(error).toHaveTextContent("The catalog could not be loaded");
+    expect(screen.queryByTestId("nft-1")).not.toBeInTheDocument();
+
+    const resultsRegion = error.parentElement;
+    fireEvent.click(within(error).getByRole("button", { name: "Try again" }));
+    expect(resultsRegion).toHaveFocus();
+
+    expect(await screen.findByTestId("nft-1")).toHaveTextContent(
+      "Recovered NFT"
+    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(fetchAllPages).toHaveBeenCalledTimes(3);
+    consoleError.mockRestore();
+  });
+
+  it("shows the error when the cards request fails after the metadata loads", async () => {
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    (fetchAllPages as jest.Mock)
+      .mockResolvedValueOnce([{ id: 1, website: "example.com", name: "meta" }])
+      .mockRejectedValueOnce(new Error("offline"));
+
+    renderComponent();
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "The catalog could not be loaded"
+    );
+    expect(screen.queryByTestId("nothing")).not.toBeInTheDocument();
+    expect(consoleError).toHaveBeenCalledWith(
+      "Failed to load Meme Lab collection",
+      expect.any(Error)
+    );
+    consoleError.mockRestore();
+  });
+
 });

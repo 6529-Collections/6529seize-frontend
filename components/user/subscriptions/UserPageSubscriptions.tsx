@@ -37,6 +37,10 @@ const SUBSCRIBE_GROUP_CLASS =
 const SUBSCRIBE_GROUP_CONTENT_CLASS =
   "tw-min-w-0 md:tw-flex md:tw-h-full md:tw-flex-col";
 
+function createEmptyPage<T>(): Page<T> {
+  return { count: 0, page: 1, next: false, data: [] };
+}
+
 function getSubscriptionProfileKey(
   profile: ApiIdentity | null | undefined
 ): string | undefined {
@@ -70,23 +74,15 @@ export default function UserPageSubscriptions(
   const [fetchingAirdropAddress, setFetchingAirdropAddress] =
     useState<boolean>(true);
 
-  const [topUpHistory, setTopUpHistory] = useState<Page<SubscriptionTopUp>>({
-    count: 0,
-    page: 1,
-    next: false,
-    data: [],
-  });
+  const [topUpHistory, setTopUpHistory] = useState<Page<SubscriptionTopUp>>(
+    createEmptyPage
+  );
   const [fetchingTopUpHistory, setFetchingTopUpHistory] =
     useState<boolean>(true);
 
   const [redeemedHistory, setRedeemedHistory] = useState<
     Page<RedeemedSubscription>
-  >({
-    count: 0,
-    page: 1,
-    next: false,
-    data: [],
-  });
+  >(createEmptyPage);
   const [fetchingRedeemedHistory, setFetchingRedeemedHistory] =
     useState<boolean>(true);
 
@@ -97,14 +93,8 @@ export default function UserPageSubscriptions(
   const [fetchingMemeSubscriptions, setFetchingMemeSubscriptions] =
     useState<boolean>(true);
 
-  const [subscriptionLogs, setSubscriptionLogs] = useState<
-    Page<SubscriptionLog>
-  >({
-    count: 0,
-    page: 1,
-    next: false,
-    data: [],
-  });
+  const [subscriptionLogs, setSubscriptionLogs] =
+    useState<Page<SubscriptionLog>>(createEmptyPage);
   const [fetchingSubscriptionLogs, setFetchingSubscriptionLogs] =
     useState<boolean>(true);
 
@@ -162,6 +152,9 @@ export default function UserPageSubscriptions(
       .then((data) => {
         setTopUpHistory(data);
       })
+      .catch(() => {
+        setTopUpHistory(createEmptyPage());
+      })
       .finally(() => {
         setFetchingTopUpHistory(false);
       });
@@ -183,6 +176,9 @@ export default function UserPageSubscriptions(
       .then((data) => {
         setRedeemedHistory(data);
       })
+      .catch(() => {
+        setRedeemedHistory(createEmptyPage());
+      })
       .finally(() => {
         setFetchingRedeemedHistory(false);
       });
@@ -202,6 +198,9 @@ export default function UserPageSubscriptions(
     })
       .then((data) => {
         setMemeSubscriptions(data);
+      })
+      .catch(() => {
+        setMemeSubscriptions([]);
       })
       .finally(() => {
         setFetchingMemeSubscriptions(false);
@@ -223,6 +222,9 @@ export default function UserPageSubscriptions(
     })
       .then((data) => {
         setSubscriptionLogs(data);
+      })
+      .catch(() => {
+        setSubscriptionLogs(createEmptyPage());
       })
       .finally(() => {
         setFetchingSubscriptionLogs(false);
