@@ -68,6 +68,20 @@ describe("useDmWavesList", () => {
     );
   });
 
+  it("exposes the same viewer identity used by the cached DM list", () => {
+    const { result, rerender } = renderHook(() => useDmWavesList());
+    expect(result.current.viewerIdentityKey).toBe("0xabc:primary");
+    useAuthMock.mockReturnValue({
+      activeProfileProxy: { id: "proxy-1" },
+      connectedProfile: { handle: "me" },
+      fetchingProfile: false,
+      isAuthenticated: true,
+    });
+    rerender();
+    expect(result.current.viewerIdentityKey).toBe("0xabc:proxy:proxy-1");
+    expect(result.current.waves).toHaveLength(2);
+  });
+
   it("disables the DM query while wallet auth is invalid", () => {
     const fetchNextPage = jest.fn();
     const refetch = jest.fn();
