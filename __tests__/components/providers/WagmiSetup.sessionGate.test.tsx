@@ -7,6 +7,7 @@ import {
   hasPersistedWalletSession,
   subscribeToWalletSessionChanges,
 } from "@/components/providers/walletSessionGate";
+import { resetWalletChunkRecoveryForTests } from "@/components/providers/walletChunkRecovery";
 import {
   createAppKitAdapter,
   initializeAppKit,
@@ -51,6 +52,11 @@ jest.mock("@/components/providers/AppKitAdapterManager", () => ({
 jest.mock("@/utils/appkit-initialization.utils", () => ({
   createAppKitAdapter: jest.fn(),
   initializeAppKit: jest.fn(),
+}));
+const mockReloadToRetryWalletChunks = jest.fn(() => true);
+jest.mock("@/components/providers/walletChunkRecovery", () => ({
+  ...jest.requireActual("@/components/providers/walletChunkRecovery"),
+  reloadToRetryWalletChunks: () => mockReloadToRetryWalletChunks(),
 }));
 jest.mock("@/components/providers/walletSessionGate", () => ({
   hasPersistedWalletSession: jest.fn(() => false),
@@ -138,6 +144,7 @@ describe("WagmiSetup wallet stack session gate", () => {
       Symbol.for("6529.wagmiAppKitFastPathStore")
     );
     jest.clearAllMocks();
+    resetWalletChunkRecoveryForTests();
     mockWalletStackLoadError = null;
     mockIsNativePlatform.mockReturnValue(false);
     jest.mocked(hasPersistedWalletSession).mockReturnValue(false);
@@ -262,6 +269,57 @@ describe("WagmiSetup wallet stack session gate", () => {
       expect.objectContaining({ isCapacitor: true })
     );
     expect(hasPersistedWalletSession).not.toHaveBeenCalled();
+  });
+
+  it("always loads the wallet stack in the desktop app", async () => {
+    const userAgent = jest
+      .spyOn(navigator, "userAgent", "get")
+      .mockReturnValue(
+        "Mozilla/5.0 (Windows NT 10.0) 6529-core Electron/41.0.0"
+      );
+    try {
+      renderWagmiSetup();
+
+      await waitFor(() =>
+        expect(screen.getByLabelText("Wallet stack status")).toHaveTextContent(
+          "ready"
+        )
+      );
+      expect(createAppKitAdapter).toHaveBeenCalledWith(
+        expect.objectContaining({ isCapacitor: false })
+      );
+    } finally {
+      userAgent.mockRestore();
+    }
+  });
+
+  // The bundler keeps rejecting a chunk that failed once in this page, so a
+  // later connect intent reloads the page instead of retrying in place.
+  it("reloads the page on the next connect intent after a wallet chunk fails", async () => {
+    const user = userEvent.setup();
+    renderWagmiSetup();
+    await waitFor(() =>
+      expect(screen.getByLabelText("Wallet stack status")).toHaveTextContent(
+        "idle"
+      )
+    );
+
+    mockWalletStackLoadError = Object.assign(
+      new Error("Failed to load chunk /_next/static/chunks/wallet.js"),
+      { name: "ChunkLoadError" }
+    );
+    await user.click(screen.getByRole("button", { name: "Connect" }));
+    await waitFor(() =>
+      expect(screen.getByLabelText("Wallet stack status")).toHaveTextContent(
+        "error"
+      )
+    );
+    expect(mockReloadToRetryWalletChunks).not.toHaveBeenCalled();
+
+    mockWalletStackLoadError = null;
+    await user.click(screen.getByRole("button", { name: "Connect" }));
+    expect(mockReloadToRetryWalletChunks).toHaveBeenCalledTimes(1);
+    expect(createAppKitAdapter).not.toHaveBeenCalled();
   });
 
   it("retries the wallet stack after a failed load", async () => {

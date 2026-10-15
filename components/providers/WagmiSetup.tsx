@@ -19,6 +19,12 @@ import {
   hasPersistedWalletSession,
   subscribeToWalletSessionChanges,
 } from "@/components/providers/walletSessionGate";
+import {
+  hasWalletChunkLoadFailed,
+  noteWalletChunkFailure,
+  reloadToRetryWalletChunks,
+  setWalletStackWagmiConfig,
+} from "@/components/providers/walletChunkRecovery";
 import type { AppToastInput } from "@/components/utils/toast/AppToast";
 import { publicEnv } from "@/config/env";
 import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
@@ -260,8 +266,10 @@ function loadWalletStackModules(): Promise<WalletStackModules> {
 
   const walletStackModules = importWalletStackModules();
   store.walletStackModules = walletStackModules;
-  // A failed chunk request must not block a later connect intent.
-  walletStackModules.catch(() => {
+  // Drop the failed promise, and remember a failed chunk: the bundler keeps
+  // rejecting that chunk in this page, so a connect intent reloads instead.
+  walletStackModules.catch((error: unknown) => {
+    noteWalletChunkFailure(error);
     if (store.walletStackModules === walletStackModules) {
       store.walletStackModules = null;
     }
@@ -695,10 +703,13 @@ export default function WagmiSetup({
     );
   }, [bootstrapConfigurationKey, chains, isCapacitor, requestWalletStack]);
 
-  const waitForAppKitReady = useCallback(
-    () => startAppKitInitialization(),
-    [startAppKitInitialization]
-  );
+  const waitForAppKitReady = useCallback((): Promise<void> => {
+    if (hasWalletChunkLoadFailed() && reloadToRetryWalletChunks()) {
+      // The page is reloading; keep the connect intent pending until then.
+      return new Promise<void>(() => undefined);
+    }
+    return startAppKitInitialization();
+  }, [startAppKitInitialization]);
 
   const appKitBootstrapValue = useMemo(
     (): AppKitBootstrapContextValue => ({
@@ -714,15 +725,17 @@ export default function WagmiSetup({
 
   // A stored wallet session restores its connection after mount, replacing
   // the wallet-free config while preserving the provider tree. The native app
-  // always loads, because its App Wallet connectors live in the adapter.
-  // Other visitors fetch the wallet stack only when they ask to connect.
+  // always loads, because its App Wallet connectors live in the adapter, and
+  // so does the desktop app, which serves its bundle locally. Other visitors
+  // fetch the wallet stack only when they ask to connect.
   useEffect(() => {
     if (fastPathSnapshot.walletStackRequested) {
       return;
     }
 
+    const isDesktopApp = navigator.userAgent.includes("Electron");
     const loadForStoredSession = (): boolean => {
-      if (!isCapacitor && !hasPersistedWalletSession()) {
+      if (!isCapacitor && !isDesktopApp && !hasPersistedWalletSession()) {
         return false;
       }
 
@@ -742,6 +755,7 @@ export default function WagmiSetup({
 
   useEffect(() => {
     markAdapterReadyForLaunchTiming(currentAdapter);
+    setWalletStackWagmiConfig(currentAdapter?.wagmiConfig ?? null);
   }, [currentAdapter]);
 
   // Inject wallet connectors dynamically using hooks (simplified approach)

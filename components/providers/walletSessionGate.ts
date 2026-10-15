@@ -1,3 +1,4 @@
+import { WAGMI_PERSISTED_STATE_KEY } from "@/components/providers/walletChunkRecovery";
 import { safeLocalStorage } from "@/helpers/safeLocalStorage";
 import {
   AUTH_STORAGE_KEYS,
@@ -5,9 +6,6 @@ import {
   WALLET_ACCOUNTS_UPDATED_EVENT,
 } from "@/services/auth/auth.utils";
 
-// The Wagmi adapter persists live connections with its default "wagmi"
-// storage prefix and its "store" persistence name.
-const WAGMI_PERSISTED_STATE_KEY = "wagmi.store";
 // Only writes to these keys can create a session that the gate would detect.
 const WALLET_SESSION_STORAGE_KEYS: ReadonlySet<string> = new Set([
   WAGMI_PERSISTED_STATE_KEY,

@@ -9,6 +9,7 @@ import type {
 import dynamic from "next/dynamic";
 import React, { useSyncExternalStore } from "react";
 import { logError } from "@/utils/security-logger";
+import { noteWalletChunkFailure } from "@/components/providers/walletChunkRecovery";
 import { AppKitModalBridgeStoreContext } from "./appKitModalBridgeStoreContext";
 
 // The AppKit hooks pull in the Reown SDK, so they load only after AppKit has
@@ -268,6 +269,9 @@ class AppKitModalBridgeErrorBoundary extends React.Component<
   }
 
   override componentDidCatch(error: Error): void {
+    // A failed hooks chunk cannot load again in this page; the next connect
+    // intent reloads it.
+    noteWalletChunkFailure(error);
     this.props.store.failBootstrap();
     logError("appkit_modal_bridge", error);
   }
