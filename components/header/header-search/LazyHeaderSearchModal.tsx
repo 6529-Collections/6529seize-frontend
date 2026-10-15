@@ -14,11 +14,12 @@ const headerSearchModalLoader =
     () => import("./HeaderSearchModal")
   );
 
-// Fetches the modal chunk ahead of the first open (hover, focus, idle). Opening
+// Fetches the modal chunk ahead of the first open (hover, focus, the visitor's
+// first interaction, idle). Opening
 // never depends on this: the modal loads on demand too.
 export const preloadHeaderSearchModal = headerSearchModalLoader.preload;
-export const useHeaderSearchModalIdlePreload =
-  headerSearchModalLoader.usePreloadWhenIdle;
+export const useHeaderSearchModalEarlyPreload =
+  headerSearchModalLoader.usePreloadEarly;
 
 const LoadedHeaderSearchModal = headerSearchModalLoader.Loaded;
 
