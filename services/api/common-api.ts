@@ -290,7 +290,12 @@ const parseApiResponse = async <T>(
   try {
     return await res.json();
   } catch (jsonError) {
-    if (jsonError instanceof DOMException && jsonError.name === "AbortError") {
+    // A cancelled or timed-out transfer is not malformed JSON, and the wrapped
+    // message below would add the full request URL to the error.
+    if (
+      jsonError instanceof DOMException &&
+      (jsonError.name === "AbortError" || jsonError.name === "TimeoutError")
+    ) {
       throw jsonError;
     }
     const errorMessage =

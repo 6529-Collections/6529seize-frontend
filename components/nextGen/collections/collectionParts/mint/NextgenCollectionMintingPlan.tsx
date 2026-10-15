@@ -109,7 +109,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
     }
     return (
       <span className="tw-font-semibold tw-text-white">
-        {date.toIsoDateString()} {date.toIsoTimeString()}
+        {date.toIsoDateString()} {date.toIsoTimeString()} UTC
       </span>
     );
   }
