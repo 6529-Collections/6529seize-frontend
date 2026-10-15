@@ -2,6 +2,8 @@ import type { Locator, Page } from "@playwright/test";
 
 import {
   expect,
+  expectActiveOptionIndicator,
+  expectKeyboardFocusIndicator,
   expectNoHorizontalOverflow,
   test,
   waitForRouteReady,
@@ -674,6 +676,13 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       0
     );
 
+    // A @tailwindcss/forms control drawing its own ring on keyboard focus.
+    await expectKeyboardFocusIndicator(
+      page,
+      page.getByLabel("Contract", { exact: true }),
+      { maxTabs: 150 }
+    );
+
     if (testInfo.project.name === "web-desktop-chromium") {
       const [logoBox, contractBox] = await Promise.all([
         page.getByAltText("re-memes").boundingBox(),
@@ -699,6 +708,9 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       await memeOption.tap();
     } else {
       await referenceSearch.press("ArrowDown");
+      // The active Headless UI option keeps focus on the input, so it has to
+      // paint its own indicator instead of a background tint alone.
+      await expectActiveOptionIndicator(memeOption);
       await referenceSearch.press("Enter");
     }
 

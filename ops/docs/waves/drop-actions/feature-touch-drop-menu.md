@@ -3,6 +3,8 @@
 ## Overview
 
 Use the touch drop menu to run drop actions without leaving the thread.
+If the keyboard is open, the actions sheet slides into its resting position
+while the keyboard closes. Reaction search still stays above the keyboard.
 
 ## Location in the Site
 

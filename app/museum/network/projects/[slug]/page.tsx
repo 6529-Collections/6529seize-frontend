@@ -18,7 +18,7 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import { toMetadataExcerpt } from "@/helpers/metadataText";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { formatDate } from "@/i18n/format";
+import { formatUtcDate } from "@/i18n/format";
 import {
   CASEY_ARTIST_NAME,
   tryCaseyArtworksFromPublication,
@@ -220,7 +220,7 @@ function ProjectWorkCard({
   const statusRecorded = t(
     DEFAULT_LOCALE,
     "museum.network.projects.statusRecorded",
-    { date: formatDate(DEFAULT_LOCALE, work.statusAsOf) }
+    { date: formatUtcDate(DEFAULT_LOCALE, work.statusAsOf) }
   );
   const programMediaMatch =
     media === undefined

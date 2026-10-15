@@ -646,8 +646,9 @@ function MemeCalendarOverviewUpcomingMints({
           {upcomingHeading}
         </div>
         <div className="tw-min-w-0 tw-text-sm tw-leading-5 tw-text-iron-400 sm:tw-max-w-[15rem] sm:tw-text-right">
-          {formatFullDate(seasonStart, displayTz, locale)} -{" "}
-          {formatFullDate(seasonEndInclusive, displayTz, locale)}
+          {/* Calendar dates (00:00 UTC carriers): the same in every zone. */}
+          {formatFullDate(seasonStart, "utc", locale)} -{" "}
+          {formatFullDate(seasonEndInclusive, "utc", locale)}
         </div>
       </div>
 
