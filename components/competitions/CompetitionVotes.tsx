@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCompetition } from "@/contexts/CompetitionContext";
 import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow";
@@ -36,7 +38,13 @@ function CompetitionPersonalVotes() {
   );
 }
 
-export default function CompetitionVotes() {
+export default function CompetitionVotes({
+  embedded = false,
+  children,
+}: {
+  readonly embedded?: boolean;
+  readonly children?: ReactNode;
+}) {
   const { competition } = useCompetition();
   const pathname = usePathname();
   const router = useRouter();
@@ -55,29 +63,37 @@ export default function CompetitionVotes() {
       className="tw-space-y-4 [&_[role=status]_p]:tw-italic"
       key={competition.id}
     >
-      <TabToggleWithOverflow
-        transition
-        variant="compactPills"
-        options={VOTE_TABS.map((key) => ({
-          key,
-          label: labels[key],
-          panelId: `competition-${competition.id}-votes-${key}`,
-        }))}
-        activeKey={active}
-        onSelect={(key) => {
-          const params = new URLSearchParams(search.toString());
-          params.set("tab", "votes");
-          params.set("voteTab", key);
-          params.delete("entry");
-          router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-        }}
-      />
+      <div
+        className={`tw-bg-iron-950 tw-py-1.5 [&_[role=tablist]]:tw-flex-wrap [&_[role=tablist]]:tw-gap-y-2.5 ${embedded ? "-tw-mx-4 tw-px-4" : ""}`}
+      >
+        <TabToggleWithOverflow
+          transition
+          variant="compactPills"
+          options={VOTE_TABS.map((key) => ({
+            key,
+            label: labels[key],
+            panelId: `competition-${competition.id}-votes-${key}`,
+          }))}
+          activeKey={active}
+          onSelect={(key) => {
+            const params = new URLSearchParams(search.toString());
+            params.set("tab", "votes");
+            params.set("voteTab", key);
+            params.delete("entry");
+            router.replace(`${pathname}?${params.toString()}`, {
+              scroll: false,
+            });
+          }}
+        />
+      </div>
+      {children}
       {VOTE_TABS.map((key) => (
         <section
           key={key}
           role="tabpanel"
           id={`competition-${competition.id}-votes-${key}`}
           aria-label={labels[key]}
+          className={embedded && key === "mine" ? "-tw-mx-4" : undefined}
           hidden={active !== key}
         >
           {active === key && key === "mine" && <CompetitionPersonalVotes />}

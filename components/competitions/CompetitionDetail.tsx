@@ -99,6 +99,37 @@ export function NativeCompetitionContent({
     panelId: `competition-${competition.id}-${value}`,
   }));
   const selectTab = (value: string) => navigateTab(`${pathname}?tab=${value}`);
+  const isVotesView = tab === "votes" && !search.get("entry");
+  const contentHeader = (
+    <>
+      {pauses.isError && (
+        <CompetitionState
+          error
+          retry={() => {
+            void pauses.refetch();
+          }}
+        />
+      )}
+      {paused && (
+        <output className="tw-block tw-rounded-lg tw-bg-iron-900 tw-p-4 tw-text-sm tw-text-amber-300">
+          {t(locale, "competitions.paused")}
+        </output>
+      )}
+      {tab === "leaderboard" &&
+        !search.get("entry") &&
+        !competition.permissions.submit && (
+          <p className="tw-text-sm tw-text-iron-400">
+            {t(locale, "competitions.submitClosed")}
+          </p>
+        )}
+      {mutationsEnabled && entering && (
+        <CompetitionEntryForm
+          key={competition.id}
+          onClose={() => setEntering(false)}
+        />
+      )}
+    </>
+  );
   if (
     mutationsEnabled &&
     competition.lifecycle === ApiCompetitionLifecycle.Draft &&
@@ -135,39 +166,17 @@ export function NativeCompetitionContent({
           </div>
         </div>
       )}
-      {pauses.isError && (
-        <CompetitionState
-          error
-          retry={() => {
-            void pauses.refetch();
-          }}
-        />
-      )}
-      {paused && (
-        <output className="tw-block tw-rounded-lg tw-bg-iron-900 tw-p-4 tw-text-sm tw-text-amber-300">
-          {t(locale, "competitions.paused")}
-        </output>
-      )}
-      {!competition.permissions.submit && (
-        <p className="tw-text-sm tw-text-iron-400">
-          {t(locale, "competitions.submitClosed")}
-        </p>
-      )}
-      {mutationsEnabled && entering && (
-        <CompetitionEntryForm
-          key={competition.id}
-          onClose={() => setEntering(false)}
-        />
-      )}
+      {!isVotesView && contentHeader}
       <section
         role={embedded ? undefined : "tabpanel"}
         id={`competition-${competition.id}-${tab}`}
         aria-label={tabLabel(tab)}
-        className="tw-space-y-5"
+        className={`tw-space-y-5 ${embedded && isVotesView ? "first:-tw-mt-4" : ""}`}
       >
         <WaveDisplayMetadataContext.Provider value={displayMetadata}>
           <CompetitionResources
             key={tab}
+            embedded={embedded}
             tab={tab}
             onCreateDrop={
               mutationsEnabled &&
@@ -176,7 +185,9 @@ export function NativeCompetitionContent({
                 ? () => setEntering((current) => !current)
                 : undefined
             }
-          />
+          >
+            {isVotesView && contentHeader}
+          </CompetitionResources>
         </WaveDisplayMetadataContext.Provider>
         {tab === "rules" && (
           <CompetitionAdmin

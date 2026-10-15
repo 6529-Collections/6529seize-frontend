@@ -201,9 +201,7 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
   };
   return (
     <>
-      <div
-        className={`tw-flex tw-shrink-0 tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-bg-iron-950 ${isApp ? "tw-border-white/5" : "tw-border-iron-800"} tw-px-4 tw-py-2.5 md:tw-px-6`}
-      >
+      <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-3 tw-bg-iron-950 tw-px-4 tw-py-1.5 md:tw-px-6">
         <div className="tw-relative tw-min-w-0 tw-flex-1">
           <div
             ref={filtersScrollerRef}
