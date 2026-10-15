@@ -53,13 +53,10 @@ export function useWaveLoadingState() {
   );
 
   /**
-   * Clears loading state for a specific wave
+   * Forgets the loading state of a wave; its next load starts a fresh one
    */
   const clearLoadingState = useCallback((waveId: string) => {
-    if (loadingStates.current[waveId]) {
-      loadingStates.current[waveId].isLoading = false;
-      loadingStates.current[waveId].promise = null;
-    }
+    delete loadingStates.current[waveId];
   }, []);
 
   return {
