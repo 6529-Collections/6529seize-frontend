@@ -237,28 +237,30 @@ export default function NextGenMint(props: Readonly<Props>) {
   }, [addressMintCountMintedPublicRead.data]);
 
   useEffect(() => {
-    if (!props.collection.merkle_root) {
-      return;
+    if (props.collection.merkle_root) {
+      const controller = new AbortController();
+      const merkleRoot = props.collection.merkle_root;
+      const url = `${publicEnv.API_ENDPOINT}/api/nextgen/merkle_roots/${merkleRoot}`;
+      fetchUrl<CollectionWithMerkle | null>(url, {
+        signal: controller.signal,
+      })
+        .then((response) => {
+          if (controller.signal.aborted) {
+            return;
+          }
+          if (response) {
+            setCollection(response);
+          }
+          setCollectionLoaded(true);
+        })
+        .catch(() => {
+          if (!controller.signal.aborted) {
+            setCollectionFailed(true);
+          }
+        });
+      return () => controller.abort();
     }
-    const controller = new AbortController();
-    const merkleRoot = props.collection.merkle_root;
-    const url = `${publicEnv.API_ENDPOINT}/api/nextgen/merkle_roots/${merkleRoot}`;
-    setCollectionFailed(false);
-    fetchUrl<CollectionWithMerkle>(url, { signal: controller.signal }).then(
-      (response: CollectionWithMerkle) => {
-        if (controller.signal.aborted) {
-          return;
-        }
-        setCollection(response ?? undefined);
-        setCollectionLoaded(true);
-      },
-      () => {
-        if (!controller.signal.aborted) {
-          setCollectionFailed(true);
-        }
-      }
-    );
-    return () => controller.abort();
+    return undefined;
   }, [props.collection.merkle_root, collectionAttempt]);
 
   function getSalesModel() {
@@ -372,7 +374,10 @@ export default function NextGenMint(props: Readonly<Props>) {
       return (
         <NextGenLoadError
           message="nextgen.loadError.mintOptions"
-          onRetry={() => setCollectionAttempt((current) => current + 1)}
+          onRetry={() => {
+            setCollectionFailed(false);
+            setCollectionAttempt((current) => current + 1);
+          }}
         />
       );
     }

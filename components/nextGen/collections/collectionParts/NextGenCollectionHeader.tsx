@@ -106,15 +106,15 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
   useEffect(() => {
     const controller = new AbortController();
     const url = `${publicEnv.API_ENDPOINT}/api/nextgen/merkle_roots/${props.collection.merkle_root}`;
-    fetchUrl<CollectionWithMerkle>(url, { signal: controller.signal }).then(
-      (response: CollectionWithMerkle) => {
+    fetchUrl<CollectionWithMerkle | null>(url, { signal: controller.signal })
+      .then((response) => {
         if (controller.signal.aborted) {
           return;
         }
         setCollection(response ?? undefined);
         setCollectionLoaded(true);
-      },
-      () => {
+      })
+      .catch(() => {
         // The allowlist type only picks the button label. If it cannot be
         // loaded, fall back to the default "MINT" label (the link still works)
         // instead of leaving the loading placeholder up forever.
@@ -122,8 +122,7 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
           setCollection(undefined);
           setCollectionLoaded(true);
         }
-      }
-    );
+      });
     return () => controller.abort();
   }, [props.collection.merkle_root]);
 

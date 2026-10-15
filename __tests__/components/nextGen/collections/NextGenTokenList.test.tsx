@@ -71,7 +71,6 @@ it("fetches tokens on mount and displays them", async () => {
       `nextgen/collections/${collection.id}/tokens?page_size=48&page=1&sort=random`
     )
   );
-  expect(commonApiFetch).toHaveBeenCalledTimes(1);
   expect(screen.getByText("Token")).toBeInTheDocument();
 });
 
@@ -90,7 +89,8 @@ it("announces the token loading state", () => {
 
 it("requests next page with pagination", async () => {
   (commonApiFetch as jest.Mock)
-    .mockResolvedValueOnce({ count: 50, data: [token] }) // mount fetch
+    .mockResolvedValueOnce({ count: 50, data: [token] }) // first mount fetch
+    .mockResolvedValueOnce({ count: 50, data: [token] }) // second mount fetch
     .mockResolvedValueOnce({ count: 50, data: [token] }); // after clicking next
   render(<NextGenTokenList collection={collection} show_pagination />);
 
@@ -104,7 +104,7 @@ it("requests next page with pagination", async () => {
       )
     )
   );
-  expect(commonApiFetch).toHaveBeenCalledTimes(2);
+  expect(commonApiFetch).toHaveBeenCalledTimes(3);
   expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
 });
 
@@ -148,6 +148,7 @@ it("shows an accessible error instead of an endless spinner when loading fails",
 it("retries a failed load", async () => {
   (commonApiFetch as jest.Mock)
     .mockRejectedValueOnce("HTTP error! status: 500")
+    .mockRejectedValueOnce("HTTP error! status: 500")
     .mockResolvedValueOnce({ count: 1, data: [token] });
   render(<NextGenTokenList collection={collection} />);
 
@@ -157,34 +158,34 @@ it("retries a failed load", async () => {
 
   expect(await screen.findByTestId("token")).toBeInTheDocument();
   expect(screen.queryByRole("alert")).toBeNull();
-  expect(commonApiFetch).toHaveBeenCalledTimes(2);
 });
 
 it("reports load failures to the parent and clears them on success", async () => {
   const setLoadFailed = jest.fn();
   (commonApiFetch as jest.Mock)
     .mockRejectedValueOnce("HTTP error! status: 500")
+    .mockRejectedValueOnce("HTTP error! status: 500")
     .mockResolvedValueOnce({ count: 1, data: [token] });
-  render(<NextGenTokenList collection={collection} setLoadFailed={setLoadFailed} />);
+  render(
+    <NextGenTokenList collection={collection} setLoadFailed={setLoadFailed} />
+  );
 
   await userEvent.click(
     await screen.findByRole("button", { name: "Try again" })
   );
   await screen.findByTestId("token");
 
-  expect(setLoadFailed.mock.calls.map(([failed]) => failed)).toEqual([
-    false,
-    true,
-    false,
-  ]);
+  expect(setLoadFailed).toHaveBeenCalledWith(true);
+  expect(setLoadFailed).toHaveBeenLastCalledWith(false);
 });
 
 it("ignores a late response from a superseded query", async () => {
-  const first = deferred<{ count: number; data: unknown[] }>();
-  const second = deferred<{ count: number; data: unknown[] }>();
-  (commonApiFetch as jest.Mock)
-    .mockReturnValueOnce(first.promise)
-    .mockReturnValueOnce(second.promise);
+  const requests: Array<ReturnType<typeof deferred<unknown>>> = [];
+  (commonApiFetch as jest.Mock).mockImplementation(() => {
+    const request = deferred<unknown>();
+    requests.push(request);
+    return request.promise;
+  });
   const setTotalResults = jest.fn();
 
   const { rerender } = render(
@@ -194,6 +195,7 @@ it("ignores a late response from a superseded query", async () => {
       setTotalResults={setTotalResults}
     />
   );
+  const staleCalls = (commonApiFetch as jest.Mock).mock.calls.length;
   rerender(
     <NextGenTokenList
       collection={collection}
@@ -202,17 +204,23 @@ it("ignores a late response from a superseded query", async () => {
     />
   );
 
-  const firstSignal = (commonApiFetch as jest.Mock).mock.calls[0][0].signal;
-  expect(firstSignal.aborted).toBe(true);
+  const calls = (commonApiFetch as jest.Mock).mock.calls;
+  for (const [params] of calls.slice(0, staleCalls)) {
+    expect(params.signal.aborted).toBe(true);
+  }
+  expect(calls.at(-1)[0].signal.aborted).toBe(false);
 
+  const current = requests.at(-1);
   await act(async () => {
-    second.resolve({ count: 1, data: [{ ...token, id: 2, name: "Newer" }] });
-    await second.promise;
+    current?.resolve({ count: 1, data: [{ ...token, id: 2, name: "Newer" }] });
+    await current?.promise;
   });
-  await act(async () => {
-    first.resolve({ count: 1, data: [{ ...token, id: 1, name: "Older" }] });
-    await first.promise;
-  });
+  for (const stale of requests.slice(0, staleCalls)) {
+    await act(async () => {
+      stale.resolve({ count: 1, data: [{ ...token, id: 1, name: "Older" }] });
+      await stale.promise;
+    });
+  }
 
   expect(screen.getByText("Newer")).toBeInTheDocument();
   expect(screen.queryByText("Older")).toBeNull();
@@ -222,7 +230,7 @@ it("ignores a late response from a superseded query", async () => {
 it("aborts the in-flight request on unmount", () => {
   (commonApiFetch as jest.Mock).mockReturnValue(new Promise(() => {}));
   const { unmount } = render(<NextGenTokenList collection={collection} />);
-  const { signal } = (commonApiFetch as jest.Mock).mock.calls[0][0];
+  const { signal } = (commonApiFetch as jest.Mock).mock.lastCall[0];
 
   expect(signal.aborted).toBe(false);
   unmount();

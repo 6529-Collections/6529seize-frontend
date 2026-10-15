@@ -105,8 +105,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
   >();
   const [originalProofs, setOriginalProofs] = useState<ProofResponse[]>([]);
   const [fetchingProofs, setFetchingProofs] = useState<boolean>(false);
-  const [proofsFailed, setProofsFailed] = useState<boolean>(false);
-  const [proofsAttempt, setProofsAttempt] = useState(0);
+  const [proofsFailedFor, setProofsFailedFor] = useState<string>();
 
   const alStatus = getStatusFromDates(
     props.collection.allowlist_start,
@@ -136,6 +135,10 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     setErrors,
   } = useMintSharedState();
 
+  const proofsFailed =
+    !fetchingProofs &&
+    proofsFailedFor === `${props.collection.merkle_root}/${mintForAddress}`;
+
   useEffect(() => {
     props.mintForAddress(mintForAddress);
   }, [mintForAddress]);
@@ -163,60 +166,63 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     };
   }
 
-  // Proofs belong to one (collection, mint-for address). Anything held for a
-  // previous key is dropped immediately, and the in-flight request is aborted
-  // when the key changes, so a late response can never be applied to (or used
+  // Proofs belong to one (collection, mint-for address). When that key changes
+  // (or on unmount) the in-flight request is aborted and everything held for
+  // the old key is dropped, so a late response can never be applied to (or used
   // for) a different address.
   useEffect(() => {
-    setProofResponse([]);
-    setCurrentProof(undefined);
-    setOriginalProofs([]);
-    setProofsFailed(false);
-    if (!address || props.collection.allowlist_end <= 0 || !mintForAddress) {
-      setFetchingProofs(false);
-      return;
-    }
-    const controller = new AbortController();
-    const merkleRoot = props.collection.merkle_root;
-    const url = `${publicEnv.API_ENDPOINT}/api/nextgen/proofs/${merkleRoot}/${mintForAddress}`;
-    setFetchingProofs(true);
-    fetchUrl<ProofResponse[]>(url, { signal: controller.signal }).then(
-      (response: ProofResponse[]) => {
-        if (controller.signal.aborted) {
-          return;
-        }
-        const proofResponses: ProofResponse[] = [];
-        if (response.length > 0) {
-          proofResponses.push({
-            keccak: response[0]?.keccak!,
-            spots: response[0]?.spots!,
-            info: response[0]?.info!,
-            proof: response[0]?.proof!,
+    if (address && props.collection.allowlist_end > 0) {
+      if (mintForAddress) {
+        const controller = new AbortController();
+        setFetchingProofs(true);
+        const merkleRoot = props.collection.merkle_root;
+        const url = `${publicEnv.API_ENDPOINT}/api/nextgen/proofs/${merkleRoot}/${mintForAddress}`;
+        fetchUrl<ProofResponse[]>(url, { signal: controller.signal })
+          .then((response: ProofResponse[]) => {
+            if (controller.signal.aborted) {
+              return;
+            }
+            const proofResponses: ProofResponse[] = [];
+            if (response.length > 0) {
+              proofResponses.push({
+                keccak: response[0]?.keccak!,
+                spots: response[0]?.spots!,
+                info: response[0]?.info!,
+                proof: response[0]?.proof!,
+              });
+              for (let i = 1; i < response.length; i++) {
+                const spots = response[i]?.spots! - response[i - 1]?.spots!;
+                proofResponses.push({
+                  keccak: response[i]?.keccak!,
+                  spots: spots,
+                  info: response[i]?.info,
+                  proof: response[i]?.proof!,
+                });
+              }
+            }
+            setProofResponse(proofResponses);
+            setCurrentProof(toCurrentProof(findActiveProof(proofResponses)));
+            setOriginalProofs(response);
+            setProofsFailedFor(undefined);
+            setFetchingProofs(false);
+          })
+          .catch(() => {
+            if (!controller.signal.aborted) {
+              setProofsFailedFor(`${merkleRoot}/${mintForAddress}`);
+              setFetchingProofs(false);
+            }
           });
-          for (let i = 1; i < response.length; i++) {
-            const spots = response[i]?.spots! - response[i - 1]?.spots!;
-            proofResponses.push({
-              keccak: response[i]?.keccak!,
-              spots: spots,
-              info: response[i]?.info,
-              proof: response[i]?.proof!,
-            });
-          }
-        }
-        setProofResponse(proofResponses);
-        setCurrentProof(toCurrentProof(findActiveProof(proofResponses)));
-        setOriginalProofs(response);
-        setFetchingProofs(false);
-      },
-      () => {
-        if (!controller.signal.aborted) {
-          setProofsFailed(true);
+        return () => {
+          controller.abort();
+          setProofResponse([]);
+          setCurrentProof(undefined);
+          setOriginalProofs([]);
           setFetchingProofs(false);
-        }
+        };
       }
-    );
-    return () => controller.abort();
-  }, [props.collection, address, mintForAddress, proofsAttempt]);
+    }
+    return undefined;
+  }, [props.collection, address, mintForAddress]);
 
   const mintWrite = useWriteContract();
 
@@ -465,10 +471,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
           />
         </div>
         {alStatus === Status.LIVE && proofsFailed && (
-          <NextGenLoadError
-            message="nextgen.loadError.allowlistProofs"
-            onRetry={() => setProofsAttempt((current) => current + 1)}
-          />
+          <NextGenLoadError message="nextgen.loadError.allowlistProofs" />
         )}
         {alStatus === Status.LIVE &&
           !proofsFailed &&

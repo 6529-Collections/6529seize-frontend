@@ -5,7 +5,6 @@ import {
 } from "@/components/nextGen/nextgen_contracts";
 import { Status } from "@/components/nextGen/nextgen_entities";
 import { act, render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 
 jest.mock(
   "@/components/nextGen/collections/collectionParts/mint/NextGenMintShared",
@@ -232,27 +231,6 @@ describe("NextGenMintBurnWidget", () => {
       );
     });
 
-    it("retries loading the burn proof", async () => {
-      mockFetchUrl
-        .mockRejectedValueOnce(new Error("HTTP error! status: 500"))
-        .mockResolvedValueOnce(burnProof("ok"));
-      renderWidget({}, { tokenId: "7" });
-
-      await userEvent.click(
-        await screen.findByRole("button", { name: "Try again" })
-      );
-
-      await waitFor(() => expect(mockFetchUrl).toHaveBeenCalledTimes(2));
-      const mintState = (useMintSharedState as jest.Mock).mock.results[0]
-        ?.value;
-      await waitFor(() =>
-        expect(mintState.setBurnProofResponse).toHaveBeenCalledWith(
-          burnProof("ok")
-        )
-      );
-      expect(screen.queryByRole("alert")).toBeNull();
-    });
-
     it("never applies a late burn proof for a previously selected token", async () => {
       const first = deferred<unknown>();
       const second = deferred<unknown>();
@@ -293,14 +271,19 @@ describe("NextGenMintBurnWidget", () => {
       );
     });
 
-    it("clears fetching state when the selected token is cleared", () => {
-      renderWidget({}, { tokenId: "" });
-      const mintState = (useMintSharedState as jest.Mock).mock.results[0]
+    it("drops the proof and the fetching state when the selected token is cleared", () => {
+      mockFetchUrl.mockReturnValue(new Promise(() => {}));
+      const { rerender } = renderWidget({}, { tokenId: "7" });
+      const firstState = (useMintSharedState as jest.Mock).mock.results[0]
         ?.value;
+      (useMintSharedState as jest.Mock).mockReturnValue(
+        createMintState({ tokenId: "" })
+      );
+      rerender(<NextGenMintBurnWidget {...baseProps} />);
 
-      expect(mintState.setBurnProofResponse).toHaveBeenCalledWith(undefined);
-      expect(mintState.setFetchingProofs).toHaveBeenCalledWith(false);
-      expect(mockFetchUrl).not.toHaveBeenCalled();
+      expect(mockFetchUrl).toHaveBeenCalledTimes(1);
+      expect(firstState.setBurnProofResponse).toHaveBeenCalledWith(undefined);
+      expect(firstState.setFetchingProofs).toHaveBeenLastCalledWith(false);
     });
 
     it("mints with the exact wei price", () => {

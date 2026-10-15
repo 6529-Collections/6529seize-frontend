@@ -6,7 +6,7 @@ import type {
   NextGenToken,
   TraitValuePair,
 } from "@/entities/INextgen";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Pagination from "@/components/pagination/Pagination";
 import { commonApiFetch } from "@/services/api/common-api";
 import DotLoader from "@/components/dotLoader/DotLoader";
@@ -32,62 +32,91 @@ interface Props {
   show_pagination?: boolean | undefined;
 }
 
-interface TokensResponse {
-  count: number;
-  page: number;
-  next: unknown;
-  data: NextGenToken[];
-}
-
-function getTokensEndpoint(
-  props: Readonly<Props>,
-  pageSize: number,
-  page: number
-): string {
-  let endpoint = `nextgen/collections/${props.collection.id}/tokens?page_size=${pageSize}&page=${page}`;
-  if (props.selected_traits) {
-    const traitsQ = props.selected_traits
-      .map((t) => `${t.trait}:${t.value}`)
-      .join(",");
-    endpoint += `&traits=${encodeURIComponent(traitsQ)}`;
-  }
-  if (props.show_normalised) {
-    endpoint += `&show_normalised=true`;
-  }
-  if (props.show_trait_count) {
-    endpoint += `&show_trait_count=true`;
-  }
-  if (props.listed_type === NextGenTokenListedType.LISTED) {
-    endpoint += `&listed=true`;
-  } else if (props.listed_type === NextGenTokenListedType.NOT_LISTED) {
-    endpoint += `&listed=false`;
-  }
-  if (props.sort) {
-    endpoint += `&sort=${props.sort.replaceAll(" ", "_").toLowerCase()}`;
-  } else {
-    endpoint += `&sort=random`;
-  }
-  if (props.sort_direction) {
-    endpoint += `&sort_direction=${props.sort_direction.toLowerCase()}`;
-  }
-  return endpoint;
-}
-
 export default function NextGenTokenList(props: Readonly<Props>) {
   const pageSize = props.limit ?? 48;
 
   const [tokens, setTokens] = useState<NextGenToken[]>([]);
   const [tokensLoaded, setTokensLoaded] = useState(false);
   const [loadFailed, setLoadFailed] = useState(false);
-  const [attempt, setAttempt] = useState(0);
+  const controllerRef = useRef<AbortController | null>(null);
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
   const [rarityType, setRarityType] = useState<NextGenTokenRarityType>();
 
-  const endpoint = getTokensEndpoint(props, pageSize, page);
+  // Only the newest request may update the list: starting a request aborts the
+  // previous one (and unmounting aborts the last one), and a response from an
+  // aborted request is ignored.
+  function fetchResults(mypage: number) {
+    controllerRef.current?.abort();
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    setTokensLoaded(false);
+    setLoadFailed(false);
+    let endpoint = `nextgen/collections/${props.collection.id}/tokens?page_size=${pageSize}&page=${mypage}`;
+    if (props.selected_traits) {
+      const traitsQ = props.selected_traits
+        .map((t) => `${t.trait}:${t.value}`)
+        .join(",");
+      endpoint += `&traits=${encodeURIComponent(traitsQ)}`;
+    }
+    if (props.show_normalised) {
+      endpoint += `&show_normalised=true`;
+    }
+    if (props.show_trait_count) {
+      endpoint += `&show_trait_count=true`;
+    }
+    if (props.listed_type === NextGenTokenListedType.LISTED) {
+      endpoint += `&listed=true`;
+    } else if (props.listed_type === NextGenTokenListedType.NOT_LISTED) {
+      endpoint += `&listed=false`;
+    }
+    if (props.sort) {
+      endpoint += `&sort=${props.sort.replaceAll(" ", "_").toLowerCase()}`;
+    } else {
+      endpoint += `&sort=random`;
+    }
+    if (props.sort_direction) {
+      endpoint += `&sort_direction=${props.sort_direction.toLowerCase()}`;
+    }
+    commonApiFetch<{
+      count: number;
+      page: number;
+      next: unknown;
+      data: NextGenToken[];
+    }>({
+      endpoint: endpoint,
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (controller.signal.aborted) {
+          return;
+        }
+        setTotalResults(response.count);
+        if (props.setTotalResults) {
+          props.setTotalResults(response.count);
+        }
+        setTokens(response.data);
+        setTokensLoaded(true);
+        props.setLoadFailed?.(false);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) {
+          setLoadFailed(true);
+          props.setLoadFailed?.(true);
+        }
+      });
+  }
 
   useEffect(() => {
-    setPage(1);
+    return () => controllerRef.current?.abort();
+  }, []);
+
+  useEffect(() => {
+    if (page === 1) {
+      fetchResults(page);
+    } else {
+      setPage(1);
+    }
   }, [
     props.selected_traits,
     props.sort,
@@ -97,38 +126,9 @@ export default function NextGenTokenList(props: Readonly<Props>) {
     props.listed_type,
   ]);
 
-  // One request per effective query. A newer query (or unmount) aborts the
-  // previous one, and a late response from an aborted request is ignored.
   useEffect(() => {
-    const controller = new AbortController();
-    const load = async () => {
-      setTokensLoaded(false);
-      setLoadFailed(false);
-      props.setLoadFailed?.(false);
-      let response: TokensResponse;
-      try {
-        response = await commonApiFetch<TokensResponse>({
-          endpoint,
-          signal: controller.signal,
-        });
-      } catch {
-        if (!controller.signal.aborted) {
-          setLoadFailed(true);
-          props.setLoadFailed?.(true);
-        }
-        return;
-      }
-      if (controller.signal.aborted) {
-        return;
-      }
-      setTotalResults(response.count);
-      props.setTotalResults?.(response.count);
-      setTokens(response.data);
-      setTokensLoaded(true);
-    };
-    void load();
-    return () => controller.abort();
-  }, [endpoint, attempt]);
+    fetchResults(page);
+  }, [page]);
 
   function getRarityType(
     baseType:
@@ -183,7 +183,7 @@ export default function NextGenTokenList(props: Readonly<Props>) {
               <NextGenLoadError
                 className="tw-col-span-full"
                 message="nextgen.loadError.tokens"
-                onRetry={() => setAttempt((current) => current + 1)}
+                onRetry={() => fetchResults(page)}
               />
             );
           }

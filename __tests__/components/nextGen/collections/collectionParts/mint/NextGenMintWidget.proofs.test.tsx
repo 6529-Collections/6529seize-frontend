@@ -1,7 +1,6 @@
 import NextGenMintWidget from "@/components/nextGen/collections/collectionParts/mint/NextGenMintWidget";
 import { Status } from "@/components/nextGen/nextgen_entities";
 import { act, render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 
 const mockSetProofResponse = jest.fn();
 const mockWriteContract = jest.fn();
@@ -194,22 +193,21 @@ describe("NextGenMintWidget allowlist proofs", () => {
     expect(screen.queryByLabelText("Loading allowlist proofs")).toBeNull();
   });
 
-  it("retries loading proofs", async () => {
+  it("clears the error and reloads when the mint-for address changes", async () => {
     mockFetchUrl
       .mockRejectedValueOnce(new Error("HTTP error! status: 500"))
-      .mockResolvedValueOnce([proof("proof-a")]);
-    render(<NextGenMintWidget {...baseProps} />);
+      .mockResolvedValueOnce([proof("proof-b")]);
+    const { rerender } = render(<NextGenMintWidget {...baseProps} />);
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
 
-    await userEvent.click(
-      await screen.findByRole("button", { name: "Try again" })
-    );
+    mockState.mintForAddress = "0xB";
+    rerender(<NextGenMintWidget {...baseProps} />);
 
     await waitFor(() =>
       expect(appliedProofs()).toEqual([
-        [expect.objectContaining({ keccak: "proof-a" })],
+        [expect.objectContaining({ keccak: "proof-b" })],
       ])
     );
-    expect(mockFetchUrl).toHaveBeenCalledTimes(2);
     expect(screen.queryByRole("alert")).toBeNull();
   });
 });
