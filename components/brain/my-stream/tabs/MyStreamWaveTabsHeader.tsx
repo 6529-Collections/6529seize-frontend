@@ -19,7 +19,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
 import { AnnouncementWaveIcon } from "@/components/brain/left-sidebar/waves/SidebarIconTile";
 import type { SetActiveContentTab } from "@/components/brain/ContentTabContext";
-import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
+import LazyHeaderSearchModal from "@/components/header/header-search/LazyHeaderSearchModal";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -33,7 +33,10 @@ import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPr
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
 import { MyStreamWaveTab } from "@/types/waves.types";
-import WaveDropsSearchModal from "@/components/waves/drops/search/WaveDropsSearchModal";
+import LazyWaveDropsSearchModal, {
+  preloadWaveDropsSearchModal,
+  useWaveDropsSearchModalIdlePreload,
+} from "@/components/waves/drops/search/LazyWaveDropsSearchModal";
 import WaveDescriptionPopover from "@/components/waves/header/WaveDescriptionPopover";
 import WavePicture from "../../../waves/WavePicture";
 import { WaveTrustSignals } from "@/components/waves/WaveTrustSignals";
@@ -301,6 +304,10 @@ export default function MyStreamWaveTabsHeader({
   const { isApp } = useDeviceInfo();
   const { connectedProfile, activeProfileProxy } = useAuth();
   const [openSearch, setOpenSearch] = useState<OpenSearch>(null);
+
+  // Warm the wave search modal once the page is idle, so the first open does
+  // not wait on the network. The chunk stays out of first-load JS.
+  useWaveDropsSearchModalIdlePreload();
   const descriptionPreviewRef = useRef<HTMLSpanElement>(null);
   const [isDescriptionPreviewTruncated, setIsDescriptionPreviewTruncated] =
     useState(false);
@@ -500,6 +507,8 @@ export default function MyStreamWaveTabsHeader({
           <button
             type="button"
             onClick={() => setOpenSearch("wave")}
+            onPointerEnter={preloadWaveDropsSearchModal}
+            onFocus={preloadWaveDropsSearchModal}
             aria-label={searchMessagesLabel}
             data-tooltip-id={headerActionsTooltipId}
             data-tooltip-content={searchMessagesLabel}
@@ -537,7 +546,7 @@ export default function MyStreamWaveTabsHeader({
         </div>
       </div>
       <MyStreamActionTooltip id={headerActionsTooltipId} />
-      <WaveDropsSearchModal
+      <LazyWaveDropsSearchModal
         isOpen={openSearch === "wave"}
         onClose={() => setOpenSearch(null)}
         wave={wave}
@@ -545,7 +554,10 @@ export default function MyStreamWaveTabsHeader({
         onSearchAll={() => setOpenSearch("site")}
       />
       {openSearch === "site" && (
-        <HeaderSearchModal onClose={() => setOpenSearch(null)} wave={null} />
+        <LazyHeaderSearchModal
+          onClose={() => setOpenSearch(null)}
+          wave={null}
+        />
       )}
     </>
   );
