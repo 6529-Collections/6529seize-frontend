@@ -6052,23 +6052,6 @@
       ]
     },
     {
-      "id": "feed.overview",
-      "kind": "route",
-      "title": "Feed",
-      "aliases": ["feed", "global feed", "activity feed", "rss feed", "rss"],
-      "keywords": ["feed", "activity", "global", "updates", "rss"],
-      "facts": [
-        "There is no /feed page. The old /feed address was a retired legacy link and now shows the not-found screen.",
-        "6529.io does not currently offer an RSS or Atom feed.",
-        "Wave conversation activity lives under /waves and /messages.",
-        "Network-specific activity lives under /network/activity."
-      ],
-      "canonical_path": "/waves",
-      "related_paths": ["/messages", "/network/activity"],
-      "tags": ["feed", "navigation"],
-      "source_refs": ["app/feed/page.tsx"]
-    },
-    {
       "id": "profiles.identity-tab",
       "kind": "route",
       "title": "Profile Identity tab",

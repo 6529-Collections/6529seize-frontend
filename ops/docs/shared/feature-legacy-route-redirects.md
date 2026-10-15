@@ -101,14 +101,6 @@ Rules:
 - Destination is fixed.
 - Source query is not forwarded.
 
-## Retired Addresses (`404`)
-
-- `/feed`: the legacy WordPress-era RSS address. It used to redirect to
-  `/index.xml`, which does not exist, and the site publishes no RSS or Atom
-  feed. It now returns the standard not-found screen. For conversation activity
-  use [Waves](../waves/README.md); for network-wide activity use
-  `/network/activity`.
-
 ## Legacy `/waves?wave=<id>` Normalization (`307`)
 
 - `/waves?wave=<id>` -> `/waves/<id>`

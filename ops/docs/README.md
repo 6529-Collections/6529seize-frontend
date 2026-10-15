@@ -181,8 +181,7 @@ Route patterns use normalized placeholders: `{param}` for one segment,
   `/consolidation-mapping-tool`, `/delegation-mapping-tool`,
   `/meme-accounting`, `/meme-gas`
 - Legacy and diagnostics routes:
-  `/feed` (retired; returns the not-found screen), `/slide-page/*`,
-  `/element_category/*`, `/gm-or-die-small-mp4`,
+  `/slide-page/*`, `/element_category/*`, `/gm-or-die-small-mp4`,
   `/cdn-cgi/l/email-protection`, `/error`, `/sentry-example-page`
 
 ## Subarea Indexes

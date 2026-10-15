@@ -421,10 +421,6 @@
       "classification": "exempt",
       "exemptReason": "Error-boundary demonstration page; crawling it asserts a crash by design."
     },
-    "/feed": {
-      "classification": "exempt",
-      "exemptReason": "Retired legacy RSS address that intentionally returns the not-found screen; not a user surface."
-    },
     "/gm-or-die-small-mp4": {
       "classification": "exempt",
       "exemptReason": "Bare media-asset wrapper page, not a user surface."
