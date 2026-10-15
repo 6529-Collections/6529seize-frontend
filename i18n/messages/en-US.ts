@@ -1120,7 +1120,7 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
   "user.profile.identity.statements",
   {
     heading: "{name} ID Statements",
-    addressesHeading: "{name} Addresses",
+    walletHeading: "{name} Wallet",
     description: "Public identity links and consolidated wallet addresses.",
     consolidatedAddresses: "Consolidated addresses",
     help: "About identity statements",
@@ -1132,7 +1132,7 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     addWallet: "Add another wallet",
     addWalletDescription:
       "Link another wallet you control. Your NFTs stay in their wallets.",
-    walletCount: "{count} of {limit} wallets",
+    walletCount: "{count} of {limit} addresses",
     walletLimitReached:
       "This consolidation has the maximum of {limit} wallets.",
     delegationCenter: "Safe Collecting",
@@ -2727,6 +2727,10 @@ const XTDH_COLLECTION_MESSAGES = objectMessages("xtdh.collections", {
   "search.emptyTitle": "No collections found for “{query}”",
 } as const);
 
+const XTDH_GRANT_MESSAGES = objectMessages("xtdh.grant", {
+  "lastGrant.label": "Last grant",
+} as const);
+
 const COLLECTION_DELEGATION_MESSAGES = objectMessages("delegation.collection", {
   "readError.message": "Unable to load delegation records for {collection}.",
   "readError.retry": "Try Again",
@@ -3248,6 +3252,7 @@ export const EN_US_MESSAGES = {
   "linkPreview.twitter.article.read": "Read article: {title}",
   ...IDENTITY_FILTER_MESSAGES,
   ...XTDH_COLLECTION_MESSAGES,
+  ...XTDH_GRANT_MESSAGES,
   ...COLLECTION_DELEGATION_MESSAGES,
   ...DELEGATION_EXPIRY_MESSAGES,
   ...join6529Messages,

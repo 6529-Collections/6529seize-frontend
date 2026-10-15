@@ -1,0 +1,416 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "37dfd8e2852ac754733b6c7b522e0e0b2ae1e475",
+  "coverage": [
+    {
+      "route": "/museum/network/about/governance",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/governance-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/about/governance",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/governance-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/about/governance",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/governance-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/about/governance/6529NM-GOV-1069256",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/governance-decision-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/about/governance/6529NM-GOV-1069256",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/governance-decision-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/about/governance/6529NM-GOV-1069256",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/governance-decision-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/projects/century",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/project-century-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/projects/century",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/project-century-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/projects/century",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/project-century-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/works/6529NM-W-0008",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/work-w-0008-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/works/6529NM-W-0008",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/work-w-0008-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/works/6529NM-W-0008",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/work-w-0008-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/acquisitions/a-gift-of-themes-and-variations-210",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/acquisition-themes-variations-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/acquisitions/a-gift-of-themes-and-variations-210",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/acquisition-themes-variations-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/acquisitions/a-gift-of-themes-and-variations-210",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/acquisition-themes-variations-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/acquisition-programs/gift-acquisitions",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/program-gift-acquisitions-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/acquisition-programs/gift-acquisitions",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/program-gift-acquisitions-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/acquisition-programs/gift-acquisitions",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/program-gift-acquisitions-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/artists/david-seymour",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/artist-david-seymour-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/artists/david-seymour",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/artist-david-seymour-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/artists/david-seymour",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/artist-david-seymour-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/organizations/art-blocks",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/organization-art-blocks-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/organizations/art-blocks",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/organization-art-blocks-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/organizations/art-blocks",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/organization-art-blocks-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/research/conflict-at-its-edges",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/research-conflict-at-its-edges-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/research/conflict-at-its-edges",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/research-conflict-at-its-edges-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/research/conflict-at-its-edges",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/research-conflict-at-its-edges-390x844-full.png"
+    }
+  ],
+  "dimensions": {
+    "J02": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/contact-sheet-1440x1000.png",
+        "evidence/candidate/organization-art-blocks-1440x1000-full.png",
+        "evidence/candidate/work-w-0008-1440x1000-full.png"
+      ],
+      "findings": ["V-006"],
+      "note": "Candidate is pixel-identical to main outside the local LCL badge; museum nav, breadcrumbs, in-page jump links and every internal link (23 routes crawled, all 200) work; section grouping and record sequence are coherent. Remaining navigation debt (no active nav item on work, project and organization pages; related-records disclosure buried in the footer strip) is pre-existing and filed as P3."
+    },
+    "J03": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/governance-1440x1000-full.png",
+        "evidence/candidate/project-century-1440x1000-full.png",
+        "evidence/candidate/research-conflict-at-its-edges-1440x1000-full.png"
+      ],
+      "findings": ["V-003"],
+      "note": "Art and the record title lead on every pinned route and chrome recedes; the changed status-as-of dates sit as quiet secondary metadata exactly where they did on main. Oversized portrait lead images on work, artist and research pages are pre-existing and filed as P3."
+    },
+    "J04": {
+      "score": 9,
+      "evidence": [
+        "evidence/candidate/contact-sheet-1440x1000.png",
+        "evidence/candidate/contact-sheet-820x1000.png",
+        "evidence/candidate/contact-sheet-390x844.png"
+      ],
+      "findings": [],
+      "note": "Dark, iron-neutral, content-led museum register with art presented at its own proportions and no casino, template or faux-science styling; the change adds no visual element and nothing departs from the section's established look."
+    },
+    "J05": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/program-gift-acquisitions-1440x1000-02.png",
+        "evidence/candidate/program-gift-acquisitions-1440x1000-03.png",
+        "evidence/candidate/work-w-0008-1440x1000-full.png"
+      ],
+      "findings": ["V-004", "V-005"],
+      "note": "Spacing and grouping are unchanged from main (page heights identical in all 27 cells); card grids, status rows and date metadata scan quickly. Fixed-height gallery frames and stacked empty rule strips are pre-existing P3 debt."
+    },
+    "J06": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/organization-art-blocks-1440x1000-01.png",
+        "evidence/candidate/acquisition-themes-variations-390x844-full.png",
+        "evidence/candidate/program-gift-acquisitions-820x1000-full.png"
+      ],
+      "findings": ["V-002", "V-007", "V-008"],
+      "note": "The UTC dates render in the same type role, tabular position and wrapping as on main (for example 'Jun 8, 2026', 'As of Aug 2, 2026', 'STATUS AS OF Aug 12, 2026') with no clipping or wrapping change. Accidental list borders, long measure and raw markdown in disclosure labels are pre-existing P3 detail debt."
+    },
+    "J08": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/artist-david-seymour-1440x1000-full.png",
+        "evidence/candidate/research-conflict-at-its-edges-1440x1000-full.png",
+        "evidence/candidate/governance-decision-1440x1000-full.png"
+      ],
+      "findings": ["V-001"],
+      "note": "Exercised on the rendered candidate build at 1440 and 390: every top-level disclosure (Technical evidence, Related works and context, Acquisition record and sources, dossier items, Read the complete study, Research context) opens, closes, and toggles from the keyboard with no overflow; Tab order shows a 2px focus ring on every control; museum nav, breadcrumbs and jump links resolve; no console errors in any of the 27 cells. The change touches no interaction. Dead footnote links are pre-existing P3."
+    },
+    "J10": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/contact-sheet-390x844.png",
+        "evidence/candidate/contact-sheet-820x1000.png",
+        "evidence/candidate/automated-checks.json"
+      ],
+      "findings": ["V-003", "V-006"],
+      "note": "No horizontal overflow at 1440, 820 or 390 on any route (measured on the live build, including with disclosures open); museum nav fits one row at 390 with 44px-high targets; galleries reflow from three to two to one column. Pixel diff against main is limited to the LCL badge, so the change cannot alter responsive behavior."
+    }
+  },
+  "checks": {},
+  "findings": [
+    {
+      "id": "V-001",
+      "targets": ["J08"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/artists/david-seymour (also projects/century, acquisition-programs/gift-acquisitions, research/conflict-at-its-edges) · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/candidate/artist-david-seymour-1440x1000-full.png",
+      "observation": "Pre-existing on main: footnote markers such as the superscript 1 link to #user-content-fn-1, but no element with that id (or any fn id) exists in the page, and the Footnotes list back-reference arrows have the same problem. Clicking a marker changes only the URL fragment and the page does not scroll (scrollY 2470 before and after on 1440, 3246 before and after on 390). The baseline on port 3418 behaves identically.",
+      "consequence": "A reader cannot jump from a citation marker to its note, or back; scholarship links look interactive and do nothing. Would affect J08 if it were in scope for this change.",
+      "change": "Render footnote items with ids that match the reference hrefs (or strip the user-content- prefix from the hrefs) in the shared Museum markdown renderer.",
+      "acceptance_check": "On the four routes, clicking a footnote marker scrolls its note into view and the back arrow returns to the marker, at 1440 and 390.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-002",
+      "targets": ["J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/organizations/art-blocks and /museum/network/acquisitions/a-gift-of-themes-and-variations-210 · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/candidate/organization-art-blocks-1440x1000-01.png",
+      "observation": "Pre-existing on main: the organization Projects list is drawn inside a box whose left and right edges carry a thick grey border (default border width) with the project names set almost flush against it, although only top and bottom rules are intended. The acquisition page's in-page jump-link strip shows the same stray side borders with tight padding.",
+      "consequence": "An accidental box that reads as a rendering fault next to the clean horizontal rules used everywhere else in the Museum.",
+      "change": "Set the side border width to zero on these lists (border-x-0) or give the intended frame consistent padding.",
+      "acceptance_check": "The Projects list and the jump-link strip show only the intended horizontal rules at all three viewports, with no side borders.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-003",
+      "targets": ["J03", "J10"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/works/6529NM-W-0008, /museum/network/research/conflict-at-its-edges, /museum/network/artists/david-seymour · default · 1440x1000 · en-US",
+      "evidence": "evidence/candidate/work-w-0008-1440x1000-02.png",
+      "observation": "Pre-existing on main: tall portrait lead images render very large (work W-0008 1180x1770 px, research 896x1349 px) so at 1440x1000 the principal work is never visible whole in one screen; the viewer sees it in slices while scrolling.",
+      "consequence": "The artwork is shown at generous presence but cannot be taken in at once on a desktop screen.",
+      "change": "Cap the lead image height to the viewport (for example max-height 85vh with object-contain) while keeping aspect ratio.",
+      "acceptance_check": "At 1440x1000 the full lead image of each portrait work is visible within one viewport.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-004",
+      "targets": ["J05"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/acquisition-programs/gift-acquisitions · default · 1440x1000 · en-US",
+      "evidence": "evidence/candidate/program-gift-acquisitions-1440x1000-03.png",
+      "observation": "Pre-existing on main: in the program gallery the images sit in fixed-height frames, leaving large empty bands between the shorter photographs and their captions (for example Demonstration, Western Wall, Jerusalem) and uneven vertical alignment between neighbouring cards in the same row.",
+      "consequence": "Captions drift away from their images and rows look unevenly spaced.",
+      "change": "Align media to a consistent edge in each row or size the frame to the image.",
+      "acceptance_check": "Image-to-caption gap is consistent across a row at all three viewports.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-005",
+      "targets": ["J05"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/works/6529NM-W-0008 · default · 1440x1000 · en-US",
+      "evidence": "evidence/candidate/work-w-0008-1440x1000-full.png",
+      "observation": "Pre-existing on main: below Browse, the work page stacks several full-width rule strips with empty bands between them (status row, Open source record, Medium and Credit and rights, the unminted statement), so the tail reads as a sequence of empty boxes before Collection context.",
+      "consequence": "Dead space and repeated rules dilute the status information that matters here.",
+      "change": "Collapse the empty wrapper bands and keep a single rule between groups.",
+      "acceptance_check": "No full-width empty rule-bounded band remains between the status row and Collection context.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-006",
+      "targets": ["J02", "J10"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/works/6529NM-W-0008 and /museum/network/projects/century · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/candidate/work-w-0008-1440x1000-full.png",
+      "observation": "Pre-existing on main: the Related works and context disclosure sits in the footer metadata strip as 12px grey text (36px high target) beside the contributor links, and it contains one link. Separately, the Museum nav shows no active section on work, project and organization pages.",
+      "consequence": "A useful relationship link is easy to miss and the reader gets no section cue on those records.",
+      "change": "Surface related records in the page body and mark the parent section (Collection) active in the museum nav.",
+      "acceptance_check": "Related-records access is visible without opening a footer disclosure, and the nav shows an active section on work and project pages.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-007",
+      "targets": ["J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/projects/century, /museum/network/acquisition-programs/gift-acquisitions, /museum/network/works/6529NM-W-0008 · default · 1440x1000 and 820x1000 · en-US",
+      "evidence": "evidence/candidate/project-century-820x1000-full.png",
+      "observation": "Pre-existing on main: body text runs 896 px wide at 16 px on desktop (about 100 characters per line) and 692 px at 820 px; the program page also carries 117 text runs at 11.2 px at 820 and 390.",
+      "consequence": "Long essay lines tire the eye and the smallest source labels are hard to read on tablet and phone.",
+      "change": "Limit prose measure to about 70 ch and raise the 11.2 px labels to 12 px.",
+      "acceptance_check": "Essay paragraphs stay at or under roughly 75 characters per line at 1440 and no body text is under 12 px at 390.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-008",
+      "targets": ["J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/acquisition-programs/gift-acquisitions and /museum/network/acquisitions/a-gift-of-themes-and-variations-210 · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/candidate/acquisition-themes-variations-390x844-full.png",
+      "observation": "Pre-existing on main: some disclosure labels show raw markdown asterisks, such as 'Publication record: *Conflict at Its Edges*' and 'Web presentation authority: *Themes and Variations* #210'.",
+      "consequence": "Visible markup characters look unfinished in an otherwise polished record.",
+      "change": "Render emphasis in disclosure labels or strip the markers.",
+      "acceptance_check": "No literal asterisk pair appears in any disclosure label on the pinned routes.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "UTC date rendering: the changed dates (decision dates, recorded date, status-as-of, project work-card status line) are visually identical to main at all 27 cells; the only pixel difference is the local LCL badge",
+    "Art-led layouts: circular CENTURY works, the Themes and Variations square, and the Magnum photographs keep their true proportions with no fallback panels, no broken images, and no clipped text",
+    "No horizontal overflow at 1440, 820 or 390, including with disclosures open, and no console errors",
+    "Disclosures operate by pointer, Enter and Space, with a visible 2px focus ring on the whole tab sequence",
+    "Museum nav, breadcrumbs, jump links and the 44px touch targets in the mobile nav row"
+  ]
+}

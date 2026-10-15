@@ -316,17 +316,19 @@ describe("DateCountdown", () => {
     });
 
     it("handles daylight saving time changes", () => {
-      // This test depends on locale, but we test the calculation logic
-      const now = new Date(2023, 2, 11, 12, 0, 0); // Before DST
+      // US clocks spring forward at 2023-03-12T10:00Z. The countdown counts
+      // elapsed milliseconds, so two instants exactly 48 hours apart show
+      // 2 days in every zone. Two local wall-clock noons would be 47 hours
+      // apart in Los Angeles, which is why the fixtures are not built from
+      // local parts.
+      const now = new Date("2023-03-11T20:00:00.000Z");
       jest.setSystemTime(now);
 
-      // 2 days ahead (after DST change in most US timezones)
-      const futureDate = new Date(2023, 2, 13, 12, 0, 0);
+      const futureDate = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000);
 
       render(<DateCountdown title="DST Test" date={futureDate} />);
 
-      // Should still show 2 days (our calculation is based on milliseconds)
-      expect(screen.getByText(/2 days/)).toBeInTheDocument();
+      expect(screen.getByText("2 days, 0 seconds")).toBeInTheDocument();
     });
   });
 
