@@ -857,6 +857,57 @@ describe("mixpanel SDK download", () => {
     expect(loadMixpanelSdkMock).toHaveBeenCalledTimes(1);
   });
 
+  it("uses one continuation for repeated requests during a download", async () => {
+    const analytics = await loadModule({
+      nodeEnv: "production",
+      token: "public-token",
+      sdkLoaded: false,
+    });
+    const downloads = deferSdkDownload();
+    const recovered = jest.fn();
+    const unsubscribe = analytics.subscribeAnalyticsRecovery(recovered);
+
+    expect(analytics.initAnalytics()).toBe(false);
+    expect(analytics.initAnalytics()).toBe(false);
+    expect(analytics.initAnalytics()).toBe(false);
+    expect(loadMixpanelSdkMock).toHaveBeenCalledTimes(1);
+
+    downloads[0]?.(mixpanelMock);
+    await waitFor(() => expect(recovered).toHaveBeenCalledTimes(1));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    unsubscribe();
+
+    expect(recovered).toHaveBeenCalledTimes(1);
+    expect(initMock).toHaveBeenCalledTimes(1);
+    expect(startBatchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("downloads again when consent returns after a withdrawn download failed", async () => {
+    const analytics = await loadModule({
+      nodeEnv: "production",
+      token: "public-token",
+      sdkLoaded: false,
+    });
+    const downloads = deferSdkDownload();
+    const recovered = jest.fn();
+    const unsubscribe = analytics.subscribeAnalyticsRecovery(recovered);
+
+    analytics.initAnalytics();
+    analytics.disableAnalytics();
+    downloads[0]?.(undefined);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(initMock).not.toHaveBeenCalled();
+
+    expect(analytics.initAnalytics()).toBe(false);
+    expect(loadMixpanelSdkMock).toHaveBeenCalledTimes(2);
+    downloads[1]?.(mixpanelMock);
+    await waitFor(() => expect(recovered).toHaveBeenCalledTimes(1));
+    unsubscribe();
+
+    expect(initMock).toHaveBeenCalledTimes(1);
+    expect(analytics.isAnalyticsTrackingAllowed()).toBe(true);
+  });
+
   it("requests the SDK again after a failed download", async () => {
     const analytics = await loadModule({
       nodeEnv: "production",

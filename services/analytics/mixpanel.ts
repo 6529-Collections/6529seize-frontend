@@ -90,6 +90,7 @@ let batchGuard: ReturnType<typeof guardMixpanelBatching> | undefined;
 let queueClearState: "ready" | "pending" | "failed" = "ready";
 let resumeRequested = false;
 let sdkInitRequested = false;
+let sdkDownloadPending = false;
 const recoveryListeners = new Set<() => void>();
 
 export const subscribeAnalyticsRecovery = (
@@ -192,13 +193,21 @@ const guardIdentityDelivery = (payload: Record<string, unknown>) =>
 // the first point where the SDK download is permitted. Initialization finishes
 // when it arrives unless consent was withdrawn meanwhile; recovery listeners
 // then retry the identity and page-view work that found analytics not ready.
+// One continuation serves every request made while a download is pending. A
+// failed download releases it, so the next request downloads again. An SDK
+// that arrives after withdrawal stays loaded and initializes synchronously on
+// the next consented initAnalytics call.
 const initializeWhenSdkLoads = (): void => {
   sdkInitRequested = true;
-  void loadMixpanelSdk().then((sdk) => {
+  if (sdkDownloadPending) return;
+  sdkDownloadPending = true;
+  const finish = (sdk: MixpanelSdk | undefined): void => {
+    sdkDownloadPending = false;
     if (!sdk || !sdkInitRequested) return;
     sdkInitRequested = false;
     if (initAnalytics()) notifyAnalyticsRecovery();
-  });
+  };
+  void loadMixpanelSdk().then(finish, () => finish(undefined));
 };
 
 export const initAnalytics = (): boolean => {
