@@ -32,7 +32,8 @@ const STANDALONE_PUBLIC_FILES = [
   "6529.svg",
   "6529io.png",
   "6529bgwhite.svg",
-  "favicon.ico",
+  "favicon.png",
+  "favicon.svg",
   "manifold.svg",
   "opensea.png",
   "rarible.svg",
@@ -595,7 +596,18 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : String(error));
-  process.exit(1);
-});
+async function runCli() {
+  try {
+    await main();
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  }
+}
+
+// Requiring this file (the contract test does) must not start an export.
+if (require.main === module) {
+  void runCli();
+}
+
+module.exports = { STANDALONE_PUBLIC_FILES };
