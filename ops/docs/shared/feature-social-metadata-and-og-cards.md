@@ -49,10 +49,11 @@ drops that the backend hides behind a 404 receive the same response as missing
 drops; preview requests do not bypass the backend's access checks.
 
 When staging access is present, profile and drop preview requests forward the
-`x-6529-auth` cookie to the configured API, falling back to `STAGING_API_KEY`
-when the cookie is missing or blank. Credential-bearing requests reject redirects
-and their successful images use `private, no-store`. Requests without credentials
-retain the public image cache policy. No staging password is embedded in the route.
+`x-6529-auth` cookie to the configured API, falling back to the server-only
+`STAGING_API_KEY` runtime variable when the cookie is missing or blank.
+Credential-bearing requests reject redirects and their successful images use
+`private, no-store`. Requests without credentials retain the public image cache
+policy. No staging password is embedded in the route or the browser bundle.
 
 Other upstream errors (including explicit 401/403 responses), network failures,
 and caught metadata or rendering failures retain the existing logged `502`

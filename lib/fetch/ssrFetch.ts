@@ -1,6 +1,7 @@
 import { publicEnv } from "@/config/env";
 import { isProductionBuildPhase } from "@/config/nextPhase";
-import { getServerEnvOrThrow } from "@/config/serverEnv";
+import { getServerEnvOrThrow, getStagingApiKey } from "@/config/serverEnv";
+import { API_AUTH_COOKIE } from "@/constants/constants";
 import {
   generateClientSignature,
   generateWafSignature,
@@ -183,6 +184,12 @@ const createSsrFetch =
     }
     if (!includeWalletAuth) {
       enhancedHeaders.delete("Authorization");
+    }
+    // Server-held staging access fills in only when the caller sent none; the
+    // signed path below still prefers the visitor's own access cookie.
+    const stagingApiKey = getStagingApiKey();
+    if (stagingApiKey && !enhancedHeaders.has(API_AUTH_COOKIE)) {
+      enhancedHeaders.set(API_AUTH_COOKIE, stagingApiKey);
     }
 
     try {

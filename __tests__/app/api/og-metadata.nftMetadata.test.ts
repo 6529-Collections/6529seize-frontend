@@ -1,3 +1,5 @@
+/** @jest-environment node */
+
 import { ReadableStream } from "node:stream/web";
 import {
   GRADIENT_CONTRACT,
@@ -9,7 +11,6 @@ import {
 jest.mock("@/config/env", () => ({
   publicEnv: {
     API_ENDPOINT: "https://api.6529.test",
-    STAGING_API_KEY: void 0,
   },
 }));
 
@@ -38,13 +39,14 @@ describe("NFT preview metadata fallback", () => {
   afterEach(() => {
     jest.useRealTimers();
     jest.restoreAllMocks();
+    delete process.env["STAGING_API_KEY"];
   });
   afterAll(() => {
     globalThis.fetch = originalFetch;
   });
 
   it("uses configured staging access only on the trusted API request", async () => {
-    jest.replaceProperty(publicEnv, "STAGING_API_KEY", "test-staging-key");
+    process.env["STAGING_API_KEY"] = "test-staging-key";
     mockFetch.mockResolvedValue(jsonResponse({ data: [] }));
     await fetchNftCardMetadata(MEMES_CONTRACT, "542");
     expect(mockFetch).toHaveBeenCalledWith(
@@ -67,7 +69,7 @@ describe("NFT preview metadata fallback", () => {
         "API_ENDPOINT",
         "https://api.staging.6529.io"
       );
-      jest.replaceProperty(publicEnv, "STAGING_API_KEY", "test-staging-key");
+      process.env["STAGING_API_KEY"] = "test-staging-key";
       const cancel = jest.fn().mockResolvedValue(undefined);
       mockFetch
         .mockResolvedValueOnce({ ok: false, status, body: { cancel } })
@@ -128,7 +130,7 @@ describe("NFT preview metadata fallback", () => {
       "API_ENDPOINT",
       "https://api.staging.6529.io"
     );
-    jest.replaceProperty(publicEnv, "STAGING_API_KEY", "test-staging-key");
+    process.env["STAGING_API_KEY"] = "test-staging-key";
     mockFetch.mockResolvedValue({ ok: false, status: 401, body: null });
     await expect(
       fetchNftCardMetadata(MEMES_CONTRACT, "542")
@@ -147,7 +149,7 @@ describe("NFT preview metadata fallback", () => {
       "API_ENDPOINT",
       "https://api.staging.6529.io"
     );
-    jest.replaceProperty(publicEnv, "STAGING_API_KEY", "test-staging-key");
+    process.env["STAGING_API_KEY"] = "test-staging-key";
     mockFetch
       .mockResolvedValueOnce({ ok: false, status: 401, body: null })
       .mockResolvedValueOnce(

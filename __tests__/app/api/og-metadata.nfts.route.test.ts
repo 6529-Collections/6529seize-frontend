@@ -36,6 +36,10 @@ jest.mock("@/config/env", () => ({
   },
 }));
 
+jest.mock("@/config/serverEnv", () => ({
+  getStagingApiKey: () => undefined,
+}));
+
 jest.mock("@/app/api/og-metadata/profiles/[identity]/font", () => ({
   loadMontserratFonts: mockLoadMontserratFonts,
 }));

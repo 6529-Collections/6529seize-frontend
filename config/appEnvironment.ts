@@ -135,6 +135,12 @@ export function getAppEnvironment(baseEndpoint: string): AppEnvironment {
   };
 }
 
+/** True when the endpoint is a loopback host: a local build, never a deployment. */
+export function isLocalAppEnvironment(baseEndpoint: string): boolean {
+  const url = parseEnvironmentUrl(baseEndpoint);
+  return url !== null && LOCAL_HOSTNAMES.has(url.hostname.toLowerCase());
+}
+
 export function getBrowserOrigin(
   browserOriginReader: BrowserOriginReader = readBrowserOrigin
 ): string {
