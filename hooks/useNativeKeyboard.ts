@@ -42,6 +42,8 @@ let nativeKeyboardLifecycleActive = false;
 const KEYBOARD_INSET_CSS_VARIABLE = "--native-keyboard-inset-bottom";
 const KEYBOARD_LAYOUT_TRANSITION_DURATION_CSS_VARIABLE =
   "--native-keyboard-layout-transition-duration";
+const KEYBOARD_LAYOUT_TRANSITION_EASING_CSS_VARIABLE =
+  "--native-keyboard-layout-transition-easing";
 const KEYBOARD_EVENT_LAYOUT_TRANSITION_MS = 250;
 const REDUCED_MOTION_MEDIA_QUERY = "(prefers-reduced-motion: reduce)";
 const VIEWPORT_KEYBOARD_HEIGHT_TOLERANCE_PX = 8;
@@ -146,7 +148,7 @@ function getKeyboardEventLayoutTransitionMs(): number {
 function applyKeyboardLayoutVariables(
   state: Pick<
     NativeKeyboardState,
-    "isVisible" | "keyboardHeight" | "isAndroid"
+    "isVisible" | "keyboardHeight" | "isIos" | "isAndroid"
   >,
   transitionMs: number
 ): void {
@@ -167,6 +169,13 @@ function applyKeyboardLayoutVariables(
   documentElement.style.setProperty(
     KEYBOARD_LAYOUT_TRANSITION_DURATION_CSS_VARIABLE,
     `${Math.max(0, transitionMs)}ms`
+  );
+
+  // iOS moves most of the keyboard distance early. Share its quicker start
+  // across the layout and composer padding so the input does not trail behind.
+  documentElement.style.setProperty(
+    KEYBOARD_LAYOUT_TRANSITION_EASING_CSS_VARIABLE,
+    state.isIos ? "cubic-bezier(0.1, 0.8, 0.2, 1)" : "ease-out"
   );
 
   if (isKeyboardActive) {
