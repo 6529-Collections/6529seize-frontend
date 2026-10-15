@@ -6,9 +6,9 @@ import { isTerminalNotificationAuthQueryError } from "@/components/react-query-w
  * refreshes once its identity sync is acknowledged. Polling is only the
  * safety net, shared by the active and the other connected accounts.
  */
-export const UNREAD_NOTIFICATIONS_RECONCILIATION_INTERVAL_MS = 5 * 60_000;
+const UNREAD_NOTIFICATIONS_RECONCILIATION_INTERVAL_MS = 5 * 60_000;
 /** Used while the socket is down or has not yet confirmed this profile. */
-export const UNREAD_NOTIFICATIONS_FALLBACK_INTERVAL_MS = 30_000;
+const UNREAD_NOTIFICATIONS_FALLBACK_INTERVAL_MS = 30_000;
 
 interface NotificationSocketCoverage {
   readonly connected: boolean;
