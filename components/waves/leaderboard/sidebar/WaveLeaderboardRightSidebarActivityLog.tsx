@@ -8,7 +8,7 @@ import { WaveLeaderboardRightSidebarActivityLogDrop } from "./WaveLeaderboardRig
 import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { SystemAdjustmentPill } from "@/components/common/SystemAdjustmentPill";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import {
   ArrowRightIcon,
   ArrowTurnDownRightIcon,
@@ -58,7 +58,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
     <>
       {log.drop_author?.pfp ? (
         <Image
-          src={resolveIpfsUrlSync(log.drop_author.pfp)}
+          src={getScaledImageUri(log.drop_author.pfp, ImageScale.W_AUTO_H_50)}
           alt=""
           width={20}
           height={20}
@@ -95,7 +95,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
       >
         {log.invoker.pfp ? (
           <Image
-            src={resolveIpfsUrlSync(log.invoker.pfp)}
+            src={getScaledImageUri(log.invoker.pfp, ImageScale.W_200_H_200)}
             alt=""
             width={24}
             height={24}
