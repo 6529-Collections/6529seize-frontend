@@ -62,6 +62,18 @@ locales.
   helper supports it.
 - Keep fallback debt visible in the page or workstream tracker.
 
+### Dictionary Loading
+
+- `en-US` ships in every client bundle. Browsers load each other locale's
+  dictionary on demand through `@/i18n/localeDictionaries`; server rendering
+  has every locale synchronously.
+- Read copy only through `t()` and `tRich()` from `@/i18n/messages`. Do not
+  import a locale dictionary such as `@/i18n/messages/de-DE` from app code:
+  that puts it back in the client baseline.
+- Until a locale's dictionary loads, `t()` returns `en-US` copy, never a key.
+  `useBrowserLocale` switches only after the dictionary arrives, and pages
+  opened with `?locale=` wait for it before hydrating.
+
 ## Formatting Policy
 
 Use native `Intl` through repo helpers before adding a larger i18n dependency.

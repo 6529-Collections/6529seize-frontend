@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import { readUsCountryHint } from "@/components/cookies/usCountryHint";
 import {
   getCanonicalNextMintNumber,
   isMintingToday,
@@ -161,7 +162,8 @@ export default function LatestDropNextMintSubscribe(
   // The server and the first hydration render cannot tell it is the native
   // shell, and on iOS the country is unknown until the first lookup settles.
   // Until purchasing is allowed the row and its requests are omitted.
-  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  const { hideNftPurchasing, shouldRedirect: isRestricted } =
+    useNftPurchasingVisibility();
   const { isIos } = useCapacitor();
   const canQuerySubscriptions = !hideNftPurchasing;
 
@@ -264,13 +266,16 @@ export default function LatestDropNextMintSubscribe(
   }
 
   if (hideNftPurchasing) {
-    // iOS gets nothing until the country settles: holding blank space for the
-    // length of the check would only collapse for restricted users. Before
-    // hydration the platform is unknown (isIos is still false), so the server
-    // HTML and the first hydration render reserve the row's height to keep web
-    // and Android from jumping when the row replaces it. The spacer holds no
-    // purchasing UI.
-    return isIos ? null : <MemeSubscriptionAwarenessRowSpace />;
+    // Blank space only, never purchasing UI. Before hydration the platform is
+    // unknown (isIos is still false), so the server HTML and first hydration
+    // render reserve the row's height to keep web and Android from jumping when
+    // the row replaces it. On iOS nothing is shown while the country check runs
+    // and after a restricted result, except that a device whose last completed
+    // check was US keeps the space through the pending window, so a US result
+    // swaps the row in without a shift. That hint is layout only: the row and
+    // its requests still wait for the real result.
+    const reservesSpace = !isIos || (!isRestricted && readUsCountryHint());
+    return reservesSpace ? <MemeSubscriptionAwarenessRowSpace /> : null;
   }
 
   return (
