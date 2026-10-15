@@ -142,8 +142,25 @@ it("encodes reserved route params before fetching the rememe", async () => {
 });
 
 describe("external links", () => {
-  function renderRememe(overrides: Partial<typeof rememe>) {
-    fetchUrl.mockResolvedValue({ data: [{ ...rememe, ...overrides }] });
+  function renderRememe({
+    externalUrl = null,
+    tokenUri = rememe.token_uri,
+  }: {
+    readonly externalUrl?: string | null;
+    readonly tokenUri?: string;
+  } = {}) {
+    fetchUrl.mockResolvedValue({
+      data: [
+        {
+          ...rememe,
+          token_uri: tokenUri,
+          contract_opensea_data: {
+            ...rememe.contract_opensea_data,
+            externalUrl,
+          },
+        },
+      ],
+    });
     fetchAllPages.mockResolvedValue([]);
     return render(
       <CookieConsentProvider>
@@ -156,11 +173,7 @@ describe("external links", () => {
 
   it("renders a javascript: external URL as plain text, not a link", async () => {
     const { container } = renderRememe({
-      contract_opensea_data: {
-        collectionName: null,
-        externalUrl: "javascript:alert(1)",
-        twitterUsername: null,
-      },
+      externalUrl: "javascript:alert(1)",
     });
     await screen.findByText("Meme Name");
 
@@ -170,7 +183,7 @@ describe("external links", () => {
 
   it("renders a data: token URI as plain text, not a link", async () => {
     const dataUri = "data:text/html,<script>alert(2)</script>";
-    const { container } = renderRememe({ token_uri: dataUri });
+    const { container } = renderRememe({ tokenUri: dataUri });
     await screen.findByText("Meme Name");
 
     await userEvent.click(screen.getByRole("button", { name: "Metadata" }));
@@ -182,7 +195,7 @@ describe("external links", () => {
 
   it("resolves an ipfs token URI through the media resolver", async () => {
     const ipfsUri = "ipfs://QmYwAPJzv5CZsnAzt8auVZRnG1R8n4wqxW48UUfZo59SyY";
-    renderRememe({ token_uri: ipfsUri });
+    renderRememe({ tokenUri: ipfsUri });
     await screen.findByText("Meme Name");
 
     await userEvent.click(screen.getByRole("button", { name: "Metadata" }));
@@ -195,13 +208,7 @@ describe("external links", () => {
   });
 
   it("keeps https external URLs as links", async () => {
-    renderRememe({
-      contract_opensea_data: {
-        collectionName: null,
-        externalUrl: "https://example.com/collection",
-        twitterUsername: null,
-      },
-    });
+    renderRememe({ externalUrl: "https://example.com/collection" });
     await screen.findByText("Meme Name");
 
     expect(
