@@ -19,8 +19,9 @@ Two pages explain wallet consolidation:
 - Guide route: `/network/tdh/consolidation`
   - Page heading: `Combine your wallets`
   - Browser title: `Combine your wallets | Network`
-  - About contents and sidebar: `Wallet Consolidation`, in the Network group
-    after `TDH Historic Boosts`
+  - About contents and sidebar: `Wallet consolidation`, in the Network group
+    after `TDH historic boosts`
+  - TDH section navigation: `Wallet consolidation`
 - Design route: `/network/tdh/consolidation/design`
   - Page heading: `How wallet consolidation works`
   - Browser title: `How wallet consolidation works | Network`

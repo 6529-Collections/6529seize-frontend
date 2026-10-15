@@ -33,11 +33,17 @@ data and states are in `lib/tdh/verification/`.
 ## Open items before the cutover
 
 - F1: four-wallet consolidations against rule version `tdh-v1.0` need an
-  owner decision. Step 10 of How it works marks this "Being decided".
-- F2: D131 netting is shown as Decided with "Rule text being finalised" until
-  P26 carries it.
-- F4: the one-sentence wording on Historic boosts ("Boost schedule 1.4 is the
-  schedule that TDH-v1 encodes") is for the owner to confirm.
+  owner decision. Step 10 of How it works marks this an open question, and
+  the overview says TDH-v1 counts up to three wallets.
+- F2 settled: P26 §7.1 carries D131's uniform netting since `0621ed4`; the
+  pages show it as in the specification, with 51 vectors.
+- The daily job's feed must carry the optional `ruleVersion`,
+  `registryHash`, `cutoffBlockHash`, `transactionNetting` and `live.sha256`
+  fields for the dashboard's provenance to come from the data; until then it
+  shows the specification's values, labelled as such.
+- The Formal model page reads its results from
+  `app/network/tdh/formal/leanResults.ts` (model at `fbc9f34`); update it with
+  each new build of the model.
 - Set `NEXT_PUBLIC_TDH_VERIFICATION_BASE` in production once the daily job
   publishes; until then production shows "Daily reports start on 16 October
   2026" and non-production shows the labelled sample.

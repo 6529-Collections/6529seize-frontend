@@ -13,25 +13,26 @@ boost rules.
 
 - Route: `/network/tdh`
 - Sidebar path: `Network -> TDH`
-- Page navigation anchors: `#tdh-minute`, `#tdh-profile`, `#tdh-example`,
-  `#tdh-reference`, `#tdh-1-4`, and `#tdh-exact`
-- Related sections also use `#tdh-verified`, `#tdh-how`, `#tdh-changes`,
-  `#tdh-deeper`, and `#tdh-explore`.
-- The TDH section navigation links the overview to How it works,
-  Specification, Formal model, Implementations and Verification.
-- `#tdh-exact` now points to [How TDH Is Calculated](feature-tdh-how-it-works.md),
-  which holds the step-by-step calculation.
+- Page sections, in order: `#tdh-minute`, `#tdh-verified`, `#tdh-profile`,
+  `#tdh-1-4`, `#tdh-changes`, `#glossary`, `#tdh-deeper`, and `#tdh-explore`.
+- Older anchors still land in the right place: `#tdh-exact` and `#tdh-how`
+  open [How TDH Is Calculated](feature-tdh-how-it-works.md), `#tdh-example`
+  opens its step 12 worked example, and `#tdh-reference` scrolls to
+  `#tdh-minute`.
+- The TDH tab row links the overview to How it works, Specification, Formal
+  model, Implementations and Verification; its `More` menu adds Historic boosts,
+  Consolidation and the glossary. A previous/next pager ends every TDH page.
 
 ## What Users Can Do
 
-1. Read the three-step explanation: count whole days, apply edition rates, and
-   apply the collection boost.
-2. Open `Try an example` and switch between `Today` and `+30 days`, or sell
-   Nakamoto #4 before the snapshot. The fixed illustration uses FirstGM #8
-   (2 copies, 100 days, rate 1), Nakamoto #4 (1 copy, 60 days, rate 13.14),
-   and one Gradient (30 days, rate 39.02). Its totals are 2,224 today,
-   3,897 in 30 days, 1,398 after the sale today, and 2,653 after the sale in
-   30 days. The rates and rules stay fixed in this illustration.
+1. Read `TDH in a minute`: hold (whole days), weigh (edition rate) and boost
+   (one multiplier), drawn for one 310-copy Meme held 100 days by a collector
+   with one Gradient: 100 days x rate 12.71 = 1,271 base, x boost 1.02 =
+   1,296 TDH. The boost meter runs from 1.00 to 2.04, the highest boost under
+   today's rule. FirstGM (Meme #8) is introduced there as the reference card.
+2. Read `Checked daily, in public`: three points (written three times, proved
+   in Lean, compared every day), the latest daily result once reports are
+   published, and a link to the verification dashboard.
 3. Use `Explain my TDH` to enter a profile handle or wallet-like identity.
    Public lookups can be submitted without wallet authentication. The page
    shows an empty state before submission, loading, not-found, and retryable
@@ -40,10 +41,12 @@ boost rules.
    profile result. Holdings tables show token, copies, whole days, rate, base,
    and final TDH; collections with more than 20 tokens use Previous/Next
    pagination.
-5. Open `Current boosts` for the active rule summary, or `Exact calculation`
-   for the pointer to the step-by-step page.
-6. Read `TDH in a minute` (hold, weigh, boost, with a worked example) and the
-   `Verified daily` strip, which links to the verification dashboard.
+5. Open `Current boosts & the full schedule` for the active rule summary,
+   `When your holdings change` for common questions about sales, transfers
+   and new cards, and `Glossary` for the terms the TDH pages use.
+6. Follow `Go deeper` to How it works (every step, with examples you can
+   change), the specification, the formal model, the implementations and the
+   verification dashboard.
 
 ## Calculation Timing and Eligibility
 
@@ -70,8 +73,8 @@ consolidate wallets.
 
 FirstGM (Meme #8) was designed to establish the one-TDH reference: one copy held
 for one complete day earns one base TDH before boosts. Its open-mint design is
-central to this role. The page introduces FirstGM before the three calculation
-steps and provides a `Why FirstGM matters` link to `#tdh-reference`.
+central to this role. `TDH in a minute` introduces FirstGM as the reference
+card; the old `#tdh-reference` anchor scrolls there.
 
 The implementation derives edition rates from the largest eligible effective
 Meme edition. FirstGM's intended reference role and this implementation rule are
@@ -178,10 +181,10 @@ destinations are `/network/definitions`, `/network/health/network-tdh`, and
 
 ## Language Support
 
-The explainer, example, profile breakdown, and current-rules copy currently use
-the English fallback in all supported locales. Numbers and dates follow the
-browser locale. Page metadata uses English. Translation of these four sections
-is the remaining localization work.
+The explainer, profile breakdown, and current-rules copy currently use the
+English fallback in all supported locales. Numbers and dates follow the
+browser locale. Page metadata uses English. Translation of these sections is
+the remaining localization work.
 
 ## Related Pages
 
