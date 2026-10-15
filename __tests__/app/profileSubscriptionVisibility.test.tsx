@@ -4,6 +4,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import SubscriptionsPage from "@/app/[user]/subscriptions/page";
 
 let mockCountry = "CY";
+let mockIsCountryPending = false;
 const mockSubscriptionMount = jest.fn();
 
 jest.mock("@/hooks/useCapacitor", () => ({
@@ -11,7 +12,10 @@ jest.mock("@/hooks/useCapacitor", () => ({
   default: () => ({ isIos: true }),
 }));
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
-  useCookieConsent: () => ({ country: mockCountry }),
+  useCookieConsent: () => ({
+    country: mockCountry,
+    isCountryPending: mockIsCountryPending,
+  }),
 }));
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace: jest.fn() }),
@@ -33,6 +37,10 @@ jest.mock("@/components/user/subscriptions/UserPageSubscriptions", () => ({
   },
 }));
 
+beforeEach(() => {
+  mockIsCountryPending = false;
+});
+
 it("never mounts subscription controls while the profile layout redirects", () => {
   mockCountry = "CY";
   mockSubscriptionMount.mockClear();
@@ -45,4 +53,13 @@ it("keeps the US iOS subscription content", () => {
   mockCountry = "US";
   render(<SubscriptionsPage />);
   expect(screen.getByText("Subscription controls")).toBeInTheDocument();
+});
+
+it("keeps subscription controls unmounted while the iOS country lookup is pending", () => {
+  mockCountry = "";
+  mockIsCountryPending = true;
+  mockSubscriptionMount.mockClear();
+  const { container } = render(<SubscriptionsPage />);
+  expect(container).toBeEmptyDOMElement();
+  expect(mockSubscriptionMount).not.toHaveBeenCalled();
 });

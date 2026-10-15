@@ -42,6 +42,7 @@ import networkTdhProfileMessages from "@/i18n/messages/networkTdhProfile.en-US.j
 import networkTdhRulesMessages from "@/i18n/messages/networkTdhRules.en-US.json";
 import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
+import utcScheduleMessages from "@/i18n/messages/utcSchedule.en-US.json";
 import worldTimeZonesMessages from "@/i18n/messages/worldTimeZones.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
@@ -2335,6 +2336,7 @@ const NETWORK_GROUP_FILTER_MESSAGES = objectMessages("network.groupFilter", {
 
 const WAVE_LOADING_MESSAGES = objectMessages("waves", {
   loadingStatus: "Loading waves",
+  "drops.editorLoadingStatus": "Loading editor",
 } as const);
 
 const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
@@ -3714,6 +3716,11 @@ export const EN_US_MESSAGES = {
   "theMemes.description.collections": "Collections",
   "theMemes.mint.metadata.description":
     "View the latest mint from The Memes collection.",
+  "theMemes.mint.openWebMint": "Mint on 6529.io",
+  "theMemes.mint.connect.connectedProfile": "Connected Profile",
+  "theMemes.mint.connect.profileStats": "TDH: {tdh} - Level: {level}",
+  "theMemes.mint.connect.mintForMe": "Mint for me",
+  "theMemes.mint.connect.mintForFren": "Mint for fren",
   "theMemes.title": "The Memes",
   "theMemes.sorting.regionLabel": "Meme sorting",
   "theMemes.sorting.sortBy": "Sort by",
@@ -4458,6 +4465,7 @@ export const EN_US_MESSAGES = {
   ...networkTdhRulesMessages,
   ...delegationTapGuideMessages,
   ...toolsMessages,
+  ...utcScheduleMessages,
   ...worldTimeZonesMessages,
   ...ABOUT_TECH_MESSAGES,
   ...REVIEWBOT_USAGE_MESSAGES,
