@@ -69,6 +69,8 @@ function parseFloorPrice(
   return null;
 }
 
+const STATIC_IMAGE_HOSTS = new Set<string>(STATIC_ALLOWED_IMAGE_HOSTNAMES);
+
 type OpenSeaMetadataSource =
   | {
       openSeaMetadata?: AlchemyOpenSeaMetadata | null | undefined;
@@ -131,7 +133,7 @@ function pickOriginalImage(...sources: unknown[]): string | null {
       !url.username &&
       !url.password &&
       (url.origin === DEFAULT_MEDIA_RESOLVER_ENDPOINT ||
-        STATIC_ALLOWED_IMAGE_HOSTNAMES.some((host) => host === url.hostname) ||
+        STATIC_IMAGE_HOSTS.has(url.hostname) ||
         isArweaveGatewayRuntimeHost(url.hostname))
     ) {
       return imageUrl;
