@@ -499,6 +499,7 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
     <>
       <MobileWrapperDialog
         ariaLabel={dialogLabel}
+        avoidKeyboard={activeView === "reactions"}
         isOpen={isOpen}
         onClose={closeMenu}
         onBack={activeView === "reactions" ? backToActions : undefined}
