@@ -6428,9 +6428,10 @@
       ],
       "keywords": ["xtdh", "granted", "grant", "create", "profile", "owner"],
       "facts": [
-        "The xTDH granted view lists grants and documents grant actions.",
-        "Open a grant's Show tokens disclosure to view its token artwork. Missing artwork shows the token ID; a failed thumbnail shows Load Error while the token details remain visible. Close and reopen the disclosure to retry the image.",
+        "The xTDH granted view lists grants and documents grant actions. Collection thumbnails show an NFT placeholder when artwork is missing or cannot load.",
+        "Open a grant's Show tokens disclosure to view its token artwork. If indexed artwork is missing, the grid can recover artwork and placeholder names from original Arweave or IPFS metadata. Unavailable artwork shows the token ID; a failed thumbnail shows Load Error while the token details remain visible. Close and reopen the disclosure to retry the image.",
         "A create-new-grant flow is available where owner permissions allow it.",
+        "A grant with an end shows Last grant: the final daily xTDH run that can add xTDH for it, at 00:00 UTC on the UTC date of the grant's end. It is shown in UTC, so every viewer sees the same run.",
         "Use profile xTDH for profile-specific grants and Network xTDH for global context."
       ],
       "canonical_path": "/{user}/xtdh",
@@ -7852,6 +7853,7 @@
         "The top Meme number control uses Show mint schedule; the lower calendar control uses Find mint date because it moves the calendar to that mint.",
         "A selected published Meme provides an Open Meme link to /the-memes/{id}; upcoming or unrevealed Memes do not receive speculative artwork links.",
         "The page heading appears first; clock panels and the calendar grid appear once browser JavaScript is ready, using the browser clock and local timezone. Viewing the schedule does not require connecting a wallet.",
+        "In Local mode the calendar grid shows each mint on the viewer's local start date and highlights the viewer's today, so east of UTC (for example New Zealand) Monday/Wednesday/Friday mints can appear on the next day. UTC mode uses UTC dates. The calendar guide lists minting days as Monday / Wednesday / Friday (UTC) and, in Local mode, the viewer's own weekdays.",
         "The home page can also surface current or upcoming mint information.",
         "The calendar models past, current, and future Meme Card mint timing from Monday/Wednesday/Friday cadence plus explicit skip, extra, and reschedule overrides.",
         "The public calendar API exposes /api/meme-calendar/next, /api/meme-calendar/current, and /api/meme-calendar/{id}.",
