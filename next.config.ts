@@ -22,6 +22,7 @@ import {
   persistBakedArtifacts,
 } from "@/config/runtimeConfig";
 import { sharedConfig } from "@/config/nextConfig";
+import { getMissingNextAssetRewriteConfig } from "@/lib/proxy/plainResponses";
 const require = createRequire(import.meta.url);
 const sentryEnabled = Boolean(process.env["SENTRY_DSN"]);
 
@@ -147,10 +148,15 @@ const nextConfigFactory = (phase: string): NextConfig => {
         PEPE_CACHE_MAX_ITEMS: publicEnv.PEPE_CACHE_MAX_ITEMS,
         FARCASTER_WARPCAST_API_BASE: publicEnv.FARCASTER_WARPCAST_API_BASE,
         FARCASTER_WARPCAST_API_KEY: publicEnv.FARCASTER_WARPCAST_API_KEY,
+        // Inlined into the client bundle so Sentry Replay is compiled out unless opted in.
+        SENTRY_REPLAY_ENABLED:
+          publicEnv.SENTRY_REPLAY_ENABLED === "true" ? "true" : "false",
       },
       async generateBuildId() {
         return VERSION;
       },
+      // Production builds only; runs after real files, before dynamic routes.
+      ...getMissingNextAssetRewriteConfig(phase),
     };
   }
 
