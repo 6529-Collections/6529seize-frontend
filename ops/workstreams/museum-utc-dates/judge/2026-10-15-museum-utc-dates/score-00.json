@@ -1,0 +1,32 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "run_id": "2026-10-15-museum-utc-dates",
+  "calibration": "uncalibrated",
+  "decision": "accepted",
+  "label": "judge-accepted (uncalibrated)",
+  "round": 0,
+  "file": "00",
+  "candidate": "37dfd8e2852ac754733b6c7b522e0e0b2ae1e475",
+  "total": 8.644,
+  "applicable_weight": 87,
+  "failed_floors": [],
+  "failed_checks": [],
+  "open_required": [],
+  "unverified": {
+    "coverage": [],
+    "dimensions": [],
+    "checks": []
+  },
+  "errors": [],
+  "budget": {
+    "repair_batches": 6,
+    "used": 0,
+    "remaining": 6,
+    "no_progress_streak": 0,
+    "recovery_batch": false
+  },
+  "best": {
+    "round": 0,
+    "candidate": "37dfd8e2852ac754733b6c7b522e0e0b2ae1e475"
+  }
+}

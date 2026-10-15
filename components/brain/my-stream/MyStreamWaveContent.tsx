@@ -211,9 +211,10 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   const loadedWaveId = wave?.id ?? null;
   const { editingDropId, setEditingDropId } = useEditingDrop();
 
-  // Warm the drop editor once the page is idle, so the first edit does not
-  // wait on the network. The chunk stays out of first-load JS.
-  editDropLexicalLoader.usePreloadWhenIdle();
+  // Warm the drop editor from the visitor's first interaction (or when idle),
+  // so the first edit does not wait on the network. The chunk stays out of
+  // first-load JS.
+  editDropLexicalLoader.usePreloadEarly();
   const requestedEditPostId = searchParams.get("editPost") ?? "";
   const { drop: requestedEditPost } = useDrop({
     dropId: requestedEditPostId,

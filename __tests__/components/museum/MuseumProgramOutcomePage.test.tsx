@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { MuseumProgramOutcomePage } from "@/components/museum/MuseumProgramOutcomePage";
 import type { MuseumObjectRecord } from "@/lib/museum/types";
+import { withHostTimeZone } from "../../utils/timeZoneHarness";
 
 const outcome: MuseumObjectRecord = {
   objectId: "6529NM-AP-01-OUT-001",
@@ -135,4 +136,22 @@ describe("MuseumProgramOutcomePage", () => {
       null
     );
   });
+
+  it.each(["America/Los_Angeles", "Pacific/Auckland", "Pacific/Kiritimati"])(
+    "prints the selection date in UTC whatever the host zone is (%s)",
+    (zone) => {
+      withHostTimeZone(zone, () =>
+        render(
+          <MuseumProgramOutcomePage
+            outcome={outcome}
+            sourceCommit={"a".repeat(40)}
+          />
+        )
+      );
+
+      expect(
+        screen.getByText(/Selected place 1 · Jul 9, 2026/u)
+      ).toBeInTheDocument();
+    }
+  );
 });
