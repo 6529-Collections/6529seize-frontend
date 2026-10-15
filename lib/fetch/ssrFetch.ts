@@ -141,6 +141,15 @@ const fetchApiWithDeadline = async (
   }
 };
 
+// Server-held staging access fills in only when the caller sent none; the
+// signed path still prefers the visitor's own access cookie.
+const applyServerStagingAccess = (headers: Headers): void => {
+  const stagingApiKey = getStagingApiKey();
+  if (stagingApiKey && !headers.has(API_AUTH_COOKIE)) {
+    headers.set(API_AUTH_COOKIE, stagingApiKey);
+  }
+};
+
 const createSsrFetch =
   (includeWalletAuth: boolean): typeof fetch =>
   async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
@@ -185,12 +194,7 @@ const createSsrFetch =
     if (!includeWalletAuth) {
       enhancedHeaders.delete("Authorization");
     }
-    // Server-held staging access fills in only when the caller sent none; the
-    // signed path below still prefers the visitor's own access cookie.
-    const stagingApiKey = getStagingApiKey();
-    if (stagingApiKey && !enhancedHeaders.has(API_AUTH_COOKIE)) {
-      enhancedHeaders.set(API_AUTH_COOKIE, stagingApiKey);
-    }
+    applyServerStagingAccess(enhancedHeaders);
 
     try {
       const env = getServerEnvOrThrow();
