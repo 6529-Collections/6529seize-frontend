@@ -118,6 +118,10 @@ performance-tracking behavior tied to that choice.
   the detailed policy page.
 - Mixpanel tracking only runs on production deployments that have a public
   Mixpanel token configured.
+- The Mixpanel SDK is not part of the initial page download. The browser
+  fetches it only after performance consent is `true`, so visitors without
+  that consent never download it. Page-view and profile identification resume
+  as soon as it arrives.
 - This page covers performance-consent behavior only. Other country-based UI
   rules that reuse the consent country are documented by their owning features.
 
