@@ -42,12 +42,16 @@ README). Device Farm test spec files live in `tests/device-farm/testspecs/`.
 - `workflow_dispatch` with `target` (`production` default, or `staging`) and
   `packs` (`all` default, `web`, `native`). The native pack always exercises
   production content because the shell hardcodes `https://6529.io`.
+- For missing artifacts from an already completed run, set `evidence_run_arn`
+  to its AWS Device Farm run ARN. This selects a read-only collection job and
+  skips planning, packaging, and all new tests. The recovered summary preserves
+  the original verdict; retrieving a failed run's logs does not make it pass.
 - Daily schedule (04:00 UTC): mobile web smoke against production. Monday's
   full pack includes web smoke plus native Android smoke and fuzz; Tuesday
   through Sunday run web only. The two schedules do not overlap.
 - Scheduled failures notify Discord and the shared CI wave receiver. Missing
-  credentials or a missing mobile repository token still produce explicit skip
-  notices; inspect the plan and pack results to distinguish a skip from a pass.
+  credentials or a missing mobile repository token produce explicit skip
+  notices and fail the aggregate report when a requested pack cannot run.
 - Post-release: `deploy-6529` may dispatch the workflow after production
   validation (`gh workflow run device-farm-qa.yml --ref main`) and record the
   run URL as release evidence. Non-gating unless the release is mobile-focused.
@@ -55,6 +59,9 @@ README). Device Farm test spec files live in `tests/device-farm/testspecs/`.
 All packs are read-only against live environments: navigation and DOM reads
 only, no authentication, no mutations — consistent with the
 `readonlyMutationGuard` discipline in the Playwright packs.
+The iOS web harness prepares its allocated test device by verifying and, when
+necessary, enabling Safari's Web Inspector preference through native Settings.
+This changes device configuration, not target-site data.
 
 ## Cost model
 
@@ -142,8 +149,9 @@ estimating cost rather than treating an old device-count estimate as a budget.
    | `MOBILE_REPO_TOKEN`                                                 | native pack  | Fine-grained PAT with read-only `contents` access to `6529-Collections/6529-core-mobile`.                                                                                                                            |
    | `MOBILE_GOOGLE_SERVICES_JSON`                                       | optional     | Raw `google-services.json` for Firebase push in the QA build. The shell builds fine without it (the Gradle project applies the google-services plugin only when the file exists); push registration is simply inert. |
 
-   Until the secrets exist, every job in the workflow skips with a `::notice`
-   and the scheduled run stays green — provisioning can land after the code.
+   Until the secrets exist, affected packs skip with a `::notice` and the
+   aggregate report fails as incomplete. A requested but unexecuted pack is
+   never a pass; explicitly unrequested packs remain neutral.
 
 4. **Actions allowlist** — this repository runs the "allow selected actions"
    policy (GitHub-owned + Marketplace-verified + explicit patterns). The
@@ -172,8 +180,41 @@ templating, not syntax. Device Farm rejects the braces with
   step summary, and uploads the full Device Farm artifact set (videos, device
   logs, Appium logs, screenshots from `$DEVICEFARM_LOG_DIR`) as workflow
   artifacts (14-day retention).
-- The `QA report` job fails the run when any pack fails, and scheduled
-  failures ping Discord via the existing `DISCORD_WEBHOOK`.
+- Web artifact collection runs separately from the AWS action, after its run
+  identity and verdict are available. Each download streams to a temporary file
+  and allows at most three transport attempts; failed downloads do not discard
+  other devices' evidence. An exhausted download still fails the collection
+  step. These are artifact-transfer attempts, never test or navigation retries.
+  `run.json`, `jobs.json`, and `collection-errors.json` retain the known result
+  and identify missing evidence. The native pack's collection is unchanged.
+- The `QA report` job checks planning, packaging, and every requested pack.
+  Failures, cancellations, and unexpected skips remain failures; scheduled
+  failures ping Discord and the shared CI wave receiver. A planning failure
+  cannot produce a green aggregate report simply because all packs skipped.
+- Mobile web packs preserve a `devicefarm-result.json` inside each device's
+  customer artifacts. The workflow summary distinguishes known Safari session
+  startup failures and device disconnections from test failures and missing
+  execution evidence. Generic timeouts remain test failures requiring triage;
+  they are not automatically attributed to AWS. Missing or malformed evidence
+  cannot override the Device Farm verdict or produce a clean pass.
+- Completeness uses the completed run's `run.totalJobs`. AWS defines a
+  [Job](https://docs.aws.amazon.com/devicefarm/latest/APIReference/API_Job.html)
+  as a device, and the [Run API](https://docs.aws.amazon.com/devicefarm/latest/APIReference/API_Run.html)
+  counts those jobs. Setup, test, and teardown suites belong to that device job;
+  they are not extra devices. Require one valid customer-artifact result per
+  device job. The diagnostics step deliberately fails the web job for missing,
+  malformed, or recovered evidence even if Device Farm returns `PASSED`.
+  The aggregate report then propagates that failure and the scheduled alerts;
+  this is an incomplete-verification verdict, not an assertion of an app bug.
+- Web session/command, navigation, and Mocha test retries are disabled. Each
+  Android page check creates a blank tab and closes the preceding tab; Safari
+  navigates the current tab to `about:blank`. Both verify the blank document
+  before requesting the destination once. Readiness
+  requires the expected origin/path, a complete document, and visible content
+  in the same observation. Recovered evidence is shown as `passed-after-retry`
+  and does not count as a clean workflow pass.
+  Empty suites and skipped tests also fail. Native smoke and fuzz retain their
+  existing behavior.
 - Deep inspection (per-device video, logcat, Appium server log) lives in the
   Device Farm console link — runs are named
   `<pack>_<github_run_id>_<attempt>`.
@@ -182,16 +223,149 @@ templating, not syntax. Device Farm rejects the braces with
 
 | Symptom                                    | Likely cause                                                                         | Action                                                                                                                         |
 | ------------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| All packs skipped with notices             | Secrets not configured                                                               | Complete provisioning above.                                                                                                   |
+| All packs skipped with notices             | Secrets not configured; required tests did not run                                   | Complete provisioning above; the aggregate report stays failed.                                                                |
 | `projectArn`/`devicePoolArn` lookup errors | Bootstrap not run, or names drifted from repo variables                              | Re-run bootstrap; align variables.                                                                                             |
-| Web pack fails only on one platform        | Real-device/browser-specific frontend regression                                     | Reproduce with Playwright mobile projects first; real-device video is in the run artifacts.                                    |
+| Safari setup hook fails before any test    | Safari debugger did not expose a web application                                     | Inspect Appium and device logs; this is incomplete app coverage, not evidence of an app regression.                            |
+| `device-connectivity`                      | Device reported offline or Chrome returned `ERR_INTERNET_DISCONNECTED`               | Inspect device network logs. A host-side successful request does not establish device connectivity.                            |
+| Web assertion fails on one platform        | Possible real-device/browser-specific frontend regression                            | Inspect the actual assertion and device video before attributing it to infrastructure.                                         |
 | Native smoke fails at WebView boot         | Shell regression, production outage, or WebView debuggability                        | Check production health first; confirm the APK is a debug build (WebView contexts are only visible to Appium in debug builds). |
 | Deep-link test fails                       | `useDeepLinkNavigation` regression in this repo or intent-filter change in the shell | Compare against `__tests__/app/openMobile.test.tsx` expectations.                                                              |
 | Fuzz fails                                 | Shell crash/ANR under monkey input                                                   | Pull the crash video + logcat from artifacts; file against `6529-core-mobile` if native.                                       |
 
-Flaky-signal policy mirrors the staging E2E rules in
-`ops/skills/deploy-6529/SKILL.md`: rerun once with evidence, then harden the
-test or investigate the app if the signal repeats.
+### Android navigation readiness
+
+Android web sessions use the supported `pageLoadStrategy: none` capability.
+The harness then owns the readiness wait: create a fresh blank tab, close the
+preceding tab, verify its handle is gone, switch to the new tab, verify blankness,
+request the target once, and require its origin/path, complete document state,
+and visible body before assertions. This does not accept an interactive-only,
+empty, or wrong document and does not replay a failed navigation.
+
+[Run 36431891530](https://github.com/6529-Collections/6529seize-frontend/actions/runs/36431891530)
+broke a two-run streak at `47127c3255`: Samsung A15 passed six of seven tests.
+Chrome acknowledged `about:blank` in 103 ms but remained on Memes throughout
+the 90-second barrier wait; `/network` was never requested. Pixel, S24, and
+the iOS lane passed, and collection retained the evidence without errors.
+The new-tab path removes the preceding document instead of navigating it away.
+It uses W3C `createWindow("tab")`, not WebdriverIO's desktop-only `newWindow`
+helper. Tab creation, closure, and switching errors remain terminal. The fresh
+tab has no opener; cookies and local storage remain shared, while session storage
+starts fresh. This is document
+isolation for direct-load checks, not a claim about in-app transitions. Safari
+and native Android are unchanged, and fresh device validation is still required.
+
+[Run 36401855670](https://github.com/6529-Collections/6529seize-frontend/actions/runs/36401855670)
+failed only the Pixel 8 Memes check (six of seven assertions passed). The URL
+command began at 09:13:54 UTC; video showed the Memes page and artwork at
+09:14:21, but Appium timed out the command at 09:17:54. Chrome had negotiated
+`pageLoadStrategy: normal` and a 300-second page-load timeout behind Appium's
+240-second proxy timeout. The later diagnostic read returned the correct URL,
+`readyState: complete`, and online status at 09:18:54. Removing Chrome's implicit
+wait lets the existing explicit readiness checks run without that competing
+load wait. The precise browser-internal reason the implicit wait hung is not
+established; this change still needs fresh real-device validation.
+
+[Recovery run 36405625529](https://github.com/6529-Collections/6529seize-frontend/actions/runs/36405625529)
+collected all three Android device archives without transfer errors. Its red
+summary preserves the original Pixel failure; no new tests ran. `run.totalJobs`
+was three, matching the three distinct recovered device reports.
+
+### Safari startup and reliability validation
+
+Native app launch returning does not establish that WDA has switched its active
+accessibility hierarchy. After launching Settings or returning to Safari, wait
+up to ten seconds for [Appium's active app information](https://appium.github.io/appium-xcuitest-driver/9.10/reference/execute-methods/#mobile-activeappinfo)
+to identify the intended bundle. Before navigating back, wait for either the
+Settings root title (navigation bar or large static title) or a visible back
+control. Missing controls during a transition never cause a blind click. These
+waits observe readiness; they do not relaunch apps or replay failed commands.
+
+[Run 36573433144](https://github.com/6529-Collections/6529seize-frontend/actions/runs/36573433144)
+at `2a86dd91c2` passed Android but failed setup on both iPhones. The iPhone 16
+log shows root queries snapshotting Safari PID 563 immediately after Settings
+launch returned, before WDA switched to Settings PID 462. Both failure screenshots
+show Settings at its root, with no back button. The preparation wrongly treated
+the missing root as a nested screen and clicked a nonexistent control. Neither
+iPhone reached Web Inspector configuration or any of the seven app assertions.
+The foreground/navigation waits address that regression; the corrected native
+Settings path still requires a fresh hardware run.
+
+Before connecting the debugger on iOS 16.4+, verify Web Inspector through native
+Settings: Safari > Advanced, or Apps > Safari > Advanced on iOS 18+. Read the
+switch, turn it on only when its value is `0`, and read it back before returning
+to Safari. This is a device-preparation step before any app test, not a recovery
+after a failed attachment. Navigation to the Settings root is bounded. A missing,
+locked, unknown, or non-persisting control fails setup, retains a screenshot,
+and records `startupStage: web-inspector-setup`. The Settings selectors assume
+the configured pools' English UI. The simulator-only Safari-preference API is
+not used. See [Appium's real-device prerequisites](https://appium.github.io/appium-xcuitest-driver/8.4/preparation/real-device-config/).
+
+[Run 36566055869](https://github.com/6529-Collections/6529seize-frontend/actions/runs/36566055869)
+broke a seven-run streak at `49054984b3`. Android and iPhone SE passed; iPhone 16
+executed zero tests. Its device log recorded `Shutting Down, Preference Disabled`
+from Web Inspector at 12:10:13 UTC, while Safari finished loading at 12:10:15.
+Appium received no applications during the 30-second debugger connection wait.
+The new preparation path addresses the disabled prerequisite instead of extending
+that timeout; native Settings navigation still requires fresh device validation.
+
+For iOS 16.4 and newer, start a native XCUITest session for Safari's bundle ID,
+using the ordinary XCTest app launch. After launch completes, issue one
+`mobile: deepLink` to the target and wait up to 30 seconds for a Safari web
+context matching the target origin/path before switching to it. This avoids
+both automatic attachment to a missing/old tab and WDA's cold deep-link launch
+race. A failed attachment closes the session and preserves the original error;
+it never recreates the session or reopens the URL. Xcode output is retained in
+the Appium log for startup failures. Older or unknown iOS versions retain the
+default Safari startup path. Both pinned iPhones support
+[mobile: deepLink](https://appium.github.io/appium-xcuitest-driver/9.10/reference/execute-methods/#mobile-deeplink).
+
+[Run 36123141853](https://github.com/6529-Collections/6529seize-frontend/actions/runs/36123141853)
+failed on the SE before any test: WDA 9.15.3 returned `Cannot launch
+com.apple.mobilesafari` immediately after its initial deep-link request, while
+the device syslog recorded a successful Safari launch and foreground scene.
+The [matching WDA source](https://github.com/appium/WebDriverAgent/blob/v9.15.3/WebDriverAgentLib/Commands/FBSessionCommands.m)
+checks `app.running` immediately after that request. The separated launch and
+attachment sequence avoids this timing dependency. It still requires real-device
+validation; local sequencing tests cannot establish device reliability.
+
+The web suite navigates from the device before app assertions and records
+browser connectivity, origin, pathname, and document readiness when navigation
+fails.
+`navigator.onLine: true` alone is not proof that production is reachable.
+Original navigation errors are preserved if diagnostic collection fails.
+The blank-document barrier (with tab replacement on Android) isolates direct-load
+smoke checks from pending hydration or router effects on the previous page. These checks cover each
+destination and its interactions; they do not establish in-app link-transition
+reliability. A failed barrier or destination is reported without replaying it.
+Navigation diagnostics record `navigationStage` (`target-validation`,
+`tab-isolation`, `blank-document`, `destination`, or `connectivity`) and `requestedUrl` separately
+from the observed browser origin/path. A blank-document timeout therefore shows
+that the destination was never requested, even when the previous route remains
+visible or the diagnostic browser read fails. Focused driver tests inject this
+timeout; it is a failing scenario, not a pass required in the acceptance streak.
+
+Document readiness and nonempty body text do not guarantee that asynchronous
+content has rendered. In [run 36135706885](https://github.com/6529-Collections/6529seize-frontend/actions/runs/36135706885),
+the iPhone 16 reached `/the-memes` but still showed `Loading collections` when
+the body-text assertion ran about 670 ms after navigation. The Memes assertion
+now waits up to 90 seconds for the same expected text, stopping immediately on
+a crash marker or browser-read error. A permanently loading page still fails;
+this wait does not repeat navigation, session creation, or a failed test.
+
+After a startup change, validate it with ten fresh, sequential manual runs of
+the same branch head using `packs=web` and the same target. Each run must cover
+both iPhones and all three Android devices, with every selected test executed,
+no recovery, and all device reports present. Record the run URLs, source SHA,
+device/OS and Appium/XCUITest versions, and first-attempt results. A repeated
+failure requires investigation and restarts the acceptance streak after the
+next fix. Do not discard earlier failed runs from the evidence record.
+
+Manual branch runs use that branch's workflow/tests against the deployed target;
+they do not deploy the branch. Dispatch each run only after its predecessor
+finishes: the shared workflow concurrency group is not a ten-run queue.
+Real-device runs require explicit authorization; this procedure does not
+schedule or dispatch them automatically. Ten clean runs provide confidence,
+not a guarantee; keep the normal daily schedule as longer-term evidence.
 
 ## Evolving the regime
 

@@ -1,0 +1,92 @@
+[
+  {
+    "url": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.002/6529NM-W-0024/65abf8b6a182bb641787a43b40d10f0b6471357e5c90777aacccf9eb73ea1453/webp-v2-q82-m6-fixed-icc/640.webp",
+    "path": "public/museum/research/editorial/magnum/6529NM-W-0024-640.webp",
+    "sha256": "e9581c1dcf487d78bd22eddee27671ea938e712242e04f72895e608e19cca60d"
+  },
+  {
+    "url": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.002/6529NM-W-0024/65abf8b6a182bb641787a43b40d10f0b6471357e5c90777aacccf9eb73ea1453/webp-v2-q82-m6-fixed-icc/1280.webp",
+    "path": "public/museum/research/editorial/magnum/6529NM-W-0024-1280.webp",
+    "sha256": "042f239d5b6147fd7cb61557a38a96615a9c1a4962dbfe66fb6a79190e0a0365"
+  },
+  {
+    "url": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.002/6529NM-W-0024/65abf8b6a182bb641787a43b40d10f0b6471357e5c90777aacccf9eb73ea1453/webp-v2-q82-m6-fixed-icc/2400.webp",
+    "path": "tests/fixtures/museum-media/6529NM-W-0024-2400.webp",
+    "sha256": "bc659438e8e4e43b57164e7dcc763ad1979dea111d34d75e6d48ddd4b9f781da"
+  },
+  {
+    "url": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.002/6529NM-W-0025/e60f2d2c56b702981597606315c6c77e07dedf4dd9a95804ae2da720d0f5bcee/webp-v2-q82-m6-fixed-icc/640.webp",
+    "path": "public/museum/research/editorial/magnum/6529NM-W-0025-640.webp",
+    "sha256": "0cdab53aeaddd9c5396a023330def5f6a395a2514fc0d36864433dc9a87f1a88"
+  },
+  {
+    "url": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.002/6529NM-W-0025/e60f2d2c56b702981597606315c6c77e07dedf4dd9a95804ae2da720d0f5bcee/webp-v2-q82-m6-fixed-icc/1280.webp",
+    "path": "public/museum/research/editorial/magnum/6529NM-W-0025-1280.webp",
+    "sha256": "3b6e75ae41658576728eb1978362bbd01b5d63c5e43b53c18cfbc64000063d89"
+  },
+  {
+    "url": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.002/6529NM-W-0025/e60f2d2c56b702981597606315c6c77e07dedf4dd9a95804ae2da720d0f5bcee/webp-v2-q82-m6-fixed-icc/2400.webp",
+    "path": "tests/fixtures/museum-media/6529NM-W-0025-2400.webp",
+    "sha256": "07a2177a15b5fb2eb28531d8684440f5f4767311338c59f28fcdb715d34b6720"
+  },
+  {
+    "url": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.002/6529NM-W-0026/a59d8624c8da11758c5f1c0b64484229e4ffb68167b8e5783cdbafa9628b74df/webp-v2-q82-m6-fixed-icc/640.webp",
+    "path": "public/museum/research/editorial/magnum/6529NM-W-0026-640.webp",
+    "sha256": "309c2e6c1596e24b80c724fb6e2efc8559af407b73bed69739f42308c9aeda21"
+  },
+  {
+    "url": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.002/6529NM-W-0026/a59d8624c8da11758c5f1c0b64484229e4ffb68167b8e5783cdbafa9628b74df/webp-v2-q82-m6-fixed-icc/1280.webp",
+    "path": "public/museum/research/editorial/magnum/6529NM-W-0026-1280.webp",
+    "sha256": "6b1d0ff6dba21cab172942980d750071651afde187681686986c594a59afff47"
+  },
+  {
+    "url": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.002/6529NM-W-0026/a59d8624c8da11758c5f1c0b64484229e4ffb68167b8e5783cdbafa9628b74df/webp-v2-q82-m6-fixed-icc/2400.webp",
+    "path": "tests/fixtures/museum-media/6529NM-W-0026-2400.webp",
+    "sha256": "1b1a247c35ea86fcc9273a17de91d271921954043f6d81f898c0547390651ce2"
+  },
+  {
+    "url": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.002/6529NM-W-0027/cf1ec75dc4e3de3bcd85cffd9954c75395d9af2bff38374468440e403352b816/webp-v2-q82-m6-fixed-icc/640.webp",
+    "path": "public/museum/research/editorial/magnum/6529NM-W-0027-640.webp",
+    "sha256": "07ca71fb0b6efab5b64a644e08380476d341725fe64338ceeffedae13fac34b2"
+  },
+  {
+    "url": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.002/6529NM-W-0027/cf1ec75dc4e3de3bcd85cffd9954c75395d9af2bff38374468440e403352b816/webp-v2-q82-m6-fixed-icc/1280.webp",
+    "path": "public/museum/research/editorial/magnum/6529NM-W-0027-1280.webp",
+    "sha256": "63bb715f267d29d0a23e3b99585c7e9c6fd0c9778ff986b0771e7af9c20fcafd"
+  },
+  {
+    "url": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.002/6529NM-W-0027/cf1ec75dc4e3de3bcd85cffd9954c75395d9af2bff38374468440e403352b816/webp-v2-q82-m6-fixed-icc/2400.webp",
+    "path": "tests/fixtures/museum-media/6529NM-W-0027-2400.webp",
+    "sha256": "d27d789961c3a9883c3ae71f14ccccdf9170876e3301b1dcccda473ebd0fe327"
+  },
+  {
+    "url": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.002/6529NM-W-0028/49c45762f344fcc058a1f1167b01e9c298b1f4cff5e200e9033577f9c1023ad2/webp-v2-q82-m6-fixed-icc/640.webp",
+    "path": "public/museum/research/editorial/magnum/6529NM-W-0028-640.webp",
+    "sha256": "717f96e39da429b7633fedaa293c8befbace1590b83d734a7bcd55396f115bd7"
+  },
+  {
+    "url": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.002/6529NM-W-0028/49c45762f344fcc058a1f1167b01e9c298b1f4cff5e200e9033577f9c1023ad2/webp-v2-q82-m6-fixed-icc/1280.webp",
+    "path": "public/museum/research/editorial/magnum/6529NM-W-0028-1280.webp",
+    "sha256": "6e8cbeca51dc4cc75cf220053e140dca939be4c2e8d863e1cd0f2af7662707e7"
+  },
+  {
+    "url": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.002/6529NM-W-0028/49c45762f344fcc058a1f1167b01e9c298b1f4cff5e200e9033577f9c1023ad2/webp-v2-q82-m6-fixed-icc/2400.webp",
+    "path": "tests/fixtures/museum-media/6529NM-W-0028-2400.webp",
+    "sha256": "123e1d3a47fb9b4b7252e840666eb507d81a79a7e6d9956d60d51fe86861b4b9"
+  },
+  {
+    "url": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.003/6529NM-W-0029/c1b6541832f2a237555adffae2f4870143a976549e591e2dbaa4d3d87f75d166/webp-v2-q82-m6-fixed-icc/640.webp",
+    "path": "tests/fixtures/museum-media/6529NM-W-0029-640.webp",
+    "sha256": "a53b0dbde5a8a43c8e25b541311f38998a106683901dab95490c1d02083bcbc1"
+  },
+  {
+    "url": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.003/6529NM-W-0029/c1b6541832f2a237555adffae2f4870143a976549e591e2dbaa4d3d87f75d166/webp-v2-q82-m6-fixed-icc/1280.webp",
+    "path": "tests/fixtures/museum-media/6529NM-W-0029-1280.webp",
+    "sha256": "3e9a68c8d1488592826567430906e5c37b5b304efff556dc8c3c422a04c42555"
+  },
+  {
+    "url": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.003/6529NM-W-0029/c1b6541832f2a237555adffae2f4870143a976549e591e2dbaa4d3d87f75d166/webp-v2-q82-m6-fixed-icc/2400.webp",
+    "path": "tests/fixtures/museum-media/6529NM-W-0029-2400.webp",
+    "sha256": "0ec810b0e62cdc9c4cfaf2a24553b4feaf57e49a877d519f7dda5300c78dc436"
+  }
+]

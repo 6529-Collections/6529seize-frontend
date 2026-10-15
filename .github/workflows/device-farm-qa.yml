@@ -15,12 +15,15 @@ name: Device Farm Mobile QA
 # frontend deploy — backend releases, data, third-party SDKs), while the
 # expensive native pack (APK build + smoke + fuzz) stays weekly.
 #
-# Every job no-ops with a notice until the Device Farm secrets are configured,
-# so the schedule stays green before provisioning.
+# Requested packs that cannot run are reported as incomplete, never as passes.
 
 on:
   workflow_dispatch:
     inputs:
+      evidence_run_arn:
+        description: "Collect an existing completed AWS run only (no tests are scheduled)"
+        type: string
+        default: ""
       target:
         description: "Environment the mobile web pack runs against"
         type: choice
@@ -63,7 +66,48 @@ env:
   MOBILE_SHELL_REF: "main"
 
 jobs:
+  recover-evidence:
+    name: Collect existing evidence (no tests)
+    if: github.event_name == 'workflow_dispatch' && inputs.evidence_run_arn != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout collector
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
+        with:
+          aws-access-key-id: ${{ secrets.DEVICEFARM_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.DEVICEFARM_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.DEVICEFARM_REGION }}
+      - name: Collect completed device evidence
+        id: evidence
+        env:
+          RUN_ARN: ${{ inputs.evidence_run_arn }}
+          ARTIFACT_FOLDER: devicefarm-artifacts/recovered
+        run: python3 scripts/device-farm-artifacts.py
+      - name: Upload recovered evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: devicefarm-recovered-artifacts
+          path: devicefarm-artifacts/recovered
+          retention-days: 14
+          if-no-files-found: error
+      - name: Report original device outcome
+        if: always()
+        env:
+          ARTIFACT_FOLDER: devicefarm-artifacts/recovered
+          RUN_RESULT: ${{ steps.evidence.outputs.result }}
+          EXPECTED_DEVICES: ${{ steps.evidence.outputs.expected-devices }}
+          PLATFORM: recovered run (no new tests)
+        run: python3 scripts/device-farm-report.py
+
   plan:
+    if: inputs.evidence_run_arn == ''
     name: Plan QA packs
     runs-on: ubuntu-latest
     permissions: {}
@@ -71,6 +115,7 @@ jobs:
       web: ${{ steps.decide.outputs.web }}
       native: ${{ steps.decide.outputs.native }}
       target-url: ${{ steps.decide.outputs.target-url }}
+      requested-packs: ${{ steps.decide.outputs.requested-packs }}
     env:
       HAS_DEVICEFARM_CREDENTIALS: ${{ secrets.DEVICEFARM_AWS_ACCESS_KEY_ID != '' && secrets.DEVICEFARM_AWS_SECRET_ACCESS_KEY != '' }}
       HAS_MOBILE_REPO_TOKEN: ${{ secrets.MOBILE_REPO_TOKEN != '' }}
@@ -126,6 +171,7 @@ jobs:
             echo "web=$web"
             echo "native=$native"
             echo "target-url=$target_url"
+            echo "requested-packs=$requested"
           } >> "$GITHUB_OUTPUT"
 
           {
@@ -164,6 +210,7 @@ jobs:
         run: |
           set -euo pipefail
           npm ci --no-audit --no-fund
+          npm run test:unit
           # bundleDependencies: true in package.json makes npm pack embed
           # node_modules in the tarball, which is the layout Device Farm's
           # APPIUM_NODE/APPIUM_WEB_NODE test types expect inside the zip.
@@ -242,7 +289,17 @@ jobs:
                 "jobTimeoutMinutes": 30
               }
             }
-          artifact-types: ALL
+          # Download separately: this action sets run outputs only AFTER its
+          # downloader finishes, so ECONNRESET otherwise loses verdict + logs.
+          artifact-types: ""
+
+      - name: Collect completed device evidence
+        id: evidence
+        if: always() && steps.devicefarm.outputs.arn != ''
+        env:
+          RUN_ARN: ${{ steps.devicefarm.outputs.arn }}
+          ARTIFACT_FOLDER: devicefarm-artifacts/${{ matrix.platform }}
+        run: python3 scripts/device-farm-artifacts.py
 
       - name: Record run summary
         if: always()
@@ -260,13 +317,22 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload Device Farm artifacts
-        if: always() && steps.devicefarm.outputs.artifact-folder != ''
+        if: always() && steps.devicefarm.outputs.arn != ''
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: devicefarm-web-${{ matrix.platform }}-artifacts
-          path: ${{ steps.devicefarm.outputs.artifact-folder }}
+          path: devicefarm-artifacts/${{ matrix.platform }}
           retention-days: 14
           if-no-files-found: ignore
+
+      - name: Summarize device diagnostics
+        if: always()
+        env:
+          ARTIFACT_FOLDER: devicefarm-artifacts/${{ matrix.platform }}
+          RUN_RESULT: ${{ steps.devicefarm.outputs.result }}
+          PLATFORM: ${{ matrix.platform }}
+          EXPECTED_DEVICES: ${{ steps.evidence.outputs.expected-devices }}
+        run: python3 scripts/device-farm-report.py
 
   native-android:
     name: Native Android shell QA
@@ -441,14 +507,17 @@ jobs:
 
   report:
     name: QA report
-    needs: [plan, web-smoke, native-android]
-    if: always()
+    needs: [plan, package-tests, web-smoke, native-android]
+    if: always() && inputs.evidence_run_arn == ''
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
       - name: Summarize pack results
         env:
+          PLAN_RESULT: ${{ needs.plan.result }}
+          PACKAGE_RESULT: ${{ needs.package-tests.result }}
+          REQUESTED_PACKS: ${{ needs.plan.outputs.requested-packs }}
           WEB_RESULT: ${{ needs.web-smoke.result }}
           NATIVE_RESULT: ${{ needs.native-android.result }}
         run: |
@@ -457,12 +526,30 @@ jobs:
             echo ""
             echo "| Pack | Result |"
             echo "| --- | --- |"
+            echo "| planning | ${PLAN_RESULT} |"
+            echo "| test packaging | ${PACKAGE_RESULT} |"
             echo "| mobile web smoke | ${WEB_RESULT} |"
             echo "| native Android shell | ${NATIVE_RESULT} |"
           } >> "$GITHUB_STEP_SUMMARY"
 
-          if [ "${WEB_RESULT}" = "failure" ] || [ "${NATIVE_RESULT}" = "failure" ]; then
-            echo "::error::At least one Device Farm QA pack failed."
+          if [ "${PLAN_RESULT}" != "success" ] || [ "${PACKAGE_RESULT}" != "success" ]; then
+            echo "::error::Device Farm infrastructure/setup failed or tests did not run. Inspect planning and packaging."
+            exit 1
+          fi
+
+          failed=false
+          case "$REQUESTED_PACKS" in
+            all|web)
+              if [ "$WEB_RESULT" != "success" ]; then failed=true; fi ;;
+            native) ;;
+            *) failed=true ;;
+          esac
+          case "$REQUESTED_PACKS" in
+            all|native)
+              if [ "$NATIVE_RESULT" != "success" ]; then failed=true; fi ;;
+          esac
+          if [ "$failed" = "true" ]; then
+            echo "::error::Requested Device Farm QA failed or did not run. See device diagnostics to distinguish infrastructure from test failures."
             exit 1
           fi
 
@@ -472,7 +559,7 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
-          title: "Device Farm Mobile QA: scheduled real-device pack failed"
+          title: "Device Farm Mobile QA: scheduled QA failed or incomplete"
           description: "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           color: 0xff0000
 
@@ -492,7 +579,7 @@ jobs:
           CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
           CI_PIPELINES_TARGET_ENV: production
           CI_PIPELINES_STATUS: failure
-          CI_PIPELINES_TITLE: "Device Farm Mobile QA: scheduled real-device pack failed"
+          CI_PIPELINES_TITLE: "Device Farm Mobile QA: scheduled QA failed or incomplete"
           CI_PIPELINES_DESCRIPTION: "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           CI_PIPELINES_ENVIRONMENT: production
           CI_PIPELINES_SERVICE: device-farm-mobile-qa
