@@ -6,6 +6,12 @@ import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 
 const mockSetActiveWave = jest.fn();
 const mockRegisterWave = jest.fn();
+const mockPrefetchWave = jest.fn();
+const mockRecentDmPrefetch = jest.fn();
+jest.mock("@/contexts/wave/hooks/useRecentDirectMessagePrefetch", () => ({
+  useRecentDirectMessagePrefetch: (...args: unknown[]) =>
+    mockRecentDmPrefetch(...args),
+}));
 const mockSyncNewestMessages = jest.fn();
 const mockFetchNextPage = jest.fn();
 const mockFetchAroundSerialNo = jest.fn();
@@ -77,6 +83,7 @@ jest.mock("@/contexts/wave/hooks/useActiveWaveManager", () => ({
 jest.mock("@/contexts/wave/hooks/useWaveDataManager", () => ({
   useWaveDataManager: jest.fn(() => ({
     registerWave: mockRegisterWave,
+    prefetchWave: mockPrefetchWave,
     syncNewestMessages: mockSyncNewestMessages,
     fetchNextPage: mockFetchNextPage,
     fetchAroundSerialNo: mockFetchAroundSerialNo,
@@ -253,9 +260,10 @@ describe("MyStreamProvider resume sync", () => {
     useWavesListMock.mockReturnValue(
       createListData(mainRefetch, mainRefreshStale)
     );
-    useDmWavesListMock.mockReturnValue(
-      createListData(dmRefetch, dmRefreshStale)
-    );
+    useDmWavesListMock.mockReturnValue({
+      ...createListData(dmRefetch, dmRefreshStale),
+      viewerIdentityKey: "wallet:primary",
+    });
   });
 
   it("keeps the active wave cached and releases the data of evicted waves", async () => {
@@ -304,6 +312,33 @@ describe("MyStreamProvider resume sync", () => {
     ]);
   });
 
+  it.each([
+    [true, true, "/messages", null, true],
+    [false, true, "/messages", null, false],
+    [true, false, "/messages", null, false],
+    [true, true, "/messages", "dm", false],
+    [true, true, "/messages/dm", "dm", false],
+    [true, true, "/messages/create", null, false],
+    [true, true, "/waves", null, false],
+  ])(
+    "gates recent DM prefetch for native=%s active=%s path=%s chat=%s",
+    (isCapacitor, isActive, pathname, activeWaveId, enabled) => {
+      useCapacitorMock.mockReturnValue({ isCapacitor, isActive });
+      usePathnameMock.mockReturnValue(pathname);
+      useActiveWaveManagerMock.mockReturnValue({
+        activeWaveId,
+        setActiveWave: mockSetActiveWave,
+      });
+      renderWithContext();
+      expect(mockRecentDmPrefetch).toHaveBeenLastCalledWith({
+        enabled,
+        viewerIdentityKey: "wallet:primary",
+        waves: [],
+        prefetchWave: mockPrefetchWave,
+      });
+    }
+  );
+
   it("does not let an old profile refresh cancel or restart the current profile's fetches", () => {
     useWaveMessagesStoreMock.mockImplementation(
       jest.requireActual("@/contexts/wave/hooks/useWaveMessagesStore").default
@@ -338,23 +373,11 @@ describe("MyStreamProvider resume sync", () => {
   });
 
   it("registers selected waves before delegating active wave navigation", () => {
-    let context: ReturnType<typeof useMyStream> | null = null;
-
-    render(
-      <MyStreamProvider>
-        <CaptureMyStream
-          onContext={(nextContext) => {
-            context = nextContext;
-          }}
-        />
-      </MyStreamProvider>
-    );
-
-    expect(context).not.toBeNull();
-    const capturedContext = context;
+    const { getContext } = renderWithContext();
+    const capturedContext = getContext();
 
     act(() => {
-      capturedContext!.activeWave.set("wave-2", {
+      capturedContext.activeWave.set("wave-2", {
         isDirectMessage: true,
         divider: 9,
       });
@@ -370,24 +393,12 @@ describe("MyStreamProvider resume sync", () => {
   });
 
   it("does not skip native backfill for blank serial targets", () => {
-    let context: ReturnType<typeof useMyStream> | null = null;
-
-    render(
-      <MyStreamProvider>
-        <CaptureMyStream
-          onContext={(nextContext) => {
-            context = nextContext;
-          }}
-        />
-      </MyStreamProvider>
-    );
-
-    expect(context).not.toBeNull();
-    const capturedContext = context;
+    const { getContext } = renderWithContext();
+    const capturedContext = getContext();
     mockRegisterWave.mockClear();
 
     act(() => {
-      capturedContext!.activeWave.set("wave-2", {
+      capturedContext.activeWave.set("wave-2", {
         serialNo: "   ",
       });
     });

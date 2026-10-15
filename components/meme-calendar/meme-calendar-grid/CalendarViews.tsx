@@ -38,6 +38,7 @@ export function SeasonView({
   onSelectDay,
   autoOpenYmd,
   displayTz,
+  timeZone,
   locale,
   publishedMemeIds,
   publishedMemesStatus,
@@ -69,6 +70,7 @@ export function SeasonView({
           onSelectDay={onSelectDay}
           autoOpenYmd={autoOpenYmd}
           displayTz={displayTz}
+          timeZone={timeZone}
           locale={locale}
           publishedMemeIds={publishedMemeIds}
           publishedMemesStatus={publishedMemesStatus}
