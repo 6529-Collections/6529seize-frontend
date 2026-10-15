@@ -237,6 +237,88 @@ describe("CookieConsentProvider country check state", () => {
     consoleError.mockRestore();
   });
 
+  describe("US country hint", () => {
+    const HINT_KEY = "6529:us-country-hint";
+
+    beforeEach(() => {
+      window.localStorage.clear();
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    const renderSettled = async (response: unknown) => {
+      (api.commonApiFetch as jest.Mock).mockResolvedValue(response);
+      render(
+        <CookieConsentProvider>
+          <CountryConsumer />
+        </CookieConsentProvider>
+      );
+      await waitFor(() =>
+        expect(screen.getByText(/pending: false/)).toBeInTheDocument()
+      );
+    };
+
+    it("remembers US after a completed lookup", async () => {
+      await renderSettled({ is_eu: false, is_consent: false, country: "US" });
+
+      expect(window.localStorage.getItem(HINT_KEY)).toBe("US");
+    });
+
+    it("clears the hint when a completed lookup returns another country", async () => {
+      window.localStorage.setItem(HINT_KEY, "US");
+
+      await renderSettled({ is_eu: true, is_consent: false, country: "FR" });
+
+      expect(window.localStorage.getItem(HINT_KEY)).toBeNull();
+    });
+
+    it("keeps the hint when the lookup fails", async () => {
+      const consoleError = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => undefined);
+      window.localStorage.setItem(HINT_KEY, "US");
+      (api.commonApiFetch as jest.Mock).mockRejectedValue(new Error("offline"));
+
+      render(
+        <CookieConsentProvider>
+          <CountryConsumer />
+        </CookieConsentProvider>
+      );
+
+      expect(
+        await screen.findByText("Country: unknown / pending: false")
+      ).toBeInTheDocument();
+      expect(window.localStorage.getItem(HINT_KEY)).toBe("US");
+      consoleError.mockRestore();
+    });
+
+    it("still settles the country when storage throws", async () => {
+      jest.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+        throw new Error("storage blocked");
+      });
+      jest.spyOn(Storage.prototype, "removeItem").mockImplementation(() => {
+        throw new Error("storage blocked");
+      });
+      (api.commonApiFetch as jest.Mock).mockResolvedValue({
+        is_eu: false,
+        is_consent: false,
+        country: "US",
+      });
+
+      render(
+        <CookieConsentProvider>
+          <CountryConsumer />
+        </CookieConsentProvider>
+      );
+
+      expect(
+        await screen.findByText("Country: US / pending: false")
+      ).toBeInTheDocument();
+    });
+  });
+
   it("is never pending when the provider is disabled", () => {
     render(
       <CookieConsentProvider disabled>
@@ -327,13 +409,17 @@ describe("CookieConsentProvider country check timeout", () => {
     renderProvider();
 
     await act(async () => {});
-    expect(screen.getByText("Country: US / pending: false")).toBeInTheDocument();
+    expect(
+      screen.getByText("Country: US / pending: false")
+    ).toBeInTheDocument();
     expectCountryTimeoutCleared();
 
     await act(async () => {
       jest.advanceTimersByTime(10_000);
     });
-    expect(screen.getByText("Country: US / pending: false")).toBeInTheDocument();
+    expect(
+      screen.getByText("Country: US / pending: false")
+    ).toBeInTheDocument();
     expect(lookupSignal().aborted).toBe(false);
     expect(consoleError).not.toHaveBeenCalled();
   });
