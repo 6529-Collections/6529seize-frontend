@@ -7,7 +7,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   getQueryErrorStatus,
   isTerminalNotificationAuthQueryError,
-  shouldStopPollingRetry,
+  shouldRetryQuery,
 } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiNotificationsResponseV2 } from "@/generated/models/ApiNotificationsResponseV2";
 import {
@@ -295,14 +295,10 @@ export function useConnectedAccountsUnreadNotifications(
         });
         return false;
       }
-      if (isTerminalNotificationAuthQueryError(error)) {
-        return false;
-      }
-      if (shouldStopPollingRetry(error)) {
-        return false;
-      }
-
-      return failureCount < 3;
+      return (
+        !isTerminalNotificationAuthQueryError(error) &&
+        shouldRetryQuery(failureCount, error)
+      );
     },
     retryDelay: (failureCount: number) => {
       return failureCount * 1000;

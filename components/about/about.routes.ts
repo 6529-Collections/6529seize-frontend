@@ -207,6 +207,7 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
     aboutRouteItem("api", "/tools/api", "api"),
     aboutRouteItem("emma", "/emma", "emma"),
     aboutRouteItem("block-finder", "/tools/block-finder", "blockFinder"),
+    aboutRouteItem("time-zones", "/tools/time-zones", "timeZones"),
     aboutRouteItem("open-data", "/open-data", "openData"),
     aboutRouteItem("6529bot-data", "/open-data/6529bot", "6529botData"),
     aboutRouteItem(

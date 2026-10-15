@@ -7,6 +7,7 @@ import {
   deleteWaveMetadata,
   fetchWaveMetadata,
   fetchWaveById,
+  fetchOfficialWaves,
   fetchWavesV2Page,
   fetchWaveSubwavesPage,
   searchWavesByName,
@@ -84,6 +85,7 @@ describe("waves-v2-api", () => {
         page_size: "100",
         sort: ApiSubwavesSort.CreatedAt,
       },
+      errorMode: "structured",
     });
     expect(result).toMatchObject({
       page: 2,
@@ -195,6 +197,7 @@ describe("waves-v2-api", () => {
         visibility_tier: ApiWaveVisibilityTier.TrustedVisible,
       },
       headers: undefined,
+      errorMode: "structured",
     });
     expect(result.waves[0]).toMatchObject({
       id: "wave-1",
@@ -213,6 +216,29 @@ describe("waves-v2-api", () => {
       endpoint: "v2/waves/wave-1/metadata",
       headers: undefined,
     });
+  });
+
+  it("requests structured errors for the polled v2 wave fetchers", async () => {
+    commonApiFetchMock.mockResolvedValue({ page: 1, next: false, data: [] });
+    await fetchWavesV2Page({ page: 1, pageSize: 20 });
+    await fetchWaveSubwavesPage({ parentWaveId: "parent-wave" });
+    commonApiFetchMock.mockResolvedValue([]);
+    await expect(fetchOfficialWaves()).resolves.toEqual([]);
+
+    expect(commonApiFetchMock.mock.calls.map(([call]) => call)).toEqual([
+      expect.objectContaining({
+        endpoint: "v2/waves",
+        errorMode: "structured",
+      }),
+      expect.objectContaining({
+        endpoint: "waves/parent-wave/subwaves",
+        errorMode: "structured",
+      }),
+      expect.objectContaining({
+        endpoint: "v2/official-waves",
+        errorMode: "structured",
+      }),
+    ]);
   });
 
   it("fetches the unchanged single-wave data shape with HTTP status preserved", async () => {
@@ -253,6 +279,7 @@ describe("waves-v2-api", () => {
         name: "missing",
       },
       headers: undefined,
+      errorMode: "structured",
     });
     expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
     expect(result).toEqual([]);

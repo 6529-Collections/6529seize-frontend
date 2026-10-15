@@ -7,6 +7,15 @@ import {
 } from "@/helpers/navigation.helpers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { getAccessVerdict, isStagingDeployment } from "@/lib/proxy/accessProbe";
+import {
+  plainNotFoundResponse,
+  plainServiceUnavailableResponse,
+} from "@/lib/proxy/plainResponses";
+import {
+  isStaticAssetPath,
+  isUnservableDotPath,
+} from "@/lib/proxy/publicPaths";
 import { publicEnv } from "./config/env";
 import { API_AUTH_COOKIE } from "./constants/constants";
 
@@ -75,29 +84,22 @@ const redirectMappings = [
   { url: "/om/bug/report/", target: "/about/contact-us" },
 ];
 
-const STATIC_PATH_PREFIXES = [
-  "/api",
-  "/_next",
-  "/pdfjs/",
-  "/sitemap",
-  "/robots.txt",
-  "/error",
-] as const;
-const STATIC_PATHS = new Set<string>([
-  "/help-index.json",
-  "/llms.txt",
-  "/glossary.json",
-]);
 const STREAM_REVIEW_DATA_PREFIX = "/review-data/6529-stream/";
-const STATIC_PATH_SUFFIXES = [
-  "favicon.ico",
-  ".jpg",
-  ".jpeg",
-  ".png",
-  ".gif",
-  ".svg",
-  ".webp",
-] as const;
+
+// The access gate runs only on staging deployments, decided from the baked
+// BASE_ENDPOINT so request headers such as Host cannot switch it off.
+// Production and local development never call the API from proxy.
+const ACCESS_GATE_ENABLED = isStagingDeployment(publicEnv.BASE_ENDPOINT);
+
+/**
+ * Proxy runs before Next serves `public/` and `_next/static`, so it cannot tell
+ * whether a `/_next/*` file exists. Real `_next/static` and `_next/image`
+ * requests skip proxy entirely; missing `/_next/*` files get a plain 404 from
+ * the `afterFiles` rewrite in `next.config.ts`, which runs after real files.
+ */
+export const config = {
+  matcher: ["/((?!_next/static|_next/image).*)"],
+};
 
 function isPublicStreamReviewDataPath(req: NextRequest, pathname: string) {
   const rawPathname = new URL(req.url).pathname;
@@ -289,31 +291,37 @@ function handleRedirects(req: NextRequest): NextResponse | undefined {
 async function enforceAccessControl(
   req: NextRequest,
   normalizedPathname: string
-): Promise<NextResponse> {
+): Promise<Response> {
   if (
+    !ACCESS_GATE_ENABLED ||
     normalizedPathname === "/access" ||
     normalizedPathname === "/restricted"
   ) {
     return NextResponse.next();
   }
 
-  const apiAuth = req.cookies.get(API_AUTH_COOKIE) ?? {
-    value: publicEnv.STAGING_API_KEY ?? "",
-  };
-  const response = await fetch(`${publicEnv.API_ENDPOINT}/api/`, {
-    headers: apiAuth ? { "x-6529-auth": apiAuth.value } : {},
+  const authValue =
+    req.cookies.get(API_AUTH_COOKIE)?.value ?? publicEnv.STAGING_API_KEY ?? "";
+  const verdict = await getAccessVerdict({
+    apiEndpoint: publicEnv.API_ENDPOINT,
+    authValue,
   });
 
-  if (response.status === 401) {
+  if (verdict === "unauthorized") {
     req.nextUrl.pathname = "/access";
     req.nextUrl.search = "";
     return NextResponse.redirect(req.nextUrl);
   }
 
-  if (response.status === 403) {
+  if (verdict === "restricted") {
     req.nextUrl.pathname = "/restricted";
     req.nextUrl.search = "";
     return NextResponse.redirect(req.nextUrl);
+  }
+
+  // Fail closed: without a definitive answer the gate must not let pages through.
+  if (verdict === "unavailable") {
+    return plainServiceUnavailableResponse();
   }
 
   return NextResponse.next();
@@ -321,6 +329,10 @@ async function enforceAccessControl(
 
 export default async function proxy(req: NextRequest) {
   try {
+    if (isUnservableDotPath(req.nextUrl.pathname)) {
+      return plainNotFoundResponse();
+    }
+
     const redirectResponse = handleRedirects(req);
     if (redirectResponse) {
       return redirectResponse;
@@ -345,18 +357,14 @@ export default async function proxy(req: NextRequest) {
     }
 
     if (
-      STATIC_PATHS.has(normalizedPathname) ||
-      isPublicStreamReviewDataPath(req, pathname) ||
-      STATIC_PATH_PREFIXES.some((prefix) =>
-        normalizedPathname.startsWith(prefix)
-      ) ||
-      STATIC_PATH_SUFFIXES.some((suffix) => normalizedPathname.endsWith(suffix))
+      isStaticAssetPath(normalizedPathname) ||
+      isPublicStreamReviewDataPath(req, pathname)
     ) {
       return NextResponse.next();
     }
 
-    return enforceAccessControl(req, normalizedPathname);
-  } catch (error) {
+    return await enforceAccessControl(req, normalizedPathname);
+  } catch {
     return NextResponse.redirect(new URL("/error", req.url));
   }
 }

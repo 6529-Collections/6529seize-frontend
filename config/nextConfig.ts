@@ -2,13 +2,19 @@ import { createSecurityHeaders } from "./securityHeaders";
 import { meebits445Headers } from "./meebits445Headers";
 import { PublicEnv } from "./env.schema";
 import { NextConfig } from "next";
+import { HTML_LIMITED_BOT_UA_RE } from "next/dist/shared/lib/router/utils/html-bots";
 import { ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/arweave-gateways";
 import { getMediaResolverHostname } from "../lib/media/decentralized-media";
 import { IPFS_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/ipfs-gateways";
 import { STATIC_ALLOWED_IMAGE_HOSTNAMES } from "../lib/media/static-image-hosts";
 
-const HTML_LIMITED_METADATA_BOTS =
-  /facebookexternalhit|facebookcatalog|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview|TelegramBot|redditbot|Pinterestbot|opentweet/i;
+// A custom htmlLimitedBots value replaces Next's default list, so extend the
+// default (Google, Bing, Apple, Yandex, Baidu, social crawlers) with only the
+// bots Next does not already list.
+const HTML_LIMITED_METADATA_BOTS = new RegExp(
+  HTML_LIMITED_BOT_UA_RE.source + "|TelegramBot|Pinterestbot|opentweet",
+  "i"
+);
 const PUBLIC_REVIEW_TRACE_EXCLUDES = [
   "content/public-reviews/**/*",
   "public/review-data/**/*",

@@ -59,6 +59,7 @@ import {
 } from "@/helpers/waves/wave-submission-experience.helpers";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
+import { editDropLexicalLoader } from "@/components/waves/drops/editDropLexicalLoader";
 import type {
   ChatSubmitDropAction,
   ChatSubmitDropState,
@@ -209,6 +210,10 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     : searchParams.get("curation");
   const loadedWaveId = wave?.id ?? null;
   const { editingDropId, setEditingDropId } = useEditingDrop();
+
+  // Warm the drop editor once the page is idle, so the first edit does not
+  // wait on the network. The chunk stays out of first-load JS.
+  editDropLexicalLoader.usePreloadWhenIdle();
   const requestedEditPostId = searchParams.get("editPost") ?? "";
   const { drop: requestedEditPost } = useDrop({
     dropId: requestedEditPostId,

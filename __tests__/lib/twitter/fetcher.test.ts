@@ -1,3 +1,5 @@
+jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
+
 import { fetchTweetPreview } from "@/lib/twitter/fetcher";
 
 const createSyndicationResponse = () =>

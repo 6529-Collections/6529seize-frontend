@@ -49,7 +49,9 @@ Use these collection routes to mint and review distribution data:
   and `BURN TO MINT` actions are hidden. Direct mint links return to the
   collection page without showing mint controls. Countdown information and
   distribution data remain available. US iOS, web, and Android keep their
-  existing mint behavior.
+  existing mint behavior. On iOS the return waits for the country check, so a
+  US deep link stays on the mint page; a failed or empty check counts as
+  unknown.
 
 - Public phase `LIVE` always uses the standard mint widget.
 - Outside public phase `LIVE`, mint widget type comes from merkle config.
@@ -57,6 +59,9 @@ Use these collection routes to mint and review distribution data:
 - External-burn mints use `burnOrSwapExternalToMint`; standard mints use
   `mint`.
 - Distribution-plan route fetches phases and allowlist rows client-side.
+- Distribution-plan phase cards show `Start` and `End` as a UTC date and time
+  followed by `UTC` (for example `2026-10-12 11:27:11 UTC`), the same for every
+  viewer. A phase with no time shows `N/A`.
 - `Distribution Plan` link visibility is timing-based, but direct route access
   still works.
 

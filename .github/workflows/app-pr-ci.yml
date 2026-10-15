@@ -463,12 +463,31 @@ jobs:
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/drop-editing"
         run: ./bin/6529 run test:e2e:edit-drop-sandbox
 
+      # One `next dev` session that compiles every critical-shell route grows
+      # Turbopack's native memory past the 16 GB runner, and the OOM killer
+      # silently ends the dev server near the last route (/waves/create).
+      # Run the pack as two complementary title filters, each with a fresh
+      # dev server, so every test still runs exactly once.
       - name: Run critical route-shell Playwright pack
+        id: critical_shell_routes
         if: matrix.lane == 'playwright-critical-shell'
         env:
           NEXT_DEV_DIST_DIR: ".next-playwright-critical-shell"
+          NEXT_DEV_TURBOPACK_FS_CACHE: "0"
           PLAYWRIGHT_READONLY: "1"
-        run: ./bin/6529 run test:e2e:critical-shell
+        run: ./bin/6529 run test:e2e:critical-shell "--grep=Critical read-only route shells"
+
+      - name: Run critical-shell hydration Playwright pack
+        if: >-
+          matrix.lane == 'playwright-critical-shell' &&
+          (success() || steps.critical_shell_routes.outcome == 'failure')
+        env:
+          NEXT_DEV_DIST_DIR: ".next-playwright-critical-shell-hydration"
+          NEXT_DEV_TURBOPACK_FS_CACHE: "0"
+          PLAYWRIGHT_READONLY: "1"
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/critical-shell-hydration"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/critical-shell-hydration"
+        run: ./bin/6529 run test:e2e:critical-shell "--grep-invert=Critical read-only route shells"
 
       - name: Run session recovery browser regression pack
         if: matrix.lane == 'playwright-critical-shell'
@@ -476,6 +495,17 @@ jobs:
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/session-recovery"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/session-recovery"
         run: ./bin/6529 run test:e2e:session-recovery-sandbox
+
+      # A dev server killed by the kernel OOM killer exits without any output,
+      # so record the container's memory peak and OOM-kill count.
+      - name: Report browser lane memory pressure
+        if: always() && matrix.lane == 'playwright-critical-shell'
+        run: |
+          for file in memory.peak memory.max memory.events; do
+            echo "== /sys/fs/cgroup/${file}"
+            cat "/sys/fs/cgroup/${file}" 2>/dev/null || echo "unavailable"
+          done
+          free -m || true
 
       - name: Upload app check artifacts
         if: always()

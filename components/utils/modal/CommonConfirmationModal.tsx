@@ -63,7 +63,7 @@ export default function CommonConfirmationModal({
                 <button
                   onClick={onClose}
                   type="button"
-                  className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-950 tw-p-2.5 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50 focus:tw-outline-none"
+                  className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-950 tw-p-2.5 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
                 >
                   <span className="tw-sr-only tw-text-sm">Close</span>
                   <svg

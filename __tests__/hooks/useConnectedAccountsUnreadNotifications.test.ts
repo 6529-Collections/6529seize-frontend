@@ -155,6 +155,30 @@ describe("useConnectedAccountsUnreadNotifications", () => {
     expect(queryOptions.retry(0, { status: 503 })).toBe(true);
   });
 
+  it("stops retrying other client errors but keeps retrying timeouts", () => {
+    useQueryMock.mockReturnValue({ data: {} });
+
+    renderHook(() =>
+      useConnectedAccountsUnreadNotifications([
+        {
+          address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          refreshToken: "refresh-token",
+          role: null,
+          jwt: "jwt-token",
+          profileId: null,
+          profileHandle: "alice",
+        },
+      ])
+    );
+
+    const queryOptions = useQueryMock.mock.calls[0]?.[0];
+    expect(queryOptions.retry(0, { status: 400 })).toBe(false);
+    expect(queryOptions.retry(0, { status: 404 })).toBe(false);
+    expect(queryOptions.retry(0, { status: 429 })).toBe(false);
+    expect(queryOptions.retry(0, { status: 408 })).toBe(true);
+    expect(queryOptions.retry(3, { status: 503 })).toBe(false);
+  });
+
   it("surfaces terminal connected-account failures instead of hiding them as successful polling", async () => {
     commonApiFetchMock.mockRejectedValue({ status: 403 });
     useQueryMock.mockReturnValue({ data: {} });
