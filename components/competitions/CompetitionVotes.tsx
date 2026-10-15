@@ -25,7 +25,7 @@ function CompetitionPersonalVotes() {
   if (!viewer)
     return (
       <div className="tw-flex tw-flex-col tw-items-start tw-gap-3 tw-p-4">
-        <p className="tw-m-0 tw-text-sm tw-italic tw-text-iron-400">
+        <p className="tw-m-0 tw-text-sm tw-italic tw-text-iron-500">
           {t(locale, "competitions.signIn")}
         </p>
         <HeaderUserConnect label={t(locale, "competitions.connectWallet")} />

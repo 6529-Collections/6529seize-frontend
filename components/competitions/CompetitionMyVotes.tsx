@@ -115,7 +115,7 @@ export default function CompetitionMyVotes() {
 
   if (!viewer)
     return (
-      <p className="tw-p-4 tw-text-sm tw-italic tw-text-iron-400">
+      <p className="tw-p-4 tw-text-sm tw-italic tw-text-iron-500">
         {t(locale, "competitions.signIn")}
       </p>
     );
