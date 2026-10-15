@@ -124,7 +124,7 @@ async function instrument(context, page, options) {
   cdp.on("Network.requestWillBeSent", (event) => {
     if (!log.requests.has(event.requestId)) log.inflight++;
     log.requests.set(event.requestId, {
-      ...(log.requests.get(event.requestId) || {}),
+      ...log.requests.get(event.requestId),
       url: event.request.url,
       type: event.type,
       startWall: Date.now(),
@@ -269,7 +269,7 @@ async function measureLoad({ page, cdp, log, url, label, coverage, baseHost }) {
       domNodes: document.getElementsByTagName("*").length,
     };
   });
-  const fcp = (perf.paint.find((p) => p.n === "first-contentful-paint") || {}).t ?? null;
+  const fcp = perf.paint.find((p) => p.n === "first-contentful-paint")?.t ?? null;
   const lcpEntry = perf.lcp.length ? perf.lcp[perf.lcp.length - 1] : null;
   const longTasksAfterFcp = perf.lt.filter((task) => fcp === null || task.s >= fcp);
   const tbt = longTasksAfterFcp.reduce((sum, task) => sum + Math.max(0, task.d - 50), 0);
@@ -421,7 +421,9 @@ function progressLine(run) {
 }
 
 // Cold loads in fresh contexts; the last context also gets the warm reload,
-// its idle window and, when asked, a warm load with coverage.
+// its idle window and, when asked, a warm load with coverage. Loads run one
+// after another on purpose: concurrent loads would share the CPU and network
+// budget being measured.
 async function measurePage(browser, options, key, runs) {
   const baseHost = options.base.hostname;
   const url = new URL(PAGES[key], options.base).href;
