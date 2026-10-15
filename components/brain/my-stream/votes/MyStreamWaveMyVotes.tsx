@@ -162,7 +162,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
     >
       {drops.length === 0 && !isFetching ? (
         <div className="tw-mt-10 tw-px-2 sm:tw-px-4">
-          <p className="tw-text-center tw-text-sm tw-italic tw-text-iron-500">
+          <p className="tw-text-left tw-text-sm tw-italic tw-text-iron-500">
             {t(locale, "waves.myVotes.empty")}
           </p>
         </div>
