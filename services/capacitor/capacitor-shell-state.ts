@@ -11,14 +11,18 @@ import { Capacitor } from "@capacitor/core";
  * `appStateChange` and `orientationchange` listeners, so the cost multiplied
  * with the number of mounted chat rows. These stores keep ONE of each for the
  * whole app: the first subscriber starts them, the last one to leave tears them
- * down, and they never start outside a native shell.
+ * down (after a microtask, so rows swapped in one commit keep the session), and
+ * they never start outside a native shell.
  */
 
 const ORIENTATION_PORTRAIT_QUERY = "(orientation: portrait)";
 
 /**
  * Builds a `subscribe` function for `useSyncExternalStore` that starts
- * `start` for the first subscriber and runs its teardown when the last leaves.
+ * `start` for the first subscriber and runs its teardown once the last one has
+ * left. Teardown waits a microtask: React runs a commit's unsubscribes before
+ * its subscribes, so a row replaced by another in the same commit momentarily
+ * leaves zero subscribers and must not restart the native session.
  */
 function createSharedSubscribe(
   start: (notify: () => void) => () => void
@@ -29,6 +33,12 @@ function createSharedSubscribe(
   const notify = () => {
     for (const subscription of subscriptions) {
       subscription();
+    }
+  };
+  const stopWhenUnused = () => {
+    if (subscriptions.size === 0) {
+      stop?.();
+      stop = undefined;
     }
   };
 
@@ -46,8 +56,7 @@ function createSharedSubscribe(
     return () => {
       subscriptions.delete(subscription);
       if (subscriptions.size === 0) {
-        stop?.();
-        stop = undefined;
+        void Promise.resolve().then(stopWhenUnused);
       }
     };
   };
@@ -112,8 +121,8 @@ export const subscribeCapacitorAppState = createSharedSubscribe((notify) => {
 
   return () => {
     cancelled = true;
-    // The next session re-reads the real state, like a freshly mounted hook.
-    appIsActive = false;
+    // The last known state is kept: the next session re-reads the real value,
+    // and consumers that remount meanwhile never flash inactive.
     if (handle) {
       void removeHandle(handle);
     }
@@ -122,7 +131,6 @@ export const subscribeCapacitorAppState = createSharedSubscribe((notify) => {
 
 const readIsPortrait = (): boolean => {
   if (
-    !Capacitor.isNativePlatform() ||
     typeof window === "undefined" ||
     typeof window.matchMedia !== "function"
   ) {
@@ -132,12 +140,28 @@ const readIsPortrait = (): boolean => {
   return window.matchMedia(ORIENTATION_PORTRAIT_QUERY).matches;
 };
 
-// Cached only while subscribed, when `orientationchange` keeps it current.
+// Kept current by `orientationchange` while subscribed.
 let sharedIsPortrait: boolean | undefined;
+// Reads made before the first subscription (every consumer of an initial mount
+// renders first) share one `matchMedia` lookup per tick instead of one each.
+let tickIsPortrait: boolean | undefined;
 
 /** Whether the native shell is in portrait (always `true` outside native). */
-export const getCapacitorIsPortrait = (): boolean =>
-  sharedIsPortrait ?? readIsPortrait();
+export const getCapacitorIsPortrait = (): boolean => {
+  if (sharedIsPortrait !== undefined) {
+    return sharedIsPortrait;
+  }
+  if (!Capacitor.isNativePlatform()) {
+    return true;
+  }
+  if (tickIsPortrait === undefined) {
+    tickIsPortrait = readIsPortrait();
+    void Promise.resolve().then(() => {
+      tickIsPortrait = undefined;
+    });
+  }
+  return tickIsPortrait;
+};
 
 export const subscribeCapacitorOrientation = createSharedSubscribe((notify) => {
   sharedIsPortrait = readIsPortrait();

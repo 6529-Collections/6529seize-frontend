@@ -132,9 +132,11 @@ function Row() {
 
 const rows = (count: number) => (
   <ul>
-    {Array.from({ length: count }, (_, index) => (
-      <Row key={index} />
-    ))}
+    {Array.from({ length: count }, (_, position) => `row-${position}`).map(
+      (id) => (
+        <Row key={id} />
+      )
+    )}
   </ul>
 );
 
@@ -286,6 +288,12 @@ describe("shared row listeners", () => {
       removeWindowListener = jest.spyOn(window, "removeEventListener");
     });
 
+    afterEach(() => {
+      // The shared store keeps its last known state between tests; the
+      // rendered rows are still mounted here, so they can receive the reset.
+      act(() => appStateCallback?.({ isActive: false }));
+    });
+
     it("reads app state and registers its listeners once for all rows", async () => {
       render(rows(ROW_COUNT));
       await flushPromises();
@@ -297,6 +305,18 @@ describe("shared row listeners", () => {
         expect.any(Function)
       );
       expect(orientationCalls(addWindowListener)).toHaveLength(1);
+    });
+
+    it("looks up the orientation a constant number of times however many rows mount", async () => {
+      render(rows(ROW_COUNT));
+      await flushPromises();
+
+      // One coalesced read for the initial renders plus one when subscribing.
+      expect(
+        jest
+          .mocked(globalThis.matchMedia)
+          .mock.calls.filter(([query]) => query === PORTRAIT_QUERY).length
+      ).toBeLessThanOrEqual(2);
     });
 
     it("propagates app state and orientation changes to every row", async () => {
@@ -356,11 +376,60 @@ describe("shared row listeners", () => {
       expect(removeAppStateHandle).toHaveBeenCalledTimes(1);
       expect(orientationCalls(removeWindowListener)).toHaveLength(1);
 
-      // A later mount starts a fresh session instead of reusing stale state.
+      // A later mount starts a new session that re-reads the real state.
       render(rows(1));
       await flushPromises();
       expect(App.getState).toHaveBeenCalledTimes(2);
       expect(App.addListener).toHaveBeenCalledTimes(2);
+    });
+
+    describe("row churn", () => {
+      let seenActive: boolean[];
+
+      function Probe() {
+        const { isActive } = useCapacitor();
+        seenActive.push(isActive);
+        return null;
+      }
+
+      beforeEach(() => {
+        seenActive = [];
+        (App.getState as jest.Mock).mockResolvedValue({ isActive: true });
+      });
+
+      it("keeps the native session and never flashes inactive when the last row is replaced in the same commit", async () => {
+        const { rerender } = render(<Probe key="first" />);
+        await flushPromises();
+        expect(seenActive.at(-1)).toBe(true);
+        seenActive = [];
+
+        // Unmounts the only subscriber and mounts a new one in one commit.
+        rerender(<Probe key="second" />);
+        await flushPromises();
+
+        expect(seenActive.length).toBeGreaterThan(0);
+        expect(seenActive).not.toContain(false);
+        expect(App.getState).toHaveBeenCalledTimes(1);
+        expect(App.addListener).toHaveBeenCalledTimes(1);
+        expect(removeAppStateHandle).not.toHaveBeenCalled();
+        expect(orientationCalls(addWindowListener)).toHaveLength(1);
+        expect(orientationCalls(removeWindowListener)).toHaveLength(0);
+      });
+
+      it("never flashes inactive when a row mounts right after the last one left", async () => {
+        const { unmount } = render(<Probe />);
+        await flushPromises();
+        expect(seenActive.at(-1)).toBe(true);
+        unmount();
+        await flushPromises();
+        seenActive = [];
+
+        render(<Probe />);
+        await flushPromises();
+
+        expect(seenActive.length).toBeGreaterThan(0);
+        expect(seenActive).not.toContain(false);
+      });
     });
   });
 
@@ -392,7 +461,15 @@ describe("shared row listeners", () => {
       (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
       (Capacitor.getPlatform as jest.Mock).mockReturnValue("ios");
       (App.getState as jest.Mock).mockResolvedValue({ isActive: true });
-      (App.addListener as jest.Mock).mockResolvedValue({ remove: jest.fn() });
+      let appStateCallback:
+        | ((state: { isActive: boolean }) => void)
+        | undefined;
+      (App.addListener as jest.Mock).mockImplementation(
+        (_event: string, callback: (state: { isActive: boolean }) => void) => {
+          appStateCallback = callback;
+          return Promise.resolve({ remove: jest.fn() });
+        }
+      );
       queryMatches[PORTRAIT_QUERY] = false;
       const consoleError = jest
         .spyOn(console, "error")
@@ -433,6 +510,8 @@ describe("shared row listeners", () => {
           new Set(["1"])
         );
       } finally {
+        // Leave the shared store inactive for any test that runs after this.
+        act(() => appStateCallback?.({ isActive: false }));
         act(() => root?.unmount());
       }
     });
