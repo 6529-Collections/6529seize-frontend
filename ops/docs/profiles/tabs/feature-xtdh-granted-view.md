@@ -59,6 +59,11 @@ Shared tab routing and owner-mode rules are documented in:
 - `Load More` paginates grant rows.
 - Granted rows can show derived badges from validity dates:
   `ACTIVE`, `SCHEDULED`, or `ENDED`.
+- Grants with an end time show `Last grant`: the final daily xTDH run that can
+  add xTDH for the grant. xTDH accrues in whole UTC days at the 00:00 UTC run,
+  so this is 00:00 UTC on the UTC date of the grant's end (for example
+  `Dec 5, 2025, 00:00 UTC`). It is shown in UTC, so every viewer sees the same
+  run.
 
 Collection thumbnails show an `NFT` placeholder when artwork is missing or
 cannot load. The collection name and grant details remain available.
