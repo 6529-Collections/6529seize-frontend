@@ -1,5 +1,6 @@
 import { MEMES_CONTRACT } from "@/constants/constants";
 import {
+  NEXTGEN_HTML_IFRAME_SANDBOX,
   NFT_HTML_IFRAME_SANDBOX,
   getNftHtmlIframeSandbox,
 } from "@/lib/media/nft-html-sandbox";
@@ -14,17 +15,34 @@ describe("NFT_HTML_IFRAME_SANDBOX", () => {
     expect(tokens).toContain("allow-scripts");
   });
 
+  it("keeps artwork save/export and outbound links working", () => {
+    expect(tokens).toContain("allow-downloads");
+    expect(tokens).toContain("allow-popups");
+    expect(tokens).toContain("allow-popups-to-escape-sandbox");
+  });
+
   it("does not grant same-origin access", () => {
     expect(tokens).not.toContain("allow-same-origin");
   });
 
-  it("does not grant popups, top navigation, forms, modals or downloads", () => {
-    expect(tokens).toEqual(["allow-scripts"]);
+  it("does not grant top navigation, forms, modals or pointer lock", () => {
+    expect(tokens).toEqual([
+      "allow-scripts",
+      "allow-downloads",
+      "allow-popups",
+      "allow-popups-to-escape-sandbox",
+    ]);
+  });
+});
+
+describe("NEXTGEN_HTML_IFRAME_SANDBOX", () => {
+  it("keeps the minimal scripts-only policy", () => {
+    expect(NEXTGEN_HTML_IFRAME_SANDBOX).toBe("allow-scripts");
   });
 });
 
 describe("getNftHtmlIframeSandbox", () => {
-  it("uses the scripts-only sandbox by default", () => {
+  it("uses the default NFT sandbox", () => {
     expect(
       getNftHtmlIframeSandbox(
         { contract: MEMES_CONTRACT, id: 1 },
@@ -42,7 +60,7 @@ describe("getNftHtmlIframeSandbox", () => {
         { contract: MEMES_CONTRACT.toLowerCase(), id: 507 },
         MEMES_507_SOURCE
       )
-    ).toBe("allow-scripts allow-same-origin");
+    ).toBe(`${NFT_HTML_IFRAME_SANDBOX} allow-same-origin`);
   });
 
   it("does not extend the #507 exception to another token, contract or source", () => {

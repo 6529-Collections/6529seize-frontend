@@ -300,15 +300,18 @@ describe("NFTHTMLRenderer", () => {
       expect(iframe).not.toHaveAttribute("title");
     });
 
-    it("sandboxes NFT HTML with scripts only", () => {
+    it("sandboxes NFT HTML with scripts, downloads and escaping popups", () => {
       const props = createDefaultProps({ id: "sandboxed-iframe" });
       render(<NFTHTMLRenderer {...props} />);
 
       const iframe = screen.getByTitle("sandboxed-iframe");
-      expect(iframe).toHaveAttribute("sandbox", "allow-scripts");
+      expect(iframe).toHaveAttribute(
+        "sandbox",
+        "allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox"
+      );
     });
 
-    it("never grants same-origin access to NFT HTML", () => {
+    it("never grants same-origin access or top navigation to NFT HTML", () => {
       const sources = [
         "https://arweave.net/1YUXdSJtHxXIzFc7REy8zQT-zpTzZLdhoT6TKM34MR4",
         "https://example.com/animation.html",
@@ -327,7 +330,10 @@ describe("NFTHTMLRenderer", () => {
           .getByTitle(`same-origin-${index}`)
           .getAttribute("sandbox");
         expect(sandbox).not.toBeNull();
-        expect(sandbox?.split(/\s+/)).not.toContain("allow-same-origin");
+        const tokens = sandbox?.split(/\s+/) ?? [];
+        expect(tokens).not.toContain("allow-same-origin");
+        expect(tokens).not.toContain("allow-top-navigation");
+        expect(tokens).not.toContain("allow-top-navigation-by-user-activation");
         unmount();
       });
     });
@@ -347,7 +353,7 @@ describe("NFTHTMLRenderer", () => {
 
       expect(screen.getByTitle("meme-507")).toHaveAttribute(
         "sandbox",
-        "allow-scripts allow-same-origin"
+        "allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-same-origin"
       );
     });
   });
