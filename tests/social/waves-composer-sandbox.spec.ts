@@ -405,9 +405,10 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     baseURL,
     page,
   }, testInfo) => {
+    // Only this project installs the iOS shell whose keyboard inset animates here.
     test.skip(
       testInfo.project.name !== "capacitor-ios-sim",
-      "Native chat layout transition"
+      "The iOS keyboard layout requires the Capacitor iOS simulation"
     );
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await gotoSandboxWave(page);
