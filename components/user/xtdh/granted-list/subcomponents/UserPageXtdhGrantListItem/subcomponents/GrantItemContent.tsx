@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { useState } from "react";
 import { shortenAddress } from "../formatters";
 import type { GrantItemContentProps } from "../types";
 import { GrantExpiryBadge } from "./GrantExpiryBadge";
@@ -15,6 +16,8 @@ export function GrantItemContent({
   validTo,
   actions,
 }: Readonly<GrantItemContentProps>) {
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
+  const imageUrl = contract.imageUrl;
   const name = contract.name ?? shortenAddress(contract.address);
 
   return (
@@ -22,16 +25,21 @@ export function GrantItemContent({
       <header className="tw-flex tw-flex-col tw-items-start tw-justify-between tw-gap-4 md:tw-flex-row">
         <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-3">
           <div className="tw-relative tw-h-12 tw-w-12 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800 sm:tw-h-16 sm:tw-w-16">
-            {contract.imageUrl ? (
+            {imageUrl && imageUrl !== failedImageUrl ? (
               <Image
-                src={contract.imageUrl}
+                key={imageUrl}
+                src={imageUrl}
+                onError={() => setFailedImageUrl(imageUrl)}
                 alt={name}
                 fill
                 sizes="64px"
                 className="tw-h-full tw-w-full tw-object-cover"
               />
             ) : (
-              <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
+              <div
+                aria-hidden="true"
+                className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400"
+              >
                 NFT
               </div>
             )}

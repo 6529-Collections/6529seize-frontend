@@ -10,6 +10,7 @@ import {
   type ReactElement,
 } from "react";
 
+import { preloadOnFirstInteraction } from "./preloadOnFirstInteraction";
 import { runWhenIdle } from "./runWhenIdle";
 
 type ComponentModule<P> = { readonly default: ComponentType<P> };
@@ -24,9 +25,10 @@ interface UseLazyReadyOptions {
 interface LazyComponentLoader<P extends object> {
   // Starts fetching now. Safe to call repeatedly.
   readonly preload: () => void;
-  // Starts fetching once the browser is idle, from the first mounted caller
-  // while enabled. The fetch is scheduled at most once, however many callers.
-  readonly usePreloadWhenIdle: (enabled?: boolean) => void;
+  // Starts fetching on the visitor's first interaction, or once the browser is
+  // idle if that comes first, from the first mounted caller while enabled. It
+  // is scheduled at most once, however many callers.
+  readonly usePreloadEarly: (enabled?: boolean) => void;
   // True once the module is loaded. A module that is already cached reports
   // true during the first render, so opening something already fetched
   // commits in a single pass.
@@ -45,7 +47,7 @@ export function createLazyComponentLoader<P extends object>(
 ): LazyComponentLoader<P> {
   let loaded: ComponentType<P> | undefined;
   let pending: Promise<ComponentType<P>> | undefined;
-  let idleScheduled = false;
+  let earlyScheduled = false;
 
   const fetchComponent = async (): Promise<ComponentType<P>> => {
     const loadedModule = await importComponent();
@@ -70,15 +72,18 @@ export function createLazyComponentLoader<P extends object>(
     load().catch(() => undefined);
   };
 
-  const preloadWhenIdle = (enabled: boolean): void => {
-    if (!enabled || loaded || idleScheduled) return;
-    idleScheduled = true;
+  const preloadEarly = (enabled: boolean): void => {
+    if (!enabled || loaded || earlyScheduled) return;
+    earlyScheduled = true;
+    // Whichever fires first starts the download; the other is then a no-op.
+    // Idle is only the fallback: a busy main thread can delay it for seconds.
+    preloadOnFirstInteraction(preload);
     runWhenIdle(preload);
   };
 
-  const usePreloadWhenIdle = (enabled = true): void => {
+  const usePreloadEarly = (enabled = true): void => {
     useEffect(() => {
-      preloadWhenIdle(enabled);
+      preloadEarly(enabled);
     }, [enabled]);
   };
 
@@ -113,7 +118,7 @@ export function createLazyComponentLoader<P extends object>(
     }, [enabled]);
 
     // The module-level cache is read on every render, so an instance that
-    // mounted before the chunk arrived (for example through idle preload)
+    // mounted before the chunk arrived (for example through an early preload)
     // still renders it synchronously the moment it is needed.
     return loaded !== undefined;
   };
@@ -125,5 +130,5 @@ export function createLazyComponentLoader<P extends object>(
   const Loaded = (props: P): ReactElement | null =>
     loaded ? createElement(loaded, props as P & Attributes) : null;
 
-  return { preload, usePreloadWhenIdle, useIsReady, Loaded };
+  return { preload, usePreloadEarly, useIsReady, Loaded };
 }
