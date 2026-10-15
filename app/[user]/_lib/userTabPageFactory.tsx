@@ -7,23 +7,19 @@ import { getMetadataForUserPage, getUserPageTitle } from "@/helpers/Helpers";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import { userPageNeedsRedirect } from "@/helpers/server.helpers";
 import {
-  getUserProfile,
-  userPageNeedsRedirect,
-} from "@/helpers/server.helpers";
+  loadProfileStatements,
+  loadUserProfile,
+} from "@/helpers/user-page.server";
 import JsonLdScript from "@/lib/structured-data/json-ld";
 import { buildProfilePageJsonLd } from "@/lib/structured-data/profile";
-import { commonApiFetch } from "@/services/api/common-api";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
 type TabProps = { readonly profile: ApiIdentity };
 type UserRouteParams = { user: string };
 type UserSearchParams = Record<string, string | string[] | undefined>;
-type ProfileLoadResult =
-  | { readonly ok: true; readonly profile: ApiIdentity }
-  | { readonly ok: false; readonly error: unknown };
 
 const PROBE_USER_SUFFIXES = [
   ".html",
@@ -100,26 +96,9 @@ const isProbeLikeUserSlug = (user: string): boolean => {
   return PROBE_USER_SUFFIXES.some((suffix) => normalized.endsWith(suffix));
 };
 
-const loadProfile = async (
-  user: string,
-  headers: Record<string, string>
-): Promise<ProfileLoadResult> => {
+const loadPublicProfileBio = async (user: string): Promise<string | null> => {
   try {
-    return { ok: true, profile: await getUserProfile({ user, headers }) };
-  } catch (error) {
-    return { ok: false, error };
-  }
-};
-
-const loadPublicProfileBio = async (
-  user: string,
-  headers: Record<string, string>
-): Promise<string | null> => {
-  try {
-    const statements = await commonApiFetch<CicStatement[]>({
-      endpoint: `profiles/${encodeURIComponent(user)}/cic/statements`,
-      headers,
-    });
+    const statements = await loadProfileStatements(encodeURIComponent(user));
     return (
       statements.find(
         (statement) =>
@@ -166,10 +145,14 @@ export function createUserTabPage<
     }
 
     const normalizedUser = user.toLowerCase();
-    const resolvedSearchParams = searchParams ? await searchParams : undefined;
+    // The identity request and the search params are independent, so they
+    // resolve together. The existence check below still runs before anything
+    // renders or suspends, which keeps unknown profiles on a real 404 status.
+    const [resolvedSearchParams, profileResult] = await Promise.all([
+      searchParams,
+      loadUserProfile(normalizedUser),
+    ]);
     const query: UserSearchParams = normalizeSearchParams(resolvedSearchParams);
-    const headers = await getAppCommonHeaders();
-    const profileResult = await loadProfile(normalizedUser, headers);
     if (!profileResult.ok) {
       if (isNotFoundError(profileResult.error)) {
         notFound();
@@ -238,8 +221,12 @@ export function createUserTabPage<
     }
 
     const normalizedUser = resolvedParams.user.toLowerCase();
-    const headers = await getAppCommonHeaders();
-    const profileResult = await loadProfile(normalizedUser, headers);
+    // The public bio only needs the route identity, so it loads alongside the
+    // profile instead of after it. The loaders are request-memoized, which lets
+    // the page and its header reuse both responses instead of refetching them.
+    const profilePromise = loadUserProfile(normalizedUser);
+    const publicBioPromise = loadPublicProfileBio(normalizedUser);
+    const profileResult = await profilePromise;
     if (!profileResult.ok) {
       if (isNotFoundError(profileResult.error)) {
         notFound();
@@ -256,7 +243,7 @@ export function createUserTabPage<
       );
     }
     const profile = profileResult.profile;
-    const publicBio = await loadPublicProfileBio(normalizedUser, headers);
+    const publicBio = await publicBioPromise;
     const canonicalUser = profile.handle ?? profile.primary_wallet;
     const canonicalUserPath = canonicalUser
       ? `/${encodeURIComponent(canonicalUser)}`

@@ -6,22 +6,13 @@ import { SortDirection } from "@/entities/ISort";
 import type { CountlessPage } from "@/helpers/Types";
 import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import { loadProfileStatements } from "@/helpers/user-page.server";
 import { commonApiFetch } from "@/services/api/common-api";
 
 import UserPageHeaderClient from "./UserPageHeaderClient";
 import { getRandomColor } from "@/helpers/Helpers";
 import { getProfileCmsPrimarySite } from "@/lib/profile-cms/runtime/fetcher";
 import { getCmsPublicPath } from "@/lib/profile-cms/runtime/routes";
-
-async function fetchStatements(
-  handleOrWallet: string,
-  headers: Record<string, string>
-) {
-  return await commonApiFetch<CicStatement[]>({
-    endpoint: `profiles/${handleOrWallet}/cic/statements`,
-    headers,
-  });
-}
 
 async function fetchProfileEnabledLog(
   handleOrWallet: string,
@@ -93,7 +84,7 @@ export default async function UserPageHeader({
   const cmsHandle = profile.handle?.toLowerCase() ?? null;
   const [statementsResult, profileLogResult, followersResult, cmsSiteResult] =
     await Promise.allSettled([
-      fetchStatements(normalizedHandle, headers),
+      loadProfileStatements(normalizedHandle),
       fetchProfileEnabledLog(normalizedHandle, headers),
       fetchFollowersCount(profile.id, headers),
       cmsHandle
