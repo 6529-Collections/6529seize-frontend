@@ -3,6 +3,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { CLASSIFICATIONS } from "@/entities/IProfile";
 import UserPageHeaderName from "@/components/user/user-page-header/name/UserPageHeaderName";
+import { mockDefaultTimeZone } from "@/__tests__/utils/timeZoneHydration";
 
 jest.mock(
   "@/components/user/user-page-header/name/UserPageHeaderNameWrapper",
@@ -151,11 +152,20 @@ describe("UserPageHeaderName", () => {
     );
   });
 
-  it("renders the message-backed profile-enabled date", () => {
-    renderComponent({ handle: "Alice" }, "0x123", "2024-01-01T00:00:00.000Z");
+  // The label formats an instant without a zone, so it shows the month in the
+  // viewer's zone. 2024-01-01T00:00Z is still December 31 in Los Angeles.
+  it.each([
+    ["UTC", "Profile enabled: January 2024"],
+    ["America/Los_Angeles", "Profile enabled: December 2023"],
+    ["Pacific/Auckland", "Profile enabled: January 2024"],
+  ])("renders the message-backed profile-enabled date in %s", (zone, label) => {
+    const restoreTimeZone = mockDefaultTimeZone(zone);
+    try {
+      renderComponent({ handle: "Alice" }, "0x123", "2024-01-01T00:00:00.000Z");
 
-    expect(
-      screen.getByText("Profile enabled: January 2024")
-    ).toBeInTheDocument();
+      expect(screen.getByText(label)).toBeInTheDocument();
+    } finally {
+      restoreTimeZone();
+    }
   });
 });

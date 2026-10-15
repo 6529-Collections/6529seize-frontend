@@ -9,13 +9,14 @@ export const usePrefetchWaveData = () => {
 
   const prefetchWaveData = useCallback(
     (waveId: string) => {
-      void (async () => {
+      return (async () => {
         try {
           await queryClient.prefetchQuery({
             queryKey: [QueryKey.WAVE, { wave_id: waveId }],
-            queryFn: async () =>
+            queryFn: async ({ signal }) =>
               await commonApiFetch<ApiWave>({
                 endpoint: `waves/${waveId}`,
+                signal,
                 errorMode: "structured",
               }),
             staleTime: 60000,

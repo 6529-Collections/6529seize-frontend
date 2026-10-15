@@ -227,6 +227,20 @@ describe("MobileWrapperDialog", () => {
       ).toBeInTheDocument();
     });
 
+    it("anchors action-only sheets independently of the closing keyboard", () => {
+      render(
+        <MobileWrapperDialog {...defaultProps} isOpen avoidKeyboard={false} />
+      );
+      const container = document.querySelector<HTMLElement>(
+        ".tw-pointer-events-none.tw-fixed.tw-inset-x-0"
+      );
+      expect(
+        container?.style.getPropertyValue(
+          "--mobile-wrapper-dialog-keyboard-inset"
+        )
+      ).toBe("0px");
+    });
+
     it("keeps mobile sheets above the native keyboard inset", () => {
       render(<MobileWrapperDialog {...defaultProps} isOpen={true} />);
 
