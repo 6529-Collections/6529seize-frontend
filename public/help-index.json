@@ -2094,7 +2094,7 @@
       ],
       "facts": [
         "A user's Meme Card subscription controls and history live under /{user}/subscriptions.",
-        "On native iOS when the detected country is not US or is unknown, subscription controls stay hidden and direct or deep-linked visits return to the profile Identity tab without showing subscription content.",
+        "On native iOS when the detected country is not US or is unknown, subscription controls stay hidden and direct or deep-linked visits return to the profile Identity tab without showing subscription content once the country check settles (a failed check counts as unknown); US iOS deep links wait for the check and then keep the Subscriptions tab, and web and Android never wait for the country check. On every platform the Subscriptions tab and the profile-header subscription status are added just after the page loads rather than in the first render.",
         "The tab leads with subscription coverage: status, consecutive intended drops funded, funded-through and next-unfunded Meme context, and an authoritative top-up deadline only when one is available.",
         "The tab also shows exact ETH balance, raw mint capacity, airdrop address, manual or automatic mode, edition preference, upcoming drops, and history when subscriptions are available.",
         "Tap, hover, or focus the Airdrop Address to read its full value when the phone layout truncates it.",
@@ -7749,6 +7749,7 @@
       ],
       "facts": [
         "The Memes mint route lives at /the-memes/mint.",
+        "On native iOS when the detected country is not US or is unknown, the mint page, recipient selection, mint count and SEIZE controls are absent and direct or deep-linked visits to /the-memes/mint return to /the-memes without an unavailable message once the country check settles (a failed check counts as unknown); US iOS deep links wait for the check and keep the Mint on 6529.io handoff, and web and Android keep the mint page.",
         "Mint flow docs explain entry points, common scenarios, and recovery.",
         "If a remembered profile's authorized wallet is disconnected, the mint page hides the duplicate Connect control; selecting SEIZE opens wallet connection and continues when the same wallet reconnects and transaction details are unchanged.",
         "Selecting a different already-authenticated wallet switches the active profile and cancels the old pending mint so refreshed recipient, eligibility, price, and transaction details can be reviewed before selecting SEIZE again; an unauthenticated wallet must complete normal authentication first.",

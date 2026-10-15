@@ -103,7 +103,10 @@ navigation/attribution fields, including the SDK's unprefixed `initial_utm_*`
 first-touch keys, while preserving explicit traits and identity
 metadata. The pinned SDK bypasses its hook for recovered orphaned queue entries,
 so batch senders start only after the final guard is installed. This narrow SDK integration
-must be checked when upgrading Mixpanel. The pinned SDK creates batchers
+must be checked when upgrading Mixpanel. The app imports the SDK's
+recorder-free core build (`mixpanel-browser/dist/mixpanel-core.cjs.js`), so the
+bundled session recorder is not shipped and recording cannot start; keep that
+entry when upgrading. The pinned SDK creates batchers
 synchronously; an unexpected missing batcher keeps delivery closed. The SDK's
 explicit XHR/storage fallback uses direct delivery through the send-time hook.
 Failure to scrub persisted private properties also keeps delivery closed rather
