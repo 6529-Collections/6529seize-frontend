@@ -16,11 +16,12 @@ const waveDropsSearchModalLoader =
     () => import("./WaveDropsSearchModal")
   );
 
-// Fetches the modal chunk ahead of the first open (hover, focus, idle). Opening
+// Fetches the modal chunk ahead of the first open (hover, focus, the visitor's
+// first interaction, idle). Opening
 // never depends on this: the modal loads on demand too.
 export const preloadWaveDropsSearchModal = waveDropsSearchModalLoader.preload;
-export const useWaveDropsSearchModalIdlePreload =
-  waveDropsSearchModalLoader.usePreloadWhenIdle;
+export const useWaveDropsSearchModalEarlyPreload =
+  waveDropsSearchModalLoader.usePreloadEarly;
 
 const LoadedWaveDropsSearchModal = waveDropsSearchModalLoader.Loaded;
 

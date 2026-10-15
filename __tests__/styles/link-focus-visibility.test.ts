@@ -48,3 +48,51 @@ describe("global link focus styles", () => {
     expect(pointerReset?.body).toMatch(/outline:\s*0\s*!important/u);
   });
 });
+
+const targetsFormControl = (selector: string) =>
+  /^(?:textarea|select|input|button|video|svg)(?![\w-])/u.test(selector);
+const setsRingShadow = (body: string) =>
+  /(?:^|[;\s])box-shadow\s*:/u.test(body);
+
+describe("global form-control focus styles", () => {
+  const resetRules = rules.filter(
+    ({ selectors, body }) =>
+      selectors.some(targetsFormControl) &&
+      (setsOutline(body) || setsRingShadow(body))
+  );
+
+  it("never cancels the outline or ring of a keyboard-focused control", () => {
+    expect(resetRules.length).toBeGreaterThan(0);
+    for (const { selectors } of resetRules) {
+      for (const selector of selectors.filter(targetsFormControl)) {
+        // Outside .tailwind-scope this reset is !important, so it outranks
+        // every focus-visible:tw-ring-* and tw-outline-* utility. It has to
+        // exclude :focus-visible to keep keyboard focus visible (WCAG 2.4.7).
+        expect(selector).toContain(":not(:focus-visible)");
+      }
+    }
+  });
+
+  it("keeps cancelling the outline and ring for pointer-only focus", () => {
+    const pointerReset = resetRules.find(({ selectors }) =>
+      selectors.includes(
+        "button:not(.tailwind-scope button):not(:focus-visible)"
+      )
+    );
+
+    expect(pointerReset?.body).toMatch(/outline:\s*0\s*!important/u);
+    expect(pointerReset?.body).toMatch(/box-shadow:\s*none\s*!important/u);
+  });
+
+  it("does not bundle the font-size rule with the focus reset", () => {
+    const fontSize = rules.find(
+      ({ selectors, body }) =>
+        selectors.includes("button:not(.tailwind-scope button)") &&
+        /font-size:\s*16px/u.test(body)
+    );
+
+    expect(fontSize).toBeDefined();
+    expect(setsOutline(fontSize?.body ?? "")).toBe(false);
+    expect(setsRingShadow(fontSize?.body ?? "")).toBe(false);
+  });
+});

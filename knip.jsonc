@@ -83,6 +83,9 @@
       "components/public-review/PublicReviewLedger.tsx": ["files"],
       "hooks/useAnimatedSidebarWaveRows.ts": ["exports"],
       "hooks/useWavePreviewById.ts": ["exports"],
+      // Browser variant of i18n/localeDictionaries.ts, reached only through
+      // the Turbopack `resolveAlias` browser condition in config/nextConfig.ts.
+      "i18n/localeDictionaries.browser.ts": ["files"],
       // The public-review generator exposes pure internals to its focused Jest
       // contract tests; Knip intentionally does not analyze test-only usage.
       "scripts/public-reviews/solidity-reference.cjs": ["exports"],
