@@ -30,6 +30,7 @@ import type { ServerWaveFeedSeedResult } from "./server-wave-feed-seed";
 import { useActiveWaveManager } from "./hooks/useActiveWaveManager";
 import type { MinimalWave } from "./hooks/useEnhancedWavesListCore";
 import useEnhancedWavesListCore from "./hooks/useEnhancedWavesListCore";
+import { useRecentDirectMessagePrefetch } from "./hooks/useRecentDirectMessagePrefetch";
 import { useWaveDataManager } from "./hooks/useWaveDataManager";
 import type { Listener as WaveMessagesListener } from "./hooks/useWaveMessagesStore";
 import useWaveMessagesStore from "./hooks/useWaveMessagesStore";
@@ -286,12 +287,19 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   });
   const {
     registerWave,
+    prefetchWave,
     syncNewestMessages,
     fetchNextPage,
     fetchAroundSerialNo,
     cancelWaveDataFetch,
     cancelPaginationFetch,
   } = waveDataManager;
+  useRecentDirectMessagePrefetch({
+    enabled:
+      isCapacitor && isActive && pathname === "/messages" && !activeWaveId,
+    waves: dmWavesHookData.waves,
+    prefetchWave,
+  });
   const { clearWave } = waveMessagesStore;
   const refreshWaveMessages = useCallback(
     (waveId: string) => {
