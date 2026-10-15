@@ -60,7 +60,7 @@ const ADDRESS_A = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 const ADDRESS_B = "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 
 type FetchParams = {
-  readonly headers: Readonly<Record<string, string>>;
+  readonly headers: { readonly Authorization: string };
   readonly signal: AbortSignal;
 };
 

@@ -83,7 +83,7 @@ const unreadCountByJwt = new Map<string, number>();
 const requestsFor = (jwt: string): number =>
   commonApiFetchMock.mock.calls.filter(
     ([params]) =>
-      (params as { readonly headers?: Readonly<Record<string, string>> })
+      (params as { readonly headers?: { readonly Authorization?: string } })
         .headers?.Authorization === `Bearer ${jwt}`
   ).length;
 
@@ -168,7 +168,7 @@ describe("socket-driven unread notification polling", () => {
     unreadCountByJwt.set(SECOND_JWT, 2);
     unreadCountByJwt.set(THIRD_JWT, 3);
     commonApiFetchMock.mockImplementation(
-      (params: { readonly headers: Readonly<Record<string, string>> }) => {
+      (params: { readonly headers: { readonly Authorization: string } }) => {
         const jwt = params.headers.Authorization.replace("Bearer ", "");
         return Promise.resolve({
           unread_count: unreadCountByJwt.get(jwt) ?? 0,
