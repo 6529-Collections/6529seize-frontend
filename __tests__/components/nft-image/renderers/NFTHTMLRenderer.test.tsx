@@ -299,6 +299,57 @@ describe("NFTHTMLRenderer", () => {
       expect(iframe).toBeInTheDocument();
       expect(iframe).not.toHaveAttribute("title");
     });
+
+    it("sandboxes NFT HTML with scripts only", () => {
+      const props = createDefaultProps({ id: "sandboxed-iframe" });
+      render(<NFTHTMLRenderer {...props} />);
+
+      const iframe = screen.getByTitle("sandboxed-iframe");
+      expect(iframe).toHaveAttribute("sandbox", "allow-scripts");
+    });
+
+    it("never grants same-origin access to NFT HTML", () => {
+      const sources = [
+        "https://arweave.net/1YUXdSJtHxXIzFc7REy8zQT-zpTzZLdhoT6TKM34MR4",
+        "https://example.com/animation.html",
+        "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+      ];
+
+      sources.forEach((animation, index) => {
+        const nft = createMockNFT({ animation });
+        const props = createDefaultProps({
+          nft,
+          id: `same-origin-${index}`,
+        });
+        const { unmount } = render(<NFTHTMLRenderer {...props} />);
+
+        const sandbox = screen
+          .getByTitle(`same-origin-${index}`)
+          .getAttribute("sandbox");
+        expect(sandbox).not.toBeNull();
+        expect(sandbox?.split(/\s+/)).not.toContain("allow-same-origin");
+        unmount();
+      });
+    });
+  });
+
+  describe("Per-artwork sandbox exception", () => {
+    it("adds same-origin only for the pinned Memes #507 artwork", () => {
+      const nft = createMockNFT({
+        id: 507,
+        contract: "0x33FD426905F149f8376e227d0C9D3340AaD17aF1",
+        animation:
+          "https://arweave.net/ZXasOCLe2lF1iR_EcG7iZ628NLWs5vYHh-zBl6zhvVg",
+      });
+      render(
+        <NFTHTMLRenderer {...createDefaultProps({ nft, id: "meme-507" })} />
+      );
+
+      expect(screen.getByTitle("meme-507")).toHaveAttribute(
+        "sandbox",
+        "allow-scripts allow-same-origin"
+      );
+    });
   });
 
   describe("NFTImageBalance Integration", () => {

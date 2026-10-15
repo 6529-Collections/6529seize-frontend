@@ -5,7 +5,8 @@
 - Interactive `text/html` media uses two renderer families:
   - Sandboxed renderer on shared drop/card surfaces and in Memes submission
     preview.
-  - NFT animation renderer on home `Latest Drop` artwork.
+  - NFT animation renderer on home `Latest Drop` artwork and on NFT pages
+    whose animation is HTML (for example Memes cards).
 - Shared card surfaces that already have preview artwork can show that static
   preview image instead of mounting the live HTML iframe immediately.
 - Some touch-device home surfaces require `Tap to load` before HTML starts.
@@ -52,8 +53,11 @@
    - validates gateway responses with `HEAD`, then `GET` fallback on `405`,
      `403`, or `501`
    - keeps `Continue` blocked until status is `valid`.
-8. Home `Latest Drop` HTML uses the NFT animation iframe path (no sandbox
-   banner/canonicalization gate). If an approved Arweave HTML URL errors or
+8. Home `Latest Drop` HTML and other NFT animation HTML use the NFT animation
+   iframe path (no host banner/canonicalization gate). That iframe is
+   sandboxed with `allow-scripts` only, so the artwork runs but cannot
+   navigate the page, open popups, or start downloads. NextGen `Live` mode
+   uses the same sandbox. If an approved Arweave HTML URL errors or
    does not finish loading, the renderer retries the same asset across the
    remaining approved gateways before giving up. Touch devices can still
    require `Tap to load`.
@@ -123,6 +127,12 @@
   live HTML when preview artwork is available.
 - The sandbox allows scripts but intentionally does not grant same-origin,
   popup, or broader permission-policy capabilities.
+- NFT animation iframes (Memes cards, NextGen `Live`) use the same
+  scripts-only sandbox. Artwork that reads `localStorage`, opens links in a new
+  tab, or saves files from script is limited by it. Exceptions are per artwork
+  and documented in code: The Memes #445 compatibility viewer also allows
+  downloads, and The Memes #507 additionally allows same-origin access because
+  it cannot start without `localStorage`.
 - Submission interactive mode currently keeps media type fixed to
   `text/html`.
 - Home `Latest Drop` HTML uses a different renderer path and does not show
