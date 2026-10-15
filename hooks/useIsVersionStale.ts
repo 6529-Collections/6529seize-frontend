@@ -8,6 +8,8 @@ const CURRENT = publicEnv.VERSION ?? "unknown"; // baked into the bundle
 const SHOW_NEW_VERSION_TOAST_PARAM = "showNewVersionToast";
 const CLIENT_VERSION_HEADER = "x-6529-client-version";
 const VERSION_ENDPOINT = "/api/version";
+// Showing a tab fires visibilitychange and focus together; check only once.
+const WAKE_RECHECK_DEBOUNCE_MS = 1_000;
 
 type VersionStatusResponse = {
   readonly stale?: unknown;
@@ -29,9 +31,14 @@ export function useIsVersionStale(interval = 120_000, enabled = true) {
       return;
     }
 
-    let id: NodeJS.Timeout;
+    let disposed = false;
+    let lastCheckAt = Number.NEGATIVE_INFINITY;
+    let timer: ReturnType<typeof setInterval> | undefined;
+
+    const isHidden = () => document.visibilityState === "hidden";
 
     async function check() {
+      lastCheckAt = Date.now();
       try {
         const { stale } = await fetch(VERSION_ENDPOINT, {
           cache: "no-store",
@@ -40,7 +47,7 @@ export function useIsVersionStale(interval = 120_000, enabled = true) {
           },
         }).then((r) => r.json() as Promise<VersionStatusResponse>);
 
-        if (typeof stale === "boolean") {
+        if (!disposed && typeof stale === "boolean") {
           setStale(stale);
         }
       } catch {
@@ -48,17 +55,57 @@ export function useIsVersionStale(interval = 120_000, enabled = true) {
       }
     }
 
-    // initial check + interval
-    check();
-    id = setInterval(check, interval);
+    function stopPolling() {
+      clearInterval(timer);
+      timer = undefined;
+    }
 
-    // also re-check when the tab becomes active
-    const onFocus = () => check();
-    globalThis.addEventListener("focus", onFocus);
+    function startPolling() {
+      timer = setInterval(() => {
+        if (!isHidden()) {
+          void check();
+        }
+      }, interval);
+    }
+
+    // Restart the polling cadence from this moment, checking now unless a
+    // check just ran (visibilitychange and focus fire together).
+    function resumePolling() {
+      stopPolling();
+      if (Date.now() - lastCheckAt > WAKE_RECHECK_DEBOUNCE_MS) {
+        void check();
+      }
+      startPolling();
+    }
+
+    // A hidden tab neither polls nor keeps a timer alive; it catches up as
+    // soon as it is shown, focused again, or back online.
+    const onWake = () => {
+      if (!isHidden()) {
+        resumePolling();
+      }
+    };
+    const onVisibilityChange = () => {
+      if (isHidden()) {
+        stopPolling();
+      } else {
+        resumePolling();
+      }
+    };
+
+    if (!isHidden()) {
+      resumePolling();
+    }
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    globalThis.addEventListener("focus", onWake);
+    globalThis.addEventListener("online", onWake);
 
     return () => {
-      clearInterval(id);
-      globalThis.removeEventListener("focus", onFocus);
+      disposed = true;
+      stopPolling();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      globalThis.removeEventListener("focus", onWake);
+      globalThis.removeEventListener("online", onWake);
     };
   }, [interval, enabled, shouldForceShowNewVersionToast]);
 

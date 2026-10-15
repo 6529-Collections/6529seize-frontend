@@ -27,6 +27,8 @@ interface Props {
 }
 
 const TOKEN_METADATA_FETCH_TIMEOUT_MS = 10_000;
+// Read once and refresh when the tab is shown again, instead of polling.
+const ON_CHAIN_READ_QUERY = { refetchOnWindowFocus: true } as const;
 
 export default function NextGenTokenOnChain(props: Readonly<Props>) {
   const capacitor = useCapacitor();
@@ -49,9 +51,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "tokenURI",
-    query: {
-      refetchInterval: 10000,
-    },
+    query: ON_CHAIN_READ_QUERY,
     args: [props.token_id],
   });
 
@@ -125,9 +125,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "ownerOf",
-    query: {
-      refetchInterval: 10000,
-    },
+    query: ON_CHAIN_READ_QUERY,
     args: [props.token_id],
   });
 

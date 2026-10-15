@@ -163,6 +163,19 @@ describe("NextGenTokenOnChain", () => {
     expect(screen.getByText("Test Artist")).toBeInTheDocument();
   });
 
+  it("reads tokenURI and ownerOf once instead of polling them", () => {
+    render(<NextGenTokenOnChain {...baseProps} />);
+
+    const reads = mockUseReadContract.mock.calls.map(([params]) => params);
+    expect(new Set(reads.map((read) => read.functionName))).toEqual(
+      new Set(["ownerOf", "tokenURI"])
+    );
+    for (const read of reads) {
+      expect(read.query).not.toHaveProperty("refetchInterval");
+      expect(read.query).toEqual({ refetchOnWindowFocus: true });
+    }
+  });
+
   it("calculates normalized token ID correctly", async () => {
     mockUseReadContract.mockImplementation(({ functionName }) => {
       if (functionName === "tokenURI") {
