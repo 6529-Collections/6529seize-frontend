@@ -169,6 +169,58 @@ export async function expectFocusedLinksShowIndicator(
   ).toEqual([]);
 }
 
+/**
+ * Tabs to the target and asserts that it paints an outline or a ring while
+ * `:focus-visible` matches. Unlike `expectKeyboardFocusOutline`, a box-shadow
+ * ring counts, so it fits controls styled with tw-ring-* utilities and the
+ * @tailwindcss/forms focus ring.
+ */
+export async function expectKeyboardFocusIndicator(
+  page: Page,
+  target: Locator,
+  options: TabToElementOptions = {}
+) {
+  await tabToElement(page, target, options);
+
+  await expect
+    .poll(
+      async () => {
+        const focused = await readActiveElementIndicator(page);
+        return Boolean(
+          focused?.focusVisible &&
+          (focused.outlineVisible || focused.ringVisible)
+        );
+      },
+      {
+        message:
+          "Expected a visible ring or outline on the keyboard-focused target",
+        timeout: 5000,
+      }
+    )
+    .toBe(true);
+}
+
+/**
+ * Asserts that an element paints an outline or a ring without needing browser
+ * focus. Headless UI marks the active option of a menu, listbox or combobox
+ * with `data-focus` while focus stays on the container or the input, so the
+ * option itself is never the focused element.
+ */
+export async function expectActiveOptionIndicator(option: Locator) {
+  await expect
+    .poll(
+      async () => {
+        const indicator = await option.evaluate(readIndicator);
+        return Boolean(indicator?.outlineVisible || indicator?.ringVisible);
+      },
+      {
+        message: "Expected a visible ring or outline on the active option",
+        timeout: 5000,
+      }
+    )
+    .toBe(true);
+}
+
 export async function getFocusedElementSummary(
   page: Page
 ): Promise<FocusSummary> {
@@ -212,51 +264,60 @@ async function waitForLinkIndicator(page: Page, timeout: number) {
   return false;
 }
 
-function readActiveElementIndicator(
+async function readActiveElementIndicator(
   page: Page
 ): Promise<FocusIndicatorReadout | null> {
-  return page.evaluate(() => {
-    const element = document.activeElement;
+  const active = await page.evaluateHandle(() => document.activeElement);
+  try {
+    return await active.evaluate(readIndicator);
+  } finally {
+    await active.dispose();
+  }
+}
 
-    if (!(element instanceof HTMLElement) || element === document.body) {
-      return null;
-    }
+/**
+ * Reads the painted focus indicator of one element. It runs in the page, so it
+ * must stay self-contained.
+ */
+function readIndicator(element: Element | null): FocusIndicatorReadout | null {
+  if (!(element instanceof HTMLElement) || element === document.body) {
+    return null;
+  }
 
-    // Computed colours serialise as rgb(...) or rgba(..., alpha); no alpha
-    // channel means fully opaque.
-    const hasPaint = (colour: string) => {
-      const alpha = /^rgba\((?:[^,]+,){3}\s*([\d.]+)\)$/.exec(colour)?.[1];
-      return Number.parseFloat(alpha ?? "1") > 0;
-    };
-    const style = globalThis.getComputedStyle(element);
-    const outlineVisible =
-      style.outlineStyle !== "none" &&
-      Number.parseFloat(style.outlineWidth || "0") > 0 &&
-      hasPaint(style.outlineColor);
-    // A ring is a painted, unblurred shadow layer with positive spread, as
-    // produced by tw-ring-* utilities.
-    const ringVisible = Array.from(
-      style.boxShadow.matchAll(
-        /(rgba?\([^)]*\))\s+-?[\d.]+px\s+-?[\d.]+px\s+([\d.]+)px\s+([\d.]+)px/g
-      )
-    ).some(
-      ([, colour = "", blur = "0", spread = "0"]) =>
-        hasPaint(colour) &&
-        Number.parseFloat(blur) === 0 &&
-        Number.parseFloat(spread) > 0
-    );
+  // Computed colours serialise as rgb(...) or rgba(..., alpha); no alpha
+  // channel means fully opaque.
+  const hasPaint = (colour: string) => {
+    const alpha = /^rgba\((?:[^,]+,){3}\s*([\d.]+)\)$/.exec(colour)?.[1];
+    return Number.parseFloat(alpha ?? "1") > 0;
+  };
+  const style = globalThis.getComputedStyle(element);
+  const outlineVisible =
+    style.outlineStyle !== "none" &&
+    Number.parseFloat(style.outlineWidth || "0") > 0 &&
+    hasPaint(style.outlineColor);
+  // A ring is a painted, unblurred shadow layer with positive spread, as
+  // produced by tw-ring-* utilities (inset or not).
+  const ringVisible = Array.from(
+    style.boxShadow.matchAll(
+      /(rgba?\([^)]*\))\s+-?[\d.]+px\s+-?[\d.]+px\s+([\d.]+)px\s+([\d.]+)px/g
+    )
+  ).some(
+    ([, colour = "", blur = "0", spread = "0"]) =>
+      hasPaint(colour) &&
+      Number.parseFloat(blur) === 0 &&
+      Number.parseFloat(spread) > 0
+  );
 
-    return {
-      tagName: element.tagName.toLowerCase(),
-      text: (element.innerText || element.getAttribute("aria-label") || "")
-        .trim()
-        .slice(0, 60),
-      focusVisible: element.matches(":focus-visible"),
-      outlineVisible,
-      ringVisible,
-      outline: `${style.outlineStyle} ${style.outlineWidth} ${style.outlineColor}`,
-    };
-  });
+  return {
+    tagName: element.tagName.toLowerCase(),
+    text: (element.innerText || element.getAttribute("aria-label") || "")
+      .trim()
+      .slice(0, 60),
+    focusVisible: element.matches(":focus-visible"),
+    outlineVisible,
+    ringVisible,
+    outline: `${style.outlineStyle} ${style.outlineWidth} ${style.outlineColor}`,
+  };
 }
 
 async function hasVisibleFocus(page: Page, timeout: number) {

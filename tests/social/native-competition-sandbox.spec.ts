@@ -700,6 +700,25 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         await expect(voters.getByRole("status")).toHaveText(
           "Loading competition…"
         );
+        const selectedTab = page.getByRole("tab", {
+          name: "All votes",
+          exact: true,
+        });
+        await expect(selectedTab).toHaveCSS("height", "32px");
+        await expect(selectedTab).toHaveCSS("border-radius", "9999px");
+        await expect(selectedTab).toHaveCSS("border-bottom-width", "0px");
+        await expect(selectedTab).toHaveCSS("font-size", "12px");
+        await expect(
+          page
+            .getByRole("tab", { name: "All votes", exact: true })
+            .locator("../../..")
+        ).toHaveCSS("background-color", "rgb(19, 19, 22)");
+        await expect(selectedTab).toHaveCSS("padding-left", "12px");
+        await expect(
+          page
+            .getByRole("tab", { name: "All votes", exact: true })
+            .locator("..")
+        ).toHaveCSS("column-gap", "10px");
         const skeletons = voters.getByTestId("competition-voter-skeleton");
         await expect(skeletons).toHaveCount(6);
         await page.emulateMedia({ reducedMotion: "reduce" });
@@ -772,6 +791,27 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         await page.screenshot({
           path: testInfo.outputPath("activity-loading.png"),
         });
+        if (!mobile) {
+          for (const width of [640, 767, 768]) {
+            await page.setViewportSize({ width, height: 1000 });
+            await expect
+              .poll(() =>
+                skeletons
+                  .first()
+                  .evaluate(
+                    (element) =>
+                      getComputedStyle(element).gridTemplateColumns.split(" ")
+                        .length
+                  )
+              )
+              .toBe(width < 768 ? 2 : 4);
+            await expectNoHorizontalOverflow(page);
+            await page.screenshot({
+              path: testInfo.outputPath(`activity-loading-${width}.png`),
+            });
+          }
+          await page.setViewportSize({ width: 1728, height: 1000 });
+        }
       } finally {
         releaseActivity();
       }
@@ -826,13 +866,13 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         animations: "disabled",
       });
       if (!mobile) {
-        for (const width of [639, 640]) {
+        for (const width of [639, 640, 767, 768]) {
           await page.setViewportSize({ width, height: 1000 });
           const responsiveVoter = await voter.boundingBox();
           const responsiveCreator = await creator.boundingBox();
           expect(responsiveVoter).not.toBeNull();
           expect(responsiveCreator).not.toBeNull();
-          if (width < 640) {
+          if (width < 768) {
             const responsiveVote = await activity
               .getByText("1,234,567 TDH", { exact: true })
               .boundingBox();
@@ -861,6 +901,275 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(viewDrop).toBeFocused();
       await page.keyboard.press("Enter");
       await expect(page).toHaveURL(new RegExp(`drop=${entryDropId("alpha")}`));
+      expect(sandbox.requests).toHaveLength(0);
+    });
+  }
+
+  test("loads voter profiles near the viewport and retries a failed profile in its row", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page, false, false);
+    const requestedProfiles: string[] = [];
+    const voters = Array.from({ length: 50 }, (_, index) => ({
+      profile_id: `nearby-voter-${index + 1}`,
+      votes: 100000 + index,
+      credit_spent: 100000 + index,
+    }));
+    await page.route("**/v3/waves/*/competitions/alpha/voters?**", (route) =>
+      route.fulfill({ json: pageResult(voters) })
+    );
+    let failProfile = true;
+    await page.route("**/identities/nearby-voter-*", (route) => {
+      const id = new URL(route.request().url()).pathname.split("/").at(-1)!;
+      requestedProfiles.push(id);
+      if (id === "nearby-voter-4" && failProfile) {
+        return route.fulfill({
+          status: 429,
+          headers: { "Retry-After": "1" },
+          json: { error: "Rate limit exceeded" },
+        });
+      }
+      return route.fulfill({
+        json: { id, handle: id, pfp: null, primary_wallet: null },
+      });
+    });
+    await page.goto(`${ROOT}/alpha?tab=votes&voteTab=all`);
+    const panel = page.getByRole("tabpanel", {
+      name: "All votes",
+      exact: true,
+    });
+    await expect(
+      panel.getByRole("link", { name: "nearby-voter-1", exact: true })
+    ).toBeVisible();
+    const failure = panel.getByRole("alert");
+    await expect(failure).toContainText("Profile unavailable");
+    await expect(failure).toContainText("100,003");
+    await expect(panel).not.toContainText(
+      "This competition could not be loaded"
+    );
+    const retry = failure.getByRole("button", {
+      name: "Retry profile at rank 4",
+    });
+    await expect(retry).toHaveCSS("height", "32px");
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("voter-profile-retry.png"),
+    });
+    expect(requestedProfiles.length).toBeLessThan(25);
+    expect(requestedProfiles).not.toContain("nearby-voter-50");
+
+    failProfile = false;
+    await retry.click();
+    await expect(
+      panel.getByRole("link", { name: "nearby-voter-4", exact: true })
+    ).toBeVisible();
+    await expect(failure).toHaveCount(0);
+    expect(
+      requestedProfiles.filter((id) => id === "nearby-voter-4")
+    ).toHaveLength(2);
+    await panel
+      .getByTestId("competition-voter-skeleton")
+      .last()
+      .scrollIntoViewIfNeeded();
+    await expect(
+      panel.getByRole("link", { name: "nearby-voter-50", exact: true })
+    ).toBeVisible();
+    await expect(page).toHaveURL(new RegExp("tab=votes&voteTab=all"));
+    expect(sandbox.requests).toHaveLength(0);
+  });
+
+  for (const legacy of [false, true]) {
+    test(`fills the available width with ${legacy ? "legacy" : "native"} My Votes`, async ({
+      page,
+    }, testInfo) => {
+      const sandbox = await installCompetitionApi(page);
+      if (legacy) {
+        await sandbox.legacyPrimary("alpha");
+        const response = await page.request.get(
+          `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
+        );
+        expect(response.ok()).toBe(true);
+        const fixture = await response.json();
+        await page.route(`**/api/v2/waves/${WAVE}/leaderboard?**`, (route) =>
+          route.fulfill({
+            json: {
+              wave: fixture.wave,
+              drops: [
+                {
+                  ...fixture.drops[0],
+                  drop_type: "SUBMISSION",
+                  title: "My voted artwork",
+                  submission_context: {
+                    status: "ACTIVE",
+                    has_metadata: false,
+                    voting: {
+                      is_open: true,
+                      total_votes_given: 100,
+                      current_calculated_vote: 100,
+                      predicted_final_vote: 120,
+                      voters_count: 1,
+                      place: 1,
+                      context_profile_context: {
+                        can_vote: true,
+                        min: -1000,
+                        max: 1000,
+                        current: 100,
+                      },
+                    },
+                  },
+                },
+              ],
+              count: 1,
+              page: 1,
+              next: false,
+            },
+          })
+        );
+      }
+      const selected = competition("alpha", "Parallel Alpha");
+      selected.permissions.submit = false;
+      await page.route("**/v3/waves/*/competitions/alpha", (route) =>
+        route.fulfill({ json: selected })
+      );
+      await page.route("**/v3/waves/*/competitions/alpha/pauses?**", (route) =>
+        route.fulfill({
+          json: pageResult([{ start_time: Date.now() - 1000, end_time: null }]),
+        })
+      );
+      if (testInfo.project.name === "web-desktop-chromium")
+        await page.setViewportSize({ width: 1920, height: 1080 });
+      await page.goto(`${ROOT}/alpha?tab=votes`);
+      const panel = page.getByRole("tabpanel", {
+        name: "My Votes",
+        exact: true,
+      });
+      const row = panel.getByRole("article").first();
+      await expect(row).toBeVisible();
+      const wavePane = page
+        .getByRole("main")
+        .locator("#my-stream-wave-tabpanel-my_votes");
+      await expect(wavePane).toBeVisible();
+      const pills = page
+        .getByRole("tab", { name: "My Votes", exact: true })
+        .locator("../../..");
+      await expect(pills).toHaveCSS("padding-top", "6px");
+      await expect(pills).toHaveCSS("padding-bottom", "6px");
+      const submissionNotice = page.getByText(
+        "Entries are currently closed or you are not eligible to submit.",
+        { exact: true }
+      );
+      await expect(submissionNotice).toHaveCount(0);
+      const pauseNotice = page.getByText(
+        "Decisions are paused. Entries and voting continue within their configured periods.",
+        { exact: true }
+      );
+      await expect(pauseNotice).toBeVisible();
+      const pillBounds = (await pills.boundingBox())!;
+      expect((await pauseNotice.boundingBox())!.y).toBeGreaterThanOrEqual(
+        pillBounds.y + pillBounds.height
+      );
+      expect(
+        Math.abs(
+          (await pills.boundingBox())!.y - (await wavePane.boundingBox())!.y
+        )
+      ).toBeLessThanOrEqual(1);
+      const available = await wavePane.evaluate((element) => {
+        return {
+          x: element.getBoundingClientRect().x,
+          width: element.clientWidth,
+        };
+      });
+      const bounds = (await row.boundingBox())!;
+      expect(Math.abs(bounds.x - available.x)).toBeLessThanOrEqual(1);
+      expect(Math.abs(bounds.width - available.width)).toBeLessThanOrEqual(1);
+      const selectAll = panel.getByRole("button", {
+        name: "Select all",
+        exact: true,
+      });
+      const resetVotes = panel.getByRole("button", {
+        name: "Reset votes",
+        exact: true,
+      });
+      await expect(selectAll).toBeVisible();
+      await expect(resetVotes).toBeDisabled();
+      const createStyle = await page
+        .getByRole("button", { name: "Open create menu", exact: true })
+        .evaluate((button) => {
+          const style = getComputedStyle(button.querySelector("span")!);
+          return Object.fromEntries(
+            [
+              "height",
+              "background-color",
+              "border-color",
+              "border-radius",
+              "font-size",
+              "font-weight",
+              "padding-left",
+              "padding-right",
+              "color",
+            ].map((property) => [property, style.getPropertyValue(property)])
+          );
+        });
+      for (const name of ["Select all", "Reset votes"]) {
+        const action = panel.getByRole("button", { name, exact: true });
+        for (const [property, value] of Object.entries(createStyle)) {
+          await expect(
+            panel.getByRole("button", { name, exact: true }).locator("span")
+          ).toHaveCSS(property, value);
+        }
+        await expect(action).toHaveCSS(
+          "height",
+          testInfo.project.name === "web-mobile-chromium" ? "44px" : "32px"
+        );
+      }
+      await selectAll.click();
+      await expect(
+        panel.getByRole("button", { name: "Deselect all", exact: true })
+      ).toBeVisible();
+      await expect(
+        panel.getByRole("button", { name: "Reset 1 vote", exact: true })
+      ).toBeEnabled();
+      await page.keyboard.press("Tab");
+      for (const name of ["Open create menu", "Deselect all", "Reset 1 vote"]) {
+        const action = page.getByRole("button", { name, exact: true });
+        await action.focus();
+        await expect(action).toBeFocused();
+        const pill = page
+          .getByRole("button", { name, exact: true })
+          .locator("span")
+          .first();
+        await expect(pill).toHaveCSS("outline-style", "solid");
+        await expect(pill).toHaveCSS("outline-width", "2px");
+        await expect(pill).toHaveCSS("outline-color", "rgb(132, 173, 255)");
+      }
+      await panel
+        .getByRole("button", { name: "Deselect all", exact: true })
+        .click();
+      await expect(resetVotes).toBeDisabled();
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("my-votes-full-width.png"),
+      });
+      if (!legacy && testInfo.project.name === "web-desktop-chromium") {
+        await page.setViewportSize({ width: 320, height: 900 });
+        for (const name of ["My Votes", "All votes", "Activity"]) {
+          await expect(
+            page.getByRole("tab", { name, exact: true })
+          ).toBeInViewport({ ratio: 1 });
+        }
+        await expectNoHorizontalOverflow(page);
+      }
+      for (const name of ["All votes", "Activity"]) {
+        await page.getByRole("tab", { name, exact: true }).click();
+        await expect(
+          page.getByRole("tabpanel", { name, exact: true })
+        ).toBeVisible();
+        await expect(submissionNotice).toHaveCount(0);
+      }
+      if (!legacy) {
+        await page.goto(`${ROOT}/alpha?tab=leaderboard`);
+        await expect(submissionNotice).toBeVisible();
+      }
       expect(sandbox.requests).toHaveLength(0);
     });
   }
@@ -1663,12 +1972,18 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       "aria-controls",
       "competition-beta-votes-mine"
     );
-    if (app) {
-      await expect(mine).toHaveCSS("border-radius", "9999px");
-      await expect(mine).toHaveCSS("height", "32px");
-    } else {
-      await expect(mine).toHaveCSS("border-bottom-width", "2px");
+    await expect(mine).toHaveCSS("border-radius", "9999px");
+    await expect(mine).toHaveCSS("height", "32px");
+    await expect(mine).toHaveCSS("border-bottom-width", "0px");
+    if (!app) {
+      await expect(
+        waveTabStrip(page).getByRole("tab", { name: "Votes", exact: true })
+      ).toHaveCSS("border-bottom-width", "2px");
     }
+    await mine.focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(allVotes).toBeFocused();
+    await expect(mine).toHaveAttribute("aria-selected", "true");
     await allVotes.click();
     await expect(page).toHaveURL(`${ROOT}/beta?tab=votes&voteTab=all`);
     await expect(

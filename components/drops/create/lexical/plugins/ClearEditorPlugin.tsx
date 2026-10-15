@@ -9,13 +9,16 @@ export interface ClearEditorPluginHandles {
 const ClearEditorPlugin = forwardRef<ClearEditorPluginHandles, {}>((_, ref) => {
   const [editor] = useLexicalComposerContext();
   const clearEditorState = () => {
-    editor.update(() => {
-      const root = $getRoot();
-      root.clear();
-      const paragraph = $createParagraphNode();
-      root.append(paragraph);
-      paragraph.select();
-    });
+    editor.update(
+      () => {
+        const root = $getRoot();
+        root.clear();
+        const paragraph = $createParagraphNode();
+        root.append(paragraph);
+        paragraph.select();
+      },
+      { tag: "composer-reset" }
+    );
   };
 
   useImperativeHandle(ref, () => ({
