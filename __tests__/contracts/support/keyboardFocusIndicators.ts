@@ -1,20 +1,20 @@
 /**
  * Shared detection for the keyboard focus indicator contract.
  *
- * `focus:tw-outline-none` removes the browser focus ring. Every control that
- * uses it must replace it with its own visible indicator (WCAG 2.2 AA 2.4.7),
- * and that indicator must reach 3:1 against the dark page surface (1.4.11).
+ * `focus:tw-outline-none` and `focus-visible:tw-outline-none` remove the
+ * browser focus ring. Every control that uses one must replace it with its own
+ * visible indicator (WCAG 2.2 AA 2.4.7), and that indicator must reach 3:1
+ * against the dark page surface (1.4.11).
  *
- * The scan finds each class list that contains `focus:tw-outline-none`, gathers
- * every class reachable from the same JSX attribute or shared class constant
- * (template parts, `clsx` arguments, and same-file constants and helpers), and
- * requires a focus or focus-visible ring, outline, shadow or border change.
+ * The scan finds each class list that removes the outline, gathers every class
+ * reachable from the same JSX attribute or shared class constant (template
+ * parts, `clsx` arguments, and same-file constants and helpers), and requires a
+ * focus or focus-visible ring, outline, shadow or border change.
  * Plain containers that never take keyboard focus (no tabIndex, or
  * tabIndex={-1}) are skipped. Audited exceptions are pinned by literal hash.
  *
- * This is the same detection that batch 1 of the focus-visible sweep carries
- * inline in `keyboard-focus-indicators.test.ts`. Once both land, the two
- * contract tests can be merged onto this helper.
+ * Used by `keyboard-focus-indicators.test.ts`, which scans all of `app/` and
+ * `components/`.
  */
 import { createHash } from "node:crypto";
 import fs from "node:fs";
@@ -28,6 +28,8 @@ const projectRoot = path.resolve(__dirname, "../../..");
 export const OUTLINE_REMOVALS: readonly string[] = [
   "focus:tw-outline-none",
   "focus:!tw-outline-none",
+  "focus-visible:tw-outline-none",
+  "focus-visible:!tw-outline-none",
 ];
 
 const removesOutline = (
@@ -209,8 +211,7 @@ export function indicatorProblem(classes: string): string | null {
       : null;
   }
   const visible = candidates.some(
-    (c) =>
-      c === "unknown" || (contrastOnSurface(c) ?? MIN_CONTRAST) >= MIN_CONTRAST
+    (c) => c === "unknown" || (contrastOnSurface(c) ?? 0) >= MIN_CONTRAST
   );
   return visible
     ? null
@@ -324,10 +325,12 @@ const NON_FOCUSABLE_TAGS = new Set([
 const INTERACTIVE_ROLE =
   /^(?:button|link|tab|menuitem\w*|option|checkbox|radio|switch|slider|textbox|combobox|treeitem)$/;
 
-const FOCUS_WITHIN_PREFIX = /^(?:focus-within|has-\[:focus-visible\]):/;
+const FOCUS_WITHIN_PREFIX =
+  /^(?:focus-within|has-\[(?:\[[^\]]*\])?[^\]]*:focus-visible\]):/;
+const GROUP_FOCUS_PREFIX = /^group-focus(?:-visible)?:/;
 
 /**
- * `focus-within:` and `has-[:focus-visible]:` indicators that wrapping JSX
+ * `focus-within:` and `has-[…:focus-visible]:` indicators that wrapping JSX
  * elements draw for a control, rewritten as plain `focus:` utilities.
  */
 function ancestorFocusWithin(
@@ -352,6 +355,28 @@ function ancestorFocusWithin(
     }
   }
   return parts.join(" ");
+}
+
+/**
+ * `group-focus-visible:` indicators that the children of a `tw-group` control
+ * draw for it (a pill or ring on an inner span), rewritten as `focus:`.
+ */
+function descendantGroupFocus(
+  attribute: ts.JsxAttribute,
+  ownClasses: string,
+  declarations: Map<string, ts.Node[]>
+): string {
+  const opening = attribute.parent.parent;
+  if (!ts.isJsxOpeningElement(opening)) return "";
+  if (!ownClasses.split(/\s+/).includes("tw-group")) return "";
+  const children = opening.parent.children
+    .map((child) => reachableClasses(child, declarations))
+    .join(" ");
+  return children
+    .split(/\s+/)
+    .filter((token) => GROUP_FOCUS_PREFIX.test(token))
+    .map((token) => token.replace(GROUP_FOCUS_PREFIX, "focus:"))
+    .join(" ");
 }
 
 /** Plain containers and tabIndex={-1} targets never show keyboard focus. */
@@ -424,7 +449,8 @@ function attributeProblem(
   if (!isKeyboardFocusTarget(attribute)) return null;
   const own = reachableClasses(classes, declarations);
   const wrapper = ancestorFocusWithin(attribute, declarations);
-  return indicatorProblem(`${own} ${wrapper}`);
+  const children = descendantGroupFocus(attribute, own, declarations);
+  return indicatorProblem(`${own} ${wrapper} ${children}`);
 }
 
 /** Why a class list lacks a keyboard indicator on an element wearing it, or null. */
@@ -493,6 +519,73 @@ function sourceFiles(root: string): string[] {
   return walk(absolute);
 }
 
+const OPTION_STATE_VARIANT = /^data-\[(?:focus|active)\]:/;
+const OPTION_TINT = /^data-\[(?:focus|active)\]:!?tw-bg-/;
+
+/**
+ * Headless UI marks the active option of a menu, listbox or combobox with
+ * `data-focus`. A background tint alone is not a focus indicator (iron-800
+ * over iron-900 is about 1.2:1), so a class list that tints on `data-[focus]:`
+ * must also draw a ring, outline, shadow or border change that reaches 3:1.
+ */
+export function findOptionHighlightHits(
+  source: string,
+  file = "inline.tsx"
+): FocusIndicatorHit[] {
+  const sourceFile = ts.createSourceFile(
+    file,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX
+  );
+  const hits: FocusIndicatorHit[] = [];
+  const visit = (node: ts.Node): void => {
+    if (isClassText(node)) {
+      const tokens = node.text.split(/\s+/).filter(Boolean);
+      const highlighted = tokens.filter((token) =>
+        OPTION_STATE_VARIANT.test(token)
+      );
+      if (highlighted.some((token) => OPTION_TINT.test(token))) {
+        // Only the active-option state counts: keep base classes and rewrite
+        // the data-focus ones as focus utilities.
+        const considered = tokens
+          .filter(
+            (token) => !token.includes(":") || highlighted.includes(token)
+          )
+          .map((token) => token.replace(OPTION_STATE_VARIANT, "focus:"));
+        const problem = indicatorProblem(considered.join(" "));
+        if (problem) {
+          hits.push({
+            file,
+            literal: node.text,
+            problem: `active option: ${problem}`,
+          });
+        }
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return hits;
+}
+
+function scanSources(
+  roots: readonly string[],
+  excludedPrefixes: readonly string[],
+  mayMatch: (source: string) => boolean,
+  find: (source: string, file: string) => FocusIndicatorHit[]
+): FocusIndicatorHit[] {
+  return roots.flatMap(sourceFiles).flatMap((file) => {
+    const relative = path.relative(projectRoot, file).split(path.sep).join("/");
+    if (excludedPrefixes.some((prefix) => relative.startsWith(prefix))) {
+      return [];
+    }
+    const source = fs.readFileSync(file, "utf8");
+    return mayMatch(source) ? find(source, relative) : [];
+  });
+}
+
 /**
  * Hits across the given directories (relative to the project root), skipping
  * any file under an excluded directory prefix.
@@ -502,15 +595,26 @@ export function scanHits(
   excludedPrefixes: readonly string[] = [],
   removals: readonly string[] = OUTLINE_REMOVALS
 ): FocusIndicatorHit[] {
-  return roots.flatMap(sourceFiles).flatMap((file) => {
-    const relative = path.relative(projectRoot, file).split(path.sep).join("/");
-    if (excludedPrefixes.some((prefix) => relative.startsWith(prefix))) {
-      return [];
-    }
-    const source = fs.readFileSync(file, "utf8");
-    if (!removals.some((token) => source.includes(token))) return [];
-    return findHits(source, relative, removals);
-  });
+  return scanSources(
+    roots,
+    excludedPrefixes,
+    (source) => removals.some((token) => source.includes(token)),
+    (source, file) => findHits(source, file, removals)
+  );
+}
+
+/** Active-option highlight hits across the given directories. */
+export function scanOptionHighlightHits(
+  roots: readonly string[],
+  excludedPrefixes: readonly string[] = []
+): FocusIndicatorHit[] {
+  return scanSources(
+    roots,
+    excludedPrefixes,
+    (source) =>
+      source.includes("data-[focus]:") || source.includes("data-[active]:"),
+    findOptionHighlightHits
+  );
 }
 
 export const normalize = (literal: string): string =>

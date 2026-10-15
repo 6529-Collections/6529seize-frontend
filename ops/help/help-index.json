@@ -4475,7 +4475,7 @@
       "facts": [
         "The Register Consolidation form is a Safe Collecting action for connecting wallets you control for supported 6529 metrics.",
         "The form requires a connected wallet, Collection, and Consolidating With address.",
-        "Add another wallet in the profile’s Addresses section opens the guided Build a Consolidation setup at /safe-collecting/build-consolidation, not this form.",
+        "Add another wallet in the profile’s Wallet section opens the guided Build a Consolidation setup at /safe-collecting/build-consolidation, not this form.",
         "The normal form explains that a consolidation holds up to 4 wallets and every pair of wallets registers a link in both directions, so every wallet signs and needs ETH for gas; the link is public and existing profile data may be combined. NFTs stay in their wallets. It links to the guided setup.",
         "For TDH consolidation, use Any Collection or The Memes."
       ],
@@ -4525,7 +4525,7 @@
       ],
       "facts": [
         "Guided Setup reads its wallet limits and activation/signing-open times from the selected backend. Missing wallet limits pause guided signing and adding wallet rows; Try Again reloads settings. With valid limits but unavailable activation dates, two- and three-wallet plans continue while four-wallet signing waits.",
-        "Build a Consolidation is Safe Collecting's guided setup for linking up to 4 wallets you control. Open it from Guided Setup on the Consolidations card, from Add another wallet in ID Statements / Consolidated Addresses, or from the link in the Register Consolidation form.",
+        "Build a Consolidation is Safe Collecting's guided setup for linking up to 4 wallets you control. Open it from Guided Setup on the Consolidations card, from Add another wallet in the profile’s Wallet section, or from the link in the Register Consolidation form.",
         "Before the activation cutoff, a subtle note under the wallet counter shows the selected environment's four-wallet signing opening time in UTC. Plans can be prepared in advance. The note disappears at the cutoff, including in an open tab; four-wallet signing remains held until the separate opening time.",
         "Every pair of wallets in a consolidation registers use case 999 in both directions. The guide reads which directions are already registered on-chain (Any Collection or The Memes) and plans one transaction per wallet: a single registration for one missing link, or one batch for several.",
         "The connected wallet and its current consolidation are prefilled. Wallets already in that consolidation sign first and new wallets sign last; signing out of order temporarily splits the consolidation and can reduce TDH-wave votes.",
@@ -6147,15 +6147,15 @@
       ],
       "facts": [
         "Identity statements are managed from profile identity surfaces on /{user}.",
-        "On mobile, select the ID Statements score card to open the addresses and statements card. The personalized Addresses heading and wallet controls come first; below a divider, the ID Statements heading has an information button and compact Add action for eligible owners.",
-        "The profile’s Addresses section precedes ID Statements. Statement groups include Social Media Accounts, NFT Accounts, Contact, and Social Media Verification Posts; there is no separate Consolidated Addresses label.",
+        "On mobile, select the ID Statements score card to open the addresses and statements card. The personalized Wallet heading and wallet controls come first; below a divider, the ID Statements heading has an information button and compact Add action for eligible owners.",
+        "The profile’s Wallet section precedes ID Statements. Statement groups include Social Media Accounts, NFT Accounts, Contact, and Social Media Verification Posts; there is no separate Consolidated Addresses label.",
         "The information tooltip beside ID Statements explains that statements are optional and permanently public, social accounts are self-declared and 6529 does not connect to them or verify account ownership or posts, and the community rates statement accuracy. Open it on hover, keyboard focus or tap; Escape or an outside click dismisses it.",
         "Eligible profile owners use Add to open a bottom sheet on mobile or a dialog on desktop, choose a statement group and platform, and can return with Back to statement types before saving.",
         "Social Media Accounts, NFT Accounts, and Contact use compact icon rows for platform selection; pointer hover and keyboard focus reveal each platform name, and the selected option has a stronger outline.",
         "On mobile, the add-statements sheet presents four compact statement groups, keeps an optional and permanently public notice visible throughout the Add flow, and provides header close, back, backdrop, Escape, and swipe-down dismissal paths.",
         "On mobile web and Capacitor, deeper add-statement forms stay above the software keyboard and keep their focused fields and Save/Cancel actions reachable by scrolling.",
         "Consolidated wallet rows expand to show the full address and ENS name when available as full-field copy controls, plus labeled mobile links to Etherscan and OpenSea.",
-        "The profile’s Addresses section shows how many of the 4 allowed wallets the profile has. Add another wallet shares an equal-width row with Wallet Checker for the connected profile owner when no proxy profile is active, a primary or consolidated wallet address is available, and the profile has fewer than 4 wallets; it opens the guided Build a Consolidation flow at /safe-collecting/build-consolidation. At 4 wallets the owner sees a maximum-reached note instead. It is separate from Add for identity statements.",
+        "The profile’s personalized Wallet heading uses the viewed profile’s name, for example prxt0's Wallet, and stays singular for multiple addresses. The right-side count uses the profile’s address count and the current settings limit, for example 1 of 4 addresses or 2 of 4 addresses. It stays hidden until limits are known or when the profile has no addresses; a failed settings refresh keeps previously loaded limits. Add another wallet shares an equal-width row with Wallet Checker for the connected profile owner when no proxy profile is active, a primary or consolidated wallet address is available, and the profile has fewer than 4 wallets; it opens the guided Build a Consolidation flow at /safe-collecting/build-consolidation. At 4 wallets the owner sees a maximum-reached note instead. It is separate from Add for identity statements.",
         "URL-capable statement rows open from the row and show a right-aligned external-link cue; Copy remains an independent inline action that does not open the destination, while eligible owners can also Delete.",
         "NFT Accounts includes Ninfa and Other. Other asks for a display name such as AOTM and a secure HTTPS URL, then shows the display name with the destination hostname.",
         "New NFT account links must use HTTPS, cannot contain URL credentials, reject duplicate normalized URLs, and are limited to 20 per profile; Ninfa links must use ninfa.io or a ninfa.io subdomain.",
@@ -6436,9 +6436,10 @@
       ],
       "keywords": ["xtdh", "granted", "grant", "create", "profile", "owner"],
       "facts": [
-        "The xTDH granted view lists grants and documents grant actions.",
-        "Open a grant's Show tokens disclosure to view its token artwork. Missing artwork shows the token ID; a failed thumbnail shows Load Error while the token details remain visible. Close and reopen the disclosure to retry the image.",
+        "The xTDH granted view lists grants and documents grant actions. Collection thumbnails show an NFT placeholder when artwork is missing or cannot load.",
+        "Open a grant's Show tokens disclosure to view its token artwork. If indexed artwork is missing, the grid can recover artwork and placeholder names from original Arweave or IPFS metadata. Unavailable artwork shows the token ID; a failed thumbnail shows Load Error while the token details remain visible. Close and reopen the disclosure to retry the image.",
         "A create-new-grant flow is available where owner permissions allow it.",
+        "A grant with an end shows Last grant: the final daily xTDH run that can add xTDH for it, at 00:00 UTC on the UTC date of the grant's end. It is shown in UTC, so every viewer sees the same run.",
         "Use profile xTDH for profile-specific grants and Network xTDH for global context."
       ],
       "canonical_path": "/{user}/xtdh",
@@ -7860,6 +7861,7 @@
         "The top Meme number control uses Show mint schedule; the lower calendar control uses Find mint date because it moves the calendar to that mint.",
         "A selected published Meme provides an Open Meme link to /the-memes/{id}; upcoming or unrevealed Memes do not receive speculative artwork links.",
         "The page heading appears first; clock panels and the calendar grid appear once browser JavaScript is ready, using the browser clock and local timezone. Viewing the schedule does not require connecting a wallet.",
+        "In Local mode the calendar grid shows each mint on the viewer's local start date and highlights the viewer's today, so east of UTC (for example New Zealand) Monday/Wednesday/Friday mints can appear on the next day. UTC mode uses UTC dates. The calendar guide lists minting days as Monday / Wednesday / Friday (UTC) and, in Local mode, the viewer's own weekdays.",
         "The home page can also surface current or upcoming mint information.",
         "The calendar models past, current, and future Meme Card mint timing from Monday/Wednesday/Friday cadence plus explicit skip, extra, and reschedule overrides.",
         "The public calendar API exposes /api/meme-calendar/next, /api/meme-calendar/current, and /api/meme-calendar/{id}.",

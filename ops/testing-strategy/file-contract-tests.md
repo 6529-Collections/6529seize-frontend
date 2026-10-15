@@ -6,9 +6,9 @@ independently of the related-Jest check. Jest's import graph cannot discover
 dependencies created by `readFileSync` or directory scans.
 
 The selector covers the hover-control, keyboard-focus-indicator and wave
-compatibility source scans, Museum publication workflow compatibility,
-coverage-floor configuration, dependency-governance workflow, and runner
-benchmark workflows. Existing deployment and agent-file contract steps retain
+compatibility source scans, the global focus-style stylesheet test, Museum
+publication workflow compatibility, coverage-floor configuration,
+dependency-governance workflow, and runner benchmark workflows. Existing deployment and agent-file contract steps retain
 their own suites. This is an explicit dependency registry, not automatic
 discovery of every filesystem read.
 
