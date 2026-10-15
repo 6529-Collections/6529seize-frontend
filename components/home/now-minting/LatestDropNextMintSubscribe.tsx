@@ -1,13 +1,11 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import {
   getCanonicalNextMintNumber,
   isMintingToday,
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import { MEMES_CONTRACT } from "@/constants/constants";
-import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import { useProfileSubscriptionsNavigation } from "@/components/user/subscriptions/useProfileSubscriptionsNavigation";
 import {
   getSubscriptionCoverageActionLabel,
@@ -23,13 +21,14 @@ import type { SubscriptionCounts } from "@/generated/models/SubscriptionCounts";
 import { formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import MemeSubscriptionAwarenessRow from "./MemeSubscriptionAwarenessRow";
+import MemeSubscriptionAwarenessRow, {
+  MemeSubscriptionAwarenessRowSpace,
+} from "./MemeSubscriptionAwarenessRow";
 
 type SubscriptionTooltipKey =
   | Extract<
@@ -145,8 +144,6 @@ export default function LatestDropNextMintSubscribe(
   }> = {}
 ) {
   const { connectedProfile, activeProfileProxy } = useAuth();
-  const { country } = useCookieConsent();
-  const { isIos } = useCapacitor();
   const locale = useBrowserLocale();
   const {
     canNavigateToProfileSubscriptionsDirectly,
@@ -160,14 +157,11 @@ export default function LatestDropNextMintSubscribe(
   const isMintingDay = shouldQueryUpcomingStatus && isMintingToday();
   const tokenId = props.tokenId ?? getCanonicalNextMintNumber();
   const hasTokenId = Number.isInteger(tokenId) && tokenId > 0;
-  const hideSubscriptions = shouldHideSubscriptions({
-    capacitorIsIos: isIos,
-    country,
-  });
-  // Rendering keeps the check above so the Home server HTML is unchanged.
-  // Requests also wait for hydration and, on iOS, the country check, because
-  // the first hydration pass cannot yet tell it is the native shell.
-  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  // The server and the first hydration render cannot tell it is the native
+  // shell, and on iOS the country is unknown until the first lookup settles.
+  // Until purchasing is allowed the row and its requests are omitted.
+  const { hideNftPurchasing, shouldRedirect: isRestricted } =
+    useNftPurchasingVisibility();
   const canQuerySubscriptions = !hideNftPurchasing;
 
   const profileKey = useMemo(
@@ -264,8 +258,15 @@ export default function LatestDropNextMintSubscribe(
     ? getSubscriptionCoverageCompactLine(locale, coverageQuery.data)
     : undefined;
 
-  if (hideSubscriptions || !hasTokenId) {
+  if (!hasTokenId) {
     return null;
+  }
+
+  if (hideNftPurchasing) {
+    // Restricted iOS gets nothing. While the platform or country is still
+    // unknown, only reserve the row's height so the content below does not
+    // jump when the row appears; the spacer holds no purchasing UI.
+    return isRestricted ? null : <MemeSubscriptionAwarenessRowSpace />;
   }
 
   return (

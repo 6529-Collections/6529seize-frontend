@@ -166,3 +166,70 @@ describe("Home subscription row requests around hydration", () => {
     }
   );
 });
+
+const SPACE_TEST_ID = "meme-subscription-awareness-row-space";
+const ROW_LABEL = "Subscription Minting";
+const spaceElement = () =>
+  container.querySelector(`[data-testid='${SPACE_TEST_ID}']`);
+
+describe("Home subscription row visibility around hydration", () => {
+  it.each(["web", "android", "ios"] as const)(
+    "keeps the row out of the server HTML on %s and reserves only blank space",
+    (platform) => {
+      mockNativePlatform = platform;
+
+      container.innerHTML = renderToString(tree());
+
+      expect(container).not.toHaveTextContent(ROW_LABEL);
+      expect(container.querySelector("a, button, svg, img")).toBeNull();
+      const space = spaceElement();
+      expect(space).not.toBeNull();
+      expect(space).toBeEmptyDOMElement();
+      expect(space).toHaveAttribute("aria-hidden", "true");
+      expect(space).toHaveClass("tw-min-h-[6.375rem]");
+    }
+  );
+
+  it.each(["web", "android"] as const)(
+    "shows the row on %s right after hydration in place of the blank space",
+    async (platform) => {
+      mockNativePlatform = platform;
+
+      await hydrateFromServerHtml();
+
+      expect(container).toHaveTextContent(ROW_LABEL);
+      expect(spaceElement()).toBeNull();
+    }
+  );
+
+  it("shows only blank space on iOS while the country is pending", async () => {
+    await hydrateFromServerHtml();
+
+    expect(container).not.toHaveTextContent(ROW_LABEL);
+    expect(container.querySelector("a, button, svg, img")).toBeNull();
+    expect(spaceElement()).not.toBeNull();
+  });
+
+  it("replaces the blank space with the row once iOS resolves to US", async () => {
+    await hydrateFromServerHtml();
+
+    await settleCountry("US");
+
+    expect(container).toHaveTextContent(ROW_LABEL);
+    expect(spaceElement()).toBeNull();
+  });
+
+  it.each([
+    ["a non-US country", "FR"],
+    ["an unknown country", ""],
+  ])(
+    "removes the blank space and renders no row when iOS resolves to %s",
+    async (_label, country) => {
+      await hydrateFromServerHtml();
+
+      await settleCountry(country);
+
+      expect(container).toBeEmptyDOMElement();
+    }
+  );
+});
