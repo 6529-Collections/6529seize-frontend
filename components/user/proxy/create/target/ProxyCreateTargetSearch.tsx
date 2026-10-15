@@ -153,7 +153,7 @@ export default function ProxyCreateTargetSearch({
                     classNames(
                       "tw-relative tw-cursor-pointer tw-select-none tw-rounded-lg tw-px-2 tw-py-2 tw-transition tw-duration-300 tw-ease-out",
                       active
-                        ? "tw-bg-iron-700 tw-font-medium tw-text-iron-50"
+                        ? "tw-bg-iron-700 tw-font-medium tw-text-iron-50 tw-ring-2 tw-ring-inset tw-ring-primary-400"
                         : ""
                     )
                   }

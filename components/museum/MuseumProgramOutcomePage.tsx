@@ -2,7 +2,7 @@ import Link from "next/link";
 import { MuseumJsonDisclosure } from "./MuseumMarkdown";
 import { MuseumProgramImage } from "./MuseumProgramImage";
 import { MuseumStatusBadge } from "./MuseumShell";
-import { formatDate } from "@/i18n/format";
+import { formatUtcDate } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { isMuseumKeysAndGatesProgramId } from "@/lib/museum/publication/collectionSemantics";
@@ -147,7 +147,7 @@ export function MuseumProgramOutcomePage({
                     place: outcome.selectionPlace,
                   })}
                   {outcome.selectionDate
-                    ? ` · ${formatDate(DEFAULT_LOCALE, outcome.selectionDate)}`
+                    ? ` · ${formatUtcDate(DEFAULT_LOCALE, outcome.selectionDate)}`
                     : ""}
                 </dd>
               </div>

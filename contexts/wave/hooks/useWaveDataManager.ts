@@ -19,14 +19,18 @@ export function useWaveDataManager({
   isCapacitor = false,
 }: WaveDataManagerProps) {
   // Use composition to build the complete functionality
-  const { registerWave, cancelWaveDataFetch, syncNewestMessages } =
-    useWaveDataFetching({
-      updateData,
-      getData,
-      hasServerFeedSeed,
-      removeDrop,
-      isCapacitor,
-    });
+  const {
+    registerWave,
+    prefetchWave,
+    cancelWaveDataFetch,
+    syncNewestMessages,
+  } = useWaveDataFetching({
+    updateData,
+    getData,
+    hasServerFeedSeed,
+    removeDrop,
+    isCapacitor,
+  });
 
   // Add pagination functionality
   const { fetchNextPage, cancelPaginationFetch, fetchAroundSerialNo } =
@@ -40,6 +44,7 @@ export function useWaveDataManager({
   return {
     // Initial data loading & updates
     registerWave,
+    prefetchWave,
     cancelWaveDataFetch,
     syncNewestMessages,
 

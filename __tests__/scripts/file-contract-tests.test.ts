@@ -13,7 +13,7 @@ const { selectFileContractTests, changedFilesSince, runFileContractTests } =
 
 const HOVER = "__tests__/contracts/hover-revealed-controls.test.ts";
 const WAVES = "__tests__/contracts/waves-multi-competition-phase-1.test.ts";
-const FOCUS = "__tests__/contracts/keyboard-focus-indicators.batch2.test.ts";
+const FOCUS = "__tests__/contracts/keyboard-focus-indicators.test.ts";
 const COVERAGE = "__tests__/scripts/coverage-floor.test.ts";
 
 describe("filesystem contract selection", () => {
@@ -35,6 +35,12 @@ describe("filesystem contract selection", () => {
     "__tests__/contracts/support/keyboardFocusIndicators.ts",
   ])("selects the keyboard focus indicator scan for %s", (file) => {
     expect(selectFileContractTests([file])).toContain(FOCUS);
+  });
+
+  it("selects the global focus style test for the stylesheet it reads", () => {
+    expect(selectFileContractTests(["styles/globals.css"])).toEqual([
+      "__tests__/styles/link-focus-visibility.test.ts",
+    ]);
   });
 
   it.each([
