@@ -3343,6 +3343,8 @@ export const EN_US_MESSAGES = {
   "acceptConnection.action.accept": "Accept connection",
   "acceptConnection.unsupportedWeb":
     "Open this connection link in the 6529 mobile app.",
+  "acceptConnection.unsupportedLegacyDesktop":
+    "This connection link can only be accepted in the 6529 Desktop app.",
   "acceptConnection.missingParameters": "Missing required parameters",
   "acceptConnection.toast.maxProfiles": "Maximum connected profiles reached",
   "acceptConnection.toast.invalidResponse": "Invalid connection response",

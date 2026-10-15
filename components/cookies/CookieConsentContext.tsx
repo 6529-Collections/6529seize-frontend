@@ -20,6 +20,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { redactSensitiveQueryParams } from "@/utils/monitoring/sensitiveQueryParams";
 import { useAuth } from "../auth/Auth";
 import CookiesBanner from "./CookiesBanner";
 import { rememberCountryHint } from "./usCountryHint";
@@ -27,6 +28,31 @@ import { rememberCountryHint } from "./usCountryHint";
 const GTM_ID = "G-71NLVV3KY3";
 
 type CookieConsent = boolean | undefined;
+
+/**
+ * gtag.js reads the page URL when it loads, which can happen before a page
+ * removes one-time link credentials from the address bar. Override the page
+ * and referrer URLs only when they carry credentials, so ordinary sessions
+ * keep Google Analytics' default page tracking. A session that starts on such
+ * a URL may keep reporting the redacted landing URL, which is preferable to
+ * sending the credential.
+ */
+const getGoogleAnalyticsConfig = (): Record<string, number | string> => {
+  const config: Record<string, number | string> = {
+    cookie_expires: 31536000,
+  };
+  const pageLocation = globalThis.location.href;
+  const redactedPageLocation = redactSensitiveQueryParams(pageLocation);
+  if (redactedPageLocation !== pageLocation) {
+    config["page_location"] = redactedPageLocation;
+  }
+  const referrer = globalThis.document.referrer;
+  const redactedReferrer = redactSensitiveQueryParams(referrer);
+  if (redactedReferrer !== referrer) {
+    config["page_referrer"] = redactedReferrer;
+  }
+  return config;
+};
 
 type CookieConsentContextType = {
   showCookieConsent: boolean;
@@ -136,13 +162,14 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
     document.head.appendChild(script1);
 
     const script2 = document.createElement("script");
+    // Page URLs never enter the script source: the config travels as JSON
+    // data on the script element and is queued by the same inline script.
+    script2.dataset["gaConfig"] = JSON.stringify(getGoogleAnalyticsConfig());
     script2.innerHTML = `
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', '${GTM_ID}', {
-            'cookie_expires': 31536000
-        });
+        gtag('config', '${GTM_ID}', JSON.parse(document.currentScript.dataset.gaConfig));
       `;
     document.head.appendChild(script2);
   }, []);

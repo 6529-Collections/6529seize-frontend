@@ -1,6 +1,8 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { Capacitor } from "@capacitor/core";
-import React, { useMemo } from "react";
+import React, { act, useMemo } from "react";
+import { hydrateRoot } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 
 import AcceptConnectionSharingPage from "@/app/accept-connection-sharing/page.client";
 import { AuthContext } from "@/components/auth/Auth";
@@ -97,7 +99,30 @@ const TestProvider: React.FC<{
   );
 };
 
+const ACCEPT_CONNECTION_PATH = "/accept-connection-sharing";
+const ORIGINAL_USER_AGENT = navigator.userAgent;
+const DESKTOP_APP_USER_AGENT =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) 6529.io/1.0.0 Chrome/124.0.0.0 Electron/31.0.0 Safari/537.36";
+
+function setUserAgent(userAgent: string) {
+  Object.defineProperty(window.navigator, "userAgent", {
+    value: userAgent,
+    configurable: true,
+  });
+}
+
+/** Opens the page as the browser would: the URL and router agree. */
+function openConnectionLink(query: string) {
+  window.history.replaceState(null, "", `${ACCEPT_CONNECTION_PATH}?${query}`);
+  (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams(query));
+}
+
 describe("AcceptConnectionSharing page", () => {
+  afterEach(() => {
+    setUserAgent(ORIGINAL_USER_AGENT);
+    window.history.replaceState(null, "", "/");
+  });
+
   beforeEach(() => {
     (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
     (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
@@ -227,14 +252,13 @@ describe("AcceptConnectionSharing page", () => {
     expect(push).toHaveBeenCalledWith("/");
   });
 
-  it("redeems a legacy desktop token connection share in web", async () => {
+  it("redeems a legacy desktop token connection share in the 6529 Desktop app", async () => {
     const push = jest.fn();
     const seizeAcceptConnection = jest.fn();
     (useRouter as jest.Mock).mockReturnValue({ push });
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
-    (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams("token=legacy-refresh&address=0x123&role=client-role")
-    );
+    setUserAgent(DESKTOP_APP_USER_AGENT);
+    openConnectionLink("token=legacy-refresh&address=0x123&role=client-role");
     (useSeizeConnectContext as jest.Mock).mockReturnValue({
       address: undefined,
       seizeDisconnectAndLogout: jest.fn(),
@@ -251,6 +275,9 @@ describe("AcceptConnectionSharing page", () => {
       </TestProvider>
     );
 
+    // The credential leaves the visible URL before the user acts on the page.
+    expect(window.location.pathname).toBe(ACCEPT_CONNECTION_PATH);
+    expect(window.location.search).toBe("?address=0x123&role=client-role");
     fireEvent.click(screen.getByText("Accept connection"));
 
     await waitFor(() =>
@@ -275,15 +302,207 @@ describe("AcceptConnectionSharing page", () => {
     expect(push).toHaveBeenCalledWith("/");
   });
 
+  it.each([
+    ["a web browser", false, ORIGINAL_USER_AGENT],
+    ["the 6529 mobile app", true, ORIGINAL_USER_AGENT],
+  ])(
+    "does not redeem or store a legacy desktop token in %s",
+    (_surface, isNativePlatform, userAgent) => {
+      (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(
+        isNativePlatform
+      );
+      setUserAgent(userAgent);
+      openConnectionLink("token=legacy-refresh&address=0x123&role=client-role");
+
+      render(
+        <TestProvider>
+          <AcceptConnectionSharingPage />
+        </TestProvider>
+      );
+
+      expect(
+        screen.getByText(
+          "This connection link can only be accepted in the 6529 Desktop app."
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "Take me home" })
+      ).toHaveAttribute("href", "/");
+      expect(screen.queryByText("Accept connection")).not.toBeInTheDocument();
+      expect(window.location.search).toBe("?address=0x123&role=client-role");
+      expect(commonApiPost).not.toHaveBeenCalled();
+      expect(setAuthJwt).not.toHaveBeenCalled();
+      expect(redeemConnectionShare).not.toHaveBeenCalled();
+    }
+  );
+
+  it("does not accept a legacy token through a mobile share link in a web browser", () => {
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
+    openConnectionLink(
+      "connection_share_code=abc12345&token=legacy-refresh&address=0x123"
+    );
+
+    render(
+      <TestProvider>
+        <AcceptConnectionSharingPage />
+      </TestProvider>
+    );
+
+    expect(
+      screen.getByText(
+        "This connection link can only be accepted in the 6529 Desktop app."
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Accept connection")).not.toBeInTheDocument();
+    expect(window.location.search).toBe("?address=0x123");
+  });
+
+  it("redeems only the share code when a mobile link also carries a legacy token in the native app", async () => {
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    openConnectionLink(
+      "connection_share_code=abc12345&token=legacy-refresh&address=0x123"
+    );
+    (redeemConnectionShare as jest.Mock).mockResolvedValue({
+      client_type: "native",
+      address: "0x123",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      native_refresh_token: "native-refresh-token",
+      refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+    });
+
+    render(
+      <TestProvider>
+        <AcceptConnectionSharingPage />
+      </TestProvider>
+    );
+
+    expect(window.location.search).toBe("?address=0x123");
+    fireEvent.click(screen.getByText("Accept connection"));
+
+    await waitFor(() =>
+      expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345")
+    );
+    expect(commonApiPost).not.toHaveBeenCalled();
+    expect(setAuthJwt).not.toHaveBeenCalled();
+  });
+
+  it("cleans the URL again when the same link is reopened on the mounted page", () => {
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    openConnectionLink("connection_share_code=abc12345&address=0x123&_t=1");
+    const { rerender } = render(
+      <TestProvider>
+        <AcceptConnectionSharingPage />
+      </TestProvider>
+    );
+    expect(window.location.search).toBe("?address=0x123&_t=1");
+
+    // A repeated deep link navigates to the same code with a new timestamp.
+    openConnectionLink("connection_share_code=abc12345&address=0x123&_t=2");
+    rerender(
+      <TestProvider>
+        <AcceptConnectionSharingPage />
+      </TestProvider>
+    );
+
+    expect(window.location.search).toBe("?address=0x123&_t=2");
+    expect(screen.getByText("Accept connection")).toBeInTheDocument();
+  });
+
+  it("removes a mobile share code from the URL and still redeems it in the native app", async () => {
+    const push = jest.fn();
+    const historyLength = window.history.length;
+    (useRouter as jest.Mock).mockReturnValue({ push });
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    openConnectionLink("connection_share_code=abc12345&address=0x123&_t=1");
+    window.history.replaceState(null, "", `${window.location.href}#top`);
+    (redeemConnectionShare as jest.Mock).mockResolvedValue({
+      client_type: "native",
+      address: "0x123",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      native_refresh_token: "native-refresh-token",
+      refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+    });
+
+    render(
+      <TestProvider>
+        <AcceptConnectionSharingPage />
+      </TestProvider>
+    );
+
+    expect(window.location.search).toBe("?address=0x123&_t=1");
+    expect(window.location.hash).toBe("#top");
+    // Replacing the entry must not add a history entry or navigate.
+    expect(window.history.length).toBe(historyLength);
+    expect(push).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByText("Accept connection"));
+
+    await waitFor(() =>
+      expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345")
+    );
+    expect(push).toHaveBeenCalledWith("/");
+  });
+
+  it("waits for hydration before choosing the Desktop flow, without a hydration mismatch", async () => {
+    setUserAgent(DESKTOP_APP_USER_AGENT);
+    openConnectionLink("token=legacy-refresh&address=0x123");
+    const page = (
+      <TestProvider>
+        <AcceptConnectionSharingPage />
+      </TestProvider>
+    );
+    const container = document.createElement("div");
+    container.innerHTML = renderToString(page);
+    document.body.appendChild(container);
+
+    // Server HTML cannot know the shell, so it offers neither outcome yet.
+    expect(container.textContent).not.toContain("Accept connection");
+    expect(container.textContent).not.toContain("6529 Desktop app");
+
+    const onRecoverableError = jest.fn();
+    let root: ReturnType<typeof hydrateRoot> | undefined;
+    try {
+      await act(async () => {
+        root = hydrateRoot(container, page, { onRecoverableError });
+      });
+
+      expect(container.textContent).toContain("Accept connection");
+      expect(onRecoverableError).not.toHaveBeenCalled();
+      expect(window.location.search).toBe("?address=0x123");
+    } finally {
+      await act(async () => root?.unmount());
+      container.remove();
+    }
+  });
+
+  it("removes link credentials from the URL in a web browser", () => {
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
+    openConnectionLink("connection_share_code=abc12345&address=0x123");
+
+    render(
+      <TestProvider>
+        <AcceptConnectionSharingPage />
+      </TestProvider>
+    );
+
+    expect(
+      screen.getByText(/Open this connection link in the 6529 mobile app/)
+    ).toBeInTheDocument();
+    expect(window.location.search).toBe("?address=0x123");
+  });
+
   it("rejects a legacy desktop token response for a different address", async () => {
     const push = jest.fn();
     const setToast = jest.fn();
     const seizeAcceptConnection = jest.fn();
     (useRouter as jest.Mock).mockReturnValue({ push });
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
-    (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams("token=legacy-refresh&address=0x123&role=client-role")
-    );
+    setUserAgent(DESKTOP_APP_USER_AGENT);
+    openConnectionLink("token=legacy-refresh&address=0x123&role=client-role");
     (useSeizeConnectContext as jest.Mock).mockReturnValue({
       address: undefined,
       seizeDisconnectAndLogout: jest.fn(),
