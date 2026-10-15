@@ -25,10 +25,11 @@ export const CreateDropSubmit: React.FC<CreateDropSubmitProps> = ({
 
   const button = (
     <Button
-      onPointerDown={(event) => {
-        // A pointer submission should not move focus off the chat input.
+      onMouseDown={(event) => {
+        // iOS synthesizes mousedown after a tap even when pointerdown is cancelled.
         if (
           !isDropMode &&
+          event.button === 0 &&
           document.activeElement instanceof HTMLElement &&
           document.activeElement.isContentEditable
         ) {
