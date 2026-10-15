@@ -19,6 +19,7 @@ interface SidebarPrimaryItemProps {
   readonly onKeyDown?:
     | React.KeyboardEventHandler<HTMLButtonElement>
     | undefined;
+  readonly onFocus?: React.FocusEventHandler<HTMLButtonElement> | undefined;
   readonly icon?: IconComp | undefined;
   readonly iconSizeClass?: string | undefined;
   readonly label: string;
@@ -40,6 +41,7 @@ function WebSidebarNavItem({
   onPointerEnter,
   onPointerLeave,
   onKeyDown,
+  onFocus,
   icon: Icon,
   iconSizeClass,
   label,
@@ -134,6 +136,7 @@ function WebSidebarNavItem({
       onPointerEnter={onPointerEnter}
       onPointerLeave={onPointerLeave}
       onKeyDown={onKeyDown}
+      onFocus={onFocus}
       className={`tw-touch-action-manipulation tw-block tw-h-[2.875rem] tw-w-full tw-cursor-pointer tw-rounded-xl tw-border-none tw-bg-transparent tw-px-2 tw-text-left tw-text-base tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 motion-reduce:tw-transition-none ${
         active
           ? "tw-bg-transparent tw-text-white active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
