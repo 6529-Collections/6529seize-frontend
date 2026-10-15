@@ -19,7 +19,7 @@ interface UseWaveNavigationOptions {
     }
   ) => void;
   readonly onHover: (waveId: string) => void;
-  readonly prefetchWaveData: (waveId: string) => void;
+  readonly prefetchWaveData: (waveId: string) => Promise<void> | void;
   readonly pathname: string | null;
   readonly searchParams: ReadonlyURLSearchParams | null;
   readonly waveId: string;
@@ -82,7 +82,7 @@ export const useWaveNavigation = ({
     }
 
     onHover(waveId);
-    prefetchWaveData(waveId);
+    void prefetchWaveData(waveId);
   }, [currentWaveId, onHover, prefetchWaveData, waveId]);
 
   // Prefetch on hover only once the pointer rests on the row, not while it
