@@ -288,17 +288,62 @@ describe("capacitor shell state", () => {
       removeSpy.mockRestore();
     });
 
-    it("answers reads made before the first subscription with one lookup per tick", async () => {
+    it("answers reads made before the first subscription with one lookup", () => {
       for (let read = 0; read < 25; read += 1) {
         expect(store.getCapacitorIsPortrait()).toBe(true);
       }
+
+      expect(matchMedia).toHaveBeenCalledTimes(1);
+    });
+
+    it("returns a stable snapshot across a microtask boundary until the subscription refreshes it", async () => {
+      expect(store.getCapacitorIsPortrait()).toBe(true);
+
+      // The orientation changes between the render read and the commit re-read.
+      matches = false;
+      await Promise.resolve();
+      expect(store.getCapacitorIsPortrait()).toBe(true);
+      await flushPromises();
+      expect(store.getCapacitorIsPortrait()).toBe(true);
       expect(matchMedia).toHaveBeenCalledTimes(1);
 
-      // The next tick reads the live orientation again.
-      await flushPromises();
-      matches = false;
+      // Subscribing refreshes it; React re-checks the snapshot right after.
+      const onChange = jest.fn();
+      const unsubscribe = store.subscribeCapacitorOrientation(onChange);
       expect(store.getCapacitorIsPortrait()).toBe(false);
-      expect(matchMedia).toHaveBeenCalledTimes(2);
+      expect(store.getCapacitorIsPortrait()).toBe(false);
+
+      unsubscribe();
+    });
+
+    it("keeps its snapshot until orientationchange notifies subscribers", async () => {
+      const onChange = jest.fn();
+      const unsubscribe = store.subscribeCapacitorOrientation(onChange);
+      expect(store.getCapacitorIsPortrait()).toBe(true);
+
+      matches = false;
+      await Promise.resolve();
+      await flushPromises();
+      expect(store.getCapacitorIsPortrait()).toBe(true);
+      expect(onChange).not.toHaveBeenCalled();
+
+      window.dispatchEvent(new Event("orientationchange"));
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(store.getCapacitorIsPortrait()).toBe(false);
+
+      unsubscribe();
+    });
+
+    it("reads the orientation afresh once the last subscriber has gone", async () => {
+      const unsubscribe = store.subscribeCapacitorOrientation(jest.fn());
+      expect(store.getCapacitorIsPortrait()).toBe(true);
+      unsubscribe();
+      await flushPromises();
+
+      matches = false;
+
+      expect(store.getCapacitorIsPortrait()).toBe(false);
+      expect(store.getCapacitorIsPortrait()).toBe(false);
     });
 
     it("stops looking up the orientation once subscribed", () => {

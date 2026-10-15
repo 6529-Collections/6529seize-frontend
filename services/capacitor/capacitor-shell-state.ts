@@ -140,38 +140,34 @@ const readIsPortrait = (): boolean => {
   return window.matchMedia(ORIENTATION_PORTRAIT_QUERY).matches;
 };
 
-// Kept current by `orientationchange` while subscribed.
-let sharedIsPortrait: boolean | undefined;
-// Reads made before the first subscription (every consumer of an initial mount
-// renders first) share one `matchMedia` lookup per tick instead of one each.
-let tickIsPortrait: boolean | undefined;
+// The orientation snapshot. `useSyncExternalStore` requires `getSnapshot` to
+// return the same value until the store notifies, so it is replaced only by
+// the subscription (when it starts, and from `orientationchange`) and cleared
+// on teardown. Never by a timer: a re-read at commit must match the render.
+let isPortraitSnapshot: boolean | undefined;
 
 /** Whether the native shell is in portrait (always `true` outside native). */
 export const getCapacitorIsPortrait = (): boolean => {
-  if (sharedIsPortrait !== undefined) {
-    return sharedIsPortrait;
-  }
   if (!Capacitor.isNativePlatform()) {
     return true;
   }
-  if (tickIsPortrait === undefined) {
-    tickIsPortrait = readIsPortrait();
-    void Promise.resolve().then(() => {
-      tickIsPortrait = undefined;
-    });
-  }
-  return tickIsPortrait;
+  // Every consumer of an initial mount renders before the first subscription:
+  // the first read is cached so they share one `matchMedia` lookup.
+  isPortraitSnapshot ??= readIsPortrait();
+  return isPortraitSnapshot;
 };
 
 export const subscribeCapacitorOrientation = createSharedSubscribe((notify) => {
-  sharedIsPortrait = readIsPortrait();
+  // React re-checks the snapshot right after subscribing, so a change since
+  // the pre-subscription read still reaches every consumer.
+  isPortraitSnapshot = readIsPortrait();
 
   const handleOrientationChange = () => {
     const nextIsPortrait = readIsPortrait();
-    if (nextIsPortrait === sharedIsPortrait) {
+    if (nextIsPortrait === isPortraitSnapshot) {
       return;
     }
-    sharedIsPortrait = nextIsPortrait;
+    isPortraitSnapshot = nextIsPortrait;
     notify();
   };
 
@@ -179,6 +175,6 @@ export const subscribeCapacitorOrientation = createSharedSubscribe((notify) => {
 
   return () => {
     window.removeEventListener("orientationchange", handleOrientationChange);
-    sharedIsPortrait = undefined;
+    isPortraitSnapshot = undefined;
   };
 });
