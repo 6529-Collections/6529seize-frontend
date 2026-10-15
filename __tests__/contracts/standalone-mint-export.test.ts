@@ -188,7 +188,7 @@ function mapThroughPaths(
   }
   return path.resolve(
     mappings.baseDir,
-    target.replace("*", specifier.slice(wildcard.prefix.length))
+    target.replaceAll("*", specifier.slice(wildcard.prefix.length))
   );
 }
 
@@ -259,8 +259,19 @@ describe("standalone mint static export", () => {
       standaloneMappings
     );
 
-    // Sanity check: the walk really covers the app, not just the two entries.
-    expect(graph.size).toBeGreaterThan(300);
+    // Sanity check: the walk follows the layout through `Providers` into the
+    // mapped stub, and the page into the mint UI, instead of stopping early.
+    const relativeGraph = new Set(
+      [...graph].map((file) =>
+        path.relative(projectRoot, file).replaceAll("\\", "/")
+      )
+    );
+    expect(relativeGraph).toContain("components/providers/Providers.tsx");
+    expect(relativeGraph).toContain(
+      "standalone/standalone-memes-mint/src/components/NoQuickDirectMessagesGate.tsx"
+    );
+    expect(relativeGraph).toContain("components/the-memes/TheMemesMint.tsx");
+    expect(relativeGraph).not.toContain(REAL_GATE);
     expect(serverActionModulesIn(graph)).toEqual([]);
   });
 

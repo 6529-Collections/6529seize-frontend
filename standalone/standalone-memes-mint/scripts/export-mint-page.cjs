@@ -28,6 +28,8 @@ const finalOutputDir = distRootDir;
 const S3_BUCKET_PROD = "thememes.6529.io";
 const S3_BUCKET_TEST = "thememestest.6529.io";
 
+// Single source of truth for the public files the export copies.
+// __tests__/contracts/standalone-mint-export.test.ts checks each one exists.
 const STANDALONE_PUBLIC_FILES = [
   "6529.svg",
   "6529io.png",
