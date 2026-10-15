@@ -107,16 +107,56 @@ describe("user page server loaders", () => {
       });
     });
 
-    it("does not share results between differently addressed segments", async () => {
+    it.each<[string[], string]>([
+      [["Alice", "alice", "ALICE"], "profiles/alice/cic/statements"],
+      [
+        ["Br%C3%9Cder", "br%c3%9cder", "BRÜDER", "brüder"],
+        "profiles/br%C3%BCder/cic/statements",
+      ],
+      [
+        ["Alice%2FAdmin", "alice%2fadmin", "Alice/Admin"],
+        "profiles/alice%2Fadmin/cic/statements",
+      ],
+    ])(
+      "shares one request across every spelling of the same identity: %j",
+      async (spellings, endpoint) => {
+        await Promise.all(
+          spellings.map((spelling) => loadProfileStatements(spelling))
+        );
+
+        expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+        expect(commonApiFetchMock).toHaveBeenCalledWith({
+          endpoint,
+          headers: { Authorization: "Bearer jwt" },
+        });
+      }
+    );
+
+    it("keeps different identities separate", async () => {
       await loadProfileStatements("alice");
-      await loadProfileStatements("alice%2Fadmin");
+      await loadProfileStatements("bob");
 
       expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
-      expect(commonApiFetchMock).toHaveBeenLastCalledWith({
-        endpoint: "profiles/alice%2Fadmin/cic/statements",
+    });
+
+    it("keeps a malformed percent sequence as one encoded literal segment", async () => {
+      await loadProfileStatements("%E0%A4%A");
+
+      expect(commonApiFetchMock).toHaveBeenCalledWith({
+        endpoint: "profiles/%25e0%25a4%25a/cic/statements",
         headers: { Authorization: "Bearer jwt" },
       });
     });
+
+    it.each([["."], [".."], ["%2E%2E"], ["%2e"]])(
+      "rejects the dot-only identity %s without calling the API",
+      async (identity) => {
+        await expect(loadProfileStatements(identity)).rejects.toThrow(
+          "Profile identity cannot be addressed as one path segment"
+        );
+        expect(commonApiFetchMock).not.toHaveBeenCalled();
+      }
+    );
 
     it("rejects when the API call fails so each caller can degrade", async () => {
       commonApiFetchMock.mockRejectedValueOnce(new Error("upstream failed"));

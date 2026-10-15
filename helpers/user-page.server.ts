@@ -35,13 +35,32 @@ export const loadUserProfile = cache(
   }
 );
 
+const DOT_ONLY_SEGMENT = /^\.+$/;
+
+const decodeRouteIdentity = (value: string): string => {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+};
+
 /**
- * Loads the profile statements once per request. `identitySegment` is the exact
- * path segment sent to the API, so callers that encode it differently stay
- * separate requests instead of silently sharing a differently-addressed result.
- * Rejects when the API call fails; callers decide how to degrade.
+ * The one canonical API path segment for a route identity: decoded once,
+ * lowercased, then encoded once. Every spelling of the same identity (case,
+ * percent-encoding) maps to the same segment, and the encoding keeps the
+ * identity from changing the request path. Dot-only identities return null
+ * because URL parsing would resolve them as path navigation.
  */
-export const loadProfileStatements = cache(
+const toProfileIdentitySegment = (routeIdentity: string): string | null => {
+  const normalized = decodeRouteIdentity(routeIdentity).toLowerCase();
+  if (normalized === "" || DOT_ONLY_SEGMENT.test(normalized)) {
+    return null;
+  }
+  return encodeURIComponent(normalized);
+};
+
+const loadProfileStatementsForSegment = cache(
   async (identitySegment: string): Promise<CicStatement[]> => {
     const headers = await getAppCommonHeaders();
     return await commonApiFetch<CicStatement[]>({
@@ -50,3 +69,19 @@ export const loadProfileStatements = cache(
     });
   }
 );
+
+/**
+ * Loads the profile statements once per request. Callers pass the route
+ * identity as received; it is canonicalized here so the page, its metadata and
+ * its header always share one request. Rejects when the identity is invalid or
+ * the API call fails; callers decide how to degrade.
+ */
+export const loadProfileStatements = async (
+  routeIdentity: string
+): Promise<CicStatement[]> => {
+  const identitySegment = toProfileIdentitySegment(routeIdentity);
+  if (identitySegment === null) {
+    throw new Error("Profile identity cannot be addressed as one path segment");
+  }
+  return await loadProfileStatementsForSegment(identitySegment);
+};

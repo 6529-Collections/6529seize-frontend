@@ -98,7 +98,7 @@ const isProbeLikeUserSlug = (user: string): boolean => {
 
 const loadPublicProfileBio = async (user: string): Promise<string | null> => {
   try {
-    const statements = await loadProfileStatements(encodeURIComponent(user));
+    const statements = await loadProfileStatements(user);
     return (
       statements.find(
         (statement) =>

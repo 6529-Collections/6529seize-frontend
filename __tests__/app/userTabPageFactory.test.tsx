@@ -242,7 +242,7 @@ describe("user tab page via createUserTabPage", () => {
     });
 
     expect(commonApiFetch).toHaveBeenCalledWith({
-      endpoint: "profiles/alice%252fadmin/cic/statements",
+      endpoint: "profiles/alice%2Fadmin/cic/statements",
       headers: { "x-test": "1" },
     });
   });
@@ -259,19 +259,25 @@ describe("user tab page via createUserTabPage", () => {
     expect(getUserProfile).toHaveBeenCalledTimes(1);
   });
 
-  it("shares the public bio request with the profile header", async () => {
-    const { generateMetadata } = buildFactory();
+  it.each([
+    ["Dave", "dave", "profiles/dave/cic/statements"],
+    ["Br%C3%9Cder", "br%c3%9cder", "profiles/br%C3%BCder/cic/statements"],
+  ])(
+    "shares one public bio request between metadata and the header for %s",
+    async (routeUser, headerIdentity, endpoint) => {
+      const { generateMetadata } = buildFactory();
 
-    await generateMetadata({ params: Promise.resolve({ user: "Dave" }) });
-    // The header requests the same statements for the same route identity.
-    await loadProfileStatements("dave");
+      await generateMetadata({ params: Promise.resolve({ user: routeUser }) });
+      // The header passes the lowercased route identity it was rendered with.
+      await loadProfileStatements(headerIdentity);
 
-    expect(commonApiFetch).toHaveBeenCalledTimes(1);
-    expect(commonApiFetch).toHaveBeenCalledWith({
-      endpoint: "profiles/dave/cic/statements",
-      headers: { "x-test": "1" },
-    });
-  });
+      expect(commonApiFetch).toHaveBeenCalledTimes(1);
+      expect(commonApiFetch).toHaveBeenCalledWith({
+        endpoint,
+        headers: { "x-test": "1" },
+      });
+    }
+  );
 
   it("requests the public bio while the identity request is still pending", async () => {
     let resolveProfile: (profile: unknown) => void = () => undefined;
