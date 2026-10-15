@@ -128,7 +128,7 @@ async function start() {
             ) {
               return { path: "null-component", namespace: "fixture" };
             }
-            if (args.path === "mixpanel-browser")
+            if (args.path === "mixpanel-browser/dist/mixpanel-core.cjs.js")
               return { path: "sdk", namespace: "fixture" };
             return undefined;
           });
@@ -137,7 +137,9 @@ async function start() {
             if (args.path === "null-component")
               contents = "export default function Component() { return null; }";
             if (args.path === "sdk") {
-              const sdkPath = require.resolve("mixpanel-browser");
+              const sdkPath = require.resolve(
+                "mixpanel-browser/dist/mixpanel-core.cjs.js"
+              );
               contents = `import sdk from ${JSON.stringify(sdkPath)};
             const init = sdk.init.bind(sdk);
             sdk.init = (token, options) => init(token, {...options,

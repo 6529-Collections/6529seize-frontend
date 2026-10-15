@@ -43,7 +43,6 @@ jest.mock("ethers", () => ({
         privateKey: "k",
       }),
     },
-    isAddress: () => true,
   },
 }));
 
@@ -54,6 +53,9 @@ jest.mock("@/components/app-wallets/app-wallet-helpers", () => ({
       : value
   ),
   encryptData: jest.fn(async (_salt, value) => `v2:${value}`),
+}));
+
+jest.mock("@/components/app-wallets/app-wallet-envelope", () => ({
   isAppWalletEncryptedEnvelope: jest.fn(
     (value) => typeof value === "string" && value.startsWith("v2:")
   ),
