@@ -1,15 +1,19 @@
 import { renderHook, act } from "@testing-library/react";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
 
-let mockAppActive = true;
-jest.mock("@/hooks/useMobileAppActivity", () => ({
-  ...jest.requireActual("@/hooks/useMobileAppActivity"),
-  useMobileAppActivity: () => mockAppActive,
-}));
+function setVisibility(value: DocumentVisibilityState) {
+  act(() => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value,
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+}
 
 describe("useWaveTimers", () => {
   beforeEach(() => {
-    mockAppActive = true;
+    setVisibility("visible");
     jest.useFakeTimers().setSystemTime(new Date(0));
   });
 
@@ -47,14 +51,15 @@ describe("useWaveTimers", () => {
   });
 
   it("stops timers in the background and immediately catches up on resume", () => {
-    const { result, rerender } = renderHook(() => useWaveTimers(baseWave));
-    expect(jest.getTimerCount()).toBe(3);
-    mockAppActive = false;
-    rerender();
+    const { result } = renderHook(() => useWaveTimers(baseWave));
+    // One shared timer drives participation, voting and decision updates.
+    expect(jest.getTimerCount()).toBe(1);
+    setVisibility("hidden");
     expect(jest.getTimerCount()).toBe(0);
     act(() => jest.advanceTimersByTime(5000));
-    mockAppActive = true;
-    rerender();
+    // Hidden pages keep their last value until they are shown again.
+    expect(result.current.participation.isUpcoming).toBe(true);
+    setVisibility("visible");
     expect(result.current.participation.isCompleted).toBe(true);
     expect(result.current.voting.isCompleted).toBe(true);
     expect(result.current.decisions.firstDecisionDone).toBe(true);

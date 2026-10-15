@@ -1,5 +1,6 @@
 "use client";
 
+import { usePageVisible } from "@/hooks/usePageVisibility";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 interface Props {
@@ -50,13 +51,15 @@ export default function DateCountdown(props: Readonly<Props>) {
 
   const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isPageVisible = usePageVisible();
 
   useEffect(() => {
-    // Reset state whenever date changes (or becomes unavailable)
+    // Reset state whenever date changes (or becomes unavailable), and catch up
+    // when a hidden page is shown again.
     setTimeLeft(calcTimeLeft());
 
-    // If no date yet, don't schedule ticks
-    if (!date) return;
+    // If no date yet, or nobody can see the page, don't schedule ticks
+    if (!date || !isPageVisible) return;
 
     const tick = () => {
       const next = calcTimeLeft();
@@ -90,7 +93,7 @@ export default function DateCountdown(props: Readonly<Props>) {
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = null;
     };
-  }, [date, calcTimeLeft]);
+  }, [date, calcTimeLeft, isPageVisible]);
 
   const plural = (n: number, word: string) =>
     `${n.toLocaleString()} ${word}${n === 1 ? "" : "s"}`;
