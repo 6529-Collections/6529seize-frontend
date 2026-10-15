@@ -116,6 +116,42 @@ describe("scheduleGoogleAnalytics", () => {
     expect(gtagScripts()).toHaveLength(1);
   });
 
+  it.each(["interaction", "cancel"] as const)(
+    "stops a pending idle wait by %s where cancelIdleCallback is missing",
+    (stopBy) => {
+      setReadyState("loading");
+      idleCallbackWindow.requestIdleCallback = jest.fn(() => 1);
+      cancel = scheduleGoogleAnalytics(hasConsent);
+      window.dispatchEvent(new Event("load"));
+
+      if (stopBy === "interaction") {
+        // A throwing stop() would end the listener before gtag.js is added.
+        window.dispatchEvent(new Event("pointerdown"));
+        expect(gtagScripts()).toHaveLength(1);
+      } else {
+        expect(cancel()).toBe(true);
+        expect(gtagScripts()).toHaveLength(0);
+      }
+    }
+  );
+
+  it("does not download gtag.js when the gtag bootstrap did not run", () => {
+    // A head that accepts nodes without executing them leaves gtag undefined.
+    const appendChild = jest
+      .spyOn(document.head, "appendChild")
+      .mockImplementation((node) => node);
+    cancel = scheduleGoogleAnalytics(hasConsent);
+
+    window.dispatchEvent(new Event("pointerdown"));
+
+    const appended = appendChild.mock.calls.map(
+      ([node]) => node as HTMLScriptElement
+    );
+    expect(appended).toHaveLength(1);
+    expect(appended[0]?.src).toBe("");
+    expect(appended.some((node) => node.src === GA_SCRIPT_URL)).toBe(false);
+  });
+
   it("waits one second after load where requestIdleCallback is missing", () => {
     cancel = scheduleGoogleAnalytics(hasConsent);
 

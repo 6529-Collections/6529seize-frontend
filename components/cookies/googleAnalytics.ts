@@ -72,7 +72,11 @@ function runWhenPageSettlesOrVisitorInteracts(task: () => void): () => boolean {
     pending = false;
     clearTimeout(maxWaitHandle);
     clearTimeout(delayHandle);
-    if (idleHandle !== undefined) {
+    // Some WebViews ship requestIdleCallback without cancelIdleCallback.
+    if (
+      idleHandle !== undefined &&
+      typeof globalThis.cancelIdleCallback === "function"
+    ) {
       globalThis.cancelIdleCallback(idleHandle);
     }
     globalThis.removeEventListener("load", waitForIdle);
@@ -131,15 +135,12 @@ function loadGoogleAnalytics(landing: PageSnapshot): void {
   const landingTitle =
     current.url === landing.url ? current.title : landing.title;
 
-  const script = globalThis.document.createElement("script");
-  script.src = GOOGLE_ANALYTICS_SCRIPT_URL;
-  script.async = true;
-  globalThis.document.head.appendChild(script);
-
   const bootstrap = globalThis.document.createElement("script");
   bootstrap.textContent = GTAG_BOOTSTRAP;
   globalThis.document.head.appendChild(bootstrap);
 
+  // Without gtag() the landing page view cannot be queued, so gtag.js is not
+  // downloaded at all rather than loaded without its page views.
   const gtag = getGtag();
   if (!gtag) {
     return;
@@ -167,7 +168,12 @@ function loadGoogleAnalytics(landing: PageSnapshot): void {
     reportedUrl = currentUrl;
   };
   reportNavigationBeforeReady();
+
+  const script = globalThis.document.createElement("script");
+  script.src = GOOGLE_ANALYTICS_SCRIPT_URL;
+  script.async = true;
   script.addEventListener("load", reportNavigationBeforeReady, { once: true });
+  globalThis.document.head.appendChild(script);
 }
 
 /**

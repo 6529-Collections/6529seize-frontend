@@ -137,7 +137,8 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
 
   // Google Analytics loads after first load, so a consent withdrawal or an
   // unmount can still stop it. A load cancelled before it started can be
-  // scheduled again by a later consent.
+  // scheduled again by a later consent. Once gtag.js has loaded, withdrawal
+  // is a no-op here: a loaded script cannot be unloaded.
   const cancelPendingGoogleAnalytics = useCallback(() => {
     const cancel = cancelGoogleAnalyticsRef.current;
     cancelGoogleAnalyticsRef.current = undefined;
