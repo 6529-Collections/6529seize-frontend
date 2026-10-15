@@ -32,6 +32,7 @@ import IpfsImageSetup from "./IpfsImageSetup";
 import MixpanelSetup from "./MixpanelSetup";
 import QueryClientSetup from "./QueryClientSetup";
 import WagmiSetup from "./WagmiSetup";
+import DocumentLanguage from "./DocumentLanguage";
 
 export default function Providers({
   children,
@@ -128,6 +129,7 @@ export default function Providers({
 
   return (
     <>
+      <DocumentLanguage />
       <CapacitorSetup />
       <EULAConsentProvider
         initialIsIos={initialIsIos}

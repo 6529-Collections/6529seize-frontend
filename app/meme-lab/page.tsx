@@ -26,7 +26,7 @@ export default async function MemeLab({ searchParams }: MemeLabPageProps = {}) {
   const locale = getMemeLabRouteLocale(resolvedSearchParams);
 
   return (
-    <main className={styles["main"]}>
+    <main className={styles["main"]} lang={locale}>
       <JsonLdScript
         data={buildCollectionPageJsonLd({
           path: "/meme-lab",

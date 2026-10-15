@@ -100,6 +100,23 @@ describe("The Memes page", () => {
     );
   });
 
+  it.each([
+    [{ locale: "fr-FR" }, "fr-FR"],
+    [{}, "en-US"],
+    [{ locale: "unsupported-LC" }, "en-US"],
+  ])(
+    "declares the language of the page content for search params %j",
+    async (searchParams, lang) => {
+      const page = await TheMemesPage({
+        searchParams: Promise.resolve(searchParams),
+      });
+
+      render(page);
+
+      expect(screen.getByRole("main")).toHaveAttribute("lang", lang);
+    }
+  );
+
   it("localizes metadata from supported locale search params", async () => {
     const metadata = await generateMetadata({
       searchParams: Promise.resolve({ locale: "de-DE" }),
