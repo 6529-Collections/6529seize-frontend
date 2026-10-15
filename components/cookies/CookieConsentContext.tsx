@@ -30,6 +30,9 @@ type CookieConsent = boolean | undefined;
 type CookieConsentContextType = {
   showCookieConsent: boolean;
   country: string;
+  // True until the first country lookup settles. A failed or empty lookup
+  // settles with an empty (unknown) country.
+  isCountryPending: boolean;
   performanceConsent: CookieConsent;
   consent: () => void;
   reject: () => void;
@@ -72,6 +75,42 @@ export const getCookieConsentByName = (name: string): CookieConsent => {
   return undefined;
 };
 
+// Bound the first-load country lookup so a stalled request settles as an
+// unknown country instead of leaving purchasing visibility pending.
+const COUNTRY_CHECK_TIMEOUT_MS = 5_000;
+
+const rejectWhenAborted = (signal: AbortSignal): Promise<never> =>
+  new Promise((_resolve, reject) => {
+    const rejectAborted = () =>
+      reject(new Error("Country check timed out or was cancelled"));
+    if (signal.aborted) {
+      rejectAborted();
+      return;
+    }
+    signal.addEventListener("abort", rejectAborted, { once: true });
+  });
+
+const fetchCountryCheck = async (
+  unmountSignal: AbortSignal | undefined
+): Promise<CookieConsentResponse> => {
+  const lookup = new AbortController();
+  const abortLookup = () => lookup.abort();
+  unmountSignal?.addEventListener("abort", abortLookup, { once: true });
+  const timeoutId = setTimeout(abortLookup, COUNTRY_CHECK_TIMEOUT_MS);
+  try {
+    return await Promise.race([
+      commonApiFetch<CookieConsentResponse>({
+        endpoint: `policies/country-check`,
+        signal: lookup.signal,
+      }),
+      rejectWhenAborted(lookup.signal),
+    ]);
+  } finally {
+    clearTimeout(timeoutId);
+    unmountSignal?.removeEventListener("abort", abortLookup);
+  }
+};
+
 export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   children,
   disabled = false,
@@ -79,6 +118,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   const { setToast } = useAuth();
   const [showCookieConsent, setShowCookieConsent] = useState(false);
   const [country, setCountry] = useState("");
+  const [isCountryPending, setIsCountryPending] = useState(true);
   const [performanceConsent, setPerformanceConsent] =
     useState<CookieConsent>(undefined);
   const performanceScriptsLoadedRef = useRef(false);
@@ -107,7 +147,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   }, []);
 
   const getCookieConsent = useCallback(
-    async (isFirstLoad: boolean = false) => {
+    async (isFirstLoad: boolean = false, unmountSignal?: AbortSignal) => {
       try {
         const essentialCookies = getCookieConsentByName(
           CONSENT_ESSENTIAL_COOKIE
@@ -129,9 +169,10 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
           return;
         }
 
-        const response = await commonApiFetch<CookieConsentResponse>({
-          endpoint: `policies/country-check`,
-        });
+        const response = await fetchCountryCheck(unmountSignal);
+        if (unmountSignal?.aborted) {
+          return;
+        }
         setCountry(response.country);
         if (response.is_eu) {
           setShowCookieConsent(
@@ -143,7 +184,13 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
           getCookieConsent();
         }
       } catch (error) {
-        console.error("Failed to fetch cookie consent status", error);
+        if (!unmountSignal?.aborted) {
+          console.error("Failed to fetch cookie consent status", error);
+        }
+      } finally {
+        if (isFirstLoad && !unmountSignal?.aborted) {
+          setIsCountryPending(false);
+        }
       }
     },
     [loadPerformanceCookies]
@@ -196,6 +243,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
             reject: noopReject,
             showCookieConsent: false,
             country: "US",
+            isCountryPending: false,
             performanceConsent: false as CookieConsent,
           }
         : {
@@ -203,6 +251,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
             reject,
             showCookieConsent,
             country,
+            isCountryPending,
             performanceConsent,
           },
     [
@@ -213,15 +262,18 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
       reject,
       showCookieConsent,
       country,
+      isCountryPending,
       performanceConsent,
     ]
   );
 
   useEffect(() => {
     if (disabled) {
-      return;
+      return undefined;
     }
-    getCookieConsent(true);
+    const unmount = new AbortController();
+    void getCookieConsent(true, unmount.signal);
+    return () => unmount.abort();
   }, [disabled, getCookieConsent]);
 
   return (

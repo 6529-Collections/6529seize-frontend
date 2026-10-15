@@ -87,7 +87,7 @@ import RootBlockGuardPlugin from "@/components/drops/create/lexical/plugins/Root
 import { $selectEndOfRootBlock } from "@/components/drops/create/lexical/utils/rootContent";
 import { processSplitMentions } from "./editDropMentionReconstruction";
 
-interface EditDropLexicalProps {
+export interface EditDropLexicalProps {
   readonly initialContent: string;
   readonly initialMentions: ApiDropMentionedUser[];
   readonly initialGroupMentions: ApiDropGroupMention[];

@@ -12,7 +12,7 @@ import { useAuth } from "@/components/auth/Auth";
 import QuorumProposalCompactContent from "@/components/waves/quorum/QuorumProposalCompactContent";
 import { parseQuorumProposalMarkdown } from "@/components/waves/quorum/quorumProposalMarkdown";
 import type { DropContentPresentation } from "./dropContentPresentation";
-import EditDropLexical from "./EditDropLexical";
+import LazyEditDropLexical from "./LazyEditDropLexical";
 import WaveDropQuoteWithDropId from "./WaveDropQuoteWithDropId";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiWaveMinWithChatLinkSettings } from "@/helpers/waves/wave.helpers";
@@ -133,7 +133,7 @@ const WaveDropPartContentMarkdown: React.FC<
 
   if (isEditing) {
     return (
-      <EditDropLexical
+      <LazyEditDropLexical
         initialContent={part.content ?? ""}
         initialMentions={mentionedUsers}
         initialGroupMentions={mentionedGroups}
