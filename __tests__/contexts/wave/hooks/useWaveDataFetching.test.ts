@@ -139,7 +139,11 @@ describe("useWaveDataFetching", () => {
   it("keeps the initial guard until a queued seed commits, then syncs newer drops", async () => {
     jest.useFakeTimers();
     formatWaveMessages.mockImplementation(
-      (waveId: string, drops: any[], options: Record<string, unknown> = {}) => ({
+      (
+        waveId: string,
+        drops: any[],
+        options: Record<string, unknown> = {}
+      ) => ({
         key: waveId,
         drops,
         ...options,
@@ -626,11 +630,13 @@ describe("useWaveDataFetching", () => {
         ]),
       })
     );
-    expect(store.wave1.drops).toHaveLength(WAVE_DROPS_PARAMS.limit);
-    expect(store.wave1.drops.map((drop: { id: string }) => drop.id)).toEqual([
-      ...initialDrops.map((drop) => drop.id),
-      ...backfillDrops.map((drop) => drop.id),
-    ]);
+    expect(store["wave1"].drops).toHaveLength(WAVE_DROPS_PARAMS.limit);
+    expect(store["wave1"].drops.map((drop: { id: string }) => drop.id)).toEqual(
+      [
+        ...initialDrops.map((drop) => drop.id),
+        ...backfillDrops.map((drop) => drop.id),
+      ]
+    );
     expect(mockTrackWaveFeedLoadStarted).toHaveBeenCalledWith({
       hadCachedDrops: true,
       isNative: true,
@@ -715,6 +721,46 @@ describe("useWaveDataFetching", () => {
       "wave1-newest-sync",
       "wave_deactivated"
     );
+  });
+
+  it("prefetches only the native first page without backfill or visible-load telemetry", async () => {
+    jest.useFakeTimers();
+    const drops = Array.from(
+      { length: WAVE_DROPS_NATIVE_INITIAL_PARAMS.limit },
+      (_, index) => ({ id: `prefetched-${index}`, serial_no: 100 - index })
+    );
+    fetchWaveMessages.mockResolvedValueOnce(drops);
+    formatWaveMessages.mockImplementation((waveId, messages) => ({
+      key: waveId,
+      drops: messages,
+    }));
+    createEmptyWaveMessages.mockImplementation((waveId) => ({
+      key: waveId,
+      drops: [],
+    }));
+    const { result, store } = setup({}, { isCapacitor: true });
+    await act(async () => {
+      await result.current.prefetchWave("wave1");
+    });
+    await act(async () => {
+      await jest.runAllTimersAsync();
+    });
+    expect(fetchWaveMessages).toHaveBeenCalledTimes(1);
+    expect(fetchWaveMessages).toHaveBeenCalledWith(
+      "wave1",
+      null,
+      expect.any(Object),
+      expect.any(Function),
+      expect.objectContaining({ limit: 20 })
+    );
+    expect(store["wave1"].drops).toEqual(drops);
+    expect(mockTrackWaveFeedLoadStarted).not.toHaveBeenCalled();
+    expect(mockTrackWaveFeedLoadSucceeded).not.toHaveBeenCalled();
+    expect(markMobileLaunchStepMock).not.toHaveBeenCalled();
+    await act(async () => {
+      await result.current.prefetchWave("wave1");
+    });
+    expect(fetchWaveMessages).toHaveBeenCalledTimes(1);
   });
 
   it("does not schedule native initial backfill for targeted serial restores", async () => {
