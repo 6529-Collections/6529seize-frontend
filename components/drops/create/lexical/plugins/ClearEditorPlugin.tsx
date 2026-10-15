@@ -1,16 +1,14 @@
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { $getRoot, $createParagraphNode, CLEAR_HISTORY_COMMAND } from "lexical";
+import { $getRoot, $createParagraphNode } from "lexical";
 import { forwardRef, useImperativeHandle } from "react";
 
 export interface ClearEditorPluginHandles {
-  clearEditorState: (options?: { readonly resetHistory?: boolean }) => void;
+  clearEditorState: () => void;
 }
 
 const ClearEditorPlugin = forwardRef<ClearEditorPluginHandles, {}>((_, ref) => {
   const [editor] = useLexicalComposerContext();
-  const clearEditorState: ClearEditorPluginHandles["clearEditorState"] = (
-    options
-  ) => {
+  const clearEditorState = () => {
     editor.update(
       () => {
         const root = $getRoot();
@@ -19,11 +17,8 @@ const ClearEditorPlugin = forwardRef<ClearEditorPluginHandles, {}>((_, ref) => {
         root.append(paragraph);
         paragraph.select();
       },
-      { discrete: true, tag: "composer-reset" }
+      { tag: "composer-reset" }
     );
-    if (options?.resetHistory) {
-      editor.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined);
-    }
   };
 
   useImperativeHandle(ref, () => ({

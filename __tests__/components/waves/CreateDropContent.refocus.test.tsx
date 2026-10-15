@@ -1,14 +1,7 @@
 import React from "react";
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateDropContent from "@/components/waves/CreateDropContent";
-import { exportComposerMarkdown } from "@/components/waves/create-drop-content/exportComposerMarkdown";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -98,7 +91,6 @@ jest.mock("@/components/waves/CreateDropInput", () => {
       }));
       return (
         <div
-          onInput={() => props.onEditorState({ read: jest.fn(() => []) })}
           data-testid="input"
           data-mode={props.isDropMode ? "drop" : "chat"}
         />
@@ -271,27 +263,51 @@ const renderSubject = ({
 };
 
 describe("CreateDropContent chat refocus", () => {
+  const originalRequestAnimationFrame = (
+    globalThis as typeof globalThis & {
+      requestAnimationFrame?: typeof requestAnimationFrame;
+    }
+  ).requestAnimationFrame;
+  const originalCancelAnimationFrame = (
+    globalThis as typeof globalThis & {
+      cancelAnimationFrame?: typeof cancelAnimationFrame;
+    }
+  ).cancelAnimationFrame;
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockRequestAuth.mockReset().mockResolvedValue({ success: true });
-    jest.mocked(exportComposerMarkdown).mockReturnValue("");
     mockIsApp = false;
+    globalThis.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+      callback(0);
+      return 1;
+    }) as typeof globalThis.requestAnimationFrame;
+    globalThis.cancelAnimationFrame = jest.fn();
   });
 
-  it("clears an accepted chat once before ensuring focus on the same editor", async () => {
-    jest.mocked(exportComposerMarkdown).mockReturnValue("accepted message");
-    const { submitDrop } = renderSubject({ isDropMode: false, drop: null });
-    const inputBefore = screen.getByTestId("input");
-    fireEvent.input(inputBefore);
+  afterEach(() => {
+    if (originalRequestAnimationFrame) {
+      globalThis.requestAnimationFrame = originalRequestAnimationFrame;
+    } else {
+      delete (globalThis as any).requestAnimationFrame;
+    }
+
+    if (originalCancelAnimationFrame) {
+      globalThis.cancelAnimationFrame = originalCancelAnimationFrame;
+    } else {
+      delete (globalThis as any).cancelAnimationFrame;
+    }
+  });
+
+  it("focuses the editor after an accepted chat submit resets it", async () => {
+    const { submitDrop } = renderSubject({ isDropMode: false });
 
     await userEvent.click(screen.getByText("submit"));
 
     await waitFor(() => expect(submitDrop).toHaveBeenCalledTimes(1));
     expect(submitDrop.mock.calls[0]?.[0].drop.drop_type).toBe(ApiDropType.Chat);
     await waitFor(() => expect(mockInputFocus).toHaveBeenCalledTimes(1));
-    expect(screen.getByTestId("input")).toBe(inputBefore);
-    expect(mockInputClear).toHaveBeenCalledTimes(1);
-    expect(mockInputClear).toHaveBeenCalledWith({ resetHistory: true });
+    expect(mockInputClear).toHaveBeenCalled();
     const clearOrder = mockInputClear.mock.invocationCallOrder[0];
     const focusOrder = mockInputFocus.mock.invocationCallOrder[0];
     if (clearOrder === undefined || focusOrder === undefined) {
@@ -300,7 +316,7 @@ describe("CreateDropContent chat refocus", () => {
     expect(clearOrder).toBeLessThan(focusOrder);
   });
 
-  it("preserves the editor through slow authentication and prevents a second submit", async () => {
+  it("prevents a second submit while authentication is pending", async () => {
     let finishAuth: ((result: { success: boolean }) => void) | undefined;
     mockRequestAuth.mockImplementationOnce(
       () =>
@@ -319,7 +335,7 @@ describe("CreateDropContent chat refocus", () => {
     expect(screen.getByTestId("input")).toBe(input);
     await act(async () => finishAuth?.({ success: true }));
     await waitFor(() => expect(submitDrop).toHaveBeenCalledTimes(1));
-    expect(screen.getByTestId("input")).toBe(input);
+    await waitFor(() => expect(mockInputFocus).toHaveBeenCalledTimes(1));
   });
 
   it("keeps the same draft when submission is not accepted", async () => {

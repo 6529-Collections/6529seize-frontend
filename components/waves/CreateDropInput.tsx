@@ -58,8 +58,8 @@ import type { NewWaveMentionsPluginHandles } from "../drops/create/lexical/plugi
 import NewWaveMentionsPlugin from "../drops/create/lexical/plugins/waves/WaveMentionsPlugin";
 import { MaxLengthPlugin } from "../drops/create/lexical/plugins/MaxLengthPlugin";
 import DragDropPastePlugin from "../drops/create/lexical/plugins/DragDropPastePlugin";
-import SubmissionLockPlugin from "../drops/create/lexical/plugins/SubmissionLockPlugin";
 import EditablePlugin from "../drops/create/lexical/plugins/EditablePlugin";
+import SubmissionLockPlugin from "../drops/create/lexical/plugins/SubmissionLockPlugin";
 import EnterKeyPlugin from "../drops/create/lexical/plugins/enter/EnterKeyPlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import CreateDropEmojiPicker from "./CreateDropEmojiPicker";
@@ -80,7 +80,7 @@ import { useDropComposerDensity } from "./CreateDropWaveWrapper";
 import { MAX_DROP_PART_UTF16_UNITS } from "@/helpers/waves/drop-content-limits";
 
 export interface CreateDropInputHandles {
-  clearEditorState: ClearEditorPluginHandles["clearEditorState"];
+  clearEditorState: () => void;
   setMarkdown: (markdown: string) => void;
   expandMentionAliases: () => Promise<MentionAliasExpansionResult>;
   focus: () => void;
@@ -88,8 +88,6 @@ export interface CreateDropInputHandles {
 }
 
 interface EditorCommandsPluginHandles {
-  isComposing: () => boolean;
-  getEditorState: () => EditorState;
   setMarkdown: (markdown: string) => void;
   focus: () => void;
   blur: () => void;
@@ -102,14 +100,8 @@ const EditorCommandsPlugin = forwardRef<EditorCommandsPluginHandles>(
     useImperativeHandle(
       ref,
       () => ({
-        focus: () => {
-          if (editor.getRootElement() !== document.activeElement) {
-            editor.focus();
-          }
-        },
+        focus: () => editor.focus(),
         blur: () => editor.blur(),
-        isComposing: () => editor.isComposing(),
-        getEditorState: () => editor.getEditorState(),
         setMarkdown: (markdown: string) => {
           editor.update(() => {
             $convertFromMarkdownString(
@@ -258,6 +250,7 @@ const CreateDropInput = forwardRef<
     ref
   ) => {
     const { isCapacitor } = useCapacitor();
+    const preserveKeyboardOnSubmit = isCapacitor && !isDropMode;
     const locale = useBrowserLocale();
     const validationHelperTextId = useId();
     const showValidationError =
@@ -307,7 +300,7 @@ const CreateDropInput = forwardRef<
               }
             }
           : editorState,
-      editable: !isDropMode || !submitting,
+      editable: preserveKeyboardOnSubmit || !submitting,
       onError(error: Error): void {
         throw error;
       },
@@ -375,10 +368,8 @@ const CreateDropInput = forwardRef<
     const clearEditorRef = useRef<ClearEditorPluginHandles | null>(null);
     const editorCommandsRef = useRef<EditorCommandsPluginHandles | null>(null);
     const mentionsPluginRef = useRef<NewMentionsPluginHandles | null>(null);
-    const clearEditorState = useCallback<
-      ClearEditorPluginHandles["clearEditorState"]
-    >((options) => {
-      clearEditorRef.current?.clearEditorState(options);
+    const clearEditorState = useCallback(() => {
+      clearEditorRef.current?.clearEditorState();
     }, []);
 
     useImperativeHandle(
@@ -388,18 +379,11 @@ const CreateDropInput = forwardRef<
         setMarkdown: (markdown: string) =>
           editorCommandsRef.current?.setMarkdown(markdown),
         expandMentionAliases: async () => {
-          const commands = editorCommandsRef.current;
-          if (commands?.isComposing()) {
-            return { completed: false, editorState: commands.getEditorState() };
-          }
           const mentionsPlugin = mentionsPluginRef.current;
           if (!mentionsPlugin) {
             throw new Error("Quick Tags are not ready yet.");
           }
-          const expansion = await mentionsPlugin.expandMentionAliases();
-          return commands?.isComposing()
-            ? { completed: false, editorState: commands.getEditorState() }
-            : expansion;
+          return mentionsPlugin.expandMentionAliases();
         },
         focus: () => editorCommandsRef.current?.focus(),
         blur: () => editorCommandsRef.current?.blur(),
@@ -460,7 +444,6 @@ const CreateDropInput = forwardRef<
                             : undefined
                         }
                         ariaRequired={isPollActive}
-                        aria-busy={submitting}
                         aria-invalid={hasValidationError || undefined}
                         style={{ touchAction: "manipulation" }}
                         onBlur={onEditorBlur}
@@ -473,7 +456,6 @@ const CreateDropInput = forwardRef<
                         } ${isCapacitor ? "tw-pr-[35px]" : "tw-pr-[40px]"}`}
                       />
                       <CreateDropEmojiPicker
-                        disabled={submitting}
                         verticalAlignment={isCompact ? "center" : "top"}
                       />
                     </div>
@@ -530,8 +512,12 @@ const CreateDropInput = forwardRef<
                 <LinkPlugin validateUrl={validateUrl} />
                 <ClearEditorPlugin ref={clearEditorRef} />
                 <EditorCommandsPlugin ref={editorCommandsRef} />
-                <EditablePlugin editable={!isDropMode || !submitting} />
-                <SubmissionLockPlugin locked={!isDropMode && submitting} />
+                <EditablePlugin
+                  editable={preserveKeyboardOnSubmit || !submitting}
+                />
+                <SubmissionLockPlugin
+                  locked={preserveKeyboardOnSubmit && submitting}
+                />
                 <InitialMarkdownPlugin
                   initialMarkdown={initialMarkdown}
                   initialMarkdownKey={initialMarkdownKey}
