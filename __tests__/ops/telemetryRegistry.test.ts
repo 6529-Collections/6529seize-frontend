@@ -12,7 +12,7 @@ jest.mock("@sentry/nextjs", () => ({
   startInactiveSpan: jest.fn(),
   startSpanManual: jest.fn(),
 }));
-jest.mock("mixpanel-browser", () => ({
+jest.mock("mixpanel-browser/dist/mixpanel-core.cjs.js", () => ({
   __esModule: true,
   default: {},
 }));
