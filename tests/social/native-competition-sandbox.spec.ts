@@ -1061,9 +1061,57 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       const bounds = (await row.boundingBox())!;
       expect(Math.abs(bounds.x - available.x)).toBeLessThanOrEqual(1);
       expect(Math.abs(bounds.width - available.width)).toBeLessThanOrEqual(1);
+      const selectAll = panel.getByRole("button", {
+        name: "Select all",
+        exact: true,
+      });
+      const resetVotes = panel.getByRole("button", {
+        name: "Reset votes",
+        exact: true,
+      });
+      await expect(selectAll).toBeVisible();
+      await expect(resetVotes).toBeDisabled();
+      const createStyle = await page
+        .getByRole("button", { name: "Open create menu", exact: true })
+        .evaluate((button) => {
+          const style = getComputedStyle(button.querySelector("span")!);
+          return Object.fromEntries(
+            [
+              "height",
+              "background-color",
+              "border-color",
+              "border-radius",
+              "font-size",
+              "font-weight",
+              "padding-left",
+              "padding-right",
+              "color",
+            ].map((property) => [property, style.getPropertyValue(property)])
+          );
+        });
+      for (const name of ["Select all", "Reset votes"]) {
+        const action = panel.getByRole("button", { name, exact: true });
+        for (const [property, value] of Object.entries(createStyle)) {
+          await expect(
+            panel.getByRole("button", { name, exact: true }).locator("span")
+          ).toHaveCSS(property, value);
+        }
+        await expect(action).toHaveCSS(
+          "height",
+          testInfo.project.name === "web-mobile-chromium" ? "44px" : "32px"
+        );
+      }
+      await selectAll.click();
       await expect(
-        panel.getByRole("button", { name: "Select all", exact: true })
+        panel.getByRole("button", { name: "Deselect all", exact: true })
       ).toBeVisible();
+      await expect(
+        panel.getByRole("button", { name: "Reset 1 vote", exact: true })
+      ).toBeEnabled();
+      await panel
+        .getByRole("button", { name: "Deselect all", exact: true })
+        .click();
+      await expect(resetVotes).toBeDisabled();
       await expectNoHorizontalOverflow(page);
       await page.screenshot({
         path: testInfo.outputPath("my-votes-full-width.png"),

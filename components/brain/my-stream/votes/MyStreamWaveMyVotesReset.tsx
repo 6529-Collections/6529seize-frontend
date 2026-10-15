@@ -1,7 +1,12 @@
 "use client";
 
 import React, { useContext, useState } from "react";
-import Button from "@/components/utils/button/Button";
+import {
+  COMPACT_ACTION_BUTTON_CLASS,
+  COMPACT_ACTION_CONTENT_CLASS,
+} from "@/components/utils/button/compactActionButtonStyles";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import MyStreamWaveMyVotesResetProgress from "./MyStreamWaveMyVotesResetProgress";
 import { commonApiPost } from "@/services/api/common-api";
 import type { DropRateChangeRequest } from "@/entities/IDrop";
@@ -46,6 +51,9 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
   onResettingChange,
 }) => {
   const locale = useBrowserLocale();
+  const { isApp } = useDeviceInfo();
+  const isMobileViewport = useIsMobileLayoutViewport();
+  const buttonClassName = `${COMPACT_ACTION_BUTTON_CLASS} ${isApp || isMobileViewport ? "tw-min-h-11" : "tw-h-8"}`;
   const { setToast } = useContext(AuthContext);
   const queryClient = useQueryClient();
   // State for reset progress
@@ -154,30 +162,34 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
       <div className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-3">
         <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 tw-px-2 sm:tw-px-4">
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-            <Button
+            <button
+              type="button"
               onClick={onToggleSelectAll}
-              variant="tertiary"
-              size="xs"
+              className={buttonClassName}
               disabled={isResetting}
             >
-              {t(
-                locale,
-                allItemsSelected
-                  ? "waves.myVotes.deselectAll"
-                  : "waves.myVotes.selectAll"
-              )}
-            </Button>
-            <Button
+              <span className={COMPACT_ACTION_CONTENT_CLASS}>
+                {t(
+                  locale,
+                  allItemsSelected
+                    ? "waves.myVotes.deselectAll"
+                    : "waves.myVotes.selectAll"
+                )}
+              </span>
+            </button>
+            <button
+              type="button"
               onClick={handleResetClick}
-              variant="tertiary"
-              size="xs"
+              className={buttonClassName}
               disabled={!selectedCount || isResetting}
               aria-label={resetButtonAriaLabel}
             >
-              {isResetting
-                ? t(locale, "waves.myVotes.resetting")
-                : resetButtonLabel}
-            </Button>
+              <span className={COMPACT_ACTION_CONTENT_CLASS}>
+                {isResetting
+                  ? t(locale, "waves.myVotes.resetting")
+                  : resetButtonLabel}
+              </span>
+            </button>
             {selectedCount > 0 && (
               <output className="tw-whitespace-nowrap tw-text-sm tw-leading-5 tw-text-iron-400">
                 {selectedLabel}
