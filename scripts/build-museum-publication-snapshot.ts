@@ -27,6 +27,7 @@ const retryOptions = {
   randomize: true,
 };
 
+/** Resolve Museum main through bounded Git execution and return its validated SHA. */
 export async function resolveMuseumBuildCommit(): Promise<string> {
   // Resolve main without consuming the anonymous REST quota. The source still
   // verifies the catalog, manifest and document hashes at this immutable SHA.
@@ -69,6 +70,7 @@ export async function resolveMuseumBuildCommit(): Promise<string> {
   return commit;
 }
 
+/** Load a commit-pinned, verified publication and atomically replace its build snapshot. */
 export async function buildMuseumPublicationSnapshot(): Promise<void> {
   const ref = await pRetry(resolveMuseumBuildCommit, retryOptions);
   const source = new GitHubMuseumPublicationSource({
