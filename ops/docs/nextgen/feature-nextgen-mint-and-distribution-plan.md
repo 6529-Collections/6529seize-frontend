@@ -59,6 +59,9 @@ Use these collection routes to mint and review distribution data:
 - External-burn mints use `burnOrSwapExternalToMint`; standard mints use
   `mint`.
 - Distribution-plan route fetches phases and allowlist rows client-side.
+- Distribution-plan phase cards show `Start` and `End` as a UTC date and time
+  followed by `UTC` (for example `2026-10-12 11:27:11 UTC`), the same for every
+  viewer. A phase with no time shows `N/A`.
 - `Distribution Plan` link visibility is timing-based, but direct route access
   still works.
 
