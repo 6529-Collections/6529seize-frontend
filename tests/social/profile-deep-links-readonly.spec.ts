@@ -469,6 +469,16 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     );
     const nativeCount = page.getByText(/^Page 2 of \d+$/, { exact: true });
     await expect(nativeCount).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    const cards = page.getByRole("list", {
+      name: "Collected cards",
+      exact: true,
+    });
+    const firstCard = cards.getByRole("link").first();
+    // The count only renders with the page's cards, so the first card exists.
+    const pageTwoFirstArtwork = new URL(
+      (await firstCard.getAttribute("href")) ?? "",
+      page.url()
+    ).pathname;
     const previous = page.getByRole("button", {
       name: "Previous",
       exact: true,
@@ -501,21 +511,26 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     await expect(
       page.getByText(/^Page 3 of \d+$/, { exact: true })
     ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
-    const cards = page.getByRole("list", {
-      name: "Collected cards",
-      exact: true,
-    });
-    // Focus moves to the first card once the new page's cards have rendered.
-    await expect(cards.getByRole("link").first()).toBeFocused({
-      timeout: RESPONSE_TIMEOUT_MS,
-    });
-    await expect(cards.getByRole("link").first()).toBeInViewport();
+    // The page count follows the URL, so the cards can still be the previous
+    // page's. Focus moves only after the requested page's cards render, so
+    // wait for those with the data budget, then assert focus strictly with the
+    // default timeout: late focus after the cards exist is a regression.
+    await expect(firstCard).toHaveAttribute(
+      "href",
+      new RegExp(`^(?!${pageTwoFirstArtwork}(?:[?#]|$)).+`),
+      { timeout: RESPONSE_TIMEOUT_MS }
+    );
+    await expect(firstCard).toBeFocused();
+    await expect(firstCard).toBeInViewport();
     await previous.click();
-    await expect(cards.getByRole("link").first()).toBeFocused({
-      timeout: RESPONSE_TIMEOUT_MS,
-    });
-    await expect(cards.getByRole("link").first()).toBeInViewport();
-    await expect(nativeCount).toBeVisible();
+    await expect(nativeCount).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    await expect(firstCard).toHaveAttribute(
+      "href",
+      new RegExp(`^${pageTwoFirstArtwork}(?:[?#]|$)`),
+      { timeout: RESPONSE_TIMEOUT_MS }
+    );
+    await expect(firstCard).toBeFocused();
+    await expect(firstCard).toBeInViewport();
     await expectUrlState(
       page,
       (url) =>

@@ -182,7 +182,7 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
 
       // Predicate-based toHaveURL also waits for the load event, which pending
       // media can delay after the URL already matches; see tests/README.md.
-      await expectUrlState(page, (url) => url.href.endsWith(path));
+      await expectUrlState(page, (url) => url.pathname + url.search === path);
       await expect(page).toHaveTitle(/404/i);
       await expect(
         page.getByRole("heading", { name: /404.*PAGE NOT FOUND/i })
