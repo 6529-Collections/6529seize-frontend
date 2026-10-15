@@ -1,6 +1,6 @@
 import { MuseumStatusBadge } from "./MuseumShell";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { formatDate } from "@/i18n/format";
+import { formatUtcDate } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import type {
   MuseumEntityContextModel,
@@ -78,7 +78,7 @@ function MuseumEntityStatus({
           </span>
           <span className="tw-text-sm tw-leading-6 tw-text-iron-300">
             <time dateTime={statusAsOf}>
-              {formatDate(DEFAULT_LOCALE, statusAsOf)}
+              {formatUtcDate(DEFAULT_LOCALE, statusAsOf)}
             </time>
           </span>
         </div>
