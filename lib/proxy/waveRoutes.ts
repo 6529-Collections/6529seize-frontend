@@ -14,6 +14,12 @@
  * resolve client-side, whether or not the wave exists.
  */
 
+/**
+ * Internal route (`app/wave-not-found`) that proxy rewrites malformed wave
+ * links to. Hyphens keep it clear of the `[user]` handle space (`\w{3,15}`).
+ */
+export const MALFORMED_WAVE_ROUTE = "/wave-not-found";
+
 /** Any 8-4-4-4-12 hex id, matching the other UUID checks in the repo. */
 const WAVE_ID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

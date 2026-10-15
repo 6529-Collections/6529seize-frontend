@@ -10,7 +10,7 @@ They redirect to active routes or external assets.
 This page covers:
 
 - middleware exact-path redirects (`301`)
-- middleware plain-text `404` for wave links whose id is not a wave id
+- middleware `404` not-found page for wave links whose id is not a wave id
 - middleware desktop `/my-stream*` compatibility redirects (`301`)
 - route-level legacy aliases (`307`)
 - `/waves?wave=<id>` normalization to `/waves/<id>` (`307`)
@@ -22,8 +22,8 @@ Profile-only legacy aliases are documented in
 
 1. Request starts at a legacy URL.
 2. Middleware exact-path map runs first.
-3. Wave links whose id is not a wave id get a plain-text `404`
-   ([Malformed Wave Ids](#malformed-wave-ids-404)).
+3. Wave links whose id is not a wave id get the not-found page with a `404`
+   status ([Malformed Wave Ids](#malformed-wave-ids-404)).
 4. Desktop-only `/my-stream*` middleware compatibility runs next.
 5. On staging deployments only, access control runs (`401 -> /access`,
    `403 -> /restricted`). Production and local development skip it.
@@ -121,9 +121,10 @@ Rules:
 ## Malformed Wave Ids (`404`)
 
 A wave id is a UUID (for example `5f207393-5418-4a75-8738-e40edb44a94d`, upper
-or lower case). Middleware answers a plain-text `404` before access control
-when a wave link names an id that is not UUID-shaped, because no wave can have
-that id:
+or lower case). When a wave link names an id that is not UUID-shaped, no wave
+can have that id, so middleware answers before access control with the
+standard not-found page (`404 | PAGE NOT FOUND`) and a real `404` status. The
+address bar keeps the original URL:
 
 - `/waves/<id>` and `/messages/<id>`
 - `/waves/<id>/competitions` and `/waves/<id>/competitions/<competition>`
@@ -160,10 +161,10 @@ Rules:
   server error), the request gets a plain-text `503`. Retry once the API
   recovers.
 - Other middleware failures redirect to `/error`.
-- Paths with a dot-prefixed segment (for example `/.env` or `/.well-known/*`),
-  missing `/_next/*` files and wave links with a malformed wave id return a
-  plain-text `404` instead of a page. For a wave link, copy a fresh link from
-  the wave: a link cut short when pasted is the usual cause.
+- Paths with a dot-prefixed segment (for example `/.env` or `/.well-known/*`)
+  and missing `/_next/*` files return a plain-text `404` instead of a page.
+- Wave links with a malformed wave id show the not-found page. Copy a fresh
+  link from the wave: a link cut short when pasted is the usual cause.
 - If the destination route fails, use
   [Route Error and Not-Found Screens](feature-route-error-and-not-found.md).
 - External redirect targets can fail independently; retry from another network

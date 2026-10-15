@@ -4,7 +4,10 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { hasMalformedWaveId } from "@/lib/proxy/waveRoutes";
+import {
+  hasMalformedWaveId,
+  MALFORMED_WAVE_ROUTE,
+} from "@/lib/proxy/waveRoutes";
 
 const APP_DIR = path.join(process.cwd(), "app");
 const WAVE_ID = "5f207393-5418-4a75-8738-e40edb44a94d";
@@ -180,5 +183,53 @@ describe("wave route tree", () => {
     for (const family of ["waves", "messages"]) {
       expect(malformed(`/${family}/create`)).toBe(false);
     }
+  });
+});
+
+// Proxy rewrites malformed wave links to this route so the branded not-found
+// page renders with a real 404. A `loading.tsx` or layout `Suspense` above its
+// page would stream a shell first and commit a 200, so none may sit there.
+describe("malformed wave route", () => {
+  const routeDirectory = path.join(
+    APP_DIR,
+    ...MALFORMED_WAVE_ROUTE.split("/").filter(Boolean)
+  );
+
+  function streamingBoundaries(): string[] {
+    const boundaries: string[] = [];
+    for (const directory of [APP_DIR, routeDirectory]) {
+      if (fs.existsSync(path.join(directory, "loading.tsx"))) {
+        boundaries.push(path.join(directory, "loading.tsx"));
+      }
+      for (const file of ["layout.tsx", "template.tsx"]) {
+        const filePath = path.join(directory, file);
+        if (
+          fs.existsSync(filePath) &&
+          /<Suspense[\s>]/u.test(fs.readFileSync(filePath, "utf8"))
+        ) {
+          boundaries.push(filePath);
+        }
+      }
+    }
+    return boundaries;
+  }
+
+  it("has a page that calls notFound()", () => {
+    const page = fs.readFileSync(path.join(routeDirectory, "page.tsx"), "utf8");
+    expect(page).toMatch(/\bnotFound\(\)/u);
+  });
+
+  it("has no streaming boundary above its page", () => {
+    expect(streamingBoundaries()).toEqual([]);
+  });
+
+  it("is never itself answered as a malformed wave id", () => {
+    expect(malformed(MALFORMED_WAVE_ROUTE)).toBe(false);
+    expect(malformed(MALFORMED_WAVE_ROUTE, "wave=not-a-real-id")).toBe(false);
+  });
+
+  it("cannot shadow a profile handle", () => {
+    const segment = MALFORMED_WAVE_ROUTE.slice(1);
+    expect(segment).not.toMatch(/^\w{3,15}$/);
   });
 });

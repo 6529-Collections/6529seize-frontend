@@ -9,11 +9,16 @@ const mockRedirect = jest.fn((url: URL) => ({
   kind: "redirect",
   url: url.toString(),
 }));
+const mockRewrite = jest.fn((url: URL) => ({
+  kind: "rewrite",
+  url: url.toString(),
+}));
 
 jest.mock("next/server", () => ({
   NextResponse: {
     next: () => mockNext(),
     redirect: (url: URL) => mockRedirect(url),
+    rewrite: (url: URL) => mockRewrite(url),
   },
 }));
 
@@ -91,6 +96,7 @@ describe("proxy", () => {
   beforeEach(() => {
     mockNext.mockClear();
     mockRedirect.mockClear();
+    mockRewrite.mockClear();
     jest.spyOn(console, "warn").mockImplementation(() => undefined);
     proxy = loadProxy();
   });
@@ -259,20 +265,21 @@ describe("proxy", () => {
   describe("malformed wave ids", () => {
     const WAVE_ID = "5f207393-5418-4a75-8738-e40edb44a94d";
 
-    async function expectPlainNotFound(request: NextRequest) {
+    async function expectRewrittenToNotFound(
+      request: NextRequest,
+      expectedSearch = ""
+    ) {
       const fetchMock = jest
         .spyOn(globalThis, "fetch")
         .mockRejectedValue(new Error("access control should not run"));
 
-      const response = (await proxy(request)) as Response;
+      const response = await proxy(request);
 
-      expect(response).toBeInstanceOf(Response);
-      expect(response.status).toBe(404);
-      expect(response.headers.get("content-type")).toBe(
-        "text/plain; charset=utf-8"
-      );
-      expect(response.headers.get("cache-control")).toContain("no-store");
-      await expect(response.text()).resolves.toBe("Not Found");
+      expect(response).toEqual({
+        kind: "rewrite",
+        url: `${new URL(request.url).origin}/wave-not-found${expectedSearch}`,
+      });
+      expect(mockRewrite).toHaveBeenCalledTimes(1);
       expect(fetchMock).not.toHaveBeenCalled();
       expect(mockNext).not.toHaveBeenCalled();
       expect(mockRedirect).not.toHaveBeenCalled();
@@ -285,31 +292,57 @@ describe("proxy", () => {
       "/waves/not-a-real-id/competitions",
       "/waves/not-a-real-id/competitions/alpha",
       "/messages/not-a-real-id",
-    ])("answers %s with a plain 404 before the staging gate", async (path) => {
-      await expectPlainNotFound(createRequest(path));
-    });
+    ])(
+      "rewrites %s to the not-found route before the staging gate",
+      async (path) => {
+        await expectRewrittenToNotFound(createRequest(path));
+      }
+    );
 
     it.each(["/waves", "/messages"])(
-      "answers a malformed legacy ?wave= link on %s",
+      "rewrites a malformed legacy ?wave= link on %s",
       async (path) => {
         const request = createRequest(path);
         request.nextUrl.search = "?wave=not-a-real-id&serialNo=4";
 
-        await expectPlainNotFound(request);
+        await expectRewrittenToNotFound(
+          request,
+          "?wave=not-a-real-id&serialNo=4"
+        );
       }
     );
 
-    it("answers in production builds too", async () => {
+    it("keeps the query on client navigations so the _rsc check still matches", async () => {
+      const request = createRequest("/waves/not-a-real-id");
+      request.nextUrl.search = "?_rsc=abc123";
+
+      await expectRewrittenToNotFound(request, "?_rsc=abc123");
+    });
+
+    it("rewrites in production builds too", async () => {
       proxy = loadProxy(PRODUCTION_BASE_ENDPOINT);
 
-      const response = (await proxy(
+      const response = await proxy(
         createRequest("/waves/not-a-real-id", {
           origin: PRODUCTION_BASE_ENDPOINT,
         })
-      )) as Response;
+      );
 
-      expect(response.status).toBe(404);
+      expect(response).toEqual({
+        kind: "rewrite",
+        url: "https://6529.io/wave-not-found",
+      });
       expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it("does not rewrite the not-found route itself", async () => {
+      const fetchMock = mockFetchStatus(200);
+
+      const response = await proxy(createRequest("/wave-not-found"));
+
+      expect(response).toEqual({ kind: "next" });
+      expect(mockRewrite).not.toHaveBeenCalled();
+      expect(fetchMock).toHaveBeenCalledTimes(1);
     });
 
     it.each([
