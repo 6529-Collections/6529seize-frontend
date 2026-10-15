@@ -5,6 +5,7 @@ import {
   getActiveWaveIdFromUrl,
   getWaveRoute,
 } from "@/helpers/navigation.helpers";
+import { useHoverIntent } from "@/hooks/useHoverIntent";
 
 interface UseWaveNavigationOptions {
   readonly basePath: string;
@@ -30,6 +31,7 @@ interface UseWaveNavigationResult {
   readonly href: string;
   readonly isActive: boolean;
   readonly onMouseEnter: (() => void) | undefined;
+  readonly onMouseLeave: (() => void) | undefined;
   readonly onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
@@ -74,7 +76,7 @@ export const useWaveNavigation = ({
 
   const isActive = waveId === currentWaveId;
 
-  const onMouseEnter = useCallback(() => {
+  const prefetchWave = useCallback(() => {
     if (waveId === currentWaveId) {
       return;
     }
@@ -82,6 +84,15 @@ export const useWaveNavigation = ({
     onHover(waveId);
     prefetchWaveData(waveId);
   }, [currentWaveId, onHover, prefetchWaveData, waveId]);
+
+  // Prefetch on hover only once the pointer rests on the row, not while it
+  // sweeps across the list. Clicking prefetches right away instead.
+  const { schedule: scheduleHoverIntent, cancel: cancelHoverIntent } =
+    useHoverIntent();
+  const onMouseEnter = useCallback(
+    () => scheduleHoverIntent(prefetchWave),
+    [prefetchWave, scheduleHoverIntent]
+  );
 
   const onClick = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement>) => {
@@ -97,7 +108,8 @@ export const useWaveNavigation = ({
         return; // allow new-tab behavior
       }
       event.preventDefault();
-      onMouseEnter();
+      cancelHoverIntent();
+      prefetchWave();
       const nextWaveId = waveId === currentWaveId ? null : waveId;
       setActiveWave(nextWaveId, {
         isDirectMessage,
@@ -105,9 +117,10 @@ export const useWaveNavigation = ({
       });
     },
     [
+      cancelHoverIntent,
       currentWaveId,
       isDirectMessage,
-      onMouseEnter,
+      prefetchWave,
       setActiveWave,
       waveId,
       firstUnreadDropSerialNo,
@@ -118,6 +131,7 @@ export const useWaveNavigation = ({
     href,
     isActive,
     onMouseEnter: hasTouchScreen ? undefined : onMouseEnter,
+    onMouseLeave: hasTouchScreen ? undefined : cancelHoverIntent,
     onClick,
   };
 };
