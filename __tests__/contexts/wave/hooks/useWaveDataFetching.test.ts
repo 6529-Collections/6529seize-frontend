@@ -630,11 +630,13 @@ describe("useWaveDataFetching", () => {
         ]),
       })
     );
-    expect(store.wave1.drops).toHaveLength(WAVE_DROPS_PARAMS.limit);
-    expect(store.wave1.drops.map((drop: { id: string }) => drop.id)).toEqual([
-      ...initialDrops.map((drop) => drop.id),
-      ...backfillDrops.map((drop) => drop.id),
-    ]);
+    expect(store["wave1"].drops).toHaveLength(WAVE_DROPS_PARAMS.limit);
+    expect(store["wave1"].drops.map((drop: { id: string }) => drop.id)).toEqual(
+      [
+        ...initialDrops.map((drop) => drop.id),
+        ...backfillDrops.map((drop) => drop.id),
+      ]
+    );
     expect(mockTrackWaveFeedLoadStarted).toHaveBeenCalledWith({
       hadCachedDrops: true,
       isNative: true,
@@ -751,7 +753,7 @@ describe("useWaveDataFetching", () => {
       expect.any(Function),
       expect.objectContaining({ limit: 20 })
     );
-    expect(store.wave1.drops).toEqual(drops);
+    expect(store["wave1"].drops).toEqual(drops);
     expect(mockTrackWaveFeedLoadStarted).not.toHaveBeenCalled();
     expect(mockTrackWaveFeedLoadSucceeded).not.toHaveBeenCalled();
     expect(markMobileLaunchStepMock).not.toHaveBeenCalled();

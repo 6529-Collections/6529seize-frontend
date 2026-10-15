@@ -321,23 +321,11 @@ describe("MyStreamProvider resume sync", () => {
   });
 
   it("registers selected waves before delegating active wave navigation", () => {
-    let context: ReturnType<typeof useMyStream> | null = null;
-
-    render(
-      <MyStreamProvider>
-        <CaptureMyStream
-          onContext={(nextContext) => {
-            context = nextContext;
-          }}
-        />
-      </MyStreamProvider>
-    );
-
-    expect(context).not.toBeNull();
-    const capturedContext = context;
+    const { getContext } = renderWithContext();
+    const capturedContext = getContext();
 
     act(() => {
-      capturedContext!.activeWave.set("wave-2", {
+      capturedContext.activeWave.set("wave-2", {
         isDirectMessage: true,
         divider: 9,
       });
@@ -353,24 +341,12 @@ describe("MyStreamProvider resume sync", () => {
   });
 
   it("does not skip native backfill for blank serial targets", () => {
-    let context: ReturnType<typeof useMyStream> | null = null;
-
-    render(
-      <MyStreamProvider>
-        <CaptureMyStream
-          onContext={(nextContext) => {
-            context = nextContext;
-          }}
-        />
-      </MyStreamProvider>
-    );
-
-    expect(context).not.toBeNull();
-    const capturedContext = context;
+    const { getContext } = renderWithContext();
+    const capturedContext = getContext();
     mockRegisterWave.mockClear();
 
     act(() => {
-      capturedContext!.activeWave.set("wave-2", {
+      capturedContext.activeWave.set("wave-2", {
         serialNo: "   ",
       });
     });
