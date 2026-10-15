@@ -256,9 +256,10 @@ describe("MyStreamProvider resume sync", () => {
     useWavesListMock.mockReturnValue(
       createListData(mainRefetch, mainRefreshStale)
     );
-    useDmWavesListMock.mockReturnValue(
-      createListData(dmRefetch, dmRefreshStale)
-    );
+    useDmWavesListMock.mockReturnValue({
+      ...createListData(dmRefetch, dmRefreshStale),
+      viewerIdentityKey: "wallet:primary",
+    });
   });
 
   it.each([
@@ -281,6 +282,7 @@ describe("MyStreamProvider resume sync", () => {
       renderWithContext();
       expect(mockRecentDmPrefetch).toHaveBeenLastCalledWith({
         enabled,
+        viewerIdentityKey: "wallet:primary",
         waves: [],
         prefetchWave: mockPrefetchWave,
       });

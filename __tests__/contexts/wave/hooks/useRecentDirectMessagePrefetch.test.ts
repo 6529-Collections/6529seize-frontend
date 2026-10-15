@@ -37,6 +37,7 @@ it("prepares only three chats, waiting for both requests before starting the nex
     (currentWaves) =>
       useRecentDirectMessagePrefetch({
         enabled: true,
+        viewerIdentityKey: "wallet:primary",
         waves: currentWaves,
         prefetchWave,
       }),
@@ -58,30 +59,40 @@ it("continues after a failed prefetch", async () => {
   mockPrefetchDetails.mockRejectedValueOnce(new Error("Unavailable"));
   await act(async () => {
     renderHook(() =>
-      useRecentDirectMessagePrefetch({ enabled: true, waves, prefetchWave })
-    );
-  });
-  expect(prefetchWave.mock.calls).toEqual([["first"], ["second"], ["third"]]);
-});
-
-it.each(["disabled", "hidden"])("does not prefetch when %s", async (state) => {
-  if (state === "hidden")
-    Object.defineProperty(document, "visibilityState", {
-      configurable: true,
-      value: "hidden",
-    });
-  await act(async () => {
-    renderHook(() =>
       useRecentDirectMessagePrefetch({
-        enabled: state !== "disabled",
+        enabled: true,
+        viewerIdentityKey: "wallet:primary",
         waves,
         prefetchWave,
       })
     );
   });
-  expect(prefetchWave).not.toHaveBeenCalled();
-  expect(mockPrefetchDetails).not.toHaveBeenCalled();
+  expect(prefetchWave.mock.calls).toEqual([["first"], ["second"], ["third"]]);
 });
+
+it.each(["disabled", "hidden", "missing-viewer"])(
+  "does not prefetch when %s",
+  async (state) => {
+    if (state === "hidden")
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        value: "hidden",
+      });
+    await act(async () => {
+      renderHook(() =>
+        useRecentDirectMessagePrefetch({
+          enabled: state !== "disabled",
+          viewerIdentityKey:
+            state === "missing-viewer" ? null : "wallet:primary",
+          waves,
+          prefetchWave,
+        })
+      );
+    });
+    expect(prefetchWave).not.toHaveBeenCalled();
+    expect(mockPrefetchDetails).not.toHaveBeenCalled();
+  }
+);
 
 it.each(["leave-list", "unmount", "profile-switch", "background"])(
   "stops queued work after %s",
@@ -90,7 +101,12 @@ it.each(["leave-list", "unmount", "profile-switch", "background"])(
     prefetchWave.mockReturnValueOnce(messages.promise);
     const view = renderHook(
       (enabled) =>
-        useRecentDirectMessagePrefetch({ enabled, waves, prefetchWave }),
+        useRecentDirectMessagePrefetch({
+          enabled,
+          viewerIdentityKey: "wallet:primary",
+          waves,
+          prefetchWave,
+        }),
       { initialProps: true }
     );
     if (transition === "leave-list") view.rerender(false);
@@ -109,3 +125,43 @@ it.each(["leave-list", "unmount", "profile-switch", "background"])(
     expect(mockPrefetchDetails.mock.calls).toEqual([["first"]]);
   }
 );
+
+it("restarts for cached conversations after the viewer changes without an empty list render", async () => {
+  const oldMessages = deferred();
+  prefetchWave.mockReturnValueOnce(oldMessages.promise);
+  const nextWaves = waves.map(({ id }) => ({ id: `next-${id}` }));
+  const { rerender } = renderHook(
+    (props) =>
+      useRecentDirectMessagePrefetch({ enabled: true, prefetchWave, ...props }),
+    { initialProps: { waves, viewerIdentityKey: "wallet:primary" } }
+  );
+  expect(prefetchWave.mock.calls).toEqual([["first"]]);
+  await act(async () => {
+    globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
+    rerender({ waves: nextWaves, viewerIdentityKey: "wallet:proxy:next" });
+  });
+  await act(async () => oldMessages.resolve());
+  expect(prefetchWave.mock.calls).toEqual([
+    ["first"],
+    ["next-first"],
+    ["next-second"],
+    ["next-third"],
+  ]);
+  expect(mockPrefetchDetails.mock.calls).toEqual(prefetchWave.mock.calls);
+});
+
+it("waits for the new viewer's list when it is not cached", async () => {
+  const { rerender } = renderHook(
+    (currentWaves) =>
+      useRecentDirectMessagePrefetch({
+        enabled: true,
+        viewerIdentityKey: "wallet:primary",
+        waves: currentWaves,
+        prefetchWave,
+      }),
+    { initialProps: [] as typeof waves }
+  );
+  expect(prefetchWave).not.toHaveBeenCalled();
+  await act(async () => rerender(waves));
+  expect(prefetchWave.mock.calls).toEqual([["first"], ["second"], ["third"]]);
+});

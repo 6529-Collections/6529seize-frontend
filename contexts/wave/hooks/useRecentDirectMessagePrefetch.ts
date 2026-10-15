@@ -6,12 +6,14 @@ import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 
 interface RecentDirectMessagePrefetchProps {
   readonly enabled: boolean;
+  readonly viewerIdentityKey: string | null;
   readonly waves: readonly { readonly id: string }[];
   readonly prefetchWave: (waveId: string) => Promise<void>;
 }
 
 export function useRecentDirectMessagePrefetch({
   enabled,
+  viewerIdentityKey,
   waves,
   prefetchWave,
 }: RecentDirectMessagePrefetchProps) {
@@ -26,7 +28,7 @@ export function useRecentDirectMessagePrefetch({
   });
 
   useEffect(() => {
-    if (!enabled || !hasWaves) return;
+    if (!enabled || !hasWaves || !viewerIdentityKey) return;
 
     let stopped = false;
     const stop = () => {
@@ -41,5 +43,5 @@ export function useRecentDirectMessagePrefetch({
       stop();
       globalThis.removeEventListener(PROFILE_SWITCHED_EVENT, stop);
     };
-  }, [enabled, hasWaves]);
+  }, [enabled, hasWaves, viewerIdentityKey]);
 }

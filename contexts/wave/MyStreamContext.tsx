@@ -298,6 +298,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     enabled:
       isCapacitor && isActive && pathname === "/messages" && !activeWaveId,
     waves: dmWavesHookData.waves,
+    viewerIdentityKey: dmWavesData.viewerIdentityKey,
     prefetchWave,
   });
   const { clearWave } = waveMessagesStore;
