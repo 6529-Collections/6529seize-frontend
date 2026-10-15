@@ -18,7 +18,8 @@ const BUDGETS = {
 };
 const START_ROUTES = new Set(["home", "waves"]);
 
-const isMissing = (value) => value === null || value === undefined || Number.isNaN(value);
+const isMissing = (value) =>
+  value === null || value === undefined || Number.isNaN(value);
 const formatter = (divisor, digits) => (value) =>
   isMissing(value) ? "-" : (value / divisor).toFixed(digits);
 const KB = formatter(1024, 0);
@@ -27,7 +28,9 @@ const seconds = formatter(1000, 1);
 const plain = formatter(1, 1);
 
 function median(values) {
-  const sorted = values.filter((value) => !isMissing(value)).sort((a, b) => a - b);
+  const sorted = values
+    .filter((value) => !isMissing(value))
+    .sort((a, b) => a - b);
   return sorted.length ? sorted[Math.floor((sorted.length - 1) / 2)] : null;
 }
 
@@ -43,8 +46,11 @@ function typeTotal(run, type, field) {
 function pageMedians(results) {
   const pages = [...new Set(results.runs.map((run) => pageKey(run.label)))];
   return pages.map((page) => {
-    const cold = results.runs.filter((run) => run.label.startsWith(`${page}-cold`));
-    const warm = results.runs.find((run) => run.label === `${page}-warm-1`) || null;
+    const cold = results.runs.filter((run) =>
+      run.label.startsWith(`${page}-cold`)
+    );
+    const warm =
+      results.runs.find((run) => run.label === `${page}-warm-1`) || null;
     const pick = (fn) => median(cold.map(fn));
     return {
       page,
@@ -54,7 +60,9 @@ function pageMedians(results) {
       transfer: pick((run) => run.net.enc),
       jsTransfer: pick((run) => typeTotal(run, "js", "enc")),
       jsDecoded: pick((run) => typeTotal(run, "js", "dec")),
-      jsBeforeFirstPaint: pick((run) => (run.jsBeforeFcp ? run.jsBeforeFcp.enc : null)),
+      jsBeforeFirstPaint: pick((run) =>
+        run.jsBeforeFcp ? run.jsBeforeFcp.enc : null
+      ),
       imageTransfer: pick((run) => typeTotal(run, "img", "enc")),
       mediaTransfer: pick((run) => typeTotal(run, "media", "enc")),
       fcp: pick((run) => run.fcp),
@@ -76,8 +84,14 @@ function checkBudget(value, limit) {
 
 function evaluateBudgets(row) {
   return {
-    jsBeforeFirstPaint: checkBudget(row.jsBeforeFirstPaint, BUDGETS.jsBeforeFirstPaintBytes),
-    firstLoadTransfer: checkBudget(row.transfer, BUDGETS.firstLoadTransferBytes),
+    jsBeforeFirstPaint: checkBudget(
+      row.jsBeforeFirstPaint,
+      BUDGETS.jsBeforeFirstPaintBytes
+    ),
+    firstLoadTransfer: checkBudget(
+      row.transfer,
+      BUDGETS.firstLoadTransferBytes
+    ),
     largestContent: checkBudget(row.lcp, BUDGETS.largestContentMs),
     idleRequests: checkBudget(row.idlePerMinute, BUDGETS.idleRequestsPerMinute),
   };
@@ -91,11 +105,24 @@ function delta(current, earlier, format) {
 }
 
 function renderHeader(results) {
-  const down = ((results.networkParams.downloadThroughput * 8) / 1e6).toFixed(2);
+  const down = ((results.networkParams.downloadThroughput * 8) / 1e6).toFixed(
+    2
+  );
   return [
     `## Mobile lab: ${results.base}`,
     "",
     `Run ${results.when}; deployed version ${results.deployedVersion || "unknown"}; Chromium ${results.browser}, ${results.device}, CPU x${results.cpuThrottle}, network ${results.network} (${results.networkParams.latency} ms, ${down} Mbit/s down); signed out. Medians of cold loads; warm is one reload in the last context; idle is the following window.`,
+  ];
+}
+
+function renderErrors(results) {
+  const failed = results.runs.filter((run) => run.navigationError);
+  if (!failed.length) return [];
+  return [
+    "",
+    "### Navigation errors (these runs are not valid measurements)",
+    "",
+    ...failed.map((run) => `- ${run.label}: ${run.navigationError}`),
   ];
 }
 
@@ -160,7 +187,9 @@ function renderIdle(results) {
       .slice(0, 8)
       .map(([endpoint, count]) => `${endpoint} x${count}`)
       .join("; ");
-    out.push(`- ${pageKey(run.label)}: ${run.idle.requests} in ${run.idle.seconds.toFixed(0)} s. ${top || "none"}`);
+    out.push(
+      `- ${pageKey(run.label)}: ${run.idle.requests} in ${run.idle.seconds.toFixed(0)} s. ${top || "none"}`
+    );
   }
   return out;
 }
@@ -185,8 +214,11 @@ function renderCoverage(results) {
   if (!covered.length) return [];
   const out = ["", "### JavaScript never run (warm load with coverage)", ""];
   for (const run of covered) {
+    const unused = isMissing(run.coverage.unusedPct)
+      ? "-"
+      : `${run.coverage.unusedPct}%`;
     out.push(
-      `- ${pageKey(run.label)}: ${(run.coverage.totalChars / 1e6).toFixed(2)} M characters evaluated, ${run.coverage.unusedPct}% not run by settle`
+      `- ${pageKey(run.label)}: ${(run.coverage.totalChars / 1e6).toFixed(2)} M characters evaluated, ${unused} not run by settle`
     );
   }
   return out;
@@ -196,6 +228,7 @@ function render(results, earlier) {
   const rows = pageMedians(results);
   return [
     ...renderHeader(results),
+    ...renderErrors(results),
     ...renderMedians(rows),
     ...renderBudgets(rows),
     ...(earlier ? renderComparison(rows, earlier) : []),
@@ -214,9 +247,12 @@ function main() {
   const args = parseArgs(process.argv.slice(2));
   const [file] = args._;
   if (!file) {
-    throw new Error("Usage: summarize.cjs <results.json> [--compare <earlier results.json>]");
+    throw new Error(
+      "Usage: summarize.cjs <results.json> [--compare <earlier results.json>]"
+    );
   }
-  const earlier = typeof args.compare === "string" ? readJson(args.compare) : null;
+  const earlier =
+    typeof args.compare === "string" ? readJson(args.compare) : null;
   process.stdout.write(`${render(readJson(file), earlier)}\n`);
 }
 

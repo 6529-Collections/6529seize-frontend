@@ -56,14 +56,18 @@ function readOptions(argv) {
   const base = new URL(String(args.base || "https://6529.io"));
   const network = String(args.net || "fast4g");
   if (!NETWORKS[network]) {
-    throw new Error(`Unknown --net ${network}; use ${Object.keys(NETWORKS).join(" or ")}.`);
+    throw new Error(
+      `Unknown --net ${network}; use ${Object.keys(NETWORKS).join(" or ")}.`
+    );
   }
   const pages = String(args.pages || Object.keys(PAGES).join(","))
     .split(",")
     .filter(Boolean);
   for (const key of pages) {
     if (!PAGES[key]) {
-      throw new Error(`Unknown page ${key}; use ${Object.keys(PAGES).join(", ")}.`);
+      throw new Error(
+        `Unknown page ${key}; use ${Object.keys(PAGES).join(", ")}.`
+      );
     }
   }
   return {
@@ -74,7 +78,11 @@ function readOptions(argv) {
     cold: Number(args.cold ?? 3),
     warm: Number(args.warm ?? 1),
     idleSeconds: Number(args.idle ?? 60),
-    coverage: new Set(String(args.coverage || "").split(",").filter(Boolean)),
+    coverage: new Set(
+      String(args.coverage || "")
+        .split(",")
+        .filter(Boolean)
+    ),
     outDir: path.resolve(String(args["out-dir"] || "tmp/mobile-lab")),
   };
 }
@@ -137,12 +145,19 @@ async function instrument(context, page, options) {
     const request = log.requests.get(event.requestId);
     if (!request) return;
     const headers = Object.fromEntries(
-      Object.entries(event.response.headers || {}).map(([k, v]) => [k.toLowerCase(), v])
+      Object.entries(event.response.headers || {}).map(([k, v]) => [
+        k.toLowerCase(),
+        v,
+      ])
     );
     request.status = event.response.status;
     request.fromCache =
       request.fromCache ||
-      Boolean(event.response.fromDiskCache || event.response.fromMemoryCache || event.response.fromPrefetchCache);
+      Boolean(
+        event.response.fromDiskCache ||
+        event.response.fromMemoryCache ||
+        event.response.fromPrefetchCache
+      );
     request.cacheControl = headers["cache-control"] || null;
     request.type = event.type || request.type;
   });
@@ -200,19 +215,26 @@ async function settle(page, log, capMs) {
     await sleep(500);
     const state = await page.evaluate(() => {
       const perf = window.__labPerf || { lt: [] };
-      const lastLongTask = perf.lt.reduce((max, task) => Math.max(max, task.s + task.d), 0);
+      const lastLongTask = perf.lt.reduce(
+        (max, task) => Math.max(max, task.s + task.d),
+        0
+      );
       return { now: performance.now(), lastLongTask };
     });
     const quietMain = state.now - state.lastLongTask >= 5000;
-    const quietNetwork = log.inflight <= 2 && Date.now() - log.lastActivity >= 2000;
-    if (quietMain && quietNetwork) return { capped: false, waitedMs: Date.now() - start };
+    const quietNetwork =
+      log.inflight <= 2 && Date.now() - log.lastActivity >= 2000;
+    if (quietMain && quietNetwork)
+      return { capped: false, waitedMs: Date.now() - start };
   }
   return { capped: true, waitedMs: Date.now() - start };
 }
 
 async function cdpMetrics(cdp) {
   const { metrics } = await cdp.send("Performance.getMetrics");
-  return Object.fromEntries(metrics.map((metric) => [metric.name, metric.value]));
+  return Object.fromEntries(
+    metrics.map((metric) => [metric.name, metric.value])
+  );
 }
 
 function coverageSummary(entries) {
@@ -225,14 +247,22 @@ function coverageSummary(entries) {
     const marks = new Uint8Array(length);
     for (const fn of entry.functions) {
       for (const range of fn.ranges) {
-        marks.fill(range.count > 0 ? 1 : 0, range.startOffset, Math.min(range.endOffset, length));
+        marks.fill(
+          range.count > 0 ? 1 : 0,
+          range.startOffset,
+          Math.min(range.endOffset, length)
+        );
       }
     }
     let usedChars = 0;
     for (let i = 0; i < length; i++) usedChars += marks[i];
     total += length;
     used += usedChars;
-    files.push({ url: entry.url.replace(/^https?:\/\//, "").slice(0, 120), length, used: usedChars });
+    files.push({
+      url: entry.url.replace(/^https?:\/\//, "").slice(0, 120),
+      length,
+      used: usedChars,
+    });
   }
   files.sort((a, b) => b.length - a.length);
   return {
@@ -246,7 +276,8 @@ function coverageSummary(entries) {
 async function measureLoad({ page, cdp, log, url, label, coverage, baseHost }) {
   log.requests.clear();
   log.inflight = 0;
-  if (coverage) await page.coverage.startJSCoverage({ resetOnNavigation: false });
+  if (coverage)
+    await page.coverage.startJSCoverage({ resetOnNavigation: false });
   const startWall = Date.now();
   let response;
   let navigationError = null;
@@ -256,6 +287,10 @@ async function measureLoad({ page, cdp, log, url, label, coverage, baseHost }) {
     navigationError = String(error.message || error).slice(0, 300);
   }
   const settled = await settle(page, log, 45000);
+  // An access-gate redirect would be measured as if it were the page.
+  if (!navigationError && new URL(page.url()).pathname.startsWith("/access")) {
+    navigationError = `Redirected to the access gate: ${new URL(page.url()).pathname}`;
+  }
   const perf = await page.evaluate(() => {
     const s = window.__labPerf || { lcp: [], lt: [], paint: [], cls: 0 };
     const nav = performance.getEntriesByType("navigation")[0] || {};
@@ -269,10 +304,16 @@ async function measureLoad({ page, cdp, log, url, label, coverage, baseHost }) {
       domNodes: document.getElementsByTagName("*").length,
     };
   });
-  const fcp = perf.paint.find((p) => p.n === "first-contentful-paint")?.t ?? null;
+  const fcp =
+    perf.paint.find((p) => p.n === "first-contentful-paint")?.t ?? null;
   const lcpEntry = perf.lcp.length ? perf.lcp[perf.lcp.length - 1] : null;
-  const longTasksAfterFcp = perf.lt.filter((task) => fcp === null || task.s >= fcp);
-  const tbt = longTasksAfterFcp.reduce((sum, task) => sum + Math.max(0, task.d - 50), 0);
+  const longTasksAfterFcp = perf.lt.filter(
+    (task) => fcp === null || task.s >= fcp
+  );
+  const tbt = longTasksAfterFcp.reduce(
+    (sum, task) => sum + Math.max(0, task.d - 50),
+    0
+  );
   const metricsBeforeGc = await cdpMetrics(cdp);
   await cdp.send("HeapProfiler.enable").catch(() => {});
   await cdp.send("HeapProfiler.collectGarbage").catch(() => {});
@@ -281,25 +322,34 @@ async function measureLoad({ page, cdp, log, url, label, coverage, baseHost }) {
   try {
     if (response) {
       const body = await response.text();
-      const inlineRsc = (body.match(/self\.__next_f\.push\(\[[\s\S]*?\]\)<\/script>/g) || []).reduce(
-        (sum, chunk) => sum + chunk.length,
-        0
-      );
+      const inlineRsc = (
+        body.match(/self\.__next_f\.push\(\[[\s\S]*?\]\)<\/script>/g) || []
+      ).reduce((sum, chunk) => sum + chunk.length, 0);
       html = { decoded: body.length, inlineRsc, status: response.status() };
     }
   } catch {
     html = null;
   }
-  const coverageResult = coverage ? coverageSummary(await page.coverage.stopJSCoverage()) : null;
+  const coverageResult = coverage
+    ? coverageSummary(await page.coverage.stopJSCoverage())
+    : null;
   const list = [...log.requests.values()];
   // Scripts requested before first paint: what the HTML asks for up front,
   // close to the route's first-load JavaScript. Navigation start is
   // approximated by the goto call.
   const beforeFcp =
-    fcp === null ? [] : list.filter((r) => !r.failed && r.startWall - startWall <= fcp);
+    fcp === null
+      ? []
+      : list.filter((r) => !r.failed && r.startWall - startWall <= fcp);
   const jsBeforeFcp = beforeFcp
     .filter((r) => typeOf(r) === "js")
-    .reduce((sum, r) => ({ enc: sum.enc + (r.enc || 0), dec: sum.dec + (r.dec || 0) }), { enc: 0, dec: 0 });
+    .reduce(
+      (sum, r) => ({
+        enc: sum.enc + (r.enc || 0),
+        dec: sum.dec + (r.dec || 0),
+      }),
+      { enc: 0, dec: 0 }
+    );
   return {
     label,
     url,
@@ -310,7 +360,13 @@ async function measureLoad({ page, cdp, log, url, label, coverage, baseHost }) {
     fcp,
     lcp: lcpEntry ? lcpEntry.t : null,
     lcpElement: lcpEntry
-      ? { tag: lcpEntry.tag, size: lcpEntry.size, url: lcpEntry.url ? lcpEntry.url.replace(/^https?:\/\//, "").slice(0, 100) : null }
+      ? {
+          tag: lcpEntry.tag,
+          size: lcpEntry.size,
+          url: lcpEntry.url
+            ? lcpEntry.url.replace(/^https?:\/\//, "").slice(0, 100)
+            : null,
+        }
       : null,
     tbt,
     longTasks: perf.lt.length,
@@ -320,14 +376,19 @@ async function measureLoad({ page, cdp, log, url, label, coverage, baseHost }) {
     html,
     heap: {
       usedMB: Number((metricsBeforeGc.JSHeapUsedSize / 1048576).toFixed(1)),
-      usedAfterGcMB: Number((metricsAfterGc.JSHeapUsedSize / 1048576).toFixed(1)),
+      usedAfterGcMB: Number(
+        (metricsAfterGc.JSHeapUsedSize / 1048576).toFixed(1)
+      ),
     },
     jsBeforeFcp,
     net: summarizeRequests(list, baseHost),
     coverage: coverageResult,
     requests: list.map((r) => ({
       host: hostClass(r.url, baseHost),
-      path: r.url.split("?")[0].replace(/^[a-z]+:\/\/[^/]+/, "").slice(0, 90),
+      path: r.url
+        .split("?")[0]
+        .replace(/^[a-z]+:\/\/[^/]+/, "")
+        .slice(0, 90),
       type: typeOf(r),
       status: r.status,
       enc: r.enc,
@@ -371,7 +432,7 @@ async function newContext(browser, options) {
     locale: "en-US",
     timezoneId: "UTC",
   });
-  const accessCode = process.env.PLAYWRIGHT_STAGING_ACCESS_CODE || process.env.STAGING_AUTH;
+  const accessCode = stagingAccessCode();
   if (options.base.hostname === STAGING_HOSTNAME && accessCode) {
     await context.addCookies([
       {
@@ -391,7 +452,10 @@ async function newContext(browser, options) {
 async function readDeployedVersion(browser, options) {
   const context = await newContext(browser, options);
   try {
-    const response = await context.request.get(new URL("/api/version", options.base).href, { timeout: 20000 });
+    const response = await context.request.get(
+      new URL("/api/version", options.base).href,
+      { timeout: 20000 }
+    );
     const body = await response.json();
     return typeof body.version === "string" ? body.version : null;
   } catch {
@@ -431,7 +495,14 @@ async function measurePage(browser, options, key, runs) {
     const context = await newContext(browser, options);
     const page = await context.newPage();
     const { cdp, log } = await instrument(context, page, options);
-    const cold = await measureLoad({ page, cdp, log, url, label: `${key}-cold-${i}`, baseHost });
+    const cold = await measureLoad({
+      page,
+      cdp,
+      log,
+      url,
+      label: `${key}-cold-${i}`,
+      baseHost,
+    });
     runs.push(cold);
     report(progressLine(cold));
     if (i === options.cold && options.warm > 0) {
@@ -445,8 +516,16 @@ async function measurePage(browser, options, key, runs) {
 async function measureWarm({ page, cdp, log, url, key, options, runs }) {
   const baseHost = options.base.hostname;
   await sleep(2000);
-  const warm = await measureLoad({ page, cdp, log, url, label: `${key}-warm-1`, baseHost });
-  if (options.idleSeconds > 0) warm.idle = await idleWindow(log, options.idleSeconds, baseHost);
+  const warm = await measureLoad({
+    page,
+    cdp,
+    log,
+    url,
+    label: `${key}-warm-1`,
+    baseHost,
+  });
+  if (options.idleSeconds > 0)
+    warm.idle = await idleWindow(log, options.idleSeconds, baseHost);
   runs.push(warm);
   report(progressLine(warm));
   if (!options.coverage.has(key)) return;
@@ -461,11 +540,26 @@ async function measureWarm({ page, cdp, log, url, key, options, runs }) {
     baseHost,
   });
   runs.push(covered);
-  report(JSON.stringify({ label: covered.label, unusedPct: covered.coverage.unusedPct }));
+  report(
+    JSON.stringify({
+      label: covered.label,
+      unusedPct: covered.coverage.unusedPct,
+    })
+  );
+}
+
+function stagingAccessCode() {
+  return process.env.PLAYWRIGHT_STAGING_ACCESS_CODE || process.env.STAGING_AUTH;
 }
 
 async function main() {
   const options = readOptions(process.argv.slice(2));
+  if (options.base.hostname === STAGING_HOSTNAME && !stagingAccessCode()) {
+    // Without the access cookie every page is the staging access wall.
+    throw new Error(
+      "Measuring staging needs PLAYWRIGHT_STAGING_ACCESS_CODE or STAGING_AUTH."
+    );
+  }
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- Operator CLI writes to the output folder it is given.
   fs.mkdirSync(options.outDir, { recursive: true });
   const browser = await chromium.launch({ headless: true });
