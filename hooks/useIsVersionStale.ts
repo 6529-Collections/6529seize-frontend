@@ -33,12 +33,16 @@ export function useIsVersionStale(interval = 120_000, enabled = true) {
 
     let disposed = false;
     let lastCheckAt = Number.NEGATIVE_INFINITY;
+    let latestCheckId = 0;
     let timer: ReturnType<typeof setInterval> | undefined;
 
     const isHidden = () => document.visibilityState === "hidden";
 
     async function check() {
       lastCheckAt = Date.now();
+      // Checks can overlap after a wake; only the newest one may set state.
+      latestCheckId += 1;
+      const checkId = latestCheckId;
       try {
         const { stale } = await fetch(VERSION_ENDPOINT, {
           cache: "no-store",
@@ -47,7 +51,11 @@ export function useIsVersionStale(interval = 120_000, enabled = true) {
           },
         }).then((r) => r.json() as Promise<VersionStatusResponse>);
 
-        if (!disposed && typeof stale === "boolean") {
+        if (
+          !disposed &&
+          checkId === latestCheckId &&
+          typeof stale === "boolean"
+        ) {
           setStale(stale);
         }
       } catch {

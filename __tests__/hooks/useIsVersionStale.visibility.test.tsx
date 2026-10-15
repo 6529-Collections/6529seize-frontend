@@ -182,4 +182,27 @@ describe("useIsVersionStale visibility", () => {
     await advance(INTERVAL_MS);
     expect(result.current).toBe(true);
   });
+
+  it("ignores an older check that resolves after a newer one", async () => {
+    const resolvers: Array<(stale: boolean) => void> = [];
+    fetchMock.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolvers.push((stale) => resolve({ json: async () => ({ stale }) }));
+        })
+    );
+    const { result } = renderHook(() => useIsVersionStale(INTERVAL_MS));
+    await advance(INTERVAL_MS);
+    expect(resolvers).toHaveLength(2);
+
+    await act(async () => {
+      resolvers[1]?.(true);
+    });
+    expect(result.current).toBe(true);
+
+    await act(async () => {
+      resolvers[0]?.(false);
+    });
+    expect(result.current).toBe(true);
+  });
 });
