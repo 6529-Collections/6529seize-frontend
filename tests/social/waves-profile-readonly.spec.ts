@@ -1524,7 +1524,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(
       page.getByRole("link", { name: "Add another wallet" })
     ).toHaveCount(0);
-    const walletCount = page.getByText(/^\d of 4 wallets$/).first();
+    const walletCount = page.getByText(/^\d of 4 addresses$/).first();
     await expect(walletCount).toBeVisible();
     await expect
       .poll(() =>
@@ -1539,21 +1539,21 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       )
       .toBeLessThanOrEqual(2);
     await expectNoHorizontalOverflow(page);
-    const addressesHeading = page.getByRole("heading", {
-      name: /Addresses$/,
+    const walletHeading = page.getByRole("heading", {
+      name: `${PROFILE_HANDLE}'s Wallet`,
       level: 3,
     });
     const statementsHeading = page.getByRole("heading", {
       name: /ID Statements$/,
       level: 3,
     });
-    await expect(addressesHeading).toBeVisible();
+    await expect(walletHeading).toBeVisible();
     await expect(statementsHeading).toBeVisible();
-    const addressesBox = await addressesHeading.boundingBox();
+    const walletBox = await walletHeading.boundingBox();
     const statementsBox = await statementsHeading.boundingBox();
-    expect(addressesBox).not.toBeNull();
+    expect(walletBox).not.toBeNull();
     expect(statementsBox).not.toBeNull();
-    expect(addressesBox!.y).toBeLessThan(statementsBox!.y);
+    expect(walletBox!.y).toBeLessThan(statementsBox!.y);
     await expect(
       page.getByText("Consolidated Addresses", { exact: true })
     ).toHaveCount(0);
@@ -1606,7 +1606,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       .getByRole("button", { name: "About identity statements", exact: true })
       .click();
     await expect(guidance).toBeVisible();
-    await addressesHeading.click();
+    await walletHeading.click();
     await expect(guidance).toBeHidden();
     await expect(guidance).toHaveCount(0);
 
@@ -1615,7 +1615,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       exact: true,
     });
     for (const interaction of ["focus", "click"] as const) {
-      await addressesHeading.click();
+      await walletHeading.click();
       if (interaction === "focus") {
         await helpButton.focus();
       } else {
