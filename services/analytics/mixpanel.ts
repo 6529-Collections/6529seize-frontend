@@ -1,5 +1,8 @@
 import { publicEnv } from "@/config/env";
-import mixpanel from "mixpanel-browser";
+// The default entry bundles the rrweb session recorder (~85 KB gzip). Recording
+// is off (record_sessions_percent: 0), so use the recorder-free core build; it
+// is the same SDK without the recorder bundle. The sibling .d.ts supplies types.
+import mixpanel from "mixpanel-browser/dist/mixpanel-core.cjs.js";
 import type { BeforeSendHookPayload } from "mixpanel-browser";
 import Cookies from "js-cookie";
 import { CONSENT_PERFORMANCE_COOKIE } from "@/constants/constants";
