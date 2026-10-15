@@ -48,7 +48,7 @@
       "automatic": ["page-views-after-performance-consent"],
       "sampling": "consented sessions",
       "release": "not attached",
-      "notes": "Overlap with Mixpanel is externally unverified; preserve until dashboard ownership is confirmed"
+      "notes": "Overlap with Mixpanel is externally unverified; preserve until dashboard ownership is confirmed. gtag.js loads after window load once the browser is idle, on the first interaction, or 10 seconds after consent, whichever is first; the landing page view is sent explicitly so a navigation before gtag.js is ready keeps today's page views"
     }
   ],
   "signals": [
