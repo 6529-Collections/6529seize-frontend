@@ -95,11 +95,12 @@ describe("WaveHeader", () => {
     wrapper(baseWave);
     const title = screen.getByTestId("name");
     const creator = screen.getByRole("link", { name: "a" });
-    const created = screen.getByText("Jan 1, 1970");
+    const created = screen.getByTestId("wave-creation-date");
 
     expect(creator).toBeVisible();
     expect(creator).toHaveAttribute("href", "/a");
     expect(creator.parentElement).toContainElement(created);
+    expect(created).toHaveTextContent("Jan 1, 1970");
     expect(created).toHaveAttribute("datetime", "1970-01-01T00:00:00.000Z");
     expect(screen.queryByText("Created by")).not.toBeInTheDocument();
     expect(screen.queryByText("Creator")).not.toBeInTheDocument();
@@ -123,9 +124,12 @@ describe("WaveHeader", () => {
     );
     try {
       expect(result.serverHtml).toContain("Oct 12, 2026, UTC");
+      expect(result.serverHtml).toContain('data-testid="wave-creation-date"');
       expect(result.recoverableErrors).toEqual([]);
       expect(result.hydrationConsoleErrors).toEqual([]);
-      const created = result.container.querySelector("time");
+      const created = within(result.container).getByTestId(
+        "wave-creation-date"
+      );
       expect(created).toHaveAttribute("datetime", "2026-10-12T11:27:11.000Z");
       expect(created).toHaveTextContent(/^Oct 13, 2026$/);
     } finally {

@@ -1311,14 +1311,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     ).toBeVisible();
     await aboutPanel.getByRole("tab", { name: "About", exact: true }).click();
     await expect(page.getByText("Created by", { exact: true })).toHaveCount(0);
-    const creationDate = page
-      .getByRole("complementary", { name: "Wave details" })
-      .locator("time[datetime]")
-      .or(
-        page
-          .getByRole("dialog", { name: "Wave details" })
-          .locator("time[datetime]")
-      );
+    // Pinned drops can render their own dates inside link previews. Select the
+    // wave's creation date explicitly instead of every date in the panel.
+    const creationDate = aboutPanel.getByTestId("wave-creation-date");
     await expect(creationDate).toBeVisible();
     await expect(creationDate).toHaveAttribute(
       "datetime",
@@ -1407,12 +1402,79 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         test.info(),
         "profile-activity-loading"
       );
+
+      // Releasing the held request starts the network round trip; it does not
+      // mean the activity data has arrived. Keep network and render readiness
+      // separate, and fail explicitly if the activity endpoint returns an error.
+      const activityResponse = page.waitForResponse(
+        (response) => {
+          const url = new URL(response.url());
+          return (
+            response.request().method() === "GET" &&
+            url.pathname === "/api/profile-logs" &&
+            url.searchParams.get("profile") === PROFILE_HANDLE
+          );
+        },
+        { timeout: RESPONSE_TIMEOUT_MS }
+      );
+      releaseLogs();
+      const response = await activityResponse;
+      expect(
+        response.ok(),
+        `Profile activity request returned HTTP ${response.status()}`
+      ).toBe(true);
+      expect(
+        await response.finished(),
+        "Profile activity response completed"
+      ).toBeNull();
+      await expect(
+        page.getByRole("status", { name: "Loading activity log" })
+      ).toHaveCount(0);
     } finally {
       releaseLogs();
     }
-    await expect(
-      page.getByRole("status", { name: "Loading activity log" })
-    ).toHaveCount(0);
+  });
+
+  test("waits for identity guidance hydration before accepting activation", async ({
+    page,
+  }) => {
+    // Desktop-only SSR check: mobile requires hydrated tab navigation to reveal
+    // this panel, so it cannot expose the button while scripts are held. The
+    // existing profile-shell test still covers mobile guidance activation.
+    test.skip(
+      (page.viewportSize()?.width ?? 1280) < 1024,
+      "The mobile statements panel requires hydrated tab navigation."
+    );
+    let releaseScripts: () => void = () => undefined;
+    const scriptsReady = new Promise<void>((resolve) => {
+      releaseScripts = resolve;
+    });
+    await page.route("**/_next/static/chunks/**", async (route) => {
+      if (new URL(route.request().url()).pathname.endsWith(".js")) {
+        await scriptsReady;
+      }
+      await route.continue();
+    });
+    const guidanceButton = page.getByRole("button", {
+      name: "About identity statements",
+      exact: true,
+    });
+    try {
+      // Commit waits for the document response, allowing inspection of server
+      // markup while client scripts remain held at the browser boundary.
+      await page.goto(`/${PROFILE_HANDLE}`, { waitUntil: "commit" });
+      await expect(guidanceButton).toBeVisible();
+      await expect(guidanceButton).toBeDisabled();
+    } finally {
+      releaseScripts();
+    }
+    await expect(guidanceButton).toBeEnabled();
+    await guidanceButton.click();
+    await expect(guidanceButton).toHaveAttribute("aria-expanded", "true");
+    await expect(page.getByRole("tooltip")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(guidanceButton).toHaveAttribute("aria-expanded", "false");
+    await expect(page.getByRole("tooltip")).toHaveCount(0);
   });
 
   test("renders the stable public profile shell read-only", async ({
@@ -1484,9 +1546,13 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(
       page.getByText("Consolidated Addresses", { exact: true })
     ).toHaveCount(0);
-    await page
-      .getByRole("button", { name: "About identity statements", exact: true })
-      .click();
+    const guidanceButton = page.getByRole("button", {
+      name: "About identity statements",
+      exact: true,
+    });
+    await expect(guidanceButton).toBeEnabled();
+    await guidanceButton.scrollIntoViewIfNeeded();
+    await guidanceButton.click();
     await expect(
       page.getByRole("button", {
         name: "About identity statements",
@@ -1496,6 +1562,22 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     // A scroll-into-view event can arrive after the opening click. It must
     // not dismiss guidance when the trigger has already reached its position.
     await page.evaluate(() => document.dispatchEvent(new Event("scroll")));
+    // Production also adjusted page scroll by 3px after guidance opened. A
+    // programmatic adjustment must reposition the popup instead of closing it.
+    const adjusted = await page.evaluate(async () => {
+      const scroller = document.scrollingElement;
+      if (!scroller) return false;
+      const before = scroller.scrollTop;
+      scroller.scrollBy({
+        top: before >= 3 ? -3 : 3,
+        behavior: "instant",
+      });
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+      );
+      return scroller.scrollTop !== before;
+    });
+    expect(adjusted).toBe(true);
     await page.mouse.move(0, 0);
     await expect(
       page.getByRole("button", {
