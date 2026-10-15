@@ -307,6 +307,9 @@ account-dependent controls load. No additional account cache is used.
   the account dropdown.
 - Unread dots/badges are notification-count indicators only; they do not show
   notification category.
+- Unread counts for every connected account update live while the realtime
+  connection is up, with a background check every 5 minutes. While it is down,
+  they refresh about every 30 seconds and when you return to the tab.
 - A connection-share QR restores an authenticated profile session; it does not
   provide a live signer for actions that require wallet signatures.
 
