@@ -7,7 +7,7 @@ const APP_ROOT = path.join(process.cwd(), "app");
 // shell first and commits a 200 status before `notFound()` can run. Detail
 // routes that must answer unknown ids with a real 404 therefore need an
 // existence check that no streaming boundary sits above.
-const NOT_FOUND_ROUTES = [
+const STATIC_NOT_FOUND_ROUTES = [
   "the-memes/[id]",
   "the-memes/[id]/distribution",
   "meme-lab/[id]",
@@ -17,6 +17,24 @@ const NOT_FOUND_ROUTES = [
   "rememes/[contract]/[id]",
   "[user]/[...cmsPath]",
 ];
+
+function collectMuseumDetailRoutes(directory: string): string[] {
+  const routes: string[] = [];
+  for (const entry of fs.readdirSync(path.join(APP_ROOT, directory), {
+    withFileTypes: true,
+  })) {
+    if (!entry.isDirectory()) continue;
+    const child = `${directory}/${entry.name}`;
+    if (
+      child.includes("[") &&
+      fs.existsSync(path.join(APP_ROOT, child, "page.tsx"))
+    ) {
+      routes.push(child);
+    }
+    routes.push(...collectMuseumDetailRoutes(child));
+  }
+  return routes;
+}
 
 function ancestorDirectories(route: string): string[] {
   const segments = route.split("/");
@@ -46,8 +64,15 @@ function findStreamingBoundaries(route: string): string[] {
   return boundaries;
 }
 
+const museumDetailRoutes = collectMuseumDetailRoutes("museum/network");
+const routes = [...STATIC_NOT_FOUND_ROUTES, ...museumDetailRoutes];
+
 describe("not-found streaming boundaries", () => {
-  it.each(NOT_FOUND_ROUTES)(
+  it("covers every Museum detail route", () => {
+    expect(museumDetailRoutes.length).toBeGreaterThan(10);
+  });
+
+  it.each(routes)(
     "keeps /%s free of streaming boundaries above its page",
     (route) => {
       expect(fs.existsSync(path.join(APP_ROOT, route))).toBe(true);
