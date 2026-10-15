@@ -44,7 +44,12 @@ performance-tracking behavior tied to that choice.
    preferences updated`.
 7. When performance consent is `true`, the site enables performance analytics.
    Current production behavior includes Google tag loading and Mixpanel
-   page-view tracking.
+   page-view tracking. The Google tag is kept out of first load: it starts
+   loading once the page has finished loading and the browser is idle, at the
+   visitor's first tap, click, key press or mouse-wheel scroll, or 10 seconds
+   after the consent decision, whichever comes first. Its first page view
+   still reports the page the visitor was on when consent was decided, and a
+   page change made before the tag was ready gets its own page view.
 8. When a connected profile exists in a consented session, Mixpanel can
    identify the session with that profile ID.
 9. If the connected profile is later cleared while performance consent stays
@@ -83,6 +88,11 @@ performance-tracking behavior tied to that choice.
 - Clearing the connected profile after analytics identification resets the
   identified analytics session without turning off page-view tracking for the
   consented browser session.
+- Turning performance consent off before the Google tag has started loading
+  cancels the load. Once the tag has loaded, it stays loaded until the page is
+  reloaded.
+- A visit that ends before the Google tag starts loading is not recorded by
+  Google Analytics.
 - Browser cookie clearing can cause the country check and consent flow to run
   again on the next visit.
 

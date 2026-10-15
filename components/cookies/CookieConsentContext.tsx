@@ -22,8 +22,7 @@ import React, {
 } from "react";
 import { useAuth } from "../auth/Auth";
 import CookiesBanner from "./CookiesBanner";
-
-const GTM_ID = "G-71NLVV3KY3";
+import { scheduleGoogleAnalytics } from "./googleAnalytics";
 
 type CookieConsent = boolean | undefined;
 
@@ -122,28 +121,29 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   const [performanceConsent, setPerformanceConsent] =
     useState<CookieConsent>(undefined);
   const performanceScriptsLoadedRef = useRef(false);
+  const cancelGoogleAnalyticsRef = useRef<(() => boolean) | undefined>(
+    undefined
+  );
 
   const loadPerformanceCookies = useCallback(() => {
     if (performanceScriptsLoadedRef.current) {
       return;
     }
     performanceScriptsLoadedRef.current = true;
+    cancelGoogleAnalyticsRef.current = scheduleGoogleAnalytics(
+      () => getCookieConsentByName(CONSENT_PERFORMANCE_COOKIE) === true
+    );
+  }, []);
 
-    const script1 = document.createElement("script");
-    script1.src = `https://www.googletagmanager.com/gtag/js?id=${GTM_ID}`;
-    script1.async = true;
-    document.head.appendChild(script1);
-
-    const script2 = document.createElement("script");
-    script2.innerHTML = `
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', '${GTM_ID}', {
-            'cookie_expires': 31536000
-        });
-      `;
-    document.head.appendChild(script2);
+  // Google Analytics loads after first load, so a consent withdrawal or an
+  // unmount can still stop it. A load cancelled before it started can be
+  // scheduled again by a later consent.
+  const cancelPendingGoogleAnalytics = useCallback(() => {
+    const cancel = cancelGoogleAnalyticsRef.current;
+    cancelGoogleAnalyticsRef.current = undefined;
+    if (cancel?.()) {
+      performanceScriptsLoadedRef.current = false;
+    }
   }, []);
 
   const getCookieConsent = useCallback(
@@ -159,6 +159,8 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
 
         if (performanceCookies) {
           loadPerformanceCookies();
+        } else {
+          cancelPendingGoogleAnalytics();
         }
 
         if (essentialCookies != undefined && performanceCookies != undefined) {
@@ -193,7 +195,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
         }
       }
     },
-    [loadPerformanceCookies]
+    [cancelPendingGoogleAnalytics, loadPerformanceCookies]
   );
 
   const consent = useCallback(async () => {
@@ -266,6 +268,8 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
       performanceConsent,
     ]
   );
+
+  useEffect(() => cancelPendingGoogleAnalytics, [cancelPendingGoogleAnalytics]);
 
   useEffect(() => {
     if (disabled) {
