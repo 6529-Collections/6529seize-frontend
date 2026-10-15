@@ -117,6 +117,26 @@ describe("mergeInfiniteHead", () => {
       ]);
     });
 
+    it("keeps one copy of an item repeated at a page boundary", () => {
+      // A page boundary that repeats its cursor item caches 7 twice.
+      const repeatedBoundary = [
+        page(rows(9, 8, 7), 1, 7),
+        page(rows(7, 6, 5), 2, 5),
+      ];
+
+      const merged = mergeInfiniteHead(
+        repeatedBoundary,
+        page(rows(9, 8, 7), 1, 7),
+        "cursor",
+        adapter
+      );
+
+      expect(idsOf(merged ?? [])).toEqual([
+        [9, 8, 7],
+        [6, 5],
+      ]);
+    });
+
     it("refuses to merge when the fresh page does not overlap the cache", () => {
       expect(
         mergeInfiniteHead(cached, page(rows(30, 29, 28)), "cursor", adapter)
@@ -412,6 +432,25 @@ describe("refreshInfiniteQueryHead", () => {
 
     await expect(pending).resolves.toBe(true);
     expect(cachedPages()).toBe(before);
+  });
+
+  it("writes nothing when the query was removed while the request was in flight", async () => {
+    await loadPages(2);
+    let finishFetch!: (value: Page) => void;
+    queryFn.mockImplementationOnce(
+      () =>
+        new Promise<Page>((resolve) => {
+          finishFetch = resolve;
+        })
+    );
+    serverIds = [14, 13, ...serverIds];
+
+    const pending = refresh();
+    queryClient.removeQueries({ queryKey: QUERY_KEY });
+    finishFetch(readServerPage(null));
+
+    await expect(pending).resolves.toBe(false);
+    expect(queryClient.getQueryData(QUERY_KEY)).toBeUndefined();
   });
 
   it("hands the first page request the abort signal of its caller", async () => {

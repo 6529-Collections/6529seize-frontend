@@ -18,6 +18,9 @@ export interface InfinitePageAdapter<TPage, TItem> {
  * pages stay valid when newer items arrive (serial-number and id cursors).
  * `aligned`: pages are fixed offsets (`page` numbers), so newer or removed
  * items shift every later page; only an unchanged first page is safe to swap.
+ * Any inserted, removed or reordered item in the first page therefore falls
+ * back to the full refetch; the saving there is the events that leave the first
+ * page as it was, such as updates for other drops in the same wave.
  */
 export type InfiniteHeadStrategy = "cursor" | "aligned";
 
@@ -37,6 +40,10 @@ const hasSameKeys = <TItem>(
   left.length === right.length &&
   left.every((item, index) => getKey(item) === getKey(right[index] as TItem));
 
+// Items are matched by key, so a key is assumed to name one item in the list
+// (serial numbers and ids are unique). A key found in both the fresh first page
+// and a later cached page is the same item seen twice, for example a page
+// boundary that repeats its cursor item, so only the fresh copy is kept.
 const mergeCursorHead = <TPage, TItem>(
   pages: readonly TPage[],
   head: TPage,
@@ -124,7 +131,11 @@ interface RunningRefresh {
 }
 
 // One refresh per query at a time; events that arrive meanwhile run once more
-// afterwards instead of stacking requests or cancelling the one in flight.
+// afterwards instead of stacking requests or cancelling the one in flight. The
+// map is keyed by the `Query` object, so it never mixes clients and entries go
+// away with the query. A refresh that outlives its query writes nothing: the
+// result is merged into whatever the cache holds under the key when the
+// request settles, and a removed query is not recreated.
 const runningRefreshes = new WeakMap<Query, RunningRefresh>();
 
 // A read through a function keeps the compiler from assuming the signal stays
