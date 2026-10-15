@@ -10,7 +10,7 @@ import {
   faPlusCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ethers } from "ethers";
+import type { ethers as EthersNamespace } from "ethers";
 import { CreateAppWalletModal } from "./AppWalletModal";
 import { useAuth } from "../auth/Auth";
 import {
@@ -31,8 +31,53 @@ const MNEMONIC_WORD_FIELD_IDS = Array.from(
   (_, index) => `mnemonic-word-${index + 1}`
 );
 
+type ImportedWallet = EthersNamespace.Wallet | EthersNamespace.HDNodeWallet;
+
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "Unknown error";
+}
+
+// ethers is only needed once the user validates a phrase or key, so it is
+// loaded on demand instead of shipping with the page.
+async function loadEthers(): Promise<typeof EthersNamespace> {
+  const { ethers } = await import("ethers");
+  return ethers;
+}
+
+function useImportedWalletValidation() {
+  const [isReadonly, setIsReadonly] = useState(false);
+  const [error, setError] = useState("");
+  const [validatedWallet, setValidatedWallet] = useState<ImportedWallet>();
+  // Identifies the latest validation so a result that resolves after the
+  // form was cleared (or validated again) is ignored.
+  const validationRunRef = useRef(0);
+
+  const resetValidation = () => {
+    validationRunRef.current += 1;
+    setError("");
+    setIsReadonly(false);
+    setValidatedWallet(undefined);
+  };
+
+  const validate = async (
+    createWallet: (ethers: typeof EthersNamespace) => ImportedWallet
+  ) => {
+    validationRunRef.current += 1;
+    const run = validationRunRef.current;
+    setIsReadonly(true);
+    try {
+      const wallet = createWallet(await loadEthers());
+      if (run === validationRunRef.current) {
+        setValidatedWallet(wallet);
+      }
+    } catch (validationError: unknown) {
+      if (run === validationRunRef.current) {
+        setError(`Error: ${getErrorMessage(validationError)}`);
+      }
+    }
+  };
+
+  return { isReadonly, error, validatedWallet, resetValidation, validate };
 }
 
 export default function AppWalletImport() {
@@ -94,35 +139,24 @@ export default function AppWalletImport() {
 function AppWalletImportMnemonic() {
   const inputRef = useRef<HTMLInputElement>(null);
   const { setToast } = useAuth();
-  const [phrase, setPhrase] = useState<string[]>(Array(12).fill(""));
-  const [isReadonly, setIsReadonly] = useState(false);
-
+  const [phrase, setPhrase] = useState<string[]>(() =>
+    new Array<string>(12).fill("")
+  );
   const [currentFocus, setCurrentFocus] = useState(0);
-
-  const [error, setError] = useState("");
-  const [validatedWallet, setValidatedWallet] = useState<
-    ethers.Wallet | ethers.HDNodeWallet
-  >();
+  const { isReadonly, error, validatedWallet, resetValidation, validate } =
+    useImportedWalletValidation();
 
   const clear = () => {
     setPhrase(Array(12).fill(""));
-    setError("");
-    setIsReadonly(false);
-    setValidatedWallet(undefined);
+    resetValidation();
     setCurrentFocus(0);
     setTimeout(() => {
       inputRef.current?.focus();
     }, 0);
   };
 
-  const validate = () => {
-    setIsReadonly(true);
-    try {
-      const wallet = ethers.Wallet.fromPhrase(phrase.join(" "));
-      setValidatedWallet(wallet);
-    } catch (error: unknown) {
-      setError(`Error: ${getErrorMessage(error)}`);
-    }
+  const validatePhrase = () => {
+    void validate((ethers) => ethers.Wallet.fromPhrase(phrase.join(" ")));
   };
 
   function isCompletePhrase() {
@@ -183,7 +217,7 @@ function AppWalletImportMnemonic() {
         <Button
           type="button"
           disabled={!isCompletePhrase() || isReadonly}
-          onClick={validate}
+          onClick={validatePhrase}
           variant="action"
           size="md"
         >
@@ -201,31 +235,19 @@ function AppWalletImportMnemonic() {
 function AppWalletImportPrivateKey() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [privateKey, setPrivateKey] = useState("");
-  const [isReadonly, setIsReadonly] = useState(false);
-
-  const [error, setError] = useState("");
-  const [validatedWallet, setValidatedWallet] = useState<
-    ethers.Wallet | ethers.HDNodeWallet
-  >();
+  const { isReadonly, error, validatedWallet, resetValidation, validate } =
+    useImportedWalletValidation();
 
   const clear = () => {
     setPrivateKey("");
-    setError("");
-    setIsReadonly(false);
-    setValidatedWallet(undefined);
+    resetValidation();
     setTimeout(() => {
       inputRef.current?.focus();
     }, 0);
   };
 
-  const validate = () => {
-    setIsReadonly(true);
-    try {
-      const wallet = new ethers.Wallet(privateKey);
-      setValidatedWallet(wallet);
-    } catch (error: unknown) {
-      setError(`Error: ${getErrorMessage(error)}`);
-    }
+  const validatePrivateKey = () => {
+    void validate((ethers) => new ethers.Wallet(privateKey));
   };
 
   return (
@@ -261,7 +283,7 @@ function AppWalletImportPrivateKey() {
         <Button
           type="button"
           disabled={!privateKey || isReadonly}
-          onClick={validate}
+          onClick={validatePrivateKey}
           variant="action"
           size="md"
         >
@@ -293,7 +315,7 @@ function ValidationError(props: Readonly<{ error: string }>) {
 
 function ValidatedWallet(
   props: Readonly<{
-    wallet: ethers.Wallet | ethers.HDNodeWallet;
+    wallet: ImportedWallet;
     mnemonic: string;
   }>
 ) {
@@ -315,7 +337,7 @@ function ValidatedWallet(
 
 function ImportWallet(
   props: Readonly<{
-    wallet: ethers.Wallet | ethers.HDNodeWallet;
+    wallet: ImportedWallet;
     mnemonic: string;
   }>
 ) {

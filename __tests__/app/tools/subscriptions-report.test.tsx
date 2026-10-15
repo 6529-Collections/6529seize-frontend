@@ -255,6 +255,7 @@ describe("Subscriptions report page", () => {
       expect(commonApiFetch).toHaveBeenCalledTimes(4);
       expect(commonApiFetch).toHaveBeenCalledWith({
         endpoint: "policies/country-check",
+        signal: expect.any(AbortSignal),
       });
       expect(mockFetch).toHaveBeenCalledWith("/api/meme-calendar/current");
       expect(commonApiFetch).toHaveBeenCalledWith({

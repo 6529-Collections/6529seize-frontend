@@ -1,3 +1,5 @@
+jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
+
 import { parseTwitterOEmbed } from "@/lib/twitter/parser";
 import { extractTweetId, parseTweetUrl } from "@/lib/twitter/url";
 
