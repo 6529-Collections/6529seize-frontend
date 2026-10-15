@@ -9,7 +9,7 @@ import {
   WAVE_VOTING_LABELS,
 } from "@/helpers/waves/waves.constants";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWaveRightPanelProfileIdentifier } from "@/helpers/waves/wave-right-panel.helpers";
 
 interface WaveLeaderboardRightSidebarVoterProps {
@@ -52,7 +52,7 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
         >
           {voter.voter.pfp ? (
             <Image
-              src={resolveIpfsUrlSync(voter.voter.pfp)}
+              src={getScaledImageUri(voter.voter.pfp, ImageScale.W_200_H_200)}
               alt=""
               width={28}
               height={28}
