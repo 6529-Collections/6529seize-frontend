@@ -463,7 +463,7 @@ export default function QuorumProposalDropModal({
       if (optimisticDrop) {
         void addOptimisticDrop({ drop: optimisticDrop });
         setTimeout(() => {
-          processIncomingDrop(
+          void processIncomingDrop(
             optimisticDrop,
             ProcessIncomingDropType.DROP_INSERT
           );

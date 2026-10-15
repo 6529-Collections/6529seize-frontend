@@ -43,7 +43,7 @@ export const useDropUpdateMutation = () => {
 
       // Update the drop in wave messages store using existing processIncomingDrop
       if (myStreamContext?.processIncomingDrop) {
-        myStreamContext.processIncomingDrop(
+        void myStreamContext.processIncomingDrop(
           updatedDrop,
           ProcessIncomingDropType.DROP_INSERT // This will merge/update the drop
         );
