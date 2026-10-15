@@ -37,9 +37,7 @@ describe("EnsAddressInput", () => {
   it("renders input with placeholder", () => {
     render(<EnsAddressInput onAddressChange={mockOnAddressChange} />);
 
-    expect(
-      screen.getByPlaceholderText("0x... or ENS")
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("0x... or ENS")).toBeInTheDocument();
   });
 
   it("renders with custom placeholder", () => {
@@ -57,6 +55,7 @@ describe("EnsAddressInput", () => {
     render(
       <>
         <EnsAddressInput
+          ariaLabel="Wallet 1 address"
           onAddressChange={mockOnAddressChange}
           ariaInvalid
           ariaDescribedBy="wallet-error"
@@ -65,6 +64,7 @@ describe("EnsAddressInput", () => {
       </>
     );
     const input = screen.getByRole("textbox");
+    expect(input).toHaveAccessibleName("Wallet 1 address");
     expect(input).toHaveAttribute("aria-invalid", "true");
     expect(input).toHaveAccessibleDescription("Invalid wallet");
   });
@@ -158,9 +158,7 @@ describe("EnsAddressInput", () => {
   });
 
   it("disables input when disabled prop is true", () => {
-    render(
-      <EnsAddressInput onAddressChange={mockOnAddressChange} disabled />
-    );
+    render(<EnsAddressInput onAddressChange={mockOnAddressChange} disabled />);
 
     expect(screen.getByPlaceholderText("0x... or ENS")).toBeDisabled();
   });

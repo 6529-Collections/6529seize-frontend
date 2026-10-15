@@ -607,6 +607,264 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     "PLAYWRIGHT_AUTH_SANDBOX",
     "Native competition tests require an isolated local mock API."
   );
+  for (const app of [false, true]) {
+    test(`keeps vote lists readable in the ${app ? "app" : "web"} layout`, async ({
+      page,
+    }, testInfo) => {
+      const mobile = testInfo.project.name === "web-mobile-chromium";
+      test.skip(app && !mobile, "The app variant uses the mobile viewport.");
+      if (!mobile) await page.setViewportSize({ width: 1728, height: 1000 });
+      const sandbox = await installCompetitionApi(page, false, false);
+      if (app)
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      const profiles = [
+        {
+          id: "layout-positive",
+          handle: "long-voter-handle-for-layout-checks",
+        },
+        { id: "layout-negative", handle: "downvoter" },
+      ];
+      let releaseVoters!: () => void;
+      let releaseProfile!: () => void;
+      let releaseActivity!: () => void;
+      const votersGate = new Promise<void>((resolve) => {
+        releaseVoters = resolve;
+      });
+      const profileGate = new Promise<void>((resolve) => {
+        releaseProfile = resolve;
+      });
+      const activityGate = new Promise<void>((resolve) => {
+        releaseActivity = resolve;
+      });
+      for (const profile of profiles) {
+        await page.route(`**/identities/${profile.id}`, async (route) => {
+          if (profile.id === profiles[0]!.id) await profileGate;
+          await route.fulfill({
+            json: { ...profile, pfp: null, primary_wallet: null },
+          });
+        });
+      }
+      await page.route(
+        "**/v3/waves/*/competitions/alpha/voters?**",
+        async (route) => {
+          await votersGate;
+          await route.fulfill({
+            json: pageResult([
+              {
+                profile_id: profiles[0]!.id,
+                votes: 123456789,
+                credit_spent: 123456789,
+              },
+              { profile_id: profiles[1]!.id, votes: -1000, credit_spent: 1000 },
+            ]),
+          });
+        }
+      );
+      await page.route(
+        "**/v3/waves/*/competitions/alpha/activity?**",
+        async (route) => {
+          await activityGate;
+          await route.fulfill({
+            json: [0, 5000, -1000].map((value, index) => ({
+              id: `layout-log-${index}`,
+              action: "DROP_VOTE_EDIT",
+              wave_id: WAVE,
+              drop_id: entryDropId("alpha"),
+              invoker: { ...profiles[0], pfp: null },
+              drop_author: {
+                id: "creator",
+                handle: "long-drop-creator-handle",
+                pfp: null,
+              },
+              created_at: Date.now(),
+              contents: {
+                oldVote: value,
+                newVote: index ? -1234567 : 1234567,
+                reason: index === 2 ? "CREDIT_OVERSPENT" : null,
+              },
+            })),
+          });
+        }
+      );
+      const voters = page.getByRole("tabpanel", {
+        name: "All votes",
+        exact: true,
+      });
+      let pendingVoterHeight = 0;
+      try {
+        await page.goto(`${ROOT}/alpha?tab=votes&voteTab=all`);
+        await expect(voters.getByRole("status")).toHaveText(
+          "Loading competition…"
+        );
+        const skeletons = voters.getByTestId("competition-voter-skeleton");
+        await expect(skeletons).toHaveCount(6);
+        await page.emulateMedia({ reducedMotion: "reduce" });
+        await expect(skeletons.first()).toHaveCSS("animation-name", "none");
+        await expectNoHorizontalOverflow(page);
+        await page.screenshot({
+          path: testInfo.outputPath("all-votes-loading.png"),
+        });
+        releaseVoters();
+        await expect(
+          voters.getByRole("link", { name: profiles[1]!.handle, exact: true })
+        ).toBeVisible();
+        await expect(skeletons).toHaveCount(1);
+        pendingVoterHeight = (await skeletons.first().boundingBox())!.height;
+        await expect(voters.getByRole("status")).toHaveCount(0);
+      } finally {
+        releaseVoters();
+        releaseProfile();
+      }
+      await expect(
+        voters.getByRole("link", { name: profiles[0]!.handle, exact: true })
+      ).toBeVisible();
+      const loadedVoterRow = voters
+        .getByRole("link", {
+          name: profiles[0]!.handle,
+          exact: true,
+        })
+        .locator("../..");
+      expect((await loadedVoterRow.boundingBox())!.height).toBe(
+        pendingVoterHeight
+      );
+      await expect(
+        voters.getByText("+123,456,789", { exact: true })
+      ).toBeVisible();
+      await expect(voters.getByText("-1,000", { exact: true })).toBeVisible();
+      const totals = voters.getByText("123,456,789", { exact: true });
+      await expect(totals).toBeInViewport();
+      const totalBox = await voters
+        .getByText("1,000", { exact: true })
+        .boundingBox();
+      const totalLabelBox = await voters
+        .getByText("TDH Total", { exact: true })
+        .nth(1)
+        .boundingBox();
+      expect(totalBox).not.toBeNull();
+      expect(totalLabelBox).not.toBeNull();
+      expect(Math.abs(totalBox!.y - totalLabelBox!.y)).toBeLessThanOrEqual(2);
+      expect(totalLabelBox!.x).toBeGreaterThan(totalBox!.x + totalBox!.width);
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("all-votes-layout.png"),
+        animations: "disabled",
+      });
+
+      const activity = page.getByRole("tabpanel", {
+        name: "Activity",
+        exact: true,
+      });
+      let pendingActivityHeight = 0;
+      try {
+        await page.getByRole("tab", { name: "Activity", exact: true }).click();
+        await expect(activity.getByRole("status")).toHaveText(
+          "Loading competition…"
+        );
+        const skeletons = activity.getByTestId("competition-activity-skeleton");
+        await expect(skeletons).toHaveCount(6);
+        await expect(skeletons.first()).toHaveCSS("animation-name", "none");
+        pendingActivityHeight = (await skeletons.first().boundingBox())!.height;
+        await expectNoHorizontalOverflow(page);
+        await page.screenshot({
+          path: testInfo.outputPath("activity-loading.png"),
+        });
+      } finally {
+        releaseActivity();
+      }
+      const voter = activity
+        .getByRole("link", { name: profiles[0]!.handle, exact: true })
+        .first();
+      const creator = activity
+        .getByRole("link", { name: "long-drop-creator-handle", exact: true })
+        .first();
+      const viewDrop = activity
+        .getByRole("button", { name: "View drop in chat", exact: true })
+        .first();
+      await expect(voter).toBeVisible();
+      const activityRow = activity
+        .getByRole("link", { name: profiles[0]!.handle, exact: true })
+        .first()
+        .locator("..");
+      expect((await activityRow.boundingBox())!.height).toBe(
+        pendingActivityHeight
+      );
+      await expect(activity.getByRole("status")).toHaveCount(0);
+      await expect(creator).toBeVisible();
+      await expect(
+        activity.getByText("System Adjustment", { exact: true })
+      ).toBeVisible();
+      const voterBox = await voter.boundingBox();
+      const voteBox = await activity
+        .getByText("1,234,567 TDH", { exact: true })
+        .boundingBox();
+      const creatorBox = await creator.boundingBox();
+      const buttonBox = await viewDrop.boundingBox();
+      expect(voterBox).not.toBeNull();
+      expect(voteBox).not.toBeNull();
+      expect(creatorBox).not.toBeNull();
+      expect(buttonBox?.width).toBeGreaterThanOrEqual(40);
+      expect(buttonBox?.height).toBeGreaterThanOrEqual(40);
+      if (mobile) {
+        expect(voteBox!.y).toBeGreaterThan(voterBox!.y + voterBox!.height);
+        expect(creatorBox!.y).toBeGreaterThan(voteBox!.y + voteBox!.height);
+      } else
+        expect(
+          Math.abs(
+            creatorBox!.y +
+              creatorBox!.height / 2 -
+              voterBox!.y -
+              voterBox!.height / 2
+          )
+        ).toBeLessThanOrEqual(1);
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("activity-layout.png"),
+        animations: "disabled",
+      });
+      if (!mobile) {
+        for (const width of [639, 640]) {
+          await page.setViewportSize({ width, height: 1000 });
+          const responsiveVoter = await voter.boundingBox();
+          const responsiveCreator = await creator.boundingBox();
+          expect(responsiveVoter).not.toBeNull();
+          expect(responsiveCreator).not.toBeNull();
+          if (width < 640) {
+            const responsiveVote = await activity
+              .getByText("1,234,567 TDH", { exact: true })
+              .boundingBox();
+            expect(responsiveVote).not.toBeNull();
+            expect(responsiveCreator!.y).toBeGreaterThan(
+              responsiveVote!.y + responsiveVote!.height
+            );
+          } else {
+            expect(
+              Math.abs(
+                responsiveCreator!.y +
+                  responsiveCreator!.height / 2 -
+                  responsiveVoter!.y -
+                  responsiveVoter!.height / 2
+              )
+            ).toBeLessThanOrEqual(1);
+          }
+          await expectNoHorizontalOverflow(page);
+          await page.screenshot({
+            path: testInfo.outputPath(`activity-${width}.png`),
+            animations: "disabled",
+          });
+        }
+      }
+      await viewDrop.focus();
+      await expect(viewDrop).toBeFocused();
+      await page.keyboard.press("Enter");
+      await expect(page).toHaveURL(new RegExp(`drop=${entryDropId("alpha")}`));
+      expect(sandbox.requests).toHaveLength(0);
+    });
+  }
+
   for (const legacy of [false, true]) {
     test(`scrolls overflowing ${legacy ? "legacy" : "native"} Settings and vote Activity`, async ({
       page,

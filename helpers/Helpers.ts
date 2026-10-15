@@ -26,6 +26,8 @@ import type { BaseNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { CICType } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { formatMintDate } from "@/helpers/mint-date.helpers";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import emojiRegex from "emoji-regex";
 import { goerli, mainnet, sepolia } from "wagmi/chains";
 
@@ -393,20 +395,12 @@ export function parseEmojis(s: string) {
   });
 }
 
-function isValidDate(date?: Date): date is Date {
-  return !!date && !isNaN(new Date(date).getTime());
-}
-
-export function printMintDate(date?: Date) {
-  if (!isValidDate(date)) {
-    return "-";
-  }
-  const mintDate = new Date(date);
-  return mintDate.toLocaleString("default", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+// Pass a hydration-stable locale (a route locale or useBrowserLocale()).
+export function printMintDate(
+  date?: Date,
+  locale: SupportedLocale = DEFAULT_LOCALE
+) {
+  return formatMintDate(locale, date);
 }
 
 export function getRandomColor() {

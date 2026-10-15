@@ -8,7 +8,7 @@ import { useMobileBatterySavings } from "./useMobileAppActivity";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   isTerminalNotificationAuthQueryError,
-  shouldStopPollingRetry,
+  shouldRetryQuery,
 } from "@/components/react-query-wrapper/utils/query-utils";
 import { getAuthJwt, isAuthJwtUsable } from "@/services/auth/auth.utils";
 import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint";
@@ -101,16 +101,9 @@ export function useUnreadNotifications(
     refetchOnReconnect: (query) =>
       !isTerminalNotificationAuthQueryError(query.state.error),
     refetchIntervalInBackground: !isMobileEnvironment,
-    retry: (failureCount: number, retryError: unknown) => {
-      if (isTerminalNotificationAuthQueryError(retryError)) {
-        return false;
-      }
-      if (shouldStopPollingRetry(retryError)) {
-        return false;
-      }
-
-      return failureCount < 3;
-    },
+    retry: (failureCount: number, retryError: unknown) =>
+      !isTerminalNotificationAuthQueryError(retryError) &&
+      shouldRetryQuery(failureCount, retryError),
     retryDelay: (failureCount: number) => {
       return failureCount * 1000;
     },

@@ -6,6 +6,10 @@ let mockLegacy: string | null = null;
 let mockId = "alpha";
 let mockViewer: string | undefined = "viewer";
 const mockReplace = jest.fn();
+const mockConnect = jest.fn().mockResolvedValue(undefined);
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => ({ seizeConnectFresh: mockConnect }),
+}));
 jest.mock("next/navigation", () => ({
   usePathname: () => `/waves/wave/competitions/${mockId}`,
   useSearchParams: () => new URLSearchParams(mockSearch),
@@ -44,6 +48,7 @@ beforeEach(() => {
   mockId = "alpha";
   mockViewer = "viewer";
   mockReplace.mockReset();
+  mockConnect.mockClear();
 });
 it.each([null, "alpha"])(
   "keeps personal vote requests unmounted for guests with legacy primary %s",
@@ -56,14 +61,18 @@ it.each([null, "alpha"])(
     ).toBeVisible();
     expect(screen.queryByText("Legacy votes")).toBeNull();
     expect(screen.queryByText("Native votes")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Connect Wallet" }));
+    expect(mockConnect).toHaveBeenCalledTimes(1);
     mockSearch = "tab=votes&voteTab=all";
     rerender(<CompetitionVotes />);
     expect(screen.getByText("Voters for selected competition")).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Connect Wallet" })).toBeNull();
   }
 );
 it("groups all three views under Votes and preserves the chosen competition and route state", () => {
   render(<CompetitionVotes />);
   expect(screen.getByText("Native votes")).toBeVisible();
+  expect(screen.queryByRole("button", { name: "Connect Wallet" })).toBeNull();
   expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
     "My Votes",
     "All votes",

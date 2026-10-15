@@ -43,7 +43,7 @@ export function NftContractHeader({
 
       <div className="tw-flex tw-flex-col tw-gap-0.5 tw-overflow-hidden">
         <div className="tw-flex tw-items-center tw-gap-2">
-          <span className="tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
+          <span className="tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100 group-data-[typography=profile]/profile-xtdh:tw-text-[15px]">
             {contract.name ?? shortenAddress(contract.address)}
           </span>
           {contract.tokenType && (
@@ -53,7 +53,7 @@ export function NftContractHeader({
           )}
         </div>
 
-        <div className="tw-flex tw-items-center tw-gap-1.5 tw-truncate tw-text-xs tw-text-iron-400">
+        <div className="tw-flex tw-items-center tw-gap-1.5 tw-truncate tw-text-xs tw-text-iron-400 group-data-[typography=profile]/profile-xtdh:tw-text-meta group-data-[typography=profile]/profile-xtdh:tw-font-normal group-data-[typography=profile]/profile-xtdh:tw-text-iron-500 group-data-[typography=profile]/profile-xtdh:tw-tabular-nums">
           <span className="tw-font-mono">
             {shortenAddress(contract.address)}
           </span>
@@ -91,7 +91,7 @@ export function NftContractHeader({
         <button
           type="button"
           onClick={onClear}
-          className="tw-ml-auto tw-flex tw-h-8 tw-w-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-500 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-200 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/50"
+          className="tw-ml-auto tw-flex tw-h-8 tw-w-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-500 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-200 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/50 focus-visible:tw-ring-primary-400"
           aria-label="Clear selection"
         >
           <svg

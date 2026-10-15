@@ -216,7 +216,7 @@ export function CollectionDelegationLocks(
         {t(locale, "delegation.collection.locks.useCase.globalNotePrefix")}{" "}
         <Link
           className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300"
-          href={`/delegation/${ANY_COLLECTION_PATH}`}
+          href={`/safe-collecting/${ANY_COLLECTION_PATH}`}
         >
           {t(locale, "delegation.collection.locks.allCollections")}
         </Link>
@@ -354,7 +354,7 @@ export function CollectionDelegationLocks(
           {t(locale, "delegation.collection.locks.note.globalPrefix")}{" "}
           <Link
             className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300"
-            href={`/delegation/${ANY_COLLECTION_PATH}`}
+            href={`/safe-collecting/${ANY_COLLECTION_PATH}`}
           >
             {t(locale, "delegation.collection.locks.allCollections")}
           </Link>{" "}

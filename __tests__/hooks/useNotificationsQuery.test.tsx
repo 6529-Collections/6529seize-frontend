@@ -176,6 +176,47 @@ describe("useNotificationsQuery", () => {
     );
   });
 
+  describe("retry policy", () => {
+    const getRetry = () => {
+      useInfiniteQueryMock.mockReturnValue({
+        data: undefined,
+        isSuccess: false,
+        isError: false,
+      });
+      renderHook(() => useNotificationsQuery({ identity: "id" }));
+      return useInfiniteQueryMock.mock.calls.at(-1)![0].retry as (
+        failureCount: number,
+        error: unknown
+      ) => boolean;
+    };
+    const apiError = (status: number, message = "Request failed") =>
+      Object.assign(new Error(message), { name: "ApiError", status });
+
+    it.each([400, 401, 403, 404, 429])(
+      "does not retry a structured %i response",
+      (status) => {
+        expect(getRetry()(0, apiError(status))).toBe(false);
+      }
+    );
+
+    it("does not retry unauthorized errors that carry no status", () => {
+      const retry = getRetry();
+
+      expect(retry(0, "Unauthorized")).toBe(false);
+      expect(retry(0, new Error("Unauthorized"))).toBe(false);
+    });
+
+    it("retries server and network failures up to three times", () => {
+      const retry = getRetry();
+
+      expect(retry(0, apiError(503))).toBe(true);
+      expect(retry(0, apiError(408))).toBe(true);
+      expect(retry(0, apiError(425))).toBe(false);
+      expect(retry(2, new TypeError("Failed to fetch"))).toBe(true);
+      expect(retry(3, apiError(503))).toBe(false);
+    });
+  });
+
   it("does nothing when prefetch called without identity", () => {
     const { result } = renderHook(() => usePrefetchNotifications());
     result.current({ identity: null });

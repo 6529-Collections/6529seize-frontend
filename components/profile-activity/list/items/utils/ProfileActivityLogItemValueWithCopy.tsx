@@ -1,5 +1,7 @@
 "use client";
 
+import { PROFILE_ACTIVITY_BODY } from "@/components/profile-activity/profileActivityTypography";
+
 import { Tooltip } from "react-tooltip";
 import { useState } from "react";
 import { useCopyToClipboard } from "react-use";
@@ -28,7 +30,9 @@ export default function ProfileActivityLogItemValueWithCopy({
     }, 1000);
   };
   return (
-    <span className="tw-group tw-inline-flex tw-h-6 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300 lg:tw-text-base">
+    <span
+      className={`tw-group tw-inline-flex tw-h-6 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300 lg:tw-text-base ${PROFILE_ACTIVITY_BODY}`}
+    >
       <span className={titleToShow === "Copied!" ? "tw-text-primary-400" : ""}>
         {titleToShow}
       </span>

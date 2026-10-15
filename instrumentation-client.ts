@@ -539,8 +539,14 @@ Sentry.init({
       }),
     ];
 
-    if (!replayEnabled) return configuredIntegrations;
-    return [...configuredIntegrations, Sentry.replayIntegration()];
+    // next.config.ts inlines process.env["SENTRY_REPLAY_ENABLED"] at build time,
+    // so the bundler drops this branch (and the Replay SDK, ~40 KB gzip) from
+    // every build where Replay is not opted in. Keep the literal comparison
+    // here; wrapping it in a variable defeats the dead-code elimination.
+    if (process.env["SENTRY_REPLAY_ENABLED"] === "true" && replayEnabled) {
+      return [...configuredIntegrations, Sentry.replayIntegration()];
+    }
+    return configuredIntegrations;
   },
 
   tracesSampleRate: 0.1,

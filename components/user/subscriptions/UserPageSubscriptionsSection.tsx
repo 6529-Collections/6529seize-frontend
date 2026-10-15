@@ -1,5 +1,9 @@
 import type { ReactNode } from "react";
 
+export function getUserPageSubscriptionsSectionTitleId(id: string): string {
+  return `${id}-title`;
+}
+
 export default function UserPageSubscriptionsSection({
   id,
   title,
@@ -13,17 +17,19 @@ export default function UserPageSubscriptionsSection({
   className?: string | undefined;
   children: ReactNode;
 }>) {
-  const titleId = `${id}-title`;
+  const titleId = getUserPageSubscriptionsSectionTitleId(id);
 
   return (
     <section
+      id={id}
       aria-labelledby={titleId}
-      className={`tw-min-w-0 ${className ?? ""}`}
+      className={`tw-min-w-0 tw-scroll-mt-24 ${className ?? ""}`}
     >
       <div className="tw-mb-5 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2">
         <h2
           id={titleId}
-          className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-100"
+          tabIndex={-1}
+          className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400 md:tw-text-xl"
         >
           {title}
         </h2>

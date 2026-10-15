@@ -3,6 +3,7 @@ import React from "react";
 import WaveHeader from "@/components/waves/header/WaveHeader";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { AuthContext } from "@/components/auth/Auth";
+import { renderServerThenHydrate } from "@/__tests__/utils/timeZoneHydration";
 
 jest.mock("@/components/waves/header/WaveHeaderFollow", () => ({
   __esModule: true,
@@ -108,6 +109,28 @@ describe("WaveHeader", () => {
     expect(creator.compareDocumentPosition(created)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING
     );
+  });
+
+  it("hydrates the server creation date, then shows it in the viewer's zone", async () => {
+    // 11:27 UTC on Oct 12 is already Oct 13 in Auckland.
+    const createdAt = Date.parse("2026-10-12T11:27:11.000Z");
+    const result = await renderServerThenHydrate(
+      <WaveHeader
+        wave={{ ...baseWave, created_at: createdAt }}
+        onFollowersClick={jest.fn()}
+      />,
+      { serverTimeZone: "UTC", clientTimeZone: "Pacific/Auckland" }
+    );
+    try {
+      expect(result.serverHtml).toContain("Oct 12, 2026, UTC");
+      expect(result.recoverableErrors).toEqual([]);
+      expect(result.hydrationConsoleErrors).toEqual([]);
+      const created = result.container.querySelector("time");
+      expect(created).toHaveAttribute("datetime", "2026-10-12T11:27:11.000Z");
+      expect(created).toHaveTextContent(/^Oct 13, 2026$/);
+    } finally {
+      await result.cleanup();
+    }
   });
 
   it.each([

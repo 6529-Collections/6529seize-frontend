@@ -193,6 +193,97 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     );
   });
 
+  test("loads granted collection metadata through the desktop batch proxy fallback", async ({
+    page,
+  }) => {
+    const address = "0xa94161fbe69e08ff5a36dfafa61bdf29dd2fb928";
+    // Keep grants stable without creating any real grant. Metadata uses the real
+    // backend in deployed environments; local/PR coverage controls that boundary.
+    await page.route("**/api/xtdh/grants?**", (route) =>
+      route.fulfill({
+        json: {
+          count: 1,
+          page: 1,
+          next: false,
+          data: [
+            {
+              id: "alchemy-proxy-regression",
+              grantor: { handle: PROFILE_HANDLE },
+              target_chain: "ETHEREUM_MAINNET",
+              target_contract: address,
+              target_token_mode: "ALL",
+              target_tokens_count: 274,
+              rate: 3,
+              status: "GRANTED",
+              error_details: null,
+              created_at: 1791642831943,
+              updated_at: 1791642976046,
+              valid_from: 1791642976046,
+              valid_to: null,
+              is_irrevocable: false,
+              total_granted: 11,
+            },
+          ],
+        },
+      })
+    );
+    await page.route("**/api/alchemy/contracts", (route) =>
+      route.fulfill({ status: 500, json: { error: "Required" } })
+    );
+    const deployedEnvironment = ["staging", "production"].includes(
+      process.env["PLAYWRIGHT_ENV"] ?? "local"
+    );
+    if (!deployedEnvironment) {
+      await page.route("**/alchemy-proxy/contracts", (route) =>
+        route.fulfill({
+          json: {
+            contracts: [
+              {
+                address,
+                chain: "ethereum",
+                metadata: {
+                  address,
+                  _checksum: address,
+                  name: "Voxelglyph",
+                  tokenType: "ERC721",
+                  totalSupply: "273",
+                },
+              },
+            ],
+          },
+        })
+      );
+    }
+    const fallbackResponse = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === "/alchemy-proxy/contracts" &&
+        response.request().method() === "POST"
+    );
+    await gotoReady(page, `/${PROFILE_HANDLE}/xtdh?tab=granted`);
+    const response = await fallbackResponse;
+    expect(response.status()).toBe(200);
+    // The picker converts the lowercase grant address to its EIP-55 checksum.
+    expect(response.request().postDataJSON()).toEqual({
+      contracts: [
+        {
+          address: "0xA94161fBE69E08fF5a36DfAfa61BdF29DD2Fb928",
+          chain: "ethereum",
+        },
+      ],
+    });
+    await expect(page.getByText("Voxelglyph", { exact: true })).toBeVisible();
+    await expect(page.getByText("ERC721", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("Contract details unavailable", { exact: true })
+    ).toHaveCount(0);
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(
+      page,
+      test.info(),
+      "granted-metadata-proxy-fallback"
+    );
+  });
+
   test("renders grant thumbnails from both Alchemy CDNs with an intentional failure fallback", async ({
     page,
   }) => {
@@ -1265,8 +1356,68 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     expect(url.searchParams.get("serialNo")).toBe("1");
   });
 
+  test("keeps profile statistics natural and activity loading compact", async ({
+    page,
+  }) => {
+    let releaseLogs: () => void = () => {};
+    const logsReady = new Promise<void>((resolve) => {
+      releaseLogs = resolve;
+    });
+    await page.route("**/api/profile-logs?**", async (route) => {
+      await logsReady;
+      await route.continue();
+    });
+    try {
+      await gotoReady(page, `/${PROFILE_HANDLE}`);
+      const loading = page.getByRole("status", {
+        name: "Loading activity log",
+      });
+      await expect(loading).toBeVisible();
+      const loadingBox = await loading.boundingBox();
+      expect(loadingBox).not.toBeNull();
+      expect(loadingBox!.height).toBeLessThan(300);
+      const stats = page.getByRole("link", {
+        name: new RegExp(`View ${PROFILE_HANDLE}'s collected TDH:`),
+      });
+      const numericStyles = await stats.evaluate((element) => {
+        const value = element.firstElementChild ?? element;
+        return {
+          family: getComputedStyle(value).fontFamily,
+          variant: getComputedStyle(value).fontVariantNumeric,
+        };
+      });
+      expect(numericStyles.family).toContain("Montserrat");
+      expect(numericStyles.variant).toBe("normal");
+      await expectNoHorizontalOverflow(page);
+      await loading.scrollIntoViewIfNeeded();
+      await expect
+        .poll(() =>
+          loading.evaluate((element) => {
+            let ancestor: Element | null = element;
+            while (ancestor) {
+              if (Number(getComputedStyle(ancestor).opacity) < 1) return false;
+              ancestor = ancestor.parentElement;
+            }
+            return true;
+          })
+        )
+        .toBe(true);
+      await captureSafeScreenshot(
+        page,
+        test.info(),
+        "profile-activity-loading"
+      );
+    } finally {
+      releaseLogs();
+    }
+    await expect(
+      page.getByRole("status", { name: "Loading activity log" })
+    ).toHaveCount(0);
+  });
+
   test("renders the stable public profile shell read-only", async ({
     page,
+    isMobile,
   }) => {
     await gotoReady(page, `/${PROFILE_HANDLE}`);
 
@@ -1275,18 +1426,133 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expectProfileShell(page);
     await expectProfileTabLinks(page);
     const statements = page.getByRole("button", { name: /ID Statements/i });
+    if (isMobile) {
+      await expect(statements).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    }
     if (await statements.isVisible()) {
-      // The count replaces the server placeholder after this section hydrates.
-      await expect(statements).toHaveAccessibleName(/^\d[\d,]* ID Statements$/);
+      // Its numeric count replaces the server placeholder only after this
+      // streamed section hydrates and its statement query resolves.
+      await expect(statements).toHaveAccessibleName(
+        /^\d[\d,]* ID Statements$/,
+        { timeout: RESPONSE_TIMEOUT_MS }
+      );
       await statements.click();
       await expect(statements).toHaveAttribute("aria-pressed", "true");
     }
     await expect(
       page.getByRole("link", { name: "Wallet Checker" })
-    ).toBeVisible();
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    await expect(
+      page.getByRole("link", { name: "Wallet Checker" })
+    ).toHaveAttribute(
+      "href",
+      /^\/safe-collecting\/wallet-checker\?address=0x[0-9a-fA-F]{40}$/
+    );
     await expect(
       page.getByRole("link", { name: "Add another wallet" })
     ).toHaveCount(0);
+    const walletCount = page.getByText(/^\d of 4 wallets$/).first();
+    await expect(walletCount).toBeVisible();
+    await expect
+      .poll(() =>
+        walletCount.evaluate((counter) => {
+          const row = counter.parentElement;
+          if (!row) return Number.POSITIVE_INFINITY;
+          return Math.abs(
+            row.getBoundingClientRect().right -
+              counter.getBoundingClientRect().right
+          );
+        })
+      )
+      .toBeLessThanOrEqual(2);
+    await expectNoHorizontalOverflow(page);
+    const addressesHeading = page.getByRole("heading", {
+      name: /Addresses$/,
+      level: 3,
+    });
+    const statementsHeading = page.getByRole("heading", {
+      name: /ID Statements$/,
+      level: 3,
+    });
+    await expect(addressesHeading).toBeVisible();
+    await expect(statementsHeading).toBeVisible();
+    const addressesBox = await addressesHeading.boundingBox();
+    const statementsBox = await statementsHeading.boundingBox();
+    expect(addressesBox).not.toBeNull();
+    expect(statementsBox).not.toBeNull();
+    expect(addressesBox!.y).toBeLessThan(statementsBox!.y);
+    await expect(
+      page.getByText("Consolidated Addresses", { exact: true })
+    ).toHaveCount(0);
+    await page
+      .getByRole("button", { name: "About identity statements", exact: true })
+      .click();
+    await expect(
+      page.getByRole("button", {
+        name: "About identity statements",
+        exact: true,
+      })
+    ).toHaveAttribute("aria-expanded", "true");
+    // A scroll-into-view event can arrive after the opening click. It must
+    // not dismiss guidance when the trigger has already reached its position.
+    await page.evaluate(() => document.dispatchEvent(new Event("scroll")));
+    await page.mouse.move(0, 0);
+    await expect(
+      page.getByRole("button", {
+        name: "About identity statements",
+        exact: true,
+      })
+    ).toHaveAttribute("aria-expanded", "true");
+    const guidance = page.getByRole("tooltip");
+    await expect(guidance).toBeVisible();
+    const guidanceBox = await guidance.boundingBox();
+    expect(guidanceBox).not.toBeNull();
+    const viewport = page.viewportSize();
+    expect(viewport).not.toBeNull();
+    expect(guidanceBox!.x).toBeGreaterThanOrEqual(0);
+    expect(guidanceBox!.y).toBeGreaterThanOrEqual(0);
+    expect(guidanceBox!.x + guidanceBox!.width).toBeLessThanOrEqual(
+      viewport!.width
+    );
+    expect(guidanceBox!.y + guidanceBox!.height).toBeLessThanOrEqual(
+      viewport!.height
+    );
+    await expect(guidance.getByRole("listitem")).toHaveCount(4);
+    await expect(guidance).toContainText("All statements are optional.");
+    await expect(guidance).toContainText(
+      "All statements are fully and permanently public."
+    );
+    await expect(guidance).toContainText("Social accounts are self-declared.");
+    await expect(guidance).toContainText(
+      "The community will rate statement accuracy."
+    );
+    await page.keyboard.press("Escape");
+    await expect(guidance).toBeHidden();
+    await expect(guidance).toHaveCount(0);
+    await page
+      .getByRole("button", { name: "About identity statements", exact: true })
+      .click();
+    await expect(guidance).toBeVisible();
+    await addressesHeading.click();
+    await expect(guidance).toBeHidden();
+    await expect(guidance).toHaveCount(0);
+
+    const helpButton = page.getByRole("button", {
+      name: "About identity statements",
+      exact: true,
+    });
+    for (const interaction of ["focus", "click"] as const) {
+      await addressesHeading.click();
+      if (interaction === "focus") {
+        await helpButton.focus();
+      } else {
+        await helpButton.click();
+      }
+      await expect(guidance).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(helpButton).toHaveAttribute("aria-expanded", "false");
+      await expect(guidance).toHaveCount(0);
+    }
   });
 
   for (const tab of PROFILE_TAB_PATHS) {

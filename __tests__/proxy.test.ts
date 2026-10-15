@@ -1,4 +1,7 @@
-import proxy from "@/proxy";
+/**
+ * @jest-environment node
+ */
+
 import type { NextRequest } from "next/server";
 
 const mockNext = jest.fn(() => ({ kind: "next" }));
@@ -14,11 +17,47 @@ jest.mock("next/server", () => ({
   },
 }));
 
+type Proxy = typeof import("@/proxy").default;
+
+const STAGING_BASE_ENDPOINT = "https://staging.6529.io";
+const PRODUCTION_BASE_ENDPOINT = "https://6529.io";
+const LOCAL_BASE_ENDPOINT = "http://localhost:3001";
+const ORIGINAL_PUBLIC_RUNTIME = process.env["PUBLIC_RUNTIME"];
+
+function loadProxy(baseEndpoint: string = STAGING_BASE_ENDPOINT): Proxy {
+  const runtime = JSON.parse(ORIGINAL_PUBLIC_RUNTIME ?? "{}") as Record<
+    string,
+    unknown
+  >;
+  process.env["PUBLIC_RUNTIME"] = JSON.stringify({
+    ...runtime,
+    BASE_ENDPOINT: baseEndpoint,
+    API_ENDPOINT: "https://api.staging.example",
+  });
+
+  let loaded: Proxy | undefined;
+  jest.isolateModules(() => {
+    loaded = (require("@/proxy") as { default: Proxy }).default;
+  });
+  if (!loaded) {
+    throw new Error("proxy module did not load");
+  }
+  return loaded;
+}
+
 function createRequest(
   pathname: string,
-  nextUrlPathname: string = pathname
+  {
+    nextUrlPathname = pathname,
+    origin = STAGING_BASE_ENDPOINT,
+    authCookie,
+  }: {
+    nextUrlPathname?: string;
+    origin?: string;
+    authCookie?: string;
+  } = {}
 ): NextRequest {
-  const requestUrl = new URL(`https://staging.6529.io${pathname}`);
+  const requestUrl = new URL(`${origin}${pathname}`);
   const nextUrl = new URL(requestUrl);
   Object.assign(nextUrl, { clone: () => new URL(nextUrl) });
   nextUrl.pathname = nextUrlPathname;
@@ -26,22 +65,39 @@ function createRequest(
     url: requestUrl.toString(),
     nextUrl,
     headers: {
-      get: jest.fn(() => ""),
+      get: jest.fn((name: string) =>
+        name.toLowerCase() === "host" ? requestUrl.host : ""
+      ),
     },
     cookies: {
-      get: jest.fn(),
+      get: jest.fn((name: string) =>
+        name === "x-6529-auth" && authCookie !== undefined
+          ? { name, value: authCookie }
+          : undefined
+      ),
     },
   } as unknown as NextRequest;
 }
 
+function mockFetchStatus(status: number) {
+  return jest
+    .spyOn(globalThis, "fetch")
+    .mockImplementation(async () => new Response(null, { status }));
+}
+
 describe("proxy", () => {
+  let proxy: Proxy;
+
   beforeEach(() => {
     mockNext.mockClear();
     mockRedirect.mockClear();
+    jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    proxy = loadProxy();
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
+    process.env["PUBLIC_RUNTIME"] = ORIGINAL_PUBLIC_RUNTIME;
   });
 
   it.each([
@@ -94,6 +150,20 @@ describe("proxy", () => {
     "/help-index.json",
     "/llms.txt",
     "/glossary.json",
+    "/robots.txt",
+    "/sitemap.xml",
+    "/sitemap-0.xml",
+    "/favicon.ico",
+    "/favicon.svg",
+    "/6529io.png",
+    "/transient.avif",
+    "/emojis/sgt_sob.webp",
+    "/museum/research/editorial/example.png",
+    "/profile-cms/templates/afterimage.png",
+    "/api",
+    "/api/version",
+    "/_next/data/build/page.json",
+    "/error",
     "/review-data/6529-stream/index.json",
     "/review-data/6529-stream/versions/2026-07-27.1/reference-manifest.json",
     "/review-data/6529-stream/versions/2026-07-27.1/definitions/record-shard.json",
@@ -120,11 +190,20 @@ describe("proxy", () => {
     "/review-data/6529-stream%2Fversions/index.json",
     "/reviews/6529-stream",
     "/reviews/6529-stream/reference",
+    // Static-looking suffixes outside real public files stay gated.
+    "/the-memes/1.png",
+    "/punk6529/site/logo.svg",
+    "/not-a-public-file.png",
+    "/emojis/page",
+    // Prefixes match whole segments only.
+    "/apixyz",
+    "/api-docs",
+    "/errors",
+    "/sitemap-guy",
+    "/pdfjs-viewer",
+    "/_nextish",
   ])("keeps %s behind staging access control", async (path) => {
-    const fetchMock = jest
-      .spyOn(globalThis, "fetch")
-      .mockResolvedValue({ status: 200 } as Response);
-    fetchMock.mockClear();
+    const fetchMock = mockFetchStatus(200);
 
     const response = await proxy(createRequest(path));
 
@@ -135,21 +214,212 @@ describe("proxy", () => {
   });
 
   it("keeps an encoded-slash request gated if Next exposes a decoded pathname", async () => {
-    const fetchMock = jest
-      .spyOn(globalThis, "fetch")
-      .mockResolvedValue({ status: 200 } as Response);
-    fetchMock.mockClear();
+    const fetchMock = mockFetchStatus(200);
 
     const response = await proxy(
-      createRequest(
-        "/review-data/6529-stream%2Fversions/index.json",
-        "/review-data/6529-stream/versions/index.json"
-      )
+      createRequest("/review-data/6529-stream%2Fversions/index.json", {
+        nextUrlPathname: "/review-data/6529-stream/versions/index.json",
+      })
     );
 
     expect(response).toEqual({ kind: "next" });
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(mockNext).toHaveBeenCalledTimes(1);
     expect(mockRedirect).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    "/.git/HEAD",
+    "/.git/config",
+    "/.env",
+    "/.well-known/security.txt",
+    "/.well-known/apple-app-site-association",
+    "/%2Egit/HEAD",
+    "/punk6529/.hidden",
+    "/api/.env",
+  ])("answers %s with a plain 404 before any other work", async (path) => {
+    const fetchMock = jest
+      .spyOn(globalThis, "fetch")
+      .mockRejectedValue(new Error("access control should not run"));
+
+    const response = (await proxy(createRequest(path))) as Response;
+
+    expect(response).toBeInstanceOf(Response);
+    expect(response.status).toBe(404);
+    expect(response.headers.get("content-type")).toBe(
+      "text/plain; charset=utf-8"
+    );
+    expect(response.headers.get("cache-control")).toContain("no-store");
+    await expect(response.text()).resolves.toBe("Not Found");
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(mockNext).not.toHaveBeenCalled();
+    expect(mockRedirect).not.toHaveBeenCalled();
+  });
+
+  describe("staging access gate", () => {
+    it("forwards the staging auth cookie to the probe", async () => {
+      const fetchMock = mockFetchStatus(200);
+
+      await proxy(createRequest("/waves", { authCookie: "team-code" }));
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        "https://api.staging.example/api/",
+        expect.objectContaining({ headers: { "x-6529-auth": "team-code" } })
+      );
+    });
+
+    it("redirects to /access when the API answers 401", async () => {
+      mockFetchStatus(401);
+      const request = createRequest("/waves");
+      request.nextUrl.search = "?tab=chat";
+
+      const response = await proxy(request);
+
+      expect(response).toEqual({
+        kind: "redirect",
+        url: "https://staging.6529.io/access",
+      });
+    });
+
+    it("redirects to /restricted when the API answers 403", async () => {
+      mockFetchStatus(403);
+
+      const response = await proxy(createRequest("/waves"));
+
+      expect(response).toEqual({
+        kind: "redirect",
+        url: "https://staging.6529.io/restricted",
+      });
+    });
+
+    it.each(["/access", "/restricted"])("never probes on %s", async (path) => {
+      const fetchMock = mockFetchStatus(401);
+
+      const response = await proxy(createRequest(path));
+
+      expect(response).toEqual({ kind: "next" });
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it("reuses a cached verdict instead of probing on every request", async () => {
+      const fetchMock = mockFetchStatus(200);
+
+      await proxy(createRequest("/waves", { authCookie: "team-code" }));
+      await proxy(createRequest("/network", { authCookie: "team-code" }));
+      await proxy(createRequest("/the-memes", { authCookie: "team-code" }));
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(mockNext).toHaveBeenCalledTimes(3);
+    });
+
+    it("does not share a cached verdict across different cookies", async () => {
+      const fetchMock = jest
+        .spyOn(globalThis, "fetch")
+        .mockImplementation(async (_url, init) => {
+          const headers = init?.headers as Record<string, string>;
+          const status = headers["x-6529-auth"] === "team-code" ? 200 : 401;
+          return new Response(null, { status });
+        });
+
+      const allowed = await proxy(
+        createRequest("/waves", { authCookie: "team-code" })
+      );
+      const denied = await proxy(
+        createRequest("/waves", { authCookie: "guess" })
+      );
+
+      expect(allowed).toEqual({ kind: "next" });
+      expect(denied).toEqual({
+        kind: "redirect",
+        url: "https://staging.6529.io/access",
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it.each([
+      ["a 5xx answer", () => mockFetchStatus(502)],
+      [
+        "a network error",
+        () =>
+          jest
+            .spyOn(globalThis, "fetch")
+            .mockRejectedValue(new TypeError("fetch failed")),
+      ],
+      [
+        "a timeout",
+        () =>
+          jest
+            .spyOn(globalThis, "fetch")
+            .mockRejectedValue(
+              new DOMException("The operation timed out.", "TimeoutError")
+            ),
+      ],
+    ])("fails closed with a plain 503 on %s", async (_label, mockProbe) => {
+      const fetchMock = mockProbe();
+
+      const response = (await proxy(createRequest("/waves"))) as Response;
+      const retry = (await proxy(createRequest("/waves"))) as Response;
+
+      expect(response).toBeInstanceOf(Response);
+      expect(response.status).toBe(503);
+      expect(response.headers.get("cache-control")).toContain("no-store");
+      expect(retry.status).toBe(503);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(mockNext).not.toHaveBeenCalled();
+      expect(mockRedirect).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("outside staging deployments", () => {
+    it.each([PRODUCTION_BASE_ENDPOINT, LOCAL_BASE_ENDPOINT])(
+      "never calls the API from a %s build",
+      async (baseEndpoint) => {
+        proxy = loadProxy(baseEndpoint);
+        const fetchMock = mockFetchStatus(401);
+
+        const response = await proxy(
+          createRequest("/waves", { origin: baseEndpoint })
+        );
+
+        expect(response).toEqual({ kind: "next" });
+        expect(fetchMock).not.toHaveBeenCalled();
+      }
+    );
+
+    it("keeps the production build ungated when the Host claims staging", async () => {
+      proxy = loadProxy(PRODUCTION_BASE_ENDPOINT);
+      const fetchMock = mockFetchStatus(401);
+
+      const response = await proxy(
+        createRequest("/waves", { origin: STAGING_BASE_ENDPOINT })
+      );
+
+      expect(response).toEqual({ kind: "next" });
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it("keeps the staging build gated when the Host claims production", async () => {
+      const fetchMock = mockFetchStatus(401);
+
+      const response = await proxy(
+        createRequest("/waves", { origin: PRODUCTION_BASE_ENDPOINT })
+      );
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(response).toEqual({
+        kind: "redirect",
+        url: "https://6529.io/access",
+      });
+    });
+
+    it("still answers dot-prefixed paths with a plain 404 in production", async () => {
+      proxy = loadProxy(PRODUCTION_BASE_ENDPOINT);
+
+      const response = (await proxy(
+        createRequest("/.git/HEAD", { origin: PRODUCTION_BASE_ENDPOINT })
+      )) as Response;
+
+      expect(response.status).toBe(404);
+    });
   });
 });
