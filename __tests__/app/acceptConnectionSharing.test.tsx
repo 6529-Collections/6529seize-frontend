@@ -357,6 +357,59 @@ describe("AcceptConnectionSharing page", () => {
     expect(window.location.search).toBe("?address=0x123");
   });
 
+  it("redeems only the share code when a mobile link also carries a legacy token in the native app", async () => {
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    openConnectionLink(
+      "connection_share_code=abc12345&token=legacy-refresh&address=0x123"
+    );
+    (redeemConnectionShare as jest.Mock).mockResolvedValue({
+      client_type: "native",
+      address: "0x123",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      native_refresh_token: "native-refresh-token",
+      refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+    });
+
+    render(
+      <TestProvider>
+        <AcceptConnectionSharingPage />
+      </TestProvider>
+    );
+
+    expect(window.location.search).toBe("?address=0x123");
+    fireEvent.click(screen.getByText("Accept connection"));
+
+    await waitFor(() =>
+      expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345")
+    );
+    expect(commonApiPost).not.toHaveBeenCalled();
+    expect(setAuthJwt).not.toHaveBeenCalled();
+  });
+
+  it("cleans the URL again when the same link is reopened on the mounted page", () => {
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    openConnectionLink("connection_share_code=abc12345&address=0x123&_t=1");
+    const { rerender } = render(
+      <TestProvider>
+        <AcceptConnectionSharingPage />
+      </TestProvider>
+    );
+    expect(window.location.search).toBe("?address=0x123&_t=1");
+
+    // A repeated deep link navigates to the same code with a new timestamp.
+    openConnectionLink("connection_share_code=abc12345&address=0x123&_t=2");
+    rerender(
+      <TestProvider>
+        <AcceptConnectionSharingPage />
+      </TestProvider>
+    );
+
+    expect(window.location.search).toBe("?address=0x123&_t=2");
+    expect(screen.getByText("Accept connection")).toBeInTheDocument();
+  });
+
   it("removes a mobile share code from the URL and still redeems it in the native app", async () => {
     const push = jest.fn();
     const historyLength = window.history.length;

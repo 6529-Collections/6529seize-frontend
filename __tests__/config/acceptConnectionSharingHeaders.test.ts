@@ -33,10 +33,11 @@ describe("accept-connection-sharing referrer policy", () => {
     expect(response.headers.get("content-security-policy")).toBeTruthy();
   });
 
-  it("keeps the site-wide referrer policy on other routes", async () => {
-    for (const path of ["/", "/accept-connection-sharing-other", "/access"]) {
+  it.each(["/", "/accept-connection-sharing-other", "/access"])(
+    "keeps the site-wide referrer policy on %s",
+    async (path) => {
       const response = await getResponse(path);
       expect(response.headers.get("referrer-policy")).toBe("same-origin");
     }
-  });
+  );
 });

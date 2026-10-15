@@ -434,9 +434,11 @@ describe("Google Analytics page URL", () => {
     expect(scriptSources).toContain(
       "https://www.googletagmanager.com/gtag/js?id=G-71NLVV3KY3"
     );
+    // Neither the script source nor its config data carries the credential.
     const inlineScripts = Array.from(document.head.querySelectorAll("script"))
-      .map((script) => script.textContent ?? "")
+      .map((script) => `${script.textContent ?? ""} ${script.outerHTML}`)
       .join("\n");
+    expect(inlineScripts).toContain("data-ga-config");
     expect(inlineScripts).not.toContain(SYNTHETIC_LINK_VALUE);
     expect(JSON.stringify(getQueuedConfig())).not.toContain(
       SYNTHETIC_LINK_VALUE

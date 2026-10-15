@@ -41,6 +41,11 @@ describe("redactSensitiveQueryParams", () => {
     expect(redactSensitiveQueryParams(value)).toBe(value);
   });
 
+  it("over-redacts trailing punctuation rather than leaking part of a value", () => {
+    expect(
+      redactSensitiveQueryParams(`(see /a?token=${SYNTHETIC_SECRET}) next`)
+    ).toBe("(see /a?token=[Filtered] next");
+  });
   it("is idempotent", () => {
     const once = redactSensitiveQueryParams(`/a?token=${SYNTHETIC_SECRET}`);
     expect(redactSensitiveQueryParams(once)).toBe(once);

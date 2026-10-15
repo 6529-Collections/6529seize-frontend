@@ -27,7 +27,6 @@ import CookiesBanner from "./CookiesBanner";
 const GTM_ID = "G-71NLVV3KY3";
 
 type CookieConsent = boolean | undefined;
-type Gtag = (...args: unknown[]) => void;
 
 /**
  * gtag.js reads the page URL when it loads, which can happen before a page
@@ -162,19 +161,16 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
     document.head.appendChild(script1);
 
     const script2 = document.createElement("script");
+    // Page URLs never enter the script source: the config travels as JSON
+    // data on the script element and is queued by the same inline script.
+    script2.dataset["gaConfig"] = JSON.stringify(getGoogleAnalyticsConfig());
     script2.innerHTML = `
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
+        gtag('config', '${GTM_ID}', JSON.parse(document.currentScript.dataset.gaConfig));
       `;
     document.head.appendChild(script2);
-    // The inline script runs on insertion and defines the global gtag. Page
-    // URLs stay out of the script text and are passed as data instead.
-    (globalThis as { gtag?: Gtag }).gtag?.(
-      "config",
-      GTM_ID,
-      getGoogleAnalyticsConfig()
-    );
   }, []);
 
   const getCookieConsent = useCallback(

@@ -652,12 +652,17 @@ export default function AcceptConnectionSharingPage() {
   const token = searchParams?.get("token") || "";
   const address = searchParams?.get("address") || "";
   const role = searchParams?.get("role") || undefined;
+  // The whole query identifies a link visit, so reopening the same link (with
+  // a new `_t`) on the mounted page is cleaned again.
+  const linkQuery = searchParams.toString();
 
   // A layout effect runs before paint and before passive effects, such as
-  // analytics and monitoring, that may read the page URL.
+  // analytics and monitoring, that may read the page URL. It reads the visible
+  // URL itself, so whatever credential is shown is removed even if it differs
+  // from the router values the accept action uses.
   useLayoutEffect(() => {
     removeConnectionSecretsFromAddressBar();
-  }, [connectionShareCode, token]);
+  }, [linkQuery]);
 
   return (
     <AcceptConnectionSharing
