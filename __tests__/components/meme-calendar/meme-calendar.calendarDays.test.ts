@@ -2,6 +2,7 @@ import {
   getHistoricalMintsOnCalendarDay,
   getScheduledMintOnCalendarDay,
 } from "@/components/meme-calendar/meme-calendar-grid/calendarDayMints";
+import { formatMintWeekdaysInZone } from "@/components/meme-calendar/meme-calendar-grid/calendarText";
 import { calendarDayInZone } from "@/components/meme-calendar/meme-calendar.zone";
 
 import {
@@ -132,6 +133,38 @@ describe("getHistoricalMintsOnCalendarDay", () => {
     expect(idsOn(day(10, 29, 2022), "Etc/GMT+12")).toEqual([40]);
     expect(idsOn(day(10, 30, 2022), "Etc/GMT+12")).toEqual([]);
     expect(idsOn(day(10, 30, 2022), LOS_ANGELES)).toEqual([40]);
+  });
+});
+
+describe("formatMintWeekdaysInZone", () => {
+  const FEBRUARY = new Date("2026-02-10T12:00:00.000Z");
+  const JULY = new Date("2026-07-14T12:00:00.000Z");
+
+  it.each([
+    ["UTC", "Mon, Wed, Fri"],
+    [LOS_ANGELES, "Mon, Wed, Fri"],
+    [AUCKLAND, "Tue, Thu, Sat"],
+    [KIRITIMATI, "Tue, Thu, Sat"],
+  ])("names the %s weekdays of the Mon/Wed/Fri mints", (zone, expected) => {
+    expect(formatMintWeekdaysInZone("en-US", zone, FEBRUARY)).toBe(expected);
+  });
+
+  it("follows the Athens daylight-saving offset", () => {
+    // 15:40 UTC in winter is 00:40 the next day in Tokyo; 14:40 UTC in
+    // summer is 23:40 the same day.
+    expect(formatMintWeekdaysInZone("en-US", "Asia/Tokyo", FEBRUARY)).toBe(
+      "Tue, Thu, Sat"
+    );
+    expect(formatMintWeekdaysInZone("en-US", "Asia/Tokyo", JULY)).toBe(
+      "Mon, Wed, Fri"
+    );
+  });
+
+  it("uses the requested locale", () => {
+    // German weekday names and list joiner ("Di, Do und Sa" in current ICU).
+    expect(formatMintWeekdaysInZone("de-DE", AUCKLAND, FEBRUARY)).toMatch(
+      /^Di\.?, Do\.? und Sa\.?$/
+    );
   });
 });
 

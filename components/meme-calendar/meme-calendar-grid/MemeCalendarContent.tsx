@@ -42,9 +42,9 @@ import {
   getDivisionName,
   getZoomLabel,
   getZoomTitle,
-  GRID_INFO_ITEMS,
   ZOOM_LEVELS,
 } from "./calendarText";
+import { CalendarGuide } from "./CalendarGuide";
 import {
   EonView,
   EpochView,
@@ -525,31 +525,12 @@ export default function MemeCalendar({
         </fieldset>
       </div>
 
-      <section
-        id="meme-calendar-info"
-        aria-label={t(locale, "memeCalendar.grid.info.panelLabel")}
-        className="tw-mb-5 tw-rounded-2xl tw-bg-iron-950 tw-p-5 tw-text-sm tw-leading-5 tw-text-iron-300 tw-shadow-lg tw-ring-1 tw-ring-iron-800 sm:tw-p-6"
+      <CalendarGuide
+        displayTz={displayTz}
         hidden={!showInfo}
-      >
-        <dl className="tw-m-0 tw-flex tw-flex-col">
-          {GRID_INFO_ITEMS.map(({ label, text, note }) => (
-            <div
-              key={label}
-              className="tw-min-w-0 tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-py-4 first:tw-pt-0 last:tw-border-b-0 last:tw-pb-0"
-            >
-              <dt className="tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.14em] tw-text-iron-500">
-                {t(locale, label)}
-              </dt>
-              <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-5 tw-text-iron-200">
-                {t(locale, text)}{" "}
-                {note && (
-                  <span className="tw-text-iron-500">{t(locale, note)}</span>
-                )}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </section>
+        locale={locale}
+        timeZone={calendarTimeZone}
+      />
 
       {/* Calendar view */}
       <div className="tw-min-w-0">{renderView()}</div>

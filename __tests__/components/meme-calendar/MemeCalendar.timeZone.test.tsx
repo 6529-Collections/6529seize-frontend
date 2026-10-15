@@ -181,6 +181,38 @@ describe("MemeCalendar grid in UTC mode", () => {
   });
 });
 
+describe("MemeCalendar guide minting days", () => {
+  const openGuide = () => {
+    fireEvent.click(
+      screen.getByRole("button", { name: "Show calendar guide" })
+    );
+    return screen.getByRole("region", { name: "Calendar guide" });
+  };
+
+  it.each([
+    ["UTC", "Mon, Wed, Fri"],
+    [LOS_ANGELES, "Mon, Wed, Fri"],
+    [AUCKLAND, "Tue, Thu, Sat"],
+    [KIRITIMATI, "Tue, Thu, Sat"],
+  ])("adds the %s weekdays in local mode", (zone, localDays) => {
+    viewInZone(zone, "2026-01-05T12:00:00.000Z");
+    render(calendar("local"));
+
+    expect(openGuide()).toHaveTextContent(
+      `Minting DaysMonday / Wednesday / Friday (UTC) In your time zone: ${localDays}`
+    );
+  });
+
+  it("states the UTC schedule only in UTC mode", () => {
+    viewInZone(AUCKLAND, "2026-01-05T12:00:00.000Z");
+    render(calendar("utc"));
+
+    const guide = openGuide();
+    expect(guide).toHaveTextContent("Monday / Wednesday / Friday (UTC)");
+    expect(guide).not.toHaveTextContent("In your time zone");
+  });
+});
+
 describe("Minting calendar page hydration", () => {
   it("keeps the grid out of server HTML and shows the viewer's dates after hydration", async () => {
     jest.useFakeTimers().setSystemTime(new Date("2026-01-05T12:00:00.000Z"));
