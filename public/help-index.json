@@ -6428,8 +6428,8 @@
       ],
       "keywords": ["xtdh", "granted", "grant", "create", "profile", "owner"],
       "facts": [
-        "The xTDH granted view lists grants and documents grant actions.",
-        "Open a grant's Show tokens disclosure to view its token artwork. Missing artwork shows the token ID; a failed thumbnail shows Load Error while the token details remain visible. Close and reopen the disclosure to retry the image.",
+        "The xTDH granted view lists grants and documents grant actions. Collection thumbnails show an NFT placeholder when artwork is missing or cannot load.",
+        "Open a grant's Show tokens disclosure to view its token artwork. If indexed artwork is missing, the grid can recover artwork and placeholder names from original Arweave or IPFS metadata. Unavailable artwork shows the token ID; a failed thumbnail shows Load Error while the token details remain visible. Close and reopen the disclosure to retry the image.",
         "A create-new-grant flow is available where owner permissions allow it.",
         "Use profile xTDH for profile-specific grants and Network xTDH for global context."
       ],
