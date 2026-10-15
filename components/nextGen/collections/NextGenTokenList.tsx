@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import Pagination from "@/components/pagination/Pagination";
 import { commonApiFetch } from "@/services/api/common-api";
 import DotLoader from "@/components/dotLoader/DotLoader";
+import NextGenLoadError from "@/components/nextGen/NextGenLoadError";
 import {
   NextGenListFilters,
   NextGenTokenListedType,
@@ -27,7 +28,49 @@ interface Props {
   show_trait_count?: boolean | undefined;
   listed_type?: NextGenTokenListedType | undefined;
   setTotalResults?: ((totalResults: number) => void) | undefined;
+  setLoadFailed?: ((failed: boolean) => void) | undefined;
   show_pagination?: boolean | undefined;
+}
+
+interface TokensResponse {
+  count: number;
+  page: number;
+  next: unknown;
+  data: NextGenToken[];
+}
+
+function getTokensEndpoint(
+  props: Readonly<Props>,
+  pageSize: number,
+  page: number
+): string {
+  let endpoint = `nextgen/collections/${props.collection.id}/tokens?page_size=${pageSize}&page=${page}`;
+  if (props.selected_traits) {
+    const traitsQ = props.selected_traits
+      .map((t) => `${t.trait}:${t.value}`)
+      .join(",");
+    endpoint += `&traits=${encodeURIComponent(traitsQ)}`;
+  }
+  if (props.show_normalised) {
+    endpoint += `&show_normalised=true`;
+  }
+  if (props.show_trait_count) {
+    endpoint += `&show_trait_count=true`;
+  }
+  if (props.listed_type === NextGenTokenListedType.LISTED) {
+    endpoint += `&listed=true`;
+  } else if (props.listed_type === NextGenTokenListedType.NOT_LISTED) {
+    endpoint += `&listed=false`;
+  }
+  if (props.sort) {
+    endpoint += `&sort=${props.sort.replaceAll(" ", "_").toLowerCase()}`;
+  } else {
+    endpoint += `&sort=random`;
+  }
+  if (props.sort_direction) {
+    endpoint += `&sort_direction=${props.sort_direction.toLowerCase()}`;
+  }
+  return endpoint;
 }
 
 export default function NextGenTokenList(props: Readonly<Props>) {
@@ -35,61 +78,16 @@ export default function NextGenTokenList(props: Readonly<Props>) {
 
   const [tokens, setTokens] = useState<NextGenToken[]>([]);
   const [tokensLoaded, setTokensLoaded] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
   const [rarityType, setRarityType] = useState<NextGenTokenRarityType>();
 
-  function fetchResults(mypage: number) {
-    setTokensLoaded(false);
-    let endpoint = `nextgen/collections/${props.collection.id}/tokens?page_size=${pageSize}&page=${mypage}`;
-    if (props.selected_traits) {
-      const traitsQ = props.selected_traits
-        .map((t) => `${t.trait}:${t.value}`)
-        .join(",");
-      endpoint += `&traits=${encodeURIComponent(traitsQ)}`;
-    }
-    if (props.show_normalised) {
-      endpoint += `&show_normalised=true`;
-    }
-    if (props.show_trait_count) {
-      endpoint += `&show_trait_count=true`;
-    }
-    if (props.listed_type === NextGenTokenListedType.LISTED) {
-      endpoint += `&listed=true`;
-    } else if (props.listed_type === NextGenTokenListedType.NOT_LISTED) {
-      endpoint += `&listed=false`;
-    }
-    if (props.sort) {
-      endpoint += `&sort=${props.sort.replaceAll(" ", "_").toLowerCase()}`;
-    } else {
-      endpoint += `&sort=random`;
-    }
-    if (props.sort_direction) {
-      endpoint += `&sort_direction=${props.sort_direction.toLowerCase()}`;
-    }
-    commonApiFetch<{
-      count: number;
-      page: number;
-      next: unknown;
-      data: NextGenToken[];
-    }>({
-      endpoint: endpoint,
-    }).then((response) => {
-      setTotalResults(response.count);
-      if (props.setTotalResults) {
-        props.setTotalResults(response.count);
-      }
-      setTokens(response.data);
-      setTokensLoaded(true);
-    });
-  }
+  const endpoint = getTokensEndpoint(props, pageSize, page);
 
   useEffect(() => {
-    if (page === 1) {
-      fetchResults(page);
-    } else {
-      setPage(1);
-    }
+    setPage(1);
   }, [
     props.selected_traits,
     props.sort,
@@ -99,9 +97,38 @@ export default function NextGenTokenList(props: Readonly<Props>) {
     props.listed_type,
   ]);
 
+  // One request per effective query. A newer query (or unmount) aborts the
+  // previous one, and a late response from an aborted request is ignored.
   useEffect(() => {
-    fetchResults(page);
-  }, [page]);
+    const controller = new AbortController();
+    const load = async () => {
+      setTokensLoaded(false);
+      setLoadFailed(false);
+      props.setLoadFailed?.(false);
+      let response: TokensResponse;
+      try {
+        response = await commonApiFetch<TokensResponse>({
+          endpoint,
+          signal: controller.signal,
+        });
+      } catch {
+        if (!controller.signal.aborted) {
+          setLoadFailed(true);
+          props.setLoadFailed?.(true);
+        }
+        return;
+      }
+      if (controller.signal.aborted) {
+        return;
+      }
+      setTotalResults(response.count);
+      props.setTotalResults?.(response.count);
+      setTokens(response.data);
+      setTokensLoaded(true);
+    };
+    void load();
+    return () => controller.abort();
+  }, [endpoint, attempt]);
 
   function getRarityType(
     baseType:
@@ -151,6 +178,15 @@ export default function NextGenTokenList(props: Readonly<Props>) {
     <div className="tw-w-full">
       <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 sm:tw-grid-cols-3 sm:tw-gap-x-6">
         {(() => {
+          if (loadFailed) {
+            return (
+              <NextGenLoadError
+                className="tw-col-span-full"
+                message="nextgen.loadError.tokens"
+                onRetry={() => setAttempt((current) => current + 1)}
+              />
+            );
+          }
           if (tokensLoaded) {
             if (tokens.length > 0) {
               return tokens.map((t) => (

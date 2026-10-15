@@ -4,7 +4,8 @@ import {
   NEXTGEN_CORE,
 } from "@/components/nextGen/nextgen_contracts";
 import { Status } from "@/components/nextGen/nextgen_entities";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 jest.mock(
   "@/components/nextGen/collections/collectionParts/mint/NextGenMintShared",
@@ -89,7 +90,7 @@ const baseProps = {
     status: true,
   } as any,
   available_supply: 5,
-  mint_price: 0,
+  mint_price: 0n,
   mint_counts: { airdrop: 0, allowlist: 0, public: 0, total: 0 },
   delegators: [],
   mintForAddress: jest.fn(),
@@ -191,5 +192,132 @@ describe("NextGenMintBurnWidget", () => {
     const btn = screen.getByRole("button");
     expect(btn).toBeDisabled();
     expect(btn).toHaveTextContent("Burn Not Active");
+  });
+
+  describe("burn proof loading", () => {
+    const burnProof = (info: string) => ({
+      keccak: `keccak-${info}`,
+      info,
+      proof: ["0xproof"],
+    });
+
+    function deferred<T>() {
+      let resolve!: (value: T) => void;
+      const promise = new Promise<T>((res) => {
+        resolve = res;
+      });
+      return { promise, resolve };
+    }
+
+    beforeEach(() => {
+      mockFetchUrl.mockReset();
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ ownedNfts: [] }),
+      } as unknown as Response);
+    });
+
+    it("shows an accessible error instead of an endless fetch when the proof fails", async () => {
+      mockFetchUrl.mockRejectedValue(new Error("HTTP error! status: 500"));
+      const state = { tokenId: "7" };
+      renderWidget({}, state);
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "The burn proof could not be loaded."
+      );
+      const mintState = (useMintSharedState as jest.Mock).mock.results[0]
+        ?.value;
+      await waitFor(() =>
+        expect(mintState.setFetchingProofs).toHaveBeenLastCalledWith(false)
+      );
+    });
+
+    it("retries loading the burn proof", async () => {
+      mockFetchUrl
+        .mockRejectedValueOnce(new Error("HTTP error! status: 500"))
+        .mockResolvedValueOnce(burnProof("ok"));
+      renderWidget({}, { tokenId: "7" });
+
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Try again" })
+      );
+
+      await waitFor(() => expect(mockFetchUrl).toHaveBeenCalledTimes(2));
+      const mintState = (useMintSharedState as jest.Mock).mock.results[0]
+        ?.value;
+      await waitFor(() =>
+        expect(mintState.setBurnProofResponse).toHaveBeenCalledWith(
+          burnProof("ok")
+        )
+      );
+      expect(screen.queryByRole("alert")).toBeNull();
+    });
+
+    it("never applies a late burn proof for a previously selected token", async () => {
+      const first = deferred<unknown>();
+      const second = deferred<unknown>();
+      mockFetchUrl
+        .mockReturnValueOnce(first.promise)
+        .mockReturnValueOnce(second.promise);
+
+      const { rerender } = renderWidget({}, { tokenId: "7" });
+      const firstState = (useMintSharedState as jest.Mock).mock.results[0]
+        ?.value;
+      const secondState = createMintState({ tokenId: "8" });
+      (useMintSharedState as jest.Mock).mockReturnValue(secondState);
+      rerender(<NextGenMintBurnWidget {...baseProps} />);
+
+      const [[firstUrl, firstInit], [secondUrl]] = mockFetchUrl.mock.calls;
+      expect(firstUrl).toContain("/burn_proofs/root/7");
+      expect(firstInit.signal.aborted).toBe(true);
+      expect(secondUrl).toContain("/burn_proofs/root/8");
+      expect(firstState.setBurnProofResponse).toHaveBeenCalledWith(undefined);
+
+      await act(async () => {
+        second.resolve(burnProof("token-8"));
+        await second.promise;
+      });
+      await act(async () => {
+        first.resolve(burnProof("token-7"));
+        await first.promise;
+      });
+
+      expect(secondState.setBurnProofResponse).toHaveBeenCalledWith(
+        burnProof("token-8")
+      );
+      expect(firstState.setBurnProofResponse).not.toHaveBeenCalledWith(
+        burnProof("token-7")
+      );
+      expect(secondState.setBurnProofResponse).not.toHaveBeenCalledWith(
+        burnProof("token-7")
+      );
+    });
+
+    it("clears fetching state when the selected token is cleared", () => {
+      renderWidget({}, { tokenId: "" });
+      const mintState = (useMintSharedState as jest.Mock).mock.results[0]
+        ?.value;
+
+      expect(mintState.setBurnProofResponse).toHaveBeenCalledWith(undefined);
+      expect(mintState.setFetchingProofs).toHaveBeenCalledWith(false);
+      expect(mockFetchUrl).not.toHaveBeenCalled();
+    });
+
+    it("mints with the exact wei price", () => {
+      mockFetchUrl.mockReturnValue(new Promise(() => {}));
+      renderWidget(
+        { mint_price: 12345678901234567891n },
+        { tokenId: "7", isMinting: true, burnProofResponse: burnProof("ok") }
+      );
+      const { writeContract } = (useWriteContract as jest.Mock).mock.results[0]
+        ?.value;
+
+      expect(writeContract).toHaveBeenCalledWith(
+        expect.objectContaining({
+          functionName: "burnOrSwapExternalToMint",
+          value: 12345678901234567891n,
+        })
+      );
+    });
   });
 });

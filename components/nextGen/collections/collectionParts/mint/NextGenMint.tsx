@@ -7,6 +7,7 @@ import {
   MINTING_USE_CASE,
 } from "@/components/delegation/delegation-constants";
 import DotLoader from "@/components/dotLoader/DotLoader";
+import NextGenLoadError from "@/components/nextGen/NextGenLoadError";
 import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
@@ -26,18 +27,17 @@ import {
   DELEGATION_CONTRACT,
 } from "@/constants/constants";
 import type { NextGenCollection } from "@/entities/INextgen";
-import { fromGWEI } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import type { Abi } from "viem";
+import { formatEther, type Abi } from "viem";
 import { useReadContract, useReadContracts } from "wagmi";
 import NextGenMintBurnWidget from "./NextGenMintBurnWidget";
 import NextGenMintWidget from "./NextGenMintWidget";
 
 interface Props {
   collection: NextGenCollection;
-  mint_price: number;
+  mint_price: bigint;
   burn_amount: number;
 }
 
@@ -55,6 +55,8 @@ export default function NextGenMint(props: Readonly<Props>) {
 
   const [collection, setCollection] = useState<CollectionWithMerkle>();
   const [collectionLoaded, setCollectionLoaded] = useState<boolean>(false);
+  const [collectionFailed, setCollectionFailed] = useState<boolean>(false);
+  const [collectionAttempt, setCollectionAttempt] = useState(0);
 
   const { mintingDetails, setMintingDetails } = useSharedState();
   useCollectionCostsHook(props.collection.id, setMintingDetails);
@@ -235,19 +237,29 @@ export default function NextGenMint(props: Readonly<Props>) {
   }, [addressMintCountMintedPublicRead.data]);
 
   useEffect(() => {
-    if (props.collection.merkle_root) {
-      const merkleRoot = props.collection.merkle_root;
-      const url = `${publicEnv.API_ENDPOINT}/api/nextgen/merkle_roots/${merkleRoot}`;
-      fetchUrl<CollectionWithMerkle>(url).then(
-        (response: CollectionWithMerkle) => {
-          if (response) {
-            setCollection(response);
-          }
-          setCollectionLoaded(true);
-        }
-      );
+    if (!props.collection.merkle_root) {
+      return;
     }
-  }, [props.collection.merkle_root]);
+    const controller = new AbortController();
+    const merkleRoot = props.collection.merkle_root;
+    const url = `${publicEnv.API_ENDPOINT}/api/nextgen/merkle_roots/${merkleRoot}`;
+    setCollectionFailed(false);
+    fetchUrl<CollectionWithMerkle>(url, { signal: controller.signal }).then(
+      (response: CollectionWithMerkle) => {
+        if (controller.signal.aborted) {
+          return;
+        }
+        setCollection(response ?? undefined);
+        setCollectionLoaded(true);
+      },
+      () => {
+        if (!controller.signal.aborted) {
+          setCollectionFailed(true);
+        }
+      }
+    );
+    return () => controller.abort();
+  }, [props.collection.merkle_root, collectionAttempt]);
 
   function getSalesModel() {
     if (!mintingDetails) {
@@ -356,6 +368,14 @@ export default function NextGenMint(props: Readonly<Props>) {
         </span>
       );
     }
+    if (collectionFailed) {
+      return (
+        <NextGenLoadError
+          message="nextgen.loadError.mintOptions"
+          onRetry={() => setCollectionAttempt((current) => current + 1)}
+        />
+      );
+    }
     return (
       <output
         aria-label="Loading mint options"
@@ -396,8 +416,8 @@ export default function NextGenMint(props: Readonly<Props>) {
                   Mint Cost
                 </dt>
                 <dd className="tw-m-0 tw-text-base tw-font-semibold tw-text-white">
-                  {props.mint_price > 0
-                    ? `${fromGWEI(props.mint_price)} ETH`
+                  {props.mint_price > 0n
+                    ? `${formatEther(props.mint_price)} ETH`
                     : "Free"}
                 </dd>
               </div>
