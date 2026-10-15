@@ -53,7 +53,7 @@ describe("useWaveLoadingState", () => {
     expect(res.shouldContinue).toBe(false);
   });
 
-  it("clearLoadingState resets data", () => {
+  it("clearLoadingState releases the wave entry so the next load starts fresh", () => {
     const { result } = renderHook(() => useWaveLoadingState());
     act(() => {
       result.current.getLoadingState("w1");
@@ -61,9 +61,10 @@ describe("useWaveLoadingState", () => {
       result.current.setLoadingState("w1", true);
       result.current.clearLoadingState("w1");
     });
-    expect(result.current.loadingStates.current["w1"]).toEqual({
-      isLoading: false,
-      promise: null,
+    expect(result.current.loadingStates.current["w1"]).toBeUndefined();
+    expect(result.current.getLoadingState("w1")).toEqual({
+      state: { isLoading: false, promise: null },
+      shouldContinue: true,
     });
   });
 });
