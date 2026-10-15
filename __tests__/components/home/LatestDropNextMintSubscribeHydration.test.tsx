@@ -166,3 +166,73 @@ describe("Home subscription row requests around hydration", () => {
     }
   );
 });
+
+const SPACE_TEST_ID = "meme-subscription-awareness-row-space";
+const ROW_LABEL = "Subscription Minting";
+const spaceElement = () =>
+  container.querySelector(`[data-testid='${SPACE_TEST_ID}']`);
+
+describe("Home subscription row visibility around hydration", () => {
+  it.each(["web", "android", "ios"] as const)(
+    "keeps the row out of the server HTML on %s and reserves only blank space",
+    (platform) => {
+      mockNativePlatform = platform;
+
+      container.innerHTML = renderToString(tree());
+
+      expect(container).not.toHaveTextContent(ROW_LABEL);
+      expect(container.querySelector("a, button, svg, img")).toBeNull();
+      const space = spaceElement();
+      expect(space).not.toBeNull();
+      expect(space).toBeEmptyDOMElement();
+      expect(space).toHaveAttribute("aria-hidden", "true");
+      expect(space).toHaveClass("tw-min-h-[6.375rem]");
+    }
+  );
+
+  it.each(["web", "android"] as const)(
+    "swaps the blank space for the row on %s right after hydration",
+    async (platform) => {
+      mockNativePlatform = platform;
+      container.innerHTML = renderToString(tree());
+      expect(spaceElement()).not.toBeNull();
+      expect(container).not.toHaveTextContent(ROW_LABEL);
+
+      await hydrateFromServerHtml();
+
+      expect(container).toHaveTextContent(ROW_LABEL);
+      expect(spaceElement()).toBeNull();
+    }
+  );
+
+  it("renders nothing, not even blank space, on iOS while the country is pending after hydration", async () => {
+    await hydrateFromServerHtml();
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("inserts the row once iOS resolves to US", async () => {
+    await hydrateFromServerHtml();
+    expect(container).toBeEmptyDOMElement();
+
+    await settleCountry("US");
+
+    expect(container).toHaveTextContent(ROW_LABEL);
+    expect(spaceElement()).toBeNull();
+  });
+
+  it.each([
+    ["a non-US country", "FR"],
+    ["an unknown country", ""],
+  ])(
+    "keeps iOS empty before and after the country resolves to %s",
+    async (_label, country) => {
+      await hydrateFromServerHtml();
+      expect(container).toBeEmptyDOMElement();
+
+      await settleCountry(country);
+
+      expect(container).toBeEmptyDOMElement();
+    }
+  );
+});
