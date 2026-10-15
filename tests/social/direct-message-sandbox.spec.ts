@@ -1,6 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 
 import {
+  captureSafeScreenshot,
   expect,
   expectNoHorizontalOverflow,
   test,
@@ -30,6 +31,117 @@ test.describe("Direct message local sandbox @auth @medium @local-only", () => {
     "PLAYWRIGHT_AUTH_SANDBOX",
     "Direct message sandbox requires the local mock API runner."
   );
+
+  test("prepares a recent native conversation without marking it read and reuses it on tap", async ({
+    baseURL,
+    page,
+  }, testInfo) => {
+    const isNative = isCapacitorSimulationProject(testInfo.project.name);
+    const feedPath = `/api/v2/waves/${SANDBOX_DM_WAVE_ID}/drops`;
+    const initialRequests: URL[] = [];
+    let releaseFeed!: () => void;
+    const feedGate = new Promise<void>((resolve) => {
+      releaseFeed = resolve;
+    });
+    let releaseRefresh!: () => void;
+    const refreshGate = new Promise<void>((resolve) => {
+      releaseRefresh = resolve;
+    });
+    await page.route("**/api/v2/waves?*", async (route) => {
+      const response = await route.fetch();
+      const body = await response.json();
+      const directMessage =
+        new URL(route.request().url()).searchParams.get("direct_message") ===
+        "true";
+      await route.fulfill({
+        response,
+        json: directMessage
+          ? {
+              ...body,
+              data: [
+                {
+                  ...body.data[0],
+                  id: SANDBOX_DM_WAVE_ID,
+                  name: "Sandbox Direct Message",
+                  is_private: true,
+                  is_dm_wave: true,
+                },
+              ],
+            }
+          : body,
+      });
+    });
+    await page.route(`**${feedPath}*`, async (route) => {
+      const url = new URL(route.request().url());
+      if (!url.searchParams.has("serial_no_limit")) {
+        initialRequests.push(url);
+        await feedGate;
+      }
+      await route.fallback();
+    });
+    try {
+      await page.goto("/messages", { waitUntil: "domcontentloaded" });
+      const chat = page
+        .getByRole("link", { name: "Sandbox Direct Message", exact: true })
+        .first();
+      await expect(chat).toBeVisible({
+        timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+      });
+      if (isNative) {
+        await expect.poll(() => initialRequests.length).toBe(1);
+        expect(initialRequests[0]!.searchParams.get("limit")).toBe("20");
+        const requests = await fetchSandboxRequests(baseURL);
+        expect(
+          requests.filter(
+            (request) =>
+              request.method === "POST" &&
+              request.path.includes("notifications/read")
+          )
+        ).toEqual([]);
+      } else {
+        expect(initialRequests).toHaveLength(0);
+      }
+      // Open while prefetch is pending; it must reuse the same initial request.
+      await chat.click();
+      await expect(page).toHaveURL(
+        new RegExp(`/messages/${SANDBOX_DM_WAVE_ID}$`)
+      );
+      releaseFeed();
+      await expect(
+        page
+          .getByText(
+            "Synthetic local-only direct message body for Playwright.",
+            { exact: true }
+          )
+          .first()
+      ).toBeVisible();
+      expect(initialRequests).toHaveLength(1);
+      await expectNoHorizontalOverflow(page);
+      await page.goBack();
+      await expect(chat).toBeVisible();
+      await page.route(`**${feedPath}*`, async (route) => {
+        await refreshGate;
+        await route.fallback();
+      });
+      await chat.click();
+      // Cached content remains available even while the newer-message refresh waits.
+      await expect(
+        page
+          .getByText(
+            "Synthetic local-only direct message body for Playwright.",
+            { exact: true }
+          )
+          .first()
+      ).toBeVisible();
+      expect(initialRequests).toHaveLength(1);
+      releaseRefresh();
+      await captureSafeScreenshot(page, testInfo, "prefetched-direct-message");
+      await expectNoUnsafeSandboxMutations(baseURL);
+    } finally {
+      releaseFeed();
+      releaseRefresh();
+    }
+  });
 
   test("selects a recipient and creates a synthetic direct-message wave", async ({
     baseURL,

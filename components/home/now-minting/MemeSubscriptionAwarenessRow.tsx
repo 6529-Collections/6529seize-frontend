@@ -202,6 +202,22 @@ function SubscriptionsCountText({
   return null;
 }
 
+// Invisible stand-in for the row's height so content below does not jump when
+// the row replaces it: 2 x 1.25rem padding, 2px border, 1.25rem label line,
+// 0.75rem gap and 1.75rem detail line (about 102px; measured 101.3 to 102px at
+// 375px and 1280px viewports). Used only while the platform is unknown (the
+// server HTML and the first hydration render). It carries no text, icon, link
+// or control, so it is not purchasing UI.
+export function MemeSubscriptionAwarenessRowSpace() {
+  return (
+    <div
+      aria-hidden="true"
+      data-testid="meme-subscription-awareness-row-space"
+      className="tw-min-h-[6.375rem] tw-w-full"
+    />
+  );
+}
+
 export default function MemeSubscriptionAwarenessRow({
   onProfileSubscriptionsAction,
   profileCoverageSummary,
