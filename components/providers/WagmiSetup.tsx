@@ -266,14 +266,17 @@ function loadWalletStackModules(): Promise<WalletStackModules> {
 
   const walletStackModules = importWalletStackModules();
   store.walletStackModules = walletStackModules;
-  // Drop the failed promise, and remember a failed chunk: the bundler keeps
-  // rejecting that chunk in this page, so a connect intent reloads instead.
-  walletStackModules.catch((error: unknown) => {
-    noteWalletChunkFailure(error);
-    if (store.walletStackModules === walletStackModules) {
-      store.walletStackModules = null;
+  // Forget a failed load; a failed chunk makes the next connect intent reload.
+  void (async () => {
+    try {
+      await walletStackModules;
+    } catch (error) {
+      noteWalletChunkFailure(error);
+      if (store.walletStackModules === walletStackModules) {
+        store.walletStackModules = null;
+      }
     }
-  });
+  })();
   return walletStackModules;
 }
 
@@ -725,9 +728,8 @@ export default function WagmiSetup({
 
   // A stored wallet session restores its connection after mount, replacing
   // the wallet-free config while preserving the provider tree. The native app
-  // always loads, because its App Wallet connectors live in the adapter, and
-  // so does the desktop app, which serves its bundle locally. Other visitors
-  // fetch the wallet stack only when they ask to connect.
+  // and the desktop app always load (App Wallet connectors live in the
+  // adapter). Other visitors fetch the wallet stack only when they connect.
   useEffect(() => {
     if (fastPathSnapshot.walletStackRequested) {
       return;
