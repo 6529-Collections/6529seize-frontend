@@ -35,8 +35,10 @@ performance-tracking behavior tied to that choice.
    `policies/country-check`.
 3. If the visitor is in the EU and both consent cookies are still missing, the
    banner stays visible until the user picks an option.
-4. If the visitor is outside the EU, the app stores both consent cookies as
-   `true` for 7 days and skips the banner.
+4. If the visitor is outside the EU, the banner is skipped. When no
+   performance choice is stored yet, the app stores both consent cookies as
+   `true` for 7 days. A stored accept or reject is never replaced by this
+   default.
 5. `Accept` records consent, stores both cookies as `true` for 365 days, and
    closes the banner.
 6. `Reject Non-Essential` keeps essential cookies enabled, stores performance
@@ -59,8 +61,12 @@ performance-tracking behavior tied to that choice.
   until the user accepts.
 - First non-EU visit: the banner is skipped and performance analytics are
   enabled automatically.
-- Returning visitor with `performance-cookies-consent=false`: the banner stays
-  hidden and performance analytics stay disabled.
+- Returning visitor with `performance-cookies-consent=false`, in or outside
+  the EU: the banner stays hidden, the rejection is kept, and performance
+  analytics stay disabled.
+- Returning non-EU visitor with a stored acceptance: the acceptance is kept
+  with its original expiry. The 7-day default is not extended by later visits;
+  once it expires, the next non-EU visit applies it again.
 - `/about/cookie-policy` reuses the same accept/reject flows to enable or
   disable performance cookies after the initial choice.
 - A connected user who has granted performance consent can be tracked across
