@@ -22,7 +22,9 @@ export async function fetchNextgenCollectionCard(
   if (!NEXTGEN_COLLECTION_ID_PATTERN.test(id)) return null;
   try {
     return await withOgApiJson(signal, async (fetchJson) => {
-      const collection = asRecord(await fetchJson(`nextgen/collections/${id}`));
+      const collection = asRecord(
+        await fetchJson(["nextgen", "collections", id])
+      );
       const name = text(collection?.["name"]);
       if (collection === null || name === null) return null;
       if (collection["id"] !== Number(id)) return null;
@@ -44,7 +46,7 @@ export async function fetchLatestMemeMintTitle(
 ): Promise<string | null> {
   try {
     return await withOgApiJson(signal, async (fetchJson) => {
-      const nft = asRecord(await fetchJson("memes_latest"));
+      const nft = asRecord(await fetchJson(["memes_latest"]));
       const id = nft?.["id"];
       const name = text(nft?.["name"]);
       return isTokenNumber(id) && name !== null

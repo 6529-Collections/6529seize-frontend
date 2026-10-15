@@ -43,7 +43,10 @@ the `1200x630` image dimensions and `summary_large_image` Twitter card.
   Meme Lab, 6529 Gradient, NextGen, and ReMemes); the only query parameter is
   `format`. When the lookup fails, the card shows a neutral label for the
   collection (for example `The Memes #542`, or `NFT #542` for other contracts)
-  and is cached for a shorter time.
+  and is cached for a shorter time. Explicit `format` exports need the artwork
+  from the same lookup (no client-supplied image is accepted): the lookup is
+  retried once on transient failures and may take up to 10 seconds, and an
+  export without artwork fails with `502` rather than returning a placeholder.
 - `/api/og-metadata/image?url={url}&w={width}` safely normalizes allowed remote
   images to PNG for card rendering. Images retain their aspect ratio and fit
   within the requested width (at most 1,200 pixels) and 12,000 pixels high,

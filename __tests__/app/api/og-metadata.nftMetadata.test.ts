@@ -309,6 +309,21 @@ describe("NFT preview metadata fallback", () => {
     [MEMES_CONTRACT, "542?contract=other"],
     [MEMES_CONTRACT, "-1"],
     [MEMES_CONTRACT, "9007199254740992"],
+    [MEMES_CONTRACT, "..%2f"],
+    [MEMES_CONTRACT, "1@evil.com"],
+    [MEMES_CONTRACT, "https://evil.test/1"],
+    [MEMES_CONTRACT, "//evil.test"],
+    [MEMES_CONTRACT, "1&contract=other"],
+    [REMEME_CONTRACT, "..%2f"],
+    [REMEME_CONTRACT, "1@evil.com"],
+    [REMEME_CONTRACT, "1/../2"],
+    [REMEME_CONTRACT, "https://evil.test/1"],
+    [NEXTGEN_CONTRACT, "1/../2"],
+    [`${REMEME_CONTRACT}%2f..`, "1"],
+    [`${REMEME_CONTRACT}@evil.com`, "1"],
+    ["https://evil.test/0x869a96493d64ed5bbbfc24d96c5e84f95e558cf2", "1"],
+    ["//evil.test", "1"],
+    ["@evil.com", "1"],
   ])("does not fetch unsupported identity %s / %s", async (contract, id) => {
     await expect(fetchNftCardMetadata(contract, id)).resolves.toBeNull();
     expect(mockFetch).not.toHaveBeenCalled();

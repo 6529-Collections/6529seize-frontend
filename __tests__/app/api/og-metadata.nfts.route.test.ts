@@ -167,6 +167,9 @@ describe("/api/og-metadata/nfts/[contract]/[id]", () => {
   afterAll(() => {
     global.fetch = originalFetch;
   });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
   beforeEach(() => {
     global.fetch = mockFetch;
     mockFetch.mockReset();
@@ -411,6 +414,79 @@ describe("/api/og-metadata/nfts/[contract]/[id]", () => {
       expect(mockImageResponse).not.toHaveBeenCalled();
     }
   );
+
+  it("retries a transient lookup failure so an export still has its artwork", async () => {
+    mockBackend(memeResponse());
+    mockFetch.mockImplementationOnce(async () => ({
+      ok: false,
+      status: 503,
+      headers: new Headers(),
+      body: null,
+    }));
+
+    const { element, response } = await renderCard(
+      MEMES_CONTRACT,
+      "542",
+      "?format=portrait"
+    );
+
+    expect(response.status).not.toBe(502);
+    expect(getText(element)).toContain("Open Source");
+    expect(collectImageSrcs(element)).toContain(
+      `data:image/png;base64,${Buffer.from(png).toString("base64")}`
+    );
+    const lookups = mockFetch.mock.calls.filter(
+      ([url]) => !String(url).includes(OG_IMAGE_PROXY_PATH)
+    );
+    expect(lookups).toHaveLength(2);
+  });
+
+  describe("lookup deadline", () => {
+    const slowBackend = () =>
+      mockFetch.mockImplementation((url: string, init?: RequestInit) => {
+        if (url.includes(OG_IMAGE_PROXY_PATH)) {
+          return Promise.resolve(streamResponse("image/png", png));
+        }
+        return new Promise((resolve, reject) => {
+          const timer = setTimeout(
+            () => resolve(jsonResponse(memeResponse())),
+            7_000
+          );
+          init?.signal?.addEventListener(
+            "abort",
+            () => {
+              clearTimeout(timer);
+              reject(new Error("aborted"));
+            },
+            { once: true }
+          );
+        });
+      });
+
+    it("lets an explicit export wait for a slow lookup", async () => {
+      jest.useFakeTimers();
+      slowBackend();
+
+      const pending = renderCard(MEMES_CONTRACT, "542", "?format=square");
+      await jest.advanceTimersByTimeAsync(7_000);
+      const { element, response } = await pending;
+
+      expect(response.status).not.toBe(502);
+      expect(getText(element)).toContain("Open Source");
+    });
+
+    it("keeps the short deadline for crawler previews", async () => {
+      jest.useFakeTimers();
+      slowBackend();
+
+      const pending = renderCard(MEMES_CONTRACT, "542");
+      await jest.advanceTimersByTimeAsync(7_000);
+      const { element } = await pending;
+
+      expect(getText(element)).toContain("The Memes #542");
+      expect(getText(element)).not.toContain("Open Source");
+    });
+  });
 
   it.each(["wide", "constructor", "__proto__", ""])(
     "rejects unsupported format %s before rendering",

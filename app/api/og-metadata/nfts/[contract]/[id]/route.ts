@@ -27,6 +27,11 @@ import {
 export const runtime = "edge";
 export const revalidate = 3600;
 
+// Explicit exports are user-initiated downloads that always need the backend
+// artwork (there is no client-supplied fallback), so their lookup may take
+// longer than a crawler preview's before the export is reported as failed.
+const EXPORT_LOOKUP_TIMEOUT_MS = 10_000;
+
 // Card text and artwork come only from the backend lookup for the path
 // identity. Query strings select the export format and nothing else.
 const getNftCardModel = ({
@@ -98,7 +103,10 @@ export async function GET(
     const metadata = await fetchNftCardMetadata(
       normalizedContract,
       normalizedId,
-      request.signal
+      request.signal,
+      requestedFormat === null
+        ? undefined
+        : { timeoutMs: EXPORT_LOOKUP_TIMEOUT_MS }
     );
     const model = getNftCardModel({
       contract: normalizedContract,

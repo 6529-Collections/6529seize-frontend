@@ -38,7 +38,9 @@ async function fetchNextgenMetadata(
   id: number,
   fetchMetadata: FetchOgApiJson
 ): Promise<NftCardMetadata | null> {
-  const token = asRecord(await fetchMetadata(`nextgen/tokens/${id}`));
+  const token = asRecord(
+    await fetchMetadata(["nextgen", "tokens", String(id)])
+  );
   if (
     token === null ||
     token["pending"] === true ||
@@ -49,9 +51,11 @@ async function fetchNextgenMetadata(
     return null;
   }
   const collection = asRecord(
-    await fetchMetadata(`nextgen/collections/${token["collection_id"]}`).catch(
-      () => null
-    )
+    await fetchMetadata([
+      "nextgen",
+      "collections",
+      String(token["collection_id"]),
+    ]).catch(() => null)
   );
   const matchingCollection =
     collection?.["id"] === token["collection_id"] ? collection : null;
@@ -106,8 +110,7 @@ async function fetchRememeMetadata(
   id: string,
   fetchMetadata: FetchOgApiJson
 ): Promise<NftCardMetadata | null> {
-  const query = new URLSearchParams({ contract, id });
-  const response = asRecord(await fetchMetadata(`rememes?${query.toString()}`));
+  const response = asRecord(await fetchMetadata(["rememes"], { contract, id }));
   const data = response?.["data"];
   const rememe = Array.isArray(data)
     ? data
@@ -169,7 +172,8 @@ export function getFallbackNftCardMetadata(
 export async function fetchNftCardMetadata(
   contract: string,
   id: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  options: { readonly timeoutMs?: number } = {}
 ): Promise<NftCardMetadata | null> {
   if (!NFT_CONTRACT_PATTERN.test(contract) || !NFT_TOKEN_ID_PATTERN.test(id)) {
     return null;
@@ -184,38 +188,44 @@ export async function fetchNftCardMetadata(
   }
 
   try {
-    return await withOgApiJson(signal, async (fetchMetadata) => {
-      if (isNextgen) return fetchNextgenMetadata(Number(id), fetchMetadata);
-      if (collection === undefined) {
-        return fetchRememeMetadata(normalizedContract, id, fetchMetadata);
-      }
-      const query = new URLSearchParams({ contract: collection.contract, id });
-      const response = asRecord(
-        await fetchMetadata(`${collection.endpoint}?${query.toString()}`)
-      );
-      const data = response?.["data"];
-      const nft = Array.isArray(data)
-        ? data
-            .map(asRecord)
-            .find(
-              (item) =>
-                item?.["id"] === Number(id) &&
-                text(item["contract"])?.toLowerCase() === normalizedContract
-            )
-        : null;
-      if (nft === null || nft === undefined) return null;
-      return {
-        title: text(nft["name"]) ?? `${collection.name} #${id}`,
-        artist: text(nft["artist"]),
-        collection: collection.name,
-        badge: collection.name,
-        displayId: null,
-        imageUrl:
-          text(nft["scaled"], MAX_IMAGE_URL_LENGTH) ??
-          text(nft["image"], MAX_IMAGE_URL_LENGTH) ??
-          text(nft["thumbnail"], MAX_IMAGE_URL_LENGTH),
-      };
-    });
+    return await withOgApiJson(
+      signal,
+      async (fetchMetadata) => {
+        if (isNextgen) return fetchNextgenMetadata(Number(id), fetchMetadata);
+        if (collection === undefined) {
+          return fetchRememeMetadata(normalizedContract, id, fetchMetadata);
+        }
+        const response = asRecord(
+          await fetchMetadata([collection.endpoint], {
+            contract: collection.contract,
+            id,
+          })
+        );
+        const data = response?.["data"];
+        const nft = Array.isArray(data)
+          ? data
+              .map(asRecord)
+              .find(
+                (item) =>
+                  item?.["id"] === Number(id) &&
+                  text(item["contract"])?.toLowerCase() === normalizedContract
+              )
+          : null;
+        if (nft === null || nft === undefined) return null;
+        return {
+          title: text(nft["name"]) ?? `${collection.name} #${id}`,
+          artist: text(nft["artist"]),
+          collection: collection.name,
+          badge: collection.name,
+          displayId: null,
+          imageUrl:
+            text(nft["scaled"], MAX_IMAGE_URL_LENGTH) ??
+            text(nft["image"], MAX_IMAGE_URL_LENGTH) ??
+            text(nft["thumbnail"], MAX_IMAGE_URL_LENGTH),
+        };
+      },
+      options
+    );
   } catch {
     return null;
   }
