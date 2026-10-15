@@ -34,20 +34,40 @@ const SURFACES_WITHOUT_COMPOSER = [
 // skipped here, and clauses made only of `type` specifiers are skipped below.
 const STATIC_IMPORT =
   /^(?:import|export)\s+(?!type\b)(?:([^;'"]*?)\s+from\s+)?["']([^"']+)["']/gm;
-const TYPE_ONLY_CLAUSE =
-  /^\{\s*(?:type\s+[\w$]+(?:\s+as\s+[\w$]+)?\s*,?\s*)+\}$/;
+const TYPE_SPECIFIER = /^type\s+[\w$]+(?:\s+as\s+[\w$]+)?$/;
+
+// `{ type A, type B as C }`: every specifier is a type, so the import is erased.
+function isTypeOnlyClause(clause: string): boolean {
+  if (!clause.startsWith("{") || !clause.endsWith("}")) {
+    return false;
+  }
+  const specifiers = clause
+    .slice(1, -1)
+    .split(",")
+    .map((specifier) => specifier.trim())
+    .filter(Boolean);
+  return (
+    specifiers.length > 0 &&
+    specifiers.every((specifier) => TYPE_SPECIFIER.test(specifier))
+  );
+}
+
 const EXTENSIONS = [".ts", ".tsx", ".js", ".jsx"];
 
 const sourceCache = new Map<string, string | null>();
 
+function readFileIfPresent(file: string): string | null {
+  try {
+    return fs.readFileSync(file, "utf8");
+  } catch {
+    // Missing files and directories are not import targets.
+    return null;
+  }
+}
+
 function readSource(file: string): string | null {
   if (!sourceCache.has(file)) {
-    sourceCache.set(
-      file,
-      fs.existsSync(file) && fs.statSync(file).isFile()
-        ? fs.readFileSync(file, "utf8")
-        : null
-    );
+    sourceCache.set(file, readFileIfPresent(file));
   }
   return sourceCache.get(file) ?? null;
 }
@@ -82,7 +102,7 @@ function walkStaticImports(entry: string): StaticImportWalk {
     for (const [, clause, specifier] of (readSource(file) ?? "").matchAll(
       STATIC_IMPORT
     )) {
-      if (!specifier || (clause && TYPE_ONLY_CLAUSE.test(clause.trim()))) {
+      if (!specifier || (clause && isTypeOnlyClause(clause.trim()))) {
         continue;
       }
 
