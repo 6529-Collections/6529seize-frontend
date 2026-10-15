@@ -8,8 +8,9 @@ prefilled reply for explaining a vote.
 
 Open **Votes** in the wave's main row, then select **My Votes**. The other
 subtabs are **All votes**, with voter profiles and totals, and **Activity**, with
-vote changes. Each uses the selected competition, including the original
-competition in an older wave. Switching competition changes all three views.
+vote changes. These three views use compact rounded pills below the main wave
+tabs on desktop, mobile web, and the app. Each uses the selected competition,
+including the original competition in an older wave. Switching competition changes all three views.
 Signed-out viewers can inspect public All votes and Activity; personal votes
 require a connected profile.
 In My Votes, signed-out viewers can select **Connect Wallet** below the

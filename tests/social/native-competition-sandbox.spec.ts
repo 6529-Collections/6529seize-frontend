@@ -700,6 +700,16 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         await expect(voters.getByRole("status")).toHaveText(
           "Loading competition…"
         );
+        const selectedTab = page.getByRole("tab", {
+          name: "All votes",
+          exact: true,
+        });
+        await expect(selectedTab).toHaveCSS("height", "32px");
+        await expect(selectedTab).toHaveCSS("border-radius", "9999px");
+        await expect(selectedTab).toHaveCSS("border-bottom-width", "0px");
+        await expect(selectedTab).toHaveCSS("font-size", "12px");
+        await expect(selectedTab).toHaveCSS("padding-left", "12px");
+        await expect(selectedTab.locator("..")).toHaveCSS("column-gap", "10px");
         const skeletons = voters.getByTestId("competition-voter-skeleton");
         await expect(skeletons).toHaveCount(6);
         await page.emulateMedia({ reducedMotion: "reduce" });
@@ -1663,12 +1673,18 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       "aria-controls",
       "competition-beta-votes-mine"
     );
-    if (app) {
-      await expect(mine).toHaveCSS("border-radius", "9999px");
-      await expect(mine).toHaveCSS("height", "32px");
-    } else {
-      await expect(mine).toHaveCSS("border-bottom-width", "2px");
+    await expect(mine).toHaveCSS("border-radius", "9999px");
+    await expect(mine).toHaveCSS("height", "32px");
+    await expect(mine).toHaveCSS("border-bottom-width", "0px");
+    if (!app) {
+      await expect(
+        waveTabStrip(page).getByRole("tab", { name: "Votes", exact: true })
+      ).toHaveCSS("border-bottom-width", "2px");
     }
+    await mine.focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(allVotes).toBeFocused();
+    await expect(mine).toHaveAttribute("aria-selected", "true");
     await allVotes.click();
     await expect(page).toHaveURL(`${ROOT}/beta?tab=votes&voteTab=all`);
     await expect(
