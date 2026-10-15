@@ -4097,6 +4097,49 @@
       ]
     },
     {
+      "id": "waves.memes-voting-checkpoint",
+      "kind": "business_rule",
+      "title": "The Memes voting checkpoint time",
+      "aliases": [
+        "memes checkpoint",
+        "memes voting checkpoint",
+        "checkpoint time",
+        "checkpoint schedule",
+        "when is the memes checkpoint",
+        "memes voting cutoff",
+        "what time does memes voting end",
+        "17:00 GMT checkpoint"
+      ],
+      "keywords": [
+        "memes",
+        "checkpoint",
+        "voting",
+        "schedule",
+        "utc",
+        "time zone",
+        "cutoff",
+        "24hv",
+        "monday",
+        "wednesday",
+        "friday"
+      ],
+      "facts": [
+        "The Memes voting checkpoints are Monday, Wednesday and Friday at 16:00 UTC, all year. The time is fixed in UTC, so it is 17:00 in London only during British Summer Time.",
+        "At each checkpoint the top submission on the leaderboard is selected, ranked by 24-Hour Vote (24HV): a weighted average of the TDH voted during the 24 hours before the checkpoint.",
+        "The Memes wave FAQ tab (How Does Voting Work?) and /about/apply (Checkpoint Schedule) state the checkpoint in UTC. After the page loads they add the viewer's own time zone in parentheses, for example (your time: Mon, Wed, Fri 09:00 PDT) for Los Angeles in summer.",
+        "The local note names the weekday because a viewer east of UTC can see the checkpoint on the next day: in Auckland the Monday, Wednesday and Friday checkpoints read Tuesday, Thursday and Saturday in the morning. It follows daylight saving in the viewer's zone and is left out for a viewer whose zone is UTC.",
+        "The wave FAQ takes the time of day from the wave's decision schedule and shows 16:00 UTC when that is not available."
+      ],
+      "canonical_path": "/about/apply",
+      "related_paths": ["/waves", "/the-memes"],
+      "tags": ["waves", "memes", "voting", "time"],
+      "source_refs": [
+        "ops/docs/waves/memes/feature-memes-voting-checkpoints.md",
+        "components/about/AboutApply.tsx",
+        "components/brain/my-stream/MyStreamWaveFAQ.tsx"
+      ]
+    },
+    {
       "id": "groups.overview",
       "kind": "route",
       "title": "Groups",
