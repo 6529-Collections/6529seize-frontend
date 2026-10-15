@@ -191,9 +191,12 @@ describe("Home subscription row visibility around hydration", () => {
   );
 
   it.each(["web", "android"] as const)(
-    "shows the row on %s right after hydration in place of the blank space",
+    "swaps the blank space for the row on %s right after hydration",
     async (platform) => {
       mockNativePlatform = platform;
+      container.innerHTML = renderToString(tree());
+      expect(spaceElement()).not.toBeNull();
+      expect(container).not.toHaveTextContent(ROW_LABEL);
 
       await hydrateFromServerHtml();
 
@@ -202,16 +205,15 @@ describe("Home subscription row visibility around hydration", () => {
     }
   );
 
-  it("shows only blank space on iOS while the country is pending", async () => {
+  it("renders nothing, not even blank space, on iOS while the country is pending after hydration", async () => {
     await hydrateFromServerHtml();
 
-    expect(container).not.toHaveTextContent(ROW_LABEL);
-    expect(container.querySelector("a, button, svg, img")).toBeNull();
-    expect(spaceElement()).not.toBeNull();
+    expect(container).toBeEmptyDOMElement();
   });
 
-  it("replaces the blank space with the row once iOS resolves to US", async () => {
+  it("inserts the row once iOS resolves to US", async () => {
     await hydrateFromServerHtml();
+    expect(container).toBeEmptyDOMElement();
 
     await settleCountry("US");
 
@@ -223,9 +225,10 @@ describe("Home subscription row visibility around hydration", () => {
     ["a non-US country", "FR"],
     ["an unknown country", ""],
   ])(
-    "removes the blank space and renders no row when iOS resolves to %s",
+    "keeps iOS empty before and after the country resolves to %s",
     async (_label, country) => {
       await hydrateFromServerHtml();
+      expect(container).toBeEmptyDOMElement();
 
       await settleCountry(country);
 
