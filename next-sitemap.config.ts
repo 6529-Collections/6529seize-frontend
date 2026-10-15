@@ -251,13 +251,24 @@ const MINIMUM_SOURCE_ITEMS: Readonly<Record<SitemapFeedName, number>> = {
   profiles: 500,
 };
 
+type SitemapFeedSample = {
+  readonly paths: ISitemapField[];
+  /** Source items received, for feeds whose URLs are filtered from them. */
+  readonly sourceItems: number;
+};
+
 type SitemapFeed = {
   readonly name: SitemapFeedName;
   /** Sitemap URLs emitted per source item, so floors count source items. */
   readonly urlsPerItem: number;
   /** Optional feeds are skipped with a warning even when the policy is `fail`. */
   readonly optional?: boolean;
-  readonly load: () => Promise<ISitemapField[]>;
+  /**
+   * Feeds that emit one set of URLs per item return them directly. A feed that
+   * filters its items returns the sample, so its floor counts what the API
+   * returned rather than what survived filtering.
+   */
+  readonly load: () => Promise<ISitemapField[] | SitemapFeedSample>;
 };
 
 // Profiles are a bounded sample: the highest-level community members, scanned
@@ -586,11 +597,12 @@ function isListableProfileHandle(handle: string): boolean {
  * Public profile pages for the highest-level community members, from the
  * public paginated `community-members/top` feed. Only user-chosen handles are
  * listed, because those are the canonical profile URLs: wallet-only identities
- * (`id-0x...` or a bare address) canonicalize elsewhere and are skipped.
+ * (`id-0x...` or a bare address) canonicalize elsewhere and are skipped. The
+ * result also reports how many members the feed returned.
  */
-export async function getProfilePaths(
+export async function getProfileSample(
   fetchJson: FetchJson = defaultFetchJson
-): Promise<ISitemapField[]> {
+): Promise<SitemapFeedSample> {
   const members = await fetchNumberedPaginatedData<unknown>(
     (page) => {
       const params = new URLSearchParams({
@@ -630,7 +642,7 @@ export async function getProfilePaths(
       })
     );
   }
-  return fields;
+  return { paths: fields, sourceItems: members.length };
 }
 
 function getAboutPaths(): ISitemapField[] {
@@ -656,12 +668,11 @@ function getStrategicStaticPaths(): ISitemapField[] {
 
 function assertSourceFloor(
   name: SitemapFeedName,
-  emittedCount: number,
-  multiplier: number,
+  sourceItems: number,
   options: SitemapBuildOptions
 ): void {
   const minimum = options.minimumItems?.[name] ?? MINIMUM_SOURCE_ITEMS[name];
-  if (emittedCount / multiplier < minimum) {
+  if (sourceItems < minimum) {
     throw new Error(`Sitemap ${name} inventory fell below its required floor`);
   }
 }
@@ -835,7 +846,13 @@ export async function buildAdditionalSitemapPaths(
       name: "profiles",
       urlsPerItem: 1,
       optional: true,
-      load: () => getProfilePaths(fetchJson),
+      load: async () => {
+        const sample = await getProfileSample(fetchJson);
+        log(
+          `profiles: listing ${sample.paths.length} of ${sample.sourceItems} top members (wallet-only identities and conflicting handles are skipped)`
+        );
+        return sample;
+      },
     },
   ];
 
@@ -845,13 +862,12 @@ export async function buildAdditionalSitemapPaths(
         loadSitemapSection(
           feed.name,
           async () => {
-            const paths = await feed.load();
-            assertSourceFloor(
-              feed.name,
-              paths.length,
-              feed.urlsPerItem,
-              options
-            );
+            const loaded = await feed.load();
+            const paths = Array.isArray(loaded) ? loaded : loaded.paths;
+            const sourceItems = Array.isArray(loaded)
+              ? paths.length / feed.urlsPerItem
+              : loaded.sourceItems;
+            assertSourceFloor(feed.name, sourceItems, options);
             return paths;
           },
           {

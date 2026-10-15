@@ -2,7 +2,7 @@ import sitemapConfig, {
   buildAdditionalSitemapPaths,
   fetchCursorPaginatedData,
   getNftSitemapPaths,
-  getProfilePaths,
+  getProfileSample,
   getPublicWavePaths,
   MUSEUM_STATIC_CANONICAL_PATHS,
   STATIC_INDEXABLE_PATHS,
@@ -1137,9 +1137,10 @@ describe("next-sitemap profile pages", () => {
       },
     });
 
-    const paths = await getProfilePaths(fetchJson);
+    const sample = await getProfileSample(fetchJson);
 
-    expect(paths).toEqual([
+    expect(sample.sourceItems).toBe(11);
+    expect(sample.paths).toEqual([
       {
         loc: "/punk6529",
         changefreq: "weekly",
@@ -1151,6 +1152,65 @@ describe("next-sitemap profile pages", () => {
     ]);
   });
 
+  it("counts the members the feed returned, not the listed handles, against the floor", async () => {
+    const walletOnly = Array.from({ length: 550 }, (_, index) =>
+      member(`id-0x${index.toString(16).padStart(40, "0")}`)
+    );
+    const handles = Array.from({ length: 50 }, (_, index) =>
+      member(`handle${index}`)
+    );
+    const warn = jest.fn();
+    const log = jest.fn();
+
+    const paths = await buildAdditionalSitemapPaths(
+      makeFetchJson({
+        ...healthyFeedResponses(),
+        [PROFILES_PAGE_1_URL]: {
+          data: [...walletOnly, ...handles],
+          next: false,
+        },
+      }),
+      museumBundle,
+      testOptions({
+        minimumItems: { ...ZERO_FLOORS, profiles: 500 },
+        failurePolicy: "fallback",
+        warn,
+        log,
+      })
+    );
+
+    const profileLocations = paths
+      .map((path) => path.loc)
+      .filter((loc) => loc.startsWith("/handle"));
+    expect(profileLocations).toHaveLength(50);
+    expect(warn).not.toHaveBeenCalled();
+    expect(log).toHaveBeenCalledWith(
+      expect.stringContaining("profiles: listing 50 of 600 top members")
+    );
+    expect(log).toHaveBeenCalledWith(
+      expect.stringMatching(/profiles=50(?:,|$)/u)
+    );
+  });
+
+  it("still skips the optional profile section when the feed returns too few members", async () => {
+    const warn = jest.fn();
+
+    const paths = await buildAdditionalSitemapPaths(
+      makeFetchJson(healthyFeedResponses()),
+      museumBundle,
+      testOptions({
+        minimumItems: { ...ZERO_FLOORS, profiles: 500 },
+        failurePolicy: "fail",
+        warn,
+      })
+    );
+
+    expect(paths.map((path) => path.loc)).not.toContain("/punk6529");
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("profiles section skipped")
+    );
+  });
+
   it("requests the public level-ranked feed and stops at the page cap", async () => {
     const requested: string[] = [];
     const fetchJson = async (url: string): Promise<unknown> => {
@@ -1159,18 +1219,19 @@ describe("next-sitemap profile pages", () => {
       return { data: [member(`member${page}`)], next: true };
     };
 
-    const paths = await getProfilePaths(fetchJson);
+    const sample = await getProfileSample(fetchJson);
 
     expect(requested).toHaveLength(10);
     expect(requested[0]).toBe(PROFILES_PAGE_1_URL);
-    expect(paths.map((path) => path.loc)).toEqual(
+    expect(sample.sourceItems).toBe(10);
+    expect(sample.paths.map((path) => path.loc)).toEqual(
       Array.from({ length: 10 }, (_, index) => `/member${index + 1}`)
     );
   });
 
   it("rejects garbled feed items", async () => {
     await expect(
-      getProfilePaths(
+      getProfileSample(
         makeFetchJson({
           [PROFILES_PAGE_1_URL]: { data: [{ level: 5 }], next: false },
         })

@@ -79,6 +79,11 @@ export function getSitemapRetryDelayMs(
   return Math.round(ceiling / 2 + (ceiling / 2) * random());
 }
 
+/**
+ * Runs `task`, retrying failures. Attempts are intentionally sequential: each
+ * retry waits out its backoff before the next request, so it is written as a
+ * recursive attempt function rather than a loop with awaits.
+ */
 export async function runSitemapTaskWithRetry<T>(
   label: string,
   task: () => Promise<T>,
@@ -87,11 +92,11 @@ export async function runSitemapTaskWithRetry<T>(
   const attempts = Math.max(1, options.attempts ?? DEFAULT_ATTEMPTS);
   const sleep = options.sleep ?? defaultSleep;
 
-  for (let attempt = 1; ; attempt += 1) {
+  const attempt = async (number: number): Promise<T> => {
     try {
       return await task();
     } catch (error) {
-      if (attempt >= attempts) {
+      if (number >= attempts) {
         throw new Error(
           `Sitemap ${label} failed after ${attempts} attempt${
             attempts === 1 ? "" : "s"
@@ -99,15 +104,18 @@ export async function runSitemapTaskWithRetry<T>(
           { cause: error }
         );
       }
-      const delayMs = getSitemapRetryDelayMs(attempt, options);
+      const delayMs = getSitemapRetryDelayMs(number, options);
       options.onRetry?.(
-        `${label} attempt ${attempt}/${attempts} failed (${errorMessage(
+        `${label} attempt ${number}/${attempts} failed (${errorMessage(
           error
         )}); retrying in ${delayMs} ms`
       );
       await sleep(delayMs);
+      return attempt(number + 1);
     }
-  }
+  };
+
+  return attempt(1);
 }
 
 /**

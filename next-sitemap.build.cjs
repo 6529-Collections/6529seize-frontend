@@ -22,7 +22,7 @@ if (!config || typeof config !== "object") {
 }
 
 if (typeof sitemapConfig.buildAdditionalSitemapPaths !== "function") {
-  throw new Error(
+  throw new TypeError(
     "next-sitemap config did not export buildAdditionalSitemapPaths"
   );
 }
