@@ -54,8 +54,8 @@ published competitions. The row starts with **Chat**, followed by the competitio
 leaderboard and results views, **Votes**, and **Settings**. **Settings** is the last
 competition tab, followed by **Competitions** when available and then named curations.
 **Votes** has **My Votes**, **All votes**, and **Activity** subtabs, all scoped to
-the selected competition. In the app, these subtabs use the shared compact pill
-style; web keeps underlined tabs. **Settings** opens its rules, access, appearance,
+the selected competition. These subtabs use the shared compact pill style on
+desktop, mobile web, and the app. **Settings** opens its rules, access, appearance,
 administration and pause history with the existing read and edit permissions.
 Chat remains shared by the whole wave.
 

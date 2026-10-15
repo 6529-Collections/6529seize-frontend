@@ -8,7 +8,7 @@ import { useKey } from "react-use";
 import BellIcon from "@/components/common/icons/BellIcon";
 import LazyHeaderSearchModal, {
   preloadHeaderSearchModal,
-  useHeaderSearchModalIdlePreload,
+  useHeaderSearchModalEarlyPreload,
 } from "@/components/header/header-search/LazyHeaderSearchModal";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
@@ -58,9 +58,10 @@ function WebSidebar({
 
   const showDesktopSearch = !isMobile;
 
-  // Warm the search modal once the page is idle, so the first open does not
-  // wait on the network. The chunk stays out of first-load JS.
-  useHeaderSearchModalIdlePreload(showDesktopSearch);
+  // Warm the search modal from the visitor's first interaction (or when idle),
+  // so the first open does not wait on the network. The chunk stays out of
+  // first-load JS.
+  useHeaderSearchModalEarlyPreload(showDesktopSearch);
 
   useKey(
     (event) => event.key === "k",

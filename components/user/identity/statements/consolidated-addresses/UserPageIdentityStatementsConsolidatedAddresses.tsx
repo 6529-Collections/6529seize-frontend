@@ -127,18 +127,16 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
     <div>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
         <h3 className="tw-m-0 tw-min-w-0 tw-break-words tw-text-lg tw-font-semibold tw-text-iron-100">
-          {t(locale, "user.profile.identity.statements.addressesHeading", {
+          {t(locale, "user.profile.identity.statements.walletHeading", {
             name: createPossessionStr(profile.handle ?? null),
           })}
         </h3>
-        {walletCount > 0 && (
+        {walletCount > 0 && limits && (
           <span className="tw-ml-auto tw-shrink-0 tw-whitespace-nowrap tw-text-right tw-text-xs tw-text-iron-400">
-            {limits
-              ? t(locale, "user.profile.identity.statements.walletCount", {
-                  count: formatInteger(locale, walletCount),
-                  limit: walletLimit,
-                })
-              : formatInteger(locale, walletCount)}
+            {t(locale, "user.profile.identity.statements.walletCount", {
+              count: formatInteger(locale, walletCount),
+              limit: walletLimit,
+            })}
           </span>
         )}
       </div>

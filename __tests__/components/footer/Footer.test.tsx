@@ -1,6 +1,7 @@
 import Footer from "@/components/footer/Footer";
 import { AboutSection } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
 
 describe("Footer", () => {
   it("uses the subdued page-shell border", () => {
@@ -26,6 +27,16 @@ describe("Footer", () => {
     const images = screen.getAllByRole("img");
     expect(images).toHaveLength(3);
     expect(punk.parentElement?.textContent).not.toContain("||");
+  });
+
+  it("lazy-loads the social icons so server rendering does not preload them", () => {
+    render(<Footer />);
+    for (const image of screen.getAllByRole("img")) {
+      expect(image).toHaveAttribute("loading", "lazy");
+    }
+
+    const html = renderToString(<Footer />);
+    expect(html).not.toMatch(/rel="preload"/);
   });
 
   it("renders policy and contact links", () => {

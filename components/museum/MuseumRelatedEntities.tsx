@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatDate } from "@/i18n/format";
+import { formatUtcDate } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type {
@@ -148,7 +148,7 @@ export function MuseumRelatedEntities({
                           )}
                         </span>{" "}
                         <time dateTime={entity.statusAsOf}>
-                          {formatDate(DEFAULT_LOCALE, entity.statusAsOf)}
+                          {formatUtcDate(DEFAULT_LOCALE, entity.statusAsOf)}
                         </time>
                       </span>
                     )}

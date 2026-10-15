@@ -376,6 +376,8 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
       isApp
         ? {
             paddingBottom: NATIVE_KEYBOARD_COMPOSER_BOTTOM_PADDING,
+            transition:
+              "padding-bottom var(--native-keyboard-layout-transition-duration, 0ms) var(--native-keyboard-layout-transition-easing, ease-out)",
           }
         : undefined,
     [isApp]
