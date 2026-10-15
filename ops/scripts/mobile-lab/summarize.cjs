@@ -46,11 +46,14 @@ function typeTotal(run, type, field) {
 function pageMedians(results) {
   const pages = [...new Set(results.runs.map((run) => pageKey(run.label)))];
   return pages.map((page) => {
-    const cold = results.runs.filter((run) =>
-      run.label.startsWith(`${page}-cold`)
+    // Runs that failed to navigate are not measurements of the page.
+    const cold = results.runs.filter(
+      (run) => run.label.startsWith(`${page}-cold`) && !run.navigationError
     );
     const warm =
-      results.runs.find((run) => run.label === `${page}-warm-1`) || null;
+      results.runs.find(
+        (run) => run.label === `${page}-warm-1` && !run.navigationError
+      ) || null;
     const pick = (fn) => median(cold.map(fn));
     return {
       page,

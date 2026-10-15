@@ -128,6 +128,11 @@ describe("mobile lab summary", () => {
       "- waves-cold-1: Redirected to the access gate: /access"
     );
     expect(render(results, null)).not.toContain("Navigation errors");
+    // The failed run does not count towards the page's medians.
+    const waves = pageMedians(withError).find(
+      (row: { page: string }) => row.page === "waves"
+    );
+    expect(waves).toMatchObject({ coldRuns: 0, transfer: null });
   });
 
   it("renders the budgets and a comparison with an earlier run", () => {
