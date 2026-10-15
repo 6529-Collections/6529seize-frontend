@@ -199,6 +199,7 @@ export const COMPETITION_MESSAGES = {
   "competitions.overlap":
     "Schedules may overlap. Parallel competitions have independent voting budgets.",
   "competitions.signIn": "Connect your wallet to participate.",
+  "competitions.connectWallet": "Connect Wallet",
   "competitions.withdrawn": "Withdrawn",
   "competitions.disqualified": "Disqualified",
   "competitions.winner": "Winner",

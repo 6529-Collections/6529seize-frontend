@@ -1,6 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 
 import {
+  captureSafeScreenshot,
   expect,
   expectNoHorizontalOverflow,
   test,
@@ -181,7 +182,7 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     );
   });
 
-  test("opens the existing consolidation form from the own-profile wallet entry", async ({
+  test("opens the guided consolidation flow from the own-profile wallet entry", async ({
     page,
   }) => {
     await gotoReady(page, PROFILE_BASE_PATH);
@@ -191,9 +192,9 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       await statements.click();
     }
 
-    await expect(
-      page.getByRole("link", { name: "Wallet Checker" })
-    ).toBeVisible();
+    const walletChecker = page.getByRole("link", { name: "Wallet Checker" });
+    await expect(walletChecker).toBeVisible();
+    await expect(page.getByText(/^\d of 4 addresses$/).first()).toBeVisible();
     const addWallet = page.getByRole("link", {
       name: "Add another wallet",
       exact: true,
@@ -201,21 +202,117 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(addWallet).toBeVisible();
     await expect(addWallet).toHaveAttribute(
       "href",
-      "/delegation/register-consolidation"
+      "/safe-collecting/build-consolidation"
     );
+    const walletHeading = page.getByRole("heading", {
+      name: `${PROFILE_HANDLE}${PROFILE_HANDLE.endsWith("s") ? "'" : "'s"} Wallet`,
+      level: 3,
+    });
+    const statementsHeading = page.getByRole("heading", {
+      name: /ID Statements$/,
+      level: 3,
+    });
+    const addStatement = page.getByRole("button", { name: "Add", exact: true });
+    await expect(walletHeading).toBeVisible();
+    await expect(statementsHeading).toBeVisible();
+    await expect(addStatement).toBeVisible();
+    await expect(walletHeading).toHaveCSS("font-size", "18px");
+    await expect(statementsHeading).toHaveCSS("font-size", "18px");
+    const statementHelp = page.getByRole("button", {
+      name: "About identity statements",
+      exact: true,
+    });
+    await expect(statementHelp).toBeVisible();
+    await expect(
+      page
+        .getByRole("button", { name: "About identity statements", exact: true })
+        .locator("svg")
+    ).toHaveCSS("width", "18px");
+    await expect(
+      page
+        .getByRole("button", { name: "About identity statements", exact: true })
+        .locator("svg")
+    ).toHaveCSS("height", "18px");
+    await expect(statementHelp).toHaveCSS("width", "32px");
+    await expect(statementHelp).toHaveCSS("height", "32px");
+    const checkerBox = await walletChecker.boundingBox();
+    const addWalletBox = await addWallet.boundingBox();
+    const statementHeadingBox = await statementsHeading.boundingBox();
+    const addStatementBox = await addStatement.boundingBox();
+    const helpBox = await statementHelp.boundingBox();
+    expect(checkerBox).not.toBeNull();
+    expect(addWalletBox).not.toBeNull();
+    expect(statementHeadingBox).not.toBeNull();
+    expect(addStatementBox).not.toBeNull();
+    expect(helpBox).not.toBeNull();
+    expect(
+      statementHeadingBox!.x + statementHeadingBox!.width
+    ).toBeLessThanOrEqual(helpBox!.x);
+    expect(helpBox!.x + helpBox!.width).toBeLessThanOrEqual(addStatementBox!.x);
+    expect(
+      Math.abs(checkerBox!.width - addWalletBox!.width)
+    ).toBeLessThanOrEqual(1);
+    expect(Math.abs(checkerBox!.y - addWalletBox!.y)).toBeLessThanOrEqual(1);
+    expect(addWalletBox!.y).toBeLessThan(statementHeadingBox!.y);
+    expect(addStatementBox!.height).toBeLessThan(addWalletBox!.height);
+    expect(
+      Math.abs(
+        statementHeadingBox!.y +
+          statementHeadingBox!.height / 2 -
+          (addStatementBox!.y + addStatementBox!.height / 2)
+      )
+    ).toBeLessThanOrEqual(1);
+    await expectNoHorizontalOverflow(page);
+
+    await captureSafeScreenshot(page, test.info(), "profile-identity-headings");
+
+    await addStatement.click();
+    const addDialog = page.getByRole("dialog");
+    await expect(addDialog).toBeVisible();
+    await expect(
+      addDialog.getByText(
+        "Statements are optional and fully and permanently public.",
+        { exact: true }
+      )
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(addDialog).toBeHidden();
+    await expect(addStatement).toBeFocused();
     await addWallet.click();
 
     await expect(page).toHaveURL(
       (url) =>
-        url.pathname === "/delegation/register-consolidation" &&
+        url.pathname === "/safe-collecting/build-consolidation" &&
         url.search === ""
     );
+    await expect(
+      page.getByRole("heading", { name: "Build a Consolidation", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Before you start" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("textbox", { name: "Wallet 1 address", exact: true })
+    ).toHaveValue(
+      new RegExp(
+        `^${escapeRegExp(process.env["DEV_MODE_WALLET_ADDRESS"] ?? "")}$`,
+        "i"
+      )
+    );
+    await expectNoHorizontalOverflow(page);
+
+    await gotoReady(page, "/safe-collecting/register-consolidation");
     await expect(
       page.getByRole("heading", { name: "Register Consolidation", exact: true })
     ).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Two wallets · two registrations" })
+      page.getByRole("heading", {
+        name: "Every pair of wallets · both directions",
+      })
     ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /^Use guided setup/ })
+    ).toHaveAttribute("href", "/safe-collecting/build-consolidation");
     await expect(page.getByLabel("Collection", { exact: true })).toHaveValue(
       "0"
     );
@@ -247,33 +344,183 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(page.getByText("Subscription History")).toBeVisible();
   });
 
+  test("scrolls to and focuses the top-up section from the notification link", async ({
+    page,
+  }) => {
+    const path = `${PROFILE_BASE_PATH}/subscriptions`;
+    const hash = "#profile-subscriptions-top-up";
+
+    // The section mounts after hydration, so the browser's own hash scroll
+    // finds nothing. Read-only: navigates and observes, never submits.
+    await page.goto(`${path}${hash}`, { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await expect(page).toHaveURL(
+      (url) => url.pathname === path && url.hash === hash
+    );
+
+    const topUp = page.getByRole("region", { name: "Top up" });
+    const heading = page.getByRole("heading", { level: 2, name: "Top up" });
+    await expect(topUp).toHaveAttribute("id", hash.slice(1));
+    await expect(heading).toBeFocused();
+    await expect(heading).toBeInViewport();
+  });
+
   test("renders the own-profile proxy shell without creating a proxy", async ({
     page,
   }) => {
     const path = `${PROFILE_BASE_PATH}/proxy`;
+    // Synthetic rows exercise narrow layouts and owner controls without writes.
+    await page.route(
+      (url) => /\/proxies(?:\/|$)/.test(url.pathname),
+      async (route) => {
+        if (route.request().method() !== "GET") {
+          await route.abort("blockedbyclient");
+          return;
+        }
+        const url = new URL(route.request().url());
+        if (!/\/profiles\/[^/]+\/proxies\/?$/.test(url.pathname)) {
+          await route.fallback();
+          return;
+        }
+        url.pathname = url.pathname.replace(
+          /\/profiles\/[^/]+\/proxies\/?$/,
+          `/identities/${encodeURIComponent(PROFILE_HANDLE)}`
+        );
+        const identityResponse = await route.fetch({ url: url.toString() });
+        expect(identityResponse.ok()).toBe(true);
+        const identity: { id: string } = await identityResponse.json();
+        expect(typeof identity.id).toBe("string");
+        const owner = { id: identity.id, handle: PROFILE_HANDLE, pfp: null };
+        const peer = {
+          id: "proxy-layout-peer",
+          handle: "proxy_layout_fixture",
+          pfp: null,
+        };
+        const startTime = Date.now() - 86400000;
+        const fixtures = [
+          { id: "proxy-layout-received", created_by: peer, granted_to: owner },
+          { id: "proxy-layout-granted", created_by: owner, granted_to: peer },
+        ].map((proxy) => ({
+          ...proxy,
+          created_at: startTime,
+          actions: [
+            {
+              id: `${proxy.id}-action`,
+              proxy_id: proxy.id,
+              action_type: "ALLOCATE_REP",
+              credit_amount: 123456789,
+              credit_spent: 12345678,
+              start_time: startTime,
+              end_time: startTime + 2592000000,
+              created_at: startTime,
+              accepted_at: null,
+              rejected_at: null,
+              revoked_at: null,
+              is_active: true,
+            },
+          ],
+        }));
+        await route.fulfill({ json: fixtures });
+      }
+    );
 
     await gotoReady(page, path);
 
     await expectProfileShell(page, "Proxy");
-    await expectAnyVisible(
-      [
-        {
-          label: "desktop proxy type tabs",
-          locator: page.getByRole("tablist", { name: "Proxy Type" }),
-        },
-        {
-          label: "mobile proxy type menu",
-          locator: page.getByRole("button", { name: /Proxy Type: All/i }),
-        },
-      ],
-      "the proxy type controls"
-    );
+    const filters = page.getByRole("tablist", { name: "Proxy Type" });
+    await expect(filters).toBeVisible();
+    for (const name of ["All", "Received", "Granted"]) {
+      const tab = filters.getByRole("tab", { name, exact: true });
+      await expect(tab).toBeInViewport({ ratio: 1 });
+      await expect(tab).toHaveCSS("font-size", "13px");
+    }
+    await expect(
+      filters.getByRole("tab", { name: "All", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
     await expect(
       page.getByText("Received proxies", { exact: true })
     ).toBeVisible();
     await expect(
       page.getByText("Granted proxies", { exact: true })
     ).toBeVisible();
+    await filters.getByRole("tab", { name: "Received", exact: true }).click();
+    await expect(
+      page.getByText("Received proxies", { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByText("Granted proxies", { exact: true })
+    ).toHaveCount(0);
+    await filters
+      .getByRole("tab", { name: "Received", exact: true })
+      .press("ArrowRight");
+    await expect(
+      filters.getByRole("tab", { name: "Granted", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(
+      page.getByText("Granted proxies", { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByText("Received proxies", { exact: true })
+    ).toHaveCount(0);
+    await filters
+      .getByRole("tab", { name: "Granted", exact: true })
+      .press("Home");
+    await expect(
+      page.getByText("Received proxies", { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByText("Granted proxies", { exact: true })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    const rows = page.getByRole("main").locator("[data-proxy-action-row]");
+    await expect(rows).toHaveCount(2);
+    const initialViewport = page.viewportSize()!;
+    for (const width of [390, 768, 1024, 1280, 1440]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await expectNoHorizontalOverflow(page);
+      for (const key of ["Home", "End", "Home"]) {
+        await filters.getByRole("tab", { selected: true }).press(key);
+        const focused = filters.getByRole("tab").locator(":scope:focus");
+        await expect
+          .poll(() =>
+            focused.evaluate((element) => {
+              const style = getComputedStyle(element);
+              const rect = element.getBoundingClientRect();
+              const clip = element
+                .closest('[role="tablist"]')!
+                .getBoundingClientRect();
+              const extent = Math.max(
+                0,
+                parseFloat(style.outlineWidth) + parseFloat(style.outlineOffset)
+              );
+              return (
+                style.outlineStyle !== "none" &&
+                extent > 0 &&
+                rect.left - extent >= clip.left &&
+                rect.top - extent >= clip.top &&
+                rect.right + extent <= clip.right &&
+                rect.bottom + extent <= clip.bottom
+              );
+            })
+          )
+          .toBe(true);
+      }
+      for (const row of await rows.all()) {
+        await expect
+          .poll(() =>
+            row.evaluate((element) => {
+              const cells = Array.from(element.children).filter(
+                (cell): cell is HTMLElement => cell instanceof HTMLElement
+              );
+              return cells.every(
+                (cell) => cell.scrollWidth <= cell.clientWidth + 1
+              );
+            })
+          )
+          .toBe(true);
+      }
+    }
+    await page.setViewportSize(initialViewport);
   });
 
   // Plans now require a session; retain the layout contract in the authenticated pack.

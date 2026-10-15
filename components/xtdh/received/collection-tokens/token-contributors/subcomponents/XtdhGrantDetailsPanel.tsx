@@ -124,14 +124,14 @@ export function XtdhGrantDetailsPanel({
               )}
             </div>
             <div className="tw-flex tw-flex-col tw-gap-1">
-              <div className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
+              <div className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500 group-data-[typography=profile]/profile-xtdh:tw-text-[11px] group-data-[typography=profile]/profile-xtdh:tw-font-medium">
                 Grantor
               </div>
-              <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+              <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100 group-data-[typography=profile]/profile-xtdh:tw-text-[15px]">
                 {displayHandle}
               </p>
               {grantorHandle && (
-                <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+                <p className="tw-m-0 tw-text-xs tw-text-iron-400 group-data-[typography=profile]/profile-xtdh:tw-text-meta group-data-[typography=profile]/profile-xtdh:tw-font-normal group-data-[typography=profile]/profile-xtdh:tw-text-iron-500 group-data-[typography=profile]/profile-xtdh:tw-tabular-nums">
                   {displayAddress}
                 </p>
               )}
@@ -159,7 +159,7 @@ export function XtdhGrantDetailsPanel({
                 <span>{viewModel.rateLabel}</span>
                 {viewModel.ratePerTokenLabel ? (
                   <span
-                    className="tw-text-xs tw-font-semibold tw-text-iron-400 tw-whitespace-nowrap"
+                    className="tw-text-xs tw-font-semibold tw-text-iron-400 tw-whitespace-nowrap group-data-[typography=profile]/profile-xtdh:tw-text-meta group-data-[typography=profile]/profile-xtdh:tw-font-normal group-data-[typography=profile]/profile-xtdh:tw-text-iron-500 group-data-[typography=profile]/profile-xtdh:tw-tabular-nums"
                     title={viewModel.ratePerTokenHint ?? undefined}
                   >
                     ({viewModel.ratePerTokenLabel}/token)

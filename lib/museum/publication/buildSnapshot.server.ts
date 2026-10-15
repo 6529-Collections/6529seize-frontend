@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import { isRfc3339DateTime, parseRfc3339DateTime } from "./rfc3339";
 import { isExactGitCommit, MUSEUM_REPOSITORY_NAME } from "./security";
 import type { MuseumLastValidPublication, MuseumPublication } from "./types";
 
@@ -41,8 +42,7 @@ function hasMinimumPublicationShape(
     isExactGitCommit(identity["commit"]) &&
     typeof identity["manifestPath"] === "string" &&
     Number.isSafeInteger(identity["inventoryCount"]) &&
-    typeof identity["assembledAt"] === "string" &&
-    Number.isFinite(Date.parse(identity["assembledAt"])) &&
+    isRfc3339DateTime(identity["assembledAt"]) &&
     Array.isArray(value["declaredSourcePaths"]) &&
     Array.isArray(value["artists"]) &&
     Array.isArray(value["projects"]) &&
@@ -59,7 +59,7 @@ export function createMuseumPublicationBuildSnapshot(
   publication: MuseumPublication,
   generatedAt = new Date().toISOString()
 ): MuseumPublicationBuildSnapshot {
-  if (!Number.isFinite(Date.parse(generatedAt))) {
+  if (!isRfc3339DateTime(generatedAt)) {
     throw new TypeError("publication_build_snapshot_timestamp_invalid");
   }
   return {
@@ -76,8 +76,7 @@ export function parseMuseumPublicationBuildSnapshot(
 ): MuseumLastValidPublication | undefined {
   if (!isRecord(value)) return undefined;
   const generatedAt = value["generatedAt"];
-  const generatedAtMs =
-    typeof generatedAt === "string" ? Date.parse(generatedAt) : Number.NaN;
+  const generatedAtMs = parseRfc3339DateTime(generatedAt) ?? Number.NaN;
   const publicationSha256 = value["publicationSha256"];
   const publication = value["publication"];
   if (

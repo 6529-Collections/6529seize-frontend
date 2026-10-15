@@ -2,6 +2,8 @@ import type { Locator, Page } from "@playwright/test";
 
 import {
   expect,
+  expectActiveOptionIndicator,
+  expectKeyboardFocusIndicator,
   expectNoHorizontalOverflow,
   test,
   waitForRouteReady,
@@ -86,6 +88,59 @@ async function getStagingApiHeaders(
 }
 
 test.describe("Public tools, calendar, and removed Groups route coverage @surface @medium @large @readonly", () => {
+  test("About groups Safe Collecting pages and keeps GDRC and Primary Address last", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/about");
+    const main = page.getByRole("main").first();
+    const wallets = main.getByRole("region", {
+      name: "Safe Collecting",
+      exact: true,
+    });
+    // Links by exact href, scoped under accessible queries.
+    const mainLinkTo = (href: string) =>
+      page.getByRole("main").first().locator(`a[href="${href}"]`);
+    const walletLinkTo = (href: string) =>
+      page
+        .getByRole("main")
+        .first()
+        .getByRole("region", { name: "Safe Collecting", exact: true })
+        .locator(`a[href="${href}"]`);
+    const collections = main.getByRole("region", {
+      name: "Collections & Minting",
+      exact: true,
+    });
+    await expect(wallets).toBeVisible();
+    await expect(wallets.getByRole("link").last()).toHaveAttribute(
+      "href",
+      "/about/primary-address"
+    );
+    await expect(collections.getByRole("link").last()).toHaveAttribute(
+      "href",
+      "/about/gdrc1"
+    );
+    await expect(mainLinkTo("/about/nft-delegation")).toHaveCount(0);
+    await expect(walletLinkTo("/about/gdrc1")).toHaveCount(0);
+    for (const path of [
+      "/safe-collecting",
+      "/safe-collecting/tap-guide",
+      "/safe-collecting/faq",
+      "/safe-collecting/consolidation-use-cases",
+      "/safe-collecting/wallet-checker",
+    ]) {
+      await expect(walletLinkTo(path)).toHaveCount(1);
+    }
+    await wallets
+      .getByRole("link", { name: "Open page: FAQ", exact: true })
+      .click();
+    await expect(page).toHaveURL(
+      (url) => url.pathname === "/safe-collecting/faq"
+    );
+    await expect(
+      page.getByRole("heading", { level: 1, name: "FAQ", exact: true })
+    ).toBeVisible();
+  });
+
   test("renders the Tools index with grouped utility links", async ({
     page,
   }) => {
@@ -96,7 +151,9 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expect(
       page.getByRole("heading", { level: 1, name: "6529 Tools" })
     ).toBeVisible();
-    await expect(page.getByText("NFT Delegation")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Safe Collecting", exact: true })
+    ).toBeVisible();
     await expect(page.getByText("The Memes Tools")).toBeVisible();
     await expect(page.getByText("Builder Tools")).toBeVisible();
     await expect(
@@ -619,6 +676,13 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       0
     );
 
+    // A @tailwindcss/forms control drawing its own ring on keyboard focus.
+    await expectKeyboardFocusIndicator(
+      page,
+      page.getByLabel("Contract", { exact: true }),
+      { maxTabs: 150 }
+    );
+
     if (testInfo.project.name === "web-desktop-chromium") {
       const [logoBox, contractBox] = await Promise.all([
         page.getByAltText("re-memes").boundingBox(),
@@ -644,6 +708,9 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       await memeOption.tap();
     } else {
       await referenceSearch.press("ArrowDown");
+      // The active Headless UI option keeps focus on the input, so it has to
+      // paint its own indicator instead of a background tint alone.
+      await expectActiveOptionIndicator(memeOption);
       await referenceSearch.press("Enter");
     }
 

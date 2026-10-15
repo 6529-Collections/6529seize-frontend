@@ -38,13 +38,14 @@ export function getDateFilters(
       filters += `&from_date=${formatDateFilterDate(firstDayOfMonth)}`;
       break;
     }
+    // Month and year math sets the target month and day in one call. Setting
+    // the month first on a 29th-31st date overflows into the next month (for
+    // example Oct 31 -> "Sep 31" -> Oct 1), which inverts the range.
     case DateIntervalsSelection.PREVIOUS_MONTH: {
-      const firstDayOfPreviousMonth = new Date();
-      firstDayOfPreviousMonth.setUTCMonth(
-        firstDayOfPreviousMonth.getUTCMonth() - 1
-      );
-      firstDayOfPreviousMonth.setUTCDate(1);
-      const lastDayOfPreviousMonth = new Date();
+      const now = new Date();
+      const firstDayOfPreviousMonth = new Date(now);
+      firstDayOfPreviousMonth.setUTCMonth(now.getUTCMonth() - 1, 1);
+      const lastDayOfPreviousMonth = new Date(now);
       lastDayOfPreviousMonth.setUTCDate(0);
       filters += `&from_date=${formatDateFilterDate(firstDayOfPreviousMonth)}`;
       filters += `&to_date=${formatDateFilterDate(lastDayOfPreviousMonth)}`;
@@ -52,21 +53,16 @@ export function getDateFilters(
     }
     case DateIntervalsSelection.YEAR_TO_DATE: {
       const firstDayOfYear = new Date();
-      firstDayOfYear.setUTCMonth(0);
-      firstDayOfYear.setUTCDate(1);
+      firstDayOfYear.setUTCMonth(0, 1);
       filters += `&from_date=${formatDateFilterDate(firstDayOfYear)}`;
       break;
     }
     case DateIntervalsSelection.LAST_YEAR: {
-      const firstDayOfLastYear = new Date();
-      firstDayOfLastYear.setUTCFullYear(
-        firstDayOfLastYear.getUTCFullYear() - 1
-      );
-      firstDayOfLastYear.setUTCMonth(0);
-      firstDayOfLastYear.setUTCDate(1);
-      const lastDayOfLastYear = new Date();
-      lastDayOfLastYear.setUTCMonth(0);
-      lastDayOfLastYear.setUTCDate(0);
+      const now = new Date();
+      const firstDayOfLastYear = new Date(now);
+      firstDayOfLastYear.setUTCFullYear(now.getUTCFullYear() - 1, 0, 1);
+      const lastDayOfLastYear = new Date(now);
+      lastDayOfLastYear.setUTCFullYear(now.getUTCFullYear(), 0, 0);
       filters += `&from_date=${formatDateFilterDate(firstDayOfLastYear)}`;
       filters += `&to_date=${formatDateFilterDate(lastDayOfLastYear)}`;
       break;

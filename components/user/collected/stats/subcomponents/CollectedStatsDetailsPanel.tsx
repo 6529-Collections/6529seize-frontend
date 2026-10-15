@@ -43,7 +43,7 @@ export function CollectedStatsDetailsPanel({
         {isOpen && (
           <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/90 tw-bg-gradient-to-b tw-from-iron-900/50 tw-via-iron-950/40 tw-to-black tw-px-3 tw-pb-3 tw-pt-3 tw-ring-1 tw-ring-inset tw-ring-white/[0.04] md:tw-px-6 md:tw-pb-6 md:tw-pt-5">
             {statsPath === null ? (
-              <div className="tw-py-2 tw-text-sm tw-text-iron-400">
+              <div className="tw-py-2 tw-text-[15px]/5 tw-font-normal tw-text-iron-300">
                 {unavailableMessage}
               </div>
             ) : (

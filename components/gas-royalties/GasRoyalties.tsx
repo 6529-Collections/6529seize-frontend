@@ -70,10 +70,13 @@ type DateFilterSelection =
   | typeof PRIMARY_SALES_SELECTION
   | typeof CUSTOM_BLOCKS_SELECTION;
 
-function formatLocalDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
+// Custom dates come from DatePickerModal, which builds them with
+// new Date("YYYY-MM-DD") (UTC midnight), and the request filters are built
+// from UTC getters, so labels and file names must read UTC too.
+function formatUtcDate(date: Date): string {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
 
@@ -87,8 +90,8 @@ function getCustomDateSelectionLabel(
   fromDate?: Date,
   toDate?: Date
 ) {
-  const formattedFromDate = fromDate ? formatLocalDate(fromDate) : undefined;
-  const formattedToDate = toDate ? formatLocalDate(toDate) : undefined;
+  const formattedFromDate = fromDate ? formatUtcDate(fromDate) : undefined;
+  const formattedToDate = toDate ? formatUtcDate(toDate) : undefined;
   if (formattedFromDate && formattedToDate) {
     return t(locale, "memeData.filters.dates.both", {
       from: formattedFromDate,
@@ -228,10 +231,8 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
     } else if (props.is_custom_blocks) {
       filters = `blocks_${fromBlock}-${toBlock}`;
     } else if (props.date_selection === DateIntervalsSelection.CUSTOM_DATES) {
-      const formattedFromDate = fromDate
-        ? formatLocalDate(fromDate)
-        : undefined;
-      const formattedToDate = toDate ? formatLocalDate(toDate) : undefined;
+      const formattedFromDate = fromDate ? formatUtcDate(fromDate) : undefined;
+      const formattedToDate = toDate ? formatUtcDate(toDate) : undefined;
       filters = `dates_${formattedFromDate ?? ""}-${formattedToDate ?? ""}`;
     } else {
       filters = `${props.date_selection.toLowerCase().replaceAll(" ", "-")}`;

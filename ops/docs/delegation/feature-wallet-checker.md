@@ -2,24 +2,25 @@
 
 ## Overview
 
-`/delegation/wallet-checker` is a read-only diagnostics page for one wallet.
+`/safe-collecting/wallet-checker` is a read-only diagnostics page for one wallet.
 It checks delegations, delegation managers, and consolidation relationships.
 
 ## Location in the Site
 
-- Route: `/delegation/wallet-checker`
-- App navigation: `About -> Delegation & Wallets -> Wallet Checker`
-- Profile identity panel link: `/delegation/wallet-checker?address=<primary-wallet>`
+- Route: `/safe-collecting/wallet-checker`
+- App navigation: `About -> Safe Collecting -> Wallet Checker`
+- Profile identity panel link: `/safe-collecting/wallet-checker?address=<primary-wallet>`
 
 ## Entry Points
 
 - Open `Wallet Checker` from the Delegation menu.
-- Open `/delegation/wallet-checker` directly.
-- Open deep links such as `/delegation/wallet-checker?address=<wallet-or-ens>`.
+- Open `/safe-collecting/wallet-checker` directly.
+- Open deep links such as `/safe-collecting/wallet-checker?address=<wallet-or-ens>`.
 
 ## What It Shows
 
 - `Delegations`: rows with `From`, `To`, `Collection`, `Use Case`, `Tokens`, and `Expiry`.
+  A dated expiry shows the exact date, time and time zone in your local time.
 - `Active Minting Delegation for The Memes`: shown when a matching active row is
   found for `The Memes` or `Any Collection` with use case `#2` (or `#1` fallback).
 - `Delegation Managers`: manager rows (`From`, `To`, `Collection`).

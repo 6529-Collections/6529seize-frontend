@@ -30,7 +30,7 @@ export default function NowMintingDetailsAccordion({
   const details = [
     {
       label: t(locale, "home.nowMinting.editionDetails.mintDate"),
-      value: printMintDate(mintDate),
+      value: printMintDate(mintDate, locale),
     },
     ...(fileType
       ? [

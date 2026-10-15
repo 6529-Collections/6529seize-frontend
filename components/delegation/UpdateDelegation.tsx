@@ -1,5 +1,6 @@
 "use client";
 
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useEnsResolution } from "@/hooks/useEnsResolution";
 import { useState } from "react";
 import { useEnsName } from "wagmi";
@@ -12,6 +13,10 @@ import {
   CONSOLIDATION_USE_CASE,
   SUB_DELEGATION_USE_CASE,
 } from "./delegation-constants";
+import {
+  EMPTY_DELEGATION_EXPIRY,
+  getDelegationExpiryError,
+} from "./delegation-expiry";
 import {
   getGasError,
   type DelegationWriteSettledHandler,
@@ -42,6 +47,7 @@ interface Props {
 }
 
 export default function UpdateDelegationComponent(props: Readonly<Props>) {
+  const locale = useBrowserLocale();
   const isDelegation = ![
     CONSOLIDATION_USE_CASE.use_case,
     SUB_DELEGATION_USE_CASE.use_case,
@@ -50,8 +56,8 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
   const [showExpiryCalendar, setShowExpiryCalendar] = useState(false);
   const [showTokensInput, setShowTokensInput] = useState(false);
 
-  const [delegationDate, setDelegationDate] = useState<Date | undefined>(
-    undefined
+  const [delegationExpiry, setDelegationExpiry] = useState(
+    EMPTY_DELEGATION_EXPIRY
   );
   const [delegationToken, setDelegationToken] = useState<number | undefined>(
     undefined
@@ -81,8 +87,8 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
       props.collection.contract,
       props.delegation.wallet,
       delegationToAddress,
-      isDelegation && showExpiryCalendar && delegationDate
-        ? delegationDate.getTime() / 1000
+      isDelegation && showExpiryCalendar && delegationExpiry.expiresAt !== null
+        ? delegationExpiry.expiresAt
         : NEVER_DATE,
       props.delegation.use_case,
       !(isDelegation && showTokensInput),
@@ -92,13 +98,20 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
       validate().length === 0 ? "updateDelegationAddress" : undefined,
   };
 
-  function validate() {
+  function validate(submittedAtMs?: number) {
     const newErrors: string[] = [];
     if (!delegationToAddress || !isValidEthAddress(delegationToAddress)) {
       newErrors.push("Missing or invalid New Address");
     }
-    if (showExpiryCalendar && !delegationDate) {
-      newErrors.push("Missing or invalid Expiry");
+    const expiryError = showExpiryCalendar
+      ? getDelegationExpiryError(
+          locale,
+          delegationExpiry.expiresAt,
+          submittedAtMs
+        )
+      : null;
+    if (expiryError) {
+      newErrors.push(expiryError);
     }
     if (showTokensInput && !delegationToken) {
       newErrors.push("Missing or invalid Token ID");
@@ -233,7 +246,8 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
               />
               {showExpiryCalendar && (
                 <DelegationExpiryCalendar
-                  setDelegationDate={setDelegationDate}
+                  value={delegationExpiry}
+                  onChange={setDelegationExpiry}
                 />
               )}
             </DelegationFormField>

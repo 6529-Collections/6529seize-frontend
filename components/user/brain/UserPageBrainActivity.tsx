@@ -41,13 +41,13 @@ function ActivityCardHeader({
       <div className="tw-min-w-0">
         <h3
           id="brain-activity-heading"
-          className="tw-m-0 tw-text-sm tw-font-bold tw-tracking-wide tw-text-iron-50"
+          className="tw-m-0 tw-text-[15px]/5 tw-font-semibold tw-tracking-wide tw-text-iron-100"
         >
           Activity
         </h3>
       </div>
       {periodLabel && totalDrops !== undefined && (
-        <div className="tw-text-xs tw-font-medium tw-text-iron-400 sm:tw-max-w-none sm:tw-text-right">
+        <div className="tw-text-meta/4 tw-font-normal tw-tabular-nums tw-text-iron-500 sm:tw-max-w-none sm:tw-text-right">
           {totalDropsLabel} public post
           {totalDrops === 1 ? "" : "s"} in {periodLabel}
         </div>
@@ -83,7 +83,7 @@ export default function UserPageBrainActivity({
     content = <UserPageBrainActivityHeatmapLoading />;
   } else if (activityQuery.status === "error") {
     content = (
-      <p className="tw-m-0 tw-px-4 tw-text-sm tw-text-iron-400 md:tw-px-5">
+      <p className="tw-m-0 tw-px-4 tw-text-[15px]/5 tw-font-normal tw-text-iron-300 md:tw-px-5">
         Unable to load activity.
       </p>
     );
@@ -91,7 +91,7 @@ export default function UserPageBrainActivity({
     content = <UserPageBrainActivityHeatmap activity={activity} />;
   } else {
     content = (
-      <p className="tw-m-0 tw-px-4 tw-text-sm tw-italic tw-text-iron-500 md:tw-px-5">
+      <p className="tw-m-0 tw-px-4 tw-text-meta/5 tw-font-normal tw-italic tw-text-iron-500 md:tw-px-5">
         No activity in last 12 months.
       </p>
     );
