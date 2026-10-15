@@ -27,12 +27,17 @@ export default function Footer() {
         target={target}
         rel={newTab ? "noopener noreferrer" : undefined}
       >
+        {/* Below the fold: lazy images are left out of the early-hints Link
+            preload header React builds from eager <img> tags. The 18px box
+            reserves the icon's space so late loading does not shift the text. */}
         <img
-          width="0"
-          height="0"
+          width={18}
+          height={18}
           style={{ height: "18px", width: "auto" }}
           src={img}
           alt={text}
+          loading="lazy"
+          decoding="async"
         />{" "}
         {text}
       </a>
