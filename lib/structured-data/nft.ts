@@ -54,7 +54,7 @@ const lookupNftCached = cache(
  * Looks an NFT up once per request and tells a token the API does not know
  * ("missing") apart from a failed request ("unavailable").
  */
-export async function lookupNft({
+export function lookupNft({
   contract,
   id,
   apiPath = "nfts",
