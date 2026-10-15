@@ -48,6 +48,8 @@ export const createGeneralQueryHandlers = (
     queryClient.invalidateQueries();
   };
   const invalidateAuthSensitiveQueries = () => {
+    // Invalidation only refetches active queries; stop inactive prefetches too.
+    void queryClient.cancelQueries({ queryKey: [QueryKey.WAVE] });
     VIEWER_CONTEXT_QUERY_KEYS.forEach((queryKey) => {
       queryClient.removeQueries({ queryKey: [queryKey] });
     });
