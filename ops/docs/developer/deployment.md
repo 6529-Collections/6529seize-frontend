@@ -73,19 +73,13 @@ an installed nginx proxy does not protect connections that bypass it.
 
 See [AWS connection-timeout guidance](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-load-balancer-attributes.html#connection-idle-timeout).
 
-## Staging server-only runtime values
+## Staging crawler cards
 
-The staging deploy job sends server-only values to the instance in its SSM
-command, and `ops/scripts/deploy-staging-artifact.sh` stores them in a private
-runtime file that the generated PM2 environment reads. The build job never
-receives them, so they cannot enter the client bundle or `PUBLIC_RUNTIME`.
-
-`STAGING_API_KEY` is one of them: the `x-6529-auth` value that server-side
-requests, including the Open Graph preview routes, send to the gated staging
-API when a visitor has no access cookie. It comes from the
-`PLAYWRIGHT_STAGING_ACCESS_CODE` repository secret, and the deploy fails before
-changing the instance when that secret is empty. Update the secret and redeploy
-staging to change the value the server sends. Production does not use it.
+Open Graph and crawler cards on staging intentionally require the visitor's
+staging access cookie, so they do not render without it. The deploy does not
+give the staging server its own access key: `/api` routes bypass the staging
+access gate, so a server-held key would let anyone without staging access render
+pre-release data through `/api/og-metadata/*`.
 
 ## Order and completion
 
