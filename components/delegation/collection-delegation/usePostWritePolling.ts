@@ -69,6 +69,7 @@ export function usePostWritePolling() {
   } as const;
 }
 
+/** @api Resets the shared window between tests. */
 export function resetPostWritePollingForTests(): void {
   clearTimeout(stopTimer);
   stopTimer = undefined;
