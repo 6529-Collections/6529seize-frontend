@@ -19,6 +19,7 @@ jest.mock("@/components/user/utils/UserCICAndLevel", () => ({
   default: () => <div data-testid="cic" />,
 }));
 import { render, screen } from "@testing-library/react";
+import { mockDefaultTimeZone } from "@/__tests__/utils/timeZoneHydration";
 import {
   NextGenTokenImage,
   get16KUrl,
@@ -180,28 +181,37 @@ test("does not render royalty image when prices do not match", () => {
   expect(screen.queryByAltText("pepe")).not.toBeInTheDocument();
 });
 
-test("renders max sale information when show_max_sale is true", () => {
-  const tokenWithMaxSale = {
-    ...token,
-    max_sale_value: 2.5,
-    max_sale_date: "2023-01-01T00:00:00Z",
-  };
-  render(<NextGenTokenImage token={tokenWithMaxSale} show_max_sale />);
+// The sale instant is 2023-01-01T00:00Z. Its date renders in the viewer's
+// zone, so Los Angeles is still on December 31.
+test.each([
+  ["UTC", "Jan 1, 2023"],
+  ["America/Los_Angeles", "Dec 31, 2022"],
+  ["Pacific/Auckland", "Jan 1, 2023"],
+])(
+  "renders max sale information when show_max_sale is true in %s",
+  (zone, saleDate) => {
+    const tokenWithMaxSale = {
+      ...token,
+      max_sale_value: 2.5,
+      max_sale_date: "2023-01-01T00:00:00Z",
+    };
+    const restoreTimeZone = mockDefaultTimeZone(zone);
+    try {
+      render(<NextGenTokenImage token={tokenWithMaxSale} show_max_sale />);
 
-  expect(screen.getByText("Max sale")).toBeInTheDocument();
-  expect(
-    screen.getByText((content, element) => {
-      // Check for presence of "2" (or "2.5" parts) and "Ξ" regardless of locale formatting
-      return content.includes("Ξ") && /2/.test(content);
-    })
-  ).toBeInTheDocument();
-  expect(
-    screen.getByText((content, element) => {
-      // Check for date containing 2023 and 1 (regardless of locale date formatting)
-      return /2023/.test(content) && /1/.test(content);
-    })
-  ).toBeInTheDocument();
-});
+      expect(screen.getByText("Max sale")).toBeInTheDocument();
+      expect(
+        screen.getByText((content, element) => {
+          // Check for presence of "2" (or "2.5" parts) and "Ξ" regardless of locale formatting
+          return content.includes("Ξ") && /2/.test(content);
+        })
+      ).toBeInTheDocument();
+      expect(screen.getByText(saleDate)).toBeInTheDocument();
+    } finally {
+      restoreTimeZone();
+    }
+  }
+);
 
 test("renders 'Not Sold' when show_max_sale is true but no sale data", () => {
   render(<NextGenTokenImage token={token} show_max_sale />);
