@@ -158,6 +158,8 @@ it("retries a failed load", async () => {
 
   expect(await screen.findByTestId("token")).toBeInTheDocument();
   expect(screen.queryByRole("alert")).toBeNull();
+  // Two mount requests (the first is aborted by the second) plus one retry.
+  expect(commonApiFetch).toHaveBeenCalledTimes(3);
 });
 
 it("reports load failures to the parent and clears them on success", async () => {

@@ -155,6 +155,28 @@ describe("NextGen request-scoped loading", () => {
     expect(fetchCounts()).toEqual({ "nextgen/collections/pebbles": 1 });
   });
 
+  it("dedupes callers that start in the same tick", async () => {
+    const collectionParams = Promise.resolve({ collection: "pebbles" });
+    await Promise.all([
+      generateCollectionMetadata({ params: collectionParams }),
+      NextGenCollectionPage({ params: collectionParams }),
+    ]);
+    expect(fetchCounts()).toEqual({ "nextgen/collections/pebbles": 1 });
+
+    jest.clearAllMocks();
+    resetRequestMemos();
+    const tokenParams = Promise.resolve({ token: "10000000042" });
+    await Promise.all([
+      generateTokenMetadata({ params: tokenParams }),
+      NextGenTokenPage({ params: tokenParams, searchParams }),
+    ]);
+    expect(fetchCounts()).toEqual({
+      "nextgen/tokens/10000000042": 1,
+      "nextgen/tokens/10000000042/traits": 1,
+      "nextgen/collections/1": 1,
+    });
+  });
+
   it("shares nothing between requests", async () => {
     const params = Promise.resolve({ collection: "pebbles" });
 

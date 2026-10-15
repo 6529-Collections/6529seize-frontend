@@ -13,6 +13,7 @@ import { NEXTGEN_CONTRACT } from "@/constants/constants";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 jest.mock(
   "@/components/nextGen/collections/collectionParts/art/NextGenCollectionArtPage",
@@ -21,6 +22,15 @@ jest.mock(
 jest.mock("@/app/nextgen/collection/[collection]/CollectionPageShell", () => ({
   __esModule: true,
   default: () => null,
+}));
+
+// A stable stand-in for Next's not-found signal, so these tests do not depend
+// on the framework's internal error digest format.
+jest.mock("next/navigation", () => ({
+  ...jest.requireActual("next/navigation"),
+  notFound: jest.fn(() => {
+    throw new Error("NEXT_NOT_FOUND");
+  }),
 }));
 
 jest.mock("@/helpers/server.app.helpers", () => ({
@@ -386,7 +396,8 @@ describe("NextGen metadata", () => {
         params: Promise.resolve({ token: "10000000042" }),
         searchParams: Promise.resolve({}),
       })
-    ).rejects.toMatchObject({ digest: "NEXT_HTTP_ERROR_FALLBACK;404" });
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+    expect(notFound).toHaveBeenCalledTimes(1);
   });
 
   it("lets a token page backend failure reach the error boundary", async () => {
@@ -399,19 +410,22 @@ describe("NextGen metadata", () => {
         searchParams: Promise.resolve({}),
       })
     ).rejects.toBe(error);
+    expect(notFound).not.toHaveBeenCalled();
   });
 
   it("renders not found only for a real 404 on the collection page", async () => {
     (commonApiFetch as jest.Mock).mockRejectedValue(apiError(404));
     await expect(
       NextGenCollectionPage({ params: Promise.resolve({ collection: "nope" }) })
-    ).rejects.toMatchObject({ digest: "NEXT_HTTP_ERROR_FALLBACK;404" });
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+    expect(notFound).toHaveBeenCalledTimes(1);
 
     const error = apiError(502);
     (commonApiFetch as jest.Mock).mockRejectedValue(error);
     await expect(
       NextGenCollectionPage({ params: Promise.resolve({ collection: "nope" }) })
     ).rejects.toBe(error);
+    expect(notFound).toHaveBeenCalledTimes(1);
   });
 
   it("normalizes short token links to the indexed token identity", async () => {

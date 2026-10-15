@@ -18,6 +18,8 @@ interface TokenData {
 }
 
 const TOKEN_ID_PATTERN = /^\d+$/;
+// NextGen token ids are collection_id * 10^10 + token index. They stay far
+// below Number.MAX_SAFE_INTEGER, so the Number math below is exact.
 const TOKENS_PER_COLLECTION = 10000000000;
 
 // Request-scoped memoization (React `cache`): `generateMetadata` and the page

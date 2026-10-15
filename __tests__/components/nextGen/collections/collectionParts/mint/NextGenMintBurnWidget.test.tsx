@@ -5,6 +5,7 @@ import {
 } from "@/components/nextGen/nextgen_contracts";
 import { Status } from "@/components/nextGen/nextgen_entities";
 import { act, render, screen, waitFor } from "@testing-library/react";
+import { useState } from "react";
 
 jest.mock(
   "@/components/nextGen/collections/collectionParts/mint/NextGenMintShared",
@@ -276,14 +277,79 @@ describe("NextGenMintBurnWidget", () => {
       const { rerender } = renderWidget({}, { tokenId: "7" });
       const firstState = (useMintSharedState as jest.Mock).mock.results[0]
         ?.value;
-      (useMintSharedState as jest.Mock).mockReturnValue(
-        createMintState({ tokenId: "" })
-      );
+      const clearedState = createMintState({ tokenId: "" });
+      (useMintSharedState as jest.Mock).mockReturnValue(clearedState);
       rerender(<NextGenMintBurnWidget {...baseProps} />);
 
       expect(mockFetchUrl).toHaveBeenCalledTimes(1);
       expect(firstState.setBurnProofResponse).toHaveBeenCalledWith(undefined);
       expect(firstState.setFetchingProofs).toHaveBeenLastCalledWith(false);
+      expect(clearedState.setBurnProofResponse).not.toHaveBeenCalled();
+      expect(clearedState.setFetchingProofs).not.toHaveBeenCalled();
+    });
+
+    it("keeps the fetching state up and applies only the new proof when the token changes", async () => {
+      const first = deferred<unknown>();
+      const second = deferred<unknown>();
+      mockFetchUrl
+        .mockReturnValueOnce(first.promise)
+        .mockReturnValueOnce(second.promise);
+      let selectToken: (tokenId: string) => void = () => {};
+      let appliedProof: unknown;
+      (useMintSharedState as jest.Mock).mockImplementation(() => {
+        const [tokenId, setTokenId] = useState("");
+        const [burnProofResponse, setBurnProofResponse] = useState<unknown>();
+        const [fetchingProofs, setFetchingProofs] = useState(false);
+        selectToken = setTokenId;
+        appliedProof = burnProofResponse;
+        return createMintState({
+          tokenId,
+          setTokenId,
+          burnProofResponse,
+          setBurnProofResponse,
+          fetchingProofs,
+          setFetchingProofs,
+        });
+      });
+      (useSeizeConnectContext as jest.Mock).mockReturnValue({
+        isConnected: true,
+        address: "0xabc",
+        seizeConnect: jest.fn(),
+      });
+      (useChainId as jest.Mock).mockReturnValue(NEXTGEN_CHAIN_ID);
+      (useWriteContract as jest.Mock).mockReturnValue({
+        writeContract: jest.fn(),
+        reset: jest.fn(),
+        isPending: false,
+        isSuccess: false,
+        isError: false,
+      });
+      (getStatusFromDates as jest.Mock).mockReturnValue(Status.LIVE);
+      render(<NextGenMintBurnWidget {...baseProps} />);
+
+      const button = screen.getByRole("button");
+      expect(button).not.toHaveTextContent("fetching proofs");
+
+      await act(async () => selectToken("7"));
+      expect(button).toHaveTextContent("fetching proofs");
+
+      await act(async () => selectToken("8"));
+      expect(button).toHaveTextContent("fetching proofs");
+      expect(mockFetchUrl.mock.calls[0][1].signal.aborted).toBe(true);
+
+      await act(async () => {
+        first.resolve(burnProof("token-7"));
+        await first.promise;
+      });
+      expect(appliedProof).toBeUndefined();
+      expect(button).toHaveTextContent("fetching proofs");
+
+      await act(async () => {
+        second.resolve(burnProof("token-8"));
+        await second.promise;
+      });
+      expect(appliedProof).toEqual(burnProof("token-8"));
+      expect(button).not.toHaveTextContent("fetching proofs");
     });
 
     it("mints with the exact wei price", () => {
