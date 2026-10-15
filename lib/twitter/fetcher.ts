@@ -1,3 +1,5 @@
+import "next/dist/compiled/server-only";
+
 import LruTtlCache from "@/lib/cache/lruTtl";
 import { readLimitedText } from "@/lib/fetch/limitedBody";
 import { parseTwitterOEmbed } from "./parser";
