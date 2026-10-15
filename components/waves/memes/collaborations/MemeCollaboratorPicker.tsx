@@ -10,10 +10,16 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
+const EMPTY_PROFILE_IDS: readonly string[] = [];
+
 export function MemeCollaboratorPicker({
   collaborators,
   onChange,
+  excludedIds = EMPTY_PROFILE_IDS,
+  disabled = false,
 }: {
+  readonly excludedIds?: readonly string[];
+  readonly disabled?: boolean;
   readonly collaborators: ApiMemeCollaboratorProfile[];
   readonly onChange: (profiles: ApiMemeCollaboratorProfile[]) => void;
 }) {
@@ -22,7 +28,7 @@ export function MemeCollaboratorPicker({
   const [resolving, setResolving] = useState(false);
   const [error, setError] = useState(false);
   const select = async (option: SelectableIdentityOption | null) => {
-    if (!option || resolving) return;
+    if (!option || resolving || disabled) return;
     setResolving(true);
     setError(false);
     try {
@@ -34,7 +40,8 @@ export function MemeCollaboratorPicker({
         !profile.handle ||
         profile.id === connectedProfile?.id ||
         collaborators.some((item) => item.id === profile.id) ||
-        collaborators.length >= 20
+        excludedIds.includes(profile.id) ||
+        collaborators.length + excludedIds.length >= 20
       ) {
         setError(true);
         return;
@@ -64,7 +71,11 @@ export function MemeCollaboratorPicker({
           void select(option);
         }}
         label={t(locale, "memes.collaborations.search")}
-        disabled={resolving || collaborators.length >= 20}
+        disabled={
+          disabled ||
+          resolving ||
+          collaborators.length + excludedIds.length >= 20
+        }
       />
       <p className="tw-m-0 tw-text-sm tw-text-iron-300">
         {t(locale, "memes.collaborations.hint")}
@@ -85,7 +96,7 @@ export function MemeCollaboratorPicker({
             </span>
             <button
               type="button"
-              disabled={resolving}
+              disabled={disabled || resolving}
               className="tw-min-h-10 tw-min-w-10 tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
               aria-label={t(locale, "memes.collaborations.remove", {
                 handle: profile.handle,

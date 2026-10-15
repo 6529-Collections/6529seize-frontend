@@ -1,5 +1,8 @@
 "use client";
 
+import { MemeCollaboratorPicker } from "./MemeCollaboratorPicker";
+import type { ApiMemeCollaboratorProfile } from "@/generated/models/ApiMemeCollaboratorProfile";
+import type { ApiMemeCollaborationInviteRequest } from "@/generated/models/ApiMemeCollaborationInviteRequest";
 import { useId, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
@@ -75,6 +78,36 @@ export function MemeCollaborationPanel({
   const confirmed =
     reviewVersion !== null && confirmedVersion === reviewVersion;
   const [saving, setSaving] = useState(false);
+  const [selected, setSelected] = useState<ApiMemeCollaboratorProfile[]>([]);
+  const invite = async () => {
+    if (!data?.can_invite || saving || !selected.length) return;
+    setSaving(true);
+    try {
+      const { success } = await requestAuth();
+      if (!success) return;
+      const updated = await commonApiPost<
+        ApiMemeCollaborationInviteRequest,
+        ApiMemeCollaborationState
+      >({
+        endpoint: `drops/${dropId}/collaborations`,
+        body: { collaborator_ids: selected.map((profile) => profile.id) },
+      });
+      queryClient.setQueryData(queryKey, updated);
+      setSelected([]);
+      setToast({
+        message: t(locale, "memes.collaborations.invited"),
+        type: "success",
+      });
+    } catch {
+      void refetch();
+      setToast({
+        message: t(locale, "memes.collaborations.saveError"),
+        type: "error",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
   const respond = async (
     invitation: ApiMemeCollaborationInvitation,
     action: ApiMemeCollaborationResponseRequestActionEnum
@@ -138,7 +171,11 @@ export function MemeCollaborationPanel({
         </button>
       </div>
     );
-  if (!data?.managed || !data.invitations.length) return null;
+  if (
+    !data ||
+    (!data.can_invite && (!data.managed || !data.invitations.length))
+  )
+    return null;
   const isAuthor = connectedProfile.id === authorId;
   const ownPending =
     data.invitations.some(
@@ -157,6 +194,26 @@ export function MemeCollaborationPanel({
       >
         {t(locale, "memes.collaborations.invitations")}
       </h2>
+      {isAuthor && data.can_invite && !data.closed && (
+        <div className="tw-space-y-3">
+          <MemeCollaboratorPicker
+            collaborators={selected}
+            onChange={setSelected}
+            excludedIds={data.invitations.map((item) => item.profile.id)}
+            disabled={saving}
+          />
+          <button
+            type="button"
+            className={BUTTON_CLASS}
+            disabled={saving || !selected.length}
+            onClick={() => {
+              void invite();
+            }}
+          >
+            {t(locale, "memes.collaborations.sendInvitations")}
+          </button>
+        </div>
+      )}
       {ownPending && (
         <>
           {data.artwork && (
