@@ -5,7 +5,8 @@ export const DeepLinkScope = {
   SHARE_CONNECTION: "share-connection",
 } as const;
 
-const EXCLUDED_ROUTES = [
+/** Routes that stay in the browser for app links and universal links alike. */
+export const MOBILE_APP_EXCLUDED_ROUTES = [
   "/open-mobile",
   "/access",
   "/restricted",
@@ -14,7 +15,7 @@ const EXCLUDED_ROUTES = [
   "/tools/app-wallets",
   "/auth",
   "/api",
-];
+] as const;
 
 export function isMobileAppDestination(path: string): boolean {
   let pathname: string;
@@ -23,7 +24,7 @@ export function isMobileAppDestination(path: string): boolean {
   } catch {
     return false;
   }
-  return !EXCLUDED_ROUTES.some(
+  return !MOBILE_APP_EXCLUDED_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
 }
