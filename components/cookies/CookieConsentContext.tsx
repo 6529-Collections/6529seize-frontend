@@ -180,7 +180,10 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
           setShowCookieConsent(
             essentialCookies == undefined && performanceCookies == undefined
           );
-        } else {
+        } else if (performanceCookies === undefined) {
+          // Outside the EU, performance cookies default to on, but only for a
+          // visitor who has not chosen yet. A stored accept or reject always
+          // wins over the regional default and is never rewritten here.
           Cookies.set(CONSENT_ESSENTIAL_COOKIE, "true", { expires: 7 });
           Cookies.set(CONSENT_PERFORMANCE_COOKIE, "true", { expires: 7 });
           getCookieConsent();
