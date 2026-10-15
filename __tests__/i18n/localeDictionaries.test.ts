@@ -65,6 +65,7 @@ afterEach(() => {
   }
   jest.dontMock("@/i18n/localeDictionaries");
   jest.dontMock("@/i18n/messages/es-ES");
+  jest.dontMock("@/i18n/messages/de-DE");
 });
 
 describe("server locale dictionaries", () => {
@@ -158,6 +159,22 @@ describe("browser locale dictionaries", () => {
 
     expect(dictionaries.getLocaleDictionary("fr-FR")).toBeDefined();
     expect(dictionaries.getPendingRouteLocaleLoad()).toBeNull();
+  });
+
+  it("stops holding hydration when the ?locale= dictionary fails to load", async () => {
+    // de-DE: no other test mocks it, so Jest has no cached mock module.
+    globalThis.history.replaceState(null, "", "/the-memes?locale=de-DE");
+    jest.doMock("@/i18n/messages/de-DE", () => {
+      throw new Error("chunk request failed");
+    });
+    const { dictionaries, messages } = loadBrowserModules();
+
+    const pendingLoad = dictionaries.getPendingRouteLocaleLoad();
+    expect(pendingLoad).not.toBeNull();
+    await pendingLoad;
+
+    expect(dictionaries.getPendingRouteLocaleLoad()).toBeNull();
+    expect(messages.t("de-DE", POSTING_KEY)).toBe("Posting");
   });
 
   it.each(["/the-memes", "/the-memes?locale=en-US", "/the-memes?locale=xx-XX"])(

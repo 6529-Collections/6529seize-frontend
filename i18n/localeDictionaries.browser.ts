@@ -58,7 +58,9 @@ export function loadLocaleDictionary(
     return dictionary;
   });
   pendingLoads.set(locale, load);
-  // A failed chunk request must not stick: the next caller retries.
+  // Drop a failed load so a later caller asks again. In a production
+  // Turbopack bundle a chunk that failed usually keeps failing until the page
+  // reloads; copy stays in en-US meanwhile.
   load.catch(() => {
     pendingLoads.delete(locale);
   });
@@ -75,13 +77,26 @@ function startLoad(locale: SupportedLocale): Promise<unknown> | null {
 // `?locale=` pages were server-rendered in that locale and hydrate once it
 // arrives; the browser locale is applied after hydration by useBrowserLocale.
 const routeLocale = normalizeLocale(
-  new URLSearchParams(globalThis.location.search).get(ROUTE_LOCALE_PARAM)
+  typeof globalThis.location === "undefined"
+    ? null
+    : new URLSearchParams(globalThis.location.search).get(ROUTE_LOCALE_PARAM)
 );
-const routeLocaleLoad = startLoad(routeLocale);
+// Settles whether the dictionary loads or its chunk fails. After a failure
+// the page hydrates with en-US copy and React re-renders over the server
+// markup; holding hydration longer would not help.
+let routeLocaleLoadSettled = false;
+const routeLocaleLoad =
+  startLoad(routeLocale)?.finally(() => {
+    routeLocaleLoadSettled = true;
+  }) ?? null;
 void startLoad(getBrowserLocale());
 
 export function getPendingRouteLocaleLoad(): Promise<unknown> | null {
-  if (!isNonDefaultLocale(routeLocale) || loadedDictionaries.has(routeLocale)) {
+  if (
+    !isNonDefaultLocale(routeLocale) ||
+    routeLocaleLoadSettled ||
+    loadedDictionaries.has(routeLocale)
+  ) {
     return null;
   }
   return routeLocaleLoad;
