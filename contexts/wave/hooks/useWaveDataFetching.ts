@@ -335,6 +335,22 @@ export function useWaveDataFetching({
     [clearLoadingState, updateData]
   );
 
+  const handlePreparedWaveActivation = useCallback(
+    (
+      waveId: string,
+      drops: readonly Pick<ApiDrop, "serial_no">[] | null,
+      options?: RegisterWaveOptions
+    ) => {
+      if (options?.isPrefetch || drops === null) {
+        return;
+      }
+
+      markMobileLaunchStep("wave_messages_loaded");
+      scheduleNativeInitialBackfill(waveId, drops, options);
+    },
+    [scheduleNativeInitialBackfill]
+  );
+
   const activateWave = useCallback(
     async (
       waveId: string,
@@ -348,10 +364,7 @@ export function useWaveDataFetching({
       const existingDrops = getData(waveId)?.drops ?? [];
       const existingDropsCount = existingDrops.length;
       if (existingDropsCount > 0) {
-        if (!options?.isPrefetch) {
-          markMobileLaunchStep("wave_messages_loaded");
-          scheduleNativeInitialBackfill(waveId, existingDrops, options);
-        }
+        handlePreparedWaveActivation(waveId, existingDrops, options);
         if (
           !options?.isPrefetch &&
           !trackedCacheSuccessWaveIdsRef.current.has(waveId)
@@ -387,10 +400,7 @@ export function useWaveDataFetching({
       const { state: loadingState, shouldContinue } = getLoadingState(waveId);
       if (!shouldContinue) {
         const drops = await loadingState.promise;
-        if (!options?.isPrefetch && drops !== null) {
-          markMobileLaunchStep("wave_messages_loaded");
-          scheduleNativeInitialBackfill(waveId, drops, options);
-        }
+        handlePreparedWaveActivation(waveId, drops, options);
         return drops;
       }
 
@@ -487,6 +497,7 @@ export function useWaveDataFetching({
       getLoadingState,
       handleFetchError,
       handleFetchSuccess,
+      handlePreparedWaveActivation,
       isCapacitor,
       initialWaveDropsLimit,
       scheduleNativeInitialBackfill,
