@@ -7,6 +7,10 @@ import {
   type AppKitBootstrapStatus,
 } from "@/components/providers/AppKitBootstrapContext";
 import { publicEnv } from "@/config/env";
+import {
+  noteWalletChunkFailure,
+  resetWalletChunkRecoveryForTests,
+} from "@/components/providers/walletChunkRecovery";
 import * as authUtils from "@/services/auth/auth.utils";
 import { WalletInitializationError } from "@/errors/wallet";
 import {
@@ -1828,6 +1832,51 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
     await expect(connectPromise!).rejects.toThrow(
       "Failed to open wallet connection modal"
     );
+  });
+
+  it("routes a connect intent through the wallet stack after a failed wallet chunk, even when it looks ready", async () => {
+    const waitForReady = jest.fn(() => new Promise<void>(() => undefined));
+    noteWalletChunkFailure(
+      Object.assign(new Error("Failed to load chunk"), {
+        name: "ChunkLoadError",
+      })
+    );
+    try {
+      const ConnectProbe: React.FC = () => {
+        const { seizeConnect } = useSeizeConnectContext();
+        return (
+          <button
+            data-testid="chunk-failed-connect"
+            onClick={() => seizeConnect()}
+          >
+            Connect
+          </button>
+        );
+      };
+
+      render(
+        <AppKitBootstrapContext.Provider
+          value={{
+            status: "ready",
+            hasTerminalError: false,
+            isCreated: true,
+            isReady: true,
+            isWaiting: false,
+            waitForReady,
+          }}
+        >
+          <SeizeConnectProvider>
+            <ConnectProbe />
+          </SeizeConnectProvider>
+        </AppKitBootstrapContext.Provider>
+      );
+
+      fireEvent.click(screen.getByTestId("chunk-failed-connect"));
+
+      await waitFor(() => expect(waitForReady).toHaveBeenCalledTimes(1));
+    } finally {
+      resetWalletChunkRecoveryForTests();
+    }
   });
 
   it("clears the connect intent fallback if AppKit never reports open", async () => {

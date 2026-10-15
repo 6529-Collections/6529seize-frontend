@@ -266,7 +266,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       try {
         clearConnectIntentHandoffTimeout();
         setIsConnectIntentWaitingForAppKit(true);
-        if (!isAppKitReady) {
+        // After a failed wallet chunk the stack can look ready while the
+        // modal cannot open; waitForAppKitReady reloads the page then.
+        if (!isAppKitReady || hasWalletChunkLoadFailed()) {
           await waitForAppKitReady();
         }
 
