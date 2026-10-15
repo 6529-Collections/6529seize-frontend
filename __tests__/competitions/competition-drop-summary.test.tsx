@@ -17,18 +17,15 @@ import { SingleWaveDrop } from "@/components/waves/drop/SingleWaveDrop";
 jest.mock("@/helpers/competition.helpers", () => ({
   isMultiCompetitionEnabled: () => true,
 }));
-jest.mock(
-  "@/components/waves/drops/participation/participationRendererRegistry",
-  () => ({
-    useWaveParticipationRendererSet: () => ({
-      SingleWaveDrop: ({ drop: renderedDrop }: { drop: ExtendedDrop }) => (
-        <div>
-          {renderedDrop.drop_type} {renderedDrop.rating}
-        </div>
-      ),
-    }),
-  })
-);
+jest.mock("@/components/waves/drop/singleWaveDropRendererRegistry", () => ({
+  useWaveSingleWaveDropRendererSet: () => ({
+    SingleWaveDrop: ({ drop: renderedDrop }: { drop: ExtendedDrop }) => (
+      <div>
+        {renderedDrop.drop_type} {renderedDrop.rating}
+      </div>
+    ),
+  }),
+}));
 
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useCompetitionViewer: () => "viewer:self",
