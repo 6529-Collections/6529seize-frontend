@@ -3,6 +3,7 @@ import { runInTimeZone, TEST_TIME_ZONES } from "../utils/timeZoneHarness";
 jest.setTimeout(60_000);
 
 const MODULE = "helpers/utc-schedule.helpers.ts";
+const OCCURRENCE_MODULE = "helpers/utc-next-occurrence.helpers.ts";
 const CHECKPOINT = { hour: 16, minute: 0 };
 const MWF = [1, 3, 5];
 
@@ -56,7 +57,7 @@ describe("getNextUtcOccurrence", () => {
     (zone) => {
       const results = runInTimeZone<number | null>(
         zone,
-        MODULE,
+        OCCURRENCE_MODULE,
         "getNextUtcOccurrence",
         [
           // Monday 15:59:59 UTC: today's checkpoint is still ahead.
