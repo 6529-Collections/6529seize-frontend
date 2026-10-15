@@ -17,7 +17,8 @@ Signed-out viewers can inspect public All votes and Activity; personal votes
 require a connected profile. My Votes rows span the full wave content pane,
 with padding inside each row for its controls.
 In My Votes, signed-out viewers can select **Connect Wallet** below the
-connection message to open the usual wallet connection flow.
+connection message to open the usual wallet connection flow. Empty-state messages
+in all three Votes subviews use muted, left-aligned text.
 
 All votes places each voter's rank, avatar, name, and signed vote amounts on
 the left, with the total and credit label inline on the right. Activity aligns
