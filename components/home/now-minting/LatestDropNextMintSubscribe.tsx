@@ -1,13 +1,12 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { readUsCountryHint } from "@/components/cookies/usCountryHint";
 import {
   getCanonicalNextMintNumber,
   isMintingToday,
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import { MEMES_CONTRACT } from "@/constants/constants";
-import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import { useProfileSubscriptionsNavigation } from "@/components/user/subscriptions/useProfileSubscriptionsNavigation";
 import {
   getSubscriptionCoverageActionLabel,
@@ -23,13 +22,15 @@ import type { SubscriptionCounts } from "@/generated/models/SubscriptionCounts";
 import { formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import useCapacitor from "@/hooks/useCapacitor";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import MemeSubscriptionAwarenessRow from "./MemeSubscriptionAwarenessRow";
+import MemeSubscriptionAwarenessRow, {
+  MemeSubscriptionAwarenessRowSpace,
+} from "./MemeSubscriptionAwarenessRow";
 
 type SubscriptionTooltipKey =
   | Extract<
@@ -145,8 +146,6 @@ export default function LatestDropNextMintSubscribe(
   }> = {}
 ) {
   const { connectedProfile, activeProfileProxy } = useAuth();
-  const { country } = useCookieConsent();
-  const { isIos } = useCapacitor();
   const locale = useBrowserLocale();
   const {
     canNavigateToProfileSubscriptionsDirectly,
@@ -160,14 +159,12 @@ export default function LatestDropNextMintSubscribe(
   const isMintingDay = shouldQueryUpcomingStatus && isMintingToday();
   const tokenId = props.tokenId ?? getCanonicalNextMintNumber();
   const hasTokenId = Number.isInteger(tokenId) && tokenId > 0;
-  const hideSubscriptions = shouldHideSubscriptions({
-    capacitorIsIos: isIos,
-    country,
-  });
-  // Rendering keeps the check above so the Home server HTML is unchanged.
-  // Requests also wait for hydration and, on iOS, the country check, because
-  // the first hydration pass cannot yet tell it is the native shell.
-  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  // The server and the first hydration render cannot tell it is the native
+  // shell, and on iOS the country is unknown until the first lookup settles.
+  // Until purchasing is allowed the row and its requests are omitted.
+  const { hideNftPurchasing, shouldRedirect: isRestricted } =
+    useNftPurchasingVisibility();
+  const { isIos } = useCapacitor();
   const canQuerySubscriptions = !hideNftPurchasing;
 
   const profileKey = useMemo(
@@ -264,8 +261,21 @@ export default function LatestDropNextMintSubscribe(
     ? getSubscriptionCoverageCompactLine(locale, coverageQuery.data)
     : undefined;
 
-  if (hideSubscriptions || !hasTokenId) {
+  if (!hasTokenId) {
     return null;
+  }
+
+  if (hideNftPurchasing) {
+    // Blank space only, never purchasing UI. Before hydration the platform is
+    // unknown (isIos is still false), so the server HTML and first hydration
+    // render reserve the row's height to keep web and Android from jumping when
+    // the row replaces it. On iOS nothing is shown while the country check runs
+    // and after a restricted result, except that a device whose last completed
+    // check was US keeps the space through the pending window, so a US result
+    // swaps the row in without a shift. That hint is layout only: the row and
+    // its requests still wait for the real result.
+    const reservesSpace = !isIos || (!isRestricted && readUsCountryHint());
+    return reservesSpace ? <MemeSubscriptionAwarenessRowSpace /> : null;
   }
 
   return (
