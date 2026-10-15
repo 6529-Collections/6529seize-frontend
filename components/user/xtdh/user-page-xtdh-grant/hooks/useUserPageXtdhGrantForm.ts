@@ -126,9 +126,9 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
         target_tokens: validatedSelection.allSelected
           ? []
           : validatedSelection.tokenIds.map((tokenId) => tokenId.toString()),
-        valid_to: validatedValidUntil
-          ? Math.floor(validatedValidUntil.getTime() / 1000)
-          : null,
+        // The xTDH grants API takes epoch milliseconds, matching the
+        // `valid_from`/`valid_to` values it returns.
+        valid_to: validatedValidUntil ? validatedValidUntil.getTime() : null,
         rate: validatedAmount,
         is_irrevocable: false,
       };

@@ -7,6 +7,7 @@ import {
   DEFAULT_FOCUS_ITEM_CLASSES,
   DEFAULT_INACTIVE_ITEM_CLASSES,
   DEFAULT_ITEM_CLASSES,
+  FOCUS_ITEM_RING_CLASSES,
 } from "../constants";
 
 interface CompactMenuItemButtonProps {
@@ -45,20 +46,20 @@ export function CompactMenuItemButton({
     : clsx(inactiveDefaultClasses, inactiveItemClassName);
 
   const role = item.role ?? "menuitem";
-  const className = ({ focus }: { readonly focus: boolean }) =>
-    clsx(
+  const className = ({ focus }: { readonly focus: boolean }) => {
+    const showFocus = focus && !item.disabled;
+    return clsx(
       unstyledItems ? undefined : DEFAULT_ITEM_CLASSES,
       stateClasses,
-      focus &&
-        !item.disabled &&
-        !isActive &&
-        clsx(focusDefaultClasses, focusItemClassName),
+      showFocus && FOCUS_ITEM_RING_CLASSES,
+      showFocus && !isActive && clsx(focusDefaultClasses, focusItemClassName),
       itemClassName,
       item.className,
       item.disabled &&
         !unstyledItems &&
         "tw-cursor-not-allowed tw-text-iron-500 tw-opacity-60"
     );
+  };
   const showIcon =
     item.icon !== undefined && item.icon !== null && item.icon !== false;
   const contents = (
