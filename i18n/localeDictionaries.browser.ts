@@ -76,10 +76,12 @@ function startLoad(locale: SupportedLocale): Promise<unknown> | null {
 // Start both requests while the page's scripts evaluate, before hydration.
 // `?locale=` pages were server-rendered in that locale and hydrate once it
 // arrives; the browser locale is applied after hydration by useBrowserLocale.
+// Some browser contexts (workers, prerender) have no location.
+const pageLocation = (globalThis as { location?: Location }).location;
 const routeLocale = normalizeLocale(
-  globalThis.location === undefined
+  pageLocation === undefined
     ? null
-    : new URLSearchParams(globalThis.location.search).get(ROUTE_LOCALE_PARAM)
+    : new URLSearchParams(pageLocation.search).get(ROUTE_LOCALE_PARAM)
 );
 // Settles whether the dictionary loads or its chunk fails. After a failure
 // the page hydrates with en-US copy and React re-renders over the server
