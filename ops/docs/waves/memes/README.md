@@ -19,6 +19,7 @@ metadata shown on memes single-drop views after submit.
 - Mobile chat view: floating submit button (`+`, top-right)
 - Memes single-drop route: `/waves/{waveId}?drop={dropId}` with post-submit
   metadata sections
+- Memes wave `FAQ` tab and `/about/apply` checkpoint schedule
 
 ## Ownership
 
@@ -53,6 +54,9 @@ This area does not own:
   single-drop detail rendering.
 - [Memes Preview and Submit States](feature-memes-preview-and-submit-states.md):
   preview behavior plus upload/sign/process success and retry states.
+- [Memes Voting Checkpoints](feature-memes-voting-checkpoints.md): the
+  Monday, Wednesday and Friday 16:00 UTC checkpoint schedule on the wave FAQ and
+  About Apply, with the viewer's own time zone.
 
 ## Flows
 
