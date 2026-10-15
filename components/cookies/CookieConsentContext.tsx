@@ -20,12 +20,39 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { redactSensitiveQueryParams } from "@/utils/monitoring/sensitiveQueryParams";
 import { useAuth } from "../auth/Auth";
 import CookiesBanner from "./CookiesBanner";
 
 const GTM_ID = "G-71NLVV3KY3";
 
 type CookieConsent = boolean | undefined;
+type Gtag = (...args: unknown[]) => void;
+
+/**
+ * gtag.js reads the page URL when it loads, which can happen before a page
+ * removes one-time link credentials from the address bar. Override the page
+ * and referrer URLs only when they carry credentials, so ordinary sessions
+ * keep Google Analytics' default page tracking. A session that starts on such
+ * a URL may keep reporting the redacted landing URL, which is preferable to
+ * sending the credential.
+ */
+const getGoogleAnalyticsConfig = (): Record<string, number | string> => {
+  const config: Record<string, number | string> = {
+    cookie_expires: 31536000,
+  };
+  const pageLocation = globalThis.location.href;
+  const redactedPageLocation = redactSensitiveQueryParams(pageLocation);
+  if (redactedPageLocation !== pageLocation) {
+    config["page_location"] = redactedPageLocation;
+  }
+  const referrer = globalThis.document.referrer;
+  const redactedReferrer = redactSensitiveQueryParams(referrer);
+  if (redactedReferrer !== referrer) {
+    config["page_referrer"] = redactedReferrer;
+  }
+  return config;
+};
 
 type CookieConsentContextType = {
   showCookieConsent: boolean;
@@ -139,11 +166,15 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', '${GTM_ID}', {
-            'cookie_expires': 31536000
-        });
       `;
     document.head.appendChild(script2);
+    // The inline script runs on insertion and defines the global gtag. Page
+    // URLs stay out of the script text and are passed as data instead.
+    (globalThis as { gtag?: Gtag }).gtag?.(
+      "config",
+      GTM_ID,
+      getGoogleAnalyticsConfig()
+    );
   }, []);
 
   const getCookieConsent = useCallback(
