@@ -96,6 +96,7 @@ describe("apple-app-site-association route", () => {
     const response = route.GET();
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toBe("application/json");
+    expect(response.headers.get("cache-control")).toBe("public, max-age=3600");
 
     const association = (await response.json()) as Record<string, unknown>;
     expect(Object.keys(association)).toEqual(["applinks"]);
