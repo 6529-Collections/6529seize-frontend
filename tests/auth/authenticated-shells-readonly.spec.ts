@@ -344,6 +344,27 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(page.getByText("Subscription History")).toBeVisible();
   });
 
+  test("scrolls to and focuses the top-up section from the notification link", async ({
+    page,
+  }) => {
+    const path = `${PROFILE_BASE_PATH}/subscriptions`;
+    const hash = "#profile-subscriptions-top-up";
+
+    // The section mounts after hydration, so the browser's own hash scroll
+    // finds nothing. Read-only: navigates and observes, never submits.
+    await page.goto(`${path}${hash}`, { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await expect(page).toHaveURL(
+      (url) => url.pathname === path && url.hash === hash
+    );
+
+    const topUp = page.getByRole("region", { name: "Top up" });
+    const heading = page.getByRole("heading", { level: 2, name: "Top up" });
+    await expect(topUp).toHaveAttribute("id", hash.slice(1));
+    await expect(heading).toBeFocused();
+    await expect(heading).toBeInViewport();
+  });
+
   test("renders the own-profile proxy shell without creating a proxy", async ({
     page,
   }) => {
