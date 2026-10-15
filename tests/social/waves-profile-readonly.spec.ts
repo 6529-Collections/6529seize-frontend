@@ -1402,12 +1402,37 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         test.info(),
         "profile-activity-loading"
       );
+
+      // Releasing the held request starts the network round trip; it does not
+      // mean the activity data has arrived. Keep network and render readiness
+      // separate, and fail explicitly if the activity endpoint returns an error.
+      const activityResponse = page.waitForResponse(
+        (response) => {
+          const url = new URL(response.url());
+          return (
+            response.request().method() === "GET" &&
+            url.pathname === "/api/profile-logs" &&
+            url.searchParams.get("profile") === PROFILE_HANDLE
+          );
+        },
+        { timeout: RESPONSE_TIMEOUT_MS }
+      );
+      releaseLogs();
+      const response = await activityResponse;
+      expect(
+        response.ok(),
+        `Profile activity request returned HTTP ${response.status()}`
+      ).toBe(true);
+      expect(
+        await response.finished(),
+        "Profile activity response completed"
+      ).toBeNull();
+      await expect(
+        page.getByRole("status", { name: "Loading activity log" })
+      ).toHaveCount(0);
     } finally {
       releaseLogs();
     }
-    await expect(
-      page.getByRole("status", { name: "Loading activity log" })
-    ).toHaveCount(0);
   });
 
   test("waits for identity guidance hydration before accepting activation", async ({
