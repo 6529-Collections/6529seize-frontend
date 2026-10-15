@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext } from "react";
+import { useContext, type ReactNode } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import UserPageIdentityStatementsAddButton from "../add/UserPageIdentityStatementsAddButton";
 import { createPossessionStr } from "@/helpers/Helpers";
@@ -8,11 +8,14 @@ import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import UserPageIdentityStatementsGuidance from "./UserPageIdentityStatementsGuidance";
 
 export default function UserPageIdentityAddStatementsHeader({
   profile,
+  headerAction,
 }: {
   readonly profile: ApiIdentity;
+  readonly headerAction?: ReactNode;
 }) {
   const locale = useBrowserLocale();
   const account = useSeizeConnectContext();
@@ -27,15 +30,19 @@ export default function UserPageIdentityAddStatementsHeader({
   const possessionName = createPossessionStr(profile.handle ?? null);
 
   return (
-    <div>
-      <div className="tw-hidden tw-w-full tw-items-center tw-justify-between tw-gap-x-3 lg:tw-flex">
-        <h3 className="tw-mb-0 tw-mt-0 tw-text-xl tw-font-semibold tw-text-iron-100">
+    <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3">
+      <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1">
+        <h3 className="tw-m-0 tw-min-w-0 tw-break-words tw-text-lg tw-font-semibold tw-text-iron-100">
           {t(locale, "user.profile.identity.statements.heading", {
             name: possessionName,
           })}
         </h3>
-        {canEdit && <UserPageIdentityStatementsAddButton profile={profile} />}
+        <UserPageIdentityStatementsGuidance />
       </div>
+      {headerAction ??
+        (canEdit && (
+          <UserPageIdentityStatementsAddButton profile={profile} size="xs" />
+        ))}
     </div>
   );
 }

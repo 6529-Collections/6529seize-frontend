@@ -57,6 +57,12 @@ export enum WebSocketStatus {
 }
 
 /**
+ * Upper bound of the random delay applied to resyncs that fire when the socket
+ * reconnects, so a deploy does not make every client refetch at the same moment.
+ */
+export const WEBSOCKET_RECONNECT_RESYNC_STAGGER_MAX_MS = 3_000;
+
+/**
  * Callback type for message subscribers
  */
 export type MessageCallback<T = unknown> = (data: T) => void;

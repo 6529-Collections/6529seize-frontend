@@ -362,6 +362,7 @@ export async function fetchWavesV2Page({
     endpoint: "v2/waves",
     params,
     headers,
+    errorMode: "structured",
   });
 
   return {
@@ -511,6 +512,7 @@ export async function fetchWaveSubwavesPage({
       page_size: `${pageSize}`,
       sort,
     },
+    errorMode: "structured",
   });
 
   return {
@@ -527,6 +529,7 @@ export async function fetchWaveSubwavesPage({
 export async function fetchOfficialWaves(): Promise<SidebarWave[]> {
   const response = await commonApiFetch<ApiWaveOverview[]>({
     endpoint: "v2/official-waves",
+    errorMode: "structured",
   });
 
   return response.map(mapApiWaveOverviewToSidebarWave);

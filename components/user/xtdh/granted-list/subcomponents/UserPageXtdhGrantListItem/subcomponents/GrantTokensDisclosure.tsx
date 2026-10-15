@@ -145,7 +145,7 @@ function GrantTokensErrorState({
 }: Readonly<{ message: string; onRetry: () => void }>) {
   return (
     <div className="tw-border-red-500/40 tw-bg-red-500/5 tw-rounded-lg tw-border tw-p-4">
-      <p className="tw-text-red-300 tw-m-0 tw-text-sm">{message}</p>
+      <p className="tw-text-red-300 tw-m-0 tw-text-sm group-data-[typography=profile]/profile-xtdh:tw-text-[15px] group-data-[typography=profile]/profile-xtdh:tw-font-normal">{message}</p>
       <Button
         variant="tertiary"
         size="sm"
@@ -161,7 +161,7 @@ function GrantTokensErrorState({
 function GrantTokensEmptyState() {
   return (
     <div className="tw-rounded-lg tw-border tw-border-white/[0.04] tw-bg-iron-900 tw-p-4">
-      <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+      <p className="tw-m-0 tw-text-sm tw-text-iron-300 group-data-[typography=profile]/profile-xtdh:tw-text-meta group-data-[typography=profile]/profile-xtdh:tw-font-normal group-data-[typography=profile]/profile-xtdh:tw-text-iron-500">
         No specific token IDs were returned for this grant.
       </p>
     </div>
@@ -170,7 +170,7 @@ function GrantTokensEmptyState() {
 
 function GrantTokensLoadingMore() {
   return (
-    <div className="tw-flex tw-items-center tw-justify-center tw-border-t tw-border-white/[0.04] tw-bg-iron-900 tw-py-2 tw-text-xs tw-text-iron-300">
+    <div className="tw-flex tw-items-center tw-justify-center tw-border-t tw-border-white/[0.04] tw-bg-iron-900 tw-py-2 tw-text-xs tw-text-iron-300 group-data-[typography=profile]/profile-xtdh:tw-text-meta group-data-[typography=profile]/profile-xtdh:tw-font-normal group-data-[typography=profile]/profile-xtdh:tw-text-iron-500">
       <Spinner />
       <span className="tw-ml-2">Loading more tokens…</span>
     </div>

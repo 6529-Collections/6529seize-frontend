@@ -13,6 +13,7 @@ import {
 } from "@/services/notifications/notification-realtime-state";
 import { NotificationWebSocketSync } from "@/services/websocket/NotificationWebSocketSync";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
+import { mockRandomUnit } from "../helpers/mockRandomUnit";
 
 const invalidateQueriesMock = jest.fn().mockResolvedValue(undefined);
 const sendMock = jest.fn();
@@ -115,9 +116,12 @@ const flushQueryWork = async (): Promise<void> => {
 };
 
 describe("NotificationWebSocketSync", () => {
+  let randomUnitSpy: jest.SpyInstance;
+
   beforeEach(() => {
     jest.useFakeTimers();
     jest.clearAllMocks();
+    randomUnitSpy = mockRandomUnit(0.5);
     mockUseQueryClient.mockReturnValue({
       invalidateQueries: invalidateQueriesMock,
     });
@@ -134,6 +138,7 @@ describe("NotificationWebSocketSync", () => {
   afterEach(() => {
     jest.runOnlyPendingTimers();
     jest.useRealTimers();
+    randomUnitSpy.mockRestore();
   });
 
   it("syncs owned account JWTs and refreshes only the changed recipient", () => {
@@ -210,6 +215,11 @@ describe("NotificationWebSocketSync", () => {
     ]);
     webSocketStatus = WebSocketStatus.CONNECTED;
     rerender(<Subject />);
+    expect(screen.getByTestId("realtime-state")).toHaveTextContent("true:");
+    // The reconnect resync is staggered by a random 0-3s (1.5s for a 0.5 draw).
+    act(() => {
+      jest.advanceTimersByTime(1500);
+    });
 
     expect(sendMock).toHaveBeenLastCalledWith(
       WsMessageType.SYNC_NOTIFICATION_IDENTITIES,
@@ -217,8 +227,147 @@ describe("NotificationWebSocketSync", () => {
         access_tokens: ["reconnect-primary-jwt", "reconnect-secondary-jwt"],
       }
     );
-    expect(screen.getByTestId("realtime-state")).toHaveTextContent("true:");
     unmount();
+  });
+
+  describe("reconnect stagger", () => {
+    const reconnect = (rerender: (ui: ReactNode) => void) => {
+      webSocketStatus = WebSocketStatus.DISCONNECTED;
+      rerender(<Subject />);
+      webSocketStatus = WebSocketStatus.CONNECTED;
+      rerender(<Subject />);
+    };
+
+    it("syncs immediately on the first connect of the session", () => {
+      webSocketStatus = WebSocketStatus.DISCONNECTED;
+      const { rerender, unmount } = render(<Subject />);
+      expect(sendMock).not.toHaveBeenCalled();
+
+      webSocketStatus = WebSocketStatus.CONNECTED;
+      rerender(<Subject />);
+
+      expect(sendMock).toHaveBeenCalledTimes(1);
+      unmount();
+    });
+
+    it.each([
+      ["lower", 0.0004, 1],
+      ["middle", 0.5, 1500],
+      ["upper", 0.999999, 2999],
+    ])(
+      "delays the reconnect sync within 0-3s (%s bound: %p -> %p ms)",
+      (_bound, unit, delayMs) => {
+        const { rerender, unmount } = render(<Subject />);
+        sendMock.mockClear();
+        randomUnitSpy.mockRestore();
+        randomUnitSpy = mockRandomUnit(unit);
+
+        reconnect(rerender);
+        act(() => {
+          jest.advanceTimersByTime(delayMs - 1);
+        });
+        expect(sendMock).not.toHaveBeenCalled();
+        act(() => {
+          jest.advanceTimersByTime(1);
+        });
+
+        expect(sendMock).toHaveBeenCalledTimes(1);
+        unmount();
+      }
+    );
+
+    it("reads the tokens when the staggered sync fires", () => {
+      const { rerender, unmount } = render(<Subject />);
+      sendMock.mockClear();
+
+      reconnect(rerender);
+      getAuthJwtMock.mockReturnValue("late-primary-jwt");
+      getConnectedWalletAccountsMock.mockReturnValue([
+        { jwt: "late-primary-jwt" },
+      ]);
+      act(() => {
+        jest.advanceTimersByTime(1500);
+      });
+
+      expect(sendMock).toHaveBeenCalledWith(
+        WsMessageType.SYNC_NOTIFICATION_IDENTITIES,
+        { access_tokens: ["late-primary-jwt"] }
+      );
+      unmount();
+    });
+
+    it("cancels the pending sync when the socket disconnects again", () => {
+      const { rerender, unmount } = render(<Subject />);
+      sendMock.mockClear();
+
+      reconnect(rerender);
+      webSocketStatus = WebSocketStatus.DISCONNECTED;
+      rerender(<Subject />);
+      act(() => {
+        jest.advanceTimersByTime(3000);
+      });
+
+      expect(sendMock).not.toHaveBeenCalled();
+      unmount();
+    });
+
+    it("cancels the pending sync on unmount", () => {
+      const { rerender, unmount } = render(<Subject />);
+      sendMock.mockClear();
+
+      reconnect(rerender);
+      unmount();
+      act(() => {
+        jest.advanceTimersByTime(3000);
+      });
+
+      expect(sendMock).not.toHaveBeenCalled();
+    });
+
+    it.each(["auth-token-changed", "wallet-accounts-updated"])(
+      "syncs immediately on %s inside the stagger window, without a duplicate or a re-delay",
+      (eventName) => {
+        const { rerender, unmount } = render(<Subject />);
+        sendMock.mockClear();
+
+        reconnect(rerender);
+        getAuthJwtMock.mockReturnValue("rotated-jwt");
+        getConnectedWalletAccountsMock.mockReturnValue([
+          { jwt: "rotated-jwt" },
+        ]);
+        act(() => {
+          window.dispatchEvent(new Event(eventName));
+        });
+
+        // The change is not treated as another reconnect: no stagger delay.
+        expect(sendMock).toHaveBeenCalledTimes(1);
+        expect(sendMock).toHaveBeenLastCalledWith(
+          WsMessageType.SYNC_NOTIFICATION_IDENTITIES,
+          { access_tokens: ["rotated-jwt"] }
+        );
+
+        // The pending staggered sync was cancelled, so it never double-sends.
+        act(() => {
+          jest.advanceTimersByTime(3000);
+        });
+        expect(sendMock).toHaveBeenCalledTimes(1);
+
+        // A later change is still immediate.
+        getAuthJwtMock.mockReturnValue("rotated-again-jwt");
+        getConnectedWalletAccountsMock.mockReturnValue([
+          { jwt: "rotated-again-jwt" },
+        ]);
+        act(() => {
+          window.dispatchEvent(new Event(eventName));
+        });
+        expect(sendMock).toHaveBeenCalledTimes(2);
+        expect(sendMock).toHaveBeenLastCalledWith(
+          WsMessageType.SYNC_NOTIFICATION_IDENTITIES,
+          { access_tokens: ["rotated-again-jwt"] }
+        );
+        unmount();
+      }
+    );
   });
 
   it("catches up the active profile when a sync ack omits it", () => {

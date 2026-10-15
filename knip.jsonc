@@ -106,6 +106,9 @@
       // Failure-summary parsers are exposed to focused CLI contract tests;
       // Knip intentionally excludes those Jest consumers from its usage graph.
       "scripts/ci-failure-details.cjs": ["exports"],
+      // The world time-zone map generator exposes its pure parsing and
+      // geometry helpers to a focused Jest contract; Knip excludes test consumers.
+      "scripts/generate-world-time-zones.cjs": ["exports"],
       // The production artifact CLI exposes pure safety helpers to a focused
       // adversarial Jest contract, which Knip excludes from its usage graph.
       "ops/scripts/verify-production-artifact.cjs": ["exports"],
@@ -159,9 +162,7 @@
       "ts-jest",
       "ts-morph",
       "baseline-browser-mapping",
-      "react-doctor",
-      // Invoked as a repository CLI through `6529 exec`, not imported by app code.
-      "@6529-collections/release-request"
+      "react-doctor"
     ],
 
     // Disable Jest and Playwright plugins so test-only usages are reported

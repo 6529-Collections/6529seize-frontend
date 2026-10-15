@@ -40,6 +40,11 @@ These surfaces show the tile even when Announcements has a saved wave picture.
 3. Use header controls near the wave title, avatar, and metadata.
 4. Open the owner options menu (`⋮`) when available.
 
+On phones, select the wave name to open `About`. Use `Close`, tap outside,
+press Escape, or use the device’s Back action to return to the thread.
+The main `About` sheet has a Close control; Back controls inside subviews return
+to their parent view.
+
 ## Conversation Header
 
 At desktop and tablet widths (768px and above), the conversation header groups
@@ -133,9 +138,6 @@ helper keeps its desktop label and opens nomination guidance.
 - Leaving from `About` brings the header `Join` back.
 - The bell notification menu renders only when the wave is followed; the
   speaker-muted control can render before joining.
-- All-message notifications can be unavailable for high-follower waves unless
-  already enabled; the unavailable all-message row stays disabled in the
-  notification menu.
 - When muted, the bell notification menu is replaced by a speaker-muted `Muted`
   control that unmutes the wave.
 - Direct-message waves never show rename or picture-edit pencils, even when the

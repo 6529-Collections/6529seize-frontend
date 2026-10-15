@@ -46,7 +46,8 @@ stale, stop arriving, or do not recover after auth changes.
 - Token change while connected:
   health checks reconnect with the new token.
 - Transport drop with valid auth:
-  reconnect backoff is automatic (`2s`, `3s`, `4.5s`, capped at `30s`).
+  reconnect backoff is automatic (`2s`, `3s`, `4.5s`, capped at `30s`,
+  each with +/-25% random jitter, so observed retry times vary).
 - Retry cap reached:
   scheduled reconnect retries stop after `20` attempts, but periodic health
   checks (`10s`) keep trying to reconnect when token and status require it.
@@ -61,8 +62,8 @@ stale, stop arriving, or do not recover after auth changes.
   and/or periodic health checks.
 - If both cookie events and `BroadcastChannel` support are unavailable, auth
   convergence depends on periodic checks only (`10s` cadence).
-- Reconnect timing is deterministic (no jitter), so multiple tabs can retry in
-  near lockstep.
+- Reconnect delays carry +/-25% random jitter, so tabs and devices retry at
+  slightly different times instead of in lockstep, and exact retry timings vary.
 
 ## Failure and Recovery
 

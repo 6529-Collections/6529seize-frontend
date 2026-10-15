@@ -75,25 +75,28 @@ export default function ProxyListItem({
   };
   return (
     <div>
-      <div className="tw-h-9 tw-mt-3 tw-flex tw-items-center tw-gap-x-3 tw-py-1">
-        <Link href={`/${profileProxy.created_by.handle}/proxy`}>
-          <div className="tw-flex tw-items-center tw-gap-x-3">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2.5 tw-gap-y-2">
+        <Link
+          href={`/${profileProxy.created_by.handle ?? profileProxy.created_by.primary_address}/proxy`}
+          className="tw-min-w-0 tw-no-underline">
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-2">
             {profileProxy.created_by.pfp ? (
               <img
                 src={profileProxy.created_by.pfp}
                 alt="Profile picture"
-                className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
+                className="tw-h-[22px] tw-w-[22px] tw-flex-none tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/[0.08]"
               />
             ) : (
-              <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
+              <div className="tw-h-[22px] tw-w-[22px] tw-flex-none tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/[0.08]"></div>
             )}
-            <p className="tw-mb-0 tw-flex-auto tw-font-semibold tw-text-iron-50 hover:tw-text-iron-400 tw-text-base tw-transition tw-duration-300 tw-ease-out">
-              {profileProxy.created_by.handle}
+            <p className="tw-m-0 tw-min-w-0 tw-break-all tw-flex-auto tw-font-semibold tw-text-iron-50 hover:tw-text-iron-400 tw-text-sm tw-leading-5 tw-transition tw-duration-300 tw-ease-out">
+              {profileProxy.created_by.handle ??
+                profileProxy.created_by.primary_address}
             </p>
           </div>
         </Link>
         <svg
-          className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-300"
+          className="tw-h-3.5 tw-w-3.5 tw-flex-none tw-text-iron-600"
           width="24"
           height="24"
           viewBox="0 0 24 24"
@@ -108,22 +111,23 @@ export default function ProxyListItem({
             strokeLinejoin="round"
           />
         </svg>
-        <div className="tw-flex tw-w-full tw-gap-x-4">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-gap-x-4">
           <Link
-            href={`/${profileProxy.granted_to.handle}/proxy`}
-            className="tw-group">
-            <div className="tw-flex tw-items-center tw-gap-x-3">
+            href={`/${profileProxy.granted_to.handle ?? profileProxy.granted_to.primary_address}/proxy`}
+            className="tw-group tw-min-w-0 tw-no-underline">
+            <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-2">
               {profileProxy.granted_to.pfp ? (
                 <img
                   src={profileProxy.granted_to.pfp}
                   alt="Profile picture"
-                  className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
+                  className="tw-h-[22px] tw-w-[22px] tw-flex-none tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/[0.08]"
                 />
               ) : (
-                <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
+                <div className="tw-h-[22px] tw-w-[22px] tw-flex-none tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/[0.08]"></div>
               )}
-              <p className="tw-mb-0 tw-flex-auto tw-font-semibold tw-text-iron-50 tw-text-base hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
-                {profileProxy.granted_to.handle}
+              <p className="tw-m-0 tw-min-w-0 tw-break-all tw-flex-auto tw-font-semibold tw-text-iron-50 tw-text-sm tw-leading-5 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
+                {profileProxy.granted_to.handle ??
+                  profileProxy.granted_to.primary_address}
               </p>
             </div>
           </Link>

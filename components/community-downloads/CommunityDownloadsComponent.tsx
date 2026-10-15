@@ -12,10 +12,10 @@ import { t } from "@/i18n/messages";
 import {
   DOWNLOADS_TABLE_CELL_CLASS_NAME,
   DOWNLOADS_TABLE_ROW_CLASS_NAME,
-  formatDate,
   DownloadsLayout,
   DownloadsTable,
 } from "./CommunityDownloadsHelpers";
+import { formatDownloadDate } from "./communityDownloadsDate";
 
 const PAGE_SIZE = 25;
 
@@ -80,7 +80,7 @@ export default function CommunityDownloadsComponent(props: Readonly<Props>) {
             key={download.date.toString()}
           >
             <td className={DOWNLOADS_TABLE_CELL_CLASS_NAME}>
-              {formatDate(download.date.toString())}
+              {formatDownloadDate(locale, download.date.toString())}
             </td>
             <td className={DOWNLOADS_TABLE_CELL_CLASS_NAME}>
               <a href={download.url} target="_blank" rel="noopener noreferrer">

@@ -1,7 +1,14 @@
 "use client";
 
+import UtcScheduleTime from "@/components/utils/time/UtcScheduleTime";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import {
+  getCheckpointUtcTime,
+  MEMES_CHECKPOINT_UTC_WEEKDAYS,
+} from "@/helpers/waves/memes-checkpoint.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
+import { tRich } from "@/i18n/messages";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import {
   ArrowUpTrayIcon,
@@ -432,7 +439,23 @@ function NotGoalsContent() {
   return <IconList items={NOT_GOALS} />;
 }
 
-function VotingContent() {
+function VotingContent({ wave }: Readonly<{ wave: ApiWave }>) {
+  const locale = useBrowserLocale();
+  const checkpointSchedule = (
+    <span className="tw-font-medium tw-text-iron-100" key="schedule">
+      {tRich(locale, "memesCheckpoint.faq.schedule", {
+        time: (
+          <UtcScheduleTime
+            key="time"
+            time={getCheckpointUtcTime(wave)}
+            weekdays={MEMES_CHECKPOINT_UTC_WEEKDAYS}
+            locale={locale}
+          />
+        ),
+      })}
+    </span>
+  );
+
   return (
     <>
       <p className="tw-mb-[13px]">
@@ -444,12 +467,9 @@ function VotingContent() {
         be the next card minted.
       </p>
       <p className="tw-mb-[13px]">
-        The checkpoint times are{" "}
-        <span className="tw-font-medium tw-text-iron-100">
-          Monday / Wednesday / Friday at 17:00 GMT
-        </span>
-        . The card will be minted at the next The Memes mint (e.g. Wednesday /
-        Friday / Monday).
+        {tRich(locale, "memesCheckpoint.faq.checkpointTimes", {
+          schedule: checkpointSchedule,
+        })}
       </p>
       <p className="tw-mb-[13px]">
         The metric that determines the winner is{" "}
@@ -617,7 +637,7 @@ const FAQ_SECTIONS: readonly WaveFaqSection<FaqSectionId>[] = [
   },
 ];
 
-const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
+const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
   const { hideNftPurchasing } = useNftPurchasingVisibility();
   const { setActiveContentTab } = useContentTab();
   const { faqViewStyle } = useLayout();
@@ -685,6 +705,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
             <MyStreamWaveFAQAccordionItem
               key={section.id}
               section={section}
+              wave={wave}
               sectionRef={(element) => {
                 sectionRefs.current[section.id] = element;
               }}

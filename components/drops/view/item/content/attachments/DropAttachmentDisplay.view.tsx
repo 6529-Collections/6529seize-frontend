@@ -49,7 +49,7 @@ const CSV_PREVIEW_MAX_CHARS = 500_000;
 
 const CSV_PREVIEW_SIZE_EXCEEDED = "__CSV_PREVIEW_SIZE_EXCEEDED__";
 const TRUSTED_BADGE_BUTTON_CLASS =
-  "tw-relative tw-inline-flex tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-emerald-500/20 tw-bg-emerald-500/10 tw-text-emerald-400 tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-emerald-500/20 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-emerald-400/30 desktop-hover:hover:tw-bg-emerald-500/15 desktop-hover:hover:tw-text-emerald-300";
+  "tw-relative tw-inline-flex tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-emerald-500/20 tw-bg-emerald-500/10 tw-text-emerald-400 tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-emerald-400/30 desktop-hover:hover:tw-bg-emerald-500/15 desktop-hover:hover:tw-text-emerald-300";
 const TRUSTED_BADGE_ICON_CLASS = "tw-flex-shrink-0 tw-text-current";
 const TRUSTED_BADGE_BUTTON_SIZE_CLASS_BY_SIZE = {
   default: "tw-h-5 tw-w-5",

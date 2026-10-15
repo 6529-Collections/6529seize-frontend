@@ -246,6 +246,7 @@ export default function UserPageProfileCurationSetupDialog({
   return (
     <MobileWrapperDialog
       title={t(locale, "profileCuration.setup.title")}
+      titleClassName="!tw-text-lg tw-font-semibold !tw-text-iron-100 md:!tw-text-xl"
       isOpen={isOpen}
       onClose={isSubmitting ? () => undefined : onClose}
       noPadding
@@ -256,14 +257,14 @@ export default function UserPageProfileCurationSetupDialog({
     >
       <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
         <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-px-4 tw-py-6 sm:tw-px-6">
-          <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <p className="tw-m-0 tw-text-md tw-font-normal tw-leading-6 tw-text-iron-300">
             {t(locale, "profileCuration.setup.intro")}
           </p>
 
           <div className="tw-mt-6">
             <label
               htmlFor="profile-curation-name"
-              className="tw-block tw-text-sm tw-font-medium tw-text-iron-200"
+              className="tw-block tw-text-sm tw-font-medium tw-text-iron-100"
             >
               {t(locale, "profileCuration.setup.nameLabel")}
             </label>
@@ -275,11 +276,11 @@ export default function UserPageProfileCurationSetupDialog({
               autoComplete="off"
               disabled={isSubmitting || completedSteps.includes("curation")}
               aria-describedby="profile-curation-name-help"
-              className="tw-form-input tw-mt-2 tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+              className="tw-form-input tw-mt-2 tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-base tw-font-normal tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 md:desktop-hover:tw-text-sm"
             />
             <p
               id="profile-curation-name-help"
-              className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-500"
+              className="tw-mb-0 tw-mt-2 tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-500"
             >
               {t(locale, "profileCuration.setup.nameHelp")}
             </p>
@@ -309,7 +310,7 @@ export default function UserPageProfileCurationSetupDialog({
                       />
                     )}
                     <span
-                      className={`tw-text-xs tw-font-medium ${
+                      className={`tw-text-meta tw-font-medium ${
                         isActive || isComplete
                           ? "tw-text-iron-200"
                           : "tw-text-iron-500"
@@ -329,17 +330,17 @@ export default function UserPageProfileCurationSetupDialog({
               role="alert"
               className="tw-mt-6 tw-rounded-lg tw-border tw-border-solid tw-border-rose-500/25 tw-bg-rose-500/10 tw-px-4 tw-py-3"
             >
-              <p className="tw-mb-0 tw-text-sm tw-leading-6 tw-text-rose-200">
+              <p className="tw-mb-0 tw-text-md tw-font-normal tw-leading-6 tw-text-rose-200">
                 {errorMessage}
               </p>
             </div>
           )}
 
           <details className="tw-mt-6 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-px-4 tw-py-3">
-            <summary className="tw-cursor-pointer tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400">
+            <summary className="tw-cursor-pointer tw-text-meta tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400">
               {t(locale, "profileCuration.setup.advancedSummary")}
             </summary>
-            <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-500">
+            <p className="tw-mb-0 tw-mt-3 tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-500">
               {t(locale, "profileCuration.setup.advancedDetails", {
                 sourceWaveName,
               })}

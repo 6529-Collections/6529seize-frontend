@@ -128,7 +128,7 @@ export function UserPageBrainActivityHeatmap({
 function HeatmapDayLabels() {
   return (
     <div
-      className="tw-hidden tw-shrink-0 tw-text-[9px] tw-font-semibold tw-uppercase tw-tracking-widest tw-text-iron-600 sm:tw-grid"
+      className="tw-hidden tw-shrink-0 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-widest tw-text-iron-500 sm:tw-grid"
       aria-hidden="true"
       style={{
         marginTop: `${DAY_LABEL_TOP_OFFSET_PX}px`,
@@ -214,11 +214,11 @@ function HeatmapTooltipContent({
       <span className="tw-flex tw-h-3 tw-w-3 tw-items-center tw-justify-center">
         <span className={getCellNodeClassName(indicatorCell, "tooltip")} />
       </span>
-      <span className="tw-text-xs tw-font-semibold tw-text-iron-50">
+      <span className="tw-text-meta/4 tw-font-medium tw-tabular-nums tw-text-iron-100">
         {getTooltipCountLabel(count)}
       </span>
       <span className="tw-h-3 tw-w-px tw-bg-white/15" />
-      <span className="tw-text-xs tw-font-medium tw-text-iron-400">
+      <span className="tw-text-meta/4 tw-font-normal tw-tabular-nums tw-text-iron-500">
         {TOOLTIP_DATE_FORMATTER.format(new Date(`${isoDate}T00:00:00.000Z`))}
       </span>
     </div>
@@ -259,7 +259,7 @@ function HeatmapMonthLabels({
 
   return (
     <div
-      className="tw-relative tw-mb-1 tw-overflow-hidden tw-text-[9px] tw-font-semibold tw-uppercase tw-tracking-widest tw-text-iron-600"
+      className="tw-relative tw-mb-1 tw-overflow-hidden tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-widest tw-text-iron-500"
       aria-hidden="true"
       style={{
         height: `${MONTH_LABEL_ROW_HEIGHT_PX}px`,

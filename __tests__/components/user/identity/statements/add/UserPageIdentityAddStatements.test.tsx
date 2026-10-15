@@ -73,9 +73,19 @@ test("changes active view when child triggers", async () => {
   const contentRef = mockKeyboardFocusScroll.mock.calls.at(-1)?.[0];
 
   expect(contentRef?.current).toContainElement(div);
+  expect(
+    screen.getByText(
+      "Statements are optional and fully and permanently public."
+    )
+  ).toBeVisible();
   expect(div.textContent).toBe(STATEMENT_ADD_VIEW.SELECT);
   expect(div.parentElement).toHaveClass("lg:tw-py-8");
   await userEvent.click(div);
+  expect(
+    screen.getByText(
+      "Statements are optional and fully and permanently public."
+    )
+  ).toBeVisible();
   expect(div.textContent).toBe(STATEMENT_ADD_VIEW.CONTACT);
   expect(div.parentElement).toHaveClass("md:tw-pt-6", "lg:tw-pb-8");
   expect(div.parentElement).not.toHaveClass("lg:tw-py-8");

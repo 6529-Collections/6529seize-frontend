@@ -12,6 +12,7 @@ const mockChildMounted = jest.fn();
 const mockCloseRightSidebar = jest.fn();
 const mockRouterReplace = jest.fn();
 const mockUseQuery = jest.fn();
+const mockRequestMainWavesList = jest.fn();
 
 jest.mock("react-use", () => ({
   createBreakpoint: () => () => mockBreakpoint,
@@ -89,6 +90,12 @@ jest.mock("@/components/auth/Auth", () => ({
 
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ contentContainerStyle: {} }),
+}));
+
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
+  useMyStreamOptional: () => ({
+    requestMainWavesList: mockRequestMainWavesList,
+  }),
 }));
 
 jest.mock("@/contexts/wave/WaveChatScrollContext", () => ({
@@ -317,6 +324,23 @@ describe("WavesMessagesWrapper", () => {
       "data-open",
       "false"
     );
+  });
+
+  it("requests the main Waves list on Waves pages even when the sidebar is hidden", () => {
+    mockBreakpoint = "S";
+    mockWaveId = "wave-1";
+
+    renderWrapper();
+
+    expect(screen.queryByTestId("left-sidebar")).not.toBeInTheDocument();
+    expect(mockRequestMainWavesList).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not request the main Waves list on Messages pages", () => {
+    renderWrapper({ defaultPath: "/messages" });
+
+    expect(screen.getByTestId("left-sidebar")).toBeInTheDocument();
+    expect(mockRequestMainWavesList).not.toHaveBeenCalled();
   });
 
   it("keeps the open sidebar controller mounted when switching waves", () => {

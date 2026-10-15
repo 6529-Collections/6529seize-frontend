@@ -68,7 +68,7 @@ function NetworkHeaderActionButton({
 }) {
   const hasHydrated = useHasHydrated();
   const buttonClassName = [
-    "tw-group tw-relative tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-text-xs tw-font-semibold tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/40",
+    "tw-group tw-relative tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-text-xs tw-font-semibold tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/40 focus-visible:tw-ring-primary-400",
     compact
       ? "tw-h-9 tw-w-9 tw-px-0 sm:tw-h-8 sm:tw-w-8"
       : "tw-h-9 tw-min-w-9 tw-px-2.5 sm:tw-h-8 sm:tw-min-w-8 sm:tw-px-2",

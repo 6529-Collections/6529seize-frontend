@@ -25,6 +25,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -163,6 +164,11 @@ export default function LatestDropNextMintSubscribe(
     capacitorIsIos: isIos,
     country,
   });
+  // Rendering keeps the check above so the Home server HTML is unchanged.
+  // Requests also wait for hydration and, on iOS, the country check, because
+  // the first hydration pass cannot yet tell it is the native shell.
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  const canQuerySubscriptions = !hideNftPurchasing;
 
   const profileKey = useMemo(
     () => (activeProfileProxy ? undefined : getProfileKey(connectedProfile)),
@@ -176,14 +182,14 @@ export default function LatestDropNextMintSubscribe(
         endpoint: `subscriptions/consolidation/upcoming-memes/${tokenId}/${profileKey}`,
       }),
     enabled:
-      !hideSubscriptions &&
+      canQuerySubscriptions &&
       !!profileKey &&
       hasTokenId &&
       shouldQueryUpcomingStatus,
     retry: false,
   });
   const coverageQuery = useSubscriptionCoverage({
-    enabled: !hideSubscriptions && !activeProfileProxy,
+    enabled: canQuerySubscriptions && !activeProfileProxy,
     profileKey,
   });
 
@@ -194,7 +200,7 @@ export default function LatestDropNextMintSubscribe(
         endpoint: `subscriptions/consolidation/final/${profileKey}/${MEMES_CONTRACT}/${tokenId}`,
       }),
     enabled:
-      !hideSubscriptions &&
+      canQuerySubscriptions &&
       !!profileKey &&
       hasTokenId &&
       !shouldQueryUpcomingStatus,
@@ -210,7 +216,7 @@ export default function LatestDropNextMintSubscribe(
         await commonApiFetch<SubscriptionCounts>({
           endpoint: `subscriptions/memes/${tokenId}/count`,
         }),
-      enabled: !hideSubscriptions && hasTokenId,
+      enabled: canQuerySubscriptions && hasTokenId,
       retry: false,
     });
 

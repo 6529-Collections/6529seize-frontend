@@ -3,6 +3,7 @@ import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 
 const wallet = "0x0000000000000000000000000000000000000123";
 let mockRole = { owner: false, admin: false, pending: false };
+const mockUseIsDropForgeAdmin = jest.fn();
 let mockSettings = {
   distribution_admin_wallets: [] as string[],
   claims_admin_wallets: [] as string[],
@@ -17,12 +18,19 @@ jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettings: () => ({ seizeSettings: mockSettings, isLoaded: true }),
 }));
 jest.mock("@/hooks/useIsDropForgeAdmin", () => ({
-  useIsDropForgeAdmin: () => ({
-    isDropForgeAdmin: mockRole.owner || mockRole.admin,
-    isDropForgeOwner: mockRole.owner,
-    isFetching: mockRole.pending,
-  }),
+  useIsDropForgeAdmin: (options: unknown) => {
+    mockUseIsDropForgeAdmin(options);
+    return {
+      isDropForgeAdmin: mockRole.owner || mockRole.admin,
+      isDropForgeOwner: mockRole.owner,
+      isFetching: mockRole.pending,
+    };
+  },
 }));
+
+beforeEach(() => {
+  mockUseIsDropForgeAdmin.mockClear();
+});
 
 it.each([
   ["distribution", true, false, false],
@@ -62,3 +70,26 @@ it("does not block configured claims admins on a pending RPC read", () => {
   expect(result.current.permissionsLoading).toBe(false);
   expect(result.current.canAccessLaunchPage).toBe(true);
 });
+
+it.each([
+  ["claims", true],
+  ["distribution", false],
+  ["onchain admin", false],
+  ["ordinary wallet", false],
+])(
+  "skips the onchain admin reads only when %s settings already decide the outcome",
+  (role, skip) => {
+    mockRole = {
+      owner: false,
+      admin: role === "onchain admin",
+      pending: false,
+    };
+    mockSettings = {
+      distribution_admin_wallets:
+        role === "distribution" ? [wallet.toUpperCase()] : [],
+      claims_admin_wallets: role === "claims" ? [wallet.toUpperCase()] : [],
+    };
+    renderHook(useDropForgePermissions);
+    expect(mockUseIsDropForgeAdmin).toHaveBeenLastCalledWith({ skip });
+  }
+);
