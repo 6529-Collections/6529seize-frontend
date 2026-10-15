@@ -53,7 +53,7 @@ export default function ConsolidationMappingTool() {
       .then((loadedConsolidations) => {
         setConsolidations(loadedConsolidations);
         if (file) {
-          parseCsvFile(
+          void parseCsvFile(
             file,
             (row, index) =>
               index === 0 ? undefined : parseConsolidationRow(row),

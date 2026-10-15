@@ -36,20 +36,6 @@ jest.mock("csv-parser", () => () => {
   return parser;
 });
 
-let mockFileReadFails = false;
-class MockFileReader {
-  result = "";
-  onload: (() => void) | null = null;
-  onerror: (() => void) | null = null;
-  readAsText() {
-    if (mockFileReadFails) {
-      this.onerror?.();
-      return;
-    }
-    this.onload?.();
-  }
-}
-
 const fetchAllPagesMock = fetchAllPages as jest.Mock;
 const downloadCsvFileMock = downloadCsvFile as jest.Mock;
 
@@ -91,27 +77,15 @@ const TOOLS: ReadonlyArray<{
 ];
 
 describe.each(TOOLS)("$name error handling", ({ element, uploadOptions }) => {
-  const originalFileReader = globalThis.FileReader;
-
   beforeEach(() => {
     fetchAllPagesMock.mockReset();
     downloadCsvFileMock.mockReset();
     mockCsvRows = [];
     mockParserError = undefined;
-    mockFileReadFails = false;
-    Object.defineProperty(globalThis, "FileReader", {
-      configurable: true,
-      writable: true,
-      value: MockFileReader,
-    });
   });
 
   afterEach(() => {
-    Object.defineProperty(globalThis, "FileReader", {
-      configurable: true,
-      writable: true,
-      value: originalFileReader,
-    });
+    jest.restoreAllMocks();
   });
 
   it("shows an alert and stops processing when the data cannot be loaded", async () => {
@@ -129,7 +103,9 @@ describe.each(TOOLS)("$name error handling", ({ element, uploadOptions }) => {
 
   it("shows an alert and stops processing when the file cannot be read", async () => {
     fetchAllPagesMock.mockResolvedValue([]);
-    mockFileReadFails = true;
+    jest
+      .spyOn(File.prototype, "text")
+      .mockRejectedValue(new Error("unreadable"));
     render(element);
 
     await uploadAndSubmit(uploadOptions);
@@ -143,7 +119,6 @@ describe.each(TOOLS)("$name error handling", ({ element, uploadOptions }) => {
   it("shows an alert and stops processing when the CSV cannot be parsed", async () => {
     fetchAllPagesMock.mockResolvedValue([]);
     mockParserError = new Error("bad csv");
-    const errorSpy = jest.spyOn(console, "error").mockImplementation();
     render(element);
 
     await uploadAndSubmit(uploadOptions);
@@ -152,7 +127,6 @@ describe.each(TOOLS)("$name error handling", ({ element, uploadOptions }) => {
       "Your CSV file could not be read. Check the file and try again."
     );
     expect(screen.getByRole("button", { name: "Submit" })).toBeEnabled();
-    errorSpy.mockRestore();
   });
 
   it("clears the alert when the user submits again", async () => {
@@ -175,26 +149,14 @@ describe.each(TOOLS)("$name error handling", ({ element, uploadOptions }) => {
 });
 
 describe("mapping tool downloads", () => {
-  const originalFileReader = globalThis.FileReader;
-
   beforeEach(() => {
     fetchAllPagesMock.mockReset();
     downloadCsvFileMock.mockReset();
     mockParserError = undefined;
-    mockFileReadFails = false;
-    Object.defineProperty(globalThis, "FileReader", {
-      configurable: true,
-      writable: true,
-      value: MockFileReader,
-    });
   });
 
   afterEach(() => {
-    Object.defineProperty(globalThis, "FileReader", {
-      configurable: true,
-      writable: true,
-      value: originalFileReader,
-    });
+    jest.restoreAllMocks();
   });
 
   it("downloads the delegation mapping as lower-case output.csv", async () => {

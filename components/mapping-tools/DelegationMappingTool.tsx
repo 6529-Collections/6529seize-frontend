@@ -46,7 +46,7 @@ export default function DelegationMappingTool() {
       .then((loadedDelegations) => {
         setDelegations(loadedDelegations);
         if (file) {
-          parseCsvFile(
+          void parseCsvFile(
             file,
             (row) => row["_0"],
             setCsvData,

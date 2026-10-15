@@ -140,7 +140,7 @@ export default function AboutHTML(props: Readonly<Props>) {
       .then((content) => {
         if (!ignore) {
           setHtml(
-            isEns
+            props.path === "ens"
               ? sanitizeHtml(formatEnsHtml(content), ENS_HTML_PROFILE)
               : sanitizeHtml(content)
           );
@@ -154,7 +154,7 @@ export default function AboutHTML(props: Readonly<Props>) {
     return () => {
       ignore = true;
     };
-  }, [props.path, isEns]);
+  }, [props.path]);
 
   let titleLighter = "";
   let titleDarker = props.title;

@@ -222,12 +222,14 @@ function isAllowedElement(
 
 function removeComments(parsed: Document) {
   const walker = parsed.createTreeWalker(parsed.body, NodeFilter.SHOW_COMMENT);
-  const comments: Node[] = [];
-  while (walker.nextNode()) {
-    comments.push(walker.currentNode);
+  const comments: Comment[] = [];
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    if (node instanceof Comment) {
+      comments.push(node);
+    }
   }
   for (const comment of comments) {
-    comment.parentNode?.removeChild(comment);
+    comment.remove();
   }
 }
 
@@ -242,6 +244,7 @@ export function sanitizeHtml(
   const parsed = new DOMParser().parseFromString(html, "text/html");
   removeComments(parsed);
 
+  // A disallowed element is removed together with all of its descendants.
   for (const element of Array.from(parsed.body.querySelectorAll("*"))) {
     if (isAllowedElement(element, profile)) {
       sanitizeAttributes(element, profile);

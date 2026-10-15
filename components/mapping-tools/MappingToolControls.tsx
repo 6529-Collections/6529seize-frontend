@@ -74,8 +74,12 @@ export function MappingToolUpload({
           </button>
         </div>
       </div>
+      {/* Test harnesses and browser extensions can add attributes (for
+          example an inline caret-color) to this server-rendered input before
+          React hydrates it; that is not a mismatch worth a console error. */}
       <input
         ref={inputRef}
+        suppressHydrationWarning
         className={`tw-form-input ${styles["formInputHidden"]}`}
         type="file"
         accept=".csv"

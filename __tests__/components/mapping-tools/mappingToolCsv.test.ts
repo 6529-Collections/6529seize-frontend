@@ -5,7 +5,7 @@ function parse<T>(
   mapRow: Parameters<typeof parseCsvFile<T>>[1]
 ): Promise<T[]> {
   return new Promise((resolve, reject) => {
-    parseCsvFile(
+    void parseCsvFile(
       new File([csv], "test.csv", { type: "text/csv" }),
       mapRow,
       resolve,
@@ -41,15 +41,13 @@ describe("parseCsvFile", () => {
   });
 
   it("reports an error when the file cannot be read", async () => {
-    const readAsText = jest
-      .spyOn(FileReader.prototype, "readAsText")
-      .mockImplementation(function (this: FileReader) {
-        this.onerror?.(new ProgressEvent("error") as ProgressEvent<FileReader>);
-      });
+    const text = jest
+      .spyOn(File.prototype, "text")
+      .mockRejectedValue(new Error("unreadable"));
     const onParsed = jest.fn();
     const onError = jest.fn();
 
-    parseCsvFile(
+    await parseCsvFile(
       new File(["a"], "test.csv"),
       (row) => row["_0"],
       onParsed,
@@ -58,6 +56,6 @@ describe("parseCsvFile", () => {
 
     expect(onError).toHaveBeenCalledTimes(1);
     expect(onParsed).not.toHaveBeenCalled();
-    readAsText.mockRestore();
+    text.mockRestore();
   });
 });

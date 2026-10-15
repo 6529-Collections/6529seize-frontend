@@ -94,18 +94,53 @@ describe("sanitizeHtml", () => {
       expect(result.querySelector("div")?.getAttributeNames()).toEqual([]);
     });
 
-    it("keeps only allowed ids", () => {
-      const result = parse(
-        sanitizeHtml(
-          '<h4 id="register_ens">A</h4><h4 id="location">B</h4><h4 id="9bad">C</h4><h4 id="has space">D</h4>'
-        )
-      );
-      const ids = Array.from(result.querySelectorAll("h4")).map((heading) =>
-        heading.getAttribute("id")
-      );
+    it("keeps the in-page anchors used by the live ENS document", () => {
+      const anchorIds = [
+        "register_ens",
+        "set_primary_name",
+        "create_subdomain",
+        "set_sub_domain",
+        "domain_name_gnosis",
+      ];
+      const html =
+        "<ul>" +
+        anchorIds
+          .map((id) => `<li><a href="#${id}">Go to ${id}</a></li>`)
+          .join("") +
+        "</ul>" +
+        anchorIds.map((id) => `<h4 id="${id}">${id}</h4>`).join("");
 
-      expect(ids).toEqual(["register_ens", null, null, null]);
+      const result = parse(sanitizeHtml(html));
+
+      expect(
+        Array.from(result.querySelectorAll("h4")).map((heading) => heading.id)
+      ).toEqual(anchorIds);
+      for (const id of anchorIds) {
+        expect(result.querySelector(`a[href="#${id}"]`)).not.toBeNull();
+        expect(result.querySelector(`#${id}`)).toBe(
+          result.querySelector(`h4#${id}`)
+        );
+      }
     });
+
+    it.each(["location", "name", "length", "top", "body", "cookie", "forms"])(
+      "drops the id %s because it shadows a window or document property",
+      (id) => {
+        const result = parse(sanitizeHtml(`<h4 id="${id}">Heading</h4>`));
+
+        expect(result.querySelector("h4")?.hasAttribute("id")).toBe(false);
+        expect(result.querySelector("h4")?.textContent).toBe("Heading");
+      }
+    );
+
+    it.each(["9bad", "has space", 'quote"id', "a".repeat(101)])(
+      "drops the malformed id %s",
+      (id) => {
+        const result = parse(sanitizeHtml(`<h4 id='${id}'>Heading</h4>`));
+
+        expect(result.querySelector("h4")?.hasAttribute("id")).toBe(false);
+      }
+    );
 
     it("keeps class tokens only when the profile lists them", () => {
       const profile: HtmlSanitizeProfile = {
