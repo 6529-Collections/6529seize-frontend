@@ -172,7 +172,10 @@ describe("NextGenTokenOnChain", () => {
     );
     for (const read of reads) {
       expect(read.query).not.toHaveProperty("refetchInterval");
-      expect(read.query).toEqual({ refetchOnWindowFocus: true });
+      expect(read.query).toEqual({
+        refetchOnWindowFocus: true,
+        staleTime: 60_000,
+      });
     }
   });
 

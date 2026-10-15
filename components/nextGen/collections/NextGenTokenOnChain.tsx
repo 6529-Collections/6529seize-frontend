@@ -27,8 +27,12 @@ interface Props {
 }
 
 const TOKEN_METADATA_FETCH_TIMEOUT_MS = 10_000;
-// Read once and refresh when the tab is shown again, instead of polling.
-const ON_CHAIN_READ_QUERY = { refetchOnWindowFocus: true } as const;
+// Read once and refresh when the tab is shown again, instead of polling. The
+// stale time skips focus refetches within a minute of the last read.
+const ON_CHAIN_READ_QUERY = {
+  refetchOnWindowFocus: true,
+  staleTime: 60_000,
+} as const;
 
 export default function NextGenTokenOnChain(props: Readonly<Props>) {
   const capacitor = useCapacitor();
