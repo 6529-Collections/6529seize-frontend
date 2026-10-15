@@ -6,6 +6,10 @@ import {
   WritableStream,
 } from "node:stream/web";
 import { MessagePort } from "node:worker_threads";
+// In the app, each route registers its own message namespace (see
+// i18n/namespaces). Unit tests render those components without their route, so
+// register every route namespace here, as the full dictionary did before.
+import "@/i18n/namespaces/public-review";
 
 class TestMessagePort {
   constructor() {

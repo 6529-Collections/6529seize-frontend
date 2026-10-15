@@ -1,4 +1,7 @@
 import "next/dist/compiled/server-only";
+// Builds its page labels while loading, and also loads outside the review
+// layout (the declarations API route), so it registers review copy itself.
+import "@/i18n/namespaces/public-review";
 
 import { connection } from "next/server";
 

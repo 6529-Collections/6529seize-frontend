@@ -53,7 +53,7 @@ import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-c
 import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
 import { THE_MEMES_MINT_PROGRESS_MESSAGES } from "@/i18n/messages/the-memes-mint-progress";
-import { PUBLIC_REVIEW_MESSAGES } from "@/i18n/messages/public-review";
+import type { PUBLIC_REVIEW_MESSAGES } from "@/i18n/messages/public-review";
 import { EN_US_RECEIPT_MESSAGES } from "@/i18n/messages/collect-receipts";
 import { CONTENT_MODERATION_MESSAGES } from "@/i18n/messages/content-moderation";
 import { MODERATION_CHECK_MESSAGES } from "@/i18n/messages/moderation-checks";
@@ -4489,7 +4489,14 @@ export const EN_US_MESSAGES = {
   ...HEADER_SEARCH_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,
-  ...PUBLIC_REVIEW_MESSAGES,
+  "navigation.nfts.theMemes": "The Memes",
+  "navigation.nfts.gradient": "6529 Gradient",
+  "navigation.nfts.nextGen": "NextGen",
+  "navigation.nfts.memeLab": "Meme Lab",
+  "navigation.nfts.rememes": "ReMemes",
+  "navigation.nfts.streamReview": "6529 Stream — Review",
+  "navigation.nfts.activity": "NFT Activity",
+  "navigation.nfts.memesCalendar": "Memes Calendar",
   ...EULA_MESSAGES,
   ...GLOBAL_ERROR_MESSAGES,
   ...TITLE_CONTEXT_MESSAGES,
@@ -4590,4 +4597,9 @@ export const EN_US_MESSAGES = {
   "waves.sidebar.byCreator": "by {creator}",
 } as const;
 
-export type MessageKey = keyof typeof EN_US_MESSAGES;
+// Route namespaces are en-US source copy that ships only with its route. The
+// route registers its namespace through `@/i18n/namespaces/<name>` before it
+// renders, and the keys stay valid message keys everywhere.
+export type MessageKey =
+  | keyof typeof EN_US_MESSAGES
+  | keyof typeof PUBLIC_REVIEW_MESSAGES;

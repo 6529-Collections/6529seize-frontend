@@ -1,3 +1,6 @@
+// Builds its section titles while loading, so it registers review copy itself.
+import "@/i18n/namespaces/public-review";
+
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
