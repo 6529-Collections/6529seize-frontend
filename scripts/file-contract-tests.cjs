@@ -21,12 +21,16 @@ const CONTRACTS = [
     inputs: [/^(?:app|components)\/.*\.tsx$/u, /^tailwind\.config\./u],
   },
   {
-    test: "__tests__/contracts/keyboard-focus-indicators.batch2.test.ts",
+    test: "__tests__/contracts/keyboard-focus-indicators.test.ts",
     inputs: [
       /^(?:app|components)\/.*\.tsx?$/u,
       /^tailwind\.config\./u,
       /^__tests__\/contracts\/support\/keyboardFocusIndicators\.ts$/u,
     ],
+  },
+  {
+    test: "__tests__/styles/link-focus-visibility.test.ts",
+    inputs: [/^styles\/globals\.css$/u],
   },
   {
     test: "__tests__/scripts/changed-file-gates.test.ts",
