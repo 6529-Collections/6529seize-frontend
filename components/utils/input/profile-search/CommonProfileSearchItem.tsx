@@ -41,7 +41,9 @@ export default function CommonProfileSearchItem({
         onClick={onProfileClick}
         tabIndex={-1}
         className={`tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-justify-between tw-rounded-lg tw-border-none tw-bg-transparent tw-px-2 tw-py-2 tw-text-left tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
-          isHighlighted ? "tw-bg-iron-700" : "tw-bg-transparent"
+          isHighlighted
+            ? "tw-bg-iron-700 tw-ring-2 tw-ring-inset tw-ring-primary-400"
+            : "tw-bg-transparent"
         }`}
       >
         <div className="tw-flex tw-w-full tw-items-center tw-justify-between">
