@@ -1,4 +1,7 @@
+import { createElement } from "react";
 import { act, renderHook } from "@testing-library/react";
+import { hydrateRoot } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 import {
   usePageVisible,
   useVisibleInterval,
@@ -76,6 +79,32 @@ describe("usePageVisible", () => {
     removeListener.mockRestore();
   });
 
+  it("hydrates as visible, then reports a hidden page", async () => {
+    jest.useRealTimers();
+    function Visibility() {
+      return createElement("span", null, String(usePageVisible()));
+    }
+    const container = document.createElement("div");
+    container.innerHTML = renderToString(createElement(Visibility));
+    expect(container.textContent).toBe("true");
+    setVisibility("hidden");
+    const onRecoverableError = jest.fn();
+    let root: ReturnType<typeof hydrateRoot> | undefined;
+    try {
+      await act(async () => {
+        root = hydrateRoot(container, createElement(Visibility), {
+          onRecoverableError,
+        });
+      });
+      expect(onRecoverableError).not.toHaveBeenCalled();
+      expect(container.textContent).toBe("false");
+      setVisibility("visible");
+      expect(container.textContent).toBe("true");
+    } finally {
+      act(() => root?.unmount());
+    }
+  });
+
   it("treats an inactive native app as hidden", () => {
     const { result } = renderHook(usePageVisible);
 
@@ -139,6 +168,50 @@ describe("useVisibleInterval", () => {
 
     setNativeActive(true);
     expect(callback).toHaveBeenCalledTimes(1);
+    expect(jest.getTimerCount()).toBe(1);
+  });
+
+  it("catches up once after a delay change while hidden", () => {
+    const callback = jest.fn();
+    const { rerender } = renderHook(
+      ({ delayMs }) => useVisibleInterval(callback, delayMs),
+      { initialProps: { delayMs: 1000 } }
+    );
+    setVisibility("hidden");
+    rerender({ delayMs: 5000 });
+    expect(jest.getTimerCount()).toBe(0);
+
+    setVisibility("visible");
+    expect(callback).toHaveBeenCalledTimes(1);
+    act(() => jest.advanceTimersByTime(4999));
+    expect(callback).toHaveBeenCalledTimes(1);
+    act(() => jest.advanceTimersByTime(1));
+    expect(callback).toHaveBeenCalledTimes(2);
+  });
+
+  it("catches up once when several signals report the page shown", () => {
+    const callback = jest.fn();
+    renderHook(() => useVisibleInterval(callback, 1000));
+    setVisibility("hidden");
+
+    // In the native app a visibility change and an app-state change both
+    // notify subscribers when the app returns.
+    setVisibility("visible");
+    setNativeActive(true);
+    expect(callback).toHaveBeenCalledTimes(1);
+    expect(jest.getTimerCount()).toBe(1);
+  });
+
+  it("does not restart a consumer removed during a notification", () => {
+    const second = jest.fn();
+    let unmountSecond = () => {};
+    renderHook(() => useVisibleInterval(() => unmountSecond(), 1000));
+    const secondView = renderHook(() => useVisibleInterval(second, 1000));
+    unmountSecond = secondView.unmount;
+    setVisibility("hidden");
+
+    setVisibility("visible");
+    expect(second).not.toHaveBeenCalled();
     expect(jest.getTimerCount()).toBe(1);
   });
 

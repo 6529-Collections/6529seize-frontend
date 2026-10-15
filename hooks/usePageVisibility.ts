@@ -21,11 +21,21 @@ function getPageVisible(): boolean {
   );
 }
 
-// Server renders and hydration treat the page as visible.
+// Server renders and hydration treat the page as visible. If the page is
+// hidden while it hydrates (for example a link opened in a background tab),
+// useSyncExternalStore re-renders with the client value right after
+// hydration; useVisibleInterval reads the client value directly.
 const getServerPageVisible = () => true;
 
 function notifySubscribers(): void {
-  subscribers.forEach((subscriber) => subscriber());
+  // Iterate a snapshot so a callback that adds or removes subscribers cannot
+  // change this pass, and skip any removed meanwhile: a removed callback
+  // belongs to a cleaned-up consumer and must not restart its timer.
+  for (const subscriber of [...subscribers]) {
+    if (subscribers.has(subscriber)) {
+      subscriber();
+    }
+  }
 }
 
 function subscribePageVisibility(subscriber: () => void): () => void {
