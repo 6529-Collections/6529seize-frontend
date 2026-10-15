@@ -4597,9 +4597,9 @@ export const EN_US_MESSAGES = {
   "waves.sidebar.byCreator": "by {creator}",
 } as const;
 
-// Route namespaces are en-US source copy that ships only with its route. The
-// route registers its namespace through `@/i18n/namespaces/<name>` before it
-// renders, and the keys stay valid message keys everywhere.
+// Route namespaces are en-US source copy that ships only with its route. Each
+// module that reads one imports `@/i18n/namespaces/<name>`, which registers
+// the copy. The keys stay valid message keys everywhere.
 export type MessageKey =
   | keyof typeof EN_US_MESSAGES
   | keyof typeof PUBLIC_REVIEW_MESSAGES;

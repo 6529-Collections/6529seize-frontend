@@ -1,13 +1,11 @@
 import "next/dist/compiled/server-only";
-// Builds its page labels while loading, and also loads outside the review
-// layout (the declarations API route), so it registers review copy itself.
-import "@/i18n/namespaces/public-review";
 
 import { connection } from "next/server";
 
 import { getPublicReviewEnvironment } from "@/config/publicReviews";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 import { loadStreamEditorialContent } from "@/lib/public-review/editorialContent";
 import { extractPublicReviewSections } from "@/lib/public-review/editorialSections";
 import {
@@ -17,8 +15,8 @@ import {
 import {
   STREAM_REVIEW_ENTRY_PAGES,
   STREAM_REVIEW_ENTRY_GUIDE_VERSION,
-  getStreamReviewEntryMarkdown,
 } from "./streamReviewEntryGuides";
+import { getStreamReviewEntryMarkdown } from "./streamReviewEntryMarkdown";
 import type {
   PublicReviewPageDefinition,
   PublicReviewSectionDefinition,

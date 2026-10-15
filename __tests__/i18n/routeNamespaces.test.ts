@@ -4,6 +4,7 @@ jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
 import fs from "node:fs";
 import path from "node:path";
 
+import { SUPPORTED_LOCALES } from "@/i18n/locales";
 import { PUBLIC_REVIEW_MESSAGES } from "@/i18n/messages/public-review";
 
 type MessagesModule = typeof import("@/i18n/messages");
@@ -52,11 +53,40 @@ const EAGER_COPY_MODULES = [
   "@/components/public-review/StreamReviewRolesGuide",
 ];
 
+// Representative keys from the namespace file and its split modules.
+const REPRESENTATIVE_REVIEW_COPY = {
+  "publicReview.status.heading": "Review status",
+  "publicReview.pages.startHere.title": "Meet Stream",
+  "publicReview.reference.overviewTitle": "Solidity technical reference",
+  "publicReview.feedback.pages.referenceOverview":
+    "Technical reference overview",
+  "publicReview.rolesGuide.status.heading": "Start with status",
+  "publicReview.development.heading": "Is Stream ready to launch?",
+} as const;
+
 const VALUE_IMPORT =
   /^\s*(?:import|export)\s+(?!type\b)(?:[^;]*?\bfrom\s+)?["']([^"']+)["']|\bimport\(\s*["']([^"']+)["']\s*\)/gm;
 
+const MESSAGES_IMPORT =
+  /import\s*\{([^}]*)\}\s*from\s*["']@\/i18n\/messages["']/;
+
 const readSource = (relativePath: string) =>
   fs.readFileSync(path.join(ROOT, relativePath), "utf8");
+
+const usesReviewKeys = (relativePath: string) =>
+  /["'`]publicReview\./.test(readSource(relativePath));
+
+// Whether the module looks up copy itself with t() or tRich().
+function readsCopy(relativePath: string): boolean {
+  const source = readSource(relativePath);
+  const names = MESSAGES_IMPORT.exec(source)?.[1]
+    ?.split(",")
+    .map((name) => name.trim());
+  return (
+    names?.some((name) => name === "t" || name === "tRich") === true &&
+    /\b(?:t|tRich)\(/.test(source)
+  );
+}
 
 function listSourceFiles(): string[] {
   const files: string[] = [];
@@ -103,7 +133,21 @@ function resolveImport(from: string, specifier: string): string | undefined {
     });
 }
 
-function reachesNamespace(entries: readonly string[]): boolean {
+const resolvedImports = new Map<string, string[]>();
+
+function moduleImports(file: string): string[] {
+  let modules = resolvedImports.get(file);
+  if (!modules) {
+    modules = valueImports(file).flatMap(
+      (specifier) => resolveImport(file, specifier) ?? []
+    );
+    resolvedImports.set(file, modules);
+  }
+  return modules;
+}
+
+// Every module the entries load through static value imports.
+function importGraph(entries: readonly string[]): Set<string> {
   const seen = new Set<string>();
   const queue = [...entries];
   while (queue.length > 0) {
@@ -111,23 +155,17 @@ function reachesNamespace(entries: readonly string[]): boolean {
     if (file === undefined || seen.has(file)) {
       continue;
     }
-    if (file === NAMESPACE_FILE) {
-      return true;
-    }
     seen.add(file);
-    for (const specifier of valueImports(file)) {
-      const resolved = resolveImport(file, specifier);
-      if (resolved) {
-        queue.push(resolved);
-      }
-    }
+    queue.push(...moduleImports(file));
   }
-  return false;
+  return seen;
 }
 
-// jest.setup.js registers every namespace for the whole suite. A fresh module
-// registry shows the dictionaries the way a page that is not a review loads
-// them.
+const reachesNamespace = (entries: readonly string[]) =>
+  importGraph(entries).has(NAMESPACE_FILE);
+
+// A fresh module registry shows the dictionaries the way a page that is not a
+// review loads them.
 function loadSharedEnUsMessages(): EnUsModule["EN_US_MESSAGES"] {
   let enUs: EnUsModule | undefined;
   jest.isolateModules(() => {
@@ -155,20 +193,45 @@ describe("public-review message namespace", () => {
     const shared = loadSharedEnUsMessages();
     const reviewKeys = Object.keys(PUBLIC_REVIEW_MESSAGES);
 
-    expect(reviewKeys.length).toBeGreaterThan(1000);
+    expect(PUBLIC_REVIEW_MESSAGES).toMatchObject(REPRESENTATIVE_REVIEW_COPY);
     expect(
       reviewKeys.filter((key) => !key.startsWith("publicReview."))
     ).toEqual([]);
     expect(reviewKeys.filter((key) => key in shared)).toEqual([]);
   });
 
+  it("registers every review key and leaves shared copy unchanged", () => {
+    jest.isolateModules(() => {
+      const { EN_US_MESSAGES } = jest.requireActual<EnUsModule>(
+        "@/i18n/messages/en-US"
+      );
+      const { t } = jest.requireActual<MessagesModule>("@/i18n/messages");
+      const shared = { ...EN_US_MESSAGES };
+
+      jest.requireActual(NAMESPACE_MODULE);
+
+      const registeredKeys = Object.keys(EN_US_MESSAGES);
+      expect(registeredKeys).toHaveLength(
+        Object.keys(shared).length + Object.keys(PUBLIC_REVIEW_MESSAGES).length
+      );
+      expect(EN_US_MESSAGES).toMatchObject(shared);
+      for (const [key, value] of Object.entries(REPRESENTATIVE_REVIEW_COPY)) {
+        expect(t("en-US", key as keyof typeof REPRESENTATIVE_REVIEW_COPY)).toBe(
+          value
+        );
+      }
+    });
+  });
+
   it("resolves review copy in every locale once the namespace loads", () => {
     jest.isolateModules(() => {
       const { t } = jest.requireActual<MessagesModule>("@/i18n/messages");
 
-      expect(() => t("en-US", "publicReview.status.heading")).toThrow(
-        "Missing source message for key: publicReview.status.heading"
-      );
+      for (const locale of SUPPORTED_LOCALES) {
+        expect(() => t(locale, "publicReview.status.heading")).toThrow(
+          "Missing source message for key: publicReview.status.heading"
+        );
+      }
 
       jest.requireActual(NAMESPACE_MODULE);
 
@@ -224,6 +287,23 @@ describe("public-review message namespace", () => {
     }
   );
 
+  it("loads the namespace in every module that reads review copy", () => {
+    const copyReaders = sourceFiles.filter(
+      (file) =>
+        readsCopy(file) && (REVIEW_CODE.test(file) || usesReviewKeys(file))
+    );
+
+    expect(copyReaders).toEqual(
+      expect.arrayContaining([
+        "components/public-review/PublicReviewGuidePointList.tsx",
+        "components/public-review/StreamReviewRolesGuide.tsx",
+        "lib/public-review/streamReviewEntryMarkdown.ts",
+        "lib/public-review/streamReviewFeedback.server.ts",
+      ])
+    );
+    expect(copyReaders.filter((file) => !reachesNamespace([file]))).toEqual([]);
+  });
+
   it("is imported only by review code", () => {
     const importers = sourceFiles.filter((file) =>
       valueImports(file).some(
@@ -274,10 +354,17 @@ describe("public-review message namespace", () => {
         )
       ).toEqual([]);
       if (!SERVER_ONLY_IMPORTERS.has(file)) {
-        const reviewModules = reviewImports.flatMap(
-          (specifier) => resolveImport(file, specifier) ?? []
+        const reviewGraph = importGraph(
+          reviewImports.flatMap(
+            (specifier) => resolveImport(file, specifier) ?? []
+          )
         );
-        expect([file, reachesNamespace(reviewModules)]).toEqual([file, false]);
+        expect([file, reviewGraph.has(NAMESPACE_FILE)]).toEqual([file, false]);
+        // Without the namespace, these modules may hold review keys as data
+        // but must never look the copy up.
+        expect([...reviewGraph].filter((module) => readsCopy(module))).toEqual(
+          []
+        );
       }
     }
   });

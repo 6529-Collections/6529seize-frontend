@@ -59,11 +59,13 @@ locales.
 - Large copy used by a single route family can be a route namespace: part of
   the `en-US` source and of `MessageKey`, but shipped only with that route.
   `publicReview.*` is one. Its copy lives in `i18n/messages/public-review*.ts`
-  and `i18n/namespaces/public-review.ts` registers it. Only review code imports
-  that module: the `/reviews` layout (server components and metadata),
-  `PublicReviewMessages` (client components), and review modules that read
-  copy while they load. Use its keys only under `components/public-review`
-  and `lib/public-review`. Add new review copy to the namespace files, not to
+  and `i18n/namespaces/public-review.ts` registers it. Every review module that
+  calls `t()` or `tRich()` imports that module, so the copy is registered
+  before the module runs. The `/reviews` layout and `PublicReviewMessages`
+  import it too, as a backstop for the whole route. Shared code must not
+  import it. Modules the sidebar loads may hold review keys as data but must
+  not look them up. Use its keys only under `components/public-review` and
+  `lib/public-review`. Add new review copy to the namespace files, not to
   `en-US.ts`. `__tests__/i18n/routeNamespaces.test.ts` checks these rules.
 - Other locale dictionaries may be partial during migration.
 - Missing keys fall back to `en-US`.

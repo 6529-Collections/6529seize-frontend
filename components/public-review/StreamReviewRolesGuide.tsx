@@ -1,12 +1,10 @@
-// Builds its section titles while loading, so it registers review copy itself.
-import "@/i18n/namespaces/public-review";
-
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
 import { PublicReviewGuidePointList } from "@/components/public-review/PublicReviewGuidePointList";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 import { createDefaultLocalePublicReviewSections } from "@/lib/public-review/publicReviewSections";
 import type {
   PublicReviewPageDefinition,

@@ -5,9 +5,10 @@ import "@/i18n/namespaces/public-review";
 import type { ReactNode } from "react";
 
 /**
- * Registers the review-only `publicReview.*` copy for client components.
- * Loading this module registers it, so the copy is in place before anything
- * below this component renders, during server rendering and in the browser.
+ * Backstop for the review routes. Review client components import the
+ * `publicReview.*` namespace themselves. This wrapper also registers it before
+ * anything below it renders, during server rendering and in the browser, so a
+ * shared client component given a review key still finds the copy.
  */
 export default function PublicReviewMessages({
   children,
