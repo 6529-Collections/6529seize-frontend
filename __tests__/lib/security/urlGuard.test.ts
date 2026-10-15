@@ -39,6 +39,7 @@ jest.mock("undici", () => ({
 import {
   fetchPublicUrl,
   isForbiddenAddress,
+  parseIpv6Groups,
   parsePublicUrl,
   type FetchPublicUrlOptions,
 } from "@/lib/security/urlGuard";
@@ -477,5 +478,57 @@ describe("isForbiddenAddress", () => {
   it("keeps public IPv4 addresses allowed", () => {
     expect(isForbiddenAddress(SAFE_EXAMPLE_ADDRESS)).toBe(false);
     expect(isForbiddenAddress("10.0.0.1")).toBe(true);
+  });
+});
+
+describe("parseIpv6Groups", () => {
+  const MAPPED_1_2_3_4 = [0, 0, 0, 0, 0, 0xffff, 0x0102, 0x0304];
+
+  it.each([
+    ["::ffff:1.2.3.4", MAPPED_1_2_3_4],
+    ["0:0:0:0:0:ffff:1.2.3.4", MAPPED_1_2_3_4],
+    ["0000:0000:0000:0000:0000:ffff:1.2.3.4", MAPPED_1_2_3_4],
+    ["::ffff:0102:0304", MAPPED_1_2_3_4],
+    ["0:0:0:0:0:ffff:0102:0304", MAPPED_1_2_3_4],
+    ["0000:0000:0000:0000:0000:ffff:0102:0304", MAPPED_1_2_3_4],
+    ["::FFFF:1.2.3.4", MAPPED_1_2_3_4],
+    ["0:0:0:0:0:FfFf:0102:0304", MAPPED_1_2_3_4],
+    ["0:0::ffff:1.2.3.4", MAPPED_1_2_3_4],
+    ["64:ff9b::8.8.8.8", [0x64, 0xff9b, 0, 0, 0, 0, 0x0808, 0x0808]],
+    ["0064:FF9B:0:0:0:0:0808:0808", [0x64, 0xff9b, 0, 0, 0, 0, 0x0808, 0x0808]],
+    ["::1.2.3.4", [0, 0, 0, 0, 0, 0, 0x0102, 0x0304]],
+    ["1:2:3:4:5:6:1.2.3.4", [1, 2, 3, 4, 5, 6, 0x0102, 0x0304]],
+    ["1:2:3:4:5:6:7:8", [1, 2, 3, 4, 5, 6, 7, 8]],
+    ["::", [0, 0, 0, 0, 0, 0, 0, 0]],
+    ["::1", [0, 0, 0, 0, 0, 0, 0, 1]],
+    ["1::", [1, 0, 0, 0, 0, 0, 0, 0]],
+    ["2606:2800:220:1:248:1893:25c8:1946", [0x2606, 0x2800, 0x220, 1, 0x248, 0x1893, 0x25c8, 0x1946]],
+  ])("expands %s", (address, groups) => {
+    expect(parseIpv6Groups(address)).toEqual(groups);
+  });
+
+  it.each([
+    ["a dotted quad before the compression", "1.2.3.4::1"],
+    ["a dotted quad as the whole head", "1.2.3.4::"],
+    ["a dotted quad followed by another group", "::1.2.3.4:5"],
+    ["a dotted quad in the middle", "1:1.2.3.4:5::"],
+    ["a dotted quad in the middle without compression", "1:2:3:4:1.2.3.4:6:7"],
+    ["a bare dotted quad", "1.2.3.4"],
+    ["a dotted quad that overfills the address", "1:2:3:4:5:6:7:1.2.3.4"],
+    ["a dotted quad that is not an IPv4 address", "::ffff:1.2.3"],
+    ["a dotted quad with an out-of-range octet", "::ffff:1.2.3.256"],
+    ["a dotted quad with a leading zero", "::ffff:01.2.3.4"],
+    ["two dotted quads", "::1.2.3.4:5.6.7.8"],
+    ["a scoped address", "fe80::1%eth0"],
+    ["two compressions", "1::2::3"],
+    ["a leading single colon", ":1:2:3:4:5:6:7"],
+    ["too many groups", "1:2:3:4:5:6:7:8:9"],
+    ["too few groups", "1:2:3:4:5:6:7"],
+    ["a compression that hides no group", "1:2:3:4:5:6:7::8"],
+    ["an oversized group", "12345::1"],
+    ["a non-hex group", "g::1"],
+    ["an empty string", ""],
+  ])("rejects %s", (_label, address) => {
+    expect(parseIpv6Groups(address)).toBeNull();
   });
 });

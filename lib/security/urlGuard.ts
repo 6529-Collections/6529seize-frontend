@@ -202,7 +202,10 @@ function isPrivateIpv4(address: string): boolean {
   );
 }
 
-function parseIpv6Part(part: string): number[] | null {
+function parseIpv6Part(
+  part: string,
+  allowIpv4Tail: boolean
+): number[] | null {
   if (part === "") {
     return [];
   }
@@ -210,7 +213,7 @@ function parseIpv6Part(part: string): number[] | null {
   const tokens = part.split(":");
   const last = tokens.at(-1) ?? "";
   if (last.includes(".")) {
-    if (isIP(last) !== 4) {
+    if (!allowIpv4Tail || isIP(last) !== 4) {
       return null;
     }
     const ipv4 = ipv4ToInt(last);
@@ -238,7 +241,8 @@ export function parseIpv6Groups(address: string): number[] | null {
     return null;
   }
 
-  const head = parseIpv6Part(halves[0] ?? "");
+  // A dotted quad is only valid as the final 32 bits of the whole address.
+  const head = parseIpv6Part(halves[0] ?? "", halves.length === 1);
   if (!head) {
     return null;
   }
@@ -246,7 +250,7 @@ export function parseIpv6Groups(address: string): number[] | null {
     return head.length === IPV6_GROUP_COUNT ? head : null;
   }
 
-  const tail = parseIpv6Part(halves[1] ?? "");
+  const tail = parseIpv6Part(halves[1] ?? "", true);
   const missing = IPV6_GROUP_COUNT - head.length - (tail?.length ?? 0);
   if (!tail || missing < 1) {
     return null;

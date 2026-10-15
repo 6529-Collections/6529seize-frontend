@@ -26,7 +26,7 @@ class MockNextResponse {
     return new MockNextResponse(JSON.stringify(body), init);
   }
 
-  async json(): Promise<any> {
+  async json(): Promise<unknown> {
     return JSON.parse(`${this.body}`);
   }
 }
@@ -92,6 +92,19 @@ describe("open-graph proxy-image route", () => {
     expect(result.body).toBe(body);
     expect(result.headers.get("content-type")).toBe(expected);
     expect(result.headers.get("cache-control")).toBe("public, max-age=86400");
+  });
+
+  it("streams a 206 body once the image type gate passes", async () => {
+    const { body, response } = upstream("image/jpeg", { status: 206 });
+    mockFetchPublicUrl.mockResolvedValue(response);
+
+    const result = await GET(requestFor(IMAGE_URL));
+
+    expect(result.status).toBe(206);
+    expect(result.body).toBe(body);
+    expect(body.cancel).not.toHaveBeenCalled();
+    expect(result.headers.get("content-type")).toBe("image/jpeg");
+    expect(result.headers.get("content-security-policy")).toBe("sandbox");
   });
 
   it("marks proxied images as sandboxed and not sniffable", async () => {

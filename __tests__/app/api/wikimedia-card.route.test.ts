@@ -33,7 +33,7 @@ class MockNextResponse {
     return new MockNextResponse(JSON.stringify(body), init);
   }
 
-  async json(): Promise<any> {
+  async json(): Promise<unknown> {
     return JSON.parse(`${this.body}`);
   }
 }
@@ -143,6 +143,53 @@ describe("wikimedia-card route", () => {
       expect((await sameLanguage.json()).title).toBe("title-fr");
       expect((await otherLanguage.json()).title).toBe("title-de");
       expect(requestedLanguages()).toEqual(["fr", "de"]);
+    });
+
+    it("does not cache unavailable cards", async () => {
+      const pageUrl = "https://en.wikipedia.org/wiki/Cache_unavailable";
+      mockFetchPublicUrl.mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        json: async () => ({}),
+      });
+
+      const failed = await (await GET(requestFor(pageUrl, "fr"))).json();
+      mockLocalizedSummary(pageUrl);
+      const recovered = await (await GET(requestFor(pageUrl, "fr"))).json();
+      const cached = await (await GET(requestFor(pageUrl, "fr"))).json();
+
+      expect(failed.kind).toBe("unavailable");
+      expect(recovered.title).toBe("title-fr");
+      expect(cached.title).toBe("title-fr");
+      expect(mockFetchPublicUrl).toHaveBeenCalledTimes(2);
+    });
+
+    it("does not alias an unavailable card under its canonical URL", async () => {
+      mockFetchPublicUrl.mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        json: async () => ({}),
+      });
+
+      const failed = await (
+        await GET(
+          requestFor("https://en.m.wikipedia.org/wiki/Cache_unavailable_alias", "fr")
+        )
+      ).json();
+      expect(failed.kind).toBe("unavailable");
+      expect(failed.canonicalUrl).toBe(
+        "https://en.wikipedia.org/wiki/Cache_unavailable_alias"
+      );
+
+      mockLocalizedSummary("https://en.wikipedia.org/wiki/Cache_unavailable_alias");
+      const recovered = await (
+        await GET(
+          requestFor("https://en.wikipedia.org/wiki/Cache_unavailable_alias", "fr")
+        )
+      ).json();
+
+      expect(recovered.title).toBe("title-fr");
+      expect(mockFetchPublicUrl).toHaveBeenCalledTimes(2);
     });
 
     it("marks card responses as varying by Accept-Language", async () => {

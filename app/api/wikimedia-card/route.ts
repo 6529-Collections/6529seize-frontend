@@ -45,8 +45,10 @@ const sanitizeHtml = (value: string): string => {
 };
 
 // The card text is localized, so cached cards are scoped to the language list.
+// A newline separates the fields because neither a header value nor a parsed
+// URL can contain one, so two different pairs never share a key.
 const buildCacheKey = (url: string, languages: readonly string[]): string =>
-  `${languages.join(",")}|${url}`;
+  `${languages.join(",")}\n${url}`;
 
 const respondWithCard = (card: WikimediaCardResponse): NextResponse =>
   NextResponse.json(card, { headers: { Vary: "Accept-Language" } });
@@ -732,10 +734,13 @@ export async function GET(request: NextRequest) {
   }
 
   const card = await buildCard(target, languages);
-  const ttl = TTL_BY_KIND[card.kind] ?? TTL_BY_KIND.unavailable;
-
-  cache.set(cacheKey, card, ttl);
-  cache.set(buildCacheKey(card.canonicalUrl, languages), card, ttl);
+  // An unavailable card may be a transient upstream failure, so it is never
+  // cached (neither under the request key nor the canonical-URL alias).
+  if (card.kind !== "unavailable") {
+    const ttl = TTL_BY_KIND[card.kind];
+    cache.set(cacheKey, card, ttl);
+    cache.set(buildCacheKey(card.canonicalUrl, languages), card, ttl);
+  }
 
   return respondWithCard(card);
 }
