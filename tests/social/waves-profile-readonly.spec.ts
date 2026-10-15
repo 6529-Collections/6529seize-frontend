@@ -465,7 +465,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         .toBe(true);
     }
     await expect(
-      tokenList.getByText("#3", { exact: true }).and(tokenList.locator("div"))
+      tokenList
+        .getByText("#3", { exact: true })
+        .and(page.getByRole("list", { name: "Selected tokens" }).locator("div"))
     ).toBeVisible();
     const source = await tokenList
       .getByRole("img", { name: "Thumbnail fixture 0", exact: true })
