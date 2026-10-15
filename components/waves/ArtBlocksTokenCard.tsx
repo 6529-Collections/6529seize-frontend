@@ -394,7 +394,7 @@ export default function ArtBlocksTokenCard({
                   title={`${headerTitle} live render`}
                   src={liveUrl}
                   className="tw-h-full tw-w-full"
-                  sandbox="allow-scripts allow-same-origin allow-pointer-lock"
+                  sandbox="allow-scripts"
                   referrerPolicy="no-referrer"
                   allow="autoplay; encrypted-media"
                 />
