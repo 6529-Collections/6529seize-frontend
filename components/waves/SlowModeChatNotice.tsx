@@ -8,7 +8,9 @@ import {
   formatSlowModeInterval,
   getSlowModeRemainingMs,
 } from "@/helpers/waves/slow-mode.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useVisibleInterval } from "@/hooks/usePageVisibility";
+import { t } from "@/i18n/messages";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -52,6 +54,7 @@ function ActiveSlowModeChatNotice({
   nextDropAllowed,
 }: ActiveSlowModeChatNoticeProps) {
   const queryClient = useQueryClient();
+  const locale = useBrowserLocale();
   const [now, setNow] = useState(() => Date.now());
   const isCoolingDown = nextDropAllowed !== null && now < nextDropAllowed;
 
@@ -79,8 +82,12 @@ function ActiveSlowModeChatNotice({
   const remainingMs = getSlowModeRemainingMs({ nextDropAllowed, now });
   const message =
     remainingMs > 0
-      ? `Slow mode: send again in ${formatSlowModeCountdown(remainingMs)}`
-      : `Slow mode: one message every ${formatSlowModeInterval(cooldownMs)}`;
+      ? t(locale, "waves.slowMode.notice.cooldown", {
+          countdown: formatSlowModeCountdown(remainingMs),
+        })
+      : t(locale, "waves.slowMode.notice.interval", {
+          interval: formatSlowModeInterval(cooldownMs),
+        });
 
   return (
     <p

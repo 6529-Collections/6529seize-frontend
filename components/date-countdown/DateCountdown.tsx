@@ -1,6 +1,10 @@
 "use client";
 
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { usePageVisible } from "@/hooks/usePageVisibility";
+import { formatInteger, selectPluralCategory } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 interface Props {
@@ -15,11 +19,60 @@ interface TimeLeft {
   seconds: number;
 }
 
+const UNIT_MESSAGE_KEYS = {
+  days: { one: "dateCountdown.days.one", other: "dateCountdown.days.other" },
+  hours: { one: "dateCountdown.hours.one", other: "dateCountdown.hours.other" },
+  minutes: {
+    one: "dateCountdown.minutes.one",
+    other: "dateCountdown.minutes.other",
+  },
+  seconds: {
+    one: "dateCountdown.seconds.one",
+    other: "dateCountdown.seconds.other",
+  },
+} as const;
+
+// Keyed by the larger units shown (days, hours, minutes); seconds always show.
+const TIME_LEFT_MESSAGE_KEYS = {
+  "": "dateCountdown.timeLeft.seconds",
+  m: "dateCountdown.timeLeft.minutesSeconds",
+  h: "dateCountdown.timeLeft.hoursSeconds",
+  hm: "dateCountdown.timeLeft.hoursMinutesSeconds",
+  d: "dateCountdown.timeLeft.daysSeconds",
+  dm: "dateCountdown.timeLeft.daysMinutesSeconds",
+  dh: "dateCountdown.timeLeft.daysHoursSeconds",
+  dhm: "dateCountdown.timeLeft.daysHoursMinutesSeconds",
+} as const;
+
+function formatUnit(
+  locale: SupportedLocale,
+  unit: keyof typeof UNIT_MESSAGE_KEYS,
+  value: number
+): string {
+  const keys = UNIT_MESSAGE_KEYS[unit];
+  const key =
+    selectPluralCategory(locale, value) === "one" ? keys.one : keys.other;
+  return t(locale, key, { count: formatInteger(locale, value) });
+}
+
+function formatTimeLeft(locale: SupportedLocale, timeLeft: TimeLeft): string {
+  const shape: keyof typeof TIME_LEFT_MESSAGE_KEYS = `${
+    timeLeft.days > 0 ? "d" : ""
+  }${timeLeft.hours > 0 ? "h" : ""}${timeLeft.minutes > 0 ? "m" : ""}`;
+  return t(locale, TIME_LEFT_MESSAGE_KEYS[shape], {
+    days: formatUnit(locale, "days", timeLeft.days),
+    hours: formatUnit(locale, "hours", timeLeft.hours),
+    minutes: formatUnit(locale, "minutes", timeLeft.minutes),
+    seconds: formatUnit(locale, "seconds", timeLeft.seconds),
+  });
+}
+
 const SKELETON_TEXT_CLASS =
   "tw-animate-[shimmer_1.5s_infinite] tw-rounded tw-bg-[linear-gradient(90deg,#444_25%,#555_50%,#444_75%)] tw-bg-[length:200%_100%]";
 
 export default function DateCountdown(props: Readonly<Props>) {
   const { title, date } = props;
+  const locale = useBrowserLocale();
 
   // Only consider the widget "ready" when BOTH title and date have arrived.
   const isReady = Boolean(title && date);
@@ -95,9 +148,6 @@ export default function DateCountdown(props: Readonly<Props>) {
     };
   }, [date, calcTimeLeft, isPageVisible]);
 
-  const plural = (n: number, word: string) =>
-    `${n.toLocaleString()} ${word}${n === 1 ? "" : "s"}`;
-
   return (
     <div className="tw-flex tw-flex-col">
       {/* Title */}
@@ -112,14 +162,7 @@ export default function DateCountdown(props: Readonly<Props>) {
       {/* Countdown */}
       <div className="tw-pt-2 tw-text-lg tw-font-bold" aria-live="polite">
         {isReady && timeLeft ? (
-          <>
-            {timeLeft.days > 0 && <>{plural(timeLeft.days, "day")}, </>}
-            {timeLeft.hours > 0 && <>{plural(timeLeft.hours, "hour")}, </>}
-            {timeLeft.minutes > 0 && (
-              <>{plural(timeLeft.minutes, "minute")} and </>
-            )}
-            {plural(timeLeft.seconds, "second")}
-          </>
+          formatTimeLeft(locale, timeLeft)
         ) : (
           <div className={`${SKELETON_TEXT_CLASS} tw-w-4/5`} aria-hidden="true">
             &nbsp;
