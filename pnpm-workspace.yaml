@@ -16,13 +16,22 @@ overrides:
   "@emoji-mart/react>react": $react
   "@emoji-mart/react>react-dom": $react-dom
   "@opentelemetry/core@<2.8.0": 2.8.0
+  "@opentelemetry/instrumentation-knex@<0.65.0": 0.65.0
+  "@opentelemetry/instrumentation-mongoose@<0.67.0": 0.67.0
+  "@opentelemetry/instrumentation-mysql@<0.67.0": 0.67.0
+  "@opentelemetry/instrumentation-mysql2@<0.67.0": 0.67.0
+  "@opentelemetry/instrumentation-pg@<0.73.0": 0.73.0
+  "@opentelemetry/instrumentation-tedious@<0.40.0": 0.40.0
   axios: 1.20.0
+  baseline-browser-mapping@<2.11.0: 2.11.5
   brace-expansion@>=5.0.0 <5.0.12: 5.0.12
   "eslint-plugin-react-compiler>@babel/core": 7.29.7
   eslint-plugin-sonarjs>minimatch: 10.2.5
+  fast-copy@>=4.0.0 <4.1.0: 4.1.0
   fast-uri@>=3.0.0 <3.1.8: 3.1.8
   get-uri>basic-ftp: ">=6.2.1"
   glob@>=10.0.0 <13.0.0: 13.0.6
+  handlebars@<4.7.10: 4.7.10
   hono@<4.13.7: 4.13.7
   js-cookie: 3.0.7
   js-yaml@>=3.0.0 <3.15.2: 3.15.2
@@ -31,9 +40,11 @@ overrides:
   nanoid@>=3.0.0 <3.3.18: 3.3.18
   "next>sharp": 0.35.5
   postcss: 8.5.23
+  postcss-selector-parser@<7.1.6: 7.1.6
   react-toggle>react: $react
   react-toggle>react-dom: $react-dom
   shell-quote@>=1.1.0 <1.11.0: 1.11.0
+  smol-toml@<1.9.0: 1.9.0
   "socks>ip-address": 10.7.1
   socket.io-parser@>=4.0.0 <4.2.7: 4.2.7
   source-map-js@>=1.0.0 <1.2.2: 1.2.2
