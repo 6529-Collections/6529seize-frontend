@@ -46,9 +46,12 @@ export interface SingleWaveDropProps {
   readonly onClose: () => void;
 }
 
+export interface WaveSingleWaveDropRendererSet {
+  readonly SingleWaveDrop: ComponentType<SingleWaveDropProps>;
+}
+
 export interface WaveParticipationRendererSet {
   readonly ParticipationDrop: ComponentType<ParticipationDropProps>;
-  readonly SingleWaveDrop: ComponentType<SingleWaveDropProps>;
 }
 
 export interface ResolvedWaveParticipationRendererSet extends WaveParticipationRendererSet {
