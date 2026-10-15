@@ -30,7 +30,11 @@ export function CompetitionState({
       className={`tw-space-y-3 ${padded ? "tw-p-6" : ""}`}
       role={error ? "alert" : "status"}
     >
-      <p className="tw-m-0 tw-text-sm tw-text-iron-300">{t(locale, message)}</p>
+      <p
+        className={`tw-m-0 tw-text-sm ${error ? "tw-text-iron-300" : "tw-text-iron-500"}`}
+      >
+        {t(locale, message)}
+      </p>
       {error && retry && (
         <button type="button" className={COMPETITION_BUTTON} onClick={retry}>
           {t(locale, "competitions.retry")}
