@@ -1,5 +1,5 @@
 /** @jest-environment node */
-import { execFile, spawnSync, type ExecFileOptions } from "node:child_process";
+import { execFile, spawnSync } from "node:child_process";
 import {
   mkdtempSync,
   mkdirSync,
@@ -45,13 +45,7 @@ jest.mock("p-retry", () => ({
   default: jest.fn((operation: () => Promise<unknown>) => operation()),
 }));
 
-const runGit = promisify(execFile) as jest.MockedFunction<
-  (
-    file: string,
-    args: readonly string[],
-    options: ExecFileOptions
-  ) => Promise<{ stdout: string; stderr: string }>
->;
+const runGit = jest.mocked(promisify(execFile));
 
 beforeEach(() => {
   jest.clearAllMocks();
