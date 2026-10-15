@@ -194,7 +194,7 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
 
     const walletChecker = page.getByRole("link", { name: "Wallet Checker" });
     await expect(walletChecker).toBeVisible();
-    await expect(page.getByText(/^\d of 4 wallets$/).first()).toBeVisible();
+    await expect(page.getByText(/^\d of 4 addresses$/).first()).toBeVisible();
     const addWallet = page.getByRole("link", {
       name: "Add another wallet",
       exact: true,
@@ -204,8 +204,8 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       "href",
       "/safe-collecting/build-consolidation"
     );
-    const addressesHeading = page.getByRole("heading", {
-      name: /Addresses$/,
+    const walletHeading = page.getByRole("heading", {
+      name: `${PROFILE_HANDLE}${PROFILE_HANDLE.endsWith("s") ? "'" : "'s"} Wallet`,
       level: 3,
     });
     const statementsHeading = page.getByRole("heading", {
@@ -213,10 +213,10 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       level: 3,
     });
     const addStatement = page.getByRole("button", { name: "Add", exact: true });
-    await expect(addressesHeading).toBeVisible();
+    await expect(walletHeading).toBeVisible();
     await expect(statementsHeading).toBeVisible();
     await expect(addStatement).toBeVisible();
-    await expect(addressesHeading).toHaveCSS("font-size", "18px");
+    await expect(walletHeading).toHaveCSS("font-size", "18px");
     await expect(statementsHeading).toHaveCSS("font-size", "18px");
     const statementHelp = page.getByRole("button", {
       name: "About identity statements",
