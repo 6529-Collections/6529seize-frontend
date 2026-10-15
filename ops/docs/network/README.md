@@ -7,6 +7,9 @@ reference routes.
 
 - Main route family: `/network`, `/network/activity`, `/network/nerd/{focus?}`,
   `/network/health`, `/network/health/network-tdh`, `/network/tdh`,
+  `/network/tdh/how-it-works`, `/network/tdh/specification`,
+  `/network/tdh/formal`, `/network/tdh/implementations`,
+  `/network/tdh/verification`, `/network/tdh/verification/{cycleDay}`,
   `/network/tdh/historic-boosts`, `/network/tdh/consolidation`,
   `/network/definitions`, and
   `/network/levels`.
@@ -39,6 +42,11 @@ reference routes.
 - [xTDH Network Overview](feature-xtdh-network-overview.md)
 - [xTDH Rules and Distribution Formula](feature-xtdh-formulas.md)
 - [TDH Boost Rules](feature-tdh-boost-rules.md)
+- [How TDH Is Calculated](feature-tdh-how-it-works.md)
+- [TDH-v1 Specification](feature-tdh-specification.md)
+- [TDH Formal Model](feature-tdh-formal-model.md)
+- [TDH Implementations](feature-tdh-implementations.md)
+- [TDH Verification Dashboard](feature-tdh-verification.md)
 - [TDH Historic Boosts](feature-tdh-historic-boosts.md)
 - [Wallet Consolidation](feature-tdh-consolidation.md)
 

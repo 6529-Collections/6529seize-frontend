@@ -2284,7 +2284,7 @@
         "Edition weighting means days held are multiplied by a HODL or edition-size rate. The calculator derives rates from the largest eligible effective Meme edition.",
         "An edition-size floor is a minimum count used for TDH: when fewer copies were minted, the calculation uses the floor instead. The exact calculation section explains how floors are set and gives a worked example.",
         "Boosts multiply weighted TDH by active boosters based on what the holder owns.",
-        "The TDH page has anchors for FirstGM's reference role, a fixed worked example, profile lookup, current boosts, and exact calculation details.",
+        "The TDH page at /network/tdh opens with TDH in a minute and a Verified daily strip, then has anchors for profile lookup, a fixed worked example, FirstGM's reference role and current boosts. The exact calculation now lives at /network/tdh/how-it-works; #tdh-exact points there. A section navigation links How it works, Specification, Formal model, Implementations and Verification.",
         "The worked example compares Today and +30 days and can remove Nakamoto #4 before the snapshot; it demonstrates that a sale removes both the card contribution and any boost component it supplied.",
         "Profile lookup accepts a public handle or wallet-like identity without requiring wallet authentication, and shows loading, empty, not-found, retryable error, snapshot, holdings, boost breakdown, and paginated collection states.",
         "The daily snapshot uses the Ethereum block at or immediately before 00:00 UTC; holding age uses that block timestamp, while a displayed API date can reflect later processing time.",
@@ -2309,13 +2309,198 @@
         "/network/tdh/historic-boosts",
         "/network/tdh/consolidation",
         "/network/health/network-tdh",
-        "/network/levels"
+        "/network/levels",
+        "/network/tdh/how-it-works",
+        "/network/tdh/verification"
       ],
       "tags": ["network", "tdh", "glossary"],
       "source_refs": [
         "ops/docs/network/feature-tdh-boost-rules.md",
         "ops/docs/network/feature-network-definitions.md"
       ]
+    },
+    {
+      "id": "network.tdh-how-it-works",
+      "kind": "route",
+      "title": "How TDH is calculated",
+      "aliases": [
+        "how is my tdh calculated",
+        "how tdh is calculated",
+        "tdh calculation",
+        "tdh step by step",
+        "why is my tdh this number",
+        "tdh worked example",
+        "exact tdh calculation"
+      ],
+      "keywords": [
+        "tdh",
+        "calculation",
+        "whole days",
+        "rate",
+        "edition",
+        "boost",
+        "consolidation",
+        "rounding",
+        "snapshot"
+      ],
+      "facts": [
+        "How TDH is calculated at /network/tdh/how-it-works follows one day's calculation in fourteen steps: one snapshot a day, whole days, which cards count, acquisition timestamps (last in, first out), ownership read between transactions, edition sizes and floors, rates, base per card, the boost, consolidation, final TDH, a two-wallet worked example, network totals and what changes at the cutover.",
+        "TDH is computed once a day from the last Ethereum block before 00:00 UTC, after Ethereum has finalized the next block, about 13 to 20 minutes after midnight. A copy's age is its whole days to that block's time; partial days do not count.",
+        "A card's rate is the largest eligible Meme edition (3,941 for FirstGM on the 2026-10-11 cycle) divided by the card's edition, rounded to cents. A Meme with fewer than 300 copies minted is counted at its claim's mint limit, at most 310. A Gradient's rate never falls below 1.00.",
+        "Base TDH per card is whole days times rate, rounded per wallet; final TDH multiplies each card's base by the boost and rounds; TDH is the sum. Example: one 310-copy Meme held 100 days with one Gradient gives 100 × 12.71 = 1,271, then × 1.02 = 1,296.",
+        "Within one transaction, each wallet's movements of each card are netted (decision D131), so a copy that leaves and returns in one transaction keeps its age. The page marks this Decided, with the rule text being finalised.",
+        "Under rule version tdh-v1.0 an identity holds up to three consolidated wallets; whether a fourth wallet is added as a new rule version is being decided before the cutover.",
+        "The page has five explorables computed in the browser for illustration: a day counter, a stack simulator, a rate explorer, a boost builder and a household walkthrough. The computation of record is the validators' Rust core.",
+        "From about 23 October 2026, 6529.io shows the result of the validators' Rust core (decision D132)."
+      ],
+      "canonical_path": "/network/tdh/how-it-works",
+      "related_paths": [
+        "/network/tdh",
+        "/network/tdh/specification",
+        "/network/tdh/verification",
+        "/network/tdh/consolidation"
+      ],
+      "tags": ["network", "tdh", "calculation"],
+      "source_refs": ["ops/docs/network/feature-tdh-how-it-works.md"]
+    },
+    {
+      "id": "network.tdh-specification",
+      "kind": "route",
+      "title": "The TDH-v1 specification",
+      "aliases": [
+        "tdh-v1",
+        "what is tdh-v1",
+        "tdh specification",
+        "p26",
+        "tdh v1.0",
+        "tdh exact rule",
+        "tdh deviations"
+      ],
+      "keywords": [
+        "tdh",
+        "specification",
+        "rule",
+        "version",
+        "deviation",
+        "parameters",
+        "registry",
+        "decision"
+      ],
+      "facts": [
+        "TDH-v1 is the exact rule behind TDH, rule version tdh-v1.0, written so that independent programs produce identical results. It restates the formula 6529.io has always used; where it departs from the old backend, it removes a dependence on timing, database order, editable data or floating-point evaluation.",
+        "The specification page at /network/tdh/specification restates each section in plain words beside the exact rule, and lists the parameter registry and its hash, the 19 deviations from the old backend with their decisions, the 15 old-backend issues, the decisions cited and the evidence.",
+        "Only one deviation changed any value on the replayed 2026-10-11 cycle: DEV-2, two identities and −241 TDH in total, a token sent out and back in one transaction.",
+        "TDH-v1 is the rule 6529.io and every validator compute (decision D121); its adoption as the consensus rule of the future chain remains the owner's decision.",
+        "Boost schedule 1.4 is the schedule that TDH-v1, rule version tdh-v1.0, encodes."
+      ],
+      "canonical_path": "/network/tdh/specification",
+      "related_paths": [
+        "/network/tdh/how-it-works",
+        "/network/tdh/implementations",
+        "/network/tdh/formal"
+      ],
+      "tags": ["network", "tdh", "specification"],
+      "source_refs": ["ops/docs/network/feature-tdh-specification.md"]
+    },
+    {
+      "id": "network.tdh-formal-model",
+      "kind": "route",
+      "title": "TDH formal model",
+      "aliases": [
+        "tdh lean",
+        "lean 4 tdh",
+        "formally verified tdh",
+        "tdh proofs",
+        "tdh formal model"
+      ],
+      "keywords": ["tdh", "lean", "formal", "proof", "model", "verification"],
+      "facts": [
+        "The Formal model page at /network/tdh/formal is In progress: TDH-v1 is being written as a Lean 4 model whose definitions run and can be tested on the same 36 conformance vectors.",
+        "Twelve statements are planned, such as order independence, conservation of copies, netting, last in first out and boost bounds. A statement shows as Proved only when a published Lean build proves it with no gaps; until then each is Planned.",
+        "The proofs will not guarantee that the English text says the same thing, that the Rust and Python programs match the model on every input, that the inputs are right, or that the rule is the right rule."
+      ],
+      "canonical_path": "/network/tdh/formal",
+      "related_paths": [
+        "/network/tdh/specification",
+        "/network/tdh/implementations"
+      ],
+      "tags": ["network", "tdh", "formal"],
+      "source_refs": ["ops/docs/network/feature-tdh-formal-model.md"]
+    },
+    {
+      "id": "network.tdh-implementations",
+      "kind": "route",
+      "title": "TDH implementations",
+      "aliases": [
+        "tdh rust core",
+        "tdh python reference",
+        "program b",
+        "tdh conformance vectors",
+        "who computes tdh"
+      ],
+      "keywords": [
+        "tdh",
+        "rust",
+        "python",
+        "implementation",
+        "vectors",
+        "conformance",
+        "validator"
+      ],
+      "facts": [
+        "The Implementations page at /network/tdh/implementations compares the Rust core every validator runs, program B, the Python reference and 6529.io's current backend: how each was written, where it runs, conformance and speed. Source is to be published.",
+        "Every implementation must pass all 36 conformance vectors. Validators compute TDH with the Rust core and program B before they sign and do not sign if they disagree (decision D125).",
+        "After the cutover, 6529.io runs the Rust core itself, so comparing the two checks publication; the Python reference and program B are the independent checks of the computation."
+      ],
+      "canonical_path": "/network/tdh/implementations",
+      "related_paths": [
+        "/network/tdh/verification",
+        "/network/tdh/formal",
+        "/network/tdh/specification"
+      ],
+      "tags": ["network", "tdh", "implementations"],
+      "source_refs": ["ops/docs/network/feature-tdh-implementations.md"]
+    },
+    {
+      "id": "network.tdh-verification",
+      "kind": "route",
+      "title": "TDH verification",
+      "aliases": [
+        "is tdh verified",
+        "tdh verification",
+        "tdh dashboard",
+        "why does 6529.io differ from the validators",
+        "rust vs python tdh",
+        "what does class a mean",
+        "when does 6529.io switch to the rust computation",
+        "tdh cutover"
+      ],
+      "keywords": [
+        "tdh",
+        "verification",
+        "dashboard",
+        "rust",
+        "python",
+        "difference",
+        "class",
+        "cutover",
+        "daily"
+      ],
+      "facts": [
+        "The TDH verification dashboard at /network/tdh/verification compares, every day, the validators' Rust core, the Python reference and 6529.io's current backend, with agreement counts, every difference with its class and cause, and day permalinks at /network/tdh/verification/{cycleDay}. Holders are never named; differences use labels such as holder-1.",
+        "Difference classes: A, deliberate (a DEV item in the specification); B, old bug (a BUG item); C, our defect, for example Rust and Python disagree; D, not yet explained. Class A and B differences are explained, not accepted.",
+        "The daily comparison starts on 16 October 2026, and 6529.io switches to the Rust core's result about 23 October 2026 (decision D132). The page shows a cutover countdown.",
+        "Until 6529's own Ethereum node has synced, the history before the snapshot block is read from a public Ethereum log service and labelled Not yet fully checked.",
+        "On 14 and 15 October 2026 the independent computation matched 10,280 of 10,282 identities and 11,131 of 11,133 wallets of 6529.io's published files each day; the two differences were a token sent out and back within one transaction (DEV-2), which decision D131's netting settles."
+      ],
+      "canonical_path": "/network/tdh/verification",
+      "related_paths": [
+        "/network/tdh",
+        "/network/tdh/implementations",
+        "/network/tdh/how-it-works"
+      ],
+      "tags": ["network", "tdh", "verification"],
+      "source_refs": ["ops/docs/network/feature-tdh-verification.md"]
     },
     {
       "id": "network.tdh-consolidation",

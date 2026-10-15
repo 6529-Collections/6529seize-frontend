@@ -13,9 +13,14 @@ boost rules.
 
 - Route: `/network/tdh`
 - Sidebar path: `Network -> TDH`
-- Page navigation anchors: `#tdh-reference`, `#tdh-example`, `#tdh-profile`,
-  `#tdh-1-4`, and `#tdh-exact`
-- Related sections also use `#tdh-how`, `#tdh-changes`, and `#tdh-explore`.
+- Page navigation anchors: `#tdh-minute`, `#tdh-profile`, `#tdh-example`,
+  `#tdh-reference`, `#tdh-1-4`, and `#tdh-exact`
+- Related sections also use `#tdh-verified`, `#tdh-how`, `#tdh-changes`,
+  `#tdh-deeper`, and `#tdh-explore`.
+- The TDH section navigation links the overview to How it works,
+  Specification, Formal model, Implementations and Verification.
+- `#tdh-exact` now points to [How TDH Is Calculated](feature-tdh-how-it-works.md),
+  which holds the step-by-step calculation.
 
 ## What Users Can Do
 
@@ -36,7 +41,9 @@ boost rules.
    and final TDH; collections with more than 20 tokens use Previous/Next
    pagination.
 5. Open `Current boosts` for the active rule summary, or `Exact calculation`
-   for rounding, transfer, eligibility, and boost precision details.
+   for the pointer to the step-by-step page.
+6. Read `TDH in a minute` (hold, weigh, boost, with a worked example) and the
+   `Verified daily` strip, which links to the verification dashboard.
 
 ## Calculation Timing and Eligibility
 
