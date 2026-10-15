@@ -32,8 +32,9 @@ pattern can differ.
    - `ASSETS_FROM_S3=false`: bundle requests stay on the page origin.
    - `ASSETS_FROM_S3=true`: bundle requests use `assetPrefix`
      `https://dnclu2fna0b2b.cloudfront.net/web_build/{build-id}`.
-3. The root layout always preconnects to media host
-   `https://d3lqz0a4bldqgf.cloudfront.net`.
+3. The root layout always preconnects to media hosts
+   `https://d3lqz0a4bldqgf.cloudfront.net` and the media resolver
+   (`MEDIA_RESOLVER_ENDPOINT`, `https://media.6529.io` by default).
 4. In CloudFront mode, the root layout also preconnects to
    `https://dnclu2fna0b2b.cloudfront.net`.
 5. If bundle files load, hydration completes and interactive controls work.

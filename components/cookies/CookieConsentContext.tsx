@@ -22,6 +22,7 @@ import React, {
 } from "react";
 import { useAuth } from "../auth/Auth";
 import CookiesBanner from "./CookiesBanner";
+import { rememberCountryHint } from "./usCountryHint";
 
 const GTM_ID = "G-71NLVV3KY3";
 
@@ -174,6 +175,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
           return;
         }
         setCountry(response.country);
+        rememberCountryHint(response.country);
         if (response.is_eu) {
           setShowCookieConsent(
             essentialCookies == undefined && performanceCookies == undefined
