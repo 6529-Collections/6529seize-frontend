@@ -53,4 +53,36 @@ describe("CompactMenu focus", () => {
     await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
     expect(screen.getByRole("button", { name: "Create" })).toHaveFocus();
   });
+
+  it("draws a ring on the active item, not a background tint alone", async () => {
+    const user = userEvent.setup();
+    render(
+      <CompactMenu
+        trigger="Options"
+        autoFocusItem={false}
+        items={[
+          { id: "first", label: "First" },
+          { id: "second", label: "Second" },
+        ]}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Options" }));
+    const first = screen.getByRole("menuitem", { name: "First" });
+    const second = screen.getByRole("menuitem", { name: "Second" });
+    expect(first).not.toHaveClass("tw-ring-primary-400");
+
+    await user.keyboard("{ArrowDown}");
+    expect(first).toHaveClass(
+      "tw-ring-2",
+      "tw-ring-inset",
+      "tw-ring-primary-400",
+      "tw-bg-iron-800"
+    );
+    expect(second).not.toHaveClass("tw-ring-primary-400");
+
+    await user.keyboard("{ArrowDown}");
+    expect(second).toHaveClass("tw-ring-primary-400");
+    expect(first).not.toHaveClass("tw-ring-primary-400");
+  });
 });
