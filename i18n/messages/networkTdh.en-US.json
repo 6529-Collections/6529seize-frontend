@@ -57,6 +57,7 @@
   "network.tdh.related.levels.action": "View Levels",
   "network.tdhHistoric.hero.title": "TDH — Historic Boosts",
   "network.tdhHistoric.hero.intro": "Previous TDH versions are archived here for reference.",
+  "network.tdhHistoric.hero.v1": "Boost schedule 1.4, the current one, is the schedule that TDH-v1, rule version tdh-v1.0, encodes.",
   "network.tdhHistoric.versions.title": "Archived versions",
   "network.tdhHistoric.versionLabel": "TDH {version}",
   "network.tdhHistoric.table.caption": "Historic TDH versions, effective periods, and booster summaries",

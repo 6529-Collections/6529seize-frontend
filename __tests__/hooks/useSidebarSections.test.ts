@@ -133,6 +133,12 @@ describe("useSidebarSections", () => {
       { name: "Identities", href: "/network" },
       { name: "Activity", href: "/network/activity" },
       { name: "TDH", href: "/network/tdh" },
+      { name: "How TDH Is Calculated", href: "/network/tdh/how-it-works" },
+      {
+        name: "TDH Verification",
+        href: "/network/tdh/verification",
+        activePathPrefixes: ["/network/tdh/verification/"],
+      },
       { name: "xTDH Overview", href: "/network/xtdh" },
       { name: "xTDH Allocations Dashboard", href: "/xtdh" },
       { name: "Wave Score", href: "/network/wave-score" },

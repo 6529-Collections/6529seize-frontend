@@ -40,6 +40,12 @@ import safeCollectingMessages from "@/i18n/messages/safeCollecting.en-US.json";
 import networkTdhExampleMessages from "@/i18n/messages/networkTdhExample.en-US.json";
 import networkTdhProfileMessages from "@/i18n/messages/networkTdhProfile.en-US.json";
 import networkTdhRulesMessages from "@/i18n/messages/networkTdhRules.en-US.json";
+import networkTdhSharedMessages from "@/i18n/messages/networkTdhShared.en-US.json";
+import networkTdhVerifyMessages from "@/i18n/messages/networkTdhVerify.en-US.json";
+import networkTdhHowMessages from "@/i18n/messages/networkTdhHow.en-US.json";
+import networkTdhSpecMessages from "@/i18n/messages/networkTdhSpec.en-US.json";
+import networkTdhFormalMessages from "@/i18n/messages/networkTdhFormal.en-US.json";
+import networkTdhImplMessages from "@/i18n/messages/networkTdhImpl.en-US.json";
 import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import utcScheduleMessages from "@/i18n/messages/utcSchedule.en-US.json";
@@ -2934,8 +2940,7 @@ const OPEN_DATA_DOWNLOAD_MESSAGES = objectMessages("openData.downloads", {
 } as const);
 
 const DATE_PICKER_MESSAGES = objectMessages("datePicker", {
-  utcNote:
-    "Dates are in UTC. The latest date you can select is today in UTC.",
+  utcNote: "Dates are in UTC. The latest date you can select is today in UTC.",
   afterTodayError: "Dates cannot be later than today in UTC.",
 } as const);
 
@@ -4462,6 +4467,12 @@ export const EN_US_MESSAGES = {
   ...networkTdhExampleMessages,
   ...networkTdhProfileMessages,
   ...networkTdhRulesMessages,
+  ...networkTdhSharedMessages,
+  ...networkTdhVerifyMessages,
+  ...networkTdhHowMessages,
+  ...networkTdhSpecMessages,
+  ...networkTdhFormalMessages,
+  ...networkTdhImplMessages,
   ...delegationTapGuideMessages,
   ...toolsMessages,
   ...utcScheduleMessages,

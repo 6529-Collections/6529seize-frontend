@@ -10,9 +10,16 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import TDHCalculationDetails from "./TDHCalculationDetails";
+import type { VerificationSummary } from "@/lib/tdh/verification/summary.server";
+import TdhSource from "./shared/TdhSource";
+import TdhSubnav from "./shared/TdhSubnav";
+import TDHCalculationMoved, {
+  TDHGoDeeper,
+  TDHHoldingChanges,
+} from "./TDHCalculationDetails";
 import TDHCurrentRules from "./TDHCurrentRules";
 import TDHExample from "./TDHExample";
+import TDHInAMinute from "./TDHInAMinute";
 import TDHProfile from "./TDHProfile";
 import {
   TDHRelatedLinks,
@@ -20,15 +27,23 @@ import {
   useTDHSectionHashFocus,
 } from "./TDHPageNavigation";
 import TDHSection, { TDH_PANEL, TDH_TEXT } from "./TDHSection";
+import TDHVerifiedDaily from "./TDHVerifiedDaily";
 
 const NAVIGATION = [
-  { id: "tdh-reference", key: "reference" },
-  { id: "tdh-example", key: "example" },
+  { id: "tdh-minute", key: "minute" },
   { id: "tdh-profile", key: "profile" },
+  { id: "tdh-example", key: "example" },
+  { id: "tdh-reference", key: "reference" },
   { id: "tdh-1-4", key: "rules" },
   { id: "tdh-exact", key: "details" },
 ] as const;
-const NAVIGATION_IDS = NAVIGATION.map((item) => item.id);
+const NAVIGATION_IDS = [
+  ...NAVIGATION.map((item) => item.id),
+  "tdh-verified",
+  "tdh-how",
+  "tdh-changes",
+  "tdh-deeper",
+];
 const STEPS = ["days", "weight", "boost"] as const;
 const RELATED = [
   { href: "/network/tdh/consolidation", key: "consolidation" },
@@ -36,7 +51,11 @@ const RELATED = [
   { href: "/network/levels", key: "levels" },
 ] as const;
 
-export default function TDHMainPage() {
+export default function TDHMainPage({
+  verification = null,
+}: {
+  readonly verification?: VerificationSummary | null;
+}) {
   const locale = useBrowserLocale();
   useSetTitle(t(locale, "network.tdh.explainer.pageTitle"));
 
@@ -50,16 +69,15 @@ export default function TDHMainPage() {
         desktopFlush
         withDivider
       />
-      <article className="tw-mx-auto tw-max-w-6xl tw-pb-8 tw-pt-7 sm:tw-pt-10">
-        <header className="tw-pb-8 sm:tw-pb-10">
+      <article className="tw-mx-auto tw-max-w-6xl tw-pb-8">
+        <TdhSubnav current="/network/tdh" locale={locale} />
+        <header className="tw-pb-8 tw-pt-5 sm:tw-pb-10 sm:tw-pt-8">
           <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl">
             {t(locale, "network.tdh.explainer.title")}
           </h1>
           <p className="tw-mb-0 tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-200">
             {t(locale, "network.tdh.explainer.intro")}
-          </p>
-          <p className={`${TDH_TEXT} tw-mt-3 tw-max-w-3xl`}>
-            {t(locale, "network.tdh.explainer.eligible")}
+            <TdhSource refs={["P26 §4", "P26 §7", "P26 §8"]} locale={locale} />
           </p>
           <TDHSectionNavigation
             label={t(locale, "network.tdh.explainer.nav")}
@@ -69,6 +87,11 @@ export default function TDHMainPage() {
             }))}
           />
         </header>
+        <TDHInAMinute locale={locale} />
+        <TDHVerifiedDaily locale={locale} summary={verification} />
+        <TDHProfile locale={locale} />
+        <TDHExample locale={locale} />
+        <HowTDHWorks locale={locale} />
         <TDHSection
           id="tdh-reference"
           title={t(locale, "network.tdh.explainer.reference.title")}
@@ -85,11 +108,10 @@ export default function TDHMainPage() {
             </p>
           </div>
         </TDHSection>
-        <HowTDHWorks locale={locale} />
-        <TDHExample locale={locale} />
-        <TDHProfile locale={locale} />
         <TDHCurrentRules locale={locale} />
-        <TDHCalculationDetails locale={locale} />
+        <TDHHoldingChanges locale={locale} />
+        <TDHGoDeeper locale={locale} />
+        <TDHCalculationMoved locale={locale} />
         <TDHSection
           id="tdh-explore"
           title={t(locale, "network.tdh.explainer.related")}

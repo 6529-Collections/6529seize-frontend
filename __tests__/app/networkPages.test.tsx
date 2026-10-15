@@ -68,10 +68,10 @@ describe("network pages render", () => {
     jest.clearAllMocks();
   });
 
-  it("renders TDH page", () => {
-    renderWithAuth(<TDHPage />);
+  it("renders TDH page", async () => {
+    renderWithAuth(await TDHPage());
     expect(
-      screen.getByRole("heading", { level: 1, name: "How TDH is calculated" })
+      screen.getByRole("heading", { level: 1, name: "TDH" })
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Explain my TDH" })
@@ -79,13 +79,28 @@ describe("network pages render", () => {
     expect(
       screen.getByRole("link", { name: "Current boosts" })
     ).toHaveAttribute("href", "#tdh-1-4");
+    expect(
+      screen.getByRole("heading", { level: 2, name: "TDH in a minute" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("= 1,296 TDH")).toBeInTheDocument();
   });
 
-  it("displays TDH calculation details", () => {
-    renderWithAuth(<TDHPage />);
+  it("points the exact calculation to its own page and shows the verified-daily strip", async () => {
+    renderWithAuth(await TDHPage());
     expect(screen.getByText(/Total Days Held/i)).toBeInTheDocument();
     expect(
-      screen.getByText("Additional complete sets and boost precision")
+      screen.getByRole("heading", { name: "The exact calculation has moved" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByRole("link", { name: /How TDH is calculated/ })[0]
+    ).toHaveAttribute("href", "/network/tdh/how-it-works");
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Verified daily" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /10,280 of 10,282 identities equal between Rust and 6529.io/
+      )
     ).toBeInTheDocument();
   });
 
@@ -130,9 +145,9 @@ describe("network pages render", () => {
 
   it("generates metadata for TDH page", async () => {
     const metadata = await generateTDHMetadata();
-    expect(metadata.title).toEqual("How TDH is calculated | Network");
+    expect(metadata.title).toEqual("TDH: Total Days Held | Network");
     expect(metadata.description).toEqual(
-      `Understand Total Days Held: holding days, edition weights, current boosts and an exact breakdown of your profile’s TDH. | ${domain}`
+      `What TDH is, how to read your own, and how it is calculated and verified every day. | ${domain}`
     );
   });
 

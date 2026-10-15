@@ -1842,9 +1842,33 @@
       "classification": "crawlable",
       "family": "network"
     },
+    "/network/tdh/formal": {
+      "classification": "crawlable",
+      "family": "network"
+    },
     "/network/tdh/historic-boosts": {
       "classification": "crawlable",
       "family": "network"
+    },
+    "/network/tdh/how-it-works": {
+      "classification": "crawlable",
+      "family": "network"
+    },
+    "/network/tdh/implementations": {
+      "classification": "crawlable",
+      "family": "network"
+    },
+    "/network/tdh/specification": {
+      "classification": "crawlable",
+      "family": "network"
+    },
+    "/network/tdh/verification": {
+      "classification": "crawlable",
+      "family": "network"
+    },
+    "/network/tdh/verification/[cycleDay]": {
+      "classification": "exempt",
+      "exemptReason": "Day permalinks exist only for days the daily verification job has published; the dashboard at /network/tdh/verification renders the same template."
     },
     "/network/wave-score": {
       "classification": "crawlable",

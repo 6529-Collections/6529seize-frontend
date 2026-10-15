@@ -62,7 +62,7 @@ async function expectTdhExplainer(page: Page) {
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: "How TDH is calculated",
+      name: "TDH",
       exact: true,
     })
   ).toBeVisible();

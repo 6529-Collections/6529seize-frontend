@@ -16,6 +16,18 @@ const REFERENCE_DESTINATIONS: readonly ReferenceDestination[] = [
     labelKey: "network.references.navigation.tdh",
   },
   {
+    href: "/network/tdh/how-it-works",
+    labelKey: "network.references.navigation.tdhHowItWorks",
+  },
+  {
+    href: "/network/tdh/specification",
+    labelKey: "network.references.navigation.tdhSpecification",
+  },
+  {
+    href: "/network/tdh/verification",
+    labelKey: "network.references.navigation.tdhVerification",
+  },
+  {
     href: "/network/tdh/historic-boosts",
     labelKey: "network.references.navigation.historicBoosts",
   },

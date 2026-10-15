@@ -130,6 +130,37 @@ export const publicEnvSchema = z.object({
   VITE_FEATURE_AB_CARD: z.string().optional(),
 
   /**
+   * Public base URL of the daily TDH verification files (`index.json`,
+   * `days/{cycleDay}.json`). HTTPS, or http://localhost outside production;
+   * the loader enforces the production rule. Unset: bundled sample data
+   * outside production, "reports start soon" in production.
+   */
+  NEXT_PUBLIC_TDH_VERIFICATION_BASE: z.preprocess(
+    (value) =>
+      typeof value === "string" && value.trim().length === 0
+        ? undefined
+        : value,
+    z
+      .string()
+      .url("NEXT_PUBLIC_TDH_VERIFICATION_BASE must be a valid URL")
+      .refine(
+        (value) => {
+          const url = new URL(value);
+          return (
+            url.protocol === "https:" ||
+            (url.protocol === "http:" &&
+              ["localhost", "127.0.0.1"].includes(url.hostname))
+          );
+        },
+        {
+          message:
+            "NEXT_PUBLIC_TDH_VERIFICATION_BASE must use HTTPS (http only for localhost)",
+        }
+      )
+      .optional()
+  ),
+
+  /**
    * ────────────────
    * CACHE / PERFORMANCE (all optional)
    * ────────────────

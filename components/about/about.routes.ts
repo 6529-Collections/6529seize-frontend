@@ -135,6 +135,17 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
     aboutRouteItem("network-identities", "/network", "networkIdentities"),
     aboutRouteItem("network-activity", "/network/activity", "networkActivity"),
     aboutRouteItem("network-tdh", "/network/tdh", "tdh"),
+    aboutRouteItem(
+      "network-tdh-how-it-works",
+      "/network/tdh/how-it-works",
+      "tdhHowItWorks"
+    ),
+    aboutRouteItem(
+      "network-tdh-verification",
+      "/network/tdh/verification",
+      "tdhVerification",
+      { activePathPrefixes: ["/network/tdh/verification/"] }
+    ),
     aboutRouteItem("network-xtdh", "/network/xtdh", "xtdhOverview", {
       descriptionId: "xtdh",
     }),

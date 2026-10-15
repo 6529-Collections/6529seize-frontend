@@ -15,6 +15,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
+import TdhSource from "../shared/TdhSource";
 
 type HistoricBoostsMessageKey = Extract<
   MessageKey,
@@ -119,6 +120,10 @@ export default function TDHHistoricBoostsPage() {
             </h1>
             <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300">
               {m(locale, "network.tdhHistoric.hero.intro")}
+            </p>
+            <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
+              {m(locale, "network.tdhHistoric.hero.v1")}
+              <TdhSource refs={["P26 §10"]} locale={locale} />
             </p>
           </header>
 
