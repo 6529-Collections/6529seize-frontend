@@ -46,7 +46,10 @@ Use this page for visibility rules, state switches, and route targets.
 
 1. Open `/`.
 2. The top slot shows a loading placeholder while current mint data, claim
-   status, and next-winner data resolve.
+   status, and next-winner data resolve. The server starts the current-mint
+   and next-winner requests with the page and the browser reuses their
+   results; claim status still loads in the browser. If a server request fails
+   or takes too long, the browser requests that data itself.
 3. The top slot then chooses one mode:
    - `Latest Drop` while the current mint is active and for the configured
      grace period after its scheduled end, or when no next winner is available.

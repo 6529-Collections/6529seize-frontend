@@ -1,11 +1,14 @@
 import { useEffect, useMemo } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { prepareWaveDecisionPoint } from "@/helpers/waves/wave-decision.helpers";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
-import { fetchWaveDecisionsV2 } from "@/services/api/wave-decisions-v2-api";
+import {
+  fetchWaveDecisionsV2,
+  getWaveDecisionsPageParams,
+} from "@/services/api/wave-decisions-v2-api";
+import { getWaveDecisionsQueryKey } from "@/services/api/wave-query";
 
 interface UseWaveDecisionsProps {
   readonly waveId: string;
@@ -55,7 +58,7 @@ export function useWaveDecisions({
     isFetchNextPageError,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: [QueryKey.WAVE_DECISIONS, { waveId, pageSize: resolvedPageSize }],
+    queryKey: getWaveDecisionsQueryKey(waveId, resolvedPageSize),
     queryFn: async ({
       pageParam,
       signal,
@@ -68,12 +71,7 @@ export function useWaveDecisions({
       return await fetchWaveDecisionsV2({
         waveId,
         wave,
-        params: {
-          sort_direction: "DESC",
-          sort: "decision_time",
-          page: currentPage.toString(),
-          page_size: resolvedPageSize.toString(),
-        },
+        params: getWaveDecisionsPageParams(currentPage, resolvedPageSize),
         signal,
       });
     },
