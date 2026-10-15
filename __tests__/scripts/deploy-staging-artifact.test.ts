@@ -42,7 +42,8 @@ function runHostPreflight(
   afterPreflight = "",
   lockHeld = false,
   ethereumRpcUrl = "https://eth-mainnet.example.test",
-  alchemyApiKey = "staging-test-key"
+  alchemyApiKey = "staging-test-key",
+  stagingApiKey = "staging-test-access"
 ) {
   // Exercise the real path adoption, PM2 validation and rollback functions;
   // replace only host privileges, PM2, the lock command and HTTP transport.
@@ -106,6 +107,7 @@ curl() { command cat "$REPO_DIR/.deploy/current/version.json"; }
         SSR_CLIENT_SECRET_B64: "c2VjcmV0",
         ETHEREUM_RPC_URL_B64: Buffer.from(ethereumRpcUrl).toString("base64"),
         ALCHEMY_API_KEY_B64: Buffer.from(alchemyApiKey).toString("base64"),
+        STAGING_API_KEY_B64: Buffer.from(stagingApiKey).toString("base64"),
         TEST_PM2_JSON: JSON.stringify(pm2Processes),
         TEST_LOCK_HELD: String(lockHeld),
       },
@@ -237,21 +239,32 @@ describe("staging runtime directory", () => {
     }
   );
 
-  it("passes the staging Alchemy key through the private runtime store into PM2", () => {
+  function runRuntimeSetup(alchemyApiKey?: string, stagingApiKey?: string) {
     createRelease(runtimeRoot, `${expectedSha}-${expectedDigest}`, expectedSha);
-    const key = "test-key-'\"$;\\value";
     const runtimeSetup = script.slice(
       script.indexOf('runtime_secrets_tmp="$(mktemp'),
       script.indexOf('\nif [[ "$process_kind" == legacy ]]')
     );
-    const result = runHostPreflight(
+    return runHostPreflight(
       repo,
       undefined,
       runtimeSetup,
       false,
       undefined,
-      key
+      alchemyApiKey,
+      stagingApiKey
     );
+  }
+
+  function readRuntimeSecrets() {
+    const secretsPath = path.join(runtimeRoot, "runtime-secrets.json");
+    expect(fs.statSync(secretsPath).mode & 0o777).toBe(0o600);
+    return JSON.parse(fs.readFileSync(secretsPath, "utf8"));
+  }
+
+  it("passes the staging Alchemy key through the private runtime store into PM2", () => {
+    const key = "test-key-'\"$;\\value";
+    const result = runRuntimeSetup(key);
 
     expect(result.status).toBe(0);
     expect(result.stderr).toBe("");
@@ -259,19 +272,69 @@ describe("staging runtime directory", () => {
     expect(`${result.stdout}${result.stderr}`).not.toContain(
       Buffer.from(key).toString("base64")
     );
-    const secretsPath = path.join(runtimeRoot, "runtime-secrets.json");
-    expect(JSON.parse(fs.readFileSync(secretsPath, "utf8"))).toEqual({
+    const secrets = readRuntimeSecrets();
+    expect(secrets).toMatchObject({
       SSR_CLIENT_ID: "client",
       SSR_CLIENT_SECRET: "secret",
       ETHEREUM_RPC_URL: "https://eth-mainnet.example.test",
       ALCHEMY_API_KEY: key,
     });
-    expect(fs.statSync(secretsPath).mode & 0o777).toBe(0o600);
+    expect(Object.keys(secrets).sort()).toEqual([
+      "ALCHEMY_API_KEY",
+      "ETHEREUM_RPC_URL",
+      "SSR_CLIENT_ID",
+      "SSR_CLIENT_SECRET",
+      "STAGING_API_KEY",
+    ]);
     const config = require(path.join(runtimeRoot, "ecosystem.config.cjs"));
     expect(config.apps[0].env.ALCHEMY_API_KEY).toBe(key);
     expect(config.apps[0].env.KEEP_ALIVE_TIMEOUT).toBe("65000");
     expect(config.apps[0].env).not.toHaveProperty("STAGING_ALCHEMY_API_KEY");
   });
+
+  it("passes the staging API key through the private runtime store into PM2 only", () => {
+    const key = "access-'\"$;\\value";
+    const result = runRuntimeSetup(undefined, key);
+
+    expect(result.status).toBe(0);
+    expect(result.stderr).toBe("");
+    expect(`${result.stdout}${result.stderr}`).not.toContain(key);
+    expect(`${result.stdout}${result.stderr}`).not.toContain(
+      Buffer.from(key).toString("base64")
+    );
+    expect(readRuntimeSecrets().STAGING_API_KEY).toBe(key);
+    const config = require(path.join(runtimeRoot, "ecosystem.config.cjs"));
+    expect(config.apps[0].env.STAGING_API_KEY).toBe(key);
+    expect(config.apps[0].env).not.toHaveProperty(
+      "PLAYWRIGHT_STAGING_ACCESS_CODE"
+    );
+    expect(config.apps[0].env).not.toHaveProperty("PUBLIC_RUNTIME");
+  });
+
+  it.each([
+    ["empty", ""],
+    ["a newline only", "\n"],
+    ["split across lines", "line-one\nline-two"],
+    ["holding a control character", "key\u0007value"],
+  ])(
+    "rejects a staging API key that is %s before changing runtime state",
+    (_description, key) => {
+      const result = runHostPreflight(
+        repo,
+        undefined,
+        "",
+        false,
+        undefined,
+        undefined,
+        key
+      );
+
+      expect(result.status).toBe(1);
+      expect(result.stderr).toMatch(/STAGING_API_KEY_B64|staging API key/);
+      expect(fs.existsSync(runtimeRoot)).toBe(false);
+      expect(fs.existsSync(path.join(repo, "pm2-events"))).toBe(false);
+    }
+  );
 
   it("keeps an already healthy exact artifact idempotent", () => {
     const releaseId = `${expectedSha}-${expectedDigest}`;
@@ -399,6 +462,9 @@ bash() { printf 'bash %s\\n' "$*" >> "$TEST_COMMAND_LOG"; }
           "base64"
         ),
         ALCHEMY_API_KEY_B64: Buffer.from("staging-test-key").toString("base64"),
+        STAGING_API_KEY_B64: Buffer.from("staging-test-access").toString(
+          "base64"
+        ),
         TEST_FETCHED_SHA: fetchedSha,
         TEST_FINAL_SHA: finalSha,
       },
@@ -573,6 +639,41 @@ describe("staging immutable artifact deployment", () => {
         'runtime_secrets_tmp="$(mktemp "$release_root/runtime-secrets.XXXXXX.json")"'
       )
     );
+  });
+
+  it("hands the staging API key to the runtime store without exposing it to the build", () => {
+    const build = workflow.jobs["build-staging-artifact"];
+    const deploy = workflow.jobs["deploy-staging"];
+    const sendStep = deploy.steps.find(
+      (step: { name?: string }) => step.name === "Send staging deploy command"
+    );
+
+    expect(script).toContain(
+      "['STAGING_API_KEY']: requireRuntimeEnv('STAGING_API_KEY')"
+    );
+    expect(sendStep.env.STAGING_API_KEY).toBe(
+      "${{ secrets.PLAYWRIGHT_STAGING_ACCESS_CODE }}"
+    );
+    expect(sendStep.run).toContain('test -n "$STAGING_API_KEY"');
+    expect(sendStep.run).toContain(
+      "printf '%s' \"$STAGING_API_KEY\" | base64 -w0"
+    );
+    expect(sendStep.run).toContain("STAGING_API_KEY_B64=$staging_api_key_b64_q");
+    expect(sendStep.run).toContain(
+      'STAGING_API_KEY_B64="$STAGING_API_KEY_B64" \\'
+    );
+    // Only the deploy step may see the value: neither the build job nor the
+    // workflow-level environment can carry it into compiled output.
+    expect(workflow.env).not.toHaveProperty("STAGING_API_KEY");
+    expect(deploy.env ?? {}).not.toHaveProperty("STAGING_API_KEY");
+    expect(JSON.stringify(build)).not.toMatch(
+      /STAGING_API_KEY|PLAYWRIGHT_STAGING_ACCESS_CODE/u
+    );
+    const referencingSteps = [build, deploy]
+      .flatMap((job: { steps: Array<{ name?: string }> }) => job.steps)
+      .filter((step) => JSON.stringify(step).includes("STAGING_API_KEY"))
+      .map((step) => step.name);
+    expect(referencingSteps).toEqual(["Send staging deploy command"]);
   });
 
   it("builds without deployment credentials and deploys only verified exact-SHA bytes", () => {

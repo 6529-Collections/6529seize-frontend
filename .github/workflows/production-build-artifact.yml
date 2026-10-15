@@ -232,6 +232,9 @@ jobs:
         env:
           NODE_ENV: "production"
           VERSION: ${{ inputs.target_sha }}
+          # Never publish a truncated sitemap from a deploy build, whatever the
+          # sitemap's own build detection concludes.
+          SITEMAP_FAILURE_POLICY: fail
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
           GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY || secrets.GIPHY_API_KEY }}
