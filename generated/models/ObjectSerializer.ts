@@ -569,6 +569,7 @@ export * from '../models/ApiMemeCardDropMapping';
 export * from '../models/ApiMemeCollaborationArtwork';
 export * from '../models/ApiMemeCollaborationCredit';
 export * from '../models/ApiMemeCollaborationInvitation';
+export * from '../models/ApiMemeCollaborationInviteRequest';
 export * from '../models/ApiMemeCollaborationResponseRequest';
 export * from '../models/ApiMemeCollaborationState';
 export * from '../models/ApiMemeCollaboratorProfile';
@@ -1521,6 +1522,7 @@ import { ApiMemeCardDropMapping } from '../models/ApiMemeCardDropMapping';
 import { ApiMemeCollaborationArtwork } from '../models/ApiMemeCollaborationArtwork';
 import { ApiMemeCollaborationCredit } from '../models/ApiMemeCollaborationCredit';
 import { ApiMemeCollaborationInvitation  , ApiMemeCollaborationInvitationStatusEnum   } from '../models/ApiMemeCollaborationInvitation';
+import { ApiMemeCollaborationInviteRequest } from '../models/ApiMemeCollaborationInviteRequest';
 import { ApiMemeCollaborationResponseRequest, ApiMemeCollaborationResponseRequestActionEnum     } from '../models/ApiMemeCollaborationResponseRequest';
 import { ApiMemeCollaborationState } from '../models/ApiMemeCollaborationState';
 import { ApiMemeCollaboratorProfile } from '../models/ApiMemeCollaboratorProfile';
@@ -2726,6 +2728,7 @@ let typeMap: {[index: string]: any} = {
     "ApiMemeCollaborationArtwork": ApiMemeCollaborationArtwork,
     "ApiMemeCollaborationCredit": ApiMemeCollaborationCredit,
     "ApiMemeCollaborationInvitation": ApiMemeCollaborationInvitation,
+    "ApiMemeCollaborationInviteRequest": ApiMemeCollaborationInviteRequest,
     "ApiMemeCollaborationResponseRequest": ApiMemeCollaborationResponseRequest,
     "ApiMemeCollaborationState": ApiMemeCollaborationState,
     "ApiMemeCollaboratorProfile": ApiMemeCollaboratorProfile,

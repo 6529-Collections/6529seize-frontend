@@ -14,6 +14,32 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { ApiMemeCollaborationInvitationStatusEnum } from "@/generated/models/ApiMemeCollaborationInvitation";
 import type { ApiMemeCollaborationState } from "@/generated/models/ApiMemeCollaborationState";
 
+jest.mock(
+  "@/components/waves/memes/collaborations/MemeCollaboratorPicker",
+  () => ({
+    MemeCollaboratorPicker: ({
+      onChange,
+      disabled,
+      excludedIds,
+    }: {
+      onChange: (profiles: unknown[]) => void;
+      disabled: boolean;
+      excludedIds: string[];
+    }) => (
+      <button
+        disabled={disabled}
+        data-excluded={excludedIds.join(",")}
+        onClick={() =>
+          onChange([
+            { id: "C", handle: "artistC", display: "artistC", pfp: null },
+          ])
+        }
+      >
+        Select collaborator C
+      </button>
+    ),
+  })
+);
 const requestAuth = jest.fn();
 const setToast = jest.fn();
 let viewer = "B";
@@ -253,4 +279,46 @@ it("announces only the changed invitation status and keeps controls outside live
   );
   expect(screen.getAllByRole("status")).toEqual(statuses);
   expect(statuses[1]).toHaveTextContent("@artistC: Pending acceptance");
+});
+
+it("lets the author invite collaborators on an existing unmanaged artwork without editing it", async () => {
+  viewer = "A";
+  requestAuth.mockResolvedValue({ success: true });
+  postMock.mockResolvedValue({ ...pending, can_invite: true });
+  mount({ ...pending, managed: false, can_invite: true, invitations: [] });
+  fireEvent.click(await screen.findByText("Select collaborator C"));
+  fireEvent.click(
+    screen.getByRole("button", { name: "Send collaborator invitations" })
+  );
+  await waitFor(() =>
+    expect(postMock).toHaveBeenCalledWith({
+      endpoint: "drops/drop/collaborations",
+      body: { collaborator_ids: ["C"] },
+    })
+  );
+});
+it("keeps accepted collaborators and excludes already invited profiles when adding more", async () => {
+  viewer = "A";
+  mount({
+    ...pending,
+    can_invite: true,
+    invitations: [
+      {
+        ...pendingInvitation,
+        status: ApiMemeCollaborationInvitationStatusEnum.Accepted,
+      },
+    ],
+  });
+  const picker = await screen.findByText("Select collaborator C");
+  expect(picker).toHaveAttribute("data-excluded", "B");
+  expect(screen.getByText("Accepted")).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Cancel invitation" })
+  ).not.toBeInTheDocument();
+});
+it("does not offer invitations after selection or to another viewer", async () => {
+  viewer = "B";
+  mount({ ...pending, can_invite: false, closed: true });
+  await screen.findByText("Collaboration invitations");
+  expect(screen.queryByText("Select collaborator C")).not.toBeInTheDocument();
 });

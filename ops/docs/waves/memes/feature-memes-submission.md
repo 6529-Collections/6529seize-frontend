@@ -184,11 +184,13 @@ reached), select the header restriction control to see the reason, then use
 
 ## Collaborator invitations
 
+Invitations are available only on The Memes Main Stage, including its designated native competition. Only the submitter needs to satisfy submission eligibility and allowance requirements. Collaborators need a profile and must accept personally.
+
 In Basic Information, use **Invite a collaborating artist** to select up to 20
 other profiles. Selected profiles receive an invitation when the artwork is
 submitted. Voting starts immediately and does not wait for their replies.
 
-The submitter can see every invitation and cancel a pending invitation. Each
+The submitter can see every invitation and cancel a pending invitation. On an existing active submission, use the collaboration invitations section to select more artists and **Send collaborator invitations**. This preserves the submission, votes and ranking, including when some collaborators have already accepted. Accepted artists cannot be removed; adding invitations does not unlock accepted artwork. The limit is 20 distinct invited profiles over the submission lifetime, including declined or cancelled invitations; the same profile cannot be invited twice. Submissions created before this feature also support invitations. Selected, closed or withdrawn submissions cannot receive more invitations. Each
 invitee can review the submitted artwork, the final acceptance wording, and the
 submission/minting terms from **Notifications → Invites** or artwork details.
 They can accept or decline using their own profile; proxies cannot consent.

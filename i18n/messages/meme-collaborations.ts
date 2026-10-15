@@ -1,4 +1,6 @@
 export const MEME_COLLABORATION_MESSAGES = {
+  "memes.collaborations.sendInvitations": "Send collaborator invitations",
+  "memes.collaborations.invited": "Collaborator invitations sent.",
   "memes.collaborations.title": "Collaborators",
   "memes.collaborations.search": "Invite a collaborating artist",
   "memes.collaborations.hint":
