@@ -69,7 +69,7 @@ export default function UserPageIdentityAddStatementsContactInput({
           value={value}
           onChange={handleInputChange}
           placeholder={STATEMENT_META[activeType].inputPlaceholder}
-          className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-3 tw-text-base tw-font-normal tw-text-iron-100 tw-caret-primary-400 tw-shadow-sm tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-400 hover:tw-ring-iron-700 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-iron-700 sm:tw-leading-6"
+          className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-3 tw-text-base tw-font-normal tw-text-iron-100 tw-caret-primary-400 tw-shadow-sm tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-400 hover:tw-ring-iron-700 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-leading-6"
         />
       </div>
     </>

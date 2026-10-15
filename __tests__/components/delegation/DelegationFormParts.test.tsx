@@ -4,6 +4,7 @@ import {
   DelegationTokenSelection,
   DelegationFormShell,
 } from "@/components/delegation/DelegationFormParts";
+import { EMPTY_DELEGATION_EXPIRY } from "@/components/delegation/delegation-expiry";
 
 jest.mock("@fortawesome/react-fontawesome", () => ({
   FontAwesomeIcon: (p: any) => (
@@ -14,16 +15,21 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
 jest.mock("wagmi", () => ({ useEnsName: () => ({ data: null }) }));
 
 describe("Delegation form helpers", () => {
-  it("DelegationExpiryCalendar sets date correctly", () => {
-    const setDate = jest.fn();
+  it("DelegationExpiryCalendar resolves the end of the local day", () => {
+    const onChange = jest.fn();
     const { container } = render(
-      <DelegationExpiryCalendar setDelegationDate={setDate} />
+      <DelegationExpiryCalendar
+        value={EMPTY_DELEGATION_EXPIRY}
+        onChange={onChange}
+      />
     );
     const input = container.querySelector("input") as HTMLInputElement;
     fireEvent.change(input, { target: { value: "2024-01-02" } });
-    expect(setDate).toHaveBeenCalledWith(new Date("2024-01-02"));
-    fireEvent.change(input, { target: { value: "" } });
-    expect(setDate).toHaveBeenLastCalledWith(undefined);
+    // The runtime's local 23:59:59, whatever TZ the test process uses.
+    expect(onChange).toHaveBeenCalledWith({
+      date: "2024-01-02",
+      expiresAt: new Date(2024, 0, 2, 23, 59, 59).getTime() / 1000,
+    });
   });
 
   it("DelegationTokenSelection handles numeric input", () => {

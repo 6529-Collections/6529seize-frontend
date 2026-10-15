@@ -107,6 +107,20 @@ describe("useUnreadNotifications", () => {
     expect(queryOptions.retry(0, new Error("temporary failure"))).toBe(true);
   });
 
+  it("stops retrying other client errors but keeps retrying timeouts and server failures", () => {
+    useQueryMock.mockReturnValue({ data: undefined });
+
+    renderHook(() => useUnreadNotifications("bob"));
+
+    const queryOptions = useQueryMock.mock.calls[0]?.[0];
+    expect(queryOptions.retry(0, { status: 400 })).toBe(false);
+    expect(queryOptions.retry(0, { status: 404 })).toBe(false);
+    expect(queryOptions.retry(0, { status: 429 })).toBe(false);
+    expect(queryOptions.retry(0, { status: 408 })).toBe(true);
+    expect(queryOptions.retry(2, { status: 503 })).toBe(true);
+    expect(queryOptions.retry(3, { status: 503 })).toBe(false);
+  });
+
   it("disables timer and lifecycle refetches only after terminal auth errors", () => {
     useQueryMock.mockReturnValue({ data: undefined });
 

@@ -342,8 +342,16 @@ code {
   color: #25e4eb;
 }
 
-a {
+/* Links drop the UA outline for pointer focus only. Keyboard focus
+   (:focus-visible) must stay visible (WCAG 2.4.7) so a link either shows its
+   own focus-visible:tw-outline-* style or the browser default ring. :where()
+   keeps the specificity of the old `a` rule, so non-keyboard focus is
+   unchanged. */
+a:where(:not(:focus-visible)) {
   outline: 0 !important;
+}
+
+a {
   text-decoration: underline;
   color: white;
 }

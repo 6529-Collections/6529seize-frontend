@@ -91,7 +91,7 @@ const getTriggerClassNames = (
     isMemesVariant
   )} tw-font-normal`;
   const appearanceClassName = getTriggerAppearanceClassName(isMemesVariant);
-  const triggerClassName = `tw-inline-flex tw-cursor-pointer tw-items-center tw-border tw-border-solid tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 ${appearanceClassName} ${DENSITY_CLASS_NAMES[density]}`;
+  const triggerClassName = `tw-inline-flex tw-cursor-pointer tw-items-center tw-border tw-border-solid tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${appearanceClassName} ${DENSITY_CLASS_NAMES[density]}`;
   const chevronSizeClassName = isSmallDensity(density)
     ? "tw-size-3"
     : "tw-size-3.5";

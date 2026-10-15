@@ -2101,7 +2101,7 @@
       ],
       "facts": [
         "A user's Meme Card subscription controls and history live under /{user}/subscriptions.",
-        "On native iOS when the detected country is not US or is unknown, subscription controls stay hidden and direct or deep-linked visits return to the profile Identity tab without showing subscription content.",
+        "On native iOS when the detected country is not US or is unknown, subscription controls stay hidden and direct or deep-linked visits return to the profile Identity tab without showing subscription content once the country check settles (a failed check counts as unknown); US iOS deep links wait for the check and then keep the Subscriptions tab, and web and Android never wait for the country check. On every platform the Subscriptions tab and the profile-header subscription status are added just after the page loads rather than in the first render.",
         "The tab leads with subscription coverage: status, consecutive intended drops funded, funded-through and next-unfunded Meme context, and an authoritative top-up deadline only when one is available.",
         "The tab also shows exact ETH balance, raw mint capacity, airdrop address, manual or automatic mode, edition preference, upcoming drops, and history when subscriptions are available.",
         "Tap, hover, or focus the Airdrop Address to read its full value when the phone layout truncates it.",
@@ -4100,6 +4100,49 @@
         "ops/docs/waves/memes/feature-memes-quick-vote.md",
         "ops/docs/waves/leaderboard/feature-drop-entry-and-eligibility.md",
         "ops/docs/waves/troubleshooting-wave-navigation-and-posting.md"
+      ]
+    },
+    {
+      "id": "waves.memes-voting-checkpoint",
+      "kind": "business_rule",
+      "title": "The Memes voting checkpoint time",
+      "aliases": [
+        "memes checkpoint",
+        "memes voting checkpoint",
+        "checkpoint time",
+        "checkpoint schedule",
+        "when is the memes checkpoint",
+        "memes voting cutoff",
+        "what time does memes voting end",
+        "17:00 GMT checkpoint"
+      ],
+      "keywords": [
+        "memes",
+        "checkpoint",
+        "voting",
+        "schedule",
+        "utc",
+        "time zone",
+        "cutoff",
+        "24hv",
+        "monday",
+        "wednesday",
+        "friday"
+      ],
+      "facts": [
+        "The Memes voting checkpoints are Monday, Wednesday and Friday at 16:00 UTC, all year. The time is fixed in UTC, so it is 17:00 in London only during British Summer Time.",
+        "At each checkpoint the top submission on the leaderboard is selected, ranked by 24-Hour Vote (24HV): a weighted average of the TDH voted during the 24 hours before the checkpoint.",
+        "The Memes wave FAQ tab (How Does Voting Work?) and /about/apply (Checkpoint Schedule) state the checkpoint in UTC. After the page loads they add the viewer's own time zone in parentheses, for example (your time: Mon, Wed, Fri 09:00 PDT) for Los Angeles in summer.",
+        "The local note names the weekday because a viewer east of UTC can see the checkpoint on the next day: in Auckland the Monday, Wednesday and Friday checkpoints read Tuesday, Thursday and Saturday in the morning. It follows daylight saving in the viewer's zone and is left out for a viewer whose zone is UTC.",
+        "The wave FAQ takes the time of day from the wave's decision schedule and shows 16:00 UTC when that is not available."
+      ],
+      "canonical_path": "/about/apply",
+      "related_paths": ["/waves", "/the-memes"],
+      "tags": ["waves", "memes", "voting", "time"],
+      "source_refs": [
+        "ops/docs/waves/memes/feature-memes-voting-checkpoints.md",
+        "components/about/AboutApply.tsx",
+        "components/brain/my-stream/MyStreamWaveFAQ.tsx"
       ]
     },
     {
@@ -7759,6 +7802,7 @@
       ],
       "facts": [
         "The Memes mint route lives at /the-memes/mint.",
+        "On native iOS when the detected country is not US or is unknown, the mint page, recipient selection, mint count and SEIZE controls are absent and direct or deep-linked visits to /the-memes/mint return to /the-memes without an unavailable message once the country check settles (a failed check counts as unknown); US iOS deep links wait for the check and keep the Mint on 6529.io handoff, and web and Android keep the mint page.",
         "Mint flow docs explain entry points, common scenarios, and recovery.",
         "If a remembered profile's authorized wallet is disconnected, the mint page hides the duplicate Connect control; selecting SEIZE opens wallet connection and continues when the same wallet reconnects and transaction details are unchanged.",
         "Selecting a different already-authenticated wallet switches the active profile and cancels the old pending mint so refreshed recipient, eligibility, price, and transaction details can be reviewed before selecting SEIZE again; an unauthenticated wallet must complete normal authentication first.",
@@ -8248,7 +8292,7 @@
       "facts": [
         "The Tools index page lives at /tools as a direct secondary route, not a primary sidebar or app drawer destination.",
         "It groups label-only tool cards with right-arrow affordances into Safe Collecting, The Memes Tools, Builder Tools, and Open Data.",
-        "The Tools index links to delegation utilities, Subscriptions Report, Meme Accounting, Meme Gas, App Wallets when supported, API, EMMA, Block Finder, and Open Data routes.",
+        "The Tools index links to delegation utilities, Subscriptions Report, Meme Accounting, Meme Gas, App Wallets when supported, API, EMMA, Block Finder, World Time Zones, and Open Data routes.",
         "Subscription-only links are hidden in restricted iOS contexts, and App Wallets is hidden when app-wallet support is unavailable.",
         "Private operator routes and local-only tools are not listed on the public Tools index.",
         "Primary menu discovery for user-facing tools, developer routes, and Open Data remains under About."
@@ -8259,6 +8303,7 @@
         "/tools/subscriptions-report",
         "/tools/api",
         "/tools/block-finder",
+        "/tools/time-zones",
         "/emma",
         "/open-data"
       ],
@@ -8450,6 +8495,45 @@
       "source_refs": [
         "app/tools/block-finder/page.tsx",
         "ops/docs/api-tool/feature-block-finder.md"
+      ]
+    },
+    {
+      "id": "tools.time-zones",
+      "kind": "route",
+      "title": "World Time Zones",
+      "aliases": [
+        "world time zones",
+        "time zone map",
+        "timezone map",
+        "world clock",
+        "utc offset",
+        "what time is it in"
+      ],
+      "keywords": [
+        "tools",
+        "time zone",
+        "timezone",
+        "utc",
+        "offset",
+        "daylight saving",
+        "map",
+        "clock"
+      ],
+      "facts": [
+        "World Time Zones lives at /tools/time-zones and is listed under Builder Tools on /tools and under About -> Data & Developer Tools.",
+        "It shows a live UTC clock, the viewer's own time zone, a world map with one dot per IANA time zone at its principal city colored by the zone's current UTC offset, optional night-side shading, and a searchable, sortable table of every IANA time zone.",
+        "Hover, tap or focus a map dot to see its city, zone name, IANA zone, local time, UTC offset and daylight saving status. With the map focused, arrow keys move between zones from west to east. Alias zones such as Europe/Amsterdam and Etc zones are in the table without a dot.",
+        "Table search matches city, IANA zone, region, zone name, or a numeric offset such as +5:30; the unfiltered list starts with 40 rows and Show all expands it.",
+        "Times, offsets, zone names and daylight saving status come from the browser's IANA Time Zone Database through Intl; the page makes no API requests and pauses updates while the tab is hidden.",
+        "The map uses public-domain data: Natural Earth land outlines and zone locations from the IANA Time Zone Database. The page credits both in a Data sources section."
+      ],
+      "canonical_path": "/tools/time-zones",
+      "related_paths": ["/tools", "/tools/block-finder"],
+      "tags": ["tools", "time-zones"],
+      "source_refs": [
+        "app/tools/time-zones/page.tsx",
+        "components/tools/time-zones/WorldTimeZonesExplorer.tsx",
+        "ops/docs/api-tool/feature-world-time-zones.md"
       ]
     },
     {

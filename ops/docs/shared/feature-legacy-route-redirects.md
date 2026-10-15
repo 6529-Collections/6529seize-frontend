@@ -22,7 +22,8 @@ Profile-only legacy aliases are documented in
 1. Request starts at a legacy URL.
 2. Middleware exact-path map runs first.
 3. Desktop-only `/my-stream*` middleware compatibility runs next.
-4. Access control runs (`401 -> /access`, `403 -> /restricted`).
+4. On staging deployments only, access control runs (`401 -> /access`,
+   `403 -> /restricted`). Production and local development skip it.
 5. Route-level redirects run (including `/waves?wave=<id>` normalization).
 6. Canonical destination route loads.
 
@@ -125,8 +126,15 @@ Rules:
 
 - Middleware redirects run before access control.
 - Route-level redirects run only after access control passes.
-- Access denied redirects to `/access` (`401`) or `/restricted` (`403`).
-- Middleware failures redirect to `/error`.
+- On staging, access denied redirects to `/access` (`401`) or `/restricted`
+  (`403`). The staging decision comes from the deployment's configured base
+  URL, not from request headers.
+- On staging, if the access check gets no answer (timeout, network error, or a
+  server error), the request gets a plain-text `503`. Retry once the API
+  recovers.
+- Other middleware failures redirect to `/error`.
+- Paths with a dot-prefixed segment (for example `/.env` or `/.well-known/*`)
+  and missing `/_next/*` files return a plain-text `404` instead of a page.
 - If the destination route fails, use
   [Route Error and Not-Found Screens](feature-route-error-and-not-found.md).
 - External redirect targets can fail independently; retry from another network

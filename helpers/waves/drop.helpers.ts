@@ -4,8 +4,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
 import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import type { ApiLightDrop } from "@/generated/models/ApiLightDrop";
-import { sha256 } from "ethereum-cryptography/sha256.js";
-import { utf8ToBytes } from "ethereum-cryptography/utils.js";
+import { bytesToHex, sha256, stringToBytes } from "viem";
 import { getRandomObjectId } from "../AllowlistToolHelpers";
 
 export enum DropSize {
@@ -66,11 +65,12 @@ export const getStableDropKey = (
     stable_created_at: stableCreatedAt,
   };
 
-  const hash = sha256(utf8ToBytes(JSON.stringify(input)));
+  const hash = sha256(stringToBytes(JSON.stringify(input)), "bytes");
   const decoder = new TextDecoder("utf-8");
   const key = decoder.decode(hash);
 
-  return { key, hash: Buffer.from(hash).toString("hex") };
+  // viem prefixes hex with "0x"; the stable hash has always been bare hex.
+  return { key, hash: bytesToHex(hash).slice(2) };
 };
 
 const findClosestMatch = (

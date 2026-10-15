@@ -5,6 +5,7 @@ import {
   useOptionalDmUnreadActions,
   useDmUnreadSummary,
 } from "@/services/dm-unread/DmUnreadStateProvider";
+import { mockRandomUnit } from "../../helpers/mockRandomUnit";
 
 const commonApiFetchMock = jest.fn();
 let connectedProfileId = "profile-1";
@@ -58,10 +59,10 @@ const state = ({
   unreadCount = 1,
   version = 1,
   latestDropSerialNo = 10,
-  firstUnreadDropSerialNo =
-    unreadCount > 0 ? latestDropSerialNo : null,
-  latestReadSerialNo =
-    unreadCount > 0 ? latestDropSerialNo - 1 : latestDropSerialNo,
+  firstUnreadDropSerialNo = unreadCount > 0 ? latestDropSerialNo : null,
+  latestReadSerialNo = unreadCount > 0
+    ? latestDropSerialNo - 1
+    : latestDropSerialNo,
 }: {
   profileId?: string;
   waveId?: string;
@@ -580,6 +581,99 @@ describe("DmUnreadStateProvider", () => {
     act(() => window.dispatchEvent(new Event("focus")));
     await waitFor(() => expect(commonApiFetchMock).toHaveBeenCalledTimes(3));
     nowSpy.mockRestore();
+  });
+
+  describe("reconnect resync stagger", () => {
+    // A fresh element per call so rerender() re-reads the mocked socket state.
+    const providerUi = () => (
+      <DmUnreadStateProvider>
+        <Capture />
+      </DmUnreadStateProvider>
+    );
+
+    // Mounts, connects for the first time (immediate resync), then drops the
+    // socket past the recovery cooldown so the next connect is a reconnect.
+    const mountAfterFirstConnect = async () => {
+      const rendered = render(providerUi());
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(0);
+      });
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+
+      isConnected = true;
+      rendered.rerender(providerUi());
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(0);
+      });
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+
+      isConnected = false;
+      rendered.rerender(providerUi());
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(2_000);
+      });
+      return rendered;
+    };
+
+    let randomUnitSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      randomUnitSpy = mockRandomUnit(0.5);
+    });
+
+    afterEach(() => {
+      randomUnitSpy.mockRestore();
+      jest.useRealTimers();
+    });
+
+    it("delays the snapshot that follows a reconnect by a random 0-3s", async () => {
+      const rendered = await mountAfterFirstConnect();
+      try {
+        isConnected = true;
+        rendered.rerender(providerUi());
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(1_499);
+        });
+        expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(1);
+        });
+        expect(commonApiFetchMock).toHaveBeenCalledTimes(3);
+      } finally {
+        rendered.unmount();
+      }
+    });
+
+    it("cancels the pending reconnect snapshot when the socket drops again", async () => {
+      const rendered = await mountAfterFirstConnect();
+      try {
+        isConnected = true;
+        rendered.rerender(providerUi());
+        isConnected = false;
+        rendered.rerender(providerUi());
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(3_000);
+        });
+
+        expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+      } finally {
+        rendered.unmount();
+      }
+    });
+
+    it("cancels the pending reconnect snapshot on unmount", async () => {
+      const rendered = await mountAfterFirstConnect();
+      isConnected = true;
+      rendered.rerender(providerUi());
+      rendered.unmount();
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(3_000);
+      });
+
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+    });
   });
 
   it("does not let a stale profile snapshot bleed into the switched profile", async () => {

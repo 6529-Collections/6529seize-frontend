@@ -157,7 +157,7 @@ export default function UserPageHeaderAboutEdit({
   return (
     <div className="tw-w-full tw-max-w-2xl">
       <form onSubmit={onSubmit}>
-        <div className="tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-200 tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400/60 hover:tw-ring-white/15">
+        <div className="tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-200 tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 hover:tw-ring-white/15">
           <textarea
             className="tw-block tw-min-h-32 tw-w-full tw-resize-none tw-border-0 tw-bg-transparent tw-px-4 tw-pb-2 tw-pt-3.5 tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-50 tw-caret-primary-400 placeholder:tw-text-iron-600 focus:tw-outline-none"
             name="profile-about"

@@ -13,8 +13,8 @@ import {
   DOWNLOADS_TABLE_ROW_CLASS_NAME,
   DownloadsLayout,
   DownloadsTable,
-  formatDate,
 } from "./CommunityDownloadsHelpers";
+import { formatDownloadDate } from "./communityDownloadsDate";
 
 const PAGE_SIZE = 25;
 
@@ -58,7 +58,7 @@ export default function CommunityDownloadsSubscriptions() {
         renderRow={(download: SubscriptionDownload) => (
           <tr className={DOWNLOADS_TABLE_ROW_CLASS_NAME} key={download.date}>
             <td className={DOWNLOADS_TABLE_CELL_CLASS_NAME}>
-              {formatDate(download.date)}
+              {formatDownloadDate(locale, download.date)}
             </td>
             <td className={DOWNLOADS_TABLE_CELL_CLASS_NAME}>
               #{download.token_id}

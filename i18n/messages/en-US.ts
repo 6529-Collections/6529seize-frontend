@@ -42,6 +42,8 @@ import networkTdhProfileMessages from "@/i18n/messages/networkTdhProfile.en-US.j
 import networkTdhRulesMessages from "@/i18n/messages/networkTdhRules.en-US.json";
 import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
+import utcScheduleMessages from "@/i18n/messages/utcSchedule.en-US.json";
+import worldTimeZonesMessages from "@/i18n/messages/worldTimeZones.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
@@ -56,6 +58,7 @@ import { EN_US_RECEIPT_MESSAGES } from "@/i18n/messages/collect-receipts";
 import { CONTENT_MODERATION_MESSAGES } from "@/i18n/messages/content-moderation";
 import { MODERATION_CHECK_MESSAGES } from "@/i18n/messages/moderation-checks";
 import { EULA_MESSAGES } from "@/i18n/messages/eula";
+import { GLOBAL_ERROR_MESSAGES } from "@/i18n/messages/global-error";
 import { PROFILE_CURATION_MESSAGES } from "@/i18n/messages/profile-curation";
 import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-documentation";
 import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artwork-documentation-integration";
@@ -2332,6 +2335,7 @@ const NETWORK_GROUP_FILTER_MESSAGES = objectMessages("network.groupFilter", {
 
 const WAVE_LOADING_MESSAGES = objectMessages("waves", {
   loadingStatus: "Loading waves",
+  "drops.editorLoadingStatus": "Loading editor",
 } as const);
 
 const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
@@ -2767,6 +2771,9 @@ const COLLECTION_DELEGATION_MESSAGES = objectMessages("delegation.collection", {
   "row.status.incomplete": "consolidation incomplete",
   "row.status.unavailable": "consolidation status unavailable",
   "row.consolidationMissing": "{label} consolidation missing",
+  "row.expiry.nonExpiring": "active - non-expiring",
+  "row.expiry.expired": "expired",
+  "row.expiry.active": "active - expires {date}",
   "row.label.incoming": "Incoming",
   "row.label.outgoing": "Outgoing",
   "outgoing.selectBulk": "Select {wallet} for bulk revoke",
@@ -2851,6 +2858,17 @@ const COLLECTION_DELEGATION_MESSAGES = objectMessages("delegation.collection", {
     "Register Consolidation from {from} to {to}",
 } as const);
 
+const DELEGATION_EXPIRY_MESSAGES = objectMessages("delegation.expiry", {
+  inputLabel: "Expiry Date",
+  timeZone:
+    "The delegation ends at the end of the selected day in your time zone ({zone}).",
+  preview: "Expires {local} ({utc})",
+  previewEmpty: "Select a date to see the exact expiry time.",
+  "error.missing": "Missing or invalid Expiry",
+  "error.tooSoon":
+    "Choose a later expiry date. The delegation must stay active for at least 1 hour after you submit.",
+} as const);
+
 const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   "wave.byAuthor": "by {author}",
   "wave.serial": "Wave #{serial}",
@@ -2913,6 +2931,12 @@ const OPEN_DATA_DOWNLOAD_MESSAGES = objectMessages("openData.downloads", {
   "columns.date": "Date",
   "columns.link": "Link",
   "columns.tokenId": "Token ID",
+} as const);
+
+const DATE_PICKER_MESSAGES = objectMessages("datePicker", {
+  utcNote:
+    "Dates are in UTC. The latest date you can select is today in UTC.",
+  afterTodayError: "Dates cannot be later than today in UTC.",
 } as const);
 
 const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
@@ -3312,6 +3336,7 @@ export const EN_US_MESSAGES = {
   ...IDENTITY_FILTER_MESSAGES,
   ...XTDH_COLLECTION_MESSAGES,
   ...COLLECTION_DELEGATION_MESSAGES,
+  ...DELEGATION_EXPIRY_MESSAGES,
   ...join6529Messages,
   "nextgen.brand": "NextGen",
   "nextgen.navigation.featured": "Featured",
@@ -3779,6 +3804,11 @@ export const EN_US_MESSAGES = {
   "theMemes.description.collections": "Collections",
   "theMemes.mint.metadata.description":
     "View the latest mint from The Memes collection.",
+  "theMemes.mint.openWebMint": "Mint on 6529.io",
+  "theMemes.mint.connect.connectedProfile": "Connected Profile",
+  "theMemes.mint.connect.profileStats": "TDH: {tdh} - Level: {level}",
+  "theMemes.mint.connect.mintForMe": "Mint for me",
+  "theMemes.mint.connect.mintForFren": "Mint for fren",
   "theMemes.title": "The Memes",
   "theMemes.sorting.regionLabel": "Meme sorting",
   "theMemes.sorting.sortBy": "Sort by",
@@ -4523,6 +4553,8 @@ export const EN_US_MESSAGES = {
   ...networkTdhRulesMessages,
   ...delegationTapGuideMessages,
   ...toolsMessages,
+  ...utcScheduleMessages,
+  ...worldTimeZonesMessages,
   ...ABOUT_TECH_MESSAGES,
   ...REVIEWBOT_USAGE_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
@@ -4536,12 +4568,14 @@ export const EN_US_MESSAGES = {
   ...COMMON_MESSAGES,
   ...EN_US_PAGINATION_MESSAGES,
   ...OPEN_DATA_DOWNLOAD_MESSAGES,
+  ...DATE_PICKER_MESSAGES,
   ...MEME_DATA_TABLE_MESSAGES,
   ...HEADER_SEARCH_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,
   ...PUBLIC_REVIEW_MESSAGES,
   ...EULA_MESSAGES,
+  ...GLOBAL_ERROR_MESSAGES,
   ...TITLE_CONTEXT_MESSAGES,
   ...WAVE_NAVIGATION_MESSAGES,
   ...MY_STREAM_CURATION_MESSAGES,
