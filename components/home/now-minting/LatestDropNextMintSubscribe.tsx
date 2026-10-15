@@ -22,6 +22,7 @@ import { formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import useCapacitor from "@/hooks/useCapacitor";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
@@ -160,8 +161,8 @@ export default function LatestDropNextMintSubscribe(
   // The server and the first hydration render cannot tell it is the native
   // shell, and on iOS the country is unknown until the first lookup settles.
   // Until purchasing is allowed the row and its requests are omitted.
-  const { hideNftPurchasing, shouldRedirect: isRestricted } =
-    useNftPurchasingVisibility();
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  const { isIos } = useCapacitor();
   const canQuerySubscriptions = !hideNftPurchasing;
 
   const profileKey = useMemo(
@@ -263,10 +264,13 @@ export default function LatestDropNextMintSubscribe(
   }
 
   if (hideNftPurchasing) {
-    // Restricted iOS gets nothing. While the platform or country is still
-    // unknown, only reserve the row's height so the content below does not
-    // jump when the row appears; the spacer holds no purchasing UI.
-    return isRestricted ? null : <MemeSubscriptionAwarenessRowSpace />;
+    // iOS gets nothing until the country settles: holding blank space for the
+    // length of the check would only collapse for restricted users. Before
+    // hydration the platform is unknown (isIos is still false), so the server
+    // HTML and the first hydration render reserve the row's height to keep web
+    // and Android from jumping when the row replaces it. The spacer holds no
+    // purchasing UI.
+    return isIos ? null : <MemeSubscriptionAwarenessRowSpace />;
   }
 
   return (
