@@ -6,22 +6,24 @@ import {
 import type { NextGenCollection } from "@/entities/INextgen";
 import { formatNameForUrl } from "@/helpers/nextgen-utils";
 import { isEmptyObject } from "@/helpers/Helpers";
-import { commonApiFetch } from "@/services/api/common-api";
 import { NextgenCollectionView } from "@/types/enums";
 import type { Metadata } from "next";
+import { fetchNextgenOrNull } from "@/app/nextgen/nextgen-api";
 import { getNextgenTitle } from "../../title-utils";
 
 const COLLECTION_VIEW_PATH_SEGMENT_INDEX = 3;
 
+// Resolves `null` only for a real 404 or an empty body; any other API failure
+// is rethrown to the route error boundary instead of becoming a 404.
 export async function fetchCollection(
   id: string,
   headers: Record<string, string>
 ): Promise<NextGenCollection | null> {
   const parsedId = encodeURIComponent(id.replaceAll(/-/g, " "));
-  const collection = await commonApiFetch<NextGenCollection>({
+  const collection = await fetchNextgenOrNull<NextGenCollection>({
     endpoint: `nextgen/collections/${parsedId}`,
-    headers: headers,
-  }).catch(() => null);
+    headers,
+  });
   return collection === null || isEmptyObject(collection) ? null : collection;
 }
 
