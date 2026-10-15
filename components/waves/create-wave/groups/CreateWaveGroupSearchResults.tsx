@@ -89,6 +89,16 @@ function HighlightedText({
   );
 }
 
+function getOptionStateClasses(isActive: boolean, isSelected: boolean): string {
+  if (isActive) {
+    return "tw-bg-iron-800 tw-text-white tw-ring-2 tw-ring-inset tw-ring-primary-400";
+  }
+  if (isSelected) {
+    return "tw-bg-iron-800 tw-text-white";
+  }
+  return "tw-text-white hover:tw-bg-iron-800";
+}
+
 function CreateWaveGroupSearchResultOption({
   group,
   index,
@@ -108,10 +118,7 @@ function CreateWaveGroupSearchResultOption({
   readonly onHover: (index: number) => void;
   readonly onSelect: (group: ApiGroupFull) => void;
 }) {
-  const optionStateClasses =
-    isActive || isSelected
-      ? "tw-bg-iron-800 tw-text-white"
-      : "tw-text-white hover:tw-bg-iron-800";
+  const optionStateClasses = getOptionStateClasses(isActive, isSelected);
 
   return (
     <li
