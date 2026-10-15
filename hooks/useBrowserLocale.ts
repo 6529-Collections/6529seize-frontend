@@ -3,29 +3,10 @@
 import { useEffect, useState } from "react";
 import {
   DEFAULT_LOCALE,
-  normalizeLocale,
+  getBrowserLocale,
   type SupportedLocale,
 } from "@/i18n/locales";
-
-const getBrowserLocale = (): SupportedLocale => {
-  const browserLanguages: unknown = Reflect.get(
-    globalThis.navigator,
-    "languages"
-  );
-  const browserLanguage: unknown = Reflect.get(
-    globalThis.navigator,
-    "language"
-  );
-  const preferredLocale =
-    Array.isArray(browserLanguages) && typeof browserLanguages[0] === "string"
-      ? browserLanguages[0]
-      : undefined;
-
-  return normalizeLocale(
-    preferredLocale ??
-      (typeof browserLanguage === "string" ? browserLanguage : undefined)
-  );
-};
+import { hasLocaleMessages, loadLocaleMessages } from "@/i18n/messages";
 
 export const useBrowserLocale = (): SupportedLocale => {
   // Keep SSR and the first hydration render identical. Browser preferences
@@ -33,14 +14,31 @@ export const useBrowserLocale = (): SupportedLocale => {
   const [locale, setLocale] = useState<SupportedLocale>(DEFAULT_LOCALE);
 
   useEffect(() => {
+    let active = true;
+
     const updateLocale = () => {
-      setLocale(getBrowserLocale());
+      const browserLocale = getBrowserLocale();
+      if (hasLocaleMessages(browserLocale)) {
+        setLocale(browserLocale);
+        return;
+      }
+
+      // Keep the current locale until the dictionary arrives, so copy and
+      // formatting switch together. If it cannot load, stay where we are.
+      loadLocaleMessages(browserLocale)
+        .then(() => {
+          if (active && getBrowserLocale() === browserLocale) {
+            setLocale(browserLocale);
+          }
+        })
+        .catch(() => undefined);
     };
 
     updateLocale();
     globalThis.addEventListener("languagechange", updateLocale);
 
     return () => {
+      active = false;
       globalThis.removeEventListener("languagechange", updateLocale);
     };
   }, []);

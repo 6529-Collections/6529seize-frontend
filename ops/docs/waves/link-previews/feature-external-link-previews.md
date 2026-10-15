@@ -90,6 +90,9 @@ loading.
 
 - Generic preview fetch supports public HTTP(S) destinations only.
 - Card quality depends on metadata published by the destination.
+- Previews read page metadata (`meta`, `link`, `title`, and JSON-LD) from the
+  first 1 MiB of the page only; metadata placed after that on very large pages
+  is not used.
 - Slow or redirect-heavy destinations can degrade preview quality or fall back to
   non-rich link states.
 - Link-preview chrome uses the app message catalog, but the wave preview stack

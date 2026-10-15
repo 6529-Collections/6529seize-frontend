@@ -45,7 +45,18 @@ jest.mock(
 jest.mock(
   "@/components/datePickerModal/DatePickerModal",
   () => (props: any) => (
-    <div data-show={props.show} data-testid={`${props.mode}-picker`} />
+    <div data-show={props.show} data-testid={`${props.mode}-picker`}>
+      {props.show && props.mode === "date" && (
+        // The real picker emits new Date("YYYY-MM-DD") values, i.e. UTC midnight.
+        <button
+          type="button"
+          data-testid="date-picker-apply"
+          onClick={() =>
+            props.onApplyDate(new Date("2026-10-05"), new Date("2026-10-31"))
+          }
+        />
+      )}
+    </div>
   )
 );
 jest.mock("next/image", () => ({
@@ -350,6 +361,90 @@ describe("GasRoyaltiesHeader", () => {
       "data-show",
       "true"
     );
+  });
+
+  it("labels and names custom dates by the picked UTC day for a US viewer", () => {
+    // Picked dates are UTC midnight, so a viewer west of UTC would see the
+    // previous day if the label read local getters. Jest's sandbox does not
+    // propagate process.env.TZ to Node, so answer the local getters as a
+    // UTC-7 viewer would instead. This fails on local-getter code under any host TZ.
+    const UTC_MINUS_7_MS = 7 * 60 * 60 * 1000;
+    const viewerLocal = (date: Date) =>
+      new Date(date.getTime() - UTC_MINUS_7_MS);
+    const localGetterSpies = [
+      jest.spyOn(Date.prototype, "getFullYear").mockImplementation(function (
+        this: Date
+      ) {
+        return viewerLocal(this).getUTCFullYear();
+      }),
+      jest.spyOn(Date.prototype, "getMonth").mockImplementation(function (
+        this: Date
+      ) {
+        return viewerLocal(this).getUTCMonth();
+      }),
+      jest.spyOn(Date.prototype, "getDate").mockImplementation(function (
+        this: Date
+      ) {
+        return viewerLocal(this).getUTCDate();
+      }),
+    ];
+    try {
+      (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
+      (usePathname as jest.Mock).mockReturnValue("/meme-gas");
+      const setDates = jest.fn();
+      const headerProps = {
+        title: "Gas",
+        fetching: false,
+        results_count: 1,
+        selected_artist: "",
+        is_primary: false,
+        is_custom_blocks: false,
+        focus: GasRoyaltiesCollectionFocus.MEMES,
+        getUrl: () => "",
+        setSelectedArtist: jest.fn(),
+        setIsPrimary: jest.fn(),
+        setIsCustomBlocks: jest.fn(),
+        setDateSelection: jest.fn(),
+        setDates,
+        setBlocks: jest.fn(),
+      };
+
+      const { rerender } = render(
+        <GasRoyaltiesHeader
+          {...headerProps}
+          date_selection={DateIntervalsSelection.TODAY}
+        />
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "Period: Today" }));
+      fireEvent.click(screen.getByRole("menuitem", { name: "Custom Dates" }));
+      fireEvent.click(screen.getByTestId("date-picker-apply"));
+
+      expect(setDates).toHaveBeenCalledWith(
+        new Date("2026-10-05T00:00:00.000Z"),
+        new Date("2026-10-31T00:00:00.000Z")
+      );
+
+      rerender(
+        <GasRoyaltiesHeader
+          {...headerProps}
+          date_selection={DateIntervalsSelection.CUSTOM_DATES}
+        />
+      );
+
+      expect(
+        screen.getByRole("button", {
+          name: "Period: from: 2026-10-05 to: 2026-10-31",
+        })
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("download").dataset["name"]).toBe(
+        "gas_the-memes_dates_2026-10-05-2026-10-31.csv"
+      );
+    } finally {
+      for (const spy of localGetterSpies) {
+        spy.mockRestore();
+      }
+    }
   });
 
   it("does not render download widget when fetching or no results", () => {

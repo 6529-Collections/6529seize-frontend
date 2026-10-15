@@ -1,4 +1,8 @@
 "use client";
+import {
+  COMPACT_ACTION_BUTTON_CLASS,
+  COMPACT_ACTION_CONTENT_CLASS,
+} from "@/components/utils/button/compactActionButtonStyles";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -129,9 +133,9 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
   const isMobileViewport = useIsMobileLayoutViewport();
   const canCreateCompetition =
     isMultiCompetitionEnabled() && hub.permissions.create_competition;
-  const createClassName = `tw-group tw-inline-flex tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-no-underline focus-visible:tw-outline-none hover:tw-no-underline ${isApp || isMobileViewport ? "tw-min-h-11" : "tw-h-8"}`;
+  const createClassName = `${COMPACT_ACTION_BUTTON_CLASS} tw-no-underline hover:tw-no-underline ${isApp || isMobileViewport ? "tw-min-h-11" : "tw-h-8"}`;
   const createContent = (
-    <span className="tw-inline-flex tw-h-8 tw-items-center tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-text-xs tw-font-semibold tw-text-iron-100 tw-transition-colors group-focus-visible:tw-outline group-focus-visible:tw-outline-2 group-focus-visible:tw-outline-offset-2 group-focus-visible:tw-outline-primary-300 desktop-hover:group-hover:tw-bg-iron-800 motion-reduce:tw-transition-none">
+    <span className={COMPACT_ACTION_CONTENT_CLASS}>
       <PlusIcon className="-tw-ml-1 tw-size-4 tw-shrink-0" aria-hidden="true" />
       <span>{t(locale, "competitions.createAction")}</span>
     </span>
@@ -182,7 +186,7 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
         ))}
       </ul>
     ) : (
-      <output className="tw-block tw-text-iron-400">
+      <output className="tw-block tw-text-sm tw-text-iron-400">
         {t(locale, "competitions.empty")}
       </output>
     );
@@ -201,9 +205,7 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
   };
   return (
     <>
-      <div
-        className={`tw-flex tw-shrink-0 tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-bg-iron-950 ${isApp ? "tw-border-white/5" : "tw-border-iron-800"} tw-px-4 tw-py-2.5 md:tw-px-6`}
-      >
+      <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-3 tw-bg-iron-950 tw-px-4 tw-py-1.5 md:tw-px-6">
         <div className="tw-relative tw-min-w-0 tw-flex-1">
           <div
             ref={filtersScrollerRef}
@@ -236,7 +238,7 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
         id={panelId}
         role="tabpanel"
         aria-label={t(locale, `competitions.${filter}`)}
-        className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-p-4 sm:tw-px-6"
+        className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-p-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 hover:tw-scrollbar-thumb-white/15 sm:tw-px-6"
       >
         <div className="tw-mx-auto tw-max-w-5xl tw-space-y-5">
           {results}

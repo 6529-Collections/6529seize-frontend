@@ -33,7 +33,7 @@ import { useSubscriptionCoverage } from "./coverage/useSubscriptionCoverage";
 
 const HISTORY_PAGE_SIZE = 10;
 const SUBSCRIBE_GROUP_CLASS =
-  "tw-relative tw-h-full tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] tw-transition-all tw-duration-500 tw-ease-out md:tw-grid md:tw-grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)]";
+  "tw-relative tw-h-full tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] tw-transition-all tw-duration-500 tw-ease-out max-md:tw-p-4 max-md:tw-shadow-none max-md:tw-bg-iron-900 md:tw-grid md:tw-grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)]";
 const SUBSCRIBE_GROUP_CONTENT_CLASS =
   "tw-min-w-0 md:tw-flex md:tw-h-full md:tw-flex-col";
 
@@ -288,7 +288,7 @@ export default function UserPageSubscriptions(
           id="profile-subscriptions-settings"
           className="tw-mt-6 tw-scroll-mt-24"
         >
-          <h3 className="tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+          <h3 className="tw-mb-3 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
             {t(locale, "subscriptions.page.settingsTitle")}
           </h3>
           <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2">

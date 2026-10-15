@@ -3,12 +3,17 @@
 import { DELEGATION_ABI } from "@/abis/abis";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants/constants";
 import { isValidEthAddress } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useState } from "react";
 import type { DelegationCollection } from "./delegation-constants";
 import { DELEGATION_USE_CASES } from "./delegation-constants";
+import {
+  EMPTY_DELEGATION_EXPIRY,
+  getDelegationExpiryError,
+} from "./delegation-expiry";
 import {
   getGasError,
   type DelegationWriteSettledHandler,
@@ -48,11 +53,12 @@ interface Props {
 }
 
 export default function NewDelegationComponent(props: Readonly<Props>) {
+  const locale = useBrowserLocale();
   const [showExpiryCalendar, setShowExpiryCalendar] = useState(false);
   const [showTokensInput, setShowTokensInput] = useState(false);
 
-  const [newDelegationDate, setNewDelegationDate] = useState<Date | undefined>(
-    undefined
+  const [newDelegationExpiry, setNewDelegationExpiry] = useState(
+    EMPTY_DELEGATION_EXPIRY
   );
   const [newDelegationToken, setNewDelegationToken] = useState<
     number | undefined
@@ -70,6 +76,10 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
     setGasError(error ? getGasError(error) : undefined);
   };
 
+  const expiryArg =
+    showExpiryCalendar && newDelegationExpiry.expiresAt !== null
+      ? newDelegationExpiry.expiresAt
+      : NEVER_DATE;
   const contractWriteDelegationConfigParams = props.subdelegation
     ? {
         address: DELEGATION_CONTRACT.contract,
@@ -79,9 +89,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
           props.subdelegation.originalDelegator,
           newDelegationCollection,
           newDelegationToAddress,
-          showExpiryCalendar && newDelegationDate
-            ? newDelegationDate.getTime() / 1000
-            : NEVER_DATE,
+          expiryArg,
           newDelegationUseCase,
           !showTokensInput,
           showTokensInput ? newDelegationToken : 0,
@@ -98,9 +106,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
         args: [
           newDelegationCollection,
           newDelegationToAddress,
-          showExpiryCalendar && newDelegationDate
-            ? newDelegationDate.getTime() / 1000
-            : NEVER_DATE,
+          expiryArg,
           newDelegationUseCase,
           !showTokensInput,
           showTokensInput ? newDelegationToken : 0,
@@ -113,7 +119,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
     setGasError(undefined);
   }
 
-  function validate() {
+  function validate(submittedAtMs?: number) {
     const newErrors: string[] = [];
     if (!newDelegationCollection || newDelegationCollection === "0") {
       newErrors.push("Missing or invalid Collection");
@@ -132,8 +138,15 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
     ) {
       newErrors.push("Invalid Address - cannot delegate to your own wallet");
     }
-    if (showExpiryCalendar && !newDelegationDate) {
-      newErrors.push("Missing or invalid Expiry");
+    const expiryError = showExpiryCalendar
+      ? getDelegationExpiryError(
+          locale,
+          newDelegationExpiry.expiresAt,
+          submittedAtMs
+        )
+      : null;
+    if (expiryError) {
+      newErrors.push(expiryError);
     }
     if (showTokensInput && !newDelegationToken) {
       newErrors.push("Missing or invalid Token ID");
@@ -238,7 +251,8 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
             />
             {showExpiryCalendar && (
               <DelegationExpiryCalendar
-                setDelegationDate={setNewDelegationDate}
+                value={newDelegationExpiry}
+                onChange={setNewDelegationExpiry}
               />
             )}
           </DelegationFormField>
@@ -273,7 +287,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
             Note: The currently supported use cases on 6529.io are: #1 - All, #2
             - Minting/Allowlist, #3 - Airdrops{" "}
             <Link
-              href={`/delegation/delegation-faq/use-cases-overview`}
+              href={`/safe-collecting/faq/use-cases-overview`}
               target="_blank"
               rel="noopener noreferrer"
             >

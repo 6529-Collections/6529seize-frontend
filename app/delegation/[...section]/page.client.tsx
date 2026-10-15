@@ -1,6 +1,10 @@
 "use client";
 
 import DelegationCenterMenu from "@/components/delegation/DelegationCenterMenu";
+import {
+  getSafeCollectingArticlePath,
+  getSafeCollectingSectionPath,
+} from "@/components/delegation/safe-collecting-routes";
 import { DELEGATION_PAGE_MAIN_CLASS_NAME } from "@/components/delegation/delegation-ui";
 import {
   getDelegationAppTitle,
@@ -64,10 +68,11 @@ export default function DelegationPageClient(props: {
   }
 
   const buildUrl = (
-    s: string,
+    s: DelegationCenterSection,
     params: { [key: string]: string | number }
   ): string => {
-    const url = new URL(`/delegation/${s}`, window.location.origin);
+    const pathname = getSafeCollectingSectionPath(s);
+    const url = new URL(pathname, window.location.origin);
     Object.entries(params).forEach(([k, v]) =>
       url.searchParams.set(k, String(v))
     );
@@ -77,7 +82,7 @@ export default function DelegationPageClient(props: {
   const updatePath = (s: DelegationCenterSection) => {
     if (s) {
       if (s === DelegationCenterSection.HTML && props.path) {
-        router.push(`/delegation/${props.path.join("/")}`);
+        router.push(getSafeCollectingArticlePath(props.path));
       } else {
         const queryParams = getQueryParams(s);
         router.push(buildUrl(s, queryParams));
@@ -87,17 +92,24 @@ export default function DelegationPageClient(props: {
 
   const updateQueryParams = (s: DelegationCenterSection) => {
     if (
+      s === DelegationCenterSection.CENTER ||
       s === DelegationCenterSection.HTML ||
       (s === DelegationCenterSection.CHECKER &&
         addressQuery === props.addressQuery)
     ) {
-      // The server already rendered this wallet's metadata. Replacing the
-      // route during hydration replays it and can leave duplicate head tags.
+      // The hub has no editable query state; preserve forwarded queries and
+      // section anchors. On Wallet Checker, the server already rendered this
+      // wallet's metadata. Replacing the route during hydration replays it and
+      // can leave duplicate head tags.
       // Only a submitted or cleared wallet needs a new server navigation.
       return;
     }
     const queryParams = getQueryParams(s);
-    router.replace(buildUrl(s, queryParams));
+    // Syncing query state must not drop an in-page anchor such as
+    // #safe-setup, or scroll the page back to the top.
+    router.replace(buildUrl(s, queryParams) + window.location.hash, {
+      scroll: false,
+    });
   };
 
   useEffect(() => {

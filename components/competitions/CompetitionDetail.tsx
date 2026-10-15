@@ -1,4 +1,5 @@
 "use client";
+import clsx from "clsx";
 import { ApiCompetitionLifecycle } from "@/generated/models/ApiCompetitionLifecycle";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 import {
@@ -99,6 +100,37 @@ export function NativeCompetitionContent({
     panelId: `competition-${competition.id}-${value}`,
   }));
   const selectTab = (value: string) => navigateTab(`${pathname}?tab=${value}`);
+  const isVotesView = tab === "votes" && !search.get("entry");
+  const contentHeader = (
+    <>
+      {pauses.isError && (
+        <CompetitionState
+          error
+          retry={() => {
+            void pauses.refetch();
+          }}
+        />
+      )}
+      {paused && (
+        <output className="tw-block tw-rounded-lg tw-bg-iron-900 tw-p-4 tw-text-sm tw-text-amber-300">
+          {t(locale, "competitions.paused")}
+        </output>
+      )}
+      {tab === "leaderboard" &&
+        !search.get("entry") &&
+        !competition.permissions.submit && (
+          <p className="tw-text-sm tw-text-iron-400">
+            {t(locale, "competitions.submitClosed")}
+          </p>
+        )}
+      {mutationsEnabled && entering && (
+        <CompetitionEntryForm
+          key={competition.id}
+          onClose={() => setEntering(false)}
+        />
+      )}
+    </>
+  );
   if (
     mutationsEnabled &&
     competition.lifecycle === ApiCompetitionLifecycle.Draft &&
@@ -116,7 +148,7 @@ export function NativeCompetitionContent({
       style={embedded && isApp ? waveViewStyle : undefined}
       className={
         embedded
-          ? "tw-h-full tw-min-h-0 tw-space-y-5 tw-overflow-y-auto tw-p-4"
+          ? "tw-h-full tw-min-h-0 tw-space-y-5 tw-overflow-y-auto tw-p-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 hover:tw-scrollbar-thumb-white/15"
           : "tw-space-y-5"
       }
     >
@@ -135,39 +167,19 @@ export function NativeCompetitionContent({
           </div>
         </div>
       )}
-      {pauses.isError && (
-        <CompetitionState
-          error
-          retry={() => {
-            void pauses.refetch();
-          }}
-        />
-      )}
-      {paused && (
-        <output className="tw-block tw-rounded-lg tw-bg-iron-900 tw-p-4 tw-text-sm tw-text-amber-300">
-          {t(locale, "competitions.paused")}
-        </output>
-      )}
-      {!competition.permissions.submit && (
-        <p className="tw-text-sm tw-text-iron-400">
-          {t(locale, "competitions.submitClosed")}
-        </p>
-      )}
-      {mutationsEnabled && entering && (
-        <CompetitionEntryForm
-          key={competition.id}
-          onClose={() => setEntering(false)}
-        />
-      )}
+      {!isVotesView && contentHeader}
       <section
         role={embedded ? undefined : "tabpanel"}
         id={`competition-${competition.id}-${tab}`}
         aria-label={tabLabel(tab)}
-        className="tw-space-y-5"
+        className={clsx("tw-space-y-5", {
+          "first:-tw-mt-4": embedded && isVotesView,
+        })}
       >
         <WaveDisplayMetadataContext.Provider value={displayMetadata}>
           <CompetitionResources
             key={tab}
+            embedded={embedded}
             tab={tab}
             onCreateDrop={
               mutationsEnabled &&
@@ -176,7 +188,9 @@ export function NativeCompetitionContent({
                 ? () => setEntering((current) => !current)
                 : undefined
             }
-          />
+          >
+            {isVotesView && contentHeader}
+          </CompetitionResources>
         </WaveDisplayMetadataContext.Provider>
         {tab === "rules" && (
           <CompetitionAdmin
@@ -252,9 +266,11 @@ export default function CompetitionDetail({
     <section
       data-competition-detail
       style={isApp && isDraft ? waveViewStyle : undefined}
-      className={`tw-h-full tw-min-h-0 tw-overflow-y-auto tw-px-4 tw-pt-4 sm:tw-px-6 sm:tw-pt-6 ${isDraft ? "tw-scroll-pb-24" : "tw-pb-4 sm:tw-pb-6"}`}
+      className={`tw-h-full tw-min-h-0 tw-overflow-y-auto tw-px-4 tw-pt-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 hover:tw-scrollbar-thumb-white/15 sm:tw-px-6 sm:tw-pt-6 ${isDraft ? "tw-scroll-pb-24" : "tw-pb-4 sm:tw-pb-6"}`}
     >
-      <div className="tw-mx-auto tw-max-w-5xl tw-space-y-5">
+      <div
+        className={`tw-mx-auto tw-max-w-5xl ${isDraft ? "tw-flex tw-min-h-full tw-flex-col tw-gap-5" : "tw-space-y-5"}`}
+      >
         <header className="tw-space-y-3">
           <nav>
             <CompetitionBackLink waveId={waveId} />

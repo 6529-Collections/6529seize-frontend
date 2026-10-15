@@ -12,7 +12,6 @@ import WaveHeaderFollowers from "./WaveHeaderFollowers";
 import WaveHeaderPinButton from "./WaveHeaderPinButton";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WavePicture from "../WavePicture";
-import { Time } from "@/helpers/time";
 import WaveNotificationSettings from "../specs/WaveNotificationSettings";
 import WaveAuthor from "../specs/WaveAuthor";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
@@ -20,8 +19,9 @@ import WaveHeaderPictureEdit from "./picture/WaveHeaderPictureEdit";
 import WaveRepButton from "./rep/WaveRepButton";
 import WaveHeaderTrustStats from "./WaveHeaderTrustStats";
 import WaveHeaderShareButton from "./WaveHeaderShareButton";
+import LocalDateTime from "@/components/utils/time/LocalDateTime";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { formatDate, formatInteger } from "@/i18n/format";
+import { formatInteger } from "@/i18n/format";
 import { t, type MessageKey } from "@/i18n/messages";
 
 const WAVE_HEADER_LOCALE = DEFAULT_LOCALE;
@@ -86,8 +86,6 @@ export default function WaveHeader({
   const showPinAction = !isSubwave;
   const showTrustStats = !isDirectMessage;
   const titleActionAlignmentClass = isSubwave ? "tw-mt-3.5" : "";
-  const createdAt = Time.millis(wave.created_at).toDate();
-  const createdDate = formatDate(WAVE_HEADER_LOCALE, createdAt);
   const postsCount = formatInteger(
     WAVE_HEADER_LOCALE,
     wave.metrics.drops_count
@@ -201,12 +199,11 @@ export default function WaveHeader({
           <span aria-hidden="true" className="tw-shrink-0 tw-text-iron-500">
             ·
           </span>
-          <time
-            dateTime={createdAt.toISOString()}
+          <LocalDateTime
+            value={wave.created_at}
+            locale={WAVE_HEADER_LOCALE}
             className="tw-shrink-0 tw-text-iron-500"
-          >
-            {createdDate}
-          </time>
+          />
         </div>
 
         <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-y-3">

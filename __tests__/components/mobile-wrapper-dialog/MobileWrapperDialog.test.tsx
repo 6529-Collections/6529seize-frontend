@@ -53,6 +53,27 @@ describe("MobileWrapperDialog", () => {
     fireEvent(element, event);
   };
 
+  it("lets Escape return within a sheet while Close dismisses the whole sheet", async () => {
+    const onEscape = jest.fn();
+    const onClose = jest.fn();
+    render(
+      <MobileWrapperDialog
+        isOpen
+        title="Notifications"
+        onClose={onClose}
+        onEscape={onEscape}
+      >
+        <button>Choice</button>
+      </MobileWrapperDialog>
+    );
+    screen.getByRole("button", { name: "Choice" }).focus();
+    await userEvent.keyboard("{Escape}");
+    expect(onEscape).toHaveBeenCalledTimes(1);
+    expect(onClose).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole("button", { name: "Close" }));
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   describe("rendering", () => {
     it("does not render children when closed", () => {
       render(<MobileWrapperDialog {...defaultProps} isOpen={false} />);
@@ -204,6 +225,20 @@ describe("MobileWrapperDialog", () => {
           ".tw-flex-1.mobile-wrapper-dialog-overflow-content.tw-overflow-visible"
         )
       ).toBeInTheDocument();
+    });
+
+    it("anchors action-only sheets independently of the closing keyboard", () => {
+      render(
+        <MobileWrapperDialog {...defaultProps} isOpen avoidKeyboard={false} />
+      );
+      const container = document.querySelector<HTMLElement>(
+        ".tw-pointer-events-none.tw-fixed.tw-inset-x-0"
+      );
+      expect(
+        container?.style.getPropertyValue(
+          "--mobile-wrapper-dialog-keyboard-inset"
+        )
+      ).toBe("0px");
     });
 
     it("keeps mobile sheets above the native keyboard inset", () => {

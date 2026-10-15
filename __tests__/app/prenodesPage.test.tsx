@@ -1,7 +1,7 @@
 import PrenodesPage, { generateMetadata } from "@/app/network/prenodes/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { publicEnv } from "@/config/env";
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import React from "react";
 
 const domain = new URL(publicEnv.BASE_ENDPOINT).hostname;
@@ -34,11 +34,19 @@ describe("prenodes page", () => {
         <PrenodesPage />
       </AuthContext.Provider>
     );
+    expect(screen.getByRole("main")).toHaveTextContent(
+      "6529 Prenodes have been deprecated."
+    );
+    expect(
+      screen.getByRole("link", { name: "Explore 6529 Desktop" })
+    ).toHaveAttribute("href", "/about/6529-apps");
   });
 
   it("has correct metadata", async () => {
     const metadata = await generateMetadata();
     expect(metadata.title).toEqual("Prenodes | Network");
-    expect(metadata.description).toEqual(`Network | ${domain}`);
+    expect(metadata.description).toEqual(
+      `6529 Prenodes have been deprecated. Use the 6529 Desktop app to calculate TDH. | ${domain}`
+    );
   });
 });

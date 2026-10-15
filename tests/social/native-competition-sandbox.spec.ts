@@ -571,6 +571,22 @@ async function installCompetitionApi(
   };
 }
 
+async function openAppearanceDraft(
+  page: Page,
+  viewport: { width: number; height: number }
+) {
+  const sandbox = await installCompetitionApi(page);
+  await page.setViewportSize(viewport);
+  await page.goto(`${ROOT}/new`);
+  const name = page.getByLabel("Competition name", { exact: true });
+  await name.fill("Appearance layout draft");
+  await expect.poll(() => sandbox.requests.length).toBe(1);
+  const footer = page
+    .getByRole("button", { name: "Close editor", exact: true })
+    .locator("..");
+  return { name, footer };
+}
+
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
   test.afterEach(async ({ page }, testInfo) => {
     if (testInfo.status !== testInfo.expectedStatus) {
@@ -591,6 +607,573 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     "PLAYWRIGHT_AUTH_SANDBOX",
     "Native competition tests require an isolated local mock API."
   );
+  for (const app of [false, true]) {
+    test(`keeps vote lists readable in the ${app ? "app" : "web"} layout`, async ({
+      page,
+    }, testInfo) => {
+      const mobile = testInfo.project.name === "web-mobile-chromium";
+      test.skip(app && !mobile, "The app variant uses the mobile viewport.");
+      if (!mobile) await page.setViewportSize({ width: 1728, height: 1000 });
+      const sandbox = await installCompetitionApi(page, false, false);
+      if (app)
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      const profiles = [
+        {
+          id: "layout-positive",
+          handle: "long-voter-handle-for-layout-checks",
+        },
+        { id: "layout-negative", handle: "downvoter" },
+      ];
+      let releaseVoters!: () => void;
+      let releaseProfile!: () => void;
+      let releaseActivity!: () => void;
+      const votersGate = new Promise<void>((resolve) => {
+        releaseVoters = resolve;
+      });
+      const profileGate = new Promise<void>((resolve) => {
+        releaseProfile = resolve;
+      });
+      const activityGate = new Promise<void>((resolve) => {
+        releaseActivity = resolve;
+      });
+      for (const profile of profiles) {
+        await page.route(`**/identities/${profile.id}`, async (route) => {
+          if (profile.id === profiles[0]!.id) await profileGate;
+          await route.fulfill({
+            json: { ...profile, pfp: null, primary_wallet: null },
+          });
+        });
+      }
+      await page.route(
+        "**/v3/waves/*/competitions/alpha/voters?**",
+        async (route) => {
+          await votersGate;
+          await route.fulfill({
+            json: pageResult([
+              {
+                profile_id: profiles[0]!.id,
+                votes: 123456789,
+                credit_spent: 123456789,
+              },
+              { profile_id: profiles[1]!.id, votes: -1000, credit_spent: 1000 },
+            ]),
+          });
+        }
+      );
+      await page.route(
+        "**/v3/waves/*/competitions/alpha/activity?**",
+        async (route) => {
+          await activityGate;
+          await route.fulfill({
+            json: [0, 5000, -1000].map((value, index) => ({
+              id: `layout-log-${index}`,
+              action: "DROP_VOTE_EDIT",
+              wave_id: WAVE,
+              drop_id: entryDropId("alpha"),
+              invoker: { ...profiles[0], pfp: null },
+              drop_author: {
+                id: "creator",
+                handle: "long-drop-creator-handle",
+                pfp: null,
+              },
+              created_at: Date.now(),
+              contents: {
+                oldVote: value,
+                newVote: index ? -1234567 : 1234567,
+                reason: index === 2 ? "CREDIT_OVERSPENT" : null,
+              },
+            })),
+          });
+        }
+      );
+      const voters = page.getByRole("tabpanel", {
+        name: "All votes",
+        exact: true,
+      });
+      let pendingVoterHeight = 0;
+      try {
+        await page.goto(`${ROOT}/alpha?tab=votes&voteTab=all`);
+        await expect(voters.getByRole("status")).toHaveText(
+          "Loading competition…"
+        );
+        const selectedTab = page.getByRole("tab", {
+          name: "All votes",
+          exact: true,
+        });
+        await expect(selectedTab).toHaveCSS("height", "32px");
+        await expect(selectedTab).toHaveCSS("border-radius", "9999px");
+        await expect(selectedTab).toHaveCSS("border-bottom-width", "0px");
+        await expect(selectedTab).toHaveCSS("font-size", "12px");
+        await expect(
+          page
+            .getByRole("tab", { name: "All votes", exact: true })
+            .locator("../../..")
+        ).toHaveCSS("background-color", "rgb(19, 19, 22)");
+        await expect(selectedTab).toHaveCSS("padding-left", "12px");
+        await expect(
+          page
+            .getByRole("tab", { name: "All votes", exact: true })
+            .locator("..")
+        ).toHaveCSS("column-gap", "10px");
+        const skeletons = voters.getByTestId("competition-voter-skeleton");
+        await expect(skeletons).toHaveCount(6);
+        await page.emulateMedia({ reducedMotion: "reduce" });
+        await expect(skeletons.first()).toHaveCSS("animation-name", "none");
+        await expectNoHorizontalOverflow(page);
+        await page.screenshot({
+          path: testInfo.outputPath("all-votes-loading.png"),
+        });
+        releaseVoters();
+        await expect(
+          voters.getByRole("link", { name: profiles[1]!.handle, exact: true })
+        ).toBeVisible();
+        await expect(skeletons).toHaveCount(1);
+        pendingVoterHeight = (await skeletons.first().boundingBox())!.height;
+        await expect(voters.getByRole("status")).toHaveCount(0);
+      } finally {
+        releaseVoters();
+        releaseProfile();
+      }
+      await expect(
+        voters.getByRole("link", { name: profiles[0]!.handle, exact: true })
+      ).toBeVisible();
+      const loadedVoterRow = voters
+        .getByRole("link", {
+          name: profiles[0]!.handle,
+          exact: true,
+        })
+        .locator("../..");
+      expect((await loadedVoterRow.boundingBox())!.height).toBe(
+        pendingVoterHeight
+      );
+      await expect(
+        voters.getByText("+123,456,789", { exact: true })
+      ).toBeVisible();
+      await expect(voters.getByText("-1,000", { exact: true })).toBeVisible();
+      const totals = voters.getByText("123,456,789", { exact: true });
+      await expect(totals).toBeInViewport();
+      const totalBox = await voters
+        .getByText("1,000", { exact: true })
+        .boundingBox();
+      const totalLabelBox = await voters
+        .getByText("TDH Total", { exact: true })
+        .nth(1)
+        .boundingBox();
+      expect(totalBox).not.toBeNull();
+      expect(totalLabelBox).not.toBeNull();
+      expect(Math.abs(totalBox!.y - totalLabelBox!.y)).toBeLessThanOrEqual(2);
+      expect(totalLabelBox!.x).toBeGreaterThan(totalBox!.x + totalBox!.width);
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("all-votes-layout.png"),
+        animations: "disabled",
+      });
+
+      const activity = page.getByRole("tabpanel", {
+        name: "Activity",
+        exact: true,
+      });
+      let pendingActivityHeight = 0;
+      try {
+        await page.getByRole("tab", { name: "Activity", exact: true }).click();
+        await expect(activity.getByRole("status")).toHaveText(
+          "Loading competition…"
+        );
+        const skeletons = activity.getByTestId("competition-activity-skeleton");
+        await expect(skeletons).toHaveCount(6);
+        await expect(skeletons.first()).toHaveCSS("animation-name", "none");
+        pendingActivityHeight = (await skeletons.first().boundingBox())!.height;
+        await expectNoHorizontalOverflow(page);
+        await page.screenshot({
+          path: testInfo.outputPath("activity-loading.png"),
+        });
+        if (!mobile) {
+          for (const width of [640, 767, 768]) {
+            await page.setViewportSize({ width, height: 1000 });
+            await expect
+              .poll(() =>
+                skeletons
+                  .first()
+                  .evaluate(
+                    (element) =>
+                      getComputedStyle(element).gridTemplateColumns.split(" ")
+                        .length
+                  )
+              )
+              .toBe(width < 768 ? 2 : 4);
+            await expectNoHorizontalOverflow(page);
+            await page.screenshot({
+              path: testInfo.outputPath(`activity-loading-${width}.png`),
+            });
+          }
+          await page.setViewportSize({ width: 1728, height: 1000 });
+        }
+      } finally {
+        releaseActivity();
+      }
+      const voter = activity
+        .getByRole("link", { name: profiles[0]!.handle, exact: true })
+        .first();
+      const creator = activity
+        .getByRole("link", { name: "long-drop-creator-handle", exact: true })
+        .first();
+      const viewDrop = activity
+        .getByRole("button", { name: "View drop in chat", exact: true })
+        .first();
+      await expect(voter).toBeVisible();
+      const activityRow = activity
+        .getByRole("link", { name: profiles[0]!.handle, exact: true })
+        .first()
+        .locator("..");
+      expect((await activityRow.boundingBox())!.height).toBe(
+        pendingActivityHeight
+      );
+      await expect(activity.getByRole("status")).toHaveCount(0);
+      await expect(creator).toBeVisible();
+      await expect(
+        activity.getByText("System Adjustment", { exact: true })
+      ).toBeVisible();
+      const voterBox = await voter.boundingBox();
+      const voteBox = await activity
+        .getByText("1,234,567 TDH", { exact: true })
+        .boundingBox();
+      const creatorBox = await creator.boundingBox();
+      const buttonBox = await viewDrop.boundingBox();
+      expect(voterBox).not.toBeNull();
+      expect(voteBox).not.toBeNull();
+      expect(creatorBox).not.toBeNull();
+      expect(buttonBox?.width).toBeGreaterThanOrEqual(40);
+      expect(buttonBox?.height).toBeGreaterThanOrEqual(40);
+      if (mobile) {
+        expect(voteBox!.y).toBeGreaterThan(voterBox!.y + voterBox!.height);
+        expect(creatorBox!.y).toBeGreaterThan(voteBox!.y + voteBox!.height);
+      } else
+        expect(
+          Math.abs(
+            creatorBox!.y +
+              creatorBox!.height / 2 -
+              voterBox!.y -
+              voterBox!.height / 2
+          )
+        ).toBeLessThanOrEqual(1);
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("activity-layout.png"),
+        animations: "disabled",
+      });
+      if (!mobile) {
+        for (const width of [639, 640, 767, 768]) {
+          await page.setViewportSize({ width, height: 1000 });
+          const responsiveVoter = await voter.boundingBox();
+          const responsiveCreator = await creator.boundingBox();
+          expect(responsiveVoter).not.toBeNull();
+          expect(responsiveCreator).not.toBeNull();
+          if (width < 768) {
+            const responsiveVote = await activity
+              .getByText("1,234,567 TDH", { exact: true })
+              .boundingBox();
+            expect(responsiveVote).not.toBeNull();
+            expect(responsiveCreator!.y).toBeGreaterThan(
+              responsiveVote!.y + responsiveVote!.height
+            );
+          } else {
+            expect(
+              Math.abs(
+                responsiveCreator!.y +
+                  responsiveCreator!.height / 2 -
+                  responsiveVoter!.y -
+                  responsiveVoter!.height / 2
+              )
+            ).toBeLessThanOrEqual(1);
+          }
+          await expectNoHorizontalOverflow(page);
+          await page.screenshot({
+            path: testInfo.outputPath(`activity-${width}.png`),
+            animations: "disabled",
+          });
+        }
+      }
+      await viewDrop.focus();
+      await expect(viewDrop).toBeFocused();
+      await page.keyboard.press("Enter");
+      await expect(page).toHaveURL(new RegExp(`drop=${entryDropId("alpha")}`));
+      expect(sandbox.requests).toHaveLength(0);
+    });
+  }
+
+  test("loads voter profiles near the viewport and retries a failed profile in its row", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page, false, false);
+    const requestedProfiles: string[] = [];
+    const voters = Array.from({ length: 50 }, (_, index) => ({
+      profile_id: `nearby-voter-${index + 1}`,
+      votes: 100000 + index,
+      credit_spent: 100000 + index,
+    }));
+    await page.route("**/v3/waves/*/competitions/alpha/voters?**", (route) =>
+      route.fulfill({ json: pageResult(voters) })
+    );
+    let failProfile = true;
+    await page.route("**/identities/nearby-voter-*", (route) => {
+      const id = new URL(route.request().url()).pathname.split("/").at(-1)!;
+      requestedProfiles.push(id);
+      if (id === "nearby-voter-4" && failProfile) {
+        return route.fulfill({
+          status: 429,
+          headers: { "Retry-After": "1" },
+          json: { error: "Rate limit exceeded" },
+        });
+      }
+      return route.fulfill({
+        json: { id, handle: id, pfp: null, primary_wallet: null },
+      });
+    });
+    await page.goto(`${ROOT}/alpha?tab=votes&voteTab=all`);
+    const panel = page.getByRole("tabpanel", {
+      name: "All votes",
+      exact: true,
+    });
+    await expect(
+      panel.getByRole("link", { name: "nearby-voter-1", exact: true })
+    ).toBeVisible();
+    const failure = panel.getByRole("alert");
+    await expect(failure).toContainText("Profile unavailable");
+    await expect(failure).toContainText("100,003");
+    await expect(panel).not.toContainText(
+      "This competition could not be loaded"
+    );
+    const retry = failure.getByRole("button", {
+      name: "Retry profile at rank 4",
+    });
+    await expect(retry).toHaveCSS("height", "32px");
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("voter-profile-retry.png"),
+    });
+    expect(requestedProfiles.length).toBeLessThan(25);
+    expect(requestedProfiles).not.toContain("nearby-voter-50");
+
+    failProfile = false;
+    await retry.click();
+    await expect(
+      panel.getByRole("link", { name: "nearby-voter-4", exact: true })
+    ).toBeVisible();
+    await expect(failure).toHaveCount(0);
+    expect(
+      requestedProfiles.filter((id) => id === "nearby-voter-4")
+    ).toHaveLength(2);
+    await panel
+      .getByTestId("competition-voter-skeleton")
+      .last()
+      .scrollIntoViewIfNeeded();
+    await expect(
+      panel.getByRole("link", { name: "nearby-voter-50", exact: true })
+    ).toBeVisible();
+    await expect(page).toHaveURL(new RegExp("tab=votes&voteTab=all"));
+    expect(sandbox.requests).toHaveLength(0);
+  });
+
+  for (const legacy of [false, true]) {
+    test(`fills the available width with ${legacy ? "legacy" : "native"} My Votes`, async ({
+      page,
+    }, testInfo) => {
+      const sandbox = await installCompetitionApi(page);
+      if (legacy) {
+        await sandbox.legacyPrimary("alpha");
+        const response = await page.request.get(
+          `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
+        );
+        expect(response.ok()).toBe(true);
+        const fixture = await response.json();
+        await page.route(`**/api/v2/waves/${WAVE}/leaderboard?**`, (route) =>
+          route.fulfill({
+            json: {
+              wave: fixture.wave,
+              drops: [
+                {
+                  ...fixture.drops[0],
+                  drop_type: "SUBMISSION",
+                  title: "My voted artwork",
+                  submission_context: {
+                    status: "ACTIVE",
+                    has_metadata: false,
+                    voting: {
+                      is_open: true,
+                      total_votes_given: 100,
+                      current_calculated_vote: 100,
+                      predicted_final_vote: 120,
+                      voters_count: 1,
+                      place: 1,
+                      context_profile_context: {
+                        can_vote: true,
+                        min: -1000,
+                        max: 1000,
+                        current: 100,
+                      },
+                    },
+                  },
+                },
+              ],
+              count: 1,
+              page: 1,
+              next: false,
+            },
+          })
+        );
+      }
+      const selected = competition("alpha", "Parallel Alpha");
+      selected.permissions.submit = false;
+      await page.route("**/v3/waves/*/competitions/alpha", (route) =>
+        route.fulfill({ json: selected })
+      );
+      await page.route("**/v3/waves/*/competitions/alpha/pauses?**", (route) =>
+        route.fulfill({
+          json: pageResult([{ start_time: Date.now() - 1000, end_time: null }]),
+        })
+      );
+      if (testInfo.project.name === "web-desktop-chromium")
+        await page.setViewportSize({ width: 1920, height: 1080 });
+      await page.goto(`${ROOT}/alpha?tab=votes`);
+      const panel = page.getByRole("tabpanel", {
+        name: "My Votes",
+        exact: true,
+      });
+      const row = panel.getByRole("article").first();
+      await expect(row).toBeVisible();
+      const wavePane = page
+        .getByRole("main")
+        .locator("#my-stream-wave-tabpanel-my_votes");
+      await expect(wavePane).toBeVisible();
+      const pills = page
+        .getByRole("tab", { name: "My Votes", exact: true })
+        .locator("../../..");
+      await expect(pills).toHaveCSS("padding-top", "6px");
+      await expect(pills).toHaveCSS("padding-bottom", "6px");
+      const submissionNotice = page.getByText(
+        "Entries are currently closed or you are not eligible to submit.",
+        { exact: true }
+      );
+      await expect(submissionNotice).toHaveCount(0);
+      const pauseNotice = page.getByText(
+        "Decisions are paused. Entries and voting continue within their configured periods.",
+        { exact: true }
+      );
+      await expect(pauseNotice).toBeVisible();
+      const pillBounds = (await pills.boundingBox())!;
+      expect((await pauseNotice.boundingBox())!.y).toBeGreaterThanOrEqual(
+        pillBounds.y + pillBounds.height
+      );
+      expect(
+        Math.abs(
+          (await pills.boundingBox())!.y - (await wavePane.boundingBox())!.y
+        )
+      ).toBeLessThanOrEqual(1);
+      const available = await wavePane.evaluate((element) => {
+        return {
+          x: element.getBoundingClientRect().x,
+          width: element.clientWidth,
+        };
+      });
+      const bounds = (await row.boundingBox())!;
+      expect(Math.abs(bounds.x - available.x)).toBeLessThanOrEqual(1);
+      expect(Math.abs(bounds.width - available.width)).toBeLessThanOrEqual(1);
+      const selectAll = panel.getByRole("button", {
+        name: "Select all",
+        exact: true,
+      });
+      const resetVotes = panel.getByRole("button", {
+        name: "Reset votes",
+        exact: true,
+      });
+      await expect(selectAll).toBeVisible();
+      await expect(resetVotes).toBeDisabled();
+      const createStyle = await page
+        .getByRole("button", { name: "Open create menu", exact: true })
+        .evaluate((button) => {
+          const style = getComputedStyle(button.querySelector("span")!);
+          return Object.fromEntries(
+            [
+              "height",
+              "background-color",
+              "border-color",
+              "border-radius",
+              "font-size",
+              "font-weight",
+              "padding-left",
+              "padding-right",
+              "color",
+            ].map((property) => [property, style.getPropertyValue(property)])
+          );
+        });
+      for (const name of ["Select all", "Reset votes"]) {
+        const action = panel.getByRole("button", { name, exact: true });
+        for (const [property, value] of Object.entries(createStyle)) {
+          await expect(
+            panel.getByRole("button", { name, exact: true }).locator("span")
+          ).toHaveCSS(property, value);
+        }
+        await expect(action).toHaveCSS(
+          "height",
+          testInfo.project.name === "web-mobile-chromium" ? "44px" : "32px"
+        );
+      }
+      await selectAll.click();
+      await expect(
+        panel.getByRole("button", { name: "Deselect all", exact: true })
+      ).toBeVisible();
+      await expect(
+        panel.getByRole("button", { name: "Reset 1 vote", exact: true })
+      ).toBeEnabled();
+      await page.keyboard.press("Tab");
+      for (const name of ["Open create menu", "Deselect all", "Reset 1 vote"]) {
+        const action = page.getByRole("button", { name, exact: true });
+        await action.focus();
+        await expect(action).toBeFocused();
+        const pill = page
+          .getByRole("button", { name, exact: true })
+          .locator("span")
+          .first();
+        await expect(pill).toHaveCSS("outline-style", "solid");
+        await expect(pill).toHaveCSS("outline-width", "2px");
+        await expect(pill).toHaveCSS("outline-color", "rgb(132, 173, 255)");
+      }
+      await panel
+        .getByRole("button", { name: "Deselect all", exact: true })
+        .click();
+      await expect(resetVotes).toBeDisabled();
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("my-votes-full-width.png"),
+      });
+      if (!legacy && testInfo.project.name === "web-desktop-chromium") {
+        await page.setViewportSize({ width: 320, height: 900 });
+        for (const name of ["My Votes", "All votes", "Activity"]) {
+          await expect(
+            page.getByRole("tab", { name, exact: true })
+          ).toBeInViewport({ ratio: 1 });
+        }
+        await expectNoHorizontalOverflow(page);
+      }
+      for (const name of ["All votes", "Activity"]) {
+        await page.getByRole("tab", { name, exact: true }).click();
+        await expect(
+          page.getByRole("tabpanel", { name, exact: true })
+        ).toBeVisible();
+        await expect(submissionNotice).toHaveCount(0);
+      }
+      if (!legacy) {
+        await page.goto(`${ROOT}/alpha?tab=leaderboard`);
+        await expect(submissionNotice).toBeVisible();
+      }
+      expect(sandbox.requests).toHaveLength(0);
+    });
+  }
+
   for (const legacy of [false, true]) {
     test(`scrolls overflowing ${legacy ? "legacy" : "native"} Settings and vote Activity`, async ({
       page,
@@ -717,6 +1300,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(dialog).toHaveAccessibleName(
         /^About Local Composer Sandbox Wave/
       );
+      await expect(
+        dialog.getByRole("button", { name: "Back", exact: true })
+      ).toHaveCount(0);
       await expect(
         dialog.getByRole("tab", { name: "About", exact: true })
       ).toBeVisible();
@@ -1386,12 +1972,18 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       "aria-controls",
       "competition-beta-votes-mine"
     );
-    if (app) {
-      await expect(mine).toHaveCSS("border-radius", "9999px");
-      await expect(mine).toHaveCSS("height", "32px");
-    } else {
-      await expect(mine).toHaveCSS("border-bottom-width", "2px");
+    await expect(mine).toHaveCSS("border-radius", "9999px");
+    await expect(mine).toHaveCSS("height", "32px");
+    await expect(mine).toHaveCSS("border-bottom-width", "0px");
+    if (!app) {
+      await expect(
+        waveTabStrip(page).getByRole("tab", { name: "Votes", exact: true })
+      ).toHaveCSS("border-bottom-width", "2px");
     }
+    await mine.focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(allVotes).toBeFocused();
+    await expect(mine).toHaveAttribute("aria-selected", "true");
     await allVotes.click();
     await expect(page).toHaveURL(`${ROOT}/beta?tab=votes&voteTab=all`);
     await expect(
@@ -1470,6 +2062,72 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     expect(sandbox.requests).toHaveLength(0);
   });
 
+  test("offers Join in the wave header and keeps the first row pin tooltip above the list filter", async ({
+    page,
+  }, testInfo) => {
+    const app = testInfo.project.name === "web-mobile-chromium";
+    const sandbox = await installCompetitionApi(page);
+    if (app)
+      await installSurfaceSimulation(
+        page.context(),
+        "capacitor-ios-sim",
+        testInfo.project.use.baseURL
+      );
+    await page.goto(`/waves/${WAVE}`);
+
+    // The sandbox profile has not joined this wave, so Join is the header CTA
+    // in both the web header and the native app header.
+    const join = page
+      .getByRole("button", {
+        name: "Join Local Composer Sandbox Wave",
+        exact: true,
+      })
+      .filter({ visible: true });
+    await expect(join).toBeVisible({ timeout: 30000 });
+    await expect(join).toHaveText("Join");
+    await expect(join).toBeInViewport({ ratio: 1 });
+    const joinBox = await join.boundingBox();
+    expect(joinBox?.height).toBeGreaterThanOrEqual(24);
+    expect(joinBox?.width).toBeGreaterThanOrEqual(24);
+    await expectNoHorizontalOverflow(page);
+
+    if (!app) {
+      // The first row sits directly under the sticky All/Pinned/Joined filter.
+      const waveList = page.getByRole("region", {
+        name: /^(All recent waves list|Following waves list|Pinned)$/,
+      });
+      await waveList.getByRole("link").first().hover();
+      const pin = waveList
+        .getByRole("button", { name: /^(Pin|Unpin) wave$/ })
+        .first();
+      await pin.hover();
+      const tooltip = page
+        .getByRole("tooltip")
+        .filter({ hasText: /^(Pin|Unpin)$/ });
+      await expect(tooltip).toBeVisible();
+      await expect
+        .poll(() =>
+          tooltip.evaluate((element) => {
+            const box = element.getBoundingClientRect();
+            const previous = (element as HTMLElement).style.pointerEvents;
+            // Tooltips ignore the pointer; enable hit-testing briefly.
+            (element as HTMLElement).style.pointerEvents = "auto";
+            const hits = [0.15, 0.5, 0.85].map((fraction) => {
+              const hit = document.elementFromPoint(
+                box.left + box.width * fraction,
+                box.top + box.height / 2
+              );
+              return hit !== null && element.contains(hit);
+            });
+            (element as HTMLElement).style.pointerEvents = previous;
+            return hits.every(Boolean);
+          })
+        )
+        .toBe(true);
+    }
+    expect(sandbox.requests).toHaveLength(0);
+  });
+
   test("keeps the draft editor footer flush with its scroll container", async ({
     page,
   }, testInfo) => {
@@ -1532,6 +2190,138 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           })
         )
         .toBeLessThanOrEqual(0);
+      await expectNoHorizontalOverflow(page);
+    }
+  });
+
+  test("keeps the editor in place when option cards receive focus", async ({
+    page,
+  }, testInfo) => {
+    const viewport = page.viewportSize();
+    if (!viewport) throw new Error("Viewport missing");
+    const { name, footer } = await openAppearanceDraft(page, {
+      width: Math.min(viewport.width, 730),
+      height: 800,
+    });
+    for (const draft of ["new", "reopened"]) {
+      if (draft === "reopened") {
+        await page.goto(`${ROOT}/draft`);
+        await expect(name).toHaveValue("Appearance layout draft");
+      }
+      const restingBottom = await footer.evaluate(
+        (element) => element.getBoundingClientRect().bottom
+      );
+      await page.getByText("Perpetual Ranking", { exact: true }).click();
+      await page
+        .getByRole("button", { name: /^Appearance and labels/ })
+        .click();
+      for (const { mode, key } of [
+        { mode: "Summary card", key: null },
+        { mode: "Full proposal", key: null },
+        { mode: "Summary card", key: "ArrowDown" },
+        { mode: "Full proposal", key: "ArrowUp" },
+      ]) {
+        if (key) await page.keyboard.press(key);
+        else await page.getByText(mode, { exact: true }).click();
+        const radio = page.getByRole("radio", { name: new RegExp(`^${mode}`) });
+        await expect(radio).toBeChecked();
+        await expect(radio).toBeFocused();
+        // Compare with the resting viewport position, not the scroll container:
+        // an out-of-bounds radio can scroll a hidden ancestor and move both.
+        const largestDrift = await footer.evaluate(
+          async (element, bottom) =>
+            new Promise<number>((resolve) => {
+              const startedAt = performance.now();
+              let maximum = 0;
+              const sample = () => {
+                maximum = Math.max(
+                  maximum,
+                  Math.abs(element.getBoundingClientRect().bottom - bottom)
+                );
+                if (performance.now() - startedAt >= 750) resolve(maximum);
+                else requestAnimationFrame(sample);
+              };
+              requestAnimationFrame(sample);
+            }),
+          restingBottom
+        );
+        expect(largestDrift).toBeLessThanOrEqual(1);
+      }
+      await page.screenshot({
+        path: testInfo.outputPath(`${draft}-option-focus-footer.png`),
+      });
+      await expectNoHorizontalOverflow(page);
+    }
+  });
+
+  test("keeps the draft footer at the bottom when proposal appearance changes", async ({
+    page,
+  }, testInfo) => {
+    const viewport = page.viewportSize();
+    if (!viewport) throw new Error("Viewport missing");
+    const { name, footer } = await openAppearanceDraft(page, {
+      ...viewport,
+      height: 1600,
+    });
+
+    for (const draft of ["new", "reopened"]) {
+      if (draft === "reopened") {
+        await page.goto(`${ROOT}/draft`);
+        await expect(name).toHaveValue("Appearance layout draft");
+      }
+      await page
+        .getByRole("button", { name: /^Appearance and labels/ })
+        .click();
+      for (const mode of ["Full proposal", "Summary card", "Full proposal"]) {
+        await page.getByText(mode, { exact: true }).click();
+        await expect(
+          page.getByRole("radio", { name: new RegExp(`^${mode}`) })
+        ).toBeChecked();
+        // Sample throughout the height animation so a passing initial position
+        // cannot hide a footer jump after the appearance controls settle.
+        const largestGap = await footer.evaluate(async (element) => {
+          let container = element.parentElement;
+          while (
+            container &&
+            !/(auto|scroll)/.test(getComputedStyle(container).overflowY)
+          ) {
+            container = container.parentElement;
+          }
+          if (!container) throw new Error("Draft scroll container missing");
+          const scrollContainer = container;
+          return new Promise<number>((resolve) => {
+            const startedAt = performance.now();
+            let maximum = 0;
+            const sample = () => {
+              maximum = Math.max(
+                maximum,
+                Math.abs(
+                  scrollContainer.getBoundingClientRect().bottom -
+                    element.getBoundingClientRect().bottom
+                )
+              );
+              if (performance.now() - startedAt >= 750) resolve(maximum);
+              else requestAnimationFrame(sample);
+            };
+            requestAnimationFrame(sample);
+          });
+        });
+        expect(largestGap).toBeLessThanOrEqual(1);
+        await expect(
+          footer.getByRole("button", { name: "Next", exact: true })
+        ).toBeInViewport({ ratio: 1 });
+        await page
+          .getByRole("group", { name: "Proposal card appearance", exact: true })
+          .screenshot({
+            path: testInfo.outputPath(
+              `${draft}-${mode === "Full proposal" ? "full" : "summary"}-appearance.png`
+            ),
+            animations: "disabled",
+          });
+      }
+      await page.screenshot({
+        path: testInfo.outputPath(`${draft}-appearance-footer.png`),
+      });
       await expectNoHorizontalOverflow(page);
     }
   });
@@ -1674,6 +2464,22 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       includeHidden: true,
     });
     await expect(trigger).toHaveText("Rank");
+    const name = page.getByLabel("Competition name", { exact: true });
+    await name.focus();
+    await page.keyboard.press("Tab");
+    await expect(trigger).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(page.getByLabel("Description", { exact: true })).toBeFocused();
+    await expect
+      .poll(async () => {
+        const nameBox = await name.boundingBox();
+        const typeBox = await trigger.boundingBox();
+        if (!nameBox || !typeBox) return false;
+        return app
+          ? typeBox.y >= nameBox.y + nameBox.height
+          : Math.abs(typeBox.y - nameBox.y) <= 1;
+      })
+      .toBe(true);
     await expect(trigger).toHaveAttribute(
       "aria-haspopup",
       app ? "dialog" : "listbox"
@@ -1754,6 +2560,26 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(page.getByText("Ranking mode", { exact: true })).toHaveCount(
       0
     );
+    const appearanceSettings = page.getByRole("button", {
+      name: /^Appearance and labels/,
+    });
+    await appearanceSettings.click();
+    await page
+      .getByLabel("Submission button label", { exact: true })
+      .locator("..")
+      .screenshot({
+        animations: "disabled",
+        path: testInfo.outputPath("submission-label-input.png"),
+      });
+    await page
+      .getByRole("heading", { name: "Tab labels", exact: true })
+      .locator("..")
+      .screenshot({
+        animations: "disabled",
+        path: testInfo.outputPath("approval-label-inputs.png"),
+      });
+    await appearanceSettings.click();
+    await trigger.focus();
     await trigger.click();
     await expect(
       choices.getByRole("option", { name: "Approve", exact: true })
@@ -1767,7 +2593,64 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await choices.getByRole("option", { name: "Rank", exact: true }).click();
     await expect(trigger).toHaveText("Rank");
     await expect(choices).toBeHidden();
-    await expectNoHorizontalOverflow(page);
+    await page.getByText("Perpetual Ranking", { exact: true }).click();
+    const ranking = page.getByRole("group", {
+      name: "Ranking mode",
+      exact: true,
+    });
+    await ranking.screenshot({
+      animations: "disabled",
+      path: testInfo.outputPath("compact-ranking-options.png"),
+    });
+    await page
+      .getByRole("button", { name: "Appearance and labels", exact: true })
+      .click();
+    const appearance = page.getByRole("group", {
+      name: "Proposal card appearance",
+      exact: true,
+    });
+    await appearance.screenshot({
+      animations: "disabled",
+      path: testInfo.outputPath("compact-appearance-options.png"),
+    });
+    const viewport = page.viewportSize();
+    if (!viewport) throw new Error("Viewport missing");
+    for (const width of app ? [viewport.width] : [viewport.width, 639, 640]) {
+      await page.setViewportSize({ ...viewport, width });
+      for (const options of [ranking, appearance]) {
+        await expect
+          .poll(() =>
+            options.getByRole("radio").evaluateAll(
+              (radios, stacked) =>
+                radios.every((radio) => {
+                  const preview = radio.closest("label")?.firstElementChild;
+                  const content = radio.parentElement;
+                  if (!preview || !content) return false;
+                  const previewBox = preview.getBoundingClientRect();
+                  const contentBox = content.getBoundingClientRect();
+                  return stacked
+                    ? previewBox.bottom <= contentBox.top &&
+                        Math.abs(previewBox.width - contentBox.width) <= 1
+                    : previewBox.right <= contentBox.left;
+                }),
+              width < 640
+            )
+          )
+          .toBe(true);
+      }
+      await expectNoHorizontalOverflow(page);
+      if (width === 639 || width === 640) {
+        await ranking.screenshot({
+          animations: "disabled",
+          path: testInfo.outputPath(`ranking-options-${width}px.png`),
+        });
+        await appearance.screenshot({
+          animations: "disabled",
+          path: testInfo.outputPath(`appearance-options-${width}px.png`),
+        });
+      }
+    }
+    await page.setViewportSize(viewport);
   });
 
   test("protects an unfinished draft when browser storage is unavailable", async ({

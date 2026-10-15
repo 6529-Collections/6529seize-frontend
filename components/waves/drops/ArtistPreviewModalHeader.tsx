@@ -1,6 +1,7 @@
 import React from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 interface ArtistPreviewModalHeaderProps {
   readonly user: ApiProfileMin;
@@ -45,7 +46,7 @@ export const ArtistPreviewModalHeader: React.FC<
           <div className="tw-h-11 tw-w-11 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
             {user.pfp && (
               <img
-                src={user.pfp}
+                src={getScaledImageUri(user.pfp, ImageScale.W_AUTO_H_50)}
                 alt="Profile"
                 className="tw-h-full tw-w-full tw-bg-transparent tw-object-contain"
               />
@@ -74,7 +75,7 @@ export const ArtistPreviewModalHeader: React.FC<
         {!isApp && (
           <button
             onClick={onClose}
-            className="tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-800/70 tw-bg-iron-950 tw-text-white tw-transition tw-duration-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-iron-600/70 active:tw-scale-95 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900"
+            className="tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-800/70 tw-bg-iron-950 tw-text-white tw-transition tw-duration-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-iron-600/70 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 active:tw-scale-95 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900"
             aria-label="Close Gallery"
           >
             <XMarkIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />

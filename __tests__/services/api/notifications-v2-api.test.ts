@@ -137,6 +137,7 @@ describe("fetchNotificationsV2", () => {
       expect.objectContaining({
         cache: "no-store",
         endpoint: "v2/notifications",
+        errorMode: "structured",
         params: {
           limit: "30",
           id_less_than: "99",

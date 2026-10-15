@@ -7,6 +7,7 @@ let mockIsRightSidebarOpen = false;
 const mockToggleRightSidebar = jest.fn();
 let mockConnectedProfile: { handle: string } | null = { handle: "alice" };
 let mockActiveProfileProxy: { created_by: { handle: string } } | null = null;
+let mockShowJoinCta = false;
 
 jest.mock("next/navigation", () => ({
   usePathname: () => "/waves/wave-1",
@@ -71,7 +72,9 @@ jest.mock("@/components/header/header-search/HeaderSearchModal", () => () => (
 
 jest.mock("@/components/waves/header/WaveDescriptionPopover", () => ({
   __esModule: true,
-  default: ({ children }: { children: ReactNode }) => <>{children}</>,
+  default: ({ children }: { children: ReactNode }) => (
+    <span data-testid="wave-description-preview">{children}</span>
+  ),
 }));
 
 jest.mock("@/components/waves/WaveTrustSignals", () => ({
@@ -85,6 +88,26 @@ jest.mock("@/components/brain/my-stream/MyStreamActionTooltip", () => () => (
 jest.mock("@/components/waves/header/rep/WaveRepButton", () => () => (
   <button type="button">Add REP</button>
 ));
+
+jest.mock("@/components/waves/header/WaveJoinCta", () => ({
+  __esModule: true,
+  default: ({
+    wave,
+    tooltipId,
+  }: {
+    readonly wave: { readonly name: string };
+    readonly tooltipId: string;
+  }) =>
+    mockShowJoinCta ? (
+      <button
+        type="button"
+        aria-label={`Join ${wave.name}`}
+        data-tooltip-id={tooltipId}
+      >
+        Join
+      </button>
+    ) : null,
+}));
 
 const wave = {
   id: "wave-1",
@@ -104,9 +127,10 @@ describe("MyStreamWaveTabsHeader", () => {
     mockToggleRightSidebar.mockClear();
     mockConnectedProfile = { handle: "alice" };
     mockActiveProfileProxy = null;
+    mockShowJoinCta = false;
   });
 
-  it("can expand Wave search into the site-wide search", () => {
+  it("can expand Wave search into the site-wide search", async () => {
     render(
       <MyStreamWaveTabsHeader
         wave={wave}
@@ -124,11 +148,15 @@ describe("MyStreamWaveTabsHeader", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "Search messages in this wave" })
     );
-    expect(screen.getByTestId("wave-drops-search-modal")).toBeInTheDocument();
+    expect(
+      await screen.findByTestId("wave-drops-search-modal")
+    ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Search all 6529" }));
     expect(screen.queryByTestId("wave-drops-search-modal")).toBeNull();
-    expect(screen.getByTestId("header-search-modal")).toBeInTheDocument();
+    expect(
+      await screen.findByTestId("header-search-modal")
+    ).toBeInTheDocument();
   });
 
   it("keeps the score in the identity and REP beside the header icon buttons", () => {
@@ -193,6 +221,62 @@ describe("MyStreamWaveTabsHeader", () => {
     expect(dropButton.parentElement?.firstElementChild).toBe(dropButton);
     expect(dropButton.nextElementSibling).toBe(repButton);
     expect(repButton.nextElementSibling).toBe(galleryButton);
+  });
+
+  it("leads the header actions with Join for a wave the viewer has not joined", () => {
+    mockShowJoinCta = true;
+    render(
+      <MyStreamWaveTabsHeader
+        wave={wave}
+        activeContentTab={MyStreamWaveTab.CHAT}
+        setActiveContentTab={jest.fn()}
+        onSelectCuration={jest.fn()}
+        isCompact={false}
+        showBackButton={false}
+        headerActionsTooltipId="header-actions"
+        headerClassName="tw-flex"
+        actionsClassName="tw-flex"
+        renderLeadingActions={() => (
+          <button type="button" aria-label="Submit drop">
+            Drop
+          </button>
+        )}
+      />
+    );
+
+    const joinButton = screen.getByRole("button", {
+      name: "Join Follow The Repo",
+    });
+    expect(joinButton.parentElement?.firstElementChild).toBe(joinButton);
+    expect(joinButton.nextElementSibling).toBe(
+      screen.getByRole("button", { name: "Submit drop" })
+    );
+    expect(joinButton).toHaveAttribute("data-tooltip-id", "header-actions");
+  });
+
+  it("keeps Join reachable in the compact mobile header", () => {
+    mockShowJoinCta = true;
+    render(
+      <MyStreamWaveTabsHeader
+        wave={wave}
+        activeContentTab={MyStreamWaveTab.CHAT}
+        setActiveContentTab={jest.fn()}
+        onSelectCuration={jest.fn()}
+        isCompact
+        showBackButton
+        headerActionsTooltipId="header-actions"
+        headerClassName="tw-flex"
+        actionsClassName="tw-flex"
+      />
+    );
+
+    const joinButton = screen.getByRole("button", {
+      name: "Join Follow The Repo",
+    });
+    expect(joinButton.parentElement).toBe(
+      screen.getByRole("button", { name: "Search messages in this wave" })
+        .parentElement
+    );
   });
 
   it.each(["logged out", "author", "proxy", "DM"])(
@@ -312,5 +396,70 @@ describe("MyStreamWaveTabsHeader", () => {
     expect(openToggle).toHaveAttribute("aria-expanded", "true");
     expect(openToggle).toHaveAttribute("aria-pressed", "true");
     expect(openToggle).toHaveAttribute("aria-controls", "brain-right-sidebar");
+  });
+
+  it.each([
+    [
+      "an image",
+      "![Seize](https://d3lqz0a4bldqgf.cloudfront.net/drops/author_x/y/image.png)",
+    ],
+    [
+      "a 6529 drop link",
+      "https://test.6529.io/waves/da16201a-f4d0-40cf-b888-9f3a4a86a894?serialNo=1518681",
+    ],
+  ])(
+    "hides the description preview when the pinned drop is only %s",
+    (_label, content) => {
+      render(
+        <MyStreamWaveTabsHeader
+          wave={{
+            ...wave,
+            description_drop: { id: "drop-1", parts: [{ content }] },
+          }}
+          activeContentTab={MyStreamWaveTab.CHAT}
+          setActiveContentTab={jest.fn()}
+          onSelectCuration={jest.fn()}
+          isCompact={false}
+          showBackButton={false}
+          headerActionsTooltipId="header-actions"
+          headerClassName="tw-flex"
+          actionsClassName="tw-flex"
+        />
+      );
+
+      expect(screen.queryByTestId("wave-description-preview")).toBeNull();
+      expect(screen.queryByText(/https?:/)).toBeNull();
+    }
+  );
+
+  it("shows the readable text of a pinned drop without its image URL", () => {
+    render(
+      <MyStreamWaveTabsHeader
+        wave={{
+          ...wave,
+          description_drop: {
+            id: "drop-1",
+            parts: [
+              {
+                content:
+                  "Validator costs ![Seize](https://d3lqz0a4bldqgf.cloudfront.net/drops/author_x/y/image.png)",
+              },
+            ],
+          },
+        }}
+        activeContentTab={MyStreamWaveTab.CHAT}
+        setActiveContentTab={jest.fn()}
+        onSelectCuration={jest.fn()}
+        isCompact={false}
+        showBackButton={false}
+        headerActionsTooltipId="header-actions"
+        headerClassName="tw-flex"
+        actionsClassName="tw-flex"
+      />
+    );
+
+    expect(screen.getByTestId("wave-description-preview")).toHaveTextContent(
+      /^Validator costs$/
+    );
   });
 });

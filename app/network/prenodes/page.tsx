@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import PrenodesStatus from "@/components/prenodes/PrenodesStatus";
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import {
@@ -26,7 +28,7 @@ export default function PrenodesPage() {
 
 export const generateMetadata = () => {
   return getAppMetadata({
-    title: "Prenodes | Network",
-    description: "Network",
+    title: t(DEFAULT_LOCALE, "network.prenodes.pageTitle"),
+    description: t(DEFAULT_LOCALE, "network.prenodes.deprecation"),
   });
 };

@@ -6,7 +6,7 @@ import { CURRENT_EULA_VERSION } from "@/constants/constants";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEULAConsent } from "./EULAConsentContext";
+import { useEULAConsent } from "./useEULAConsent";
 import { useEffect, useId, useRef, useSyncExternalStore } from "react";
 import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
 import EULAIntroSections from "./EULAIntroSections";

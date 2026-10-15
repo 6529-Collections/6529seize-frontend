@@ -77,4 +77,50 @@ describe("UserPageActivityTabs", () => {
 
     expect(setActive).toHaveBeenCalledWith(USER_PAGE_ACTIVITY_TAB.TDH_HISTORY);
   });
+
+  it("reveals the selected tab after late content sizing and stops observing on unmount", () => {
+    const originalObserver = globalThis.ResizeObserver;
+    let resize: ResizeObserverCallback | undefined;
+    const observe = jest.fn();
+    const disconnect = jest.fn();
+    const observer = { observe, disconnect, unobserve: jest.fn() };
+    globalThis.ResizeObserver = jest.fn().mockImplementation((callback) => {
+      resize = callback;
+      return observer;
+    });
+    try {
+      const view = render(
+        <UserPageActivityTabs
+          activeTab={USER_PAGE_ACTIVITY_TAB.TDH_HISTORY}
+          setActiveTab={jest.fn()}
+          locale="en-US"
+        />
+      );
+      const list = screen.getByRole("tablist");
+      const selected = screen.getByRole("tab", { name: "TDH History" });
+      const scrollTo = jest.fn();
+      Object.defineProperties(list, {
+        clientWidth: { configurable: true, value: 200 },
+        scrollLeft: { configurable: true, value: 0 },
+        scrollTo: { configurable: true, value: scrollTo },
+      });
+      Object.defineProperties(selected, {
+        offsetLeft: { configurable: true, value: 220 },
+        offsetWidth: { configurable: true, value: 100 },
+      });
+      expect(observe).toHaveBeenCalledWith(list);
+      expect(observe).toHaveBeenCalledWith(list.firstElementChild);
+      expect(resize).toBeDefined();
+      resize!([], observer);
+      expect(scrollTo).toHaveBeenCalledWith({ left: 120 });
+      // A narrower panel must reveal the tab again without a window resize.
+      Object.defineProperty(list, "clientWidth", { value: 150 });
+      resize!([], observer);
+      expect(scrollTo).toHaveBeenLastCalledWith({ left: 170 });
+      view.unmount();
+      expect(disconnect).toHaveBeenCalledTimes(1);
+    } finally {
+      globalThis.ResizeObserver = originalObserver;
+    }
+  });
 });

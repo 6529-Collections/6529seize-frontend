@@ -1,6 +1,6 @@
 "use client";
 
-import { resolveIpfsUrl } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import clsx from "clsx";
 import Image from "next/image";
@@ -48,7 +48,7 @@ export default function ArtistPill({
     >
       {resolvedPfp ? (
         <Image
-          src={resolveIpfsUrl(resolvedPfp)}
+          src={getScaledImageUri(resolvedPfp, ImageScale.W_AUTO_H_50)}
           alt={label}
           width={isMinimal ? 24 : 16}
           height={isMinimal ? 24 : 16}

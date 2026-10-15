@@ -38,6 +38,7 @@ type MobileWrapperDialogProps = {
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly onBack?: (() => void) | undefined;
+  readonly onEscape?: (() => void) | undefined;
   readonly onBeforeLeave?: (() => void) | undefined;
   readonly onAfterLeave?: (() => void) | undefined;
   readonly children: ReactNode;
@@ -46,6 +47,8 @@ type MobileWrapperDialogProps = {
   readonly fixedHeight?: boolean | undefined;
   /** Also fit the software keyboard viewport in mobile browsers. */
   readonly fitVisualViewport?: boolean | undefined;
+  /** Action-only sheets enter at their final position while the keyboard closes. */
+  readonly avoidKeyboard?: boolean | undefined;
   readonly tabletModal?: boolean | undefined;
   readonly showScrollbar?: boolean | undefined;
   readonly allowOverflow?: boolean | undefined;
@@ -405,6 +408,7 @@ export default function MobileWrapperDialog({
   isOpen,
   onClose,
   onBack,
+  onEscape,
   onBeforeLeave,
   onAfterLeave,
   children,
@@ -412,6 +416,7 @@ export default function MobileWrapperDialog({
   tall,
   fixedHeight,
   fitVisualViewport = false,
+  avoidKeyboard = true,
   tabletModal,
   showScrollbar,
   allowOverflow,
@@ -512,7 +517,13 @@ export default function MobileWrapperDialog({
   const fitBrowserViewport = useCallback(
     (container: HTMLDivElement | null) => {
       const viewport = globalThis.visualViewport;
-      if (!fitVisualViewport || isCapacitor || !container || !viewport) {
+      if (
+        !avoidKeyboard ||
+        !fitVisualViewport ||
+        isCapacitor ||
+        !container ||
+        !viewport
+      ) {
         return;
       }
       // Native shells already own this inset. Browsers expose their keyboard
@@ -558,7 +569,7 @@ export default function MobileWrapperDialog({
         delete container.dataset["mobileDialogKeyboardVisible"];
       };
     },
-    [fitVisualViewport, isCapacitor]
+    [avoidKeyboard, fitVisualViewport, isCapacitor]
   );
 
   useEffect(() => {
@@ -595,7 +606,7 @@ export default function MobileWrapperDialog({
           // Headless UI blurs focus before calling onClose for Escape. Keep
           // focus here, but let nested dialogs and portalled controls handle it.
           if (
-            preserveFocusOnEscape &&
+            (preserveFocusOnEscape || onEscape) &&
             !event.defaultPrevented &&
             event.key === "Escape" &&
             event.target instanceof Element &&
@@ -603,7 +614,7 @@ export default function MobileWrapperDialog({
               event.currentTarget
           ) {
             event.preventDefault();
-            handleClose();
+            (onEscape ?? handleClose)();
           }
         }}
         aria-label={ariaLabel}
@@ -628,7 +639,14 @@ export default function MobileWrapperDialog({
             <div
               ref={fitVisualViewport ? fitBrowserViewport : undefined}
               className={containerClassNames}
-              style={MOBILE_DIALOG_CONTAINER_STYLE}
+              style={
+                avoidKeyboard
+                  ? MOBILE_DIALOG_CONTAINER_STYLE
+                  : ({
+                      ...MOBILE_DIALOG_CONTAINER_STYLE,
+                      "--mobile-wrapper-dialog-keyboard-inset": "0px",
+                    } as CSSProperties)
+              }
             >
               <TransitionChild
                 as={Fragment}

@@ -102,11 +102,9 @@ test("keeps FAQ context and article hierarchy on child pages", async () => {
 
   render(<DelegationHTML path="child" />);
 
+  expect(screen.getByText("FAQ", { selector: "p" })).toBeInTheDocument();
   expect(
-    screen.getByText("Delegation FAQ", { selector: "p" })
-  ).toBeInTheDocument();
-  expect(
-    screen.queryByRole("heading", { name: "Delegation FAQ" })
+    screen.queryByRole("heading", { name: "FAQ" })
   ).not.toBeInTheDocument();
   expect(
     screen.getByRole("heading", { level: 1, name: "Child Article" })
@@ -117,10 +115,10 @@ test("keeps FAQ context and article hierarchy on child pages", async () => {
   ).not.toBeInTheDocument();
 
   const allTopicsLink = screen.getByRole("link", { name: "All FAQ topics" });
-  expect(allTopicsLink).toHaveAttribute("href", "/delegation/delegation-faq");
+  expect(allTopicsLink).toHaveAttribute("href", "/safe-collecting/faq");
   expect(allTopicsLink).toHaveClass("tw-text-iron-300");
   expect(allTopicsLink.querySelector("svg")).toBeInTheDocument();
-  expect(screen.queryByText("Back to Delegation FAQ")).not.toBeInTheDocument();
+  expect(screen.queryByText("Back to FAQ")).not.toBeInTheDocument();
   expect(screen.getByText("A test article.")).toHaveClass(
     "tw-font-normal",
     "tw-text-iron-300"
@@ -146,18 +144,16 @@ test("keeps the FAQ section title aligned inside the article shell", async () =>
     url: "/delegation-content/test/html/page.html",
   });
 
-  const { rerender } = render(
-    <DelegationHTML path="page" title="Delegation FAQ" />
-  );
+  const { rerender } = render(<DelegationHTML path="page" title="FAQ" />);
   const indexTitle = screen.getByRole("heading", {
     level: 1,
-    name: "Delegation FAQ",
+    name: "FAQ",
   });
   expect(indexTitle.parentElement).toHaveClass("tw-mb-8", "tw-pb-6");
   expect(indexTitle.parentElement?.parentElement).toHaveClass("tw-w-full");
 
   rerender(<DelegationHTML path="child" />);
-  const childSectionTitle = screen.getByText("Delegation FAQ", {
+  const childSectionTitle = screen.getByText("FAQ", {
     selector: "p",
   });
   expect(childSectionTitle).toHaveClass("tw-uppercase", "tw-text-primary-300");
@@ -179,22 +175,20 @@ test("uses client navigation for internal links from fetched html", async () => 
       sha256: "hash",
     },
     html: `
-      <a href="/delegation/delegation-faq/child">Child article</a>
+      <a href="/safe-collecting/faq/child">Child article</a>
       <a href="https://example.com/article">External article</a>
-      <a href="/delegation/delegation-faq/child" target="_blank">Child article in new tab</a>
+      <a href="/safe-collecting/faq/child" target="_blank">Child article in new tab</a>
     `,
     url: "/delegation-content/test/html/page.html",
   });
 
-  render(<DelegationHTML path="page" title="Delegation FAQ" />);
+  render(<DelegationHTML path="page" title="FAQ" />);
   const internalLink = await screen.findByRole("link", {
     name: "Child article",
   });
 
   fireEvent.mouseOver(internalLink);
-  expect(mockRouterPrefetch).toHaveBeenCalledWith(
-    "/delegation/delegation-faq/child"
-  );
+  expect(mockRouterPrefetch).toHaveBeenCalledWith("/safe-collecting/faq/child");
   expect(mockLoadDelegationArticleHtml).toHaveBeenCalledWith("child");
 
   fireEvent.mouseOver(screen.getByRole("link", { name: "External article" }));
@@ -204,9 +198,7 @@ test("uses client navigation for internal links from fetched html", async () => 
   expect(mockRouterPrefetch).toHaveBeenCalledTimes(1);
 
   fireEvent.click(internalLink);
-  expect(mockRouterPush).toHaveBeenCalledWith(
-    "/delegation/delegation-faq/child"
-  );
+  expect(mockRouterPush).toHaveBeenCalledWith("/safe-collecting/faq/child");
 });
 
 test("renders a prefetched article immediately on route change", async () => {
@@ -236,9 +228,7 @@ test("renders a prefetched article immediately on route change", async () => {
     html: "<p>index content</p>",
   });
 
-  const { rerender } = render(
-    <DelegationHTML path="page" title="Delegation FAQ" />
-  );
+  const { rerender } = render(<DelegationHTML path="page" title="FAQ" />);
   await screen.findByText("index content");
 
   rerender(<DelegationHTML path="child" />);
@@ -251,7 +241,7 @@ test("renders a prefetched article immediately on route change", async () => {
 test("renders a stable loading placeholder", () => {
   mockLoadDelegationArticleHtml.mockReturnValue(new Promise(() => undefined));
 
-  render(<DelegationHTML path="page" title="Delegation FAQ" />);
+  render(<DelegationHTML path="page" title="FAQ" />);
 
   const status = screen.getByRole("status");
   expect(status).toHaveTextContent("Loading article...");

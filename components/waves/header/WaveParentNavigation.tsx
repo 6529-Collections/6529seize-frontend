@@ -38,7 +38,7 @@ export default function WaveParentNavigation({
         "waves.header.parentNavigation.regionLabel"
       )}
       className={`tw-flex tw-min-w-0 tw-items-center tw-gap-x-1.5 tw-text-xs tw-leading-4 ${
-        isHeader ? "tw-mb-0.5" : ""
+        isHeader ? "tw-mb-0.5 md:tw-mb-0" : ""
       }`}
     >
       <span
@@ -64,7 +64,7 @@ export default function WaveParentNavigation({
           isCompactHeader ? "tw-max-w-full" : "tw-max-w-[60%]"
         } ${
           isHeader
-            ? "desktop-hover:hover:tw-text-primary-200 tw-min-h-6 tw-text-primary-300"
+            ? "desktop-hover:hover:tw-text-primary-200 tw-min-h-6 tw-text-primary-300 md:tw-items-end"
             : "tw-text-iron-300 desktop-hover:hover:tw-text-iron-100"
         }`}
       >

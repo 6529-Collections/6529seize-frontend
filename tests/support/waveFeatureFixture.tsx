@@ -2,7 +2,7 @@
 // but uses the production components, telemetry helpers and pinned Mixpanel SDK.
 import { createContext, useContext, useState } from "react";
 import { createRoot } from "react-dom/client";
-import mixpanel from "mixpanel-browser";
+import mixpanel from "mixpanel-browser/dist/mixpanel-core.cjs.js";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";

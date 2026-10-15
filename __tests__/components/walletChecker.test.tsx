@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import WalletChecker from "@/components/delegation/walletChecker/WalletChecker";
 import type { WalletConsolidation } from "@/entities/IDelegation";
 import { fetchUrl } from "@/services/6529api";
@@ -251,6 +251,41 @@ describe("WalletChecker consolidation groups", () => {
   beforeEach(() => {
     mockFetchUrl.mockReset();
   });
+
+  it.each([WALLET_A, WALLET_B, WALLET_C, WALLET_D])(
+    "shows the complete four-wallet consolidation when checking %s",
+    async (checkedWallet) => {
+      const wallets = [WALLET_A, WALLET_B, WALLET_C, WALLET_D];
+      const rows = [
+        pair(WALLET_A, WALLET_B, true),
+        pair(WALLET_A, WALLET_C, true),
+        pair(WALLET_A, WALLET_D, true),
+        pair(WALLET_B, WALLET_C, true),
+        pair(WALLET_B, WALLET_D, true),
+        pair(WALLET_C, WALLET_D, true),
+      ];
+      mockConsolidationApi({
+        rowsFor: (wallet) => rows.filter((row) => involves(row, wallet)),
+        resolved: wallets,
+      });
+
+      renderCheckedWallet(checkedWallet);
+
+      const heading = await screen.findByRole("heading", {
+        name: "Active Consolidation",
+      });
+      const activeGroup = within(heading.parentElement!);
+      for (const wallet of wallets) {
+        expect(activeGroup.getByText(DISPLAYS[wallet]!)).toBeInTheDocument();
+        expect(countShowIncompleteCalls(wallet)).toBe(1);
+      }
+      expect(screen.getByText("Consolidations (12)")).toBeInTheDocument();
+      expect(screen.getAllByRole("row")).toHaveLength(12);
+      expect(
+        screen.queryByText("Incomplete Consolidation")
+      ).not.toBeInTheDocument();
+    }
+  );
 
   it("loads every linked wallet and flags an incomplete pair between other members", async () => {
     // Four-wallet group checked from A: every pair is confirmed except C<->D,

@@ -229,6 +229,13 @@ jobs:
           if (waveCreationBrowserRequired) {
             corePlaywrightLanes.push({ lane: "playwright-wave-creation", label: "Wave creation desktop and mobile", runner: defaultRunner });
           }
+          const dropEditingBrowserRequired = plan.changed_files.some((file) =>
+            /^(?:components\/waves\/drops\/|contexts\/EditingDropContext\.tsx|hooks\/useLongPressClickSuppression\.ts|tests\/social\/wave-edit-drop-sandbox\.spec\.ts)/.test(file) ||
+            ["services/api/common-api.ts", "services/api/submission-request-key.ts", "styles/globals.css", "tests/packs.manifest.cjs", "tests/support/composerSandboxServer.cjs", ".github/workflows/app-pr-ci.yml"].includes(file)
+          );
+          if (dropEditingBrowserRequired) {
+            corePlaywrightLanes.push({ lane: "playwright-drop-editing", label: "Drop editing desktop and mobile", runner: defaultRunner });
+          }
           if (plan.checks.playwright_critical_shell.required) {
             corePlaywrightLanes.push({
               lane: "playwright-critical-shell",
@@ -320,7 +327,8 @@ jobs:
       needs.plan.outputs.core_playwright_required == 'true' &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 20
+    # The complete native pack needs room for its dev-server bootstrap and tests.
+    timeout-minutes: ${{ matrix.lane == 'playwright-native-competition' && 30 || 20 }}
     permissions:
       contents: read
       issues: read
@@ -448,12 +456,38 @@ jobs:
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/wave-creation"
         run: ./bin/6529 run test:e2e:wave-creation-sandbox
 
+      - name: Run drop editing browser regression pack
+        if: matrix.lane == 'playwright-drop-editing'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/drop-editing"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/drop-editing"
+        run: ./bin/6529 run test:e2e:edit-drop-sandbox
+
+      # One `next dev` session that compiles every critical-shell route grows
+      # Turbopack's native memory past the 16 GB runner, and the OOM killer
+      # silently ends the dev server near the last route (/waves/create).
+      # Run the pack as two complementary title filters, each with a fresh
+      # dev server, so every test still runs exactly once.
       - name: Run critical route-shell Playwright pack
+        id: critical_shell_routes
         if: matrix.lane == 'playwright-critical-shell'
         env:
           NEXT_DEV_DIST_DIR: ".next-playwright-critical-shell"
+          NEXT_DEV_TURBOPACK_FS_CACHE: "0"
           PLAYWRIGHT_READONLY: "1"
-        run: ./bin/6529 run test:e2e:critical-shell
+        run: ./bin/6529 run test:e2e:critical-shell "--grep=Critical read-only route shells"
+
+      - name: Run critical-shell hydration Playwright pack
+        if: >-
+          matrix.lane == 'playwright-critical-shell' &&
+          (success() || steps.critical_shell_routes.outcome == 'failure')
+        env:
+          NEXT_DEV_DIST_DIR: ".next-playwright-critical-shell-hydration"
+          NEXT_DEV_TURBOPACK_FS_CACHE: "0"
+          PLAYWRIGHT_READONLY: "1"
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/critical-shell-hydration"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/critical-shell-hydration"
+        run: ./bin/6529 run test:e2e:critical-shell "--grep-invert=Critical read-only route shells"
 
       - name: Run session recovery browser regression pack
         if: matrix.lane == 'playwright-critical-shell'
@@ -461,6 +495,17 @@ jobs:
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/session-recovery"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/session-recovery"
         run: ./bin/6529 run test:e2e:session-recovery-sandbox
+
+      # A dev server killed by the kernel OOM killer exits without any output,
+      # so record the container's memory peak and OOM-kill count.
+      - name: Report browser lane memory pressure
+        if: always() && matrix.lane == 'playwright-critical-shell'
+        run: |
+          for file in memory.peak memory.max memory.events; do
+            echo "== /sys/fs/cgroup/${file}"
+            cat "/sys/fs/cgroup/${file}" 2>/dev/null || echo "unavailable"
+          done
+          free -m || true
 
       - name: Upload app check artifacts
         if: always()
@@ -639,6 +684,8 @@ jobs:
           ./bin/6529 run test:no-coverage --runInBand --runTestsByPath \
             __tests__/scripts/app-pr-ci-effective-plan.test.ts \
             __tests__/scripts/ci-wave-web-validation.test.ts \
+            __tests__/scripts/ci-failure-details.test.ts \
+            __tests__/scripts/notify-ci-wave.test.ts \
             __tests__/scripts/deploy-staging-artifact.test.ts \
             __tests__/scripts/e2e-packs.test.ts \
             __tests__/scripts/frontend-deployment-workflows.test.ts \

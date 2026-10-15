@@ -76,7 +76,7 @@ export default function WalletConnectBalance() {
           seizeConnect();
         }}
         disabled={seizeConnectOpen}
-        className="tw-inline-flex tw-h-8 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-full tw-border-0 tw-bg-primary-500 tw-px-4 !tw-text-sm tw-font-medium tw-leading-none tw-text-white tw-shadow-sm tw-ring-0 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-primary-600 focus:tw-outline-none disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+        className="tw-inline-flex tw-h-8 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-full tw-border-0 tw-bg-primary-500 tw-px-4 !tw-text-sm tw-font-medium tw-leading-none tw-text-white tw-shadow-sm tw-ring-0 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-primary-600 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
       >
         Connect Wallet
       </button>
@@ -101,7 +101,7 @@ export default function WalletConnectBalance() {
         type="button"
         aria-label="Disconnect wallet"
         onClick={handleDisconnect}
-        className="tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-rounded-r-full tw-border-0 tw-bg-transparent tw-px-3 tw-text-black tw-ring-0 tw-transition-colors hover:tw-bg-iron-100 focus:tw-outline-none focus-visible:tw-bg-iron-100"
+        className="tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-rounded-r-full tw-border-0 tw-bg-transparent tw-px-3 tw-text-black tw-ring-0 tw-transition-colors hover:tw-bg-iron-100 focus:tw-outline-none focus-visible:tw-bg-iron-100 focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
       >
         <FontAwesomeIcon icon={faPlugCircleXmark} className="tw-h-4 tw-w-4" />
       </button>

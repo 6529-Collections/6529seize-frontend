@@ -369,7 +369,7 @@ export default function IdentitySearch({
           type="button"
           aria-label="Clear identity"
           onClick={() => onValueChange(null)}
-          className={`${iconPosition} tw-absolute tw-right-3 tw-flex tw-h-5 tw-w-5 tw-cursor-pointer tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-error focus:tw-outline-none focus:tw-ring-0`}
+          className={`${iconPosition} tw-absolute tw-right-3 tw-flex tw-h-5 tw-w-5 tw-cursor-pointer tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-error focus:tw-outline-none focus:tw-ring-0 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400`}
         >
           <FontAwesomeIcon
             icon={faXmark}

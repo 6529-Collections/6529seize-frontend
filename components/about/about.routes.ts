@@ -129,6 +129,7 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
     aboutSectionItem(AboutSection.MINTING, "minting", {
       requiresVisibleSubscriptions: true,
     }),
+    aboutSectionItem(AboutSection.GDRC1, "gdrc"),
   ]),
   aboutGroup("networkReputation", [
     aboutRouteItem("network-identities", "/network", "networkIdentities"),
@@ -157,46 +158,40 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
     aboutRouteItem("network-nerd", "/network/nerd", "networkNerd", {
       activePathPrefixes: ["/network/nerd/"],
     }),
-    aboutRouteItem("network-prenodes", "/network/prenodes", "prenodes"),
     aboutRouteItem(
       "network-tdh-historic-boosts",
       "/network/tdh/historic-boosts",
       "tdhHistoricBoosts"
     ),
+    aboutRouteItem(
+      "network-tdh-consolidation",
+      "/network/tdh/consolidation",
+      "tdhConsolidation"
+    ),
   ]),
   aboutGroup("delegationWallets", [
-    aboutSectionItem(AboutSection.GDRC1, "gdrc"),
-    aboutSectionItem(AboutSection.NFT_DELEGATION, "nftDelegation"),
-    aboutSectionItem(AboutSection.PRIMARY_ADDRESS, "primaryAddress"),
-    aboutRouteItem(
-      "delegation-center",
-      "/delegation/delegation-center",
-      "delegationCenter"
-    ),
+    aboutRouteItem("delegation-center", "/safe-collecting", "delegationCenter"),
     aboutRouteItem(
       "wallet-architecture",
-      "/delegation/wallet-architecture",
+      "/safe-collecting/tap-guide",
       "walletArchitecture"
     ),
-    aboutRouteItem(
-      "delegation-faq",
-      "/delegation/delegation-faq",
-      "delegationFaq"
-    ),
+    aboutRouteItem("delegation-faq", "/safe-collecting/faq", "delegationFaq"),
     aboutRouteItem(
       "consolidation-use-cases",
-      "/delegation/consolidation-use-cases",
+      "/safe-collecting/consolidation-use-cases",
       "consolidationUseCases"
     ),
     aboutRouteItem(
       "wallet-checker",
-      "/delegation/wallet-checker",
+      "/safe-collecting/wallet-checker",
       "walletChecker"
     ),
     aboutRouteItem("app-wallets", "/tools/app-wallets", "appWallets", {
       activePathPrefixes: ["/tools/app-wallets/"],
       requiresAppWalletsSupported: true,
     }),
+    aboutSectionItem(AboutSection.PRIMARY_ADDRESS, "primaryAddress"),
   ]),
   aboutGroup("dataDeveloperTools", [
     aboutSectionItem(AboutSection.TECH, "tech"),
@@ -212,6 +207,7 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
     aboutRouteItem("api", "/tools/api", "api"),
     aboutRouteItem("emma", "/emma", "emma"),
     aboutRouteItem("block-finder", "/tools/block-finder", "blockFinder"),
+    aboutRouteItem("time-zones", "/tools/time-zones", "timeZones"),
     aboutRouteItem("open-data", "/open-data", "openData"),
     aboutRouteItem("6529bot-data", "/open-data/6529bot", "6529botData"),
     aboutRouteItem(
@@ -261,7 +257,6 @@ const ABOUT_FEATURE_SECTIONS = new Set<AboutSection>([
   AboutSection.FAQ,
   AboutSection.APPLY,
   AboutSection.CONTACT_US,
-  AboutSection.NFT_DELEGATION,
 ]);
 
 const ABOUT_LEGAL_SECTIONS = new Set<AboutSection>(

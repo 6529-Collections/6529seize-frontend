@@ -1,7 +1,7 @@
 "use client";
 
 import DropPartMarkdownWithPropLogger from "@/components/drops/view/part/DropPartMarkdownWithPropLogger";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
@@ -121,7 +121,7 @@ const WaveDropQuoteProfilePicture: React.FC<
   }
 
   const resolvedPfp = drop.author.pfp
-    ? resolveIpfsUrlSync(drop.author.pfp)
+    ? getScaledImageUri(drop.author.pfp, ImageScale.W_200_H_200)
     : null;
 
   if (resolvedPfp) {

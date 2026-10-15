@@ -9,6 +9,12 @@ import {
 import React from "react";
 import AppHeader from "@/components/header/AppHeader";
 import { PROFILE_DOUBLE_ACTIVATE_DELAY_MS } from "@/components/header/profile-activation.constants";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
 
 const mockShare = jest.fn();
 const mockNativeCanShare = jest.fn();
@@ -44,6 +50,20 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStreamOptional: jest.fn(),
 }));
 jest.mock("@/hooks/useWaveById", () => ({ useWaveById: jest.fn() }));
+jest.mock("@/components/waves/header/WaveJoinCta", () => ({
+  __esModule: true,
+  default: ({
+    wave,
+    variant,
+  }: {
+    readonly wave: { readonly id: string };
+    readonly variant?: string;
+  }) => (
+    <div data-testid="wave-join-cta" data-variant={variant}>
+      {wave.id}
+    </div>
+  ),
+}));
 jest.mock("@/hooks/useWave", () => ({ useWave: jest.fn() }));
 jest.mock("@/hooks/useWaveViewMode", () => ({ useWaveViewMode: jest.fn() }));
 jest.mock("@/components/navigation/BackButton", () => ({
@@ -492,6 +512,29 @@ describe("AppHeader", () => {
     expect(screen.getByText("WaveOne")).toBeInTheDocument();
   });
 
+  it("offers the wave Join action in the native header inside a wave", () => {
+    setup({
+      address: "0xabc",
+      wave: {
+        id: "w1",
+        name: "WaveOne",
+        chat: { scope: { group: { is_direct_message: false } } },
+      },
+      query: { wave: "w1" },
+      asPath: "/waves/w1",
+    });
+
+    const joinCta = screen.getByTestId("wave-join-cta");
+    expect(joinCta).toHaveTextContent("w1");
+    expect(joinCta).toHaveAttribute("data-variant", "app-header");
+  });
+
+  it("does not offer a wave Join action outside a wave", () => {
+    setup({ asPath: "/waves" });
+
+    expect(screen.queryByTestId("wave-join-cta")).toBeNull();
+  });
+
   it("shows a linked parent wave for an active subwave", () => {
     const wave = {
       id: "child-wave",
@@ -527,6 +570,17 @@ describe("AppHeader", () => {
     });
     const img = screen.getByRole("img", { name: "pfp" });
     expect(img).toBeInTheDocument();
+  });
+
+  it("requests the AUTOx50 derivative of a CDN profile picture", () => {
+    setup({
+      address: "0xabc",
+      profile: { pfp: CDN_AVATAR_URL },
+      asPath: "/waves",
+    });
+    expect(
+      getRequestedImageSrc(screen.getByRole("img", { name: "pfp" }))
+    ).toContain(scaledAvatarPath(ImageScale.W_AUTO_H_50));
   });
 
   it("uses the fallback avatar when an active proxy has no creator pfp", () => {

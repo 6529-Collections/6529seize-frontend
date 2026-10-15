@@ -1,4 +1,3 @@
-import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import HeaderSearchButton from "@/components/header/header-search/HeaderSearchButton";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -76,19 +75,19 @@ describe("HeaderSearchButton", () => {
     keyCb = () => undefined;
   });
 
-  it("opens modal when button is clicked and closes via onClose", () => {
+  it("opens modal when button is clicked and closes via onClose", async () => {
     useDeviceInfoMock.mockReturnValue({ isApp: false } as any);
     render(<HeaderSearchButton wave={null} />);
     expect(screen.queryByTestId("modal")).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: /search/i }));
-    expect(screen.getByTestId("modal")).toBeInTheDocument();
+    expect(await screen.findByTestId("modal")).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId("modal"));
     expect(screen.queryByTestId("modal")).toBeNull();
   });
 
-  it("opens modal when meta+k is pressed", () => {
+  it("opens modal when meta+k is pressed", async () => {
     useDeviceInfoMock.mockReturnValue({ isApp: false } as any);
     render(<HeaderSearchButton wave={null} />);
     expect(screen.queryByTestId("modal")).toBeNull();
@@ -100,10 +99,10 @@ describe("HeaderSearchButton", () => {
       });
     }
 
-    expect(screen.getByTestId("modal")).toBeInTheDocument();
+    expect(await screen.findByTestId("modal")).toBeInTheDocument();
   });
 
-  it("opens modal and prevents the browser shortcut for ctrl+k", () => {
+  it("opens modal and prevents the browser shortcut for ctrl+k", async () => {
     useDeviceInfoMock.mockReturnValue({ isApp: false } as any);
     render(<HeaderSearchButton wave={null} />);
 
@@ -119,17 +118,18 @@ describe("HeaderSearchButton", () => {
     }
 
     expect(event.defaultPrevented).toBe(true);
-    expect(screen.getByTestId("modal")).toBeInTheDocument();
+    expect(await screen.findByTestId("modal")).toBeInTheDocument();
   });
 
-  it("uses larger icon when app mode is true", () => {
+  it("uses a stronger icon stroke when app mode is true", () => {
     useDeviceInfoMock.mockReturnValue({ isApp: true } as any);
     render(<HeaderSearchButton wave={null} />);
     const icon = screen.getByTestId("icon");
     expect(icon).toHaveClass("tw-size-5");
+    expect(icon).toHaveAttribute("stroke-width", "2");
   });
 
-  it("opens the scoped message search in a wave and can switch to site search", () => {
+  it("opens the scoped message search in a wave and can switch to site search", async () => {
     useDeviceInfoMock.mockReturnValue({ isApp: false } as any);
     const wave = { id: "wave-1", name: "Design Wave" } as any;
     render(<HeaderSearchButton wave={wave} />);
@@ -139,14 +139,14 @@ describe("HeaderSearchButton", () => {
         name: "Search messages in Design Wave",
       })
     );
-    expect(screen.getByTestId("wave-search-modal")).toBeInTheDocument();
+    expect(await screen.findByTestId("wave-search-modal")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Search all 6529" }));
     expect(screen.queryByTestId("wave-search-modal")).not.toBeInTheDocument();
-    expect(screen.getByTestId("modal")).toBeInTheDocument();
+    expect(await screen.findByTestId("modal")).toBeInTheDocument();
   });
 
-  it("preserves existing query parameters when opening a wave result", () => {
+  it("preserves existing query parameters when opening a wave result", async () => {
     useDeviceInfoMock.mockReturnValue({ isApp: false } as any);
     window.history.replaceState({}, "", "/waves/wave-1?divider=1&tab=chat");
     const wave = { id: "wave-1", name: "Design Wave" } as any;
@@ -157,7 +157,9 @@ describe("HeaderSearchButton", () => {
         name: "Search messages in Design Wave",
       })
     );
-    fireEvent.click(screen.getByRole("button", { name: "Open result 42" }));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Open result 42" })
+    );
 
     expect(mockRouterReplace).toHaveBeenCalledWith(
       "/waves/wave-1?divider=1&tab=chat&serialNo=42",

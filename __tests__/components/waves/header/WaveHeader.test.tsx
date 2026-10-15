@@ -3,6 +3,10 @@ import React from "react";
 import WaveHeader from "@/components/waves/header/WaveHeader";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { AuthContext } from "@/components/auth/Auth";
+import {
+  mockDefaultTimeZone,
+  renderServerThenHydrate,
+} from "@/__tests__/utils/timeZoneHydration";
 
 jest.mock("@/components/waves/header/WaveHeaderFollow", () => ({
   __esModule: true,
@@ -90,24 +94,60 @@ describe("WaveHeader", () => {
       </AuthContext.Provider>
     );
 
-  it("shows the creator and creation date in one row below the title", () => {
-    wrapper(baseWave);
-    const title = screen.getByTestId("name");
-    const creator = screen.getByRole("link", { name: "a" });
-    const created = screen.getByText("Jan 1, 1970");
+  // baseWave was created at the epoch, 1970-01-01T00:00Z. The visible date is
+  // the viewer's local day, so Los Angeles is still on December 31.
+  it.each([
+    ["UTC", "Jan 1, 1970"],
+    ["America/Los_Angeles", "Dec 31, 1969"],
+    ["Pacific/Auckland", "Jan 1, 1970"],
+  ])(
+    "shows the creator and creation date in one row below the title in %s",
+    (zone, createdText) => {
+      const restoreTimeZone = mockDefaultTimeZone(zone);
+      try {
+        wrapper(baseWave);
+        const title = screen.getByTestId("name");
+        const creator = screen.getByRole("link", { name: "a" });
+        const created = screen.getByText(createdText);
 
-    expect(creator).toBeVisible();
-    expect(creator).toHaveAttribute("href", "/a");
-    expect(creator.parentElement).toContainElement(created);
-    expect(created).toHaveAttribute("datetime", "1970-01-01T00:00:00.000Z");
-    expect(screen.queryByText("Created by")).not.toBeInTheDocument();
-    expect(screen.queryByText("Creator")).not.toBeInTheDocument();
-    expect(title.compareDocumentPosition(creator)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING
+        expect(creator).toBeVisible();
+        expect(creator).toHaveAttribute("href", "/a");
+        expect(creator.parentElement).toContainElement(created);
+        expect(created).toHaveAttribute("datetime", "1970-01-01T00:00:00.000Z");
+        expect(screen.queryByText("Created by")).not.toBeInTheDocument();
+        expect(screen.queryByText("Creator")).not.toBeInTheDocument();
+        expect(title.compareDocumentPosition(creator)).toBe(
+          Node.DOCUMENT_POSITION_FOLLOWING
+        );
+        expect(creator.compareDocumentPosition(created)).toBe(
+          Node.DOCUMENT_POSITION_FOLLOWING
+        );
+      } finally {
+        restoreTimeZone();
+      }
+    }
+  );
+
+  it("hydrates the server creation date, then shows it in the viewer's zone", async () => {
+    // 11:27 UTC on Oct 12 is already Oct 13 in Auckland.
+    const createdAt = Date.parse("2026-10-12T11:27:11.000Z");
+    const result = await renderServerThenHydrate(
+      <WaveHeader
+        wave={{ ...baseWave, created_at: createdAt }}
+        onFollowersClick={jest.fn()}
+      />,
+      { serverTimeZone: "UTC", clientTimeZone: "Pacific/Auckland" }
     );
-    expect(creator.compareDocumentPosition(created)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING
-    );
+    try {
+      expect(result.serverHtml).toContain("Oct 12, 2026, UTC");
+      expect(result.recoverableErrors).toEqual([]);
+      expect(result.hydrationConsoleErrors).toEqual([]);
+      const created = result.container.querySelector("time");
+      expect(created).toHaveAttribute("datetime", "2026-10-12T11:27:11.000Z");
+      expect(created).toHaveTextContent(/^Oct 13, 2026$/);
+    } finally {
+      await result.cleanup();
+    }
   });
 
   it.each([

@@ -27,12 +27,14 @@ export default function Footer() {
         target={target}
         rel={newTab ? "noopener noreferrer" : undefined}
       >
+        {/* Lazy keeps below-the-fold footer icons out of the server's preload hints. */}
         <img
           width="0"
           height="0"
           style={{ height: "18px", width: "auto" }}
           src={img}
           alt={text}
+          loading="lazy"
         />{" "}
         {text}
       </a>

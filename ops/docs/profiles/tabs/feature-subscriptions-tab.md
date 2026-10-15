@@ -21,7 +21,17 @@ are documented in
 On native iOS when the detected country is not `US` or is unknown, the tab and
 subscription actions are hidden. Direct links (including native deep links)
 return to the profile's Identity tab without displaying subscription content
-or an unavailable page. US iOS, web, and Android retain their existing behavior.
+or an unavailable page. On iOS the return waits for the country check: the tab
+and content stay hidden while it loads, a US deep link then opens the
+`Subscriptions` tab in place, and a non-US, unknown, failed, or slow (over five
+seconds) check redirects. Web and Android never wait for the country check.
+
+On every platform the `Subscriptions` tab, the profile-header subscription
+status, and their requests are left out of the server HTML and the first
+render, because the page cannot yet tell whether it is the iOS app. They appear
+right after the page loads where subscriptions are allowed. A direct
+`/{user}/subscriptions` link stays selected and does not redirect during that
+first render.
 
 - Open `/{user}/subscriptions` directly.
 - Open a profile and choose the `Subscriptions` tab.
@@ -30,6 +40,12 @@ or an unavailable page. US iOS, web, and Android retain their existing behavior.
   the identity block on smaller layouts. The current state and contextual
   action share the row's second line, and the whole row opens the relevant
   settings, upcoming-drops, or top-up section.
+- Open a subscription top-up notification. It links to the `Top up` section
+  (`/{user}/subscriptions#profile-subscriptions-top-up`); once the section has
+  loaded the page scrolls to it and moves keyboard and screen-reader focus to
+  its heading, with smooth scrolling skipped when reduced motion is on.
+  Where Subscriptions are hidden (the iOS app outside the US) the tab
+  redirects to Identity and nothing scrolls.
 - Use the subscription-awareness action on Home or a Meme card.
 - Use `Learn more` in the `Subscription minting` section to open
   `/about/subscriptions`.
@@ -61,7 +77,7 @@ or an unavailable page. US iOS, web, and Android retain their existing behavior.
    - exact recommended top-up and its projected runway when available
 3. Review `Minting settings`:
    - `Subscription balance` (exact ETH and raw mint capacity)
-   - `Airdrop Address`
+   - `Airdrop Address`; tap, hover, or focus the address to read it in full
    - `Mode` (`Manual` or `Automatic`)
    - `Edition Preference` (`One edition` or `All eligible`)
 4. In owner mode:
@@ -143,6 +159,8 @@ or an unavailable page. US iOS, web, and Android retain their existing behavior.
   - `Redeemed Subscriptions`
   - `Log History`
   - `Top Up History`
+  - sections start closed on phones and open on larger screens; opening or closing
+    a section keeps that choice while data refreshes or the window is resized
   - pagination when a section has more than 10 rows
 
 ## Consolidation Changes
