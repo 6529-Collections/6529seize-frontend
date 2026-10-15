@@ -61,6 +61,8 @@ export const COMPETITION_MESSAGES = {
   "competitions.error":
     "This competition could not be loaded. It may be unavailable or you may not have access.",
   "competitions.retry": "Try again",
+  "competitions.voterProfileUnavailable": "Profile unavailable",
+  "competitions.retryVoterProfile": "Retry profile at rank {rank}",
   "competitions.empty": "No competitions here yet. Chat is always available.",
   "competitions.parallel":
     "Each competition has its own entries, voting credits, and results. All competitions share this wave’s chat.",
