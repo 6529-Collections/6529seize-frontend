@@ -21,7 +21,7 @@
     "__tests__/app/blogCategoryPage.test.tsx": 1,
     "__tests__/app/collectionMetadataPages.test.tsx": 2,
     "__tests__/app/delegationMappingToolPage.test.tsx": 2,
-    "__tests__/app/gradientPage.test.tsx": 4,
+    "__tests__/app/gradientPage.test.tsx": 3,
     "__tests__/app/messagesPage.test.tsx": 1,
     "__tests__/app/messageWavePage.test.tsx": 1,
     "__tests__/app/nextgen/page.test.tsx": 1,

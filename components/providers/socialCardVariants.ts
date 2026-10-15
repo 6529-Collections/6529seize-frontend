@@ -19,9 +19,6 @@ export const COLLECTION_CARD_VIEW_LABELS = [
   "Trait Sets",
 ] as const;
 
-export type CollectionCardViewLabel =
-  (typeof COLLECTION_CARD_VIEW_LABELS)[number];
-
 export const findClosedCardValue = <const Allowed extends readonly string[]>(
   allowed: Allowed,
   value: string | null | undefined

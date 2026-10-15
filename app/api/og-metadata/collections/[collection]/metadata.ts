@@ -7,9 +7,9 @@ import {
 
 const MAX_IMAGE_URL_LENGTH = 8192;
 
-export const NEXTGEN_COLLECTION_ID_PATTERN = /^\d{1,9}$/;
+const NEXTGEN_COLLECTION_ID_PATTERN = /^\d{1,9}$/;
 
-export interface NextgenCollectionCardMetadata {
+interface NextgenCollectionCardMetadata {
   readonly name: string;
   readonly imageUrl: string | null;
 }
