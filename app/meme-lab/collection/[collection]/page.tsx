@@ -9,8 +9,37 @@ import {
 } from "@/components/memelab/memeLabRouteParams";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { LabExtendedData } from "@/entities/INFT";
 import { t } from "@/i18n/messages";
+import { fetchUrl } from "@/services/6529api";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { cache } from "react";
+
+// Collections are named by the URL, so an empty result is the only "missing"
+// signal; transient API failures keep rendering and let the client retry.
+const isMemeLabCollectionMissing = cache(
+  async (collectionName: string): Promise<boolean> => {
+    if (collectionName.length === 0) {
+      return true;
+    }
+
+    try {
+      const response = await fetchUrl<DBResponse<LabExtendedData>>(
+        `${publicEnv.API_ENDPOINT}/api/lab_extended_data?collection=${encodeURIComponent(collectionName)}&page_size=1`,
+        { cache: "no-store" }
+      );
+      return Array.isArray(response.data) && response.data.length === 0;
+    } catch (error) {
+      console.warn("Failed to resolve Meme Lab collection", {
+        collectionName,
+        error,
+      });
+      return false;
+    }
+  }
+);
 
 export default async function MemeLabCollectionPage({
   params,
@@ -23,6 +52,9 @@ export default async function MemeLabCollectionPage({
   const resolvedSearchParams = (await searchParams) ?? {};
   const locale = getMemeLabRouteLocale(resolvedSearchParams);
   const collectionName = getMemeLabCollectionName(collection);
+  if (await isMemeLabCollectionMissing(collectionName)) {
+    notFound();
+  }
 
   return (
     <main className={styles["main"]}>
@@ -48,6 +80,9 @@ export async function generateMetadata({
   const { collection } = await params;
   const locale = getMemeLabRouteLocale((await searchParams) ?? {});
   const collectionName = getMemeLabCollectionName(collection);
+  if (await isMemeLabCollectionMissing(collectionName)) {
+    notFound();
+  }
   return getAppMetadata({
     title: t(locale, "memeLab.collections.documentTitle", {
       collectionName,
