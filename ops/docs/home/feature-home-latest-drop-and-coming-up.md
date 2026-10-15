@@ -110,7 +110,15 @@ Use this page for visibility rules, state switches, and route targets.
 - On phone browsers and the mobile app, still artwork fills the panel width
   at its natural aspect ratio and keeps its details below the image.
 - On iOS outside the US, the countdown `Mint` button is hidden.
-- On iOS outside the US, The Memes subscription row is hidden.
+- On iOS outside the US, or while the iOS country check is still loading, The
+  Memes subscription row is not shown.
+- The Memes subscription row is not part of the server HTML or the first render
+  on any platform, because the page cannot yet tell whether it is the iOS app.
+  Where the server renders a page that includes it (Meme card and upcoming Meme
+  routes), a blank, invisible space of the row's height is reserved so the
+  content below does not jump, and the row replaces it right after the page
+  loads on web, Android, and US iOS. On restricted iOS the space is removed once
+  the country check settles. The space holds no text, icons, links, or controls.
 - Latest Drop and mapped Next Drop cards always show `Your allowance`. Before a
   wallet is connected, the row prompts the user to connect to view it. Once
   connected, compact wrapping pills list each nonzero Phase 0, Phase 1, Phase 2,
