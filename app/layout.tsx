@@ -8,6 +8,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "@/styles/swiper.css";
+import "@/styles/wave-navigation-transition.css";
 //keep this last so that we can override the styles of the above css files
 import "@/styles/animations.css";
 import "@/styles/globals.css";
