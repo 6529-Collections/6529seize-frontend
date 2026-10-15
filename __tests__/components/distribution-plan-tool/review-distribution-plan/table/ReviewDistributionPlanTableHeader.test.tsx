@@ -43,7 +43,9 @@ describe('ReviewDistributionPlanTableHeader', () => {
     await userEvent.click(screen.getAllByRole('button')[0]);
     await waitFor(() => expect(distributionPlanApiFetch).toHaveBeenCalled());
     expect(document.createElement).toHaveBeenCalled();
-    
+    expect(clickSpy).toHaveBeenCalled();
+    expect(window.URL.revokeObjectURL).toHaveBeenCalledWith('mock-url');
+
     // Cleanup
     document.createElement = originalCreateElement;
   });
