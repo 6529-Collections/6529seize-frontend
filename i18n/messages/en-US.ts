@@ -41,6 +41,7 @@ import networkTdhExampleMessages from "@/i18n/messages/networkTdhExample.en-US.j
 import networkTdhProfileMessages from "@/i18n/messages/networkTdhProfile.en-US.json";
 import networkTdhRulesMessages from "@/i18n/messages/networkTdhRules.en-US.json";
 import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US.json";
+import pageMetadataMessages from "@/i18n/messages/pageMetadata.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import utcScheduleMessages from "@/i18n/messages/utcSchedule.en-US.json";
 import worldTimeZonesMessages from "@/i18n/messages/worldTimeZones.en-US.json";
@@ -2221,6 +2222,11 @@ const WAVE_COMPOSER_PLACEHOLDER_MESSAGES = objectMessages(
     postQuote: "Post a quote",
   } as const
 );
+
+const WAVE_DROP_EDITOR_MESSAGES = objectMessages("waves.dropEditor", {
+  label: "Edit message",
+  placeholder: "Edit message...",
+} as const);
 
 const WAVE_STORM_COMPOSER_MESSAGES = objectMessages("waves.stormComposer", {
   draftTitle: "Storm draft",
@@ -4408,6 +4414,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_CHAT_MESSAGES,
   ...WAVE_COMPOSER_ACTION_MESSAGES,
   ...WAVE_COMPOSER_PLACEHOLDER_MESSAGES,
+  ...WAVE_DROP_EDITOR_MESSAGES,
   ...WAVE_STORM_COMPOSER_MESSAGES,
   ...WAVE_CHAT_SETTINGS_MESSAGES,
   ...NETWORK_GROUP_INSPECTION_MESSAGES,
@@ -4468,6 +4475,7 @@ export const EN_US_MESSAGES = {
   ...networkTdhProfileMessages,
   ...networkTdhRulesMessages,
   ...delegationTapGuideMessages,
+  ...pageMetadataMessages,
   ...toolsMessages,
   ...utcScheduleMessages,
   ...worldTimeZonesMessages,

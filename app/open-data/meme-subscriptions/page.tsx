@@ -2,6 +2,8 @@ import styles from "@/styles/Home.module.css";
 import { ABOUT_PAGE_SURFACE_CLASS_NAME } from "@/components/about/AboutLayout";
 import CommunityDownloadsSubscriptions from "@/components/community-downloads/CommunityDownloadsSubscriptions";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import clsx from "clsx";
 import type { Metadata } from "next";
 
@@ -22,6 +24,9 @@ export default function MemeSubscriptions() {
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({
     title: "Meme Subscriptions | Open Data",
-    description: "Open Data",
+    description: t(
+      DEFAULT_LOCALE,
+      "pageMetadata.openDataMemeSubscriptions.description"
+    ),
   });
 }
