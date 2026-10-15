@@ -5,6 +5,7 @@ import userEvent from "@testing-library/user-event";
 import TwitterPreviewCard from "@/components/waves/TwitterPreviewCard";
 import { fetchTwitterPreview } from "@/services/api/twitter-preview-api";
 import { renderWithQueryClient as render } from "../../utils/reactQuery";
+import { mockDefaultTimeZone } from "../../utils/timeZoneHydration";
 
 jest.mock("@/services/api/twitter-preview-api", () => ({
   fetchTwitterPreview: jest.fn(),
@@ -108,7 +109,6 @@ describe("TwitterPreviewCard", () => {
         .getByRole("img", { name: "These jobs won't be here forever." })
         .closest("a")
     ).toHaveClass("tw-aspect-video", "tw-min-h-40");
-    expect(screen.getByText(/Apr 28, 2026/)).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Like" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Reply" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Repost" })).toBeNull();
@@ -123,6 +123,41 @@ describe("TwitterPreviewCard", () => {
     expect(
       screen.queryByRole("link", { name: "Read 3,951 replies" })
     ).not.toBeInTheDocument();
+  });
+
+  // The post was published at 2026-04-28T19:02Z. The card shows that instant in
+  // the viewer's zone, so Auckland (UTC+12 in April) is already on the 29th.
+  // The patterns use \s because newer ICU puts a narrow no-break space before
+  // AM or PM.
+  it.each([
+    ["UTC", /^7:02\sPM, Apr 28, 2026$/],
+    ["America/Los_Angeles", /^12:02\sPM, Apr 28, 2026$/],
+    ["Pacific/Auckland", /^7:02\sAM, Apr 29, 2026$/],
+  ])("shows the post time in the viewer's zone (%s)", async (zone, expected) => {
+    mockedFetchTwitterPreview.mockResolvedValue({
+      tweetId: "2049202644879565155",
+      url: "https://x.com/Mayudropsphotos/status/2049202644879565155",
+      authorName: "Mayudrops",
+      authorHandle: "Mayudropsphotos",
+      text: "These jobs won't be here forever.",
+      createdAtIso: "2026-04-28T19:02:00.000Z",
+    });
+    const restoreTimeZone = mockDefaultTimeZone(zone);
+    try {
+      render(
+        <TwitterPreviewCard
+          href="https://x.com/Mayudropsphotos/status/2049202644879565155"
+          tweetId="2049202644879565155"
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId("twitter-post-preview")).toBeInTheDocument();
+      });
+      expect(screen.getByText(expected)).toBeInTheDocument();
+    } finally {
+      restoreTimeZone();
+    }
   });
 
   it("renders canonical X Article metadata instead of the redirect URL", async () => {

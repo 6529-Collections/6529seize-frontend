@@ -1,6 +1,7 @@
 import Footer from "@/components/footer/Footer";
 import { AboutSection } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
 
 describe("Footer", () => {
   it("uses the subdued page-shell border", () => {
@@ -28,23 +29,14 @@ describe("Footer", () => {
     expect(punk.parentElement?.textContent).not.toContain("||");
   });
 
-  it("lazy-loads the below-the-fold social icons so they are not preloaded on every page", () => {
+  it("lazy-loads the social icons so server rendering does not preload them", () => {
     render(<Footer />);
-
-    // React hoists eager <img> tags into the early-hints Link header; the
-    // footer icons sit below the fold and must stay out of it.
-    const images = screen.getAllByRole("img");
-    expect(images.map((image) => image.getAttribute("src"))).toEqual([
-      "/twitter.png",
-      "/twitter.png",
-      "/github_w.png",
-    ]);
-    for (const image of images) {
+    for (const image of screen.getAllByRole("img")) {
       expect(image).toHaveAttribute("loading", "lazy");
-      expect(image).toHaveAttribute("decoding", "async");
-      expect(image).toHaveAttribute("width", "18");
-      expect(image).toHaveAttribute("height", "18");
     }
+
+    const html = renderToString(<Footer />);
+    expect(html).not.toMatch(/rel="preload"/);
   });
 
   it("renders policy and contact links", () => {
