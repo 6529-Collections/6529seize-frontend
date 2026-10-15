@@ -1,5 +1,6 @@
 "use client";
 
+import { getScaledResolvedImageUri, ImageScale } from "@/helpers/image.helpers";
 import { useResolvedIpfsUrl } from "@/hooks/useResolvedIpfsUrl";
 import Image from "next/image";
 
@@ -37,7 +38,7 @@ export default function HeaderSearchModalPfp({
   return (
     <div className="tw-relative tw-inline-block">
       <Image
-        src={resolved}
+        src={getScaledResolvedImageUri(resolved, ImageScale.W_200_H_200)}
         alt={alt ?? ""}
         width={size}
         height={size}
