@@ -1130,14 +1130,14 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         panel.getByRole("button", { name: "Reset 1 vote", exact: true })
       ).toBeEnabled();
       await page.keyboard.press("Tab");
-      for (const action of [
-        page.getByRole("button", { name: "Open create menu", exact: true }),
-        panel.getByRole("button", { name: "Deselect all", exact: true }),
-        panel.getByRole("button", { name: "Reset 1 vote", exact: true }),
-      ]) {
+      for (const name of ["Open create menu", "Deselect all", "Reset 1 vote"]) {
+        const action = page.getByRole("button", { name, exact: true });
         await action.focus();
         await expect(action).toBeFocused();
-        const pill = action.locator("span").first();
+        const pill = page
+          .getByRole("button", { name, exact: true })
+          .locator("span")
+          .first();
         await expect(pill).toHaveCSS("outline-style", "solid");
         await expect(pill).toHaveCSS("outline-width", "2px");
         await expect(pill).toHaveCSS("outline-color", "rgb(132, 173, 255)");
