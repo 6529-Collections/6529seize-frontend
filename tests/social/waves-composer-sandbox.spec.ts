@@ -401,10 +401,65 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("moves the app chat composer down without an upward jump when closing the keyboard", async ({
+    baseURL,
+    page,
+  }, testInfo) => {
+    // Only this project installs the iOS shell whose keyboard inset animates here.
+    test.skip(
+      testInfo.project.name !== "capacitor-ios-sim",
+      "The iOS keyboard layout requires the Capacitor iOS simulation"
+    );
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await gotoSandboxWave(page);
+    const composer = page
+      .getByRole("textbox", { name: "Write a chat message" })
+      .last();
+    const positions = await composer.evaluate(async (element) => {
+      const root = document.documentElement;
+      // Publish the same geometry as the native keyboard hook. This checks
+      // browser layout; native keyboard synchronization is verified separately.
+      root.style.setProperty(
+        "--native-keyboard-layout-transition-duration",
+        "0ms"
+      );
+      root.style.setProperty(
+        "--native-keyboard-layout-transition-easing",
+        "cubic-bezier(0.1, 0.8, 0.2, 1)"
+      );
+      root.style.setProperty("--native-keyboard-inset-bottom", "180px");
+      root.dataset["nativeKeyboardVisible"] = "true";
+      const positions = [element.getBoundingClientRect().bottom];
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => resolve())
+      );
+      root.style.setProperty(
+        "--native-keyboard-layout-transition-duration",
+        "250ms"
+      );
+      root.style.setProperty("--native-keyboard-inset-bottom", "0px");
+      delete root.dataset["nativeKeyboardVisible"];
+      positions.push(element.getBoundingClientRect().bottom);
+      const started = performance.now();
+      while (performance.now() - started < 350) {
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => resolve())
+        );
+        positions.push(element.getBoundingClientRect().bottom);
+      }
+      return positions;
+    });
+    for (let i = 1; i < positions.length; i += 1) {
+      expect(positions[i]!).toBeGreaterThanOrEqual(positions[i - 1]! - 1);
+    }
+    expect(positions.at(-1)! - positions[0]!).toBeGreaterThan(100);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("submits one exact-shape synthetic chat drop without uploads", async ({
     baseURL,
     page,
-  }) => {
+  }, testInfo) => {
     await gotoSandboxWave(page);
 
     const composer = page
@@ -429,7 +484,31 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
         timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
       });
     }
-    await page.getByRole("button", { name: "Post" }).last().click();
+    const postButton = page.getByRole("button", { name: "Post" }).last();
+    await postButton.evaluate((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          button.setAttribute(
+            "data-composer-focused-at-submit",
+            String(
+              document.activeElement?.getAttribute("contenteditable") === "true"
+            )
+          );
+        },
+        { capture: true, once: true }
+      );
+    });
+    if (testInfo.project.use.isMobile) {
+      await postButton.tap();
+    } else {
+      await postButton.click();
+    }
+    // A tap must not dismiss the native input before submission starts.
+    await expect(postButton).toHaveAttribute(
+      "data-composer-focused-at-submit",
+      "true"
+    );
 
     await expect
       .poll(
@@ -479,6 +558,11 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     await expect(submittedDrop).toContainText(SANDBOX_CHAT_DROP_CONTENT);
+    await expect(composer).toBeFocused();
+    await expect(composer).toHaveText("");
+    // Sending ends this draft's undo history; Undo must not revive a sent post.
+    await composer.press("ControlOrMeta+z");
+    await expect(composer).toHaveText("");
 
     const requests = await fetchSandboxRequests(baseURL);
     expect(

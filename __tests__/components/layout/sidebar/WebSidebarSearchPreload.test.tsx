@@ -2,14 +2,14 @@ import WebSidebar from "@/components/layout/sidebar/WebSidebar";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 const mockPreloadSite = jest.fn();
-const mockSiteIdlePreload = jest.fn();
+const mockSiteEarlyPreload = jest.fn();
 
 jest.mock("@/components/header/header-search/LazyHeaderSearchModal", () => ({
   __esModule: true,
   default: () => null,
   preloadHeaderSearchModal: () => mockPreloadSite(),
-  useHeaderSearchModalIdlePreload: (enabled?: boolean) =>
-    mockSiteIdlePreload(enabled),
+  useHeaderSearchModalEarlyPreload: (enabled?: boolean) =>
+    mockSiteEarlyPreload(enabled),
 }));
 
 jest.mock("next/navigation", () => ({ usePathname: () => "/waves" }));
@@ -71,13 +71,13 @@ const sidebarProps = {
 beforeEach(() => jest.clearAllMocks());
 
 describe("WebSidebar search chunk warm-up", () => {
-  it("asks to warm the search modal when idle, only where the sidebar has desktop search", () => {
+  it("asks to warm the search modal early, only where the sidebar has desktop search", () => {
     const { rerender } = render(<WebSidebar {...sidebarProps} isMobile />);
-    expect(mockSiteIdlePreload).toHaveBeenLastCalledWith(false);
+    expect(mockSiteEarlyPreload).toHaveBeenLastCalledWith(false);
 
     rerender(<WebSidebar {...sidebarProps} />);
-    expect(mockSiteIdlePreload).toHaveBeenLastCalledWith(true);
-    // Nothing is fetched eagerly: only the idle hook is involved.
+    expect(mockSiteEarlyPreload).toHaveBeenLastCalledWith(true);
+    // Nothing is fetched eagerly: only the early-preload hook is involved.
     expect(mockPreloadSite).not.toHaveBeenCalled();
   });
 
