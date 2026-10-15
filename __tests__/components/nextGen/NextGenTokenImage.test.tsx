@@ -95,7 +95,7 @@ test("sandboxes the generative animation iframe with scripts only", () => {
   );
   const frame = screen.getByTitle("token");
   expect(frame).toHaveAttribute("sandbox", "allow-scripts");
-  expect(frame.getAttribute("sandbox")?.split(/s+/)).not.toContain(
+  expect(frame.getAttribute("sandbox")?.split(/\s+/)).not.toContain(
     "allow-same-origin"
   );
 });
