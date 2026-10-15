@@ -154,6 +154,11 @@ export function sharedConfig(
         "@react-native-async-storage/async-storage": "./stubs/empty.js",
         "react-native": "./stubs/empty.js",
         "idb-keyval": "./lib/storage/idb-keyval.ts",
+        // Browser bundles load non-default locale dictionaries on demand;
+        // server rendering keeps every locale synchronous.
+        "@/i18n/localeDictionaries": {
+          browser: "./i18n/localeDictionaries.browser.ts",
+        },
       },
     },
     serverExternalPackages: ["@reown/appkit", "@reown/appkit-adapter-wagmi"],
