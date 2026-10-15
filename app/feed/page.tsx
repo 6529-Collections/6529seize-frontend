@@ -1,11 +1,8 @@
-import { redirect } from "next/navigation";
-import { getAppMetadata } from "@/components/providers/metadata";
-import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
-export default function FeedRedirectPage() {
-  redirect("/index.xml");
-}
-
-export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({ title: "Redirecting..." });
+// `/feed` was the address of the WordPress-era RSS feed, later redirected to
+// `/index.xml`. The site publishes no feed there (or anywhere), so the
+// redirect only led to another 404. Answer 404 directly instead.
+export default function FeedPage(): never {
+  notFound();
 }

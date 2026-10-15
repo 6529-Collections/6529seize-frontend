@@ -2633,7 +2633,7 @@
         "The Network Definitions page lists transfers as a core Network activity metric."
       ],
       "canonical_path": "/network/definitions",
-      "related_paths": ["/network/activity", "/feed"],
+      "related_paths": ["/network/activity"],
       "tags": ["network", "glossary", "concept", "activity"],
       "source_refs": ["ops/docs/network/feature-network-definitions.md"]
     },
@@ -2945,7 +2945,7 @@
         "Profile-specific activity belongs on profile tabs rather than the global Network feed."
       ],
       "canonical_path": "/network/activity",
-      "related_paths": ["/feed", "/network"],
+      "related_paths": ["/network"],
       "tags": ["network", "activity"],
       "source_refs": ["ops/docs/network/feature-network-activity-feed.md"]
     },
@@ -6005,15 +6005,16 @@
       "id": "feed.overview",
       "kind": "route",
       "title": "Feed",
-      "aliases": ["feed", "global feed", "activity feed"],
-      "keywords": ["feed", "activity", "global", "updates"],
+      "aliases": ["feed", "global feed", "activity feed", "rss feed", "rss"],
+      "keywords": ["feed", "activity", "global", "updates", "rss"],
       "facts": [
-        "The /feed route is a general feed entry point.",
-        "Network-specific activity lives under /network/activity.",
-        "Wave conversation activity lives under /waves and /messages."
+        "There is no /feed page. The old /feed address was a retired legacy link and now shows the not-found screen.",
+        "6529.io does not currently offer an RSS or Atom feed.",
+        "Wave conversation activity lives under /waves and /messages.",
+        "Network-specific activity lives under /network/activity."
       ],
-      "canonical_path": "/feed",
-      "related_paths": ["/waves", "/network/activity"],
+      "canonical_path": "/waves",
+      "related_paths": ["/messages", "/network/activity"],
       "tags": ["feed", "navigation"],
       "source_refs": ["app/feed/page.tsx"]
     },
