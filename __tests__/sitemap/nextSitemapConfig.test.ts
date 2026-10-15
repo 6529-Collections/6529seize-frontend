@@ -25,6 +25,29 @@ const makeFetchJson =
     return response;
   };
 
+const ZERO_FLOORS = {
+  memes: 0,
+  "meme-lab": 0,
+  gradient: 0,
+  "nextgen-tokens": 0,
+  "nextgen-collections": 0,
+  "public-waves": 0,
+} as const;
+
+type BuildOptions = NonNullable<
+  Parameters<typeof buildAdditionalSitemapPaths>[2]
+>;
+
+// Tests never sleep between retries and never print to the build log.
+const testOptions = (overrides: BuildOptions = {}): BuildOptions => ({
+  minimumItems: ZERO_FLOORS,
+  failurePolicy: "fail",
+  retry: { sleep: async () => undefined },
+  log: () => undefined,
+  warn: () => undefined,
+  ...overrides,
+});
+
 const SOURCE_COMMIT = "92966f2836ebf2af06edfe0fe2cff25041307c92";
 
 function museumEntity({
@@ -371,16 +394,11 @@ const museumBundle = async () => ({
 });
 
 const buildFixturePaths = (responses: Record<string, unknown>) =>
-  buildAdditionalSitemapPaths(makeFetchJson(responses), museumBundle, {
-    minimumItems: {
-      memes: 0,
-      "meme-lab": 0,
-      gradient: 0,
-      "nextgen-tokens": 0,
-      "nextgen-collections": 0,
-      "public-waves": 0,
-    },
-  });
+  buildAdditionalSitemapPaths(
+    makeFetchJson(responses),
+    museumBundle,
+    testOptions()
+  );
 
 describe("next-sitemap config", () => {
   it.each([
@@ -495,16 +513,11 @@ describe("next-sitemap config", () => {
         },
     });
 
-    const paths = await buildAdditionalSitemapPaths(fetchJson, museumBundle, {
-      minimumItems: {
-        memes: 0,
-        "meme-lab": 0,
-        gradient: 0,
-        "nextgen-tokens": 0,
-        "nextgen-collections": 0,
-        "public-waves": 0,
-      },
-    });
+    const paths = await buildAdditionalSitemapPaths(
+      fetchJson,
+      museumBundle,
+      testOptions()
+    );
     const locations = paths.map((path) => path.loc);
 
     expect(locations).toContain("/the-memes/1");
@@ -676,16 +689,7 @@ describe("next-sitemap config", () => {
         },
         view: null,
       }),
-      {
-        minimumItems: {
-          memes: 0,
-          "meme-lab": 0,
-          gradient: 0,
-          "nextgen-tokens": 0,
-          "nextgen-collections": 0,
-          "public-waves": 0,
-        },
-      }
+      testOptions()
     );
     const museumLocations = paths.map((path) => path.loc);
 
@@ -739,16 +743,11 @@ describe("next-sitemap config", () => {
     };
 
     await expect(
-      buildAdditionalSitemapPaths(throwingFetchJson, museumBundle, {
-        minimumItems: {
-          memes: 0,
-          "meme-lab": 0,
-          gradient: 0,
-          "nextgen-tokens": 0,
-          "nextgen-collections": 0,
-          "public-waves": 0,
-        },
-      })
+      buildAdditionalSitemapPaths(
+        throwingFetchJson,
+        museumBundle,
+        testOptions()
+      )
     ).rejects.toThrow("gradient failed");
   });
 
@@ -806,16 +805,7 @@ describe("next-sitemap config", () => {
             { data: [], next: false },
         }),
         museumBundle,
-        {
-          minimumItems: {
-            memes: 2,
-            "meme-lab": 0,
-            gradient: 0,
-            "nextgen-tokens": 0,
-            "nextgen-collections": 0,
-            "public-waves": 0,
-          },
-        }
+        testOptions({ minimumItems: { ...ZERO_FLOORS, memes: 2 } })
       )
     ).rejects.toThrow("Sitemap memes inventory fell below its required floor");
   });
@@ -852,16 +842,7 @@ describe("next-sitemap config", () => {
             },
             view: null,
           }) as never,
-        {
-          minimumItems: {
-            memes: 0,
-            "meme-lab": 0,
-            gradient: 0,
-            "nextgen-tokens": 0,
-            "nextgen-collections": 0,
-            "public-waves": 0,
-          },
-        }
+        testOptions()
       )
     ).rejects.toThrow("Museum sitemap publication unavailable");
   });
@@ -915,5 +896,172 @@ describe("next-sitemap config", () => {
       changefreq: "hourly",
       priority: 0.9,
     });
+  });
+});
+
+const FEED_URLS = {
+  memes: "https://api.6529.io/sitemap/memes",
+  gradient: "https://api.6529.io/sitemap/gradient",
+  memeLab: "https://api.6529.io/sitemap/meme-lab",
+  nextgenTokens: "https://api.6529.io/sitemap/nextgen/tokens",
+  nextgenCollections: "https://api.6529.io/sitemap/nextgen/collections",
+  waves:
+    "https://api.6529.io/api/v2/waves?view=SEARCH&page=1&page_size=50&direct_message=false",
+} as const;
+
+const healthyFeedResponses = (): Record<string, unknown> => ({
+  [FEED_URLS.memes]: { data: [1], next: null },
+  [FEED_URLS.gradient]: { data: [0], next: null },
+  [FEED_URLS.memeLab]: { data: [10], next: null },
+  [FEED_URLS.nextgenTokens]: { data: [10000000000], next: null },
+  [FEED_URLS.nextgenCollections]: { data: ["Pebbles"], next: null },
+  [FEED_URLS.waves]: { data: [], next: false },
+});
+
+// Fails each listed URL for its first N requests, like a flaky API.
+function createFlakyFetchJson(
+  responses: Record<string, unknown>,
+  failures: Record<string, number>
+) {
+  const calls = new Map<string, number>();
+  const fetchJson = async (url: string): Promise<unknown> => {
+    const count = (calls.get(url) ?? 0) + 1;
+    calls.set(url, count);
+    if (count <= (failures[url] ?? 0)) {
+      throw new Error(`HTTP 503 ${url}`);
+    }
+    return makeFetchJson(responses)(url);
+  };
+  return { fetchJson, calls };
+}
+
+describe("next-sitemap resilience", () => {
+  it("retries a transient feed failure and keeps the section", async () => {
+    const { fetchJson, calls } = createFlakyFetchJson(healthyFeedResponses(), {
+      [FEED_URLS.gradient]: 2,
+    });
+    const log = jest.fn();
+
+    const paths = await buildAdditionalSitemapPaths(
+      fetchJson,
+      museumBundle,
+      testOptions({ log })
+    );
+
+    expect(paths.map((path) => path.loc)).toContain("/6529-gradient/0");
+    expect(calls.get(FEED_URLS.gradient)).toBe(3);
+    expect(log).toHaveBeenCalledWith(expect.stringContaining("attempt 1/3"));
+    expect(log).toHaveBeenCalledWith(expect.stringContaining("attempt 2/3"));
+  });
+
+  it("fails after the retry budget when the policy is fail", async () => {
+    const { fetchJson, calls } = createFlakyFetchJson(healthyFeedResponses(), {
+      [FEED_URLS.gradient]: 99,
+    });
+
+    await expect(
+      buildAdditionalSitemapPaths(fetchJson, museumBundle, testOptions())
+    ).rejects.toThrow("Sitemap gradient failed after 3 attempts");
+    expect(calls.get(FEED_URLS.gradient)).toBe(3);
+  });
+
+  it("skips only the unavailable section with a loud warning under the fallback policy", async () => {
+    const { fetchJson } = createFlakyFetchJson(healthyFeedResponses(), {
+      [FEED_URLS.gradient]: 99,
+    });
+    const warn = jest.fn();
+    const log = jest.fn();
+
+    const paths = await buildAdditionalSitemapPaths(
+      fetchJson,
+      museumBundle,
+      testOptions({ failurePolicy: "fallback", warn, log })
+    );
+    const locations = paths.map((path) => path.loc);
+
+    expect(locations).not.toContain("/6529-gradient/0");
+    expect(locations).toContain("/the-memes/1");
+    expect(locations).toContain("/meme-lab/10");
+    expect(locations).toContain("/nextgen/token/10000000000");
+    expect(locations).toContain("/museum/network/works/6529NM-W-0001");
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("gradient section skipped")
+    );
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("INCOMPLETE sitemap without: gradient")
+    );
+    expect(log).toHaveBeenCalledWith(
+      expect.stringMatching(/memes=\d+, gradient=SKIPPED, meme-lab=\d+/u)
+    );
+  });
+
+  it("resolves the failure policy from the supplied build environment", async () => {
+    const responses = healthyFeedResponses();
+    const failingGradient = { [FEED_URLS.gradient]: 99 };
+    const options = (env: Record<string, string>) =>
+      testOptions({ failurePolicy: undefined, env });
+
+    await expect(
+      buildAdditionalSitemapPaths(
+        createFlakyFetchJson(responses, failingGradient).fetchJson,
+        museumBundle,
+        options({ GITHUB_ACTIONS: "true", VERSION: SOURCE_COMMIT })
+      )
+    ).rejects.toThrow("Sitemap gradient failed after 3 attempts");
+    await expect(
+      buildAdditionalSitemapPaths(
+        createFlakyFetchJson(responses, failingGradient).fetchJson,
+        museumBundle,
+        options({ GITHUB_ACTIONS: "true" })
+      )
+    ).resolves.toEqual(
+      expect.not.arrayContaining([
+        expect.objectContaining({ loc: "/6529-gradient/0" }),
+      ])
+    );
+  });
+
+  it("treats a floor violation like an unavailable feed under the fallback policy", async () => {
+    const minimumItems = { ...ZERO_FLOORS, memes: 5 };
+    const warn = jest.fn();
+
+    const paths = await buildAdditionalSitemapPaths(
+      makeFetchJson(healthyFeedResponses()),
+      museumBundle,
+      testOptions({ minimumItems, failurePolicy: "fallback", warn })
+    );
+
+    expect(paths.map((path) => path.loc)).not.toContain("/the-memes/1");
+    expect(paths.map((path) => path.loc)).toContain("/6529-gradient/0");
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("memes inventory fell below its required floor")
+    );
+    await expect(
+      buildAdditionalSitemapPaths(
+        makeFetchJson(healthyFeedResponses()),
+        museumBundle,
+        testOptions({ minimumItems })
+      )
+    ).rejects.toThrow("Sitemap memes inventory fell below its required floor");
+  });
+
+  it("keeps the in-repo Museum publication a hard requirement under the fallback policy", async () => {
+    await expect(
+      buildAdditionalSitemapPaths(
+        makeFetchJson(healthyFeedResponses()),
+        async () =>
+          ({
+            publicationState: {
+              status: "unavailable",
+              publication: null,
+              errorCode: "source_unavailable",
+              failedAt: "2026-09-14T00:00:00.000Z",
+              lastValidAcceptedAt: null,
+            },
+            view: null,
+          }) as never,
+        testOptions({ failurePolicy: "fallback" })
+      )
+    ).rejects.toThrow("Museum sitemap publication unavailable");
   });
 });

@@ -3,6 +3,14 @@ import {
   getNftSitemapFocuses,
   type NftCollectionRoute,
 } from "@/helpers/seo/nft-route-policy";
+import {
+  emitSitemapWarning,
+  loadSitemapSection,
+  resolveSitemapFailurePolicy,
+  type SitemapEnvironment,
+  type SitemapFailurePolicy,
+  type SitemapRetryOptions,
+} from "@/helpers/seo/sitemap-resilience";
 import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
 import type {
   MuseumPublicationLoadState,
@@ -197,6 +205,16 @@ type FetchJson = (url: string) => Promise<unknown>;
 type MuseumBundleLoader = typeof getMuseumPublicationBundle;
 type SitemapBuildOptions = {
   readonly minimumItems?: Partial<Record<SitemapFeedName, number>>;
+  /**
+   * The build environment, passed in by `next-sitemap.build.cjs` so this module
+   * never reads `process.env`. Without it the policy is `fallback`.
+   */
+  readonly env?: SitemapEnvironment | undefined;
+  /** Overrides the policy resolved from `env` (fail only for deploy builds). */
+  readonly failurePolicy?: SitemapFailurePolicy | undefined;
+  readonly retry?: SitemapRetryOptions | undefined;
+  readonly log?: ((message: string) => void) | undefined;
+  readonly warn?: ((message: string) => void) | undefined;
 };
 type SitemapFeedName =
   | "memes"
@@ -212,6 +230,13 @@ const MINIMUM_SOURCE_ITEMS: Readonly<Record<SitemapFeedName, number>> = {
   "nextgen-tokens": 900,
   "nextgen-collections": 1,
   "public-waves": 800,
+};
+
+type SitemapFeed = {
+  readonly name: SitemapFeedName;
+  /** Sitemap URLs emitted per source item, so floors count source items. */
+  readonly urlsPerItem: number;
+  readonly load: () => Promise<ISitemapField[]>;
 };
 
 interface CursorPaginatedResponse<T> {
@@ -667,56 +692,105 @@ export async function buildAdditionalSitemapPaths(
   getMuseumBundle: MuseumBundleLoader = getMuseumPublicationBundle,
   options: SitemapBuildOptions = {}
 ): Promise<ISitemapField[]> {
-  const [
-    memesPaths,
-    gradientPaths,
-    memeLabPaths,
-    nextgenTokensPaths,
-    nextgenCollectionPaths,
-    publicWavePaths,
-    museumBundle,
-  ] = await Promise.all([
-    getNftCollectionPaths("the-memes", "memes", fetchJson),
-    getPlainApiSitemapPaths("6529-gradient", "gradient", fetchJson, 0.7),
-    getNftCollectionPaths("meme-lab", "meme-lab", fetchJson),
-    getPlainApiSitemapPaths("nextgen/token", "nextgen/tokens", fetchJson, 0.7),
-    getNextgenCollectionPaths(fetchJson),
-    getPublicWavePaths(fetchJson),
+  const env = options.env ?? {};
+  const policy = options.failurePolicy ?? resolveSitemapFailurePolicy(env);
+  const log =
+    options.log ??
+    ((message: string) => process.stdout.write(`[sitemap] ${message}\n`));
+  const warn =
+    options.warn ?? ((message: string) => emitSitemapWarning(message, env));
+
+  const feeds: readonly SitemapFeed[] = [
+    {
+      name: "memes",
+      urlsPerItem: 1 + getNftSitemapFocuses("the-memes").length,
+      load: () => getNftCollectionPaths("the-memes", "memes", fetchJson),
+    },
+    {
+      name: "gradient",
+      urlsPerItem: 1,
+      load: () =>
+        getPlainApiSitemapPaths("6529-gradient", "gradient", fetchJson, 0.7),
+    },
+    {
+      name: "meme-lab",
+      urlsPerItem: 1 + getNftSitemapFocuses("meme-lab").length,
+      load: () => getNftCollectionPaths("meme-lab", "meme-lab", fetchJson),
+    },
+    {
+      name: "nextgen-tokens",
+      urlsPerItem: 1,
+      load: () =>
+        getPlainApiSitemapPaths(
+          "nextgen/token",
+          "nextgen/tokens",
+          fetchJson,
+          0.7
+        ),
+    },
+    {
+      name: "nextgen-collections",
+      urlsPerItem: 1 + NEXTGEN_COLLECTION_SUBPAGES.length,
+      load: () => getNextgenCollectionPaths(fetchJson),
+    },
+    {
+      name: "public-waves",
+      urlsPerItem: 1,
+      load: () => getPublicWavePaths(fetchJson),
+    },
+  ];
+
+  const [sections, museumBundle] = await Promise.all([
+    Promise.all(
+      feeds.map((feed) =>
+        loadSitemapSection(
+          feed.name,
+          async () => {
+            const paths = await feed.load();
+            assertSourceFloor(
+              feed.name,
+              paths.length,
+              feed.urlsPerItem,
+              options
+            );
+            return paths;
+          },
+          {
+            policy,
+            retry: options.retry,
+            log,
+            warn,
+          }
+        )
+      )
+    ),
     getMuseumBundle(),
   ]);
-  assertSourceFloor(
-    "memes",
-    memesPaths.length,
-    1 + getNftSitemapFocuses("the-memes").length,
-    options
+
+  log(
+    `dynamic sections (URLs before de-duplication): ${sections
+      .map((section) =>
+        section.status === "loaded"
+          ? `${section.name}=${section.items.length}`
+          : `${section.name}=SKIPPED`
+      )
+      .join(", ")}`
   );
-  assertSourceFloor(
-    "meme-lab",
-    memeLabPaths.length,
-    1 + getNftSitemapFocuses("meme-lab").length,
-    options
-  );
-  assertSourceFloor("gradient", gradientPaths.length, 1, options);
-  assertSourceFloor("nextgen-tokens", nextgenTokensPaths.length, 1, options);
-  assertSourceFloor(
-    "nextgen-collections",
-    nextgenCollectionPaths.length,
-    1 + NEXTGEN_COLLECTION_SUBPAGES.length,
-    options
-  );
-  assertSourceFloor("public-waves", publicWavePaths.length, 1, options);
+  const skipped = sections.filter((section) => section.status === "skipped");
+  if (skipped.length > 0) {
+    warn(
+      `Generated an INCOMPLETE sitemap without: ${skipped
+        .map((section) => section.name)
+        .join(", ")}. Rebuild once the API is healthy to publish them.`
+    );
+  }
 
   return validateSitemapFields([
     ...getStrategicStaticPaths(),
     ...getAboutPaths(),
     ...getMuseumCanonicalPaths(),
     ...getMuseumEntityPaths(museumBundle.publicationState),
-    ...memesPaths,
-    ...gradientPaths,
-    ...memeLabPaths,
-    ...nextgenTokensPaths,
-    ...nextgenCollectionPaths,
-    ...publicWavePaths,
+    ...sections.flatMap((section) => section.items),
   ]);
 }
 
