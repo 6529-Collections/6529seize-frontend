@@ -1,6 +1,5 @@
 import { screen } from "@testing-library/react";
 import TDHCurrentRules from "@/app/network/tdh/TDHCurrentRules";
-import TDHExample from "@/app/network/tdh/TDHExample";
 import { commonApiFetch } from "@/services/api/common-api";
 import { renderWithQueryClient } from "../../../utils/reactQuery";
 import userEvent from "@testing-library/user-event";
@@ -112,25 +111,13 @@ describe("TDHCurrentRules", () => {
     "keeps numeric formatting and fallback labels in %s",
     async (locale, fullMultiplier, ceiling) => {
       fetchMock.mockResolvedValue(rules);
-      renderWithQueryClient(
-        <>
-          <TDHCurrentRules locale={locale} />
-          <TDHExample locale={locale} />
-        </>
-      );
+      renderWithQueryClient(<TDHCurrentRules locale={locale} />);
 
       expect(
         await screen.findByText(`${fullMultiplier}× before Gradients`)
       ).toBeInTheDocument();
       expect(
         screen.getByText(`Final rounded multiplier ceiling: ${ceiling}×`)
-      ).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "Today" })).toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: "+30 days" })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("checkbox", { name: /sell nakamoto/i })
       ).toBeInTheDocument();
     }
   );

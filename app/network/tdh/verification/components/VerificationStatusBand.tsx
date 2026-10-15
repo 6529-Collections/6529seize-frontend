@@ -1,39 +1,79 @@
-import type { ReactNode } from "react";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
-import { formatInteger, selectPluralCategory } from "@/i18n/format";
-import type { CutoverState, VerdictState } from "@/lib/tdh/verification/states";
+import {
+  formatInteger,
+  formatPercent,
+  selectPluralCategory,
+} from "@/i18n/format";
+import {
+  CUTOVER_DECIDED_DATE,
+  type CutoverState,
+  type Freshness,
+  type VerdictState,
+} from "@/lib/tdh/verification/states";
+import TdhDisclosure from "../../shared/TdhDisclosure";
 import TdhSource from "../../shared/TdhSource";
 import TdhStatusPill from "../../shared/TdhStatusPill";
-import { TDH_CARD, TDH_FOCUS_RING } from "../../shared/tdhStyles";
-import { formatCycleDate } from "./verificationFormat";
+import { TDH_CARD } from "../../shared/tdhStyles";
+import { formatCycleDate, formatShortCycleDate } from "./verificationFormat";
 
-const SUMMARY = `tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-gap-2 tw-rounded-lg tw-text-sm tw-text-iron-300 hover:tw-text-iron-100 [&::-webkit-details-marker]:tw-hidden ${TDH_FOCUS_RING}`;
+const LABEL =
+  "tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400";
 
-function Explainer({
-  label,
-  children,
+function plural(locale: SupportedLocale, count: number): "one" | "other" {
+  return selectPluralCategory(locale, count) === "one" ? "one" : "other";
+}
+
+/** The latest report, and a warning when reports are late or missing. */
+function FreshnessLine({
+  locale,
+  freshness,
+  latestDate,
+  missingDays,
 }: {
-  readonly label: string;
-  readonly children: ReactNode;
+  readonly locale: SupportedLocale;
+  readonly freshness: Freshness;
+  readonly latestDate: string;
+  readonly missingDays: number;
 }) {
+  const latest = {
+    cycle: formatInteger(locale, freshness.latest),
+    date: formatCycleDate(locale, latestDate),
+  };
+  const late = freshness.kind === "late";
   return (
-    <details className="tw-group">
-      <summary className={SUMMARY}>
-        <span className="tw-underline tw-decoration-iron-600 tw-underline-offset-4">
-          {label}
+    <div className="tw-mt-4 tw-space-y-1 tw-text-sm tw-leading-6">
+      <p
+        className={`tw-m-0 tw-flex tw-items-start tw-gap-2 ${late ? "tw-text-amber-100" : "tw-text-iron-400"}`}
+        role={late ? "status" : undefined}
+      >
+        {late && (
+          <ExclamationTriangleIcon
+            aria-hidden="true"
+            className="tw-mt-1 tw-size-4 tw-shrink-0 tw-text-amber-300"
+          />
+        )}
+        <span>
+          {late
+            ? t(
+                locale,
+                `network.tdh.verify.status.late.${plural(locale, freshness.missing)}` as MessageKey,
+                { ...latest, days: formatInteger(locale, freshness.missing) }
+              )
+            : t(locale, "network.tdh.verify.status.latest", latest)}
         </span>
-        <span
-          aria-hidden="true"
-          className="tw-text-iron-500 tw-transition-transform group-open:tw-rotate-90 motion-reduce:tw-transition-none"
-        >
-          ›
-        </span>
-      </summary>
-      <div className="tw-pb-1 tw-pt-1 tw-text-sm tw-leading-6 tw-text-iron-300">
-        {children}
-      </div>
-    </details>
+      </p>
+      {missingDays > 0 && (
+        <p className="tw-m-0 tw-text-amber-100">
+          {t(
+            locale,
+            `network.tdh.verify.status.missing.${plural(locale, missingDays)}` as MessageKey,
+            { count: formatInteger(locale, missingDays) }
+          )}
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -45,6 +85,10 @@ export function VerificationStatusBand({
   verdict,
   mode,
   cutover,
+  isLatest,
+  freshness,
+  latestDate,
+  missingDays,
 }: {
   readonly locale: SupportedLocale;
   readonly cycleDay: number;
@@ -53,6 +97,10 @@ export function VerificationStatusBand({
   readonly verdict: VerdictState;
   readonly mode: "unchecked-history" | "checked" | null;
   readonly cutover: CutoverState;
+  readonly isLatest: boolean;
+  readonly freshness: Freshness | null;
+  readonly latestDate: string | null;
+  readonly missingDays: number;
 }) {
   const cycle = formatInteger(locale, cycleDay);
   return (
@@ -66,7 +114,7 @@ export function VerificationStatusBand({
         </h2>
         <dl className="tw-m-0 tw-grid tw-gap-5 sm:tw-grid-cols-2">
           <div>
-            <dt className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
+            <dt className={LABEL}>
               {t(locale, "network.tdh.verify.status.verdictLabel")}
             </dt>
             <dd className="tw-m-0 tw-mt-2">
@@ -81,7 +129,7 @@ export function VerificationStatusBand({
           </div>
           {mode && (
             <div>
-              <dt className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
+              <dt className={LABEL}>
                 {t(locale, "network.tdh.verify.status.historyLabel")}
               </dt>
               <dd className="tw-m-0 tw-mt-2">
@@ -97,10 +145,10 @@ export function VerificationStatusBand({
                       : "network.tdh.verify.mode.uncheckedShort"
                   )}
                 </p>
-                <Explainer
-                  label={t(locale, "network.tdh.verify.status.explain")}
+                <TdhDisclosure
+                  summary={t(locale, "network.tdh.verify.status.explain")}
                 >
-                  <p className="tw-m-0">
+                  <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
                     {t(
                       locale,
                       mode === "checked"
@@ -112,12 +160,12 @@ export function VerificationStatusBand({
                       locale={locale}
                     />
                   </p>
-                </Explainer>
+                </TdhDisclosure>
               </dd>
             </div>
           )}
         </dl>
-        <p className="tw-m-0 tw-mt-5 tw-flex tw-flex-col tw-gap-x-3 tw-gap-y-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4 tw-text-sm tw-tabular-nums tw-text-iron-400 sm:tw-flex-row sm:tw-flex-wrap">
+        <p className="tw-m-0 tw-mt-5 tw-flex tw-flex-col tw-gap-x-3 tw-gap-y-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4 tw-text-sm tw-tabular-nums tw-text-iron-300 sm:tw-flex-row sm:tw-flex-wrap">
           <span>{t(locale, "network.tdh.verify.status.cycle", { cycle })}</span>
           <span aria-hidden="true" className="tw-hidden sm:tw-inline">
             ·
@@ -140,8 +188,20 @@ export function VerificationStatusBand({
             </>
           )}
         </p>
+        {freshness && latestDate && (
+          <FreshnessLine
+            locale={locale}
+            freshness={freshness}
+            latestDate={latestDate}
+            missingDays={missingDays}
+          />
+        )}
       </div>
-      <VerificationCutoverCard locale={locale} cutover={cutover} />
+      <VerificationCutoverCard
+        locale={locale}
+        cutover={cutover}
+        asOfToday={!isLatest}
+      />
     </section>
   );
 }
@@ -149,18 +209,18 @@ export function VerificationStatusBand({
 export function VerificationCutoverCard({
   locale,
   cutover,
+  asOfToday = false,
 }: {
   readonly locale: SupportedLocale;
   readonly cutover: CutoverState;
+  readonly asOfToday?: boolean;
 }) {
   let headline: string;
   let body: string;
   if (cutover.kind === "countdown") {
-    const plural =
-      selectPluralCategory(locale, cutover.days) === "one" ? "one" : "other";
     headline = t(
       locale,
-      `network.tdh.verify.cutover.countdown.${plural}` as MessageKey,
+      `network.tdh.verify.cutover.countdown.${plural(locale, cutover.days)}` as MessageKey,
       { days: formatInteger(locale, cutover.days) }
     );
     body = t(locale, "network.tdh.verify.cutover.countdownBody", {
@@ -185,15 +245,20 @@ export function VerificationCutoverCard({
   return (
     <aside
       aria-labelledby="tdh-verify-cutover-heading"
-      className={`${TDH_CARD} tw-flex tw-flex-col tw-justify-between tw-gap-3 tw-p-5 sm:tw-p-6`}
+      className={`${TDH_CARD} tw-flex tw-flex-col tw-justify-between tw-gap-4 tw-p-5 sm:tw-p-6`}
       data-cutover={cutover.kind}
     >
       <div>
         <h2
           id="tdh-verify-cutover-heading"
-          className="tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500"
+          className={`tw-m-0 tw-flex tw-flex-wrap tw-items-center tw-gap-2 ${LABEL}`}
         >
           {t(locale, "network.tdh.verify.cutover.heading")}
+          {asOfToday && (
+            <span className="tw-rounded-full tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-[11px] tw-normal-case tw-tracking-normal tw-text-iron-300">
+              {t(locale, "network.tdh.verify.cutover.asOfToday")}
+            </span>
+          )}
         </h2>
         <p className="tw-m-0 tw-mt-2 tw-text-2xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50">
           {headline}
@@ -203,25 +268,54 @@ export function VerificationCutoverCard({
           <TdhSource refs={["D132", "D121"]} locale={locale} />
         </p>
       </div>
-      {cutover.kind === "countdown" && <CutoverTrack days={cutover.days} />}
+      {cutover.kind === "countdown" && (
+        <CutoverProgress
+          locale={locale}
+          elapsed={cutover.elapsed}
+          plannedDate={cutover.plannedDate}
+        />
+      )}
     </aside>
   );
 }
 
-/** Seven short segments, one per day of D132's week, lit as days pass. */
-function CutoverTrack({ days }: { readonly days: number }) {
-  const total = 7;
-  const remaining = Math.min(days, total);
+/** The week from D132's decision to the planned cutover, and how much has passed. */
+function CutoverProgress({
+  locale,
+  elapsed,
+  plannedDate,
+}: {
+  readonly locale: SupportedLocale;
+  readonly elapsed: number;
+  readonly plannedDate: string;
+}) {
+  const label = t(locale, "network.tdh.verify.cutover.progress", {
+    elapsed: formatPercent(locale, elapsed, 0),
+  });
   return (
-    <div aria-hidden="true" className="tw-flex tw-gap-1">
-      {Array.from({ length: total }, (_, index) => (
+    <div>
+      <div
+        role="img"
+        aria-label={label}
+        className="tw-relative tw-h-1.5 tw-w-full tw-overflow-hidden tw-rounded-full tw-bg-iron-800"
+      >
         <span
-          key={index}
-          className={`tw-h-1.5 tw-flex-1 tw-rounded-full ${
-            index < total - remaining ? "tw-bg-primary-400" : "tw-bg-iron-700"
-          }`}
+          className="tw-absolute tw-inset-y-0 tw-left-0 tw-rounded-full tw-bg-primary-400"
+          style={{ width: `${Math.max(elapsed * 100, 2)}%` }}
         />
-      ))}
+      </div>
+      <p className="tw-m-0 tw-mt-2 tw-flex tw-justify-between tw-gap-3 tw-text-xs tw-tabular-nums tw-text-iron-400">
+        <span>
+          {t(locale, "network.tdh.verify.cutover.decided", {
+            date: formatShortCycleDate(locale, CUTOVER_DECIDED_DATE),
+          })}
+        </span>
+        <span>
+          {t(locale, "network.tdh.verify.cutover.planned", {
+            date: formatShortCycleDate(locale, plannedDate),
+          })}
+        </span>
+      </p>
     </div>
   );
 }

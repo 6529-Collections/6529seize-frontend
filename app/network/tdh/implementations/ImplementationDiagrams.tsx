@@ -1,8 +1,14 @@
 import { ArrowDownIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
-import { useId } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
-import { TDH_SERIES } from "../shared/tdhStyles";
+import {
+  TDH_CAPTION,
+  TDH_SERIES,
+  TDH_TABLE,
+  TDH_TABLE_WRAP,
+  TDH_TD,
+  TDH_TH,
+} from "../shared/tdhStyles";
 
 type Series = keyof typeof TDH_SERIES;
 
@@ -47,19 +53,19 @@ function Arrow({
   readonly dashed?: boolean;
 }) {
   return (
-    <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-pl-3 tw-text-xs tw-text-iron-400 sm:tw-pl-0">
+    <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-pl-3 tw-text-xs tw-text-iron-300 sm:tw-pl-0">
       <span
         aria-hidden="true"
         className={`tw-hidden tw-w-6 tw-border-0 tw-border-t tw-border-iron-500 sm:tw-inline-block ${dashed ? "tw-border-dashed" : "tw-border-solid"}`}
       />
       <ArrowDownIcon
         aria-hidden="true"
-        className="tw-size-3.5 tw-shrink-0 tw-text-iron-500 sm:tw-hidden"
+        className="tw-size-3.5 tw-shrink-0 tw-text-iron-400 sm:tw-hidden"
       />
       {note && <span className="tw-italic">{note}</span>}
       <ArrowRightIcon
         aria-hidden="true"
-        className="tw-hidden tw-size-3.5 tw-text-iron-500 sm:tw-block"
+        className="tw-hidden tw-size-3.5 tw-text-iron-400 sm:tw-block"
       />
     </span>
   );
@@ -67,7 +73,7 @@ function Arrow({
 
 function Wall({ label }: { readonly label: string }) {
   return (
-    <span className="tw-inline-flex tw-items-center tw-gap-1 tw-rounded-md tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-400/[0.07] tw-px-2 tw-py-0.5 tw-text-[11px] tw-text-amber-100">
+    <span className="tw-inline-flex tw-items-center tw-gap-1 tw-rounded-md tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-400/[0.07] tw-px-2 tw-py-0.5 tw-text-xs tw-text-amber-100">
       <span aria-hidden="true">▮</span>
       {label}
     </span>
@@ -89,11 +95,11 @@ export function LineageDiagram({
       <ol className="tw-m-0 tw-list-none tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900/40 tw-p-4">
         <li className={row}>
           <Doc label={m("lineage.p26")} />
-          <Arrow />
+          <Arrow note={m("lineage.wrote")} />
           <Impl label={m("name.python")} series="python" />
         </li>
         <li className={row}>
-          <Doc label={m("lineage.p26")} />
+          <Doc label={m("lineage.p26cited")} />
           <Arrow />
           <Wall label={m("lineage.wallPython")} />
           <Impl label={m("lineage.cleanRoom")} series="rust" />
@@ -107,6 +113,11 @@ export function LineageDiagram({
           <Impl label={m("name.programB")} series="programB" />
         </li>
         <li className={row}>
+          <Doc label={m("lineage.p26")} />
+          <Arrow />
+          <Impl label={m("name.lean")} series="lean" />
+        </li>
+        <li className={row}>
           <Impl label={m("lineage.backend")} series="live" />
           <Arrow note={m("lineage.replaced")} dashed />
           <Impl label={m("name.rust")} series="rust" />
@@ -116,123 +127,151 @@ export function LineageDiagram({
   );
 }
 
-/** Diagram 3: the shared vectors at the centre of every check (plan §9.2). */
-export function CheckWebDiagram({
-  locale,
-}: {
-  readonly locale: SupportedLocale;
-}) {
-  const id = useId();
-  const cx = 210;
-  const cy = 176;
-  const nodes = [
-    { key: "rust", series: "rust" as const, angle: -90 },
-    { key: "programB", series: "programB" as const, angle: 30 },
-    { key: "python", series: "python" as const, angle: 150 },
-  ];
-  const arcs = [
-    { key: "dual", start: -90, end: 30 },
-    { key: "daily", start: 150, end: 270 },
-    { key: "proofs", start: 30, end: 150 },
-  ];
-  const point = (angle: number, radius: number) => {
-    const radians = (angle * Math.PI) / 180;
-    return [
-      cx + radius * Math.cos(radians),
-      cy + radius * Math.sin(radians),
-    ] as const;
-  };
-  const arcPath = (start: number, end: number, radius: number) => {
-    const [x1, y1] = point(start + 14, radius);
-    const [x2, y2] = point(end - 14, radius);
-    return `M${x1.toFixed(1)},${y1.toFixed(1)} A${radius},${radius} 0 0 1 ${x2.toFixed(1)},${y2.toFixed(1)}`;
-  };
+type Cell = "yes" | "planned" | "underTest" | "against" | "no";
+
+const MATRIX_COLUMNS: ReadonlyArray<{
+  readonly key: "rust" | "programB" | "python" | "lean" | "backend";
+  readonly series: Series;
+}> = [
+  { key: "rust", series: "rust" },
+  { key: "programB", series: "programB" },
+  { key: "python", series: "python" },
+  { key: "lean", series: "lean" },
+  { key: "backend", series: "live" },
+];
+
+const MATRIX_ROWS: ReadonlyArray<{
+  readonly key: "vectors" | "fullDay" | "random" | "dual" | "daily" | "proofs";
+  readonly cells: readonly [Cell, Cell, Cell, Cell, Cell];
+}> = [
+  { key: "vectors", cells: ["yes", "yes", "yes", "yes", "no"] },
+  { key: "fullDay", cells: ["yes", "no", "yes", "yes", "underTest"] },
+  { key: "random", cells: ["no", "no", "yes", "against", "no"] },
+  { key: "dual", cells: ["planned", "planned", "no", "no", "no"] },
+  { key: "daily", cells: ["yes", "no", "yes", "no", "underTest"] },
+  { key: "proofs", cells: ["planned", "planned", "no", "no", "no"] },
+];
+
+const CELL_TONE: Record<Cell, string> = {
+  yes: "tw-bg-success",
+  planned: "tw-bg-iron-400",
+  underTest: "tw-bg-iron-300",
+  against: "tw-bg-success",
+  no: "",
+};
+
+/**
+ * Diagram 3: which check covers which program. It replaces a radial figure
+ * whose arcs had no legend: each cell says in words what applies.
+ */
+export function CheckMatrix({ locale }: { readonly locale: SupportedLocale }) {
+  const m = (key: string) => t(locale, `network.tdh.impl.${key}` as MessageKey);
   return (
-    <svg
-      viewBox="0 0 420 352"
-      role="img"
-      aria-labelledby={`${id}-title ${id}-desc`}
-      className="tw-mx-auto tw-block tw-h-auto tw-w-full tw-max-w-md"
-    >
-      <title id={`${id}-title`}>
-        {t(locale, "network.tdh.impl.web.title")}
-      </title>
-      <desc id={`${id}-desc`}>{t(locale, "network.tdh.impl.web.desc")}</desc>
-      {arcs.map((arc) => {
-        const [lx, ly] = point((arc.start + arc.end) / 2, 158);
-        return (
-          <g key={arc.key}>
-            <path
-              d={arcPath(arc.start, arc.end, 140)}
-              fill="none"
-              strokeWidth="1.5"
-              strokeDasharray="5 5"
-              className="tw-stroke-iron-600"
-            />
-            <text
-              x={lx}
-              y={ly + 4}
-              textAnchor="middle"
-              className="tw-fill-iron-400 tw-text-[12px]"
-            >
-              {t(locale, `network.tdh.impl.web.${arc.key}` as MessageKey)}
-            </text>
-          </g>
-        );
-      })}
-      {nodes.map((node) => {
-        const [x, y] = point(node.angle, 96);
-        const [sx, sy] = point(node.angle, 44);
-        const [mx, my] = point(node.angle, 70);
-        return (
-          <g key={node.key}>
-            <line
-              x1={sx}
-              y1={sy}
-              x2={x}
-              y2={y}
-              strokeWidth="1.5"
-              className="tw-stroke-iron-500"
-            />
-            <text
-              x={mx + 6}
-              y={my - 4}
-              className="tw-fill-success tw-text-[11px] tw-font-medium"
-            >
-              {t(locale, "network.tdh.impl.web.pass")}
-            </text>
-            <circle
-              cx={x}
-              cy={y}
-              r="8"
-              className={TDH_SERIES[node.series].fill}
-            />
-            <text
-              x={x}
-              y={y + (node.angle < 0 ? -16 : 24)}
-              textAnchor="middle"
-              className="tw-fill-iron-100 tw-text-[12px] tw-font-medium"
-            >
-              {t(locale, `network.tdh.impl.name.${node.key}` as MessageKey)}
-            </text>
-          </g>
-        );
-      })}
-      <circle
-        cx={cx}
-        cy={cy}
-        r="42"
-        className="tw-fill-iron-900 tw-stroke-primary-400/70"
-        strokeWidth="1.5"
-      />
-      <text
-        x={cx}
-        y={cy + 4}
-        textAnchor="middle"
-        className="tw-fill-iron-50 tw-text-[13px] tw-font-semibold"
+    <figure className="tw-m-0">
+      <p className="tw-m-0 tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-200 md:tw-hidden">
+        {m("matrix.title")}
+      </p>
+      <ul className="tw-m-0 tw-grid tw-list-none tw-gap-2 tw-p-0 md:tw-hidden">
+        {MATRIX_ROWS.map((row) => (
+          <li
+            key={row.key}
+            className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-4 tw-py-3"
+          >
+            <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
+              {m(`matrix.${row.key}`)}
+            </p>
+            <ul className="tw-m-0 tw-mt-2 tw-flex tw-list-none tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-p-0 tw-text-xs">
+              {row.cells.map((cell, index) => {
+                const column = MATRIX_COLUMNS[index];
+                if (!column || cell === "no") {
+                  return null;
+                }
+                return (
+                  <li
+                    key={column.key}
+                    className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-iron-200"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`tw-size-2 tw-rounded-full ${TDH_SERIES[column.series].bg}`}
+                    />
+                    {m(`name.${column.key}`)}
+                    {cell !== "yes" && (
+                      <span className="tw-text-iron-400">
+                        ({m(`matrix.${cell}`)})
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </li>
+        ))}
+      </ul>
+      <div
+        className={`${TDH_TABLE_WRAP} tw-hidden md:tw-block`}
+        tabIndex={0}
+        role="region"
+        aria-label={m("matrix.caption")}
       >
-        {t(locale, "network.tdh.impl.web.vectors")}
-      </text>
-    </svg>
+        <table className={`${TDH_TABLE} tw-min-w-[40rem]`}>
+          <caption className={TDH_CAPTION}>{m("matrix.title")}</caption>
+          <thead>
+            <tr>
+              <th scope="col" className={TDH_TH}>
+                {m("matrix.check")}
+              </th>
+              {MATRIX_COLUMNS.map((column) => (
+                <th key={column.key} scope="col" className={TDH_TH}>
+                  <span className="tw-inline-flex tw-items-center tw-gap-2">
+                    <span
+                      aria-hidden="true"
+                      className={`tw-size-2 tw-shrink-0 tw-rounded-full ${TDH_SERIES[column.series].bg}`}
+                    />
+                    {m(`name.${column.key}`)}
+                  </span>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {MATRIX_ROWS.map((row) => (
+              <tr key={row.key}>
+                <th
+                  scope="row"
+                  className={`${TDH_TD} tw-font-medium tw-text-iron-200`}
+                >
+                  {m(`matrix.${row.key}`)}
+                </th>
+                {row.cells.map((cell, index) => (
+                  <td
+                    key={MATRIX_COLUMNS[index]?.key ?? index}
+                    className={`${TDH_TD} tw-text-[13px] ${cell === "no" ? "tw-text-iron-500" : "tw-text-iron-100"}`}
+                  >
+                    {cell === "no" ? (
+                      <>
+                        <span aria-hidden="true">–</span>
+                        <span className="tw-sr-only">{m("matrix.no")}</span>
+                      </>
+                    ) : (
+                      <span className="tw-inline-flex tw-items-start tw-gap-1.5">
+                        <span
+                          aria-hidden="true"
+                          className={`tw-mt-1.5 tw-size-1.5 tw-shrink-0 tw-rounded-full ${CELL_TONE[cell]}`}
+                        />
+                        {m(`matrix.${cell}`)}
+                      </span>
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <figcaption className="tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400">
+        {m("matrix.note")}
+      </figcaption>
+    </figure>
   );
 }

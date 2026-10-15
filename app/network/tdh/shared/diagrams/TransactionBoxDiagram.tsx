@@ -1,127 +1,57 @@
-import { useId } from "react";
+import {
+  ArrowLongLeftIcon,
+  ArrowLongRightIcon,
+} from "@heroicons/react/24/outline";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+
+function Wallet({ label }: { readonly label: string }) {
+  return (
+    <span className="tw-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-800 tw-text-base tw-font-semibold tw-text-iron-50">
+      {label}
+    </span>
+  );
+}
 
 /**
  * Step 5 and DEV-2: one transaction that sends a copy out of Wallet A and
  * back. Netted at the transaction boundary (D131), Wallet A never lost it.
+ * Built in HTML, so its labels stay legible at any width.
  */
 export default function TransactionBoxDiagram({
   locale,
 }: {
   readonly locale: SupportedLocale;
 }) {
-  const id = useId();
-  const titleId = `${id}-title`;
-  const descId = `${id}-desc`;
   return (
-    <svg
-      viewBox="0 0 480 200"
-      role="img"
-      aria-labelledby={`${titleId} ${descId}`}
-      className="tw-block tw-h-auto tw-w-full tw-max-w-xl"
-    >
-      <title id={titleId}>{t(locale, "network.tdh.how.s5.diagramTitle")}</title>
-      <desc id={descId}>{t(locale, "network.tdh.how.s5.diagramDesc")}</desc>
-      <defs>
-        <marker
-          id={`${id}-arrow`}
-          viewBox="0 0 10 10"
-          refX="9"
-          refY="5"
-          markerWidth="7"
-          markerHeight="7"
-          orient="auto-start-reverse"
-        >
-          <path d="M0,0 L10,5 L0,10 z" className="tw-fill-primary-300" />
-        </marker>
-      </defs>
-      <rect
-        x="20"
-        y="14"
-        width="440"
-        height="120"
-        rx="14"
-        className="tw-fill-iron-900 tw-stroke-iron-600"
-        strokeDasharray="5 5"
-        strokeWidth="1.5"
-      />
-      <text
-        x="36"
-        y="38"
-        className="tw-fill-iron-400 tw-text-[12px] tw-font-medium"
-      >
-        {t(locale, "network.tdh.how.s5.transaction")}
-      </text>
-      {[
-        { x: 70, label: "A" },
-        { x: 410, label: "C" },
-      ].map((wallet) => (
-        <g key={wallet.label}>
-          <circle
-            cx={wallet.x}
-            cy="84"
-            r="24"
-            className="tw-fill-iron-800 tw-stroke-iron-500"
-            strokeWidth="1.5"
-          />
-          <text
-            x={wallet.x}
-            y="89"
-            textAnchor="middle"
-            className="tw-fill-iron-50 tw-text-[15px] tw-font-semibold"
-          >
-            {wallet.label}
-          </text>
-        </g>
-      ))}
-      <path
-        d="M98 74 C 180 50, 300 50, 382 74"
-        fill="none"
-        strokeWidth="2"
-        className="tw-stroke-primary-300"
-        markerEnd={`url(#${id}-arrow)`}
-      />
-      <text
-        x="240"
-        y="52"
-        textAnchor="middle"
-        className="tw-fill-iron-300 tw-text-[12px]"
-      >
-        {t(locale, "network.tdh.how.s5.out")}
-      </text>
-      <path
-        d="M382 96 C 300 120, 180 120, 98 96"
-        fill="none"
-        strokeWidth="2"
-        className="tw-stroke-primary-300"
-        markerEnd={`url(#${id}-arrow)`}
-      />
-      <text
-        x="240"
-        y="126"
-        textAnchor="middle"
-        className="tw-fill-iron-300 tw-text-[12px]"
-      >
-        {t(locale, "network.tdh.how.s5.back")}
-      </text>
-      <rect
-        x="120"
-        y="152"
-        width="240"
-        height="36"
-        rx="18"
-        className="tw-fill-iron-800 tw-stroke-success"
-        strokeWidth="1.5"
-      />
-      <text
-        x="240"
-        y="175"
-        textAnchor="middle"
-        className="tw-fill-iron-50 tw-text-[13px] tw-font-medium"
-      >
-        {t(locale, "network.tdh.how.s5.net")}
-      </text>
-    </svg>
+    <figure className="tw-m-0 tw-max-w-md">
+      <figcaption className="tw-sr-only">
+        {t(locale, "network.tdh.how.s5.diagramDesc")}
+      </figcaption>
+      <div aria-hidden="true">
+        <div className="tw-rounded-xl tw-border tw-border-dashed tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-py-3">
+          <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-300">
+            {t(locale, "network.tdh.how.s5.transaction")}
+          </p>
+          <div className="tw-mt-2 tw-flex tw-items-center tw-gap-2">
+            <Wallet label="A" />
+            <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-1.5">
+              <span className="tw-flex tw-items-center tw-justify-center tw-gap-1 tw-text-xs tw-text-primary-300">
+                {t(locale, "network.tdh.how.s5.out")}
+                <ArrowLongRightIcon className="tw-size-5 tw-text-primary-300" />
+              </span>
+              <span className="tw-flex tw-items-center tw-justify-center tw-gap-1 tw-text-xs tw-text-primary-300">
+                <ArrowLongLeftIcon className="tw-size-5 tw-text-primary-300" />
+                {t(locale, "network.tdh.how.s5.back")}
+              </span>
+            </div>
+            <Wallet label="C" />
+          </div>
+        </div>
+        <p className="tw-m-0 tw-mt-2 tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-success/70 tw-bg-iron-800 tw-px-3 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-50">
+          {t(locale, "network.tdh.how.s5.net")}
+        </p>
+      </div>
+    </figure>
   );
 }

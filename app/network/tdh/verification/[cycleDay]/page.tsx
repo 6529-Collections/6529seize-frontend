@@ -67,16 +67,25 @@ export default async function TdhVerificationDayPage({
   const { indexLoad, entry, dayLoad } = loaded;
   const isSample = indexLoad.source === "sample";
   const cycle = formatInteger(locale, entry.cycleDay);
+  const date = formatCycleDate(locale, entry.date);
 
   return (
     <TdhPageShell
       locale={locale}
       current="/network/tdh/verification"
       dropdownHref="/network/tdh/verification"
-      documentTitle={t(locale, "network.tdh.verify.dayPageTitle", { cycle })}
-      title={t(locale, "network.tdh.verify.dayTitle", { cycle })}
+      documentTitle={t(locale, "network.tdh.verify.dayPageTitle", {
+        cycle,
+        date,
+      })}
+      title={t(locale, "network.tdh.verify.dayTitle", { date })}
       pills={
-        isSample ? <TdhStatusPill pill="sample" locale={locale} /> : undefined
+        <>
+          <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-text-xs tw-tabular-nums tw-text-iron-200 sm:tw-text-sm">
+            {t(locale, "network.tdh.verify.dayCycle", { cycle })}
+          </span>
+          {isSample && <TdhStatusPill pill="sample" locale={locale} />}
+        </>
       }
       lede={<VerificationLede locale={locale} />}
     >
@@ -104,9 +113,13 @@ export async function generateMetadata({
       ? indexLoad.index.days.find((day) => day.cycleDay === value)
       : undefined;
   const cycle = formatInteger(DEFAULT_LOCALE, value ?? 0);
+  const date = entry ? formatCycleDate(DEFAULT_LOCALE, entry.date) : cycle;
   return getAppMetadata(
     {
-      title: t(DEFAULT_LOCALE, "network.tdh.verify.dayPageTitle", { cycle }),
+      title: t(DEFAULT_LOCALE, "network.tdh.verify.dayPageTitle", {
+        cycle,
+        date,
+      }),
       description: entry
         ? t(DEFAULT_LOCALE, "network.tdh.verify.dayMetadataDescription", {
             date: formatCycleDate(DEFAULT_LOCALE, entry.date),

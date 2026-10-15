@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
-import { t, type MessageKey } from "@/i18n/messages";
+import { t } from "@/i18n/messages";
 import { formatNumber } from "@/i18n/format";
 import type {
   VerificationImplementation,
@@ -17,17 +17,18 @@ import {
   TDH_TH,
   TDH_SERIES,
 } from "../../shared/tdhStyles";
-import {
-  formatInteger,
-  formatSigned,
-  middleTruncate,
-} from "./verificationFormat";
+import { formatInteger, middleTruncate } from "./verificationFormat";
 
 type RootKey = "cycleRoot" | "walletRoot" | "historyRoot";
+const ROOT_LABELS: Record<RootKey, string> = {
+  cycleRoot: "cycle",
+  walletRoot: "wallet",
+  historyRoot: "history",
+};
 
-const MUTED = "tw-text-iron-500";
+const MUTED = "tw-text-iron-400";
 
-function Missing({ children }: { readonly children: ReactNode }) {
+function Muted({ children }: { readonly children: ReactNode }) {
   return <span className={MUTED}>{children}</span>;
 }
 
@@ -75,6 +76,31 @@ function SeriesHeader({
   );
 }
 
+function ArweaveLink({
+  locale,
+  source,
+  labelKey,
+}: {
+  readonly locale: SupportedLocale;
+  readonly source: string;
+  readonly labelKey:
+    | "network.tdh.verify.side.upload"
+    | "network.tdh.verify.side.walletUpload";
+}) {
+  const id = source.replace(/^arweave:/, "");
+  return (
+    <a
+      href={`https://arweave.net/${id}`}
+      className={TDH_LINK}
+      rel="noopener noreferrer"
+      target="_blank"
+      aria-label={t(locale, "network.tdh.verify.side.uploadLink", { id })}
+    >
+      {t(locale, labelKey, { id: middleTruncate(id, 5) })}
+    </a>
+  );
+}
+
 export default function VerificationSideBySide({
   locale,
   rust,
@@ -87,75 +113,125 @@ export default function VerificationSideBySide({
   readonly live: VerificationLive | null;
 }) {
   const notRun = t(locale, "network.tdh.verify.side.notRun");
-  const notYet = t(locale, "network.tdh.verify.side.notYetPublished");
-  const notPublished = t(locale, "network.tdh.verify.side.notPublished");
+  const notApplicable = t(locale, "network.tdh.impl.notApplicable");
 
-  const count = (value: number | null | undefined, missing: string) =>
+  const count = (value: number | null | undefined) =>
     value === null || value === undefined ? (
-      <Missing>{missing}</Missing>
+      <Muted>{t(locale, "network.tdh.verify.tiles.liveMissing")}</Muted>
     ) : (
       formatInteger(locale, value)
     );
 
-  const deltaNote = (value: number | null | undefined, against: number) =>
-    value === null || value === undefined || value === against ? null : (
-      <span className="tw-mt-0.5 tw-block tw-text-xs tw-text-amber-200">
-        {t(locale, "network.tdh.verify.side.deltaVsRust", {
-          delta: formatSigned(locale, value - against),
-        })}
+  const versusRust = (value: number | null | undefined) => {
+    if (value === null || value === undefined) {
+      return null;
+    }
+    const difference = value - rust.totalTdh;
+    let text = t(locale, "network.tdh.verify.side.equalRust");
+    if (difference !== 0) {
+      text = t(
+        locale,
+        difference > 0
+          ? "network.tdh.verify.side.higherRust"
+          : "network.tdh.verify.side.lowerRust",
+        { amount: formatInteger(locale, Math.abs(difference)) }
+      );
+    }
+    return (
+      <span
+        className={`tw-mt-0.5 tw-block tw-text-xs ${difference === 0 ? "tw-text-iron-400" : "tw-text-amber-200"}`}
+      >
+        {text}
       </span>
     );
+  };
 
-  const root = (impl: VerificationImplementation | null, key: RootKey) => {
-    if (impl === null) {
-      return <Missing>{notRun}</Missing>;
+  const roots = (impl: VerificationImplementation) => {
+    const present = (["cycleRoot", "walletRoot", "historyRoot"] as const)
+      .map((key) => ({ key, value: impl[key] }))
+      .filter((entry): entry is { key: RootKey; value: string } =>
+        Boolean(entry.value)
+      );
+    if (present.length === 0) {
+      return null;
     }
-    const value = impl[key];
-    return value === null ? (
-      <Missing>{notYet}</Missing>
-    ) : (
-      <HashValue
-        locale={locale}
-        value={value}
-        name={t(locale, `network.tdh.verify.side.${key}` as MessageKey)}
-      />
+    return (
+      <span className="tw-flex tw-flex-col tw-gap-1">
+        {present.map((entry) => (
+          <span
+            key={entry.key}
+            className="tw-inline-flex tw-flex-wrap tw-items-center tw-gap-x-2"
+          >
+            <span className="tw-w-14 tw-text-xs tw-text-iron-400">
+              {ROOT_LABELS[entry.key]}
+            </span>
+            <HashValue
+              locale={locale}
+              value={entry.value}
+              name={`${ROOT_LABELS[entry.key]} root`}
+            />
+          </span>
+        ))}
+      </span>
     );
   };
 
   const commit = (impl: VerificationImplementation | null) => {
     if (impl === null) {
-      return <Missing>{notRun}</Missing>;
+      return <Muted>{notRun}</Muted>;
     }
     return impl.commit === null ? (
-      <Missing>{notYet}</Missing>
+      <Muted>{notApplicable}</Muted>
     ) : (
       <code className="tw-font-mono tw-text-xs tw-text-iron-200">
-        {impl.commit.slice(0, 12)}
+        {impl.commit.slice(0, 7)}
       </code>
     );
   };
 
   const runtime = (impl: VerificationImplementation | null) => {
     if (impl === null) {
-      return <Missing>{notRun}</Missing>;
+      return <Muted>{notRun}</Muted>;
     }
     return impl.runtimeMs === null ? (
-      <Missing>{notYet}</Missing>
+      <Muted>{notApplicable}</Muted>
     ) : (
       t(locale, "network.tdh.verify.side.seconds", {
         seconds: formatNumber(locale, impl.runtimeMs / 1000, {
-          maximumFractionDigits: 1,
+          maximumFractionDigits: 0,
         }),
       })
     );
   };
 
-  const liveSource = live?.source ?? null;
-  const uploadId = liveSource?.replace(/^arweave:/, "") ?? null;
+  const netting = (impl: VerificationImplementation | null) => {
+    if (impl === null) {
+      return <Muted>{notRun}</Muted>;
+    }
+    if (impl.transactionNetting === null) {
+      return (
+        <Muted>{t(locale, "network.tdh.verify.side.nettingUnknown")}</Muted>
+      );
+    }
+    return impl.transactionNetting ? (
+      t(locale, "network.tdh.verify.side.nettingOn")
+    ) : (
+      <span className="tw-text-amber-200">
+        {t(locale, "network.tdh.verify.side.nettingOff")}
+      </span>
+    );
+  };
+
+  const rustRoots = roots(rust);
+  const liveTotal = live?.totalTdh ?? null;
+  const showNetting =
+    rust.transactionNetting !== null ||
+    (python !== null && python.transactionNetting !== null);
+  const walletSource = live?.sources?.wallet ?? null;
 
   const rows: ReadonlyArray<{
     readonly key: string;
-    readonly label: string;
+    readonly label: ReactNode;
     readonly rust: ReactNode;
     readonly python: ReactNode;
     readonly live: ReactNode;
@@ -163,23 +239,31 @@ export default function VerificationSideBySide({
     {
       key: "totalTdh",
       label: t(locale, "network.tdh.verify.side.totalTdh"),
-      rust: formatInteger(locale, rust.totalTdh),
+      rust: (
+        <span className="tw-font-semibold tw-text-iron-50">
+          {formatInteger(locale, rust.totalTdh)}
+        </span>
+      ),
       python:
         python === null ? (
-          <Missing>{notRun}</Missing>
+          <Muted>{notRun}</Muted>
         ) : (
           <>
-            {formatInteger(locale, python.totalTdh)}
-            {deltaNote(python.totalTdh, rust.totalTdh)}
+            <span className="tw-font-semibold tw-text-iron-50">
+              {formatInteger(locale, python.totalTdh)}
+            </span>
+            {versusRust(python.totalTdh)}
           </>
         ),
       live:
-        live === null ? (
-          <Missing>{notYet}</Missing>
+        liveTotal === null ? (
+          count(null)
         ) : (
           <>
-            {count(live.totalTdh, notYet)}
-            {deltaNote(live.totalTdh, rust.totalTdh)}
+            <span className="tw-font-semibold tw-text-iron-50">
+              {formatInteger(locale, liveTotal)}
+            </span>
+            {versusRust(liveTotal)}
           </>
         ),
     },
@@ -189,11 +273,11 @@ export default function VerificationSideBySide({
       rust: formatInteger(locale, rust.identities),
       python:
         python === null ? (
-          <Missing>{notRun}</Missing>
+          <Muted>{notRun}</Muted>
         ) : (
           formatInteger(locale, python.identities)
         ),
-      live: count(live?.identities, notYet),
+      live: count(live?.identities),
     },
     {
       key: "wallets",
@@ -201,63 +285,103 @@ export default function VerificationSideBySide({
       rust: formatInteger(locale, rust.wallets),
       python:
         python === null ? (
-          <Missing>{notRun}</Missing>
+          <Muted>{notRun}</Muted>
         ) : (
           formatInteger(locale, python.wallets)
         ),
-      live: count(live?.wallets, notYet),
+      live: count(live?.wallets),
     },
-    ...(["cycleRoot", "walletRoot", "historyRoot"] as const).map((key) => ({
-      key,
-      label: t(locale, `network.tdh.verify.side.${key}` as MessageKey),
-      rust: root(rust, key),
-      python: root(python, key),
-      live: <Missing>{notPublished}</Missing>,
-    })),
+    ...(rustRoots === null
+      ? []
+      : [
+          {
+            key: "roots",
+            label: (
+              <>
+                {t(locale, "network.tdh.verify.side.roots")}
+                <span className="tw-mt-1 tw-block tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-400">
+                  {t(locale, "network.tdh.verify.side.rootsHelp")}
+                </span>
+              </>
+            ),
+            rust: rustRoots,
+            python:
+              python === null ? (
+                <Muted>{notRun}</Muted>
+              ) : (
+                (roots(python) ?? (
+                  <Muted>
+                    {t(locale, "network.tdh.verify.side.pythonRoots")}
+                  </Muted>
+                ))
+              ),
+            live: (
+              <Muted>{t(locale, "network.tdh.verify.side.liveRoots")}</Muted>
+            ),
+          },
+        ]),
+    ...(showNetting
+      ? [
+          {
+            key: "netting",
+            label: t(locale, "network.tdh.verify.side.netting"),
+            rust: netting(rust),
+            python: netting(python),
+            live: <Muted>{notApplicable}</Muted>,
+          },
+        ]
+      : []),
     {
       key: "commit",
       label: t(locale, "network.tdh.verify.side.commit"),
       rust: commit(rust),
       python: commit(python),
-      live: <Missing>{t(locale, "network.tdh.impl.notApplicable")}</Missing>,
+      live: <Muted>{notApplicable}</Muted>,
     },
     {
       key: "runtime",
-      label: t(locale, "network.tdh.verify.side.runtime"),
+      label: (
+        <>
+          {t(locale, "network.tdh.verify.side.runtime")}
+          <span className="tw-mt-1 tw-block tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-400">
+            {t(locale, "network.tdh.verify.side.runtimeNote")}
+          </span>
+        </>
+      ),
       rust: runtime(rust),
       python: runtime(python),
-      live: <Missing>{t(locale, "network.tdh.impl.notApplicable")}</Missing>,
+      live: <Muted>{notApplicable}</Muted>,
     },
     {
       key: "source",
       label: t(locale, "network.tdh.verify.side.source"),
-      rust: t(locale, "network.tdh.verify.side.computedHere"),
+      rust: t(locale, "network.tdh.verify.side.computedRust"),
       python:
         python === null ? (
-          <Missing>{notRun}</Missing>
+          <Muted>{notRun}</Muted>
         ) : (
-          t(locale, "network.tdh.verify.side.computedHere")
+          t(locale, "network.tdh.verify.side.computedPython")
         ),
-      live:
-        uploadId === null ? (
-          <Missing>
-            {t(locale, "network.tdh.verify.provenance.liveSourceMissing")}
-          </Missing>
-        ) : (
-          <a
-            href={`https://arweave.net/${uploadId}`}
-            className={TDH_LINK}
-            rel="noopener noreferrer"
-            target="_blank"
-            aria-label={t(locale, "network.tdh.verify.side.uploadLink", {
-              id: uploadId,
-            })}
-          >
-            {t(locale, "network.tdh.verify.side.upload", {
-              id: middleTruncate(uploadId, 5),
-            })}
-          </a>
-        ),
+      live: live?.source ? (
+        <span className="tw-flex tw-flex-col tw-gap-0.5">
+          <ArweaveLink
+            locale={locale}
+            source={live.source}
+            labelKey="network.tdh.verify.side.upload"
+          />
+          {walletSource && walletSource !== live.source && (
+            <ArweaveLink
+              locale={locale}
+              source={walletSource}
+              labelKey="network.tdh.verify.side.walletUpload"
+            />
+          )}
+        </span>
+      ) : (
+        <Muted>
+          {t(locale, "network.tdh.verify.provenance.liveSourceMissing")}
+        </Muted>
+      ),
     },
   ];
 
@@ -279,13 +403,13 @@ export default function VerificationSideBySide({
             key={row.key}
             className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-4 tw-py-3"
           >
-            <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
+            <div className="tw-text-sm tw-font-medium tw-text-iron-100">
               {row.label}
-            </p>
-            <dl className="tw-m-0 tw-mt-2 tw-grid tw-grid-cols-[auto_minmax(0,1fr)] tw-items-baseline tw-gap-x-4 tw-gap-y-1.5 tw-text-sm tw-tabular-nums">
+            </div>
+            <dl className="tw-m-0 tw-mt-2 tw-grid tw-grid-cols-[6.5rem_minmax(0,1fr)] tw-items-start tw-gap-x-3 tw-gap-y-2 tw-text-sm tw-tabular-nums">
               {(["rust", "python", "live"] as const).map((series) => (
                 <div key={series} className="tw-contents">
-                  <dt className="tw-text-xs tw-text-iron-400">
+                  <dt className="tw-pt-px tw-text-xs tw-text-iron-400">
                     <SeriesHeader
                       label={t(locale, `network.tdh.verify.side.${series}`)}
                       series={series}
@@ -306,13 +430,13 @@ export default function VerificationSideBySide({
         role="region"
         aria-labelledby="tdh-verify-side-heading"
       >
-        <table className={`${TDH_TABLE} tw-min-w-[40rem]`}>
+        <table className={`${TDH_TABLE} tw-min-w-[44rem]`}>
           <caption className={`${TDH_CAPTION} tw-sr-only`}>
             {t(locale, "network.tdh.verify.side.caption")}
           </caption>
           <thead>
             <tr>
-              <th scope="col" className={TDH_TH}>
+              <th scope="col" className={`${TDH_TH} tw-w-[28%]`}>
                 {t(locale, "network.tdh.verify.side.measure")}
               </th>
               <th scope="col" className={TDH_TH}>
@@ -340,7 +464,7 @@ export default function VerificationSideBySide({
               <tr key={row.key}>
                 <th
                   scope="row"
-                  className={`${TDH_TD} tw-font-medium tw-text-iron-300`}
+                  className={`${TDH_TD} tw-font-medium tw-text-iron-200`}
                 >
                   {row.label}
                 </th>

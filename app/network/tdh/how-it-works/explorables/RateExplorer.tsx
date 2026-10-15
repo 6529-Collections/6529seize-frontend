@@ -85,7 +85,7 @@ export default function RateExplorer({
       </div>
       <output aria-live="polite" className="tw-mt-4 tw-block">
         <dl className="tw-m-0 tw-grid tw-grid-cols-3 tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-p-3 tw-text-center">
-          <div>
+          <div className="tw-flex tw-flex-col tw-justify-between">
             <dt className="tw-text-xs tw-text-iron-400">
               {t(locale, "network.tdh.how.rate.edition")}
             </dt>
@@ -93,7 +93,7 @@ export default function RateExplorer({
               {formatInteger(locale, edition)}
             </dd>
           </div>
-          <div>
+          <div className="tw-flex tw-flex-col tw-justify-between">
             <dt className="tw-text-xs tw-text-iron-400">
               {t(locale, "network.tdh.how.rate.exact")}
             </dt>
@@ -101,7 +101,7 @@ export default function RateExplorer({
               {formatNumber(locale, H / edition, { maximumFractionDigits: 4 })}
             </dd>
           </div>
-          <div>
+          <div className="tw-flex tw-flex-col tw-justify-between">
             <dt className="tw-text-xs tw-text-iron-400">
               {t(locale, "network.tdh.how.rate.rounded")}
             </dt>

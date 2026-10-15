@@ -4,6 +4,7 @@ import { useId, useState } from "react";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import TdhDisclosure from "../../shared/TdhDisclosure";
 import { TDH_BUTTON, TDH_FOCUS_RING } from "../../shared/tdhStyles";
 import ExplorableFrame from "./ExplorableFrame";
 
@@ -14,6 +15,9 @@ type StackEvent = {
 
 const ADVANCE_DAYS = 10;
 const MAX_COPIES = 8;
+/** The simulator starts with one copy bought 30 days ago, so it is never empty. */
+const SEED_EVENTS: readonly StackEvent[] = [{ kind: "buy", day: 0 }];
+const SEED_DAY = 30;
 
 export interface StackState {
   readonly a: readonly number[];
@@ -71,7 +75,7 @@ function Stack({
       </p>
       <ol
         reversed
-        className="tw-m-0 tw-mt-2 tw-flex tw-min-h-[12.5rem] tw-list-none tw-flex-col-reverse tw-justify-start tw-gap-1 tw-rounded-lg tw-border tw-border-dashed tw-border-iron-700 tw-p-2"
+        className="tw-m-0 tw-mt-2 tw-flex tw-min-h-[7.5rem] tw-list-none tw-flex-col-reverse tw-justify-start tw-gap-1 tw-rounded-lg tw-border tw-border-dashed tw-border-iron-700 tw-p-2"
       >
         {stack.length === 0 && (
           <li className="tw-m-auto tw-text-xs tw-text-iron-500">
@@ -124,9 +128,9 @@ export default function StackSimulator({
   readonly locale: SupportedLocale;
 }) {
   const toggleId = useId();
-  const [events, setEvents] = useState<readonly StackEvent[]>([]);
-  const [today, setToday] = useState(0);
-  const [consolidated, setConsolidated] = useState(true);
+  const [events, setEvents] = useState<readonly StackEvent[]>(SEED_EVENTS);
+  const [today, setToday] = useState(SEED_DAY);
+  const [consolidated, setConsolidated] = useState(false);
   const { a, b } = replayStacks(events, consolidated);
   const add = (kind: StackEvent["kind"]) =>
     setEvents((current) => [...current, { kind, day: today }]);
@@ -136,9 +140,9 @@ export default function StackSimulator({
       locale={locale}
       title={t(locale, "network.tdh.how.stack.title")}
       onReset={() => {
-        setEvents([]);
-        setToday(0);
-        setConsolidated(true);
+        setEvents(SEED_EVENTS);
+        setToday(SEED_DAY);
+        setConsolidated(false);
       }}
     >
       <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
@@ -212,13 +216,12 @@ export default function StackSimulator({
           rawB: formatInteger(locale, rawDays(b, today)),
         })}
       </p>
-      <details className="tw-mt-4">
-        <summary
-          className={`tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-text-sm tw-text-iron-300 hover:tw-text-iron-100 ${TDH_FOCUS_RING}`}
-        >
-          {t(locale, "network.tdh.how.stack.log")}
-        </summary>
-        <ol className="tw-m-0 tw-mt-1 tw-space-y-1 tw-pl-5 tw-text-sm tw-text-iron-400">
+      <TdhDisclosure
+        className="tw-mt-4"
+        defaultOpen
+        summary={t(locale, "network.tdh.how.stack.log")}
+      >
+        <ol className="tw-m-0 tw-space-y-1 tw-pl-11 tw-text-sm tw-text-iron-300">
           {events.length === 0 ? (
             <li className="-tw-ml-5 tw-list-none tw-pl-0">
               {t(locale, "network.tdh.how.stack.log.empty")}
@@ -233,7 +236,7 @@ export default function StackSimulator({
             ))
           )}
         </ol>
-      </details>
+      </TdhDisclosure>
     </ExplorableFrame>
   );
 }

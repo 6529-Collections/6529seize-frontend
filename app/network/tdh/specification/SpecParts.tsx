@@ -39,7 +39,7 @@ export function SpecSection({
           copiedLabel={t(locale, "network.tdh.shared.linkCopied")}
         />
       </div>
-      <div className="tw-mt-4 tw-space-y-5">{children}</div>
+      <div className="tw-mt-4 tw-max-w-3xl tw-space-y-5">{children}</div>
     </section>
   );
 }
@@ -106,22 +106,30 @@ export function Rule({
   locale,
   code,
   source,
+  title,
 }: {
   readonly locale: SupportedLocale;
   readonly code: string;
   readonly source: string;
+  readonly title?: string;
 }) {
   return (
     <div className="tw-max-w-3xl">
-      <TdhRuleBlock code={code} source={source} locale={locale} />
+      <TdhRuleBlock
+        code={code}
+        source={source}
+        locale={locale}
+        {...(title ? { title, label: title } : {})}
+      />
     </div>
   );
 }
 
-export function PendingNote({ children }: { readonly children: ReactNode }) {
+/** A note that a rule is settled in the text: green, because it is in P26. */
+export function SettledNote({ children }: { readonly children: ReactNode }) {
   return (
-    <p className="tw-m-0 tw-max-w-3xl tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/30 tw-bg-amber-400/[0.06] tw-px-4 tw-py-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+    <div className="tw-flex tw-flex-col tw-items-start tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-success/30 tw-bg-success/[0.06] tw-px-4 tw-py-3 tw-text-sm tw-leading-6 tw-text-iron-200 sm:tw-flex-row sm:tw-items-start">
       {children}
-    </p>
+    </div>
   );
 }

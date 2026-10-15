@@ -14,18 +14,22 @@ export default function TdhRuleBlock({
   source,
   locale,
   label,
+  title,
 }: {
   readonly code: string;
   readonly source?: string;
   readonly locale: SupportedLocale;
   readonly label?: string;
+  /** The block's heading; "Exact rule" unless the block is not a rule. */
+  readonly title?: string;
 }) {
   const caption = label ?? source ?? t(locale, "network.tdh.shared.rule");
+  const heading = title ?? t(locale, "network.tdh.shared.rule");
   return (
     <figure className="tw-m-0 tw-min-w-0 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950">
       <figcaption className="tw-flex tw-min-h-11 tw-items-center tw-justify-between tw-gap-2 tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.06] tw-py-0 tw-pl-3 tw-pr-1">
         <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-font-medium tw-text-iron-400">
-          <span>{t(locale, "network.tdh.shared.rule")}</span>
+          <span>{heading}</span>
           {source && <TdhSource refs={[source]} locale={locale} />}
         </span>
         <TdhCopyButton
@@ -37,14 +41,20 @@ export default function TdhRuleBlock({
           failedLabel={t(locale, "network.tdh.shared.copyFailed")}
         />
       </figcaption>
-      <pre
-        tabIndex={0}
-        role="region"
-        aria-label={t(locale, "network.tdh.shared.ruleRegion", { caption })}
-        className={`tw-m-0 tw-overflow-x-auto tw-whitespace-pre tw-bg-transparent tw-p-4 tw-font-mono tw-text-[13px] tw-leading-6 tw-text-iron-100 ${TDH_FOCUS_RING}`}
-      >
-        <code className="tw-text-iron-100">{code}</code>
-      </pre>
+      <div className="tw-relative">
+        <pre
+          tabIndex={0}
+          role="region"
+          aria-label={t(locale, "network.tdh.shared.ruleRegion", { caption })}
+          className={`tw-m-0 tw-overflow-x-auto tw-whitespace-pre tw-bg-transparent tw-p-4 tw-pr-8 tw-font-mono tw-text-[13px] tw-leading-6 tw-text-iron-100 sm:tw-pr-4 ${TDH_FOCUS_RING}`}
+        >
+          <code className="tw-text-iron-100">{code}</code>
+        </pre>
+        <span
+          aria-hidden="true"
+          className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-w-8 tw-bg-gradient-to-l tw-from-iron-950 tw-to-transparent sm:tw-hidden"
+        />
+      </div>
     </figure>
   );
 }

@@ -4,6 +4,9 @@ import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import { TDH_FOCUS_RING } from "./tdhStyles";
 
+/** Pixels below the top of the viewport at which a section counts as current. */
+const ACTIVE_OFFSET = 128;
+
 export interface ScrollSpyItem {
   readonly id: string;
   readonly label: string;
@@ -26,31 +29,32 @@ export default function TdhScrollSpyNav({
   const [active, setActive] = useState<string | null>(items[0]?.id ?? null);
 
   useEffect(() => {
-    const sections = items
-      .map((item) => globalThis.document.getElementById(item.id))
-      .filter((element): element is HTMLElement => element !== null);
-    if (sections.length === 0 || !("IntersectionObserver" in globalThis)) {
-      return undefined;
-    }
-    const visible = new Map<string, number>();
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            visible.set(entry.target.id, entry.boundingClientRect.top);
-          } else {
-            visible.delete(entry.target.id);
-          }
+    // The current section is the last one whose top has passed the sticky
+    // header; above the first section, the first one. Computed from layout
+    // on scroll, so it is right at the top of the page and after a jump.
+    const update = () => {
+      let current = items[0]?.id ?? null;
+      for (const item of items) {
+        const element = globalThis.document.getElementById(item.id);
+        if (element && element.getBoundingClientRect().top <= ACTIVE_OFFSET) {
+          current = item.id;
         }
-        const first = items.find((item) => visible.has(item.id));
-        if (first) {
-          setActive(first.id);
-        }
-      },
-      { rootMargin: "-96px 0px -55% 0px" }
-    );
-    sections.forEach((section) => observer.observe(section));
-    return () => observer.disconnect();
+      }
+      setActive(current);
+    };
+    let frame = 0;
+    const schedule = () => {
+      globalThis.cancelAnimationFrame(frame);
+      frame = globalThis.requestAnimationFrame(update);
+    };
+    update();
+    globalThis.addEventListener("scroll", schedule, { passive: true });
+    globalThis.addEventListener("resize", schedule);
+    return () => {
+      globalThis.cancelAnimationFrame(frame);
+      globalThis.removeEventListener("scroll", schedule);
+      globalThis.removeEventListener("resize", schedule);
+    };
   }, [items]);
 
   useEffect(() => {

@@ -10,14 +10,21 @@ import type { VerificationIndexDay } from "@/lib/tdh/verification/schema";
 import {
   cutoverState,
   dayNeighbours,
+  indexDayVerdict,
+  latestIndexDay,
+  missingCycleDays,
+  reportFreshness,
+  reportsAreLate,
   sortedIndexDays,
   totalDelta,
   verdictState,
 } from "@/lib/tdh/verification/states";
+import TdhPager from "../../shared/TdhPager";
 import TdhSource from "../../shared/TdhSource";
 import TdhStatusPill from "../../shared/TdhStatusPill";
 import { TDH_CARD, TDH_LINK_STANDALONE } from "../../shared/tdhStyles";
 import VerificationAgreementTiles from "./VerificationAgreementTiles";
+import VerificationCheck from "./VerificationCheck";
 import VerificationDayPicker from "./VerificationDayPicker";
 import VerificationDifferences from "./VerificationDifferences";
 import VerificationHistory from "./VerificationHistory";
@@ -82,8 +89,61 @@ export function VerificationLede({
 export function SampleBanner({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <Notice tone="warning" title={t(locale, "network.tdh.verify.sample.title")}>
-      <p className="tw-m-0">{t(locale, "network.tdh.verify.sample.body")}</p>
+      <p className="tw-m-0">
+        {t(locale, "network.tdh.verify.sample.body")}
+        <TdhSource
+          refs={["D131", "Comparison 2026-10-14/15"]}
+          locale={locale}
+        />
+      </p>
     </Notice>
+  );
+}
+
+function AwaitingState({
+  locale,
+  now,
+}: {
+  readonly locale: SupportedLocale;
+  readonly now: Date;
+}) {
+  const late = reportsAreLate(now);
+  return (
+    <div className="tw-space-y-8">
+      <div className="tw-grid tw-gap-4 lg:tw-grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+        <Notice
+          tone="neutral"
+          title={t(
+            locale,
+            late
+              ? "network.tdh.verify.awaiting.titleLate"
+              : "network.tdh.verify.awaiting.title"
+          )}
+        >
+          <p className="tw-m-0">
+            {t(
+              locale,
+              late
+                ? "network.tdh.verify.awaiting.bodyLate"
+                : "network.tdh.verify.awaiting.body"
+            )}
+            <TdhSource refs={["D132"]} locale={locale} />
+          </p>
+          <Link
+            href="/network/tdh/specification#evidence"
+            className={TDH_LINK_STANDALONE}
+          >
+            {t(locale, "network.tdh.verify.awaiting.link")}
+          </Link>
+        </Notice>
+        <VerificationCutoverCard
+          locale={locale}
+          cutover={cutoverState(null, now)}
+        />
+      </div>
+      <VerificationMethod locale={locale} />
+      <TdhPager current="/network/tdh/verification" locale={locale} />
+    </div>
   );
 }
 
@@ -101,32 +161,7 @@ export default function VerificationDashboard({
   readonly now: Date;
 }) {
   if (indexLoad.status === "awaiting") {
-    return (
-      <div className="tw-space-y-8">
-        <div className="tw-grid tw-gap-4 lg:tw-grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
-          <Notice
-            tone="neutral"
-            title={t(locale, "network.tdh.verify.awaiting.title")}
-          >
-            <p className="tw-m-0">
-              {t(locale, "network.tdh.verify.awaiting.body")}
-              <TdhSource refs={["D132"]} locale={locale} />
-            </p>
-            <Link
-              href="/network/tdh/specification#evidence"
-              className={TDH_LINK_STANDALONE}
-            >
-              {t(locale, "network.tdh.verify.awaiting.link")}
-            </Link>
-          </Notice>
-          <VerificationCutoverCard
-            locale={locale}
-            cutover={cutoverState(null, now)}
-          />
-        </div>
-        <VerificationMethod locale={locale} />
-      </div>
-    );
+    return <AwaitingState locale={locale} now={now} />;
   }
 
   if (indexLoad.status === "error") {
@@ -157,9 +192,20 @@ export default function VerificationDashboard({
   if (entry === null) {
     return null;
   }
+  const latest = latestIndexDay(index);
   const neighbours = dayNeighbours(index, entry.cycleDay);
   const day = dayLoad?.status === "ok" ? dayLoad.day : null;
-  const verdict = verdictState(day?.verdict ?? entry.verdict);
+  const verdict = day
+    ? verdictState(day.verdict, day.differences.length > 0)
+    : indexDayVerdict(entry);
+  const isLatest = latest?.cycleDay === entry.cycleDay;
+  const delta = day
+    ? totalDelta(
+        day.implementations.rust.totalTdh,
+        day.implementations.live?.totalTdh
+      )
+    : totalDelta(entry.totalTdh.rust, entry.totalTdh.live);
+  const missing = missingCycleDays(index);
 
   return (
     <div className="tw-space-y-6">
@@ -186,6 +232,12 @@ export default function VerificationDashboard({
         verdict={verdict}
         mode={day?.mode ?? null}
         cutover={cutover}
+        isLatest={isLatest}
+        freshness={
+          latest && !isSample ? reportFreshness(latest.cycleDay, now) : null
+        }
+        latestDate={latest?.date ?? null}
+        missingDays={missing.length}
       />
       {(dayLoad?.status === "error" || dayLoad?.status === "not-found") && (
         <Notice
@@ -205,10 +257,7 @@ export default function VerificationDashboard({
             rustVsLive={day.agreement.rustVsLive}
             rustVsPython={day.agreement.rustVsPython}
             pythonRan={day.implementations.python !== null}
-            totalDelta={totalDelta(
-              day.implementations.rust.totalTdh,
-              day.implementations.live?.totalTdh
-            )}
+            totalDelta={delta}
             afterCutover={afterCutover}
           />
           <VerificationSideBySide
@@ -221,7 +270,7 @@ export default function VerificationDashboard({
             locale={locale}
             differences={day.differences}
             cycleDay={day.cycleDay}
-            isSample={isSample}
+            totalDelta={delta}
           />
         </>
       ) : (
@@ -230,39 +279,29 @@ export default function VerificationDashboard({
       <VerificationHistory
         locale={locale}
         days={index.days}
+        missing={missing}
         selectedCycleDay={entry.cycleDay}
         cutoverCycleDay={cutover.kind === "done" ? cutover.cycleDay : null}
       />
       <VerificationProvenance
         locale={locale}
         isSample={isSample}
-        cutoffBlock={day?.cutoffBlock ?? null}
-        mode={day?.mode ?? null}
-        liveSource={day?.implementations.live?.source ?? null}
+        day={day}
         dayUrl={dayLoad?.status === "ok" ? dayLoad.dayUrl : null}
         indexUrl={indexLoad.indexUrl}
       />
+      <VerificationCheck
+        locale={locale}
+        cycleDay={entry.cycleDay}
+        cutoffBlock={day?.cutoffBlock ?? null}
+        liveSource={
+          day?.implementations.live?.sources?.identity ??
+          day?.implementations.live?.source ??
+          null
+        }
+      />
       <VerificationMethod locale={locale} />
-      <nav
-        aria-label={t(locale, "network.tdh.verify.explore.heading")}
-        className="tw-flex tw-flex-wrap tw-gap-x-6 tw-gap-y-1 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-6 tw-text-sm"
-      >
-        <Link href="/network/tdh/how-it-works" className={TDH_LINK_STANDALONE}>
-          {t(locale, "network.tdh.verify.explore.how")}
-        </Link>
-        <Link
-          href="/network/tdh/implementations"
-          className={TDH_LINK_STANDALONE}
-        >
-          {t(locale, "network.tdh.verify.explore.impl")}
-        </Link>
-        <Link
-          href="/network/tdh/specification#evidence"
-          className={TDH_LINK_STANDALONE}
-        >
-          {t(locale, "network.tdh.verify.explore.spec")}
-        </Link>
-      </nav>
+      <TdhPager current="/network/tdh/verification" locale={locale} />
     </div>
   );
 }
@@ -280,22 +319,20 @@ function IndexOnlySummary({
     <div
       className={`${TDH_CARD} tw-flex tw-flex-wrap tw-items-center tw-gap-x-6 tw-gap-y-2 tw-p-5 tw-text-sm tw-text-iron-200`}
     >
-      <TdhStatusPill pill={verdictState(entry.verdict)} locale={locale} />
-      <span className="tw-tabular-nums">
-        {t(locale, "network.tdh.verify.tiles.labelValue", {
-          label: t(locale, "network.tdh.verify.tiles.identitiesLive"),
-          value: t(locale, "network.tdh.verify.tiles.ofTotal", {
+      <TdhStatusPill pill={indexDayVerdict(entry)} locale={locale} />
+      {entry.identitiesEqual !== null && entry.identitiesTotal !== null && (
+        <span className="tw-tabular-nums">
+          {t(locale, "network.tdh.verify.tiles.identitiesLive")}:{" "}
+          {t(locale, "network.tdh.verify.tiles.equalOf", {
             equal: formatInteger(locale, entry.identitiesEqual),
             total: formatInteger(locale, entry.identitiesTotal),
-          }),
-        })}
-      </span>
+          })}
+        </span>
+      )}
       {delta !== null && (
         <span className="tw-tabular-nums">
-          {t(locale, "network.tdh.verify.tiles.labelValue", {
-            label: t(locale, "network.tdh.verify.tiles.totalDelta"),
-            value: formatSigned(locale, delta),
-          })}
+          {t(locale, "network.tdh.verify.tiles.totalDelta")}:{" "}
+          {formatSigned(locale, delta)}
         </span>
       )}
     </div>

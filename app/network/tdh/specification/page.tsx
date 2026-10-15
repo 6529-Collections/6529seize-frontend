@@ -2,10 +2,12 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import TdhPageShell from "../shared/TdhPageShell";
+import TdhPager from "../shared/TdhPager";
 import TdhScrollSpyNav from "../shared/TdhScrollSpyNav";
 import TdhSource from "../shared/TdhSource";
 import TdhStatusPill from "../shared/TdhStatusPill";
 import { SectionMap } from "./SpecDiagrams";
+import { SettledNote } from "./SpecParts";
 import SpecSectionsA from "./SpecSectionsA";
 import SpecSectionsB from "./SpecSectionsB";
 
@@ -34,6 +36,7 @@ export default function TdhSpecificationPage() {
     ])
   );
   const tocItems = [
+    { id: "symbols", label: t(locale, "network.tdh.spec.symbols.title") },
     ...SECTION_IDS.map((id) => ({ id, label: titles[id] ?? id })),
     { id: "decisions", label: t(locale, "network.tdh.spec.decisions.title") },
     { id: "evidence", label: t(locale, "network.tdh.spec.evidence.title") },
@@ -43,7 +46,7 @@ export default function TdhSpecificationPage() {
     <TdhPageShell
       locale={locale}
       current="/network/tdh/specification"
-      dropdownHref="/network/tdh"
+      dropdownHref="/network/tdh/specification"
       documentTitle={t(locale, "network.tdh.spec.pageTitle")}
       title={t(locale, "network.tdh.spec.title")}
       pills={
@@ -61,18 +64,21 @@ export default function TdhSpecificationPage() {
             {t(locale, "network.tdh.spec.version")}
             <TdhSource refs={["D121", "P26 header"]} locale={locale} />
           </p>
-          <p className="tw-m-0 tw-flex tw-flex-wrap tw-items-start tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/30 tw-bg-amber-400/[0.06] tw-px-4 tw-py-3 tw-text-sm tw-leading-6 tw-text-iron-200">
-            <TdhStatusPill pill="decided" locale={locale} size="sm" />
+          <SettledNote>
+            <TdhStatusPill pill="inSpec" locale={locale} size="sm" />
             <span className="tw-min-w-0 tw-flex-1">
-              {t(locale, "network.tdh.spec.pendingD131")}
-              <TdhSource refs={["D131"]} locale={locale} />
+              {t(locale, "network.tdh.spec.amended")}
+              <TdhSource
+                refs={["P26 §7.1", "P26 §13", "D131"]}
+                locale={locale}
+              />
             </span>
-          </p>
+          </SettledNote>
         </>
       }
       headerExtra={
         <div className="tw-mt-8">
-          <SectionMap locale={locale} titles={titles} />
+          <SectionMap locale={locale} />
         </div>
       }
     >
@@ -84,6 +90,7 @@ export default function TdhSpecificationPage() {
         <div className="tw-min-w-0">
           <SpecSectionsA locale={locale} />
           <SpecSectionsB locale={locale} />
+          <TdhPager current="/network/tdh/specification" locale={locale} />
         </div>
       </div>
     </TdhPageShell>

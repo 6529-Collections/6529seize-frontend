@@ -28,6 +28,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate, formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import TdhSubnav from "../shared/TdhSubnav";
 import { TDHRelatedLinks } from "../TDHPageNavigation";
 import TDHSection, { TDH_FOCUS, TDH_PANEL, TDH_TEXT } from "../TDHSection";
 
@@ -112,10 +113,11 @@ export default function TDHConsolidationPage() {
         desktopFlush
         withDivider
       />
-      <article className="tw-mx-auto tw-max-w-6xl tw-pb-8 tw-pt-7 sm:tw-pt-10">
-        <header className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-8 tw-pb-10 lg:tw-grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:tw-gap-12">
+      <article className="tw-mx-auto tw-max-w-6xl tw-pb-8">
+        <TdhSubnav current="/network/tdh/consolidation" locale={locale} />
+        <header className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-8 tw-pb-10 tw-pt-5 sm:tw-pt-8 lg:tw-grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:tw-gap-12">
           <div>
-            <h1 className="tw-m-0 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl">
+            <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl">
               {t(locale, "network.tdhConsolidation.title")}
             </h1>
             <p className="tw-mb-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-200 sm:tw-text-lg sm:tw-leading-8">
@@ -133,7 +135,7 @@ export default function TDHConsolidationPage() {
                 <ArrowRightIcon aria-hidden="true" className="tw-size-4" />
               </ButtonLink>
               <Link
-                className={`${LINK} tw-text-sm`}
+                className={`${LINK} tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm`}
                 href={SAFE_COLLECTING_HREF}
               >
                 {t(locale, "network.tdhConsolidation.safeCollectingLink")}
@@ -203,7 +205,7 @@ export default function TDHConsolidationPage() {
             ))}
           </ul>
           <Link
-            className={`${LINK} tw-mt-4 tw-inline-block tw-text-sm`}
+            className={`${LINK} tw-mt-2 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm`}
             href={SAFE_COLLECTING_HREF}
           >
             {t(locale, "network.tdhConsolidation.wallets.more")}

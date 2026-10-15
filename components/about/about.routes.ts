@@ -141,6 +141,17 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
       "tdhHowItWorks"
     ),
     aboutRouteItem(
+      "network-tdh-specification",
+      "/network/tdh/specification",
+      "tdhSpecification"
+    ),
+    aboutRouteItem("network-tdh-formal", "/network/tdh/formal", "tdhFormal"),
+    aboutRouteItem(
+      "network-tdh-implementations",
+      "/network/tdh/implementations",
+      "tdhImplementations"
+    ),
+    aboutRouteItem(
       "network-tdh-verification",
       "/network/tdh/verification",
       "tdhVerification",

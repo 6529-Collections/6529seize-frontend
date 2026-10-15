@@ -177,6 +177,7 @@ function Snapshot({
             time: formatDate(locale, profile.date, {
               dateStyle: "medium",
               timeStyle: "short",
+              hourCycle: "h23",
               timeZone: "UTC",
             }),
           }),

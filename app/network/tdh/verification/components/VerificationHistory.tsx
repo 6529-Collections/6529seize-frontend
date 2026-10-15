@@ -4,14 +4,14 @@ import { t } from "@/i18n/messages";
 import type { VerificationIndexDay } from "@/lib/tdh/verification/schema";
 import {
   agreementShare,
+  indexDayVerdict,
   totalDelta,
-  verdictState,
   VERDICT_TONE,
 } from "@/lib/tdh/verification/states";
+import TdhDisclosure from "../../shared/TdhDisclosure";
 import TdhStatusPill from "../../shared/TdhStatusPill";
 import {
   TDH_CAPTION,
-  TDH_FOCUS_RING,
   TDH_TABLE,
   TDH_TABLE_WRAP,
   TDH_TD,
@@ -61,7 +61,8 @@ function HistoryChart({
   const id = useId();
   const left = width < 500 ? 58 : 66;
   const shares = ordered.map(
-    (day) => agreementShare(day.identitiesEqual, day.identitiesTotal) ?? 1
+    (day) =>
+      agreementShare(day.identitiesEqual ?? 0, day.identitiesTotal ?? 0) ?? 1
   );
   const deltas = ordered.map((day) =>
     totalDelta(day.totalTdh.rust, day.totalTdh.live)
@@ -169,7 +170,7 @@ function HistoryChart({
       {ordered.map((day, index) => {
         const share = shares[index] ?? 1;
         const delta = deltas[index] ?? null;
-        const tone = VERDICT_TONE[verdictState(day.verdict)];
+        const tone = VERDICT_TONE[indexDayVerdict(day)];
         const selected = day.cycleDay === selectedCycleDay;
         return (
           <g key={day.cycleDay}>
@@ -236,21 +237,282 @@ function HistoryChart({
   );
 }
 
+const MIN_DAYS_FOR_CHART = 7;
+
+type HistoryRow =
+  | { readonly kind: "day"; readonly day: VerificationIndexDay }
+  | { readonly kind: "missing"; readonly cycleDay: number };
+
+function rowCycleDay(row: HistoryRow): number {
+  return row.kind === "day" ? row.day.cycleDay : row.cycleDay;
+}
+
+/** Reported days and days without a report, newest first. */
+function historyRows(
+  ordered: readonly VerificationIndexDay[],
+  missing: readonly number[]
+): HistoryRow[] {
+  return [
+    ...ordered.map((day): HistoryRow => ({ kind: "day", day })),
+    ...missing.map((cycleDay): HistoryRow => ({ kind: "missing", cycleDay })),
+  ].sort((left, right) => rowCycleDay(right) - rowCycleDay(left));
+}
+
+function missingDate(cycleDay: number): string {
+  return new Date(cycleDay * 86_400_000).toISOString().slice(0, 10);
+}
+
+function identitiesEqualText(
+  locale: SupportedLocale,
+  day: VerificationIndexDay,
+  noValue: string
+): string {
+  return day.identitiesEqual === null || day.identitiesTotal === null
+    ? noValue
+    : t(locale, "network.tdh.verify.history.equalOf", {
+        equal: formatInteger(locale, day.identitiesEqual),
+        total: formatInteger(locale, day.identitiesTotal),
+      });
+}
+
+function optionalInteger(
+  locale: SupportedLocale,
+  value: number | null,
+  noValue: string
+): string {
+  return value === null ? noValue : formatInteger(locale, value);
+}
+
+/**
+ * The daily results on a phone: one card per day, newest first, with the same
+ * values as the table's columns, so nothing needs a sideways scroll.
+ */
+function HistoryList({
+  locale,
+  ordered,
+  missing,
+}: {
+  readonly locale: SupportedLocale;
+  readonly ordered: readonly VerificationIndexDay[];
+  readonly missing: readonly number[];
+}) {
+  const noValue = t(locale, "network.tdh.verify.history.noValue");
+  const cycleLabel = t(locale, "network.tdh.verify.history.cycle");
+  return (
+    <ol
+      aria-label={t(locale, "network.tdh.verify.history.tableCaption")}
+      className="tw-m-0 tw-list-none tw-space-y-3 tw-p-0"
+    >
+      {historyRows(ordered, missing).map((row) => {
+        if (row.kind === "missing") {
+          return (
+            <li
+              key={`missing-${row.cycleDay}`}
+              className="tw-rounded-xl tw-border tw-border-dashed tw-border-white/[0.1] tw-bg-iron-900/60 tw-p-4"
+            >
+              <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-200">
+                {formatCycleDate(locale, missingDate(row.cycleDay))}
+              </p>
+              <p className="tw-m-0 tw-mt-0.5 tw-text-xs tw-text-iron-400">
+                {cycleLabel} {formatInteger(locale, row.cycleDay)}
+              </p>
+              <p className="tw-m-0 tw-mt-2 tw-text-sm tw-text-amber-200">
+                {t(locale, "network.tdh.verify.history.noReport")}
+              </p>
+            </li>
+          );
+        }
+        const { day } = row;
+        const delta = totalDelta(day.totalTdh.rust, day.totalTdh.live);
+        const values = [
+          {
+            key: "identitiesEqual",
+            value: identitiesEqualText(locale, day, noValue),
+          },
+          {
+            key: "deltaColumn",
+            value: delta === null ? noValue : formatSigned(locale, delta),
+          },
+          { key: "totalRust", value: formatInteger(locale, day.totalTdh.rust) },
+          {
+            key: "totalPython",
+            value: optionalInteger(locale, day.totalTdh.python, noValue),
+          },
+          {
+            key: "totalLive",
+            value: optionalInteger(locale, day.totalTdh.live, noValue),
+          },
+        ] as const;
+        return (
+          <li
+            key={day.cycleDay}
+            className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-p-4"
+          >
+            <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
+              <div className="tw-min-w-0">
+                <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-50">
+                  {formatCycleDate(locale, day.date)}
+                </p>
+                <p className="tw-m-0 tw-mt-0.5 tw-text-xs tw-text-iron-400">
+                  {cycleLabel} {formatInteger(locale, day.cycleDay)}
+                </p>
+              </div>
+              <TdhStatusPill
+                pill={indexDayVerdict(day)}
+                locale={locale}
+                size="sm"
+              />
+            </div>
+            <dl className="tw-m-0 tw-mt-3 tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-2.5">
+              {values.map((item) => (
+                <div key={item.key} className="tw-min-w-0">
+                  <dt className="tw-text-xs tw-text-iron-400">
+                    {t(locale, `network.tdh.verify.history.${item.key}`)}
+                  </dt>
+                  <dd className="tw-m-0 tw-text-sm tw-tabular-nums tw-text-iron-100">
+                    {item.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+function HistoryTable({
+  locale,
+  ordered,
+  missing,
+  caption,
+}: {
+  readonly locale: SupportedLocale;
+  readonly ordered: readonly VerificationIndexDay[];
+  readonly missing: readonly number[];
+  readonly caption: boolean;
+}) {
+  const rows = historyRows(ordered, missing);
+  const noValue = t(locale, "network.tdh.verify.history.noValue");
+  return (
+    <div
+      className={TDH_TABLE_WRAP}
+      tabIndex={0}
+      role="region"
+      aria-label={t(locale, "network.tdh.verify.history.tableCaption")}
+    >
+      <table className={`${TDH_TABLE} tw-min-w-[46rem]`}>
+        <caption className={caption ? TDH_CAPTION : "tw-sr-only"}>
+          {t(locale, "network.tdh.verify.history.tableCaption")}
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col" className={TDH_TH}>
+              {t(locale, "network.tdh.verify.history.date")}
+            </th>
+            <th scope="col" className={TDH_TH_NUM}>
+              {t(locale, "network.tdh.verify.history.cycle")}
+            </th>
+            <th scope="col" className={TDH_TH}>
+              {t(locale, "network.tdh.verify.history.verdict")}
+            </th>
+            <th scope="col" className={TDH_TH_NUM}>
+              {t(locale, "network.tdh.verify.history.identitiesEqual")}
+            </th>
+            <th scope="col" className={TDH_TH_NUM}>
+              {t(locale, "network.tdh.verify.history.totalRust")}
+            </th>
+            <th scope="col" className={TDH_TH_NUM}>
+              {t(locale, "network.tdh.verify.history.totalPython")}
+            </th>
+            <th scope="col" className={TDH_TH_NUM}>
+              {t(locale, "network.tdh.verify.history.totalLive")}
+            </th>
+            <th scope="col" className={TDH_TH_NUM}>
+              {t(locale, "network.tdh.verify.history.deltaColumn")}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => {
+            if (row.kind === "missing") {
+              const date = missingDate(row.cycleDay);
+              return (
+                <tr key={`missing-${row.cycleDay}`}>
+                  <th
+                    scope="row"
+                    className={`${TDH_TD} tw-font-normal tw-text-iron-400`}
+                  >
+                    {formatCycleDate(locale, date)}
+                  </th>
+                  <td className={`${TDH_TD_NUM} tw-text-iron-400`}>
+                    {formatInteger(locale, row.cycleDay)}
+                  </td>
+                  <td colSpan={6} className={`${TDH_TD} tw-text-amber-200`}>
+                    {t(locale, "network.tdh.verify.history.noReport")}
+                  </td>
+                </tr>
+              );
+            }
+            const { day } = row;
+            const delta = totalDelta(day.totalTdh.rust, day.totalTdh.live);
+            return (
+              <tr key={day.cycleDay}>
+                <th scope="row" className={`${TDH_TD} tw-font-medium`}>
+                  {formatCycleDate(locale, day.date)}
+                </th>
+                <td className={TDH_TD_NUM}>
+                  {formatInteger(locale, day.cycleDay)}
+                </td>
+                <td className={TDH_TD}>
+                  <TdhStatusPill
+                    pill={indexDayVerdict(day)}
+                    locale={locale}
+                    size="sm"
+                  />
+                </td>
+                <td className={TDH_TD_NUM}>
+                  {identitiesEqualText(locale, day, noValue)}
+                </td>
+                <td className={TDH_TD_NUM}>
+                  {formatInteger(locale, day.totalTdh.rust)}
+                </td>
+                <td className={TDH_TD_NUM}>
+                  {optionalInteger(locale, day.totalTdh.python, noValue)}
+                </td>
+                <td className={TDH_TD_NUM}>
+                  {optionalInteger(locale, day.totalTdh.live, noValue)}
+                </td>
+                <td className={TDH_TD_NUM}>
+                  {delta === null ? noValue : formatSigned(locale, delta)}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 /**
  * Agreement over time (plan §10.3): identities equal between Rust and
- * 6529.io as a share (axis from 99.90% unless a day falls below), and the
- * total TDH difference as bars around zero. Server-rendered SVG, drawn at a
- * phone width and a desktop width, with a table version; points carry native
- * tooltips.
+ * 6529.io as a share, and the total TDH difference as bars around zero.
+ * Below seven days a chart says little, so the days show as a table, or as
+ * one card per day on a phone; from the seventh, wider screens draw the chart
+ * with the table one click away. Days without a report are listed as such.
  */
 export default function VerificationHistory({
   locale,
   days,
+  missing,
   selectedCycleDay,
   cutoverCycleDay,
 }: {
   readonly locale: SupportedLocale;
   readonly days: readonly VerificationIndexDay[];
+  readonly missing: readonly number[];
   readonly selectedCycleDay: number | null;
   readonly cutoverCycleDay: number | null;
 }) {
@@ -258,6 +520,7 @@ export default function VerificationHistory({
     (left, right) => left.cycleDay - right.cycleDay
   );
   const chart = { locale, ordered, selectedCycleDay, cutoverCycleDay };
+  const enough = ordered.length >= MIN_DAYS_FOR_CHART;
 
   return (
     <section aria-labelledby="tdh-verify-history-heading" className="tw-mt-10">
@@ -267,99 +530,48 @@ export default function VerificationHistory({
       >
         {t(locale, "network.tdh.verify.history.heading")}
       </h2>
-      <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
+      <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
         {t(locale, "network.tdh.verify.history.caption")}
+        {!enough && ` ${t(locale, "network.tdh.verify.history.fewDays")}`}
       </p>
-      <div className="tw-mt-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-p-3 sm:tw-p-5">
-        <div className="md:tw-hidden">
-          <HistoryChart {...chart} width={360} maxLabels={4} />
-        </div>
-        <div className="tw-hidden md:tw-block">
-          <HistoryChart {...chart} width={1040} maxLabels={10} />
-        </div>
-      </div>
-      <details className="tw-group tw-mt-3">
-        <summary
-          className={`tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-rounded-lg tw-text-sm tw-font-medium tw-text-primary-300 hover:tw-text-primary-400 ${TDH_FOCUS_RING}`}
-        >
-          {t(locale, "network.tdh.verify.history.showTable")}
-        </summary>
-        <div
-          className={`${TDH_TABLE_WRAP} tw-mt-2`}
-          tabIndex={0}
-          role="region"
-          aria-label={t(locale, "network.tdh.verify.history.tableCaption")}
-        >
-          <table className={`${TDH_TABLE} tw-min-w-[44rem]`}>
-            <caption className={TDH_CAPTION}>
-              {t(locale, "network.tdh.verify.history.tableCaption")}
-            </caption>
-            <thead>
-              <tr>
-                <th scope="col" className={TDH_TH}>
-                  {t(locale, "network.tdh.verify.history.date")}
-                </th>
-                <th scope="col" className={TDH_TH_NUM}>
-                  {t(locale, "network.tdh.verify.history.cycle")}
-                </th>
-                <th scope="col" className={TDH_TH}>
-                  {t(locale, "network.tdh.verify.history.verdict")}
-                </th>
-                <th scope="col" className={TDH_TH_NUM}>
-                  {t(locale, "network.tdh.verify.history.identitiesEqual")}
-                </th>
-                <th scope="col" className={TDH_TH_NUM}>
-                  {t(locale, "network.tdh.verify.history.totalRust")}
-                </th>
-                <th scope="col" className={TDH_TH_NUM}>
-                  {t(locale, "network.tdh.verify.history.totalPython")}
-                </th>
-                <th scope="col" className={TDH_TH_NUM}>
-                  {t(locale, "network.tdh.verify.history.totalLive")}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {[...ordered].reverse().map((day) => (
-                <tr key={day.cycleDay}>
-                  <th scope="row" className={`${TDH_TD} tw-font-medium`}>
-                    {formatCycleDate(locale, day.date)}
-                  </th>
-                  <td className={TDH_TD_NUM}>
-                    {formatInteger(locale, day.cycleDay)}
-                  </td>
-                  <td className={TDH_TD}>
-                    <TdhStatusPill
-                      pill={verdictState(day.verdict)}
-                      locale={locale}
-                      size="sm"
-                    />
-                  </td>
-                  <td className={TDH_TD_NUM}>
-                    {t(locale, "network.tdh.verify.tiles.ofTotal", {
-                      equal: formatInteger(locale, day.identitiesEqual),
-                      total: formatInteger(locale, day.identitiesTotal),
-                    })}
-                  </td>
-                  <td className={TDH_TD_NUM}>
-                    {formatInteger(locale, day.totalTdh.rust)}
-                  </td>
-                  <td className={TDH_TD_NUM}>
-                    {day.totalTdh.python === null
-                      ? t(locale, "network.tdh.verify.history.noValue")
-                      : formatInteger(locale, day.totalTdh.python)}
-                  </td>
-                  <td className={TDH_TD_NUM}>
-                    {day.totalTdh.live === null
-                      ? t(locale, "network.tdh.verify.history.noValue")
-                      : formatInteger(locale, day.totalTdh.live)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </details>
+      {enough ? (
+        <>
+          <div className="tw-mt-4 tw-hidden md:tw-block">
+            <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-p-5">
+              <HistoryChart {...chart} width={1040} maxLabels={10} />
+            </div>
+            <TdhDisclosure
+              className="tw-mt-3"
+              tone="link"
+              summary={t(locale, "network.tdh.verify.history.showTable")}
+            >
+              <HistoryTable
+                locale={locale}
+                ordered={ordered}
+                missing={missing}
+                caption
+              />
+            </TdhDisclosure>
+          </div>
+          <div className="tw-mt-4 md:tw-hidden">
+            <HistoryList locale={locale} ordered={ordered} missing={missing} />
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="tw-mt-4 tw-hidden md:tw-block">
+            <HistoryTable
+              locale={locale}
+              ordered={ordered}
+              missing={missing}
+              caption={false}
+            />
+          </div>
+          <div className="tw-mt-4 md:tw-hidden">
+            <HistoryList locale={locale} ordered={ordered} missing={missing} />
+          </div>
+        </>
+      )}
     </section>
   );
 }

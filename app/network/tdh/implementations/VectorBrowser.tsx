@@ -19,7 +19,7 @@ type Filter = VectorTopic | "all";
 
 const CELL = `${TDH_TD_STACK_MD} tw-block md:tw-table-cell`;
 
-/** The 36 conformance vectors, filterable by topic (plan §9.3). */
+/** The 51 conformance vectors, filterable by topic (plan §9.3). */
 export default function VectorBrowser({
   locale,
 }: {
@@ -40,7 +40,7 @@ export default function VectorBrowser({
       <div
         role="group"
         aria-label={t(locale, "network.tdh.impl.vectors.filterLabel")}
-        className="tw-flex tw-flex-wrap tw-gap-2"
+        className="tw-flex tw-gap-2 tw-overflow-x-auto tw-pb-1 lg:tw-flex-wrap lg:tw-overflow-visible"
       >
         {(["all", ...VECTOR_TOPICS] as const).map((option) => (
           <button
@@ -48,7 +48,7 @@ export default function VectorBrowser({
             type="button"
             aria-pressed={filter === option}
             onClick={() => setFilter(option)}
-            className={`${TDH_CHIP_BUTTON} ${filter === option ? TDH_CHIP_ON : TDH_CHIP_OFF}`}
+            className={`${TDH_CHIP_BUTTON} tw-shrink-0 ${filter === option ? TDH_CHIP_ON : TDH_CHIP_OFF}`}
           >
             {option === "all"
               ? t(locale, "network.tdh.impl.vectors.all")
@@ -64,6 +64,7 @@ export default function VectorBrowser({
           <caption className="tw-sr-only" aria-live="polite">
             {t(locale, "network.tdh.impl.vectors.caption", {
               shown: formatInteger(locale, shown.length),
+              total: formatInteger(locale, VECTORS.length),
             })}
           </caption>
           <thead className="tw-hidden md:tw-table-header-group">

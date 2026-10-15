@@ -5,7 +5,8 @@ import type {
 
 /**
  * Obviously synthetic verification data for tests (plan §11.4): values like
- * 1,000 against 1,120, never a real holder.
+ * 1,000 against 1,120, never a real holder. Labels and field names follow the
+ * daily job's feed: `holder-N`, `holder-N/wM`, `boosted_tdh`, `memes#1.tdh`.
  */
 export function syntheticDay(
   overrides: Partial<VerificationDay> = {}
@@ -14,6 +15,10 @@ export function syntheticDay(
     cycleDay: 20_741,
     date: "2026-10-15",
     cutoffBlock: 26_194_188,
+    cutoffBlockHash: null,
+    cutoffTimestamp: null,
+    ruleVersion: null,
+    registryHash: null,
     mode: "unchecked-history",
     implementations: {
       rust: {
@@ -25,22 +30,29 @@ export function syntheticDay(
         walletRoot: null,
         historyRoot: null,
         runtimeMs: 612,
+        transactionNetting: true,
       },
       python: {
         commit: "0f1e2d3c4b5a",
         totalTdh: 10_000,
         identities: 10,
         wallets: 12,
-        cycleRoot: `0x${"1".repeat(64)}`,
+        cycleRoot: null,
         walletRoot: null,
         historyRoot: null,
         runtimeMs: 4_300,
+        transactionNetting: true,
       },
       live: {
         source: `arweave:${"A".repeat(43)}`,
+        sources: {
+          identity: `arweave:${"A".repeat(43)}`,
+          wallet: `arweave:${"B".repeat(43)}`,
+        },
         totalTdh: 10_120,
         identities: 10,
         wallets: 12,
+        sha256: null,
       },
     },
     agreement: {
@@ -61,19 +73,34 @@ export function syntheticDay(
       {
         label: "holder-1",
         kind: "identity",
-        fields: [{ name: "final", rust: 1_000, python: 1_000, live: 1_120 }],
+        fields: [
+          { name: "boosted_tdh", rust: 1_000, python: 1_000, live: 1_120 },
+          { name: "memes#1.tdh", rust: 500, python: 500, live: 620 },
+          { name: "memes_tdh", rust: 1_000, python: 1_000, live: 1_120 },
+        ],
         class: "A",
         cause: "DEV-2",
       },
       {
-        label: "holder-1",
+        label: "holder-1/w1",
         kind: "wallet",
-        fields: [{ name: "final", rust: 1_000, python: 1_000, live: 1_120 }],
+        fields: [
+          { name: "boosted_tdh", rust: 1_000, python: 1_000, live: 1_120 },
+          { name: "memes#1.tdh", rust: 500, python: 500, live: 620 },
+          { name: "memes_tdh", rust: 1_000, python: 1_000, live: 1_120 },
+        ],
+        class: "A",
+        cause: "DEV-2",
+      },
+      {
+        label: "holder-2/w1",
+        kind: "wallet",
+        fields: [{ name: "boosted_tdh", rust: 700, python: 700, live: 690 }],
         class: "D",
         cause: null,
       },
     ],
-    verdict: "investigating",
+    verdict: "LIVE_UNEXPLAINED",
     ...overrides,
   };
 }
@@ -86,7 +113,7 @@ export function syntheticIndex(
       {
         cycleDay: 20_740,
         date: "2026-10-14",
-        verdict: "explained",
+        verdict: "OK",
         identitiesEqual: 9,
         identitiesTotal: 10,
         totalTdh: { rust: 9_900, python: 9_900, live: 10_020 },
@@ -94,7 +121,7 @@ export function syntheticIndex(
       {
         cycleDay: 20_741,
         date: "2026-10-15",
-        verdict: "investigating",
+        verdict: "LIVE_UNEXPLAINED",
         identitiesEqual: 9,
         identitiesTotal: 10,
         totalTdh: { rust: 10_000, python: 10_000, live: 10_120 },

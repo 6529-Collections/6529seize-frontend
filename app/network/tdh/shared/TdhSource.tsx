@@ -15,16 +15,19 @@ export default function TdhSource({
   refs,
   locale,
   className = "",
+  block = false,
 }: {
   readonly refs: readonly string[];
   readonly locale: SupportedLocale;
   readonly className?: string;
+  /** A row of its own instead of chips that follow the text. */
+  readonly block?: boolean;
 }) {
+  const layout = block
+    ? "tw-flex tw-flex-wrap tw-gap-1"
+    : "tw-ml-1 tw-inline-flex tw-flex-wrap tw-gap-1 tw-align-baseline";
   return (
-    <span
-      className={`tw-ml-1 tw-inline-flex tw-flex-wrap tw-gap-1 tw-align-baseline ${className}`}
-      data-tdh-sources=""
-    >
+    <span className={`${layout} ${className}`} data-tdh-sources="">
       {refs.map((reference) => {
         const source = resolveSource(locale, reference);
         if (source.href === null) {

@@ -76,7 +76,7 @@ const BOOST_EXAMPLE_INPUTS: readonly BoostExample[] = [
   { id: "twoFullSets", fullSets: 2 },
   { id: "threeFullSets", fullSets: 3 },
   { id: "oneFullSetFiveGradients", fullSets: 1, gradients: 5 },
-  { id: "highest", fullSets: 33, gradients: 5 },
+  { id: "highest", fullSets: 8, gradients: 5 },
 ];
 
 export const BOOST_EXAMPLES = BOOST_EXAMPLE_INPUTS.map((example) => ({
@@ -90,6 +90,21 @@ export const BOOST_EXAMPLES = BOOST_EXAMPLE_INPUTS.map((example) => ({
     nMemes: EXAMPLE_NETWORK.eligibleMemes,
   }).betaCents,
 }));
+
+/**
+ * The highest boost on the 2026-10-11 cycle, reached from 8 full sets and five
+ * Gradients: ADD keeps growing until 33 sets, but from 8 sets on the total
+ * rounds to the same cents. With 17 seasons listed, 16 pay, so it is 2.04, not
+ * the 2.24 that 20 paying seasons would allow (P26 §5.4, §8.3, §10).
+ */
+export const MAX_BOOST_CENTS = boost({
+  fullSets: 33,
+  gradients: 5,
+  completeSeasons: [],
+  genesis: false,
+  nakamoto: false,
+  nMemes: EXAMPLE_NETWORK.eligibleMemes,
+}).betaCents;
 
 /** The household of step 12: one collector, two consolidated wallets. */
 type HouseholdCardId =

@@ -45,7 +45,9 @@ test.describe("TDH explained and verified @network @wcag @medium @large", () => 
     await expectNoHorizontalOverflow(page);
 
     const agreement = page.getByRole("region", { name: "Agreement" });
-    const empty = page.getByText("Daily reports start on 16 October 2026.");
+    const empty = page.getByText(
+      /^Daily reports (start on 16 October 2026|are not yet connected to this page)\.$/
+    );
     if (await empty.isVisible()) {
       // Production without a data source: the honest awaiting state.
       await expectAxeClean(page, { route: VERIFICATION_ROUTE });
@@ -53,19 +55,25 @@ test.describe("TDH explained and verified @network @wcag @medium @large", () => 
     }
     await expect(agreement).toBeVisible();
 
-    await page.getByText("Show as table").click();
+    // Fewer than seven days show as a table at once; from seven, a chart
+    // comes first on wide screens with the table one click away.
+    const showTable = page.getByText("Show as table");
+    if (await showTable.isVisible()) {
+      await showTable.click();
+    }
     await expect(
-      page.getByRole("table", { name: "Daily results" })
+      page.getByRole("table", { name: "Daily results" }).first()
     ).toBeVisible();
 
     const filters = page.getByRole("group", {
       name: "Filter differences by class",
     });
     if (await filters.isVisible()) {
-      await filters.getByRole("button", { name: /Class C/ }).click();
-      await expect(
-        filters.getByRole("button", { name: /Class C/ })
-      ).toHaveAttribute("aria-pressed", "true");
+      const classFilter = filters
+        .getByRole("button", { name: /Class / })
+        .first();
+      await classFilter.click();
+      await expect(classFilter).toHaveAttribute("aria-pressed", "true");
     }
 
     await expectAxeClean(page, { route: VERIFICATION_ROUTE });

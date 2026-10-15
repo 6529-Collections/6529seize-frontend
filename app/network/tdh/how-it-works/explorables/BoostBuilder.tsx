@@ -11,45 +11,21 @@ import {
   seasonsFor,
   type BoostBreakdown,
 } from "@/lib/tdh/tdhV1Arithmetic";
+import { MAX_BOOST_CENTS } from "../examples";
 import { TDH_FOCUS_RING } from "../../shared/tdhStyles";
 import ExplorableFrame from "./ExplorableFrame";
 import IntegerField from "./IntegerField";
 
 const SEASONS = seasonsFor(EXAMPLE_NETWORK.eligibleMemes);
 const CURRENT_SEASON = SEASONS.at(-1) ?? 0;
-const CEILING_CENTS = 224;
 
+/** Five parts, five distinct hues; the legend names each one too. */
 const PARTS = [
-  {
-    key: "seasons",
-    field: "seasonsMicro",
-    className: "tw-fill-sky-400",
-    dot: "tw-bg-sky-400",
-  },
-  {
-    key: "extra",
-    field: "additionalSetsMicro",
-    className: "tw-fill-sky-200",
-    dot: "tw-bg-sky-200",
-  },
-  {
-    key: "genesis",
-    field: "genesisMicro",
-    className: "tw-fill-teal-300",
-    dot: "tw-bg-teal-300",
-  },
-  {
-    key: "nakamoto",
-    field: "nakamotoMicro",
-    className: "tw-fill-teal-500",
-    dot: "tw-bg-teal-500",
-  },
-  {
-    key: "gradients",
-    field: "gradientsMicro",
-    className: "tw-fill-fuchsia-400",
-    dot: "tw-bg-fuchsia-400",
-  },
+  { key: "seasons", field: "seasonsMicro", dot: "tw-bg-sky-400" },
+  { key: "extra", field: "additionalSetsMicro", dot: "tw-bg-indigo-300" },
+  { key: "genesis", field: "genesisMicro", dot: "tw-bg-emerald-400" },
+  { key: "nakamoto", field: "nakamotoMicro", dot: "tw-bg-amber-300" },
+  { key: "gradients", field: "gradientsMicro", dot: "tw-bg-fuchsia-400" },
 ] as const;
 
 function multiplier(locale: SupportedLocale, cents: number): string {
@@ -67,7 +43,11 @@ function micro(locale: SupportedLocale, value: number): string {
   });
 }
 
-/** The boost ladder (plan §6.2, diagram 5), from 1.00 to the 2.24 ceiling. */
+/**
+ * The boost ladder (plan §6.2, diagram 5), from 1.00 to the highest boost on
+ * the 2026-10-11 cycle, 2.04. Drawn in HTML, so its labels keep their size
+ * on a phone.
+ */
 export function BoostLadder({
   locale,
   breakdown,
@@ -75,84 +55,56 @@ export function BoostLadder({
   readonly locale: SupportedLocale;
   readonly breakdown: BoostBreakdown;
 }) {
-  const id = useId();
-  const width = 600;
-  const scale = (microValue: number) =>
-    (microValue / ((CEILING_CENTS - 100) * 10_000)) * (width - 20);
-  const sizes = PARTS.map((part) => scale(breakdown[part.field]));
-  const segments = PARTS.map((part, index) => ({
-    ...part,
-    size: sizes[index] ?? 0,
-    x: 10 + sizes.slice(0, index).reduce((sum, size) => sum + size, 0),
-  }));
-  const marker = 10 + scale((breakdown.betaCents - 100) * 10_000);
+  const span = (MAX_BOOST_CENTS - 100) * 10_000;
+  const share = (microValue: number) =>
+    Math.min(Math.max((microValue / span) * 100, 0), 100);
+  const marker = share((breakdown.betaCents - 100) * 10_000);
+  let shift = "-50%";
+  if (marker > 85) {
+    shift = "-100%";
+  } else if (marker < 8) {
+    shift = "0";
+  }
   return (
-    <svg
-      viewBox={`0 0 ${width} 72`}
+    <span
+      className="tw-block"
       role="img"
-      aria-labelledby={`${id}-title ${id}-desc`}
-      className="tw-block tw-h-auto tw-w-full"
+      aria-label={t(locale, "network.tdh.how.boostBuilder.ladderDesc", {
+        boost: multiplier(locale, breakdown.betaCents),
+      })}
     >
-      <title id={`${id}-title`}>
-        {t(locale, "network.tdh.how.boostBuilder.ladderTitle")}
-      </title>
-      <desc id={`${id}-desc`}>
-        {t(locale, "network.tdh.how.boostBuilder.ladderDesc", {
-          boost: multiplier(locale, breakdown.betaCents),
-        })}
-      </desc>
-      <rect
-        x="10"
-        y="22"
-        width={width - 20}
-        height="16"
-        rx="8"
-        className="tw-fill-iron-800"
-      />
-      {segments.map((segment) =>
-        segment.size > 0 ? (
-          <rect
-            key={segment.key}
-            x={segment.x}
-            y="22"
-            width={segment.size}
-            height="16"
-            className={`${segment.className} tw-transition-all tw-duration-200 motion-reduce:tw-transition-none`}
-          />
-        ) : null
-      )}
-      <line
-        x1={marker}
-        x2={marker}
-        y1="14"
-        y2="46"
-        strokeWidth="2"
-        className="tw-stroke-iron-50"
-      />
-      <text
-        x={marker}
-        y="10"
-        textAnchor="middle"
-        className="tw-fill-iron-50 tw-text-[12px] tw-font-semibold tw-tabular-nums"
-      >
-        {multiplier(locale, breakdown.betaCents)}
-      </text>
-      <text
-        x="10"
-        y="62"
-        className="tw-fill-iron-400 tw-text-[11px] tw-tabular-nums"
-      >
-        {multiplier(locale, 100)}
-      </text>
-      <text
-        x={width - 10}
-        y="62"
-        textAnchor="end"
-        className="tw-fill-iron-400 tw-text-[11px]"
-      >
-        {t(locale, "network.tdh.how.boostBuilder.ceiling")}
-      </text>
-    </svg>
+      <span className="tw-relative tw-block tw-pt-6">
+        <span
+          className="tw-absolute tw-top-0 tw-text-xs tw-font-semibold tw-tabular-nums tw-text-iron-50"
+          style={{
+            left: `${marker}%`,
+            transform: `translateX(${shift})`,
+          }}
+        >
+          {multiplier(locale, breakdown.betaCents)}
+        </span>
+        <span className="tw-relative tw-flex tw-h-4 tw-overflow-hidden tw-rounded-full tw-bg-iron-800">
+          {PARTS.map((part) => {
+            const width = share(breakdown[part.field]);
+            return width > 0 ? (
+              <span
+                key={part.key}
+                className={`tw-h-full tw-transition-all tw-duration-200 motion-reduce:tw-transition-none ${part.dot}`}
+                style={{ width: `${width}%` }}
+              />
+            ) : null;
+          })}
+        </span>
+        <span
+          className="tw-absolute tw-bottom-[-4px] tw-top-5 tw-w-0.5 tw-bg-iron-50"
+          style={{ left: `${marker}%` }}
+        />
+      </span>
+      <span className="tw-mt-2 tw-flex tw-justify-between tw-text-xs tw-tabular-nums tw-text-iron-300">
+        <span>{multiplier(locale, 100)}</span>
+        <span>{t(locale, "network.tdh.how.boostBuilder.ceiling")}</span>
+      </span>
+    </span>
   );
 }
 
@@ -267,16 +219,24 @@ export default function BoostBuilder({
                 checked={fullSetChosen || seasons.has(season)}
                 onChange={() => toggleSeason(season)}
               />
-              {season === CURRENT_SEASON
-                ? t(locale, "network.tdh.how.boostBuilder.seasonCurrent", {
-                    season: formatInteger(locale, season),
-                  })
-                : t(locale, "network.tdh.how.boostBuilder.season", {
-                    season: formatInteger(locale, season),
-                  })}
+              <span className="tw-whitespace-nowrap">
+                {t(locale, "network.tdh.how.boostBuilder.season", {
+                  season: formatInteger(locale, season),
+                })}
+              </span>
+              {season === CURRENT_SEASON && (
+                <span className="tw-rounded-full tw-bg-iron-800 tw-px-1.5 tw-py-0.5 tw-text-[11px] tw-text-iron-300">
+                  {t(locale, "network.tdh.how.boostBuilder.currentBadge")}
+                </span>
+              )}
             </label>
           ))}
         </div>
+        <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+          {t(locale, "network.tdh.how.boostBuilder.currentNote", {
+            season: formatInteger(locale, CURRENT_SEASON),
+          })}
+        </p>
         <div
           className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-x-6"
           aria-describedby={season1Complete ? `${id}-season1` : undefined}
@@ -323,7 +283,7 @@ export default function BoostBuilder({
             boost: multiplier(locale, breakdown.betaCents),
           })}
         </span>
-        <span className="tw-mt-3 tw-block" aria-hidden="true">
+        <span className="tw-mt-3 tw-block">
           <BoostLadder locale={locale} breakdown={breakdown} />
         </span>
         <span className="tw-mt-2 tw-block tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">

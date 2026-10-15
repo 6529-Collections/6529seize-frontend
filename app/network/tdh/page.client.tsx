@@ -7,44 +7,41 @@ import {
 } from "@/components/network/networkPageLayoutClasses";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatInteger } from "@/i18n/format";
-import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { VerificationSummary } from "@/lib/tdh/verification/summary.server";
-import TdhSource from "./shared/TdhSource";
+import TdhPager from "./shared/TdhPager";
 import TdhSubnav from "./shared/TdhSubnav";
-import TDHCalculationMoved, {
+import {
+  TDHGlossary,
   TDHGoDeeper,
   TDHHoldingChanges,
 } from "./TDHCalculationDetails";
 import TDHCurrentRules from "./TDHCurrentRules";
-import TDHExample from "./TDHExample";
 import TDHInAMinute from "./TDHInAMinute";
 import TDHProfile from "./TDHProfile";
-import {
-  TDHRelatedLinks,
-  TDHSectionNavigation,
-  useTDHSectionHashFocus,
-} from "./TDHPageNavigation";
-import TDHSection, { TDH_PANEL, TDH_TEXT } from "./TDHSection";
+import { TDHRelatedLinks, useTDHSectionHashFocus } from "./TDHPageNavigation";
+import TDHSection from "./TDHSection";
 import TDHVerifiedDaily from "./TDHVerifiedDaily";
 
-const NAVIGATION = [
-  { id: "tdh-minute", key: "minute" },
-  { id: "tdh-profile", key: "profile" },
-  { id: "tdh-example", key: "example" },
-  { id: "tdh-reference", key: "reference" },
-  { id: "tdh-1-4", key: "rules" },
-  { id: "tdh-exact", key: "details" },
-] as const;
-const NAVIGATION_IDS = [
-  ...NAVIGATION.map((item) => item.id),
+const SECTION_IDS = [
+  "tdh-minute",
   "tdh-verified",
-  "tdh-how",
+  "tdh-profile",
+  "tdh-1-4",
   "tdh-changes",
+  "glossary",
   "tdh-deeper",
+  "tdh-explore",
 ];
-const STEPS = ["days", "weight", "boost"] as const;
+
+/** Anchors of sections that moved: old links still land in the right place. */
+const MOVED_ANCHORS: Readonly<Record<string, string>> = {
+  "tdh-exact": "/network/tdh/how-it-works",
+  "tdh-how": "/network/tdh/how-it-works",
+  "tdh-example": "/network/tdh/how-it-works#step-12",
+  "tdh-reference": "#tdh-minute",
+};
+
 const RELATED = [
   { href: "/network/tdh/consolidation", key: "consolidation" },
   { href: "/network/health/network-tdh", key: "stats" },
@@ -59,7 +56,7 @@ export default function TDHMainPage({
   const locale = useBrowserLocale();
   useSetTitle(t(locale, "network.tdh.explainer.pageTitle"));
 
-  useTDHSectionHashFocus(NAVIGATION_IDS);
+  useTDHSectionHashFocus(SECTION_IDS, MOVED_ANCHORS);
 
   return (
     <div className={NETWORK_REFERENCE_PAGE_CLASSES}>
@@ -75,43 +72,20 @@ export default function TDHMainPage({
           <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl">
             {t(locale, "network.tdh.explainer.title")}
           </h1>
-          <p className="tw-mb-0 tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-200">
+          <p className="tw-mb-0 tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-200 sm:tw-text-lg sm:tw-leading-8">
             {t(locale, "network.tdh.explainer.intro")}
-            <TdhSource refs={["P26 §4", "P26 §7", "P26 §8"]} locale={locale} />
           </p>
-          <TDHSectionNavigation
-            label={t(locale, "network.tdh.explainer.nav")}
-            items={NAVIGATION.map(({ id, key }) => ({
-              id,
-              label: t(locale, `network.tdh.explainer.nav.${key}`),
-            }))}
-          />
+          <p className="tw-mb-0 tw-mt-3 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-300">
+            {t(locale, "network.tdh.explainer.why")}
+          </p>
         </header>
         <TDHInAMinute locale={locale} />
         <TDHVerifiedDaily locale={locale} summary={verification} />
         <TDHProfile locale={locale} />
-        <TDHExample locale={locale} />
-        <HowTDHWorks locale={locale} />
-        <TDHSection
-          id="tdh-reference"
-          title={t(locale, "network.tdh.explainer.reference.title")}
-        >
-          <div className={`${TDH_PANEL} tw-space-y-4 tw-p-5`}>
-            <p className={TDH_TEXT}>
-              {t(locale, "network.tdh.explainer.reference.body")}
-            </p>
-            <p className="tw-m-0 tw-font-mono tw-text-base tw-font-medium tw-leading-7 tw-text-iron-100">
-              {t(locale, "network.tdh.explainer.reference.unit")}
-            </p>
-            <p className={TDH_TEXT}>
-              {t(locale, "network.tdh.explainer.reference.weight")}
-            </p>
-          </div>
-        </TDHSection>
         <TDHCurrentRules locale={locale} />
         <TDHHoldingChanges locale={locale} />
+        <TDHGlossary locale={locale} />
         <TDHGoDeeper locale={locale} />
-        <TDHCalculationMoved locale={locale} />
         <TDHSection
           id="tdh-explore"
           title={t(locale, "network.tdh.explainer.related")}
@@ -124,37 +98,8 @@ export default function TDHMainPage({
             }))}
           />
         </TDHSection>
+        <TdhPager current="/network/tdh" locale={locale} />
       </article>
     </div>
-  );
-}
-
-function HowTDHWorks({ locale }: { readonly locale: SupportedLocale }) {
-  return (
-    <TDHSection id="tdh-how" title={t(locale, "network.tdh.explainer.how")}>
-      <ol className="tw-m-0 tw-list-none tw-space-y-6 tw-p-0">
-        {STEPS.map((step, index) => (
-          <li
-            key={step}
-            className="tw-grid tw-grid-cols-[2rem_minmax(0,1fr)] tw-gap-3"
-          >
-            <span className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-text-sm tw-font-medium tw-text-iron-200">
-              {formatInteger(locale, index + 1)}
-            </span>
-            <div>
-              <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-7 tw-text-iron-100">
-                {t(locale, `network.tdh.explainer.step.${step}.title`)}
-              </h3>
-              <p className={`${TDH_TEXT} tw-mt-1`}>
-                {t(locale, `network.tdh.explainer.step.${step}.body`)}
-              </p>
-            </div>
-          </li>
-        ))}
-      </ol>
-      <p className="tw-mb-0 tw-mt-6 tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-600 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-400">
-        {t(locale, "network.tdh.explainer.snapshot")}
-      </p>
-    </TDHSection>
   );
 }

@@ -1,9 +1,8 @@
 "use client";
 
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
-import NetworkReferenceNavigation from "@/components/network/NetworkReferenceNavigation";
+import Link from "next/link";
 import {
-  NETWORK_PAGE_TITLE_CLASSES,
   NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
   NETWORK_REFERENCE_PAGE_CLASSES,
   NETWORK_REFERENCE_SECTION_HEADING_CLASSES,
@@ -16,6 +15,8 @@ import { t, type MessageKey } from "@/i18n/messages";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import TdhSource from "../shared/TdhSource";
+import TdhSubnav from "../shared/TdhSubnav";
+import { TDH_LINK } from "../shared/tdhStyles";
 
 type HistoricBoostsMessageKey = Extract<
   MessageKey,
@@ -89,7 +90,7 @@ export default function TDHHistoricBoostsPage() {
     () => new Set()
   );
 
-  useSetTitle("TDH Historic Boosts | Network");
+  useSetTitle("TDH historic boosts | Network");
 
   const toggleRule = (ruleId: string) => {
     setExpandedRuleIds((current) => {
@@ -105,62 +106,108 @@ export default function TDHHistoricBoostsPage() {
 
   return (
     <main className={NETWORK_REFERENCE_PAGE_CLASSES}>
-      <div className="tw-w-full">
-        <AboutContentsDropdown
-          className={NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES}
-          currentHref="/network/tdh/historic-boosts"
-          desktopFlush
-          withDivider
-        />
+      <AboutContentsDropdown
+        className={NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES}
+        currentHref="/network/tdh/historic-boosts"
+        desktopFlush
+        withDivider
+      />
+      <article className="tw-mx-auto tw-max-w-6xl tw-pb-8">
+        <TdhSubnav current="/network/tdh/historic-boosts" locale={locale} />
+        <header className="tw-pb-8 tw-pt-5 sm:tw-pb-10 sm:tw-pt-8">
+          <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl">
+            {m(locale, "network.tdhHistoric.hero.title")}
+          </h1>
+          <p className="tw-mb-0 tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-200">
+            {m(locale, "network.tdhHistoric.hero.intro")}
+          </p>
+          <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
+            {m(locale, "network.tdhHistoric.hero.v1")}
+            <TdhSource refs={["P26 §10"]} locale={locale} />
+          </p>
+        </header>
 
-        <article className="tw-pb-12 tw-pt-4 max-sm:tw-px-1 sm:tw-pt-8">
-          <header className="tw-pb-8 sm:tw-pb-10">
-            <h1 className={NETWORK_PAGE_TITLE_CLASSES}>
-              {m(locale, "network.tdhHistoric.hero.title")}
-            </h1>
-            <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300">
-              {m(locale, "network.tdhHistoric.hero.intro")}
+        <section
+          aria-labelledby="historic-versions-heading"
+          className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-5 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-8 sm:tw-py-10 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,2.5fr)] lg:tw-gap-10"
+        >
+          <div className="lg:tw-sticky lg:tw-top-28">
+            <h2
+              className={NETWORK_REFERENCE_SECTION_HEADING_CLASSES}
+              id="historic-versions-heading"
+            >
+              {m(locale, "network.tdhHistoric.versions.title")}
+            </h2>
+            <BoostTimeline locale={locale} />
+          </div>
+
+          <div className="tw-min-w-0 tw-space-y-4">
+            <p className="tw-m-0 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-500/[0.06] tw-px-4 tw-py-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+              {m(locale, "network.tdhHistoric.current.body")}{" "}
+              <Link href="/network/tdh#tdh-1-4" className={TDH_LINK}>
+                {m(locale, "network.tdhHistoric.current.link")}
+              </Link>
             </p>
-            <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
-              {m(locale, "network.tdhHistoric.hero.v1")}
-              <TdhSource refs={["P26 §10"]} locale={locale} />
-            </p>
-          </header>
-
-          <section
-            aria-labelledby="historic-versions-heading"
-            className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-6 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-py-8 sm:tw-py-12 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,2.5fr)] lg:tw-gap-12"
-          >
-            <div className="lg:tw-sticky lg:tw-top-28">
-              <h2
-                className={NETWORK_REFERENCE_SECTION_HEADING_CLASSES}
-                id="historic-versions-heading"
-              >
-                {m(locale, "network.tdhHistoric.versions.title")}
-              </h2>
-            </div>
-
-            <div className="tw-min-w-0">
-              <HistoricRulesTable
-                expandedRuleIds={expandedRuleIds}
-                locale={locale}
-                onToggle={toggleRule}
-              />
-              <HistoricRulesMobileCards
-                expandedRuleIds={expandedRuleIds}
-                locale={locale}
-                onToggle={toggleRule}
-              />
-            </div>
-          </section>
-
-          <NetworkReferenceNavigation
-            currentHref="/network/tdh/historic-boosts"
-            locale={locale}
-          />
-        </article>
-      </div>
+            <HistoricRulesTable
+              expandedRuleIds={expandedRuleIds}
+              locale={locale}
+              onToggle={toggleRule}
+            />
+            <HistoricRulesMobileCards
+              expandedRuleIds={expandedRuleIds}
+              locale={locale}
+              onToggle={toggleRule}
+            />
+          </div>
+        </section>
+      </article>
     </main>
+  );
+}
+
+/** The full-set boost of each archived schedule, oldest first, as bars. */
+function BoostTimeline({ locale }: { readonly locale: SupportedLocale }) {
+  const ordered = [...HISTORIC_RULES].reverse();
+  const max = Math.max(...ordered.map((rule) => rule.completeSetMultiplier));
+  return (
+    <figure className="tw-m-0 tw-mt-5">
+      <figcaption className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
+        {m(locale, "network.tdhHistoric.timeline.title")}
+      </figcaption>
+      <ol className="tw-m-0 tw-mt-3 tw-list-none tw-space-y-2.5 tw-p-0">
+        {ordered.map((rule) => (
+          <li key={rule.id}>
+            <p className="tw-m-0 tw-flex tw-justify-between tw-gap-3 tw-text-xs tw-text-iron-300">
+              <span className="tw-font-mono">
+                {formatVersionLabel(locale, rule)}
+              </span>
+              <span className="tw-tabular-nums">
+                {formatDate(locale, rule.startDateIso, {
+                  month: "short",
+                  year: "numeric",
+                })}
+              </span>
+            </p>
+            <span className="tw-mt-1 tw-flex tw-items-center tw-gap-2">
+              <span className="tw-h-2 tw-flex-1 tw-overflow-hidden tw-rounded-full tw-bg-iron-800">
+                <span
+                  className="tw-block tw-h-full tw-rounded-full tw-bg-[#00f0ff]/70"
+                  style={{
+                    width: `${((rule.completeSetMultiplier - 1) / (max - 1)) * 100}%`,
+                  }}
+                />
+              </span>
+              <span className="tw-w-12 tw-text-right tw-font-mono tw-text-xs tw-tabular-nums tw-text-iron-100">
+                {formatMultiplier(locale, rule.completeSetMultiplier)}
+              </span>
+            </span>
+          </li>
+        ))}
+      </ol>
+      <p className="tw-m-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-400">
+        {m(locale, "network.tdhHistoric.timeline.note")}
+      </p>
+    </figure>
   );
 }
 
@@ -377,7 +424,7 @@ function MobileSummaryMetric({
 }) {
   return (
     <div className="tw-min-w-0">
-      <dt className="tw-text-[10px] tw-font-medium tw-uppercase tw-leading-4 tw-tracking-wide tw-text-iron-400">
+      <dt className="tw-text-[11px] tw-font-medium tw-uppercase tw-leading-4 tw-tracking-wide tw-text-iron-400">
         {label}
       </dt>
       <dd

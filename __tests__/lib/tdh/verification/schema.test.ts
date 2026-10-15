@@ -18,8 +18,21 @@ describe("verification schema", () => {
     }
   });
 
-  it("keeps the sample's real comparison figures and labels Python as copied", () => {
+  it("keeps the daily job's real files as the sample, marked as run before D131 netting", () => {
     const day = SAMPLE_VERIFICATION_DAYS[20_741];
+    expect(day?.verdict).toBe("OK");
+    expect(day?.implementations.rust.transactionNetting).toBe(false);
+    expect(day?.implementations.python?.transactionNetting).toBe(false);
+    expect(day?.implementations.python?.runtimeMs).toBe(42_265);
+    expect(day?.implementations.live?.source).toBe(
+      "arweave:4mTqQxjtPpArwMw4UzLvJbzsawWoWDPN7OJrncpEuQE"
+    );
+    expect(day?.differences.map((difference) => difference.label)).toEqual([
+      "holder-1",
+      "holder-2",
+      "holder-1/w1",
+      "holder-2/w1",
+    ]);
     expect(day?.agreement.rustVsLive).toEqual({
       identitiesEqual: 10_280,
       identitiesTotal: 10_282,
@@ -68,12 +81,42 @@ describe("verification schema", () => {
     expect(parsed.success && parsed.data.implementations.python).toBeNull();
   });
 
+  it("accepts the feed's wallet labels and upload field names", () => {
+    const day = syntheticDay();
+    const first = day.differences[0];
+    if (!first) {
+      throw new Error("fixture has differences");
+    }
+    for (const name of [
+      "boosted_tdh",
+      "tdh__raw",
+      "boosted_nextgen_tdh",
+      "memes#208.tdh",
+      "nextgen#10000000049.tdh__raw",
+    ]) {
+      expect(
+        parseVerificationDay({
+          ...day,
+          differences: [
+            {
+              ...first,
+              label: "holder-12/w3",
+              fields: [{ name, rust: 1, python: 1, live: 2 }],
+            },
+          ],
+        }).success
+      ).toBe(true);
+    }
+  });
+
   it("rejects an address or any other identifier in a holder label", () => {
     for (const label of [
       "0x33fd426905f149f8376e227d0c9d3340aad17af1",
       "holder-1 0x33fd426905f149f8376e227d0c9d3340aad17af1",
       "someone.eth",
       "holder-",
+      "holder-1/someone",
+      "holder-1/w",
     ]) {
       const day = syntheticDay();
       const first = day.differences[0];
@@ -106,6 +149,17 @@ describe("verification schema", () => {
           {
             ...first,
             fields: [{ name: "wallet 0xabc", rust: 1, python: 1, live: 2 }],
+          },
+        ],
+      }).success
+    ).toBe(false);
+    expect(
+      parseVerificationDay({
+        ...day,
+        differences: [
+          {
+            ...first,
+            fields: [{ name: "memes#x.tdh", rust: 1, python: 1, live: 2 }],
           },
         ],
       }).success
@@ -185,7 +239,7 @@ describe("verification schema", () => {
 
   it("accepts an unknown verdict string, which the page shows as See details", () => {
     expect(
-      parseVerificationDay(syntheticDay({ verdict: "under-review" })).success
+      parseVerificationDay(syntheticDay({ verdict: "UNDER_REVIEW" })).success
     ).toBe(true);
     expect(parseVerificationDay(syntheticDay({ verdict: "" })).success).toBe(
       false

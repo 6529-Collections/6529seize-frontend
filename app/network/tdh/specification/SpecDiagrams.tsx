@@ -1,79 +1,94 @@
+import { ArrowDownIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useId } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 import { TDH_FOCUS_RING } from "../shared/tdhStyles";
 
-const MAP_NODES = [
-  { id: "s2", n: "2" },
-  { id: "s3", n: "3" },
-  { id: "s4", n: "4" },
-  { id: "s5", n: "5" },
-  { id: "s6", n: "6" },
-  { id: "s7", n: "7" },
-  { id: "s8", n: "8" },
-  { id: "s9", n: "9" },
-] as const;
+const NODE = `tw-flex tw-h-full tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-[13px] tw-leading-5 tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-primary-400/60 motion-reduce:tw-transition-none ${TDH_FOCUS_RING}`;
 
-const NODE = `tw-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-primary-400/60 motion-reduce:tw-transition-none ${TDH_FOCUS_RING}`;
-
-/** Diagram 1: how the sections of P26 feed each other; each box links to its section. */
-export function SectionMap({
+function MapNode({
   locale,
-  titles,
+  section,
+  dashed = false,
 }: {
   readonly locale: SupportedLocale;
-  readonly titles: Readonly<Record<string, string>>;
+  readonly section: number;
+  readonly dashed?: boolean;
 }) {
-  const node = (id: string) => (
-    <Link href={`#${id}`} className={NODE}>
-      {titles[id]}
+  return (
+    <Link
+      href={`#s${section}`}
+      className={`${NODE} ${dashed ? "tw-border-dashed tw-border-iron-500 tw-text-iron-200" : ""}`}
+    >
+      <span className="tw-font-mono tw-text-xs tw-text-iron-400">
+        §{section}
+      </span>
+      <span>{t(locale, `network.tdh.spec.map.s${section}` as MessageKey)}</span>
     </Link>
   );
+}
+
+function Across() {
+  return (
+    <span
+      aria-hidden="true"
+      className="tw-flex tw-items-center tw-justify-center tw-text-iron-400"
+    >
+      <ArrowDownIcon className="tw-size-4 md:tw-hidden" />
+      <ArrowRightIcon className="tw-hidden tw-size-4 md:tw-block" />
+    </span>
+  );
+}
+
+/**
+ * Diagram 1: how the sections of P26 feed each other, as a flow. Inputs to
+ * events to the snapshot; eligibility and identities side by side; then
+ * holdings, scores and the output, with the parameters feeding sections 5
+ * to 8. Each box links to its section.
+ */
+export function SectionMap({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <figure className="tw-m-0">
-      <figcaption className="tw-mb-3 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
+      <figcaption className="tw-mb-3 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
         {t(locale, "network.tdh.spec.mapTitle")}
       </figcaption>
       <p className="tw-sr-only">{t(locale, "network.tdh.spec.mapDesc")}</p>
-      <div className="tw-grid tw-gap-2 md:tw-grid-cols-[repeat(4,minmax(0,1fr))]">
-        <div className="tw-flex tw-flex-col tw-gap-2">
-          {node("s2")}
-          {node("s3")}
-          {node("s4")}
+      <div className="tw-grid tw-gap-2 md:tw-grid-cols-[minmax(0,1fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1.25fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1fr)] md:tw-items-center md:tw-gap-x-1.5 md:tw-gap-y-2">
+        <MapNode locale={locale} section={2} />
+        <Across />
+        <MapNode locale={locale} section={3} />
+        <Across />
+        <MapNode locale={locale} section={4} />
+        <Across />
+        <div className="tw-grid tw-grid-cols-2 tw-gap-2 md:tw-grid-cols-1">
+          <MapNode locale={locale} section={5} />
+          <MapNode locale={locale} section={6} />
         </div>
-        <div className="tw-flex tw-flex-col tw-gap-2">
-          {node("s5")}
-          {node("s6")}
-        </div>
-        <div className="tw-flex tw-flex-col tw-gap-2">
-          {node("s7")}
-          {node("s8")}
-        </div>
-        <div className="tw-flex tw-flex-col tw-gap-2">
-          {node("s9")}
-          <Link
-            href="#s10"
-            className={`${NODE} tw-border-dashed tw-text-iron-300`}
-          >
-            {titles["s10"]}
-          </Link>
+        <Across />
+        <MapNode locale={locale} section={7} />
+        <Across />
+        <MapNode locale={locale} section={8} />
+        <Across />
+        <MapNode locale={locale} section={9} />
+        <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-1 md:tw-col-start-7 md:tw-col-end-12 md:tw-mt-0">
+          <span
+            aria-hidden="true"
+            className="tw-hidden tw-h-3 tw-border-0 tw-border-x tw-border-t tw-border-dashed tw-border-iron-500 md:tw-block"
+          />
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+            <MapNode locale={locale} section={10} dashed />
+            <span className="tw-text-xs tw-text-iron-400">
+              {t(locale, "network.tdh.spec.mapFeeds")}
+            </span>
+          </div>
         </div>
       </div>
-      <ol
-        aria-hidden="true"
-        className="tw-m-0 tw-mt-2 tw-hidden tw-list-none tw-gap-2 tw-p-0 tw-text-[11px] tw-text-iron-500 md:tw-flex"
-      >
-        {MAP_NODES.map((item, index) => (
-          <li key={item.id}>
-            {index > 0 && "→ "}§{item.n}
-          </li>
-        ))}
-        <li className="tw-ml-auto">§10 → §5–§8</li>
-      </ol>
     </figure>
   );
 }
+
+const TRANSITIONS = ["t1", "t2", "t3", "t4", "t5"] as const;
 
 /** Diagram 2: the pair state machine of P26 §6.2. */
 export function PairStateMachine({
@@ -105,122 +120,134 @@ export function PairStateMachine({
   );
   const arrowId = `${id}-arrow`;
   return (
-    <svg
-      viewBox="0 0 600 140"
-      role="img"
-      aria-labelledby={`${id}-title ${id}-desc`}
-      className="tw-block tw-h-auto tw-w-full tw-max-w-2xl"
-    >
-      <title id={`${id}-title`}>
-        {t(locale, "network.tdh.spec.s6-2.machineTitle")}
-      </title>
-      <desc id={`${id}-desc`}>
-        {t(locale, "network.tdh.spec.s6-2.machineDesc")}
-      </desc>
-      <defs>
-        <marker
-          id={arrowId}
-          viewBox="0 0 10 10"
-          refX="9"
-          refY="5"
-          markerWidth="7"
-          markerHeight="7"
-          orient="auto-start-reverse"
+    <figure className="tw-m-0">
+      <ol className="tw-m-0 tw-list-none tw-space-y-2 tw-p-0 md:tw-hidden">
+        {TRANSITIONS.map((key) => (
+          <li
+            key={key}
+            className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-leading-6 tw-text-iron-200"
+          >
+            {t(locale, `network.tdh.spec.s6-2.${key}` as MessageKey)}
+          </li>
+        ))}
+      </ol>
+      <svg
+        viewBox="0 0 600 140"
+        role="img"
+        aria-labelledby={`${id}-title ${id}-desc`}
+        className="tw-hidden tw-h-auto tw-w-full tw-max-w-2xl md:tw-block"
+      >
+        <title id={`${id}-title`}>
+          {t(locale, "network.tdh.spec.s6-2.machineTitle")}
+        </title>
+        <desc id={`${id}-desc`}>
+          {t(locale, "network.tdh.spec.s6-2.machineDesc")}
+        </desc>
+        <defs>
+          <marker
+            id={arrowId}
+            viewBox="0 0 10 10"
+            refX="9"
+            refY="5"
+            markerWidth="7"
+            markerHeight="7"
+            orient="auto-start-reverse"
+          >
+            <path d="M0,0 L10,5 L0,10 z" className="tw-fill-iron-300" />
+          </marker>
+        </defs>
+        {box(
+          10,
+          t(locale, "network.tdh.spec.s6-2.none"),
+          "tw-fill-iron-900 tw-stroke-iron-600"
+        )}
+        {box(
+          225,
+          t(locale, "network.tdh.spec.s6-2.pending"),
+          "tw-fill-amber-400/10 tw-stroke-amber-300/60"
+        )}
+        {box(
+          440,
+          t(locale, "network.tdh.spec.s6-2.confirmed"),
+          "tw-fill-success/10 tw-stroke-success/70"
+        )}
+        <path
+          d="M160 74 L 223 74"
+          className="tw-stroke-iron-300"
+          strokeWidth="1.5"
+          markerEnd={`url(#${arrowId})`}
+          fill="none"
+        />
+        <text
+          x="192"
+          y="52"
+          textAnchor="middle"
+          className="tw-fill-iron-300 tw-font-mono tw-text-[12px]"
         >
-          <path d="M0,0 L10,5 L0,10 z" className="tw-fill-iron-300" />
-        </marker>
-      </defs>
-      {box(
-        10,
-        t(locale, "network.tdh.spec.s6-2.none"),
-        "tw-fill-iron-900 tw-stroke-iron-600"
-      )}
-      {box(
-        225,
-        t(locale, "network.tdh.spec.s6-2.pending"),
-        "tw-fill-amber-400/10 tw-stroke-amber-300/60"
-      )}
-      {box(
-        440,
-        t(locale, "network.tdh.spec.s6-2.confirmed"),
-        "tw-fill-success/10 tw-stroke-success/70"
-      )}
-      <path
-        d="M160 74 L 223 74"
-        className="tw-stroke-iron-300"
-        strokeWidth="1.5"
-        markerEnd={`url(#${arrowId})`}
-        fill="none"
-      />
-      <text
-        x="192"
-        y="52"
-        textAnchor="middle"
-        className="tw-fill-iron-300 tw-font-mono tw-text-[11px]"
-      >
-        REGISTER(a,b)
-      </text>
-      <path
-        d="M223 96 L 162 96"
-        className="tw-stroke-iron-500"
-        strokeWidth="1.5"
-        markerEnd={`url(#${arrowId})`}
-        fill="none"
-      />
-      <text
-        x="192"
-        y="126"
-        textAnchor="middle"
-        className="tw-fill-iron-400 tw-font-mono tw-text-[11px]"
-      >
-        REVOKE(a,b)
-      </text>
-      <path
-        d="M375 74 L 438 74"
-        className="tw-stroke-iron-300"
-        strokeWidth="1.5"
-        markerEnd={`url(#${arrowId})`}
-        fill="none"
-      />
-      <text
-        x="407"
-        y="52"
-        textAnchor="middle"
-        className="tw-fill-iron-300 tw-font-mono tw-text-[11px]"
-      >
-        REGISTER(b,a)
-      </text>
-      <path
-        d="M438 96 L 377 96"
-        className="tw-stroke-iron-500"
-        strokeWidth="1.5"
-        markerEnd={`url(#${arrowId})`}
-        fill="none"
-      />
-      <text
-        x="407"
-        y="126"
-        textAnchor="middle"
-        className="tw-fill-iron-400 tw-font-mono tw-text-[11px]"
-      >
-        REVOKE
-      </text>
-      <path
-        d="M490 60 C 490 18, 560 18, 560 58"
-        className="tw-stroke-iron-600"
-        strokeDasharray="4 4"
-        strokeWidth="1.2"
-        fill="none"
-        markerEnd={`url(#${arrowId})`}
-      />
-      <text
-        x="525"
-        y="14"
-        textAnchor="middle"
-        className="tw-fill-iron-500 tw-font-mono tw-text-[11px]"
-      >
-        REGISTER · refresh
-      </text>
-    </svg>
+          REGISTER(a,b)
+        </text>
+        <path
+          d="M223 96 L 162 96"
+          className="tw-stroke-iron-500"
+          strokeWidth="1.5"
+          markerEnd={`url(#${arrowId})`}
+          fill="none"
+        />
+        <text
+          x="192"
+          y="126"
+          textAnchor="middle"
+          className="tw-fill-iron-300 tw-font-mono tw-text-[12px]"
+        >
+          REVOKE(a,b)
+        </text>
+        <path
+          d="M375 74 L 438 74"
+          className="tw-stroke-iron-300"
+          strokeWidth="1.5"
+          markerEnd={`url(#${arrowId})`}
+          fill="none"
+        />
+        <text
+          x="407"
+          y="52"
+          textAnchor="middle"
+          className="tw-fill-iron-300 tw-font-mono tw-text-[12px]"
+        >
+          REGISTER(b,a)
+        </text>
+        <path
+          d="M438 96 L 377 96"
+          className="tw-stroke-iron-500"
+          strokeWidth="1.5"
+          markerEnd={`url(#${arrowId})`}
+          fill="none"
+        />
+        <text
+          x="407"
+          y="126"
+          textAnchor="middle"
+          className="tw-fill-iron-300 tw-font-mono tw-text-[12px]"
+        >
+          REVOKE
+        </text>
+        <path
+          d="M490 60 C 490 18, 560 18, 560 58"
+          className="tw-stroke-iron-600"
+          strokeDasharray="4 4"
+          strokeWidth="1.2"
+          fill="none"
+          markerEnd={`url(#${arrowId})`}
+        />
+        <text
+          x="525"
+          y="14"
+          textAnchor="middle"
+          className="tw-fill-iron-400 tw-font-mono tw-text-[12px]"
+        >
+          REGISTER · refresh
+        </text>
+      </svg>
+    </figure>
   );
 }

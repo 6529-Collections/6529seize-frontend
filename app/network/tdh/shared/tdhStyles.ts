@@ -18,12 +18,16 @@ export const TDH_LINK_STANDALONE = `${TDH_LINK} tw-inline-flex tw-min-h-11 tw-it
 export const TDH_MONO = "tw-font-mono tw-text-[13px] tw-leading-6";
 export const TDH_NUM = "tw-tabular-nums";
 
-/** A table frame that scrolls sideways: pair it with tabIndex 0, role region and a label. */
+/**
+ * A table frame that scrolls sideways: pair it with tabIndex 0, role region
+ * and a label. It is positioned, so screen-reader-only text and tooltips
+ * inside it are clipped with it instead of widening the page.
+ */
 export const TDH_TABLE_WRAP =
-  "tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07]";
+  "tw-relative tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07]";
 /** A table frame for tables whose cells wrap to fit, so it never scrolls. */
 export const TDH_TABLE_FRAME =
-  "tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07]";
+  "tw-relative tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07]";
 export const TDH_TABLE =
   "tw-w-full tw-border-collapse tw-text-left tw-text-sm tw-leading-5";
 export const TDH_CAPTION =
@@ -39,6 +43,11 @@ export const TDH_TD_STACK_LG =
   "tw-border-0 tw-p-0 tw-align-top tw-text-iron-200 lg:tw-border-b lg:tw-border-solid lg:tw-border-white/[0.05] lg:tw-px-4 lg:tw-py-3";
 export const TDH_TD_NUM = `${TDH_TD} tw-text-right tw-tabular-nums`;
 export const TDH_TH_NUM = `${TDH_TH} tw-text-right`;
+
+/** A table cell with tighter side padding on phones, for small tables inside cards. */
+export function tdhNarrowCell(cell: string): string {
+  return cell.replace("tw-px-4", "tw-px-3 sm:tw-px-4");
+}
 
 export const TDH_BUTTON = `tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3.5 tw-text-sm tw-font-medium tw-text-iron-100 tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 motion-reduce:tw-transition-none ${TDH_FOCUS_RING}`;
 export const TDH_CHIP_BUTTON = `tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-px-3.5 tw-text-sm tw-font-medium tw-transition-colors motion-reduce:tw-transition-none ${TDH_FOCUS_RING}`;
@@ -63,6 +72,12 @@ export const TDH_SERIES = {
     fill: "tw-fill-violet-400",
     stroke: "tw-stroke-violet-400",
     bg: "tw-bg-violet-400",
+  },
+  lean: {
+    text: "tw-text-emerald-300",
+    fill: "tw-fill-emerald-400",
+    stroke: "tw-stroke-emerald-400",
+    bg: "tw-bg-emerald-400",
   },
   python: {
     text: "tw-text-amber-200",

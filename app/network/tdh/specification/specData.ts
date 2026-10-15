@@ -69,6 +69,29 @@ export const TOPICS = [
   ],
 ] as const;
 
+/** The rule's symbols and the P26 section that defines each (shown in order of first use). */
+export const SYMBOLS = [
+  { symbol: "N", key: "N", section: "4.1" },
+  { symbol: "M = t_N", key: "M", section: "4.1" },
+  { symbol: "B", key: "B", section: "4.2" },
+  { symbol: "T = ts(B)", key: "T", section: "4.2" },
+  { symbol: "days(a)", key: "days", section: "4.3" },
+  { symbol: "n_memes", key: "nmemes", section: "5.1" },
+  { symbol: "E[i]", key: "E", section: "5.2" },
+  { symbol: "H", key: "H", section: "5.2" },
+  { symbol: "G", key: "G", section: "5.3" },
+  { symbol: "N_c", key: "Nc", section: "5.3" },
+  { symbol: "net(w)", key: "net", section: "7.1" },
+  { symbol: "raw", key: "raw", section: "7.2" },
+  { symbol: "base", key: "base", section: "7.2" },
+  { symbol: "sets", key: "sets", section: "8.3" },
+  { symbol: "ADD(sets)", key: "ADD", section: "8.3" },
+  { symbol: "beta", key: "beta", section: "8.3" },
+  { symbol: "B64(x)", key: "B64", section: "1" },
+  { symbol: "HALFUP(x)", key: "HALFUP", section: "1" },
+  { symbol: "SINKS", key: "SINKS", section: "1" },
+] as const;
+
 /** P26 §10, without the provenance column. */
 export const PARAMETERS = [
   {

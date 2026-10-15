@@ -86,12 +86,12 @@ export default function TDHCurrentRules({
       >
         <ButtonLink
           variant="tertiary"
-          size="sm"
+          size="lg"
           href="/network/tdh/historic-boosts"
         >
           {t(locale, "network.tdh.related.historic.title")}
         </ButtonLink>
-        <ButtonLink variant="tertiary" size="sm" href="/network/definitions">
+        <ButtonLink variant="tertiary" size="lg" href="/network/definitions">
           {t(locale, "network.tdh.related.definitions.title")}
         </ButtonLink>
       </nav>
@@ -116,6 +116,7 @@ function Rules({
               time: formatDate(locale, snapshot.block_timestamp, {
                 dateStyle: "medium",
                 timeStyle: "medium",
+                hourCycle: "h23",
                 timeZone: "UTC",
               }),
             }),

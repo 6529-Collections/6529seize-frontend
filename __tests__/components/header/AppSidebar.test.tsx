@@ -213,7 +213,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
           { label: "Wave Score", path: "/network/wave-score" },
           { label: "Network Nerd", path: "/network/nerd" },
           {
-            label: "TDH Historic Boosts",
+            label: "TDH historic boosts",
             path: "/network/tdh/historic-boosts",
           },
         ])

@@ -4,6 +4,8 @@ import { publicEnv } from "@/config/env";
 import {
   parseVerificationDay,
   parseVerificationIndex,
+  verificationDaySchema,
+  verificationIndexSchema,
   type VerificationDay,
   type VerificationIndex,
 } from "./schema";
@@ -133,12 +135,21 @@ async function fetchJson(
   }
 }
 
-async function loadBundledSample() {
+/**
+ * The bundled sample, parsed through the same schema as the published files,
+ * so it can never show a shape the real feed would not pass.
+ */
+export async function loadBundledSample(): Promise<{
+  readonly index: VerificationIndex;
+  readonly days: Readonly<Record<number, VerificationDay>>;
+}> {
   const sample = await import("./sampleData");
-  return {
-    index: sample.SAMPLE_VERIFICATION_INDEX,
-    days: sample.SAMPLE_VERIFICATION_DAYS,
-  };
+  const index = verificationIndexSchema.parse(sample.SAMPLE_VERIFICATION_INDEX);
+  const days: Record<number, VerificationDay> = {};
+  for (const [key, value] of Object.entries(sample.SAMPLE_VERIFICATION_DAYS)) {
+    days[Number(key)] = verificationDaySchema.parse(value);
+  }
+  return { index, days };
 }
 
 export function createVerificationLoader(options: VerificationLoaderOptions) {

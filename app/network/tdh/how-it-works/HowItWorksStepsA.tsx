@@ -13,8 +13,10 @@ import {
   RULE_CUTOFF,
   RULE_DAYS,
   RULE_EDITIONS,
+  RULE_NETTING,
   RULE_RATE,
-  RULE_STACKS,
+  RULE_REPLAY,
+  RULE_TOKEN_VALUES,
 } from "../shared/tdhRules";
 import {
   TDH_TABLE,
@@ -23,6 +25,7 @@ import {
   TDH_TD_NUM,
   TDH_TH,
   TDH_TH_NUM,
+  tdhNarrowCell,
 } from "../shared/tdhStyles";
 import { EDITION_EXAMPLES, RATE_EXAMPLES } from "./examples";
 import DayCounter from "./explorables/DayCounter";
@@ -154,7 +157,7 @@ function Step4({ locale }: { readonly locale: SupportedLocale }) {
       locale={locale}
       step={4}
       title={t(locale, "network.tdh.how.s4.title")}
-      rule={RULE_STACKS}
+      rule={`${RULE_REPLAY}\n\n${RULE_TOKEN_VALUES}`}
       ruleSource="P26 §7.1"
     >
       <Cited locale={locale} refs={["P26 §7.1"]}>
@@ -169,37 +172,50 @@ function Step4({ locale }: { readonly locale: SupportedLocale }) {
             </caption>
             <thead>
               <tr>
-                <th scope="col" className={TDH_TH}>
+                <th scope="col" className={tdhNarrowCell(TDH_TH)}>
                   {t(locale, "network.tdh.how.s4.holder")}
                 </th>
-                <th scope="col" className={TDH_TH_NUM}>
+                <th scope="col" className={tdhNarrowCell(TDH_TH_NUM)}>
                   {t(locale, "network.tdh.how.s4.copies")}
                 </th>
-                <th scope="col" className={TDH_TH_NUM}>
+                <th scope="col" className={tdhNarrowCell(TDH_TH_NUM)}>
                   {t(locale, "network.tdh.how.s4.days")}
                 </th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <th scope="row" className={`${TDH_TD} tw-font-normal`}>
+                <th
+                  scope="row"
+                  className={`${tdhNarrowCell(TDH_TD)} tw-whitespace-nowrap tw-font-normal`}
+                >
                   {t(locale, "network.tdh.how.s4.walletA")}
                 </th>
-                <td className={TDH_TD_NUM}>{formatInteger(locale, 2)}</td>
-                <td className={TDH_TD_NUM}>
-                  {formatInteger(locale, 300)} + {formatInteger(locale, 200)} ={" "}
+                <td className={tdhNarrowCell(TDH_TD_NUM)}>
+                  {formatInteger(locale, 2)}
+                </td>
+                <td className={tdhNarrowCell(TDH_TD_NUM)}>
                   {formatInteger(locale, 500)}
+                  <span className="tw-block tw-whitespace-nowrap tw-text-xs tw-text-iron-400">
+                    {formatInteger(locale, 300)} + {formatInteger(locale, 200)}
+                  </span>
                 </td>
               </tr>
               <tr>
-                <th scope="row" className={`${TDH_TD} tw-font-normal`}>
+                <th
+                  scope="row"
+                  className={`${tdhNarrowCell(TDH_TD)} tw-whitespace-nowrap tw-font-normal`}
+                >
                   {t(locale, "network.tdh.how.s4.buyer")}
                 </th>
-                <td className={TDH_TD_NUM}>{formatInteger(locale, 1)}</td>
-                <td className={TDH_TD_NUM}>
-                  {t(locale, "network.tdh.how.s4.buyerDays", {
-                    days: formatInteger(locale, 50),
-                  })}
+                <td className={tdhNarrowCell(TDH_TD_NUM)}>
+                  {formatInteger(locale, 1)}
+                </td>
+                <td className={tdhNarrowCell(TDH_TD_NUM)}>
+                  {formatInteger(locale, 50)}
+                  <span className="tw-block tw-text-xs tw-text-iron-400">
+                    {t(locale, "network.tdh.how.s4.buyerFresh")}
+                  </span>
                 </td>
               </tr>
             </tbody>
@@ -221,14 +237,11 @@ function Step5({ locale }: { readonly locale: SupportedLocale }) {
       locale={locale}
       step={5}
       title={t(locale, "network.tdh.how.s5.title")}
-      pills={
-        <>
-          <TdhStatusPill pill="decided" locale={locale} />
-          <TdhStatusPill pill="ruleTextPending" locale={locale} />
-        </>
-      }
+      pills={<TdhStatusPill pill="inSpec" locale={locale} />}
+      rule={RULE_NETTING}
+      ruleSource="P26 §7.1"
     >
-      <Cited locale={locale} refs={["D131", "D121"]}>
+      <Cited locale={locale} refs={["P26 §7.1", "D131", "D121"]}>
         {t(locale, "network.tdh.how.s5.body")}
       </Cited>
       <Example locale={locale}>
@@ -274,11 +287,11 @@ function Step5({ locale }: { readonly locale: SupportedLocale }) {
         </div>
         <TransactionBoxDiagram locale={locale} />
       </Example>
-      <Cited locale={locale} refs={["D131", "Comparison 2026-10-14/15"]}>
+      <Cited locale={locale} refs={["Comparison 2026-10-14/15", "P26 §13"]}>
         {t(locale, "network.tdh.how.s5.measured")}
       </Cited>
-      <Cited locale={locale} refs={[]} muted>
-        {t(locale, "network.tdh.how.s5.pending")}
+      <Cited locale={locale} refs={["P26 §7.1", "P26 §13"]} muted>
+        {t(locale, "network.tdh.how.s5.vectors")}
       </Cited>
     </StepSection>
   );

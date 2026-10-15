@@ -6,88 +6,122 @@ import { TDH_SERIES } from "../../shared/tdhStyles";
 
 type Series = keyof typeof TDH_SERIES | "neutral";
 
-interface FlowNode {
-  readonly key: string;
+function Node({
+  label,
+  series,
+}: {
+  readonly label: string;
   readonly series: Series;
+}) {
+  return (
+    <span className="tw-inline-flex tw-min-h-10 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-text-iron-100">
+      <span
+        aria-hidden="true"
+        className={`tw-size-2 tw-shrink-0 tw-rounded-full ${
+          series === "neutral" ? "tw-bg-iron-600" : TDH_SERIES[series].bg
+        }`}
+      />
+      {label}
+    </span>
+  );
 }
 
-const STAGES: ReadonlyArray<readonly FlowNode[]> = [
-  [
-    { key: "ethereum", series: "neutral" },
-    { key: "backend", series: "live" },
-  ],
-  [
-    { key: "rust", series: "rust" },
-    { key: "python", series: "python" },
-    { key: "arweave", series: "live" },
-  ],
-  [{ key: "compare", series: "neutral" }],
-  [
-    { key: "published", series: "neutral" },
-    { key: "page", series: "neutral" },
-  ],
-];
-
-function Arrow() {
+function Next() {
   return (
-    <div
+    <ArrowRightIcon
       aria-hidden="true"
-      className="tw-flex tw-items-center tw-justify-center tw-text-iron-500"
-    >
-      <ArrowDownIcon className="tw-size-5 md:tw-hidden" />
-      <ArrowRightIcon className="tw-hidden tw-size-5 md:tw-block" />
+      className="tw-size-4 tw-shrink-0 tw-text-iron-400"
+    />
+  );
+}
+
+function Lane({
+  title,
+  nodes,
+}: {
+  readonly title: string;
+  readonly nodes: ReadonlyArray<{
+    readonly label: string;
+    readonly series: Series;
+  }>;
+}) {
+  return (
+    <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-p-3">
+      <p className="tw-m-0 tw-mb-2 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
+        {title}
+      </p>
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-1.5">
+        {nodes.map((node, index) => (
+          <span
+            key={node.label}
+            className="tw-inline-flex tw-items-center tw-gap-1.5"
+          >
+            {index > 0 && <Next />}
+            <Node label={node.label} series={node.series} />
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
 
-/** The daily comparison as a four-stage flow, horizontal from `md`. */
+/**
+ * The daily comparison as two lanes that meet: our own computation (Ethereum
+ * to the Rust core, the Python reference on the same input) and the object
+ * under test (6529.io's backend and its upload).
+ */
 export function DailyFlow({ locale }: { readonly locale: SupportedLocale }) {
   const label = (key: string) =>
     t(locale, `network.tdh.verify.flow.${key}` as MessageKey);
   return (
     <figure className="tw-m-0">
       <figcaption className="tw-mb-3 tw-text-sm tw-font-medium tw-text-iron-200">
-        {t(locale, "network.tdh.verify.flow.title")}
+        {label("title")}
       </figcaption>
-      <div className="tw-grid tw-gap-2 md:tw-grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,0.8fr)_auto_minmax(0,1fr)] md:tw-items-center">
-        {STAGES.map((stage, stageIndex) => (
-          <div
-            key={stage.map((node) => node.key).join("-")}
-            className="tw-contents"
-          >
-            {stageIndex > 0 && <Arrow />}
-            <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-2 tw-p-0">
-              {stage.map((node) => (
-                <li
-                  key={node.key}
-                  className="tw-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100"
-                >
-                  <span
-                    aria-hidden="true"
-                    className={`tw-size-2 tw-shrink-0 tw-rounded-full ${
-                      node.series === "neutral"
-                        ? "tw-bg-iron-600"
-                        : TDH_SERIES[node.series].bg
-                    }`}
-                  />
-                  {label(node.key)}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+      <p className="tw-sr-only">{label("text")}</p>
+      <div
+        aria-hidden="true"
+        className="tw-grid tw-gap-2 md:tw-grid-cols-[minmax(0,1fr)_auto_minmax(0,11rem)] md:tw-items-center"
+      >
+        <div className="tw-space-y-2">
+          <Lane
+            title={label("ours")}
+            nodes={[
+              { label: label("ethereum"), series: "neutral" },
+              { label: label("rust"), series: "rust" },
+              { label: label("pythonInput"), series: "python" },
+            ]}
+          />
+          <Lane
+            title={label("theirs")}
+            nodes={[
+              { label: label("backend"), series: "live" },
+              { label: label("arweave"), series: "live" },
+            ]}
+          />
+        </div>
+        <div className="tw-flex tw-justify-center tw-text-iron-400">
+          <ArrowDownIcon className="tw-size-5 md:tw-hidden" />
+          <ArrowRightIcon className="tw-hidden tw-size-5 md:tw-block" />
+        </div>
+        <div className="tw-flex tw-flex-col tw-items-start tw-gap-1.5">
+          <Node label={label("compare")} series="neutral" />
+          <ArrowDownIcon className="tw-ml-4 tw-size-4 tw-text-iron-400" />
+          <Node label={label("published")} series="neutral" />
+          <ArrowDownIcon className="tw-ml-4 tw-size-4 tw-text-iron-400" />
+          <Node label={label("page")} series="neutral" />
+        </div>
       </div>
       <p className="tw-m-0 tw-mt-3 tw-inline-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-dashed tw-border-primary-400/50 tw-px-3 tw-py-1 tw-text-xs tw-text-primary-300">
-        {t(locale, "network.tdh.verify.flow.sameCode")}
+        {label("sameCode")}
       </p>
-      <p className="tw-sr-only">{t(locale, "network.tdh.verify.flow.text")}</p>
     </figure>
   );
 }
 
 const STEPS = [
   { key: "snapshot", refs: ["P26 §4.2"] },
-  { key: "inputs", refs: ["P53 §12"] },
+  { key: "inputs", refs: ["P53 §12", "D132"] },
   { key: "exact", refs: ["P53 §12"] },
   { key: "classes", refs: ["P38 §3.3"] },
   { key: "after", refs: ["P53 §4.5", "D132"] },

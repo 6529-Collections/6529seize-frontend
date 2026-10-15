@@ -18,6 +18,7 @@ import {
   TDH_TD_NUM,
   TDH_TH,
   TDH_TH_NUM,
+  tdhNarrowCell,
 } from "../../shared/tdhStyles";
 import ExplorableFrame from "./ExplorableFrame";
 
@@ -64,6 +65,10 @@ function summary(locale: SupportedLocale, scenario: HouseholdScenario): string {
   return t(locale, "network.tdh.how.s12.result.identity", {
     total,
     rate: rate(result.records[0]?.dailyRateE4 ?? 0),
+    tomorrow: formatInteger(
+      locale,
+      householdScenario("tomorrow").total - result.total
+    ),
   });
 }
 
@@ -105,7 +110,7 @@ export default function HouseholdWalkthrough({
             className="tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07]"
           >
             <table className={TDH_TABLE}>
-              <caption className="tw-px-4 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200">
+              <caption className="tw-px-3 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200 sm:tw-px-4">
                 {t(
                   locale,
                   `network.tdh.how.s12.recordCaption.${record.label}`,
@@ -116,13 +121,13 @@ export default function HouseholdWalkthrough({
               </caption>
               <thead>
                 <tr>
-                  <th scope="col" className={TDH_TH}>
+                  <th scope="col" className={tdhNarrowCell(TDH_TH)}>
                     {t(locale, "network.tdh.how.s12.card")}
                   </th>
-                  <th scope="col" className={TDH_TH_NUM}>
+                  <th scope="col" className={tdhNarrowCell(TDH_TH_NUM)}>
                     {t(locale, "network.tdh.how.s12.base")}
                   </th>
-                  <th scope="col" className={TDH_TH_NUM}>
+                  <th scope="col" className={tdhNarrowCell(TDH_TH_NUM)}>
                     {t(locale, "network.tdh.how.s12.final")}
                   </th>
                 </tr>
@@ -130,13 +135,16 @@ export default function HouseholdWalkthrough({
               <tbody>
                 {record.rows.map((row) => (
                   <tr key={row.card}>
-                    <th scope="row" className={`${TDH_TD} tw-font-normal`}>
+                    <th
+                      scope="row"
+                      className={`${tdhNarrowCell(TDH_TD)} tw-font-normal`}
+                    >
                       {t(locale, `network.tdh.how.s12.card.${row.card}`)}
                     </th>
-                    <td className={TDH_TD_NUM}>
+                    <td className={tdhNarrowCell(TDH_TD_NUM)}>
                       {formatInteger(locale, row.base)}
                     </td>
-                    <td className={TDH_TD_NUM}>
+                    <td className={tdhNarrowCell(TDH_TD_NUM)}>
                       {formatInteger(locale, row.final)}
                     </td>
                   </tr>
@@ -144,17 +152,17 @@ export default function HouseholdWalkthrough({
                 <tr>
                   <th
                     scope="row"
-                    className={`${TDH_TD} tw-border-b-0 tw-font-semibold tw-text-iron-50`}
+                    className={`${tdhNarrowCell(TDH_TD)} tw-border-b-0 tw-font-semibold tw-text-iron-50`}
                   >
                     {t(locale, "network.tdh.how.s12.total")}
                   </th>
                   <td
-                    className={`${TDH_TD_NUM} tw-border-b-0 tw-font-semibold tw-text-iron-50`}
+                    className={`${tdhNarrowCell(TDH_TD_NUM)} tw-border-b-0 tw-font-semibold tw-text-iron-50`}
                   >
                     {formatInteger(locale, record.base)}
                   </td>
                   <td
-                    className={`${TDH_TD_NUM} tw-border-b-0 tw-font-semibold tw-text-iron-50`}
+                    className={`${tdhNarrowCell(TDH_TD_NUM)} tw-border-b-0 tw-font-semibold tw-text-iron-50`}
                   >
                     {formatInteger(locale, record.final)}
                   </td>

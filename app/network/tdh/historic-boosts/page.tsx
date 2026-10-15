@@ -7,7 +7,7 @@ export default function TDHHistory() {
 
 export const generateMetadata = async () => {
   return getAppMetadata({
-    title: "TDH Historic Boosts | Network",
-    description: "Network",
+    title: "TDH historic boosts | Network",
+    description: "Earlier TDH boost schedules, archived for reference.",
   });
 };

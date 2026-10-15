@@ -1,88 +1,130 @@
 "use client";
 
-import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { Fragment, useId, useState, type ReactNode } from "react";
-import { formatInteger, formatNumber } from "@/i18n/format";
+import { useState } from "react";
+import { formatInteger, selectPluralCategory } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import {
   DIFFERENCE_CLASSES,
   type DifferenceClass,
   type VerificationDifference,
+  type VerificationDifferenceField,
 } from "@/lib/tdh/verification/schema";
-import { differenceClassCounts } from "@/lib/tdh/verification/states";
+import {
+  differenceCases,
+  type DifferenceCase,
+} from "@/lib/tdh/verification/states";
 import TransactionBoxDiagram from "../../shared/diagrams/TransactionBoxDiagram";
+import TdhDisclosure from "../../shared/TdhDisclosure";
 import { SPECIFICATION_PATH } from "../../shared/tdhSources";
 import {
+  TDH_CARD,
   TDH_CHIP_BUTTON,
   TDH_CHIP_OFF,
   TDH_CHIP_ON,
   TDH_FOCUS_RING,
   TDH_LINK,
-  TDH_LINK_STANDALONE,
   TDH_TABLE,
-  TDH_TD_STACK_MD,
+  TDH_TD,
   TDH_TH,
 } from "../../shared/tdhStyles";
+import { formatSigned } from "./verificationFormat";
 
 type ClassFilter = DifferenceClass | "all";
 
-const KNOWN_FIELDS = new Set(["final", "base", "boost", "balance"]);
 const KNOWN_CAUSES = new Set(["DEV-2"]);
-const CLASS_DOT: Record<DifferenceClass, string> = {
+const COLLECTIONS = new Set(["memes", "gradients", "nextgen"]);
+/** Class colours: distinct hues, always next to the class letter. */
+export const CLASS_DOT: Record<DifferenceClass, string> = {
   A: "tw-bg-primary-400",
-  B: "tw-bg-sky-300",
+  B: "tw-bg-violet-400",
   C: "tw-bg-error",
   D: "tw-bg-amber-400",
 };
 
-function fieldLabel(locale: SupportedLocale, name: string): string {
-  return KNOWN_FIELDS.has(name)
-    ? t(locale, `network.tdh.verify.diff.field.${name}` as MessageKey)
-    : name;
+function plural(locale: SupportedLocale, count: number): "one" | "other" {
+  return selectPluralCategory(locale, count) === "one" ? "one" : "other";
 }
 
 function causeHref(cause: string): string {
   return `${SPECIFICATION_PATH}#${cause.toLowerCase()}`;
 }
 
-function DeltaBar({
-  locale,
-  delta,
-  max,
-}: {
-  readonly locale: SupportedLocale;
-  readonly delta: number;
-  readonly max: number;
-}) {
-  const width = max > 0 ? Math.max((Math.abs(delta) / max) * 50, 2) : 0;
-  return (
-    <span className="tw-flex tw-items-center tw-gap-2">
-      <span
-        aria-hidden="true"
-        className="tw-relative tw-h-2 tw-w-16 tw-shrink-0 tw-rounded-full tw-bg-iron-800"
-      >
-        <span className="tw-absolute tw-inset-y-0 tw-left-1/2 tw-w-px tw-bg-iron-500" />
-        <span
-          className={`tw-absolute tw-inset-y-0 tw-rounded-full ${
-            delta < 0 ? "tw-bg-amber-400" : "tw-bg-primary-400"
-          }`}
-          style={
-            delta < 0
-              ? { right: "50%", width: `${width}%` }
-              : { left: "50%", width: `${width}%` }
-          }
-        />
-      </span>
-      <span className="tw-tabular-nums">
-        {formatNumber(locale, delta, {
-          signDisplay: "exceptZero",
-          maximumFractionDigits: 0,
-        })}
-      </span>
-    </span>
+/**
+ * A field of 6529.io's upload, made readable: `memes#208.tdh__raw` is
+ * "The Memes #208" with `tdh__raw`; `boosted_nextgen_tdh` is "NextGen" with
+ * its name; `boosted_tdh` belongs to the whole record.
+ */
+export function describeField(
+  locale: SupportedLocale,
+  name: string
+): { readonly label: string; readonly code: string } {
+  const token = /^([a-z]+)#(\d+)\.(.+)$/.exec(name);
+  if (token?.[1] && token[2] && token[3] && COLLECTIONS.has(token[1])) {
+    return {
+      label: t(locale, "network.tdh.verify.diff.token", {
+        collection: t(
+          locale,
+          `network.tdh.verify.diff.collection.${token[1]}` as MessageKey
+        ),
+        id: token[2],
+      }),
+      code: token[3],
+    };
+  }
+  const collection = /^(?:boosted_)?(memes|gradients|nextgen)_/.exec(name);
+  if (collection?.[1]) {
+    return {
+      label: t(
+        locale,
+        `network.tdh.verify.diff.collection.${collection[1]}` as MessageKey
+      ),
+      code: name,
+    };
+  }
+  return { label: t(locale, "network.tdh.verify.diff.record"), code: name };
+}
+
+/** The fields to show first: the record's total and every per-token field. */
+function mainFields(
+  fields: readonly VerificationDifferenceField[]
+): VerificationDifferenceField[] {
+  const main = fields.filter(
+    (field) => field.name === "boosted_tdh" || field.name.includes("#")
   );
+  return main.length > 0 ? main : [...fields];
+}
+
+function sameFields(
+  left: VerificationDifference,
+  right: VerificationDifference
+): boolean {
+  return (
+    left.fields.length === right.fields.length &&
+    left.fields.every((field, index) => {
+      const other = right.fields[index];
+      return (
+        other?.name === field.name &&
+        other.rust === field.rust &&
+        other.python === field.python &&
+        other.live === field.live
+      );
+    })
+  );
+}
+
+export function caseDelta(item: DifferenceCase): number | null {
+  const record = item.identity ?? item.wallets[0];
+  const field =
+    record?.fields.find((entry) => entry.name === "boosted_tdh") ??
+    record?.fields[0];
+  const rust = field?.rust ?? null;
+  const live = field?.live ?? null;
+  if (rust === null || live === null) {
+    return null;
+  }
+  return rust - live;
 }
 
 function ClassBadge({
@@ -96,44 +138,312 @@ function ClassBadge({
     <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap">
       <span
         aria-hidden="true"
-        className={`tw-size-2 tw-rounded-full ${CLASS_DOT[value]}`}
-      />
+        className={`tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded tw-text-[11px] tw-font-bold tw-text-iron-950 ${CLASS_DOT[value]}`}
+      >
+        {value}
+      </span>
       {t(locale, `network.tdh.verify.class.${value}` as MessageKey)}
     </span>
   );
 }
 
-function CauseDetails({
+function Value({
+  locale,
+  value,
+}: {
+  readonly locale: SupportedLocale;
+  readonly value: number | null;
+}) {
+  return value === null ? (
+    <span className="tw-text-iron-500">
+      <span aria-hidden="true">–</span>
+      <span className="tw-sr-only">
+        {t(locale, "network.tdh.verify.history.noValue")}
+      </span>
+    </span>
+  ) : (
+    <>{formatInteger(locale, value)}</>
+  );
+}
+
+function FieldsTable({
+  locale,
+  caption,
+  fields,
+}: {
+  readonly locale: SupportedLocale;
+  readonly caption: string;
+  readonly fields: readonly VerificationDifferenceField[];
+}) {
+  const head = {
+    field: t(locale, "network.tdh.verify.diff.field"),
+    rust: t(locale, "network.tdh.verify.diff.rust"),
+    python: t(locale, "network.tdh.verify.diff.python"),
+    live: t(locale, "network.tdh.verify.diff.live"),
+    delta: t(locale, "network.tdh.verify.diff.delta"),
+  };
+  return (
+    <table className={`${TDH_TABLE} tw-block md:tw-table md:tw-table-fixed`}>
+      <caption className="tw-sr-only">{caption}</caption>
+      <thead className="tw-hidden md:tw-table-header-group">
+        <tr>
+          <th scope="col" className={`${TDH_TH} tw-w-[36%]`}>
+            {head.field}
+          </th>
+          <th scope="col" className={`${TDH_TH} tw-text-right`}>
+            {head.rust}
+          </th>
+          <th scope="col" className={`${TDH_TH} tw-text-right`}>
+            {head.python}
+          </th>
+          <th scope="col" className={`${TDH_TH} tw-text-right`}>
+            {head.live}
+          </th>
+          <th scope="col" className={`${TDH_TH} tw-text-right`}>
+            {head.delta}
+          </th>
+        </tr>
+      </thead>
+      <tbody className="tw-block md:tw-table-row-group">
+        {fields.map((field) => {
+          const { label, code } = describeField(locale, field.name);
+          const delta =
+            field.rust !== null && field.live !== null
+              ? field.rust - field.live
+              : null;
+          return (
+            <tr
+              key={field.name}
+              className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-py-3 first:tw-border-t-0 md:tw-table-row md:tw-py-0"
+            >
+              <th
+                scope="row"
+                className={`${TDH_TD} tw-col-span-2 tw-border-0 tw-p-0 tw-font-normal md:tw-border-b md:tw-border-solid md:tw-px-4 md:tw-py-2.5`}
+              >
+                <span className="tw-block tw-text-sm tw-text-iron-100">
+                  {label}
+                </span>
+                <code className="tw-font-mono tw-text-xs tw-text-iron-400">
+                  {code}
+                </code>
+              </th>
+              {(
+                [
+                  ["rust", field.rust],
+                  ["python", field.python],
+                  ["live", field.live],
+                ] as const
+              ).map(([series, value]) => (
+                <td
+                  key={series}
+                  className={`${TDH_TD} tw-flex tw-items-baseline tw-justify-between tw-gap-2 tw-border-0 tw-p-0 tw-tabular-nums md:tw-table-cell md:tw-border-b md:tw-border-solid md:tw-px-4 md:tw-py-2.5 md:tw-text-right`}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="tw-text-xs tw-text-iron-400 md:tw-hidden"
+                  >
+                    {head[series]}
+                  </span>
+                  <Value locale={locale} value={value} />
+                </td>
+              ))}
+              <td
+                className={`${TDH_TD} tw-flex tw-items-baseline tw-justify-between tw-gap-2 tw-border-0 tw-p-0 tw-tabular-nums md:tw-table-cell md:tw-border-b md:tw-border-solid md:tw-px-4 md:tw-py-2.5 md:tw-text-right`}
+              >
+                <span
+                  aria-hidden="true"
+                  className="tw-text-xs tw-text-iron-400 md:tw-hidden"
+                >
+                  {head.delta}
+                </span>
+                {delta === null ? (
+                  <Value locale={locale} value={null} />
+                ) : (
+                  <span
+                    className={
+                      delta === 0 ? "tw-text-iron-300" : "tw-text-amber-200"
+                    }
+                  >
+                    {formatSigned(locale, delta)}
+                  </span>
+                )}
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  );
+}
+
+function RecordFields({
+  locale,
+  record,
+  captionKey,
+}: {
+  readonly locale: SupportedLocale;
+  readonly record: VerificationDifference;
+  readonly captionKey:
+    | "network.tdh.verify.diff.identityFields"
+    | "network.tdh.verify.diff.walletFields";
+}) {
+  const [all, setAll] = useState(false);
+  const noValues = record.fields.every(
+    (field) =>
+      field.rust === null && field.python === null && field.live === null
+  );
+  if (record.fields.length === 0 || noValues) {
+    return (
+      <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+        {t(locale, "network.tdh.verify.diff.noValues")}
+      </p>
+    );
+  }
+  const main = mainFields(record.fields);
+  const shown = all ? record.fields : main;
+  return (
+    <div>
+      <FieldsTable
+        locale={locale}
+        caption={t(locale, captionKey, { label: record.label })}
+        fields={shown}
+      />
+      {main.length < record.fields.length && (
+        <button
+          type="button"
+          onClick={() => setAll((value) => !value)}
+          aria-expanded={all}
+          className={`tw-mt-1 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-text-sm tw-font-medium tw-text-primary-300 hover:tw-text-primary-400 ${TDH_FOCUS_RING}`}
+        >
+          {all
+            ? t(locale, "network.tdh.verify.diff.showFewer")
+            : t(locale, "network.tdh.verify.diff.showAll", {
+                count: formatInteger(locale, record.fields.length),
+              })}
+        </button>
+      )}
+    </div>
+  );
+}
+
+function CauseText({
   locale,
   cause,
 }: {
   readonly locale: SupportedLocale;
-  readonly cause: string | null;
+  readonly cause: string;
 }) {
-  if (cause === null) {
-    return (
-      <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
-        {t(locale, "network.tdh.verify.class.D.body")}
-      </p>
-    );
-  }
   return (
-    <div className="tw-grid tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:tw-items-center">
-      <div className="tw-space-y-2">
-        <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-200">
-          {KNOWN_CAUSES.has(cause)
-            ? t(locale, `network.tdh.verify.cause.${cause}` as MessageKey)
-            : t(locale, "network.tdh.verify.cause.generic", { cause })}
-        </p>
-        <Link
-          href={causeHref(cause)}
-          className={`${TDH_LINK_STANDALONE} tw-text-sm`}
-        >
-          {t(locale, "network.tdh.verify.cause.link", { cause })}
-        </Link>
+    <TdhDisclosure summary={t(locale, "network.tdh.verify.diff.details")}>
+      <div className="tw-grid tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:tw-items-center">
+        <div className="tw-space-y-2">
+          <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-200">
+            {KNOWN_CAUSES.has(cause)
+              ? t(locale, `network.tdh.verify.cause.${cause}` as MessageKey)
+              : t(locale, "network.tdh.verify.cause.generic", { cause })}
+          </p>
+          <Link
+            href={causeHref(cause)}
+            className={`${TDH_LINK} tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm`}
+          >
+            {t(locale, "network.tdh.verify.cause.link", { cause })}
+          </Link>
+        </div>
+        {cause === "DEV-2" && <TransactionBoxDiagram locale={locale} />}
       </div>
-      {cause === "DEV-2" && <TransactionBoxDiagram locale={locale} />}
-    </div>
+    </TdhDisclosure>
+  );
+}
+
+function CaseCard({
+  locale,
+  item,
+}: {
+  readonly locale: SupportedLocale;
+  readonly item: DifferenceCase;
+}) {
+  const delta = caseDelta(item);
+  const records = item.identity
+    ? t(
+        locale,
+        `network.tdh.verify.diff.caseRecords.${plural(locale, item.wallets.length)}` as MessageKey,
+        { count: formatInteger(locale, item.wallets.length) }
+      )
+    : t(
+        locale,
+        `network.tdh.verify.diff.caseWalletsOnly.${plural(locale, item.wallets.length)}` as MessageKey,
+        { count: formatInteger(locale, item.wallets.length) }
+      );
+  return (
+    <li className={`${TDH_CARD} tw-p-4 sm:tw-p-5`}>
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
+        <h3 className="tw-m-0 tw-font-mono tw-text-base tw-font-semibold tw-text-iron-50">
+          {item.holder}
+        </h3>
+        <span className="tw-text-sm tw-text-iron-400">{records}</span>
+        {item.classes.map((value) => (
+          <span key={value} className="tw-text-sm tw-text-iron-200">
+            <ClassBadge locale={locale} value={value} />
+          </span>
+        ))}
+        {item.causes.map((cause) => (
+          <Link
+            key={cause}
+            href={causeHref(cause)}
+            className={`${TDH_LINK} tw-font-mono tw-text-sm`}
+          >
+            {cause}
+          </Link>
+        ))}
+        {delta !== null && (
+          <span className="tw-ml-auto tw-text-sm tw-font-semibold tw-tabular-nums tw-text-amber-200">
+            {t(locale, "network.tdh.verify.diff.caseDelta", {
+              delta: formatSigned(locale, delta),
+            })}
+          </span>
+        )}
+      </div>
+      <div className="tw-mt-3 tw-space-y-3">
+        {item.identity && (
+          <RecordFields
+            locale={locale}
+            record={item.identity}
+            captionKey="network.tdh.verify.diff.identityFields"
+          />
+        )}
+        {item.wallets.map((wallet) =>
+          item.identity && sameFields(item.identity, wallet) ? (
+            <p
+              key={wallet.label}
+              className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300"
+            >
+              {t(locale, "network.tdh.verify.diff.sameAsIdentity", {
+                label: wallet.label,
+              })}
+            </p>
+          ) : (
+            <div key={wallet.label}>
+              <p className="tw-m-0 tw-mb-1 tw-font-mono tw-text-sm tw-text-iron-200">
+                {wallet.label}
+              </p>
+              <RecordFields
+                locale={locale}
+                record={wallet}
+                captionKey="network.tdh.verify.diff.walletFields"
+              />
+            </div>
+          )
+        )}
+        {item.causes.map((cause) => (
+          <CauseText key={cause} locale={locale} cause={cause} />
+        ))}
+        {item.causes.length === 0 && (
+          <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+            {t(locale, "network.tdh.verify.class.D.body")}
+          </p>
+        )}
+      </div>
+    </li>
   );
 }
 
@@ -141,69 +451,26 @@ export default function VerificationDifferences({
   locale,
   differences,
   cycleDay,
-  isSample,
+  totalDelta,
 }: {
   readonly locale: SupportedLocale;
   readonly differences: readonly VerificationDifference[];
   readonly cycleDay: number;
-  readonly isSample: boolean;
+  readonly totalDelta: number | null;
 }) {
   const [filter, setFilter] = useState<ClassFilter>("all");
-  const [open, setOpen] = useState<ReadonlySet<number>>(new Set());
-  const baseId = useId();
-  const counts = differenceClassCounts(differences);
-  const indexed = differences.map((difference, index) => ({
-    difference,
-    index,
-  }));
+  const cases = differenceCases(differences);
   const shown =
     filter === "all"
-      ? indexed
-      : indexed.filter(({ difference }) => difference.class === filter);
-  const missingValue = t(
-    locale,
-    isSample
-      ? "network.tdh.verify.diff.valuesNotInSample"
-      : "network.tdh.verify.diff.valueNotPublished"
+      ? cases
+      : cases.filter((item) => item.classes.includes(filter));
+  const identities = differences.filter(
+    (difference) => difference.kind === "identity"
+  ).length;
+  const wallets = differences.length - identities;
+  const presentClasses = DIFFERENCE_CLASSES.filter((value) =>
+    cases.some((item) => item.classes.includes(value))
   );
-  const maxDelta = Math.max(
-    0,
-    ...differences.flatMap((difference) =>
-      difference.fields.map((field) =>
-        field.rust !== null && field.live !== null
-          ? Math.abs(field.rust - field.live)
-          : 0
-      )
-    )
-  );
-
-  const toggle = (index: number) =>
-    setOpen((current) => {
-      const next = new Set(current);
-      if (next.has(index)) {
-        next.delete(index);
-      } else {
-        next.add(index);
-      }
-      return next;
-    });
-
-  const hasMissingValues = differences.some((difference) =>
-    difference.fields.some(
-      (field) =>
-        field.rust === null || field.python === null || field.live === null
-    )
-  );
-  const cellValue = (amount: number | null) =>
-    amount === null ? (
-      <span className="tw-text-iron-500">
-        <span aria-hidden="true">—</span>
-        <span className="tw-sr-only">{missingValue}</span>
-      </span>
-    ) : (
-      formatInteger(locale, amount)
-    );
-
   const filters: ReadonlyArray<{
     id: ClassFilter;
     label: string;
@@ -212,12 +479,14 @@ export default function VerificationDifferences({
     {
       id: "all",
       label: t(locale, "network.tdh.verify.diff.filterAll"),
-      count: differences.length,
+      count: cases.length,
     },
-    ...DIFFERENCE_CLASSES.map((value) => ({
+    ...presentClasses.map((value) => ({
       id: value,
-      label: t(locale, "network.tdh.verify.diff.filterClass", { class: value }),
-      count: counts[value],
+      label: t(locale, "network.tdh.verify.diff.filterClass", {
+        class: value,
+      }),
+      count: cases.filter((item) => item.classes.includes(value)).length,
     })),
   ];
 
@@ -239,229 +508,68 @@ export default function VerificationDifferences({
         </p>
       ) : (
         <>
-          <div
-            role="group"
-            aria-label={t(locale, "network.tdh.verify.diff.filterLabel")}
-            className="tw-mt-4 tw-flex tw-flex-wrap tw-gap-2"
-          >
-            {filters.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                aria-pressed={filter === item.id}
-                onClick={() => setFilter(item.id)}
-                className={`${TDH_CHIP_BUTTON} ${filter === item.id ? TDH_CHIP_ON : TDH_CHIP_OFF}`}
-              >
-                {item.label}
-                <span className="tw-rounded-full tw-bg-iron-800 tw-px-1.5 tw-text-xs tw-tabular-nums tw-text-iron-300">
-                  {formatInteger(locale, item.count)}
-                </span>
-              </button>
-            ))}
-          </div>
-
+          <p className="tw-m-0 tw-mt-4 tw-text-[15px] tw-font-medium tw-leading-7 tw-text-iron-100">
+            {t(
+              locale,
+              `network.tdh.verify.diff.summary.${plural(locale, cases.length)}` as MessageKey,
+              {
+                cases: formatInteger(locale, cases.length),
+                identities: formatInteger(locale, identities),
+                wallets: formatInteger(locale, wallets),
+              }
+            )}
+            {totalDelta !== null && (
+              <>
+                {" "}
+                {t(locale, "network.tdh.verify.diff.summaryTotal", {
+                  delta: formatSigned(locale, totalDelta),
+                })}
+              </>
+            )}
+          </p>
+          {filters.length > 2 && (
+            <div
+              role="group"
+              aria-label={t(locale, "network.tdh.verify.diff.filterLabel")}
+              className="tw-mt-3 tw-flex tw-gap-2 tw-overflow-x-auto tw-pb-1"
+            >
+              {filters.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-pressed={filter === item.id}
+                  onClick={() => setFilter(item.id)}
+                  className={`${TDH_CHIP_BUTTON} tw-shrink-0 ${filter === item.id ? TDH_CHIP_ON : TDH_CHIP_OFF}`}
+                >
+                  {item.label}
+                  <span className="tw-rounded-full tw-bg-iron-800 tw-px-1.5 tw-text-xs tw-tabular-nums tw-text-iron-300">
+                    {formatInteger(locale, item.count)}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+          <p className="tw-sr-only" aria-live="polite">
+            {t(locale, "network.tdh.verify.diff.caption", {
+              cycle: formatInteger(locale, cycleDay),
+              shown: formatInteger(locale, shown.length),
+              total: formatInteger(locale, cases.length),
+            })}
+          </p>
           {shown.length === 0 ? (
             <p className="tw-m-0 tw-mt-4 tw-text-sm tw-text-iron-300">
               {t(locale, "network.tdh.verify.diff.emptyFiltered")}
             </p>
           ) : (
-            <div className="tw-mt-4 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07]">
-              <table className={`${TDH_TABLE} tw-block md:tw-table`}>
-                <caption className="tw-sr-only">
-                  {t(locale, "network.tdh.verify.diff.caption", {
-                    cycle: formatInteger(locale, cycleDay),
-                    shown: formatInteger(locale, shown.length),
-                    total: formatInteger(locale, differences.length),
-                  })}
-                </caption>
-                <thead className="tw-hidden md:tw-table-header-group">
-                  <tr>
-                    <th scope="col" className={TDH_TH}>
-                      {t(locale, "network.tdh.verify.diff.label")}
-                    </th>
-                    <th scope="col" className={TDH_TH}>
-                      {t(locale, "network.tdh.verify.diff.field")}
-                    </th>
-                    <th scope="col" className={`${TDH_TH} tw-text-right`}>
-                      {t(locale, "network.tdh.verify.diff.rust")}
-                    </th>
-                    <th scope="col" className={`${TDH_TH} tw-text-right`}>
-                      {t(locale, "network.tdh.verify.diff.python")}
-                    </th>
-                    <th scope="col" className={`${TDH_TH} tw-text-right`}>
-                      {t(locale, "network.tdh.verify.diff.live")}
-                    </th>
-                    <th scope="col" className={TDH_TH}>
-                      {t(locale, "network.tdh.verify.diff.delta")}
-                    </th>
-                    <th scope="col" className={TDH_TH}>
-                      {t(locale, "network.tdh.verify.diff.class")}
-                    </th>
-                    <th scope="col" className={TDH_TH}>
-                      {t(locale, "network.tdh.verify.diff.cause")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="tw-block md:tw-table-row-group">
-                  {shown.map(({ difference, index }) => {
-                    const isOpen = open.has(index);
-                    const detailsId = `${baseId}-details-${index}`;
-                    const kind = t(
-                      locale,
-                      `network.tdh.verify.diff.kind.${difference.kind}` as MessageKey
-                    );
-                    const fields =
-                      difference.fields.length > 0
-                        ? difference.fields
-                        : [
-                            {
-                              name: "final",
-                              rust: null,
-                              python: null,
-                              live: null,
-                            },
-                          ];
-                    return (
-                      <Fragment key={index}>
-                        {fields.map((field, fieldIndex) => (
-                          <tr
-                            key={`${index}-${field.name}`}
-                            className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-p-4 first:tw-border-t-0 md:tw-table-row md:tw-p-0"
-                          >
-                            <th
-                              scope="row"
-                              className={`${TDH_TD_STACK_MD} tw-col-span-2 tw-font-medium`}
-                            >
-                              {fieldIndex === 0 ? (
-                                <button
-                                  type="button"
-                                  aria-expanded={isOpen}
-                                  aria-controls={detailsId}
-                                  onClick={() => toggle(index)}
-                                  aria-label={t(
-                                    locale,
-                                    "network.tdh.verify.diff.details",
-                                    {
-                                      label: difference.label,
-                                      kind,
-                                    }
-                                  )}
-                                  className={`-tw-ml-2 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-2 tw-text-left tw-font-mono tw-text-sm tw-text-iron-100 hover:tw-bg-iron-800 ${TDH_FOCUS_RING}`}
-                                >
-                                  <ChevronRightIcon
-                                    aria-hidden="true"
-                                    className={`tw-size-4 tw-text-iron-400 tw-transition-transform motion-reduce:tw-transition-none ${isOpen ? "tw-rotate-90" : ""}`}
-                                  />
-                                  {difference.label}
-                                  <span className="tw-font-sans tw-text-xs tw-font-normal tw-text-iron-400">
-                                    {kind}
-                                  </span>
-                                </button>
-                              ) : (
-                                <span className="tw-sr-only">
-                                  {`${difference.label}, ${kind}`}
-                                </span>
-                              )}
-                            </th>
-                            <MobileLabeled
-                              label={t(locale, "network.tdh.verify.diff.field")}
-                            >
-                              {fieldLabel(locale, field.name)}
-                            </MobileLabeled>
-                            <MobileLabeled
-                              label={t(locale, "network.tdh.verify.diff.rust")}
-                              numeric
-                            >
-                              {cellValue(field.rust)}
-                            </MobileLabeled>
-                            <MobileLabeled
-                              label={t(
-                                locale,
-                                "network.tdh.verify.diff.python"
-                              )}
-                              numeric
-                            >
-                              {cellValue(field.python)}
-                            </MobileLabeled>
-                            <MobileLabeled
-                              label={t(locale, "network.tdh.verify.diff.live")}
-                              numeric
-                            >
-                              {cellValue(field.live)}
-                            </MobileLabeled>
-                            <MobileLabeled
-                              label={t(locale, "network.tdh.verify.diff.delta")}
-                            >
-                              {field.rust !== null && field.live !== null ? (
-                                <DeltaBar
-                                  locale={locale}
-                                  delta={field.rust - field.live}
-                                  max={maxDelta}
-                                />
-                              ) : (
-                                cellValue(null)
-                              )}
-                            </MobileLabeled>
-                            <MobileLabeled
-                              label={t(locale, "network.tdh.verify.diff.class")}
-                            >
-                              <ClassBadge
-                                locale={locale}
-                                value={difference.class}
-                              />
-                            </MobileLabeled>
-                            <MobileLabeled
-                              label={t(locale, "network.tdh.verify.diff.cause")}
-                            >
-                              {difference.cause === null ? (
-                                <span className="tw-text-iron-400">
-                                  {t(locale, "network.tdh.verify.diff.noCause")}
-                                </span>
-                              ) : (
-                                <Link
-                                  href={causeHref(difference.cause)}
-                                  className={`${TDH_LINK} tw-font-mono`}
-                                >
-                                  {difference.cause}
-                                </Link>
-                              )}
-                            </MobileLabeled>
-                          </tr>
-                        ))}
-                        <tr
-                          id={detailsId}
-                          hidden={!isOpen}
-                          className={
-                            isOpen ? "tw-block md:tw-table-row" : "tw-hidden"
-                          }
-                        >
-                          <td
-                            colSpan={8}
-                            className="tw-block tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/60 tw-px-4 tw-py-4 md:tw-table-cell"
-                          >
-                            <CauseDetails
-                              locale={locale}
-                              cause={difference.cause}
-                            />
-                          </td>
-                        </tr>
-                      </Fragment>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            <ul className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-gap-3 tw-p-0">
+              {shown.map((item) => (
+                <CaseCard key={item.holder} locale={locale} item={item} />
+              ))}
+            </ul>
           )}
         </>
       )}
 
-      {hasMissingValues && (
-        <p className="tw-m-0 tw-mt-2 tw-text-xs tw-text-iron-500">
-          {t(locale, "network.tdh.verify.diff.missingNote", {
-            missing: missingValue,
-          })}
-        </p>
-      )}
       <dl className="tw-m-0 tw-mt-6 tw-grid tw-gap-3 sm:tw-grid-cols-2">
         {DIFFERENCE_CLASSES.map((value) => (
           <div key={value} className="tw-rounded-lg tw-bg-iron-900/60 tw-p-4">
@@ -481,30 +589,5 @@ export default function VerificationDifferences({
         {t(locale, "network.tdh.verify.class.note")}
       </p>
     </section>
-  );
-}
-
-/** A cell that shows its column label above the value on phones. */
-function MobileLabeled({
-  label,
-  numeric = false,
-  children,
-}: {
-  readonly label: string;
-  readonly numeric?: boolean;
-  readonly children: ReactNode;
-}) {
-  return (
-    <td
-      className={`${TDH_TD_STACK_MD} ${numeric ? "md:tw-text-right md:tw-tabular-nums" : ""}`}
-    >
-      <span
-        aria-hidden="true"
-        className="tw-block tw-text-xs tw-text-iron-500 md:tw-hidden"
-      >
-        {label}
-      </span>
-      {children}
-    </td>
   );
 }

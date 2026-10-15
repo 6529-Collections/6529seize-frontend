@@ -1,9 +1,14 @@
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { SupportedLocale } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
-import TdhStatusPill from "./shared/TdhStatusPill";
-import TDHSection, { TDH_FOCUS, TDH_PANEL, TDH_TEXT } from "./TDHSection";
+import { t, type MessageKey } from "@/i18n/messages";
+import TdhDisclosure from "./shared/TdhDisclosure";
+import TDHSection, {
+  TDH_CARD_GRID,
+  TDH_FOCUS,
+  TDH_PANEL,
+  TDH_TEXT,
+} from "./TDHSection";
 
 const FAQ_KEYS = ["sale", "transfer", "new", "set", "rate", "xtdh"] as const;
 const DEEPER = [
@@ -13,9 +18,23 @@ const DEEPER = [
   { key: "impl", href: "/network/tdh/implementations" },
   { key: "verify", href: "/network/tdh/verification" },
 ] as const;
-const DISCLOSURE =
-  "tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 last:tw-border-b-0";
-const SUMMARY = `tw-cursor-pointer tw-py-4 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-100 ${TDH_FOCUS}`;
+/** In the order a calculation meets them. */
+export const GLOSSARY_TERMS = [
+  "tdh",
+  "cycle",
+  "snapshot",
+  "edition",
+  "rate",
+  "base",
+  "boost",
+  "identity",
+  "consolidation",
+  "sink",
+  "xtdh",
+  "versions",
+  "validator",
+  "rust",
+] as const;
 
 export function TDHHoldingChanges({
   locale,
@@ -24,16 +43,50 @@ export function TDHHoldingChanges({
 }) {
   return (
     <TDHSection id="tdh-changes" title={t(locale, "network.tdh.explainer.faq")}>
-      {FAQ_KEYS.map((key) => (
-        <details key={key} className={DISCLOSURE}>
-          <summary className={SUMMARY}>
-            {t(locale, `network.tdh.explainer.faq.${key}.title`)}
-          </summary>
-          <p className={`${TDH_TEXT} tw-pb-5`}>
-            {t(locale, `network.tdh.explainer.faq.${key}.body`)}
-          </p>
-        </details>
-      ))}
+      <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800">
+        {FAQ_KEYS.map((key) => (
+          <TdhDisclosure
+            key={key}
+            tone="strong"
+            className="tw-py-1"
+            summary={t(locale, `network.tdh.explainer.faq.${key}.title`)}
+          >
+            <p className={`${TDH_TEXT} tw-pb-4 tw-pl-6`}>
+              {t(locale, `network.tdh.explainer.faq.${key}.body`)}
+            </p>
+          </TdhDisclosure>
+        ))}
+      </div>
+    </TDHSection>
+  );
+}
+
+/** The words the TDH pages use, defined once. */
+export function TDHGlossary({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <TDHSection
+      id="glossary"
+      title={t(locale, "network.tdh.explainer.glossary.title")}
+      description={t(locale, "network.tdh.explainer.glossary.intro")}
+    >
+      <dl className="tw-m-0 tw-grid tw-gap-x-8 tw-gap-y-4 md:tw-grid-cols-2">
+        {GLOSSARY_TERMS.map((term) => (
+          <div key={term} id={`glossary-${term}`} className="tw-scroll-mt-28">
+            <dt className="tw-text-sm tw-font-semibold tw-text-iron-50">
+              {t(
+                locale,
+                `network.tdh.explainer.glossary.${term}.term` as MessageKey
+              )}
+            </dt>
+            <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-300">
+              {t(
+                locale,
+                `network.tdh.explainer.glossary.${term}.def` as MessageKey
+              )}
+            </dd>
+          </div>
+        ))}
+      </dl>
     </TDHSection>
   );
 }
@@ -45,55 +98,27 @@ export function TDHGoDeeper({ locale }: { readonly locale: SupportedLocale }) {
       id="tdh-deeper"
       title={t(locale, "network.tdh.explainer.deeper.title")}
     >
-      <ul className="tw-m-0 tw-grid tw-list-none tw-gap-4 tw-p-0 sm:tw-grid-cols-2">
+      <ul className={`tw-m-0 tw-list-none tw-p-0 ${TDH_CARD_GRID}`}>
         {DEEPER.map(({ key, href }) => (
           <li key={key}>
             <Link
               href={href}
-              className={`${TDH_PANEL} tw-group tw-flex tw-h-full tw-flex-col tw-gap-2 tw-p-5 tw-no-underline tw-transition-colors hover:tw-border-iron-600 motion-reduce:tw-transition-none ${TDH_FOCUS}`}
+              className={`${TDH_PANEL} tw-group tw-grid tw-h-full tw-grid-cols-[minmax(0,1fr)_auto] tw-content-start tw-gap-x-3 tw-gap-y-2 tw-p-5 tw-no-underline tw-transition-colors hover:tw-border-iron-600 motion-reduce:tw-transition-none ${TDH_FOCUS}`}
             >
-              <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-base tw-font-medium tw-text-iron-100">
+              <span className="tw-text-base tw-font-medium tw-text-iron-100">
                 {t(locale, `network.tdh.explainer.deeper.${key}.title`)}
-                {key === "formal" && (
-                  <TdhStatusPill pill="inProgress" locale={locale} size="sm" />
-                )}
-                <ArrowRightIcon
-                  aria-hidden="true"
-                  className="tw-ml-auto tw-size-4 tw-text-iron-600 tw-transition-transform group-hover:tw-translate-x-0.5 group-hover:tw-text-primary-300 motion-reduce:tw-transition-none"
-                />
               </span>
-              <span className="tw-text-sm tw-leading-6 tw-text-iron-400">
+              <ArrowRightIcon
+                aria-hidden="true"
+                className="tw-mt-1 tw-size-4 tw-text-iron-500 tw-transition-transform group-hover:tw-translate-x-0.5 group-hover:tw-text-primary-300 motion-reduce:tw-transition-none"
+              />
+              <span className="tw-col-span-2 tw-text-sm tw-leading-6 tw-text-iron-400">
                 {t(locale, `network.tdh.explainer.deeper.${key}.body`)}
               </span>
             </Link>
           </li>
         ))}
       </ul>
-    </TDHSection>
-  );
-}
-
-/** The old "Exact calculation" anchor now points at How TDH is calculated. */
-export default function TDHCalculationMoved({
-  locale,
-}: {
-  readonly locale: SupportedLocale;
-}) {
-  return (
-    <TDHSection
-      id="tdh-exact"
-      title={t(locale, "network.tdh.explainer.moved.title")}
-    >
-      <p className={TDH_TEXT}>
-        {t(locale, "network.tdh.explainer.moved.body")}
-      </p>
-      <Link
-        href="/network/tdh/how-it-works"
-        className={`tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-primary-300 hover:tw-text-primary-400 ${TDH_FOCUS}`}
-      >
-        {t(locale, "network.tdh.explainer.moved.link")}
-        <ArrowRightIcon aria-hidden="true" className="tw-size-4" />
-      </Link>
     </TDHSection>
   );
 }

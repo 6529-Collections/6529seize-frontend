@@ -9,7 +9,6 @@ import VerificationDayPage from "@/app/network/tdh/verification/[cycleDay]/page"
 import VerificationPage, {
   generateMetadata as generateVerificationMetadata,
 } from "@/app/network/tdh/verification/page";
-import { loadFormalManifest } from "@/lib/tdh/verification/formalManifest.server";
 
 const notFound = jest.fn(() => {
   throw new Error("NEXT_NOT_FOUND");
@@ -32,13 +31,6 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 jest.mock("@/components/app-wallets/AppWalletsContext", () => ({
   useAppWallets: () => ({ appWalletsSupported: false }),
 }));
-jest.mock("@/lib/tdh/verification/formalManifest.server", () => ({
-  loadFormalManifest: jest.fn(async () => null),
-}));
-
-const manifestMock = loadFormalManifest as jest.MockedFunction<
-  typeof loadFormalManifest
->;
 
 function renderPage(element: ReactElement) {
   return render(element);
@@ -90,6 +82,9 @@ describe("TDH sub-pages", () => {
     const household = screen.getByRole("region", {
       name: "Show the household",
     });
+    expect(
+      within(household).getByText(/tomorrow it rises by 114/)
+    ).toBeInTheDocument();
     await user.click(
       within(household).getByRole("button", { name: "As two wallets" })
     );
@@ -105,6 +100,20 @@ describe("TDH sub-pages", () => {
 
     const rate = screen.getByRole("region", { name: "Rate explorer" });
     expect(within(rate).getByText("12.71")).toBeInTheDocument();
+
+    const stack = screen.getByRole("region", { name: "Stack simulator" });
+    expect(within(stack).getByText("Whole days: 30")).toBeInTheDocument();
+    expect(
+      within(stack).getByRole("checkbox", { name: /consolidated/ })
+    ).not.toBeChecked();
+
+    expect(screen.queryByText("Rule text being finalised")).toBeNull();
+    expect(screen.getAllByText("In the specification").length).toBeGreaterThan(
+      0
+    );
+    expect(
+      screen.getByRole("link", { name: /Next Specification/ })
+    ).toHaveAttribute("href", "/network/tdh/specification");
   });
 
   it("renders the specification with an anchor for every source chip on every TDH page", async () => {
@@ -135,6 +144,10 @@ describe("TDH sub-pages", () => {
       )
     ).toBeInTheDocument();
     expect(container.textContent).not.toMatch(/github\.com/);
+    expect(container.textContent).not.toMatch(/not yet in the text/);
+    expect(container.textContent).toMatch(/every one of the 51 conformance/);
+    expect(container.textContent).toMatch(/net\(w\) = the amount w receives/);
+    expect(container.querySelector("#symbols")).not.toBeNull();
   });
 
   it("filters the specification's deviations", async () => {
@@ -142,7 +155,7 @@ describe("TDH sub-pages", () => {
     renderPage(<SpecificationPage />);
     const filters = screen.getByRole("group", { name: "Filter differences" });
     await user.click(
-      within(filters).getByRole("button", { name: "Changes values" })
+      within(filters).getByRole("button", { name: "Can change values" })
     );
     expect(document.getElementById("dev-2")).not.toBeNull();
     expect(document.getElementById("dev-1")).toBeNull();
@@ -153,45 +166,32 @@ describe("TDH sub-pages", () => {
     expect(document.getElementById("dev-2")).toBeNull();
   });
 
-  it("shows every formal statement as planned until a Lean build publishes a manifest", async () => {
-    const { unmount } = renderPage(await FormalPage());
+  it("shows the formal model's proved, checked and refuted statements", async () => {
+    const user = userEvent.setup();
+    const { container } = renderPage(await FormalPage());
     expect(
       screen.getByRole("heading", { level: 1, name: "Formal model" })
     ).toBeInTheDocument();
-    expect(screen.getAllByText("Planned")).toHaveLength(12);
-    expect(screen.queryByText("Proved")).toBeNull();
-    unmount();
-
-    manifestMock.mockResolvedValueOnce({
-      leanVersion: "4.35.0",
-      builtAt: "2026-10-20T00:00:00Z",
-      vectorsPassed: 36,
-      vectorsTotal: 36,
-      statements: [
-        {
-          id: "lifo",
-          title: "Last in, first out",
-          plain: "A send removes the newest entries.",
-          p26: "P26 §7.1",
-          lean: "theorem lifo : True",
-          status: "proved",
-        },
-        {
-          id: "range",
-          title: "Range",
-          plain: "Values fit in 64 bits.",
-          p26: "P26 §8.7",
-          lean: "theorem range : True",
-          status: "gap",
-        },
-      ],
-    });
-    renderPage(await FormalPage());
     expect(screen.queryByText("Planned")).toBeNull();
-    expect(screen.getAllByText("Proved").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Gap").length).toBeGreaterThan(0);
+    expect(screen.queryByText("In progress")).toBeNull();
+    expect(container.querySelectorAll('[data-tdh-pill="proved"]')).toHaveLength(
+      8
+    );
     expect(
-      screen.getByText(/reproduces 36 of 36 conformance vectors/)
+      container.querySelectorAll('[data-tdh-pill="shownFalse"]')
+    ).toHaveLength(3);
+    expect(screen.getByText("51 / 51")).toBeInTheDocument();
+    expect(screen.getByText("21,410")).toBeInTheDocument();
+    expect(
+      screen.getAllByText(/theorem replayHoldings_invariance/).length
+    ).toBeGreaterThan(0);
+    const toggle = screen.getByRole("button", {
+      name: "Show the details of The first netting rule",
+    });
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(
+      screen.getByText("The first netting rule against the current one")
     ).toBeInTheDocument();
   });
 
@@ -207,6 +207,13 @@ describe("TDH sub-pages", () => {
     expect(
       screen.getByText(/Rust and Python agree on 10,282 of 10,282 identities/)
     ).toBeInTheDocument();
+    expect(
+      screen.getByText(/run before the Rust core netted within a transaction/)
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByText("All 51 vectors (976 checks)").length
+    ).toBeGreaterThan(0);
+    expect(screen.getByText("Inside one vector")).toBeInTheDocument();
     const filters = screen.getByRole("group", {
       name: "Filter vectors by topic",
     });
@@ -214,7 +221,11 @@ describe("TDH sub-pages", () => {
       within(filters).getByRole("button", { name: /No result/ })
     );
     expect(
-      screen.getByText("Conformance vectors, 6 of 36 shown")
+      screen.getByText("Conformance vectors, 10 of 51 shown")
+    ).toBeInTheDocument();
+    await user.click(within(filters).getByRole("button", { name: /Netting/ }));
+    expect(
+      screen.getByText("Conformance vectors, 16 of 51 shown")
     ).toBeInTheDocument();
   });
 
@@ -233,7 +244,7 @@ describe("TDH sub-pages", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: "TDH verification, cycle 20,740",
+        name: "TDH verification, October 14, 2026",
       })
     ).toBeInTheDocument();
 

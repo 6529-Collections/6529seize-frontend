@@ -2,10 +2,10 @@ import type { ReactNode } from "react";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import TdhDisclosure from "../shared/TdhDisclosure";
 import TdhHeadingLink from "../shared/TdhHeadingLink";
 import TdhRuleBlock from "../shared/TdhRuleBlock";
 import TdhSource from "../shared/TdhSource";
-import { TDH_FOCUS_RING } from "../shared/tdhStyles";
 
 /** One numbered step of How TDH is calculated. */
 export default function StepSection({
@@ -58,32 +58,28 @@ export default function StepSection({
       )}
       <div className="tw-mt-4 tw-max-w-3xl tw-space-y-4">{children}</div>
       {rule && (
-        <details className="tw-group tw-mt-5 tw-max-w-3xl">
-          <summary
-            className={`tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-gap-2 tw-rounded-lg tw-text-sm tw-font-medium tw-text-iron-300 hover:tw-text-iron-50 [&::-webkit-details-marker]:tw-hidden ${TDH_FOCUS_RING}`}
-          >
-            <span
-              aria-hidden="true"
-              className="tw-inline-block tw-text-iron-500 tw-transition-transform group-open:tw-rotate-90 motion-reduce:tw-transition-none"
-            >
-              ›
-            </span>
-            {t(locale, "network.tdh.shared.rule")}
-          </summary>
-          <div className="tw-mt-2">
+        <TdhDisclosure
+          className="tw-mt-5 tw-max-w-3xl"
+          tone="strong"
+          summary={t(locale, "network.tdh.shared.rule")}
+        >
+          <div className="tw-mt-1">
             <TdhRuleBlock
               code={rule}
               locale={locale}
               {...(ruleSource ? { source: ruleSource } : {})}
             />
           </div>
-        </details>
+        </TdhDisclosure>
       )}
     </section>
   );
 }
 
-/** A paragraph of prose followed by its source chips. */
+/**
+ * A paragraph of prose with its source chips on a row of their own, like
+ * footnote marks, so a chip never ends up alone on a line.
+ */
 export function Cited({
   locale,
   refs,
@@ -96,12 +92,16 @@ export function Cited({
   readonly muted?: boolean;
 }) {
   return (
-    <p
-      className={`tw-m-0 tw-text-[15px] tw-leading-7 ${muted ? "tw-text-iron-400" : "tw-text-iron-200"}`}
-    >
-      {children}
-      {refs.length > 0 && <TdhSource refs={refs} locale={locale} />}
-    </p>
+    <div>
+      <p
+        className={`tw-m-0 tw-text-[15px] tw-leading-7 ${muted ? "tw-text-iron-400" : "tw-text-iron-200"}`}
+      >
+        {children}
+      </p>
+      {refs.length > 0 && (
+        <TdhSource refs={refs} locale={locale} block className="tw-mt-1" />
+      )}
+    </div>
   );
 }
 

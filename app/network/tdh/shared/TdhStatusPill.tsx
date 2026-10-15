@@ -7,42 +7,40 @@ export type TdhPill =
   | "explained"
   | "investigating"
   | "mismatch"
+  | "liveUnavailable"
   | "pending"
   | "unknown"
   | "decided"
-  | "ruleTextPending"
-  | "inProgress"
-  | "planned"
-  | "stated"
+  | "inSpec"
   | "proved"
-  | "gap"
+  | "checkedBuild"
+  | "checkedVectors"
+  | "shownFalse"
   | "sample"
   | "unchecked"
   | "checked"
-  | "builtNotDeployed"
-  | "running"
-  | "beingDecided";
+  | "openQuestion"
+  | "netting";
 
 const PILL_TONE: Record<TdhPill, PillTone> = {
   equal: "success",
   explained: "primary",
   investigating: "warning",
   mismatch: "error",
+  liveUnavailable: "warning",
   pending: "neutral",
   unknown: "neutral",
   decided: "primary",
-  ruleTextPending: "warning",
-  inProgress: "warning",
-  planned: "neutral",
-  stated: "primary",
+  inSpec: "success",
   proved: "success",
-  gap: "error",
+  checkedBuild: "primary",
+  checkedVectors: "neutral",
+  shownFalse: "warning",
   sample: "warning",
   unchecked: "warning",
   checked: "success",
-  builtNotDeployed: "neutral",
-  running: "success",
-  beingDecided: "warning",
+  openQuestion: "warning",
+  netting: "warning",
 };
 
 const DOT: Record<PillTone, string> = {

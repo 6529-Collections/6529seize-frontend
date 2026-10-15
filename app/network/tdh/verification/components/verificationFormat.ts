@@ -22,12 +22,15 @@ export function formatShortCycleDate(
   return formatDate(locale, date, { day: "numeric", month: "short" });
 }
 
-/** A signed integer: "+240", "−240" or "0". */
+/**
+ * A signed integer with a real minus sign: "+240", "−240" or "0". Intl uses
+ * the hyphen-minus for negative numbers in English.
+ */
 export function formatSigned(locale: SupportedLocale, value: number): string {
   return formatNumber(locale, value, {
     signDisplay: "exceptZero",
     maximumFractionDigits: 0,
-  });
+  }).replace("-", "−");
 }
 
 /** An agreement share with two decimals, so 10,280 of 10,282 is not 100%. */

@@ -3,6 +3,9 @@ import type { ReactNode } from "react";
 export const TDH_PANEL =
   "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/50";
 export const TDH_TEXT = "tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300";
+/** Cards that fill a two-column grid; an odd last card spans both columns. */
+export const TDH_CARD_GRID =
+  "tw-grid tw-gap-4 sm:tw-grid-cols-2 sm:[&>*:last-child:nth-child(odd)]:tw-col-span-2";
 export const TDH_FOCUS =
   "focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400";
 

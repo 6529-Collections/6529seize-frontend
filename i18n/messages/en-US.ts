@@ -37,7 +37,6 @@ import networkTdhMessages from "@/i18n/messages/networkTdh.en-US.json";
 import networkTdhExplainerMessages from "@/i18n/messages/networkTdhExplainer.en-US.json";
 import networkTdhConsolidationMessages from "@/i18n/messages/networkTdhConsolidation.en-US.json";
 import safeCollectingMessages from "@/i18n/messages/safeCollecting.en-US.json";
-import networkTdhExampleMessages from "@/i18n/messages/networkTdhExample.en-US.json";
 import networkTdhProfileMessages from "@/i18n/messages/networkTdhProfile.en-US.json";
 import networkTdhRulesMessages from "@/i18n/messages/networkTdhRules.en-US.json";
 import networkTdhSharedMessages from "@/i18n/messages/networkTdhShared.en-US.json";
@@ -4464,7 +4463,6 @@ export const EN_US_MESSAGES = {
   ...networkTdhExplainerMessages,
   ...networkTdhConsolidationMessages,
   ...safeCollectingMessages,
-  ...networkTdhExampleMessages,
   ...networkTdhProfileMessages,
   ...networkTdhRulesMessages,
   ...networkTdhSharedMessages,

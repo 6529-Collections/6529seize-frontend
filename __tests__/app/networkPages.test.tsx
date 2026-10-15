@@ -9,7 +9,7 @@ import NetworkWaveScorePage, {
 } from "@/app/network/wave-score/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { publicEnv } from "@/config/env";
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { renderWithQueryClient } from "../utils/reactQuery";
 import React from "react";
 
@@ -74,34 +74,51 @@ describe("network pages render", () => {
       screen.getByRole("heading", { level: 1, name: "TDH" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Explain my TDH" })
-    ).toHaveAttribute("href", "#tdh-profile");
-    expect(
-      screen.getByRole("link", { name: "Current boosts" })
-    ).toHaveAttribute("href", "#tdh-1-4");
-    expect(
       screen.getByRole("heading", { level: 2, name: "TDH in a minute" })
     ).toBeInTheDocument();
     expect(screen.getByText("= 1,296 TDH")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Explain my TDH" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Glossary" })
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("navigation", { name: "TDH pages" })).getByRole(
+        "link",
+        { name: "Glossary" }
+      )
+    ).toHaveAttribute("href", "/network/tdh#glossary");
+    expect(
+      screen.getByText(/TDH gives your votes more weight in TDH waves/)
+    ).toBeInTheDocument();
   });
 
-  it("points the exact calculation to its own page and shows the verified-daily strip", async () => {
+  it("links the step-by-step calculation and shows the checked-daily section", async () => {
     renderWithAuth(await TDHPage());
-    expect(screen.getByText(/Total Days Held/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Total Days Held/i).length).toBeGreaterThan(0);
     expect(
-      screen.getByRole("heading", { name: "The exact calculation has moved" })
-    ).toBeInTheDocument();
+      screen.getByRole("link", {
+        name: /Every step, with examples you can change/,
+      })
+    ).toHaveAttribute("href", "/network/tdh/how-it-works");
     expect(
       screen.getAllByRole("link", { name: /How TDH is calculated/ })[0]
     ).toHaveAttribute("href", "/network/tdh/how-it-works");
     expect(
-      screen.getByRole("heading", { level: 2, name: "Verified daily" })
+      screen.getByRole("heading", {
+        level: 2,
+        name: "Checked daily, in public",
+      })
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /10,280 of 10,282 identities equal between Rust and 6529.io/
+        /10,280 of 10,282 identities equal between the Rust core and 6529.io/
       )
     ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "The exact calculation has moved" })
+    ).not.toBeInTheDocument();
   });
 
   it("renders Definitions page", () => {
@@ -147,7 +164,7 @@ describe("network pages render", () => {
     const metadata = await generateTDHMetadata();
     expect(metadata.title).toEqual("TDH: Total Days Held | Network");
     expect(metadata.description).toEqual(
-      `What TDH is, how to read your own, and how it is calculated and verified every day. | ${domain}`
+      `What TDH is, how to read your own, and how it is calculated, specified, proved and checked every day. | ${domain}`
     );
   });
 

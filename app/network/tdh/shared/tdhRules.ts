@@ -1,8 +1,9 @@
 /**
- * Rule blocks quoted verbatim from specification P26, text of 15 October 2026
- * (rule version `tdh-v1.0`). Formulas, hashes and addresses are not
- * translated. Updating them is a deliberate content change reviewed against
- * the new P26 text.
+ * Rule blocks from specification P26 as amended on 15 October 2026 (commit
+ * 0621ed4, rule version `tdh-v1.0`). Pseudocode is quoted verbatim; the
+ * netting block gives §7.1's bullets line for line; a `#` line names the step
+ * it starts. Formulas, hashes and addresses are not translated. Updating them
+ * is a deliberate content change reviewed against the new P26 text.
  */
 
 export const RULE_CONVENTIONS = `a div b    floor division
@@ -10,16 +11,16 @@ HALFUP(x)  floor(x + 1/2), for rational x >= 0
 B64(x)     the IEEE-754 binary64 value nearest to x, ties to even; B64(0) = 0
 DAY        86,400 seconds
 SINKS      {0x0000000000000000000000000000000000000000,
-            0x000000000000000000000000000000000000dEaD}`;
+            0x000000000000000000000000000000000000dead}`;
 
 export const RULE_CUTOFF = `B = the block b on the finalized chain with ts(b) < M <= ts(b + 1)
-T = ts(B)        M = N × 86,400`;
+T = ts(B)        M = N * 86400`;
 
 export const RULE_CUTOFF_SPEC = `B = the block b on the finalized chain with ts(b) < M <= ts(b + 1)
 T = ts(B)
 days(a) = (T - a) div DAY`;
 
-export const RULE_DAYS = "days(a) = (T − a) div 86,400";
+export const RULE_DAYS = "days(a) = (T - a) div DAY";
 
 export const RULE_ORDER =
   "order = ascending (block, txIndex, logIndex, batchPos)";
@@ -30,26 +31,66 @@ floor[i]   = min(totalMax_i, 310) if minted[i] + adj[i] < 300 and totalMax_i > 0
 E[i]       = max(minted[i] + adj[i], floor[i])
 H          = max(E[i] over eligible Memes), or 0 if none`;
 
-export const RULE_STACKS = `if from = to or amount = 0: skip
+/** P26 §7.1: the underflow test, before netting, in canonical order. */
+export const RULE_UNDERFLOW = `if from = to or amount = 0: skip
+if from not in SINKS:
+    if count[from] < amount: input invalid
+    count[from] -= amount
+count[to] += amount`;
+
+/** P26 §7.1: transaction netting (D131), every transaction, sinks included. */
+export const RULE_NETTING = `A transaction is the set of transfers with one (block, txIndex).
+For each transaction and (contract, tokenId), M = its transfers with
+amount > 0 and from != to. Every non-empty M is netted.
+
+- For every address w in M, a sink included,
+  net(w) = the amount w receives in M - the amount it sends in M.
+- Sources: the w with net(w) < 0, each with amount -net(w).
+  Destinations: the w with net(w) > 0, each with amount net(w).
+  Both lists are in ascending address order.
+- Pairing: repeatedly emit (head source, head destination, k), where k
+  is the smaller of their remaining amounts, subtract k from both,
+  and drop any head that reaches 0.
+- M is replaced by the emitted pairs, in order: each a transfer of k
+  copies with the transaction's block, timestamp and txHash, at the
+  position of M's first transfer.
+- Every |net(w)| MUST be below 2^64.`;
+
+/** P26 §7.1: the replay, after netting, in canonical order. */
+export const RULE_REPLAY = `if from = to or amount = 0: skip
 moved = none
 if from not in SINKS:
-    if len(stack[from]) < amount: input invalid
-    moved = last \`amount\` entries of stack[from]; remove them
+    moved = last \`amount\` entries of stack[from], in order; remove them
 if to in SINKS:
     unless to = ZERO and txHash = firstgm_burn_tx:
         append amount copies of timestamp to stack[to]
 elif moved is not none and cluster(from) = cluster(to):
     append moved to stack[to]                 # age carries inside an identity
 else:
-    append amount copies of timestamp to stack[to]
+    append amount copies of timestamp to stack[to]`;
 
-balance = len(stack)
+/** P26 §7.2: the values of one token in one wallet. */
+export const RULE_TOKEN_VALUES = `balance = len(stack)
 raw     = sum(days(a) for a in stack if days(a) > 0)
-base    = BASE(rate, raw)`;
+rate    = §5.3
+base    = BASE(rate, raw)                        # §8.2`;
 
-export const RULE_RATE = "RATE(n, d) = HALFUP( B64( B64(n / d) × 100 ) )";
+/** P26 §7.1 and §7.2 in order: underflow test, netting, replay, values. */
+export const RULE_STACKS = `# 1. The underflow test, before netting, in canonical order
+${RULE_UNDERFLOW}
 
-export const RULE_BASE = "BASE(r, raw) = (r × raw + 50) div 100";
+# 2. Transaction netting (D131)
+${RULE_NETTING}
+
+# 3. The replay, after netting, in canonical order
+${RULE_REPLAY}
+
+# 4. Per-token values (§7.2)
+${RULE_TOKEN_VALUES}`;
+
+export const RULE_RATE = "RATE(n, d) = HALFUP( B64( B64(n / d) * 100 ) )";
+
+export const RULE_BASE = "BASE(r, raw) = (r * raw + 50) div 100";
 
 export const RULE_BOOST = `sets = min(bal[i] over eligible Memes) if n_memes > 0 and every eligible
        Meme is held, else 0
@@ -62,14 +103,14 @@ else:
     for each boostable season s in ascending id:
         complete = every id in [start_s, start_(s+1) - 1] is held
         if s = 1 and not complete:
-            meme_u += 10,000 if Memes 1, 2 and 3 are all held       # Genesis
-            meme_u += 10,000 if Meme 4 is held                        # Nakamoto
+            meme_u += 10,000 if Memes 1, 2 and 3 are all held  # Genesis
+            meme_u += 10,000 if Meme 4 is held                 # Nakamoto
         elif complete:
             meme_u += 50,000
 grad_u = 20,000 * min(g, 5)
-beta   = HALFUP((10^6 + meme_u + grad_u) / 10^4)                     # cents`;
+beta   = HALFUP((10^6 + meme_u + grad_u) / 10^4)               # cents`;
 
-export const RULE_FINAL = `FINAL(base, beta) = HALFUP( B64( base × B64(beta / 100) ) )
+export const RULE_FINAL = `FINAL(base, beta) = HALFUP( B64( base * B64(beta / 100) ) )
 final(record)     = sum of FINAL over the record's Meme, Gradient and NextGen tokens`;
 
 export const RULE_PAIR_STATE = `REGISTER(a, b):
@@ -119,8 +160,8 @@ registryHash = H("6529.TdhRegistry.v1", the fields above in order)`;
 export const RULE_SEASONS =
   "season_starts = 1, 48, 87, 119, 152, 181, 213, 246, 279, 311, 343, 375, 407, 439, 477, 516, 556";
 
-export const RULE_RANGE =
-  "H, G, every N_c, every base × beta and total_final < 2^53";
+export const RULE_RANGE = `H, G, every N_c, every base * beta and total_final < 2^53
+every net movement |net(w)| of §7.1's netting       < 2^64`;
 
 export const RULE_OUTPUT = `header   = (N, B, hash(B), T, rule_version, registry_hash)
 identity = (key, wallets, beta, final)

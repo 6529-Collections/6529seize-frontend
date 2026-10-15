@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
@@ -16,7 +16,13 @@ import { DEVIATIONS, type DeviationGroup } from "./specData";
 
 type Filter = "all" | Exclude<DeviationGroup, "other">;
 
-const FILTERS: readonly Filter[] = ["changes", "kept", "all"];
+const FILTERS: readonly Filter[] = ["all", "changes", "kept"];
+const DECISION_TONE: Record<string, string> = {
+  adopted: "tw-bg-success",
+  dev2: "tw-bg-primary-400",
+  kept: "tw-bg-iron-400",
+  dev13: "tw-bg-amber-400",
+};
 
 /** P26 §11: the 19 deviations, filterable by whether they changed values. */
 export default function DeviationsTable({
@@ -35,7 +41,7 @@ export default function DeviationsTable({
       <div
         role="group"
         aria-label={t(locale, "network.tdh.spec.s11.filterLabel")}
-        className="tw-flex tw-flex-wrap tw-gap-2"
+        className="tw-flex tw-gap-2 tw-overflow-x-auto tw-pb-1"
       >
         {FILTERS.map((option) => (
           <button
@@ -43,7 +49,7 @@ export default function DeviationsTable({
             type="button"
             aria-pressed={filter === option}
             onClick={() => setFilter(option)}
-            className={`${TDH_CHIP_BUTTON} ${filter === option ? TDH_CHIP_ON : TDH_CHIP_OFF}`}
+            className={`${TDH_CHIP_BUTTON} tw-shrink-0 ${filter === option ? TDH_CHIP_ON : TDH_CHIP_OFF}`}
           >
             {t(locale, `network.tdh.spec.s11.filter.${option}`)}
           </button>
@@ -103,16 +109,25 @@ export default function DeviationsTable({
                   {t(locale, key(row.id, "effect"))}
                 </Cell>
                 <Cell label={t(locale, "network.tdh.spec.s11.decision")}>
-                  {t(
-                    locale,
-                    `network.tdh.spec.decision.${row.decision}` as MessageKey
-                  )}
+                  <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-text-iron-100">
+                    <span
+                      aria-hidden="true"
+                      className={`tw-size-1.5 tw-rounded-full ${DECISION_TONE[row.decision] ?? "tw-bg-iron-400"}`}
+                    />
+                    {t(
+                      locale,
+                      `network.tdh.spec.decision.${row.decision}` as MessageKey
+                    )}
+                  </span>
                 </Cell>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+        {t(locale, "network.tdh.spec.decision.legend")}
+      </p>
     </div>
   );
 }
@@ -122,7 +137,7 @@ function Cell({
   children,
 }: {
   readonly label: string;
-  readonly children: string;
+  readonly children: ReactNode;
 }) {
   return (
     <td className={`${TDH_TD_STACK_LG}`}>

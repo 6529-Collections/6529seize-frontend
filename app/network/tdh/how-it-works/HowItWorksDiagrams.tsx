@@ -1,5 +1,6 @@
+import { ArrowDownIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useId } from "react";
+import { useId, type ReactNode } from "react";
 import { formatInteger, formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
@@ -14,20 +15,14 @@ function useSvgLabels() {
   return { titleId: `${id}-title`, descId: `${id}-desc` };
 }
 
-const PIPELINE = [
-  { key: "logs", step: 1 },
-  { key: "order", step: 5 },
-  { key: "stacks", step: 4 },
-  { key: "days", step: 2 },
-  { key: "rate", step: 7 },
-  { key: "base", step: 8 },
-  { key: "identity", step: 10 },
-  { key: "boost", step: 9 },
-  { key: "final", step: 11 },
-  { key: "total", step: 13 },
-] as const;
+/** The steps the pipeline shows, in order: every step except the worked example and the changes. */
+const PIPELINE_STEPS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13] as const;
 
-/** Diagram 1: the calculation as a pipeline; each node links to its step. */
+/**
+ * Diagram 1: the calculation as numbered steps, in the order of the page;
+ * each links to its step. A grid on every width, so no arrow is ever left at
+ * the start of a line.
+ */
 export function PipelineDiagram({
   locale,
   stepTitles,
@@ -40,109 +35,151 @@ export function PipelineDiagram({
       <figcaption className="tw-sr-only">
         {t(locale, "network.tdh.how.pipeline.desc")}
       </figcaption>
-      <ol className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-items-center tw-gap-x-1 tw-gap-y-2 tw-p-0">
-        {PIPELINE.map((node, index) => (
-          <li key={node.key} className="tw-flex tw-items-center tw-gap-1">
-            {index > 0 && (
-              <span aria-hidden="true" className="tw-text-iron-600">
-                →
-              </span>
-            )}
-            <Link
-              href={`#step-${node.step}`}
-              aria-label={t(locale, "network.tdh.how.pipeline.goto", {
-                n: formatInteger(locale, node.step),
-                title: stepTitles[node.step] ?? "",
-              })}
-              className={`tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-text-sm tw-no-underline tw-transition-colors motion-reduce:tw-transition-none ${
-                node.key === "total"
-                  ? "tw-border-primary-400/60 tw-bg-primary-500/15 tw-font-semibold tw-text-iron-50"
-                  : "tw-border-white/10 tw-bg-iron-900 tw-text-iron-200 hover:tw-border-iron-500 hover:tw-text-iron-50"
-              } ${TDH_FOCUS_RING}`}
-            >
-              {t(locale, `network.tdh.how.pipeline.${node.key}` as MessageKey)}
-            </Link>
-          </li>
-        ))}
+      <ol className="tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-2 tw-p-0 sm:tw-grid-cols-3 md:tw-grid-cols-4 xl:tw-grid-cols-6">
+        {PIPELINE_STEPS.map((step) => {
+          const isTotal = step === 13;
+          return (
+            <li key={step} className="tw-min-w-0">
+              <Link
+                href={`#step-${step}`}
+                aria-label={t(locale, "network.tdh.how.pipeline.goto", {
+                  n: formatInteger(locale, step),
+                  title: stepTitles[step] ?? "",
+                })}
+                className={`tw-flex tw-h-full tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-no-underline tw-transition-colors motion-reduce:tw-transition-none ${
+                  isTotal
+                    ? "tw-border-primary-400/60 tw-bg-primary-500/15 tw-font-semibold tw-text-iron-50"
+                    : "tw-border-white/10 tw-bg-iron-900 tw-text-iron-200 hover:tw-border-iron-500 hover:tw-text-iron-50"
+                } ${TDH_FOCUS_RING}`}
+              >
+                <span className="tw-w-5 tw-shrink-0 tw-text-right tw-font-mono tw-text-xs tw-tabular-nums tw-text-iron-400">
+                  {formatInteger(locale, step)}
+                </span>
+                <span className="tw-min-w-0">
+                  {t(locale, `network.tdh.how.pipeline.s${step}` as MessageKey)}
+                </span>
+              </Link>
+            </li>
+          );
+        })}
       </ol>
     </figure>
   );
 }
 
-const TILE_TONES = {
-  kept: "tw-fill-sky-400/20 tw-stroke-sky-400/50",
-  sold: "tw-fill-transparent tw-stroke-iron-500",
-  fresh: "tw-fill-amber-300/20 tw-stroke-amber-300/60",
+const TILE = {
+  kept: "tw-bg-sky-400/20 tw-border-sky-400/50 tw-text-sky-50",
+  sold: "tw-border-dashed tw-border-iron-500 tw-bg-transparent tw-text-iron-300 tw-line-through",
+  fresh: "tw-bg-amber-300/20 tw-border-amber-300/60 tw-text-amber-50",
 } as const;
 
-/** Diagram 2: Wallet A's stack before and after one sale (step 4). */
-export function StackDiagram({ locale }: { readonly locale: SupportedLocale }) {
-  const { titleId, descId } = useSvgLabels();
-  const tile = (
-    x: number,
-    y: number,
-    label: string,
-    tone: "kept" | "sold" | "fresh"
-  ) => (
-    <g key={`${x}-${y}`}>
-      <rect
-        x={x}
-        y={y}
-        width="104"
-        height="30"
-        rx="6"
-        className={TILE_TONES[tone]}
-        strokeDasharray={tone === "sold" ? "4 4" : undefined}
-      />
-      <text
-        x={x + 52}
-        y={y + 20}
-        textAnchor="middle"
-        className="tw-fill-iron-50 tw-text-[13px] tw-font-medium tw-tabular-nums"
-      >
+function StackColumn({
+  label,
+  tiles,
+}: {
+  readonly label: string;
+  readonly tiles: ReadonlyArray<{
+    readonly label: string;
+    readonly tone: keyof typeof TILE;
+  }>;
+}) {
+  return (
+    <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-justify-end">
+      <ol className="tw-m-0 tw-flex tw-list-none tw-flex-col-reverse tw-gap-1 tw-p-0">
+        {tiles.map((tile, index) => (
+          <li
+            key={`${tile.label}-${index}`}
+            className={`tw-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-text-[13px] tw-font-medium tw-tabular-nums ${TILE[tile.tone]}`}
+          >
+            {tile.label}
+          </li>
+        ))}
+      </ol>
+      <p className="tw-m-0 tw-mt-1.5 tw-text-center tw-text-xs tw-text-iron-300">
         {label}
-      </text>
-    </g>
+      </p>
+    </div>
   );
+}
+
+function StackCard({
+  title,
+  note,
+  children,
+}: {
+  readonly title: string;
+  readonly note?: string;
+  readonly children: ReactNode;
+}) {
+  return (
+    <div className="tw-flex tw-min-w-0 tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-p-3">
+      <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-100">
+        {title}
+        {note && (
+          <span className="tw-font-normal tw-text-iron-400"> · {note}</span>
+        )}
+      </p>
+      <div className="tw-mt-2 tw-flex tw-flex-1 tw-items-end tw-gap-3">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Diagram 2: Wallet A's stack at the sale and at the snapshot (step 4). At
+ * the sale, 50 days before the snapshot, the copies bought 300, 200 and 100
+ * days before the snapshot are 250, 150 and 50 days old; the newest leaves.
+ */
+export function StackDiagram({ locale }: { readonly locale: SupportedLocale }) {
   const days = (value: number) =>
     t(locale, "network.tdh.how.s4.daysLabel", {
       days: formatInteger(locale, value),
     });
   return (
-    <svg
-      viewBox="0 0 520 190"
-      role="img"
-      aria-labelledby={`${titleId} ${descId}`}
-      className="tw-mt-4 tw-block tw-h-auto tw-w-full tw-max-w-xl"
-    >
-      <title id={titleId}>{t(locale, "network.tdh.how.s4.diagramTitle")}</title>
-      <desc id={descId}>{t(locale, "network.tdh.how.s4.diagramDesc")}</desc>
-      <text x="20" y="18" className="tw-fill-iron-400 tw-text-[12px]">
-        {t(locale, "network.tdh.how.s4.before")}
-      </text>
-      {tile(20, 136, days(300), "kept")}
-      {tile(20, 100, days(200), "kept")}
-      {tile(20, 64, days(100), "kept")}
-      <text x="190" y="18" className="tw-fill-iron-400 tw-text-[12px]">
-        {t(locale, "network.tdh.how.s4.after")}
-      </text>
-      <text x="190" y="40" className="tw-fill-iron-300 tw-text-[12px]">
-        {t(locale, "network.tdh.how.s4.walletA")}
-      </text>
-      {tile(190, 136, days(300), "kept")}
-      {tile(190, 100, days(200), "kept")}
-      {tile(190, 64, t(locale, "network.tdh.how.s4.sold"), "sold")}
-      <path
-        d="M298 79 C 330 79, 340 150, 372 150"
-        fill="none"
-        strokeWidth="1.5"
-        className="tw-stroke-amber-300/70"
-      />
-      <text x="380" y="40" className="tw-fill-iron-300 tw-text-[12px]">
-        {t(locale, "network.tdh.how.s4.buyer")}
-      </text>
-      {tile(380, 136, days(50), "fresh")}
-    </svg>
+    <figure className="tw-m-0 tw-mt-4">
+      <figcaption className="tw-sr-only">
+        {t(locale, "network.tdh.how.s4.diagramDesc")}
+      </figcaption>
+      <div
+        aria-hidden="true"
+        className="tw-grid tw-max-w-xl tw-gap-2 sm:tw-grid-cols-[minmax(0,0.8fr)_1.25rem_minmax(0,1.2fr)] sm:tw-items-stretch"
+      >
+        <StackCard
+          title={t(locale, "network.tdh.how.s4.before")}
+          note={t(locale, "network.tdh.how.s4.beforeNote")}
+        >
+          <StackColumn
+            label={t(locale, "network.tdh.how.s4.walletA")}
+            tiles={[
+              { label: days(250), tone: "kept" },
+              { label: days(150), tone: "kept" },
+              { label: days(50), tone: "sold" },
+            ]}
+          />
+        </StackCard>
+        <span className="tw-flex tw-items-center tw-justify-center tw-text-iron-400">
+          <ArrowDownIcon className="tw-size-4 sm:tw-hidden" />
+          <ArrowRightIcon className="tw-hidden tw-size-4 sm:tw-block" />
+        </span>
+        <StackCard title={t(locale, "network.tdh.how.s4.after")}>
+          <StackColumn
+            label={t(locale, "network.tdh.how.s4.walletA")}
+            tiles={[
+              { label: days(300), tone: "kept" },
+              { label: days(200), tone: "kept" },
+            ]}
+          />
+          <StackColumn
+            label={t(locale, "network.tdh.how.s4.buyer")}
+            tiles={[{ label: days(50), tone: "fresh" }]}
+          />
+        </StackCard>
+      </div>
+      <p className="tw-m-0 tw-mt-2 tw-text-xs tw-text-iron-400">
+        {t(locale, "network.tdh.how.s4.legend")}
+      </p>
+    </figure>
   );
 }
 
@@ -164,27 +201,33 @@ const CURVE_POINTS = [
   { key: "firstgm", edition: H, minimumOne: false, series: "memes" },
 ] as const;
 
-// Label offsets keep the close 300 and 310 points readable.
-const LABEL_DY: Readonly<Record<string, number>> = {
-  gradient: 4,
-  meme300: -10,
-  meme310: 16,
-  nextgen: -10,
-  firstgm: -10,
+/**
+ * Where each label sits, in pixels from its point; the two close Meme points
+ * get their labels on opposite sides with leader lines, so nothing overlaps.
+ */
+const LABEL_OFFSET: Readonly<Record<string, readonly [number, number]>> = {
+  gradient: [12, 4],
+  meme300: [-30, -26],
+  meme310: [30, 26],
+  nextgen: [10, -14],
+  firstgm: [-12, -14],
 };
 
-/** Diagram 4: rate against edition size on a logarithmic axis (step 7). */
-export function RateCurveDiagram({
+function RateCurve({
   locale,
+  width,
+  height,
+  font,
 }: {
   readonly locale: SupportedLocale;
+  readonly width: number;
+  readonly height: number;
+  readonly font: number;
 }) {
   const { titleId, descId } = useSvgLabels();
-  const width = 560;
-  const height = 280;
-  const left = 48;
-  const right = 20;
-  const top = 26;
+  const left = 40;
+  const right = 18;
+  const top = 34;
   const bottom = 44;
   const minLog = Math.log10(100);
   const maxLog = Math.log10(4_000);
@@ -209,10 +252,13 @@ export function RateCurveDiagram({
       viewBox={`0 0 ${width} ${height}`}
       role="img"
       aria-labelledby={`${titleId} ${descId}`}
-      className="tw-mt-4 tw-block tw-h-auto tw-w-full tw-max-w-2xl"
+      className="tw-block tw-h-auto tw-w-full"
     >
       <title id={titleId}>{t(locale, "network.tdh.how.s7.curveTitle")}</title>
       <desc id={descId}>{t(locale, "network.tdh.how.s7.curveDesc")}</desc>
+      <text x={8} y={14} className="tw-fill-iron-300" fontSize={font}>
+        {t(locale, "network.tdh.how.s7.curveY")}
+      </text>
       {[0, 10, 20, 30, 40].map((tick) => (
         <g key={tick}>
           <line
@@ -226,7 +272,8 @@ export function RateCurveDiagram({
             x={left - 8}
             y={y(tick) + 4}
             textAnchor="end"
-            className="tw-fill-iron-500 tw-text-[11px] tw-tabular-nums"
+            className="tw-fill-iron-400 tw-tabular-nums"
+            fontSize={font}
           >
             {formatInteger(locale, tick)}
           </text>
@@ -238,7 +285,8 @@ export function RateCurveDiagram({
           x={x(tick)}
           y={height - bottom + 18}
           textAnchor="middle"
-          className="tw-fill-iron-500 tw-text-[11px] tw-tabular-nums"
+          className="tw-fill-iron-400 tw-tabular-nums"
+          fontSize={font}
         >
           {formatInteger(locale, tick)}
         </text>
@@ -259,13 +307,6 @@ export function RateCurveDiagram({
         strokeDasharray="5 4"
         className="tw-stroke-sky-300"
       />
-      <text
-        x={x(104)}
-        y={y(12.71) + 30}
-        className="tw-fill-sky-200 tw-text-[11px]"
-      >
-        {t(locale, "network.tdh.how.s7.floorBand")}
-      </text>
       <path
         d={curve}
         fill="none"
@@ -276,9 +317,21 @@ export function RateCurveDiagram({
         const cents = rateCents(H, point.edition, point.minimumOne) ?? 0;
         const px = x(point.edition);
         const py = y(cents / 100);
-        const labelRight = point.key !== "firstgm";
+        const [dx, dy] = LABEL_OFFSET[point.key] ?? [10, -10];
+        const anchor = dx < 0 ? "end" : "start";
+        const leader = Math.abs(dy) > 16;
         return (
           <g key={point.key}>
+            {leader && (
+              <line
+                x1={px}
+                y1={py}
+                x2={px + dx * 0.8}
+                y2={py + dy * 0.75}
+                strokeWidth="1"
+                className="tw-stroke-iron-500"
+              />
+            )}
             <circle
               cx={px}
               cy={py}
@@ -286,10 +339,13 @@ export function RateCurveDiagram({
               className={TDH_SERIES[point.series].fill}
             />
             <text
-              x={labelRight ? px + 10 : px - 10}
-              y={py + (LABEL_DY[point.key] ?? -10)}
-              textAnchor={labelRight ? "start" : "end"}
-              className="tw-fill-iron-100 tw-text-[11px] tw-tabular-nums"
+              x={px + dx}
+              y={py + dy + (dy > 0 ? font * 0.6 : 0)}
+              textAnchor={anchor}
+              className="tw-fill-iron-50 tw-stroke-iron-950 tw-font-medium tw-tabular-nums"
+              strokeWidth={4}
+              paintOrder="stroke"
+              fontSize={font}
             >
               {rate(cents)}
             </text>
@@ -300,33 +356,73 @@ export function RateCurveDiagram({
         x={(left + width - right) / 2}
         y={height - 6}
         textAnchor="middle"
-        className="tw-fill-iron-400 tw-text-[11px]"
+        className="tw-fill-iron-300"
+        fontSize={font}
       >
         {t(locale, "network.tdh.how.s7.curveX")}
-      </text>
-      <text
-        x={left + 6}
-        y={top - 8}
-        className="tw-fill-iron-400 tw-text-[11px]"
-      >
-        {t(locale, "network.tdh.how.s7.curveY")}
       </text>
     </svg>
   );
 }
 
+/**
+ * Diagram 4: rate against edition size on a logarithmic axis (step 7),
+ * drawn at a phone width and a desktop width, with the floor band named in
+ * a legend instead of inside the plot.
+ */
+export function RateCurveDiagram({
+  locale,
+}: {
+  readonly locale: SupportedLocale;
+}) {
+  return (
+    <figure className="tw-m-0 tw-mt-4 tw-max-w-2xl">
+      <div className="sm:tw-hidden">
+        <RateCurve locale={locale} width={300} height={280} font={13} />
+      </div>
+      <div className="tw-hidden sm:tw-block">
+        <RateCurve locale={locale} width={600} height={300} font={12} />
+      </div>
+      <figcaption className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-1 tw-text-xs tw-text-iron-300">
+        <span className="tw-inline-flex tw-items-center tw-gap-2">
+          <span
+            aria-hidden="true"
+            className="tw-w-5 tw-border-0 tw-border-t-2 tw-border-dashed tw-border-sky-300"
+          />
+          {t(locale, "network.tdh.how.s7.floorBand")}
+        </span>
+        {(["memes", "gradients", "nextgen"] as const).map((series) => (
+          <span
+            key={series}
+            className="tw-inline-flex tw-items-center tw-gap-1.5"
+          >
+            <span
+              aria-hidden="true"
+              className={`tw-size-2 tw-rounded-full ${TDH_SERIES[series].bg}`}
+            />
+            {t(locale, `network.tdh.how.s7.legend.${series}` as MessageKey)}
+          </span>
+        ))}
+      </figcaption>
+    </figure>
+  );
+}
+
 const GRAPHS = [
   {
+    key: "row1",
     wallets: { A: [40, 30], B: [130, 30], C: [85, 100] },
     links: ["AB", "BC", "AC"],
     identities: [["A", "B", "C"]],
   },
   {
+    key: "row2",
     wallets: { A: [26, 30], B: [134, 30], C: [108, 100] },
     links: ["AB", "BC"],
     identities: [["B", "C"], ["A"]],
   },
   {
+    key: "row3",
     wallets: { A: [40, 30], B: [130, 30], C: [40, 100], D: [130, 100] },
     links: ["AB", "BC", "AC", "CD"],
     identities: [
@@ -336,107 +432,89 @@ const GRAPHS = [
   },
 ] as const;
 
-/** Diagram 6: three link patterns and the identities they form (step 10). */
-export function IdentityGraphDiagram({
-  locale,
-}: {
-  readonly locale: SupportedLocale;
-}) {
-  const { titleId, descId } = useSvgLabels();
+function IdentityGraph({ graph }: { readonly graph: (typeof GRAPHS)[number] }) {
+  const position = (name: string): readonly [number, number] => {
+    const point = (graph.wallets as Record<string, readonly [number, number]>)[
+      name
+    ] ?? [0, 0];
+    return [point[0] + 10, point[1] + 10];
+  };
   return (
     <svg
-      viewBox="0 0 600 150"
-      role="img"
-      aria-labelledby={`${titleId} ${descId}`}
-      className="tw-mt-4 tw-block tw-h-auto tw-w-full tw-max-w-2xl"
+      viewBox="0 0 190 140"
+      aria-hidden="true"
+      className="tw-mx-auto tw-block tw-h-auto tw-w-full tw-max-w-[15rem]"
     >
-      <title id={titleId}>{t(locale, "network.tdh.how.s10.graphTitle")}</title>
-      <desc id={descId}>{t(locale, "network.tdh.how.s10.graphDesc")}</desc>
-      {GRAPHS.map((graph, graphIndex) => {
-        const offset = graphIndex * 200 + 10;
-        const position = (name: string): readonly [number, number] => {
-          const point = (
-            graph.wallets as Record<string, readonly [number, number]>
-          )[name] ?? [0, 0];
-          return [point[0] + offset, point[1] + 10];
-        };
+      {graph.identities.map((members, index) => {
+        const points = members.map(position);
+        const xs = points.map((point) => point[0]);
+        const ys = points.map((point) => point[1]);
+        const minX = Math.min(...xs) - 26;
+        const minY = Math.min(...ys) - 22;
+        const tone =
+          index === 0
+            ? "tw-fill-primary-500/10 tw-stroke-primary-400/70"
+            : "tw-fill-iron-800/40 tw-stroke-iron-500";
+        const [single] = points;
+        if (points.length === 1 && single) {
+          return (
+            <circle
+              key={members.join("")}
+              cx={single[0]}
+              cy={single[1]}
+              r="21"
+              className={tone}
+              strokeWidth="1.5"
+            />
+          );
+        }
         return (
-          <g key={graphIndex}>
-            {graph.identities.map((members, index) => {
-              const points = members.map(position);
-              const xs = points.map((point) => point[0]);
-              const ys = points.map((point) => point[1]);
-              const minX = Math.min(...xs) - 26;
-              const minY = Math.min(...ys) - 22;
-              const tone =
-                index === 0
-                  ? "tw-fill-primary-500/10 tw-stroke-primary-400/70"
-                  : "tw-fill-iron-800/40 tw-stroke-iron-500";
-              const [single] = points;
-              if (points.length === 1 && single) {
-                return (
-                  <circle
-                    key={members.join("")}
-                    cx={single[0]}
-                    cy={single[1]}
-                    r="21"
-                    className={tone}
-                    strokeWidth="1.5"
-                  />
-                );
-              }
-              return (
-                <rect
-                  key={members.join("")}
-                  x={minX}
-                  y={minY}
-                  width={Math.max(...xs) - minX + 26}
-                  height={Math.max(...ys) - minY + 22}
-                  rx="22"
-                  className={tone}
-                  strokeWidth="1.5"
-                />
-              );
-            })}
-            {graph.links.map((link) => {
-              const [from, to] = [
-                position(link[0] ?? ""),
-                position(link[1] ?? ""),
-              ];
-              return (
-                <line
-                  key={link}
-                  x1={from[0]}
-                  y1={from[1]}
-                  x2={to[0]}
-                  y2={to[1]}
-                  strokeWidth="2"
-                  className="tw-stroke-iron-300"
-                />
-              );
-            })}
-            {Object.keys(graph.wallets).map((name) => {
-              const [cx, cy] = position(name);
-              return (
-                <g key={name}>
-                  <circle
-                    cx={cx}
-                    cy={cy}
-                    r="14"
-                    className="tw-fill-iron-900 tw-stroke-iron-300"
-                    strokeWidth="1.5"
-                  />
-                  <text
-                    x={cx}
-                    y={cy + 4.5}
-                    textAnchor="middle"
-                    className="tw-fill-iron-50 tw-text-[12px] tw-font-semibold"
-                  >
-                    {name}
-                  </text>
-                </g>
-              );
-            })}
+          <rect
+            key={members.join("")}
+            x={minX}
+            y={minY}
+            width={Math.max(...xs) - minX + 26}
+            height={Math.max(...ys) - minY + 22}
+            rx="22"
+            className={tone}
+            strokeWidth="1.5"
+          />
+        );
+      })}
+      {graph.links.map((link) => {
+        const [from, to] = [position(link[0] ?? ""), position(link[1] ?? "")];
+        return (
+          <line
+            key={link}
+            x1={from[0]}
+            y1={from[1]}
+            x2={to[0]}
+            y2={to[1]}
+            strokeWidth="2"
+            className="tw-stroke-iron-300"
+          />
+        );
+      })}
+      {Object.keys(graph.wallets).map((name) => {
+        const [cx, cy] = position(name);
+        return (
+          <g key={name}>
+            <circle
+              cx={cx}
+              cy={cy}
+              r="14"
+              className="tw-fill-iron-900 tw-stroke-iron-300"
+              strokeWidth="1.5"
+            />
+            <text
+              x={cx}
+              y={cy + 5}
+              textAnchor="middle"
+              className="tw-fill-iron-50 tw-font-semibold"
+              fontSize="14"
+            >
+              {name}
+            </text>
           </g>
         );
       })}
@@ -444,149 +522,158 @@ export function IdentityGraphDiagram({
   );
 }
 
-/** Diagram 7: two wallets feeding one identity, with per-card bases (step 12). */
+/**
+ * Diagram 6: three link patterns and the identities they form (step 10).
+ * Each pattern is its own small figure with an HTML caption, so it stays
+ * legible on a phone.
+ */
+export function IdentityGraphDiagram({
+  locale,
+}: {
+  readonly locale: SupportedLocale;
+}) {
+  return (
+    <figure className="tw-m-0 tw-mt-4">
+      <p className="tw-sr-only">{t(locale, "network.tdh.how.s10.graphDesc")}</p>
+      <ol className="tw-m-0 tw-grid tw-list-none tw-gap-3 tw-p-0 sm:tw-grid-cols-3">
+        {GRAPHS.map((graph) => (
+          <li
+            key={graph.key}
+            className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-p-3"
+          >
+            <IdentityGraph graph={graph} />
+            <p className="tw-m-0 tw-mt-2 tw-text-center tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-300">
+              {t(
+                locale,
+                `network.tdh.how.s10.${graph.key}.links` as MessageKey
+              )}
+            </p>
+            <p className="tw-m-0 tw-text-center tw-font-mono tw-text-xs tw-leading-5 tw-text-primary-300">
+              {t(
+                locale,
+                `network.tdh.how.s10.${graph.key}.result` as MessageKey
+              )}
+            </p>
+          </li>
+        ))}
+      </ol>
+      <figcaption className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-1 tw-text-xs tw-text-iron-300">
+        <span className="tw-inline-flex tw-items-center tw-gap-2">
+          <span
+            aria-hidden="true"
+            className="tw-w-5 tw-border-0 tw-border-t-2 tw-border-solid tw-border-iron-300"
+          />
+          {t(locale, "network.tdh.how.s10.legendLink")}
+        </span>
+        <span className="tw-inline-flex tw-items-center tw-gap-2">
+          <span
+            aria-hidden="true"
+            className="tw-h-3 tw-w-5 tw-rounded-full tw-border tw-border-solid tw-border-primary-400/70 tw-bg-primary-500/10"
+          />
+          {t(locale, "network.tdh.how.s10.legendIdentity")}
+        </span>
+      </figcaption>
+    </figure>
+  );
+}
+
+/**
+ * Diagram 7: two wallets feeding one identity, with per-card bases (step
+ * 12). Built in HTML, so it reflows: side by side on wide screens, stacked
+ * on phones.
+ */
 export function HouseholdDiagram({
   locale,
 }: {
   readonly locale: SupportedLocale;
 }) {
-  const { titleId, descId } = useSvgLabels();
   const wallets = householdScenario("wallets").records;
   const identity = householdScenario("identity").records[0];
   const card = (key: string) =>
     t(locale, `network.tdh.how.s12.card.${key}` as MessageKey);
-  const rowHeight = 26;
   return (
-    <svg
-      viewBox="0 0 640 230"
-      role="img"
-      aria-labelledby={`${titleId} ${descId}`}
-      className="tw-mt-4 tw-block tw-h-auto tw-w-full"
-    >
-      <title id={titleId}>
-        {t(locale, "network.tdh.how.s12.diagramTitle")}
-      </title>
-      <desc id={descId}>{t(locale, "network.tdh.how.s12.diagramDesc")}</desc>
-      {wallets.map((record, column) => {
-        const x = 10;
-        const y = 10 + column * 112;
-        return (
-          <g key={record.label}>
-            <rect
-              x={x}
-              y={y}
-              width="230"
-              height="100"
-              rx="10"
-              className="tw-fill-iron-900 tw-stroke-iron-700"
-            />
-            <text
-              x={x + 12}
-              y={y + 20}
-              className="tw-fill-iron-400 tw-text-[12px] tw-font-medium"
+    <figure className="tw-m-0 tw-mt-4">
+      <figcaption className="tw-sr-only">
+        {t(locale, "network.tdh.how.s12.diagramDesc")}
+      </figcaption>
+      <div
+        aria-hidden="true"
+        className="tw-grid tw-items-center tw-gap-3 md:tw-grid-cols-[minmax(0,1fr)_1.5rem_minmax(0,1.1fr)]"
+      >
+        <div className="tw-grid tw-gap-2">
+          {wallets.map((record) => (
+            <div
+              key={record.label}
+              className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3"
             >
-              {t(
-                locale,
-                record.label === "A"
-                  ? "network.tdh.how.s12.walletA"
-                  : "network.tdh.how.s12.walletB"
-              )}
-            </text>
-            {record.rows.map((row, index) => (
-              <g key={row.card}>
-                <text
-                  x={x + 12}
-                  y={y + 42 + index * 20}
-                  className="tw-fill-iron-200 tw-text-[12px]"
-                >
-                  {card(row.card)}
-                </text>
-                <text
-                  x={x + 218}
-                  y={y + 42 + index * 20}
-                  textAnchor="end"
-                  className="tw-fill-iron-50 tw-text-[12px] tw-tabular-nums"
-                >
-                  {formatInteger(locale, row.base)}
-                </text>
-              </g>
+              <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-300">
+                {t(
+                  locale,
+                  record.label === "A"
+                    ? "network.tdh.how.s12.walletA"
+                    : "network.tdh.how.s12.walletB"
+                )}
+              </p>
+              <ul className="tw-m-0 tw-mt-1.5 tw-list-none tw-space-y-1 tw-p-0 tw-text-[13px]">
+                {record.rows.map((row) => (
+                  <li
+                    key={row.card}
+                    className="tw-flex tw-justify-between tw-gap-3 tw-text-iron-200"
+                  >
+                    <span>{card(row.card)}</span>
+                    <span className="tw-tabular-nums tw-text-iron-50">
+                      {formatInteger(locale, row.base)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+        <span className="tw-flex tw-justify-center tw-text-iron-400">
+          <ArrowDownIcon className="tw-size-5 md:tw-hidden" />
+          <ArrowRightIcon className="tw-hidden tw-size-5 md:tw-block" />
+        </span>
+        <div className="tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/60 tw-bg-primary-500/10 tw-px-4 tw-py-3">
+          <p className="tw-m-0 tw-flex tw-justify-between tw-gap-3 tw-text-xs tw-font-medium tw-text-primary-300">
+            <span>
+              {t(locale, "network.tdh.how.s12.identity")} ×{" "}
+              {formatNumber(locale, (identity?.betaCents ?? 100) / 100, {
+                minimumFractionDigits: 2,
+              })}
+            </span>
+            <span>
+              {t(locale, "network.tdh.how.s12.base")} →{" "}
+              {t(locale, "network.tdh.how.s12.final")}
+            </span>
+          </p>
+          <ul className="tw-m-0 tw-mt-1.5 tw-list-none tw-space-y-1 tw-p-0 tw-text-[13px]">
+            {identity?.rows.map((row) => (
+              <li
+                key={row.card}
+                className="tw-flex tw-justify-between tw-gap-3 tw-text-iron-200"
+              >
+                <span>{card(row.card)}</span>
+                <span className="tw-tabular-nums">
+                  <span className="tw-text-iron-400">
+                    {formatInteger(locale, row.base)}
+                  </span>{" "}
+                  →{" "}
+                  <span className="tw-font-semibold tw-text-iron-50">
+                    {formatInteger(locale, row.final)}
+                  </span>
+                </span>
+              </li>
             ))}
-            <path
-              d={`M${x + 232} ${y + 50} C 290 ${y + 50}, 300 115, 352 115`}
-              fill="none"
-              strokeWidth="1.5"
-              className="tw-stroke-iron-500"
-            />
-          </g>
-        );
-      })}
-      <rect
-        x="354"
-        y="20"
-        width="276"
-        height="190"
-        rx="12"
-        className="tw-fill-primary-500/10 tw-stroke-primary-400/60"
-      />
-      <text
-        x="368"
-        y="42"
-        className="tw-fill-primary-300 tw-text-[12px] tw-font-medium"
-      >
-        {t(locale, "network.tdh.how.s12.identity")} ×{" "}
-        {formatNumber(locale, (identity?.betaCents ?? 100) / 100, {
-          minimumFractionDigits: 2,
-        })}
-      </text>
-      {identity?.rows.map((row, index) => (
-        <g key={row.card}>
-          <text
-            x="368"
-            y={66 + index * rowHeight}
-            className="tw-fill-iron-200 tw-text-[12px]"
-          >
-            {card(row.card)}
-          </text>
-          <text
-            x="560"
-            y={66 + index * rowHeight}
-            textAnchor="end"
-            className="tw-fill-iron-400 tw-text-[12px] tw-tabular-nums"
-          >
-            {formatInteger(locale, row.base)}
-          </text>
-          <text
-            x="618"
-            y={66 + index * rowHeight}
-            textAnchor="end"
-            className="tw-fill-iron-50 tw-text-[12px] tw-font-semibold tw-tabular-nums"
-          >
-            {formatInteger(locale, row.final)}
-          </text>
-        </g>
-      ))}
-      <line
-        x1="368"
-        x2="618"
-        y1="190"
-        y2="190"
-        className="tw-stroke-primary-400/40"
-      />
-      <text
-        x="368"
-        y="204"
-        className="tw-fill-iron-50 tw-text-[12px] tw-font-semibold"
-      >
-        {t(locale, "network.tdh.how.s12.total")}
-      </text>
-      <text
-        x="618"
-        y="204"
-        textAnchor="end"
-        className="tw-fill-iron-50 tw-text-[13px] tw-font-semibold tw-tabular-nums"
-      >
-        {formatInteger(locale, identity?.final ?? 0)}
-      </text>
-    </svg>
+          </ul>
+          <p className="tw-m-0 tw-mt-2 tw-flex tw-justify-between tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-primary-400/30 tw-pt-2 tw-text-sm tw-font-semibold tw-text-iron-50">
+            <span>{t(locale, "network.tdh.how.s12.total")}</span>
+            <span className="tw-tabular-nums">
+              {formatInteger(locale, identity?.final ?? 0)}
+            </span>
+          </p>
+        </div>
+      </div>
+    </figure>
   );
 }

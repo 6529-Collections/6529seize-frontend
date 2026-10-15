@@ -43,11 +43,11 @@ export default function TdhSection({
             {eyebrow}
           </p>
         )}
-        <div className="tw-flex tw-items-start tw-gap-1">
+        <div className="tw-flex tw-w-fit tw-max-w-full tw-items-start tw-gap-1">
           <h2
             id={`${id}-heading`}
             tabIndex={-1}
-            className="tw-m-0 tw-pt-2 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none"
+            className="tw-[text-wrap:balance] tw-m-0 tw-min-w-0 tw-pt-2 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none"
           >
             {title}
           </h2>

@@ -1,12 +1,11 @@
-import Link from "next/link";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import TdhPageShell from "../shared/TdhPageShell";
+import TdhPager from "../shared/TdhPager";
 import TdhScrollSpyNav from "../shared/TdhScrollSpyNav";
 import TdhSource from "../shared/TdhSource";
-import { TDH_LINK_STANDALONE } from "../shared/tdhStyles";
 import { PipelineDiagram } from "./HowItWorksDiagrams";
 import HowItWorksStepsA from "./HowItWorksStepsA";
 import HowItWorksStepsB from "./HowItWorksStepsB";
@@ -66,14 +65,7 @@ export default function TdhHowItWorksPage() {
         <div className="tw-min-w-0">
           <HowItWorksStepsA locale={locale} />
           <HowItWorksStepsB locale={locale} />
-          <p className="tw-m-0 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-6">
-            <Link
-              href="/network/tdh/specification"
-              className={TDH_LINK_STANDALONE}
-            >
-              {t(locale, "network.tdh.how.next")}
-            </Link>
-          </p>
+          <TdhPager current="/network/tdh/how-it-works" locale={locale} />
         </div>
       </div>
     </TdhPageShell>

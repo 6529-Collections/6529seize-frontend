@@ -1,11 +1,13 @@
 import {
   BOOST_EXAMPLES,
   EDITION_EXAMPLES,
+  MAX_BOOST_CENTS,
   MINUTE_EXAMPLE,
   RATE_EXAMPLES,
   householdScenario,
 } from "@/app/network/tdh/how-it-works/examples";
 import { replayStacks } from "@/app/network/tdh/how-it-works/explorables/StackSimulator";
+import { EXAMPLE_NETWORK, boost } from "@/lib/tdh/tdhV1Arithmetic";
 
 // The worked examples of How TDH is calculated, checked against the numbers
 // the P26 Python reference printed (plan, Appendix A).
@@ -48,6 +50,20 @@ describe("How TDH is calculated: worked examples", () => {
       oneFullSetFiveGradients: 190,
       highest: 204,
     });
+  });
+
+  it("reaches the highest boost from 8 full sets: 7 sets round to 2.03, 33 sets to 2.04", () => {
+    const highest = (fullSets: number) =>
+      boost({
+        fullSets,
+        gradients: 5,
+        completeSeasons: [],
+        genesis: false,
+        nakamoto: false,
+        nMemes: EXAMPLE_NETWORK.eligibleMemes,
+      }).betaCents;
+    expect([highest(7), highest(8), highest(33)]).toEqual([203, 204, 204]);
+    expect(MAX_BOOST_CENTS).toBe(204);
   });
 
   it("computes the one-minute example: 100 days × 12.71 = 1,271, × 1.02 = 1,296", () => {

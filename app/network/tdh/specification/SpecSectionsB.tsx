@@ -23,12 +23,46 @@ import {
   TDH_TD,
   TDH_TH,
 } from "../shared/tdhStyles";
+import { middleTruncate } from "../verification/components/verificationFormat";
 import DeviationsTable from "./DeviationsTable";
 import { Plain, Rule, SpecSection, SpecSub } from "./SpecParts";
 import { BUG_IDS, DECISION_IDS, PARAMETERS } from "./specData";
 
 const CAPTION =
   "tw-px-4 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200";
+
+/** A parameter value; a long hash or address is shortened in the middle. */
+function ParameterValue({
+  locale,
+  value,
+}: {
+  readonly locale: SupportedLocale;
+  readonly value: string;
+}) {
+  const match = /0x[0-9a-f]{40,64}/.exec(value);
+  if (!match) {
+    return <>{value}</>;
+  }
+  const hash = match[0];
+  const rest = value.slice(hash.length);
+  return (
+    <span className="tw-inline-flex tw-flex-wrap tw-items-center tw-gap-x-1">
+      <span className="tw-inline-flex tw-items-center tw-whitespace-nowrap">
+        <span title={hash}>
+          <span aria-hidden="true">{middleTruncate(hash, 6)}</span>
+          <span className="tw-sr-only">{hash}</span>
+        </span>
+        <TdhCopyButton
+          value={hash}
+          label={t(locale, "network.tdh.shared.copyNamed", { name: hash })}
+          copiedLabel={t(locale, "network.tdh.shared.copied")}
+          failedLabel={t(locale, "network.tdh.shared.copyFailed")}
+        />
+      </span>
+      {rest && <span>{rest.replace(/^,\s*/, "")}</span>}
+    </span>
+  );
+}
 
 const ARITHMETIC = [
   { id: "s8-1", key: "s8-1", rule: RULE_RATE, refs: ["P26 §8.1"] },
@@ -103,7 +137,7 @@ export default function SpecSectionsB({
           role="region"
           aria-label={t(locale, "network.tdh.spec.s10.tableCaption")}
         >
-          <table className={`${TDH_TABLE} tw-min-w-[44rem]`}>
+          <table className={`${TDH_TABLE} tw-min-w-[36rem]`}>
             <caption className={CAPTION}>
               {t(locale, "network.tdh.spec.s10.tableCaption")}
             </caption>
@@ -129,10 +163,8 @@ export default function SpecSectionsB({
                   >
                     {row.name}
                   </th>
-                  <td
-                    className={`${TDH_TD} tw-max-w-[22rem] tw-break-all tw-font-mono tw-text-xs`}
-                  >
-                    {row.value}
+                  <td className={`${TDH_TD} tw-font-mono tw-text-xs`}>
+                    <ParameterValue locale={locale} value={row.value} />
                   </td>
                   <td className={`${TDH_TD} tw-text-[13px] tw-text-iron-300`}>
                     {t(

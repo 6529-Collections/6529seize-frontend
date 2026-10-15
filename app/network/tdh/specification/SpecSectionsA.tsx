@@ -1,30 +1,34 @@
 import type { SupportedLocale } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 import TdhCopyButton from "../shared/TdhCopyButton";
+import TdhDisclosure from "../shared/TdhDisclosure";
 import TdhSource from "../shared/TdhSource";
-import TdhStatusPill from "../shared/TdhStatusPill";
 import {
   RULE_CLUSTERS,
   RULE_CONVENTIONS,
   RULE_CUTOFF_SPEC,
   RULE_EDITIONS,
+  RULE_NETTING,
   RULE_ORDER,
   RULE_PAIR_STATE,
   RULE_RATE,
+  RULE_REPLAY,
   RULE_SEASONS,
-  RULE_STACKS,
+  RULE_TOKEN_VALUES,
+  RULE_UNDERFLOW,
 } from "../shared/tdhRules";
 import {
-  TDH_FOCUS_RING,
   TDH_TABLE,
+  TDH_TABLE_FRAME,
   TDH_TABLE_WRAP,
   TDH_TD,
   TDH_TH,
 } from "../shared/tdhStyles";
 import { IdentityGraphDiagram } from "../how-it-works/HowItWorksDiagrams";
+import { middleTruncate } from "../verification/components/verificationFormat";
 import { PairStateMachine } from "./SpecDiagrams";
-import { PendingNote, Plain, Rule, SpecSection, SpecSub } from "./SpecParts";
-import { CONTRACTS, TOPICS } from "./specData";
+import { Plain, Rule, SpecSection, SpecSub } from "./SpecParts";
+import { CONTRACTS, SYMBOLS, TOPICS } from "./specData";
 
 const CAPTION =
   "tw-px-4 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200";
@@ -37,9 +41,10 @@ function Address({
   readonly value: string;
 }) {
   return (
-    <span className="tw-inline-flex tw-items-center tw-gap-0.5">
-      <code className="tw-break-all tw-font-mono tw-text-xs tw-text-iron-200">
-        {value}
+    <span className="tw-inline-flex tw-items-center tw-gap-0.5 tw-whitespace-nowrap">
+      <code className="tw-font-mono tw-text-xs tw-text-iron-200" title={value}>
+        <span aria-hidden="true">{middleTruncate(value, 6)}</span>
+        <span className="tw-sr-only">{value}</span>
       </code>
       <TdhCopyButton
         value={value}
@@ -67,7 +72,7 @@ function Section2({ locale }: { readonly locale: SupportedLocale }) {
         role="region"
         aria-label={t(locale, "network.tdh.spec.s2.tableCaption")}
       >
-        <table className={`${TDH_TABLE} tw-min-w-[44rem]`}>
+        <table className={`${TDH_TABLE} tw-min-w-[40rem]`}>
           <caption className={CAPTION}>
             {t(locale, "network.tdh.spec.s2.tableCaption")}
           </caption>
@@ -113,19 +118,17 @@ function Section2({ locale }: { readonly locale: SupportedLocale }) {
           </tbody>
         </table>
       </div>
-      <details className="tw-group tw-max-w-3xl">
-        <summary
-          className={`tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-text-sm tw-font-medium tw-text-iron-300 hover:tw-text-iron-50 ${TDH_FOCUS_RING}`}
-        >
-          {t(locale, "network.tdh.spec.s2.topics")}
-        </summary>
+      <TdhDisclosure
+        tone="strong"
+        summary={t(locale, "network.tdh.spec.s2.topics")}
+      >
         <div
           className={`${TDH_TABLE_WRAP} tw-mt-2`}
           tabIndex={0}
           role="region"
           aria-label={t(locale, "network.tdh.spec.s2.topicsCaption")}
         >
-          <table className={`${TDH_TABLE} tw-min-w-[48rem]`}>
+          <table className={`${TDH_TABLE} tw-min-w-[40rem]`}>
             <caption className={CAPTION}>
               {t(locale, "network.tdh.spec.s2.topicsCaption")}
             </caption>
@@ -144,21 +147,74 @@ function Section2({ locale }: { readonly locale: SupportedLocale }) {
                 <tr key={topic}>
                   <th
                     scope="row"
-                    className={`${TDH_TD} tw-font-mono tw-text-xs tw-font-normal`}
+                    className={`${TDH_TD} tw-font-mono tw-text-xs tw-font-normal [overflow-wrap:anywhere]`}
                   >
                     {signature}
                   </th>
-                  <td
-                    className={`${TDH_TD} tw-break-all tw-font-mono tw-text-xs`}
-                  >
-                    {topic}
+                  <td className={`${TDH_TD} tw-font-mono tw-text-xs`}>
+                    <Address locale={locale} value={topic} />
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-      </details>
+      </TdhDisclosure>
+    </SpecSection>
+  );
+}
+
+function Symbols({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <SpecSection
+      id="symbols"
+      title={t(locale, "network.tdh.spec.symbols.title")}
+      locale={locale}
+    >
+      <p className="tw-m-0 tw-text-[15px] tw-leading-7 tw-text-iron-200">
+        {t(locale, "network.tdh.spec.symbols.intro")}
+      </p>
+      <div className={TDH_TABLE_FRAME}>
+        <table className={TDH_TABLE}>
+          <caption className="tw-sr-only">
+            {t(locale, "network.tdh.spec.symbols.title")}
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col" className={TDH_TH}>
+                {t(locale, "network.tdh.spec.symbols.symbol")}
+              </th>
+              <th scope="col" className={TDH_TH}>
+                {t(locale, "network.tdh.spec.symbols.meaning")}
+              </th>
+              <th scope="col" className={TDH_TH}>
+                {t(locale, "network.tdh.spec.symbols.section")}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {SYMBOLS.map((row) => (
+              <tr key={row.key}>
+                <th
+                  scope="row"
+                  className={`${TDH_TD} tw-whitespace-nowrap tw-font-mono tw-text-[13px] tw-font-normal tw-text-iron-50`}
+                >
+                  {row.symbol}
+                </th>
+                <td className={`${TDH_TD} tw-text-[13px] tw-text-iron-200`}>
+                  {t(
+                    locale,
+                    `network.tdh.spec.symbol.${row.key}` as MessageKey
+                  )}
+                </td>
+                <td className={`${TDH_TD} tw-whitespace-nowrap`}>
+                  <TdhSource refs={[`P26 §${row.section}`]} locale={locale} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </SpecSection>
   );
 }
@@ -170,6 +226,7 @@ export default function SpecSectionsA({
 }) {
   return (
     <>
+      <Symbols locale={locale} />
       <SpecSection
         id="s1"
         title={t(locale, "network.tdh.spec.s1.title")}
@@ -201,11 +258,9 @@ export default function SpecSectionsA({
           </Plain>
         </div>
         <Rule locale={locale} code={RULE_ORDER} source="P26 §3.3" />
-        <PendingNote>
-          <TdhStatusPill pill="ruleTextPending" locale={locale} size="sm" />{" "}
-          {t(locale, "network.tdh.spec.s3.d131")}
-          <TdhSource refs={["D131"]} locale={locale} />
-        </PendingNote>
+        <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-400">
+          {t(locale, "network.tdh.spec.s3.decoding")}
+        </p>
       </SpecSection>
 
       <SpecSection
@@ -333,12 +388,33 @@ export default function SpecSectionsA({
             {t(locale, "network.tdh.spec.s7.body")}
           </Plain>
         </div>
-        <Rule locale={locale} code={RULE_STACKS} source="P26 §7.1" />
-        <PendingNote>
-          <TdhStatusPill pill="ruleTextPending" locale={locale} size="sm" />{" "}
-          {t(locale, "network.tdh.spec.s7.d131")}
-          <TdhSource refs={["D131"]} locale={locale} />
-        </PendingNote>
+        <Rule
+          locale={locale}
+          code={RULE_UNDERFLOW}
+          source="P26 §7.1"
+          title={t(locale, "network.tdh.spec.s7.underflow")}
+        />
+        <Rule
+          locale={locale}
+          code={RULE_NETTING}
+          source="P26 §7.1"
+          title={t(locale, "network.tdh.spec.s7.netting")}
+        />
+        <Rule
+          locale={locale}
+          code={RULE_REPLAY}
+          source="P26 §7.1"
+          title={t(locale, "network.tdh.spec.s7.replay")}
+        />
+        <Rule
+          locale={locale}
+          code={RULE_TOKEN_VALUES}
+          source="P26 §7.2"
+          title={t(locale, "network.tdh.spec.s7.values")}
+        />
+        <Plain locale={locale} refs={["P26 §7.1", "D131"]}>
+          {t(locale, "network.tdh.spec.s7.property")}
+        </Plain>
       </SpecSection>
     </>
   );
