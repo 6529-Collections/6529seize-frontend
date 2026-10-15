@@ -15,7 +15,7 @@ const TRANSIENT_STATUSES = new Set([429, 502, 503, 504]);
 // Path segments and query values must match these allowlists before they are
 // placed in a request URL. Neither pattern admits "/", ".", ":", "@", "?",
 // "#", "%", "&", "=" or whitespace.
-const API_SEGMENT_PATTERN = /^[A-Za-z0-9_]{1,80}$/;
+const API_SEGMENT_PATTERN = /^\w{1,80}$/;
 const API_QUERY_KEY_PATTERN = /^[a-z_]{1,24}$/;
 const API_QUERY_VALUE_PATTERN = /^[A-Za-z0-9]{1,80}$/;
 
