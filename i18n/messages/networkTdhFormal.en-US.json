@@ -19,7 +19,7 @@
   "network.tdh.formal.manifest.bundled.invalid": "Statuses from the copy of the model’s proof manifest bundled with this page; the published one did not pass validation:",
   "network.tdh.formal.manifest.bundled.unconfigured": "Statuses from the copy of the model’s proof manifest bundled with this page:",
   "network.tdh.formal.manifest.build": "Lean {version}, model at commit {commit} of 6529’s design repository ({date}).",
-  "network.tdh.formal.manifest.spec": "P26 last changed at {spec}.",
+  "network.tdh.formal.manifest.spec": "P26 as of that commit: last changed at {spec}.",
   "network.tdh.formal.manifest.json": "Download the manifest (JSON)",
   "network.tdh.formal.why.title": "Why write the rule again",
   "network.tdh.formal.why.body": "Plain English can be read more than one way. When a second implementation was written from the specification alone, it recorded 23 places where it had to make a choice. Two were rated high: whether N in the boost means the day number or the count of Memes, which give different boosts, and how to decode the delegation events at all, since P26 then gave no layouts. P26 now states a rule for each.",

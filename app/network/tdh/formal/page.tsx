@@ -41,6 +41,10 @@ import {
 import NettingFigure from "./NettingFigure";
 import StatementsTable from "./StatementsTable";
 
+// The proof manifest is rechecked hourly (it changes only with a new build
+// of the model); a failed fetch falls back to the bundled copy until then.
+export const revalidate = 3600;
+
 const PROSE =
   "tw-m-0 tw-max-w-3xl tw-text-[15px] tw-leading-7 tw-text-iron-200";
 const NOT_KEYS = ["english", "programs", "inputs", "rule", "lean"] as const;
@@ -156,7 +160,7 @@ function ManifestSource({
           spec: figures.specCommit.slice(0, 7),
         });
   return (
-    <div className="tw-mt-4 tw-flex tw-max-w-4xl tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-px-4 tw-py-3">
+    <div className="tw-mt-4 tw-flex tw-max-w-4xl tw-flex-col tw-items-start tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-px-4 tw-py-3 sm:tw-flex-row sm:tw-flex-wrap sm:tw-items-center sm:tw-gap-x-3">
       <TdhStatusPill
         pill={load.status === "published" ? "checkedBuild" : "bundled"}
         locale={locale}

@@ -17,12 +17,11 @@ import VerificationDashboard, {
 } from "../components/VerificationDashboard";
 import { formatCycleDate } from "../components/verificationFormat";
 
-// Day permalinks are rendered on first request and refreshed hourly.
+// Day permalinks render per request, like every route under the root layout
+// (it reads cookies and headers); the day file's fetch is cached for an hour.
+// No generateStaticParams: an on-demand static render would fail on the
+// layout's dynamic reads (DYNAMIC_SERVER_USAGE, a 500 in production).
 export const revalidate = 3600;
-
-export function generateStaticParams() {
-  return [];
-}
 
 type Params = Promise<{ cycleDay: string }>;
 
