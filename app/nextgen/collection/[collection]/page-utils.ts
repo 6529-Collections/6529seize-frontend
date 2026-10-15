@@ -8,24 +8,29 @@ import { formatNameForUrl } from "@/helpers/nextgen-utils";
 import { isEmptyObject } from "@/helpers/Helpers";
 import { NextgenCollectionView } from "@/types/enums";
 import type { Metadata } from "next";
+import { cache } from "react";
 import { fetchNextgenOrNull } from "@/app/nextgen/nextgen-api";
 import { getNextgenTitle } from "../../title-utils";
 
 const COLLECTION_VIEW_PATH_SEGMENT_INDEX = 3;
 
-// Resolves `null` only for a real 404 or an empty body; any other API failure
-// is rethrown to the route error boundary instead of becoming a 404.
-export async function fetchCollection(
-  id: string,
-  headers: Record<string, string>
-): Promise<NextGenCollection | null> {
-  const parsedId = encodeURIComponent(id.replaceAll(/-/g, " "));
-  const collection = await fetchNextgenOrNull<NextGenCollection>({
-    endpoint: `nextgen/collections/${parsedId}`,
-    headers,
-  });
-  return collection === null || isEmptyObject(collection) ? null : collection;
-}
+// Request-scoped memoization (React `cache`): `generateMetadata` and the page
+// share one fetch per request, as long as they pass the same headers object
+// (see `getNextgenRequestHeaders`). Resolves `null` only for a real 404 or an
+// empty body; any other API failure is rethrown to the route error boundary.
+export const fetchCollection = cache(
+  async (
+    id: string,
+    headers: Record<string, string>
+  ): Promise<NextGenCollection | null> => {
+    const parsedId = encodeURIComponent(id.replaceAll(/-/g, " "));
+    const collection = await fetchNextgenOrNull<NextGenCollection>({
+      endpoint: `nextgen/collections/${parsedId}`,
+      headers,
+    });
+    return collection === null || isEmptyObject(collection) ? null : collection;
+  }
+);
 
 export function getCollectionView(view: string): NextgenCollectionView {
   const normalizedView = view.toLowerCase();

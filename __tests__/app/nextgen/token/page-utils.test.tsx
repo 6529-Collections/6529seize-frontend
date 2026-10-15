@@ -70,6 +70,37 @@ describe("token utils", () => {
     }
   });
 
+  it("loads traits and the collection in parallel once the token is known", async () => {
+    const pending: Record<string, () => void> = {};
+    const payloads: Record<string, unknown> = {
+      "nextgen/tokens/1": { id: 1, collection_id: 2 },
+      "nextgen/tokens/1/traits": [{ token_count: 3 }],
+      "nextgen/collections/2": { id: 2 },
+    };
+    (commonApiFetch as jest.Mock).mockImplementation(
+      ({ endpoint }: { endpoint: string }) =>
+        new Promise((resolve) => {
+          pending[endpoint] = () => resolve(payloads[endpoint]);
+        })
+    );
+
+    const result = fetchTokenData("1", {});
+    expect(Object.keys(pending)).toEqual(["nextgen/tokens/1"]);
+
+    pending["nextgen/tokens/1"]?.();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    // Both dependent requests are in flight before either one resolves.
+    expect(Object.keys(pending).sort()).toEqual([
+      "nextgen/collections/2",
+      "nextgen/tokens/1",
+      "nextgen/tokens/1/traits",
+    ]);
+
+    pending["nextgen/collections/2"]?.();
+    pending["nextgen/tokens/1/traits"]?.();
+    await expect(result).resolves.toMatchObject({ tokenCount: 3 });
+  });
+
   it("returns null when collection empty", async () => {
     mockEndpoints({
       "nextgen/tokens/5": { id: 5, collection_id: 0 },
