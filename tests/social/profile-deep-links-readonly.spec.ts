@@ -479,6 +479,11 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       (await firstCard.getAttribute("href")) ?? "",
       page.url()
     ).pathname;
+    // Match the path literally: artwork paths may contain regex metacharacters.
+    const pageTwoFirstArtworkPattern = pageTwoFirstArtwork.replaceAll(
+      /[.*+?^${}()|[\]\\]/g,
+      String.raw`\$&`
+    );
     const previous = page.getByRole("button", {
       name: "Previous",
       exact: true,
@@ -517,7 +522,7 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     // default timeout: late focus after the cards exist is a regression.
     await expect(firstCard).toHaveAttribute(
       "href",
-      new RegExp(`^(?!${pageTwoFirstArtwork}(?:[?#]|$)).+`),
+      new RegExp(`^(?!${pageTwoFirstArtworkPattern}(?:[?#]|$)).+`),
       { timeout: RESPONSE_TIMEOUT_MS }
     );
     await expect(firstCard).toBeFocused();
@@ -526,7 +531,7 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     await expect(nativeCount).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await expect(firstCard).toHaveAttribute(
       "href",
-      new RegExp(`^${pageTwoFirstArtwork}(?:[?#]|$)`),
+      new RegExp(`^${pageTwoFirstArtworkPattern}(?:[?#]|$)`),
       { timeout: RESPONSE_TIMEOUT_MS }
     );
     await expect(firstCard).toBeFocused();
