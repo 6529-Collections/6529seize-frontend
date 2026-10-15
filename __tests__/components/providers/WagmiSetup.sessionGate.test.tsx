@@ -19,6 +19,7 @@ const mockAppKitAdapterManager = jest.fn(() => ({
 }));
 let mockWalletStackLoadError: Error | null = null;
 const mockIsNativePlatform = jest.fn(() => false);
+const unsubscribeSessionChanges = jest.fn();
 
 // WagmiSetup provides its own Wagmi context; skip the global test wrapper.
 jest.unmock("@testing-library/react");
@@ -140,6 +141,9 @@ describe("WagmiSetup wallet stack session gate", () => {
     mockWalletStackLoadError = null;
     mockIsNativePlatform.mockReturnValue(false);
     jest.mocked(hasPersistedWalletSession).mockReturnValue(false);
+    jest
+      .mocked(subscribeToWalletSessionChanges)
+      .mockImplementation(() => unsubscribeSessionChanges);
     jest.mocked(createAppKitAdapter).mockReturnValue(
       // The provider only reads the adapter's Wagmi config.
       { wagmiConfig: walletConfig } as unknown as ReturnType<
@@ -194,6 +198,9 @@ describe("WagmiSetup wallet stack session gate", () => {
     expect(mockAppKitAdapterManager).toHaveBeenCalledTimes(1);
     expect(createAppKitAdapter).toHaveBeenCalledTimes(1);
     expect(initializeAppKit).toHaveBeenCalledTimes(1);
+    // The session listener is removed once the stack loads, not renewed.
+    expect(subscribeToWalletSessionChanges).toHaveBeenCalledTimes(1);
+    expect(unsubscribeSessionChanges).toHaveBeenCalledTimes(1);
   });
 
   it("restores a stored session without a connect intent", async () => {
@@ -213,13 +220,12 @@ describe("WagmiSetup wallet stack session gate", () => {
   });
 
   it("loads once a session is stored after mount", async () => {
-    const unsubscribe = jest.fn();
     let notifySessionChange: (() => void) | undefined;
     jest
       .mocked(subscribeToWalletSessionChanges)
       .mockImplementation((onChange) => {
         notifySessionChange = onChange;
-        return unsubscribe;
+        return unsubscribeSessionChanges;
       });
     renderWagmiSetup();
     await waitFor(() =>
@@ -238,7 +244,8 @@ describe("WagmiSetup wallet stack session gate", () => {
         "ready"
       )
     );
-    expect(unsubscribe).toHaveBeenCalledTimes(1);
+    expect(subscribeToWalletSessionChanges).toHaveBeenCalledTimes(1);
+    expect(unsubscribeSessionChanges).toHaveBeenCalledTimes(1);
     expect(createAppKitAdapter).toHaveBeenCalledTimes(1);
   });
 

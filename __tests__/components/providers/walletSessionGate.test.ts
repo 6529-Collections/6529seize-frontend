@@ -5,6 +5,10 @@ import {
 import { getWalletAddress } from "@/services/auth/auth.utils";
 
 jest.mock("@/services/auth/auth.utils", () => ({
+  AUTH_STORAGE_KEYS: {
+    accounts: "6529-wallet-accounts",
+    legacyAddress: "6529-wallet-address",
+  },
   getWalletAddress: jest.fn(() => null),
   WALLET_ACCOUNTS_UPDATED_EVENT: "6529-wallet-accounts-updated",
 }));
@@ -74,17 +78,41 @@ describe("walletSessionGate", () => {
     expect(hasPersistedWalletSession()).toBe(false);
   });
 
-  it("notifies on same-tab account updates and cross-tab storage writes", () => {
+  it("notifies on same-tab account updates and cross-tab session writes", () => {
     const onChange = jest.fn();
     const unsubscribe = subscribeToWalletSessionChanges(onChange);
 
     globalThis.dispatchEvent(new CustomEvent("6529-wallet-accounts-updated"));
-    globalThis.dispatchEvent(new StorageEvent("storage", { key: "any" }));
-    expect(onChange).toHaveBeenCalledTimes(2);
+    for (const key of [
+      WAGMI_STORE_KEY,
+      "6529-wallet-accounts",
+      "6529-wallet-address",
+      null,
+    ]) {
+      globalThis.dispatchEvent(new StorageEvent("storage", { key }));
+    }
+    expect(onChange).toHaveBeenCalledTimes(5);
 
     unsubscribe();
     globalThis.dispatchEvent(new CustomEvent("6529-wallet-accounts-updated"));
-    globalThis.dispatchEvent(new StorageEvent("storage", { key: "any" }));
-    expect(onChange).toHaveBeenCalledTimes(2);
+    globalThis.dispatchEvent(
+      new StorageEvent("storage", { key: WAGMI_STORE_KEY })
+    );
+    expect(onChange).toHaveBeenCalledTimes(5);
+  });
+
+  it("ignores cross-tab writes to unrelated storage keys", () => {
+    const onChange = jest.fn();
+    const unsubscribe = subscribeToWalletSessionChanges(onChange);
+
+    globalThis.dispatchEvent(
+      new StorageEvent("storage", { key: "react-query-cache" })
+    );
+    globalThis.dispatchEvent(
+      new StorageEvent("storage", { key: "wagmi.recentConnectorId" })
+    );
+    expect(onChange).not.toHaveBeenCalled();
+
+    unsubscribe();
   });
 });

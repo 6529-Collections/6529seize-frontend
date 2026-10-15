@@ -1,5 +1,6 @@
 import { safeLocalStorage } from "@/helpers/safeLocalStorage";
 import {
+  AUTH_STORAGE_KEYS,
   getWalletAddress,
   WALLET_ACCOUNTS_UPDATED_EVENT,
 } from "@/services/auth/auth.utils";
@@ -7,6 +8,12 @@ import {
 // The Wagmi adapter persists live connections with its default "wagmi"
 // storage prefix and its "store" persistence name.
 const WAGMI_PERSISTED_STATE_KEY = "wagmi.store";
+// Only writes to these keys can create a session that the gate would detect.
+const WALLET_SESSION_STORAGE_KEYS: ReadonlySet<string> = new Set([
+  WAGMI_PERSISTED_STATE_KEY,
+  AUTH_STORAGE_KEYS.accounts,
+  AUTH_STORAGE_KEYS.legacyAddress,
+]);
 
 type PersistedWagmiState = {
   readonly state?: {
@@ -45,10 +52,17 @@ export function hasPersistedWalletSession(): boolean {
 export function subscribeToWalletSessionChanges(
   onChange: () => void
 ): () => void {
+  const onStorage = (event: StorageEvent): void => {
+    // A null key means another tab cleared storage.
+    if (event.key === null || WALLET_SESSION_STORAGE_KEYS.has(event.key)) {
+      onChange();
+    }
+  };
+
   globalThis.addEventListener(WALLET_ACCOUNTS_UPDATED_EVENT, onChange);
-  globalThis.addEventListener("storage", onChange);
+  globalThis.addEventListener("storage", onStorage);
   return () => {
     globalThis.removeEventListener(WALLET_ACCOUNTS_UPDATED_EVENT, onChange);
-    globalThis.removeEventListener("storage", onChange);
+    globalThis.removeEventListener("storage", onStorage);
   };
 }
