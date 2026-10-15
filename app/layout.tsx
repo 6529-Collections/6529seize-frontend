@@ -16,11 +16,7 @@ import VersionReloadScreen, {
   VERSION_RELOAD_STYLES,
 } from "@/components/version-update/VersionReloadScreen";
 import { VERSION_RELOAD_BOOTSTRAP_SCRIPT } from "@/components/version-update/versionReload";
-import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
 import { NATIVE_IOS_BOOTSTRAP_SCRIPT } from "@/components/eula/nativeIosBootstrap";
-import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
-import MobileLaunchTimingReporter from "@/components/monitoring/MobileLaunchTimingReporter";
-import LayoutWrapper from "@/components/providers/LayoutWrapper";
 import {
   NATIVE_STARTUP_SCRIPT,
   NATIVE_STARTUP_STYLES,
@@ -33,15 +29,13 @@ import {
   SMALL_WEB_STARTUP_SCRIPT,
   SMALL_WEB_STARTUP_STYLES,
 } from "@/components/layout/smallWebStartup";
-import Providers from "@/components/providers/Providers";
-import RuntimeFavicon from "@/components/providers/RuntimeFavicon";
+import RootClientShell from "@/components/providers/RootClientShell";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { getProductionAppEnvironment } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";
 import { CONSENT_EULA_COOKIE, NATIVE_IOS_COOKIE } from "@/constants/constants";
 import type { Viewport } from "next";
 import { cookies, headers } from "next/headers";
-import EnvironmentOriginProvider from "@/components/common/EnvironmentOriginContext";
 import { getRequestOrigin } from "@/config/requestOrigin";
 import Script from "next/script";
 
@@ -127,19 +121,13 @@ export default async function RootLayout({
       {/* The touch-first helper may restore data-fine-pointer before hydration. */}
       <body suppressHydrationWarning>
         <VersionReloadScreen />
-        <RuntimeFavicon />
-        <MobileLaunchTimingReporter />
-        <AwsRumProvider>
-          <EnvironmentOriginProvider origin={initialOrigin}>
-            <Providers
-              initialIsIos={initialIsIos}
-              initialEulaConsentVersion={initialEulaConsentVersion}
-            >
-              <DynamicHeadTitle />
-              <LayoutWrapper>{children}</LayoutWrapper>
-            </Providers>
-          </EnvironmentOriginProvider>
-        </AwsRumProvider>
+        <RootClientShell
+          origin={initialOrigin}
+          initialIsIos={initialIsIos}
+          initialEulaConsentVersion={initialEulaConsentVersion}
+        >
+          {children}
+        </RootClientShell>
       </body>
     </html>
   );
