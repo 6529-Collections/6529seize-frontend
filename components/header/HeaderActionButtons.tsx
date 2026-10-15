@@ -3,6 +3,7 @@
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { PlusIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { getActiveViewFromUrl } from "../navigation/ViewContext";
@@ -13,7 +14,7 @@ function HeaderActionButtonsContent() {
   const pathname = usePathname();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
-  const { openWave, openDirectMessage } = useCreateModalState();
+  const { openWave, openDirectMessage, isApp } = useCreateModalState();
 
   const baseButtonClasses =
     "tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-black tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-iron-800";
@@ -49,20 +50,37 @@ function HeaderActionButtonsContent() {
   }
 
   if (showMessagesButton) {
-    const onCreateDm = openDirectMessage;
+    const icon = (
+      <FontAwesomeIcon
+        icon={faPaperPlane}
+        className="tw-size-[18px] tw-flex-shrink-0"
+      />
+    );
+
+    if (isApp) {
+      // Full prefetch includes the composer beyond the messages loading boundary.
+      return (
+        <Link
+          href="/messages/create"
+          prefetch={true}
+          aria-label="Create DM"
+          title="Create DM"
+          className={baseButtonClasses}
+        >
+          {icon}
+        </Link>
+      );
+    }
 
     return (
       <button
         type="button"
         aria-label="Create DM"
         title="Create DM"
-        onClick={onCreateDm}
+        onClick={openDirectMessage}
         className={baseButtonClasses}
       >
-        <FontAwesomeIcon
-          icon={faPaperPlane}
-          className="tw-size-[18px] tw-flex-shrink-0"
-        />
+        {icon}
       </button>
     );
   }
