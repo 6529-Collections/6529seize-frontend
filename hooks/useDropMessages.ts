@@ -12,11 +12,7 @@ import { useDebouncedQueryRefetch } from "./useDebouncedQueryRefetch";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import { upsertDropIntoMatchingDropsQueries } from "@/components/react-query-wrapper/utils/addDropsToDrops";
-import {
-  updateAttachmentInCachedDrops,
-  updateDropInCachedDrops,
-} from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
-import type { ApiAttachment } from "@/generated/models/ApiAttachment";
+import { updateDropInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import {
@@ -151,16 +147,6 @@ export function useDropMessages(
         requestRefetch();
       },
       [dropId, queryClient, requestRefetch, waveId]
-    )
-  );
-
-  useWebSocketMessage<ApiAttachment>(
-    WsMessageType.ATTACHMENT_STATUS_UPDATE,
-    useCallback(
-      (attachment) => {
-        updateAttachmentInCachedDrops(queryClient, attachment);
-      },
-      [queryClient]
     )
   );
 
