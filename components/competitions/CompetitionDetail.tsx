@@ -1,4 +1,5 @@
 "use client";
+import clsx from "clsx";
 import { ApiCompetitionLifecycle } from "@/generated/models/ApiCompetitionLifecycle";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 import {
@@ -171,7 +172,9 @@ export function NativeCompetitionContent({
         role={embedded ? undefined : "tabpanel"}
         id={`competition-${competition.id}-${tab}`}
         aria-label={tabLabel(tab)}
-        className={`tw-space-y-5 ${embedded && isVotesView ? "first:-tw-mt-4" : ""}`}
+        className={clsx("tw-space-y-5", {
+          "first:-tw-mt-4": embedded && isVotesView,
+        })}
       >
         <WaveDisplayMetadataContext.Provider value={displayMetadata}>
           <CompetitionResources
