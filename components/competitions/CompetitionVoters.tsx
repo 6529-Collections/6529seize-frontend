@@ -2,6 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useCompetition } from "@/contexts/CompetitionContext";
 import { useCompetitionResource } from "@/hooks/competitions/useCompetitionQueries";
+import { useInView } from "@/hooks/useInView";
 import { getIdentityQueryOptions } from "@/services/api/identity-query";
 import { WaveLeaderboardRightSidebarVoter } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoter";
 import type { ApiCompetitionVoter } from "@/generated/models/ApiCompetitionVoter";
@@ -13,18 +14,27 @@ import {
   CompetitionVotesSkeleton,
 } from "./CompetitionVotesSkeleton";
 
-function Voter({
-  voter,
-  position,
-  creditType,
-}: {
+// The voters payload only carries profile ids and there is no bulk identity
+// lookup, so each row resolves its own identity. Only rows near the viewport do
+// that; a page of 50 voters no longer fires 50 requests at once.
+const IDENTITY_LOOKUP_ROOT_MARGIN = "400px 0px";
+
+type VoterProps = {
   readonly voter: ApiCompetitionVoter;
   readonly position: number;
   readonly creditType: ApiWaveCreditType;
-}) {
+};
+
+function VoterRow({
+  voter,
+  position,
+  creditType,
+  lookupEnabled,
+}: VoterProps & { readonly lookupEnabled: boolean }) {
   const query = useQuery({
     ...getIdentityQueryOptions({ handleOrWallet: voter.profile_id }),
     retry: false,
+    enabled: lookupEnabled,
   });
   if (query.isPending) return <CompetitionVoterSkeleton />;
   if (query.isError)
@@ -46,6 +56,16 @@ function Voter({
         negative_votes_summed: (voter.credit_spent - voter.votes) / 2,
       }}
     />
+  );
+}
+function Voter(props: VoterProps) {
+  const [ref, isNearViewport] = useInView<HTMLDivElement>({
+    rootMargin: IDENTITY_LOOKUP_ROOT_MARGIN,
+  });
+  return (
+    <div ref={ref}>
+      <VoterRow {...props} lookupEnabled={isNearViewport} />
+    </div>
   );
 }
 export default function CompetitionVoters() {
