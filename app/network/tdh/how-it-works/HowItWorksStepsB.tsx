@@ -1,15 +1,11 @@
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import { formatInteger, formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { baseTdh, finalTdh, rateCents } from "@/lib/tdh/tdhV1Arithmetic";
+import TdhArrowLink from "../shared/TdhArrowLink";
 import TdhSource from "../shared/TdhSource";
-import TdhStatusPill from "../shared/TdhStatusPill";
 import { RULE_BASE, RULE_BOOST, RULE_FINAL } from "../shared/tdhRules";
 import {
-  TDH_FOCUS_RING,
-  TDH_LINK_STANDALONE,
   TDH_TABLE,
   TDH_TABLE_FRAME,
   TDH_TABLE_WRAP,
@@ -42,10 +38,14 @@ function Bullets({
   return (
     <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-[15px] tw-leading-7 tw-text-iron-200 marker:tw-text-iron-500">
       {items.map((item) => (
-        <li key={item.text}>
+        <li key={item.text} className="tw-relative">
           {item.text}
           {item.refs.length > 0 && (
-            <TdhSource refs={item.refs} locale={locale} />
+            <TdhSource
+              refs={item.refs}
+              locale={locale}
+              className="xl:tw-absolute xl:tw-left-full xl:tw-top-1 xl:tw-ml-6 xl:tw-w-36"
+            />
           )}
         </li>
       ))}
@@ -169,12 +169,10 @@ function Step10({ locale }: { readonly locale: SupportedLocale }) {
       <Cited locale={locale} refs={["P26 §6.3", "P26 §10"]}>
         {t(locale, "network.tdh.how.s10.limit")}
       </Cited>
-      <div className="tw-flex tw-flex-col tw-items-start tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/25 tw-bg-amber-400/[0.05] tw-p-3 sm:tw-flex-row sm:tw-gap-3">
-        <TdhStatusPill pill="openQuestion" locale={locale} size="sm" />
-        <p className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-sm tw-leading-6 tw-text-iron-200">
-          {t(locale, "network.tdh.how.s10.fourth")}
-        </p>
-      </div>
+      <p className="tw-m-0 tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+        {t(locale, "network.tdh.how.s10.fourth")}
+        <TdhSource refs={["P26 §6.3", "P26 §10"]} locale={locale} />
+      </p>
       <IdentityGraphDiagram locale={locale} />
       <p className="tw-m-0 tw-text-[15px] tw-font-medium tw-leading-7 tw-text-iron-100">
         {t(locale, "network.tdh.how.s10.changes")}
@@ -196,16 +194,9 @@ function Step10({ locale }: { readonly locale: SupportedLocale }) {
         {t(locale, "network.tdh.how.s10.delegation")}
       </Cited>
       <p className="tw-m-0">
-        <Link
-          href="/network/tdh/consolidation"
-          className={`tw-inline-block tw-py-2.5 tw-text-sm tw-font-medium tw-leading-6 tw-text-primary-300 tw-no-underline hover:tw-text-primary-400 ${TDH_FOCUS_RING}`}
-        >
+        <TdhArrowLink href="/network/tdh/consolidation">
           {t(locale, "network.tdh.how.s10.guide")}
-          <ArrowRightIcon
-            aria-hidden="true"
-            className="tw-ml-1.5 tw-inline tw-size-4 tw-align-[-3px]"
-          />
-        </Link>
+        </TdhArrowLink>
       </p>
     </StepSection>
   );
@@ -395,6 +386,9 @@ function Step12({ locale }: { readonly locale: SupportedLocale }) {
       </Cited>
       <HouseholdDiagram locale={locale} />
       <HouseholdWalkthrough locale={locale} />
+      <TdhArrowLink href="/network/tdh#tdh-profile">
+        {t(locale, "network.tdh.how.s12.cta")}
+      </TdhArrowLink>
     </StepSection>
   );
 }
@@ -409,6 +403,12 @@ function Step13({ locale }: { readonly locale: SupportedLocale }) {
       <Cited locale={locale} refs={["P26 §8.5", "P26 §13", "DEV-13", "D121"]}>
         {t(locale, "network.tdh.how.s13.body")}
       </Cited>
+      <p className="tw-m-0 tw-flex tw-flex-col tw-items-start tw-gap-1 tw-rounded-lg tw-border tw-border-solid tw-border-success/30 tw-bg-success/[0.05] tw-px-4 tw-py-3 tw-text-[15px] tw-leading-7 tw-text-iron-100">
+        {t(locale, "network.tdh.how.s13.verify")}
+        <TdhArrowLink href="/network/tdh/verification">
+          {t(locale, "network.tdh.how.s13.verifyLink")}
+        </TdhArrowLink>
+      </p>
     </StepSection>
   );
 }
@@ -439,12 +439,9 @@ function Step14({ locale }: { readonly locale: SupportedLocale }) {
           },
         ]}
       />
-      <Link
-        href="/network/tdh/verification"
-        className={`${TDH_LINK_STANDALONE} tw-text-sm`}
-      >
+      <TdhArrowLink href="/network/tdh/verification">
         {t(locale, "network.tdh.how.s14.verify")}
-      </Link>
+      </TdhArrowLink>
     </StepSection>
   );
 }

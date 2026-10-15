@@ -14,6 +14,7 @@ import {
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
+import TdhDisclosure from "./shared/TdhDisclosure";
 import TDHSection, { TDH_PANEL, TDH_TEXT } from "./TDHSection";
 import {
   getTdhFutureCeiling,
@@ -21,8 +22,6 @@ import {
   type TdhRules,
 } from "./tdh-rules.helpers";
 
-const HEADING =
-  "tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100";
 const formatBonus = (locale: SupportedLocale, value: number) =>
   formatNumber(locale, value, { maximumFractionDigits: 6 });
 const formatMultiplier = (locale: SupportedLocale, value: number) =>
@@ -99,6 +98,33 @@ export default function TDHCurrentRules({
   );
 }
 
+/** Consecutive seasons with the same bonus, as ranges: 1–16 at +0.05. */
+export function seasonRanges(
+  seasons: readonly { readonly season: number; readonly bonus: number }[]
+): { readonly from: number; readonly to: number; readonly bonus: number }[] {
+  const sorted = [...seasons].sort((left, right) => left.season - right.season);
+  const ranges: { from: number; to: number; bonus: number }[] = [];
+  for (const { season, bonus } of sorted) {
+    const last = ranges.at(-1);
+    if (last && last.to + 1 === season && last.bonus === bonus) {
+      last.to = season;
+    } else {
+      ranges.push({ from: season, to: season, bonus });
+    }
+  }
+  return ranges;
+}
+
+const STAT =
+  "tw-flex tw-min-w-0 tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-p-4";
+const STAT_LABEL =
+  "tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400";
+const STAT_VALUE =
+  "tw-m-0 tw-mt-2 tw-text-2xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50";
+const STAT_NOTE = "tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-300";
+const CHIP =
+  "tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-3 tw-py-1 tw-text-sm tw-tabular-nums tw-text-iron-100";
+
 function Rules({
   rules,
   locale,
@@ -109,72 +135,119 @@ function Rules({
   const { boost, snapshot } = rules;
   return (
     <div className="tw-space-y-5">
-      <div className="tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-600 tw-pl-4">
-        <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-300">
-          {t(locale, "network.tdh.rules.snapshot", {
-            date: t(locale, "network.tdh.value.utcTime", {
-              time: formatDate(locale, snapshot.block_timestamp, {
-                dateStyle: "medium",
-                timeStyle: "medium",
-                hourCycle: "h23",
-                timeZone: "UTC",
-              }),
+      <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+        {t(locale, "network.tdh.rules.snapshot", {
+          date: t(locale, "network.tdh.value.utcTime", {
+            time: formatDate(locale, snapshot.block_timestamp, {
+              dateStyle: "medium",
+              timeStyle: "medium",
+              hourCycle: "h23",
+              timeZone: "UTC",
             }),
-            block: formatInteger(locale, snapshot.block_number),
-          })}
-        </p>
-        <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-leading-5 tw-text-iron-400">
-          {t(locale, "network.tdh.rules.snapshotNote")}
-        </p>
-      </div>
-      <div className={`${TDH_PANEL} tw-space-y-4 tw-p-5`}>
-        <h3 className={HEADING}>{t(locale, "network.tdh.rules.full.title")}</h3>
-        <p className="tw-m-0 tw-font-mono tw-text-2xl tw-font-semibold tw-text-iron-50">
-          {t(locale, "network.tdh.rules.full.multiplier", {
-            value: formatMultiplier(
-              locale,
-              boost.base_multiplier + boost.full_collection.first_set_bonus
-            ),
-          })}
-        </p>
-        <p className={TDH_TEXT}>
-          {t(locale, "network.tdh.rules.full.body", {
-            count: formatInteger(locale, snapshot.eligible_memes_count),
-            bonus: formatBonus(locale, boost.full_collection.first_set_bonus),
-          })}
-        </p>
-        <p className={TDH_TEXT}>
-          {t(locale, "network.tdh.rules.full.extra", {
-            initial: formatBonus(
-              locale,
-              boost.full_collection.additional_set_initial_bonus
-            ),
-            decay: formatBonus(
-              locale,
-              boost.full_collection.additional_set_decay_ratio
-            ),
-            limit: formatBonus(
-              locale,
-              boost.full_collection.additional_sets_limit_bonus
-            ),
-          })}
-        </p>
-      </div>
+          }),
+          block: formatInteger(locale, snapshot.block_number),
+        })}{" "}
+        {t(locale, "network.tdh.rules.snapshotNote")}
+      </p>
+      <ul className="tw-m-0 tw-grid tw-list-none tw-gap-3 tw-p-0 sm:tw-grid-cols-3">
+        <li className={STAT}>
+          <p className={STAT_LABEL}>
+            {t(locale, "network.tdh.rules.full.title")}
+          </p>
+          <p className={STAT_VALUE}>
+            {t(locale, "network.tdh.rules.full.multiplier", {
+              value: formatMultiplier(
+                locale,
+                boost.base_multiplier + boost.full_collection.first_set_bonus
+              ),
+            })}
+          </p>
+          <p className={STAT_NOTE}>
+            {t(locale, "network.tdh.rules.full.short", {
+              count: formatInteger(locale, snapshot.eligible_memes_count),
+            })}
+          </p>
+        </li>
+        <li className={STAT}>
+          <p className={STAT_LABEL}>
+            {t(locale, "network.tdh.rules.gradient.title")}
+          </p>
+          <p className={STAT_VALUE}>
+            {t(locale, "network.tdh.rules.gradient.value", {
+              bonus: formatBonus(locale, boost.gradients.bonus_per_token),
+            })}
+          </p>
+          <p className={STAT_NOTE}>
+            {t(locale, "network.tdh.rules.gradient.short", {
+              count: formatInteger(locale, boost.gradients.max_count),
+              maximum: formatBonus(locale, boost.gradients.max_bonus),
+            })}
+          </p>
+        </li>
+        <li className={STAT}>
+          <p className={STAT_LABEL}>
+            {t(locale, "network.tdh.rules.future.ceilingLabel")}
+          </p>
+          <p className={STAT_VALUE}>
+            {t(locale, "network.tdh.rules.future.ceiling", {
+              multiplier: formatMultiplier(locale, getTdhFutureCeiling(rules)),
+            })}
+          </p>
+          <p className={STAT_NOTE}>
+            {t(locale, "network.tdh.rules.future.ceilingShort", {
+              last: formatInteger(
+                locale,
+                boost.season_schedule.last_boosted_season
+              ),
+              gradients: formatInteger(locale, boost.gradients.max_count),
+            })}
+          </p>
+        </li>
+      </ul>
       <PartialSets rules={rules} locale={locale} />
-      <div className={`${TDH_PANEL} tw-space-y-3 tw-p-5`}>
-        <h3 className={HEADING}>
-          {t(locale, "network.tdh.rules.gradient.title")}
-        </h3>
-        <p className={TDH_TEXT}>
-          {t(locale, "network.tdh.rules.gradient.body", {
-            bonus: formatBonus(locale, boost.gradients.bonus_per_token),
-            count: formatInteger(locale, boost.gradients.max_count),
-            maximum: formatBonus(locale, boost.gradients.max_bonus),
-            decimals: formatInteger(locale, boost.final_rounding_decimals),
-          })}
-        </p>
-      </div>
-      <FutureSchedule rules={rules} locale={locale} />
+      <TdhDisclosure
+        tone="strong"
+        className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-px-4"
+        summary={t(locale, "network.tdh.rules.details")}
+      >
+        <div className="tw-space-y-3 tw-pb-4 tw-pl-6">
+          <p className={TDH_TEXT}>
+            {t(locale, "network.tdh.rules.full.body", {
+              count: formatInteger(locale, snapshot.eligible_memes_count),
+              bonus: formatBonus(locale, boost.full_collection.first_set_bonus),
+            })}
+          </p>
+          <p className={TDH_TEXT}>
+            {t(locale, "network.tdh.rules.full.extra", {
+              initial: formatBonus(
+                locale,
+                boost.full_collection.additional_set_initial_bonus
+              ),
+              decay: formatBonus(
+                locale,
+                boost.full_collection.additional_set_decay_ratio
+              ),
+              limit: formatBonus(
+                locale,
+                boost.full_collection.additional_sets_limit_bonus
+              ),
+            })}
+          </p>
+          <p className={TDH_TEXT}>
+            {t(locale, "network.tdh.rules.partial.body")}{" "}
+            {t(locale, "network.tdh.rules.partial.note")}
+          </p>
+          <p className={TDH_TEXT}>
+            {t(locale, "network.tdh.rules.gradient.body", {
+              bonus: formatBonus(locale, boost.gradients.bonus_per_token),
+              count: formatInteger(locale, boost.gradients.max_count),
+              maximum: formatBonus(locale, boost.gradients.max_bonus),
+              decimals: formatInteger(locale, boost.final_rounding_decimals),
+            })}
+          </p>
+          <FutureSchedule rules={rules} locale={locale} />
+        </div>
+      </TdhDisclosure>
     </div>
   );
 }
@@ -186,40 +259,48 @@ function PartialSets({
   readonly rules: TdhRules;
   readonly locale: SupportedLocale;
 }) {
+  const ranges = seasonRanges(boost.season_sets);
   return (
-    <div className={`${TDH_PANEL} tw-space-y-3 tw-p-5`}>
-      <h3 className={HEADING}>
+    <div className={`${TDH_PANEL} tw-p-4 sm:tw-p-5`}>
+      <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
         {t(locale, "network.tdh.rules.partial.title")}
       </h3>
-      <p className={TDH_TEXT}>{t(locale, "network.tdh.rules.partial.body")}</p>
-      {boost.season_sets.length ? (
-        <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-x-5 tw-gap-y-2 tw-p-0 tw-text-sm tw-text-iron-200 sm:tw-grid-cols-2">
-          {boost.season_sets.map((season) => (
-            <li key={season.season}>
-              {t(locale, "network.tdh.rules.season", {
-                season: formatInteger(locale, season.season),
-                bonus: formatBonus(locale, season.bonus),
+      <p className={`${TDH_TEXT} tw-mt-1`}>
+        {t(locale, "network.tdh.rules.partial.short")}
+      </p>
+      {ranges.length ? (
+        <ul className="tw-m-0 tw-mt-3 tw-flex tw-list-none tw-flex-wrap tw-gap-2 tw-p-0">
+          {ranges.map((range) => (
+            <li key={range.from} className={CHIP}>
+              {range.from === range.to
+                ? t(locale, "network.tdh.rules.season", {
+                    season: formatInteger(locale, range.from),
+                    bonus: formatBonus(locale, range.bonus),
+                  })
+                : t(locale, "network.tdh.rules.seasonRange", {
+                    from: formatInteger(locale, range.from),
+                    to: formatInteger(locale, range.to),
+                    bonus: formatBonus(locale, range.bonus),
+                  })}
+            </li>
+          ))}
+          {boost.season_one_partials.map((partial) => (
+            <li key={partial.key} className={CHIP}>
+              {t(locale, `network.tdh.rules.partial.${partial.key}`, {
+                ids: formatList(
+                  locale,
+                  partial.token_ids.map((id) => formatInteger(locale, id))
+                ),
+                bonus: formatBonus(locale, partial.bonus),
               })}
             </li>
           ))}
         </ul>
       ) : (
-        <p className={TDH_TEXT}>{t(locale, "network.tdh.rules.noSeasons")}</p>
+        <p className={`${TDH_TEXT} tw-mt-3`}>
+          {t(locale, "network.tdh.rules.noSeasons")}
+        </p>
       )}
-      <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-200">
-        {boost.season_one_partials.map((partial) => (
-          <li key={partial.key}>
-            {t(locale, `network.tdh.rules.partial.${partial.key}`, {
-              ids: formatList(
-                locale,
-                partial.token_ids.map((id) => formatInteger(locale, id))
-              ),
-              bonus: formatBonus(locale, partial.bonus),
-            })}
-          </li>
-        ))}
-      </ul>
-      <p className={TDH_TEXT}>{t(locale, "network.tdh.rules.partial.note")}</p>
     </div>
   );
 }
@@ -233,8 +314,7 @@ function FutureSchedule({
 }) {
   const { boost } = rules;
   return (
-    <div className={`${TDH_PANEL} tw-space-y-4 tw-p-5`}>
-      <h3 className={HEADING}>{t(locale, "network.tdh.rules.future.title")}</h3>
+    <>
       <p className={TDH_TEXT}>
         {t(locale, "network.tdh.rules.future.body", {
           lastSeason: formatInteger(
@@ -242,9 +322,7 @@ function FutureSchedule({
             boost.season_schedule.last_boosted_season
           ),
           bonus: formatBonus(locale, boost.season_schedule.bonus_per_season),
-        })}
-      </p>
-      <p className={TDH_TEXT}>
+        })}{" "}
         {t(locale, "network.tdh.rules.future.full", {
           count: formatInteger(
             locale,
@@ -256,17 +334,12 @@ function FutureSchedule({
           ),
         })}
       </p>
-      <p className="tw-m-0 tw-font-mono tw-text-lg tw-font-semibold tw-leading-7 tw-text-iron-50">
-        {t(locale, "network.tdh.rules.future.ceiling", {
-          multiplier: formatMultiplier(locale, getTdhFutureCeiling(rules)),
-        })}
-      </p>
       <p className={TDH_TEXT}>
         {t(locale, "network.tdh.rules.future.condition", {
           gradients: formatInteger(locale, boost.gradients.max_count),
-        })}
+        })}{" "}
+        {t(locale, "network.tdh.rules.future.cards")}
       </p>
-      <p className={TDH_TEXT}>{t(locale, "network.tdh.rules.future.cards")}</p>
-    </div>
+    </>
   );
 }

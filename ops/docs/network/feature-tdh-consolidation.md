@@ -34,8 +34,9 @@ Two pages explain wallet consolidation:
   `/network/tdh`.
 - Select `Wallet Consolidation` in `Explore Network references` on Network
   reference pages, or in the About contents menu or sidebar.
-- From the guide, select `Read how it works` to open the design page. The
-  design page links back with `Read the collector's guide`.
+- From the guide, select `Consolidation design and signing-order simulator`
+  to open the design page. The design page links back with `Read the
+  collector's guide`.
 
 ## Guide Sections (`/network/tdh/consolidation`)
 
@@ -43,11 +44,15 @@ Two pages explain wallet consolidation:
    the four-wallet limit and the fourth wallet's start date
    (loaded from the current environment’s settings), a `Start guided setup` button to
    `/safe-collecting/build-consolidation`, and a link to the safe collecting setup.
+   A note says that TDH-v1, the rule 6529.io moves to around 23 October 2026,
+   counts up to three wallets per identity and does not include the fourth
+   wallet yet, with a link to step 10 of How TDH is calculated.
    A figure shows the vault, transaction, social and old wallets becoming one
    collector.
 2. `Why combine`: the vault stays cold; TDH adds up; sets count across wallets;
    moving cards keeps holding time; old wallets keep their TDH; one profile and
-   one collection (profile, leaderboards, Meme Card subscriptions).
+   one collection (profile, leaderboards, Meme Card subscriptions). The TDH
+   claims cite the rule and link to step 10 of How TDH is calculated.
 3. `Which wallets to combine`: the safe collecting roles, each with a
    temperature dot: vault (holds NFTs, never connects), transaction wallet
    (buys, sells and trades; can manage the vault), social wallet (the hot
@@ -62,9 +67,11 @@ Two pages explain wallet consolidation:
 6. `Changing it later`: add, remove, lost or hacked wallet, and replacing a
    wallet when four are already combined.
 7. `Questions`: cost, moving NFTs, the limit, friends, wallets set up before
-   the start date, profiles, wrong order, where to see it, expiry.
+   the start date, profiles, wrong order, where to see it, expiry, in the TDH
+   pages' disclosure style.
 8. `Under the hood`: cards for the design page, the TDH explainer, the Wallet
    Checker and the Delegation Center.
+9. The TDH pager: previous `Verification`, next `Historic boosts`.
 
 ## Design Page Sections (`/network/tdh/consolidation/design`)
 

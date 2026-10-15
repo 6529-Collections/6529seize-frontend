@@ -2,20 +2,25 @@ import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import type { VerificationDay } from "@/lib/tdh/verification/schema";
+import type {
+  VerificationDay,
+  VerificationImplementation,
+} from "@/lib/tdh/verification/schema";
 import TdhCopyButton from "../../shared/TdhCopyButton";
+import TdhSource from "../../shared/TdhSource";
 import TdhStatusPill from "../../shared/TdhStatusPill";
 import { REGISTRY_HASH } from "../../shared/tdhRules";
 import { TDH_CARD, TDH_LINK } from "../../shared/tdhStyles";
+import {
+  arweaveFileUrl,
+  arweaveTransactionUrl,
+  etherscanBlockUrl,
+} from "./verificationLinks";
 import { formatInteger, middleTruncate } from "./verificationFormat";
 
 const DT =
   "tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400";
 const DD = "tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-200";
-
-export function etherscanBlockUrl(block: number): string {
-  return `https://etherscan.io/block/${block}`;
-}
 
 function Hash({
   locale,
@@ -29,7 +34,7 @@ function Hash({
   readonly keep?: number;
 }) {
   return (
-    <span className="tw-inline-flex tw-items-center tw-gap-1 tw-align-middle">
+    <span className="tw-inline-flex tw-items-center tw-gap-1 tw-whitespace-nowrap tw-align-middle">
       <code
         className="tw-font-mono tw-text-xs tw-leading-6 tw-text-iron-200"
         title={value}
@@ -51,23 +56,136 @@ function Hash({
 function Item({
   label,
   children,
+  wide = false,
 }: {
   readonly label: string;
   readonly children: ReactNode;
+  readonly wide?: boolean;
 }) {
   return (
-    <div className="tw-min-w-0">
+    <div className={`tw-min-w-0 ${wide ? "sm:tw-col-span-2" : ""}`}>
       <dt className={DT}>{label}</dt>
       <dd className={DD}>{children}</dd>
     </div>
   );
 }
 
+/** A commit with the repository it belongs to: "validator @ db72daa". */
+export function CommitLine({
+  locale,
+  program,
+  repository,
+  commit,
+}: {
+  readonly locale: SupportedLocale;
+  readonly program: string;
+  readonly repository: string;
+  readonly commit: string;
+}) {
+  return (
+    <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2">
+      <span className="tw-text-iron-300">{program}</span>
+      <span className="tw-inline-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
+        <code className="tw-font-mono tw-text-xs tw-text-iron-200">
+          {repository}@{commit.slice(0, 7)}
+        </code>
+        <TdhCopyButton
+          value={commit}
+          label={t(locale, "network.tdh.shared.copyNamed", {
+            name: `${repository} ${commit}`,
+          })}
+          copiedLabel={t(locale, "network.tdh.shared.copied")}
+          failedLabel={t(locale, "network.tdh.shared.copyFailed")}
+        />
+      </span>
+    </span>
+  );
+}
+
+function UploadLine({
+  locale,
+  label,
+  source,
+}: {
+  readonly locale: SupportedLocale;
+  readonly label: string;
+  readonly source: string;
+}) {
+  const id = source.replace(/^arweave:/, "");
+  return (
+    <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-0.5">
+      <span className="tw-w-20 tw-shrink-0 tw-text-xs tw-text-iron-400">
+        {label}
+      </span>
+      <Hash
+        locale={locale}
+        value={id}
+        name={t(locale, "network.tdh.verify.provenance.liveSource")}
+        keep={6}
+      />
+      <span className="tw-inline-flex tw-gap-3 tw-text-xs">
+        <a
+          href={arweaveTransactionUrl(id)}
+          className={TDH_LINK}
+          rel="noopener noreferrer"
+          target="_blank"
+          aria-label={t(locale, "network.tdh.verify.provenance.txLink", { id })}
+        >
+          {t(locale, "network.tdh.verify.provenance.tx")}
+        </a>
+        <a
+          href={arweaveFileUrl(id)}
+          className={TDH_LINK}
+          rel="noopener noreferrer"
+          target="_blank"
+          aria-label={t(locale, "network.tdh.verify.side.uploadLink", { id })}
+        >
+          {t(locale, "network.tdh.verify.provenance.file")}
+        </a>
+      </span>
+    </span>
+  );
+}
+
+function Commits({
+  locale,
+  rust,
+  python,
+}: {
+  readonly locale: SupportedLocale;
+  readonly rust: VerificationImplementation | null;
+  readonly python: VerificationImplementation | null;
+}) {
+  return (
+    <>
+      {rust?.commit && (
+        <CommitLine
+          locale={locale}
+          program={t(locale, "network.tdh.verify.side.rust")}
+          repository="validator"
+          commit={rust.commit}
+        />
+      )}
+      {python?.commit && (
+        <CommitLine
+          locale={locale}
+          program={t(locale, "network.tdh.verify.side.python")}
+          repository="6529chain"
+          commit={python.commit}
+        />
+      )}
+      <span className="tw-mt-1 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
+        {t(locale, "network.tdh.verify.provenance.commitsNote")}
+      </span>
+    </>
+  );
+}
+
 /**
- * What the day's result rests on (P26 §4.2, §9): rule version, registry
- * hash, snapshot block, history mode, netting, code versions and 6529.io's
- * files. Values come from the day's file; where it does not state one, the
- * page says so and shows the specification's value.
+ * What the day's result rests on (P26 §4.2, §9): where the data comes from,
+ * rule version, registry hash, snapshot block, history mode, code versions
+ * and 6529.io's signed files. Values come from the day's file; where it does
+ * not state one, the page says so and shows the specification's value.
  */
 export default function VerificationProvenance({
   locale,
@@ -87,47 +205,27 @@ export default function VerificationProvenance({
   const live = day?.implementations.live ?? null;
   const identityUpload = live?.sources?.identity ?? live?.source ?? null;
   const walletUpload = live?.sources?.wallet ?? null;
-  const netting = rust?.transactionNetting ?? null;
   return (
     <section
       aria-labelledby="tdh-verify-provenance-heading"
-      className="tw-mt-10"
+      className="tw-mt-12"
     >
       <h2
         id="tdh-verify-provenance-heading"
-        className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
+        className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
       >
         {t(locale, "network.tdh.verify.provenance.heading")}
       </h2>
       <div className={`${TDH_CARD} tw-mt-4 tw-p-5 sm:tw-p-6`}>
-        <dl className="tw-m-0 tw-grid tw-items-start tw-gap-5 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
+        <dl className="tw-m-0 tw-grid tw-items-start tw-gap-x-8 tw-gap-y-5 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
           <Item label={t(locale, "network.tdh.verify.provenance.dataSource")}>
             {isSample ? (
-              <span className="tw-inline-flex tw-flex-wrap tw-items-center tw-gap-2">
+              <span className="tw-flex tw-flex-col tw-items-start tw-gap-1.5">
                 <TdhStatusPill pill="sample" locale={locale} size="sm" />
                 {t(locale, "network.tdh.verify.provenance.sample")}
               </span>
             ) : (
               t(locale, "network.tdh.verify.provenance.remote")
-            )}
-          </Item>
-          <Item label={t(locale, "network.tdh.verify.provenance.rule")}>
-            {day?.ruleVersion
-              ? t(locale, "network.tdh.verify.provenance.ruleFromFile", {
-                  version: day.ruleVersion,
-                })
-              : t(locale, "network.tdh.verify.provenance.ruleFromSpec")}
-          </Item>
-          <Item label={t(locale, "network.tdh.verify.provenance.registry")}>
-            <Hash
-              locale={locale}
-              value={day?.registryHash ?? REGISTRY_HASH}
-              name={t(locale, "network.tdh.verify.provenance.registry")}
-            />
-            {!day?.registryHash && (
-              <span className="tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
-                {t(locale, "network.tdh.verify.provenance.registryFromSpec")}
-              </span>
             )}
           </Item>
           {day && (
@@ -140,9 +238,7 @@ export default function VerificationProvenance({
                 aria-label={t(
                   locale,
                   "network.tdh.verify.provenance.explorer",
-                  {
-                    block: formatInteger(locale, day.cutoffBlock),
-                  }
+                  { block: formatInteger(locale, day.cutoffBlock) }
                 )}
               >
                 {formatInteger(locale, day.cutoffBlock)}
@@ -167,72 +263,59 @@ export default function VerificationProvenance({
               />
             </Item>
           )}
-          {day && netting !== null && (
-            <Item label={t(locale, "network.tdh.verify.provenance.netting")}>
-              {netting ? (
-                t(locale, "network.tdh.verify.side.nettingOn")
-              ) : (
-                <span className="tw-text-amber-200">
-                  {t(locale, "network.tdh.verify.side.nettingOff")}
-                </span>
-              )}
-            </Item>
-          )}
+          <Item label={t(locale, "network.tdh.verify.provenance.rule")}>
+            {day?.ruleVersion
+              ? t(locale, "network.tdh.verify.provenance.ruleFromFile", {
+                  version: day.ruleVersion,
+                })
+              : t(locale, "network.tdh.verify.provenance.ruleFromSpec")}
+          </Item>
+          <Item label={t(locale, "network.tdh.verify.provenance.registry")}>
+            <Hash
+              locale={locale}
+              value={day?.registryHash ?? REGISTRY_HASH}
+              name={t(locale, "network.tdh.verify.provenance.registry")}
+            />
+            {!day?.registryHash && (
+              <span className="tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
+                {t(locale, "network.tdh.verify.provenance.registryFromSpec")}
+                <TdhSource refs={["P26 §10"]} locale={locale} />
+              </span>
+            )}
+          </Item>
           {(rust?.commit ?? python?.commit) && (
             <Item label={t(locale, "network.tdh.verify.provenance.commits")}>
-              {rust?.commit && (
-                <span className="tw-block">
-                  {t(locale, "network.tdh.verify.provenance.commitRust", {
-                    commit: rust.commit.slice(0, 7),
-                  })}
-                </span>
-              )}
-              {python?.commit && (
-                <span className="tw-block">
-                  {t(locale, "network.tdh.verify.provenance.commitPython", {
-                    commit: python.commit.slice(0, 7),
-                  })}
-                </span>
-              )}
+              <Commits locale={locale} rust={rust} python={python} />
             </Item>
           )}
           {day && (
-            <Item label={t(locale, "network.tdh.verify.provenance.liveSource")}>
+            <Item
+              label={t(locale, "network.tdh.verify.provenance.liveSource")}
+              wide
+            >
               {identityUpload === null ? (
                 <span className="tw-text-iron-400">
                   {t(locale, "network.tdh.verify.provenance.liveSourceMissing")}
                 </span>
               ) : (
-                <>
-                  <span className="tw-flex tw-items-center tw-gap-2">
-                    <span className="tw-w-14 tw-text-xs tw-text-iron-400">
-                      {t(locale, "network.tdh.verify.provenance.identityFile")}
-                    </span>
-                    <Hash
-                      locale={locale}
-                      value={identityUpload.replace(/^arweave:/, "")}
-                      name={t(
-                        locale,
-                        "network.tdh.verify.provenance.liveSource"
-                      )}
-                      keep={6}
-                    />
-                  </span>
+                <span className="tw-flex tw-flex-col tw-gap-1">
+                  <UploadLine
+                    locale={locale}
+                    label={t(
+                      locale,
+                      "network.tdh.verify.provenance.identityFile"
+                    )}
+                    source={identityUpload}
+                  />
                   {walletUpload && walletUpload !== identityUpload && (
-                    <span className="tw-flex tw-items-center tw-gap-2">
-                      <span className="tw-w-14 tw-text-xs tw-text-iron-400">
-                        {t(locale, "network.tdh.verify.provenance.walletFile")}
-                      </span>
-                      <Hash
-                        locale={locale}
-                        value={walletUpload.replace(/^arweave:/, "")}
-                        name={t(
-                          locale,
-                          "network.tdh.verify.provenance.liveSource"
-                        )}
-                        keep={6}
-                      />
-                    </span>
+                    <UploadLine
+                      locale={locale}
+                      label={t(
+                        locale,
+                        "network.tdh.verify.provenance.walletFile"
+                      )}
+                      source={walletUpload}
+                    />
                   )}
                   {live?.sha256 && (
                     <span className="tw-block tw-text-xs tw-text-iron-400">
@@ -241,7 +324,10 @@ export default function VerificationProvenance({
                       })}
                     </span>
                   )}
-                </>
+                  <span className="tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
+                    {t(locale, "network.tdh.verify.provenance.signed")}
+                  </span>
+                </span>
               )}
             </Item>
           )}

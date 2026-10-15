@@ -1,6 +1,6 @@
-import Link from "next/link";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import TdhArrowLink from "../shared/TdhArrowLink";
 import TdhCopyButton from "../shared/TdhCopyButton";
 import TdhSource from "../shared/TdhSource";
 import {
@@ -11,16 +11,16 @@ import {
   RULE_FINAL,
   RULE_OUTPUT,
   RULE_RANGE,
-  RULE_RATE,
+  RULE_RATE_SPEC,
   RULE_REGISTRY,
+  RULE_REGISTRY_CONSTRAINTS_CONDENSED,
+  RULE_TOTALS_CONDENSED,
 } from "../shared/tdhRules";
 import {
   TDH_CARD,
-  TDH_LINK_STANDALONE,
   TDH_TABLE,
   TDH_TABLE_FRAME,
-  TDH_TABLE_WRAP,
-  TDH_TD,
+  TDH_TD_STACK_MD,
   TDH_TH,
 } from "../shared/tdhStyles";
 import { middleTruncate } from "../verification/components/verificationFormat";
@@ -41,13 +41,15 @@ function ParameterValue({
 }) {
   const match = /0x[0-9a-f]{40,64}/.exec(value);
   if (!match) {
-    return <>{value}</>;
+    return <span>{value}</span>;
   }
   const hash = match[0];
-  const rest = value.slice(hash.length);
+  const before = value.slice(0, match.index).replace(/,\s*$/, "");
+  const after = value.slice(match.index + hash.length).replace(/^,\s*/, "");
   return (
-    <span className="tw-inline-flex tw-flex-wrap tw-items-center tw-gap-x-1">
-      <span className="tw-inline-flex tw-items-center tw-whitespace-nowrap">
+    <span className="tw-inline-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-0.5">
+      {before && <span className="tw-whitespace-nowrap">{before},</span>}
+      <span className="tw-inline-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
         <span title={hash}>
           <span aria-hidden="true">{middleTruncate(hash, 6)}</span>
           <span className="tw-sr-only">{hash}</span>
@@ -59,17 +61,22 @@ function ParameterValue({
           failedLabel={t(locale, "network.tdh.shared.copyFailed")}
         />
       </span>
-      {rest && <span>{rest.replace(/^,\s*/, "")}</span>}
+      {after && <span className="tw-whitespace-nowrap">{after}</span>}
     </span>
   );
 }
 
 const ARITHMETIC = [
-  { id: "s8-1", key: "s8-1", rule: RULE_RATE, refs: ["P26 §8.1"] },
+  { id: "s8-1", key: "s8-1", rule: RULE_RATE_SPEC, refs: ["P26 §8.1"] },
   { id: "s8-2", key: "s8-2", rule: RULE_BASE, refs: ["P26 §8.2"] },
   { id: "s8-3", key: "s8-3", rule: RULE_BOOST, refs: ["P26 §8.3"] },
   { id: "s8-4", key: "s8-4", rule: RULE_FINAL, refs: ["P26 §8.4"] },
-  { id: "s8-5", key: "s8-5", rule: null, refs: ["P26 §8.5", "DEV-13"] },
+  {
+    id: "s8-5",
+    key: "s8-5",
+    rule: RULE_TOTALS_CONDENSED,
+    refs: ["P26 §8.5", "DEV-13"],
+  },
   { id: "s8-6", key: "s8-6", rule: RULE_DAILY_RATE, refs: ["P26 §8.6"] },
   { id: "s8-7", key: "s8-7", rule: RULE_RANGE, refs: ["P26 §8.7"] },
 ] as const;
@@ -105,9 +112,12 @@ export default function SpecSectionsB({
             <Plain locale={locale} refs={part.refs}>
               {t(locale, `network.tdh.spec.${part.key}.body` as MessageKey)}
             </Plain>
-            {part.rule && (
-              <Rule locale={locale} code={part.rule} source={part.refs[0]} />
-            )}
+            <Rule
+              locale={locale}
+              code={part.rule}
+              source={part.refs[0]}
+              condensed={part.id === "s8-5" || part.id === "s8-7"}
+            />
           </SpecSub>
         ))}
       </SpecSection>
@@ -131,17 +141,28 @@ export default function SpecSectionsB({
         <Plain locale={locale} refs={["P26 §10"]}>
           {t(locale, "network.tdh.spec.s10.body")}
         </Plain>
-        <div
-          className={TDH_TABLE_WRAP}
-          tabIndex={0}
-          role="region"
-          aria-label={t(locale, "network.tdh.spec.s10.tableCaption")}
-        >
-          <table className={`${TDH_TABLE} tw-min-w-[36rem]`}>
+        <Plain locale={locale} refs={["P26 §10"]}>
+          {t(locale, "network.tdh.spec.s10.read")}
+        </Plain>
+        <Rule
+          locale={locale}
+          code={RULE_REGISTRY_CONSTRAINTS_CONDENSED}
+          source="P26 §10"
+          condensed
+        />
+        <div className={TDH_TABLE_FRAME}>
+          <table
+            className={`${TDH_TABLE} tw-block md:tw-table md:tw-table-fixed`}
+          >
             <caption className={CAPTION}>
               {t(locale, "network.tdh.spec.s10.tableCaption")}
             </caption>
-            <thead>
+            <colgroup className="tw-hidden md:tw-table-column-group">
+              <col className="md:tw-w-[34%]" />
+              <col className="md:tw-w-[28%]" />
+              <col />
+            </colgroup>
+            <thead className="tw-hidden md:tw-table-header-group">
               <tr>
                 <th scope="col" className={TDH_TH}>
                   {t(locale, "network.tdh.spec.s10.name")}
@@ -154,19 +175,26 @@ export default function SpecSectionsB({
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="tw-block md:tw-table-row-group">
               {PARAMETERS.map((row) => (
-                <tr key={row.name}>
+                <tr
+                  key={row.name}
+                  className="tw-grid tw-gap-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3 first:tw-border-t-0 md:tw-table-row md:tw-p-0"
+                >
                   <th
                     scope="row"
-                    className={`${TDH_TD} tw-font-mono tw-text-xs tw-font-normal tw-text-iron-100`}
+                    className={`${TDH_TD_STACK_MD} tw-font-mono tw-text-xs tw-font-normal tw-text-iron-50 [overflow-wrap:anywhere]`}
                   >
                     {row.name}
                   </th>
-                  <td className={`${TDH_TD} tw-font-mono tw-text-xs`}>
+                  <td
+                    className={`${TDH_TD_STACK_MD} tw-font-mono tw-text-xs tw-text-iron-200`}
+                  >
                     <ParameterValue locale={locale} value={row.value} />
                   </td>
-                  <td className={`${TDH_TD} tw-text-[13px] tw-text-iron-300`}>
+                  <td
+                    className={`${TDH_TD_STACK_MD} tw-text-[13px] tw-text-iron-300`}
+                  >
                     {t(
                       locale,
                       `network.tdh.spec.param.${row.key}` as MessageKey
@@ -181,8 +209,8 @@ export default function SpecSectionsB({
           <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
             {t(locale, "network.tdh.spec.s10.hash")}
           </p>
-          <p className="tw-m-0 tw-mt-1 tw-flex tw-items-start tw-gap-1">
-            <code className="tw-min-w-0 tw-break-all tw-pt-3 tw-font-mono tw-text-xs tw-text-iron-200">
+          <p className="tw-m-0 tw-mt-1 tw-flex tw-items-center tw-gap-1">
+            <code className="tw-min-w-0 tw-break-all tw-font-mono tw-text-xs tw-text-iron-200">
               {REGISTRY_HASH}
             </code>
             <TdhCopyButton
@@ -222,11 +250,11 @@ export default function SpecSectionsB({
           {t(locale, "network.tdh.spec.s12.body")}
         </Plain>
         <div className={TDH_TABLE_FRAME}>
-          <table className={TDH_TABLE}>
+          <table className={`${TDH_TABLE} tw-block md:tw-table`}>
             <caption className={CAPTION}>
               {t(locale, "network.tdh.spec.s12.tableCaption")}
             </caption>
-            <thead>
+            <thead className="tw-hidden md:tw-table-header-group">
               <tr>
                 <th scope="col" className={TDH_TH}>
                   {t(locale, "network.tdh.spec.s12.id")}
@@ -239,26 +267,32 @@ export default function SpecSectionsB({
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="tw-block md:tw-table-row-group">
               {BUG_IDS.map((id) => (
                 <tr
                   key={id}
                   id={`bug-${id}`}
-                  className="tw-scroll-mt-28 target:tw-bg-primary-500/10"
+                  className="tw-grid tw-scroll-mt-28 tw-gap-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3 first:tw-border-t-0 target:tw-bg-primary-500/10 md:tw-table-row md:tw-p-0"
                 >
                   <th
                     scope="row"
-                    className={`${TDH_TD} tw-whitespace-nowrap tw-font-mono tw-text-[13px] tw-font-medium tw-text-iron-50`}
+                    className={`${TDH_TD_STACK_MD} tw-whitespace-nowrap tw-font-mono tw-text-[13px] tw-font-medium tw-text-iron-50`}
                   >
                     {`BUG-${id}`}
                   </th>
-                  <td className={TDH_TD}>
+                  <td className={TDH_TD_STACK_MD}>
                     {t(
                       locale,
                       `network.tdh.spec.bug.${id}.issue` as MessageKey
                     )}
                   </td>
-                  <td className={`${TDH_TD} tw-text-iron-300`}>
+                  <td className={`${TDH_TD_STACK_MD} tw-text-iron-300`}>
+                    <span
+                      aria-hidden="true"
+                      className="tw-mr-1 tw-text-xs tw-text-iron-500 md:tw-hidden"
+                    >
+                      {t(locale, "network.tdh.spec.s12.fixed")}:
+                    </span>
                     {t(
                       locale,
                       `network.tdh.spec.bug.${id}.fixed` as MessageKey
@@ -279,12 +313,9 @@ export default function SpecSectionsB({
         <Plain locale={locale} refs={["P26 §13", "Clean room 2026-10-11"]}>
           {t(locale, "network.tdh.spec.s13.body")}
         </Plain>
-        <Link
-          href="/network/tdh/implementations"
-          className={`${TDH_LINK_STANDALONE} tw-text-sm`}
-        >
+        <TdhArrowLink href="/network/tdh/implementations">
           {t(locale, "network.tdh.spec.s13.link")}
-        </Link>
+        </TdhArrowLink>
       </SpecSection>
 
       <SpecSection
@@ -332,12 +363,12 @@ export default function SpecSectionsB({
                 {t(locale, `network.tdh.spec.evidence.${item.key}.body`)}
               </p>
               {item.key === "comparison" && (
-                <Link
+                <TdhArrowLink
                   href="/network/tdh/verification"
-                  className={`${TDH_LINK_STANDALONE} tw-mt-2 tw-text-sm`}
+                  className="tw-mt-2"
                 >
                   {t(locale, "network.tdh.spec.evidence.dashboard")}
-                </Link>
+                </TdhArrowLink>
               )}
             </article>
           ))}

@@ -1,7 +1,12 @@
 "use client";
 
 import { useId, useState } from "react";
-import { formatInteger, formatTime, selectPluralCategory } from "@/i18n/format";
+import {
+  formatInteger,
+  formatTime,
+  selectPluralCategory,
+  formatDate,
+} from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
@@ -130,13 +135,33 @@ export default function DayCounter({
           </label>
           <input
             id={`${id}-time`}
-            type="time"
+            type="text"
+            inputMode="numeric"
+            autoComplete="off"
+            pattern="[0-2][0-9]:[0-5][0-9]"
+            placeholder="HH:MM"
+            maxLength={5}
             value={time}
             onChange={(event) => setTime(event.target.value)}
-            className={FIELD}
+            className={`${FIELD} tw-tabular-nums`}
           />
         </div>
       </div>
+      {acquired !== null && (
+        <p className="tw-m-0 tw-mt-2 tw-text-sm tw-tabular-nums tw-text-iron-300">
+          {t(locale, "network.tdh.how.days.echo", {
+            time: formatDate(locale, acquired * 1000, {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              hourCycle: "h23",
+              timeZone: "UTC",
+            }),
+          })}
+        </p>
+      )}
       <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
         <span className="tw-text-sm tw-text-iron-400">
           {t(locale, "network.tdh.how.days.presets")}

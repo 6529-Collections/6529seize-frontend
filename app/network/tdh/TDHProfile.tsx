@@ -67,7 +67,7 @@ export default function TDHProfile({
           >
             {t(locale, "network.tdh.profile.input")}
           </label>
-          <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row">
+          <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-stretch">
             <input
               id="tdh-profile-input"
               value={input}
@@ -77,11 +77,13 @@ export default function TDHProfile({
               autoComplete="off"
               autoCapitalize="none"
               spellCheck={false}
-              className={`tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-950 tw-px-3 tw-py-2.5 tw-text-base tw-text-iron-100 ${TDH_FOCUS}`}
+              placeholder={t(locale, "network.tdh.profile.placeholder")}
+              className={`tw-h-11 tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-950 tw-px-3 tw-text-base tw-text-iron-100 placeholder:tw-text-iron-500 ${TDH_FOCUS}`}
             />
             <Button
               type="submit"
-              size="sm"
+              size="md"
+              className="tw-h-11 tw-shrink-0"
               loading={query.isFetching}
               disabled={!normalizedInput}
             >
@@ -200,13 +202,14 @@ function Snapshot({
         <p className="tw-m-0 tw-text-sm tw-text-iron-300">
           {t(locale, "network.tdh.profile.final")}
         </p>
-        <p className="tw-mb-0 tw-mt-2 tw-break-words tw-font-mono tw-text-3xl tw-font-semibold tw-tabular-nums tw-text-iron-50 sm:tw-text-4xl">
+        <p className="tw-mb-0 tw-mt-2 tw-break-words tw-text-3xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl">
           {formatInteger(locale, profile.boosted_tdh)}
         </p>
         <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-400">
           {t(locale, "network.tdh.profile.rate", {
             rate: formatNumber(locale, profile.boosted_tdh_rate, {
-              maximumFractionDigits: 4,
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
             }),
           })}
         </p>

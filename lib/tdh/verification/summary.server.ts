@@ -5,13 +5,15 @@ import {
 } from "./loadVerification.server";
 import {
   cutoverState,
-  differenceCases,
+  dayDifferences,
+  dayHasDifferences,
   differenceSentenceKind,
   indexDayHasDifferences,
   latestIndexDay,
   verdictState,
   type VerdictState,
 } from "./states";
+import type { VerificationDay, VerificationIndexDay } from "./schema";
 
 /**
  * The latest day in a few plain numbers, for the overview's "Checked daily"
@@ -30,26 +32,65 @@ export type VerificationSummary =
       /** Rust against 6529.io before the cutover, Rust against Python after. */
       readonly equal: number | null;
       readonly total: number | null;
-      /** Holders that differ: an identity and its wallets count once. */
+      /** Identity records that differ anywhere, from the day's counts. */
       readonly differenceCount: number;
+      readonly walletsEqual: number | null;
+      readonly walletsTotal: number | null;
       readonly liveEqual: number | null;
       readonly liveTotal: number | null;
       readonly pythonEqual: number | null;
       readonly pythonTotal: number | null;
-      /** False when the day's runs did not net within a transaction (D131). */
-      readonly netting: boolean | null;
+      /** Whether the Rust, Python and 6529.io totals were all equal. */
+      readonly totalsEqual: boolean | null;
     };
 
-type DaySummaryInput = NonNullable<
-  Awaited<ReturnType<typeof loadVerificationDay>>
->;
+type DataSummary = Extract<VerificationSummary, { kind: "data" | "sample" }>;
 
-/** Rust against Python, when the Python reference ran that day. */
-function pythonAgreement(dayLoad: DaySummaryInput) {
-  if (dayLoad.status !== "ok" || dayLoad.day.implementations.python === null) {
-    return null;
-  }
-  return dayLoad.day.agreement.rustVsPython;
+/** The summary of the latest day, from its index entry and, when loaded, its file. */
+export function summarizeDay(
+  latest: VerificationIndexDay,
+  day: VerificationDay | null,
+  afterCutoverDone: boolean,
+  kind: DataSummary["kind"]
+): DataSummary {
+  const python =
+    day !== null && day.implementations.python !== null
+      ? day.agreement.rustVsPython
+      : null;
+  const live = day?.agreement.rustVsLive ?? null;
+  const verdict = verdictState(
+    latest.verdict,
+    day ? dayHasDifferences(day) : indexDayHasDifferences(latest)
+  );
+  const useRustPython = afterCutoverDone && python !== null;
+  const equal = useRustPython ? python.identitiesEqual : latest.identitiesEqual;
+  const total = useRustPython ? python.identitiesTotal : latest.identitiesTotal;
+  const differenceCount = day
+    ? dayDifferences(day).identities
+    : Math.max((total ?? 0) - (equal ?? 0), 0);
+  const wallets = useRustPython ? python : live;
+  const totals = latest.totalTdh;
+  const totalsKnown = totals.python !== null && totals.live !== null;
+  return {
+    kind,
+    cycleDay: latest.cycleDay,
+    date: latest.date,
+    verdict,
+    sentence: differenceSentenceKind(verdict, differenceCount),
+    afterCutover: useRustPython,
+    equal,
+    total,
+    differenceCount,
+    walletsEqual: wallets?.walletsEqual ?? null,
+    walletsTotal: wallets?.walletsTotal ?? null,
+    liveEqual: latest.identitiesEqual,
+    liveTotal: latest.identitiesTotal,
+    pythonEqual: python?.identitiesEqual ?? null,
+    pythonTotal: python?.identitiesTotal ?? null,
+    totalsEqual: totalsKnown
+      ? totals.rust === totals.python && totals.rust === totals.live
+      : null,
+  };
 }
 
 export async function loadVerificationSummary(
@@ -71,40 +112,12 @@ export async function loadVerificationSummary(
       latest.cycleDay,
       LATEST_DAY_REVALIDATE_SECONDS
     );
-    const day = dayLoad.status === "ok" ? dayLoad.day : null;
-    const python = pythonAgreement(dayLoad);
-    const afterCutover =
-      cutoverState(indexLoad.index.cutover, now).kind === "done";
-    const verdict = verdictState(
-      latest.verdict,
-      day ? day.differences.length > 0 : indexDayHasDifferences(latest)
+    return summarizeDay(
+      latest,
+      dayLoad.status === "ok" ? dayLoad.day : null,
+      cutoverState(indexLoad.index.cutover, now).kind === "done",
+      indexLoad.source === "sample" ? "sample" : "data"
     );
-    const useRustPython = afterCutover && python !== null;
-    const equal = useRustPython
-      ? python.identitiesEqual
-      : latest.identitiesEqual;
-    const total = useRustPython
-      ? python.identitiesTotal
-      : latest.identitiesTotal;
-    const differenceCount = day
-      ? differenceCases(day.differences).length
-      : Math.max((total ?? 0) - (equal ?? 0), 0);
-    return {
-      kind: indexLoad.source === "sample" ? "sample" : "data",
-      cycleDay: latest.cycleDay,
-      date: latest.date,
-      verdict,
-      sentence: differenceSentenceKind(verdict, differenceCount),
-      afterCutover: useRustPython,
-      equal,
-      total,
-      differenceCount,
-      liveEqual: latest.identitiesEqual,
-      liveTotal: latest.identitiesTotal,
-      pythonEqual: python?.identitiesEqual ?? null,
-      pythonTotal: python?.identitiesTotal ?? null,
-      netting: day?.implementations.rust.transactionNetting ?? null,
-    };
   } catch {
     return null;
   }

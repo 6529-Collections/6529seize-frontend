@@ -523,10 +523,10 @@ export default function VerificationHistory({
   const enough = ordered.length >= MIN_DAYS_FOR_CHART;
 
   return (
-    <section aria-labelledby="tdh-verify-history-heading" className="tw-mt-10">
+    <section aria-labelledby="tdh-verify-history-heading" className="tw-mt-12">
       <h2
         id="tdh-verify-history-heading"
-        className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
+        className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
       >
         {t(locale, "network.tdh.verify.history.heading")}
       </h2>

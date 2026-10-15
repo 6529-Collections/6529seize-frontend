@@ -9,6 +9,7 @@ import { loadBundledSample } from "@/lib/tdh/verification/loadVerification.serve
 import type { VerificationIndex } from "@/lib/tdh/verification/schema";
 import {
   syntheticDay,
+  syntheticEqualDay,
   syntheticIndex,
 } from "../../../../lib/tdh/verification/fixtures";
 
@@ -98,7 +99,7 @@ function expectAccessibleStructure(container: HTMLElement) {
 describe("VerificationDashboard", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("shows the daily job's own files as the sample, labelled as run before D131 netting", async () => {
+  it("shows the daily job's published feed as the sample, with the result first", async () => {
     const sample = await loadBundledSample();
     const { container } = renderDashboard(
       {
@@ -112,90 +113,75 @@ describe("VerificationDashboard", () => {
       20_741
     );
     expect(screen.getByRole("note")).toHaveTextContent(
-      "Sample: the daily job’s own files for 14 and 15 October 2026."
+      "Sample data: the daily job’s files for 14 and 15 October 2026"
     );
-    expect(screen.getByRole("note")).toHaveTextContent(
-      /made before the Rust core netted within a transaction/
-    );
-    expect(screen.getAllByText("2 differ").length).toBe(2);
     expect(
-      screen.getByText("10,280 of 10,282 equal · 99.98%")
+      screen.getByText(
+        "On October 15, 2026, the Rust core, the Python reference and 6529.io agreed on all 10,282 collectors and 11,133 wallets, to the last unit of TDH."
+      )
     ).toBeInTheDocument();
-    expect(screen.getByText("All equal")).toBeInTheDocument();
-    expect(screen.getAllByText("−240").length).toBeGreaterThan(0);
-    expect(screen.getByText("6529.io is 240 higher")).toBeInTheDocument();
-    expect(screen.getAllByText("Off: run before D131").length).toBeGreaterThan(
-      0
-    );
+    expect(screen.getAllByText("All equal").length).toBe(3);
+    expect(screen.getByText("Equal: 2,073,214,934 each")).toBeInTheDocument();
+    expect(screen.getByText("In 8 days")).toBeInTheDocument();
     expect(screen.getAllByText("Not yet fully checked").length).toBeGreaterThan(
       0
     );
-    expect(screen.getByText("Cutover in 8 days")).toBeInTheDocument();
-    expect(screen.getAllByText("Explained").length).toBeGreaterThan(0);
-    expect(screen.getByText(/2 holders differ/)).toBeInTheDocument();
-    expect(screen.getByText("Total −63")).toBeInTheDocument();
-    expect(screen.getByText("Total −177")).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "holder-1/w1: the same fields and values as the identity."
-      )
+      screen.getByText(/No differences: every collector and wallet is equal/)
     ).toBeInTheDocument();
     expect(
+      screen.getByText(/Individual records are never published/)
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("validator@db72daa").length).toBeGreaterThan(1);
+    expect(screen.getAllByText("6529chain@0621ed4").length).toBeGreaterThan(1);
+    expect(
       screen.getByText(
-        "Sample data is bundled with this page; there is no file to download."
+        "This sample is bundled with the page; published days can be downloaded here once they are connected."
       )
     ).toBeInTheDocument();
+    expect(container.textContent).not.toMatch(/holder-\d/);
     expectAccessibleStructure(container);
   });
 
-  it("groups an identity with its wallets, filters by class and explains a cause", async () => {
-    const user = userEvent.setup();
+  it("never says there are no differences on a day whose counts say otherwise", () => {
     const { container } = renderDashboard(
       remoteIndex(syntheticIndex()),
       okDay(),
       20_741
     );
+    expect(screen.getAllByText("Investigating").length).toBeGreaterThan(0);
     expect(
       screen.getByText(
-        "2 holders differ: 1 identity and 2 wallet records. Rust − 6529.io over all identities: −120 TDH."
+        "On October 15, 2026, 9 of 10 collectors were equal between the Rust core and 6529.io. Not every difference is explained yet, so an alarm was raised."
       )
     ).toBeInTheDocument();
-    const filters = screen.getByRole("group", {
-      name: "Filter differences by class",
-    });
+    expect(screen.queryByText(/No differences/)).not.toBeInTheDocument();
     expect(
-      within(filters).getByRole("button", { name: /All/ })
-    ).toHaveAttribute("aria-pressed", "true");
-    await user.click(within(filters).getByRole("button", { name: /Class D/ }));
-    expect(
-      screen.queryByRole("heading", { name: "holder-1" })
-    ).not.toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "holder-2" })).toBeVisible();
-
-    await user.click(within(filters).getByRole("button", { name: /Class A/ }));
-    const card = screen.getByRole("heading", { name: "holder-1" })
-      .parentElement!.parentElement!;
-    expect(within(card).getByText("The Memes #1")).toBeInTheDocument();
-    expect(within(card).getByText("Total −120")).toBeInTheDocument();
-    await user.click(
-      within(card).getByRole("button", { name: "Show all 3 fields" })
-    );
-    expect(within(card).getByText("memes_tdh")).toBeInTheDocument();
-    expect(within(card).getByText("How this cause works")).toBeInTheDocument();
-    expect(
-      within(card).getByText(/a sale and a purchase of one card/)
+      screen.getByText("Records that differ: collectors 1, wallets 1.")
     ).toBeInTheDocument();
+    expect(screen.getByText("Not yet explained")).toBeInTheDocument();
     expect(
-      within(card).getAllByRole("link", { name: "DEV-2" })[0]
-    ).toHaveAttribute("href", "/network/tdh/specification#dev-2");
+      screen.getByText(/^1 differs · 90(.00)?% equal$/)
+    ).toBeInTheDocument();
     expectAccessibleStructure(container);
   });
 
-  it("shows exact per-holder values, the signed difference and the day's files", () => {
+  it("falls back to the agreement counts when a day carries no summary", () => {
+    renderDashboard(
+      remoteIndex(syntheticIndex()),
+      okDay(syntheticDay({ verdict: "OK", differenceSummary: null })),
+      20_741
+    );
+    expect(screen.getAllByText("Explained").length).toBeGreaterThan(0);
+    expect(screen.queryByText(/No differences/)).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Records that differ: collectors 1, wallets 1.")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("By cause")).not.toBeInTheDocument();
+  });
+
+  it("links the day's files and the explorers, and shows the commands", () => {
     renderDashboard(remoteIndex(syntheticIndex()), okDay(), 20_741);
-    expect(screen.getAllByText("1,120").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("−120").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Investigating").length).toBeGreaterThan(0);
     expect(
       screen.getByRole("link", { name: "Download this day as JSON" })
     ).toHaveAttribute(
@@ -213,6 +199,7 @@ describe("VerificationDashboard", () => {
     expect(
       screen.getByText(/validator compute --day 20741/)
     ).toBeInTheDocument();
+    expect(screen.getByText(/three_way\.py --day 20741/)).toBeInTheDocument();
   });
 
   it("says when the Python reference did not run", () => {
@@ -230,16 +217,6 @@ describe("VerificationDashboard", () => {
       screen.getByText("The Python reference did not run this day.")
     ).toBeInTheDocument();
     expect(screen.getAllByText("Not run").length).toBeGreaterThan(0);
-  });
-
-  it("shows the empty state when a day has no differences", () => {
-    renderDashboard(
-      remoteIndex(syntheticIndex()),
-      okDay(syntheticDay({ differences: [], verdict: "OK" })),
-      20_741
-    );
-    expect(screen.getByText("No differences on this day.")).toBeInTheDocument();
-    expect(screen.getAllByText("Equal").length).toBeGreaterThan(0);
   });
 
   it("maps the feed's alarm verdicts", () => {
@@ -269,7 +246,7 @@ describe("VerificationDashboard", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(
       "This day’s details could not be loaded."
     );
-    expect(screen.getAllByText("Explained").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Equal").length).toBeGreaterThan(0);
   });
 
   it("shows an unknown verdict as See details", () => {
@@ -281,7 +258,7 @@ describe("VerificationDashboard", () => {
     expect(screen.getAllByText("See details").length).toBeGreaterThan(0);
   });
 
-  it("warns when reports are late and lists days with no report", () => {
+  it("warns when reports are late and shows days with no report", () => {
     const index = syntheticIndex();
     renderDashboard(
       remoteIndex({
@@ -310,8 +287,9 @@ describe("VerificationDashboard", () => {
     expect(
       screen.getByText("1 day between reports has no report.")
     ).toBeInTheDocument();
-    expect(screen.getAllByText("No report").length).toBeGreaterThan(0);
-    // Phones get one card per day, newest first, including the missing day.
+    expect(
+      screen.getByRole("img", { name: "October 16, 2026: no report" })
+    ).toBeInTheDocument();
     const list = screen.getByRole("list", { name: "Daily results" });
     const cards = within(list).getAllByRole("listitem");
     expect(cards.map((card) => card.textContent?.slice(0, 16))).toEqual([
@@ -320,7 +298,30 @@ describe("VerificationDashboard", () => {
       "October 15, 2026",
       "October 14, 2026",
     ]);
-    expect(within(cards[1]!).getByText("No report")).toBeInTheDocument();
+  });
+
+  it("leads up to the planned cutover in the calendar, and stops counting on older days", () => {
+    const { unmount } = renderDashboard(
+      remoteIndex(syntheticIndex()),
+      okDay(),
+      20_741
+    );
+    expect(
+      screen.getByRole("img", {
+        name: "October 23, 2026: planned cutover (D132)",
+      })
+    ).toBeInTheDocument();
+    unmount();
+    renderDashboard(
+      remoteIndex(syntheticIndex()),
+      okDay(syntheticEqualDay({ cycleDay: 20_740, date: "2026-10-14" })),
+      20_740
+    );
+    expect(screen.queryByText("In 8 days")).not.toBeInTheDocument();
+    expect(screen.getByText("About Oct 23")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Not the latest day: go to the latest" })
+    ).toHaveAttribute("href", "/network/tdh/verification");
   });
 
   it("puts Rust against Python first after the cutover and labels the 6529.io check as publication", () => {
@@ -338,9 +339,11 @@ describe("VerificationDashboard", () => {
       20_741
     );
     const tiles = within(
-      screen.getByRole("region", { name: "Agreement" }).querySelector("ul")!
+      screen
+        .getByRole("region", { name: "The day at a glance" })
+        .querySelector("ul")!
     ).getAllByRole("listitem");
-    expect(tiles[0]).toHaveTextContent("Identities equal, Rust and Python");
+    expect(tiles[0]).toHaveTextContent("Rust and Python");
     expect(screen.getByText(/Publication check/)).toBeInTheDocument();
     expect(
       screen.getByText("Switched on October 23, 2026")
@@ -352,7 +355,7 @@ describe("VerificationDashboard", () => {
     expect(
       screen.getByText("Daily reports start on 16 October 2026.")
     ).toBeInTheDocument();
-    expect(screen.getByText("Cutover in 8 days")).toBeInTheDocument();
+    expect(screen.getByText("In 8 days")).toBeInTheDocument();
     expectAccessibleStructure(container);
   });
 
@@ -387,22 +390,21 @@ describe("VerificationDashboard", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(
       "This day’s details could not be loaded."
     );
-    expect(
-      screen.getByText(/Identities equal, Rust and 6529.io: 9 of 10 equal/)
-    ).toBeInTheDocument();
-    expect(screen.getByText("Agreement over time")).toBeInTheDocument();
+    expect(screen.getByText(/Collectors: 9 of 10/)).toBeInTheDocument();
+    expect(screen.getByText("Day by day")).toBeInTheDocument();
   });
 
-  it("navigates between published days without changing the page while choosing", async () => {
-    const user = userEvent.setup();
+  it("links the previous and next day, and each day of the calendar", () => {
     renderDashboard(remoteIndex(syntheticIndex()), okDay(), 20_741);
-    expect(screen.getByRole("link", { name: /Previous day/ })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Previous day" })).toHaveAttribute(
       "href",
       "/network/tdh/verification/20740"
     );
-    await user.selectOptions(screen.getByLabelText("Day"), "20740");
-    expect(push).not.toHaveBeenCalled();
-    await user.click(screen.getByRole("button", { name: "Show day" }));
-    expect(push).toHaveBeenCalledWith("/network/tdh/verification/20740");
+    expect(
+      screen.getByRole("link", { name: /^October 14, 2026, cycle 20,740/ })
+    ).toHaveAttribute("href", "/network/tdh/verification/20740");
+    expect(
+      screen.getByRole("link", { name: /^October 15, 2026, cycle 20,741/ })
+    ).toHaveAttribute("aria-current", "date");
   });
 });

@@ -6,7 +6,7 @@ import TdhPageShell from "../shared/TdhPageShell";
 import TdhPager from "../shared/TdhPager";
 import TdhScrollSpyNav from "../shared/TdhScrollSpyNav";
 import TdhSource from "../shared/TdhSource";
-import { PipelineDiagram } from "./HowItWorksDiagrams";
+import { PipelineDiagram } from "./PipelineDiagram";
 import HowItWorksStepsA from "./HowItWorksStepsA";
 import HowItWorksStepsB from "./HowItWorksStepsB";
 

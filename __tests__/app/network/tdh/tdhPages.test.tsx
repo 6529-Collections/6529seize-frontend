@@ -145,7 +145,11 @@ describe("TDH sub-pages", () => {
     ).toBeInTheDocument();
     expect(container.textContent).not.toMatch(/github\.com/);
     expect(container.textContent).not.toMatch(/not yet in the text/);
-    expect(container.textContent).toMatch(/every one of the 51 conformance/);
+    expect(container.textContent).toMatch(/every one of the 61 conformance/);
+    expect(container.textContent).toMatch(/commit 16d70d0/);
+    expect(container.textContent).toMatch(/ZERO -> ZERO is not a mint/);
+    expect(container.textContent).toMatch(/sinks contains ZERO/);
+    expect(container.textContent).toMatch(/0x8888…888888/);
     expect(container.textContent).toMatch(/net\(w\) = the amount w receives/);
     expect(container.querySelector("#symbols")).not.toBeNull();
   });
@@ -179,8 +183,16 @@ describe("TDH sub-pages", () => {
     );
     expect(
       container.querySelectorAll('[data-tdh-pill="shownFalse"]')
-    ).toHaveLength(3);
-    expect(screen.getByText("51 / 51")).toBeInTheDocument();
+    ).toHaveLength(4);
+    expect(
+      container.querySelectorAll('[data-tdh-pill="byDefinition"]')
+    ).toHaveLength(1);
+    expect(screen.getAllByText("Proposal, not adopted").length).toBeGreaterThan(
+      0
+    );
+    expect(screen.getByText("61 / 61")).toBeInTheDocument();
+    expect(container.textContent).not.toMatch(/cannot change TDH/);
+    expect(container.textContent).toMatch(/It stops there/);
     expect(screen.getByText("21,410")).toBeInTheDocument();
     expect(
       screen.getAllByText(/theorem replayHoldings_invariance/).length
@@ -204,28 +216,43 @@ describe("TDH sub-pages", () => {
     expect(
       screen.getAllByText("Source to be published").length
     ).toBeGreaterThan(0);
+    expect(screen.getByText(/Pinned: 6529chain 16d70d0/)).toBeInTheDocument();
     expect(
-      screen.getByText(/Rust and Python agree on 10,282 of 10,282 identities/)
+      screen.getByText(/Rust and Python agree on 10,282 of 10,282 collectors/)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/run before the Rust core netted within a transaction/)
+      screen.getByText(/the daily job’s test runs of 14 and 15 October 2026/)
     ).toBeInTheDocument();
     expect(
-      screen.getAllByText("All 51 vectors (976 checks)").length
-    ).toBeGreaterThan(0);
+      screen.getByText("All 61 vectors (1,098 checks)")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Built; not yet inside the validator")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "The 61 conformance vectors" })
+    ).toBeInTheDocument();
     expect(screen.getByText("Inside one vector")).toBeInTheDocument();
     const filters = screen.getByRole("group", {
       name: "Filter vectors by topic",
     });
+    expect(
+      screen.getByText("Conformance vectors, 10 of 61 shown")
+    ).toBeInTheDocument();
     await user.click(
       within(filters).getByRole("button", { name: /No result/ })
     );
     expect(
-      screen.getByText("Conformance vectors, 10 of 51 shown")
+      screen.getByText("Conformance vectors, 10 of 17 shown")
     ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Show all 17" }));
+    expect(
+      screen.getByText("Conformance vectors, 17 of 17 shown")
+    ).toBeInTheDocument();
+    expect(screen.getByText("60-invalid-registry")).toBeInTheDocument();
     await user.click(within(filters).getByRole("button", { name: /Netting/ }));
     expect(
-      screen.getByText("Conformance vectors, 16 of 51 shown")
+      screen.getByText("Conformance vectors, 16 of 16 shown")
     ).toBeInTheDocument();
   });
 

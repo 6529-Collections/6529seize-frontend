@@ -30,7 +30,7 @@ export default function TDHSection({
         <h2
           id={`${id}-heading`}
           tabIndex={-1}
-          className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none"
+          className="tw-m-0 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none"
         >
           {title}
         </h2>

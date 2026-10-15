@@ -4,9 +4,11 @@ Parent: [Network Index](README.md)
 
 ## Overview
 
-`/network/tdh/historic-boosts` documents archived TDH booster rules for
-versions `1.3`, `1.2`, and `1.1`.
-Current TDH rules are on `/network/tdh`.
+`/network/tdh/historic-boosts` documents 6529.io's archived boost schedules
+`1.3`, `1.2`, and `1.1`, labelled `Boost schedule 1.x` so they are not
+confused with TDH-v1, the exact written rule. Current boosts are on
+`/network/tdh`. The page says that TDH-v1 (rule version `tdh-v1.0`) and the
+daily comparison use only the current schedule.
 
 ## Location in the Site
 
@@ -24,14 +26,16 @@ Current TDH rules are on `/network/tdh`.
 ## User Journey
 
 1. Open `TDH — Historic Boosts`.
-2. Compare the archived versions, effective periods, and Category A, B, and C
-   summaries.
-3. On tablet or desktop, use the details control at the end of a table row.
-   On mobile, use `Show rules` on the version card.
+2. Compare the schedules: a bar chart of the full-set boost (bars start at
+   1.00×) that ends with the current schedule, its value on 15 October 2026
+   and its reach once all its seasons pay; and a table of effective periods,
+   full-set boosts, seasons with a bonus and the Gradient bonus
+   (`+0.02 each, up to 3`), with sentence-case headers and `×`.
+3. On tablet or desktop, use `Show rules` at the end of a table row. On
+   mobile, use `Show rules` on the version card.
 4. Review the complete Category A, B, and C rules for any expanded version.
 5. Expand more than one version when comparing rules.
-6. Use `Explore Network references` to open current TDH, Definitions, Network
-   TDH Stats, or Levels.
+6. Use the TDH pager to go back to Wallet consolidation.
 
 ## Archived Rule Model
 
@@ -80,7 +84,7 @@ All archived versions use this combination model:
 ## Common Scenarios
 
 - Compare archived multipliers with current rules on `/network/tdh`.
-- Confirm version handoff dates between `TDH 1.3` and `TDH 1.4`.
+- Confirm the handoff between boost schedules 1.3 and 1.4.
 - Check which season range each archived version supported.
 - Expand multiple versions to compare complete-set multipliers or season
   coverage without losing the other open rule.

@@ -7,11 +7,17 @@ import {
   RULE_CLUSTERS,
   RULE_CONVENTIONS,
   RULE_CUTOFF_SPEC,
+  RULE_DECODING_CONDENSED,
+  RULE_DELEGATION_CONDENSED,
   RULE_EDITIONS,
+  RULE_IDENTITY_CONDENSED,
+  RULE_LOG_SELECTION_CONDENSED,
+  RULE_MINTS_CONDENSED,
   RULE_NETTING,
   RULE_ORDER,
   RULE_PAIR_STATE,
-  RULE_RATE,
+  RULE_RATE_SPEC,
+  RULE_RECORDS_CONDENSED,
   RULE_REPLAY,
   RULE_SEASONS,
   RULE_TOKEN_VALUES,
@@ -245,22 +251,64 @@ export default function SpecSectionsA({
         title={t(locale, "network.tdh.spec.s3.title")}
         locale={locale}
       >
-        <div id="s3-1" className="tw-scroll-mt-24" />
-        <div id="s3-2" className="tw-scroll-mt-24" />
-        <div id="s3-3" className="tw-scroll-mt-24">
-          <Plain locale={locale} refs={["P26 §3.1", "P26 §3.2", "P26 §3.3"]}>
-            {t(locale, "network.tdh.spec.s3.body")}
+        <Plain locale={locale} refs={["P26 §3"]}>
+          {t(locale, "network.tdh.spec.s3.body")}
+        </Plain>
+        <SpecSub
+          id="s3-1"
+          title={t(locale, "network.tdh.spec.s3-1.title")}
+          locale={locale}
+        >
+          <Plain locale={locale} refs={["P26 §3.1"]}>
+            {t(locale, "network.tdh.spec.s3-1.body")}
           </Plain>
-        </div>
-        <div id="s3-4" className="tw-scroll-mt-24">
+          <Rule
+            locale={locale}
+            code={RULE_LOG_SELECTION_CONDENSED}
+            source="P26 §3.1"
+            condensed
+          />
+        </SpecSub>
+        <SpecSub
+          id="s3-2"
+          title={t(locale, "network.tdh.spec.s3-2.title")}
+          locale={locale}
+        >
+          <Plain locale={locale} refs={["P26 §3.2"]}>
+            {t(locale, "network.tdh.spec.s3-2.body")}
+          </Plain>
+          <Rule
+            locale={locale}
+            code={RULE_DECODING_CONDENSED}
+            source="P26 §3.2"
+            condensed
+          />
+        </SpecSub>
+        <SpecSub
+          id="s3-3"
+          title={t(locale, "network.tdh.spec.s3-3.title")}
+          locale={locale}
+        >
+          <Plain locale={locale} refs={["P26 §3.3", "DEV-2", "D131"]}>
+            {t(locale, "network.tdh.spec.s3-3.body")}
+          </Plain>
+          <Rule locale={locale} code={RULE_ORDER} source="P26 §3.3" />
+        </SpecSub>
+        <SpecSub
+          id="s3-4"
+          title={t(locale, "network.tdh.spec.s3-4.title")}
+          locale={locale}
+        >
           <Plain locale={locale} refs={["P26 §3.4"]}>
             {t(locale, "network.tdh.spec.s3.sinks")}
           </Plain>
-        </div>
-        <Rule locale={locale} code={RULE_ORDER} source="P26 §3.3" />
-        <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-400">
-          {t(locale, "network.tdh.spec.s3.decoding")}
-        </p>
+          <Rule
+            locale={locale}
+            code={RULE_MINTS_CONDENSED}
+            source="P26 §3.4"
+            condensed
+          />
+        </SpecSub>
       </SpecSection>
 
       <SpecSection
@@ -273,7 +321,11 @@ export default function SpecSectionsA({
             {t(locale, "network.tdh.spec.s4.body")}
           </Plain>
         </div>
-        <div id="s4-2" className="tw-scroll-mt-24" />
+        <div id="s4-2" className="tw-scroll-mt-24">
+          <Plain locale={locale} refs={["P26 §4.2"]}>
+            {t(locale, "network.tdh.spec.s4.order")}
+          </Plain>
+        </div>
         <div id="s4-3" className="tw-scroll-mt-24">
           <Rule locale={locale} code={RULE_CUTOFF_SPEC} source="P26 §4.2" />
         </div>
@@ -314,7 +366,7 @@ export default function SpecSectionsA({
           <Plain locale={locale} refs={["P26 §5.3"]}>
             {t(locale, "network.tdh.spec.s5-3.body")}
           </Plain>
-          <Rule locale={locale} code={RULE_RATE} source="P26 §8.1" />
+          <Rule locale={locale} code={RULE_RATE_SPEC} source="P26 §8.1" />
         </SpecSub>
         <SpecSub
           id="s5-4"
@@ -341,6 +393,12 @@ export default function SpecSectionsA({
           <Plain locale={locale} refs={["P26 §6.1"]}>
             {t(locale, "network.tdh.spec.s6-1.body")}
           </Plain>
+          <Rule
+            locale={locale}
+            code={RULE_DELEGATION_CONDENSED}
+            source="P26 §6.1"
+            condensed
+          />
         </SpecSub>
         <SpecSub
           id="s6-2"
@@ -373,6 +431,12 @@ export default function SpecSectionsA({
           <Plain locale={locale} refs={["P26 §6.4", "P26 §6.5", "DEV-10"]}>
             {t(locale, "network.tdh.spec.s6-4.body")}
           </Plain>
+          <Rule
+            locale={locale}
+            code={RULE_IDENTITY_CONDENSED}
+            source="P26 §6.5"
+            condensed
+          />
         </SpecSub>
       </SpecSection>
 
@@ -381,40 +445,70 @@ export default function SpecSectionsA({
         title={t(locale, "network.tdh.spec.s7.title")}
         locale={locale}
       >
-        <div id="s7-1" className="tw-scroll-mt-24" />
-        <div id="s7-2" className="tw-scroll-mt-24" />
-        <div id="s7-3" className="tw-scroll-mt-24">
-          <Plain locale={locale} refs={["P26 §7"]}>
+        <SpecSub
+          id="s7-1"
+          title={t(locale, "network.tdh.spec.s7-1.title")}
+          locale={locale}
+        >
+          <Plain locale={locale} refs={["P26 §7.1"]}>
             {t(locale, "network.tdh.spec.s7.body")}
           </Plain>
-        </div>
-        <Rule
+          <Rule
+            locale={locale}
+            code={RULE_UNDERFLOW}
+            source="P26 §7.1"
+            title={t(locale, "network.tdh.spec.s7.underflow")}
+          />
+          <Rule
+            locale={locale}
+            code={RULE_NETTING}
+            source="P26 §7.1"
+            title={t(locale, "network.tdh.spec.s7.netting")}
+          />
+          <Rule
+            locale={locale}
+            code={RULE_REPLAY}
+            source="P26 §7.1"
+            title={t(locale, "network.tdh.spec.s7.replay")}
+          />
+          <Plain locale={locale} refs={["P26 §7.1", "D131"]}>
+            {t(locale, "network.tdh.spec.s7.property")}
+          </Plain>
+          <p className="tw-m-0 tw-max-w-3xl tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+            {t(locale, "network.tdh.spec.s7.limit")}
+            <TdhSource refs={["P26 §5", "P26 §7.1"]} locale={locale} />
+          </p>
+        </SpecSub>
+        <SpecSub
+          id="s7-2"
+          title={t(locale, "network.tdh.spec.s7-2.title")}
           locale={locale}
-          code={RULE_UNDERFLOW}
-          source="P26 §7.1"
-          title={t(locale, "network.tdh.spec.s7.underflow")}
-        />
-        <Rule
+        >
+          <Plain locale={locale} refs={["P26 §7.2"]}>
+            {t(locale, "network.tdh.spec.s7-2.body")}
+          </Plain>
+          <Rule
+            locale={locale}
+            code={RULE_TOKEN_VALUES}
+            source="P26 §7.2"
+            title={t(locale, "network.tdh.spec.s7.values")}
+          />
+        </SpecSub>
+        <SpecSub
+          id="s7-3"
+          title={t(locale, "network.tdh.spec.s7-3.title")}
           locale={locale}
-          code={RULE_NETTING}
-          source="P26 §7.1"
-          title={t(locale, "network.tdh.spec.s7.netting")}
-        />
-        <Rule
-          locale={locale}
-          code={RULE_REPLAY}
-          source="P26 §7.1"
-          title={t(locale, "network.tdh.spec.s7.replay")}
-        />
-        <Rule
-          locale={locale}
-          code={RULE_TOKEN_VALUES}
-          source="P26 §7.2"
-          title={t(locale, "network.tdh.spec.s7.values")}
-        />
-        <Plain locale={locale} refs={["P26 §7.1", "D131"]}>
-          {t(locale, "network.tdh.spec.s7.property")}
-        </Plain>
+        >
+          <Plain locale={locale} refs={["P26 §7.3"]}>
+            {t(locale, "network.tdh.spec.s7-3.body")}
+          </Plain>
+          <Rule
+            locale={locale}
+            code={RULE_RECORDS_CONDENSED}
+            source="P26 §7.3"
+            condensed
+          />
+        </SpecSub>
       </SpecSection>
     </>
   );

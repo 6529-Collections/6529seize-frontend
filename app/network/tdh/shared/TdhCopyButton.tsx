@@ -9,7 +9,8 @@ type CopyState = "idle" | "copied" | "failed";
 /**
  * Copies a value to the clipboard and announces the result politely. The
  * accessible name carries what is copied, so a truncated hash is still read
- * in full.
+ * in full. The icon-only button is 28 px, so it sits on the line of the value
+ * it copies, and an invisible margin around it keeps a 44 px target.
  */
 export default function TdhCopyButton({
   value,
@@ -60,7 +61,11 @@ export default function TdhCopyButton({
         type="button"
         onClick={copy}
         aria-label={label}
-        className={`tw-inline-flex tw-min-h-11 tw-min-w-11 tw-shrink-0 tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-2 tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-100 motion-reduce:tw-transition-none ${TDH_FOCUS_RING} ${className}`}
+        className={`tw-relative tw-inline-flex tw-shrink-0 tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-100 motion-reduce:tw-transition-none ${
+          showText
+            ? "tw-min-h-11 tw-min-w-11 tw-px-2"
+            : "tw-size-7 tw-p-0 before:tw-absolute before:-tw-inset-2 before:tw-rounded-lg"
+        } ${TDH_FOCUS_RING} ${className}`}
       >
         {state === "copied" ? (
           <CheckIcon aria-hidden="true" className="tw-size-4 tw-text-success" />

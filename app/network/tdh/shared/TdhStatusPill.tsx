@@ -13,6 +13,8 @@ export type TdhPill =
   | "decided"
   | "inSpec"
   | "proved"
+  | "byDefinition"
+  | "proposal"
   | "checkedBuild"
   | "checkedVectors"
   | "shownFalse"
@@ -33,6 +35,8 @@ const PILL_TONE: Record<TdhPill, PillTone> = {
   decided: "primary",
   inSpec: "success",
   proved: "success",
+  byDefinition: "neutral",
+  proposal: "warning",
   checkedBuild: "primary",
   checkedVectors: "neutral",
   shownFalse: "warning",

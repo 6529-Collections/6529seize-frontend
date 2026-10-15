@@ -41,7 +41,7 @@ export default function StepSection({
         <h2
           id={`${id}-heading`}
           tabIndex={-1}
-          className="tw-m-0 tw-pt-2 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none sm:tw-text-2xl"
+          className="tw-m-0 tw-pt-1.5 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none sm:tw-text-[1.75rem]"
         >
           {title}
         </h2>
@@ -77,8 +77,10 @@ export default function StepSection({
 }
 
 /**
- * A paragraph of prose with its source chips on a row of their own, like
- * footnote marks, so a chip never ends up alone on a line.
+ * A paragraph of prose with its source chips. On wide screens the chips sit
+ * in the right margin beside the paragraph, like margin notes; on narrower
+ * ones they follow it on a row of their own, so a chip never ends up alone
+ * on a line of text.
  */
 export function Cited({
   locale,
@@ -92,14 +94,19 @@ export function Cited({
   readonly muted?: boolean;
 }) {
   return (
-    <div>
+    <div className="xl:-tw-mr-[8rem] xl:tw-grid xl:tw-grid-cols-[minmax(0,1fr)_6.5rem] xl:tw-gap-6">
       <p
         className={`tw-m-0 tw-text-[15px] tw-leading-7 ${muted ? "tw-text-iron-400" : "tw-text-iron-200"}`}
       >
         {children}
       </p>
       {refs.length > 0 && (
-        <TdhSource refs={refs} locale={locale} block className="tw-mt-1" />
+        <TdhSource
+          refs={refs}
+          locale={locale}
+          block
+          className="tw-mt-1 xl:tw-mt-1 xl:tw-flex-col xl:tw-items-start"
+        />
       )}
     </div>
   );

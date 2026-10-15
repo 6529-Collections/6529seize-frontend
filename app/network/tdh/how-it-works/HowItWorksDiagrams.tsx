@@ -1,11 +1,10 @@
 import { ArrowDownIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import { useId, type ReactNode } from "react";
 import { formatInteger, formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { EXAMPLE_NETWORK, rateCents } from "@/lib/tdh/tdhV1Arithmetic";
-import { TDH_FOCUS_RING, TDH_SERIES } from "../shared/tdhStyles";
+import { TDH_SERIES } from "../shared/tdhStyles";
 import { householdScenario } from "./examples";
 
 const H = EXAMPLE_NETWORK.largestEdition;
@@ -13,58 +12,6 @@ const H = EXAMPLE_NETWORK.largestEdition;
 function useSvgLabels() {
   const id = useId();
   return { titleId: `${id}-title`, descId: `${id}-desc` };
-}
-
-/** The steps the pipeline shows, in order: every step except the worked example and the changes. */
-const PIPELINE_STEPS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13] as const;
-
-/**
- * Diagram 1: the calculation as numbered steps, in the order of the page;
- * each links to its step. A grid on every width, so no arrow is ever left at
- * the start of a line.
- */
-export function PipelineDiagram({
-  locale,
-  stepTitles,
-}: {
-  readonly locale: SupportedLocale;
-  readonly stepTitles: Readonly<Record<number, string>>;
-}) {
-  return (
-    <figure className="tw-m-0">
-      <figcaption className="tw-sr-only">
-        {t(locale, "network.tdh.how.pipeline.desc")}
-      </figcaption>
-      <ol className="tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-2 tw-p-0 sm:tw-grid-cols-3 md:tw-grid-cols-4 xl:tw-grid-cols-6">
-        {PIPELINE_STEPS.map((step) => {
-          const isTotal = step === 13;
-          return (
-            <li key={step} className="tw-min-w-0">
-              <Link
-                href={`#step-${step}`}
-                aria-label={t(locale, "network.tdh.how.pipeline.goto", {
-                  n: formatInteger(locale, step),
-                  title: stepTitles[step] ?? "",
-                })}
-                className={`tw-flex tw-h-full tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-no-underline tw-transition-colors motion-reduce:tw-transition-none ${
-                  isTotal
-                    ? "tw-border-primary-400/60 tw-bg-primary-500/15 tw-font-semibold tw-text-iron-50"
-                    : "tw-border-white/10 tw-bg-iron-900 tw-text-iron-200 hover:tw-border-iron-500 hover:tw-text-iron-50"
-                } ${TDH_FOCUS_RING}`}
-              >
-                <span className="tw-w-5 tw-shrink-0 tw-text-right tw-font-mono tw-text-xs tw-tabular-nums tw-text-iron-400">
-                  {formatInteger(locale, step)}
-                </span>
-                <span className="tw-min-w-0">
-                  {t(locale, `network.tdh.how.pipeline.s${step}` as MessageKey)}
-                </span>
-              </Link>
-            </li>
-          );
-        })}
-      </ol>
-    </figure>
-  );
 }
 
 const TILE = {
@@ -143,7 +90,7 @@ export function StackDiagram({ locale }: { readonly locale: SupportedLocale }) {
       </figcaption>
       <div
         aria-hidden="true"
-        className="tw-grid tw-max-w-xl tw-gap-2 sm:tw-grid-cols-[minmax(0,0.8fr)_1.25rem_minmax(0,1.2fr)] sm:tw-items-stretch"
+        className="tw-grid tw-gap-2 sm:tw-grid-cols-[minmax(0,1fr)_1.25rem_minmax(0,1.2fr)] sm:tw-items-stretch"
       >
         <StackCard
           title={t(locale, "network.tdh.how.s4.before")}
@@ -202,16 +149,66 @@ const CURVE_POINTS = [
 ] as const;
 
 /**
- * Where each label sits, in pixels from its point; the two close Meme points
- * get their labels on opposite sides with leader lines, so nothing overlaps.
+ * Where each label sits, in pixels from its point, always on the side away
+ * from the falling curve. The two Meme points, 300 and 310 copies, are almost
+ * on top of each other, so they share one label with one leader line.
  */
 const LABEL_OFFSET: Readonly<Record<string, readonly [number, number]>> = {
-  gradient: [12, 4],
-  meme300: [-30, -26],
-  meme310: [30, 26],
-  nextgen: [10, -14],
-  firstgm: [-12, -14],
+  gradient: [12, -6],
+  nextgen: [8, -12],
+  firstgm: [-10, -12],
 };
+const PAIRED = new Set(["meme300", "meme310"]);
+
+/** One label for the 300- and 310-copy Memes, up and to the right of them. */
+function PairLabel({
+  x,
+  y,
+  font,
+  text,
+  note,
+}: {
+  readonly x: number;
+  readonly y: number;
+  readonly font: number;
+  readonly text: string;
+  readonly note: string;
+}) {
+  const lx = x + 22;
+  const ly = y - 34;
+  return (
+    <g>
+      <line
+        x1={x + 3}
+        y1={y - 3}
+        x2={lx - 2}
+        y2={ly + 4}
+        strokeWidth="1"
+        className="tw-stroke-iron-500"
+      />
+      <text
+        x={lx}
+        y={ly}
+        className="tw-fill-iron-50 tw-stroke-iron-950 tw-font-medium tw-tabular-nums"
+        strokeWidth={4}
+        paintOrder="stroke"
+        fontSize={font}
+      >
+        {text}
+      </text>
+      <text
+        x={lx}
+        y={ly - font - 2}
+        className="tw-fill-iron-400 tw-stroke-iron-950"
+        strokeWidth={4}
+        paintOrder="stroke"
+        fontSize={font - 1}
+      >
+        {note}
+      </text>
+    </g>
+  );
+}
 
 function RateCurve({
   locale,
@@ -226,7 +223,7 @@ function RateCurve({
 }) {
   const { titleId, descId } = useSvgLabels();
   const left = 40;
-  const right = 18;
+  const right = 28;
   const top = 34;
   const bottom = 44;
   const minLog = Math.log10(100);
@@ -284,7 +281,7 @@ function RateCurve({
           key={tick}
           x={x(tick)}
           y={height - bottom + 18}
-          textAnchor="middle"
+          textAnchor={tick === 4_000 ? "end" : "middle"}
           className="tw-fill-iron-400 tw-tabular-nums"
           fontSize={font}
         >
@@ -319,19 +316,20 @@ function RateCurve({
         const py = y(cents / 100);
         const [dx, dy] = LABEL_OFFSET[point.key] ?? [10, -10];
         const anchor = dx < 0 ? "end" : "start";
-        const leader = Math.abs(dy) > 16;
+        if (PAIRED.has(point.key)) {
+          return (
+            <circle
+              key={point.key}
+              cx={px}
+              cy={py}
+              r="4.5"
+              className={`${TDH_SERIES[point.series].fill} tw-stroke-iron-950`}
+              strokeWidth="1.5"
+            />
+          );
+        }
         return (
           <g key={point.key}>
-            {leader && (
-              <line
-                x1={px}
-                y1={py}
-                x2={px + dx * 0.8}
-                y2={py + dy * 0.75}
-                strokeWidth="1"
-                className="tw-stroke-iron-500"
-              />
-            )}
             <circle
               cx={px}
               cy={py}
@@ -352,6 +350,13 @@ function RateCurve({
           </g>
         );
       })}
+      <PairLabel
+        x={x(305)}
+        y={y((rateCents(H, 300, false) ?? 0) / 100)}
+        font={font}
+        text={`${rate(rateCents(H, 300, false) ?? 0)} · ${rate(rateCents(H, 310, false) ?? 0)}`}
+        note={t(locale, "network.tdh.how.s7.pairLabel")}
+      />
       <text
         x={(left + width - right) / 2}
         y={height - 6}
@@ -495,6 +500,31 @@ function IdentityGraph({ graph }: { readonly graph: (typeof GRAPHS)[number] }) {
           />
         );
       })}
+      {graph.links.map((link, index) => {
+        const [from, to] = [position(link[0] ?? ""), position(link[1] ?? "")];
+        const mx = (from[0] + to[0]) / 2;
+        const my = (from[1] + to[1]) / 2;
+        return (
+          <g key={`order-${link}`}>
+            <circle
+              cx={mx}
+              cy={my}
+              r="8"
+              strokeWidth="1"
+              className="tw-fill-iron-950 tw-stroke-primary-400/70"
+            />
+            <text
+              x={mx}
+              y={my + 3.5}
+              textAnchor="middle"
+              fontSize="10"
+              className="tw-fill-primary-300 tw-font-semibold tw-tabular-nums"
+            >
+              {index + 1}
+            </text>
+          </g>
+        );
+      })}
       {Object.keys(graph.wallets).map((name) => {
         const [cx, cy] = position(name);
         return (
@@ -571,6 +601,15 @@ export function IdentityGraphDiagram({
             className="tw-h-3 tw-w-5 tw-rounded-full tw-border tw-border-solid tw-border-primary-400/70 tw-bg-primary-500/10"
           />
           {t(locale, "network.tdh.how.s10.legendIdentity")}
+        </span>
+        <span className="tw-inline-flex tw-items-center tw-gap-2">
+          <span
+            aria-hidden="true"
+            className="tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-primary-400/70 tw-text-[9px] tw-font-semibold tw-text-primary-300"
+          >
+            1
+          </span>
+          {t(locale, "network.tdh.how.s10.linksNote")}
         </span>
       </figcaption>
     </figure>

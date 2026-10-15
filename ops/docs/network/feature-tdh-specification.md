@@ -5,8 +5,12 @@ Parent: [Network Index](README.md)
 ## Overview
 
 `/network/tdh/specification` restates specification P26 (TDH-v1, rule
-version `tdh-v1.0`, as amended on 15 October 2026 at commit `0621ed4`) section
-by section: each section in plain words beside the exact rule. It opens with a
+version `tdh-v1.0`, as clarified on 15 October 2026 at commit `16d70d0`)
+section by section: each section in plain words beside the rule, either quoted
+(`Exact rule`) or P26's prose rules line for line (`Rule, line for line from
+P26`): log selection and positions, decoding, mints and sinks, header order,
+delegation events, identities, records, totals, the numeric range and the
+registry's constraints. It opens with a
 map of how the sections feed each other and a symbol table, and lists the
 parameter registry and its hash, the 19 deviations from the old backend with
 their decisions, the 15 old-backend issues, the decisions the TDH pages cite,
@@ -25,8 +29,8 @@ chip links to a private repository.
 
 ## Anchors
 
-- `#symbols`; sections `#s1` to `#s13`, subsections such as `#s5-2` and
-  `#s8-4`.
+- `#symbols`; sections `#s1` to `#s13`, subsections such as `#s3-1`,
+  `#s5-2`, `#s7-3` and `#s8-4`.
 - Deviations `#dev-1` to `#dev-19`, issues `#bug-1` to `#bug-15`.
 - Decisions `#d112`, `#d116`, `#d118`, `#d119`, `#d121`, `#d122`, `#d125`,
   `#d128`, `#d130`, `#d131`, `#d132`.
@@ -38,13 +42,17 @@ chip links to a private repository.
 - A link button beside each heading copies the section address.
 - Copy buttons on rule blocks, contract addresses and the registry hash.
 - Deviation filter: `All`, `Can change values`, `Kept as before`; each
-  deviation's decision is a compact status with a legend under the table.
+  deviation is a card with its decision, the old backend's behaviour,
+  TDH-v1's and the measured effect, with a legend under the list.
 
 ## Notes
 
-- Section 7 shows P26 §7.1 in four blocks: the underflow test before
-  netting, transaction netting (D131), the replay after netting, and the
-  per-token values.
+- Section 7 shows P26 §7.1 in three blocks (the underflow test before
+  netting, transaction netting (D131), the replay after netting), the
+  property and where it stops, then §7.2's per-token values and §7.3's
+  records.
+- Rule blocks longer than seven lines are numbered, and comments are set in
+  a quieter colour.
 - The page is static content; changing it is a reviewed content change
   against the new P26 text.
 

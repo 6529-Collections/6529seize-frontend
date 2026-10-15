@@ -17,6 +17,7 @@ import {
   TDHHoldingChanges,
 } from "./TDHCalculationDetails";
 import TDHCurrentRules from "./TDHCurrentRules";
+import TDHHero from "./TDHHero";
 import TDHInAMinute from "./TDHInAMinute";
 import TDHProfile from "./TDHProfile";
 import { TDHRelatedLinks, useTDHSectionHashFocus } from "./TDHPageNavigation";
@@ -68,17 +69,7 @@ export default function TDHMainPage({
       />
       <article className="tw-mx-auto tw-max-w-6xl tw-pb-8">
         <TdhSubnav current="/network/tdh" locale={locale} />
-        <header className="tw-pb-8 tw-pt-5 sm:tw-pb-10 sm:tw-pt-8">
-          <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl">
-            {t(locale, "network.tdh.explainer.title")}
-          </h1>
-          <p className="tw-mb-0 tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-200 sm:tw-text-lg sm:tw-leading-8">
-            {t(locale, "network.tdh.explainer.intro")}
-          </p>
-          <p className="tw-mb-0 tw-mt-3 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-300">
-            {t(locale, "network.tdh.explainer.why")}
-          </p>
-        </header>
+        <TDHHero locale={locale} verification={verification} />
         <TDHInAMinute locale={locale} />
         <TDHVerifiedDaily locale={locale} summary={verification} />
         <TDHProfile locale={locale} />

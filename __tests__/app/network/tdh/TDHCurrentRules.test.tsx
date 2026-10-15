@@ -1,5 +1,7 @@
 import { screen } from "@testing-library/react";
-import TDHCurrentRules from "@/app/network/tdh/TDHCurrentRules";
+import TDHCurrentRules, {
+  seasonRanges,
+} from "@/app/network/tdh/TDHCurrentRules";
 import { commonApiFetch } from "@/services/api/common-api";
 import { renderWithQueryClient } from "../../../utils/reactQuery";
 import userEvent from "@testing-library/user-event";
@@ -46,6 +48,22 @@ function renderRules(locale: "en-US" | "fr-FR" = "en-US") {
 describe("TDHCurrentRules", () => {
   beforeEach(() => jest.clearAllMocks());
 
+  it("groups consecutive seasons with the same bonus into one range", () => {
+    expect(
+      seasonRanges([
+        { season: 3, bonus: 0.05 },
+        { season: 1, bonus: 0.05 },
+        { season: 2, bonus: 0.05 },
+        { season: 5, bonus: 0.05 },
+        { season: 6, bonus: 0.04 },
+      ])
+    ).toEqual([
+      { from: 1, to: 3, bonus: 0.05 },
+      { from: 5, to: 5, bonus: 0.05 },
+      { from: 6, to: 6, bonus: 0.04 },
+    ]);
+  });
+
   it("renders current data and formats the current/future values by locale", async () => {
     fetchMock.mockResolvedValue(rules);
     renderRules("fr-FR");
@@ -72,7 +90,7 @@ describe("TDHCurrentRules", () => {
     renderRules();
 
     expect(await screen.findByText(/No seasons qualify/i)).toBeInTheDocument();
-    expect(screen.getByText(/Seasons 1–22/i)).toBeInTheDocument();
+    expect(screen.getByText(/Seasons 1–22 each have/i)).toBeInTheDocument();
     expect(screen.getByText(/2\.34/)).toBeInTheDocument();
   });
 
@@ -113,12 +131,9 @@ describe("TDHCurrentRules", () => {
       fetchMock.mockResolvedValue(rules);
       renderWithQueryClient(<TDHCurrentRules locale={locale} />);
 
-      expect(
-        await screen.findByText(`${fullMultiplier}× before Gradients`)
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(`Final rounded multiplier ceiling: ${ceiling}×`)
-      ).toBeInTheDocument();
+      expect(await screen.findByText(`${fullMultiplier}×`)).toBeInTheDocument();
+      expect(screen.getByText(`${ceiling}×`)).toBeInTheDocument();
+      expect(screen.getByText("Highest possible")).toBeInTheDocument();
     }
   );
 });

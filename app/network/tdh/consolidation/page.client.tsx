@@ -28,6 +28,10 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate, formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import TdhArrowLink from "../shared/TdhArrowLink";
+import TdhDisclosure from "../shared/TdhDisclosure";
+import TdhPager from "../shared/TdhPager";
+import TdhSource from "../shared/TdhSource";
 import TdhSubnav from "../shared/TdhSubnav";
 import { TDHRelatedLinks } from "../TDHPageNavigation";
 import TDHSection, { TDH_FOCUS, TDH_PANEL, TDH_TEXT } from "../TDHSection";
@@ -72,9 +76,6 @@ const FAQ = [
 ] as const;
 
 const LINK = `tw-text-primary-300 tw-underline-offset-4 hover:tw-underline ${TDH_FOCUS}`;
-const DISCLOSURE =
-  "tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 last:tw-border-b-0";
-const SUMMARY = `tw-cursor-pointer tw-py-4 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-100 ${TDH_FOCUS}`;
 
 function activationDate(
   locale: SupportedLocale,
@@ -129,6 +130,13 @@ export default function TDHConsolidationPage() {
                 ? t(locale, "network.tdhConsolidation.limit", { limit, date })
                 : pendingLimits}
             </p>
+            <p className="tw-mb-0 tw-mt-3 tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+              {t(locale, "network.tdhConsolidation.tdhv1Note")}
+              <TdhSource refs={["P26 §6.3", "D132"]} locale={locale} />{" "}
+              <Link className={LINK} href="/network/tdh/how-it-works#step-10">
+                {t(locale, "network.tdhConsolidation.tdhv1Link")}
+              </Link>
+            </p>
             <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-center tw-gap-x-6 tw-gap-y-3">
               <ButtonLink href={GUIDED_SETUP_HREF} variant="primary" size="lg">
                 {t(locale, "network.tdhConsolidation.cta")}
@@ -168,7 +176,21 @@ export default function TDHConsolidationPage() {
                   </h3>
                   <p className={`${TDH_TEXT} tw-mt-1.5`}>
                     {t(locale, `network.tdhConsolidation.benefits.${key}.body`)}
+                    {key === "move" && (
+                      <TdhSource
+                        refs={["P26 §7.1", "DEV-10", "D121"]}
+                        locale={locale}
+                      />
+                    )}
+                    {key === "tdh" && (
+                      <TdhSource refs={["P26 §7.3"]} locale={locale} />
+                    )}
                   </p>
+                  {(key === "move" || key === "tdh") && (
+                    <TdhArrowLink href="/network/tdh/how-it-works#step-10">
+                      {t(locale, "network.tdhConsolidation.benefits.ruleLink")}
+                    </TdhArrowLink>
+                  )}
                 </div>
               </li>
             ))}
@@ -204,12 +226,9 @@ export default function TDHConsolidationPage() {
               </li>
             ))}
           </ul>
-          <Link
-            className={`${LINK} tw-mt-2 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm`}
-            href={SAFE_COLLECTING_HREF}
-          >
+          <TdhArrowLink href={SAFE_COLLECTING_HREF} className="tw-mt-2">
             {t(locale, "network.tdhConsolidation.wallets.more")}
-          </Link>
+          </TdhArrowLink>
         </TDHSection>
 
         <TDHSection
@@ -289,21 +308,25 @@ export default function TDHConsolidationPage() {
           id="consolidation-faq"
           title={t(locale, "network.tdhConsolidation.faq.title")}
         >
-          {FAQ.map((key) => (
-            <details key={key} className={DISCLOSURE}>
-              <summary className={SUMMARY}>
-                {t(locale, `network.tdhConsolidation.faq.${key}.title`)}
-              </summary>
-              <p className={`${TDH_TEXT} tw-pb-5`}>
-                {!limits && key === "limit"
-                  ? pendingLimits
-                  : t(locale, `network.tdhConsolidation.faq.${key}.body`, {
-                      date,
-                      limit,
-                    })}
-              </p>
-            </details>
-          ))}
+          <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800">
+            {FAQ.map((key) => (
+              <TdhDisclosure
+                key={key}
+                tone="strong"
+                className="tw-py-1"
+                summary={t(locale, `network.tdhConsolidation.faq.${key}.title`)}
+              >
+                <p className={`${TDH_TEXT} tw-pb-4 tw-pl-6`}>
+                  {!limits && key === "limit"
+                    ? pendingLimits
+                    : t(locale, `network.tdhConsolidation.faq.${key}.body`, {
+                        date,
+                        limit,
+                      })}
+                </p>
+              </TdhDisclosure>
+            ))}
+          </div>
         </TDHSection>
 
         <TDHSection
@@ -343,6 +366,7 @@ export default function TDHConsolidationPage() {
           />
         </TDHSection>
 
+        <TdhPager current="/network/tdh/consolidation" locale={locale} />
         <NetworkReferenceNavigation
           currentHref="/network/tdh/consolidation"
           locale={locale}

@@ -1,4 +1,11 @@
-import { ArrowDownIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowDownIcon,
+  ArrowRightIcon,
+  CheckIcon,
+  ClockIcon,
+  EyeIcon,
+  MinusIcon,
+} from "@heroicons/react/24/outline";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import {
@@ -103,6 +110,9 @@ export function LineageDiagram({
           <Arrow />
           <Wall label={m("lineage.wallPython")} />
           <Impl label={m("lineage.cleanRoom")} series="rust" />
+        </li>
+        <li className={`${row} sm:tw-pl-10`}>
+          <Impl label={m("lineage.cleanRoom")} series="rust" />
           <Arrow note={m("lineage.library")} />
           <Impl label={m("name.rust")} series="rust" />
         </li>
@@ -127,7 +137,70 @@ export function LineageDiagram({
   );
 }
 
-type Cell = "yes" | "planned" | "underTest" | "against" | "no";
+/** How a matrix cell reads: in use now, planned or from a date, under test. */
+export type MatrixTone = "now" | "later" | "review" | "test" | "no";
+
+const TONE_ICON = {
+  now: CheckIcon,
+  later: ClockIcon,
+  review: ClockIcon,
+  test: EyeIcon,
+  no: MinusIcon,
+} as const;
+
+const TONE_COLOR: Record<MatrixTone, string> = {
+  now: "tw-text-success",
+  later: "tw-text-primary-300",
+  review: "tw-text-primary-300",
+  test: "tw-text-amber-300",
+  no: "tw-text-iron-600",
+};
+
+export function MatrixCell({
+  tone,
+  label,
+}: {
+  readonly tone: MatrixTone;
+  readonly label: string;
+}) {
+  const Icon = TONE_ICON[tone];
+  return (
+    <span
+      className={`tw-inline-flex tw-items-start tw-gap-1.5 ${tone === "no" ? "tw-text-iron-500" : "tw-text-iron-100"}`}
+    >
+      <Icon
+        aria-hidden="true"
+        className={`tw-mt-0.5 tw-size-4 tw-shrink-0 ${TONE_COLOR[tone]}`}
+      />
+      {tone === "no" ? <span className="tw-sr-only">{label}</span> : label}
+    </span>
+  );
+}
+
+/** The key to the matrices' icons. */
+export function MatrixLegend({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <ul className="tw-m-0 tw-mt-2 tw-flex tw-list-none tw-flex-wrap tw-gap-x-4 tw-gap-y-1 tw-p-0 tw-text-xs tw-text-iron-400">
+      {(["now", "later", "test", "no"] as const).map((tone) => {
+        const Icon = TONE_ICON[tone];
+        return (
+          <li key={tone} className="tw-inline-flex tw-items-center tw-gap-1.5">
+            <Icon
+              aria-hidden="true"
+              className={`tw-size-3.5 ${TONE_COLOR[tone]}`}
+            />
+            {t(locale, `network.tdh.impl.legend.${tone}`)}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+type Cell = {
+  readonly tone: MatrixTone;
+  readonly label: string;
+};
 
 const MATRIX_COLUMNS: ReadonlyArray<{
   readonly key: "rust" | "programB" | "python" | "lean" | "backend";
@@ -140,29 +213,69 @@ const MATRIX_COLUMNS: ReadonlyArray<{
   { key: "backend", series: "live" },
 ];
 
+const Y: Cell = { tone: "now", label: "yes" };
+const N: Cell = { tone: "no", label: "no" };
+
 const MATRIX_ROWS: ReadonlyArray<{
   readonly key: "vectors" | "fullDay" | "random" | "dual" | "daily" | "proofs";
   readonly cells: readonly [Cell, Cell, Cell, Cell, Cell];
 }> = [
-  { key: "vectors", cells: ["yes", "yes", "yes", "yes", "no"] },
-  { key: "fullDay", cells: ["yes", "no", "yes", "yes", "underTest"] },
-  { key: "random", cells: ["no", "no", "yes", "against", "no"] },
-  { key: "dual", cells: ["planned", "planned", "no", "no", "no"] },
-  { key: "daily", cells: ["yes", "no", "yes", "no", "underTest"] },
-  { key: "proofs", cells: ["planned", "planned", "no", "no", "no"] },
+  {
+    key: "vectors",
+    cells: [
+      { tone: "review", label: "inReview" },
+      { tone: "review", label: "inReview" },
+      Y,
+      Y,
+      N,
+    ],
+  },
+  {
+    key: "fullDay",
+    cells: [
+      Y,
+      { tone: "now", label: "totals" },
+      Y,
+      Y,
+      { tone: "test", label: "underTest" },
+    ],
+  },
+  { key: "random", cells: [Y, Y, Y, Y, N] },
+  {
+    key: "dual",
+    cells: [
+      { tone: "later", label: "planned" },
+      { tone: "later", label: "planned" },
+      N,
+      N,
+      N,
+    ],
+  },
+  {
+    key: "daily",
+    cells: [
+      { tone: "now", label: "from16" },
+      N,
+      { tone: "now", label: "from16" },
+      N,
+      { tone: "test", label: "underTest" },
+    ],
+  },
+  {
+    key: "proofs",
+    cells: [
+      { tone: "later", label: "planned" },
+      { tone: "later", label: "planned" },
+      N,
+      N,
+      N,
+    ],
+  },
 ];
 
-const CELL_TONE: Record<Cell, string> = {
-  yes: "tw-bg-success",
-  planned: "tw-bg-iron-400",
-  underTest: "tw-bg-iron-300",
-  against: "tw-bg-success",
-  no: "",
-};
-
 /**
- * Diagram 3: which check covers which program. It replaces a radial figure
- * whose arcs had no legend: each cell says in words what applies.
+ * Diagram 3: which check covers which program, each cell an icon and a word,
+ * so colour is never the only signal.
  */
 export function CheckMatrix({ locale }: { readonly locale: SupportedLocale }) {
   const m = (key: string) => t(locale, `network.tdh.impl.${key}` as MessageKey);
@@ -180,27 +293,25 @@ export function CheckMatrix({ locale }: { readonly locale: SupportedLocale }) {
             <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
               {m(`matrix.${row.key}`)}
             </p>
-            <ul className="tw-m-0 tw-mt-2 tw-flex tw-list-none tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-p-0 tw-text-xs">
+            <ul className="tw-m-0 tw-mt-2 tw-grid tw-list-none tw-grid-cols-[auto_minmax(0,1fr)] tw-gap-x-3 tw-gap-y-1 tw-p-0 tw-text-xs">
               {row.cells.map((cell, index) => {
                 const column = MATRIX_COLUMNS[index];
-                if (!column || cell === "no") {
+                if (!column || cell.tone === "no") {
                   return null;
                 }
                 return (
-                  <li
-                    key={column.key}
-                    className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-iron-200"
-                  >
-                    <span
-                      aria-hidden="true"
-                      className={`tw-size-2 tw-rounded-full ${TDH_SERIES[column.series].bg}`}
+                  <li key={column.key} className="tw-contents">
+                    <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-iron-200">
+                      <span
+                        aria-hidden="true"
+                        className={`tw-size-2 tw-rounded-full ${TDH_SERIES[column.series].bg}`}
+                      />
+                      {m(`name.${column.key}`)}
+                    </span>
+                    <MatrixCell
+                      tone={cell.tone}
+                      label={m(`matrix.${cell.label}`)}
                     />
-                    {m(`name.${column.key}`)}
-                    {cell !== "yes" && (
-                      <span className="tw-text-iron-400">
-                        ({m(`matrix.${cell}`)})
-                      </span>
-                    )}
                   </li>
                 );
               })}
@@ -246,22 +357,12 @@ export function CheckMatrix({ locale }: { readonly locale: SupportedLocale }) {
                 {row.cells.map((cell, index) => (
                   <td
                     key={MATRIX_COLUMNS[index]?.key ?? index}
-                    className={`${TDH_TD} tw-text-[13px] ${cell === "no" ? "tw-text-iron-500" : "tw-text-iron-100"}`}
+                    className={`${TDH_TD} tw-text-[13px]`}
                   >
-                    {cell === "no" ? (
-                      <>
-                        <span aria-hidden="true">–</span>
-                        <span className="tw-sr-only">{m("matrix.no")}</span>
-                      </>
-                    ) : (
-                      <span className="tw-inline-flex tw-items-start tw-gap-1.5">
-                        <span
-                          aria-hidden="true"
-                          className={`tw-mt-1.5 tw-size-1.5 tw-shrink-0 tw-rounded-full ${CELL_TONE[cell]}`}
-                        />
-                        {m(`matrix.${cell}`)}
-                      </span>
-                    )}
+                    <MatrixCell
+                      tone={cell.tone}
+                      label={m(`matrix.${cell.label}`)}
+                    />
                   </td>
                 ))}
               </tr>
@@ -269,6 +370,7 @@ export function CheckMatrix({ locale }: { readonly locale: SupportedLocale }) {
           </tbody>
         </table>
       </div>
+      <MatrixLegend locale={locale} />
       <figcaption className="tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400">
         {m("matrix.note")}
       </figcaption>

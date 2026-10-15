@@ -3,6 +3,7 @@ import {
   SAMPLE_VERIFICATION_INDEX,
 } from "@/lib/tdh/verification/sampleData";
 import {
+  isDifferenceCause,
   parseVerificationDay,
   parseVerificationIndex,
 } from "@/lib/tdh/verification/schema";
@@ -18,43 +19,65 @@ describe("verification schema", () => {
     }
   });
 
-  it("keeps the daily job's real files as the sample, marked as run before D131 netting", () => {
+  it("keeps the daily job's published feed as the sample: verdict OK, everything equal", () => {
     const day = SAMPLE_VERIFICATION_DAYS[20_741];
     expect(day?.verdict).toBe("OK");
-    expect(day?.implementations.rust.transactionNetting).toBe(false);
-    expect(day?.implementations.python?.transactionNetting).toBe(false);
-    expect(day?.implementations.python?.runtimeMs).toBe(42_265);
+    expect(day?.implementations.rust.commit).toBe(
+      "db72daab2fc3112909ed0523637c8cf40908f141"
+    );
+    expect(day?.implementations.python?.commit).toBe(
+      "0621ed4651e7a3be37bfa1862648d0d0291215d5"
+    );
+    expect(day?.implementations.rust.runtimeMs).toBe(816_881);
+    expect(day?.implementations.python?.runtimeMs).toBe(37_848);
     expect(day?.implementations.live?.source).toBe(
       "arweave:4mTqQxjtPpArwMw4UzLvJbzsawWoWDPN7OJrncpEuQE"
     );
-    expect(day?.differences.map((difference) => difference.label)).toEqual([
-      "holder-1",
-      "holder-2",
-      "holder-1/w1",
-      "holder-2/w1",
-    ]);
     expect(day?.agreement.rustVsLive).toEqual({
-      identitiesEqual: 10_280,
+      identitiesEqual: 10_282,
       identitiesTotal: 10_282,
-      walletsEqual: 11_131,
+      walletsEqual: 11_133,
       walletsTotal: 11_133,
     });
+    expect(day?.implementations.rust.totalTdh).toBe(2_073_214_934);
+    expect(day?.implementations.live?.totalTdh).toBe(2_073_214_934);
+    expect(day?.differences).toEqual([]);
+    expect(day?.differenceSummary?.byClass).toEqual({
+      A: 0,
+      B: 0,
+      C: 0,
+      D: 0,
+    });
     expect(
-      (day?.implementations.live?.totalTdh ?? 0) -
-        (day?.implementations.rust.totalTdh ?? 0)
-    ).toBe(240);
-    expect(day?.implementations.python?.totalTdh).toBe(
-      day?.implementations.rust.totalTdh
-    );
-    expect(
-      day?.differences.every((difference) => difference.cause === "DEV-2")
-    ).toBe(true);
+      SAMPLE_VERIFICATION_DAYS[20_740]?.implementations.rust.totalTdh
+    ).toBe(2_070_436_337);
+  });
+
+  it("publishes nothing per record: the sample carries no holder, token or address", () => {
+    const text = JSON.stringify([
+      SAMPLE_VERIFICATION_INDEX,
+      SAMPLE_VERIFICATION_DAYS,
+    ]);
+    expect(text).not.toMatch(/holder-\d/);
+    expect(text).not.toMatch(/#\d/);
+    expect(text).not.toMatch(/0x[0-9a-f]{40}(?![0-9a-f])/);
+  });
+
+  it("never reads the differences list, so no record can reach the page", () => {
+    const parsed = parseVerificationDay({
+      ...syntheticDay(),
+      differences: [{ label: "holder-1", fields: [] }],
+    });
+    expect(parsed.success).toBe(true);
+    expect(parsed.success && "differences" in parsed.data).toBe(false);
   });
 
   it("accepts the schema as first given, without the optional additions", () => {
     const index = syntheticIndex();
     const { cutover: _cutover, ...withoutCutover } = index;
     expect(parseVerificationIndex(withoutCutover).success).toBe(true);
+    const { differenceSummary: _summary, ...withoutSummary } = syntheticDay();
+    expect(parseVerificationDay(withoutSummary).success).toBe(true);
   });
 
   it("ignores unknown fields", () => {
@@ -81,87 +104,27 @@ describe("verification schema", () => {
     expect(parsed.success && parsed.data.implementations.python).toBeNull();
   });
 
-  it("accepts the feed's wallet labels and upload field names", () => {
-    const day = syntheticDay();
-    const first = day.differences[0];
-    if (!first) {
-      throw new Error("fixture has differences");
-    }
-    for (const name of [
-      "boosted_tdh",
-      "tdh__raw",
-      "boosted_nextgen_tdh",
-      "memes#208.tdh",
-      "nextgen#10000000049.tdh__raw",
+  it("accepts the causes the job writes and nothing that could carry free text", () => {
+    for (const cause of [
+      "DEV-2",
+      "BUG-15,DEV-2",
+      "rust-python",
+      "unexplained",
     ]) {
-      expect(
-        parseVerificationDay({
-          ...day,
-          differences: [
-            {
-              ...first,
-              label: "holder-12/w3",
-              fields: [{ name, rust: 1, python: 1, live: 2 }],
-            },
-          ],
-        }).success
-      ).toBe(true);
+      expect(isDifferenceCause(cause)).toBe(true);
     }
-  });
-
-  it("rejects an address or any other identifier in a holder label", () => {
-    for (const label of [
-      "0x33fd426905f149f8376e227d0c9d3340aad17af1",
-      "holder-1 0x33fd426905f149f8376e227d0c9d3340aad17af1",
-      "someone.eth",
-      "holder-",
-      "holder-1/someone",
-      "holder-1/w",
-    ]) {
-      const day = syntheticDay();
-      const first = day.differences[0];
-      if (!first) {
-        throw new Error("fixture has differences");
-      }
-      expect(
-        parseVerificationDay({ ...day, differences: [{ ...first, label }] })
-          .success
-      ).toBe(false);
+    for (const cause of ["see 0xabc", "holder-1", "DEV-2, BUG-15", ""]) {
+      expect(isDifferenceCause(cause)).toBe(false);
     }
-  });
-
-  it("rejects a cause or field name that could carry free text", () => {
     const day = syntheticDay();
-    const first = day.differences[0];
-    if (!first) {
-      throw new Error("fixture has differences");
+    const summary = day.differenceSummary;
+    if (!summary) {
+      throw new Error("fixture has a summary");
     }
     expect(
       parseVerificationDay({
         ...day,
-        differences: [{ ...first, cause: "see 0xabc" }],
-      }).success
-    ).toBe(false);
-    expect(
-      parseVerificationDay({
-        ...day,
-        differences: [
-          {
-            ...first,
-            fields: [{ name: "wallet 0xabc", rust: 1, python: 1, live: 2 }],
-          },
-        ],
-      }).success
-    ).toBe(false);
-    expect(
-      parseVerificationDay({
-        ...day,
-        differences: [
-          {
-            ...first,
-            fields: [{ name: "memes#x.tdh", rust: 1, python: 1, live: 2 }],
-          },
-        ],
+        differenceSummary: { ...summary, byCause: { "wallet 0xabc": 1 } },
       }).success
     ).toBe(false);
   });
@@ -223,7 +186,10 @@ describe("verification schema", () => {
     expect(
       parseVerificationDay({
         ...day,
-        differences: [{ ...day.differences[0], class: "E" }],
+        differenceSummary: {
+          ...day.differenceSummary,
+          byClass: { A: 0, B: 0, C: 0, D: -1 },
+        },
       }).success
     ).toBe(false);
     expect(

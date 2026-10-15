@@ -2,11 +2,11 @@ import {
   DEFAULT_CUTOVER,
   agreementShare,
   cutoverState,
+  dayDifferences,
+  dayHasDifferences,
   dayNeighbours,
-  differenceCases,
-  differenceClassCounts,
+  dayVerdict,
   differenceSentenceKind,
-  holderOf,
   indexDayVerdict,
   latestIndexDay,
   missingCycleDays,
@@ -16,7 +16,7 @@ import {
   utcCycleDay,
   verdictState,
 } from "@/lib/tdh/verification/states";
-import { syntheticDay, syntheticIndex } from "./fixtures";
+import { syntheticDay, syntheticEqualDay, syntheticIndex } from "./fixtures";
 
 describe("verification states", () => {
   it("maps the daily job's verdicts and the plain names, and keeps unknown ones neutral", () => {
@@ -31,11 +31,12 @@ describe("verification states", () => {
       )
     ).toEqual(["equal", "explained", "investigating", "mismatch", "pending"]);
     expect(verdictState("UNDER_REVIEW", false)).toBe("unknown");
-    const [day] = syntheticIndex().days;
-    expect(day && indexDayVerdict(day)).toBe("explained");
+    const [equalDay, differingDay] = syntheticIndex().days;
+    expect(equalDay && indexDayVerdict(equalDay)).toBe("equal");
+    expect(differingDay && indexDayVerdict(differingDay)).toBe("investigating");
   });
 
-  it("counts down to the cutover in whole UTC days, across the week from D132", () => {
+  it("counts down to the cutover in whole UTC days, across D132's week from the first daily run", () => {
     expect(
       cutoverState(DEFAULT_CUTOVER, new Date("2026-10-15T12:00:00Z"))
     ).toEqual({
@@ -44,10 +45,15 @@ describe("verification states", () => {
       plannedDate: "2026-10-23",
       elapsed: 0,
     });
+    expect(cutoverState(null, new Date("2026-10-16T12:00:00Z"))).toMatchObject({
+      kind: "countdown",
+      days: 7,
+      elapsed: 0,
+    });
     expect(cutoverState(null, new Date("2026-10-22T23:59:59Z"))).toMatchObject({
       kind: "countdown",
       days: 1,
-      elapsed: 7 / 8,
+      elapsed: 6 / 7,
     });
   });
 
@@ -117,28 +123,43 @@ describe("verification states", () => {
     expect(reportsAreLate(new Date("2026-10-17T00:00:00Z"))).toBe(true);
   });
 
-  it("counts differences per class and groups a holder's identity with its wallets", () => {
-    const differences = syntheticDay().differences;
-    expect(differenceClassCounts(differences)).toEqual({
-      A: 2,
-      B: 0,
-      C: 0,
-      D: 1,
+  it("reads a day's differences from the job's counts, never from a list of records", () => {
+    expect(dayDifferences(syntheticDay())).toEqual({
+      identities: 1,
+      wallets: 1,
+      byClass: { A: 0, B: 0, C: 0, D: 2 },
+      byCause: [{ cause: "unexplained", count: 2 }],
+      rustVsLive: -120,
+      pythonVsLive: -120,
     });
-    expect(holderOf("holder-3/w2")).toBe("holder-3");
-    const cases = differenceCases(differences);
-    expect(cases.map((item) => item.holder)).toEqual(["holder-1", "holder-2"]);
-    expect(cases[0]?.identity?.label).toBe("holder-1");
-    expect(cases[0]?.wallets.map((wallet) => wallet.label)).toEqual([
-      "holder-1/w1",
-    ]);
-    expect(cases[0]?.causes).toEqual(["DEV-2"]);
-    expect(cases[1]?.identity).toBeNull();
-    expect(cases[1]?.classes).toEqual(["D"]);
+    expect(dayHasDifferences(syntheticDay())).toBe(true);
+    expect(dayVerdict(syntheticDay())).toBe("investigating");
+    expect(dayHasDifferences(syntheticEqualDay())).toBe(false);
+    expect(dayVerdict(syntheticEqualDay())).toBe("equal");
+  });
+
+  it("never reads a day as equal while the counts say records differ", () => {
+    const withoutSummary = syntheticDay({
+      verdict: "OK",
+      differenceSummary: null,
+    });
+    expect(dayHasDifferences(withoutSummary)).toBe(true);
+    expect(dayVerdict(withoutSummary)).toBe("explained");
+    expect(dayDifferences(withoutSummary)).toMatchObject({
+      identities: 1,
+      wallets: 1,
+      byClass: null,
+      rustVsLive: -120,
+    });
+    const zeroSummary = syntheticEqualDay({
+      agreement: syntheticDay().agreement,
+    });
+    expect(dayHasDifferences(zeroSummary)).toBe(true);
   });
 
   it("chooses the overview's difference sentence", () => {
     expect(differenceSentenceKind("equal", 0)).toBe("none");
+    expect(differenceSentenceKind("investigating", 0)).toBe("investigating");
     expect(differenceSentenceKind("explained", 2)).toBe("explained");
     expect(differenceSentenceKind("investigating", 3)).toBe("investigating");
     expect(differenceSentenceKind("mismatch", 0)).toBe("mismatch");

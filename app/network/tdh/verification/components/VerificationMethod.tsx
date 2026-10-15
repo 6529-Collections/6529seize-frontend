@@ -84,14 +84,26 @@ export function DailyFlow({ locale }: { readonly locale: SupportedLocale }) {
         className="tw-grid tw-gap-2 md:tw-grid-cols-[minmax(0,1fr)_auto_minmax(0,11rem)] md:tw-items-center"
       >
         <div className="tw-space-y-2">
-          <Lane
-            title={label("ours")}
-            nodes={[
-              { label: label("ethereum"), series: "neutral" },
-              { label: label("rust"), series: "rust" },
-              { label: label("pythonInput"), series: "python" },
-            ]}
-          />
+          <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-p-3">
+            <p className="tw-m-0 tw-mb-2 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
+              {label("ours")}
+            </p>
+            <div className="tw-grid tw-grid-cols-[auto_auto_minmax(0,1fr)] tw-items-center tw-gap-x-1.5 tw-gap-y-1">
+              <Node label={label("ethereum")} series="neutral" />
+              <Next />
+              <span>
+                <Node label={label("rust")} series="rust" />
+              </span>
+              <span className="tw-col-start-3 tw-flex tw-flex-wrap tw-items-center tw-gap-1.5 tw-pl-3">
+                <span className="tw-h-5 tw-w-3 tw-shrink-0 -tw-translate-y-2 tw-rounded-bl-md tw-border-0 tw-border-b-2 tw-border-l-2 tw-border-solid tw-border-iron-600" />
+                <span className="tw-text-xs tw-text-iron-400">
+                  {label("handoff")}
+                </span>
+                <Next />
+                <Node label={label("python")} series="python" />
+              </span>
+            </div>
+          </div>
           <Lane
             title={label("theirs")}
             nodes={[
@@ -136,7 +148,7 @@ export default function VerificationMethod({
     <section aria-labelledby="tdh-verify-method-heading" className="tw-mt-12">
       <h2
         id="tdh-verify-method-heading"
-        className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
+        className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
       >
         {t(locale, "network.tdh.verify.method.heading")}
       </h2>

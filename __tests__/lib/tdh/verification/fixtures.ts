@@ -5,8 +5,8 @@ import type {
 
 /**
  * Obviously synthetic verification data for tests (plan §11.4): values like
- * 1,000 against 1,120, never a real holder. Labels and field names follow the
- * daily job's feed: `holder-N`, `holder-N/wM`, `boosted_tdh`, `memes#1.tdh`.
+ * 1,000 against 1,120, never a real holder. Like the daily job's feed, a day
+ * carries its differences only as counts (`differenceSummary`).
  */
 export function syntheticDay(
   overrides: Partial<VerificationDay> = {}
@@ -29,8 +29,8 @@ export function syntheticDay(
         cycleRoot: `0x${"1".repeat(64)}`,
         walletRoot: null,
         historyRoot: null,
+        rootsNote: null,
         runtimeMs: 612,
-        transactionNetting: true,
       },
       python: {
         commit: "0f1e2d3c4b5a",
@@ -40,8 +40,8 @@ export function syntheticDay(
         cycleRoot: null,
         walletRoot: null,
         historyRoot: null,
+        rootsNote: "No Keccak tree.",
         runtimeMs: 4_300,
-        transactionNetting: true,
       },
       live: {
         source: `arweave:${"A".repeat(43)}`,
@@ -69,40 +69,49 @@ export function syntheticDay(
         walletsTotal: 12,
       },
     },
-    differences: [
-      {
-        label: "holder-1",
-        kind: "identity",
-        fields: [
-          { name: "boosted_tdh", rust: 1_000, python: 1_000, live: 1_120 },
-          { name: "memes#1.tdh", rust: 500, python: 500, live: 620 },
-          { name: "memes_tdh", rust: 1_000, python: 1_000, live: 1_120 },
-        ],
-        class: "A",
-        cause: "DEV-2",
-      },
-      {
-        label: "holder-1/w1",
-        kind: "wallet",
-        fields: [
-          { name: "boosted_tdh", rust: 1_000, python: 1_000, live: 1_120 },
-          { name: "memes#1.tdh", rust: 500, python: 500, live: 620 },
-          { name: "memes_tdh", rust: 1_000, python: 1_000, live: 1_120 },
-        ],
-        class: "A",
-        cause: "DEV-2",
-      },
-      {
-        label: "holder-2/w1",
-        kind: "wallet",
-        fields: [{ name: "boosted_tdh", rust: 700, python: 700, live: 690 }],
-        class: "D",
-        cause: null,
-      },
-    ],
+    differenceSummary: {
+      identities: 1,
+      wallets: 1,
+      byClass: { A: 0, B: 0, C: 0, D: 2 },
+      byCause: { unexplained: 2 },
+      totalTdhDelta: { rustVsLive: -120, pythonVsLive: -120 },
+    },
     verdict: "LIVE_UNEXPLAINED",
     ...overrides,
   };
+}
+
+/** A day on which every record is equal, as the job publishes it. */
+export function syntheticEqualDay(
+  overrides: Partial<VerificationDay> = {}
+): VerificationDay {
+  const day = syntheticDay();
+  return syntheticDay({
+    implementations: {
+      ...day.implementations,
+      live: day.implementations.live
+        ? { ...day.implementations.live, totalTdh: 10_000 }
+        : null,
+    },
+    agreement: {
+      rustVsPython: day.agreement.rustVsPython,
+      rustVsLive: {
+        identitiesEqual: 10,
+        identitiesTotal: 10,
+        walletsEqual: 12,
+        walletsTotal: 12,
+      },
+    },
+    differenceSummary: {
+      identities: 0,
+      wallets: 0,
+      byClass: { A: 0, B: 0, C: 0, D: 0 },
+      byCause: {},
+      totalTdhDelta: { rustVsLive: 0, pythonVsLive: 0 },
+    },
+    verdict: "OK",
+    ...overrides,
+  });
 }
 
 export function syntheticIndex(
@@ -114,9 +123,9 @@ export function syntheticIndex(
         cycleDay: 20_740,
         date: "2026-10-14",
         verdict: "OK",
-        identitiesEqual: 9,
+        identitiesEqual: 10,
         identitiesTotal: 10,
-        totalTdh: { rust: 9_900, python: 9_900, live: 10_020 },
+        totalTdh: { rust: 9_900, python: 9_900, live: 9_900 },
       },
       {
         cycleDay: 20_741,
@@ -127,7 +136,7 @@ export function syntheticIndex(
         totalTdh: { rust: 10_000, python: 10_000, live: 10_120 },
       },
     ],
-    cutover: { plannedDate: "2026-10-23", status: "planned", cycleDay: null },
+    cutover: null,
     ...overrides,
   };
 }

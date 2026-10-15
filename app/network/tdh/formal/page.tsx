@@ -7,6 +7,7 @@ import TdhPager from "../shared/TdhPager";
 import TdhRuleBlock from "../shared/TdhRuleBlock";
 import TdhSection from "../shared/TdhSection";
 import TdhSource from "../shared/TdhSource";
+import TdhStatusPill from "../shared/TdhStatusPill";
 import {
   TDH_CAPTION,
   TDH_CARD,
@@ -24,7 +25,9 @@ import {
   LEAN_BUILD,
   LEAN_STATEMENTS,
   MODEL_MODULES,
+  NETTING_DEFINITIONS,
 } from "./leanResults";
+import NettingFigure from "./NettingFigure";
 import StatementsTable from "./StatementsTable";
 
 const PROSE =
@@ -33,7 +36,12 @@ const NOT_KEYS = ["english", "programs", "inputs", "rule", "lean"] as const;
 const FEATURED = LEAN_STATEMENTS.find((row) => row.id === "netting");
 
 function SummaryBand({ locale }: { readonly locale: SupportedLocale }) {
-  const proved = LEAN_STATEMENTS.filter((row) => row.status === "proved");
+  const proved = LEAN_STATEMENTS.filter(
+    (row) => row.status === "proved" && row.group === "p26"
+  );
+  const provedP53 = LEAN_STATEMENTS.filter(
+    (row) => row.status === "proved" && row.group === "p53"
+  );
   const shownFalse = LEAN_STATEMENTS.filter(
     (row) => row.status === "shownFalse"
   );
@@ -41,7 +49,9 @@ function SummaryBand({ locale }: { readonly locale: SupportedLocale }) {
     {
       key: "proved",
       value: formatInteger(locale, proved.length),
-      body: t(locale, "network.tdh.formal.summary.provedBody"),
+      body: t(locale, "network.tdh.formal.summary.provedBody", {
+        p53: formatInteger(locale, provedP53.length),
+      }),
     },
     {
       key: "false",
@@ -67,29 +77,39 @@ function SummaryBand({ locale }: { readonly locale: SupportedLocale }) {
     <div className="tw-mt-6">
       <ul className="tw-m-0 tw-grid tw-list-none tw-gap-3 tw-p-0 sm:tw-grid-cols-2 lg:tw-grid-cols-4">
         {items.map((item) => (
-          <li key={item.key} className={`${TDH_CARD} tw-p-4`}>
-            <p className="tw-m-0 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2">
-              <span className="tw-text-2xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50">
-                {item.value}
-              </span>
-              <span className="tw-text-sm tw-text-iron-200">
-                {t(
-                  locale,
-                  `network.tdh.formal.summary.${item.key}` as MessageKey
-                )}
-              </span>
+          <li
+            key={item.key}
+            className={`${TDH_CARD} tw-flex tw-flex-col tw-border-l-2 tw-p-4 ${
+              item.key === "false"
+                ? "tw-border-l-amber-400/70"
+                : "tw-border-l-success/70"
+            }`}
+          >
+            <p className="tw-m-0 tw-text-3xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50">
+              {item.value}
             </p>
-            <p className="tw-m-0 tw-mt-1 tw-text-xs tw-leading-5 tw-text-iron-400">
+            <p className="tw-m-0 tw-mt-1 tw-min-h-10 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
+              {t(
+                locale,
+                `network.tdh.formal.summary.${item.key}` as MessageKey
+              )}
+            </p>
+            <p className="tw-m-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400">
               {item.body}
             </p>
           </li>
         ))}
       </ul>
-      <p className="tw-m-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-400">
+      <p className="tw-m-0 tw-mt-3 tw-max-w-4xl tw-text-xs tw-leading-5 tw-text-iron-400">
+        {t(locale, "network.tdh.formal.summary.theorems", {
+          tdh: formatInteger(locale, LEAN_BUILD.theoremsTdh),
+          p53: formatInteger(locale, LEAN_BUILD.theoremsP53),
+        })}{" "}
         {t(locale, "network.tdh.formal.build", {
           date: formatCycleDate(locale, LEAN_BUILD.date),
           version: LEAN_BUILD.leanVersion,
           commit: LEAN_BUILD.commit,
+          spec: LEAN_BUILD.specCommit,
         })}
       </p>
     </div>
@@ -175,7 +195,16 @@ export default function TdhFormalPage() {
       dropdownHref="/network/tdh/formal"
       documentTitle={t(locale, "network.tdh.formal.pageTitle")}
       title={t(locale, "network.tdh.formal.title")}
-      lede={<p className="tw-m-0">{t(locale, "network.tdh.formal.lede")}</p>}
+      pills={<TdhStatusPill pill="proposal" locale={locale} />}
+      lede={
+        <>
+          <p className="tw-m-0">{t(locale, "network.tdh.formal.lede")}</p>
+          <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-300">
+            {t(locale, "network.tdh.formal.status")}
+            <TdhSource refs={["P26 header"]} locale={locale} />
+          </p>
+        </>
+      }
       headerExtra={<SummaryBand locale={locale} />}
     >
       <TdhSection
@@ -203,12 +232,24 @@ export default function TdhFormalPage() {
           locale={locale}
           wide
         >
-          <div className="tw-space-y-4">
-            <p className={PROSE}>
-              {t(locale, "network.tdh.formal.featured.plain")}
-              <TdhSource refs={["P26 §7.1"]} locale={locale} />
-            </p>
-            <div className="tw-max-w-4xl">
+          <div className="tw-grid tw-gap-8 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <div className="tw-space-y-4">
+              <p className={PROSE}>
+                {t(locale, "network.tdh.formal.featured.plain")}
+                <TdhSource refs={["P26 §7.1"]} locale={locale} />
+              </p>
+              <p className={`${PROSE} tw-font-medium tw-text-iron-50`}>
+                {t(locale, "network.tdh.formal.featured.means")}
+              </p>
+              <p className="tw-m-0 tw-max-w-3xl tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+                {t(locale, "network.tdh.formal.featured.limit")}
+                <TdhSource refs={["P26 §5"]} locale={locale} />
+              </p>
+            </div>
+            <NettingFigure locale={locale} />
+          </div>
+          <div className="tw-mt-6 tw-grid tw-max-w-4xl tw-gap-4">
+            <div className="tw-min-w-0">
               <TdhRuleBlock
                 code={FEATURED.lean}
                 locale={locale}
@@ -220,6 +261,14 @@ export default function TdhFormalPage() {
                   file: FEATURED.file,
                 })}
               </p>
+            </div>
+            <div className="tw-min-w-0">
+              <TdhRuleBlock
+                code={NETTING_DEFINITIONS}
+                locale={locale}
+                title={t(locale, "network.tdh.formal.featured.definitions")}
+                label={t(locale, "network.tdh.formal.featured.definitions")}
+              />
             </div>
           </div>
         </TdhSection>
@@ -270,7 +319,12 @@ export default function TdhFormalPage() {
             {t(locale, "network.tdh.formal.contains.body")}
           </p>
           <p className={PROSE}>
-            {t(locale, "network.tdh.formal.contains.runs")}
+            {t(locale, "network.tdh.formal.contains.runs", {
+              checks: formatInteger(locale, LEAN_BUILD.vectorChecks),
+              seconds: formatInteger(locale, LEAN_BUILD.fullDaySeconds),
+              total: formatInteger(locale, LEAN_BUILD.fullDayTotal),
+              randomChecks: formatInteger(locale, LEAN_BUILD.randomChecks),
+            })}
             <TdhSource refs={["P26 §13"]} locale={locale} />
           </p>
           <p className="tw-m-0 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">

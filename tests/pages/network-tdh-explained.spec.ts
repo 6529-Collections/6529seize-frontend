@@ -33,7 +33,7 @@ test.describe("TDH explained and verified @network @wcag @medium @large", () => 
     await expectAxeClean(page, { route: HOW_IT_WORKS_ROUTE });
   });
 
-  test("TDH verification renders tiles, the history table and class filters", async ({
+  test("TDH verification renders the day at a glance, the calendar and the history table", async ({
     page,
   }) => {
     await page.goto(VERIFICATION_ROUTE, { waitUntil: "domcontentloaded" });
@@ -44,7 +44,7 @@ test.describe("TDH explained and verified @network @wcag @medium @large", () => 
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
-    const agreement = page.getByRole("region", { name: "Agreement" });
+    const glance = page.getByRole("region", { name: "The day at a glance" });
     const empty = page.getByText(
       /^Daily reports (start on 16 October 2026|are not yet connected to this page)\.$/
     );
@@ -53,7 +53,14 @@ test.describe("TDH explained and verified @network @wcag @medium @large", () => 
       await expectAxeClean(page, { route: VERIFICATION_ROUTE });
       return;
     }
-    await expect(agreement).toBeVisible();
+    await expect(glance).toBeVisible();
+
+    // Every published day is a link in the calendar strip, the shown day
+    // marked as current.
+    const calendar = page.getByRole("region", { name: "Every day" });
+    await expect(
+      calendar.locator('a[aria-current="date"]').first()
+    ).toBeVisible();
 
     // Fewer than seven days show as a table at once; from seven, a chart
     // comes first on wide screens with the table one click away.
@@ -65,16 +72,11 @@ test.describe("TDH explained and verified @network @wcag @medium @large", () => 
       page.getByRole("table", { name: "Daily results" }).first()
     ).toBeVisible();
 
-    const filters = page.getByRole("group", {
-      name: "Filter differences by class",
-    });
-    if (await filters.isVisible()) {
-      const classFilter = filters
-        .getByRole("button", { name: /Class / })
-        .first();
-      await classFilter.click();
-      await expect(classFilter).toHaveAttribute("aria-pressed", "true");
-    }
+    // Differences are counts only: no record is ever listed.
+    await expect(
+      page.getByRole("region", { name: "Differences" })
+    ).toBeVisible();
+    await expect(page.getByText(/holder-\d/)).toHaveCount(0);
 
     await expectAxeClean(page, { route: VERIFICATION_ROUTE });
   });

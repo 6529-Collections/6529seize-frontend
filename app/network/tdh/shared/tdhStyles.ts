@@ -1,11 +1,12 @@
 /** Shared class names for the TDH pages (section 4 of the plan). */
+import tableStyles from "./tdhTable.module.css";
 
 export const TDH_PROSE = "tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300";
 export const TDH_PROSE_LARGE =
   "tw-m-0 tw-text-base tw-leading-7 tw-text-iron-200";
 export const TDH_PROSE_MAX = "tw-max-w-3xl";
 export const TDH_H3 =
-  "tw-m-0 tw-text-base tw-font-semibold tw-leading-7 tw-text-iron-100";
+  "tw-m-0 tw-text-lg tw-font-semibold tw-leading-7 tw-text-iron-50";
 export const TDH_CARD =
   "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900";
 export const TDH_CARD_SOFT =
@@ -13,8 +14,6 @@ export const TDH_CARD_SOFT =
 export const TDH_FOCUS_RING =
   "focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 export const TDH_LINK = `tw-font-medium tw-text-primary-300 tw-underline tw-decoration-primary-300/40 tw-underline-offset-4 hover:tw-text-primary-400 hover:tw-decoration-primary-400 ${TDH_FOCUS_RING}`;
-/** A link that stands alone, outside a sentence: it keeps a 44 px target. */
-export const TDH_LINK_STANDALONE = `${TDH_LINK} tw-inline-flex tw-min-h-11 tw-items-center`;
 export const TDH_MONO = "tw-font-mono tw-text-[13px] tw-leading-6";
 export const TDH_NUM = "tw-tabular-nums";
 
@@ -28,19 +27,17 @@ export const TDH_TABLE_WRAP =
 /** A table frame for tables whose cells wrap to fit, so it never scrolls. */
 export const TDH_TABLE_FRAME =
   "tw-relative tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07]";
-export const TDH_TABLE =
-  "tw-w-full tw-border-collapse tw-text-left tw-text-sm tw-leading-5";
+/** Every TDH table: full width, collapsed borders, no stray pseudo-cells. */
+export const TDH_TABLE = `tw-w-full tw-border-collapse tw-text-left tw-text-sm tw-leading-5 ${tableStyles["table"] ?? ""}`;
 export const TDH_CAPTION =
   "tw-px-4 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400";
 export const TDH_TH =
   "tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-4 tw-py-2.5 tw-text-xs tw-font-medium tw-text-iron-400";
 export const TDH_TD =
   "tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.05] tw-px-4 tw-py-3 tw-align-top tw-text-iron-200";
-/** A cell that stacks as a block on phones and becomes a bordered table cell from md (or lg). */
+/** A cell that stacks as a block on phones and becomes a bordered table cell from md. */
 export const TDH_TD_STACK_MD =
   "tw-border-0 tw-p-0 tw-align-top tw-text-iron-200 md:tw-border-b md:tw-border-solid md:tw-border-white/[0.05] md:tw-px-4 md:tw-py-3";
-export const TDH_TD_STACK_LG =
-  "tw-border-0 tw-p-0 tw-align-top tw-text-iron-200 lg:tw-border-b lg:tw-border-solid lg:tw-border-white/[0.05] lg:tw-px-4 lg:tw-py-3";
 export const TDH_TD_NUM = `${TDH_TD} tw-text-right tw-tabular-nums`;
 export const TDH_TH_NUM = `${TDH_TH} tw-text-right`;
 

@@ -92,9 +92,6 @@ function LatestCard({
         {summary.kind === "sample" && (
           <TdhStatusPill pill="sample" locale={locale} size="sm" />
         )}
-        {summary.netting === false && (
-          <TdhStatusPill pill="netting" locale={locale} size="sm" />
-        )}
       </span>
       {summary.equal !== null && summary.total !== null && (
         <span className="tw-text-sm tw-tabular-nums tw-leading-6 tw-text-iron-100">
@@ -104,7 +101,6 @@ function LatestCard({
               ? "network.tdh.explainer.verified.summaryAfter"
               : "network.tdh.explainer.verified.summary",
             {
-              cycle: formatInteger(locale, summary.cycleDay),
               date: formatCycleDate(locale, summary.date),
               equal: formatInteger(locale, summary.equal),
               total: formatInteger(locale, summary.total),

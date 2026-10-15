@@ -76,7 +76,10 @@ describe("network pages render", () => {
     expect(
       screen.getByRole("heading", { level: 2, name: "TDH in a minute" })
     ).toBeInTheDocument();
-    expect(screen.getByText("= 1,296 TDH")).toBeInTheDocument();
+    expect(screen.getByText("= 1,296 TDH from this card")).toBeInTheDocument();
+    expect(
+      screen.getByText(/The Gradient earns TDH of its own on top/)
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { level: 2, name: "Explain my TDH" })
     ).toBeInTheDocument();
@@ -90,7 +93,7 @@ describe("network pages render", () => {
       )
     ).toHaveAttribute("href", "/network/tdh#glossary");
     expect(
-      screen.getByText(/TDH gives your votes more weight in TDH waves/)
+      screen.getByText(/can weight your votes in waves that vote with TDH/)
     ).toBeInTheDocument();
   });
 
@@ -113,9 +116,13 @@ describe("network pages render", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /10,280 of 10,282 identities equal between the Rust core and 6529.io/
+        /10,282 of 10,282 collectors equal between the Rust core and 6529.io/
       )
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Checked daily in public: on/ })
+    ).toHaveAttribute("href", "/network/tdh/verification");
+    expect(screen.getByText(/61 conformance vectors/)).toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { name: "The exact calculation has moved" })
     ).not.toBeInTheDocument();

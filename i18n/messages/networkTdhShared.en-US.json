@@ -60,5 +60,8 @@
   "network.tdh.shared.pill.netting": "Before D131 netting",
   "network.tdh.shared.pager": "More TDH pages",
   "network.tdh.shared.pager.previous": "Previous",
-  "network.tdh.shared.pager.next": "Next"
+  "network.tdh.shared.pager.next": "Next",
+  "network.tdh.shared.pill.byDefinition": "By definition",
+  "network.tdh.shared.pill.proposal": "Proposal, not adopted",
+  "network.tdh.shared.ruleCondensed": "Rule, line for line from P26"
 }

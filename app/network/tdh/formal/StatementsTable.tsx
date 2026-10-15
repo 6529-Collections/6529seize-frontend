@@ -21,8 +21,8 @@ type Filter = StatementStatus | "all";
 
 const ORDER: readonly StatementStatus[] = [
   "proved",
+  "byDefinition",
   "checkedBuild",
-  "checkedVectors",
   "shownFalse",
 ];
 
@@ -60,7 +60,7 @@ export default function StatementsTable({
         <div
           role="group"
           aria-label={t(locale, "network.tdh.formal.statements.filterLabel")}
-          className="tw-mb-3 tw-flex tw-gap-2 tw-overflow-x-auto tw-pb-1"
+          className="tw-mb-3 tw-flex tw-flex-wrap tw-gap-2"
         >
           {filters.map((option) => (
             <button
@@ -191,7 +191,9 @@ export default function StatementsTable({
                             aria-label={`${t(locale, "network.tdh.formal.statements.lean")}: ${title}`}
                             className={`tw-m-0 tw-overflow-x-auto tw-whitespace-pre tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-p-3 tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-100 ${TDH_FOCUS_RING}`}
                           >
-                            <code className="tw-text-iron-100">{row.lean}</code>
+                            <code className="tw-font-mono tw-text-iron-100">
+                              {row.lean}
+                            </code>
                           </pre>
                         )}
                       </div>

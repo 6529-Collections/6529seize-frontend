@@ -3,7 +3,7 @@ import {
   DIFFERENCE_CLASSES,
   type DifferenceClass,
   type VerificationCutover,
-  type VerificationDifference,
+  type VerificationDay,
   type VerificationIndex,
   type VerificationIndexDay,
 } from "./schema";
@@ -15,10 +15,10 @@ export const DEFAULT_CUTOVER: VerificationCutover = {
   cycleDay: null,
 };
 
-/** D132 was decided on 15 October 2026: the cutover week starts there. */
-export const CUTOVER_DECIDED_DATE = "2026-10-15";
-
-/** D132: the daily comparison starts on 16 October 2026. */
+/**
+ * D132: the daily runs start on 16 October 2026, and the cutover follows
+ * "one week later". The cutover week is measured from here.
+ */
 export const FIRST_REPORT_DATE = "2026-10-16";
 
 /** Whether the first daily report should exist by now. */
@@ -42,8 +42,9 @@ export type VerdictState = (typeof VERDICT_STATES)[number];
 
 /**
  * The daily job's verdict as a page state. `OK` is "equal" when no record
- * differs and "explained" when every difference has a known cause. The plain
- * names of the first data contract are still accepted.
+ * differs and "explained" when records differ and each has a known cause.
+ * Whether records differ comes from the counts, never from a list of records.
+ * The plain names of the first data contract are still accepted.
  */
 export function verdictState(
   verdict: string,
@@ -82,6 +83,97 @@ export function indexDayVerdict(day: VerificationIndexDay): VerdictState {
   return verdictState(day.verdict, indexDayHasDifferences(day));
 }
 
+export type ClassCounts = Record<DifferenceClass, number>;
+
+/** A day's differences as the page shows them: counts only, never records. */
+export interface DayDifferences {
+  /** Identity and wallet records that differ anywhere. */
+  readonly identities: number;
+  readonly wallets: number;
+  /** Null when the day's file carries no class counts. */
+  readonly byClass: ClassCounts | null;
+  readonly byCause: ReadonlyArray<{
+    readonly cause: string;
+    readonly count: number;
+  }>;
+  readonly rustVsLive: number | null;
+  readonly pythonVsLive: number | null;
+}
+
+function differing(
+  agreement: VerificationDay["agreement"]["rustVsLive"],
+  kind: "identities" | "wallets"
+): number {
+  if (agreement === null) {
+    return 0;
+  }
+  return kind === "identities"
+    ? agreement.identitiesTotal - agreement.identitiesEqual
+    : agreement.walletsTotal - agreement.walletsEqual;
+}
+
+/**
+ * The day's differences: the job's `differenceSummary` when the file has it.
+ * Otherwise the agreement counts give a floor: records that differ from
+ * 6529.io or from Python, whichever is more.
+ */
+export function dayDifferences(day: VerificationDay): DayDifferences {
+  const live = day.implementations.live?.totalTdh ?? null;
+  const python = day.implementations.python?.totalTdh ?? null;
+  const summary = day.differenceSummary;
+  if (summary !== null) {
+    return {
+      identities: summary.identities,
+      wallets: summary.wallets,
+      byClass: { ...summary.byClass },
+      byCause: Object.entries(summary.byCause)
+        .filter(([, value]) => value > 0)
+        .map(([cause, value]) => ({ cause, count: value }))
+        .sort(
+          (left, right) =>
+            right.count - left.count || left.cause.localeCompare(right.cause)
+        ),
+      rustVsLive: summary.totalTdhDelta.rustVsLive,
+      pythonVsLive: summary.totalTdhDelta.pythonVsLive,
+    };
+  }
+  const { rustVsLive, rustVsPython } = day.agreement;
+  return {
+    identities: Math.max(
+      differing(rustVsLive, "identities"),
+      differing(rustVsPython, "identities")
+    ),
+    wallets: Math.max(
+      differing(rustVsLive, "wallets"),
+      differing(rustVsPython, "wallets")
+    ),
+    byClass: null,
+    byCause: [],
+    rustVsLive: totalDelta(day.implementations.rust.totalTdh, live),
+    pythonVsLive: python === null || live === null ? null : python - live,
+  };
+}
+
+/**
+ * Whether any record differs on a day: from the summary's counts and from
+ * the agreement counts, so a day with differences can never read as equal.
+ */
+export function dayHasDifferences(day: VerificationDay): boolean {
+  const counts = dayDifferences(day);
+  const { rustVsLive, rustVsPython } = day.agreement;
+  return (
+    counts.identities + counts.wallets > 0 ||
+    differing(rustVsLive, "identities") + differing(rustVsLive, "wallets") >
+      0 ||
+    differing(rustVsPython, "identities") + differing(rustVsPython, "wallets") >
+      0
+  );
+}
+
+export function dayVerdict(day: VerificationDay): VerdictState {
+  return verdictState(day.verdict, dayHasDifferences(day));
+}
+
 export type PillTone = "success" | "primary" | "warning" | "error" | "neutral";
 
 export const VERDICT_TONE: Record<VerdictState, PillTone> = {
@@ -99,7 +191,7 @@ export type CutoverState =
       readonly kind: "countdown";
       readonly days: number;
       readonly plannedDate: string;
-      /** Share of the week from D132's decision to the planned day. */
+      /** Share of the week from the first daily run to the planned day. */
       readonly elapsed: number;
     }
   | { readonly kind: "due"; readonly plannedDate: string }
@@ -131,13 +223,13 @@ export function cutoverState(
   if (plannedDay === null || today >= plannedDay) {
     return { kind: "due", plannedDate: value.plannedDate };
   }
-  const decidedDay = cycleDayOfDate(CUTOVER_DECIDED_DATE) ?? today;
-  const span = Math.max(plannedDay - decidedDay, 1);
+  const startDay = cycleDayOfDate(FIRST_REPORT_DATE) ?? today;
+  const span = Math.max(plannedDay - startDay, 1);
   return {
     kind: "countdown",
     days: plannedDay - today,
     plannedDate: value.plannedDate,
-    elapsed: Math.min(Math.max((today - decidedDay) / span, 0), 1),
+    elapsed: Math.min(Math.max((today - startDay) / span, 0), 1),
   };
 }
 
@@ -221,68 +313,11 @@ export function reportFreshness(latestCycleDay: number, now: Date): Freshness {
   };
 }
 
-export type ClassCounts = Record<DifferenceClass, number>;
-
-export function differenceClassCounts(
-  differences: readonly VerificationDifference[]
-): ClassCounts {
-  const counts: ClassCounts = { A: 0, B: 0, C: 0, D: 0 };
-  for (const difference of differences) {
-    counts[difference.class] += 1;
-  }
-  return counts;
-}
-
 export { DIFFERENCE_CLASSES };
 
 /** The share of equal records, or null when there are no records. */
 export function agreementShare(equal: number, total: number): number | null {
   return total > 0 ? equal / total : null;
-}
-
-/** The holder a label belongs to: `holder-1/w2` belongs to `holder-1`. */
-export function holderOf(label: string): string {
-  return label.split("/")[0] ?? label;
-}
-
-export interface DifferenceCase {
-  readonly holder: string;
-  readonly identity: VerificationDifference | null;
-  readonly wallets: readonly VerificationDifference[];
-  readonly classes: readonly DifferenceClass[];
-  readonly causes: readonly string[];
-}
-
-/**
- * Differences grouped by holder: an identity and its wallets are one case,
- * because a wallet's difference is usually its identity's difference.
- */
-export function differenceCases(
-  differences: readonly VerificationDifference[]
-): DifferenceCase[] {
-  const byHolder = new Map<string, VerificationDifference[]>();
-  for (const difference of differences) {
-    const holder = holderOf(difference.label);
-    byHolder.set(holder, [...(byHolder.get(holder) ?? []), difference]);
-  }
-  return [...byHolder.entries()].map(([holder, records]) => {
-    const identity =
-      records.find((record) => record.kind === "identity") ?? null;
-    const wallets = records.filter((record) => record !== identity);
-    return {
-      holder,
-      identity,
-      wallets,
-      classes: [...new Set(records.map((record) => record.class))].sort(),
-      causes: [
-        ...new Set(
-          records
-            .map((record) => record.cause)
-            .filter((cause): cause is string => cause !== null)
-        ),
-      ],
-    };
-  });
 }
 
 /**
@@ -306,14 +341,14 @@ export function differenceSentenceKind(
   if (verdict === "mismatch") {
     return "mismatch";
   }
+  if (verdict === "investigating") {
+    return "investigating";
+  }
   if (differenceCount === 0) {
-    return "none";
+    return verdict === "unknown" ? "unknown" : "none";
   }
   if (verdict === "explained") {
     return "explained";
-  }
-  if (verdict === "investigating") {
-    return "investigating";
   }
   return "unknown";
 }

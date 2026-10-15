@@ -3,12 +3,7 @@ import Link from "next/link";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import TdhDisclosure from "./shared/TdhDisclosure";
-import TDHSection, {
-  TDH_CARD_GRID,
-  TDH_FOCUS,
-  TDH_PANEL,
-  TDH_TEXT,
-} from "./TDHSection";
+import TDHSection, { TDH_FOCUS, TDH_PANEL, TDH_TEXT } from "./TDHSection";
 
 const FAQ_KEYS = ["sale", "transfer", "new", "set", "rate", "xtdh"] as const;
 const DEEPER = [
@@ -23,17 +18,27 @@ export const GLOSSARY_TERMS = [
   "tdh",
   "cycle",
   "snapshot",
+  "finalized",
   "edition",
   "rate",
+  "raw",
   "base",
   "boost",
   "identity",
   "consolidation",
   "sink",
+  "netting",
+  "underflow",
   "xtdh",
   "versions",
   "validator",
   "rust",
+  "programs",
+  "vector",
+  "root",
+  "cutover",
+  "classes",
+  "items",
 ] as const;
 
 export function TDHHoldingChanges({
@@ -91,6 +96,16 @@ export function TDHGlossary({ locale }: { readonly locale: SupportedLocale }) {
   );
 }
 
+/** Three cards then two on wide screens; the last spans both columns on small ones. */
+function deeperSpan(index: number): string {
+  if (index < 3) {
+    return "lg:tw-col-span-2";
+  }
+  return index === DEEPER.length - 1
+    ? "sm:tw-col-span-2 lg:tw-col-span-3"
+    : "lg:tw-col-span-3";
+}
+
 /** Cards to the five TDH sub-pages (plan §5.2, "Go deeper"). */
 export function TDHGoDeeper({ locale }: { readonly locale: SupportedLocale }) {
   return (
@@ -98,9 +113,9 @@ export function TDHGoDeeper({ locale }: { readonly locale: SupportedLocale }) {
       id="tdh-deeper"
       title={t(locale, "network.tdh.explainer.deeper.title")}
     >
-      <ul className={`tw-m-0 tw-list-none tw-p-0 ${TDH_CARD_GRID}`}>
-        {DEEPER.map(({ key, href }) => (
-          <li key={key}>
+      <ul className="tw-m-0 tw-grid tw-list-none tw-gap-4 tw-p-0 sm:tw-grid-cols-2 lg:tw-grid-cols-6">
+        {DEEPER.map(({ key, href }, index) => (
+          <li key={key} className={deeperSpan(index)}>
             <Link
               href={href}
               className={`${TDH_PANEL} tw-group tw-grid tw-h-full tw-grid-cols-[minmax(0,1fr)_auto] tw-content-start tw-gap-x-3 tw-gap-y-2 tw-p-5 tw-no-underline tw-transition-colors hover:tw-border-iron-600 motion-reduce:tw-transition-none ${TDH_FOCUS}`}

@@ -27,7 +27,7 @@ export function SpecSection({
         <h2
           id={`${id}-heading`}
           tabIndex={-1}
-          className="tw-m-0 tw-pt-2 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none sm:tw-text-2xl"
+          className="tw-m-0 tw-pt-1.5 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none sm:tw-text-[1.75rem]"
         >
           {title}
         </h2>
@@ -62,7 +62,7 @@ export function SpecSub({
         <h3
           id={`${id}-heading`}
           tabIndex={-1}
-          className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100 focus:tw-outline-none"
+          className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50 focus:tw-outline-none"
         >
           {title}
         </h3>
@@ -91,7 +91,11 @@ export function Plain({
 }) {
   return (
     <div className="tw-max-w-3xl">
-      <p className="tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
+      <p className="tw-m-0 tw-inline-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-primary-300">
+        <span
+          aria-hidden="true"
+          className="tw-size-1.5 tw-rounded-full tw-bg-primary-400"
+        />
         {t(locale, "network.tdh.spec.plain")}
       </p>
       <p className="tw-m-0 tw-mt-1 tw-text-[15px] tw-leading-7 tw-text-iron-200">
@@ -107,19 +111,25 @@ export function Rule({
   code,
   source,
   title,
+  condensed = false,
 }: {
   readonly locale: SupportedLocale;
   readonly code: string;
   readonly source: string;
   readonly title?: string;
+  /** P26's prose rules restated line for line, not quoted pseudocode. */
+  readonly condensed?: boolean;
 }) {
+  const heading =
+    title ?? (condensed ? t(locale, "network.tdh.shared.ruleCondensed") : null);
   return (
     <div className="tw-max-w-3xl">
       <TdhRuleBlock
         code={code}
         source={source}
         locale={locale}
-        {...(title ? { title, label: title } : {})}
+        tone={condensed ? "condensed" : "exact"}
+        {...(heading ? { title: heading, label: heading } : {})}
       />
     </div>
   );

@@ -47,7 +47,7 @@ export default function TdhSection({
           <h2
             id={`${id}-heading`}
             tabIndex={-1}
-            className="tw-[text-wrap:balance] tw-m-0 tw-min-w-0 tw-pt-2 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none"
+            className="tw-m-0 tw-min-w-0 tw-text-balance tw-pt-1.5 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none"
           >
             {title}
           </h2>

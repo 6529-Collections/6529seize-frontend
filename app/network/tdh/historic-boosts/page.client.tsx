@@ -14,6 +14,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
+import TdhPager from "../shared/TdhPager";
 import TdhSource from "../shared/TdhSource";
 import TdhSubnav from "../shared/TdhSubnav";
 import { TDH_LINK } from "../shared/tdhStyles";
@@ -72,7 +73,7 @@ const HISTORIC_RULES: readonly HistoricRule[] = [
 ] as const;
 
 const TABLE_HEADER_CLASS =
-  "tw-border-0 tw-px-3 tw-py-3.5 tw-text-left tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400 first:tw-pl-4 sm:first:tw-pl-6 last:tw-pr-4 sm:last:tw-pr-6";
+  "tw-border-0 tw-px-3 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-iron-400 first:tw-pl-4 sm:first:tw-pl-6 last:tw-pr-4 sm:last:tw-pr-6";
 const TABLE_CELL_CLASS =
   "tw-border-0 tw-px-3 tw-py-4 tw-text-left tw-text-sm tw-leading-5 tw-text-iron-400 first:tw-pl-4 sm:first:tw-pl-6 last:tw-pr-4 sm:last:tw-pr-6";
 const DETAIL_PANEL_CLASS =
@@ -160,15 +161,23 @@ export default function TDHHistoricBoostsPage() {
             />
           </div>
         </section>
+        <TdhPager current="/network/tdh/historic-boosts" locale={locale} />
       </article>
     </main>
   );
 }
 
-/** The full-set boost of each archived schedule, oldest first, as bars. */
+/** The current schedule's full-set boost on 15 October 2026, and its ceiling. */
+const CURRENT_FULL_SET = { today: 1.8, ceiling: 2 } as const;
+
+/**
+ * The full-set boost of each schedule, oldest first, as bars that start at
+ * 1.00x, ending with the current schedule: today's value, and the dashed
+ * reach to its ceiling once all its seasons pay.
+ */
 function BoostTimeline({ locale }: { readonly locale: SupportedLocale }) {
   const ordered = [...HISTORIC_RULES].reverse();
-  const max = Math.max(...ordered.map((rule) => rule.completeSetMultiplier));
+  const max = CURRENT_FULL_SET.ceiling;
   return (
     <figure className="tw-m-0 tw-mt-5">
       <figcaption className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
@@ -178,9 +187,7 @@ function BoostTimeline({ locale }: { readonly locale: SupportedLocale }) {
         {ordered.map((rule) => (
           <li key={rule.id}>
             <p className="tw-m-0 tw-flex tw-justify-between tw-gap-3 tw-text-xs tw-text-iron-300">
-              <span className="tw-font-mono">
-                {formatVersionLabel(locale, rule)}
-              </span>
+              <span>{formatVersionLabel(locale, rule)}</span>
               <span className="tw-tabular-nums">
                 {formatDate(locale, rule.startDateIso, {
                   month: "short",
@@ -191,18 +198,53 @@ function BoostTimeline({ locale }: { readonly locale: SupportedLocale }) {
             <span className="tw-mt-1 tw-flex tw-items-center tw-gap-2">
               <span className="tw-h-2 tw-flex-1 tw-overflow-hidden tw-rounded-full tw-bg-iron-800">
                 <span
-                  className="tw-block tw-h-full tw-rounded-full tw-bg-[#00f0ff]/70"
+                  className="tw-block tw-h-full tw-rounded-full tw-bg-iron-400"
                   style={{
                     width: `${((rule.completeSetMultiplier - 1) / (max - 1)) * 100}%`,
                   }}
                 />
               </span>
-              <span className="tw-w-12 tw-text-right tw-font-mono tw-text-xs tw-tabular-nums tw-text-iron-100">
+              <span className="tw-w-12 tw-text-right tw-text-xs tw-tabular-nums tw-text-iron-100">
                 {formatMultiplier(locale, rule.completeSetMultiplier)}
               </span>
             </span>
           </li>
         ))}
+        <li>
+          <p className="tw-m-0 tw-flex tw-justify-between tw-gap-3 tw-text-xs tw-text-iron-100">
+            <span className="tw-font-medium">
+              {m(locale, "network.tdhHistoric.versionLabel", {
+                version: "1.4",
+              })}{" "}
+              <span className="tw-rounded-full tw-bg-primary-500/15 tw-px-1.5 tw-text-[11px] tw-text-primary-300">
+                {m(locale, "network.tdhHistoric.timeline.current")}
+              </span>
+            </span>
+            <span className="tw-tabular-nums tw-text-iron-300">
+              {formatDate(locale, "2025-10-10", {
+                month: "short",
+                year: "numeric",
+              })}
+            </span>
+          </p>
+          <span className="tw-mt-1 tw-flex tw-items-center tw-gap-2">
+            <span className="tw-relative tw-h-2 tw-flex-1 tw-overflow-hidden tw-rounded-full tw-bg-iron-800">
+              <span
+                className="tw-absolute tw-inset-y-0 tw-left-0 tw-rounded-full tw-border tw-border-dashed tw-border-primary-400/60"
+                style={{ width: "100%" }}
+              />
+              <span
+                className="tw-absolute tw-inset-y-0 tw-left-0 tw-rounded-full tw-bg-primary-400"
+                style={{
+                  width: `${((CURRENT_FULL_SET.today - 1) / (max - 1)) * 100}%`,
+                }}
+              />
+            </span>
+            <span className="tw-w-12 tw-text-right tw-text-xs tw-font-semibold tw-tabular-nums tw-text-iron-50">
+              {formatMultiplier(locale, CURRENT_FULL_SET.today)}
+            </span>
+          </span>
+        </li>
       </ol>
       <p className="tw-m-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-400">
         {m(locale, "network.tdhHistoric.timeline.note")}
@@ -222,7 +264,7 @@ function HistoricRulesTable({
 }) {
   return (
     <div className="tw-hidden md:tw-block">
-      <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60">
+      <div className="tw-overflow-x-auto tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60">
         <table className="tw-m-0 tw-w-full tw-border-collapse tw-border-0">
           <caption className="tw-sr-only">
             {m(locale, "network.tdhHistoric.table.caption")}
@@ -235,19 +277,22 @@ function HistoricRulesTable({
               <th className={TABLE_HEADER_CLASS} scope="col">
                 {m(locale, "network.tdhHistoric.table.period")}
               </th>
-              <th className={TABLE_HEADER_CLASS} scope="col">
+              <th
+                className={`${TABLE_HEADER_CLASS} tw-whitespace-nowrap`}
+                scope="col"
+              >
                 {m(locale, "network.tdhHistoric.table.categoryA")}
               </th>
               <th className={TABLE_HEADER_CLASS} scope="col">
                 {m(locale, "network.tdhHistoric.table.categoryB")}
               </th>
               <th
-                className={`${TABLE_HEADER_CLASS} tw-hidden lg:tw-table-cell`}
+                className={`${TABLE_HEADER_CLASS} tw-hidden 2xl:tw-table-cell`}
                 scope="col"
               >
                 {m(locale, "network.tdhHistoric.table.categoryC")}
               </th>
-              <th className={`${TABLE_HEADER_CLASS} tw-w-14`} scope="col">
+              <th className={`${TABLE_HEADER_CLASS} tw-w-28`} scope="col">
                 <span className="tw-sr-only">
                   {m(locale, "network.tdhHistoric.table.details")}
                 </span>
@@ -272,7 +317,7 @@ function HistoricRulesTable({
                   }`}
                 >
                   <th
-                    className={`${TABLE_CELL_CLASS} tw-whitespace-nowrap tw-font-mono tw-font-medium tw-text-iron-100`}
+                    className={`${TABLE_CELL_CLASS} tw-whitespace-nowrap tw-font-medium tw-text-iron-100`}
                     scope="row"
                   >
                     {versionLabel}
@@ -281,19 +326,19 @@ function HistoricRulesTable({
                     <RulePeriod locale={locale} rule={rule} />
                   </td>
                   <td
-                    className={`${TABLE_CELL_CLASS} tw-whitespace-nowrap tw-font-mono tw-tabular-nums tw-text-[#00f0ff]`}
+                    className={`${TABLE_CELL_CLASS} tw-whitespace-nowrap tw-font-semibold tw-tabular-nums tw-text-iron-50`}
                   >
                     {formatMultiplier(locale, rule.completeSetMultiplier)}
                   </td>
                   <td
-                    className={`${TABLE_CELL_CLASS} tw-whitespace-nowrap tw-font-mono tw-tabular-nums`}
+                    className={`${TABLE_CELL_CLASS} tw-whitespace-nowrap tw-tabular-nums tw-text-iron-200`}
                   >
                     {formatSeasonRange(locale, rule)}
                   </td>
                   <td
-                    className={`${TABLE_CELL_CLASS} tw-hidden tw-whitespace-nowrap tw-font-mono tw-tabular-nums lg:tw-table-cell`}
+                    className={`${TABLE_CELL_CLASS} tw-hidden tw-whitespace-nowrap tw-tabular-nums tw-text-iron-200 2xl:tw-table-cell`}
                   >
-                    {formatMultiplier(locale, 1.02)}
+                    {formatGradientBonus(locale)}
                   </td>
                   <td className={`${TABLE_CELL_CLASS} tw-text-right`}>
                     <RuleToggleButton
@@ -356,7 +401,7 @@ function HistoricRulesMobileCards({
               type="button"
             >
               <span className="tw-min-w-0">
-                <span className="tw-block tw-font-mono tw-text-sm tw-font-medium tw-text-iron-100">
+                <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-100">
                   {versionLabel}
                 </span>
                 <span className="tw-mt-1 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
@@ -383,7 +428,7 @@ function HistoricRulesMobileCards({
               <MobileSummaryMetric
                 label={m(locale, "network.tdhHistoric.table.categoryA")}
                 value={formatMultiplier(locale, rule.completeSetMultiplier)}
-                valueClassName="tw-text-[#00f0ff]"
+                valueClassName="tw-font-semibold tw-text-iron-50"
               />
               <MobileSummaryMetric
                 label={m(locale, "network.tdhHistoric.table.categoryB")}
@@ -391,7 +436,7 @@ function HistoricRulesMobileCards({
               />
               <MobileSummaryMetric
                 label={m(locale, "network.tdhHistoric.table.categoryC")}
-                value={formatMultiplier(locale, 1.02)}
+                value={formatGradientBonus(locale)}
               />
             </dl>
 
@@ -424,11 +469,11 @@ function MobileSummaryMetric({
 }) {
   return (
     <div className="tw-min-w-0">
-      <dt className="tw-text-[11px] tw-font-medium tw-uppercase tw-leading-4 tw-tracking-wide tw-text-iron-400">
+      <dt className="tw-min-h-8 tw-text-xs tw-leading-4 tw-text-iron-400">
         {label}
       </dt>
       <dd
-        className={`tw-m-0 tw-mt-1 tw-truncate tw-font-mono tw-text-xs tw-font-medium tw-tabular-nums tw-leading-5 ${valueClassName}`}
+        className={`tw-m-0 tw-mt-1 tw-text-sm tw-font-medium tw-tabular-nums tw-leading-5 ${valueClassName}`}
       >
         {value}
       </dd>
@@ -460,10 +505,18 @@ function RuleToggleButton({
           : "network.tdhHistoric.details.showForVersion",
         { version: versionLabel }
       )}
-      className="tw-inline-flex tw-size-11 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-900/60 tw-text-iron-400 tw-transition-colors hover:tw-border-white/[0.12] hover:tw-bg-iron-800 hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none"
+      className="tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none"
       onClick={onToggle}
       type="button"
     >
+      <span aria-hidden="true">
+        {m(
+          locale,
+          isExpanded
+            ? "network.tdhHistoric.details.hide"
+            : "network.tdhHistoric.details.show"
+        )}
+      </span>
       <ChevronDownIcon
         aria-hidden="true"
         className={`tw-size-4 tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${
@@ -649,12 +702,14 @@ function RulePeriod({
   readonly rule: HistoricRule;
 }) {
   return (
-    <span className="tw-whitespace-normal md:tw-whitespace-nowrap">
-      <time dateTime={rule.startDateIso}>
-        {formatLongDate(locale, rule.startDate)}
-      </time>
-      <span> — </span>
-      <time dateTime={rule.endDateIso}>
+    <span className="tw-inline-flex tw-flex-wrap tw-gap-x-1">
+      <span className="tw-whitespace-nowrap">
+        <time dateTime={rule.startDateIso}>
+          {formatLongDate(locale, rule.startDate)}
+        </time>
+        <span> —</span>
+      </span>
+      <time className="tw-whitespace-nowrap" dateTime={rule.endDateIso}>
         {formatLongDate(locale, rule.endDate)}
       </time>
     </span>
@@ -685,6 +740,14 @@ function formatSeasonRange(
 ): string {
   return m(locale, "network.tdhHistoric.table.seasonRange", {
     maxSeason: formatInteger(locale, rule.maxSeason),
+  });
+}
+
+/** The archived schedules' Gradient bonus: +0.02 for each, up to 3. */
+function formatGradientBonus(locale: SupportedLocale): string {
+  return m(locale, "network.tdhHistoric.table.gradientValue", {
+    bonus: formatNumber(locale, 0.02, { minimumFractionDigits: 2 }),
+    count: formatInteger(locale, 3),
   });
 }
 

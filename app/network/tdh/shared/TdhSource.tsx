@@ -23,6 +23,9 @@ export default function TdhSource({
   /** A row of its own instead of chips that follow the text. */
   readonly block?: boolean;
 }) {
+  // In a margin column a long evidence label wraps at its space instead of
+  // running past the page edge.
+  const chip = block ? `${CHIP} xl:tw-whitespace-normal` : CHIP;
   const layout = block
     ? "tw-flex tw-flex-wrap tw-gap-1"
     : "tw-ml-1 tw-inline-flex tw-flex-wrap tw-gap-1 tw-align-baseline";
@@ -34,7 +37,7 @@ export default function TdhSource({
           return (
             <span
               key={reference}
-              className={`${CHIP} tw-border-iron-800 tw-text-iron-500`}
+              className={`${chip} tw-border-iron-800 tw-text-iron-500`}
               title={source.accessibleName}
             >
               <span aria-hidden="true">{source.label}</span>
@@ -49,7 +52,7 @@ export default function TdhSource({
             prefetch={false}
             title={source.accessibleName}
             data-tdh-source-href={source.href}
-            className={`${CHIP} tw-border-iron-700 tw-text-iron-400 tw-transition-colors hover:tw-border-primary-400/60 hover:tw-text-primary-300 motion-reduce:tw-transition-none ${TDH_FOCUS_RING}`}
+            className={`${chip} tw-border-iron-700 tw-text-iron-400 tw-transition-colors hover:tw-border-primary-400/60 hover:tw-text-primary-300 motion-reduce:tw-transition-none ${TDH_FOCUS_RING}`}
           >
             <span aria-hidden="true">{source.label}</span>
             <span className="tw-sr-only">{source.accessibleName}</span>

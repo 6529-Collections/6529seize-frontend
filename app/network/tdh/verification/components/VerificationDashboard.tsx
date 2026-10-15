@@ -1,15 +1,20 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
+import { selectPluralCategory } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type {
   DayLoad,
   IndexLoad,
 } from "@/lib/tdh/verification/loadVerification.server";
-import type { VerificationIndexDay } from "@/lib/tdh/verification/schema";
+import type {
+  VerificationDay,
+  VerificationIndexDay,
+} from "@/lib/tdh/verification/schema";
 import {
   cutoverState,
+  dayDifferences,
   dayNeighbours,
+  dayVerdict,
   indexDayVerdict,
   latestIndexDay,
   missingCycleDays,
@@ -17,25 +22,25 @@ import {
   reportsAreLate,
   sortedIndexDays,
   totalDelta,
-  verdictState,
+  type Freshness,
 } from "@/lib/tdh/verification/states";
 import TdhPager from "../../shared/TdhPager";
 import TdhSource from "../../shared/TdhSource";
 import TdhStatusPill from "../../shared/TdhStatusPill";
-import { TDH_CARD, TDH_LINK_STANDALONE } from "../../shared/tdhStyles";
-import VerificationAgreementTiles from "./VerificationAgreementTiles";
+import TdhArrowLink from "../../shared/TdhArrowLink";
+import { TDH_CARD } from "../../shared/tdhStyles";
+import VerificationAgreementTiles, {
+  CutoverTile,
+} from "./VerificationAgreementTiles";
+import VerificationCalendar from "./VerificationCalendar";
 import VerificationCheck from "./VerificationCheck";
-import VerificationDayPicker from "./VerificationDayPicker";
 import VerificationDifferences from "./VerificationDifferences";
+import VerificationHeadline from "./VerificationHeadline";
 import VerificationHistory from "./VerificationHistory";
 import VerificationMethod from "./VerificationMethod";
 import VerificationProvenance from "./VerificationProvenance";
 import VerificationRetry from "./VerificationRetry";
 import VerificationSideBySide from "./VerificationSideBySide";
-import {
-  VerificationCutoverCard,
-  VerificationStatusBand,
-} from "./VerificationStatusBand";
 import {
   formatCycleDate,
   formatInteger,
@@ -59,7 +64,7 @@ function Notice({
   return (
     <div
       role={tone === "error" ? "alert" : "note"}
-      className={`tw-rounded-xl tw-border tw-border-solid tw-p-5 ${border}`}
+      className={`tw-rounded-xl tw-border tw-border-solid tw-p-4 sm:tw-p-5 ${border}`}
     >
       <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-50">
         {title}
@@ -89,14 +94,58 @@ export function VerificationLede({
 export function SampleBanner({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <Notice tone="warning" title={t(locale, "network.tdh.verify.sample.title")}>
-      <p className="tw-m-0">
-        {t(locale, "network.tdh.verify.sample.body")}
-        <TdhSource
-          refs={["D131", "Comparison 2026-10-14/15"]}
-          locale={locale}
-        />
-      </p>
+      <p className="tw-m-0">{t(locale, "network.tdh.verify.sample.body")}</p>
     </Notice>
+  );
+}
+
+/** The latest report, and a warning when reports are late or missing. */
+function FreshnessLine({
+  locale,
+  freshness,
+  latestDate,
+  missingDays,
+}: {
+  readonly locale: SupportedLocale;
+  readonly freshness: Freshness;
+  readonly latestDate: string;
+  readonly missingDays: number;
+}) {
+  const latest = {
+    cycle: formatInteger(locale, freshness.latest),
+    date: formatCycleDate(locale, latestDate),
+  };
+  const late = freshness.kind === "late";
+  const one = (count: number) => selectPluralCategory(locale, count) === "one";
+  let status = t(locale, "network.tdh.verify.status.latest", latest);
+  if (late) {
+    status = t(
+      locale,
+      one(freshness.missing)
+        ? "network.tdh.verify.status.late.one"
+        : "network.tdh.verify.status.late.other",
+      { ...latest, days: formatInteger(locale, freshness.missing) }
+    );
+  }
+  const missingKey = one(missingDays)
+    ? "network.tdh.verify.status.missing.one"
+    : "network.tdh.verify.status.missing.other";
+  return (
+    <div className="tw-space-y-1 tw-text-sm tw-leading-6">
+      <p
+        className={`tw-m-0 ${late ? "tw-text-amber-100" : "tw-text-iron-400"}`}
+        role={late ? "status" : undefined}
+      >
+        {status}
+      </p>
+      {missingDays > 0 && (
+        <p className="tw-m-0 tw-text-amber-100">
+          {t(locale, missingKey, {
+            count: formatInteger(locale, missingDays),
+          })}
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -110,7 +159,7 @@ function AwaitingState({
   const late = reportsAreLate(now);
   return (
     <div className="tw-space-y-8">
-      <div className="tw-grid tw-gap-4 lg:tw-grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="tw-grid tw-gap-3 lg:tw-grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <Notice
           tone="neutral"
           title={t(
@@ -129,17 +178,17 @@ function AwaitingState({
             )}
             <TdhSource refs={["D132"]} locale={locale} />
           </p>
-          <Link
-            href="/network/tdh/specification#evidence"
-            className={TDH_LINK_STANDALONE}
-          >
+          <TdhArrowLink href="/network/tdh/specification#evidence">
             {t(locale, "network.tdh.verify.awaiting.link")}
-          </Link>
+          </TdhArrowLink>
         </Notice>
-        <VerificationCutoverCard
-          locale={locale}
-          cutover={cutoverState(null, now)}
-        />
+        <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-p-0 lg:tw-grid-cols-1">
+          <CutoverTile
+            locale={locale}
+            cutover={cutoverState(null, now)}
+            relative
+          />
+        </ul>
       </div>
       <VerificationMethod locale={locale} />
       <TdhPager current="/network/tdh/verification" locale={locale} />
@@ -186,7 +235,6 @@ export default function VerificationDashboard({
   const index = indexLoad.index;
   const isSample = indexLoad.source === "sample";
   const cutover = cutoverState(index.cutover, now);
-  const afterCutover = cutover.kind === "done";
   const days = sortedIndexDays(index);
   const entry = selected ?? days[0] ?? null;
   if (entry === null) {
@@ -195,9 +243,6 @@ export default function VerificationDashboard({
   const latest = latestIndexDay(index);
   const neighbours = dayNeighbours(index, entry.cycleDay);
   const day = dayLoad?.status === "ok" ? dayLoad.day : null;
-  const verdict = day
-    ? verdictState(day.verdict, day.differences.length > 0)
-    : indexDayVerdict(entry);
   const isLatest = latest?.cycleDay === entry.cycleDay;
   const delta = day
     ? totalDelta(
@@ -206,60 +251,56 @@ export default function VerificationDashboard({
       )
     : totalDelta(entry.totalTdh.rust, entry.totalTdh.live);
   const missing = missingCycleDays(index);
+  const freshness =
+    latest && !isSample ? reportFreshness(latest.cycleDay, now) : null;
+  const agreementComplete = isAgreementComplete(day);
 
   return (
-    <div className="tw-space-y-6">
-      {isSample && <SampleBanner locale={locale} />}
-      <VerificationDayPicker
-        locale={locale}
-        options={days.map((option) => ({
-          cycleDay: option.cycleDay,
-          label: t(locale, "network.tdh.verify.picker.option", {
-            date: formatCycleDate(locale, option.date),
-            cycle: formatInteger(locale, option.cycleDay),
-          }),
-        }))}
-        selected={entry.cycleDay}
-        previous={neighbours.previous}
-        next={neighbours.next}
-        latest={neighbours.latest}
-      />
-      <VerificationStatusBand
-        locale={locale}
-        cycleDay={entry.cycleDay}
-        date={entry.date}
-        cutoffBlock={day?.cutoffBlock ?? null}
-        verdict={verdict}
-        mode={day?.mode ?? null}
-        cutover={cutover}
-        isLatest={isLatest}
-        freshness={
-          latest && !isSample ? reportFreshness(latest.cycleDay, now) : null
-        }
-        latestDate={latest?.date ?? null}
-        missingDays={missing.length}
-      />
-      {(dayLoad?.status === "error" || dayLoad?.status === "not-found") && (
-        <Notice
-          tone="error"
-          title={t(locale, "network.tdh.verify.error.dayTitle")}
-        >
-          <p className="tw-m-0">
-            {t(locale, "network.tdh.verify.error.dayBody")}
-          </p>
-          <VerificationRetry label={t(locale, "network.tdh.verify.retry")} />
-        </Notice>
-      )}
-      {day ? (
-        <>
-          <VerificationAgreementTiles
+    <div>
+      <div className="tw-space-y-4">
+        {isSample && <SampleBanner locale={locale} />}
+        {day ? (
+          <>
+            <VerificationHeadline
+              locale={locale}
+              day={day}
+              verdict={dayVerdict(day)}
+              neighbours={neighbours}
+              isLatest={isLatest}
+            />
+            <VerificationAgreementTiles
+              locale={locale}
+              day={day}
+              totalDelta={delta}
+              cutover={cutover}
+              relativeCutover={isLatest}
+            />
+          </>
+        ) : (
+          <DayMissing locale={locale} entry={entry} failed={dayLoad !== null} />
+        )}
+        <VerificationCalendar
+          locale={locale}
+          days={index.days}
+          selectedCycleDay={entry.cycleDay}
+          upcomingUntil={
+            isLatest && cutover.kind === "countdown"
+              ? cutover.plannedDate
+              : null
+          }
+          now={now}
+        />
+        {freshness && latest && (
+          <FreshnessLine
             locale={locale}
-            rustVsLive={day.agreement.rustVsLive}
-            rustVsPython={day.agreement.rustVsPython}
-            pythonRan={day.implementations.python !== null}
-            totalDelta={delta}
-            afterCutover={afterCutover}
+            freshness={freshness}
+            latestDate={latest.date}
+            missingDays={missing.length}
           />
+        )}
+      </div>
+      {day && (
+        <>
           <VerificationSideBySide
             locale={locale}
             rust={day.implementations.rust}
@@ -268,13 +309,10 @@ export default function VerificationDashboard({
           />
           <VerificationDifferences
             locale={locale}
-            differences={day.differences}
-            cycleDay={day.cycleDay}
-            totalDelta={delta}
+            differences={dayDifferences(day)}
+            agreementComplete={agreementComplete}
           />
         </>
-      ) : (
-        <IndexOnlySummary locale={locale} entry={entry} />
       )}
       <VerificationHistory
         locale={locale}
@@ -292,17 +330,54 @@ export default function VerificationDashboard({
       />
       <VerificationCheck
         locale={locale}
+        isSample={isSample}
+        day={day}
         cycleDay={entry.cycleDay}
-        cutoffBlock={day?.cutoffBlock ?? null}
-        liveSource={
-          day?.implementations.live?.sources?.identity ??
-          day?.implementations.live?.source ??
-          null
-        }
       />
       <VerificationMethod locale={locale} />
       <TdhPager current="/network/tdh/verification" locale={locale} />
     </div>
+  );
+}
+
+/** A listed day whose own file failed: the error, then the index's counts. */
+function DayMissing({
+  locale,
+  entry,
+  failed,
+}: {
+  readonly locale: SupportedLocale;
+  readonly entry: VerificationIndexDay;
+  readonly failed: boolean;
+}) {
+  return (
+    <>
+      {failed && (
+        <Notice
+          tone="error"
+          title={t(locale, "network.tdh.verify.error.dayTitle")}
+        >
+          <p className="tw-m-0">
+            {t(locale, "network.tdh.verify.error.dayBody")}
+          </p>
+          <VerificationRetry label={t(locale, "network.tdh.verify.retry")} />
+        </Notice>
+      )}
+      <IndexOnlySummary locale={locale} entry={entry} />
+    </>
+  );
+}
+
+/** Whether both comparisons found every record equal. */
+function isAgreementComplete(day: VerificationDay | null): boolean {
+  return (
+    day !== null &&
+    [day.agreement.rustVsLive, day.agreement.rustVsPython].every(
+      (agreement) =>
+        agreement !== null &&
+        agreement.identitiesEqual === agreement.identitiesTotal &&
+        agreement.walletsEqual === agreement.walletsTotal
+    )
   );
 }
 
@@ -320,10 +395,13 @@ function IndexOnlySummary({
       className={`${TDH_CARD} tw-flex tw-flex-wrap tw-items-center tw-gap-x-6 tw-gap-y-2 tw-p-5 tw-text-sm tw-text-iron-200`}
     >
       <TdhStatusPill pill={indexDayVerdict(entry)} locale={locale} />
+      <span className="tw-font-medium tw-text-iron-50">
+        {formatCycleDate(locale, entry.date)}
+      </span>
       {entry.identitiesEqual !== null && entry.identitiesTotal !== null && (
         <span className="tw-tabular-nums">
-          {t(locale, "network.tdh.verify.tiles.identitiesLive")}:{" "}
-          {t(locale, "network.tdh.verify.tiles.equalOf", {
+          {t(locale, "network.tdh.verify.tiles.identities")}:{" "}
+          {t(locale, "network.tdh.verify.history.equalOf", {
             equal: formatInteger(locale, entry.identitiesEqual),
             total: formatInteger(locale, entry.identitiesTotal),
           })}

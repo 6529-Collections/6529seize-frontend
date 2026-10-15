@@ -192,7 +192,7 @@ describe("createVerificationLoader", () => {
     });
   });
 
-  it("rejects a day file that names a holder", async () => {
+  it("drops any per-record list a day file carries, so no holder reaches the page", async () => {
     const day = syntheticDay();
     const fetchImpl = fetchFrom({
       [`${BASE}/days/20741.json`]: async () =>
@@ -200,10 +200,33 @@ describe("createVerificationLoader", () => {
           ...day,
           differences: [
             {
-              ...day.differences[0],
               label: "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+              fields: [{ name: "memes#1.tdh", rust: 1, python: 1, live: 2 }],
             },
           ],
+        }),
+    });
+    const loader = createVerificationLoader({
+      base: BASE,
+      isProduction: true,
+      fetchImpl,
+    });
+    const load = await loader.loadDay(20_741);
+    expect(load.status).toBe("ok");
+    expect(JSON.stringify(load)).not.toContain("0x33fd");
+    expect(JSON.stringify(load)).not.toContain("memes#1");
+  });
+
+  it("rejects a day file whose cause could carry free text", async () => {
+    const day = syntheticDay();
+    const fetchImpl = fetchFrom({
+      [`${BASE}/days/20741.json`]: async () =>
+        jsonResponse({
+          ...day,
+          differenceSummary: {
+            ...day.differenceSummary,
+            byCause: { "0x33fd426905f149f8376e227d0c9d3340aad17af1": 1 },
+          },
         }),
     });
     const loader = createVerificationLoader({

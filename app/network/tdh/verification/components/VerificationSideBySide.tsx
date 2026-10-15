@@ -18,6 +18,7 @@ import {
   TDH_SERIES,
 } from "../../shared/tdhStyles";
 import { formatInteger, middleTruncate } from "./verificationFormat";
+import { arweaveTransactionUrl } from "./verificationLinks";
 
 type RootKey = "cycleRoot" | "walletRoot" | "historyRoot";
 const ROOT_LABELS: Record<RootKey, string> = {
@@ -36,15 +37,17 @@ function HashValue({
   locale,
   value,
   name,
+  display,
 }: {
   readonly locale: SupportedLocale;
   readonly value: string;
   readonly name: string;
+  readonly display?: string;
 }) {
   return (
-    <span className="tw-inline-flex tw-items-center tw-gap-1">
+    <span className="tw-inline-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
       <code className="tw-font-mono tw-text-xs tw-text-iron-200" title={value}>
-        {middleTruncate(value, 6)}
+        {display ?? middleTruncate(value, 6)}
       </code>
       <TdhCopyButton
         value={value}
@@ -90,11 +93,11 @@ function ArweaveLink({
   const id = source.replace(/^arweave:/, "");
   return (
     <a
-      href={`https://arweave.net/${id}`}
-      className={TDH_LINK}
+      href={arweaveTransactionUrl(id)}
+      className={`${TDH_LINK} tw-whitespace-nowrap`}
       rel="noopener noreferrer"
       target="_blank"
-      aria-label={t(locale, "network.tdh.verify.side.uploadLink", { id })}
+      aria-label={t(locale, "network.tdh.verify.provenance.txLink", { id })}
     >
       {t(locale, labelKey, { id: middleTruncate(id, 5) })}
     </a>
@@ -176,16 +179,22 @@ export default function VerificationSideBySide({
     );
   };
 
-  const commit = (impl: VerificationImplementation | null) => {
+  const commit = (
+    impl: VerificationImplementation | null,
+    repository: string
+  ) => {
     if (impl === null) {
       return <Muted>{notRun}</Muted>;
     }
     return impl.commit === null ? (
       <Muted>{notApplicable}</Muted>
     ) : (
-      <code className="tw-font-mono tw-text-xs tw-text-iron-200">
-        {impl.commit.slice(0, 7)}
-      </code>
+      <HashValue
+        locale={locale}
+        value={impl.commit}
+        name={repository}
+        display={`${repository}@${impl.commit.slice(0, 7)}`}
+      />
     );
   };
 
@@ -204,29 +213,8 @@ export default function VerificationSideBySide({
     );
   };
 
-  const netting = (impl: VerificationImplementation | null) => {
-    if (impl === null) {
-      return <Muted>{notRun}</Muted>;
-    }
-    if (impl.transactionNetting === null) {
-      return (
-        <Muted>{t(locale, "network.tdh.verify.side.nettingUnknown")}</Muted>
-      );
-    }
-    return impl.transactionNetting ? (
-      t(locale, "network.tdh.verify.side.nettingOn")
-    ) : (
-      <span className="tw-text-amber-200">
-        {t(locale, "network.tdh.verify.side.nettingOff")}
-      </span>
-    );
-  };
-
   const rustRoots = roots(rust);
   const liveTotal = live?.totalTdh ?? null;
-  const showNetting =
-    rust.transactionNetting !== null ||
-    (python !== null && python.transactionNetting !== null);
   const walletSource = live?.sources?.wallet ?? null;
 
   const rows: ReadonlyArray<{
@@ -311,7 +299,8 @@ export default function VerificationSideBySide({
               ) : (
                 (roots(python) ?? (
                   <Muted>
-                    {t(locale, "network.tdh.verify.side.pythonRoots")}
+                    {python.rootsNote ??
+                      t(locale, "network.tdh.verify.side.pythonRoots")}
                   </Muted>
                 ))
               ),
@@ -320,22 +309,11 @@ export default function VerificationSideBySide({
             ),
           },
         ]),
-    ...(showNetting
-      ? [
-          {
-            key: "netting",
-            label: t(locale, "network.tdh.verify.side.netting"),
-            rust: netting(rust),
-            python: netting(python),
-            live: <Muted>{notApplicable}</Muted>,
-          },
-        ]
-      : []),
     {
       key: "commit",
       label: t(locale, "network.tdh.verify.side.commit"),
-      rust: commit(rust),
-      python: commit(python),
+      rust: commit(rust, "validator"),
+      python: commit(python, "6529chain"),
       live: <Muted>{notApplicable}</Muted>,
     },
     {
@@ -386,10 +364,10 @@ export default function VerificationSideBySide({
   ];
 
   return (
-    <section aria-labelledby="tdh-verify-side-heading" className="tw-mt-10">
+    <section aria-labelledby="tdh-verify-side-heading" className="tw-mt-12">
       <h2
         id="tdh-verify-side-heading"
-        className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
+        className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
       >
         {t(locale, "network.tdh.verify.side.heading")}
       </h2>

@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 import { TDH_FOCUS_RING } from "./tdhStyles";
 
 /** Pixels below the top of the viewport at which a section counts as current. */
-const ACTIVE_OFFSET = 128;
+/** A section becomes current once its top passes 30% of the viewport. */
+const activeOffset = () => Math.max(120, globalThis.innerHeight * 0.3);
 
 export interface ScrollSpyItem {
   readonly id: string;
@@ -34,9 +35,10 @@ export default function TdhScrollSpyNav({
     // on scroll, so it is right at the top of the page and after a jump.
     const update = () => {
       let current = items[0]?.id ?? null;
+      const offset = activeOffset();
       for (const item of items) {
         const element = globalThis.document.getElementById(item.id);
-        if (element && element.getBoundingClientRect().top <= ACTIVE_OFFSET) {
+        if (element && element.getBoundingClientRect().top <= offset) {
           current = item.id;
         }
       }

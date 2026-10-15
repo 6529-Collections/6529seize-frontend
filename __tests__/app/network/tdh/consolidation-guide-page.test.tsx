@@ -70,7 +70,9 @@ describe("TDHConsolidationPage (collector's guide)", () => {
     render(<TDHConsolidationPage />);
 
     expect(
-      screen.getByRole("link", { name: /Read how it works/ })
+      screen.getByRole("link", {
+        name: /Consolidation design and signing-order simulator/,
+      })
     ).toHaveAttribute("href", "/network/tdh/consolidation/design");
   });
 

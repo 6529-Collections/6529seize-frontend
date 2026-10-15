@@ -49,7 +49,7 @@ export default function TdhPageShell({
           id="top"
           className="tw-scroll-mt-24 tw-pb-8 tw-pt-5 sm:tw-pb-10 sm:tw-pt-8"
         >
-          <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl">
+          <h1 className="tw-m-0 tw-text-[1.875rem] tw-font-semibold tw-leading-[1.15] tw-tracking-tight tw-text-iron-50 sm:tw-text-[2.5rem] sm:tw-leading-[1.1]">
             {title}
           </h1>
           {pills !== undefined && (
@@ -58,7 +58,7 @@ export default function TdhPageShell({
             </div>
           )}
           {lede !== undefined && (
-            <div className="tw-mt-4 tw-max-w-3xl tw-space-y-3 tw-text-base tw-leading-7 tw-text-iron-200">
+            <div className="tw-mt-4 tw-max-w-3xl tw-space-y-3 tw-text-base tw-leading-7 tw-text-iron-200 sm:tw-text-lg sm:tw-leading-8">
               {lede}
             </div>
           )}

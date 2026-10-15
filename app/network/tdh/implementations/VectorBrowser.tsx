@@ -5,6 +5,7 @@ import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import {
+  TDH_BUTTON,
   TDH_CHIP_BUTTON,
   TDH_CHIP_OFF,
   TDH_CHIP_ON,
@@ -19,16 +20,23 @@ type Filter = VectorTopic | "all";
 
 const CELL = `${TDH_TD_STACK_MD} tw-block md:tw-table-cell`;
 
-/** The 51 conformance vectors, filterable by topic (plan §9.3). */
+/** The conformance vectors, filterable by topic, the first ten shown until all are asked for. */
+const PREVIEW = 10;
+
 export default function VectorBrowser({
   locale,
 }: {
   readonly locale: SupportedLocale;
 }) {
   const [filter, setFilter] = useState<Filter>("all");
-  const shown = VECTORS.filter(
+  const [expanded, setExpanded] = useState(false);
+  const matching = VECTORS.filter(
     (vector) => filter === "all" || vector.topics.includes(filter)
   );
+  const shown =
+    expanded || matching.length <= PREVIEW + 2
+      ? matching
+      : matching.slice(0, PREVIEW);
   const topic = (value: VectorTopic) =>
     t(locale, `network.tdh.impl.topic.${value}` as MessageKey);
   const count = (value: Filter) =>
@@ -40,7 +48,7 @@ export default function VectorBrowser({
       <div
         role="group"
         aria-label={t(locale, "network.tdh.impl.vectors.filterLabel")}
-        className="tw-flex tw-gap-2 tw-overflow-x-auto tw-pb-1 lg:tw-flex-wrap lg:tw-overflow-visible"
+        className="tw-flex tw-flex-wrap tw-gap-2"
       >
         {(["all", ...VECTOR_TOPICS] as const).map((option) => (
           <button
@@ -64,7 +72,7 @@ export default function VectorBrowser({
           <caption className="tw-sr-only" aria-live="polite">
             {t(locale, "network.tdh.impl.vectors.caption", {
               shown: formatInteger(locale, shown.length),
-              total: formatInteger(locale, VECTORS.length),
+              total: formatInteger(locale, matching.length),
             })}
           </caption>
           <thead className="tw-hidden md:tw-table-header-group">
@@ -112,6 +120,17 @@ export default function VectorBrowser({
           </tbody>
         </table>
       </div>
+      {matching.length > shown.length && (
+        <button
+          type="button"
+          onClick={() => setExpanded(true)}
+          className={`${TDH_BUTTON} tw-mt-3`}
+        >
+          {t(locale, "network.tdh.impl.vectors.showAll", {
+            count: formatInteger(locale, matching.length),
+          })}
+        </button>
+      )}
     </div>
   );
 }

@@ -25,26 +25,41 @@ boost rules.
 
 ## What Users Can Do
 
-1. Read `TDH in a minute`: hold (whole days), weigh (edition rate) and boost
-   (one multiplier), drawn for one 310-copy Meme held 100 days by a collector
-   with one Gradient: 100 days x rate 12.71 = 1,271 base, x boost 1.02 =
-   1,296 TDH. The boost meter runs from 1.00 to 2.04, the highest boost under
-   today's rule. FirstGM (Meme #8) is introduced there as the reference card.
-2. Read `Checked daily, in public`: three points (written three times, proved
-   in Lean, compared every day), the latest daily result once reports are
-   published, and a link to the verification dashboard.
-3. Use `Explain my TDH` to enter a profile handle or wallet-like identity.
+1. Read the header: `TDH`, the one-line promise (Total Days Held: the art
+   you hold, and how long you have held it), the formula Days × Rate × Boost
+   = TDH, and a `Checked daily in public` strip with the latest daily result
+   (or when reports start) linking to the verification dashboard.
+2. Read `TDH in a minute`: hold (whole days), weigh (edition rate) and boost
+   (one multiplier), drawn for one copy of a 310-copy Meme held 100 days by a
+   collector with one Gradient: 100 days x rate 12.71 = 1,271 base, x boost
+   1.02 = 1,296 TDH from this card; the Gradient earns TDH of its own on top.
+   The rate is drawn as two bars on one scale, and the boost as a scale from
+   1.00 to 2.04, the highest boost under today's rule. FirstGM (Meme #8) is
+   introduced there as the reference card.
+3. Read `Checked daily, in public`: three points (written more than once and
+   tested against the 61 conformance vectors, specified in Lean as a
+   proposal, compared every day with every difference counted and classed),
+   the latest daily result once reports are published, and a link to the
+   verification dashboard.
+4. Use `Explain my TDH` to enter a profile handle or wallet-like identity.
+   Its results use the same words as the other TDH pages (raw days, base
+   TDH, boost, final TDH).
    Public lookups can be submitted without wallet authentication. The page
    shows an empty state before submission, loading, not-found, and retryable
    error states, followed by the stored snapshot when available.
-4. Expand collection holdings, boost details, and wallet information in a
+5. Expand collection holdings, boost details, and wallet information in a
    profile result. Holdings tables show token, copies, whole days, rate, base,
    and final TDH; collections with more than 20 tokens use Previous/Next
    pagination.
-5. Open `Current boosts & the full schedule` for the active rule summary,
-   `When your holdings change` for common questions about sales, transfers
-   and new cards, and `Glossary` for the terms the TDH pages use.
-6. Follow `Go deeper` to How it works (every step, with examples you can
+6. Open `Current boosts` for today's values: the full-collection boost, the
+   Gradient bonus and the highest possible boost, the season bonuses as
+   ranges (for example `Seasons 1–16: +0.05 each`) with Genesis and
+   Nakamoto, and how the bonuses combine in a disclosure. Then `When your
+   holdings change` for common questions about sales, transfers and new
+   cards, and `Glossary` for the terms the TDH pages use (including netting,
+   the underflow test, conformance vectors, roots, the cutover, classes A to
+   D and program A and B).
+7. Follow `Go deeper` to How it works (every step, with examples you can
    change), the specification, the formal model, the implementations and the
    verification dashboard.
 

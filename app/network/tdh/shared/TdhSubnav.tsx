@@ -13,7 +13,7 @@ export const TDH_PAGES = [
   { href: "/network/tdh/verification", key: "verify" },
 ] as const;
 
-const MORE_PAGES = [
+export const TDH_MORE_PAGES = [
   { href: "/network/tdh/consolidation", key: "consolidation" },
   { href: "/network/tdh/historic-boosts", key: "historic" },
   { href: "/network/tdh#glossary", key: "glossary" },
@@ -21,7 +21,7 @@ const MORE_PAGES = [
 
 export type TdhPageHref = (typeof TDH_PAGES)[number]["href"];
 export type TdhMorePageHref = Exclude<
-  (typeof MORE_PAGES)[number]["href"],
+  (typeof TDH_MORE_PAGES)[number]["href"],
   "/network/tdh#glossary"
 >;
 
@@ -49,7 +49,7 @@ export default function TdhSubnav({
       aria-label={t(locale, "network.tdh.shared.nav.label")}
       className="tw-relative -tw-mx-3 tw-mb-2 tw-mt-1 lg:tw-mx-0"
     >
-      <TdhSubnavScroll className="tw-[mask-image:linear-gradient(to_right,transparent,black_12px,black_calc(100%-24px),transparent)] lg:tw-[mask-image:none] tw-overflow-x-auto tw-px-3 tw-scrollbar-none lg:tw-px-0">
+      <TdhSubnavScroll className="tw-overflow-x-auto tw-px-3 tw-scrollbar-none [-webkit-mask-image:linear-gradient(to_right,transparent,#000_16px,#000_calc(100%_-_28px),transparent)] [mask-image:linear-gradient(to_right,transparent,#000_16px,#000_calc(100%_-_28px),transparent)] lg:tw-px-0 lg:[-webkit-mask-image:none] lg:[mask-image:none]">
         <ul className="tw-m-0 tw-flex tw-w-max tw-list-none tw-items-center tw-gap-1 tw-p-0 tw-pr-6 lg:tw-w-auto lg:tw-flex-wrap lg:tw-pr-0">
           {TDH_PAGES.map((page) => {
             const isCurrent = page.href === current;
@@ -73,7 +73,7 @@ export default function TdhSubnav({
             aria-hidden="true"
             className="tw-mx-1 tw-h-5 tw-w-px tw-bg-iron-800"
           />
-          {MORE_PAGES.map((page) => {
+          {TDH_MORE_PAGES.map((page) => {
             const isCurrent = page.href === current;
             return (
               <li key={page.href}>

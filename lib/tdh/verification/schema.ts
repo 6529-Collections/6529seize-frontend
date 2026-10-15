@@ -5,18 +5,20 @@ import { cycleDayOfDate } from "@/lib/tdh/tdhV1Arithmetic";
  * The public TDH verification files, published every day by 6529's daily
  * comparison job (`tools/tdh-daily/publish_feed.py` in the validator code):
  * `index.json` and `days/{cycleDay}.json`. Fields beyond the schema are
- * ignored, and the optional additions (nullable values, the `cutover` block,
- * the provenance fields) let the page render every state of the job's feed.
+ * ignored.
  *
- * Holders are never named. A label is `holder-<n>` for an identity or
- * `holder-<n>/w<m>` for one of its wallets, and a file whose label, cause or
- * field name could carry anything else is rejected whole.
+ * Holders are never named, and no record is ever published. The job gives a
+ * day's differences only as aggregates (`differenceSummary`): counts by class
+ * and by cause, and the totals' differences. Its `differences` list is always
+ * empty, because one differing token can single its holder out; this schema
+ * does not read it, so nothing per record can ever reach the page.
  */
 
 const MAX_TDH = Number.MAX_SAFE_INTEGER;
 
 const tdhValue = z.number().int().nonnegative().max(MAX_TDH);
 const count = z.number().int().nonnegative().max(MAX_TDH);
+const signedTdh = z.number().int().min(-MAX_TDH).max(MAX_TDH);
 const calendarDate = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/)
@@ -31,7 +33,8 @@ const nullish = <T extends z.ZodTypeAny>(schema: T) =>
 
 /**
  * The verdicts the daily job publishes. `OK` means every difference from
- * 6529.io is explained; the other three each raise an alarm.
+ * 6529.io, if any, is known and explained; the other three each raise an
+ * alarm.
  */
 export const FEED_VERDICTS = [
   "OK",
@@ -70,6 +73,11 @@ const indexDay = z
     { message: "more equal identities than identities" }
   );
 
+/**
+ * An optional statement that 6529.io has switched to the Rust result. The
+ * daily job does not write it today; the page only shows "switched" when a
+ * published file says so, and otherwise counts down to D132's planned date.
+ */
 const cutover = z.object({
   plannedDate: calendarDate,
   status: z.enum(["planned", "done"]),
@@ -95,9 +103,9 @@ const implementation = z.object({
   cycleRoot: nullish(hash32),
   walletRoot: nullish(hash32),
   historyRoot: nullish(hash32),
+  /** Why an implementation has no roots (the Python reference). */
+  rootsNote: nullish(z.string().min(1).max(400)),
   runtimeMs: nullish(count),
-  /** Whether this run netted each transaction's movements (P26 §7.1, D131). */
-  transactionNetting: nullish(z.boolean()),
 });
 
 const live = z.object({
@@ -129,41 +137,40 @@ const agreement = z
     { message: "more equal records than records" }
   );
 
-const RECORD_FIELD = /^[a-z][a-z0-9_]{0,40}$/;
-const TOKEN_FIELD = /^[a-z][a-z0-9_]{0,40}#\d{1,24}\.[a-z][a-z0-9_]{0,31}$/;
-
-/**
- * A compared field, under the name 6529.io's upload uses: `boosted_tdh`,
- * `tdh__raw`, a collection's `memes_tdh`, or a token's `memes#208.tdh`.
- */
-export function isDifferenceField(name: string): boolean {
-  return RECORD_FIELD.test(name) || TOKEN_FIELD.test(name);
-}
-
-const differenceField = z.object({
-  name: z.string().max(80).refine(isDifferenceField, "invalid field name"),
-  rust: nullish(tdhValue),
-  python: nullish(tdhValue),
-  live: nullish(tdhValue),
-});
-
 export const DIFFERENCE_CLASSES = ["A", "B", "C", "D"] as const;
 export type DifferenceClass = (typeof DIFFERENCE_CLASSES)[number];
 
-const HOLDER_IDENTITY = /^holder-\d{1,6}$/;
-const HOLDER_WALLET = /^holder-\d{1,6}\/w\d{1,3}$/;
+const ITEM_ID = /^[A-Z]{2,8}-\d{1,4}$/;
 
-/** `holder-N` for an identity, `holder-N/wM` for one of its wallets. */
-export function isHolderLabel(label: string): boolean {
-  return HOLDER_IDENTITY.test(label) || HOLDER_WALLET.test(label);
+/**
+ * A cause as the job writes it: a known entry's id (`DEV-2`), several joined
+ * by commas (`BUG-15,DEV-2`), `rust-python` or `unexplained`.
+ */
+export function isDifferenceCause(value: string): boolean {
+  return (
+    value === "rust-python" ||
+    value === "unexplained" ||
+    value.split(",").every((part) => ITEM_ID.test(part))
+  );
 }
 
-const difference = z.object({
-  label: z.string().max(20).refine(isHolderLabel, "invalid holder label"),
-  kind: z.enum(["identity", "wallet"]),
-  fields: z.array(differenceField).max(256),
-  class: z.enum(DIFFERENCE_CLASSES),
-  cause: nullish(z.string().regex(/^[A-Z]{2,8}-\d{1,4}$/)),
+const differenceSummary = z.object({
+  /** Identity and wallet records that differ anywhere. */
+  identities: count,
+  wallets: count,
+  /** Every differing record counted once by its class (P38 §3.3.1). */
+  byClass: z.object({ A: count, B: count, C: count, D: count }),
+  /** The same records counted by cause; only the causes seen that day. */
+  byCause: z
+    .record(
+      z.string().max(64).refine(isDifferenceCause, "invalid cause"),
+      count
+    )
+    .refine((value) => Object.keys(value).length <= 32, "too many causes"),
+  totalTdhDelta: z.object({
+    rustVsLive: nullish(signedTdh),
+    pythonVsLive: nullish(signedTdh),
+  }),
 });
 
 export const verificationDaySchema = z
@@ -186,7 +193,7 @@ export const verificationDaySchema = z
       rustVsPython: nullish(agreement),
       rustVsLive: nullish(agreement),
     }),
-    differences: z.array(difference).max(100_000),
+    differenceSummary: nullish(differenceSummary),
     verdict,
   })
   .refine((day) => cycleDayOfDate(day.date) === day.cycleDay, {
@@ -194,7 +201,10 @@ export const verificationDaySchema = z
   });
 
 export type VerificationIndexInput = z.input<typeof verificationIndexSchema>;
-export type VerificationDayInput = z.input<typeof verificationDaySchema>;
+/** A day file as published; `differences` is the job's always-empty list. */
+export type VerificationDayInput = z.input<typeof verificationDaySchema> & {
+  readonly differences?: readonly unknown[];
+};
 export type VerificationIndex = z.infer<typeof verificationIndexSchema>;
 export type VerificationIndexDay = VerificationIndex["days"][number];
 export type VerificationCutover = NonNullable<VerificationIndex["cutover"]>;
@@ -207,9 +217,9 @@ export type VerificationLive = NonNullable<
 export type VerificationAgreement = NonNullable<
   VerificationDay["agreement"]["rustVsLive"]
 >;
-export type VerificationDifference = VerificationDay["differences"][number];
-export type VerificationDifferenceField =
-  VerificationDifference["fields"][number];
+export type VerificationDifferenceSummary = NonNullable<
+  VerificationDay["differenceSummary"]
+>;
 
 export function parseVerificationIndex(value: unknown) {
   return verificationIndexSchema.safeParse(value);

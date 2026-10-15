@@ -22,7 +22,7 @@ const PANEL =
 const PANEL_LABEL =
   "tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400";
 const PANEL_VALUE =
-  "tw-m-0 tw-text-lg tw-font-semibold tw-tabular-nums tw-text-iron-50";
+  "tw-m-0 tw-text-xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50";
 const GLYPH =
   "tw-flex tw-items-center tw-justify-center tw-text-2xl tw-font-light tw-text-iron-500";
 const CAPTION = "tw-m-0 tw-text-xs tw-leading-4";
@@ -33,7 +33,7 @@ const cents = (locale: SupportedLocale, value: number) =>
     maximumFractionDigits: 2,
   });
 
-/** Days: ten blocks of ten whole days, from the purchase to the snapshot. */
+/** Days: ten groups of ten whole days, from the purchase to the snapshot. */
 function DaysPanel({ locale }: { readonly locale: SupportedLocale }) {
   const blocks = Math.ceil(MINUTE_EXAMPLE.days / 10);
   return (
@@ -70,40 +70,33 @@ function DaysPanel({ locale }: { readonly locale: SupportedLocale }) {
   );
 }
 
-/** Rate: the largest edition beside this card's, as columns of copies. */
+/** Rate: the largest edition and this card's on one shared scale. */
 function RatePanel({ locale }: { readonly locale: SupportedLocale }) {
-  const perSquare = 50;
-  const columns = 6;
-  const size = 6;
-  const tall = Math.round(MINUTE_EXAMPLE.largestEdition / perSquare);
-  const short = Math.round(MINUTE_EXAMPLE.edition / perSquare);
-  const squares = (count: number, className: string) =>
-    Array.from({ length: count }, (_, index) => (
-      <rect
-        key={index}
-        x={(index % columns) * (size + 3)}
-        y={108 - Math.floor(index / columns) * (size + 2)}
-        width={size}
-        height={size}
-        rx="1.2"
-        className={className}
-      />
-    ));
-  const column = (
-    count: number,
-    className: string,
-    caption: string,
+  const share = MINUTE_EXAMPLE.edition / MINUTE_EXAMPLE.largestEdition;
+  const bar = (
+    label: string,
+    copies: number,
+    width: number,
+    fill: string,
     tone: string
   ) => (
-    <div className="tw-grid tw-min-w-0 tw-grid-rows-[1fr_auto] tw-items-end tw-gap-2">
-      <svg
-        viewBox="0 0 54 116"
-        aria-hidden="true"
-        className="tw-block tw-h-24 tw-w-auto"
+    <div>
+      <p
+        className={`${CAPTION} tw-flex tw-justify-between tw-gap-2 tw-tabular-nums ${tone}`}
       >
-        {squares(count, className)}
-      </svg>
-      <p className={`${CAPTION} ${tone}`}>{caption}</p>
+        <span>{label}</span>
+        <span>
+          {t(locale, "network.tdh.explainer.minute.copies", {
+            copies: formatInteger(locale, copies),
+          })}
+        </span>
+      </p>
+      <div className="tw-mt-1 tw-h-3 tw-w-full tw-rounded-sm tw-bg-iron-800">
+        <div
+          className={`tw-h-full tw-rounded-sm ${fill}`}
+          style={{ width: `${Math.max(width * 100, 1.5)}%` }}
+        />
+      </div>
     </div>
   );
   return (
@@ -111,25 +104,23 @@ function RatePanel({ locale }: { readonly locale: SupportedLocale }) {
       <p className={PANEL_LABEL}>
         {t(locale, "network.tdh.explainer.minute.rate")}
       </p>
-      <div className="tw-grid tw-grid-cols-2 tw-items-stretch tw-gap-3">
-        {column(
-          tall,
-          "tw-fill-iron-500",
-          t(locale, "network.tdh.explainer.minute.largest", {
-            copies: formatInteger(locale, MINUTE_EXAMPLE.largestEdition),
-          }),
+      <div className="tw-flex tw-flex-col tw-justify-center tw-gap-3">
+        {bar(
+          t(locale, "network.tdh.explainer.minute.largest"),
+          MINUTE_EXAMPLE.largestEdition,
+          1,
+          "tw-bg-iron-500",
           "tw-text-iron-300"
         )}
-        {column(
-          short,
-          "tw-fill-sky-400",
-          t(locale, "network.tdh.explainer.minute.thisCard", {
-            copies: formatInteger(locale, MINUTE_EXAMPLE.edition),
-          }),
+        {bar(
+          t(locale, "network.tdh.explainer.minute.thisCard"),
+          MINUTE_EXAMPLE.edition,
+          share,
+          TDH_SERIES.memes.bg,
           "tw-text-sky-200"
         )}
       </div>
-      <p className={`${PANEL_VALUE} tw-font-mono tw-text-base`}>
+      <p className={PANEL_VALUE}>
         {t(locale, "network.tdh.explainer.minute.division", {
           largest: formatInteger(locale, MINUTE_EXAMPLE.largestEdition),
           edition: formatInteger(locale, MINUTE_EXAMPLE.edition),
@@ -140,27 +131,34 @@ function RatePanel({ locale }: { readonly locale: SupportedLocale }) {
   );
 }
 
-/** Boost: a meter from 1.00 to the highest boost under today's rule. */
+/** Boost: a scale from 1.00 to the highest boost today, marked at 1.02. */
 function BoostPanel({ locale }: { readonly locale: SupportedLocale }) {
-  const fill =
-    ((MINUTE_EXAMPLE.betaCents - 100) / (MAX_BOOST_CENTS - 100)) * 100;
+  const at = (value: number) => ((value - 100) / (MAX_BOOST_CENTS - 100)) * 100;
+  const position = at(MINUTE_EXAMPLE.betaCents);
   return (
     <div className={PANEL}>
       <p className={PANEL_LABEL}>
         {t(locale, "network.tdh.explainer.minute.boostLabel")}
       </p>
       <div className="tw-self-center">
-        <div className="tw-relative tw-h-3.5 tw-overflow-hidden tw-rounded-full tw-bg-iron-800">
+        <p className={`${CAPTION} tw-text-fuchsia-200`}>
+          {t(locale, "network.tdh.explainer.minute.oneGradient")}{" "}
+          <span className="tw-tabular-nums">
+            +{cents(locale, MINUTE_EXAMPLE.betaCents - 100)}
+          </span>
+        </p>
+        <div className="tw-relative tw-mt-1.5 tw-h-3 tw-rounded-full tw-bg-iron-800">
           <span
             className={`tw-absolute tw-inset-y-0 tw-left-0 tw-rounded-full ${TDH_SERIES.gradients.bg}`}
-            style={{ width: `${Math.max(fill, 3)}%` }}
+            style={{ width: `${Math.max(position, 2.5)}%` }}
+          />
+          <span
+            className="tw-absolute tw-top-1/2 tw-size-4 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-border-2 tw-border-solid tw-border-iron-950 tw-bg-fuchsia-300"
+            style={{ left: `${Math.max(position, 2.5)}%` }}
           />
         </div>
-        <p className={`${CAPTION} tw-mt-2 tw-text-fuchsia-200`}>
-          {t(locale, "network.tdh.explainer.minute.oneGradient")}
-        </p>
         <p
-          className={`${CAPTION} tw-mt-1 tw-flex tw-justify-between tw-gap-2 tw-tabular-nums tw-text-iron-300`}
+          className={`${CAPTION} tw-mt-1.5 tw-flex tw-justify-between tw-gap-2 tw-tabular-nums tw-text-iron-400`}
         >
           <span>{cents(locale, 100)}</span>
           <span>
@@ -230,7 +228,7 @@ export default function TDHInAMinute({
       <h2
         id="tdh-minute-heading"
         tabIndex={-1}
-        className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none"
+        className="tw-m-0 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none"
       >
         {t(locale, "network.tdh.explainer.minute.title")}
       </h2>
@@ -271,14 +269,19 @@ export default function TDHInAMinute({
           </span>
           <BoostPanel locale={locale} />
         </div>
-        <figcaption className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
-          <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-primary-500/15 tw-px-4 tw-py-1.5 tw-text-lg tw-font-semibold tw-tabular-nums tw-text-iron-50 tw-ring-1 tw-ring-inset tw-ring-primary-400/40">
-            {t(locale, "network.tdh.explainer.minute.result", {
-              final: values.final,
-            })}
+        <figcaption className="tw-mt-4">
+          <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
+            <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-primary-500/15 tw-px-4 tw-py-1.5 tw-text-lg tw-font-semibold tw-tabular-nums tw-text-iron-50 tw-ring-1 tw-ring-inset tw-ring-primary-400/40">
+              {t(locale, "network.tdh.explainer.minute.result", {
+                final: values.final,
+              })}
+            </span>
+            <span className="tw-text-sm tw-tabular-nums tw-text-iron-300">
+              {t(locale, "network.tdh.explainer.minute.textVersion", values)}
+            </span>
           </span>
-          <span className="tw-text-sm tw-tabular-nums tw-text-iron-300">
-            {t(locale, "network.tdh.explainer.minute.textVersion", values)}
+          <span className="tw-mt-2 tw-block tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
+            {t(locale, "network.tdh.explainer.minute.resultNote")}
           </span>
         </figcaption>
       </figure>

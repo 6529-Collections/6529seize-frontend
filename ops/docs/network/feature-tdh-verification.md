@@ -6,11 +6,11 @@ Parent: [Network Index](README.md)
 
 `/network/tdh/verification` is the public, daily, three-way comparison of TDH:
 the validators' Rust core, the Python reference and 6529.io's current backend
-compute TDH for the same snapshot, and the page shows the results side by
-side with every difference, its class and its cause. Holders are never named;
-differences carry labels such as `holder-1` (identity) and `holder-1/w1`
-(one of its wallets). Each value is also in 6529.io's public upload of that
-day, and the page says so.
+compute TDH for the same snapshot, and the page shows how many collectors and
+wallets are equal, the three totals side by side, and every difference
+counted and classed by cause. No individual record is ever shown: the daily
+job publishes differences only as counts, because one differing token can
+single its holder out.
 
 `/network/tdh/verification/{cycleDay}` is the permalink for one day. Unknown
 days return the standard not-found page.
@@ -26,73 +26,83 @@ days return the standard not-found page.
 
 ## Entry Points
 
-- `Checked daily, in public` on `/network/tdh`.
+- The `Checked daily in public` strip under the overview's introduction, and
+  `Checked daily, in public` further down `/network/tdh`.
 - `Latest daily agreement` on `/network/tdh/implementations`.
-- `See today's comparison` at step 14 of `/network/tdh/how-it-works`.
+- Step 13 (`Network totals`) and step 14 of `/network/tdh/how-it-works`.
 
 ## What the Page Shows
 
-1. A sample banner when bundled sample data is shown (never in production).
-2. A day picker: previous, next, latest, and a list of every published day
-   (`Show day` navigates; moving through the list does not).
-3. Status: the verdict (`Equal`, `Explained`, `Investigating`, `Mismatch`,
-   `6529.io file missing`, or `See details` for an unknown value), the
-   history mode (`Not yet fully checked` or `History fully checked`, each
-   with a `What this means` disclosure), the cycle, the day boundary and the
-   snapshot block. With published data it also says which report is the
-   latest, warns when reports are late, and counts days with no report.
-4. The cutover card: `Cutover in N days` with the week from D132's decision
-   to about 23 October 2026, `Cutover due` from that UTC day, `Switched on
-   {date}` once the data says the cutover is done. On an older day it is
-   marked `As of today`.
-5. Agreement tiles: for identities and wallets equal between Rust and
-   6529.io, and identities equal between Rust and Python, how many differ
-   (or `All equal`) with the equal count and share; and the total TDH, Rust
-   minus 6529.io, in numbers and words.
-6. Side by side: totals, identity and wallet counts, the roots (Python
-   computes none and is compared record by record), whether each run netted
-   within a transaction, code versions, run times and sources.
-7. Differences, one case per holder (an identity and its wallets): class,
-   cause, the total difference, and the differing fields under 6529.io's
-   upload names with Rust, Python, 6529.io and Rust minus 6529.io. A wallet
-   with the identity's values is noted in one line. Each cause opens to its
-   explanation and, for DEV-2, the one-transaction diagram.
-8. Agreement over time: a table of the days (one card per day on phones),
-   with days that have no report; from the seventh day wider screens show a
-   chart, with the table one click away.
-9. Provenance: data source, rule version and registry hash (from the day's
-   file, or the specification's, labelled as such), snapshot block with an
-   Etherscan link, history mode, netting, code versions, 6529.io's upload
-   ids and JSON download links.
-10. Check it yourself: what anyone can check today from public sources, and
-    the two commands that reproduce the day once the source is published.
-11. How this works: the method, and a diagram of the two flows that meet in
+1. A short sample banner when bundled sample data is shown (never in
+   production).
+2. The headline: the verdict, the day and cycle, the day's result in one
+   sentence (for example that the Rust core, the Python reference and
+   6529.io agreed on all collectors and wallets), the verdict in words,
+   previous and next day arrows, the snapshot block, and the history mode
+   (`Not yet fully checked` or `History fully checked`, with a
+   `What this label means` disclosure). On a day that is not the latest, a
+   link back to the latest.
+3. The day at a glance: collectors and wallets equal between Rust and
+   6529.io, records equal between Rust and Python, each with a meter that
+   keeps a visible sliver for any difference; the total TDH, Rust minus
+   6529.io; and the cutover: a countdown with the week from the first daily
+   run (16 October 2026) to about 23 October 2026 on the latest day, the
+   planned date on older days, and `Switched on {date}` only when a published
+   file says the cutover is done.
+4. Every day: one square per day coloured by its verdict and linking to it,
+   a mark under each for the total's difference, dashed squares for days
+   with no report and, while the cutover is ahead, the days still to come up
+   to it. With published data it also says which report is the latest, warns
+   when reports are late, and counts days with no report.
+5. Side by side: totals, collector and wallet counts, the roots (Python
+   computes none and is compared record by record), code versions as
+   `validator@…` and `6529chain@…` with copy buttons, run times and sources.
+6. Differences: when there are none, a plain statement that every collector
+   and wallet is equal; otherwise the number of differing collector and
+   wallet records, the counts by class (A to D) and by cause (DEV and BUG
+   items link to the specification), and the totals' differences. The four
+   classes are explained beside it, with a note that no record is published,
+   and a short history of the DEV-2 cases that D131's netting settled.
+7. Day by day: a table of the days (one card per day on phones), with days
+   that have no report; from the seventh day wider screens show a chart,
+   with the table one click away.
+8. Provenance: data source, snapshot block with an Etherscan link, history
+   mode, rule version and registry hash (from the day's file, or the
+   specification's, labelled as such), code versions, and 6529.io's files on
+   Arweave with links to each transaction and file, and JSON download links.
+9. Check it yourself: what anyone can check today from public sources, what
+   that does not reach, the three commands that reproduce the day once the
+   source is published, and the roots and files to compare.
+10. How this works: the method, and a diagram of the two flows that meet in
     the comparison.
 
 ## Data Source
 
 - `NEXT_PUBLIC_TDH_VERIFICATION_BASE` names the public base URL of
   `index.json` and `days/{cycleDay}.json`, as the daily job's
-  `publish_feed.py` writes them. The page reads them on the server and
-  refreshes every 10 minutes (day permalinks hourly).
+  `publish_feed.py` writes them. The job publishes once a day after its
+  00:40 UTC run and fetches a late 6529.io file again at 06:00 and 12:00 UTC;
+  the page rechecks the files every 10 minutes (day permalinks hourly).
 - The feed's verdicts are `OK`, `RUST_PYTHON_MISMATCH`, `LIVE_UNAVAILABLE`
-  and `LIVE_UNEXPLAINED`; field names are the upload's (`boosted_tdh`,
-  `memes#208.tdh`). Optional fields (`ruleVersion`, `registryHash`,
-  `cutoffBlockHash`, `cutoffTimestamp`, `transactionNetting`, `live.sha256`)
-  are shown when present.
+  and `LIVE_UNEXPLAINED`. A day's differences come from `differenceSummary`
+  (counts by class and cause, and the totals' differences) and from the
+  agreement counts; the page never reads the feed's `differences` list, which
+  the job always publishes empty. Optional fields (`ruleVersion`,
+  `registryHash`, `cutoffBlockHash`, `cutoffTimestamp`, `live.sha256`,
+  `rootsNote`) are shown when present.
 - Unset in production: the page says daily reports start on 16 October 2026,
   and from 17 October that they are not yet connected.
-- Unset outside production: the daily job's own files for 14 and 15 October
-  2026, run before the Rust core netted within a transaction, under a
-  `Sample` banner that says so.
-- A file that fails validation, or carries a label other than `holder-N` or
-  `holder-N/wM`, is rejected whole.
+- Unset outside production: a verbatim copy of the daily job's published
+  feed for 14 and 15 October 2026, from test runs made on 15 October, under
+  a `Sample` banner.
+- A file that fails validation, or whose cause could carry anything but a
+  DEV or BUG item, `rust-python` or `unexplained`, is rejected whole.
 
 ## Failure and Recovery
 
 - Data source unreachable or invalid: an error notice with `Try again`.
-- Day file missing but the index loaded: the status and history still show,
-  with a notice and `Try again`.
+- Day file missing but the index loaded: the index's counts and the calendar
+  still show, with a notice and `Try again`.
 
 ## Related Pages
 
