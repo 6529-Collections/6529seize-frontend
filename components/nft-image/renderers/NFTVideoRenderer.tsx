@@ -10,8 +10,12 @@ import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-
 import { getResolvedImageSrc } from "@/components/nft-image/utils/image-source";
 import { getVideoPosterSrc } from "@/components/nft-image/utils/video-poster";
 import { getNFTMediaRendererAttributes } from "@/components/nft-image/media-renderer-marker";
+import useIsConstrainedNetwork from "@/hooks/useIsConstrainedNetwork";
 
 export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
+  // On a cellular, slow or data-saver connection, fetch only metadata until
+  // the player starts playback.
+  const isConstrainedNetwork = useIsConstrainedNetwork();
   const animationSrc = getResolvedAnimationSrc(props.nft);
   const animationClassName = styles["nftAnimation"] ?? "";
   const compressedAnimationSrc =
@@ -62,7 +66,7 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
         autoPlay
         muted
         loop
-        preload="auto"
+        preload={isConstrainedNetwork ? "metadata" : "auto"}
         layout={props.fillContainer ? "fill" : videoLayout}
         align="center"
         className={`${animationClassName} ${useFrame ? "" : props.heightStyle} ${props.bgStyle} tw-flex tw-items-center tw-justify-center`}

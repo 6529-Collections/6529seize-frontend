@@ -232,6 +232,38 @@ describe("NFTVideoRenderer", () => {
       expect(container.querySelector("video")).not.toHaveAttribute("poster");
     });
 
+    it("never uses an animated GIF as the poster", () => {
+      const nft = createMockNFT({
+        scaled: "https://example.com/scaled_x1000/561.GIF",
+        image: "https://example.com/original/561.GIF",
+        thumbnail: "https://example.com/scaled_x450/561.GIF",
+        metadata: {},
+      });
+      const { container } = render(
+        <NFTVideoRenderer {...createDefaultProps({ nft })} />
+      );
+      const video = container.querySelector("video")!;
+      expect(video).not.toHaveAttribute("poster");
+      expect(video).toHaveAttribute(
+        "src",
+        "https://example.com/compressed-video.mp4"
+      );
+    });
+
+    it("prefers a still image over an animated scaled GIF", () => {
+      const nft = createMockNFT({
+        scaled: "https://example.com/scaled_x1000/1.GIF",
+        image: "https://example.com/original/1.png",
+      });
+      const { container } = render(
+        <NFTVideoRenderer {...createDefaultProps({ nft })} />
+      );
+      expect(container.querySelector("video")).toHaveAttribute(
+        "poster",
+        "https://example.com/original/1.png"
+      );
+    });
+
     it("updates the poster when the displayed NFT changes", () => {
       const { container, rerender } = render(
         <NFTVideoRenderer {...createDefaultProps()} />
@@ -365,6 +397,49 @@ describe("NFTVideoRenderer", () => {
         "https://example.com/metadata-fallback.mp4"
       );
     });
+  });
+
+  describe("Video preload", () => {
+    const setConnection = (connection: object | undefined) => {
+      Object.defineProperty(globalThis.navigator, "connection", {
+        configurable: true,
+        value: connection,
+      });
+    };
+    afterEach(() => setConnection(undefined));
+
+    it("preloads the whole video on an unconstrained connection", () => {
+      setConnection({ type: "wifi", effectiveType: "4g", saveData: false });
+      const { container } = render(
+        <NFTVideoRenderer {...createDefaultProps()} />
+      );
+      expect(container.querySelector("video")).toHaveAttribute(
+        "preload",
+        "auto"
+      );
+    });
+
+    it.each([
+      { saveData: true },
+      { type: "cellular", effectiveType: "4g" },
+      { effectiveType: "3g" },
+    ])(
+      "preloads only metadata on a constrained connection %o",
+      (connection) => {
+        setConnection({
+          ...connection,
+          addEventListener: jest.fn(),
+          removeEventListener: jest.fn(),
+        });
+        const { container } = render(
+          <NFTVideoRenderer {...createDefaultProps()} />
+        );
+        expect(container.querySelector("video")).toHaveAttribute(
+          "preload",
+          "metadata"
+        );
+      }
+    );
   });
 
   describe("Video Attributes", () => {

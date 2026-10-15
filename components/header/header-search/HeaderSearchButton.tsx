@@ -8,7 +8,7 @@ import { useKey } from "react-use";
 
 import LazyWaveDropsSearchModal, {
   preloadWaveDropsSearchModal,
-  useWaveDropsSearchModalIdlePreload,
+  useWaveDropsSearchModalEarlyPreload,
 } from "@/components/waves/drops/search/LazyWaveDropsSearchModal";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -19,7 +19,7 @@ import { t } from "@/i18n/messages";
 
 import LazyHeaderSearchModal, {
   preloadHeaderSearchModal,
-  useHeaderSearchModalIdlePreload,
+  useHeaderSearchModalEarlyPreload,
 } from "./LazyHeaderSearchModal";
 
 interface HeaderSearchButtonProps {
@@ -60,10 +60,11 @@ export default function HeaderSearchButton({ wave }: HeaderSearchButtonProps) {
     ? preloadWaveDropsSearchModal
     : preloadHeaderSearchModal;
 
-  // Warm the modal this button opens once the page is idle, so the first open
-  // does not wait on the network. The chunk stays out of first-load JS.
-  useWaveDropsSearchModalIdlePreload(hasWave);
-  useHeaderSearchModalIdlePreload(!hasWave);
+  // Warm the modal this button opens from the visitor's first interaction (or
+  // when idle), so the first open does not wait on the network. The chunk stays
+  // out of first-load JS.
+  useWaveDropsSearchModalEarlyPreload(hasWave);
+  useHeaderSearchModalEarlyPreload(!hasWave);
   const handleSearchShortcut = (event?: KeyboardEvent) => {
     event?.preventDefault();
     openContextSearch();

@@ -1,0 +1,76 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "profile": "museum",
+  "run_id": "2026-10-15-museum-utc-dates",
+  "candidate": {
+    "commit": "37dfd8e2852ac754733b6c7b522e0e0b2ae1e475",
+    "build": "production"
+  },
+  "baseline": {
+    "commit": "3f33da5c7e71ddae71150cfebeb1a34faf74c9d9",
+    "build": "production",
+    "museum_publication_commit": "92966f2836ebf2af06edfe0fe2cff25041307c92"
+  },
+  "scope": {
+    "routes": [
+      "/museum/network/about/governance",
+      "/museum/network/about/governance/6529NM-GOV-1069256",
+      "/museum/network/projects/century",
+      "/museum/network/works/6529NM-W-0008",
+      "/museum/network/acquisitions/a-gift-of-themes-and-variations-210",
+      "/museum/network/acquisition-programs/gift-acquisitions",
+      "/museum/network/artists/david-seymour",
+      "/museum/network/organizations/art-blocks",
+      "/museum/network/research/conflict-at-its-edges"
+    ],
+    "templates": {
+      "/museum/network/about/governance": "governance decision list (decision dates)",
+      "/museum/network/about/governance/[decisionId]": "governance decision record (recorded date)",
+      "/museum/network/projects/[slug]": "project record (work cards with status-recorded dates, entity context, related records)",
+      "/museum/network/works/[workId]": "work record (entity context status date, related records)",
+      "/museum/network/acquisitions/[slug]": "acquisition record (header and documents entity context, related records)",
+      "/museum/network/acquisition-programs/[slug]": "acquisition program record (entity context status date)",
+      "/museum/network/artists/[slug]": "artist record (related records with status dates)",
+      "/museum/network/organizations/[slug]": "organization record (entity context and related records; no date in the current publication)",
+      "/museum/network/research/[slug]": "research detail (entity context and related records with status dates)"
+    },
+    "audience": "Visitors reading 6529 Network Museum records: governance decisions, projects, works, acquisitions, programs, artists, organizations, and research",
+    "primary_task": "Read a Museum record with its status and the date that status or decision was recorded",
+    "release_intent": "Format Museum status, governance, and selection dates explicitly in UTC so server-rendered dates no longer depend on the server's time zone. Production runs in UTC, so no visible change is intended there.",
+    "states": ["default"],
+    "viewports": ["1440x1000", "820x1000", "390x844"],
+    "locales": ["en-US"]
+  },
+  "not_applicable": {
+    "J09": "Only the default published state is in scope; the change alters no loading, empty, error, or publication-unavailable path, and a record without a date still omits the date element as before",
+    "J11": "Server-side date formatting only; no data loading, client code, or rendering path changed",
+    "J13": "No wallet or chain interaction on these surfaces"
+  },
+  "budget": {
+    "repair_batches": 6
+  },
+  "decisions": [
+    "Baseline: main at 3f33da5c7e, built and served the same way from the same Museum publication commit, is the comparison baseline. evidence/main holds the same capture matrix as evidence/candidate.",
+    "Repair scope (coordinator decision): this run repairs only deficits that the candidate introduces or alters relative to the baseline. A deficit present identically on the baseline is pre-existing Museum debt: file it as P3, begin its observation with 'Pre-existing on main:', and name any dimension or check it would otherwise affect, so it is recorded for the Museum backlog without blocking this change. Scores and checks assess the candidate relative to the baseline; a pre-existing deficit filed as P3 does not lower a score or fail a check.",
+    "Linked records share works by design: a work can appear on its work, acquisition, artist, organization, project, program, and research records. That cross-record appearance within this route set is the existing record design and is named here as a curatorial decision for M4. A repeated lead image within one route, or a repeat with no record link, is still an M4 matter.",
+    "Each dynamic template is represented by one instance that renders a changed date element, spread across acquisition families to limit cross-route repetition. The program-outcome selection date has no instance in the current publication (no object record carries selection evidence), so it is covered by unit tests only.",
+    "The LCL:3417 and LCL:3418 badge in the header marks a locally served build; production 6529.io does not show it. The 390x844 cell uses a Pixel 7 phone profile, so the app shows its mobile-app banner and touch header as it does for phone visitors."
+  ],
+  "evidence_index": {
+    "candidate": "evidence/candidate: <slug>-<viewport>-full.png full-page captures, <slug>-<viewport>-NN.png viewport-height tiles, text/<slug>-<viewport>.txt (text of <main>), automated-checks.json, contact-sheet-<viewport>.png",
+    "baseline": "evidence/main: the same files for the baseline build",
+    "comparison": "evidence/diff-candidate-vs-main.json: per-cell pixel, <main> text, date, and automated-check comparison",
+    "zones": "evidence/zone-comparison.json: rendered dates on 117 Museum pages from both builds served under the UTC, Pacific/Auckland, and America/Los_Angeles host zones",
+    "slugs": {
+      "/museum/network/about/governance": "governance",
+      "/museum/network/about/governance/6529NM-GOV-1069256": "governance-decision",
+      "/museum/network/projects/century": "project-century",
+      "/museum/network/works/6529NM-W-0008": "work-w-0008",
+      "/museum/network/acquisitions/a-gift-of-themes-and-variations-210": "acquisition-themes-variations",
+      "/museum/network/acquisition-programs/gift-acquisitions": "program-gift-acquisitions",
+      "/museum/network/artists/david-seymour": "artist-david-seymour",
+      "/museum/network/organizations/art-blocks": "organization-art-blocks",
+      "/museum/network/research/conflict-at-its-edges": "research-conflict-at-its-edges"
+    }
+  }
+}
