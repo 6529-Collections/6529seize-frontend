@@ -256,6 +256,102 @@ describe("proxy", () => {
     expect(mockRedirect).not.toHaveBeenCalled();
   });
 
+  describe("malformed wave ids", () => {
+    const WAVE_ID = "5f207393-5418-4a75-8738-e40edb44a94d";
+
+    async function expectPlainNotFound(request: NextRequest) {
+      const fetchMock = jest
+        .spyOn(globalThis, "fetch")
+        .mockRejectedValue(new Error("access control should not run"));
+
+      const response = (await proxy(request)) as Response;
+
+      expect(response).toBeInstanceOf(Response);
+      expect(response.status).toBe(404);
+      expect(response.headers.get("content-type")).toBe(
+        "text/plain; charset=utf-8"
+      );
+      expect(response.headers.get("cache-control")).toContain("no-store");
+      await expect(response.text()).resolves.toBe("Not Found");
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(mockNext).not.toHaveBeenCalled();
+      expect(mockRedirect).not.toHaveBeenCalled();
+    }
+
+    it.each([
+      "/waves/not-a-real-id",
+      "/waves/not-a-real-id/",
+      "/waves/5f207393-5418-4a75-8738-e40edb44a94",
+      "/waves/not-a-real-id/competitions",
+      "/waves/not-a-real-id/competitions/alpha",
+      "/messages/not-a-real-id",
+    ])("answers %s with a plain 404 before the staging gate", async (path) => {
+      await expectPlainNotFound(createRequest(path));
+    });
+
+    it.each(["/waves", "/messages"])(
+      "answers a malformed legacy ?wave= link on %s",
+      async (path) => {
+        const request = createRequest(path);
+        request.nextUrl.search = "?wave=not-a-real-id&serialNo=4";
+
+        await expectPlainNotFound(request);
+      }
+    );
+
+    it("answers in production builds too", async () => {
+      proxy = loadProxy(PRODUCTION_BASE_ENDPOINT);
+
+      const response = (await proxy(
+        createRequest("/waves/not-a-real-id", {
+          origin: PRODUCTION_BASE_ENDPOINT,
+        })
+      )) as Response;
+
+      expect(response.status).toBe(404);
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      `/waves/${WAVE_ID}`,
+      `/waves/${WAVE_ID.toUpperCase()}`,
+      `/waves/${WAVE_ID}/competitions/alpha`,
+      `/messages/${WAVE_ID}`,
+      "/waves/create",
+      "/messages/create",
+    ])("keeps %s behind staging access control", async (path) => {
+      const fetchMock = mockFetchStatus(200);
+
+      const response = await proxy(createRequest(path));
+
+      expect(response).toEqual({ kind: "next" });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(mockNext).toHaveBeenCalledTimes(1);
+    });
+
+    it("leaves a drop deep link on a valid wave to the app", async () => {
+      const fetchMock = mockFetchStatus(200);
+      const request = createRequest(`/waves/${WAVE_ID}`);
+      request.nextUrl.search = "?drop=not-a-uuid&serialNo=abc";
+
+      const response = await proxy(request);
+
+      expect(response).toEqual({ kind: "next" });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("leaves a valid legacy ?wave= link to the page redirect", async () => {
+      const fetchMock = mockFetchStatus(200);
+      const request = createRequest("/waves");
+      request.nextUrl.search = `?wave=${WAVE_ID}`;
+
+      const response = await proxy(request);
+
+      expect(response).toEqual({ kind: "next" });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe("staging access gate", () => {
     it("forwards the staging auth cookie to the probe", async () => {
       const fetchMock = mockFetchStatus(200);

@@ -16,6 +16,7 @@ import {
   isStaticAssetPath,
   isUnservableDotPath,
 } from "@/lib/proxy/publicPaths";
+import { hasMalformedWaveId } from "@/lib/proxy/waveRoutes";
 import { publicEnv } from "./config/env";
 import { API_AUTH_COOKIE } from "./constants/constants";
 
@@ -343,6 +344,12 @@ export default async function proxy(req: NextRequest) {
       pathname.length > 1 && pathname.endsWith("/")
         ? pathname.slice(0, -1)
         : pathname;
+
+    // Wave routes stream their shell with a 200 before a page can call
+    // notFound(), so an id that cannot be a wave id is answered here.
+    if (hasMalformedWaveId(normalizedPathname, req.nextUrl.searchParams)) {
+      return plainNotFoundResponse();
+    }
 
     const redirectTarget = normalizedPathname.startsWith("/my-stream")
       ? resolveMyStreamRedirect(req, normalizedPathname)

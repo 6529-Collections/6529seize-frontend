@@ -10,6 +10,7 @@ They redirect to active routes or external assets.
 This page covers:
 
 - middleware exact-path redirects (`301`)
+- middleware plain-text `404` for wave links whose id is not a wave id
 - middleware desktop `/my-stream*` compatibility redirects (`301`)
 - route-level legacy aliases (`307`)
 - `/waves?wave=<id>` normalization to `/waves/<id>` (`307`)
@@ -21,11 +22,13 @@ Profile-only legacy aliases are documented in
 
 1. Request starts at a legacy URL.
 2. Middleware exact-path map runs first.
-3. Desktop-only `/my-stream*` middleware compatibility runs next.
-4. On staging deployments only, access control runs (`401 -> /access`,
+3. Wave links whose id is not a wave id get a plain-text `404`
+   ([Malformed Wave Ids](#malformed-wave-ids-404)).
+4. Desktop-only `/my-stream*` middleware compatibility runs next.
+5. On staging deployments only, access control runs (`401 -> /access`,
    `403 -> /restricted`). Production and local development skip it.
-5. Route-level redirects run (including `/waves?wave=<id>` normalization).
-6. Canonical destination route loads.
+6. Route-level redirects run (including `/waves?wave=<id>` normalization).
+7. Canonical destination route loads.
 
 ## Redirect Families
 
@@ -115,6 +118,30 @@ Rules:
 - If `wave` is repeated, use the first value.
 - Preserve repeated values for non-`wave` keys.
 
+## Malformed Wave Ids (`404`)
+
+A wave id is a UUID (for example `5f207393-5418-4a75-8738-e40edb44a94d`, upper
+or lower case). Middleware answers a plain-text `404` before access control
+when a wave link names an id that is not UUID-shaped, because no wave can have
+that id:
+
+- `/waves/<id>` and `/messages/<id>`
+- `/waves/<id>/competitions` and `/waves/<id>/competitions/<competition>`
+- the legacy `/waves?wave=<id>` and `/messages?wave=<id>` links
+
+Rules:
+
+- `/waves/create` and `/messages/create` are the create pages and are never
+  answered this way.
+- `/waves` and `/messages` without a `wave` value, or with an empty one, load
+  normally. A repeated `wave` uses its first value.
+- Only the wave id is checked. `drop`, `serialNo`, `divider` and the
+  competition segment are not, and neither is `/my-stream` (its redirect target
+  is checked instead).
+- A UUID-shaped id is never answered here. Waves, direct messages and
+  competitions that do not exist, or that the signed-in account cannot see,
+  still open the app shell and resolve on the page.
+
 ## Edge Cases
 
 - `/om/OM` resolves through middleware exact-path map (case-insensitive match to
@@ -133,8 +160,10 @@ Rules:
   server error), the request gets a plain-text `503`. Retry once the API
   recovers.
 - Other middleware failures redirect to `/error`.
-- Paths with a dot-prefixed segment (for example `/.env` or `/.well-known/*`)
-  and missing `/_next/*` files return a plain-text `404` instead of a page.
+- Paths with a dot-prefixed segment (for example `/.env` or `/.well-known/*`),
+  missing `/_next/*` files and wave links with a malformed wave id return a
+  plain-text `404` instead of a page. For a wave link, copy a fresh link from
+  the wave: a link cut short when pasted is the usual cause.
 - If the destination route fails, use
   [Route Error and Not-Found Screens](feature-route-error-and-not-found.md).
 - External redirect targets can fail independently; retry from another network
