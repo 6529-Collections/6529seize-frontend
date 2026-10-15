@@ -89,6 +89,8 @@ test.describe("Wave drop edit local sandbox @auth @medium @local-only", () => {
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     await expect(submittedDrop).toContainText(SANDBOX_CHAT_DROP_CONTENT);
+    await expect(composer).toBeFocused();
+    await expect(composer).toHaveText("");
 
     // Escape cancels edit mode without any mutation reaching the API.
     await openDropEditor(page, submittedDrop, hasTouch);
@@ -241,11 +243,29 @@ async function openDropEditor(
 ) {
   await dismissNextDevTools(page);
   if (hasTouch) {
+    // Model a keyboard that has not finished dismissing when actions appear.
+    const previousInset = await page.evaluate(() => {
+      const style = document.documentElement.style;
+      const previous = style.getPropertyValue("--native-keyboard-inset-bottom");
+      style.setProperty("--native-keyboard-inset-bottom", "300px");
+      return previous;
+    });
     await holdTouch(
       page,
       submittedDrop.getByText(SANDBOX_CHAT_DROP_CONTENT, { exact: true }),
       "touchCancel"
     );
+    const container = page
+      .getByRole("dialog", { name: "Drop actions", exact: true })
+      .locator(".tw-pointer-events-none.tw-fixed.tw-inset-x-0");
+    await expect(container).toHaveCSS("transform", "matrix(1, 0, 0, 1, 0, 0)");
+    await page.evaluate((previous) => {
+      const style = document.documentElement.style;
+      if (previous)
+        style.setProperty("--native-keyboard-inset-bottom", previous);
+      else style.removeProperty("--native-keyboard-inset-bottom");
+    }, previousInset);
+    await expect(container).toHaveCSS("transform", "matrix(1, 0, 0, 1, 0, 0)");
     await page.getByRole("button", { name: "Edit Message", exact: true }).tap();
     await expect(dropEditor(submittedDrop)).toBeVisible();
     return;

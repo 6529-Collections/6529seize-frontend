@@ -1,5 +1,15 @@
 import { createLazyComponentLoader } from "@/components/utils/lazy-load/createLazyComponentLoader";
 import { act, render, screen } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
+
+// The interaction helper has its own tests. Here it is replaced by a recorder so
+// these tests can fire the first interaction themselves and see how the loader
+// uses it, whatever earlier tests did to the real one's shared state.
+const mockPreloadOnFirstInteraction = jest.fn();
+jest.mock("@/components/utils/lazy-load/preloadOnFirstInteraction", () => ({
+  preloadOnFirstInteraction: (task: () => void) =>
+    mockPreloadOnFirstInteraction(task),
+}));
 
 type GreetingProps = { readonly name: string };
 
@@ -38,8 +48,8 @@ function setup() {
     );
   }
 
-  function IdleProbe({ enabled }: { readonly enabled?: boolean }) {
-    loader.usePreloadWhenIdle(enabled);
+  function EarlyProbe({ enabled }: { readonly enabled?: boolean }) {
+    loader.usePreloadEarly(enabled);
     return null;
   }
 
@@ -48,7 +58,7 @@ function setup() {
     loader,
     frames,
     Probe,
-    IdleProbe,
+    EarlyProbe,
     arrive: () => act(async () => gate.resolve({ default: Greeting })),
   };
 }
@@ -59,6 +69,7 @@ const idleHost = globalThis as unknown as {
 const originalRequestIdleCallback = idleHost.requestIdleCallback;
 
 afterEach(() => {
+  mockPreloadOnFirstInteraction.mockClear();
   idleHost.requestIdleCallback = originalRequestIdleCallback;
   jest.useRealTimers();
   jest.restoreAllMocks();
@@ -127,14 +138,37 @@ describe("createLazyComponentLoader", () => {
     expect(importer).toHaveBeenCalledTimes(1);
   });
 
-  it("waits for an idle callback after mounting before warming up, and schedules only once", async () => {
+  it("starts warming up on the first interaction, and registers once however many instances mount", async () => {
     const requestIdleCallback = jest.fn();
     idleHost.requestIdleCallback = requestIdleCallback;
-    const { IdleProbe, importer, arrive } = setup();
+    const { EarlyProbe, importer, arrive } = setup();
 
-    const first = render(<IdleProbe />);
-    render(<IdleProbe />);
-    first.rerender(<IdleProbe />);
+    const first = render(<EarlyProbe />);
+    render(<EarlyProbe />);
+    first.rerender(<EarlyProbe />);
+
+    expect(mockPreloadOnFirstInteraction).toHaveBeenCalledTimes(1);
+    expect(importer).not.toHaveBeenCalled();
+
+    // The visitor interacts: the helper runs the task it was given.
+    mockPreloadOnFirstInteraction.mock.calls[0][0]();
+    expect(importer).toHaveBeenCalledTimes(1);
+
+    // The idle fallback arriving later changes nothing.
+    requestIdleCallback.mock.calls[0][0]();
+    expect(importer).toHaveBeenCalledTimes(1);
+
+    await arrive();
+    render(<EarlyProbe />);
+    expect(mockPreloadOnFirstInteraction).toHaveBeenCalledTimes(1);
+  });
+
+  it("still warms up when idle if the visitor has not interacted", () => {
+    const requestIdleCallback = jest.fn();
+    idleHost.requestIdleCallback = requestIdleCallback;
+    const { EarlyProbe, importer } = setup();
+
+    render(<EarlyProbe />);
 
     expect(requestIdleCallback).toHaveBeenCalledTimes(1);
     expect(requestIdleCallback).toHaveBeenCalledWith(expect.any(Function), {
@@ -145,20 +179,38 @@ describe("createLazyComponentLoader", () => {
     requestIdleCallback.mock.calls[0][0]();
     expect(importer).toHaveBeenCalledTimes(1);
 
-    await arrive();
-    render(<IdleProbe />);
-    expect(requestIdleCallback).toHaveBeenCalledTimes(1);
+    // An interaction after that finds the chunk already requested.
+    mockPreloadOnFirstInteraction.mock.calls[0][0]();
+    expect(importer).toHaveBeenCalledTimes(1);
   });
 
-  it("does not warm up while the idle preload is disabled", () => {
+  it("registers nothing until the component has mounted, so nothing runs before hydration", () => {
     const requestIdleCallback = jest.fn();
     idleHost.requestIdleCallback = requestIdleCallback;
-    const { IdleProbe, importer } = setup();
+    const { EarlyProbe, importer } = setup();
 
-    const { rerender } = render(<IdleProbe enabled={false} />);
+    // A server render never runs effects.
+    renderToString(<EarlyProbe />);
+
+    expect(mockPreloadOnFirstInteraction).not.toHaveBeenCalled();
+    expect(requestIdleCallback).not.toHaveBeenCalled();
+    expect(importer).not.toHaveBeenCalled();
+
+    render(<EarlyProbe />);
+    expect(mockPreloadOnFirstInteraction).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not warm up while the early preload is disabled", () => {
+    const requestIdleCallback = jest.fn();
+    idleHost.requestIdleCallback = requestIdleCallback;
+    const { EarlyProbe, importer } = setup();
+
+    const { rerender } = render(<EarlyProbe enabled={false} />);
+    expect(mockPreloadOnFirstInteraction).not.toHaveBeenCalled();
     expect(requestIdleCallback).not.toHaveBeenCalled();
 
-    rerender(<IdleProbe enabled />);
+    rerender(<EarlyProbe enabled />);
+    expect(mockPreloadOnFirstInteraction).toHaveBeenCalledTimes(1);
     expect(requestIdleCallback).toHaveBeenCalledTimes(1);
     expect(importer).not.toHaveBeenCalled();
   });
@@ -166,16 +218,16 @@ describe("createLazyComponentLoader", () => {
   it("falls back to a timer where requestIdleCallback is missing", () => {
     jest.useFakeTimers();
     idleHost.requestIdleCallback = undefined;
-    const { IdleProbe, importer } = setup();
+    const { EarlyProbe, importer } = setup();
 
-    render(<IdleProbe />);
+    render(<EarlyProbe />);
     jest.advanceTimersByTime(2999);
     expect(importer).not.toHaveBeenCalled();
 
     jest.advanceTimersByTime(1);
     expect(importer).toHaveBeenCalledTimes(1);
 
-    render(<IdleProbe />);
+    render(<EarlyProbe />);
     jest.advanceTimersByTime(10000);
     expect(importer).toHaveBeenCalledTimes(1);
   });

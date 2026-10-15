@@ -36,21 +36,18 @@ function getWallClockFormatter(timeZone: string): Intl.DateTimeFormat {
 }
 
 /**
- * Offset of `timeZone` from UTC, in milliseconds, at the given instant
- * (positive east of UTC). Derived as the difference between the zone's wall
- * clock and UTC.
- *
- * Throws if Intl does not return readable date parts: guessing an offset
- * would silently show wrong times.
+ * The wall clock of `timeZone` at the given instant, encoded as the UTC
+ * timestamp with the same date and time (whole seconds). Returns NaN when Intl
+ * does not return readable date parts; callers must not guess a value.
  */
-function zoneOffsetMillis(instantMillis: number, timeZone: string): number {
+function wallClockAsUtcMillis(instantMillis: number, timeZone: string): number {
   const parts = getWallClockFormatter(timeZone).formatToParts(
     new Date(instantMillis)
   );
   const read = (type: Intl.DateTimeFormatPartTypes): number =>
     Number(parts.find((part) => part.type === type)?.value);
 
-  const wallClockAsUtc = Date.UTC(
+  return Date.UTC(
     read("year"),
     read("month") - 1,
     read("day"),
@@ -59,6 +56,18 @@ function zoneOffsetMillis(instantMillis: number, timeZone: string): number {
     read("minute"),
     read("second")
   );
+}
+
+/**
+ * Offset of `timeZone` from UTC, in milliseconds, at the given instant
+ * (positive east of UTC). Derived as the difference between the zone's wall
+ * clock and UTC.
+ *
+ * Throws if Intl does not return readable date parts: guessing an offset
+ * would silently show wrong times.
+ */
+function zoneOffsetMillis(instantMillis: number, timeZone: string): number {
+  const wallClockAsUtc = wallClockAsUtcMillis(instantMillis, timeZone);
   if (!Number.isFinite(wallClockAsUtc)) {
     throw new TypeError(
       `Unable to derive the UTC offset of time zone "${timeZone}": Intl returned unreadable date parts`
@@ -121,4 +130,31 @@ export function wallTimeToUtcInstantInZone(
 
   // No candidate matched: the wall time is inside a spring-forward gap.
   return new Date(earliestMatch ?? wallClockAsUtc - offsetBefore);
+}
+
+/**
+ * The viewer's IANA time zone, as the runtime reports it ("UTC" when it reports
+ * none). Read it only on the client after hydration: on the server it is the
+ * server's zone, not the viewer's.
+ */
+export function getViewerTimeZone(): string {
+  return new Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+}
+
+/**
+ * The calendar date that `instant` falls on in `timeZone` (an IANA name such as
+ * "Pacific/Auckland"), returned as 00:00 UTC of that date. Like the calendar
+ * grid's cell dates, the result names a day: read it with UTC getters, never
+ * as an instant.
+ *
+ * Throws if Intl does not return readable date parts.
+ */
+export function calendarDayInZone(instant: Date, timeZone: string): Date {
+  const wallClockAsUtc = wallClockAsUtcMillis(instant.getTime(), timeZone);
+  if (!Number.isFinite(wallClockAsUtc)) {
+    throw new TypeError(
+      `Unable to read the calendar date in time zone "${timeZone}": Intl returned unreadable date parts`
+    );
+  }
+  return new Date(Math.floor(wallClockAsUtc / MILLIS_PER_DAY) * MILLIS_PER_DAY);
 }
