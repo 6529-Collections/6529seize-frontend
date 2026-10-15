@@ -26,6 +26,14 @@ type DateCountdownTranslations = readonly [
   deDE: string,
 ];
 
+const sameInEveryLocale = (value: string): DateCountdownTranslations => [
+  value,
+  value,
+  value,
+  value,
+  value,
+];
+
 // Units are chosen with the locale's plural rules, so every supported locale
 // carries its own forms. The time-left sentences list only the units shown;
 // minutes and seconds are joined with "and", larger units with commas.
@@ -86,13 +94,7 @@ const DATE_COUNTDOWN_MESSAGE_VALUES = {
     "{count} segundos",
     "{count} Sekunden",
   ],
-  "timeLeft.seconds": [
-    "{seconds}",
-    "{seconds}",
-    "{seconds}",
-    "{seconds}",
-    "{seconds}",
-  ],
+  "timeLeft.seconds": sameInEveryLocale("{seconds}"),
   "timeLeft.minutesSeconds": [
     "{minutes} and {seconds}",
     "{minutes} and {seconds}",
@@ -100,13 +102,7 @@ const DATE_COUNTDOWN_MESSAGE_VALUES = {
     "{minutes} y {seconds}",
     "{minutes} und {seconds}",
   ],
-  "timeLeft.hoursSeconds": [
-    "{hours}, {seconds}",
-    "{hours}, {seconds}",
-    "{hours}, {seconds}",
-    "{hours}, {seconds}",
-    "{hours}, {seconds}",
-  ],
+  "timeLeft.hoursSeconds": sameInEveryLocale("{hours}, {seconds}"),
   "timeLeft.hoursMinutesSeconds": [
     "{hours}, {minutes} and {seconds}",
     "{hours}, {minutes} and {seconds}",
@@ -114,13 +110,7 @@ const DATE_COUNTDOWN_MESSAGE_VALUES = {
     "{hours}, {minutes} y {seconds}",
     "{hours}, {minutes} und {seconds}",
   ],
-  "timeLeft.daysSeconds": [
-    "{days}, {seconds}",
-    "{days}, {seconds}",
-    "{days}, {seconds}",
-    "{days}, {seconds}",
-    "{days}, {seconds}",
-  ],
+  "timeLeft.daysSeconds": sameInEveryLocale("{days}, {seconds}"),
   "timeLeft.daysMinutesSeconds": [
     "{days}, {minutes} and {seconds}",
     "{days}, {minutes} and {seconds}",
@@ -128,13 +118,7 @@ const DATE_COUNTDOWN_MESSAGE_VALUES = {
     "{days}, {minutes} y {seconds}",
     "{days}, {minutes} und {seconds}",
   ],
-  "timeLeft.daysHoursSeconds": [
-    "{days}, {hours}, {seconds}",
-    "{days}, {hours}, {seconds}",
-    "{days}, {hours}, {seconds}",
-    "{days}, {hours}, {seconds}",
-    "{days}, {hours}, {seconds}",
-  ],
+  "timeLeft.daysHoursSeconds": sameInEveryLocale("{days}, {hours}, {seconds}"),
   "timeLeft.daysHoursMinutesSeconds": [
     "{days}, {hours}, {minutes} and {seconds}",
     "{days}, {hours}, {minutes} and {seconds}",
