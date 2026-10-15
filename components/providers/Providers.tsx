@@ -36,6 +36,7 @@ import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import { ViewProvider } from "../navigation/ViewContext";
 import CapacitorSetup from "./CapacitorSetup";
 import IpfsImageSetup from "./IpfsImageSetup";
+import LocaleMessagesGate from "./LocaleMessagesGate";
 import MixpanelSetup from "./MixpanelSetup";
 import QueryClientSetup from "./QueryClientSetup";
 import WagmiSetup from "./WagmiSetup";
@@ -65,7 +66,9 @@ export default function Providers({
         <ScrollPositionProvider>
           <ViewProvider>
             <WaveInformationProvider>
-              <NavigationHistoryProvider>{children}</NavigationHistoryProvider>
+              <NavigationHistoryProvider>
+                <LocaleMessagesGate>{children}</LocaleMessagesGate>
+              </NavigationHistoryProvider>
             </WaveInformationProvider>
           </ViewProvider>
         </ScrollPositionProvider>
