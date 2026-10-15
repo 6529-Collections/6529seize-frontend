@@ -4,6 +4,7 @@ import "@testing-library/jest-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ArtistActiveSubmissionContent } from "@/components/waves/drops/ArtistActiveSubmissionContent";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import { mockDefaultTimeZone } from "@/__tests__/utils/timeZoneHydration";
 
 // Mock dependencies
 const mockPush = jest.fn();
@@ -291,12 +292,28 @@ describe("ArtistActiveSubmissionContent", () => {
     expect(mockOnClose).toHaveBeenCalled();
   });
 
-  it("renders date information for submissions", () => {
-    renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);
+  // The submissions are created at 2022-01-01T00:00Z and 2022-01-02T00:00Z.
+  // Each date renders in the viewer's zone, so Los Angeles is a day behind.
+  it.each([
+    ["UTC", "Jan 1, 2022", "Jan 2, 2022"],
+    ["America/Los_Angeles", "Dec 31, 2021", "Jan 1, 2022"],
+    ["Pacific/Auckland", "Jan 1, 2022", "Jan 2, 2022"],
+  ])(
+    "renders date information for submissions in %s",
+    (zone, firstDate, secondDate) => {
+      const restoreTimeZone = mockDefaultTimeZone(zone);
+      try {
+        renderWithProviders(
+          <ArtistActiveSubmissionContent {...defaultProps} />
+        );
 
-    expect(screen.getByText("Jan 1, 2022")).toBeInTheDocument();
-    expect(screen.getByText("Jan 2, 2022")).toBeInTheDocument();
-  });
+        expect(screen.getByText(firstDate)).toBeInTheDocument();
+        expect(screen.getByText(secondDate)).toBeInTheDocument();
+      } finally {
+        restoreTimeZone();
+      }
+    }
+  );
 
   it("renders submission grid correctly", () => {
     renderWithProviders(<ArtistActiveSubmissionContent {...defaultProps} />);

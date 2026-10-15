@@ -338,7 +338,7 @@ export default function PublicReviewLedger({
           <button
             type="button"
             onClick={() => void ledgerQuery.refetch()}
-            className="tw-border-red-300/50 tw-text-red-100 focus-visible:tw-ring-red-300 tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-bg-transparent tw-px-4 tw-py-2 tw-font-semibold focus:tw-outline-none focus-visible:tw-ring-2"
+            className="tw-border-red-300/50 tw-text-red-100 focus-visible:tw-ring-primary-400 tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-bg-transparent tw-px-4 tw-py-2 tw-font-semibold focus:tw-outline-none focus-visible:tw-ring-2"
           >
             {t(locale, "publicReview.ledger.retry")}
           </button>
