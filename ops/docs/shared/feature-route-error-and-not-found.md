@@ -28,7 +28,6 @@ route/layout render boundary fails.
 - Trigger a route, layout, or global render exception.
 - Trigger an app-shell client exception inside the layout error boundary.
 - Open `/error` directly, with or without `?stack=...`.
-- Open `/sentry-example-page` and press `Throw Sample Error`.
 
 ## User Journey
 
@@ -83,7 +82,6 @@ route/layout render boundary fails.
 - Payload sanitization removes request cookies/body/query data, strips URL query/hash, and redacts sensitive headers and secret-like fields.
 - Session Replay is enabled only when `NODE_ENV=production` and `SENTRY_REPLAY_ENABLED=true`.
 - If Sentry is blocked by network/policy, fallback screens still render.
-- On `/sentry-example-page`, `Throw Sample Error` is disabled when Sentry connectivity reports `sentry-unreachable`.
 
 ## Limitations / Notes
 
