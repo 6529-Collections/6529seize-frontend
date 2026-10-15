@@ -265,7 +265,7 @@ export function useNativeInitialBackfill({
   const scheduleNativeInitialBackfill = useCallback(
     (
       waveId: string,
-      initialDrops: readonly ApiDrop[] | null,
+      initialDrops: readonly DropWithSerialNo[] | null,
       options?: { readonly skipInitialBackfill?: boolean | undefined }
     ) => {
       if (

@@ -345,8 +345,13 @@ export function useWaveDataFetching({
         return;
       }
 
-      const existingDropsCount = getData(waveId)?.drops.length ?? 0;
+      const existingDrops = getData(waveId)?.drops ?? [];
+      const existingDropsCount = existingDrops.length;
       if (existingDropsCount > 0) {
+        if (!options?.isPrefetch) {
+          markMobileLaunchStep("wave_messages_loaded");
+          scheduleNativeInitialBackfill(waveId, existingDrops, options);
+        }
         if (
           !options?.isPrefetch &&
           !trackedCacheSuccessWaveIdsRef.current.has(waveId)
@@ -381,7 +386,12 @@ export function useWaveDataFetching({
 
       const { state: loadingState, shouldContinue } = getLoadingState(waveId);
       if (!shouldContinue) {
-        return loadingState.promise;
+        const drops = await loadingState.promise;
+        if (!options?.isPrefetch && drops !== null) {
+          markMobileLaunchStep("wave_messages_loaded");
+          scheduleNativeInitialBackfill(waveId, drops, options);
+        }
+        return drops;
       }
 
       setLoadingState(waveId, true);
