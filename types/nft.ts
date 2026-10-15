@@ -9,7 +9,12 @@ export type Suggestion = {
   floorPriceEth?: number | null | undefined;
   imageUrl?: string | null | undefined;
   isSpam?: boolean | undefined;
-  safelist?: "verified" | "approved" | "requested" | "not_requested" | undefined;
+  safelist?:
+    | "verified"
+    | "approved"
+    | "requested"
+    | "not_requested"
+    | undefined;
   deployer?: `0x${string}` | null | undefined;
 };
 
@@ -21,6 +26,7 @@ export type ContractOverview = Suggestion & {
 export type TokenMetadata = {
   tokenId: bigint;
   tokenIdRaw: string;
+  tokenUri?: string | null | undefined;
   contract?: string | undefined;
   name: string | null;
   imageUrl: string | null;

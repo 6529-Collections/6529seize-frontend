@@ -291,7 +291,15 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       "https://nft2-cdn.alchemy.com/cdn-cgi/image/width=250,height=250,fit=scale-down/eth-mainnet/a3062b74e1b4d79fdab0ca1ec5a92615";
     const cloudinaryThumbnail =
       "https://res.cloudinary.com/alchemyapi/image/upload/thumbnailv2/eth-mainnet/136dc79022a5b971800cf8405adb5cea_ea0b833e";
-    const thumbnails = [alchemyThumbnail, cloudinaryThumbnail, null, null];
+    const thumbnails = [
+      alchemyThumbnail,
+      cloudinaryThumbnail,
+      null,
+      null,
+      null,
+    ];
+    const tokenUri =
+      "https://arweave.net/fLAMSnWmzM9tAso6xMRSSPC2ZYaRoqjRnqGKaxk7vRQ";
     let collectionImageUrl = "null";
     let releaseMetadata: () => void;
     const metadataReady = new Promise<void>((resolve) => {
@@ -301,7 +309,10 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     // Control grant/token data while exercising the deployed disclosure, grid,
     // real CDN responses and image optimizer in both environments.
     const grantId = "thumbnail-fixture";
-    const tokens = ["1", "2", "3", "17"].map((token) => ({ token, xtdh: 1 }));
+    const tokens = ["1", "2", "3", "17", "18"].map((token) => ({
+      token,
+      xtdh: 1,
+    }));
     const grantsPage: ApiXTdhGrantsPage = {
       data: [
         {
@@ -381,6 +392,16 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         },
       });
     });
+    await page.route(
+      "https://media.6529.io/arweave/fLAMSnWmzM9tAso6xMRSSPC2ZYaRoqjRnqGKaxk7vRQ",
+      (route) =>
+        route.fulfill({
+          json: {
+            name: "Recovered original artwork",
+            image: cloudinaryThumbnail,
+          },
+        })
+    );
     await page.route("**/api/alchemy/token-metadata", async (route) => {
       await metadataReady;
       const body = route.request().postDataJSON() as { tokenIds: string[] };
@@ -388,7 +409,8 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         json: {
           tokens: body.tokenIds.map((tokenId, index) => ({
             tokenId,
-            name: `Thumbnail fixture ${index}`,
+            name: tokenId === "18" ? "#18" : `Thumbnail fixture ${index}`,
+            ...(tokenId === "18" ? { tokenUri } : {}),
             image: { thumbnailUrl: thumbnails[index % thumbnails.length] },
             ...(tokenId === "17"
               ? {
@@ -426,6 +448,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       "Thumbnail fixture 0",
       "Thumbnail fixture 1",
       "Thumbnail fixture 3",
+      "Recovered original artwork",
     ]) {
       const image = tokenList.getByRole("img", { name, exact: true });
       await image.scrollIntoViewIfNeeded();

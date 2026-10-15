@@ -70,8 +70,10 @@ Grant token panel:
 - disclosure first load shows spinner, then token grid.
 - first-load fetch failure shows inline `Retry`.
 - token cards prefer thumbnails and can use supplied original artwork from
-  supported image hosts when thumbnails are absent. Missing artwork shows the
-  token ID; a metadata name such as `#1` is shown as supplied.
+  supported image hosts when thumbnails are absent. When the indexed record has
+  no artwork, the grid can recover artwork and a placeholder name such as `#1`
+  from the token's original Arweave or IPFS metadata. Available cards remain
+  visible while this loads. If recovery is unavailable, the token ID remains.
 - if thumbnail metadata or the image cannot load, its tile shows `Load Error`.
   Image failures retain the available token name, ID, and xTDH. If metadata
   fails, the name falls back to `Token #<ID>`. Close and reopen the disclosure

@@ -1,6 +1,7 @@
 import {
   processContractMetadataResponse,
   processTokenMetadataResponse,
+  processTokenUriMetadata,
 } from "@/services/alchemy/utils";
 import type { AlchemyTokenMetadataEntry } from "@/services/alchemy/types";
 
@@ -23,7 +24,7 @@ describe("Alchemy image metadata", () => {
         processContractMetadataResponse(
           { address, openSeaMetadata: { imageUrl } },
           address
-        ).imageUrl
+        )?.imageUrl
       ).toBeNull();
     }
   );
@@ -37,7 +38,7 @@ describe("Alchemy image metadata", () => {
           image: { cachedUrl: thumbnail },
         },
         address
-      ).imageUrl
+      )?.imageUrl
     ).toBe(thumbnail);
   });
 
@@ -73,6 +74,26 @@ describe("Alchemy image metadata", () => {
   ])("does not load unsupported raw artwork %s", (image) => {
     expect(tokenImage({ raw: { metadata: { image } } })).toBeNull();
   });
+
+  it("resolves native IPFS artwork through the existing image resolver", () => {
+    const cid = "bafybeigdyrzt5sfp7udm7hu76mjts3sfb44oixwkw55rmpbc6g6wuigv3i";
+    expect(
+      processTokenUriMetadata({
+        name: "Original title",
+        image: `ipfs://${cid}/image.png`,
+      })
+    ).toEqual({
+      name: "Original title",
+      imageUrl: `https://media.6529.io/ipfs/${cid}/image.png`,
+    });
+  });
+
+  it.each([null, [], "invalid"])(
+    "ignores invalid original metadata %p",
+    (metadata) => {
+      expect(processTokenUriMetadata(metadata)).toBeNull();
+    }
+  );
 
   it("preserves the supplied token number when artwork is absent", () => {
     expect(

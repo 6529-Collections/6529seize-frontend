@@ -1,6 +1,10 @@
 import { STATIC_ALLOWED_IMAGE_HOSTNAMES } from "@/lib/media/static-image-hosts";
 import { isArweaveGatewayRuntimeHost } from "@/lib/media/arweave-gateways";
 import { getAddress } from "viem";
+import {
+  DEFAULT_MEDIA_RESOLVER_ENDPOINT,
+  normalizeDecentralizedMediaUrl,
+} from "@/lib/media/decentralized-media";
 
 import { isValidEthAddress } from "@/helpers/Helpers";
 import type {
@@ -111,7 +115,11 @@ function normaliseImageUrl(value: unknown): string | null {
 
 function pickOriginalImage(...sources: unknown[]): string | null {
   for (const source of sources) {
-    const imageUrl = normaliseImageUrl(source);
+    const imageUrl =
+      normaliseImageUrl(source) ??
+      (typeof source === "string"
+        ? normaliseImageUrl(normalizeDecentralizedMediaUrl(source))
+        : null);
     if (!imageUrl) {
       continue;
     }
@@ -122,7 +130,8 @@ function pickOriginalImage(...sources: unknown[]): string | null {
       !url.port &&
       !url.username &&
       !url.password &&
-      (STATIC_ALLOWED_IMAGE_HOSTNAMES.some((host) => host === url.hostname) ||
+      (url.origin === DEFAULT_MEDIA_RESOLVER_ENDPOINT ||
+        STATIC_ALLOWED_IMAGE_HOSTNAMES.some((host) => host === url.hostname) ||
         isArweaveGatewayRuntimeHost(url.hostname))
     ) {
       return imageUrl;
@@ -140,22 +149,11 @@ function pickImage(source?: {
     | null
     | undefined;
   imageUrl?: string | null | undefined;
-  media?:
-    | {
-        thumbnailUrl?: string | null | undefined;
-        gateway?: string | null | undefined;
-      }[]
-    | null
-    | undefined;
 }): string | null {
   return (
     normaliseImageUrl(source?.imageUrl) ??
     normaliseImageUrl(source?.image?.cachedUrl) ??
-    normaliseImageUrl(source?.image?.thumbnailUrl) ??
-    source?.media
-      ?.map((item) => normaliseImageUrl(item.thumbnailUrl))
-      .find(Boolean) ??
-    normaliseImageUrl(source?.media?.[0]?.gateway)
+    normaliseImageUrl(source?.image?.thumbnailUrl)
   );
 }
 
@@ -299,6 +297,7 @@ function normaliseTokenMetadata(
     return {
       tokenId,
       tokenIdRaw,
+      tokenUri: token.tokenUri ?? token.raw?.tokenUri ?? null,
       contract: token.contract?.address ?? undefined,
       name:
         token.title ??
@@ -331,4 +330,23 @@ export function processTokenMetadataResponse(
     }
   }
   return results;
+}
+
+export function processTokenUriMetadata(
+  payload: unknown
+): Pick<TokenMetadata, "name" | "imageUrl"> | null {
+  if (
+    payload === null ||
+    typeof payload !== "object" ||
+    Array.isArray(payload)
+  ) {
+    return null;
+  }
+  const metadata = payload as Record<string, unknown>;
+  const name =
+    typeof metadata["name"] === "string" ? metadata["name"].trim() : null;
+  return {
+    name: name === "" ? null : name,
+    imageUrl: pickOriginalImage(metadata["image"], metadata["image_url"]),
+  };
 }
