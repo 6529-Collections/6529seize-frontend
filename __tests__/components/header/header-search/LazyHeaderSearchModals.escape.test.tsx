@@ -60,6 +60,15 @@ jest.mock("@/components/waves/drops/search/WaveDropsSearchModal", () => {
   return { __esModule: true, default: MockWaveDropsSearchModal };
 });
 
+// These tests open search while its chunk is still loading, so the warm-up
+// that starts the download on the first interaction must stay out of the way:
+// it exists to make the chunk arrive early, and (once the visitor has
+// interacted) would also fetch every later modal as soon as it mounts. Its own
+// tests cover it.
+jest.mock("@/components/utils/lazy-load/preloadOnFirstInteraction", () => ({
+  preloadOnFirstInteraction: () => undefined,
+}));
+
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace: jest.fn() }),
   usePathname: () => "/waves/wave-1",

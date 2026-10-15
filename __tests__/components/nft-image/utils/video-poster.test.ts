@@ -28,6 +28,20 @@ describe("getVideoPosterSrc", () => {
     expect(getVideoPosterSrc([src])).toBe(src);
   });
 
+  it.each([
+    "https://cdn.example.com/images/scaled_x1000/0xabc/561.GIF",
+    "https://cdn.example.com/art.gif?width=450",
+    "data:image/gif;base64,R0lGOD",
+  ])("skips an animated GIF candidate: %s", (src) => {
+    expect(getVideoPosterSrc([src, "poster.webp"])).toBe("poster.webp");
+  });
+
+  it("omits the poster when every image candidate is a GIF", () => {
+    expect(
+      getVideoPosterSrc(["scaled.GIF", "original.gif", "thumb.gif"])
+    ).toBeUndefined();
+  });
+
   it("omits the poster when there is no image candidate", () => {
     expect(getVideoPosterSrc([undefined, "", "art.mp4"])).toBeUndefined();
   });

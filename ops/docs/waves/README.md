@@ -61,6 +61,10 @@ Use this area for wave and direct-message tasks:
 - Small-screen web `/waves` with no selected wave and native-app waves routes
   still use the regular connect-wallet gate.
 - `/messages` requires authenticated wallet access.
+- While the native app shows the Messages list, it prepares a few recent
+  conversations in the background. Prepared chats show cached messages on open
+  while checking for newer ones; an unprepared chat can still show loading.
+  Background preparation does not mark a conversation as read.
 - A profile handle is required before route content renders.
 - Proxy sessions cannot access wave/message content and show unavailable states.
 - Wave and direct-message creation requires a connected non-proxy profile.

@@ -574,7 +574,7 @@ export default function MyStreamWaveCurationCreateDialog({
                       onClick={() => handlePresetSelect(preset)}
                       aria-pressed={isSelected}
                       className={clsx(
-                        "tw-inline-flex tw-appearance-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-shadow-sm tw-transition-all tw-duration-300 group-data-[profile-typography=true]/curation-dialog:tw-text-meta focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20",
+                        "tw-inline-flex tw-appearance-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-shadow-sm tw-transition-all tw-duration-300 group-data-[profile-typography=true]/curation-dialog:tw-text-meta focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400",
                         isSelected
                           ? "tw-border-white/20 tw-bg-iron-800 tw-text-iron-100"
                           : "tw-border-white/10 tw-bg-iron-900 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50"
