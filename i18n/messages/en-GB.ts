@@ -9,6 +9,7 @@ import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.en-GB
 import { EN_GB_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { EN_GB_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { EN_GB_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
+import { EN_GB_DATE_COUNTDOWN_MESSAGES } from "@/i18n/messages/date-countdown";
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES as EN_GB_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
@@ -1044,6 +1045,7 @@ export const EN_GB_MESSAGES = {
   "waves.proposalCard.tabLabels.errorReserved":
     "Labels cannot match existing tabs.",
   ...EN_GB_PAGINATION_MESSAGES,
+  ...EN_GB_DATE_COUNTDOWN_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} left this round",
   "memes.quickVote.unrated": "{count} unrated",
   "memes.quickVote.summary": "{leftThisRound}, {unrated}",

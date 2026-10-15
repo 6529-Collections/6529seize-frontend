@@ -12,6 +12,7 @@ import { ES_ES_GLOBAL_ERROR_MESSAGES } from "@/i18n/messages/global-error";
 import { ES_ES_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { ES_ES_CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
 import { ES_ES_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
+import { ES_ES_DATE_COUNTDOWN_MESSAGES } from "@/i18n/messages/date-countdown";
 import { ES_ES_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { ES_ES_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { ES_ES_THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
@@ -1038,6 +1039,7 @@ export const ES_ES_MESSAGES = {
   "waves.proposalCard.tabLabels.errorReserved":
     "Las etiquetas no pueden coincidir con pestañas existentes.",
   ...ES_ES_PAGINATION_MESSAGES,
+  ...ES_ES_DATE_COUNTDOWN_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} restantes esta ronda",
   "memes.quickVote.unrated": "{count} sin valorar",
   "memes.quickVote.summary": "{leftThisRound}, {unrated}",

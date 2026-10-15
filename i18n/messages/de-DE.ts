@@ -12,6 +12,7 @@ import { DE_DE_GLOBAL_ERROR_MESSAGES } from "@/i18n/messages/global-error";
 import { DE_DE_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { DE_DE_CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
 import { DE_DE_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
+import { DE_DE_DATE_COUNTDOWN_MESSAGES } from "@/i18n/messages/date-countdown";
 import { DE_DE_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { DE_DE_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { DE_DE_THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
@@ -1042,6 +1043,7 @@ export const DE_DE_MESSAGES = {
   "waves.proposalCard.tabLabels.errorReserved":
     "Bezeichnungen dürfen nicht mit vorhandenen Tabs übereinstimmen.",
   ...DE_DE_PAGINATION_MESSAGES,
+  ...DE_DE_DATE_COUNTDOWN_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} in dieser Runde übrig",
   "memes.quickVote.unrated": "{count} unbewertet",
   "memes.quickVote.summary": "{leftThisRound}, {unrated}",
