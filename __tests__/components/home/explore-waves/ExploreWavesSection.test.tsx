@@ -1,7 +1,7 @@
 import { renderWithQueryClient } from "../../../utils/reactQuery";
 import { ExploreWavesSection } from "@/components/home/explore-waves/ExploreWavesSection";
 import { fetchWavesV2Page } from "@/services/api/waves-v2-api";
-import { waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 
@@ -99,5 +99,73 @@ describe("ExploreWavesSection", () => {
         scoreSort: undefined,
       })
     );
+  });
+});
+
+describe("ExploreWavesSection load failures", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useAuthMock.mockReturnValue({ connectedProfile: null });
+    fetchWavesV2PageMock.mockResolvedValue({
+      waves: [{ id: "wave-1", name: "Scored wave" }],
+      page: 1,
+      next: null,
+    });
+  });
+
+  it("shows an alert with retry instead of a blank section on discovery", async () => {
+    fetchWavesV2PageMock.mockRejectedValueOnce(new Error("offline"));
+
+    renderWithQueryClient(
+      <ExploreWavesSection
+        headingVariant="page"
+        title="Active discussions"
+        statusLabel="Balanced waves"
+        showEmptyState
+        headerControls={<div>Sort controls</div>}
+      />
+    );
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(
+      "Could not load Balanced waves. Please try again."
+    );
+    expect(
+      screen.getByRole("heading", { name: "Active discussions" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Sort controls")).toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+
+    fireEvent.click(within(alert).getByRole("button", { name: "Try again" }));
+    expect(alert.parentElement).toHaveFocus();
+
+    expect(await screen.findByText("Scored wave")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(fetchWavesV2PageMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps the section hidden on failure where empty states are not shown", async () => {
+    fetchWavesV2PageMock.mockRejectedValueOnce(new Error("offline"));
+
+    const { container } = renderWithQueryClient(<ExploreWavesSection />);
+
+    await waitFor(() => expect(container).toBeEmptyDOMElement());
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("keeps loaded waves on screen when a later refetch fails", async () => {
+    const { queryClient } = renderWithQueryClient(
+      <ExploreWavesSection showEmptyState />
+    );
+    expect(await screen.findByText("Scored wave")).toBeInTheDocument();
+
+    fetchWavesV2PageMock.mockRejectedValueOnce(new Error("offline"));
+    await act(async () => {
+      await queryClient.refetchQueries({ queryKey: ["explore-waves"] });
+    });
+
+    expect(fetchWavesV2PageMock).toHaveBeenCalledTimes(2);
+    expect(screen.getByText("Scored wave")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 });
