@@ -61,4 +61,22 @@ describe("AboutSubscriptions", () => {
     expect(container.querySelector("details")).toBeInTheDocument();
     expect(screen.getByText("Delegation")).toBeInTheDocument();
   });
+
+  it("states the top-up and opt-out deadlines in UTC without a US zone example", () => {
+    // 00:00 UTC is 19:00 EST only in winter (20:00 EDT in summer), so a fixed
+    // example in another zone is wrong for most of the year.
+    const { container } = render(<AboutSubscriptions />);
+
+    expect(
+      screen.getByText(
+        "Top ups must be received by 00:00 UTC the day before the Meme Card mint to be eligible for the mint; otherwise they will roll over to the next mint"
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "You must turn off minting for that specific drop before 00:00 UTC the day before the mint"
+      )
+    ).toBeInTheDocument();
+    expect(container).not.toHaveTextContent(/\b(EST|EDT)\b/);
+  });
 });
