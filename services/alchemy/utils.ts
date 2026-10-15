@@ -1,3 +1,5 @@
+import { STATIC_ALLOWED_IMAGE_HOSTNAMES } from "@/lib/media/static-image-hosts";
+import { isArweaveGatewayRuntimeHost } from "@/lib/media/arweave-gateways";
 import { getAddress } from "viem";
 
 import { isValidEthAddress } from "@/helpers/Helpers";
@@ -92,6 +94,43 @@ function resolveOpenSeaMetadata(
   return undefined;
 }
 
+function normaliseImageUrl(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+  const source = value.trim();
+  try {
+    const url = new URL(source);
+    return url.protocol === "https:" || url.protocol === "http:"
+      ? source
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function pickOriginalImage(...sources: unknown[]): string | null {
+  for (const source of sources) {
+    const imageUrl = normaliseImageUrl(source);
+    if (!imageUrl) {
+      continue;
+    }
+    const url = new URL(imageUrl);
+    // Raw metadata can name any host; retain the existing image-host policy.
+    if (
+      url.protocol === "https:" &&
+      !url.port &&
+      !url.username &&
+      !url.password &&
+      (STATIC_ALLOWED_IMAGE_HOSTNAMES.some((host) => host === url.hostname) ||
+        isArweaveGatewayRuntimeHost(url.hostname))
+    ) {
+      return imageUrl;
+    }
+  }
+  return null;
+}
+
 function pickImage(source?: {
   image?:
     | {
@@ -109,58 +148,31 @@ function pickImage(source?: {
     | null
     | undefined;
 }): string | null {
-  if (!source) {
-    return null;
-  }
-  if (source.imageUrl) {
-    return source.imageUrl;
-  }
-  if (source.image?.cachedUrl) {
-    return source.image.cachedUrl;
-  }
-  if (source.image?.thumbnailUrl) {
-    return source.image.thumbnailUrl;
-  }
-  if (source.media && source.media.length > 0) {
-    const mediaItem =
-      source.media.find((item) => item.thumbnailUrl) ?? source.media[0];
-    if (mediaItem?.thumbnailUrl) {
-      return mediaItem.thumbnailUrl;
-    }
-    if (mediaItem?.gateway) {
-      return mediaItem.gateway;
-    }
-  }
-  return null;
+  return (
+    normaliseImageUrl(source?.imageUrl) ??
+    normaliseImageUrl(source?.image?.cachedUrl) ??
+    normaliseImageUrl(source?.image?.thumbnailUrl) ??
+    source?.media
+      ?.map((item) => normaliseImageUrl(item.thumbnailUrl))
+      .find(Boolean) ??
+    normaliseImageUrl(source?.media?.[0]?.gateway)
+  );
 }
 
-function pickThumbnail(source?: {
-  image?:
-    | {
-        thumbnailUrl?: string | null | undefined;
-        cachedUrl?: string | null | undefined;
-      }
-    | null
-    | undefined;
-  media?: { thumbnailUrl?: string | null | undefined }[] | null | undefined;
-}): string | null {
-  if (!source) {
-    return null;
-  }
-  if (source.image?.thumbnailUrl) {
-    return source.image.thumbnailUrl;
-  }
-  if (source.image?.cachedUrl) {
-    return source.image.cachedUrl;
-  }
-  if (source.media && source.media.length > 0) {
-    const mediaItem =
-      source.media.find((item) => item.thumbnailUrl) ?? source.media[0];
-    if (mediaItem?.thumbnailUrl) {
-      return mediaItem.thumbnailUrl;
-    }
-  }
-  return null;
+function pickThumbnail(source: AlchemyTokenMetadataEntry): string | null {
+  return (
+    normaliseImageUrl(source.image?.thumbnailUrl) ??
+    normaliseImageUrl(source.image?.cachedUrl) ??
+    source.media
+      ?.map((item) => normaliseImageUrl(item.thumbnailUrl))
+      .find(Boolean) ??
+    pickOriginalImage(
+      source.image?.originalUrl,
+      source.metadata?.image,
+      source.raw?.metadata?.image,
+      source.raw?.metadata?.["original_image_url"]
+    )
+  );
 }
 
 export function normaliseAddress(
@@ -283,10 +295,7 @@ function normaliseTokenMetadata(
   const tokenIdRaw = token.tokenId ?? "";
   try {
     const tokenId = parseTokenIdToBigint(tokenIdRaw);
-    const imageUrl = pickThumbnail({
-      image: token.image ?? undefined,
-      media: token.media ?? undefined,
-    });
+    const imageUrl = pickThumbnail(token);
     return {
       tokenId,
       tokenIdRaw,

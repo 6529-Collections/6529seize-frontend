@@ -291,7 +291,8 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       "https://nft2-cdn.alchemy.com/cdn-cgi/image/width=250,height=250,fit=scale-down/eth-mainnet/a3062b74e1b4d79fdab0ca1ec5a92615";
     const cloudinaryThumbnail =
       "https://res.cloudinary.com/alchemyapi/image/upload/thumbnailv2/eth-mainnet/136dc79022a5b971800cf8405adb5cea_ea0b833e";
-    const thumbnails = [alchemyThumbnail, cloudinaryThumbnail, null];
+    const thumbnails = [alchemyThumbnail, cloudinaryThumbnail, null, null];
+    let collectionImageUrl = "null";
     let releaseMetadata: () => void;
     const metadataReady = new Promise<void>((resolve) => {
       releaseMetadata = resolve;
@@ -300,7 +301,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     // Control grant/token data while exercising the deployed disclosure, grid,
     // real CDN responses and image optimizer in both environments.
     const grantId = "thumbnail-fixture";
-    const tokens = ["1", "2", "3"].map((token) => ({ token, xtdh: 1 }));
+    const tokens = ["1", "2", "3", "17"].map((token) => ({ token, xtdh: 1 }));
     const grantsPage: ApiXTdhGrantsPage = {
       data: [
         {
@@ -362,6 +363,24 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await page.route(tokensRoute, (route) =>
       route.fulfill({ json: tokensPage })
     );
+    await page.route("**/api/alchemy/contracts", (route) => {
+      const body = route.request().postDataJSON() as {
+        contracts: { address: string; chain: string }[];
+      };
+      return route.fulfill({
+        json: {
+          contracts: body.contracts.map((contract) => ({
+            ...contract,
+            metadata: {
+              address: contract.address,
+              name: "Thumbnail fixture collection",
+              tokenType: "ERC721",
+              openSeaMetadata: { imageUrl: collectionImageUrl },
+            },
+          })),
+        },
+      });
+    });
     await page.route("**/api/alchemy/token-metadata", async (route) => {
       await metadataReady;
       const body = route.request().postDataJSON() as { tokenIds: string[] };
@@ -371,11 +390,25 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
             tokenId,
             name: `Thumbnail fixture ${index}`,
             image: { thumbnailUrl: thumbnails[index % thumbnails.length] },
+            ...(tokenId === "17"
+              ? {
+                  raw: {
+                    metadata: { original_image_url: cloudinaryThumbnail },
+                  },
+                }
+              : {}),
           })),
         },
       });
     });
     await gotoReady(page, `/${PROFILE_HANDLE}/xtdh?tab=granted`);
+    await expect(page.getByText("NFT", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("img", {
+        name: "Thumbnail fixture collection",
+        exact: true,
+      })
+    ).toHaveCount(0);
     await page
       .getByRole("button", { name: /^Show [\d,]+ tokens$/ })
       .first()
@@ -389,7 +422,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     } finally {
       releaseMetadata!();
     }
-    for (const name of ["Thumbnail fixture 0", "Thumbnail fixture 1"]) {
+    for (const name of [
+      "Thumbnail fixture 0",
+      "Thumbnail fixture 1",
+      "Thumbnail fixture 3",
+    ]) {
       const image = tokenList.getByRole("img", { name, exact: true });
       await image.scrollIntoViewIfNeeded();
       await expect(image).toBeVisible();
@@ -404,6 +441,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         )
         .toBe(true);
     }
+    await expect(
+      tokenList.getByText("#3", { exact: true }).and(tokenList.locator("div"))
+    ).toBeVisible();
     const source = await tokenList
       .getByRole("img", { name: "Thumbnail fixture 0", exact: true })
       .getAttribute("src");
@@ -412,7 +452,8 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
 
     await captureSafeScreenshot(page, test.info(), "grant-thumbnail-artwork");
 
-    // A fresh browser load must also replace a real image-network failure.
+    // A fresh browser load must also replace real collection/token image failures.
+    collectionImageUrl = alchemyThumbnail;
     await page.route("**/_next/image?**", async (route) => {
       const sourceUrl = new URL(route.request().url()).searchParams.get("url");
       if (sourceUrl === alchemyThumbnail) {
@@ -427,6 +468,13 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       .getByRole("button", { name: /^Show [\d,]+ tokens$/ })
       .first()
       .click();
+    await expect(page.getByText("NFT", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("img", {
+        name: "Thumbnail fixture collection",
+        exact: true,
+      })
+    ).toHaveCount(0);
     await expect(
       tokenList.getByRole("img", { name: "Failed to load thumbnail" }).first()
     ).toBeVisible();
