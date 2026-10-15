@@ -77,7 +77,7 @@ function startLoad(locale: SupportedLocale): Promise<unknown> | null {
 // `?locale=` pages were server-rendered in that locale and hydrate once it
 // arrives; the browser locale is applied after hydration by useBrowserLocale.
 const routeLocale = normalizeLocale(
-  typeof globalThis.location === "undefined"
+  globalThis.location === undefined
     ? null
     : new URLSearchParams(globalThis.location.search).get(ROUTE_LOCALE_PARAM)
 );
