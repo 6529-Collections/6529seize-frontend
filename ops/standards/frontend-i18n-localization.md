@@ -76,6 +76,24 @@ Helpers should cover:
 Do not use `toLocaleString()` directly in newly touched UI when a repo helper is
 available.
 
+### Dates And Time Zones
+
+- Use IANA zones through `Intl`. Do not hard-code UTC offsets or DST rules.
+- Keep instants in UTC. Serialize with `toISOString()`.
+- A date-only value ("YYYY-MM-DD") is a calendar date, not an instant. Format it
+  with `formatDate` from `@/i18n/format`: it prints the same day in every zone
+  and ignores any `timeZone` option. Never build a `Date` from it and format
+  that in the viewer's zone, which shows the previous day west of UTC.
+- Format an instant with an explicit `timeZone` whenever the meaning needs one:
+  a UTC-published day (`formatUtcDate`), a labelled UTC time, or a named zone.
+  Server Components must always do so, because the server's zone is not the
+  viewer's and can differ between environments.
+- Without an explicit zone, an instant renders in the viewer's zone. Render that
+  only on the client after mount, or accept it on routes that are never
+  prefetched on the server.
+- Test zone-sensitive code in several zones; see
+  [CONTRIBUTING.md](../../CONTRIBUTING.md#time-zones-in-tests).
+
 ## Verification
 
 For each migrated page or component:

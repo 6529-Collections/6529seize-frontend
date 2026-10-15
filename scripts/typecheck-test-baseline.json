@@ -3,7 +3,7 @@
   "config": "tsconfig.jest.json",
   "toolchain": {
     "typescript_version": "5.9.3",
-    "pnpm_lock_sha256": "51644499332ca4d6712a927d2ddca7b0b4067ded9291a7c2f2ce0b6ed1b77d4b",
+    "pnpm_lock_sha256": "44a6c769d0b5951a5304e8d3f67b8dafaf98829c05574203123088f78aa71b22",
     "jest_tsconfig_sha256": "feda509a89cdd90cbcd9da6eecae28759c34c7aaae3725593ec2b1c022017062",
     "base_tsconfig_sha256": "fdbd8e548aed634324fd228e74d541ea702c1311597aa938741651e50de59c5f"
   },
@@ -31,7 +31,6 @@
     "__tests__/app/rememes/contract-id.test.tsx": 1,
     "__tests__/app/rememesMetadataPages.test.tsx": 9,
     "__tests__/app/the-memes/theMemesMint.test.tsx": 1,
-    "__tests__/app/tools/block-finder/page.client.test.tsx": 2,
     "__tests__/app/tools/block-finder/page.test.tsx": 1,
     "__tests__/app/wavesPage.test.tsx": 1,
     "__tests__/app/wavesPageShared.redirect.test.tsx": 1,
@@ -725,7 +724,6 @@
     "__tests__/contexts/wave/hooks/useWavePagination.test.ts": 2,
     "__tests__/contexts/wave/MyStreamContext.resume.test.tsx": 2,
     "__tests__/contracts/waves-multi-competition-phase-1.test.ts": 7,
-    "__tests__/helpers/time.test.ts": 2,
     "__tests__/helpers/touch-first-pointer-latch.test.ts": 5,
     "__tests__/helpers/waves/create-wave.helpers.extra.test.ts": 6,
     "__tests__/helpers/waves/create-wave.helpers.test.ts": 11,

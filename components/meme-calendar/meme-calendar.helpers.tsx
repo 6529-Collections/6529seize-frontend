@@ -3,6 +3,7 @@ import {
   SKIPPED_MINT_UTC_DAYS,
 } from "./meme-calendar.overrides";
 import { HISTORICAL_MINTS } from "./meme-calendar.szn1";
+import { wallTimeToUtcInstantInZone } from "./meme-calendar.zone";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -20,9 +21,6 @@ export const SZN1_RANGE = {
 } as const;
 export const SZN1_SEASON_INDEX = -13;
 
-const EUROPE_TZ = "Europe/Athens"; // EET/EEST
-const EUROPE_WINTER_OFFSET_HOURS = +2; // EET (UTC+2)
-const EUROPE_SUMMER_OFFSET_HOURS = +3; // EEST (UTC+3)
 const MINT_EUROPE_HOUR = 17;
 const MINT_EUROPE_MINUTE = 40;
 const MINT_END_EUROPE_HOUR = 17;
@@ -102,40 +100,6 @@ const FIRST_MINT_DATE: Date = (() => {
   // safety fallback (should never hit)
   return nextMintDateOnOrAfter(phase?.startUtcDay);
 })();
-
-export function wallTimeToUtcInstantInZone(
-  utcDay: Date,
-  hour: number,
-  minute: number
-): Date {
-  const mk = (offsetHours: number) => {
-    const out = new Date(utcDay);
-    out.setUTCHours(hour - offsetHours, minute, 0, 0);
-    return out;
-  };
-
-  const winterCandidate = mk(EUROPE_WINTER_OFFSET_HOURS);
-  const summerCandidate = mk(EUROPE_SUMMER_OFFSET_HOURS);
-
-  const showsTargetWallTime = (d: Date) => {
-    const parts = new Intl.DateTimeFormat(undefined, {
-      timeZone: EUROPE_TZ,
-      hour12: false,
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(d);
-    return (
-      parts ===
-      `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`
-    );
-  };
-
-  if (showsTargetWallTime(summerCandidate)) return summerCandidate;
-  if (showsTargetWallTime(winterCandidate)) return winterCandidate;
-
-  // Fallback: prefer the offset that matches the zone's DST on that date (summer first);
-  return summerCandidate;
-}
 
 // ---- Mint schedule helpers (Mon/Wed/Fri only, by UTC weekday) ----
 function isMintDow(dow: number): boolean {
@@ -768,6 +732,7 @@ function printDivision(
   );
 }
 
+export { wallTimeToUtcInstantInZone } from "./meme-calendar.zone";
 // eslint-disable-next-line import/no-cycle -- Keep the established helper barrel API while the invite module consumes date helpers from this file.
 export { printCalendarInvites } from "./meme-calendar.invites";
 // eslint-disable-next-line import/no-cycle -- Keep the established helper barrel API while the upcoming module consumes schedule helpers from this file.

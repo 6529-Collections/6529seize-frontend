@@ -266,7 +266,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
           <button
             type="button"
             onClick={() => setCurrentVoteMode(getNextVoteMode(isSliderMode))}
-            className="tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-white/[0.06] tw-font-medium tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-white/25 desktop-hover:hover:tw-bg-white/[0.1] desktop-hover:hover:tw-text-white"
+            className="tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-white/[0.06] tw-font-medium tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/[0.1] desktop-hover:hover:tw-text-white"
             title={switchModeTitle}
             aria-label={switchModeAriaLabel}
           >

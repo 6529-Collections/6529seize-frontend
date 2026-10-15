@@ -53,12 +53,12 @@ const TabButton = ({
     const stateClassName = isActive
       ? `${accentTextClass} tw-border-current tw-font-semibold`
       : "tw-border-transparent tw-font-medium tw-text-iron-500 desktop-hover:hover:tw-text-iron-200";
-    className = `tw-min-h-11 tw-flex-1 tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400/60 ${stateClassName}`;
+    className = `tw-min-h-11 tw-flex-1 tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 ${stateClassName}`;
   } else {
     const stateClassName = isActive
       ? webActiveClass
       : "tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-text-iron-200";
-    className = `tw-flex-1 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-px-3 tw-py-1.5 tw-text-xs tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 ${stateClassName}`;
+    className = `tw-flex-1 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-px-3 tw-py-1.5 tw-text-xs tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${stateClassName}`;
   }
 
   return (
@@ -182,7 +182,7 @@ export const WaveCompetitionPreviewModalContent = ({
           <button
             type="button"
             onClick={onClose}
-            className="tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-800/70 tw-bg-iron-950 tw-text-white tw-transition tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 active:tw-scale-95 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900"
+            className="tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-800/70 tw-bg-iron-950 tw-text-white tw-transition tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 active:tw-scale-95 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900"
             aria-label={t(locale, "waves.competitionBadges.close")}
           >
             <XMarkIcon className="tw-size-5" />

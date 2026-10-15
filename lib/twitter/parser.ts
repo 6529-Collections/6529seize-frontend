@@ -1,3 +1,5 @@
+import "next/dist/compiled/server-only";
+
 import * as cheerio from "cheerio";
 
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";

@@ -70,6 +70,7 @@ const queryClientMock = {
   getQueryData: jest.fn(),
   getQueriesData: jest.fn().mockReturnValue([]),
   invalidateQueries: jest.fn(),
+  refetchQueries: jest.fn().mockResolvedValue(undefined),
   setQueryData: jest.fn(),
 };
 
@@ -510,13 +511,31 @@ test("keeps raw pinned ids but ignores official pins for budget checks", async (
   expect(pinMutateAsync).toHaveBeenCalledWith("new-wave");
 });
 
-test("always refetches pinned waves on window focus", () => {
+test("refetches pinned waves on window focus only once they are stale", () => {
   renderHook(() => usePinnedWavesServer(), { wrapper });
 
   expect(useQueryMock).toHaveBeenCalledWith(
     expect.objectContaining({
-      refetchOnWindowFocus: "always",
+      refetchOnWindowFocus: true,
+      staleTime: 5 * 60 * 1000,
     })
+  );
+});
+
+test("refetchIfStale refreshes only the stale, active pinned query without cancelling", () => {
+  const { result } = renderHook(() => usePinnedWavesServer(), { wrapper });
+
+  result.current.refetchIfStale();
+
+  expect(queryClientMock.refetchQueries).toHaveBeenCalledTimes(1);
+  expect(queryClientMock.refetchQueries).toHaveBeenCalledWith(
+    {
+      queryKey: getPinnedWavesQueryOptions().queryKey,
+      exact: true,
+      type: "active",
+      stale: true,
+    },
+    { cancelRefetch: false }
   );
 });
 

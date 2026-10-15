@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { scheduleStaggered } from "@/helpers/jitter.helpers";
 import { WsMessageType } from "@/helpers/Types";
 import {
   AUTH_TOKEN_CHANGED_EVENT,
@@ -15,7 +16,10 @@ import {
 import { setNotificationRealtimeState } from "@/services/notifications/notification-realtime-state";
 import { useWebSocket } from "./useWebSocket";
 import { useWebSocketMessage } from "./useWebSocketMessage";
-import { WebSocketStatus } from "./WebSocketTypes";
+import {
+  WEBSOCKET_RECONNECT_RESYNC_STAGGER_MAX_MS,
+  WebSocketStatus,
+} from "./WebSocketTypes";
 
 const INVALIDATION_COALESCE_MS = 150;
 
@@ -54,6 +58,7 @@ export function NotificationWebSocketSync() {
   const { send, status } = useWebSocket();
   const [authRevision, setAuthRevision] = useState(0);
   const previousStatusRef = useRef(status);
+  const hasConnectedRef = useRef(false);
   const pendingProfileIdsRef = useRef(new Set<string>());
   const invalidationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
@@ -88,17 +93,33 @@ export function NotificationWebSocketSync() {
       setNotificationRealtimeState(true);
     }
 
-    // Read tokens at send time so reconnects never reuse a memoized JWT.
-    const tokens = getConnectedWalletAccounts()
-      .map((account) => account.jwt)
-      .filter((jwt): jwt is string => isAuthJwtUsable(jwt));
-    const primaryJwt = getAuthJwt();
-    if (typeof primaryJwt === "string" && isAuthJwtUsable(primaryJwt)) {
-      tokens.unshift(primaryJwt);
+    const syncIdentities = () => {
+      // Read tokens at send time so reconnects never reuse a memoized JWT.
+      const tokens = getConnectedWalletAccounts()
+        .map((account) => account.jwt)
+        .filter((jwt): jwt is string => isAuthJwtUsable(jwt));
+      const primaryJwt = getAuthJwt();
+      if (typeof primaryJwt === "string" && isAuthJwtUsable(primaryJwt)) {
+        tokens.unshift(primaryJwt);
+      }
+      send(WsMessageType.SYNC_NOTIFICATION_IDENTITIES, {
+        access_tokens: Array.from(new Set(tokens)).slice(0, 5),
+      });
+    };
+
+    const isReconnect = !wasConnected && hasConnectedRef.current;
+    hasConnectedRef.current = true;
+    if (!isReconnect) {
+      syncIdentities();
+      return;
     }
-    send(WsMessageType.SYNC_NOTIFICATION_IDENTITIES, {
-      access_tokens: Array.from(new Set(tokens)).slice(0, 5),
-    });
+    // Every client reconnects together after a deploy, and the sync ack makes
+    // each one refetch notifications. Stagger the sync; the effect cleanup
+    // cancels it on disconnect, unmount, or a newer immediate sync.
+    return scheduleStaggered(
+      syncIdentities,
+      WEBSOCKET_RECONNECT_RESYNC_STAGGER_MAX_MS
+    );
   }, [authRevision, connectedAccountsRevision, send, status]);
 
   const invalidateProfiles = useCallback(

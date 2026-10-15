@@ -38,7 +38,10 @@ updates. When auth is missing, the session disconnects and push updates pause.
 6. The client sends up to five currently usable account JWTs in
    `SYNC_NOTIFICATION_IDENTITIES`. The server acknowledges only identities
    authenticated by those JWTs, and notification realtime coverage begins for
-   those profile IDs.
+   those profile IDs. After a reconnect (not the first connect of a session),
+   the sync and the direct-message unread snapshot refresh each wait a random
+   0-3 seconds so clients do not all resync at the same instant after a
+   server deploy. Token or account changes still sync immediately.
 
 ## Common Scenarios
 
@@ -51,7 +54,8 @@ updates. When auth is missing, the session disconnects and push updates pause.
 - Auth changes converge across tabs through cookie-store listeners when
   available, with broadcast-channel fallback (`auth-token-updates`) when not.
 - Temporary disconnects retry automatically while auth is still valid, using
-  deterministic exponential backoff (`2s`, `3s`, `4.5s`, capped at `30s`).
+  exponential backoff (`2s`, `3s`, `4.5s`, capped at `30s`) with +/-25%
+  random jitter on every delay so clients do not reconnect in lockstep.
 - Live-update listeners remain ready while the connection recovers, so Waves
   and Messages resume receiving supported events as soon as reconnection and
   authentication finish.
@@ -65,14 +69,14 @@ updates. When auth is missing, the session disconnects and push updates pause.
   on periodic checks only (`10s`).
 - Background tabs can apply retries and auth-change handling later due to
   browser scheduling.
-- Reconnect timing is deterministic (no jitter), so multiple tabs can retry in
-  near lockstep.
+- Reconnect delays carry +/-25% random jitter, so tabs and devices retry at
+  slightly different times instead of in lockstep, and exact retry timings vary.
 
 ## Failure and Recovery
 
 - Unexpected closes (non-`1000`) with a valid token trigger automatic retries.
 - Retry scheduling allows up to `20` attempts by default (`2s`, `3s`, `4.5s`,
-  capped at `30s`).
+  capped at `30s`, each +/-25% jittered).
 - After the cap is reached, scheduled reconnect retries stop; periodic health
   checks (`10s`) still attempt reconnect while token+status require it.
 - If auth is missing or invalid, the session stays disconnected until

@@ -49,6 +49,13 @@ jest.mock("@/components/manifold-minting/ManifoldMintingWidget", () => ({
   ),
 }));
 
+jest.mock("@/hooks/useNftPurchasingVisibility", () => ({
+  useNftPurchasingVisibility: () => ({
+    hideNftPurchasing: false,
+    shouldRedirect: false,
+  }),
+}));
+
 jest.mock("@/components/nft-attributes/NFTAttributes", () => ({
   __esModule: true,
   default: () => <div data-testid="nft-attributes" />,
