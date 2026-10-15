@@ -684,6 +684,7 @@
         "Visitors can browse the public home activity without connecting a wallet.",
         "Authenticated visitors keep the dashboard-first home experience.",
         "It highlights the current or upcoming Meme Card mint, discovery sections, and 6529 mission content.",
+        "Coming up shows the next mint when available and current vote leaders. On mobile, swipe horizontally through the cards; keyboard users can tab through their links. Tablet and desktop show a grid. Status and mint date or TDH appear over uncropped artwork. Card titles open the drop, artist names open profiles, and View all opens the wave.",
         "After the current Meme mint ends, the homepage keeps Latest Drop through a configurable grace period before replacing it with a mapped Next Drop.",
         "Latest Drop groups title and artist first, then stats with Edition Details beneath them, then Your allowance above Subscription Minting, and the countdown and mint action at the bottom.",
         "A mapped Latest Drop adds Main Stage Submission -> View as the last Edition Details row, and a mapped Next Drop shows a The Memes #{id} pill linked to the Meme card.",
@@ -701,6 +702,8 @@
       "tags": ["home", "navigation"],
       "source_refs": [
         "components/home/newcomer/HomeNewcomerIntro.tsx",
+        "components/home/next-mint-leading/NextMintLeadingSection.tsx",
+        "ops/docs/home/feature-home-latest-drop-and-coming-up.md",
         "ops/docs/home/README.md",
         "ops/docs/home/feature-home-header-and-mission.md",
         "ops/docs/home/flow-home-landing-and-section-navigation.md"

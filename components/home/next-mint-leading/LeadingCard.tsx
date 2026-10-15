@@ -71,25 +71,25 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
   })();
 
   return (
-    <div className="tw-group tw-flex tw-flex-col tw-text-left tw-transition-all tw-duration-500">
-      <div className="tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-transition-colors group-hover:tw-border-white/10">
-        <div className="tw-flex tw-flex-col tw-items-start tw-gap-1 tw-border-b tw-border-white/10 tw-bg-iron-900 tw-px-2.5 tw-py-1.5 @sm:tw-flex-row @sm:tw-items-center @sm:tw-justify-between sm:tw-px-3 sm:tw-py-2">
+    <div className="tw-group tw-min-w-0 tw-snap-start tw-text-left">
+      <div className="tw-relative tw-flex tw-h-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-transition-[border-color,transform] tw-duration-200 desktop-hover:hover:tw-border-white/20 motion-reduce:tw-transition-none motion-safe:md:desktop-hover:hover:-tw-translate-y-0.5">
+        <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-top-0 tw-z-10 tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-2 tw-bg-gradient-to-b tw-from-black/70 tw-to-transparent tw-px-3.5 tw-pb-7 tw-pt-3.5">
           <span
-            className={`tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-wide ${rankLabelClass}`}
+            className={`tw-rounded-md tw-bg-black/60 tw-px-2 tw-py-1 tw-text-[10.5px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.06em] ${rankLabelClass}`}
           >
             {rank === 1 ? "LEADING" : `${formatOrdinal(rank)} PLACE`}
           </span>
-          <span className="tw-font-mono tw-text-xs tw-text-white/50">
+          <span className="tw-rounded-md tw-bg-black/60 tw-px-2 tw-py-1 tw-text-[11px] tw-font-medium tw-tabular-nums tw-leading-4 tw-text-white/90 md:tw-text-xs">
             {formatNumberWithCommas(drop.rating)} TDH
           </span>
         </div>
-        <div className="tw-relative tw-flex tw-aspect-[3/4] tw-max-h-[clamp(320px,70vw,500px)] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950">
-          <div className="tw-[&>div]:tw-mx-0 tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-transition-transform tw-duration-700 tw-ease-out group-hover:tw-scale-105">
+        <div className="tw-relative tw-flex tw-aspect-[4/5] tw-w-full tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950">
+          <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center [&>div]:tw-mx-0">
             {mediaContent}
           </div>
         </div>
-        <div className="tw-flex tw-flex-col tw-gap-3 tw-border-t tw-border-white/10 tw-px-3 tw-py-3 sm:tw-px-4">
-          <div className="tw-flex tw-items-center tw-gap-2">
+        <div className="tw-flex tw-flex-col tw-gap-2.5 tw-px-4 tw-pb-4 tw-pt-3.5 md:tw-px-5 md:tw-pb-5 md:tw-pt-4">
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
             <MediaTypeBadge
               mimeType={media?.mime_type}
               dropId={drop.id}
@@ -103,7 +103,7 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
                 isDirectMessage: false,
                 isApp: false,
               })}
-              className="tw-m-0 tw-line-clamp-2 tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-200 tw-no-underline tw-transition-colors group-hover:tw-text-white @lg:tw-line-clamp-1"
+              className="tw-m-0 tw-line-clamp-2 tw-min-h-6 tw-min-w-0 tw-text-[15px] tw-font-semibold tw-leading-6 tw-tracking-tight tw-text-white tw-no-underline focus-visible:tw-rounded-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 md:tw-text-base"
             >
               {title}
             </Link>
@@ -111,14 +111,14 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
           <Link
             data-home-action="Open artist profile"
             href={`/${author.handle ?? author.primary_address}`}
-            className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-no-underline"
+            className="tw-flex tw-min-h-6 tw-min-w-0 tw-items-center tw-gap-2 tw-no-underline focus-visible:tw-rounded-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
           >
             <ProfileAvatar
               pfpUrl={author.pfp}
               alt={author.handle ?? "Artist"}
               size={ProfileBadgeSize.SMALL}
             />
-            <span className="tw-min-w-0 tw-truncate tw-text-xs tw-text-white/50 desktop-hover:hover:tw-text-white">
+            <span className="tw-min-w-0 tw-truncate tw-text-xs tw-text-iron-400 desktop-hover:hover:tw-text-white">
               {author.handle ?? "Anonymous"}
             </span>
           </Link>

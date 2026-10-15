@@ -19,6 +19,9 @@ const SKELETON_KEYS = [
   "coming-up-skeleton-3",
 ];
 
+const CARD_LAYOUT_CLASS_NAME =
+  "-tw-mx-4 tw-grid tw-auto-cols-[80%] tw-grid-flow-col tw-snap-x tw-snap-mandatory tw-scroll-px-4 tw-gap-3 tw-overflow-x-auto tw-overscroll-x-contain tw-px-4 tw-py-1 tw-scrollbar-none md:tw-mx-0 md:tw-auto-cols-auto md:tw-grid-flow-row md:tw-grid-cols-2 md:tw-gap-4 md:tw-overflow-visible md:tw-px-0 lg:tw-grid-cols-3 lg:tw-gap-5";
+
 export function NextMintLeadingSection() {
   const {
     nft: nowMinting,
@@ -68,12 +71,15 @@ export function NextMintLeadingSection() {
   const sectionClassName =
     "tw-px-4 md:tw-px-6 lg:tw-px-8 tw-relative tw-z-10 tw-@container tw-pb-10 md:tw-pb-16";
   const header = (
-    <div className="tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-4 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
-      <div>
-        <h2 className="tw-m-0 tw-text-xl tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 md:tw-text-2xl">
+    <div className="tw-mb-5 tw-flex tw-items-start tw-justify-between tw-gap-4 md:tw-mb-6 md:tw-items-end">
+      <div className="tw-min-w-0">
+        <h2
+          id="coming-up-heading"
+          className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-[-0.03em] tw-text-iron-50 md:tw-text-[26px] lg:tw-text-3xl"
+        >
           Coming up
         </h2>
-        <p className="tw-mb-0 tw-mt-3 tw-text-[11px] tw-font-normal tw-uppercase tw-leading-relaxed tw-tracking-[0.14em] tw-text-iron-500 sm:tw-text-xs">
+        <p className="tw-mb-0 tw-mt-2 tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-relaxed tw-tracking-[0.08em] tw-text-iron-500 md:tw-mt-2.5">
           Next in queue and current vote leaders
         </p>
       </div>
@@ -84,7 +90,7 @@ export function NextMintLeadingSection() {
           isDirectMessage: false,
           isApp: false,
         })}
-        className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-white"
+        className="tw-inline-flex tw-min-h-8 tw-shrink-0 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/15 tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-200 tw-no-underline tw-transition-colors focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-4 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-white/30 desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none md:tw-min-h-9 md:tw-px-3.5 md:tw-text-[13px]"
       >
         <span>View all</span>
         <ArrowRightIcon className="tw-size-4 tw-flex-shrink-0" aria-hidden />
@@ -94,10 +100,14 @@ export function NextMintLeadingSection() {
 
   if (isFetching && !showNextMint && leading.length === 0) {
     return (
-      <section className={sectionClassName}>
+      <section
+        aria-labelledby="coming-up-heading"
+        aria-busy="true"
+        className={sectionClassName}
+      >
         <div>
           {header}
-          <div className="tw-grid tw-grid-cols-1 tw-gap-6 md:tw-grid-cols-2 lg:tw-grid-cols-3 lg:tw-gap-8">
+          <div className={CARD_LAYOUT_CLASS_NAME} aria-hidden="true">
             {SKELETON_KEYS.map((key) => (
               <NextMintLeadingSkeletonCard key={key} />
             ))}
@@ -112,10 +122,14 @@ export function NextMintLeadingSection() {
   }
 
   return (
-    <section data-home-section="Coming up" className={sectionClassName}>
+    <section
+      aria-labelledby="coming-up-heading"
+      data-home-section="Coming up"
+      className={sectionClassName}
+    >
       <div>
         {header}
-        <div className="tw-grid tw-grid-cols-1 tw-gap-6 md:tw-grid-cols-2 lg:tw-grid-cols-3 lg:tw-gap-8">
+        <div className={CARD_LAYOUT_CLASS_NAME}>
           {showNextMint && <NextMintCard drop={nextMint} />}
           {leading.map((drop, index) => (
             <LeadingCard key={drop.id} drop={drop} rank={index + 1} />
@@ -128,16 +142,15 @@ export function NextMintLeadingSection() {
 
 const NextMintLeadingSkeletonCard = () => {
   return (
-    <div className="tw-flex tw-flex-col tw-text-left">
+    <div className="tw-min-w-0 tw-snap-start tw-text-left motion-reduce:[&_*]:tw-animate-none">
       <div className="tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950">
-        <div className="tw-flex tw-items-center tw-justify-between tw-gap-2 tw-border-b tw-border-white/10 tw-bg-iron-900 tw-px-2.5 tw-py-1.5 sm:tw-px-3 sm:tw-py-2">
-          <div className="tw-h-4 tw-w-24 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
-          <div className="tw-h-3 tw-w-16 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
+        <div className="tw-relative tw-aspect-[4/5] tw-w-full tw-animate-pulse tw-bg-iron-900/70">
+          <div className="tw-absolute tw-inset-x-0 tw-top-0 tw-flex tw-flex-wrap tw-justify-between tw-gap-2 tw-p-3.5">
+            <div className="tw-h-6 tw-w-20 tw-rounded-md tw-bg-iron-800/60" />
+            <div className="tw-h-6 tw-w-24 tw-rounded-md tw-bg-iron-800/60" />
+          </div>
         </div>
-        <div className="tw-relative tw-flex tw-aspect-[3/4] tw-max-h-[clamp(320px,70vw,500px)] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950">
-          <div className="tw-h-full tw-w-full tw-animate-pulse tw-rounded-lg tw-bg-iron-900/70" />
-        </div>
-        <div className="tw-flex tw-flex-col tw-gap-3 tw-border-t tw-border-white/10 tw-px-3 tw-py-3 sm:tw-px-4">
+        <div className="tw-flex tw-flex-col tw-gap-2.5 tw-px-4 tw-pb-4 tw-pt-3.5 md:tw-px-5 md:tw-pb-5 md:tw-pt-4">
           <div className="tw-flex tw-items-center tw-gap-2">
             <div className="tw-h-4 tw-w-10 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
             <div className="tw-h-4 tw-flex-1 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />

@@ -71,6 +71,13 @@ Use this page for visibility rules, state switches, and route targets.
    - Top leaderboard cards from the same wave, sorted by prediction rating
 7. `View all` opens `/waves/{waveId}` for that wave.
 
+On mobile, `Coming up` is a horizontal row: swipe to reveal the remaining
+cards, which snap into place. The next card peeks in from the right. Tablet
+uses two columns and desktop uses three. Status and mint date or TDH appear
+over the artwork; the title and artist links sit below. Artwork retains its
+proportions without cropping. Keyboard users can tab through the links to
+bring each card into view.
+
 ## Common Scenarios
 
 - Mint active, next winner available:
