@@ -3,14 +3,14 @@
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect } from "react";
+import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { getActiveViewFromUrl } from "../navigation/ViewContext";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 
 function HeaderActionButtonsContent() {
-  const router = useRouter();
   const pathname = usePathname();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
@@ -32,14 +32,6 @@ function HeaderActionButtonsContent() {
   const showWaveButton =
     !isOnWaveCreateRoute && (isOnWavesRoute || isWaveContext);
   const showMessagesButton = isOnMessagesRoute || isMessagesContext;
-  const shouldPrefetchDirectMessage =
-    isApp && showMessagesButton && !showWaveButton;
-
-  useEffect(() => {
-    if (shouldPrefetchDirectMessage) {
-      router.prefetch("/messages/create");
-    }
-  }, [router, shouldPrefetchDirectMessage]);
 
   if (showWaveButton) {
     const onCreateWave = openWave;
@@ -58,20 +50,37 @@ function HeaderActionButtonsContent() {
   }
 
   if (showMessagesButton) {
-    const onCreateDm = openDirectMessage;
+    const icon = (
+      <FontAwesomeIcon
+        icon={faPaperPlane}
+        className="tw-size-[18px] tw-flex-shrink-0"
+      />
+    );
+
+    if (isApp) {
+      // Full prefetch includes the composer beyond the messages loading boundary.
+      return (
+        <Link
+          href="/messages/create"
+          prefetch={true}
+          aria-label="Create DM"
+          title="Create DM"
+          className={baseButtonClasses}
+        >
+          {icon}
+        </Link>
+      );
+    }
 
     return (
       <button
         type="button"
         aria-label="Create DM"
         title="Create DM"
-        onClick={onCreateDm}
+        onClick={openDirectMessage}
         className={baseButtonClasses}
       >
-        <FontAwesomeIcon
-          icon={faPaperPlane}
-          className="tw-size-[18px] tw-flex-shrink-0"
-        />
+        {icon}
       </button>
     );
   }

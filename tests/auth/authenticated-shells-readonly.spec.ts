@@ -8,6 +8,8 @@ import {
   waitForRouteReady,
 } from "../testHelpers";
 
+import { isCapacitorSimulationProject } from "../support/surfaceSimulation";
+
 const plan = {
   id: "emma-layout-fixture",
   name: `${"Long distribution plan name ".repeat(4)}${"N".repeat(80)}`,
@@ -175,11 +177,55 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
           label: "create DM action",
           locator: page
             .getByRole("button", { name: /Create DM|New direct message/i })
+            .or(page.getByRole("link", { name: "Create DM", exact: true }))
             .first(),
         },
       ],
       "the authenticated messages shell"
     );
+  });
+
+  test("opens New message from the messages action and returns without creating a conversation", async ({
+    page,
+  }, testInfo) => {
+    await gotoReady(page, "/messages", { readySelector: "#messages-content" });
+    const nativeAction = page.getByRole("link", {
+      name: "Create DM",
+      exact: true,
+    });
+    const isNative = isCapacitorSimulationProject(testInfo.project.name);
+    const action = isNative
+      ? nativeAction
+      : page
+          .getByRole("button", { name: /^(Create DM|New direct message)$/ })
+          .first();
+    await action.click();
+    await expect(page).toHaveURL((url) =>
+      isNative
+        ? url.pathname === "/messages/create"
+        : url.pathname === "/messages" &&
+          url.searchParams.get("create") === "dm"
+    );
+    await expect(
+      page.getByRole("textbox", { name: "To:", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Message", exact: true })
+    ).toBeDisabled();
+    await expectWalletGateAbsent(page);
+
+    if (isNative) {
+      await page.goBack();
+    } else {
+      await page
+        .getByRole("button", { name: "Close new direct message modal" })
+        .click();
+    }
+    await expect(page).toHaveURL(
+      (url) => url.pathname === "/messages" && !url.searchParams.has("create")
+    );
+    await expect(action).toBeVisible();
+    await expectNoHorizontalOverflow(page);
   });
 
   test("opens the guided consolidation flow from the own-profile wallet entry", async ({
