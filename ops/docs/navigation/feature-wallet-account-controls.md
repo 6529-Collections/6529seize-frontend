@@ -242,6 +242,14 @@ action.
   malformed connection links, duplicate parameters, and unexpected parameters.
 - After web `Disconnect Wallet`, dropdown actions change to `Connect Wallet`
   and `Logout`; `Connect Wallet` remains grouped with `Connect Device`.
+- Wallet connection services load only when needed: right after page load for
+  a browser with a stored profile session or a wallet connection to restore,
+  and always in the native app. Signed-out web visitors load them on their
+  first connect action, so that first connect can take a moment. Until the
+  wallet dialog opens, the web sidebar `Connect Wallet` control shows a spinner
+  and `Connect` buttons in the app footer and on page prompts show a busy
+  spinner. If loading fails, an error message appears and connecting again
+  retries.
 
 ## Signing In
 

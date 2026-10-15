@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useConnect } from "wagmi";
 import { CreateAppWalletModal } from "@/components/app-wallets/AppWalletModal";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
+import { useAppKitBootstrap } from "@/components/providers/AppKitBootstrapContext";
 import { getConnectionShareRoute } from "@/components/header/share/connectionShareQr";
 import {
   getQRScannerErrorReason,
@@ -39,6 +40,14 @@ export default function CapacitorConnectFlow({
   onHandoffStateChange: (isPending: boolean) => void;
 }>) {
   const { connectAsync, connectors } = useConnect();
+  const { isReady: isWalletStackReady, waitForReady: waitForWalletStack } =
+    useAppKitBootstrap();
+  // App Wallet connectors live in the wallet stack, which loads after the
+  // page. A tap before it is ready waits for it and reads the latest list.
+  const connectorsRef = useRef(connectors);
+  useEffect(() => {
+    connectorsRef.current = connectors;
+  }, [connectors]);
   const router = useRouter();
   const capacitor = useCapacitor();
   const locale = useBrowserLocale();
@@ -108,22 +117,36 @@ export default function CapacitorConnectFlow({
     showError,
   ]);
 
-  const handleConnectAppWallet = useCallback(
-    (address: string): void => {
-      const connector = connectors.find(
+  const findAppWalletConnector = useCallback(
+    (address: string) =>
+      connectorsRef.current.find(
         (candidate) =>
           candidate.type === APP_WALLET_CONNECTOR_TYPE &&
           normalizeAddress(candidate.id) === normalizeAddress(address)
-      );
-      if (!connector) {
-        showError(
-          t(locale, "capacitorConnect.error.connectionFailed"),
-          APP_WALLETS_VIEW
-        );
-        return;
-      }
+      ),
+    []
+  );
 
-      setBusyAppWalletAddress(address);
+  const resolveAppWalletConnector = useCallback(
+    async (address: string) => {
+      const connector = findAppWalletConnector(address);
+      if (connector || isWalletStackReady) {
+        return connector;
+      }
+      await waitForWalletStack();
+      // Let the provider commit the wallet stack's connectors first.
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 0);
+      });
+      return findAppWalletConnector(address);
+    },
+    [findAppWalletConnector, isWalletStackReady, waitForWalletStack]
+  );
+
+  const startAppWalletConnection = useCallback(
+    (
+      connector: NonNullable<ReturnType<typeof findAppWalletConnector>>
+    ): void => {
       queueHandoff(() => {
         void (async () => {
           try {
@@ -149,13 +172,42 @@ export default function CapacitorConnectFlow({
     },
     [
       connectAsync,
-      connectors,
       disconnectExternalWallet,
       finishHandoff,
       locale,
       queueHandoff,
       showError,
     ]
+  );
+
+  const handleConnectAppWallet = useCallback(
+    (address: string): void => {
+      setBusyAppWalletAddress(address);
+      void (async () => {
+        let connector: Awaited<ReturnType<typeof resolveAppWalletConnector>>;
+        try {
+          connector = await resolveAppWalletConnector(address);
+        } catch (error) {
+          logError(
+            "capacitorAppWalletConnect",
+            error instanceof Error
+              ? error
+              : new Error("Wallet stack failed to load", { cause: error })
+          );
+          connector = undefined;
+        }
+        if (!connector) {
+          setBusyAppWalletAddress(null);
+          showError(
+            t(locale, "capacitorConnect.error.connectionFailed"),
+            APP_WALLETS_VIEW
+          );
+          return;
+        }
+        startAppWalletConnection(connector);
+      })();
+    },
+    [locale, resolveAppWalletConnector, showError, startAppWalletConnection]
   );
 
   const handleCreateAppWallet = useCallback((): void => {
