@@ -33,6 +33,11 @@ const ON_CHAIN_READ_QUERY = {
   refetchOnWindowFocus: true,
   staleTime: 60_000,
 } as const;
+// This view shows tokens the API has not indexed yet, often one just minted
+// and opened in a new tab while the read RPC is a block behind. Until the
+// token URI arrives, retry every 10 s for up to two minutes.
+const MISSING_TOKEN_RETRY_INTERVAL_MS = 10_000;
+const MISSING_TOKEN_RETRY_LIMIT = 12;
 
 export default function NextGenTokenOnChain(props: Readonly<Props>) {
   const capacitor = useCapacitor();
@@ -55,7 +60,15 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "tokenURI",
-    query: ON_CHAIN_READ_QUERY,
+    query: {
+      ...ON_CHAIN_READ_QUERY,
+      refetchInterval: (query) =>
+        query.state.data === undefined &&
+        query.state.dataUpdateCount + query.state.errorUpdateCount <
+          MISSING_TOKEN_RETRY_LIMIT
+          ? MISSING_TOKEN_RETRY_INTERVAL_MS
+          : false,
+    },
     args: [props.token_id],
   });
 

@@ -3,6 +3,7 @@
 import { publicEnv } from "@/config/env";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { subscribeNativeAppActivity } from "@/services/app-activity/native-app-activity";
 
 const CURRENT = publicEnv.VERSION ?? "unknown"; // baked into the bundle
 const SHOW_NEW_VERSION_TOAST_PARAM = "showNewVersionToast";
@@ -107,6 +108,9 @@ export function useIsVersionStale(interval = 120_000, enabled = true) {
     document.addEventListener("visibilitychange", onVisibilityChange);
     globalThis.addEventListener("focus", onWake);
     globalThis.addEventListener("online", onWake);
+    // The native app's resume signal, in case the web view's own visibility
+    // events arrive late or not at all.
+    const unsubscribeNativeActivity = subscribeNativeAppActivity(onWake);
 
     return () => {
       disposed = true;
@@ -114,6 +118,7 @@ export function useIsVersionStale(interval = 120_000, enabled = true) {
       document.removeEventListener("visibilitychange", onVisibilityChange);
       globalThis.removeEventListener("focus", onWake);
       globalThis.removeEventListener("online", onWake);
+      unsubscribeNativeActivity();
     };
   }, [interval, enabled, shouldForceShowNewVersionToast]);
 

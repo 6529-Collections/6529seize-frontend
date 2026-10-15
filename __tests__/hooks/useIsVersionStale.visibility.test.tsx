@@ -5,6 +5,16 @@ jest.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(globalThis.location.search),
 }));
 
+const mockNativeActivitySubscribers = new Set<() => void>();
+jest.mock("@/services/app-activity/native-app-activity", () => ({
+  subscribeNativeAppActivity: (subscriber: () => void) => {
+    mockNativeActivitySubscribers.add(subscriber);
+    return () => {
+      mockNativeActivitySubscribers.delete(subscriber);
+    };
+  },
+}));
+
 const INTERVAL_MS = 1000;
 
 let visibilityState: DocumentVisibilityState = "visible";
@@ -41,6 +51,28 @@ describe("useIsVersionStale visibility", () => {
   afterEach(() => {
     jest.useRealTimers();
     Reflect.deleteProperty(document, "visibilityState");
+  });
+
+  it("resumes on the native app's resume signal even without a visibility event", async () => {
+    const { unmount } = renderHook(() => useIsVersionStale(INTERVAL_MS));
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    setVisibility("hidden");
+    await advance(INTERVAL_MS * 10);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    // The web view became visible again but did not fire visibilitychange.
+    visibilityState = "visible";
+    act(() => {
+      mockNativeActivitySubscribers.forEach((subscriber) => subscriber());
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    await advance(INTERVAL_MS);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+
+    unmount();
+    expect(mockNativeActivitySubscribers.size).toBe(0);
   });
 
   it("checks immediately and then on the interval while visible", async () => {

@@ -20,6 +20,11 @@ import {
   type ReactNode,
 } from "react";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import {
+  CONFIRMED_WRITE_POLL_WINDOW_MS,
+  notePostWriteActivity,
+  SUBMITTED_WRITE_POLL_WINDOW_MS,
+} from "./collection-delegation/usePostWritePolling";
 import type { DelegationCollection } from "./delegation-constants";
 import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
 import {
@@ -461,6 +466,13 @@ export function DelegationSubmitGroups(
       });
     }
     if (writeDelegation.data) {
+      // Every delegation screen re-reads the chain while this write is
+      // pending and shortly after it is confirmed, even if this form closes.
+      if (waitWriteDelegation.isLoading) {
+        notePostWriteActivity(SUBMITTED_WRITE_POLL_WINDOW_MS);
+      } else if (waitWriteDelegation.isSuccess) {
+        notePostWriteActivity(CONFIRMED_WRITE_POLL_WINDOW_MS);
+      }
       if (waitWriteDelegation.isLoading) {
         emitToast({
           status: "submitted",

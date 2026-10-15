@@ -1,4 +1,10 @@
-import { usePostWritePolling } from "@/components/delegation/collection-delegation/usePostWritePolling";
+import {
+  CONFIRMED_WRITE_POLL_WINDOW_MS,
+  notePostWriteActivity,
+  resetPostWritePollingForTests,
+  SUBMITTED_WRITE_POLL_WINDOW_MS,
+  usePostWritePolling,
+} from "@/components/delegation/collection-delegation/usePostWritePolling";
 import { useDelegationToast } from "@/components/delegation/DelegationToast";
 import {
   QueryClient,
@@ -24,6 +30,7 @@ describe("usePostWritePolling", () => {
   });
 
   afterEach(() => {
+    resetPostWritePollingForTests();
     jest.useRealTimers();
   });
 
@@ -83,14 +90,45 @@ describe("usePostWritePolling", () => {
     expect(result.current.startPostWritePolling).toBe(startPostWritePolling);
   });
 
-  it("clears its timer on unmount", () => {
-    const { result, unmount } = renderHook(() => usePostWritePolling());
+  // The window is shared by every delegation screen, so a write sent from a
+  // form that then closes still refreshes the tables that stay open.
+  it("shares one window across screens and keeps it after the writer unmounts", () => {
+    const writer = renderHook(() => usePostWritePolling());
+    const table = renderHook(() => usePostWritePolling());
 
-    act(() => result.current.startPostWritePolling());
-    expect(jest.getTimerCount()).toBeGreaterThan(0);
+    act(() => writer.result.current.startPostWritePolling());
+    writer.unmount();
+    expect(table.result.current.refetchInterval).toBe(
+      POST_WRITE_POLL_INTERVAL_MS
+    );
 
-    unmount();
+    act(() => {
+      jest.advanceTimersByTime(CONFIRMED_WRITE_POLL_WINDOW_MS);
+    });
+    expect(table.result.current.refetchInterval).toBe(false);
     expect(jest.getTimerCount()).toBe(0);
+  });
+
+  it("keeps polling while a submitted write is pending", () => {
+    const { result } = renderHook(() => usePostWritePolling());
+
+    act(() => notePostWriteActivity(SUBMITTED_WRITE_POLL_WINDOW_MS));
+    act(() => {
+      jest.advanceTimersByTime(CONFIRMED_WRITE_POLL_WINDOW_MS * 2);
+    });
+    expect(result.current.refetchInterval).toBe(POST_WRITE_POLL_INTERVAL_MS);
+
+    // A confirmation does not cut a longer pending window short.
+    act(() => notePostWriteActivity(CONFIRMED_WRITE_POLL_WINDOW_MS));
+    act(() => {
+      jest.advanceTimersByTime(CONFIRMED_WRITE_POLL_WINDOW_MS);
+    });
+    expect(result.current.refetchInterval).toBe(POST_WRITE_POLL_INTERVAL_MS);
+
+    act(() => {
+      jest.advanceTimersByTime(SUBMITTED_WRITE_POLL_WINDOW_MS);
+    });
+    expect(result.current.refetchInterval).toBe(false);
   });
 });
 
@@ -205,6 +243,7 @@ describe("post-write polling with a real query", () => {
   });
 
   afterEach(() => {
+    resetPostWritePollingForTests();
     jest.useRealTimers();
   });
 
