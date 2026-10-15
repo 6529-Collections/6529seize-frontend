@@ -334,6 +334,19 @@ button:not(.tailwind-scope button),
 video:not(.tailwind-scope video),
 svg:not(.tailwind-scope svg) {
   font-size: 16px;
+}
+
+/* Outside .tailwind-scope (portals, modals) form controls drop the UA outline
+   and any ring shadow for pointer focus only. Keyboard focus (:focus-visible)
+   must stay visible (WCAG 2.4.7), so a control either draws its own
+   focus-visible:tw-ring-* / tw-outline-* indicator or gets the browser default
+   ring. Text fields always match :focus-visible, so they keep their ring. */
+textarea:not(.tailwind-scope textarea):not(:focus-visible),
+select:not(.tailwind-scope select):not(:focus-visible),
+input:not(.tailwind-scope input):not(:focus-visible),
+button:not(.tailwind-scope button):not(:focus-visible),
+video:not(.tailwind-scope video):not(:focus-visible),
+svg:not(.tailwind-scope svg):not(:focus-visible) {
   outline: 0 !important;
   box-shadow: none !important;
 }
