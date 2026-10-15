@@ -65,13 +65,20 @@ Shared tab routing and owner-mode rules are documented in:
   `Dec 5, 2025, 00:00 UTC`). It is shown in UTC, so every viewer sees the same
   run.
 
+Collection thumbnails show an `NFT` placeholder when artwork is missing or
+cannot load. The collection name and grant details remain available.
+
 Grant token panel:
 
 - `all tokens` grants show a static message.
 - specific-token grants show a `Show/Hide` disclosure panel.
 - disclosure first load shows spinner, then token grid.
 - first-load fetch failure shows inline `Retry`.
-- token cards display available artwork; missing artwork shows the token ID.
+- token cards prefer thumbnails and can use supplied original artwork from
+  supported image hosts when thumbnails are absent. When the indexed record has
+  no artwork, the grid can recover artwork and a placeholder name such as `#1`
+  from the token's original Arweave or IPFS metadata. Available cards remain
+  visible while this loads. If recovery is unavailable, the token ID remains.
 - if thumbnail metadata or the image cannot load, its tile shows `Load Error`.
   Image failures retain the available token name, ID, and xTDH. If metadata
   fails, the name falls back to `Token #<ID>`. Close and reopen the disclosure
