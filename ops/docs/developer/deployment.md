@@ -172,7 +172,7 @@ notifications are best effort and use deploy run IDs to correlate E2E replies.
 ## Sitemap generation
 
 The `postbuild` step (`next-sitemap.build.cjs`) builds the sitemap from live
-public API feeds. Each feed is retried three times with jittered backoff. If a
+public API feeds. Each feed gets up to three attempts with jittered backoff. If a
 feed is still unavailable or fails its minimum-size floor, production deploy
 builds (GitHub Actions with `VERSION` set to the exact commit) fail rather than
 publish a truncated sitemap; rerun the build once the API is healthy. Pull
