@@ -40,6 +40,12 @@ first render.
   the identity block on smaller layouts. The current state and contextual
   action share the row's second line, and the whole row opens the relevant
   settings, upcoming-drops, or top-up section.
+- Open a subscription top-up notification. It links to the `Top up` section
+  (`/{user}/subscriptions#profile-subscriptions-top-up`); once the section has
+  loaded the page scrolls to it and moves keyboard and screen-reader focus to
+  its heading, with smooth scrolling skipped when reduced motion is on.
+  Where Subscriptions are hidden (the iOS app outside the US) the tab
+  redirects to Identity and nothing scrolls.
 - Use the subscription-awareness action on Home or a Meme card.
 - Use `Learn more` in the `Subscription minting` section to open
   `/about/subscriptions`.
