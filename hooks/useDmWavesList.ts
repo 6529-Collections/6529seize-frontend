@@ -108,6 +108,7 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
 
   return useMemo(
     () => ({
+      viewerIdentityKey,
       waves: sorted,
       isFetching: shouldFetchDmWaves ? isFetching : false,
       isFetchingNextPage: shouldFetchDmWaves ? isFetchingNextPage : false,
@@ -129,6 +130,7 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
     }),
     [
       sorted,
+      viewerIdentityKey,
       isFetching,
       isFetchingNextPage,
       hasNextPage,
