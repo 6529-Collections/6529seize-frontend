@@ -154,8 +154,10 @@ const formatProfileEnabledAt = (
     return null;
   }
 
+  // Explicit zone: the card text must not depend on the server's time zone.
   return new Intl.DateTimeFormat("en-US", {
     month: "long",
+    timeZone: "UTC",
     year: "numeric",
   }).format(date);
 };

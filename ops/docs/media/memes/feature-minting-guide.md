@@ -63,6 +63,8 @@ works`, `Eligibility`, or `Help and history`.
   and Subscriptions entries and promotional links are hidden. Direct visits to
   `/about/minting` and `/about/subscriptions` return to `/about` without showing
   the guide or an unavailable message. US iOS, web, and Android keep the guides.
+  On iOS the return waits for the country check, so a US deep link stays on
+  the guide; a failed or empty check counts as unknown.
 - A card may not yet have published claim or Distribution Plan data. The live
   mint flow owns the associated loading, unavailable, and recovery states.
 - A phase can end before a later phase begins. The live mint flow, not the

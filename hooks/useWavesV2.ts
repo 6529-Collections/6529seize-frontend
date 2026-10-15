@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
+import { refetchQueryIfStale } from "@/components/react-query-wrapper/utils/refetchQueryIfStale";
 import type { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import type { ApiWaveVisibilityTier } from "@/generated/models/ApiWaveVisibilityTier";
 import type { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
@@ -15,6 +16,8 @@ import {
 } from "@/services/api/waves-v2-api";
 
 export { mapApiWaveToSidebarWave } from "@/services/api/waves-v2-api";
+
+const RETRY_FAILURE_COOLDOWN_MS = 30000;
 
 interface UseWavesV2Props {
   readonly overviewType: ApiWavesOverviewType;
@@ -87,6 +90,11 @@ export const useWavesV2 = ({
     ]
   );
 
+  const queryClient = useQueryClient();
+  const queryKey = useMemo(
+    () => [QueryKey.WAVES_V2, queryKeyParams] as const,
+    [queryKeyParams]
+  );
   const [lastErrorTimestamp, setLastErrorTimestamp] = useState<number | null>(
     null
   );
@@ -95,7 +103,7 @@ export const useWavesV2 = ({
   }, []);
 
   const query = useInfiniteQuery({
-    queryKey: [QueryKey.WAVES_V2, queryKeyParams],
+    queryKey,
     queryFn: async ({ pageParam }: { pageParam: number }) =>
       await fetchWavesV2Page({
         page: pageParam,
@@ -144,31 +152,40 @@ export const useWavesV2 = ({
     [query.data]
   );
 
+  // After retries are exhausted, hold further requests for a cooldown period.
+  const runAfterRetryFailureCooldown = useCallback(
+    (task: () => void) => {
+      if (
+        lastErrorTimestamp !== null &&
+        Date.now() - lastErrorTimestamp < RETRY_FAILURE_COOLDOWN_MS
+      ) {
+        setTimeout(task, RETRY_FAILURE_COOLDOWN_MS);
+        return;
+      }
+      task();
+    },
+    [lastErrorTimestamp]
+  );
+
   const fetchNextPage = useCallback(() => {
-    if (
-      lastErrorTimestamp !== null &&
-      Date.now() - lastErrorTimestamp < 30000
-    ) {
-      setTimeout(() => {
-        query.fetchNextPage().catch(() => undefined);
-      }, 30000);
-      return;
-    }
-    query.fetchNextPage().catch(() => undefined);
-  }, [lastErrorTimestamp, query]);
+    runAfterRetryFailureCooldown(() => {
+      query.fetchNextPage().catch(() => undefined);
+    });
+  }, [runAfterRetryFailureCooldown, query]);
 
   const refetch = useCallback(() => {
-    if (
-      lastErrorTimestamp !== null &&
-      Date.now() - lastErrorTimestamp < 30000
-    ) {
-      setTimeout(() => {
-        query.refetch().catch(() => undefined);
-      }, 30000);
-      return;
-    }
-    query.refetch().catch(() => undefined);
-  }, [lastErrorTimestamp, query]);
+    runAfterRetryFailureCooldown(() => {
+      query.refetch().catch(() => undefined);
+    });
+  }, [runAfterRetryFailureCooldown, query]);
+
+  // Resync helper: keeps data that is still fresh and never cancels a request
+  // that is already in flight.
+  const refetchIfStale = useCallback(() => {
+    runAfterRetryFailureCooldown(() => {
+      refetchQueryIfStale(queryClient, queryKey);
+    });
+  }, [runAfterRetryFailureCooldown, queryClient, queryKey]);
 
   return useMemo(
     () => ({
@@ -179,7 +196,8 @@ export const useWavesV2 = ({
       fetchNextPage,
       status: query.status,
       refetch,
+      refetchIfStale,
     }),
-    [waves, query, fetchNextPage, refetch]
+    [waves, query, fetchNextPage, refetch, refetchIfStale]
   );
 };

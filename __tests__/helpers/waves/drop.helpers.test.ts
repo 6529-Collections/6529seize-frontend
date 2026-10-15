@@ -31,6 +31,42 @@ describe("drop.helpers", () => {
     expect(key).toEqual({ key: "d1", hash: "d1" });
   });
 
+  describe("stable full-drop hashes", () => {
+    const stableHashCases = [
+      {
+        name: "ascii content",
+        drop: { ...baseDrop, type: DropSize.FULL },
+        hash: "c2cf570e70a3e4e746d2255fe0b29f84694822f83e6cf2a7d91143ad1a7b6841",
+      },
+      {
+        name: "multi-byte content, reply and metadata",
+        drop: {
+          ...baseDrop,
+          type: DropSize.FULL,
+          reply_to: { drop_id: "r1", drop_part_id: 2 },
+          parts: [{ content: "gm ünïcödé " }, { content: "\u{1F680}" }],
+          metadata: [
+            { data_key: "k1", data_value: "v1" },
+            { data_key: "k2", data_value: "v2" },
+          ],
+        },
+        hash: "4bb89b0abc60139b4f59687f1274b8fd79d4af81a9ddec5af0f208fe2492ccde",
+      },
+    ];
+
+    it.each(stableHashCases)(
+      "keeps the sha256 stable key and hash ($name)",
+      ({ drop, hash }) => {
+        const digest = Uint8Array.from(Buffer.from(hash, "hex"));
+
+        expect(getStableDropKey(drop)).toEqual({
+          key: new TextDecoder("utf-8").decode(digest),
+          hash,
+        });
+      }
+    );
+  });
+
   it("converts api drop to extended drop", () => {
     const extended = convertApiDropToExtendedDrop(baseDrop);
     const again = convertApiDropToExtendedDrop(baseDrop);

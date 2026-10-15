@@ -228,7 +228,9 @@ export function createSecurityHeaders(
       key: "Permissions-Policy",
       value: [
         "accelerometer=()",
-        "autoplay=()",
+        // Muted in-app video (NFT, drop and preview players) autoplays on this
+        // origin only; cross-origin frames remain blocked.
+        "autoplay=(self)",
         "camera=()",
         "cross-origin-isolated=()",
         "display-capture=()",
@@ -242,11 +244,15 @@ export function createSecurityHeaders(
         "midi=()",
         "payment=()",
         "picture-in-picture=()",
+        // Passkey WebAuthn stays closed: no wallet SDK path we ship calls
+        // navigator.credentials in this document. A cross-origin wallet frame
+        // would need its origin listed here plus an iframe allow attribute.
         "publickey-credentials-get=()",
         "screen-wake-lock=()",
         "sync-xhr=()",
         "usb=()",
-        "web-share=(self)",
+        // web-share is intentionally not listed: Chromium reports it as an
+        // unrecognized feature. Same-origin sharing is already the default.
         "xr-spatial-tracking=()",
       ].join(", "),
     },

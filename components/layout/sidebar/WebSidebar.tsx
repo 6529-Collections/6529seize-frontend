@@ -6,7 +6,10 @@ import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useKey } from "react-use";
 import BellIcon from "@/components/common/icons/BellIcon";
-import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
+import LazyHeaderSearchModal, {
+  preloadHeaderSearchModal,
+  useHeaderSearchModalIdlePreload,
+} from "@/components/header/header-search/LazyHeaderSearchModal";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
@@ -54,6 +57,10 @@ function WebSidebar({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const showDesktopSearch = !isMobile;
+
+  // Warm the search modal once the page is idle, so the first open does not
+  // wait on the network. The chunk stays out of first-load JS.
+  useHeaderSearchModalIdlePreload(showDesktopSearch);
 
   useKey(
     (event) => event.key === "k",
@@ -127,8 +134,8 @@ function WebSidebar({
           type="button"
           className={
             isMobile
-              ? "tw-fixed tw-inset-0 tw-z-[70] tw-border-0 tw-bg-gray-600 tw-bg-opacity-50 focus:tw-outline-none"
-              : "tw-fixed tw-inset-0 tw-z-30 tw-border-0 tw-bg-gray-600 tw-bg-opacity-50 focus:tw-outline-none"
+              ? "tw-fixed tw-inset-0 tw-z-[70] tw-border-0 tw-bg-gray-600 tw-bg-opacity-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
+              : "tw-fixed tw-inset-0 tw-z-30 tw-border-0 tw-bg-gray-600 tw-bg-opacity-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
           }
           onClick={onCloseOffcanvas}
           aria-label="Close menu overlay"
@@ -194,6 +201,8 @@ function WebSidebar({
                           event?.stopPropagation();
                           setIsSearchOpen(true);
                         }}
+                        onPointerEnter={preloadHeaderSearchModal}
+                        onFocus={preloadHeaderSearchModal}
                         icon={MagnifyingGlassIcon}
                         active={false}
                         collapsed={shouldShowCollapsed}
@@ -232,7 +241,10 @@ function WebSidebar({
         </div>
       </div>
       {isSearchOpen && (
-        <HeaderSearchModal onClose={() => setIsSearchOpen(false)} wave={null} />
+        <LazyHeaderSearchModal
+          onClose={() => setIsSearchOpen(false)}
+          wave={null}
+        />
       )}
       {!isTouchScreen && (
         <ReactTooltip

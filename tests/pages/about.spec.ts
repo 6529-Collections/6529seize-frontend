@@ -1,6 +1,8 @@
 import {
   expect,
+  expectKeyboardFocusOutline,
   expectNoHorizontalOverflow,
+  expectNoOutlineOnPointerFocus,
   test,
   waitForRouteReady,
 } from "../testHelpers";
@@ -120,5 +122,35 @@ test.describe("About Pages @smoke @medium @large", () => {
       )
       .toBe(true);
     await expectNoHorizontalOverflow(page);
+  });
+
+  test("should paint a keyboard focus outline on button links", async ({
+    page,
+  }) => {
+    await page.goto("/about/minting", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+
+    const mintLink = page.getByRole("link", {
+      name: "Mint the latest Meme Card",
+    });
+    await expect(mintLink).toBeVisible();
+
+    // The global link reset used to cancel every focus-visible:tw-outline-*
+    // utility, so a Tab stop on a ButtonLink painted no indicator at all.
+    await expectKeyboardFocusOutline(page, mintLink);
+  });
+
+  test("should not paint a focus outline on button links for pointer focus", async ({
+    page,
+  }) => {
+    await page.goto("/about/minting", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+
+    const mintLink = page.getByRole("link", {
+      name: "Mint the latest Meme Card",
+    });
+    await expect(mintLink).toBeVisible();
+
+    await expectNoOutlineOnPointerFocus(page, mintLink);
   });
 });
