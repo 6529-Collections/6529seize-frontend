@@ -1,8 +1,7 @@
 import {
-  CONFIRMED_WRITE_POLL_WINDOW_MS,
-  notePostWriteActivity,
+  notePostWriteSettled,
+  notePostWriteSubmitted,
   resetPostWritePollingForTests,
-  SUBMITTED_WRITE_POLL_WINDOW_MS,
   usePostWritePolling,
 } from "@/components/delegation/collection-delegation/usePostWritePolling";
 import { useDelegationToast } from "@/components/delegation/DelegationToast";
@@ -17,6 +16,9 @@ import type { ReactNode } from "react";
 // The documented cadence: re-read every 5 s for 30 s after a confirmed write.
 const POST_WRITE_POLL_INTERVAL_MS = 5_000;
 const POST_WRITE_POLL_WINDOW_MS = 30_000;
+const CONFIRMED_WRITE_POLL_WINDOW_MS = POST_WRITE_POLL_WINDOW_MS;
+// A pending write polls until its receipt settles, at most 3 minutes.
+const SUBMITTED_WRITE_POLL_WINDOW_MS = 180_000;
 
 async function advance(ms: number) {
   await act(async () => {
@@ -109,26 +111,83 @@ describe("usePostWritePolling", () => {
     expect(jest.getTimerCount()).toBe(0);
   });
 
-  it("keeps polling while a submitted write is pending", () => {
+  it("polls while a write is pending and only for the confirmed window after its receipt", () => {
     const { result } = renderHook(() => usePostWritePolling());
 
-    act(() => notePostWriteActivity(SUBMITTED_WRITE_POLL_WINDOW_MS));
+    act(() => notePostWriteSubmitted("0xa"));
     act(() => {
       jest.advanceTimersByTime(CONFIRMED_WRITE_POLL_WINDOW_MS * 2);
     });
     expect(result.current.refetchInterval).toBe(POST_WRITE_POLL_INTERVAL_MS);
 
-    // A confirmation does not cut a longer pending window short.
-    act(() => notePostWriteActivity(CONFIRMED_WRITE_POLL_WINDOW_MS));
+    // The receipt ends the long pending window: polling stops one
+    // confirmed window later, not at the end of the submitted window.
+    act(() => notePostWriteSettled("0xa", true));
+    act(() => {
+      jest.advanceTimersByTime(CONFIRMED_WRITE_POLL_WINDOW_MS - 1);
+    });
+    expect(result.current.refetchInterval).toBe(POST_WRITE_POLL_INTERVAL_MS);
+    act(() => {
+      jest.advanceTimersByTime(1);
+    });
+    expect(result.current.refetchInterval).toBe(false);
+    expect(jest.getTimerCount()).toBe(0);
+  });
+
+  it("stops polling when a pending write fails", () => {
+    const { result } = renderHook(() => usePostWritePolling());
+
+    act(() => notePostWriteSubmitted("0xa"));
+    expect(result.current.refetchInterval).toBe(POST_WRITE_POLL_INTERVAL_MS);
+    act(() => notePostWriteSettled("0xa", false));
+    expect(result.current.refetchInterval).toBe(false);
+    expect(jest.getTimerCount()).toBe(0);
+  });
+
+  it("stops a pending write whose receipt never settles after the submitted window", () => {
+    const { result } = renderHook(() => usePostWritePolling());
+
+    act(() => notePostWriteSubmitted("0xa"));
+    // Re-noting the same pending write (an effect re-run) does not extend it.
     act(() => {
       jest.advanceTimersByTime(CONFIRMED_WRITE_POLL_WINDOW_MS);
     });
-    expect(result.current.refetchInterval).toBe(POST_WRITE_POLL_INTERVAL_MS);
-
+    act(() => notePostWriteSubmitted("0xa"));
     act(() => {
-      jest.advanceTimersByTime(SUBMITTED_WRITE_POLL_WINDOW_MS);
+      jest.advanceTimersByTime(
+        SUBMITTED_WRITE_POLL_WINDOW_MS - CONFIRMED_WRITE_POLL_WINDOW_MS
+      );
     });
     expect(result.current.refetchInterval).toBe(false);
+    expect(jest.getTimerCount()).toBe(0);
+  });
+
+  it("keeps polling for another pending write after one settles", () => {
+    const { result } = renderHook(() => usePostWritePolling());
+
+    act(() => notePostWriteSubmitted("0xa"));
+    act(() => notePostWriteSubmitted("0xb"));
+    act(() => notePostWriteSettled("0xa", true));
+    act(() => {
+      jest.advanceTimersByTime(CONFIRMED_WRITE_POLL_WINDOW_MS * 2);
+    });
+    expect(result.current.refetchInterval).toBe(POST_WRITE_POLL_INTERVAL_MS);
+
+    act(() => notePostWriteSettled("0xb", false));
+    expect(result.current.refetchInterval).toBe(false);
+  });
+
+  it("does not let a confirmed window shorten a longer one", () => {
+    const { result } = renderHook(() => usePostWritePolling());
+
+    act(() =>
+      result.current.startPostWritePolling(CONFIRMED_WRITE_POLL_WINDOW_MS * 4)
+    );
+    act(() => result.current.startPostWritePolling());
+    act(() => {
+      jest.advanceTimersByTime(CONFIRMED_WRITE_POLL_WINDOW_MS * 2);
+    });
+    expect(result.current.refetchInterval).toBe(POST_WRITE_POLL_INTERVAL_MS);
   });
 });
 

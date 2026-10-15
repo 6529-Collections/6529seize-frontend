@@ -21,9 +21,8 @@ import {
 } from "react";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import {
-  CONFIRMED_WRITE_POLL_WINDOW_MS,
-  notePostWriteActivity,
-  SUBMITTED_WRITE_POLL_WINDOW_MS,
+  notePostWriteSettled,
+  notePostWriteSubmitted,
 } from "./collection-delegation/usePostWritePolling";
 import type { DelegationCollection } from "./delegation-constants";
 import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
@@ -469,9 +468,11 @@ export function DelegationSubmitGroups(
       // Every delegation screen re-reads the chain while this write is
       // pending and shortly after it is confirmed, even if this form closes.
       if (waitWriteDelegation.isLoading) {
-        notePostWriteActivity(SUBMITTED_WRITE_POLL_WINDOW_MS);
+        notePostWriteSubmitted(writeDelegation.data);
       } else if (waitWriteDelegation.isSuccess) {
-        notePostWriteActivity(CONFIRMED_WRITE_POLL_WINDOW_MS);
+        notePostWriteSettled(writeDelegation.data, true);
+      } else if (waitWriteDelegation.isError) {
+        notePostWriteSettled(writeDelegation.data, false);
       }
       if (waitWriteDelegation.isLoading) {
         emitToast({
