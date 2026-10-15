@@ -2,7 +2,10 @@ import {
   SeizeConnectProvider,
   useSeizeConnectContext,
 } from "@/components/auth/SeizeConnectContext";
-import { AppKitBootstrapContext } from "@/components/providers/AppKitBootstrapContext";
+import {
+  AppKitBootstrapContext,
+  type AppKitBootstrapStatus,
+} from "@/components/providers/AppKitBootstrapContext";
 import { publicEnv } from "@/config/env";
 import * as authUtils from "@/services/auth/auth.utils";
 import { WalletInitializationError } from "@/errors/wallet";
@@ -1484,6 +1487,31 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
       );
     }
   );
+
+  it("reports no pending wallet connection until the wallet stack is requested", () => {
+    let status: AppKitBootstrapStatus = "idle";
+    const { result, rerender } = renderHook(() => useSeizeConnectContext(), {
+      wrapper: ({ children }) => (
+        <AppKitBootstrapContext.Provider
+          value={{
+            status,
+            hasTerminalError: false,
+            isCreated: false,
+            isReady: false,
+            isWaiting: status === "initializing",
+            waitForReady: jest.fn(() => Promise.resolve()),
+          }}
+        >
+          <SeizeConnectProvider>{children}</SeizeConnectProvider>
+        </AppKitBootstrapContext.Provider>
+      ),
+    });
+    expect(result.current.isWalletConnectionPending).toBe(false);
+
+    status = "initializing";
+    rerender();
+    expect(result.current.isWalletConnectionPending).toBe(true);
+  });
 
   it("should maintain all original context values", async () => {
     const validAddress = "0x1234567890abcdef1234567890abcdef12345678";
