@@ -1,3 +1,9 @@
+"use client";
+
+// Keep the whole provider tree behind this one client boundary. Each Client
+// Component a Server Component renders becomes its own client reference in the
+// RSC payload, and each reference repeats the root layout's full chunk list in
+// the inline flight data of every HTML page.
 import { WaveInformationProvider } from "@/contexts/WaveInformationContext";
 import { VersionStatusProvider } from "@/contexts/VersionStatusContext";
 import { AppWalletsProvider } from "@/components/app-wallets/AppWalletsContext";
