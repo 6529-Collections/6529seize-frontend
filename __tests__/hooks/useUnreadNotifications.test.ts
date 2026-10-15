@@ -49,7 +49,6 @@ describe("useUnreadNotifications", () => {
           QueryKey.IDENTITY_NOTIFICATIONS,
           {
             auth: getAuthTokenFingerprint("valid-jwt"),
-            identity: "bob",
             limit: "1",
             version: "v2",
           },
@@ -180,6 +179,21 @@ describe("useUnreadNotifications", () => {
     );
   });
 
+  it("shares one query between readers of the same token whatever handle they pass", () => {
+    useQueryMock.mockReturnValue({ data: undefined });
+
+    renderHook(() => useUnreadNotifications("bob"));
+    renderHook(() => useUnreadNotifications("Bob"));
+    renderHook(() => useUnreadNotifications("previous-handle"));
+
+    const queryKeys = useQueryMock.mock.calls.map(
+      ([options]) => options.queryKey
+    );
+    expect(queryKeys).toHaveLength(3);
+    expect(queryKeys[1]).toEqual(queryKeys[0]);
+    expect(queryKeys[2]).toEqual(queryKeys[0]);
+  });
+
   it("uses a fresh query after the auth token materially changes", () => {
     useQueryMock.mockReturnValue({ data: undefined });
     getAuthJwtMock.mockReturnValue("first-jwt");
@@ -195,7 +209,6 @@ describe("useUnreadNotifications", () => {
     expect(secondQueryKey[1]).toEqual(
       expect.objectContaining({
         auth: getAuthTokenFingerprint("reauthenticated-jwt"),
-        identity: "bob",
       })
     );
   });
