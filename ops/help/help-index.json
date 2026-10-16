@@ -6914,6 +6914,27 @@
       ]
     },
     {
+      "id": "waves.drop.editing",
+      "kind": "workflow",
+      "title": "Edit a drop or wave description",
+      "aliases": [
+        "edit message",
+        "edit description",
+        "description edit time limit"
+      ],
+      "keywords": ["drop", "edit", "description", "pinned", "time limit"],
+      "facts": [
+        "Edit is available for your own non-participatory drops. Ordinary drops have a five-minute edit window measured from creation or the latest edit.",
+        "The wave's current description (pinned drop) can be edited by its author at any time. Replacing the pinned description makes the previous drop subject to the normal edit window again. Pinning does not grant other users permission to edit the drop.",
+        "Open the drop action menu and choose Edit. Save the changed content; existing mentions, metadata and referenced NFTs are preserved. Editing a description still requires the usual wave access and content validation."
+      ],
+      "canonical_path": "/waves",
+      "tags": ["waves", "drops", "editing", "description"],
+      "source_refs": [
+        "ops/docs/waves/composer/feature-edit-mention-preservation.md"
+      ]
+    },
+    {
       "id": "waves.composer.body-length-limits",
       "kind": "business_rule",
       "title": "Wave drop text and payload limits",
