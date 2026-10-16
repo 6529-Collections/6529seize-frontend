@@ -21,8 +21,9 @@ pinned drop with its content and media. Eligible viewers can add or edit REP.
 
 1. Open a wave and select its name.
 2. Read About or switch to REP or Configuration.
-3. On mobile, close the panel, press Escape, or use Back to return to the original
-   view. The competition, tab, curation, scroll and unfinished input remain in place.
+3. On mobile, swipe down from the handle or header, select Close, tap outside,
+   press Escape, or use Back to return to the original view. The competition,
+   tab, curation, scroll and unfinished input remain in place.
 
 ## Common Scenarios
 
@@ -32,10 +33,28 @@ pinned drop with its content and media. Eligible viewers can add or edit REP.
   curation management, chat history deletion and personal display preferences.
 - Shared changes use administrator gear controls. Personal controls retain their
   own authentication requirements.
+- On mobile, configuration gears open their editor inside the information
+  panel. Links, chat settings, visibility and administrator access share the
+  same Back and Close controls. Back (including browser Back or Escape) returns
+  to Configuration without submitting changes; Save returns after a successful update.
+  Failed saves keep the editor open for retry. Configuration keeps its selected
+  tab and scroll position. Close or a downward header swipe dismisses the whole
+  panel. The sheet keeps its height when opening an editor or returning with Back,
+  so short forms do not pull its top edge down the screen.
+  Sheet editors omit a duplicate Cancel button; desktop setting popovers keep
+  Cancel. Chat, Links and Replies checkboxes use the shared dark styling.
+- In Curations, the section plus opens Create curation. A row gear offers
+  management actions including Edit Curation. Both forms stay inside the same
+  mobile sheet or tablet panel, with inline group selection and Back to
+  Configuration.
+- On tablet-sized layouts, the overlay side panel also keeps these editors
+  inside the panel. Back or Escape returns to the selected information tab.
 - Competition access, rules, appearance and pauses belong to **Settings** in the
   main row. Voter lists and vote activity belong to **Votes**.
 - Information tabs support ArrowLeft, ArrowRight, Home and End. Mobile confines
   focus to the open panel and returns focus to its opener when it closes.
+- Scroll the panel content normally. A short or canceled header drag returns
+  the panel to its open position; horizontal gestures do not dismiss it.
 
 ## Edge Cases
 
