@@ -97,5 +97,17 @@ it("renders accepted collaborator attribution once through the author metadata r
       { id: "B", handle: "artistB", display: "artistB", pfp: null },
     ],
   } as ExtendedDrop);
-  expect(screen.getAllByRole("link", { name: "@artistB" })).toHaveLength(1);
+  expect(screen.getAllByRole("link", { name: "artistB" })).toHaveLength(1);
 });
+
+// Profile fetching and badge rendering have dedicated collaborator identity coverage.
+jest.mock(
+  "@/components/waves/memes/collaborations/MemeCollaboratorIdentity",
+  () => ({
+    MemeCollaboratorIdentity: ({
+      collaborator,
+    }: {
+      collaborator: { handle: string };
+    }) => <a href={`/${collaborator.handle}`}>{collaborator.handle}</a>,
+  })
+);

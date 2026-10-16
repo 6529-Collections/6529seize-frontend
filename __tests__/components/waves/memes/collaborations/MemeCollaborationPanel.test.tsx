@@ -9,7 +9,6 @@ import {
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemeCollaborationPanel } from "@/components/waves/memes/collaborations/MemeCollaborationPanel";
-import { MemeCollaboratorCredits } from "@/components/waves/memes/collaborations/MemeCollaboratorCredits";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { ApiMemeCollaborationInvitationStatusEnum } from "@/generated/models/ApiMemeCollaborationInvitation";
 import type { ApiMemeCollaborationState } from "@/generated/models/ApiMemeCollaborationState";
@@ -212,22 +211,6 @@ it("does not expose pending names to public viewers or offer late acceptance", a
   expect(
     screen.queryByRole("button", { name: "Accept collaboration" })
   ).not.toBeInTheDocument();
-});
-
-it("renders all accepted collaborators as independent profile links", () => {
-  render(
-    <MemeCollaboratorCredits
-      collaborators={[profile, { ...profile, id: "C", handle: "artistC" }]}
-    />
-  );
-  expect(screen.getByRole("link", { name: "@artistB" })).toHaveAttribute(
-    "href",
-    "/artistB"
-  );
-  expect(screen.getByRole("link", { name: "@artistC" })).toHaveAttribute(
-    "href",
-    "/artistC"
-  );
 });
 
 it("shows the exact review snapshot and opens only safe media links", async () => {

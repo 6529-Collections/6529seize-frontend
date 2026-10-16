@@ -198,7 +198,7 @@ Acceptance is final, with no withdrawal. The submitter cannot replace the
 accepted artwork or original artist name; replacing the submission requires
 fresh invitations. Admins can edit the final mint artwork and credits in Craft.
 
-Public submission cards and details show only accepted collaborators. Pending
+Public submission cards and details show only accepted collaborators. Details show their avatar, handle, level and profile badges in the same style as the submitter. Previews use smaller profile rows with the same identity information. Profile links and avatars remain available if the additional level/badge lookup fails. Pending
 names are private to the submitter and their own invitee. Accepted submissions
 appear on each collaborating artist's profile with the same active/winner
 status, votes and result. There is one entry and one submitter; collaborators do

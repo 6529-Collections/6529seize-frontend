@@ -25,15 +25,17 @@ export default function NotificationMemeCollaboration({
       ? `/waves/${encodeURIComponent(context.wave_id)}?drop=${encodeURIComponent(context.drop_id)}`
       : null;
   return (
-    <div className="tw-space-y-2 tw-py-3">
-      <p className="tw-m-0 tw-text-sm tw-text-iron-200">
-        {t(locale, messageKey)}
-      </p>
-      <NotificationTimestamp createdAt={notification.created_at} />
+    <div className="tailwind-scope tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-2 tw-py-3">
+      <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1">
+        <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-200">
+          {t(locale, messageKey)}
+        </p>
+        <NotificationTimestamp createdAt={notification.created_at} />
+      </div>
       {artworkHref && (
         <Link
           href={artworkHref}
-          className="tw-rounded tw-font-semibold tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          className="tw-max-w-full tw-break-words tw-rounded tw-text-sm tw-font-semibold tw-leading-6 tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
         >
           {t(locale, "memes.collaborations.open")}
         </Link>
