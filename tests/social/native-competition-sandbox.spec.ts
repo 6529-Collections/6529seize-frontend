@@ -1625,7 +1625,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(
         page.getByRole("img", { name: handle, exact: true })
       ).toBeVisible();
-      const row = actor.locator("xpath=ancestor::div[1]");
+      const row = page
+        .getByRole("link", { name: handle, exact: true })
+        .locator("xpath=ancestor::div[1]");
       await expect(row.getByText(message, { exact: true })).toBeVisible();
       const artwork = row.getByRole("link", { name: "Test Cat", exact: true });
       const link = row.getByRole("link", { name: action, exact: true });
