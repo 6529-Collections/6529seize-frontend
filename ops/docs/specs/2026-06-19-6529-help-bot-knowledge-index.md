@@ -7,6 +7,9 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The `waves.drop.editing` record covers author-only editing, the normal edit
+window, and unlimited editing of the wave's current pinned description drop.
+
 The `about.6529-apps` record includes a concise `brief_answer` naming both
 6529 Mobile and 6529 Desktop and an `answer_links` footer to the official Apps
 page. The companion backend uses it for short availability/download requests
