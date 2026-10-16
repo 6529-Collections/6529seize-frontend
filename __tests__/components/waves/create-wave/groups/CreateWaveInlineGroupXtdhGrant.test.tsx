@@ -140,13 +140,11 @@ describe("CreateWaveInlineGroupXtdhGrant", () => {
         );
       } else if (filter === "grantor") {
         await user.type(
-          screen.getByRole("textbox", { name: "Grantor", exact: true }),
+          screen.getByRole("textbox", { name: "Grantor" }),
           "alice"
         );
       } else {
-        await user.click(
-          screen.getByRole("button", { name: "Pending", exact: true })
-        );
+        await user.click(screen.getByRole("button", { name: "Pending" }));
       }
 
       await user.click(screen.getByRole("button", { name: "Clear filters" }));
@@ -154,15 +152,12 @@ describe("CreateWaveInlineGroupXtdhGrant", () => {
       expect(
         screen.getByRole("textbox", { name: "Collection name" })
       ).toHaveValue("");
-      expect(
-        screen.getByRole("textbox", { name: "Grantor", exact: true })
-      ).toHaveValue("");
-      expect(
-        screen.getByRole("button", { name: "Granted", exact: true })
-      ).toHaveAttribute("aria-pressed", "true");
-      expect(
-        screen.getByRole("button", { name: "Granted", exact: true })
-      ).toHaveFocus();
+      expect(screen.getByRole("textbox", { name: "Grantor" })).toHaveValue("");
+      expect(screen.getByRole("button", { name: "Granted" })).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      );
+      expect(screen.getByRole("button", { name: "Granted" })).toHaveFocus();
       expect(
         screen.getByRole("status", { name: "Selected grant" })
       ).toHaveTextContent("none");
