@@ -3,9 +3,23 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { render, screen } from "@testing-library/react";
 
 jest.mock("@/components/waves/drop/WaveDropMetaRow", () => ({
-  WaveDropMetaRow: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
+  WaveDropMetaRow: ({
+    children,
+    drop,
+  }: {
+    children: React.ReactNode;
+    drop: ExtendedDrop;
+  }) => {
+    const { MemeCollaboratorCredits } = jest.requireActual(
+      "@/components/waves/memes/collaborations/MemeCollaboratorCredits"
+    );
+    return (
+      <div>
+        <MemeCollaboratorCredits collaborators={drop.collaborators} />
+        {children}
+      </div>
+    );
+  },
 }));
 
 jest.mock("@/components/waves/drop/WaveDropVoteSummary", () => ({
@@ -75,3 +89,25 @@ describe("MemesDropSummarySection", () => {
     ).not.toBeInTheDocument();
   });
 });
+
+it("renders accepted collaborator attribution once through the author metadata row", () => {
+  renderSummary({
+    submission_context: {},
+    collaborators: [
+      { id: "B", handle: "artistB", display: "artistB", pfp: null },
+    ],
+  } as ExtendedDrop);
+  expect(screen.getAllByRole("link", { name: "artistB" })).toHaveLength(1);
+});
+
+// Profile fetching and badge rendering have dedicated collaborator identity coverage.
+jest.mock(
+  "@/components/waves/memes/collaborations/MemeCollaboratorIdentity",
+  () => ({
+    MemeCollaboratorIdentity: ({
+      collaborator,
+    }: {
+      collaborator: { handle: string };
+    }) => <a href={`/${collaborator.handle}`}>{collaborator.handle}</a>,
+  })
+);

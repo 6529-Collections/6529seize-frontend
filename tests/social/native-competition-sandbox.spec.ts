@@ -2,6 +2,9 @@ import { writeFile } from "node:fs/promises";
 import composerSandboxConstants from "../support/composerSandboxConstants.json";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import type { Frame, Locator, Page } from "@playwright/test";
+import type { ApiDropAndWave } from "@/generated/models/ApiDropAndWave";
+import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2PageWithoutCount";
+import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { expectCompetitionScroll } from "../support/competitionScroll";
 import {
   monitorRememberedLeaderboard,
@@ -246,6 +249,33 @@ const pageResult = (data: unknown[]) => ({
   next_cursor: null,
   has_more: false,
 });
+
+async function installCollaborationDropFixture(
+  page: Page,
+  getFixture: () => ApiDropAndWave
+) {
+  const dropId = getFixture().drop.id;
+  // Competition cards fetch one drop; the detail overlay batches its read.
+  // Keep both views on the same fixture, including post-acceptance refreshes.
+  await page.route(`**/v2/drops/${dropId}`, (route) =>
+    route.fulfill({ json: getFixture() })
+  );
+  await page.route(
+    (url) =>
+      url.pathname.endsWith("/v2/drops") &&
+      url.searchParams.get("ids") === dropId,
+    (route) => {
+      const { drop, wave } = getFixture();
+      return route.fulfill({
+        json: {
+          data: [{ ...drop, wave }],
+          page: 1,
+          next: false,
+        } satisfies ApiDropV2PageWithoutCount,
+      });
+    }
+  );
+}
 const competition = (id: string, title: string) => ({
   id,
   wave_id: WAVE,
@@ -1669,6 +1699,379 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         /hydration|hydrated|cannot be a (?:child|descendant)/i.test(error)
       )
     ).toEqual([]);
+  });
+
+  test("shows collaboration actors and named artwork in the standard notification header", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    const origin = getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"]);
+    const response = await page.request.get(
+      `${origin}/api/v2/waves/${WAVE}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const fixture = await response.json();
+    const pfp =
+      "data:image/svg+xml;base64," +
+      Buffer.from(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28"><rect width="28" height="28" fill="#9b7ec8"/></svg>'
+      ).toString("base64");
+    await page.route("**/api/v2/notifications**", (route) =>
+      route.fulfill({
+        json: {
+          unread_count: 2,
+          notifications: ["INVITED", "ACCEPTED"].map((event, index) => ({
+            id: 5000 - index,
+            cause: "MEME_COLLABORATION",
+            created_at: Date.now() - 3 * 60 * 60 * 1000,
+            read_at: null,
+            related_identity: {
+              ...fixture.drops[0].author,
+              id: `notification-actor-${index}`,
+              handle: index === 0 ? "phoebeum" : "prxt0",
+              pfp,
+            },
+            additional_context: {
+              event_type: event,
+              wave_id: WAVE,
+              drop_id: entryDropId("alpha"),
+              invitation_id: `invite-${index}`,
+              artwork_name: "Test Cat",
+            },
+          })),
+        },
+      })
+    );
+    await page.goto("/notifications");
+    for (const [handle, action, message] of [
+      ["phoebeum", "Review invitation", "invited you to collaborate on"],
+      ["prxt0", "View artwork", "accepted your collaboration invitation for"],
+    ] as const) {
+      const actor = page.getByRole("link", { name: handle, exact: true });
+      await expect(actor).toBeVisible();
+      await expect(actor).toHaveAttribute("href", `/${handle}`);
+      await expect(
+        page.getByRole("img", { name: handle, exact: true })
+      ).toBeVisible();
+      const row = page
+        .getByRole("link", { name: handle, exact: true })
+        .locator("xpath=ancestor::div[1]");
+      await expect(row.getByText(message, { exact: true })).toBeVisible();
+      const artwork = row.getByRole("link", { name: "Test Cat", exact: true });
+      await expect(artwork).toBeVisible();
+      await expect(
+        row.getByRole("link", { name: action, exact: true })
+      ).toHaveCount(0);
+      await expect(row.getByRole("link")).toHaveCount(2);
+      const artworkHref = `/waves/${encodeURIComponent(WAVE)}?drop=${encodeURIComponent(entryDropId("alpha"))}`;
+      await expect(artwork).toHaveAttribute("href", artworkHref);
+    }
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("collaboration-notifications.png"),
+    });
+  });
+
+  test("keeps collaborator search, selected chips and disclosure usable", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    const origin = getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"]);
+    const response = await page.request.get(
+      `${origin}/api/v2/waves/${WAVE}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const fixture = await response.json();
+    await installCollaborationDropFixture(page, () => ({
+      wave: fixture.wave,
+      drop: {
+        ...fixture.drops[0],
+        id: entryDropId("alpha"),
+        submission_artist: "playwright",
+        author: { ...fixture.drops[0].author, id: PROFILE },
+        title: "Collaboration artwork",
+      },
+    }));
+    await page.route(
+      `**/drops/${entryDropId("alpha")}/collaborations`,
+      (route) =>
+        route.fulfill({
+          json: {
+            managed: true,
+            can_invite: true,
+            closed: false,
+            artwork_hash: "a".repeat(64),
+            terms_version: "b".repeat(64),
+            acceptance_copy: "Acceptance is final.",
+            terms: null,
+            collaborators: [],
+            invitations: [
+              {
+                id: "existing-invite",
+                profile: {
+                  id: "artist-d",
+                  handle: "artistD",
+                  display: "artistD",
+                  pfp: null,
+                },
+                status: "PENDING",
+              },
+            ],
+          },
+        })
+    );
+    let releaseSearch!: () => void;
+    const searchGate = new Promise<void>((resolve) => {
+      releaseSearch = resolve;
+    });
+    await page.route("**/community-members?**", async (route) => {
+      await searchGate;
+      return route.fulfill({
+        json: [
+          {
+            profile_id: "artist-c",
+            handle: "artistC",
+            display: "artistC",
+            wallet: "0x0000000000000000000000000000000000000003",
+            primary_wallet: "0x0000000000000000000000000000000000000003",
+            pfp: null,
+          },
+        ],
+      });
+    });
+    await page.route("**/identities/artist-c", (route) =>
+      route.fulfill({ json: { id: "artist-c", handle: "artistC", pfp: null } })
+    );
+    try {
+      await page.goto(`${ROOT}/alpha?drop=${entryDropId("alpha")}`);
+      await expect(
+        page.getByRole("button", { name: "Close panel", exact: true })
+      ).toBeVisible();
+      const manage = page.getByRole("button", { name: /Manage collaborators/ });
+      await expect(manage).toBeVisible({ timeout: 30000 });
+      await expect(
+        page.getByRole("dialog", { name: "Manage collaborators" })
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("button", { name: "Add collaborators", exact: true })
+      ).toHaveCount(0);
+      await expect(manage).toHaveCSS("border-top-style", "solid");
+      const summary = page
+        .getByRole("button", { name: /Manage collaborators/ })
+        .locator("xpath=ancestor::div[2]");
+      const author = summary.getByRole("link", {
+        name: fixture.drops[0].author.handle,
+        exact: false,
+      });
+      const manageBox = await manage.boundingBox();
+      const authorBox = await author.boundingBox();
+      expect(manageBox).not.toBeNull();
+      expect(authorBox).not.toBeNull();
+      expect(Math.abs(manageBox!.x - authorBox!.x)).toBeLessThan(1);
+      expect(manageBox!.height).toBeLessThanOrEqual(44);
+      await manage.click();
+      const manager = page.getByRole("dialog", {
+        name: "Manage collaborators",
+      });
+      await expect(manager).toBeVisible();
+      await expect(
+        manager.getByText("@artistD", { exact: true })
+      ).toBeVisible();
+      const add = manager.getByRole("button", {
+        name: "Add collaborators",
+        exact: true,
+      });
+      await expect(add).toBeVisible();
+      const search = page.getByRole("combobox", {
+        name: "Invite a collaborating artist",
+      });
+      await expect(search).toHaveCount(0);
+      await add.click();
+      await search.fill("art");
+      await expect(
+        page.getByRole("status").filter({ hasText: "Searching…" })
+      ).toBeVisible();
+      await expect(page.getByText("No results", { exact: true })).toHaveCount(
+        0
+      );
+      releaseSearch();
+      await page
+        .getByRole("option")
+        .filter({ hasText: "artistC" })
+        .getByRole("button")
+        .click();
+      await expect(
+        page.getByRole("button", { name: "Remove invitation for artistC" })
+      ).toBeVisible();
+      const fold = page.getByRole("button", {
+        name: "Collaborators (1)",
+        exact: true,
+      });
+      await fold.click();
+      await expect(search).toHaveCount(0);
+      await fold.click();
+      await expect(page.getByText("@artistC", { exact: true })).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("collaborator-picker.png"),
+      });
+      await page
+        .getByRole("button", { name: "Remove invitation for artistC" })
+        .click();
+      await expect(
+        page.getByRole("button", { name: "Add collaborators", exact: true })
+      ).toHaveAttribute("aria-expanded", "true");
+      await page.keyboard.press("Escape");
+      await expect(manager).toHaveCount(0);
+      await expect(manage).toBeFocused();
+      await manage.click();
+      await expect(manager).toBeVisible();
+      await manager.getByRole("button", { name: "Done", exact: true }).click();
+      await expect(manager).toHaveCount(0);
+      await expect(manage).toBeFocused();
+    } finally {
+      releaseSearch();
+    }
+  });
+
+  test("reviews collaborator consent in a modal and displays accepted credit once", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    const origin = getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"]);
+    const response = await page.request.get(
+      `${origin}/api/v2/waves/${WAVE}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const fixture = await response.json();
+    const profile = {
+      id: PROFILE,
+      handle: "playwright",
+      display: "playwright",
+      pfp: null,
+    };
+    await page.route(`**/identities/${PROFILE.toLowerCase()}`, (route) =>
+      route.fulfill({
+        json: {
+          ...fixture.drops[0].author,
+          id: PROFILE,
+          handle: "playwright",
+          level: 21,
+        },
+      })
+    );
+    let accepted = false;
+    await installCollaborationDropFixture(page, () => ({
+      wave: fixture.wave,
+      drop: {
+        ...fixture.drops[0],
+        id: entryDropId("alpha"),
+        drop_type: ApiDropMainType.Submission,
+        author: {
+          ...fixture.drops[0].author,
+          id: "other-artist",
+          handle: "otherArtist",
+        },
+        title: "Collaboration artwork",
+        collaborators: accepted ? [profile] : [],
+      },
+    }));
+    const state = () => ({
+      managed: true,
+      can_invite: false,
+      closed: false,
+      artwork_hash: "a".repeat(64),
+      terms_version: "b".repeat(64),
+      acceptance_copy:
+        "Acceptance is final and admins control final mint credits.",
+      terms: "The submission and minting terms for this artwork.",
+      collaborators: accepted ? [profile] : [],
+      invitations: [
+        { id: "invite", profile, status: accepted ? "ACCEPTED" : "PENDING" },
+      ],
+    });
+    await page.route(
+      `**/drops/${entryDropId("alpha")}/collaborations`,
+      (route) => route.fulfill({ json: state() })
+    );
+    await page.route(
+      `**/drops/${entryDropId("alpha")}/collaborations/invite/response`,
+      (route) => {
+        expect(route.request().method()).toBe("POST");
+        expect(route.request().postDataJSON()).toEqual({
+          action: "ACCEPT",
+          artist_name: "Playwright Artist",
+          artwork_hash: "a".repeat(64),
+          terms_version: "b".repeat(64),
+        });
+        accepted = true;
+        return route.fulfill({ json: state() });
+      }
+    );
+    await page.goto(`${ROOT}/alpha?drop=${entryDropId("alpha")}`);
+    await expect(
+      page.getByRole("button", { name: "Close panel", exact: true })
+    ).toBeVisible();
+    const review = page.getByRole("button", {
+      name: "Review invitation",
+      exact: true,
+    });
+    await expect(review).toBeVisible({ timeout: 30000 });
+    await expect(
+      page.getByText("The submission and minting terms for this artwork.", {
+        exact: true,
+      })
+    ).toHaveCount(0);
+    await review.click();
+    const dialog = page.getByRole("dialog", { name: "Review invitation" });
+    await expect(dialog).toBeVisible();
+    const accept = dialog.getByRole("button", {
+      name: "Accept collaboration",
+      exact: true,
+    });
+    await expect(accept).toBeDisabled();
+    await expect(
+      dialog.getByText("The submission and minting terms for this artwork.", {
+        exact: true,
+      })
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(dialog).toHaveCount(0);
+    await expect(review).toBeFocused();
+    await review.click();
+    await expect(dialog.getByRole("checkbox")).not.toBeChecked();
+    const artistName = dialog.getByRole("textbox", {
+      name: "Artist credit name",
+      exact: true,
+    });
+    await expect(artistName).toHaveValue("playwright");
+    await artistName.fill("   ");
+    await dialog.getByRole("checkbox").check();
+    await expect(accept).toBeDisabled();
+    await artistName.fill("Playwright Artist");
+    await expect(dialog.getByRole("checkbox")).not.toBeChecked();
+    await dialog.getByRole("checkbox").check();
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("collaboration-review-modal.png"),
+    });
+    await accept.click();
+    await expect(dialog).toHaveCount(0);
+    await expect(
+      page
+        .getByRole("list", { name: "Collaborators", exact: true })
+        .getByRole("link", { name: "playwright", exact: true })
+    ).toHaveCount(1);
+    await expect(review).toHaveCount(0);
+    await expect(
+      page
+        .getByRole("list", { name: "Collaborators", exact: true })
+        .getByText("21", { exact: true })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("accepted-collaborator-profile.png"),
+    });
   });
 
   test("renders frozen CHAT deep links with submission voting controls", async ({

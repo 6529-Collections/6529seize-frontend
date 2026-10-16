@@ -105,6 +105,8 @@ export function MemesArtSubmissionStepContent({
         <ArtworkStep
           proposalFrame={form.proposalFrame}
           onProposalFrameChange={form.setProposalFrame}
+          collaborators={form.collaborators}
+          onCollaboratorsChange={form.setCollaborators}
           traits={form.traits}
           artworkUploaded={form.artworkUploaded}
           artworkUrl={form.artworkUrl}
@@ -146,6 +148,7 @@ export function MemesArtSubmissionStepContent({
       if (isPreviewMode && previewDrop) {
         return (
           <MemesSubmissionPreviewScreen
+            collaborators={form.collaborators}
             proposalCard={
               form.proposalFrame
                 ? {

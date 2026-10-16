@@ -12,6 +12,7 @@ import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import Link from "next/link";
+import { MemeCollaboratorCredits } from "@/components/waves/memes/collaborations/MemeCollaboratorCredits";
 
 interface NextMintCardProps {
   readonly drop: ApiDrop;
@@ -115,6 +116,7 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
               {author.handle ?? "Anonymous"}
             </span>
           </Link>
+          <MemeCollaboratorCredits collaborators={drop.collaborators} />
         </div>
       </div>
     </div>
