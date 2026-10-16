@@ -7,6 +7,7 @@ import {
 import type { SupportedLocale } from "@/i18n/locales";
 import TdhPageTitle from "./TdhPageTitle";
 import TdhSubnav, { type TdhPageHref } from "./TdhSubnav";
+import { TDH_H1, TDH_LEDE } from "./tdhStyles";
 
 /**
  * The frame of every TDH sub-page: the About contents menu, the TDH section
@@ -49,16 +50,14 @@ export default function TdhPageShell({
           id="top"
           className="tw-scroll-mt-24 tw-pb-8 tw-pt-5 sm:tw-pb-10 sm:tw-pt-8"
         >
-          <h1 className="tw-m-0 tw-text-[1.875rem] tw-font-semibold tw-leading-[1.15] tw-tracking-tight tw-text-iron-50 sm:tw-text-[2.5rem] sm:tw-leading-[1.1]">
-            {title}
-          </h1>
+          <h1 className={TDH_H1}>{title}</h1>
           {pills !== undefined && (
             <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
               {pills}
             </div>
           )}
           {lede !== undefined && (
-            <div className="tw-mt-4 tw-max-w-3xl tw-space-y-3 tw-text-base tw-leading-7 tw-text-iron-200 sm:tw-text-lg sm:tw-leading-8">
+            <div className={`tw-mt-4 tw-max-w-3xl tw-space-y-3 ${TDH_LEDE}`}>
               {lede}
             </div>
           )}

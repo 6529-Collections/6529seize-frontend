@@ -13,7 +13,11 @@ import {
   verdictState,
   type VerdictState,
 } from "./states";
-import type { VerificationDay, VerificationIndexDay } from "./schema";
+import type {
+  VerificationDay,
+  VerificationIndex,
+  VerificationIndexDay,
+} from "./schema";
 
 /**
  * The latest day in a few plain numbers, for the overview's "Checked daily"
@@ -46,15 +50,47 @@ export type VerificationSummary =
       readonly rustTotal: number;
       /** Whether the day's history was checked; null without its file. */
       readonly historyChecked: boolean | null;
+      /** The day's snapshot block; null without its file. */
+      readonly cutoffBlock: number | null;
+      /** The track record: every published day, and those equal everywhere. */
+      readonly record: TrackRecord;
     };
+
+/** How many published days there are, and on how many all three agreed. */
+export interface TrackRecord {
+  readonly days: number;
+  /** Days whose verdict is OK with every identity and the totals equal. */
+  readonly allEqual: number;
+  /** The first published day's date (YYYY-MM-DD). */
+  readonly firstDate: string;
+}
+
+/** The index's track record: days published, and days equal everywhere. */
+function trackRecord(index: VerificationIndex): TrackRecord {
+  const days = index.days;
+  const allEqual = days.filter(
+    (day) =>
+      day.verdict === "OK" &&
+      day.identitiesTotal !== null &&
+      day.identitiesEqual === day.identitiesTotal &&
+      day.totalTdh.python === day.totalTdh.rust &&
+      day.totalTdh.live === day.totalTdh.rust
+  ).length;
+  const firstDate = days.reduce(
+    (first, day) => (day.date < first ? day.date : first),
+    days[0]?.date ?? ""
+  );
+  return { days: days.length, allEqual, firstDate };
+}
 
 type DataSummary = Extract<VerificationSummary, { kind: "data" }>;
 
 /** The summary of the latest day, from its index entry and, when loaded, its file. */
-export function summarizeDay(
+function summarizeDay(
   latest: VerificationIndexDay,
   day: VerificationDay | null,
-  afterCutoverDone: boolean
+  afterCutoverDone: boolean,
+  record: TrackRecord = { days: 1, allEqual: 0, firstDate: latest.date }
 ): DataSummary {
   const python =
     day !== null && day.implementations.python !== null
@@ -95,6 +131,8 @@ export function summarizeDay(
       : null,
     rustTotal: totals.rust,
     historyChecked: day === null ? null : day.mode === "checked",
+    cutoffBlock: day?.cutoffBlock ?? null,
+    record,
   };
 }
 
@@ -120,7 +158,8 @@ export async function loadVerificationSummary(
     return summarizeDay(
       latest,
       dayLoad.status === "ok" ? dayLoad.day : null,
-      cutoverState(indexLoad.index.cutover, now).kind === "done"
+      cutoverState(indexLoad.index.cutover, now).kind === "done",
+      trackRecord(indexLoad.index)
     );
   } catch {
     return null;

@@ -143,29 +143,37 @@ describe("network pages render", () => {
         name: "Checked daily, in public",
       })
     ).toBeInTheDocument();
+    // The strip near the top: the track record and the latest cycle in one
+    // sentence.
     expect(
       screen.getByText(
-        /October 15, 2026: 10,282 of 10,282 collectors equal between the Rust core and 6529.io/
+        /^Cycle of October 15, 2026 \(holdings at 23:59:59 UTC the day before\): 6529.io’s calculation and two separately written programs agreed on all 10,282 TDH records/
       )
     ).toBeInTheDocument();
+    expect(screen.getByText(/equal on 2 of 2 days/)).toBeInTheDocument();
+    // The checked-daily section's row: the record and the latest day.
     expect(
-      screen.getByText("collectors equal, Rust core and 6529.io")
+      screen.getByText("Equal on 2 of 2 published days since October 14, 2026.")
     ).toBeInTheDocument();
     expect(
-      screen.getByText("total TDH, the same in all three")
+      screen.getByText(
+        "Latest, October 15, 2026: all 10,282 identity records equal, the two burn addresses’ included."
+      )
     ).toBeInTheDocument();
     expect(screen.getAllByText("Not yet fully checked").length).toBeGreaterThan(
       0
     );
     expect(screen.queryByText(/sample/i)).not.toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /Checked daily in public: on/ })
+      screen.getByRole("link", { name: /^Checked daily, in public · equal on/ })
     ).toHaveAttribute("href", "/network/tdh/verification");
     expect(
-      screen.getByText(/tested against the specification’s conformance vectors/)
+      screen.getByText(/Each is tested against the conformance vectors/)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/cannot change any copy’s acquisition record/)
+      screen.getByText(
+        /cannot change a holding stack, while the day has a result/
+      )
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { name: "The exact calculation has moved" })

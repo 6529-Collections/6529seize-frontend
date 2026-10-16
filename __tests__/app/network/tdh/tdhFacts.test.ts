@@ -132,6 +132,40 @@ describe("TDH page facts", () => {
     );
   });
 
+  it("keeps the fact-check corrections of 16 October 2026", () => {
+    // The validator's round-4 code is on its development branch, not merged
+    // into main; the daily runs are scheduled from 16 October (D132).
+    noMessageMatches(/merged (on )?October|75 merged|current code, merged/);
+    noMessageMatches(
+      /[Ss]ince October 15, 2026|daily comparison, since October 15|^Since October 15$/
+    );
+    // P53 §11.3 pins the edition-floor adapter since P26 f840096.
+    noMessageMatches(/stays open/);
+    // Sinks send too (mints come from the zero address).
+    noMessageMatches(/only ever receive|sinks only receive/);
+    // The Lean model uses Lean's core and standard library.
+    noMessageMatches(/core library only/);
+    // The netting theorem is about holding stacks, under its conditions.
+    noMessageMatches(/acquisition record/);
+    noMessageMatches(/removes the newest copies first/);
+    // P26 §6.3 decides groups of four: three form an identity, the fourth
+    // counts alone.
+    noMessageMatches(/how a group of four counts[^.]*not settled/);
+    noMessageMatches(/does not (yet )?say how a fourth counts/);
+    // The feed's identity counts include the two sink identities.
+    noMessageMatches(/\{(total|identities)\} collectors|collectors equal/i);
+    // Program B read the design record too, not only the specifications.
+    noMessageMatches(/specifications and the vector files only/);
+    // Vector 40: a burn to 0x…dead credits the sink.
+    expect(
+      (impl as Record<string, string>)[
+        "network.tdh.impl.v.40-mint-and-burn-in-one-transaction"
+      ]
+    ).toMatch(/0x…dead credits the sink/);
+    // No real token or cycle in the vector anatomy.
+    noMessageMatches(/observed on the 2026-10-11 cycle|10000000049/i);
+  });
+
   it("shows no sample data", () => {
     noMessageMatches(/\bsample\b/i);
   });

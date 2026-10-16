@@ -1,21 +1,21 @@
 /** Shared class names for the TDH pages (section 4 of the plan). */
 import tableStyles from "./tdhTable.module.css";
 
-export const TDH_PROSE = "tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300";
-export const TDH_PROSE_LARGE =
-  "tw-m-0 tw-text-base tw-leading-7 tw-text-iron-200";
-export const TDH_PROSE_MAX = "tw-max-w-3xl";
-export const TDH_H3 =
-  "tw-m-0 tw-text-lg tw-font-semibold tw-leading-7 tw-text-iron-50";
+/**
+ * The TDH type scale, one for every page: H1 30 px on phones (26 px in a
+ * window under 360 px) and 40 px from `sm`, the lede 16 and 18 px. Section
+ * headings are 24 px (20 px under 360 px).
+ */
+export const TDH_H1 =
+  "tw-m-0 tw-hyphens-auto tw-break-words tw-text-[1.625rem] tw-font-semibold tw-leading-[1.15] tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-[1.875rem] sm:tw-text-[2.5rem] sm:tw-leading-[1.1]";
+export const TDH_LEDE =
+  "tw-text-base tw-leading-7 tw-text-iron-200 sm:tw-text-lg sm:tw-leading-8";
+
 export const TDH_CARD =
   "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900";
-export const TDH_CARD_SOFT =
-  "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/50";
 export const TDH_FOCUS_RING =
   "focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 export const TDH_LINK = `tw-font-medium tw-text-primary-300 tw-underline tw-decoration-primary-300/40 tw-underline-offset-4 hover:tw-text-primary-400 hover:tw-decoration-primary-400 ${TDH_FOCUS_RING}`;
-export const TDH_MONO = "tw-font-mono tw-text-[13px] tw-leading-6";
-export const TDH_NUM = "tw-tabular-nums";
 
 /**
  * A table frame that scrolls sideways: pair it with tabIndex 0, role region

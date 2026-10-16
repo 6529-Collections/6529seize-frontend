@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
-import NetworkReferenceNavigation from "@/components/network/NetworkReferenceNavigation";
 import {
   NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
   NETWORK_REFERENCE_PAGE_CLASSES,
@@ -21,6 +20,7 @@ import {
 import TdhSource from "../../shared/TdhSource";
 import TdhStackTable from "../../shared/TdhStackTable";
 import TdhSubnav from "../../shared/TdhSubnav";
+import { TDH_H1, TDH_LEDE } from "../../shared/tdhStyles";
 import TDHSection, { TDH_FOCUS, TDH_PANEL, TDH_TEXT } from "../../TDHSection";
 import ConsolidationOrderSimulator from "../ConsolidationOrderSimulator";
 
@@ -190,10 +190,10 @@ export default function TDHConsolidationDesignPage() {
       <article className="tw-mx-auto tw-max-w-6xl tw-pb-8">
         <TdhSubnav current="/network/tdh/consolidation" locale={locale} />
         <header className="tw-pb-8 tw-pt-5 sm:tw-pb-10 sm:tw-pt-8">
-          <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl">
+          <h1 className={TDH_H1}>
             {t(locale, "network.tdhConsolidation.design.title")}
           </h1>
-          <p className="tw-mb-0 tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-200">
+          <p className={`tw-mb-0 tw-mt-4 tw-max-w-3xl ${TDH_LEDE}`}>
             {limits
               ? t(locale, "network.tdhConsolidation.design.intro", {
                   date,
@@ -228,7 +228,7 @@ export default function TDHConsolidationDesignPage() {
           title={t(locale, "network.tdhConsolidation.rules.title")}
           description={t(locale, "network.tdhConsolidation.rules.description")}
         >
-          <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-4 tw-p-0 sm:tw-grid-cols-2">
+          <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-items-start tw-gap-4 tw-p-0 sm:tw-grid-cols-2">
             {RULES.map((rule) => (
               <li key={rule} className={`${TDH_PANEL} tw-p-5`}>
                 <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-7 tw-text-iron-100">
@@ -325,6 +325,10 @@ export default function TDHConsolidationDesignPage() {
             <p className={TDH_TEXT}>
               {t(locale, "network.tdhConsolidation.tested.port", {
                 total: formatInteger(locale, LIVE_SNAPSHOT.total),
+                snapshotDate: formatDate(locale, LIVE_SNAPSHOT.date, {
+                  dateStyle: "long",
+                  timeZone: "UTC",
+                }),
               })}
             </p>
             <p className={TDH_TEXT}>
@@ -352,6 +356,7 @@ export default function TDHConsolidationDesignPage() {
           title={t(locale, "network.tdhConsolidation.related")}
         >
           <TDHRelatedLinks
+            variant="list"
             links={(
               [
                 ["/network/tdh/consolidation", "consolidationGuide"],
@@ -369,11 +374,6 @@ export default function TDHConsolidationDesignPage() {
             }))}
           />
         </TDHSection>
-
-        <NetworkReferenceNavigation
-          currentHref="/network/tdh/consolidation"
-          locale={locale}
-        />
       </article>
     </div>
   );
@@ -429,7 +429,7 @@ function AddWalletSection({ locale }: { readonly locale: SupportedLocale }) {
           }))}
         />
         <Link
-          className={`${LINK} tw-text-sm`}
+          className={`${LINK} tw-mt-4 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm`}
           href="/safe-collecting/build-consolidation"
         >
           {t(locale, "network.tdhConsolidation.add.cta")}

@@ -1,11 +1,15 @@
-import { ArrowDownIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowDownIcon,
+  ArrowRightIcon,
+  ArrowUpIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useId } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { TDH_FOCUS_RING } from "../shared/tdhStyles";
 
-const NODE = `tw-flex tw-h-full tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-[13px] tw-leading-5 tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-primary-400/60 motion-reduce:tw-transition-none ${TDH_FOCUS_RING}`;
+const NODE = `tw-flex tw-h-full tw-min-h-11 tw-items-center tw-gap-2 xl:tw-h-14 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-[13px] tw-leading-5 tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-primary-400/60 motion-reduce:tw-transition-none ${TDH_FOCUS_RING}`;
 
 function MapNode({
   locale,
@@ -41,11 +45,24 @@ function Across() {
   );
 }
 
+/** An arrow from the parameters up into a section, from `xl`. */
+function Up() {
+  return (
+    <span
+      aria-hidden="true"
+      className="tw-hidden tw-justify-center tw-text-iron-500 xl:tw-flex"
+    >
+      <ArrowUpIcon className="tw-size-4" />
+    </span>
+  );
+}
+
 /**
  * Diagram 1: how the sections of P26 feed each other, as a flow. Inputs to
  * events to the snapshot; eligibility and identities side by side; then
- * holdings, scores and the output, with the parameters feeding sections 5
- * to 8. Each box links to its section.
+ * holdings, scores and the output. From `xl`, the parameters (§10) sit under
+ * the sections they feed, with an arrow up into each of §5 to §8; every
+ * node is the same height. Each box links to its section.
  */
 export function SectionMap({ locale }: { readonly locale: SupportedLocale }) {
   return (
@@ -54,14 +71,14 @@ export function SectionMap({ locale }: { readonly locale: SupportedLocale }) {
         {t(locale, "network.tdh.spec.mapTitle")}
       </figcaption>
       <p className="tw-sr-only">{t(locale, "network.tdh.spec.mapDesc")}</p>
-      <div className="tw-grid tw-max-w-md tw-gap-2 xl:tw-max-w-none xl:tw-grid-cols-[minmax(0,1fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1.25fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1fr)] xl:tw-items-center xl:tw-gap-x-1.5 xl:tw-gap-y-2">
+      <div className="tw-grid tw-max-w-md tw-gap-2 xl:tw-max-w-none xl:tw-grid-cols-[minmax(0,1fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1.3fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1fr)] xl:tw-items-center xl:tw-gap-x-1.5 xl:tw-gap-y-1.5">
         <MapNode locale={locale} section={2} />
         <Across />
         <MapNode locale={locale} section={3} />
         <Across />
         <MapNode locale={locale} section={4} />
         <Across />
-        <div className="tw-grid tw-grid-cols-2 tw-gap-2 xl:tw-grid-cols-1">
+        <div className="tw-grid tw-grid-cols-1 tw-gap-2 min-[400px]:tw-grid-cols-2 xl:tw-grid-cols-1">
           <MapNode locale={locale} section={5} />
           <MapNode locale={locale} section={6} />
         </div>
@@ -71,17 +88,20 @@ export function SectionMap({ locale }: { readonly locale: SupportedLocale }) {
         <MapNode locale={locale} section={8} />
         <Across />
         <MapNode locale={locale} section={9} />
-        <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-1 xl:tw-col-start-7 xl:tw-col-end-12 xl:tw-mt-0">
-          <span
-            aria-hidden="true"
-            className="tw-hidden tw-h-3 tw-border-0 tw-border-x tw-border-t tw-border-dashed tw-border-iron-500 xl:tw-block"
-          />
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-            <MapNode locale={locale} section={10} dashed />
-            <span className="tw-text-xs tw-text-iron-400">
-              {t(locale, "network.tdh.spec.mapFeeds")}
-            </span>
-          </div>
+        <span className="tw-hidden xl:tw-col-start-7 xl:tw-row-start-2 xl:tw-block">
+          <Up />
+        </span>
+        <span className="tw-hidden xl:tw-col-start-9 xl:tw-row-start-2 xl:tw-block">
+          <Up />
+        </span>
+        <span className="tw-hidden xl:tw-col-start-11 xl:tw-row-start-2 xl:tw-block">
+          <Up />
+        </span>
+        <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-2 xl:tw-col-start-7 xl:tw-col-end-12 xl:tw-row-start-3 xl:tw-mt-0 xl:tw-grid xl:tw-grid-cols-[auto_minmax(0,1fr)]">
+          <MapNode locale={locale} section={10} dashed />
+          <span className="tw-text-xs tw-text-iron-400">
+            {t(locale, "network.tdh.spec.mapFeeds")}
+          </span>
         </div>
       </div>
     </figure>

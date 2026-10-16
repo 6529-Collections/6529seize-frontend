@@ -46,7 +46,7 @@ export type FormalManifestLoad =
         | "unconfigured";
     };
 
-export interface FormalManifestLoaderOptions {
+interface FormalManifestLoaderOptions {
   readonly base: string | undefined;
   readonly isProduction: boolean;
   readonly fetchImpl?: typeof fetch;
@@ -54,7 +54,7 @@ export interface FormalManifestLoaderOptions {
 }
 
 /** The bundled manifest, parsed through the same schema as the published one. */
-export async function loadBundledFormalManifest(): Promise<FormalManifest> {
+async function loadBundledFormalManifest(): Promise<FormalManifest> {
   const bundled = await import("./bundledManifest");
   return formalManifestSchema.parse(bundled.BUNDLED_FORMAL_MANIFEST);
 }

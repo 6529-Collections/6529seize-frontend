@@ -126,7 +126,7 @@ describe("VerificationDashboard", () => {
     expect(screen.queryByText(/sample/i)).not.toBeInTheDocument();
     expect(
       screen.getByText(
-        "On October 15, 2026, the Rust core, the Python reference and 6529.io agreed on all 10,282 collectors and 11,133 wallets, to the last unit of TDH."
+        "Cycle of October 15, 2026 (holdings at 23:59:59 UTC the day before): the Rust core, the Python reference and 6529.io agreed on all 10,282 identity records, each collector’s and the two burn addresses’, and all 11,133 wallet records, to the last unit of TDH."
       )
     ).toBeInTheDocument();
     expect(screen.getAllByText("All equal").length).toBe(2);
@@ -140,7 +140,9 @@ describe("VerificationDashboard", () => {
       0
     );
     expect(
-      screen.getByText(/No differences: every collector and wallet is equal/)
+      screen.getByText(
+        /No differences: every identity and wallet record is equal/
+      )
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Individual records are never published/)
@@ -166,12 +168,12 @@ describe("VerificationDashboard", () => {
     expect(screen.getAllByText("Investigating").length).toBeGreaterThan(0);
     expect(
       screen.getByText(
-        "On October 15, 2026, 9 of 10 collectors were equal between the Rust core and 6529.io. Not every difference is explained yet, so an alarm was raised."
+        "Cycle of October 15, 2026 (holdings at 23:59:59 UTC the day before): 9 of 10 identity records were equal between the Rust core and 6529.io. Not every difference is explained yet, so an alarm was raised."
       )
     ).toBeInTheDocument();
     expect(screen.queryByText(/No differences/)).not.toBeInTheDocument();
     expect(
-      screen.getByText("Records that differ: collectors 1, wallets 1.")
+      screen.getByText("Records that differ: identities 1, wallets 1.")
     ).toBeInTheDocument();
     expect(screen.getByText("Not yet explained")).toBeInTheDocument();
     expect(
@@ -189,7 +191,7 @@ describe("VerificationDashboard", () => {
     expect(screen.getAllByText("Explained").length).toBeGreaterThan(0);
     expect(screen.queryByText(/No differences/)).not.toBeInTheDocument();
     expect(
-      screen.getByText("Records that differ: collectors 1, wallets 1.")
+      screen.getByText("Records that differ: identities 1, wallets 1.")
     ).toBeInTheDocument();
     expect(screen.queryByText("By cause")).not.toBeInTheDocument();
   });
@@ -211,9 +213,19 @@ describe("VerificationDashboard", () => {
       );
     }
     expect(
-      screen.getByText(/validator compute --day 20741/)
+      screen.getByText(
+        (_, element) =>
+          element?.tagName === "CODE" &&
+          /validator compute --day 20741/.test(element.textContent ?? "")
+      )
     ).toBeInTheDocument();
-    expect(screen.getByText(/three_way\.py --day 20741/)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        (_, element) =>
+          element?.tagName === "CODE" &&
+          /three_way\.py --day 20741/.test(element.textContent ?? "")
+      )
+    ).toBeInTheDocument();
   });
 
   it("says when the Python reference did not run", () => {
@@ -392,7 +404,7 @@ describe("VerificationDashboard", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(
       "This day’s details could not be loaded."
     );
-    expect(screen.getByText(/Collectors: 9 of 10/)).toBeInTheDocument();
+    expect(screen.getByText(/Identity records: 9 of 10/)).toBeInTheDocument();
     expect(screen.getByText("Day by day")).toBeInTheDocument();
   });
 

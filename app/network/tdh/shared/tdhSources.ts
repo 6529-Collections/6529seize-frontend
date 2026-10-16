@@ -31,14 +31,14 @@ const EVIDENCE: Record<string, { anchor: string; key: MessageKey }> = {
   },
 };
 
-export interface ResolvedSource {
+interface ResolvedSource {
   readonly label: string;
   readonly href: string | null;
   readonly accessibleName: string;
 }
 
 /** The specification anchor of a P26 section: "5.2" becomes "s5-2". */
-export function specificationAnchor(section: string): string {
+function specificationAnchor(section: string): string {
   return `s${section.replaceAll(".", "-")}`;
 }
 
@@ -113,13 +113,4 @@ export function resolveSource(
     }
   }
   throw new Error(`Unknown TDH source reference: ${reference}`);
-}
-
-/** Every anchor a source chip can point to on the specification page. */
-export function sourceAnchor(reference: string): string | null {
-  const resolved = resolveSource("en-US", reference);
-  if (resolved.href === null) {
-    return null;
-  }
-  return resolved.href.split("#")[1] ?? null;
 }

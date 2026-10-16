@@ -1,11 +1,10 @@
 import { cycleDayOfDate } from "@/lib/tdh/tdhV1Arithmetic";
-import {
-  DIFFERENCE_CLASSES,
-  type DifferenceClass,
-  type VerificationCutover,
-  type VerificationDay,
-  type VerificationIndex,
-  type VerificationIndexDay,
+import type {
+  DifferenceClass,
+  VerificationCutover,
+  VerificationDay,
+  VerificationIndex,
+  VerificationIndexDay,
 } from "./schema";
 
 /** D132: 6529.io switches to the Rust core's result about 23 October 2026. */
@@ -312,8 +311,6 @@ export function reportFreshness(latestCycleDay: number, now: Date): Freshness {
     missing: Math.max(utcCycleDay(now) - latestCycleDay, 1),
   };
 }
-
-export { DIFFERENCE_CLASSES };
 
 /** The share of equal records, or null when there are no records. */
 export function agreementShare(equal: number, total: number): number | null {

@@ -85,13 +85,13 @@ export default function RateExplorer({
           })}
         />
       </div>
-      <output aria-live="polite" className="tw-mt-4 tw-block">
-        <dl className="tw-m-0 tw-grid tw-grid-cols-3 tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-p-3 tw-text-center">
+      <output aria-live="polite" className="tw-mt-4 tw-block tw-@container">
+        <dl className="tw-m-0 tw-grid tw-grid-cols-1 tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-p-3 tw-text-center @[18rem]:tw-grid-cols-3">
           <div className="tw-flex tw-flex-col tw-justify-between">
             <dt className="tw-text-xs tw-text-iron-400">
               {t(locale, "network.tdh.how.rate.edition")}
             </dt>
-            <dd className="tw-m-0 tw-mt-1 tw-text-lg tw-font-semibold tw-tabular-nums tw-text-iron-50">
+            <dd className="tw-m-0 tw-mt-1 tw-break-all tw-text-lg tw-font-semibold tw-tabular-nums tw-text-iron-50">
               {formatInteger(locale, edition)}
             </dd>
           </div>
@@ -99,7 +99,7 @@ export default function RateExplorer({
             <dt className="tw-text-xs tw-text-iron-400">
               {t(locale, "network.tdh.how.rate.exact")}
             </dt>
-            <dd className="tw-m-0 tw-mt-1 tw-text-lg tw-font-semibold tw-tabular-nums tw-text-iron-50">
+            <dd className="tw-m-0 tw-mt-1 tw-break-all tw-text-lg tw-font-semibold tw-tabular-nums tw-text-iron-50">
               {formatNumber(locale, H / edition, { maximumFractionDigits: 4 })}
             </dd>
           </div>

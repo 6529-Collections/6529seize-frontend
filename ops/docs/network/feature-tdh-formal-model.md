@@ -26,14 +26,19 @@ and a status line say that P26 stays the rule.
 - A summary band: properties of TDH-v1 proved (plus two validator rules),
   draft claims disproved, conformance vectors (68 of 68, 1,190 checks, from
   the manifest) and the records of a real day reproduced (all 21,410 of the
-  2026-10-11 cycle), with the theorem counts. Below it, where the statuses
-  come from: the published manifest (with a link to its JSON) or the copy
-  bundled with the page, and the build it records (commit, date, Lean
-  version, P26's last change).
+  2026-10-11 cycle, equal to the Python reference's), with the theorem
+  counts. Below it, where the statuses come from: the published manifest
+  (with a link to its JSON) or the copy bundled with the page, and the build
+  it records (commit, date, Lean version, P26's last change); then, while a
+  newer round exists, its panel (below).
 - Why write the rule again (the 23 choices a clean-room implementation had to
   make, two rated high, and the first netting rule the proofs refuted).
-- One theorem read two ways: netting invariance in plain words with its
-  hypotheses, what it means (no holding stack can change), where it stops
+- What the netting theorem proves, and where it stops: netting invariance in
+  plain words with its hypotheses (two canonically ordered transfer
+  sequences, transactions corresponding one to one and in order, one
+  registry, both replays with a result), its two limits (whole transactions
+  added or removed, and the canonical sort, are not covered), what it means
+  (within those limits no holding stack can change), where it stops
   (mint facts read the steps, so eligibility, and with it balances, raw days,
   rates and TDH, can change; the underflow test reads the steps too), a
   figure of two inputs with one net movement, and the Lean statement with the
@@ -52,20 +57,21 @@ and a status line say that P26 stays the rule.
 - What the model contains: what it covers and what it leaves out, its runs
   (the vectors, the 2026-10-11 cycle from raw logs, the random inputs), and
   its modules by P26 section.
-- What the proofs do not guarantee.
-- Three layers of assurance, and how anyone will be able to check
+- What the proofs do not guarantee, with a table of the four rounds of
+  differential tests (inputs, findings, the P26 round that settled them).
+- Three layers of assurance as one column (the specification, the model,
+  the programs, and the inputs that feed them), and how anyone will be able
+  to check
   (`lake build`, `lake exe tdh-vectors`) once the source is published.
 
 ## Rounds of the model
 
-The page knows two rounds of the model and shows the one its manifest
+The page knows three rounds of the model and shows the one its manifest
 records (`leanRound` in `formalStatus.ts`):
 
-- Round 3 (the bundled copy, `7bf579a`): the model starts from decoded
-  inputs; order independence covers the decoded items, and raw log order is
-  marked not covered. While the manifest is of this round, a note under the
-  manifest source says that round 4 exists (6529chain `f854661`, October 15,
-  2026), what its PROOFS.md adds, and that its manifest is not published yet.
+- Round 3 (the bundled copy and the feed's manifest, `7bf579a`): the model
+  starts from decoded inputs; order independence covers the decoded items,
+  and raw log order is marked not covered.
 - Round 4 (a manifest that proves `computeCycleFromSource_perm`): the model
   starts from raw `eth_getLogs` entries. Order independence covers raw logs
   too, a row `The model from raw logs` adds the decoded-input special case
@@ -73,8 +79,23 @@ records (`leanRound` in `formalStatus.ts`):
   PROOFS.md names as not proved (the canonical sort, the identity record's
   `wallets` field), the module table adds `Tdh.Logs`, and the runs are those
   of the README at `f854661` (all 414,254 logs at their types, 56 to 72
-  seconds, 1,182,188 random checks). The Implementations page's Lean card
-  follows the same switch for its compute time.
+  seconds, 1,182,188 random checks).
+- Round 5 (a manifest that proves `canonicalTransfers_oneLog`, 6529chain
+  `6b32f3f`, October 16, 2026): follows P26's fifth round. The order row
+  adds that transfers at one log position share contract, sender and
+  recipient, and that the header and claims maps are taken as fixed; the
+  runs are the README's at `6b32f3f` (about 20 seconds from raw logs,
+  1,127,150 random checks).
+
+While the published manifest records an earlier round than round 5, a
+"Newer round, not yet published" panel under the manifest source shows
+round 5's figures from its committed manifest (89 of 89 vectors, 1,253
+checks; 55 + 30 theorems; 46 fact checks) and says every status below is the
+published build's. The Implementations page's Lean card follows the same
+switch for its compute time, and adds round 5's vector count.
+
+The summary counts properties of the rule only: last in, first out is a
+lemma about how the model stores a stack and is not counted.
 
 ## Data
 
@@ -95,10 +116,12 @@ records (`leanRound` in `formalStatus.ts`):
   every one of them. The plain-English text, the quoted Lean statements and
   the runs the manifest does not repeat (the 2026-10-11 cycle, the random
   inputs) are bundled and change with a reviewed update.
-- `__tests__/app/network/tdh/formalStatus.test.ts` checks both rounds: every
-  statement of a round is confirmed by a manifest of that round, every
-  audited theorem belongs to exactly one statement, and a round-3 manifest
-  cannot confirm round 4's statements.
+- `__tests__/app/network/tdh/formalStatus.test.ts` checks every round: every
+  statement of a round is confirmed by a manifest of that round (round 5's
+  from the theorem entries of its committed manifest,
+  `__tests__/app/network/tdh/fixtures/roundFiveManifest.json`), every
+  audited theorem belongs to exactly one statement, and a manifest of an
+  earlier round cannot confirm a later round's statements.
 
 ## Related Pages
 

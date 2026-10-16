@@ -12,7 +12,11 @@ import {
   type BoostBreakdown,
 } from "@/lib/tdh/tdhV1Arithmetic";
 import { MAX_BOOST_CENTS } from "../examples";
-import { TDH_FOCUS_RING } from "../../shared/tdhStyles";
+import {
+  TDH_CHIP_BUTTON,
+  TDH_CHIP_OFF,
+  TDH_CHIP_ON,
+} from "../../shared/tdhStyles";
 import ExplorableFrame from "./ExplorableFrame";
 import IntegerField from "./IntegerField";
 
@@ -48,7 +52,7 @@ function micro(locale: SupportedLocale, value: number): string {
  * the 2026-10-11 cycle, 2.04. Drawn in HTML, so its labels keep their size
  * on a phone.
  */
-export function BoostLadder({
+function BoostLadder({
   locale,
   breakdown,
 }: {
@@ -146,10 +150,14 @@ export default function BoostBuilder({
       return next;
     });
   const fullSetChosen = fullSets > 0;
+  const seasonName = (season: number) =>
+    t(locale, "network.tdh.how.boostBuilder.season", {
+      season: formatInteger(locale, season),
+    });
+  const currentBadge = t(locale, "network.tdh.how.boostBuilder.currentBadge");
   const season1Complete = seasons.has(1);
   const label = (key: "fullSets" | "gradients") =>
     t(locale, `network.tdh.how.boostBuilder.${key}`);
-  const checkbox = `tw-form-checkbox tw-size-5 tw-shrink-0 tw-rounded tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400 disabled:tw-opacity-40 ${TDH_FOCUS_RING}`;
 
   return (
     <ExplorableFrame
@@ -207,63 +215,61 @@ export default function BoostBuilder({
             {t(locale, "network.tdh.how.boostBuilder.disabledFullSet")}
           </p>
         )}
-        <div className="tw-mt-2 tw-grid tw-grid-cols-2 tw-gap-x-3 sm:tw-grid-cols-3 lg:tw-grid-cols-4">
-          {SEASONS.map((season) => (
-            <label
-              key={season}
-              className="tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-gap-2 tw-text-sm tw-text-iron-200"
-            >
-              <input
-                type="checkbox"
-                className={checkbox}
-                checked={fullSetChosen || seasons.has(season)}
-                onChange={() => toggleSeason(season)}
-              />
-              <span className="tw-whitespace-nowrap">
-                {t(locale, "network.tdh.how.boostBuilder.season", {
-                  season: formatInteger(locale, season),
-                })}
-              </span>
-              {season === CURRENT_SEASON && (
-                <span className="tw-rounded-full tw-bg-iron-800 tw-px-1.5 tw-py-0.5 tw-text-xs tw-text-iron-300">
-                  {t(locale, "network.tdh.how.boostBuilder.currentBadge")}
-                </span>
-              )}
-            </label>
-          ))}
+        {/* Seasons as toggle chips in one wrapping row, then Genesis and
+            Nakamoto, the two partial bonuses of season 1. */}
+        <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-1.5">
+          {SEASONS.map((season) => {
+            const on = fullSetChosen || seasons.has(season);
+            const current = season === CURRENT_SEASON;
+            return (
+              <button
+                key={season}
+                type="button"
+                aria-pressed={on}
+                onClick={() => toggleSeason(season)}
+                aria-label={
+                  current
+                    ? `${seasonName(season)}, ${currentBadge}`
+                    : seasonName(season)
+                }
+                className={`${TDH_CHIP_BUTTON} tw-min-w-11 tw-justify-center tw-px-2 tw-tabular-nums disabled:tw-cursor-not-allowed ${on ? TDH_CHIP_ON : TDH_CHIP_OFF} ${current ? "tw-border-dashed" : ""}`}
+              >
+                {formatInteger(locale, season)}
+              </button>
+            );
+          })}
         </div>
-        <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+        <p className="tw-m-0 tw-mt-2 tw-text-xs tw-text-iron-400">
           {t(locale, "network.tdh.how.boostBuilder.currentNote", {
             season: formatInteger(locale, CURRENT_SEASON),
           })}
         </p>
         <div
-          className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-x-6"
+          className="tw-mt-3 tw-flex tw-flex-wrap tw-gap-1.5"
           aria-describedby={season1Complete ? `${id}-season1` : undefined}
         >
-          {(["genesis", "nakamoto"] as const).map((key) => (
-            <label
-              key={key}
-              className="tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-gap-2 tw-text-sm tw-text-iron-200"
-            >
-              <input
-                type="checkbox"
-                className={checkbox}
+          {(["genesis", "nakamoto"] as const).map((key) => {
+            const on =
+              fullSetChosen ||
+              season1Complete ||
+              (key === "genesis" ? genesis : nakamoto);
+            return (
+              <button
+                key={key}
+                type="button"
+                aria-pressed={on}
                 disabled={season1Complete}
-                checked={
-                  fullSetChosen ||
-                  season1Complete ||
-                  (key === "genesis" ? genesis : nakamoto)
-                }
-                onChange={(event) =>
+                onClick={() =>
                   (key === "genesis" ? setGenesis : setNakamoto)(
-                    event.target.checked
+                    (value) => !value
                   )
                 }
-              />
-              {t(locale, `network.tdh.how.boostBuilder.${key}`)}
-            </label>
-          ))}
+                className={`${TDH_CHIP_BUTTON} disabled:tw-cursor-not-allowed disabled:tw-opacity-60 ${on ? TDH_CHIP_ON : TDH_CHIP_OFF}`}
+              >
+                {t(locale, `network.tdh.how.boostBuilder.${key}`)}
+              </button>
+            );
+          })}
         </div>
         {season1Complete && !fullSetChosen && (
           <p
@@ -289,7 +295,7 @@ export default function BoostBuilder({
         <span className="tw-mt-2 tw-block tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
           {t(locale, "network.tdh.how.boostBuilder.parts")}
         </span>
-        <span className="tw-mt-2 tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-1 tw-text-sm tw-tabular-nums sm:tw-grid-cols-3">
+        <span className="tw-mt-2 tw-grid tw-grid-cols-1 tw-gap-x-4 tw-gap-y-1 tw-text-sm tw-tabular-nums min-[400px]:tw-grid-cols-2 sm:tw-grid-cols-3">
           <span className="tw-text-iron-300">
             {t(locale, "network.tdh.how.boostBuilder.part.base")}{" "}
             {multiplier(locale, 100)}

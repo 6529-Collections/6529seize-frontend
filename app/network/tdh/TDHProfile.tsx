@@ -1,6 +1,8 @@
 "use client";
 
+import { CheckBadgeIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import Button from "@/components/utils/button/Button";
@@ -8,11 +10,15 @@ import type { ApiConsolidatedTdh } from "@/generated/models/ApiConsolidatedTdh";
 import { formatDate, formatInteger, formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import type { VerificationSummary } from "@/lib/tdh/verification/summary.server";
 import {
   commonApiFetch,
   getStructuredApiErrorStatus,
 } from "@/services/api/common-api";
+import TdhDisclosure from "./shared/TdhDisclosure";
+import { TDH_LINK } from "./shared/tdhStyles";
 import TDHProfileHoldings from "./TDHProfileHoldings";
+import { formatCycleDate } from "./verification/components/verificationFormat";
 import TDHSection, { TDH_FOCUS, TDH_PANEL, TDH_TEXT } from "./TDHSection";
 import {
   getBoostLabel,
@@ -23,8 +29,11 @@ import {
 
 export default function TDHProfile({
   locale,
+  verification = null,
 }: {
   readonly locale: SupportedLocale;
+  /** The latest daily comparison, to say when this record was reproduced. */
+  readonly verification?: VerificationSummary | null;
 }) {
   const [input, setInput] = useState("");
   const normalizedInput = input.trim().replace(/^@/, "");
@@ -85,7 +94,6 @@ export default function TDHProfile({
               size="md"
               className="tw-h-11 tw-shrink-0"
               loading={query.isFetching}
-              disabled={!normalizedInput}
             >
               {t(locale, "network.tdh.profile.submit")}
             </Button>
@@ -138,6 +146,7 @@ export default function TDHProfile({
             profile={query.data}
             identity={identity}
             locale={locale}
+            verification={verification}
           />
         )}
       </div>
@@ -145,16 +154,42 @@ export default function TDHProfile({
   );
 }
 
+/**
+ * Whether the latest daily comparison reproduced this snapshot: the same
+ * snapshot block, and every record equal in all three computations.
+ */
+function reproducedBy(
+  profile: TdhProfile,
+  verification: VerificationSummary | null
+): Extract<VerificationSummary, { kind: "data" }> | null {
+  if (
+    verification?.kind !== "data" ||
+    verification.cutoffBlock !== profile.block ||
+    verification.sentence !== "none" ||
+    verification.totalsEqual !== true ||
+    verification.pythonEqual === null ||
+    verification.pythonEqual !== verification.pythonTotal ||
+    verification.liveEqual === null ||
+    verification.liveEqual !== verification.liveTotal
+  ) {
+    return null;
+  }
+  return verification;
+}
+
 function Snapshot({
   profile,
   identity,
   locale,
+  verification,
 }: {
   readonly profile: TdhProfile;
   readonly identity: string;
   readonly locale: SupportedLocale;
+  readonly verification: VerificationSummary | null;
 }) {
   const reconciliation = reconcileTdhProfile(profile);
+  const reproduced = reproducedBy(profile, verification);
   const metrics = [
     { key: "raw", value: formatInteger(locale, profile.tdh__raw) },
     { key: "base", value: formatInteger(locale, profile.tdh) },
@@ -227,25 +262,45 @@ function Snapshot({
           {t(locale, "network.tdh.profile.zero")}
         </p>
       )}
-      <details className="tw-mt-5">
-        <summary
-          className={`tw-cursor-pointer tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 ${TDH_FOCUS}`}
-        >
-          {t(locale, "network.tdh.profile.wallets", {
-            count: formatInteger(locale, profile.wallets.length),
-          })}
-        </summary>
-        <ul className="tw-mb-0 tw-mt-2 tw-space-y-2 tw-pl-5 tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-300">
+      {reproduced && (
+        <p className="tw-mb-0 tw-mt-3 tw-flex tw-items-start tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-success/30 tw-bg-success/[0.05] tw-px-3 tw-py-2 tw-text-sm tw-leading-6 tw-text-iron-100">
+          <CheckBadgeIcon
+            aria-hidden="true"
+            className="tw-mt-0.5 tw-size-5 tw-shrink-0 tw-text-success"
+          />
+          <span>
+            {t(locale, "network.tdh.profile.reproduced", {
+              date: formatCycleDate(locale, reproduced.date),
+              total: formatInteger(locale, reproduced.total ?? 0),
+            })}{" "}
+            <Link
+              href={`/network/tdh/verification/${reproduced.cycleDay}`}
+              className={TDH_LINK}
+            >
+              {t(locale, "network.tdh.profile.reproducedLink")}
+            </Link>
+          </span>
+        </p>
+      )}
+      <TdhDisclosure
+        className="tw-mt-4"
+        tone="strong"
+        summary={t(locale, "network.tdh.profile.wallets", {
+          count: formatInteger(locale, profile.wallets.length),
+        })}
+      >
+        <ul className="tw-mb-0 tw-mt-1 tw-space-y-2 tw-pl-6 tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-300">
           {profile.wallets.map((wallet) => (
             <li key={wallet} className="tw-break-all">
               <bdi>{wallet}</bdi>
             </li>
           ))}
         </ul>
-      </details>
+      </TdhDisclosure>
       <BoostBreakdown profile={profile} locale={locale} />
       <TDHProfileHoldings profile={profile} locale={locale} />
       <p className="tw-mb-0 tw-mt-5 tw-text-xs tw-leading-5 tw-text-iron-400">
+        {t(locale, "network.tdh.profile.storedNote")}{" "}
         {t(locale, "network.tdh.profile.dateNote")}
       </p>
     </div>
@@ -263,12 +318,10 @@ function BoostBreakdown({
     ([, value]) => value.acquired > 0
   );
   return (
-    <details className="tw-mt-2">
-      <summary
-        className={`tw-cursor-pointer tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 ${TDH_FOCUS}`}
-      >
-        {t(locale, "network.tdh.profile.boostDetails")}
-      </summary>
+    <TdhDisclosure
+      tone="strong"
+      summary={t(locale, "network.tdh.profile.boostDetails")}
+    >
       <dl className="tw-mb-0 tw-mt-3 tw-space-y-3 tw-text-sm">
         <div className="tw-flex tw-justify-between tw-gap-4">
           <dt className="tw-text-iron-300">
@@ -308,6 +361,6 @@ function BoostBreakdown({
       <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-400">
         {t(locale, "network.tdh.profile.boostPrecision")}
       </p>
-    </details>
+    </TdhDisclosure>
   );
 }

@@ -227,7 +227,7 @@ export default function TDHInAMinute({
       <h2
         id="tdh-minute-heading"
         tabIndex={-1}
-        className="tw-m-0 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none"
+        className="tw-m-0 tw-hyphens-auto tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none min-[360px]:tw-text-2xl"
       >
         {t(locale, "network.tdh.explainer.minute.title")}
       </h2>
@@ -276,7 +276,11 @@ export default function TDHInAMinute({
               })}
             </span>
             <span className="tw-text-sm tw-tabular-nums tw-text-iron-300">
-              {t(locale, "network.tdh.explainer.minute.textVersion", values)}
+              {t(locale, "network.tdh.explainer.minute.whatMoves", {
+                base: values.base,
+                fullSetBoost: cents(locale, MINUTE_EXAMPLE.fullSetBetaCents),
+                fullSet: formatInteger(locale, MINUTE_EXAMPLE.fullSetFinal),
+              })}
             </span>
           </span>
           <span className="tw-mt-2 tw-block tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">

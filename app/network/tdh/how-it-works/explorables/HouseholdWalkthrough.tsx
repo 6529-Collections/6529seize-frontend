@@ -20,6 +20,7 @@ import {
   TDH_TH_NUM,
   tdhNarrowCell,
 } from "../../shared/tdhStyles";
+import TdhTableFrame from "../../shared/TdhTableFrame";
 import ExplorableFrame from "./ExplorableFrame";
 
 const BASELINE = householdScenario("identity");
@@ -103,11 +104,20 @@ export default function HouseholdWalkthrough({
           </button>
         ))}
       </div>
-      <div className="tw-mt-4 tw-grid tw-gap-4 lg:tw-grid-cols-2">
+      {/* One record fills the panel; two sit side by side from lg. */}
+      <div
+        className={`tw-mt-4 tw-grid tw-gap-4 ${result.records.length > 1 ? "lg:tw-grid-cols-2" : ""}`}
+      >
         {result.records.map((record) => (
-          <div
+          <TdhTableFrame
             key={record.label}
-            className="tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07]"
+            label={t(
+              locale,
+              `network.tdh.how.s12.recordCaption.${record.label}`,
+              {
+                boost: multiplier(locale, record.betaCents),
+              }
+            )}
           >
             <table className={TDH_TABLE}>
               <caption className="tw-px-3 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200 sm:tw-px-4">
@@ -169,7 +179,7 @@ export default function HouseholdWalkthrough({
                 </tr>
               </tbody>
             </table>
-          </div>
+          </TdhTableFrame>
         ))}
       </div>
       <p

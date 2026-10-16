@@ -460,7 +460,12 @@ export default function SpecSectionsA({
             {t(locale, "network.tdh.spec.s6-2.body")}
           </Plain>
           <PairStateMachine locale={locale} />
-          <Rule locale={locale} code={RULE_PAIR_STATE} source="P26 §6.2" />
+          <Rule
+            locale={locale}
+            code={RULE_PAIR_STATE}
+            source="P26 §6.2"
+            aligned
+          />
         </SpecSub>
         <SpecSub
           id="s6-3"

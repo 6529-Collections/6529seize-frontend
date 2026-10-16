@@ -23,7 +23,7 @@ const NAV_DISABLED =
   "tw-inline-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-text-iron-700";
 
 /** The day's result in one sentence, from its counts and verdict. */
-export function headlineSentence(
+function headlineSentence(
   locale: SupportedLocale,
   day: VerificationDay,
   verdict: VerdictState
@@ -179,7 +179,7 @@ export default function VerificationHeadline({
           <DayArrow locale={locale} target={neighbours.next} direction="next" />
         </nav>
       </div>
-      <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4 md:tw-flex-row md:tw-items-start md:tw-justify-between">
+      <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4 lg:tw-flex-row lg:tw-items-start lg:tw-justify-between">
         <p className="tw-m-0 tw-text-sm tw-tabular-nums tw-leading-6 tw-text-iron-300">
           {t(locale, "network.tdh.verify.status.block", {
             block: formatInteger(locale, day.cutoffBlock),
@@ -187,7 +187,7 @@ export default function VerificationHeadline({
           })}
           <TdhSource refs={["P26 §4.2"]} locale={locale} />
         </p>
-        <div className="tw-min-w-0 md:tw-max-w-md">
+        <div className="tw-min-w-0 lg:tw-max-w-md lg:tw-shrink-0">
           <TdhStatusPill
             pill={day.mode === "checked" ? "checked" : "unchecked"}
             locale={locale}

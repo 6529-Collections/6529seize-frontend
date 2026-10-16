@@ -11,22 +11,17 @@
  */
 
 export const DAY_SECONDS = 86_400;
-export const FIRSTGM_ID = 8;
-export const FIRSTGM_EDITION_ADJUSTMENT = -2_588;
-export const EDITION_FLOOR_CAP = 310;
+const EDITION_FLOOR_CAP = 310;
 export const EDITION_FLOOR_THRESHOLD = 300;
-export const GRADIENT_RATE_MINIMUM_CENTS = 100;
-export const SEASON_BONUS_U = 50_000;
-export const LAST_BOOSTED_SEASON = 20;
-export const GENESIS_BONUS_U = 10_000;
-export const NAKAMOTO_BONUS_U = 10_000;
-export const GRADIENT_BONUS_U = 20_000;
+const SEASON_BONUS_U = 50_000;
+const LAST_BOOSTED_SEASON = 20;
+const GENESIS_BONUS_U = 10_000;
+const NAKAMOTO_BONUS_U = 10_000;
+const GRADIENT_BONUS_U = 20_000;
 export const GRADIENT_MAX_COUNT = 5;
-export const GENESIS_IDS = [1, 2, 3] as const;
-export const NAKAMOTO_IDS = [4] as const;
 
 /** The first Meme id of each season, from the `tdh-v1.0` registry (§10). */
-export const SEASON_STARTS = [
+const SEASON_STARTS = [
   1, 48, 87, 119, 152, 181, 213, 246, 279, 311, 343, 375, 407, 439, 477, 516,
   556,
 ] as const;
@@ -140,7 +135,7 @@ export function boostableSeasons(nMemes: number): number[] {
   );
 }
 
-export interface BoostInput {
+interface BoostInput {
   /** Complete sets of every eligible Meme: the minimum balance across them. */
   readonly fullSets: number;
   /** Gradients held. */

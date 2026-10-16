@@ -9,7 +9,7 @@ import { arweaveTransactionUrl, etherscanBlockUrl } from "./verificationLinks";
 import { formatInteger, middleTruncate } from "./verificationFormat";
 
 /** The day's run, as the daily job's README gives it. */
-export function dailyRunCommands(cycleDay: number): string {
+function dailyRunCommands(cycleDay: number): string {
   return `validator compute --day ${cycleDay} --out day/rust --store store
 python3 tools/tdh-daily/python_compute.py --chain ../6529chain \\
     --input day/rust/canonical-input.jsonl.gz \\
@@ -50,7 +50,7 @@ export default function VerificationCheck({
         id="check"
         title={t(locale, "network.tdh.verify.check.heading")}
         locale={locale}
-        className="tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
+        className="tw-hyphens-auto tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
       />
       <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
         {t(locale, "network.tdh.verify.check.intro")}
@@ -119,6 +119,7 @@ export default function VerificationCheck({
               locale={locale}
               label={t(locale, "network.tdh.verify.check.commands")}
               title={t(locale, "network.tdh.verify.check.commands")}
+              wrap="words"
             />
           </div>
           <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">

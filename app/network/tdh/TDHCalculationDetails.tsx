@@ -15,7 +15,7 @@ const DEEPER = [
   { key: "consolidation", href: "/network/tdh/consolidation" },
 ] as const;
 /** The terms needed to read your own TDH, in the order a calculation meets them. */
-export const GLOSSARY_ESSENTIAL = [
+const GLOSSARY_ESSENTIAL = [
   "tdh",
   "memes",
   "snapshot",
@@ -28,7 +28,7 @@ export const GLOSSARY_ESSENTIAL = [
   "identity",
 ] as const;
 /** Every other term the TDH pages use. */
-export const GLOSSARY_MORE = [
+const GLOSSARY_MORE = [
   "cycle",
   "finalized",
   "firstgm",
@@ -50,7 +50,7 @@ export const GLOSSARY_MORE = [
   "classes",
   "items",
 ] as const;
-export const GLOSSARY_TERMS = [...GLOSSARY_ESSENTIAL, ...GLOSSARY_MORE];
+const GLOSSARY_TERMS = [...GLOSSARY_ESSENTIAL, ...GLOSSARY_MORE];
 
 function GlossaryList({
   locale,

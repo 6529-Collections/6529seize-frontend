@@ -31,7 +31,7 @@ import {
 /** 6529's public TDH feed, written by the daily comparison job (D132). */
 export const PUBLIC_TDH_FEED_BASE = "https://d379duzqnomz3w.cloudfront.net/";
 
-export const INDEX_REVALIDATE_SECONDS = 600;
+const INDEX_REVALIDATE_SECONDS = 600;
 export const LATEST_DAY_REVALIDATE_SECONDS = 600;
 export const OLDER_DAY_REVALIDATE_SECONDS = 3_600;
 /** The Lean proof manifest changes only with a new build of the model. */
@@ -48,7 +48,7 @@ export function isNotPublishedStatus(status: number | undefined): boolean {
 
 export type VerificationErrorReason = "config" | "network" | "http" | "invalid";
 
-export type VerificationSource =
+type VerificationSource =
   | { readonly kind: "remote"; readonly base: URL }
   | { readonly kind: "invalid" };
 
@@ -72,7 +72,7 @@ export type DayLoad =
   | { readonly status: "not-found" }
   | { readonly status: "error"; readonly reason: VerificationErrorReason };
 
-export interface VerificationLoaderOptions {
+interface VerificationLoaderOptions {
   readonly base: string | undefined;
   readonly isProduction: boolean;
   readonly fetchImpl?: typeof fetch;
@@ -104,7 +104,7 @@ export function resolveVerificationSource(
   return { kind: "remote", base: url };
 }
 
-export type FeedFetchResult =
+type FeedFetchResult =
   | { readonly ok: true; readonly json: unknown }
   | {
       readonly ok: false;

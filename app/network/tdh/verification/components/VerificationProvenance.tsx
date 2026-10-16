@@ -76,7 +76,7 @@ function Item({
 }
 
 /** A commit with the repository it belongs to: "validator @ db72daa". */
-export function CommitLine({
+function CommitLine({
   locale,
   program,
   repository,
@@ -131,7 +131,7 @@ function UploadLine({
       <span className="tw-inline-flex tw-gap-3 tw-text-xs">
         <a
           href={arweaveTransactionUrl(id)}
-          className={TDH_LINK}
+          className={`${TDH_LINK} tw-inline-flex tw-min-h-6 tw-min-w-6 tw-items-center`}
           rel="noopener noreferrer"
           target="_blank"
           aria-label={t(locale, "network.tdh.verify.provenance.txLink", { id })}
@@ -140,7 +140,7 @@ function UploadLine({
         </a>
         <a
           href={arweaveFileUrl(id)}
-          className={TDH_LINK}
+          className={`${TDH_LINK} tw-inline-flex tw-min-h-6 tw-min-w-6 tw-items-center`}
           rel="noopener noreferrer"
           target="_blank"
           aria-label={t(locale, "network.tdh.verify.side.uploadLink", { id })}
@@ -218,7 +218,7 @@ export default function VerificationProvenance({
         id="provenance"
         title={t(locale, "network.tdh.verify.provenance.heading")}
         locale={locale}
-        className="tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
+        className="tw-hyphens-auto tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
       />
       <div className={`${TDH_CARD} tw-mt-4 tw-p-5 sm:tw-p-6`}>
         <dl className="tw-m-0 tw-grid tw-items-start tw-gap-x-8 tw-gap-y-5 sm:tw-grid-cols-2 lg:tw-grid-cols-3">

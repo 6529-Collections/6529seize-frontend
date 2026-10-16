@@ -9,14 +9,15 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { VerificationSummary } from "@/lib/tdh/verification/summary.server";
 import { MINUTE_EXAMPLE } from "./how-it-works/examples";
-import { TDH_FOCUS_RING } from "./shared/tdhStyles";
+import TdhStatusPill from "./shared/TdhStatusPill";
+import { TDH_FOCUS_RING, TDH_H1, TDH_LEDE } from "./shared/tdhStyles";
 import { formatCycleDate } from "./verification/components/verificationFormat";
 
 const TERMS = [
-  { key: "days", accent: "tw-border-t-sky-400", value: "days" },
-  { key: "rate", accent: "tw-border-t-iron-400", value: "rate" },
-  { key: "boost", accent: "tw-border-t-fuchsia-400", value: "boost" },
-  { key: "tdh", accent: "tw-border-t-primary-400", value: "final" },
+  { key: "days", value: "days" },
+  { key: "rate", value: "rate" },
+  { key: "boost", value: "boost" },
+  { key: "tdh", value: "final" },
 ] as const;
 
 const cents = (locale: SupportedLocale, value: number) =>
@@ -94,7 +95,7 @@ function FormulaStrip({ locale }: { readonly locale: SupportedLocale }) {
               </span>
             )}
             <div
-              className={`tw-flex tw-min-w-0 tw-flex-col tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-t-2 tw-border-solid tw-border-white/[0.07] tw-px-3 tw-py-3 tw-text-center ${term.accent} ${index === TERMS.length - 1 ? "tw-bg-primary-500/[0.08]" : "tw-bg-iron-900"}`}
+              className={`tw-grid tw-min-w-0 tw-grid-rows-[auto_auto_1fr] tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-3 tw-text-center ${index === TERMS.length - 1 ? "tw-border-primary-400/40 tw-bg-primary-500/[0.08]" : "tw-border-white/[0.07] tw-bg-iron-900"}`}
             >
               <span className="tw-block tw-text-sm tw-font-semibold tw-text-iron-100">
                 {t(locale, `network.tdh.explainer.formula.${term.key}`)}
@@ -102,7 +103,7 @@ function FormulaStrip({ locale }: { readonly locale: SupportedLocale }) {
               <span className="tw-block tw-whitespace-nowrap tw-text-2xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50">
                 {values[term.value]}
               </span>
-              <span className="tw-block tw-text-balance tw-text-xs tw-text-iron-400">
+              <span className="tw-block tw-self-start tw-text-balance tw-text-xs tw-leading-4 tw-text-iron-400">
                 {t(locale, `network.tdh.explainer.formula.${term.key}Note`)}
               </span>
             </div>
@@ -141,8 +142,10 @@ function stripSentence(
 }
 
 /**
- * The latest daily result in one line, near the top of the overview: the
- * proudest fact about TDH, and the way into the dashboard.
+ * The latest daily result near the top of the overview: the track record,
+ * the latest day in one sentence, and its limit (history not yet fully
+ * checked) beside it, so the claim carries its own caveat. The way into the
+ * dashboard.
  */
 function VerifiedStrip({
   locale,
@@ -156,18 +159,37 @@ function VerifiedStrip({
   return (
     <Link
       href="/network/tdh/verification"
-      className={`tw-group tw-mt-8 tw-flex tw-flex-col tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-success/30 tw-bg-success/[0.05] tw-px-4 tw-py-3.5 tw-no-underline tw-transition-colors hover:tw-border-success/60 motion-reduce:tw-transition-none sm:tw-flex-row sm:tw-items-center sm:tw-justify-between sm:tw-px-5 ${TDH_FOCUS_RING}`}
+      className={`tw-group tw-mt-8 tw-flex tw-flex-col tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-success/30 tw-bg-success/[0.05] tw-px-4 tw-py-3.5 tw-no-underline tw-transition-colors hover:tw-border-success/60 motion-reduce:tw-transition-none md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-px-5 ${TDH_FOCUS_RING}`}
     >
-      <span className="tw-flex tw-items-start tw-gap-3">
+      <span className="tw-flex tw-min-w-0 tw-items-start tw-gap-3">
         <Icon
           aria-hidden="true"
           className={`tw-mt-0.5 tw-size-5 tw-shrink-0 ${awaiting ? "tw-text-iron-300" : "tw-text-success"}`}
         />
-        <span className="tw-text-sm tw-leading-6 tw-text-iron-100 sm:tw-text-[15px]">
-          {stripSentence(locale, summary)}
+        <span className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
+          <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+            <span className="tw-text-sm tw-font-semibold tw-text-iron-50 sm:tw-text-[15px]">
+              {t(locale, "network.tdh.explainer.strip.title")}
+              {!awaiting && (
+                <span className="tw-font-normal tw-text-iron-200">
+                  {" · "}
+                  {t(locale, "network.tdh.explainer.strip.record", {
+                    allEqual: formatInteger(locale, summary.record.allEqual),
+                    days: formatInteger(locale, summary.record.days),
+                  })}
+                </span>
+              )}
+            </span>
+            {!awaiting && summary.historyChecked === false && (
+              <TdhStatusPill pill="unchecked" locale={locale} size="sm" />
+            )}
+          </span>
+          <span className="tw-text-sm tw-leading-6 tw-text-iron-200">
+            {stripSentence(locale, summary)}
+          </span>
         </span>
       </span>
-      <span className="tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1.5 tw-pl-8 tw-text-sm tw-font-medium tw-text-primary-300 sm:tw-pl-0">
+      <span className="tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1.5 tw-pl-8 tw-text-sm tw-font-medium tw-text-primary-300 md:tw-pl-0">
         {t(locale, "network.tdh.explainer.strip.link")}
         <ArrowRightIcon
           aria-hidden="true"
@@ -190,13 +212,13 @@ export default function TDHHero({
     <header className="tw-pb-10 tw-pt-6 sm:tw-pb-12 sm:tw-pt-10">
       <div className="tw-grid tw-gap-8 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:tw-items-center lg:tw-gap-12">
         <div>
-          <h1 className="tw-m-0 tw-text-[2.5rem] tw-font-semibold tw-leading-none tw-tracking-tight tw-text-iron-50 sm:tw-text-6xl">
-            {t(locale, "network.tdh.explainer.title")}
-          </h1>
-          <p className="tw-mb-0 tw-mt-4 tw-text-xl tw-font-medium tw-leading-8 tw-text-iron-50 sm:tw-text-2xl sm:tw-leading-9">
+          <h1 className={TDH_H1}>{t(locale, "network.tdh.explainer.title")}</h1>
+          <p
+            className={`tw-mb-0 tw-mt-4 tw-max-w-2xl tw-font-medium ${TDH_LEDE} tw-text-iron-50`}
+          >
             {t(locale, "network.tdh.explainer.promise")}
           </p>
-          <p className="tw-mb-0 tw-mt-4 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-200 sm:tw-text-lg sm:tw-leading-8">
+          <p className="tw-mb-0 tw-mt-3 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-200">
             {t(locale, "network.tdh.explainer.intro")}
           </p>
           <p className="tw-mb-0 tw-mt-3 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-300">

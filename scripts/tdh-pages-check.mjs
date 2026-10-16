@@ -2,14 +2,19 @@
 /**
  * Layout and legibility gate for the TDH pages.
  *
- * Renders every TDH route in headless Chromium at 1440 px (desktop), 390 px
- * (a phone: touch, mobile user agent) and 390 px with a desktop user agent
- * (a narrow desktop window), with every <details> opened, and fails on:
+ * Renders every TDH route in headless Chromium at 1440 and 1280 px (desktop),
+ * 768 px (a tablet), 390 px (a phone: touch, mobile user agent), and 390 and
+ * 320 px with a desktop user agent (narrow desktop windows; 320 is 400% zoom
+ * on a 1280 screen, WCAG 1.4.10 Reflow). Each view is inspected twice, first
+ * as it loads, with every <details> closed, then with every <details> open,
+ * and fails on:
  *
  * - horizontal page overflow, and elements that reach past the viewport;
  * - text that escapes its frame (the nearest ancestor with a border or a
  *   background), is cut off by an overflow-hidden ancestor, or runs past the
  *   edge of its SVG;
+ * - SVG text that is not at least 4 px inside the box drawn around it (the
+ *   smallest rect of its SVG that holds the text's centre);
  * - sideways-scrolling regions that are not marked `data-tdh-scroll` (the
  *   shared scroll frame, which shows an edge fade and a hint);
  * - text collisions: two pieces of text drawn over each other, in HTML or
@@ -17,7 +22,8 @@
  * - one word per line: a text block of three or more words wrapped so that
  *   most of its lines hold a single word;
  * - text rendered under 12 px, SVG text included (its font size times the
- *   SVG's scale on screen);
+ *   SVG's scale on screen); 10 and 9 px in the 360 and 320 px windows, which
+ *   stand for zoom;
  * - WCAG 2.2 AA failures found by axe-core (colour contrast among them), and
  *   SVG text whose contrast with what is drawn under it is below AA;
  * - broken table layouts: a <caption> taken out of flow (the sr-only
@@ -28,7 +34,8 @@
  *
  *   6529 run tdh-pages:check -- --base http://localhost:3001
  *
- * Options: --base URL, --routes /a,/b, --widths 1440,390,390d,
+ * Options: --base URL, --routes /a,/b, --widths 1440,1280,768,390,390d,320d
+ * (also 1024 and 360d),
  * --out DIR (report.json and screenshots of failing views), --timeout MS
  * (per navigation), --channel chrome (use the installed Chrome instead of
  * Playwright's Chromium), --no-axe.
@@ -77,13 +84,37 @@ const VIEWS = {
     isMobile: false,
     hasTouch: false,
   },
-  // Not in the default set; for checking the tablet band by hand.
+  1280: {
+    label: "1280",
+    viewport: { width: 1280, height: 800 },
+    isMobile: false,
+    hasTouch: false,
+  },
   768: {
     label: "768",
     viewport: { width: 768, height: 1024 },
     isMobile: false,
     hasTouch: false,
   },
+  // A 360 and a 320 px desktop window stand for 350% and 400% zoom of a
+  // 1,280 px screen (WCAG 1.4.10 Reflow): nothing may scroll sideways, be
+  // cut off or collide there. Zoom also magnifies the text, so 9 and 10 CSS
+  // px render at 36 and 35 device px; the size floor is lowered to match.
+  "360d": {
+    label: "360-desktop",
+    viewport: { width: 360, height: 800 },
+    isMobile: false,
+    hasTouch: false,
+    minFontPx: 10,
+  },
+  "320d": {
+    label: "320-desktop",
+    viewport: { width: 320, height: 800 },
+    isMobile: false,
+    hasTouch: false,
+    minFontPx: 9,
+  },
+  // Not in the default set.
   1024: {
     label: "1024",
     viewport: { width: 1024, height: 800 },
@@ -96,7 +127,7 @@ function parseArgs(argv) {
   const args = {
     base: process.env.TDH_CHECK_BASE ?? "http://localhost:3001",
     routes: null,
-    widths: ["1440", "390", "390d"],
+    widths: ["1440", "1280", "768", "390", "390d", "320d"],
     out: path.join("test-results", "tdh-pages-check"),
     timeout: 180_000,
     channel: undefined,
@@ -124,7 +155,7 @@ function parseArgs(argv) {
   for (const width of args.widths) {
     if (!(width in VIEWS)) {
       throw new Error(
-        `Unknown width ${width}; use 1440, 390, 390d, 768 or 1024`
+        `Unknown width ${width}; use ${Object.keys(VIEWS).join(", ")}`
       );
     }
   }
@@ -135,8 +166,8 @@ function parseArgs(argv) {
  * Runs in the page. Returns every violation of the geometric and type checks
  * inside <main>, plus the page-level overflow.
  */
-function inspectPage() {
-  const MIN_FONT_PX = 12;
+function inspectPage(minFontPx) {
+  const MIN_FONT_PX = minFontPx ?? 12;
   const violations = [];
   const root = document.querySelector("main") ?? document.body;
   const vw = document.documentElement.clientWidth;
@@ -326,6 +357,7 @@ function inspectPage() {
 
   const boxes = [];
   const smallFlagged = new Set();
+  const nodeFlagged = new Set();
   const frameFlagged = new Set();
   const clipFlagged = new Set();
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -391,6 +423,40 @@ function inspectPage() {
           owner,
           `text ${Math.round(r.left)}..${Math.round(r.right)} x ${Math.round(r.top)}..${Math.round(r.bottom)} outside its SVG ${Math.round(sr.left)}..${Math.round(sr.right)} x ${Math.round(sr.top)}..${Math.round(sr.bottom)}`
         );
+      }
+      // The box drawn around the text: the smallest rect of the SVG that
+      // holds the text's centre. The text must sit 4 px inside it.
+      if (svg && !nodeFlagged.has(owner)) {
+        const cx = (r.left + r.right) / 2;
+        const cy = (r.top + r.bottom) / 2;
+        let node = null;
+        let nodeArea = Number.POSITIVE_INFINITY;
+        for (const rect of svg.querySelectorAll("rect")) {
+          const b = rect.getBoundingClientRect();
+          if (cx < b.left || cx > b.right || cy < b.top || cy > b.bottom) {
+            continue;
+          }
+          const a = b.width * b.height;
+          if (a < nodeArea && a < sr.width * sr.height * 0.9) {
+            node = b;
+            nodeArea = a;
+          }
+        }
+        const PAD = 4;
+        if (
+          node &&
+          (r.left < node.left + PAD ||
+            r.right > node.right - PAD ||
+            r.top < node.top + 1 ||
+            r.bottom > node.bottom - 1)
+        ) {
+          nodeFlagged.add(owner);
+          add(
+            "svg-text-in-node",
+            owner,
+            `text ${Math.round(r.left)}..${Math.round(r.right)} in a box ${Math.round(node.left)}..${Math.round(node.right)}; needs ${PAD} px inside`
+          );
+        }
       }
     } else {
       for (const { full, clip } of visibleRects) {
@@ -655,10 +721,12 @@ function inspectPage() {
   return violations;
 }
 
-async function settle(page) {
-  await page.evaluate(async () => {
-    for (const details of document.querySelectorAll("main details")) {
-      details.open = true;
+async function settle(page, open) {
+  await page.evaluate(async (openDetails) => {
+    if (openDetails) {
+      for (const details of document.querySelectorAll("main details")) {
+        details.open = true;
+      }
     }
     await document.fonts.ready;
     const step = Math.max(400, window.innerHeight * 0.8);
@@ -668,7 +736,7 @@ async function settle(page) {
     }
     window.scrollTo(0, 0);
     await new Promise((r) => setTimeout(r, 300));
-  });
+  }, open);
 }
 
 async function latestDay(context, base, timeout) {
@@ -722,8 +790,23 @@ async function checkView(browser, args, route, widthKey) {
       return result;
     }
     await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => {});
-    await settle(page);
-    result.violations = await page.evaluate(inspectPage);
+    // First as the page loads, every <details> closed; then all open.
+    await settle(page, false);
+    const closed = await page.evaluate(inspectPage, view.minFontPx ?? 12);
+    await settle(page, true);
+    const opened = await page.evaluate(inspectPage, view.minFontPx ?? 12);
+    const seen = new Set();
+    for (const [pass, list] of [
+      ["closed", closed],
+      ["open", opened],
+    ]) {
+      for (const v of list) {
+        const key = `${v.check}|${v.where}|${v.text}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        result.violations.push({ ...v, detail: `${v.detail} [${pass}]` });
+      }
+    }
     if (args.axe) {
       const axe = await new AxeBuilder({ page })
         .include("main")

@@ -1,6 +1,6 @@
 # TDH, explained and verified
 
-Status: built and revised on 15 October 2026 on branch
+Status: built on 15 October 2026 and revised on 16 October 2026 on branch
 `claude/tdh-explained-and-verified`; not yet reviewed, merged or deployed.
 
 Pages on 6529.io that explain TDH from a one-minute introduction to the
@@ -35,30 +35,38 @@ contract, loader and states are in `lib/tdh/verification/`.
 
 The pages follow P26 at 6529chain `f840096` (its fifth round, of 16 October
 2026): 89 conformance vectors (01 to 88 and 12b). The Lean model's figures
-come from its proof manifest (model at `7bf579a`, P26 as of `1c69528`, 68
-vectors). `__tests__/app/network/tdh/tdhFacts.test.ts` guards the vector
-count, the Lean build, the netting wording, the absence of sample data and
-the feed's privacy wording.
+come from its proof manifest (the feed's is the model at `7bf579a`, P26 as of
+`1c69528`, 68 vectors); while the feed has not published a newer one, the
+Formal model page shows round 5 (`6b32f3f`, 89 of 89) from its committed
+manifest in a "not yet published" panel.
+`__tests__/app/network/tdh/tdhFacts.test.ts` guards the vector count, the
+Lean build, the netting wording, the corrections of the 16 October fact
+check, the absence of sample data and the feed's privacy wording.
 
 Layout gate: `6529 run tdh-pages:check -- --base <url>` renders every TDH
-route in headless Chromium at 1440, 390 (phone) and 390 (narrow desktop
-window) and fails on page or element overflow, text that escapes its frame or
-is clipped, sideways scrolling outside the marked scroll rows, text
-collisions, one word per line, text under 12 px (SVG included), WCAG 2.2 AA
-failures from axe-core, SVG text contrast, and tables broken by an
-out-of-flow caption. `--widths 768,1024` checks the tablet band by hand.
+route in headless Chromium at 1440, 1280, 768, 390 (phone), 390 and 320
+(narrow desktop windows; 320 stands for 400% zoom) and inspects each view
+twice, with every `<details>` closed and then open. It fails on page or
+element overflow, text that escapes its frame or is clipped, SVG text that
+is not 4 px inside the box drawn around it, sideways scrolling outside the
+marked scroll regions, text collisions, one word per line, text under 12 px
+(SVG included; 9 px in the 320 window), WCAG 2.2 AA failures from axe-core,
+SVG text contrast, and tables broken by an out-of-flow caption.
+`--widths 1024,360d` adds the other bands.
 
 ## Open items before the cutover
 
 - F1: 6529.io's consolidation guide allows a fourth consolidated wallet;
-  P26 rule version `tdh-v1.0` groups at most three, and P26 does not say how
-  a fourth counts. The pages state both facts (step 10 and step 14 of How it
-  works, the overview's FAQ, both consolidation pages); groups of four
-  wallets would differ at the cutover unless the owner amends P26 or the
-  backend's fourth wallet is excluded.
+  P26 rule version `tdh-v1.0` groups at most three, so P26 §6.3 forms an
+  identity of three from four wallets that all confirm each other (from the
+  newest link) and the fourth counts on its own. The pages say so (step 10
+  and step 14 of How it works, the overview's FAQ, both consolidation
+  pages); such groups split that way at the cutover unless the owner amends
+  P26. The guided setup itself does not warn yet.
 - The Rust core and program B pass the 75 vectors of P26's fourth round in
-  the validator's current code (merged at `28a6072` on 15 October 2026),
-  not yet the fifth round's vectors 75 to 88;
+  the validator's development branch (`28a6072`, 15 October 2026; the
+  repository's main is not updated), not yet the fifth round's vectors 75
+  to 88;
   the daily job still runs the Rust core of validator `e127676` (P26
   `0621ed4`, 51 vectors) and the Python reference at `0621ed4`. Update
   `shared/tdhFacts.ts`, the program cards and the check matrix when the
@@ -68,8 +76,8 @@ out-of-flow caption. `--widths 768,1024` checks the tablet band by hand.
   the snapshot block), F9 (the Python reference's vector runner did not type
   header timestamps beside an empty `raw_logs`) and E12 (a `timestamps` map
   with no raw logs). P26's fifth round (`f840096`, 16 October) settled all
-  three, and the references follow it; the Rust core, program B and the
-  Lean model (round 4, `f854661`) have yet to.
+  three, and the references and the Lean model's round 5 (`6b32f3f`)
+  follow it; the Rust core and program B have yet to.
 - The pages read 6529's public feed, `https://d379duzqnomz3w.cloudfront.net`,
   in every environment; `NEXT_PUBLIC_TDH_VERIFICATION_BASE` only overrides it.
   No sample or bundled verification data ships; Jest serves a verbatim copy
@@ -84,11 +92,20 @@ out-of-flow caption. `--widths 768,1024` checks the tablet band by hand.
 - The Formal model page takes its statuses from the proof manifest
   (`formal/manifest.json` on the feed), falling back to the bundled copy
   (`lib/tdh/formal/bundledManifest.ts`, model at `7bf579a`); refresh the copy
-  and `leanResults.ts` with each new build of the model. Round 4 of the model
-  (6529chain `f854661`, from raw logs) is in `leanResults.ts` already: the
-  page switches to it when the published manifest proves
-  `computeCycleFromSource_perm`, and until then says that round 4's manifest
-  is not published.
+  and `leanResults.ts` with each new build of the model. Rounds 4
+  (`f854661`) and 5 (`6b32f3f`) are in `leanResults.ts` already: the page
+  switches when the published manifest proves `computeCycleFromSource_perm`
+  or `canonicalTransfers_oneLog`. Publishing round 5's manifest
+  (`design/tdh-lean/proof-manifest.json` at `6b32f3f`, with its source
+  fields) to the feed is the next step; it is outside this repository.
+- Vector 18's description in 6529chain names a real token and cycle
+  ("Observed on 2026-10-11 (NextGen #...)"); the pages no longer show it
+  (the anatomy uses synthetic vector 36), but the description should be
+  made synthetic before the vectors are published (D116).
+- Unknown day permalinks show the not-found page with status 200:
+  `app/network/loading.tsx` starts streaming before the page can call
+  `notFound()`. The title says the day was not found and the page is
+  `noindex`.
 - History is labelled not yet fully checked until 6529's own Ethereum node
   (expected about 18 October 2026) is synced and the daily run checks the
   whole history against it.

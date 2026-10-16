@@ -1,4 +1,5 @@
 import { formatInteger, formatNumber } from "@/i18n/format";
+import TdhTableFrame from "../shared/TdhTableFrame";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
@@ -20,7 +21,6 @@ import {
 } from "../shared/tdhRules";
 import {
   TDH_TABLE,
-  TDH_TABLE_FRAME,
   TDH_TD,
   TDH_TD_NUM,
   TDH_TH,
@@ -49,17 +49,14 @@ function Step1({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <StepSection
       locale={locale}
+      sources={["P26 §4.1", "P26 §4.2", "P53 §2"]}
       step={1}
       title={t(locale, "network.tdh.how.s1.title")}
       rule={RULE_CUTOFF}
       ruleSource="P26 §4.2"
     >
-      <Cited locale={locale} refs={["P26 §4.1", "P26 §4.2"]}>
-        {t(locale, "network.tdh.how.s1.body")}
-      </Cited>
-      <Cited locale={locale} refs={["P26 §4.2", "P53 §2"]}>
-        {t(locale, "network.tdh.how.s1.finality")}
-      </Cited>
+      <Cited locale={locale}>{t(locale, "network.tdh.how.s1.body")}</Cited>
+      <Cited locale={locale}>{t(locale, "network.tdh.how.s1.finality")}</Cited>
       <Example locale={locale}>
         <p className="tw-m-0">
           {t(locale, "network.tdh.how.s1.example", {
@@ -82,15 +79,14 @@ function Step2({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <StepSection
       locale={locale}
+      sources={["P26 §4.3", "DEV-17", "D121"]}
       step={2}
       title={t(locale, "network.tdh.how.s2.title")}
       rule={RULE_DAYS}
       ruleSource="P26 §4.3"
     >
-      <Cited locale={locale} refs={["P26 §4.3"]}>
-        {t(locale, "network.tdh.how.s2.body")}
-      </Cited>
-      <div className={TDH_TABLE_FRAME}>
+      <Cited locale={locale}>{t(locale, "network.tdh.how.s2.body")}</Cited>
+      <TdhTableFrame label={t(locale, "network.tdh.how.s2.tableCaption")}>
         <table className={TDH_TABLE}>
           <caption className={CAPTION}>
             {t(locale, "network.tdh.how.s2.tableCaption")}
@@ -128,8 +124,8 @@ function Step2({ locale }: { readonly locale: SupportedLocale }) {
             })}
           </tbody>
         </table>
-      </div>
-      <Cited locale={locale} refs={["P26 §4.3", "DEV-17", "D121"]} muted>
+      </TdhTableFrame>
+      <Cited locale={locale} muted>
         {t(locale, "network.tdh.how.s2.reference")}
       </Cited>
       <DayCounter locale={locale} />
@@ -141,12 +137,11 @@ function Step3({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <StepSection
       locale={locale}
+      sources={["P26 §2", "P26 §5.1", "DEV-5"]}
       step={3}
       title={t(locale, "network.tdh.how.s3.title")}
     >
-      <Cited locale={locale} refs={["P26 §2", "P26 §5.1", "DEV-5"]}>
-        {t(locale, "network.tdh.how.s3.body")}
-      </Cited>
+      <Cited locale={locale}>{t(locale, "network.tdh.how.s3.body")}</Cited>
     </StepSection>
   );
 }
@@ -155,17 +150,16 @@ function Step4({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <StepSection
       locale={locale}
+      sources={["P26 §7.1", "P26 §3.4", "P26 §5.2"]}
       step={4}
       title={t(locale, "network.tdh.how.s4.title")}
       rule={`${RULE_REPLAY}\n\n${RULE_TOKEN_VALUES}`}
       ruleSource="P26 §7.1"
     >
-      <Cited locale={locale} refs={["P26 §7.1"]}>
-        {t(locale, "network.tdh.how.s4.body")}
-      </Cited>
+      <Cited locale={locale}>{t(locale, "network.tdh.how.s4.body")}</Cited>
       <Example locale={locale}>
         <p className="tw-m-0">{t(locale, "network.tdh.how.s4.example")}</p>
-        <div className={TDH_TABLE_FRAME}>
+        <TdhTableFrame label={t(locale, "network.tdh.how.s4.tableCaption")}>
           <table className={TDH_TABLE}>
             <caption className={CAPTION}>
               {t(locale, "network.tdh.how.s4.tableCaption")}
@@ -220,10 +214,10 @@ function Step4({ locale }: { readonly locale: SupportedLocale }) {
               </tr>
             </tbody>
           </table>
-        </div>
+        </TdhTableFrame>
         <StackDiagram locale={locale} />
       </Example>
-      <Cited locale={locale} refs={["P26 §3.4", "P26 §5.2"]} muted>
+      <Cited locale={locale} muted>
         {t(locale, "network.tdh.how.s4.burns")}
       </Cited>
       <StackSimulator locale={locale} />
@@ -235,18 +229,17 @@ function Step5({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <StepSection
       locale={locale}
+      sources={["P26 §7.1", "D131", "D121", "Comparison Oct 14–15", "P26 §13"]}
       step={5}
       title={t(locale, "network.tdh.how.s5.title")}
       pills={<TdhStatusPill pill="inSpec" locale={locale} />}
       rule={RULE_NETTING}
       ruleSource="P26 §7.1"
     >
-      <Cited locale={locale} refs={["P26 §7.1", "D131", "D121"]}>
-        {t(locale, "network.tdh.how.s5.body")}
-      </Cited>
+      <Cited locale={locale}>{t(locale, "network.tdh.how.s5.body")}</Cited>
       <Example locale={locale}>
         <p className="tw-m-0">{t(locale, "network.tdh.how.s5.example")}</p>
-        <div className={TDH_TABLE_FRAME}>
+        <TdhTableFrame label={t(locale, "network.tdh.how.s5.tableCaption")}>
           <table className={TDH_TABLE}>
             <caption className={CAPTION}>
               {t(locale, "network.tdh.how.s5.tableCaption")}
@@ -284,13 +277,11 @@ function Step5({ locale }: { readonly locale: SupportedLocale }) {
               </tr>
             </tbody>
           </table>
-        </div>
+        </TdhTableFrame>
         <TransactionBoxDiagram locale={locale} />
       </Example>
-      <Cited locale={locale} refs={["Comparison Oct 14–15", "P26 §7.1"]}>
-        {t(locale, "network.tdh.how.s5.measured")}
-      </Cited>
-      <Cited locale={locale} refs={["P26 §7.1", "P26 §13"]} muted>
+      <Cited locale={locale}>{t(locale, "network.tdh.how.s5.measured")}</Cited>
+      <Cited locale={locale} muted>
         {t(locale, "network.tdh.how.s5.vectors")}
       </Cited>
     </StepSection>
@@ -301,18 +292,15 @@ function Step6({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <StepSection
       locale={locale}
+      sources={["P26 §3.4", "P26 §5.2", "P26 §10"]}
       step={6}
       title={t(locale, "network.tdh.how.s6.title")}
       rule={RULE_EDITIONS}
       ruleSource="P26 §5.2"
     >
-      <Cited locale={locale} refs={["P26 §3.4", "P26 §5.2", "P26 §10"]}>
-        {t(locale, "network.tdh.how.s6.body")}
-      </Cited>
-      <Cited locale={locale} refs={["P26 §5.2"]}>
-        {t(locale, "network.tdh.how.s6.floor")}
-      </Cited>
-      <div className={TDH_TABLE_FRAME}>
+      <Cited locale={locale}>{t(locale, "network.tdh.how.s6.body")}</Cited>
+      <Cited locale={locale}>{t(locale, "network.tdh.how.s6.floor")}</Cited>
+      <TdhTableFrame label={t(locale, "network.tdh.how.s6.tableCaption")}>
         <table className={TDH_TABLE}>
           <caption className={CAPTION}>
             {t(locale, "network.tdh.how.s6.tableCaption")}
@@ -352,8 +340,8 @@ function Step6({ locale }: { readonly locale: SupportedLocale }) {
             ))}
           </tbody>
         </table>
-      </div>
-      <Cited locale={locale} refs={["P26 §5.2"]} muted>
+      </TdhTableFrame>
+      <Cited locale={locale} muted>
         {t(locale, "network.tdh.how.s6.cycle")}
       </Cited>
       <RateExplorer locale={locale} />
@@ -378,15 +366,14 @@ function Step7({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <StepSection
       locale={locale}
+      sources={["P26 §5.3", "P26 §8.1"]}
       step={7}
       title={t(locale, "network.tdh.how.s7.title")}
       rule={RULE_RATE}
       ruleSource="P26 §8.1"
     >
-      <Cited locale={locale} refs={["P26 §5.3", "P26 §8.1"]}>
-        {t(locale, "network.tdh.how.s7.body")}
-      </Cited>
-      <div className={TDH_TABLE_FRAME}>
+      <Cited locale={locale}>{t(locale, "network.tdh.how.s7.body")}</Cited>
+      <TdhTableFrame label={t(locale, "network.tdh.how.s7.tableCaption")}>
         <table className={TDH_TABLE}>
           <caption className={CAPTION}>
             {t(locale, "network.tdh.how.s7.tableCaption")}
@@ -420,9 +407,9 @@ function Step7({ locale }: { readonly locale: SupportedLocale }) {
             ))}
           </tbody>
         </table>
-      </div>
+      </TdhTableFrame>
       <RateCurveDiagram locale={locale} />
-      <Cited locale={locale} refs={["P26 §8.1"]} muted>
+      <Cited locale={locale} muted>
         {t(locale, "network.tdh.how.s7.tie")}
       </Cited>
     </StepSection>

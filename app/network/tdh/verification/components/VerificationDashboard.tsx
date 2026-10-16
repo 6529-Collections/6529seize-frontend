@@ -273,9 +273,7 @@ export default function VerificationDashboard({
           days={index.days}
           selectedCycleDay={entry.cycleDay}
           upcomingUntil={
-            isLatest && cutover.kind === "countdown"
-              ? cutover.plannedDate
-              : null
+            cutover.kind === "countdown" ? cutover.plannedDate : null
           }
           now={now}
         />

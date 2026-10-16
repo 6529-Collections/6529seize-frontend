@@ -32,18 +32,11 @@ const nullish = <T extends z.ZodTypeAny>(schema: T) =>
     );
 
 /**
- * The verdicts the daily job publishes. `OK` means every difference from
- * 6529.io, if any, is known and explained; the other three each raise an
- * alarm.
+ * The verdict the daily job publishes: `OK` means every difference from
+ * 6529.io, if any, is known and explained; `RUST_PYTHON_MISMATCH`,
+ * `LIVE_UNAVAILABLE` and `LIVE_UNEXPLAINED` each raise an alarm. Unknown
+ * strings are kept and shown as a neutral "See details" state.
  */
-export const FEED_VERDICTS = [
-  "OK",
-  "RUST_PYTHON_MISMATCH",
-  "LIVE_UNAVAILABLE",
-  "LIVE_UNEXPLAINED",
-] as const;
-
-/** Unknown strings are kept and shown as a neutral "See details" state. */
 const verdict = z.string().min(1).max(32);
 
 const totalTdh = z.object({
@@ -150,7 +143,7 @@ export type DifferenceClass = (typeof DIFFERENCE_CLASSES)[number];
  * defect (`BUG-n`) or another P26 item kind, exactly as the job's
  * `publish_feed.py` CAUSE pattern allows.
  */
-export const CAUSE_ITEM = /^(?:DEV|BUG|SD|MS|CN|RP)-\d+$/;
+const CAUSE_ITEM = /^(?:DEV|BUG|SD|MS|CN|RP)-\d+$/;
 const CAUSE_KEY_MAX = 64;
 
 /**
@@ -246,9 +239,6 @@ export type VerificationLive = NonNullable<
 >;
 export type VerificationAgreement = NonNullable<
   VerificationDay["agreement"]["rustVsLive"]
->;
-export type VerificationDifferenceSummary = NonNullable<
-  VerificationDay["differenceSummary"]
 >;
 
 export function parseVerificationIndex(value: unknown) {

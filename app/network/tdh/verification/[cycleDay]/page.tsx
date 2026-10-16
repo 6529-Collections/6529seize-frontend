@@ -17,10 +17,12 @@ import VerificationDashboard, {
 import { formatCycleDate } from "../components/verificationFormat";
 
 // Day permalinks render per request, like every route under the root layout
-// (it reads cookies and headers); the day file's fetch is cached for an hour.
-// No generateStaticParams: an on-demand static render would fail on the
-// layout's dynamic reads (DYNAMIC_SERVER_USAGE, a 500 in production).
-export const revalidate = 3600;
+// (it reads cookies and headers); the index and day files are cached at the
+// fetch level (`loadVerification.server.ts`). Rendering is made explicitly
+// dynamic so no static-paths work is ever attempted for this segment: no
+// generateStaticParams, and no route-level revalidate, which made the dev
+// server's static-paths worker try (and fail on) the layout's dynamic reads.
+export const dynamic = "force-dynamic";
 
 type Params = Promise<{ cycleDay: string }>;
 
@@ -108,25 +110,37 @@ export async function generateMetadata({
     indexLoad?.status === "ok"
       ? indexLoad.index.days.find((day) => day.cycleDay === value)
       : undefined;
-  const cycle = formatInteger(DEFAULT_LOCALE, value ?? 0);
-  const date = entry ? formatCycleDate(DEFAULT_LOCALE, entry.date) : cycle;
+  if (value === null || entry === undefined) {
+    // An unknown day: the page renders the not-found view (`notFound()`), so
+    // it gets a not-found title and is kept out of search results.
+    return getAppMetadata(
+      {
+        title: t(DEFAULT_LOCALE, "network.tdh.verify.dayNotFoundTitle"),
+        description: t(
+          DEFAULT_LOCALE,
+          "network.tdh.verify.metadataDescription"
+        ),
+      },
+      {
+        canonicalPath: "/network/tdh/verification",
+        robots: { index: false, follow: true },
+      }
+    );
+  }
+  const cycle = formatInteger(DEFAULT_LOCALE, value);
+  const date = formatCycleDate(DEFAULT_LOCALE, entry.date);
   return getAppMetadata(
     {
       title: t(DEFAULT_LOCALE, "network.tdh.verify.dayPageTitle", {
         cycle,
         date,
       }),
-      description: entry
-        ? t(DEFAULT_LOCALE, "network.tdh.verify.dayMetadataDescription", {
-            date: formatCycleDate(DEFAULT_LOCALE, entry.date),
-          })
-        : t(DEFAULT_LOCALE, "network.tdh.verify.metadataDescription"),
+      description: t(
+        DEFAULT_LOCALE,
+        "network.tdh.verify.dayMetadataDescription",
+        { date }
+      ),
     },
-    {
-      canonicalPath:
-        value === null
-          ? "/network/tdh/verification"
-          : `/network/tdh/verification/${value}`,
-    }
+    { canonicalPath: `/network/tdh/verification/${value}` }
   );
 }

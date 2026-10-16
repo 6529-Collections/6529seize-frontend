@@ -19,7 +19,7 @@ const MAX_COPIES = 8;
 const SEED_EVENTS: readonly StackEvent[] = [{ kind: "buy", day: 0 }];
 const SEED_DAY = 30;
 
-export interface StackState {
+interface StackState {
   readonly a: readonly number[];
   readonly b: readonly number[];
 }
@@ -68,14 +68,13 @@ function Stack({
   readonly stack: readonly number[];
   readonly today: number;
 }) {
+  // A tower on a shelf: copies stack upward from the wallet's name, and
+  // the box is only as tall as its copies, at least one copy high.
   return (
-    <div className="tw-min-w-0">
-      <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
-        {t(locale, "network.tdh.how.stack.wallet", { name })}
-      </p>
+    <div className="tw-flex tw-min-w-0 tw-flex-col tw-justify-end">
       <ol
         reversed
-        className="tw-m-0 tw-mt-2 tw-flex tw-min-h-[7.5rem] tw-list-none tw-flex-col-reverse tw-justify-start tw-gap-1 tw-rounded-lg tw-border tw-border-dashed tw-border-iron-700 tw-p-2"
+        className="tw-m-0 tw-flex tw-min-h-[3.25rem] tw-list-none tw-flex-col-reverse tw-justify-start tw-gap-1 tw-rounded-lg tw-border tw-border-dashed tw-border-iron-700 tw-p-2"
       >
         {stack.length === 0 && (
           <li className="tw-m-auto tw-text-xs tw-text-iron-500">
@@ -87,7 +86,7 @@ function Stack({
           return (
             <li
               key={`${acquired}-${index}`}
-              className="tw-flex tw-min-h-9 tw-items-center tw-justify-between tw-rounded-md tw-bg-sky-400/15 tw-px-3 tw-text-sm tw-tabular-nums tw-text-sky-100 tw-ring-1 tw-ring-inset tw-ring-sky-400/30"
+              className="tw-flex tw-min-h-9 tw-items-center tw-justify-between tw-gap-2 tw-rounded-md tw-bg-sky-400/15 tw-px-3 tw-text-sm tw-tabular-nums tw-text-sky-100 tw-ring-1 tw-ring-inset tw-ring-sky-400/30"
             >
               <span className="tw-sr-only">
                 {t(locale, "network.tdh.how.stack.copy", {
@@ -112,7 +111,10 @@ function Stack({
           );
         })}
       </ol>
-      <p className="tw-m-0 tw-mt-2 tw-text-sm tw-tabular-nums tw-text-iron-300">
+      <p className="tw-m-0 tw-mt-2 tw-border-0 tw-border-t-2 tw-border-solid tw-border-iron-600 tw-pt-2 tw-text-sm tw-font-medium tw-text-iron-100">
+        {t(locale, "network.tdh.how.stack.wallet", { name })}
+      </p>
+      <p className="tw-m-0 tw-text-sm tw-tabular-nums tw-text-iron-300">
         {t(locale, "network.tdh.how.stack.raw", {
           raw: formatInteger(locale, rawDays(stack, today)),
         })}

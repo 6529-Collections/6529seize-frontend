@@ -4,7 +4,7 @@
   "network.tdh.rules.loading": "Loading current TDH rules…",
   "network.tdh.rules.error": "Current rules are temporarily unavailable. Try again to load the snapshot and boost schedule.",
   "network.tdh.rules.retry": "Reload rules",
-  "network.tdh.rules.snapshot": "Snapshot {date}, Ethereum block {block}.",
+  "network.tdh.rules.snapshot": "Cycle of {cycle}: snapshot {date}, Ethereum block {block}.",
   "network.tdh.rules.snapshotNote": "The values use today’s definitions with that snapshot’s eligible cards.",
   "network.tdh.rules.full.title": "A full Meme collection",
   "network.tdh.rules.full.multiplier": "{value}×",

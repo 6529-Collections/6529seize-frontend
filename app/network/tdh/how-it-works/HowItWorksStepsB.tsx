@@ -1,4 +1,5 @@
 import { formatInteger, formatNumber } from "@/i18n/format";
+import TdhTableFrame from "../shared/TdhTableFrame";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { baseTdh, finalTdh, rateCents } from "@/lib/tdh/tdhV1Arithmetic";
@@ -7,7 +8,6 @@ import TdhSource from "../shared/TdhSource";
 import { RULE_BASE, RULE_BOOST, RULE_FINAL } from "../shared/tdhRules";
 import {
   TDH_TABLE,
-  TDH_TABLE_FRAME,
   TDH_TABLE_WRAP,
   TDH_TD,
   TDH_TD_NUM,
@@ -17,7 +17,7 @@ import {
 import { BOOST_EXAMPLES, HOUSEHOLD_HOLDINGS, MINUTE_EXAMPLE } from "./examples";
 import BoostBuilder from "./explorables/BoostBuilder";
 import HouseholdWalkthrough from "./explorables/HouseholdWalkthrough";
-import { HouseholdDiagram, IdentityGraphDiagram } from "./HowItWorksDiagrams";
+import { IdentityGraphDiagram } from "./HowItWorksDiagrams";
 import { rateText } from "./HowItWorksStepsA";
 import StepSection, { Cited, Example } from "./StepSection";
 
@@ -25,29 +25,17 @@ const CAPTION =
   "tw-px-4 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200";
 const H = 3_941;
 
+/** A step's list; its sources are on the step's line. */
 function Bullets({
-  locale,
   items,
 }: {
   readonly locale: SupportedLocale;
-  readonly items: ReadonlyArray<{
-    readonly text: string;
-    readonly refs: readonly string[];
-  }>;
+  readonly items: ReadonlyArray<{ readonly text: string }>;
 }) {
   return (
     <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-[15px] tw-leading-7 tw-text-iron-200 marker:tw-text-iron-500">
       {items.map((item) => (
-        <li key={item.text} className="tw-relative">
-          {item.text}
-          {item.refs.length > 0 && (
-            <TdhSource
-              refs={item.refs}
-              locale={locale}
-              className="xl:tw-absolute xl:tw-left-full xl:tw-top-1 xl:tw-ml-6 xl:tw-w-36"
-            />
-          )}
-        </li>
+        <li key={item.text}>{item.text}</li>
       ))}
     </ul>
   );
@@ -58,14 +46,13 @@ function Step8({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <StepSection
       locale={locale}
+      sources={["P26 §7.2", "P26 §8.2", "P26 §7.3"]}
       step={8}
       title={t(locale, "network.tdh.how.s8.title")}
       rule={RULE_BASE}
       ruleSource="P26 §8.2"
     >
-      <Cited locale={locale} refs={["P26 §7.2", "P26 §8.2"]}>
-        {t(locale, "network.tdh.how.s8.body")}
-      </Cited>
+      <Cited locale={locale}>{t(locale, "network.tdh.how.s8.body")}</Cited>
       <Example locale={locale}>
         <p className="tw-m-0">
           {t(locale, "network.tdh.how.s8.example", {
@@ -73,7 +60,7 @@ function Step8({ locale }: { readonly locale: SupportedLocale }) {
           })}
         </p>
       </Example>
-      <Cited locale={locale} refs={["P26 §7.3"]}>
+      <Cited locale={locale}>
         {t(locale, "network.tdh.how.s8.perWallet", {
           one: formatInteger(locale, baseTdh(rate, 1)),
           two: formatInteger(locale, 2 * baseTdh(rate, 1)),
@@ -88,33 +75,30 @@ function Step9({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <StepSection
       locale={locale}
+      sources={["P26 §8.3", "P26 §10", "P26 §5.4"]}
       step={9}
       title={t(locale, "network.tdh.how.s9.title")}
       rule={RULE_BOOST}
       ruleSource="P26 §8.3"
     >
-      <Cited locale={locale} refs={["P26 §8.3"]}>
-        {t(locale, "network.tdh.how.s9.body")}
-      </Cited>
+      <Cited locale={locale}>{t(locale, "network.tdh.how.s9.body")}</Cited>
       <Bullets
         locale={locale}
         items={[
           {
             text: t(locale, "network.tdh.how.s9.gradients"),
-            refs: ["P26 §10"],
           },
           {
             text: t(locale, "network.tdh.how.s9.seasons"),
-            refs: ["P26 §5.4", "P26 §8.3"],
           },
-          { text: t(locale, "network.tdh.how.s9.partial"), refs: ["P26 §8.3"] },
-          { text: t(locale, "network.tdh.how.s9.fullSet"), refs: ["P26 §8.3"] },
+          { text: t(locale, "network.tdh.how.s9.partial") },
+          { text: t(locale, "network.tdh.how.s9.fullSet") },
         ]}
       />
       <p className="tw-m-0 tw-text-[15px] tw-leading-7 tw-text-iron-200">
         {t(locale, "network.tdh.how.s9.tableIntro")}
       </p>
-      <div className={TDH_TABLE_FRAME}>
+      <TdhTableFrame label={t(locale, "network.tdh.how.s9.tableCaption")}>
         <table className={TDH_TABLE}>
           <caption className={CAPTION}>
             {t(locale, "network.tdh.how.s9.tableCaption")}
@@ -147,8 +131,8 @@ function Step9({ locale }: { readonly locale: SupportedLocale }) {
             ))}
           </tbody>
         </table>
-      </div>
-      <Cited locale={locale} refs={["P26 §8.3"]} muted>
+      </TdhTableFrame>
+      <Cited locale={locale} muted>
         {t(locale, "network.tdh.how.s9.newest")}
       </Cited>
       <BoostBuilder locale={locale} />
@@ -160,15 +144,12 @@ function Step10({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <StepSection
       locale={locale}
+      sources={["P26 §6.1", "P26 §6.2", "P26 §6.3", "P26 §10", "DEV-12"]}
       step={10}
       title={t(locale, "network.tdh.how.s10.title")}
     >
-      <Cited locale={locale} refs={["P26 §6.1", "P26 §6.2"]}>
-        {t(locale, "network.tdh.how.s10.body")}
-      </Cited>
-      <Cited locale={locale} refs={["P26 §6.3", "P26 §10"]}>
-        {t(locale, "network.tdh.how.s10.limit")}
-      </Cited>
+      <Cited locale={locale}>{t(locale, "network.tdh.how.s10.body")}</Cited>
+      <Cited locale={locale}>{t(locale, "network.tdh.how.s10.limit")}</Cited>
       <p className="tw-m-0 tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
         {t(locale, "network.tdh.how.s10.fourth")}
         <TdhSource refs={["P26 §6.3", "P26 §10"]} locale={locale} />
@@ -190,7 +171,7 @@ function Step10({ locale }: { readonly locale: SupportedLocale }) {
           <TdhSource refs={["DEV-10", "D121"]} locale={locale} />
         </li>
       </ol>
-      <Cited locale={locale} refs={["P26 §6.1", "DEV-12"]} muted>
+      <Cited locale={locale} muted>
         {t(locale, "network.tdh.how.s10.delegation")}
       </Cited>
       <p className="tw-m-0">
@@ -214,14 +195,13 @@ function Step11({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <StepSection
       locale={locale}
+      sources={["P26 §8.4", "DEV-14", "D121"]}
       step={11}
       title={t(locale, "network.tdh.how.s11.title")}
       rule={RULE_FINAL}
       ruleSource="P26 §8.4"
     >
-      <Cited locale={locale} refs={["P26 §8.4"]}>
-        {t(locale, "network.tdh.how.s11.body")}
-      </Cited>
+      <Cited locale={locale}>{t(locale, "network.tdh.how.s11.body")}</Cited>
       <Example locale={locale}>
         <p className="tw-m-0">
           {t(locale, "network.tdh.how.s11.example", {
@@ -232,7 +212,7 @@ function Step11({ locale }: { readonly locale: SupportedLocale }) {
           })}
         </p>
       </Example>
-      <Cited locale={locale} refs={["P26 §8.4", "DEV-14", "D121"]} muted>
+      <Cited locale={locale} muted>
         {t(locale, "network.tdh.how.s11.tie", {
           tie: formatInteger(locale, finalTdh(25, 114)),
         })}
@@ -252,12 +232,11 @@ function Step12({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <StepSection
       locale={locale}
+      sources={["P26 §7", "P26 §8", "P26 §8.3", "P26 §8.6"]}
       step={12}
       title={t(locale, "network.tdh.how.s12.title")}
     >
-      <Cited locale={locale} refs={["P26 §7", "P26 §8"]}>
-        {t(locale, "network.tdh.how.s12.body")}
-      </Cited>
+      <Cited locale={locale}>{t(locale, "network.tdh.how.s12.body")}</Cited>
       <ul
         aria-label={t(locale, "network.tdh.how.s12.holdingsCaption")}
         className="tw-m-0 tw-grid tw-list-none tw-gap-2 tw-p-0 md:tw-hidden"
@@ -269,9 +248,9 @@ function Step12({ locale }: { readonly locale: SupportedLocale }) {
           return (
             <li
               key={`${holding.wallet}-${holding.card}`}
-              className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-4 tw-py-3"
+              className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-4 tw-py-3 tw-@container"
             >
-              <p className="tw-m-0 tw-flex tw-items-baseline tw-justify-between tw-gap-3 tw-text-sm">
+              <p className="tw-m-0 tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-3 tw-text-sm">
                 <span className="tw-font-medium tw-text-iron-100">
                   {t(
                     locale,
@@ -284,11 +263,11 @@ function Step12({ locale }: { readonly locale: SupportedLocale }) {
                   {t(locale, "network.tdh.how.s12.wallet")} {holding.wallet}
                 </span>
               </p>
-              <dl className="tw-m-0 tw-mt-2 tw-grid tw-grid-cols-[auto_minmax(0,1fr)] tw-gap-x-4 tw-gap-y-1 tw-text-sm tw-tabular-nums">
+              <dl className="tw-m-0 tw-mt-2 tw-grid tw-grid-cols-1 tw-gap-x-4 tw-gap-y-0.5 tw-text-sm tw-tabular-nums @[16rem]:tw-grid-cols-[auto_minmax(0,1fr)] @[16rem]:tw-gap-y-1 [&>dd]:tw-mb-1 @[16rem]:[&>dd]:tw-mb-0 @[16rem]:[&>dd]:tw-text-right">
                 <dt className="tw-text-iron-400">
                   {t(locale, "network.tdh.how.s12.days")}
                 </dt>
-                <dd className="tw-m-0 tw-text-right tw-text-iron-200">
+                <dd className="tw-m-0 tw-text-iron-200">
                   {holding.wallet === "A" && holding.card === "meme310"
                     ? t(locale, "network.tdh.how.s12.freshCopy")
                     : holding.days
@@ -298,13 +277,13 @@ function Step12({ locale }: { readonly locale: SupportedLocale }) {
                 <dt className="tw-text-iron-400">
                   {t(locale, "network.tdh.how.s12.rate")}
                 </dt>
-                <dd className="tw-m-0 tw-text-right tw-text-iron-200">
+                <dd className="tw-m-0 tw-text-iron-200">
                   {rateText(locale, rate)}
                 </dd>
                 <dt className="tw-text-iron-400">
                   {t(locale, "network.tdh.how.s12.base")}
                 </dt>
-                <dd className="tw-m-0 tw-text-right tw-font-semibold tw-text-iron-50">
+                <dd className="tw-m-0 tw-font-semibold tw-text-iron-50">
                   {formatInteger(locale, baseTdh(rate, raw))}
                 </dd>
               </dl>
@@ -381,10 +360,9 @@ function Step12({ locale }: { readonly locale: SupportedLocale }) {
           </tbody>
         </table>
       </div>
-      <Cited locale={locale} refs={["P26 §8.3", "P26 §8.6"]}>
+      <Cited locale={locale}>
         {t(locale, "network.tdh.how.s12.boostNote")}
       </Cited>
-      <HouseholdDiagram locale={locale} />
       <HouseholdWalkthrough locale={locale} />
       <TdhArrowLink href="/network/tdh#tdh-profile">
         {t(locale, "network.tdh.how.s12.cta")}
@@ -397,12 +375,11 @@ function Step13({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <StepSection
       locale={locale}
+      sources={["P26 §8.5", "P26 §13", "DEV-13", "D121"]}
       step={13}
       title={t(locale, "network.tdh.how.s13.title")}
     >
-      <Cited locale={locale} refs={["P26 §8.5", "P26 §13", "DEV-13", "D121"]}>
-        {t(locale, "network.tdh.how.s13.body")}
-      </Cited>
+      <Cited locale={locale}>{t(locale, "network.tdh.how.s13.body")}</Cited>
       <p className="tw-m-0 tw-flex tw-flex-col tw-items-start tw-gap-1 tw-rounded-lg tw-border tw-border-solid tw-border-success/30 tw-bg-success/[0.05] tw-px-4 tw-py-3 tw-text-[15px] tw-leading-7 tw-text-iron-100">
         {t(locale, "network.tdh.how.s13.verify")}
         <TdhArrowLink href="/network/tdh/verification">
@@ -417,28 +394,36 @@ function Step14({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <StepSection
       locale={locale}
+      sources={[
+        "D132",
+        "D121",
+        "DEV-3",
+        "DEV-4",
+        "DEV-6",
+        "DEV-7",
+        "DEV-8",
+        "DEV-2",
+        "DEV-9",
+        "P26 §6.3",
+      ]}
       step={14}
       title={t(locale, "network.tdh.how.s14.title")}
     >
-      <Cited locale={locale} refs={["D132", "D121"]}>
-        {t(locale, "network.tdh.how.s14.body")}
-      </Cited>
+      <Cited locale={locale}>{t(locale, "network.tdh.how.s14.body")}</Cited>
       <Bullets
         locale={locale}
         items={[
           {
             text: t(locale, "network.tdh.how.s14.item1"),
-            refs: ["DEV-3", "DEV-4"],
           },
-          { text: t(locale, "network.tdh.how.s14.item2"), refs: ["DEV-6"] },
-          { text: t(locale, "network.tdh.how.s14.item3"), refs: ["DEV-7"] },
-          { text: t(locale, "network.tdh.how.s14.item4"), refs: ["DEV-8"] },
+          { text: t(locale, "network.tdh.how.s14.item2") },
+          { text: t(locale, "network.tdh.how.s14.item3") },
+          { text: t(locale, "network.tdh.how.s14.item4") },
           {
             text: t(locale, "network.tdh.how.s14.item5"),
-            refs: ["DEV-2", "D121", "D132"],
           },
-          { text: t(locale, "network.tdh.how.s14.item6"), refs: ["DEV-9"] },
-          { text: t(locale, "network.tdh.how.s14.item7"), refs: ["P26 §6.3"] },
+          { text: t(locale, "network.tdh.how.s14.item6") },
+          { text: t(locale, "network.tdh.how.s14.item7") },
         ]}
       />
       <TdhArrowLink href="/network/tdh/verification">

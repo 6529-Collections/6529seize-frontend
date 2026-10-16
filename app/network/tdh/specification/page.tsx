@@ -7,7 +7,6 @@ import TdhScrollSpyNav from "../shared/TdhScrollSpyNav";
 import TdhSource from "../shared/TdhSource";
 import TdhStatusPill from "../shared/TdhStatusPill";
 import { SectionMap } from "./SpecDiagrams";
-import { SettledNote } from "./SpecParts";
 import SpecSectionsA from "./SpecSectionsA";
 import SpecSectionsB from "./SpecSectionsB";
 
@@ -40,6 +39,7 @@ export default function TdhSpecificationPage() {
     ...SECTION_IDS.map((id) => ({ id, label: titles[id] ?? id })),
     { id: "decisions", label: t(locale, "network.tdh.spec.decisions.title") },
     { id: "evidence", label: t(locale, "network.tdh.spec.evidence.title") },
+    { id: "changes", label: t(locale, "network.tdh.spec.changes.title") },
   ];
 
   return (
@@ -50,9 +50,12 @@ export default function TdhSpecificationPage() {
       documentTitle={t(locale, "network.tdh.spec.pageTitle")}
       title={t(locale, "network.tdh.spec.title")}
       pills={
-        <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-font-mono tw-text-xs tw-text-iron-200">
-          tdh-v1.0
-        </span>
+        <>
+          <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-font-mono tw-text-xs tw-text-iron-200">
+            tdh-v1.0
+          </span>
+          <TdhStatusPill pill="proposal" locale={locale} />
+        </>
       }
       lede={
         <>
@@ -62,18 +65,8 @@ export default function TdhSpecificationPage() {
           </p>
           <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-400">
             {t(locale, "network.tdh.spec.version")}
-            <TdhSource refs={["D121", "P26 header"]} locale={locale} />
+            <TdhSource refs={["D121", "D116", "P26 header"]} locale={locale} />
           </p>
-          <SettledNote>
-            <TdhStatusPill pill="inSpec" locale={locale} size="sm" />
-            <span className="tw-min-w-0 tw-flex-1">
-              {t(locale, "network.tdh.spec.amended")}
-              <TdhSource
-                refs={["P26 §7.1", "P26 §13", "D131"]}
-                locale={locale}
-              />
-            </span>
-          </SettledNote>
         </>
       }
       headerExtra={

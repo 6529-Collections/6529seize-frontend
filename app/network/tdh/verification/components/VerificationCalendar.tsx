@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatDate } from "@/i18n/format";
+import { formatDate, formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import type { VerificationIndexDay } from "@/lib/tdh/verification/schema";
@@ -22,7 +22,7 @@ import {
 } from "./verificationFormat";
 
 /** The newest days the strip shows; older ones stay in the table below. */
-export const CALENDAR_DAYS = 42;
+const CALENDAR_DAYS = 42;
 
 const TONE_BG: Record<PillTone, string> = {
   success: "tw-bg-success/80 hover:tw-bg-success",
@@ -84,7 +84,7 @@ function isoDate(cycleDay: number): string {
  * Every cycle day from the first shown report to the latest, oldest first;
  * then, while the cutover is ahead, the days still to come up to it.
  */
-export function calendarCells(
+function calendarCells(
   days: readonly VerificationIndexDay[],
   options: {
     readonly limit?: number;
@@ -132,26 +132,30 @@ function formatDayOfMonth(locale: SupportedLocale, date: string): string {
   return formatDate(locale, date, { day: "numeric" });
 }
 
-/** Total TDH, Rust − 6529.io, as a bar under the day; a flat mark is zero. */
-function DeltaBar({
+/**
+ * Total TDH, Rust − 6529.io, as a number under the day: 0 when equal, else
+ * signed and compact (+1.2K), so the strip carries the delta itself.
+ */
+function DeltaLabel({
+  locale,
   delta,
-  maxDelta,
 }: {
+  readonly locale: SupportedLocale;
   readonly delta: number | null;
-  readonly maxDelta: number;
 }) {
   if (delta === null) {
     return null;
   }
-  const height =
-    delta === 0
-      ? 3
-      : Math.max(5, Math.round((Math.abs(delta) / maxDelta) * 20));
   return (
     <span
-      className={`tw-w-3/5 tw-rounded-sm ${delta === 0 ? "tw-bg-iron-500" : "tw-bg-amber-300"}`}
-      style={{ height: `${height}px` }}
-    />
+      className={`tw-text-xs tw-font-medium tw-tabular-nums tw-leading-4 ${delta === 0 ? "tw-text-iron-400" : "tw-text-amber-200"}`}
+    >
+      {formatNumber(locale, delta, {
+        notation: "compact",
+        maximumFractionDigits: 1,
+        signDisplay: "exceptZero",
+      })}
+    </span>
   );
 }
 
@@ -233,7 +237,8 @@ function CellSquare({
 
 /**
  * Every day at a glance: one square per day, coloured by its verdict and
- * linking to it, and under each the total's difference from 6529.io. Days
+ * linking to it, and under each the total's difference from 6529.io, as a
+ * number. Days
  * without a report show as dashed squares, and while the cutover is ahead the
  * days still to come lead up to it. It grows to six weeks before it scrolls.
  */
@@ -263,7 +268,6 @@ export default function VerificationCalendar({
       ? totalDelta(cell.day.totalTdh.rust, cell.day.totalTdh.live)
       : null
   );
-  const maxDelta = Math.max(1, ...deltas.map((value) => Math.abs(value ?? 0)));
   const first = cells[0];
   const last = cells.filter((cell) => cell.kind !== "upcoming").at(-1);
   const hasUpcoming = cells.some((cell) => cell.kind === "upcoming");
@@ -309,9 +313,9 @@ export default function VerificationCalendar({
               />
               <span
                 aria-hidden="true"
-                className="tw-mt-1 tw-flex tw-h-5 tw-w-full tw-items-end tw-justify-center"
+                className="tw-mt-1 tw-flex tw-h-4 tw-w-full tw-items-center tw-justify-center"
               >
-                <DeltaBar delta={deltas[index] ?? null} maxDelta={maxDelta} />
+                <DeltaLabel locale={locale} delta={deltas[index] ?? null} />
               </span>
               <span
                 aria-hidden="true"
@@ -351,13 +355,22 @@ export default function VerificationCalendar({
             {t(locale, "network.tdh.verify.history.noReport")}
           </li>
           {hasUpcoming && (
-            <li className="tw-inline-flex tw-items-center tw-gap-1.5">
-              <span
-                aria-hidden="true"
-                className="tw-size-2.5 tw-rounded-sm tw-border tw-border-solid tw-border-primary-400/70 tw-bg-primary-500/15"
-              />
-              {t(locale, "network.tdh.verify.calendar.cutoverLegend")}
-            </li>
+            <>
+              <li className="tw-inline-flex tw-items-center tw-gap-1.5">
+                <span
+                  aria-hidden="true"
+                  className="tw-size-2.5 tw-rounded-sm tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-900"
+                />
+                {t(locale, "network.tdh.verify.calendar.upcomingLegend")}
+              </li>
+              <li className="tw-inline-flex tw-items-center tw-gap-1.5">
+                <span
+                  aria-hidden="true"
+                  className="tw-size-2.5 tw-rounded-sm tw-border tw-border-solid tw-border-primary-400/70 tw-bg-primary-500/15"
+                />
+                {t(locale, "network.tdh.verify.calendar.cutoverLegend")}
+              </li>
+            </>
           )}
         </ul>
         <p className="tw-m-0">

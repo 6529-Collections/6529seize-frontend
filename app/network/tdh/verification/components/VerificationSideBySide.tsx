@@ -377,22 +377,25 @@ export default function VerificationSideBySide({
         id="side"
         title={t(locale, "network.tdh.verify.side.heading")}
         locale={locale}
-        className="tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
+        className="tw-hyphens-auto tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
       />
       <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
         {t(locale, "network.tdh.verify.side.caption")}
         <TdhSource refs={["P53 §12"]} locale={locale} />
       </p>
-      <ul className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-gap-2 tw-p-0 sm:tw-grid-cols-2 lg:tw-hidden">
+      {/* One card per measure below lg, in one column, so no card is
+          stretched beside a taller one; inside a card the three values sit
+          beside their labels from 17rem and under them below. */}
+      <ul className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-gap-2 tw-p-0 lg:tw-hidden">
         {rows.map((row) => (
           <li
             key={row.key}
-            className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-4 tw-py-3"
+            className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-4 tw-py-3 tw-@container"
           >
             <div className="tw-text-sm tw-font-medium tw-text-iron-100">
               {row.label}
             </div>
-            <dl className="tw-m-0 tw-mt-2 tw-grid tw-grid-cols-[6.5rem_minmax(0,1fr)] tw-items-start tw-gap-x-3 tw-gap-y-2 tw-text-sm tw-tabular-nums">
+            <dl className="tw-m-0 tw-mt-2 tw-grid tw-grid-cols-1 tw-items-start tw-gap-x-3 tw-gap-y-1 tw-text-sm tw-tabular-nums @[17rem]:tw-grid-cols-[6.5rem_minmax(0,1fr)] @[17rem]:tw-gap-y-2">
               {(["rust", "python", "live"] as const).map((series) => (
                 <div key={series} className="tw-contents">
                   <dt className="tw-pt-px tw-text-xs tw-text-iron-400">
@@ -401,7 +404,7 @@ export default function VerificationSideBySide({
                       series={series}
                     />
                   </dt>
-                  <dd className="tw-m-0 tw-min-w-0 tw-text-iron-100">
+                  <dd className="tw-m-0 tw-mb-1.5 tw-min-w-0 tw-break-words tw-text-iron-100 @[17rem]:tw-mb-0">
                     {row[series]}
                   </dd>
                 </div>

@@ -123,8 +123,11 @@ describe("TDH sub-pages", () => {
     );
     expect(within(builder).getByText("Boost 1.84")).toBeInTheDocument();
     expect(
-      within(builder).getByRole("checkbox", { name: /Season 2$/ })
+      within(builder).getByRole("button", { name: "Season 2" })
     ).toBeDisabled();
+    expect(
+      within(builder).getByRole("button", { name: "Season 2" })
+    ).toHaveAttribute("aria-pressed", "true");
 
     const household = screen.getByRole("region", {
       name: "Show the household",
@@ -246,6 +249,9 @@ describe("TDH sub-pages", () => {
       0
     );
     expect(screen.getByText("68 / 68")).toBeInTheDocument();
+    // Five properties of the rule; last in, first out is a lemma about the
+    // model's stack and is not counted.
+    expect(container.textContent).toMatch(/5properties of TDH-v1 proved/);
     expect(container.textContent).not.toMatch(/cannot change TDH/);
     expect(container.textContent).not.toMatch(/and so no balance/);
     expect(container.textContent).toMatch(/It stops there/);
@@ -258,16 +264,20 @@ describe("TDH sub-pages", () => {
     expect(
       container.querySelector('[data-tdh-manifest="bundled"]')?.textContent
     ).toMatch(/bundled with this page.*model at commit 7bf579a/);
-    // The manifest's build follows P26 as of 1c69528; P26 has 89 vectors
-    // since f840096, and the page says the build predates them.
-    expect(container.textContent).toMatch(
-      /on P26 as of 1c69528; P26 has 89 since f840096, after this build/
-    );
-    // Round 4 of the model exists but its manifest is not published: the
-    // page says so, and keeps round 3's statements.
+    // The manifest's build follows P26 as of 1c69528.
+    expect(container.textContent).toMatch(/1,190 checks, P26 as of 1c69528/);
+    // Round 5 of the model exists, but its manifest is not published: the
+    // page shows its committed figures beside a pill, and keeps round 3's
+    // statements.
+    const note = container.querySelector("[data-tdh-round-note]");
+    expect(note?.textContent).toMatch(/Round 5 of the model, October 16, 2026/);
+    expect(note?.textContent).toMatch(/89 of 89 vectors/);
+    expect(note?.textContent).toMatch(/55 \+ 30 theorems/);
+    expect(note?.textContent).toMatch(/46 fact checks/);
+    expect(note?.textContent).toMatch(/at commit 6b32f3f/);
     expect(
-      container.querySelector("[data-tdh-round-note]")?.textContent
-    ).toMatch(/newer round, at commit f854661 \(October 15, 2026\)/);
+      note?.querySelector('[data-tdh-pill="notPublished"]')
+    ).not.toBeNull();
     expect(container.textContent).toMatch(
       /the order of raw logs is not covered/
     );
@@ -342,7 +352,10 @@ describe("TDH sub-pages", () => {
       theorems,
     });
     const { container } = renderPage(await FormalPage());
-    expect(container.querySelector("[data-tdh-round-note]")).toBeNull();
+    // Round 5 is still newer than this round-4 manifest.
+    expect(
+      container.querySelector("[data-tdh-round-note]")?.textContent
+    ).toMatch(/Round 5 of the model/);
     expect(
       container.querySelector('[data-tdh-manifest="published"]')
     ).not.toBeNull();
@@ -379,7 +392,9 @@ describe("TDH sub-pages", () => {
       screen.getByText(/The list follows 6529chain f840096/)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Rust and Python agree on 10,282 of 10,282 collectors/)
+      screen.getByText(
+        /Rust and Python agree on 10,282 of 10,282 identity records/
+      )
     ).toBeInTheDocument();
     expect(screen.queryByText(/sample|test runs/i)).toBeNull();
     expect(
@@ -392,7 +407,7 @@ describe("TDH sub-pages", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "68 of 68 vectors (1,190 checks), at P26 1c69528; every record of the 2026-10-11 cycle"
+        "68 of 68 vectors (1,190 checks), at P26 1c69528; every record of the 2026-10-11 cycle. Round 5 (6b32f3f), committed but not yet in a published manifest: 89 of 89 at P26 f840096."
       )
     ).toBeInTheDocument();
     expect(
@@ -436,7 +451,7 @@ describe("TDH sub-pages", () => {
     expect(screen.getAllByText("Equal").length).toBeGreaterThan(0);
     expect(
       screen.getByText(
-        "On October 15, 2026, the Rust core, the Python reference and 6529.io agreed on all 10,282 collectors and 11,133 wallets, to the last unit of TDH."
+        "Cycle of October 15, 2026 (holdings at 23:59:59 UTC the day before): the Rust core, the Python reference and 6529.io agreed on all 10,282 identity records, each collector’s and the two burn addresses’, and all 11,133 wallet records, to the last unit of TDH."
       )
     ).toBeInTheDocument();
 

@@ -1,5 +1,7 @@
 import type { SupportedLocale } from "@/i18n/locales";
+import TdhTableFrame from "../shared/TdhTableFrame";
 import { t, type MessageKey } from "@/i18n/messages";
+import DifftestRounds from "../shared/DifftestRounds";
 import TdhArrowLink from "../shared/TdhArrowLink";
 import TdhCopyButton from "../shared/TdhCopyButton";
 import TdhSource from "../shared/TdhSource";
@@ -19,7 +21,6 @@ import {
 import {
   TDH_CARD,
   TDH_TABLE,
-  TDH_TABLE_FRAME,
   TDH_TD_STACK_MD,
   TDH_TH,
 } from "../shared/tdhStyles";
@@ -81,6 +82,8 @@ const ARITHMETIC = [
   { id: "s8-7", key: "s8-7", rule: RULE_RANGE, refs: ["P26 §8.7"] },
 ] as const;
 
+const CHANGES = ["floors", "netting", "inputs", "vectors"] as const;
+
 const EVIDENCE = [
   { id: "evidence-replay", key: "replay" },
   { id: "evidence-clean-room", key: "cleanRoom" },
@@ -118,6 +121,7 @@ export default function SpecSectionsB({
               code={part.rule}
               source={part.refs[0]}
               condensed={part.id === "s8-5" || part.id === "s8-7"}
+              aligned={part.id === "s8-7"}
             />
           </SpecSub>
         ))}
@@ -151,7 +155,7 @@ export default function SpecSectionsB({
           source="P26 §10"
           condensed
         />
-        <div className={TDH_TABLE_FRAME}>
+        <TdhTableFrame label={t(locale, "network.tdh.spec.s10.tableCaption")}>
           <table
             className={`${TDH_TABLE} tw-block md:tw-table md:tw-table-fixed`}
           >
@@ -205,7 +209,7 @@ export default function SpecSectionsB({
               ))}
             </tbody>
           </table>
-        </div>
+        </TdhTableFrame>
         <div className={`${TDH_CARD} tw-max-w-3xl tw-p-4`}>
           <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
             {t(locale, "network.tdh.spec.s10.hash")}
@@ -235,6 +239,7 @@ export default function SpecSectionsB({
         id="s11"
         title={t(locale, "network.tdh.spec.s11.title")}
         locale={locale}
+        wide
       >
         <Plain locale={locale} refs={["P26 §11", "D121"]}>
           {t(locale, "network.tdh.spec.s11.body")}
@@ -250,7 +255,7 @@ export default function SpecSectionsB({
         <Plain locale={locale} refs={["P26 §12"]}>
           {t(locale, "network.tdh.spec.s12.body")}
         </Plain>
-        <div className={TDH_TABLE_FRAME}>
+        <TdhTableFrame label={t(locale, "network.tdh.spec.s12.tableCaption")}>
           <table className={`${TDH_TABLE} tw-block md:tw-table`}>
             <caption className={`${CAPTION} tw-block md:tw-table-caption`}>
               {t(locale, "network.tdh.spec.s12.tableCaption")}
@@ -303,7 +308,7 @@ export default function SpecSectionsB({
               ))}
             </tbody>
           </table>
-        </div>
+        </TdhTableFrame>
       </SpecSection>
 
       <SpecSection
@@ -314,6 +319,21 @@ export default function SpecSectionsB({
         <Plain locale={locale} refs={["P26 §13", "Clean room 2026-10-11"]}>
           {t(locale, "network.tdh.spec.s13.body")}
         </Plain>
+        <aside
+          aria-labelledby="spec-implementers"
+          className="tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-500/[0.06] tw-px-4 tw-py-3"
+        >
+          <h3
+            id="spec-implementers"
+            className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-50"
+          >
+            {t(locale, "network.tdh.spec.implementers.title")}
+          </h3>
+          <p className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-200">
+            {t(locale, "network.tdh.spec.implementers.body")}
+            <TdhSource refs={["P26 §10", "P53 §11.3"]} locale={locale} />
+          </p>
+        </aside>
         <TdhArrowLink href="/network/tdh/implementations">
           {t(locale, "network.tdh.spec.s13.link")}
         </TdhArrowLink>
@@ -371,9 +391,32 @@ export default function SpecSectionsB({
                   {t(locale, "network.tdh.spec.evidence.dashboard")}
                 </TdhArrowLink>
               )}
+              {item.key === "difftest" && (
+                <div className="tw-mt-4">
+                  <DifftestRounds locale={locale} />
+                </div>
+              )}
             </article>
           ))}
         </div>
+      </SpecSection>
+
+      <SpecSection
+        id="changes"
+        title={t(locale, "network.tdh.spec.changes.title")}
+        locale={locale}
+      >
+        <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
+          {t(locale, "network.tdh.spec.changes.intro")}
+          <TdhSource refs={["P26 §7.1", "P26 §13", "D131"]} locale={locale} />
+        </p>
+        <ul className="tw-m-0 tw-list-disc tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-iron-500">
+          {CHANGES.map((key) => (
+            <li key={key}>
+              {t(locale, `network.tdh.spec.changes.${key}` as MessageKey)}
+            </li>
+          ))}
+        </ul>
       </SpecSection>
     </>
   );

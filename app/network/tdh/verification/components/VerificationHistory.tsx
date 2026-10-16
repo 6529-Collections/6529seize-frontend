@@ -1,4 +1,5 @@
 import { useId } from "react";
+import TdhTableFrame from "../../shared/TdhTableFrame";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { VerificationIndexDay } from "@/lib/tdh/verification/schema";
@@ -15,7 +16,6 @@ import TdhStatusPill from "../../shared/TdhStatusPill";
 import {
   TDH_CAPTION,
   TDH_TABLE,
-  TDH_TABLE_FRAME,
   TDH_TD,
   TDH_TD_NUM,
   TDH_TH,
@@ -29,6 +29,7 @@ import {
   formatSigned,
 } from "./verificationFormat";
 
+const TABLE_CAPTION_KEY = "network.tdh.verify.history.tableCaption";
 const RIGHT = 16;
 const TOP_PANEL = { top: 22, height: 110 };
 const BOTTOM_PANEL = { top: 164, height: 90 };
@@ -302,7 +303,7 @@ function HistoryList({
   const cycleLabel = t(locale, "network.tdh.verify.history.cycle");
   return (
     <ol
-      aria-label={t(locale, "network.tdh.verify.history.tableCaption")}
+      aria-label={t(locale, TABLE_CAPTION_KEY)}
       className="tw-m-0 tw-list-none tw-space-y-3 tw-p-0"
     >
       {historyRows(ordered, missing).map((row) => {
@@ -348,9 +349,9 @@ function HistoryList({
         return (
           <li
             key={day.cycleDay}
-            className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-p-4"
+            className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-p-4 tw-@container"
           >
-            <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
+            <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-3">
               <div className="tw-min-w-0">
                 <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-50">
                   {formatCycleDate(locale, day.date)}
@@ -365,7 +366,7 @@ function HistoryList({
                 size="sm"
               />
             </div>
-            <dl className="tw-m-0 tw-mt-3 tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-2.5">
+            <dl className="tw-m-0 tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-x-4 tw-gap-y-2.5 @[17rem]:tw-grid-cols-2">
               {values.map((item) => (
                 <div key={item.key} className="tw-min-w-0">
                   <dt className="tw-text-xs tw-text-iron-400">
@@ -398,18 +399,14 @@ function HistoryTable({
   const rows = historyRows(ordered, missing);
   const noValue = t(locale, "network.tdh.verify.history.noValue");
   return (
-    <div className={TDH_TABLE_FRAME}>
+    <TdhTableFrame label={t(locale, TABLE_CAPTION_KEY)}>
       <table
         className={TDH_TABLE}
-        aria-label={
-          caption
-            ? undefined
-            : t(locale, "network.tdh.verify.history.tableCaption")
-        }
+        aria-label={caption ? undefined : t(locale, TABLE_CAPTION_KEY)}
       >
         {caption && (
           <caption className={TDH_CAPTION}>
-            {t(locale, "network.tdh.verify.history.tableCaption")}
+            {t(locale, TABLE_CAPTION_KEY)}
           </caption>
         )}
         <thead>
@@ -498,7 +495,7 @@ function HistoryTable({
           })}
         </tbody>
       </table>
-    </div>
+    </TdhTableFrame>
   );
 }
 
@@ -540,7 +537,7 @@ export default function VerificationHistory({
         id="history"
         title={t(locale, "network.tdh.verify.history.heading")}
         locale={locale}
-        className="tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
+        className="tw-hyphens-auto tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
       />
       <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
         {t(locale, "network.tdh.verify.history.caption")}

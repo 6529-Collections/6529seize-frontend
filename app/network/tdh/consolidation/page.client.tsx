@@ -5,6 +5,7 @@ import {
   ArrowDownIcon,
   ArrowRightIcon,
   ArrowsRightLeftIcon,
+  CalendarDaysIcon,
   ChartBarIcon,
   CheckIcon,
   LockClosedIcon,
@@ -16,7 +17,6 @@ import {
 import Link from "next/link";
 import { useId, type ComponentType, type SVGProps } from "react";
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
-import NetworkReferenceNavigation from "@/components/network/NetworkReferenceNavigation";
 import {
   NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
   NETWORK_REFERENCE_PAGE_CLASSES,
@@ -33,6 +33,7 @@ import TdhDisclosure from "../shared/TdhDisclosure";
 import TdhPager from "../shared/TdhPager";
 import TdhSource from "../shared/TdhSource";
 import TdhSubnav from "../shared/TdhSubnav";
+import { TDH_H1 } from "../shared/tdhStyles";
 import { TDHRelatedLinks } from "../TDHPageNavigation";
 import TDHSection, { TDH_FOCUS, TDH_PANEL, TDH_TEXT } from "../TDHSection";
 
@@ -118,7 +119,7 @@ export default function TDHConsolidationPage() {
         <TdhSubnav current="/network/tdh/consolidation" locale={locale} />
         <header className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-8 tw-pb-10 tw-pt-5 sm:tw-pt-8 lg:tw-grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:tw-gap-12">
           <div>
-            <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl">
+            <h1 className={TDH_H1}>
               {t(locale, "network.tdhConsolidation.title")}
             </h1>
             <p className="tw-mb-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-200 sm:tw-text-lg sm:tw-leading-8">
@@ -137,6 +138,25 @@ export default function TDHConsolidationPage() {
                 {t(locale, "network.tdhConsolidation.tdhv1Link")}
               </Link>
             </p>
+            <ol
+              aria-label={t(locale, "network.tdhConsolidation.timeline.label")}
+              className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-gap-2 tw-p-0 tw-text-sm tw-leading-6 sm:tw-grid-cols-2"
+            >
+              {(["fourth", "cutover"] as const).map((key) => (
+                <li
+                  key={key}
+                  className="tw-flex tw-items-start tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-iron-200"
+                >
+                  <CalendarDaysIcon
+                    aria-hidden="true"
+                    className="tw-mt-0.5 tw-size-4 tw-shrink-0 tw-text-iron-400"
+                  />
+                  {t(locale, `network.tdhConsolidation.timeline.${key}`, {
+                    date,
+                  })}
+                </li>
+              ))}
+            </ol>
             <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-center tw-gap-x-6 tw-gap-y-3">
               <ButtonLink href={GUIDED_SETUP_HREF} variant="primary" size="lg">
                 {t(locale, "network.tdhConsolidation.cta")}
@@ -167,7 +187,7 @@ export default function TDHConsolidationPage() {
                 <span className="tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800/80 tw-text-iron-100">
                   <BenefitIcon aria-hidden="true" className="tw-size-5" />
                 </span>
-                <div className="tw-min-w-0">
+                <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
                   <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100">
                     {t(
                       locale,
@@ -187,7 +207,10 @@ export default function TDHConsolidationPage() {
                     )}
                   </p>
                   {(key === "move" || key === "tdh") && (
-                    <TdhArrowLink href="/network/tdh/how-it-works#step-10">
+                    <TdhArrowLink
+                      href="/network/tdh/how-it-works#step-10"
+                      className="tw-mt-auto tw-self-start tw-pt-2"
+                    >
                       {t(locale, "network.tdhConsolidation.benefits.ruleLink")}
                     </TdhArrowLink>
                   )}
@@ -335,6 +358,7 @@ export default function TDHConsolidationPage() {
           description={t(locale, "network.tdhConsolidation.under.description")}
         >
           <TDHRelatedLinks
+            variant="list"
             links={[
               {
                 href: DESIGN_HREF,
@@ -367,10 +391,6 @@ export default function TDHConsolidationPage() {
         </TDHSection>
 
         <TdhPager current="/network/tdh/consolidation" locale={locale} />
-        <NetworkReferenceNavigation
-          currentHref="/network/tdh/consolidation"
-          locale={locale}
-        />
       </article>
     </div>
   );

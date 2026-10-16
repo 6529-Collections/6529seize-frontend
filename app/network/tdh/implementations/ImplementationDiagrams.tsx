@@ -22,6 +22,7 @@ import {
   TdhSvg,
   WIDE_WIDTH,
 } from "../shared/TdhSvg";
+import { svgBoxWidth } from "../shared/svgText";
 
 type Series = keyof typeof TDH_SERIES;
 
@@ -122,6 +123,8 @@ function ArrowMarker({ id }: { readonly id: string }) {
 }
 
 const EDGE = "tw-fill-none tw-stroke-iron-500";
+const P26_NAME = "lineage.p26";
+const P26_SUB = "lineage.p26Sub";
 
 const LINEAGE_PROGRAMS = [
   {
@@ -145,6 +148,27 @@ const LINEAGE_PROGRAMS = [
   { key: "lean", name: "name.lean", sub: "lineage.fromSpec", series: "lean" },
 ] as const;
 
+/** A lineage node's width: its name and line, after the dot, with padding. */
+function lineageWidth(
+  name: string,
+  sub: string,
+  nameSize: number,
+  subSize: number,
+  dot: boolean
+): number {
+  return (
+    svgBoxWidth(
+      [
+        [name, nameSize, 600],
+        [sub, subSize, 400],
+      ],
+      0
+    ) +
+    (dot ? 26 : 12) +
+    14
+  );
+}
+
 function LineageWide({
   m,
   title,
@@ -155,27 +179,48 @@ function LineageWide({
   readonly desc: string;
 }) {
   // P26 on the left, the four programs in a column, the Rust core on the
-  // right, the backend below with its dashed path to the Rust core.
-  const p26: Box = { x: 0, y: 112, w: 104, h: 56 };
-  const columnX = 156;
+  // right, the backend below with its dashed path to the Rust core. Every
+  // box is as wide as its text in the site font, with room on both sides.
+  const p26Width = lineageWidth(m(P26_NAME), m(P26_SUB), 16, 13, false);
+  const columnWidth = Math.max(
+    ...LINEAGE_PROGRAMS.map((program) =>
+      lineageWidth(m(program.name), m(program.sub), 14, 13, true)
+    )
+  );
+  const coreWidth = lineageWidth(
+    m("name.rust"),
+    m("lineage.library"),
+    14,
+    13,
+    true
+  );
+  const backendWidth = lineageWidth(m("lineage.backend"), "", 14, 13, true);
+  const p26: Box = { x: 0, y: 112, w: p26Width, h: 56 };
+  const columnX = p26.w + 48;
   const boxAt = (index: number): Box => ({
     x: columnX,
     y: 8 + index * 64,
-    w: 196,
+    w: columnWidth,
     h: 48,
   });
-  const core: Box = { x: 396, y: 72, w: 164, h: 48 };
-  const backend: Box = { x: 0, y: 270, w: 150, h: 48 };
+  const core: Box = {
+    x: columnX + columnWidth + 40,
+    y: 72,
+    w: coreWidth,
+    h: 48,
+  };
+  const backend: Box = { x: 0, y: 270, w: backendWidth, h: 48 };
+  const width = Math.max(WIDE_WIDTH, core.x + core.w);
   const reference = boxAt(1);
   const fromY = p26.y + p26.h / 2;
   return (
     <TdhSvg
       id="lineage-wide"
-      width={WIDE_WIDTH}
+      width={width}
       height={326}
       title={title}
       desc={desc}
-      maxWidth={720}
+      maxWidth={680}
     >
       <defs>
         <ArrowMarker id="lineage-wide-arrow" />
@@ -212,8 +257,8 @@ function LineageWide({
       </text>
       <LineageNode
         box={p26}
-        name={m("lineage.p26")}
-        sub={m("lineage.p26Sub")}
+        name={m(P26_NAME)}
+        sub={m(P26_SUB)}
         nameSize={16}
         subSize={13}
       />
@@ -321,9 +366,17 @@ function LineageNarrow({
         markerEnd="url(#lineage-narrow-arrow)"
       />
       <LineageNode
-        box={{ x: 0, y: 0, w: 132, h: 52 }}
-        name={m("lineage.p26")}
-        sub={m("lineage.p26Sub")}
+        box={{
+          x: 0,
+          y: 0,
+          w: Math.min(
+            NARROW_WIDTH,
+            lineageWidth(m(P26_NAME), m(P26_SUB), 16, 14, false)
+          ),
+          h: 52,
+        }}
+        name={m(P26_NAME)}
+        sub={m(P26_SUB)}
         nameSize={16}
         subSize={14}
       />
@@ -486,13 +539,15 @@ const LEAN_VECTORS: Cell = { tone: "review", label: "ofVectors" };
 /**
  * Which check covers which program. Vectors: P26 has 89 since f840096; the
  * Rust core's daily version passes the 51 of 0621ed4, and the validator's
- * current code, the Rust core and program B, the 75 of a4db4ae
+ * development branch, the Rust core and program B, the 75 of a4db4ae
  * (`shared/tdhFacts.ts`); the Lean model's count comes from its published
- * proof manifest. A whole
- * real day: the references and the Lean model on 2026-10-11 (P26 §13, the
- * model's README), the Rust core in the daily runs; program B has published
- * none. Generated inputs: the four-way differential tests ran the Rust core,
- * not the Rust reference.
+ * proof manifest. A whole real day: the references and the Lean model on
+ * 2026-10-11 (P26 §13, the model's README), the Rust core in the daily runs;
+ * program B has published none. Random and generated inputs: the four-way
+ * differential tests ran the Rust core, program B, the Lean model and the
+ * Python reference; since P26's fifth round (f840096) 6529chain's
+ * tdh-formal workflow also runs the Rust reference on the Lean job's random
+ * vectors, so Lean, Python and Rust are compared three ways there.
  */
 const MATRIX_ROWS: ReadonlyArray<{
   readonly key: "vectors" | "fullDay" | "random" | "dual" | "daily" | "proofs";
@@ -510,7 +565,7 @@ const MATRIX_ROWS: ReadonlyArray<{
     ],
   },
   { key: "fullDay", cells: [Y, Y, N, Y, Y, UNDER_TEST] },
-  { key: "random", cells: [Y, N, Y, Y, Y, N] },
+  { key: "random", cells: [Y, Y, Y, Y, Y, N] },
   { key: "dual", cells: [PLANNED, N, PLANNED, N, N, N] },
   { key: "daily", cells: [SINCE, N, N, SINCE, N, UNDER_TEST] },
   { key: "proofs", cells: [PLANNED, N, PLANNED, N, N, N] },
@@ -561,12 +616,12 @@ export function CheckMatrix({
         {MATRIX_ROWS.map((row) => (
           <li
             key={row.key}
-            className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-4 tw-py-3"
+            className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-4 tw-py-3 tw-@container"
           >
             <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
               {m(`matrix.${row.key}`)}
             </p>
-            <ul className="tw-m-0 tw-mt-2 tw-grid tw-list-none tw-grid-cols-[auto_minmax(0,1fr)] tw-gap-x-3 tw-gap-y-1 tw-p-0 tw-text-xs">
+            <ul className="tw-m-0 tw-mt-2 tw-grid tw-list-none tw-grid-cols-1 tw-gap-x-3 tw-gap-y-1 tw-p-0 tw-text-xs @[17rem]:tw-grid-cols-[auto_minmax(0,1fr)]">
               {row.cells.map((cell, index) => {
                 const column = MATRIX_COLUMNS[index];
                 if (!column || cell.tone === "no") {
@@ -598,7 +653,11 @@ export function CheckMatrix({
                 {m("matrix.check")}
               </th>
               {MATRIX_COLUMNS.map((column) => (
-                <th key={column.key} scope="col" className={TDH_TH}>
+                <th
+                  key={column.key}
+                  scope="col"
+                  className={`${TDH_TH} tw-whitespace-nowrap`}
+                >
                   <span className="tw-inline-flex tw-items-center tw-gap-2">
                     <span
                       aria-hidden="true"

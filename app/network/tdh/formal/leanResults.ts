@@ -8,28 +8,61 @@
  * the manifest (`formal/manifest.json` on the TDH feed, or the copy bundled
  * with the page), and a statement whose entries the manifest does not
  * confirm shows as unverified. Lean statements are quoted verbatim, without
- * their proofs, from the model at 6529chain 7bf579a; those of round 4 from
- * f854661, where the earlier ones read the same.
+ * their proofs, from the model at 6529chain 7bf579a; those of rounds 4 and 5
+ * from f854661 and 6b32f3f, where the earlier ones read the same.
  *
- * The page knows two rounds of the model. Round 3 (manifest at 7bf579a)
+ * The page knows three rounds of the model. Round 3 (manifest at 7bf579a)
  * starts from decoded inputs; round 4 (6529chain f854661) starts from raw
- * logs and proves their order cannot matter. Which one a manifest records is
- * read from the manifest itself (`leanRound` in `formalStatus.ts`).
+ * logs and proves their order cannot matter; round 5 (6b32f3f) follows P26's
+ * fifth round and proves that transfers at one log position share their
+ * contract, sender and recipient. Which one a manifest records is read from
+ * the manifest itself (`leanRound` in `formalStatus.ts`).
  */
 
 /** A round of the model the page can show. */
-export type LeanRound = 3 | 4;
+export type LeanRound = 3 | 4 | 5;
 
-/** Round 4 of the model, from its commit in 6529's design repository. */
-export const LEAN_ROUND_4 = {
+/** A round of the model, from its commit in 6529's design repository. */
+interface LeanRoundInfo {
+  readonly round: LeanRound;
+  readonly commit: string;
+  readonly date: string;
+  /** A theorem the round added: a manifest proving it is this round or later. */
+  readonly theorem: string;
+}
+
+export const LEAN_ROUND_4: LeanRoundInfo = {
+  round: 4,
   commit: "f854661",
   date: "2026-10-15",
-  /** A theorem round 4 added: a manifest proving it is round 4 or later. */
   theorem: "computeCycleFromSource_perm",
-} as const;
+};
+
+/**
+ * Round 5 (6529chain 6b32f3f, 2026-10-16 01:24 UTC), which follows P26
+ * f840096. Its proof manifest is committed with the model
+ * (`design/tdh-lean/proof-manifest.json`); the figures below are that
+ * manifest's, shown until the feed publishes it.
+ */
+export const LEAN_ROUND_5 = {
+  round: 5,
+  commit: "6b32f3f",
+  date: "2026-10-16",
+  theorem: "canonicalTransfers_oneLog",
+  specCommit: "f840096",
+  vectorsPassed: 89,
+  vectorsTotal: 89,
+  vectorChecks: 1_253,
+  theoremsTdh: 55,
+  theoremsP53: 30,
+  facts: 46,
+} as const satisfies LeanRoundInfo & Record<string, unknown>;
+
+/** The newest round of the model the page knows. */
+export const LEAN_LATEST_ROUND: LeanRound = LEAN_ROUND_5.round;
 
 export interface LeanRuns {
-  /** The README commit whose "Results, 2026-10-15" these figures are. */
+  /** The README commit whose "Results" section these figures are. */
   readonly readmeCommit: string;
   /** The raw logs of the 2026-10-11 cycle the run reads. */
   readonly rawLogs: number;
@@ -45,7 +78,7 @@ export interface LeanRuns {
 
 /**
  * Results of runs the manifest does not repeat, from the model's README:
- * round 3 at 6529chain 237c997, round 4 at f854661.
+ * round 3 at 6529chain 237c997, round 4 at f854661, round 5 at 6b32f3f.
  */
 export const LEAN_RUNS: Readonly<Record<LeanRound, LeanRuns>> = {
   3: {
@@ -73,6 +106,21 @@ export const LEAN_RUNS: Readonly<Record<LeanRound, LeanRuns>> = {
     // 195,510 (seed 6529) + 986,678 (seed 7).
     randomChecks: 1_182_188,
   },
+  5: {
+    readmeCommit: "6b32f3f",
+    // All 414,254 logs read at their types; the 414,007 through B decoded.
+    rawLogs: 414_254,
+    fullDayRecords: 21_410,
+    fullDayTotal: 2_061_888_816,
+    // Under 3 s to read and parse with the strict parser, about 17 s to
+    // type-check, select, decode and compute.
+    fullDaySeconds: [20, 20],
+    randomInputs: 6_000,
+    randomVectors: 12_000,
+    // 179,818 (seed 6529) + 947,332 (seed 7), against the Python reference
+    // at f840096; all 40 + 210 files that are no vector fail.
+    randomChecks: 1_127_150,
+  },
 };
 
 /** A statement's status as the page shows it. */
@@ -84,8 +132,8 @@ export type StatementStatus =
   | "deferred"
   | "unverified";
 
-/** What a statement changes in round 4 of the model. */
-type RoundFourChanges = Partial<
+/** What a statement changes in a later round of the model. */
+type RoundChanges = Partial<
   Pick<LeanStatement, "copy" | "refs" | "proved" | "deferred" | "file" | "lean">
 >;
 
@@ -95,9 +143,16 @@ export interface LeanStatement {
   readonly copy?: string;
   /** The rounds of the model the statement is about; every round if unset. */
   readonly rounds?: readonly LeanRound[];
-  /** Its entries and wording in round 4, where they differ. */
-  readonly round4?: RoundFourChanges;
+  /** Its entries and wording from round 4 on, where they differ. */
+  readonly round4?: RoundChanges;
+  /** Its entries and wording in round 5, on top of round 4's. */
+  readonly round5?: RoundChanges;
   readonly group: "p26" | "p53";
+  /**
+   * `lemma` for a statement about the model's own representation rather
+   * than a property of the rule; the page does not count it as a property.
+   */
+  readonly kind?: "property" | "lemma";
   readonly refs: readonly string[];
   /** The status the statement claims, once the manifest confirms it. */
   readonly status: Exclude<StatementStatus, "unverified">;
@@ -276,6 +331,38 @@ export const LEAN_STATEMENTS: readonly LeanStatement[] = [
     (he : src₁.delegationEvents.Perm src₂.delegationEvents) :
     (computeCycleFromSource p v src₁).toOption = (computeCycleFromSource p v src₂).toOption`,
     },
+    round5: {
+      copy: "orderOneLog",
+      proved: [
+        "computeCycleFromSource_perm",
+        "decode_perm",
+        "decodeLogs_perm",
+        "mapM_perm",
+        "checkLogTypes_perm",
+        "checkLogPositions_perm",
+        "logBlocks_perm",
+        "checkSelected_perm",
+        "checkRawOrDecoded_perm",
+        "computeCycle_perm",
+        "canonicalTransfers_perm",
+        "checkPositions_perm",
+        "checkInputTypes_perm",
+        "keptEvents_perm",
+        "canonicalTransfers_oneLog",
+        "oneLog_of_neighbours",
+      ],
+      deferred: ["4.error-names", "4.maps-fixed"],
+      lean: `theorem computeCycleFromSource_perm (p : Params) (v : Variant) (src₁ src₂ : CycleSource)
+    (hB : src₁.cutoffBlock = src₂.cutoffBlock) (hT : src₁.cutoffTime = src₂.cutoffTime)
+    (hH : src₁.headers = src₂.headers) (hC : src₁.claimTotalMax = src₂.claimTotalMax)
+    (hl : src₁.logs.Perm src₂.logs) (ht : src₁.transfers.Perm src₂.transfers)
+    (he : src₁.delegationEvents.Perm src₂.delegationEvents) :
+    (computeCycleFromSource p v src₁).toOption = (computeCycleFromSource p v src₂).toOption
+
+theorem canonicalTransfers_oneLog (input : CycleInput) (out : Array Transfer)
+    (h : canonicalTransfers input = .ok out) :
+    ∀ a ∈ out.toList, ∀ b ∈ out.toList, a.logPart.1 = b.logPart.1 → a.logPart.2 = b.logPart.2`,
+    },
     file: "Tdh/Proofs/Order.lean",
     lean: `theorem computeCycle_perm (p : Params) (v : Variant) (input : CycleInput)
     (ts : List Transfer) (es : List DelegationEvent) (is : List Position)
@@ -287,7 +374,7 @@ export const LEAN_STATEMENTS: readonly LeanStatement[] = [
   {
     id: "rawLogs",
     group: "p26",
-    rounds: [4],
+    rounds: [4, 5],
     refs: ["P26 §3.1", "P26 §3.2", "P26 §4.2", "P26 §6.1", "P26 §10"],
     status: "proved",
     proved: [
@@ -319,6 +406,7 @@ theorem computeCycleFromSource_typed (p : Params) (v : Variant) (src : CycleSour
   {
     id: "lifo",
     group: "p26",
+    kind: "lemma",
     refs: ["P26 §7.1"],
     status: "proved",
     proved: ["Stack.toList_push", "Stack.takeLast_some", "Stack.takeLast_none"],
@@ -483,11 +571,11 @@ theorem pruning_keeps_exclusions (evs : List Event) (ht : Timed evs) (c : Nat) (
 export function statementsFor(round: LeanRound): readonly LeanStatement[] {
   return LEAN_STATEMENTS.filter(
     (statement) => statement.rounds?.includes(round) ?? true
-  ).map((statement) =>
-    round === 4 && statement.round4
-      ? { ...statement, ...statement.round4 }
-      : statement
-  );
+  ).map((statement) => ({
+    ...statement,
+    ...(round >= 4 ? statement.round4 : undefined),
+    ...(round >= 5 ? statement.round5 : undefined),
+  }));
 }
 
 /** The definitions the netting theorem's hypotheses use, verbatim. */
@@ -513,7 +601,7 @@ export const FIRST_RULE_CASES = [
   { id: "E", first: [100, 20], current: [100, 100] },
 ] as const;
 
-export interface ModelModule {
+interface ModelModule {
   readonly module: string;
   /** Message key suffix: `network.tdh.formal.module.<key>`. */
   readonly key: string;
@@ -522,7 +610,7 @@ export interface ModelModule {
 }
 
 /** The model's files and the P26 sections they cover (README, "Layout"). */
-export const MODEL_MODULES: readonly ModelModule[] = [
+const MODEL_MODULES: readonly ModelModule[] = [
   { module: "Tdh.Basic, Tdh.Binary64", key: "basic", section: "§1" },
   {
     module: "Tdh.Registry, Tdh.Keccak, Tdh.RegistryHash",
@@ -539,13 +627,13 @@ export const MODEL_MODULES: readonly ModelModule[] = [
     module: "Tdh.Inputs",
     key: "inputsTyped",
     section: "§2, §3, §6.1",
-    rounds: [4],
+    rounds: [4, 5],
   },
   {
     module: "Tdh.Logs",
     key: "logs",
     section: "§3.1, §3.2, §4.2, §6.1",
-    rounds: [4],
+    rounds: [4, 5],
   },
   { module: "Tdh.Cutoff", key: "cutoff", section: "§4" },
   { module: "Tdh.Eligibility", key: "eligibility", section: "§5" },

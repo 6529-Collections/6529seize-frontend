@@ -1,29 +1,41 @@
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import type { LeanRound } from "../formal/leanResults";
 import TdhDisclosure from "../shared/TdhDisclosure";
+import TdhStatusPill from "../shared/TdhStatusPill";
 import { TDH_SERIES } from "../shared/tdhStyles";
 
-export const PROGRAMS = [
-  { key: "rust", series: "rust", tone: "now" },
-  { key: "rustReference", series: "rust", tone: "now" },
-  { key: "programB", series: "programB", tone: "later" },
-  { key: "python", series: "python", tone: "now" },
-  { key: "lean", series: "lean", tone: "later" },
-  { key: "backend", series: "live", tone: "test" },
+const PROGRAMS = [
+  { key: "rust", series: "rust", pill: "inDailyRun" },
+  { key: "rustReference", series: "rust", pill: "followsLatest" },
+  { key: "programB", series: "programB", pill: "builtNotInValidator" },
+  { key: "python", series: "python", pill: "inDailyRun" },
+  { key: "lean", series: "lean", pill: "proposal" },
+  { key: "backend", series: "live", pill: "underTest" },
 ] as const;
 
 type ProgramKey = (typeof PROGRAMS)[number]["key"];
 
 /** The Lean model's vector run, from its proof manifest. */
-export interface LeanVectorRun {
+interface LeanVectorRun {
   readonly passed: number;
   readonly total: number;
   readonly checks: number;
   /** The P26 commit the model's build follows, short. */
   readonly spec: string;
-  /** Whether the build is round 4 or later, which starts from raw logs. */
-  readonly fromRawLogs: boolean;
+  /** The round of the model the published manifest records. */
+  readonly round: LeanRound;
+  /**
+   * The newest round's own vector run, when the published manifest records
+   * an earlier round: its passed and total, the P26 commit, its commit.
+   */
+  readonly newer: {
+    readonly passed: number;
+    readonly total: number;
+    readonly spec: string;
+    readonly commit: string;
+  } | null;
 }
 
 const ACCENT: Record<keyof typeof TDH_SERIES, string> = {
@@ -37,13 +49,14 @@ const ACCENT: Record<keyof typeof TDH_SERIES, string> = {
   nextgen: "tw-border-t-teal-400",
 };
 
-const STATUS_DOT = {
-  now: "tw-bg-success",
-  later: "tw-bg-primary-400",
-  test: "tw-bg-amber-400",
-} as const;
-
 const FACTS = ["language", "conformance", "speed"] as const;
+
+/** The Lean model's time for the whole day, by the round of its build. */
+const LEAN_SPEED: Record<LeanRound, MessageKey> = {
+  3: "network.tdh.impl.lean.speed",
+  4: "network.tdh.impl.lean.speedRaw",
+  5: "network.tdh.impl.lean.speedRound5",
+};
 
 function text(
   locale: SupportedLocale,
@@ -52,15 +65,23 @@ function text(
   lean: LeanVectorRun
 ) {
   if (program === "lean" && part === "conformance") {
-    return t(locale, "network.tdh.impl.lean.conformance", {
+    const published = t(locale, "network.tdh.impl.lean.conformance", {
       passed: formatInteger(locale, lean.passed),
       total: formatInteger(locale, lean.total),
       checks: formatInteger(locale, lean.checks),
       spec: lean.spec,
     });
+    return lean.newer === null
+      ? published
+      : `${published}. ${t(locale, "network.tdh.impl.lean.conformanceNewer", {
+          passed: formatInteger(locale, lean.newer.passed),
+          total: formatInteger(locale, lean.newer.total),
+          spec: lean.newer.spec,
+          commit: lean.newer.commit,
+        })}`;
   }
-  if (program === "lean" && part === "speed" && lean.fromRawLogs) {
-    return t(locale, "network.tdh.impl.lean.speedRaw");
+  if (program === "lean" && part === "speed") {
+    return t(locale, LEAN_SPEED[lean.round]);
   }
   return t(locale, `network.tdh.impl.${program}.${part}` as MessageKey);
 }
@@ -68,8 +89,8 @@ function text(
 /**
  * The programs as six equal cards, in the series colours the diagrams use:
  * what each is, its status, and three facts; how it was written and where it
- * runs open below. The status uses the same dot-and-word pill as every TDH
- * status, so colour is never the only signal.
+ * runs open below. The status is the shared TDH status pill, in the one
+ * palette every TDH page uses, so colour is never the only signal.
  */
 export default function ProgramCards({
   locale,
@@ -95,12 +116,8 @@ export default function ProgramCards({
           <p className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-300">
             {text(locale, program.key, "role", lean)}
           </p>
-          <p className="tw-m-0 tw-mt-3 tw-inline-flex tw-w-fit tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-medium tw-text-iron-100">
-            <span
-              aria-hidden="true"
-              className={`tw-size-2 tw-shrink-0 tw-rounded-full ${STATUS_DOT[program.tone]}`}
-            />
-            {text(locale, program.key, "status", lean)}
+          <p className="tw-m-0 tw-mt-3">
+            <TdhStatusPill pill={program.pill} locale={locale} size="sm" />
           </p>
           <dl className="tw-m-0 tw-mt-4 tw-space-y-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4">
             {FACTS.map((fact) => (

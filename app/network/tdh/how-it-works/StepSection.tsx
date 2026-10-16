@@ -7,7 +7,10 @@ import TdhHeading from "../shared/TdhHeading";
 import TdhRuleBlock from "../shared/TdhRuleBlock";
 import TdhSource from "../shared/TdhSource";
 
-/** One numbered step of How TDH is calculated. */
+/**
+ * One numbered step of How TDH is calculated. The step's sources sit on one
+ * line at its end, not beside every paragraph, so the prose reads as prose.
+ */
 export default function StepSection({
   locale,
   step,
@@ -15,6 +18,7 @@ export default function StepSection({
   pills,
   rule,
   ruleSource,
+  sources = [],
   children,
 }: {
   readonly locale: SupportedLocale;
@@ -23,6 +27,8 @@ export default function StepSection({
   readonly pills?: ReactNode;
   readonly rule?: string;
   readonly ruleSource?: string;
+  /** Every source the step's prose rests on, in order of first use. */
+  readonly sources?: readonly string[];
   readonly children: ReactNode;
 }) {
   const id = `step-${step}`;
@@ -41,12 +47,20 @@ export default function StepSection({
         id={id}
         title={title}
         locale={locale}
-        className="tw-mt-1 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[1.75rem]"
+        className="tw-mt-1 tw-hyphens-auto tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
       />
       {pills !== undefined && (
         <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-2">{pills}</div>
       )}
       <div className="tw-mt-4 tw-max-w-3xl tw-space-y-4">{children}</div>
+      {sources.length > 0 && (
+        <p className="tw-m-0 tw-mt-4 tw-flex tw-max-w-3xl tw-flex-wrap tw-items-center tw-gap-x-1 tw-gap-y-1 tw-text-xs tw-text-iron-400">
+          <span className="tw-mr-1 tw-font-medium tw-text-iron-300">
+            {t(locale, "network.tdh.explainer.sources.label")}
+          </span>
+          <TdhSource refs={sources} locale={locale} block />
+        </p>
+      )}
       {rule && (
         <TdhDisclosure
           className="tw-mt-5 tw-max-w-3xl"
@@ -66,39 +80,21 @@ export default function StepSection({
   );
 }
 
-/**
- * A paragraph of prose with its source chips. On wide screens the chips sit
- * in the right margin beside the paragraph, like margin notes; on narrower
- * ones they follow it on a row of their own, so a chip never ends up alone
- * on a line of text.
- */
+/** A paragraph of a step's prose; its sources are on the step's line. */
 export function Cited({
-  locale,
-  refs,
   children,
   muted = false,
 }: {
-  readonly locale: SupportedLocale;
-  readonly refs: readonly string[];
+  readonly locale?: SupportedLocale;
   readonly children: ReactNode;
   readonly muted?: boolean;
 }) {
   return (
-    <div className="xl:-tw-mr-[8rem] xl:tw-grid xl:tw-grid-cols-[minmax(0,1fr)_6.5rem] xl:tw-gap-6">
-      <p
-        className={`tw-m-0 tw-text-[15px] tw-leading-7 ${muted ? "tw-text-iron-400" : "tw-text-iron-200"}`}
-      >
-        {children}
-      </p>
-      {refs.length > 0 && (
-        <TdhSource
-          refs={refs}
-          locale={locale}
-          block
-          className="tw-mt-1 xl:tw-mt-1 xl:tw-flex-col xl:tw-items-start"
-        />
-      )}
-    </div>
+    <p
+      className={`tw-m-0 tw-text-[15px] tw-leading-7 ${muted ? "tw-text-iron-400" : "tw-text-iron-200"}`}
+    >
+      {children}
+    </p>
   );
 }
 

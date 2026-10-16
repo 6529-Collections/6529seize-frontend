@@ -125,24 +125,27 @@ count[to] += amount`;
 
 /** P26 §7.1: transaction netting (D131), every transaction, sinks included. */
 export const RULE_NETTING = `A transaction is the set of transfers with one (block, txIndex).
-For each transaction and (contract, tokenId), M = its transfers with
-amount > 0 and from != to. Every non-empty M is netted.
+For each transaction and (contract, tokenId), S = its transfers with
+amount > 0 and from != to. Every non-empty S is netted.
+(P26 names this set M; here it is S, because M is the cycle boundary.)
 
-- For every address w in M, a sink included,
-  net(w) = the amount w receives in M - the amount it sends in M.
+- For every address w in S, a sink included,
+  net(w) = the amount w receives in S - the amount it sends in S.
 - Sources: the w with net(w) < 0, each with amount -net(w).
   Destinations: the w with net(w) > 0, each with amount net(w).
   Both lists are in ascending address order.
 - Pairing: repeatedly emit (head source, head destination, k), where k
   is the smaller of their remaining amounts, subtract k from both,
   and drop any head that reaches 0.
-- M is replaced by the emitted pairs, in order: each a transfer of k
+- S is replaced by the emitted pairs, in order: each a transfer of k
   copies with the transaction's block, timestamp and txHash, at the
-  position of M's first transfer.
+  position of S's first transfer.
 - Every |net(w)| MUST be below 2^64.`;
 
 /** P26 §7.1: the replay, after netting, in canonical order. */
-export const RULE_REPLAY = `if from = to or amount = 0: skip
+export const RULE_REPLAY = `# SINKS: the zero address and 0x…dead (§3.4); cluster(w): the identity
+# of wallet w (§6.3); firstgm_burn_tx: FirstGM's recorded burn (§10)
+if from = to or amount = 0: skip
 moved = none
 if from not in SINKS:
     moved = last \`amount\` entries of stack[from], in order; remove them
@@ -168,19 +171,6 @@ identity base:   the sum of wallet bases, never recomputed from the merged raw
 beta and final:  computed for each record; an identity's are not the sums
                  of its wallets' (e.g. two wallets at 102 each, identity 208)
 totals (§8.5):   sums over identity records, never over wallet records`;
-
-/** P26 §7.1 and §7.2 in order: underflow test, netting, replay, values. */
-export const RULE_STACKS = `# 1. The underflow test, before netting, in canonical order
-${RULE_UNDERFLOW}
-
-# 2. Transaction netting (D131)
-${RULE_NETTING}
-
-# 3. The replay, after netting, in canonical order
-${RULE_REPLAY}
-
-# 4. Per-token values (§7.2)
-${RULE_TOKEN_VALUES}`;
 
 export const RULE_RATE = "RATE(n, d) = HALFUP( B64( B64(n / d) * 100 ) )";
 

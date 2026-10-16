@@ -72,6 +72,9 @@ describe("How TDH is calculated: worked examples", () => {
       base: 1_271,
       betaCents: 102,
       final: 1_296,
+      // What moves it: one full set instead of the Gradient, 1.80.
+      fullSetBetaCents: 180,
+      fullSetFinal: 2_288,
     });
   });
 

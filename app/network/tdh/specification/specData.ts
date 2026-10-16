@@ -216,10 +216,10 @@ export const PARAMETERS = [
   },
 ] as const;
 
-export type DeviationDecision = "adopted" | "dev2" | "kept" | "dev13";
+type DeviationDecision = "adopted" | "dev2" | "kept" | "dev13";
 export type DeviationGroup = "changes" | "kept" | "other";
 
-export interface Deviation {
+interface Deviation {
   readonly id: number;
   readonly decision: DeviationDecision;
   readonly group: DeviationGroup;

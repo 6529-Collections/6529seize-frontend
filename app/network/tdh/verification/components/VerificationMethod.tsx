@@ -9,6 +9,7 @@ import {
   TdhSvg,
   WIDE_WIDTH,
 } from "../../shared/TdhSvg";
+import { svgBoxWidth } from "../../shared/svgText";
 
 type FlowSeries = keyof typeof TDH_SERIES | "neutral";
 type FlowBox = {
@@ -31,6 +32,8 @@ const FLOW_DOT: Record<FlowSeries, string> = {
 };
 
 const FLOW_EDGE = "tw-fill-none tw-stroke-iron-400";
+/** Where a node's label starts: after its series dot. */
+const NODE_TEXT_X = 26;
 
 function FlowNode({
   box,
@@ -60,7 +63,7 @@ function FlowNode({
         className={FLOW_DOT[series]}
       />
       <text
-        x={box.x + 26}
+        x={box.x + NODE_TEXT_X}
         y={box.y + box.h / 2 + size * 0.36}
         fontSize={size}
         fontWeight={500}
@@ -113,27 +116,50 @@ function GroupLabel({
   );
 }
 
-/** Wide: our computation and the object under test, converging on Compare. */
+/** A node's width: its label at 14 units, after the dot, with padding. */
+function nodeWidth(labels: readonly string[]): number {
+  return (
+    svgBoxWidth(
+      labels.map((text) => [text, 14, 500] as const),
+      0
+    ) +
+    NODE_TEXT_X +
+    16
+  );
+}
+
+/**
+ * Wide: our computation and the object under test, converging on Compare.
+ * Each column is as wide as its longest label in the site font, with room
+ * on both sides, so no label touches its box or an arrow.
+ */
 function FlowWide({ label }: { readonly label: (key: string) => string }) {
   const arrow = "tdh-flow-wide-arrow";
-  const ethereum: FlowBox = { x: 0, y: 26, w: 140, h: 40 };
-  const rust: FlowBox = { x: 180, y: 26, w: 160, h: 40 };
-  const python: FlowBox = { x: 180, y: 110, w: 160, h: 40 };
-  const backend: FlowBox = { x: 0, y: 206, w: 140, h: 40 };
-  const arweave: FlowBox = { x: 180, y: 206, w: 160, h: 40 };
-  const compare: FlowBox = { x: 396, y: 110, w: 164, h: 40 };
-  const published: FlowBox = { x: 396, y: 186, w: 164, h: 40 };
-  const page: FlowBox = { x: 396, y: 262, w: 164, h: 40 };
-  const bus = 368;
+  const w1 = nodeWidth([label("ethereum"), label("backend")]);
+  const w2 = nodeWidth([label("rust"), label("python"), label("arweave")]);
+  const w3 = nodeWidth([label("compare"), label("published"), label("page")]);
+  const x2 = w1 + 36;
+  const bus = x2 + w2 + 24;
+  const x3 = bus + 28;
+  const width = Math.max(WIDE_WIDTH, x3 + w3);
+  const ethereum: FlowBox = { x: 0, y: 26, w: w1, h: 40 };
+  const rust: FlowBox = { x: x2, y: 26, w: w2, h: 40 };
+  const python: FlowBox = { x: x2, y: 110, w: w2, h: 40 };
+  const backend: FlowBox = { x: 0, y: 206, w: w1, h: 40 };
+  const arweave: FlowBox = { x: x2, y: 206, w: w2, h: 40 };
+  const compare: FlowBox = { x: x3, y: 110, w: w3, h: 40 };
+  const published: FlowBox = { x: x3, y: 186, w: w3, h: 40 };
+  const page: FlowBox = { x: x3, y: 262, w: w3, h: 40 };
   const into = compare.x - 2;
+  const down = compare.x + compare.w / 2;
   return (
     <TdhSvg
       id="tdh-flow-wide"
-      width={WIDE_WIDTH}
+      width={width}
       height={304}
       title={label("title")}
       desc={label("text")}
-      maxWidth={720}
+      maxWidth={640}
     >
       <defs>
         <FlowArrow id={arrow} />
@@ -189,12 +215,12 @@ function FlowWide({ label }: { readonly label: (key: string) => string }) {
         markerEnd={`url(#${arrow})`}
       />
       <path
-        d={`M478,${compare.y + compare.h} V${published.y - 2}`}
+        d={`M${down},${compare.y + compare.h} V${published.y - 2}`}
         className={FLOW_EDGE}
         markerEnd={`url(#${arrow})`}
       />
       <path
-        d={`M478,${published.y + published.h} V${page.y - 2}`}
+        d={`M${down},${published.y + published.h} V${page.y - 2}`}
         className={FLOW_EDGE}
         markerEnd={`url(#${arrow})`}
       />
@@ -353,7 +379,7 @@ function FlowNarrow({ label }: { readonly label: (key: string) => string }) {
  * publishes the files this page reads. A column on phones, two lanes from
  * `md`.
  */
-export function DailyFlow({ locale }: { readonly locale: SupportedLocale }) {
+function DailyFlow({ locale }: { readonly locale: SupportedLocale }) {
   const label = (key: string) =>
     t(locale, `network.tdh.verify.flow.${key}` as MessageKey);
   return (
@@ -397,7 +423,7 @@ export default function VerificationMethod({
         id="method"
         title={t(locale, "network.tdh.verify.method.heading")}
         locale={locale}
-        className="tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
+        className="tw-hyphens-auto tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
       />
       <div className="tw-mt-4 tw-space-y-8">
         <div className="tw-max-w-3xl">

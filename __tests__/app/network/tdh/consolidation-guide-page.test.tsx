@@ -71,7 +71,7 @@ describe("TDHConsolidationPage (collector's guide)", () => {
 
     expect(
       screen.getByRole("link", {
-        name: /Consolidation design and signing-order simulator/,
+        name: /^How consolidation works(?! in TDH-v1)/,
       })
     ).toHaveAttribute("href", "/network/tdh/consolidation/design");
   });

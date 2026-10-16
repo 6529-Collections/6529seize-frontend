@@ -11,7 +11,6 @@ import {
   TdhSvg,
   WIDE_WIDTH,
 } from "../shared/TdhSvg";
-import { householdScenario } from "./examples";
 
 const H = EXAMPLE_NETWORK.largestEdition;
 
@@ -630,107 +629,6 @@ export function IdentityGraphDiagram({
           {t(locale, "network.tdh.how.s10.linksNote")}
         </span>
       </figcaption>
-    </figure>
-  );
-}
-
-/**
- * Diagram 7: two wallets feeding one identity, with per-card bases (step
- * 12). Built in HTML, so it reflows: side by side on wide screens, stacked
- * on phones.
- */
-export function HouseholdDiagram({
-  locale,
-}: {
-  readonly locale: SupportedLocale;
-}) {
-  const wallets = householdScenario("wallets").records;
-  const identity = householdScenario("identity").records[0];
-  const card = (key: string) =>
-    t(locale, `network.tdh.how.s12.card.${key}` as MessageKey);
-  return (
-    <figure className="tw-m-0 tw-mt-4">
-      <figcaption className="tw-sr-only">
-        {t(locale, "network.tdh.how.s12.diagramDesc")}
-      </figcaption>
-      <div
-        aria-hidden="true"
-        className="tw-grid tw-items-center tw-gap-3 md:tw-grid-cols-[minmax(0,1fr)_1.5rem_minmax(0,1.1fr)]"
-      >
-        <div className="tw-grid tw-gap-2">
-          {wallets.map((record) => (
-            <div
-              key={record.label}
-              className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3"
-            >
-              <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-300">
-                {t(
-                  locale,
-                  record.label === "A"
-                    ? "network.tdh.how.s12.walletA"
-                    : "network.tdh.how.s12.walletB"
-                )}
-              </p>
-              <ul className="tw-m-0 tw-mt-1.5 tw-list-none tw-space-y-1 tw-p-0 tw-text-[13px]">
-                {record.rows.map((row) => (
-                  <li
-                    key={row.card}
-                    className="tw-flex tw-justify-between tw-gap-3 tw-text-iron-200"
-                  >
-                    <span>{card(row.card)}</span>
-                    <span className="tw-tabular-nums tw-text-iron-50">
-                      {formatInteger(locale, row.base)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <span className="tw-flex tw-justify-center tw-text-iron-400">
-          <ArrowDownIcon className="tw-size-5 md:tw-hidden" />
-          <ArrowRightIcon className="tw-hidden tw-size-5 md:tw-block" />
-        </span>
-        <div className="tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/60 tw-bg-primary-500/10 tw-px-4 tw-py-3">
-          <p className="tw-m-0 tw-flex tw-justify-between tw-gap-3 tw-text-xs tw-font-medium tw-text-primary-300">
-            <span>
-              {t(locale, "network.tdh.how.s12.identity")} ×{" "}
-              {formatNumber(locale, (identity?.betaCents ?? 100) / 100, {
-                minimumFractionDigits: 2,
-              })}
-            </span>
-            <span>
-              {t(locale, "network.tdh.how.s12.base")} →{" "}
-              {t(locale, "network.tdh.how.s12.final")}
-            </span>
-          </p>
-          <ul className="tw-m-0 tw-mt-1.5 tw-list-none tw-space-y-1 tw-p-0 tw-text-[13px]">
-            {identity?.rows.map((row) => (
-              <li
-                key={row.card}
-                className="tw-flex tw-justify-between tw-gap-3 tw-text-iron-200"
-              >
-                <span>{card(row.card)}</span>
-                <span className="tw-tabular-nums">
-                  <span className="tw-text-iron-400">
-                    {formatInteger(locale, row.base)}
-                  </span>{" "}
-                  →{" "}
-                  <span className="tw-font-semibold tw-text-iron-50">
-                    {formatInteger(locale, row.final)}
-                  </span>
-                </span>
-              </li>
-            ))}
-          </ul>
-          <p className="tw-m-0 tw-mt-2 tw-flex tw-justify-between tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-primary-400/30 tw-pt-2 tw-text-sm tw-font-semibold tw-text-iron-50">
-            <span>{t(locale, "network.tdh.how.s12.total")}</span>
-            <span className="tw-tabular-nums">
-              {formatInteger(locale, identity?.final ?? 0)}
-            </span>
-          </p>
-        </div>
-      </div>
     </figure>
   );
 }

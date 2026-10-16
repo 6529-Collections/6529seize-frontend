@@ -1,7 +1,6 @@
 "use client";
 
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
-import Link from "next/link";
 import {
   NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
   NETWORK_REFERENCE_PAGE_CLASSES,
@@ -9,81 +8,33 @@ import {
 } from "@/components/network/networkPageLayoutClasses";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatDate, formatInteger, formatNumber } from "@/i18n/format";
+import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
-import { t, type MessageKey } from "@/i18n/messages";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import TdhPager from "../shared/TdhPager";
 import TdhSource from "../shared/TdhSource";
 import TdhSubnav from "../shared/TdhSubnav";
-import { TDH_LINK } from "../shared/tdhStyles";
-
-type HistoricBoostsMessageKey = Extract<
-  MessageKey,
-  `network.tdhHistoric.${string}`
->;
-
-interface HistoricRule {
-  readonly id: string;
-  readonly version: string;
-  readonly startDate: number;
-  readonly startDateIso: string;
-  readonly endDate: number;
-  readonly endDateIso: string;
-  readonly completeSetMultiplier: number;
-  readonly maxSeason: number;
-  readonly categoryBAppliesToTotal: boolean;
-}
-
-const HISTORIC_RULES: readonly HistoricRule[] = [
-  {
-    id: "tdh-1-3",
-    version: "1.3",
-    startDate: Date.UTC(2024, 2, 29),
-    startDateIso: "2024-03-29",
-    endDate: Date.UTC(2025, 9, 9),
-    endDateIso: "2025-10-09",
-    completeSetMultiplier: 1.55,
-    maxSeason: 11,
-    categoryBAppliesToTotal: true,
-  },
-  {
-    id: "tdh-1-2",
-    version: "1.2",
-    startDate: Date.UTC(2023, 11, 30),
-    startDateIso: "2023-12-30",
-    endDate: Date.UTC(2024, 2, 28),
-    endDateIso: "2024-03-28",
-    completeSetMultiplier: 1.25,
-    maxSeason: 5,
-    categoryBAppliesToTotal: false,
-  },
-  {
-    id: "tdh-1-1",
-    version: "1.1",
-    startDate: Date.UTC(2023, 6, 14),
-    startDateIso: "2023-07-14",
-    endDate: Date.UTC(2023, 11, 29),
-    endDateIso: "2023-12-29",
-    completeSetMultiplier: 1.2,
-    maxSeason: 4,
-    categoryBAppliesToTotal: false,
-  },
-] as const;
-
-const TABLE_HEADER_CLASS =
-  "tw-border-0 tw-px-3 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-iron-400 first:tw-pl-4 sm:first:tw-pl-6 last:tw-pr-4 sm:last:tw-pr-6";
-const TABLE_CELL_CLASS =
-  "tw-border-0 tw-px-3 tw-py-4 tw-text-left tw-text-sm tw-leading-5 tw-text-iron-400 first:tw-pl-4 sm:first:tw-pl-6 last:tw-pr-4 sm:last:tw-pr-6";
-const DETAIL_PANEL_CLASS =
-  "tw-rounded-lg tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/45 tw-p-4";
-
-const m = (
-  locale: SupportedLocale,
-  key: HistoricBoostsMessageKey,
-  params: Parameters<typeof t>[2] = {}
-) => t(locale, key, params);
+import { TDH_H1, TDH_LEDE } from "../shared/tdhStyles";
+import {
+  BoostTimeline,
+  CurrentRuleCard,
+  CurrentRuleRow,
+} from "./HistoricBoostsCurrent";
+import {
+  DETAIL_PANEL_CLASS,
+  HISTORIC_RULES,
+  MobileSummaryMetric,
+  TABLE_CELL_CLASS,
+  TABLE_HEADER_CLASS,
+  formatGradientBonus,
+  formatMultiplier,
+  formatSeasonRange,
+  formatShortDate,
+  formatVersionLabel,
+  m,
+  type HistoricRule,
+} from "./historicBoostsShared";
 
 export default function TDHHistoricBoostsPage() {
   const locale = useBrowserLocale();
@@ -116,10 +67,10 @@ export default function TDHHistoricBoostsPage() {
       <article className="tw-mx-auto tw-max-w-6xl tw-pb-8">
         <TdhSubnav current="/network/tdh/historic-boosts" locale={locale} />
         <header className="tw-pb-8 tw-pt-5 sm:tw-pb-10 sm:tw-pt-8">
-          <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl">
+          <h1 className={TDH_H1}>
             {m(locale, "network.tdhHistoric.hero.title")}
           </h1>
-          <p className="tw-mb-0 tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-200">
+          <p className={`tw-mb-0 tw-mt-4 tw-max-w-3xl ${TDH_LEDE}`}>
             {m(locale, "network.tdhHistoric.hero.intro")}
           </p>
           <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
@@ -143,12 +94,6 @@ export default function TDHHistoricBoostsPage() {
           </div>
 
           <div className="tw-min-w-0 tw-space-y-4">
-            <p className="tw-m-0 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-500/[0.06] tw-px-4 tw-py-3 tw-text-sm tw-leading-6 tw-text-iron-200">
-              {m(locale, "network.tdhHistoric.current.body")}{" "}
-              <Link href="/network/tdh#tdh-1-4" className={TDH_LINK}>
-                {m(locale, "network.tdhHistoric.current.link")}
-              </Link>
-            </p>
             <HistoricRulesTable
               expandedRuleIds={expandedRuleIds}
               locale={locale}
@@ -167,92 +112,11 @@ export default function TDHHistoricBoostsPage() {
   );
 }
 
-/** The current schedule's full-set boost on 15 October 2026, and its ceiling. */
-const CURRENT_FULL_SET = { today: 1.8, ceiling: 2 } as const;
-
 /**
- * The full-set boost of each schedule, oldest first, as bars that start at
- * 1.00x, ending with the current schedule: today's value, and the dashed
- * reach to its ceiling once all its seasons pay.
+ * The current schedule, 1.4 (from October 10, 2025): its full-set boost on
+ * the cycle of October 16, 2026 (17 seasons listed, so seasons 1 to 16 pay)
+ * and its ceiling once seasons 1 to 20 all pay.
  */
-function BoostTimeline({ locale }: { readonly locale: SupportedLocale }) {
-  const ordered = [...HISTORIC_RULES].reverse();
-  const max = CURRENT_FULL_SET.ceiling;
-  return (
-    <figure className="tw-m-0 tw-mt-5">
-      <figcaption className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
-        {m(locale, "network.tdhHistoric.timeline.title")}
-      </figcaption>
-      <ol className="tw-m-0 tw-mt-3 tw-list-none tw-space-y-2.5 tw-p-0">
-        {ordered.map((rule) => (
-          <li key={rule.id}>
-            <p className="tw-m-0 tw-flex tw-justify-between tw-gap-3 tw-text-xs tw-text-iron-300">
-              <span>{formatVersionLabel(locale, rule)}</span>
-              <span className="tw-tabular-nums">
-                {formatDate(locale, rule.startDateIso, {
-                  month: "short",
-                  year: "numeric",
-                })}
-              </span>
-            </p>
-            <span className="tw-mt-1 tw-flex tw-items-center tw-gap-2">
-              <span className="tw-h-2 tw-flex-1 tw-overflow-hidden tw-rounded-full tw-bg-iron-800">
-                <span
-                  className="tw-block tw-h-full tw-rounded-full tw-bg-iron-400"
-                  style={{
-                    width: `${((rule.completeSetMultiplier - 1) / (max - 1)) * 100}%`,
-                  }}
-                />
-              </span>
-              <span className="tw-w-12 tw-text-right tw-text-xs tw-tabular-nums tw-text-iron-100">
-                {formatMultiplier(locale, rule.completeSetMultiplier)}
-              </span>
-            </span>
-          </li>
-        ))}
-        <li>
-          <p className="tw-m-0 tw-flex tw-justify-between tw-gap-3 tw-text-xs tw-text-iron-100">
-            <span className="tw-font-medium">
-              {m(locale, "network.tdhHistoric.versionLabel", {
-                version: "1.4",
-              })}{" "}
-              <span className="tw-rounded-full tw-bg-primary-500/15 tw-px-1.5 tw-text-xs tw-text-primary-300">
-                {m(locale, "network.tdhHistoric.timeline.current")}
-              </span>
-            </span>
-            <span className="tw-tabular-nums tw-text-iron-300">
-              {formatDate(locale, "2025-10-10", {
-                month: "short",
-                year: "numeric",
-              })}
-            </span>
-          </p>
-          <span className="tw-mt-1 tw-flex tw-items-center tw-gap-2">
-            <span className="tw-relative tw-h-2 tw-flex-1 tw-overflow-hidden tw-rounded-full tw-bg-iron-800">
-              <span
-                className="tw-absolute tw-inset-y-0 tw-left-0 tw-rounded-full tw-border tw-border-dashed tw-border-primary-400/60"
-                style={{ width: "100%" }}
-              />
-              <span
-                className="tw-absolute tw-inset-y-0 tw-left-0 tw-rounded-full tw-bg-primary-400"
-                style={{
-                  width: `${((CURRENT_FULL_SET.today - 1) / (max - 1)) * 100}%`,
-                }}
-              />
-            </span>
-            <span className="tw-w-12 tw-text-right tw-text-xs tw-font-semibold tw-tabular-nums tw-text-iron-50">
-              {formatMultiplier(locale, CURRENT_FULL_SET.today)}
-            </span>
-          </span>
-        </li>
-      </ol>
-      <p className="tw-m-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-400">
-        {m(locale, "network.tdhHistoric.timeline.note")}
-      </p>
-    </figure>
-  );
-}
-
 function HistoricRulesTable({
   expandedRuleIds,
   locale,
@@ -283,7 +147,10 @@ function HistoricRulesTable({
               >
                 {m(locale, "network.tdhHistoric.table.categoryA")}
               </th>
-              <th className={TABLE_HEADER_CLASS} scope="col">
+              <th
+                className={`${TABLE_HEADER_CLASS} tw-whitespace-nowrap`}
+                scope="col"
+              >
                 {m(locale, "network.tdhHistoric.table.categoryB")}
               </th>
               <th
@@ -299,6 +166,7 @@ function HistoricRulesTable({
               </th>
             </tr>
           </thead>
+          <CurrentRuleRow locale={locale} />
           {HISTORIC_RULES.map((rule, index) => {
             const isExpanded = expandedRuleIds.has(rule.id);
             const detailsId = `${rule.id}-desktop-details`;
@@ -383,6 +251,7 @@ function HistoricRulesMobileCards({
 }) {
   return (
     <div className="tw-grid tw-gap-3 md:tw-grid-cols-2 xl:tw-hidden">
+      <CurrentRuleCard locale={locale} />
       {HISTORIC_RULES.map((rule) => {
         const isExpanded = expandedRuleIds.has(rule.id);
         const detailsId = `${rule.id}-mobile-details`;
@@ -409,12 +278,14 @@ function HistoricRulesMobileCards({
                 </span>
               </span>
               <span className="tw-flex tw-shrink-0 tw-items-center tw-gap-2 tw-text-xs tw-font-medium tw-text-iron-400">
-                {m(
-                  locale,
-                  isExpanded
-                    ? "network.tdhHistoric.details.hide"
-                    : "network.tdhHistoric.details.show"
-                )}
+                <span className="tw-sr-only min-[400px]:tw-not-sr-only">
+                  {m(
+                    locale,
+                    isExpanded
+                      ? "network.tdhHistoric.details.hide"
+                      : "network.tdhHistoric.details.show"
+                  )}
+                </span>
                 <ChevronDownIcon
                   aria-hidden="true"
                   className={`tw-size-4 tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${
@@ -454,29 +325,6 @@ function HistoricRulesMobileCards({
           </article>
         );
       })}
-    </div>
-  );
-}
-
-function MobileSummaryMetric({
-  label,
-  value,
-  valueClassName = "tw-text-iron-300",
-}: {
-  readonly label: string;
-  readonly value: string;
-  readonly valueClassName?: string;
-}) {
-  return (
-    <div className="tw-min-w-0">
-      <dt className="tw-text-balance tw-text-xs tw-leading-4 tw-text-iron-400">
-        {label}
-      </dt>
-      <dd
-        className={`tw-m-0 tw-mt-1 tw-text-sm tw-font-medium tw-tabular-nums tw-leading-5 ${valueClassName}`}
-      >
-        {value}
-      </dd>
     </div>
   );
 }
@@ -705,57 +553,13 @@ function RulePeriod({
     <span className="tw-inline-flex tw-flex-wrap tw-gap-x-1">
       <span className="tw-whitespace-nowrap">
         <time dateTime={rule.startDateIso}>
-          {formatLongDate(locale, rule.startDate)}
+          {formatShortDate(locale, rule.startDate)}
         </time>
-        <span> —</span>
+        <span> –</span>
       </span>
       <time className="tw-whitespace-nowrap" dateTime={rule.endDateIso}>
-        {formatLongDate(locale, rule.endDate)}
+        {formatShortDate(locale, rule.endDate)}
       </time>
     </span>
   );
-}
-
-function formatLongDate(locale: SupportedLocale, date: number): string {
-  return formatDate(locale, date, {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  });
-}
-
-function formatVersionLabel(
-  locale: SupportedLocale,
-  rule: HistoricRule
-): string {
-  return m(locale, "network.tdhHistoric.versionLabel", {
-    version: rule.version,
-  });
-}
-
-function formatSeasonRange(
-  locale: SupportedLocale,
-  rule: HistoricRule
-): string {
-  return m(locale, "network.tdhHistoric.table.seasonRange", {
-    maxSeason: formatInteger(locale, rule.maxSeason),
-  });
-}
-
-/** The archived schedules' Gradient bonus: +0.02 for each, up to 3. */
-function formatGradientBonus(locale: SupportedLocale): string {
-  return m(locale, "network.tdhHistoric.table.gradientValue", {
-    bonus: formatNumber(locale, 0.02, { minimumFractionDigits: 2 }),
-    count: formatInteger(locale, 3),
-  });
-}
-
-function formatMultiplier(locale: SupportedLocale, value: number): string {
-  return t(locale, "network.tdh.value.multiplier", {
-    value: formatNumber(locale, value, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }),
-  });
 }

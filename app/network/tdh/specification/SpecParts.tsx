@@ -11,11 +11,14 @@ export function SpecSection({
   title,
   locale,
   children,
+  wide = false,
 }: {
   readonly id: string;
   readonly title: string;
   readonly locale: SupportedLocale;
   readonly children: ReactNode;
+  /** Content across the whole column, for a table that needs the room. */
+  readonly wide?: boolean;
 }) {
   return (
     <section
@@ -27,9 +30,11 @@ export function SpecSection({
         id={id}
         title={title}
         locale={locale}
-        className="tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[1.75rem]"
+        className="tw-hyphens-auto tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
       />
-      <div className="tw-mt-4 tw-max-w-3xl tw-space-y-5">{children}</div>
+      <div className={`tw-mt-4 tw-space-y-5 ${wide ? "" : "tw-max-w-3xl"}`}>
+        {children}
+      </div>
     </section>
   );
 }
@@ -87,6 +92,7 @@ export function Rule({
   source,
   title,
   condensed = false,
+  aligned = false,
 }: {
   readonly locale: SupportedLocale;
   readonly code: string;
@@ -94,6 +100,8 @@ export function Rule({
   readonly title?: string;
   /** P26's prose rules restated line for line, not quoted pseudocode. */
   readonly condensed?: boolean;
+  /** Column-aligned: never wrapped, scrolls sideways when too wide. */
+  readonly aligned?: boolean;
 }) {
   const heading =
     title ?? (condensed ? t(locale, "network.tdh.shared.ruleCondensed") : null);
@@ -104,17 +112,9 @@ export function Rule({
         source={source}
         locale={locale}
         tone={condensed ? "condensed" : "exact"}
+        {...(aligned ? { wrap: "none" as const } : {})}
         {...(heading ? { title: heading, label: heading } : {})}
       />
-    </div>
-  );
-}
-
-/** A note that a rule is settled in the text: green, because it is in P26. */
-export function SettledNote({ children }: { readonly children: ReactNode }) {
-  return (
-    <div className="tw-flex tw-flex-col tw-items-start tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-success/30 tw-bg-success/[0.06] tw-px-4 tw-py-3 tw-text-sm tw-leading-6 tw-text-iron-200 sm:tw-flex-row sm:tw-items-start">
-      {children}
     </div>
   );
 }

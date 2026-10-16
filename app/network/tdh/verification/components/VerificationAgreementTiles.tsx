@@ -37,7 +37,7 @@ function plural(locale: SupportedLocale, count: number): "one" | "other" {
  * Equal against differing records on one bar. Agreement is usually above
  * 99.9%, so a differing count always keeps a visible sliver.
  */
-export function AgreementMeter({
+function AgreementMeter({
   locale,
   equal,
   total,
@@ -90,10 +90,13 @@ function CountTile({
   walletsTotal = null,
   missing,
   extra,
+  note,
 }: {
   readonly locale: SupportedLocale;
   readonly label: string;
   readonly sub: string;
+  /** What the identity records include, under the sub-label. */
+  readonly note?: string;
   readonly equal: number | null;
   readonly total: number | null;
   readonly walletsEqual?: number | null;
@@ -117,6 +120,7 @@ function CountTile({
     <li className={TILE}>
       <p className={TILE_LABEL}>{label}</p>
       <p className={TILE_SUB}>{sub}</p>
+      {note && <p className={TILE_SUB}>{note}</p>}
       <p className={TILE_VALUE}>
         {formatInteger(locale, equal)}
         <span className="tw-text-sm tw-font-normal tw-tracking-normal tw-text-iron-400">
@@ -189,7 +193,7 @@ function TotalTile({
     );
   }
   return (
-    <li className={`${TILE} tw-col-span-2 lg:tw-col-span-1`}>
+    <li className={TILE}>
       <p className={TILE_LABEL}>
         {t(locale, "network.tdh.verify.tiles.totalDelta")}
       </p>
@@ -248,10 +252,7 @@ export function CutoverTile({
     body = t(locale, "network.tdh.verify.cutover.plannedBody", { date });
   }
   return (
-    <li
-      className={`${TILE} tw-col-span-2 lg:tw-col-span-1`}
-      data-cutover={cutover.kind}
-    >
+    <li className={TILE} data-cutover={cutover.kind}>
       <p
         className={`${TILE_LABEL} tw-flex tw-items-center tw-justify-between tw-gap-2`}
       >
@@ -315,8 +316,8 @@ function CutoverProgress({
 }
 
 /**
- * The day at a glance, directly under the headline: how many collectors and
- * wallets are equal between Rust and 6529.io and between Rust and Python, the
+ * The day at a glance, directly under the headline: how many identity and
+ * wallet records are equal between Rust and 6529.io and between Rust and Python, the
  * difference of the totals, and the cutover.
  */
 export default function VerificationAgreementTiles({
@@ -348,6 +349,7 @@ export default function VerificationAgreementTiles({
       walletsEqual={rustVsLive?.walletsEqual ?? null}
       walletsTotal={rustVsLive?.walletsTotal ?? null}
       missing={t(locale, "network.tdh.verify.tiles.liveMissing")}
+      note={t(locale, "network.tdh.verify.tiles.identitiesNote")}
     />
   );
   const python = (
@@ -361,6 +363,7 @@ export default function VerificationAgreementTiles({
       walletsEqual={rustVsPython?.walletsEqual ?? null}
       walletsTotal={rustVsPython?.walletsTotal ?? null}
       missing={t(locale, "network.tdh.verify.tiles.pythonNotRun")}
+      note={t(locale, "network.tdh.verify.tiles.identitiesNote")}
     />
   );
   const tiles = afterCutover ? [python, live] : [live, python];
@@ -368,7 +371,10 @@ export default function VerificationAgreementTiles({
   const rustTotal = day.implementations.rust.totalTdh;
 
   return (
-    <section aria-labelledby="tdh-verify-tiles-heading">
+    <section
+      aria-labelledby="tdh-verify-tiles-heading"
+      className="tw-@container"
+    >
       <h2 id="tdh-verify-tiles-heading" className="tw-sr-only">
         {t(locale, "network.tdh.verify.tiles.heading")}
       </h2>
@@ -378,7 +384,9 @@ export default function VerificationAgreementTiles({
           <TdhSource refs={["P53 §4.5"]} locale={locale} />
         </p>
       )}
-      <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-3 tw-p-0 lg:tw-grid-cols-4">
+      {/* One tile a row on a phone, a 2 × 2 grid from 26rem, and one row of
+          four from 56rem: never 2 + 1 + 1. */}
+      <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-3 tw-p-0 @[26rem]:tw-grid-cols-2 @[56rem]:tw-grid-cols-4">
         {tiles}
         <TotalTile
           locale={locale}

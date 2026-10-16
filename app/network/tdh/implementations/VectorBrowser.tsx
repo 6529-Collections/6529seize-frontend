@@ -1,5 +1,6 @@
 "use client";
 
+import TdhTableFrame from "../shared/TdhTableFrame";
 import { useState } from "react";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -11,7 +12,6 @@ import {
   TDH_CHIP_ON,
   TDH_SELECT,
   TDH_TABLE,
-  TDH_TABLE_FRAME,
   TDH_TD_STACK_MD,
   TDH_TH,
 } from "../shared/tdhStyles";
@@ -85,7 +85,13 @@ export default function VectorBrowser({
           </button>
         ))}
       </div>
-      <div className={`${TDH_TABLE_FRAME} tw-mt-4`}>
+      <TdhTableFrame
+        label={t(locale, "network.tdh.impl.vectors.caption", {
+          shown: formatInteger(locale, shown.length),
+          total: formatInteger(locale, matching.length),
+        })}
+        className="tw-mt-4"
+      >
         <table
           className={`${TDH_TABLE} tw-block md:tw-table`}
           aria-label={t(locale, "network.tdh.impl.vectors.caption", {
@@ -137,7 +143,7 @@ export default function VectorBrowser({
             ))}
           </tbody>
         </table>
-      </div>
+      </TdhTableFrame>
       {matching.length > shown.length && (
         <button
           type="button"

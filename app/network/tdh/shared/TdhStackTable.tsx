@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
 
-export interface TdhStackColumn {
+interface TdhStackColumn {
   readonly key: string;
   readonly label: string;
 }
 
-export interface TdhStackRow {
+interface TdhStackRow {
   readonly key: string;
   /** One cell per column; the first is the row's header. */
   readonly cells: readonly ReactNode[];

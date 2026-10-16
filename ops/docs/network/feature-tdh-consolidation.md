@@ -34,7 +34,7 @@ Two pages explain wallet consolidation:
   `/network/tdh`.
 - Select `Wallet Consolidation` in `Explore Network references` on Network
   reference pages, or in the About contents menu or sidebar.
-- From the guide, select `Consolidation design and signing-order simulator`
+- From the guide, select `How consolidation works` under `Under the hood`
   to open the design page. The design page links back with `Read the
   collector's guide`.
 
@@ -44,12 +44,15 @@ Two pages explain wallet consolidation:
    the four-wallet limit and the fourth wallet's start date
    (loaded from the current environment’s settings), a `Start guided setup` button to
    `/safe-collecting/build-consolidation`, and a link to the safe collecting setup.
-   A note says that TDH-v1, the rule 6529.io moves to around October 23,
-   2026, groups at most three wallets into one identity and that its
-   specification does not include a fourth wallet yet, so how a group of four
-   counts after the cutover is not settled there, with a link to step 10 of
-   How TDH is calculated. The design page carries the same note and the TDH
-   section navigation.
+   A note says that TDH-v1, the rule 6529.io moves to about October 23,
+   2026, groups at most three wallets into one identity: from four wallets
+   that all confirm each other it forms an identity of three, starting from
+   the newest link, and the fourth counts on its own, so unless the rule is
+   amended a group of four splits that way at the cutover (combine up to
+   three to keep a grouping unchanged), with a link to step 10 of How TDH is
+   calculated. Under it, the two dates side by side: when a fourth wallet can
+   join on 6529.io, and the cutover. The design page carries the same note
+   and the TDH section navigation.
    A figure shows the vault, transaction, social and old wallets becoming one
    collector.
 2. `Why combine`: the vault stays cold; TDH adds up; sets count across wallets;
@@ -74,7 +77,9 @@ Two pages explain wallet consolidation:
    pages' disclosure style.
 8. `Under the hood`: cards for the design page, the TDH explainer, the Wallet
    Checker and the Delegation Center.
-9. The TDH pager: previous `Verification`, next `Historic boosts`.
+9. The TDH pager: previous `Verification`, next `Historic boosts`. `Under
+   the hood` is one list of links (the design page first), and the page has
+   no other navigation block at its end.
 
 ## Design Page Sections (`/network/tdh/consolidation/design`)
 
@@ -82,7 +87,9 @@ Two pages explain wallet consolidation:
    four wallets; a fourth wallet counts only for links registered in both
    directions on or after the cutoff supplied by the current environment; the newest confirmed link
    wins; consolidations are for one collector; registrations do not expire;
-   what consolidation changes for TDH and profiles.
+   what consolidation changes for TDH and profiles, today and under TDH-v1
+   (the grouping at the snapshot block, at most three wallets). The page's
+   contents are a numbered `On this page` list (a collapsed menu on phones).
 2. `Add a wallet in four transactions`: the two steps (existing wallets each
    register one link to the new wallet, then the new wallet signs one
    `batchDelegations` transaction last), why the order matters, a table of
@@ -91,7 +98,8 @@ Two pages explain wallet consolidation:
    the group despite following that order.
 3. `Try the signing order`: an interactive simulator using the backend
    grouping rule. The example assumes no existing D return links and one
-   self-signed transaction per wallet.
+   self-signed transaction per wallet; a note says what TDH-v1 forms from
+   the same links.
 4. `Remove or replace a wallet`: batch revocation, replacement order by group
    size, revocations for a lost or compromised wallet, and which part keeps the
    profile when a consolidation splits.
@@ -101,7 +109,7 @@ Two pages explain wallet consolidation:
 6. `What consolidation protects, and what it does not`.
 7. `Why the fourth wallet has a start date`, with the 2026-10-10 live snapshot.
 8. `How it was tested`, with links to the grouping source and tracking issue.
-9. `Related` links, starting with the guide.
+9. `Related` links as one list, starting with the guide.
 
 ## States
 

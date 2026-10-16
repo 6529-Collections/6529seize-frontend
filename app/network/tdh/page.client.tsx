@@ -71,7 +71,7 @@ export default function TDHMainPage({
         <TDHHero locale={locale} verification={verification} />
         <TDHInAMinute locale={locale} />
         <TDHVerifiedDaily locale={locale} summary={verification} />
-        <TDHProfile locale={locale} />
+        <TDHProfile locale={locale} verification={verification} />
         <TDHCurrentRules locale={locale} />
         <TDHHoldingChanges locale={locale} />
         <TDHGlossary locale={locale} />

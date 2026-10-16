@@ -5,12 +5,14 @@ import {
   manifestFigures,
 } from "@/app/network/tdh/formal/formalStatus";
 import {
+  LEAN_ROUND_5,
   LEAN_STATEMENTS,
   modulesFor,
   statementsFor,
   type LeanStatement,
 } from "@/app/network/tdh/formal/leanResults";
 import { BUNDLED_FORMAL_MANIFEST } from "@/lib/tdh/formal/bundledManifest";
+import roundFive from "./fixtures/roundFiveManifest.json";
 import {
   formalManifestSchema,
   type FormalManifest,
@@ -150,6 +152,52 @@ describe("formal statements against the proof manifest", () => {
     expect(early["order"]?.status).toBe("unverified");
     expect(early["rawLogs"]?.status).toBe("unverified");
     expect(LEAN_STATEMENTS.length).toBe(statementsFor(4).length);
+  });
+
+  it("follows round 5 of the model from its committed manifest's entries", () => {
+    // The theorem entries of 6529chain 6b32f3f's committed proof manifest,
+    // on the published manifest's frame (source and build), as the feed
+    // would publish it.
+    const round5 = formalManifestSchema.parse({
+      ...manifest,
+      summary: roundFive.summary,
+      facts: roundFive.facts,
+      vectors: roundFive.vectors,
+      theorems: roundFive.theorems,
+    });
+    expect(leanRound(round5)).toBe(5);
+    const statements = statementsFor(5);
+    const checks = checkStatements(statements, round5);
+    for (const row of statements) {
+      expect([row.id, checks[row.id]?.status]).toEqual([row.id, row.status]);
+      expect(checks[row.id]?.unconfirmed).toEqual([]);
+    }
+    const { named, covered, audited } = auditedCoverage(statements, round5);
+    expect(audited).toBe(85);
+    expect(covered).toBe(audited);
+    expect(new Set(named).size).toBe(named.length);
+    expect(statements.find((row) => row.id === "order")?.copy).toBe(
+      "orderOneLog"
+    );
+    expect(manifestFigures(round5)).toMatchObject({
+      vectorsPassed: 89,
+      vectorsTotal: 89,
+      vectorChecks: 1_253,
+      facts: 46,
+      theoremsTdh: 55,
+      theoremsP53: 30,
+    });
+    expect(LEAN_ROUND_5).toMatchObject({
+      vectorsPassed: 89,
+      vectorChecks: 1_253,
+      theoremsTdh: 55,
+      theoremsP53: 30,
+      facts: 46,
+    });
+    // A round-4 manifest cannot confirm round 5's statements.
+    expect(leanRound(roundFourManifest())).toBe(4);
+    const early = checkStatements(statementsFor(5), roundFourManifest());
+    expect(early["order"]?.status).toBe("unverified");
   });
 
   it("shows a statement as unverified when the manifest lacks a theorem or disagrees", () => {

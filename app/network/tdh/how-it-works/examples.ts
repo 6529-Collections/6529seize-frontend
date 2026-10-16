@@ -121,7 +121,7 @@ interface HouseholdCopy {
   readonly days: readonly number[];
 }
 
-export const HOUSEHOLD_CARDS: readonly HouseholdCardId[] = [
+const HOUSEHOLD_CARDS: readonly HouseholdCardId[] = [
   "firstgm",
   "meme310",
   "gradient1",
@@ -155,13 +155,13 @@ export const HOUSEHOLD_SCENARIOS: readonly HouseholdScenario[] = [
   "sell",
 ];
 
-export interface HouseholdRow {
+interface HouseholdRow {
   readonly card: HouseholdCardId;
   readonly base: number;
   readonly final: number;
 }
 
-export interface HouseholdRecord {
+interface HouseholdRecord {
   readonly label: "identity" | HouseholdWallet;
   readonly betaCents: number;
   readonly rows: readonly HouseholdRow[];
@@ -170,7 +170,7 @@ export interface HouseholdRecord {
   readonly dailyRateE4: number;
 }
 
-export interface HouseholdResult {
+interface HouseholdResult {
   readonly scenario: HouseholdScenario;
   readonly records: readonly HouseholdRecord[];
   readonly total: number;
@@ -255,6 +255,9 @@ export function householdScenario(
 }
 
 /** The overview's one-card example: a 310-copy Meme held 100 days, one Gradient. */
+/** One full set on the 2026-10-11 cycle: seasons 1 to 16 pay, 1.80. */
+const FULL_SET_BETA_CENTS = 180;
+
 export const MINUTE_EXAMPLE = (() => {
   const rate = rateCents(H, 310) ?? 0;
   const base = baseTdh(rate, 100);
@@ -267,5 +270,8 @@ export const MINUTE_EXAMPLE = (() => {
     base,
     betaCents,
     final: finalTdh(base, betaCents),
+    /** The same copy for a holder of one full set instead: boost 1.80. */
+    fullSetBetaCents: FULL_SET_BETA_CENTS,
+    fullSetFinal: finalTdh(base, FULL_SET_BETA_CENTS),
   };
 })();

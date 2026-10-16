@@ -1,14 +1,13 @@
 "use client";
 
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { useEffect, useState } from "react";
+import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
+import { useEffect, useRef, useState } from "react";
 import { TDH_FOCUS_RING } from "./tdhStyles";
 
-/** Pixels below the top of the viewport at which a section counts as current. */
 /** A section becomes current once its top passes 30% of the viewport. */
 const activeOffset = () => Math.max(120, globalThis.innerHeight * 0.3);
 
-export interface ScrollSpyItem {
+interface ScrollSpyItem {
   readonly id: string;
   readonly label: string;
   readonly prefix?: string;
@@ -17,8 +16,10 @@ export interface ScrollSpyItem {
 
 /**
  * A table of contents that highlights the section in view: a sticky rail from
- * `lg`, a disclosure on smaller screens. Headings named in the URL hash get
- * focus, so keyboard and screen-reader users land where a link points.
+ * `lg`; on smaller screens a disclosure at the top, and, once that has
+ * scrolled away, a compact bar at the bottom of the screen naming the
+ * section in view, which opens the contents. Headings named in the URL hash
+ * get focus, so keyboard and screen-reader users land where a link points.
  */
 export default function TdhScrollSpyNav({
   items,
@@ -28,6 +29,12 @@ export default function TdhScrollSpyNav({
   readonly label: string;
 }) {
   const [active, setActive] = useState<string | null>(items[0]?.id ?? null);
+  // Below lg, once the reader has scrolled past the contents at the top, a
+  // compact bar at the bottom of the screen names the section in view and
+  // opens the contents again, so a long page never loses its place.
+  const [floating, setFloating] = useState(false);
+  const topRef = useRef<HTMLDetailsElement>(null);
+  const floatingRef = useRef<HTMLDetailsElement>(null);
 
   useEffect(() => {
     // The current section is the last one whose top has passed the sticky
@@ -43,6 +50,8 @@ export default function TdhScrollSpyNav({
         }
       }
       setActive(current);
+      const top = topRef.current;
+      setFloating(top !== null && top.getBoundingClientRect().bottom < 0);
     };
     let frame = 0;
     const schedule = () => {
@@ -76,6 +85,12 @@ export default function TdhScrollSpyNav({
     return () => globalThis.removeEventListener("hashchange", focusHash);
   }, []);
 
+  const activeItem = items.find((item) => item.id === active) ?? items[0];
+  const closeFloating = () => {
+    if (floatingRef.current) {
+      floatingRef.current.open = false;
+    }
+  };
   const list = (
     <ol className="tw-m-0 tw-list-none tw-space-y-0.5 tw-p-0">
       {items.map((item) => {
@@ -84,6 +99,7 @@ export default function TdhScrollSpyNav({
           <li key={item.id}>
             <a
               href={`#${item.id}`}
+              onClick={closeFloating}
               aria-current={isActive ? "location" : undefined}
               className={`tw-flex tw-min-h-9 tw-items-baseline tw-gap-2 tw-rounded-md tw-py-1.5 tw-pr-2 tw-text-sm tw-leading-5 tw-no-underline tw-transition-colors motion-reduce:tw-transition-none ${
                 item.depth === 1 ? "tw-pl-6" : "tw-pl-2"
@@ -108,7 +124,10 @@ export default function TdhScrollSpyNav({
 
   return (
     <>
-      <details className="tw-group tw-mb-6 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 lg:tw-hidden">
+      <details
+        ref={topRef}
+        className="tw-group tw-mb-6 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 lg:tw-hidden"
+      >
         <summary
           className={`tw-flex tw-min-h-12 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-px-4 tw-text-sm tw-font-medium tw-text-iron-100 [&::-webkit-details-marker]:tw-hidden ${TDH_FOCUS_RING}`}
         >
@@ -122,6 +141,39 @@ export default function TdhScrollSpyNav({
           {list}
         </nav>
       </details>
+      {floating && activeItem && (
+        <details
+          ref={floatingRef}
+          className="tw-group tw-fixed tw-inset-x-3 tw-bottom-3 tw-z-30 tw-flex tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/95 tw-shadow-lg tw-backdrop-blur lg:tw-hidden"
+          data-tdh-floating-contents=""
+        >
+          <summary
+            className={`tw-flex tw-min-h-12 tw-cursor-pointer tw-list-none tw-items-center tw-gap-2 tw-px-4 tw-text-sm tw-text-iron-100 [&::-webkit-details-marker]:tw-hidden ${TDH_FOCUS_RING}`}
+          >
+            <span className="tw-shrink-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
+              {label}
+            </span>
+            <span className="tw-min-w-0 tw-flex-1 tw-truncate tw-font-medium">
+              {activeItem.prefix && (
+                <span className="tw-mr-1.5 tw-tabular-nums tw-text-iron-400">
+                  {activeItem.prefix}
+                </span>
+              )}
+              {activeItem.label}
+            </span>
+            <ChevronUpIcon
+              aria-hidden="true"
+              className="tw-size-4 tw-shrink-0 tw-text-iron-400 tw-transition-transform group-open:tw-rotate-180 motion-reduce:tw-transition-none"
+            />
+          </summary>
+          <nav
+            aria-label={label}
+            className="tw-max-h-[60vh] tw-overflow-y-auto tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-px-2 tw-py-2"
+          >
+            {list}
+          </nav>
+        </details>
+      )}
       <nav
         aria-label={label}
         className="tw-sticky tw-top-24 tw-hidden tw-max-h-[calc(100vh-7rem)] tw-overflow-y-auto tw-pr-2 lg:tw-block"

@@ -22,6 +22,15 @@ import {
   type TdhRules,
 } from "./tdh-rules.helpers";
 
+/**
+ * The cycle a snapshot belongs to: the day after its block, whose 00:00 UTC
+ * closes it, as the daily comparison names it.
+ */
+function cycleDateOf(blockTimestamp: string): number {
+  const day = Math.floor(Date.parse(blockTimestamp) / 86_400_000);
+  return (day + 1) * 86_400_000;
+}
+
 const formatBonus = (locale: SupportedLocale, value: number) =>
   formatNumber(locale, value, { maximumFractionDigits: 6 });
 const formatMultiplier = (locale: SupportedLocale, value: number) =>
@@ -98,7 +107,11 @@ export default function TDHCurrentRules({
   );
 }
 
-/** Consecutive seasons with the same bonus, as ranges: 1–16 at +0.05. */
+/**
+ * Consecutive seasons with the same bonus, as ranges: 1–16 at +0.05.
+ *
+ * @api Exported for its unit test.
+ */
 export function seasonRanges(
   seasons: readonly { readonly season: number; readonly bonus: number }[]
 ): { readonly from: number; readonly to: number; readonly bonus: number }[] {
@@ -137,6 +150,10 @@ function Rules({
     <div className="tw-space-y-5">
       <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
         {t(locale, "network.tdh.rules.snapshot", {
+          cycle: formatDate(locale, cycleDateOf(snapshot.block_timestamp), {
+            dateStyle: "medium",
+            timeZone: "UTC",
+          }),
           date: t(locale, "network.tdh.value.utcTime", {
             time: formatDate(locale, snapshot.block_timestamp, {
               dateStyle: "medium",

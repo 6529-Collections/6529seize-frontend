@@ -2,6 +2,7 @@ import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import TdhSource from "../shared/TdhSource";
+import TdhTableFrame from "../shared/TdhTableFrame";
 import {
   TDH_CAPTION,
   TDH_CARD,
@@ -11,15 +12,19 @@ import {
   TDH_TD_NUM,
   TDH_TH,
   TDH_TH_NUM,
+  tdhNarrowCell,
 } from "../shared/tdhStyles";
 
 /**
- * Vector 18-erc721-round-trip of P26 §13, as its file states it: four
- * transfers in canonical order and the values a program must produce. The
- * addresses are the vector's synthetic ones; transfers 3 and 4 share one
- * transaction (block 4000, txIndex 5).
+ * Vector 36-erc1155-send-and-return of P26 §13, as its file states it: eight
+ * transfers in canonical order and the values a program must produce. Every
+ * address, transaction and token in it is synthetic: A is 0x…a1, the
+ * marketplace W 0x…ee and the buyer B 0x…b2. Transfers 4 to 8 share one
+ * transaction (block 2000, txIndex 3), five days before the snapshot.
  */
-const VECTOR_18 = {
+const SAME_TX_BLOCK = 2000;
+const VECTOR = {
+  id: "36-erc1155-send-and-return",
   transfers: [
     {
       block: 1001,
@@ -27,45 +32,82 @@ const VECTOR_18 = {
       log: 0,
       token: "memes#1",
       from: "mint",
-      to: "c3",
-      amount: 1,
+      to: "a1",
+      amount: 3,
     },
     {
       block: 1002,
       tx: 0,
       log: 0,
-      token: "nextgen#10000000049",
+      token: "memes#1",
       from: "mint",
-      to: "c2",
-      amount: 1,
+      to: "a1",
+      amount: 2,
     },
     {
-      block: 4000,
-      tx: 5,
+      block: 1003,
+      tx: 0,
+      log: 0,
+      token: "memes#2",
+      from: "mint",
+      to: "a1",
+      amount: 4,
+    },
+    {
+      block: 2000,
+      tx: 3,
+      log: 0,
+      token: "memes#1",
+      from: "a1",
+      to: "ee",
+      amount: 3,
+    },
+    {
+      block: 2000,
+      tx: 3,
       log: 1,
-      token: "nextgen#10000000049",
-      from: "c2",
-      to: "c3",
-      amount: 1,
+      token: "memes#2",
+      from: "a1",
+      to: "ee",
+      amount: 3,
     },
     {
-      block: 4000,
-      tx: 5,
+      block: 2000,
+      tx: 3,
       log: 2,
-      token: "nextgen#10000000049",
-      from: "c3",
-      to: "c2",
+      token: "memes#1",
+      from: "ee",
+      to: "a1",
+      amount: 3,
+    },
+    {
+      block: 2000,
+      tx: 3,
+      log: 3,
+      token: "memes#2",
+      from: "ee",
+      to: "a1",
+      amount: 2,
+    },
+    {
+      block: 2000,
+      tx: 3,
+      log: 4,
+      token: "memes#2",
+      from: "ee",
+      to: "b2",
       amount: 1,
     },
   ],
+  /** The two identities' expected records: wallet A and buyer B. */
   expected: [
-    { field: "rate (nextgen#10000000049)", value: "100" },
-    { field: "balance", value: "1" },
-    { field: "raw", value: "239" },
-    { field: "base", value: "239" },
-    { field: "boost_c", value: "100" },
-    { field: "final", value: "239" },
+    { field: "balance", a: "8", b: "1" },
+    { field: "raw", a: "560", b: "5" },
+    { field: "base", a: "605", b: "6" },
+    { field: "boost_c", a: "108", b: "100" },
+    { field: "final", a: "653", b: "6" },
   ],
+  rates: "memes#1 100, memes#2 125",
 } as const;
 
 export default function VectorAnatomy({
@@ -81,7 +123,7 @@ export default function VectorAnatomy({
         <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
           {m("title")}{" "}
           <code className="tw-font-mono tw-text-sm tw-font-normal tw-text-iron-300">
-            18-erc721-round-trip
+            {VECTOR.id}
           </code>
         </p>
         <p className="tw-m-0 tw-mt-1 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">
@@ -95,8 +137,8 @@ export default function VectorAnatomy({
             {m("input")}
           </p>
           <ol className="tw-m-0 tw-grid tw-list-none tw-gap-2 tw-p-0 lg:tw-hidden">
-            {VECTOR_18.transfers.map((row) => {
-              const sameTx = row.block === 4000;
+            {VECTOR.transfers.map((row) => {
+              const sameTx = row.block === SAME_TX_BLOCK;
               return (
                 <li
                   key={`${row.block}-${row.log}`}
@@ -122,6 +164,9 @@ export default function VectorAnatomy({
                   <p className="tw-m-0 tw-mt-0.5 tw-font-mono tw-text-[13px] tw-text-iron-200">
                     {row.from === "mint" ? m("mint") : `0x…${row.from}`} →{" "}
                     {`0x…${row.to}`}
+                    <span className="tw-ml-2 tw-font-sans tw-tabular-nums tw-text-iron-300">
+                      × {formatInteger(locale, row.amount)}
+                    </span>
                   </p>
                 </li>
               );
@@ -147,11 +192,14 @@ export default function VectorAnatomy({
                   <th scope="col" className={TDH_TH}>
                     {m("move")}
                   </th>
+                  <th scope="col" className={TDH_TH_NUM}>
+                    {m("amount")}
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {VECTOR_18.transfers.map((row) => {
-                  const sameTx = row.block === 4000;
+                {VECTOR.transfers.map((row) => {
+                  const sameTx = row.block === SAME_TX_BLOCK;
                   return (
                     <tr
                       key={`${row.block}-${row.log}`}
@@ -176,6 +224,9 @@ export default function VectorAnatomy({
                           </span>
                         )}
                       </td>
+                      <td className={TDH_TD_NUM}>
+                        {formatInteger(locale, row.amount)}
+                      </td>
                     </tr>
                   );
                 })}
@@ -184,36 +235,49 @@ export default function VectorAnatomy({
           </div>
         </div>
         <div className="tw-min-w-0 tw-space-y-3">
-          <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07]">
+          <TdhTableFrame label={m("expected")}>
             <table className={TDH_TABLE}>
               <caption className={TDH_CAPTION}>{m("expected")}</caption>
               <thead>
                 <tr>
-                  <th scope="col" className={TDH_TH}>
+                  <th scope="col" className={tdhNarrowCell(TDH_TH)}>
                     {m("field")}
                   </th>
-                  <th scope="col" className={TDH_TH_NUM}>
+                  <th scope="col" className={tdhNarrowCell(TDH_TH_NUM)}>
                     {m("value")}
+                  </th>
+                  <th scope="col" className={tdhNarrowCell(TDH_TH_NUM)}>
+                    {m("valueB")}
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {VECTOR_18.expected.map((row) => (
+                {VECTOR.expected.map((row) => (
                   <tr key={row.field}>
                     <th
                       scope="row"
-                      className={`${TDH_TD} tw-font-mono tw-text-xs tw-font-normal`}
+                      className={`${tdhNarrowCell(TDH_TD)} tw-font-mono tw-text-xs tw-font-normal`}
                     >
                       {row.field}
                     </th>
-                    <td className={`${TDH_TD_NUM} tw-font-mono tw-text-xs`}>
-                      {row.value}
+                    <td
+                      className={`${tdhNarrowCell(TDH_TD_NUM)} tw-font-mono tw-text-xs`}
+                    >
+                      {row.a}
+                    </td>
+                    <td
+                      className={`${tdhNarrowCell(TDH_TD_NUM)} tw-font-mono tw-text-xs`}
+                    >
+                      {row.b}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
+          </TdhTableFrame>
+          <p className="tw-m-0 tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-400">
+            rates: {VECTOR.rates}
+          </p>
         </div>
       </div>
       <p className="tw-m-0 tw-mt-4 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">

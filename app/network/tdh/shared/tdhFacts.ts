@@ -68,20 +68,6 @@ export const PROGRAM_CONFORMANCE = {
   pythonDaily: { specCommit: "0621ed4", vectors: 51 },
 } as const;
 
-/** D132: the daily runs and the cutover. */
-export const DAILY = {
-  firstScheduledRun: "2026-10-16",
-  /** UTC time of the daily run. */
-  runTime: "00:40",
-  plannedCutover: "2026-10-23",
-  /**
-   * The history is read from Ethereum log servers on trust until 6529's own
-   * node is synced (about 2026-10-18, crates/validator/README.md) and the
-   * full check runs against it.
-   */
-  ownNodeExpected: "2026-10-18",
-} as const;
-
 /**
  * The four-way differential tests of 15 October 2026 (tools/difftest): the
  * P26 commit that settled each round's findings, and the findings.

@@ -12,9 +12,12 @@ import { TDH_FOCUS_RING } from "./tdhStyles";
 
 const CARD = `tw-group tw-flex tw-min-h-11 tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-1 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-4 tw-py-3 tw-no-underline tw-transition-colors hover:tw-border-primary-400/50 motion-reduce:tw-transition-none ${TDH_FOCUS_RING}`;
 
-/** The six core pages, then the consolidation guide and historic boosts. */
+/**
+ * The six core pages, then the consolidation guide and historic boosts, and
+ * last the overview's glossary, so the last page also leads somewhere.
+ */
 const SEQUENCE: ReadonlyArray<{ readonly href: string; readonly key: string }> =
-  [...TDH_PAGES, ...TDH_MORE_PAGES.filter((page) => !page.href.includes("#"))];
+  [...TDH_PAGES, ...TDH_MORE_PAGES];
 
 /** Previous and next page of the TDH section, at the end of each page. */
 export default function TdhPager({

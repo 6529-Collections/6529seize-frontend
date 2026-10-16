@@ -12,7 +12,7 @@ import TdhPager from "../shared/TdhPager";
 import TdhRuleBlock from "../shared/TdhRuleBlock";
 import TdhSection from "../shared/TdhSection";
 import TdhSource from "../shared/TdhSource";
-import TdhStatusPill from "../shared/TdhStatusPill";
+import TdhStatusPill, { TdhStatusLegend } from "../shared/TdhStatusPill";
 import {
   TDH_CAPTION,
   TDH_CARD,
@@ -24,6 +24,7 @@ import {
   TDH_TH,
   TDH_TH_NUM,
 } from "../shared/tdhStyles";
+import DifftestRounds from "../shared/DifftestRounds";
 import AssuranceLayers from "./AssuranceLayers";
 import {
   checkStatements,
@@ -34,7 +35,8 @@ import {
 } from "./formalStatus";
 import {
   FIRST_RULE_CASES,
-  LEAN_ROUND_4,
+  LEAN_LATEST_ROUND,
+  LEAN_ROUND_5,
   LEAN_RUNS,
   modulesFor,
   NETTING_DEFINITIONS,
@@ -56,9 +58,9 @@ const PROSE =
 const NOT_KEYS = ["english", "programs", "inputs", "rule", "lean"] as const;
 const LONG_DATE = { day: "numeric", month: "long", year: "numeric" } as const;
 
-/** A message key, with its round-4 variant (`<key>Raw`) for that round. */
+/** A message key, with its variant from round 4 on (`<key>Raw`). */
 function byRound(round: LeanRound, key: string): MessageKey {
-  return (round === 4 ? `${key}Raw` : key) as MessageKey;
+  return (round >= 4 ? `${key}Raw` : key) as MessageKey;
 }
 
 /** How long the model takes for the whole day from raw logs. */
@@ -98,9 +100,14 @@ function SummaryBand({
   readonly round: LeanRound;
 }) {
   const runs = LEAN_RUNS[round];
+  // Properties of the rule only: a lemma about the model's own
+  // representation (last in, first out) is not counted.
   const count = (group: "p26" | "p53", status: StatementCheck["status"]) =>
     statements.filter(
-      (row) => row.group === group && checks[row.id]?.status === status
+      (row) =>
+        row.group === group &&
+        row.kind !== "lemma" &&
+        checks[row.id]?.status === status
     ).length;
   const shownFalse = count("p26", "shownFalse") + count("p53", "shownFalse");
   const items = [
@@ -123,6 +130,7 @@ function SummaryBand({
         checks: figure(locale, figures.vectorChecks),
         spec: specShort(figures),
       })}${
+        round >= LEAN_LATEST_ROUND &&
         (figures.vectorsTotal ?? 0) < P26.vectorCount
           ? t(locale, "network.tdh.formal.summary.vectorsBehind", {
               latest: formatInteger(locale, P26.vectorCount),
@@ -134,13 +142,19 @@ function SummaryBand({
     {
       key: "day",
       value: formatInteger(locale, runs.fullDayRecords),
-      body: t(locale, "network.tdh.formal.summary.dayBody", {
+      body: t(locale, byRound(round, "network.tdh.formal.summary.dayBody"), {
         total: formatInteger(locale, runs.fullDayTotal),
       }),
     },
   ] as const;
   return (
     <div className="tw-mt-6">
+      <p className="tw-m-0 tw-mb-2 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
+        {t(locale, "network.tdh.formal.summary.caption", {
+          commit: figures.commit.slice(0, 7),
+          date: formatUtcDate(locale, figures.commitDate, LONG_DATE),
+        })}
+      </p>
       <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-[repeat(auto-fit,minmax(9.5rem,1fr))] tw-gap-3 tw-p-0">
         {items.map((item) => (
           <li
@@ -162,7 +176,7 @@ function SummaryBand({
           </li>
         ))}
       </ul>
-      <p className="tw-m-0 tw-mt-3 tw-max-w-4xl tw-text-xs tw-leading-5 tw-text-iron-400">
+      <p className="tw-m-0 tw-mt-3 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
         {t(locale, "network.tdh.formal.summary.theorems", {
           tdh: formatInteger(locale, figures.theoremsTdh),
           p53: formatInteger(locale, figures.theoremsP53),
@@ -197,14 +211,14 @@ function ManifestSource({
           spec: figures.specCommit.slice(0, 7),
         });
   return (
-    <div className="tw-mt-4 tw-flex tw-max-w-4xl tw-flex-col tw-items-start tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-px-4 tw-py-3 sm:tw-flex-row sm:tw-flex-wrap sm:tw-items-center sm:tw-gap-x-3">
+    <div className="tw-mt-4 tw-flex tw-max-w-3xl tw-flex-col tw-items-start tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-px-4 tw-py-3 sm:tw-flex-row sm:tw-flex-wrap sm:tw-items-center sm:tw-gap-x-3">
       <TdhStatusPill
         pill={load.status === "published" ? "checkedBuild" : "bundled"}
         locale={locale}
         size="sm"
       />
       <p
-        className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-xs tw-leading-5 tw-text-iron-300"
+        className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-sm tw-leading-6 tw-text-iron-300"
         data-tdh-manifest={load.status}
       >
         {load.status === "published"
@@ -230,24 +244,78 @@ function ManifestSource({
 }
 
 /**
- * Shown while the manifest records an earlier round of the model than the
- * design repository has: what round 4 adds, by its PROOFS.md.
+ * Shown while the published manifest records an earlier round of the model
+ * than 6529's design repository has: the newest round's own figures, from
+ * the manifest committed with it, beside a pill saying it is not published.
  */
-function RoundFourNote({ locale }: { readonly locale: SupportedLocale }) {
+function NewerRound({ locale }: { readonly locale: SupportedLocale }) {
+  const r = LEAN_ROUND_5;
+  const n = (value: number) => formatInteger(locale, value);
+  const stats = [
+    {
+      key: "vectors",
+      value: t(locale, "network.tdh.formal.newer.vectors", {
+        passed: n(r.vectorsPassed),
+        total: n(r.vectorsTotal),
+      }),
+      sub: t(locale, "network.tdh.formal.newer.vectorsSub", {
+        checks: n(r.vectorChecks),
+        spec: r.specCommit,
+      }),
+    },
+    {
+      key: "theorems",
+      value: t(locale, "network.tdh.formal.newer.theorems", {
+        tdh: n(r.theoremsTdh),
+        p53: n(r.theoremsP53),
+      }),
+      sub: t(locale, "network.tdh.formal.newer.theoremsSub"),
+    },
+    {
+      key: "facts",
+      value: t(locale, "network.tdh.formal.newer.facts", {
+        facts: n(r.facts),
+      }),
+      sub: t(locale, "network.tdh.formal.newer.factsSub"),
+    },
+  ] as const;
   return (
-    <p
-      className="tw-m-0 tw-mt-3 tw-max-w-4xl tw-text-xs tw-leading-5 tw-text-iron-400"
+    <section
+      aria-labelledby="tdh-formal-newer"
+      className="tw-mt-6 tw-max-w-3xl tw-rounded-lg tw-border tw-border-dashed tw-border-amber-400/40 tw-bg-amber-400/[0.04] tw-px-4 tw-py-3"
       data-tdh-round-note
     >
-      {t(locale, "network.tdh.formal.manifest.round4", {
-        commit: LEAN_ROUND_4.commit,
-        date: formatUtcDate(
-          locale,
-          `${LEAN_ROUND_4.date}T00:00:00Z`,
-          LONG_DATE
-        ),
-      })}
-    </p>
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2">
+        <TdhStatusPill pill="notPublished" locale={locale} size="sm" />
+        <h2
+          id="tdh-formal-newer"
+          className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-50"
+        >
+          {t(locale, "network.tdh.formal.newer.title", {
+            round: n(r.round),
+            date: formatUtcDate(locale, `${r.date}T00:00:00Z`, LONG_DATE),
+          })}
+        </h2>
+      </div>
+      <ul className="tw-m-0 tw-mt-3 tw-grid tw-list-none tw-grid-cols-1 tw-gap-x-6 tw-gap-y-2 tw-p-0 sm:tw-grid-cols-3">
+        {stats.map((stat) => (
+          <li key={stat.key} className="tw-min-w-0">
+            <span className="tw-block tw-text-base tw-font-semibold tw-tabular-nums tw-text-iron-50">
+              {stat.value}
+            </span>
+            <span className="tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
+              {stat.sub}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
+        {t(locale, "network.tdh.formal.newer.body", {
+          round: n(r.round),
+          commit: r.commit,
+        })}
+      </p>
+    </section>
   );
 }
 
@@ -349,6 +417,7 @@ export default async function TdhFormalPage() {
       }
       headerExtra={
         <>
+          {round < LEAN_LATEST_ROUND && <NewerRound locale={locale} />}
           <SummaryBand
             locale={locale}
             figures={figures}
@@ -357,7 +426,6 @@ export default async function TdhFormalPage() {
             round={round}
           />
           <ManifestSource locale={locale} load={load} figures={figures} />
-          {round < 4 && <RoundFourNote locale={locale} />}
         </>
       }
     >
@@ -392,6 +460,10 @@ export default async function TdhFormalPage() {
                 {t(locale, "network.tdh.formal.featured.plain")}
                 <TdhSource refs={["P26 §7.1"]} locale={locale} />
               </p>
+              <p className={PROSE}>
+                {t(locale, "network.tdh.formal.featured.scope")}
+                <TdhSource refs={["P26 §3.3", "P26 §7.1"]} locale={locale} />
+              </p>
               <p className={`${PROSE} tw-font-medium tw-text-iron-50`}>
                 {t(locale, "network.tdh.formal.featured.means")}
               </p>
@@ -402,7 +474,7 @@ export default async function TdhFormalPage() {
             </div>
             <NettingFigure locale={locale} />
           </div>
-          <div className="tw-mt-6 tw-grid tw-max-w-4xl tw-gap-4">
+          <div className="tw-mt-6 tw-grid tw-max-w-3xl tw-gap-4">
             <div className="tw-min-w-0">
               <TdhRuleBlock
                 code={featured.lean}
@@ -438,6 +510,10 @@ export default async function TdhFormalPage() {
           <p className={PROSE}>
             {t(locale, "network.tdh.formal.statements.intro")}
           </p>
+          <TdhStatusLegend
+            locale={locale}
+            tones={["success", "primary", "warning", "refuted", "neutral"]}
+          />
           <div className="tw-space-y-3">
             <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
               {t(locale, "network.tdh.formal.statements.p26")}
@@ -452,7 +528,7 @@ export default async function TdhFormalPage() {
                 facts: (
                   <p
                     key="facts"
-                    className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400"
+                    className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-400"
                   >
                     {t(locale, "network.tdh.formal.st.facts.count", {
                       checks: formatInteger(locale, figures.facts),
@@ -547,7 +623,7 @@ export default async function TdhFormalPage() {
                       )}
                     </td>
                     <td
-                      className={`${TDH_TD_STACK_MD} tw-whitespace-nowrap tw-font-mono tw-text-xs tw-text-iron-400`}
+                      className={`${TDH_TD_STACK_MD} tw-font-mono tw-text-xs tw-text-iron-400 md:tw-whitespace-nowrap`}
                     >
                       P26 {row.section}
                     </td>
@@ -592,10 +668,16 @@ export default async function TdhFormalPage() {
                 {key === "inputs" && (
                   <TdhSource refs={["D118", "D119"]} locale={locale} />
                 )}
+                {key === "programs" && (
+                  <TdhSource refs={["Difftest Oct 15"]} locale={locale} />
+                )}
               </p>
             </li>
           ))}
         </ul>
+        <div className="tw-mt-6">
+          <DifftestRounds locale={locale} />
+        </div>
       </TdhSection>
 
       <TdhSection
@@ -627,6 +709,7 @@ export default async function TdhFormalPage() {
               locale={locale}
               title={t(locale, "network.tdh.formal.check.title")}
               label={t(locale, "network.tdh.formal.check.title")}
+              wrap="words"
             />
           </div>
           <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-dashed tw-border-iron-600 tw-px-3 tw-py-1 tw-text-xs tw-text-iron-300">

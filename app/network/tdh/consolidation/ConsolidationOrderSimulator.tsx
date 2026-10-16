@@ -24,6 +24,54 @@ const SAFE_ORDER: readonly SimulatedWallet[] = ["A", "B", "C", "D"];
 const UNSAFE_ORDER: readonly SimulatedWallet[] = ["D", "A", "B", "C"];
 const BUTTON = `tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200 hover:tw-bg-iron-800 hover:tw-text-iron-50 ${TDH_FOCUS}`;
 
+const START_GROUPS: readonly (readonly SimulatedWallet[])[] = [
+  ["A", "B", "C"],
+  ["D"],
+];
+
+/** A group's outline: a lone wallet dashed; a group amber while split. */
+function groupTone(group: readonly SimulatedWallet[], split: boolean): string {
+  if (group.length < 2) {
+    return "tw-border-dashed tw-border-iron-600";
+  }
+  return split
+    ? "tw-border-amber-400/60 tw-bg-amber-400/[0.06]"
+    : "tw-border-primary-400/60 tw-bg-primary-500/10";
+}
+
+/**
+ * The wallets as they are grouped, drawn: each group an outlined box of
+ * wallet discs, so a split shows as boxes coming apart and the join as one
+ * box of four. Decorative; the groups are also said in words.
+ */
+function GroupChips({
+  groups,
+  split,
+}: {
+  readonly groups: readonly (readonly SimulatedWallet[])[];
+  readonly split: boolean;
+}) {
+  return (
+    <span aria-hidden="true" className="tw-flex tw-flex-wrap tw-gap-2">
+      {groups.map((group) => (
+        <span
+          key={group.join("")}
+          className={`tw-inline-flex tw-gap-1 tw-rounded-full tw-border tw-border-solid tw-p-1 ${groupTone(group, split)}`}
+        >
+          {group.map((wallet) => (
+            <span
+              key={wallet}
+              className="tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-text-xs tw-font-semibold tw-text-iron-50"
+            >
+              {wallet}
+            </span>
+          ))}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export default function ConsolidationOrderSimulator({
   locale,
   activationDate,
@@ -126,6 +174,13 @@ export default function ConsolidationOrderSimulator({
         </fieldset>
       )}
 
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-rounded-lg tw-bg-iron-950 tw-px-3 tw-py-3">
+        <GroupChips
+          groups={lastStep?.groups ?? START_GROUPS}
+          split={lastStep !== undefined && !lastStep.existingMembersTogether}
+        />
+      </div>
+
       <p className={TDH_TEXT}>
         {order.length > 0
           ? t(locale, "network.tdhConsolidation.order.chosen", {
@@ -153,7 +208,13 @@ export default function ConsolidationOrderSimulator({
                     wallet: step.signer,
                   })}
                 </p>
-                <p className={TDH_TEXT}>
+                <span className="tw-mt-1 tw-block">
+                  <GroupChips
+                    groups={step.groups}
+                    split={!step.existingMembersTogether}
+                  />
+                </span>
+                <p className={`${TDH_TEXT} tw-mt-1`}>
                   {t(locale, "network.tdhConsolidation.order.groups", {
                     groups: describeGroups(step.groups),
                   })}

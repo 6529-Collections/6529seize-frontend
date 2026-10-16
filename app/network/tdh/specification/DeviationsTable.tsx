@@ -11,16 +11,22 @@ import {
   TDH_TABLE,
   TDH_TH,
 } from "../shared/tdhStyles";
+import { TDH_TONE_DOT, type TdhTone } from "../shared/TdhStatusPill";
 import { DEVIATIONS, type DeviationGroup } from "./specData";
 
 type Filter = "all" | Exclude<DeviationGroup, "other">;
 
 const FILTERS: readonly Filter[] = ["all", "changes", "kept"];
-const DECISION_TONE: Record<string, string> = {
-  adopted: "tw-bg-success",
-  dev2: "tw-bg-primary-400",
-  kept: "tw-bg-iron-400",
-  dev13: "tw-bg-amber-400",
+/**
+ * In the one TDH status palette: adopted, green; the spec winning over the
+ * old backend, a decision that changes values, blue; the old behaviour kept,
+ * grey, informational.
+ */
+const DECISION_TONE: Record<string, TdhTone> = {
+  adopted: "success",
+  dev2: "primary",
+  kept: "neutral",
+  dev13: "neutral",
 };
 
 const CELL =
@@ -40,7 +46,7 @@ function Decision({
       </span>
       <span
         aria-hidden="true"
-        className={`tw-size-1.5 tw-shrink-0 tw-rounded-full ${DECISION_TONE[decision] ?? "tw-bg-iron-400"}`}
+        className={`tw-size-2 tw-shrink-0 tw-rounded-full ${TDH_TONE_DOT[DECISION_TONE[decision] ?? "neutral"]}`}
       />
       {t(locale, `network.tdh.spec.decision.${decision}` as MessageKey)}
     </span>
@@ -148,7 +154,7 @@ export default function DeviationsTable({
           </tbody>
         </table>
       </div>
-      <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+      <p className="tw-m-0 tw-mt-3 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
         {t(locale, "network.tdh.spec.decision.legend")}
       </p>
     </div>

@@ -16,7 +16,7 @@ import { z } from "zod";
  * not its commit, or whose build or audit did not pass, is rejected whole.
  */
 
-export const FORMAL_MANIFEST_FORMAT = "6529chain.tdh-lean-manifest.v1";
+const FORMAL_MANIFEST_FORMAT = "6529chain.tdh-lean-manifest.v1";
 export const FORMAL_STATUSES = [
   "proved",
   "counterexample",
@@ -25,11 +25,7 @@ export const FORMAL_STATUSES = [
 export type FormalStatus = (typeof FORMAL_STATUSES)[number];
 
 /** Lean's three standard axioms, the only ones the audit allows. */
-export const STANDARD_AXIOMS = [
-  "propext",
-  "Classical.choice",
-  "Quot.sound",
-] as const;
+const STANDARD_AXIOMS = ["propext", "Classical.choice", "Quot.sound"] as const;
 
 const MAX = Number.MAX_SAFE_INTEGER;
 const count = z.number().int().nonnegative().max(MAX);
@@ -151,10 +147,9 @@ export const formalManifestSchema = z
     message: "the summary does not count the theorems",
   });
 
-export type FormalManifestInput = z.input<typeof formalManifestSchema>;
 export type FormalManifest = z.infer<typeof formalManifestSchema>;
-export type FormalTheorem = FormalManifest["theorems"][number];
-export type FormalVectorRun = FormalManifest["vectors"][number];
+type FormalTheorem = FormalManifest["theorems"][number];
+type FormalVectorRun = FormalManifest["vectors"][number];
 
 export function parseFormalManifest(value: unknown) {
   return formalManifestSchema.safeParse(value);

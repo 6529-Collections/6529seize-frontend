@@ -15,7 +15,7 @@ import { TDH_CARD, TDH_LINK } from "../../shared/tdhStyles";
 import { formatInteger, formatSigned } from "./verificationFormat";
 
 /** Class colours: distinct hues, always next to the class letter. */
-export const CLASS_DOT: Record<DifferenceClass, string> = {
+const CLASS_DOT: Record<DifferenceClass, string> = {
   A: "tw-bg-primary-400",
   B: "tw-bg-violet-400",
   C: "tw-bg-error",
@@ -125,7 +125,7 @@ export default function VerificationDifferences({
         id="diff"
         title={t(locale, "network.tdh.verify.diff.heading")}
         locale={locale}
-        className="tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
+        className="tw-hyphens-auto tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
       />
       <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
         {t(locale, "network.tdh.verify.diff.lede")}
@@ -205,7 +205,7 @@ export default function VerificationDifferences({
           )}
           {(differences.rustVsLive !== null ||
             differences.pythonVsLive !== null) && (
-            <dl className="tw-m-0 tw-mt-5 tw-grid tw-grid-cols-2 tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4">
+            <dl className="tw-m-0 tw-mt-5 tw-grid tw-grid-cols-1 tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4 min-[400px]:tw-grid-cols-2">
               {(["rustVsLive", "pythonVsLive"] as const).map((key) => (
                 <div key={key}>
                   <dt className="tw-text-xs tw-text-iron-400">

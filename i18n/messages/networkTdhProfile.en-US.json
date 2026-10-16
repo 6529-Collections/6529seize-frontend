@@ -53,5 +53,8 @@
   "network.tdh.profile.previous": "Previous tokens",
   "network.tdh.profile.next": "Next tokens",
   "network.tdh.profile.pagination": "Tokens {start}–{end} of {total}",
-  "network.tdh.profile.placeholder": "A profile handle, name.eth or 0x…"
+  "network.tdh.profile.placeholder": "A profile handle, name.eth or 0x…",
+  "network.tdh.profile.storedNote": "These are 6529.io’s stored values; until the cutover they come from its own backend, which the daily comparison checks against TDH-v1.",
+  "network.tdh.profile.reproduced": "Reproduced independently: for the cycle of {date}, this snapshot, the Rust core, the Python reference and 6529.io computed all {total} TDH records identically, this one included.",
+  "network.tdh.profile.reproducedLink": "See that day"
 }
