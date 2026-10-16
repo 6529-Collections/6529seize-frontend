@@ -3431,7 +3431,7 @@
         "Wave Configuration contains wave access, chat availability, links, slow mode, curations, chat history deletion and personal display preferences. Selected competition access, rules, appearance and pauses belong to Settings in the main row.",
         "Voter lists and vote activity are available in Votes, under All votes and Activity. Both follow the chosen competition; they are absent from the information panel.",
         "On mobile, selecting the wave name opens a dismissible information panel containing About, REP and Configuration. About includes the pinned drop.",
-        "Closing mobile information or using Back returns to the original competition, tab, curation and scroll position. The underlying view stays mounted.",
+        "Swipe down from the mobile information panel's handle or header, select Close, tap outside, press Escape, or use Back to return to the original competition, tab, curation and scroll position. The underlying view stays mounted. Scrolling the panel content does not dismiss it; short or canceled header drags return it to its open position.",
         "Selecting a section switches information for the active wave without navigating away from the thread."
       ],
       "canonical_path": "/waves",

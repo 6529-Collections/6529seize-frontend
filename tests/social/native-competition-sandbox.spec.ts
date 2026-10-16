@@ -1,7 +1,7 @@
 import { writeFile } from "node:fs/promises";
 import composerSandboxConstants from "../support/composerSandboxConstants.json";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
-import type { Frame, Page } from "@playwright/test";
+import type { Frame, Locator, Page } from "@playwright/test";
 import { expectCompetitionScroll } from "../support/competitionScroll";
 import {
   monitorRememberedLeaderboard,
@@ -22,6 +22,33 @@ const entryDropId = (id: string) =>
     ? "00000000-0000-4000-8000-000000000532"
     : "00000000-0000-4000-8000-000000000533";
 const ROOT = `/waves/${WAVE}/competitions`;
+
+async function swipeVertically(page: Page, target: Locator, distance: number) {
+  await target.click({ trial: true });
+  const box = await target.boundingBox();
+  expect(box).not.toBeNull();
+  const x = box!.x + box!.width / 2;
+  const y = box!.y + Math.min(box!.height / 2, 120);
+  const touch = await page.context().newCDPSession(page);
+  try {
+    await touch.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [{ x, y }],
+    });
+    for (const fraction of [0.2, 0.5, 0.8, 1]) {
+      await touch.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ x, y: y + distance * fraction }],
+      });
+    }
+    await touch.send("Input.dispatchTouchEvent", {
+      type: "touchEnd",
+      touchPoints: [],
+    });
+  } finally {
+    await touch.detach();
+  }
+}
 async function openNewCompetition(page: Page) {
   await page.getByRole("link", { name: "Competition", exact: true }).click();
 }
@@ -1313,6 +1340,19 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(
         dialog.getByRole("heading", { name: "Chat", exact: true })
       ).toBeVisible();
+      const content = dialog
+        .locator(".tw-overflow-y-auto")
+        .filter({
+          has: page.getByRole("heading", { name: "Chat", exact: true }),
+        })
+        .last();
+      await swipeVertically(page, content, -90);
+      await expect
+        .poll(() => content.evaluate((element) => element.scrollTop))
+        .toBeGreaterThan(0);
+      await expect(
+        dialog.getByRole("button", { name: "Close", exact: true })
+      ).toBeVisible();
       await page.screenshot({
         path: testInfo.outputPath("wave-information-mobile.png"),
         fullPage: true,
@@ -1329,6 +1369,15 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await opener.click();
       await page.keyboard.press("Escape");
       await expect(dialog).toHaveCount(0);
+      await expect(opener).toBeFocused();
+      await expect(activity).toHaveAttribute("aria-selected", "true");
+      await opener.click();
+      const header = dialog.getByTestId("mobile-dialog-header");
+      await swipeVertically(page, header, 10);
+      await expect(header).toBeVisible();
+      await swipeVertically(page, header, 90);
+      await expect(dialog).toHaveCount(0);
+      await expect(page).toHaveURL(destination);
       await expect(opener).toBeFocused();
       await expect(activity).toHaveAttribute("aria-selected", "true");
       await opener.click();
@@ -1351,6 +1400,73 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expectNoHorizontalOverflow(page);
     });
   }
+  test("keeps native wave identity compact without a description", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-mobile-chromium",
+      "Native touch header layout."
+    );
+    await installCompetitionApi(page);
+    await installSurfaceSimulation(
+      page.context(),
+      "capacitor-ios-sim",
+      testInfo.project.use.baseURL
+    );
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/waves/${WAVE}`
+    );
+    expect(response.ok()).toBe(true);
+    const wave = await response.json();
+    wave.parent_wave = {
+      ...wave,
+      id: PROFILE,
+      name: "Follow the repository with an intentionally long parent wave name",
+      pfp: null,
+      creator: wave.author,
+      description_drop: { contents: null, media: [] },
+    };
+    wave.description_drop.parts = [];
+    await page.route(`**/api/waves/${WAVE}`, (route) =>
+      route.fulfill({ json: wave })
+    );
+    await page.goto(`${ROOT}/beta?tab=votes`);
+    const title = page.getByRole("button", {
+      name: /^About Local Composer Sandbox Wave/,
+    });
+    const parent = page
+      .getByRole("navigation", { name: "Wave hierarchy", exact: true })
+      .first();
+    for (const width of [320, 430, 768]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(title).toBeVisible();
+      await expect(parent).toBeVisible();
+      await expect
+        .poll(async () => {
+          const parentBox = await parent.boundingBox();
+          const titleBox = await title.boundingBox();
+          if (!parentBox || !titleBox) return Number.POSITIVE_INFINITY;
+          return Math.abs(titleBox.y - parentBox.y - parentBox.height);
+        })
+        .toBeLessThanOrEqual(1);
+      await expect
+        .poll(() =>
+          title.evaluate((element) => element.getBoundingClientRect().height)
+        )
+        .toBe(24);
+      await expect
+        .poll(() =>
+          parent.evaluate(
+            (element) => element.scrollWidth - element.clientWidth
+          )
+        )
+        .toBeLessThanOrEqual(1);
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath(`compact-native-header-${width}.png`),
+      });
+    }
+  });
   test("isolates parallel votes and content and preserves back, forward and shared chat", async ({
     page,
   }, testInfo) => {

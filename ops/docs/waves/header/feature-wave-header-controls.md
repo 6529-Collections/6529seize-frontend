@@ -40,12 +40,18 @@ These surfaces show the tile even when Announcements has a saved wave picture.
 3. Use header controls near the wave title, avatar, and metadata.
 4. Open the owner options menu (`⋮`) when available.
 
-On phones, select the wave name to open `About`. Use `Close`, tap outside,
-press Escape, or use the device’s Back action to return to the thread.
+On phones, select the wave name to open `About`. Swipe down from the sheet's
+handle or header, use `Close`, tap outside, press Escape, or use the device’s
+Back action to return to the thread.
 The main `About` sheet has a Close control; Back controls inside subviews return
 to their parent view.
 
 ## Conversation Header
+
+In the native app's compact header, the parent-wave link sits directly above
+the wave name beside the avatar. Long names truncate within the available space
+so they do not overlap the header actions. A hidden or absent description leaves
+no extra row in this identity block.
 
 At desktop and tablet widths (768px and above), the conversation header groups
 its avatar, parent-wave link, name, and a short one-line description preview into a compact

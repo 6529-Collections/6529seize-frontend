@@ -21,8 +21,9 @@ pinned drop with its content and media. Eligible viewers can add or edit REP.
 
 1. Open a wave and select its name.
 2. Read About or switch to REP or Configuration.
-3. On mobile, close the panel, press Escape, or use Back to return to the original
-   view. The competition, tab, curation, scroll and unfinished input remain in place.
+3. On mobile, swipe down from the handle or header, select Close, tap outside,
+   press Escape, or use Back to return to the original view. The competition,
+   tab, curation, scroll and unfinished input remain in place.
 
 ## Common Scenarios
 
@@ -36,6 +37,8 @@ pinned drop with its content and media. Eligible viewers can add or edit REP.
   main row. Voter lists and vote activity belong to **Votes**.
 - Information tabs support ArrowLeft, ArrowRight, Home and End. Mobile confines
   focus to the open panel and returns focus to its opener when it closes.
+- Scroll the panel content normally. A short or canceled header drag returns
+  the panel to its open position; horizontal gestures do not dismiss it.
 
 ## Edge Cases
 
