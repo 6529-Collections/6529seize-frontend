@@ -218,4 +218,4 @@ Resubmission starts a new invitation set and restores the original submitter's
 artist credit. Deleting an unminted submission closes its pending invitations.
 Existing cards and claims retain their historical artist credits.
 
-Collaboration notifications show the actor’s avatar and linked handle, the saved artwork name, and the time using the standard notification header. An invitation offers **Review invitation**; an acceptance offers **View artwork**. The artwork name also opens the submission. Older notifications without a saved name show “an artwork”; an unavailable actor profile uses neutral wording.
+Collaboration notifications show the actor’s avatar and linked handle, the saved artwork name, and the time using the standard notification header. For both invitations and acceptances, the artwork name is the single link to the submission; there is no separate action link. Older notifications without a saved name show “an artwork”; an unavailable actor profile uses neutral wording.

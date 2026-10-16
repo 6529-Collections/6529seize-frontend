@@ -63,21 +63,6 @@ export default function NotificationMemeCollaboration({
           </span>
         ))}
       <NotificationTimestamp createdAt={notification.created_at} />
-      {artworkHref && (
-        <div className="tw-basis-full tw-pt-1">
-          <Link
-            href={artworkHref}
-            className="tw-inline-block tw-max-w-full tw-break-words tw-rounded-sm tw-text-sm tw-font-semibold tw-leading-6 tw-text-primary-300 tw-no-underline hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-          >
-            {t(
-              locale,
-              invited
-                ? "memes.collaborations.review"
-                : "memes.collaborations.viewArtwork"
-            )}
-          </Link>
-        </div>
-      )}
     </>
   );
   return (

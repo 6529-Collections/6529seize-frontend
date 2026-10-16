@@ -1630,22 +1630,13 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         .locator("xpath=ancestor::div[1]");
       await expect(row.getByText(message, { exact: true })).toBeVisible();
       const artwork = row.getByRole("link", { name: "Test Cat", exact: true });
-      const link = row.getByRole("link", { name: action, exact: true });
       await expect(artwork).toBeVisible();
-      await expect(link).toBeVisible();
+      await expect(
+        row.getByRole("link", { name: action, exact: true })
+      ).toHaveCount(0);
+      await expect(row.getByRole("link")).toHaveCount(2);
       const artworkHref = `/waves/${encodeURIComponent(WAVE)}?drop=${encodeURIComponent(entryDropId("alpha"))}`;
       await expect(artwork).toHaveAttribute("href", artworkHref);
-      await expect(link).toHaveAttribute("href", artworkHref);
-      const actorBox = await actor.boundingBox();
-      const artworkBox = await artwork.boundingBox();
-      const linkBox = await link.boundingBox();
-      expect(actorBox).not.toBeNull();
-      expect(artworkBox).not.toBeNull();
-      expect(linkBox).not.toBeNull();
-      expect(Math.abs(actorBox!.x - linkBox!.x)).toBeLessThan(1);
-      expect(linkBox!.y).toBeGreaterThanOrEqual(
-        artworkBox!.y + artworkBox!.height + 4
-      );
     }
     await expectNoHorizontalOverflow(page);
     await page.screenshot({
