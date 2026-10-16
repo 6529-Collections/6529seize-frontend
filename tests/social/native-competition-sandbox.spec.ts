@@ -1618,7 +1618,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     for (const [handle, action, message] of [
       ["phoebeum", "Review invitation", "invited you to collaborate on"],
       ["prxt0", "View artwork", "accepted your collaboration invitation for"],
-    ]) {
+    ] as const) {
       const actor = page.getByRole("link", { name: handle, exact: true });
       await expect(actor).toBeVisible();
       await expect(actor).toHaveAttribute("href", `/${handle}`);
