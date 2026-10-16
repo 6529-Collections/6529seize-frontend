@@ -45,9 +45,11 @@ describe("usePrefetchWaveData", () => {
       staleTime: 60000,
     });
 
-    await prefetchQuery.mock.calls[0][0].queryFn();
+    const signal = new AbortController().signal;
+    await prefetchQuery.mock.calls[0][0].queryFn({ signal });
     expect(commonApiFetch).toHaveBeenCalledWith({
       endpoint: "waves/wave",
+      signal,
       errorMode: "structured",
     });
   });

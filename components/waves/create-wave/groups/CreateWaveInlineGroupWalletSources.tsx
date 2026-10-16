@@ -29,6 +29,7 @@ interface InlineWalletSourcesProps {
   readonly onChange: (update: WalletSourcesUpdate) => void;
   readonly quiet?: boolean;
   readonly networkPresentation?: boolean;
+  readonly hideEmptyMessages?: boolean;
 }
 
 function RemoveSourceButton({
@@ -87,7 +88,7 @@ function getWalletSourceClasses(quiet: boolean, networkPresentation: boolean) {
       input: "[&_input]:tw-h-11 [&_input]:tw-py-0",
       title: "tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100",
       description:
-        "tw-mb-3 tw-mt-2 tw-text-xxs tw-font-normal tw-leading-5 tw-text-iron-350",
+        "tw-mb-3 tw-mt-2 tw-text-xxs tw-font-normal tw-leading-5 tw-text-iron-400",
       status:
         "tw-flex tw-justify-between tw-gap-3 tw-mt-2 tw-items-start lg:tw-row-start-5",
       empty: "tw-m-0 tw-text-xs tw-text-iron-500 tw-font-normal",
@@ -112,6 +113,7 @@ function EmmaWalletSource({
   onChange,
   quiet = false,
   networkPresentation = false,
+  hideEmptyMessages = false,
 }: Omit<InlineWalletSourcesProps, "direction">) {
   const locale = useBrowserLocale();
   const { connectedProfile, requestAuth } = useAuth();
@@ -218,52 +220,28 @@ function EmmaWalletSource({
           "waves.create.groups.inlineIdentities.sources.emma.searchEmpty"
         )}
       />
-      <div className={sourceClasses.status}>
-        {selectedId === null ? (
-          <p className={sourceClasses.empty}>
-            {t(
-              locale,
-              "waves.create.groups.inlineIdentities.sources.emma.empty"
-            )}
-          </p>
-        ) : null}
-        {isLoading ? (
-          <p
-            role="status"
-            className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-400"
-          >
-            {t(
-              locale,
-              "waves.create.groups.inlineIdentities.sources.emma.loading"
-            )}
-          </p>
-        ) : null}
-        {isLoadPending ? (
-          <button
-            type="button"
-            onClick={() => {
-              if (sources.selectedAllowlist) {
-                void loadAllowlist(sources.selectedAllowlist);
-              }
-            }}
-            className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-          >
-            {t(
-              locale,
-              "waves.create.groups.inlineIdentities.sources.emma.load"
-            )}
-          </button>
-        ) : null}
-        {authenticationRequired || hasLoadError ? (
-          <div role="alert" className="tw-min-w-0">
-            <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-error">
+      {(!hideEmptyMessages || selectedId !== null) && (
+        <div className={sourceClasses.status}>
+          {selectedId === null ? (
+            <p className={sourceClasses.empty}>
               {t(
                 locale,
-                authenticationRequired
-                  ? "waves.create.groups.inlineIdentities.sources.emma.authenticationRequired"
-                  : "waves.create.groups.inlineIdentities.sources.emma.error"
+                "waves.create.groups.inlineIdentities.sources.emma.empty"
               )}
             </p>
+          ) : null}
+          {isLoading ? (
+            <p
+              role="status"
+              className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-400"
+            >
+              {t(
+                locale,
+                "waves.create.groups.inlineIdentities.sources.emma.loading"
+              )}
+            </p>
+          ) : null}
+          {isLoadPending ? (
             <button
               type="button"
               onClick={() => {
@@ -271,29 +249,58 @@ function EmmaWalletSource({
                   void loadAllowlist(sources.selectedAllowlist);
                 }
               }}
-              className="tw-mt-1 tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+              className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
             >
-              {t(locale, "waves.create.groups.inlineIdentities.sources.retry")}
+              {t(
+                locale,
+                "waves.create.groups.inlineIdentities.sources.emma.load"
+              )}
             </button>
-          </div>
-        ) : null}
-        {sources.emmaWallets !== null ? (
-          <SourceCount
-            count={sources.emmaWallets.length}
-            sourceName={sources.selectedAllowlist?.name}
-          />
-        ) : null}
-        {selectedId !== null ? (
-          <RemoveSourceButton
-            label={t(
-              locale,
-              "waves.create.groups.inlineIdentities.sources.emma.remove"
-            )}
-            onClick={onRemove}
-            quiet={quiet}
-          />
-        ) : null}
-      </div>
+          ) : null}
+          {authenticationRequired || hasLoadError ? (
+            <div role="alert" className="tw-min-w-0">
+              <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-error">
+                {t(
+                  locale,
+                  authenticationRequired
+                    ? "waves.create.groups.inlineIdentities.sources.emma.authenticationRequired"
+                    : "waves.create.groups.inlineIdentities.sources.emma.error"
+                )}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  if (sources.selectedAllowlist) {
+                    void loadAllowlist(sources.selectedAllowlist);
+                  }
+                }}
+                className="tw-mt-1 tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+              >
+                {t(
+                  locale,
+                  "waves.create.groups.inlineIdentities.sources.retry"
+                )}
+              </button>
+            </div>
+          ) : null}
+          {sources.emmaWallets !== null ? (
+            <SourceCount
+              count={sources.emmaWallets.length}
+              sourceName={sources.selectedAllowlist?.name}
+            />
+          ) : null}
+          {selectedId !== null ? (
+            <RemoveSourceButton
+              label={t(
+                locale,
+                "waves.create.groups.inlineIdentities.sources.emma.remove"
+              )}
+              onClick={onRemove}
+              quiet={quiet}
+            />
+          ) : null}
+        </div>
+      )}
     </section>
   );
 }
@@ -304,6 +311,7 @@ function CsvWalletSource({
   onChange,
   quiet = false,
   networkPresentation = false,
+  hideEmptyMessages = false,
 }: InlineWalletSourcesProps) {
   const locale = useBrowserLocale();
   const inputId = useId();
@@ -451,31 +459,33 @@ function CsvWalletSource({
           {errorMessage}
         </p>
       ) : null}
-      <div className={sourceClasses.status}>
-        {sources.uploadedWallets === null ? (
-          <p className={sourceClasses.empty}>
-            {t(
-              locale,
-              "waves.create.groups.inlineIdentities.sources.csv.empty"
-            )}
-          </p>
-        ) : (
-          <SourceCount
-            count={sources.uploadedWallets.length}
-            sourceName={sources.uploadedFileName ?? undefined}
-          />
-        )}
-        {sources.uploadedWallets !== null ? (
-          <RemoveSourceButton
-            label={t(
-              locale,
-              "waves.create.groups.inlineIdentities.sources.csv.remove"
-            )}
-            onClick={onRemove}
-            quiet={quiet}
-          />
-        ) : null}
-      </div>
+      {(!hideEmptyMessages || sources.uploadedWallets !== null) && (
+        <div className={sourceClasses.status}>
+          {sources.uploadedWallets === null ? (
+            <p className={sourceClasses.empty}>
+              {t(
+                locale,
+                "waves.create.groups.inlineIdentities.sources.csv.empty"
+              )}
+            </p>
+          ) : (
+            <SourceCount
+              count={sources.uploadedWallets.length}
+              sourceName={sources.uploadedFileName ?? undefined}
+            />
+          )}
+          {sources.uploadedWallets !== null ? (
+            <RemoveSourceButton
+              label={t(
+                locale,
+                "waves.create.groups.inlineIdentities.sources.csv.remove"
+              )}
+              onClick={onRemove}
+              quiet={quiet}
+            />
+          ) : null}
+        </div>
+      )}
     </section>
   );
 }
@@ -495,6 +505,7 @@ export default function CreateWaveInlineGroupWalletSources(
         onChange={props.onChange}
         quiet={props.quiet ?? false}
         networkPresentation={props.networkPresentation ?? false}
+        hideEmptyMessages={props.hideEmptyMessages ?? false}
       />
       <CsvWalletSource {...props} />
     </div>

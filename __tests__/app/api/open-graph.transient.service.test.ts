@@ -1,3 +1,5 @@
+jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
+
 import { createTransientPlan } from "@/app/api/open-graph/transient/service";
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
 

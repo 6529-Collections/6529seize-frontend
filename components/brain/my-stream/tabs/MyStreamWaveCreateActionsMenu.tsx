@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  COMPACT_ACTION_BUTTON_CLASS,
+  COMPACT_ACTION_CONTENT_CLASS,
+} from "@/components/utils/button/compactActionButtonStyles";
+
 import { useState } from "react";
 import {
   ChatBubbleLeftRightIcon,
@@ -107,9 +112,9 @@ export default function MyStreamWaveCreateActionsMenu({
     return null;
   }
 
-  const buttonClassName = `tw-group tw-inline-flex tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline-none ${isMobile ? "tw-min-h-11" : "tw-h-8"}`;
+  const buttonClassName = `${COMPACT_ACTION_BUTTON_CLASS} ${isMobile ? "tw-min-h-11" : "tw-h-8"}`;
   const trigger = (
-    <span className="tw-inline-flex tw-h-8 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-text-xs tw-font-semibold tw-text-iron-100 tw-transition-colors group-focus-visible:tw-outline group-focus-visible:tw-outline-2 group-focus-visible:tw-outline-offset-2 group-focus-visible:tw-outline-primary-300 desktop-hover:group-hover:tw-bg-iron-800 motion-reduce:tw-transition-none">
+    <span className={COMPACT_ACTION_CONTENT_CLASS}>
       <PlusIcon className="-tw-ml-1 tw-size-4 tw-shrink-0" aria-hidden="true" />
       <span>{t(locale, "waves.create.actions.create")}</span>
     </span>

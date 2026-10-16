@@ -26,6 +26,13 @@ loading does not change a deliberate selection.
 The wave list stays in place when switching waves. The remembered section opens
 directly; pending data uses that section's loading state without opening Chat or
 Competitions first.
+When a wave needs to load, its name and picture from the wave list appear
+immediately above a quiet loading state. A shared link whose name is not yet
+available shows `Loading wave…`. Recently opened waves use available content
+without a forced loading screen. If loading fails, the wave identity stays visible
+and **Try again** retries the request; competition views keep their own recovery
+controls.
+
 Explicit tab, competition, curation and message links retain their destinations.
 Browser Back/Forward and native app Back restore the section from that visit
 when it is still available, ahead of the wave's latest remembered choice.

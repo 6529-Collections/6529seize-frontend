@@ -176,9 +176,20 @@ zone bugs by itself, so test date code in other zones on purpose:
 - `withHostTimeZone` in the same file makes `Intl.DateTimeFormat` default to
   a zone inside a callback, for rendering components in-process. It does not
   change `Date` getters or `toLocale*String`.
+- `mockDefaultTimeZone` in `__tests__/utils/timeZoneHydration.ts` does the same
+  for `Intl.DateTimeFormat` and for `Date#toLocaleDateString`,
+  `toLocaleTimeString` and `toLocaleString`, so use it for components that
+  format through those. Restore it in a `finally` block.
 - `TEST_TIME_ZONES` (UTC, Los Angeles, Auckland) and `EXTREME_TIME_ZONES`
   (UTC-11, UTC+14) are the zones to cover. Assigning `process.env.TZ` inside a
   test does nothing: Jest gives each test a copy of the environment.
+
+Write each date expectation so it holds in every zone. If the code shows a
+viewer-local time, run it in each of `TEST_TIME_ZONES` and expect a literal
+string per zone, not one string that happens to be right in UTC. If the code
+shows a UTC or calendar value, name `timeZone: "UTC"` or use a date-only string
+in the test. If the code works in local wall-clock time, build the fixtures
+from local parts (`new Date(2035, 4, 1, 9, 15)`), not from a `...Z` instant.
 
 To run a suite or file in another zone, set `JEST_TZ` to an IANA zone name. A
 plain `TZ` is ignored on purpose, because shells often set it. In PowerShell:

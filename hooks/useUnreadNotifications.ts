@@ -13,14 +13,15 @@ import {
 import { getAuthJwt, isAuthJwtUsable } from "@/services/auth/auth.utils";
 import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint";
 import { useNotificationRealtimeState } from "@/services/notifications/notification-realtime-state";
+import {
+  getUnreadNotificationsRefetchInterval,
+  isProfileCoveredByNotificationSocket,
+} from "@/services/notifications/unread-notifications-polling";
 
 interface UseUnreadNotificationsOptions {
   readonly enabled?: boolean | undefined;
   readonly profileId?: string | null | undefined;
 }
-
-const FALLBACK_POLL_INTERVAL_MS = 30_000;
-const REALTIME_RECONCILIATION_INTERVAL_MS = 5 * 60_000;
 
 type MissingAuthPollingError = Error & {
   readonly status: 401;
@@ -47,17 +48,18 @@ export function useUnreadNotifications(
   const hasUsableAuthJwt = isAuthJwtUsable(authJwt);
   const authFingerprint = getAuthTokenFingerprint(authJwt);
   const isEnabled = !!handle && options.enabled !== false && hasUsableAuthJwt;
-  const isRealtimeCovered =
-    notificationRealtimeState.connected &&
-    !!options.profileId &&
-    notificationRealtimeState.syncedProfileIds.includes(options.profileId);
+  const isRealtimeCovered = isProfileCoveredByNotificationSocket(
+    notificationRealtimeState,
+    options.profileId
+  );
 
   const notificationQuery = useQuery<ApiNotificationsResponseV2>({
+    // The token decides whose count this is, so every consumer of the active
+    // account shares one cache entry even while its profile handle catches up.
     queryKey: [
       QueryKey.IDENTITY_NOTIFICATIONS,
       {
         auth: authFingerprint,
-        identity: handle,
         limit: "1",
         version: "v2",
         ...(isMultiCompetitionEnabled() ? { includeCompetitions: true } : {}),
@@ -86,14 +88,8 @@ export function useUnreadNotifications(
       });
     },
     enabled: isEnabled,
-    refetchInterval: (query) => {
-      if (isTerminalNotificationAuthQueryError(query.state.error)) {
-        return false;
-      }
-      return isRealtimeCovered
-        ? REALTIME_RECONCILIATION_INTERVAL_MS
-        : FALLBACK_POLL_INTERVAL_MS;
-    },
+    refetchInterval: (query) =>
+      getUnreadNotificationsRefetchInterval(query, isRealtimeCovered),
     refetchOnWindowFocus: (query) =>
       !isTerminalNotificationAuthQueryError(query.state.error),
     refetchOnMount: (query) =>
