@@ -73,11 +73,13 @@ let queryClient: QueryClient;
 
 function setAccount(
   address: string | undefined,
-  connectionState = "connected"
+  connectionState = "connected",
+  { seizeConnectOpen = false }: { readonly seizeConnectOpen?: boolean } = {}
 ) {
   jest.mocked(useSeizeConnectContext).mockReturnValue({
     address,
     connectionState,
+    seizeConnectOpen,
     hasValidWalletAuth: !!address,
     isConnected: false,
     connectedAccounts: [],
@@ -148,6 +150,23 @@ it("distinguishes initializing from signed out and keeps the same account footpr
   setAccount("0xalice");
   rerender(accountUi());
   expect(container.firstElementChild?.className).toBe(loadingClasses);
+});
+
+it("marks the signed-out connect button busy while the wallet connection opens", () => {
+  setAccount(undefined, "disconnected");
+  const { unmount } = render(accountUi(false));
+  expect(
+    screen.getByRole("button", { name: "Connect Wallet" })
+  ).not.toHaveAttribute("aria-busy");
+  unmount();
+
+  setAccount(undefined, "disconnected", { seizeConnectOpen: true });
+  render(accountUi(false));
+
+  const button = screen.getByRole("button", { name: "Connect Wallet" });
+  expect(button).toHaveAttribute("aria-busy", "true");
+  expect(button).toBeEnabled();
+  expect(button.querySelector(".tw-animate-spin")).toBeInTheDocument();
 });
 
 it("hydrates the loading account before revealing a stored profile", async () => {

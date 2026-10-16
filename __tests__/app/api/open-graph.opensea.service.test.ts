@@ -1,3 +1,5 @@
+jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
+
 import { createOpenSeaPlan } from "@/app/api/open-graph/opensea/service";
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
 
