@@ -9,6 +9,8 @@ export interface MonthProps {
   readonly onSelectDay?: ((date: Date) => void) | undefined;
   readonly autoOpenYmd?: string | undefined;
   readonly displayTz: DisplayTz;
+  /** IANA zone whose calendar dates the grid shows ("UTC" in UTC mode). */
+  readonly timeZone: string;
   readonly locale: SupportedLocale;
   readonly publishedMemeIds: ReadonlySet<number>;
   readonly publishedMemesStatus: PublishedMemesStatus;
@@ -19,6 +21,7 @@ export interface SeasonViewProps {
   readonly onSelectDay?: ((date: Date) => void) | undefined;
   readonly autoOpenYmd?: string | undefined;
   readonly displayTz: DisplayTz;
+  readonly timeZone: string;
   readonly locale: SupportedLocale;
   readonly publishedMemeIds: ReadonlySet<number>;
   readonly publishedMemesStatus: PublishedMemesStatus;
@@ -71,6 +74,8 @@ export interface MintCellDetails {
   readonly mintInstantUtc: Date | undefined;
   readonly mintLabel: string | undefined;
   readonly mintNumber: number | undefined;
+  /** UTC day a scheduled mint is assigned to; overrides are keyed by it. */
+  readonly mintUtcDay: Date | undefined;
 }
 
 export interface MintTooltip {
@@ -85,6 +90,9 @@ export interface MonthDayCellProps {
   readonly locale: SupportedLocale;
   readonly month: number;
   readonly onSelectDay?: ((date: Date) => void) | undefined;
+  readonly timeZone: string;
+  /** `ymd` of today's date in `timeZone`. */
+  readonly todayYmd: string;
   readonly year: number;
   readonly publishedMemeIds: ReadonlySet<number>;
   readonly publishedMemesStatus: PublishedMemesStatus;

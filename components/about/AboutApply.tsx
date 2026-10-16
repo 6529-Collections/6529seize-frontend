@@ -4,6 +4,9 @@ import {
   CheckIcon,
 } from "@heroicons/react/24/outline";
 
+import UtcScheduleTime from "@/components/utils/time/UtcScheduleTime";
+import { MEMES_CHECKPOINT_UTC_TIME } from "@/helpers/waves/memes-checkpoint.helpers";
+
 import {
   ABOUT_BODY_TEXT_CLASS_NAME,
   ABOUT_CARD_CLASS_NAME,
@@ -172,9 +175,21 @@ export default function AboutApply() {
                   Checkpoint Schedule
                 </h4>
                 <div className="tw-mt-4 tw-space-y-3 tw-text-sm tw-leading-6 sm:tw-text-base sm:tw-leading-7">
-                  <ScheduleRow day="Monday" destination="Wednesday" />
-                  <ScheduleRow day="Wednesday" destination="Friday" />
-                  <ScheduleRow day="Friday" destination="Monday" />
+                  <ScheduleRow
+                    day="Monday"
+                    utcWeekday={1}
+                    destination="Wednesday"
+                  />
+                  <ScheduleRow
+                    day="Wednesday"
+                    utcWeekday={3}
+                    destination="Friday"
+                  />
+                  <ScheduleRow
+                    day="Friday"
+                    utcWeekday={5}
+                    destination="Monday"
+                  />
                 </div>
               </div>
             </div>
@@ -312,16 +327,23 @@ function ApplyCheckIcon() {
 
 function ScheduleRow({
   day,
+  utcWeekday,
   destination,
 }: {
   readonly day: string;
+  readonly utcWeekday: number;
   readonly destination: string;
 }) {
   return (
     <div className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-1 sm:tw-grid-cols-[minmax(5.75rem,auto)_minmax(0,1fr)] sm:tw-items-center sm:tw-gap-3">
       <span className="tw-font-semibold tw-text-primary-300">{day}</span>
       <span className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2">
-        <span className="tw-text-iron-400">17:00 GMT</span>
+        <span className="tw-text-iron-400">
+          <UtcScheduleTime
+            time={MEMES_CHECKPOINT_UTC_TIME}
+            weekdays={[utcWeekday]}
+          />
+        </span>
         <ArrowRightIcon
           aria-hidden="true"
           className="tw-size-4 tw-shrink-0 tw-text-iron-500"

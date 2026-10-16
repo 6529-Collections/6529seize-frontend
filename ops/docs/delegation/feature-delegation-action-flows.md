@@ -24,7 +24,7 @@ and submit/recovery behavior.
   - `Register Delegation Manager` -> `/safe-collecting/register-sub-delegation`
 - Open write routes directly by URL.
 - Profile owners can select `Add another wallet` beside `Wallet Checker` in
-  `ID Statements` → `Consolidated Addresses` to open
+  the profile’s `Wallet` section to open
   `/safe-collecting/build-consolidation`. This entry is hidden while a proxy
   profile is active and once the profile has 4 wallets.
 - The normal `register-consolidation` form links to the guided setup.
@@ -46,7 +46,10 @@ standard tooltip, available on hover and keyboard focus.
 
 - `register-delegation`
   - Required: `Collection`, `Use Case`, `Delegate Address`
-  - Optional: `Expiry Date` (`Never` or `Select Date`)
+  - Optional: `Expiry Date` (`Never` or `Select Date`). A selected date is a
+    day in your own time zone, and the delegation expires at the end of that
+    day (23:59:59 local). The form names your time zone and shows the exact
+    expiry in local time and UTC before you sign.
   - Optional: `Tokens` (`All` or `Select Token ID`)
 - `register-consolidation`
   - Required: `Collection`, `Consolidating With`
@@ -72,6 +75,11 @@ standard tooltip, available on hover and keyboard focus.
   `Missing or invalid Address`.
 - Write forms reject self-targeting and show
   `Invalid Address - cannot delegate to your own wallet`.
+- With `Select Date`, the picker starts at the first date that ends at least
+  1 hour from now. Submit rechecks the time and refuses an expiry less than
+  1 hour away with `Choose a later expiry date. The delegation must stay
+  active for at least 1 hour after you submit.` The same rules apply to
+  `Expiry Date` on the inline update form.
 - `register-delegation` supports all listed use cases in the selector, but the
   UI note calls out current 6529.io support for `#1`, `#2`, and `#3`.
 - `register-consolidation` shows an on-page note that TDH consolidation should

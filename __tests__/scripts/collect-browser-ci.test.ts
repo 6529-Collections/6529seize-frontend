@@ -103,7 +103,7 @@ it("does not select wave creation for unrelated locale messages", () => {
     ],
   });
 });
-it("selects both browser lanes when their shared workflow changes", () => {
+it("selects every core browser lane when their shared workflow changes", () => {
   const outputs = select([".github/workflows/app-pr-ci.yml"]);
   expect(JSON.parse(outputs["core_playwright_matrix"]!)).toEqual({
     include: [
@@ -115,6 +115,11 @@ it("selects both browser lanes when their shared workflow changes", () => {
       {
         lane: "playwright-wave-creation",
         label: "Wave creation desktop and mobile",
+        runner: "ubuntu-latest",
+      },
+      {
+        lane: "playwright-drop-editing",
+        label: "Drop editing desktop and mobile",
         runner: "ubuntu-latest",
       },
     ],

@@ -23,6 +23,7 @@ import BrainRightSidebar, {
 import CreateWaveModal from "../waves/create-wave/CreateWaveModal";
 import { isCreateWavePathname } from "@/helpers/waves/create-wave-route.helpers";
 import { WaveChatScrollProvider } from "@/contexts/wave/WaveChatScrollContext";
+import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
 import {
   DROP_DETAIL_STALE_TIME_MS,
@@ -80,6 +81,18 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   const information = useWaveInformation();
   const { connectedProfile } = useAuth();
   const { isWaveModalOpen, close } = useCreateModalState();
+  const requestMainWavesList = useMyStreamOptional()?.requestMainWavesList;
+  const isWavesSurface = defaultPath === "/waves";
+
+  // Waves pages read the main list even when the sidebar is hidden (mobile
+  // web wave view), so the layout requests it. Messages pages show DMs only.
+  useEffect(() => {
+    if (!isWavesSurface) {
+      return;
+    }
+
+    return requestMainWavesList?.();
+  }, [isWavesSurface, requestMainWavesList]);
 
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
 

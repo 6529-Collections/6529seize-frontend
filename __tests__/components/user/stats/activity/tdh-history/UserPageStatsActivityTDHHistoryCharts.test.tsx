@@ -3,6 +3,7 @@ import UserPageStatsActivityTDHHistoryCharts from "@/components/user/stats/activ
 import { getTdhHistoryMessage } from "@/components/user/stats/activity/tdh-history/tdh-history.messages";
 import type { TDHHistory } from "@/entities/ITDH";
 import { formatDate } from "@/i18n/format";
+import { withHostTimeZone } from "../../../../../utils/timeZoneHarness";
 
 jest.mock(
   "@/components/user/stats/activity/tdh-history/UserPageStatsActivityTDHHistoryChart",
@@ -93,6 +94,33 @@ describe("UserPageStatsActivityTDHHistoryCharts", () => {
         locale,
         history[0]!.date
       )}`
+    );
+  });
+
+  it("labels the API's date-only strings with their own day in a western browser", () => {
+    // The API sends "YYYY-MM-DD" at runtime even though TDHHistory types it as Date.
+    const history = ["2026-10-11", "2026-10-12"].map(
+      (date) =>
+        ({
+          date,
+          boosted_tdh: 1,
+          net_boosted_tdh: 2,
+          created_boosted_tdh: 3,
+          destroyed_boosted_tdh: 4,
+        }) as unknown as TDHHistory
+    );
+
+    withHostTimeZone("America/Los_Angeles", () => {
+      render(
+        <UserPageStatsActivityTDHHistoryCharts
+          tdhHistory={history}
+          locale="en-US"
+        />
+      );
+    });
+
+    expect(screen.getAllByTestId("chart")[0]).toHaveTextContent(
+      "Oct 12, 2026|Oct 11, 2026"
     );
   });
 });

@@ -133,6 +133,9 @@
 - Query keys outside `sort`, `sort_dir`, `year`, and `szn` are removed by route
   rewrites.
 - Infinite scroll only continues while another API page exists.
+- Under `Age` and `Meme` sorts, each card shows its UTC mint day, the same date
+  as the card page. Viewers far east of UTC, such as in New Zealand, see that
+  day even when their local date has already moved on.
 
 ## Failure and Recovery
 

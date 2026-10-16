@@ -12,13 +12,15 @@ import type {
   WebSocketMessage,
 } from "./WebSocketTypes";
 import { setWebSocketMessageMetadata, WebSocketStatus } from "./WebSocketTypes";
+import { applyDelayJitter } from "@/helpers/jitter.helpers";
 import { asNonEmptyString } from "@/lib/text/nonEmptyString";
 import { ensureActiveSession } from "../auth/session-readiness";
 import { getAuthJwt, isAuthJwtUsable } from "../auth/auth.utils";
 
 // Default values for reconnection
 const DEFAULT_RECONNECT_DELAY = 2000; // Start with 2 seconds
-const MAX_RECONNECT_DELAY = 30000; // Max 30 seconds
+const MAX_RECONNECT_DELAY = 30000; // Max 30 seconds, before jitter
+const RECONNECT_JITTER_RATIO = 0.25; // +/-25% so reconnects do not synchronize
 const DEFAULT_MAX_RECONNECT_ATTEMPTS = 20; // Try up to 20 times before giving up
 const AUTHENTICATION_TIMEOUT_MS = 8000;
 const AUTHENTICATION_FAILED_CLOSE_CODE = 4008;
@@ -91,16 +93,18 @@ const createCredentialMarker = (credential: string): string => {
 };
 
 /**
- * Calculate delay for exponential backoff
+ * Calculate delay for exponential backoff with jitter
  */
 function calculateReconnectDelay(
   attempt: number,
   initialDelay: number,
   maxDelay: number
 ): number {
-  // Exponential backoff formula: initialDelay * 2^attempt (capped at maxDelay)
-  const delay = initialDelay * Math.pow(1.5, attempt);
-  return Math.min(delay, maxDelay);
+  // Exponential backoff formula: initialDelay * 1.5^attempt (capped at maxDelay)
+  const delay = Math.min(initialDelay * Math.pow(1.5, attempt), maxDelay);
+  // Jitter is applied after the cap so clients that saturate at the maximum
+  // delay still spread out instead of reconnecting together after a deploy.
+  return applyDelayJitter(delay, RECONNECT_JITTER_RATIO);
 }
 
 /**

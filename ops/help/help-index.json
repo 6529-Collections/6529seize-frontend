@@ -69,7 +69,7 @@
         "Competition links use /waves/{waveId}/competitions/{competitionId}; an entry link adds ?entry={entryId}. Explicit competition and entry links preserve that competition across tabs, reload and Back/Forward even when another competition becomes the default.",
         "In competition setup, Competition type offers Rank and Approve in a desktop dropdown or a bottom sheet on smaller screens, including the app. The current choice is marked. Selecting a type closes the picker; dismissing it leaves the choice unchanged.",
         "In the app, the competition setup editor keeps the focused name or description field above the keyboard and action bar. Closing the keyboard restores the editor's full height.",
-        "In the native app, the competition collection filters and Votes subtabs use the same compact pills as wave information. More opens remaining collection choices and shows the selected choice's name after selection. Dismissing More leaves the selection unchanged. Desktop and mobile web also use compact pills for collection filters, with all available filters visible. Votes subtabs retain underlined styling on web; published competitions keep the shared wave-level navigation.",
+        "In the native app, the competition collection filters and Votes subtabs use the same compact pills as wave information. More opens remaining collection choices and shows the selected choice's name after selection. Dismissing More leaves the selection unchanged. Desktop and mobile web also use compact pills for collection filters, with all available filters visible. Votes subtabs use the same compact pills on desktop and mobile web. Decision-pause notices appear below the Votes pills. Entry-submission eligibility notices appear only in Leaderboard, not in My Votes, All votes, or Activity; published competitions keep the shared wave-level navigation.",
         "When switching to a competition route, its controls appear after navigation completes, so a newly opened sort sheet or form stays in that view.",
         "A wave link targeting a specific chat message remains in Chat even when the link also names another section. The message target takes priority over that conflicting destination.",
         "Ordinary wave navigation restores each wave’s last selected valid tab in the same browser or app, including after reloads or app restarts. Main Stage can remember Leaderboard while Maybes Bar independently remembers Chat. Switching waves keeps the wave list in place and opens the remembered section directly; pending competition data loads in that section without opening Chat or Competitions first. With no valid remembered choice, Chat is the fallback, including Memes and completed waves. Loading or refreshing competition data does not override deliberate Chat selections. Remembered competition views retain their competition identity; if the default changes, ordinary entry falls back to Chat. Explicit tab and competition links retain their destination. Competition tabs use the default unless an explicit selection supplies another competition. One eligible competition wins; otherwise the earliest-starting running competition wins, including paused decisions. With none running, the soonest upcoming wins over history; otherwise the most recently ended wins, including archived completed history. Drafts, archived never-published drafts and cancelled competitions are excluded. With none eligible, shared chat remains usable. Chat and every selected published competition share one wave-level row: Chat, competition views, Votes, Settings, then Competitions when available, then curations. Votes contains My Votes, All votes and Activity, scoped to the selected competition. Settings renders its access, rules, appearance and pause history, including original competitions stored in wave settings. About and wave Configuration live in the information panel. Select the wave name to open it; mobile Close or the device’s Back action returns to the original competition, tab, curation and scroll. Administrators retain Competitions; other viewers see it for more than one visible competition. Unknown counts or permissions keep it hidden until administrator access or more than one visible competition is established. Direct collection links remain readable. Temporary refresh failures retain loaded competition content and its selected section; rejected access or an unavailable competition shows a retryable error in that section. Explicit competition choices and open forms keep their original competition.",
@@ -77,7 +77,7 @@
         "Where the competition experience is available, creating a wave opens shared chat without creating a competition. The Competitions tab is available to wave administrators for management, and to other viewers only when more than one visible competition is established. Users with competition creation permission open Competitions, then + Competition beside the collection filter pills, to configure a competition afterward.",
         "Wave administrators can create Rank or Approve drafts and publish them. Drafts are visible only to wave administrators. Approve requires a whole-number approval threshold greater than zero. The competition setup editor saves changes automatically. Incomplete input is retained on this device; valid drafts sync to the server. Next highlights invalid voting settings. Opening a draft goes directly to the setup wizard with saved settings prefilled. Close editor returns to the competition list and preserves the draft without publishing. The final step has Previous, Close editor and Publish; Publish saves the latest edits before publication. Whole competition means one voting budget across that competition’s entries. Competition guidelines apply to its entries and voting; chat guidelines belong to the shared wave. Published types cannot change; after the first entry, credit, signing, submission, timing, decision and outcome rules are fixed. Participation and voting access groups, title, description and presentation can still be updated while published.",
         "Each entry creates a dedicated competition drop that belongs to exactly one competition. Chat messages cannot become competition entries, and competition drops cannot be reused in another competition. Competition submissions cannot be edited, including unsigned submissions. Delete removes the entry from all competition views and direct entry links. There are no Withdraw or Disqualify actions. Existing drop-deletion permissions apply.",
-        "The wave header and tabs stay visible. Every selected published competition renders directly under the single wave tab row. The collection opens from Competitions. + Competition beside the collection filter pills opens setup directly; existing drafts open from their collection cards. The Competitions tab shows a badge counting active and upcoming competitions, hidden at zero; drafts and completed competitions do not count. The collection offers Active and upcoming, Completed, Drafts for administrators, and All. The app uses compact pills with More for remaining filters; desktop and mobile web show all available collection filters as compact pills. Create beside the wave tabs contains eligible New curation and New subwave actions. On desktop, mouse opening leaves actions unhighlighted; keyboard opening and arrow keys highlight options for selection. The separate + Competition action appears only in the Competitions collection for users with competition creation permission. Mobile uses a bottom sheet with short action descriptions; selecting an action closes the sheet before its form opens. Competition cards show the start date and any configured end date, using Starts or Ends for future dates and Started or Ended for past dates. Competition views include Leaderboard, Winners, Outcomes, Votes and Settings. Votes has My Votes, All votes and Activity subtabs scoped to the chosen competition. The leaderboard uses the familiar schedule or approval-status bar, list/grid controls, sorting and rich drop cards with the Drop action. Winners use Rank podium/timeline or Approve result cards; Outcomes use expandable reward cards; My votes uses editable rows and reset controls; All votes shows profile rows and vote totals. Open Settings for an overview with the competition type, status, name, description and guidelines, followed by Participation, Voting and Winners settings cards. Administrators can use Edit competition details on the overview card to edit the name, description and guidelines together in place, then Save changes or Cancel. Published competitions no longer open a separate editing wizard. Administrators can use the gear beside Participation or Voting Access to edit its criteria, including after entries have been submitted. Access changes preserve existing entries, votes, outcomes and decision progress. Administrators can expand Appearance and labels below these cards to edit the submission button label, proposal card display, Approve tab labels and outcome visibility, with Save changes and Cancel in that section. Approve competitions default to Proposals and Approved; custom tab labels apply to that competition. Drafts also have Finish draft setup for unpublished execution settings. Select Chat to return to the conversation. Competition drop cards in shared chat show the competition name beneath the author, linked to that competition, plus the entry’s current total, your vote, rank, and voter count. The voter dropdown shows the entry’s voters and vote history. Voting credit is independent per competition. Voting on a competition drop from shared chat uses that entry’s competition credit type, available budget, and rules. A budget can be shared across that competition or apply per entry. Zero removes a vote; negative values depend on the rules. Winning or deleting an entry releases its active voting spend. Deleted entries and their votes no longer appear in competition views.",
+        "The wave header and tabs stay visible. Every selected published competition renders directly under the single wave tab row. The collection opens from Competitions. + Competition beside the collection filter pills opens setup directly; existing drafts open from their collection cards. The Competitions tab shows a badge counting active and upcoming competitions, hidden at zero; drafts and completed competitions do not count. The collection offers Active and upcoming, Completed, Drafts for administrators, and All. The app uses compact pills with More for remaining filters; desktop and mobile web show all available collection filters as compact pills. Create beside the wave tabs contains eligible New curation and New subwave actions. On desktop, mouse opening leaves actions unhighlighted; keyboard opening and arrow keys highlight options for selection. The separate + Competition action appears only in the Competitions collection for users with competition creation permission. Mobile uses a bottom sheet with short action descriptions; selecting an action closes the sheet before its form opens. Competition cards show the start date and any configured end date, using Starts or Ends for future dates and Started or Ended for past dates. Competition views include Leaderboard, Winners, Outcomes, Votes and Settings. Votes has My Votes, All votes and Activity subtabs scoped to the chosen competition. The leaderboard uses the familiar schedule or approval-status bar, list/grid controls, sorting and rich drop cards with the Drop action. Winners use Rank podium/timeline or Approve result cards; Outcomes use expandable reward cards; My votes uses editable rows and reset controls; All votes shows profile rows and vote totals. Profiles load as their rows approach the visible area. If one profile fails, its row keeps the rank and total and shows Profile unavailable with Try again; retry reloads only that profile. Open Settings for an overview with the competition type, status, name, description and guidelines, followed by Participation, Voting and Winners settings cards. Administrators can use Edit competition details on the overview card to edit the name, description and guidelines together in place, then Save changes or Cancel. Published competitions no longer open a separate editing wizard. Administrators can use the gear beside Participation or Voting Access to edit its criteria, including after entries have been submitted. Access changes preserve existing entries, votes, outcomes and decision progress. Administrators can expand Appearance and labels below these cards to edit the submission button label, proposal card display, Approve tab labels and outcome visibility, with Save changes and Cancel in that section. Approve competitions default to Proposals and Approved; custom tab labels apply to that competition. Drafts also have Finish draft setup for unpublished execution settings. Select Chat to return to the conversation. Competition drop cards in shared chat show the competition name beneath the author, linked to that competition, plus the entry’s current total, your vote, rank, and voter count. The voter dropdown shows the entry’s voters and vote history. Voting credit is independent per competition. Voting on a competition drop from shared chat uses that entry’s competition credit type, available budget, and rules. A budget can be shared across that competition or apply per entry. Zero removes a vote; negative values depend on the rules. Winning or deleting an entry releases its active voting spend. Deleted entries and their votes no longer appear in competition views.",
         "Competition winner notifications link to the relevant competition or entry. Competition status changes and entry deletion do not send notifications or appear in the notification feed.",
         "Pause decisions stops winner selection while otherwise eligible entries and votes remain available. In Settings, Pause decisions and Resume decisions sit beside Pause history, alongside the other Settings sections. Pausing requires a non-blank reason in the confirmation dialog. Anyone who can view the competition can see each pause’s dates and reason in Pause history, including after resuming. Older pauses without a reason show No reason recorded. Approve may finalize accepted votes after voting closes when a hold or pause finishes. Competitions complete through their configured rules; administrators cannot manually end or cancel them. Archive moves a draft or completed competition into history. Terminal competitions can be cloned into new drafts but cannot reopen.",
         "Main Stage privileges belong only to an explicitly designated competition. Other competitions in the same wave do not inherit them. A wave containing native competition history cannot be deleted, and ordinary chat-history deletion preserves competition content.",
@@ -687,7 +687,7 @@
         "After the current Meme mint ends, the homepage keeps Latest Drop through a configurable grace period before replacing it with a mapped Next Drop.",
         "Latest Drop groups title and artist first, then stats with Edition Details beneath them, then Your allowance above Subscription Minting, and the countdown and mint action at the bottom.",
         "A mapped Latest Drop adds Main Stage Submission -> View as the last Edition Details row, and a mapped Next Drop shows a The Memes #{id} pill linked to the Meme card.",
-        "The home mint panel can surface The Memes subscription awareness with read-only status, subscription info, and Set up or Manage actions for the profile Subscriptions tab.",
+        "The home mint panel can surface The Memes subscription awareness with read-only status, subscription info, and Set up or Manage actions for the profile Subscriptions tab. On native iOS outside the US, or while the country check is loading, the row is not shown; on every platform it appears just after the page loads rather than in the first render.",
         "Use it when users ask where to start or where the current mint is surfaced."
       ],
       "canonical_path": "/",
@@ -1872,6 +1872,7 @@
         "Sign out all clears every connected profile in one visible transition without switching through the remaining profiles.",
         "On the native app, logout removes that profile from push delivery on this phone unless another connected wallet still uses the same profile; Sign out all removes every profile registration for this installation, including stale profiles missing locally. Other devices stay connected. Offline cleanup retries when the app reconnects, so pushes can continue until the server accepts it.",
         "If wallet connection is not working, retry from the header wallet controls and confirm the wallet modal is completed before using write actions.",
+        "On the web, signed-out visitors load wallet connection services on their first connect, so that first Connect can take a moment; the button shows a spinner until the wallet dialog opens. If loading fails, select Connect again to retry.",
         "If Post cannot finish its session check, the draft stays in the composer. Wait for loading to finish, check the connection, complete sign-in if prompted, then retry Post. A stalled session check expires so a later attempt can check again; it does not automatically post the draft.",
         "If Post asks you to reconnect or reactions show Please reconnect your wallet, the saved profile can still be visible even though its session cannot renew. Reconnect that profile from the wallet account controls, then retry the action. Save your draft before logging out or reloading; failed authentication keeps it in the composer, and reactions are not automatically retried after sign-in.",
         "Protected pages show a loading placeholder while wallet identity and the required profile are being restored; connect-wallet, profile-setup, and permission messages appear after those checks settle. Public browsing, Search, and Share remain available while account-dependent controls load.",
@@ -2101,7 +2102,7 @@
       ],
       "facts": [
         "A user's Meme Card subscription controls and history live under /{user}/subscriptions.",
-        "On native iOS when the detected country is not US or is unknown, subscription controls stay hidden and direct or deep-linked visits return to the profile Identity tab without showing subscription content.",
+        "On native iOS when the detected country is not US or is unknown, subscription controls stay hidden and direct or deep-linked visits return to the profile Identity tab without showing subscription content once the country check settles (a failed check counts as unknown); US iOS deep links wait for the check and then keep the Subscriptions tab, and web and Android never wait for the country check. On every platform the Subscriptions tab and the profile-header subscription status are added just after the page loads rather than in the first render.",
         "The tab leads with subscription coverage: status, consecutive intended drops funded, funded-through and next-unfunded Meme context, and an authoritative top-up deadline only when one is available.",
         "The tab also shows exact ETH balance, raw mint capacity, airdrop address, manual or automatic mode, edition preference, upcoming drops, and history when subscriptions are available.",
         "Tap, hover, or focus the Airdrop Address to read its full value when the phone layout truncates it.",
@@ -4103,6 +4104,49 @@
       ]
     },
     {
+      "id": "waves.memes-voting-checkpoint",
+      "kind": "business_rule",
+      "title": "The Memes voting checkpoint time",
+      "aliases": [
+        "memes checkpoint",
+        "memes voting checkpoint",
+        "checkpoint time",
+        "checkpoint schedule",
+        "when is the memes checkpoint",
+        "memes voting cutoff",
+        "what time does memes voting end",
+        "17:00 GMT checkpoint"
+      ],
+      "keywords": [
+        "memes",
+        "checkpoint",
+        "voting",
+        "schedule",
+        "utc",
+        "time zone",
+        "cutoff",
+        "24hv",
+        "monday",
+        "wednesday",
+        "friday"
+      ],
+      "facts": [
+        "The Memes voting checkpoints are Monday, Wednesday and Friday at 16:00 UTC, all year. The time is fixed in UTC, so it is 17:00 in London only during British Summer Time.",
+        "At each checkpoint the top submission on the leaderboard is selected, ranked by 24-Hour Vote (24HV): a weighted average of the TDH voted during the 24 hours before the checkpoint.",
+        "The Memes wave FAQ tab (How Does Voting Work?) and /about/apply (Checkpoint Schedule) state the checkpoint in UTC. After the page loads they add the viewer's own time zone in parentheses, for example (your time: Mon, Wed, Fri 09:00 PDT) for Los Angeles in summer.",
+        "The local note names the weekday because a viewer east of UTC can see the checkpoint on the next day: in Auckland the Monday, Wednesday and Friday checkpoints read Tuesday, Thursday and Saturday in the morning. It follows daylight saving in the viewer's zone and is left out for a viewer whose zone is UTC.",
+        "The wave FAQ takes the time of day from the wave's decision schedule and shows 16:00 UTC when that is not available."
+      ],
+      "canonical_path": "/about/apply",
+      "related_paths": ["/waves", "/the-memes"],
+      "tags": ["waves", "memes", "voting", "time"],
+      "source_refs": [
+        "ops/docs/waves/memes/feature-memes-voting-checkpoints.md",
+        "components/about/AboutApply.tsx",
+        "components/brain/my-stream/MyStreamWaveFAQ.tsx"
+      ]
+    },
+    {
       "id": "groups.overview",
       "kind": "route",
       "title": "Groups",
@@ -4431,7 +4475,7 @@
       "facts": [
         "The Register Consolidation form is a Safe Collecting action for connecting wallets you control for supported 6529 metrics.",
         "The form requires a connected wallet, Collection, and Consolidating With address.",
-        "Add another wallet in the profile’s Addresses section opens the guided Build a Consolidation setup at /safe-collecting/build-consolidation, not this form.",
+        "Add another wallet in the profile’s Wallet section opens the guided Build a Consolidation setup at /safe-collecting/build-consolidation, not this form.",
         "The normal form explains that a consolidation holds up to 4 wallets and every pair of wallets registers a link in both directions, so every wallet signs and needs ETH for gas; the link is public and existing profile data may be combined. NFTs stay in their wallets. It links to the guided setup.",
         "For TDH consolidation, use Any Collection or The Memes."
       ],
@@ -4481,7 +4525,7 @@
       ],
       "facts": [
         "Guided Setup reads its wallet limits and activation/signing-open times from the selected backend. Missing wallet limits pause guided signing and adding wallet rows; Try Again reloads settings. With valid limits but unavailable activation dates, two- and three-wallet plans continue while four-wallet signing waits.",
-        "Build a Consolidation is Safe Collecting's guided setup for linking up to 4 wallets you control. Open it from Guided Setup on the Consolidations card, from Add another wallet in ID Statements / Consolidated Addresses, or from the link in the Register Consolidation form.",
+        "Build a Consolidation is Safe Collecting's guided setup for linking up to 4 wallets you control. Open it from Guided Setup on the Consolidations card, from Add another wallet in the profile’s Wallet section, or from the link in the Register Consolidation form.",
         "Before the activation cutoff, a subtle note under the wallet counter shows the selected environment's four-wallet signing opening time in UTC. Plans can be prepared in advance. The note disappears at the cutoff, including in an open tab; four-wallet signing remains held until the separate opening time.",
         "Every pair of wallets in a consolidation registers use case 999 in both directions. The guide reads which directions are already registered on-chain (Any Collection or The Memes) and plans one transaction per wallet: a single registration for one missing link, or one batch for several.",
         "The connected wallet and its current consolidation are prefilled. Wallets already in that consolidation sign first and new wallets sign last; signing out of order temporarily splits the consolidation and can reduce TDH-wave votes.",
@@ -6103,15 +6147,15 @@
       ],
       "facts": [
         "Identity statements are managed from profile identity surfaces on /{user}.",
-        "On mobile, select the ID Statements score card to open the addresses and statements card. The personalized Addresses heading and wallet controls come first; below a divider, the ID Statements heading has an information button and compact Add action for eligible owners.",
-        "The profile’s Addresses section precedes ID Statements. Statement groups include Social Media Accounts, NFT Accounts, Contact, and Social Media Verification Posts; there is no separate Consolidated Addresses label.",
+        "On mobile, select the ID Statements score card to open the addresses and statements card. The personalized Wallet heading and wallet controls come first; below a divider, the ID Statements heading has an information button and compact Add action for eligible owners.",
+        "The profile’s Wallet section precedes ID Statements. Statement groups include Social Media Accounts, NFT Accounts, Contact, and Social Media Verification Posts; there is no separate Consolidated Addresses label.",
         "The information tooltip beside ID Statements explains that statements are optional and permanently public, social accounts are self-declared and 6529 does not connect to them or verify account ownership or posts, and the community rates statement accuracy. Open it on hover, keyboard focus or tap; Escape or an outside click dismisses it.",
         "Eligible profile owners use Add to open a bottom sheet on mobile or a dialog on desktop, choose a statement group and platform, and can return with Back to statement types before saving.",
         "Social Media Accounts, NFT Accounts, and Contact use compact icon rows for platform selection; pointer hover and keyboard focus reveal each platform name, and the selected option has a stronger outline.",
         "On mobile, the add-statements sheet presents four compact statement groups, keeps an optional and permanently public notice visible throughout the Add flow, and provides header close, back, backdrop, Escape, and swipe-down dismissal paths.",
         "On mobile web and Capacitor, deeper add-statement forms stay above the software keyboard and keep their focused fields and Save/Cancel actions reachable by scrolling.",
         "Consolidated wallet rows expand to show the full address and ENS name when available as full-field copy controls, plus labeled mobile links to Etherscan and OpenSea.",
-        "The profile’s Addresses section shows how many of the 4 allowed wallets the profile has. Add another wallet shares an equal-width row with Wallet Checker for the connected profile owner when no proxy profile is active, a primary or consolidated wallet address is available, and the profile has fewer than 4 wallets; it opens the guided Build a Consolidation flow at /safe-collecting/build-consolidation. At 4 wallets the owner sees a maximum-reached note instead. It is separate from Add for identity statements.",
+        "The profile’s personalized Wallet heading uses the viewed profile’s name, for example prxt0's Wallet, and stays singular for multiple addresses. The right-side count uses the profile’s address count and the current settings limit, for example 1 of 4 addresses or 2 of 4 addresses. It stays hidden until limits are known or when the profile has no addresses; a failed settings refresh keeps previously loaded limits. Add another wallet shares an equal-width row with Wallet Checker for the connected profile owner when no proxy profile is active, a primary or consolidated wallet address is available, and the profile has fewer than 4 wallets; it opens the guided Build a Consolidation flow at /safe-collecting/build-consolidation. At 4 wallets the owner sees a maximum-reached note instead. It is separate from Add for identity statements.",
         "URL-capable statement rows open from the row and show a right-aligned external-link cue; Copy remains an independent inline action that does not open the destination, while eligible owners can also Delete.",
         "NFT Accounts includes Ninfa and Other. Other asks for a display name such as AOTM and a secure HTTPS URL, then shows the display name with the destination hostname.",
         "New NFT account links must use HTTPS, cannot contain URL credentials, reject duplicate normalized URLs, and are limited to 20 per profile; Ninfa links must use ninfa.io or a ninfa.io subdomain.",
@@ -6392,9 +6436,10 @@
       ],
       "keywords": ["xtdh", "granted", "grant", "create", "profile", "owner"],
       "facts": [
-        "The xTDH granted view lists grants and documents grant actions.",
-        "Open a grant's Show tokens disclosure to view its token artwork. Missing artwork shows the token ID; a failed thumbnail shows Load Error while the token details remain visible. Close and reopen the disclosure to retry the image.",
+        "The xTDH granted view lists grants and documents grant actions. Collection thumbnails show an NFT placeholder when artwork is missing or cannot load.",
+        "Open a grant's Show tokens disclosure to view its token artwork. If indexed artwork is missing, the grid can recover artwork and placeholder names from original Arweave or IPFS metadata. Unavailable artwork shows the token ID; a failed thumbnail shows Load Error while the token details remain visible. Close and reopen the disclosure to retry the image.",
         "A create-new-grant flow is available where owner permissions allow it.",
+        "A grant with an end shows Last grant: the final daily xTDH run that can add xTDH for it, at 00:00 UTC on the UTC date of the grant's end. It is shown in UTC, so every viewer sees the same run.",
         "Use profile xTDH for profile-specific grants and Network xTDH for global context."
       ],
       "canonical_path": "/{user}/xtdh",
@@ -7342,7 +7387,7 @@
         "Click a row outside its controls or use the checkbox beside the artwork to select or deselect its vote for reset. Use its artwork or title buttons to open the drop; these buttons support Enter and Space. Vote controls and profile links keep their own actions. Selecting text does not toggle the row. Select all selects loaded rows for reset. Row selection is disabled during reset and when voting is closed.",
         "Reset votes opens a confirmation showing the selected count. Confirming sets those votes to zero; cancelling leaves votes unchanged.",
         "Rows can include an Explain action that opens a normal drop reply prefilled with a vote rationale prefix without submitting or changing the vote.",
-        "Open Votes, then My Votes. All votes and Activity are its other subtabs. All three follow the chosen competition, and voteTab preserves the selected subtab in a link."
+        "Open Votes, then My Votes. All votes and Activity are its other subtabs. These three views use compact rounded pills below the main wave tabs on desktop, mobile web, and the app. My Votes rows span the full wave content pane, with padding inside each row for its controls. All three follow the chosen competition, and voteTab preserves the selected subtab in a link. Activity keeps the vote change and drop creator below the voter on screens narrower than 768px, with the time and View drop in chat action on the first line."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
@@ -7756,6 +7801,7 @@
       ],
       "facts": [
         "The Memes mint route lives at /the-memes/mint.",
+        "On native iOS when the detected country is not US or is unknown, the mint page, recipient selection, mint count and SEIZE controls are absent and direct or deep-linked visits to /the-memes/mint return to /the-memes without an unavailable message once the country check settles (a failed check counts as unknown); US iOS deep links wait for the check and keep the Mint on 6529.io handoff, and web and Android keep the mint page.",
         "Mint flow docs explain entry points, common scenarios, and recovery.",
         "If a remembered profile's authorized wallet is disconnected, the mint page hides the duplicate Connect control; selecting SEIZE opens wallet connection and continues when the same wallet reconnects and transaction details are unchanged.",
         "Selecting a different already-authenticated wallet switches the active profile and cancels the old pending mint so refreshed recipient, eligibility, price, and transaction details can be reviewed before selecting SEIZE again; an unauthenticated wallet must complete normal authentication first.",
@@ -7815,6 +7861,7 @@
         "The top Meme number control uses Show mint schedule; the lower calendar control uses Find mint date because it moves the calendar to that mint.",
         "A selected published Meme provides an Open Meme link to /the-memes/{id}; upcoming or unrevealed Memes do not receive speculative artwork links.",
         "The page heading appears first; clock panels and the calendar grid appear once browser JavaScript is ready, using the browser clock and local timezone. Viewing the schedule does not require connecting a wallet.",
+        "In Local mode the calendar grid shows each mint on the viewer's local start date and highlights the viewer's today, so east of UTC (for example New Zealand) Monday/Wednesday/Friday mints can appear on the next day. UTC mode uses UTC dates. The calendar guide lists minting days as Monday / Wednesday / Friday (UTC) and, in Local mode, the viewer's own weekdays.",
         "The home page can also surface current or upcoming mint information.",
         "The calendar models past, current, and future Meme Card mint timing from Monday/Wednesday/Friday cadence plus explicit skip, extra, and reschedule overrides.",
         "The public calendar API exposes /api/meme-calendar/next, /api/meme-calendar/current, and /api/meme-calendar/{id}.",
@@ -8245,7 +8292,7 @@
       "facts": [
         "The Tools index page lives at /tools as a direct secondary route, not a primary sidebar or app drawer destination.",
         "It groups label-only tool cards with right-arrow affordances into Safe Collecting, The Memes Tools, Builder Tools, and Open Data.",
-        "The Tools index links to delegation utilities, Subscriptions Report, Meme Accounting, Meme Gas, App Wallets when supported, API, EMMA, Block Finder, and Open Data routes.",
+        "The Tools index links to delegation utilities, Subscriptions Report, Meme Accounting, Meme Gas, App Wallets when supported, API, EMMA, Block Finder, World Time Zones, and Open Data routes.",
         "Subscription-only links are hidden in restricted iOS contexts, and App Wallets is hidden when app-wallet support is unavailable.",
         "Private operator routes and local-only tools are not listed on the public Tools index.",
         "Primary menu discovery for user-facing tools, developer routes, and Open Data remains under About."
@@ -8256,6 +8303,7 @@
         "/tools/subscriptions-report",
         "/tools/api",
         "/tools/block-finder",
+        "/tools/time-zones",
         "/emma",
         "/open-data"
       ],
@@ -8446,6 +8494,45 @@
       "source_refs": [
         "app/tools/block-finder/page.tsx",
         "ops/docs/api-tool/feature-block-finder.md"
+      ]
+    },
+    {
+      "id": "tools.time-zones",
+      "kind": "route",
+      "title": "World Time Zones",
+      "aliases": [
+        "world time zones",
+        "time zone map",
+        "timezone map",
+        "world clock",
+        "utc offset",
+        "what time is it in"
+      ],
+      "keywords": [
+        "tools",
+        "time zone",
+        "timezone",
+        "utc",
+        "offset",
+        "daylight saving",
+        "map",
+        "clock"
+      ],
+      "facts": [
+        "World Time Zones lives at /tools/time-zones and is listed under Builder Tools on /tools and under About -> Data & Developer Tools.",
+        "It shows a live UTC clock, the viewer's own time zone, a world map with one dot per IANA time zone at its principal city colored by the zone's current UTC offset, optional night-side shading, and a searchable, sortable table of every IANA time zone.",
+        "Hover, tap or focus a map dot to see its city, zone name, IANA zone, local time, UTC offset and daylight saving status. With the map focused, arrow keys move between zones from west to east. Alias zones such as Europe/Amsterdam and Etc zones are in the table without a dot.",
+        "Table search matches city, IANA zone, region, zone name, or a numeric offset such as +5:30; the unfiltered list starts with 40 rows and Show all expands it.",
+        "Times, offsets, zone names and daylight saving status come from the browser's IANA Time Zone Database through Intl; the page makes no API requests and pauses updates while the tab is hidden.",
+        "The map uses public-domain data: Natural Earth land outlines and zone locations from the IANA Time Zone Database. The page credits both in a Data sources section."
+      ],
+      "canonical_path": "/tools/time-zones",
+      "related_paths": ["/tools", "/tools/block-finder"],
+      "tags": ["tools", "time-zones"],
+      "source_refs": [
+        "app/tools/time-zones/page.tsx",
+        "components/tools/time-zones/WorldTimeZonesExplorer.tsx",
+        "ops/docs/api-tool/feature-world-time-zones.md"
       ]
     },
     {
