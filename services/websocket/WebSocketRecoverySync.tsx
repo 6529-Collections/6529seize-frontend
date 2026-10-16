@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { WsMessageType } from "@/helpers/Types";
+import { applyDelayJitter } from "@/helpers/jitter.helpers";
 import { useMobileAppActivity } from "@/hooks/useMobileAppActivity";
 import { useWebSocket } from "./useWebSocket";
 import {
@@ -18,6 +19,11 @@ export function WebSocketRecoverySync() {
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const pending = useRef(false);
   const lastRefreshAt = useRef(0);
+  const previous = useRef({
+    status,
+    active,
+    hasConnected: status === WebSocketStatus.CONNECTED,
+  });
 
   const refresh = useCallback(() => {
     pending.current = true;
@@ -30,7 +36,7 @@ export function WebSocketRecoverySync() {
       return;
     const delay =
       Math.max(1000, lastRefreshAt.current + 5000 - Date.now()) +
-      Math.floor(Math.random() * WEBSOCKET_RECONNECT_RESYNC_STAGGER_MAX_MS);
+      applyDelayJitter(WEBSOCKET_RECONNECT_RESYNC_STAGGER_MAX_MS / 2, 1);
     timer.current = setTimeout(() => {
       timer.current = undefined;
       if (document.visibilityState !== "visible") return;
@@ -47,8 +53,19 @@ export function WebSocketRecoverySync() {
   );
 
   useEffect(() => {
-    // Includes reconnect after a server closes a listener whose buffer is full.
-    if (status === WebSocketStatus.CONNECTED && active) refresh();
+    const reconnected =
+      status === WebSocketStatus.CONNECTED &&
+      previous.current.status !== WebSocketStatus.CONNECTED &&
+      previous.current.hasConnected;
+    const resumed = active && !previous.current.active;
+    previous.current = {
+      status,
+      active,
+      hasConnected:
+        previous.current.hasConnected || status === WebSocketStatus.CONNECTED,
+    };
+    // Initial HTTP queries already load current state; reconcile missed updates only.
+    if (reconnected || resumed) refresh();
     return () => {
       clearTimeout(timer.current);
       timer.current = undefined;
