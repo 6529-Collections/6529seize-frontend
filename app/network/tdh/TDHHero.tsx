@@ -4,55 +4,114 @@ import {
   ClockIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { formatInteger } from "@/i18n/format";
+import { formatInteger, formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { VerificationSummary } from "@/lib/tdh/verification/summary.server";
-import TdhStatusPill from "./shared/TdhStatusPill";
+import { MINUTE_EXAMPLE } from "./how-it-works/examples";
 import { TDH_FOCUS_RING } from "./shared/tdhStyles";
 import { formatCycleDate } from "./verification/components/verificationFormat";
 
 const TERMS = [
-  { key: "days", accent: "tw-border-t-sky-400" },
-  { key: "rate", accent: "tw-border-t-iron-400" },
-  { key: "boost", accent: "tw-border-t-fuchsia-400" },
-  { key: "tdh", accent: "tw-border-t-primary-400" },
+  { key: "days", accent: "tw-border-t-sky-400", value: "days" },
+  { key: "rate", accent: "tw-border-t-iron-400", value: "rate" },
+  { key: "boost", accent: "tw-border-t-fuchsia-400", value: "boost" },
+  { key: "tdh", accent: "tw-border-t-primary-400", value: "final" },
 ] as const;
 
-/** Days × Rate × Boost = TDH, the whole rule in one line. */
+const cents = (locale: SupportedLocale, value: number) =>
+  formatNumber(locale, value / 100, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+/**
+ * Days × Rate × Boost = TDH, the whole rule in one line, with the worked
+ * example's numbers in it. On phones it reads as a sum down the page; from
+ * `sm` as one line of four equal tiles.
+ */
 function FormulaStrip({ locale }: { readonly locale: SupportedLocale }) {
+  const values = {
+    days: formatInteger(locale, MINUTE_EXAMPLE.days),
+    rate: cents(locale, MINUTE_EXAMPLE.rateCents),
+    boost: cents(locale, MINUTE_EXAMPLE.betaCents),
+    final: formatInteger(locale, MINUTE_EXAMPLE.final),
+  };
+  const operator = (index: number): string => {
+    if (index === 0) {
+      return "";
+    }
+    return index === TERMS.length - 1 ? "=" : "×";
+  };
   return (
     <figure className="tw-m-0">
-      <figcaption className="tw-mb-3 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
-        {t(locale, "network.tdh.explainer.formula.label")}
+      <figcaption className="tw-mb-3">
+        <span className="tw-block tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
+          {t(locale, "network.tdh.explainer.formula.label")}
+        </span>
+        <span className="tw-mt-1 tw-block tw-text-sm tw-leading-6 tw-text-iron-300">
+          {t(locale, "network.tdh.explainer.formula.example")}
+        </span>
       </figcaption>
       <p className="tw-sr-only">
         {t(locale, "network.tdh.explainer.formula.text")}
       </p>
+      <ol
+        aria-hidden="true"
+        className="tw-m-0 tw-list-none tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06] tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-p-0 sm:tw-hidden lg:tw-block xl:tw-hidden"
+      >
+        {TERMS.map((term, index) => (
+          <li
+            key={term.key}
+            className={`tw-grid tw-grid-cols-[1.5rem_minmax(0,1fr)_auto] tw-items-baseline tw-gap-2 tw-px-4 tw-py-3 ${index === TERMS.length - 1 ? "tw-bg-primary-500/[0.08]" : ""}`}
+          >
+            <span className="tw-text-lg tw-font-light tw-text-iron-400">
+              {operator(index)}
+            </span>
+            <span className="tw-min-w-0">
+              <span className="tw-block tw-text-base tw-font-semibold tw-text-iron-50">
+                {t(locale, `network.tdh.explainer.formula.${term.key}`)}
+              </span>
+              <span className="tw-block tw-text-sm tw-text-iron-400">
+                {t(locale, `network.tdh.explainer.formula.${term.key}Note`)}
+              </span>
+            </span>
+            <span className="tw-text-xl tw-font-semibold tw-tabular-nums tw-text-iron-50">
+              {values[term.value]}
+            </span>
+          </li>
+        ))}
+      </ol>
       <div
         aria-hidden="true"
-        className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)] tw-items-start tw-gap-1.5 sm:tw-gap-2"
+        className="tw-hidden tw-grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1.15fr)] tw-items-stretch tw-gap-2 sm:tw-grid lg:tw-hidden xl:tw-grid"
       >
         {TERMS.map((term, index) => (
           <div key={term.key} className="tw-contents">
             {index > 0 && (
-              <span className="tw-pt-3.5 tw-text-center tw-text-xl tw-font-light tw-text-iron-500 sm:tw-text-2xl">
-                {index === TERMS.length - 1 ? "=" : "×"}
+              <span className="tw-flex tw-items-center tw-justify-center tw-text-2xl tw-font-light tw-text-iron-400">
+                {operator(index)}
               </span>
             )}
             <div
-              className={`tw-min-w-0 tw-rounded-lg tw-border tw-border-t-2 tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-2 tw-py-3 tw-text-center sm:tw-px-3 ${term.accent}`}
+              className={`tw-flex tw-min-w-0 tw-flex-col tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-t-2 tw-border-solid tw-border-white/[0.07] tw-px-3 tw-py-3 tw-text-center ${term.accent} ${index === TERMS.length - 1 ? "tw-bg-primary-500/[0.08]" : "tw-bg-iron-900"}`}
             >
-              <span className="tw-block tw-text-base tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
+              <span className="tw-block tw-text-sm tw-font-semibold tw-text-iron-100">
                 {t(locale, `network.tdh.explainer.formula.${term.key}`)}
               </span>
-              <span className="tw-mt-1 tw-block tw-text-[11px] tw-leading-4 tw-text-iron-400 sm:tw-text-xs">
+              <span className="tw-block tw-whitespace-nowrap tw-text-2xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50">
+                {values[term.value]}
+              </span>
+              <span className="tw-block tw-text-balance tw-text-xs tw-text-iron-400">
                 {t(locale, `network.tdh.explainer.formula.${term.key}Note`)}
               </span>
             </div>
           </div>
         ))}
       </div>
+      <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
+        {t(locale, "network.tdh.explainer.formula.sum")}
+      </p>
     </figure>
   );
 }
@@ -106,11 +165,6 @@ function VerifiedStrip({
         />
         <span className="tw-text-sm tw-leading-6 tw-text-iron-100 sm:tw-text-[15px]">
           {stripSentence(locale, summary)}
-          {summary.kind === "sample" && (
-            <span className="tw-ml-2 tw-inline-block tw-align-middle">
-              <TdhStatusPill pill="sample" locale={locale} size="sm" />
-            </span>
-          )}
         </span>
       </span>
       <span className="tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1.5 tw-pl-8 tw-text-sm tw-font-medium tw-text-primary-300 sm:tw-pl-0">
@@ -134,7 +188,7 @@ export default function TDHHero({
 }) {
   return (
     <header className="tw-pb-10 tw-pt-6 sm:tw-pb-12 sm:tw-pt-10">
-      <div className="tw-grid tw-gap-8 lg:tw-grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:tw-items-end lg:tw-gap-12">
+      <div className="tw-grid tw-gap-8 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:tw-items-center lg:tw-gap-12">
         <div>
           <h1 className="tw-m-0 tw-text-[2.5rem] tw-font-semibold tw-leading-none tw-tracking-tight tw-text-iron-50 sm:tw-text-6xl">
             {t(locale, "network.tdh.explainer.title")}

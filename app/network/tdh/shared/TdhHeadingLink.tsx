@@ -12,10 +12,13 @@ export default function TdhHeadingLink({
   id,
   label,
   copiedLabel,
+  inline = false,
 }: {
   readonly id: string;
   readonly label: string;
   readonly copiedLabel: string;
+  /** Set in the heading's line, after its last word. */
+  readonly inline?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -44,7 +47,7 @@ export default function TdhHeadingLink({
             setCopied(false);
           }
         }}
-        className={`tw-inline-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-text-iron-600 tw-transition-colors hover:tw-bg-iron-900 hover:tw-text-iron-200 motion-reduce:tw-transition-none ${TDH_FOCUS_RING}`}
+        className={`tw-inline-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-text-iron-500 tw-transition-colors hover:tw-bg-iron-900 hover:tw-text-iron-200 motion-reduce:tw-transition-none ${inline ? "-tw-my-3 tw-ml-0.5 tw-align-middle" : ""} ${TDH_FOCUS_RING}`}
       >
         <LinkIcon aria-hidden="true" className="tw-size-4" />
       </a>

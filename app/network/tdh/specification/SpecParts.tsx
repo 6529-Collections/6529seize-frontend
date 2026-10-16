@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import TdhHeadingLink from "../shared/TdhHeadingLink";
+import TdhHeading from "../shared/TdhHeading";
 import TdhRuleBlock from "../shared/TdhRuleBlock";
 import TdhSource from "../shared/TdhSource";
 
@@ -23,22 +23,12 @@ export function SpecSection({
       aria-labelledby={`${id}-heading`}
       className="tw-scroll-mt-24 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-8 first:tw-border-t-0 first:tw-pt-0 sm:tw-py-10"
     >
-      <div className="tw-flex tw-items-start tw-gap-1">
-        <h2
-          id={`${id}-heading`}
-          tabIndex={-1}
-          className="tw-m-0 tw-pt-1.5 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none sm:tw-text-[1.75rem]"
-        >
-          {title}
-        </h2>
-        <TdhHeadingLink
-          id={id}
-          label={t(locale, "network.tdh.shared.headingLink", {
-            heading: title,
-          })}
-          copiedLabel={t(locale, "network.tdh.shared.linkCopied")}
-        />
-      </div>
+      <TdhHeading
+        id={id}
+        title={title}
+        locale={locale}
+        className="tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[1.75rem]"
+      />
       <div className="tw-mt-4 tw-max-w-3xl tw-space-y-5">{children}</div>
     </section>
   );
@@ -58,28 +48,22 @@ export function SpecSub({
 }) {
   return (
     <div id={id} className="tw-scroll-mt-24 tw-space-y-3">
-      <div className="tw-flex tw-items-center tw-gap-1">
-        <h3
-          id={`${id}-heading`}
-          tabIndex={-1}
-          className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50 focus:tw-outline-none"
-        >
-          {title}
-        </h3>
-        <TdhHeadingLink
-          id={id}
-          label={t(locale, "network.tdh.shared.headingLink", {
-            heading: title,
-          })}
-          copiedLabel={t(locale, "network.tdh.shared.linkCopied")}
-        />
-      </div>
+      <TdhHeading
+        id={id}
+        title={title}
+        locale={locale}
+        level={3}
+        className="tw-text-lg tw-font-semibold tw-leading-7 tw-text-iron-50"
+      />
       {children}
     </div>
   );
 }
 
-/** "In plain words" beside the exact rule. */
+/**
+ * The rule in plain words, before the exact rule: set as the lede of its
+ * subsection, with a primary rule at its side, so it needs no label.
+ */
 export function Plain({
   locale,
   refs,
@@ -90,19 +74,10 @@ export function Plain({
   readonly children: ReactNode;
 }) {
   return (
-    <div className="tw-max-w-3xl">
-      <p className="tw-m-0 tw-inline-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-primary-300">
-        <span
-          aria-hidden="true"
-          className="tw-size-1.5 tw-rounded-full tw-bg-primary-400"
-        />
-        {t(locale, "network.tdh.spec.plain")}
-      </p>
-      <p className="tw-m-0 tw-mt-1 tw-text-[15px] tw-leading-7 tw-text-iron-200">
-        {children}
-        {refs.length > 0 && <TdhSource refs={refs} locale={locale} />}
-      </p>
-    </div>
+    <p className="tw-m-0 tw-max-w-3xl tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/50 tw-pl-4 tw-text-base tw-leading-7 tw-text-iron-100">
+      {children}
+      {refs.length > 0 && <TdhSource refs={refs} locale={locale} />}
+    </p>
   );
 }
 

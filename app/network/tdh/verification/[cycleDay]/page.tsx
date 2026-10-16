@@ -11,7 +11,6 @@ import {
 } from "@/lib/tdh/verification/loadVerification.server";
 import { latestIndexDay } from "@/lib/tdh/verification/states";
 import TdhPageShell from "../../shared/TdhPageShell";
-import TdhStatusPill from "../../shared/TdhStatusPill";
 import VerificationDashboard, {
   VerificationLede,
 } from "../components/VerificationDashboard";
@@ -64,7 +63,6 @@ export default async function TdhVerificationDayPage({
   }
   const locale = DEFAULT_LOCALE;
   const { indexLoad, entry, dayLoad } = loaded;
-  const isSample = indexLoad.source === "sample";
   const cycle = formatInteger(locale, entry.cycleDay);
   const date = formatCycleDate(locale, entry.date);
 
@@ -83,7 +81,6 @@ export default async function TdhVerificationDayPage({
           <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-text-xs tw-tabular-nums tw-text-iron-200 sm:tw-text-sm">
             {t(locale, "network.tdh.verify.dayCycle", { cycle })}
           </span>
-          {isSample && <TdhStatusPill pill="sample" locale={locale} />}
         </>
       }
       lede={<VerificationLede locale={locale} />}

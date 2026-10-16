@@ -4,10 +4,13 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import { loadFormalManifest } from "@/lib/tdh/formal/loadFormalManifest.server";
+import { conformanceRun } from "@/lib/tdh/formal/manifest";
 import {
   loadVerificationSummary,
   type VerificationSummary,
 } from "@/lib/tdh/verification/summary.server";
+import { leanRound } from "../formal/formalStatus";
 import TdhPageShell from "../shared/TdhPageShell";
 import TdhPager from "../shared/TdhPager";
 import TdhSection from "../shared/TdhSection";
@@ -20,7 +23,7 @@ import {
   TDH_LINK,
   TDH_SERIES,
   TDH_TABLE,
-  TDH_TABLE_WRAP,
+  TDH_TABLE_FRAME,
   TDH_TD,
   TDH_TH,
 } from "../shared/tdhStyles";
@@ -108,6 +111,7 @@ function Dot({ series }: { readonly series: keyof typeof TDH_SERIES }) {
 const CHECKS = [
   { key: "vectors", refs: ["P26 §13"] },
   { key: "replays", refs: ["Replay 2026-10-11", "P26 §13"] },
+  { key: "difftest", refs: ["P26 §13"] },
   { key: "dual", refs: ["D125", "P53 §4.5"] },
   { key: "daily", refs: ["D132"] },
   { key: "lean", refs: [] },
@@ -120,7 +124,7 @@ function WhereItRuns({ locale }: { readonly locale: SupportedLocale }) {
   const columns = ["validator", "dailyJob", "site", "proof"] as const;
   return (
     <>
-      <ul className="tw-m-0 tw-grid tw-list-none tw-gap-2 tw-p-0 md:tw-hidden">
+      <ul className="tw-m-0 tw-grid tw-list-none tw-gap-2 tw-p-0 sm:tw-grid-cols-2 xl:tw-hidden">
         {WHERE.map((row) => (
           <li key={row.key} className={`${TDH_CARD} tw-p-4`}>
             <p className="tw-m-0 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-text-iron-50">
@@ -135,7 +139,7 @@ function WhereItRuns({ locale }: { readonly locale: SupportedLocale }) {
                       locale,
                       `network.tdh.impl.where.${columns[index] ?? "validator"}`
                     )}
-                    <span className="tw-block tw-text-[11px] tw-text-iron-500">
+                    <span className="tw-block tw-text-xs tw-text-iron-400">
                       {t(
                         locale,
                         `network.tdh.impl.where.${columns[index] ?? "validator"}When` as MessageKey
@@ -161,13 +165,8 @@ function WhereItRuns({ locale }: { readonly locale: SupportedLocale }) {
           </li>
         ))}
       </ul>
-      <div
-        className={`${TDH_TABLE_WRAP} tw-hidden md:tw-block`}
-        tabIndex={0}
-        role="region"
-        aria-label={t(locale, "network.tdh.impl.where.caption")}
-      >
-        <table className={`${TDH_TABLE} tw-min-w-[36rem]`}>
+      <div className={`${TDH_TABLE_FRAME} tw-hidden xl:tw-block`}>
+        <table className={TDH_TABLE}>
           <caption className={TDH_CAPTION}>
             {t(locale, "network.tdh.impl.where.caption")}
           </caption>
@@ -179,7 +178,7 @@ function WhereItRuns({ locale }: { readonly locale: SupportedLocale }) {
               {columns.map((column) => (
                 <th key={column} scope="col" className={TDH_TH}>
                   {t(locale, `network.tdh.impl.where.${column}`)}
-                  <span className="tw-block tw-text-[11px] tw-font-normal tw-text-iron-400">
+                  <span className="tw-block tw-text-xs tw-font-normal tw-text-iron-400">
                     {t(
                       locale,
                       `network.tdh.impl.where.${column}When` as MessageKey
@@ -246,20 +245,12 @@ function LatestAgreement({
       <span className="tw-flex tw-min-w-0 tw-flex-col tw-gap-2">
         <span className="tw-flex tw-flex-wrap tw-gap-2">
           <TdhStatusPill pill={summary.verdict} locale={locale} size="sm" />
-          {summary.kind === "sample" && (
-            <TdhStatusPill pill="sample" locale={locale} size="sm" />
-          )}
         </span>
         <span className="tw-text-sm tw-tabular-nums tw-leading-6 tw-text-iron-100">
           {summary.pythonEqual === null
             ? t(locale, "network.tdh.impl.latest.noPython", values)
             : t(locale, "network.tdh.impl.latest.body", values)}
         </span>
-        {summary.kind === "sample" && (
-          <span className="tw-text-xs tw-leading-5 tw-text-amber-200">
-            {t(locale, "network.tdh.impl.latest.sampleNote")}
-          </span>
-        )}
       </span>
       <span className="tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-primary-300">
         {t(locale, "network.tdh.impl.latest.link")}
@@ -271,7 +262,21 @@ function LatestAgreement({
 
 export default async function TdhImplementationsPage() {
   const locale = DEFAULT_LOCALE;
-  const summary = await loadVerificationSummary();
+  const [summary, formal] = await Promise.all([
+    loadVerificationSummary(),
+    loadFormalManifest(),
+  ]);
+  const leanRun = conformanceRun(formal.manifest);
+  const lean = {
+    passed: leanRun?.passed ?? 0,
+    total: leanRun?.total ?? 0,
+    checks: leanRun?.checks ?? 0,
+    spec: (
+      formal.manifest.documents?.specification?.lastChange ??
+      formal.manifest.source.commit
+    ).slice(0, 7),
+    fromRawLogs: leanRound(formal.manifest) === 4,
+  };
   return (
     <TdhPageShell
       locale={locale}
@@ -286,21 +291,21 @@ export default async function TdhImplementationsPage() {
         title={t(locale, "network.tdh.impl.programs.title")}
         locale={locale}
         wide
-        pills={
-          <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-dashed tw-border-iron-600 tw-px-2.5 tw-py-0.5 tw-text-xs tw-text-iron-300">
-            {t(locale, "network.tdh.shared.sourceToBePublished")}
-          </span>
-        }
+        pills={<TdhStatusPill pill="toBePublished" locale={locale} size="sm" />}
       >
-        <div className="tw-space-y-3">
-          <ProgramCards locale={locale} />
-          <p className="tw-m-0 tw-max-w-4xl tw-text-xs tw-leading-5 tw-text-iron-400">
-            {t(locale, "network.tdh.impl.speedNote")}
-          </p>
-          <p className="tw-m-0 tw-max-w-4xl tw-text-xs tw-leading-5 tw-text-iron-400">
-            {t(locale, "network.tdh.impl.illustration")}
-          </p>
-          <p className="tw-m-0 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1 tw-text-xs tw-text-iron-400">
+        <div className="tw-space-y-4">
+          <ProgramCards locale={locale} lean={lean} />
+          <div className="tw-max-w-4xl tw-space-y-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+            <p className="tw-m-0">
+              {t(locale, "network.tdh.impl.conformanceNote")}
+              <TdhSource refs={["P26 §13"]} locale={locale} />
+            </p>
+            <p className="tw-m-0">{t(locale, "network.tdh.impl.speedNote")}</p>
+            <p className="tw-m-0">
+              {t(locale, "network.tdh.impl.illustration")}
+            </p>
+          </div>
+          <p className="tw-m-0 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1 tw-text-sm tw-text-iron-400">
             <span className="tw-font-medium tw-text-iron-300">
               {t(locale, "network.tdh.explainer.sources.label")}
             </span>
@@ -384,7 +389,7 @@ export default async function TdhImplementationsPage() {
             {t(locale, "network.tdh.impl.checked.after")}
             <TdhSource refs={["P53 §4.5"]} locale={locale} />
           </p>
-          <CheckMatrix locale={locale} />
+          <CheckMatrix locale={locale} lean={lean} />
         </div>
       </TdhSection>
 

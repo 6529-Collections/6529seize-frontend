@@ -1,18 +1,19 @@
 import { ArrowDownIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
-import { useId, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { formatInteger, formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { EXAMPLE_NETWORK, rateCents } from "@/lib/tdh/tdhV1Arithmetic";
 import { TDH_SERIES } from "../shared/tdhStyles";
+import {
+  NARROW_WIDTH,
+  TdhDiagramSwitch,
+  TdhSvg,
+  WIDE_WIDTH,
+} from "../shared/TdhSvg";
 import { householdScenario } from "./examples";
 
 const H = EXAMPLE_NETWORK.largestEdition;
-
-function useSvgLabels() {
-  const id = useId();
-  return { titleId: `${id}-title`, descId: `${id}-desc` };
-}
 
 const TILE = {
   kept: "tw-bg-sky-400/20 tw-border-sky-400/50 tw-text-sky-50",
@@ -212,16 +213,17 @@ function PairLabel({
 
 function RateCurve({
   locale,
+  id,
   width,
   height,
   font,
 }: {
   readonly locale: SupportedLocale;
+  readonly id: string;
   readonly width: number;
   readonly height: number;
   readonly font: number;
 }) {
-  const { titleId, descId } = useSvgLabels();
   const left = 40;
   const right = 28;
   const top = 34;
@@ -245,15 +247,15 @@ function RateCurve({
       maximumFractionDigits: 2,
     });
   return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      role="img"
-      aria-labelledby={`${titleId} ${descId}`}
-      className="tw-block tw-h-auto tw-w-full"
+    <TdhSvg
+      id={id}
+      width={width}
+      height={height}
+      title={t(locale, "network.tdh.how.s7.curveTitle")}
+      desc={t(locale, "network.tdh.how.s7.curveDesc")}
+      maxWidth={width === NARROW_WIDTH ? 400 : 720}
     >
-      <title id={titleId}>{t(locale, "network.tdh.how.s7.curveTitle")}</title>
-      <desc id={descId}>{t(locale, "network.tdh.how.s7.curveDesc")}</desc>
-      <text x={8} y={14} className="tw-fill-iron-300" fontSize={font}>
+      <text x={8} y={16} className="tw-fill-iron-300" fontSize={font}>
         {t(locale, "network.tdh.how.s7.curveY")}
       </text>
       {[0, 10, 20, 30, 40].map((tick) => (
@@ -366,7 +368,7 @@ function RateCurve({
       >
         {t(locale, "network.tdh.how.s7.curveX")}
       </text>
-    </svg>
+    </TdhSvg>
   );
 }
 
@@ -381,13 +383,27 @@ export function RateCurveDiagram({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <figure className="tw-m-0 tw-mt-4 tw-max-w-2xl">
-      <div className="sm:tw-hidden">
-        <RateCurve locale={locale} width={300} height={280} font={13} />
-      </div>
-      <div className="tw-hidden sm:tw-block">
-        <RateCurve locale={locale} width={600} height={300} font={12} />
-      </div>
+    <figure className="tw-m-0 tw-mt-4">
+      <TdhDiagramSwitch
+        narrow={
+          <RateCurve
+            locale={locale}
+            id="rate-curve-narrow"
+            width={NARROW_WIDTH}
+            height={300}
+            font={14}
+          />
+        }
+        wide={
+          <RateCurve
+            locale={locale}
+            id="rate-curve-wide"
+            width={WIDE_WIDTH}
+            height={300}
+            font={13}
+          />
+        }
+      />
       <figcaption className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-1 tw-text-xs tw-text-iron-300">
         <span className="tw-inline-flex tw-items-center tw-gap-2">
           <span
@@ -509,15 +525,15 @@ function IdentityGraph({ graph }: { readonly graph: (typeof GRAPHS)[number] }) {
             <circle
               cx={mx}
               cy={my}
-              r="8"
+              r="10"
               strokeWidth="1"
               className="tw-fill-iron-950 tw-stroke-primary-400/70"
             />
             <text
               x={mx}
-              y={my + 3.5}
+              y={my + 4.5}
               textAnchor="middle"
-              fontSize="10"
+              fontSize="12"
               className="tw-fill-primary-300 tw-font-semibold tw-tabular-nums"
             >
               {index + 1}
@@ -565,25 +581,27 @@ export function IdentityGraphDiagram({
   return (
     <figure className="tw-m-0 tw-mt-4">
       <p className="tw-sr-only">{t(locale, "network.tdh.how.s10.graphDesc")}</p>
-      <ol className="tw-m-0 tw-grid tw-list-none tw-gap-3 tw-p-0 sm:tw-grid-cols-3">
+      <ol className="tw-m-0 tw-grid tw-list-none tw-gap-3 tw-p-0 xl:tw-grid-cols-3">
         {GRAPHS.map((graph) => (
           <li
             key={graph.key}
-            className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-p-3"
+            className="tw-grid tw-items-center tw-gap-x-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-p-3 sm:tw-grid-cols-[15rem_minmax(0,1fr)] xl:tw-grid-cols-1"
           >
             <IdentityGraph graph={graph} />
-            <p className="tw-m-0 tw-mt-2 tw-text-center tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-300">
-              {t(
-                locale,
-                `network.tdh.how.s10.${graph.key}.links` as MessageKey
-              )}
-            </p>
-            <p className="tw-m-0 tw-text-center tw-font-mono tw-text-xs tw-leading-5 tw-text-primary-300">
-              {t(
-                locale,
-                `network.tdh.how.s10.${graph.key}.result` as MessageKey
-              )}
-            </p>
+            <div className="tw-mt-2 tw-text-center sm:tw-mt-0 sm:tw-text-left xl:tw-mt-2 xl:tw-text-center">
+              <p className="tw-m-0 tw-font-mono tw-text-[13px] tw-leading-5 tw-text-iron-300">
+                {t(
+                  locale,
+                  `network.tdh.how.s10.${graph.key}.links` as MessageKey
+                )}
+              </p>
+              <p className="tw-m-0 tw-font-mono tw-text-[13px] tw-leading-5 tw-text-primary-300">
+                {t(
+                  locale,
+                  `network.tdh.how.s10.${graph.key}.result` as MessageKey
+                )}
+              </p>
+            </div>
           </li>
         ))}
       </ol>
@@ -605,7 +623,7 @@ export function IdentityGraphDiagram({
         <span className="tw-inline-flex tw-items-center tw-gap-2">
           <span
             aria-hidden="true"
-            className="tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-primary-400/70 tw-text-[9px] tw-font-semibold tw-text-primary-300"
+            className="tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-primary-400/70 tw-text-xs tw-font-semibold tw-text-primary-300"
           >
             1
           </span>

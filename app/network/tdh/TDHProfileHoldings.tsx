@@ -94,12 +94,12 @@ function Collection({
             tabIndex={0}
             className={`tw-overflow-x-auto ${TDH_FOCUS}`}
           >
-            <table className="tw-w-full tw-border-collapse tw-text-sm tw-tabular-nums">
-              <caption className="tw-sr-only">
-                {t(locale, "network.tdh.profile.table", {
-                  collection: collectionName,
-                })}
-              </caption>
+            <table
+              className="tw-w-full tw-border-collapse tw-text-sm tw-tabular-nums"
+              aria-label={t(locale, "network.tdh.profile.table", {
+                collection: collectionName,
+              })}
+            >
               <thead>
                 <tr>
                   {COLUMNS.map((key) => (

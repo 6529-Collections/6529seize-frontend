@@ -5,13 +5,20 @@ import type {
   DayLoad,
   IndexLoad,
 } from "@/lib/tdh/verification/loadVerification.server";
-import { loadBundledSample } from "@/lib/tdh/verification/loadVerification.server";
-import type { VerificationIndex } from "@/lib/tdh/verification/schema";
+import {
+  parseVerificationDay,
+  parseVerificationIndex,
+  type VerificationIndex,
+} from "@/lib/tdh/verification/schema";
 import {
   syntheticDay,
   syntheticEqualDay,
   syntheticIndex,
 } from "../../../../lib/tdh/verification/fixtures";
+import {
+  PUBLIC_FEED_DAYS,
+  PUBLIC_FEED_INDEX,
+} from "../../../../lib/tdh/verification/publicFeedFixture";
 
 const push = jest.fn();
 const refresh = jest.fn();
@@ -74,7 +81,13 @@ function expectAccessibleStructure(container: HTMLElement) {
   );
   expect(new Set(ids).size).toBe(ids.length);
   for (const table of container.querySelectorAll("table")) {
-    expect(table.querySelector("caption")?.textContent?.trim()).toBeTruthy();
+    const caption = table.querySelector("caption");
+    // A caption taken out of flow (sr-only) breaks the table's columns, so a
+    // table is named by a visible caption or by aria-label.
+    expect(caption?.className ?? "").not.toMatch(/sr-only/);
+    expect(
+      caption?.textContent?.trim() || table.getAttribute("aria-label")
+    ).toBeTruthy();
   }
   for (const button of screen.queryAllByRole("button")) {
     expect(button).toHaveAccessibleName();
@@ -99,29 +112,29 @@ function expectAccessibleStructure(container: HTMLElement) {
 describe("VerificationDashboard", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("shows the daily job's published feed as the sample, with the result first", async () => {
-    const sample = await loadBundledSample();
+  it("shows the public feed's published days, with the result first", () => {
+    const index = parseVerificationIndex(PUBLIC_FEED_INDEX);
+    const day = parseVerificationDay(PUBLIC_FEED_DAYS[20_741]);
+    if (!index.success || !day.success) {
+      throw new Error("the public feed fixture no longer parses");
+    }
     const { container } = renderDashboard(
-      {
-        status: "ok",
-        source: "sample",
-        index: sample.index,
-        indexUrl: null,
-        baseUrl: null,
-      },
-      { status: "ok", day: sample.days[20_741]!, dayUrl: null },
+      remoteIndex(index.data),
+      okDay(day.data),
       20_741
     );
-    expect(screen.getByRole("note")).toHaveTextContent(
-      "Sample data: the daily job’s files for 14 and 15 October 2026"
-    );
+    expect(screen.queryByText(/sample/i)).not.toBeInTheDocument();
     expect(
       screen.getByText(
         "On October 15, 2026, the Rust core, the Python reference and 6529.io agreed on all 10,282 collectors and 11,133 wallets, to the last unit of TDH."
       )
     ).toBeInTheDocument();
-    expect(screen.getAllByText("All equal").length).toBe(3);
-    expect(screen.getByText("Equal: 2,073,214,934 each")).toBeInTheDocument();
+    expect(screen.getAllByText("All equal").length).toBe(2);
+    expect(screen.getAllByText("2,073,214,934").length).toBeGreaterThan(1);
+    expect(screen.getByText("The same in all three")).toBeInTheDocument();
+    expect(screen.getAllByText("Wallets: 11,133 of 11,133 equal").length).toBe(
+      2
+    );
     expect(screen.getByText("In 8 days")).toBeInTheDocument();
     expect(screen.getAllByText("Not yet fully checked").length).toBeGreaterThan(
       0
@@ -135,10 +148,11 @@ describe("VerificationDashboard", () => {
     expect(screen.getAllByText("validator@e127676").length).toBeGreaterThan(1);
     expect(screen.getAllByText("6529chain@0621ed4").length).toBeGreaterThan(1);
     expect(
-      screen.getByText(
-        "This sample is bundled with the page; published days can be downloaded here once they are connected."
-      )
-    ).toBeInTheDocument();
+      screen.getByRole("link", { name: "Download this day as JSON" })
+    ).toHaveAttribute(
+      "href",
+      "https://verification.example/tdh/days/20741.json"
+    );
     expect(container.textContent).not.toMatch(/holder-\d/);
     expectAccessibleStructure(container);
   });
@@ -343,32 +357,20 @@ describe("VerificationDashboard", () => {
         .getByRole("region", { name: "The day at a glance" })
         .querySelector("ul")!
     ).getAllByRole("listitem");
-    expect(tiles[0]).toHaveTextContent("Rust and Python");
+    expect(tiles[0]).toHaveTextContent("Rust core and Python");
     expect(screen.getByText(/Publication check/)).toBeInTheDocument();
     expect(
       screen.getByText("Switched on October 23, 2026")
     ).toBeInTheDocument();
   });
 
-  it("explains that reports have not started when production has no data source", () => {
+  it("says plainly when the feed has published no report yet", () => {
     const { container } = renderDashboard({ status: "awaiting" }, null);
     expect(
-      screen.getByText("Daily reports start on 16 October 2026.")
+      screen.getByText("No daily report is published yet.")
     ).toBeInTheDocument();
     expect(screen.getByText("In 8 days")).toBeInTheDocument();
     expectAccessibleStructure(container);
-  });
-
-  it("says reports are not yet connected once they should have started", () => {
-    renderDashboard(
-      { status: "awaiting" },
-      null,
-      undefined,
-      new Date("2026-10-18T12:00:00Z")
-    );
-    expect(
-      screen.getByText("Daily reports are not yet connected to this page.")
-    ).toBeInTheDocument();
   });
 
   it("offers a retry when the data cannot be loaded", async () => {

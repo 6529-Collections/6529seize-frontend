@@ -3,7 +3,6 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import TdhCopyButton from "./TdhCopyButton";
 import TdhSource from "./TdhSource";
-import { TDH_FOCUS_RING } from "./tdhStyles";
 
 /** Blocks longer than this get line numbers. */
 const NUMBERED_FROM = 8;
@@ -17,7 +16,7 @@ function Line({ text }: { readonly text: string }): ReactNode {
   return (
     <>
       {text.slice(0, index)}
-      <span className="tw-text-iron-500">{text.slice(index)}</span>
+      <span className="tw-text-iron-400">{text.slice(index)}</span>
     </>
   );
 }
@@ -25,9 +24,9 @@ function Line({ text }: { readonly text: string }): ReactNode {
 /**
  * A rule block (plan §4.3): a formula or pseudocode exactly as P26 writes it,
  * or P26's prose rules restated line for line ("condensed"), with a caption
- * naming its section and a copy button. Comments are quieter, long blocks
- * are numbered, and on phones the block scrolls inside itself, so the page
- * never scrolls sideways.
+ * naming its section and a copy button. Comments are quieter and long blocks
+ * are numbered. A line too long for its column wraps with a hanging indent,
+ * so nothing scrolls sideways at any width.
  */
 export default function TdhRuleBlock({
   code,
@@ -72,36 +71,28 @@ export default function TdhRuleBlock({
           failedLabel={t(locale, "network.tdh.shared.copyFailed")}
         />
       </figcaption>
-      <div className="tw-relative">
-        <pre
-          tabIndex={0}
-          role="region"
-          aria-label={t(locale, "network.tdh.shared.ruleRegion", { caption })}
-          className={`tw-m-0 tw-overflow-x-auto tw-whitespace-pre tw-bg-transparent tw-py-4 tw-pr-8 tw-font-mono tw-text-[13px] tw-leading-6 tw-text-iron-100 sm:tw-pr-4 ${numbered ? "tw-pl-2" : "tw-pl-4"} ${TDH_FOCUS_RING}`}
-        >
-          <code className="tw-block tw-w-max tw-min-w-full tw-font-mono tw-text-iron-100">
-            {lines.map((text, index) => (
-              <span key={index} className="tw-flex">
-                {numbered && (
-                  <span
-                    aria-hidden="true"
-                    className="tw-w-7 tw-shrink-0 tw-select-none tw-pr-3 tw-text-right tw-text-iron-600"
-                  >
-                    {index + 1}
-                  </span>
-                )}
-                <span>
-                  <Line text={text} />
+      <pre
+        aria-label={t(locale, "network.tdh.shared.ruleRegion", { caption })}
+        className="tw-m-0 tw-whitespace-pre-wrap tw-bg-transparent tw-px-3 tw-py-4 tw-font-mono tw-text-[13px] tw-leading-6 tw-text-iron-100 sm:tw-px-4"
+      >
+        <code className="tw-block tw-font-mono tw-text-iron-100">
+          {lines.map((text, index) => (
+            <span key={index} className="tw-flex">
+              {numbered && (
+                <span
+                  aria-hidden="true"
+                  className="tw-w-7 tw-shrink-0 tw-select-none tw-pr-3 tw-text-right tw-text-iron-500"
+                >
+                  {index + 1}
                 </span>
+              )}
+              <span className="tw-min-w-0 tw-flex-1 tw-whitespace-pre-wrap tw-pl-[2ch] -tw-indent-[2ch] [overflow-wrap:anywhere]">
+                <Line text={text} />
               </span>
-            ))}
-          </code>
-        </pre>
-        <span
-          aria-hidden="true"
-          className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-w-8 tw-bg-gradient-to-l tw-from-iron-950 tw-to-transparent sm:tw-hidden"
-        />
-      </div>
+            </span>
+          ))}
+        </code>
+      </pre>
     </figure>
   );
 }

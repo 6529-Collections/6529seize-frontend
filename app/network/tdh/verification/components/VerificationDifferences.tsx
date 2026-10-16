@@ -8,6 +8,7 @@ import {
   type DifferenceClass,
 } from "@/lib/tdh/verification/schema";
 import type { DayDifferences } from "@/lib/tdh/verification/states";
+import TdhHeading from "../../shared/TdhHeading";
 import TdhSource from "../../shared/TdhSource";
 import { SPECIFICATION_PATH } from "../../shared/tdhSources";
 import { TDH_CARD, TDH_LINK } from "../../shared/tdhStyles";
@@ -115,18 +116,22 @@ export default function VerificationDifferences({
   const classes = differences.byClass;
 
   return (
-    <section aria-labelledby="tdh-verify-diff-heading" className="tw-mt-12">
-      <h2
-        id="tdh-verify-diff-heading"
-        className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
-      >
-        {t(locale, "network.tdh.verify.diff.heading")}
-      </h2>
+    <section
+      id="diff"
+      aria-labelledby="diff-heading"
+      className="tw-mt-12 tw-scroll-mt-24"
+    >
+      <TdhHeading
+        id="diff"
+        title={t(locale, "network.tdh.verify.diff.heading")}
+        locale={locale}
+        className="tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
+      />
       <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
         {t(locale, "network.tdh.verify.diff.lede")}
         <TdhSource refs={["P38 §3.3"]} locale={locale} />
       </p>
-      <div className="tw-mt-4 tw-grid tw-gap-4 lg:tw-grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+      <div className="tw-mt-4 tw-grid tw-items-start tw-gap-4 lg:tw-grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
         <div className={`${TDH_CARD} tw-p-5 sm:tw-p-6`}>
           {none ? (
             <p className="tw-m-0 tw-flex tw-items-start tw-gap-3 tw-text-base tw-leading-7 tw-text-iron-100">

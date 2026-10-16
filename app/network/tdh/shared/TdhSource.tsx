@@ -4,7 +4,7 @@ import { resolveSource } from "./tdhSources";
 import { TDH_FOCUS_RING } from "./tdhStyles";
 
 const CHIP =
-  "tw-inline-flex tw-min-h-6 tw-items-center tw-rounded-md tw-border tw-border-solid tw-px-1.5 tw-font-mono tw-text-[11px] tw-font-medium tw-leading-4 tw-no-underline tw-whitespace-nowrap";
+  "tw-inline-flex tw-min-h-6 tw-items-center tw-rounded-md tw-border tw-border-solid tw-px-1.5 tw-font-mono tw-text-xs tw-font-medium tw-leading-4 tw-no-underline tw-whitespace-nowrap";
 
 /**
  * Source chips after a cited sentence or paragraph (plan §4.4). Specification,

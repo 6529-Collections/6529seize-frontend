@@ -437,6 +437,8 @@ function Step14({ locale }: { readonly locale: SupportedLocale }) {
             text: t(locale, "network.tdh.how.s14.item5"),
             refs: ["DEV-2", "D121", "D132"],
           },
+          { text: t(locale, "network.tdh.how.s14.item6"), refs: ["DEV-9"] },
+          { text: t(locale, "network.tdh.how.s14.item7"), refs: ["P26 §6.3"] },
         ]}
       />
       <TdhArrowLink href="/network/tdh/verification">

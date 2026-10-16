@@ -26,7 +26,6 @@ import {
 import {
   TDH_TABLE,
   TDH_TABLE_FRAME,
-  TDH_TABLE_WRAP,
   TDH_TD,
   TDH_TH,
 } from "../shared/tdhStyles";
@@ -62,6 +61,18 @@ function Address({
   );
 }
 
+const MOBILE_CARD =
+  "tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-3 tw-py-2.5";
+
+function contractEvents(locale: SupportedLocale, key: string): string {
+  return t(
+    locale,
+    key === "delegation"
+      ? "network.tdh.spec.s2.delegationEvents"
+      : "network.tdh.spec.s2.manifoldEvents"
+  );
+}
+
 function Section2({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <SpecSection
@@ -72,13 +83,31 @@ function Section2({ locale }: { readonly locale: SupportedLocale }) {
       <Plain locale={locale} refs={["P26 §2"]}>
         {t(locale, "network.tdh.spec.s2.body")}
       </Plain>
-      <div
-        className={TDH_TABLE_WRAP}
-        tabIndex={0}
-        role="region"
+      <ul
         aria-label={t(locale, "network.tdh.spec.s2.tableCaption")}
+        className="tw-m-0 tw-grid tw-list-none tw-gap-2 tw-p-0 sm:tw-grid-cols-2 lg:tw-hidden"
       >
-        <table className={`${TDH_TABLE} tw-min-w-[40rem]`}>
+        {CONTRACTS.map((contract) => (
+          <li key={contract.key} className={MOBILE_CARD}>
+            <p className="tw-m-0 tw-flex tw-items-baseline tw-justify-between tw-gap-3 tw-text-sm tw-font-semibold tw-text-iron-50">
+              <span>{t(locale, `network.tdh.spec.s2.${contract.key}`)}</span>
+              {contract.standard && (
+                <span className="tw-text-xs tw-font-normal tw-text-iron-400">
+                  {contract.standard}
+                </span>
+              )}
+            </p>
+            <p className="tw-m-0 tw-mt-1">
+              <Address locale={locale} value={contract.address} />
+            </p>
+            <p className="tw-m-0 tw-mt-1 tw-text-[13px] tw-leading-5 tw-text-iron-300">
+              {contract.events ?? contractEvents(locale, contract.key)}
+            </p>
+          </li>
+        ))}
+      </ul>
+      <div className={`${TDH_TABLE_FRAME} tw-hidden lg:tw-block`}>
+        <table className={TDH_TABLE}>
           <caption className={CAPTION}>
             {t(locale, "network.tdh.spec.s2.tableCaption")}
           </caption>
@@ -111,13 +140,7 @@ function Section2({ locale }: { readonly locale: SupportedLocale }) {
                   {contract.standard ?? "–"}
                 </td>
                 <td className={`${TDH_TD} tw-text-[13px]`}>
-                  {contract.events ??
-                    t(
-                      locale,
-                      contract.key === "delegation"
-                        ? "network.tdh.spec.s2.delegationEvents"
-                        : "network.tdh.spec.s2.manifoldEvents"
-                    )}
+                  {contract.events ?? contractEvents(locale, contract.key)}
                 </td>
               </tr>
             ))}
@@ -128,13 +151,23 @@ function Section2({ locale }: { readonly locale: SupportedLocale }) {
         tone="strong"
         summary={t(locale, "network.tdh.spec.s2.topics")}
       >
-        <div
-          className={`${TDH_TABLE_WRAP} tw-mt-2`}
-          tabIndex={0}
-          role="region"
+        <ul
           aria-label={t(locale, "network.tdh.spec.s2.topicsCaption")}
+          className="tw-m-0 tw-mt-2 tw-grid tw-list-none tw-gap-2 tw-p-0 lg:tw-hidden"
         >
-          <table className={`${TDH_TABLE} tw-min-w-[40rem]`}>
+          {TOPICS.map(([signature, topic]) => (
+            <li key={topic} className={MOBILE_CARD}>
+              <p className="tw-m-0 tw-break-all tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-100">
+                {signature}
+              </p>
+              <p className="tw-m-0 tw-mt-1">
+                <Address locale={locale} value={topic} />
+              </p>
+            </li>
+          ))}
+        </ul>
+        <div className={`${TDH_TABLE_FRAME} tw-mt-2 tw-hidden lg:tw-block`}>
+          <table className={TDH_TABLE}>
             <caption className={CAPTION}>
               {t(locale, "network.tdh.spec.s2.topicsCaption")}
             </caption>
@@ -180,11 +213,29 @@ function Symbols({ locale }: { readonly locale: SupportedLocale }) {
       <p className="tw-m-0 tw-text-[15px] tw-leading-7 tw-text-iron-200">
         {t(locale, "network.tdh.spec.symbols.intro")}
       </p>
-      <div className={TDH_TABLE_FRAME}>
-        <table className={TDH_TABLE}>
-          <caption className="tw-sr-only">
-            {t(locale, "network.tdh.spec.symbols.title")}
-          </caption>
+      <dl className="tw-m-0 tw-grid tw-gap-2 md:tw-hidden">
+        {SYMBOLS.map((row) => (
+          <div
+            key={row.key}
+            className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-3 tw-py-2.5"
+          >
+            <dt className="tw-flex tw-items-center tw-justify-between tw-gap-3">
+              <span className="tw-font-mono tw-text-sm tw-text-iron-50">
+                {row.symbol}
+              </span>
+              <TdhSource refs={[`P26 §${row.section}`]} locale={locale} />
+            </dt>
+            <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-200">
+              {t(locale, `network.tdh.spec.symbol.${row.key}` as MessageKey)}
+            </dd>
+          </div>
+        ))}
+      </dl>
+      <div className={`${TDH_TABLE_FRAME} tw-hidden md:tw-block`}>
+        <table
+          className={TDH_TABLE}
+          aria-label={t(locale, "network.tdh.spec.symbols.title")}
+        >
           <thead>
             <tr>
               <th scope="col" className={TDH_TH}>

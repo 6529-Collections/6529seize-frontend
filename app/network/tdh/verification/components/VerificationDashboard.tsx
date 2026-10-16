@@ -91,14 +91,6 @@ export function VerificationLede({
   );
 }
 
-export function SampleBanner({ locale }: { readonly locale: SupportedLocale }) {
-  return (
-    <Notice tone="warning" title={t(locale, "network.tdh.verify.sample.title")}>
-      <p className="tw-m-0">{t(locale, "network.tdh.verify.sample.body")}</p>
-    </Notice>
-  );
-}
-
 /** The latest report, and a warning when reports are late or missing. */
 function FreshnessLine({
   locale,
@@ -233,7 +225,6 @@ export default function VerificationDashboard({
   }
 
   const index = indexLoad.index;
-  const isSample = indexLoad.source === "sample";
   const cutover = cutoverState(index.cutover, now);
   const days = sortedIndexDays(index);
   const entry = selected ?? days[0] ?? null;
@@ -251,14 +242,12 @@ export default function VerificationDashboard({
       )
     : totalDelta(entry.totalTdh.rust, entry.totalTdh.live);
   const missing = missingCycleDays(index);
-  const freshness =
-    latest && !isSample ? reportFreshness(latest.cycleDay, now) : null;
+  const freshness = latest ? reportFreshness(latest.cycleDay, now) : null;
   const agreementComplete = isAgreementComplete(day);
 
   return (
     <div>
       <div className="tw-space-y-4">
-        {isSample && <SampleBanner locale={locale} />}
         {day ? (
           <>
             <VerificationHeadline
@@ -323,17 +312,11 @@ export default function VerificationDashboard({
       />
       <VerificationProvenance
         locale={locale}
-        isSample={isSample}
         day={day}
         dayUrl={dayLoad?.status === "ok" ? dayLoad.dayUrl : null}
         indexUrl={indexLoad.indexUrl}
       />
-      <VerificationCheck
-        locale={locale}
-        isSample={isSample}
-        day={day}
-        cycleDay={entry.cycleDay}
-      />
+      <VerificationCheck locale={locale} day={day} cycleDay={entry.cycleDay} />
       <VerificationMethod locale={locale} />
       <TdhPager current="/network/tdh/verification" locale={locale} />
     </div>

@@ -8,10 +8,10 @@ import {
   indexDayVerdict,
   totalDelta,
   utcCycleDay,
-  VERDICT_TONE,
   type PillTone,
   type VerdictState,
 } from "@/lib/tdh/verification/states";
+import TdhSubnavScroll from "../../shared/TdhSubnavScroll";
 import { TDH_FOCUS_RING } from "../../shared/tdhStyles";
 import { verificationDayHref } from "./VerificationHeadline";
 import {
@@ -31,6 +31,29 @@ const TONE_BG: Record<PillTone, string> = {
   error: "tw-bg-error/80 hover:tw-bg-error",
   neutral: "tw-bg-iron-500/80 hover:tw-bg-iron-400",
 };
+
+/**
+ * Each verdict has its own look as well as its colour: a missing 6529.io
+ * file is an amber outline, an unexplained difference a filled amber cell
+ * with a mark, a mismatch a red cell with a cross.
+ */
+const VERDICT_CELL: Record<VerdictState, string> = {
+  equal: TONE_BG.success,
+  explained: TONE_BG.primary,
+  investigating: TONE_BG.warning,
+  mismatch: TONE_BG.error,
+  liveUnavailable:
+    "tw-border-2 tw-border-solid tw-border-amber-400 tw-bg-transparent hover:tw-bg-amber-400/20",
+  pending: TONE_BG.neutral,
+  unknown: TONE_BG.neutral,
+};
+
+const VERDICT_MARK: Partial<Record<VerdictState, string>> = {
+  investigating: "!",
+  mismatch: "×",
+};
+
+const CELL_SIZE = "tw-h-10 tw-w-full";
 
 const LEGEND: readonly VerdictState[] = [
   "equal",
@@ -122,11 +145,11 @@ function DeltaBar({
   }
   const height =
     delta === 0
-      ? 2
-      : Math.max(4, Math.round((Math.abs(delta) / maxDelta) * 20));
+      ? 3
+      : Math.max(5, Math.round((Math.abs(delta) / maxDelta) * 20));
   return (
     <span
-      className={`tw-w-2 tw-rounded-sm ${delta === 0 ? "tw-bg-iron-600" : "tw-bg-amber-300"}`}
+      className={`tw-w-3/5 tw-rounded-sm ${delta === 0 ? "tw-bg-iron-500" : "tw-bg-amber-300"}`}
       style={{ height: `${height}px` }}
     />
   );
@@ -157,7 +180,7 @@ function CellSquare({
         role="img"
         aria-label={label}
         title={label}
-        className={`tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid ${
+        className={`tw-flex ${CELL_SIZE} tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid ${
           cell.cutover
             ? "tw-border-primary-400/70 tw-bg-primary-500/15"
             : "tw-border-white/[0.08] tw-bg-iron-900"
@@ -179,7 +202,7 @@ function CellSquare({
         role="img"
         aria-label={label}
         title={label}
-        className="tw-size-7 tw-rounded-md tw-border tw-border-dashed tw-border-iron-600"
+        className={`tw-block ${CELL_SIZE} tw-rounded-md tw-border tw-border-dashed tw-border-iron-500`}
       />
     );
   }
@@ -195,12 +218,16 @@ function CellSquare({
       aria-label={label}
       title={label}
       aria-current={selected ? "date" : undefined}
-      className={`tw-block tw-size-7 tw-rounded-md tw-transition-colors motion-reduce:tw-transition-none ${TONE_BG[VERDICT_TONE[cell.verdict]]} ${
+      className={`tw-flex ${CELL_SIZE} tw-items-center tw-justify-center tw-rounded-md tw-text-sm tw-font-bold tw-text-iron-950 tw-no-underline tw-transition-colors motion-reduce:tw-transition-none ${VERDICT_CELL[cell.verdict]} ${
         selected
           ? "tw-ring-2 tw-ring-iron-50 tw-ring-offset-2 tw-ring-offset-iron-950"
           : ""
       } ${TDH_FOCUS_RING}`}
-    />
+    >
+      {VERDICT_MARK[cell.verdict] && (
+        <span aria-hidden="true">{VERDICT_MARK[cell.verdict]}</span>
+      )}
+    </Link>
   );
 }
 
@@ -262,12 +289,15 @@ export default function VerificationCalendar({
           })}
         </p>
       </div>
-      <div className="tw-mt-3 tw-overflow-x-auto tw-pb-1">
-        <ol className="tw-m-0 tw-flex tw-w-max tw-list-none tw-gap-1.5 tw-p-0">
+      <TdhSubnavScroll
+        className="tw-mt-3 tw-overflow-x-auto tw-px-1 tw-pb-1 tw-pt-1 tw-scrollbar-none"
+        focusSelector='[aria-current="date"]'
+      >
+        <ol className="tw-m-0 tw-grid tw-list-none tw-auto-cols-[minmax(2rem,4.5rem)] tw-grid-flow-col tw-gap-1.5 tw-p-0">
           {cells.map((cell, index) => (
             <li
               key={`${cell.kind}-${cell.kind === "day" ? cell.day.cycleDay : cell.cycleDay}`}
-              className="tw-flex tw-w-7 tw-flex-col tw-items-center"
+              className="tw-flex tw-min-w-0 tw-flex-col tw-items-center"
             >
               <CellSquare
                 locale={locale}
@@ -285,7 +315,7 @@ export default function VerificationCalendar({
               </span>
               <span
                 aria-hidden="true"
-                className={`tw-mt-0.5 tw-text-[10px] tw-tabular-nums tw-leading-4 ${
+                className={`tw-mt-0.5 tw-text-xs tw-tabular-nums tw-leading-4 ${
                   cell.kind === "upcoming" && cell.cutover
                     ? "tw-font-semibold tw-text-primary-300"
                     : "tw-text-iron-500"
@@ -296,7 +326,7 @@ export default function VerificationCalendar({
             </li>
           ))}
         </ol>
-      </div>
+      </TdhSubnavScroll>
       <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-2 tw-text-xs tw-text-iron-400 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
         <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-p-0">
           {LEGEND.map((state) => (
@@ -306,8 +336,10 @@ export default function VerificationCalendar({
             >
               <span
                 aria-hidden="true"
-                className={`tw-size-2.5 tw-rounded-sm ${TONE_BG[VERDICT_TONE[state]]}`}
-              />
+                className={`tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-sm tw-text-xs tw-font-bold tw-leading-none tw-text-iron-950 ${VERDICT_CELL[state]}`}
+              >
+                {VERDICT_MARK[state]}
+              </span>
               {t(locale, `network.tdh.shared.pill.${state}` as MessageKey)}
             </li>
           ))}

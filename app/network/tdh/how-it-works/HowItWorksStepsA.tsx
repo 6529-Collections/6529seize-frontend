@@ -287,7 +287,7 @@ function Step5({ locale }: { readonly locale: SupportedLocale }) {
         </div>
         <TransactionBoxDiagram locale={locale} />
       </Example>
-      <Cited locale={locale} refs={["Comparison 2026-10-14/15", "P26 §13"]}>
+      <Cited locale={locale} refs={["Comparison Oct 14–15", "P26 §7.1"]}>
         {t(locale, "network.tdh.how.s5.measured")}
       </Cited>
       <Cited locale={locale} refs={["P26 §7.1", "P26 §13"]} muted>

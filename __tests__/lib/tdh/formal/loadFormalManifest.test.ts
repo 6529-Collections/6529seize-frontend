@@ -4,6 +4,7 @@
 import { BUNDLED_FORMAL_MANIFEST } from "@/lib/tdh/formal/bundledManifest";
 import { createFormalManifestLoader } from "@/lib/tdh/formal/loadFormalManifest.server";
 import { formalManifestSchema } from "@/lib/tdh/formal/manifest";
+import { PUBLIC_TDH_FEED_BASE } from "@/lib/tdh/verification/loadVerification.server";
 
 const BASE = "https://verification.example/tdh";
 const URL = `${BASE}/formal/manifest.json`;
@@ -76,14 +77,30 @@ describe("createFormalManifestLoader", () => {
     }
   });
 
-  it("never fetches without a usable base", async () => {
-    for (const base of [null, "", "http://example.com"]) {
-      const { load, fetchImpl } = loaderFor(null, base);
-      await expect(load()).resolves.toMatchObject({
-        status: "bundled",
-        reason: "unconfigured",
+  it("never fetches from a misconfigured base", async () => {
+    const { load, fetchImpl } = loaderFor(null, "http://example.com");
+    await expect(load()).resolves.toMatchObject({
+      status: "bundled",
+      reason: "unconfigured",
+    });
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it("reads the manifest from 6529's public feed when no base is configured", async () => {
+    for (const base of [undefined, ""]) {
+      const fetchImpl = jest.fn(async (input: RequestInfo | URL) => {
+        expect(String(input)).toBe(
+          `${PUBLIC_TDH_FEED_BASE}formal/manifest.json`
+        );
+        return jsonResponse(BUNDLED);
+      }) as unknown as jest.MockedFunction<typeof fetch>;
+      const load = createFormalManifestLoader({
+        base,
+        isProduction: true,
+        fetchImpl,
       });
-      expect(fetchImpl).not.toHaveBeenCalled();
+      await expect(load()).resolves.toMatchObject({ status: "published" });
+      expect(fetchImpl).toHaveBeenCalledTimes(1);
     }
   });
 });

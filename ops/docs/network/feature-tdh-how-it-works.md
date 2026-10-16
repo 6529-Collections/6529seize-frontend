@@ -62,8 +62,13 @@ on. Each has a `Reset` button and announces its result politely.
   (FirstGM's, after its adjustment), 559 eligible Memes in 17 seasons, 101
   Gradients, 1,000 NextGen tokens. The highest boost that day is 2.04.
 - Step 10 states the three-wallet limit of `tdh-v1.0` and notes that
-  6529.io's backend can count a fourth wallet that the TDH-v1 specification
-  does not include yet. Its link diagrams number each link in on-chain order.
+  6529.io's consolidation guide also allows a fourth wallet, which P26 does
+  not include yet; step 14 lists it, and that consolidations count as they
+  stand at the snapshot block, among the cutover changes. Its link diagrams
+  number each link in on-chain order.
+- Diagrams are drawn phone first: the rate chart, the transaction and the
+  link diagrams keep their text at 12 px or more at every width
+  (`scripts/tdh-pages-check.mjs` checks it).
 
 ## Related Pages
 

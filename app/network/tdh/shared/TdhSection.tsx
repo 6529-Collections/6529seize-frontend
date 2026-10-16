@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
-import TdhHeadingLink from "./TdhHeadingLink";
+import TdhHeading from "./TdhHeading";
 
 /**
  * A section of a TDH sub-page: a sticky heading column and a content column
@@ -43,22 +42,12 @@ export default function TdhSection({
             {eyebrow}
           </p>
         )}
-        <div className="tw-flex tw-w-fit tw-max-w-full tw-items-start tw-gap-1">
-          <h2
-            id={`${id}-heading`}
-            tabIndex={-1}
-            className="tw-m-0 tw-min-w-0 tw-text-balance tw-pt-1.5 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none"
-          >
-            {title}
-          </h2>
-          <TdhHeadingLink
-            id={id}
-            label={t(locale, "network.tdh.shared.headingLink", {
-              heading: title,
-            })}
-            copiedLabel={t(locale, "network.tdh.shared.linkCopied")}
-          />
-        </div>
+        <TdhHeading
+          id={id}
+          title={title}
+          locale={locale}
+          className="tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50"
+        />
         {pills !== undefined && (
           <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-2">{pills}</div>
         )}

@@ -8,6 +8,8 @@ import {
   TDH_CHIP_BUTTON,
   TDH_CHIP_OFF,
   TDH_CHIP_ON,
+  TDH_TABLE,
+  TDH_TH,
 } from "../shared/tdhStyles";
 import { DEVIATIONS, type DeviationGroup } from "./specData";
 
@@ -21,7 +23,35 @@ const DECISION_TONE: Record<string, string> = {
   dev13: "tw-bg-amber-400",
 };
 
-/** P26 §11: the 19 deviations, filterable by whether they changed values. */
+const CELL =
+  "tw-block tw-border-0 tw-p-0 tw-align-top xl:tw-table-cell xl:tw-border-b xl:tw-border-solid xl:tw-border-white/[0.05] xl:tw-px-4 xl:tw-py-3";
+
+function Decision({
+  locale,
+  decision,
+}: {
+  readonly locale: SupportedLocale;
+  readonly decision: string;
+}) {
+  return (
+    <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-2 tw-py-0.5 tw-font-sans tw-text-xs tw-font-medium tw-text-iron-100">
+      <span className="tw-sr-only">
+        {t(locale, "network.tdh.spec.s11.decision")}:
+      </span>
+      <span
+        aria-hidden="true"
+        className={`tw-size-1.5 tw-shrink-0 tw-rounded-full ${DECISION_TONE[decision] ?? "tw-bg-iron-400"}`}
+      />
+      {t(locale, `network.tdh.spec.decision.${decision}` as MessageKey)}
+    </span>
+  );
+}
+
+/**
+ * P26 §11: the 19 deviations, filterable by whether they changed values. One
+ * table: a dense grid of rows from `lg`, a card per deviation below, with
+ * each row's anchor (`#dev-2`) in both.
+ */
 export default function DeviationsTable({
   locale,
 }: {
@@ -57,51 +87,67 @@ export default function DeviationsTable({
           shown: formatInteger(locale, shown.length),
         })}
       </p>
-      <ol className="tw-m-0 tw-mt-3 tw-list-none tw-space-y-3 tw-p-0">
-        {shown.map((row) => (
-          <li
-            key={row.id}
-            id={`dev-${row.id}`}
-            className="tw-scroll-mt-28 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-p-4 target:tw-ring-1 target:tw-ring-primary-400/60 sm:tw-p-5"
-          >
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2">
-              <h3 className="tw-m-0 tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-font-mono tw-text-sm tw-font-semibold tw-text-iron-50">
-                {`DEV-${row.id}`}
-                {row.group === "changes" && (
-                  <span className="tw-rounded-full tw-bg-amber-400/15 tw-px-2 tw-py-0.5 tw-font-sans tw-text-[11px] tw-font-medium tw-text-amber-200">
-                    {t(locale, "network.tdh.spec.s11.filter.changes")}
-                  </span>
-                )}
-              </h3>
-              <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-text-iron-100">
-                <span className="tw-sr-only">
-                  {t(locale, "network.tdh.spec.s11.decision")}:
-                </span>
-                <span
-                  aria-hidden="true"
-                  className={`tw-size-1.5 tw-rounded-full ${DECISION_TONE[row.decision] ?? "tw-bg-iron-400"}`}
-                />
-                {t(
-                  locale,
-                  `network.tdh.spec.decision.${row.decision}` as MessageKey
-                )}
-              </span>
-            </div>
-            <dl className="tw-m-0 tw-mt-3 tw-grid tw-gap-x-5 tw-gap-y-3 sm:tw-grid-cols-3">
+      <div className="tw-mt-3 xl:tw-overflow-hidden xl:tw-rounded-lg xl:tw-border xl:tw-border-solid xl:tw-border-white/[0.07]">
+        <table
+          className={`${TDH_TABLE} tw-block xl:tw-table xl:tw-table-fixed`}
+          aria-label={t(locale, "network.tdh.spec.s11.tableCaption", {
+            shown: formatInteger(locale, shown.length),
+          })}
+        >
+          <thead className="tw-hidden xl:tw-table-header-group">
+            <tr>
+              <th scope="col" className={`${TDH_TH} tw-w-[8.5rem]`}>
+                {t(locale, "network.tdh.spec.s11.id")}
+              </th>
               {(["old", "v1", "effect"] as const).map((field) => (
-                <div key={field} className="tw-min-w-0">
-                  <dt className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
-                    {t(locale, `network.tdh.spec.s11.${field}`)}
-                  </dt>
-                  <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-200">
-                    {t(locale, key(row.id, field))}
-                  </dd>
-                </div>
+                <th key={field} scope="col" className={TDH_TH}>
+                  {t(locale, `network.tdh.spec.s11.${field}`)}
+                </th>
               ))}
-            </dl>
-          </li>
-        ))}
-      </ol>
+              <th scope="col" className={`${TDH_TH} tw-w-[11rem]`}>
+                {t(locale, "network.tdh.spec.s11.decision")}
+              </th>
+            </tr>
+          </thead>
+          <tbody className="tw-grid tw-gap-3 xl:tw-table-row-group">
+            {shown.map((row) => (
+              <tr
+                key={row.id}
+                id={`dev-${row.id}`}
+                className="tw-grid tw-scroll-mt-28 tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-p-4 target:tw-ring-1 target:tw-ring-primary-400/60 sm:tw-grid-cols-3 xl:tw-table-row xl:tw-rounded-none xl:tw-border-0 xl:tw-bg-transparent xl:tw-p-0"
+              >
+                <th
+                  scope="row"
+                  className={`${CELL} tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-font-mono tw-text-sm tw-font-semibold tw-text-iron-50 sm:tw-col-span-3 xl:tw-table-cell`}
+                >
+                  <span className="tw-block">{`DEV-${row.id}`}</span>
+                  {row.group === "changes" && (
+                    <span className="tw-inline-block tw-whitespace-nowrap tw-rounded-full tw-bg-amber-400/15 tw-px-2 tw-py-0.5 tw-font-sans tw-text-xs tw-font-medium tw-text-amber-200">
+                      {t(locale, "network.tdh.spec.s11.filter.changes")}
+                    </span>
+                  )}
+                  <span className="xl:tw-hidden">
+                    <Decision locale={locale} decision={row.decision} />
+                  </span>
+                </th>
+                {(["old", "v1", "effect"] as const).map((field) => (
+                  <td key={field} className={`${CELL} tw-min-w-0`}>
+                    <span className="tw-block tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400 xl:tw-hidden">
+                      {t(locale, `network.tdh.spec.s11.${field}`)}
+                    </span>
+                    <span className="tw-mt-1 tw-block tw-text-sm tw-leading-6 tw-text-iron-200 xl:tw-mt-0">
+                      {t(locale, key(row.id, field))}
+                    </span>
+                  </td>
+                ))}
+                <td className={`${CELL} tw-hidden xl:tw-table-cell`}>
+                  <Decision locale={locale} decision={row.decision} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
         {t(locale, "network.tdh.spec.decision.legend")}
       </p>

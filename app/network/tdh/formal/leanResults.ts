@@ -7,26 +7,73 @@
  * model's PROOFS.md names as not proved. The page takes every status from
  * the manifest (`formal/manifest.json` on the TDH feed, or the copy bundled
  * with the page), and a statement whose entries the manifest does not
- * confirm shows as unverified. Lean statements are quoted verbatim from the
- * model at 6529chain 7bf579a, without their proofs.
+ * confirm shows as unverified. Lean statements are quoted verbatim, without
+ * their proofs, from the model at 6529chain 7bf579a; those of round 4 from
+ * f854661, where the earlier ones read the same.
+ *
+ * The page knows two rounds of the model. Round 3 (manifest at 7bf579a)
+ * starts from decoded inputs; round 4 (6529chain f854661) starts from raw
+ * logs and proves their order cannot matter. Which one a manifest records is
+ * read from the manifest itself (`leanRound` in `formalStatus.ts`).
  */
 
-/**
- * Results of runs the manifest does not repeat, from the model's README at
- * 6529chain 237c997 ("Results, 2026-10-15").
- */
-export const LEAN_RUNS = {
-  readmeCommit: "237c997",
-  /** The 2026-10-11 cycle from 414,007 raw logs. */
-  fullDayRecords: 21_410,
-  fullDayTotal: 2_061_888_816,
-  /** About 15 s to read and parse the input, 30 s to compute. */
-  fullDaySeconds: 45,
-  /** Random differential inputs, seeds 6529 and 7, each under both rules. */
-  randomInputs: 6_000,
-  randomVectors: 12_000,
-  randomChecks: 1_272_930,
+/** A round of the model the page can show. */
+export type LeanRound = 3 | 4;
+
+/** Round 4 of the model, from its commit in 6529's design repository. */
+export const LEAN_ROUND_4 = {
+  commit: "f854661",
+  date: "2026-10-15",
+  /** A theorem round 4 added: a manifest proving it is round 4 or later. */
+  theorem: "computeCycleFromSource_perm",
 } as const;
+
+export interface LeanRuns {
+  /** The README commit whose "Results, 2026-10-15" these figures are. */
+  readonly readmeCommit: string;
+  /** The raw logs of the 2026-10-11 cycle the run reads. */
+  readonly rawLogs: number;
+  readonly fullDayRecords: number;
+  readonly fullDayTotal: number;
+  /** Seconds for the whole day from raw logs: about, or a range. */
+  readonly fullDaySeconds: readonly [number, number];
+  /** Random differential inputs, seeds 6529 and 7, each under both rules. */
+  readonly randomInputs: number;
+  readonly randomVectors: number;
+  readonly randomChecks: number;
+}
+
+/**
+ * Results of runs the manifest does not repeat, from the model's README:
+ * round 3 at 6529chain 237c997, round 4 at f854661.
+ */
+export const LEAN_RUNS: Readonly<Record<LeanRound, LeanRuns>> = {
+  3: {
+    readmeCommit: "237c997",
+    rawLogs: 414_007,
+    fullDayRecords: 21_410,
+    fullDayTotal: 2_061_888_816,
+    // About 15 s to read and parse the input, 30 s to compute.
+    fullDaySeconds: [45, 45],
+    randomInputs: 6_000,
+    randomVectors: 12_000,
+    randomChecks: 1_272_930,
+  },
+  4: {
+    readmeCommit: "f854661",
+    // All 414,254 logs read at their types; the 414,007 through B decoded.
+    rawLogs: 414_254,
+    fullDayRecords: 21_410,
+    fullDayTotal: 2_061_888_816,
+    // 19 to 29 s to read and parse, 38 to 42 s to type-check, decode and
+    // compute.
+    fullDaySeconds: [56, 72],
+    randomInputs: 6_000,
+    randomVectors: 12_000,
+    // 195,510 (seed 6529) + 986,678 (seed 7).
+    randomChecks: 1_182_188,
+  },
+};
 
 /** A statement's status as the page shows it. */
 export type StatementStatus =
@@ -37,9 +84,19 @@ export type StatementStatus =
   | "deferred"
   | "unverified";
 
+/** What a statement changes in round 4 of the model. */
+type RoundFourChanges = Partial<
+  Pick<LeanStatement, "copy" | "refs" | "proved" | "deferred" | "file" | "lean">
+>;
+
 export interface LeanStatement {
-  /** Message key suffix: `network.tdh.formal.st.<id>.*`. */
   readonly id: string;
+  /** Message key suffix, `network.tdh.formal.st.<copy>.*`; the id if unset. */
+  readonly copy?: string;
+  /** The rounds of the model the statement is about; every round if unset. */
+  readonly rounds?: readonly LeanRound[];
+  /** Its entries and wording in round 4, where they differ. */
+  readonly round4?: RoundFourChanges;
   readonly group: "p26" | "p53";
   readonly refs: readonly string[];
   /** The status the statement claims, once the manifest confirms it. */
@@ -85,6 +142,7 @@ export const LEAN_STATEMENTS: readonly LeanStatement[] = [
     ],
     counterexamples: NONE,
     deferred: NONE,
+    round4: { deferred: ["1.canonical-sort"] },
     file: "Tdh/Proofs/NetInvariance.lean, Tdh/Proofs/Netting.lean",
     lean: `theorem replayHoldings_invariance (p : Params) (cm : ClusterMap) (c₁ c₂ : Array Transfer)
     (hg : Corresponds (groupByTransaction c₁) (groupByTransaction c₂))
@@ -163,6 +221,7 @@ export const LEAN_STATEMENTS: readonly LeanStatement[] = [
     ],
     counterexamples: NONE,
     deferred: NONE,
+    round4: { deferred: ["3.identity-wallets-field"] },
     file: "Tdh/Proofs/Records.lean",
     lean: `theorem computeCycle_identity_sums (p : Params) (v : Variant) (input : CycleInput) (out : CycleOutput)
     (h : computeCycle p v input = .ok out) :
@@ -189,6 +248,34 @@ export const LEAN_STATEMENTS: readonly LeanStatement[] = [
     ],
     counterexamples: NONE,
     deferred: ["4.raw-log-order"],
+    round4: {
+      copy: "orderRaw",
+      refs: ["P26 §3.1", "P26 §3.2", "P26 §3.3", "P26 §6.1"],
+      proved: [
+        "computeCycleFromSource_perm",
+        "decode_perm",
+        "decodeLogs_perm",
+        "mapM_perm",
+        "checkLogTypes_perm",
+        "checkLogPositions_perm",
+        "logBlocks_perm",
+        "checkSelected_perm",
+        "checkRawOrDecoded_perm",
+        "computeCycle_perm",
+        "canonicalTransfers_perm",
+        "checkPositions_perm",
+        "checkInputTypes_perm",
+        "keptEvents_perm",
+      ],
+      deferred: ["4.error-names"],
+      file: "Tdh/Proofs/Order.lean, Tdh/Proofs/Decoding.lean",
+      lean: `theorem computeCycleFromSource_perm (p : Params) (v : Variant) (src₁ src₂ : CycleSource)
+    (hB : src₁.cutoffBlock = src₂.cutoffBlock) (hT : src₁.cutoffTime = src₂.cutoffTime)
+    (hH : src₁.headers = src₂.headers) (hC : src₁.claimTotalMax = src₂.claimTotalMax)
+    (hl : src₁.logs.Perm src₂.logs) (ht : src₁.transfers.Perm src₂.transfers)
+    (he : src₁.delegationEvents.Perm src₂.delegationEvents) :
+    (computeCycleFromSource p v src₁).toOption = (computeCycleFromSource p v src₂).toOption`,
+    },
     file: "Tdh/Proofs/Order.lean",
     lean: `theorem computeCycle_perm (p : Params) (v : Variant) (input : CycleInput)
     (ts : List Transfer) (es : List DelegationEvent) (is : List Position)
@@ -196,6 +283,38 @@ export const LEAN_STATEMENTS: readonly LeanStatement[] = [
     (his : is.Perm input.ignoredLogs) :
     computeCycle p v { input with transfers := ts, delegationEvents := es, ignoredLogs := is } =
       computeCycle p v input`,
+  },
+  {
+    id: "rawLogs",
+    group: "p26",
+    rounds: [4],
+    refs: ["P26 §3.1", "P26 §3.2", "P26 §4.2", "P26 §6.1", "P26 §10"],
+    status: "proved",
+    proved: [
+      "computeCycleFromSource_decoded",
+      "computeCycle_typed",
+      "computeCycleFromSource_typed",
+    ],
+    counterexamples: NONE,
+    deferred: ["6.rules-are-definitions", "6.json-reader"],
+    file: "Tdh/Logs.lean, Tdh/Proofs/Decoding.lean",
+    lean: `theorem computeCycleFromSource_decoded (p : Params) (v : Variant) (src : CycleSource)
+    (hl : src.logs = [])
+    (hh : (src.headers.toList.all fun (b, t) => isUint 64 b && isUint 64 t) = true) :
+    computeCycleFromSource p v src =
+      (do p.check
+          computeCycle p v { cutoffBlock := src.cutoffBlock, cutoffTime := src.cutoffTime,
+                             transfers := src.transfers, delegationEvents := src.delegationEvents,
+                             claimTotalMax := src.claimTotalMax, ignoredLogs := [] })
+
+theorem computeCycle_typed (p : Params) (v : Variant) (input : CycleInput) (out : CycleOutput)
+    (h : computeCycle p v input = .ok out) :
+    p.checkTypes = .ok () ∧ checkInputTypes input = .ok ()
+
+theorem computeCycleFromSource_typed (p : Params) (v : Variant) (src : CycleSource)
+    (out : CycleOutput) (h : computeCycleFromSource p v src = .ok out) :
+    checkLogTypes src.logs src.headers = .ok () ∧ ∃ input, src.decode p = .ok input ∧
+      p.checkTypes = .ok () ∧ checkInputTypes input = .ok ()`,
   },
   {
     id: "lifo",
@@ -246,6 +365,18 @@ theorem Stack.takeLast_none (s : Stack) (n : Nat) (h : s.takeLast n = none) :
     proved: NONE,
     counterexamples: NONE,
     deferred: NONE,
+    round4: {
+      copy: "factsTyped",
+      refs: [
+        "P26 §3.1",
+        "P26 §4.1",
+        "P26 §7.1",
+        "P26 §8.1",
+        "P26 §8.3",
+        "P26 §8.4",
+        "P26 §10",
+      ],
+    },
     file: "Tdh/Facts.lean",
     lean: null,
   },
@@ -348,6 +479,17 @@ theorem pruning_keeps_exclusions (evs : List Event) (ht : Timed evs) (c : Nat) (
   },
 ];
 
+/** The statements about a round of the model, with that round's entries. */
+export function statementsFor(round: LeanRound): readonly LeanStatement[] {
+  return LEAN_STATEMENTS.filter(
+    (statement) => statement.rounds?.includes(round) ?? true
+  ).map((statement) =>
+    round === 4 && statement.round4
+      ? { ...statement, ...statement.round4 }
+      : statement
+  );
+}
+
 /** The definitions the netting theorem's hypotheses use, verbatim. */
 export const NETTING_DEFINITIONS = `def SameNet (tx₁ tx₂ : List Transfer) : Prop :=
   ∃ ts hh, (∀ m ∈ tx₁, m.timestamp = ts ∧ m.txHash = hh) ∧ (∀ m ∈ tx₂, m.timestamp = ts ∧ m.txHash = hh) ∧
@@ -371,15 +513,40 @@ export const FIRST_RULE_CASES = [
   { id: "E", first: [100, 20], current: [100, 100] },
 ] as const;
 
+export interface ModelModule {
+  readonly module: string;
+  /** Message key suffix: `network.tdh.formal.module.<key>`. */
+  readonly key: string;
+  readonly section: string;
+  readonly rounds?: readonly LeanRound[];
+}
+
 /** The model's files and the P26 sections they cover (README, "Layout"). */
-export const MODEL_MODULES = [
+export const MODEL_MODULES: readonly ModelModule[] = [
   { module: "Tdh.Basic, Tdh.Binary64", key: "basic", section: "§1" },
   {
     module: "Tdh.Registry, Tdh.Keccak, Tdh.RegistryHash",
     key: "registry",
     section: "§2, §10",
   },
-  { module: "Tdh.Inputs", key: "inputs", section: "§2, §3, §6.1" },
+  {
+    module: "Tdh.Inputs",
+    key: "inputs",
+    section: "§2, §3, §6.1",
+    rounds: [3],
+  },
+  {
+    module: "Tdh.Inputs",
+    key: "inputsTyped",
+    section: "§2, §3, §6.1",
+    rounds: [4],
+  },
+  {
+    module: "Tdh.Logs",
+    key: "logs",
+    section: "§3.1, §3.2, §4.2, §6.1",
+    rounds: [4],
+  },
   { module: "Tdh.Cutoff", key: "cutoff", section: "§4" },
   { module: "Tdh.Eligibility", key: "eligibility", section: "§5" },
   { module: "Tdh.Consolidation", key: "consolidation", section: "§6" },
@@ -395,4 +562,9 @@ export const MODEL_MODULES = [
     section: "§7.3, §8.3, §8.4, §8.6, §8.7",
   },
   { module: "Tdh.Cycle", key: "cycle", section: "§7.3, §8.5, §8.7, §9" },
-] as const;
+];
+
+/** The modules of a round of the model. */
+export function modulesFor(round: LeanRound): readonly ModelModule[] {
+  return MODEL_MODULES.filter((row) => row.rounds?.includes(round) ?? true);
+}

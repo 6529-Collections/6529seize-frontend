@@ -225,7 +225,7 @@ export default function BoostBuilder({
                 })}
               </span>
               {season === CURRENT_SEASON && (
-                <span className="tw-rounded-full tw-bg-iron-800 tw-px-1.5 tw-py-0.5 tw-text-[11px] tw-text-iron-300">
+                <span className="tw-rounded-full tw-bg-iron-800 tw-px-1.5 tw-py-0.5 tw-text-xs tw-text-iron-300">
                   {t(locale, "network.tdh.how.boostBuilder.currentBadge")}
                 </span>
               )}

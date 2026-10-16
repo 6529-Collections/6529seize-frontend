@@ -36,7 +36,7 @@ const SOURCES = ["P26 §13", "D125", "D131", "D132"] as const;
 
 function differenceSentence(
   locale: SupportedLocale,
-  summary: Extract<VerificationSummary, { kind: "data" | "sample" }>
+  summary: Extract<VerificationSummary, { kind: "data" }>
 ): string {
   const count = formatInteger(locale, summary.differenceCount);
   const plural =
@@ -85,16 +85,54 @@ function LatestCard({
       </span>
     );
   }
+  const allEqual =
+    summary.sentence === "none" &&
+    summary.equal !== null &&
+    summary.equal === summary.total;
   return (
     <>
       <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
         <TdhStatusPill pill={summary.verdict} locale={locale} size="sm" />
-        {summary.kind === "sample" && (
-          <TdhStatusPill pill="sample" locale={locale} size="sm" />
+        {summary.historyChecked === false && (
+          <TdhStatusPill pill="unchecked" locale={locale} size="sm" />
         )}
       </span>
       {summary.equal !== null && summary.total !== null && (
-        <span className="tw-text-sm tw-tabular-nums tw-leading-6 tw-text-iron-100">
+        <span className="tw-grid tw-gap-x-8 tw-gap-y-3 sm:tw-grid-cols-2">
+          <span className="tw-flex tw-flex-col">
+            <span className="tw-text-3xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50">
+              {formatInteger(locale, summary.equal)}
+              <span className="tw-text-lg tw-font-normal tw-text-iron-400">
+                {" / "}
+                {formatInteger(locale, summary.total)}
+              </span>
+            </span>
+            <span className="tw-text-sm tw-text-iron-300">
+              {t(
+                locale,
+                summary.afterCutover
+                  ? "network.tdh.explainer.verified.metricAfter"
+                  : "network.tdh.explainer.verified.metric"
+              )}
+            </span>
+          </span>
+          <span className="tw-flex tw-flex-col">
+            <span className="tw-text-3xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50">
+              {formatInteger(locale, summary.rustTotal)}
+            </span>
+            <span className="tw-text-sm tw-text-iron-300">
+              {t(
+                locale,
+                summary.totalsEqual === true
+                  ? "network.tdh.explainer.verified.totalEqual"
+                  : "network.tdh.explainer.verified.totalRust"
+              )}
+            </span>
+          </span>
+        </span>
+      )}
+      {summary.equal !== null && summary.total !== null && (
+        <span className="tw-text-sm tw-tabular-nums tw-leading-6 tw-text-iron-200">
           {t(
             locale,
             summary.afterCutover
@@ -106,12 +144,14 @@ function LatestCard({
               total: formatInteger(locale, summary.total),
             }
           )}{" "}
-          {differenceSentence(locale, summary)}
+          {allEqual
+            ? t(locale, "network.tdh.explainer.verified.none")
+            : differenceSentence(locale, summary)}
         </span>
       )}
-      {summary.kind === "sample" && (
-        <span className="tw-text-xs tw-leading-5 tw-text-amber-200">
-          {t(locale, "network.tdh.explainer.verified.sample")}
+      {summary.historyChecked === false && (
+        <span className="tw-text-sm tw-leading-6 tw-text-iron-400">
+          {t(locale, "network.tdh.explainer.verified.history")}
         </span>
       )}
     </>

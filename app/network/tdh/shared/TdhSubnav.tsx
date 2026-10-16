@@ -31,9 +31,10 @@ const CURRENT =
 
 /**
  * The TDH section navigation (plan §3.2), shared by every TDH page,
- * including the consolidation guide and historic boosts. On phones the list
- * scrolls sideways inside its own region with edge fades, starting at the
- * current page; the page itself never scrolls sideways.
+ * including the consolidation guide and historic boosts. It is one row at
+ * every width: where it does not fit, it scrolls sideways inside its own
+ * region with edge fades, starting at the current page, and the page itself
+ * never scrolls sideways.
  */
 export default function TdhSubnav({
   current,
@@ -49,8 +50,8 @@ export default function TdhSubnav({
       aria-label={t(locale, "network.tdh.shared.nav.label")}
       className="tw-relative -tw-mx-3 tw-mb-2 tw-mt-1 lg:tw-mx-0"
     >
-      <TdhSubnavScroll className="tw-overflow-x-auto tw-px-3 tw-scrollbar-none [-webkit-mask-image:linear-gradient(to_right,transparent,#000_16px,#000_calc(100%_-_28px),transparent)] [mask-image:linear-gradient(to_right,transparent,#000_16px,#000_calc(100%_-_28px),transparent)] lg:tw-px-0 lg:[-webkit-mask-image:none] lg:[mask-image:none]">
-        <ul className="tw-m-0 tw-flex tw-w-max tw-list-none tw-items-center tw-gap-1 tw-p-0 tw-pr-6 lg:tw-w-auto lg:tw-flex-wrap lg:tw-pr-0">
+      <TdhSubnavScroll className="tw-overflow-x-auto tw-px-3 tw-scrollbar-none lg:tw-px-0">
+        <ul className="tw-m-0 tw-flex tw-w-max tw-list-none tw-items-center tw-gap-1 tw-p-0">
           {TDH_PAGES.map((page) => {
             const isCurrent = page.href === current;
             return (

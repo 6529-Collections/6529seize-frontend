@@ -8,12 +8,14 @@ import {
   totalDelta,
   VERDICT_TONE,
 } from "@/lib/tdh/verification/states";
+import TdhHeading from "../../shared/TdhHeading";
+import { WIDE_WIDTH } from "../../shared/TdhSvg";
 import TdhDisclosure from "../../shared/TdhDisclosure";
 import TdhStatusPill from "../../shared/TdhStatusPill";
 import {
   TDH_CAPTION,
   TDH_TABLE,
-  TDH_TABLE_WRAP,
+  TDH_TABLE_FRAME,
   TDH_TD,
   TDH_TD_NUM,
   TDH_TH,
@@ -97,8 +99,8 @@ function HistoryChart({
       : ordered.findIndex((day) => day.cycleDay === cutoverCycleDay);
   const titleId = `${id}-title`;
   const descId = `${id}-desc`;
-  const label = "tw-fill-iron-400 tw-text-[12px]";
-  const tickLabel = "tw-fill-iron-500 tw-text-[12px] tw-tabular-nums";
+  const label = "tw-fill-iron-300 tw-text-[13px]";
+  const tickLabel = "tw-fill-iron-400 tw-text-[13px] tw-tabular-nums";
 
   return (
     <svg
@@ -396,16 +398,20 @@ function HistoryTable({
   const rows = historyRows(ordered, missing);
   const noValue = t(locale, "network.tdh.verify.history.noValue");
   return (
-    <div
-      className={TDH_TABLE_WRAP}
-      tabIndex={0}
-      role="region"
-      aria-label={t(locale, "network.tdh.verify.history.tableCaption")}
-    >
-      <table className={`${TDH_TABLE} tw-min-w-[46rem]`}>
-        <caption className={caption ? TDH_CAPTION : "tw-sr-only"}>
-          {t(locale, "network.tdh.verify.history.tableCaption")}
-        </caption>
+    <div className={TDH_TABLE_FRAME}>
+      <table
+        className={TDH_TABLE}
+        aria-label={
+          caption
+            ? undefined
+            : t(locale, "network.tdh.verify.history.tableCaption")
+        }
+      >
+        {caption && (
+          <caption className={TDH_CAPTION}>
+            {t(locale, "network.tdh.verify.history.tableCaption")}
+          </caption>
+        )}
         <thead>
           <tr>
             <th scope="col" className={TDH_TH}>
@@ -499,9 +505,11 @@ function HistoryTable({
 /**
  * Agreement over time (plan §10.3): identities equal between Rust and
  * 6529.io as a share, and the total TDH difference as bars around zero.
- * Below seven days a chart says little, so the days show as a table, or as
- * one card per day on a phone; from the seventh, wider screens draw the chart
- * with the table one click away. Days without a report are listed as such.
+ * Below seven days a chart says little, so the days show as a table on wide
+ * screens and as one card per day below `xl`; from the seventh, the chart is
+ * drawn at a width composed for the column (560 units to `xl`, 1,040 from
+ * it), never scaled below its own size, with the table one click away. Days
+ * without a report are listed as such.
  */
 export default function VerificationHistory({
   locale,
@@ -523,22 +531,30 @@ export default function VerificationHistory({
   const enough = ordered.length >= MIN_DAYS_FOR_CHART;
 
   return (
-    <section aria-labelledby="tdh-verify-history-heading" className="tw-mt-12">
-      <h2
-        id="tdh-verify-history-heading"
-        className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
-      >
-        {t(locale, "network.tdh.verify.history.heading")}
-      </h2>
+    <section
+      id="history"
+      aria-labelledby="history-heading"
+      className="tw-mt-12 tw-scroll-mt-24"
+    >
+      <TdhHeading
+        id="history"
+        title={t(locale, "network.tdh.verify.history.heading")}
+        locale={locale}
+        className="tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
+      />
       <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
         {t(locale, "network.tdh.verify.history.caption")}
-        {!enough && ` ${t(locale, "network.tdh.verify.history.fewDays")}`}
       </p>
       {enough ? (
         <>
           <div className="tw-mt-4 tw-hidden md:tw-block">
             <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-p-5">
-              <HistoryChart {...chart} width={1040} maxLabels={10} />
+              <div className="xl:tw-hidden">
+                <HistoryChart {...chart} width={WIDE_WIDTH} maxLabels={6} />
+              </div>
+              <div className="tw-hidden xl:tw-block">
+                <HistoryChart {...chart} width={1040} maxLabels={10} />
+              </div>
             </div>
             <TdhDisclosure
               className="tw-mt-3"
@@ -559,7 +575,7 @@ export default function VerificationHistory({
         </>
       ) : (
         <>
-          <div className="tw-mt-4 tw-hidden md:tw-block">
+          <div className="tw-mt-4 tw-hidden xl:tw-block">
             <HistoryTable
               locale={locale}
               ordered={ordered}
@@ -567,7 +583,7 @@ export default function VerificationHistory({
               caption={false}
             />
           </div>
-          <div className="tw-mt-4 md:tw-hidden">
+          <div className="tw-mt-4 xl:tw-hidden">
             <HistoryList locale={locale} ordered={ordered} missing={missing} />
           </div>
         </>

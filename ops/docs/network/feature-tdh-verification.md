@@ -33,55 +33,59 @@ days return the standard not-found page.
 
 ## What the Page Shows
 
-1. A short sample banner when bundled sample data is shown (never in
-   production).
-2. The headline: the verdict, the day and cycle, the day's result in one
+1. The headline: the verdict, the day and cycle, the day's result in one
    sentence (for example that the Rust core, the Python reference and
    6529.io agreed on all collectors and wallets), the verdict in words,
    previous and next day arrows, the snapshot block, and the history mode
    (`Not yet fully checked` or `History fully checked`, with a
    `What this label means` disclosure). On a day that is not the latest, a
    link back to the latest.
-3. The day at a glance: collectors and wallets equal between Rust and
-   6529.io, records equal between Rust and Python, each with a meter that
-   keeps a visible sliver for any difference; the total TDH, Rust minus
-   6529.io; and the cutover: a countdown with the week from the first daily
-   run (16 October 2026) to about 23 October 2026 on the latest day, the
-   planned date on older days, and `Switched on {date}` only when a published
-   file says the cutover is done.
-4. Every day: one square per day coloured by its verdict and linking to it,
-   a mark under each for the total's difference, dashed squares for days
-   with no report and, while the cutover is ahead, the days still to come up
-   to it. With published data it also says which report is the latest, warns
-   when reports are late, and counts days with no report.
-5. Side by side: totals, collector and wallet counts, the roots (Python
+2. The day at a glance: collectors equal between the Rust core and 6529.io
+   and between the Rust core and Python, each with a meter that keeps a
+   visible sliver for any difference and a line for the wallets; the total
+   TDH, with whether it is the same in all three; and the cutover: a
+   countdown with the week from the start of the daily runs (October 16,
+   2026) to about October 23, 2026 on the latest day, the planned date on
+   older days, and `Switched on {date}` only when a published file says the
+   cutover is done.
+3. Every day: one cell per day coloured and shaped by its verdict and
+   linking to it (a missing 6529.io file is an outline, an unexplained
+   difference carries `!`, a mismatch `×`), a bar under each for the total's
+   difference, dashed cells for days with no report and, while the cutover is
+   ahead, the days still to come up to it. On phones the row scrolls inside
+   itself with edge fades, starting at the shown day. It also says which
+   report is the latest, warns when reports are late, and counts days with no
+   report.
+4. Side by side: totals, collector and wallet counts, the roots (Python
    computes none and is compared record by record), code versions as
    `validator@…` and `6529chain@…` with copy buttons, run times and sources.
-6. Differences: when there are none, a plain statement that every collector
+5. Differences: when there are none, a plain statement that every collector
    and wallet is equal; otherwise the number of differing collector and
    wallet records, the counts by class (A to D) and by cause (DEV and BUG
    items link to the specification), and the totals' differences. The four
    classes are explained beside it, with a note that no record is published,
    and a short history of the DEV-2 cases that D131's netting settled.
-7. Day by day: a table of the days (one card per day on phones), with days
-   that have no report; from the seventh day wider screens show a chart,
-   with the table one click away.
-8. Provenance: data source, snapshot block with an Etherscan link, history
+6. Day by day: a table of the days from `xl` (one card per day below), with
+   days that have no report; from the seventh day wider screens show a chart
+   drawn for the column width, with the table one click away.
+7. Provenance: data source, snapshot block with an Etherscan link, history
    mode, rule version and registry hash (from the day's file, or the
    specification's, labelled as such), code versions, and 6529.io's files on
    Arweave with links to each transaction and file, and JSON download links.
-9. Check it yourself: what anyone can check today from public sources, what
+8. Check it yourself: what anyone can check today from public sources, what
    that does not reach, the three commands that reproduce the day once the
    source is published, and the roots and files to compare.
-10. How this works: the method, and a diagram of the two flows that meet in
-    the comparison.
+9. How this works: the daily comparison as one graph (our computation and
+   the object under test converging on the comparison, which publishes the
+   files this page reads), drawn as a column on phones and as two lanes from
+   `md`, then the method. Every section heading carries a link to its anchor.
 
 ## Data Source
 
-- `NEXT_PUBLIC_TDH_VERIFICATION_BASE` names the public base URL of
+- The page reads 6529's public TDH feed, `https://d379duzqnomz3w.cloudfront.net`:
   `index.json` and `days/{cycleDay}.json`, as the daily job's
-  `publish_feed.py` writes them. In production it is
-  `https://d379duzqnomz3w.cloudfront.net`, set in the deploy configuration. The feed is
+  `publish_feed.py` writes them. `NEXT_PUBLIC_TDH_VERIFICATION_BASE`
+  overrides the base (HTTPS, or http://localhost outside production). The feed is
   served by CloudFront from a private bucket, which answers 403 (not 404)
   for a file that does not exist yet: the page reads 403 and 404 alike as
   "not yet published" (no index yet: reports start soon; a missing day: not
@@ -95,11 +99,10 @@ days return the standard not-found page.
   the job always publishes empty. Optional fields (`ruleVersion`,
   `registryHash`, `cutoffBlockHash`, `cutoffTimestamp`, `live.sha256`,
   `rootsNote`) are shown when present.
-- Unset in production: the page says daily reports start on 16 October 2026,
-  and from 17 October that they are not yet connected.
-- Unset outside production: a verbatim copy of the public feed as the daily
-  job published it on 15 October 2026 (cycles 20,740 and 20,741), under a
-  `Sample` banner.
+- No index published yet (403, 404 or no days): the page says no daily
+  report is published yet. There is no bundled or sample data in any
+  environment; Jest tests serve a verbatim copy of the feed's first days
+  (`__tests__/lib/tdh/verification/publicFeedFixture.ts`).
 - A file that fails validation is rejected whole: among other checks, a
   cause must be what the job writes (`DEV-n`, `BUG-n`, `SD-n`, `MS-n`,
   `CN-n` or `RP-n`, several joined by commas, `rust-python` or

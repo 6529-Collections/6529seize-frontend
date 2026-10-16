@@ -1,9 +1,15 @@
 import {
   checkStatement,
   checkStatements,
+  leanRound,
   manifestFigures,
 } from "@/app/network/tdh/formal/formalStatus";
-import { LEAN_STATEMENTS } from "@/app/network/tdh/formal/leanResults";
+import {
+  LEAN_STATEMENTS,
+  modulesFor,
+  statementsFor,
+  type LeanStatement,
+} from "@/app/network/tdh/formal/leanResults";
 import { BUNDLED_FORMAL_MANIFEST } from "@/lib/tdh/formal/bundledManifest";
 import {
   formalManifestSchema,
@@ -22,36 +28,128 @@ function statement(id: string) {
   return found;
 }
 
+/**
+ * What round 4 of the model (6529chain f854661) adds to the audit and to
+ * PROOFS.md's claims not proved, for a manifest of that round. Test data:
+ * the bundled manifest is round 3's, and round 4's is not published yet.
+ */
+const ROUND_4_THEOREMS = [
+  "checkInputTypes_perm",
+  "checkLogPositions_perm",
+  "checkLogTypes_perm",
+  "checkRawOrDecoded_perm",
+  "checkSelected_perm",
+  "computeCycleFromSource_decoded",
+  "computeCycleFromSource_perm",
+  "computeCycleFromSource_typed",
+  "computeCycle_typed",
+  "decodeLogs_perm",
+  "decode_perm",
+  "logBlocks_perm",
+  "mapM_perm",
+];
+const ROUND_4_DEFERRED = [
+  "1.canonical-sort",
+  "3.identity-wallets-field",
+  "4.error-names",
+  "6.rules-are-definitions",
+  "6.json-reader",
+];
+
+function firstWith(status: FormalManifest["theorems"][number]["status"]) {
+  const found = manifest.theorems.find((entry) => entry.status === status);
+  if (!found) {
+    throw new Error(`no ${status} entry`);
+  }
+  return found;
+}
+
+function roundFourManifest(): FormalManifest {
+  const base = manifest.theorems.filter(
+    (entry) => entry.id !== "4.raw-log-order"
+  );
+  const proved = ROUND_4_THEOREMS.map((name) => ({
+    ...firstWith("proved"),
+    id: `4.${name}`,
+    leanName: `Tdh.Proofs.${name}`,
+  }));
+  const deferred = ROUND_4_DEFERRED.map((id) => ({
+    ...firstWith("deferred"),
+    id,
+  }));
+  return { ...manifest, theorems: [...base, ...proved, ...deferred] };
+}
+
+function auditedCoverage(
+  statements: readonly LeanStatement[],
+  of: FormalManifest
+) {
+  const named = statements.flatMap((row) => [
+    ...row.proved,
+    ...row.counterexamples,
+  ]);
+  const audited = of.theorems.filter((entry) => entry.checkedBy === "kernel");
+  const covered = new Set(
+    named.flatMap((name) =>
+      audited
+        .filter(
+          (entry) =>
+            entry.leanName === name ||
+            (entry.leanName?.endsWith(`.${name}`) ?? false)
+        )
+        .map((entry) => entry.leanName)
+    )
+  );
+  return { named, covered: covered.size, audited: audited.length };
+}
+
 describe("formal statements against the proof manifest", () => {
   it("confirms every statement's own status from the bundled manifest", () => {
-    const checks = checkStatements(LEAN_STATEMENTS, manifest);
-    for (const row of LEAN_STATEMENTS) {
+    expect(leanRound(manifest)).toBe(3);
+    const statements = statementsFor(3);
+    const checks = checkStatements(statements, manifest);
+    for (const row of statements) {
       expect([row.id, checks[row.id]?.status]).toEqual([row.id, row.status]);
       expect(checks[row.id]?.unconfirmed).toEqual([]);
     }
+    expect(statements.map((row) => row.id)).not.toContain("rawLogs");
   });
 
   it("accounts for every audited theorem, each in exactly one statement", () => {
-    const named = LEAN_STATEMENTS.flatMap((row) => [
-      ...row.proved,
-      ...row.counterexamples,
-    ]);
-    const audited = manifest.theorems.filter(
-      (entry) => entry.checkedBy === "kernel"
+    const { named, covered, audited } = auditedCoverage(
+      statementsFor(3),
+      manifest
     );
-    const covered = new Set(
-      named.flatMap((name) =>
-        audited
-          .filter(
-            (entry) =>
-              entry.leanName === name ||
-              (entry.leanName?.endsWith(`.${name}`) ?? false)
-          )
-          .map((entry) => entry.leanName)
-      )
-    );
-    expect(covered.size).toBe(audited.length);
+    expect(covered).toBe(audited);
     expect(new Set(named).size).toBe(named.length);
+  });
+
+  it("follows round 4 of the model when its manifest proves the raw-log theorems", () => {
+    const round4 = roundFourManifest();
+    expect(leanRound(round4)).toBe(4);
+    const statements = statementsFor(4);
+    const checks = checkStatements(statements, round4);
+    for (const row of statements) {
+      expect([row.id, checks[row.id]?.status]).toEqual([row.id, row.status]);
+      expect(checks[row.id]?.unconfirmed).toEqual([]);
+    }
+    const { named, covered, audited } = auditedCoverage(statements, round4);
+    expect(audited).toBe(manifest.summary.audited + ROUND_4_THEOREMS.length);
+    expect(covered).toBe(audited);
+    expect(new Set(named).size).toBe(named.length);
+    expect(statements.find((row) => row.id === "order")?.copy).toBe("orderRaw");
+    expect(statements.find((row) => row.id === "rawLogs")?.status).toBe(
+      "proved"
+    );
+    expect(modulesFor(4).map((row) => row.key)).toEqual(
+      expect.arrayContaining(["logs", "inputsTyped"])
+    );
+    expect(modulesFor(3).map((row) => row.key)).not.toContain("logs");
+    // A round-3 manifest cannot confirm round 4's statements.
+    const early = checkStatements(statementsFor(4), manifest);
+    expect(early["order"]?.status).toBe("unverified");
+    expect(early["rawLogs"]?.status).toBe("unverified");
+    expect(LEAN_STATEMENTS.length).toBe(statementsFor(4).length);
   });
 
   it("shows a statement as unverified when the manifest lacks a theorem or disagrees", () => {

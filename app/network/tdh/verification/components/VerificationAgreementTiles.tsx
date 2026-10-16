@@ -86,6 +86,8 @@ function CountTile({
   sub,
   equal,
   total,
+  walletsEqual = null,
+  walletsTotal = null,
   missing,
   extra,
 }: {
@@ -94,6 +96,8 @@ function CountTile({
   readonly sub: string;
   readonly equal: number | null;
   readonly total: number | null;
+  readonly walletsEqual?: number | null;
+  readonly walletsTotal?: number | null;
   readonly missing: string;
   readonly extra?: ReactNode;
 }) {
@@ -136,55 +140,73 @@ function CountTile({
               }
             )}
       </p>
+      {walletsEqual !== null && walletsTotal !== null && (
+        <p className="tw-m-0 tw-text-xs tw-tabular-nums tw-leading-5 tw-text-iron-300">
+          {t(locale, "network.tdh.verify.tiles.walletsLine", {
+            equal: formatInteger(locale, walletsEqual),
+            total: formatInteger(locale, walletsTotal),
+          })}
+        </p>
+      )}
       {extra}
     </li>
   );
 }
 
-function DeltaTile({
+function TotalTile({
   locale,
+  rustTotal,
   delta,
-  liveTotal,
+  pythonDelta,
 }: {
   readonly locale: SupportedLocale;
+  readonly rustTotal: number;
+  /** Rust minus 6529.io; null when 6529.io was not compared. */
   readonly delta: number | null;
-  readonly liveTotal: number | null;
+  /** Python minus Rust; null when the Python reference did not run. */
+  readonly pythonDelta: number | null;
 }) {
-  let words: string | null = null;
-  if (delta === 0) {
-    words = t(locale, "network.tdh.verify.tiles.totalsEqual", {
-      total: formatInteger(locale, liveTotal ?? 0),
-    });
-  } else if (delta !== null) {
-    words = t(
-      locale,
-      delta < 0
-        ? "network.tdh.verify.tiles.liveHigher"
-        : "network.tdh.verify.tiles.liveLower",
-      { amount: formatInteger(locale, Math.abs(delta)) }
+  const allEqual = delta === 0 && (pythonDelta === null || pythonDelta === 0);
+  const lines: string[] = [];
+  if (delta === null) {
+    lines.push(t(locale, "network.tdh.verify.tiles.liveMissing"));
+  } else if (delta !== 0) {
+    lines.push(
+      t(
+        locale,
+        delta < 0
+          ? "network.tdh.verify.tiles.liveHigher"
+          : "network.tdh.verify.tiles.liveLower",
+        { amount: formatInteger(locale, Math.abs(delta)) }
+      )
+    );
+  }
+  if (pythonDelta !== null && pythonDelta !== 0) {
+    lines.push(
+      t(locale, "network.tdh.verify.tiles.pythonDiffers", {
+        amount: formatSigned(locale, pythonDelta),
+      })
     );
   }
   return (
-    <li className={TILE}>
+    <li className={`${TILE} tw-col-span-2 lg:tw-col-span-1`}>
       <p className={TILE_LABEL}>
         {t(locale, "network.tdh.verify.tiles.totalDelta")}
       </p>
       <p className={TILE_SUB}>
         {t(locale, "network.tdh.verify.tiles.totalDeltaSub")}
       </p>
-      {delta === null ? (
-        <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
-          {t(locale, "network.tdh.verify.tiles.liveMissing")}
+      <p className={TILE_VALUE}>{formatInteger(locale, rustTotal)}</p>
+      {allEqual ? (
+        <p className={`${TILE_FOOT} tw-text-success`}>
+          {t(locale, "network.tdh.verify.tiles.totalsAllEqual")}
         </p>
       ) : (
-        <>
-          <p
-            className={`${TILE_VALUE} ${delta === 0 ? "tw-text-success" : "tw-text-amber-200"}`}
-          >
-            {formatSigned(locale, delta)}
+        lines.map((line) => (
+          <p key={line} className={`${TILE_FOOT} tw-text-amber-200`}>
+            {line}
           </p>
-          <p className={`${TILE_FOOT} tw-text-iron-300`}>{words}</p>
-        </>
+        ))
       )}
     </li>
   );
@@ -276,7 +298,7 @@ function CutoverProgress({
           style={{ width: `${Math.max(elapsed * 100, 3)}%` }}
         />
       </span>
-      <span className="tw-mt-1.5 tw-flex tw-justify-between tw-gap-3 tw-text-[11px] tw-tabular-nums tw-text-iron-400">
+      <span className="tw-mt-1.5 tw-flex tw-justify-between tw-gap-3 tw-text-xs tw-tabular-nums tw-text-iron-400">
         <span>
           {t(locale, "network.tdh.verify.cutover.start", {
             date: formatShortCycleDate(locale, FIRST_REPORT_DATE),
@@ -314,49 +336,36 @@ export default function VerificationAgreementTiles({
   const pythonRan = day.implementations.python !== null;
   const rustVsPython = pythonRan ? day.agreement.rustVsPython : null;
   const afterCutover = cutover.kind === "done";
-  const liveMissing = t(locale, "network.tdh.verify.tiles.liveMissing");
-  const liveSub = t(locale, "network.tdh.verify.tiles.rustVsLive");
-
-  const live = [
+  const sub = t(locale, "network.tdh.verify.tiles.collectorsEqual");
+  const live = (
     <CountTile
-      key="identities-live"
+      key="live"
       locale={locale}
-      label={t(locale, "network.tdh.verify.tiles.identities")}
-      sub={liveSub}
+      label={t(locale, "network.tdh.verify.tiles.rustVsLive")}
+      sub={sub}
       equal={rustVsLive?.identitiesEqual ?? null}
       total={rustVsLive?.identitiesTotal ?? null}
-      missing={liveMissing}
-    />,
-    <CountTile
-      key="wallets-live"
-      locale={locale}
-      label={t(locale, "network.tdh.verify.tiles.wallets")}
-      sub={liveSub}
-      equal={rustVsLive?.walletsEqual ?? null}
-      total={rustVsLive?.walletsTotal ?? null}
-      missing={liveMissing}
-    />,
-  ];
+      walletsEqual={rustVsLive?.walletsEqual ?? null}
+      walletsTotal={rustVsLive?.walletsTotal ?? null}
+      missing={t(locale, "network.tdh.verify.tiles.liveMissing")}
+    />
+  );
   const python = (
     <CountTile
       key="python"
       locale={locale}
-      label={t(locale, "network.tdh.verify.tiles.pythonRecords")}
-      sub={t(locale, "network.tdh.verify.tiles.rustVsPython")}
-      equal={
-        rustVsPython === null
-          ? null
-          : rustVsPython.identitiesEqual + rustVsPython.walletsEqual
-      }
-      total={
-        rustVsPython === null
-          ? null
-          : rustVsPython.identitiesTotal + rustVsPython.walletsTotal
-      }
+      label={t(locale, "network.tdh.verify.tiles.rustVsPython")}
+      sub={sub}
+      equal={rustVsPython?.identitiesEqual ?? null}
+      total={rustVsPython?.identitiesTotal ?? null}
+      walletsEqual={rustVsPython?.walletsEqual ?? null}
+      walletsTotal={rustVsPython?.walletsTotal ?? null}
       missing={t(locale, "network.tdh.verify.tiles.pythonNotRun")}
     />
   );
-  const tiles = afterCutover ? [python, ...live] : [...live, python];
+  const tiles = afterCutover ? [python, live] : [live, python];
+  const pythonTotal = day.implementations.python?.totalTdh ?? null;
+  const rustTotal = day.implementations.rust.totalTdh;
 
   return (
     <section aria-labelledby="tdh-verify-tiles-heading">
@@ -369,12 +378,13 @@ export default function VerificationAgreementTiles({
           <TdhSource refs={["P53 §4.5"]} locale={locale} />
         </p>
       )}
-      <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-3 tw-p-0 lg:tw-grid-cols-5">
+      <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-3 tw-p-0 lg:tw-grid-cols-4">
         {tiles}
-        <DeltaTile
+        <TotalTile
           locale={locale}
+          rustTotal={rustTotal}
           delta={totalDelta}
-          liveTotal={day.implementations.live?.totalTdh ?? null}
+          pythonDelta={pythonTotal === null ? null : pythonTotal - rustTotal}
         />
         <CutoverTile
           locale={locale}

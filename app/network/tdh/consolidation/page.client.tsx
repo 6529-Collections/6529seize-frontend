@@ -388,9 +388,9 @@ function WalletsFigure({ locale }: { readonly locale: SupportedLocale }) {
       </figcaption>
       <div
         aria-hidden="true"
-        className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-4 sm:tw-grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
+        className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-4 xl:tw-grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
       >
-        <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-2 tw-p-0 sm:tw-grid-cols-1">
+        <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-[repeat(auto-fit,minmax(9.5rem,1fr))] tw-gap-2 tw-p-0 xl:tw-grid-cols-1">
           {WALLET_ROLES.map(({ key, dot }) => (
             <li
               key={key}
@@ -406,8 +406,8 @@ function WalletsFigure({ locale }: { readonly locale: SupportedLocale }) {
             </li>
           ))}
         </ul>
-        <ArrowRightIcon className="tw-hidden tw-size-5 tw-text-iron-500 sm:tw-block" />
-        <ArrowDownIcon className="tw-mx-auto tw-size-5 tw-text-iron-500 sm:tw-hidden" />
+        <ArrowRightIcon className="tw-hidden tw-size-5 tw-text-iron-500 xl:tw-block" />
+        <ArrowDownIcon className="tw-mx-auto tw-size-5 tw-text-iron-500 xl:tw-hidden" />
         <div className="tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-500/[0.06] tw-p-4">
           <div className="tw-flex tw-items-center tw-gap-2.5">
             <UserCircleIcon className="tw-size-6 tw-text-primary-300" />

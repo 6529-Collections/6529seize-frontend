@@ -6,13 +6,13 @@ import type {
   VerificationImplementation,
   VerificationLive,
 } from "@/lib/tdh/verification/schema";
+import TdhHeading from "../../shared/TdhHeading";
 import TdhCopyButton from "../../shared/TdhCopyButton";
 import TdhSource from "../../shared/TdhSource";
 import {
-  TDH_CAPTION,
   TDH_LINK,
   TDH_TABLE,
-  TDH_TABLE_WRAP,
+  TDH_TABLE_FRAME,
   TDH_TD,
   TDH_TH,
   TDH_SERIES,
@@ -98,7 +98,7 @@ function ArweaveLink({
   return (
     <a
       href={arweaveTransactionUrl(id)}
-      className={`${TDH_LINK} tw-whitespace-nowrap`}
+      className={`${TDH_LINK} tw-inline-flex tw-min-h-6 tw-items-center tw-break-words`}
       rel="noopener noreferrer"
       target="_blank"
       aria-label={t(locale, "network.tdh.verify.provenance.txLink", { id })}
@@ -345,7 +345,7 @@ export default function VerificationSideBySide({
           t(locale, "network.tdh.verify.side.computedPython")
         ),
       live: live?.source ? (
-        <span className="tw-flex tw-flex-col tw-gap-0.5">
+        <span className="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-1">
           <ArweaveLink
             locale={locale}
             source={live.source}
@@ -368,18 +368,22 @@ export default function VerificationSideBySide({
   ];
 
   return (
-    <section aria-labelledby="tdh-verify-side-heading" className="tw-mt-12">
-      <h2
-        id="tdh-verify-side-heading"
-        className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
-      >
-        {t(locale, "network.tdh.verify.side.heading")}
-      </h2>
+    <section
+      id="side"
+      aria-labelledby="side-heading"
+      className="tw-mt-12 tw-scroll-mt-24"
+    >
+      <TdhHeading
+        id="side"
+        title={t(locale, "network.tdh.verify.side.heading")}
+        locale={locale}
+        className="tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
+      />
       <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
         {t(locale, "network.tdh.verify.side.caption")}
         <TdhSource refs={["P53 §12"]} locale={locale} />
       </p>
-      <ul className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-gap-2 tw-p-0 md:tw-hidden">
+      <ul className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-gap-2 tw-p-0 sm:tw-grid-cols-2 lg:tw-hidden">
         {rows.map((row) => (
           <li
             key={row.key}
@@ -406,16 +410,11 @@ export default function VerificationSideBySide({
           </li>
         ))}
       </ul>
-      <div
-        className={`${TDH_TABLE_WRAP} tw-mt-4 tw-hidden md:tw-block`}
-        tabIndex={0}
-        role="region"
-        aria-labelledby="tdh-verify-side-heading"
-      >
-        <table className={`${TDH_TABLE} tw-min-w-[44rem]`}>
-          <caption className={`${TDH_CAPTION} tw-sr-only`}>
-            {t(locale, "network.tdh.verify.side.caption")}
-          </caption>
+      <div className={`${TDH_TABLE_FRAME} tw-mt-4 tw-hidden lg:tw-block`}>
+        <table
+          className={TDH_TABLE}
+          aria-label={t(locale, "network.tdh.verify.side.caption")}
+        >
           <thead>
             <tr>
               <th scope="col" className={`${TDH_TH} tw-w-[28%]`}>

@@ -11,7 +11,7 @@ import { t, type MessageKey } from "@/i18n/messages";
 
 export const SPECIFICATION_PATH = "/network/tdh/specification";
 
-const PRIVATE_DOCUMENTS = new Set(["P53", "P38", "P52"]);
+const PRIVATE_DOCUMENTS = new Set(["P53", "P38", "P52", "P28"]);
 const EVIDENCE: Record<string, { anchor: string; key: MessageKey }> = {
   "Replay 2026-10-11": {
     anchor: "evidence-replay",
@@ -21,9 +21,13 @@ const EVIDENCE: Record<string, { anchor: string; key: MessageKey }> = {
     anchor: "evidence-clean-room",
     key: "network.tdh.shared.source.cleanRoom",
   },
-  "Comparison 2026-10-14/15": {
+  "Comparison Oct 14–15": {
     anchor: "evidence-comparison",
     key: "network.tdh.shared.source.comparison",
+  },
+  "Difftest Oct 15": {
+    anchor: "evidence-difftest",
+    key: "network.tdh.shared.source.difftest",
   },
 };
 

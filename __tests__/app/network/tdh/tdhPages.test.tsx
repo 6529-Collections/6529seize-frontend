@@ -9,6 +9,12 @@ import VerificationDayPage from "@/app/network/tdh/verification/[cycleDay]/page"
 import VerificationPage, {
   generateMetadata as generateVerificationMetadata,
 } from "@/app/network/tdh/verification/page";
+import { BUNDLED_FORMAL_MANIFEST } from "@/lib/tdh/formal/bundledManifest";
+import { PUBLIC_TDH_FEED_BASE } from "@/lib/tdh/verification/loadVerification.server";
+import {
+  PUBLIC_FEED_DAYS,
+  PUBLIC_FEED_INDEX,
+} from "../../../lib/tdh/verification/publicFeedFixture";
 
 const notFound = jest.fn(() => {
   throw new Error("NEXT_NOT_FOUND");
@@ -32,6 +38,40 @@ jest.mock("@/components/app-wallets/AppWalletsContext", () => ({
   useAppWallets: () => ({ appWalletsSupported: false }),
 }));
 
+function jsonResponse(body: unknown, status = 200): Response {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    json: async () => body,
+  } as Response;
+}
+
+/**
+ * The pages read 6529's public feed; tests serve its first published days
+ * from a verbatim copy, and no proof manifest (403, as CloudFront answers
+ * for a file not yet published), so the formal page shows its bundled copy.
+ */
+function serveFeed(formalManifest?: unknown) {
+  globalThis.fetch = jest.fn(async (input: RequestInfo | URL) => {
+    const url = String(input);
+    if (
+      formalManifest !== undefined &&
+      url === `${PUBLIC_TDH_FEED_BASE}formal/manifest.json`
+    ) {
+      return jsonResponse(formalManifest);
+    }
+    if (url === `${PUBLIC_TDH_FEED_BASE}index.json`) {
+      return jsonResponse(PUBLIC_FEED_INDEX);
+    }
+    const day = /days\/(\d+)\.json$/.exec(url)?.[1];
+    const file = day === undefined ? undefined : PUBLIC_FEED_DAYS[Number(day)];
+    if (file) {
+      return jsonResponse(file);
+    }
+    return jsonResponse({ error: "AccessDenied" }, 403);
+  }) as unknown as typeof fetch;
+}
+
 function renderPage(element: ReactElement) {
   return render(element);
 }
@@ -44,7 +84,14 @@ function sourceAnchors(container: HTMLElement): string[] {
 }
 
 describe("TDH sub-pages", () => {
-  beforeEach(() => jest.clearAllMocks());
+  const realFetch = globalThis.fetch;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    serveFeed();
+  });
+  afterAll(() => {
+    globalThis.fetch = realFetch;
+  });
 
   it("renders How TDH is calculated with fourteen steps and live explorables", async () => {
     const user = userEvent.setup();
@@ -145,8 +192,10 @@ describe("TDH sub-pages", () => {
     ).toBeInTheDocument();
     expect(container.textContent).not.toMatch(/github\.com/);
     expect(container.textContent).not.toMatch(/not yet in the text/);
-    expect(container.textContent).toMatch(/every one of the 61 conformance/);
-    expect(container.textContent).toMatch(/commit 16d70d0/);
+    expect(container.textContent).toMatch(/every one of the 89 conformance/);
+    expect(container.textContent).toMatch(/commit f840096/);
+    expect(container.textContent).toMatch(/removed: true left the chain/);
+    expect(container.textContent).not.toMatch(/IN PLAIN WORDS|In plain words/);
     expect(container.textContent).toMatch(/ZERO -> ZERO is not a mint/);
     expect(container.textContent).toMatch(/sinks contains ZERO/);
     expect(container.textContent).toMatch(/0x8888…888888/);
@@ -208,7 +257,21 @@ describe("TDH sub-pages", () => {
     // copy of the manifest, and the page says so.
     expect(
       container.querySelector('[data-tdh-manifest="bundled"]')?.textContent
-    ).toMatch(/bundled with this page:.*model at commit 7bf579a/);
+    ).toMatch(/bundled with this page.*model at commit 7bf579a/);
+    // The manifest's build follows P26 as of 1c69528; P26 has 89 vectors
+    // since f840096, and the page says the build predates them.
+    expect(container.textContent).toMatch(
+      /on P26 as of 1c69528; P26 has 89 since f840096, after this build/
+    );
+    // Round 4 of the model exists but its manifest is not published: the
+    // page says so, and keeps round 3's statements.
+    expect(
+      container.querySelector("[data-tdh-round-note]")?.textContent
+    ).toMatch(/newer round, at commit f854661 \(October 15, 2026\)/);
+    expect(container.textContent).toMatch(
+      /the order of raw logs is not covered/
+    );
+    expect(container.textContent).not.toMatch(/The model from raw logs/);
     const toggle = screen.getByRole("button", {
       name: "Show the details of The first netting rule",
     });
@@ -231,6 +294,78 @@ describe("TDH sub-pages", () => {
     ).toBeGreaterThan(0);
   });
 
+  it("shows round 4's statements when the published manifest proves them", async () => {
+    // Test data: the bundled manifest with round 4's theorems added, as a
+    // manifest of that round would list them.
+    const base = BUNDLED_FORMAL_MANIFEST as {
+      theorems: { id: string; status: string; leanName?: string | null }[];
+    };
+    const proved = base.theorems.find((entry) => entry.status === "proved");
+    const deferred = base.theorems.find((entry) => entry.status === "deferred");
+    const added = [
+      "checkInputTypes_perm",
+      "checkLogPositions_perm",
+      "checkLogTypes_perm",
+      "checkRawOrDecoded_perm",
+      "checkSelected_perm",
+      "computeCycleFromSource_decoded",
+      "computeCycleFromSource_perm",
+      "computeCycleFromSource_typed",
+      "computeCycle_typed",
+      "decodeLogs_perm",
+      "decode_perm",
+      "logBlocks_perm",
+      "mapM_perm",
+    ].map((name) => ({
+      ...proved,
+      id: `4.${name}`,
+      leanName: `Tdh.Proofs.${name}`,
+    }));
+    const notProved = [
+      "1.canonical-sort",
+      "3.identity-wallets-field",
+      "4.error-names",
+      "6.rules-are-definitions",
+      "6.json-reader",
+    ].map((id) => ({ ...deferred, id }));
+    const theorems = [
+      ...base.theorems.filter((entry) => entry.id !== "4.raw-log-order"),
+      ...added,
+      ...notProved,
+    ];
+    serveFeed({
+      ...base,
+      summary: {
+        ...(base as unknown as { summary: Record<string, number> }).summary,
+        entries: theorems.length,
+      },
+      theorems,
+    });
+    const { container } = renderPage(await FormalPage());
+    expect(container.querySelector("[data-tdh-round-note]")).toBeNull();
+    expect(
+      container.querySelector('[data-tdh-manifest="published"]')
+    ).not.toBeNull();
+    expect(
+      screen.getAllByText("The model from raw logs").length
+    ).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText("Order independence, raw logs included").length
+    ).toBeGreaterThan(0);
+    expect(container.querySelectorAll('[data-tdh-pill="proved"]')).toHaveLength(
+      9
+    );
+    expect(
+      container.querySelectorAll('[data-tdh-pill="unverified"]')
+    ).toHaveLength(0);
+    expect(container.textContent).toMatch(/414,254 logs/);
+    expect(container.textContent).toMatch(/56 to 72 seconds/);
+    expect(container.textContent).toMatch(/Tdh\.Logs/);
+    expect(container.textContent).not.toMatch(
+      /order of raw logs is not covered/
+    );
+  });
+
   it("renders the implementations with the vector browser and the latest agreement", async () => {
     const user = userEvent.setup();
     renderPage(await ImplementationsPage());
@@ -240,43 +375,55 @@ describe("TDH sub-pages", () => {
     expect(
       screen.getAllByText("Source to be published").length
     ).toBeGreaterThan(0);
-    expect(screen.getByText(/Pinned: 6529chain 16d70d0/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/The list follows 6529chain f840096/)
+    ).toBeInTheDocument();
     expect(
       screen.getByText(/Rust and Python agree on 10,282 of 10,282 collectors/)
     ).toBeInTheDocument();
+    expect(screen.queryByText(/sample|test runs/i)).toBeNull();
     expect(
-      screen.getByText(/the daily job’s test runs of 14 and 15 October 2026/)
+      screen.getByText(
+        "All 89 vectors (1,257 checks), at P26 f840096. The daily job runs it at 0621ed4, which had 51"
+      )
     ).toBeInTheDocument();
     expect(
-      screen.getByText("All 61 vectors (1,098 checks)")
+      screen.getByText("All 89 vectors (1,253 checks), at P26 f840096")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "68 of 68 vectors (1,190 checks), at P26 1c69528; every record of the 2026-10-11 cycle"
+      )
     ).toBeInTheDocument();
     expect(
       screen.getByText("Built; not yet inside the validator")
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "The 61 conformance vectors" })
+      screen.getByRole("heading", { name: "The 89 conformance vectors" })
     ).toBeInTheDocument();
     expect(screen.getByText("Inside one vector")).toBeInTheDocument();
     const filters = screen.getByRole("group", {
       name: "Filter vectors by topic",
     });
     expect(
-      screen.getByText("Conformance vectors, 10 of 61 shown")
+      screen.getByRole("table", { name: "Conformance vectors, 10 of 89 shown" })
     ).toBeInTheDocument();
     await user.click(
       within(filters).getByRole("button", { name: /No result/ })
     );
     expect(
-      screen.getByText("Conformance vectors, 10 of 17 shown")
+      screen.getByRole("table", { name: "Conformance vectors, 10 of 39 shown" })
     ).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Show all 17" }));
+    await user.click(screen.getByRole("button", { name: "Show all 39" }));
     expect(
-      screen.getByText("Conformance vectors, 17 of 17 shown")
+      screen.getByRole("table", { name: "Conformance vectors, 39 of 39 shown" })
     ).toBeInTheDocument();
-    expect(screen.getByText("60-invalid-registry")).toBeInTheDocument();
+    expect(
+      screen.getByText("72-invalid-transfer-at-raw-transfer-log")
+    ).toBeInTheDocument();
     await user.click(within(filters).getByRole("button", { name: /Netting/ }));
     expect(
-      screen.getByText("Conformance vectors, 16 of 16 shown")
+      screen.getByRole("table", { name: "Conformance vectors, 16 of 16 shown" })
     ).toBeInTheDocument();
   });
 
@@ -285,7 +432,13 @@ describe("TDH sub-pages", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "TDH verification" })
     ).toBeInTheDocument();
-    expect(screen.getAllByText("Sample").length).toBeGreaterThan(0);
+    expect(screen.queryByText(/sample/i)).toBeNull();
+    expect(screen.getAllByText("Equal").length).toBeGreaterThan(0);
+    expect(
+      screen.getByText(
+        "On October 15, 2026, the Rust core, the Python reference and 6529.io agreed on all 10,282 collectors and 11,133 wallets, to the last unit of TDH."
+      )
+    ).toBeInTheDocument();
 
     renderPage(
       await VerificationDayPage({

@@ -44,7 +44,7 @@
   "network.tdhConsolidation.steps.sign.title": "Follow the signing steps",
   "network.tdhConsolidation.steps.sign.body": "Switch to the wallet shown and approve its transaction. Each costs a normal network (gas) fee. A vault with a manager stays disconnected: its manager approves one transaction for each link.",
   "network.tdhConsolidation.steps.done.title": "Done",
-  "network.tdhConsolidation.steps.done.body": "Your profile shows the combined wallets within minutes. TDH fully updates at the next daily update, at 00:00 UTC.",
+  "network.tdhConsolidation.steps.done.body": "Your profile shows the combined wallets within minutes. TDH fully updates at the next daily update, at 00:00 UTC; under TDH-v1, from about October 23, 2026, it counts the wallets as linked at that day’s snapshot block.",
   "network.tdhConsolidation.steps.order": "Follow the order shown. Signing out of order, old return links or separate manager transactions can temporarily split your wallets, and votes you have cast in TDH waves can be reduced.",
   "network.tdhConsolidation.before.title": "Before you start",
   "network.tdhConsolidation.before.keys": "Every combined wallet can sign in as your profile, change your primary address and choose where airdrops go. Only combine wallets you control.",
@@ -217,7 +217,7 @@
   "network.tdhConsolidation.policy.pendingLimits": "Wallet limits are loading from the selected backend. Check Guided Setup if settings are unavailable.",
   "network.tdhConsolidation.policy.pendingDate": "the activation time shown in Guided Setup",
   "network.tdhConsolidation.order.activation": "This example models registrations made after {date}, using the activation cutoff for this environment.",
-  "network.tdhConsolidation.tdhv1Note": "TDH-v1, the exact rule 6529.io moves to around 23 October 2026, counts up to three wallets per identity. Its specification does not include the fourth wallet yet, so it would group four linked wallets differently.",
+  "network.tdhConsolidation.tdhv1Note": "TDH-v1, the exact rule 6529.io moves to around October 23, 2026, groups at most three wallets into one identity (rule version tdh-v1.0). Its specification does not include a fourth wallet yet, so how a group of four counts after the cutover is not settled there.",
   "network.tdhConsolidation.tdhv1Link": "How consolidation works in TDH-v1",
   "network.tdhConsolidation.benefits.ruleLink": "See the rule, step 10"
 }

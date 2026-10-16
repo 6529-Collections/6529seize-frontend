@@ -4,7 +4,22 @@ import {
   type FormalManifest,
   type FormalStatus,
 } from "@/lib/tdh/formal/manifest";
-import type { LeanStatement, StatementStatus } from "./leanResults";
+import {
+  LEAN_ROUND_4,
+  type LeanRound,
+  type LeanStatement,
+  type StatementStatus,
+} from "./leanResults";
+
+/**
+ * The round of the model a manifest records: 4 when it proves round 4's
+ * order theorem for raw logs, else 3.
+ */
+export function leanRound(manifest: FormalManifest): LeanRound {
+  return findFormalEntry(manifest, LEAN_ROUND_4.theorem)?.status === "proved"
+    ? 4
+    : 3;
+}
 
 /** One manifest entry behind a statement, as the statement's details show it. */
 export interface CheckedEntry {

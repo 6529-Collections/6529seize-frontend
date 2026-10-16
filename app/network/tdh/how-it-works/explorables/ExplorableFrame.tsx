@@ -5,8 +5,9 @@ import { t } from "@/i18n/messages";
 import { TDH_FOCUS_RING } from "../../shared/tdhStyles";
 
 /**
- * The frame of an explorable (plan §4.7): a titled panel with a reset button
- * and the note that the computation of record is the Rust core.
+ * The frame of an explorable (plan §4.7): a titled panel with a reset button.
+ * The page's lede says once that the explorables compute in the browser and
+ * that the computation of record is 6529.io's, then the Rust core's.
  */
 export default function ExplorableFrame({
   locale,
@@ -38,9 +39,6 @@ export default function ExplorableFrame({
         </button>
       </div>
       <div className="tw-mt-3">{children}</div>
-      <p className="tw-m-0 tw-mt-4 tw-text-xs tw-leading-5 tw-text-iron-500">
-        {t(locale, "network.tdh.shared.explorableNote")}
-      </p>
     </section>
   );
 }

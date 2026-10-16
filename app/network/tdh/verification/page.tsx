@@ -8,7 +8,6 @@ import {
 } from "@/lib/tdh/verification/loadVerification.server";
 import { latestIndexDay } from "@/lib/tdh/verification/states";
 import TdhPageShell from "../shared/TdhPageShell";
-import TdhStatusPill from "../shared/TdhStatusPill";
 import VerificationDashboard, {
   VerificationLede,
 } from "./components/VerificationDashboard";
@@ -28,7 +27,6 @@ export default async function TdhVerificationPage() {
           latest.cycleDay,
           LATEST_DAY_REVALIDATE_SECONDS
         );
-  const isSample = indexLoad.status === "ok" && indexLoad.source === "sample";
 
   return (
     <TdhPageShell
@@ -37,9 +35,6 @@ export default async function TdhVerificationPage() {
       dropdownHref="/network/tdh/verification"
       documentTitle={t(locale, "network.tdh.verify.pageTitle")}
       title={t(locale, "network.tdh.verify.title")}
-      pills={
-        isSample ? <TdhStatusPill pill="sample" locale={locale} /> : undefined
-      }
       lede={<VerificationLede locale={locale} />}
     >
       <VerificationDashboard

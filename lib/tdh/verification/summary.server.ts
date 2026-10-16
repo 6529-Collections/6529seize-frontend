@@ -23,7 +23,7 @@ import type { VerificationDay, VerificationIndexDay } from "./schema";
 export type VerificationSummary =
   | { readonly kind: "awaiting" }
   | {
-      readonly kind: "data" | "sample";
+      readonly kind: "data";
       readonly cycleDay: number;
       readonly date: string;
       readonly verdict: VerdictState;
@@ -42,16 +42,19 @@ export type VerificationSummary =
       readonly pythonTotal: number | null;
       /** Whether the Rust, Python and 6529.io totals were all equal. */
       readonly totalsEqual: boolean | null;
+      /** The Rust core's total TDH, sinks included. */
+      readonly rustTotal: number;
+      /** Whether the day's history was checked; null without its file. */
+      readonly historyChecked: boolean | null;
     };
 
-type DataSummary = Extract<VerificationSummary, { kind: "data" | "sample" }>;
+type DataSummary = Extract<VerificationSummary, { kind: "data" }>;
 
 /** The summary of the latest day, from its index entry and, when loaded, its file. */
 export function summarizeDay(
   latest: VerificationIndexDay,
   day: VerificationDay | null,
-  afterCutoverDone: boolean,
-  kind: DataSummary["kind"]
+  afterCutoverDone: boolean
 ): DataSummary {
   const python =
     day !== null && day.implementations.python !== null
@@ -72,7 +75,7 @@ export function summarizeDay(
   const totals = latest.totalTdh;
   const totalsKnown = totals.python !== null && totals.live !== null;
   return {
-    kind,
+    kind: "data",
     cycleDay: latest.cycleDay,
     date: latest.date,
     verdict,
@@ -90,6 +93,8 @@ export function summarizeDay(
     totalsEqual: totalsKnown
       ? totals.rust === totals.python && totals.rust === totals.live
       : null,
+    rustTotal: totals.rust,
+    historyChecked: day === null ? null : day.mode === "checked",
   };
 }
 
@@ -115,8 +120,7 @@ export async function loadVerificationSummary(
     return summarizeDay(
       latest,
       dayLoad.status === "ok" ? dayLoad.day : null,
-      cutoverState(indexLoad.index.cutover, now).kind === "done",
-      indexLoad.source === "sample" ? "sample" : "data"
+      cutoverState(indexLoad.index.cutover, now).kind === "done"
     );
   } catch {
     return null;

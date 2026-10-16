@@ -44,9 +44,12 @@ Two pages explain wallet consolidation:
    the four-wallet limit and the fourth wallet's start date
    (loaded from the current environment’s settings), a `Start guided setup` button to
    `/safe-collecting/build-consolidation`, and a link to the safe collecting setup.
-   A note says that TDH-v1, the rule 6529.io moves to around 23 October 2026,
-   counts up to three wallets per identity and does not include the fourth
-   wallet yet, with a link to step 10 of How TDH is calculated.
+   A note says that TDH-v1, the rule 6529.io moves to around October 23,
+   2026, groups at most three wallets into one identity and that its
+   specification does not include a fourth wallet yet, so how a group of four
+   counts after the cutover is not settled there, with a link to step 10 of
+   How TDH is calculated. The design page carries the same note and the TDH
+   section navigation.
    A figure shows the vault, transaction, social and old wallets becoming one
    collector.
 2. `Why combine`: the vault stays cold; TDH adds up; sets count across wallets;

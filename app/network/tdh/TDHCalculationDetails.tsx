@@ -12,21 +12,31 @@ const DEEPER = [
   { key: "formal", href: "/network/tdh/formal" },
   { key: "impl", href: "/network/tdh/implementations" },
   { key: "verify", href: "/network/tdh/verification" },
+  { key: "consolidation", href: "/network/tdh/consolidation" },
 ] as const;
-/** In the order a calculation meets them. */
-export const GLOSSARY_TERMS = [
+/** The terms needed to read your own TDH, in the order a calculation meets them. */
+export const GLOSSARY_ESSENTIAL = [
   "tdh",
-  "cycle",
+  "memes",
   "snapshot",
-  "finalized",
   "edition",
   "rate",
   "raw",
   "base",
   "boost",
+  "fullSet",
   "identity",
+] as const;
+/** Every other term the TDH pages use. */
+export const GLOSSARY_MORE = [
+  "cycle",
+  "finalized",
+  "firstgm",
+  "season",
+  "stack",
   "consolidation",
   "sink",
+  "registry",
   "netting",
   "underflow",
   "xtdh",
@@ -40,6 +50,36 @@ export const GLOSSARY_TERMS = [
   "classes",
   "items",
 ] as const;
+export const GLOSSARY_TERMS = [...GLOSSARY_ESSENTIAL, ...GLOSSARY_MORE];
+
+function GlossaryList({
+  locale,
+  terms,
+}: {
+  readonly locale: SupportedLocale;
+  readonly terms: readonly string[];
+}) {
+  return (
+    <dl className="tw-m-0 tw-grid tw-gap-x-8 tw-gap-y-4 md:tw-grid-cols-2">
+      {terms.map((term) => (
+        <div key={term} id={`glossary-${term}`} className="tw-scroll-mt-28">
+          <dt className="tw-text-sm tw-font-semibold tw-text-iron-50">
+            {t(
+              locale,
+              `network.tdh.explainer.glossary.${term}.term` as MessageKey
+            )}
+          </dt>
+          <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-300">
+            {t(
+              locale,
+              `network.tdh.explainer.glossary.${term}.def` as MessageKey
+            )}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
 
 export function TDHHoldingChanges({
   locale,
@@ -74,48 +114,31 @@ export function TDHGlossary({ locale }: { readonly locale: SupportedLocale }) {
       title={t(locale, "network.tdh.explainer.glossary.title")}
       description={t(locale, "network.tdh.explainer.glossary.intro")}
     >
-      <dl className="tw-m-0 tw-grid tw-gap-x-8 tw-gap-y-4 md:tw-grid-cols-2">
-        {GLOSSARY_TERMS.map((term) => (
-          <div key={term} id={`glossary-${term}`} className="tw-scroll-mt-28">
-            <dt className="tw-text-sm tw-font-semibold tw-text-iron-50">
-              {t(
-                locale,
-                `network.tdh.explainer.glossary.${term}.term` as MessageKey
-              )}
-            </dt>
-            <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-300">
-              {t(
-                locale,
-                `network.tdh.explainer.glossary.${term}.def` as MessageKey
-              )}
-            </dd>
-          </div>
-        ))}
-      </dl>
+      <GlossaryList locale={locale} terms={GLOSSARY_ESSENTIAL} />
+      <TdhDisclosure
+        className="tw-mt-4 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-2"
+        summary={t(locale, "network.tdh.explainer.glossary.more", {
+          count: String(GLOSSARY_TERMS.length),
+        })}
+      >
+        <div className="tw-pb-2 tw-pt-3">
+          <GlossaryList locale={locale} terms={GLOSSARY_MORE} />
+        </div>
+      </TdhDisclosure>
     </TDHSection>
   );
 }
 
-/** Three cards then two on wide screens; the last spans both columns on small ones. */
-function deeperSpan(index: number): string {
-  if (index < 3) {
-    return "lg:tw-col-span-2";
-  }
-  return index === DEEPER.length - 1
-    ? "sm:tw-col-span-2 lg:tw-col-span-3"
-    : "lg:tw-col-span-3";
-}
-
-/** Cards to the five TDH sub-pages (plan §5.2, "Go deeper"). */
+/** Cards to the TDH sub-pages (plan §5.2, "Go deeper"): six, in even rows. */
 export function TDHGoDeeper({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <TDHSection
       id="tdh-deeper"
       title={t(locale, "network.tdh.explainer.deeper.title")}
     >
-      <ul className="tw-m-0 tw-grid tw-list-none tw-gap-4 tw-p-0 sm:tw-grid-cols-2 lg:tw-grid-cols-6">
-        {DEEPER.map(({ key, href }, index) => (
-          <li key={key} className={deeperSpan(index)}>
+      <ul className="tw-m-0 tw-grid tw-list-none tw-gap-4 tw-p-0 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
+        {DEEPER.map(({ key, href }) => (
+          <li key={key}>
             <Link
               href={href}
               className={`${TDH_PANEL} tw-group tw-grid tw-h-full tw-grid-cols-[minmax(0,1fr)_auto] tw-content-start tw-gap-x-3 tw-gap-y-2 tw-p-5 tw-no-underline tw-transition-colors hover:tw-border-iron-600 motion-reduce:tw-transition-none ${TDH_FOCUS}`}

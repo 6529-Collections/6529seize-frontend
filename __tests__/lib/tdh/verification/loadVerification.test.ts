@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 import {
+  PUBLIC_TDH_FEED_BASE,
   createVerificationLoader,
   resolveVerificationSource,
 } from "@/lib/tdh/verification/loadVerification.server";
@@ -30,10 +31,10 @@ function fetchFrom(routes: Record<string, () => Promise<Response>>) {
 
 describe("resolveVerificationSource", () => {
   it.each([
-    [undefined, true, "awaiting"],
-    ["", true, "awaiting"],
-    ["   ", false, "sample"],
-    [undefined, false, "sample"],
+    [undefined, true, "remote"],
+    ["", true, "remote"],
+    ["   ", false, "remote"],
+    [undefined, false, "remote"],
     ["https://verification.example/tdh", true, "remote"],
     ["http://localhost:4010/tdh", false, "remote"],
     ["http://localhost:4010/tdh", true, "invalid"],
@@ -45,6 +46,15 @@ describe("resolveVerificationSource", () => {
     expect(resolveVerificationSource(base, isProduction).kind).toBe(kind);
   });
 
+  it("reads 6529's public feed when no base is configured, in every environment", () => {
+    for (const isProduction of [true, false]) {
+      const source = resolveVerificationSource(undefined, isProduction);
+      expect(source.kind === "remote" && source.base.toString()).toBe(
+        PUBLIC_TDH_FEED_BASE
+      );
+    }
+  });
+
   it("treats the base as a directory so a path can never escape it", () => {
     const source = resolveVerificationSource(BASE, true);
     expect(
@@ -54,34 +64,26 @@ describe("resolveVerificationSource", () => {
 });
 
 describe("createVerificationLoader", () => {
-  it("returns awaiting in production without a data source, and never fetches", async () => {
-    const fetchImpl = fetchFrom({});
+  it("fetches the public feed without a configured base, and shows no bundled data", async () => {
+    const fetchImpl = fetchFrom({
+      [`${PUBLIC_TDH_FEED_BASE}index.json`]: async () =>
+        jsonResponse(syntheticIndex()),
+      [`${PUBLIC_TDH_FEED_BASE}days/20741.json`]: async () =>
+        jsonResponse(syntheticDay()),
+    });
     const loader = createVerificationLoader({
       base: undefined,
       isProduction: true,
       fetchImpl,
     });
-    await expect(loader.loadIndex()).resolves.toEqual({ status: "awaiting" });
-    await expect(loader.loadDay(20_741)).resolves.toEqual({
-      status: "not-found",
-    });
-    expect(fetchImpl).not.toHaveBeenCalled();
-  });
-
-  it("returns the bundled sample outside production without a data source", async () => {
-    const loader = createVerificationLoader({
-      base: undefined,
-      isProduction: false,
-    });
-    const index = await loader.loadIndex();
-    expect(index).toMatchObject({
+    await expect(loader.loadIndex()).resolves.toMatchObject({
       status: "ok",
-      source: "sample",
-      indexUrl: null,
+      source: "remote",
+      indexUrl: `${PUBLIC_TDH_FEED_BASE}index.json`,
     });
     await expect(loader.loadDay(20_741)).resolves.toMatchObject({
       status: "ok",
-      dayUrl: null,
+      dayUrl: `${PUBLIC_TDH_FEED_BASE}days/20741.json`,
     });
     await expect(loader.loadDay(1)).resolves.toEqual({ status: "not-found" });
   });
@@ -207,7 +209,7 @@ describe("createVerificationLoader", () => {
     await expect(loader.loadDay(-1)).resolves.toEqual({ status: "not-found" });
   });
 
-  it("refuses a misconfigured data source instead of falling back to the sample", async () => {
+  it("refuses a misconfigured data source instead of falling back to another", async () => {
     const loader = createVerificationLoader({
       base: "http://example.com",
       isProduction: true,

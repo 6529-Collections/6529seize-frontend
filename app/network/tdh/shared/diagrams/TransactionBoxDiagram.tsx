@@ -1,32 +1,31 @@
-import { useId } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { NARROW_WIDTH, TdhSvg } from "../TdhSvg";
 
 /**
  * Step 5 and DEV-2: one transaction that sends a copy out of Wallet A to
  * Wallet C and back. Two arcs join the wallets, each labelled with its
  * movement, and the result, netted at the transaction boundary (D131), sits
- * inside the figure: Wallet A never lost the copy.
+ * under the figure: Wallet A never lost the copy. One compact drawing, phone
+ * first: its text is 14 units, so it stays above 12 px in any column it is
+ * shown in, and it grows to 1.4 times on wide screens.
  */
 export default function TransactionBoxDiagram({
   locale,
 }: {
   readonly locale: SupportedLocale;
 }) {
-  const id = useId();
-  const arrow = `${id}-arrow`;
-  const titleId = `${id}-title`;
+  const arrow = "tdh-transaction-arrow";
   return (
-    <figure className="tw-m-0 tw-max-w-md">
-      <svg
-        viewBox="0 0 340 204"
-        role="img"
-        aria-labelledby={titleId}
-        className="tw-block tw-h-auto tw-w-full"
+    <figure className="tw-m-0">
+      <TdhSvg
+        id="tdh-transaction"
+        width={NARROW_WIDTH}
+        height={192}
+        title={t(locale, "network.tdh.how.s5.diagramTitle")}
+        desc={t(locale, "network.tdh.how.s5.diagramDesc")}
+        maxWidth={392}
       >
-        <title id={titleId}>
-          {t(locale, "network.tdh.how.s5.diagramDesc")}
-        </title>
         <defs>
           <marker
             id={arrow}
@@ -41,67 +40,67 @@ export default function TransactionBoxDiagram({
           </marker>
         </defs>
         <rect
-          x="6"
-          y="6"
-          width="328"
-          height="150"
+          x="2"
+          y="2"
+          width={NARROW_WIDTH - 4}
+          height="140"
           rx="14"
           fill="none"
           strokeDasharray="5 5"
-          className="tw-stroke-iron-600"
+          className="tw-stroke-iron-500"
         />
-        <text x="22" y="28" fontSize="12" className="tw-fill-iron-300">
+        <text x="16" y="26" fontSize="14" className="tw-fill-iron-300">
           {t(locale, "network.tdh.how.s5.transaction")}
         </text>
         <path
-          d="M 84 76 Q 170 22 256 76"
+          d="M 80 72 Q 140 30 200 72"
           fill="none"
           strokeWidth="2"
           markerEnd={`url(#${arrow})`}
           className="tw-stroke-primary-300"
         />
         <path
-          d="M 256 100 Q 170 154 84 100"
+          d="M 200 96 Q 140 138 80 96"
           fill="none"
           strokeWidth="2"
           markerEnd={`url(#${arrow})`}
           className="tw-stroke-primary-300"
         />
         <text
-          x="170"
-          y="38"
+          x="140"
+          y="46"
           textAnchor="middle"
-          fontSize="13"
+          fontSize="14"
           className="tw-fill-primary-300 tw-font-medium"
         >
           {t(locale, "network.tdh.how.s5.out")}
         </text>
         <text
-          x="170"
-          y="147"
+          x="140"
+          y="134"
           textAnchor="middle"
-          fontSize="13"
+          fontSize="14"
           className="tw-fill-primary-300 tw-font-medium"
         >
           {t(locale, "network.tdh.how.s5.back")}
         </text>
         {[
-          { x: 60, label: "A" },
-          { x: 280, label: "C" },
+          { x: 56, label: "A" },
+          { x: 224, label: "C" },
         ].map((wallet) => (
           <g key={wallet.label}>
             <circle
               cx={wallet.x}
-              cy="88"
+              cy="84"
               r="22"
               strokeWidth="1.5"
               className="tw-fill-iron-800 tw-stroke-iron-500"
             />
             <text
               x={wallet.x}
-              y="93"
+              y="90"
               textAnchor="middle"
-              fontSize="16"
+              fontSize="17"
               className="tw-fill-iron-50 tw-font-semibold"
             >
               {wallet.label}
@@ -109,24 +108,24 @@ export default function TransactionBoxDiagram({
           </g>
         ))}
         <rect
-          x="70"
-          y="168"
-          width="200"
-          height="30"
-          rx="15"
+          x="20"
+          y="154"
+          width="240"
+          height="34"
+          rx="17"
           strokeWidth="1.5"
           className="tw-fill-iron-900 tw-stroke-success"
         />
         <text
-          x="170"
-          y="188"
+          x="140"
+          y="176"
           textAnchor="middle"
-          fontSize="13"
+          fontSize="14"
           className="tw-fill-iron-50 tw-font-medium"
         >
           {t(locale, "network.tdh.how.s5.net")}
         </text>
-      </svg>
+      </TdhSvg>
     </figure>
   );
 }

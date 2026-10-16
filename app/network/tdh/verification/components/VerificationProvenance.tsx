@@ -6,6 +6,7 @@ import type {
   VerificationDay,
   VerificationImplementation,
 } from "@/lib/tdh/verification/schema";
+import TdhHeading from "../../shared/TdhHeading";
 import TdhCopyButton from "../../shared/TdhCopyButton";
 import TdhSource from "../../shared/TdhSource";
 import TdhStatusPill from "../../shared/TdhStatusPill";
@@ -193,16 +194,14 @@ function Commits({
  */
 export default function VerificationProvenance({
   locale,
-  isSample,
   day,
   dayUrl,
   indexUrl,
 }: {
   readonly locale: SupportedLocale;
-  readonly isSample: boolean;
   readonly day: VerificationDay | null;
   readonly dayUrl: string | null;
-  readonly indexUrl: string | null;
+  readonly indexUrl: string;
 }) {
   const rust = day?.implementations.rust ?? null;
   const python = day?.implementations.python ?? null;
@@ -211,26 +210,20 @@ export default function VerificationProvenance({
   const walletUpload = live?.sources?.wallet ?? null;
   return (
     <section
-      aria-labelledby="tdh-verify-provenance-heading"
-      className="tw-mt-12"
+      id="provenance"
+      aria-labelledby="provenance-heading"
+      className="tw-mt-12 tw-scroll-mt-24"
     >
-      <h2
-        id="tdh-verify-provenance-heading"
-        className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
-      >
-        {t(locale, "network.tdh.verify.provenance.heading")}
-      </h2>
+      <TdhHeading
+        id="provenance"
+        title={t(locale, "network.tdh.verify.provenance.heading")}
+        locale={locale}
+        className="tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
+      />
       <div className={`${TDH_CARD} tw-mt-4 tw-p-5 sm:tw-p-6`}>
         <dl className="tw-m-0 tw-grid tw-items-start tw-gap-x-8 tw-gap-y-5 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
           <Item label={t(locale, "network.tdh.verify.provenance.dataSource")}>
-            {isSample ? (
-              <span className="tw-flex tw-flex-col tw-items-start tw-gap-1.5">
-                <TdhStatusPill pill="sample" locale={locale} size="sm" />
-                {t(locale, "network.tdh.verify.provenance.sample")}
-              </span>
-            ) : (
-              t(locale, "network.tdh.verify.provenance.remote")
-            )}
+            {t(locale, "network.tdh.verify.provenance.remote")}
           </Item>
           {day && (
             <Item label={t(locale, "network.tdh.verify.provenance.snapshot")}>
@@ -337,32 +330,22 @@ export default function VerificationProvenance({
           )}
         </dl>
         <div className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-x-6 tw-gap-y-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4 tw-text-sm">
-          {dayUrl === null && indexUrl === null ? (
-            <p className="tw-m-0 tw-text-iron-400">
-              {t(locale, "network.tdh.verify.provenance.noDownload")}
-            </p>
-          ) : (
-            <>
-              {dayUrl && (
-                <a
-                  href={dayUrl}
-                  className={`${TDH_LINK} tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5`}
-                >
-                  <ArrowDownTrayIcon aria-hidden="true" className="tw-size-4" />
-                  {t(locale, "network.tdh.verify.provenance.downloadDay")}
-                </a>
-              )}
-              {indexUrl && (
-                <a
-                  href={indexUrl}
-                  className={`${TDH_LINK} tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5`}
-                >
-                  <ArrowDownTrayIcon aria-hidden="true" className="tw-size-4" />
-                  {t(locale, "network.tdh.verify.provenance.downloadIndex")}
-                </a>
-              )}
-            </>
+          {dayUrl && (
+            <a
+              href={dayUrl}
+              className={`${TDH_LINK} tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5`}
+            >
+              <ArrowDownTrayIcon aria-hidden="true" className="tw-size-4" />
+              {t(locale, "network.tdh.verify.provenance.downloadDay")}
+            </a>
           )}
+          <a
+            href={indexUrl}
+            className={`${TDH_LINK} tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5`}
+          >
+            <ArrowDownTrayIcon aria-hidden="true" className="tw-size-4" />
+            {t(locale, "network.tdh.verify.provenance.downloadIndex")}
+          </a>
         </div>
       </div>
     </section>

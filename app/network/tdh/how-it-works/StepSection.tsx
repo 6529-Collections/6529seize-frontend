@@ -3,7 +3,7 @@ import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import TdhDisclosure from "../shared/TdhDisclosure";
-import TdhHeadingLink from "../shared/TdhHeadingLink";
+import TdhHeading from "../shared/TdhHeading";
 import TdhRuleBlock from "../shared/TdhRuleBlock";
 import TdhSource from "../shared/TdhSource";
 
@@ -37,22 +37,12 @@ export default function StepSection({
           n: formatInteger(locale, step),
         })}
       </p>
-      <div className="tw-mt-1 tw-flex tw-items-start tw-gap-1">
-        <h2
-          id={`${id}-heading`}
-          tabIndex={-1}
-          className="tw-m-0 tw-pt-1.5 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none sm:tw-text-[1.75rem]"
-        >
-          {title}
-        </h2>
-        <TdhHeadingLink
-          id={id}
-          label={t(locale, "network.tdh.shared.headingLink", {
-            heading: title,
-          })}
-          copiedLabel={t(locale, "network.tdh.shared.linkCopied")}
-        />
-      </div>
+      <TdhHeading
+        id={id}
+        title={title}
+        locale={locale}
+        className="tw-mt-1 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[1.75rem]"
+      />
       {pills !== undefined && (
         <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-2">{pills}</div>
       )}

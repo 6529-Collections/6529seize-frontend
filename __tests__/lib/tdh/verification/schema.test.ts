@@ -1,26 +1,21 @@
 import {
-  SAMPLE_VERIFICATION_DAYS,
-  SAMPLE_VERIFICATION_INDEX,
-} from "@/lib/tdh/verification/sampleData";
-import {
   isDifferenceCause,
   parseVerificationDay,
   parseVerificationIndex,
 } from "@/lib/tdh/verification/schema";
 import { syntheticDay, syntheticIndex } from "./fixtures";
+import { PUBLIC_FEED_DAYS, PUBLIC_FEED_INDEX } from "./publicFeedFixture";
 
 describe("verification schema", () => {
-  it("accepts the bundled sample data", () => {
-    expect(parseVerificationIndex(SAMPLE_VERIFICATION_INDEX).success).toBe(
-      true
-    );
-    for (const day of Object.values(SAMPLE_VERIFICATION_DAYS)) {
+  it("accepts the public feed as published", () => {
+    expect(parseVerificationIndex(PUBLIC_FEED_INDEX).success).toBe(true);
+    for (const day of Object.values(PUBLIC_FEED_DAYS)) {
       expect(parseVerificationDay(day).success).toBe(true);
     }
   });
 
-  it("keeps the public feed as the sample: verdict OK, everything equal", () => {
-    const day = SAMPLE_VERIFICATION_DAYS[20_741];
+  it("reads the public feed's first days: verdict OK, everything equal", () => {
+    const day = PUBLIC_FEED_DAYS[20_741];
     expect(day?.verdict).toBe("OK");
     expect(day?.implementations.rust.commit).toBe(
       "e1276762ec5cf014bfb30efcb081f940d3d02154"
@@ -30,7 +25,7 @@ describe("verification schema", () => {
     );
     expect(day?.implementations.rust.runtimeMs).toBe(815_909);
     expect(day?.implementations.python?.runtimeMs).toBe(12_105);
-    expect(SAMPLE_VERIFICATION_DAYS[20_740]?.implementations.rust.commit).toBe(
+    expect(PUBLIC_FEED_DAYS[20_740]?.implementations.rust.commit).toBe(
       "2b172160e6daa50761ec054a5f53ba4c755cfbcc"
     );
     expect(day?.implementations.live?.source).toBe(
@@ -51,16 +46,13 @@ describe("verification schema", () => {
       C: 0,
       D: 0,
     });
-    expect(
-      SAMPLE_VERIFICATION_DAYS[20_740]?.implementations.rust.totalTdh
-    ).toBe(2_070_436_337);
+    expect(PUBLIC_FEED_DAYS[20_740]?.implementations.rust.totalTdh).toBe(
+      2_070_436_337
+    );
   });
 
-  it("publishes nothing per record: the sample carries no holder, token or address", () => {
-    const text = JSON.stringify([
-      SAMPLE_VERIFICATION_INDEX,
-      SAMPLE_VERIFICATION_DAYS,
-    ]);
+  it("publishes nothing per record: the feed carries no holder, token or address", () => {
+    const text = JSON.stringify([PUBLIC_FEED_INDEX, PUBLIC_FEED_DAYS]);
     expect(text).not.toMatch(/holder-\d/);
     expect(text).not.toMatch(/#\d/);
     expect(text).not.toMatch(/0x[0-9a-f]{40}(?![0-9a-f])/);

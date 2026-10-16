@@ -45,8 +45,8 @@ export default function TdhHowItWorksPage() {
         </>
       }
       headerExtra={
-        <div className="tw-mt-6">
-          <p className="tw-m-0 tw-mb-3 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
+        <div className="tw-mt-6 tw-hidden md:tw-block">
+          <p className="tw-m-0 tw-mb-3 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
             {t(locale, "network.tdh.how.pipeline.title")}
           </p>
           <PipelineDiagram locale={locale} stepTitles={stepTitles} />

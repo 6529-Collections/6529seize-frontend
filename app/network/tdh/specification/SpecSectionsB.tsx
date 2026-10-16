@@ -85,6 +85,7 @@ const EVIDENCE = [
   { id: "evidence-replay", key: "replay" },
   { id: "evidence-clean-room", key: "cleanRoom" },
   { id: "evidence-comparison", key: "comparison" },
+  { id: "evidence-difftest", key: "difftest" },
 ] as const;
 
 export default function SpecSectionsB({
@@ -154,7 +155,7 @@ export default function SpecSectionsB({
           <table
             className={`${TDH_TABLE} tw-block md:tw-table md:tw-table-fixed`}
           >
-            <caption className={CAPTION}>
+            <caption className={`${CAPTION} tw-block md:tw-table-caption`}>
               {t(locale, "network.tdh.spec.s10.tableCaption")}
             </caption>
             <colgroup className="tw-hidden md:tw-table-column-group">
@@ -251,7 +252,7 @@ export default function SpecSectionsB({
         </Plain>
         <div className={TDH_TABLE_FRAME}>
           <table className={`${TDH_TABLE} tw-block md:tw-table`}>
-            <caption className={CAPTION}>
+            <caption className={`${CAPTION} tw-block md:tw-table-caption`}>
               {t(locale, "network.tdh.spec.s12.tableCaption")}
             </caption>
             <thead className="tw-hidden md:tw-table-header-group">

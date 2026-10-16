@@ -13,8 +13,9 @@ const PIPELINE_STEPS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] as const;
 /**
  * Diagram 1: the page as a rail of its fourteen steps, in order, each linking
  * to its section under the section's own title. The calculation runs from 1
- * to 13, the network total; 12 is the worked example and 14 what changes at
- * the cutover, drawn apart.
+ * to 13, the network total, drawn as a square end marker; 12 is the worked
+ * example and 14 what changes at the cutover, drawn apart. From `md` only:
+ * on phones the steps menu below does the same job.
  */
 export function PipelineDiagram({
   locale,
@@ -28,7 +29,7 @@ export function PipelineDiagram({
       <figcaption className="tw-sr-only">
         {t(locale, "network.tdh.how.pipeline.desc")}
       </figcaption>
-      <ol className="tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-y-4 tw-p-0 sm:tw-grid-cols-4 lg:tw-grid-cols-7">
+      <ol className="tw-m-0 tw-grid tw-list-none tw-grid-cols-4 tw-gap-y-4 tw-p-0 xl:tw-grid-cols-7">
         {PIPELINE_STEPS.map((step) => {
           const aside = ASIDE_STEPS.has(step);
           const result = step === RESULT_STEP;
@@ -36,7 +37,7 @@ export function PipelineDiagram({
             "tw-border-iron-500 tw-bg-iron-900 tw-text-iron-100 group-hover:tw-border-primary-400";
           if (result) {
             marker =
-              "tw-border-primary-400 tw-bg-primary-500/20 tw-text-primary-100";
+              "tw-rounded-md tw-border-2 tw-border-primary-400 tw-bg-iron-950 tw-text-primary-200";
           } else if (aside) {
             marker =
               "tw-border-dashed tw-border-iron-600 tw-bg-iron-950 tw-text-iron-400";
@@ -56,7 +57,7 @@ export function PipelineDiagram({
                 className={`tw-group tw-relative tw-flex tw-min-h-11 tw-flex-col tw-gap-1.5 tw-rounded-lg tw-pr-3 tw-no-underline ${TDH_FOCUS_RING}`}
               >
                 <span
-                  className={`tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-text-xs tw-font-semibold tw-tabular-nums tw-transition-colors motion-reduce:tw-transition-none ${marker}`}
+                  className={`tw-flex tw-size-7 tw-items-center tw-justify-center ${result ? "" : "tw-rounded-full"} tw-border tw-border-solid tw-text-xs tw-font-semibold tw-tabular-nums tw-transition-colors motion-reduce:tw-transition-none ${marker}`}
                 >
                   {formatInteger(locale, step)}
                 </span>
@@ -79,7 +80,7 @@ export function PipelineDiagram({
         className="tw-m-0 tw-mt-4 tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-2 tw-text-xs tw-text-iron-400"
       >
         <span className="tw-inline-flex tw-items-center tw-gap-2">
-          <span className="tw-size-3 tw-rounded-full tw-border tw-border-solid tw-border-primary-400 tw-bg-primary-500/20" />
+          <span className="tw-size-3 tw-rounded-sm tw-border-2 tw-border-solid tw-border-primary-400" />
           {t(locale, "network.tdh.how.pipeline.legendResult")}
         </span>
         <span className="tw-inline-flex tw-items-center tw-gap-2">

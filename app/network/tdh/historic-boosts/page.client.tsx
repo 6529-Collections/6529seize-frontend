@@ -216,7 +216,7 @@ function BoostTimeline({ locale }: { readonly locale: SupportedLocale }) {
               {m(locale, "network.tdhHistoric.versionLabel", {
                 version: "1.4",
               })}{" "}
-              <span className="tw-rounded-full tw-bg-primary-500/15 tw-px-1.5 tw-text-[11px] tw-text-primary-300">
+              <span className="tw-rounded-full tw-bg-primary-500/15 tw-px-1.5 tw-text-xs tw-text-primary-300">
                 {m(locale, "network.tdhHistoric.timeline.current")}
               </span>
             </span>
@@ -263,12 +263,12 @@ function HistoricRulesTable({
   readonly onToggle: (ruleId: string) => void;
 }) {
   return (
-    <div className="tw-hidden md:tw-block">
-      <div className="tw-overflow-x-auto tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60">
-        <table className="tw-m-0 tw-w-full tw-border-collapse tw-border-0">
-          <caption className="tw-sr-only">
-            {m(locale, "network.tdhHistoric.table.caption")}
-          </caption>
+    <div className="tw-hidden xl:tw-block">
+      <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60">
+        <table
+          className="tw-m-0 tw-w-full tw-border-collapse tw-border-0"
+          aria-label={m(locale, "network.tdhHistoric.table.caption")}
+        >
           <thead className="tw-bg-iron-900/80">
             <tr className="tw-border-0">
               <th className={TABLE_HEADER_CLASS} scope="col">
@@ -382,7 +382,7 @@ function HistoricRulesMobileCards({
   readonly onToggle: (ruleId: string) => void;
 }) {
   return (
-    <div className="tw-space-y-3 md:tw-hidden">
+    <div className="tw-grid tw-gap-3 md:tw-grid-cols-2 xl:tw-hidden">
       {HISTORIC_RULES.map((rule) => {
         const isExpanded = expandedRuleIds.has(rule.id);
         const detailsId = `${rule.id}-mobile-details`;
@@ -424,7 +424,7 @@ function HistoricRulesMobileCards({
               </span>
             </button>
 
-            <dl className="tw-m-0 tw-grid tw-grid-cols-3 tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3">
+            <dl className="tw-m-0 tw-grid tw-grid-cols-[repeat(auto-fit,minmax(6.5rem,1fr))] tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3">
               <MobileSummaryMetric
                 label={m(locale, "network.tdhHistoric.table.categoryA")}
                 value={formatMultiplier(locale, rule.completeSetMultiplier)}
@@ -469,7 +469,7 @@ function MobileSummaryMetric({
 }) {
   return (
     <div className="tw-min-w-0">
-      <dt className="tw-min-h-8 tw-text-xs tw-leading-4 tw-text-iron-400">
+      <dt className="tw-text-balance tw-text-xs tw-leading-4 tw-text-iron-400">
         {label}
       </dt>
       <dd

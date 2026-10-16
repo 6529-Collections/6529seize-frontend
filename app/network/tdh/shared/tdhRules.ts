@@ -1,6 +1,6 @@
 /**
- * Rule blocks from specification P26 as clarified on 15 October 2026 (6529chain
- * commit 16d70d0, rule version `tdh-v1.0`). Pseudocode is quoted verbatim;
+ * Rule blocks from specification P26 after its fifth round of 16 October
+ * 2026 (6529chain commit f840096, rule version `tdh-v1.0`). Pseudocode is quoted verbatim;
  * blocks named `..._CONDENSED` restate P26's prose rules line for line, with
  * the section or vector each line comes from. A `#` line names the step it
  * starts. Formulas, hashes and addresses are not translated. Updating them is
@@ -19,7 +19,9 @@ SINKS      the registry's sinks (§10), {ZERO, DEAD} in tdh-v1.0`;
 export const RULE_LOG_SELECTION_CONDENSED = `input log: address in {memes, gradients, nextgen, delegation}
            and block <= B and block hash on the canonical chain ending at hash(B)
 every input log exactly once, the logs §3.2 and §6.1 ignore included
-logs in later blocks: neither decoded nor checked
+logs in later blocks: neither decoded nor checked, beyond their field types
+a log marked removed: true left the chain: not an input       # vector 67
+removed must be a JSON boolean; anything else: invalid        # vector 69
 no completeness proof for [deployment, B]: publish no result
 
 invalid if two logs share one (block, logIndex)                   # vector 52
@@ -27,6 +29,13 @@ invalid if, in one block, a larger logIndex has a smaller txIndex  # vector 53
 decoded inputs: items of different logs never share (block, logIndex);
                 the positions of all delegation events count, kept or not
                                                                   # vectors 30, 51
+transfers at one (block, logIndex) are one log's elements: they share its
+    contract, from, to and txIndex; differing in any: invalid    # vectors 85-87
+    their number and batchPos (distinct) are not otherwise checked
+each log is given raw or decoded, never both: a decoded item at a raw
+    log's (block, logIndex) is invalid, an ignored raw log included
+                                                          # vectors 63, 72
+the txIndex order counts raw and decoded logs together    # vector 64
 checked before §6.1 filters events and before §7.1 nets transfers`;
 
 /** P26 §3.2, the decoding rules line for line. */
@@ -40,11 +49,30 @@ Transfer(from, to, tokenId), Gradients or NextGen, exactly four topics:
     empty data; amount = 1; batchPos = 0
 
 every address topic, operator included, has 12 zero high bytes
-an amount of 2^64 or more is malformed
+an amount of 2^64 or more is malformed, in a log and in a decoded transfer
+    in a block <= B; after B a decoded transfer is no input, no effect
+                                                                  # vector 76
 a malformed log makes the input invalid; a node MUST NOT skip it
 any other topic0 or topic count, anonymous logs included: ignored
 timestamp = the header timestamp of the log's block
-one transaction (block, txIndex): one timestamp and one txHash   # vectors 48, 49`;
+one transaction (block, txIndex): one timestamp and one txHash   # vectors 48, 49
+
+types: block numbers, txIndex, logIndex, batchPos and timestamps are uint64,
+       token ids, amounts and a delegation event's useCase uint256; a value
+       outside its type is malformed wherever it is, a header timestamp no
+       log reads included, and the input has no result
+                                                    # vectors 71, 77, 78, 79
+
+values written in JSON, one way each:
+    an integer is a JSON number in canonical form: no fraction, no
+        exponent, no -0, a minus sign only on a negative signed field
+                                                                  # vector 80
+    a string is never an integer, a token id included             # vector 81
+    a key naming an integer is its canonical decimal: no sign, no leading
+        zero, so two keys never name one value          # vectors 82, 84, 88
+    any other form is outside its type: the input has no result
+not JSON, a member named twice, a required field missing: no input
+    document at all, refused whole before any value is read`;
 
 export const RULE_ORDER =
   "order = ascending (block, txIndex, logIndex, batchPos)";
@@ -60,17 +88,25 @@ burns do not reduce edition sizes`;
 export const RULE_CUTOFF = `B = the block b on the finalized chain with ts(b) < M <= ts(b + 1)
 T = ts(B)        M = N * 86400`;
 
-/** P26 §4.2-§4.3: the cutoff verbatim, then its header-order rule. */
+/** P26 §4.1-§4.3: the cutoff verbatim, then its header-order rule. */
 export const RULE_CUTOFF_SPEC = `B = the block b on the finalized canonical chain with ts(b) < M <= ts(b + 1)
 T = ts(B)
 days(a) = (T - a) div day_s                            # §4.3, for a <= T
 
+# The cycle date (§4.1)
+a date is exactly eight digits naming a calendar date on or after 1970-01-01;
+    anything else names no cycle                       # vector 74
+
 # Header order (§4.2)
 no result until b + 1 is finalized
+block 2^64 - 1 has no block b + 1, so it is never B    # vector 74
 headers read for the cycle (b, b + 1, the search's, the decoded logs' blocks):
-    by block number, timestamps MUST strictly increase between every two
-    else the cycle has no result                       # vectors 34, 55
-a transfer in a block <= B stamped after T: input invalid  # vector 54`;
+    by block number, timestamps MUST strictly increase between every two;
+    the set need not be contiguous, else the cycle has no result
+                                                       # vectors 34, 55
+the set always holds B stamped T: a log below B stamped at T or later, or
+    block B stamped other than T, is invalid           # vectors 61, 62
+a decoded transfer in a block <= B stamped after T: input invalid  # vector 54`;
 
 export const RULE_DAYS = "days(a) = (T - a) div day_s";
 
@@ -257,9 +293,13 @@ registryHash = H("6529.TdhRegistry.v1", the fields above in order)
 # CE list<T>, ascending. Boosts are in micro-units, additional_set_ratio in
 # 10^-4 and gradient_rate_minimum in cents.`;
 
-/** P26 §10, "Registry constraints", line for line. */
-export const RULE_REGISTRY_CONSTRAINTS_CONDENSED = `season_starts starts at 1 and strictly increases       # §5.4
-every list field is strictly ascending, so it has no repeats
+/** P26 §10, "Field types" and "Registry constraints", line for line. */
+export const RULE_REGISTRY_CONSTRAINTS_CONDENSED = `every field at its type (uint32, uint64, uint256, int64, address, bytes32);
+    a value outside it: no registry, no hash, no result   # vectors 68, 70, 75
+read at its type, cut to fit never: a uint32 in 32 bits, every uint256 in
+    full                                                  # vectors 73, 75
+season_starts starts at 1 and strictly increases       # §5.4
+every list field is strictly ascending, so it has no repeats  # vector 66
 sinks contains ZERO                                     # §3.4
 day_s > 0 and nextgen_collection_divisor > 0
 additional_set_ratio < 10^4, a ratio below 1            # §8.3

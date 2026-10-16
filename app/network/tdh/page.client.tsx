@@ -44,7 +44,6 @@ const MOVED_ANCHORS: Readonly<Record<string, string>> = {
 };
 
 const RELATED = [
-  { href: "/network/tdh/consolidation", key: "consolidation" },
   { href: "/network/health/network-tdh", key: "stats" },
   { href: "/network/levels", key: "levels" },
 ] as const;

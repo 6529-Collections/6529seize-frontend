@@ -66,7 +66,7 @@ export default function VectorFormat({
                     {key}
                   </code>
                   <span
-                    className={`tw-rounded-full tw-px-2 tw-py-px tw-text-[11px] ${
+                    className={`tw-rounded-full tw-px-2 tw-py-px tw-text-xs ${
                       normative
                         ? "tw-bg-primary-500/15 tw-text-primary-300"
                         : "tw-bg-iron-800 tw-text-iron-400"

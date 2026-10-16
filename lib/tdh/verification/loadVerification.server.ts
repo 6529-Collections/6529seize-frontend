@@ -4,29 +4,32 @@ import { publicEnv } from "@/config/env";
 import {
   parseVerificationDay,
   parseVerificationIndex,
-  verificationDaySchema,
-  verificationIndexSchema,
   type VerificationDay,
   type VerificationIndex,
 } from "./schema";
 
 /**
- * Server-side loader for the public TDH verification files. Every page and
- * card renders each outcome explicitly:
+ * Server-side loader for the public TDH feed: 6529's daily comparison files
+ * (`index.json`, `days/{cycleDay}.json`). Every page and card renders each
+ * outcome explicitly:
  *
- * | Base URL | Environment | Result |
- * | Set      | Any         | fetched; `error` on failure |
- * | Unset    | Production  | `awaiting` (daily reports not started) |
- * | Unset    | Elsewhere   | `sample` (bundled, labelled sample data) |
+ * | Feed                              | Result                          |
+ * | Index published, at least one day | `ok`                            |
+ * | Index 403 or 404, or no days      | `awaiting` (no report yet)      |
+ * | Any other failure                 | `error`, with its reason        |
  *
- * Production is decided by the app's host (6529.io), not by NODE_ENV,
- * because staging builds also run with NODE_ENV=production.
+ * The base URL is `NEXT_PUBLIC_TDH_VERIFICATION_BASE` when it is set, and
+ * otherwise 6529's public feed, so every environment shows the published
+ * reports and nothing else: there is no bundled or sample data.
  *
  * The feed is served by CloudFront from a private bucket (Origin Access
  * Control), which answers 403, not 404, for a file that does not exist yet.
  * Both mean "not yet published": a missing index is `awaiting`, a missing day
  * `not-found`.
  */
+
+/** 6529's public TDH feed, written by the daily comparison job (D132). */
+export const PUBLIC_TDH_FEED_BASE = "https://d379duzqnomz3w.cloudfront.net/";
 
 export const INDEX_REVALIDATE_SECONDS = 600;
 export const LATEST_DAY_REVALIDATE_SECONDS = 600;
@@ -47,8 +50,6 @@ export type VerificationErrorReason = "config" | "network" | "http" | "invalid";
 
 export type VerificationSource =
   | { readonly kind: "remote"; readonly base: URL }
-  | { readonly kind: "sample" }
-  | { readonly kind: "awaiting" }
   | { readonly kind: "invalid" };
 
 export type IndexLoad =
@@ -59,13 +60,6 @@ export type IndexLoad =
       readonly indexUrl: string;
       readonly baseUrl: string;
     }
-  | {
-      readonly status: "ok";
-      readonly source: "sample";
-      readonly index: VerificationIndex;
-      readonly indexUrl: null;
-      readonly baseUrl: null;
-    }
   | { readonly status: "awaiting" }
   | { readonly status: "error"; readonly reason: VerificationErrorReason };
 
@@ -73,7 +67,7 @@ export type DayLoad =
   | {
       readonly status: "ok";
       readonly day: VerificationDay;
-      readonly dayUrl: string | null;
+      readonly dayUrl: string;
     }
   | { readonly status: "not-found" }
   | { readonly status: "error"; readonly reason: VerificationErrorReason };
@@ -82,20 +76,14 @@ export interface VerificationLoaderOptions {
   readonly base: string | undefined;
   readonly isProduction: boolean;
   readonly fetchImpl?: typeof fetch;
-  readonly loadSample?: () => Promise<{
-    readonly index: VerificationIndex;
-    readonly days: Readonly<Record<number, VerificationDay>>;
-  }>;
 }
 
 export function resolveVerificationSource(
   base: string | undefined,
   isProduction: boolean
 ): VerificationSource {
-  const trimmed = base?.trim() ?? "";
-  if (trimmed.length === 0) {
-    return isProduction ? { kind: "awaiting" } : { kind: "sample" };
-  }
+  const configured = base?.trim() ?? "";
+  const trimmed = configured.length === 0 ? PUBLIC_TDH_FEED_BASE : configured;
   let url: URL;
   try {
     url = new URL(trimmed);
@@ -149,44 +137,13 @@ export async function fetchFeedJson(
   }
 }
 
-/**
- * The bundled sample, parsed through the same schema as the published files,
- * so it can never show a shape the real feed would not pass.
- */
-export async function loadBundledSample(): Promise<{
-  readonly index: VerificationIndex;
-  readonly days: Readonly<Record<number, VerificationDay>>;
-}> {
-  const sample = await import("./sampleData");
-  const index = verificationIndexSchema.parse(sample.SAMPLE_VERIFICATION_INDEX);
-  const days: Record<number, VerificationDay> = {};
-  for (const [key, value] of Object.entries(sample.SAMPLE_VERIFICATION_DAYS)) {
-    days[Number(key)] = verificationDaySchema.parse(value);
-  }
-  return { index, days };
-}
-
 export function createVerificationLoader(options: VerificationLoaderOptions) {
   const source = resolveVerificationSource(options.base, options.isProduction);
   const fetchImpl = options.fetchImpl ?? globalThis.fetch;
-  const loadSample = options.loadSample ?? loadBundledSample;
 
   async function loadIndex(): Promise<IndexLoad> {
-    if (source.kind === "awaiting") {
-      return { status: "awaiting" };
-    }
     if (source.kind === "invalid") {
       return { status: "error", reason: "config" };
-    }
-    if (source.kind === "sample") {
-      const sample = await loadSample();
-      return {
-        status: "ok",
-        source: "sample",
-        index: sample.index,
-        indexUrl: null,
-        baseUrl: null,
-      };
     }
     const url = new URL("index.json", source.base);
     const result = await fetchFeedJson(
@@ -222,18 +179,8 @@ export function createVerificationLoader(options: VerificationLoaderOptions) {
     if (!Number.isSafeInteger(cycleDay) || cycleDay <= 0) {
       return { status: "not-found" };
     }
-    if (source.kind === "awaiting") {
-      return { status: "not-found" };
-    }
     if (source.kind === "invalid") {
       return { status: "error", reason: "config" };
-    }
-    if (source.kind === "sample") {
-      const sample = await loadSample();
-      const day = sample.days[cycleDay];
-      return day
-        ? { status: "ok", day, dayUrl: null }
-        : { status: "not-found" };
     }
     const url = new URL(`days/${cycleDay}.json`, source.base);
     const result = await fetchFeedJson(fetchImpl, url, revalidate);

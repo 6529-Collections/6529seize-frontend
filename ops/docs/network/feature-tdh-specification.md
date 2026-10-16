@@ -5,7 +5,7 @@ Parent: [Network Index](README.md)
 ## Overview
 
 `/network/tdh/specification` restates specification P26 (TDH-v1, rule
-version `tdh-v1.0`, as clarified on 15 October 2026 at commit `16d70d0`)
+version `tdh-v1.0`, at commit `f840096`, its latest change, October 16, 2026)
 section by section: each section in plain words beside the rule, either quoted
 (`Exact rule`) or P26's prose rules line for line (`Rule, line for line from
 P26`): log selection and positions, decoding, mints and sinks, header order,

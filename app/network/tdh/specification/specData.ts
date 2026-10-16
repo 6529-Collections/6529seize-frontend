@@ -75,12 +75,15 @@ export const SYMBOLS = [
   { symbol: "M = t_N", key: "M", section: "4.1" },
   { symbol: "B", key: "B", section: "4.2" },
   { symbol: "T = ts(B)", key: "T", section: "4.2" },
+  { symbol: "day_s", key: "day_s", section: "4.3" },
   { symbol: "days(a)", key: "days", section: "4.3" },
   { symbol: "n_memes", key: "nmemes", section: "5.1" },
   { symbol: "E[i]", key: "E", section: "5.2" },
   { symbol: "H", key: "H", section: "5.2" },
   { symbol: "G", key: "G", section: "5.3" },
   { symbol: "N_c", key: "Nc", section: "5.3" },
+  { symbol: "cluster(w)", key: "cluster", section: "6.3" },
+  { symbol: "stack", key: "stack", section: "7.1" },
   { symbol: "net(w)", key: "net", section: "7.1" },
   { symbol: "raw", key: "raw", section: "7.2" },
   { symbol: "base", key: "base", section: "7.2" },
@@ -90,6 +93,7 @@ export const SYMBOLS = [
   { symbol: "B64(x)", key: "B64", section: "1" },
   { symbol: "HALFUP(x)", key: "HALFUP", section: "1" },
   { symbol: "SINKS", key: "SINKS", section: "1" },
+  { symbol: "registry", key: "registry", section: "10" },
 ] as const;
 
 /** P26 §10, without the provenance column. */

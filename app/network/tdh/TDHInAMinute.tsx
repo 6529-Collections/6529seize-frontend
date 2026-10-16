@@ -57,7 +57,6 @@ function DaysPanel({ locale }: { readonly locale: SupportedLocale }) {
           className={`${CAPTION} tw-mt-2 tw-flex tw-justify-between tw-gap-2 tw-text-iron-300`}
         >
           <span>{t(locale, "network.tdh.explainer.minute.bought")}</span>
-          <span>{t(locale, "network.tdh.explainer.minute.daysBlocks")}</span>
           <span>{t(locale, "network.tdh.explainer.minute.today")}</span>
         </p>
       </div>

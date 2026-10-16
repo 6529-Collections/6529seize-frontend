@@ -9,6 +9,7 @@ import {
   TDH_CHIP_BUTTON,
   TDH_CHIP_OFF,
   TDH_CHIP_ON,
+  TDH_SELECT,
   TDH_TABLE,
   TDH_TABLE_FRAME,
   TDH_TD_STACK_MD,
@@ -45,10 +46,27 @@ export default function VectorBrowser({
       : VECTORS.filter((vector) => vector.topics.includes(value)).length;
   return (
     <div>
+      <label className="tw-flex tw-flex-col tw-gap-1.5 tw-text-sm tw-font-medium tw-text-iron-200 md:tw-hidden">
+        {t(locale, "network.tdh.impl.vectors.filterLabel")}
+        <select
+          value={filter}
+          onChange={(event) => setFilter(event.target.value as Filter)}
+          className={`${TDH_SELECT}`}
+        >
+          {(["all", ...VECTOR_TOPICS] as const).map((option) => (
+            <option key={option} value={option}>
+              {option === "all"
+                ? t(locale, "network.tdh.impl.vectors.all")
+                : topic(option)}{" "}
+              ({formatInteger(locale, count(option))})
+            </option>
+          ))}
+        </select>
+      </label>
       <div
         role="group"
         aria-label={t(locale, "network.tdh.impl.vectors.filterLabel")}
-        className="tw-flex tw-flex-wrap tw-gap-2"
+        className="tw-hidden tw-flex-wrap tw-gap-2 md:tw-flex"
       >
         {(["all", ...VECTOR_TOPICS] as const).map((option) => (
           <button
@@ -68,13 +86,13 @@ export default function VectorBrowser({
         ))}
       </div>
       <div className={`${TDH_TABLE_FRAME} tw-mt-4`}>
-        <table className={`${TDH_TABLE} tw-block md:tw-table`}>
-          <caption className="tw-sr-only" aria-live="polite">
-            {t(locale, "network.tdh.impl.vectors.caption", {
-              shown: formatInteger(locale, shown.length),
-              total: formatInteger(locale, matching.length),
-            })}
-          </caption>
+        <table
+          className={`${TDH_TABLE} tw-block md:tw-table`}
+          aria-label={t(locale, "network.tdh.impl.vectors.caption", {
+            shown: formatInteger(locale, shown.length),
+            total: formatInteger(locale, matching.length),
+          })}
+        >
           <thead className="tw-hidden md:tw-table-header-group">
             <tr>
               <th scope="col" className={TDH_TH}>
@@ -108,7 +126,7 @@ export default function VectorBrowser({
                     {vector.topics.map((value) => (
                       <span
                         key={value}
-                        className="tw-rounded-full tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-[11px] tw-text-iron-300"
+                        className="tw-rounded-full tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-xs tw-text-iron-300"
                       >
                         {topic(value)}
                       </span>

@@ -12,6 +12,34 @@ import { publicEnv } from "@/config/env";
 import { screen, within } from "@testing-library/react";
 import { renderWithQueryClient } from "../utils/reactQuery";
 import React from "react";
+import { PUBLIC_TDH_FEED_BASE } from "@/lib/tdh/verification/loadVerification.server";
+import {
+  PUBLIC_FEED_DAYS,
+  PUBLIC_FEED_INDEX,
+} from "../lib/tdh/verification/publicFeedFixture";
+
+// The overview reads 6529's public feed; serve its first published days.
+const realFetch = globalThis.fetch;
+beforeEach(() => {
+  globalThis.fetch = jest.fn(async (input: RequestInfo | URL) => {
+    const url = String(input);
+    const day = /days\/(\d+)\.json$/.exec(url)?.[1];
+    const body =
+      url === `${PUBLIC_TDH_FEED_BASE}index.json`
+        ? PUBLIC_FEED_INDEX
+        : day === undefined
+          ? undefined
+          : PUBLIC_FEED_DAYS[Number(day)];
+    return {
+      ok: body !== undefined,
+      status: body === undefined ? 403 : 200,
+      json: async () => body ?? { error: "AccessDenied" },
+    } as Response;
+  }) as unknown as typeof fetch;
+});
+afterAll(() => {
+  globalThis.fetch = realFetch;
+});
 
 // ✅ Mock next/navigation
 jest.mock("next/navigation", () => ({
@@ -93,8 +121,9 @@ describe("network pages render", () => {
       )
     ).toHaveAttribute("href", "/network/tdh#glossary");
     expect(
-      screen.getByText(/can weight your votes in waves that vote with TDH/)
+      screen.getByText(/It counts toward your Level on 6529.io/)
     ).toBeInTheDocument();
+    expect(screen.queryByText(/votes in waves/)).not.toBeInTheDocument();
   });
 
   it("links the step-by-step calculation and shows the checked-daily section", async () => {
@@ -116,13 +145,28 @@ describe("network pages render", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /10,282 of 10,282 collectors equal between the Rust core and 6529.io/
+        /October 15, 2026: 10,282 of 10,282 collectors equal between the Rust core and 6529.io/
       )
     ).toBeInTheDocument();
     expect(
+      screen.getByText("collectors equal, Rust core and 6529.io")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("total TDH, the same in all three")
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("Not yet fully checked").length).toBeGreaterThan(
+      0
+    );
+    expect(screen.queryByText(/sample/i)).not.toBeInTheDocument();
+    expect(
       screen.getByRole("link", { name: /Checked daily in public: on/ })
     ).toHaveAttribute("href", "/network/tdh/verification");
-    expect(screen.getByText(/61 conformance vectors/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/tested against the specification’s conformance vectors/)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/cannot change any copy’s acquisition record/)
+    ).toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { name: "The exact calculation has moved" })
     ).not.toBeInTheDocument();

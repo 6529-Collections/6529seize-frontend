@@ -42,11 +42,17 @@ describe("TDHConsolidationDesignPage", () => {
     const meshRow = within(matrix).getByRole("row", {
       name: /Every pair links both ways/,
     });
+    // Each value is labelled with its column for the phone layout.
     expect(
       within(meshRow)
         .getAllByRole("cell")
         .map((cell) => cell.textContent)
-    ).toEqual(["No", "No", "No", "Yes"]);
+    ).toEqual([
+      "Attacker controls 0 of your walletsNo",
+      "Attacker controls 1 of your walletsNo",
+      "Attacker controls 2 of your walletsNo",
+      "Attacker controls 3 of your walletsYes",
+    ]);
 
     expect(
       screen.getByRole("button", { name: "D signs last" })

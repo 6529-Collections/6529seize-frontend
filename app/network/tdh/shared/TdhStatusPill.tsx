@@ -21,7 +21,7 @@ export type TdhPill =
   | "deferred"
   | "unverified"
   | "bundled"
-  | "sample"
+  | "toBePublished"
   | "unchecked"
   | "checked"
   | "openQuestion"
@@ -46,7 +46,7 @@ const PILL_TONE: Record<TdhPill, PillTone> = {
   deferred: "neutral",
   unverified: "warning",
   bundled: "neutral",
-  sample: "warning",
+  toBePublished: "neutral",
   unchecked: "warning",
   checked: "success",
   openQuestion: "warning",

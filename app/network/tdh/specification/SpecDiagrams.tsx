@@ -35,8 +35,8 @@ function Across() {
       aria-hidden="true"
       className="tw-flex tw-items-center tw-justify-center tw-text-iron-400"
     >
-      <ArrowDownIcon className="tw-size-4 md:tw-hidden" />
-      <ArrowRightIcon className="tw-hidden tw-size-4 md:tw-block" />
+      <ArrowDownIcon className="tw-size-4 xl:tw-hidden" />
+      <ArrowRightIcon className="tw-hidden tw-size-4 xl:tw-block" />
     </span>
   );
 }
@@ -54,14 +54,14 @@ export function SectionMap({ locale }: { readonly locale: SupportedLocale }) {
         {t(locale, "network.tdh.spec.mapTitle")}
       </figcaption>
       <p className="tw-sr-only">{t(locale, "network.tdh.spec.mapDesc")}</p>
-      <div className="tw-grid tw-gap-2 md:tw-grid-cols-[minmax(0,1fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1.25fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1fr)] md:tw-items-center md:tw-gap-x-1.5 md:tw-gap-y-2">
+      <div className="tw-grid tw-max-w-md tw-gap-2 xl:tw-max-w-none xl:tw-grid-cols-[minmax(0,1fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1.25fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1fr)] xl:tw-items-center xl:tw-gap-x-1.5 xl:tw-gap-y-2">
         <MapNode locale={locale} section={2} />
         <Across />
         <MapNode locale={locale} section={3} />
         <Across />
         <MapNode locale={locale} section={4} />
         <Across />
-        <div className="tw-grid tw-grid-cols-2 tw-gap-2 md:tw-grid-cols-1">
+        <div className="tw-grid tw-grid-cols-2 tw-gap-2 xl:tw-grid-cols-1">
           <MapNode locale={locale} section={5} />
           <MapNode locale={locale} section={6} />
         </div>
@@ -71,10 +71,10 @@ export function SectionMap({ locale }: { readonly locale: SupportedLocale }) {
         <MapNode locale={locale} section={8} />
         <Across />
         <MapNode locale={locale} section={9} />
-        <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-1 md:tw-col-start-7 md:tw-col-end-12 md:tw-mt-0">
+        <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-1 xl:tw-col-start-7 xl:tw-col-end-12 xl:tw-mt-0">
           <span
             aria-hidden="true"
-            className="tw-hidden tw-h-3 tw-border-0 tw-border-x tw-border-t tw-border-dashed tw-border-iron-500 md:tw-block"
+            className="tw-hidden tw-h-3 tw-border-0 tw-border-x tw-border-t tw-border-dashed tw-border-iron-500 xl:tw-block"
           />
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
             <MapNode locale={locale} section={10} dashed />
@@ -182,7 +182,7 @@ export function PairStateMachine({
           x="192"
           y="52"
           textAnchor="middle"
-          className="tw-fill-iron-300 tw-font-mono tw-text-[12px]"
+          className="tw-fill-iron-300 tw-font-mono tw-text-[13px]"
         >
           REGISTER(a,b)
         </text>
@@ -197,7 +197,7 @@ export function PairStateMachine({
           x="192"
           y="126"
           textAnchor="middle"
-          className="tw-fill-iron-300 tw-font-mono tw-text-[12px]"
+          className="tw-fill-iron-300 tw-font-mono tw-text-[13px]"
         >
           REVOKE(a,b)
         </text>
@@ -212,7 +212,7 @@ export function PairStateMachine({
           x="407"
           y="52"
           textAnchor="middle"
-          className="tw-fill-iron-300 tw-font-mono tw-text-[12px]"
+          className="tw-fill-iron-300 tw-font-mono tw-text-[13px]"
         >
           REGISTER(b,a)
         </text>
@@ -227,7 +227,7 @@ export function PairStateMachine({
           x="407"
           y="126"
           textAnchor="middle"
-          className="tw-fill-iron-300 tw-font-mono tw-text-[12px]"
+          className="tw-fill-iron-300 tw-font-mono tw-text-[13px]"
         >
           REVOKE
         </text>
@@ -243,7 +243,7 @@ export function PairStateMachine({
           x="525"
           y="14"
           textAnchor="middle"
-          className="tw-fill-iron-400 tw-font-mono tw-text-[12px]"
+          className="tw-fill-iron-400 tw-font-mono tw-text-[13px]"
         >
           REGISTER · refresh
         </text>

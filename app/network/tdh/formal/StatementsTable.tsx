@@ -120,7 +120,7 @@ function ManifestEntries({
                 {entryEvidence(locale, entry)}
               </span>
               {place && (
-                <span className="tw-font-mono tw-text-[11px] tw-text-iron-500">
+                <span className="tw-font-mono tw-text-xs tw-text-iron-500">
                   {place}
                 </span>
               )}
@@ -165,7 +165,10 @@ export default function StatementsTable({
     (row) => filter === "all" || statusOf(row) === filter
   );
   const text = (row: LeanStatement, part: "title" | "plain" | "scope") =>
-    t(locale, `network.tdh.formal.st.${row.id}.${part}` as MessageKey);
+    t(
+      locale,
+      `network.tdh.formal.st.${row.copy ?? row.id}.${part}` as MessageKey
+    );
 
   return (
     <div>
@@ -201,14 +204,11 @@ export default function StatementsTable({
       <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07]">
         <table
           className={`${TDH_TABLE} tw-block md:tw-table md:tw-table-fixed`}
+          aria-label={`${t(locale, "network.tdh.formal.statements.caption", {
+            shown: formatInteger(locale, shown.length),
+            total: formatInteger(locale, rows.length),
+          })} ${caption}`}
         >
-          <caption className="tw-sr-only">
-            {t(locale, "network.tdh.formal.statements.caption", {
-              shown: formatInteger(locale, shown.length),
-              total: formatInteger(locale, rows.length),
-            })}
-            {` ${caption}`}
-          </caption>
           <thead className="tw-hidden md:tw-table-header-group">
             <tr>
               <th scope="col" className={`${TDH_TH} tw-w-[28%]`}>
@@ -252,7 +252,7 @@ export default function StatementsTable({
                         />
                         {title}
                       </button>
-                      <span className="tw-block tw-pl-6 tw-font-mono tw-text-[11px] tw-font-normal tw-text-iron-400">
+                      <span className="tw-block tw-pl-6 tw-font-mono tw-text-xs tw-font-normal tw-text-iron-400">
                         {row.refs.join(" · ")}
                       </span>
                     </th>
@@ -295,10 +295,9 @@ export default function StatementsTable({
                           )}
                         {row.lean && (
                           <pre
-                            tabIndex={0}
                             role="region"
                             aria-label={`${t(locale, "network.tdh.formal.statements.lean")}: ${title}`}
-                            className={`tw-m-0 tw-overflow-x-auto tw-whitespace-pre tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-p-3 tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-100 ${TDH_FOCUS_RING}`}
+                            className={`tw-m-0 tw-whitespace-pre-wrap tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-p-3 tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-100 [overflow-wrap:anywhere]`}
                           >
                             <code className="tw-font-mono tw-text-iron-100">
                               {row.lean}

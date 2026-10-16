@@ -39,6 +39,8 @@ export default function RateExplorer({
     note = t(locale, "network.tdh.how.rate.thresholdNote");
   } else if (floorApplied) {
     note = t(locale, "network.tdh.how.rate.floorNote");
+  } else if (claim > 0) {
+    note = t(locale, "network.tdh.how.rate.claimBelowNote");
   } else {
     note = t(locale, "network.tdh.how.rate.noFloorNote");
   }

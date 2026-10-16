@@ -1,6 +1,8 @@
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { VerificationDay } from "@/lib/tdh/verification/schema";
+import TdhHeading from "../../shared/TdhHeading";
+import TdhStatusPill from "../../shared/TdhStatusPill";
 import TdhRuleBlock from "../../shared/TdhRuleBlock";
 import { TDH_CARD, TDH_LINK } from "../../shared/tdhStyles";
 import { arweaveTransactionUrl, etherscanBlockUrl } from "./verificationLinks";
@@ -26,12 +28,10 @@ const STEP = "tw-pl-1";
  */
 export default function VerificationCheck({
   locale,
-  isSample,
   day,
   cycleDay,
 }: {
   readonly locale: SupportedLocale;
-  readonly isSample: boolean;
   readonly day: VerificationDay | null;
   readonly cycleDay: number;
 }) {
@@ -41,18 +41,22 @@ export default function VerificationCheck({
     .trim();
   const cutoffBlock = day?.cutoffBlock ?? null;
   return (
-    <section aria-labelledby="tdh-verify-check-heading" className="tw-mt-12">
-      <h2
-        id="tdh-verify-check-heading"
-        className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
-      >
-        {t(locale, "network.tdh.verify.check.heading")}
-      </h2>
+    <section
+      id="check"
+      aria-labelledby="check-heading"
+      className="tw-mt-12 tw-scroll-mt-24"
+    >
+      <TdhHeading
+        id="check"
+        title={t(locale, "network.tdh.verify.check.heading")}
+        locale={locale}
+        className="tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
+      />
       <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
         {t(locale, "network.tdh.verify.check.intro")}
       </p>
-      <div className="tw-mt-4 tw-grid tw-gap-4 lg:tw-grid-cols-2">
-        <div className={`${TDH_CARD} tw-p-5 sm:tw-p-6`}>
+      <div className="tw-mt-4 tw-grid tw-grid-cols-[minmax(0,1fr)] tw-items-start tw-gap-4 lg:tw-grid-cols-2">
+        <div className={`${TDH_CARD} tw-min-w-0 tw-p-5 sm:tw-p-6`}>
           <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">
             {t(locale, "network.tdh.verify.check.today")}
           </h3>
@@ -64,7 +68,7 @@ export default function VerificationCheck({
                   {" "}
                   <a
                     href={arweaveTransactionUrl(identityUpload)}
-                    className={`${TDH_LINK} tw-whitespace-nowrap`}
+                    className={`${TDH_LINK} tw-break-words`}
                     rel="noopener noreferrer"
                     target="_blank"
                   >
@@ -82,7 +86,7 @@ export default function VerificationCheck({
                   {" "}
                   <a
                     href={etherscanBlockUrl(cutoffBlock)}
-                    className={`${TDH_LINK} tw-whitespace-nowrap`}
+                    className={`${TDH_LINK} tw-break-words`}
                     rel="noopener noreferrer"
                     target="_blank"
                   >
@@ -94,12 +98,7 @@ export default function VerificationCheck({
               )}
             </li>
             <li className={STEP}>
-              {t(
-                locale,
-                isSample
-                  ? "network.tdh.verify.check.fileSample"
-                  : "network.tdh.verify.check.file"
-              )}
+              {t(locale, "network.tdh.verify.check.file")}
             </li>
           </ol>
           <p className="tw-m-0 tw-mt-4 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4 tw-text-sm tw-leading-6 tw-text-iron-400">
@@ -109,9 +108,7 @@ export default function VerificationCheck({
         <div className={`${TDH_CARD} tw-min-w-0 tw-p-5 sm:tw-p-6`}>
           <h3 className="tw-m-0 tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-lg tw-font-semibold tw-text-iron-50">
             {t(locale, "network.tdh.verify.check.source")}
-            <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-dashed tw-border-iron-600 tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-normal tw-text-iron-300">
-              {t(locale, "network.tdh.shared.sourceToBePublished")}
-            </span>
+            <TdhStatusPill pill="toBePublished" locale={locale} size="sm" />
           </h3>
           <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, "network.tdh.verify.check.sourceBody")}

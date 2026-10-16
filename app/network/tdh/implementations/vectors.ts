@@ -1,9 +1,10 @@
 /**
- * The 61 conformance vectors of P26 §13 (01 to 60, and 12b, as of 6529chain
- * 16d70d0) and their topics. Vectors 01-18 have hand-derived expected values
- * (18 updated for D131); 19-60 were generated with the Python reference and
- * their derivations checked by hand. 51-60 are the input rules made explicit
- * on 15 October 2026.
+ * The 89 conformance vectors of P26 §13 (01 to 88, and 12b, as of 6529chain
+ * f840096) and their topics. Vectors 01-18 have hand-derived expected values
+ * (18 updated for D131); 19-88 were generated with the Python reference and
+ * their derivations checked by hand. 51-74 are the input rules made explicit
+ * on 15 October 2026, in P26's second, third and fourth rounds that day;
+ * 75-88 the input types settled in its fifth round, on 16 October.
  */
 export const VECTOR_TOPICS = [
   "holdings",
@@ -105,13 +106,95 @@ export const VECTORS: ReadonlyArray<{
   { id: "58-invalid-balance-range", topics: ["holdings", "noResult"] },
   { id: "59-registry-overrides", topics: ["parameters"] },
   { id: "60-invalid-registry", topics: ["parameters", "noResult"] },
+  {
+    id: "61-invalid-log-stamped-at-cutoff",
+    topics: ["snapshot", "noResult"],
+  },
+  {
+    id: "62-invalid-cutoff-block-timestamp",
+    topics: ["snapshot", "noResult"],
+  },
+  {
+    id: "63-invalid-transfer-at-ignored-log",
+    topics: ["decoding", "noResult"],
+  },
+  { id: "64-invalid-ignored-log-order", topics: ["order", "noResult"] },
+  { id: "65-registry-lists", topics: ["parameters", "consolidation"] },
+  {
+    id: "66-invalid-registry-list-order",
+    topics: ["parameters", "noResult"],
+  },
+  { id: "67-removed-logs", topics: ["decoding"] },
+  {
+    id: "68-invalid-registry-out-of-type",
+    topics: ["parameters", "noResult"],
+  },
+  {
+    id: "69-invalid-removed-not-boolean",
+    topics: ["decoding", "noResult"],
+  },
+  {
+    id: "70-invalid-day-s-out-of-type",
+    topics: ["parameters", "noResult"],
+  },
+  {
+    id: "71-invalid-timestamp-out-of-range",
+    topics: ["snapshot", "noResult"],
+  },
+  {
+    id: "72-invalid-transfer-at-raw-transfer-log",
+    topics: ["decoding", "noResult"],
+  },
+  { id: "73-registry-uint256", topics: ["parameters"] },
+  { id: "74-cutoff-dates-and-top-block", topics: ["snapshot"] },
+  { id: "75-invalid-day-s-uint32", topics: ["parameters", "noResult"] },
+  { id: "76-amounts-after-cutoff", topics: ["decoding", "snapshot"] },
+  {
+    id: "77-invalid-amount-out-of-type",
+    topics: ["decoding", "noResult"],
+  },
+  {
+    id: "78-invalid-timestamp-with-empty-raw-logs",
+    topics: ["snapshot", "noResult"],
+  },
+  {
+    id: "79-invalid-timestamp-without-raw-logs",
+    topics: ["snapshot", "noResult"],
+  },
+  { id: "80-invalid-negative-zero", topics: ["decoding", "noResult"] },
+  { id: "81-invalid-token-id-string", topics: ["decoding", "noResult"] },
+  {
+    id: "82-invalid-timestamps-key-leading-zero",
+    topics: ["snapshot", "noResult"],
+  },
+  {
+    id: "83-invalid-claim-max-out-of-type",
+    topics: ["editions", "noResult"],
+  },
+  {
+    id: "84-invalid-claim-max-key-leading-zero",
+    topics: ["editions", "noResult"],
+  },
+  {
+    id: "85-invalid-transfers-at-one-position-recipient",
+    topics: ["order", "noResult"],
+  },
+  {
+    id: "86-invalid-transfers-at-one-position-sender",
+    topics: ["order", "noResult"],
+  },
+  {
+    id: "87-invalid-transfers-at-one-position-contract",
+    topics: ["order", "noResult"],
+  },
+  { id: "88-cutoff-header-keys", topics: ["snapshot"] },
 ];
 
 /** Where the vector set is pinned: 6529chain's git tree of the directory. */
 export const VECTOR_SET = {
-  specCommit: "16d70d0",
+  specCommit: "f840096",
   path: "design/tdh-reference/vectors",
-  tree: "49f66cad67ec52efb0ef2ca7123c5c1e5510e690",
+  tree: "086e5ffbabc6758365eaaaf33db3c68dfbb8e22d",
 } as const;
 
 export const VECTOR_COUNT = VECTORS.length;
