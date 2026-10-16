@@ -232,7 +232,7 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     );
     expect(
       await guidance
-        .locator("p")
+        .getByRole("paragraph")
         .last()
         .evaluate((element) =>
           Number.parseFloat(getComputedStyle(element).lineHeight)

@@ -339,11 +339,11 @@ export default function CreateWaveInlineGroupXtdhGrant({
                   onClick={onResetFilters}
                   className="tw-min-h-8 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-py-1.5 tw-text-xxs tw-font-medium tw-text-rose-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-rose-400 desktop-hover:hover:tw-text-rose-300"
                 >
-                  Clear filters
+                  {t(locale, "waves.create.groups.xtdhGrant.clearFilters")}
                 </button>
               ) : (
                 <Button variant="tertiary" size="md" onClick={onResetFilters}>
-                  Clear filters
+                  {t(locale, "waves.create.groups.xtdhGrant.clearFilters")}
                 </Button>
               ))}
           </div>
