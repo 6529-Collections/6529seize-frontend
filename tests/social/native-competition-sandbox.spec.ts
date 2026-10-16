@@ -33,12 +33,12 @@ async function swipeVertically(page: Page, target: Locator, distance: number) {
   try {
     await touch.send("Input.dispatchTouchEvent", {
       type: "touchStart",
-      touchPoints: [{ x, y }],
+      touchPoints: [{ x, y, id: 1 }],
     });
     for (const fraction of [0.2, 0.5, 0.8, 1]) {
       await touch.send("Input.dispatchTouchEvent", {
         type: "touchMove",
-        touchPoints: [{ x, y: y + distance * fraction }],
+        touchPoints: [{ x, y: y + distance * fraction, id: 1 }],
       });
     }
     await touch.send("Input.dispatchTouchEvent", {
@@ -1340,7 +1340,8 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(
         dialog.getByRole("heading", { name: "Chat", exact: true })
       ).toBeVisible();
-      const content = dialog
+      const content = page
+        .getByRole("dialog")
         .locator(".tw-overflow-y-auto")
         .filter({
           has: page.getByRole("heading", { name: "Chat", exact: true }),
@@ -3795,6 +3796,239 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       fullPage: true,
     });
   });
+
+  test("keeps Configuration editors inside the tablet information panel", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-mobile-chromium",
+      "Tablet touch coverage."
+    );
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await installCompetitionApi(page);
+    await page.goto(`/waves/${WAVE}?tab=chat`);
+    await openWaveInformation(page);
+    const panel = page.getByRole("dialog");
+    const configuration = panel.getByRole("tab", {
+      name: "Configuration",
+      exact: true,
+    });
+    await configuration.click();
+    for (const label of [
+      "Edit links",
+      "Edit Visibility access",
+      "Edit Chat access",
+      "Edit Admins access",
+    ]) {
+      const trigger = panel.getByRole("button", { name: label, exact: true });
+      await trigger.click();
+      await expect(panel).toHaveCount(1);
+      await expect(panel).toHaveAccessibleName(label);
+      await expect(configuration).toBeHidden();
+      await panel
+        .getByRole("button", {
+          name: label === "Edit links" ? "Save" : "Save changes",
+          exact: true,
+        })
+        .click({ trial: true });
+      await page.screenshot({
+        path: testInfo.outputPath(`tablet-${label.split(" ")[1]}.png`),
+      });
+      if (label === "Edit Admins access") await page.keyboard.press("Escape");
+      else
+        await panel.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(trigger).toBeFocused();
+      await expect(configuration).toHaveAttribute("aria-selected", "true");
+      await expectNoHorizontalOverflow(page);
+    }
+    await panel
+      .getByRole("button", { name: "Edit links", exact: true })
+      .click();
+    await panel
+      .getByRole("button", { name: "Close wave details", exact: true })
+      .click();
+    await expect(panel).toHaveCount(0);
+    await openWaveInformation(page);
+    await expect(configuration).toBeVisible();
+  });
+
+  for (const surface of ["web", "ios", "android"] as const) {
+    test(`edits Configuration inside the ${surface} Wave sheet and returns with Back`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      test.skip(
+        testInfo.project.name !== "web-mobile-chromium",
+        "Touch sheet coverage."
+      );
+      if (surface !== "web")
+        await installSurfaceSimulation(
+          page.context(),
+          surface === "ios" ? "capacitor-ios-sim" : "capacitor-android-sim",
+          baseURL
+        );
+      await installCompetitionApi(page);
+      const response = await page.request.get(
+        `${getSandboxApiOrigin(baseURL)}/api/waves/${WAVE}`
+      );
+      const wave = await response.json();
+      wave.chat.links_disabled = false;
+      wave.visibility.scope.group = {
+        id: composerSandboxConstants.previewGroupId,
+        name: "Active collectors",
+        is_hidden: false,
+      };
+      let failSave = true;
+      let writes = 0;
+      await page.route(`**/api/waves/${WAVE}`, async (route) => {
+        if (route.request().method() === "POST") {
+          writes++;
+          if (failSave)
+            return route.fulfill({
+              status: 500,
+              json: { error: "Sandbox save failed" },
+            });
+          wave.chat = { ...wave.chat, ...route.request().postDataJSON().chat };
+        }
+        await route.fulfill({ json: wave });
+      });
+      await page.goto(`/waves/${WAVE}?tab=chat`);
+      await openWaveInformation(page);
+      const sheet = page.getByRole("dialog");
+      await sheet
+        .getByRole("tab", { name: "Configuration", exact: true })
+        .click();
+      const links = sheet.getByRole("button", {
+        name: "Edit links",
+        exact: true,
+      });
+      await links.scrollIntoViewIfNeeded();
+      const row = sheet
+        .getByRole("button", { name: "Edit links", exact: true })
+        .locator("..");
+      const labelBox = await row
+        .getByText("Links", { exact: true })
+        .boundingBox();
+      const iconBox = await sheet
+        .getByRole("button", { name: "Edit links", exact: true })
+        .locator("svg")
+        .boundingBox();
+      expect(labelBox).not.toBeNull();
+      expect(iconBox).not.toBeNull();
+      expect(
+        Math.abs(
+          labelBox!.y + labelBox!.height / 2 - iconBox!.y - iconBox!.height / 2
+        )
+      ).toBeLessThanOrEqual(1);
+      const originalUrl = page.url();
+      await page.screenshot({
+        path: testInfo.outputPath(`configuration-${surface}.png`),
+      });
+
+      await links.click();
+      await expect(sheet).toHaveCount(1);
+      await expect(sheet).toHaveAccessibleName("Edit links");
+      await expect(
+        sheet.getByRole("button", { name: "Back", exact: true })
+      ).toBeVisible();
+      const checkbox = sheet.getByRole("checkbox", {
+        name: "Disable links",
+        exact: true,
+      });
+      await checkbox.check();
+      await sheet.getByRole("button", { name: "Cancel", exact: true }).click();
+      await expect(links).toBeFocused();
+      expect(writes).toBe(0);
+      await expect(
+        sheet.getByRole("tab", { name: "Configuration", exact: true })
+      ).toHaveAttribute("aria-selected", "true");
+      await links.click();
+      await expect(checkbox).not.toBeChecked();
+      await checkbox.check();
+      await sheet.getByRole("button", { name: "Save", exact: true }).click();
+      await expect(
+        page.getByText("Couldn't save these wave settings.", { exact: true })
+      ).toBeVisible();
+      await expect(checkbox).toBeChecked();
+      await expect(sheet).toHaveAccessibleName("Edit links");
+      failSave = false;
+      await sheet.getByRole("button", { name: "Save", exact: true }).click();
+      await expect(links).toBeFocused();
+      await expect(row.getByText("Disabled", { exact: true })).toBeVisible();
+      expect(writes).toBe(2);
+
+      for (const label of [
+        "Edit Visibility access",
+        "Edit Chat access",
+        "Edit Admins access",
+      ]) {
+        const trigger = sheet.getByRole("button", { name: label, exact: true });
+        await trigger.click();
+        await expect(sheet).toHaveCount(1);
+        await expect(sheet).toHaveAccessibleName(label);
+        await expect(
+          sheet.getByRole("button", { name: "Back", exact: true })
+        ).toBeVisible();
+        await expect(
+          sheet.getByRole("button", { name: "Save changes", exact: true })
+        ).toBeVisible();
+        await expectNoHorizontalOverflow(page);
+        if (label === "Edit Visibility access") {
+          await sheet
+            .getByRole("button", { name: "Make wave public", exact: true })
+            .click();
+          const confirmation = page.getByRole("dialog", {
+            name: "Make wave public?",
+            exact: true,
+          });
+          await expect(
+            confirmation.getByRole("heading", {
+              name: "Make wave public?",
+              exact: true,
+            })
+          ).toBeVisible();
+          await confirmation
+            .getByRole("button", { name: "Make public", exact: true })
+            .click({ trial: true });
+          await confirmation
+            .getByRole("button", { name: "Cancel", exact: true })
+            .click();
+          await expect(confirmation).toHaveCount(0);
+          await expect(sheet).toHaveCount(1);
+          await expect(sheet).toHaveAccessibleName(label);
+        }
+        await page.screenshot({
+          path: testInfo.outputPath(
+            `configuration-${surface}-${label.split(" ")[1]}.png`
+          ),
+        });
+        if (label === "Edit Chat access") await page.goBack();
+        else if (label === "Edit Admins access")
+          await page.keyboard.press("Escape");
+        else
+          await sheet
+            .getByRole("button", { name: "Back", exact: true })
+            .click();
+        await expect(trigger).toBeFocused();
+        await expect(
+          sheet.getByRole("tab", { name: "Configuration", exact: true })
+        ).toHaveAttribute("aria-selected", "true");
+        await expect(page).toHaveURL(originalUrl);
+      }
+      expect(writes).toBe(2);
+      await links.click();
+      await swipeVertically(
+        page,
+        sheet.getByTestId("mobile-dialog-header"),
+        90
+      );
+      await expect(sheet).toHaveCount(0);
+      await expect(page).toHaveURL(originalUrl);
+      await expect
+        .poll(() => page.evaluate(() => window.history.state?.waveInformation))
+        .toBeUndefined();
+    });
+  }
 
   test("keeps wave Configuration in the information panel and competition appearance in Settings", async ({
     page,

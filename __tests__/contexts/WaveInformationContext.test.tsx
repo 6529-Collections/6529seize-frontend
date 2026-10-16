@@ -35,9 +35,21 @@ function Harness() {
       {information.request && (
         <div role="dialog">
           <button onClick={information.close}>Close</button>
-          <button onClick={information.openNotifications}>
+          <button
+            onClick={() =>
+              information.openSubview("notifications", "Notification settings")
+            }
+          >
             Open notifications
           </button>
+          <button
+            onClick={() =>
+              information.openSubview("links-editor", "Edit links")
+            }
+          >
+            Open configuration editor
+          </button>
+          <span>{information.request.viewTitle}</span>
           {information.request.view === "notifications" && (
             <>
               <span>Notification view</span>
@@ -272,6 +284,32 @@ it("Close removes both notification and About entries without leaving a phantom 
     expect(window.history.state).toEqual({ original: "kept" })
   );
   expect(window.location.pathname).toBe("/waves/wave");
+});
+
+it("restores a configuration editor and its title with Forward, then closes both entries", async () => {
+  window.history.replaceState({ original: "kept" }, "", "/waves/wave");
+  render(
+    <WaveInformationProvider>
+      <Harness />
+    </WaveInformationProvider>
+  );
+  fireEvent.click(screen.getByText("Open mobile information"));
+  fireEvent.click(screen.getByText("Open configuration editor"));
+  expect(screen.getByText("Edit links")).toBeVisible();
+  const length = window.history.length;
+  fireEvent.click(screen.getByText("Open notifications"));
+  expect(window.history.length).toBe(length);
+  expect(screen.queryByText("Notification view")).toBeNull();
+  window.history.back();
+  await waitFor(() => expect(screen.queryByText("Edit links")).toBeNull());
+  expect(screen.getByRole("dialog")).toBeVisible();
+  window.history.forward();
+  await waitFor(() => expect(screen.getByText("Edit links")).toBeVisible());
+  fireEvent.click(screen.getByText("Close"));
+  await waitFor(() =>
+    expect(window.history.state).toEqual({ original: "kept" })
+  );
+  expect(screen.queryByRole("dialog")).toBeNull();
 });
 
 it("recovers when route navigation interrupts a pending sheet traversal", () => {

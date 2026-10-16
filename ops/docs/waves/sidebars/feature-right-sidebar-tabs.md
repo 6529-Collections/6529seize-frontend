@@ -33,6 +33,15 @@ pinned drop with its content and media. Eligible viewers can add or edit REP.
   curation management, chat history deletion and personal display preferences.
 - Shared changes use administrator gear controls. Personal controls retain their
   own authentication requirements.
+- On mobile, configuration gears open their editor inside the information
+  panel. Links, chat settings, visibility and administrator access share the
+  same Back and Close controls. Back (including browser Back or Escape) returns
+  to Configuration without submitting changes; Save returns after a successful update.
+  Failed saves keep the editor open for retry. Configuration keeps its selected
+  tab and scroll position. Close or a downward header swipe dismisses the whole
+  panel.
+- On tablet-sized layouts, the overlay side panel also keeps these editors
+  inside the panel. Back or Escape returns to the selected information tab.
 - Competition access, rules, appearance and pauses belong to **Settings** in the
   main row. Voter lists and vote activity belong to **Votes**.
 - Information tabs support ArrowLeft, ArrowRight, Home and End. Mobile confines

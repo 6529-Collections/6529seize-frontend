@@ -17,17 +17,19 @@ interface WaveInformationRequest {
   readonly overlay: boolean;
   readonly id: string;
   readonly route: string;
-  readonly view: "about" | "notifications";
+  readonly view: string;
+  readonly viewTitle?: string;
 }
 interface WaveInformationHistoryState {
   readonly waveInformation?: unknown;
   readonly waveInformationView?: unknown;
+  readonly waveInformationViewTitle?: unknown;
 }
 interface WaveInformationState {
   readonly request: WaveInformationRequest | null;
   readonly open: (waveId: string, overlay?: boolean) => void;
   readonly close: () => void;
-  readonly openNotifications: () => void;
+  readonly openSubview: (view: string, title: string) => void;
   readonly back: () => void;
   readonly registerDesktopHandler: (
     handler: (waveId: string) => void
@@ -91,28 +93,37 @@ export function WaveInformationProvider({
     },
     [route]
   );
-  const openNotifications = useCallback(() => {
-    if (!request?.overlay || traversing.current) return;
-    const state = window.history.state as WaveInformationHistoryState | null;
-    if (
-      state?.waveInformation !== request.id ||
-      state.waveInformationView === "notifications"
-    )
-      return;
-    window.history.pushState(
-      { ...state, waveInformationView: "notifications" },
-      "",
-      window.location.href
-    );
-    setStoredRequest({ ...request, view: "notifications" });
-  }, [request]);
+  const openSubview = useCallback(
+    (view: string, title: string) => {
+      if (!request?.overlay || traversing.current) return;
+      const state = window.history.state as WaveInformationHistoryState | null;
+      if (
+        state?.waveInformation !== request.id ||
+        state.waveInformationView !== "about" ||
+        view === "about"
+      )
+        return;
+      window.history.pushState(
+        {
+          ...state,
+          waveInformationView: view,
+          waveInformationViewTitle: title,
+        },
+        "",
+        window.location.href
+      );
+      setStoredRequest({ ...request, view, viewTitle: title });
+    },
+    [request]
+  );
   const back = useCallback(() => {
     const state = window.history.state as WaveInformationHistoryState | null;
     if (
       traversing.current ||
       !request?.overlay ||
       state?.waveInformation !== request.id ||
-      state.waveInformationView !== "notifications"
+      request.view === "about" ||
+      state.waveInformationView !== request.view
     )
       return;
     traversing.current = true;
@@ -124,9 +135,7 @@ export function WaveInformationProvider({
     if (request?.overlay && state?.waveInformation === request.id) {
       traversing.current = true;
       // Close dismisses the whole sheet, including its optional subview entry.
-      window.history.go(
-        state.waveInformationView === "notifications" ? -2 : -1
-      );
+      window.history.go(state.waveInformationView !== "about" ? -2 : -1);
     }
     setStoredRequest(null);
   }, [request]);
@@ -165,6 +174,10 @@ export function WaveInformationProvider({
             stateWithoutInformation,
             "waveInformationView"
           );
+          Reflect.deleteProperty(
+            stateWithoutInformation,
+            "waveInformationViewTitle"
+          );
           nextState = stateWithoutInformation;
         }
         originalReplace(nextState, unused, url);
@@ -184,15 +197,20 @@ export function WaveInformationProvider({
       const state = event.state as {
         waveInformation?: unknown;
         waveInformationView?: unknown;
+        waveInformationViewTitle?: unknown;
       } | null;
       setStoredRequest((current) =>
         current && state?.waveInformation === current.id
           ? {
               ...current,
               view:
-                state.waveInformationView === "notifications"
-                  ? "notifications"
+                typeof state.waveInformationView === "string"
+                  ? state.waveInformationView
                   : "about",
+              viewTitle:
+                typeof state.waveInformationViewTitle === "string"
+                  ? state.waveInformationViewTitle
+                  : "",
             }
           : null
       );
@@ -205,11 +223,11 @@ export function WaveInformationProvider({
       request,
       open,
       close,
-      openNotifications,
+      openSubview,
       back,
       registerDesktopHandler,
     }),
-    [request, open, close, openNotifications, back, registerDesktopHandler]
+    [request, open, close, openSubview, back, registerDesktopHandler]
   );
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }

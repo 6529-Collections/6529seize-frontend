@@ -3432,6 +3432,8 @@
         "Voter lists and vote activity are available in Votes, under All votes and Activity. Both follow the chosen competition; they are absent from the information panel.",
         "On mobile, selecting the wave name opens a dismissible information panel containing About, REP and Configuration. About includes the pinned drop.",
         "Swipe down from the mobile information panel's handle or header, select Close, tap outside, press Escape, or use Back to return to the original competition, tab, curation and scroll position. The underlying view stays mounted. Scrolling the panel content does not dismiss it; short or canceled header drags return it to its open position.",
+        "On mobile, Configuration gear controls open editors inside the information panel. Back, browser Back or Escape returns to Configuration without submitting changes; Save returns after a successful update. Failed saves keep the editor open for retry. Configuration retains its selected tab and scroll position. Close or a downward header swipe dismisses the whole panel.",
+        "On tablet-sized layouts, the overlay side panel also keeps these editors inside the panel. Back or Escape returns to the selected information tab.",
         "Selecting a section switches information for the active wave without navigating away from the thread."
       ],
       "canonical_path": "/waves",
