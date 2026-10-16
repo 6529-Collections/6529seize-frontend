@@ -41,7 +41,7 @@ const SCROLL_TARGET_REASON =
 const LIGHT_SURFACE_REASON =
   "Input on the white modal panel: the iron-950 ring measures about 18:1 against white, so the dark-surface model reports it incorrectly.";
 const CHILD_RING_REASON =
-  "Trigger class passed to CompactMenu through a prop: the inner pill span draws the group-focus-visible outline, which the scan cannot follow across the component boundary.";
+  "Shared compact-action button class: every consumer renders COMPACT_ACTION_CONTENT_CLASS on the inner pill span, which draws the group-focus-visible outline. The scan cannot follow these imported constants across files; the native competition browser pack verifies the visible outline.";
 const AUDITED_EXCEPTIONS: readonly AuditedException[] = [
   {
     file: "components/brain/my-stream/tabs/MyStreamWaveCreateActionsMenu.tsx",
@@ -51,10 +51,10 @@ const AUDITED_EXCEPTIONS: readonly AuditedException[] = [
     reason: OPTIONS_REASON,
   },
   {
-    file: "components/brain/my-stream/tabs/MyStreamWaveCreateActionsMenu.tsx",
+    file: "components/utils/button/compactActionButtonStyles.ts",
     marker: "tw-p-0 focus-visible:tw-outline-none",
     literalHash:
-      "57899be4a421bd7af48fc7e1577f1d49fcc3f04bcdc360ec316f5d0e0ecdf8a9",
+      "3b513201246dad340473ea8e111e20b694405777038994c0e2c68a5a97559fea",
     reason: CHILD_RING_REASON,
   },
   {

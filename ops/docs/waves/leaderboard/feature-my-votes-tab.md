@@ -8,23 +8,28 @@ prefilled reply for explaining a vote.
 
 Open **Votes** in the wave's main row, then select **My Votes**. The other
 subtabs are **All votes**, with voter profiles and totals, and **Activity**, with
-vote changes. Each uses the selected competition, including the original
-competition in an older wave. Switching competition changes all three views.
+vote changes. These three views use compact rounded pills below the main wave
+tabs on desktop, mobile web, and the app. Decision-pause notices appear below the
+pills. Submission eligibility notices belong to Leaderboard and do not appear in
+Votes. Each view uses the selected competition,
+including the original competition in an older wave. Switching competition changes all three views.
 Signed-out viewers can inspect public All votes and Activity; personal votes
-require a connected profile.
+require a connected profile. My Votes rows span the full wave content pane,
+with padding inside each row for its controls.
 In My Votes, signed-out viewers can select **Connect Wallet** below the
-connection message to open the usual wallet connection flow.
+connection message to open the usual wallet connection flow. Empty-state messages
+in all three Votes subviews use muted, left-aligned text.
 
 All votes places each voter's rank, avatar, name, and signed vote amounts on
 the left, with the total and credit label inline on the right. Activity aligns
 the voter, vote change, drop creator, and time across
-wide views. On narrow views, the vote change and creator use separate lines
-below the voter, with a bent arrow beside the creator. The time and
+wide views. Below 768px, including small tablet widths, the vote change and creator
+use separate lines below the voter, with a bent arrow beside the creator. The time and
 **View drop in chat** button stay on the first line. Both lists
 use subtle row dividers and keep **Load more** below the rows.
 While loading, both lists show placeholders that match their rows. All votes
-also keeps a row placeholder while that voter's profile loads. The placeholders
-stay still when reduced motion is enabled.
+loads profiles as their rows approach the visible area and keeps a row placeholder
+while each profile loads. The placeholders stay still when reduced motion is enabled.
 
 ## Location in the Site
 
@@ -96,6 +101,10 @@ stay still when reduced motion is enabled.
 - Bulk reset runs one selected row at a time.
 
 ## Failure and Recovery
+
+- If an All votes profile fails to load, its row keeps the rank and vote total
+  and shows **Profile unavailable** with a compact **Try again** button. Retry
+  reloads that profile without replacing the rest of the list.
 
 - If wallet authentication fails before single-row submit, a toast asks you to
   reconnect your wallet and try again; the row stays editable.

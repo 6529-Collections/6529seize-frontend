@@ -84,4 +84,17 @@ describe("lazy-load modules under the React Compiler", () => {
 
     expect([...new Set(types)].sort()).toEqual([...components].sort());
   });
+
+  it.each([
+    ["components/waves/drop/LazySingleWaveDrop.tsx", "LoadedSingleWaveDrop"],
+    [
+      "components/waves/LazyCreateDropGifPicker.tsx",
+      "LoadedCreateDropGifPicker",
+    ],
+  ])("renders the loaded component by identifier in %s", (file, loaded) => {
+    const types = jsxElementTypes(compileWithReactCompiler(file));
+
+    expect(types).toContain(loaded);
+    expect(types).not.toContain('"loaded"');
+  });
 });

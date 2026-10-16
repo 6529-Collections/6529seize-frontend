@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useWaveParticipationRendererSet } from "../drops/participation/participationRendererRegistry";
+import { useWaveSingleWaveDropRendererSet } from "./singleWaveDropRendererRegistry";
 import type { SingleWaveDropProps } from "../drops/participation/participationRenderer.types";
 import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import { useCompetitionDrop } from "@/hooks/competitions/useCompetitionDrop";
@@ -23,7 +23,7 @@ const SingleWaveDropContent: React.FC<SingleWaveDropProps> = ({
   onClose,
 }) => {
   const { SingleWaveDrop: SingleWaveDropRenderer } =
-    useWaveParticipationRendererSet(initialDrop.wave.id);
+    useWaveSingleWaveDropRendererSet(initialDrop.wave.id);
 
   return <SingleWaveDropRenderer drop={initialDrop} onClose={onClose} />;
 };
