@@ -196,7 +196,7 @@ describe("MemesSingleWaveDropInfoPanel", () => {
   );
 
   it.each([undefined, []])(
-    "does not load invitations for ordinary artwork with collaborators %s",
+    "loads invitation eligibility for lightweight submissions with collaborators %s",
     (collaborators) => {
       render(
         <MemesSingleWaveDropInfoPanel
@@ -204,9 +204,7 @@ describe("MemesSingleWaveDropInfoPanel", () => {
           wave={null}
         />
       );
-      expect(
-        screen.queryByTestId("collaboration-panel")
-      ).not.toBeInTheDocument();
+      expect(screen.getByTestId("collaboration-panel")).toBeInTheDocument();
     }
   );
 

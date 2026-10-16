@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
+import Button from "@/components/utils/button/Button";
 import IdentitySearch from "@/components/utils/input/identity/IdentitySearch";
 import type { SelectableIdentityOption } from "@/components/utils/input/profile-search/getSelectableIdentity";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -9,6 +10,15 @@ import { useAuth } from "@/components/auth/Auth";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+
+import ProfileAvatar, {
+  ProfileBadgeSize,
+} from "@/components/common/profile/ProfileAvatar";
+import {
+  ChevronDownIcon,
+  PlusIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 
 const EMPTY_PROFILE_IDS: readonly string[] = [];
 
@@ -25,6 +35,8 @@ export function MemeCollaboratorPicker({
 }) {
   const { connectedProfile } = useAuth();
   const locale = useBrowserLocale();
+  const [expanded, setExpanded] = useState(collaborators.length > 0);
+  const contentId = useId();
   const [resolving, setResolving] = useState(false);
   const [error, setError] = useState(false);
   const select = async (option: SelectableIdentityOption | null) => {
@@ -63,53 +75,103 @@ export function MemeCollaboratorPicker({
   };
   return (
     <div className="tw-space-y-3">
-      <IdentitySearch
-        key={collaborators.length}
-        identity={null}
-        setIdentity={() => undefined}
-        onSelectionChange={(option) => {
-          void select(option);
-        }}
-        label={t(locale, "memes.collaborations.search")}
-        disabled={
-          disabled ||
-          resolving ||
-          collaborators.length + excludedIds.length >= 20
-        }
-      />
-      <p className="tw-m-0 tw-text-sm tw-text-iron-300">
-        {t(locale, "memes.collaborations.hint")}
-      </p>
-      {error && (
-        <p role="alert" className="tw-text-sm tw-text-rose-300">
-          {t(locale, "memes.collaborations.invalid")}
-        </p>
-      )}
-      <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-2 tw-p-0">
-        {collaborators.map((profile) => (
-          <li
-            key={profile.id}
-            className="tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-800 tw-pl-3"
+      <Button
+        variant="ghost"
+        size="sm"
+        aria-expanded={expanded}
+        aria-controls={contentId}
+        disabled={disabled || resolving}
+        onClick={() => setExpanded((value) => !value)}
+        className="tw-min-h-11 !tw-px-0"
+      >
+        {collaborators.length ? (
+          <span>
+            {t(locale, "memes.collaborations.selected", {
+              count: collaborators.length,
+            })}
+          </span>
+        ) : (
+          <>
+            <PlusIcon aria-hidden="true" className="tw-size-4" />
+            <span>{t(locale, "memes.collaborations.add")}</span>
+          </>
+        )}
+        <ChevronDownIcon
+          aria-hidden="true"
+          className={`tw-size-4 ${expanded ? "tw-rotate-180" : ""}`}
+        />
+      </Button>
+      <div id={contentId} hidden={!expanded} className="tw-space-y-3">
+        <IdentitySearch
+          key={collaborators.length}
+          identity={null}
+          setIdentity={() => undefined}
+          onSelectionChange={(option) => {
+            void select(option);
+          }}
+          label={t(locale, "memes.collaborations.search")}
+          searchingLabel={t(locale, "memes.collaborations.searching")}
+          searchErrorLabel={t(locale, "memes.collaborations.searchError")}
+          iconPositionClassName="tw-top-6 -tw-translate-y-1/2"
+          inputClassName="tw-h-12 tw-leading-5"
+          disabled={
+            disabled ||
+            resolving ||
+            collaborators.length + excludedIds.length >= 20
+          }
+        />
+        {!!collaborators.length && (
+          <ul
+            aria-label={t(locale, "memes.collaborations.title")}
+            className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-2 tw-p-0"
           >
-            <span className="tw-text-sm tw-text-iron-100">
-              @{profile.handle}
-            </span>
-            <button
-              type="button"
-              disabled={disabled || resolving}
-              className="tw-min-h-10 tw-min-w-10 tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-              aria-label={t(locale, "memes.collaborations.remove", {
-                handle: profile.handle,
-              })}
-              onClick={() =>
-                onChange(collaborators.filter((item) => item.id !== profile.id))
-              }
-            >
-              ×
-            </button>
-          </li>
-        ))}
-      </ul>
+            {collaborators.map((profile) => (
+              <li
+                key={profile.id}
+                className="tw-flex tw-max-w-full tw-items-center tw-gap-2 tw-rounded-full tw-bg-iron-900/70 tw-py-0 tw-pl-1.5 tw-pr-1 tw-ring-1 tw-ring-inset tw-ring-white/10"
+              >
+                <span className="tw-flex tw-shrink-0 tw-overflow-hidden tw-rounded-full">
+                  <ProfileAvatar
+                    pfpUrl={profile.pfp}
+                    size={ProfileBadgeSize.SMALL}
+                    alt=""
+                    fallbackContent={<span aria-hidden="true">@</span>}
+                  />
+                </span>
+                <span className="tw-max-w-48 tw-truncate tw-text-sm tw-font-medium tw-text-iron-100">
+                  @{profile.handle}
+                </span>
+                <button
+                  type="button"
+                  disabled={disabled || resolving}
+                  className="tw-flex tw-min-h-11 tw-min-w-11 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 hover:tw-text-error focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50"
+                  aria-label={t(locale, "memes.collaborations.remove", {
+                    handle: profile.handle,
+                  })}
+                  onClick={() =>
+                    onChange(
+                      collaborators.filter((item) => item.id !== profile.id)
+                    )
+                  }
+                >
+                  <XMarkIcon aria-hidden="true" className="tw-size-4" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {error && (
+          <p role="alert" className="tw-m-0 tw-text-sm tw-text-rose-300">
+            {t(locale, "memes.collaborations.invalid")}
+          </p>
+        )}
+        <p className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-300">
+          {t(locale, "memes.collaborations.hint")}
+        </p>
+        <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+          {t(locale, "memes.collaborations.mintHint")}
+        </p>
+      </div>
     </div>
   );
 }

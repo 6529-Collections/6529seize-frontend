@@ -75,6 +75,28 @@ describe("MemesSubmissionPreviewScreen", () => {
     expect(screen.getByTestId("preview-gallery-card")).toBeInTheDocument();
   });
 
+  it("shows pending invite recipients before final submission without claiming they accepted", () => {
+    render(
+      <MemesSubmissionPreviewScreen
+        collaborators={[
+          { id: "B", handle: "artistB", display: "artistB", pfp: null },
+        ]}
+        previewDrop={previewDrop}
+        onBackToEdit={jest.fn()}
+        onSubmit={jest.fn()}
+        identity={identity}
+        isSubmitting={false}
+        submissionPhase="idle"
+        uploadProgress={0}
+      />
+    );
+    expect(
+      screen.getByText("Invitations will be sent to:")
+    ).toBeInTheDocument();
+    expect(screen.getByText("@artistB")).toBeInTheDocument();
+    expect(screen.queryByText("Accepted")).not.toBeInTheDocument();
+  });
+
   it("keeps footer actions wired", async () => {
     const user = userEvent.setup();
     const onBackToEdit = jest.fn();

@@ -186,14 +186,14 @@ reached), select the header restriction control to see the reason, then use
 
 Invitations are available only on The Memes Main Stage, including its designated native competition. Only the submitter needs to satisfy submission eligibility and allowance requirements. Collaborators need a profile and must accept personally.
 
-In Basic Information, use **Invite a collaborating artist** to select up to 20
-other profiles. Selected profiles receive an invitation when the artwork is
+In Basic Information, expand **Add collaborators**, then use **Invite a collaborating artist** to select up to 20
+other profiles. Selected artists appear as avatar chips with a remove control. The section can be folded without clearing selections; its heading shows the selected count. Opening the section alone does not mark the artwork as a collaboration. Selected profiles receive an invitation when the artwork is
 submitted. Voting starts immediately and does not wait for their replies.
 
-The submitter can see every invitation and cancel a pending invitation. On an existing active submission, use the collaboration invitations section to select more artists and **Send collaborator invitations**. This preserves the submission, votes and ranking, including when some collaborators have already accepted. Accepted artists cannot be removed; adding invitations does not unlock accepted artwork. The limit is 20 distinct invited profiles over the submission lifetime, including declined or cancelled invitations; the same profile cannot be invited twice. Submissions created before this feature also support invitations. Selected, closed or withdrawn submissions cannot receive more invitations. Each
-invitee can review the submitted artwork, the final acceptance wording, and the
-submission/minting terms from **Notifications → Invites** or artwork details.
-They can accept or decline using their own profile; proxies cannot consent.
+The final submission preview lists the profiles that will receive invitations.
+
+On artwork details, the submitter can expand **Manage invitations** to see every invitee and status or cancel a pending invitation. The compact row shows the number of pending replies. On an existing active submission, use **Add collaborators** to select more artists and **Send collaborator invitations**. This preserves the submission, votes and ranking, including when some collaborators have already accepted. Accepted artists cannot be removed; adding invitations does not unlock accepted artwork. The limit is 20 distinct invited profiles over the submission lifetime, including declined or cancelled invitations; the same profile cannot be invited twice. Submissions created before this feature also support invitations. Selected, closed or withdrawn submissions cannot receive more invitations. Each
+invitee can open the artwork from **Notifications → Invites** or go directly to artwork details and choose **Review invitation**. A modal shows the saved artwork details, media links, final acceptance wording and submission/minting terms. Check the review confirmation there before **Accept collaboration**, or close it with **Not now** without responding. **Decline** remains available on the artwork. They respond using their own profile; proxies cannot consent. Accepted artists appear once in public credits, without another accepted-invitation panel.
 Acceptance is final, with no withdrawal. The submitter cannot replace the
 accepted artwork or original artist name; replacing the submission requires
 fresh invitations. Admins can edit the final mint artwork and credits in Craft.
