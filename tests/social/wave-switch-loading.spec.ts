@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import type { Page, Request } from "@playwright/test";
 import { expect, expectNoHorizontalOverflow, test } from "../testHelpers";
 import {
   dismissNextDevTools,
@@ -263,7 +263,7 @@ test("keeps wave identity on failure and recovers with Retry", async ({
   await expect(pending).toHaveCount(0);
 });
 
-test("ignores late metadata after switching back to a cached wave", async ({
+test("keeps the cached wave selected after an abandoned request settles", async ({
   page,
   baseURL,
 }, testInfo) => {
@@ -277,12 +277,12 @@ test("ignores late metadata after switching back to a cached wave", async ({
   const gate = new Promise<void>((resolve) => {
     release = resolve;
   });
-  let requestStarted!: () => void;
-  const pendingRequest = new Promise<void>((resolve) => {
+  let requestStarted!: (request: Request) => void;
+  const pendingRequest = new Promise<Request>((resolve) => {
     requestStarted = resolve;
   });
   await page.route(`**/api/waves/${TARGET}`, async (route) => {
-    requestStarted();
+    requestStarted(route.request());
     await gate;
     await route.fallback();
   });
@@ -295,16 +295,20 @@ test("ignores late metadata after switching back to a cached wave", async ({
     await expect(
       page.getByTestId("wave-pending").getByRole("heading")
     ).toHaveText(NAME);
-    // The pending shell can paint before the query starts. Hold a real request
-    // before switching away so this exercises a late response, not no request.
-    await pendingRequest;
+    // Hold a real request before switching away. Depending on which query
+    // consumer started it, navigation may cancel it or let it finish late.
+    const request = await pendingRequest;
+    const settledResponse = request.response();
     await page
       .getByRole("link", { name: SOURCE_NAME, exact: true })
       .first()
       .click();
-    const response = page.waitForResponse(`**/api/waves/${TARGET}`);
     release();
-    await response;
+    const response = await settledResponse;
+    if (response) {
+      expect(response.ok()).toBe(true);
+      await response.finished();
+    } else expect(request.failure()?.errorText).toBe("net::ERR_ABORTED");
     await expect(page).toHaveURL(new RegExp(`/waves/${SOURCE}$`));
     await expect(
       page.getByTestId("wave-content").getByRole("heading").first()
