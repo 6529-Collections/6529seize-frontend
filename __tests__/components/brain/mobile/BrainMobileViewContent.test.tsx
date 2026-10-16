@@ -252,6 +252,35 @@ describe("BrainMobileViewContent", () => {
     expect(screen.getByTestId("children")).toBeInTheDocument();
   });
 
+  it.each([
+    BrainView.COMPETITIONS,
+    BrainView.CONFIGURATION,
+    BrainView.LEADERBOARD,
+    BrainView.POLLS,
+    BrainView.FAQ,
+  ])(
+    "keeps the shared pending content visible before metadata loads for %s",
+    (activeView) => {
+      render(
+        <BrainMobileViewContent
+          activeView={activeView}
+          activeWaveId="wave-123"
+          isCurationWave={false}
+          isMemesWave={false}
+          isRankWave={false}
+          onDropClick={jest.fn()}
+          onOpenQuickVote={jest.fn()}
+          wave={null}
+        >
+          <div role="status">Loading the requested wave</div>
+        </BrainMobileViewContent>
+      );
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Loading the requested wave"
+      );
+    }
+  );
+
   it("renders the about view with the active wave id", () => {
     render(
       <BrainMobileViewContent
@@ -734,7 +763,7 @@ describe("BrainMobileViewContent", () => {
       wave: null,
     },
   ])(
-    "returns null when $activeView is unavailable",
+    "keeps pending content for $activeView until availability is known",
     ({ activeView, isCurationWave, isMemesWave, isRankWave, wave }) => {
       const { container } = render(
         <BrainMobileViewContent
@@ -751,7 +780,8 @@ describe("BrainMobileViewContent", () => {
         </BrainMobileViewContent>
       );
 
-      expect(container.firstChild).toBeNull();
+      if (wave) expect(container.firstChild).toBeNull();
+      else expect(screen.getByText("child")).toBeInTheDocument();
     }
   );
 });

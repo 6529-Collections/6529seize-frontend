@@ -94,6 +94,7 @@ describe("E2E pack manifest", () => {
       specs: [
         "tests/social/native-competition-sandbox.spec.ts",
         "tests/social/wave-notification-settings-sandbox.spec.ts",
+        "tests/social/wave-switch-loading.spec.ts",
       ],
       projects: ["web-desktop-chromium", "web-mobile-chromium"],
       env: {
