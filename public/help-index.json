@@ -5997,7 +5997,8 @@
         "On Apple mobile while the reader is not pinned to the bottom, newest drops can be held behind the new-messages control until the user reveals them.",
         "Thread reply views listen for drop updates and refetch replies, so a thread can lag briefly even when the notification arrives.",
         "Connectivity problems can make feeds or counts appear stale until reconnect or refresh.",
-        "The realtime troubleshooting docs cover connection recovery and expected limitations."
+        "The realtime troubleshooting docs cover connection recovery and expected limitations.",
+        "After the connection recovers, the app returns to the foreground, or the server asks it to repair missed live updates, active data refreshes after a short staggered delay. Repeated refresh requests are combined and hidden tabs wait until visible. Individual events are not guaranteed to replay. Signing out still stops the authenticated connection."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/notifications", "/nft-activity"],
