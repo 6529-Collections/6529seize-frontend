@@ -22,8 +22,8 @@ import React, {
 } from "react";
 import { useAuth } from "../auth/Auth";
 import CookiesBanner from "./CookiesBanner";
-
-const GTM_ID = "G-71NLVV3KY3";
+import { scheduleGoogleAnalytics } from "./googleAnalytics";
+import { rememberCountryHint } from "./usCountryHint";
 
 type CookieConsent = boolean | undefined;
 
@@ -122,28 +122,30 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   const [performanceConsent, setPerformanceConsent] =
     useState<CookieConsent>(undefined);
   const performanceScriptsLoadedRef = useRef(false);
+  const cancelGoogleAnalyticsRef = useRef<(() => boolean) | undefined>(
+    undefined
+  );
 
   const loadPerformanceCookies = useCallback(() => {
     if (performanceScriptsLoadedRef.current) {
       return;
     }
     performanceScriptsLoadedRef.current = true;
+    cancelGoogleAnalyticsRef.current = scheduleGoogleAnalytics(
+      () => getCookieConsentByName(CONSENT_PERFORMANCE_COOKIE) === true
+    );
+  }, []);
 
-    const script1 = document.createElement("script");
-    script1.src = `https://www.googletagmanager.com/gtag/js?id=${GTM_ID}`;
-    script1.async = true;
-    document.head.appendChild(script1);
-
-    const script2 = document.createElement("script");
-    script2.innerHTML = `
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', '${GTM_ID}', {
-            'cookie_expires': 31536000
-        });
-      `;
-    document.head.appendChild(script2);
+  // Google Analytics loads after first load, so a consent withdrawal or an
+  // unmount can still stop it. A load cancelled before it started can be
+  // scheduled again by a later consent. Once gtag.js has loaded, withdrawal
+  // is a no-op here: a loaded script cannot be unloaded.
+  const cancelPendingGoogleAnalytics = useCallback(() => {
+    const cancel = cancelGoogleAnalyticsRef.current;
+    cancelGoogleAnalyticsRef.current = undefined;
+    if (cancel?.()) {
+      performanceScriptsLoadedRef.current = false;
+    }
   }, []);
 
   const getCookieConsent = useCallback(
@@ -159,6 +161,8 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
 
         if (performanceCookies) {
           loadPerformanceCookies();
+        } else {
+          cancelPendingGoogleAnalytics();
         }
 
         if (essentialCookies != undefined && performanceCookies != undefined) {
@@ -174,11 +178,15 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
           return;
         }
         setCountry(response.country);
+        rememberCountryHint(response.country);
         if (response.is_eu) {
           setShowCookieConsent(
             essentialCookies == undefined && performanceCookies == undefined
           );
-        } else {
+        } else if (performanceCookies === undefined) {
+          // Outside the EU, performance cookies default to on, but only for a
+          // visitor who has not chosen yet. A stored accept or reject always
+          // wins over the regional default and is never rewritten here.
           Cookies.set(CONSENT_ESSENTIAL_COOKIE, "true", { expires: 7 });
           Cookies.set(CONSENT_PERFORMANCE_COOKIE, "true", { expires: 7 });
           getCookieConsent();
@@ -193,7 +201,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
         }
       }
     },
-    [loadPerformanceCookies]
+    [cancelPendingGoogleAnalytics, loadPerformanceCookies]
   );
 
   const consent = useCallback(async () => {
@@ -266,6 +274,8 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
       performanceConsent,
     ]
   );
+
+  useEffect(() => cancelPendingGoogleAnalytics, [cancelPendingGoogleAnalytics]);
 
   useEffect(() => {
     if (disabled) {

@@ -1532,6 +1532,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       name: "About identity statements",
       exact: true,
     });
+    const guidance = page.getByRole("tooltip", {
+      name: /All statements are optional\./,
+    });
     try {
       // Commit waits for the document response, allowing inspection of server
       // markup while client scripts remain held at the browser boundary.
@@ -1544,10 +1547,10 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(guidanceButton).toBeEnabled();
     await guidanceButton.click();
     await expect(guidanceButton).toHaveAttribute("aria-expanded", "true");
-    await expect(page.getByRole("tooltip")).toBeVisible();
+    await expect(guidance).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(guidanceButton).toHaveAttribute("aria-expanded", "false");
-    await expect(page.getByRole("tooltip")).toHaveCount(0);
+    await expect(guidance).toHaveCount(0);
   });
 
   test("renders the stable public profile shell read-only", async ({
@@ -1658,7 +1661,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         exact: true,
       })
     ).toHaveAttribute("aria-expanded", "true");
-    const guidance = page.getByRole("tooltip");
+    // Statement-row tooltips can still be closing while guidance is open.
+    // Select its existing accessible name instead of every tooltip on the page.
+    const guidance = page.getByRole("tooltip", {
+      name: /All statements are optional\./,
+    });
     await expect(guidance).toBeVisible();
     const guidanceBox = await guidance.boundingBox();
     expect(guidanceBox).not.toBeNull();

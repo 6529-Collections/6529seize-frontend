@@ -8,7 +8,7 @@ import { WaveLeaderboardRightSidebarActivityLogDrop } from "./WaveLeaderboardRig
 import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { SystemAdjustmentPill } from "@/components/common/SystemAdjustmentPill";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import {
   ArrowRightIcon,
   ArrowTurnDownRightIcon,
@@ -58,7 +58,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
     <>
       {log.drop_author?.pfp ? (
         <Image
-          src={resolveIpfsUrlSync(log.drop_author.pfp)}
+          src={getScaledImageUri(log.drop_author.pfp, ImageScale.W_AUTO_H_50)}
           alt=""
           width={20}
           height={20}
@@ -84,7 +84,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
   );
 
   return (
-    <div className="tw-grid tw-min-w-0 tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-3 tw-gap-y-1 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-900 tw-py-3 sm:tw-grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1fr)_auto] sm:tw-gap-x-5">
+    <div className="tw-grid tw-min-w-0 tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-3 tw-gap-y-1 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-900 tw-py-3 md:tw-grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1fr)_auto] md:tw-gap-x-5">
       <Link
         href={`/${voterProfile}`}
         className="tw-group tw-col-start-1 tw-row-start-1 tw-flex tw-min-h-8 tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-sm tw-no-underline tw-transition-opacity tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-opacity-80"
@@ -95,7 +95,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
       >
         {log.invoker.pfp ? (
           <Image
-            src={resolveIpfsUrlSync(log.invoker.pfp)}
+            src={getScaledImageUri(log.invoker.pfp, ImageScale.W_200_H_200)}
             alt=""
             width={24}
             height={24}
@@ -113,7 +113,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
         </span>
       </Link>
 
-      <div className="tw-col-start-2 tw-row-start-1 tw-flex tw-items-center tw-justify-end tw-gap-1 sm:tw-col-start-4">
+      <div className="tw-col-start-2 tw-row-start-1 tw-flex tw-items-center tw-justify-end tw-gap-1 md:tw-col-start-4">
         <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-tabular-nums tw-text-iron-400">
           {getTimeAgoShort(new Date(log.created_at).getTime())}
         </span>
@@ -124,19 +124,19 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
         )}
       </div>
 
-      <div className="tw-col-span-2 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-y-2 tw-pl-8 sm:tw-contents">
-        <div className="tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 sm:tw-col-start-2 sm:tw-row-start-1">
+      <div className="tw-col-span-2 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-y-2 tw-pl-8 md:tw-contents">
+        <div className="tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 md:tw-col-start-2 md:tw-row-start-1">
           {oldVote === 0 ? (
-            <span className="tw-text-xs tw-text-iron-400 sm:tw-text-sm">
+            <span className="tw-text-xs tw-text-iron-400 md:tw-text-sm">
               {waveRightPanelText("waves.sidebar.rightPanel.activity.voted")}
             </span>
           ) : (
-            <span className="tw-break-all tw-text-xs tw-tabular-nums tw-text-iron-400 sm:tw-text-sm">
+            <span className="tw-break-all tw-text-xs tw-tabular-nums tw-text-iron-400 md:tw-text-sm">
               {formatNumberWithCommas(oldVote)} →
             </span>
           )}
           <span
-            className={`tw-max-w-full tw-break-words tw-rounded-md tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-tabular-nums sm:tw-text-sm ${
+            className={`tw-max-w-full tw-break-words tw-rounded-md tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-tabular-nums md:tw-text-sm ${
               newVote > 0
                 ? "tw-bg-green/10 tw-text-green"
                 : "tw-bg-red/10 tw-text-red"
@@ -149,14 +149,14 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
           )}
         </div>
 
-        <div className="tw-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2 sm:tw-col-start-3 sm:tw-row-start-1">
+        <div className="tw-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2 md:tw-col-start-3 md:tw-row-start-1">
           <ArrowTurnDownRightIcon
             aria-hidden="true"
-            className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-500 sm:tw-hidden"
+            className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-500 md:tw-hidden"
           />
           <ArrowRightIcon
             aria-hidden="true"
-            className="tw-hidden tw-size-3.5 tw-flex-shrink-0 tw-text-iron-500 sm:tw-block"
+            className="tw-hidden tw-size-3.5 tw-flex-shrink-0 tw-text-iron-500 md:tw-block"
           />
           {dropCreatorProfile ? (
             <Link
