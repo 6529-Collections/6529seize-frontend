@@ -181,7 +181,7 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
               heading.closest(".mobile-wrapper-dialog")?.getBoundingClientRect()
                 .height
           )
-      ).toBeLessThan((originalHeight ?? 0) / 2);
+      ).toBeCloseTo(originalHeight ?? 0, 0);
       await expect(
         choices.getByRole("button", { name: "Back", exact: true })
       ).toBeVisible();
