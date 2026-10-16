@@ -213,8 +213,7 @@ export function MemeCollaborationPanel({
                   <span className="tw-text-iron-100">
                     @{invitation.profile.handle}
                   </span>
-                  <span
-                    role="status"
+                  <output
                     aria-live="polite"
                     aria-atomic="true"
                     className="tw-text-iron-400"
@@ -223,7 +222,7 @@ export function MemeCollaborationPanel({
                       @{invitation.profile.handle}:{" "}
                     </span>
                     {t(locale, STATUS_MESSAGES[invitation.status])}
-                  </span>
+                  </output>
                   {!data.closed &&
                     invitation.status ===
                       ApiMemeCollaborationInvitationStatusEnum.Pending && (
@@ -299,9 +298,9 @@ export function MemeCollaborationPanel({
             </>
           ) : (
             ownInvitation && (
-              <span role="status" className="tw-text-iron-400">
+              <output className="tw-text-iron-400">
                 {t(locale, STATUS_MESSAGES[ownInvitation.status])}
-              </span>
+              </output>
             )
           )}
         </div>

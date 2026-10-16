@@ -134,7 +134,7 @@ export default function CommonProfileSearchItems({
                     aria-selected="false"
                     className="tw-relative tw-flex tw-h-full tw-w-full tw-select-none tw-items-center tw-justify-between tw-rounded-lg tw-px-2 tw-py-2 tw-text-sm tw-font-medium tw-text-white"
                   >
-                    <span role="status">{statusText ?? noResultsText}</span>
+                    <output>{statusText ?? noResultsText}</output>
                   </li>
                 )}
               </ul>

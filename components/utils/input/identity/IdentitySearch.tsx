@@ -33,6 +33,40 @@ type IdentitySearchDraft = {
   readonly preservedResolvedValues: readonly (string | null)[];
 };
 
+function getIdentitySearchCriteria(
+  disabled: boolean,
+  draft: IdentitySearchDraft | null,
+  resolvedDisplayValue: string | null
+): string | null {
+  const shouldUseDraft =
+    !disabled &&
+    draft !== null &&
+    (draft.baseResolvedDisplayValue === resolvedDisplayValue ||
+      draft.preservedResolvedValues.some(
+        (value) => value === resolvedDisplayValue
+      ));
+  return shouldUseDraft ? draft.value : resolvedDisplayValue;
+}
+
+function isIdentitySearchPending({
+  searchCriteria,
+  debouncedValue,
+  isFetching,
+  isError,
+  hasData,
+}: {
+  readonly searchCriteria: string | null;
+  readonly debouncedValue: string | null;
+  readonly isFetching: boolean;
+  readonly isError: boolean;
+  readonly hasData: boolean;
+}): boolean {
+  return (
+    (searchCriteria?.length ?? 0) >= MIN_SEARCH_LENGTH &&
+    (searchCriteria !== debouncedValue || isFetching || (!hasData && !isError))
+  );
+}
+
 export default function IdentitySearch({
   identity,
   size = IdentitySearchSize.MD,
@@ -94,16 +128,11 @@ export default function IdentitySearch({
   const resolvedDisplayValue = selectedDisplayValue ?? identity ?? null;
   const [searchCriteriaDraft, setSearchCriteriaDraft] =
     useState<IdentitySearchDraft | null>(null);
-  const shouldUseDraft =
-    !disabled &&
-    searchCriteriaDraft !== null &&
-    (searchCriteriaDraft.baseResolvedDisplayValue === resolvedDisplayValue ||
-      searchCriteriaDraft.preservedResolvedValues.some(
-        (value) => value === resolvedDisplayValue
-      ));
-  const searchCriteria = shouldUseDraft
-    ? searchCriteriaDraft.value
-    : resolvedDisplayValue;
+  const searchCriteria = getIdentitySearchCriteria(
+    disabled,
+    searchCriteriaDraft,
+    resolvedDisplayValue
+  );
   const [debouncedValue, setDebouncedValue] = useState<string | null>(
     searchCriteria
   );
@@ -132,11 +161,13 @@ export default function IdentitySearch({
       !!debouncedValue &&
       debouncedValue.length >= MIN_SEARCH_LENGTH,
   });
-  const waitingForSearch =
-    (searchCriteria?.length ?? 0) >= MIN_SEARCH_LENGTH &&
-    (searchCriteria !== debouncedValue ||
-      !!isFetching ||
-      (data === undefined && !isError));
+  const waitingForSearch = isIdentitySearchPending({
+    searchCriteria,
+    debouncedValue,
+    isFetching,
+    isError,
+    hasData: data !== undefined,
+  });
   const searchStatus = waitingForSearch ? searchingLabel : undefined;
   const searchResults = useMemo(
     () => (disabled || waitingForSearch || isError ? [] : (data ?? [])),

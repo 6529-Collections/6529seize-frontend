@@ -37,7 +37,6 @@ it("keeps the author and timestamp on one row and credits collaborators once bel
   );
   const authorRow = screen.getByText("Author").parentElement;
   expect(authorRow).toContainElement(screen.getByText("Time"));
-  const links = screen.getAllByRole("link", { name: "@artistB" });
-  expect(links).toHaveLength(1);
-  expect(authorRow).not.toContainElement(links[0]);
+  const collaborator = screen.getByRole("link", { name: "@artistB" });
+  expect(authorRow).not.toContainElement(collaborator);
 });
