@@ -18,6 +18,7 @@ import {
 import { createPortal } from "react-dom";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { useWaveInformationPanel } from "@/components/brain/mobile/WaveInformationPanelContext";
+import { WaveSettingEditorContext } from "./WaveSettingEditorContext";
 
 interface WaveSettingRowProps {
   readonly canEdit: boolean;
@@ -220,7 +221,14 @@ export default function WaveSettingRow({
     };
   }, [isEditorOpen, updatePopoverPosition, useBottomSheet, panel.isInSheet]);
 
-  const editorForm = isEditorOpen ? renderEditor({ closeEditor }) : null;
+  const editorContent = isEditorOpen ? renderEditor({ closeEditor }) : null;
+  const editorForm = (
+    <WaveSettingEditorContext.Provider
+      value={panel.isInSheet || useBottomSheet ? "sheet" : "popover"}
+    >
+      {editorContent}
+    </WaveSettingEditorContext.Provider>
+  );
   const bottomSheetSurface = (
     <MobileWrapperDialog
       isOpen={isEditorOpen}

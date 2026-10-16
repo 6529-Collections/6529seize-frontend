@@ -39,7 +39,14 @@ pinned drop with its content and media. Eligible viewers can add or edit REP.
   to Configuration without submitting changes; Save returns after a successful update.
   Failed saves keep the editor open for retry. Configuration keeps its selected
   tab and scroll position. Close or a downward header swipe dismisses the whole
-  panel.
+  panel. The sheet keeps its height when opening an editor or returning with Back,
+  so short forms do not pull its top edge down the screen.
+  Sheet editors omit a duplicate Cancel button; desktop setting popovers keep
+  Cancel. Chat, Links and Replies checkboxes use the shared dark styling.
+- In Curations, the section plus opens Create curation. A row gear offers
+  management actions including Edit Curation. Both forms stay inside the same
+  mobile sheet or tablet panel, with inline group selection and Back to
+  Configuration.
 - On tablet-sized layouts, the overlay side panel also keeps these editors
   inside the panel. Back or Escape returns to the selected information tab.
 - Competition access, rules, appearance and pauses belong to **Settings** in the

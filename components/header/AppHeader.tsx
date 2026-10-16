@@ -493,6 +493,7 @@ export default function AppHeader() {
   const pathname = usePathname();
   const params = useParams();
   const { canGoBack } = useNavigationHistoryContext();
+  const information = useWaveInformation();
   const { profile } = useIdentity({
     handleOrWallet: address ?? null,
     initialProfile: null,
@@ -592,6 +593,7 @@ export default function AppHeader() {
     : null;
 
   const showBackButton =
+    Boolean(information?.returnFromNavigation) ||
     isInsideWave ||
     isCreateRoute ||
     isProfileWavesFeedView ||

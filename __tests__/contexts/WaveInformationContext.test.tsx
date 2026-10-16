@@ -10,6 +10,7 @@ import {
   useWaveInformation,
 } from "@/contexts/WaveInformationContext";
 import { StrictMode, useEffect } from "react";
+import { SidebarTab } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
 
 jest.mock("next/navigation", () => ({
   usePathname: () => window.location.pathname,
@@ -26,6 +27,22 @@ function Harness() {
   return (
     <>
       <input aria-label="Unfinished message" defaultValue="keep me" />
+      <button
+        onClick={() =>
+          information.prepareNavigation(
+            "/network?page=1&group=group",
+            SidebarTab.CONFIGURATION,
+            120
+          )
+        }
+      >
+        Inspect group
+      </button>
+      {information.returnFromNavigation && (
+        <button onClick={information.returnFromNavigation}>
+          Return to information
+        </button>
+      )}
       <button onClick={() => information.open("wave")}>
         Open mobile information
       </button>
@@ -50,6 +67,10 @@ function Harness() {
             Open configuration editor
           </button>
           <span>{information.request.viewTitle}</span>
+          <span>{information.request.tab}</span>
+          <output aria-label="Restored scroll">
+            {information.request.scrollTop}
+          </output>
           {information.request.view === "notifications" && (
             <>
               <span>Notification view</span>
@@ -232,6 +253,90 @@ it("uses one navigation entry when leaving information and preserves Back and Fo
   expect(window.history.state).toMatchObject({ nextTree: "profile" });
   expect(window.history.state).not.toHaveProperty("waveInformation");
   expect(screen.queryByRole("dialog")).toBeNull();
+});
+
+it.each(["Close", "browser Back"])(
+  "returns from Network to Configuration and clears the saved return after %s",
+  async (dismissal) => {
+    const originalUrl = "/waves/wave?tab=chat&curation=art";
+    window.history.replaceState({ original: "kept" }, "", originalUrl);
+    const children = () => (
+      <WaveInformationProvider>
+        <Harness />
+      </WaveInformationProvider>
+    );
+    const { rerender } = render(children());
+    fireEvent.click(screen.getByText("Open mobile information"));
+    fireEvent.click(screen.getByText("Inspect group"));
+    const sheetHistoryLength = window.history.length;
+    window.history.pushState(
+      { nextTree: "network" },
+      "",
+      "/network?page=1&group=group"
+    );
+    rerender(children());
+    expect(window.history.length).toBe(sheetHistoryLength + 1);
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(window.history.state).not.toHaveProperty("waveInformation");
+    // Filtering Network replaces its URL without losing the return visit.
+    window.history.replaceState(
+      { nextTree: "network" },
+      "",
+      "/network?page=2&group=group"
+    );
+    rerender(children());
+    fireEvent.click(screen.getByText("Return to information"));
+    await waitFor(() =>
+      expect(window.location.pathname + window.location.search).toBe(
+        originalUrl
+      )
+    );
+    rerender(children());
+    expect(screen.getByRole("dialog")).toBeVisible();
+    expect(screen.getByText("CONFIGURATION")).toBeVisible();
+    expect(screen.getByLabelText("Restored scroll")).toHaveTextContent("120");
+    expect(screen.queryByText("Return to information")).toBeNull();
+    window.history.forward();
+    await waitFor(() => expect(window.location.pathname).toBe("/network"));
+    rerender(children());
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.getByText("Return to information")).toBeVisible();
+    window.history.back();
+    await waitFor(() =>
+      expect(window.location.pathname + window.location.search).toBe(
+        originalUrl
+      )
+    );
+    rerender(children());
+    if (dismissal === "Close") fireEvent.click(screen.getByText("Close"));
+    else window.history.back();
+    await waitFor(() =>
+      expect(window.history.state).toEqual({ original: "kept" })
+    );
+    expect(screen.queryByRole("dialog")).toBeNull();
+    window.history.pushState({}, "", "/network");
+    rerender(children());
+    expect(screen.queryByText("Return to information")).toBeNull();
+  }
+);
+
+it("does not offer a stale sheet return after leaving Network through another route", () => {
+  window.history.replaceState({}, "", "/waves/wave");
+  const children = () => (
+    <WaveInformationProvider>
+      <Harness />
+    </WaveInformationProvider>
+  );
+  const { rerender } = render(children());
+  fireEvent.click(screen.getByText("Open mobile information"));
+  fireEvent.click(screen.getByText("Inspect group"));
+  window.history.pushState({}, "", "/network?group=group");
+  rerender(children());
+  window.history.pushState({}, "", "/waves/other");
+  rerender(children());
+  window.history.pushState({}, "", "/network");
+  rerender(children());
+  expect(screen.queryByText("Return to information")).toBeNull();
 });
 
 it("navigates inside one information request and restores its parent with Back", async () => {

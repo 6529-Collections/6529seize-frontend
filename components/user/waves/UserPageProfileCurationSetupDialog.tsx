@@ -355,6 +355,7 @@ export default function UserPageProfileCurationSetupDialog({
             variant="tertiary"
             size="md"
             disabled={isSubmitting}
+            className="tw-hidden md:tw-inline-flex"
           >
             {t(locale, "profileCuration.setup.cancel")}
           </Button>

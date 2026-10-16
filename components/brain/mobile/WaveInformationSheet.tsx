@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo, useState } from "react";
+import { useCallback, useId, useMemo, useRef, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -19,9 +19,18 @@ export default function WaveInformationSheet({
   readonly onClose: () => void;
 }) {
   const locale = useBrowserLocale();
-  const [tab, setTab] = useState(SidebarTab.ABOUT);
-  const [mode, setMode] = useState(Mode.CONTENT);
   const information = useWaveInformation();
+  const [tab, setTab] = useState(information?.request?.tab ?? SidebarTab.ABOUT);
+  const [mode, setMode] = useState(Mode.CONTENT);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const initialScrollTop = information?.request?.scrollTop ?? 0;
+  const setScrollContainer = useCallback(
+    (element: HTMLDivElement | null) => {
+      scrollRef.current = element;
+      if (element) element.scrollTop = initialScrollTop;
+    },
+    [initialScrollTop]
+  );
   const subviewOpen = Boolean(
     information?.request && information.request.view !== "about"
   );
@@ -36,9 +45,15 @@ export default function WaveInformationSheet({
             container,
             open: information.openSubview,
             back: information.back,
+            prepareNavigation: (destination: string) =>
+              information.prepareNavigation(
+                destination,
+                tab,
+                scrollRef.current?.scrollTop ?? 0
+              ),
           }
         : null,
-    [information, contentId, container]
+    [information, contentId, container, tab]
   );
   return (
     <MobileWrapperDialog
@@ -54,7 +69,7 @@ export default function WaveInformationSheet({
       focusTitleOnOpen={subviewOpen}
       showHeaderDivider={false}
       tall
-      fixedHeight={!subviewOpen}
+      fixedHeight
       fitVisualViewport
       noPadding
       headerClassName="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-py-4"
@@ -69,6 +84,7 @@ export default function WaveInformationSheet({
               activeTab={tab}
               setActiveTab={setTab}
               maxVisibleTabs={3}
+              scrollRef={setScrollContainer}
             />
           </WaveDeleteFlowProvider>
         </div>

@@ -17,6 +17,7 @@ export const WaveInformationPanelContext = createContext<{
   readonly container: HTMLDivElement | null;
   readonly open: (view: string, title: string) => void;
   readonly back: () => void;
+  readonly prepareNavigation?: (destination: string) => void;
 } | null>(null);
 
 export function useWaveInformationPanel(title: string) {
