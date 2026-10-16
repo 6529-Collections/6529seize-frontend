@@ -1,7 +1,8 @@
 "use client";
 
-import { useId, useRef, type ReactNode } from "react";
-import { CheckIcon } from "@heroicons/react/24/outline";
+import { useId, useLayoutEffect, useRef, type ReactNode } from "react";
+import clsx from "clsx";
+import { CheckIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import Button from "@/components/utils/button/Button";
 import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
@@ -60,6 +61,7 @@ export default function GroupCriteriaEditor({
   onViewChange,
   disabled = false,
   scrollWithin = false,
+  mobileNavigation = false,
   label,
   onClose,
   children,
@@ -69,6 +71,7 @@ export default function GroupCriteriaEditor({
   readonly onViewChange: (view: GroupCriteriaView) => void;
   readonly disabled?: boolean;
   readonly scrollWithin?: boolean;
+  readonly mobileNavigation?: boolean;
   readonly label?: string;
   readonly onClose?: (() => void) | undefined;
   readonly children: ReactNode;
@@ -76,17 +79,33 @@ export default function GroupCriteriaEditor({
   const locale = useBrowserLocale();
   const editorId = useId();
   const editorRef = useRef<HTMLElement>(null);
+  const navigationRef = useRef<HTMLFieldSetElement>(null);
+  const lastView = useRef<GroupCriteriaView | null>(null);
+  useLayoutEffect(() => {
+    if (!mobileNavigation) return;
+    if (view !== null) {
+      editorRef.current?.focus({ preventScroll: true });
+      return;
+    }
+    if (lastView.current === null) return;
+    const choice = navigationRef.current?.querySelector<HTMLButtonElement>(
+      `[data-criterion="${lastView.current}"]`
+    );
+    choice?.focus({ preventScroll: true });
+    choice?.scrollIntoView({ block: "nearest" });
+  }, [mobileNavigation, view]);
   useKeyboardFocusScroll(editorRef, scrollWithin ? "nearest" : "center");
   const configuredRules = new Set(getInlineGroupConfiguredRules(draft));
   const identitiesConfigured =
     (draft.group.identity_addresses?.length ?? 0) > 0 ||
     (draft.group.excluded_identity_addresses?.length ?? 0) > 0;
   const changeView = (next: GroupCriteriaView, focusEditor: boolean) => {
+    lastView.current = next;
     onViewChange(next);
     if (editorRef.current) {
       editorRef.current.scrollTop = 0;
     }
-    if (focusEditor) {
+    if (focusEditor && !mobileNavigation) {
       globalThis.requestAnimationFrame(() => editorRef.current?.focus());
     }
   };
@@ -114,15 +133,28 @@ export default function GroupCriteriaEditor({
       )}
       <fieldset
         disabled={disabled}
-        className={`tw-m-0 tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-border-0 tw-p-0 lg:tw-flex-row ${FILTER_INPUT_PRESENTATION_CLASS_NAME}`}
+        className={`tw-m-0 tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-border-0 tw-p-0 ${mobileNavigation ? "" : "lg:tw-flex-row"} ${FILTER_INPUT_PRESENTATION_CLASS_NAME}`}
       >
         <fieldset
+          ref={navigationRef}
+          hidden={mobileNavigation && view !== null}
           aria-label={label ?? t(locale, "waves.create.groups.criteriaLabel")}
-          className={`tw-m-0 tw-flex tw-min-h-0 tw-min-w-0 tw-shrink-0 tw-flex-nowrap tw-gap-1 tw-overflow-x-auto tw-overscroll-x-contain tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-py-1 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60 lg:tw-flex-col lg:tw-overflow-y-auto lg:tw-overflow-x-hidden lg:tw-border-b-0 ${scrollWithin ? "tw-px-4 sm:tw-px-6 lg:tw-w-52 lg:tw-py-5" : "tw-px-0 lg:tw-w-44 lg:tw-self-start lg:tw-py-0 lg:tw-pr-4"}`}
+          className={clsx(
+            mobileNavigation &&
+              "tw-m-0 tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-y-auto tw-overscroll-contain tw-border-0 tw-p-0 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60",
+            mobileNavigation && (view === null ? "tw-flex" : "tw-hidden"),
+            !mobileNavigation &&
+              "tw-m-0 tw-flex tw-min-h-0 tw-min-w-0 tw-shrink-0 tw-flex-nowrap tw-gap-1 tw-overflow-x-auto tw-overscroll-x-contain tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-py-1 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60 lg:tw-flex-col lg:tw-overflow-y-auto lg:tw-overflow-x-hidden lg:tw-border-b-0",
+            !mobileNavigation &&
+              (scrollWithin
+                ? "tw-px-4 sm:tw-px-6 lg:tw-w-52 lg:tw-py-5"
+                : "tw-px-0 lg:tw-w-44 lg:tw-self-start lg:tw-py-0 lg:tw-pr-4")
+          )}
         >
           {FILTER_VIEWS.map((rule) => (
             <button
               key={rule}
+              data-criterion={rule}
               id={`${editorId}-${rule}`}
               type="button"
               aria-current={view === rule ? "true" : undefined}
@@ -133,9 +165,19 @@ export default function GroupCriteriaEditor({
                   : configuredRules.has(rule)) || undefined
               }
               onClick={(event) => changeView(rule, event.detail === 0)}
-              className={`tw-flex tw-min-h-8 tw-shrink-0 tw-items-center tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-px-2.5 tw-py-1 tw-text-left tw-text-sm tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${view === rule ? "tw-bg-white/5 tw-font-medium tw-text-iron-50" : "tw-bg-transparent tw-font-normal tw-text-iron-400 desktop-hover:hover:tw-bg-white/[0.03] desktop-hover:hover:tw-text-iron-100"}`}
+              className={clsx(
+                "tw-flex tw-shrink-0 tw-items-center tw-text-left focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-primary-400",
+                mobileNavigation &&
+                  "tw-min-h-14 tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-bg-transparent tw-px-4 tw-py-3 tw-text-base tw-font-medium tw-text-iron-100 active:tw-bg-white/5 sm:tw-px-6",
+                !mobileNavigation &&
+                  "tw-min-h-8 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-px-2.5 tw-py-1 tw-text-sm tw-transition-colors",
+                !mobileNavigation &&
+                  (view === rule
+                    ? "tw-bg-white/5 tw-font-medium tw-text-iron-50"
+                    : "tw-bg-transparent tw-font-normal tw-text-iron-400 desktop-hover:hover:tw-bg-white/[0.03] desktop-hover:hover:tw-text-iron-100")
+              )}
             >
-              <span className="tw-flex tw-items-center tw-gap-1.5 lg:tw-w-full lg:tw-justify-between">
+              <span className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2">
                 <span id={`${editorId}-${rule}-label`}>
                   {t(
                     locale,
@@ -148,6 +190,12 @@ export default function GroupCriteriaEditor({
                   ? identitiesConfigured
                   : configuredRules.has(rule)) && configuredMark}
               </span>
+              {mobileNavigation && (
+                <ChevronRightIcon
+                  aria-hidden="true"
+                  className="tw-size-5 tw-shrink-0 tw-text-iron-500"
+                />
+              )}
             </button>
           ))}
         </fieldset>
@@ -159,7 +207,7 @@ export default function GroupCriteriaEditor({
           }
           hidden={view === null}
           tabIndex={-1}
-          className={`tw-min-h-0 tw-min-w-0 tw-py-4 lg:tw-flex-1 lg:tw-border-y-0 lg:tw-border-l lg:tw-border-r-0 lg:tw-border-solid lg:tw-border-white/5 ${scrollWithin ? "tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-px-4 sm:tw-px-6 lg:tw-py-5" : "lg:tw-py-0 lg:tw-pl-6"}`}
+          className={`tw-min-h-0 tw-min-w-0 tw-py-4 ${mobileNavigation ? "" : "lg:tw-flex-1 lg:tw-border-y-0 lg:tw-border-l lg:tw-border-r-0 lg:tw-border-solid lg:tw-border-white/5"} ${scrollWithin ? "tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-px-4 sm:tw-px-6 lg:tw-py-5" : "lg:tw-py-0 lg:tw-pl-6"}`}
         >
           {children}
         </section>

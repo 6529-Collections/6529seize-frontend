@@ -28,7 +28,7 @@ export default function GroupCreateTDH({
   return (
     <div className={GROUP_CREATE_PANEL_STYLES}>
       <div className="tw-mb-4">
-        <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4">
+        <div className="tw-flex tw-flex-col tw-items-start tw-justify-between tw-gap-4 sm:tw-flex-row sm:tw-items-center">
           <div>
             <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
               {tdh.inclusion_strategy === ApiGroupTdhInclusionStrategy.Both

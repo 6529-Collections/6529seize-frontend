@@ -33,6 +33,7 @@ import {
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
 import CommunityMembersGroupDetails from "./CommunityMembersGroupDetails";
 import CommunityMembersGroupFilter from "./CommunityMembersGroupFilter";
+import type { GroupCriteriaView } from "@/components/groups/assignment/GroupCriteriaEditor";
 
 interface QueryUpdateInput {
   name: keyof typeof SEARCH_PARAMS_FIELDS;
@@ -360,6 +361,8 @@ export default function CommunityMembers() {
   const goToNerd = () => router.push("/network/nerd");
 
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [filterView, setFilterView] = useState<GroupCriteriaView | null>(null);
+  const showFilterBack = !centeredFilterModal && filterView !== null;
   const [mobileSortOpen, setMobileSortOpen] = useState(false);
 
   const hasCustomSort =
@@ -418,7 +421,10 @@ export default function CommunityMembers() {
               active={!!activeGroupId}
               expanded={mobileFilterOpen}
               hasPopup
-              onClick={() => setMobileFilterOpen(true)}
+              onClick={() => {
+                setFilterView(null);
+                setMobileFilterOpen(true);
+              }}
               label={t(locale, "network.actions.openFilters")}
             >
               <FunnelIcon className="tw-size-4" aria-hidden="true" />
@@ -469,7 +475,12 @@ export default function CommunityMembers() {
       </div>
 
       <MobileWrapperDialog
-        title={t(locale, "network.groupFilter.title")}
+        title={
+          showFilterBack ? undefined : t(locale, "network.groupFilter.title")
+        }
+        ariaLabel={t(locale, "network.groupFilter.title")}
+        onBack={showFilterBack ? () => setFilterView(null) : undefined}
+        showHeaderDivider={false}
         isOpen={mobileFilterOpen}
         onClose={() => setMobileFilterOpen(false)}
         tall
@@ -480,12 +491,15 @@ export default function CommunityMembers() {
         noPadding
         enableDragToClose
         showHeaderCloseButton
-        surfaceClassName={`[--mobile-wrapper-dialog-resting-height:40rem] tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-shadow-2xl tw-shadow-black/60 ${centeredFilterModal ? "lg:!tw-h-[min(44rem,calc(100dvh-4rem))]" : ""}`}
+        surfaceClassName={`[--mobile-wrapper-dialog-resting-height:calc(100dvh-4rem)] tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-shadow-2xl tw-shadow-black/60 ${centeredFilterModal ? "lg:!tw-h-[min(44rem,calc(100dvh-4rem))]" : ""}`}
         titleClassName="tw-text-base !tw-font-semibold !tw-text-iron-100 tw-tracking-tight"
-        headerClassName={`${NETWORK_DIALOG_HEADER_CLASS_NAME} tw-shrink-0`}
-        headerCloseButtonClassName="-tw-mt-1 !tw-size-11 max-md:!tw-inline-flex"
+        headerClassName="tw-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-2"
+        headerCloseButtonClassName="!tw-size-11 max-md:!tw-inline-flex"
       >
         <CommunityMembersGroupFilter
+          view={centeredFilterModal ? (filterView ?? "identities") : filterView}
+          onViewChange={setFilterView}
+          mobileNavigation={!centeredFilterModal}
           activeGroupId={activeGroupId}
           onGroupChange={(group) => {
             setActiveGroupId(group?.id ?? null);

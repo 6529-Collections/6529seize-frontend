@@ -1593,6 +1593,7 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "xtdhGrant.change": "Change grant",
   "xtdhGrant.cancelChange": "Cancel change",
   "xtdhGrant.remove": "Remove grant",
+  "xtdhGrant.clearFilters": "Clear filters",
   done: "Done",
   enableChat: "Enable chat",
   allowAdminsToDeletePosts: "Allow admins to delete posts",
