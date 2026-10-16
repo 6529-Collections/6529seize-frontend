@@ -44,7 +44,11 @@ const requestAuth = jest.fn();
 const setToast = jest.fn();
 let viewer = "B";
 jest.mock("@/components/auth/Auth", () => ({
-  useAuth: () => ({ connectedProfile: { id: viewer }, requestAuth, setToast }),
+  useAuth: () => ({
+    connectedProfile: { id: viewer, handle: "artistB" },
+    requestAuth,
+    setToast,
+  }),
 }));
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
@@ -110,6 +114,10 @@ it("requires reviewing the terms and sends consent for the exact artwork version
     name: "Accept collaboration",
   });
   expect(accept).toBeDisabled();
+  fireEvent.change(
+    screen.getByRole("textbox", { name: "Artist credit name" }),
+    { target: { value: "  Artist B Name  " } }
+  );
   fireEvent.click(screen.getByRole("checkbox"));
   const accepted = {
     ...pending,
@@ -129,6 +137,7 @@ it("requires reviewing the terms and sends consent for the exact artwork version
       endpoint: "drops/drop/collaborations/invitation/response",
       body: {
         action: "ACCEPT",
+        artist_name: "Artist B Name",
         artwork_hash: pending.artwork_hash,
         terms_version: pending.terms_version,
       },
@@ -408,4 +417,23 @@ it("does not repeat accepted attribution in a second invitee panel", async () =>
   expect(
     screen.queryByRole("button", { name: "Review invitation" })
   ).not.toBeInTheDocument();
+});
+
+it("requires a nonblank credit name and fresh confirmation after editing it", async () => {
+  mount();
+  await openReview();
+  const input = screen.getByRole("textbox", { name: "Artist credit name" });
+  const accept = screen.getByRole("button", { name: "Accept collaboration" });
+  expect(input).toHaveValue("artistB");
+  expect(input).toHaveAttribute("maxLength", "200");
+  fireEvent.click(screen.getByRole("checkbox"));
+  expect(accept).toBeEnabled();
+  fireEvent.change(input, { target: { value: "   " } });
+  expect(screen.getByRole("checkbox")).not.toBeChecked();
+  fireEvent.click(screen.getByRole("checkbox"));
+  expect(accept).toBeDisabled();
+  fireEvent.change(input, { target: { value: "Artist B Name" } });
+  expect(accept).toBeDisabled();
+  fireEvent.click(screen.getByRole("checkbox"));
+  expect(accept).toBeEnabled();
 });

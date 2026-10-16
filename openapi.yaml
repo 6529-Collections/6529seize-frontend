@@ -32397,6 +32397,12 @@ components:
           type: string
         profile:
           $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
+        artist_name:
+          type: string
+          nullable: true
+          description: >-
+            Artist credit name confirmed on acceptance; null for legacy
+            invitations.
         status:
           type: string
           enum:
@@ -32433,6 +32439,14 @@ components:
           type: string
         terms_version:
           type: string
+        artist_name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: >-
+            Artist credit name confirmed when accepting. Only valid for ACCEPT.
+            Older clients may omit it, in which case the accepting profile
+            handle is saved.
     ApiMemeCollaborationState:
       type: object
       required:

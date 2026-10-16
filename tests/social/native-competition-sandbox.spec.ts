@@ -1742,6 +1742,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         expect(route.request().method()).toBe("POST");
         expect(route.request().postDataJSON()).toEqual({
           action: "ACCEPT",
+          artist_name: "Playwright Artist",
           artwork_hash: "a".repeat(64),
           terms_version: "b".repeat(64),
         });
@@ -1780,6 +1781,16 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(dialog).toHaveCount(0);
     await expect(review).toBeFocused();
     await review.click();
+    await expect(dialog.getByRole("checkbox")).not.toBeChecked();
+    const artistName = dialog.getByRole("textbox", {
+      name: "Artist credit name",
+      exact: true,
+    });
+    await expect(artistName).toHaveValue("playwright");
+    await artistName.fill("   ");
+    await dialog.getByRole("checkbox").check();
+    await expect(accept).toBeDisabled();
+    await artistName.fill("Playwright Artist");
     await expect(dialog.getByRole("checkbox")).not.toBeChecked();
     await dialog.getByRole("checkbox").check();
     await expectNoHorizontalOverflow(page);

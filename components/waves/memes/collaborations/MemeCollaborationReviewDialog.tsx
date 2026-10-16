@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import {
   Dialog,
   DialogBackdrop,
@@ -35,17 +35,22 @@ function reviewMediaUrls(state: ApiMemeCollaborationState): string[] {
 export function MemeCollaborationReviewDialog({
   state,
   saving,
+  initialArtistName,
   onClose,
   onAccept,
 }: {
   readonly state: ApiMemeCollaborationState;
   readonly saving: boolean;
+  readonly initialArtistName: string;
   readonly onClose: () => void;
-  readonly onAccept: () => void;
+  readonly onAccept: (artistName: string) => void;
 }) {
   const locale = useBrowserLocale();
   const headingRef = useRef<HTMLHeadingElement>(null);
   const [confirmed, setConfirmed] = useState(false);
+  const [artistName, setArtistName] = useState(initialArtistName);
+  const artistNameId = useId();
+  const trimmedArtistName = artistName.trim();
   return (
     <Dialog
       initialFocus={headingRef}
@@ -102,6 +107,34 @@ export function MemeCollaborationReviewDialog({
                 </p>
               </section>
             )}
+            <div className="tw-space-y-2">
+              <label
+                htmlFor={artistNameId}
+                className="tw-block tw-font-medium tw-text-iron-100"
+              >
+                {t(locale, "memes.collaborations.artistName")}
+              </label>
+              <input
+                id={artistNameId}
+                type="text"
+                required
+                maxLength={200}
+                value={artistName}
+                disabled={saving}
+                aria-describedby={`${artistNameId}-hint`}
+                onChange={(event) => {
+                  setArtistName(event.target.value);
+                  setConfirmed(false);
+                }}
+                className="tw-form-input tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-3 tw-text-base tw-text-iron-100 tw-ring-1 tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400"
+              />
+              <p
+                id={`${artistNameId}-hint`}
+                className="tw-m-0 tw-text-iron-400"
+              >
+                {t(locale, "memes.collaborations.artistNameHint")}
+              </p>
+            </div>
             <label className="tw-flex tw-min-h-11 tw-cursor-pointer tw-items-start tw-gap-3">
               <input
                 type="checkbox"
@@ -126,8 +159,12 @@ export function MemeCollaborationReviewDialog({
               variant="action"
               size="lg"
               loading={saving}
-              disabled={!confirmed}
-              onClick={onAccept}
+              disabled={
+                !confirmed ||
+                !trimmedArtistName ||
+                trimmedArtistName.length > 200
+              }
+              onClick={() => onAccept(trimmedArtistName)}
             >
               {t(locale, "memes.collaborations.accept")}
             </Button>
