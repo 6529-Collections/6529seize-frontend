@@ -12,6 +12,7 @@ import {
 import { useContentTab } from "../ContentTabContext";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import MyStreamWaveChat from "./MyStreamWaveChat";
+import MyStreamWavePending from "./MyStreamWavePending";
 import MyStreamWaveCurationContent from "./curations/MyStreamWaveCurationContent";
 import { useWaveData } from "@/hooks/useWaveData";
 import { useDrop } from "@/hooks/useDrop";
@@ -114,7 +115,12 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     serverFeedSeed: { completeInitialRegistration },
   } = useMyStream();
   const { updateEligibility } = useWaveEligibility();
-  const { data: wave } = useWaveData({
+  const {
+    data: wave,
+    isError,
+    isFetching,
+    refetch,
+  } = useWaveData({
     waveId,
     onWaveNotFound: isCompetitionPathname(pathname)
       ? undefined
@@ -541,9 +547,15 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
 
   // Early return if no wave data - all hooks must be called before this
   if (!wave) {
-    return isCompetitionPathname(pathname)
-      ? (competitionContent ?? null)
-      : null;
+    return (
+      <MyStreamWavePending
+        waveId={waveId}
+        isError={isError && !isFetching}
+        onRetry={() => void refetch()}
+      >
+        {isCompetitionPathname(pathname) ? competitionContent : undefined}
+      </MyStreamWavePending>
+    );
   }
 
   const activeChatSubmitDropState: ChatSubmitDropState | null =
@@ -634,6 +646,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     <div
       className="tailwind-scope tw-relative tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-col"
       key={stableWaveKey}
+      data-testid="wave-content"
     >
       {competitionOnly ? (
         <div className="tw-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950">

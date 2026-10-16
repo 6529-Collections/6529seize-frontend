@@ -16,6 +16,10 @@ rebuilding them.
 
 - Open a drop action menu and select `Edit Message`.
 - Edit is shown only for your own non-participatory drops.
+- The wave's current description (pinned drop) can be edited by its author at
+  any time, including after the normal five-minute edit window. If another drop
+  replaces it as the pinned description, the previous drop uses the normal
+  edit window again.
 - Start from a drop that already contains `@[handle]`, `#[wave_name]`, or both.
 
 ## User Journey
@@ -51,8 +55,8 @@ rebuilding them.
 
 - If mention reconstruction fails on a segment, the editor stays usable.
 - Save failures show `Failed to update drop. Please try again.`
-- If the backend rejects editing after the time window, users see `This drop can
-  no longer be edited. Drops can only be edited within 5 minutes of creation.`
+- If the backend rejects editing an ordinary drop after the time window, users see
+  `This drop can no longer be edited. Drops can only be edited within 5 minutes of creation.`
 - If a mention renders as plain text after save, reopen `Edit Message` and
   reinsert it using autocomplete.
 
