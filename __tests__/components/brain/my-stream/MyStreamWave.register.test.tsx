@@ -360,7 +360,7 @@ describe("MyStreamWave registration", () => {
     expect(mockPush).not.toHaveBeenCalled();
   });
 
-  it("keeps ordinary absent-wave content empty", () => {
+  it("shows loading identity without mounting chat or unrelated competition content", () => {
     mockResolvedWave = undefined;
     render(
       <HeaderProvider>
@@ -370,6 +370,7 @@ describe("MyStreamWave registration", () => {
         />
       </HeaderProvider>
     );
+    expect(screen.getByRole("status")).toHaveTextContent("Loading wave…");
     expect(screen.queryByRole("alert")).toBeNull();
     expect(screen.queryByTestId("chat")).toBeNull();
   });

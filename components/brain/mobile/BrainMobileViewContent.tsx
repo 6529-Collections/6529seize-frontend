@@ -289,6 +289,17 @@ export default function BrainMobileViewContent({
   const isCompetitionRoute = isCompetitionPathname(usePathname());
   const search = useSearchParams();
   const isCompetitionWave = isRankWave || isApproveWave;
+  const hasIndependentContent = [
+    BrainView.ABOUT,
+    BrainView.WAVES,
+    BrainView.PROFILE_FEED,
+    BrainView.MESSAGES,
+    BrainView.NOTIFICATIONS,
+  ].includes(activeView);
+
+  // Remembered wave views must not discard the shared loading/retry shell
+  // while their permissions and availability are still unknown.
+  if (activeWaveId && !wave && !hasIndependentContent) return children;
 
   // Implicit competition sections resolve in the shared wave content. Rendering
   // a legacy mobile view here first would expose the wrong content and controls.
