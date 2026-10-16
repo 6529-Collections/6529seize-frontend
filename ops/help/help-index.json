@@ -2040,6 +2040,7 @@
       "facts": [
         "The Profile Curation tab lives at /{user}/curations and presents the profile's selected named Curation.",
         "On an owner's empty Curation tab, Create Curation asks for a name and prepares the required access, public source Wave, Curation, and profile connection.",
+        "Mobile Curation setup and edit sheets use Close or a downward header swipe to leave without submitting; desktop dialogs also offer Cancel.",
         "If the owner has no profile handle, Go to Identity opens /{user} so profile setup can be completed first.",
         "After guided setup succeeds, Add post opens automatically; if post creation succeeds but Curation membership fails, Retry add reuses the created post.",
         "Owners see Add post as the primary action. Manage separates profile display actions from Curation actions: Hide from profile keeps the Curation, source Wave, and posts, while Delete Curation deletes the Curation but keeps its source Wave and posts.",
@@ -2228,6 +2229,7 @@
         "The section shows up to three tags and uses a +N more chip when additional tags exist; controls wrap at narrow widths.",
         "Manage and +N more open the inline Quick Tags manager inside the same Brain-tab card.",
         "On mobile, New Quick Tag and existing-tag editing open in a bottom sheet; on wider screens, create and edit forms remain inline.",
+        "The mobile Quick Tag editor uses Back, Close, or a downward header swipe to discard edits. The inline editor keeps Cancel.",
         "The section is hidden on other profiles and while acting through a proxy.",
         "Quick Tags do not have a dedicated profile tab or route."
       ],
@@ -3431,7 +3433,10 @@
         "Wave Configuration contains wave access, chat availability, links, slow mode, curations, chat history deletion and personal display preferences. Selected competition access, rules, appearance and pauses belong to Settings in the main row.",
         "Voter lists and vote activity are available in Votes, under All votes and Activity. Both follow the chosen competition; they are absent from the information panel.",
         "On mobile, selecting the wave name opens a dismissible information panel containing About, REP and Configuration. About includes the pinned drop.",
-        "Closing mobile information or using Back returns to the original competition, tab, curation and scroll position. The underlying view stays mounted.",
+        "Swipe down from the mobile information panel's handle or header, select Close, tap outside, press Escape, or use Back to return to the original competition, tab, curation and scroll position. The underlying view stays mounted. Scrolling the panel content does not dismiss it; short or canceled header drags return it to its open position.",
+        "On mobile, Configuration gear controls open editors inside the information panel. Back, browser Back or Escape returns to Configuration without submitting changes; Save returns after a successful update. Failed saves keep the editor open for retry. Configuration retains its selected tab and scroll position. Close or a downward header swipe dismisses the whole panel.",
+        "On tablet-sized layouts, the overlay side panel also keeps these editors inside the panel. Back or Escape returns to the selected information tab.",
+        "In Configuration's Curations section, the plus button creates a curation and a row gear manages an existing curation. Create curation and Edit curation use the same mobile information sheet or tablet panel at its existing height. Group selection stays inside the form. Back discards the draft and returns to Configuration; Close or a downward header swipe dismisses the panel. Successful saves return to Configuration, while a failed save keeps the draft open. Desktop forms remain separate dialogs.",
         "Selecting a section switches information for the active wave without navigating away from the thread."
       ],
       "canonical_path": "/waves",
@@ -3942,10 +3947,12 @@
         "The Access row uses Chat access wording; `Anyone` means no chat access group is attached, independently of whether chat is enabled.",
         "Rank and Approve Configuration shows Chat status separately from Chat access, so disabled chat does not look like the same thing as an unrestricted chat access group.",
         "Access groups available to the current viewer—including authorized private groups and direct-message groups for their eligible authenticated members or creators—link from Configuration to a filtered Network view that shows both the group criteria and current members; Configuration displays a live eligible-member count instead of the generated group name.",
+        "After following a member count from the mobile Wave information sheet to Network, the app header Back button or browser Back returns to the same Wave, selected information tab, and scroll position. Changing Network filters preserves that return destination.",
         "Use the Clear selected group button in Network to close the group summary and return to the default member view.",
         "A scoped group hidden from the current viewer is labeled `Private group` without a link, name, id, author, criteria, or membership details.",
         "Network does not reuse a selected group's cached criteria or members after the authenticated viewer changes, or while opening a different group.",
-        "When chat is disabled, slow mode and disable-links settings are hidden because they only apply when chat is enabled."
+        "When chat is disabled, slow mode and disable-links settings are hidden because they only apply when chat is enabled.",
+        "Wave setting editors inside the mobile information sheet or tablet panel use Back to discard changes and return to Configuration, or Close and a downward header swipe to dismiss the sheet. They omit a duplicate Cancel button; desktop setting popovers keep Cancel. Save applies the edit, and a failed save keeps the draft open for retry."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves?create=wave"],
@@ -7010,6 +7017,7 @@
         "Available controls depend on permissions and the current wave state.",
         "Unavailable submission actions use a lock icon at every width. Hover, focus, or select the lock for the full restriction reason; the Memes How to Submit helper keeps its desktop label and opens nomination guidance.",
         "Wave picture edit and link sharing are separate header features.",
+        "Owners can select the three-dot Open options button in About for profile-wave actions and Delete. In the mobile information sheet and tablet overlay, Wave options opens inside the same panel. The mobile sheet keeps its height when opening options or setting editors and when returning with Back. Back returns to About and Close dismisses the panel. Delete requires confirmation; cancelling it returns to Wave options.",
         "A wave you have not joined shows a Join button first in the conversation header's top-right controls."
       ],
       "canonical_path": "/waves",

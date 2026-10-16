@@ -330,14 +330,12 @@ function getSurfaceStyle({
 
 function FloatingCloseButton({
   show,
-  hideOnMobile,
   tabletModal,
   onClose,
   mobileCloseButtonClassName,
   closeLabel,
 }: {
   readonly show: boolean;
-  readonly hideOnMobile: boolean;
   readonly tabletModal?: boolean | undefined;
   readonly onClose: () => void;
   readonly mobileCloseButtonClassName?: string | undefined;
@@ -359,9 +357,7 @@ function FloatingCloseButton({
     >
       <div
         className={clsx(
-          "tw-absolute -tw-top-16 tw-right-0 tw-pr-2 tw-pt-4 md:tw-pr-0",
-          hideOnMobile ? "tw-hidden" : "tw-flex",
-          hideOnMobile && !tabletModal && "md:tw-flex",
+          "tw-absolute -tw-top-16 tw-right-0 tw-flex tw-pr-2 tw-pt-4 md:tw-pr-0",
           tabletModal && "md:tw-hidden"
         )}
       >
@@ -460,7 +456,6 @@ export default function MobileWrapperDialog({
     isDragging,
   } = useMobileDialogDrag({
     dismissible,
-    showDragHandle,
     enableDragToClose,
     tabletModal,
     onClose,
@@ -508,7 +503,6 @@ export default function MobileWrapperDialog({
     dismissible && !!tabletModal && !showHeaderCloseButton;
   const showFloatingCloseButton = dismissible && !showHeaderCloseButton;
   const showInlineHeaderCloseButton = dismissible && !!showHeaderCloseButton;
-  const hideMobileCloseButton = canDragToClose && isTouchDevice;
   const shouldHideOnDesktopHover =
     hideOnDesktopHover && !isMobileLayoutViewport && !isTouchDevice;
   const dialogOpen = isOpen && dialogMount !== null;
@@ -657,12 +651,10 @@ export default function MobileWrapperDialog({
                   <DialogPanel
                     className={dragPanelClassNames}
                     style={panelStyle}
-                    {...dragTouchHandlers}
                     onClick={(e) => e.stopPropagation()}
                   >
                     <FloatingCloseButton
                       show={showFloatingCloseButton}
-                      hideOnMobile={hideMobileCloseButton}
                       tabletModal={tabletModal}
                       onClose={handleClose}
                       mobileCloseButtonClassName={mobileCloseButtonClassName}
@@ -673,31 +665,41 @@ export default function MobileWrapperDialog({
                         className={contentClassNames}
                         style={{ paddingBottom: bottomPadding }}
                       >
-                        <DragHandle
-                          show={showTouchDragHandle}
-                          tabletModal={tabletModal}
-                        />
-                        <MobileWrapperDialogHeader
-                          title={title}
-                          showDesktopCloseButton={showDesktopHeaderCloseButton}
-                          onClose={handleClose}
-                          onBack={dismissible ? onBack : undefined}
-                          className={headerClassName}
-                          variant={headerVariant}
-                          titleActions={titleActions}
-                          headerActions={headerActions}
-                          showHeaderCloseButton={showInlineHeaderCloseButton}
-                          showHeaderDivider={showHeaderDivider}
-                          headerCloseButtonClassName={clsx(
-                            hideMobileCloseButton &&
-                              "!tw-hidden md:!tw-inline-flex",
-                            headerCloseButtonClassName
-                          )}
-                          titleClassName={titleClassName}
-                          titleRef={titleRef}
-                          backLabel={resolvedBackLabel}
-                          closeLabel={resolvedCloseLabel}
-                        />
+                        <div
+                          data-testid="mobile-dialog-header"
+                          {...dragTouchHandlers}
+                          style={
+                            canDragToClose
+                              ? { touchAction: "pan-x pinch-zoom" }
+                              : undefined
+                          }
+                        >
+                          <DragHandle
+                            show={showTouchDragHandle}
+                            tabletModal={tabletModal}
+                          />
+                          <MobileWrapperDialogHeader
+                            title={title}
+                            showDesktopCloseButton={
+                              showDesktopHeaderCloseButton
+                            }
+                            onClose={handleClose}
+                            onBack={dismissible ? onBack : undefined}
+                            className={headerClassName}
+                            variant={headerVariant}
+                            titleActions={titleActions}
+                            headerActions={headerActions}
+                            showHeaderCloseButton={showInlineHeaderCloseButton}
+                            showHeaderDivider={showHeaderDivider}
+                            headerCloseButtonClassName={
+                              headerCloseButtonClassName
+                            }
+                            titleClassName={titleClassName}
+                            titleRef={titleRef}
+                            backLabel={resolvedBackLabel}
+                            closeLabel={resolvedCloseLabel}
+                          />
+                        </div>
                         {children}
                       </div>
                     </div>
