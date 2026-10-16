@@ -75,7 +75,7 @@ updates. When auth is missing, the session disconnects and push updates pause.
 
 ## Failure and Recovery
 
-- Server-initiated closes, including normal closes, trigger automatic retries while auth remains valid. Signing out and intentional local disconnects still stop the session.
+- Server-initiated closes, including normal closes, trigger automatic retries while auth remains valid. Signing out and intentional local disconnects still stop the session. Automatic closure of a persistently blocked listener requires the updated client to advertise recovery support; older tabs retain their existing behavior until refreshed.
 - Retry scheduling allows up to `20` attempts by default (`2s`, `3s`, `4.5s`,
   capped at `30s`, each +/-25% jittered).
 - After the cap is reached, scheduled reconnect retries stop; periodic health
