@@ -59,19 +59,25 @@ test.describe("TDH explained and verified @network @wcag @medium @large", () => 
 
     // Every published day is a link in the calendar strip, the shown day
     // marked as current.
-    const calendar = page.getByRole("region", { name: "Every day" });
     await expect(
-      calendar.locator('a[aria-current="date"]').first()
+      page
+        .getByRole("region", { name: "Every day" })
+        .locator('a[aria-current="date"]')
+        .first()
     ).toBeVisible();
 
     // Fewer than seven days show as a table at once; from seven, a chart
-    // comes first on wide screens with the table one click away.
+    // comes first on wide screens with the table one click away. On a phone
+    // the same results are one card per day, in a list.
     const showTable = page.getByText("Show as table");
     if (await showTable.isVisible()) {
       await showTable.click();
     }
     await expect(
-      page.getByRole("table", { name: "Daily results" }).first()
+      page
+        .getByRole("table", { name: "Daily results" })
+        .or(page.getByRole("list", { name: "Daily results" }))
+        .first()
     ).toBeVisible();
 
     // Differences are counts only: no record is ever listed.
