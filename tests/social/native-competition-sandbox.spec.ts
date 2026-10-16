@@ -1634,7 +1634,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     );
     try {
       await page.goto(`${ROOT}/alpha?drop=${entryDropId("alpha")}`);
-      await expect(page.locator("[data-video-viewport]")).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Close panel", exact: true })
+      ).toBeVisible();
       const add = page.getByRole("button", {
         name: "Add collaborators",
         exact: true,
@@ -1748,7 +1750,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       }
     );
     await page.goto(`${ROOT}/alpha?drop=${entryDropId("alpha")}`);
-    await expect(page.locator("[data-video-viewport]")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Close panel", exact: true })
+    ).toBeVisible();
     const review = page.getByRole("button", {
       name: "Review invitation",
       exact: true,
