@@ -29,12 +29,40 @@ import {
  */
 type RuleWrap = "code" | "prose" | "none";
 
+/**
+ * How a block lays out, from its `wrap` and its lines:
+ * - `wrap`: lines wrap with a hanging indent at every width;
+ * - `scroll`: lines never wrap (`wrap="none"`);
+ * - `phoneScroll`: a wrapping block whose lines align in columns with runs
+ *   of spaces (`data:   useCase, allTokens`). Wrapped on a phone, such a
+ *   line turns into a staircase with orphan tokens, so below `sm` it keeps
+ *   its lines and scrolls sideways in the shared frame; from `sm` it wraps
+ *   like any other block.
+ */
+type RuleMode = "wrap" | "scroll" | "phoneScroll";
+
+/** A run of two or more spaces inside a line: columns aligned by hand. */
+const COLUMN_PADDING = /\S {2,}\S/;
+
+function ruleMode(wrap: RuleWrap, lines: readonly RuleLine[]): RuleMode {
+  if (wrap === "none") {
+    return "scroll";
+  }
+  return lines.some(
+    (line) => line.kind !== "comment" && COLUMN_PADDING.test(line.code)
+  )
+    ? "phoneScroll"
+    : "wrap";
+}
+
 /** Blocks longer than this get line numbers. */
 const NUMBERED_FROM = 8;
-/** Blocks this long show their first lines on phones, and a button. */
-const CLAMPED_FROM = 16;
-/** Blocks this long show their first lines at every width. */
-const CLAMPED_EVERYWHERE_FROM = 16;
+/**
+ * Blocks this long show their first lines and a button, at every width:
+ * reference listings. An algorithm of up to 20 lines is shown whole, so
+ * the condition that defines it is never behind the button.
+ */
+const CLAMPED_FROM = 21;
 /**
  * Blocks this short (a formula, an order) are one compact row: the code,
  * then the source chip and the copy button at its side, with no caption
@@ -80,13 +108,18 @@ function Tinted({
  * comment span both, so they do not widen the code column. On phones a
  * wrapping block is one text column: each comment drops below its line.
  */
-function gridClass(wrap: RuleWrap, numbered: boolean): string {
+function gridClass(mode: RuleMode, numbered: boolean): string {
   // Where lines never wrap, the code column is as wide as its longest
   // commented line, so a comment never sits on its code.
-  if (wrap === "none") {
+  if (mode === "scroll") {
     return numbered
       ? "tw-inline-grid tw-min-w-full tw-grid-cols-[auto_max-content_minmax(min-content,1fr)]"
       : "tw-inline-grid tw-min-w-full tw-grid-cols-[max-content_minmax(min-content,1fr)]";
+  }
+  if (mode === "phoneScroll") {
+    return numbered
+      ? "max-sm:tw-inline-grid max-sm:tw-min-w-full max-sm:tw-grid-cols-[auto_max-content_minmax(min-content,1fr)] sm:tw-grid sm:tw-grid-cols-[auto_minmax(0,max-content)_minmax(min-content,1fr)]"
+      : "max-sm:tw-inline-grid max-sm:tw-min-w-full max-sm:tw-grid-cols-[max-content_minmax(min-content,1fr)] sm:tw-grid sm:tw-grid-cols-[minmax(0,max-content)_minmax(min-content,1fr)]";
   }
   return numbered
     ? "tw-grid tw-grid-cols-[auto_minmax(0,1fr)] sm:tw-grid-cols-[auto_minmax(0,max-content)_minmax(min-content,1fr)]"
@@ -102,10 +135,14 @@ function codeColumn(numbered: boolean): number {
  * The `white-space` of a cell. Scrolling blocks keep every space; wrapping
  * ones wrap between words, and a word longer than the line breaks inside.
  */
-function cellWrap(wrap: RuleWrap): string {
-  return wrap === "none"
-    ? "tw-whitespace-pre"
-    : "tw-whitespace-pre-wrap [overflow-wrap:anywhere]";
+function cellWrap(mode: RuleMode): string {
+  if (mode === "scroll") {
+    return "tw-whitespace-pre";
+  }
+  if (mode === "phoneScroll") {
+    return "max-sm:tw-whitespace-pre sm:tw-whitespace-pre-wrap sm:[overflow-wrap:anywhere]";
+  }
+  return "tw-whitespace-pre-wrap [overflow-wrap:anywhere]";
 }
 
 /**
@@ -122,15 +159,24 @@ function cellWrap(wrap: RuleWrap): string {
  */
 const HANG_CLASS =
   "tw-pl-[var(--tdh-hang)] max-sm:tw-pl-[min(var(--tdh-hang),45%)]";
+/** The hanging indent from `sm` only, where a `phoneScroll` block wraps. */
+const HANG_CLASS_SM = "sm:tw-pl-[var(--tdh-hang)] sm:[text-indent:-2ch]";
 
-function indentStyle(line: RuleLine, wrap: RuleWrap): CSSProperties {
-  if (wrap === "none") {
+function indentStyle(line: RuleLine, mode: RuleMode): CSSProperties {
+  if (mode === "scroll") {
     return {};
   }
-  return {
-    "--tdh-hang": `${line.indent + 2}ch`,
-    textIndent: "-2ch",
-  } as CSSProperties;
+  const hang = { "--tdh-hang": `${line.indent + 2}ch` };
+  return (
+    mode === "phoneScroll" ? hang : { ...hang, textIndent: "-2ch" }
+  ) as CSSProperties;
+}
+
+function hangClass(mode: RuleMode): string {
+  if (mode === "wrap") {
+    return HANG_CLASS;
+  }
+  return mode === "phoneScroll" ? HANG_CLASS_SM : "";
 }
 
 /** A line's code: a heading comment as it is, code tinted, a blank kept. */
@@ -157,24 +203,31 @@ function RuleRow({
   line,
   number,
   numbered,
-  wrap,
+  mode,
   language,
   keywords,
 }: {
   readonly line: RuleLine;
   readonly number: number;
   readonly numbered: boolean;
-  readonly wrap: RuleWrap;
+  readonly mode: RuleMode;
   readonly language: RuleLanguage;
   readonly keywords: boolean;
 }) {
   const start = codeColumn(numbered);
   // A scrolling block keeps its indentation as spaces; a wrapping one
-  // indents with padding, so its continuations hang.
-  const lead = wrap === "none" ? " ".repeat(line.indent) : "";
+  // indents with padding, so its continuations hang. A block that scrolls
+  // on phones only has both: spaces below `sm`, padding from it.
+  const spaces = " ".repeat(line.indent);
+  let lead: ReactNode = "";
+  if (mode === "scroll") {
+    lead = spaces;
+  } else if (mode === "phoneScroll" && line.indent > 0) {
+    lead = <span className="sm:tw-hidden">{spaces}</span>;
+  }
   const codeStyle: CSSProperties = {
     gridColumn: line.comment === null ? `${start} / -1` : `${start}`,
-    ...indentStyle(line, wrap),
+    ...indentStyle(line, mode),
   };
   // On phones a wrapping block's comment sits under its line, at the
   // line's continuation indent; from sm it joins the comment column.
@@ -196,7 +249,7 @@ function RuleRow({
       <span
         style={codeStyle}
         data-tdh-code-cell=""
-        className={`tw-min-w-0 ${cellWrap(wrap)} ${wrap === "none" ? "" : HANG_CLASS} ${line.kind === "comment" ? "tw-text-iron-400" : ""}`}
+        className={`tw-min-w-0 ${cellWrap(mode)} ${hangClass(mode)} ${line.kind === "comment" ? "tw-text-iron-400" : ""}`}
       >
         {lead}
         <LineCode line={line} language={language} keywords={keywords} />
@@ -204,10 +257,10 @@ function RuleRow({
       {line.comment !== null && (
         <span
           style={commentStyle}
-          className={`tw-min-w-0 tw-text-iron-400 ${cellWrap(wrap)} ${
-            wrap === "none"
-              ? "tw-pl-[3ch]"
-              : "max-sm:tw-pb-1 max-sm:tw-pl-[var(--tdh-comment-indent)] sm:tw-pl-[3ch]"
+          className={`tw-min-w-0 tw-text-iron-400 ${cellWrap(mode)} ${
+            mode === "wrap"
+              ? "max-sm:tw-pb-1 max-sm:tw-pl-[var(--tdh-comment-indent)] sm:tw-pl-[3ch]"
+              : "tw-pl-[3ch]"
           } ${line.reference ? "sm:tw-whitespace-nowrap" : ""}`}
         >
           {line.comment}
@@ -258,13 +311,15 @@ export default function TdhRuleBlock({
   const heading = title ?? t(locale, "network.tdh.shared.rule");
   const lines = ruleLines(code, language);
   const numbered = lines.length >= NUMBERED_FROM;
-  const scrolls = wrap === "none";
+  const mode = ruleMode(wrap, lines);
+  /** Whether the block scrolls sideways at some width: a phone, or all. */
+  const scrollFrame = mode !== "wrap";
   // P26's prose rules read as English: no keyword is tinted in them.
   const keywords = tone !== "condensed";
   const clamp = (pre: ReactNode): ReactNode =>
     lines.length >= CLAMPED_FROM ? (
       <TdhRuleClamp
-        everywhere={lines.length >= CLAMPED_EVERYWHERE_FROM}
+        everywhere
         more={t(locale, "network.tdh.shared.showAllLines", {
           count: formatInteger(locale, lines.length),
         })}
@@ -280,10 +335,12 @@ export default function TdhRuleBlock({
     condensed: "tw-border-l-iron-500",
     plain: "tw-border-l-white/[0.07]",
   }[tone];
-  const preScroll =
-    wrap === "none"
-      ? `tw-overflow-x-auto ${scrollStyles["shade"] ?? ""} ${scrollStyles["bar"] ?? ""}`
-      : "";
+  let preScroll = "";
+  if (mode === "scroll") {
+    preScroll = `tw-overflow-x-auto ${scrollStyles["shade"] ?? ""} ${scrollStyles["bar"] ?? ""}`;
+  } else if (mode === "phoneScroll") {
+    preScroll = `max-sm:tw-overflow-x-auto ${scrollStyles["shadePhone"] ?? ""} ${scrollStyles["bar"] ?? ""}`;
+  }
   const copy = (
     <TdhCopyButton
       value={code}
@@ -296,7 +353,7 @@ export default function TdhRuleBlock({
   );
   const body = (
     <code
-      className={`tw-font-mono tw-text-iron-100 ${gridClass(wrap, numbered)}`}
+      className={`tw-font-mono tw-text-iron-100 ${gridClass(mode, numbered)}`}
     >
       {lines.map((line, index) => (
         <RuleRow
@@ -304,14 +361,14 @@ export default function TdhRuleBlock({
           line={line}
           number={index + 1}
           numbered={numbered}
-          wrap={wrap}
+          mode={mode}
           language={language}
           keywords={keywords}
         />
       ))}
     </code>
   );
-  if (lines.length <= COMPACT_UP_TO && !scrolls) {
+  if (lines.length <= COMPACT_UP_TO && !scrollFrame) {
     return (
       <figure
         className={`tw-m-0 tw-flex tw-min-w-0 tw-items-start tw-gap-2 tw-overflow-hidden tw-rounded-lg tw-border tw-border-l-2 tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-py-1.5 tw-pl-3 tw-pr-1.5 sm:tw-pl-4 ${accent}`}
@@ -342,7 +399,7 @@ export default function TdhRuleBlock({
           {source && (
             <TdhSource refs={[source, ...moreSources]} locale={locale} />
           )}
-          {scrolls && (
+          {scrollFrame && (
             // Column-aligned lines run past a phone's edge: say so.
             <span className="tw-font-normal tw-text-iron-400 sm:tw-hidden">
               {t(locale, "network.tdh.shared.scrollHint")}
@@ -355,7 +412,7 @@ export default function TdhRuleBlock({
         <pre
           aria-label={t(locale, "network.tdh.shared.ruleRegion", { caption })}
           className={`tw-m-0 tw-bg-transparent tw-px-3 tw-py-3 tw-font-mono tw-text-[13px] tw-font-normal tw-leading-6 tw-text-iron-100 sm:tw-px-4 sm:tw-text-sm sm:tw-leading-[1.375rem] ${preScroll}`}
-          {...(scrolls
+          {...(scrollFrame
             ? { "data-tdh-scroll": "", tabIndex: 0, role: "region" }
             : {})}
         >

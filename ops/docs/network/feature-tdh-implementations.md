@@ -46,8 +46,9 @@ reference, the Lean model and 6529.io's current backend.
   the naming key (program B is also the TDH code of proof program B, and
   proof program A runs the validators' own code), that the later rounds'
   vectors change no value of a real day, that check counts
-  are each runner's own (1,257 in the Python reference, 1,253 in the Rust
-  reference and the Lean model, for the same 89 vectors), what each compute
+  are each runner's own (1,257 in the Python reference and 1,253 in the
+  Rust reference for the same 89 vectors, and the Lean model's as its
+  proof manifest gives it), what each compute
   time includes (the Rust reference's 0.6 s is computation alone, 2.9 s
   with parsing, and the Rust core's TDH-v1 step took 1.7 s on Linux and
   5.7 s on Windows inside the validator's run of October 15; the Python
@@ -66,11 +67,13 @@ reference, the Lean model and 6529.io's current backend.
   B was written from the specifications, the vectors and the design record,
   without opening any other implementation's code; the Rust reference's
   last open choice, the edition-floor adapter, is pinned in P53 §11.3.
-- Where each runs: validator signing (once validators run), the daily
-  comparison (from 16 October 2026), 6529.io (cutover about 23 October 2026)
-  and the proof programs (being built), each date in a caption under the
-  table so the headers stay on one line. Each cell has an icon and a word:
-  now, planned or from a date, under test, or no, with a legend.
+- Where each runs, and which checks cover it: one matrix, the full width
+  of the page, with a column per program and a row per check or use (P26's
+  conformance vectors, a whole real day, random and generated inputs, the
+  daily comparison, validator signing, 6529.io's published TDH and the
+  zero-knowledge proofs). Each cell has an icon and a word: now, planned
+  (said in the cell: `First check, planned`), from a date, under test, or
+  no, with a legend.
 - How they are checked: conformance vectors, differential replays, five
   rounds of differential tests across the Lean model, the Python reference,
   the Rust core and program B (a table, `#difftest-rounds`, gives each
@@ -81,9 +84,9 @@ reference, the Lean model and 6529.io's current backend.
   reference an optional third check: decided, D125 and P53 §4.5, not yet
   built in), the daily comparison (scheduled daily from 16 October 2026),
   the formal model, and proofs A and B, plus why Rust versus Python is the
-  real check after the cutover. A table shows which check covers which
-  program, with the same icons and legend, its cells at 14 px, and short
-  notes at prose width: in CI, 6529chain's `tdh-formal.yml` runs 1,000
+  real check after the cutover. Each check is two lines, with the counts
+  and the detail under `More`. The matrix above has short notes at prose
+  width: in CI, 6529chain's `tdh-formal.yml` runs 1,000
   seeded random inputs through Lean, Python and the Rust reference on every
   change, and the validator's CI runs the Rust core against program B. A
   note under the differential tests says where vectors 75 to 88 came from:

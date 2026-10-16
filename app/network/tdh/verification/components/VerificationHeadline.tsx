@@ -1,18 +1,23 @@
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowDownTrayIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import type { VerificationDay } from "@/lib/tdh/verification/schema";
 import {
   dayDifferences,
-  FIRST_REPORT_DATE,
+  dayRunNote,
   type DayNeighbours,
   type VerdictState,
 } from "@/lib/tdh/verification/states";
 import TdhDisclosure from "../../shared/TdhDisclosure";
 import TdhCopyButton from "../../shared/TdhCopyButton";
 import TdhStatusPill from "../../shared/TdhStatusPill";
-import { TDH_CARD, TDH_FOCUS_RING } from "../../shared/tdhStyles";
+import { TDH_CARD, TDH_FOCUS_RING, TDH_LINK } from "../../shared/tdhStyles";
+import { DayRunNoteText, ShaMatch } from "./VerificationProvenanceParts";
 import {
   formatCycleDate,
   formatInteger,
@@ -151,15 +156,23 @@ function DayArrow({
   );
 }
 
-/** The three totals of the day, and the SHA-256 of its file. */
+/**
+ * The three totals of the day, the SHA-256 of its file with whether it is the
+ * one the feed states, and the file itself: a shared link shows its evidence
+ * in the first screen.
+ */
 function DayEvidence({
   locale,
   day,
   daySha256,
+  statedSha256,
+  dayUrl,
 }: {
   readonly locale: SupportedLocale;
   readonly day: VerificationDay;
   readonly daySha256: string | null;
+  readonly statedSha256: string | null;
+  readonly dayUrl: string | null;
 }) {
   const totals = [
     ["rust", day.implementations.rust.totalTdh],
@@ -192,7 +205,7 @@ function DayEvidence({
             className="tw-font-mono tw-text-xs tw-text-iron-200"
             title={daySha256}
           >
-            {middleTruncate(daySha256, 6)}
+            {middleTruncate(daySha256)}
           </code>
           <TdhCopyButton
             value={daySha256}
@@ -204,6 +217,27 @@ function DayEvidence({
           />
         </p>
       )}
+      {(daySha256 !== null && statedSha256 !== null) || dayUrl !== null ? (
+        <p className="tw-m-0 tw-mt-1 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 sm:tw-justify-end">
+          {daySha256 !== null && statedSha256 !== null && (
+            <ShaMatch
+              locale={locale}
+              stated={statedSha256}
+              read={daySha256}
+              of="read"
+            />
+          )}
+          {dayUrl !== null && (
+            <a
+              href={dayUrl}
+              className={`${TDH_LINK} tw-inline-flex tw-min-h-6 tw-items-center tw-gap-1`}
+            >
+              <ArrowDownTrayIcon aria-hidden="true" className="tw-size-4" />
+              {t(locale, "network.tdh.verify.dayHero.download")}
+            </a>
+          )}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -220,6 +254,9 @@ export default function VerificationHeadline({
   isLatest,
   permalink = false,
   daySha256 = null,
+  statedSha256 = null,
+  dayUrl = null,
+  generatedAt = null,
 }: {
   readonly locale: SupportedLocale;
   readonly day: VerificationDay;
@@ -230,8 +267,21 @@ export default function VerificationHeadline({
   readonly permalink?: boolean;
   /** The SHA-256 of the day's file as the page read it. */
   readonly daySha256?: string | null;
+  /** The SHA-256 the feed's index states for the day's file. */
+  readonly statedSha256?: string | null;
+  /** The day's file, to download. */
+  readonly dayUrl?: string | null;
+  /** When the feed wrote the day's file, from the file or the index. */
+  readonly generatedAt?: string | null;
 }) {
   const cycle = formatInteger(locale, day.cycleDay);
+  // "Every record equal" says it all; any other verdict needs its sentence
+  // and the job's verdict word.
+  const equal =
+    verdict === "equal" &&
+    day.agreement.rustVsLive !== null &&
+    day.implementations.python !== null;
+  const runNote = dayRunNote(day.date, generatedAt ?? day.generatedAt);
   return (
     <section
       aria-labelledby="tdh-verify-status-heading"
@@ -269,11 +319,15 @@ export default function VerificationHeadline({
             {headlineShort(locale, day, verdict)}
           </h2>
           <p className="tw-m-0 tw-mt-2 tw-max-w-[38em] tw-text-base tw-leading-7 tw-text-iron-200">
-            {headlineSentence(locale, day, verdict)}
+            {equal
+              ? t(locale, "network.tdh.verify.headline.equalBy")
+              : headlineSentence(locale, day, verdict)}
           </p>
-          <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
-            {t(locale, `network.tdh.verify.verdict.${verdict}` as MessageKey)}
-          </p>
+          {!equal && (
+            <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+              {t(locale, `network.tdh.verify.verdict.${verdict}` as MessageKey)}
+            </p>
+          )}
         </div>
         {/* The day's evidence beside the sentence: the three totals and
             the SHA-256 of the file read, so a shared link shows them in
@@ -294,7 +348,13 @@ export default function VerificationHeadline({
               direction="next"
             />
           </nav>
-          <DayEvidence locale={locale} day={day} daySha256={daySha256} />
+          <DayEvidence
+            locale={locale}
+            day={day}
+            daySha256={daySha256}
+            statedSha256={statedSha256}
+            dayUrl={dayUrl}
+          />
         </div>
       </div>
       <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4 lg:tw-flex-row lg:tw-items-start lg:tw-justify-between">
@@ -305,9 +365,13 @@ export default function VerificationHeadline({
               date: formatCycleDate(locale, day.date),
             })}
           </p>
-          {day.date < FIRST_REPORT_DATE && (
+          {runNote !== null && (
             <p className="tw-m-0 tw-max-w-[34rem] tw-text-iron-400">
-              {t(locale, "network.tdh.verify.provenance.manualRun")}
+              <DayRunNoteText
+                locale={locale}
+                date={day.date}
+                generatedAt={generatedAt ?? day.generatedAt}
+              />
             </p>
           )}
         </div>

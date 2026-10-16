@@ -94,25 +94,39 @@ Each explorable is titled under a `Try it` eyebrow.
 - The worked examples and explorables come from a TypeScript port of the
   TDH-v1 arithmetic, tested against values the Python reference printed;
   the page's other figures are stated from P26, the replay and the daily
-  comparison. Step 14 counts the days compared from the daily feed (the
-  page revalidates every 10 minutes).
+  comparison. Step 13 gives the latest compared day's total from the
+  daily feed (the page revalidates every 10 minutes).
 - Rates, boosts and the full example use the network of the 2026-10-11
   cycle: largest edition 3,941 (FirstGM's, after its adjustment), 559
   eligible Memes in 17 seasons, 101 Gradients, 1,000 NextGen tokens; the
   date examples use the cycle of 16 October 2026 (cycle 20,742). The highest
   boost on 2026-10-11 is 2.04.
-- Step 5's first paragraph says that the mint counts still read every step,
-  so a mint and its burn inside one transaction move no copy but can make a
-  card eligible and change editions, rates and other collectors' TDH (the
-  formal model's counterexample I, linked). Which rules read the transfers
+- Step 5 gives its example (a table, the transaction figure and what the
+  daily comparison found on October 14 and 15) in one neutral card, then one
+  note: netting covers the holdings only, since the mint counts, the
+  underflow test and the log-position checks still read every step, so a
+  mint and its burn inside one transaction can make a card eligible and
+  change other collectors' TDH (the formal model's counterexample I,
+  linked). Example cards have a neutral frame; the blue rule marks exact
+  rules only. Step 1's history line follows its example, with a link to
+  the label. Which rules read the transfers
   before netting (the mint facts, the underflow test and the log-position
   checks) and the vectors that pin the rule are in its `Exact rule and
   sources` disclosure. Its transaction figure is centred, with the result
   inside its frame.
-- Step 14 says what a collector sees of a sale and a purchase of one card in
-  different transactions of one block: a difference in the daily comparison
-  until the cutover, the one D132 expects, and TDH-v1's value on 6529.io
-  from then; it links to the dashboard's four classes.
+- Step 14 lists netting within one transaction (D131, as 6529.io's backend
+  already does) and on-chain order across transactions of one block
+  (DEV-2) as two items: a sale and a purchase of one card in different
+  transactions of one block can lower a few wallets' TDH, which the daily
+  comparison would show as a difference until the cutover; it links to the
+  dashboard's four classes.
+- Step 6 says the floor in one sentence (below 300 copies minted, the
+  claim's mint limit, up to 310, when that is more than the minted count)
+  and its table adds a claim limit below 310 (149 minted under 200: edition
+  200, rate 19.70). Step 9's table says why every Meme but the newest is a
+  full set that day (the newest is in season 17, the current season).
+  Step 12's phone table writes a holding of two copies one copy a line
+  (`200 d`, `+ 120 d`, `× 1.00`).
 - Step 10 states the three-wallet limit of `tdh-v1.0` (every pair
   confirmed, groups formed newest confirmed link first) and, in one line,
   that 6529.io accepts a fourth consolidated wallet since October 15, 2026
@@ -128,8 +142,7 @@ Each explorable is titled under a `Try it` eyebrow.
   phones NextGen's 3.94 sits above and left of its point and FirstGM's 1.00
   straight above its own, so they never stack, and the 4,000 tick is
   dropped. Its legend is a two-column grid. The rate and boost tables are
-  captioned with their cycle, 2026-10-11, and that their values are the
-  same on October 16, 2026.
+  captioned with their cycle, the October 11, 2026 cycle.
 
 ## Related Pages
 

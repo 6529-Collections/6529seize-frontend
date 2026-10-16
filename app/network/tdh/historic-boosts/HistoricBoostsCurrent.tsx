@@ -21,16 +21,32 @@ import {
   m,
 } from "./historicBoostsShared";
 
-/** A bar from 1.00× to the axis maximum, 2.00×. */
+/**
+ * A bar from 1.00× to the axis maximum, 2.24×: the scale of the boost
+ * ladder below, so a value is the same length in both drawings.
+ */
 function barWidth(value: number): string {
-  return `${((value - 1) / (CURRENT_RULE.ceiling - 1)) * 100}%`;
+  return `${((value - 1) / (CURRENT_RULE.axisMax - 1)) * 100}%`;
+}
+
+/** A legend swatch: the solid bar or its dashed reach. */
+function Swatch({ dashed }: { readonly dashed: boolean }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`tw-inline-block tw-h-2 tw-w-4 tw-shrink-0 tw-rounded-full ${
+        dashed
+          ? "tw-border tw-border-dashed tw-border-primary-300/80 tw-bg-primary-400/15"
+          : "tw-bg-primary-400"
+      }`}
+    />
+  );
 }
 
 /**
  * The full-set boost of each schedule, oldest first, as bars on one axis
- * from 1.00× to 2.00×, ending with the current schedule: its value on the
- * latest cycle, and the dashed reach to its ceiling, each labelled where it
- * is drawn.
+ * from 1.00× to 2.24×, ending with the current schedule: its value on the
+ * latest cycle and the dashed reach to its ceiling, told apart by a legend.
  */
 export function BoostTimeline({
   locale,
@@ -96,14 +112,16 @@ export function BoostTimeline({
               {formatMultiplier(locale, CURRENT_RULE.today)}
             </span>
           </span>
-          <span className="tw-mr-14 tw-mt-1 tw-flex tw-flex-wrap tw-justify-between tw-gap-x-2 tw-text-sm tw-text-iron-400">
-            <span className="tw-text-primary-300">
+          <span className="tw-mr-14 tw-mt-1.5 tw-flex tw-flex-col tw-gap-1 tw-text-sm tw-text-iron-300">
+            <span className="tw-inline-flex tw-items-center tw-gap-2">
+              <Swatch dashed={false} />
               {m(locale, "network.tdhHistoric.timeline.todayLabel", {
                 value: formatMultiplier(locale, CURRENT_RULE.today),
                 date: formatShortDate(locale, CURRENT_RULE.valueDateIso),
               })}
             </span>
-            <span className="tw-text-right tw-text-primary-300">
+            <span className="tw-inline-flex tw-items-center tw-gap-2">
+              <Swatch dashed />
               {m(locale, "network.tdhHistoric.timeline.reachLabel", {
                 value: formatMultiplier(locale, CURRENT_RULE.ceiling),
               })}
@@ -116,9 +134,9 @@ export function BoostTimeline({
         className="tw-m-0 tw-mr-14 tw-mt-2 tw-flex tw-justify-between tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pt-1 tw-text-sm tw-tabular-nums tw-text-iron-400"
       >
         <span>{formatMultiplier(locale, 1)}</span>
-        <span>{formatMultiplier(locale, CURRENT_RULE.ceiling)}</span>
+        <span>{formatMultiplier(locale, CURRENT_RULE.axisMax)}</span>
       </p>
-      <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-5 tw-text-iron-400">
+      <p className="tw-m-0 tw-mt-3 tw-max-w-[38em] tw-text-sm tw-leading-5 tw-text-iron-400">
         {m(locale, "network.tdhHistoric.timeline.note")}
       </p>
     </figure>
@@ -332,9 +350,18 @@ export function CurrentLadder({
     );
   }
   const rules = query.data;
+  // The cycle the rules' snapshot belongs to: the day after its block.
+  const snapshotDay = Math.floor(
+    Date.parse(rules.snapshot.block_timestamp) / 86_400_000
+  );
   return (
     <BoostLadder
       locale={locale}
+      cycle={formatUtcDate(locale, (snapshotDay + 1) * 86_400_000, {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })}
       values={getTdhBoostLadder(rules)}
       eligibleMemes={rules.snapshot.eligible_memes_count}
       lastSeason={rules.boost.season_schedule.last_boosted_season}

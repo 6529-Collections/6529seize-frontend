@@ -29,6 +29,7 @@ const ORDER: readonly StatementStatus[] = [
   "byDefinition",
   "checkedBuild",
   "shownFalse",
+  "shownFalseEval",
   "deferred",
   "unverified",
 ];
@@ -39,7 +40,7 @@ function entryPill(entry: CheckedEntry): TdhPill {
     return "unverified";
   }
   if (entry.status === "counterexample") {
-    return "shownFalse";
+    return entry.checkedBy === "evaluation" ? "shownFalseEval" : "shownFalse";
   }
   return entry.status;
 }
@@ -171,14 +172,25 @@ export default function StatementsTable({
   const shown = rows.filter(
     (row) => filter === "all" || statusOf(row) === filter
   );
-  const text = (row: LeanStatement, part: "title" | "plain" | "scope") =>
+  const text = (
+    row: LeanStatement,
+    part: "title" | "claim" | "plain" | "scope"
+  ) =>
     t(
       locale,
       `network.tdh.formal.st.${row.copy ?? row.id}.${part}` as MessageKey
     );
 
+  const entryCount = (row: LeanStatement) =>
+    checks[row.id]?.entries.length ?? 0;
+
   return (
     <div>
+      {filters.length > 0 && (
+        <p className="tw-m-0 tw-mb-2 tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-400">
+          {t(locale, "network.tdh.formal.statements.filterNote")}
+        </p>
+      )}
       {filters.length > 0 && (
         <div
           role="group"
@@ -225,9 +237,9 @@ export default function StatementsTable({
                 {t(locale, "network.tdh.formal.statements.statement")}
               </th>
               <th scope="col" className={TDH_TH}>
-                {t(locale, "network.tdh.formal.statements.plain")}
+                {t(locale, "network.tdh.formal.statements.claim")}
               </th>
-              <th scope="col" className={`${TDH_TH} tw-w-[11.5rem]`}>
+              <th scope="col" className={`${TDH_TH} tw-w-[12rem]`}>
                 {t(locale, "network.tdh.formal.statements.status")}
               </th>
             </tr>
@@ -270,9 +282,24 @@ export default function StatementsTable({
                           .map((ref) => ref.replaceAll(" ", NO_BREAK_SPACE))
                           .join(" · ")}
                       </span>
+                      {entryCount(row) > 0 && (
+                        <span className="tw-block tw-pl-6 tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-400">
+                          {t(
+                            locale,
+                            entryCount(row) === 1
+                              ? "network.tdh.formal.statements.entries.one"
+                              : "network.tdh.formal.statements.entries.other",
+                            { count: formatInteger(locale, entryCount(row)) }
+                          )}
+                        </span>
+                      )}
                     </th>
-                    <td className={`${TDH_TD_STACK_MD} tw-text-iron-300`}>
-                      {text(row, "plain")}
+                    {/* One line of claim in the row; the plain-words
+                        explanation waits behind the row's chevron. */}
+                    <td
+                      className={`${TDH_TD_STACK_MD} tw-text-[15px] tw-leading-6 tw-text-iron-100`}
+                    >
+                      {text(row, "claim")}
                     </td>
                     <td className={`${TDH_TD_STACK_MD} tw-pt-1 md:tw-pt-3`}>
                       <TdhStatusPill
@@ -294,7 +321,13 @@ export default function StatementsTable({
                       className="tw-block tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/60 tw-px-4 tw-py-4 md:tw-table-cell"
                     >
                       <div className="tw-space-y-3">
-                        <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
+                        <p className="tw-m-0 tw-max-w-[44em] tw-text-sm tw-leading-6 tw-text-iron-200">
+                          <span className="tw-font-medium tw-text-iron-100">
+                            {t(locale, "network.tdh.formal.statements.plain")}:
+                          </span>{" "}
+                          {text(row, "plain")}
+                        </p>
+                        <p className="tw-m-0 tw-max-w-[44em] tw-text-sm tw-leading-6 tw-text-iron-300">
                           <span className="tw-font-medium tw-text-iron-100">
                             {t(locale, "network.tdh.formal.statements.scope")}:
                           </span>{" "}

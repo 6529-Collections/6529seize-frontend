@@ -2,9 +2,12 @@ import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import type { LeanRound } from "../formal/leanResults";
-import TdhDisclosure from "../shared/TdhDisclosure";
 import TdhStatusPill from "../shared/TdhStatusPill";
-import { shortCommit } from "../verification/components/verificationFormat";
+import {
+  formatCycleDate,
+  shortCommit,
+} from "../verification/components/verificationFormat";
+import ProgramRow from "./ProgramRow";
 import {
   knownBuild,
   P26,
@@ -42,23 +45,15 @@ type ProgramKey =
   | "backend";
 
 /**
- * One build of a program: how many of its P26 round's vectors it passes
- * (null where the build's round is not known) and which build it is.
- */
-interface RoundRun {
-  readonly passed: number | null;
-  readonly total: number | null;
-  readonly label: string;
-}
-
-/**
  * The builds the daily comparison ran on its latest published day, as that
  * day's file names them: the validator commit of the Rust core and the
- * 6529chain commit of the Python reference.
+ * 6529chain commit of the Python reference, and the day.
  */
 export interface DailyBuilds {
   readonly rust: string | null;
   readonly python: string | null;
+  /** The latest published day, "YYYY-MM-DD". */
+  readonly date: string;
 }
 
 const PROGRAMS = [
@@ -111,167 +106,85 @@ function longText(
 }
 
 /**
- * The daily comparison's build of a program, from the latest day's file:
- * its vectors when the build is a known one, else the build alone.
+ * Each program's one vectors figure: its latest build against P26's latest
+ * vectors (the Lean model's from its proof manifest). The P26 commit is said
+ * once, under the table.
  */
-function dailyRun(
-  locale: SupportedLocale,
-  repository: "validator" | "6529chain",
-  commit: string | null
-): RoundRun[] {
-  if (commit === null) {
-    return [];
-  }
-  const build = `${repository}@${shortCommit(commit)}`;
-  const known = knownBuild(commit);
-  return [
-    known === null
-      ? {
-          passed: null,
-          total: null,
-          label: t(locale, "network.tdh.impl.round.dailyUnknown", { build }),
-        }
-      : {
-          passed: known.vectors,
-          total: known.vectors,
-          label: t(locale, "network.tdh.impl.round.daily", {
-            spec: known.spec,
-            build,
-          }),
-        },
-  ];
-}
-
-/**
- * Each program's vectors, build by build: the newest first, then the build
- * the daily comparison ran on its latest day, read from the feed. Every
- * count is out of its own round's vectors, so a build that passes all of an
- * older round never reads as failing vectors.
- */
-function roundRuns(
-  locale: SupportedLocale,
+function vectorsFigure(
   program: ProgramKey,
-  lean: LeanVectorRun,
-  daily: DailyBuilds | null
-): RoundRun[] | null {
-  const round = (key: string, values: Record<string, string>) =>
-    t(locale, `network.tdh.impl.round.${key}` as MessageKey, values);
+  lean: LeanVectorRun
+): { readonly passed: number; readonly total: number } | null {
   switch (program) {
     case "rust":
-      return [
-        {
-          passed: PROGRAM_CONFORMANCE.rustCoreCurrent.vectors,
-          total: P26.vectorCount,
-          label: round("development", {
-            spec: PROGRAM_CONFORMANCE.rustCoreCurrent.specCommit,
-            commit: VALIDATOR_DEVELOPMENT.commit,
-          }),
-        },
-        ...dailyRun(locale, "validator", daily?.rust ?? null),
-      ];
+      return {
+        passed: PROGRAM_CONFORMANCE.rustCoreCurrent.vectors,
+        total: P26.vectorCount,
+      };
     case "programB":
-      return [
-        {
-          passed: PROGRAM_CONFORMANCE.programBCurrent.vectors,
-          total: P26.vectorCount,
-          label: round("development", {
-            spec: PROGRAM_CONFORMANCE.programBCurrent.specCommit,
-            commit: VALIDATOR_DEVELOPMENT.commit,
-          }),
-        },
-      ];
+      return {
+        passed: PROGRAM_CONFORMANCE.programBCurrent.vectors,
+        total: P26.vectorCount,
+      };
     case "python":
-      return [
-        {
-          passed: PROGRAM_CONFORMANCE.python.vectors,
-          total: P26.vectorCount,
-          label: round("latest", { spec: P26.commit }),
-        },
-        ...dailyRun(locale, "6529chain", daily?.python ?? null),
-      ];
+      return {
+        passed: PROGRAM_CONFORMANCE.python.vectors,
+        total: P26.vectorCount,
+      };
     case "rustReference":
-      return [
-        {
-          passed: PROGRAM_CONFORMANCE.rustReference.vectors,
-          total: P26.vectorCount,
-          label: round("latest", { spec: P26.commit }),
-        },
-      ];
+      return {
+        passed: PROGRAM_CONFORMANCE.rustReference.vectors,
+        total: P26.vectorCount,
+      };
     case "lean":
-      return [
-        {
-          passed: lean.passed,
-          total: lean.total,
-          label: round("published", { spec: lean.spec }),
-        },
-        ...(lean.newer === null
-          ? []
-          : [
-              {
-                passed: lean.newer.passed,
-                total: lean.newer.total,
-                label: round("committed", {
-                  spec: lean.newer.spec,
-                  commit: lean.newer.commit,
-                }),
-              },
-            ]),
-      ];
+      return { passed: lean.passed, total: lean.total };
     case "backend":
       return null;
   }
 }
 
-/** A program's rounds as short lines: "51 of 51 · P26 0621ed4, daily job". */
-function RoundRuns({
-  locale,
-  runs,
-}: {
-  readonly locale: SupportedLocale;
-  readonly runs: readonly RoundRun[] | null;
-}) {
-  if (runs === null) {
-    return (
-      <span className="tw-text-sm tw-leading-6 tw-text-iron-300">
-        {t(locale, "network.tdh.impl.bar.none")}
-      </span>
-    );
+/**
+ * The build that ran on the latest published day, from that day's file: its
+ * commit, and whether this page knows what it computes ("a build not yet
+ * described here" otherwise, so a redeployed job never looks unaccounted
+ * for). Only the Rust core and the Python reference run daily.
+ */
+function dailyLine(
+  locale: SupportedLocale,
+  program: ProgramKey,
+  daily: DailyBuilds | null
+): string | null {
+  if (daily === null) {
+    return null;
   }
-  return (
-    <ul className="tw-m-0 tw-list-none tw-space-y-1 tw-p-0">
-      {runs.map((run, index) => (
-        <li
-          key={run.label}
-          className={`tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-tabular-nums ${index === 0 ? "tw-text-sm tw-leading-6" : "tw-text-sm tw-leading-5 tw-text-iron-400"}`}
-        >
-          {run.passed !== null && run.total !== null && (
-            <span
-              className={`tw-whitespace-nowrap ${index === 0 ? "tw-font-semibold tw-text-iron-50" : "tw-text-iron-300"}`}
-            >
-              {t(locale, "network.tdh.impl.round.count", {
-                passed: formatInteger(locale, run.passed),
-                total: formatInteger(locale, run.total),
-              })}
-            </span>
-          )}
-          <span className={index === 0 ? "tw-text-iron-300" : ""}>
-            {run.label}
-          </span>
-        </li>
-      ))}
-    </ul>
-  );
+  let repository: "validator" | "6529chain" | null = null;
+  let commit: string | null = null;
+  if (program === "rust") {
+    repository = "validator";
+    commit = daily.rust;
+  } else if (program === "python") {
+    repository = "6529chain";
+    commit = daily.python;
+  }
+  if (repository === null || commit === null) {
+    return null;
+  }
+  const values = {
+    date: formatCycleDate(locale, daily.date),
+    build: `${repository}@${shortCommit(commit)}`,
+  };
+  return knownBuild(commit) === null
+    ? t(locale, "network.tdh.impl.round.dailyUnknown", values)
+    : t(locale, "network.tdh.impl.round.daily", values);
 }
 
 const COLUMNS =
   "lg:tw-grid lg:tw-grid-cols-[minmax(0,1.3fr)_minmax(0,0.85fr)_minmax(0,1.35fr)_minmax(0,0.7fr)] lg:tw-gap-x-6";
 
 /**
- * The programs as one comparison: a row each, with its status, the vectors
- * it passes round by round, and its compute time, under one header row
- * inside the card. Names carry no colour, so the status pills' colours are
- * the only ones in the table. Commits and the longer story open below each
- * row, so the matrix stays readable.
+ * The programs as one comparison: a row each, with its name (the button that
+ * opens its details), its role, its status, one vectors figure with the
+ * build that ran on the latest published day, and its compute time, under
+ * one header row inside the card.
  */
 export default function ProgramCards({
   locale,
@@ -285,6 +198,8 @@ export default function ProgramCards({
 }) {
   const head = (key: string) =>
     t(locale, `network.tdh.impl.matrixHead.${key}` as MessageKey);
+  const label =
+    "tw-mb-1 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400 lg:tw-sr-only";
   return (
     <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900">
       <div
@@ -298,6 +213,10 @@ export default function ProgramCards({
       </div>
       <ul className="tw-m-0 tw-list-none tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06] tw-p-0">
         {PROGRAMS.map((program) => {
+          const name = t(
+            locale,
+            `network.tdh.impl.name.${program.key}` as MessageKey
+          );
           const speed =
             program.key === "lean"
               ? t(locale, LEAN_SPEED_SHORT[lean.round])
@@ -305,26 +224,22 @@ export default function ProgramCards({
                   locale,
                   `network.tdh.impl.speedShort.${program.key}` as MessageKey
                 );
+          const figure = vectorsFigure(program.key, lean);
+          const ranOn = dailyLine(locale, program.key, daily);
           return (
-            <li key={program.key} className="tw-px-4 tw-py-4">
-              <div className={`tw-space-y-4 lg:tw-space-y-0 ${COLUMNS}`}>
-                <div className="tw-min-w-0">
-                  <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
-                    {t(
-                      locale,
-                      `network.tdh.impl.name.${program.key}` as MessageKey
-                    )}
-                  </h3>
-                  <p className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-300">
-                    {longText(locale, program.key, "role", lean)}
-                  </p>
-                </div>
+            <ProgramRow
+              key={program.key}
+              name={name}
+              role={longText(locale, program.key, "role", lean)}
+              columns={COLUMNS}
+              showLabel={t(locale, "network.tdh.impl.programs.showDetails", {
+                name,
+              })}
+              cells={
                 <dl className="tw-m-0 tw-contents">
                   <div className="tw-min-w-0 max-lg:tw-mt-4">
-                    <dt className="tw-mb-1 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400 lg:tw-sr-only">
-                      {head("status")}
-                    </dt>
-                    <dd className="tw-m-0 tw-flex tw-flex-wrap tw-gap-1.5">
+                    <dt className={label}>{head("status")}</dt>
+                    <dd className="tw-m-0 tw-flex tw-flex-wrap tw-gap-1.5 lg:tw-pt-2.5">
                       <TdhStatusPill
                         pill={program.pill}
                         locale={locale}
@@ -333,42 +248,36 @@ export default function ProgramCards({
                     </dd>
                   </div>
                   <div className="tw-min-w-0 max-lg:tw-mt-4">
-                    <dt className="tw-mb-1 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400 lg:tw-sr-only">
-                      {head("vectors")}
-                    </dt>
-                    <dd className="tw-m-0">
-                      <RoundRuns
-                        locale={locale}
-                        runs={roundRuns(locale, program.key, lean, daily)}
-                      />
+                    <dt className={label}>{head("vectors")}</dt>
+                    <dd className="tw-m-0 tw-text-sm tw-tabular-nums tw-leading-6 lg:tw-pt-2.5">
+                      {figure === null ? (
+                        <span className="tw-text-iron-300">
+                          {t(locale, "network.tdh.impl.bar.none")}
+                        </span>
+                      ) : (
+                        <span className="tw-font-semibold tw-text-iron-50">
+                          {t(locale, "network.tdh.impl.round.count", {
+                            passed: formatInteger(locale, figure.passed),
+                            total: formatInteger(locale, figure.total),
+                          })}
+                        </span>
+                      )}
+                      {ranOn !== null && (
+                        <span className="tw-block tw-text-sm tw-leading-5 tw-text-iron-400">
+                          {ranOn}
+                        </span>
+                      )}
                     </dd>
                   </div>
                   <div className="tw-min-w-0 max-lg:tw-mt-4">
-                    <dt className="tw-mb-1 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400 lg:tw-sr-only">
-                      {head("speed")}
-                    </dt>
-                    <dd className="tw-m-0 tw-text-sm tw-tabular-nums tw-leading-6 tw-text-iron-100">
+                    <dt className={label}>{head("speed")}</dt>
+                    <dd className="tw-m-0 tw-text-sm tw-tabular-nums tw-leading-6 tw-text-iron-100 lg:tw-pt-2.5">
                       {speed}
                     </dd>
                   </div>
                 </dl>
-              </div>
-              <TdhDisclosure
-                className="tw-mt-1"
-                summaryClassName="tw-w-fit"
-                summary={
-                  <>
-                    {t(locale, "network.tdh.impl.programs.details")}
-                    <span className="tw-sr-only">
-                      {" "}
-                      {t(
-                        locale,
-                        `network.tdh.impl.name.${program.key}` as MessageKey
-                      )}
-                    </span>
-                  </>
-                }
-              >
+              }
+              details={
                 <dl className="tw-m-0 tw-grid tw-gap-x-6 tw-gap-y-3 tw-pb-2 tw-pl-6 md:tw-grid-cols-2">
                   {(
                     [
@@ -389,11 +298,20 @@ export default function ProgramCards({
                     </div>
                   ))}
                 </dl>
-              </TdhDisclosure>
-            </li>
+              }
+            />
           );
         })}
       </ul>
+      <p className="tw-m-0 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-px-4 tw-py-2.5 tw-text-sm tw-leading-6 tw-text-iron-400">
+        <span className="tw-block tw-max-w-[38em]">
+          {t(locale, "network.tdh.impl.programs.vectorsNote", {
+            count: formatInteger(locale, P26.vectorCount),
+            spec: P26.commit,
+            commit: VALIDATOR_DEVELOPMENT.commit,
+          })}
+        </span>
+      </p>
     </div>
   );
 }

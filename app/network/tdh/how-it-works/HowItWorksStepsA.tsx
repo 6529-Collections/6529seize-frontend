@@ -1,5 +1,5 @@
+import Link from "next/link";
 import { formatInteger, formatNumber } from "@/i18n/format";
-import TdhArrowLink from "../shared/TdhArrowLink";
 import TdhTableFrame from "../shared/TdhTableFrame";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -24,6 +24,7 @@ import {
   TDH_TD,
   TDH_TD_NUM,
   TDH_TH,
+  TDH_LINK,
   TDH_TH_NUM,
   tdhNarrowCell,
 } from "../shared/tdhStyles";
@@ -32,13 +33,7 @@ import DayCounter from "./explorables/DayCounter";
 import RateExplorer from "./explorables/RateExplorer";
 import StackSimulator from "./explorables/StackSimulator";
 import { RateCurveDiagram, StackDiagram } from "./HowItWorksDiagrams";
-import StepSection, {
-  Caution,
-  Cited,
-  Example,
-  Measure,
-  Note,
-} from "./StepSection";
+import StepSection, { Cited, Example, Measure, Note } from "./StepSection";
 
 const CAPTION =
   "tw-px-4 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200";
@@ -63,12 +58,6 @@ function Step1({ locale }: { readonly locale: SupportedLocale }) {
     >
       <Cited locale={locale}>{t(locale, "network.tdh.how.s1.body")}</Cited>
       <Cited locale={locale}>{t(locale, "network.tdh.how.s1.finality")}</Cited>
-      <Cited locale={locale} muted>
-        {t(locale, "network.tdh.how.s1.daily")}
-      </Cited>
-      <TdhArrowLink href="/network/tdh/verification">
-        {t(locale, "network.tdh.how.s1.dailyLink")}
-      </TdhArrowLink>
       <Example locale={locale}>
         <p className="tw-m-0">
           {t(locale, "network.tdh.how.s1.example", {
@@ -78,6 +67,12 @@ function Step1({ locale }: { readonly locale: SupportedLocale }) {
           })}
         </p>
       </Example>
+      <Note>
+        {t(locale, "network.tdh.how.s1.daily")}{" "}
+        <Link href="/network/tdh/verification#provenance" className={TDH_LINK}>
+          {t(locale, "network.tdh.how.s1.dailyLink")}
+        </Link>
+      </Note>
     </StepSection>
   );
 }
@@ -169,7 +164,7 @@ function Step4({ locale }: { readonly locale: SupportedLocale }) {
       ruleSource="P26 §7.1"
     >
       <Cited locale={locale}>{t(locale, "network.tdh.how.s4.body")}</Cited>
-      <Example locale={locale}>
+      <Example locale={locale} wide>
         <p className="tw-m-0">{t(locale, "network.tdh.how.s4.example")}</p>
         <TdhTableFrame label={t(locale, "network.tdh.how.s4.tableCaption")}>
           <table className={TDH_TABLE}>
@@ -257,7 +252,6 @@ function Step5({ locale }: { readonly locale: SupportedLocale }) {
       ruleNote={t(locale, "network.tdh.how.s5.vectors")}
     >
       <Cited locale={locale}>{t(locale, "network.tdh.how.s5.body")}</Cited>
-      <Caution>{t(locale, "network.tdh.how.s5.limit")}</Caution>
       <Example locale={locale}>
         <p className="tw-m-0">{t(locale, "network.tdh.how.s5.example")}</p>
         <TdhTableFrame label={t(locale, "network.tdh.how.s5.tableCaption")}>
@@ -300,11 +294,16 @@ function Step5({ locale }: { readonly locale: SupportedLocale }) {
           </table>
         </TdhTableFrame>
         <TransactionBoxDiagram locale={locale} />
+        <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
+          {t(locale, "network.tdh.how.s5.measured")}
+        </p>
       </Example>
-      <Note>{t(locale, "network.tdh.how.s5.measured")}</Note>
-      <TdhArrowLink href="/network/tdh/formal#statements">
-        {t(locale, "network.tdh.how.s5.formalLink")}
-      </TdhArrowLink>
+      <Note>
+        {t(locale, "network.tdh.how.s5.limit")}{" "}
+        <Link href="/network/tdh/formal#statements" className={TDH_LINK}>
+          {t(locale, "network.tdh.how.s5.formalLink")}
+        </Link>
+      </Note>
     </StepSection>
   );
 }
@@ -345,7 +344,7 @@ function Step6({ locale }: { readonly locale: SupportedLocale }) {
             </thead>
             <tbody>
               {EDITION_EXAMPLES.map((row) => (
-                <tr key={row.minted}>
+                <tr key={`${row.minted}-${row.claimLimit}`}>
                   <td className={TDH_TD_NUM}>
                     {formatInteger(locale, row.minted)}
                   </td>
@@ -431,9 +430,7 @@ function Step7({ locale }: { readonly locale: SupportedLocale }) {
           </table>
         </TdhTableFrame>
       </Measure>
-      <Measure>
-        <RateCurveDiagram locale={locale} />
-      </Measure>
+      <RateCurveDiagram locale={locale} />
       <Note>{t(locale, "network.tdh.how.s7.tie")}</Note>
     </StepSection>
   );

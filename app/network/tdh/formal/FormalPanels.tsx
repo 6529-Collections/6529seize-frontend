@@ -6,6 +6,8 @@ import CaseSafe from "../shared/CaseSafe";
 import TdhDisclosure from "../shared/TdhDisclosure";
 import TdhStatusPill from "../shared/TdhStatusPill";
 import { TDH_CARD, TDH_LINK } from "../shared/tdhStyles";
+import type { FormalManifest, FormalStatus } from "@/lib/tdh/formal/manifest";
+import type { TdhPill } from "../shared/TdhStatusPill";
 import { LEAN_ROUND_5 } from "./leanResults";
 
 /** Parts of the formal model page: the builds, what the model found, the legend. */
@@ -321,6 +323,7 @@ const PROOF_STATUSES = [
   "byDefinition",
   "checkedBuild",
   "shownFalse",
+  "shownFalseEval",
   "deferred",
 ] as const;
 
@@ -341,5 +344,96 @@ export function ProofLegend({ locale }: { readonly locale: SupportedLocale }) {
         </div>
       ))}
     </dl>
+  );
+}
+
+const ENTRY_GROUPS: readonly FormalStatus[] = [
+  "proved",
+  "counterexample",
+  "deferred",
+];
+
+function manifestPill(entry: FormalManifest["theorems"][number]): TdhPill {
+  if (entry.status === "counterexample") {
+    return entry.checkedBy === "evaluation" ? "shownFalseEval" : "shownFalse";
+  }
+  return entry.status;
+}
+
+/**
+ * Every entry of the proof manifest, by status, so each headline count can
+ * be found and audited: the statements above group these entries.
+ */
+export function AllManifestEntries({
+  locale,
+  manifest,
+}: {
+  readonly locale: SupportedLocale;
+  readonly manifest: FormalManifest;
+}) {
+  return (
+    <TdhDisclosure
+      tone="strong"
+      summary={t(locale, "network.tdh.formal.allEntries.summary", {
+        count: formatInteger(locale, manifest.theorems.length),
+      })}
+    >
+      <div className="tw-space-y-5 tw-pb-2 tw-pl-6">
+        {ENTRY_GROUPS.map((status) => {
+          const entries = manifest.theorems.filter(
+            (entry) => entry.status === status
+          );
+          if (entries.length === 0) {
+            return null;
+          }
+          return (
+            <section
+              key={status}
+              aria-label={t(locale, `network.tdh.formal.allEntries.${status}`, {
+                count: formatInteger(locale, entries.length),
+              })}
+            >
+              <h4 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+                {t(locale, `network.tdh.formal.allEntries.${status}`, {
+                  count: formatInteger(locale, entries.length),
+                })}
+              </h4>
+              <ul className="tw-m-0 tw-mt-2 tw-list-none tw-p-0">
+                {entries.map((entry) => (
+                  <li
+                    key={entry.id}
+                    className="tw-grid tw-min-w-0 tw-grid-cols-[minmax(0,1fr)] tw-gap-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-py-2 first:tw-border-t-0 md:tw-grid-cols-[minmax(0,16rem)_minmax(0,1fr)] md:tw-gap-x-4"
+                  >
+                    <span className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
+                      <code className="tw-min-w-0 tw-max-w-full tw-break-all tw-font-mono tw-text-xs tw-text-iron-100">
+                        {entry.id}
+                      </code>
+                      <TdhStatusPill
+                        pill={manifestPill(entry)}
+                        locale={locale}
+                        size="sm"
+                      />
+                      <span className="tw-text-xs tw-text-iron-400">
+                        {t(
+                          locale,
+                          entry.library === "p53"
+                            ? "network.tdh.formal.allEntries.p53"
+                            : "network.tdh.formal.allEntries.tdh"
+                        )}
+                      </span>
+                    </span>
+                    {/* Theorem names in the text are long words: they may
+                        break anywhere rather than run past a phone's edge. */}
+                    <span className="tw-min-w-0 tw-max-w-[44em] tw-text-sm tw-leading-6 tw-text-iron-300 [overflow-wrap:anywhere]">
+                      {entry.statement}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })}
+      </div>
+    </TdhDisclosure>
   );
 }

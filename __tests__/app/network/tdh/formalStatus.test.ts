@@ -113,6 +113,17 @@ function auditedCoverage(
   return { named, covered: covered.size, audited: audited.length };
 }
 
+/**
+ * The statements refuted only by counterexamples the build evaluates
+ * (#guard, cases F, G, H and I): their status says so, since evaluation
+ * trusts Lean's compiler and a kernel-checked theorem does not.
+ */
+const EVALUATED_REFUTATIONS = new Set(["beyondStacks", "minted", "walletSum"]);
+
+function expectedStatus(row: { readonly id: string; readonly status: string }) {
+  return EVALUATED_REFUTATIONS.has(row.id) ? "shownFalseEval" : row.status;
+}
+
 describe("formal statements against the proof manifest", () => {
   it("confirms every round-5 statement from the bundled copy of the feed's manifest", () => {
     expect(bundled.source.commit.startsWith("6b32f3f")).toBe(true);
@@ -120,7 +131,10 @@ describe("formal statements against the proof manifest", () => {
     const statements = statementsFor(5);
     const checks = checkStatements(statements, bundled);
     for (const row of statements) {
-      expect([row.id, checks[row.id]?.status]).toEqual([row.id, row.status]);
+      expect([row.id, checks[row.id]?.status]).toEqual([
+        row.id,
+        expectedStatus(row),
+      ]);
       expect(checks[row.id]?.unconfirmed).toEqual([]);
     }
     expect(manifestFigures(bundled)).toMatchObject({
@@ -139,7 +153,10 @@ describe("formal statements against the proof manifest", () => {
     const statements = statementsFor(3);
     const checks = checkStatements(statements, manifest);
     for (const row of statements) {
-      expect([row.id, checks[row.id]?.status]).toEqual([row.id, row.status]);
+      expect([row.id, checks[row.id]?.status]).toEqual([
+        row.id,
+        expectedStatus(row),
+      ]);
       expect(checks[row.id]?.unconfirmed).toEqual([]);
     }
     expect(statements.map((row) => row.id)).not.toContain("rawLogs");
@@ -160,7 +177,10 @@ describe("formal statements against the proof manifest", () => {
     const statements = statementsFor(4);
     const checks = checkStatements(statements, round4);
     for (const row of statements) {
-      expect([row.id, checks[row.id]?.status]).toEqual([row.id, row.status]);
+      expect([row.id, checks[row.id]?.status]).toEqual([
+        row.id,
+        expectedStatus(row),
+      ]);
       expect(checks[row.id]?.unconfirmed).toEqual([]);
     }
     const { named, covered, audited } = auditedCoverage(statements, round4);
@@ -197,7 +217,10 @@ describe("formal statements against the proof manifest", () => {
     const statements = statementsFor(5);
     const checks = checkStatements(statements, round5);
     for (const row of statements) {
-      expect([row.id, checks[row.id]?.status]).toEqual([row.id, row.status]);
+      expect([row.id, checks[row.id]?.status]).toEqual([
+        row.id,
+        expectedStatus(row),
+      ]);
       expect(checks[row.id]?.unconfirmed).toEqual([]);
     }
     const { named, covered, audited } = auditedCoverage(statements, round5);

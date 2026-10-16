@@ -20,24 +20,31 @@ day in canonical form, before the feed's first day, 20,740, or after the
 latest closed cycle) is rewritten by the proxy
 (`lib/proxy/tdhVerificationDay.ts`) to the TDH pages' own not-found view,
 `/network/tdh/verification/day-not-found?day=…`, with a real 404 status and
-the site around it: `No published day 20,739`, where the feed starts, the
-every-day strip, the latest day as a primary button, the dashboard, and
-that days before the feed's first were not computed under TDH-v1 (6529.io's
-own uploads for them are listed by its public API), marked `noindex`. The address
+the site around it: `No published day 20,739`; for a cycle before the
+feed's first day, its date and that it is before October 14, 2026 (cycle
+20,740); for a future cycle, when it closes and that its report appears
+after its 00:40 UTC run. Below, the latest day as a primary button, the
+dashboard, that the daily comparison began with October 14, 2026 and
+earlier days have no file here (6529.io's own uploads for them are listed
+by its public API), and a link to the October 11, 2026 replay in the
+specification's evidence; no day strip. Marked `noindex`. The address
 bar keeps the path asked for, and the access gate still runs first. A day
 inside that range that the feed does not list shows the standard not-found
 page, titled `TDH verification: day not found` and marked `noindex` with
 one robots tag; its status stays 200 because `app/network/loading.tsx`
-starts streaming before the page can call `notFound()`. A day's own page is
-a record: its lede is one line naming the day and cycle, with a link to the
-latest day; its cutover tile shows the planned date with the countdown as it
-stood on that day (`On this day: 9 days to go`), it has no live freshness
-line, the headline card drops the date its title already gives, and
-Provenance shows the SHA-256 of the day file the page read and the day
-before it with its own file's SHA-256, so days can be checked as a chain.
-Days computed together on October 15, before the scheduled runs began,
-say so in Provenance's notes, and each code version names the P26 commit it
-computes (both Rust commits of the first days port P26 `0621ed4`).
+starts streaming before the page can call `notFound()`. A day's own page has
+a one-line lede (a lasting address for the day's comparison) with a link to
+the latest day; its cutover tile shows the planned date, about October 23,
+2026, and that the day came before it; it has no live freshness line, the
+headline card drops the date its title already gives, and Provenance shows
+the SHA-256 of the day file the page read and the day before it with its
+own file's SHA-256 and whether the index states the same, so days can be
+checked as a chain. The run that wrote a day's file is read from the file
+itself (`generatedAt`): for the first two days, first computed on October
+15, 2026, before the scheduled runs began, and recomputed when the file was
+written; for a later day whose file was written well after its 00:40 UTC
+run, that time. The note shows under the snapshot line and in Provenance's
+feed row. Each code version names the P26 commit it computes.
 
 ## Location in the Site
 
@@ -59,20 +66,20 @@ computes (both Rust commits of the first days port P26 `0621ed4`).
 
 1. The headline: the verdict and the day and cycle on a line above the
    card's heading, the short headline itself (for example "Every record
-   equal: 10,279 identities and 11,131 wallets"), then
-   the day's result in one sentence that names the cycle and when its
-   holdings were read (for example: "Cycle of October 16, 2026 (holdings at
-   the last Ethereum block before 00:00 UTC): the Rust core, the Python
-   reference and 6529.io agreed on all 10,279 identity records, each
-   collector's and the two burn addresses', and all 11,131 wallet
-   records"), the verdict in words, previous and next day arrows, the
-   snapshot block, and the history mode (`Not yet fully checked` or
+   equal: 10,279 identities and 11,131 wallets"), then one line saying who
+   agrees (the Rust core, the Python reference and 6529.io, to the last
+   unit of TDH, the burn addresses included); on any other verdict, the
+   day's result in one sentence and the verdict in words. Beside it the
+   three totals, the SHA-256 of the day's file (one abbreviation length on
+   every page), whether the feed's index states the same, and `Download
+   JSON`; previous and next day arrows, the snapshot block, the run note,
+   and the history mode (`Not yet fully checked` or
    `History fully checked`, with its meaning in one line beside it: the
    history before the snapshot is taken as reported by public log servers,
    and stays so, even once 6529's own Ethereum node is synced, until the
    daily run checks it in full against that node; no date is given. A
-   `What this label means` disclosure says the finalized block comes from a
-   public beacon server, with no pinned checkpoint yet.) The two
+   `What this label means` disclosure says the light client starts from
+   the first beacon server's checkpoint, with no pinned checkpoint yet.) The two
    stack below `lg`. On a day that is not the latest, a neutral link back
    to the latest. The feed's
    identity counts include the two sink identities (the zero address and
@@ -80,16 +87,15 @@ computes (both Rust commits of the first days port P26 `0621ed4`).
 2. The day at a glance: identity records equal between the Rust core and
    6529.io and between the Rust core and Python (one subtitle: identity
    records equal, burn addresses included), each with a meter that keeps a
-   visible sliver for any difference and a line for the wallets, the tiles
-   aligned at their tops; the total
+   visible sliver for any difference and a line for the wallets; each tile
+   reads label, figure, then its caption at the foot, so the figures of a
+   row share one baseline; the total
    TDH, with `Rust − 6529.io` and `Rust − Python` as numbers and whether it
-   is the same in all three; and the cutover: a countdown (`7 days to go`
-   on the dashboard; on a day's own page the planned date, with `On this
-   day: 9 days to go`) over one segment per daily run of the week from the
-   start of the daily runs (October 16, 2026) to about October 23, 2026
-   (`Daily run 1 of 7 before the cutover`, the runs so far filled), and
-   `Switched on {date}` only when a published file says the cutover is
-   done. Every difference on the dashboard and the day pages has one sign:
+   is the same in all three; and the cutover: `About Oct 23`, planned for
+   about October 23, 2026, about a week after the daily runs began on
+   October 16 (D132), with no countdown (on a day's own page, that the day
+   came before it), and `Switched on {date}` only when a published file says
+   the cutover is done. Every difference on the dashboard and the day pages has one sign:
    the Rust core minus the other program. The total tile notes
    that the total validators are to sign leaves out the two sinks, which
    the feed does not publish yet. Tile eyebrows keep the case of 6529.io
@@ -128,9 +134,14 @@ computes (both Rust commits of the first days port P26 `0621ed4`).
    classes are explained below it, with a note that no record is published,
    the difference possible until the cutover (a sale and a purchase of one
    card in different transactions of one block, DEV-2, the one difference
-   D132 names, which would show as class D; on a day whose identity records
-   are all equal, that there is none that day), and a short history of the
-   DEV-2 cases that D131's netting settled.
+   D132 names, which would show as class D until 6529 matches it to DEV-2;
+   from the cutover 6529.io shows the Rust core's value; on a day whose
+   identity records are all equal, that there is none that day), and a
+   short history: DEV-2 has two cases, the one within one transaction that
+   D131's netting settled on October 14 and 15, and the one across
+   transactions of one block, which can still differ until the cutover.
+   How this works names 6529.io's columns once with the pages' words
+   (boosted TDH, final TDH; TDH, base TDH; unweighted days, raw days).
    A Rust–Python difference is class C (the new programs disagree), a
    difference from 6529.io class A or B only when the list of known ones
    explains it, else D; C and D both raise an alarm. The classes have an
@@ -141,16 +152,20 @@ computes (both Rust commits of the first days port P26 `0621ed4`).
    `RUST_PYTHON_MISMATCH`, else the totals); from the seventh day wider
    screens show a chart drawn for the column width, with the table one
    click away.
-7. Provenance: the data source first, across the card in two lines (6529's
-   feed, named with its CloudFront host, and that its files are not
-   signed), then one column of facts, a label and a line or two of value
+7. Provenance: the data source first (6529's feed, named with its
+   CloudFront host; the job's schedule; the page rechecks the index and the
+   latest day every 10 minutes and older days hourly; the index states a
+   SHA-256 for each day's file, which the page recomputes from the bytes it
+   read, neither being a signature), then one column of facts, a label and a line or two of value
    each: snapshot block with an Etherscan link and hash, history mode with
    its meaning, rule version, registry hash (from the day's file, or the
    specification's; the rule version and registry hash the Rust run states
-   count as the day's), code versions with the P26 commit each computes,
+   count as the day's, with the rule id, P28's tdhRuleId, and whether the
+   Python reference states the same registry hash), code versions with the
+   P26 commit each computes and the Rust binary's SHA-256,
    when the day's file names them the files by SHA-256 (the canonical
-   input, the identities and the wallets record files, each with whether
-   the Python reference's is the same file), 6529.io's files on Arweave
+   input, the identities and the wallets record files, then one line saying
+   whether the Python reference's are identical), 6529.io's files on Arweave
    with links to each transaction and file and each file's SHA-256, the
    day before with its file's SHA-256, and, when the feed writes them, when
    the index and the day file were generated (`generatedAt`) and the day
@@ -160,7 +175,9 @@ computes (both Rust commits of the first days port P26 `0621ed4`).
    registry hash comes from, the first days' runs, the upload signature)
    is in one disclosure under them. Then JSON download links, an RSS feed of every published day
    (`/network/tdh/verification.rss`, one item per day with its verdict,
-   agreement and totals, dated by the day's report), and the SHA-256 of the day file as the page read it (only
+   its agreement with 6529.io and between the Rust core and the Python
+   reference, and its totals, dated when the feed wrote the day's file;
+   the channel's build date is the index's), and the SHA-256 of the day file as the page read it (only
    the hash breaks on a phone).
 8. Check it yourself: what anyone can check today from public sources
    (6529.io's own API lists every day's upload with its Arweave link, and

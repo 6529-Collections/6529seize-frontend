@@ -43,7 +43,7 @@ const POINTS: ReadonlyArray<{
 ];
 /** What the checks caught, oldest first (plan §5.2, "found by the checks"). */
 const FOUND = ["floors", "netting", "lean", "difftest"] as const;
-const SOURCES = ["P26 §13", "D125", "D131", "D132"] as const;
+const SOURCES = ["P26 §13", "D116", "D125", "D131", "D132"] as const;
 
 function differenceSentence(
   locale: SupportedLocale,
@@ -89,18 +89,13 @@ function allAgreed(summary: DataSummary): boolean {
 function Figure({
   value,
   label,
-  wide = false,
 }: {
   readonly value: string;
   readonly label: string;
-  /** The total: a row of its own, in the largest type. */
-  readonly wide?: boolean;
 }) {
   return (
     <div className="tw-min-w-0">
-      <p
-        className={`tw-m-0 tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50 ${wide ? "tw-text-xl min-[360px]:tw-text-3xl sm:tw-text-4xl" : "tw-text-xl sm:tw-text-2xl"}`}
-      >
+      <p className="tw-m-0 tw-text-xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50 sm:tw-text-2xl">
         {value}
       </p>
       <p className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-5 tw-text-iron-300">
@@ -126,8 +121,7 @@ function Streak({
   return (
     <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-gap-4">
       <p className="tw-m-0 tw-text-sm tw-font-medium tw-tabular-nums tw-leading-6 tw-text-iron-100">
-        {t(locale, "network.tdh.explainer.verified.record", {
-          allEqual: formatInteger(locale, record.allEqual),
+        {t(locale, "network.tdh.explainer.verified.streakTitle", {
           days: formatInteger(locale, record.days),
         })}
       </p>
@@ -198,30 +192,27 @@ function ProofPanel({
       </p>
       {agreed ? (
         <>
-          <div className="tw-mt-3 tw-grid tw-gap-x-8 tw-gap-y-4 md:tw-grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] md:tw-items-start">
+          <div className="tw-mt-3 tw-grid tw-gap-x-8 tw-gap-y-4 sm:tw-grid-cols-3 sm:tw-items-start">
             <Figure
-              wide
               value={formatInteger(locale, summary.rustTotal)}
               label={t(locale, "network.tdh.explainer.verified.totalLabel")}
             />
-            <div className="tw-grid tw-gap-4">
+            <Figure
+              value={t(locale, "network.tdh.explainer.verified.ofValue", {
+                equal: formatInteger(locale, summary.equal ?? 0),
+                total: formatInteger(locale, summary.total ?? 0),
+              })}
+              label={t(locale, "network.tdh.explainer.verified.identities")}
+            />
+            {summary.walletsTotal !== null && (
               <Figure
                 value={t(locale, "network.tdh.explainer.verified.ofValue", {
-                  equal: formatInteger(locale, summary.equal ?? 0),
-                  total: formatInteger(locale, summary.total ?? 0),
+                  equal: formatInteger(locale, summary.walletsEqual ?? 0),
+                  total: formatInteger(locale, summary.walletsTotal),
                 })}
-                label={t(locale, "network.tdh.explainer.verified.identities")}
+                label={t(locale, "network.tdh.explainer.verified.wallets")}
               />
-              {summary.walletsTotal !== null && (
-                <Figure
-                  value={t(locale, "network.tdh.explainer.verified.ofValue", {
-                    equal: formatInteger(locale, summary.walletsEqual ?? 0),
-                    total: formatInteger(locale, summary.walletsTotal),
-                  })}
-                  label={t(locale, "network.tdh.explainer.verified.wallets")}
-                />
-              )}
-            </div>
+            )}
           </div>
         </>
       ) : (
@@ -245,17 +236,6 @@ function ProofPanel({
       )}
       <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-2 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4">
         <Streak locale={locale} summary={summary} />
-        {summary.rustCommit !== null && (
-          <p className="tw-m-0 tw-text-[13px] tw-leading-6 tw-text-iron-400">
-            {t(locale, "network.tdh.explainer.verified.builds", {
-              rust: `validator@${shortCommit(summary.rustCommit)}`,
-              python:
-                summary.pythonCommit === null
-                  ? "–"
-                  : `6529chain@${shortCommit(summary.pythonCommit)}`,
-            })}
-          </p>
-        )}
       </div>
       {summary.historyChecked === false && (
         <p className="tw-m-0 tw-mt-3 tw-flex tw-flex-col tw-items-start tw-gap-2 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-flex-row sm:tw-items-baseline">
@@ -281,6 +261,14 @@ function ProofPanel({
         >
           <p className="tw-m-0 tw-max-w-[38em] tw-pb-2 tw-pl-6 tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, "network.tdh.explainer.verified.how")}
+            {summary.rustCommit !== null &&
+              ` ${t(locale, "network.tdh.explainer.verified.builds", {
+                rust: `validator@${shortCommit(summary.rustCommit)}`,
+                python:
+                  summary.pythonCommit === null
+                    ? "–"
+                    : `6529chain@${shortCommit(summary.pythonCommit)}`,
+              })}.`}
           </p>
         </TdhDisclosure>
       )}
@@ -383,6 +371,9 @@ export default function TDHVerifiedDaily({
       {summary?.kind === "data" && (
         <ProofPanel locale={locale} summary={summary} />
       )}
+      <p className="tw-m-0 tw-mt-4 tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-300">
+        {t(locale, "network.tdh.explainer.verified.private")}
+      </p>
       {summary?.kind === "awaiting" && (
         <p className="tw-m-0 tw-mt-4 tw-text-sm tw-leading-6 tw-text-iron-200">
           {t(

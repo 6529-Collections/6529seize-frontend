@@ -4,6 +4,7 @@ import {
   cutoverState,
   dayDifferences,
   dayHasDifferences,
+  dayRunNote,
   dayNeighbours,
   dayVerdict,
   differenceSentenceKind,
@@ -36,24 +37,33 @@ describe("verification states", () => {
     expect(differingDay && indexDayVerdict(differingDay)).toBe("investigating");
   });
 
-  it("counts down to the cutover in whole UTC days, across D132's week from the first daily run", () => {
+  it("plans the cutover for about a date and never counts the days (D132: about October 23)", () => {
     expect(
       cutoverState(DEFAULT_CUTOVER, new Date("2026-10-15T12:00:00Z"))
-    ).toEqual({
+    ).toEqual({ kind: "countdown", plannedDate: "2026-10-23" });
+    expect(cutoverState(null, new Date("2026-10-22T23:59:59Z"))).toEqual({
       kind: "countdown",
-      days: 8,
       plannedDate: "2026-10-23",
-      elapsed: 0,
     });
-    expect(cutoverState(null, new Date("2026-10-16T12:00:00Z"))).toMatchObject({
-      kind: "countdown",
-      days: 7,
-      elapsed: 0,
+  });
+
+  it("says which run wrote a day's file, from the file itself", () => {
+    // The first two days: first computed on October 15, and recomputed
+    // when a later file says so.
+    expect(dayRunNote("2026-10-14", null)).toEqual({ kind: "firstRun" });
+    expect(dayRunNote("2026-10-15", "2026-10-15T14:59:00Z")).toEqual({
+      kind: "firstRun",
     });
-    expect(cutoverState(null, new Date("2026-10-22T23:59:59Z"))).toMatchObject({
-      kind: "countdown",
-      days: 1,
-      elapsed: 6 / 7,
+    expect(dayRunNote("2026-10-14", "2026-10-16T15:59:06Z")).toEqual({
+      kind: "recomputed",
+      generatedAt: "2026-10-16T15:59:06Z",
+    });
+    // A scheduled day: nothing near its 00:40 UTC run, a note well after.
+    expect(dayRunNote("2026-10-17", "2026-10-17T00:55:00Z")).toBeNull();
+    expect(dayRunNote("2026-10-17", null)).toBeNull();
+    expect(dayRunNote("2026-10-16", "2026-10-16T15:59:14Z")).toEqual({
+      kind: "later",
+      generatedAt: "2026-10-16T15:59:14Z",
     });
   });
 

@@ -314,7 +314,8 @@ export default function VectorAnatomy({
             <TdhSource refs={["P26 §4.2"]} locale={locale} />
           </p>
         </div>
-        <div className="tw-grid tw-items-start tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
+        {/* The cycle's values and the records side by side, one height. */}
+        <div className="tw-grid tw-items-stretch tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
           <div className="tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-px-4 tw-py-3">
             <p className="tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
               {m("expectedCycle")}
@@ -399,15 +400,19 @@ export default function VectorAnatomy({
           </TdhTableFrame>
         </div>
       </div>
-      <p className="tw-m-0 tw-mt-4 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
-        <span className="tw-font-medium tw-text-iron-100">
-          {m("derivation")}:
-        </span>{" "}
-        {m("derivationBody")}
-      </p>
-      <p className="tw-m-0 tw-mt-2 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
-        {m("boostBody")}
-      </p>
+      {/* Why and the boost side by side from lg, so the card's width is
+          used and neither paragraph runs past the measure. */}
+      <div className="tw-mt-4 tw-grid tw-gap-x-8 tw-gap-y-2 lg:tw-grid-cols-2">
+        <p className="tw-m-0 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
+          <span className="tw-font-medium tw-text-iron-100">
+            {m("derivation")}:
+          </span>{" "}
+          {m("derivationBody")}
+        </p>
+        <p className="tw-m-0 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
+          {m("boostBody")}
+        </p>
+      </div>
     </figure>
   );
 }

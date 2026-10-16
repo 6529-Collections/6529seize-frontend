@@ -27,12 +27,21 @@ const SEQUENCE: ReadonlyArray<{ readonly href: string; readonly key: string }> =
 export default function TdhPager({
   current,
   locale,
+  subpage = false,
 }: {
   readonly current: TdhPageHref | TdhMorePageHref;
   readonly locale: SupportedLocale;
+  /**
+   * The page is a sub-page of `current` (the consolidation design under the
+   * guide): it leads back to `current` and on to the page after it.
+   */
+  readonly subpage?: boolean;
 }) {
   const index = SEQUENCE.findIndex((page) => page.href === current);
-  const previous = index > 0 ? SEQUENCE[index - 1] : undefined;
+  let previous = index > 0 ? SEQUENCE[index - 1] : undefined;
+  if (subpage) {
+    previous = index >= 0 ? SEQUENCE[index] : undefined;
+  }
   const next = index >= 0 ? SEQUENCE[index + 1] : undefined;
   const label = (key: string) =>
     t(locale, `network.tdh.shared.nav.${key}` as MessageKey);

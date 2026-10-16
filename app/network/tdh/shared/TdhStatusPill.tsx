@@ -18,6 +18,7 @@ export type TdhPill =
   | "checkedBuild"
   | "checkedVectors"
   | "shownFalse"
+  | "shownFalseEval"
   | "deferred"
   | "unverified"
   | "bundled"
@@ -61,6 +62,7 @@ const PILL_TONE: Record<TdhPill, TdhTone> = {
   checkedBuild: "primary",
   checkedVectors: "neutral",
   shownFalse: "refuted",
+  shownFalseEval: "refuted",
   deferred: "neutral",
   unverified: "warning",
   bundled: "neutral",
@@ -84,6 +86,44 @@ export const TDH_TONE_DOT: Record<TdhTone, string> = {
   error: "tw-bg-error",
   neutral: "tw-bg-iron-400",
 };
+
+/**
+ * A pill's mark: a filled dot by default. Statuses that share a tone get a
+ * shape of their own, so the formal model's statuses are told apart without
+ * colour: "by definition" a square, "checked at build" a diamond, "not
+ * proved here" a hollow ring, and a claim shown false only by evaluation a
+ * hollow ring in the refuted tone.
+ */
+type TdhMark = "dot" | "square" | "diamond" | "ring";
+
+const PILL_MARK: Partial<Record<TdhPill, TdhMark>> = {
+  byDefinition: "square",
+  checkedBuild: "diamond",
+  deferred: "ring",
+  shownFalseEval: "ring",
+};
+
+const TONE_RING: Record<TdhTone, string> = {
+  success: "tw-border-success",
+  primary: "tw-border-primary-400",
+  warning: "tw-border-amber-400",
+  refuted: "tw-border-rose-400",
+  error: "tw-border-error",
+  neutral: "tw-border-iron-400",
+};
+
+function markClass(mark: TdhMark, tone: TdhTone): string {
+  switch (mark) {
+    case "square":
+      return `tw-size-2 tw-rounded-[1px] ${TDH_TONE_DOT[tone]}`;
+    case "diamond":
+      return `tw-size-[7px] tw-rotate-45 tw-rounded-[1px] ${TDH_TONE_DOT[tone]}`;
+    case "ring":
+      return `tw-size-2 tw-rounded-full tw-border-[1.5px] tw-border-solid tw-bg-transparent ${TONE_RING[tone]}`;
+    case "dot":
+      return `tw-size-2 tw-rounded-full ${TDH_TONE_DOT[tone]}`;
+  }
+}
 
 function tdhPillLabel(locale: SupportedLocale, pill: TdhPill): string {
   return t(locale, `network.tdh.shared.pill.${pill}` as MessageKey);
@@ -114,7 +154,8 @@ export default function TdhStatusPill({
     >
       <span
         aria-hidden="true"
-        className={`tw-size-2 tw-shrink-0 tw-rounded-full ${TDH_TONE_DOT[tone]}`}
+        className={`tw-shrink-0 ${markClass(PILL_MARK[pill] ?? "dot", tone)}`}
+        data-tdh-mark={PILL_MARK[pill] ?? "dot"}
       />
       {/* One line; it wraps only in a window under 360 px. */}
       <span className="tw-min-w-0 tw-whitespace-nowrap max-[359px]:tw-whitespace-normal">

@@ -134,11 +134,17 @@ export const LEAN_RUNS: Readonly<Record<LeanRound, LeanRuns>> = {
 };
 
 /** A statement's status as the page shows it. */
+/**
+ * A statement's status. `shownFalseEval` is a claim shown false only by
+ * counterexamples the build evaluates (#guard), which trusts Lean's
+ * compiler: the page derives it from the manifest, never states it.
+ */
 export type StatementStatus =
   | "proved"
   | "byDefinition"
   | "checkedBuild"
   | "shownFalse"
+  | "shownFalseEval"
   | "deferred"
   | "unverified";
 
@@ -165,7 +171,7 @@ export interface LeanStatement {
   readonly kind?: "property" | "lemma";
   readonly refs: readonly string[];
   /** The status the statement claims, once the manifest confirms it. */
-  readonly status: Exclude<StatementStatus, "unverified">;
+  readonly status: Exclude<StatementStatus, "unverified" | "shownFalseEval">;
   /** Theorems the statement rests on; the manifest must say each is proved. */
   readonly proved: readonly string[];
   /** Counterexamples: theorems, or #guard cases by id (`1.case-H`). */
@@ -209,7 +215,8 @@ export const LEAN_STATEMENTS: readonly LeanStatement[] = [
     deferred: NONE,
     round4: { deferred: ["1.canonical-sort"] },
     file: "Tdh/Proofs/NetInvariance.lean, Tdh/Proofs/Netting.lean",
-    lean: `theorem replayHoldings_invariance (p : Params) (cm : ClusterMap) (c₁ c₂ : Array Transfer)
+    lean: `theorem replayHoldings_invariance
+    (p : Params) (cm : ClusterMap) (c₁ c₂ : Array Transfer)
     (hg : Corresponds (groupByTransaction c₁) (groupByTransaction c₂))
     (h₁ h₂ : Holdings)
     (hr₁ : replayHoldings p { netting := true } cm c₁ = .ok h₁)
@@ -604,13 +611,18 @@ export function statementsFor(round: LeanRound): readonly LeanStatement[] {
 
 /** The definitions the netting theorem's hypotheses use, verbatim. */
 export const NETTING_DEFINITIONS = `def SameNet (tx₁ tx₂ : List Transfer) : Prop :=
-  ∃ ts hh, (∀ m ∈ tx₁, m.timestamp = ts ∧ m.txHash = hh) ∧ (∀ m ∈ tx₂, m.timestamp = ts ∧ m.txHash = hh) ∧
-    ∀ k w, netChange (tokenMovements tx₁ k) w = netChange (tokenMovements tx₂ k) w
+  ∃ ts hh,
+    (∀ m ∈ tx₁, m.timestamp = ts ∧ m.txHash = hh) ∧
+    (∀ m ∈ tx₂, m.timestamp = ts ∧ m.txHash = hh) ∧
+    ∀ k w, netChange (tokenMovements tx₁ k) w =
+      netChange (tokenMovements tx₂ k) w
 
-inductive Corresponds : List (List Transfer) → List (List Transfer) → Prop
+inductive Corresponds :
+    List (List Transfer) → List (List Transfer) → Prop
   | nil : Corresponds [] []
   | cons {tx₁ tx₂ : List Transfer} {gs₁ gs₂ : List (List Transfer)} :
-      SameNet tx₁ tx₂ → Corresponds gs₁ gs₂ → Corresponds (tx₁ :: gs₁) (tx₂ :: gs₂)`;
+      SameNet tx₁ tx₂ → Corresponds gs₁ gs₂ →
+        Corresponds (tx₁ :: gs₁) (tx₂ :: gs₂)`;
 
 /**
  * P26 §7.1's first netting rule against the current one, from

@@ -8,8 +8,8 @@ import { NARROW_WIDTH, TdhSvg } from "../TdhSvg";
  * movement, and the result, netted at the transaction boundary (D131), sits
  * inside the frame under the arcs: Wallet A never lost the copy. One compact drawing, phone
  * first: its text is 14 units, so it stays above 12 px in any column it is
- * shown in, and it grows to 1.15 times at most, so no label outranks the
- * step's heading.
+ * shown in, and it is never drawn larger than its own size, so its labels
+ * stay quieter than the card around it.
  */
 export default function TransactionBoxDiagram({
   locale,
@@ -22,6 +22,7 @@ export default function TransactionBoxDiagram({
       <TdhSvg
         id="tdh-transaction"
         width={NARROW_WIDTH}
+        maxWidth={NARROW_WIDTH}
         height={200}
         title={t(locale, "network.tdh.how.s5.diagramTitle")}
         desc={t(locale, "network.tdh.how.s5.diagramDesc")}
@@ -49,13 +50,9 @@ export default function TransactionBoxDiagram({
           strokeDasharray="5 5"
           className="tw-stroke-iron-500"
         />
-        <text
-          x="16"
-          y="26"
-          fontSize="14"
-          letterSpacing="0.6"
-          className="tw-fill-iron-400 tw-font-medium tw-uppercase"
-        >
+        {/* The frame's label, quieter than the card's own eyebrow: grey,
+            in sentence case, at the drawing's smallest size. */}
+        <text x="16" y="26" fontSize="14" className="tw-fill-iron-400">
           {t(locale, "network.tdh.how.s5.transaction")}
         </text>
         <path

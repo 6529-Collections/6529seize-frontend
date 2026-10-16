@@ -22,13 +22,12 @@ const STEP_COUNT = 14;
 const PORT_TESTS =
   "https://github.com/6529-Collections/6529seize-frontend/blob/main/__tests__/lib/tdh/tdhV1Arithmetic.test.ts";
 
-// Step 14 counts the days compared so far, from the daily feed.
+// Step 13 shows the latest compared day's total, from the daily feed.
 export const revalidate = 600;
 
 export default async function TdhHowItWorksPage() {
   const locale = DEFAULT_LOCALE;
   const summary = await loadVerificationSummary();
-  const comparedDays = summary?.kind === "data" ? summary.record.days : null;
   // Step 13: the latest compared day's total, when all three agreed on it.
   const latestTotal =
     summary?.kind === "data" && summary.totalsEqual === true
@@ -100,11 +99,7 @@ export default async function TdhHowItWorksPage() {
         />
         <div className="tw-min-w-0">
           <HowItWorksStepsA locale={locale} />
-          <HowItWorksStepsB
-            locale={locale}
-            comparedDays={comparedDays}
-            latestTotal={latestTotal}
-          />
+          <HowItWorksStepsB locale={locale} latestTotal={latestTotal} />
           <TdhPager current="/network/tdh/how-it-works" locale={locale} />
         </div>
       </div>

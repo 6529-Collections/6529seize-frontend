@@ -48,7 +48,13 @@
  * - a wrapped code line: on a desktop (1280 px and wider) any line of a rule
  *   block's code (`[data-tdh-code-cell]`) that takes more than one line on
  *   screen; on a phone, a wrapped code line whose continuation does not
- *   hang to the right of its first line;
+ *   hang to the right of its first line, and any wrapped line whose columns
+ *   are aligned with runs of spaces (`data:   useCase, allTokens`): such a
+ *   block must scroll sideways in the shared frame on a phone, since its
+ *   wrap reads as a staircase with orphan tokens;
+ * - cards too close: two bordered, rounded cards of at least 120 x 48 px,
+ *   neither inside the other, side by side or one above the other with
+ *   less than 8 px between them (a margin lost at a CSS column break);
  * - an SVG label that outranks the type around it: SVG text set larger on
  *   screen than the heading of its section, or larger than 1.15 times body
  *   text (18.4 px), the most a drawing is ever scaled (`MAX_SVG_SCALE`);
@@ -195,7 +201,12 @@ function parseArgs(argv) {
     };
     if (arg === "--") continue;
     else if (arg === "--base") args.base = next();
-    else if (arg === "--routes") args.routes = next().split(",");
+    // A route may be given without its leading slash ("network/tdh"), so a
+    // shell that rewrites "/..." arguments into file paths leaves it alone.
+    else if (arg === "--routes")
+      args.routes = next()
+        .split(",")
+        .map((route) => (route.startsWith("/") ? route : `/${route}`));
     else if (arg === "--widths") args.widths = next().split(",");
     else if (arg === "--out") args.out = next();
     else if (arg === "--timeout") args.timeout = Number(next());
@@ -1071,6 +1082,14 @@ function inspectPage(limits) {
     if (DESKTOP) {
       add("code-wrap", cell, `${lines.length} lines at ${vw}px`);
     } else if (PHONE) {
+      if (/\S {2,}\S/.test(cell.textContent ?? "")) {
+        add(
+          "code-columnar-wrap",
+          cell,
+          `a column-aligned line wraps into ${lines.length} lines`
+        );
+        continue;
+      }
       const first = lines[0].left;
       const ch = Number.parseFloat(style(cell).fontSize) * 0.6;
       if (lines.slice(1).some((line) => line.left < first + ch * 0.9)) {
@@ -1170,6 +1189,48 @@ function inspectPage(limits) {
       const empty = innerRight - right;
       if (empty > Math.max(220, inner * 0.3)) {
         add("empty-card", card, `${Math.round(empty)}px of ${Math.round(inner)}px empty at the right`);
+      }
+    }
+  }
+
+  // 13b. Cards too close: two bordered, rounded cards that sit side by side
+  // or one above the other with less than 8 px between them. Chips, pills
+  // and calendar cells are smaller than a card and are not counted.
+  {
+    const cards = [];
+    for (const el of root.querySelectorAll("div, section, article, aside, figure, li, a, details, ul, ol, dl")) {
+      if (!isShown(el) || el.closest("table, svg, pre")) continue;
+      const cs = style(el);
+      const sides = ["Top", "Right", "Bottom", "Left"];
+      const bordered = sides.every(
+        (side) =>
+          Number.parseFloat(cs[`border${side}Width`]) >= 1 &&
+          cs[`border${side}Style`] !== "none"
+      );
+      if (!bordered || Number.parseFloat(cs.borderTopLeftRadius) < 4) continue;
+      const r = el.getBoundingClientRect();
+      if (r.width < 120 || r.height < 48) continue;
+      cards.push({ el, r });
+    }
+    const GAP = 8;
+    for (let i = 0; i < cards.length; i += 1) {
+      for (let j = i + 1; j < cards.length; j += 1) {
+        const a = cards[i];
+        const b = cards[j];
+        if (a.el.contains(b.el) || b.el.contains(a.el)) continue;
+        const overlapX = Math.min(a.r.right, b.r.right) - Math.max(a.r.left, b.r.left);
+        const overlapY = Math.min(a.r.bottom, b.r.bottom) - Math.max(a.r.top, b.r.top);
+        let gap = null;
+        if (overlapX > 1 && overlapY <= 1) {
+          gap = Math.max(a.r.top, b.r.top) - Math.min(a.r.bottom, b.r.bottom);
+        } else if (overlapY > 1 && overlapX <= 1) {
+          gap = Math.max(a.r.left, b.r.left) - Math.min(a.r.right, b.r.right);
+        } else if (overlapX > 1 && overlapY > 1) {
+          gap = -Math.min(overlapX, overlapY);
+        }
+        if (gap !== null && gap < GAP - 0.5) {
+          add("card-gap", b.el, `${Math.round(gap)}px from another card`);
+        }
       }
     }
   }

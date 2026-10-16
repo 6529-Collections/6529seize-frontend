@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRightIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useState, useSyncExternalStore } from "react";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -15,9 +15,13 @@ import {
 } from "../shared/tdhStyles";
 import CaseSafe from "../shared/CaseSafe";
 import { TDH_TONE_DOT, type TdhTone } from "../shared/TdhStatusPill";
+import previewStyles from "../shared/tdhRowsPreview.module.css";
 import { DEVIATIONS, type DeviationGroup } from "./specData";
 
 type Filter = "all" | Exclude<DeviationGroup, "other">;
+
+/** Rows shown inline before "Show all 19 differences". */
+const PREVIEW_ROWS = 3;
 
 const FILTERS: readonly Filter[] = ["all", "changes", "kept"];
 /**
@@ -99,9 +103,15 @@ export default function DeviationsTable({
     toggled.get(id) ?? (OPEN_AT_FIRST.has(id) || target === id);
   const toggle = (id: number) =>
     setToggled((current) => new Map(current).set(id, !isOpenRow(id)));
+  const [all, setAll] = useState(false);
   const shown = DEVIATIONS.filter(
     (row) => filter === "all" || row.group === filter
   );
+  // The first rows inline; every row once the reader asks, picks a filter,
+  // or follows a link to a row.
+  // Every row stays in the document (a chip's #dev-14 must resolve); the
+  // rows after the first are hidden by CSS while the table is limited.
+  const limited = !all && filter === "all" && target === null;
   const key = (id: number, field: string) =>
     `network.tdh.spec.dev.${id}.${field}` as MessageKey;
   return (
@@ -128,7 +138,9 @@ export default function DeviationsTable({
           shown: formatInteger(locale, shown.length),
         })}
       </p>
-      <div className="tw-mt-3 xl:tw-overflow-hidden xl:tw-rounded-lg xl:tw-border xl:tw-border-solid xl:tw-border-white/[0.07]">
+      <div
+        className={`tw-mt-3 xl:tw-overflow-hidden xl:tw-rounded-lg xl:tw-border xl:tw-border-solid xl:tw-border-white/[0.07] ${limited ? (previewStyles["collapsed"] ?? "") : ""}`}
+      >
         <table
           className={`${TDH_TABLE} tw-block xl:tw-table xl:tw-table-fixed`}
           aria-label={t(locale, "network.tdh.spec.s11.tableCaption", {
@@ -151,13 +163,14 @@ export default function DeviationsTable({
             </tr>
           </thead>
           <tbody className="tw-grid tw-grid-cols-[minmax(0,1fr)] tw-gap-2 xl:tw-table-row-group">
-            {shown.map((row) => {
+            {shown.map((row, index) => {
               const isOpen = isOpenRow(row.id);
               const body = `dev-${row.id}-body`;
               return (
                 <tr
                   key={row.id}
                   id={`dev-${row.id}`}
+                  data-tdh-more-row={index >= PREVIEW_ROWS ? "" : undefined}
                   className="tw-grid tw-scroll-mt-28 tw-grid-cols-[minmax(0,1fr)] tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-4 tw-py-2 target:tw-ring-1 target:tw-ring-primary-400/60 sm:tw-grid-cols-3 xl:tw-table-row xl:tw-rounded-none xl:tw-border-0 xl:tw-bg-transparent xl:tw-p-0"
                 >
                   <th
@@ -231,6 +244,24 @@ export default function DeviationsTable({
           </tbody>
         </table>
       </div>
+      {filter === "all" && target === null && (
+        <button
+          type="button"
+          aria-expanded={!limited}
+          onClick={() => setAll((value) => !value)}
+          className={`tw-mt-2 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-text-sm tw-font-medium tw-text-primary-300 hover:tw-text-primary-400 ${TDH_FOCUS_RING}`}
+        >
+          {limited
+            ? t(locale, "network.tdh.spec.s11.showAll", {
+                count: formatInteger(locale, DEVIATIONS.length),
+              })
+            : t(locale, "network.tdh.spec.s11.showFewer")}
+          <ChevronDownIcon
+            aria-hidden="true"
+            className={`tw-size-4 tw-transition-transform motion-reduce:tw-transition-none ${limited ? "" : "tw-rotate-180"}`}
+          />
+        </button>
+      )}
       <p className="tw-m-0 tw-mt-3 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
         {t(locale, "network.tdh.spec.decision.legend")}
       </p>

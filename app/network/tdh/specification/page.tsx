@@ -1,6 +1,7 @@
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import { loadVerificationSummary } from "@/lib/tdh/verification/summary.server";
 import TdhPageShell from "../shared/TdhPageShell";
 import TdhCopyButton from "../shared/TdhCopyButton";
 import TdhDisclosure from "../shared/TdhDisclosure";
@@ -28,17 +29,13 @@ const VERSION_ROWS = ["rule", "text", "sha", "where", "status"] as const;
  */
 function SpecVersion({ locale }: { readonly locale: SupportedLocale }) {
   return (
-    <section
-      aria-labelledby="spec-version-heading"
-      className="tw-mt-1 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-4 tw-py-1 sm:tw-px-5"
-    >
+    <section aria-labelledby="spec-version-heading" className="tw-mt-1">
       <h2 id="spec-version-heading" className="tw-sr-only">
         {t(locale, "network.tdh.spec.versionRow.title")}
       </h2>
-      <TdhDisclosure
-        summary={t(locale, "network.tdh.spec.versionRow.summary")}
-        summaryClassName="tw-text-[15px] tw-text-iron-100"
-      >
+      {/* A quiet disclosure under the lede: the version line itself sits
+          beside the pills. */}
+      <TdhDisclosure summary={t(locale, "network.tdh.spec.versionRow.summary")}>
         <dl className="tw-m-0 tw-grid tw-grid-cols-1 tw-gap-x-6 tw-gap-y-2 tw-pb-3 tw-pl-6 tw-text-sm tw-leading-6 sm:tw-grid-cols-[8rem_minmax(0,1fr)]">
           {VERSION_ROWS.map((row) => (
             <div key={row} className="tw-contents">
@@ -105,8 +102,20 @@ const SECTION_IDS = [
   "s13",
 ] as const;
 
-export default function TdhSpecificationPage() {
+// The evidence gives the daily comparison as of its latest day, from the feed.
+export const revalidate = 600;
+
+export default async function TdhSpecificationPage() {
   const locale = DEFAULT_LOCALE;
+  const summary = await loadVerificationSummary();
+  const record =
+    summary?.kind === "data"
+      ? {
+          latestDate: summary.date,
+          days: summary.record.days,
+          allEqual: summary.record.allEqual,
+        }
+      : null;
   const titles: Record<string, string> = Object.fromEntries(
     SECTION_IDS.map((id) => [
       id,
@@ -134,11 +143,18 @@ export default function TdhSpecificationPage() {
             tdh-v1.0
           </span>
           <TdhStatusPill pill="proposal" locale={locale} />
+          <span className="tw-text-xs tw-text-iron-400 sm:tw-text-sm">
+            {t(locale, "network.tdh.spec.versionRow.meta")}
+          </span>
         </>
       }
       lede={
         <>
           <p className="tw-m-0">{t(locale, "network.tdh.spec.lede")}</p>
+          {/* What an implementer needs to know before investing time. */}
+          <p className="tw-m-0 tw-mt-3 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-text-base sm:tw-leading-7">
+            {t(locale, "network.tdh.spec.heroFacts")}
+          </p>
           <SpecVersion locale={locale} />
         </>
       }
@@ -156,7 +172,7 @@ export default function TdhSpecificationPage() {
         />
         <div className="tw-min-w-0">
           <SpecSectionsA locale={locale} />
-          <SpecSectionsB locale={locale} />
+          <SpecSectionsB locale={locale} record={record} />
           <TdhPager current="/network/tdh/specification" locale={locale} />
         </div>
       </div>

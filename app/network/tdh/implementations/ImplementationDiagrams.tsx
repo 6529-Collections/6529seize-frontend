@@ -439,7 +439,7 @@ export function LineageDiagram({
 }
 
 /** How a matrix cell reads: in use now, planned or from a date, under test. */
-export type MatrixTone = "now" | "later" | "review" | "test" | "no";
+type MatrixTone = "now" | "later" | "review" | "test" | "no";
 
 const TONE_ICON = {
   now: CheckIcon,
@@ -457,7 +457,7 @@ const TONE_COLOR: Record<MatrixTone, string> = {
   no: "tw-text-iron-600",
 };
 
-export function MatrixCell({
+function MatrixCell({
   tone,
   label,
 }: {
@@ -479,7 +479,7 @@ export function MatrixCell({
 }
 
 /** The key to the matrices' icons. */
-export function MatrixLegend({ locale }: { readonly locale: SupportedLocale }) {
+function MatrixLegend({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <ul className="tw-m-0 tw-mt-2 tw-flex tw-list-none tw-flex-wrap tw-gap-x-4 tw-gap-y-1 tw-p-0 tw-text-sm tw-text-iron-400">
       {(["now", "later", "test", "no"] as const).map((tone) => {
@@ -525,15 +525,17 @@ const MATRIX_COLUMNS: ReadonlyArray<{
 
 const Y: Cell = { tone: "now", label: "yes" };
 const N: Cell = { tone: "no", label: "no" };
-const PLANNED: Cell = { tone: "later", label: "planned" };
 const SINCE: Cell = { tone: "now", label: "from16" };
 const UNDER_TEST: Cell = { tone: "test", label: "underTest" };
+const later = (label: string): Cell => ({ tone: "later", label });
 const ALL_VECTORS: Cell = { tone: "now", label: "allVectors" };
 /** The Lean model's cell, filled from its proof manifest. */
 const LEAN_VECTORS: Cell = { tone: "review", label: "ofVectors" };
 
 /**
- * Which check covers which program. Vectors: P26 has 89 since f840096, and
+ * Where each program runs and which check covers it, in one matrix: the
+ * checks, then the places a program's result is used (validator signing,
+ * 6529.io, the proof programs). Vectors: P26 has 89 since f840096, and
  * the references, the Rust core and program B (the validator's development
  * branch, 30bf8f9) pass all of them (`shared/tdhFacts.ts`); the Lean
  * model's count comes from its published proof manifest. A whole real day:
@@ -545,7 +547,14 @@ const LEAN_VECTORS: Cell = { tone: "review", label: "ofVectors" };
  * inputs through Lean, Python and the Rust reference on every change.
  */
 const MATRIX_ROWS: ReadonlyArray<{
-  readonly key: "vectors" | "fullDay" | "random" | "dual" | "daily" | "proofs";
+  readonly key:
+    | "vectors"
+    | "fullDay"
+    | "random"
+    | "daily"
+    | "dual"
+    | "site"
+    | "proofs";
   readonly cells: readonly [Cell, Cell, Cell, Cell, Cell, Cell];
 }> = [
   {
@@ -561,9 +570,33 @@ const MATRIX_ROWS: ReadonlyArray<{
   },
   { key: "fullDay", cells: [Y, Y, N, Y, Y, UNDER_TEST] },
   { key: "random", cells: [Y, Y, Y, Y, Y, N] },
-  { key: "dual", cells: [PLANNED, N, PLANNED, N, N, N] },
   { key: "daily", cells: [SINCE, N, N, SINCE, N, UNDER_TEST] },
-  { key: "proofs", cells: [PLANNED, N, PLANNED, N, N, N] },
+  {
+    key: "dual",
+    cells: [
+      later("firstCheck"),
+      N,
+      later("secondCheck"),
+      later("optionalThird"),
+      N,
+      N,
+    ],
+  },
+  {
+    key: "site",
+    cells: [
+      later("fromCutover"),
+      N,
+      N,
+      N,
+      N,
+      { tone: "now", label: "untilCutover" },
+    ],
+  },
+  {
+    key: "proofs",
+    cells: [later("programA"), N, later("programB"), N, N, N],
+  },
 ];
 
 /**

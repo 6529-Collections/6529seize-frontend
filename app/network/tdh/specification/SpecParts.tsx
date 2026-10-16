@@ -132,3 +132,26 @@ export function Rule({
     </div>
   );
 }
+
+/**
+ * A rule's details after its summary and exact rule: short items, each a
+ * line or two, instead of one long paragraph.
+ */
+export function Details({
+  id,
+  items,
+}: {
+  readonly id?: string;
+  readonly items: readonly string[];
+}) {
+  return (
+    <ul
+      id={id}
+      className="tw-m-0 tw-max-w-[34rem] tw-scroll-mt-24 tw-list-disc tw-space-y-1.5 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-iron-500"
+    >
+      {items.map((item) => (
+        <li key={item}>{noBreakTerms(item)}</li>
+      ))}
+    </ul>
+  );
+}

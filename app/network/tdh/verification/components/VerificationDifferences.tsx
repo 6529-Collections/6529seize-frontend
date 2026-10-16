@@ -254,7 +254,7 @@ export default function VerificationDifferences({
           </div>
         </div>
       </div>
-      <p className="tw-m-0 tw-mt-4 tw-max-w-[34rem] tw-text-sm tw-leading-6 tw-text-iron-300">
+      <p className="tw-m-0 tw-mt-4 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
         {t(locale, "network.tdh.verify.diff.history")}{" "}
         <Link href="/network/tdh/how-it-works#step-5" className={TDH_LINK}>
           {t(locale, "network.tdh.verify.diff.historyLink")}

@@ -33,10 +33,10 @@
   "network.tdh.rules.ladder.title": "Four boost figures, and how they relate",
   "network.tdh.rules.ladder.intro": "Every boost starts at 1.00×. These are the figures quoted across these pages, on one scale.",
   "network.tdh.rules.ladder.value": "{value}×",
-  "network.tdh.rules.ladder.fullSetToday": "A full set today: one of each of the {count} eligible Memes",
+  "network.tdh.rules.ladder.fullSetToday": "A full set on the cycle of {cycle}: one of each of the {count} eligible Memes",
   "network.tdh.rules.ladder.fullSetAllSeasons": "A full set once seasons 1–{last} all pay",
-  "network.tdh.rules.ladder.highestToday": "Today’s highest: a full set, extra full sets and {gradients} Gradients",
+  "network.tdh.rules.ladder.highestToday": "The highest on the cycle of {cycle}: a full set, extra full sets and {gradients} Gradients",
   "network.tdh.rules.ladder.highestEver": "The schedule’s highest: the same, once seasons 1–{last} all pay",
-  "network.tdh.rules.ladder.note": "Blue bars are reachable today; grey bars once later seasons are eligible. A season pays once a later season has begun, so the current season never does.",
+  "network.tdh.rules.ladder.note": "Blue bars are reachable on that cycle; grey bars once later seasons are eligible. A season pays once a later season has begun, so the current season never does.",
   "network.tdh.rules.ladder.link": "The four boost figures these pages quote, on one scale"
 }

@@ -217,13 +217,26 @@ export default function TDHInAMinute({
 }: {
   readonly locale: SupportedLocale;
 }) {
-  const values = {
-    days: formatInteger(locale, MINUTE_EXAMPLE.days),
-    rate: cents(locale, MINUTE_EXAMPLE.rateCents),
-    base: formatInteger(locale, MINUTE_EXAMPLE.base),
-    boost: cents(locale, MINUTE_EXAMPLE.betaCents),
-    final: formatInteger(locale, MINUTE_EXAMPLE.final),
-  };
+  const variants = [
+    {
+      key: "none",
+      boost: cents(locale, 100),
+      value: formatInteger(locale, MINUTE_EXAMPLE.base),
+      current: false,
+    },
+    {
+      key: "one",
+      boost: cents(locale, MINUTE_EXAMPLE.betaCents),
+      value: formatInteger(locale, MINUTE_EXAMPLE.final),
+      current: true,
+    },
+    {
+      key: "fullSet",
+      boost: cents(locale, MINUTE_EXAMPLE.fullSetBetaCents),
+      value: formatInteger(locale, MINUTE_EXAMPLE.fullSetFinal),
+      current: false,
+    },
+  ] as const;
   return (
     <section
       id="tdh-minute"
@@ -277,21 +290,41 @@ export default function TDHInAMinute({
           </span>
           <BoostPanel locale={locale} />
         </div>
+        {/* The hero's card, then what the boost does to it: the one number
+            that moves with what else you hold. */}
         <figcaption className="tw-mt-4">
-          <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
-            <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-primary-500/15 tw-px-4 tw-py-1.5 tw-text-lg tw-font-semibold tw-tabular-nums tw-text-iron-50 tw-ring-1 tw-ring-inset tw-ring-primary-400/40">
-              {t(locale, "network.tdh.explainer.minute.result", {
-                final: values.final,
-              })}
-            </span>
-            <span className="tw-max-w-[36em] tw-text-sm tw-tabular-nums tw-leading-6 tw-text-iron-300">
-              {t(locale, "network.tdh.explainer.minute.whatMoves", {
-                base: values.base,
-                fullSetBoost: cents(locale, MINUTE_EXAMPLE.fullSetBetaCents),
-                fullSet: formatInteger(locale, MINUTE_EXAMPLE.fullSetFinal),
-              })}
-            </span>
-          </span>
+          <p
+            id="tdh-minute-variants"
+            className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200"
+          >
+            {t(locale, "network.tdh.explainer.minute.variantsLabel")}
+          </p>
+          <ul
+            aria-labelledby="tdh-minute-variants"
+            className="tw-m-0 tw-mt-2 tw-grid tw-list-none tw-gap-2 tw-p-0 sm:tw-grid-cols-3"
+          >
+            {variants.map((variant) => (
+              <li
+                key={variant.key}
+                className={`tw-flex tw-items-baseline tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-2.5 tw-text-sm tw-tabular-nums ${
+                  variant.current
+                    ? "tw-border-primary-400/40 tw-bg-primary-500/[0.08] tw-text-iron-50"
+                    : "tw-border-white/[0.07] tw-bg-iron-900 tw-text-iron-200"
+                }`}
+              >
+                <span>
+                  {t(
+                    locale,
+                    `network.tdh.explainer.minute.variant.${variant.key}`,
+                    { boost: variant.boost }
+                  )}
+                </span>
+                <span className="tw-text-base tw-font-semibold tw-text-iron-50">
+                  {variant.value}
+                </span>
+              </li>
+            ))}
+          </ul>
         </figcaption>
       </figure>
       {/* Three short notes side by side from md, under the three panels,

@@ -89,6 +89,7 @@ export default function TDHMainPage({
           title={t(locale, "network.tdh.explainer.related")}
         >
           <TDHRelatedLinks
+            variant="grid"
             links={RELATED.map(({ href, key }) => ({
               href,
               title: t(locale, `network.tdh.related.${key}.title`),

@@ -304,19 +304,19 @@ uint256[] genesis_ids; uint32 genesis_bonus; uint256[] nakamoto_ids;
 uint32 nakamoto_bonus, gradient_bonus, gradient_max_count;
 uint256[] season_starts
 
-registryHash = H("6529.TdhRegistry.v1", the fields above in order)
+registryHash = TH("6529.TdhRegistry.v1", the fields above in order)
 
-# H is P28's hash (below), not the edition H. Stored, the record is a CE
-# struct of these fields in this order; a T[] field is a CE list<T>,
-# ascending. Boosts are in micro-units, additional_set_ratio in 10^-4 and
-# gradient_rate_minimum in cents.`;
+# TH is P28's tagged hash (below), which P28 writes H. Stored, the
+# record is a CE struct of these fields in this order; a T[] field is a
+# CE list<T>, ascending. Boosts are in micro-units, additional_set_ratio
+# in 10^-4 and gradient_rate_minimum in cents.`;
 
 /**
  * P28 §1 (H), §2.6 (the stored record), §2.7 (abi.encode) and §3.1 (TAG):
  * how H and the registry record are encoded.
  */
 export const RULE_REGISTRY_HASH = `TAG(name)    = keccak256(the ASCII bytes of name)
-H(name, f1, ..., fk) = keccak256(abi.encode(bytes32 TAG(name), f1, ..., fk))
+TH(name, f1, ..., fk) = keccak256(abi.encode(bytes32 TAG(name), f1, ..., fk))
 
 abi.encode, with the types declared above, in order:
   address, uintN, intN, bytes32   one 32-byte word each, big-endian;
@@ -330,19 +330,22 @@ stored record (CE struct)         the same fields in order, fixed-width
                                   uint32 count then its elements
 the hash is taken over the typed values, never over the stored bytes`;
 
-/** P53 §4.2: the cycle root validators sign. */
-export const RULE_CYCLE_ROOT = `# H(name, f1, ..., fk) = keccak256(abi.encode(bytes32 TAG(name), f1, ..., fk)),
-# P28's tagged hash (section 10), not the edition H of section 5
+/**
+ * P53 §4.2: the cycle root validators sign. P28 writes its tagged hash H;
+ * this page writes it TH, so that H stays the largest edition of section 5.
+ */
+export const RULE_CYCLE_ROOT = `# TH(name, f1, ..., fk) = keccak256(abi.encode(bytes32 TAG(name), f1, ..., fk)),
+# P28's tagged hash (section 10), which P28 writes H
 # NETWORK_ID, v1's own network (P53 §3.1):
-NETWORK_ID = H("6529.Network.v1", keccak256("6529-validator-1"),
-               keccak256("6529-validator-1 no genesis"))
+NETWORK_ID = TH("6529.Network.v1", keccak256("6529-validator-1"),
+                keccak256("6529-validator-1 no genesis"))
            = 0x305a60a8768fcb3908a775373e58a0f8c60642dba778d8158c8cbd75284cd102
 
-cycleRoot_N = H("6529.TdhCycleRoot.v1",
+cycleRoot_N = TH("6529.TdhCycleRoot.v1",
   bytes32 NETWORK_ID,
   uint32  cycleDay,         # N
   uint64  boundary,         # t_N, Unix seconds
-  bytes32 tdhRuleId,        # H("6529.TdhRule.v1", keccak256("tdh-v1.0"),
+  bytes32 tdhRuleId,        # TH("6529.TdhRule.v1", keccak256("tdh-v1.0"),
                             #   registryHash), P28 §4.5
   uint64  cutoffNumber,     # B_N
   bytes32 cutoffHash,       # hash(B_N)
@@ -358,9 +361,9 @@ cycleRoot_N = H("6529.TdhCycleRoot.v1",
  * P28 §3.3, §4.3, §4.4 and §4.12 (as P53 §4.1 uses them): the leaves of the
  * wallet and per-token trees the cycle root binds, and the list tree.
  */
-export const RULE_EXPORT_TREES = `cid = H("6529.TdhIdentity.v1", address[] wallets)    # wallets ascending
+export const RULE_EXPORT_TREES = `cid = TH("6529.TdhIdentity.v1", address[] wallets)    # wallets ascending
 
-walletLeaf = H("6529.TdhWalletLeaf.v1",
+walletLeaf = TH("6529.TdhWalletLeaf.v1",
     address wallet,
     bytes32 cid,              # the wallet's identity
     uint64  identityTDH,      # the identity's final TDH
@@ -370,7 +373,7 @@ walletLeaf = H("6529.TdhWalletLeaf.v1",
     ascending by address as an unsigned 160-bit integer
 walletRoot = ROOT("6529.TdhWalletRoot.v1", wallet leaves)
 
-tokenLeaf = H("6529.TdhTokenLeaf.v1",
+tokenLeaf = TH("6529.TdhTokenLeaf.v1",
     bytes32 cid, address contract, uint256 tokenId,
     uint64  tokenTDH)         # the identity's per-token final
     one leaf per non-sink identity and eligible token with tokenTDH > 0,
@@ -382,7 +385,7 @@ TOP([])        = 32 zero bytes
 TOP([x])       = x
 TOP(L)         = pair adjacent entries left to right with NODE; an odd
                  last entry is promoted unchanged; repeat until one remains
-ROOT(class, L) = H(class, uint64 len(L), bytes32 TOP(L))`;
+ROOT(class, L) = TH(class, uint64 len(L), bytes32 TOP(L))`;
 
 /** P26 §10, "Field types" and "Registry constraints", line for line. */
 export const RULE_REGISTRY_CONSTRAINTS_CONDENSED = `every field at its type (uint32, uint64, uint256, int64, address, bytes32);

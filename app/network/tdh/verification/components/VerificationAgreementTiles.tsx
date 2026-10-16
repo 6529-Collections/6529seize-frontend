@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { selectPluralCategory } from "@/i18n/format";
-import { cycleDayOfDate } from "@/lib/tdh/tdhV1Arithmetic";
 import type {
   VerificationAgreement,
   VerificationDay,
@@ -25,11 +24,16 @@ import {
 const TILE = `${TDH_CARD} tw-flex tw-min-w-0 tw-flex-col tw-p-4 sm:tw-p-5`;
 const TILE_LABEL =
   "tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400";
-const TILE_SUB = "tw-m-0 tw-mt-0.5 tw-text-sm tw-leading-5 tw-text-iron-400";
 const TILE_VALUE =
-  "tw-m-0 tw-mt-3 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-1.5 tw-text-2xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50";
-/** A tile's last line, right under its figure: tiles align their tops. */
+  "tw-m-0 tw-mt-2 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-1.5 tw-text-2xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50";
+/** A line right under the figure. */
 const TILE_FOOT = "tw-m-0 tw-mt-2 tw-text-sm tw-tabular-nums tw-leading-5";
+/**
+ * What the tile compares, at its foot: label, figure, then caption, so the
+ * figures of a row share one baseline however the captions wrap.
+ */
+const TILE_CAPTION =
+  "tw-m-0 tw-mt-auto tw-pt-3 tw-text-sm tw-leading-5 tw-text-iron-400";
 
 function plural(locale: SupportedLocale, count: number): "one" | "other" {
   return selectPluralCategory(locale, count) === "one" ? "one" : "other";
@@ -112,10 +116,10 @@ function CountTile({
         <p className={TILE_LABEL}>
           <CaseSafe text={label} />
         </p>
-        <p className={TILE_SUB}>{sub}</p>
-        <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
+        <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
           {missing}
         </p>
+        <p className={TILE_CAPTION}>{sub}</p>
       </li>
     );
   }
@@ -125,8 +129,6 @@ function CountTile({
       <p className={TILE_LABEL}>
         <CaseSafe text={label} />
       </p>
-      <p className={TILE_SUB}>{sub}</p>
-      {note && <p className={TILE_SUB}>{note}</p>}
       <p className={TILE_VALUE}>
         {formatInteger(locale, equal)}
         <span className="tw-text-sm tw-font-normal tw-tracking-normal tw-text-iron-400">
@@ -159,6 +161,7 @@ function CountTile({
         </p>
       )}
       {extra}
+      <p className={TILE_CAPTION}>{note ? `${sub}. ${note}.` : sub}</p>
     </li>
   );
 }
@@ -204,13 +207,7 @@ function TotalTile({
       <p className={TILE_LABEL}>
         {t(locale, "network.tdh.verify.tiles.totalDelta")}
       </p>
-      <p className={TILE_SUB}>
-        {t(locale, "network.tdh.verify.tiles.totalDeltaSub")}
-      </p>
       <p className={TILE_VALUE}>{formatInteger(locale, rustTotal)}</p>
-      <p className={TILE_SUB}>
-        {t(locale, "network.tdh.verify.tiles.signedTotalNote")}
-      </p>
       <dl className="tw-m-0 tw-mt-3 tw-space-y-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-2 tw-text-sm tw-tabular-nums tw-leading-5">
         {(
           [
@@ -243,14 +240,18 @@ function TotalTile({
           </p>
         ))
       )}
+      <p className={TILE_CAPTION}>
+        {t(locale, "network.tdh.verify.tiles.totalDeltaSub")}.{" "}
+        {t(locale, "network.tdh.verify.tiles.signedTotalNote")}
+      </p>
     </li>
   );
 }
 
 /**
- * The cutover, D132: the days to go and the week's progress. On the latest
- * day they count from today; on a day's own page, from that day, so the
- * record does not change after it was published.
+ * The cutover, D132: planned for about a date, never on one, so the tile
+ * shows the date with "about" and never counts the days. On a day's own
+ * page it says how that day stood, so the record does not go stale.
  */
 export function CutoverTile({
   locale,
@@ -259,11 +260,13 @@ export function CutoverTile({
 }: {
   readonly locale: SupportedLocale;
   readonly cutover: CutoverState;
-  /** False on a day's own page: the countdown is as of that day. */
+  /** False on a day's own page: the tile is as of that day. */
   readonly relative: boolean;
 }) {
   const date = formatCycleDate(locale, cutover.plannedDate);
-  let headline: string;
+  let headline = t(locale, "network.tdh.verify.cutover.planned", {
+    date: formatShortCycleDate(locale, cutover.plannedDate),
+  });
   let body: string;
   if (cutover.kind === "done") {
     headline = t(locale, "network.tdh.verify.cutover.done", { date });
@@ -273,29 +276,15 @@ export function CutoverTile({
         : t(locale, "network.tdh.verify.cutover.doneBody", {
             cycle: formatInteger(locale, cutover.cycleDay),
           });
-  } else if (cutover.kind === "countdown" && relative) {
-    headline = t(
-      locale,
-      `network.tdh.verify.cutover.countdown.${plural(locale, cutover.days)}` as MessageKey,
-      { days: formatInteger(locale, cutover.days) }
-    );
-    body = t(locale, "network.tdh.verify.cutover.countdownBody", { date });
   } else if (cutover.kind === "countdown") {
-    // A day's own page: the planned date, which does not go stale, and the
-    // countdown as it stood on that day, labelled so.
-    headline = t(locale, "network.tdh.verify.cutover.planned", {
-      date: formatShortCycleDate(locale, cutover.plannedDate),
-    });
-    body = t(
-      locale,
-      `network.tdh.verify.cutover.countdownOnDay.${plural(locale, cutover.days)}` as MessageKey,
-      { days: formatInteger(locale, cutover.days) }
-    );
+    body = relative
+      ? t(locale, "network.tdh.verify.cutover.plannedBody", {
+          date,
+          start: formatCycleDate(locale, FIRST_REPORT_DATE),
+        })
+      : t(locale, "network.tdh.verify.cutover.plannedOnDay", { date });
   } else {
-    headline = t(locale, "network.tdh.verify.cutover.planned", {
-      date: formatShortCycleDate(locale, cutover.plannedDate),
-    });
-    body = t(locale, "network.tdh.verify.cutover.plannedBody", { date });
+    body = t(locale, "network.tdh.verify.cutover.dueBody", { date });
   }
   return (
     <li className={TILE} data-cutover={cutover.kind}>
@@ -305,78 +294,12 @@ export function CutoverTile({
         {t(locale, "network.tdh.verify.cutover.heading")}
         <TdhSource refs={["D132"]} locale={locale} />
       </p>
-      <p className={TILE_SUB}>{t(locale, "network.tdh.verify.cutover.sub")}</p>
       <p className={`${TILE_VALUE} tw-text-iron-50`}>{headline}</p>
-      {cutover.kind === "countdown" ? (
-        <>
-          {!relative && (
-            <p className={`${TILE_FOOT} tw-text-iron-300`}>{body}</p>
-          )}
-          <CutoverProgress
-            locale={locale}
-            days={cutover.days}
-            plannedDate={cutover.plannedDate}
-          />
-        </>
-      ) : (
-        <p className={`${TILE_FOOT} tw-text-iron-300`}>{body}</p>
-      )}
+      <p className={`${TILE_FOOT} tw-text-iron-300`}>{body}</p>
+      <p className={TILE_CAPTION}>
+        {t(locale, "network.tdh.verify.cutover.sub")}
+      </p>
     </li>
-  );
-}
-
-/**
- * The week from the first daily run to the planned cutover (D132), one
- * segment per daily run: the runs so far filled, the rest still to come.
- */
-function CutoverProgress({
-  locale,
-  days,
-  plannedDate,
-}: {
-  readonly locale: SupportedLocale;
-  /** Days still to go to the planned cutover. */
-  readonly days: number;
-  readonly plannedDate: string;
-}) {
-  const start = cycleDayOfDate(FIRST_REPORT_DATE);
-  const end = cycleDayOfDate(plannedDate);
-  const span = start === null || end === null ? 7 : Math.max(end - start, 1);
-  const run = Math.min(Math.max(span - days + 1, 1), span);
-  const label = t(locale, "network.tdh.verify.cutover.progress", {
-    run: formatInteger(locale, run),
-    span: formatInteger(locale, span),
-  });
-  return (
-    <div className="tw-mt-3">
-      <span className="tw-block tw-text-sm tw-tabular-nums tw-text-iron-200">
-        {label}
-      </span>
-      <span
-        aria-hidden="true"
-        className="tw-mt-1.5 tw-grid tw-gap-1"
-        style={{ gridTemplateColumns: `repeat(${span}, minmax(0, 1fr))` }}
-      >
-        {Array.from({ length: span }, (_, index) => (
-          <span
-            key={index}
-            className={`tw-h-2 tw-rounded-sm ${index < run ? "tw-bg-primary-400" : "tw-bg-iron-800"}`}
-          />
-        ))}
-      </span>
-      <span className="tw-mt-1.5 tw-flex tw-justify-between tw-gap-3 tw-text-sm tw-tabular-nums tw-text-iron-400">
-        <span className="tw-min-w-0">
-          {t(locale, "network.tdh.verify.cutover.start", {
-            date: formatShortCycleDate(locale, FIRST_REPORT_DATE),
-          })}
-        </span>
-        <span className="tw-whitespace-nowrap">
-          {t(locale, "network.tdh.verify.cutover.end", {
-            date: formatShortCycleDate(locale, plannedDate),
-          })}
-        </span>
-      </span>
-    </div>
   );
 }
 

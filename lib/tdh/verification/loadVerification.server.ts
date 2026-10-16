@@ -242,8 +242,8 @@ export const loadVerificationDay = cache(
 
 /**
  * The day before a published day, with its file's SHA-256 as the server read
- * it, so a day's page can name the one before it; null for the first day or
- * when its file cannot be read.
+ * it and the one the index states, so a day's page can name the one before
+ * it and show the two match; null for the first day.
  */
 export async function loadPreviousDay(
   index: VerificationIndex,
@@ -252,6 +252,7 @@ export async function loadPreviousDay(
   readonly cycleDay: number;
   readonly date: string;
   readonly sha256: string | null;
+  readonly stated: string | null;
 } | null> {
   const earlier = index.days
     .filter((day) => day.cycleDay < cycleDay)
@@ -267,5 +268,6 @@ export async function loadPreviousDay(
     cycleDay: earlier.cycleDay,
     date: earlier.date,
     sha256: load.status === "ok" ? load.sha256 : null,
+    stated: earlier.sha256 ?? null,
   };
 }

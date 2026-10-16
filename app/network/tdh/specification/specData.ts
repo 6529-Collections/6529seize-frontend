@@ -80,7 +80,7 @@ export const SYMBOLS = [
   { symbol: "n_memes", key: "nmemes", section: "5.1" },
   { symbol: "E[i]", key: "E", section: "5.2" },
   { symbol: "H", key: "H", section: "5.2" },
-  { symbol: "H(name, …)", key: "Hhash", section: "10" },
+  { symbol: "TH(name, …)", key: "Hhash", section: "10" },
   { symbol: "G", key: "G", section: "5.3" },
   { symbol: "N_c", key: "Nc", section: "5.3" },
   { symbol: "cluster(w)", key: "cluster", section: "6.3" },
@@ -266,6 +266,15 @@ export const DEVIATIONS: readonly Deviation[] = Array.from(
   }
 );
 
+/**
+ * The parameters P26 §10's table names: a row may name two
+ * ("firstgm_id, firstgm_edition_adjustment"), so this counts names.
+ */
+export const PARAMETER_NAME_COUNT = PARAMETERS.reduce(
+  (total, row) => total + row.name.split(", ").length,
+  0
+);
+
 export const BUG_IDS = Array.from({ length: 15 }, (_, index) => index + 1);
 
 export const DECISION_IDS = [
@@ -273,6 +282,7 @@ export const DECISION_IDS = [
   "D116",
   "D118",
   "D119",
+  "D120",
   "D121",
   "D122",
   "D125",

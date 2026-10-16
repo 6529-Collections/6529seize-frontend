@@ -32,7 +32,7 @@ import {
 } from "../shared/tdhStyles";
 import { middleTruncate } from "../verification/components/verificationFormat";
 import { PairStateMachine } from "./SpecDiagrams";
-import { Plain, Rule, SpecSection, SpecSub } from "./SpecParts";
+import { Details, Plain, Rule, SpecSection, SpecSub } from "./SpecParts";
 import { CONTRACTS, SYMBOLS, TOPICS } from "./specData";
 
 const CAPTION =
@@ -326,12 +326,15 @@ export default function SpecSectionsA({
         <div id="s4-1" className="tw-scroll-mt-24">
           <Plain>{t(locale, "network.tdh.spec.s4.body")}</Plain>
         </div>
-        <div id="s4-2" className="tw-scroll-mt-24">
-          <Plain>{t(locale, "network.tdh.spec.s4.order")}</Plain>
-        </div>
         <div id="s4-3" className="tw-scroll-mt-24">
           <Rule locale={locale} code={RULE_CUTOFF_SPEC} source="P26 §4.2" />
         </div>
+        <Details
+          id="s4-2"
+          items={(["day", "result", "ages", "order", "example"] as const).map(
+            (key) => t(locale, `network.tdh.spec.s4.detail.${key}`)
+          )}
+        />
         <p className="tw-m-0 tw-max-w-[34rem] tw-text-sm tw-leading-6 tw-text-iron-400">
           {t(locale, "network.tdh.spec.s4.binds")}
         </p>
@@ -357,6 +360,11 @@ export default function SpecSectionsA({
         >
           <Plain>{t(locale, "network.tdh.spec.s5-2.body")}</Plain>
           <Rule locale={locale} code={RULE_EDITIONS} source="P26 §5.2" />
+          <Details
+            items={(
+              ["firstgm", "why310", "noFloor", "totalMax", "zero"] as const
+            ).map((key) => t(locale, `network.tdh.spec.s5-2.detail.${key}`))}
+          />
           <TdhDisclosure
             tone="strong"
             summary={t(locale, "network.tdh.spec.s5-2.floorRead")}

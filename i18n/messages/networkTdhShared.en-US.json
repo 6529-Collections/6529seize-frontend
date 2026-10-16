@@ -102,5 +102,6 @@
   "network.tdh.shared.sources": "Sources",
   "network.tdh.shared.sourcesCount": "Sources ({count})",
   "network.tdh.shared.difftest.found.5": "All four equal on all 30,000 main cases, and on every ruling of P26’s fifth round. Edge probes found one question for the vector format: a member it does not name in a transfer, an event or the cycle, which program B refuses and the other three ignore (E13).",
-  "network.tdh.shared.difftest.settled.5": "Open: E13, for the vector format"
+  "network.tdh.shared.difftest.settled.5": "Open: E13, for the vector format",
+  "network.tdh.shared.pill.shownFalseEval": "False by evaluation"
 }

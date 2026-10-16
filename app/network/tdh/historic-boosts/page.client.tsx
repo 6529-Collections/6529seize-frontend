@@ -9,7 +9,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import TdhPager from "../shared/TdhPager";
-import TdhSource from "../shared/TdhSource";
+import TdhSourcesNote from "../shared/TdhSourcesNote";
 import TdhSubnav from "../shared/TdhSubnav";
 import {
   TDH_DROPDOWN_ROW,
@@ -126,31 +126,39 @@ export default function TDHHistoricBoostsPage({
             <CurrentLadder locale={locale} initialRules={rules} />
             <div className="tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
               <p className="tw-m-0">
-                {m(locale, "network.tdhHistoric.provenance")}{" "}
-                <TdhSource refs={["P26 §10", "DEV-3"]} locale={locale} />
+                {m(locale, "network.tdhHistoric.provenance")}
               </p>
-              <ul className="tw-m-0 tw-mt-2 tw-list-none tw-space-y-1 tw-p-0">
-                <li>
-                  <a
-                    href={ARCHIVE_SOURCE}
-                    className={TDH_LINK}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    {m(locale, "network.tdhHistoric.provenance.archive")}
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href={RULES_SOURCE}
-                    className={TDH_LINK}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    {m(locale, "network.tdhHistoric.provenance.rules")}
-                  </a>
-                </li>
-              </ul>
+              {/* The chips and the two source files in the standard closed
+                  Sources disclosure, as on every other TDH page. */}
+              <TdhSourcesNote
+                locale={locale}
+                className="tw-mt-3"
+                refs={["P26 §10", "DEV-3"]}
+                note={
+                  <ul className="tw-m-0 tw-list-none tw-space-y-1 tw-p-0">
+                    <li>
+                      <a
+                        href={ARCHIVE_SOURCE}
+                        className={TDH_LINK}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        {m(locale, "network.tdhHistoric.provenance.archive")}
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href={RULES_SOURCE}
+                        className={TDH_LINK}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        {m(locale, "network.tdhHistoric.provenance.rules")}
+                      </a>
+                    </li>
+                  </ul>
+                }
+              />
             </div>
           </div>
         </section>

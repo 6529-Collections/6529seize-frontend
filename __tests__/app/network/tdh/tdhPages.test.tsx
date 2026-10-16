@@ -195,7 +195,7 @@ describe("TDH sub-pages", () => {
     );
     pages.forEach(({ unmount }) => unmount());
 
-    const { container } = renderPage(<SpecificationPage />);
+    const { container } = renderPage(await SpecificationPage());
     for (const anchor of new Set([...cited, ...sourceAnchors(container)])) {
       expect(container.querySelector(`[id="${anchor}"]`)).not.toBeNull();
     }
@@ -227,7 +227,7 @@ describe("TDH sub-pages", () => {
 
   it("filters the specification's deviations", async () => {
     const user = userEvent.setup();
-    renderPage(<SpecificationPage />);
+    renderPage(await SpecificationPage());
     const filters = screen.getByRole("group", { name: "Filter differences" });
     await user.click(
       within(filters).getByRole("button", { name: "Can change values" })
@@ -255,16 +255,26 @@ describe("TDH sub-pages", () => {
     const statements = statementsFor(5);
     const count = (status: string) =>
       statements.filter((row) => row.status === status).length;
-    for (const status of [
-      "proved",
-      "shownFalse",
-      "byDefinition",
-      "deferred",
-    ] as const) {
+    for (const status of ["proved", "byDefinition", "deferred"] as const) {
       expect(
         container.querySelectorAll(`table [data-tdh-pill="${status}"]`)
       ).toHaveLength(count(status));
     }
+    // A claim shown false only by evaluated counterexamples (cases F, G, H
+    // and I) says so; the first netting rule's are kernel theorems.
+    expect(
+      container.querySelectorAll('table [data-tdh-pill="shownFalse"]')
+    ).toHaveLength(1);
+    expect(
+      container.querySelectorAll('table [data-tdh-pill="shownFalseEval"]')
+    ).toHaveLength(count("shownFalse") - 1);
+    // The counterexamples' split and the audited arithmetic, from the
+    // manifest; every entry is listed.
+    expect(container.textContent).toMatch(/7 by theorem, 4 by evaluation/);
+    expect(container.textContent).toMatch(/78 \+ 7 = 85/);
+    expect(
+      screen.getByText("All 98 manifest entries, by status")
+    ).toBeInTheDocument();
     expect(
       container.querySelectorAll('table [data-tdh-pill="unverified"]')
     ).toHaveLength(0);
@@ -311,7 +321,9 @@ describe("TDH sub-pages", () => {
       name: "Show the details of Netting invariance",
     });
     await user.click(netting);
-    expect(screen.getByText("replayHoldings_invariance")).toBeInTheDocument();
+    expect(
+      screen.getByText("replayHoldings_invariance", { selector: "code" })
+    ).toBeInTheDocument();
     expect(
       screen.getAllByText(
         "Checked by Lean’s kernel; axioms: propext, Classical.choice, Quot.sound"
@@ -436,21 +448,16 @@ describe("TDH sub-pages", () => {
         "All 89 vectors (1,257 checks), at P26 f840096. The daily comparison runs the 6529chain build each day’s page names"
       )
     ).toBeInTheDocument();
-    // The Rust core and program B on the validator's development branch;
-    // the daily comparison's builds read from the latest day's file.
+    // One vectors figure a program, P26's commit said once under the
+    // table; the builds that ran on the latest day, from its file.
     expect(
-      screen.getAllByText("P26 f840096, validator development branch (30bf8f9)")
-        .length
-    ).toBe(2);
-    expect(
-      screen.getByText(
-        "P26 0621ed4, the daily comparison’s build (validator@e127676)"
-      )
+      screen.getByText(/Vectors: all 89 of P26 at f840096/)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "P26 0621ed4, the daily comparison’s build (6529chain@0621ed4)"
-      )
+      screen.getByText("Ran on October 15, 2026: validator@e127676")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Ran on October 15, 2026: 6529chain@0621ed4")
     ).toBeInTheDocument();
     expect(
       screen.getByText("All 89 vectors (1,253 checks), at P26 f840096")
@@ -474,12 +481,14 @@ describe("TDH sub-pages", () => {
     await user.click(
       within(filters).getByRole("button", { name: /No result/ })
     );
+    // "No result" is the 37 vectors whose whole expected output is no
+    // result (expected_invalid); 34 and 55 mix cases with and without one.
     expect(
-      screen.getByRole("table", { name: "Conformance vectors, 10 of 39 shown" })
+      screen.getByRole("table", { name: "Conformance vectors, 10 of 37 shown" })
     ).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Show all 39" }));
+    await user.click(screen.getByRole("button", { name: "Show all 37" }));
     expect(
-      screen.getByRole("table", { name: "Conformance vectors, 39 of 39 shown" })
+      screen.getByRole("table", { name: "Conformance vectors, 37 of 37 shown" })
     ).toBeInTheDocument();
     expect(
       screen.getByText("72-invalid-transfer-at-raw-transfer-log")
@@ -499,7 +508,7 @@ describe("TDH sub-pages", () => {
     expect(screen.getAllByText("Equal").length).toBeGreaterThan(0);
     expect(
       screen.getByText(
-        "Cycle of October 15, 2026 (holdings at the last Ethereum block before 00:00 UTC): the Rust core, the Python reference and 6529.io agreed on all 10,282 identity records, each collector’s and the two burn addresses’, and all 11,133 wallet records, to the last unit of TDH."
+        "The Rust core, the Python reference and 6529.io agree to the last unit of TDH, the two burn addresses included."
       )
     ).toBeInTheDocument();
 
@@ -541,9 +550,23 @@ describe("TDH sub-pages", () => {
         "TDH verification"
       )
     ).toBeInTheDocument();
+    // A cycle before the feed's first day says so, with its date; the
+    // days before the comparison point to 6529.io's uploads and the
+    // October 11 replay, never "not computed under TDH-v1".
     expect(
-      screen.getByText(/This address names no day the feed holds/)
+      screen.getByText(
+        "Cycle 20,739 (October 13, 2026) is before the first published day, October 14, 2026 (cycle 20,740)."
+      )
     ).toBeInTheDocument();
+    expect(
+      screen.getByText(/The daily comparison began with October 14, 2026/)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {
+        name: "the replay, in the specification’s evidence",
+      })
+    ).toHaveAttribute("href", "/network/tdh/specification#evidence-replay");
+    expect(document.body.textContent).not.toMatch(/not computed under TDH-v1/);
     unmount();
 
     renderPage(
@@ -551,7 +574,7 @@ describe("TDH sub-pages", () => {
     );
     expect(
       screen.getByText(
-        /Cycle 99,999 closes at 00:00 UTC on .*, so it has no report yet/
+        /Cycle 99,999 closes at 00:00 UTC on .*, so it has no report yet; a day’s report appears after its run at 00:40 UTC/
       )
     ).toBeInTheDocument();
   });

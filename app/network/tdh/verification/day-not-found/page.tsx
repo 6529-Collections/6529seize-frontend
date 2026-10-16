@@ -6,11 +6,10 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { FIRST_TDH_FEED_CYCLE_DAY } from "@/lib/proxy/tdhVerificationDay";
 import { loadVerificationIndex } from "@/lib/tdh/verification/loadVerification.server";
-import { cutoverState, latestIndexDay } from "@/lib/tdh/verification/states";
+import { latestIndexDay } from "@/lib/tdh/verification/states";
 import TdhArrowLink from "../../shared/TdhArrowLink";
 import TdhPageShell from "../../shared/TdhPageShell";
 import { TDH_BUTTON, TDH_CARD, TDH_LINK } from "../../shared/tdhStyles";
-import VerificationCalendar from "../components/VerificationCalendar";
 import { verificationDayHref } from "../components/VerificationHeadline";
 import { formatCycleDate } from "../components/verificationFormat";
 
@@ -54,6 +53,21 @@ function futureCycle(
   return cycle * 86_400_000 > now.getTime() ? cycle : null;
 }
 
+/** The cycle asked for when it is a number before the feed's first day. */
+function earlyCycle(value: string | string[] | undefined): number | null {
+  const raw = firstValue(value);
+  if (!/^[1-9]\d{0,6}$/.test(raw)) {
+    return null;
+  }
+  const cycle = Number(raw);
+  return cycle < FIRST_TDH_FEED_CYCLE_DAY ? cycle : null;
+}
+
+/** A cycle day's date, "YYYY-MM-DD". */
+function cycleDate(cycle: number): string {
+  return new Date(cycle * 86_400_000).toISOString().slice(0, 10);
+}
+
 /**
  * The TDH pages' not-found view for a day permalink: which day was asked
  * for, the days the feed holds, and the way to the latest day and the
@@ -72,10 +86,25 @@ export default async function TdhVerificationDayNotFound({
     indexLoad.status === "ok" ? latestIndexDay(indexLoad.index) : null;
   const now = new Date();
   const future = futureCycle(day, now);
-  const cutover = cutoverState(
-    indexLoad.status === "ok" ? indexLoad.index.cutover : null,
-    now
-  );
+  const early = earlyCycle(day);
+  const first = {
+    first: formatCycleDate(locale, FIRST_DATE),
+    cycle: formatInteger(locale, FIRST_TDH_FEED_CYCLE_DAY),
+  };
+  let lede = t(locale, "network.tdh.verify.notFound.body", first);
+  if (future !== null) {
+    lede = t(locale, "network.tdh.verify.notFound.future", {
+      ...first,
+      day: formatInteger(locale, future),
+      date: formatCycleDate(locale, cycleDate(future)),
+    });
+  } else if (early !== null) {
+    lede = t(locale, "network.tdh.verify.notFound.beforeFirst", {
+      ...first,
+      day: formatInteger(locale, early),
+      date: formatCycleDate(locale, cycleDate(early)),
+    });
+  }
   return (
     <TdhPageShell
       locale={locale}
@@ -88,37 +117,11 @@ export default async function TdhVerificationDayNotFound({
           ? t(locale, "network.tdh.verify.notFound.title", { day: asked })
           : t(locale, "network.tdh.verify.notFound.titleNoDay")
       }
-      lede={
-        <p className="tw-m-0">
-          {future === null
-            ? t(locale, "network.tdh.verify.notFound.body", {
-                first: formatCycleDate(locale, FIRST_DATE),
-                cycle: formatInteger(locale, FIRST_TDH_FEED_CYCLE_DAY),
-              })
-            : t(locale, "network.tdh.verify.notFound.future", {
-                day: formatInteger(locale, future),
-                date: formatCycleDate(
-                  locale,
-                  new Date(future * 86_400_000).toISOString().slice(0, 10)
-                ),
-                first: formatCycleDate(locale, FIRST_DATE),
-                cycle: formatInteger(locale, FIRST_TDH_FEED_CYCLE_DAY),
-              })}
-        </p>
-      }
+      lede={<p className="tw-m-0">{lede}</p>}
     >
+      {/* The way on, and nothing else: the latest day, the dashboard, and
+          where the days before the feed are. */}
       <div className="tw-space-y-4">
-        {indexLoad.status === "ok" && latest && (
-          <VerificationCalendar
-            locale={locale}
-            days={indexLoad.index.days}
-            selectedCycleDay={latest.cycleDay}
-            upcomingUntil={
-              cutover.kind === "countdown" ? cutover.plannedDate : null
-            }
-            now={now}
-          />
-        )}
         <div
           className={`${TDH_CARD} tw-flex tw-w-fit tw-max-w-full tw-flex-col tw-items-start tw-gap-3 tw-p-5`}
         >
@@ -149,6 +152,15 @@ export default async function TdhVerificationDayNotFound({
             >
               {t(locale, "network.tdh.verify.check.apiLink")}
             </a>
+          </p>
+          <p className="tw-m-0 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
+            {t(locale, "network.tdh.verify.notFound.replay")}{" "}
+            <Link
+              href="/network/tdh/specification#evidence-replay"
+              className={TDH_LINK}
+            >
+              {t(locale, "network.tdh.verify.notFound.replayLink")}
+            </Link>
           </p>
         </div>
       </div>

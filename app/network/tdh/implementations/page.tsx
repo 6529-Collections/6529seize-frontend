@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
-import { t, type MessageKey } from "@/i18n/messages";
+import { t } from "@/i18n/messages";
 import { loadFormalManifest } from "@/lib/tdh/formal/loadFormalManifest.server";
 import { conformanceRun } from "@/lib/tdh/formal/manifest";
 import {
@@ -19,29 +19,15 @@ import TdhPager from "../shared/TdhPager";
 import TdhSection from "../shared/TdhSection";
 import TdhDisclosure from "../shared/TdhDisclosure";
 import TdhStatusPill, { TdhStatusLegend } from "../shared/TdhStatusPill";
-import {
-  TDH_CAPTION,
-  TDH_CARD,
-  TDH_FOCUS_RING,
-  TDH_TABLE,
-  TDH_TABLE_FRAME,
-  TDH_TD,
-  TDH_TH,
-} from "../shared/tdhStyles";
-import TdhProgramMark, { type TdhProgram } from "../shared/TdhProgramMark";
+import { TDH_CARD, TDH_FOCUS_RING } from "../shared/tdhStyles";
 import { formatCycleDate } from "../verification/components/verificationFormat";
-import {
-  CheckMatrix,
-  LineageDiagram,
-  MatrixCell,
-  MatrixLegend,
-  type MatrixTone,
-} from "./ImplementationDiagrams";
+import { CheckMatrix, LineageDiagram } from "./ImplementationDiagrams";
 import ProgramCards, { type DailyBuilds } from "./ProgramCards";
 import VectorAnatomy from "./VectorAnatomy";
 import VectorBrowser from "./VectorBrowser";
 import VectorFormat from "./VectorFormat";
 import { VECTOR_COUNT } from "./vectors";
+import { P26 } from "../shared/tdhFacts";
 
 // The agreement card reads the latest daily verification files.
 export const revalidate = 600;
@@ -55,56 +41,6 @@ const TABLE_SOURCES = [
   "D116",
   "P52 §3.4",
 ] as const;
-const WHERE: ReadonlyArray<{
-  readonly key: "rust" | "programB" | "python" | "backend";
-  readonly series: TdhProgram;
-  readonly cells: ReadonlyArray<readonly [MatrixTone, string]>;
-}> = [
-  {
-    key: "rust",
-    series: "rust",
-    cells: [
-      ["later", "firstCheck"],
-      ["now", "yes"],
-      ["later", "fromCutover"],
-      ["later", "programA"],
-    ],
-  },
-  {
-    key: "programB",
-    series: "programB",
-    cells: [
-      ["later", "secondCheck"],
-      ["no", "no"],
-      ["no", "no"],
-      ["later", "programB"],
-    ],
-  },
-  {
-    key: "python",
-    series: "python",
-    cells: [
-      ["later", "optional"],
-      ["now", "yes"],
-      ["no", "no"],
-      ["no", "no"],
-    ],
-  },
-  {
-    key: "backend",
-    series: "live",
-    cells: [
-      ["no", "no"],
-      ["test", "underTest"],
-      ["now", "untilCutover"],
-      ["no", "no"],
-    ],
-  },
-];
-
-function Dot({ series }: { readonly series: TdhProgram }) {
-  return <TdhProgramMark program={series} />;
-}
 const CHECKS = [
   { key: "vectors", refs: ["P26 §13"] },
   { key: "replays", refs: ["Replay 2026-10-11", "P26 §13"] },
@@ -116,119 +52,6 @@ const CHECKS = [
 ] as const;
 const PROSE =
   "tw-m-0 tw-max-w-[34rem] tw-text-base tw-leading-7 tw-text-iron-200";
-
-function WhereItRuns({ locale }: { readonly locale: SupportedLocale }) {
-  const columns = ["validator", "dailyJob", "site", "proof"] as const;
-  return (
-    <>
-      <ul className="tw-m-0 tw-grid tw-list-none tw-gap-2 tw-p-0 sm:tw-grid-cols-2 xl:tw-hidden">
-        {WHERE.map((row) => (
-          <li key={row.key} className={`${TDH_CARD} tw-p-4`}>
-            <p className="tw-m-0 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-text-iron-50">
-              <Dot series={row.series} />
-              {t(locale, `network.tdh.impl.name.${row.key}`)}
-            </p>
-            <dl className="tw-m-0 tw-mt-2 tw-grid tw-grid-cols-1 tw-gap-x-3 tw-gap-y-2 min-[400px]:tw-grid-cols-2">
-              {row.cells.map(([tone, cell], index) => (
-                <div key={columns[index]}>
-                  <dt className="tw-text-sm tw-text-iron-400">
-                    {t(
-                      locale,
-                      `network.tdh.impl.where.${columns[index] ?? "validator"}`
-                    )}
-                    <span className="tw-block tw-text-sm tw-text-iron-400">
-                      {t(
-                        locale,
-                        `network.tdh.impl.where.${columns[index] ?? "validator"}When` as MessageKey
-                      )}
-                    </span>
-                  </dt>
-                  <dd className="tw-m-0 tw-mt-0.5 tw-text-sm">
-                    {tone === "no" ? (
-                      <span className="tw-text-iron-500">–</span>
-                    ) : (
-                      <MatrixCell
-                        tone={tone}
-                        label={t(
-                          locale,
-                          `network.tdh.impl.where.${cell}` as MessageKey
-                        )}
-                      />
-                    )}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </li>
-        ))}
-      </ul>
-      <div className={`${TDH_TABLE_FRAME} tw-hidden xl:tw-block`}>
-        <table className={TDH_TABLE}>
-          <caption className={TDH_CAPTION}>
-            {t(locale, "network.tdh.impl.where.caption")}
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col" className={TDH_TH}>
-                {t(locale, "network.tdh.impl.where.implementation")}
-              </th>
-              {columns.map((column) => (
-                <th
-                  key={column}
-                  scope="col"
-                  className={`${TDH_TH} tw-whitespace-nowrap`}
-                >
-                  {t(locale, `network.tdh.impl.where.${column}`)}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {WHERE.map((row) => (
-              <tr key={row.key}>
-                <th scope="row" className={`${TDH_TD} tw-font-medium`}>
-                  <span className="tw-inline-flex tw-items-center tw-gap-2">
-                    <Dot series={row.series} />
-                    {t(locale, `network.tdh.impl.name.${row.key}`)}
-                  </span>
-                </th>
-                {row.cells.map(([tone, cell], index) => (
-                  <td
-                    key={columns[index]}
-                    className={`${TDH_TD} tw-text-[13px] ${columns[index] === "proof" ? "tw-whitespace-nowrap" : ""}`}
-                  >
-                    <MatrixCell
-                      tone={tone}
-                      label={t(
-                        locale,
-                        `network.tdh.impl.where.${cell}` as MessageKey
-                      )}
-                    />
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <p className="tw-m-0 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-px-4 tw-py-2.5 tw-text-sm tw-leading-5 tw-text-iron-400">
-          {t(locale, "network.tdh.impl.where.whenCaption", {
-            items: columns
-              .map((column) => {
-                const name = t(locale, `network.tdh.impl.where.${column}`);
-                const when = t(
-                  locale,
-                  `network.tdh.impl.where.${column}When` as MessageKey
-                );
-                return `${name}, ${when}`;
-              })
-              .join("; "),
-          })}
-        </p>
-      </div>
-      <MatrixLegend locale={locale} />
-    </>
-  );
-}
 
 function LatestAgreement({
   locale,
@@ -286,7 +109,11 @@ export default async function TdhImplementationsPage() {
   // The builds the daily comparison ran, from its latest day's file.
   const daily: DailyBuilds | null =
     summary?.kind === "data"
-      ? { rust: summary.rustCommit, python: summary.pythonCommit }
+      ? {
+          rust: summary.rustCommit,
+          python: summary.pythonCommit,
+          date: summary.date,
+        }
       : null;
   const round = leanRound(formal.manifest);
   const lean = {
@@ -340,7 +167,11 @@ export default async function TdhImplementationsPage() {
                 {t(locale, "network.tdh.impl.conformanceNote")}
               </p>
               <p className="tw-m-0">
-                {t(locale, "network.tdh.impl.checksNote")}
+                {t(locale, "network.tdh.impl.checksNote", {
+                  python: formatInteger(locale, P26.pythonChecks),
+                  rust: formatInteger(locale, P26.rustReferenceChecks),
+                  lean: formatInteger(locale, lean.checks),
+                })}
               </p>
               <p className="tw-m-0">
                 {t(locale, "network.tdh.impl.speedNote")}
@@ -366,19 +197,21 @@ export default async function TdhImplementationsPage() {
         </div>
       </TdhSection>
 
+      {/* A matrix of seven columns: a full-width figure, like the
+          programs table. */}
       <TdhSection
         id="where"
         title={t(locale, "network.tdh.impl.where.title")}
         locale={locale}
+        wide
       >
-        <WhereItRuns locale={locale} />
+        <CheckMatrix locale={locale} lean={lean} />
       </TdhSection>
 
       <TdhSection
         id="checked"
         title={t(locale, "network.tdh.impl.checked.title")}
         locale={locale}
-        wide
         sources={[...CHECKS.flatMap((check) => check.refs), "P53 §4.5"]}
       >
         <div className="tw-space-y-6">
@@ -392,12 +225,21 @@ export default async function TdhImplementationsPage() {
                   {formatInteger(locale, index + 1)}
                 </span>
                 <div className="tw-min-w-0">
+                  {/* Two lines each; the counts and the detail one click
+                      away. */}
                   <p className="tw-m-0 tw-max-w-[34rem] tw-text-base tw-leading-7 tw-text-iron-300">
                     <strong className="tw-font-semibold tw-text-iron-50">
                       {t(locale, `network.tdh.impl.checked.${check.key}.title`)}
                     </strong>{" "}
-                    {t(locale, `network.tdh.impl.checked.${check.key}.body`)}
+                    {t(locale, `network.tdh.impl.checked.${check.key}.short`)}
                   </p>
+                  <TdhDisclosure
+                    summary={t(locale, "network.tdh.impl.checked.more")}
+                  >
+                    <p className="tw-m-0 tw-max-w-[34rem] tw-pb-2 tw-pl-6 tw-text-sm tw-leading-6 tw-text-iron-300">
+                      {t(locale, `network.tdh.impl.checked.${check.key}.body`)}
+                    </p>
+                  </TdhDisclosure>
                   {check.key === "daily" && (
                     <TdhArrowLink href="/network/tdh/verification">
                       {t(locale, "network.tdh.impl.checked.daily.link")}
@@ -418,7 +260,6 @@ export default async function TdhImplementationsPage() {
           <p className="tw-m-0 tw-max-w-[34rem] tw-rounded-lg tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-base tw-leading-7 tw-text-iron-200">
             {t(locale, "network.tdh.impl.checked.after")}
           </p>
-          <CheckMatrix locale={locale} lean={lean} />
         </div>
       </TdhSection>
 

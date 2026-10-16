@@ -316,9 +316,33 @@ function Step12({ locale }: { readonly locale: SupportedLocale }) {
                       )}
                     </th>
                     <td className={tdhNarrowCell(TDH_TD_NUM)}>
-                      {fresh
-                        ? t(locale, "network.tdh.how.s12.freshCopy")
-                        : `${formatInteger(locale, raw)} × ${rateText(locale, rate)}`}
+                      {fresh && t(locale, "network.tdh.how.s12.freshCopy")}
+                      {/* Several copies: each copy's days on a line, then
+                          the rate, so the cell stays narrow. */}
+                      {!fresh && holding.days.length > 1 && (
+                        <>
+                          {holding.days.map((days, index) => (
+                            <span
+                              key={index}
+                              className="tw-block tw-whitespace-nowrap"
+                            >
+                              {t(
+                                locale,
+                                index === 0
+                                  ? "network.tdh.how.s12.copyDays"
+                                  : "network.tdh.how.s12.moreCopyDays",
+                                { days: formatInteger(locale, days) }
+                              )}
+                            </span>
+                          ))}
+                          <span className="tw-block tw-whitespace-nowrap">
+                            × {rateText(locale, rate)}
+                          </span>
+                        </>
+                      )}
+                      {!fresh &&
+                        holding.days.length === 1 &&
+                        `${formatInteger(locale, raw)} × ${rateText(locale, rate)}`}
                     </td>
                     <td
                       className={`${tdhNarrowCell(TDH_TD_NUM)} tw-font-semibold tw-text-iron-50`}
@@ -446,20 +470,7 @@ function Step13({
   );
 }
 
-function Step14({
-  locale,
-  comparedDays,
-}: {
-  readonly locale: SupportedLocale;
-  /** Days the daily comparison has published; null without the feed. */
-  readonly comparedDays: number | null;
-}) {
-  const compared =
-    comparedDays === null
-      ? t(locale, "network.tdh.how.s14.comparedNoFeed")
-      : t(locale, "network.tdh.how.s14.compared", {
-          days: formatInteger(locale, comparedDays),
-        });
+function Step14({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <StepSection
       locale={locale}
@@ -487,9 +498,8 @@ function Step14({
           { text: t(locale, "network.tdh.how.s14.item2") },
           { text: t(locale, "network.tdh.how.s14.item3") },
           { text: t(locale, "network.tdh.how.s14.item4") },
-          {
-            text: t(locale, "network.tdh.how.s14.item5", { compared }),
-          },
+          { text: t(locale, "network.tdh.how.s14.item5") },
+          { text: t(locale, "network.tdh.how.s14.item5b") },
           { text: t(locale, "network.tdh.how.s14.item6") },
           { text: t(locale, "network.tdh.how.s14.item7") },
         ]}
@@ -508,12 +518,9 @@ function Step14({
 
 export default function HowItWorksStepsB({
   locale,
-  comparedDays = null,
   latestTotal = null,
 }: {
   readonly locale: SupportedLocale;
-  /** Days the daily comparison has published; null without the feed. */
-  readonly comparedDays?: number | null;
   /** The latest compared day's total, when all three agreed on it. */
   readonly latestTotal?: {
     readonly date: string;
@@ -528,7 +535,7 @@ export default function HowItWorksStepsB({
       <Step11 locale={locale} />
       <Step12 locale={locale} />
       <Step13 locale={locale} latestTotal={latestTotal} />
-      <Step14 locale={locale} comparedDays={comparedDays} />
+      <Step14 locale={locale} />
     </>
   );
 }

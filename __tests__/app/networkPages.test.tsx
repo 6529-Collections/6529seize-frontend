@@ -108,7 +108,15 @@ describe("network pages render", () => {
     expect(
       screen.getByRole("heading", { level: 2, name: "TDH in a minute" })
     ).toBeInTheDocument();
-    expect(screen.getByText("= 1,296 TDH from this card")).toBeInTheDocument();
+    // The card's TDH with one Gradient, beside no Gradient and a full set.
+    const variants = within(
+      screen.getByRole("list", { name: "What the boost does to this card" })
+    ).getAllByRole("listitem");
+    expect(variants.map((item) => item.textContent)).toEqual([
+      "No Gradient, boost 1.001,271",
+      "One Gradient, boost 1.021,296",
+      "A full set instead, boost 1.802,288",
+    ]);
     expect(
       screen.getByText(/The Gradient earns TDH of its own on top/)
     ).toBeInTheDocument();
@@ -147,21 +155,23 @@ describe("network pages render", () => {
         name: "Checked daily, in public",
       })
     ).toBeInTheDocument();
-    // The strip near the top, in one line: the track record in bold and the
-    // latest cycle's identity and wallet records.
-    expect(
-      screen.getByText("Equal on 2 of 2 published days.")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", {
-        name: /Latest, Oct 15: 6529.io, the Rust core and the Python reference \(on the Rust run’s input\) agree on all 10,282 identity and 11,133 wallet records\./,
-      })
-    ).toHaveAttribute("href", "/network/tdh/verification");
-    // The checked-daily section's proof panel: the latest day's figures,
-    // every published day as a dot, and the record.
+    // The strip near the top: the track record in bold with the latest
+    // day, the history not yet fully checked, and the comparison one link
+    // away.
     expect(
       screen.getByText("Equal on 2 of 2 published days")
     ).toBeInTheDocument();
+    expect(screen.getByText("· latest Oct 15")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {
+        name: "History read from public servers, taken as reported",
+      })
+    ).toHaveAttribute("href", "#tdh-verified");
+    expect(
+      screen.getByRole("link", { name: "See the comparison" })
+    ).toHaveAttribute("href", "/network/tdh/verification");
+    // The proof panel: the latest day's figures and every published day as
+    // a dot.
     expect(
       screen.getByText("Latest day: October 15, 2026")
     ).toBeInTheDocument();
@@ -189,12 +199,13 @@ describe("network pages render", () => {
         /cannot change who holds which copies since when\. A mint and its burn there can still change eligibility/
       )
     ).toBeInTheDocument();
-    // The day's builds come from its file.
+    // The day's builds come from its file: in the strip, and in the
+    // section's "How" disclosure.
     expect(
-      screen.getByText(
+      screen.getAllByText(
         /Builds: Rust core validator@e127676, Python reference 6529chain@0621ed4/
       )
-    ).toBeInTheDocument();
+    ).toHaveLength(2);
     expect(
       screen.queryByRole("heading", { name: "The exact calculation has moved" })
     ).not.toBeInTheDocument();

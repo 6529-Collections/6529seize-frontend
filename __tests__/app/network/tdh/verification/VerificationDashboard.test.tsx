@@ -127,24 +127,40 @@ describe("VerificationDashboard", () => {
       okDay(day.data)
     );
     expect(screen.queryByText(/sample/i)).not.toBeInTheDocument();
+    // "Every record equal" is the heading; the line under it says who
+    // agrees, and no paragraph restates the counts.
+    expect(
+      screen.getByRole("heading", {
+        name: "Every record equal: 10,282 identities and 11,133 wallets",
+      })
+    ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Cycle of October 15, 2026 (holdings at the last Ethereum block before 00:00 UTC): the Rust core, the Python reference and 6529.io agreed on all 10,282 identity records, each collector’s and the two burn addresses’, and all 11,133 wallet records, to the last unit of TDH."
+        "The Rust core, the Python reference and 6529.io agree to the last unit of TDH, the two burn addresses included."
       )
     ).toBeInTheDocument();
+    expect(screen.queryByText(/^Verdict OK/)).not.toBeInTheDocument();
+    // The fixture's files state no time: they are the first runs.
+    expect(
+      screen.getAllByText(
+        "First computed on October 15, 2026, with the feed’s first two days, before the scheduled daily runs began on October 16."
+      ).length
+    ).toBeGreaterThan(0);
     expect(screen.getAllByText("All equal").length).toBe(2);
     expect(screen.getAllByText("2,073,214,934").length).toBeGreaterThan(1);
     expect(screen.getByText("The same in all three")).toBeInTheDocument();
     expect(screen.getAllByText("Wallets: 11,133 of 11,133 equal").length).toBe(
       2
     );
-    expect(screen.getByText("8 days to go")).toBeInTheDocument();
+    // D132 plans the cutover for about October 23: no countdown.
+    expect(screen.getByText("About Oct 23")).toBeInTheDocument();
+    expect(screen.queryByText(/days? to go/)).not.toBeInTheDocument();
     expect(screen.getAllByText("Not yet fully checked").length).toBeGreaterThan(
       0
     );
     expect(
       screen.getByText(
-        /No differences: every identity and wallet record is equal/
+        "No differences: every compared field of every record is equal."
       )
     ).toBeInTheDocument();
     expect(
@@ -186,6 +202,16 @@ describe("VerificationDashboard", () => {
     expect(
       screen.getByText("matches the file this page read")
     ).toBeInTheDocument();
+    // Beside the totals, the same check, said of the hash read.
+    expect(
+      screen.getByText("the feed’s index states the same")
+    ).toBeInTheDocument();
+    // A first day's file written on October 16: recomputed, not first run.
+    expect(
+      screen.getAllByText(
+        "First computed on October 15, 2026, before the scheduled daily runs began. This file was recomputed on October 16, 2026 at 00:51 UTC, by the builds this page names."
+      ).length
+    ).toBeGreaterThan(0);
     // The totals tile and the strip use one direction: Rust minus the other.
     expect(screen.getAllByText("Rust − 6529.io").length).toBeGreaterThan(1);
     expect(screen.getByText("Rust − Python")).toBeInTheDocument();
@@ -235,10 +261,11 @@ describe("VerificationDashboard", () => {
     );
     expect(screen.getByText("Files, by SHA-256")).toBeInTheDocument();
     // Same input and identities file in both programs; a different wallets
-    // file is shown with its own hash.
+    // file is shown with its own hash, so the files are not called
+    // identical.
     expect(
-      screen.getAllByText("the Python reference’s is the same")
-    ).toHaveLength(2);
+      screen.queryByText("Python reference: identical files")
+    ).not.toBeInTheDocument();
     expect(screen.getByText("the Python reference’s:")).toBeInTheDocument();
     expect(container.querySelector(`code[title="${wallets}"]`)).not.toBeNull();
     expect(
@@ -446,11 +473,15 @@ describe("VerificationDashboard", () => {
       NOW,
       true
     );
-    // A day's own page shows the planned date, and the countdown as it
-    // stood on that day, labelled so; not today's.
-    expect(screen.queryByText("8 days to go")).not.toBeInTheDocument();
+    // A day's own page shows the planned date and that the day came before
+    // it; it never counts the days.
+    expect(screen.queryByText(/days? to go/)).not.toBeInTheDocument();
     expect(screen.getByText("About Oct 23")).toBeInTheDocument();
-    expect(screen.getByText("On this day: 9 days to go")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Planned for about October 23, 2026; this day came before it."
+      )
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Not the latest day: go to the latest" })
     ).toHaveAttribute("href", "/network/tdh/verification");
@@ -487,7 +518,7 @@ describe("VerificationDashboard", () => {
     expect(
       screen.getByText("No daily report is published yet.")
     ).toBeInTheDocument();
-    expect(screen.getByText("8 days to go")).toBeInTheDocument();
+    expect(screen.getByText("About Oct 23")).toBeInTheDocument();
     expectAccessibleStructure(container);
   });
 

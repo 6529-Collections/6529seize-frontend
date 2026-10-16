@@ -2,7 +2,13 @@ import { publicEnv } from "@/config/env";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
-import { loadVerificationIndex } from "@/lib/tdh/verification/loadVerification.server";
+import {
+  LATEST_DAY_REVALIDATE_SECONDS,
+  OLDER_DAY_REVALIDATE_SECONDS,
+  loadVerificationDay,
+  loadVerificationIndex,
+} from "@/lib/tdh/verification/loadVerification.server";
+import type { VerificationDay } from "@/lib/tdh/verification/schema";
 import { indexDayVerdict } from "@/lib/tdh/verification/states";
 import { formatCycleDate } from "../verification/components/verificationFormat";
 
@@ -20,12 +26,19 @@ function escapeXml(value: string): string {
     .replaceAll('"', "&quot;");
 }
 
+/** An RFC 822 date for RSS. */
+function rssDate(value: string): string {
+  return new Date(value).toUTCString();
+}
+
 /**
  * The daily comparison as an RSS 2.0 feed: one item per published day, with
- * its verdict and how many identity records agree, newest first, so a reader
- * hears of a difference as soon as the day is published. An item's date is
- * the feed's own `generatedAt` for the day when the index states one, and
- * otherwise the cycle's boundary, 00:00 UTC of its date.
+ * its verdict, how many identity records agree with 6529.io and between the
+ * Rust core and the Python reference, and the totals, newest first, so a
+ * reader hears of a difference as soon as the day is published. An item's
+ * date is when the feed wrote the day's file (its `generatedAt`, from the
+ * file or the index), else when the index was written, else the cycle's
+ * boundary, 00:00 UTC of its date; the channel's build date is the index's.
  */
 export async function GET(): Promise<Response> {
   const locale = DEFAULT_LOCALE;
@@ -38,7 +51,21 @@ export async function GET(): Promise<Response> {
           .sort((left, right) => right.cycleDay - left.cycleDay)
           .slice(0, FEED_DAYS)
       : [];
-  const items = days.map((day) => {
+  const files = await Promise.all(
+    days.map(async (day, position): Promise<VerificationDay | null> => {
+      const dayLoad = await loadVerificationDay(
+        day.cycleDay,
+        position === 0
+          ? LATEST_DAY_REVALIDATE_SECONDS
+          : OLDER_DAY_REVALIDATE_SECONDS
+      );
+      return dayLoad.status === "ok" ? dayLoad.day : null;
+    })
+  );
+  const indexWritten =
+    load.status === "ok" ? (load.index.generatedAt ?? null) : null;
+  const items = days.map((day, position) => {
+    const file = files[position] ?? null;
     const link = `${dashboard}/${day.cycleDay}`;
     const verdict = t(
       locale,
@@ -67,10 +94,24 @@ export async function GET(): Promise<Response> {
           ? "–"
           : formatInteger(locale, day.totalTdh.live),
     });
-    const description = `${agreement} ${totals}`;
-    const published = new Date(
-      day.generatedAt ?? `${day.date}T00:00:00Z`
-    ).toUTCString();
+    const python = file?.agreement.rustVsPython ?? null;
+    const pythonLine =
+      python === null
+        ? ""
+        : ` ${t(locale, "network.tdh.verify.rss.itemPython", {
+            equal: formatInteger(locale, python.identitiesEqual),
+            total: formatInteger(locale, python.identitiesTotal),
+          })}`;
+    const written =
+      file?.generatedAt ?? day.generatedAt ?? indexWritten ?? null;
+    const writtenLine =
+      written === null
+        ? ""
+        : ` ${t(locale, "network.tdh.verify.rss.itemFile", {
+            time: rssDate(written),
+          })}`;
+    const description = `${agreement}${pythonLine} ${totals}${writtenLine}`;
+    const published = rssDate(written ?? `${day.date}T00:00:00Z`);
     return [
       "    <item>",
       `      <title>${escapeXml(title)}</title>`,
@@ -89,6 +130,11 @@ export async function GET(): Promise<Response> {
     `    <link>${escapeXml(dashboard)}</link>`,
     `    <description>${escapeXml(t(locale, "network.tdh.verify.rss.description"))}</description>`,
     "    <language>en-us</language>",
+    ...(indexWritten === null
+      ? []
+      : [
+          `    <lastBuildDate>${escapeXml(rssDate(indexWritten))}</lastBuildDate>`,
+        ]),
     ...items,
     "  </channel>",
     "</rss>",

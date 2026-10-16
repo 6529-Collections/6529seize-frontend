@@ -29,9 +29,12 @@ export default function BoostLadder({
   eligibleMemes,
   lastSeason,
   gradients,
+  cycle,
 }: {
   readonly locale: SupportedLocale;
   readonly values: BoostLadderValues;
+  /** The cycle the values are for, as a date: "Oct 16, 2026". */
+  readonly cycle: string;
   readonly eligibleMemes: number;
   readonly lastSeason: number;
   readonly gradients: number;
@@ -44,6 +47,7 @@ export default function BoostLadder({
     count: formatInteger(locale, eligibleMemes),
     last: formatInteger(locale, lastSeason),
     gradients: formatInteger(locale, gradients),
+    cycle,
   };
   return (
     <figure

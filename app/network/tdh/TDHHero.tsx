@@ -11,7 +11,10 @@ import type { VerificationSummary } from "@/lib/tdh/verification/summary.server"
 import { MINUTE_EXAMPLE } from "./how-it-works/examples";
 import { TDH_FOCUS_RING, TDH_H1, TDH_LEDE } from "./shared/tdhStyles";
 import TdhStatusPill from "./shared/TdhStatusPill";
-import { formatShortCycleDate } from "./verification/components/verificationFormat";
+import {
+  formatShortCycleDate,
+  shortCommit,
+} from "./verification/components/verificationFormat";
 
 const TERMS = [
   { key: "days", value: "days" },
@@ -117,40 +120,25 @@ function FormulaStrip({ locale }: { readonly locale: SupportedLocale }) {
   );
 }
 
-function stripSentence(
-  locale: SupportedLocale,
-  summary: VerificationSummary
-): string {
-  if (summary.kind === "awaiting") {
-    return t(locale, "network.tdh.explainer.strip.awaiting");
-  }
-  const date = formatShortCycleDate(locale, summary.date);
-  if (
+/** Whether the latest day is equal everywhere: identities, wallets, totals. */
+function latestAllEqual(summary: VerificationSummary): boolean {
+  return (
+    summary.kind === "data" &&
     summary.sentence === "none" &&
     summary.totalsEqual === true &&
     summary.equal !== null &&
     summary.equal === summary.total &&
     summary.walletsTotal !== null &&
     summary.walletsEqual === summary.walletsTotal
-  ) {
-    return t(locale, "network.tdh.explainer.strip.equal", {
-      date,
-      identities: formatInteger(locale, summary.total),
-      wallets: formatInteger(locale, summary.walletsTotal),
-    });
-  }
-  return t(locale, "network.tdh.explainer.strip.other", {
-    date,
-    equal: formatInteger(locale, summary.equal ?? 0),
-    total: formatInteger(locale, summary.total ?? 0),
-  });
+  );
 }
 
 /**
  * The latest daily result near the top of the overview, in one line: the
- * track record in bold, the latest day's agreement, its limit as a pill
- * (history not yet fully checked), and the way into the dashboard. The
- * section "Checked daily, in public" below carries the detail.
+ * track record and the latest day, its limit as a pill with what it means in
+ * a few words, and the way into the dashboard; under it, the builds the
+ * latest day's file names. The section "Checked daily, in public" below
+ * carries the detail.
  */
 function VerifiedStrip({
   locale,
@@ -161,41 +149,74 @@ function VerifiedStrip({
 }) {
   const awaiting = summary.kind === "awaiting";
   const Icon = awaiting ? ClockIcon : CheckBadgeIcon;
+  let line = t(locale, "network.tdh.explainer.strip.awaiting");
+  if (summary.kind === "data") {
+    const date = formatShortCycleDate(locale, summary.date);
+    line = latestAllEqual(summary)
+      ? t(locale, "network.tdh.explainer.strip.equal", { date })
+      : t(locale, "network.tdh.explainer.strip.other", {
+          date,
+          equal: formatInteger(locale, summary.equal ?? 0),
+          total: formatInteger(locale, summary.total ?? 0),
+        });
+  }
+  const builds =
+    summary.kind === "data" && summary.rustCommit && summary.pythonCommit
+      ? t(locale, "network.tdh.explainer.verified.builds", {
+          rust: `validator@${shortCommit(summary.rustCommit)}`,
+          python: `6529chain@${shortCommit(summary.pythonCommit)}`,
+        })
+      : null;
   return (
-    <Link
-      href="/network/tdh/verification"
-      className={`tw-group tw-mt-8 tw-flex tw-flex-col tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-border-success/30 tw-bg-success/[0.05] tw-px-4 tw-py-3 tw-no-underline tw-transition-colors hover:tw-border-success/60 motion-reduce:tw-transition-none md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-6 md:tw-px-5 ${TDH_FOCUS_RING}`}
+    <div
+      className={`tw-mt-8 tw-flex tw-flex-col tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-px-4 tw-py-3 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-6 md:tw-px-5 ${awaiting ? "tw-border-white/10 tw-bg-iron-900" : "tw-border-success/30 tw-bg-success/[0.05]"}`}
     >
-      <span className="tw-flex tw-min-w-0 tw-items-start tw-gap-3">
+      <div className="tw-flex tw-min-w-0 tw-items-start tw-gap-3">
         <Icon
           aria-hidden="true"
           className={`tw-mt-0.5 tw-size-5 tw-shrink-0 ${awaiting ? "tw-text-iron-300" : "tw-text-success"}`}
         />
-        <span className="tw-min-w-0 tw-text-sm tw-leading-6 tw-text-iron-200 sm:tw-text-[15px]">
-          {!awaiting && (
-            <strong className="tw-font-semibold tw-text-iron-50">
-              {t(locale, "network.tdh.explainer.strip.record", {
-                allEqual: formatInteger(locale, summary.record.allEqual),
-                days: formatInteger(locale, summary.record.days),
-              })}
-            </strong>
-          )}{" "}
-          {stripSentence(locale, summary)}
-          {!awaiting && summary.historyChecked === false && (
-            <span className="tw-ml-2 tw-inline-flex tw-align-middle">
+        <div className="tw-min-w-0 tw-text-sm tw-leading-6 tw-text-iron-200 sm:tw-text-[15px]">
+          <p className="tw-m-0">
+            {summary.kind === "data" && (
+              <strong className="tw-font-semibold tw-text-iron-50">
+                {t(locale, "network.tdh.explainer.strip.record", {
+                  allEqual: formatInteger(locale, summary.record.allEqual),
+                  days: formatInteger(locale, summary.record.days),
+                })}
+              </strong>
+            )}{" "}
+            {line}
+          </p>
+          {summary.kind === "data" && summary.historyChecked === false && (
+            <p className="tw-m-0 tw-mt-1 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-sm tw-text-iron-300">
               <TdhStatusPill pill="unchecked" locale={locale} size="sm" />
-            </span>
+              <a
+                href="#tdh-verified"
+                className={`tw-text-iron-300 tw-underline tw-decoration-iron-600 tw-underline-offset-4 hover:tw-text-iron-50 ${TDH_FOCUS_RING}`}
+              >
+                {t(locale, "network.tdh.explainer.strip.unchecked")}
+              </a>
+            </p>
           )}
-        </span>
-      </span>
-      <span className="tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1.5 tw-pl-8 tw-text-sm tw-font-medium tw-text-primary-300 md:tw-pl-0">
+          {builds !== null && (
+            <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-400">
+              {builds}
+            </p>
+          )}
+        </div>
+      </div>
+      <Link
+        href="/network/tdh/verification"
+        className={`tw-group tw-inline-flex tw-min-h-11 tw-shrink-0 tw-items-center tw-gap-1.5 tw-pl-8 tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline hover:tw-text-primary-400 md:tw-pl-0 ${TDH_FOCUS_RING}`}
+      >
         {t(locale, "network.tdh.explainer.strip.link")}
         <ArrowRightIcon
           aria-hidden="true"
           className="tw-size-4 tw-transition-transform group-hover:tw-translate-x-0.5 motion-reduce:tw-transition-none"
         />
-      </span>
-    </Link>
+      </Link>
+    </div>
   );
 }
 

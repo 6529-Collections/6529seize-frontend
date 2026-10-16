@@ -36,6 +36,7 @@ export const RATE_EXAMPLES = [
 export const EDITION_EXAMPLES = (
   [
     [149, 332],
+    [149, 200],
     [299, 333],
     [300, 333],
     [303, 333],

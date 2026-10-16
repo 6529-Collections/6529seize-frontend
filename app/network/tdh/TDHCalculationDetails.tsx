@@ -15,21 +15,18 @@ const DEEPER = [
   { key: "verify", href: "/network/tdh/verification" },
   { key: "consolidation", href: "/network/tdh/consolidation" },
 ] as const;
-/** The terms needed to read your own TDH, in the order a calculation meets them. */
-const GLOSSARY_ESSENTIAL = [
-  "tdh",
+/**
+ * The five terms needed to read your own TDH, in the order Explain my TDH
+ * shows them: what TDH is, raw days, the rate, base TDH and the boost.
+ */
+const GLOSSARY_ESSENTIAL = ["tdh", "raw", "rate", "base", "boost"] as const;
+/** Every other term the TDH pages use. */
+const GLOSSARY_MORE = [
   "memes",
   "snapshot",
   "edition",
-  "rate",
-  "raw",
-  "base",
-  "boost",
   "fullSet",
   "identity",
-] as const;
-/** Every other term the TDH pages use. */
-const GLOSSARY_MORE = [
   "cycle",
   "finalized",
   "firstgm",
@@ -97,20 +94,30 @@ export function TDHHoldingChanges({
 }) {
   return (
     <TDHSection id="tdh-changes" title={t(locale, "network.tdh.explainer.faq")}>
-      <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800">
-        {FAQ_KEYS.map((key) => (
-          <TdhDisclosure
-            key={key}
-            tone="strong"
-            className="tw-py-1"
-            summary={t(locale, `network.tdh.explainer.faq.${key}.title`)}
-          >
-            <p className={`${TDH_TEXT} tw-pb-4 tw-pl-6`}>
-              {t(locale, `network.tdh.explainer.faq.${key}.body`)}
-            </p>
-          </TdhDisclosure>
-        ))}
-      </div>
+      {/* The questions one click away in a single group, so the section is
+          a line or two until it is wanted. */}
+      <p className={TDH_TEXT}>{t(locale, "network.tdh.explainer.faq.lede")}</p>
+      <TdhDisclosure
+        className="tw-mt-2"
+        summary={t(locale, "network.tdh.explainer.faq.all", {
+          count: String(FAQ_KEYS.length),
+        })}
+      >
+        <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800 tw-pl-6">
+          {FAQ_KEYS.map((key) => (
+            <TdhDisclosure
+              key={key}
+              tone="strong"
+              className="tw-py-1"
+              summary={t(locale, `network.tdh.explainer.faq.${key}.title`)}
+            >
+              <p className={`${TDH_TEXT} tw-pb-4 tw-pl-6`}>
+                {t(locale, `network.tdh.explainer.faq.${key}.body`)}
+              </p>
+            </TdhDisclosure>
+          ))}
+        </div>
+      </TdhDisclosure>
     </TDHSection>
   );
 }

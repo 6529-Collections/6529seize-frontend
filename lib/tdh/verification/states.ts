@@ -20,6 +20,56 @@ export const DEFAULT_CUTOVER: VerificationCutover = {
  */
 export const FIRST_REPORT_DATE = "2026-10-16";
 
+/**
+ * The feed's first two days (October 14 and 15, 2026) were first computed
+ * together on October 15, before the scheduled runs began (the validator's
+ * `tools/tdh-daily/README.md`). The file the feed serves for a day may be a
+ * later run: what it is comes from its own `generatedAt`, never from here.
+ */
+const FIRST_RUN_DATE = "2026-10-15";
+
+/** The daily job's run, minutes after a cycle's 00:00 UTC boundary. */
+const SCHEDULED_RUN_MINUTES = 40;
+/** A file written this long after its scheduled run is called a later run. */
+const LATE_AFTER_MS = 2 * 3_600_000;
+
+/**
+ * What a day's file says about the run that wrote it, for the page's note:
+ * - `firstRun`: a day before the scheduled runs, from the first runs of
+ *   October 15 (the file states no later time);
+ * - `recomputed`: a day before the scheduled runs whose file was written
+ *   after October 15, by the builds the file names;
+ * - `later`: a scheduled day whose file was written well after its 00:40
+ *   UTC run (a retry or a rerun);
+ * - null: the file is the day's scheduled run, or says nothing either way.
+ */
+type DayRunNote =
+  | { readonly kind: "firstRun" }
+  | { readonly kind: "recomputed"; readonly generatedAt: string }
+  | { readonly kind: "later"; readonly generatedAt: string };
+
+export function dayRunNote(
+  date: string,
+  generatedAt: string | null
+): DayRunNote | null {
+  const written = generatedAt === null ? Number.NaN : Date.parse(generatedAt);
+  const known = generatedAt !== null && !Number.isNaN(written);
+  if (date < FIRST_REPORT_DATE) {
+    if (!known || generatedAt.slice(0, 10) <= FIRST_RUN_DATE) {
+      return { kind: "firstRun" };
+    }
+    return { kind: "recomputed", generatedAt };
+  }
+  if (!known) {
+    return null;
+  }
+  const scheduled =
+    Date.parse(`${date}T00:00:00Z`) + SCHEDULED_RUN_MINUTES * 60_000;
+  return written - scheduled > LATE_AFTER_MS
+    ? { kind: "later", generatedAt }
+    : null;
+}
+
 /** Whether the first daily report should exist by now. */
 export function reportsAreLate(now: Date): boolean {
   const first = cycleDayOfDate(FIRST_REPORT_DATE);
@@ -191,13 +241,14 @@ export const VERDICT_TONE: Record<VerdictState, PillTone> = {
   unknown: "neutral",
 };
 
+/**
+ * The cutover as the pages show it. D132 plans it for about a date, never on
+ * one, so the pages show the date with "about" and never count the days.
+ */
 export type CutoverState =
   | {
       readonly kind: "countdown";
-      readonly days: number;
       readonly plannedDate: string;
-      /** Share of the week from the first daily run to the planned day. */
-      readonly elapsed: number;
     }
   | { readonly kind: "due"; readonly plannedDate: string }
   | {
@@ -228,14 +279,7 @@ export function cutoverState(
   if (plannedDay === null || today >= plannedDay) {
     return { kind: "due", plannedDate: value.plannedDate };
   }
-  const startDay = cycleDayOfDate(FIRST_REPORT_DATE) ?? today;
-  const span = Math.max(plannedDay - startDay, 1);
-  return {
-    kind: "countdown",
-    days: plannedDay - today,
-    plannedDate: value.plannedDate,
-    elapsed: Math.min(Math.max((today - startDay) / span, 0), 1),
-  };
+  return { kind: "countdown", plannedDate: value.plannedDate };
 }
 
 /** Days of the index, newest first. */

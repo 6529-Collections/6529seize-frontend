@@ -25,6 +25,9 @@ describe("How TDH is calculated: worked examples", () => {
   it("prints the edition floors of step 6", () => {
     expect(EDITION_EXAMPLES.map((row) => [row.edition, row.cents])).toEqual([
       [310, 1_271],
+      // 149 minted under a claim limit of 200: the floor is the limit, and
+      // 3,941 / 200 = 19.705 is a binary tie that rounds to 19.70.
+      [200, 1_970],
       [310, 1_271],
       [300, 1_314],
       [303, 1_301],

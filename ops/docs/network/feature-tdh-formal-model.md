@@ -125,9 +125,19 @@ records (`leanRound` in `formalStatus.ts`):
   runs are the README's at `6b32f3f` (about 20 seconds from raw logs,
   1,127,150 random checks).
 
-The feed has published round 5's manifest since October 16, 2026 (89 of 89
-vectors, 1,253 checks; 55 + 30 theorems; 46 fact checks), and the bundled
-copy is that file (SHA-256 `24e2f16b…`). Should the feed serve an earlier
+The feed has published round 5's manifest since October 16, 2026, and the
+bundled copy is that file (SHA-256 `24e2f16b…`); every count the page shows
+is read from the manifest it loads, never written into the page. The
+summary splits the claims shown false by how each counterexample is checked
+(a kernel-checked theorem or an evaluation, #guard), its details give the
+arithmetic of proved and audited theorems, the statements table's filters
+count statements (each row says how many manifest entries it groups, and
+shows a one-line claim with the plain words behind its chevron), and every
+manifest entry is listed by status under the tables. A statement refuted
+only by evaluated counterexamples has its own status, `False by
+evaluation`; each status has a shape as well as a colour. Every section uses
+the heading rail, and `What the proofs do not guarantee` gives each item in
+two lines with the rest under `More`. Should the feed serve an earlier
 round again, the builds panel shows round 5 in a column of its own, under a
 `Not yet published` pill, and says every status on the page is the published
 build's. Round 5's fact-check row lists the facts it adds (an amount's type,

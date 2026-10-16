@@ -276,6 +276,9 @@ export default function VerificationDashboard({
               isLatest={isLatest}
               permalink={permalink}
               daySha256={loaded?.sha256 ?? null}
+              statedSha256={entry.sha256 ?? null}
+              dayUrl={loaded?.dayUrl ?? null}
+              generatedAt={day.generatedAt ?? entry.generatedAt ?? null}
             />
             <VerificationAgreementTiles
               locale={locale}

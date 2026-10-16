@@ -64,7 +64,9 @@ export const VECTORS: ReadonlyArray<{
   { id: "31-invalid-zero-edition-holder", topics: ["noResult"] },
   { id: "32-invalid-rate-range", topics: ["noResult"] },
   { id: "33-invalid-final-range", topics: ["noResult"] },
-  { id: "34-cutoff-edges", topics: ["snapshot", "noResult"] },
+  // 34 and 55 hold cases with and without a result; "No result" tags only
+  // the vectors whose whole expected output is no result (expected_invalid).
+  { id: "34-cutoff-edges", topics: ["snapshot"] },
   { id: "35-edition-floor-threshold", topics: ["editions"] },
   { id: "36-erc1155-send-and-return", topics: ["netting"] },
   { id: "37-pass-through-cluster-carry", topics: ["netting", "consolidation"] },
@@ -100,7 +102,7 @@ export const VECTORS: ReadonlyArray<{
     id: "54-invalid-transfer-after-cutoff",
     topics: ["snapshot", "noResult"],
   },
-  { id: "55-cutoff-header-order", topics: ["snapshot", "noResult"] },
+  { id: "55-cutoff-header-order", topics: ["snapshot"] },
   { id: "56-zero-to-zero", topics: ["eligibility", "editions"] },
   { id: "57-consolidated-sink", topics: ["consolidation", "holdings"] },
   { id: "58-invalid-balance-range", topics: ["holdings", "noResult"] },

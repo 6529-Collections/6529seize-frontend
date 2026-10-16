@@ -95,9 +95,12 @@ chip links to a private repository.
   is computed (P28's `TAG`, `H`, `abi.encode` with the declared types, and
   the stored CE record) and tags the eight rows that restate formulas
   (`formula`: fixed by the rule version, not fields of the hashed record);
-  section 11 adds one line on four wallets: 6529.io accepts four
+  section 6.3 adds one line on four wallets: 6529.io accepts four
   consolidated wallets since October 15, 2026, while `tdh-v1.0` groups at
-  most three, and which applies is pending an owner decision. Section 13 has a `For implementers` box: what can be checked
+  most three, and which applies is pending an owner decision. P28's tagged
+  hash is written `TH` on the page (P28 writes `H`), so `H` stays the
+  largest edition. Sections 11 and 12 show their first three rows inline,
+  with `Show all 19 differences` and `Show all 15 issues`. Section 13 has a `For implementers` box: what can be checked
   today (the registry hash and vector 36, restated in full on the
   Implementations page), the conformance vectors once published (D116), and
   the SHA-256 of P28 and P53 at `f840096`.

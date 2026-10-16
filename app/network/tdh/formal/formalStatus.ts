@@ -97,13 +97,21 @@ export function checkStatement(
     .map((entry) => entry.name);
   const factsRan =
     statement.status !== "checkedBuild" || manifest.facts.checks > 0;
-  return {
-    id: statement.id,
-    status:
-      unconfirmed.length === 0 && factsRan ? statement.status : "unverified",
-    entries,
-    unconfirmed,
-  };
+  let status: StatementStatus =
+    unconfirmed.length === 0 && factsRan ? statement.status : "unverified";
+  // A claim refuted only by evaluated counterexamples says so: evaluation
+  // trusts Lean's compiler, a kernel-checked theorem does not.
+  const refutations = entries.filter(
+    (entry) => entry.expected === "counterexample"
+  );
+  if (
+    status === "shownFalse" &&
+    refutations.length > 0 &&
+    refutations.every((entry) => entry.checkedBy === "evaluation")
+  ) {
+    status = "shownFalseEval";
+  }
+  return { id: statement.id, status, entries, unconfirmed };
 }
 
 export function checkStatements(
@@ -141,9 +149,18 @@ export interface ManifestFigures {
   readonly deferred: number;
   readonly entries: number;
   readonly audited: number;
+  /** Counterexamples by how they are checked: a kernel theorem or #guard. */
+  readonly counterexampleTheorems: number;
+  readonly counterexampleEvaluations: number;
+  /** Claims not proved here, about TDH-v1 and about the validator rules. */
+  readonly deferredTdh: number;
+  readonly deferredP53: number;
 }
 
 export function manifestFigures(manifest: FormalManifest): ManifestFigures {
+  const count = (
+    test: (entry: FormalManifest["theorems"][number]) => boolean
+  ) => manifest.theorems.filter(test).length;
   const p26 = conformanceRun(manifest, "p26");
   const reasons = conformanceRun(manifest, "p26-reasons");
   const netting = conformanceRun(manifest, "netting");
@@ -167,5 +184,19 @@ export function manifestFigures(manifest: FormalManifest): ManifestFigures {
     deferred: manifest.summary.deferred,
     entries: manifest.summary.entries,
     audited: manifest.summary.audited,
+    counterexampleTheorems: count(
+      (entry) =>
+        entry.status === "counterexample" && entry.checkedBy === "kernel"
+    ),
+    counterexampleEvaluations: count(
+      (entry) =>
+        entry.status === "counterexample" && entry.checkedBy === "evaluation"
+    ),
+    deferredTdh: count(
+      (entry) => entry.status === "deferred" && entry.library === "tdh"
+    ),
+    deferredP53: count(
+      (entry) => entry.status === "deferred" && entry.library === "p53"
+    ),
   };
 }

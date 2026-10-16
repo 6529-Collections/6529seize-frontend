@@ -27,26 +27,26 @@ boost rules.
 
 1. Read the header: `TDH`, the one-line promise (Total Days Held: the art
    you hold, and how long you have held it), the formula Days × Rate × Boost
-   = TDH worked for one card (100 × 12.71 × 1.02 = 1,296), and a one-line
-   strip: the latest day's agreement between 6529.io, the Rust core and the
-   Python reference (on the Rust run's input), the track record in bold
-   (`Equal on 3 of 3 published days.`) and a `Not yet fully checked` pill,
-   linking to the verification dashboard. The `TDH` eyebrow shows from `md`
+   = TDH worked for one card (100 × 12.71 × 1.02 = 1,296), and a strip:
+   the track record in bold (`Equal on 3 of 3 published days`) with the
+   latest day, a `Not yet fully checked` pill with its meaning in a few
+   words (a link to the section below), the builds the latest day's file
+   names, and `See the comparison`. The `TDH` eyebrow shows from `md`
    up, so on a phone the heading starts high on the screen.
 2. Read `TDH in a minute`: hold (whole days), weigh (a Meme's rate is the
    largest edition over its own; a Gradient's divides by the number of
    Gradients, 101, and a NextGen token's by its collection's size) and boost
    (one multiplier), drawn for one copy of a 310-copy Meme held 100 days by a
-   collector with one Gradient: 100 days x rate 12.71 = 1,271 base, x boost
-   1.02 = 1,296 TDH from this card; the Gradient earns TDH of its own on top.
-   The example card is captioned with its cycle (`Worked example · the
-October 11, 2026 cycle`, the day the specification was replayed against
-   6529.io); the card's rate and boost are the same on the latest day. Its
+   collector with one Gradient, the hero's card factor by factor; the
+   Gradient earns TDH of its own on top. The example is captioned with its
+   cycle (`The card above, factor by factor · the October 11, 2026 cycle`,
+   the day the specification was replayed against 6529.io), and the weigh
+   step says the largest edition is FirstGM's 3,941 on that cycle. Its
    days panel draws ten blocks of ten days in one colour, labelled.
    The rate is drawn as two bars on one scale, and the boost as a scale from
-   1.00 to 2.04, the highest boost on the October 11, 2026 cycle. Under it,
-   what moves the number: without the Gradient 1,271, with one full set
-   instead (1.80) 2,288. FirstGM (Meme #8) is introduced there as the
+   1.00 to 2.04, the highest boost possible on the October 11, 2026 cycle.
+   Under it, `What the boost does to this card`: no Gradient 1,271, one
+   Gradient 1,296, a full set instead (1.80) 2,288. FirstGM (Meme #8) is introduced there as the
    reference card.
 3. Read `Checked daily, in public`: first the latest day from the feed, as
    figures (the total TDH identical in all three, identity records and
@@ -163,8 +163,9 @@ used by earlier calculations. The profile panel shows stored calculation results
 - With a complete collection, the first collection receives the eligible season
   bonus sum. Each additional complete set adds `0.05 * 0.6529^(n-1)`.
   There is no hard set-count cap; the additional-set series approaches
-  `0.144051`, and rounded to millionths it reaches that at 33 full sets, so
-  further sets add nothing.
+  0.05 / (1 − 0.6529), about `0.14405` (`0.1440507…`), and rounded to
+  millionths it reaches `0.144051` at 33 full sets, so further sets add
+  nothing.
 - Without a complete collection, each complete eligible season contributes its
   configured bonus once. Season 1 can instead expose the Genesis and Nakamoto
   partial bonuses when its full set is incomplete.

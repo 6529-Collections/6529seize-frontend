@@ -2,6 +2,7 @@ import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import TdhDisclosure from "../shared/TdhDisclosure";
 import TdhTableFrame from "../shared/TdhTableFrame";
+import TdhRowsPreview from "../shared/TdhRowsPreview";
 import { t, type MessageKey } from "@/i18n/messages";
 import TdhArrowLink from "../shared/TdhArrowLink";
 import TdhCopyButton from "../shared/TdhCopyButton";
@@ -27,15 +28,22 @@ import {
   TDH_TD_STACK_MD,
   TDH_TH,
 } from "../shared/tdhStyles";
-import { middleTruncate } from "../verification/components/verificationFormat";
+import {
+  formatCycleDate,
+  middleTruncate,
+} from "../verification/components/verificationFormat";
 import DeviationsTable from "./DeviationsTable";
 import { Plain, Rule, SpecSection, SpecSub } from "./SpecParts";
 import {
   BUG_IDS,
   DECISION_IDS,
   FORMULA_PARAMETERS,
+  PARAMETER_NAME_COUNT,
   PARAMETERS,
 } from "./specData";
+
+/** Rows of a long reference table shown before its "Show all" button. */
+const PREVIEW_ROWS = 3;
 
 /**
  * SHA-256 of the two documents section 13 names, at 6529chain f840096, their
@@ -117,8 +125,18 @@ const EVIDENCE = [
 
 export default function SpecSectionsB({
   locale,
+  record = null,
 }: {
   readonly locale: SupportedLocale;
+  /**
+   * The daily comparison's track record, from the feed: the evidence says
+   * how it stands as of the latest day, not only the first two.
+   */
+  readonly record?: {
+    readonly latestDate: string;
+    readonly days: number;
+    readonly allEqual: number;
+  } | null;
 }) {
   return (
     <>
@@ -210,7 +228,8 @@ export default function SpecSectionsB({
         <TdhDisclosure
           tone="strong"
           summary={t(locale, "network.tdh.spec.s10.tableSummary", {
-            count: formatInteger(locale, PARAMETERS.length),
+            count: formatInteger(locale, PARAMETER_NAME_COUNT),
+            rows: formatInteger(locale, PARAMETERS.length),
           })}
         >
           <TdhTableFrame label={t(locale, "network.tdh.spec.s10.tableCaption")}>
@@ -327,14 +346,8 @@ export default function SpecSectionsB({
         sources={["D121", "D131"]}
       >
         <Plain>{t(locale, "network.tdh.spec.s11.body")}</Plain>
-        <TdhDisclosure
-          tone="strong"
-          summary={t(locale, "network.tdh.spec.s11.tableSummary")}
-        >
-          <div className="tw-pt-1">
-            <DeviationsTable locale={locale} />
-          </div>
-        </TdhDisclosure>
+        {/* The first rows inline, the rest one click away. */}
+        <DeviationsTable locale={locale} />
       </SpecSection>
 
       <SpecSection
@@ -343,9 +356,12 @@ export default function SpecSectionsB({
         locale={locale}
       >
         <Plain>{t(locale, "network.tdh.spec.s12.body")}</Plain>
-        <TdhDisclosure
-          tone="strong"
-          summary={t(locale, "network.tdh.spec.s12.tableSummary")}
+        <TdhRowsPreview
+          more={t(locale, "network.tdh.spec.s12.showAll", {
+            count: formatInteger(locale, BUG_IDS.length),
+          })}
+          less={t(locale, "network.tdh.spec.s12.showFewer")}
+          ids={BUG_IDS.map((id) => `bug-${id}`)}
         >
           <TdhTableFrame label={t(locale, "network.tdh.spec.s12.tableCaption")}>
             <table className={`${TDH_TABLE} tw-block md:tw-table`}>
@@ -366,10 +382,11 @@ export default function SpecSectionsB({
                 </tr>
               </thead>
               <tbody className="tw-block md:tw-table-row-group">
-                {BUG_IDS.map((id) => (
+                {BUG_IDS.map((id, index) => (
                   <tr
                     key={id}
                     id={`bug-${id}`}
+                    data-tdh-more-row={index >= PREVIEW_ROWS ? "" : undefined}
                     className="tw-grid tw-scroll-mt-28 tw-gap-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3 first:tw-border-t-0 target:tw-bg-primary-500/10 md:tw-table-row md:tw-p-0"
                   >
                     <th
@@ -401,7 +418,7 @@ export default function SpecSectionsB({
               </tbody>
             </table>
           </TdhTableFrame>
-        </TdhDisclosure>
+        </TdhRowsPreview>
       </SpecSection>
 
       <SpecSection
@@ -413,7 +430,7 @@ export default function SpecSectionsB({
         <Plain>{t(locale, "network.tdh.spec.s13.body")}</Plain>
         <aside
           aria-labelledby="spec-implementers"
-          className="tw-max-w-[34rem] tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-500/[0.06] tw-px-4 tw-py-3"
+          className="tw-max-w-[34rem] tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-4 tw-py-3"
         >
           <h3
             id="spec-implementers"
@@ -509,6 +526,15 @@ export default function SpecSectionsB({
                   <p className="tw-m-0 tw-max-w-[34rem] tw-text-sm tw-leading-6 tw-text-iron-300">
                     {t(locale, `network.tdh.spec.evidence.${item.key}.body`)}
                   </p>
+                  {item.key === "comparison" && record !== null && (
+                    <p className="tw-m-0 tw-mt-2 tw-max-w-[34rem] tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-100">
+                      {t(locale, "network.tdh.spec.evidence.comparisonAsOf", {
+                        date: formatCycleDate(locale, record.latestDate),
+                        allEqual: formatInteger(locale, record.allEqual),
+                        days: formatInteger(locale, record.days),
+                      })}
+                    </p>
+                  )}
                   {item.key === "comparison" && (
                     <TdhArrowLink href="/network/tdh/verification">
                       {t(locale, "network.tdh.spec.evidence.dashboard")}

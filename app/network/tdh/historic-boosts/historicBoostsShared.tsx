@@ -82,6 +82,12 @@ export const CURRENT_RULE = {
   valueDateIso: "2026-10-16",
   today: 1.8,
   ceiling: 2,
+  /**
+   * The schedule's highest boost, a full set, extra sets and 5 Gradients
+   * once seasons 1 to 20 pay: the top of the boost ladder's scale, so the
+   * schedule chart and the ladder share one axis.
+   */
+  axisMax: 2.24,
   maxSeason: 20,
   payingSeasons: 16,
   gradients: 5,

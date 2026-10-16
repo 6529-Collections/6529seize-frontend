@@ -128,17 +128,23 @@ export function Cited({
   );
 }
 
-/** A labelled example block. */
+/**
+ * A labelled example block, in a neutral frame: the blue rule is kept for
+ * normative code. At the measure, or the full column when it holds a table
+ * and a drawing side by side.
+ */
 export function Example({
   locale,
   children,
+  wide = false,
 }: {
   readonly locale: SupportedLocale;
   readonly children: ReactNode;
+  readonly wide?: boolean;
 }) {
   return (
     <div
-      className={`tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-bg-iron-900/60 tw-py-3 tw-pl-4 tw-pr-3 ${TDH_MEASURE}`}
+      className={`tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900/60 tw-px-4 tw-py-3 ${wide ? "" : TDH_MEASURE}`}
     >
       <p className="tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
         {t(locale, "network.tdh.how.example")}

@@ -30,6 +30,7 @@ import TdhSubnav from "../shared/TdhSubnav";
 import {
   TDH_DROPDOWN_ROW,
   TDH_H1,
+  TDH_LINK,
   TDH_PAGE,
   TDH_PAGE_HEADER_TOP,
 } from "../shared/tdhStyles";
@@ -63,10 +64,11 @@ const WALLET_ROLES = [
 const STEPS = ["list", "sign", "done"] as const;
 const BEFORE = ["keys", "merge", "public"] as const;
 const CHANGES = ["add", "remove", "lost", "full"] as const;
+/** The question the status line raises comes first, and is open. */
 const FAQ = [
+  "limit",
   "cost",
   "move",
-  "limit",
   "friend",
   "before",
   "profile",
@@ -126,7 +128,10 @@ export default function TDHConsolidationPage() {
             </p>
             {/* One status line: what 6529.io accepts, and what TDH-v1
                 allows, as the owner's open decision stands. */}
-            <p className="tw-mb-0 tw-mt-4 tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+            <p
+              id="consolidation-status"
+              className="tw-mb-0 tw-mt-4 tw-scroll-mt-28 tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200"
+            >
               {limits
                 ? t(locale, "network.tdhConsolidation.status", { limit, date })
                 : pendingLimits}
@@ -144,7 +149,12 @@ export default function TDHConsolidationPage() {
               {t(locale, "network.tdhConsolidation.nothingMoves")}
             </p>
           </div>
-          <WalletsFigure locale={locale} />
+          <div>
+            <WalletsFigure locale={locale} />
+            <TdhArrowLink href="#consolidation-wallets" className="tw-mt-2">
+              {t(locale, "network.tdhConsolidation.figure.rolesLink")}
+            </TdhArrowLink>
+          </div>
         </header>
 
         <TDHSection
@@ -249,6 +259,17 @@ export default function TDHConsolidationPage() {
                             limit,
                           }
                         )}
+                    {limits && step === "list" && (
+                      <>
+                        {" "}
+                        <a href="#consolidation-status" className={TDH_LINK}>
+                          {t(
+                            locale,
+                            "network.tdhConsolidation.steps.list.note"
+                          )}
+                        </a>
+                      </>
+                    )}
                   </p>
                 </div>
               </li>
@@ -272,10 +293,14 @@ export default function TDHConsolidationPage() {
           id="consolidation-before"
           title={t(locale, "network.tdhConsolidation.before.title")}
         >
-          <ul className="tw-m-0 tw-list-none tw-space-y-3 tw-p-0">
+          {/* Three short cards across the column, the width of the lists
+              around them. */}
+          <ul className="tw-m-0 tw-grid tw-list-none tw-gap-4 tw-p-0 md:tw-grid-cols-3">
             {BEFORE.map((key) => (
-              <li key={key} className={`${TDH_PANEL} ${TDH_TEXT} tw-p-5`}>
-                {t(locale, `network.tdhConsolidation.before.${key}`)}
+              <li key={key} className={`${TDH_PANEL} tw-p-5`}>
+                <p className={TDH_TEXT}>
+                  {t(locale, `network.tdhConsolidation.before.${key}`)}
+                </p>
               </li>
             ))}
           </ul>
@@ -304,6 +329,7 @@ export default function TDHConsolidationPage() {
                 key={key}
                 tone="strong"
                 className="tw-py-1"
+                defaultOpen={key === "limit"}
                 summary={t(locale, `network.tdhConsolidation.faq.${key}.title`)}
               >
                 <p className={`${TDH_TEXT} tw-pb-4 tw-pl-6`}>
@@ -322,7 +348,7 @@ export default function TDHConsolidationPage() {
         <TDHSection
           id="consolidation-under"
           title={t(locale, "network.tdhConsolidation.under.title")}
-          description={t(locale, "network.tdhConsolidation.under.description")}
+          description={t(locale, "network.tdhConsolidation.under.intro")}
         >
           <TDHRelatedLinks
             variant="list"
