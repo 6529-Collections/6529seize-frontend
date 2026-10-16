@@ -31,7 +31,12 @@ export function MemeCollaboratorIdentity({
     retry: false,
   });
   const profile = identity?.id === collaborator.id ? identity : null;
-  const handle = profile?.handle || collaborator.handle || collaborator.id;
+  let handle = collaborator.handle.length
+    ? collaborator.handle
+    : collaborator.id;
+  const liveHandle = profile?.handle;
+  if (typeof liveHandle === "string" && liveHandle.length > 0)
+    handle = liveHandle;
   const compact = size === "compact";
   return (
     <div className="tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-2">

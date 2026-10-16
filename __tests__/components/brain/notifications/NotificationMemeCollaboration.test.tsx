@@ -92,3 +92,16 @@ it("uses a neutral fallback for an unknown event", () => {
     screen.queryByText("invited you to collaborate on")
   ).not.toBeInTheDocument();
 });
+
+it("uses the artwork fallback when a saved title contains only whitespace", () => {
+  const base = notification("INVITED");
+  render(
+    <NotificationMemeCollaboration
+      notification={{
+        ...base,
+        additional_context: { ...base.additional_context, artwork_name: "   " },
+      }}
+    />
+  );
+  expect(screen.getByRole("link", { name: "an artwork" })).toBeVisible();
+});

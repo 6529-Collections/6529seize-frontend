@@ -22,9 +22,11 @@ export default function NotificationMemeCollaboration({
     context.wave_id && context.drop_id
       ? `/waves/${encodeURIComponent(context.wave_id)}?drop=${encodeURIComponent(context.drop_id)}`
       : null;
+  const savedArtworkName = context.artwork_name?.trim();
   const artworkName =
-    context.artwork_name?.trim() ||
-    t(locale, "memes.collaborations.artworkFallback");
+    typeof savedArtworkName === "string" && savedArtworkName.length > 0
+      ? savedArtworkName
+      : t(locale, "memes.collaborations.artworkFallback");
   const message = () => {
     if (invited)
       return t(

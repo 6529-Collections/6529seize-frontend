@@ -96,3 +96,23 @@ it("keeps all profile links and avatars when enrichment fails, without inventing
   );
   expect(screen.queryByText(/Badges/)).not.toBeInTheDocument();
 });
+
+it("retains accepted handles when a resolved profile has an empty handle", async () => {
+  jest.mocked(commonApiFetch).mockImplementation(async ({ endpoint }) => ({
+    id: endpoint.endsWith("b") ? "B" : "C",
+    handle: "",
+    pfp: null,
+    level: 21,
+    classification: ApiProfileClassification.Pseudonym,
+  }));
+  mount();
+  await waitFor(() => expect(screen.getAllByText("Level 21")).toHaveLength(2));
+  expect(screen.getByRole("link", { name: "artistB" })).toHaveAttribute(
+    "href",
+    "/artistB"
+  );
+  expect(screen.getByRole("link", { name: "artistC" })).toHaveAttribute(
+    "href",
+    "/artistC"
+  );
+});
