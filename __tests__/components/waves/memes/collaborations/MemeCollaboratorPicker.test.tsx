@@ -39,6 +39,7 @@ it("rejects an artist who already has an invitation", async () => {
       onChange={onChange}
     />
   );
+  fireEvent.click(screen.getByRole("button", { name: "Add collaborators" }));
   fireEvent.click(screen.getByText("Search profile"));
   await screen.findByRole("alert");
   expect(onChange).not.toHaveBeenCalled();
@@ -52,6 +53,7 @@ it("selects a new artist while preserving the existing roster outside the picker
       onChange={onChange}
     />
   );
+  fireEvent.click(screen.getByRole("button", { name: "Add collaborators" }));
   fireEvent.click(screen.getByText("Search profile"));
   await waitFor(() =>
     expect(onChange).toHaveBeenCalledWith([
@@ -72,4 +74,37 @@ it("counts existing invitations toward the maximum and disables selection while 
     <MemeCollaboratorPicker collaborators={[]} disabled onChange={jest.fn()} />
   );
   expect(screen.getByText("Search profile")).toBeDisabled();
+});
+
+it("starts collapsed and preserves selected collaborators when folded", () => {
+  const onChange = jest.fn();
+  const { rerender } = render(
+    <MemeCollaboratorPicker collaborators={[]} onChange={onChange} />
+  );
+  const add = screen.getByRole("button", { name: "Add collaborators" });
+  expect(add).toHaveAttribute("aria-expanded", "false");
+  expect(
+    screen.queryByRole("button", { name: "Search profile" })
+  ).not.toBeInTheDocument();
+  fireEvent.click(add);
+  expect(add).toHaveAttribute("aria-expanded", "true");
+  rerender(
+    <MemeCollaboratorPicker
+      collaborators={[
+        { id: "B", handle: "artistB", display: "artistB", pfp: null },
+      ]}
+      onChange={onChange}
+    />
+  );
+  expect(screen.getByText("@artistB")).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "Collaborators (1)" }));
+  expect(
+    screen.getByRole("button", { name: "Collaborators (1)" })
+  ).toHaveAttribute("aria-expanded", "false");
+  expect(onChange).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole("button", { name: "Collaborators (1)" }));
+  fireEvent.click(
+    screen.getByRole("button", { name: "Remove invitation for artistB" })
+  );
+  expect(onChange).toHaveBeenCalledWith([]);
 });

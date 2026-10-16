@@ -1,10 +1,17 @@
 export const MEME_COLLABORATION_MESSAGES = {
   "memes.collaborations.sendInvitations": "Send collaborator invitations",
   "memes.collaborations.invited": "Collaborator invitations sent.",
+  "memes.collaborations.add": "Add collaborators",
+  "memes.collaborations.selected": "Collaborators ({count})",
+  "memes.collaborations.searching": "Searching…",
+  "memes.collaborations.searchError":
+    "Couldn’t load profiles. Try searching again.",
+  "memes.collaborations.mintHint":
+    "Artists who accept before mint selection are included in the initial claim credits.",
   "memes.collaborations.title": "Collaborators",
   "memes.collaborations.search": "Invite a collaborating artist",
   "memes.collaborations.hint":
-    "Voting starts immediately. Collaborators appear publicly after they accept. Artists who accept before mint selection are included in the initial claim credits.",
+    "Collaborators receive an invitation and appear publicly after accepting. Voting can start before they accept.",
   "memes.collaborations.remove": "Remove invitation for {handle}",
   "memes.collaborations.invalid":
     "Choose a different profile with a handle. You can invite up to 20 collaborators.",

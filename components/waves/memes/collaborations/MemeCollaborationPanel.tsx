@@ -171,12 +171,13 @@ export function MemeCollaborationPanel({
         </button>
       </div>
     );
+  const isAuthor = connectedProfile.id === authorId;
   if (
     !data ||
-    (!data.can_invite && (!data.managed || !data.invitations.length))
+    ((!isAuthor || !data.can_invite) &&
+      (!data.managed || !data.invitations.length))
   )
     return null;
-  const isAuthor = connectedProfile.id === authorId;
   const ownPending =
     data.invitations.some(
       (item) =>
@@ -202,16 +203,18 @@ export function MemeCollaborationPanel({
             excludedIds={data.invitations.map((item) => item.profile.id)}
             disabled={saving}
           />
-          <button
-            type="button"
-            className={BUTTON_CLASS}
-            disabled={saving || !selected.length}
-            onClick={() => {
-              void invite();
-            }}
-          >
-            {t(locale, "memes.collaborations.sendInvitations")}
-          </button>
+          {!!selected.length && (
+            <button
+              type="button"
+              className={BUTTON_CLASS}
+              disabled={saving}
+              onClick={() => {
+                void invite();
+              }}
+            >
+              {t(locale, "memes.collaborations.sendInvitations")}
+            </button>
+          )}
         </div>
       )}
       {ownPending && (

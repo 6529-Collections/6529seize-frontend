@@ -1543,6 +1543,120 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     ).toEqual([]);
   });
 
+  test("keeps collaborator search, selected chips and disclosure usable", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    const origin = getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"]);
+    const response = await page.request.get(
+      `${origin}/api/v2/waves/${WAVE}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const fixture = await response.json();
+    await page.route(`**/v2/drops/${entryDropId("alpha")}`, (route) =>
+      route.fulfill({
+        json: {
+          wave: fixture.wave,
+          drop: {
+            ...fixture.drops[0],
+            id: entryDropId("alpha"),
+            submission_artist: "playwright",
+            author: { ...fixture.drops[0].author, id: PROFILE },
+            title: "Collaboration artwork",
+          },
+        },
+      })
+    );
+    await page.route(
+      `**/drops/${entryDropId("alpha")}/collaborations`,
+      (route) =>
+        route.fulfill({
+          json: {
+            managed: true,
+            can_invite: true,
+            closed: false,
+            artwork_hash: "a".repeat(64),
+            terms_version: "b".repeat(64),
+            acceptance_copy: "Acceptance is final.",
+            terms: null,
+            collaborators: [],
+            invitations: [],
+          },
+        })
+    );
+    let releaseSearch!: () => void;
+    const searchGate = new Promise<void>((resolve) => {
+      releaseSearch = resolve;
+    });
+    await page.route("**/community-members?**", async (route) => {
+      await searchGate;
+      return route.fulfill({
+        json: [
+          {
+            profile_id: "artist-c",
+            handle: "artistC",
+            display: "artistC",
+            wallet: "0x0000000000000000000000000000000000000003",
+            primary_wallet: "0x0000000000000000000000000000000000000003",
+            pfp: null,
+          },
+        ],
+      });
+    });
+    await page.route("**/identities/artist-c", (route) =>
+      route.fulfill({ json: { id: "artist-c", handle: "artistC", pfp: null } })
+    );
+    try {
+      await page.goto(`${ROOT}/alpha?drop=${entryDropId("alpha")}`);
+      const add = page.getByRole("button", {
+        name: "Add collaborators",
+        exact: true,
+      });
+      await expect(add).toBeVisible({ timeout: 30000 });
+      const search = page.getByRole("combobox", {
+        name: "Invite a collaborating artist",
+      });
+      await expect(search).toHaveCount(0);
+      await add.click();
+      await search.fill("art");
+      await expect(
+        page.getByRole("status").filter({ hasText: "Searching…" })
+      ).toBeVisible();
+      await expect(page.getByText("No results", { exact: true })).toHaveCount(
+        0
+      );
+      releaseSearch();
+      await page
+        .getByRole("option")
+        .filter({ hasText: "artistC" })
+        .getByRole("button")
+        .click();
+      await expect(
+        page.getByRole("button", { name: "Remove invitation for artistC" })
+      ).toBeVisible();
+      const fold = page.getByRole("button", {
+        name: "Collaborators (1)",
+        exact: true,
+      });
+      await fold.click();
+      await expect(search).toHaveCount(0);
+      await fold.click();
+      await expect(page.getByText("@artistC", { exact: true })).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("collaborator-picker.png"),
+      });
+      await page
+        .getByRole("button", { name: "Remove invitation for artistC" })
+        .click();
+      await expect(
+        page.getByRole("button", { name: "Add collaborators", exact: true })
+      ).toHaveAttribute("aria-expanded", "true");
+    } finally {
+      releaseSearch();
+    }
+  });
+
   test("renders frozen CHAT deep links with submission voting controls", async ({
     page,
   }) => {

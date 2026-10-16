@@ -322,3 +322,11 @@ it("does not offer invitations after selection or to another viewer", async () =
   await screen.findByText("Collaboration invitations");
   expect(screen.queryByText("Select collaborator C")).not.toBeInTheDocument();
 });
+
+it("does not render an empty invite section for a nonauthor even with a stale capability", async () => {
+  mount({ ...pending, managed: false, can_invite: true, invitations: [] });
+  await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+  expect(
+    screen.queryByRole("heading", { name: "Collaboration invitations" })
+  ).not.toBeInTheDocument();
+});
