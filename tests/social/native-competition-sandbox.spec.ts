@@ -4017,6 +4017,19 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       }
       expect(writes).toBe(2);
       await links.click();
+      if (surface === "web") {
+        // A history entry without its optional title still needs a named sheet.
+        await page.evaluate(() => {
+          const state = { ...window.history.state };
+          delete state.waveInformationViewTitle;
+          window.history.replaceState(state, "");
+        });
+        await page.goBack();
+        await expect(links).toBeFocused();
+        await page.goForward();
+        await expect(sheet).toHaveAccessibleName(`About ${wave.name}`);
+        await expect(checkbox).toBeVisible();
+      }
       await swipeVertically(
         page,
         sheet.getByTestId("mobile-dialog-header"),

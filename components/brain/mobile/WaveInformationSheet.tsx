@@ -44,8 +44,8 @@ export default function WaveInformationSheet({
     <MobileWrapperDialog
       isOpen
       title={
-        subviewOpen
-          ? information?.request?.viewTitle
+        subviewOpen && information?.request?.viewTitle
+          ? information.request.viewTitle
           : t(locale, "waves.information.open", { name: wave.name })
       }
       onClose={onClose}

@@ -264,6 +264,7 @@ const OverlaySidebar = ({
       contentId,
       container,
       open: (view: string, title: string) => setSubview({ view, title }),
+      // A save from an earlier editor must not close the editor opened since.
       back: () =>
         setSubview((current) =>
           current?.view === subview?.view ? null : current

@@ -1,4 +1,5 @@
 import {
+  act,
   render,
   screen,
   waitFor,
@@ -6,6 +7,8 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
+import { createPortal } from "react-dom";
+import { WaveInformationPanelContext } from "@/components/brain/mobile/WaveInformationPanelContext";
 
 let mockPrefersReducedMotion = false;
 
@@ -64,6 +67,7 @@ describe("BrainRightSidebar", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    WaveContentMock.mockImplementation(() => <div data-testid="content" />);
     mockPrefersReducedMotion = false;
     mockUseQuery.mockReturnValue({
       data: wave,
@@ -293,5 +297,62 @@ describe("BrainRightSidebar", () => {
         screen.queryByRole("complementary", { name: "Wave details" })
       ).not.toBeInTheDocument();
     });
+  });
+
+  it("keeps the current editor open when an earlier editor finishes saving", async () => {
+    const user = userEvent.setup();
+    let finishSave = () => {};
+    function Editors() {
+      const panel = React.useContext(WaveInformationPanelContext)!;
+      return (
+        <>
+          <button onClick={() => panel.open("links", "Edit links")}>
+            Links
+          </button>
+          <button onClick={() => panel.open("admins", "Edit admins")}>
+            Admins
+          </button>
+          {panel.container &&
+            panel.view !== "about" &&
+            createPortal(
+              <button
+                onClick={() => {
+                  finishSave = panel.back;
+                }}
+              >
+                Save later
+              </button>,
+              panel.container
+            )}
+        </>
+      );
+    }
+    WaveContentMock.mockImplementation(() => <Editors />);
+    renderSidebar(
+      <BrainRightSidebar
+        isOpen
+        waveId="1"
+        activeTab={SidebarTab.ABOUT}
+        setActiveTab={setActiveTab}
+      />
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Links", exact: true })
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Save later", exact: true })
+    );
+    await user.click(screen.getByRole("button", { name: "Back", exact: true }));
+    await user.click(
+      screen.getByRole("button", { name: "Admins", exact: true })
+    );
+    act(() => finishSave());
+    expect(
+      screen.getByRole("dialog", { name: "Edit admins", exact: true })
+    ).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Back", exact: true }));
+    expect(
+      screen.getByRole("button", { name: "Admins", exact: true })
+    ).toBeVisible();
   });
 });
