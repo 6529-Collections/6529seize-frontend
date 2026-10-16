@@ -28,11 +28,11 @@ boost rules.
 1. Read the header: `TDH`, the one-line promise (Total Days Held: the art
    you hold, and how long you have held it), the formula Days × Rate × Boost
    = TDH worked for one card (100 × 12.71 × 1.02 = 1,296), and a strip:
-   the track record in bold (`Equal on 3 of 3 published days`) with the
-   latest day, a `Not yet fully checked` pill with its meaning in a few
-   words (a link to the section below), the builds the latest day's file
-   names, and `See the comparison`. The `TDH` eyebrow shows from `md`
-   up, so on a phone the heading starts high on the screen.
+   the track record in bold (`Recomputed independently every day: equal to
+   6529.io on 3 of 3 published days`) with the latest day and `See the
+   comparison`. The history's limit and the builds are in the section
+   below, not in the first screen. The `TDH` eyebrow shows from `md` up, so
+   on a phone the heading starts high on the screen.
 2. Read `TDH in a minute`: hold (whole days), weigh (a Meme's rate is the
    largest edition over its own; a Gradient's divides by the number of
    Gradients, 101, and a NextGen token's by its collection's size) and boost
@@ -45,10 +45,15 @@ boost rules.
    days panel draws ten blocks of ten days in one colour, labelled.
    The rate is drawn as two bars on one scale, and the boost as a scale from
    1.00 to 2.04, the highest boost possible on the October 11, 2026 cycle.
-   Under it, `What the boost does to this card`: no Gradient 1,271, one
-   Gradient 1,296, a full set instead (1.80) 2,288. FirstGM (Meme #8) is introduced there as the
+   The boost panel is where the reader changes the example: three buttons
+   (`What else the collector holds`: no Gradient, one Gradient, a full set)
+   move the boost, and the line under the three panels gives the card's
+   TDH: 1,271, 1,296 or 2,288. FirstGM (Meme #8) is introduced there as the
    reference card.
-3. Read `Checked daily, in public`: first the latest day from the feed, as
+3. Use `Explain my TDH`, right after the minute: it looks up 6529.io's
+   stored calculation for a profile or wallet, card by card, the values
+   the daily comparison tests against TDH-v1 (described below).
+4. Read `Checked daily, in public`: first the latest day from the feed, as
    figures (the total TDH identical in all three, identity records and
    wallet records equal), how they were read (the Python reference on the
    Rust run's input; 6529.io's backend from its own indexer, its files
@@ -60,16 +65,19 @@ boost rules.
    meaning beside it (taken as reported until the daily run checks the
    full history against 6529's own node, with no date), and a link to the
    dashboard;
-   then three points (written separately, each reproducing every
-   conformance vector; specified in Lean as a proposal, with the netting
-   theorem's hypotheses: every address's net movement, the burn addresses'
-   included, and both versions of the day with a result; compared every
-   day, scheduled from October 16); then `Found by the checks, before
-launch`, four dated findings (the edition-floor text corrected on
-   October 15, the first netting rule, the Lean model's counterexample to a
-   draft claim, and five rounds of differential tests, all settled but
-   E13), and a link to the Lean proof manifest on the daily feed.
-4. Use `Explain my TDH` to enter a profile handle or wallet-like identity.
+   one line on what is not public yet (P26, its vectors and the programs'
+   code) with a link to what anyone can check today; then three points
+   (written separately, each reproducing every conformance vector;
+   specified in Lean as a proposal, with the netting theorem's hypotheses:
+   every address's net movement, the burn addresses' included, and both
+   versions of the day with a result; compared every day, scheduled from
+   October 16); then `Fixed before the cutover`, four dated items of one
+   line each with the detail under `More` (the edition-floor text
+   corrected on October 15, the flaw program B found in the first netting
+   rule, what the Lean model showed netting does not guarantee, and five
+   rounds of differential tests, all settled but E13), and a link to the
+   Lean proof manifest on the daily feed.
+5. In `Explain my TDH`, enter a profile handle or wallet-like identity.
    Its results use the same words as the other TDH pages (raw days, base
    TDH, boost, final TDH).
    Public lookups can be submitted without wallet authentication. The page
@@ -79,21 +87,22 @@ launch`, four dated findings (the edition-floor text corrected on
    on every record, a line says this record was reproduced by two
    separately written programs from one input, and by 6529.io. Each
    collection's row says how many cards it holds.
-5. Expand collection holdings, boost details, and wallet information in a
+6. Expand collection holdings, boost details, and wallet information in a
    profile result. Holdings tables show token, copies, whole days, rate, base,
    and final TDH; collections with more than 20 tokens use Previous/Next
    pagination.
-6. Open `Current boosts` for today's values (read on the server, so they
+7. Open `Current boosts` for today's values (read on the server, so they
    render with the page; a failed refresh in the browser keeps them): the
    full-set boost and the Gradient bonus, an arrow link to the four boost
    figures these pages quote, drawn on one scale on the Historic boosts
    page (`#boost-figures`), the season bonuses as ranges (for example `Seasons 1–16: +0.05 each`) with Genesis and
    Nakamoto, and how the bonuses combine in a disclosure. Then `When your
 holdings change` for common questions about sales, transfers and new
-   cards, and `Glossary` for the terms the TDH pages use (including netting,
+   cards, and `Glossary` for the terms the TDH pages use (six to read your
+   own TDH, ending with final TDH, then the rest, including netting,
    the underflow test, conformance vectors, roots, the cutover, classes A to
    D and program A and B).
-7. Follow `Go deeper` to How it works (every step, with examples you can
+8. Follow `Go deeper` to How it works (every step, with examples you can
    change), the specification, the formal model, the implementations and the
    verification dashboard.
 

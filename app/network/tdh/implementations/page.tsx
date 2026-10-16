@@ -25,6 +25,7 @@ import { CheckMatrix, LineageDiagram } from "./ImplementationDiagrams";
 import ProgramCards, { type DailyBuilds } from "./ProgramCards";
 import VectorAnatomy from "./VectorAnatomy";
 import VectorBrowser from "./VectorBrowser";
+import VectorsByHand from "./VectorsByHand";
 import VectorFormat from "./VectorFormat";
 import { VECTOR_COUNT } from "./vectors";
 import { P26 } from "../shared/tdhFacts";
@@ -79,13 +80,14 @@ function LatestAgreement({
           <TdhStatusPill pill={summary.verdict} locale={locale} size="sm" />
         </span>
         <span className="tw-text-sm tw-tabular-nums tw-leading-6 tw-text-iron-100">
-          <span className="tw-font-semibold tw-text-iron-50">
+          {/* The record on its own line, then the latest day's counts. */}
+          <span className="tw-block tw-font-semibold tw-text-iron-50">
             {t(locale, "network.tdh.explainer.verified.record", {
               allEqual: formatInteger(locale, summary.record.allEqual),
               days: formatInteger(locale, summary.record.days),
               first: formatCycleDate(locale, summary.record.firstDate),
             })}
-          </span>{" "}
+          </span>
           {summary.pythonEqual === null
             ? t(locale, "network.tdh.impl.latest.noPython", values)
             : t(locale, "network.tdh.impl.latest.body", values)}
@@ -286,6 +288,7 @@ export default async function TdhImplementationsPage() {
           <p className={PROSE}>{t(locale, "network.tdh.impl.vectors.intro")}</p>
           <VectorFormat locale={locale} />
           <VectorAnatomy locale={locale} />
+          <VectorsByHand locale={locale} />
           <VectorBrowser locale={locale} />
         </div>
       </TdhSection>

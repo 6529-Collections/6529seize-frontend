@@ -102,24 +102,34 @@ Each explorable is titled under a `Try it` eyebrow.
   date examples use the cycle of 16 October 2026 (cycle 20,742). The highest
   boost on 2026-10-11 is 2.04.
 - Step 5 gives its example (a table, the transaction figure and what the
-  daily comparison found on October 14 and 15) in one neutral card, then one
-  note: netting covers the holdings only, since the mint counts, the
-  underflow test and the log-position checks still read every step, so a
+  daily comparison found on October 14 and 15) in one neutral card, then an
+  amber caution at the weight of the example: netting covers the holdings
+  only, and three things still read every step. The mint counts do, so a
   mint and its burn inside one transaction can make a card eligible and
   change other collectors' TDH (the formal model's counterexample I,
-  linked). Example cards have a neutral frame; the blue rule marks exact
-  rules only. Step 1's history line follows its example, with a link to
-  the label. Which rules read the transfers
+  linked); two validity checks do too (no wallet sends a copy it does not
+  hold, every log's position is valid), and an input that fails either has
+  no result. Example cards have a neutral frame and the reading measure;
+  the blue rule marks exact rules only. Step 1's history line follows its
+  example, with a link that says what "Not yet fully checked" means. Which rules read the transfers
   before netting (the mint facts, the underflow test and the log-position
   checks) and the vectors that pin the rule are in its `Exact rule and
   sources` disclosure. Its transaction figure is centred, with the result
   inside its frame.
-- Step 14 lists netting within one transaction (D131, as 6529.io's backend
-  already does) and on-chain order across transactions of one block
-  (DEV-2) as two items: a sale and a purchase of one card in different
-  transactions of one block can lower a few wallets' TDH, which the daily
-  comparison would show as a difference until the cutover; it links to the
-  dashboard's four classes.
+- Step 14 says TDH-v1 removes what made today's result depend on timing,
+  database order or editable data, in three items: every input read as of
+  the snapshot block on the finalized chain, and complete, with seasons
+  from a versioned list; netting within one transaction (D131, which
+  6529.io's results already match, D132) and on-chain order across
+  transactions of one block (DEV-2), where a sale and a purchase of one
+  card can still differ until the cutover; and a consolidation change
+  counting from the next cycle. An amber line names the one open question,
+  a fourth consolidated wallet, with a link to step 10. It links all 19
+  differences in the specification, today's comparison and the dashboard's
+  four classes.
+- Step 12 says its rates are the October 11, 2026 cycle's, and its result
+  line explains the daily rate in words (the boost times the rates of every
+  copy held a whole day; specification 8.6).
 - Step 6 says the floor in one sentence (below 300 copies minted, the
   claim's mint limit, up to 310, when that is more than the minted count)
   and its table adds a claim limit below 310 (149 minted under 200: edition
@@ -129,10 +139,9 @@ Each explorable is titled under a `Try it` eyebrow.
   (`200 d`, `+ 120 d`, `× 1.00`).
 - Step 10 states the three-wallet limit of `tdh-v1.0` (every pair
   confirmed, groups formed newest confirmed link first) and, in one line,
-  that 6529.io accepts a fourth consolidated wallet since October 15, 2026
-  while TDH-v1 groups at most three, which applies being pending an owner
-  decision; step 14 lists the same line, and that consolidations count as
-  they stand at the snapshot block, among the cutover changes. Its link
+  that 6529.io accepts a fourth consolidated wallet since October 15, 2026,
+  and that TDH-v1 allows three; whether it allows four is pending an owner
+  decision. Step 14 points to it as the open question. Its link
   diagrams number each link in on-chain order and draw links inside an
   identity heavier than links between identities (dashed).
 - Diagrams are drawn phone first: the rate chart, the transaction and the
@@ -140,8 +149,9 @@ Each explorable is titled under a `Try it` eyebrow.
   drawn line crosses a label (`scripts/tdh-pages-check.mjs` checks both).
   The rate chart anchors each label to its point with a short leader; on
   phones NextGen's 3.94 sits above and left of its point and FirstGM's 1.00
-  straight above its own, so they never stack, and the 4,000 tick is
-  dropped. Its legend is a two-column grid. The rate and boost tables are
+  straight above its own, so they never stack; both drawings keep the
+  4,000 tick. Its legend is a two-column grid, and its floor item says that
+  a claim limit of 310 or more counts as 310 below 300 minted. The rate and boost tables are
   captioned with their cycle, the October 11, 2026 cycle.
 
 ## Related Pages

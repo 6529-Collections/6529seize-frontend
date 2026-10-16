@@ -18,21 +18,55 @@ import {
 import type { CheckedEntry, StatementCheck } from "./formalStatus";
 import type { LeanStatement, StatementStatus } from "./leanResults";
 
-type Filter = StatementStatus | "all";
+/**
+ * Three outcomes a reader can hold on to, with the method as the pill's own
+ * label: what holds (proved, by definition, checked at build), what was shown
+ * false, and what these proofs do not cover.
+ */
+type StatusGroup = "holds" | "false" | "notCovered" | "unverified";
+type Filter = StatusGroup | "all";
+
+const GROUP_OF: Readonly<Record<StatementStatus, StatusGroup>> = {
+  proved: "holds",
+  byDefinition: "holds",
+  checkedBuild: "holds",
+  shownFalse: "false",
+  shownFalseEval: "false",
+  deferred: "notCovered",
+  unverified: "unverified",
+};
+
+const GROUPS: readonly StatusGroup[] = [
+  "holds",
+  "false",
+  "notCovered",
+  "unverified",
+];
+
+/**
+ * A row's references, with one document named once: "P26 §3.1, 3.2, 6.1 ·
+ * D131". A document keeps its first section ("P26 §3.1") and every other
+ * reference its own words together (U+00A0); the line breaks only after a
+ * comma or between references.
+ */
+function foldRefs(refs: readonly string[]): string {
+  const parts: { doc: string | null; text: string }[] = [];
+  for (const ref of refs) {
+    const match = /^(\S+) §(.+)$/.exec(ref);
+    const doc = match?.[1] ?? null;
+    const last = parts.at(-1);
+    if (match && last?.doc === doc) {
+      last.text += `, ${match[2] ?? ""}`;
+      continue;
+    }
+    parts.push({ doc, text: ref.replaceAll(" ", NO_BREAK_SPACE) });
+  }
+  return parts.map((part) => part.text).join(" · ");
+}
 
 const NO_EXTRA: Readonly<Record<string, ReactNode>> = {};
 /** U+00A0, so a reference such as "P26 §8.3" never breaks inside. */
 const NO_BREAK_SPACE = String.fromCodePoint(0xa0);
-
-const ORDER: readonly StatementStatus[] = [
-  "proved",
-  "byDefinition",
-  "checkedBuild",
-  "shownFalse",
-  "shownFalseEval",
-  "deferred",
-  "unverified",
-];
 
 /** A manifest entry's status as a pill; anything unexpected is unverified. */
 function entryPill(entry: CheckedEntry): TdhPill {
@@ -79,6 +113,16 @@ function entryEvidence(locale: SupportedLocale, entry: CheckedEntry): string {
     : t(locale, "network.tdh.formal.entry.axioms", {
         axioms: axioms.join(", "),
       });
+}
+
+function statementsCount(locale: SupportedLocale, count: number): string {
+  return t(
+    locale,
+    count === 1
+      ? "network.tdh.formal.statements.statementsCount.one"
+      : "network.tdh.formal.statements.statementsCount.other",
+    { count: formatInteger(locale, count) }
+  );
 }
 
 function entryPlace(entry: CheckedEntry): string | null {
@@ -164,14 +208,22 @@ export default function StatementsTable({
   const [open, setOpen] = useState<string | null>(null);
   const statusOf = (row: LeanStatement): StatementStatus =>
     checks[row.id]?.status ?? "unverified";
-  const present = ORDER.filter((status) =>
-    rows.some((row) => statusOf(row) === status)
+  const groupOf = (row: LeanStatement): StatusGroup => GROUP_OF[statusOf(row)];
+  const present = GROUPS.filter((group) =>
+    rows.some((row) => groupOf(row) === group)
   );
   const filters: readonly Filter[] =
     present.length > 1 ? ["all", ...present] : [];
   const shown = rows.filter(
-    (row) => filter === "all" || statusOf(row) === filter
+    (row) => filter === "all" || groupOf(row) === filter
   );
+  /** Claims a statement leaves to PROOFS.md as not proved here. */
+  const limitsOf = (row: LeanStatement): number =>
+    statusOf(row) === "deferred"
+      ? 0
+      : (checks[row.id]?.entries.filter(
+          (entry) => entry.expected === "deferred"
+        ).length ?? 0);
   const text = (
     row: LeanStatement,
     part: "title" | "claim" | "plain" | "scope"
@@ -207,13 +259,17 @@ export default function StatementsTable({
             >
               {option === "all"
                 ? t(locale, "network.tdh.formal.statements.filterAll")
-                : t(locale, `network.tdh.shared.pill.${option}`)}
+                : t(
+                    locale,
+                    `network.tdh.formal.statements.filterGroup.${option}`
+                  )}
+              {/* The unit is said: these count statements, not theorems. */}
               <span className="tw-rounded-full tw-bg-iron-800 tw-px-1.5 tw-text-xs tw-tabular-nums tw-text-iron-300">
-                {formatInteger(
+                {statementsCount(
                   locale,
                   option === "all"
                     ? rows.length
-                    : rows.filter((row) => statusOf(row) === option).length
+                    : rows.filter((row) => groupOf(row) === option).length
                 )}
               </span>
             </button>
@@ -276,11 +332,7 @@ export default function StatementsTable({
                         {title}
                       </button>
                       <span className="tw-block tw-pl-6 tw-font-mono tw-text-[0.8125rem] tw-font-normal tw-text-iron-300">
-                        {/* Each reference keeps "P26 §8.3" together; the
-                            line breaks only between references. */}
-                        {row.refs
-                          .map((ref) => ref.replaceAll(" ", NO_BREAK_SPACE))
-                          .join(" · ")}
+                        {foldRefs(row.refs)}
                       </span>
                       {entryCount(row) > 0 && (
                         <span className="tw-block tw-pl-6 tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-400">
@@ -307,6 +359,23 @@ export default function StatementsTable({
                         locale={locale}
                         size="sm"
                       />
+                      {/* A proved statement that bundles a limit PROOFS.md
+                          leaves open says so beside its pill. */}
+                      {limitsOf(row) > 0 && (
+                        <span className="tw-mt-1 tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-leading-5 tw-text-iron-300">
+                          <span
+                            aria-hidden="true"
+                            className="tw-size-2 tw-shrink-0 tw-rounded-full tw-border-[1.5px] tw-border-solid tw-border-iron-400"
+                          />
+                          {t(
+                            locale,
+                            limitsOf(row) === 1
+                              ? "network.tdh.formal.statements.limits.one"
+                              : "network.tdh.formal.statements.limits.other",
+                            { count: formatInteger(locale, limitsOf(row)) }
+                          )}
+                        </span>
+                      )}
                     </td>
                   </tr>
                   <tr

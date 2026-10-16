@@ -13,9 +13,8 @@ import {
 
 /**
  * The frame of every TDH sub-page: the About contents menu, the TDH section
- * navigation, then a header with the H1, status pills and lede. An optional
- * eyebrow names the page the header belongs to (the 404 view's, for one); like
- * the overview's, it shows from `md` up, where no section tab says it.
+ * navigation, then a header with the H1, status pills and lede; the section
+ * tabs above say which page it is, so it carries no eyebrow.
  */
 export default function TdhPageShell({
   locale,
@@ -23,7 +22,6 @@ export default function TdhPageShell({
   dropdownHref,
   documentTitle,
   title,
-  eyebrow,
   pills,
   lede,
   children,
@@ -34,7 +32,6 @@ export default function TdhPageShell({
   readonly dropdownHref: string;
   readonly documentTitle: string;
   readonly title: string;
-  readonly eyebrow?: string;
   readonly pills?: ReactNode;
   readonly lede?: ReactNode;
   readonly headerExtra?: ReactNode;
@@ -56,11 +53,6 @@ export default function TdhPageShell({
           id="top"
           className={`tw-scroll-mt-24 tw-pb-8 sm:tw-pb-10 ${TDH_PAGE_HEADER_TOP}`}
         >
-          {eyebrow !== undefined && (
-            <p className="tw-m-0 tw-mb-3 tw-hidden tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wide tw-text-primary-300 md:tw-block">
-              {eyebrow}
-            </p>
-          )}
           <h1 className={TDH_H1}>{title}</h1>
           {pills !== undefined && (
             <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-2">

@@ -29,8 +29,8 @@ daily comparison use only the current schedule.
 2. Compare the schedules under `All boost schedules`: a bar chart of the
    full-set boost on the scale of the four boost figures, 1.00× to 2.24×,
    that ends with the current schedule, its value on 16 October 2026 and,
-   drawn dashed, its reach once seasons 1 to 20 pay, with a legend of a
-   solid and a dashed swatch; and a table of effective
+   drawn dashed, its reach once seasons 1 to 20 pay, both labelled in
+   words under the bar (no legend swatch), with a one-line caption; and a table of effective
    periods, full-set boosts (the current row: the value today, with "up to
    2.00× once seasons 1–20 pay" in a muted line under it), seasons with a
    bonus ("Seasons 1–20", with "1–16 paying today" under it) and the

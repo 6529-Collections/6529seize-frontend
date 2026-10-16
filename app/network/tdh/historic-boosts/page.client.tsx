@@ -50,6 +50,12 @@ const ARCHIVE_SOURCE =
 /** Schedule 1.4: the backend's rule file at the commit P26 cites. */
 const RULES_SOURCE =
   "https://github.com/6529-Collections/6529seize-backend/blob/d0c070cc821ed0211cb6b19b17e27b2a32609ac3/src/tdhLoop/tdh-rules.ts";
+/**
+ * The same file on the backend's main branch: unchanged from d0c070c through
+ * c2f4020 (16 October 2026).
+ */
+const RULES_CURRENT =
+  "https://github.com/6529-Collections/6529seize-backend/blob/main/src/tdhLoop/tdh-rules.ts";
 
 /** The current schedule's id among the rows that open. */
 const CURRENT_ID = "boost-schedule-1-4";
@@ -136,6 +142,7 @@ export default function TDHHistoricBoostsPage({
                 refs={["P26 §10", "DEV-3"]}
                 note={
                   <ul className="tw-m-0 tw-list-none tw-space-y-1 tw-p-0">
+                    <li>{m(locale, "network.tdhHistoric.provenance.dev3")}</li>
                     <li>
                       <a
                         href={ARCHIVE_SOURCE}
@@ -154,6 +161,15 @@ export default function TDHHistoricBoostsPage({
                         target="_blank"
                       >
                         {m(locale, "network.tdhHistoric.provenance.rules")}
+                      </a>{" "}
+                      {m(locale, "network.tdhHistoric.provenance.unchanged")}{" "}
+                      <a
+                        href={RULES_CURRENT}
+                        className={TDH_LINK}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        {m(locale, "network.tdhHistoric.provenance.current")}
                       </a>
                     </li>
                   </ul>

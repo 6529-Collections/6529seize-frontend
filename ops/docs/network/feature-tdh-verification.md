@@ -20,21 +20,24 @@ day in canonical form, before the feed's first day, 20,740, or after the
 latest closed cycle) is rewritten by the proxy
 (`lib/proxy/tdhVerificationDay.ts`) to the TDH pages' own not-found view,
 `/network/tdh/verification/day-not-found?day=…`, with a real 404 status and
-the site around it: `No published day 20,739`; for a cycle before the
-feed's first day, its date and that it is before October 14, 2026 (cycle
-20,740); for a future cycle, when it closes and that its report appears
-after its 00:40 UTC run. Below, the latest day as a primary button, the
-dashboard, that the daily comparison began with October 14, 2026 and
-earlier days have no file here (6529.io's own uploads for them are listed
-by its public API), and a link to the October 11, 2026 replay in the
-specification's evidence; no day strip. Marked `noindex`. The address
+the site around it, under a `TDH verification` eyebrow at every width:
+`No published day 20,739`, or `No published day here` for an address that
+is not a cycle number (the page never repeats the text of the address);
+for a cycle before the feed's first day, its date and that it is before
+October 14, 2026 (cycle 20,740); for a future cycle, when it closes and
+that its report appears after its 00:40 UTC run. Below, the latest day as
+a primary button and the dashboard as a secondary one; only for a cycle
+before the feed's first day, that the days compared start with October 14,
+2026 and earlier days have no file here (6529.io's own uploads for them
+are listed by its public API), and a link to the October 11, 2026 replay
+in the specification's evidence; no day strip. Marked `noindex`. The address
 bar keeps the path asked for, and the access gate still runs first. A day
 inside that range that the feed does not list shows the standard not-found
 page, titled `TDH verification: day not found` and marked `noindex` with
 one robots tag; its status stays 200 because `app/network/loading.tsx`
 starts streaming before the page can call `notFound()`. A day's own page has
-a one-line lede (a lasting address for the day's comparison) with a link to
-the latest day; its cutover tile shows the planned date, about October 23,
+a one-line lede (a lasting address for the day's comparison); its cutover
+tile shows the planned date, about October 23,
 2026, and that the day came before it; it has no live freshness line, the
 headline card drops the date its title already gives, and Provenance shows
 the SHA-256 of the day file the page read and the day before it with its
@@ -43,8 +46,15 @@ checked as a chain. The run that wrote a day's file is read from the file
 itself (`generatedAt`): for the first two days, first computed on October
 15, 2026, before the scheduled runs began, and recomputed when the file was
 written; for a later day whose file was written well after its 00:40 UTC
-run, that time. The note shows under the snapshot line and in Provenance's
-feed row. Each code version names the P26 commit it computes.
+run, that time and the builds that wrote it. Under the snapshot line a small
+amber mark says which it is (`Computed before the schedule`, `Recomputed
+later`, `Written after its scheduled run`), with the sentence as its
+tooltip and a link to Provenance, whose feed row gives the sentence. Each
+code version names the P26 commit it computes. Provenance says that a
+day's runs followed the P26 text these pages restate only when the day's
+registry hash is that text's (tdh-v1.0 at `f840096`); otherwise it names
+the day's hash and says the runs may follow a later text, or that the file
+states no hash to compare.
 
 ## Location in the Site
 
@@ -88,12 +98,13 @@ feed row. Each code version names the P26 commit it computes.
    6529.io and between the Rust core and Python (one subtitle: identity
    records equal, burn addresses included), each with a meter that keeps a
    visible sliver for any difference and a line for the wallets; each tile
-   reads label, figure, then its caption at the foot, so the figures of a
-   row share one baseline; the total
+   reads label, figure, then its caption right under them, so no tile
+   opens a gap in its middle; the total
    TDH, with `Rust − 6529.io` and `Rust − Python` as numbers and whether it
    is the same in all three; and the cutover: `About Oct 23`, planned for
-   about October 23, 2026, about a week after the daily runs began on
-   October 16 (D132), with no countdown (on a day's own page, that the day
+   about October 23, 2026, a week after the scheduled daily runs began on
+   October 16 (D132); the days compared start with October 14, computed
+   before the schedule began; with no countdown (on a day's own page, that the day
    came before it), and `Switched on {date}` only when a published file says
    the cutover is done. Every difference on the dashboard and the day pages has one sign:
    the Rust core minus the other program. The total tile notes
@@ -105,8 +116,11 @@ feed row. Each code version names the P26 commit it computes.
    linking to it (a missing 6529.io file is an outline, an unexplained
    difference carries `!`, a mismatch `×`), the total's difference under
    each as a number (0 when equal), dashed cells for days with no report
-   and, while the cutover is ahead, the days still to come up to it, on
-   every day's page alike. The days share the card's whole width, with the
+   and, while the cutover is ahead, the days still to come up to it (each
+   with a 1 px border, as is its legend swatch), on every day's page alike.
+   The cutover cell is hatched with a dashed border and labelled `~23`, and
+   its legend says `Planned cutover, about this day`, so the strip states
+   no more than the words (D132). The days share the card's whole width, with the
    rows labelled on the left (`Rust − 6529.io`, the month); its label reads
    `Published Oct 14 to Oct 16 · cutover Oct 23` while the cutover is
    ahead. The legend names only the states on screen, the others under
@@ -136,10 +150,10 @@ feed row. Each code version names the P26 commit it computes.
    card in different transactions of one block, DEV-2, the one difference
    D132 names, which would show as class D until 6529 matches it to DEV-2;
    from the cutover 6529.io shows the Rust core's value; on a day whose
-   identity records are all equal, that there is none that day), and a
-   short history: DEV-2 has two cases, the one within one transaction that
-   D131's netting settled on October 14 and 15, and the one across
-   transactions of one block, which can still differ until the cutover.
+   identity records are all equal, that there is none that day), in one
+   amber note that also says DEV-2's other case, a token sent out and back
+   within one transaction, was settled by D131's netting, with a link to
+   how netting works.
    How this works names 6529.io's columns once with the pages' words
    (boosted TDH, final TDH; TDH, base TDH; unweighted days, raw days).
    A Rust–Python difference is class C (the new programs disagree), a

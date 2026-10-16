@@ -10,11 +10,7 @@ import { t } from "@/i18n/messages";
 import type { VerificationSummary } from "@/lib/tdh/verification/summary.server";
 import { MINUTE_EXAMPLE } from "./how-it-works/examples";
 import { TDH_FOCUS_RING, TDH_H1, TDH_LEDE } from "./shared/tdhStyles";
-import TdhStatusPill from "./shared/TdhStatusPill";
-import {
-  formatShortCycleDate,
-  shortCommit,
-} from "./verification/components/verificationFormat";
+import { formatShortCycleDate } from "./verification/components/verificationFormat";
 
 const TERMS = [
   { key: "days", value: "days" },
@@ -135,10 +131,8 @@ function latestAllEqual(summary: VerificationSummary): boolean {
 
 /**
  * The latest daily result near the top of the overview, in one line: the
- * track record and the latest day, its limit as a pill with what it means in
- * a few words, and the way into the dashboard; under it, the builds the
- * latest day's file names. The section "Checked daily, in public" below
- * carries the detail.
+ * track record, the latest day and the way into the dashboard. The section
+ * "Checked daily, in public" below carries its limit and the builds.
  */
 function VerifiedStrip({
   locale,
@@ -160,13 +154,6 @@ function VerifiedStrip({
           total: formatInteger(locale, summary.total ?? 0),
         });
   }
-  const builds =
-    summary.kind === "data" && summary.rustCommit && summary.pythonCommit
-      ? t(locale, "network.tdh.explainer.verified.builds", {
-          rust: `validator@${shortCommit(summary.rustCommit)}`,
-          python: `6529chain@${shortCommit(summary.pythonCommit)}`,
-        })
-      : null;
   return (
     <div
       className={`tw-mt-8 tw-flex tw-flex-col tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-px-4 tw-py-3 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-6 md:tw-px-5 ${awaiting ? "tw-border-white/10 tw-bg-iron-900" : "tw-border-success/30 tw-bg-success/[0.05]"}`}
@@ -188,22 +175,6 @@ function VerifiedStrip({
             )}{" "}
             {line}
           </p>
-          {summary.kind === "data" && summary.historyChecked === false && (
-            <p className="tw-m-0 tw-mt-1 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-sm tw-text-iron-300">
-              <TdhStatusPill pill="unchecked" locale={locale} size="sm" />
-              <a
-                href="#tdh-verified"
-                className={`tw-text-iron-300 tw-underline tw-decoration-iron-600 tw-underline-offset-4 hover:tw-text-iron-50 ${TDH_FOCUS_RING}`}
-              >
-                {t(locale, "network.tdh.explainer.strip.unchecked")}
-              </a>
-            </p>
-          )}
-          {builds !== null && (
-            <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-400">
-              {builds}
-            </p>
-          )}
         </div>
       </div>
       <Link

@@ -29,11 +29,11 @@ const TILE_VALUE =
 /** A line right under the figure. */
 const TILE_FOOT = "tw-m-0 tw-mt-2 tw-text-sm tw-tabular-nums tw-leading-5";
 /**
- * What the tile compares, at its foot: label, figure, then caption, so the
- * figures of a row share one baseline however the captions wrap.
+ * What the tile compares, right under its figures: label, figure, then
+ * caption, top-aligned, so no tile opens a gap in its middle. The figures of
+ * a row still share one baseline: labels and values are one line each.
  */
-const TILE_CAPTION =
-  "tw-m-0 tw-mt-auto tw-pt-3 tw-text-sm tw-leading-5 tw-text-iron-400";
+const TILE_CAPTION = "tw-m-0 tw-pt-3 tw-text-sm tw-leading-5 tw-text-iron-400";
 
 function plural(locale: SupportedLocale, count: number): "one" | "other" {
   return selectPluralCategory(locale, count) === "one" ? "one" : "other";

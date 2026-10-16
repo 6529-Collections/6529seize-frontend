@@ -184,7 +184,7 @@ export default function HouseholdWalkthrough({
       </div>
       <p
         aria-live="polite"
-        className="tw-m-0 tw-mt-4 tw-min-h-[3rem] tw-text-sm tw-leading-6 tw-text-iron-200"
+        className="tw-m-0 tw-mt-4 tw-min-h-[3rem] tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-200"
       >
         {summary(locale, scenario)}
       </p>

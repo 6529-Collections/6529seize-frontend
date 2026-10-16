@@ -431,8 +431,19 @@ describe("TDH sub-pages", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "Implementations" })
     ).toBeInTheDocument();
+    // D116 covers the validator code only: the Rust core and program B;
+    // the references and the Lean model are in the design repository.
     expect(
-      screen.getByText(/None of their source is public yet/)
+      screen.getByText(
+        /The Rust core and program B are to be published with the validator code \(D116\); the references and the Lean model are in 6529’s private design repository/
+      )
+    ).toBeInTheDocument();
+    // 6529.io is compared with the Rust core, and the Rust core with
+    // the Python reference, not with every program.
+    expect(
+      screen.getByText(
+        /compared record by record with the Rust core, and the Rust core with the Python reference/
+      )
     ).toBeInTheDocument();
     expect(
       screen.getByText(/the list is P26’s as of f840096/)
@@ -472,6 +483,14 @@ describe("TDH sub-pages", () => {
       screen.getByRole("heading", { name: "The 89 conformance vectors" })
     ).toBeInTheDocument();
     expect(screen.getByText("Inside one vector")).toBeInTheDocument();
+    // Three more vectors in full, to check by hand before the files are
+    // published: 04, 06 and 23.
+    expect(
+      screen.getByText("Three more vectors to check by hand: 04, 06 and 23")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Identity sums and their rounding")
+    ).toBeInTheDocument();
     const filters = screen.getByRole("group", {
       name: "Filter vectors by topic",
     });
@@ -544,12 +563,13 @@ describe("TDH sub-pages", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "No published day 20,739" })
     ).toBeInTheDocument();
-    // The eyebrow ties the view to the dashboard it belongs to.
+    // No eyebrow at any width: the TDH tabs already say where the view
+    // belongs, and the heading starts high on a phone.
     expect(
-      within(document.getElementById("top") as HTMLElement).getByText(
+      within(document.getElementById("top") as HTMLElement).queryByText(
         "TDH verification"
       )
-    ).toBeInTheDocument();
+    ).not.toBeInTheDocument();
     // A cycle before the feed's first day says so, with its date; the
     // days before the comparison point to 6529.io's uploads and the
     // October 11 replay, never "not computed under TDH-v1".
@@ -559,7 +579,7 @@ describe("TDH sub-pages", () => {
       )
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/The daily comparison began with October 14, 2026/)
+      screen.getByText(/The days compared start with October 14, 2026/)
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", {
@@ -569,7 +589,7 @@ describe("TDH sub-pages", () => {
     expect(document.body.textContent).not.toMatch(/not computed under TDH-v1/);
     unmount();
 
-    renderPage(
+    const { unmount: unmount2 } = renderPage(
       await DayNotFoundPage({ searchParams: Promise.resolve({ day: "99999" }) })
     );
     expect(
@@ -577,5 +597,25 @@ describe("TDH sub-pages", () => {
         /Cycle 99,999 closes at 00:00 UTC on .*, so it has no report yet; a day’s report appears after its run at 00:40 UTC/
       )
     ).toBeInTheDocument();
+    // The days before the comparison are only a future day's question
+    // when it is before the feed: not here.
+    expect(
+      screen.queryByText(/The days compared start with/)
+    ).not.toBeInTheDocument();
+    unmount2();
+
+    // An address that is not a cycle number is never echoed into the
+    // page: the title is the plain one, whatever the link says.
+    renderPage(
+      await DayNotFoundPage({
+        searchParams: Promise.resolve({
+          day: "Your-TDH-was-reset-contact-support-now",
+        }),
+      })
+    );
+    expect(
+      screen.getByRole("heading", { level: 1, name: "No published day here" })
+    ).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/Your-TDH|contact-support/);
   });
 });

@@ -1,13 +1,39 @@
+"use client";
+
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { useState } from "react";
 import { formatInteger, formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { MAX_BOOST_CENTS, MINUTE_EXAMPLE } from "./how-it-works/examples";
 import TdhSourcesNote from "./shared/TdhSourcesNote";
-import { TDH_FOCUS_RING, TDH_SERIES } from "./shared/tdhStyles";
+import {
+  TDH_CHIP_BUTTON,
+  TDH_CHIP_OFF,
+  TDH_CHIP_ON,
+  TDH_FOCUS_RING,
+  TDH_SERIES,
+} from "./shared/tdhStyles";
 
 const STEPS = ["hold", "weigh", "boost"] as const;
+
+/** What else the example's collector holds: the one factor a reader moves. */
+const VARIANTS = [
+  { key: "none", betaCents: 100, final: MINUTE_EXAMPLE.base },
+  {
+    key: "one",
+    betaCents: MINUTE_EXAMPLE.betaCents,
+    final: MINUTE_EXAMPLE.final,
+  },
+  {
+    key: "fullSet",
+    betaCents: MINUTE_EXAMPLE.fullSetBetaCents,
+    final: MINUTE_EXAMPLE.fullSetFinal,
+  },
+] as const;
+
+type Variant = (typeof VARIANTS)[number];
 const SOURCES = [
   "P26 §4.3",
   "P26 §7.1",
@@ -133,30 +159,53 @@ function RatePanel({ locale }: { readonly locale: SupportedLocale }) {
   );
 }
 
-/** Boost: a scale from 1.00 to the highest boost today, marked at 1.02. */
-function BoostPanel({ locale }: { readonly locale: SupportedLocale }) {
+/**
+ * Boost: the factor the reader changes. Three choices of what else the
+ * collector holds, and the boost on a scale from 1.00 to the highest boost
+ * that day.
+ */
+function BoostPanel({
+  locale,
+  variant,
+  onChange,
+}: {
+  readonly locale: SupportedLocale;
+  readonly variant: Variant;
+  readonly onChange: (next: Variant) => void;
+}) {
   const at = (value: number) => ((value - 100) / (MAX_BOOST_CENTS - 100)) * 100;
-  const position = at(MINUTE_EXAMPLE.betaCents);
+  const position = Math.max(at(variant.betaCents), 2.5);
   return (
     <div className={PANEL}>
       <p className={PANEL_LABEL}>
         {t(locale, "network.tdh.explainer.minute.boostLabel")}
       </p>
       <div className="tw-self-center">
-        <p className={`${CAPTION} tw-text-fuchsia-200`}>
-          {t(locale, "network.tdh.explainer.minute.oneGradient")}{" "}
-          <span className="tw-tabular-nums">
-            +{cents(locale, MINUTE_EXAMPLE.betaCents - 100)}
-          </span>
-        </p>
-        <div className="tw-relative tw-mt-1.5 tw-h-3 tw-rounded-full tw-bg-iron-800">
+        <div
+          role="group"
+          aria-label={t(locale, "network.tdh.explainer.minute.choiceLabel")}
+          className="tw-flex tw-flex-wrap tw-gap-1.5"
+        >
+          {VARIANTS.map((option) => (
+            <button
+              key={option.key}
+              type="button"
+              aria-pressed={option.key === variant.key}
+              onClick={() => onChange(option)}
+              className={`${TDH_CHIP_BUTTON} tw-min-h-9 tw-px-3 tw-text-[13px] ${option.key === variant.key ? TDH_CHIP_ON : TDH_CHIP_OFF}`}
+            >
+              {t(locale, `network.tdh.explainer.minute.choice.${option.key}`)}
+            </button>
+          ))}
+        </div>
+        <div className="tw-relative tw-mt-3 tw-h-3 tw-rounded-full tw-bg-iron-800">
           <span
-            className={`tw-absolute tw-inset-y-0 tw-left-0 tw-rounded-full ${TDH_SERIES.gradients.bg}`}
-            style={{ width: `${Math.max(position, 2.5)}%` }}
+            className={`tw-absolute tw-inset-y-0 tw-left-0 tw-rounded-full ${TDH_SERIES.gradients.bg} tw-transition-[width] motion-reduce:tw-transition-none`}
+            style={{ width: `${position}%` }}
           />
           <span
             className="tw-absolute tw-top-1/2 tw-size-4 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-border-2 tw-border-solid tw-border-iron-950 tw-bg-fuchsia-300"
-            style={{ left: `${Math.max(position, 2.5)}%` }}
+            style={{ left: `${position}%` }}
           />
         </div>
         <p
@@ -170,7 +219,7 @@ function BoostPanel({ locale }: { readonly locale: SupportedLocale }) {
           </span>
         </p>
       </div>
-      <p className={PANEL_VALUE}>× {cents(locale, MINUTE_EXAMPLE.betaCents)}</p>
+      <p className={PANEL_VALUE}>× {cents(locale, variant.betaCents)}</p>
     </div>
   );
 }
@@ -217,26 +266,8 @@ export default function TDHInAMinute({
 }: {
   readonly locale: SupportedLocale;
 }) {
-  const variants = [
-    {
-      key: "none",
-      boost: cents(locale, 100),
-      value: formatInteger(locale, MINUTE_EXAMPLE.base),
-      current: false,
-    },
-    {
-      key: "one",
-      boost: cents(locale, MINUTE_EXAMPLE.betaCents),
-      value: formatInteger(locale, MINUTE_EXAMPLE.final),
-      current: true,
-    },
-    {
-      key: "fullSet",
-      boost: cents(locale, MINUTE_EXAMPLE.fullSetBetaCents),
-      value: formatInteger(locale, MINUTE_EXAMPLE.fullSetFinal),
-      current: false,
-    },
-  ] as const;
+  // The hero's card: one Gradient. The reader can swap what else is held.
+  const [variant, setVariant] = useState<Variant>(VARIANTS[1]);
   return (
     <section
       id="tdh-minute"
@@ -269,17 +300,13 @@ export default function TDHInAMinute({
         ))}
       </ol>
       <figure className="tw-m-0 tw-mt-8">
-        <p className="tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
+        <figcaption className="tw-m-0 tw-mb-3 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
           {t(locale, "network.tdh.explainer.minute.exampleLabel")}
+        </figcaption>
+        <p className="tw-sr-only">
+          {t(locale, "network.tdh.explainer.minute.diagramDesc")}
         </p>
-        <p className="tw-m-0 tw-mb-3 tw-mt-1 tw-max-w-[38em] tw-text-base tw-leading-7 tw-text-iron-300">
-          {t(locale, "network.tdh.explainer.minute.example")}
-        </p>
-        <div
-          role="img"
-          aria-label={t(locale, "network.tdh.explainer.minute.diagramDesc")}
-          className="tw-grid tw-gap-2 md:tw-grid-cols-[minmax(0,1fr)_1.75rem_minmax(0,1fr)_1.75rem_minmax(0,1fr)]"
-        >
+        <div className="tw-grid tw-gap-2 md:tw-grid-cols-[minmax(0,1fr)_1.75rem_minmax(0,1fr)_1.75rem_minmax(0,1fr)]">
           <DaysPanel locale={locale} />
           <span aria-hidden="true" className={GLYPH}>
             ×
@@ -288,44 +315,24 @@ export default function TDHInAMinute({
           <span aria-hidden="true" className={GLYPH}>
             ×
           </span>
-          <BoostPanel locale={locale} />
+          <BoostPanel locale={locale} variant={variant} onChange={setVariant} />
         </div>
-        {/* The hero's card, then what the boost does to it: the one number
-            that moves with what else you hold. */}
-        <figcaption className="tw-mt-4">
-          <p
-            id="tdh-minute-variants"
-            className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200"
-          >
-            {t(locale, "network.tdh.explainer.minute.variantsLabel")}
-          </p>
-          <ul
-            aria-labelledby="tdh-minute-variants"
-            className="tw-m-0 tw-mt-2 tw-grid tw-list-none tw-gap-2 tw-p-0 sm:tw-grid-cols-3"
-          >
-            {variants.map((variant) => (
-              <li
-                key={variant.key}
-                className={`tw-flex tw-items-baseline tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-2.5 tw-text-sm tw-tabular-nums ${
-                  variant.current
-                    ? "tw-border-primary-400/40 tw-bg-primary-500/[0.08] tw-text-iron-50"
-                    : "tw-border-white/[0.07] tw-bg-iron-900 tw-text-iron-200"
-                }`}
-              >
-                <span>
-                  {t(
-                    locale,
-                    `network.tdh.explainer.minute.variant.${variant.key}`,
-                    { boost: variant.boost }
-                  )}
-                </span>
-                <span className="tw-text-base tw-font-semibold tw-text-iron-50">
-                  {variant.value}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </figcaption>
+        {/* The product, for the boost chosen above. */}
+        <p
+          aria-live="polite"
+          className="tw-m-0 tw-mt-2 tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-4 tw-gap-y-1 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/[0.08] tw-px-4 tw-py-3 sm:tw-px-5"
+        >
+          <span className="tw-text-sm tw-text-iron-200">
+            {t(locale, `network.tdh.explainer.minute.variant.${variant.key}`, {
+              boost: cents(locale, variant.betaCents),
+            })}
+          </span>
+          <span className="tw-text-xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50">
+            {t(locale, "network.tdh.explainer.minute.result", {
+              final: formatInteger(locale, variant.final),
+            })}
+          </span>
+        </p>
       </figure>
       {/* Three short notes side by side from md, under the three panels,
           so the band keeps one measure. */}

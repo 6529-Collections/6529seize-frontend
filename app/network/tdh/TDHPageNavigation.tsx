@@ -120,8 +120,8 @@ export function TDHRelatedLinks({
   readonly links: readonly TDHRelatedLink[];
   /**
    * `list`: one row per link, for longer lists that cards would orphan;
-   * `grid`: the overview's card size, two columns from `sm` and three from
-   * `xl`, the same as "Go deeper" above it.
+   * `grid`: the overview's card size, two columns from `sm` and, for three
+   * links or more, three from `xl`, the same as "Go deeper" above it.
    */
   readonly variant?: "cards" | "list" | "grid";
 }) {
@@ -152,12 +152,15 @@ export function TDHRelatedLinks({
       </ul>
     );
   }
+  // Two links fill two columns; a third column only for three or more.
+  const gridColumns =
+    links.length >= 3
+      ? "sm:tw-grid-cols-2 xl:tw-grid-cols-3"
+      : "sm:tw-grid-cols-2";
   return (
     <div
       className={
-        variant === "grid"
-          ? "tw-grid tw-gap-4 sm:tw-grid-cols-2 xl:tw-grid-cols-3"
-          : TDH_CARD_GRID
+        variant === "grid" ? `tw-grid tw-gap-4 ${gridColumns}` : TDH_CARD_GRID
       }
     >
       {links.map(({ href, title, description }) => (

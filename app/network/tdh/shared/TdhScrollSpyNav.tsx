@@ -144,7 +144,9 @@ export default function TdhScrollSpyNav({
       {floating && activeItem && (
         <details
           ref={floatingRef}
-          className="tw-group tw-fixed tw-inset-x-3 tw-bottom-3 tw-z-30 tw-flex tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/95 tw-shadow-lg tw-backdrop-blur lg:tw-hidden"
+          // Solid, with a shadow that fades the text behind it, 8 px off
+          // the bottom edge: no line of the page shows through.
+          className="tw-group tw-fixed tw-inset-x-3 tw-bottom-2 tw-z-30 tw-flex tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-shadow-[0_-12px_24px_8px_rgba(10,10,12,0.85)] lg:tw-hidden"
           data-tdh-floating-contents=""
         >
           <summary

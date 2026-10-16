@@ -24,8 +24,8 @@ import TDHVerifiedDaily from "./TDHVerifiedDaily";
 
 const SECTION_IDS = [
   "tdh-minute",
-  "tdh-verified",
   "tdh-profile",
+  "tdh-verified",
   "tdh-1-4",
   "tdh-changes",
   "glossary",
@@ -74,12 +74,14 @@ export default function TDHMainPage({
         <TdhSubnav current="/network/tdh" locale={locale} />
         <TDHHero locale={locale} verification={verification} />
         <TDHInAMinute locale={locale} />
+        {/* A collector's own number right after the minute, before the
+            evidence. */}
+        <TDHProfile locale={locale} verification={verification} />
         <TDHVerifiedDaily
           locale={locale}
           summary={verification}
           manifestUrl={manifestUrl}
         />
-        <TDHProfile locale={locale} verification={verification} />
         <TDHCurrentRules locale={locale} initialRules={rules} />
         <TDHHoldingChanges locale={locale} />
         <TDHGlossary locale={locale} />

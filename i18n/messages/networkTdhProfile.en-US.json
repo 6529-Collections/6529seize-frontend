@@ -1,6 +1,6 @@
 {
   "network.tdh.profile.title": "Explain my TDH",
-  "network.tdh.profile.intro": "Look up a public profile or wallet to follow its latest stored calculation, in the same words as the rest of these pages. No wallet connection is needed.",
+  "network.tdh.profile.intro": "Look up a public profile or wallet to follow 6529.io’s stored calculation for it, card by card: the values the daily comparison tests against TDH-v1. No wallet connection is needed.",
   "network.tdh.profile.input": "Profile handle, ENS name or wallet address",
   "network.tdh.profile.submit": "Explain TDH",
   "network.tdh.profile.loading": "Loading the TDH snapshot…",

@@ -39,8 +39,15 @@ reference, the Lean model and 6529.io's current backend.
   the page. Then its compute time for one day (program B: not measured yet;
   the Lean model's labelled with its build). Language, how it was written,
   where it runs, the commits and the longer conformance and speed notes
-  open under one `Details` control at the row's end. An intro says that no
-  source is public yet (D116).
+  open under one `Details` control at the row's end. The header row is in
+  sentence case (`Time, one day`); below `lg` each value sits beside a
+  short label (`Status`, `Vectors`, `Time`), two columns a line when the
+  card is at least 19rem wide (a container query), above it otherwise. An intro says what computes TDH-v1 (three programs
+  written separately, the Rust core ported from the Rust reference, and the
+  Lean model), that 6529.io is compared every day with the Rust core and
+  the Rust core with the Python reference, and that the Rust core and
+  program B are to be published with the validator code (D116) while the
+  references and the Lean model are in 6529's private design repository.
   Under the cards, one closed disclosure (`Notes: names, vector counts,
   check counts and times`) holds, one sentence each:
   the naming key (program B is also the TDH code of proof program B, and
@@ -57,7 +64,7 @@ reference, the Lean model and 6529.io's current backend.
   timed, and the TypeScript port of How it works is an illustration, not
   an implementation.
 - How each was written, with a lineage graph: P26 at the root, the Rust core
-  as a copy of the Rust reference, and the old backend replaced at the
+  ported from the Rust reference, and the old backend replaced at the
   cutover (the arrow labelled so in both drawings); a tree down the page in
   a narrow column, left to right from a 34rem column. Each program is
   marked by a neutral shape (Rust a square, program B a triangle, the
@@ -77,16 +84,19 @@ reference, the Lean model and 6529.io's current backend.
 - How they are checked: conformance vectors, differential replays, five
   rounds of differential tests across the Lean model, the Python reference,
   the Rust core and program B (a table, `#difftest-rounds`, gives each
-  round's inputs, findings and the P26 round that settled it; E13, from the
+  round's findings in one line and the P26 round that settled it with the
+  findings' codes, the generated inputs in its caption and each round's
+  findings in full in a disclosure; E13, from the
   fifth round on October 16, is open for the vector format; the
   Specification and Formal model pages link to it), the dual run in every
   validator (the Rust core against program B before signing, the Python
   reference an optional third check: decided, D125 and P53 §4.5, not yet
-  built in), the daily comparison (scheduled daily from 16 October 2026),
-  the formal model, and proofs A and B, plus why Rust versus Python is the
-  real check after the cutover. Each check is two lines, with the counts
-  and the detail under `More`. The matrix above has short notes at prose
-  width: in CI, 6529chain's `tdh-formal.yml` runs 1,000
+  built in), the daily comparison (days compared from October 14, 2026, the
+  scheduled job every day since October 16), the formal model, and proofs A
+  and B, plus why the Python reference is the independent check of the
+  published day after the cutover, program B joining once it runs inside
+  validators. Each check is two lines, with the counts and the detail under
+  `More`. The matrix above has its notes in one closed disclosure: in CI, 6529chain's `tdh-formal.yml` runs 1,000
   seeded random inputs through Lean, Python and the Rust reference on every
   change, and the validator's CI runs the Rust core against program B. A
   note under the differential tests says where vectors 75 to 88 came from:
@@ -104,7 +114,13 @@ reference, the Lean model and 6529.io's current backend.
   its tokens with balance, raw, base, boost_c and final; which wallet is A,
   W and B, why the values are what they are, and where its boost of 1.08
   comes from (three full sets under the vector's one-season registry). Its
-  addresses, transactions and tokens are synthetic.
+  addresses, transactions and tokens are synthetic. Under it, a closed
+  disclosure restates three more vectors in full, generated from their
+  files (`byHandVectors.ts`): 04 (last in, first out), 06 (the age carried
+  inside an identity) and 23 (identity sums and their rounding), each with
+  its wallets, registry seasons and T, its transfers with their position
+  and days before T, its consolidation registrations, H and rates where it
+  states them, its expected records and why.
 - The 89 conformance vectors (01 to 88 and 12b, as of 6529chain `f840096`),
   with where the set is pinned (its git tree) and how to read a vector file,
   filterable by topic; the first ten show until `Show all` is chosen. The

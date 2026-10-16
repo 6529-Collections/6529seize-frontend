@@ -198,13 +198,22 @@ export default function ProgramCards({
 }) {
   const head = (key: string) =>
     t(locale, `network.tdh.impl.matrixHead.${key}` as MessageKey);
-  const label =
-    "tw-mb-1 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400 lg:tw-sr-only";
+  // Below lg each value sits beside its label, two columns a line, so a
+  // program is a few short lines on a phone; from lg the header row names
+  // the columns.
+  const label = "tw-text-sm tw-leading-6 tw-text-iron-400 lg:tw-sr-only";
+  // By the card's own width (a container below lg): in a narrow card the
+  // label stays above its value.
+  const cell =
+    "tw-min-w-0 @[19rem]:tw-grid @[19rem]:tw-grid-cols-[4.5rem_minmax(0,1fr)] @[19rem]:tw-gap-x-3";
+  // The short labels of those lines; the full ones stay for screen readers.
+  const short = (key: string) =>
+    t(locale, `network.tdh.impl.matrixHead.${key}Short` as MessageKey);
   return (
     <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900">
       <div
         aria-hidden="true"
-        className={`tw-hidden tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-px-4 tw-py-2.5 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400 ${COLUMNS}`}
+        className={`tw-hidden tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-px-4 tw-py-2.5 tw-text-sm tw-font-medium tw-text-iron-300 ${COLUMNS}`}
       >
         <span>{head("program")}</span>
         <span>{head("status")}</span>
@@ -236,19 +245,30 @@ export default function ProgramCards({
                 name,
               })}
               cells={
-                <dl className="tw-m-0 tw-contents">
-                  <div className="tw-min-w-0 max-lg:tw-mt-4">
-                    <dt className={label}>{head("status")}</dt>
+                <dl className="tw-m-0 tw-space-y-1.5 max-lg:tw-@container lg:tw-contents">
+                  <div className={cell}>
+                    <dt className={label}>
+                      <span aria-hidden="true" className="lg:tw-hidden">
+                        {short("status")}
+                      </span>
+                      <span className="tw-sr-only">{head("status")}</span>
+                    </dt>
                     <dd className="tw-m-0 tw-flex tw-flex-wrap tw-gap-1.5 lg:tw-pt-2.5">
                       <TdhStatusPill
                         pill={program.pill}
                         locale={locale}
                         size="sm"
+                        wrap
                       />
                     </dd>
                   </div>
-                  <div className="tw-min-w-0 max-lg:tw-mt-4">
-                    <dt className={label}>{head("vectors")}</dt>
+                  <div className={cell}>
+                    <dt className={label}>
+                      <span aria-hidden="true" className="lg:tw-hidden">
+                        {short("vectors")}
+                      </span>
+                      <span className="tw-sr-only">{head("vectors")}</span>
+                    </dt>
                     <dd className="tw-m-0 tw-text-sm tw-tabular-nums tw-leading-6 lg:tw-pt-2.5">
                       {figure === null ? (
                         <span className="tw-text-iron-300">
@@ -269,8 +289,13 @@ export default function ProgramCards({
                       )}
                     </dd>
                   </div>
-                  <div className="tw-min-w-0 max-lg:tw-mt-4">
-                    <dt className={label}>{head("speed")}</dt>
+                  <div className={cell}>
+                    <dt className={label}>
+                      <span aria-hidden="true" className="lg:tw-hidden">
+                        {short("speed")}
+                      </span>
+                      <span className="tw-sr-only">{head("speed")}</span>
+                    </dt>
                     <dd className="tw-m-0 tw-text-sm tw-tabular-nums tw-leading-6 tw-text-iron-100 lg:tw-pt-2.5">
                       {speed}
                     </dd>

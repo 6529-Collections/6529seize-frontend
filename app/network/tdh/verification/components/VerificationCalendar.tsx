@@ -25,6 +25,12 @@ import {
 
 /** The newest days the strip shows; older ones stay in the table below. */
 const CALENDAR_DAYS = 42;
+/** The planned cutover's cell and swatch: a hatch, for "about this day". */
+const CUTOVER_HATCH = {
+  backgroundImage:
+    "repeating-linear-gradient(135deg, rgba(96, 165, 250, 0.28) 0 3px, transparent 3px 6px)",
+} as const;
+
 /** The cells a phone shows, the cutover included, so nothing is cut off. */
 const PHONE_CELLS = 7;
 
@@ -183,24 +189,20 @@ function CellSquare({
         : "network.tdh.verify.calendar.upcoming",
       { date }
     );
+    // The cutover is "about" its date (D132): a hatched, dashed cell, not
+    // a solid one, so the picture states no more than the words.
     return (
       <span
         role="img"
         aria-label={label}
         title={label}
-        className={`tw-flex ${CELL_SIZE} tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid ${
+        className={`tw-flex ${CELL_SIZE} tw-items-center tw-justify-center tw-rounded-md tw-border ${
           cell.cutover
-            ? "tw-border-primary-400/70 tw-bg-primary-500/15"
-            : "tw-border-white/[0.08] tw-bg-iron-900"
+            ? "tw-border-dashed tw-border-primary-400/70"
+            : "tw-border-solid tw-border-iron-600 tw-bg-iron-900"
         }`}
-      >
-        {cell.cutover && (
-          <span
-            aria-hidden="true"
-            className="tw-size-1.5 tw-rounded-full tw-bg-primary-300"
-          />
-        )}
-      </span>
+        style={cell.cutover ? CUTOVER_HATCH : undefined}
+      />
     );
   }
   if (cell.kind === "missing") {
@@ -330,14 +332,15 @@ function UpcomingLegend({ locale }: { readonly locale: SupportedLocale }) {
       <li className="tw-inline-flex tw-items-center tw-gap-1.5">
         <span
           aria-hidden="true"
-          className="tw-size-2.5 tw-rounded-sm tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-900"
+          className="tw-size-2.5 tw-rounded-sm tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900"
         />
         {t(locale, "network.tdh.verify.calendar.upcomingLegend")}
       </li>
       <li className="tw-inline-flex tw-items-center tw-gap-1.5">
         <span
           aria-hidden="true"
-          className="tw-size-2.5 tw-rounded-sm tw-border tw-border-solid tw-border-primary-400/70 tw-bg-primary-500/15"
+          className="tw-size-2.5 tw-rounded-sm tw-border tw-border-dashed tw-border-primary-400/70"
+          style={CUTOVER_HATCH}
         />
         {t(locale, "network.tdh.verify.calendar.cutoverLegend")}
       </li>
@@ -485,11 +488,15 @@ export default function VerificationCalendar({
                     aria-hidden="true"
                     className={`tw-mt-0.5 tw-text-sm tw-tabular-nums tw-leading-5 ${
                       cell.kind === "upcoming" && cell.cutover
-                        ? "tw-font-semibold tw-text-primary-300"
+                        ? "tw-text-primary-300"
                         : "tw-text-iron-400"
                     }`}
                   >
-                    {formatDayOfMonth(locale, cellDate(cell))}
+                    {cell.kind === "upcoming" && cell.cutover
+                      ? t(locale, "network.tdh.verify.calendar.about", {
+                          day: formatDayOfMonth(locale, cellDate(cell)),
+                        })
+                      : formatDayOfMonth(locale, cellDate(cell))}
                   </span>
                 </li>
               </Fragment>

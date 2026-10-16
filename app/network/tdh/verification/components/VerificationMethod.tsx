@@ -465,18 +465,41 @@ export default function VerificationMethod({
               <span className="tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-text-xs tw-font-medium tw-tabular-nums tw-text-iron-200">
                 {index + 1}
               </span>
-              <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
-                <strong className="tw-font-semibold tw-text-iron-100">
+              <div className="tw-min-w-0">
+                <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
+                  <strong className="tw-font-semibold tw-text-iron-100">
+                    {t(
+                      locale,
+                      `network.tdh.verify.method.${step.key}.title` as MessageKey
+                    )}
+                  </strong>{" "}
                   {t(
                     locale,
-                    `network.tdh.verify.method.${step.key}.title` as MessageKey
+                    `network.tdh.verify.method.${step.key}.body` as MessageKey
                   )}
-                </strong>{" "}
-                {t(
-                  locale,
-                  `network.tdh.verify.method.${step.key}.body` as MessageKey
+                </p>
+                {/* What is compared and what is not, as two short lists. */}
+                {step.key === "exact" && (
+                  <dl className="tw-m-0 tw-mt-2 tw-grid tw-grid-cols-1 tw-gap-x-3 tw-gap-y-1 tw-text-sm tw-leading-6 min-[480px]:tw-grid-cols-[6.5rem_minmax(0,1fr)] min-[480px]:tw-gap-y-1.5">
+                    {(["compared", "notCompared"] as const).map((part) => (
+                      <div key={part} className="tw-contents">
+                        <dt className="tw-font-medium tw-text-iron-100">
+                          {t(
+                            locale,
+                            `network.tdh.verify.method.exact.${part}` as MessageKey
+                          )}
+                        </dt>
+                        <dd className="tw-m-0 tw-text-iron-300">
+                          {t(
+                            locale,
+                            `network.tdh.verify.method.exact.${part}List` as MessageKey
+                          )}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
                 )}
-              </p>
+              </div>
             </li>
           ))}
           <li className="tw-mb-4 tw-break-inside-avoid tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-700 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-300">

@@ -9,6 +9,7 @@ import TdhPager from "../shared/TdhPager";
 import TdhScrollSpyNav from "../shared/TdhScrollSpyNav";
 import TdhSource from "../shared/TdhSource";
 import TdhStatusPill from "../shared/TdhStatusPill";
+import { middleTruncate } from "../verification/components/verificationFormat";
 import { SectionMap } from "./SpecDiagrams";
 import SpecSectionsA from "./SpecSectionsA";
 import SpecSectionsB from "./SpecSectionsB";
@@ -145,6 +146,24 @@ export default async function TdhSpecificationPage() {
           <TdhStatusPill pill="proposal" locale={locale} />
           <span className="tw-text-xs tw-text-iron-400 sm:tw-text-sm">
             {t(locale, "network.tdh.spec.versionRow.meta")}
+          </span>
+          {/* The hash that pins the text, beside the version it pins. */}
+          <span className="tw-inline-flex tw-items-center tw-gap-1 tw-text-xs tw-text-iron-400 sm:tw-text-sm">
+            {t(locale, "network.tdh.spec.versionRow.shaShort")}
+            <code
+              className="tw-font-mono tw-text-xs tw-text-iron-200"
+              title={P26_SHA256}
+            >
+              {middleTruncate(P26_SHA256, 8)}
+            </code>
+            <TdhCopyButton
+              value={P26_SHA256}
+              label={t(locale, "network.tdh.shared.copyNamed", {
+                name: t(locale, "network.tdh.spec.versionRow.sha"),
+              })}
+              copiedLabel={t(locale, "network.tdh.shared.copied")}
+              failedLabel={t(locale, "network.tdh.shared.copyFailed")}
+            />
           </span>
         </>
       }

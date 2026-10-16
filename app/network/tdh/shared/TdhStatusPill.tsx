@@ -57,9 +57,9 @@ const PILL_TONE: Record<TdhPill, TdhTone> = {
   decided: "primary",
   inSpec: "success",
   proved: "success",
-  byDefinition: "neutral",
+  byDefinition: "success",
   proposal: "warning",
-  checkedBuild: "primary",
+  checkedBuild: "success",
   checkedVectors: "neutral",
   shownFalse: "refuted",
   shownFalseEval: "refuted",
@@ -88,9 +88,10 @@ export const TDH_TONE_DOT: Record<TdhTone, string> = {
 };
 
 /**
- * A pill's mark: a filled dot by default. Statuses that share a tone get a
- * shape of their own, so the formal model's statuses are told apart without
- * colour: "by definition" a square, "checked at build" a diamond, "not
+ * A pill's mark: a filled dot by default. The formal model's statuses come in
+ * three colours, what holds, what was shown false and what is not covered,
+ * and each method has a shape of its own, so they are told apart without
+ * colour too: "by definition" a square, "checked at build" a diamond, "not
  * proved here" a hollow ring, and a claim shown false only by evaluation a
  * hollow ring in the refuted tone.
  */
@@ -137,10 +138,13 @@ export default function TdhStatusPill({
   pill,
   locale,
   size = "md",
+  wrap = false,
 }: {
   readonly pill: TdhPill;
   readonly locale: SupportedLocale;
   readonly size?: "sm" | "md";
+  /** Let the label wrap in a narrow cell, instead of below 360 px only. */
+  readonly wrap?: boolean;
 }) {
   const tone = PILL_TONE[pill];
   return (
@@ -158,7 +162,9 @@ export default function TdhStatusPill({
         data-tdh-mark={PILL_MARK[pill] ?? "dot"}
       />
       {/* One line; it wraps only in a window under 360 px. */}
-      <span className="tw-min-w-0 tw-whitespace-nowrap max-[359px]:tw-whitespace-normal">
+      <span
+        className={`tw-min-w-0 ${wrap ? "tw-whitespace-normal" : "tw-whitespace-nowrap max-[359px]:tw-whitespace-normal"}`}
+      >
         {tdhPillLabel(locale, pill)}
       </span>
     </span>

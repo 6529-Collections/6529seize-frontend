@@ -23,6 +23,7 @@ import {
   WIDE_WIDTH,
 } from "../shared/TdhSvg";
 import { svgBoxWidth } from "../shared/svgText";
+import TdhDisclosure from "../shared/TdhDisclosure";
 import { isTdhProgram, ProgramGlyph } from "../shared/TdhProgramMark";
 
 type Series = keyof typeof TDH_SERIES;
@@ -741,11 +742,17 @@ export function CheckMatrix({
             })}
           </p>
         )}
-        {(["note1", "note2", "note3"] as const).map((key) => (
-          <p key={key} className="tw-m-0">
-            {m(`matrix.${key}`)}
-          </p>
-        ))}
+        {/* The matrix's three notes in one closed disclosure, as the
+            programs table does. */}
+        <TdhDisclosure summary={m("matrix.notes")}>
+          <div className="tw-space-y-1 tw-pb-2 tw-pl-6">
+            {(["note1", "note2", "note3"] as const).map((key) => (
+              <p key={key} className="tw-m-0">
+                {m(`matrix.${key}`)}
+              </p>
+            ))}
+          </div>
+        </TdhDisclosure>
       </figcaption>
     </figure>
   );

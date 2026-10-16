@@ -340,10 +340,9 @@ function RateCurve({
           </text>
         </g>
       ))}
-      {(width === NARROW_WIDTH
-        ? [100, 300, 1_000]
-        : [100, 300, 1_000, 4_000]
-      ).map((tick) => (
+      {/* Every tick at both widths: FirstGM's point at 3,941 keeps its
+          anchor on the phone drawing too. */}
+      {[100, 300, 1_000, 4_000].map((tick) => (
         <text
           key={tick}
           x={x(tick)}

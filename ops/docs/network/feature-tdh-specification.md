@@ -15,8 +15,9 @@ map of how the sections feed each other (from `md` up; phones go straight to
 the sections) and a symbol table, and lists the parameter registry and its
 hash, the 19 deviations from the old backend with their decisions, the 15
 old-backend issues, the decisions the TDH pages cite, the evidence and the
-changes since 15 October. The header carries the rule version and a
-`Proposal, not adopted` pill, then one closed `Version` disclosure
+changes since 15 October. The header carries the rule version, a
+`Proposal, not adopted` pill and P26's SHA-256, shortened with a copy
+button, beside the version line, then one closed `Version` disclosure
 (`Version: tdh-v1.0, specification P26 at f840096, October 16, 2026`): the
 rule version (not frozen until launch), the text (P26 at `f840096`), the
 SHA-256 of P26's file with a copy button, so the text it restates can be
@@ -77,7 +78,9 @@ chip links to a private repository.
   property with the Lean theorem's form and both of its limits (whole
   transactions added or removed, and the canonical sort), where it stops
   (§5's mint facts read the steps), then §7.2's per-token values and §7.3's
-  records. The netting block keeps P26's own name for a set of transfers,
+  records. Transaction netting, which P26 writes in English, is a numbered
+  list in body type inside the exact rule's frame, with its names (`M`,
+  `net(w)`, `k`) in mono; it keeps P26's own name for a set of transfers,
   M, with a note that it is not the cycle boundary M of section 4. Under the replay, P26's note that removal is from the end
   of the list and that, after a move inside an identity, an old timestamp
   can be removed first (legacy behaviour that MUST be kept). §7.3's example
@@ -96,14 +99,22 @@ chip links to a private repository.
   the stored CE record) and tags the eight rows that restate formulas
   (`formula`: fixed by the rule version, not fields of the hashed record);
   section 6.3 adds one line on four wallets: 6529.io accepts four
-  consolidated wallets since October 15, 2026, while `tdh-v1.0` groups at
-  most three, and which applies is pending an owner decision. P28's tagged
+  consolidated wallets since October 15, 2026, and `tdh-v1.0` allows three;
+  whether it allows four is pending an owner decision. P28's tagged
   hash is written `TH` on the page (P28 writes `H`), so `H` stays the
   largest edition. Sections 11 and 12 show their first three rows inline,
-  with `Show all 19 differences` and `Show all 15 issues`. Section 13 has a `For implementers` box: what can be checked
-  today (the registry hash and vector 36, restated in full on the
-  Implementations page), the conformance vectors once published (D116), and
-  the SHA-256 of P28 and P53 at `f840096`.
+  with `Show all 19 differences` and `Show all 15 issues`. Section 13 has a `For implementers` checklist: values and
+  records (sections 4 to 8), the day's output (section 9), the registry
+  hash (section 10), and what can be checked today (vector 28, and vectors
+  04, 06, 23 and 36, restated in full on the Implementations page), then
+  one line: no vector checks a root, the rest of P28 is not needed, and the
+  other vectors are to be published with the validator code (D116); the
+  SHA-256 of P28 and P53 at `f840096` are in a disclosure.
+- Syntax tinting keeps names with digits whole and plain: a section
+  (`§3.2`), the rule version (`tdh-v1.0`), `DEV-10`, `BUG-15`, `ERC-1155`.
+  The phone `Contents` pill is solid, 8 px off the bottom edge.
+- The evidence's replay links 6529.io's published identities and wallets
+  files for 2026-10-11 on Arweave and its list of daily uploads.
 - The sections map draws the parameter registry (§10) on a bus line under
   sections 2 to 8, with an arrow up into each, every node the same height
   from `xl`. §6.2's state machine labels REVOKE's target as pending the

@@ -29,24 +29,10 @@ function barWidth(value: number): string {
   return `${((value - 1) / (CURRENT_RULE.axisMax - 1)) * 100}%`;
 }
 
-/** A legend swatch: the solid bar or its dashed reach. */
-function Swatch({ dashed }: { readonly dashed: boolean }) {
-  return (
-    <span
-      aria-hidden="true"
-      className={`tw-inline-block tw-h-2 tw-w-4 tw-shrink-0 tw-rounded-full ${
-        dashed
-          ? "tw-border tw-border-dashed tw-border-primary-300/80 tw-bg-primary-400/15"
-          : "tw-bg-primary-400"
-      }`}
-    />
-  );
-}
-
 /**
  * The full-set boost of each schedule, oldest first, as bars on one axis
  * from 1.00× to 2.24×, ending with the current schedule: its value on the
- * latest cycle and the dashed reach to its ceiling, told apart by a legend.
+ * latest cycle and the dashed reach to its ceiling, each labelled in words.
  */
 export function BoostTimeline({
   locale,
@@ -112,16 +98,16 @@ export function BoostTimeline({
               {formatMultiplier(locale, CURRENT_RULE.today)}
             </span>
           </span>
-          <span className="tw-mr-14 tw-mt-1.5 tw-flex tw-flex-col tw-gap-1 tw-text-sm tw-text-iron-300">
-            <span className="tw-inline-flex tw-items-center tw-gap-2">
-              <Swatch dashed={false} />
+          {/* The bar labelled directly: today's value, then what its dashed
+              reach means, in words, with no legend swatch to decode. */}
+          <span className="tw-mr-14 tw-mt-1.5 tw-flex tw-flex-wrap tw-justify-between tw-gap-x-3 tw-gap-y-0.5 tw-text-sm tw-text-iron-300">
+            <span>
               {m(locale, "network.tdhHistoric.timeline.todayLabel", {
                 value: formatMultiplier(locale, CURRENT_RULE.today),
                 date: formatShortDate(locale, CURRENT_RULE.valueDateIso),
               })}
             </span>
-            <span className="tw-inline-flex tw-items-center tw-gap-2">
-              <Swatch dashed />
+            <span className="tw-text-primary-200">
               {m(locale, "network.tdhHistoric.timeline.reachLabel", {
                 value: formatMultiplier(locale, CURRENT_RULE.ceiling),
               })}

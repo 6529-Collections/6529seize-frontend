@@ -10,6 +10,7 @@ import NetworkWaveScorePage, {
 import { AuthContext } from "@/components/auth/Auth";
 import { publicEnv } from "@/config/env";
 import { screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { renderWithQueryClient } from "../utils/reactQuery";
 import React from "react";
 import { PUBLIC_TDH_FEED_BASE } from "@/lib/tdh/verification/loadVerification.server";
@@ -108,15 +109,27 @@ describe("network pages render", () => {
     expect(
       screen.getByRole("heading", { level: 2, name: "TDH in a minute" })
     ).toBeInTheDocument();
-    // The card's TDH with one Gradient, beside no Gradient and a full set.
-    const variants = within(
-      screen.getByRole("list", { name: "What the boost does to this card" })
-    ).getAllByRole("listitem");
-    expect(variants.map((item) => item.textContent)).toEqual([
-      "No Gradient, boost 1.001,271",
-      "One Gradient, boost 1.021,296",
-      "A full set instead, boost 1.802,288",
-    ]);
+    // The boost is the factor the reader changes: the card's TDH with one
+    // Gradient, then with none and with a full set instead.
+    const user = userEvent.setup();
+    const choice = screen.getByRole("group", {
+      name: "What else the collector holds",
+    });
+    expect(
+      within(choice).getByRole("button", { name: "One Gradient" })
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText("= 1,296 TDH")).toBeInTheDocument();
+    await user.click(
+      within(choice).getByRole("button", { name: "No Gradient" })
+    );
+    expect(screen.getByText("= 1,271 TDH")).toBeInTheDocument();
+    await user.click(
+      within(choice).getByRole("button", { name: "A full set" })
+    );
+    expect(screen.getByText("= 2,288 TDH")).toBeInTheDocument();
+    expect(
+      screen.getByText("With a full set instead, boost 1.80")
+    ).toBeInTheDocument();
     expect(
       screen.getByText(/The Gradient earns TDH of its own on top/)
     ).toBeInTheDocument();
@@ -155,18 +168,20 @@ describe("network pages render", () => {
         name: "Checked daily, in public",
       })
     ).toBeInTheDocument();
-    // The strip near the top: the track record in bold with the latest
-    // day, the history not yet fully checked, and the comparison one link
-    // away.
+    // The strip near the top: the track record in bold, saying what is
+    // equal to what, with the latest day and the comparison one link away;
+    // the history's limit is said once, in the section below.
     expect(
-      screen.getByText("Equal on 2 of 2 published days")
+      screen.getByText(
+        "Recomputed independently every day: equal to 6529.io on 2 of 2 published days"
+      )
     ).toBeInTheDocument();
     expect(screen.getByText("· latest Oct 15")).toBeInTheDocument();
     expect(
-      screen.getByRole("link", {
+      screen.queryByRole("link", {
         name: "History read from public servers, taken as reported",
       })
-    ).toHaveAttribute("href", "#tdh-verified");
+    ).not.toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "See the comparison" })
     ).toHaveAttribute("href", "/network/tdh/verification");
@@ -182,7 +197,7 @@ describe("network pages render", () => {
     expect(
       screen.getByRole("heading", {
         level: 3,
-        name: "Found by the checks, before launch",
+        name: "Fixed before the cutover",
       })
     ).toBeInTheDocument();
     expect(screen.getAllByText("Not yet fully checked").length).toBeGreaterThan(
@@ -199,13 +214,13 @@ describe("network pages render", () => {
         /cannot change who holds which copies since when\. A mint and its burn there can still change eligibility/
       )
     ).toBeInTheDocument();
-    // The day's builds come from its file: in the strip, and in the
-    // section's "How" disclosure.
+    // The day's builds come from its file, in the section's "How"
+    // disclosure, not in the newcomer's first screen.
     expect(
       screen.getAllByText(
         /Builds: Rust core validator@e127676, Python reference 6529chain@0621ed4/
       )
-    ).toHaveLength(2);
+    ).toHaveLength(1);
     expect(
       screen.queryByRole("heading", { name: "The exact calculation has moved" })
     ).not.toBeInTheDocument();

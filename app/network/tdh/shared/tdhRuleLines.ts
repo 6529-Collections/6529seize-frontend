@@ -191,7 +191,13 @@ const NAMES = new Set([
   "keccak256",
 ]);
 
-const TOKEN = /("[^"\n]*")|(0x[0-9a-fA-F…]+|\b\d[\d,.]*\b)|([A-Za-z_]\w*)/g;
+/**
+ * Strings; names that carry digits, kept whole and plain (a section like
+ * §3.2, a rule version like tdh-v1.0, DEV-10, BUG-15, ERC-1155); numbers,
+ * never digits that follow a "." or "§"; and words.
+ */
+const TOKEN =
+  /("[^"\n]*")|(\b(?:DEV|BUG|ERC|EIP|IEEE|SHA)-\d+\b|\btdh-v\d[\d.]*|§\d[\d.]*)|(0x[0-9a-fA-F…]+|(?<![.§])\b\d[\d,.]*\b)|([A-Za-z_]\w*)/g;
 
 /**
  * A line's code as tokens: keywords, numbers, strings and rule names.
@@ -225,9 +231,11 @@ export function ruleTokens(
   for (const match of text.matchAll(TOKEN)) {
     const { index } = match;
     push("text", text.slice(last, index));
-    const [whole, string, number, word] = match;
+    const [whole, string, identifier, number, word] = match;
     if (string) {
       push("string", whole);
+    } else if (identifier) {
+      push("text", whole);
     } else if (number) {
       push("number", whole);
     } else if (word && isKeyword(word, index)) {

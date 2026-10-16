@@ -29,8 +29,11 @@ decided.
 
 - One row of four figures, every one read from the manifest the page
   loaded: theorems proved, claims shown false, claims not proved here, and
-  conformance vectors passed out of P26's. What each counts, and the
-  manifest's commit and generation time, are in one disclosure under them.
+  conformance vectors passed out of P26's. Under the theorems figure, one
+  line adds the theorems that establish counterexamples up to the audited
+  count and says how many proved theorems restate a definition. What each
+  counts, and the manifest's commit and generation time (24-hour clock),
+  are in one disclosure under them.
   A new build changes them by itself; nothing in the page fixes a count the
   manifest gives.
 - The builds behind the page, in one panel: the published build (model
@@ -61,14 +64,21 @@ decided.
   text), and the Lean statement with the definitions it uses. The netting
   row adds that a reordered or inserted round trip changes no stack as long
   as both versions still pass the underflow test.
-- What is proved, and what is not: a legend of the proof statuses, each
-  with what it rests on (kernel, definition, evaluation that trusts the
-  compiler, counterexample, outside these proofs), then one table for
-  TDH-v1 and one for two validator rules. Each row has a status (`Proved`,
-  `By definition`, `Checked at build`, `Shown false`, `Not proved here`,
-  or `Not confirmed` when the manifest does not confirm it); the netting
-  row states the theorem's hypotheses in its plain words, and the cap row
-  says which inputs are taken as given. A row opens to its scope, the Lean
+- What is proved, and what is not, across the whole width: a legend in
+  three colours (holds, shown false, not covered), each listing its
+  methods by label and shape (kernel, definition, evaluation that trusts
+  the compiler; a kernel or an evaluated counterexample; outside these
+  proofs), then one table for TDH-v1 and one for two validator rules. The
+  filters count statements, in the same three groups, and say that the
+  figures at the top count manifest entries. Each row has a status
+  (`Proved`, `By definition`, `Checked at build`, `Shown false`, `False by
+  evaluation`, `Not proved here`, or `Not confirmed` when the manifest
+  does not confirm it), and a proved row that bundles a limit PROOFS.md
+  leaves open (netting invariance and the canonical sort) says so beside
+  its pill. Its references name a document once (`P26 §3.1, 3.2, 6.1`).
+  The netting row's claim states the theorem's hypotheses (transfers
+  already in canonical order, transactions corresponding one to one), and
+  the cap row says which inputs are taken as given. A row opens to its scope, the Lean
   statement and the manifest's entries: each theorem with its status, the
   axioms Lean reports for it, its file and line and the manifest's reading
   of it, each `#guard` case with its number of checks. Lean code keeps its
@@ -79,13 +89,14 @@ decided.
   token's balance and raw days stay the same while its eligibility does is
   marked not proved here (it follows from P26 §7.2's definitions); the first
   netting rule's row shows its five counterexamples.
-- What the model contains: what it covers and what it leaves out (since
-  round 4, `f854661`, selecting and decoding logs are definitions of the
-  model; round 5 adds the one-log rule and the strict reader), its runs (the
-  vectors, the 2026-10-11 cycle from raw logs, called evidence by
-  evaluation, which trusts Lean's compiler, not proof; the random inputs
-  against the Python reference; and, in CI, 1,000 seeded random inputs
-  through Lean, the Python reference and the Rust reference), and its
+- What the model contains, across the whole width: what it covers, its
+  runs as a small table (the vectors; the 2026-10-11 cycle from raw logs;
+  the random inputs against the Python reference locally and, in CI, 1,000
+  seeded random inputs through Lean, the Python reference and the Rust
+  reference), one line calling the day and the random inputs evidence by
+  evaluation, which trusts Lean's compiler, not proof, what it leaves out
+  (since round 4, `f854661`, selecting and decoding logs are definitions of
+  the model; round 5 adds the one-log rule and the strict reader), and its
   modules by P26 section. The day's log counts are given both ways: 414,007
   through the snapshot block, of 414,254 in the day's file.
 - What the proofs do not guarantee, with a link to the five rounds of
@@ -98,9 +109,12 @@ decided.
   edition floors, while the history before the snapshot is taken as
   reported until the full check runs; proofs A and B, D119, are being
   built). Each check is named on the arrow between the layers it joins,
-  with a legend for each border; then how the model is checked (`lake build`, `lake exe
-tdh-vectors`; it is in 6529's private design repository), with the
-  published build's figures.
+  with a legend for each border. Its text alternative says that the Rust
+  core and the Python reference check each other in the daily comparison,
+  and that the Rust core against program B before every validator signs is
+  decided (D125) but not built in, with nothing signing today. Then how
+  the model is checked (`lake build`, `lake exe tdh-vectors`; it is in
+  6529's private design repository), with the published build's figures.
 
 ## Rounds of the model
 

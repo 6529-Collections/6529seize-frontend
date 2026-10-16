@@ -1,3 +1,4 @@
+import { CheckIcon } from "@heroicons/react/24/outline";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import TdhDisclosure from "../shared/TdhDisclosure";
@@ -24,6 +25,7 @@ import {
 } from "../shared/tdhRules";
 import {
   TDH_CARD,
+  TDH_LINK,
   TDH_TABLE,
   TDH_TD_STACK_MD,
   TDH_TH,
@@ -121,6 +123,30 @@ const EVIDENCE = [
   { id: "evidence-clean-room", key: "cleanRoom" },
   { id: "evidence-comparison", key: "comparison" },
   { id: "evidence-difftest", key: "difftest" },
+] as const;
+
+/**
+ * 6529.io's published files for the replayed cycle, 2026-10-11 (block
+ * 26,165,481), as its public API lists them, and the list itself.
+ */
+const REPLAY_FILES = [
+  {
+    key: "identities",
+    href: "https://arweave.net/YnVs5vCt0dtlVwh-wOOWR2iOYfnjXOLr4PvGT2L11sE",
+  },
+  {
+    key: "wallets",
+    href: "https://arweave.net/0vqx8BBN69Oczoe2DOCyJR4-vklwlp_BZQjuMatB-MI",
+  },
+  { key: "list", href: "https://api.6529.io/api/consolidated_uploads" },
+] as const;
+
+/** The implementers' checklist: each part, and where it is. */
+const IMPLEMENTER_ITEMS = [
+  { key: "values", href: "#s4" },
+  { key: "output", href: "#s9" },
+  { key: "registry", href: "#s10" },
+  { key: "today", href: "/network/tdh/implementations#vectors" },
 ] as const;
 
 export default function SpecSectionsB({
@@ -438,7 +464,37 @@ export default function SpecSectionsB({
           >
             {t(locale, "network.tdh.spec.implementers.title")}
           </h3>
-          <p className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-200">
+          {/* A checklist, one line a part: what to build, where it is,
+              and what can be tested today. */}
+          <ul className="tw-m-0 tw-mt-2 tw-list-none tw-space-y-1.5 tw-p-0 tw-text-sm tw-leading-6">
+            {IMPLEMENTER_ITEMS.map((item) => (
+              <li
+                key={item.key}
+                className="tw-grid tw-grid-cols-[1rem_minmax(0,1fr)] tw-items-baseline tw-gap-x-2 sm:tw-grid-cols-[1rem_7.5rem_minmax(0,1fr)]"
+              >
+                <CheckIcon
+                  aria-hidden="true"
+                  className="tw-size-4 tw-translate-y-0.5 tw-self-start tw-text-success"
+                />
+                <span className="tw-font-medium tw-text-iron-100">
+                  {t(
+                    locale,
+                    `network.tdh.spec.implementers.${item.key}` as MessageKey
+                  )}
+                </span>
+                <a
+                  href={item.href}
+                  className={`${TDH_LINK} tw-col-start-2 sm:tw-col-start-auto`}
+                >
+                  {t(
+                    locale,
+                    `network.tdh.spec.implementers.${item.key}Where` as MessageKey
+                  )}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, "network.tdh.spec.implementers.body")}
           </p>
           <TdhDisclosure
@@ -526,6 +582,26 @@ export default function SpecSectionsB({
                   <p className="tw-m-0 tw-max-w-[34rem] tw-text-sm tw-leading-6 tw-text-iron-300">
                     {t(locale, `network.tdh.spec.evidence.${item.key}.body`)}
                   </p>
+                  {item.key === "replay" && (
+                    // The published files the replay was compared with.
+                    <ul className="tw-m-0 tw-mt-2 tw-list-none tw-space-y-1 tw-p-0 tw-text-sm tw-leading-6">
+                      {REPLAY_FILES.map((file) => (
+                        <li key={file.key}>
+                          <a
+                            href={file.href}
+                            className={TDH_LINK}
+                            rel="noopener noreferrer"
+                            target="_blank"
+                          >
+                            {t(
+                              locale,
+                              `network.tdh.spec.evidence.replay.${file.key}` as MessageKey
+                            )}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   {item.key === "comparison" && record !== null && (
                     <p className="tw-m-0 tw-mt-2 tw-max-w-[34rem] tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-100">
                       {t(locale, "network.tdh.spec.evidence.comparisonAsOf", {

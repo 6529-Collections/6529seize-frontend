@@ -313,18 +313,28 @@ function FoundByChecks({
       <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
         {t(locale, "network.tdh.explainer.found.title")}
       </h3>
-      <ul className="tw-m-0 tw-mt-3 tw-max-w-[38em] tw-list-none tw-space-y-3 tw-p-0">
+      {/* One line an item; the detail waits behind its "More". */}
+      <ul className="tw-m-0 tw-mt-3 tw-max-w-[40em] tw-list-none tw-space-y-1 tw-p-0">
         {FOUND.map((key) => (
           <li
             key={key}
-            className="tw-grid tw-grid-cols-[5.5rem_minmax(0,1fr)] tw-gap-3 tw-text-sm tw-leading-6 sm:tw-grid-cols-[6.5rem_minmax(0,1fr)]"
+            className="tw-grid tw-grid-cols-1 tw-gap-x-3 tw-text-sm tw-leading-6 sm:tw-grid-cols-[6.5rem_minmax(0,1fr)]"
           >
             <span className="tw-font-medium tw-tabular-nums tw-text-iron-400">
               {t(locale, `network.tdh.explainer.found.${key}.date`)}
             </span>
-            <span className="tw-text-iron-200">
-              {t(locale, `network.tdh.explainer.found.${key}.body`)}
-            </span>
+            <div className="tw-min-w-0">
+              <p className="tw-m-0 tw-text-iron-100">
+                {t(locale, `network.tdh.explainer.found.${key}.short`)}
+              </p>
+              <TdhDisclosure
+                summary={t(locale, "network.tdh.explainer.found.more")}
+              >
+                <p className="tw-m-0 tw-pb-2 tw-pl-6 tw-text-sm tw-leading-6 tw-text-iron-300">
+                  {t(locale, `network.tdh.explainer.found.${key}.body`)}
+                </p>
+              </TdhDisclosure>
+            </div>
           </li>
         ))}
       </ul>
@@ -372,7 +382,10 @@ export default function TDHVerifiedDaily({
         <ProofPanel locale={locale} summary={summary} />
       )}
       <p className="tw-m-0 tw-mt-4 tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-300">
-        {t(locale, "network.tdh.explainer.verified.private")}
+        {t(locale, "network.tdh.explainer.verified.private")}{" "}
+        <Link href="/network/tdh/verification#check" className={TDH_LINK}>
+          {t(locale, "network.tdh.explainer.verified.privateLink")}
+        </Link>
       </p>
       {summary?.kind === "awaiting" && (
         <p className="tw-m-0 tw-mt-4 tw-text-sm tw-leading-6 tw-text-iron-200">

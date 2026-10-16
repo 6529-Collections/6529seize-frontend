@@ -184,6 +184,7 @@ export function BuildsPanel({
                       ...LONG_DATE,
                       hour: "2-digit",
                       minute: "2-digit",
+                      hourCycle: "h23",
                       timeZoneName: "short",
                     }),
                   })}
@@ -318,32 +319,52 @@ export function FoundByModel({ locale }: { readonly locale: SupportedLocale }) {
 }
 
 /** The statuses of the statements table, each with what it rests on. */
-const PROOF_STATUSES = [
-  "proved",
-  "byDefinition",
-  "checkedBuild",
-  "shownFalse",
-  "shownFalseEval",
-  "deferred",
+/** The statuses in three groups, each with the methods behind it. */
+const PROOF_GROUPS = [
+  {
+    key: "holds",
+    tone: "tw-bg-success",
+    statuses: ["proved", "byDefinition", "checkedBuild"],
+  },
+  {
+    key: "false",
+    tone: "tw-bg-rose-400",
+    statuses: ["shownFalse", "shownFalseEval"],
+  },
+  { key: "notCovered", tone: "tw-bg-iron-400", statuses: ["deferred"] },
 ] as const;
 
+/**
+ * What the status pills mean: three outcomes by colour (holds, shown false,
+ * not covered), and under each the methods by their own label and shape.
+ */
 export function ProofLegend({ locale }: { readonly locale: SupportedLocale }) {
   return (
-    <dl className="tw-m-0 tw-grid tw-gap-x-6 tw-gap-y-2 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
-      {PROOF_STATUSES.map((status) => (
-        <div
-          key={status}
-          className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1"
-        >
-          <dt>
-            <TdhStatusPill pill={status} locale={locale} size="sm" />
-          </dt>
-          <dd className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-400">
-            {t(locale, `network.tdh.formal.legend.${status}`)}
-          </dd>
+    <div className="tw-grid tw-gap-x-8 tw-gap-y-4 sm:tw-grid-cols-3">
+      {PROOF_GROUPS.map((group) => (
+        <div key={group.key} className="tw-min-w-0">
+          <p className="tw-m-0 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-text-iron-100">
+            <span
+              aria-hidden="true"
+              className={`tw-h-2 tw-w-4 tw-rounded-full ${group.tone}`}
+            />
+            {t(locale, `network.tdh.formal.legend.group.${group.key}`)}
+          </p>
+          <dl className="tw-m-0 tw-mt-2 tw-space-y-2">
+            {group.statuses.map((status) => (
+              <div key={status}>
+                <dt>
+                  <TdhStatusPill pill={status} locale={locale} size="sm" />
+                </dt>
+                <dd className="tw-m-0 tw-mt-0.5 tw-text-sm tw-leading-5 tw-text-iron-400">
+                  {t(locale, `network.tdh.formal.legend.${status}`)}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </div>
       ))}
-    </dl>
+    </div>
   );
 }
 

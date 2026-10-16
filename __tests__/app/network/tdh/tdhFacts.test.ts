@@ -230,7 +230,7 @@ describe("TDH page facts", () => {
     // Three things read the transfers before netting (P26 §3.3, §7.1).
     noMessageMatches(/One thing still reads every step/);
     expect(how["network.tdh.how.s5.limit"]).toMatch(
-      /Three things still read every step/
+      /[Tt]hree things still read every step/
     );
     // Since Lean round 4 selection and decoding are in the model.
     noMessageMatches(/round 5 brings selection/);
@@ -243,6 +243,51 @@ describe("TDH page facts", () => {
     // The four-wallet consolidation: stated plainly, nothing more.
     noMessageMatches(/a fourth (wallet )?(then )?counts on its own/);
     noMessageMatches(/splits that way at the cutover/);
+  });
+
+  it("keeps the fact list of 16 October 2026, round 7", () => {
+    const text = (key: string) => MESSAGES[key] ?? "";
+    // D116 covers the validator code only (with the Rust core, program B
+    // and the vectors), never P26, the references or the Lean model.
+    for (const key of [
+      "network.tdh.formal.lede",
+      "network.tdh.formal.check.body",
+      "network.tdh.spec.versionRow.shaNote",
+    ]) {
+      expect(text(key)).not.toMatch(/D116/);
+    }
+    expect(text("network.tdh.impl.programs.intro")).toMatch(
+      /The Rust core and program B are to be published with the validator code \(D116\); the references and the Lean model are in 6529’s private design repository/
+    );
+    // The Rust core against program B before signing is decided (D125,
+    // P53 §4.5), not built in; nothing signs today.
+    expect(text("network.tdh.formal.layers.desc")).toMatch(
+      /As decided \(D125\), every validator is to check the Rust core against program B before it signs; program B is not in the validator yet, and nothing signs today/
+    );
+    expect(text("network.tdh.explainer.glossary.programs.def")).toMatch(
+      /is to be the validators’ built-in second check \(D125, decided, not yet built in\)/
+    );
+    noMessageMatches(/TDH code is the validators’ built-in second check/);
+    noMessageMatches(/independent checks are then the Python reference and/);
+    noMessageMatches(/Before signing, a validator checks/);
+    // Program B has run no real day.
+    noMessageMatches(/agree on real days/);
+    // Step 14: what changes is not "only" timing, and the backend's
+    // results match netting (D132); the backend does not net.
+    noMessageMatches(/differs only where today’s result depends/);
+    noMessageMatches(/as 6529\.io’s backend already does/);
+    // The four-wallet status in one form.
+    noMessageMatches(/[Ww]hich applies is pending/);
+    // The floor lifts a Meme with a claim limit, never a bare count.
+    expect(text("network.tdh.how.s7.floorBand")).toMatch(
+      /a claim limit of 310 or more counts as 310/
+    );
+    // The Rust core is a port of the Rust reference; the clean room read
+    // P26 with its vectors and the documents it cites.
+    noMessageMatches(/Rust core is a copy|of which the Rust core is a copy/);
+    noMessageMatches(/written from P26 alone/);
+    // No run time that the daily feed gives is fixed in the copy.
+    noMessageMatches(/10 to 12 s/);
   });
 
   it("shows no sample data", () => {

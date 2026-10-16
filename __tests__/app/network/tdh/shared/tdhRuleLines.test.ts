@@ -95,6 +95,24 @@ describe("ruleTokens", () => {
     expect(keywords("    append moved to stack[to]")).toEqual(["append"]);
   });
 
+  it("keeps names with digits whole and plain: §3.2, tdh-v1.0, DEV-10", () => {
+    const text =
+      'v = "x" # tdh-v1.0 (§3.2, §6.1), DEV-10, BUG-15 and ERC-1155: 2^64';
+    const tokens = ruleTokens(text, "pseudo");
+    expect(
+      tokens
+        .filter((token) => token.kind === "number")
+        .map((token) => token.text)
+    ).toEqual(["2", "64"]);
+    expect(tokens.map((token) => token.text).join("")).toBe(text);
+    // A number of its own still tints, decimals included.
+    expect(
+      ruleTokens("q = 0.6529, n >= 33", "pseudo")
+        .filter((token) => token.kind === "number")
+        .map((token) => token.text)
+    ).toEqual(["0.6529", "33"]);
+  });
+
   it("tints Lean keywords wherever they are", () => {
     expect(
       ruleTokens("theorem t : True := by trivial", "lean")

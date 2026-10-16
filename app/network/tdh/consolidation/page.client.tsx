@@ -64,7 +64,7 @@ const WALLET_ROLES = [
 const STEPS = ["list", "sign", "done"] as const;
 const BEFORE = ["keys", "merge", "public"] as const;
 const CHANGES = ["add", "remove", "lost", "full"] as const;
-/** The question the status line raises comes first, and is open. */
+/** The question the status line raises comes first; every answer is closed. */
 const FAQ = [
   "limit",
   "cost",
@@ -298,8 +298,12 @@ export default function TDHConsolidationPage() {
           <ul className="tw-m-0 tw-grid tw-list-none tw-gap-4 tw-p-0 md:tw-grid-cols-3">
             {BEFORE.map((key) => (
               <li key={key} className={`${TDH_PANEL} tw-p-5`}>
-                <p className={TDH_TEXT}>
-                  {t(locale, `network.tdhConsolidation.before.${key}`)}
+                {/* The point in one bold line, the detail under it. */}
+                <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100">
+                  {t(locale, `network.tdhConsolidation.before.${key}.title`)}
+                </h3>
+                <p className={`${TDH_TEXT} tw-mt-1.5`}>
+                  {t(locale, `network.tdhConsolidation.before.${key}.body`)}
                 </p>
               </li>
             ))}
@@ -329,7 +333,6 @@ export default function TDHConsolidationPage() {
                 key={key}
                 tone="strong"
                 className="tw-py-1"
-                defaultOpen={key === "limit"}
                 summary={t(locale, `network.tdhConsolidation.faq.${key}.title`)}
               >
                 <p className={`${TDH_TEXT} tw-pb-4 tw-pl-6`}>
@@ -403,21 +406,24 @@ function WalletsFigure({ locale }: { readonly locale: SupportedLocale }) {
         aria-hidden="true"
         className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-4 xl:tw-grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
       >
-        <ul className="tw-m-0 tw-grid tw-list-none tw-auto-rows-fr tw-grid-cols-[repeat(auto-fit,minmax(9.5rem,1fr))] tw-gap-2 tw-p-0 xl:tw-grid-cols-1">
+        {/* One row a wallet, 44 px each: a list on phones, two columns
+            from sm, one column again beside the collector from xl. */}
+        <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-2 tw-p-0 sm:tw-grid-cols-2 xl:tw-grid-cols-1">
           {WALLET_ROLES.map(({ key, icon: RoleIcon }) => (
             <li
               key={key}
-              className="tw-flex tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-2.5"
+              className="tw-flex tw-min-h-11 tw-flex-wrap tw-items-center tw-gap-x-2.5 tw-gap-y-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-2"
             >
               <RoleIcon className="tw-size-4 tw-flex-shrink-0 tw-text-iron-400" />
-              <span className="tw-min-w-0 tw-flex-1 tw-text-sm tw-text-iron-200">
+              <span className="tw-text-sm tw-text-iron-200">
                 {t(locale, `network.tdhConsolidation.figure.${key}`)}
-                {key === "old" && (
-                  <span className="tw-block tw-text-sm tw-text-iron-400">
-                    {t(locale, "network.tdhConsolidation.figure.fourthTag")}
-                  </span>
-                )}
               </span>
+              {/* Beside the name when it fits, under it when not. */}
+              {key === "old" && (
+                <span className="tw-ml-auto tw-text-xs tw-text-amber-200">
+                  {t(locale, "network.tdhConsolidation.figure.fourthTag")}
+                </span>
+              )}
             </li>
           ))}
         </ul>

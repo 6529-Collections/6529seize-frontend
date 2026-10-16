@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { formatInteger } from "@/i18n/format";
@@ -13,7 +12,6 @@ import {
 } from "@/lib/tdh/verification/loadVerification.server";
 import { latestIndexDay } from "@/lib/tdh/verification/states";
 import TdhPageShell from "../../shared/TdhPageShell";
-import { TDH_LINK } from "../../shared/tdhStyles";
 import VerificationDashboard from "../components/VerificationDashboard";
 import { formatCycleDate } from "../components/verificationFormat";
 
@@ -91,10 +89,7 @@ export default async function TdhVerificationDayPage({
       }
       lede={
         <p className="tw-m-0">
-          {t(locale, "network.tdh.verify.dayLede", { date, cycle })}{" "}
-          <Link href="/network/tdh/verification" className={TDH_LINK}>
-            {t(locale, "network.tdh.verify.dayLedeLatest")}
-          </Link>
+          {t(locale, "network.tdh.verify.dayLede", { date, cycle })}
         </p>
       }
     >

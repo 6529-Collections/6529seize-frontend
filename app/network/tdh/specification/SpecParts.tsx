@@ -3,6 +3,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import TdhHeading from "../shared/TdhHeading";
 import TdhRuleBlock from "../shared/TdhRuleBlock";
+import TdhSource from "../shared/TdhSource";
 import TdhSourcesNote from "../shared/TdhSourcesNote";
 import { noBreakTerms } from "../shared/noBreakTerms";
 
@@ -153,5 +154,66 @@ export function Details({
         <li key={item}>{noBreakTerms(item)}</li>
       ))}
     </ul>
+  );
+}
+
+/**
+ * Text with `backticked` names set in mono: a rule written in English keeps
+ * body type, and only its identifiers read as code.
+ */
+function withCode(text: string): ReactNode[] {
+  return text.split("`").map((part, index) =>
+    index % 2 === 1 ? (
+      <code
+        key={index}
+        className="tw-rounded tw-bg-iron-900 tw-px-1 tw-font-mono tw-text-[0.9em] tw-text-iron-50"
+      >
+        {part}
+      </code>
+    ) : (
+      <span key={index}>{noBreakTerms(part)}</span>
+    )
+  );
+}
+
+/**
+ * A normative rule P26 writes in English, as a numbered list in body type
+ * inside the exact rule's frame (the blue edge), with its identifiers in
+ * mono: prose set in a code block reads as code and is hard to scan.
+ */
+export function ProseRule({
+  locale,
+  title,
+  source,
+  intro,
+  steps,
+}: {
+  readonly locale: SupportedLocale;
+  readonly title: string;
+  readonly source: string;
+  readonly intro: string;
+  readonly steps: readonly string[];
+}) {
+  return (
+    // As wide as its text: a prose rule keeps the reading measure, so its
+    // frame does too.
+    <figure className="tw-m-0 tw-min-w-0 tw-max-w-[41rem] tw-overflow-hidden tw-rounded-lg tw-border tw-border-l-2 tw-border-solid tw-border-white/[0.07] tw-border-l-primary-400/70 tw-bg-iron-950">
+      <figcaption className="tw-flex tw-min-h-9 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.06] tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-300">
+        <span className="tw-min-w-0">{title}</span>
+        <TdhSource refs={[source]} locale={locale} />
+      </figcaption>
+      <div className="tw-px-3 tw-py-3 sm:tw-px-4">
+        <p className="tw-m-0 tw-max-w-[38em] tw-text-[15px] tw-leading-7 tw-text-iron-100">
+          {withCode(intro)}
+        </p>
+        <ol className="tw-m-0 tw-mt-2 tw-max-w-[38em] tw-list-decimal tw-space-y-1.5 tw-pl-6 tw-text-[15px] tw-leading-7 tw-text-iron-100 marker:tw-text-iron-400">
+          {steps.map((step) => (
+            <li key={step} className="tw-pl-1">
+              {withCode(step)}
+            </li>
+          ))}
+        </ol>
+      </div>
+    </figure>
   );
 }

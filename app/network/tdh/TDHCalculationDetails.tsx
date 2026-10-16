@@ -16,10 +16,18 @@ const DEEPER = [
   { key: "consolidation", href: "/network/tdh/consolidation" },
 ] as const;
 /**
- * The five terms needed to read your own TDH, in the order Explain my TDH
- * shows them: what TDH is, raw days, the rate, base TDH and the boost.
+ * The six terms needed to read your own TDH, in the order Explain my TDH
+ * shows them: what TDH is, raw days, the rate, base TDH, the boost and the
+ * final TDH.
  */
-const GLOSSARY_ESSENTIAL = ["tdh", "raw", "rate", "base", "boost"] as const;
+const GLOSSARY_ESSENTIAL = [
+  "tdh",
+  "raw",
+  "rate",
+  "base",
+  "boost",
+  "final",
+] as const;
 /** Every other term the TDH pages use. */
 const GLOSSARY_MORE = [
   "memes",

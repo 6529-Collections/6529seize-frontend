@@ -38,6 +38,7 @@ export default function TdhStackTable({
   columns,
   rows,
   inlineColumns = [],
+  wideInlineColumns = [],
 }: {
   readonly label: string;
   readonly columns: readonly TdhStackColumn[];
@@ -47,6 +48,11 @@ export default function TdhStackTable({
    * value side by side, so the cards stay short on a phone.
    */
   readonly inlineColumns?: readonly number[];
+  /**
+   * Columns a card shows label and value on one line across the card, for a
+   * value too long to share a line with another.
+   */
+  readonly wideInlineColumns?: readonly number[];
 }) {
   return (
     <div className="xl:tw-overflow-hidden xl:tw-rounded-lg xl:tw-border xl:tw-border-solid xl:tw-border-white/[0.07]">
@@ -88,18 +94,15 @@ export default function TdhStackTable({
                     </th>
                   );
                 }
+                const inline =
+                  inlineColumns.includes(index) ||
+                  wideInlineColumns.includes(index);
                 return (
                   <td
                     key={column?.key ?? index}
                     className={`${CELL} ${inlineColumns.includes(index) ? "" : "tw-col-span-full"} ${extra}`}
                   >
-                    <span
-                      className={
-                        inlineColumns.includes(index)
-                          ? INLINE_LABEL
-                          : BLOCK_LABEL
-                      }
-                    >
+                    <span className={inline ? INLINE_LABEL : BLOCK_LABEL}>
                       {column?.label}
                     </span>
                     {cell}

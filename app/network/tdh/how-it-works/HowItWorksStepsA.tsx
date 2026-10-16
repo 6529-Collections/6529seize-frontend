@@ -33,7 +33,13 @@ import DayCounter from "./explorables/DayCounter";
 import RateExplorer from "./explorables/RateExplorer";
 import StackSimulator from "./explorables/StackSimulator";
 import { RateCurveDiagram, StackDiagram } from "./HowItWorksDiagrams";
-import StepSection, { Cited, Example, Measure, Note } from "./StepSection";
+import StepSection, {
+  Caution,
+  Cited,
+  Example,
+  Measure,
+  Note,
+} from "./StepSection";
 
 const CAPTION =
   "tw-px-4 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200";
@@ -160,11 +166,11 @@ function Step4({ locale }: { readonly locale: SupportedLocale }) {
       sources={["P26 §7.1", "P26 §3.4", "P26 §5.2"]}
       step={4}
       title={t(locale, "network.tdh.how.s4.title")}
-      rule={`${RULE_REPLAY}\n\n${RULE_TOKEN_VALUES}`}
+      rule={`${RULE_REPLAY}\n\n# P26 §7.2, the values of one token in one wallet\n${RULE_TOKEN_VALUES}`}
       ruleSource="P26 §7.1"
     >
       <Cited locale={locale}>{t(locale, "network.tdh.how.s4.body")}</Cited>
-      <Example locale={locale} wide>
+      <Example locale={locale}>
         <p className="tw-m-0">{t(locale, "network.tdh.how.s4.example")}</p>
         <TdhTableFrame label={t(locale, "network.tdh.how.s4.tableCaption")}>
           <table className={TDH_TABLE}>
@@ -298,12 +304,14 @@ function Step5({ locale }: { readonly locale: SupportedLocale }) {
           {t(locale, "network.tdh.how.s5.measured")}
         </p>
       </Example>
-      <Note>
+      {/* The limit of the page's headline promise, at the weight of the
+          example it qualifies. */}
+      <Caution>
         {t(locale, "network.tdh.how.s5.limit")}{" "}
         <Link href="/network/tdh/formal#statements" className={TDH_LINK}>
           {t(locale, "network.tdh.how.s5.formalLink")}
         </Link>
-      </Note>
+      </Caution>
     </StepSection>
   );
 }

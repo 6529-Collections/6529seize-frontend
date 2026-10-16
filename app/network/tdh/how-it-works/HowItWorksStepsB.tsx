@@ -6,6 +6,7 @@ import { baseTdh, finalTdh, rateCents } from "@/lib/tdh/tdhV1Arithmetic";
 import TdhArrowLink from "../shared/TdhArrowLink";
 import { RULE_BASE, RULE_BOOST, RULE_FINAL } from "../shared/tdhRules";
 import {
+  TDH_LINK,
   TDH_MEASURE,
   TDH_TABLE,
   TDH_TABLE_WRAP,
@@ -489,22 +490,26 @@ function Step14({ locale }: { readonly locale: SupportedLocale }) {
       title={t(locale, "network.tdh.how.s14.title")}
     >
       <Cited locale={locale}>{t(locale, "network.tdh.how.s14.body")}</Cited>
+      {/* Three kinds of change, then the one open question; the
+          specification lists all nineteen differences. */}
       <Bullets
         locale={locale}
         items={[
-          {
-            text: t(locale, "network.tdh.how.s14.item1"),
-          },
-          { text: t(locale, "network.tdh.how.s14.item2") },
-          { text: t(locale, "network.tdh.how.s14.item3") },
-          { text: t(locale, "network.tdh.how.s14.item4") },
-          { text: t(locale, "network.tdh.how.s14.item5") },
-          { text: t(locale, "network.tdh.how.s14.item5b") },
-          { text: t(locale, "network.tdh.how.s14.item6") },
-          { text: t(locale, "network.tdh.how.s14.item7") },
+          { text: t(locale, "network.tdh.how.s14.timing") },
+          { text: t(locale, "network.tdh.how.s14.order") },
+          { text: t(locale, "network.tdh.how.s14.consolidations") },
         ]}
       />
+      <Caution>
+        {t(locale, "network.tdh.how.s14.pending")}{" "}
+        <a href="#step-10" className={TDH_LINK}>
+          {t(locale, "network.tdh.how.s14.pendingLink")}
+        </a>
+      </Caution>
       <div className="tw-flex tw-flex-col tw-items-start tw-gap-1">
+        <TdhArrowLink href="/network/tdh/specification#s11">
+          {t(locale, "network.tdh.how.s14.all")}
+        </TdhArrowLink>
         <TdhArrowLink href="/network/tdh/verification">
           {t(locale, "network.tdh.how.s14.verify")}
         </TdhArrowLink>

@@ -13,7 +13,7 @@ import TdhCopyButton from "../../shared/TdhCopyButton";
 import TdhSource from "../../shared/TdhSource";
 import TdhStatusPill from "../../shared/TdhStatusPill";
 import TdhDisclosure from "../../shared/TdhDisclosure";
-import { rustCoreSpec } from "../../shared/tdhFacts";
+import { P26, rustCoreSpec } from "../../shared/tdhFacts";
 import { REGISTRY_HASH } from "../../shared/tdhRules";
 import { TDH_CARD, TDH_LINK } from "../../shared/tdhStyles";
 import {
@@ -293,6 +293,28 @@ function RegistryAgreement({
 }
 
 /**
+ * Which P26 a day's runs followed, said only as far as the day's own
+ * registry hash shows it: this page restates P26 at one commit, and a later
+ * build may compute another text.
+ */
+function p26RunNote(
+  locale: SupportedLocale,
+  pythonCommit: string,
+  registryHash: string | null
+): string {
+  const values = { commit: pythonCommit.slice(0, 7), p26: P26.commit };
+  if (registryHash === null) {
+    return t(locale, "network.tdh.verify.provenance.p26RunUnstated", values);
+  }
+  return registryHash.toLowerCase() === REGISTRY_HASH.toLowerCase()
+    ? t(locale, "network.tdh.verify.provenance.p26Run", values)
+    : t(locale, "network.tdh.verify.provenance.p26RunOther", {
+        ...values,
+        hash: middleTruncate(registryHash),
+      });
+}
+
+/**
  * What the day's result rests on (P26 §4.2, §9): where the data comes from,
  * rule version, registry hash, snapshot block, history mode, code versions
  * and 6529.io's signed files. Values come from the day's file; where it does
@@ -538,12 +560,11 @@ export default function VerificationProvenance({
                 )}
               </li>
             )}
+            {/* Which P26 the runs followed, said only as far as the day's
+                own registry hash shows it: the page knows P26 at one
+                commit, and a later build may compute another text. */}
             {python?.commit && (
-              <li>
-                {t(locale, "network.tdh.verify.provenance.p26Run", {
-                  commit: python.commit.slice(0, 7),
-                })}
-              </li>
+              <li>{p26RunNote(locale, python.commit, registryHash)}</li>
             )}
             {!registryHash && (
               <li>

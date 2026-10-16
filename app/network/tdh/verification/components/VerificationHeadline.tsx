@@ -17,7 +17,7 @@ import TdhDisclosure from "../../shared/TdhDisclosure";
 import TdhCopyButton from "../../shared/TdhCopyButton";
 import TdhStatusPill from "../../shared/TdhStatusPill";
 import { TDH_CARD, TDH_FOCUS_RING, TDH_LINK } from "../../shared/tdhStyles";
-import { DayRunNoteText, ShaMatch } from "./VerificationProvenanceParts";
+import { dayRunNoteString, ShaMatch } from "./VerificationProvenanceParts";
 import {
   formatCycleDate,
   formatInteger,
@@ -365,14 +365,29 @@ export default function VerificationHeadline({
               date: formatCycleDate(locale, day.date),
             })}
           </p>
+          {/* When the file was not written by its scheduled run: a small
+              mark here, the sentence in Provenance. */}
           {runNote !== null && (
-            <p className="tw-m-0 tw-max-w-[34rem] tw-text-iron-400">
-              <DayRunNoteText
-                locale={locale}
-                date={day.date}
-                generatedAt={generatedAt ?? day.generatedAt}
+            <a
+              href="#provenance"
+              title={
+                dayRunNoteString(
+                  locale,
+                  day.date,
+                  generatedAt ?? day.generatedAt
+                ) ?? undefined
+              }
+              className={`tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-border-amber-400/50 tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-medium tw-text-amber-100 tw-no-underline hover:tw-border-amber-300 ${TDH_FOCUS_RING}`}
+            >
+              <span
+                aria-hidden="true"
+                className="tw-size-1.5 tw-rounded-full tw-bg-amber-400"
               />
-            </p>
+              {t(
+                locale,
+                `network.tdh.verify.provenance.run.pill.${runNote.kind}` as MessageKey
+              )}
+            </a>
           )}
         </div>
         <div className="tw-min-w-0 lg:tw-max-w-md lg:tw-shrink-0">

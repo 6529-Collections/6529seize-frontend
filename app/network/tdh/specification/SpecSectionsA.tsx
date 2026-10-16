@@ -14,7 +14,6 @@ import {
   RULE_IDENTITY_CONDENSED,
   RULE_LOG_SELECTION_CONDENSED,
   RULE_MINTS_CONDENSED,
-  RULE_NETTING,
   RULE_ORDER,
   RULE_PAIR_STATE,
   RULE_RATE_SPEC,
@@ -32,7 +31,14 @@ import {
 } from "../shared/tdhStyles";
 import { middleTruncate } from "../verification/components/verificationFormat";
 import { PairStateMachine } from "./SpecDiagrams";
-import { Details, Plain, Rule, SpecSection, SpecSub } from "./SpecParts";
+import {
+  Details,
+  Plain,
+  ProseRule,
+  Rule,
+  SpecSection,
+  SpecSub,
+} from "./SpecParts";
 import { CONTRACTS, SYMBOLS, TOPICS } from "./specData";
 
 const CAPTION =
@@ -485,11 +491,14 @@ export default function SpecSectionsA({
             source="P26 §7.1"
             title={t(locale, "network.tdh.spec.s7.underflow")}
           />
-          <Rule
+          <ProseRule
             locale={locale}
-            code={RULE_NETTING}
-            source="P26 §7.1"
             title={t(locale, "network.tdh.spec.s7.netting")}
+            source="P26 §7.1"
+            intro={t(locale, "network.tdh.spec.s7.nettingRule.intro")}
+            steps={(["1", "2", "3", "4", "5"] as const).map((n) =>
+              t(locale, `network.tdh.spec.s7.nettingRule.${n}`)
+            )}
           />
           <Rule
             locale={locale}

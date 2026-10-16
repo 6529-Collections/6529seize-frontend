@@ -92,23 +92,30 @@ function figure(locale: SupportedLocale, value: number | null): string {
 function SummaryBand({
   locale,
   figures,
+  byDefinition,
 }: {
   readonly locale: SupportedLocale;
   readonly figures: ManifestFigures;
+  /** Proved entries that only restate how the model computes a value. */
+  readonly byDefinition: number;
 }) {
+  const proved = {
+    entries: formatInteger(locale, figures.entries),
+    proved: formatInteger(locale, figures.proved),
+    cexTheorems: formatInteger(locale, figures.counterexampleTheorems),
+    audited: formatInteger(locale, figures.audited),
+    tdh: formatInteger(locale, figures.theoremsTdh),
+    p53: formatInteger(locale, figures.theoremsP53),
+    byDefinition: formatInteger(locale, byDefinition),
+  };
   const items = [
     {
       key: "proved",
       value: formatInteger(locale, figures.proved),
-      sub: null,
-      body: t(locale, "network.tdh.formal.summary.provedBody", {
-        entries: formatInteger(locale, figures.entries),
-        proved: formatInteger(locale, figures.proved),
-        cexTheorems: formatInteger(locale, figures.counterexampleTheorems),
-        audited: formatInteger(locale, figures.audited),
-        tdh: formatInteger(locale, figures.theoremsTdh),
-        p53: formatInteger(locale, figures.theoremsP53),
-      }),
+      // How the headline reconciles with the builds card's audited count,
+      // and how many of the proved theorems only restate a definition.
+      sub: t(locale, "network.tdh.formal.summary.provedSub", proved),
+      body: t(locale, "network.tdh.formal.summary.provedBody", proved),
     },
     {
       key: "false",
@@ -203,6 +210,7 @@ function SummaryBand({
                     year: "numeric",
                     hour: "2-digit",
                     minute: "2-digit",
+                    hourCycle: "h23",
                     timeZoneName: "short",
                   }),
                 })}
@@ -282,6 +290,86 @@ function FirstRuleCases({ locale }: { readonly locale: SupportedLocale }) {
   );
 }
 
+/**
+ * What the model has run, one row a run: the vectors, a whole real day and
+ * random inputs, then one line on what kind of evidence that is.
+ */
+function ModelRuns({
+  locale,
+  round,
+  figures,
+  runs,
+}: {
+  readonly locale: SupportedLocale;
+  readonly round: LeanRound;
+  readonly figures: ManifestFigures;
+  readonly runs: LeanRuns;
+}) {
+  const rows = [
+    {
+      key: "vectors",
+      value: t(locale, "network.tdh.formal.contains.stat.vectorsValue", {
+        vectors: figure(locale, figures.vectorsTotal),
+        checks: figure(locale, figures.vectorChecks),
+        spec: specShort(figures),
+      }),
+    },
+    {
+      key: "day",
+      value: t(
+        locale,
+        round >= 4
+          ? "network.tdh.formal.contains.stat.dayValueRaw"
+          : "network.tdh.formal.contains.stat.dayValue",
+        {
+          read: formatInteger(locale, runs.logsRead),
+          throughB: formatInteger(locale, runs.logsThroughB),
+          duration: dayDuration(locale, runs),
+          total: formatInteger(locale, runs.fullDayTotal),
+          records: formatInteger(locale, runs.fullDayRecords),
+        }
+      ),
+    },
+    {
+      key: "random",
+      value: t(locale, "network.tdh.formal.contains.stat.randomValue", {
+        randomInputs: formatInteger(locale, runs.randomInputs),
+        randomChecks: formatInteger(locale, runs.randomChecks),
+      }),
+    },
+  ] as const;
+  return (
+    <div className={`${TDH_CARD} tw-max-w-3xl tw-p-4 sm:tw-p-5`}>
+      <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
+        {t(locale, "network.tdh.formal.contains.stats")}
+      </h3>
+      <dl className="tw-m-0 tw-mt-3 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06]">
+        {rows.map((row) => (
+          <div
+            key={row.key}
+            className="tw-grid tw-gap-1 tw-py-2.5 first:tw-pt-0 sm:tw-grid-cols-[10rem_minmax(0,1fr)] sm:tw-gap-4"
+          >
+            <dt className="tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-100">
+              {t(
+                locale,
+                `network.tdh.formal.contains.stat.${row.key}` as MessageKey
+              )}
+            </dt>
+            <dd className="tw-m-0 tw-text-sm tw-tabular-nums tw-leading-6 tw-text-iron-200">
+              {row.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+      <p className="tw-m-0 tw-mt-3 tw-max-w-[38em] tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
+        {t(locale, "network.tdh.formal.contains.evaluation", {
+          readme: runs.readmeCommit,
+        })}
+      </p>
+    </div>
+  );
+}
+
 export default async function TdhFormalPage() {
   const locale = DEFAULT_LOCALE;
   const load = await loadFormalManifest();
@@ -291,6 +379,15 @@ export default async function TdhFormalPage() {
   const checks = checkStatements(statements, load.manifest);
   const figures = manifestFigures(load.manifest);
   const featured = statements.find((row) => row.id === "netting");
+  const byDefinition = statements
+    .filter((row) => checks[row.id]?.status === "byDefinition")
+    .reduce(
+      (sum, row) =>
+        sum +
+        (checks[row.id]?.entries.filter((entry) => entry.status === "proved")
+          .length ?? 0),
+      0
+    );
   const p26 = statements.filter((row) => row.group === "p26");
   const p53 = statements.filter((row) => row.group === "p53");
 
@@ -305,7 +402,11 @@ export default async function TdhFormalPage() {
       lede={<p className="tw-m-0">{t(locale, "network.tdh.formal.lede")}</p>}
       headerExtra={
         <>
-          <SummaryBand locale={locale} figures={figures} />
+          <SummaryBand
+            locale={locale}
+            figures={figures}
+            byDefinition={byDefinition}
+          />
           <BuildsPanel
             locale={locale}
             published={figures}
@@ -390,6 +491,7 @@ export default async function TdhFormalPage() {
         id="statements"
         title={t(locale, "network.tdh.formal.statements.title")}
         locale={locale}
+        wide
       >
         <div className="tw-space-y-6">
           <p className={PROSE}>
@@ -439,26 +541,19 @@ export default async function TdhFormalPage() {
         id="contains"
         title={t(locale, "network.tdh.formal.contains.title")}
         locale={locale}
+        wide
       >
         <div className="tw-space-y-5">
           <p className={PROSE}>
             {t(locale, byRound(round, "network.tdh.formal.contains.body"))}
           </p>
-          <p className={PROSE}>
-            {t(locale, byRound(round, "network.tdh.formal.contains.runs"), {
-              vectors: figure(locale, figures.vectorsTotal),
-              checks: figure(locale, figures.vectorChecks),
-              spec: specShort(figures),
-              read: formatInteger(locale, runs.logsRead),
-              throughB: formatInteger(locale, runs.logsThroughB),
-              duration: dayDuration(locale, runs),
-              total: formatInteger(locale, runs.fullDayTotal),
-              records: formatInteger(locale, runs.fullDayRecords),
-              randomInputs: formatInteger(locale, runs.randomInputs),
-              randomChecks: formatInteger(locale, runs.randomChecks),
-              readme: runs.readmeCommit,
-            })}
-          </p>
+          {/* The runs as a table of figures, not a paragraph of them. */}
+          <ModelRuns
+            locale={locale}
+            round={round}
+            figures={figures}
+            runs={runs}
+          />
           <p className="tw-m-0 tw-max-w-[34rem] tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, byRound(round, "network.tdh.formal.contains.outside"))}
           </p>
@@ -586,7 +681,6 @@ export default async function TdhFormalPage() {
         title={t(locale, "network.tdh.formal.check.title")}
         locale={locale}
         pills={<TdhStatusPill pill="toBePublished" locale={locale} />}
-        sources={["D116"]}
       >
         <div className="tw-flex tw-flex-col tw-items-start tw-gap-3">
           <p className={PROSE}>{t(locale, "network.tdh.formal.check.body")}</p>

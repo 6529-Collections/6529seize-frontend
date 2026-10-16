@@ -247,19 +247,22 @@ export default function VerificationDifferences({
             <p className="tw-m-0 tw-font-semibold tw-text-iron-50">
               {t(locale, "network.tdh.verify.class.expectedTitle")}
             </p>
+            {/* DEV-2 once: the case that can still differ, and how the
+                other was settled, with the way to the rule. */}
             <p className="tw-m-0 tw-mt-0.5">
               {t(locale, "network.tdh.verify.class.expectedDev2")}
-              {none && ` ${t(locale, "network.tdh.verify.class.expectedNone")}`}
+              {none &&
+                ` ${t(locale, "network.tdh.verify.class.expectedNone")}`}{" "}
+              <Link
+                href="/network/tdh/how-it-works#step-5"
+                className={TDH_LINK}
+              >
+                {t(locale, "network.tdh.verify.diff.historyLink")}
+              </Link>
             </p>
           </div>
         </div>
       </div>
-      <p className="tw-m-0 tw-mt-4 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
-        {t(locale, "network.tdh.verify.diff.history")}{" "}
-        <Link href="/network/tdh/how-it-works#step-5" className={TDH_LINK}>
-          {t(locale, "network.tdh.verify.diff.historyLink")}
-        </Link>
-      </p>
       <TdhSourcesNote
         locale={locale}
         refs={["P38 §3.3", "DEV-2", "D131", "D132"]}

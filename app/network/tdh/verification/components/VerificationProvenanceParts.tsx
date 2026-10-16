@@ -80,23 +80,20 @@ const UTC_TIME = {
 /**
  * What the day's file says about the run that wrote it, from its own date
  * and `generatedAt` (`dayRunNote`): the first runs of October 15, a later
- * recomputation, or a file written well after the scheduled run.
+ * recomputation, or a file written well after the scheduled run. Null when
+ * the file was written by its scheduled run.
  */
-export function DayRunNoteText({
-  locale,
-  date,
-  generatedAt,
-}: {
-  readonly locale: SupportedLocale;
-  readonly date: string;
-  readonly generatedAt: string | null;
-}) {
+export function dayRunNoteString(
+  locale: SupportedLocale,
+  date: string,
+  generatedAt: string | null
+): string | null {
   const note = dayRunNote(date, generatedAt);
   if (note === null) {
     return null;
   }
   if (note.kind === "firstRun") {
-    return <>{t(locale, "network.tdh.verify.provenance.run.firstRun")}</>;
+    return t(locale, "network.tdh.verify.provenance.run.firstRun");
   }
   const values = {
     date: formatUtcDate(locale, note.generatedAt, {
@@ -110,17 +107,26 @@ export function DayRunNoteText({
       hourCycle: "h23",
     }),
   };
-  return (
-    <>
-      {t(
-        locale,
-        note.kind === "recomputed"
-          ? "network.tdh.verify.provenance.run.recomputed"
-          : "network.tdh.verify.provenance.run.later",
-        values
-      )}
-    </>
+  return t(
+    locale,
+    note.kind === "recomputed"
+      ? "network.tdh.verify.provenance.run.recomputed"
+      : "network.tdh.verify.provenance.run.later",
+    values
   );
+}
+
+function DayRunNoteText({
+  locale,
+  date,
+  generatedAt,
+}: {
+  readonly locale: SupportedLocale;
+  readonly date: string;
+  readonly generatedAt: string | null;
+}) {
+  const text = dayRunNoteString(locale, date, generatedAt);
+  return text === null ? null : <>{text}</>;
 }
 
 /**

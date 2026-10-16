@@ -1,6 +1,6 @@
 # TDH, explained and verified
 
-Status: built on 15 October 2026 and revised through round 5 on 16 October 2026 on branch
+Status: built on 15 October 2026 and revised through round 7 on 16 October 2026 on branch
 `claude/tdh-explained-and-verified`; not yet reviewed, merged or deployed.
 
 Pages on 6529.io that explain TDH from a one-minute introduction to the
@@ -92,9 +92,10 @@ bands.
   No sample or bundled verification data ships; Jest serves a verbatim copy
   of the feed's first days
   (`__tests__/lib/tdh/verification/publicFeedFixture.ts`).
-- The feed's `cutover` block is optional; the page counts down from the
-  start of the daily runs (16 October 2026) to about 23 October 2026 (D132)
-  and shows "Switched on" only when the feed says the cutover is done.
+- The feed's `cutover` block is optional; the page shows the planned
+  cutover, about 23 October 2026 (D132), with no countdown, draws it in the
+  day strip as a hatched cell labelled `~23`, and shows "Switched on" only
+  when the feed says the cutover is done.
 - Since 16 October 2026 the feed states when each file was written
   (`generatedAt`), each day file's SHA-256 in `index.json`, each run's rule
   version, rule id and registry hash, the Rust core binary's SHA-256, and
@@ -127,6 +128,22 @@ bands.
   The pages give no date for it.
 - The Playwright spec `tests/pages/network-tdh-explained.spec.ts` is not yet
   registered in a pack; `tests/pages/` specs run with the full E2E suite.
+- How it works links the arithmetic port's tests on `main`
+  (`__tests__/lib/tdh/tdhV1Arithmetic.test.ts`); the file reaches `main`
+  with the merge. Check that link, and the pages' other `main` links, after
+  the merge and before the pages are announced.
+- Feed-side, not in this branch: a day file is replaced in place when the
+  job recomputes a day (day 20,742's file of 00:40 UTC was rewritten at
+  15:59 UTC), so a day's address shows only its current bytes. Keeping
+  superseded files by hash (`days/{N}.{sha256}.json`, listed in the index)
+  would let Provenance show what a file replaced; signing `index.json`, or
+  anchoring each day's SHA-256 on Arweave under 6529's key, would make the
+  feed checkable without CloudFront. Both belong to the validator
+  repository's `publish_feed.py`.
+- The implementations page restates vectors 04, 06 and 23 in full beside
+  vector 36 (`implementations/byHandVectors.ts`, generated from their files
+  at `f840096`, unchanged at `6b32f3f`); regenerate it if those files
+  change.
 - I18n fallback debt: [network TDH pages](../i18n-fallbacks/tdh-explained-and-verified.md).
 
 Live code, tests and the specification text override this plan.

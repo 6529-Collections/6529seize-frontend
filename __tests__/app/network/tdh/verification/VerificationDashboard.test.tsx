@@ -460,11 +460,14 @@ describe("VerificationDashboard", () => {
       okDay(),
       20_741
     );
+    // The cutover is about its date (D132): the cell says so, and its
+    // label reads "~23", not a bold fixed day.
     expect(
       screen.getByRole("img", {
-        name: "October 23, 2026: planned cutover (D132)",
+        name: "October 23, 2026: planned cutover, about this day (D132)",
       })
     ).toBeInTheDocument();
+    expect(screen.getByText("~23")).toBeInTheDocument();
     unmount();
     renderDashboard(
       remoteIndex(syntheticIndex()),

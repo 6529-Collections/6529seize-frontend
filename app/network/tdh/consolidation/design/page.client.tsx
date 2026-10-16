@@ -50,6 +50,7 @@ const NAVIGATION = [
 const NAVIGATION_IDS = NAVIGATION.map((item) => item.id);
 
 const RULES = ["pairs", "limit", "newest", "collector", "expiry"] as const;
+const REMOVALS = ["leave", "replace", "replaceInFour", "lost"] as const;
 
 // Registrations and transactions for each change; see the rules above. A
 // group of n wallets has n(n-1)/2 pairs, each registered in both directions.
@@ -243,11 +244,12 @@ export default function TDHConsolidationDesignPage() {
           title={t(locale, "network.tdhConsolidation.rules.title")}
           description={t(locale, "network.tdhConsolidation.rules.description")}
         >
-          {/* Six cards in a grid of equal rows, the effects card the sixth:
-              the cards of a row share one height and sit at the grid's own
-              gap. (CSS columns dropped the last card's margin at the column
+          {/* Six cards in a grid, the effects card the sixth: each card
+              sizes to its content, so a short card never shows an empty
+              frame beside a long one, and all sit at the grid's own gap.
+              (CSS columns dropped the last card's margin at the column
               break, so two cards touched.) */}
-          <ul className="tw-m-0 tw-grid tw-list-none tw-gap-4 tw-p-0 sm:tw-grid-cols-2">
+          <ul className="tw-m-0 tw-grid tw-list-none tw-items-start tw-gap-4 tw-p-0 sm:tw-grid-cols-2">
             {RULES.map((rule) => (
               <li key={rule} className={`${TDH_PANEL} tw-p-5`}>
                 <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-7 tw-text-iron-100">
@@ -296,12 +298,29 @@ export default function TDHConsolidationDesignPage() {
           id="consolidation-remove"
           title={t(locale, "network.tdhConsolidation.remove.title")}
         >
+          {/* Four cases as a table, like adding a wallet; then what decides
+              who keeps the profile when a group splits. */}
           <div className="tw-space-y-4">
-            {(["leave", "replace", "lost", "split"] as const).map((key) => (
-              <p key={key} className={TDH_TEXT}>
-                {t(locale, `network.tdhConsolidation.remove.${key}`)}
-              </p>
-            ))}
+            <TdhStackTable
+              label={t(locale, "network.tdhConsolidation.remove.table.caption")}
+              columns={(["case", "how"] as const).map((column) => ({
+                key: column,
+                label: t(
+                  locale,
+                  `network.tdhConsolidation.remove.table.${column}`
+                ),
+              }))}
+              rows={REMOVALS.map((key) => ({
+                key,
+                cells: [
+                  t(locale, `network.tdhConsolidation.remove.case.${key}`),
+                  t(locale, `network.tdhConsolidation.remove.how.${key}`),
+                ],
+              }))}
+            />
+            <p className={TDH_TEXT}>
+              {t(locale, "network.tdhConsolidation.remove.split")}
+            </p>
           </div>
         </TDHSection>
 
@@ -359,23 +378,33 @@ export default function TDHConsolidationDesignPage() {
           title={t(locale, "network.tdhConsolidation.tested.title")}
         >
           <div className="tw-space-y-4">
+            {/* The three tests as figures, then what each rests on. */}
+            <ul className="tw-m-0 tw-grid tw-list-none tw-gap-3 tw-p-0 sm:tw-grid-cols-3">
+              {(
+                [
+                  ["live", LIVE_SNAPSHOT.total],
+                  ["graphs", RANDOM_GRAPHS],
+                  ["sequences", RANDOM_SEQUENCES],
+                ] as const
+              ).map(([key, value]) => (
+                <li key={key} className={`${TDH_PANEL} tw-p-4`}>
+                  <p className="tw-m-0 tw-text-2xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50">
+                    {formatInteger(locale, value)}
+                  </p>
+                  <p className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-5 tw-text-iron-300">
+                    {t(locale, `network.tdhConsolidation.tested.stat.${key}`, {
+                      snapshotDate: formatDate(locale, LIVE_SNAPSHOT.date, {
+                        dateStyle: "long",
+                        timeZone: "UTC",
+                      }),
+                    })}
+                  </p>
+                </li>
+              ))}
+            </ul>
             <p className={TDH_TEXT}>
-              {t(locale, "network.tdhConsolidation.tested.port", {
-                total: formatInteger(locale, LIVE_SNAPSHOT.total),
-                snapshotDate: formatDate(locale, LIVE_SNAPSHOT.date, {
-                  dateStyle: "long",
-                  timeZone: "UTC",
-                }),
-              })}
-            </p>
-            <p className={TDH_TEXT}>
+              {t(locale, "network.tdhConsolidation.tested.port")}{" "}
               {t(locale, "network.tdhConsolidation.tested.exhaustive")}
-            </p>
-            <p className={TDH_TEXT}>
-              {t(locale, "network.tdhConsolidation.tested.properties", {
-                graphs: formatInteger(locale, RANDOM_GRAPHS),
-                sequences: formatInteger(locale, RANDOM_SEQUENCES),
-              })}
             </p>
             <div className="tw-flex tw-flex-wrap tw-gap-x-6">
               <TdhArrowLink href={GROUPING_SOURCE}>
@@ -469,6 +498,10 @@ function AddWalletSection({ locale }: { readonly locale: SupportedLocale }) {
             ],
             cellClassNames: { 1: "tw-tabular-nums", 2: "tw-tabular-nums" },
           }))}
+          // On a phone: links and transactions on one line, the order on
+          // the next, so a row is three short lines.
+          inlineColumns={[1, 2]}
+          wideInlineColumns={[3]}
         />
         <TdhArrowLink href="/safe-collecting/build-consolidation">
           {t(locale, "network.tdhConsolidation.add.cta")}
@@ -496,6 +529,17 @@ function AttackMatrix({ locale }: { readonly locale: SupportedLocale }) {
       <table className={TDH_TABLE}>
         <caption className={TDH_CAPTION}>{caption}</caption>
         <thead>
+          {/* What the columns count, over them. */}
+          <tr>
+            <td className={`${RULE_TH} tw-border-b-0`} />
+            <th
+              scope="colgroup"
+              colSpan={CONTROLLED_WALLET_COUNTS.length}
+              className={`${COUNT_TH} tw-border-b-0 tw-text-center tw-text-xs tw-font-medium tw-text-iron-300`}
+            >
+              {t(locale, "network.tdhConsolidation.why.matrix.columnsHead")}
+            </th>
+          </tr>
           <tr>
             <th scope="col" className={`${RULE_TH} tw-min-w-[7rem]`}>
               {t(locale, "network.tdhConsolidation.why.matrix.rule")}
@@ -597,8 +641,7 @@ function WhyEveryPairSection({ locale }: { readonly locale: SupportedLocale }) {
             {t(locale, "network.tdhConsolidation.why.matrix.title")}
           </h3>
           <p className={TDH_TEXT}>
-            {t(locale, "network.tdhConsolidation.why.matrix.description")}{" "}
-            {t(locale, "network.tdhConsolidation.why.matrix.columns")}
+            {t(locale, "network.tdhConsolidation.why.matrix.description")}
           </p>
           <AttackMatrix locale={locale} />
         </div>
