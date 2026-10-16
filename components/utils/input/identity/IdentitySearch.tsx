@@ -42,9 +42,7 @@ function getIdentitySearchCriteria(
     !disabled &&
     draft !== null &&
     (draft.baseResolvedDisplayValue === resolvedDisplayValue ||
-      draft.preservedResolvedValues.some(
-        (value) => value === resolvedDisplayValue
-      ));
+      draft.preservedResolvedValues.includes(resolvedDisplayValue));
   return shouldUseDraft ? draft.value : resolvedDisplayValue;
 }
 
