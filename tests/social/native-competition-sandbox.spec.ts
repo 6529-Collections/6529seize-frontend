@@ -2,6 +2,9 @@ import { writeFile } from "node:fs/promises";
 import composerSandboxConstants from "../support/composerSandboxConstants.json";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import type { Frame, Page } from "@playwright/test";
+import type { ApiDropAndWave } from "@/generated/models/ApiDropAndWave";
+import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2PageWithoutCount";
+import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { expectCompetitionScroll } from "../support/competitionScroll";
 import {
   monitorRememberedLeaderboard,
@@ -208,6 +211,33 @@ const pageResult = (data: unknown[]) => ({
   next_cursor: null,
   has_more: false,
 });
+
+async function installCollaborationDropFixture(
+  page: Page,
+  getFixture: () => ApiDropAndWave
+) {
+  const dropId = getFixture().drop.id;
+  // Competition cards fetch one drop; the detail overlay batches its read.
+  // Keep both views on the same fixture, including post-acceptance refreshes.
+  await page.route(`**/v2/drops/${dropId}`, (route) =>
+    route.fulfill({ json: getFixture() })
+  );
+  await page.route(
+    (url) =>
+      url.pathname.endsWith("/v2/drops") &&
+      url.searchParams.get("ids") === dropId,
+    (route) => {
+      const { drop, wave } = getFixture();
+      return route.fulfill({
+        json: {
+          data: [{ ...drop, wave }],
+          page: 1,
+          next: false,
+        } satisfies ApiDropV2PageWithoutCount,
+      });
+    }
+  );
+}
 const competition = (id: string, title: string) => ({
   id,
   wave_id: WAVE,
@@ -1553,20 +1583,16 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     );
     expect(response.ok()).toBe(true);
     const fixture = await response.json();
-    await page.route(`**/v2/drops/${entryDropId("alpha")}`, (route) =>
-      route.fulfill({
-        json: {
-          wave: fixture.wave,
-          drop: {
-            ...fixture.drops[0],
-            id: entryDropId("alpha"),
-            submission_artist: "playwright",
-            author: { ...fixture.drops[0].author, id: PROFILE },
-            title: "Collaboration artwork",
-          },
-        },
-      })
-    );
+    await installCollaborationDropFixture(page, () => ({
+      wave: fixture.wave,
+      drop: {
+        ...fixture.drops[0],
+        id: entryDropId("alpha"),
+        submission_artist: "playwright",
+        author: { ...fixture.drops[0].author, id: PROFILE },
+        title: "Collaboration artwork",
+      },
+    }));
     await page.route(
       `**/drops/${entryDropId("alpha")}/collaborations`,
       (route) =>
@@ -1608,6 +1634,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     );
     try {
       await page.goto(`${ROOT}/alpha?drop=${entryDropId("alpha")}`);
+      await expect(page.locator("[data-video-viewport]")).toBeVisible();
       const add = page.getByRole("button", {
         name: "Add collaborators",
         exact: true,
@@ -1674,25 +1701,21 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       pfp: null,
     };
     let accepted = false;
-    await page.route(`**/v2/drops/${entryDropId("alpha")}`, (route) =>
-      route.fulfill({
-        json: {
-          wave: fixture.wave,
-          drop: {
-            ...fixture.drops[0],
-            id: entryDropId("alpha"),
-            drop_type: "SUBMISSION",
-            author: {
-              ...fixture.drops[0].author,
-              id: "other-artist",
-              handle: "otherArtist",
-            },
-            title: "Collaboration artwork",
-            collaborators: accepted ? [profile] : [],
-          },
+    await installCollaborationDropFixture(page, () => ({
+      wave: fixture.wave,
+      drop: {
+        ...fixture.drops[0],
+        id: entryDropId("alpha"),
+        drop_type: ApiDropMainType.Submission,
+        author: {
+          ...fixture.drops[0].author,
+          id: "other-artist",
+          handle: "otherArtist",
         },
-      })
-    );
+        title: "Collaboration artwork",
+        collaborators: accepted ? [profile] : [],
+      },
+    }));
     const state = () => ({
       managed: true,
       can_invite: false,
@@ -1725,6 +1748,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       }
     );
     await page.goto(`${ROOT}/alpha?drop=${entryDropId("alpha")}`);
+    await expect(page.locator("[data-video-viewport]")).toBeVisible();
     const review = page.getByRole("button", {
       name: "Review invitation",
       exact: true,
