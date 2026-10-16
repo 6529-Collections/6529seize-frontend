@@ -58,7 +58,7 @@ export function MemeCollaborationReviewDialog({
       onClose={() => {
         if (!saving) onClose();
       }}
-      className="tailwind-scope tw-relative tw-z-[1000001]"
+      className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1000001]"
     >
       <DialogBackdrop className="tw-fixed tw-inset-0 tw-bg-iron-600/60 tw-backdrop-blur-[1px]" />
       <div className="tw-fixed tw-inset-0 tw-flex tw-items-end tw-justify-center tw-overflow-hidden tw-pt-[calc(env(safe-area-inset-top,0px)+1rem)] sm:tw-items-center sm:tw-p-4">
