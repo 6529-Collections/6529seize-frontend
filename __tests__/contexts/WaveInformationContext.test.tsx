@@ -320,24 +320,27 @@ it.each(["Close", "browser Back"])(
   }
 );
 
-it("does not offer a stale sheet return after leaving Network through another route", () => {
-  window.history.replaceState({}, "", "/waves/wave");
-  const children = () => (
-    <WaveInformationProvider>
-      <Harness />
-    </WaveInformationProvider>
-  );
-  const { rerender } = render(children());
-  fireEvent.click(screen.getByText("Open mobile information"));
-  fireEvent.click(screen.getByText("Inspect group"));
-  window.history.pushState({}, "", "/network?group=group");
-  rerender(children());
-  window.history.pushState({}, "", "/waves/other");
-  rerender(children());
-  window.history.pushState({}, "", "/network");
-  rerender(children());
-  expect(screen.queryByText("Return to information")).toBeNull();
-});
+it.each(["/network", "/network?group=other"])(
+  "does not offer a stale sheet return after leaving Network and re-entering at %s",
+  (destination) => {
+    window.history.replaceState({}, "", "/waves/wave");
+    const children = () => (
+      <WaveInformationProvider>
+        <Harness />
+      </WaveInformationProvider>
+    );
+    const { rerender } = render(children());
+    fireEvent.click(screen.getByText("Open mobile information"));
+    fireEvent.click(screen.getByText("Inspect group"));
+    window.history.pushState({}, "", "/network?group=group");
+    rerender(children());
+    window.history.pushState({}, "", "/waves/other");
+    rerender(children());
+    window.history.pushState({}, "", destination);
+    rerender(children());
+    expect(screen.queryByText("Return to information")).toBeNull();
+  }
+);
 
 it("navigates inside one information request and restores its parent with Back", async () => {
   window.history.replaceState({ original: "kept" }, "", "/waves/wave");
