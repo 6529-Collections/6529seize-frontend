@@ -1,4 +1,5 @@
 "use client";
+import type { ReactNode } from "react";
 import { skipToken, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import { ApiCompetitionEntryStatus } from "@/generated/models/ApiCompetitionEntryStatus";
@@ -123,9 +124,13 @@ function EntryFocus({ entryId }: { readonly entryId: string }) {
 export default function CompetitionResources({
   tab,
   onCreateDrop,
+  embedded = false,
+  children,
 }: {
   readonly onCreateDrop?: (() => void) | undefined;
   readonly tab: CompetitionTab;
+  readonly embedded?: boolean;
+  readonly children?: ReactNode;
 }) {
   const search = useSearchParams();
   const entryId = search.get("entry");
@@ -134,7 +139,9 @@ export default function CompetitionResources({
     case "leaderboard":
       return <CompetitionLeaderboard onCreateDrop={onCreateDrop} />;
     case "votes":
-      return <CompetitionVotes />;
+      return (
+        <CompetitionVotes embedded={embedded}>{children}</CompetitionVotes>
+      );
     case "decisions":
       return <CompetitionWinners />;
     case "outcomes":

@@ -34,3 +34,27 @@ export function normalizeLocale(
 ): SupportedLocale {
   return getCanonicalSupportedLocale(locale) ?? DEFAULT_LOCALE;
 }
+
+function getPreferredBrowserLanguage(): string | undefined {
+  const browserLanguages: unknown = Reflect.get(
+    globalThis.navigator,
+    "languages"
+  );
+  if (
+    Array.isArray(browserLanguages) &&
+    typeof browserLanguages[0] === "string"
+  ) {
+    return browserLanguages[0];
+  }
+
+  const browserLanguage: unknown = Reflect.get(
+    globalThis.navigator,
+    "language"
+  );
+  return typeof browserLanguage === "string" ? browserLanguage : undefined;
+}
+
+/** The browser's first preferred language as a supported locale. Browser only. */
+export function getBrowserLocale(): SupportedLocale {
+  return normalizeLocale(getPreferredBrowserLanguage());
+}

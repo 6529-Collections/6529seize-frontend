@@ -12,7 +12,7 @@ import Link from "next/link";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { CompactMenu } from "@/components/compact-menu";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
 import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
 import {
@@ -499,7 +499,9 @@ export default function AppHeader() {
   });
 
   const pfp = getHeaderProfilePfp({ activeProfileProxy, profile });
-  const resolvedPfp = pfp ? resolveIpfsUrlSync(pfp) : null;
+  const resolvedPfp = pfp
+    ? getScaledImageUri(pfp, ImageScale.W_AUTO_H_50)
+    : null;
   const menuAvatarSrc = resolvedPfp ?? DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP;
 
   const connectionIndicator = getConnectionProfileIndicator({

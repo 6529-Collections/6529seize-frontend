@@ -1,7 +1,5 @@
 "use client";
 
-import "./WaveNavigationTransition.module.css";
-
 import dynamic from "next/dynamic";
 import type { CSSProperties, ReactNode } from "react";
 import { Suspense, useCallback, useMemo, useRef } from "react";

@@ -1,6 +1,7 @@
 import React from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 interface ArtistPreviewModalHeaderProps {
   readonly user: ApiProfileMin;
@@ -45,7 +46,7 @@ export const ArtistPreviewModalHeader: React.FC<
           <div className="tw-h-11 tw-w-11 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
             {user.pfp && (
               <img
-                src={user.pfp}
+                src={getScaledImageUri(user.pfp, ImageScale.W_AUTO_H_50)}
                 alt="Profile"
                 className="tw-h-full tw-w-full tw-bg-transparent tw-object-contain"
               />

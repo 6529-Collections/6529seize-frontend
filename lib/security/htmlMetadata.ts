@@ -1,3 +1,5 @@
+import "next/dist/compiled/server-only";
+
 import { load } from "cheerio";
 
 /**

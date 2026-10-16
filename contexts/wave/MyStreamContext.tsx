@@ -30,6 +30,7 @@ import type { ServerWaveFeedSeedResult } from "./server-wave-feed-seed";
 import { useActiveWaveManager } from "./hooks/useActiveWaveManager";
 import type { MinimalWave } from "./hooks/useEnhancedWavesListCore";
 import useEnhancedWavesListCore from "./hooks/useEnhancedWavesListCore";
+import { useRecentDirectMessagePrefetch } from "./hooks/useRecentDirectMessagePrefetch";
 import { useWaveDataManager } from "./hooks/useWaveDataManager";
 import type { Listener as WaveMessagesListener } from "./hooks/useWaveMessagesStore";
 import useWaveMessagesStore from "./hooks/useWaveMessagesStore";
@@ -286,12 +287,20 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   });
   const {
     registerWave,
+    prefetchWave,
     syncNewestMessages,
     fetchNextPage,
     fetchAroundSerialNo,
     cancelWaveDataFetch,
     cancelPaginationFetch,
   } = waveDataManager;
+  useRecentDirectMessagePrefetch({
+    enabled:
+      isCapacitor && isActive && pathname === "/messages" && !activeWaveId,
+    waves: dmWavesHookData.waves,
+    viewerIdentityKey: dmWavesData.viewerIdentityKey,
+    prefetchWave,
+  });
   const { clearWave } = waveMessagesStore;
   const refreshWaveMessages = useCallback(
     (waveId: string) => {
@@ -380,6 +389,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     activeWaveId,
     getData: waveMessagesStore.getData,
     hasServerFeedSeed: waveMessagesStore.hasServerFeedSeed,
+    isWaveInUse: waveMessagesStore.isWaveInUse,
     updateData: waveMessagesStore.updateData,
     registerWave,
     syncNewestMessages,
@@ -476,6 +486,23 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     }
     handleConnectedWebSocket();
   }, [websocketStatus]);
+
+  // The message store never evicts the active wave and counts it as used.
+  const { trackActiveWave, subscribeToEvictions } = waveMessagesStore;
+  useLayoutEffect(() => {
+    trackActiveWave(activeWaveId);
+  }, [activeWaveId, trackActiveWave]);
+
+  // An evicted wave gives up its requests, timers and per-wave state, so it
+  // loads from scratch when it is opened again.
+  useEffect(
+    () =>
+      subscribeToEvictions((waveId) => {
+        cancelWaveDataFetch(waveId);
+        cancelPaginationFetch(waveId);
+      }),
+    [cancelPaginationFetch, cancelWaveDataFetch, subscribeToEvictions]
+  );
 
   useEffect(() => {
     if (!hasMountedActiveWaveRegistrationRef.current) {
