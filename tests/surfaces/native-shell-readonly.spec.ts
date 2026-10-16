@@ -669,8 +669,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       name: "Level at least",
       exact: true,
     });
-    const summary = filter.getByText("After editing", { exact: true });
-    const currentSummary = filter.getByText("Before editing", { exact: true });
+    const summary = filter.getByText("Level at least 10", { exact: true });
     const action = filter.getByRole("button", {
       name: "Create and use new group",
       exact: true,
@@ -758,11 +757,11 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         return false;
       });
     await expect.poll(summaryIsCompact).toBe(true);
-    await expect.poll(() => summaryIsCompact(currentSummary)).toBe(true);
     // Compact the visual footer without removing its summary from the
     // accessibility tree; preview actions become visible when focused.
-    await expect.poll(() => filter.ariaSnapshot()).toContain("After editing");
-    await expect.poll(() => filter.ariaSnapshot()).toContain("Before editing");
+    await expect
+      .poll(() => filter.ariaSnapshot())
+      .toContain("Level at least 10");
     await expect
       .poll(() =>
         input.evaluate((element) => {
@@ -811,6 +810,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await expect(preview).toBeInViewport({ ratio: 1 });
     await input.focus();
     await expect.poll(summaryIsCompact).toBe(true);
+    await filter.getByRole("button", { name: "Back", exact: true }).click();
     await filter
       .getByRole("group", { name: "Filter Network", exact: true })
       .getByRole("button", { name: "Identities", exact: true })
@@ -839,18 +839,18 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         })
       )
       .toBe(true);
-    const criteria = filter.getByRole("group", {
-      name: "Filter Network",
-      exact: true,
-    });
-    await expect(criteria).toBeInViewport({ ratio: 1 });
-    const criteriaBounds = await criteria.boundingBox();
+    const back = filter.getByRole("button", { name: "Back", exact: true });
+    await expect(back).toBeInViewport({ ratio: 1 });
+    await expect(
+      filter.getByRole("group", { name: "Filter Network", exact: true })
+    ).toBeHidden();
+    const backBounds = await back.boundingBox();
     const editorTop = await allowlists.evaluate(
       (element) =>
         element.closest("[tabindex='-1']")?.getBoundingClientRect().top
     );
     expect(
-      (criteriaBounds?.y ?? 0) + (criteriaBounds?.height ?? 0)
+      (backBounds?.y ?? 0) + (backBounds?.height ?? 0)
     ).toBeLessThanOrEqual(editorTop ?? 0);
     await page.screenshot({
       path: testInfo.outputPath("network-keyboard.png"),
@@ -867,10 +867,16 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       "true"
     );
     await expect(summary).toBeVisible();
-    await expect.poll(() => summaryIsCompact(currentSummary)).toBe(false);
+    await expect(
+      filter.getByText("Before editing", { exact: true })
+    ).toHaveCount(0);
     await allowlists.blur();
     await allowlists.focus();
     await expect(allowlists).toHaveValue("keyboard-test-no-match");
+    await back.click();
+    await expect(
+      filter.getByText("Before editing", { exact: true })
+    ).toHaveCount(0);
     await filter
       .getByRole("group", { name: "Filter Network", exact: true })
       .getByRole("button", { name: /^Level(?: Configured)?$/, exact: true })
