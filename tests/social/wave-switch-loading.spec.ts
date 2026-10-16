@@ -277,7 +277,12 @@ test("ignores late metadata after switching back to a cached wave", async ({
   const gate = new Promise<void>((resolve) => {
     release = resolve;
   });
+  let requestStarted!: () => void;
+  const pendingRequest = new Promise<void>((resolve) => {
+    requestStarted = resolve;
+  });
   await page.route(`**/api/waves/${TARGET}`, async (route) => {
+    requestStarted();
     await gate;
     await route.fallback();
   });
@@ -290,6 +295,9 @@ test("ignores late metadata after switching back to a cached wave", async ({
     await expect(
       page.getByTestId("wave-pending").getByRole("heading")
     ).toHaveText(NAME);
+    // The pending shell can paint before the query starts. Hold a real request
+    // before switching away so this exercises a late response, not no request.
+    await pendingRequest;
     await page
       .getByRole("link", { name: SOURCE_NAME, exact: true })
       .first()
