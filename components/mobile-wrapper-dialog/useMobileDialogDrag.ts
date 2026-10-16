@@ -170,6 +170,7 @@ export function useMobileDialogDrag({
 
   const handleDragStart = useCallback(
     (event: TouchEvent<HTMLDivElement>) => {
+      if (dismissTimerRef.current !== null) return;
       if (event.touches.length !== 1) {
         resetDrag();
         return;
@@ -179,11 +180,10 @@ export function useMobileDialogDrag({
         !touch ||
         !canDragToClose ||
         isCenteredTabletModal(tabletModal) ||
-        dismissTimerRef.current !== null ||
         !(event.target instanceof Element) ||
         !event.currentTarget.contains(event.target) ||
         event.target.closest(
-          "a, button, input, select, textarea, [contenteditable]"
+          'a, button, input, select, textarea, [contenteditable], [role="button"], [role="link"], [role="menuitem"], [role="tab"], [role="switch"], [tabindex]:not([tabindex="-1"])'
         )
       ) {
         return;
@@ -223,6 +223,7 @@ export function useMobileDialogDrag({
   );
 
   const handleDragEnd = useCallback(() => {
+    if (dismissTimerRef.current !== null) return;
     if (!canDragToClose || dragStartYRef.current === null) {
       resetDrag();
       return;
@@ -260,13 +261,19 @@ export function useMobileDialogDrag({
     onAfterLeave?.();
   }, [onAfterLeave, resetDrag]);
 
-  let dragTouchHandlers: DragTouchHandlers = { onTouchCancel: resetDrag };
+  const handleDragCancel = useCallback(() => {
+    if (dismissTimerRef.current === null) resetDrag();
+  }, [resetDrag]);
+
+  let dragTouchHandlers: DragTouchHandlers = {
+    onTouchCancel: handleDragCancel,
+  };
   if (canDragToClose) {
     dragTouchHandlers = {
       onTouchStart: handleDragStart,
       onTouchMove: handleDragMove,
       onTouchEnd: handleDragEnd,
-      onTouchCancel: resetDrag,
+      onTouchCancel: handleDragCancel,
     };
   }
 

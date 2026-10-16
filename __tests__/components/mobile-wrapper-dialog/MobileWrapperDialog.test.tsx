@@ -477,7 +477,34 @@ describe("MobileWrapperDialog", () => {
       await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
     });
 
-    it("cancels a drag when a second finger touches the header", async () => {
+    it.each(["touchStart", "touchMove"] as const)(
+      "cancels a drag on a second finger's %s",
+      async (event) => {
+        const onClose = jest.fn();
+        render(
+          <MobileWrapperDialog {...defaultProps} isOpen onClose={onClose} />
+        );
+        const header = screen.getByTestId("mobile-dialog-header");
+        fireTouch(header, "touchstart", 20);
+        fireTouch(header, "touchmove", 100);
+        fireEvent[event](header, {
+          touches: [
+            { clientX: 0, clientY: 100 },
+            { clientX: 40, clientY: 100 },
+          ],
+        });
+        fireTouch(header, "touchend");
+        await act(async () => {
+          await new Promise((resolve) => setTimeout(resolve, 180));
+        });
+        expect(onClose).not.toHaveBeenCalled();
+        expect(
+          header.closest<HTMLElement>(".mobile-wrapper-dialog")?.style.transform
+        ).toBe("translate3d(0, 0px, 0)");
+      }
+    );
+
+    it("finishes a released dismissal despite later touch events", async () => {
       const onClose = jest.fn();
       render(
         <MobileWrapperDialog {...defaultProps} isOpen onClose={onClose} />
@@ -485,20 +512,40 @@ describe("MobileWrapperDialog", () => {
       const header = screen.getByTestId("mobile-dialog-header");
       fireTouch(header, "touchstart", 20);
       fireTouch(header, "touchmove", 100);
+      fireTouch(header, "touchend");
       fireEvent.touchStart(header, {
         touches: [
           { clientX: 0, clientY: 100 },
           { clientX: 40, clientY: 100 },
         ],
       });
+      fireTouch(header, "touchcancel");
       fireTouch(header, "touchend");
+      await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    });
+
+    it("keeps a custom header control operable without starting a drag", async () => {
+      const onClose = jest.fn();
+      render(
+        <MobileWrapperDialog
+          {...defaultProps}
+          isOpen
+          onClose={onClose}
+          titleActions={
+            <span role="tab" tabIndex={0}>
+              Settings tab
+            </span>
+          }
+        />
+      );
+      const tab = screen.getByRole("tab", { name: "Settings tab" });
+      fireTouch(tab, "touchstart", 20);
+      fireTouch(tab, "touchmove", 100);
+      fireTouch(tab, "touchend");
       await act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 180));
       });
       expect(onClose).not.toHaveBeenCalled();
-      expect(
-        header.closest<HTMLElement>(".mobile-wrapper-dialog")?.style.transform
-      ).toBe("translate3d(0, 0px, 0)");
     });
 
     it.each([
