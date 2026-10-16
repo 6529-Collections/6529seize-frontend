@@ -356,11 +356,20 @@ const mapNotificationV2 = (
         created_at: notification.created_at,
         read_at: notification.read_at,
         cause: ApiNotificationCause.MemeCollaboration,
+        related_identity: notification.related_identity
+          ? mapIdentityOverviewToProfileMin(notification.related_identity)
+          : null,
         additional_context: {
           event_type: context.event_type,
           wave_id: context.wave_id,
           drop_id: context.drop_id,
           invitation_id: context.invitation_id,
+          ...(typeof context.actor_id === "string"
+            ? { actor_id: context.actor_id }
+            : {}),
+          ...(typeof context.artwork_name === "string"
+            ? { artwork_name: context.artwork_name }
+            : {}),
         },
       },
     ];

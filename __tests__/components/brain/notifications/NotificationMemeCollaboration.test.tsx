@@ -1,6 +1,15 @@
 import { render, screen } from "@testing-library/react";
 import NotificationMemeCollaboration from "@/components/brain/notifications/NotificationMemeCollaboration";
 import type { INotificationMemeCollaboration } from "@/types/feed.types";
+import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import { commonApiFetch } from "@/services/api/common-api";
+import { fetchNotificationsV2 } from "@/services/api/notifications-v2-api";
+
+jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
+jest.mock("@/helpers/competition.helpers", () => ({
+  isMultiCompetitionEnabled: () => false,
+}));
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
@@ -105,3 +114,57 @@ it("uses the artwork fallback when a saved title contains only whitespace", () =
   );
   expect(screen.getByRole("link", { name: "an artwork" })).toBeVisible();
 });
+
+it.each(["INVITED", "ACCEPTED"] as const)(
+  "renders the fetched and adapted %s notification with its actor and named artwork",
+  async (event_type) => {
+    jest.mocked(commonApiFetch).mockResolvedValue({
+      unread_count: 1,
+      notifications: [
+        {
+          id: 123,
+          cause: ApiNotificationCause.MemeCollaboration,
+          created_at: 1,
+          read_at: null,
+          related_drops: [],
+          related_identity: {
+            id: "actor",
+            handle: "phoebeum",
+            pfp: "https://example.com/avatar.png",
+            primary_address: "0xabc",
+            level: 21,
+            classification: ApiProfileClassification.Pseudonym,
+            badges: {},
+          },
+          additional_context: {
+            event_type,
+            wave_id: "wave/1",
+            drop_id: "drop/1",
+            invitation_id: "invite",
+            actor_id: "actor",
+            artwork_name: "Test Cat",
+          },
+        },
+      ],
+    });
+    const result = await fetchNotificationsV2({ limit: "30" });
+    const item = result.notifications[0];
+    if (item?.cause !== ApiNotificationCause.MemeCollaboration)
+      throw new Error("Expected collaboration notification");
+    render(<NotificationMemeCollaboration notification={item} />);
+    expect(screen.getByRole("img", { name: "phoebeum" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "phoebeum" })).toHaveAttribute(
+      "href",
+      "/phoebeum"
+    );
+    expect(screen.getByRole("link", { name: "Test Cat" })).toHaveAttribute(
+      "href",
+      "/waves/wave%2F1?drop=drop%2F1"
+    );
+    expect(
+      screen.getByRole("link", {
+        name: event_type === "INVITED" ? "Review invitation" : "View artwork",
+      })
+    ).toBeVisible();
+  }
+);
