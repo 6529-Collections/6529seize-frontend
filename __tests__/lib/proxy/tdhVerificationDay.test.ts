@@ -4,7 +4,9 @@
 
 import {
   FIRST_TDH_FEED_CYCLE_DAY,
+  TDH_DAY_NOT_FOUND_PATH,
   isImpossibleTdhVerificationDay,
+  tdhDayNotFoundTarget,
 } from "@/lib/proxy/tdhVerificationDay";
 
 // 2026-10-16 12:00 UTC: the latest closed cycle is day 20,742.
@@ -45,5 +47,27 @@ describe("isImpossibleTdhVerificationDay", () => {
       isImpossibleTdhVerificationDay("/network/tdh/verification/20742/x", NOW)
     ).toBe(false);
     expect(isImpossibleTdhVerificationDay("/network/tdh/abc", NOW)).toBe(false);
+  });
+});
+
+describe("tdhDayNotFoundTarget", () => {
+  it("sends an impossible day to the not-found view with the day asked for", () => {
+    const target = tdhDayNotFoundTarget(
+      new URL("https://6529.io/network/tdh/verification/20739?x=1"),
+      "/network/tdh/verification/20739"
+    );
+    expect(target.pathname).toBe(TDH_DAY_NOT_FOUND_PATH);
+    expect(target.searchParams.get("day")).toBe("20739");
+    expect(target.searchParams.get("x")).toBeNull();
+    expect(target.origin).toBe("https://6529.io");
+  });
+
+  it("cuts a long segment to 32 characters", () => {
+    const segment = "x".repeat(80);
+    const target = tdhDayNotFoundTarget(
+      new URL(`https://6529.io/network/tdh/verification/${segment}`),
+      `/network/tdh/verification/${segment}`
+    );
+    expect(target.searchParams.get("day")).toHaveLength(32);
   });
 });

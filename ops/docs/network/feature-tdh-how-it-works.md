@@ -40,10 +40,16 @@ collapsible `Exact rule` block quoting TDH-v1 (rule version `tdh-v1.0`).
   indentation and scrolls sideways inside its frame, with a shadow at a cut
   edge, and a long block shows its first lines and `Show all N lines`.
 - The lede says P26 is a proposal that 6529.io computes from the cutover;
-  the basis line names the P26 commit the in-browser arithmetic was
-  rechecked at (`f840096`) and links its tests. Step 1 says the daily runs
-  take history from public log servers until 6529's own node is synced, and
-  links the dashboard's label. Step 10's link order uses numbered badges.
+  under it one line, `Every worked example here is computed in your
+browser`, opens to the basis: the P26 commit the in-browser arithmetic was
+  rechecked at (`f840096`), that the daily runs follow `0621ed4` with the
+  same rule version and registry hash, that the other figures are stated
+  from P26, its replay and the daily comparison, and a link to the port's
+  tests pinned to the commit that last changed them. Step 1 says the daily
+  runs take history from public log servers until 6529's own node is
+  synced, and links the dashboard's label. Step 10's link order uses
+  numbered badges; its link captions are set in the figure's sans, and a
+  second identity is drawn in a second tint, with its own legend entry.
 
 ## Interactive Elements
 
@@ -51,36 +57,47 @@ All compute in the browser for illustration; the computation of record is
 6529.io's backend until the cutover and the validators' Rust core from then
 on. Each has a `Reset` button and announces its result politely.
 
-- Day counter: days, hours and minutes before the 2026-10-14 23:59:59
-  snapshot, set with steppers and three presets, echoed as a long-form date
+- Day counter: days, hours and minutes before the 2026-10-15 23:59:59
+  snapshot (block 26,201,364, cycle 20,742), set with steppers and three presets, echoed as a long-form date
   (no native date input, so no date format can be misread), and the whole
   days.
 - Stack simulator: starts with one copy bought 30 days ago; buy, sell, move a
-  copy to Wallet B, advance time, and switch consolidation with a switch in
-  the explorables' pill style (off by default, applied to the whole
-  history). Each wallet's copies stack upward from its
+  copy to Wallet B and advance time with four equal buttons (two by two on
+  phones), and switch consolidation with `A and B consolidated`, a switch
+  in the explorables' pill style (off by default, applied to the whole
+  history), with a link to step 10 beside it. Each wallet's copies stack upward from its
   name, the box only as tall as its copies.
 - Rate explorer: copies minted and claim limit to edition and rate.
-- Boost builder: full sets and Gradients with steppers; complete seasons,
-  Genesis and Nakamoto as toggle chips in one wrapping row (the current
-  season dashed); the boost ladder.
+- Boost builder: full sets and Gradients with steppers; complete seasons as
+  toggle chips on a grid whose rows balance (6, 6 and 5 on phones; 9 and 8
+  from `sm`; the current season dashed), then Genesis and Nakamoto; the
+  boost ladder.
 - Household walkthrough: one identity, two wallets, tomorrow, or after
   selling Gradient 2; one record fills the panel, two sit side by side.
   Step 12 shows the household's holdings once, then this walkthrough.
 
 ## Notes
 
-- The page's numbers come from a TypeScript port of the TDH-v1 arithmetic,
-  whose worked examples are tested against values the Python reference
-  printed.
+- The worked examples and explorables come from a TypeScript port of the
+  TDH-v1 arithmetic, tested against values the Python reference printed;
+  the page's other figures are stated from P26, the replay and the daily
+  comparison. Step 14 counts the days compared from the daily feed (the
+  page revalidates every 10 minutes).
 - Rates, boosts and the full example use the network of the 2026-10-11
   cycle: largest edition 3,941 (FirstGM's, after its adjustment), 559
   eligible Memes in 17 seasons, 101 Gradients, 1,000 NextGen tokens; the
-  date examples use the cycle of 15 October 2026 (cycle 20,741). The highest
-  boost that day is 2.04.
+  date examples use the cycle of 16 October 2026 (cycle 20,742). The highest
+  boost on 2026-10-11 is 2.04.
 - Step 5 says which rules still read the transfers before netting: the mint
-  facts (each card's first mint and the counts behind its edition) and the
-  underflow test; a sink is credited but never debited.
+  facts (each card's first mint and the counts behind its edition), the
+  underflow test and the log-position checks; a sink is credited but never
+  debited. It says that this is why a mint and its burn inside one
+  transaction can still change editions (the formal model's counterexample
+  I), with a link to the formal page.
+- Step 14 says what a collector sees of a sale and a purchase of one card in
+  different transactions of one block: a difference in the daily comparison
+  until the cutover, the one D132 expects, and TDH-v1's value on 6529.io
+  from then.
 - Step 10 states the three-wallet limit of `tdh-v1.0` and what P26 §6.3
   does with four wallets that all confirm each other (an identity of three,
   from the newest link, and the fourth on its own), so a group of four that
@@ -89,8 +106,10 @@ on. Each has a `Reset` button and announces its result politely.
   the snapshot block, among the cutover changes. Its link diagrams number
   each link in on-chain order.
 - Diagrams are drawn phone first: the rate chart, the transaction and the
-  link diagrams keep their text at 12 px or more at every width
-  (`scripts/tdh-pages-check.mjs` checks it).
+  link diagrams keep their text at 12 px or more at every width, and no
+  drawn line crosses a label (`scripts/tdh-pages-check.mjs` checks both).
+  The rate chart sets FirstGM's 1.00 above and left of its point, clear of
+  the curve, and drops the 4,000 tick on phones.
 
 ## Related Pages
 

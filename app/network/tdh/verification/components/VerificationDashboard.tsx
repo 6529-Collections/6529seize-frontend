@@ -38,7 +38,9 @@ import VerificationDifferences from "./VerificationDifferences";
 import VerificationHeadline from "./VerificationHeadline";
 import VerificationHistory from "./VerificationHistory";
 import VerificationMethod from "./VerificationMethod";
-import VerificationProvenance from "./VerificationProvenance";
+import VerificationProvenance, {
+  type PreviousDay,
+} from "./VerificationProvenance";
 import VerificationRetry from "./VerificationRetry";
 import VerificationSideBySide from "./VerificationSideBySide";
 import {
@@ -195,6 +197,7 @@ export default function VerificationDashboard({
   selected,
   now,
   permalink = false,
+  previousDay = null,
 }: {
   readonly locale: SupportedLocale;
   readonly indexLoad: IndexLoad;
@@ -203,6 +206,8 @@ export default function VerificationDashboard({
   readonly now: Date;
   /** A day's own page, a record: no live freshness, cutover as of the day. */
   readonly permalink?: boolean;
+  /** The day before, with its file's SHA-256, for the provenance chain. */
+  readonly previousDay?: PreviousDay | null;
 }) {
   if (indexLoad.status === "awaiting") {
     return <AwaitingState locale={locale} now={now} />;
@@ -259,6 +264,7 @@ export default function VerificationDashboard({
               verdict={dayVerdict(day)}
               neighbours={neighbours}
               isLatest={isLatest}
+              permalink={permalink}
             />
             <VerificationAgreementTiles
               locale={locale}
@@ -323,6 +329,7 @@ export default function VerificationDashboard({
         day={day}
         dayUrl={dayLoad?.status === "ok" ? dayLoad.dayUrl : null}
         daySha256={dayLoad?.status === "ok" ? dayLoad.sha256 : null}
+        previousDay={previousDay}
         indexUrl={indexLoad.indexUrl}
       />
       <VerificationCheck locale={locale} day={day} cycleDay={entry.cycleDay} />

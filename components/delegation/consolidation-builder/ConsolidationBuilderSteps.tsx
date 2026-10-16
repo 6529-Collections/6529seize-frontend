@@ -13,6 +13,7 @@ import { ConsolidationSafeWalletLinks } from "./ConsolidationBuilderNotices";
 
 export type ConsolidationStepsState =
   | { readonly kind: "incomplete" }
+  | { readonly kind: "acknowledge" }
   | { readonly kind: "loading" }
   | { readonly kind: "error" }
   | { readonly kind: "groupError" }
@@ -322,6 +323,12 @@ function StepsBody(
       return (
         <p className={MESSAGE_CLASS_NAME}>
           {t(locale, "delegation.consolidationBuilder.steps.incomplete")}
+        </p>
+      );
+    case "acknowledge":
+      return (
+        <p className={MESSAGE_CLASS_NAME}>
+          {t(locale, "delegation.consolidationBuilder.steps.acknowledge")}
         </p>
       );
     case "loading":

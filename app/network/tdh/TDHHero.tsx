@@ -10,7 +10,8 @@ import { t } from "@/i18n/messages";
 import type { VerificationSummary } from "@/lib/tdh/verification/summary.server";
 import { MINUTE_EXAMPLE } from "./how-it-works/examples";
 import { TDH_FOCUS_RING, TDH_H1, TDH_LEDE } from "./shared/tdhStyles";
-import { formatCycleDate } from "./verification/components/verificationFormat";
+import TdhStatusPill from "./shared/TdhStatusPill";
+import { formatShortCycleDate } from "./verification/components/verificationFormat";
 
 const TERMS = [
   { key: "days", value: "days" },
@@ -123,29 +124,33 @@ function stripSentence(
   if (summary.kind === "awaiting") {
     return t(locale, "network.tdh.explainer.strip.awaiting");
   }
-  const date = formatCycleDate(locale, summary.date);
-  const total = formatInteger(locale, summary.total ?? 0);
+  const date = formatShortCycleDate(locale, summary.date);
   if (
     summary.sentence === "none" &&
     summary.totalsEqual === true &&
     summary.equal !== null &&
-    summary.equal === summary.total
+    summary.equal === summary.total &&
+    summary.walletsTotal !== null &&
+    summary.walletsEqual === summary.walletsTotal
   ) {
-    return t(locale, "network.tdh.explainer.strip.equal", { date, total });
+    return t(locale, "network.tdh.explainer.strip.equal", {
+      date,
+      identities: formatInteger(locale, summary.total),
+      wallets: formatInteger(locale, summary.walletsTotal),
+    });
   }
   return t(locale, "network.tdh.explainer.strip.other", {
     date,
     equal: formatInteger(locale, summary.equal ?? 0),
-    total,
+    total: formatInteger(locale, summary.total ?? 0),
   });
 }
 
 /**
- * The latest daily result near the top of the overview: the track record and
- * the latest day in one sentence, with its limit (history not yet fully
- * checked) in the same sentence, so the claim carries its own caveat. The
- * status itself, with its pill, is in "Checked daily, in public"; this strip
- * is the way into the dashboard.
+ * The latest daily result near the top of the overview, in one line: the
+ * track record in bold, the latest day's agreement, its limit as a pill
+ * (history not yet fully checked), and the way into the dashboard. The
+ * section "Checked daily, in public" below carries the detail.
  */
 function VerifiedStrip({
   locale,
@@ -159,37 +164,28 @@ function VerifiedStrip({
   return (
     <Link
       href="/network/tdh/verification"
-      className={`tw-group tw-mt-8 tw-flex tw-flex-col tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-success/30 tw-bg-success/[0.05] tw-px-4 tw-py-3.5 tw-no-underline tw-transition-colors hover:tw-border-success/60 motion-reduce:tw-transition-none md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-px-5 ${TDH_FOCUS_RING}`}
+      className={`tw-group tw-mt-8 tw-flex tw-flex-col tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-border-success/30 tw-bg-success/[0.05] tw-px-4 tw-py-3 tw-no-underline tw-transition-colors hover:tw-border-success/60 motion-reduce:tw-transition-none md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-6 md:tw-px-5 ${TDH_FOCUS_RING}`}
     >
       <span className="tw-flex tw-min-w-0 tw-items-start tw-gap-3">
         <Icon
           aria-hidden="true"
           className={`tw-mt-0.5 tw-size-5 tw-shrink-0 ${awaiting ? "tw-text-iron-300" : "tw-text-success"}`}
         />
-        <span className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
-          <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-            <span className="tw-text-sm tw-font-semibold tw-text-iron-50 sm:tw-text-[15px]">
-              {t(locale, "network.tdh.explainer.strip.title")}
-              {!awaiting && (
-                <span className="tw-font-normal tw-text-iron-200">
-                  {" · "}
-                  {t(locale, "network.tdh.explainer.strip.record", {
-                    allEqual: formatInteger(locale, summary.record.allEqual),
-                    days: formatInteger(locale, summary.record.days),
-                  })}
-                </span>
-              )}
+        <span className="tw-min-w-0 tw-text-sm tw-leading-6 tw-text-iron-200 sm:tw-text-[15px]">
+          {!awaiting && (
+            <strong className="tw-font-semibold tw-text-iron-50">
+              {t(locale, "network.tdh.explainer.strip.record", {
+                allEqual: formatInteger(locale, summary.record.allEqual),
+                days: formatInteger(locale, summary.record.days),
+              })}
+            </strong>
+          )}{" "}
+          {stripSentence(locale, summary)}
+          {!awaiting && summary.historyChecked === false && (
+            <span className="tw-ml-2 tw-inline-flex tw-align-middle">
+              <TdhStatusPill pill="unchecked" locale={locale} size="sm" />
             </span>
-          </span>
-          <span className="tw-text-sm tw-leading-6 tw-text-iron-200">
-            {stripSentence(locale, summary)}
-            {!awaiting && summary.historyChecked === false && (
-              <span className="tw-text-iron-400">
-                {" "}
-                {t(locale, "network.tdh.explainer.strip.unchecked")}
-              </span>
-            )}
-          </span>
+          )}
         </span>
       </span>
       <span className="tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1.5 tw-pl-8 tw-text-sm tw-font-medium tw-text-primary-300 md:tw-pl-0">

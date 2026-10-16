@@ -236,13 +236,11 @@ export default function VectorAnatomy({
                       </td>
                       <td className={TDH_TD_NUM}>{row.tx}</td>
                       <td className={TDH_TD_NUM}>{row.log}</td>
-                      <td className={`${TDH_TD} tw-font-mono tw-text-xs`}>
-                        {row.token}
-                      </td>
-                      <td className={`${TDH_TD} tw-font-mono tw-text-xs`}>
+                      <td className={TDH_TD}>{row.token}</td>
+                      <td className={TDH_TD}>
                         {who(row.from, m("mint"))} → {who(row.to, m("mint"))}
                         {sameTx && (
-                          <span className="tw-ml-2 tw-font-sans tw-text-xs tw-text-primary-300">
+                          <span className="tw-ml-2 tw-text-xs tw-text-primary-300">
                             {m("sameTx")}
                           </span>
                         )}
@@ -278,32 +276,35 @@ export default function VectorAnatomy({
                 </tr>
               </thead>
               <tbody>
+                <tr>
+                  <th
+                    scope="row"
+                    className={`${tdhNarrowCell(TDH_TD)} tw-font-normal`}
+                  >
+                    {m("rates")}
+                  </th>
+                  <td
+                    colSpan={2}
+                    className={`${tdhNarrowCell(TDH_TD_NUM)} tw-tabular-nums`}
+                  >
+                    {VECTOR.rates}
+                  </td>
+                </tr>
                 {VECTOR.expected.map((row) => (
                   <tr key={row.field}>
                     <th
                       scope="row"
-                      className={`${tdhNarrowCell(TDH_TD)} tw-font-mono tw-text-xs tw-font-normal`}
+                      className={`${tdhNarrowCell(TDH_TD)} tw-font-normal`}
                     >
                       {row.field}
                     </th>
-                    <td
-                      className={`${tdhNarrowCell(TDH_TD_NUM)} tw-font-mono tw-text-xs`}
-                    >
-                      {row.a}
-                    </td>
-                    <td
-                      className={`${tdhNarrowCell(TDH_TD_NUM)} tw-font-mono tw-text-xs`}
-                    >
-                      {row.b}
-                    </td>
+                    <td className={tdhNarrowCell(TDH_TD_NUM)}>{row.a}</td>
+                    <td className={tdhNarrowCell(TDH_TD_NUM)}>{row.b}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </TdhTableFrame>
-          <p className="tw-m-0 tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-400">
-            rates: {VECTOR.rates}
-          </p>
         </div>
       </div>
       <p className="tw-m-0 tw-mt-4 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">

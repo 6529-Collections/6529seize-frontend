@@ -96,6 +96,22 @@ export const SYMBOLS = [
   { symbol: "registry", key: "registry", section: "10" },
 ] as const;
 
+/**
+ * The registry rows that restate formulas of §4 and §8: P26 §10 says the
+ * rule version string fixes them, so they are not fields of the hashed
+ * record.
+ */
+export const FORMULA_PARAMETERS: ReadonlySet<string> = new Set([
+  "cycle_boundary",
+  "age_reference",
+  "cutoff_finality",
+  "rate_decimals",
+  "base_rounding",
+  "base_multiplier",
+  "boost_decimals",
+  "boost_intermediate_decimals",
+]);
+
 /** P26 §10, without the provenance column. */
 export const PARAMETERS = [
   {

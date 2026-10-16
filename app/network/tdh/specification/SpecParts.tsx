@@ -100,6 +100,7 @@ export function Rule({
   locale,
   code,
   source,
+  moreSources,
   title,
   condensed = false,
   aligned = false,
@@ -107,6 +108,8 @@ export function Rule({
   readonly locale: SupportedLocale;
   readonly code: string;
   readonly source: string;
+  /** Further sections the block draws on. */
+  readonly moreSources?: readonly string[];
   readonly title?: string;
   /** P26's prose rules restated line for line, not quoted pseudocode. */
   readonly condensed?: boolean;
@@ -120,6 +123,7 @@ export function Rule({
       <TdhRuleBlock
         code={code}
         source={source}
+        {...(moreSources ? { moreSources } : {})}
         locale={locale}
         tone={condensed ? "condensed" : "exact"}
         {...(aligned ? { wrap: "none" as const } : {})}

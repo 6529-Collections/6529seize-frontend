@@ -239,3 +239,33 @@ export const loadVerificationDay = cache(
   (cycleDay: number, revalidate?: number): Promise<DayLoad> =>
     environmentLoader().loadDay(cycleDay, revalidate)
 );
+
+/**
+ * The day before a published day, with its file's SHA-256 as the server read
+ * it, so a day's page can name the one before it; null for the first day or
+ * when its file cannot be read.
+ */
+export async function loadPreviousDay(
+  index: VerificationIndex,
+  cycleDay: number
+): Promise<{
+  readonly cycleDay: number;
+  readonly date: string;
+  readonly sha256: string | null;
+} | null> {
+  const earlier = index.days
+    .filter((day) => day.cycleDay < cycleDay)
+    .sort((left, right) => right.cycleDay - left.cycleDay)[0];
+  if (!earlier) {
+    return null;
+  }
+  const load = await loadVerificationDay(
+    earlier.cycleDay,
+    OLDER_DAY_REVALIDATE_SECONDS
+  );
+  return {
+    cycleDay: earlier.cycleDay,
+    date: earlier.date,
+    sha256: load.status === "ok" ? load.sha256 : null,
+  };
+}

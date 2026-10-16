@@ -10,7 +10,7 @@ import { t, type MessageKey } from "@/i18n/messages";
 import { P26, PROGRAM_CONFORMANCE } from "../shared/tdhFacts";
 import {
   TDH_CAPTION,
-  TDH_SERIES,
+  type TDH_SERIES,
   TDH_TABLE,
   TDH_TABLE_FRAME,
   TDH_TD,
@@ -587,7 +587,12 @@ export function CheckMatrix({
     /** The P26 commit the model's build follows, short. */
     readonly spec: string;
     /** The next round's count, while it is not published. */
-    readonly newer: { readonly passed: number; readonly total: number } | null;
+    readonly newer: {
+      readonly passed: number;
+      readonly total: number;
+      /** The P26 commit the next round follows, short. */
+      readonly spec: string;
+    } | null;
   };
 }) {
   const m = (key: string) => t(locale, `network.tdh.impl.${key}` as MessageKey);
@@ -651,11 +656,7 @@ export function CheckMatrix({
                 }
                 return (
                   <li key={column.key} className="tw-contents">
-                    <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-iron-200">
-                      <span
-                        aria-hidden="true"
-                        className={`tw-size-2 tw-rounded-full ${TDH_SERIES[column.series].bg}`}
-                      />
+                    <span className="tw-text-iron-200">
                       {m(`name.${column.key}`)}
                     </span>
                     <MatrixCell {...resolve(cell)} />
@@ -680,13 +681,7 @@ export function CheckMatrix({
                   scope="col"
                   className={`${TDH_TH} tw-whitespace-nowrap`}
                 >
-                  <span className="tw-inline-flex tw-items-center tw-gap-2">
-                    <span
-                      aria-hidden="true"
-                      className={`tw-mt-1 tw-size-2 tw-shrink-0 tw-rounded-full ${TDH_SERIES[column.series].bg}`}
-                    />
-                    {m(`name.${column.key}`)}
-                  </span>
+                  {m(`name.${column.key}`)}
                 </th>
               ))}
             </tr>
@@ -714,8 +709,23 @@ export function CheckMatrix({
         </table>
       </div>
       <MatrixLegend locale={locale} />
-      <figcaption className="tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400">
-        {m("matrix.note")}
+      <figcaption className="tw-mt-2 tw-max-w-prose tw-space-y-1 tw-text-sm tw-leading-6 tw-text-iron-300">
+        {lean.newer !== null && (
+          <p className="tw-m-0">
+            {t(locale, "network.tdh.impl.matrix.leanNote", {
+              passed: formatInteger(locale, lean.passed),
+              spec: lean.spec,
+              newerPassed: formatInteger(locale, lean.newer.passed),
+              newerTotal: formatInteger(locale, lean.newer.total),
+              newerSpec: lean.newer.spec,
+            })}
+          </p>
+        )}
+        {(["note1", "note2", "note3"] as const).map((key) => (
+          <p key={key} className="tw-m-0">
+            {m(`matrix.${key}`)}
+          </p>
+        ))}
       </figcaption>
     </figure>
   );

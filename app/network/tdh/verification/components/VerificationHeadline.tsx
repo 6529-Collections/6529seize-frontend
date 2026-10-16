@@ -156,12 +156,15 @@ export default function VerificationHeadline({
   verdict,
   neighbours,
   isLatest,
+  permalink = false,
 }: {
   readonly locale: SupportedLocale;
   readonly day: VerificationDay;
   readonly verdict: VerdictState;
   readonly neighbours: DayNeighbours;
   readonly isLatest: boolean;
+  /** A day's own page: its title already names the day and cycle. */
+  readonly permalink?: boolean;
 }) {
   const cycle = formatInteger(locale, day.cycleDay);
   return (
@@ -177,12 +180,14 @@ export default function VerificationHeadline({
             className="tw-m-0 tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-300"
           >
             <TdhStatusPill pill={verdict} locale={locale} />
-            <span>
-              {t(locale, "network.tdh.verify.headline.day", {
-                date: formatCycleDate(locale, day.date),
-                cycle,
-              })}
-            </span>
+            {!permalink && (
+              <span>
+                {t(locale, "network.tdh.verify.headline.day", {
+                  date: formatCycleDate(locale, day.date),
+                  cycle,
+                })}
+              </span>
+            )}
             {!isLatest && neighbours.latest !== null && (
               // A neutral way to the latest day: an older day is not a
               // problem with its data, so no warning colour.

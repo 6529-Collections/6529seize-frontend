@@ -244,6 +244,10 @@ export default function VerificationDifferences({
             {t(locale, "network.tdh.verify.class.expected")}
             <TdhSource refs={["P26 §6.3"]} locale={locale} />
           </p>
+          <p className="tw-m-0 tw-mt-3 tw-max-w-4xl tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+            {t(locale, "network.tdh.verify.class.expectedDev2")}
+            <TdhSource refs={["DEV-2", "D132"]} locale={locale} />
+          </p>
         </div>
       </div>
       <p className="tw-m-0 tw-mt-4 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">

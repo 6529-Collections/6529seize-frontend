@@ -157,18 +157,17 @@ function Step10({ locale }: { readonly locale: SupportedLocale }) {
       <IdentityGraphDiagram locale={locale} />
       <p className="tw-m-0 tw-text-[15px] tw-font-medium tw-leading-7 tw-text-iron-100">
         {t(locale, "network.tdh.how.s10.changes")}
-        <TdhSource
-          refs={["P26 §7.1", "P26 §7.3", "P26 §6.4"]}
-          locale={locale}
-        />
       </p>
       <ol className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-[15px] tw-leading-7 tw-text-iron-200 marker:tw-text-iron-500">
         <li>{t(locale, "network.tdh.how.s10.change1")}</li>
         <li>{t(locale, "network.tdh.how.s10.change2")}</li>
-        <li>{t(locale, "network.tdh.how.s10.change3")}</li>
+        <li>
+          {t(locale, "network.tdh.how.s10.change3")}
+          <TdhSource refs={["P26 §7.1", "P26 §7.3"]} locale={locale} />
+        </li>
         <li>
           {t(locale, "network.tdh.how.s10.change4")}
-          <TdhSource refs={["DEV-10", "D121"]} locale={locale} />
+          <TdhSource refs={["P26 §6.4", "DEV-10", "D121"]} locale={locale} />
         </li>
       </ol>
       <Cited locale={locale} muted>
@@ -396,7 +395,20 @@ function Step13({ locale }: { readonly locale: SupportedLocale }) {
   );
 }
 
-function Step14({ locale }: { readonly locale: SupportedLocale }) {
+function Step14({
+  locale,
+  comparedDays,
+}: {
+  readonly locale: SupportedLocale;
+  /** Days the daily comparison has published; null without the feed. */
+  readonly comparedDays: number | null;
+}) {
+  const compared =
+    comparedDays === null
+      ? t(locale, "network.tdh.how.s14.comparedNoFeed")
+      : t(locale, "network.tdh.how.s14.compared", {
+          days: formatInteger(locale, comparedDays),
+        });
   return (
     <StepSection
       locale={locale}
@@ -426,7 +438,7 @@ function Step14({ locale }: { readonly locale: SupportedLocale }) {
           { text: t(locale, "network.tdh.how.s14.item3") },
           { text: t(locale, "network.tdh.how.s14.item4") },
           {
-            text: t(locale, "network.tdh.how.s14.item5"),
+            text: t(locale, "network.tdh.how.s14.item5", { compared }),
           },
           { text: t(locale, "network.tdh.how.s14.item6") },
           { text: t(locale, "network.tdh.how.s14.item7") },
@@ -441,8 +453,11 @@ function Step14({ locale }: { readonly locale: SupportedLocale }) {
 
 export default function HowItWorksStepsB({
   locale,
+  comparedDays = null,
 }: {
   readonly locale: SupportedLocale;
+  /** Days the daily comparison has published; null without the feed. */
+  readonly comparedDays?: number | null;
 }) {
   return (
     <>
@@ -452,7 +467,7 @@ export default function HowItWorksStepsB({
       <Step11 locale={locale} />
       <Step12 locale={locale} />
       <Step13 locale={locale} />
-      <Step14 locale={locale} />
+      <Step14 locale={locale} comparedDays={comparedDays} />
     </>
   );
 }

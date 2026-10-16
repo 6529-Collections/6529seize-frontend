@@ -48,7 +48,7 @@ function DaysPanel({ locale }: { readonly locale: SupportedLocale }) {
             {Array.from({ length: blocks }, (_, index) => (
               <span
                 key={index}
-                className={`tw-h-5 tw-rounded-sm ${TDH_SERIES.memes.bg} ${index % 2 === 0 ? "tw-opacity-90" : "tw-opacity-60"}`}
+                className={`tw-h-5 tw-rounded-sm ${TDH_SERIES.memes.bg} tw-opacity-80`}
               />
             ))}
           </span>
@@ -58,6 +58,9 @@ function DaysPanel({ locale }: { readonly locale: SupportedLocale }) {
         >
           <span>{t(locale, "network.tdh.explainer.minute.bought")}</span>
           <span>{t(locale, "network.tdh.explainer.minute.today")}</span>
+        </p>
+        <p className={`${CAPTION} tw-mt-1 tw-text-center tw-text-iron-400`}>
+          {t(locale, "network.tdh.explainer.minute.daysBlocks")}
         </p>
       </div>
       <p className={PANEL_VALUE}>
@@ -183,7 +186,7 @@ export function TdhSourcesFootnote({
   readonly legend?: boolean;
 }) {
   return (
-    <div className="tw-mt-6 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4 tw-text-xs tw-leading-5 tw-text-iron-400">
+    <div className="tw-mt-6 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4 tw-text-sm tw-leading-6 tw-text-iron-300">
       <p className="tw-m-0 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1">
         <span className="tw-font-medium tw-text-iron-300">
           {t(locale, "network.tdh.explainer.sources.label")}
@@ -191,7 +194,7 @@ export function TdhSourcesFootnote({
         <TdhSource refs={refs} locale={locale} />
       </p>
       {legend && (
-        <p className="tw-m-0 tw-mt-1 tw-max-w-3xl">
+        <p className="tw-m-0 tw-mt-1 tw-max-w-prose">
           {t(locale, "network.tdh.explainer.sources.legend")}{" "}
           <a
             href="#glossary"
@@ -249,10 +252,13 @@ export default function TDHInAMinute({
           </li>
         ))}
       </ol>
-      <p className="tw-m-0 tw-mt-8 tw-text-sm tw-leading-6 tw-text-iron-300">
-        {t(locale, "network.tdh.explainer.minute.example")}
-      </p>
-      <figure className="tw-m-0 tw-mt-3">
+      <figure className="tw-m-0 tw-mt-8">
+        <p className="tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
+          {t(locale, "network.tdh.explainer.minute.exampleLabel")}
+        </p>
+        <p className="tw-m-0 tw-mb-3 tw-mt-1 tw-max-w-prose tw-text-[15px] tw-leading-7 tw-text-iron-300">
+          {t(locale, "network.tdh.explainer.minute.example")}
+        </p>
         <div
           role="img"
           aria-label={t(locale, "network.tdh.explainer.minute.diagramDesc")}
@@ -275,7 +281,7 @@ export default function TDHInAMinute({
                 final: values.final,
               })}
             </span>
-            <span className="tw-text-sm tw-tabular-nums tw-text-iron-300">
+            <span className="tw-max-w-prose tw-text-sm tw-tabular-nums tw-leading-6 tw-text-iron-300">
               {t(locale, "network.tdh.explainer.minute.whatMoves", {
                 base: values.base,
                 fullSetBoost: cents(locale, MINUTE_EXAMPLE.fullSetBetaCents),
@@ -287,7 +293,7 @@ export default function TDHInAMinute({
       </figure>
       {/* Three short notes side by side from md, under the three panels,
           so the band keeps one measure. */}
-      <div className="tw-mt-6 tw-grid tw-gap-x-8 tw-gap-y-2 tw-text-sm tw-leading-6 tw-text-iron-400 md:tw-grid-cols-3">
+      <div className="tw-mt-6 tw-grid tw-gap-x-8 tw-gap-y-2 tw-text-sm tw-leading-6 tw-text-iron-300 md:tw-grid-cols-3">
         <p className="tw-m-0">
           {t(locale, "network.tdh.explainer.minute.resultNote")}
         </p>

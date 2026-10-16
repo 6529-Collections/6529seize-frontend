@@ -21,18 +21,22 @@ export function NewerRoundLine({
 }) {
   const r = LEAN_ROUND_5;
   const n = (value: number) => formatInteger(locale, value);
+  // One badge for the newer build; every figure on the page is the
+  // published build's.
   return (
-    <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
-      {t(locale, "network.tdh.formal.newer.line", {
-        round: n(r.round),
-        commit: r.commit,
-        date: formatUtcDate(locale, `${r.date}T00:00:00Z`, LONG_DATE),
-        passed: n(r.vectorsPassed),
-        total: n(r.vectorsTotal),
-        tdh: n(r.theoremsTdh),
-        p53: n(r.theoremsP53),
-        facts: n(r.facts),
-      })}{" "}
+    <p className="tw-m-0 tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-text-sm tw-leading-6">
+      <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/10 tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-medium tw-tabular-nums tw-text-iron-100">
+        <span
+          aria-hidden="true"
+          className="tw-size-2 tw-shrink-0 tw-rounded-full tw-bg-primary-400"
+        />
+        {t(locale, "network.tdh.formal.newer.badge", {
+          passed: n(r.vectorsPassed),
+          total: n(r.vectorsTotal),
+          tdh: n(r.theoremsTdh),
+          p53: n(r.theoremsP53),
+        })}
+      </span>
       <a href="#next-build" className={TDH_LINK}>
         {t(locale, "network.tdh.formal.newer.lineLink")}
       </a>
@@ -95,11 +99,19 @@ export function NewerRound({ locale }: { readonly locale: SupportedLocale }) {
           </li>
         ))}
       </ul>
-      <p className="tw-m-0 tw-mt-3 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">
+      <p className="tw-m-0 tw-mt-3 tw-max-w-prose tw-text-sm tw-leading-6 tw-text-iron-300">
         {t(locale, "network.tdh.formal.newer.body", {
           round: n(r.round),
           commit: r.commit,
         })}
+      </p>
+      <p className="tw-m-0 tw-mt-3 tw-max-w-prose tw-text-sm tw-leading-6 tw-text-iron-300">
+        {t(locale, "network.tdh.formal.newer.manifestSha", {
+          commit: r.commit,
+        })}
+        <code className="tw-mt-0.5 tw-block tw-break-all tw-font-mono tw-text-xs tw-text-iron-200">
+          {r.manifestSha256}
+        </code>
       </p>
     </div>
   );

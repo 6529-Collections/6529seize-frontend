@@ -116,8 +116,10 @@ export default function TdhStatusPill({
         aria-hidden="true"
         className={`tw-size-2 tw-shrink-0 tw-rounded-full ${TDH_TONE_DOT[tone]}`}
       />
-      {/* Wraps only when the pill is wider than its column. */}
-      <span className="tw-min-w-0">{tdhPillLabel(locale, pill)}</span>
+      {/* One line; it wraps only in a window under 360 px. */}
+      <span className="tw-min-w-0 tw-whitespace-nowrap max-[359px]:tw-whitespace-normal">
+        {tdhPillLabel(locale, pill)}
+      </span>
     </span>
   );
 }

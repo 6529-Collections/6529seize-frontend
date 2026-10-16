@@ -2,8 +2,9 @@ import Link from "next/link";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import BoostLadder from "../shared/BoostLadder";
-import { TDH_LINK } from "../shared/tdhStyles";
-import { getTdhBoostLadder } from "../tdh-rules.helpers";
+import { t } from "@/i18n/messages";
+import { TDH_BUTTON, TDH_LINK } from "../shared/tdhStyles";
+import { getTdhBoostLadder, type TdhRules } from "../tdh-rules.helpers";
 import { useTdhRules } from "../TDHCurrentRules";
 import {
   CURRENT_KEY,
@@ -156,9 +157,10 @@ export function CurrentRuleRow({
           <span className="tw-block">
             {m(locale, "network.tdhHistoric.current.fullSet", {
               today: formatMultiplier(locale, CURRENT_RULE.today),
-              date: formatShortDate(locale, CURRENT_RULE.valueDateIso),
             })}
           </span>
+          {/* The value today, then its ceiling; the period column already
+              says "today", and the chart beside it names the day. */}
           <span className="tw-mt-0.5 tw-block tw-text-xs tw-font-normal tw-text-iron-400">
             {m(locale, "network.tdhHistoric.current.fullSetReach", {
               ceiling: formatMultiplier(locale, CURRENT_RULE.ceiling),
@@ -226,6 +228,7 @@ export function CurrentRuleCard({
           label={m(locale, "network.tdhHistoric.table.categoryA")}
           value={`${m(locale, "network.tdhHistoric.current.fullSet", {
             today: formatMultiplier(locale, CURRENT_RULE.today),
+          })} ${m(locale, "network.tdhHistoric.current.fullSetOn", {
             date: formatShortDate(locale, CURRENT_RULE.valueDateIso),
           })}; ${m(locale, "network.tdhHistoric.current.fullSetReach", {
             ceiling: formatMultiplier(locale, CURRENT_RULE.ceiling),
@@ -255,12 +258,41 @@ export function CurrentRuleCard({
  */
 export function CurrentLadder({
   locale,
+  initialRules = null,
 }: {
   readonly locale: SupportedLocale;
+  /** The rules as the server read them, if it could. */
+  readonly initialRules?: TdhRules | null;
 }) {
-  const query = useTdhRules();
+  const query = useTdhRules(initialRules);
   if (!query.data) {
-    return null;
+    // Hold the ladder's place while the rules load, and say so if they fail,
+    // so the panel never vanishes from the page.
+    return (
+      <div
+        aria-live="polite"
+        className="tw-flex tw-min-h-[22rem] tw-flex-col tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-p-5"
+      >
+        {query.isError ? (
+          <>
+            <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
+              {t(locale, "network.tdh.rules.error")}
+            </p>
+            <button
+              type="button"
+              className={`${TDH_BUTTON} tw-mt-3 tw-self-start`}
+              onClick={() => void query.refetch()}
+            >
+              {t(locale, "network.tdh.rules.retry")}
+            </button>
+          </>
+        ) : (
+          <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-400">
+            {t(locale, "network.tdh.rules.loading")}
+          </p>
+        )}
+      </div>
+    );
   }
   const rules = query.data;
   return (

@@ -18,7 +18,11 @@ import {
 import TdhDisclosure from "./shared/TdhDisclosure";
 import { TDH_LINK } from "./shared/tdhStyles";
 import TDHProfileHoldings from "./TDHProfileHoldings";
-import { formatCycleDate } from "./verification/components/verificationFormat";
+import TdhCopyButton from "./shared/TdhCopyButton";
+import {
+  formatCycleDate,
+  middleTruncate,
+} from "./verification/components/verificationFormat";
 import TDHSection, { TDH_FOCUS, TDH_PANEL, TDH_TEXT } from "./TDHSection";
 import {
   getBoostLabel,
@@ -177,6 +181,47 @@ function reproducedBy(
   return verification;
 }
 
+const ADDRESS = /^0x[0-9a-f]{40}$/i;
+
+/**
+ * "TDH for …": a wallet address is shortened in the middle on phones, with a
+ * button that copies it in full, so the heading keeps to one line.
+ */
+function ResultHeading({
+  identity,
+  locale,
+}: {
+  readonly identity: string;
+  readonly locale: SupportedLocale;
+}) {
+  const heading = "tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-100";
+  if (!ADDRESS.test(identity)) {
+    return (
+      <h3 className={`${heading} tw-break-words`}>
+        {t(locale, "network.tdh.profile.result", { identity })}
+      </h3>
+    );
+  }
+  return (
+    <h3 className={`${heading} tw-flex tw-items-center tw-gap-2`}>
+      <span className="tw-min-w-0 sm:tw-hidden">
+        {t(locale, "network.tdh.profile.result", {
+          identity: middleTruncate(identity, 6),
+        })}
+      </span>
+      <span className="tw-hidden tw-min-w-0 tw-break-all sm:tw-inline">
+        {t(locale, "network.tdh.profile.result", { identity })}
+      </span>
+      <TdhCopyButton
+        value={identity}
+        label={t(locale, "network.tdh.shared.copyNamed", { name: identity })}
+        copiedLabel={t(locale, "network.tdh.shared.copied")}
+        failedLabel={t(locale, "network.tdh.shared.copyFailed")}
+      />
+    </h3>
+  );
+}
+
 function Snapshot({
   profile,
   identity,
@@ -205,9 +250,7 @@ function Snapshot({
   ] as const;
   return (
     <div className="tw-mt-5 tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pt-5">
-      <h3 className="tw-m-0 tw-break-words tw-text-lg tw-font-semibold tw-text-iron-100">
-        {t(locale, "network.tdh.profile.result", { identity })}
-      </h3>
+      <ResultHeading identity={identity} locale={locale} />
       <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400">
         {t(locale, "network.tdh.profile.calculated", {
           date: t(locale, "network.tdh.value.utcTime", {
@@ -271,7 +314,8 @@ function Snapshot({
           <span>
             {t(locale, "network.tdh.profile.reproduced", {
               date: formatCycleDate(locale, reproduced.date),
-              total: formatInteger(locale, reproduced.total ?? 0),
+              identities: formatInteger(locale, reproduced.total ?? 0),
+              wallets: formatInteger(locale, reproduced.walletsTotal ?? 0),
             })}{" "}
             <Link
               href={`/network/tdh/verification/${reproduced.cycleDay}`}

@@ -60,9 +60,9 @@ function Up() {
 /**
  * Diagram 1: how the sections of P26 feed each other, as a flow. Inputs to
  * events to the snapshot; eligibility and identities side by side; then
- * holdings, scores and the output. From `xl`, the parameters (§10) sit under
- * the sections they feed, with an arrow up into each of §5 to §8; every
- * node is the same height. Each box links to its section.
+ * holdings, scores and the output. From `xl`, the parameters (§10) sit on a
+ * bus line under §2 to §8, with an arrow up into each of them, as the label
+ * says; every node is the same height. Each box links to its section.
  */
 export function SectionMap({ locale }: { readonly locale: SupportedLocale }) {
   return (
@@ -88,6 +88,15 @@ export function SectionMap({ locale }: { readonly locale: SupportedLocale }) {
         <MapNode locale={locale} section={8} />
         <Across />
         <MapNode locale={locale} section={9} />
+        <span className="tw-hidden xl:tw-col-start-1 xl:tw-row-start-2 xl:tw-block">
+          <Up />
+        </span>
+        <span className="tw-hidden xl:tw-col-start-3 xl:tw-row-start-2 xl:tw-block">
+          <Up />
+        </span>
+        <span className="tw-hidden xl:tw-col-start-5 xl:tw-row-start-2 xl:tw-block">
+          <Up />
+        </span>
         <span className="tw-hidden xl:tw-col-start-7 xl:tw-row-start-2 xl:tw-block">
           <Up />
         </span>
@@ -97,7 +106,8 @@ export function SectionMap({ locale }: { readonly locale: SupportedLocale }) {
         <span className="tw-hidden xl:tw-col-start-11 xl:tw-row-start-2 xl:tw-block">
           <Up />
         </span>
-        <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-2 xl:tw-col-start-7 xl:tw-col-end-12 xl:tw-row-start-3 xl:tw-mt-0 xl:tw-grid xl:tw-grid-cols-[auto_minmax(0,1fr)]">
+        {/* The bus: one line under §2 to §8, which §10 feeds. */}
+        <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-2 xl:tw-col-start-1 xl:tw-col-end-12 xl:tw-row-start-3 xl:tw-mt-0 xl:tw-flex-nowrap xl:tw-justify-center xl:tw-border-0 xl:tw-border-t xl:tw-border-solid xl:tw-border-iron-500 xl:tw-pt-2">
           <MapNode locale={locale} section={10} dashed />
           <span className="tw-text-xs tw-text-iron-400">
             {t(locale, "network.tdh.spec.mapFeeds")}
@@ -152,7 +162,7 @@ export function PairStateMachine({
         ))}
       </ol>
       <svg
-        viewBox="0 0 600 140"
+        viewBox="0 0 600 152"
         role="img"
         aria-labelledby={`${id}-title ${id}-desc`}
         className="tw-hidden tw-h-auto tw-w-full tw-max-w-2xl md:tw-block"
@@ -250,6 +260,14 @@ export function PairStateMachine({
           className="tw-fill-iron-300 tw-font-mono tw-text-[13px]"
         >
           REVOKE
+        </text>
+        <text
+          x="407"
+          y="144"
+          textAnchor="middle"
+          className="tw-fill-iron-400 tw-text-[13px]"
+        >
+          {t(locale, "network.tdh.spec.s6-2.revokeTo")}
         </text>
         <path
           d="M490 60 C 490 18, 560 18, 560 58"

@@ -2,6 +2,7 @@ import { screen } from "@testing-library/react";
 import TDHCurrentRules, {
   seasonRanges,
 } from "@/app/network/tdh/TDHCurrentRules";
+import { tdhRulesSchema } from "@/app/network/tdh/tdh-rules.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { renderWithQueryClient } from "../../../utils/reactQuery";
 import userEvent from "@testing-library/user-event";
@@ -103,6 +104,20 @@ describe("TDHCurrentRules", () => {
       await screen.findByText(/temporarily unavailable/i)
     ).toBeInTheDocument();
     expect(screen.queryByText(/1\.60/)).not.toBeInTheDocument();
+  });
+
+  it("renders the rules the server read at once, and keeps them when a refresh fails", async () => {
+    fetchMock.mockRejectedValue(new Error("temporary failure"));
+    renderWithQueryClient(
+      <TDHCurrentRules
+        locale="en-US"
+        initialRules={tdhRulesSchema.parse(rules)}
+      />
+    );
+
+    expect(screen.getByText(/Season 15/i)).toBeInTheDocument();
+    expect(screen.queryByText(/temporarily unavailable/i)).toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("retries an API error and renders the returned rules", async () => {

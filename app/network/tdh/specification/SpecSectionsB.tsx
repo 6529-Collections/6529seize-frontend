@@ -1,4 +1,6 @@
+import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
+import TdhRuleClamp from "../shared/TdhRuleClamp";
 import TdhTableFrame from "../shared/TdhTableFrame";
 import { t, type MessageKey } from "@/i18n/messages";
 import TdhArrowLink from "../shared/TdhArrowLink";
@@ -14,6 +16,7 @@ import {
   RULE_RANGE,
   RULE_RATE_SPEC,
   RULE_CYCLE_ROOT,
+  RULE_EXPORT_TREES,
   RULE_REGISTRY,
   RULE_REGISTRY_CONSTRAINTS_CONDENSED,
   RULE_REGISTRY_HASH,
@@ -28,7 +31,12 @@ import {
 import { middleTruncate } from "../verification/components/verificationFormat";
 import DeviationsTable from "./DeviationsTable";
 import { Plain, Rule, SpecSection, SpecSub } from "./SpecParts";
-import { BUG_IDS, DECISION_IDS, PARAMETERS } from "./specData";
+import {
+  BUG_IDS,
+  DECISION_IDS,
+  FORMULA_PARAMETERS,
+  PARAMETERS,
+} from "./specData";
 
 const CAPTION =
   "tw-px-4 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200";
@@ -146,6 +154,16 @@ export default function SpecSectionsB({
           source="P53 §4.2"
           title={t(locale, "network.tdh.spec.s9.rootTitle")}
         />
+        <p className="tw-m-0 tw-max-w-3xl tw-text-[15px] tw-leading-7 tw-text-iron-200">
+          {t(locale, "network.tdh.spec.s9.leaves")}
+          <TdhSource refs={["P28 §4.3", "P28 §4.12"]} locale={locale} />
+        </p>
+        <Rule
+          locale={locale}
+          code={RULE_EXPORT_TREES}
+          source="P28 §4.4"
+          title={t(locale, "network.tdh.spec.s9.leavesTitle")}
+        />
       </SpecSection>
 
       <SpecSection
@@ -165,61 +183,81 @@ export default function SpecSectionsB({
           source="P26 §10"
           condensed
         />
-        <TdhTableFrame label={t(locale, "network.tdh.spec.s10.tableCaption")}>
-          <table
-            className={`${TDH_TABLE} tw-block md:tw-table md:tw-table-fixed`}
-          >
-            <caption className={`${CAPTION} tw-block md:tw-table-caption`}>
-              {t(locale, "network.tdh.spec.s10.tableCaption")}
-            </caption>
-            <colgroup className="tw-hidden md:tw-table-column-group">
-              <col className="md:tw-w-[34%]" />
-              <col className="md:tw-w-[28%]" />
-              <col />
-            </colgroup>
-            <thead className="tw-hidden md:tw-table-header-group">
-              <tr>
-                <th scope="col" className={TDH_TH}>
-                  {t(locale, "network.tdh.spec.s10.name")}
-                </th>
-                <th scope="col" className={TDH_TH}>
-                  {t(locale, "network.tdh.spec.s10.value")}
-                </th>
-                <th scope="col" className={TDH_TH}>
-                  {t(locale, "network.tdh.spec.s10.what")}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="tw-block md:tw-table-row-group">
-              {PARAMETERS.map((row) => (
-                <tr
-                  key={row.name}
-                  className="tw-grid tw-gap-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3 first:tw-border-t-0 md:tw-table-row md:tw-p-0"
-                >
-                  <th
-                    scope="row"
-                    className={`${TDH_TD_STACK_MD} tw-font-mono tw-text-xs tw-font-normal tw-text-iron-50 [overflow-wrap:anywhere]`}
-                  >
-                    {row.name}
+        <TdhRuleClamp
+          everywhere
+          more={t(locale, "network.tdh.spec.s10.showAll", {
+            count: formatInteger(locale, PARAMETERS.length),
+          })}
+          less={t(locale, "network.tdh.shared.showFewerLines")}
+        >
+          <TdhTableFrame label={t(locale, "network.tdh.spec.s10.tableCaption")}>
+            <table
+              className={`${TDH_TABLE} tw-block md:tw-table md:tw-table-fixed`}
+            >
+              <caption className={`${CAPTION} tw-block md:tw-table-caption`}>
+                {t(locale, "network.tdh.spec.s10.tableCaption")}
+              </caption>
+              <colgroup className="tw-hidden md:tw-table-column-group">
+                <col className="md:tw-w-[34%]" />
+                <col className="md:tw-w-[28%]" />
+                <col />
+              </colgroup>
+              <thead className="tw-hidden md:tw-table-header-group">
+                <tr>
+                  <th scope="col" className={TDH_TH}>
+                    {t(locale, "network.tdh.spec.s10.name")}
                   </th>
-                  <td
-                    className={`${TDH_TD_STACK_MD} tw-font-mono tw-text-xs tw-text-iron-200`}
-                  >
-                    <ParameterValue locale={locale} value={row.value} />
-                  </td>
-                  <td
-                    className={`${TDH_TD_STACK_MD} tw-text-[13px] tw-text-iron-300`}
-                  >
-                    {t(
-                      locale,
-                      `network.tdh.spec.param.${row.key}` as MessageKey
-                    )}
-                  </td>
+                  <th scope="col" className={TDH_TH}>
+                    {t(locale, "network.tdh.spec.s10.value")}
+                  </th>
+                  <th scope="col" className={TDH_TH}>
+                    {t(locale, "network.tdh.spec.s10.what")}
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </TdhTableFrame>
+              </thead>
+              <tbody className="tw-block md:tw-table-row-group">
+                {PARAMETERS.map((row) => (
+                  <tr
+                    key={row.name}
+                    className="tw-grid tw-gap-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3 first:tw-border-t-0 md:tw-table-row md:tw-p-0"
+                  >
+                    <th
+                      scope="row"
+                      className={`${TDH_TD_STACK_MD} tw-font-mono tw-text-xs tw-font-normal tw-text-iron-50 [overflow-wrap:anywhere]`}
+                    >
+                      {row.name}
+                      {FORMULA_PARAMETERS.has(row.name) && (
+                        <span
+                          title={t(locale, "network.tdh.spec.s10.formulaTitle")}
+                          className="tw-ml-2 tw-inline-block tw-whitespace-nowrap tw-rounded-full tw-border tw-border-dashed tw-border-iron-600 tw-px-1.5 tw-font-sans tw-text-xs tw-text-iron-300"
+                        >
+                          {t(locale, "network.tdh.spec.s10.formulaTag")}
+                          <span className="tw-sr-only">
+                            {": "}
+                            {t(locale, "network.tdh.spec.s10.formulaTitle")}
+                          </span>
+                        </span>
+                      )}
+                    </th>
+                    <td
+                      className={`${TDH_TD_STACK_MD} tw-font-mono tw-text-xs tw-text-iron-200`}
+                    >
+                      <ParameterValue locale={locale} value={row.value} />
+                    </td>
+                    <td
+                      className={`${TDH_TD_STACK_MD} tw-text-[13px] tw-text-iron-300`}
+                    >
+                      {t(
+                        locale,
+                        `network.tdh.spec.param.${row.key}` as MessageKey
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TdhTableFrame>
+        </TdhRuleClamp>
         <div className={`${TDH_CARD} tw-max-w-3xl tw-p-4`}>
           <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
             {t(locale, "network.tdh.spec.s10.hash")}
@@ -246,7 +284,8 @@ export default function SpecSectionsB({
         <Rule
           locale={locale}
           code={RULE_REGISTRY_HASH}
-          source="P28 §2.7"
+          source="P28 §1"
+          moreSources={["P28 §2.6", "P28 §2.7", "P28 §3.1"]}
           title={t(locale, "network.tdh.spec.s10.hashRuleTitle")}
         />
       </SpecSection>

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
+import CaseSafe from "./CaseSafe";
 import TdhHeading from "./TdhHeading";
 
 /**
@@ -39,7 +40,7 @@ export default function TdhSection({
       <div className={wide ? "" : "lg:tw-sticky lg:tw-top-28"}>
         {eyebrow && (
           <p className="tw-m-0 tw-mb-2 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
-            {eyebrow}
+            <CaseSafe text={eyebrow} />
           </p>
         )}
         <TdhHeading

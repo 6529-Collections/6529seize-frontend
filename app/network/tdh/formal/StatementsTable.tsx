@@ -22,6 +22,8 @@ import type { LeanStatement, StatementStatus } from "./leanResults";
 type Filter = StatementStatus | "all";
 
 const NO_EXTRA: Readonly<Record<string, ReactNode>> = {};
+/** U+00A0, so a reference such as "P26 §8.3" never breaks inside. */
+const NO_BREAK_SPACE = String.fromCodePoint(0xa0);
 
 const ORDER: readonly StatementStatus[] = [
   "proved",
@@ -223,7 +225,7 @@ export default function StatementsTable({
               <th scope="col" className={TDH_TH}>
                 {t(locale, "network.tdh.formal.statements.plain")}
               </th>
-              <th scope="col" className={`${TDH_TH} tw-w-[10rem]`}>
+              <th scope="col" className={`${TDH_TH} tw-w-[11.5rem]`}>
                 {t(locale, "network.tdh.formal.statements.status")}
               </th>
             </tr>
@@ -259,7 +261,11 @@ export default function StatementsTable({
                         {title}
                       </button>
                       <span className="tw-block tw-pl-6 tw-font-mono tw-text-xs tw-font-normal tw-text-iron-400">
-                        {row.refs.join(" · ")}
+                        {/* Each reference keeps "P26 §8.3" together; the
+                            line breaks only between references. */}
+                        {row.refs
+                          .map((ref) => ref.replaceAll(" ", NO_BREAK_SPACE))
+                          .join(" · ")}
                       </span>
                     </th>
                     <td className={`${TDH_TD_STACK_MD} tw-text-iron-300`}>

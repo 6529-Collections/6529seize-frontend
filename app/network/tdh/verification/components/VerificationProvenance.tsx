@@ -1,4 +1,5 @@
-import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import { ArrowDownTrayIcon, RssIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -6,6 +7,7 @@ import type {
   VerificationDay,
   VerificationImplementation,
 } from "@/lib/tdh/verification/schema";
+import CaseSafe from "../../shared/CaseSafe";
 import TdhHeading from "../../shared/TdhHeading";
 import TdhCopyButton from "../../shared/TdhCopyButton";
 import TdhSource from "../../shared/TdhSource";
@@ -18,6 +20,7 @@ import {
   etherscanBlockUrl,
 } from "./verificationLinks";
 import {
+  formatCycleDate,
   formatInteger,
   middleTruncate,
   shortCommit,
@@ -69,7 +72,9 @@ function Item({
 }) {
   return (
     <div className={`tw-min-w-0 ${wide ? "sm:tw-col-span-2" : ""}`}>
-      <dt className={DT}>{label}</dt>
+      <dt className={DT}>
+        <CaseSafe text={label} />
+      </dt>
       <dd className={DD}>{children}</dd>
     </div>
   );
@@ -186,6 +191,19 @@ function Commits({
   );
 }
 
+/** The day before a day, as its own page shows it. */
+export interface PreviousDay {
+  readonly cycleDay: number;
+  readonly date: string;
+  readonly sha256: string | null;
+}
+
+/**
+ * The first day of the scheduled daily runs (D132): the feed's days before it
+ * were computed together on October 15, 2026.
+ */
+const SCHEDULED_FROM = "2026-10-16";
+
 /**
  * What the day's result rests on (P26 §4.2, §9): where the data comes from,
  * rule version, registry hash, snapshot block, history mode, code versions
@@ -197,6 +215,7 @@ export default function VerificationProvenance({
   day,
   dayUrl,
   daySha256 = null,
+  previousDay = null,
   indexUrl,
 }: {
   readonly locale: SupportedLocale;
@@ -204,6 +223,8 @@ export default function VerificationProvenance({
   readonly dayUrl: string | null;
   /** The SHA-256 of the day file's bytes as the page read them. */
   readonly daySha256?: string | null;
+  /** The day before, with its own file's SHA-256, to check days as a chain. */
+  readonly previousDay?: PreviousDay | null;
   readonly indexUrl: string;
 }) {
   const rust = day?.implementations.rust ?? null;
@@ -224,13 +245,18 @@ export default function VerificationProvenance({
         className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
       />
       <div className={`${TDH_CARD} tw-mt-4 tw-p-5 sm:tw-p-6`}>
-        <dl className="tw-m-0 tw-grid tw-items-start tw-gap-x-8 tw-gap-y-5 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
-          <Item label={t(locale, "network.tdh.verify.provenance.dataSource")}>
-            {/* The feed's host name is one long word: it may break anywhere. */}
-            <span className="[overflow-wrap:anywhere]">
-              {t(locale, "network.tdh.verify.provenance.remote")}
-            </span>
-          </Item>
+        {/* Where the data comes from, across the card, then the facts in a
+            grid of short cells, so no long paragraph sits beside them. */}
+        <div className="tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.06] tw-pb-5">
+          <p className={`${DT} tw-m-0`}>
+            {t(locale, "network.tdh.verify.provenance.dataSource")}
+          </p>
+          {/* The feed's host name is one long word: it may break anywhere. */}
+          <p className="tw-m-0 tw-mt-1 tw-max-w-prose tw-text-sm tw-leading-6 tw-text-iron-200 [overflow-wrap:anywhere]">
+            {t(locale, "network.tdh.verify.provenance.remote")}
+          </p>
+        </div>
+        <dl className="tw-m-0 tw-mt-5 tw-grid tw-items-start tw-gap-x-8 tw-gap-y-5 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
           {day && (
             <Item label={t(locale, "network.tdh.verify.provenance.snapshot")}>
               <a
@@ -296,6 +322,36 @@ export default function VerificationProvenance({
           {(rust?.commit ?? python?.commit) && (
             <Item label={t(locale, "network.tdh.verify.provenance.commits")}>
               <Commits locale={locale} rust={rust} python={python} />
+              {day && day.date < SCHEDULED_FROM && (
+                <span className="tw-mt-1 tw-block tw-text-xs tw-leading-5 tw-text-amber-200">
+                  {t(locale, "network.tdh.verify.provenance.manualRun")}
+                </span>
+              )}
+            </Item>
+          )}
+          {previousDay && (
+            <Item label={t(locale, "network.tdh.verify.provenance.previous")}>
+              <Link
+                href={`/network/tdh/verification/${previousDay.cycleDay}`}
+                className={TDH_LINK}
+              >
+                {formatCycleDate(locale, previousDay.date)}
+              </Link>
+              {previousDay.sha256 && (
+                <span className="tw-block">
+                  <Hash
+                    locale={locale}
+                    value={previousDay.sha256}
+                    name={t(
+                      locale,
+                      "network.tdh.verify.provenance.previousSha"
+                    )}
+                  />
+                </span>
+              )}
+              <span className="tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
+                {t(locale, "network.tdh.verify.provenance.previousNote")}
+              </span>
             </Item>
           )}
           {day && (
@@ -359,11 +415,20 @@ export default function VerificationProvenance({
             <ArrowDownTrayIcon aria-hidden="true" className="tw-size-4" />
             {t(locale, "network.tdh.verify.provenance.downloadIndex")}
           </a>
+          <a
+            href="/network/tdh/verification.rss"
+            className={`${TDH_LINK} tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5`}
+          >
+            <RssIcon aria-hidden="true" className="tw-size-4" />
+            {t(locale, "network.tdh.verify.provenance.rss")}
+          </a>
           {daySha256 && (
-            <p className="tw-m-0 tw-basis-full tw-break-all tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-400">
-              {t(locale, "network.tdh.verify.provenance.daySha", {
-                hash: daySha256,
-              })}
+            <p className="tw-m-0 tw-basis-full tw-text-xs tw-leading-5 tw-text-iron-400">
+              {t(locale, "network.tdh.verify.provenance.daySha")}
+              {/* Only the hash may break, anywhere; the words never. */}
+              <code className="tw-mt-0.5 tw-block tw-break-all tw-font-mono tw-text-iron-300">
+                {daySha256}
+              </code>
             </p>
           )}
         </div>

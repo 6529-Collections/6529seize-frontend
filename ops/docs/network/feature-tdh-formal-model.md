@@ -10,7 +10,7 @@ claims were shown false with counterexamples, and what the proofs do not
 cover. Every status comes from the model's proof manifest (below); the
 copy bundled with the page records the model at commit `7bf579a` of 6529's
 design repository (15 October 2026, Lean 4.35.0), beside P26 as last changed
-at `1c69528`. The source is not yet published. A `Proposal, not adopted` pill
+at `1c69528`. The model's source is in 6529's private design repository. A `Proposal, not adopted` pill
 and a status line say that P26 stays the rule.
 
 ## Location in the Site
@@ -23,13 +23,17 @@ and a status line say that P26 stays the rule.
 
 ## Content
 
-- A summary band: properties of TDH-v1 proved (plus two validator rules),
-  draft claims disproved, conformance vectors (68 of 68, 1,190 checks, from
-  the manifest) and the records of a real day reproduced (all 21,410 of the
-  2026-10-11 cycle, equal to the Python reference's), with the theorem
-  counts, captioned with the published build. While a newer round exists,
-  one quiet line names it with its headline figures and links to its
-  section (below). Then where the statuses come from: the published
+- A summary band: statements about TDH-v1 proved (counted as the table's
+  filter counts them, last in, first out named on the card; plus two
+  validator rules), draft claims disproved (the card names the validator
+  rule the model also caught), conformance vectors (68 of 68, 1,190 checks,
+  from the manifest) and the records of a real day reproduced (all 21,410 of
+  the 2026-10-11 cycle, equal to the Python reference's), with the theorem
+  counts, captioned with the published build; commits in capitalised
+  eyebrows keep their case (`CaseSafe`). While a newer round exists, one
+  badge names it (`Round 5 committed: 89 of 89 vectors, 55 + 30 theorems`)
+  and links to its section (below); every other figure is the published
+  build's. Then where the statuses come from: the published
   manifest (with a link to its JSON) or the copy bundled with the page, and
   the build it records (commit, date, Lean version, P26's last change). The
   header carries one pill, `Proposal, not adopted`.
@@ -45,8 +49,10 @@ and a status line say that P26 stays the rule.
   (within those limits no holding stack can change), where it stops
   (mint facts read the steps, so eligibility, and with it balances, raw days,
   rates and TDH, can change; the underflow test reads the steps too), a
-  figure of two inputs with one net movement, and the Lean statement with the
-  definitions it uses.
+  figure of two inputs with one net movement (across the column, under the
+  text), and the Lean statement with the definitions it uses. The netting
+  row adds that a reordered or inserted round trip changes no stack as long
+  as both versions still pass the underflow test.
 - What is proved, and what is not: a legend of the proof statuses, each
   with what it rests on (kernel, definition, evaluation that trusts the
   compiler, counterexample, outside these proofs), then one table for
@@ -69,12 +75,18 @@ and a status line say that P26 stays the rule.
   P26 section. While the published build is round 3, a line says that
   round 5 moves log selection and decoding into the model.
 - What the proofs do not guarantee, labelled the same way, with a link to
-  the four rounds of differential tests on the Implementations page.
-- The next build (while one exists): round 5's figures and what it adds.
+  the four rounds of differential tests on the Implementations page, which
+  lists what each round found.
+- The next build (while one exists): round 5's figures, what it adds, and
+  the SHA-256 of its committed proof manifest, so the one the feed later
+  publishes can be matched against it.
 - Three layers of assurance as one column (the specification, the model,
-  the programs, and the inputs that feed them), and how anyone will be able
-  to check (`lake build`, `lake exe tdh-vectors`) once the source is
-  published, with the figures each build gives.
+  the programs, and the inputs that feed them, the last drawn dashed as
+  planned: checked reads and proofs A and B; today the history is taken as
+  reported), every connector with its arrowheads in the gap and a legend
+  for each border, and how the model is checked (`lake build`, `lake exe
+tdh-vectors`; it is in 6529's private design repository), with the
+  published build's figures.
 
 ## Rounds of the model
 
@@ -107,8 +119,9 @@ theorems; 46 fact checks) and says every status above is the published
 build's. The Implementations page's Lean card follows the same
 switch for its compute time, and adds round 5's vector count.
 
-The summary counts properties of the rule only: last in, first out is a
-lemma about how the model stores a stack and is not counted.
+The summary counts every proved statement of the TDH-v1 table, as the
+filter does; its card names last in, first out, a lemma about how the model
+stores a stack.
 
 ## Data
 

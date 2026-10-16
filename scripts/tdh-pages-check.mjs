@@ -31,7 +31,18 @@
  *   table;
  * - controls too small to hit: a button, switch, select, summary or text
  *   field under 24 x 24 px (WCAG 2.2 AA 2.5.8), and a text field or select
- *   under 40 px tall, or 44 px in the phone view.
+ *   under 40 px tall, or 44 px in the phone view;
+ * - SVG text that a drawn line crosses: a path, line or polyline whose stroke
+ *   runs through the text's box, or an arrowhead (marker) drawn inside it;
+ * - case-significant text set in capitals by `text-transform`: a commit or
+ *   hash, a 0x value, a domain such as 6529.io, or TDH-v1 and tdh-v1.0
+ *   (wrap it in the CaseSafe component, which keeps its case);
+ * - a word split across two lines by `word-break: break-all` (apply it to
+ *   the hash alone, never to the sentence around it).
+ *
+ * Routes that must answer 404 (a day permalink that names no day) must do so
+ * inside the site: a <main>, the viewport meta and the TDH section links,
+ * never a bare text body.
  *
  * A view whose page or browser crashes, or that does not finish within its
  * time, fails at once with an error instead of stopping the run; a crashed
@@ -56,6 +67,15 @@ import process from "node:process";
 import { AxeBuilder } from "@axe-core/playwright";
 import { chromium } from "playwright";
 
+/**
+ * Day permalinks that cannot name a published day: each must answer 404
+ * with the TDH pages' own not-found view, inside the site.
+ */
+const NOT_FOUND_ROUTES = [
+  "/network/tdh/verification/20739",
+  "/network/tdh/verification/abc",
+];
+
 const DEFAULT_ROUTES = [
   "/network/tdh",
   "/network/tdh/how-it-works",
@@ -67,6 +87,7 @@ const DEFAULT_ROUTES = [
   "/network/tdh/consolidation",
   "/network/tdh/consolidation/design",
   "/network/tdh/historic-boosts",
+  ...NOT_FOUND_ROUTES,
 ];
 
 const VIEWS = {
@@ -661,7 +682,189 @@ function inspectPage(limits) {
     }
   }
 
-  // 6. SVG text contrast against what is drawn under it.
+  // 6. SVG text crossed by a drawn line or arrowhead. The text's box is
+  // shrunk by a margin, so a leader line that ends at its label passes.
+  const lineOpacity = (el) => {
+    let o = 1;
+    for (let n = el; n && n !== document.body; n = n.parentElement) {
+      o *= Number.parseFloat(style(n).opacity);
+    }
+    return o;
+  };
+  /** A fill's alpha, or null when the shape paints no fill. */
+  const parseFill = (value) => {
+    if (!value || value === "none") return null;
+    const m = /rgba?\(([^)]+)\)/.exec(value);
+    if (!m) return 1;
+    const parts = m[1].split(/[\s,/]+/).filter(Boolean).map(Number);
+    return parts.length > 3 ? parts[3] : 1;
+  };
+  const strokeOf = (el) => {
+    const cs = style(el);
+    return (
+      cs.stroke &&
+      cs.stroke !== "none" &&
+      Number.parseFloat(cs.strokeWidth) > 0 &&
+      Number.parseFloat(cs.strokeOpacity) * lineOpacity(el) > 0.05
+    );
+  };
+  for (const svg of root.querySelectorAll("svg")) {
+    if (!isShown(svg)) continue;
+    const texts = [...svg.querySelectorAll("text")].filter(
+      (text) =>
+        text.textContent.trim() &&
+        isShown(text) &&
+        !ignored(text, "svg-text-crossing")
+    );
+    if (texts.length === 0) continue;
+    // Gridlines (`data-tdh-grid`) are background: haloed labels sit on them.
+    const lines = [...svg.querySelectorAll("path, line, polyline")].filter(
+      (el) =>
+        !el.closest("defs, marker, clipPath, mask, pattern, symbol") &&
+        !el.hasAttribute("data-tdh-grid") &&
+        isShown(el)
+    );
+    // Opaque shapes: a line drawn under one of them, where the text sits,
+    // is hidden there (a link under a wallet's disc, a badge on its line).
+    const covers = [
+      ...svg.querySelectorAll("circle, ellipse, rect, polygon, path"),
+    ].filter((el) => {
+      if (el.closest("defs, marker, clipPath, mask, pattern, symbol")) {
+        return false;
+      }
+      const cs = style(el);
+      const fill = parseFill(cs.fill);
+      return (
+        fill !== null &&
+        fill * Number.parseFloat(cs.fillOpacity) * lineOpacity(el) >= 0.9
+      );
+    });
+    const coveredAt = (line, screenPoint) =>
+      covers.some((cover) => {
+        if (
+          cover === line ||
+          !(line.compareDocumentPosition(cover) & Node.DOCUMENT_POSITION_FOLLOWING)
+        ) {
+          return false;
+        }
+        const ctm = cover.getScreenCTM?.();
+        return (
+          ctm &&
+          typeof cover.isPointInFill === "function" &&
+          cover.isPointInFill(screenPoint.matrixTransform(ctm.inverse()))
+        );
+      });
+    for (const text of texts) {
+      const r = text.getBoundingClientRect();
+      if (r.width < 2 || r.height < 2) continue;
+      const mx = Math.min(4, r.width * 0.12);
+      const my = r.height * 0.28;
+      const box = {
+        left: r.left + mx,
+        right: r.right - mx,
+        top: r.top + my,
+        bottom: r.bottom - my,
+      };
+      let hit = null;
+      for (const el of lines) {
+        if (hit) break;
+        const ctm = el.getScreenCTM?.();
+        if (!ctm) continue;
+        const inverse = ctm.inverse();
+        if (strokeOf(el) && typeof el.isPointInStroke === "function") {
+          const point = svg.createSVGPoint();
+          for (let i = 0; i <= 6 && !hit; i += 1) {
+            for (let j = 0; j <= 2 && !hit; j += 1) {
+              point.x = box.left + ((box.right - box.left) * i) / 6;
+              point.y = box.top + ((box.bottom - box.top) * j) / 2;
+              if (
+                el.isPointInStroke(point.matrixTransform(inverse)) &&
+                !coveredAt(el, point)
+              ) {
+                hit = `a ${el.tagName} crosses it`;
+              }
+            }
+          }
+        }
+        // An arrowhead sits on the end (or start) of its line.
+        const markers = ["markerEnd", "markerStart"].filter((key) => {
+          const value = style(el)[key];
+          return value && value !== "none";
+        });
+        if (!hit && markers.length > 0 && typeof el.getTotalLength === "function") {
+          const length = el.getTotalLength();
+          for (const key of markers) {
+            const local = el.getPointAtLength(key === "markerEnd" ? length : 0);
+            const point = svg.createSVGPoint();
+            point.x = local.x;
+            point.y = local.y;
+            const screen = point.matrixTransform(ctm);
+            if (
+              screen.x > box.left &&
+              screen.x < box.right &&
+              screen.y > box.top &&
+              screen.y < box.bottom &&
+              !coveredAt(el, screen)
+            ) {
+              hit = "an arrowhead sits on it";
+            }
+          }
+        }
+      }
+      if (hit) {
+        add("svg-text-crossing", text, hit);
+      }
+    }
+  }
+
+  // 7. Case-significant text in capitals, and words split by break-all.
+  const CASE_SIGNIFICANT =
+    /\b(?:0x[0-9a-fA-F…]+|(?=[0-9a-f]*\d)[0-9a-f]{7,64}|TDH-v1|tdh-v\d+\.\d+|tdh-v\d+|[a-z0-9-]+\.(?:io|eth|com|net|org))\b/;
+  const caseWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const caseFlagged = new Set();
+  for (let node = caseWalker.nextNode(); node; node = caseWalker.nextNode()) {
+    const parent = node.parentElement;
+    if (!parent || caseFlagged.has(parent)) continue;
+    if (parent.closest("script, style, noscript, [hidden], template")) continue;
+    const cs = style(parent);
+    const match = CASE_SIGNIFICANT.exec(node.data);
+    if (
+      match &&
+      (cs.textTransform === "uppercase" || cs.textTransform === "lowercase") &&
+      isShown(parent)
+    ) {
+      caseFlagged.add(parent);
+      add(
+        "case-mangled",
+        parent,
+        `"${match[0]}" is set in ${cs.textTransform}; keep its case (CaseSafe)`
+      );
+      continue;
+    }
+    // Only sentences: a hash or a signature with no space may break anywhere.
+    if (cs.wordBreak === "break-all" && /\s/.test(node.data.trim()) && isShown(parent)) {
+      for (const word of node.data.matchAll(/[A-Za-z’']{2,24}/g)) {
+        range.setStart(node, word.index);
+        range.setEnd(node, word.index + word[0].length);
+        const tops = new Set(
+          [...range.getClientRects()]
+            .filter((rect) => rect.width > 0.5)
+            .map((rect) => Math.round(rect.top))
+        );
+        if (tops.size > 1) {
+          caseFlagged.add(parent);
+          add(
+            "word-split",
+            parent,
+            `"${word[0]}" breaks across lines; apply break-all to the hash alone`
+          );
+          break;
+        }
+      }
+    }
+  }
+
+  // 8. SVG text contrast against what is drawn under it.
   const parseColor = (value) => {
     const m = /rgba?\(([^)]+)\)/.exec(value ?? "");
     if (!m) return null;
@@ -829,7 +1032,26 @@ async function checkView(browser, args, route, widthKey) {
       })
     );
     const status = response?.status() ?? 0;
-    if (status >= 400) {
+    const expectNotFound = NOT_FOUND_ROUTES.includes(route);
+    if (expectNotFound) {
+      // A 404, and inside the site: never a bare text body.
+      const frame = await guard(
+        page.evaluate(() => ({
+          main: Boolean(document.querySelector("main")),
+          viewport: Boolean(document.querySelector('meta[name="viewport"]')),
+          subnav: Boolean(
+            document.querySelector('a[href="/network/tdh/verification"]')
+          ),
+        }))
+      );
+      const missing = Object.entries(frame)
+        .filter(([, present]) => !present)
+        .map(([key]) => key);
+      if (status !== 404 || missing.length > 0) {
+        result.error = `expected a 404 inside the site; got HTTP ${status}${missing.length > 0 ? `, missing ${missing.join(", ")}` : ""}`;
+        return result;
+      }
+    } else if (status >= 400) {
       result.error = `HTTP ${status}`;
       return result;
     }

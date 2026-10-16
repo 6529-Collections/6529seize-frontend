@@ -34,8 +34,11 @@ export const EXAMPLE_NETWORK = {
   nextgenCollectionSize: 1_000,
 } as const;
 
-/** Unix time of the snapshot block of cycle 20,741 (2026-10-14 23:59:59 UTC). */
-export const EXAMPLE_SNAPSHOT_TIME = 1_792_022_399;
+/**
+ * Unix time of the snapshot block of cycle 20,742, block 26,201,364
+ * (2026-10-15 23:59:59 UTC).
+ */
+export const EXAMPLE_SNAPSHOT_TIME = 1_792_108_799;
 
 const ADD_FIRST_U = 50_000n;
 const ADD_RATIO_NUMERATOR = 6_529n;

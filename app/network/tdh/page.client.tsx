@@ -17,6 +17,7 @@ import {
   TDHHoldingChanges,
 } from "./TDHCalculationDetails";
 import TDHCurrentRules from "./TDHCurrentRules";
+import type { TdhRules } from "./tdh-rules.helpers";
 import TDHHero from "./TDHHero";
 import TDHInAMinute from "./TDHInAMinute";
 import TDHProfile from "./TDHProfile";
@@ -51,10 +52,13 @@ const RELATED = [
 export default function TDHMainPage({
   verification = null,
   manifestUrl = null,
+  rules = null,
 }: {
   readonly verification?: VerificationSummary | null;
   /** The Lean proof manifest on the daily feed, when it is published. */
   readonly manifestUrl?: string | null;
+  /** The current boost rules, read on the server when it could. */
+  readonly rules?: TdhRules | null;
 }) {
   const locale = useBrowserLocale();
   useSetTitle(t(locale, "network.tdh.explainer.pageTitle"));
@@ -79,7 +83,7 @@ export default function TDHMainPage({
           manifestUrl={manifestUrl}
         />
         <TDHProfile locale={locale} verification={verification} />
-        <TDHCurrentRules locale={locale} />
+        <TDHCurrentRules locale={locale} initialRules={rules} />
         <TDHHoldingChanges locale={locale} />
         <TDHGlossary locale={locale} />
         <TDHGoDeeper locale={locale} />

@@ -1,4 +1,3 @@
-import { ArrowUpIcon } from "@heroicons/react/24/outline";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
@@ -25,25 +24,41 @@ function Band({
   );
 }
 
+/** A small arrowhead for a connector, pointing up or down. */
+function Head({ up }: { readonly up: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 10 6"
+      className={`tw-h-1.5 tw-w-2.5 tw-text-iron-400 ${up ? "" : "tw-rotate-180"}`}
+    >
+      <path d="M0 6 L5 0 L10 6 z" fill="currentColor" />
+    </svg>
+  );
+}
+
+/**
+ * A connector between two bands, with its arrowheads drawn inside the gap,
+ * clear of both borders: up where what is below feeds what is above, at
+ * both ends where two layers are checked against each other.
+ */
 function Link({
   label,
-  up = false,
+  ends,
 }: {
   readonly label: string;
-  /** An arrow up: what is below feeds what is above. */
-  readonly up?: boolean;
+  readonly ends: "both" | "up";
 }) {
   return (
-    <div className="tw-flex tw-items-stretch tw-gap-3 tw-pl-6">
+    <div className="tw-flex tw-items-stretch tw-gap-3 tw-py-1.5 tw-pl-[1.3rem]">
       <span
         aria-hidden="true"
-        className="tw-relative tw-w-0 tw-border-0 tw-border-l-2 tw-border-dashed tw-border-iron-500"
+        className="tw-flex tw-w-2.5 tw-flex-col tw-items-center"
       >
-        {up && (
-          <ArrowUpIcon className="tw-absolute -tw-left-[9px] -tw-top-1 tw-size-4 tw-text-iron-400" />
-        )}
+        <Head up />
+        <span className="tw-w-0 tw-flex-1 tw-border-0 tw-border-l-2 tw-border-dashed tw-border-iron-500" />
+        {ends === "both" ? <Head up={false} /> : null}
       </span>
-      <span className="tw-py-2 tw-text-sm tw-leading-5 tw-text-iron-300">
+      <span className="tw-py-1 tw-text-sm tw-leading-5 tw-text-iron-300">
         {label}
       </span>
     </div>
@@ -72,23 +87,23 @@ export default function AssuranceLayers({
           subtitle={m("specSub")}
           tone="tw-border-iron-600 tw-bg-iron-900"
         />
-        <Link label={m("people")} />
+        <Link label={m("people")} ends="both" />
         <Band
           title={m("model")}
           subtitle={m("modelSub")}
           tone="tw-border-success/70 tw-bg-success/10"
         />
-        <Link label={m("vectors")} />
+        <Link label={m("vectors")} ends="both" />
         <Band
           title={m("programs")}
           subtitle={m("programsSub")}
-          tone="tw-border-primary-400/60 tw-bg-primary-500/10"
+          tone="tw-border-iron-600 tw-bg-iron-900"
         />
-        <Link label={m("inputsEdge")} up />
+        <Link label={m("inputsEdge")} ends="up" />
         <Band
           title={m("inputs")}
           subtitle={m("inputsBody")}
-          tone="tw-border-dashed tw-border-amber-300/50 tw-bg-iron-900"
+          tone="tw-border-dashed tw-border-iron-500 tw-bg-iron-950"
         />
       </div>
       <figcaption className="tw-mt-4 tw-flex tw-flex-wrap tw-gap-x-6 tw-gap-y-2 tw-text-xs tw-text-iron-300">
@@ -105,6 +120,13 @@ export default function AssuranceLayers({
             className="tw-w-5 tw-border-0 tw-border-t-2 tw-border-dashed tw-border-iron-500"
           />
           {m("human")}
+        </span>
+        <span className="tw-inline-flex tw-items-center tw-gap-2">
+          <span
+            aria-hidden="true"
+            className="tw-h-3 tw-w-5 tw-rounded tw-border tw-border-dashed tw-border-iron-500 tw-bg-iron-950"
+          />
+          {m("planned")}
         </span>
       </figcaption>
     </figure>

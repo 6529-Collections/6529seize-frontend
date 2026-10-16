@@ -5,7 +5,8 @@ Parent: [Network Index](README.md)
 ## Overview
 
 `/network/tdh/verification` is the public, daily, three-way comparison of TDH:
-the validators' Rust core, the Python reference and 6529.io's current backend
+the Rust core that validators will run, the Python reference and 6529.io's
+current backend
 compute TDH for the same snapshot, and the page shows how many collectors and
 wallets are equal, the three totals side by side, and every difference
 counted and classed by cause. No individual record is ever shown: the daily
@@ -16,14 +17,23 @@ single its holder out.
 renders per request (`dynamic = "force-dynamic"`; the feed files are cached
 at the fetch level). A path that cannot name a published day (not a cycle
 day in canonical form, before the feed's first day, 20,740, or after the
-latest closed cycle) gets a real 404 from the proxy
-(`lib/proxy/tdhVerificationDay.ts`). A day inside that range that the feed
-does not list shows the standard not-found page, titled `TDH verification:
-day not found` and marked `noindex` with one robots tag; its status stays
-200 because `app/network/loading.tsx` starts streaming before the page can
-call `notFound()`. A day's own page is a record: its cutover countdown is
-as of that day, it has no live freshness line, and Provenance shows the
-SHA-256 of the day file the page read.
+latest closed cycle) is rewritten by the proxy
+(`lib/proxy/tdhVerificationDay.ts`) to the TDH pages' own not-found view,
+`/network/tdh/verification/day-not-found?day=…`, with a real 404 status and
+the site around it: `No published day 20,739`, where the feed starts, and
+links to the latest day and the dashboard, marked `noindex`. The address
+bar keeps the path asked for, and the access gate still runs first. A day
+inside that range that the feed does not list shows the standard not-found
+page, titled `TDH verification: day not found` and marked `noindex` with
+one robots tag; its status stays 200 because `app/network/loading.tsx`
+starts streaming before the page can call `notFound()`. A day's own page is
+a record: its cutover tile shows the planned date with the countdown as it
+stood on that day (`On this day: 9 days to go`), it has no live freshness
+line, the headline card drops the date its title already gives, and
+Provenance shows the SHA-256 of the day file the page read and the day
+before it with its own file's SHA-256, so days can be checked as a chain.
+Days computed together on October 15, before the scheduled runs began,
+say so beside their code versions.
 
 ## Location in the Site
 
@@ -65,18 +75,23 @@ SHA-256 of the day file the page read.
    TDH, with Python − Rust and 6529.io − Rust as numbers and whether it is
    the same in all three; and the cutover: a countdown with the week from
    the start of the daily runs (October 16, 2026) to about October 23,
-   2026, counted from today on the dashboard and from the day itself on a
-   day's own page, and `Switched on {date}` only when a published file
-   says the cutover is done. One tile a row on phones, a 2 × 2 grid from a 26rem
+   2026 (`7 days to go` on the dashboard; on a day's own page the planned
+   date, with `On this day: 9 days to go`), and `Switched on {date}` only
+   when a published file says the cutover is done. The total tile notes
+   that the total validators are to sign leaves out the two sinks, which
+   the feed does not publish yet. Tile eyebrows keep the case of 6529.io
+   (`CaseSafe`). One tile a row on phones, a 2 × 2 grid from a 26rem
    column and one row of four from 56rem.
 3. Every day: one cell per day coloured and shaped by its verdict and
    linking to it (a missing 6529.io file is an outline, an unexplained
    difference carries `!`, a mismatch `×`), the total's difference under
    each as a number (0 when equal), dashed cells for days with no report
    and, while the cutover is ahead, the days still to come up to it, on
-   every day's page alike, with a legend under the row. The cells shrink
-   to fit a phone; past about ten days the row scrolls inside itself with
-   edge fades, starting at the shown day. It also says which
+   every day's page alike. The days share the card's whole width, with the
+   rows labelled on the left (`Rust − 6529.io`, the month); the legend
+   names only the states on screen, the others under `Other states`. The
+   cells keep at least 1.75rem; when the days need more room the row
+   scrolls inside itself with edge fades, starting at the shown day. It also says which
    report is the latest, warns when reports are late, and counts days with no
    report.
 4. Side by side (one card per measure, in one column below `lg`): totals,
@@ -90,24 +105,34 @@ SHA-256 of the day file the page read.
    and wallet records, the counts by class (A to D) and by cause (DEV and BUG
    items link to the specification), and the totals' differences. The four
    classes are explained below it, with a note that no record is published,
-   the difference expected until the owner decides (a group of four
-   consolidated wallets, which would show as class D), and a short history
-   of the DEV-2 cases that D131's netting settled.
+   the differences expected until the cutover (a group of four
+   consolidated wallets, until the owner decides; and a sale and a purchase
+   of one card in different transactions of one block, DEV-2, the one
+   difference D132 names), each of which would show as class D, and a short
+   history of the DEV-2 cases that D131's netting settled.
 6. Day by day: a table of the days from `xl` (one card per day below), with
    days that have no report; from the seventh day wider screens show a chart
    drawn for the column width, with the table one click away.
-7. Provenance: data source (6529's feed, named with its CloudFront host),
-   snapshot block with an Etherscan link, history mode, rule version and
+7. Provenance: the data source first, across the card (6529's feed, named
+   with its CloudFront host, and that its files are not signed), then a
+   grid of facts: snapshot block with an Etherscan link, history mode, rule
+   version and
    registry hash (from the day's file, or the specification's, labelled as
    such) with the P26 commit the runs followed (the Python reference's), code
    versions, and 6529.io's files on Arweave with links to each transaction
-   and file, JSON download links, and the SHA-256 of the day file as the
-   page read it.
+   and file, JSON download links, an RSS feed of every published day
+   (`/network/tdh/verification.rss`, one item per day with its verdict and
+   agreement), and the SHA-256 of the day file as the page read it (only
+   the hash breaks on a phone).
 8. Check it yourself: what anyone can check today from public sources
-   (6529.io's own API lists every day's upload with its Arweave link), what
-   that does not reach, the three commands that reproduce the day once the
-   source is published (wrapped only between words, so no flag is split),
-   and the roots and files to compare.
+   (6529.io's own API lists every day's upload with its Arweave link, and
+   the page prints the upload key's Arweave address,
+   `aLSndlbQ2FCefmpjQv0LML9rjghrrGlnaoNXUATHig0`), what that does not reach
+   (the validator's source is to be published when the owner decides,
+   D116; the Python reference is in 6529's private design repository), the
+   three commands that reproduce the day with the source code (they never
+   wrap: the block scrolls sideways, so a soft wrap is never mistaken for a
+   `\` continuation), and the roots and files to compare.
 9. How this works: the daily comparison as one graph (our computation and
    the object under test converging on the comparison, which publishes the
    files this page reads), drawn as a column in a narrow column and as two

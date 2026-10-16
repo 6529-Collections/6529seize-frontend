@@ -64,7 +64,7 @@ export default function NettingFigure({
       </figcaption>
       <p className="tw-sr-only">{m("desc")}</p>
       <div aria-hidden="true">
-        <div className="tw-grid tw-items-stretch tw-gap-3 md:tw-grid-cols-[minmax(0,1fr)_minmax(0,11rem)_minmax(0,1fr)]">
+        <div className="tw-grid tw-items-start tw-gap-3 md:tw-grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:tw-items-center">
           <div className={card}>
             <p className="tw-m-0 tw-flex tw-justify-between tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
               <span>{m("logged")}</span>
@@ -78,7 +78,7 @@ export default function NettingFigure({
               <Step from="A" to="B" />
             </ol>
           </div>
-          <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-rounded-xl tw-border tw-border-dashed tw-border-primary-400/40 tw-px-3 tw-py-4 tw-text-center">
+          <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-rounded-xl tw-border tw-border-dashed tw-border-primary-400/40 tw-px-4 tw-py-3 tw-text-center">
             <span className="tw-text-xs tw-font-medium tw-text-primary-300">
               {m("net")}
             </span>

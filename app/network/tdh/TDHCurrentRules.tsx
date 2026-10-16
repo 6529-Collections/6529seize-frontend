@@ -40,8 +40,12 @@ const formatMultiplier = (locale: SupportedLocale, value: number) =>
     maximumFractionDigits: 2,
   });
 
-/** The current TDH rules from the API, shared by every page that shows them. */
-export function useTdhRules() {
+/**
+ * The current TDH rules from the API, shared by every page that shows them.
+ * A page that read them on the server passes them in, so they render at once
+ * and a failed refresh in the browser keeps them on screen.
+ */
+export function useTdhRules(initialRules: TdhRules | null = null) {
   return useQuery({
     queryKey: [QueryKey.TDH_RULES],
     queryFn: async ({ signal }) =>
@@ -53,6 +57,7 @@ export function useTdhRules() {
           includeWalletAuth: false,
         })
       ),
+    ...(initialRules ? { initialData: initialRules } : {}),
     staleTime: 5 * 60_000,
     retry: false,
   });
@@ -60,10 +65,13 @@ export function useTdhRules() {
 
 export default function TDHCurrentRules({
   locale,
+  initialRules = null,
 }: {
   readonly locale: SupportedLocale;
+  /** The rules as the server read them, if it could. */
+  readonly initialRules?: TdhRules | null;
 }) {
-  const query = useTdhRules();
+  const query = useTdhRules(initialRules);
   return (
     <TDHSection
       id="tdh-1-4"
@@ -76,7 +84,7 @@ export default function TDHCurrentRules({
             {t(locale, "network.tdh.rules.loading")}
           </p>
         )}
-        {query.isError && (
+        {query.isError && !query.data && (
           <div className={`${TDH_PANEL} tw-p-5`}>
             <p className={TDH_TEXT}>{t(locale, "network.tdh.rules.error")}</p>
             <Button
@@ -91,9 +99,7 @@ export default function TDHCurrentRules({
           </div>
         )}
       </div>
-      {query.data && !query.isError && (
-        <Rules rules={query.data} locale={locale} />
-      )}
+      {query.data && <Rules rules={query.data} locale={locale} />}
       <nav
         aria-label={t(locale, "network.tdh.rules.links")}
         className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-3"
@@ -154,7 +160,7 @@ function Rules({
   const { boost, snapshot } = rules;
   return (
     <div className="tw-space-y-5">
-      <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+      <p className="tw-m-0 tw-max-w-prose tw-text-sm tw-leading-6 tw-text-iron-300">
         {t(locale, "network.tdh.rules.snapshot", {
           cycle: formatDate(locale, cycleDateOf(snapshot.block_timestamp), {
             dateStyle: "medium",

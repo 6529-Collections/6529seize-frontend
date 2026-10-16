@@ -9,11 +9,17 @@ const mockRedirect = jest.fn((url: URL) => ({
   kind: "redirect",
   url: url.toString(),
 }));
+const mockRewrite = jest.fn((url: URL, init?: { status?: number }) => ({
+  kind: "rewrite",
+  url: url.toString(),
+  status: init?.status,
+}));
 
 jest.mock("next/server", () => ({
   NextResponse: {
     next: () => mockNext(),
     redirect: (url: URL) => mockRedirect(url),
+    rewrite: (url: URL, init?: { status?: number }) => mockRewrite(url, init),
   },
 }));
 
@@ -412,21 +418,25 @@ describe("proxy", () => {
       });
     });
 
-    it("answers a TDH verification day that cannot exist with a 404", async () => {
+    it("answers a TDH verification day that cannot exist with the TDH not-found view and a 404", async () => {
       proxy = loadProxy(PRODUCTION_BASE_ENDPOINT);
 
-      const unknown = (await proxy(
+      const unknown = await proxy(
         createRequest("/network/tdh/verification/abc", {
           origin: PRODUCTION_BASE_ENDPOINT,
         })
-      )) as Response;
+      );
       const published = await proxy(
         createRequest("/network/tdh/verification/20740", {
           origin: PRODUCTION_BASE_ENDPOINT,
         })
       );
 
-      expect(unknown.status).toBe(404);
+      expect(unknown).toEqual({
+        kind: "rewrite",
+        url: "https://6529.io/network/tdh/verification/day-not-found?day=abc",
+        status: 404,
+      });
       expect(published).toEqual({ kind: "next" });
     });
 

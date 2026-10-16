@@ -15,10 +15,11 @@ const CANONICAL_DAY = /^[1-9]\d{0,6}$/;
  * True for a day permalink that cannot name a published day: a segment that
  * is not a cycle day number in canonical form, a day before the feed's first,
  * or a day after the latest closed cycle (cycle N closes at 00:00 UTC of its
- * date, so no later day can exist yet). The proxy answers these with a real
- * 404: the page itself streams under `app/network/loading.tsx`, so its own
- * not-found view can only be sent with status 200. A day inside the range
- * that the feed does not list still gets that view, marked noindex.
+ * date, so no later day can exist yet). The proxy rewrites these to the TDH
+ * pages' own not-found view (`TDH_DAY_NOT_FOUND_PATH`) with a real 404
+ * status: the day page itself streams under `app/network/loading.tsx`, so
+ * its own not-found view can only be sent with status 200. A day inside the
+ * range that the feed does not list still gets that view, marked noindex.
  */
 export function isImpossibleTdhVerificationDay(
   pathname: string,
@@ -37,4 +38,23 @@ export function isImpossibleTdhVerificationDay(
   const day = Number(segment);
   const latestClosed = Math.floor(nowMs / MS_PER_DAY);
   return day < FIRST_TDH_FEED_CYCLE_DAY || day > latestClosed;
+}
+
+/** The TDH pages' view for a day permalink that names no published day. */
+export const TDH_DAY_NOT_FOUND_PATH = "/network/tdh/verification/day-not-found";
+
+/**
+ * Where the proxy sends an impossible day permalink: the not-found view, with
+ * the segment that was asked for (cut to 32 characters) as `?day=`. The
+ * address bar keeps the original path.
+ */
+export function tdhDayNotFoundTarget(url: URL, pathname: string): URL {
+  const target = new URL(url.toString());
+  target.pathname = TDH_DAY_NOT_FOUND_PATH;
+  target.search = "";
+  const segment = pathname.startsWith(DAY_PATH_PREFIX)
+    ? pathname.slice(DAY_PATH_PREFIX.length)
+    : "";
+  target.searchParams.set("day", segment.slice(0, 32));
+  return target;
 }

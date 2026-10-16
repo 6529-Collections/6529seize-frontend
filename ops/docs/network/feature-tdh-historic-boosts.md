@@ -30,14 +30,17 @@ daily comparison use only the current schedule.
    full-set boost (bars start at 1.00×) that ends with the current schedule,
    its value on 16 October 2026 and, drawn dashed and labelled with a dashed
    swatch, its reach once seasons 1 to 20 pay; and a table of effective
-   periods, full-set boosts (the current row: the value today, with "up to
-   2.00× once seasons 1–20 pay" under it), seasons with a bonus ("Seasons
+   periods, full-set boosts (the current row: the value today, with
+   "2.00× once seasons 1–20 pay" under it), seasons with a bonus ("Seasons
    1–20 (1–16 paying today)") and the Gradient bonus (`+0.02 each, up to
-   3`), with sentence-case headers and `×`. Under the table, the same four
-   boost figures as the overview's Current boosts, on one scale, and where
-   the values come from: 6529.io's published TDH pages for 1.1 to 1.3, the
-   backend's rule file (which P26 cites) for 1.4, and why days under 1.1 to
-   1.3 are not checked.
+3`), with sentence-case headers and `×`. Under the table, the same four
+   boost figures as the overview's Current boosts, on one scale (read on
+   the server; while the rules load, or if they fail, a panel of the same
+   height holds the place, with `Reload rules`), and where the values come
+   from in two sentences, with links pinned to commits: 6529.io's TDH pages
+   as first archived (6529seize-frontend `2d92c95`, October 9, 2025) for
+   1.1 to 1.3, the backend's rule file at `d0c070c` (the commit P26 cites)
+   for 1.4. The chart's note says it shows full-set boosts only.
 3. On tablet or desktop, use `Show rules` in the `Rule details` column. On
    mobile, use `Show rules` on the version card.
 4. Review the complete Category A, B, and C rules for any expanded version.

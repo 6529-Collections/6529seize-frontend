@@ -6,6 +6,7 @@ import { t } from "@/i18n/messages";
 import {
   LATEST_DAY_REVALIDATE_SECONDS,
   OLDER_DAY_REVALIDATE_SECONDS,
+  loadPreviousDay,
   loadVerificationDay,
   loadVerificationIndex,
 } from "@/lib/tdh/verification/loadVerification.server";
@@ -44,11 +45,14 @@ async function loadPermalink(value: string) {
     return null;
   }
   const isLatest = latestIndexDay(indexLoad.index)?.cycleDay === cycleDay;
-  const dayLoad = await loadVerificationDay(
-    cycleDay,
-    isLatest ? LATEST_DAY_REVALIDATE_SECONDS : OLDER_DAY_REVALIDATE_SECONDS
-  );
-  return { indexLoad, entry, dayLoad };
+  const [dayLoad, previousDay] = await Promise.all([
+    loadVerificationDay(
+      cycleDay,
+      isLatest ? LATEST_DAY_REVALIDATE_SECONDS : OLDER_DAY_REVALIDATE_SECONDS
+    ),
+    loadPreviousDay(indexLoad.index, cycleDay),
+  ]);
+  return { indexLoad, entry, dayLoad, previousDay };
 }
 
 export default async function TdhVerificationDayPage({
@@ -64,7 +68,7 @@ export default async function TdhVerificationDayPage({
     notFound();
   }
   const locale = DEFAULT_LOCALE;
-  const { indexLoad, entry, dayLoad } = loaded;
+  const { indexLoad, entry, dayLoad, previousDay } = loaded;
   const cycle = formatInteger(locale, entry.cycleDay);
   const date = formatCycleDate(locale, entry.date);
 
@@ -94,6 +98,7 @@ export default async function TdhVerificationDayPage({
         selected={entry}
         now={new Date()}
         permalink
+        previousDay={previousDay}
       />
     </TdhPageShell>
   );

@@ -156,9 +156,9 @@ const CURVE_POINTS = [
 const LABEL_OFFSET: Readonly<Record<string, readonly [number, number]>> = {
   gradient: [12, -6],
   nextgen: [8, -12],
-  // Left of its dot, level with it: above it, at the right end of the
-  // axis, the label crowded NextGen's on a phone.
-  firstgm: [-10, 0],
+  // Above and left of its dot, clear of the curve, which runs into the dot
+  // from the left almost level with it.
+  firstgm: [-8, -14],
 };
 const PAIRED = new Set(["meme300", "meme310"]);
 
@@ -279,6 +279,7 @@ function RateCurve({
             y1={y(tick)}
             y2={y(tick)}
             className="tw-stroke-iron-800"
+            data-tdh-grid=""
           />
           <text
             x={left - 8}
@@ -291,7 +292,10 @@ function RateCurve({
           </text>
         </g>
       ))}
-      {[100, 300, 1_000, 4_000].map((tick) => (
+      {(width === NARROW_WIDTH
+        ? [100, 300, 1_000]
+        : [100, 300, 1_000, 4_000]
+      ).map((tick) => (
         <text
           key={tick}
           x={x(tick)}
@@ -485,10 +489,12 @@ function IdentityGraph({ graph }: { readonly graph: (typeof GRAPHS)[number] }) {
         const ys = points.map((point) => point[1]);
         const minX = Math.min(...xs) - 26;
         const minY = Math.min(...ys) - 22;
+        // The first identity in the identity blue, a second one in a second
+        // tint, as the legend shows: a wallet alone is an identity too.
         const tone =
           index === 0
             ? "tw-fill-primary-500/10 tw-stroke-primary-400/70"
-            : "tw-fill-iron-800/40 tw-stroke-iron-500";
+            : "tw-fill-teal-400/10 tw-stroke-teal-300/70";
         const [single] = points;
         if (points.length === 1 && single) {
           return (
@@ -613,7 +619,7 @@ function LinkOrder({
               n: formatInteger(locale, index + 1),
             })}
           </span>
-          <span className="tw-font-mono">{`${link.slice(0, 1)}–${link.slice(1)}`}</span>
+          <span className="tw-font-medium">{`${link.slice(0, 1)}–${link.slice(1)}`}</span>
         </span>
       ))}
       {graph.key === "row2" && (
@@ -647,7 +653,7 @@ export function IdentityGraphDiagram({
             <IdentityGraph graph={graph} />
             <div className="tw-mt-2 tw-text-center sm:tw-mt-0 sm:tw-text-left xl:tw-mt-2 xl:tw-text-center">
               <LinkOrder locale={locale} graph={graph} />
-              <p className="tw-m-0 tw-font-mono tw-text-[13px] tw-leading-5 tw-text-primary-300">
+              <p className="tw-m-0 tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-100">
                 {t(
                   locale,
                   `network.tdh.how.s10.${graph.key}.result` as MessageKey
@@ -671,6 +677,13 @@ export function IdentityGraphDiagram({
             className="tw-h-3 tw-w-5 tw-rounded-full tw-border tw-border-solid tw-border-primary-400/70 tw-bg-primary-500/10"
           />
           {t(locale, "network.tdh.how.s10.legendIdentity")}
+        </span>
+        <span className="tw-inline-flex tw-items-center tw-gap-2">
+          <span
+            aria-hidden="true"
+            className="tw-h-3 tw-w-5 tw-rounded-full tw-border tw-border-solid tw-border-teal-300/70 tw-bg-teal-400/10"
+          />
+          {t(locale, "network.tdh.how.s10.legendIdentity2")}
         </span>
         <span className="tw-inline-flex tw-items-center tw-gap-2">
           <span

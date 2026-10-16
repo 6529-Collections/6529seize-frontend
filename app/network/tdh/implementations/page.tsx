@@ -332,7 +332,7 @@ export default async function TdhImplementationsPage() {
             locale={locale}
             tones={["success", "primary", "warning"]}
           />
-          <div className="tw-max-w-4xl tw-space-y-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+          <div className="tw-max-w-prose tw-space-y-2 tw-text-sm tw-leading-6 tw-text-iron-300">
             <p className="tw-m-0">
               {t(locale, "network.tdh.impl.conformanceNote")}
               <TdhSource refs={["P26 §13"]} locale={locale} />

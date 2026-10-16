@@ -137,7 +137,7 @@ describe("VerificationDashboard", () => {
     expect(screen.getAllByText("Wallets: 11,133 of 11,133 equal").length).toBe(
       2
     );
-    expect(screen.getByText("In 8 days")).toBeInTheDocument();
+    expect(screen.getByText("8 days to go")).toBeInTheDocument();
     expect(screen.getAllByText("Not yet fully checked").length).toBeGreaterThan(
       0
     );
@@ -349,9 +349,11 @@ describe("VerificationDashboard", () => {
       NOW,
       true
     );
-    // A day's own page counts down from that day, not from today.
-    expect(screen.queryByText("In 8 days")).not.toBeInTheDocument();
-    expect(screen.getByText("9 days to go")).toBeInTheDocument();
+    // A day's own page shows the planned date, and the countdown as it
+    // stood on that day, labelled so; not today's.
+    expect(screen.queryByText("8 days to go")).not.toBeInTheDocument();
+    expect(screen.getByText("About Oct 23")).toBeInTheDocument();
+    expect(screen.getByText("On this day: 9 days to go")).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Not the latest day: go to the latest" })
     ).toHaveAttribute("href", "/network/tdh/verification");
@@ -388,7 +390,7 @@ describe("VerificationDashboard", () => {
     expect(
       screen.getByText("No daily report is published yet.")
     ).toBeInTheDocument();
-    expect(screen.getByText("In 8 days")).toBeInTheDocument();
+    expect(screen.getByText("8 days to go")).toBeInTheDocument();
     expectAccessibleStructure(container);
   });
 

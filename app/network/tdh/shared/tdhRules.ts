@@ -283,7 +283,10 @@ registryHash = H("6529.TdhRegistry.v1", the fields above in order)
 # ascending. Boosts are in micro-units, additional_set_ratio in 10^-4 and
 # gradient_rate_minimum in cents.`;
 
-/** P28 §1, §2.6 and §2.7: how H and the registry record are encoded. */
+/**
+ * P28 §1 (H), §2.6 (the stored record), §2.7 (abi.encode) and §3.1 (TAG):
+ * how H and the registry record are encoded.
+ */
 export const RULE_REGISTRY_HASH = `TAG(name)    = keccak256(the ASCII bytes of name)
 H(name, f1, ..., fk) = keccak256(abi.encode(bytes32 TAG(name), f1, ..., fk))
 
@@ -315,6 +318,36 @@ export const RULE_CYCLE_ROOT = `cycleRoot_N = H("6529.TdhCycleRoot.v1",
   uint64  totalTDH,         # sum of identityTDH over non-sink identities
   bytes32 tokenRoot,        # P28 §4.12
   uint32  tokenCount)       # leaves in tokenRoot`;
+
+/**
+ * P28 §3.3, §4.3, §4.4 and §4.12 (as P53 §4.1 uses them): the leaves of the
+ * wallet and per-token trees the cycle root binds, and the list tree.
+ */
+export const RULE_EXPORT_TREES = `cid = H("6529.TdhIdentity.v1", address[] wallets)    # wallets ascending
+
+walletLeaf = H("6529.TdhWalletLeaf.v1",
+    address wallet,
+    bytes32 cid,              # the wallet's identity
+    uint64  identityTDH,      # the identity's final TDH
+    uint64  walletTDH,        # this wallet's own final TDH
+    uint8   walletCount)      # wallets in the identity, 1 to 3
+    one leaf per wallet record whose identity is not a sink,
+    ascending by address as an unsigned 160-bit integer
+walletRoot = ROOT("6529.TdhWalletRoot.v1", wallet leaves)
+
+tokenLeaf = H("6529.TdhTokenLeaf.v1",
+    bytes32 cid, address contract, uint256 tokenId,
+    uint64  tokenTDH)         # the identity's per-token final
+    one leaf per non-sink identity and eligible token with tokenTDH > 0,
+    ascending by (cid, contract, tokenId)
+tokenRoot = ROOT("6529.TdhTokenRoot.v1", token leaves)
+
+NODE(l, r)     = keccak256(TAG("6529.MerkleNode.v1") || l || r)
+TOP([])        = 32 zero bytes
+TOP([x])       = x
+TOP(L)         = pair adjacent entries left to right with NODE; an odd
+                 last entry is promoted unchanged; repeat until one remains
+ROOT(class, L) = H(class, uint64 len(L), bytes32 TOP(L))`;
 
 /** P26 §10, "Field types" and "Registry constraints", line for line. */
 export const RULE_REGISTRY_CONSTRAINTS_CONDENSED = `every field at its type (uint32, uint64, uint256, int64, address, bytes32);

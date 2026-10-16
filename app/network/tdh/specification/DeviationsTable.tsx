@@ -11,6 +11,7 @@ import {
   TDH_TABLE,
   TDH_TH,
 } from "../shared/tdhStyles";
+import CaseSafe from "../shared/CaseSafe";
 import { TDH_TONE_DOT, type TdhTone } from "../shared/TdhStatusPill";
 import { DEVIATIONS, type DeviationGroup } from "./specData";
 
@@ -102,7 +103,7 @@ export default function DeviationsTable({
         >
           <thead className="tw-hidden xl:tw-table-header-group">
             <tr>
-              <th scope="col" className={`${TDH_TH} tw-w-[8.5rem]`}>
+              <th scope="col" className={`${TDH_TH} tw-w-[5.5rem]`}>
                 {t(locale, "network.tdh.spec.s11.id")}
               </th>
               {(["old", "v1", "effect"] as const).map((field) => (
@@ -110,7 +111,7 @@ export default function DeviationsTable({
                   {t(locale, `network.tdh.spec.s11.${field}`)}
                 </th>
               ))}
-              <th scope="col" className={`${TDH_TH} tw-w-[11rem]`}>
+              <th scope="col" className={`${TDH_TH} tw-w-[13rem]`}>
                 {t(locale, "network.tdh.spec.s11.decision")}
               </th>
             </tr>
@@ -128,7 +129,7 @@ export default function DeviationsTable({
                 >
                   <span className="tw-block">{`DEV-${row.id}`}</span>
                   {row.group === "changes" && (
-                    <span className="tw-inline-block tw-whitespace-nowrap tw-rounded-full tw-bg-amber-400/15 tw-px-2 tw-py-0.5 tw-font-sans tw-text-xs tw-font-medium tw-text-amber-200">
+                    <span className="tw-inline-block tw-whitespace-nowrap tw-rounded-full tw-bg-amber-400/15 tw-px-2 tw-py-0.5 tw-font-sans tw-text-xs tw-font-medium tw-text-amber-200 xl:tw-hidden">
                       {t(locale, "network.tdh.spec.s11.filter.changes")}
                     </span>
                   )}
@@ -139,8 +140,17 @@ export default function DeviationsTable({
                 {(["old", "v1", "effect"] as const).map((field) => (
                   <td key={field} className={`${CELL} tw-min-w-0`}>
                     <span className="tw-block tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400 xl:tw-hidden">
-                      {t(locale, `network.tdh.spec.s11.${field}`)}
+                      <CaseSafe
+                        text={t(locale, `network.tdh.spec.s11.${field}`)}
+                      />
                     </span>
+                    {/* From xl the ID column is narrow: the "can change
+                        values" mark moves to the head of the effect. */}
+                    {field === "effect" && row.group === "changes" && (
+                      <span className="tw-mb-1 tw-hidden tw-whitespace-nowrap tw-rounded-full tw-bg-amber-400/15 tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-text-amber-200 xl:tw-inline-block">
+                        {t(locale, "network.tdh.spec.s11.filter.changes")}
+                      </span>
+                    )}
                     <span className="tw-mt-1 tw-block tw-text-sm tw-leading-6 tw-text-iron-200 xl:tw-mt-0">
                       {t(locale, key(row.id, field))}
                     </span>

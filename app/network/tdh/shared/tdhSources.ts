@@ -5,8 +5,8 @@ import { t, type MessageKey } from "@/i18n/messages";
  * Source references cited by the TDH pages (plan §4.4). Every reference to
  * the specification, a deviation, an old-backend issue, a decision or the
  * evidence resolves to an anchor on the specification page, so no chip links
- * to a private repository. P53, P38 and P52 stay unlinked until the source is
- * published.
+ * to a private repository. P53, P38, P52 and P28 are in 6529's private design
+ * repository, so their chips have no link.
  */
 
 export const SPECIFICATION_PATH = "/network/tdh/specification";

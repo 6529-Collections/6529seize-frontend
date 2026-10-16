@@ -10,6 +10,7 @@ import {
   FIRST_REPORT_DATE,
   type CutoverState,
 } from "@/lib/tdh/verification/states";
+import CaseSafe from "../../shared/CaseSafe";
 import TdhSource from "../../shared/TdhSource";
 import { TDH_CARD } from "../../shared/tdhStyles";
 import {
@@ -107,7 +108,9 @@ function CountTile({
   if (equal === null || total === null) {
     return (
       <li className={TILE}>
-        <p className={TILE_LABEL}>{label}</p>
+        <p className={TILE_LABEL}>
+          <CaseSafe text={label} />
+        </p>
         <p className={TILE_SUB}>{sub}</p>
         <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
           {missing}
@@ -118,7 +121,9 @@ function CountTile({
   const differ = total - equal;
   return (
     <li className={TILE}>
-      <p className={TILE_LABEL}>{label}</p>
+      <p className={TILE_LABEL}>
+        <CaseSafe text={label} />
+      </p>
       <p className={TILE_SUB}>{sub}</p>
       {note && <p className={TILE_SUB}>{note}</p>}
       <p className={TILE_VALUE}>
@@ -201,6 +206,9 @@ function TotalTile({
         {t(locale, "network.tdh.verify.tiles.totalDeltaSub")}
       </p>
       <p className={TILE_VALUE}>{formatInteger(locale, rustTotal)}</p>
+      <p className={TILE_SUB}>
+        {t(locale, "network.tdh.verify.tiles.signedTotalNote")}
+      </p>
       <dl className="tw-m-0 tw-mt-3 tw-space-y-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-2 tw-text-xs tw-tabular-nums tw-leading-5">
         {(
           [
@@ -263,13 +271,24 @@ export function CutoverTile({
         : t(locale, "network.tdh.verify.cutover.doneBody", {
             cycle: formatInteger(locale, cutover.cycleDay),
           });
-  } else if (cutover.kind === "countdown") {
+  } else if (cutover.kind === "countdown" && relative) {
     headline = t(
       locale,
-      `network.tdh.verify.cutover.${relative ? "countdown" : "countdownOnDay"}.${plural(locale, cutover.days)}` as MessageKey,
+      `network.tdh.verify.cutover.countdown.${plural(locale, cutover.days)}` as MessageKey,
       { days: formatInteger(locale, cutover.days) }
     );
     body = t(locale, "network.tdh.verify.cutover.countdownBody", { date });
+  } else if (cutover.kind === "countdown") {
+    // A day's own page: the planned date, which does not go stale, and the
+    // countdown as it stood on that day, labelled so.
+    headline = t(locale, "network.tdh.verify.cutover.planned", {
+      date: formatShortCycleDate(locale, cutover.plannedDate),
+    });
+    body = t(
+      locale,
+      `network.tdh.verify.cutover.countdownOnDay.${plural(locale, cutover.days)}` as MessageKey,
+      { days: formatInteger(locale, cutover.days) }
+    );
   } else {
     headline = t(locale, "network.tdh.verify.cutover.planned", {
       date: formatShortCycleDate(locale, cutover.plannedDate),
@@ -279,7 +298,7 @@ export function CutoverTile({
   return (
     <li className={TILE} data-cutover={cutover.kind}>
       <p
-        className={`${TILE_LABEL} tw-flex tw-items-center tw-justify-between tw-gap-2`}
+        className={`${TILE_LABEL} tw-flex tw-items-baseline tw-justify-between tw-gap-2`}
       >
         {t(locale, "network.tdh.verify.cutover.heading")}
         <TdhSource refs={["D132"]} locale={locale} />
@@ -287,11 +306,16 @@ export function CutoverTile({
       <p className={TILE_SUB}>{t(locale, "network.tdh.verify.cutover.sub")}</p>
       <p className={`${TILE_VALUE} tw-text-iron-50`}>{headline}</p>
       {cutover.kind === "countdown" ? (
-        <CutoverProgress
-          locale={locale}
-          elapsed={cutover.elapsed}
-          plannedDate={cutover.plannedDate}
-        />
+        <>
+          {!relative && (
+            <p className={`${TILE_FOOT} tw-text-iron-300`}>{body}</p>
+          )}
+          <CutoverProgress
+            locale={locale}
+            elapsed={cutover.elapsed}
+            plannedDate={cutover.plannedDate}
+          />
+        </>
       ) : (
         <p className={`${TILE_FOOT} tw-text-iron-300`}>{body}</p>
       )}

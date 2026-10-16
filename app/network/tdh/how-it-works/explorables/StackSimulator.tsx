@@ -9,6 +9,7 @@ import {
   TDH_BUTTON,
   TDH_CHIP_BUTTON,
   TDH_CHIP_OFF,
+  TDH_FOCUS_RING,
   TDH_CHIP_ON,
 } from "../../shared/tdhStyles";
 import ExplorableFrame from "./ExplorableFrame";
@@ -155,7 +156,8 @@ export default function StackSimulator({
       <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
         {t(locale, "network.tdh.how.stack.intro")}
       </p>
-      <div className="tw-mt-3 tw-flex tw-flex-wrap tw-gap-2">
+      {/* Four equal buttons: two by two on phones, one row from sm. */}
+      <div className="tw-mt-3 tw-grid tw-grid-cols-2 tw-gap-2 sm:tw-flex sm:tw-flex-wrap">
         <button
           type="button"
           className={TDH_BUTTON}
@@ -190,7 +192,7 @@ export default function StackSimulator({
           })}
         </button>
       </div>
-      <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
+      <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
         {/* A switch in the explorables' pill style, not a native checkbox. */}
         <button
           id={toggleId}
@@ -210,7 +212,13 @@ export default function StackSimulator({
           </span>
           {t(locale, "network.tdh.how.stack.consolidated")}
         </button>
-        <span className="tw-rounded-full tw-bg-iron-800 tw-px-3 tw-py-1 tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100">
+        <a
+          href="#step-10"
+          className={`tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline hover:tw-text-primary-400 ${TDH_FOCUS_RING}`}
+        >
+          {t(locale, "network.tdh.how.stack.consolidatedLink")}
+        </a>
+        <span className="tw-ml-auto tw-rounded-full tw-bg-iron-800 tw-px-3 tw-py-1 tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100">
           {t(locale, "network.tdh.how.stack.day", {
             day: formatInteger(locale, today),
           })}

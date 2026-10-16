@@ -221,9 +221,21 @@ function step(position: number) {
   return within(item);
 }
 
-function addFourthWallet() {
+/** Ticks the guided setup's confirmation of TDH-v1's three-wallet rule. */
+function acknowledgeFourthWallet() {
+  fireEvent.click(
+    screen.getByRole("checkbox", {
+      name: /from the cutover one of the four wallets counts on its own/,
+    })
+  );
+}
+
+function addFourthWallet({ acknowledge = true } = {}) {
   fireEvent.click(screen.getByRole("button", { name: "Add Wallet" }));
   fireEvent.change(walletInput(4), { target: { value: D } });
+  if (acknowledge) {
+    acknowledgeFourthWallet();
+  }
 }
 
 beforeEach(() => {
@@ -690,6 +702,22 @@ describe("ConsolidationBuilder", () => {
     }
   });
 
+  it("opens a four-wallet group's steps only once the collector confirms the TDH-v1 note", () => {
+    renderBuilder();
+    addFourthWallet({ acknowledge: false });
+
+    expect(
+      screen.getByText(
+        "Confirm the note about a fourth wallet above to see the steps."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /^Sign Step/ })
+    ).not.toBeInTheDocument();
+    acknowledgeFourthWallet();
+    expect(step(1).getByRole("button", { name: "Sign Step 1" })).toBeEnabled();
+  });
+
   it("says what TDH-v1 does with a fourth wallet once one is listed", () => {
     renderBuilder();
     expect(
@@ -813,6 +841,7 @@ describe("ConsolidationBuilder", () => {
     fireEvent.change(walletInput(3), { target: { value: B } });
     fireEvent.click(screen.getByRole("button", { name: "Add Wallet" }));
     fireEvent.change(walletInput(4), { target: { value: C } });
+    acknowledgeFourthWallet();
 
     expect(stepHeadings()).toEqual(["Wallet 1 signs"]);
     expect(screen.queryByText(/Four-wallet consolidations/)).toBeNull();
@@ -862,6 +891,7 @@ describe("ConsolidationBuilder", () => {
     fireEvent.change(walletInput(3), { target: { value: "social.eth" } });
     fireEvent.click(screen.getByRole("button", { name: "Add Wallet" }));
     fireEvent.change(walletInput(4), { target: { value: "old.eth" } });
+    acknowledgeFourthWallet();
     expect(walletInput(1)).toHaveValue(`vault.eth - ${A}`);
     expect(screen.getByText("4 of 4 wallets")).toBeInTheDocument();
     expect(stepHeadings()).toEqual([

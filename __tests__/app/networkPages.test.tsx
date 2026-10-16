@@ -143,18 +143,25 @@ describe("network pages render", () => {
         name: "Checked daily, in public",
       })
     ).toBeInTheDocument();
-    // The strip near the top: the track record and the latest cycle in one
-    // sentence.
+    // The strip near the top, in one line: the track record in bold and the
+    // latest cycle's identity and wallet records.
     expect(
-      screen.getByText(
-        /^Cycle of October 15, 2026 \(holdings at the last Ethereum block before 00:00 UTC\): 6529.io, the Rust core and the Python reference, which computes from the Rust run’s input, agreed on all 10,282 TDH records/
-      )
+      screen.getByText("Equal on 2 of 2 published days.")
     ).toBeInTheDocument();
-    expect(screen.getByText(/equal on 2 of 2 days/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {
+        name: /Latest, Oct 15: 6529.io, the Rust core and the Python reference \(on the Rust run’s input\) agree on all 10,282 identity and 11,133 wallet records\./,
+      })
+    ).toHaveAttribute("href", "/network/tdh/verification");
     // The checked-daily section's proof panel: the latest day's figures,
     // every published day as a dot, and the record.
     expect(
       screen.getByText("Equal on 2 of 2 published days since October 14, 2026.")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "The first two were computed on October 15; the scheduled daily runs began on October 16."
+      )
     ).toBeInTheDocument();
     expect(
       screen.getByText("Latest day: October 15, 2026")
@@ -174,14 +181,11 @@ describe("network pages render", () => {
     );
     expect(screen.queryByText(/sample/i)).not.toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /^Checked daily, in public · equal on/ })
-    ).toHaveAttribute("href", "/network/tdh/verification");
-    expect(
-      screen.getByText(/Each is tested against the conformance vectors/)
+      screen.getByText(/Each must reproduce every conformance vector/)
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /cannot change a holding stack, while the day has a result/
+        /cannot change a holding stack when both versions of the day have a result/
       )
     ).toBeInTheDocument();
     expect(

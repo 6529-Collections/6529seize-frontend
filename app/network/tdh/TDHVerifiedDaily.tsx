@@ -40,6 +40,11 @@ const POINTS: ReadonlyArray<{
 /** What the checks caught, oldest first (plan §5.2, "found by the checks"). */
 const FOUND = ["floors", "netting", "lean", "difftest"] as const;
 const SOURCES = ["P26 §13", "D125", "D131", "D132"] as const;
+/**
+ * The feed's first day. Its first two days were computed together on
+ * October 15, 2026; the scheduled daily runs began on October 16.
+ */
+const FIRST_FEED_DATE = "2026-10-14";
 
 function differenceSentence(
   locale: SupportedLocale,
@@ -143,12 +148,18 @@ function Streak({
           </li>
         ))}
       </ol>
-      <p className="tw-m-0 tw-text-sm tw-tabular-nums tw-leading-6 tw-text-iron-200">
+      <p className="tw-m-0 tw-max-w-prose tw-text-sm tw-tabular-nums tw-leading-6 tw-text-iron-200">
         {t(locale, "network.tdh.explainer.verified.record", {
           allEqual: formatInteger(locale, record.allEqual),
           days: formatInteger(locale, record.days),
           first: formatCycleDate(locale, record.firstDate),
         })}
+        {record.firstDate === FIRST_FEED_DATE && (
+          <span className="tw-text-iron-300">
+            {" "}
+            {t(locale, "network.tdh.explainer.verified.recordNote")}
+          </span>
+        )}
       </p>
     </div>
   );
@@ -201,7 +212,7 @@ function ProofPanel({
               />
             )}
           </div>
-          <p className="tw-m-0 tw-mt-3 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">
+          <p className="tw-m-0 tw-mt-3 tw-max-w-prose tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, "network.tdh.explainer.verified.how")}
           </p>
         </>
@@ -229,8 +240,17 @@ function ProofPanel({
       </div>
       {summary.historyChecked === false && (
         <p className="tw-m-0 tw-mt-3 tw-flex tw-flex-col tw-items-start tw-gap-2 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-flex-row sm:tw-items-baseline">
-          <TdhStatusPill pill="unchecked" locale={locale} size="sm" />
-          <span>
+          <Link
+            href={`/network/tdh/verification/${summary.cycleDay}#provenance`}
+            className={`tw-shrink-0 tw-rounded-full tw-no-underline ${TDH_FOCUS_RING}`}
+            title={t(locale, "network.tdh.explainer.verified.uncheckedLink")}
+          >
+            <TdhStatusPill pill="unchecked" locale={locale} size="sm" />
+            <span className="tw-sr-only">
+              {t(locale, "network.tdh.explainer.verified.uncheckedLink")}
+            </span>
+          </Link>
+          <span className="tw-max-w-prose">
             {t(locale, "network.tdh.explainer.verified.uncheckedMeans")}
           </span>
         </p>
@@ -314,7 +334,7 @@ export default function TDHVerifiedDaily({
       id="tdh-verified"
       title={t(locale, "network.tdh.explainer.verified.title")}
     >
-      <p className="tw-m-0 tw-max-w-3xl tw-text-[15px] tw-leading-7 tw-text-iron-200">
+      <p className="tw-m-0 tw-max-w-prose tw-text-[15px] tw-leading-7 tw-text-iron-200">
         {t(locale, "network.tdh.explainer.verified.body")}
       </p>
       {summary?.kind === "data" && (
@@ -344,7 +364,7 @@ export default function TDHVerifiedDaily({
                 />
                 {t(locale, `network.tdh.explainer.verified.point.${key}.title`)}
               </span>
-              <span className="tw-text-sm tw-leading-6 tw-text-iron-300">
+              <span className="tw-text-[15px] tw-leading-7 tw-text-iron-300">
                 {t(locale, `network.tdh.explainer.verified.point.${key}.body`)}
               </span>
             </Link>

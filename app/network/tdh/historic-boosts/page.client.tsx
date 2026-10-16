@@ -15,7 +15,8 @@ import { useState } from "react";
 import TdhPager from "../shared/TdhPager";
 import TdhSource from "../shared/TdhSource";
 import TdhSubnav from "../shared/TdhSubnav";
-import { TDH_H1, TDH_LEDE } from "../shared/tdhStyles";
+import { TDH_H1, TDH_LEDE, TDH_LINK } from "../shared/tdhStyles";
+import type { TdhRules } from "../tdh-rules.helpers";
 import {
   BoostTimeline,
   CurrentLadder,
@@ -37,7 +38,19 @@ import {
   type HistoricRule,
 } from "./historicBoostsShared";
 
-export default function TDHHistoricBoostsPage() {
+/** Schedules 1.1 to 1.3 as 6529.io's TDH pages first archived them. */
+const ARCHIVE_SOURCE =
+  "https://github.com/6529-Collections/6529seize-frontend/blob/2d92c9536698ea6056f8b47bdcd9a14cd2386bed/app/network/tdh/historic-boosts/page.client.tsx";
+/** Schedule 1.4: the backend's rule file at the commit P26 cites. */
+const RULES_SOURCE =
+  "https://github.com/6529-Collections/6529seize-backend/blob/d0c070cc821ed0211cb6b19b17e27b2a32609ac3/src/tdhLoop/tdh-rules.ts";
+
+export default function TDHHistoricBoostsPage({
+  rules = null,
+}: {
+  /** The current boost rules, read on the server when it could. */
+  readonly rules?: TdhRules | null;
+}) {
   const locale = useBrowserLocale();
   const [expandedRuleIds, setExpandedRuleIds] = useState<ReadonlySet<string>>(
     () => new Set()
@@ -105,11 +118,35 @@ export default function TDHHistoricBoostsPage() {
               locale={locale}
               onToggle={toggleRule}
             />
-            <CurrentLadder locale={locale} />
-            <p className="tw-m-0 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
-              {m(locale, "network.tdhHistoric.provenance")}
-              <TdhSource refs={["P26 §10", "DEV-3"]} locale={locale} />
-            </p>
+            <CurrentLadder locale={locale} initialRules={rules} />
+            <div className="tw-max-w-prose tw-text-sm tw-leading-6 tw-text-iron-300">
+              <p className="tw-m-0">
+                {m(locale, "network.tdhHistoric.provenance")}
+                <TdhSource refs={["P26 §10", "DEV-3"]} locale={locale} />
+              </p>
+              <ul className="tw-m-0 tw-mt-2 tw-list-none tw-space-y-1 tw-p-0">
+                <li>
+                  <a
+                    href={ARCHIVE_SOURCE}
+                    className={TDH_LINK}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    {m(locale, "network.tdhHistoric.provenance.archive")}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={RULES_SOURCE}
+                    className={TDH_LINK}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    {m(locale, "network.tdhHistoric.provenance.rules")}
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
         </section>
         <TdhPager current="/network/tdh/historic-boosts" locale={locale} />
@@ -148,7 +185,7 @@ function HistoricRulesTable({
                 {m(locale, "network.tdhHistoric.table.period")}
               </th>
               <th
-                className={`${TABLE_HEADER_CLASS} tw-whitespace-nowrap`}
+                className={`${TABLE_HEADER_CLASS} tw-w-36 tw-whitespace-nowrap`}
                 scope="col"
               >
                 {m(locale, "network.tdhHistoric.table.categoryA")}

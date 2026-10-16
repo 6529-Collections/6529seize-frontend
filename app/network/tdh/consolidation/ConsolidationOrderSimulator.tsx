@@ -6,7 +6,8 @@ import { useMemo, useState } from "react";
 import { formatInteger, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
-import { TDH_FOCUS, TDH_PANEL, TDH_TEXT } from "../TDHSection";
+import { TDH_BUTTON } from "../shared/tdhStyles";
+import { TDH_PANEL, TDH_TEXT } from "../TDHSection";
 import {
   matchesSimulatedScenario,
   SIMULATED_SIGNERS,
@@ -22,7 +23,8 @@ const SIGNER_LABELS: Record<SimulatedWallet, MessageKey> = {
 };
 const SAFE_ORDER: readonly SimulatedWallet[] = ["A", "B", "C", "D"];
 const UNSAFE_ORDER: readonly SimulatedWallet[] = ["D", "A", "B", "C"];
-const BUTTON = `tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200 hover:tw-bg-iron-800 hover:tw-text-iron-50 ${TDH_FOCUS}`;
+/** The explorables' shared button, as on How it works, left-aligned. */
+const BUTTON = `${TDH_BUTTON} tw-justify-start tw-text-left`;
 
 const START_GROUPS: readonly (readonly SimulatedWallet[])[] = [
   ["A", "B", "C"],

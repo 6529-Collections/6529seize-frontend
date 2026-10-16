@@ -49,6 +49,8 @@ export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
     "A group of four: 6529.io counts all four wallets as one collector until the cutover, about October 23, 2026. From then TDH-v1 groups at most three, and one of the four counts on its own unless the rule is amended. Three wallets stay one collector either way.",
   "delegation.consolidationBuilder.wallets.fourthLink":
     "How consolidation works in TDH-v1",
+  "delegation.consolidationBuilder.wallets.fourthAcknowledge":
+    "I understand that from the cutover one of the four wallets counts on its own, and its cards stop adding to the others’ sets and boost.",
   "delegation.consolidationBuilder.wallets.loadingGroup":
     "Loading your current consolidation…",
   "delegation.consolidationBuilder.wallets.groupError":
@@ -65,6 +67,8 @@ export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
     "One transaction per wallet. Wallets already in your consolidation sign first; new wallets sign last.",
   "delegation.consolidationBuilder.steps.incomplete":
     "Enter at least two valid wallets to see the steps.",
+  "delegation.consolidationBuilder.steps.acknowledge":
+    "Confirm the note about a fourth wallet above to see the steps.",
   "delegation.consolidationBuilder.steps.loading": "Checking registered links…",
   "delegation.consolidationBuilder.steps.readError":
     "Couldn’t check the registered links.",

@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 interface TdhStackColumn {
   readonly key: string;
   readonly label: string;
+  /** A fuller label, as the header's tooltip, for a short header. */
+  readonly title?: string;
 }
 
 interface TdhStackRow {
@@ -53,7 +55,12 @@ export default function TdhStackTable({
         <thead className="tw-hidden xl:tw-table-header-group">
           <tr>
             {columns.map((column) => (
-              <th key={column.key} scope="col" className={HEADER}>
+              <th
+                key={column.key}
+                scope="col"
+                className={HEADER}
+                title={column.title}
+              >
                 {column.label}
               </th>
             ))}

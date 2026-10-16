@@ -130,6 +130,7 @@ function HistoryChart({
             y2={yShare(tick)}
             className="tw-stroke-iron-800"
             strokeDasharray={tick === 1 ? undefined : "3 4"}
+            data-tdh-grid=""
           />
           <text
             x={left - 8}

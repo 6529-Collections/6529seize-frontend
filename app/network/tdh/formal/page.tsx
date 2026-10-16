@@ -10,6 +10,7 @@ import {
 import TdhPageShell from "../shared/TdhPageShell";
 import TdhPager from "../shared/TdhPager";
 import TdhRuleBlock from "../shared/TdhRuleBlock";
+import CaseSafe from "../shared/CaseSafe";
 import TdhSection from "../shared/TdhSection";
 import TdhSource from "../shared/TdhSource";
 import TdhStatusPill from "../shared/TdhStatusPill";
@@ -106,14 +107,11 @@ function SummaryBand({
   readonly round: LeanRound;
 }) {
   const runs = LEAN_RUNS[round];
-  // Properties of the rule only: a lemma about the model's own
-  // representation (last in, first out) is not counted.
+  // Every statement of the table counts, as its filter counts them: the
+  // card names the one about the model's own storage (last in, first out).
   const count = (group: "p26" | "p53", status: StatementCheck["status"]) =>
     statements.filter(
-      (row) =>
-        row.group === group &&
-        row.kind !== "lemma" &&
-        checks[row.id]?.status === status
+      (row) => row.group === group && checks[row.id]?.status === status
     ).length;
   const shownFalse = count("p26", "shownFalse") + count("p53", "shownFalse");
   const items = [
@@ -156,12 +154,14 @@ function SummaryBand({
   return (
     <div className="tw-mt-6">
       <p className="tw-m-0 tw-mb-2 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
-        {t(locale, "network.tdh.formal.summary.caption", {
-          commit: figures.commit.slice(0, 7),
-          date: formatUtcDate(locale, figures.commitDate, LONG_DATE),
-        })}
+        <CaseSafe
+          text={t(locale, "network.tdh.formal.summary.caption", {
+            commit: figures.commit.slice(0, 7),
+            date: formatUtcDate(locale, figures.commitDate, LONG_DATE),
+          })}
+        />
       </p>
-      <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-[repeat(auto-fit,minmax(9.5rem,1fr))] tw-gap-3 tw-p-0">
+      <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-3 tw-p-0 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
         {items.map((item) => (
           <li
             key={item.key}
@@ -171,10 +171,12 @@ function SummaryBand({
               {item.value}
             </p>
             <p className="tw-m-0 tw-mt-1 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
-              {t(
-                locale,
-                `network.tdh.formal.summary.${item.key}` as MessageKey
-              )}
+              <CaseSafe
+                text={t(
+                  locale,
+                  `network.tdh.formal.summary.${item.key}` as MessageKey
+                )}
+              />
             </p>
             <p className="tw-m-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400">
               {item.body}
@@ -383,7 +385,9 @@ export default async function TdhFormalPage() {
           locale={locale}
           wide
         >
-          <div className="tw-grid tw-gap-8 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+          {/* The text at its measure, then the figure across the column,
+              so neither leaves a hole beside the other. */}
+          <div className="tw-space-y-6">
             <div className="tw-space-y-4">
               <p className={PROSE}>
                 {t(locale, "network.tdh.formal.featured.plain")}
@@ -408,6 +412,7 @@ export default async function TdhFormalPage() {
               <TdhRuleBlock
                 code={featured.lean}
                 locale={locale}
+                language="lean"
                 title={t(locale, "network.tdh.formal.featured.lean")}
                 label={featured.file}
               />
@@ -421,6 +426,7 @@ export default async function TdhFormalPage() {
               <TdhRuleBlock
                 code={NETTING_DEFINITIONS}
                 locale={locale}
+                language="lean"
                 title={t(locale, "network.tdh.formal.featured.definitions")}
                 label={t(locale, "network.tdh.formal.featured.definitions")}
               />
@@ -519,9 +525,11 @@ export default async function TdhFormalPage() {
               <caption
                 className={`${TDH_CAPTION} tw-block md:tw-table-caption`}
               >
-                {t(locale, "network.tdh.formal.module.captionAt", {
-                  commit: figures.commit.slice(0, 7),
-                })}
+                <CaseSafe
+                  text={t(locale, "network.tdh.formal.module.captionAt", {
+                    commit: figures.commit.slice(0, 7),
+                  })}
+                />
               </caption>
               <thead className="tw-hidden md:tw-table-header-group">
                 <tr>
@@ -597,11 +605,7 @@ export default async function TdhFormalPage() {
                   key === "inputs"
                     ? byRound(round, "network.tdh.formal.not.inputs.body")
                     : `network.tdh.formal.not.${key}.body`,
-                  {
-                    vectors: figure(locale, figures.vectorsTotal),
-                    facts: formatInteger(locale, figures.facts),
-                    factsNext: formatInteger(locale, LEAN_ROUND_5.facts),
-                  }
+                  { vectors: figure(locale, figures.vectorsTotal) }
                 )}
                 {key === "inputs" && (
                   <TdhSource refs={["D118", "D119"]} locale={locale} />
@@ -656,7 +660,8 @@ export default async function TdhFormalPage() {
               locale={locale}
               title={t(locale, "network.tdh.formal.check.title")}
               label={t(locale, "network.tdh.formal.check.title")}
-              wrap="words"
+              wrap="none"
+              language="shell"
             />
           </div>
           <p className={PROSE}>
@@ -668,13 +673,6 @@ export default async function TdhFormalPage() {
               nettingPassed: figure(locale, figures.nettingPassed),
               nettingTotal: figure(locale, figures.nettingTotal),
             })}
-            {round < LEAN_LATEST_ROUND &&
-              ` ${t(locale, "network.tdh.formal.check.figuresNext", {
-                commit: LEAN_ROUND_5.commit,
-                passed: formatInteger(locale, LEAN_ROUND_5.vectorsPassed),
-                total: formatInteger(locale, LEAN_ROUND_5.vectorsTotal),
-                checks: formatInteger(locale, LEAN_ROUND_5.vectorChecks),
-              })}`}
           </p>
         </div>
       </TdhSection>

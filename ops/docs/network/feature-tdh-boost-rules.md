@@ -27,19 +27,21 @@ boost rules.
 
 1. Read the header: `TDH`, the one-line promise (Total Days Held: the art
    you hold, and how long you have held it), the formula Days × Rate × Boost
-   = TDH worked for one card (100 × 12.71 × 1.02 = 1,296), and a `Checked
-   daily, in public` strip with the track record (days equal out of days
-   published) and the latest cycle's result in one sentence, which says that
-   the Python reference computes from the Rust run's input and that the
-   history read is not yet checked against 6529's own Ethereum node, linking
-   to the verification dashboard.
-2. Read `TDH in a minute`: hold (whole days), weigh (edition rate) and boost
+   = TDH worked for one card (100 × 12.71 × 1.02 = 1,296), and a one-line
+   strip with the track record in bold (`Equal on 3 of 3 published days.`),
+   the latest cycle's identity and wallet records (the Python reference on
+   the Rust run's input) and a `Not yet fully checked` pill, linking to the
+   verification dashboard.
+2. Read `TDH in a minute`: hold (whole days), weigh (a Meme's rate is the
+   largest edition over its own; a Gradient's divides by the number of
+   Gradients, 101, and a NextGen token's by its collection's size) and boost
    (one multiplier), drawn for one copy of a 310-copy Meme held 100 days by a
    collector with one Gradient: 100 days x rate 12.71 = 1,271 base, x boost
    1.02 = 1,296 TDH from this card; the Gradient earns TDH of its own on top.
-   The example uses the October 11, 2026 cycle, the day the specification was
-   replayed against 6529.io, and the card's rate and boost are the same on
-   the latest day.
+   The example card is captioned with its cycle (`Worked example · the
+October 11, 2026 cycle`, the day the specification was replayed against
+   6529.io); the card's rate and boost are the same on the latest day. Its
+   days panel draws ten blocks of ten days in one colour, labelled.
    The rate is drawn as two bars on one scale, and the boost as a scale from
    1.00 to 2.04, the highest boost on the October 11, 2026 cycle. Under it,
    what moves the number: without the Gradient 1,271, with one full set
@@ -47,12 +49,19 @@ boost rules.
    reference card.
 3. Read `Checked daily, in public`: first the latest day from the feed, as
    figures (the total TDH identical in all three, identity records and
-   wallet records equal) with every published day as a dot, the
-   `Not yet fully checked` label with its meaning beside it, and a link to
-   the dashboard; then three points (written separately and tested against
-   the specification's conformance vectors, specified in Lean as a
-   proposal, compared every day); then `Found by the checks, before
-   launch`, four dated findings (the edition-floor text corrected on
+   wallet records equal), how they were read (the Python reference on the
+   Rust run's input; 6529.io's backend from its own indexer, its files
+   fetched from Arweave and accepted only when its upload key's signature,
+   size and data root verify), every published day as a dot (the first two
+   computed on October 15, the scheduled runs from October 16), the
+   `Not yet fully checked` label, which links to the latest day's
+   provenance, with its meaning beside it, and a link to the dashboard;
+   then three points (written separately, each reproducing every
+   conformance vector; specified in Lean as a proposal, with the netting
+   theorem's hypotheses: every address's net movement, the burn addresses'
+   included, and both versions of the day with a result; compared every
+   day, scheduled from October 16); then `Found by the checks, before
+launch`, four dated findings (the edition-floor text corrected on
    October 15, the first netting rule, the Lean model's counterexamples and
    the differential tests), and a link to the Lean proof manifest on the
    daily feed when it is published.
@@ -70,13 +79,14 @@ boost rules.
    profile result. Holdings tables show token, copies, whole days, rate, base,
    and final TDH; collections with more than 20 tokens use Previous/Next
    pagination.
-6. Open `Current boosts` for today's values: the full-collection boost and
-   the Gradient bonus, then `Four boost figures, and how they relate`: a
+6. Open `Current boosts` for today's values (read on the server, so they
+   render with the page; a failed refresh in the browser keeps them): the
+   full-set boost and the Gradient bonus, then `Four boost figures, and how they relate`: a
    full set today, a full set once seasons 1 to 20 pay, today's highest and
    the schedule's highest on one scale from 1.00, the season bonuses as
    ranges (for example `Seasons 1–16: +0.05 each`) with Genesis and
    Nakamoto, and how the bonuses combine in a disclosure. Then `When your
-   holdings change` for common questions about sales, transfers and new
+holdings change` for common questions about sales, transfers and new
    cards, and `Glossary` for the terms the TDH pages use (including netting,
    the underflow test, conformance vectors, roots, the cutover, classes A to
    D and program A and B).
@@ -144,13 +154,14 @@ used by earlier calculations. The profile panel shows stored calculation results
 - The current highest eligible season is excluded from season bonuses. Seasons
   1 through 20 are configured for `+0.05`; later indexed seasons currently have
   no automatic `+0.05` extrapolation.
-- A full collection means at least one copy of every Meme ID eligible for that
+- A full set means at least one copy of every Meme ID eligible for that
   snapshot, including cards in the current partial season. Missing one ID
-  makes the full-collection count zero.
+  makes the full-set count zero. The pages call it a full set everywhere.
 - With a complete collection, the first collection receives the eligible season
   bonus sum. Each additional complete set adds `0.05 * 0.6529^(n-1)`.
   There is no hard set-count cap; the additional-set series approaches
-  `0.144051` before final rounding.
+  `0.144051`, and rounded to millionths it reaches that at 33 full sets, so
+  further sets add nothing.
 - Without a complete collection, each complete eligible season contributes its
   configured bonus once. Season 1 can instead expose the Genesis and Nakamoto
   partial bonuses when its full set is incomplete.

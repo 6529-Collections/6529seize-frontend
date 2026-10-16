@@ -11,6 +11,7 @@ import {
   type PillTone,
   type VerdictState,
 } from "@/lib/tdh/verification/states";
+import TdhDisclosure from "../../shared/TdhDisclosure";
 import TdhSubnavScroll from "../../shared/TdhSubnavScroll";
 import { TDH_FOCUS_RING } from "../../shared/tdhStyles";
 import { verificationDayHref } from "./VerificationHeadline";
@@ -235,6 +236,73 @@ function CellSquare({
   );
 }
 
+/** The month (or months) the strip covers, as the day row's label. */
+function monthLabel(locale: SupportedLocale, cells: readonly Cell[]): string {
+  const months = [
+    ...new Set(
+      cells.map((cell) =>
+        formatDate(locale, cellDate(cell), { month: "short", timeZone: "UTC" })
+      )
+    ),
+  ];
+  const first = months[0] ?? "";
+  const last = months.at(-1) ?? "";
+  return months.length > 1 ? `${first}–${last}` : first;
+}
+
+function LegendState({
+  locale,
+  state,
+}: {
+  readonly locale: SupportedLocale;
+  readonly state: VerdictState;
+}) {
+  return (
+    <li className="tw-inline-flex tw-items-center tw-gap-1.5">
+      <span
+        aria-hidden="true"
+        className={`tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-sm tw-text-xs tw-font-bold tw-leading-none tw-text-iron-950 ${VERDICT_CELL[state]}`}
+      >
+        {VERDICT_MARK[state]}
+      </span>
+      {t(locale, `network.tdh.shared.pill.${state}` as MessageKey)}
+    </li>
+  );
+}
+
+function MissingLegend({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <li className="tw-inline-flex tw-items-center tw-gap-1.5">
+      <span
+        aria-hidden="true"
+        className="tw-size-2.5 tw-rounded-sm tw-border tw-border-dashed tw-border-iron-500"
+      />
+      {t(locale, "network.tdh.verify.history.noReport")}
+    </li>
+  );
+}
+
+function UpcomingLegend({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <>
+      <li className="tw-inline-flex tw-items-center tw-gap-1.5">
+        <span
+          aria-hidden="true"
+          className="tw-size-2.5 tw-rounded-sm tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-900"
+        />
+        {t(locale, "network.tdh.verify.calendar.upcomingLegend")}
+      </li>
+      <li className="tw-inline-flex tw-items-center tw-gap-1.5">
+        <span
+          aria-hidden="true"
+          className="tw-size-2.5 tw-rounded-sm tw-border tw-border-solid tw-border-primary-400/70 tw-bg-primary-500/15"
+        />
+        {t(locale, "network.tdh.verify.calendar.cutoverLegend")}
+      </li>
+    </>
+  );
+}
+
 /**
  * Every day at a glance: one square per day, coloured by its verdict and
  * linking to it, and under each the total's difference from 6529.io, as a
@@ -271,6 +339,13 @@ export default function VerificationCalendar({
   const first = cells[0];
   const last = cells.filter((cell) => cell.kind !== "upcoming").at(-1);
   const hasUpcoming = cells.some((cell) => cell.kind === "upcoming");
+  const hasMissing = cells.some((cell) => cell.kind === "missing");
+  // The legend names the states on screen; the others wait in "More".
+  const inUse = new Set(
+    cells.flatMap((cell) => (cell.kind === "day" ? [cell.verdict] : []))
+  );
+  const shownStates = LEGEND.filter((state) => inUse.has(state));
+  const otherStates = LEGEND.filter((state) => !inUse.has(state));
   const dateOf = (cell: Cell | undefined) =>
     cell === undefined ? "" : formatShortCycleDate(locale, cellDate(cell));
 
@@ -293,86 +368,88 @@ export default function VerificationCalendar({
           })}
         </p>
       </div>
-      <TdhSubnavScroll
-        className="tw-mt-3 tw-overflow-x-auto tw-px-1 tw-pb-1 tw-pt-1 tw-scrollbar-none"
-        focusSelector='[aria-current="date"]'
-      >
-        <ol className="tw-m-0 tw-grid tw-list-none tw-auto-cols-[minmax(1.75rem,4.5rem)] tw-grid-flow-col tw-gap-1 tw-p-0 sm:tw-gap-1.5">
-          {cells.map((cell, index) => (
-            <li
-              key={`${cell.kind}-${cell.kind === "day" ? cell.day.cycleDay : cell.cycleDay}`}
-              className="tw-flex tw-min-w-0 tw-flex-col tw-items-center"
-            >
-              <CellSquare
-                locale={locale}
-                cell={cell}
-                delta={deltas[index] ?? null}
-                selected={
-                  cell.kind === "day" && cell.day.cycleDay === selectedCycleDay
-                }
-              />
-              <span
-                aria-hidden="true"
-                className="tw-mt-1 tw-flex tw-h-4 tw-w-full tw-items-center tw-justify-center"
+      {/* Row labels on the left, the days across the rest of the card:
+          one column per day, as wide as the card allows, scrolling once
+          the days need more room than it has. */}
+      <div className="tw-mt-3 tw-flex tw-items-start tw-gap-2 sm:tw-gap-3">
+        <div
+          aria-hidden="true"
+          className="tw-flex tw-shrink-0 tw-flex-col tw-pt-1 tw-text-right tw-text-xs tw-leading-4 tw-text-iron-400"
+        >
+          <span className="tw-h-10" />
+          <span className="tw-mt-1 tw-flex tw-h-4 tw-items-center tw-justify-end tw-whitespace-nowrap">
+            {t(locale, "network.tdh.verify.calendar.deltaRow")}
+          </span>
+          <span className="tw-mt-0.5 tw-whitespace-nowrap">
+            {monthLabel(locale, cells)}
+          </span>
+        </div>
+        <TdhSubnavScroll
+          className="tw-min-w-0 tw-flex-1 tw-overflow-x-auto tw-px-1 tw-pb-1 tw-pt-1 tw-scrollbar-none"
+          focusSelector='[aria-current="date"]'
+        >
+          <ol
+            className="tw-m-0 tw-grid tw-list-none tw-gap-1 tw-p-0 sm:tw-gap-1.5"
+            style={{
+              gridTemplateColumns: `repeat(${cells.length}, minmax(1.75rem, 1fr))`,
+            }}
+          >
+            {cells.map((cell, index) => (
+              <li
+                key={`${cell.kind}-${cell.kind === "day" ? cell.day.cycleDay : cell.cycleDay}`}
+                className="tw-flex tw-min-w-0 tw-flex-col tw-items-center"
               >
-                <DeltaLabel locale={locale} delta={deltas[index] ?? null} />
-              </span>
-              <span
-                aria-hidden="true"
-                className={`tw-mt-0.5 tw-text-xs tw-tabular-nums tw-leading-4 ${
-                  cell.kind === "upcoming" && cell.cutover
-                    ? "tw-font-semibold tw-text-primary-300"
-                    : "tw-text-iron-500"
-                }`}
-              >
-                {formatDayOfMonth(locale, cellDate(cell))}
-              </span>
-            </li>
-          ))}
-        </ol>
-      </TdhSubnavScroll>
+                <CellSquare
+                  locale={locale}
+                  cell={cell}
+                  delta={deltas[index] ?? null}
+                  selected={
+                    cell.kind === "day" &&
+                    cell.day.cycleDay === selectedCycleDay
+                  }
+                />
+                <span
+                  aria-hidden="true"
+                  className="tw-mt-1 tw-flex tw-h-4 tw-w-full tw-items-center tw-justify-center"
+                >
+                  <DeltaLabel locale={locale} delta={deltas[index] ?? null} />
+                </span>
+                <span
+                  aria-hidden="true"
+                  className={`tw-mt-0.5 tw-text-xs tw-tabular-nums tw-leading-4 ${
+                    cell.kind === "upcoming" && cell.cutover
+                      ? "tw-font-semibold tw-text-primary-300"
+                      : "tw-text-iron-400"
+                  }`}
+                >
+                  {formatDayOfMonth(locale, cellDate(cell))}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </TdhSubnavScroll>
+      </div>
       <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-2 tw-text-xs tw-text-iron-400">
         <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-p-0">
-          {LEGEND.map((state) => (
-            <li
-              key={state}
-              className="tw-inline-flex tw-items-center tw-gap-1.5"
-            >
-              <span
-                aria-hidden="true"
-                className={`tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-sm tw-text-xs tw-font-bold tw-leading-none tw-text-iron-950 ${VERDICT_CELL[state]}`}
-              >
-                {VERDICT_MARK[state]}
-              </span>
-              {t(locale, `network.tdh.shared.pill.${state}` as MessageKey)}
-            </li>
+          {shownStates.map((state) => (
+            <LegendState key={state} locale={locale} state={state} />
           ))}
-          <li className="tw-inline-flex tw-items-center tw-gap-1.5">
-            <span
-              aria-hidden="true"
-              className="tw-size-2.5 tw-rounded-sm tw-border tw-border-dashed tw-border-iron-500"
-            />
-            {t(locale, "network.tdh.verify.history.noReport")}
-          </li>
-          {hasUpcoming && (
-            <>
-              <li className="tw-inline-flex tw-items-center tw-gap-1.5">
-                <span
-                  aria-hidden="true"
-                  className="tw-size-2.5 tw-rounded-sm tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-900"
-                />
-                {t(locale, "network.tdh.verify.calendar.upcomingLegend")}
-              </li>
-              <li className="tw-inline-flex tw-items-center tw-gap-1.5">
-                <span
-                  aria-hidden="true"
-                  className="tw-size-2.5 tw-rounded-sm tw-border tw-border-solid tw-border-primary-400/70 tw-bg-primary-500/15"
-                />
-                {t(locale, "network.tdh.verify.calendar.cutoverLegend")}
-              </li>
-            </>
-          )}
+          {hasMissing && <MissingLegend locale={locale} />}
+          {hasUpcoming && <UpcomingLegend locale={locale} />}
         </ul>
+        {otherStates.length > 0 && (
+          <TdhDisclosure
+            summary={t(locale, "network.tdh.verify.calendar.moreStates")}
+            summaryClassName="tw-min-h-8 tw-text-xs"
+          >
+            <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-p-0 tw-pl-6">
+              {otherStates.map((state) => (
+                <LegendState key={state} locale={locale} state={state} />
+              ))}
+              {!hasMissing && <MissingLegend locale={locale} />}
+            </ul>
+          </TdhDisclosure>
+        )}
         <p className="tw-m-0">
           {t(locale, "network.tdh.verify.calendar.bars")}
         </p>

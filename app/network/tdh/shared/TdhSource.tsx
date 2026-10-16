@@ -9,7 +9,8 @@ const CHIP =
 /**
  * Source chips after a cited sentence or paragraph (plan §4.4). Specification,
  * deviation, decision and evidence chips link into the specification page;
- * private documents show their reference with "source to be published".
+ * private documents show their reference, with no link, and say they are in
+ * 6529's private design repository.
  */
 export default function TdhSource({
   refs,

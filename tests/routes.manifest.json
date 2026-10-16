@@ -1870,6 +1870,10 @@
       "classification": "exempt",
       "exemptReason": "Day permalinks exist only for days the daily verification job has published; the dashboard at /network/tdh/verification renders the same template."
     },
+    "/network/tdh/verification/day-not-found": {
+      "classification": "exempt",
+      "exemptReason": "The not-found view the proxy rewrites an impossible day permalink to, with a 404 status and noindex; it is not a page to crawl."
+    },
     "/network/wave-score": {
       "classification": "crawlable",
       "family": "network"

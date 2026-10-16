@@ -3,6 +3,7 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
   LATEST_DAY_REVALIDATE_SECONDS,
+  loadPreviousDay,
   loadVerificationDay,
   loadVerificationIndex,
 } from "@/lib/tdh/verification/loadVerification.server";
@@ -20,13 +21,13 @@ export default async function TdhVerificationPage() {
   const indexLoad = await loadVerificationIndex();
   const latest =
     indexLoad.status === "ok" ? latestIndexDay(indexLoad.index) : null;
-  const dayLoad =
-    latest === null
-      ? null
-      : await loadVerificationDay(
-          latest.cycleDay,
-          LATEST_DAY_REVALIDATE_SECONDS
-        );
+  const [dayLoad, previousDay] =
+    latest === null || indexLoad.status !== "ok"
+      ? [null, null]
+      : await Promise.all([
+          loadVerificationDay(latest.cycleDay, LATEST_DAY_REVALIDATE_SECONDS),
+          loadPreviousDay(indexLoad.index, latest.cycleDay),
+        ]);
 
   return (
     <TdhPageShell
@@ -43,6 +44,7 @@ export default async function TdhVerificationPage() {
         dayLoad={dayLoad}
         selected={latest}
         now={new Date()}
+        previousDay={previousDay}
       />
     </TdhPageShell>
   );

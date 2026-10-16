@@ -14,7 +14,6 @@ import {
   UserGroupIcon,
   WalletIcon,
 } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import { useId, type ComponentType, type SVGProps } from "react";
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import {
@@ -36,7 +35,7 @@ import TdhSource from "../shared/TdhSource";
 import TdhSubnav from "../shared/TdhSubnav";
 import { TDH_H1 } from "../shared/tdhStyles";
 import { TDHRelatedLinks } from "../TDHPageNavigation";
-import TDHSection, { TDH_FOCUS, TDH_PANEL, TDH_TEXT } from "../TDHSection";
+import TDHSection, { TDH_PANEL, TDH_TEXT } from "../TDHSection";
 
 type Icon = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -77,8 +76,6 @@ const FAQ = [
   "expiry",
 ] as const;
 
-const LINK = `tw-text-primary-300 tw-underline-offset-4 hover:tw-underline ${TDH_FOCUS}`;
-
 function activationDate(
   locale: SupportedLocale,
   activationMs: number | undefined
@@ -118,7 +115,7 @@ export default function TDHConsolidationPage() {
       />
       <article className="tw-mx-auto tw-max-w-6xl tw-pb-8">
         <TdhSubnav current="/network/tdh/consolidation" locale={locale} />
-        <header className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-8 tw-pb-10 tw-pt-5 sm:tw-pt-8 lg:tw-grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:tw-gap-12">
+        <header className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-8 tw-pb-10 tw-pt-5 sm:tw-pt-8 lg:tw-grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:tw-gap-12">
           <div>
             <h1 className={TDH_H1}>
               {t(locale, "network.tdhConsolidation.title")}
@@ -156,19 +153,18 @@ export default function TDHConsolidationPage() {
                 {t(locale, "network.tdhConsolidation.cta")}
                 <ArrowRightIcon aria-hidden="true" className="tw-size-4" />
               </ButtonLink>
-              <Link
-                className={`${LINK} tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm`}
-                href={SAFE_COLLECTING_HREF}
-              >
+              <TdhArrowLink href={SAFE_COLLECTING_HREF}>
                 {t(locale, "network.tdhConsolidation.safeCollectingLink")}
-              </Link>
+              </TdhArrowLink>
             </div>
+            {/* Two lines: the rule and the way to how it works; the worked
+                example (D–A, D–B, D–C) is on the design page. */}
             <div className="tw-mt-6 tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
               <p className="tw-m-0">
-                {noBreakTerms(t(locale, "network.tdhConsolidation.tdhv1Note"))}
+                {noBreakTerms(t(locale, "network.tdhConsolidation.tdhv1Short"))}
                 <TdhSource refs={["P26 §6.3", "D132"]} locale={locale} />
               </p>
-              <TdhArrowLink href="/network/tdh/how-it-works#step-10">
+              <TdhArrowLink href={`${DESIGN_HREF}#tdh-v1`}>
                 {t(locale, "network.tdhConsolidation.tdhv1Link")}
               </TdhArrowLink>
             </div>
@@ -428,7 +424,7 @@ function WalletsFigure({ locale }: { readonly locale: SupportedLocale }) {
               <span className="tw-min-w-0 tw-flex-1 tw-text-sm tw-text-iron-200">
                 {t(locale, `network.tdhConsolidation.figure.${key}`)}
                 {key === "old" && (
-                  <span className="tw-block tw-text-xs tw-text-amber-200">
+                  <span className="tw-block tw-whitespace-nowrap tw-text-xs tw-text-amber-200">
                     {t(locale, "network.tdhConsolidation.figure.fourthTag")}
                   </span>
                 )}
@@ -461,6 +457,9 @@ function WalletsFigure({ locale }: { readonly locale: SupportedLocale }) {
           </ul>
         </div>
       </div>
+      <p className="tw-m-0 tw-mt-4 tw-text-xs tw-leading-5 tw-text-iron-300">
+        {t(locale, "network.tdhConsolidation.figure.fourthNote")}
+      </p>
     </figure>
   );
 }

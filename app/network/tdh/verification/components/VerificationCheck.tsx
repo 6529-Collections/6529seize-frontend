@@ -22,6 +22,13 @@ python3 -I tools/tdh-daily/three_way.py --day ${cycleDay} \\
 const STEP = "tw-pl-1";
 
 /**
+ * The Arweave address of 6529.io's upload key: the SHA-256 of the key that
+ * signs every daily upload the public API lists (the daily job's README
+ * gives it as aLSndlbQ…THig0).
+ */
+const UPLOAD_KEY = "aLSndlbQ2FCefmpjQv0LML9rjghrrGlnaoNXUATHig0";
+
+/**
  * "Check it yourself": what anyone can verify today from public sources, what
  * that does not reach, and the commands that reproduce the day once the
  * source is published.
@@ -63,6 +70,13 @@ export default function VerificationCheck({
           <ol className="tw-m-0 tw-mt-3 tw-space-y-3 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-iron-500">
             <li className={STEP}>
               {t(locale, "network.tdh.verify.check.upload")}{" "}
+              <code
+                className="tw-break-all tw-font-mono tw-text-xs tw-text-iron-100"
+                title={t(locale, "network.tdh.verify.check.uploadKey")}
+              >
+                {UPLOAD_KEY}
+              </code>
+              , {t(locale, "network.tdh.verify.check.uploadSum")}{" "}
               <a
                 href="https://api.6529.io/api/consolidated_uploads"
                 className={`${TDH_LINK} tw-break-words`}
@@ -127,7 +141,8 @@ export default function VerificationCheck({
               locale={locale}
               label={t(locale, "network.tdh.verify.check.commands")}
               title={t(locale, "network.tdh.verify.check.commands")}
-              wrap="words"
+              wrap="none"
+              language="shell"
             />
           </div>
           <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">

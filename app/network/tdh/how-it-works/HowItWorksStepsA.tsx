@@ -45,7 +45,7 @@ export function rateText(locale: SupportedLocale, cents: number): string {
 }
 
 function Step1({ locale }: { readonly locale: SupportedLocale }) {
-  const cycle = cycleDayOfDate("2026-10-15") ?? 0;
+  const cycle = cycleDayOfDate("2026-10-16") ?? 0;
   return (
     <StepSection
       locale={locale}
@@ -289,6 +289,9 @@ function Step5({ locale }: { readonly locale: SupportedLocale }) {
       <Cited locale={locale} muted>
         {t(locale, "network.tdh.how.s5.vectors")}
       </Cited>
+      <TdhArrowLink href="/network/tdh/formal#statements">
+        {t(locale, "network.tdh.how.s5.formalLink")}
+      </TdhArrowLink>
     </StepSection>
   );
 }

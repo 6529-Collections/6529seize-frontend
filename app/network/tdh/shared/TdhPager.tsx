@@ -21,7 +21,8 @@ const SEQUENCE: ReadonlyArray<{ readonly href: string; readonly key: string }> =
 
 /**
  * Previous and next page of the TDH section, at the end of each page. A card
- * with no partner (the first and last pages) takes the whole row.
+ * with no partner (the first and last pages) keeps half the row, on its own
+ * side, so it never stretches across the page.
  */
 export default function TdhPager({
   current,
@@ -41,7 +42,11 @@ export default function TdhPager({
       className="tw-mt-12 tw-flex tw-flex-col tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8 sm:tw-flex-row"
     >
       {previous ? (
-        <Link href={previous.href} className={CARD} rel="prev">
+        <Link
+          href={previous.href}
+          className={`${CARD} ${next ? "" : "sm:tw-max-w-[calc(50%_-_0.375rem)]"}`}
+          rel="prev"
+        >
           <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-xs tw-text-iron-400">
             <ArrowLeftIcon aria-hidden="true" className="tw-size-3.5" />
             {t(locale, "network.tdh.shared.pager.previous")}
@@ -54,7 +59,7 @@ export default function TdhPager({
       {next ? (
         <Link
           href={next.href}
-          className={`${CARD} tw-items-end tw-text-right`}
+          className={`${CARD} tw-items-end tw-text-right ${previous ? "" : "sm:tw-ml-auto sm:tw-max-w-[calc(50%_-_0.375rem)]"}`}
           rel="next"
         >
           <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-xs tw-text-iron-400">

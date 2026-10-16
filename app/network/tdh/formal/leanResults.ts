@@ -56,6 +56,9 @@ export const LEAN_ROUND_5 = {
   theoremsTdh: 55,
   theoremsP53: 30,
   facts: 46,
+  /** SHA-256 of design/tdh-lean/proof-manifest.json at 6b32f3f. */
+  manifestSha256:
+    "6825ffa47980ea9c7baa35470a6ddd24e7383fcbbe95bec4e237dfd0a7f537e5",
 } as const satisfies LeanRoundInfo & Record<string, unknown>;
 
 /** The newest round of the model the page knows. */

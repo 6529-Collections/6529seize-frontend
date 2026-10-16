@@ -215,9 +215,10 @@ export default function BoostBuilder({
             {t(locale, "network.tdh.how.boostBuilder.disabledFullSet")}
           </p>
         )}
-        {/* Seasons as toggle chips in one wrapping row, then Genesis and
-            Nakamoto, the two partial bonuses of season 1. */}
-        <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-1.5">
+        {/* Seasons as toggle chips on a grid whose rows balance (6, 6 and 5
+            on phones; 9 and 8 from sm), then Genesis and Nakamoto, the two
+            partial bonuses of season 1. */}
+        <div className="tw-mt-2 tw-grid tw-grid-cols-6 tw-gap-1.5 sm:tw-grid-cols-9">
           {SEASONS.map((season) => {
             const on = fullSetChosen || seasons.has(season);
             const current = season === CURRENT_SEASON;
@@ -232,7 +233,7 @@ export default function BoostBuilder({
                     ? `${seasonName(season)}, ${currentBadge}`
                     : seasonName(season)
                 }
-                className={`${TDH_CHIP_BUTTON} tw-min-w-11 tw-justify-center tw-px-2 tw-tabular-nums disabled:tw-cursor-not-allowed ${on ? TDH_CHIP_ON : TDH_CHIP_OFF} ${current ? "tw-border-dashed" : ""}`}
+                className={`${TDH_CHIP_BUTTON} tw-w-full tw-min-w-0 tw-justify-center tw-px-1 tw-tabular-nums disabled:tw-cursor-not-allowed ${on ? TDH_CHIP_ON : TDH_CHIP_OFF} ${current ? "tw-border-dashed" : ""}`}
               >
                 {formatInteger(locale, season)}
               </button>

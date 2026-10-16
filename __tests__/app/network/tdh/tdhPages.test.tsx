@@ -95,7 +95,7 @@ describe("TDH sub-pages", () => {
 
   it("renders How TDH is calculated with fourteen steps and live explorables", async () => {
     const user = userEvent.setup();
-    renderPage(<HowItWorksPage />);
+    renderPage(await HowItWorksPage());
     expect(
       screen.getByRole("heading", { level: 1, name: "How TDH is calculated" })
     ).toBeInTheDocument();
@@ -166,7 +166,7 @@ describe("TDH sub-pages", () => {
 
   it("renders the specification with an anchor for every source chip on every TDH page", async () => {
     const pages = [
-      render(<HowItWorksPage />),
+      render(await HowItWorksPage()),
       render(await ImplementationsPage()),
       render(await FormalPage()),
       render(await VerificationPage()),
@@ -248,9 +248,12 @@ describe("TDH sub-pages", () => {
       0
     );
     expect(screen.getByText("68 / 68")).toBeInTheDocument();
-    // Five properties of the rule; last in, first out is a lemma about the
-    // model's stack and is not counted.
-    expect(container.textContent).toMatch(/5properties of TDH-v1 proved/);
+    // Six proved statements, as the table's filter counts them; the card
+    // names last in, first out, a lemma about the model's stack.
+    expect(container.textContent).toMatch(/6statements about TDH-v1 proved/);
+    expect(container.textContent).toMatch(
+      /last in, first out for the model’s own stacks/
+    );
     expect(container.textContent).not.toMatch(/cannot change TDH/);
     expect(container.textContent).not.toMatch(/and so no balance/);
     expect(container.textContent).toMatch(/It stops there/);
@@ -274,13 +277,16 @@ describe("TDH sub-pages", () => {
     expect(note?.textContent).toMatch(/55 \+ 30 theorems/);
     expect(note?.textContent).toMatch(/46 fact checks/);
     expect(note?.textContent).toMatch(/at commit 6b32f3f/);
-    // It is its own section after the body, under a pill, and the header
-    // gives it one quiet line.
+    // It is its own section after the body, under a pill, with its
+    // committed manifest's SHA-256; the header gives it one badge.
     expect(
       container.querySelector('#next-build [data-tdh-pill="notPublished"]')
     ).not.toBeNull();
+    expect(note?.textContent).toMatch(
+      /6825ffa47980ea9c7baa35470a6ddd24e7383fcbbe95bec4e237dfd0a7f537e5/
+    );
     expect(container.textContent).toMatch(
-      /Round 5 of the model \(6b32f3f, October 16, 2026\) is committed but not yet published/
+      /Round 5 committed: 89 of 89 vectors, 55 \+ 30 theorems/
     );
     expect(container.textContent).toMatch(
       /the order of raw logs is not covered/
@@ -390,7 +396,7 @@ describe("TDH sub-pages", () => {
       screen.getByRole("heading", { level: 1, name: "Implementations" })
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/None of their source is public yet/)
+      screen.getByText(/None of their source is public:/)
     ).toBeInTheDocument();
     expect(
       screen.getByText(/The list follows 6529chain f840096/)
@@ -414,9 +420,7 @@ describe("TDH sub-pages", () => {
         "68 of 68 vectors (1,190 checks), at P26 1c69528; every record of the 2026-10-11 cycle. Round 5 (6b32f3f), committed but not yet in a published manifest: 89 of 89 at P26 f840096."
       )
     ).toBeInTheDocument();
-    expect(
-      screen.getByText("Built; not yet inside the validator")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Built, not in validator")).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "The 89 conformance vectors" })
     ).toBeInTheDocument();
