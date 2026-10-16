@@ -1,32 +1,34 @@
 "use client";
 
-import Link from "next/link";
 import type { ApiMemeCollaboratorProfile } from "@/generated/models/ApiMemeCollaboratorProfile";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { MemeCollaboratorIdentity } from "./MemeCollaboratorIdentity";
 
 export function MemeCollaboratorCredits({
   collaborators,
+  size = "compact",
 }: {
   readonly collaborators?: ApiMemeCollaboratorProfile[] | undefined;
+  readonly size?: "default" | "compact";
 }) {
   const locale = useBrowserLocale();
   if (!collaborators || collaborators.length === 0) return null;
   return (
-    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-sm">
-      <span className="tw-text-iron-300">
+    <div className="tailwind-scope tw-min-w-0 tw-space-y-2">
+      <div className="tw-text-xs tw-font-medium tw-text-iron-400">
         {t(locale, "memes.collaborations.title")}:
-      </span>
-      {collaborators.map((profile) => (
-        <Link
-          key={profile.id}
-          href={`/${encodeURIComponent(profile.handle || profile.id)}`}
-          onClick={(event) => event.stopPropagation()}
-          className="tw-rounded tw-font-medium tw-text-primary-300 tw-no-underline hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-        >
-          @{profile.handle || profile.id}
-        </Link>
-      ))}
+      </div>
+      <ul
+        aria-label={t(locale, "memes.collaborations.title")}
+        className={`tw-m-0 tw-flex tw-list-none tw-gap-x-5 tw-gap-y-3 tw-p-0 ${size === "default" ? "tw-flex-col tw-items-start" : "tw-flex-wrap"}`}
+      >
+        {collaborators.map((profile) => (
+          <li key={profile.id} className="tw-min-w-0 tw-max-w-full">
+            <MemeCollaboratorIdentity collaborator={profile} size={size} />
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

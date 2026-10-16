@@ -198,7 +198,7 @@ Acceptance is final, with no withdrawal. The submitter cannot replace the
 accepted artwork or original artist name; replacing the submission requires
 fresh invitations. Admins can edit the final mint artwork and credits in Craft.
 
-Public submission cards and details show only accepted collaborators. Pending
+Public submission cards and details show only accepted collaborators. Details show their avatar, handle, level and profile badges in the same style as the submitter. Previews use smaller profile rows with the same identity information. Profile links and avatars remain available if the additional level/badge lookup fails. Pending
 names are private to the submitter and their own invitee. Accepted submissions
 appear on each collaborating artist's profile with the same active/winner
 status, votes and result. There is one entry and one submitter; collaborators do
@@ -217,3 +217,5 @@ merely sending an invitation.
 Resubmission starts a new invitation set and restores the original submitter's
 artist credit. Deleting an unminted submission closes its pending invitations.
 Existing cards and claims retain their historical artist credits.
+
+Collaboration notifications show the actor’s avatar and linked handle, the saved artwork name, and the time using the standard notification header. An invitation offers **Review invitation**; an acceptance offers **View artwork**. The artwork name also opens the submission. Older notifications without a saved name show “an artwork”; an unavailable actor profile uses neutral wording.

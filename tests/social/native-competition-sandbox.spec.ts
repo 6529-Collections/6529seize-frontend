@@ -1573,6 +1573,86 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     ).toEqual([]);
   });
 
+  test("shows collaboration actors and named artwork in the standard notification header", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    const origin = getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"]);
+    const response = await page.request.get(
+      `${origin}/api/v2/waves/${WAVE}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const fixture = await response.json();
+    const pfp =
+      "data:image/svg+xml;base64," +
+      Buffer.from(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28"><rect width="28" height="28" fill="#9b7ec8"/></svg>'
+      ).toString("base64");
+    await page.route("**/api/v2/notifications**", (route) =>
+      route.fulfill({
+        json: {
+          unread_count: 2,
+          notifications: ["INVITED", "ACCEPTED"].map((event, index) => ({
+            id: 5000 - index,
+            cause: "MEME_COLLABORATION",
+            created_at: Date.now() - 3 * 60 * 60 * 1000,
+            read_at: null,
+            related_identity: {
+              ...fixture.drops[0].author,
+              id: `notification-actor-${index}`,
+              handle: index === 0 ? "phoebeum" : "prxt0",
+              pfp,
+            },
+            additional_context: {
+              event_type: event,
+              wave_id: WAVE,
+              drop_id: entryDropId("alpha"),
+              invitation_id: `invite-${index}`,
+              artwork_name: "Test Cat",
+            },
+          })),
+        },
+      })
+    );
+    await page.goto("/notifications");
+    for (const [handle, action, message] of [
+      ["phoebeum", "Review invitation", "invited you to collaborate on"],
+      ["prxt0", "View artwork", "accepted your collaboration invitation for"],
+    ] as const) {
+      const actor = page.getByRole("link", { name: handle, exact: true });
+      await expect(actor).toBeVisible();
+      await expect(actor).toHaveAttribute("href", `/${handle}`);
+      await expect(
+        page.getByRole("img", { name: handle, exact: true })
+      ).toBeVisible();
+      const row = page
+        .getByRole("link", { name: handle, exact: true })
+        .locator("xpath=ancestor::div[1]");
+      await expect(row.getByText(message, { exact: true })).toBeVisible();
+      const artwork = row.getByRole("link", { name: "Test Cat", exact: true });
+      const link = row.getByRole("link", { name: action, exact: true });
+      await expect(artwork).toBeVisible();
+      await expect(link).toBeVisible();
+      const artworkHref = `/waves/${encodeURIComponent(WAVE)}?drop=${encodeURIComponent(entryDropId("alpha"))}`;
+      await expect(artwork).toHaveAttribute("href", artworkHref);
+      await expect(link).toHaveAttribute("href", artworkHref);
+      const actorBox = await actor.boundingBox();
+      const artworkBox = await artwork.boundingBox();
+      const linkBox = await link.boundingBox();
+      expect(actorBox).not.toBeNull();
+      expect(artworkBox).not.toBeNull();
+      expect(linkBox).not.toBeNull();
+      expect(Math.abs(actorBox!.x - linkBox!.x)).toBeLessThan(1);
+      expect(linkBox!.y).toBeGreaterThanOrEqual(
+        artworkBox!.y + artworkBox!.height + 4
+      );
+    }
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("collaboration-notifications.png"),
+    });
+  });
+
   test("keeps collaborator search, selected chips and disclosure usable", async ({
     page,
   }, testInfo) => {
@@ -1606,7 +1686,18 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
             acceptance_copy: "Acceptance is final.",
             terms: null,
             collaborators: [],
-            invitations: [],
+            invitations: [
+              {
+                id: "existing-invite",
+                profile: {
+                  id: "artist-d",
+                  handle: "artistD",
+                  display: "artistD",
+                  pfp: null,
+                },
+                status: "PENDING",
+              },
+            ],
           },
         })
     );
@@ -1642,6 +1733,16 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         exact: true,
       });
       await expect(add).toBeVisible({ timeout: 30000 });
+      const manage = page.getByRole("button", { name: /Manage invitations/ });
+      await expect(manage).toBeVisible();
+      const manageBox = await manage.boundingBox();
+      const addBox = await add.boundingBox();
+      expect(manageBox).not.toBeNull();
+      expect(addBox).not.toBeNull();
+      expect(Math.abs(manageBox!.x - addBox!.x)).toBeLessThan(1);
+      expect(Math.abs(manageBox!.height - addBox!.height)).toBeLessThan(1);
+      await expect(manage).toHaveCSS("border-top-style", "solid");
+      await expect(add).toHaveCSS("border-top-style", "solid");
       const search = page.getByRole("combobox", {
         name: "Invite a collaborating artist",
       });
@@ -1702,6 +1803,16 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       display: "playwright",
       pfp: null,
     };
+    await page.route(`**/identities/${PROFILE.toLowerCase()}`, (route) =>
+      route.fulfill({
+        json: {
+          ...fixture.drops[0].author,
+          id: PROFILE,
+          handle: "playwright",
+          level: 21,
+        },
+      })
+    );
     let accepted = false;
     await installCollaborationDropFixture(page, () => ({
       wave: fixture.wave,
@@ -1800,9 +1911,20 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await accept.click();
     await expect(dialog).toHaveCount(0);
     await expect(
-      page.getByRole("link", { name: "@playwright", exact: true })
+      page
+        .getByRole("list", { name: "Collaborators", exact: true })
+        .getByRole("link", { name: "playwright", exact: true })
     ).toHaveCount(1);
     await expect(review).toHaveCount(0);
+    await expect(
+      page
+        .getByRole("list", { name: "Collaborators", exact: true })
+        .getByText("21", { exact: true })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("accepted-collaborator-profile.png"),
+    });
   });
 
   test("renders frozen CHAT deep links with submission voting controls", async ({

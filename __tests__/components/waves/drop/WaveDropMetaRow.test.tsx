@@ -37,6 +37,18 @@ it("keeps the author and timestamp on one row and credits collaborators once bel
   );
   const authorRow = screen.getByText("Author").parentElement;
   expect(authorRow).toContainElement(screen.getByText("Time"));
-  const collaborator = screen.getByRole("link", { name: "@artistB" });
+  const collaborator = screen.getByRole("link", { name: "artistB" });
   expect(authorRow).not.toContainElement(collaborator);
 });
+
+// Profile fetching and badge rendering have dedicated collaborator identity coverage.
+jest.mock(
+  "@/components/waves/memes/collaborations/MemeCollaboratorIdentity",
+  () => ({
+    MemeCollaboratorIdentity: ({
+      collaborator,
+    }: {
+      collaborator: { handle: string };
+    }) => <a href={`/${collaborator.handle}`}>{collaborator.handle}</a>,
+  })
+);
