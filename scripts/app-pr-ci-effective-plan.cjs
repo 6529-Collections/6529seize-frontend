@@ -122,6 +122,8 @@ function applyEffectiveAppPrCiPlan(plan) {
         "i18n/messages/competitions.ts",
         "tests/social/native-competition-sandbox.spec.ts",
         "tests/social/wave-notification-settings-sandbox.spec.ts",
+        "tests/social/wave-switch-loading.spec.ts",
+        "components/brain/my-stream/MyStreamWavePending.tsx",
         "components/header/AppHeader.tsx",
         "components/brain/mobile/WaveInformationSheet.tsx",
         "components/waves/specs/WaveNotificationSettings.tsx",

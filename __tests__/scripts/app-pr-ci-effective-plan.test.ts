@@ -97,6 +97,8 @@ describe("effective App PR CI plan", () => {
     "services/wallet-signatures/competition-signature.ts",
     "i18n/messages/competitions.ts",
     "tests/social/native-competition-sandbox.spec.ts",
+    "tests/social/wave-switch-loading.spec.ts",
+    "components/brain/my-stream/MyStreamWavePending.tsx",
     "tests/support/composerSandboxServer.cjs",
     "components/waves/WavesMobile.tsx",
     "components/brain/BrainMobile.tsx",
