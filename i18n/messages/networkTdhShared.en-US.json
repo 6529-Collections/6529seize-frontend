@@ -97,5 +97,7 @@
   "network.tdh.shared.showAllLines": "Show all {count} lines",
   "network.tdh.shared.showFewerLines": "Show fewer lines",
   "network.tdh.shared.difftest.link": "The four rounds of differential tests, round by round",
-  "network.tdh.shared.difftest.otherVectors": "P26’s fifth round (f840096, October 16) added vectors 75 to 88: 76 to 79 settle round 4’s findings, and 75 and 80 to 88 pin its rulings on how each input value is typed and written (a day length as a 32-bit number, JSON integers and keys in one canonical form, the claim limit as a 32-bit number, one log per position). None changes a value of the 2026-10-11 cycle."
+  "network.tdh.shared.difftest.otherVectors": "P26’s fifth round (f840096, October 16) added vectors 75 to 88: 76 to 79 settle round 4’s findings, and 75 and 80 to 88 pin its rulings on how each input value is typed and written (a day length as a 32-bit number, JSON integers and keys in one canonical form, the claim limit as a 32-bit number, one log per position). None changes a value of the 2026-10-11 cycle.",
+  "network.tdh.shared.pill.behindLatest": "Behind P26’s latest round",
+  "network.tdh.shared.scrollHint": "Scroll sideways →"
 }

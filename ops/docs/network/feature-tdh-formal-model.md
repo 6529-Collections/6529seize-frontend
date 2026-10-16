@@ -11,7 +11,9 @@ cover. Every status comes from the model's proof manifest (below); the
 copy bundled with the page records the model at commit `7bf579a` of 6529's
 design repository (15 October 2026, Lean 4.35.0), beside P26 as last changed
 at `1c69528`. The model's source is in 6529's private design repository. A `Proposal, not adopted` pill
-and a status line say that P26 stays the rule.
+and a status line say that P26 stays the rule: it is proposed to the owner
+that the model become the normative definition of TDH-v1, which has not been
+decided.
 
 ## Location in the Site
 
@@ -23,29 +25,34 @@ and a status line say that P26 stays the rule.
 
 ## Content
 
-- A summary band: statements about TDH-v1 proved (counted as the table's
-  filter counts them, last in, first out named on the card; plus two
-  validator rules), draft claims disproved (the card names the validator
-  rule the model also caught), conformance vectors (68 of 68, 1,190 checks,
-  from the manifest) and the records of a real day reproduced (all 21,410 of
-  the 2026-10-11 cycle, equal to the Python reference's), with the theorem
-  counts, captioned with the published build; commits in capitalised
-  eyebrows keep their case (`CaseSafe`). While a newer round exists, one
-  badge names it (`Round 5 committed: 89 of 89 vectors, 55 + 30 theorems`)
-  and links to its section (below); every other figure is the published
-  build's. Then where the statuses come from: the published
-  manifest (with a link to its JSON) or the copy bundled with the page, and
-  the build it records (commit, date, Lean version, P26's last change). The
-  header carries one pill, `Proposal, not adopted`.
+- The builds behind the page, in one panel: the published build (model
+  commit and date, Lean version, P26's last change, its vectors and checks,
+  theorems and fact checks, where its statuses were read from, the link to
+  the manifest JSON and the SHA-256 of the file served) and, while a newer
+  round is committed but not published, that round in the column beside it
+  under a `Not yet published` pill: its commit and date, the P26 round it
+  follows, its figures, the SHA-256 of its committed manifest and, in a
+  disclosure, what it changes. A line under both says every status and
+  count on the page is the published build's. Each build's figures appear
+  only there, so no paragraph below mixes two builds.
+- Four figure cards, each a number and a one-line label: statements about
+  TDH-v1 proved (counted as the table's filter counts them), draft claims
+  disproved, conformance vectors passed and records of a real day; what
+  each counts (the statements' names, the validator rules the model caught,
+  the checks and the P26 commit, the 2026-10-11 cycle) is in one disclosure
+  under them, with the theorem counts.
 - Why write the rule again (the 23 choices a clean-room implementation had to
   make, two rated high, and the first netting rule the proofs refuted), and
   `Found by the model, and settled in the specifications`: the first
-  netting rule, cases H and I, F, G and the P53 recomputation finding.
+  netting rule, cases H and I, F, G, the 19.99% cap (six passes where P53
+  said five, a valid key as part of being live, the level as one floor) and
+  the exclusions recomputation finding.
 - What the netting theorem proves, and where it stops: netting invariance in
-  plain words with its hypotheses (two canonically ordered transfer
-  sequences, transactions corresponding one to one and in order, one
-  registry, both replays with a result), its two limits (whole transactions
-  added or removed, and the canonical sort, are not covered), what it means
+  plain words with its hypotheses (any two transfer sequences, transactions
+  corresponding one to one and in order, one registry, both replays with a
+  result; P26 applies it to the canonically ordered transfers), its two
+  limits (whole transactions added or removed, and the canonical sort, are
+  not covered), what it means
   (within those limits no holding stack can change), where it stops
   (mint facts read the steps, so eligibility, and with it balances, raw days,
   rates and TDH, can change; the underflow test reads the steps too), a
@@ -64,7 +71,9 @@ and a status line say that P26 stays the rule.
   statement and the manifest's entries: each theorem with its status, the
   axioms Lean reports for it, its file and line and the manifest's reading
   of it, each `#guard` case with its number of checks. Lean code keeps its
-  lines and scrolls sideways on phones. Four draft claims are shown false, among them that
+  lines, and a long line wraps with a hanging indent. The replay row is
+  `The replay succeeds on valid input`, with the transaction rules it
+  assumes. Four draft claims are shown false, among them that
   steps inside a transaction never matter (counterexamples H and I); that a
   token's balance and raw days stay the same while its eligibility does is
   marked not proved here (it follows from P26 §7.2's definitions); the first
@@ -72,19 +81,19 @@ and a status line say that P26 stays the rule.
 - What the model contains, labelled `At the published build` with its
   commit: what it covers and what it leaves out, its runs (the vectors, the
   2026-10-11 cycle from raw logs, the random inputs), and its modules by
-  P26 section. While the published build is round 3, a line says that
-  round 5 moves log selection and decoding into the model.
+  P26 section. The day's log counts are given both ways: 414,007 through
+  the snapshot block, of 414,254 in the day's file.
 - What the proofs do not guarantee, labelled the same way, with a link to
   the four rounds of differential tests on the Implementations page, which
   lists what each round found.
-- The next build (while one exists): round 5's figures, what it adds, and
-  the SHA-256 of its committed proof manifest, so the one the feed later
-  publishes can be matched against it.
-- Three layers of assurance as one column (the specification, the model,
-  the programs, and the inputs that feed them, the last drawn dashed as
-  planned: checked reads and proofs A and B; today the history is taken as
-  reported), every connector with its arrowheads in the gap and a legend
-  for each border, and how the model is checked (`lake build`, `lake exe
+- Three layers of assurance across the section: the specification, the
+  model and the programs as bands, each labelled with its layer, and the
+  inputs under them, drawn dashed as partly in place (checked reads, D118,
+  are built: every daily run checks the snapshot block's headers and the
+  edition floors, while the history before the snapshot is taken as
+  reported until the full check runs; proofs A and B, D119, are being
+  built). Each check is named on the arrow between the layers it joins,
+  with a legend for each border; then how the model is checked (`lake build`, `lake exe
 tdh-vectors`; it is in 6529's private design repository), with the
   published build's figures.
 
@@ -112,11 +121,11 @@ records (`leanRound` in `formalStatus.ts`):
   1,127,150 random checks).
 
 While the published manifest records an earlier round than round 5, the
-header has one quiet line naming round 5 and a section after the body, "The
-next build: round 5", under a `Not yet published` pill, shows its figures
-from its committed manifest (89 of 89 vectors, 1,253 checks; 55 + 30
-theorems; 46 fact checks) and says every status above is the published
-build's. The Implementations page's Lean card follows the same
+builds panel shows round 5 in a column of its own, under a `Not yet
+published` pill, with the figures of its committed manifest (89 of 89
+vectors, 1,253 checks; 55 + 30 theorems; 46 fact checks), and says every
+status on the page is the published build's. Round 5's fact-check row also
+lists the facts it adds (an amount's type, `totalMax`'s, the one-log rule). The Implementations page's Lean card follows the same
 switch for its compute time, and adds round 5's vector count.
 
 The summary counts every proved statement of the TDH-v1 table, as the

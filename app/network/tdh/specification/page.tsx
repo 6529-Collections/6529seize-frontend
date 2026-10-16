@@ -1,7 +1,8 @@
 import { getAppMetadata } from "@/components/providers/metadata";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import TdhPageShell from "../shared/TdhPageShell";
+import TdhCopyButton from "../shared/TdhCopyButton";
 import TdhPager from "../shared/TdhPager";
 import TdhScrollSpyNav from "../shared/TdhScrollSpyNav";
 import TdhSource from "../shared/TdhSource";
@@ -16,6 +17,67 @@ import SpecSectionsB from "./SpecSectionsB";
  */
 const P26_SHA256 =
   "c7918b6d3275b8058401a166bf81f4880bbf072d11ce01b1525b21207cabb28d";
+
+const VERSION_ROWS = ["rule", "text", "sha", "where", "status"] as const;
+
+/**
+ * The version of the text this page restates, in one panel: the rule
+ * version, the P26 commit, its SHA-256 with a copy button, where the text
+ * is and what its status is.
+ */
+function SpecVersion({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <section
+      aria-labelledby="spec-version-heading"
+      className="tw-mt-1 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-4 tw-py-3 sm:tw-px-5"
+    >
+      <h2
+        id="spec-version-heading"
+        className="tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400"
+      >
+        {t(locale, "network.tdh.spec.versionRow.title")}
+      </h2>
+      <dl className="tw-m-0 tw-mt-2 tw-grid tw-grid-cols-1 tw-gap-x-6 tw-gap-y-2 tw-text-sm tw-leading-6 sm:tw-grid-cols-[8rem_minmax(0,1fr)]">
+        {VERSION_ROWS.map((row) => (
+          <div key={row} className="tw-contents">
+            <dt className="tw-font-medium tw-text-iron-300">
+              {t(locale, `network.tdh.spec.versionRow.${row}` as MessageKey)}
+            </dt>
+            <dd className="tw-m-0 tw-mb-2 tw-min-w-0 tw-text-iron-200 sm:tw-mb-0">
+              {row === "sha" ? (
+                <span className="tw-inline-flex tw-max-w-full tw-items-center tw-gap-1">
+                  <code
+                    className="tw-min-w-0 tw-break-all tw-font-mono tw-text-[13px] tw-text-iron-100"
+                    title={P26_SHA256}
+                  >
+                    {P26_SHA256}
+                  </code>
+                  <TdhCopyButton
+                    value={P26_SHA256}
+                    label={t(locale, "network.tdh.shared.copyNamed", {
+                      name: t(locale, "network.tdh.spec.versionRow.sha"),
+                    })}
+                    copiedLabel={t(locale, "network.tdh.shared.copied")}
+                    failedLabel={t(locale, "network.tdh.shared.copyFailed")}
+                  />
+                </span>
+              ) : (
+                t(
+                  locale,
+                  `network.tdh.spec.versionRow.${row}Value` as MessageKey
+                )
+              )}
+              {row === "where" && <TdhSource refs={["D116"]} locale={locale} />}
+              {row === "status" && (
+                <TdhSource refs={["D121", "P26 header"]} locale={locale} />
+              )}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+}
 
 const SECTION_IDS = [
   "s1",
@@ -70,16 +132,7 @@ export default function TdhSpecificationPage() {
             {t(locale, "network.tdh.spec.lede")}
             <TdhSource refs={["P26 header"]} locale={locale} />
           </p>
-          <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
-            {t(locale, "network.tdh.spec.version")}
-            <TdhSource refs={["D121", "D116", "P26 header"]} locale={locale} />
-          </p>
-          <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
-            {t(locale, "network.tdh.spec.versionHash")}
-            <code className="tw-mt-0.5 tw-block tw-break-all tw-font-mono tw-text-xs tw-text-iron-200">
-              {P26_SHA256}
-            </code>
-          </p>
+          <SpecVersion locale={locale} />
         </>
       }
       headerExtra={

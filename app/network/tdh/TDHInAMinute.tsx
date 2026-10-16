@@ -25,7 +25,7 @@ const PANEL_VALUE =
   "tw-m-0 tw-text-xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50";
 const GLYPH =
   "tw-flex tw-items-center tw-justify-center tw-text-2xl tw-font-light tw-text-iron-500";
-const CAPTION = "tw-m-0 tw-text-xs tw-leading-4";
+const CAPTION = "tw-m-0 tw-text-sm tw-leading-5";
 
 const cents = (locale: SupportedLocale, value: number) =>
   formatNumber(locale, value / 100, {
@@ -194,7 +194,7 @@ export function TdhSourcesFootnote({
         <TdhSource refs={refs} locale={locale} />
       </p>
       {legend && (
-        <p className="tw-m-0 tw-mt-1 tw-max-w-prose">
+        <p className="tw-m-0 tw-mt-1 tw-max-w-[36em]">
           {t(locale, "network.tdh.explainer.sources.legend")}{" "}
           <a
             href="#glossary"
@@ -243,7 +243,7 @@ export default function TDHInAMinute({
             <span className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500/15 tw-text-sm tw-font-semibold tw-text-primary-300 tw-ring-1 tw-ring-inset tw-ring-primary-400/40">
               {formatInteger(locale, index + 1)}
             </span>
-            <p className="tw-m-0 tw-text-[15px] tw-leading-7 tw-text-iron-300">
+            <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-300">
               <strong className="tw-font-semibold tw-text-iron-50">
                 {t(locale, `network.tdh.explainer.minute.${step}.title`)}
               </strong>{" "}
@@ -252,11 +252,14 @@ export default function TDHInAMinute({
           </li>
         ))}
       </ol>
+      <p className="tw-m-0 tw-mt-4 tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-300 md:tw-pl-11">
+        {t(locale, "network.tdh.explainer.minute.otherRates")}
+      </p>
       <figure className="tw-m-0 tw-mt-8">
         <p className="tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
           {t(locale, "network.tdh.explainer.minute.exampleLabel")}
         </p>
-        <p className="tw-m-0 tw-mb-3 tw-mt-1 tw-max-w-prose tw-text-[15px] tw-leading-7 tw-text-iron-300">
+        <p className="tw-m-0 tw-mb-3 tw-mt-1 tw-max-w-[36em] tw-text-base tw-leading-7 tw-text-iron-300">
           {t(locale, "network.tdh.explainer.minute.example")}
         </p>
         <div
@@ -281,7 +284,7 @@ export default function TDHInAMinute({
                 final: values.final,
               })}
             </span>
-            <span className="tw-max-w-prose tw-text-sm tw-tabular-nums tw-leading-6 tw-text-iron-300">
+            <span className="tw-max-w-[36em] tw-text-sm tw-tabular-nums tw-leading-6 tw-text-iron-300">
               {t(locale, "network.tdh.explainer.minute.whatMoves", {
                 base: values.base,
                 fullSetBoost: cents(locale, MINUTE_EXAMPLE.fullSetBetaCents),

@@ -59,12 +59,12 @@ export default function NettingFigure({
     "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-900 tw-p-4";
   return (
     <figure className="tw-m-0">
-      <figcaption className="tw-mb-3 tw-text-sm tw-font-medium tw-text-iron-200">
+      <figcaption className="tw-mb-3 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
         {m("title")}
       </figcaption>
       <p className="tw-sr-only">{m("desc")}</p>
       <div aria-hidden="true">
-        <div className="tw-grid tw-items-start tw-gap-3 md:tw-grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:tw-items-center">
+        <div className="tw-grid tw-items-stretch tw-gap-3 md:tw-grid-cols-3">
           <div className={card}>
             <p className="tw-m-0 tw-flex tw-justify-between tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
               <span>{m("logged")}</span>
@@ -78,14 +78,17 @@ export default function NettingFigure({
               <Step from="A" to="B" />
             </ol>
           </div>
-          <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-rounded-xl tw-border tw-border-dashed tw-border-primary-400/40 tw-px-4 tw-py-3 tw-text-center">
-            <span className="tw-text-xs tw-font-medium tw-text-primary-300">
+          <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-rounded-xl tw-border tw-border-dashed tw-border-primary-400/40 tw-px-4 tw-py-4 tw-text-center">
+            <span className="tw-text-sm tw-font-medium tw-text-primary-300">
               {m("net")}
             </span>
             <span className="tw-flex tw-flex-wrap tw-justify-center tw-gap-1.5">
               <Net label="A" value="−1" />
               <Net label="B" value="+1" />
               <Net label="X" value="0" />
+            </span>
+            <span className="tw-text-sm tw-leading-5 tw-text-iron-300">
+              {m("netNote")}
             </span>
           </div>
           <div className={card}>

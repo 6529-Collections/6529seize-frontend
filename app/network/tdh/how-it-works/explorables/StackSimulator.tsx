@@ -83,7 +83,7 @@ function Stack({
         className="tw-m-0 tw-flex tw-min-h-[3.25rem] tw-list-none tw-flex-col-reverse tw-justify-start tw-gap-1 tw-rounded-lg tw-border tw-border-dashed tw-border-iron-700 tw-p-2"
       >
         {stack.length === 0 && (
-          <li className="tw-m-auto tw-text-xs tw-text-iron-500">
+          <li className="tw-m-auto tw-text-sm tw-text-iron-500">
             {t(locale, "network.tdh.how.stack.empty")}
           </li>
         )}
@@ -102,7 +102,7 @@ function Stack({
               </span>
               <span
                 aria-hidden="true"
-                className="tw-text-xs tw-text-sky-200/70"
+                className="tw-text-sm tw-text-sky-200/70"
               >
                 {t(locale, "network.tdh.how.stack.day", {
                   day: formatInteger(locale, acquired),

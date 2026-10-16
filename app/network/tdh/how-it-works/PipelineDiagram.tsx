@@ -77,7 +77,7 @@ export function PipelineDiagram({
       </ol>
       <p
         aria-hidden="true"
-        className="tw-m-0 tw-mt-4 tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-2 tw-text-xs tw-text-iron-400"
+        className="tw-m-0 tw-mt-4 tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-2 tw-text-sm tw-text-iron-400"
       >
         <span className="tw-inline-flex tw-items-center tw-gap-2">
           <span className="tw-size-3 tw-rounded-sm tw-border-2 tw-border-solid tw-border-primary-400" />

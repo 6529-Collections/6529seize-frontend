@@ -106,7 +106,10 @@ headers read for the cycle (b, b + 1, the search's, the decoded logs' blocks):
                                                        # vectors 34, 55
 the set always holds B stamped T: a log below B stamped at T or later, or
     block B stamped other than T, is invalid           # vectors 61, 62
-a decoded transfer in a block <= B stamped after T: input invalid  # vector 54`;
+a decoded transfer in a block <= B stamped after T: input invalid  # vector 54
+no other order of decoded timestamps is checked: two of one block may differ,
+    they may fall as the block number rises, and one need not carry the
+    header set's timestamp for its block; MUST NOT refuse an input for these`;
 
 export const RULE_DAYS = "days(a) = (T - a) div day_s";
 
@@ -148,7 +151,7 @@ export const RULE_REPLAY = `# SINKS: the zero address and 0x…dead (§3.4); clu
 if from = to or amount = 0: skip
 moved = none
 if from not in SINKS:
-    moved = last \`amount\` entries of stack[from], in order; remove them
+    moved = last amount entries of stack[from], in order; remove them
 if to in SINKS:
     unless to = ZERO and txHash = firstgm_burn_tx:
         append amount copies of timestamp to stack[to]
@@ -169,7 +172,8 @@ identity record: at least one wallet record
 identity, per token: the sums over its wallets of balance, raw and base
 identity base:   the sum of wallet bases, never recomputed from the merged raw
 beta and final:  computed for each record; an identity's are not the sums
-                 of its wallets' (e.g. two wallets at 102 each, identity 208)
+                 of its wallets' (e.g. two wallets, one Gradient each with
+                 base 100: 102 each, and the identity 208)
 totals (§8.5):   sums over identity records, never over wallet records`;
 
 export const RULE_RATE = "RATE(n, d) = HALFUP( B64( B64(n / d) * 100 ) )";
@@ -303,7 +307,14 @@ stored record (CE struct)         the same fields in order, fixed-width
 the hash is taken over the typed values, never over the stored bytes`;
 
 /** P53 §4.2: the cycle root validators sign. */
-export const RULE_CYCLE_ROOT = `cycleRoot_N = H("6529.TdhCycleRoot.v1",
+export const RULE_CYCLE_ROOT = `# H(name, f1, ..., fk) = keccak256(abi.encode(bytes32 TAG(name), f1, ..., fk)),
+# P28's tagged hash (section 10), not the edition H of section 5
+# NETWORK_ID, v1's own network (P53 §3.1):
+NETWORK_ID = H("6529.Network.v1", keccak256("6529-validator-1"),
+               keccak256("6529-validator-1 no genesis"))
+           = 0x305a60a8768fcb3908a775373e58a0f8c60642dba778d8158c8cbd75284cd102
+
+cycleRoot_N = H("6529.TdhCycleRoot.v1",
   bytes32 NETWORK_ID,
   uint32  cycleDay,         # N
   uint64  boundary,         # t_N, Unix seconds

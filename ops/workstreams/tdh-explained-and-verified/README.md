@@ -53,7 +53,11 @@ marked scroll regions, text collisions, one word per line, text under 12 px
 (SVG included; 9 px in the 320 window), WCAG 2.2 AA failures from axe-core,
 SVG text contrast, tables broken by an out-of-flow caption, and controls
 too small to hit (a button, switch, select or summary under 24 x 24 px, a
-text field or select under 40 px tall, 44 px in the phone view). A view
+text field or select under 40 px tall, 44 px in the phone view), prose set
+wider than 80 characters a line, a heading smaller than the paragraph under
+it, and any error in the browser console (on the 404 views only the
+browser's line for the 404 and the wallet SDK's
+Cross-Origin-Opener-Policy check of the page are allowed). A view
 whose page or browser crashes, or that does not finish in time, fails at
 once instead of stopping the run. `--widths 1024,360d` adds the other
 bands.

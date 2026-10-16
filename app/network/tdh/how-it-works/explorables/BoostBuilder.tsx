@@ -79,7 +79,7 @@ function BoostLadder({
     >
       <span className="tw-relative tw-block tw-pt-6">
         <span
-          className="tw-absolute tw-top-0 tw-text-xs tw-font-semibold tw-tabular-nums tw-text-iron-50"
+          className="tw-absolute tw-top-0 tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-50"
           style={{
             left: `${marker}%`,
             transform: `translateX(${shift})`,
@@ -104,7 +104,7 @@ function BoostLadder({
           style={{ left: `${marker}%` }}
         />
       </span>
-      <span className="tw-mt-2 tw-flex tw-justify-between tw-text-xs tw-tabular-nums tw-text-iron-300">
+      <span className="tw-mt-2 tw-flex tw-justify-between tw-text-sm tw-tabular-nums tw-text-iron-300">
         <span>{multiplier(locale, 100)}</span>
         <span>{t(locale, "network.tdh.how.boostBuilder.ceiling")}</span>
       </span>
@@ -210,7 +210,7 @@ export default function BoostBuilder({
         {fullSetChosen && (
           <p
             id={`${id}-fullset`}
-            className="tw-m-0 tw-mt-1 tw-text-xs tw-text-iron-400"
+            className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-400"
           >
             {t(locale, "network.tdh.how.boostBuilder.disabledFullSet")}
           </p>
@@ -240,7 +240,7 @@ export default function BoostBuilder({
             );
           })}
         </div>
-        <p className="tw-m-0 tw-mt-2 tw-text-xs tw-text-iron-400">
+        <p className="tw-m-0 tw-mt-2 tw-text-sm tw-text-iron-400">
           {t(locale, "network.tdh.how.boostBuilder.currentNote", {
             season: formatInteger(locale, CURRENT_SEASON),
           })}
@@ -275,7 +275,7 @@ export default function BoostBuilder({
         {season1Complete && !fullSetChosen && (
           <p
             id={`${id}-season1`}
-            className="tw-m-0 tw-text-xs tw-text-iron-400"
+            className="tw-m-0 tw-text-sm tw-text-iron-400"
           >
             {t(locale, "network.tdh.how.boostBuilder.disabledSeason1")}
           </p>

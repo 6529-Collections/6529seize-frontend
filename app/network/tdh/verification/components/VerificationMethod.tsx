@@ -10,6 +10,7 @@ import {
   WIDE_WIDTH,
 } from "../../shared/TdhSvg";
 import { svgBoxWidth } from "../../shared/svgText";
+import { isTdhProgram, ProgramGlyph } from "../../shared/TdhProgramMark";
 
 type FlowSeries = keyof typeof TDH_SERIES | "neutral";
 type FlowBox = {
@@ -17,18 +18,6 @@ type FlowBox = {
   readonly y: number;
   readonly w: number;
   readonly h: number;
-};
-
-const FLOW_DOT: Record<FlowSeries, string> = {
-  rust: "tw-fill-primary-400",
-  programB: "tw-fill-violet-400",
-  lean: "tw-fill-emerald-400",
-  python: "tw-fill-amber-300",
-  live: "tw-fill-iron-400",
-  memes: "tw-fill-sky-400",
-  gradients: "tw-fill-fuchsia-400",
-  nextgen: "tw-fill-teal-400",
-  neutral: "tw-fill-iron-500",
 };
 
 const FLOW_EDGE = "tw-fill-none tw-stroke-iron-400";
@@ -56,12 +45,16 @@ function FlowNode({
         rx={8}
         className="tw-fill-iron-900 tw-stroke-white/20"
       />
-      <circle
-        cx={box.x + 14}
-        cy={box.y + box.h / 2}
-        r={4}
-        className={FLOW_DOT[series]}
-      />
+      {isTdhProgram(series) ? (
+        <ProgramGlyph program={series} cx={box.x + 14} cy={box.y + box.h / 2} />
+      ) : (
+        <circle
+          cx={box.x + 14}
+          cy={box.y + box.h / 2}
+          r={2.5}
+          className="tw-fill-iron-500"
+        />
+      )}
       <text
         x={box.x + NODE_TEXT_X}
         y={box.y + box.h / 2 + size * 0.36}
@@ -393,7 +386,7 @@ function DailyFlow({ locale }: { readonly locale: SupportedLocale }) {
           wide={<FlowWide label={label} />}
         />
       </div>
-      <p className="tw-m-0 tw-mt-3 tw-max-w-3xl tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-300">
+      <p className="tw-m-0 tw-mt-3 tw-max-w-[36em] tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-300">
         {label("sameCode")}
       </p>
     </figure>
@@ -425,11 +418,11 @@ export default function VerificationMethod({
         locale={locale}
         className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
       />
-      <div className="tw-mt-4 tw-space-y-8">
-        <div className="tw-max-w-3xl">
+      <div className="tw-mt-4 tw-grid tw-items-start tw-gap-8 xl:tw-grid-cols-2">
+        <div className="tw-min-w-0">
           <DailyFlow locale={locale} />
         </div>
-        <ol className="tw-m-0 tw-max-w-3xl tw-list-none tw-space-y-4 tw-p-0">
+        <ol className="tw-m-0 tw-min-w-0 tw-max-w-[36em] tw-list-none tw-space-y-4 tw-p-0">
           {STEPS.map((step, index) => (
             <li
               key={step.key}
@@ -453,7 +446,7 @@ export default function VerificationMethod({
               </p>
             </li>
           ))}
-          <li className="tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-700 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <li className="tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-700 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, "network.tdh.verify.method.validators")}
             <TdhSource refs={["P53 §12"]} locale={locale} />
           </li>

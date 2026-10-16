@@ -24,11 +24,11 @@ import {
 const TILE = `${TDH_CARD} tw-flex tw-min-w-0 tw-flex-col tw-p-4 sm:tw-p-5`;
 const TILE_LABEL =
   "tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400";
-const TILE_SUB = "tw-m-0 tw-mt-0.5 tw-text-xs tw-leading-5 tw-text-iron-400";
+const TILE_SUB = "tw-m-0 tw-mt-0.5 tw-text-sm tw-leading-5 tw-text-iron-400";
 const TILE_VALUE =
   "tw-m-0 tw-mt-3 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-1.5 tw-text-2xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50";
-const TILE_FOOT =
-  "tw-m-0 tw-mt-auto tw-pt-2 tw-text-xs tw-tabular-nums tw-leading-5";
+/** A tile's last line, right under its figure: tiles align their tops. */
+const TILE_FOOT = "tw-m-0 tw-mt-2 tw-text-sm tw-tabular-nums tw-leading-5";
 
 function plural(locale: SupportedLocale, count: number): "one" | "other" {
   return selectPluralCategory(locale, count) === "one" ? "one" : "other";
@@ -150,7 +150,7 @@ function CountTile({
             )}
       </p>
       {walletsEqual !== null && walletsTotal !== null && (
-        <p className="tw-m-0 tw-text-xs tw-tabular-nums tw-leading-5 tw-text-iron-300">
+        <p className="tw-m-0 tw-text-sm tw-tabular-nums tw-leading-5 tw-text-iron-300">
           {t(locale, "network.tdh.verify.tiles.walletsLine", {
             equal: formatInteger(locale, walletsEqual),
             total: formatInteger(locale, walletsTotal),
@@ -209,7 +209,7 @@ function TotalTile({
       <p className={TILE_SUB}>
         {t(locale, "network.tdh.verify.tiles.signedTotalNote")}
       </p>
-      <dl className="tw-m-0 tw-mt-3 tw-space-y-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-2 tw-text-xs tw-tabular-nums tw-leading-5">
+      <dl className="tw-m-0 tw-mt-3 tw-space-y-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-2 tw-text-sm tw-tabular-nums tw-leading-5">
         {(
           [
             ["pythonMinusRust", pythonDelta],
@@ -348,7 +348,7 @@ function CutoverProgress({
           style={{ width: `${Math.max(elapsed * 100, 3)}%` }}
         />
       </span>
-      <span className="tw-mt-1.5 tw-flex tw-justify-between tw-gap-3 tw-text-xs tw-tabular-nums tw-text-iron-400">
+      <span className="tw-mt-1.5 tw-flex tw-justify-between tw-gap-3 tw-text-sm tw-tabular-nums tw-text-iron-400">
         <span className="tw-min-w-0">
           {t(locale, "network.tdh.verify.cutover.start", {
             date: formatShortCycleDate(locale, FIRST_REPORT_DATE),
@@ -398,7 +398,6 @@ export default function VerificationAgreementTiles({
       walletsEqual={rustVsLive?.walletsEqual ?? null}
       walletsTotal={rustVsLive?.walletsTotal ?? null}
       missing={t(locale, "network.tdh.verify.tiles.liveMissing")}
-      note={t(locale, "network.tdh.verify.tiles.identitiesNote")}
     />
   );
   const python = (
@@ -412,7 +411,6 @@ export default function VerificationAgreementTiles({
       walletsEqual={rustVsPython?.walletsEqual ?? null}
       walletsTotal={rustVsPython?.walletsTotal ?? null}
       missing={t(locale, "network.tdh.verify.tiles.pythonNotRun")}
-      note={t(locale, "network.tdh.verify.tiles.identitiesNote")}
     />
   );
   const tiles = afterCutover ? [python, live] : [live, python];
@@ -428,7 +426,7 @@ export default function VerificationAgreementTiles({
         {t(locale, "network.tdh.verify.tiles.heading")}
       </h2>
       {afterCutover && (
-        <p className="tw-m-0 tw-mb-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+        <p className="tw-m-0 tw-mb-3 tw-text-sm tw-leading-6 tw-text-iron-300">
           {t(locale, "network.tdh.verify.tiles.publicationCheck")}
           <TdhSource refs={["P53 §4.5"]} locale={locale} />
         </p>

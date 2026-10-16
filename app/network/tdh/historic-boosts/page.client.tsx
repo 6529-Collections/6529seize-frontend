@@ -21,14 +21,17 @@ import {
   BoostTimeline,
   CurrentLadder,
   CurrentRuleCard,
+  CurrentRuleDetails,
   CurrentRuleRow,
 } from "./HistoricBoostsCurrent";
 import {
+  CURRENT_RULE,
   DETAIL_PANEL_CLASS,
   HISTORIC_RULES,
   MobileSummaryMetric,
   TABLE_CELL_CLASS,
   TABLE_HEADER_CLASS,
+  VERSION_LABEL_KEY,
   formatGradientBonus,
   formatMultiplier,
   formatSeasonRange,
@@ -44,6 +47,9 @@ const ARCHIVE_SOURCE =
 /** Schedule 1.4: the backend's rule file at the commit P26 cites. */
 const RULES_SOURCE =
   "https://github.com/6529-Collections/6529seize-backend/blob/d0c070cc821ed0211cb6b19b17e27b2a32609ac3/src/tdhLoop/tdh-rules.ts";
+
+/** The current schedule's id among the rows that open. */
+const CURRENT_ID = "boost-schedule-1-4";
 
 export default function TDHHistoricBoostsPage({
   rules = null,
@@ -84,10 +90,10 @@ export default function TDHHistoricBoostsPage({
           <h1 className={TDH_H1}>
             {m(locale, "network.tdhHistoric.hero.title")}
           </h1>
-          <p className={`tw-mb-0 tw-mt-4 tw-max-w-3xl ${TDH_LEDE}`}>
+          <p className={`tw-mb-0 tw-mt-4 tw-max-w-[38em] ${TDH_LEDE}`}>
             {m(locale, "network.tdhHistoric.hero.intro")}
           </p>
-          <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
+          <p className="tw-mb-0 tw-mt-2 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
             {m(locale, "network.tdhHistoric.hero.v1")}
             <TdhSource refs={["P26 §10"]} locale={locale} />
           </p>
@@ -119,7 +125,7 @@ export default function TDHHistoricBoostsPage({
               onToggle={toggleRule}
             />
             <CurrentLadder locale={locale} initialRules={rules} />
-            <div className="tw-max-w-prose tw-text-sm tw-leading-6 tw-text-iron-300">
+            <div className="tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
               <p className="tw-m-0">
                 {m(locale, "network.tdhHistoric.provenance")}
                 <TdhSource refs={["P26 §10", "DEV-3"]} locale={locale} />
@@ -169,6 +175,9 @@ function HistoricRulesTable({
   readonly locale: SupportedLocale;
   readonly onToggle: (ruleId: string) => void;
 }) {
+  const currentLabel = m(locale, VERSION_LABEL_KEY, {
+    version: CURRENT_RULE.version,
+  });
   return (
     <div className="tw-hidden xl:tw-block">
       <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60">
@@ -210,7 +219,29 @@ function HistoricRulesTable({
               </th>
             </tr>
           </thead>
-          <CurrentRuleRow locale={locale} />
+          <CurrentRuleRow
+            locale={locale}
+            toggle={
+              <RuleToggleButton
+                controlsId={`${CURRENT_ID}-desktop-details`}
+                isExpanded={expandedRuleIds.has(CURRENT_ID)}
+                locale={locale}
+                onToggle={() => onToggle(CURRENT_ID)}
+                versionLabel={currentLabel}
+              />
+            }
+            details={
+              <tr
+                className="tw-border-0 tw-bg-black/20"
+                hidden={!expandedRuleIds.has(CURRENT_ID)}
+                id={`${CURRENT_ID}-desktop-details`}
+              >
+                <td className="tw-border-0 tw-p-4 sm:tw-p-6" colSpan={6}>
+                  <CurrentRuleDetails locale={locale} />
+                </td>
+              </tr>
+            }
+          />
           {HISTORIC_RULES.map((rule, index) => {
             const isExpanded = expandedRuleIds.has(rule.id);
             const detailsId = `${rule.id}-desktop-details`;
@@ -293,9 +324,32 @@ function HistoricRulesMobileCards({
   readonly locale: SupportedLocale;
   readonly onToggle: (ruleId: string) => void;
 }) {
+  const currentLabel = m(locale, VERSION_LABEL_KEY, {
+    version: CURRENT_RULE.version,
+  });
   return (
     <div className="tw-grid tw-gap-3 md:tw-grid-cols-2 xl:tw-hidden">
-      <CurrentRuleCard locale={locale} />
+      <CurrentRuleCard
+        locale={locale}
+        toggle={
+          <RuleToggleButton
+            controlsId={`${CURRENT_ID}-mobile-details`}
+            isExpanded={expandedRuleIds.has(CURRENT_ID)}
+            locale={locale}
+            onToggle={() => onToggle(CURRENT_ID)}
+            versionLabel={currentLabel}
+          />
+        }
+        details={
+          <div
+            className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-p-4"
+            hidden={!expandedRuleIds.has(CURRENT_ID)}
+            id={`${CURRENT_ID}-mobile-details`}
+          >
+            <CurrentRuleDetails locale={locale} />
+          </div>
+        }
+      />
       {HISTORIC_RULES.map((rule) => {
         const isExpanded = expandedRuleIds.has(rule.id);
         const detailsId = `${rule.id}-mobile-details`;
@@ -317,11 +371,11 @@ function HistoricRulesMobileCards({
                 <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-100">
                   {versionLabel}
                 </span>
-                <span className="tw-mt-1 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
+                <span className="tw-mt-1 tw-block tw-text-sm tw-leading-5 tw-text-iron-400">
                   <RulePeriod locale={locale} rule={rule} />
                 </span>
               </span>
-              <span className="tw-flex tw-shrink-0 tw-items-center tw-gap-2 tw-text-xs tw-font-medium tw-text-iron-400">
+              <span className="tw-flex tw-shrink-0 tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-400">
                 <span className="tw-sr-only min-[400px]:tw-not-sr-only">
                   {m(
                     locale,
@@ -397,7 +451,7 @@ function RuleToggleButton({
           : "network.tdhHistoric.details.showForVersion",
         { version: versionLabel }
       )}
-      className="tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none"
+      className="tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none"
       onClick={onToggle}
       type="button"
     >
@@ -430,7 +484,7 @@ function HistoricRuleDetails({
 }) {
   return (
     <>
-      <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-400">
+      <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
         {m(
           locale,
           rule.version === "1.2"
@@ -448,7 +502,7 @@ function HistoricRuleDetails({
             id={`${idPrefix}-category-a-heading`}
             title={m(locale, "network.tdhHistoric.details.categoryA.title")}
           />
-          <ul className="tw-m-0 tw-mt-4 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-iron-600">
+          <ul className="tw-m-0 tw-mt-4 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-iron-600">
             <li>
               {m(locale, "network.tdhHistoric.details.categoryA.completeSet")}{" "}
               <Multiplier locale={locale} value={rule.completeSetMultiplier} />
@@ -474,14 +528,14 @@ function HistoricRuleDetails({
             title={m(locale, "network.tdhHistoric.details.categoryB.title")}
           />
           {rule.categoryBAppliesToTotal ? (
-            <p className="tw-mb-0 tw-mt-4 tw-text-xs tw-leading-5 tw-text-iron-400">
+            <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-leading-5 tw-text-iron-400">
               {m(
                 locale,
                 "network.tdhHistoric.details.categoryB.appliesToTotal"
               )}
             </p>
           ) : null}
-          <ul className="tw-m-0 tw-mt-4 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-iron-600">
+          <ul className="tw-m-0 tw-mt-4 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-iron-600">
             <li>
               {m(locale, "network.tdhHistoric.details.categoryB.szn1")}
               <ul className="tw-m-0 tw-mt-2 tw-space-y-1.5 tw-pl-4 tw-text-iron-400 marker:tw-text-iron-700">
@@ -534,7 +588,7 @@ function HistoricRuleDetails({
             id={`${idPrefix}-category-c-heading`}
             title={m(locale, "network.tdhHistoric.details.categoryC.title")}
           />
-          <ul className="tw-m-0 tw-mt-4 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-iron-600">
+          <ul className="tw-m-0 tw-mt-4 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-iron-600">
             <li>
               {m(locale, "network.tdhHistoric.details.categoryC.gradient")}{" "}
               <Multiplier locale={locale} value={1.02} />{" "}

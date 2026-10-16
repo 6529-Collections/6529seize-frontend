@@ -279,6 +279,32 @@ function identitiesEqualText(
       });
 }
 
+/**
+ * The Rust core against the Python reference on a day, from the index: the
+ * daily job's verdict is OK only when the two agree on every record (any
+ * difference is RUST_PYTHON_MISMATCH and an alarm); on other verdicts the
+ * index carries only the two totals.
+ */
+function rustPythonText(
+  locale: SupportedLocale,
+  day: VerificationIndexDay,
+  noValue: string
+): string {
+  if (day.verdict === "OK") {
+    return t(locale, "network.tdh.verify.history.rustPythonEqual");
+  }
+  if (day.verdict === "RUST_PYTHON_MISMATCH") {
+    return t(locale, "network.tdh.verify.history.rustPythonDiffer");
+  }
+  if (day.totalTdh.python === null) {
+    return noValue;
+  }
+  const delta = day.totalTdh.python - day.totalTdh.rust;
+  return delta === 0
+    ? t(locale, "network.tdh.verify.history.rustPythonTotals")
+    : formatSigned(locale, delta);
+}
+
 function optionalInteger(
   locale: SupportedLocale,
   value: number | null,
@@ -317,7 +343,7 @@ function HistoryList({
               <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-200">
                 {formatCycleDate(locale, missingDate(row.cycleDay))}
               </p>
-              <p className="tw-m-0 tw-mt-0.5 tw-text-xs tw-text-iron-400">
+              <p className="tw-m-0 tw-mt-0.5 tw-text-sm tw-text-iron-400">
                 {cycleLabel} {formatInteger(locale, row.cycleDay)}
               </p>
               <p className="tw-m-0 tw-mt-2 tw-text-sm tw-text-amber-200">
@@ -332,6 +358,10 @@ function HistoryList({
           {
             key: "identitiesEqualShort",
             value: identitiesEqualText(locale, day, noValue),
+          },
+          {
+            key: "rustPython",
+            value: rustPythonText(locale, day, noValue),
           },
           {
             key: "deltaColumn",
@@ -357,7 +387,7 @@ function HistoryList({
                 <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-50">
                   {formatCycleDate(locale, day.date)}
                 </p>
-                <p className="tw-m-0 tw-mt-0.5 tw-text-xs tw-text-iron-400">
+                <p className="tw-m-0 tw-mt-0.5 tw-text-sm tw-text-iron-400">
                   {cycleLabel} {formatInteger(locale, day.cycleDay)}
                 </p>
               </div>
@@ -370,7 +400,7 @@ function HistoryList({
             <dl className="tw-m-0 tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-x-4 tw-gap-y-2.5 @[17rem]:tw-grid-cols-2">
               {values.map((item) => (
                 <div key={item.key} className="tw-min-w-0">
-                  <dt className="tw-text-xs tw-text-iron-400">
+                  <dt className="tw-text-sm tw-text-iron-400">
                     {t(locale, `network.tdh.verify.history.${item.key}`)}
                   </dt>
                   <dd className="tw-m-0 tw-text-sm tw-tabular-nums tw-text-iron-100">
@@ -425,6 +455,9 @@ function HistoryTable({
               {t(locale, "network.tdh.verify.history.identitiesEqual")}
             </th>
             <th scope="col" className={TDH_TH_NUM}>
+              {t(locale, "network.tdh.verify.history.rustPython")}
+            </th>
+            <th scope="col" className={TDH_TH_NUM}>
               {t(locale, "network.tdh.verify.history.totalRust")}
             </th>
             <th scope="col" className={TDH_TH_NUM}>
@@ -453,7 +486,7 @@ function HistoryTable({
                   <td className={`${TDH_TD_NUM} tw-text-iron-400`}>
                     {formatInteger(locale, row.cycleDay)}
                   </td>
-                  <td colSpan={6} className={`${TDH_TD} tw-text-amber-200`}>
+                  <td colSpan={7} className={`${TDH_TD} tw-text-amber-200`}>
                     {t(locale, "network.tdh.verify.history.noReport")}
                   </td>
                 </tr>
@@ -478,6 +511,9 @@ function HistoryTable({
                 </td>
                 <td className={TDH_TD_NUM}>
                   {identitiesEqualText(locale, day, noValue)}
+                </td>
+                <td className={TDH_TD_NUM}>
+                  {rustPythonText(locale, day, noValue)}
                 </td>
                 <td className={TDH_TD_NUM}>
                   {formatInteger(locale, day.totalTdh.rust)}
@@ -540,7 +576,7 @@ export default function VerificationHistory({
         locale={locale}
         className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
       />
-      <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
+      <p className="tw-m-0 tw-mt-2 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
         {t(locale, "network.tdh.verify.history.caption")}
       </p>
       {enough ? (

@@ -53,7 +53,7 @@ export default function TdhSection({
           <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-2">{pills}</div>
         )}
         {description !== undefined && (
-          <div className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <div className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
             {description}
           </div>
         )}

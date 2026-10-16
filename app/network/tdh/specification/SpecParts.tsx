@@ -4,6 +4,7 @@ import { t } from "@/i18n/messages";
 import TdhHeading from "../shared/TdhHeading";
 import TdhRuleBlock from "../shared/TdhRuleBlock";
 import TdhSource from "../shared/TdhSource";
+import { noBreakTerms } from "../shared/noBreakTerms";
 
 /** A numbered section of the specification page. */
 export function SpecSection({
@@ -88,9 +89,9 @@ export function Plain({
   return (
     <p
       data-tdh-plain=""
-      className="tw-m-0 tw-max-w-3xl tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/50 tw-pl-4 tw-text-base tw-leading-7 tw-text-iron-100"
+      className="tw-m-0 tw-max-w-[36em] tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/50 tw-pl-4 tw-text-base tw-leading-7 tw-text-iron-100"
     >
-      {children}
+      {typeof children === "string" ? noBreakTerms(children) : children}
       {refs.length > 0 && <TdhSource refs={refs} locale={locale} />}
     </p>
   );

@@ -85,7 +85,7 @@ export default function BoostLadder({
           );
         })}
       </ol>
-      <p className="tw-m-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-400">
+      <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-5 tw-text-iron-400">
         {t(locale, "network.tdh.rules.ladder.note")}
       </p>
     </figure>

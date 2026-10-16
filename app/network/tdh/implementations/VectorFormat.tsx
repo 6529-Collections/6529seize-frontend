@@ -89,7 +89,7 @@ export default function VectorFormat({
               </div>
             ))}
           </dl>
-          <p className="tw-m-0 tw-mt-4 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <p className="tw-m-0 tw-mt-4 tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, "network.tdh.impl.format.records")}
           </p>
         </div>

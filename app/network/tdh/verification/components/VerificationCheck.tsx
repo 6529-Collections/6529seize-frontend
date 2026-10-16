@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { VerificationDay } from "@/lib/tdh/verification/schema";
@@ -59,7 +60,7 @@ export default function VerificationCheck({
         locale={locale}
         className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
       />
-      <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
+      <p className="tw-m-0 tw-mt-2 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
         {t(locale, "network.tdh.verify.check.intro")}
       </p>
       <div className="tw-mt-4 tw-grid tw-grid-cols-[minmax(0,1fr)] tw-items-start tw-gap-4 lg:tw-grid-cols-2">
@@ -67,7 +68,7 @@ export default function VerificationCheck({
           <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">
             {t(locale, "network.tdh.verify.check.today")}
           </h3>
-          <ol className="tw-m-0 tw-mt-3 tw-space-y-3 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-iron-500">
+          <ol className="tw-m-0 tw-mt-3 tw-max-w-[38em] tw-space-y-3 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-iron-500">
             <li className={STEP}>
               {t(locale, "network.tdh.verify.check.upload")}{" "}
               <code
@@ -120,10 +121,16 @@ export default function VerificationCheck({
               )}
             </li>
             <li className={STEP}>
+              {t(locale, "network.tdh.verify.check.yours")}{" "}
+              <Link href="/network/tdh#tdh-profile" className={TDH_LINK}>
+                {t(locale, "network.tdh.verify.check.yoursLink")}
+              </Link>
+            </li>
+            <li className={STEP}>
               {t(locale, "network.tdh.verify.check.file")}
             </li>
           </ol>
-          <p className="tw-m-0 tw-mt-4 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <p className="tw-m-0 tw-mt-4 tw-max-w-[38em] tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4 tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, "network.tdh.verify.check.limit")}
           </p>
         </div>
@@ -132,7 +139,7 @@ export default function VerificationCheck({
             {t(locale, "network.tdh.verify.check.source")}
             <TdhStatusPill pill="toBePublished" locale={locale} size="sm" />
           </h3>
-          <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
+          <p className="tw-m-0 tw-mt-3 tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, "network.tdh.verify.check.sourceBody")}
           </p>
           <div className="tw-mt-3">
@@ -145,7 +152,7 @@ export default function VerificationCheck({
               language="shell"
             />
           </div>
-          <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
+          <p className="tw-m-0 tw-mt-3 tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, "network.tdh.verify.check.compare")}
           </p>
         </div>

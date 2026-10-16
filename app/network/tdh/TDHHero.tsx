@@ -103,7 +103,7 @@ function FormulaStrip({ locale }: { readonly locale: SupportedLocale }) {
               <span className="tw-block tw-whitespace-nowrap tw-text-2xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50">
                 {values[term.value]}
               </span>
-              <span className="tw-block tw-self-start tw-text-balance tw-text-xs tw-leading-4 tw-text-iron-400">
+              <span className="tw-block tw-self-start tw-text-balance tw-text-sm tw-leading-5 tw-text-iron-400">
                 {t(locale, `network.tdh.explainer.formula.${term.key}Note`)}
               </span>
             </div>
@@ -211,13 +211,13 @@ export default function TDHHero({
     <header className="tw-pb-10 tw-pt-6 sm:tw-pb-12 sm:tw-pt-10">
       <div className="tw-grid tw-gap-8 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:tw-items-center lg:tw-gap-12">
         <div>
-          <h1 className={TDH_H1}>{t(locale, "network.tdh.explainer.title")}</h1>
-          <p
-            className={`tw-mb-0 tw-mt-4 tw-max-w-2xl tw-font-medium ${TDH_LEDE} tw-text-iron-50`}
-          >
-            {t(locale, "network.tdh.explainer.promise")}
+          <p className="tw-m-0 tw-mb-3 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wide tw-text-primary-300">
+            {t(locale, "network.tdh.explainer.title")}
           </p>
-          <p className="tw-mb-0 tw-mt-3 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-200">
+          <h1 className={TDH_H1}>
+            {t(locale, "network.tdh.explainer.promise")}
+          </h1>
+          <p className={`tw-mb-0 tw-mt-5 tw-max-w-2xl ${TDH_LEDE}`}>
             {t(locale, "network.tdh.explainer.intro")}
           </p>
           <p className="tw-mb-0 tw-mt-3 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-300">

@@ -69,6 +69,22 @@ export const PROGRAM_CONFORMANCE = {
 } as const;
 
 /**
+ * The P26 commit each validator commit the daily job has run computes TDH
+ * by: its `crates/tdh-core/PORTING.md` names the 6529chain commit it ports.
+ * Both commits of the feed's first days port 0621ed4, with the same
+ * tdh-core (51 vectors).
+ */
+const RUST_CORE_SPEC: Readonly<Record<string, string>> = {
+  "2b17216": "0621ed4",
+  e127676: "0621ed4",
+};
+
+/** The P26 commit a validator commit's Rust core follows, when known. */
+export function rustCoreSpec(commit: string): string | null {
+  return RUST_CORE_SPEC[commit.slice(0, 7)] ?? null;
+}
+
+/**
  * The four-way differential tests of 15 October 2026 (tools/difftest): the
  * P26 commit that settled each round's findings, and the findings.
  */

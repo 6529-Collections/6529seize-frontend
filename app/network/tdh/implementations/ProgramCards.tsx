@@ -4,6 +4,7 @@ import { t, type MessageKey } from "@/i18n/messages";
 import type { LeanRound } from "../formal/leanResults";
 import TdhDisclosure from "../shared/TdhDisclosure";
 import TdhStatusPill from "../shared/TdhStatusPill";
+import { TDH_FOCUS_RING } from "../shared/tdhStyles";
 import { P26, PROGRAM_CONFORMANCE } from "../shared/tdhFacts";
 
 /** The Lean model's vector run, from its proof manifest. */
@@ -37,21 +38,24 @@ type ProgramKey =
 
 /**
  * One P26 round a program has run: how many of that round's vectors it
- * passes, and where; `pending` for a round it has yet to follow.
+ * passes, and where; `behind` marks a program still to follow P26's
+ * latest round, which the table's footnote explains.
  */
 interface RoundRun {
   readonly passed: number | null;
   readonly total: number;
   readonly label: string;
+  /** Marked for the footnote: P26's latest round is still to follow. */
+  readonly behind?: boolean;
 }
 
 const PROGRAMS = [
-  { key: "rust", pill: "inDailyRun" },
-  { key: "rustReference", pill: "followsLatest" },
-  { key: "programB", pill: "builtNotInValidator" },
-  { key: "python", pill: "inDailyRun" },
-  { key: "lean", pill: "proposal" },
-  { key: "backend", pill: "underTest" },
+  { key: "rust", pill: "inDailyRun", behind: true },
+  { key: "rustReference", pill: "followsLatest", behind: false },
+  { key: "programB", pill: "builtNotInValidator", behind: true },
+  { key: "python", pill: "inDailyRun", behind: false },
+  { key: "lean", pill: "proposal", behind: false },
+  { key: "backend", pill: "underTest", behind: false },
 ] as const;
 
 /** The Lean model's time for the whole day, by the round of its build. */
@@ -105,21 +109,19 @@ function roundRuns(
   program: ProgramKey,
   lean: LeanVectorRun
 ): RoundRun[] | null {
-  const n = (value: number) => formatInteger(locale, value);
   const round = (key: string, values: Record<string, string>) =>
     t(locale, `network.tdh.impl.round.${key}` as MessageKey, values);
-  const pending = (passed: number): RoundRun => ({
-    passed: null,
-    total: P26.vectorCount,
-    label: round("pending", {
-      total: n(P26.vectorCount),
-      spec: P26.commit,
-      count: n(P26.vectorCount - passed),
-    }),
-  });
   switch (program) {
     case "rust":
       return [
+        {
+          passed: PROGRAM_CONFORMANCE.rustCoreCurrent.vectors,
+          total: PROGRAM_CONFORMANCE.rustCoreCurrent.vectors,
+          label: round("development", {
+            spec: PROGRAM_CONFORMANCE.rustCoreCurrent.specCommit,
+          }),
+          behind: true,
+        },
         {
           passed: PROGRAM_CONFORMANCE.rustCoreDaily.vectors,
           total: PROGRAM_CONFORMANCE.rustCoreDaily.vectors,
@@ -127,14 +129,6 @@ function roundRuns(
             spec: PROGRAM_CONFORMANCE.rustCoreDaily.specCommit,
           }),
         },
-        {
-          passed: PROGRAM_CONFORMANCE.rustCoreCurrent.vectors,
-          total: PROGRAM_CONFORMANCE.rustCoreCurrent.vectors,
-          label: round("development", {
-            spec: PROGRAM_CONFORMANCE.rustCoreCurrent.specCommit,
-          }),
-        },
-        pending(PROGRAM_CONFORMANCE.rustCoreCurrent.vectors),
       ];
     case "programB":
       return [
@@ -144,22 +138,22 @@ function roundRuns(
           label: round("development", {
             spec: PROGRAM_CONFORMANCE.programBCurrent.specCommit,
           }),
+          behind: true,
         },
-        pending(PROGRAM_CONFORMANCE.programBCurrent.vectors),
       ];
     case "python":
       return [
+        {
+          passed: PROGRAM_CONFORMANCE.python.vectors,
+          total: P26.vectorCount,
+          label: round("latest", { spec: P26.commit }),
+        },
         {
           passed: PROGRAM_CONFORMANCE.pythonDaily.vectors,
           total: PROGRAM_CONFORMANCE.pythonDaily.vectors,
           label: round("daily", {
             spec: PROGRAM_CONFORMANCE.pythonDaily.specCommit,
           }),
-        },
-        {
-          passed: PROGRAM_CONFORMANCE.python.vectors,
-          total: P26.vectorCount,
-          label: round("latest", { spec: P26.commit }),
         },
       ];
     case "rustReference":
@@ -205,31 +199,40 @@ function RoundRuns({
 }) {
   if (runs === null) {
     return (
-      <span className="tw-text-sm tw-leading-6 tw-text-iron-400">
+      <span className="tw-text-sm tw-leading-6 tw-text-iron-300">
         {t(locale, "network.tdh.impl.bar.none")}
       </span>
     );
   }
   return (
     <ul className="tw-m-0 tw-list-none tw-space-y-1 tw-p-0">
-      {runs.map((run) => (
+      {runs.map((run, index) => (
         <li
           key={run.label}
-          className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-text-sm tw-tabular-nums tw-leading-6"
+          className={`tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-tabular-nums ${index === 0 ? "tw-text-sm tw-leading-6" : "tw-text-sm tw-leading-5 tw-text-iron-400"}`}
         >
-          {run.passed === null ? (
-            <span className="tw-text-iron-400">{run.label}</span>
-          ) : (
-            <>
-              <span className="tw-whitespace-nowrap tw-font-semibold tw-text-iron-50">
-                {t(locale, "network.tdh.impl.round.count", {
-                  passed: formatInteger(locale, run.passed),
-                  total: formatInteger(locale, run.total),
-                })}
-              </span>
-              <span className="tw-text-iron-300">{run.label}</span>
-            </>
-          )}
+          <span
+            className={`tw-whitespace-nowrap ${index === 0 ? "tw-font-semibold tw-text-iron-50" : "tw-text-iron-300"}`}
+          >
+            {t(locale, "network.tdh.impl.round.count", {
+              passed: formatInteger(locale, run.passed ?? 0),
+              total: formatInteger(locale, run.total),
+            })}
+            {run.behind && (
+              <sup className="tw-ml-0.5 tw-text-xs tw-font-semibold tw-text-amber-300">
+                <a
+                  href="#programs-behind"
+                  className={`tw-text-amber-300 tw-no-underline ${TDH_FOCUS_RING}`}
+                  aria-label={t(locale, "network.tdh.impl.round.behindMark")}
+                >
+                  1
+                </a>
+              </sup>
+            )}
+          </span>
+          <span className={index === 0 ? "tw-text-iron-300" : ""}>
+            {run.label}
+          </span>
         </li>
       ))}
     </ul>
@@ -290,19 +293,26 @@ export default function ProgramCards({
                   </p>
                 </div>
                 <dl className="tw-m-0 tw-contents">
-                  <div className="tw-min-w-0">
+                  <div className="tw-min-w-0 max-lg:tw-mt-4">
                     <dt className="tw-mb-1 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400 lg:tw-sr-only">
                       {head("status")}
                     </dt>
-                    <dd className="tw-m-0">
+                    <dd className="tw-m-0 tw-flex tw-flex-wrap tw-gap-1.5">
                       <TdhStatusPill
                         pill={program.pill}
                         locale={locale}
                         size="sm"
                       />
+                      {program.behind && (
+                        <TdhStatusPill
+                          pill="behindLatest"
+                          locale={locale}
+                          size="sm"
+                        />
+                      )}
                     </dd>
                   </div>
-                  <div className="tw-min-w-0">
+                  <div className="tw-min-w-0 max-lg:tw-mt-4">
                     <dt className="tw-mb-1 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400 lg:tw-sr-only">
                       {head("vectors")}
                     </dt>
@@ -313,7 +323,7 @@ export default function ProgramCards({
                       />
                     </dd>
                   </div>
-                  <div className="tw-min-w-0">
+                  <div className="tw-min-w-0 max-lg:tw-mt-4">
                     <dt className="tw-mb-1 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400 lg:tw-sr-only">
                       {head("speed")}
                     </dt>
@@ -325,7 +335,19 @@ export default function ProgramCards({
               </div>
               <TdhDisclosure
                 className="tw-mt-2"
-                summary={t(locale, "network.tdh.impl.programs.more")}
+                summaryClassName="tw-w-fit lg:tw-ml-auto"
+                summary={
+                  <>
+                    {t(locale, "network.tdh.impl.programs.details")}
+                    <span className="tw-sr-only">
+                      {" "}
+                      {t(
+                        locale,
+                        `network.tdh.impl.name.${program.key}` as MessageKey
+                      )}
+                    </span>
+                  </>
+                }
               >
                 <dl className="tw-m-0 tw-grid tw-gap-x-6 tw-gap-y-3 tw-pb-2 tw-pl-6 md:tw-grid-cols-2">
                   {(
@@ -352,6 +374,22 @@ export default function ProgramCards({
           );
         })}
       </ul>
+      <p
+        id="programs-behind"
+        className="tw-m-0 tw-scroll-mt-28 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/40 tw-px-4 tw-py-3 tw-text-sm tw-leading-6 tw-text-iron-300"
+      >
+        <sup className="tw-mr-1 tw-text-xs tw-font-semibold tw-text-amber-300">
+          1
+        </sup>
+        {t(locale, "network.tdh.impl.round.behindNote", {
+          total: formatInteger(locale, P26.vectorCount),
+          spec: P26.commit,
+          count: formatInteger(
+            locale,
+            P26.vectorCount - PROGRAM_CONFORMANCE.rustCoreCurrent.vectors
+          ),
+        })}
+      </p>
     </div>
   );
 }

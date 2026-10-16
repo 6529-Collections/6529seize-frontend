@@ -31,6 +31,15 @@ import {
   type TdhProfile,
 } from "./tdh-profile.helpers";
 
+/**
+ * The registry's sinks in tdh-v1.0 (P26 §3.4, §10): the zero address and
+ * 0x…dead. Their records count in the total but never as participants.
+ */
+const SINK_ADDRESSES: ReadonlySet<string> = new Set([
+  "0x0000000000000000000000000000000000000000",
+  "0x000000000000000000000000000000000000dead",
+]);
+
 export default function TDHProfile({
   locale,
   verification = null,
@@ -251,7 +260,7 @@ function Snapshot({
   return (
     <div className="tw-mt-5 tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pt-5">
       <ResultHeading identity={identity} locale={locale} />
-      <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400">
+      <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-5 tw-text-iron-400">
         {t(locale, "network.tdh.profile.calculated", {
           date: t(locale, "network.tdh.value.utcTime", {
             time: formatDate(locale, profile.date, {
@@ -267,7 +276,7 @@ function Snapshot({
       <dl className="tw-m-0 tw-mt-5 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-3">
         {metrics.map(({ key, value }) => (
           <div key={key}>
-            <dt className="tw-text-xs tw-leading-5 tw-text-iron-400">
+            <dt className="tw-text-sm tw-leading-5 tw-text-iron-400">
               {t(locale, `network.tdh.profile.${key}`)}
             </dt>
             <dd className="tw-m-0 tw-mt-1 tw-break-words tw-font-mono tw-text-lg tw-font-medium tw-text-iron-100">
@@ -283,7 +292,7 @@ function Snapshot({
         <p className="tw-mb-0 tw-mt-2 tw-break-words tw-text-3xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl">
           {formatInteger(locale, profile.boosted_tdh)}
         </p>
-        <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-400">
+        <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-5 tw-text-iron-400">
           {t(locale, "network.tdh.profile.rate", {
             rate: formatNumber(locale, profile.boosted_tdh_rate, {
               minimumFractionDigits: 2,
@@ -300,6 +309,13 @@ function Snapshot({
             : "network.tdh.profile.mismatch"
         )}
       </p>
+      {profile.wallets.some((wallet) =>
+        SINK_ADDRESSES.has(wallet.toLowerCase())
+      ) && (
+        <p className={`${TDH_TEXT} tw-mt-3`}>
+          {t(locale, "network.tdh.profile.sink")}
+        </p>
+      )}
       {profile.boosted_tdh === 0 && (
         <p className={`${TDH_TEXT} tw-mt-3`}>
           {t(locale, "network.tdh.profile.zero")}
@@ -329,9 +345,13 @@ function Snapshot({
       <TdhDisclosure
         className="tw-mt-4"
         tone="strong"
-        summary={t(locale, "network.tdh.profile.wallets", {
-          count: formatInteger(locale, profile.wallets.length),
-        })}
+        summary={t(
+          locale,
+          profile.wallets.length > 1
+            ? "network.tdh.profile.wallets"
+            : "network.tdh.profile.walletsOne",
+          { count: formatInteger(locale, profile.wallets.length) }
+        )}
       >
         <ul className="tw-mb-0 tw-mt-1 tw-space-y-2 tw-pl-6 tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-300">
           {profile.wallets.map((wallet) => (
@@ -343,7 +363,7 @@ function Snapshot({
       </TdhDisclosure>
       <BoostBreakdown profile={profile} locale={locale} />
       <TDHProfileHoldings profile={profile} locale={locale} />
-      <p className="tw-mb-0 tw-mt-5 tw-text-xs tw-leading-5 tw-text-iron-400">
+      <p className="tw-mb-0 tw-mt-5 tw-text-sm tw-leading-5 tw-text-iron-400">
         {t(locale, "network.tdh.profile.storedNote")}{" "}
         {t(locale, "network.tdh.profile.dateNote")}
       </p>
@@ -402,7 +422,7 @@ function BoostBreakdown({
           {t(locale, "network.tdh.profile.boostNone")}
         </p>
       )}
-      <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-400">
+      <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-5 tw-text-iron-400">
         {t(locale, "network.tdh.profile.boostPrecision")}
       </p>
     </TdhDisclosure>

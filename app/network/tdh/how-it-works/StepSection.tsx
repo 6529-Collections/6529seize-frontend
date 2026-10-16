@@ -6,6 +6,7 @@ import TdhDisclosure from "../shared/TdhDisclosure";
 import TdhHeading from "../shared/TdhHeading";
 import TdhRuleBlock from "../shared/TdhRuleBlock";
 import TdhSource from "../shared/TdhSource";
+import { noBreakTerms } from "../shared/noBreakTerms";
 
 /**
  * One numbered step of How TDH is calculated. The step's sources and its
@@ -19,6 +20,7 @@ export default function StepSection({
   pills,
   rule,
   ruleSource,
+  ruleNote,
   sources = [],
   children,
 }: {
@@ -28,6 +30,8 @@ export default function StepSection({
   readonly pills?: ReactNode;
   readonly rule?: string;
   readonly ruleSource?: string;
+  /** The rule's detail in prose: shown with the rule, not in the step. */
+  readonly ruleNote?: string;
   /** Every source the step's prose rests on, in order of first use. */
   readonly sources?: readonly string[];
   readonly children: ReactNode;
@@ -64,8 +68,13 @@ export default function StepSection({
           )}
         >
           <div className="tw-mt-1 tw-space-y-3">
+            {ruleNote !== undefined && (
+              <p className="tw-m-0 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
+                {ruleNote}
+              </p>
+            )}
             {sources.length > 0 && (
-              <p className="tw-m-0 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1 tw-gap-y-1 tw-text-xs tw-text-iron-400">
+              <p className="tw-m-0 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1 tw-gap-y-1 tw-text-sm tw-text-iron-400">
                 <span className="tw-mr-1 tw-font-medium tw-text-iron-300">
                   {t(locale, "network.tdh.explainer.sources.label")}
                 </span>
@@ -107,9 +116,9 @@ export function Cited({
 }) {
   return (
     <p
-      className={`tw-m-0 tw-text-[15px] tw-leading-7 ${muted ? "tw-text-iron-400" : "tw-text-iron-200"}`}
+      className={`tw-m-0 tw-max-w-[36em] tw-text-base tw-leading-7 ${muted ? "tw-text-iron-300" : "tw-text-iron-200"}`}
     >
-      {children}
+      {typeof children === "string" ? noBreakTerms(children) : children}
     </p>
   );
 }
@@ -127,7 +136,7 @@ export function Example({
       <p className="tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
         {t(locale, "network.tdh.how.example")}
       </p>
-      <div className="tw-mt-1 tw-space-y-3 tw-text-[15px] tw-leading-7 tw-text-iron-200">
+      <div className="tw-mt-1 tw-space-y-3 tw-text-base tw-leading-7 tw-text-iron-200">
         {children}
       </div>
     </div>

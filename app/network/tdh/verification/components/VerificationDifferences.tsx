@@ -32,7 +32,7 @@ function ClassLetter({ value }: { readonly value: DifferenceClass }) {
   return (
     <span
       aria-hidden="true"
-      className={`tw-flex tw-size-5 tw-shrink-0 tw-items-center tw-justify-center tw-rounded tw-text-xs tw-font-bold tw-text-iron-950 ${CLASS_DOT[value]}`}
+      className={`tw-flex tw-size-5 tw-shrink-0 tw-items-center tw-justify-center tw-rounded tw-text-sm tw-font-bold tw-text-iron-950 ${CLASS_DOT[value]}`}
     >
       {value}
     </span>
@@ -127,7 +127,7 @@ export default function VerificationDifferences({
         locale={locale}
         className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
       />
-      <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
+      <p className="tw-m-0 tw-mt-2 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
         {t(locale, "network.tdh.verify.diff.lede")}
         <TdhSource refs={["P38 §3.3"]} locale={locale} />
       </p>
@@ -210,7 +210,7 @@ export default function VerificationDifferences({
             <dl className="tw-m-0 tw-mt-5 tw-grid tw-grid-cols-1 tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4 min-[400px]:tw-grid-cols-2">
               {(["rustVsLive", "pythonVsLive"] as const).map((key) => (
                 <div key={key}>
-                  <dt className="tw-text-xs tw-text-iron-400">
+                  <dt className="tw-text-sm tw-text-iron-400">
                     {t(locale, `network.tdh.verify.diff.delta.${key}`)}
                   </dt>
                   <dd className="tw-m-0 tw-mt-0.5 tw-text-lg tw-font-semibold tw-tabular-nums tw-text-iron-50">
@@ -230,27 +230,31 @@ export default function VerificationDifferences({
             <span>{t(locale, "network.tdh.verify.diff.privacy")}</span>
           </p>
         </div>
-        <div className={`${TDH_CARD} tw-p-5 sm:tw-p-6`}>
+        <div
+          id="classes"
+          className={`${TDH_CARD} tw-scroll-mt-24 tw-p-5 sm:tw-p-6`}
+        >
           <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
             {t(locale, "network.tdh.verify.diff.classesTitle")}
           </h3>
           <div className="tw-mt-3">
             <ClassLegend locale={locale} />
           </div>
-          <p className="tw-m-0 tw-mt-4 tw-max-w-4xl tw-text-sm tw-leading-6 tw-text-iron-400">
+          <p className="tw-m-0 tw-mt-4 tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, "network.tdh.verify.class.note")}
           </p>
-          <p className="tw-m-0 tw-mt-3 tw-max-w-4xl tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+          <p className="tw-m-0 tw-mt-3 tw-max-w-[38em] tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
             {t(locale, "network.tdh.verify.class.expected")}
+            {none && ` ${t(locale, "network.tdh.verify.class.expectedNone")}`}
             <TdhSource refs={["P26 §6.3"]} locale={locale} />
           </p>
-          <p className="tw-m-0 tw-mt-3 tw-max-w-4xl tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+          <p className="tw-m-0 tw-mt-3 tw-max-w-[38em] tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
             {t(locale, "network.tdh.verify.class.expectedDev2")}
             <TdhSource refs={["DEV-2", "D132"]} locale={locale} />
           </p>
         </div>
       </div>
-      <p className="tw-m-0 tw-mt-4 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
+      <p className="tw-m-0 tw-mt-4 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
         {t(locale, "network.tdh.verify.diff.history")}
         <TdhSource refs={["DEV-2", "D131"]} locale={locale} />{" "}
         <Link href="/network/tdh/how-it-works#step-5" className={TDH_LINK}>

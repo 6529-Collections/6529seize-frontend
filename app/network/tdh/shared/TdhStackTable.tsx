@@ -5,6 +5,8 @@ interface TdhStackColumn {
   readonly label: string;
   /** A fuller label, as the header's tooltip, for a short header. */
   readonly title?: string;
+  /** Extra classes for the column's header, such as its width from xl. */
+  readonly className?: string;
 }
 
 interface TdhStackRow {
@@ -16,14 +18,14 @@ interface TdhStackRow {
 }
 
 const INLINE_LABEL =
-  "tw-mr-1.5 tw-inline tw-text-xs tw-font-medium tw-text-iron-400 xl:tw-hidden";
+  "tw-mr-1.5 tw-inline tw-text-sm tw-font-medium tw-text-iron-400 xl:tw-hidden";
 const BLOCK_LABEL =
-  "tw-block tw-text-xs tw-font-medium tw-text-iron-400 xl:tw-hidden";
+  "tw-block tw-text-sm tw-font-medium tw-text-iron-400 xl:tw-hidden";
 
 const CELL =
   "tw-block tw-border-0 tw-p-0 tw-align-top tw-text-sm tw-leading-6 tw-text-iron-200 xl:tw-table-cell xl:tw-border-b xl:tw-border-solid xl:tw-border-white/[0.05] xl:tw-px-4 xl:tw-py-3";
 const HEADER =
-  "tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-4 tw-py-2.5 tw-text-left tw-align-bottom tw-text-xs tw-font-medium tw-text-iron-400";
+  "tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-4 tw-py-2.5 tw-text-left tw-align-bottom tw-text-sm tw-font-medium tw-text-iron-400";
 
 /**
  * A table that is a table from `xl` and a card per row below, with each
@@ -58,7 +60,7 @@ export default function TdhStackTable({
               <th
                 key={column.key}
                 scope="col"
-                className={HEADER}
+                className={`${HEADER} ${column.className ?? ""}`}
                 title={column.title}
               >
                 {column.label}

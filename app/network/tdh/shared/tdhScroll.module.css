@@ -51,3 +51,21 @@
     background-color: var(--tdh-shade-bg);
   }
 }
+
+/*
+ * A visible scrollbar for blocks that scroll sideways, so a reader sees at
+ * once that the lines continue past the edge.
+ */
+.bar {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.35) transparent;
+}
+
+.bar::-webkit-scrollbar {
+  height: 8px;
+}
+
+.bar::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background-color: rgb(255 255 255 / 0.35);
+}

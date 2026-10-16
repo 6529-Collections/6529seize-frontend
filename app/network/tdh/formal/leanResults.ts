@@ -67,8 +67,10 @@ export const LEAN_LATEST_ROUND: LeanRound = LEAN_ROUND_5.round;
 export interface LeanRuns {
   /** The README commit whose "Results" section these figures are. */
   readonly readmeCommit: string;
-  /** The raw logs of the 2026-10-11 cycle the run reads. */
-  readonly rawLogs: number;
+  /** The logs in the 2026-10-11 cycle's file, after B included. */
+  readonly logsRead: number;
+  /** Those through the snapshot block B, which the cycle is computed from. */
+  readonly logsThroughB: number;
   readonly fullDayRecords: number;
   readonly fullDayTotal: number;
   /** Seconds for the whole day from raw logs: about, or a range. */
@@ -86,7 +88,10 @@ export interface LeanRuns {
 export const LEAN_RUNS: Readonly<Record<LeanRound, LeanRuns>> = {
   3: {
     readmeCommit: "237c997",
-    rawLogs: 414_007,
+    // 414,007 logs through B, of 414,254 in the file; the later 247 are not
+    // decoded.
+    logsRead: 414_254,
+    logsThroughB: 414_007,
     fullDayRecords: 21_410,
     fullDayTotal: 2_061_888_816,
     // About 15 s to read and parse the input, 30 s to compute.
@@ -98,7 +103,8 @@ export const LEAN_RUNS: Readonly<Record<LeanRound, LeanRuns>> = {
   4: {
     readmeCommit: "f854661",
     // All 414,254 logs read at their types; the 414,007 through B decoded.
-    rawLogs: 414_254,
+    logsRead: 414_254,
+    logsThroughB: 414_007,
     fullDayRecords: 21_410,
     fullDayTotal: 2_061_888_816,
     // 19 to 29 s to read and parse, 38 to 42 s to type-check, decode and
@@ -112,7 +118,8 @@ export const LEAN_RUNS: Readonly<Record<LeanRound, LeanRuns>> = {
   5: {
     readmeCommit: "6b32f3f",
     // All 414,254 logs read at their types; the 414,007 through B decoded.
-    rawLogs: 414_254,
+    logsRead: 414_254,
+    logsThroughB: 414_007,
     fullDayRecords: 21_410,
     fullDayTotal: 2_061_888_816,
     // Under 3 s to read and parse with the strict parser, about 17 s to
@@ -461,6 +468,20 @@ theorem Stack.takeLast_none (s : Stack) (n : Nat) (h : s.takeLast n = none) :
       refs: [
         "P26 §3.1",
         "P26 §4.1",
+        "P26 §7.1",
+        "P26 §8.1",
+        "P26 §8.3",
+        "P26 §8.4",
+        "P26 §10",
+      ],
+    },
+    round5: {
+      copy: "factsRound5",
+      refs: [
+        "P26 §3.1",
+        "P26 §3.2",
+        "P26 §4.1",
+        "P26 §5.2",
         "P26 §7.1",
         "P26 §8.1",
         "P26 §8.3",

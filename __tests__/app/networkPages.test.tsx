@@ -98,8 +98,12 @@ describe("network pages render", () => {
 
   it("renders TDH page", async () => {
     renderWithAuth(await TDHPage());
+    // The promise is the heading; "TDH" is the eyebrow above it.
     expect(
-      screen.getByRole("heading", { level: 1, name: "TDH" })
+      screen.getByRole("heading", {
+        level: 1,
+        name: "Total Days Held: the art you hold, and how long you have held it.",
+      })
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { level: 2, name: "TDH in a minute" })
@@ -156,12 +160,7 @@ describe("network pages render", () => {
     // The checked-daily section's proof panel: the latest day's figures,
     // every published day as a dot, and the record.
     expect(
-      screen.getByText("Equal on 2 of 2 published days since October 14, 2026.")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "The first two were computed on October 15; the scheduled daily runs began on October 16."
-      )
+      screen.getByText("Equal on 2 of 2 published days")
     ).toBeInTheDocument();
     expect(
       screen.getByText("Latest day: October 15, 2026")
@@ -181,11 +180,11 @@ describe("network pages render", () => {
     );
     expect(screen.queryByText(/sample/i)).not.toBeInTheDocument();
     expect(
-      screen.getByText(/Each must reproduce every conformance vector/)
+      screen.getByText(/Each must pass every conformance vector/)
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /cannot change a holding stack when both versions of the day have a result/
+        /cannot change any holding stack: which copies an address holds and when each was acquired/
       )
     ).toBeInTheDocument();
     expect(

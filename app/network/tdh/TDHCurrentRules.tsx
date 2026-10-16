@@ -160,7 +160,7 @@ function Rules({
   const { boost, snapshot } = rules;
   return (
     <div className="tw-space-y-5">
-      <p className="tw-m-0 tw-max-w-prose tw-text-sm tw-leading-6 tw-text-iron-300">
+      <p className="tw-m-0 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
         {t(locale, "network.tdh.rules.snapshot", {
           cycle: formatDate(locale, cycleDateOf(snapshot.block_timestamp), {
             dateStyle: "medium",

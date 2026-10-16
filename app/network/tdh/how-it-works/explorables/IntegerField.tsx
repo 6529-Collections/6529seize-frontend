@@ -76,7 +76,7 @@ export default function IntegerField({
         </button>
       </div>
       {hint && (
-        <p id={hintId} className="tw-m-0 tw-mt-1 tw-text-xs tw-text-iron-500">
+        <p id={hintId} className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-500">
           {hint}
         </p>
       )}

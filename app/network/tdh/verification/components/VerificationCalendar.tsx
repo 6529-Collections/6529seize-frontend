@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Fragment, type CSSProperties } from "react";
 import { formatDate, formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
@@ -24,6 +25,8 @@ import {
 
 /** The newest days the strip shows; older ones stay in the table below. */
 const CALENDAR_DAYS = 42;
+/** The cells a phone shows, the cutover included, so nothing is cut off. */
+const PHONE_CELLS = 7;
 
 const TONE_BG: Record<PillTone, string> = {
   success: "tw-bg-success/80 hover:tw-bg-success",
@@ -236,6 +239,45 @@ function CellSquare({
   );
 }
 
+/**
+ * Which cells a phone hides: the strip keeps its published days (the newest
+ * of them when there are many), the first days still to come, and the
+ * cutover pinned at the end, with a gap mark where days are left out.
+ */
+function phoneLayout(cells: readonly Cell[]): {
+  readonly hidden: ReadonlySet<number>;
+  readonly gapBefore: number | null;
+} {
+  const hidden = new Set<number>();
+  if (cells.length <= PHONE_CELLS) {
+    return { hidden, gapBefore: null };
+  }
+  const cutover = cells.findIndex(
+    (cell) => cell.kind === "upcoming" && cell.cutover
+  );
+  // One cell goes to the gap mark, one to the cutover.
+  const room = PHONE_CELLS - (cutover >= 0 ? 2 : 0);
+  const kept = cells
+    .map((_, index) => index)
+    .filter((index) => index !== cutover);
+  const published = kept.filter((index) => cells[index]?.kind !== "upcoming");
+  const upcoming = kept.filter((index) => cells[index]?.kind === "upcoming");
+  const keepPublished = published.slice(
+    -(upcoming.length > 0 ? Math.max(room - 2, 3) : room)
+  );
+  const keepUpcoming = upcoming.slice(0, room - keepPublished.length);
+  const shown = new Set([...keepPublished, ...keepUpcoming]);
+  for (const index of kept) {
+    if (!shown.has(index)) {
+      hidden.add(index);
+    }
+  }
+  return {
+    hidden,
+    gapBefore: cutover >= 0 && hidden.size > 0 ? cutover : null,
+  };
+}
+
 /** The month (or months) the strip covers, as the day row's label. */
 function monthLabel(locale: SupportedLocale, cells: readonly Cell[]): string {
   const months = [
@@ -261,7 +303,7 @@ function LegendState({
     <li className="tw-inline-flex tw-items-center tw-gap-1.5">
       <span
         aria-hidden="true"
-        className={`tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-sm tw-text-xs tw-font-bold tw-leading-none tw-text-iron-950 ${VERDICT_CELL[state]}`}
+        className={`tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-sm tw-text-sm tw-font-bold tw-leading-none tw-text-iron-950 ${VERDICT_CELL[state]}`}
       >
         {VERDICT_MARK[state]}
       </span>
@@ -348,6 +390,12 @@ export default function VerificationCalendar({
   const otherStates = LEGEND.filter((state) => !inUse.has(state));
   const dateOf = (cell: Cell | undefined) =>
     cell === undefined ? "" : formatShortCycleDate(locale, cellDate(cell));
+  const cutoverCell = cells.find(
+    (cell) => cell.kind === "upcoming" && cell.cutover
+  );
+  const phone = phoneLayout(cells);
+  const phoneColumns =
+    cells.length - phone.hidden.size + (phone.gapBefore === null ? 0 : 1);
 
   return (
     <section
@@ -361,11 +409,17 @@ export default function VerificationCalendar({
         >
           {t(locale, "network.tdh.verify.calendar.heading")}
         </h2>
-        <p className="tw-m-0 tw-text-xs tw-text-iron-400">
-          {t(locale, "network.tdh.verify.calendar.range", {
-            from: dateOf(first),
-            to: dateOf(last),
-          })}
+        <p className="tw-m-0 tw-text-sm tw-text-iron-400">
+          {cutoverCell === undefined
+            ? t(locale, "network.tdh.verify.calendar.range", {
+                from: dateOf(first),
+                to: dateOf(last),
+              })
+            : t(locale, "network.tdh.verify.calendar.rangeCutover", {
+                from: dateOf(first),
+                to: dateOf(last),
+                cutover: dateOf(cutoverCell),
+              })}
         </p>
       </div>
       {/* Row labels on the left, the days across the rest of the card:
@@ -374,7 +428,7 @@ export default function VerificationCalendar({
       <div className="tw-mt-3 tw-flex tw-items-start tw-gap-2 sm:tw-gap-3">
         <div
           aria-hidden="true"
-          className="tw-flex tw-shrink-0 tw-flex-col tw-pt-1 tw-text-right tw-text-xs tw-leading-4 tw-text-iron-400"
+          className="tw-flex tw-shrink-0 tw-flex-col tw-pt-1 tw-text-right tw-text-sm tw-leading-5 tw-text-iron-400"
         >
           <span className="tw-h-10" />
           <span className="tw-mt-1 tw-flex tw-h-4 tw-items-center tw-justify-end tw-whitespace-nowrap">
@@ -389,47 +443,61 @@ export default function VerificationCalendar({
           focusSelector='[aria-current="date"]'
         >
           <ol
-            className="tw-m-0 tw-grid tw-list-none tw-gap-1 tw-p-0 sm:tw-gap-1.5"
-            style={{
-              gridTemplateColumns: `repeat(${cells.length}, minmax(1.75rem, 1fr))`,
-            }}
+            className="tw-m-0 tw-grid tw-list-none tw-grid-cols-[repeat(var(--tdh-cols-phone),minmax(1.75rem,1fr))] tw-gap-1 tw-p-0 sm:tw-grid-cols-[repeat(var(--tdh-cols),minmax(1.75rem,1fr))] sm:tw-gap-1.5"
+            style={
+              {
+                "--tdh-cols": String(cells.length),
+                "--tdh-cols-phone": String(phoneColumns),
+              } as CSSProperties
+            }
           >
             {cells.map((cell, index) => (
-              <li
+              <Fragment
                 key={`${cell.kind}-${cell.kind === "day" ? cell.day.cycleDay : cell.cycleDay}`}
-                className="tw-flex tw-min-w-0 tw-flex-col tw-items-center"
               >
-                <CellSquare
-                  locale={locale}
-                  cell={cell}
-                  delta={deltas[index] ?? null}
-                  selected={
-                    cell.kind === "day" &&
-                    cell.day.cycleDay === selectedCycleDay
-                  }
-                />
-                <span
-                  aria-hidden="true"
-                  className="tw-mt-1 tw-flex tw-h-4 tw-w-full tw-items-center tw-justify-center"
+                {phone.gapBefore === index && (
+                  <li
+                    aria-hidden="true"
+                    className="tw-flex tw-h-10 tw-items-center tw-justify-center tw-text-sm tw-text-iron-400 sm:tw-hidden"
+                  >
+                    …
+                  </li>
+                )}
+                <li
+                  className={`tw-flex tw-min-w-0 tw-flex-col tw-items-center ${phone.hidden.has(index) ? "max-sm:tw-hidden" : ""}`}
                 >
-                  <DeltaLabel locale={locale} delta={deltas[index] ?? null} />
-                </span>
-                <span
-                  aria-hidden="true"
-                  className={`tw-mt-0.5 tw-text-xs tw-tabular-nums tw-leading-4 ${
-                    cell.kind === "upcoming" && cell.cutover
-                      ? "tw-font-semibold tw-text-primary-300"
-                      : "tw-text-iron-400"
-                  }`}
-                >
-                  {formatDayOfMonth(locale, cellDate(cell))}
-                </span>
-              </li>
+                  <CellSquare
+                    locale={locale}
+                    cell={cell}
+                    delta={deltas[index] ?? null}
+                    selected={
+                      cell.kind === "day" &&
+                      cell.day.cycleDay === selectedCycleDay
+                    }
+                  />
+                  <span
+                    aria-hidden="true"
+                    className="tw-mt-1 tw-flex tw-h-4 tw-w-full tw-items-center tw-justify-center"
+                  >
+                    <DeltaLabel locale={locale} delta={deltas[index] ?? null} />
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    className={`tw-mt-0.5 tw-text-sm tw-tabular-nums tw-leading-5 ${
+                      cell.kind === "upcoming" && cell.cutover
+                        ? "tw-font-semibold tw-text-primary-300"
+                        : "tw-text-iron-400"
+                    }`}
+                  >
+                    {formatDayOfMonth(locale, cellDate(cell))}
+                  </span>
+                </li>
+              </Fragment>
             ))}
           </ol>
         </TdhSubnavScroll>
       </div>
-      <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-2 tw-text-xs tw-text-iron-400">
+      <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-2 tw-text-sm tw-text-iron-400">
         <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-p-0">
           {shownStates.map((state) => (
             <LegendState key={state} locale={locale} state={state} />
@@ -440,7 +508,7 @@ export default function VerificationCalendar({
         {otherStates.length > 0 && (
           <TdhDisclosure
             summary={t(locale, "network.tdh.verify.calendar.moreStates")}
-            summaryClassName="tw-min-h-8 tw-text-xs"
+            summaryClassName="tw-min-h-8 tw-text-sm"
           >
             <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-p-0 tw-pl-6">
               {otherStates.map((state) => (

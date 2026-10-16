@@ -38,7 +38,18 @@
  *   hash, a 0x value, a domain such as 6529.io, or TDH-v1 and tdh-v1.0
  *   (wrap it in the CaseSafe component, which keeps its case);
  * - a word split across two lines by `word-break: break-all` (apply it to
- *   the hash alone, never to the sentence around it).
+ *   the hash alone, never to the sentence around it);
+ * - prose set wider than 80 characters a line: a paragraph or list item of
+ *   running text (240 characters or more, no blocks inside it) whose text
+ *   box holds more than 80 of its own characters, at their average width
+ *   in its own font;
+ * - a heading set smaller than the text under it: an h1 to h4 whose font
+ *   size is below that of the paragraph that follows it;
+ * - an error in the browser console or an uncaught page error. On the 404
+ *   views two are expected and allowed: the browser's line for the 404
+ *   itself, and the wallet SDK's check of the page's
+ *   Cross-Origin-Opener-Policy, which fetches the page and reports the 404
+ *   it is meant to get.
  *
  * Routes that must answer 404 (a day permalink that names no day) must do so
  * inside the site: a <main>, the viewport meta and the TDH section links,
@@ -954,8 +965,81 @@ function inspectPage(limits) {
     }
   }
 
+  // 9. Prose measure: running text wider than 80 characters a line,
+  // counted with the element's own text in its own font (a `0` is wider
+  // than the average letter, so `ch` would undercount).
+  const canvas = document.createElement("canvas").getContext("2d");
+  const averageCharWidth = (cs, text) => {
+    canvas.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    const sample = text.slice(0, 600);
+    return (
+      canvas.measureText(sample).width / sample.length ||
+      Number.parseFloat(cs.fontSize) * 0.5
+    );
+  };
+  for (const el of root.querySelectorAll("p, li, dd")) {
+    if (!isShown(el)) continue;
+    if (el.closest("table, svg, pre, [role='img']")) continue;
+    if (el.querySelector("p, ul, ol, dl, div, table, figure, pre")) continue;
+    if (
+      [...el.children].some((child) => {
+        const display = style(child).display;
+        return !display.startsWith("inline") && display !== "contents" && display !== "none";
+      })
+    ) {
+      continue;
+    }
+    const text = (el.textContent ?? "").replace(/\s+/g, " ").trim();
+    if (text.length < 240) continue;
+    const cs = style(el);
+    // Running text only: a row of chips or a grid of label and value is
+    // not a line of prose.
+    if (
+      cs.display === "contents" ||
+      cs.display.startsWith("inline") ||
+      cs.display.includes("flex") ||
+      cs.display.includes("grid")
+    ) {
+      continue;
+    }
+    const r = el.getBoundingClientRect();
+    const width =
+      r.width -
+      Number.parseFloat(cs.paddingLeft) -
+      Number.parseFloat(cs.paddingRight);
+    const chars = width / averageCharWidth(cs, text);
+    if (chars > 80.5) {
+      add("prose-measure", el, `${Math.round(chars)} characters a line at ${cs.fontSize}`);
+    }
+  }
+
+  // 10. A heading smaller than the paragraph under it.
+  for (const heading of root.querySelectorAll("h1, h2, h3, h4")) {
+    if (!isShown(heading)) continue;
+    let next = heading.nextElementSibling;
+    while (next && !isShown(next)) next = next.nextElementSibling;
+    if (!next || next.tagName !== "P") continue;
+    if (!(next.textContent ?? "").trim()) continue;
+    const own = Number.parseFloat(style(heading).fontSize);
+    const body = Number.parseFloat(style(next).fontSize);
+    if (own + 0.25 < body) {
+      add("heading-size", heading, `heading ${own}px under ${body}px text`);
+    }
+  }
+
   return violations;
 }
+
+/**
+ * The one console error a view may log: the wallet SDK checks its page's
+ * Cross-Origin-Opener-Policy by fetching the page, and on a 404 view it
+ * reports the 404 the view is meant to answer.
+ */
+const ALLOWED_NOT_FOUND_CONSOLE = [
+  /^Error checking Cross-Origin-Opener-Policy: HTTP error! status: 404/,
+  // The browser's own line for the 404 the view answers.
+  /^Failed to load resource: the server responded with a status of 404/,
+];
 
 async function settle(page, open) {
   await page.evaluate(async (openDetails) => {
@@ -1015,6 +1099,13 @@ async function checkView(browser, args, route, widthKey) {
   const page = await context.newPage();
   const url = new URL(route, args.base).toString();
   const result = { route, width: view.label, violations: [], error: null };
+  const consoleErrors = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") consoleErrors.push(message.text());
+  });
+  page.on("pageerror", (error) => {
+    consoleErrors.push(`uncaught: ${String(error?.message ?? error)}`);
+  });
   let crashed = null;
   const crash = new Promise((_, reject) => {
     page.on("crash", () => {
@@ -1076,6 +1167,18 @@ async function checkView(browser, args, route, widthKey) {
         seen.add(key);
         result.violations.push({ ...v, detail: `${v.detail} [${pass}]` });
       }
+    }
+    const notFound = NOT_FOUND_ROUTES.includes(route);
+    for (const text of new Set(consoleErrors)) {
+      if (notFound && ALLOWED_NOT_FOUND_CONSOLE.some((allowed) => allowed.test(text))) {
+        continue;
+      }
+      result.violations.push({
+        check: "console-error",
+        where: "console",
+        text: text.replace(/\s+/g, " ").slice(0, 160),
+        detail: "an error in the browser console",
+      });
     }
     if (args.axe) {
       const axe = await new AxeBuilder({ page })

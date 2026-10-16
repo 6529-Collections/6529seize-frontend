@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 
-const FADE = 24;
+const FADE = 36;
 
 function maskFor(start: boolean, end: boolean): string {
   if (!start && !end) {
@@ -26,8 +26,8 @@ function updateFades(container: HTMLElement) {
 /**
  * A sideways-scrolling row (the TDH section navigation, the verification
  * calendar): one row at every width. An edge fades only while there is more
- * to scroll that way, and on load the item matching `focusSelector` is
- * brought into view without scrolling the page itself.
+ * to scroll that way, and on load the item matching `focusSelector` starts
+ * the visible row, without scrolling the page itself.
  */
 export default function TdhSubnavScroll({
   className,
@@ -52,10 +52,10 @@ export default function TdhSubnavScroll({
         active.getBoundingClientRect().left -
         container.getBoundingClientRect().left +
         container.scrollLeft;
-      container.scrollLeft = Math.max(
-        offset - (container.clientWidth - active.offsetWidth) / 2,
-        0
-      );
+      // The active item starts the visible row, so no label is cut at the
+      // left edge; whatever is cut is at the right, under the fade.
+      const start = Number.parseFloat(getComputedStyle(container).paddingLeft);
+      container.scrollLeft = Math.max(offset - (start || 0), 0);
     }
     const update = () => updateFades(container);
     update();

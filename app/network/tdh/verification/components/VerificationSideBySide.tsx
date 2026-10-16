@@ -15,8 +15,8 @@ import {
   TDH_TABLE_FRAME,
   TDH_TD,
   TDH_TH,
-  TDH_SERIES,
 } from "../../shared/tdhStyles";
+import TdhProgramMark, { type TdhProgram } from "../../shared/TdhProgramMark";
 import {
   formatInteger,
   middleTruncate,
@@ -70,14 +70,11 @@ function SeriesHeader({
   series,
 }: {
   readonly label: string;
-  readonly series: keyof typeof TDH_SERIES;
+  readonly series: TdhProgram;
 }) {
   return (
     <span className="tw-inline-flex tw-items-center tw-gap-2">
-      <span
-        aria-hidden="true"
-        className={`tw-size-2 tw-rounded-full ${TDH_SERIES[series].bg}`}
-      />
+      <TdhProgramMark program={series} />
       {label}
     </span>
   );
@@ -103,7 +100,7 @@ function ArweaveLink({
       target="_blank"
       aria-label={t(locale, "network.tdh.verify.provenance.txLink", { id })}
     >
-      {t(locale, labelKey, { id: middleTruncate(id, 5) })}
+      <span title={id}>{t(locale, labelKey)}</span>
     </a>
   );
 }
@@ -146,7 +143,7 @@ export default function VerificationSideBySide({
     }
     return (
       <span
-        className={`tw-mt-0.5 tw-block tw-text-xs ${difference === 0 ? "tw-text-iron-400" : "tw-text-amber-200"}`}
+        className={`tw-mt-0.5 tw-block tw-text-sm ${difference === 0 ? "tw-text-iron-400" : "tw-text-amber-200"}`}
       >
         {text}
       </span>
@@ -169,7 +166,7 @@ export default function VerificationSideBySide({
             key={entry.key}
             className="tw-inline-flex tw-flex-wrap tw-items-center tw-gap-x-2"
           >
-            <span className="tw-w-14 tw-text-xs tw-text-iron-400">
+            <span className="tw-w-14 tw-text-sm tw-text-iron-400">
               {ROOT_LABELS[entry.key]}
             </span>
             <HashValue
@@ -288,14 +285,7 @@ export default function VerificationSideBySide({
       : [
           {
             key: "roots",
-            label: (
-              <>
-                {t(locale, "network.tdh.verify.side.roots")}
-                <span className="tw-mt-1 tw-block tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-400">
-                  {t(locale, "network.tdh.verify.side.rootsHelp")}
-                </span>
-              </>
-            ),
+            label: t(locale, "network.tdh.verify.side.roots"),
             rust: rustRoots,
             python:
               python === null ? (
@@ -322,14 +312,7 @@ export default function VerificationSideBySide({
     },
     {
       key: "runtime",
-      label: (
-        <>
-          {t(locale, "network.tdh.verify.side.runtime")}
-          <span className="tw-mt-1 tw-block tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-400">
-            {t(locale, "network.tdh.verify.side.runtimeNote")}
-          </span>
-        </>
-      ),
+      label: t(locale, "network.tdh.verify.side.runtime"),
       rust: runtime(rust),
       python: runtime(python),
       live: <Muted>{notApplicable}</Muted>,
@@ -379,7 +362,7 @@ export default function VerificationSideBySide({
         locale={locale}
         className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
       />
-      <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
+      <p className="tw-m-0 tw-mt-2 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
         {t(locale, "network.tdh.verify.side.caption")}
         <TdhSource refs={["P53 §12"]} locale={locale} />
       </p>
@@ -398,7 +381,7 @@ export default function VerificationSideBySide({
             <dl className="tw-m-0 tw-mt-2 tw-grid tw-grid-cols-1 tw-items-start tw-gap-x-3 tw-gap-y-1 tw-text-sm tw-tabular-nums @[17rem]:tw-grid-cols-[6.5rem_minmax(0,1fr)] @[17rem]:tw-gap-y-2">
               {(["rust", "python", "live"] as const).map((series) => (
                 <div key={series} className="tw-contents">
-                  <dt className="tw-pt-px tw-text-xs tw-text-iron-400">
+                  <dt className="tw-pt-px tw-text-sm tw-text-iron-400">
                     <SeriesHeader
                       label={t(locale, `network.tdh.verify.side.${series}`)}
                       series={series}
@@ -460,6 +443,30 @@ export default function VerificationSideBySide({
           </tbody>
         </table>
       </div>
+      <dl className="tw-m-0 tw-mt-4 tw-grid tw-max-w-[38em] tw-gap-y-3 tw-text-sm tw-leading-6">
+        {rustRoots !== null && (
+          <div>
+            <dt className="tw-font-medium tw-text-iron-100">
+              {t(locale, "network.tdh.verify.side.roots")}
+            </dt>
+            <dd className="tw-m-0 tw-text-iron-300">
+              {t(locale, "network.tdh.verify.side.rootsHelp")}
+              <TdhSource
+                refs={["P53 §4.2", "P28 §4.4", "P53 §4.6", "D130"]}
+                locale={locale}
+              />
+            </dd>
+          </div>
+        )}
+        <div>
+          <dt className="tw-font-medium tw-text-iron-100">
+            {t(locale, "network.tdh.verify.side.runtime")}
+          </dt>
+          <dd className="tw-m-0 tw-text-iron-300">
+            {t(locale, "network.tdh.verify.side.runtimeNote")}
+          </dd>
+        </div>
+      </dl>
     </section>
   );
 }

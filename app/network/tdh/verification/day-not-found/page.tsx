@@ -1,13 +1,16 @@
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { FIRST_TDH_FEED_CYCLE_DAY } from "@/lib/proxy/tdhVerificationDay";
 import { loadVerificationIndex } from "@/lib/tdh/verification/loadVerification.server";
-import { latestIndexDay } from "@/lib/tdh/verification/states";
+import { cutoverState, latestIndexDay } from "@/lib/tdh/verification/states";
 import TdhArrowLink from "../../shared/TdhArrowLink";
 import TdhPageShell from "../../shared/TdhPageShell";
-import { TDH_CARD } from "../../shared/tdhStyles";
+import { TDH_BUTTON, TDH_CARD, TDH_LINK } from "../../shared/tdhStyles";
+import VerificationCalendar from "../components/VerificationCalendar";
 import { verificationDayHref } from "../components/VerificationHeadline";
 import { formatCycleDate } from "../components/verificationFormat";
 
@@ -47,6 +50,11 @@ export default async function TdhVerificationDayNotFound({
   const indexLoad = await loadVerificationIndex();
   const latest =
     indexLoad.status === "ok" ? latestIndexDay(indexLoad.index) : null;
+  const now = new Date();
+  const cutover = cutoverState(
+    indexLoad.status === "ok" ? indexLoad.index.cutover : null,
+    now
+  );
   return (
     <TdhPageShell
       locale={locale}
@@ -67,18 +75,50 @@ export default async function TdhVerificationDayNotFound({
         </p>
       }
     >
-      <div className={`${TDH_CARD} tw-flex tw-flex-col tw-gap-2 tw-p-5`}>
-        {latest && (
-          <TdhArrowLink href={verificationDayHref(latest.cycleDay)}>
-            {t(locale, "network.tdh.verify.notFound.latest", {
-              date: formatCycleDate(locale, latest.date),
-              cycle: formatInteger(locale, latest.cycleDay),
-            })}
-          </TdhArrowLink>
+      <div className="tw-space-y-4">
+        {indexLoad.status === "ok" && latest && (
+          <VerificationCalendar
+            locale={locale}
+            days={indexLoad.index.days}
+            selectedCycleDay={latest.cycleDay}
+            upcomingUntil={
+              cutover.kind === "countdown" ? cutover.plannedDate : null
+            }
+            now={now}
+          />
         )}
-        <TdhArrowLink href="/network/tdh/verification">
-          {t(locale, "network.tdh.verify.notFound.dashboard")}
-        </TdhArrowLink>
+        <div
+          className={`${TDH_CARD} tw-flex tw-flex-col tw-items-start tw-gap-3 tw-p-5`}
+        >
+          {latest && (
+            <Link
+              href={verificationDayHref(latest.cycleDay)}
+              className={`${TDH_BUTTON} tw-border-primary-400/60 tw-bg-primary-500/15 tw-text-iron-50 tw-no-underline hover:tw-border-primary-400 hover:tw-bg-primary-500/25`}
+            >
+              {t(locale, "network.tdh.verify.notFound.latest", {
+                date: formatCycleDate(locale, latest.date),
+                cycle: formatInteger(locale, latest.cycleDay),
+              })}
+              <ArrowRightIcon aria-hidden="true" className="tw-size-4" />
+            </Link>
+          )}
+          <TdhArrowLink href="/network/tdh/verification">
+            {t(locale, "network.tdh.verify.notFound.dashboard")}
+          </TdhArrowLink>
+          <p className="tw-m-0 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
+            {t(locale, "network.tdh.verify.notFound.before", {
+              first: formatCycleDate(locale, FIRST_DATE),
+            })}{" "}
+            <a
+              href="https://api.6529.io/api/consolidated_uploads"
+              className={TDH_LINK}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              {t(locale, "network.tdh.verify.check.apiLink")}
+            </a>
+          </p>
+        </div>
       </div>
     </TdhPageShell>
   );

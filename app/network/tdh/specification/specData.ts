@@ -80,6 +80,7 @@ export const SYMBOLS = [
   { symbol: "n_memes", key: "nmemes", section: "5.1" },
   { symbol: "E[i]", key: "E", section: "5.2" },
   { symbol: "H", key: "H", section: "5.2" },
+  { symbol: "H(name, …)", key: "Hhash", section: "10" },
   { symbol: "G", key: "G", section: "5.3" },
   { symbol: "N_c", key: "Nc", section: "5.3" },
   { symbol: "cluster(w)", key: "cluster", section: "6.3" },

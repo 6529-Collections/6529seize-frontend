@@ -79,7 +79,7 @@ export function TDHSectionNavigation({
             href={`#${id}`}
             className={`tw-flex tw-min-h-11 tw-items-center tw-gap-2.5 tw-rounded-md tw-px-2 tw-text-sm tw-text-iron-200 tw-no-underline hover:tw-bg-iron-800/60 hover:tw-text-iron-50 ${TDH_FOCUS}`}
           >
-            <span className="tw-w-4 tw-shrink-0 tw-text-right tw-text-xs tw-tabular-nums tw-text-iron-500">
+            <span className="tw-w-4 tw-shrink-0 tw-text-right tw-text-sm tw-tabular-nums tw-text-iron-500">
               {index + 1}
             </span>
             {itemLabel}
@@ -139,7 +139,7 @@ export function TDHRelatedLinks({
                 aria-hidden="true"
                 className="tw-row-span-2 tw-size-4 tw-text-iron-500 tw-transition-transform group-hover:tw-translate-x-0.5 group-hover:tw-text-primary-300 motion-reduce:tw-transition-none"
               />
-              <span className="tw-text-sm tw-leading-6 tw-text-iron-400">
+              <span className="tw-text-sm tw-leading-6 tw-text-iron-300">
                 {description}
               </span>
             </Link>
@@ -163,7 +163,7 @@ export function TDHRelatedLinks({
             aria-hidden="true"
             className="tw-mt-1 tw-size-4 tw-text-iron-500 tw-transition-transform group-hover:tw-translate-x-0.5 group-hover:tw-text-primary-300 motion-reduce:tw-transition-none"
           />
-          <span className="tw-col-span-2 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <span className="tw-col-span-2 tw-text-sm tw-leading-6 tw-text-iron-300">
             {description}
           </span>
         </Link>

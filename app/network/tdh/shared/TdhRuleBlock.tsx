@@ -14,15 +14,18 @@ import {
 } from "./tdhRuleLines";
 
 /**
- * How a block's lines behave:
- * - `code`: pseudocode. Lines keep their breaks and indentation; on phones
- *   the block scrolls sideways inside its frame, from `sm` a long line wraps
- *   with a hanging indent.
- * - `prose`: P26's prose rules restated line for line. A long line wraps
- *   with a hanging indent at every width, so nothing scrolls mid-sentence.
+ * How a block's lines behave. One treatment for every block that is read as
+ * text, and one for the blocks whose columns carry meaning:
+ * - `code`: pseudocode. Lines keep their breaks and indentation; a long line
+ *   wraps with a hanging indent at every width, so nothing scrolls and no
+ *   token is cut at the edge. On phones a trailing comment drops below its
+ *   line, at the line's continuation indent.
+ * - `prose`: P26's prose rules restated line for line: wrapped the same way,
+ *   with no keyword tinting, so English reads as English.
  * - `none`: lines never wrap, at any width; the block scrolls sideways when
- *   it is wider than its column (column-aligned tables, shell commands, whose
- *   soft wraps would read as `\` continuations).
+ *   it is wider than its column, with a visible scrollbar (column-aligned
+ *   tables, shell commands, whose soft wraps would read as `\`
+ *   continuations).
  */
 type RuleWrap = "code" | "prose" | "none";
 
@@ -41,15 +44,29 @@ const TOKEN_CLASS = {
   text: "",
 } as const;
 
+/**
+ * Whether a line of pseudocode reads as code: it has an operator, a call or
+ * a block's colon. A line of plain English inside pseudocode ("anything else
+ * names no cycle") gets no keyword tinting, so "else" and "not" read as
+ * words there.
+ */
+function readsAsCode(text: string): boolean {
+  return /[=()[\]<>{}:+*]|->/.test(text);
+}
+
 /** One code fragment, tinted: keywords, numbers, strings and rule names. */
 function Tinted({
   text,
   language,
+  keywords,
 }: {
   readonly text: string;
   readonly language: RuleLanguage;
+  readonly keywords: boolean;
 }): ReactNode {
-  return ruleTokens(text, language).map((token, index) =>
+  return ruleTokens(text, language, {
+    keywords: keywords && (language !== "pseudo" || readsAsCode(text)),
+  }).map((token, index) =>
     token.kind === "text" ? (
       token.text
     ) : (
@@ -61,30 +78,25 @@ function Tinted({
 }
 
 /**
- * The grid's column template for each mode, with or without numbers: the
- * code column as wide as its longest commented line allows, and the comment
+ * The grid's column template, with or without numbers: from `sm`, the code
+ * column as wide as its longest commented line allows, and the comment
  * column the rest, never narrower than its longest word (a vector
  * reference keeps its line). The cells are `min-width: 0`, so the floor is
  * `min-content`, not `auto`, which would resolve to zero. Lines with no
- * comment span both, so they do not widen the code column.
+ * comment span both, so they do not widen the code column. On phones a
+ * wrapping block is one text column: each comment drops below its line.
  */
 function gridClass(wrap: RuleWrap, numbered: boolean): string {
-  if (wrap === "prose") {
-    // On phones the comments drop below their line: one text column.
-    return numbered
-      ? "tw-grid tw-grid-cols-[auto_minmax(0,1fr)] sm:tw-grid-cols-[auto_minmax(0,max-content)_minmax(min-content,1fr)]"
-      : "tw-grid tw-grid-cols-[minmax(0,1fr)] sm:tw-grid-cols-[minmax(0,max-content)_minmax(min-content,1fr)]";
-  }
   // Where lines never wrap, the code column is as wide as its longest
   // commented line, so a comment never sits on its code.
   if (wrap === "none") {
     return numbered
-      ? "tw-grid-cols-[auto_max-content_minmax(min-content,1fr)]"
-      : "tw-grid-cols-[max-content_minmax(min-content,1fr)]";
+      ? "tw-inline-grid tw-min-w-full tw-grid-cols-[auto_max-content_minmax(min-content,1fr)]"
+      : "tw-inline-grid tw-min-w-full tw-grid-cols-[max-content_minmax(min-content,1fr)]";
   }
   return numbered
-    ? "tw-grid-cols-[auto_max-content_minmax(min-content,1fr)] sm:tw-grid-cols-[auto_minmax(0,max-content)_minmax(min-content,1fr)]"
-    : "tw-grid-cols-[max-content_minmax(min-content,1fr)] sm:tw-grid-cols-[minmax(0,max-content)_minmax(min-content,1fr)]";
+    ? "tw-grid tw-grid-cols-[auto_minmax(0,1fr)] sm:tw-grid-cols-[auto_minmax(0,max-content)_minmax(min-content,1fr)]"
+    : "tw-grid tw-grid-cols-[minmax(0,1fr)] sm:tw-grid-cols-[minmax(0,max-content)_minmax(min-content,1fr)]";
 }
 
 /** Where the code column starts: after the line numbers, if any. */
@@ -97,26 +109,23 @@ function codeColumn(numbered: boolean): number {
  * ones wrap between words, and a word longer than the line breaks inside.
  */
 function cellWrap(wrap: RuleWrap): string {
-  if (wrap === "none") {
-    return "tw-whitespace-pre";
-  }
-  if (wrap === "code") {
-    return "tw-whitespace-pre sm:tw-whitespace-pre-wrap sm:[overflow-wrap:anywhere]";
-  }
-  return "tw-whitespace-pre-wrap [overflow-wrap:anywhere]";
+  return wrap === "none"
+    ? "tw-whitespace-pre"
+    : "tw-whitespace-pre-wrap [overflow-wrap:anywhere]";
 }
 
 /**
  * The hanging indent of a wrapping line: its own indentation, then two more
  * columns for each continuation, so a wrapped line never lines up with a
- * real child line (four columns deeper).
+ * real child line (four columns deeper). In a narrow block a deep indent
+ * takes at most 45% of the width, so the text keeps room to wrap.
  */
 function indentStyle(line: RuleLine, wrap: RuleWrap): CSSProperties {
   if (wrap === "none") {
     return {};
   }
   return {
-    paddingLeft: `${line.indent + 2}ch`,
+    paddingLeft: `min(${line.indent + 2}ch, 45%)`,
     textIndent: "-2ch",
   };
 }
@@ -125,15 +134,17 @@ function indentStyle(line: RuleLine, wrap: RuleWrap): CSSProperties {
 function LineCode({
   line,
   language,
+  keywords,
 }: {
   readonly line: RuleLine;
   readonly language: RuleLanguage;
+  readonly keywords: boolean;
 }): ReactNode {
   if (line.kind === "comment") {
     return line.code;
   }
   return line.code.length > 0 ? (
-    <Tinted text={line.code} language={language} />
+    <Tinted text={line.code} language={language} keywords={keywords} />
   ) : (
     " "
   );
@@ -145,25 +156,29 @@ function RuleRow({
   numbered,
   wrap,
   language,
+  keywords,
 }: {
   readonly line: RuleLine;
   readonly number: number;
   readonly numbered: boolean;
   readonly wrap: RuleWrap;
   readonly language: RuleLanguage;
+  readonly keywords: boolean;
 }) {
   const start = codeColumn(numbered);
-  const keepIndent = wrap === "none" || wrap === "code";
-  const indentClass =
-    wrap === "code" ? "max-sm:!tw-pl-0 max-sm:!tw-indent-0" : "";
-  const lead = keepIndent ? " ".repeat(line.indent) : "";
-  // On a phone a scrolling block keeps its indentation as spaces; a
-  // wrapping one, and every block from sm, indents with padding.
-  const leadClass = wrap === "code" ? "sm:tw-hidden" : "";
+  // A scrolling block keeps its indentation as spaces; a wrapping one
+  // indents with padding, so its continuations hang.
+  const lead = wrap === "none" ? " ".repeat(line.indent) : "";
   const codeStyle: CSSProperties = {
     gridColumn: line.comment === null ? `${start} / -1` : `${start}`,
     ...indentStyle(line, wrap),
   };
+  // On phones a wrapping block's comment sits under its line, at the
+  // line's continuation indent; from sm it joins the comment column.
+  const commentStyle = {
+    gridColumn: "-2 / -1",
+    "--tdh-comment-indent": `min(${line.indent + 2}ch, 45%)`,
+  } as CSSProperties;
   return (
     <>
       {numbered && (
@@ -177,18 +192,18 @@ function RuleRow({
       )}
       <span
         style={codeStyle}
-        className={`tw-min-w-0 ${cellWrap(wrap)} ${indentClass} ${line.kind === "comment" ? "tw-text-iron-400" : ""}`}
+        className={`tw-min-w-0 ${cellWrap(wrap)} ${line.kind === "comment" ? "tw-text-iron-400" : ""}`}
       >
-        {lead && <span className={leadClass}>{lead}</span>}
-        <LineCode line={line} language={language} />
+        {lead}
+        <LineCode line={line} language={language} keywords={keywords} />
       </span>
       {line.comment !== null && (
         <span
-          style={{ gridColumn: "-2 / -1" }}
-          className={`tw-min-w-0 tw-pl-[3ch] tw-text-iron-400 ${cellWrap(wrap === "prose" ? "prose" : wrap)} ${
-            wrap === "prose"
-              ? "max-sm:tw-pb-1 max-sm:tw-pl-0 max-sm:tw-text-right"
-              : ""
+          style={commentStyle}
+          className={`tw-min-w-0 tw-text-iron-400 ${cellWrap(wrap)} ${
+            wrap === "none"
+              ? "tw-pl-[3ch]"
+              : "max-sm:tw-pb-1 max-sm:tw-pl-[var(--tdh-comment-indent)] sm:tw-pl-[3ch]"
           } ${line.reference ? "sm:tw-whitespace-nowrap" : ""}`}
         >
           {line.comment}
@@ -239,7 +254,9 @@ export default function TdhRuleBlock({
   const heading = title ?? t(locale, "network.tdh.shared.rule");
   const lines = ruleLines(code, language);
   const numbered = lines.length >= NUMBERED_FROM;
-  const scrolls = wrap !== "prose";
+  const scrolls = wrap === "none";
+  // P26's prose rules read as English: no keyword is tinted in them.
+  const keywords = tone !== "condensed";
   const clamp = (pre: ReactNode): ReactNode =>
     lines.length >= CLAMPED_FROM ? (
       <TdhRuleClamp
@@ -259,16 +276,10 @@ export default function TdhRuleBlock({
     condensed: "tw-border-l-iron-500",
     plain: "tw-border-l-white/[0.07]",
   }[tone];
-  const preScroll = {
-    none: `tw-overflow-x-auto ${scrollStyles["shade"] ?? ""}`,
-    code: `max-sm:tw-overflow-x-auto ${scrollStyles["shadePhone"] ?? ""}`,
-    prose: "",
-  }[wrap];
-  const codeDisplay = {
-    none: "tw-inline-grid tw-min-w-full",
-    code: "tw-inline-grid tw-min-w-full sm:tw-grid",
-    prose: "",
-  }[wrap];
+  const preScroll =
+    wrap === "none"
+      ? `tw-overflow-x-auto ${scrollStyles["shade"] ?? ""} ${scrollStyles["bar"] ?? ""}`
+      : "";
   return (
     <figure
       className={`tw-m-0 tw-min-w-0 tw-overflow-hidden tw-rounded-lg tw-border tw-border-l-2 tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 ${accent}`}
@@ -278,6 +289,12 @@ export default function TdhRuleBlock({
           <span className="tw-min-w-0">{heading}</span>
           {source && (
             <TdhSource refs={[source, ...moreSources]} locale={locale} />
+          )}
+          {scrolls && (
+            // Column-aligned lines run past a phone's edge: say so.
+            <span className="tw-font-normal tw-text-iron-400 sm:tw-hidden">
+              {t(locale, "network.tdh.shared.scrollHint")}
+            </span>
           )}
         </span>
         <TdhCopyButton
@@ -292,13 +309,13 @@ export default function TdhRuleBlock({
       {clamp(
         <pre
           aria-label={t(locale, "network.tdh.shared.ruleRegion", { caption })}
-          className={`tw-m-0 tw-bg-transparent tw-px-3 tw-py-4 tw-font-mono tw-text-[13px] tw-font-normal tw-leading-6 tw-text-iron-100 sm:tw-px-4 ${preScroll}`}
+          className={`tw-m-0 tw-bg-transparent tw-px-3 tw-py-4 tw-font-mono tw-text-[13px] tw-font-normal tw-leading-6 tw-text-iron-100 sm:tw-px-4 sm:tw-text-sm sm:tw-leading-[1.375rem] ${preScroll}`}
           {...(scrolls
             ? { "data-tdh-scroll": "", tabIndex: 0, role: "region" }
             : {})}
         >
           <code
-            className={`tw-font-mono tw-text-iron-100 ${codeDisplay} ${gridClass(wrap, numbered)}`}
+            className={`tw-font-mono tw-text-iron-100 ${gridClass(wrap, numbered)}`}
           >
             {lines.map((line, index) => (
               <RuleRow
@@ -308,6 +325,7 @@ export default function TdhRuleBlock({
                 numbered={numbered}
                 wrap={wrap}
                 language={language}
+                keywords={keywords}
               />
             ))}
           </code>

@@ -76,7 +76,9 @@ describe("ConsolidationOrderSimulator", () => {
 
     await user.click(screen.getByRole("button", { name: "Start again" }));
     expect(screen.getByText("Signing order so far: none")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Start again" })).toBeDisabled();
+    // Nothing to undo: the control is gone until the first step.
+    expect(screen.queryByRole("button", { name: "Start again" })).toBeNull();
+    expect(screen.getByText("Before anyone signs:")).toBeInTheDocument();
   });
 });
 

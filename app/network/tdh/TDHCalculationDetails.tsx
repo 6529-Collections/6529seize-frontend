@@ -75,7 +75,7 @@ function GlossaryList({
               `network.tdh.explainer.glossary.${term}.term` as MessageKey
             )}
           </dt>
-          <dd className="tw-m-0 tw-mt-1 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300 md:tw-mt-0">
+          <dd className="tw-m-0 tw-mt-1 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300 md:tw-mt-0">
             {t(
               locale,
               `network.tdh.explainer.glossary.${term}.def` as MessageKey
@@ -156,7 +156,7 @@ export function TDHGoDeeper({ locale }: { readonly locale: SupportedLocale }) {
                 aria-hidden="true"
                 className="tw-mt-1 tw-size-4 tw-text-iron-500 tw-transition-transform group-hover:tw-translate-x-0.5 group-hover:tw-text-primary-300 motion-reduce:tw-transition-none"
               />
-              <span className="tw-col-span-2 tw-text-sm tw-leading-6 tw-text-iron-400">
+              <span className="tw-col-span-2 tw-text-sm tw-leading-6 tw-text-iron-300">
                 {t(locale, `network.tdh.explainer.deeper.${key}.body`)}
               </span>
             </Link>

@@ -47,7 +47,7 @@ export default function TdhPager({
           className={`${CARD} ${next ? "" : "sm:tw-max-w-[calc(50%_-_0.375rem)]"}`}
           rel="prev"
         >
-          <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-xs tw-text-iron-400">
+          <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-sm tw-text-iron-400">
             <ArrowLeftIcon aria-hidden="true" className="tw-size-3.5" />
             {t(locale, "network.tdh.shared.pager.previous")}
           </span>
@@ -62,7 +62,7 @@ export default function TdhPager({
           className={`${CARD} tw-items-end tw-text-right ${previous ? "" : "sm:tw-ml-auto sm:tw-max-w-[calc(50%_-_0.375rem)]"}`}
           rel="next"
         >
-          <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-xs tw-text-iron-400">
+          <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-sm tw-text-iron-400">
             {t(locale, "network.tdh.shared.pager.next")}
             <ArrowRightIcon aria-hidden="true" className="tw-size-3.5" />
           </span>

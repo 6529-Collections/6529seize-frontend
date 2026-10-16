@@ -51,14 +51,7 @@ const NAVIGATION = [
 ] as const;
 const NAVIGATION_IDS = NAVIGATION.map((item) => item.id);
 
-const RULES = [
-  "pairs",
-  "limit",
-  "newest",
-  "collector",
-  "expiry",
-  "effects",
-] as const;
+const RULES = ["pairs", "limit", "newest", "collector", "expiry"] as const;
 
 // Registrations and transactions for each change; see the rules above. A
 // group of n wallets has n(n-1)/2 pairs, each registered in both directions.
@@ -122,6 +115,14 @@ const RULE_COMPARISON: readonly RuleComparison[] = [
 
 const CONTROLLED_WALLET_COUNTS = [0, 1, 2, 3] as const;
 
+/** The rules table's column widths from xl, so short headers do not wrap. */
+const WHY_COLUMN_WIDTH = {
+  rule: "xl:tw-w-[34%]",
+  signers: "xl:tw-w-[12%] xl:tw-whitespace-nowrap",
+  transactions: "xl:tw-w-[14%]",
+  problem: "xl:tw-w-[40%]",
+} as const;
+
 const PROTECTIONS = [
   { key: "adding", kind: "does" },
   { key: "old", kind: "does" },
@@ -162,6 +163,116 @@ const GROUPING_SOURCE =
   "https://github.com/6529-Collections/6529seize-backend/blob/ee74952d3a6161e5a0ccb4fb960949a8ff6cb8d8/src/consolidation-tools.ts";
 const TRACKING_ISSUE =
   "https://github.com/6529-Collections/6529seize-frontend/issues/4214";
+
+/** Where each wallet of the four-wallet example sits in its drawing. */
+const SPLIT_WALLETS = {
+  D: [110, 28],
+  A: [32, 96],
+  B: [110, 96],
+  C: [188, 96],
+} as const;
+/** D's three links, in the order they were confirmed. */
+const SPLIT_LINKS = [
+  { to: "A", inside: false },
+  { to: "B", inside: true },
+  { to: "C", inside: true },
+] as const;
+
+/**
+ * TDH-v1's split of a group of four, drawn as on How it works step 10:
+ * D's links numbered in the order they were confirmed, the identity of
+ * three outlined, and A, left over, in a ring of its own.
+ */
+function FourWalletSplit({ locale }: { readonly locale: SupportedLocale }) {
+  const [dx, dy] = SPLIT_WALLETS.D;
+  return (
+    <svg
+      viewBox="0 0 222 126"
+      role="img"
+      aria-label={t(locale, "network.tdhConsolidation.tdhv1.figure")}
+      className="tw-block tw-h-auto tw-w-full tw-max-w-[15rem] tw-shrink-0"
+    >
+      <rect
+        x={84}
+        y={4}
+        width={132}
+        height={116}
+        rx={22}
+        strokeWidth={1.5}
+        className="tw-fill-primary-500/10 tw-stroke-primary-400/70"
+      />
+      <circle
+        cx={SPLIT_WALLETS.A[0]}
+        cy={SPLIT_WALLETS.A[1]}
+        r={22}
+        strokeWidth={1.5}
+        className="tw-fill-teal-400/10 tw-stroke-teal-300/70"
+      />
+      {SPLIT_LINKS.map((link) => {
+        const [x, y] = SPLIT_WALLETS[link.to];
+        return (
+          <line
+            key={link.to}
+            x1={dx}
+            y1={dy}
+            x2={x}
+            y2={y}
+            strokeWidth={link.inside ? 3 : 1.5}
+            strokeDasharray={link.inside ? undefined : "4 3"}
+            className={
+              link.inside ? "tw-stroke-iron-200" : "tw-stroke-iron-400"
+            }
+          />
+        );
+      })}
+      {SPLIT_LINKS.map((link, index) => {
+        const [x, y] = SPLIT_WALLETS[link.to];
+        const mx = (dx + x) / 2;
+        const my = (dy + y) / 2;
+        return (
+          <g key={`order-${link.to}`}>
+            <circle
+              cx={mx}
+              cy={my}
+              r={10}
+              strokeWidth={1}
+              className="tw-fill-iron-950 tw-stroke-primary-400/70"
+            />
+            <text
+              x={mx}
+              y={my + 4.5}
+              textAnchor="middle"
+              fontSize={12}
+              className="tw-fill-primary-300 tw-font-semibold tw-tabular-nums"
+            >
+              {formatInteger(locale, index + 1)}
+            </text>
+          </g>
+        );
+      })}
+      {Object.entries(SPLIT_WALLETS).map(([name, [x, y]]) => (
+        <g key={name}>
+          <circle
+            cx={x}
+            cy={y}
+            r={14}
+            strokeWidth={1.5}
+            className="tw-fill-iron-900 tw-stroke-iron-300"
+          />
+          <text
+            x={x}
+            y={y + 5}
+            textAnchor="middle"
+            fontSize={14}
+            className="tw-fill-iron-50 tw-font-semibold"
+          >
+            {name}
+          </text>
+        </g>
+      ))}
+    </svg>
+  );
+}
 
 function activationDate(
   locale: SupportedLocale,
@@ -207,7 +318,7 @@ export default function TDHConsolidationDesignPage() {
           <h1 className={TDH_H1}>
             {t(locale, "network.tdhConsolidation.design.title")}
           </h1>
-          <p className={`tw-mb-0 tw-mt-4 tw-max-w-3xl ${TDH_LEDE}`}>
+          <p className={`tw-mb-0 tw-mt-4 tw-max-w-[38em] ${TDH_LEDE}`}>
             {limits
               ? t(locale, "network.tdhConsolidation.design.intro", {
                   date,
@@ -215,13 +326,22 @@ export default function TDHConsolidationDesignPage() {
                 })
               : pendingLimits}
           </p>
-          <p className="tw-mb-0 tw-mt-3 tw-flex tw-max-w-3xl tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
-            <span>{t(locale, "network.tdhConsolidation.design.status")}</span>
-            <TdhArrowLink href="#tdh-v1">
-              {t(locale, "network.tdhConsolidation.design.statusLink")}
-            </TdhArrowLink>
-          </p>
-          <p className="tw-mb-0 tw-mt-3 tw-flex tw-max-w-3xl tw-flex-wrap tw-items-center tw-gap-x-3 tw-text-sm tw-leading-6 tw-text-iron-300">
+          <div className="tw-mt-4 tw-flex tw-max-w-4xl tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-400/[0.05] tw-p-4 sm:tw-flex-row sm:tw-items-center sm:tw-gap-6 sm:tw-p-5">
+            <div className="tw-min-w-0 tw-flex-1">
+              <p className="tw-m-0 tw-text-base tw-font-semibold tw-leading-7 tw-text-iron-50">
+                {t(locale, "network.tdhConsolidation.tdhv1.rule")}
+              </p>
+              <p className="tw-m-0 tw-mt-1 tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-200">
+                {t(locale, "network.tdhConsolidation.tdhv1.example")}
+                <TdhSource refs={["P26 §6.3", "D132"]} locale={locale} />
+              </p>
+              <TdhArrowLink href="#tdh-v1" className="tw-mt-1">
+                {t(locale, "network.tdhConsolidation.design.statusLink")}
+              </TdhArrowLink>
+            </div>
+            <FourWalletSplit locale={locale} />
+          </div>
+          <p className="tw-mb-0 tw-mt-3 tw-flex tw-max-w-[36em] tw-flex-wrap tw-items-center tw-gap-x-3 tw-text-sm tw-leading-6 tw-text-iron-300">
             <span>
               {t(locale, "network.tdhConsolidation.design.guideNote")}
             </span>
@@ -270,13 +390,21 @@ export default function TDHConsolidationDesignPage() {
               </li>
             ))}
           </ul>
+          <div className={`${TDH_PANEL} tw-p-5`}>
+            <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-7 tw-text-iron-100">
+              {t(locale, "network.tdhConsolidation.rules.effects.title")}
+            </h3>
+            <p className={`${TDH_TEXT} tw-mt-2 tw-max-w-[38em]`}>
+              {t(locale, "network.tdhConsolidation.rules.effects.body")}
+            </p>
+          </div>
         </TDHSection>
 
         <TDHSection
           id="tdh-v1"
           title={t(locale, "network.tdhConsolidation.tdhv1.title")}
         >
-          <div className="tw-max-w-prose tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-3 tw-pl-4 tw-pr-3 tw-text-[15px] tw-leading-7 tw-text-iron-200">
+          <div className="tw-max-w-[36em] tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-3 tw-pl-4 tw-pr-3 tw-text-base tw-leading-7 tw-text-iron-200">
             <p className="tw-m-0">
               {t(locale, "network.tdhConsolidation.tdhv1Note")}
               <TdhSource refs={["P26 §6.3", "D132"]} locale={locale} />
@@ -445,7 +573,7 @@ function AddWalletSection({ locale }: { readonly locale: SupportedLocale }) {
             </li>
           ))}
         </ol>
-        <p className="tw-m-0 tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-600 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-400">
+        <p className="tw-m-0 tw-max-w-[38em] tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-600 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-300">
           {t(locale, "network.tdhConsolidation.add.why")}
         </p>
         <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-amber-200">
@@ -565,6 +693,7 @@ function WhyEveryPairSection({ locale }: { readonly locale: SupportedLocale }) {
           ).map((column) => ({
             key: column,
             label: t(locale, `network.tdhConsolidation.why.table.${column}`),
+            className: WHY_COLUMN_WIDTH[column],
             ...(column === "signers"
               ? {
                   title: t(
@@ -582,7 +711,10 @@ function WhyEveryPairSection({ locale }: { readonly locale: SupportedLocale }) {
               formatInteger(locale, rule.transactions),
               t(locale, `network.tdhConsolidation.why.problem.${rule.key}`),
             ],
-            cellClassNames: { 2: "tw-tabular-nums" },
+            cellClassNames: {
+              1: "xl:tw-whitespace-nowrap",
+              2: "tw-tabular-nums",
+            },
           }))}
           inlineColumns={[1, 2]}
         />

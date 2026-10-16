@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { formatInteger } from "@/i18n/format";
@@ -12,9 +13,8 @@ import {
 } from "@/lib/tdh/verification/loadVerification.server";
 import { latestIndexDay } from "@/lib/tdh/verification/states";
 import TdhPageShell from "../../shared/TdhPageShell";
-import VerificationDashboard, {
-  VerificationLede,
-} from "../components/VerificationDashboard";
+import { TDH_LINK } from "../../shared/tdhStyles";
+import VerificationDashboard from "../components/VerificationDashboard";
 import { formatCycleDate } from "../components/verificationFormat";
 
 // Day permalinks render per request, like every route under the root layout
@@ -89,7 +89,14 @@ export default async function TdhVerificationDayPage({
           </span>
         </>
       }
-      lede={<VerificationLede locale={locale} />}
+      lede={
+        <p className="tw-m-0">
+          {t(locale, "network.tdh.verify.dayLede", { date, cycle })}{" "}
+          <Link href="/network/tdh/verification" className={TDH_LINK}>
+            {t(locale, "network.tdh.verify.dayLedeLatest")}
+          </Link>
+        </p>
+      }
     >
       <VerificationDashboard
         locale={locale}

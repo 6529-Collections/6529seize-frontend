@@ -61,7 +61,7 @@ export const HISTORIC_RULES: readonly HistoricRule[] = [
 ] as const;
 
 export const TABLE_HEADER_CLASS =
-  "tw-border-0 tw-px-3 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-iron-400 first:tw-pl-4 sm:first:tw-pl-6 last:tw-pr-4 sm:last:tw-pr-6";
+  "tw-border-0 tw-px-3 tw-py-3 tw-text-left tw-text-sm tw-font-medium tw-text-iron-400 first:tw-pl-4 sm:first:tw-pl-6 last:tw-pr-4 sm:last:tw-pr-6";
 export const TABLE_CELL_CLASS =
   "tw-border-0 tw-px-3 tw-py-4 tw-text-left tw-text-sm tw-leading-5 tw-text-iron-400 first:tw-pl-4 sm:first:tw-pl-6 last:tw-pr-4 sm:last:tw-pr-6";
 export const DETAIL_PANEL_CLASS =
@@ -90,21 +90,29 @@ export const CURRENT_RULE = {
 export function MobileSummaryMetric({
   label,
   value,
+  sub,
   valueClassName = "tw-text-iron-300",
 }: {
   readonly label: string;
   readonly value: string;
+  /** A muted line under the value. */
+  readonly sub?: string;
   readonly valueClassName?: string;
 }) {
   return (
     <div className="tw-min-w-0">
-      <dt className="tw-text-balance tw-text-xs tw-leading-4 tw-text-iron-400">
+      <dt className="tw-text-balance tw-text-sm tw-leading-5 tw-text-iron-400">
         {label}
       </dt>
       <dd
         className={`tw-m-0 tw-mt-1 tw-text-sm tw-font-medium tw-tabular-nums tw-leading-5 ${valueClassName}`}
       >
         {value}
+        {sub && (
+          <span className="tw-mt-0.5 tw-block tw-text-[13px] tw-font-normal tw-text-iron-400">
+            {sub}
+          </span>
+        )}
       </dd>
     </div>
   );

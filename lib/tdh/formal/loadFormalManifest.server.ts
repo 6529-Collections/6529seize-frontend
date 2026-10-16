@@ -30,11 +30,13 @@ import {
  * which of the two it shows.
  */
 
-export type FormalManifestLoad =
+type FormalManifestLoad =
   | {
       readonly status: "published";
       readonly manifest: FormalManifest;
       readonly url: string;
+      /** SHA-256 of the file's bytes as served; null when not read. */
+      readonly sha256: string | null;
     }
   | {
       readonly status: "bundled";
@@ -92,7 +94,12 @@ export function createFormalManifestLoader(
     if (!parsed.success) {
       return bundled("invalid");
     }
-    return { status: "published", manifest: parsed.data, url: url.toString() };
+    return {
+      status: "published",
+      manifest: parsed.data,
+      url: url.toString(),
+      sha256: result.sha256,
+    };
   };
 }
 

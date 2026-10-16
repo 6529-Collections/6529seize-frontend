@@ -175,10 +175,7 @@ export default function VerificationHeadline({
     >
       <div className="tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
         <div className="tw-min-w-0">
-          <h2
-            id="tdh-verify-status-heading"
-            className="tw-m-0 tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-300"
-          >
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-300">
             <TdhStatusPill pill={verdict} locale={locale} />
             {!permalink && (
               <span>
@@ -199,14 +196,17 @@ export default function VerificationHeadline({
                 <ChevronRightIcon aria-hidden="true" className="tw-size-3.5" />
               </Link>
             )}
-          </h2>
-          <p className="tw-m-0 tw-mt-3 tw-max-w-4xl tw-text-balance tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-50 sm:tw-text-2xl sm:tw-leading-8">
+          </div>
+          <h2
+            id="tdh-verify-status-heading"
+            className="tw-m-0 tw-mt-3 tw-max-w-4xl tw-text-balance tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-50 sm:tw-text-2xl sm:tw-leading-8"
+          >
             {headlineShort(locale, day, verdict)}
-          </p>
-          <p className="tw-m-0 tw-mt-2 tw-max-w-4xl tw-text-base tw-leading-7 tw-text-iron-200">
+          </h2>
+          <p className="tw-m-0 tw-mt-2 tw-max-w-[38em] tw-text-base tw-leading-7 tw-text-iron-200">
             {headlineSentence(locale, day, verdict)}
           </p>
-          <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, `network.tdh.verify.verdict.${verdict}` as MessageKey)}
           </p>
         </div>
@@ -249,7 +249,7 @@ export default function VerificationHeadline({
           <TdhDisclosure
             summary={t(locale, "network.tdh.verify.status.explain")}
           >
-            <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
+            <p className="tw-m-0 tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-300">
               {t(
                 locale,
                 day.mode === "checked"

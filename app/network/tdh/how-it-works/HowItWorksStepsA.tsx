@@ -196,7 +196,7 @@ function Step4({ locale }: { readonly locale: SupportedLocale }) {
                 </td>
                 <td className={tdhNarrowCell(TDH_TD_NUM)}>
                   {formatInteger(locale, 500)}
-                  <span className="tw-block tw-whitespace-nowrap tw-text-xs tw-text-iron-400">
+                  <span className="tw-block tw-whitespace-nowrap tw-text-sm tw-text-iron-400">
                     {formatInteger(locale, 300)} + {formatInteger(locale, 200)}
                   </span>
                 </td>
@@ -213,7 +213,7 @@ function Step4({ locale }: { readonly locale: SupportedLocale }) {
                 </td>
                 <td className={tdhNarrowCell(TDH_TD_NUM)}>
                   {formatInteger(locale, 50)}
-                  <span className="tw-block tw-text-xs tw-text-iron-400">
+                  <span className="tw-block tw-text-sm tw-text-iron-400">
                     {t(locale, "network.tdh.how.s4.buyerFresh")}
                   </span>
                 </td>
@@ -240,6 +240,7 @@ function Step5({ locale }: { readonly locale: SupportedLocale }) {
       title={t(locale, "network.tdh.how.s5.title")}
       rule={RULE_NETTING}
       ruleSource="P26 §7.1"
+      ruleNote={t(locale, "network.tdh.how.s5.vectors")}
     >
       <Cited locale={locale}>{t(locale, "network.tdh.how.s5.body")}</Cited>
       <Example locale={locale}>
@@ -286,9 +287,6 @@ function Step5({ locale }: { readonly locale: SupportedLocale }) {
         <TransactionBoxDiagram locale={locale} />
       </Example>
       <Cited locale={locale}>{t(locale, "network.tdh.how.s5.measured")}</Cited>
-      <Cited locale={locale} muted>
-        {t(locale, "network.tdh.how.s5.vectors")}
-      </Cited>
       <TdhArrowLink href="/network/tdh/formal#statements">
         {t(locale, "network.tdh.how.s5.formalLink")}
       </TdhArrowLink>

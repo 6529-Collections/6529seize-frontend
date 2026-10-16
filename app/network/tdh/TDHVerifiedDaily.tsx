@@ -2,7 +2,9 @@ import {
   ArrowDownTrayIcon,
   ArrowRightIcon,
   BeakerIcon,
+  CheckIcon,
   CodeBracketIcon,
+  MinusIcon,
   ScaleIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -40,11 +42,6 @@ const POINTS: ReadonlyArray<{
 /** What the checks caught, oldest first (plan §5.2, "found by the checks"). */
 const FOUND = ["floors", "netting", "lean", "difftest"] as const;
 const SOURCES = ["P26 §13", "D125", "D131", "D132"] as const;
-/**
- * The feed's first day. Its first two days were computed together on
- * October 15, 2026; the scheduled daily runs began on October 16.
- */
-const FIRST_FEED_DATE = "2026-10-14";
 
 function differenceSentence(
   locale: SupportedLocale,
@@ -111,7 +108,11 @@ function Figure({
   );
 }
 
-/** Every published day as a dot, oldest first: filled where all agreed. */
+/**
+ * Every published day as a labelled chip, oldest first: a tick where every
+ * record agreed. The run history of the first days is the dashboard's to
+ * tell; here the record stands alone.
+ */
 function Streak({
   locale,
   summary,
@@ -121,7 +122,13 @@ function Streak({
 }) {
   const { record } = summary;
   return (
-    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2">
+    <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-gap-4">
+      <p className="tw-m-0 tw-text-sm tw-font-medium tw-tabular-nums tw-leading-6 tw-text-iron-100">
+        {t(locale, "network.tdh.explainer.verified.record", {
+          allEqual: formatInteger(locale, record.allEqual),
+          days: formatInteger(locale, record.days),
+        })}
+      </p>
       <ol
         className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-1.5 tw-p-0"
         aria-label={t(locale, "network.tdh.explainer.verified.streakLabel")}
@@ -129,13 +136,26 @@ function Streak({
         {record.results.map((day) => (
           <li
             key={day.date}
-            title={formatShortCycleDate(locale, day.date)}
-            className={`tw-size-3.5 tw-rounded-full tw-border tw-border-solid ${
+            className={`tw-inline-flex tw-items-center tw-gap-1 tw-rounded-md tw-border tw-border-solid tw-px-2 tw-py-0.5 tw-text-sm tw-tabular-nums ${
               day.equal
-                ? "tw-border-success tw-bg-success"
-                : "tw-border-amber-400 tw-bg-transparent"
+                ? "tw-border-success/40 tw-bg-success/10 tw-text-iron-100"
+                : "tw-border-amber-400/60 tw-text-iron-100"
             }`}
           >
+            {day.equal ? (
+              <CheckIcon
+                aria-hidden="true"
+                className="tw-size-3.5 tw-shrink-0 tw-text-success"
+              />
+            ) : (
+              <MinusIcon
+                aria-hidden="true"
+                className="tw-size-3.5 tw-shrink-0 tw-text-amber-300"
+              />
+            )}
+            <span aria-hidden="true">
+              {formatShortCycleDate(locale, day.date)}
+            </span>
             <span className="tw-sr-only">
               {t(
                 locale,
@@ -148,19 +168,6 @@ function Streak({
           </li>
         ))}
       </ol>
-      <p className="tw-m-0 tw-max-w-prose tw-text-sm tw-tabular-nums tw-leading-6 tw-text-iron-200">
-        {t(locale, "network.tdh.explainer.verified.record", {
-          allEqual: formatInteger(locale, record.allEqual),
-          days: formatInteger(locale, record.days),
-          first: formatCycleDate(locale, record.firstDate),
-        })}
-        {record.firstDate === FIRST_FEED_DATE && (
-          <span className="tw-text-iron-300">
-            {" "}
-            {t(locale, "network.tdh.explainer.verified.recordNote")}
-          </span>
-        )}
-      </p>
     </div>
   );
 }
@@ -212,7 +219,7 @@ function ProofPanel({
               />
             )}
           </div>
-          <p className="tw-m-0 tw-mt-3 tw-max-w-prose tw-text-sm tw-leading-6 tw-text-iron-300">
+          <p className="tw-m-0 tw-mt-3 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, "network.tdh.explainer.verified.how")}
           </p>
         </>
@@ -250,14 +257,28 @@ function ProofPanel({
               {t(locale, "network.tdh.explainer.verified.uncheckedLink")}
             </span>
           </Link>
-          <span className="tw-max-w-prose">
+          <span className="tw-max-w-[36em]">
             {t(locale, "network.tdh.explainer.verified.uncheckedMeans")}
           </span>
         </p>
       )}
+      <p className="tw-m-0 tw-mt-3 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
+        {t(locale, "network.tdh.explainer.verified.yours")}{" "}
+        <a href="#tdh-profile" className={TDH_LINK}>
+          {t(locale, "network.tdh.explainer.verified.yoursExplain")}
+        </a>
+        {t(locale, "network.tdh.explainer.verified.yoursOr")}
+        <Link
+          href={`/network/tdh/verification/${summary.cycleDay}#side`}
+          className={TDH_LINK}
+        >
+          {t(locale, "network.tdh.explainer.verified.yoursFiles")}
+        </Link>
+        {t(locale, "network.tdh.explainer.verified.yoursEnd")}
+      </p>
       <Link
         href="/network/tdh/verification"
-        className={`tw-group tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline hover:tw-text-primary-400 ${TDH_FOCUS_RING}`}
+        className={`tw-group tw-mt-1 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline hover:tw-text-primary-400 ${TDH_FOCUS_RING}`}
       >
         {t(locale, "network.tdh.explainer.verified.link")}
         <ArrowRightIcon
@@ -282,7 +303,7 @@ function FoundByChecks({
       <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
         {t(locale, "network.tdh.explainer.found.title")}
       </h3>
-      <ul className="tw-m-0 tw-mt-3 tw-list-none tw-space-y-3 tw-p-0">
+      <ul className="tw-m-0 tw-mt-3 tw-max-w-[38em] tw-list-none tw-space-y-3 tw-p-0">
         {FOUND.map((key) => (
           <li
             key={key}
@@ -334,7 +355,7 @@ export default function TDHVerifiedDaily({
       id="tdh-verified"
       title={t(locale, "network.tdh.explainer.verified.title")}
     >
-      <p className="tw-m-0 tw-max-w-prose tw-text-[15px] tw-leading-7 tw-text-iron-200">
+      <p className="tw-m-0 tw-max-w-[36em] tw-text-base tw-leading-7 tw-text-iron-200">
         {t(locale, "network.tdh.explainer.verified.body")}
       </p>
       {summary?.kind === "data" && (
@@ -350,23 +371,27 @@ export default function TDHVerifiedDaily({
           )}
         </p>
       )}
-      <ul className="tw-m-0 tw-mt-5 tw-grid tw-list-none tw-gap-3 tw-p-0 md:tw-grid-cols-3">
+      <ul className="tw-m-0 tw-mt-5 tw-list-none tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06] tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-p-0">
         {POINTS.map(({ key, href, icon: PointIcon }) => (
           <li key={key}>
             <Link
               href={href}
-              className={`tw-group tw-flex tw-h-full tw-flex-col tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-p-4 tw-no-underline tw-transition-colors hover:tw-border-primary-400/50 motion-reduce:tw-transition-none ${TDH_FOCUS_RING}`}
+              className={`tw-group tw-grid tw-grid-cols-[1.25rem_minmax(0,1fr)_1rem] tw-items-start tw-gap-x-3 tw-gap-y-1 tw-px-4 tw-py-4 tw-no-underline tw-transition-colors hover:tw-bg-iron-800/60 motion-reduce:tw-transition-none md:tw-grid-cols-[1.25rem_11rem_minmax(0,1fr)_1rem] md:tw-gap-x-4 ${TDH_FOCUS_RING}`}
             >
-              <span className="tw-flex tw-items-center tw-gap-2 tw-text-base tw-font-semibold tw-text-iron-50">
-                <PointIcon
-                  aria-hidden="true"
-                  className="tw-size-5 tw-shrink-0 tw-text-primary-300"
-                />
+              <PointIcon
+                aria-hidden="true"
+                className="tw-mt-0.5 tw-size-5 tw-shrink-0 tw-text-primary-300"
+              />
+              <span className="tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50">
                 {t(locale, `network.tdh.explainer.verified.point.${key}.title`)}
               </span>
-              <span className="tw-text-[15px] tw-leading-7 tw-text-iron-300">
+              <span className="tw-col-start-2 tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-300 md:tw-col-start-3 md:tw-row-start-1">
                 {t(locale, `network.tdh.explainer.verified.point.${key}.body`)}
               </span>
+              <ArrowRightIcon
+                aria-hidden="true"
+                className="tw-col-start-3 tw-row-start-1 tw-mt-1 tw-size-4 tw-text-primary-300 tw-transition-transform group-hover:tw-translate-x-0.5 motion-reduce:tw-transition-none md:tw-col-start-4"
+              />
             </Link>
           </li>
         ))}

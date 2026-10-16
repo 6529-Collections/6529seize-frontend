@@ -13,6 +13,7 @@ import {
   TDH_TD_NUM,
   TDH_TH,
   TDH_TH_NUM,
+  tdhNarrowCell,
 } from "../shared/tdhStyles";
 import { BOOST_EXAMPLES, HOUSEHOLD_HOLDINGS, MINUTE_EXAMPLE } from "./examples";
 import BoostBuilder from "./explorables/BoostBuilder";
@@ -21,6 +22,7 @@ import { IdentityGraphDiagram } from "./HowItWorksDiagrams";
 import { rateText } from "./HowItWorksStepsA";
 import StepSection, { Cited, Example } from "./StepSection";
 
+const HOLDINGS_CAPTION = "network.tdh.how.s12.holdingsCaption";
 const CAPTION =
   "tw-px-4 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200";
 const H = 3_941;
@@ -33,7 +35,7 @@ function Bullets({
   readonly items: ReadonlyArray<{ readonly text: string }>;
 }) {
   return (
-    <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-[15px] tw-leading-7 tw-text-iron-200 marker:tw-text-iron-500">
+    <ul className="tw-m-0 tw-max-w-[36em] tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-200 marker:tw-text-iron-500">
       {items.map((item) => (
         <li key={item.text}>{item.text}</li>
       ))}
@@ -95,7 +97,7 @@ function Step9({ locale }: { readonly locale: SupportedLocale }) {
           { text: t(locale, "network.tdh.how.s9.fullSet") },
         ]}
       />
-      <p className="tw-m-0 tw-text-[15px] tw-leading-7 tw-text-iron-200">
+      <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-200">
         {t(locale, "network.tdh.how.s9.tableIntro")}
       </p>
       <TdhTableFrame label={t(locale, "network.tdh.how.s9.tableCaption")}>
@@ -150,15 +152,15 @@ function Step10({ locale }: { readonly locale: SupportedLocale }) {
     >
       <Cited locale={locale}>{t(locale, "network.tdh.how.s10.body")}</Cited>
       <Cited locale={locale}>{t(locale, "network.tdh.how.s10.limit")}</Cited>
-      <p className="tw-m-0 tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+      <p className="tw-m-0 tw-max-w-[38em] tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
         {t(locale, "network.tdh.how.s10.fourth")}
         <TdhSource refs={["P26 §6.3", "P26 §10"]} locale={locale} />
       </p>
       <IdentityGraphDiagram locale={locale} />
-      <p className="tw-m-0 tw-text-[15px] tw-font-medium tw-leading-7 tw-text-iron-100">
+      <p className="tw-m-0 tw-text-base tw-font-medium tw-leading-7 tw-text-iron-100">
         {t(locale, "network.tdh.how.s10.changes")}
       </p>
-      <ol className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-[15px] tw-leading-7 tw-text-iron-200 marker:tw-text-iron-500">
+      <ol className="tw-m-0 tw-max-w-[36em] tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-200 marker:tw-text-iron-500">
         <li>{t(locale, "network.tdh.how.s10.change1")}</li>
         <li>{t(locale, "network.tdh.how.s10.change2")}</li>
         <li>
@@ -236,76 +238,85 @@ function Step12({ locale }: { readonly locale: SupportedLocale }) {
       title={t(locale, "network.tdh.how.s12.title")}
     >
       <Cited locale={locale}>{t(locale, "network.tdh.how.s12.body")}</Cited>
-      <ul
-        aria-label={t(locale, "network.tdh.how.s12.holdingsCaption")}
-        className="tw-m-0 tw-grid tw-list-none tw-gap-2 tw-p-0 md:tw-hidden"
+      {/* On phones a compact table of three columns, one row group per
+          wallet, instead of a card per holding. */}
+      <TdhTableFrame
+        label={t(locale, HOLDINGS_CAPTION)}
+        className="md:tw-hidden"
       >
-        {HOUSEHOLD_HOLDINGS.map((holding) => {
-          const rate = rates[holding.card] ?? 0;
-          const raw = holding.days.reduce((sum, days) => sum + days, 0);
-          const sameMeme = holding.wallet === "B" && holding.card === "meme310";
-          return (
-            <li
-              key={`${holding.wallet}-${holding.card}`}
-              className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-4 tw-py-3 tw-@container"
-            >
-              <p className="tw-m-0 tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-3 tw-text-sm">
-                <span className="tw-font-medium tw-text-iron-100">
-                  {t(
-                    locale,
-                    sameMeme
-                      ? "network.tdh.how.s12.card.meme310Same"
-                      : `network.tdh.how.s12.card.${holding.card}`
-                  )}
-                </span>
-                <span className="tw-text-xs tw-text-iron-400">
-                  {t(locale, "network.tdh.how.s12.wallet")} {holding.wallet}
-                </span>
-              </p>
-              <dl className="tw-m-0 tw-mt-2 tw-grid tw-grid-cols-1 tw-gap-x-4 tw-gap-y-0.5 tw-text-sm tw-tabular-nums @[16rem]:tw-grid-cols-[auto_minmax(0,1fr)] @[16rem]:tw-gap-y-1 [&>dd]:tw-mb-1 @[16rem]:[&>dd]:tw-mb-0 @[16rem]:[&>dd]:tw-text-right">
-                <dt className="tw-text-iron-400">
-                  {t(locale, "network.tdh.how.s12.copies")}
-                </dt>
-                <dd className="tw-m-0 tw-text-iron-200">
-                  {formatInteger(locale, holding.days.length)}
-                </dd>
-                <dt className="tw-text-iron-400">
-                  {t(locale, "network.tdh.how.s12.days")}
-                </dt>
-                <dd className="tw-m-0 tw-text-iron-200">
-                  {holding.wallet === "A" && holding.card === "meme310"
-                    ? t(locale, "network.tdh.how.s12.freshCopy")
-                    : holding.days
-                        .map((days) => formatInteger(locale, days))
-                        .join(", ")}
-                </dd>
-                <dt className="tw-text-iron-400">
-                  {t(locale, "network.tdh.how.s12.rate")}
-                </dt>
-                <dd className="tw-m-0 tw-text-iron-200">
-                  {rateText(locale, rate)}
-                </dd>
-                <dt className="tw-text-iron-400">
-                  {t(locale, "network.tdh.how.s12.base")}
-                </dt>
-                <dd className="tw-m-0 tw-font-semibold tw-text-iron-50">
-                  {formatInteger(locale, baseTdh(rate, raw))}
-                </dd>
-              </dl>
-            </li>
-          );
-        })}
-      </ul>
+        <table className={TDH_TABLE}>
+          <caption className={CAPTION}>{t(locale, HOLDINGS_CAPTION)}</caption>
+          <thead>
+            <tr>
+              <th scope="col" className={tdhNarrowCell(TDH_TH)}>
+                {t(locale, "network.tdh.how.s12.card")}
+              </th>
+              <th scope="col" className={tdhNarrowCell(TDH_TH_NUM)}>
+                {t(locale, "network.tdh.how.s12.daysTimesRate")}
+              </th>
+              <th scope="col" className={tdhNarrowCell(TDH_TH_NUM)}>
+                {t(locale, "network.tdh.how.s12.base")}
+              </th>
+            </tr>
+          </thead>
+          {(["A", "B"] as const).map((wallet) => (
+            <tbody key={wallet}>
+              <tr>
+                <th
+                  scope="colgroup"
+                  colSpan={3}
+                  className="tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.05] tw-bg-iron-950/60 tw-px-3 tw-py-2 tw-text-left tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400"
+                >
+                  {t(locale, "network.tdh.how.s12.wallet")} {wallet}
+                </th>
+              </tr>
+              {HOUSEHOLD_HOLDINGS.filter(
+                (holding) => holding.wallet === wallet
+              ).map((holding) => {
+                const rate = rates[holding.card] ?? 0;
+                const raw = holding.days.reduce((sum, days) => sum + days, 0);
+                const sameMeme =
+                  holding.wallet === "B" && holding.card === "meme310";
+                const fresh =
+                  holding.wallet === "A" && holding.card === "meme310";
+                return (
+                  <tr key={`${holding.wallet}-${holding.card}`}>
+                    <th
+                      scope="row"
+                      className={`${tdhNarrowCell(TDH_TD)} tw-font-normal tw-text-iron-100`}
+                    >
+                      {t(
+                        locale,
+                        sameMeme
+                          ? "network.tdh.how.s12.card.meme310Same"
+                          : `network.tdh.how.s12.card.${holding.card}`
+                      )}
+                    </th>
+                    <td className={tdhNarrowCell(TDH_TD_NUM)}>
+                      {fresh
+                        ? t(locale, "network.tdh.how.s12.freshCopy")
+                        : `${formatInteger(locale, raw)} × ${rateText(locale, rate)}`}
+                    </td>
+                    <td
+                      className={`${tdhNarrowCell(TDH_TD_NUM)} tw-font-semibold tw-text-iron-50`}
+                    >
+                      {formatInteger(locale, baseTdh(rate, raw))}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          ))}
+        </table>
+      </TdhTableFrame>
       <div
         className={`${TDH_TABLE_WRAP} tw-hidden md:tw-block`}
         tabIndex={0}
         role="region"
-        aria-label={t(locale, "network.tdh.how.s12.holdingsCaption")}
+        aria-label={t(locale, HOLDINGS_CAPTION)}
       >
         <table className={`${TDH_TABLE} tw-min-w-[36rem]`}>
-          <caption className={CAPTION}>
-            {t(locale, "network.tdh.how.s12.holdingsCaption")}
-          </caption>
+          <caption className={CAPTION}>{t(locale, HOLDINGS_CAPTION)}</caption>
           <thead>
             <tr>
               <th scope="col" className={TDH_TH}>
@@ -385,7 +396,7 @@ function Step13({ locale }: { readonly locale: SupportedLocale }) {
       title={t(locale, "network.tdh.how.s13.title")}
     >
       <Cited locale={locale}>{t(locale, "network.tdh.how.s13.body")}</Cited>
-      <p className="tw-m-0 tw-flex tw-flex-col tw-items-start tw-gap-1 tw-rounded-lg tw-border tw-border-solid tw-border-success/30 tw-bg-success/[0.05] tw-px-4 tw-py-3 tw-text-[15px] tw-leading-7 tw-text-iron-100">
+      <p className="tw-m-0 tw-flex tw-flex-col tw-items-start tw-gap-1 tw-rounded-lg tw-border tw-border-solid tw-border-success/30 tw-bg-success/[0.05] tw-px-4 tw-py-3 tw-text-base tw-leading-7 tw-text-iron-100">
         {t(locale, "network.tdh.how.s13.verify")}
         <TdhArrowLink href="/network/tdh/verification">
           {t(locale, "network.tdh.how.s13.verifyLink")}
@@ -444,9 +455,14 @@ function Step14({
           { text: t(locale, "network.tdh.how.s14.item7") },
         ]}
       />
-      <TdhArrowLink href="/network/tdh/verification">
-        {t(locale, "network.tdh.how.s14.verify")}
-      </TdhArrowLink>
+      <div className="tw-flex tw-flex-col tw-items-start tw-gap-1">
+        <TdhArrowLink href="/network/tdh/verification">
+          {t(locale, "network.tdh.how.s14.verify")}
+        </TdhArrowLink>
+        <TdhArrowLink href="/network/tdh/verification#classes">
+          {t(locale, "network.tdh.how.s14.classes")}
+        </TdhArrowLink>
+      </div>
     </StepSection>
   );
 }

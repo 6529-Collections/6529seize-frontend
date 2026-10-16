@@ -57,7 +57,7 @@ export default function TdhPageShell({
             </div>
           )}
           {lede !== undefined && (
-            <div className={`tw-mt-4 tw-max-w-3xl tw-space-y-3 ${TDH_LEDE}`}>
+            <div className={`tw-mt-4 tw-max-w-[38em] tw-space-y-3 ${TDH_LEDE}`}>
               {lede}
             </div>
           )}

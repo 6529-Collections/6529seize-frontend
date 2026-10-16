@@ -6,7 +6,6 @@ import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import TdhStatusPill, { type TdhPill } from "../shared/TdhStatusPill";
-import scrollStyles from "../shared/tdhScroll.module.css";
 import {
   TDH_CHIP_BUTTON,
   TDH_CHIP_OFF,
@@ -119,7 +118,7 @@ function ManifestEntries({
                 locale={locale}
                 size="sm"
               />
-              <span className="tw-text-xs tw-text-iron-400">
+              <span className="tw-text-sm tw-text-iron-400">
                 {entryEvidence(locale, entry)}
               </span>
               {place && (
@@ -128,7 +127,7 @@ function ManifestEntries({
                 </span>
               )}
               {entry.statement && entry.expected !== "deferred" && (
-                <span className="tw-basis-full tw-text-xs tw-leading-5 tw-text-iron-300">
+                <span className="tw-basis-full tw-text-sm tw-leading-5 tw-text-iron-300">
                   {entry.statement}
                 </span>
               )}
@@ -306,17 +305,30 @@ export default function StatementsTable({
                             />
                           )}
                         {row.lean && (
-                          // Lean is layout-sensitive: on phones its lines keep
-                          // their indentation and scroll sideways.
+                          // Lean is layout-sensitive: each line keeps its
+                          // indentation, and a long line wraps with a
+                          // hanging indent, so nothing scrolls sideways.
                           <pre
-                            role="region"
-                            tabIndex={0}
-                            data-tdh-scroll=""
                             aria-label={`${t(locale, "network.tdh.formal.statements.lean")}: ${title}`}
-                            className={`tw-m-0 tw-whitespace-pre tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-p-3 tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-100 max-sm:tw-overflow-x-auto sm:tw-whitespace-pre-wrap sm:[overflow-wrap:anywhere] ${scrollStyles["shadePhone"] ?? ""}`}
+                            className="tw-m-0 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-p-3 tw-font-mono tw-text-[13px] tw-leading-5 tw-text-iron-100"
                           >
-                            <code className="tw-font-mono tw-text-iron-100">
-                              {row.lean}
+                            <code className="tw-block tw-font-mono tw-text-iron-100">
+                              {row.lean.split("\n").map((line, index) => {
+                                const indent =
+                                  /^ */.exec(line)?.[0].length ?? 0;
+                                return (
+                                  <span
+                                    key={index}
+                                    className="tw-block tw-whitespace-pre-wrap [overflow-wrap:anywhere]"
+                                    style={{
+                                      paddingLeft: `${indent + 2}ch`,
+                                      textIndent: "-2ch",
+                                    }}
+                                  >
+                                    {line.slice(indent) || " "}
+                                  </span>
+                                );
+                              })}
                             </code>
                           </pre>
                         )}

@@ -41,8 +41,11 @@ describe("TDHConsolidationPage (collector's guide)", () => {
         name: "Your wallets count as one collector: up to three under TDH-v1, and a fourth on 6529.io until the cutover",
       })
     ).toBeInTheDocument();
+    // The start date is carried by its date chip, not repeated in prose.
     expect(
-      screen.getByText(/A fourth needs fresh links from October 12, 2026/)
+      screen.getByText(
+        /October 12, 2026.*: a fourth wallet can join on 6529\.io/
+      )
     ).toBeInTheDocument();
   });
 

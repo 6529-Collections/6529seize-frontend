@@ -12,6 +12,7 @@ import { TDH_LINK } from "../shared/tdhStyles";
 import { PipelineDiagram } from "./PipelineDiagram";
 import HowItWorksStepsA from "./HowItWorksStepsA";
 import HowItWorksStepsB from "./HowItWorksStepsB";
+import { noBreakTerms } from "../shared/noBreakTerms";
 
 const STEP_COUNT = 14;
 /**
@@ -46,14 +47,14 @@ export default async function TdhHowItWorksPage() {
       lede={
         <>
           <p className="tw-m-0">
-            {t(locale, "network.tdh.how.lede")}
+            {noBreakTerms(t(locale, "network.tdh.how.lede"))}
             <TdhSource refs={["D121", "D132"]} locale={locale} />
           </p>
           <TdhDisclosure
             summary={t(locale, "network.tdh.how.basisSummary")}
-            summaryClassName="tw-text-[15px]"
+            summaryClassName="tw-text-base"
           >
-            <p className="tw-m-0 tw-max-w-prose tw-pl-6 tw-text-sm tw-leading-6 tw-text-iron-300">
+            <p className="tw-m-0 tw-max-w-[36em] tw-pl-6 tw-text-sm tw-leading-6 tw-text-iron-300">
               {t(locale, "network.tdh.how.basis")}{" "}
               <a
                 href={PORT_TESTS}

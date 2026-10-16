@@ -42,7 +42,7 @@ function StackColumn({
           </li>
         ))}
       </ol>
-      <p className="tw-m-0 tw-mt-1.5 tw-text-center tw-text-xs tw-text-iron-300">
+      <p className="tw-m-0 tw-mt-1.5 tw-text-center tw-text-sm tw-text-iron-300">
         {label}
       </p>
     </div>
@@ -60,7 +60,7 @@ function StackCard({
 }) {
   return (
     <div className="tw-flex tw-min-w-0 tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-p-3">
-      <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-100">
+      <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
         {title}
         {note && (
           <span className="tw-font-normal tw-text-iron-400"> · {note}</span>
@@ -123,7 +123,7 @@ export function StackDiagram({ locale }: { readonly locale: SupportedLocale }) {
           />
         </StackCard>
       </div>
-      <p className="tw-m-0 tw-mt-2 tw-text-xs tw-text-iron-400">
+      <p className="tw-m-0 tw-mt-2 tw-text-sm tw-text-iron-400">
         {t(locale, "network.tdh.how.s4.legend")}
       </p>
     </figure>
@@ -153,12 +153,28 @@ const CURVE_POINTS = [
  * from the falling curve. The two Meme points, 300 and 310 copies, are almost
  * on top of each other, so they share one label with one leader line.
  */
-const LABEL_OFFSET: Readonly<Record<string, readonly [number, number]>> = {
-  gradient: [12, -6],
-  nextgen: [8, -12],
-  // Above and left of its dot, clear of the curve, which runs into the dot
-  // from the left almost level with it.
-  firstgm: [-8, -14],
+type LabelPlace = readonly [number, number, "start" | "middle" | "end"];
+
+/**
+ * Where each label sits, in pixels from its point, with its anchor, for
+ * each drawing: always clear of the falling curve, of the axes and of the
+ * other labels, and joined to its point by a short leader. On the phone
+ * drawing NextGen's 3.94 sits above and left of its dot, over the curve's
+ * bend, and FirstGM's 1.00 straight above its dot, so the two never stack.
+ */
+const LABEL_PLACE: Readonly<
+  Record<"narrow" | "wide", Readonly<Record<string, LabelPlace>>>
+> = {
+  narrow: {
+    gradient: [14, -4, "start"],
+    nextgen: [-6, -24, "end"],
+    firstgm: [0, -20, "middle"],
+  },
+  wide: {
+    gradient: [14, -4, "start"],
+    nextgen: [10, -16, "start"],
+    firstgm: [-12, -22, "end"],
+  },
 };
 const PAIRED = new Set(["meme300", "meme310"]);
 
@@ -333,8 +349,9 @@ function RateCurve({
         const cents = rateCents(H, point.edition, point.minimumOne) ?? 0;
         const px = x(point.edition);
         const py = y(cents / 100);
-        const [dx, dy] = LABEL_OFFSET[point.key] ?? [10, -10];
-        const anchor = dx < 0 ? "end" : "start";
+        const [dx, dy, anchor] = LABEL_PLACE[
+          width === NARROW_WIDTH ? "narrow" : "wide"
+        ][point.key] ?? [10, -10, "start"];
         if (PAIRED.has(point.key)) {
           return (
             <circle
@@ -347,8 +364,21 @@ function RateCurve({
             />
           );
         }
+        // A leader from the dot's edge toward the label's corner.
+        const length = Math.hypot(dx, dy);
+        const leader = length > 16;
         return (
           <g key={point.key}>
+            {leader && (
+              <line
+                x1={px + (dx / length) * 7}
+                y1={py + (dy / length) * 7}
+                x2={px + dx * 0.72}
+                y2={py + dy * 0.72}
+                strokeWidth="1"
+                className="tw-stroke-iron-500"
+              />
+            )}
             <circle
               cx={px}
               cy={py}
@@ -421,11 +451,11 @@ export function RateCurveDiagram({
           />
         }
       />
-      <figcaption className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-1 tw-text-xs tw-text-iron-300">
+      <figcaption className="tw-mt-3 tw-grid tw-grid-cols-1 tw-items-center tw-gap-x-6 tw-gap-y-1.5 tw-text-sm tw-text-iron-300 sm:tw-grid-cols-2">
         <span className="tw-inline-flex tw-items-center tw-gap-2">
           <span
             aria-hidden="true"
-            className="tw-w-5 tw-border-0 tw-border-t-2 tw-border-dashed tw-border-sky-300"
+            className="tw-w-5 tw-shrink-0 tw-border-0 tw-border-t-2 tw-border-dashed tw-border-sky-300"
           />
           {t(locale, "network.tdh.how.s7.floorBand")}
         </span>
@@ -461,7 +491,7 @@ const GRAPHS = [
   },
   {
     key: "row3",
-    wallets: { A: [40, 30], B: [130, 30], C: [40, 100], D: [130, 100] },
+    wallets: { A: [30, 30], B: [110, 30], C: [70, 100], D: [150, 100] },
     links: ["AB", "BC", "AC", "CD"],
     identities: [
       ["C", "D"],
@@ -523,6 +553,11 @@ function IdentityGraph({ graph }: { readonly graph: (typeof GRAPHS)[number] }) {
       })}
       {graph.links.map((link) => {
         const [from, to] = [position(link[0] ?? ""), position(link[1] ?? "")];
+        const inside = graph.identities.some(
+          (members) =>
+            (members as readonly string[]).includes(link[0] ?? "") &&
+            (members as readonly string[]).includes(link[1] ?? "")
+        );
         return (
           <line
             key={link}
@@ -530,8 +565,9 @@ function IdentityGraph({ graph }: { readonly graph: (typeof GRAPHS)[number] }) {
             y1={from[1]}
             x2={to[0]}
             y2={to[1]}
-            strokeWidth="2"
-            className="tw-stroke-iron-300"
+            strokeWidth={inside ? 3 : 1.5}
+            strokeDasharray={inside ? undefined : "4 3"}
+            className={inside ? "tw-stroke-iron-200" : "tw-stroke-iron-400"}
           />
         );
       })}
@@ -663,13 +699,20 @@ export function IdentityGraphDiagram({
           </li>
         ))}
       </ol>
-      <figcaption className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-1 tw-text-xs tw-text-iron-300">
+      <figcaption className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-1 tw-text-sm tw-text-iron-300">
         <span className="tw-inline-flex tw-items-center tw-gap-2">
           <span
             aria-hidden="true"
-            className="tw-w-5 tw-border-0 tw-border-t-2 tw-border-solid tw-border-iron-300"
+            className="tw-w-5 tw-border-0 tw-border-t-[3px] tw-border-solid tw-border-iron-200"
           />
           {t(locale, "network.tdh.how.s10.legendLink")}
+        </span>
+        <span className="tw-inline-flex tw-items-center tw-gap-2">
+          <span
+            aria-hidden="true"
+            className="tw-w-5 tw-border-0 tw-border-t-2 tw-border-dashed tw-border-iron-400"
+          />
+          {t(locale, "network.tdh.how.s10.legendLinkBetween")}
         </span>
         <span className="tw-inline-flex tw-items-center tw-gap-2">
           <span

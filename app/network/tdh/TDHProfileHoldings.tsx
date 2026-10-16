@@ -176,7 +176,7 @@ function Collection({
           {tokens.length > PAGE_SIZE && (
             <div className="tw-my-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
               <p
-                className="tw-m-0 tw-text-xs tw-text-iron-400"
+                className="tw-m-0 tw-text-sm tw-text-iron-400"
                 aria-live="polite"
               >
                 {t(locale, "network.tdh.profile.pagination", {
@@ -214,17 +214,17 @@ function Collection({
               </div>
             </div>
           )}
-          <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-400">
+          <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-5 tw-text-iron-400">
             {t(locale, "network.tdh.profile.tableNote")}
           </p>
           <TdhDisclosure
             className="tw-my-2"
             summary={t(locale, "network.tdh.profile.ages")}
           >
-            <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400">
+            <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-5 tw-text-iron-400">
               {t(locale, "network.tdh.profile.agesNote")}
             </p>
-            <ul className="tw-mb-0 tw-mt-3 tw-space-y-2 tw-pl-5 tw-text-xs tw-leading-5 tw-text-iron-300">
+            <ul className="tw-mb-0 tw-mt-3 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-5 tw-text-iron-300">
               {visible.map((token) => (
                 <li key={token.id}>
                   {t(locale, "network.tdh.profile.agesRow", {

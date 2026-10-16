@@ -112,7 +112,9 @@ describe("TDH sub-pages", () => {
       )
     ).toHaveAttribute("aria-current", "page");
 
-    const builder = screen.getByRole("region", { name: "Boost builder" });
+    const builder = screen.getByRole("region", {
+      name: "Build a collection and see its boost",
+    });
     expect(within(builder).getByText("Boost 1.02")).toBeInTheDocument();
     await user.click(
       within(builder).getByRole("button", { name: "Increase Gradients" })
@@ -130,7 +132,7 @@ describe("TDH sub-pages", () => {
     ).toHaveAttribute("aria-pressed", "true");
 
     const household = screen.getByRole("region", {
-      name: "Show the household",
+      name: "Change the household and see its TDH",
     });
     expect(
       within(household).getByText(/tomorrow it rises by 114/)
@@ -148,10 +150,15 @@ describe("TDH sub-pages", () => {
       within(household).getByText(/18,880, down 1,589/)
     ).toBeInTheDocument();
 
-    const rate = screen.getByRole("region", { name: "Rate explorer" });
-    expect(within(rate).getByText("12.71")).toBeInTheDocument();
+    const rate = screen.getByRole("region", {
+      name: "Change an edition and see its rate",
+    });
+    // The rate, and the same rate at the edition's point on the curve.
+    expect(within(rate).getAllByText("12.71")).toHaveLength(2);
 
-    const stack = screen.getByRole("region", { name: "Stack simulator" });
+    const stack = screen.getByRole("region", {
+      name: "Send and receive copies, and watch the stack",
+    });
     expect(within(stack).getByText("Whole days: 30")).toBeInTheDocument();
     expect(
       within(stack).getByRole("switch", { name: /consolidated/ })
@@ -265,29 +272,28 @@ describe("TDH sub-pages", () => {
     // copy of the manifest, and the page says so.
     expect(
       container.querySelector('[data-tdh-manifest="bundled"]')?.textContent
-    ).toMatch(/bundled with this page.*model at commit 7bf579a/);
-    // The manifest's build follows P26 as of 1c69528.
-    expect(container.textContent).toMatch(/1,190 checks, P26 as of 1c69528/);
+    ).toMatch(/Model at 7bf579a.*bundled with this page/);
+    // The manifest's build follows P26 as of 1c69528, and its figures are
+    // in the builds panel once.
+    expect(
+      container.querySelector('[data-tdh-manifest="bundled"]')?.textContent
+    ).toMatch(/P26 as of 1c69528.*68 of 68 vectors1,190 checks/);
     // Round 5 of the model exists, but its manifest is not published: the
-    // page shows its committed figures in a section of their own, and keeps
-    // round 3's statements, each labelled with the published build.
+    // builds panel shows its committed figures in a column of its own, under
+    // a pill, and the page keeps round 3's statements.
     const note = container.querySelector("[data-tdh-round-note]");
-    expect(note?.textContent).toMatch(/Round 5 of the model, October 16, 2026/);
+    expect(note?.textContent).toMatch(/Round 5 at 6b32f3f, October 16, 2026/);
     expect(note?.textContent).toMatch(/89 of 89 vectors/);
     expect(note?.textContent).toMatch(/55 \+ 30 theorems/);
     expect(note?.textContent).toMatch(/46 fact checks/);
-    expect(note?.textContent).toMatch(/at commit 6b32f3f/);
-    // It is its own section after the body, under a pill, with its
-    // committed manifest's SHA-256; the header gives it one badge.
     expect(
-      container.querySelector('#next-build [data-tdh-pill="notPublished"]')
+      note?.querySelector('[data-tdh-pill="notPublished"]')
     ).not.toBeNull();
     expect(note?.textContent).toMatch(
       /6825ffa47980ea9c7baa35470a6ddd24e7383fcbbe95bec4e237dfd0a7f537e5/
     );
-    expect(container.textContent).toMatch(
-      /Round 5 committed: 89 of 89 vectors, 55 \+ 30 theorems/
-    );
+    // No second section repeats them.
+    expect(container.querySelector("#next-build")).toBeNull();
     expect(container.textContent).toMatch(
       /the order of raw logs is not covered/
     );
@@ -365,7 +371,7 @@ describe("TDH sub-pages", () => {
     // Round 5 is still newer than this round-4 manifest.
     expect(
       container.querySelector("[data-tdh-round-note]")?.textContent
-    ).toMatch(/Round 5 of the model/);
+    ).toMatch(/Round 5 at 6b32f3f/);
     expect(
       container.querySelector('[data-tdh-manifest="published"]')
     ).not.toBeNull();

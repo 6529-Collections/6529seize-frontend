@@ -170,12 +170,18 @@ const NAMES = new Set([
 
 const TOKEN = /("[^"\n]*")|(0x[0-9a-fA-F…]+|\b\d[\d,.]*\b)|([A-Za-z_]\w*)/g;
 
-/** A line's code as tokens: keywords, numbers, strings and rule names. */
+/**
+ * A line's code as tokens: keywords, numbers, strings and rule names.
+ * `keywords: false` leaves keywords as plain text, for lines that read as
+ * English.
+ */
 export function ruleTokens(
   text: string,
-  language: RuleLanguage = "pseudo"
+  language: RuleLanguage = "pseudo",
+  options: { readonly keywords?: boolean } = {}
 ): RuleToken[] {
-  const keywords = KEYWORDS[language];
+  const keywords =
+    options.keywords === false ? new Set<string>() : KEYWORDS[language];
   const tokens: RuleToken[] = [];
   let last = 0;
   const push = (kind: RuleToken["kind"], value: string) => {

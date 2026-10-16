@@ -57,5 +57,7 @@
   "network.tdh.profile.reproduced": "Reproduced by two separately written programs from one input, and by 6529.io: for the cycle of {date}, the Rust core, the Python reference (computing from the Rust run’s input) and 6529.io gave all {identities} identity records and {wallets} wallet records identically, this one included.",
   "network.tdh.profile.reproducedLink": "See that day",
   "network.tdh.profile.holdings.one": "{collection} · {tdh} TDH · {count} card",
-  "network.tdh.profile.holdings.other": "{collection} · {tdh} TDH · {count} cards"
+  "network.tdh.profile.holdings.other": "{collection} · {tdh} TDH · {count} cards",
+  "network.tdh.profile.walletsOne": "Wallet ({count})",
+  "network.tdh.profile.sink": "This is a burn address, one of the registry’s two sinks. Its record counts in the network total, but it is never a participant: it is never debited and never consolidated."
 }

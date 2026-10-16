@@ -38,6 +38,22 @@ import {
   PARAMETERS,
 } from "./specData";
 
+/**
+ * SHA-256 of the two documents section 13 names, at 6529chain f840096, their
+ * latest change: P28 is design/canonical-encodings.md, P53
+ * design/validator-v1.md.
+ */
+const DOCUMENT_HASHES = [
+  {
+    key: "p28",
+    sha256: "524c5c9b8458ff08f9f082f667ba1fba936b407b8e477a214c3c93b4d78ea14c",
+  },
+  {
+    key: "p53",
+    sha256: "139c608ee2bcbc3986ba3240c056b50fe84036048aec5c26137143e828f1bfe3",
+  },
+] as const;
+
 const CAPTION =
   "tw-px-4 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200";
 
@@ -145,7 +161,7 @@ export default function SpecSectionsB({
           {t(locale, "network.tdh.spec.s9.body")}
         </Plain>
         <Rule locale={locale} code={RULE_OUTPUT} source="P26 §9" />
-        <p className="tw-m-0 tw-max-w-3xl tw-text-[15px] tw-leading-7 tw-text-iron-200">
+        <p className="tw-m-0 tw-max-w-[36em] tw-text-base tw-leading-7 tw-text-iron-200">
           {t(locale, "network.tdh.spec.s9.root")}
         </p>
         <Rule
@@ -154,7 +170,7 @@ export default function SpecSectionsB({
           source="P53 §4.2"
           title={t(locale, "network.tdh.spec.s9.rootTitle")}
         />
-        <p className="tw-m-0 tw-max-w-3xl tw-text-[15px] tw-leading-7 tw-text-iron-200">
+        <p className="tw-m-0 tw-max-w-[36em] tw-text-base tw-leading-7 tw-text-iron-200">
           {t(locale, "network.tdh.spec.s9.leaves")}
           <TdhSource refs={["P28 §4.3", "P28 §4.12"]} locale={locale} />
         </p>
@@ -275,7 +291,7 @@ export default function SpecSectionsB({
               failedLabel={t(locale, "network.tdh.shared.copyFailed")}
             />
           </p>
-          <p className="tw-m-0 tw-mt-1 tw-text-xs tw-text-iron-500">
+          <p className="tw-m-0 tw-mt-1 tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, "network.tdh.spec.s10.hashNote")}
             <TdhSource refs={["P26 §10"]} locale={locale} />
           </p>
@@ -287,6 +303,7 @@ export default function SpecSectionsB({
           source="P28 §1"
           moreSources={["P28 §2.6", "P28 §2.7", "P28 §3.1"]}
           title={t(locale, "network.tdh.spec.s10.hashRuleTitle")}
+          aligned
         />
       </SpecSection>
 
@@ -300,7 +317,7 @@ export default function SpecSectionsB({
           {t(locale, "network.tdh.spec.s11.body")}
         </Plain>
         <DeviationsTable locale={locale} />
-        <p className="tw-m-0 tw-max-w-3xl tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+        <p className="tw-m-0 tw-max-w-[36em] tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
           {t(locale, "network.tdh.spec.s11.pending")}
           <TdhSource refs={["P26 §6.3"]} locale={locale} />
         </p>
@@ -354,7 +371,7 @@ export default function SpecSectionsB({
                   <td className={`${TDH_TD_STACK_MD} tw-text-iron-300`}>
                     <span
                       aria-hidden="true"
-                      className="tw-mr-1 tw-text-xs tw-text-iron-500 md:tw-hidden"
+                      className="tw-mr-1 tw-text-sm tw-text-iron-500 md:tw-hidden"
                     >
                       {t(locale, "network.tdh.spec.s12.fixed")}:
                     </span>
@@ -388,10 +405,28 @@ export default function SpecSectionsB({
           >
             {t(locale, "network.tdh.spec.implementers.title")}
           </h3>
-          <p className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-200">
+          <p className="tw-m-0 tw-mt-1 tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-200">
             {t(locale, "network.tdh.spec.implementers.body")}
             <TdhSource refs={["P26 §10", "P53 §11.3"]} locale={locale} />
           </p>
+          <p className="tw-m-0 tw-mt-2 tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-300">
+            {t(locale, "network.tdh.spec.implementers.hashes")}
+          </p>
+          <dl className="tw-m-0 tw-mt-1 tw-grid tw-gap-1 tw-text-sm tw-leading-6">
+            {DOCUMENT_HASHES.map((document) => (
+              <div key={document.key} className="tw-min-w-0">
+                <dt className="tw-text-iron-200">
+                  {t(
+                    locale,
+                    `network.tdh.spec.implementers.${document.key}` as MessageKey
+                  )}
+                </dt>
+                <dd className="tw-m-0 tw-break-all tw-font-mono tw-text-[13px] tw-text-iron-100">
+                  {document.sha256}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </aside>
         <TdhArrowLink href="/network/tdh/implementations">
           {t(locale, "network.tdh.spec.s13.link")}
@@ -403,7 +438,7 @@ export default function SpecSectionsB({
         title={t(locale, "network.tdh.spec.decisions.title")}
         locale={locale}
       >
-        <p className="tw-m-0 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
+        <p className="tw-m-0 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
           {t(locale, "network.tdh.spec.decisions.intro")}
         </p>
         <dl className="tw-m-0 tw-max-w-3xl tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07]">
@@ -439,7 +474,7 @@ export default function SpecSectionsB({
               <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
                 {t(locale, `network.tdh.spec.evidence.${item.key}.title`)}
               </h3>
-              <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+              <p className="tw-m-0 tw-mt-2 tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-300">
                 {t(locale, `network.tdh.spec.evidence.${item.key}.body`)}
               </p>
               {item.key === "comparison" && (
@@ -468,11 +503,11 @@ export default function SpecSectionsB({
         title={t(locale, "network.tdh.spec.changes.title")}
         locale={locale}
       >
-        <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
+        <p className="tw-m-0 tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-300">
           {t(locale, "network.tdh.spec.changes.intro")}
           <TdhSource refs={["P26 §7.1", "P26 §13", "D131"]} locale={locale} />
         </p>
-        <ul className="tw-m-0 tw-list-disc tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-iron-500">
+        <ul className="tw-m-0 tw-max-w-[38em] tw-list-disc tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-iron-500">
           {CHANGES.map((key) => (
             <li key={key}>
               {t(locale, `network.tdh.spec.changes.${key}` as MessageKey)}

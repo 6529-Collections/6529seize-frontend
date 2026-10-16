@@ -113,16 +113,68 @@ const VECTOR = {
       amount: 1,
     },
   ],
-  /** The two identities' expected records: wallet A and buyer B. */
-  expected: [
-    { field: "balance", a: "8", b: "1" },
-    { field: "raw", a: "560", b: "5" },
-    { field: "base", a: "605", b: "6" },
-    { field: "boost_c", a: "108", b: "100" },
-    { field: "final", a: "653", b: "6" },
+  /** The vector's expected values for the cycle as a whole. */
+  cycle: {
+    H: 5,
+    editions: "memes#1 5, memes#2 4",
+    rates: "memes#1 100, memes#2 125",
+  },
+  /**
+   * The expected records: each identity, then its tokens. boost_c is the
+   * identity's boost in cents; a token has none of its own.
+   */
+  records: [
+    {
+      id: "a1",
+      token: null,
+      balance: 8,
+      raw: 560,
+      base: 605,
+      boost: 108,
+      final: 653,
+    },
+    {
+      id: "a1",
+      token: "memes#1",
+      balance: 5,
+      raw: 380,
+      base: 380,
+      boost: null,
+      final: 410,
+    },
+    {
+      id: "a1",
+      token: "memes#2",
+      balance: 3,
+      raw: 180,
+      base: 225,
+      boost: null,
+      final: 243,
+    },
+    {
+      id: "b2",
+      token: null,
+      balance: 1,
+      raw: 5,
+      base: 6,
+      boost: 100,
+      final: 6,
+    },
+    {
+      id: "b2",
+      token: "memes#2",
+      balance: 1,
+      raw: 5,
+      base: 6,
+      boost: null,
+      final: 6,
+    },
   ],
-  rates: "memes#1 100, memes#2 125",
+  /** Addresses that must have no record: the marketplace W. */
+  absent: "ee",
+  totals: { final: 659, base: 611, raw: 565, finalExcludingSinks: 659 },
 } as const;
+const RECORD_FIELDS = ["balance", "raw", "base", "boost", "final"] as const;
 
 export default function VectorAnatomy({
   locale,
@@ -140,15 +192,15 @@ export default function VectorAnatomy({
             {VECTOR.id}
           </code>
         </p>
-        <p className="tw-m-0 tw-mt-1 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">
+        <p className="tw-m-0 tw-mt-1 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
           {m("intro")}
           <TdhSource refs={["P26 §13", "D131"]} locale={locale} />
         </p>
-        <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
+        <p className="tw-m-0 tw-mt-2 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
           {m("legend")}
         </p>
       </figcaption>
-      <div className="tw-mt-4 tw-grid tw-items-start tw-gap-4 xl:tw-grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <div className="tw-mt-4 tw-space-y-4">
         <div className="tw-min-w-0">
           <p className="tw-m-0 tw-mb-2 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400 lg:tw-hidden">
             {m("input")}
@@ -161,7 +213,7 @@ export default function VectorAnatomy({
                   key={`${row.block}-${row.log}`}
                   className={`tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2.5 ${sameTx ? "tw-border-primary-400/40 tw-bg-primary-500/[0.07]" : "tw-border-white/[0.07] tw-bg-iron-950"}`}
                 >
-                  <p className="tw-m-0 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1 tw-text-xs tw-tabular-nums tw-text-iron-300">
+                  <p className="tw-m-0 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1 tw-text-sm tw-tabular-nums tw-text-iron-300">
                     <span>
                       {m("block")} {formatInteger(locale, row.block)}
                     </span>
@@ -240,7 +292,7 @@ export default function VectorAnatomy({
                       <td className={TDH_TD}>
                         {who(row.from, m("mint"))} → {who(row.to, m("mint"))}
                         {sameTx && (
-                          <span className="tw-ml-2 tw-text-xs tw-text-primary-300">
+                          <span className="tw-ml-2 tw-text-sm tw-text-primary-300">
                             {m("sameTx")}
                           </span>
                         )}
@@ -257,49 +309,89 @@ export default function VectorAnatomy({
               </tbody>
             </table>
           </div>
+          <p className="tw-m-0 tw-mt-2 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
+            {m("timestampsNote")}
+            <TdhSource refs={["P26 §4.2"]} locale={locale} />
+          </p>
         </div>
-        <div className="tw-min-w-0 tw-space-y-3">
+        <div className="tw-grid tw-items-start tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
+          <div className="tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-px-4 tw-py-3">
+            <p className="tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
+              {m("expectedCycle")}
+            </p>
+            <dl className="tw-m-0 tw-mt-2 tw-grid tw-grid-cols-1 tw-gap-x-4 tw-gap-y-0.5 tw-text-sm tw-leading-6 min-[420px]:tw-grid-cols-[auto_minmax(0,1fr)] min-[420px]:tw-gap-y-2">
+              <dt className="tw-text-iron-400">H</dt>
+              <dd className="tw-m-0 tw-tabular-nums tw-text-iron-100">
+                {formatInteger(locale, VECTOR.cycle.H)}
+              </dd>
+              <dt className="tw-text-iron-400">{m("editions")}</dt>
+              <dd className="tw-m-0 tw-tabular-nums tw-text-iron-100">
+                {VECTOR.cycle.editions}
+              </dd>
+              <dt className="tw-text-iron-400">{m("rates")}</dt>
+              <dd className="tw-m-0 tw-tabular-nums tw-text-iron-100">
+                {VECTOR.cycle.rates}
+              </dd>
+              <dt className="tw-text-iron-400">{m("absent")}</dt>
+              <dd className="tw-m-0 tw-text-iron-100">
+                {t(locale, "network.tdh.impl.anatomy.absentValue", {
+                  who: who(VECTOR.absent, m("mint")),
+                })}
+              </dd>
+              <dt className="tw-text-iron-400">{m("totals")}</dt>
+              <dd className="tw-m-0 tw-tabular-nums tw-text-iron-100">
+                {t(locale, "network.tdh.impl.anatomy.totalsValue", {
+                  final: formatInteger(locale, VECTOR.totals.final),
+                  base: formatInteger(locale, VECTOR.totals.base),
+                  raw: formatInteger(locale, VECTOR.totals.raw),
+                  excluding: formatInteger(
+                    locale,
+                    VECTOR.totals.finalExcludingSinks
+                  ),
+                })}
+              </dd>
+            </dl>
+          </div>
           <TdhTableFrame label={m("expected")}>
             <table className={TDH_TABLE}>
               <caption className={TDH_CAPTION}>{m("expected")}</caption>
               <thead>
                 <tr>
                   <th scope="col" className={tdhNarrowCell(TDH_TH)}>
-                    {m("field")}
+                    {m("record")}
                   </th>
-                  <th scope="col" className={tdhNarrowCell(TDH_TH_NUM)}>
-                    {m("value")}
-                  </th>
-                  <th scope="col" className={tdhNarrowCell(TDH_TH_NUM)}>
-                    {m("valueB")}
-                  </th>
+                  {RECORD_FIELDS.map((field) => (
+                    <th
+                      key={field}
+                      scope="col"
+                      className={tdhNarrowCell(TDH_TH_NUM)}
+                    >
+                      {field === "boost" ? "boost_c" : field}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <th
-                    scope="row"
-                    className={`${tdhNarrowCell(TDH_TD)} tw-font-normal`}
+                {VECTOR.records.map((row) => (
+                  <tr
+                    key={`${row.id}-${row.token ?? "identity"}`}
+                    className={
+                      row.token === null ? "tw-bg-white/[0.02]" : undefined
+                    }
                   >
-                    {m("rates")}
-                  </th>
-                  <td
-                    colSpan={2}
-                    className={`${tdhNarrowCell(TDH_TD_NUM)} tw-tabular-nums`}
-                  >
-                    {VECTOR.rates}
-                  </td>
-                </tr>
-                {VECTOR.expected.map((row) => (
-                  <tr key={row.field}>
                     <th
                       scope="row"
-                      className={`${tdhNarrowCell(TDH_TD)} tw-font-normal`}
+                      className={`${tdhNarrowCell(TDH_TD)} tw-font-normal ${row.token === null ? "tw-font-semibold tw-text-iron-50" : "tw-pl-6 tw-font-mono tw-text-[13px] tw-text-iron-300 sm:tw-pl-7"}`}
                     >
-                      {row.field}
+                      {row.token ?? who(row.id, m("mint"))}
                     </th>
-                    <td className={tdhNarrowCell(TDH_TD_NUM)}>{row.a}</td>
-                    <td className={tdhNarrowCell(TDH_TD_NUM)}>{row.b}</td>
+                    {RECORD_FIELDS.map((field) => (
+                      <td key={field} className={tdhNarrowCell(TDH_TD_NUM)}>
+                        {row[field] === null
+                          ? "–"
+                          : formatInteger(locale, row[field])}
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
@@ -307,13 +399,13 @@ export default function VectorAnatomy({
           </TdhTableFrame>
         </div>
       </div>
-      <p className="tw-m-0 tw-mt-4 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">
+      <p className="tw-m-0 tw-mt-4 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
         <span className="tw-font-medium tw-text-iron-100">
           {m("derivation")}:
         </span>{" "}
         {m("derivationBody")}
       </p>
-      <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">
+      <p className="tw-m-0 tw-mt-2 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
         {m("boostBody")}
       </p>
     </figure>

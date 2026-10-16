@@ -61,7 +61,7 @@ export default function DifftestRounds({
                     {m("roundN", { n: formatInteger(locale, index + 1) })}
                   </th>
                   <td
-                    className={`${TDH_TD_STACK_MD} tw-text-[13px] tw-tabular-nums tw-text-iron-300`}
+                    className={`${TDH_TD_STACK_MD} tw-tabular-nums tw-text-iron-300`}
                   >
                     {m("casesValue", {
                       cases: formatInteger(locale, round.cases),
@@ -71,9 +71,7 @@ export default function DifftestRounds({
                   <td className={`${TDH_TD_STACK_MD} tw-text-sm tw-leading-6`}>
                     {m(`found.${n}`)}
                   </td>
-                  <td
-                    className={`${TDH_TD_STACK_MD} tw-text-[13px] tw-text-iron-300`}
-                  >
+                  <td className={`${TDH_TD_STACK_MD} tw-text-iron-300`}>
                     {m(`settled.${n}`, { commit: round.settledBy })}
                   </td>
                 </tr>
@@ -82,7 +80,7 @@ export default function DifftestRounds({
           </tbody>
         </table>
       </div>
-      <p className="tw-m-0 tw-max-w-prose tw-text-sm tw-leading-6 tw-text-iron-300">
+      <p className="tw-m-0 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
         {m("otherVectors")}
       </p>
     </div>

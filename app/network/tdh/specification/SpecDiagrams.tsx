@@ -109,7 +109,7 @@ export function SectionMap({ locale }: { readonly locale: SupportedLocale }) {
         {/* The bus: one line under §2 to §8, which §10 feeds. */}
         <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-2 xl:tw-col-start-1 xl:tw-col-end-12 xl:tw-row-start-3 xl:tw-mt-0 xl:tw-flex-nowrap xl:tw-justify-center xl:tw-border-0 xl:tw-border-t xl:tw-border-solid xl:tw-border-iron-500 xl:tw-pt-2">
           <MapNode locale={locale} section={10} dashed />
-          <span className="tw-text-xs tw-text-iron-400">
+          <span className="tw-text-sm tw-text-iron-400">
             {t(locale, "network.tdh.spec.mapFeeds")}
           </span>
         </div>

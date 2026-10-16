@@ -24,7 +24,9 @@ test.describe("TDH explained and verified @network @wcag @medium @large", () => 
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
-    const builder = page.getByRole("region", { name: "Boost builder" });
+    const builder = page.getByRole("region", {
+      name: "Build a collection and see its boost",
+    });
     await builder.scrollIntoViewIfNeeded();
     await expect(builder.getByText("Boost 1.02")).toBeVisible();
     await builder.getByRole("button", { name: "Increase Gradients" }).click();

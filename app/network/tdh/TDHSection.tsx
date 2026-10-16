@@ -3,7 +3,8 @@ import { noBreakTerms } from "./shared/noBreakTerms";
 
 export const TDH_PANEL =
   "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/50";
-export const TDH_TEXT = "tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300";
+export const TDH_TEXT =
+  "tw-m-0 tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-300";
 /** Cards that fill a two-column grid; an odd last card spans both columns. */
 export const TDH_CARD_GRID =
   "tw-grid tw-gap-4 sm:tw-grid-cols-2 sm:[&>*:last-child:nth-child(odd)]:tw-col-span-2";
@@ -36,7 +37,7 @@ export default function TDHSection({
           {noBreakTerms(title)}
         </h2>
         {description && (
-          <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <p className="tw-mb-0 tw-mt-3 tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-300">
             {description}
           </p>
         )}

@@ -6,7 +6,7 @@ import { NARROW_WIDTH, TdhSvg } from "../TdhSvg";
  * Step 5 and DEV-2: one transaction that sends a copy out of Wallet A to
  * Wallet C and back. Two arcs join the wallets, each labelled with its
  * movement, and the result, netted at the transaction boundary (D131), sits
- * under the figure: Wallet A never lost the copy. One compact drawing, phone
+ * inside the frame under the arcs: Wallet A never lost the copy. One compact drawing, phone
  * first: its text is 14 units, so it stays above 12 px in any column it is
  * shown in, and it grows to 1.4 times on wide screens.
  */
@@ -17,11 +17,11 @@ export default function TransactionBoxDiagram({
 }) {
   const arrow = "tdh-transaction-arrow";
   return (
-    <figure className="tw-m-0">
+    <figure className="tw-m-0 tw-flex tw-justify-center">
       <TdhSvg
         id="tdh-transaction"
         width={NARROW_WIDTH}
-        height={192}
+        height={200}
         title={t(locale, "network.tdh.how.s5.diagramTitle")}
         desc={t(locale, "network.tdh.how.s5.diagramDesc")}
         maxWidth={392}
@@ -43,13 +43,19 @@ export default function TransactionBoxDiagram({
           x="2"
           y="2"
           width={NARROW_WIDTH - 4}
-          height="140"
+          height="196"
           rx="14"
           fill="none"
           strokeDasharray="5 5"
           className="tw-stroke-iron-500"
         />
-        <text x="16" y="26" fontSize="14" className="tw-fill-iron-300">
+        <text
+          x="16"
+          y="26"
+          fontSize="14"
+          letterSpacing="0.6"
+          className="tw-fill-iron-400 tw-font-medium tw-uppercase"
+        >
           {t(locale, "network.tdh.how.s5.transaction")}
         </text>
         <path
@@ -109,7 +115,7 @@ export default function TransactionBoxDiagram({
         ))}
         <rect
           x="20"
-          y="154"
+          y="150"
           width="240"
           height="34"
           rx="17"
@@ -118,7 +124,7 @@ export default function TransactionBoxDiagram({
         />
         <text
           x="140"
-          y="176"
+          y="172"
           textAnchor="middle"
           fontSize="14"
           className="tw-fill-iron-50 tw-font-medium"

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import BoostLadder from "../shared/BoostLadder";
@@ -45,7 +46,7 @@ export function BoostTimeline({
       <ol className="tw-m-0 tw-mt-3 tw-list-none tw-space-y-2.5 tw-p-0">
         {ordered.map((rule) => (
           <li key={rule.id}>
-            <p className="tw-m-0 tw-flex tw-justify-between tw-gap-3 tw-text-xs tw-text-iron-200">
+            <p className="tw-m-0 tw-flex tw-justify-between tw-gap-3 tw-text-sm tw-text-iron-200">
               <span>{formatVersionLabel(locale, rule)}</span>
               <span className="tw-tabular-nums tw-text-iron-400">
                 {formatShortDate(locale, rule.startDateIso)}
@@ -58,14 +59,14 @@ export function BoostTimeline({
                   style={{ width: barWidth(rule.completeSetMultiplier) }}
                 />
               </span>
-              <span className="tw-w-12 tw-text-right tw-text-xs tw-tabular-nums tw-text-iron-100">
+              <span className="tw-w-12 tw-text-right tw-text-sm tw-tabular-nums tw-text-iron-100">
                 {formatMultiplier(locale, rule.completeSetMultiplier)}
               </span>
             </span>
           </li>
         ))}
         <li>
-          <p className="tw-m-0 tw-flex tw-justify-between tw-gap-3 tw-text-xs tw-text-iron-100">
+          <p className="tw-m-0 tw-flex tw-justify-between tw-gap-3 tw-text-sm tw-text-iron-100">
             <span className="tw-font-medium">
               {m(locale, VERSION_LABEL_KEY, {
                 version: CURRENT_RULE.version,
@@ -89,11 +90,11 @@ export function BoostTimeline({
                 style={{ width: barWidth(CURRENT_RULE.today) }}
               />
             </span>
-            <span className="tw-w-12 tw-text-right tw-text-xs tw-font-semibold tw-tabular-nums tw-text-iron-50">
+            <span className="tw-w-12 tw-text-right tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-50">
               {formatMultiplier(locale, CURRENT_RULE.today)}
             </span>
           </span>
-          <span className="tw-mr-14 tw-mt-1 tw-flex tw-flex-wrap tw-justify-between tw-gap-x-2 tw-text-xs tw-text-iron-400">
+          <span className="tw-mr-14 tw-mt-1 tw-flex tw-flex-wrap tw-justify-between tw-gap-x-2 tw-text-sm tw-text-iron-400">
             <span className="tw-text-primary-300">
               {m(locale, "network.tdhHistoric.timeline.todayLabel", {
                 value: formatMultiplier(locale, CURRENT_RULE.today),
@@ -114,23 +115,50 @@ export function BoostTimeline({
       </ol>
       <p
         aria-hidden="true"
-        className="tw-m-0 tw-mr-14 tw-mt-2 tw-flex tw-justify-between tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pt-1 tw-text-xs tw-tabular-nums tw-text-iron-400"
+        className="tw-m-0 tw-mr-14 tw-mt-2 tw-flex tw-justify-between tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pt-1 tw-text-sm tw-tabular-nums tw-text-iron-400"
       >
         <span>{formatMultiplier(locale, 1)}</span>
         <span>{formatMultiplier(locale, CURRENT_RULE.ceiling)}</span>
       </p>
-      <p className="tw-m-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-400">
+      <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-5 tw-text-iron-400">
         {m(locale, "network.tdhHistoric.timeline.note")}
       </p>
     </figure>
   );
 }
 
-/** The current schedule's row, first in the table, linking to its values. */
-export function CurrentRuleRow({
+/** The current schedule's rules in a sentence, and where its values are. */
+export function CurrentRuleDetails({
   locale,
 }: {
   readonly locale: SupportedLocale;
+}) {
+  return (
+    <div className="tw-max-w-[36em] tw-space-y-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+      <p className="tw-m-0">{m(locale, "network.tdhHistoric.current.rules")}</p>
+      <p className="tw-m-0 tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-1">
+        <Link href="/network/tdh#tdh-1-4" className={TDH_LINK}>
+          {m(locale, "network.tdhHistoric.current.link")}
+        </Link>
+        <Link href="/network/tdh/how-it-works#step-9" className={TDH_LINK}>
+          {m(locale, "network.tdhHistoric.current.ruleLink")}
+        </Link>
+      </p>
+    </div>
+  );
+}
+
+/** The current schedule's row, first in the table, with its rules below. */
+export function CurrentRuleRow({
+  locale,
+  toggle,
+  details,
+}: {
+  readonly locale: SupportedLocale;
+  /** The row's show-rules control. */
+  readonly toggle: ReactNode;
+  /** The row that opens under it. */
+  readonly details: ReactNode;
 }) {
   return (
     <tbody className="tw-border-0">
@@ -161,7 +189,7 @@ export function CurrentRuleRow({
           </span>
           {/* The value today, then its ceiling; the period column already
               says "today", and the chart beside it names the day. */}
-          <span className="tw-mt-0.5 tw-block tw-text-xs tw-font-normal tw-text-iron-400">
+          <span className="tw-mt-0.5 tw-block tw-text-[13px] tw-font-normal tw-text-iron-400">
             {m(locale, "network.tdhHistoric.current.fullSetReach", {
               ceiling: formatMultiplier(locale, CURRENT_RULE.ceiling),
               max: formatInteger(locale, CURRENT_RULE.maxSeason),
@@ -169,34 +197,38 @@ export function CurrentRuleRow({
           </span>
         </td>
         <td className={`${TABLE_CELL_CLASS} tw-tabular-nums tw-text-iron-200`}>
-          {m(locale, "network.tdhHistoric.current.seasons", {
-            max: formatInteger(locale, CURRENT_RULE.maxSeason),
-            paying: formatInteger(locale, CURRENT_RULE.payingSeasons),
-          })}
+          <span className="tw-block tw-whitespace-nowrap">
+            {m(locale, "network.tdhHistoric.current.seasons", {
+              max: formatInteger(locale, CURRENT_RULE.maxSeason),
+            })}
+          </span>
+          <span className="tw-mt-0.5 tw-block tw-text-[13px] tw-text-iron-400">
+            {m(locale, "network.tdhHistoric.current.paying", {
+              paying: formatInteger(locale, CURRENT_RULE.payingSeasons),
+            })}
+          </span>
         </td>
         <td
           className={`${TABLE_CELL_CLASS} tw-hidden tw-whitespace-nowrap tw-tabular-nums tw-text-iron-200 2xl:tw-table-cell`}
         >
           {formatGradientBonus(locale, CURRENT_RULE.gradients)}
         </td>
-        <td className={`${TABLE_CELL_CLASS} tw-text-right`}>
-          <Link
-            href="/network/tdh#tdh-1-4"
-            className={`${TDH_LINK} tw-whitespace-nowrap tw-text-xs`}
-          >
-            {m(locale, "network.tdhHistoric.current.link")}
-          </Link>
-        </td>
+        <td className={`${TABLE_CELL_CLASS} tw-text-right`}>{toggle}</td>
       </tr>
+      {details}
     </tbody>
   );
 }
 
-/** The current schedule as the first card below xl, linking to its values. */
+/** The current schedule as the first card below xl, with its rules below. */
 export function CurrentRuleCard({
   locale,
+  toggle,
+  details,
 }: {
   readonly locale: SupportedLocale;
+  readonly toggle: ReactNode;
+  readonly details: ReactNode;
 }) {
   return (
     <article className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-500/[0.04]">
@@ -210,36 +242,32 @@ export function CurrentRuleCard({
               {m(locale, CURRENT_KEY)}
             </span>
           </span>
-          <span className="tw-mt-1 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
+          <span className="tw-mt-1 tw-block tw-text-sm tw-leading-5 tw-text-iron-400">
             {m(locale, "network.tdhHistoric.current.period", {
               date: formatShortDate(locale, CURRENT_RULE.startDateIso),
             })}
           </span>
         </span>
-        <Link
-          href="/network/tdh#tdh-1-4"
-          className={`${TDH_LINK} tw-shrink-0 tw-text-xs`}
-        >
-          {m(locale, "network.tdhHistoric.current.link")}
-        </Link>
+        {toggle}
       </div>
       <dl className="tw-m-0 tw-grid tw-grid-cols-[repeat(auto-fit,minmax(6.5rem,1fr))] tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3">
         <MobileSummaryMetric
           label={m(locale, "network.tdhHistoric.table.categoryA")}
-          value={`${m(locale, "network.tdhHistoric.current.fullSet", {
+          value={m(locale, "network.tdhHistoric.current.fullSet", {
             today: formatMultiplier(locale, CURRENT_RULE.today),
-          })} ${m(locale, "network.tdhHistoric.current.fullSetOn", {
-            date: formatShortDate(locale, CURRENT_RULE.valueDateIso),
-          })}; ${m(locale, "network.tdhHistoric.current.fullSetReach", {
+          })}
+          sub={m(locale, "network.tdhHistoric.current.fullSetReach", {
             ceiling: formatMultiplier(locale, CURRENT_RULE.ceiling),
             max: formatInteger(locale, CURRENT_RULE.maxSeason),
-          })}`}
+          })}
           valueClassName="tw-font-semibold tw-text-iron-50"
         />
         <MobileSummaryMetric
           label={m(locale, "network.tdhHistoric.table.categoryB")}
           value={m(locale, "network.tdhHistoric.current.seasons", {
             max: formatInteger(locale, CURRENT_RULE.maxSeason),
+          })}
+          sub={m(locale, "network.tdhHistoric.current.paying", {
             paying: formatInteger(locale, CURRENT_RULE.payingSeasons),
           })}
         />
@@ -248,6 +276,7 @@ export function CurrentRuleCard({
           value={formatGradientBonus(locale, CURRENT_RULE.gradients)}
         />
       </dl>
+      {details}
     </article>
   );
 }
@@ -287,7 +316,7 @@ export function CurrentLadder({
             </button>
           </>
         ) : (
-          <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, "network.tdh.rules.loading")}
           </p>
         )}

@@ -7,12 +7,12 @@ import {
   ArrowsRightLeftIcon,
   CalendarDaysIcon,
   ChartBarIcon,
+  ChatBubbleLeftRightIcon,
   CheckIcon,
   LockClosedIcon,
   Squares2X2Icon,
   UserCircleIcon,
   UserGroupIcon,
-  WalletIcon,
 } from "@heroicons/react/24/outline";
 import { useId, type ComponentType, type SVGProps } from "react";
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
@@ -52,14 +52,14 @@ const BENEFITS = [
   { key: "collection", icon: UserGroupIcon },
 ] as const satisfies readonly { readonly key: string; readonly icon: Icon }[];
 
-// The dot shows each safe collecting role's temperature: a vault is ice-cold,
-// a transaction wallet warm and a social wallet hot.
+// Each safe collecting role has a neutral icon of its own: no colour, so
+// none reads as a status.
 const WALLET_ROLES = [
-  { key: "vault", dot: "tw-bg-sky-400" },
-  { key: "transaction", dot: "tw-bg-amber-400" },
-  { key: "social", dot: "tw-bg-rose-400" },
-  { key: "old", dot: "tw-bg-iron-500" },
-] as const;
+  { key: "vault", icon: LockClosedIcon },
+  { key: "transaction", icon: ArrowsRightLeftIcon },
+  { key: "social", icon: ChatBubbleLeftRightIcon },
+  { key: "old", icon: ArchiveBoxIcon },
+] as const satisfies readonly { readonly key: string; readonly icon: Icon }[];
 
 const STEPS = ["list", "sign", "done"] as const;
 const BEFORE = ["keys", "merge", "public"] as const;
@@ -123,7 +123,7 @@ export default function TDHConsolidationPage() {
             <p className="tw-mb-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-200 sm:tw-text-lg sm:tw-leading-8">
               {t(locale, "network.tdhConsolidation.lead")}
             </p>
-            <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+            <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
               {t(locale, "network.tdhConsolidation.nothingMoves")}{" "}
               {limits
                 ? t(locale, "network.tdhConsolidation.limit", { limit, date })
@@ -201,7 +201,7 @@ export default function TDHConsolidationPage() {
             ))}
           </ul>
           <div className="tw-mt-4 tw-flex tw-flex-col tw-items-start tw-gap-1">
-            <p className="tw-m-0 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1 tw-text-xs tw-text-iron-400">
+            <p className="tw-m-0 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1 tw-text-sm tw-text-iron-400">
               <span className="tw-mr-1 tw-font-medium tw-text-iron-300">
                 {t(locale, "network.tdh.explainer.sources.label")}
               </span>
@@ -225,14 +225,14 @@ export default function TDHConsolidationPage() {
           )}
         >
           <ul className={`${TDH_PANEL} tw-m-0 tw-list-none tw-p-0`}>
-            {WALLET_ROLES.map(({ key, dot }) => (
+            {WALLET_ROLES.map(({ key, icon: RoleIcon }) => (
               <li
                 key={key}
                 className="tw-flex tw-gap-4 tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-5 tw-py-4 last:tw-border-b-0"
               >
-                <span
+                <RoleIcon
                   aria-hidden="true"
-                  className={`tw-mt-2 tw-size-2.5 tw-flex-shrink-0 tw-rounded-full ${dot}`}
+                  className="tw-mt-1 tw-size-5 tw-flex-shrink-0 tw-text-iron-400"
                 />
                 <div className="tw-min-w-0">
                   <p className="tw-m-0 tw-text-sm tw-font-semibold tw-leading-6 tw-text-iron-100">
@@ -280,18 +280,18 @@ export default function TDHConsolidationPage() {
                         )}
                   </p>
                   {step === "done" && (
-                    <p className={`${TDH_TEXT} tw-mt-2 tw-text-iron-400`}>
-                      {t(
-                        locale,
-                        "network.tdhConsolidation.steps.done.fourNote"
-                      )}
-                    </p>
+                    <TdhArrowLink
+                      href={`${DESIGN_HREF}#tdh-v1`}
+                      className="tw-mt-1"
+                    >
+                      {t(locale, "network.tdhConsolidation.tdhv1Link")}
+                    </TdhArrowLink>
                   )}
                 </div>
               </li>
             ))}
           </ol>
-          <p className="tw-mb-0 tw-mt-6 tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-600 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <p className="tw-mb-0 tw-mt-6 tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-600 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, "network.tdhConsolidation.steps.order")}
           </p>
           <ButtonLink
@@ -414,24 +414,21 @@ function WalletsFigure({ locale }: { readonly locale: SupportedLocale }) {
         aria-hidden="true"
         className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-4 xl:tw-grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
       >
-        <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-[repeat(auto-fit,minmax(9.5rem,1fr))] tw-gap-2 tw-p-0 xl:tw-grid-cols-1">
-          {WALLET_ROLES.map(({ key, dot }) => (
+        <ul className="tw-m-0 tw-grid tw-list-none tw-auto-rows-fr tw-grid-cols-[repeat(auto-fit,minmax(9.5rem,1fr))] tw-gap-2 tw-p-0 xl:tw-grid-cols-1">
+          {WALLET_ROLES.map(({ key, icon: RoleIcon }) => (
             <li
               key={key}
               className="tw-flex tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-2.5"
             >
-              <WalletIcon className="tw-size-4 tw-flex-shrink-0 tw-text-iron-400" />
+              <RoleIcon className="tw-size-4 tw-flex-shrink-0 tw-text-iron-400" />
               <span className="tw-min-w-0 tw-flex-1 tw-text-sm tw-text-iron-200">
                 {t(locale, `network.tdhConsolidation.figure.${key}`)}
                 {key === "old" && (
-                  <span className="tw-block tw-whitespace-nowrap tw-text-xs tw-text-amber-200">
+                  <span className="tw-block tw-text-sm tw-text-amber-200">
                     {t(locale, "network.tdhConsolidation.figure.fourthTag")}
                   </span>
                 )}
               </span>
-              <span
-                className={`tw-size-2 tw-flex-shrink-0 tw-rounded-full ${dot}`}
-              />
             </li>
           ))}
         </ul>
@@ -457,7 +454,7 @@ function WalletsFigure({ locale }: { readonly locale: SupportedLocale }) {
           </ul>
         </div>
       </div>
-      <p className="tw-m-0 tw-mt-4 tw-text-xs tw-leading-5 tw-text-iron-300">
+      <p className="tw-m-0 tw-mt-4 tw-text-sm tw-leading-5 tw-text-iron-300">
         {t(locale, "network.tdhConsolidation.figure.fourthNote")}
       </p>
     </figure>

@@ -23,6 +23,7 @@ import {
   WIDE_WIDTH,
 } from "../shared/TdhSvg";
 import { svgBoxWidth } from "../shared/svgText";
+import { isTdhProgram, ProgramGlyph } from "../shared/TdhProgramMark";
 
 type Series = keyof typeof TDH_SERIES;
 
@@ -31,17 +32,6 @@ type Box = {
   readonly y: number;
   readonly w: number;
   readonly h: number;
-};
-
-const SERIES_FILL: Record<Series, string> = {
-  rust: "tw-fill-primary-400",
-  programB: "tw-fill-violet-400",
-  lean: "tw-fill-emerald-400",
-  python: "tw-fill-amber-300",
-  live: "tw-fill-iron-400",
-  memes: "tw-fill-sky-400",
-  gradients: "tw-fill-fuchsia-400",
-  nextgen: "tw-fill-teal-400",
 };
 
 /** A program or document in the lineage: a name and one line about it. */
@@ -75,12 +65,11 @@ function LineageNode({
         className={`tw-fill-iron-900 ${dashed ? "tw-stroke-iron-500" : "tw-stroke-white/20"}`}
         strokeDasharray={dashed ? "5 4" : undefined}
       />
-      {series && (
-        <circle
+      {series && isTdhProgram(series) && (
+        <ProgramGlyph
+          program={series}
           cx={box.x + 14}
           cy={sub ? middle - 7 : middle}
-          r={4}
-          className={SERIES_FILL[series]}
         />
       )}
       <text
@@ -324,17 +313,20 @@ function LineageNarrow({
   const boxes: Record<(typeof LINEAGE_PROGRAMS)[number]["key"], Box> = {
     python: full(72),
     rustReference: full(136),
-    programB: full(348),
-    lean: full(412),
+    programB: full(376),
+    lean: full(440),
   };
   const core = indented(200);
-  const backend = indented(284);
+  const backend = indented(304);
+  // The dashed arrow from the backend up to the Rust core, with its label
+  // beside it in the gap, on two lines: "replaced at the cutover".
+  const replacedX = core.x + core.w / 2;
   const reference = boxes.rustReference;
   return (
     <TdhSvg
       id="lineage-narrow"
       width={NARROW_WIDTH}
-      height={468}
+      height={496}
       title={title}
       desc={desc}
       maxWidth={420}
@@ -360,11 +352,23 @@ function LineageNarrow({
         markerEnd="url(#lineage-narrow-arrow)"
       />
       <path
-        d={`M${core.x + core.w / 2},${backend.y - 1} V${core.y + core.h + 2}`}
+        d={`M${replacedX},${backend.y - 1} V${core.y + core.h + 2}`}
         className={EDGE}
         strokeDasharray="5 4"
         markerEnd="url(#lineage-narrow-arrow)"
       />
+      <text
+        x={replacedX - 8}
+        y={core.y + core.h + 21}
+        fontSize={14}
+        textAnchor="end"
+        className="tw-fill-iron-300"
+      >
+        <tspan x={replacedX - 8}>{m("lineage.replacedLine1")}</tspan>
+        <tspan x={replacedX - 8} dy={17}>
+          {m("lineage.replacedLine2")}
+        </tspan>
+      </text>
       <LineageNode
         box={{
           x: 0,
@@ -479,7 +483,7 @@ export function MatrixCell({
 /** The key to the matrices' icons. */
 export function MatrixLegend({ locale }: { readonly locale: SupportedLocale }) {
   return (
-    <ul className="tw-m-0 tw-mt-2 tw-flex tw-list-none tw-flex-wrap tw-gap-x-4 tw-gap-y-1 tw-p-0 tw-text-xs tw-text-iron-400">
+    <ul className="tw-m-0 tw-mt-2 tw-flex tw-list-none tw-flex-wrap tw-gap-x-4 tw-gap-y-1 tw-p-0 tw-text-sm tw-text-iron-400">
       {(["now", "later", "test", "no"] as const).map((tone) => {
         const Icon = TONE_ICON[tone];
         return (
@@ -648,7 +652,7 @@ export function CheckMatrix({
             <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
               {m(`matrix.${row.key}`)}
             </p>
-            <ul className="tw-m-0 tw-mt-2 tw-grid tw-list-none tw-grid-cols-1 tw-gap-x-3 tw-gap-y-1 tw-p-0 tw-text-xs @[17rem]:tw-grid-cols-[auto_minmax(0,1fr)]">
+            <ul className="tw-m-0 tw-mt-2 tw-grid tw-list-none tw-grid-cols-1 tw-gap-x-3 tw-gap-y-1 tw-p-0 tw-text-sm @[17rem]:tw-grid-cols-[auto_minmax(0,1fr)]">
               {row.cells.map((cell, index) => {
                 const column = MATRIX_COLUMNS[index];
                 if (!column || cell.tone === "no") {
@@ -698,7 +702,7 @@ export function CheckMatrix({
                 {row.cells.map((cell, index) => (
                   <td
                     key={MATRIX_COLUMNS[index]?.key ?? index}
-                    className={`${TDH_TD} tw-px-3 tw-text-[13px]`}
+                    className={`${TDH_TD} tw-px-3`}
                   >
                     <MatrixCell {...resolve(cell)} />
                   </td>
@@ -709,7 +713,7 @@ export function CheckMatrix({
         </table>
       </div>
       <MatrixLegend locale={locale} />
-      <figcaption className="tw-mt-2 tw-max-w-prose tw-space-y-1 tw-text-sm tw-leading-6 tw-text-iron-300">
+      <figcaption className="tw-mt-2 tw-max-w-[36em] tw-space-y-1 tw-text-sm tw-leading-6 tw-text-iron-300">
         {lean.newer !== null && (
           <p className="tw-m-0">
             {t(locale, "network.tdh.impl.matrix.leanNote", {

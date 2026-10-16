@@ -25,10 +25,15 @@ export default function ExplorableFrame({
       aria-label={title}
       className="tw-mt-5 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/25 tw-bg-iron-950 tw-p-4 sm:tw-p-5"
     >
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-        <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wide tw-text-primary-300">
-          {title}
-        </h3>
+      <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-x-3 tw-gap-y-1">
+        <div className="tw-min-w-[12rem] tw-flex-1">
+          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-primary-300">
+            {t(locale, "network.tdh.how.tryIt")}
+          </p>
+          <h3 className="tw-m-0 tw-mt-0.5 tw-text-lg tw-font-semibold tw-leading-snug tw-text-iron-50">
+            {title}
+          </h3>
+        </div>
         <button
           type="button"
           onClick={onReset}

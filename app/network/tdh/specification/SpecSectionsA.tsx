@@ -92,7 +92,7 @@ function Section2({ locale }: { readonly locale: SupportedLocale }) {
             <p className="tw-m-0 tw-flex tw-items-baseline tw-justify-between tw-gap-3 tw-text-sm tw-font-semibold tw-text-iron-50">
               <span>{t(locale, `network.tdh.spec.s2.${contract.key}`)}</span>
               {contract.standard && (
-                <span className="tw-text-xs tw-font-normal tw-text-iron-400">
+                <span className="tw-text-sm tw-font-normal tw-text-iron-400">
                   {contract.standard}
                 </span>
               )}
@@ -210,68 +210,25 @@ function Symbols({ locale }: { readonly locale: SupportedLocale }) {
       title={t(locale, "network.tdh.spec.symbols.title")}
       locale={locale}
     >
-      <p className="tw-m-0 tw-text-[15px] tw-leading-7 tw-text-iron-200">
+      <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-200">
         {t(locale, "network.tdh.spec.symbols.intro")}
       </p>
-      <dl className="tw-m-0 tw-grid tw-gap-2 md:tw-hidden">
+      <dl className="tw-m-0 tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-0 md:tw-grid-cols-2">
         {SYMBOLS.map((row) => (
           <div
             key={row.key}
-            className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-3 tw-py-2.5"
+            className="tw-grid tw-grid-cols-1 tw-items-baseline tw-gap-x-3 tw-gap-y-0.5 tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.06] tw-py-2 min-[420px]:tw-grid-cols-[6.5rem_minmax(0,1fr)]"
           >
-            <dt className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-              <span className="tw-font-mono tw-text-sm tw-text-iron-50">
-                {row.symbol}
-              </span>
-              <TdhSource refs={[`P26 §${row.section}`]} locale={locale} />
+            <dt className="tw-break-words tw-font-mono tw-text-sm tw-text-iron-50">
+              {row.symbol}
             </dt>
-            <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-200">
-              {t(locale, `network.tdh.spec.symbol.${row.key}` as MessageKey)}
+            <dd className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-200">
+              {t(locale, `network.tdh.spec.symbol.${row.key}` as MessageKey)}{" "}
+              <TdhSource refs={[`P26 §${row.section}`]} locale={locale} />
             </dd>
           </div>
         ))}
       </dl>
-      <div className={`${TDH_TABLE_FRAME} tw-hidden md:tw-block`}>
-        <table
-          className={TDH_TABLE}
-          aria-label={t(locale, "network.tdh.spec.symbols.title")}
-        >
-          <thead>
-            <tr>
-              <th scope="col" className={TDH_TH}>
-                {t(locale, "network.tdh.spec.symbols.symbol")}
-              </th>
-              <th scope="col" className={TDH_TH}>
-                {t(locale, "network.tdh.spec.symbols.meaning")}
-              </th>
-              <th scope="col" className={TDH_TH}>
-                {t(locale, "network.tdh.spec.symbols.section")}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {SYMBOLS.map((row) => (
-              <tr key={row.key}>
-                <th
-                  scope="row"
-                  className={`${TDH_TD} tw-whitespace-nowrap tw-font-mono tw-text-[13px] tw-font-normal tw-text-iron-50`}
-                >
-                  {row.symbol}
-                </th>
-                <td className={`${TDH_TD} tw-text-[13px] tw-text-iron-200`}>
-                  {t(
-                    locale,
-                    `network.tdh.spec.symbol.${row.key}` as MessageKey
-                  )}
-                </td>
-                <td className={`${TDH_TD} tw-whitespace-nowrap`}>
-                  <TdhSource refs={[`P26 §${row.section}`]} locale={locale} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
     </SpecSection>
   );
 }
@@ -380,7 +337,7 @@ export default function SpecSectionsA({
         <div id="s4-3" className="tw-scroll-mt-24">
           <Rule locale={locale} code={RULE_CUTOFF_SPEC} source="P26 §4.2" />
         </div>
-        <p className="tw-m-0 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
+        <p className="tw-m-0 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
           {t(locale, "network.tdh.spec.s4.binds")}
         </p>
       </SpecSection>
@@ -527,10 +484,14 @@ export default function SpecSectionsA({
             source="P26 §7.1"
             title={t(locale, "network.tdh.spec.s7.replay")}
           />
+          <p className="tw-m-0 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
+            {t(locale, "network.tdh.spec.s7.replayNote")}
+            <TdhSource refs={["P26 §7.1"]} locale={locale} />
+          </p>
           <Plain locale={locale} refs={["P26 §7.1", "D131"]}>
             {t(locale, "network.tdh.spec.s7.property")}
           </Plain>
-          <p className="tw-m-0 tw-max-w-3xl tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+          <p className="tw-m-0 tw-max-w-[36em] tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
             {t(locale, "network.tdh.spec.s7.limit")}
             <TdhSource refs={["P26 §5", "P26 §7.1"]} locale={locale} />
           </p>
