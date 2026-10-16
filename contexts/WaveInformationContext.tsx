@@ -255,7 +255,7 @@ export function WaveInformationProvider({
         waveInformationViewTitle?: unknown;
       } | null;
       const saved = navigationReturn.current?.request;
-      const currentRoute = `${window.location.pathname}?${window.location.search.slice(1)}`;
+      const currentRoute = `${window.location.pathname}?${new URLSearchParams(window.location.search).toString()}`;
       if (
         saved?.route === currentRoute &&
         state?.waveInformation !== saved.id

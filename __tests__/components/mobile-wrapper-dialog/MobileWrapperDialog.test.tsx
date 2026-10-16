@@ -1,4 +1,5 @@
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
 import { CompactMenu } from "@/components/compact-menu";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
@@ -465,6 +466,39 @@ describe("MobileWrapperDialog", () => {
   });
 
   describe("user interactions", () => {
+    it("keeps a pending confirmation on screen and restores dismissal afterward", async () => {
+      const onClose = jest.fn();
+      const props = {
+        isOpen: true,
+        onClose,
+        onConfirm: jest.fn(),
+        title: "Delete curation",
+        message: "Delete this curation?",
+        confirmText: "Delete",
+      };
+      const { rerender } = render(
+        <MobileWrapperConfirmationDialog {...props} isConfirming />
+      );
+      expect(screen.queryByRole("button", { name: "Close" })).toBeNull();
+      expect(screen.getByRole("button", { name: "Cancel" })).toBeDisabled();
+      const header = screen.getByTestId("mobile-dialog-header");
+      const panel = header.closest<HTMLElement>(".mobile-wrapper-dialog")!;
+      const originalTransform = panel.style.transform;
+      fireTouch(header, "touchstart", 20);
+      fireTouch(header, "touchmove", 100);
+      fireTouch(header, "touchend");
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 180));
+      });
+      expect(onClose).not.toHaveBeenCalled();
+      expect(panel.style.transform).toBe(originalTransform);
+      rerender(
+        <MobileWrapperConfirmationDialog {...props} isConfirming={false} />
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Close" }));
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
     it("closes a default sheet with a downward header swipe", async () => {
       const onClose = jest.fn();
       render(

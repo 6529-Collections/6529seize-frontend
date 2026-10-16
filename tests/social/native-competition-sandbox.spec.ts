@@ -4236,7 +4236,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await page.route(`**/api/waves/${WAVE}`, (route) =>
         route.fulfill({ json: wave })
       );
-      await page.goto(`/waves/${WAVE}?tab=chat`);
+      await page.goto(`/waves/${WAVE}?tab=chat&search=art%20work`);
       await openWaveInformation(page);
       const sheet = page.getByRole("dialog");
       const configuration = sheet.getByRole("tab", {

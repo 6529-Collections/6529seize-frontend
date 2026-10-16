@@ -258,7 +258,7 @@ it("uses one navigation entry when leaving information and preserves Back and Fo
 it.each(["Close", "browser Back"])(
   "returns from Network to Configuration and clears the saved return after %s",
   async (dismissal) => {
-    const originalUrl = "/waves/wave?tab=chat&curation=art";
+    const originalUrl = "/waves/wave?tab=chat&curation=art&search=art%20work";
     window.history.replaceState({ original: "kept" }, "", originalUrl);
     const children = () => (
       <WaveInformationProvider>
