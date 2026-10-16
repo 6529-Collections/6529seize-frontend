@@ -133,6 +133,18 @@ describe("useSidebarSections", () => {
       { name: "Identities", href: "/network" },
       { name: "Activity", href: "/network/activity" },
       { name: "TDH", href: "/network/tdh" },
+      { name: "How TDH is calculated", href: "/network/tdh/how-it-works" },
+      { name: "TDH specification", href: "/network/tdh/specification" },
+      { name: "TDH formal model", href: "/network/tdh/formal" },
+      {
+        name: "TDH implementations",
+        href: "/network/tdh/implementations",
+      },
+      {
+        name: "TDH verification",
+        href: "/network/tdh/verification",
+        activePathPrefixes: ["/network/tdh/verification/"],
+      },
       { name: "xTDH Overview", href: "/network/xtdh" },
       { name: "xTDH Allocations Dashboard", href: "/xtdh" },
       { name: "Wave Score", href: "/network/wave-score" },
@@ -151,11 +163,11 @@ describe("useSidebarSections", () => {
         activePathPrefixes: ["/network/nerd/"],
       },
       {
-        name: "TDH Historic Boosts",
+        name: "TDH historic boosts",
         href: "/network/tdh/historic-boosts",
       },
       {
-        name: "Wallet Consolidation",
+        name: "Wallet consolidation",
         href: "/network/tdh/consolidation",
       },
     ]);

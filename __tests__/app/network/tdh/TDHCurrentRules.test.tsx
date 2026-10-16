@@ -1,6 +1,8 @@
 import { screen } from "@testing-library/react";
-import TDHCurrentRules from "@/app/network/tdh/TDHCurrentRules";
-import TDHExample from "@/app/network/tdh/TDHExample";
+import TDHCurrentRules, {
+  seasonRanges,
+} from "@/app/network/tdh/TDHCurrentRules";
+import { tdhRulesSchema } from "@/app/network/tdh/tdh-rules.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { renderWithQueryClient } from "../../../utils/reactQuery";
 import userEvent from "@testing-library/user-event";
@@ -47,14 +49,34 @@ function renderRules(locale: "en-US" | "fr-FR" = "en-US") {
 describe("TDHCurrentRules", () => {
   beforeEach(() => jest.clearAllMocks());
 
+  it("groups consecutive seasons with the same bonus into one range", () => {
+    expect(
+      seasonRanges([
+        { season: 3, bonus: 0.05 },
+        { season: 1, bonus: 0.05 },
+        { season: 2, bonus: 0.05 },
+        { season: 5, bonus: 0.05 },
+        { season: 6, bonus: 0.04 },
+      ])
+    ).toEqual([
+      { from: 1, to: 3, bonus: 0.05 },
+      { from: 5, to: 5, bonus: 0.05 },
+      { from: 6, to: 6, bonus: 0.04 },
+    ]);
+  });
+
   it("renders current data and formats the current/future values by locale", async () => {
     fetchMock.mockResolvedValue(rules);
     renderRules("fr-FR");
 
-    expect(await screen.findByText(/1,75/)).toBeInTheDocument();
+    // The full set's card shows it; the four boost figures are drawn once,
+    // on Historic boosts, and linked from here.
+    expect((await screen.findAllByText(/1,75/)).length).toBeGreaterThan(0);
     expect(screen.getByText(/Season 15/i)).toBeInTheDocument();
     expect(screen.queryByText(/Season 16/i)).not.toBeInTheDocument();
-    expect(screen.getByText(/2,24/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /four boost figures/i })
+    ).toHaveAttribute("href", "/network/tdh/historic-boosts#boost-figures");
   });
 
   it("accepts an empty season list and derives the ceiling from the returned schedule", async () => {
@@ -73,8 +95,9 @@ describe("TDHCurrentRules", () => {
     renderRules();
 
     expect(await screen.findByText(/No seasons qualify/i)).toBeInTheDocument();
-    expect(screen.getByText(/Seasons 1–22/i)).toBeInTheDocument();
-    expect(screen.getByText(/2\.34/)).toBeInTheDocument();
+    expect(screen.getByText(/Seasons 1–22 each have/i)).toBeInTheDocument();
+    // Derived from the returned schedule: 1.00 plus 22 bonuses of 0.05.
+    expect(screen.getByText(/gives 2\.10×/)).toBeInTheDocument();
   });
 
   it("rejects malformed rules without showing the old static 1.60 fallback", async () => {
@@ -85,6 +108,20 @@ describe("TDHCurrentRules", () => {
       await screen.findByText(/temporarily unavailable/i)
     ).toBeInTheDocument();
     expect(screen.queryByText(/1\.60/)).not.toBeInTheDocument();
+  });
+
+  it("renders the rules the server read at once, and keeps them when a refresh fails", async () => {
+    fetchMock.mockRejectedValue(new Error("temporary failure"));
+    renderWithQueryClient(
+      <TDHCurrentRules
+        locale="en-US"
+        initialRules={tdhRulesSchema.parse(rules)}
+      />
+    );
+
+    expect(screen.getByText(/Season 15/i)).toBeInTheDocument();
+    expect(screen.queryByText(/temporarily unavailable/i)).toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("retries an API error and renders the returned rules", async () => {
@@ -103,34 +140,24 @@ describe("TDHCurrentRules", () => {
   });
 
   it.each([
-    ["en-US", "1.75", "2.24"],
-    ["en-GB", "1.75", "2.24"],
-    ["fr-FR", "1,75", "2,24"],
-    ["es-ES", "1,75", "2,24"],
-    ["de-DE", "1,75", "2,24"],
+    ["en-US", "1.75", "0.02"],
+    ["en-GB", "1.75", "0.02"],
+    ["fr-FR", "1,75", "0,02"],
+    ["es-ES", "1,75", "0,02"],
+    ["de-DE", "1,75", "0,02"],
   ] as const)(
     "keeps numeric formatting and fallback labels in %s",
-    async (locale, fullMultiplier, ceiling) => {
+    async (locale, fullMultiplier, gradientBonus) => {
       fetchMock.mockResolvedValue(rules);
-      renderWithQueryClient(
-        <>
-          <TDHCurrentRules locale={locale} />
-          <TDHExample locale={locale} />
-        </>
-      );
+      renderWithQueryClient(<TDHCurrentRules locale={locale} />);
 
+      // The full set's card, and the Gradient bonus at two decimals.
+      expect((await screen.findAllByText(`${fullMultiplier}×`)).length).toBe(1);
+      expect(screen.getByText(`+${gradientBonus} each`)).toBeInTheDocument();
       expect(
-        await screen.findByText(`${fullMultiplier}× before Gradients`)
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(`Final rounded multiplier ceiling: ${ceiling}×`)
-      ).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "Today" })).toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: "+30 days" })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("checkbox", { name: /sell nakamoto/i })
+        screen.getByText(
+          "The four boost figures these pages quote, on one scale"
+        )
       ).toBeInTheDocument();
     }
   );

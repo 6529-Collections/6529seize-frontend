@@ -1,4 +1,5 @@
 import {
+  getTdhBoostLadder,
   getTdhFutureCeiling,
   tdhRulesSchema,
 } from "@/app/network/tdh/tdh-rules.helpers";
@@ -44,6 +45,26 @@ describe("TDH full-schedule presentation", () => {
       },
     };
     expect(getTdhFutureCeiling(tdhRulesSchema.parse(updated))).toBe(2.444);
+  });
+
+  it("gives the four boost figures the pages quote, rounded like the boost", () => {
+    // October 2026: seasons 1 to 16 pay, so a full set is 1.80.
+    const today = tdhRulesSchema.parse({
+      ...rules,
+      boost: {
+        ...rules.boost,
+        full_collection: {
+          ...rules.boost.full_collection,
+          first_set_bonus: 0.8,
+        },
+      },
+    });
+    expect(getTdhBoostLadder(today)).toEqual({
+      fullSetToday: 1.8,
+      highestToday: 2.04,
+      fullSetAllSeasons: 2,
+      highestEver: 2.24,
+    });
   });
 
   it("rejects malformed rule data instead of substituting an old schedule", () => {

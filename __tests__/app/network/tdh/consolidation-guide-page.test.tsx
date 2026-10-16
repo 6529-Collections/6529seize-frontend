@@ -38,11 +38,15 @@ describe("TDHConsolidationPage (collector's guide)", () => {
     }
     expect(
       screen.getByRole("figure", {
-        name: "Up to four of your wallets count as one collector",
+        name: "Your wallets count as one collector",
       })
     ).toBeInTheDocument();
+    // One plain status line: what 6529.io accepts and what TDH-v1 allows,
+    // pending the owner's decision; nothing more.
     expect(
-      screen.getByText(/The fourth requires fresh links from October 12, 2026/)
+      screen.getByText(
+        /a fourth for links signed from October 12, 2026.*TDH-v1 allows three; whether it allows four is pending an owner decision/
+      )
     ).toBeInTheDocument();
   });
 
@@ -70,7 +74,9 @@ describe("TDHConsolidationPage (collector's guide)", () => {
     render(<TDHConsolidationPage />);
 
     expect(
-      screen.getByRole("link", { name: /Read how it works/ })
+      screen.getByRole("link", {
+        name: /^How consolidation works(?! in TDH-v1)/,
+      })
     ).toHaveAttribute("href", "/network/tdh/consolidation/design");
   });
 

@@ -1,12 +1,6 @@
 "use client";
 
-import Link from "next/link";
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
-import NetworkReferenceNavigation from "@/components/network/NetworkReferenceNavigation";
-import {
-  NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
-  NETWORK_REFERENCE_PAGE_CLASSES,
-} from "@/components/network/networkPageLayoutClasses";
 import { useConsolidationPolicy } from "@/hooks/useConsolidationPolicy";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -18,7 +12,24 @@ import {
   TDHSectionNavigation,
   useTDHSectionHashFocus,
 } from "../../TDHPageNavigation";
-import TDHSection, { TDH_FOCUS, TDH_PANEL, TDH_TEXT } from "../../TDHSection";
+import TdhArrowLink from "../../shared/TdhArrowLink";
+import TdhPager from "../../shared/TdhPager";
+import TdhStackTable from "../../shared/TdhStackTable";
+import TdhTableFrame from "../../shared/TdhTableFrame";
+import TdhSubnav from "../../shared/TdhSubnav";
+import {
+  TDH_CAPTION,
+  TDH_DROPDOWN_ROW,
+  TDH_H1,
+  TDH_LEDE,
+  TDH_PAGE,
+  TDH_PAGE_HEADER_TOP,
+  TDH_TABLE,
+  TDH_TD,
+  TDH_TH,
+  tdhNarrowCell,
+} from "../../shared/tdhStyles";
+import TDHSection, { TDH_PANEL, TDH_TEXT } from "../../TDHSection";
 import ConsolidationOrderSimulator from "../ConsolidationOrderSimulator";
 
 type ConsolidationKey = Extract<
@@ -38,14 +49,8 @@ const NAVIGATION = [
 ] as const;
 const NAVIGATION_IDS = NAVIGATION.map((item) => item.id);
 
-const RULES = [
-  "pairs",
-  "limit",
-  "newest",
-  "collector",
-  "expiry",
-  "effects",
-] as const;
+const RULES = ["pairs", "limit", "newest", "collector", "expiry"] as const;
+const REMOVALS = ["leave", "replace", "replaceInFour", "lost"] as const;
 
 // Registrations and transactions for each change; see the rules above. A
 // group of n wallets has n(n-1)/2 pairs, each registered in both directions.
@@ -108,6 +113,16 @@ const RULE_COMPARISON: readonly RuleComparison[] = [
 ];
 
 const CONTROLLED_WALLET_COUNTS = [0, 1, 2, 3] as const;
+/** The rule 6529.io chose: every pair links both ways. */
+const CHOSEN_RULE: RuleComparison["key"] = "mesh";
+
+/** The rules table's column widths from xl, so short headers do not wrap. */
+const WHY_COLUMN_WIDTH = {
+  rule: "xl:tw-w-[34%]",
+  signers: "xl:tw-w-[12%] xl:tw-whitespace-nowrap",
+  transactions: "xl:tw-w-[14%]",
+  problem: "xl:tw-w-[40%]",
+} as const;
 
 const PROTECTIONS = [
   { key: "adding", kind: "does" },
@@ -139,16 +154,16 @@ const LIVE_SNAPSHOT = {
 const RANDOM_GRAPHS = 500;
 const RANDOM_SEQUENCES = 1000;
 
+/**
+ * The backend's grouping code, pinned to its latest change (ee74952,
+ * October 12, 2026: the four-wallet rule and its settings); the live dry run
+ * of October 10 with its 673 consolidations is recorded in the tracking
+ * issue.
+ */
 const GROUPING_SOURCE =
-  "https://github.com/6529-Collections/6529seize-backend/blob/main/src/consolidation-tools.ts";
+  "https://github.com/6529-Collections/6529seize-backend/blob/ee74952d3a6161e5a0ccb4fb960949a8ff6cb8d8/src/consolidation-tools.ts";
 const TRACKING_ISSUE =
   "https://github.com/6529-Collections/6529seize-frontend/issues/4214";
-
-const TABLE_HEADER =
-  "tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400";
-const TABLE_CELL =
-  "tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-align-top tw-text-sm tw-leading-6 tw-text-iron-300";
-const LINK = `tw-text-primary-300 ${TDH_FOCUS}`;
 
 function activationDate(
   locale: SupportedLocale,
@@ -181,19 +196,20 @@ export default function TDHConsolidationDesignPage() {
   );
 
   return (
-    <div className={NETWORK_REFERENCE_PAGE_CLASSES}>
+    <div className={TDH_PAGE}>
       <AboutContentsDropdown
-        className={NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES}
+        className={TDH_DROPDOWN_ROW}
         currentHref="/network/tdh/consolidation"
         desktopFlush
         withDivider
       />
-      <article className="tw-mx-auto tw-max-w-6xl tw-pb-8 tw-pt-7 sm:tw-pt-10">
-        <header className="tw-pb-8 sm:tw-pb-10">
-          <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl">
+      <article className="tw-mx-auto tw-max-w-6xl tw-pb-8">
+        <TdhSubnav current="/network/tdh/consolidation" locale={locale} />
+        <header className={`tw-pb-8 sm:tw-pb-10 ${TDH_PAGE_HEADER_TOP}`}>
+          <h1 className={TDH_H1}>
             {t(locale, "network.tdhConsolidation.design.title")}
           </h1>
-          <p className="tw-mb-0 tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-200">
+          <p className={`tw-mb-0 tw-mt-4 tw-max-w-[38em] ${TDH_LEDE}`}>
             {limits
               ? t(locale, "network.tdhConsolidation.design.intro", {
                   date,
@@ -201,11 +217,18 @@ export default function TDHConsolidationDesignPage() {
                 })
               : pendingLimits}
           </p>
-          <p className="tw-mb-0 tw-mt-3 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
-            {t(locale, "network.tdhConsolidation.design.guideNote")}{" "}
-            <Link className={LINK} href="/network/tdh/consolidation">
+          <p className="tw-mb-0 tw-mt-4 tw-max-w-[34rem] tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+            {limits
+              ? t(locale, "network.tdhConsolidation.status", { limit, date })
+              : pendingLimits}
+          </p>
+          <p className="tw-mb-0 tw-mt-3 tw-flex tw-max-w-[36em] tw-flex-wrap tw-items-center tw-gap-x-3 tw-text-sm tw-leading-6 tw-text-iron-300">
+            <span>
+              {t(locale, "network.tdhConsolidation.design.guideNote")}
+            </span>
+            <TdhArrowLink href="/network/tdh/consolidation">
               {t(locale, "network.tdhConsolidation.design.guideLink")}
-            </Link>
+            </TdhArrowLink>
           </p>
           <TDHSectionNavigation
             label={t(locale, "network.tdhConsolidation.nav")}
@@ -221,7 +244,12 @@ export default function TDHConsolidationDesignPage() {
           title={t(locale, "network.tdhConsolidation.rules.title")}
           description={t(locale, "network.tdhConsolidation.rules.description")}
         >
-          <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-4 tw-p-0 sm:tw-grid-cols-2">
+          {/* Six cards in a grid, the effects card the sixth: each card
+              sizes to its content, so a short card never shows an empty
+              frame beside a long one, and all sit at the grid's own gap.
+              (CSS columns dropped the last card's margin at the column
+              break, so two cards touched.) */}
+          <ul className="tw-m-0 tw-grid tw-list-none tw-items-start tw-gap-4 tw-p-0 sm:tw-grid-cols-2">
             {RULES.map((rule) => (
               <li key={rule} className={`${TDH_PANEL} tw-p-5`}>
                 <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-7 tw-text-iron-100">
@@ -237,6 +265,18 @@ export default function TDHConsolidationDesignPage() {
                 </p>
               </li>
             ))}
+            <li className={`${TDH_PANEL} tw-p-5`}>
+              <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-7 tw-text-iron-100">
+                {t(locale, "network.tdhConsolidation.rules.effects.title")}
+              </h3>
+              <ul className="tw-m-0 tw-mt-2 tw-list-disc tw-space-y-1.5 tw-pl-5 marker:tw-text-iron-500">
+                {(["holdings", "profiles", "timing"] as const).map((key) => (
+                  <li key={key} className={TDH_TEXT}>
+                    {t(locale, `network.tdhConsolidation.rules.effects.${key}`)}
+                  </li>
+                ))}
+              </ul>
+            </li>
           </ul>
         </TDHSection>
 
@@ -258,12 +298,29 @@ export default function TDHConsolidationDesignPage() {
           id="consolidation-remove"
           title={t(locale, "network.tdhConsolidation.remove.title")}
         >
+          {/* Four cases as a table, like adding a wallet; then what decides
+              who keeps the profile when a group splits. */}
           <div className="tw-space-y-4">
-            {(["leave", "replace", "lost", "split"] as const).map((key) => (
-              <p key={key} className={TDH_TEXT}>
-                {t(locale, `network.tdhConsolidation.remove.${key}`)}
-              </p>
-            ))}
+            <TdhStackTable
+              label={t(locale, "network.tdhConsolidation.remove.table.caption")}
+              columns={(["case", "how"] as const).map((column) => ({
+                key: column,
+                label: t(
+                  locale,
+                  `network.tdhConsolidation.remove.table.${column}`
+                ),
+              }))}
+              rows={REMOVALS.map((key) => ({
+                key,
+                cells: [
+                  t(locale, `network.tdhConsolidation.remove.case.${key}`),
+                  t(locale, `network.tdhConsolidation.remove.how.${key}`),
+                ],
+              }))}
+            />
+            <p className={TDH_TEXT}>
+              {t(locale, "network.tdhConsolidation.remove.split")}
+            </p>
           </div>
         </TDHSection>
 
@@ -273,7 +330,7 @@ export default function TDHConsolidationDesignPage() {
           id="consolidation-protects"
           title={t(locale, "network.tdhConsolidation.protects.title")}
         >
-          <ul className="tw-m-0 tw-list-none tw-space-y-4 tw-p-0">
+          <ul className="tw-m-0 tw-grid tw-list-none tw-gap-4 tw-p-0 lg:tw-grid-cols-2">
             {PROTECTIONS.map(({ key, kind }) => (
               <li key={key} className={`${TDH_PANEL} tw-p-5`}>
                 <p className="tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
@@ -292,9 +349,15 @@ export default function TDHConsolidationDesignPage() {
           title={t(locale, "network.tdhConsolidation.start.title")}
         >
           <div className="tw-space-y-4">
-            <p className={TDH_TEXT}>
-              {t(locale, "network.tdhConsolidation.start.body", { date })}
-            </p>
+            <ul className="tw-m-0 tw-list-disc tw-space-y-2 tw-pl-5 marker:tw-text-iron-500">
+              {(["old", "date", "both"] as const).map((key) => (
+                <li key={key} className={TDH_TEXT}>
+                  {t(locale, `network.tdhConsolidation.start.${key}`, {
+                    date,
+                  })}
+                </li>
+              ))}
+            </ul>
             <p className={`${TDH_PANEL} ${TDH_TEXT} tw-p-5`}>
               {t(locale, "network.tdhConsolidation.start.data", {
                 snapshotDate: formatDate(locale, LIVE_SNAPSHOT.date, {
@@ -315,27 +378,41 @@ export default function TDHConsolidationDesignPage() {
           title={t(locale, "network.tdhConsolidation.tested.title")}
         >
           <div className="tw-space-y-4">
+            {/* The three tests as figures, then what each rests on. */}
+            <ul className="tw-m-0 tw-grid tw-list-none tw-gap-3 tw-p-0 sm:tw-grid-cols-3">
+              {(
+                [
+                  ["live", LIVE_SNAPSHOT.total],
+                  ["graphs", RANDOM_GRAPHS],
+                  ["sequences", RANDOM_SEQUENCES],
+                ] as const
+              ).map(([key, value]) => (
+                <li key={key} className={`${TDH_PANEL} tw-p-4`}>
+                  <p className="tw-m-0 tw-text-2xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50">
+                    {formatInteger(locale, value)}
+                  </p>
+                  <p className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-5 tw-text-iron-300">
+                    {t(locale, `network.tdhConsolidation.tested.stat.${key}`, {
+                      snapshotDate: formatDate(locale, LIVE_SNAPSHOT.date, {
+                        dateStyle: "long",
+                        timeZone: "UTC",
+                      }),
+                    })}
+                  </p>
+                </li>
+              ))}
+            </ul>
             <p className={TDH_TEXT}>
-              {t(locale, "network.tdhConsolidation.tested.port", {
-                total: formatInteger(locale, LIVE_SNAPSHOT.total),
-              })}
-            </p>
-            <p className={TDH_TEXT}>
+              {t(locale, "network.tdhConsolidation.tested.port")}{" "}
               {t(locale, "network.tdhConsolidation.tested.exhaustive")}
             </p>
-            <p className={TDH_TEXT}>
-              {t(locale, "network.tdhConsolidation.tested.properties", {
-                graphs: formatInteger(locale, RANDOM_GRAPHS),
-                sequences: formatInteger(locale, RANDOM_SEQUENCES),
-              })}
-            </p>
-            <div className="tw-flex tw-flex-wrap tw-gap-x-6 tw-gap-y-3 tw-text-sm">
-              <Link className={LINK} href={GROUPING_SOURCE}>
+            <div className="tw-flex tw-flex-wrap tw-gap-x-6">
+              <TdhArrowLink href={GROUPING_SOURCE}>
                 {t(locale, "network.tdhConsolidation.tested.source")}
-              </Link>
-              <Link className={LINK} href={TRACKING_ISSUE}>
+              </TdhArrowLink>
+              <TdhArrowLink href={TRACKING_ISSUE}>
                 {t(locale, "network.tdhConsolidation.tested.issue")}
-              </Link>
+              </TdhArrowLink>
             </div>
           </div>
         </TDHSection>
@@ -345,6 +422,7 @@ export default function TDHConsolidationDesignPage() {
           title={t(locale, "network.tdhConsolidation.related")}
         >
           <TDHRelatedLinks
+            variant="list"
             links={(
               [
                 ["/network/tdh/consolidation", "consolidationGuide"],
@@ -362,10 +440,10 @@ export default function TDHConsolidationDesignPage() {
             }))}
           />
         </TDHSection>
-
-        <NetworkReferenceNavigation
-          currentHref="/network/tdh/consolidation"
+        <TdhPager
+          current="/network/tdh/consolidation"
           locale={locale}
+          subpage
         />
       </article>
     </div>
@@ -395,66 +473,125 @@ function AddWalletSection({ locale }: { readonly locale: SupportedLocale }) {
             </li>
           ))}
         </ol>
-        <p className="tw-m-0 tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-600 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-400">
+        <p className="tw-m-0 tw-max-w-[38em] tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-600 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-300">
           {t(locale, "network.tdhConsolidation.add.why")}
         </p>
-        <div className={`${TDH_PANEL} tw-overflow-x-auto`}>
-          <table className="tw-m-0 tw-w-full tw-border-collapse tw-border-0">
-            <caption className="tw-sr-only">
-              {t(locale, "network.tdhConsolidation.add.table.caption")}
-            </caption>
-            <thead className="tw-bg-iron-900/80">
-              <tr>
-                {(
-                  ["change", "registrations", "transactions", "order"] as const
-                ).map((column) => (
-                  <th key={column} scope="col" className={TABLE_HEADER}>
-                    {t(locale, `network.tdhConsolidation.add.table.${column}`)}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {CHANGES.map((change) => (
-                <tr key={change.key}>
-                  <th
-                    scope="row"
-                    className={`${TABLE_CELL} tw-text-left tw-font-medium tw-text-iron-100`}
-                  >
-                    {t(
-                      locale,
-                      `network.tdhConsolidation.add.row.${change.key}`
-                    )}
-                  </th>
-                  <td className={TABLE_CELL}>
-                    {change.registrations === null
-                      ? t(locale, "network.tdhConsolidation.add.notApplicable")
-                      : formatInteger(locale, change.registrations)}
-                  </td>
-                  <td className={`${TABLE_CELL} tw-whitespace-nowrap`}>
-                    {change.transactions
-                      .map((count) => formatInteger(locale, count))
-                      .join(" + ")}
-                  </td>
-                  <td className={TABLE_CELL}>
-                    {t(
-                      locale,
-                      `network.tdhConsolidation.add.order.${change.order}`
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <Link
-          className={`${LINK} tw-text-sm`}
-          href="/safe-collecting/build-consolidation"
-        >
+        <TdhStackTable
+          label={t(locale, "network.tdhConsolidation.add.table.caption")}
+          columns={(
+            ["change", "registrations", "transactions", "order"] as const
+          ).map((column) => ({
+            key: column,
+            label: t(locale, `network.tdhConsolidation.add.table.${column}`),
+          }))}
+          rows={CHANGES.map((change) => ({
+            key: change.key,
+            cells: [
+              t(locale, `network.tdhConsolidation.add.row.${change.key}`),
+              change.registrations === null
+                ? t(locale, "network.tdhConsolidation.add.notApplicable")
+                : formatInteger(locale, change.registrations),
+              change.transactions
+                .map((count) => formatInteger(locale, count))
+                .join(" + "),
+              t(locale, `network.tdhConsolidation.add.order.${change.order}`),
+            ],
+            cellClassNames: { 1: "tw-tabular-nums", 2: "tw-tabular-nums" },
+          }))}
+          // On a phone: links and transactions on one line, the order on
+          // the next, so a row is three short lines.
+          inlineColumns={[1, 2]}
+          wideInlineColumns={[3]}
+        />
+        <TdhArrowLink href="/safe-collecting/build-consolidation">
           {t(locale, "network.tdhConsolidation.add.cta")}
-        </Link>
+        </TdhArrowLink>
       </div>
     </TDHSection>
+  );
+}
+
+/**
+ * Who can add an outside wallet: four rules by how many of your wallets an
+ * attacker controls, as one compact grid at every width (a phone included),
+ * so the comparison stays a comparison. It scrolls inside its frame only in
+ * a very narrow window.
+ */
+const RULE_TH = tdhNarrowCell(TDH_TH);
+const RULE_TD = tdhNarrowCell(TDH_TD);
+const COUNT_TH = TDH_TH.replace("tw-px-4", "tw-px-1.5");
+const COUNT_TD = TDH_TD.replace("tw-px-4", "tw-px-1.5");
+
+function AttackMatrix({ locale }: { readonly locale: SupportedLocale }) {
+  const caption = t(locale, "network.tdhConsolidation.why.matrix.caption");
+  return (
+    <TdhTableFrame label={caption}>
+      <table className={TDH_TABLE}>
+        <caption className={TDH_CAPTION}>{caption}</caption>
+        <thead>
+          {/* What the columns count, over them. */}
+          <tr>
+            <td className={`${RULE_TH} tw-border-b-0`} />
+            <th
+              scope="colgroup"
+              colSpan={CONTROLLED_WALLET_COUNTS.length}
+              className={`${COUNT_TH} tw-border-b-0 tw-text-center tw-text-xs tw-font-medium tw-text-iron-300`}
+            >
+              {t(locale, "network.tdhConsolidation.why.matrix.columnsHead")}
+            </th>
+          </tr>
+          <tr>
+            <th scope="col" className={`${RULE_TH} tw-min-w-[7rem]`}>
+              {t(locale, "network.tdhConsolidation.why.matrix.rule")}
+            </th>
+            {CONTROLLED_WALLET_COUNTS.map((count) => (
+              <th
+                key={count}
+                scope="col"
+                className={`${COUNT_TH} tw-w-10 tw-text-center tw-tabular-nums sm:tw-w-14`}
+              >
+                <span aria-hidden="true">{formatInteger(locale, count)}</span>
+                <span className="tw-sr-only">
+                  {t(locale, "network.tdhConsolidation.why.matrix.controls", {
+                    count: formatInteger(locale, count),
+                  })}
+                </span>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {RULE_COMPARISON.map((rule) => (
+            <tr
+              key={rule.key}
+              className={
+                rule.key === CHOSEN_RULE ? "tw-bg-primary-500/[0.07]" : ""
+              }
+            >
+              <th
+                scope="row"
+                className={`${RULE_TD} tw-font-medium tw-text-iron-100 ${rule.key === CHOSEN_RULE ? "tw-border-0 tw-border-l-2 tw-border-solid tw-border-l-primary-400" : ""}`}
+              >
+                {t(locale, `network.tdhConsolidation.why.rule.${rule.key}`)}
+              </th>
+              {CONTROLLED_WALLET_COUNTS.map((count) => (
+                <td
+                  key={count}
+                  className={`${COUNT_TD} tw-text-center ${rule.addable[count] ? "tw-text-red-200 tw-bg-error/[0.16] tw-font-semibold" : "tw-text-iron-500"}`}
+                >
+                  {t(
+                    locale,
+                    rule.addable[count]
+                      ? "network.tdhConsolidation.why.matrix.yes"
+                      : "network.tdhConsolidation.why.matrix.no"
+                  )}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </TdhTableFrame>
   );
 }
 
@@ -466,54 +603,38 @@ function WhyEveryPairSection({ locale }: { readonly locale: SupportedLocale }) {
       description={t(locale, "network.tdhConsolidation.why.description")}
     >
       <div className="tw-space-y-6">
-        <div className={`${TDH_PANEL} tw-overflow-x-auto`}>
-          <table className="tw-m-0 tw-w-full tw-border-collapse tw-border-0">
-            <caption className="tw-sr-only">
-              {t(locale, "network.tdhConsolidation.why.table.caption")}
-            </caption>
-            <thead className="tw-bg-iron-900/80">
-              <tr>
-                {(["rule", "signers", "transactions", "problem"] as const).map(
-                  (column) => (
-                    <th key={column} scope="col" className={TABLE_HEADER}>
-                      {t(
-                        locale,
-                        `network.tdhConsolidation.why.table.${column}`
-                      )}
-                    </th>
-                  )
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {RULE_COMPARISON.map((rule) => (
-                <tr key={rule.key}>
-                  <th
-                    scope="row"
-                    className={`${TABLE_CELL} tw-text-left tw-font-medium tw-text-iron-100`}
-                  >
-                    {t(locale, `network.tdhConsolidation.why.rule.${rule.key}`)}
-                  </th>
-                  <td className={TABLE_CELL}>
-                    {t(
-                      locale,
-                      `network.tdhConsolidation.why.signers.${rule.signers}`
-                    )}
-                  </td>
-                  <td className={TABLE_CELL}>
-                    {formatInteger(locale, rule.transactions)}
-                  </td>
-                  <td className={TABLE_CELL}>
-                    {t(
-                      locale,
-                      `network.tdhConsolidation.why.problem.${rule.key}`
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <TdhStackTable
+          label={t(locale, "network.tdhConsolidation.why.table.caption")}
+          columns={(
+            ["rule", "signers", "transactions", "problem"] as const
+          ).map((column) => ({
+            key: column,
+            label: t(locale, `network.tdhConsolidation.why.table.${column}`),
+            className: WHY_COLUMN_WIDTH[column],
+            ...(column === "signers" || column === "transactions"
+              ? {
+                  title: t(
+                    locale,
+                    `network.tdhConsolidation.why.table.${column}Title`
+                  ),
+                }
+              : {}),
+          }))}
+          rows={RULE_COMPARISON.map((rule) => ({
+            key: rule.key,
+            cells: [
+              t(locale, `network.tdhConsolidation.why.rule.${rule.key}`),
+              t(locale, `network.tdhConsolidation.why.signers.${rule.signers}`),
+              formatInteger(locale, rule.transactions),
+              t(locale, `network.tdhConsolidation.why.problem.${rule.key}`),
+            ],
+            cellClassNames: {
+              1: "xl:tw-whitespace-nowrap",
+              2: "tw-tabular-nums",
+            },
+          }))}
+          inlineColumns={[1, 2]}
+        />
 
         <div className="tw-space-y-3">
           <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-7 tw-text-iron-100">
@@ -522,63 +643,7 @@ function WhyEveryPairSection({ locale }: { readonly locale: SupportedLocale }) {
           <p className={TDH_TEXT}>
             {t(locale, "network.tdhConsolidation.why.matrix.description")}
           </p>
-          <div className={`${TDH_PANEL} tw-overflow-x-auto`}>
-            <table className="tw-m-0 tw-w-full tw-border-collapse tw-border-0">
-              <caption className="tw-sr-only">
-                {t(locale, "network.tdhConsolidation.why.matrix.caption")}
-              </caption>
-              <thead className="tw-bg-iron-900/80">
-                <tr>
-                  <th scope="col" className={TABLE_HEADER}>
-                    {t(locale, "network.tdhConsolidation.why.matrix.rule")}
-                  </th>
-                  {CONTROLLED_WALLET_COUNTS.map((count) => (
-                    <th key={count} scope="col" className={TABLE_HEADER}>
-                      {t(
-                        locale,
-                        "network.tdhConsolidation.why.matrix.controls",
-                        {
-                          count: formatInteger(locale, count),
-                        }
-                      )}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {RULE_COMPARISON.map((rule) => (
-                  <tr key={rule.key}>
-                    <th
-                      scope="row"
-                      className={`${TABLE_CELL} tw-text-left tw-font-medium tw-text-iron-100`}
-                    >
-                      {t(
-                        locale,
-                        `network.tdhConsolidation.why.rule.${rule.key}`
-                      )}
-                    </th>
-                    {CONTROLLED_WALLET_COUNTS.map((count) => (
-                      <td
-                        key={count}
-                        className={`${TABLE_CELL} ${
-                          rule.addable[count]
-                            ? "tw-text-error"
-                            : "tw-text-iron-300"
-                        }`}
-                      >
-                        {t(
-                          locale,
-                          rule.addable[count]
-                            ? "network.tdhConsolidation.why.matrix.yes"
-                            : "network.tdhConsolidation.why.matrix.no"
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <AttackMatrix locale={locale} />
         </div>
 
         <p className={TDH_TEXT}>

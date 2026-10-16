@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Button from "@/components/utils/button/Button";
 import EnsAddressInput from "@/components/utils/input/ens-address/EnsAddressInput";
 import { formatInteger } from "@/i18n/format";
@@ -117,6 +118,9 @@ export function ConsolidationBuilderWallets(
     maxWallets: number | null;
     preActivationSigningDate: string | null;
     entries: readonly ConsolidationWalletEntry[];
+    /** Whether the collector confirmed what TDH-v1 does with a fourth wallet. */
+    fourthAcknowledged: boolean;
+    onFourthAcknowledgedChange: (acknowledged: boolean) => void;
     issues: readonly (ConsolidationWalletIssue | undefined)[];
     validCount: number;
     connectedKey: string | undefined;
@@ -277,6 +281,36 @@ export function ConsolidationBuilderWallets(
           </p>
         )}
       </div>
+      {entries.length >= 4 && (
+        <div
+          className="tw-mb-0 tw-mt-4 tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200"
+          data-testid="consolidation-fourth-wallet-note"
+        >
+          <p className="tw-m-0">
+            {t(locale, "delegation.consolidationBuilder.wallets.fourthNote")}{" "}
+            <Link
+              href="/network/tdh/how-it-works#step-10"
+              className="tw-whitespace-nowrap tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-400"
+            >
+              {t(locale, "delegation.consolidationBuilder.wallets.fourthLink")}
+            </Link>
+          </p>
+          <label className="tw-mt-2 tw-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-gap-3 tw-font-medium tw-text-iron-100">
+            <input
+              type="checkbox"
+              className="tw-size-5 tw-shrink-0 tw-cursor-pointer tw-accent-primary-500"
+              checked={props.fourthAcknowledged}
+              onChange={(event) =>
+                props.onFourthAcknowledgedChange(event.target.checked)
+              }
+            />
+            {t(
+              locale,
+              "delegation.consolidationBuilder.wallets.fourthAcknowledge"
+            )}
+          </label>
+        </div>
+      )}
       <GroupLookupStatus
         locale={locale}
         state={props.groupLookupState}

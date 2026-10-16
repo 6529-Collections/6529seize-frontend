@@ -13,30 +13,98 @@ boost rules.
 
 - Route: `/network/tdh`
 - Sidebar path: `Network -> TDH`
-- Page navigation anchors: `#tdh-reference`, `#tdh-example`, `#tdh-profile`,
-  `#tdh-1-4`, and `#tdh-exact`
-- Related sections also use `#tdh-how`, `#tdh-changes`, and `#tdh-explore`.
+- Page sections, in order: `#tdh-minute`, `#tdh-verified`, `#tdh-profile`,
+  `#tdh-1-4`, `#tdh-changes`, `#glossary`, `#tdh-deeper`, and `#tdh-explore`.
+- Older anchors still land in the right place: `#tdh-exact` and `#tdh-how`
+  open [How TDH Is Calculated](feature-tdh-how-it-works.md), `#tdh-example`
+  opens its step 12 worked example, and `#tdh-reference` scrolls to
+  `#tdh-minute`.
+- The TDH tab row links the overview to How it works, Specification, Formal
+  model, Implementations and Verification; its `More` menu adds Historic boosts,
+  Consolidation and the glossary. A previous/next pager ends every TDH page.
 
 ## What Users Can Do
 
-1. Read the three-step explanation: count whole days, apply edition rates, and
-   apply the collection boost.
-2. Open `Try an example` and switch between `Today` and `+30 days`, or sell
-   Nakamoto #4 before the snapshot. The fixed illustration uses FirstGM #8
-   (2 copies, 100 days, rate 1), Nakamoto #4 (1 copy, 60 days, rate 13.14),
-   and one Gradient (30 days, rate 39.02). Its totals are 2,224 today,
-   3,897 in 30 days, 1,398 after the sale today, and 2,653 after the sale in
-   30 days. The rates and rules stay fixed in this illustration.
-3. Use `Explain my TDH` to enter a profile handle or wallet-like identity.
+1. Read the header: `TDH`, the one-line promise (Total Days Held: the art
+   you hold, and how long you have held it), the formula Days × Rate × Boost
+   = TDH worked for one card (100 × 12.71 × 1.02 = 1,296), and a strip:
+   the track record in bold (`Recomputed independently every day: equal to
+   6529.io on 3 of 3 published days`) with the latest day and `See the
+   comparison`. The history's limit and the builds are in the section
+   below, not in the first screen. The `TDH` eyebrow shows from `md` up, so
+   on a phone the heading starts high on the screen.
+2. Read `TDH in a minute`: hold (whole days), weigh (a Meme's rate is the
+   largest edition over its own; a Gradient's divides by the number of
+   Gradients, 101, and a NextGen token's by its collection's size) and boost
+   (one multiplier), drawn for one copy of a 310-copy Meme held 100 days by a
+   collector with one Gradient, the hero's card factor by factor; the
+   Gradient earns TDH of its own on top. The example is captioned with its
+   cycle (`The card above, factor by factor · the October 11, 2026 cycle`,
+   the day the specification was replayed against 6529.io), and the weigh
+   step says the largest edition is FirstGM's 3,941 on that cycle. Its
+   days panel draws ten blocks of ten days in one colour, labelled.
+   The rate is drawn as two bars on one scale, and the boost as a scale from
+   1.00 to 2.04, the highest boost possible on the October 11, 2026 cycle.
+   The boost panel is where the reader changes the example: three buttons
+   (`What else the collector holds`: no Gradient, one Gradient, a full set)
+   move the boost, and the line under the three panels gives the card's
+   TDH: 1,271, 1,296 or 2,288. FirstGM (Meme #8) is introduced there as the
+   reference card.
+3. Use `Explain my TDH`, right after the minute: it looks up 6529.io's
+   stored calculation for a profile or wallet, card by card, the values
+   the daily comparison tests against TDH-v1 (described below).
+4. Read `Checked daily, in public`: first the latest day from the feed, as
+   figures (the total TDH identical in all three, identity records and
+   wallet records equal), how they were read (the Python reference on the
+   Rust run's input; 6529.io's backend from its own indexer, its files
+   fetched from Arweave and accepted only when its upload key's signature,
+   size and data root verify; in one closed disclosure), the builds the
+   day's file names (`Builds: Rust core validator@…, Python reference
+   6529chain@…`), every published day as a dated chip, the `Not yet fully
+   checked` label, which links to the latest day's provenance, with its
+   meaning beside it (taken as reported until the daily run checks the
+   full history against 6529's own node, with no date), and a link to the
+   dashboard;
+   one line on what is not public yet (P26, its vectors and the programs'
+   code) with a link to what anyone can check today; then three points
+   (written separately, each reproducing every conformance vector;
+   specified in Lean as a proposal, with the netting theorem's hypotheses:
+   every address's net movement, the burn addresses' included, and both
+   versions of the day with a result; compared every day, scheduled from
+   October 16); then `Fixed before the cutover`, four dated items of one
+   line each with the detail under `More` (the edition-floor text
+   corrected on October 15, the flaw program B found in the first netting
+   rule, what the Lean model showed netting does not guarantee, and five
+   rounds of differential tests, all settled but E13), and a link to the
+   Lean proof manifest on the daily feed.
+5. In `Explain my TDH`, enter a profile handle or wallet-like identity.
+   Its results use the same words as the other TDH pages (raw days, base
+   TDH, boost, final TDH).
    Public lookups can be submitted without wallet authentication. The page
    shows an empty state before submission, loading, not-found, and retryable
-   error states, followed by the stored snapshot when available.
-4. Expand collection holdings, boost details, and wallet information in a
+   error states, followed by the stored snapshot when available. When the
+   snapshot is the latest compared day's and all three computations agreed
+   on every record, a line says this record was reproduced by two
+   separately written programs from one input, and by 6529.io. Each
+   collection's row says how many cards it holds.
+6. Expand collection holdings, boost details, and wallet information in a
    profile result. Holdings tables show token, copies, whole days, rate, base,
    and final TDH; collections with more than 20 tokens use Previous/Next
    pagination.
-5. Open `Current boosts` for the active rule summary, or `Exact calculation`
-   for rounding, transfer, eligibility, and boost precision details.
+7. Open `Current boosts` for today's values (read on the server, so they
+   render with the page; a failed refresh in the browser keeps them): the
+   full-set boost and the Gradient bonus, an arrow link to the four boost
+   figures these pages quote, drawn on one scale on the Historic boosts
+   page (`#boost-figures`), the season bonuses as ranges (for example `Seasons 1–16: +0.05 each`) with Genesis and
+   Nakamoto, and how the bonuses combine in a disclosure. Then `When your
+holdings change` for common questions about sales, transfers and new
+   cards, and `Glossary` for the terms the TDH pages use (six to read your
+   own TDH, ending with final TDH, then the rest, including netting,
+   the underflow test, conformance vectors, roots, the cutover, classes A to
+   D and program A and B).
+8. Follow `Go deeper` to How it works (every step, with examples you can
+   change), the specification, the formal model, the implementations and the
+   verification dashboard.
 
 ## Calculation Timing and Eligibility
 
@@ -63,8 +131,8 @@ consolidate wallets.
 
 FirstGM (Meme #8) was designed to establish the one-TDH reference: one copy held
 for one complete day earns one base TDH before boosts. Its open-mint design is
-central to this role. The page introduces FirstGM before the three calculation
-steps and provides a `Why FirstGM matters` link to `#tdh-reference`.
+central to this role. `TDH in a minute` introduces FirstGM as the reference
+card; the old `#tdh-reference` anchor scrolls there.
 
 The implementation derives edition rates from the largest eligible effective
 Meme edition. FirstGM's intended reference role and this implementation rule are
@@ -98,13 +166,15 @@ used by earlier calculations. The profile panel shows stored calculation results
 - The current highest eligible season is excluded from season bonuses. Seasons
   1 through 20 are configured for `+0.05`; later indexed seasons currently have
   no automatic `+0.05` extrapolation.
-- A full collection means at least one copy of every Meme ID eligible for that
+- A full set means at least one copy of every Meme ID eligible for that
   snapshot, including cards in the current partial season. Missing one ID
-  makes the full-collection count zero.
+  makes the full-set count zero. The pages call it a full set everywhere.
 - With a complete collection, the first collection receives the eligible season
   bonus sum. Each additional complete set adds `0.05 * 0.6529^(n-1)`.
   There is no hard set-count cap; the additional-set series approaches
-  `0.144051` before final rounding.
+  0.05 / (1 − 0.6529), about `0.14405` (`0.1440507…`), and rounded to
+  millionths it reaches `0.144051` at 33 full sets, so further sets add
+  nothing.
 - Without a complete collection, each complete eligible season contributes its
   configured bonus once. Season 1 can instead expose the Genesis and Nakamoto
   partial bonuses when its full set is incomplete.
@@ -171,10 +241,10 @@ destinations are `/network/definitions`, `/network/health/network-tdh`, and
 
 ## Language Support
 
-The explainer, example, profile breakdown, and current-rules copy currently use
-the English fallback in all supported locales. Numbers and dates follow the
-browser locale. Page metadata uses English. Translation of these four sections
-is the remaining localization work.
+The explainer, profile breakdown, and current-rules copy currently use the
+English fallback in all supported locales. Numbers and dates follow the
+browser locale. Page metadata uses English. Translation of these sections is
+the remaining localization work.
 
 ## Related Pages
 

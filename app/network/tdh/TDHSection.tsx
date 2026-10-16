@@ -1,8 +1,13 @@
 import type { ReactNode } from "react";
+import { noBreakTerms } from "./shared/noBreakTerms";
 
 export const TDH_PANEL =
   "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/50";
-export const TDH_TEXT = "tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300";
+export const TDH_TEXT =
+  "tw-m-0 tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-300";
+/** Cards that fill a two-column grid; an odd last card spans both columns. */
+export const TDH_CARD_GRID =
+  "tw-grid tw-gap-4 sm:tw-grid-cols-2 sm:[&>*:last-child:nth-child(odd)]:tw-col-span-2";
 export const TDH_FOCUS =
   "focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400";
 
@@ -27,12 +32,12 @@ export default function TDHSection({
         <h2
           id={`${id}-heading`}
           tabIndex={-1}
-          className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none"
+          className="tw-m-0 tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none sm:tw-text-2xl"
         >
-          {title}
+          {noBreakTerms(title)}
         </h2>
         {description && (
-          <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <p className="tw-mb-0 tw-mt-3 tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-300">
             {description}
           </p>
         )}

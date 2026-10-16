@@ -15,6 +15,9 @@ import {
 const NAVIGATION_TIMEOUT_MS = 15000;
 const WAVE_SCORE_RESULT = /Wave Score.*About.*Network & Reputation/i;
 const WAVE_SCORE_HEADING = "Wave score transparency";
+const TDH_EXPLAINER_HEADING =
+  "Total Days Held: the art you hold, and how long you have held it.";
+const TDH_CURRENT_BOOSTS_HEADING = "Current boosts";
 const REQUIRED_DELEGATION_ACTIONS = [
   "Delegation",
   "Consolidation",
@@ -62,7 +65,7 @@ async function expectTdhExplainer(page: Page) {
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: "How TDH is calculated",
+      name: TDH_EXPLAINER_HEADING,
       exact: true,
     })
   ).toBeVisible();
@@ -220,7 +223,7 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     await expect(
       page.getByRole("heading", {
         level: 2,
-        name: "Current boosts & the full schedule",
+        name: TDH_CURRENT_BOOSTS_HEADING,
         exact: true,
       })
     ).toBeVisible();

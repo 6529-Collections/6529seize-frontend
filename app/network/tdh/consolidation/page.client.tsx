@@ -6,21 +6,15 @@ import {
   ArrowRightIcon,
   ArrowsRightLeftIcon,
   ChartBarIcon,
+  ChatBubbleLeftRightIcon,
   CheckIcon,
   LockClosedIcon,
   Squares2X2Icon,
   UserCircleIcon,
   UserGroupIcon,
-  WalletIcon,
 } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import { useId, type ComponentType, type SVGProps } from "react";
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
-import NetworkReferenceNavigation from "@/components/network/NetworkReferenceNavigation";
-import {
-  NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
-  NETWORK_REFERENCE_PAGE_CLASSES,
-} from "@/components/network/networkPageLayoutClasses";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import { useConsolidationPolicy } from "@/hooks/useConsolidationPolicy";
 import { useSetTitle } from "@/contexts/TitleContext";
@@ -28,8 +22,20 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate, formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import TdhArrowLink from "../shared/TdhArrowLink";
+import TdhSourcesNote from "../shared/TdhSourcesNote";
+import TdhDisclosure from "../shared/TdhDisclosure";
+import TdhPager from "../shared/TdhPager";
+import TdhSubnav from "../shared/TdhSubnav";
+import {
+  TDH_DROPDOWN_ROW,
+  TDH_H1,
+  TDH_LINK,
+  TDH_PAGE,
+  TDH_PAGE_HEADER_TOP,
+} from "../shared/tdhStyles";
 import { TDHRelatedLinks } from "../TDHPageNavigation";
-import TDHSection, { TDH_FOCUS, TDH_PANEL, TDH_TEXT } from "../TDHSection";
+import TDHSection, { TDH_PANEL, TDH_TEXT } from "../TDHSection";
 
 type Icon = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -46,22 +52,23 @@ const BENEFITS = [
   { key: "collection", icon: UserGroupIcon },
 ] as const satisfies readonly { readonly key: string; readonly icon: Icon }[];
 
-// The dot shows each safe collecting role's temperature: a vault is ice-cold,
-// a transaction wallet warm and a social wallet hot.
+// Each safe collecting role has a neutral icon of its own: no colour, so
+// none reads as a status.
 const WALLET_ROLES = [
-  { key: "vault", dot: "tw-bg-sky-400" },
-  { key: "transaction", dot: "tw-bg-amber-400" },
-  { key: "social", dot: "tw-bg-rose-400" },
-  { key: "old", dot: "tw-bg-iron-500" },
-] as const;
+  { key: "vault", icon: LockClosedIcon },
+  { key: "transaction", icon: ArrowsRightLeftIcon },
+  { key: "social", icon: ChatBubbleLeftRightIcon },
+  { key: "old", icon: ArchiveBoxIcon },
+] as const satisfies readonly { readonly key: string; readonly icon: Icon }[];
 
 const STEPS = ["list", "sign", "done"] as const;
 const BEFORE = ["keys", "merge", "public"] as const;
 const CHANGES = ["add", "remove", "lost", "full"] as const;
+/** The question the status line raises comes first; every answer is closed. */
 const FAQ = [
+  "limit",
   "cost",
   "move",
-  "limit",
   "friend",
   "before",
   "profile",
@@ -69,11 +76,6 @@ const FAQ = [
   "see",
   "expiry",
 ] as const;
-
-const LINK = `tw-text-primary-300 tw-underline-offset-4 hover:tw-underline ${TDH_FOCUS}`;
-const DISCLOSURE =
-  "tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 last:tw-border-b-0";
-const SUMMARY = `tw-cursor-pointer tw-py-4 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-100 ${TDH_FOCUS}`;
 
 function activationDate(
   locale: SupportedLocale,
@@ -105,26 +107,33 @@ export default function TDHConsolidationPage() {
   );
 
   return (
-    <div className={NETWORK_REFERENCE_PAGE_CLASSES}>
+    <div className={TDH_PAGE}>
       <AboutContentsDropdown
-        className={NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES}
+        className={TDH_DROPDOWN_ROW}
         currentHref="/network/tdh/consolidation"
         desktopFlush
         withDivider
       />
-      <article className="tw-mx-auto tw-max-w-6xl tw-pb-8 tw-pt-7 sm:tw-pt-10">
-        <header className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-8 tw-pb-10 lg:tw-grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:tw-gap-12">
+      <article className="tw-mx-auto tw-max-w-6xl tw-pb-8">
+        <TdhSubnav current="/network/tdh/consolidation" locale={locale} />
+        <header
+          className={`tw-grid tw-grid-cols-1 tw-items-start tw-gap-8 tw-pb-10 lg:tw-grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:tw-gap-12 ${TDH_PAGE_HEADER_TOP}`}
+        >
           <div>
-            <h1 className="tw-m-0 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl">
+            <h1 className={TDH_H1}>
               {t(locale, "network.tdhConsolidation.title")}
             </h1>
             <p className="tw-mb-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-200 sm:tw-text-lg sm:tw-leading-8">
               {t(locale, "network.tdhConsolidation.lead")}
             </p>
-            <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
-              {t(locale, "network.tdhConsolidation.nothingMoves")}{" "}
+            {/* One status line: what 6529.io accepts, and what TDH-v1
+                allows, as the owner's open decision stands. */}
+            <p
+              id="consolidation-status"
+              className="tw-mb-0 tw-mt-4 tw-scroll-mt-28 tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200"
+            >
               {limits
-                ? t(locale, "network.tdhConsolidation.limit", { limit, date })
+                ? t(locale, "network.tdhConsolidation.status", { limit, date })
                 : pendingLimits}
             </p>
             <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-center tw-gap-x-6 tw-gap-y-3">
@@ -132,15 +141,20 @@ export default function TDHConsolidationPage() {
                 {t(locale, "network.tdhConsolidation.cta")}
                 <ArrowRightIcon aria-hidden="true" className="tw-size-4" />
               </ButtonLink>
-              <Link
-                className={`${LINK} tw-text-sm`}
-                href={SAFE_COLLECTING_HREF}
-              >
+              <TdhArrowLink href={SAFE_COLLECTING_HREF}>
                 {t(locale, "network.tdhConsolidation.safeCollectingLink")}
-              </Link>
+              </TdhArrowLink>
             </div>
+            <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+              {t(locale, "network.tdhConsolidation.nothingMoves")}
+            </p>
           </div>
-          <WalletsFigure locale={locale} />
+          <div>
+            <WalletsFigure locale={locale} />
+            <TdhArrowLink href="#consolidation-wallets" className="tw-mt-2">
+              {t(locale, "network.tdhConsolidation.figure.rolesLink")}
+            </TdhArrowLink>
+          </div>
         </header>
 
         <TDHSection
@@ -157,7 +171,7 @@ export default function TDHConsolidationPage() {
                 <span className="tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800/80 tw-text-iron-100">
                   <BenefitIcon aria-hidden="true" className="tw-size-5" />
                 </span>
-                <div className="tw-min-w-0">
+                <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
                   <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100">
                     {t(
                       locale,
@@ -171,6 +185,16 @@ export default function TDHConsolidationPage() {
               </li>
             ))}
           </ul>
+          <TdhArrowLink
+            href="/network/tdh/how-it-works#step-10"
+            className="tw-mt-4"
+          >
+            {t(locale, "network.tdhConsolidation.benefits.ruleLink")}
+          </TdhArrowLink>
+          <TdhSourcesNote
+            locale={locale}
+            refs={["P26 §6.3", "P26 §7.1", "P26 §7.3", "DEV-10", "D121"]}
+          />
         </TDHSection>
 
         <TDHSection
@@ -182,14 +206,14 @@ export default function TDHConsolidationPage() {
           )}
         >
           <ul className={`${TDH_PANEL} tw-m-0 tw-list-none tw-p-0`}>
-            {WALLET_ROLES.map(({ key, dot }) => (
+            {WALLET_ROLES.map(({ key, icon: RoleIcon }) => (
               <li
                 key={key}
                 className="tw-flex tw-gap-4 tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-5 tw-py-4 last:tw-border-b-0"
               >
-                <span
+                <RoleIcon
                   aria-hidden="true"
-                  className={`tw-mt-2 tw-size-2.5 tw-flex-shrink-0 tw-rounded-full ${dot}`}
+                  className="tw-mt-1 tw-size-5 tw-flex-shrink-0 tw-text-iron-400"
                 />
                 <div className="tw-min-w-0">
                   <p className="tw-m-0 tw-text-sm tw-font-semibold tw-leading-6 tw-text-iron-100">
@@ -202,12 +226,9 @@ export default function TDHConsolidationPage() {
               </li>
             ))}
           </ul>
-          <Link
-            className={`${LINK} tw-mt-4 tw-inline-block tw-text-sm`}
-            href={SAFE_COLLECTING_HREF}
-          >
+          <TdhArrowLink href={SAFE_COLLECTING_HREF} className="tw-mt-2">
             {t(locale, "network.tdhConsolidation.wallets.more")}
-          </Link>
+          </TdhArrowLink>
         </TDHSection>
 
         <TDHSection
@@ -238,12 +259,23 @@ export default function TDHConsolidationPage() {
                             limit,
                           }
                         )}
+                    {limits && step === "list" && (
+                      <>
+                        {" "}
+                        <a href="#consolidation-status" className={TDH_LINK}>
+                          {t(
+                            locale,
+                            "network.tdhConsolidation.steps.list.note"
+                          )}
+                        </a>
+                      </>
+                    )}
                   </p>
                 </div>
               </li>
             ))}
           </ol>
-          <p className="tw-mb-0 tw-mt-6 tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-600 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <p className="tw-mb-0 tw-mt-6 tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-600 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, "network.tdhConsolidation.steps.order")}
           </p>
           <ButtonLink
@@ -261,10 +293,18 @@ export default function TDHConsolidationPage() {
           id="consolidation-before"
           title={t(locale, "network.tdhConsolidation.before.title")}
         >
-          <ul className="tw-m-0 tw-list-none tw-space-y-3 tw-p-0">
+          {/* Three short cards across the column, the width of the lists
+              around them. */}
+          <ul className="tw-m-0 tw-grid tw-list-none tw-gap-4 tw-p-0 md:tw-grid-cols-3">
             {BEFORE.map((key) => (
-              <li key={key} className={`${TDH_PANEL} ${TDH_TEXT} tw-p-5`}>
-                {t(locale, `network.tdhConsolidation.before.${key}`)}
+              <li key={key} className={`${TDH_PANEL} tw-p-5`}>
+                {/* The point in one bold line, the detail under it. */}
+                <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100">
+                  {t(locale, `network.tdhConsolidation.before.${key}.title`)}
+                </h3>
+                <p className={`${TDH_TEXT} tw-mt-1.5`}>
+                  {t(locale, `network.tdhConsolidation.before.${key}.body`)}
+                </p>
               </li>
             ))}
           </ul>
@@ -287,29 +327,34 @@ export default function TDHConsolidationPage() {
           id="consolidation-faq"
           title={t(locale, "network.tdhConsolidation.faq.title")}
         >
-          {FAQ.map((key) => (
-            <details key={key} className={DISCLOSURE}>
-              <summary className={SUMMARY}>
-                {t(locale, `network.tdhConsolidation.faq.${key}.title`)}
-              </summary>
-              <p className={`${TDH_TEXT} tw-pb-5`}>
-                {!limits && key === "limit"
-                  ? pendingLimits
-                  : t(locale, `network.tdhConsolidation.faq.${key}.body`, {
-                      date,
-                      limit,
-                    })}
-              </p>
-            </details>
-          ))}
+          <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800">
+            {FAQ.map((key) => (
+              <TdhDisclosure
+                key={key}
+                tone="strong"
+                className="tw-py-1"
+                summary={t(locale, `network.tdhConsolidation.faq.${key}.title`)}
+              >
+                <p className={`${TDH_TEXT} tw-pb-4 tw-pl-6`}>
+                  {!limits && key === "limit"
+                    ? pendingLimits
+                    : t(locale, `network.tdhConsolidation.faq.${key}.body`, {
+                        date,
+                        limit,
+                      })}
+                </p>
+              </TdhDisclosure>
+            ))}
+          </div>
         </TDHSection>
 
         <TDHSection
           id="consolidation-under"
           title={t(locale, "network.tdhConsolidation.under.title")}
-          description={t(locale, "network.tdhConsolidation.under.description")}
+          description={t(locale, "network.tdhConsolidation.under.intro")}
         >
           <TDHRelatedLinks
+            variant="list"
             links={[
               {
                 href: DESIGN_HREF,
@@ -341,10 +386,7 @@ export default function TDHConsolidationPage() {
           />
         </TDHSection>
 
-        <NetworkReferenceNavigation
-          currentHref="/network/tdh/consolidation"
-          locale={locale}
-        />
+        <TdhPager current="/network/tdh/consolidation" locale={locale} />
       </article>
     </div>
   );
@@ -362,26 +404,31 @@ function WalletsFigure({ locale }: { readonly locale: SupportedLocale }) {
       </figcaption>
       <div
         aria-hidden="true"
-        className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-4 sm:tw-grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
+        className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-4 xl:tw-grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
       >
-        <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-2 tw-p-0 sm:tw-grid-cols-1">
-          {WALLET_ROLES.map(({ key, dot }) => (
+        {/* One row a wallet, 44 px each: a list on phones, two columns
+            from sm, one column again beside the collector from xl. */}
+        <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-2 tw-p-0 sm:tw-grid-cols-2 xl:tw-grid-cols-1">
+          {WALLET_ROLES.map(({ key, icon: RoleIcon }) => (
             <li
               key={key}
-              className="tw-flex tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-2.5"
+              className="tw-flex tw-min-h-11 tw-flex-wrap tw-items-center tw-gap-x-2.5 tw-gap-y-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-2"
             >
-              <WalletIcon className="tw-size-4 tw-flex-shrink-0 tw-text-iron-400" />
-              <span className="tw-min-w-0 tw-flex-1 tw-text-sm tw-text-iron-200">
+              <RoleIcon className="tw-size-4 tw-flex-shrink-0 tw-text-iron-400" />
+              <span className="tw-text-sm tw-text-iron-200">
                 {t(locale, `network.tdhConsolidation.figure.${key}`)}
               </span>
-              <span
-                className={`tw-size-2 tw-flex-shrink-0 tw-rounded-full ${dot}`}
-              />
+              {/* Beside the name when it fits, under it when not. */}
+              {key === "old" && (
+                <span className="tw-ml-auto tw-text-xs tw-text-amber-200">
+                  {t(locale, "network.tdhConsolidation.figure.fourthTag")}
+                </span>
+              )}
             </li>
           ))}
         </ul>
-        <ArrowRightIcon className="tw-hidden tw-size-5 tw-text-iron-500 sm:tw-block" />
-        <ArrowDownIcon className="tw-mx-auto tw-size-5 tw-text-iron-500 sm:tw-hidden" />
+        <ArrowRightIcon className="tw-hidden tw-size-5 tw-text-iron-500 xl:tw-block" />
+        <ArrowDownIcon className="tw-mx-auto tw-size-5 tw-text-iron-500 xl:tw-hidden" />
         <div className="tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-500/[0.06] tw-p-4">
           <div className="tw-flex tw-items-center tw-gap-2.5">
             <UserCircleIcon className="tw-size-6 tw-text-primary-300" />

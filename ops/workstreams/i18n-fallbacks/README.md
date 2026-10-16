@@ -13,6 +13,7 @@ fallback dictionaries.
 | [About minting](about-minting.md)                                   | `AboutMinting` still uses `DEFAULT_LOCALE`, with canonical body copy remaining in source-locale English                       |
 | [Content moderation](content-moderation.md)                         | Moderation actions, tombstones, preferences, queue, and composer feedback currently fall back to the reviewed `en-US` messages |
 | [Public contract review](public-contract-review.md)                 | The shell, feedback composer, ledger, and immutable editorial snapshots currently use the source-locale fallback              |
+| [TDH explained and verified](tdh-explained-and-verified.md) | The TDH sub-pages render with `DEFAULT_LOCALE`; the six new `network.tdh.*` namespaces have `en-US` source text only |
 | [Network reference pages](network-reference-pages.md)               | Prenodes and xTDH remain English in source; Definitions and Historic Boosts messages fall back to `en-US` outside the source  |
 | [Listings and Offers](listings-and-offers.md)                       | Card price messages fall back to `en-US`; API explanatory notes currently have no localized identifiers                      |
 | [Museum Open Museum and source contribution](museum-open-source.md) | Museum source/contribution and transition interface messages currently resolve through the reviewed `en-US` fallback          |

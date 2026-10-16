@@ -1,8 +1,15 @@
+import Link from "next/link";
 import { useState } from "react";
 import Button from "@/components/utils/button/Button";
-import { formatInteger, formatList, formatNumber } from "@/i18n/format";
+import {
+  formatInteger,
+  formatList,
+  formatNumber,
+  selectPluralCategory,
+} from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import TdhDisclosure from "./shared/TdhDisclosure";
 import { TDH_FOCUS, TDH_TEXT } from "./TDHSection";
 import {
   TDH_COLLECTIONS,
@@ -20,6 +27,13 @@ const COLUMNS = [
   "tokenBase",
   "tokenFinal",
 ] as const;
+/** Column heads that link to the step of How it works that defines them. */
+const COLUMN_STEP: Partial<Record<(typeof COLUMNS)[number], number>> = {
+  days: 2,
+  weight: 7,
+  tokenBase: 8,
+  tokenFinal: 11,
+};
 const CELL =
   "tw-whitespace-nowrap tw-px-3 tw-py-3 tw-text-right first:tw-pl-0 first:tw-text-left last:tw-pr-0";
 
@@ -70,16 +84,21 @@ function Collection({
     0
   );
   return (
-    <details className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 last:tw-border-b-0">
-      <summary
-        className={`tw-cursor-pointer tw-py-3 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-100 ${TDH_FOCUS}`}
-      >
-        {t(locale, "network.tdh.profile.holdings", {
+    <TdhDisclosure
+      tone="strong"
+      className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 last:tw-border-b-0"
+      summary={t(
+        locale,
+        selectPluralCategory(locale, tokens.length) === "one"
+          ? "network.tdh.profile.holdings.one"
+          : "network.tdh.profile.holdings.other",
+        {
           collection: collectionName,
           count: formatInteger(locale, tokens.length),
           tdh: formatInteger(locale, total),
-        })}
-      </summary>
+        }
+      )}
+    >
       {!tokens.length ? (
         <p className={`${TDH_TEXT} tw-pb-4`}>
           {t(locale, "network.tdh.profile.noHoldings")}
@@ -94,12 +113,12 @@ function Collection({
             tabIndex={0}
             className={`tw-overflow-x-auto ${TDH_FOCUS}`}
           >
-            <table className="tw-w-full tw-border-collapse tw-text-sm tw-tabular-nums">
-              <caption className="tw-sr-only">
-                {t(locale, "network.tdh.profile.table", {
-                  collection: collectionName,
-                })}
-              </caption>
+            <table
+              className="tw-w-full tw-border-collapse tw-text-sm tw-tabular-nums"
+              aria-label={t(locale, "network.tdh.profile.table", {
+                collection: collectionName,
+              })}
+            >
               <thead>
                 <tr>
                   {COLUMNS.map((key) => (
@@ -108,7 +127,16 @@ function Collection({
                       scope="col"
                       className={`${CELL} tw-font-medium tw-text-iron-400`}
                     >
-                      {t(locale, `network.tdh.profile.${key}`)}
+                      {COLUMN_STEP[key] === undefined ? (
+                        t(locale, `network.tdh.profile.${key}`)
+                      ) : (
+                        <Link
+                          href={`/network/tdh/how-it-works#step-${COLUMN_STEP[key]}`}
+                          className={`tw-text-iron-300 tw-underline tw-decoration-iron-600 tw-underline-offset-4 hover:tw-text-iron-50 ${TDH_FOCUS}`}
+                        >
+                          {t(locale, `network.tdh.profile.${key}`)}
+                        </Link>
+                      )}
                     </th>
                   ))}
                 </tr>
@@ -148,7 +176,7 @@ function Collection({
           {tokens.length > PAGE_SIZE && (
             <div className="tw-my-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
               <p
-                className="tw-m-0 tw-text-xs tw-text-iron-400"
+                className="tw-m-0 tw-text-sm tw-text-iron-400"
                 aria-live="polite"
               >
                 {t(locale, "network.tdh.profile.pagination", {
@@ -186,19 +214,17 @@ function Collection({
               </div>
             </div>
           )}
-          <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-400">
+          <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-5 tw-text-iron-400">
             {t(locale, "network.tdh.profile.tableNote")}
           </p>
-          <details className="tw-my-4">
-            <summary
-              className={`tw-cursor-pointer tw-py-2 tw-text-xs tw-text-iron-200 ${TDH_FOCUS}`}
-            >
-              {t(locale, "network.tdh.profile.ages")}
-            </summary>
-            <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400">
+          <TdhDisclosure
+            className="tw-my-2"
+            summary={t(locale, "network.tdh.profile.ages")}
+          >
+            <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-5 tw-text-iron-400">
               {t(locale, "network.tdh.profile.agesNote")}
             </p>
-            <ul className="tw-mb-0 tw-mt-3 tw-space-y-2 tw-pl-5 tw-text-xs tw-leading-5 tw-text-iron-300">
+            <ul className="tw-mb-0 tw-mt-3 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-5 tw-text-iron-300">
               {visible.map((token) => (
                 <li key={token.id}>
                   {t(locale, "network.tdh.profile.agesRow", {
@@ -215,9 +241,9 @@ function Collection({
                 </li>
               ))}
             </ul>
-          </details>
+          </TdhDisclosure>
         </>
       )}
-    </details>
+    </TdhDisclosure>
   );
 }

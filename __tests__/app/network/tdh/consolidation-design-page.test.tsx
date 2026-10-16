@@ -26,7 +26,7 @@ describe("TDHConsolidationDesignPage", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: "How wallet consolidation works",
+        name: "How consolidation works",
       })
     ).toBeInTheDocument();
     expect(
@@ -42,6 +42,15 @@ describe("TDHConsolidationDesignPage", () => {
     const meshRow = within(matrix).getByRole("row", {
       name: /Every pair links both ways/,
     });
+    // One compact grid at every width: a column per number of wallets the
+    // attacker controls, 0 to 3.
+    for (const count of [0, 1, 2, 3]) {
+      expect(
+        within(matrix).getByRole("columnheader", {
+          name: `Attacker controls ${count} of your wallets`,
+        })
+      ).toBeInTheDocument();
+    }
     expect(
       within(meshRow)
         .getAllByRole("cell")
@@ -57,7 +66,7 @@ describe("TDHConsolidationDesignPage", () => {
     render(<TDHConsolidationDesignPage />);
 
     expect(
-      screen.getByRole("link", { name: "Read the collector's guide" })
+      screen.getByRole("link", { name: "Read the collector’s guide" })
     ).toHaveAttribute("href", "/network/tdh/consolidation");
     expect(
       screen.getByRole("link", { name: "Open the guided setup" })

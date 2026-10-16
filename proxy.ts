@@ -16,6 +16,10 @@ import {
   isStaticAssetPath,
   isUnservableDotPath,
 } from "@/lib/proxy/publicPaths";
+import {
+  isImpossibleTdhVerificationDay,
+  tdhDayNotFoundTarget,
+} from "@/lib/proxy/tdhVerificationDay";
 import { publicEnv } from "./config/env";
 import { API_AUTH_COOKIE } from "./constants/constants";
 
@@ -292,12 +296,24 @@ async function enforceAccessControl(
   req: NextRequest,
   normalizedPathname: string
 ): Promise<Response> {
+  return (await accessDenial(req, normalizedPathname)) ?? NextResponse.next();
+}
+
+/**
+ * The access gate's answer when it turns a request away (a redirect to
+ * /access or /restricted, or a 503 when it cannot decide), or null when the
+ * request may go through.
+ */
+async function accessDenial(
+  req: NextRequest,
+  normalizedPathname: string
+): Promise<Response | null> {
   if (
     !ACCESS_GATE_ENABLED ||
     normalizedPathname === "/access" ||
     normalizedPathname === "/restricted"
   ) {
-    return NextResponse.next();
+    return null;
   }
 
   const authValue =
@@ -324,7 +340,7 @@ async function enforceAccessControl(
     return plainServiceUnavailableResponse();
   }
 
-  return NextResponse.next();
+  return null;
 }
 
 export default async function proxy(req: NextRequest) {
@@ -343,6 +359,18 @@ export default async function proxy(req: NextRequest) {
       pathname.length > 1 && pathname.endsWith("/")
         ? pathname.slice(0, -1)
         : pathname;
+
+    if (isImpossibleTdhVerificationDay(normalizedPathname, Date.now())) {
+      // The TDH pages' own not-found view, with the site around it, sent
+      // with a real 404 status, after the same access gate as any page.
+      return (
+        (await accessDenial(req, normalizedPathname)) ??
+        NextResponse.rewrite(
+          tdhDayNotFoundTarget(req.nextUrl, normalizedPathname),
+          { status: 404 }
+        )
+      );
+    }
 
     const redirectTarget = normalizedPathname.startsWith("/my-stream")
       ? resolveMyStreamRedirect(req, normalizedPathname)
