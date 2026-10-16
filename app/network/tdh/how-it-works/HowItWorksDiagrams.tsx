@@ -190,52 +190,85 @@ function labelShift(dy: number, font: number): number {
   return dy === 0 ? font * 0.35 : 0;
 }
 
-/** One label for the 300- and 310-copy Memes, up and to the right of them. */
-function PairLabel({
-  x,
-  y,
+/**
+ * The 300- and 310-copy Memes sit almost on one spot of the log axis, so
+ * they are drawn apart: 300 as a ring, 310 as a dot inside its edge, each
+ * with its own leader and label, 300 above and to the left (its rate is the
+ * higher), 310 below and to the right.
+ */
+function PairPoints({
+  locale,
+  x300,
+  y300,
+  x310,
+  y310,
   font,
-  text,
-  note,
 }: {
-  readonly x: number;
-  readonly y: number;
+  readonly locale: SupportedLocale;
+  readonly x300: number;
+  readonly y300: number;
+  readonly x310: number;
+  readonly y310: number;
   readonly font: number;
-  readonly text: string;
-  readonly note: string;
 }) {
-  const lx = x + 22;
-  const ly = y - 34;
+  const label = (copies: number) => {
+    const cents = rateCents(H, copies, false) ?? 0;
+    return t(locale, "network.tdh.how.s7.pointLabel", {
+      copies: formatInteger(locale, copies),
+      rate: formatNumber(locale, cents / 100, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }),
+    });
+  };
+  const textProps = {
+    className:
+      "tw-fill-iron-50 tw-stroke-iron-950 tw-font-medium tw-tabular-nums",
+    strokeWidth: 4,
+    paintOrder: "stroke" as const,
+    fontSize: font,
+  };
+  // 300 above and to the right, where the falling curve leaves room; 310
+  // below and to the left, under the floor's dashed line.
   return (
     <g>
       <line
-        x1={x + 3}
-        y1={y - 3}
-        x2={lx - 2}
-        y2={ly + 4}
+        x1={x300 + 4}
+        y1={y300 - 5}
+        x2={x300 + 14}
+        y2={y300 - 30}
         strokeWidth="1"
         className="tw-stroke-iron-500"
       />
-      <text
-        x={lx}
-        y={ly}
-        className="tw-fill-iron-50 tw-stroke-iron-950 tw-font-medium tw-tabular-nums"
-        strokeWidth={4}
-        paintOrder="stroke"
-        fontSize={font}
-      >
-        {text}
+      <text x={x300 + 12} y={y300 - 34} textAnchor="start" {...textProps}>
+        {label(300)}
       </text>
-      <text
-        x={lx}
-        y={ly - font - 2}
-        className="tw-fill-iron-400 tw-stroke-iron-950"
-        strokeWidth={4}
-        paintOrder="stroke"
-        fontSize={font - 1}
-      >
-        {note}
+      <line
+        x1={x310 - 4}
+        y1={y310 + 5}
+        x2={x310 - 12}
+        y2={y310 + 20}
+        strokeWidth="1"
+        className="tw-stroke-iron-500"
+      />
+      <text x={x310 - 12} y={y310 + 20 + font} textAnchor="end" {...textProps}>
+        {label(310)}
       </text>
+      <circle
+        cx={x300}
+        cy={y300}
+        r="6"
+        fill="none"
+        strokeWidth="1.75"
+        className={TDH_SERIES.memes.stroke}
+      />
+      <circle
+        cx={x310}
+        cy={y310}
+        r="3.25"
+        className={`${TDH_SERIES.memes.fill} tw-stroke-iron-950`}
+        strokeWidth="1"
+      />
     </g>
   );
 }
@@ -282,7 +315,6 @@ function RateCurve({
       height={height}
       title={t(locale, "network.tdh.how.s7.curveTitle")}
       desc={t(locale, "network.tdh.how.s7.curveDesc")}
-      maxWidth={width === NARROW_WIDTH ? 400 : 720}
     >
       <text x={8} y={16} className="tw-fill-iron-300" fontSize={font}>
         {t(locale, "network.tdh.how.s7.curveY")}
@@ -353,16 +385,7 @@ function RateCurve({
           width === NARROW_WIDTH ? "narrow" : "wide"
         ][point.key] ?? [10, -10, "start"];
         if (PAIRED.has(point.key)) {
-          return (
-            <circle
-              key={point.key}
-              cx={px}
-              cy={py}
-              r="4.5"
-              className={`${TDH_SERIES[point.series].fill} tw-stroke-iron-950`}
-              strokeWidth="1.5"
-            />
-          );
+          return null;
         }
         // A leader from the dot's edge toward the label's corner.
         const length = Math.hypot(dx, dy);
@@ -399,12 +422,13 @@ function RateCurve({
           </g>
         );
       })}
-      <PairLabel
-        x={x(305)}
-        y={y((rateCents(H, 300, false) ?? 0) / 100)}
+      <PairPoints
+        locale={locale}
+        x300={x(300)}
+        y300={y((rateCents(H, 300, false) ?? 0) / 100)}
+        x310={x(310)}
+        y310={y((rateCents(H, 310, false) ?? 0) / 100)}
         font={font}
-        text={`${rate(rateCents(H, 300, false) ?? 0)} · ${rate(rateCents(H, 310, false) ?? 0)}`}
-        note={t(locale, "network.tdh.how.s7.pairLabel")}
       />
       <text
         x={(left + width - right) / 2}
@@ -451,26 +475,26 @@ export function RateCurveDiagram({
           />
         }
       />
-      <figcaption className="tw-mt-3 tw-grid tw-grid-cols-1 tw-items-center tw-gap-x-6 tw-gap-y-1.5 tw-text-sm tw-text-iron-300 sm:tw-grid-cols-2">
-        <span className="tw-inline-flex tw-items-center tw-gap-2">
-          <span
-            aria-hidden="true"
-            className="tw-w-5 tw-shrink-0 tw-border-0 tw-border-t-2 tw-border-dashed tw-border-sky-300"
-          />
-          {t(locale, "network.tdh.how.s7.floorBand")}
-        </span>
-        {(["memes", "gradients", "nextgen"] as const).map((series) => (
-          <span
-            key={series}
-            className="tw-inline-flex tw-items-center tw-gap-1.5"
-          >
+      {/* The key, one item a row, in the order the eye meets them. */}
+      <figcaption>
+        <ul className="tw-m-0 tw-mt-3 tw-grid tw-list-none tw-gap-1.5 tw-p-0 tw-text-[13px] tw-leading-5 tw-text-iron-300">
+          {(["memes", "gradients", "nextgen"] as const).map((series) => (
+            <li key={series} className="tw-flex tw-items-center tw-gap-2">
+              <span
+                aria-hidden="true"
+                className={`tw-ml-1.5 tw-mr-1.5 tw-size-2 tw-shrink-0 tw-rounded-full ${TDH_SERIES[series].bg}`}
+              />
+              {t(locale, `network.tdh.how.s7.legend.${series}` as MessageKey)}
+            </li>
+          ))}
+          <li className="tw-flex tw-items-center tw-gap-2">
             <span
               aria-hidden="true"
-              className={`tw-size-2 tw-rounded-full ${TDH_SERIES[series].bg}`}
+              className="tw-w-5 tw-shrink-0 tw-border-0 tw-border-t-2 tw-border-dashed tw-border-sky-300"
             />
-            {t(locale, `network.tdh.how.s7.legend.${series}` as MessageKey)}
-          </span>
-        ))}
+            {t(locale, "network.tdh.how.s7.floorBand")}
+          </li>
+        </ul>
       </figcaption>
     </figure>
   );
@@ -511,7 +535,7 @@ function IdentityGraph({ graph }: { readonly graph: (typeof GRAPHS)[number] }) {
     <svg
       viewBox="0 0 190 140"
       aria-hidden="true"
-      className="tw-mx-auto tw-block tw-h-auto tw-w-full tw-max-w-[15rem]"
+      className="tw-mx-auto tw-block tw-h-auto tw-w-full tw-max-w-[13.625rem]"
     >
       {graph.identities.map((members, index) => {
         const points = members.map(position);

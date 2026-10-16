@@ -34,7 +34,13 @@ const NUMBERED_FROM = 8;
 /** Blocks this long show their first lines on phones, and a button. */
 const CLAMPED_FROM = 16;
 /** Blocks this long show their first lines at every width. */
-const CLAMPED_EVERYWHERE_FROM = 28;
+const CLAMPED_EVERYWHERE_FROM = 16;
+/**
+ * Blocks this short (a formula, an order) are one compact row: the code,
+ * then the source chip and the copy button at its side, with no caption
+ * bar of their own; the region's name still says it is the exact rule.
+ */
+const COMPACT_UP_TO = 2;
 
 const TOKEN_CLASS = {
   keyword: "tw-text-violet-300",
@@ -43,16 +49,6 @@ const TOKEN_CLASS = {
   name: "tw-text-sky-200",
   text: "",
 } as const;
-
-/**
- * Whether a line of pseudocode reads as code: it has an operator, a call or
- * a block's colon. A line of plain English inside pseudocode ("anything else
- * names no cycle") gets no keyword tinting, so "else" and "not" read as
- * words there.
- */
-function readsAsCode(text: string): boolean {
-  return /[=()[\]<>{}:+*]|->/.test(text);
-}
 
 /** One code fragment, tinted: keywords, numbers, strings and rule names. */
 function Tinted({
@@ -64,9 +60,7 @@ function Tinted({
   readonly language: RuleLanguage;
   readonly keywords: boolean;
 }): ReactNode {
-  return ruleTokens(text, language, {
-    keywords: keywords && (language !== "pseudo" || readsAsCode(text)),
-  }).map((token, index) =>
+  return ruleTokens(text, language, { keywords }).map((token, index) =>
     token.kind === "text" ? (
       token.text
     ) : (
@@ -117,17 +111,26 @@ function cellWrap(wrap: RuleWrap): string {
 /**
  * The hanging indent of a wrapping line: its own indentation, then two more
  * columns for each continuation, so a wrapped line never lines up with a
- * real child line (four columns deeper). In a narrow block a deep indent
- * takes at most 45% of the width, so the text keeps room to wrap.
+ * real child line (four columns deeper).
+ *
+ * The padding is set in `ch` alone from `sm`, where the code column is as
+ * wide as its longest commented line (`minmax(0, max-content)`): a
+ * percentage there is cyclic, counts as zero toward the column's width and
+ * left every commented line 2ch short, so its last token wrapped. Below
+ * `sm` the block is one column and a deep indent takes at most 45% of the
+ * width, so the text keeps room to wrap.
  */
+const HANG_CLASS =
+  "tw-pl-[var(--tdh-hang)] max-sm:tw-pl-[min(var(--tdh-hang),45%)]";
+
 function indentStyle(line: RuleLine, wrap: RuleWrap): CSSProperties {
   if (wrap === "none") {
     return {};
   }
   return {
-    paddingLeft: `min(${line.indent + 2}ch, 45%)`,
+    "--tdh-hang": `${line.indent + 2}ch`,
     textIndent: "-2ch",
-  };
+  } as CSSProperties;
 }
 
 /** A line's code: a heading comment as it is, code tinted, a blank kept. */
@@ -192,7 +195,8 @@ function RuleRow({
       )}
       <span
         style={codeStyle}
-        className={`tw-min-w-0 ${cellWrap(wrap)} ${line.kind === "comment" ? "tw-text-iron-400" : ""}`}
+        data-tdh-code-cell=""
+        className={`tw-min-w-0 ${cellWrap(wrap)} ${wrap === "none" ? "" : HANG_CLASS} ${line.kind === "comment" ? "tw-text-iron-400" : ""}`}
       >
         {lead}
         <LineCode line={line} language={language} keywords={keywords} />
@@ -280,12 +284,60 @@ export default function TdhRuleBlock({
     wrap === "none"
       ? `tw-overflow-x-auto ${scrollStyles["shade"] ?? ""} ${scrollStyles["bar"] ?? ""}`
       : "";
+  const copy = (
+    <TdhCopyButton
+      value={code}
+      label={t(locale, "network.tdh.shared.copyNamed", {
+        name: t(locale, "network.tdh.shared.ruleRegion", { caption }),
+      })}
+      copiedLabel={t(locale, "network.tdh.shared.copied")}
+      failedLabel={t(locale, "network.tdh.shared.copyFailed")}
+    />
+  );
+  const body = (
+    <code
+      className={`tw-font-mono tw-text-iron-100 ${gridClass(wrap, numbered)}`}
+    >
+      {lines.map((line, index) => (
+        <RuleRow
+          key={index}
+          line={line}
+          number={index + 1}
+          numbered={numbered}
+          wrap={wrap}
+          language={language}
+          keywords={keywords}
+        />
+      ))}
+    </code>
+  );
+  if (lines.length <= COMPACT_UP_TO && !scrolls) {
+    return (
+      <figure
+        className={`tw-m-0 tw-flex tw-min-w-0 tw-items-start tw-gap-2 tw-overflow-hidden tw-rounded-lg tw-border tw-border-l-2 tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-py-1.5 tw-pl-3 tw-pr-1.5 sm:tw-pl-4 ${accent}`}
+      >
+        <figcaption className="tw-sr-only">{heading}</figcaption>
+        <pre
+          aria-label={t(locale, "network.tdh.shared.ruleRegion", { caption })}
+          className="tw-m-0 tw-min-w-0 tw-flex-1 tw-bg-transparent tw-py-1.5 tw-font-mono tw-text-[13px] tw-font-normal tw-leading-6 tw-text-iron-100 sm:tw-text-sm sm:tw-leading-[1.375rem]"
+        >
+          {body}
+        </pre>
+        <span className="tw-flex tw-shrink-0 tw-items-center tw-gap-1 tw-pt-0.5">
+          {source && (
+            <TdhSource refs={[source, ...moreSources]} locale={locale} />
+          )}
+          {copy}
+        </span>
+      </figure>
+    );
+  }
   return (
     <figure
       className={`tw-m-0 tw-min-w-0 tw-overflow-hidden tw-rounded-lg tw-border tw-border-l-2 tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 ${accent}`}
     >
-      <figcaption className="tw-flex tw-min-h-11 tw-items-start tw-justify-between tw-gap-2 tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.06] tw-py-2 tw-pl-3 tw-pr-2">
-        <span className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-pt-0.5 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-300">
+      <figcaption className="tw-flex tw-min-h-9 tw-items-start tw-justify-between tw-gap-2 tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.06] tw-py-1 tw-pl-3 tw-pr-1.5">
+        <span className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-pt-1 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-300">
           <span className="tw-min-w-0">{heading}</span>
           {source && (
             <TdhSource refs={[source, ...moreSources]} locale={locale} />
@@ -297,38 +349,17 @@ export default function TdhRuleBlock({
             </span>
           )}
         </span>
-        <TdhCopyButton
-          value={code}
-          label={t(locale, "network.tdh.shared.copyNamed", {
-            name: t(locale, "network.tdh.shared.ruleRegion", { caption }),
-          })}
-          copiedLabel={t(locale, "network.tdh.shared.copied")}
-          failedLabel={t(locale, "network.tdh.shared.copyFailed")}
-        />
+        {copy}
       </figcaption>
       {clamp(
         <pre
           aria-label={t(locale, "network.tdh.shared.ruleRegion", { caption })}
-          className={`tw-m-0 tw-bg-transparent tw-px-3 tw-py-4 tw-font-mono tw-text-[13px] tw-font-normal tw-leading-6 tw-text-iron-100 sm:tw-px-4 sm:tw-text-sm sm:tw-leading-[1.375rem] ${preScroll}`}
+          className={`tw-m-0 tw-bg-transparent tw-px-3 tw-py-3 tw-font-mono tw-text-[13px] tw-font-normal tw-leading-6 tw-text-iron-100 sm:tw-px-4 sm:tw-text-sm sm:tw-leading-[1.375rem] ${preScroll}`}
           {...(scrolls
             ? { "data-tdh-scroll": "", tabIndex: 0, role: "region" }
             : {})}
         >
-          <code
-            className={`tw-font-mono tw-text-iron-100 ${gridClass(wrap, numbered)}`}
-          >
-            {lines.map((line, index) => (
-              <RuleRow
-                key={index}
-                line={line}
-                number={index + 1}
-                numbered={numbered}
-                wrap={wrap}
-                language={language}
-                keywords={keywords}
-              />
-            ))}
-          </code>
+          {body}
         </pre>
       )}
     </figure>

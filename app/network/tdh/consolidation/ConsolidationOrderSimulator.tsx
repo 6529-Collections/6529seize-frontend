@@ -30,16 +30,6 @@ const START_GROUPS: readonly (readonly SimulatedWallet[])[] = [
   ["A", "B", "C"],
   ["D"],
 ];
-/**
- * The same four wallets under TDH-v1 (tdh-v1.0, P26 §6.3), when D's links
- * were confirmed D–A, then D–B, then D–C: an identity of three from the
- * newest link, and A on its own.
- */
-const TDH_V1_GROUPS: readonly (readonly SimulatedWallet[])[] = [
-  ["B", "C", "D"],
-  ["A"],
-];
-
 /** A group's outline: a lone wallet dashed; a group amber while split. */
 function groupTone(group: readonly SimulatedWallet[], split: boolean): string {
   if (group.length < 2) {
@@ -267,20 +257,6 @@ export default function ConsolidationOrderSimulator({
                 total: formatInteger(locale, steps.length),
               }))}
       </output>
-
-      {complete && lastStep?.groups.some((group) => group.length === 4) && (
-        <div className="tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-3 tw-pl-4 tw-pr-3">
-          <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
-            {t(locale, "network.tdhConsolidation.order.v1Title")}
-          </p>
-          <span className="tw-mt-2 tw-block">
-            <GroupChips groups={TDH_V1_GROUPS} split={false} />
-          </span>
-          <p className={`${TDH_TEXT} tw-mt-2`}>
-            {t(locale, "network.tdhConsolidation.order.v1Body")}
-          </p>
-        </div>
-      )}
 
       <p className="tw-m-0 tw-max-w-[38em] tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-600 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-300">
         {t(locale, "network.tdhConsolidation.order.note")}

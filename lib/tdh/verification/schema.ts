@@ -24,6 +24,17 @@ const calendarDate = z
   .regex(/^\d{4}-\d{2}-\d{2}$/)
   .refine((value) => cycleDayOfDate(value) !== null, "invalid date");
 const cycleDay = z.number().int().positive().max(1_000_000);
+/**
+ * When the feed wrote a file, and a file's SHA-256, as the publisher is
+ * adding them (`generatedAt`, `sha256`): optional, shown in Provenance when
+ * present, and never required.
+ */
+const timestamp = z
+  .string()
+  .max(40)
+  .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[.\dZ+:-]{1,16}$/)
+  .refine((value) => !Number.isNaN(Date.parse(value)), "invalid time");
+const fileSha256 = z.string().regex(/^[0-9a-f]{64}$/);
 const nullish = <T extends z.ZodTypeAny>(schema: T) =>
   schema
     .nullish()
@@ -54,6 +65,9 @@ const indexDay = z
     identitiesEqual: nullish(count),
     identitiesTotal: nullish(count),
     totalTdh,
+    /** When the day's file was written, and its SHA-256, if the index says. */
+    generatedAt: nullish(timestamp),
+    sha256: nullish(fileSha256),
   })
   .refine((day) => cycleDayOfDate(day.date) === day.cycleDay, {
     message: "cycleDay and date disagree",
@@ -80,6 +94,8 @@ const cutover = z.object({
 export const verificationIndexSchema = z.object({
   days: z.array(indexDay).max(10_000),
   cutover: nullish(cutover),
+  /** When the index was written, if it says. */
+  generatedAt: nullish(timestamp),
 });
 
 /**
@@ -95,6 +111,12 @@ const ruleVersion = z.string().regex(/^tdh-v\d{1,3}\.\d{1,3}$/);
 
 const implementation = z.object({
   commit: nullish(codeCommit),
+  /** What the run states it computed by, when it states it. */
+  ruleVersion: nullish(ruleVersion),
+  ruleId: nullish(hash32),
+  registryHash: nullish(hash32),
+  /** SHA-256 of the program the run executed (the Rust core's binary). */
+  binarySha256: nullish(sha256),
   totalTdh: tdhValue,
   identities: count,
   wallets: count,
@@ -119,6 +141,34 @@ const live = z.object({
   wallets: nullish(count),
   /** SHA-256 of 6529.io's identity upload, as the comparison read it. */
   sha256: nullish(sha256),
+});
+
+/**
+ * The files a run read and wrote, by SHA-256: the canonical input both new
+ * programs computed from, and the identity and wallet record files each
+ * wrote. Equal hashes mean byte-identical files.
+ */
+const runFiles = z.object({
+  canonicalInputSha256: nullish(sha256),
+  identitiesSha256: nullish(sha256),
+  walletsSha256: nullish(sha256),
+});
+
+/** One of 6529.io's uploads, with the SHA-256 of the file as read. */
+const liveFile = z.object({
+  source: nullish(arweaveSource),
+  sha256: nullish(sha256),
+});
+
+const daySources = z.object({
+  rust: nullish(runFiles),
+  python: nullish(runFiles),
+  live: nullish(
+    z.object({
+      identity: nullish(liveFile),
+      wallet: nullish(liveFile),
+    })
+  ),
 });
 
 const agreement = z
@@ -217,7 +267,12 @@ export const verificationDaySchema = z
       rustVsLive: nullish(agreement),
     }),
     differenceSummary: nullish(consistentDifferenceSummary),
+    /** The files each run read and wrote, by SHA-256, when stated. */
+    sources: nullish(daySources),
     verdict,
+    /** When the job wrote this file, and a SHA-256 it states, if present. */
+    generatedAt: nullish(timestamp),
+    sha256: nullish(fileSha256),
   })
   .refine((day) => cycleDayOfDate(day.date) === day.cycleDay, {
     message: "cycleDay and date disagree",
@@ -236,6 +291,9 @@ export type VerificationImplementation =
   VerificationDay["implementations"]["rust"];
 export type VerificationLive = NonNullable<
   VerificationDay["implementations"]["live"]
+>;
+export type VerificationRunFiles = NonNullable<
+  NonNullable<VerificationDay["sources"]>["rust"]
 >;
 export type VerificationAgreement = NonNullable<
   VerificationDay["agreement"]["rustVsLive"]

@@ -5,14 +5,19 @@ import { t, type MessageKey } from "@/i18n/messages";
 import type { VerificationDay } from "@/lib/tdh/verification/schema";
 import {
   dayDifferences,
+  FIRST_REPORT_DATE,
   type DayNeighbours,
   type VerdictState,
 } from "@/lib/tdh/verification/states";
 import TdhDisclosure from "../../shared/TdhDisclosure";
-import TdhSource from "../../shared/TdhSource";
+import TdhCopyButton from "../../shared/TdhCopyButton";
 import TdhStatusPill from "../../shared/TdhStatusPill";
 import { TDH_CARD, TDH_FOCUS_RING } from "../../shared/tdhStyles";
-import { formatCycleDate, formatInteger } from "./verificationFormat";
+import {
+  formatCycleDate,
+  formatInteger,
+  middleTruncate,
+} from "./verificationFormat";
 
 export function verificationDayHref(cycleDay: number): string {
   return `/network/tdh/verification/${cycleDay}`;
@@ -146,6 +151,63 @@ function DayArrow({
   );
 }
 
+/** The three totals of the day, and the SHA-256 of its file. */
+function DayEvidence({
+  locale,
+  day,
+  daySha256,
+}: {
+  readonly locale: SupportedLocale;
+  readonly day: VerificationDay;
+  readonly daySha256: string | null;
+}) {
+  const totals = [
+    ["rust", day.implementations.rust.totalTdh],
+    ["python", day.implementations.python?.totalTdh ?? null],
+    ["live", day.implementations.live?.totalTdh ?? null],
+  ] as const;
+  return (
+    <div className="tw-min-w-0 tw-text-sm tw-leading-6 sm:tw-text-right">
+      <p className="tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
+        {t(locale, "network.tdh.verify.dayHero.totals", {
+          cycle: formatInteger(locale, day.cycleDay),
+        })}
+      </p>
+      <dl className="tw-m-0 tw-mt-1 tw-grid tw-grid-cols-[auto_auto] tw-justify-start tw-gap-x-4 tw-tabular-nums sm:tw-justify-end">
+        {totals.map(([key, value]) => (
+          <div key={key} className="tw-contents">
+            <dt className="tw-text-iron-400">
+              {t(locale, `network.tdh.verify.side.${key}`)}
+            </dt>
+            <dd className="tw-m-0 tw-font-medium tw-text-iron-50">
+              {value === null ? "–" : formatInteger(locale, value)}
+            </dd>
+          </div>
+        ))}
+      </dl>
+      {daySha256 !== null && (
+        <p className="tw-m-0 tw-mt-2 tw-flex tw-items-center tw-gap-1 tw-text-iron-400 sm:tw-justify-end">
+          <span>{t(locale, "network.tdh.verify.dayHero.file")}</span>
+          <code
+            className="tw-font-mono tw-text-xs tw-text-iron-200"
+            title={daySha256}
+          >
+            {middleTruncate(daySha256, 6)}
+          </code>
+          <TdhCopyButton
+            value={daySha256}
+            label={t(locale, "network.tdh.shared.copyNamed", {
+              name: t(locale, "network.tdh.verify.dayHero.file"),
+            })}
+            copiedLabel={t(locale, "network.tdh.shared.copied")}
+            failedLabel={t(locale, "network.tdh.shared.copyFailed")}
+          />
+        </p>
+      )}
+    </div>
+  );
+}
+
 /**
  * The top of the dashboard: the verdict and the day's result in one plain
  * sentence, what the day is, and the previous and next day.
@@ -157,6 +219,7 @@ export default function VerificationHeadline({
   neighbours,
   isLatest,
   permalink = false,
+  daySha256 = null,
 }: {
   readonly locale: SupportedLocale;
   readonly day: VerificationDay;
@@ -165,6 +228,8 @@ export default function VerificationHeadline({
   readonly isLatest: boolean;
   /** A day's own page: its title already names the day and cycle. */
   readonly permalink?: boolean;
+  /** The SHA-256 of the day's file as the page read it. */
+  readonly daySha256?: string | null;
 }) {
   const cycle = formatInteger(locale, day.cycleDay);
   return (
@@ -210,26 +275,42 @@ export default function VerificationHeadline({
             {t(locale, `network.tdh.verify.verdict.${verdict}` as MessageKey)}
           </p>
         </div>
-        <nav
-          aria-label={t(locale, "network.tdh.verify.picker.nav")}
-          className="tw-flex tw-shrink-0 tw-items-center tw-gap-2"
-        >
-          <DayArrow
-            locale={locale}
-            target={neighbours.previous}
-            direction="previous"
-          />
-          <DayArrow locale={locale} target={neighbours.next} direction="next" />
-        </nav>
+        {/* The day's evidence beside the sentence: the three totals and
+            the SHA-256 of the file read, so a shared link shows them in
+            the first screen. */}
+        <div className="tw-flex tw-shrink-0 tw-flex-col tw-gap-4 sm:tw-items-end">
+          <nav
+            aria-label={t(locale, "network.tdh.verify.picker.nav")}
+            className="tw-flex tw-items-center tw-gap-2"
+          >
+            <DayArrow
+              locale={locale}
+              target={neighbours.previous}
+              direction="previous"
+            />
+            <DayArrow
+              locale={locale}
+              target={neighbours.next}
+              direction="next"
+            />
+          </nav>
+          <DayEvidence locale={locale} day={day} daySha256={daySha256} />
+        </div>
       </div>
       <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4 lg:tw-flex-row lg:tw-items-start lg:tw-justify-between">
-        <p className="tw-m-0 tw-text-sm tw-tabular-nums tw-leading-6 tw-text-iron-300">
-          {t(locale, "network.tdh.verify.status.block", {
-            block: formatInteger(locale, day.cutoffBlock),
-            date: formatCycleDate(locale, day.date),
-          })}
-          <TdhSource refs={["P26 §4.2"]} locale={locale} />
-        </p>
+        <div className="tw-min-w-0 tw-space-y-1 tw-text-sm tw-leading-6 tw-text-iron-300">
+          <p className="tw-m-0 tw-tabular-nums">
+            {t(locale, "network.tdh.verify.status.block", {
+              block: formatInteger(locale, day.cutoffBlock),
+              date: formatCycleDate(locale, day.date),
+            })}
+          </p>
+          {day.date < FIRST_REPORT_DATE && (
+            <p className="tw-m-0 tw-max-w-[34rem] tw-text-iron-400">
+              {t(locale, "network.tdh.verify.provenance.manualRun")}
+            </p>
+          )}
+        </div>
         <div className="tw-min-w-0 lg:tw-max-w-md lg:tw-shrink-0">
           <p className="tw-m-0 tw-flex tw-flex-col tw-items-start tw-gap-1.5 tw-text-sm tw-leading-6 tw-text-iron-300">
             <TdhStatusPill
@@ -256,7 +337,6 @@ export default function VerificationHeadline({
                   ? "network.tdh.verify.mode.checked"
                   : "network.tdh.verify.mode.unchecked"
               )}
-              <TdhSource refs={["D118", "P53 §11"]} locale={locale} />
             </p>
           </TdhDisclosure>
         </div>

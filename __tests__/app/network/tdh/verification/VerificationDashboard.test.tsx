@@ -45,6 +45,7 @@ function okDay(day = syntheticDay()): DayLoad {
     status: "ok",
     day,
     dayUrl: `https://verification.example/tdh/days/${day.cycleDay}.json`,
+    sha256: null,
   };
 }
 
@@ -159,6 +160,100 @@ describe("VerificationDashboard", () => {
     );
     expect(container.textContent).not.toMatch(/holder-\d/);
     expectAccessibleStructure(container);
+  });
+
+  it("shows the feed's own statement in Provenance once the feed carries one", () => {
+    const sha = "b".repeat(64);
+    const index = parseVerificationIndex({
+      ...PUBLIC_FEED_INDEX,
+      generatedAt: "2026-10-16T00:52:12Z",
+      days: PUBLIC_FEED_INDEX.days.map((entry) => ({ ...entry, sha256: sha })),
+    });
+    const day = parseVerificationDay({
+      ...PUBLIC_FEED_DAYS[20_741],
+      generatedAt: "2026-10-16T00:51:40Z",
+    });
+    if (!index.success || !day.success) {
+      throw new Error("the public feed fixture no longer parses");
+    }
+    renderDashboard(remoteIndex(index.data), {
+      ...okDay(day.data),
+      sha256: sha,
+    } as DayLoad);
+    expect(screen.getByText("The feed’s own statement")).toBeInTheDocument();
+    expect(screen.getByText("Published by the feed")).toBeInTheDocument();
+    expect(screen.getByText("Index published")).toBeInTheDocument();
+    expect(
+      screen.getByText("matches the file this page read")
+    ).toBeInTheDocument();
+    // The totals tile and the strip use one direction: Rust minus the other.
+    expect(screen.getAllByText("Rust − 6529.io").length).toBeGreaterThan(1);
+    expect(screen.getByText("Rust − Python")).toBeInTheDocument();
+    expect(screen.queryByText(/Python − Rust|6529\.io − Rust/)).toBeNull();
+  });
+
+  it("shows the files each run read and wrote, and the rule the run states", () => {
+    const input = "1".repeat(64);
+    const identities = "2".repeat(64);
+    const wallets = "3".repeat(64);
+    const liveIdentity = "4".repeat(64);
+    const base = PUBLIC_FEED_DAYS[20_741];
+    if (base === undefined) {
+      throw new Error("the public feed fixture has no October 15");
+    }
+    const day = parseVerificationDay({
+      ...base,
+      implementations: {
+        ...base.implementations,
+        rust: {
+          ...base.implementations.rust,
+          ruleVersion: "tdh-v1.0",
+          registryHash: `0x${"5".repeat(64)}`,
+        },
+      },
+      sources: {
+        rust: {
+          canonicalInputSha256: input,
+          identitiesSha256: identities,
+          walletsSha256: wallets,
+        },
+        python: {
+          canonicalInputSha256: input,
+          identitiesSha256: identities,
+          walletsSha256: "6".repeat(64),
+        },
+        live: { identity: { sha256: liveIdentity } },
+      },
+    });
+    const index = parseVerificationIndex(PUBLIC_FEED_INDEX);
+    if (!index.success || !day.success) {
+      throw new Error("a day with run files no longer parses");
+    }
+    const { container } = renderDashboard(
+      remoteIndex(index.data),
+      okDay(day.data)
+    );
+    expect(screen.getByText("Files, by SHA-256")).toBeInTheDocument();
+    // Same input and identities file in both programs; a different wallets
+    // file is shown with its own hash.
+    expect(
+      screen.getAllByText("the Python reference’s is the same")
+    ).toHaveLength(2);
+    expect(screen.getByText("the Python reference’s:")).toBeInTheDocument();
+    expect(container.querySelector(`code[title="${wallets}"]`)).not.toBeNull();
+    expect(
+      container.querySelector(`code[title="${"6".repeat(64)}"]`)
+    ).not.toBeNull();
+    expect(
+      container.querySelector(`code[title="${liveIdentity}"]`)
+    ).not.toBeNull();
+    // The rule version and registry hash the run states, not the spec's.
+    expect(
+      screen.getByText("tdh-v1.0, from this day’s file")
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector(`code[title="0x${"5".repeat(64)}"]`)
+    ).not.toBeNull();
   });
 
   it("never says there are no differences on a day whose counts say otherwise", () => {
@@ -300,6 +395,8 @@ describe("VerificationDashboard", () => {
             identitiesEqual: 10,
             identitiesTotal: 10,
             totalTdh: { rust: 10_000, python: 10_000, live: 10_000 },
+            generatedAt: null,
+            sha256: null,
           },
         ],
       }),

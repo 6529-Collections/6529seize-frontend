@@ -7,6 +7,7 @@ import TdhHeading from "../shared/TdhHeading";
 import TdhRuleBlock from "../shared/TdhRuleBlock";
 import TdhSource from "../shared/TdhSource";
 import { noBreakTerms } from "../shared/noBreakTerms";
+import { TDH_MEASURE } from "../shared/tdhStyles";
 
 /**
  * One numbered step of How TDH is calculated. The step's sources and its
@@ -52,15 +53,17 @@ export default function StepSection({
         id={id}
         title={title}
         locale={locale}
-        className="tw-mt-1 tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
+        className="tw-mt-1 tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-2xl"
       />
       {pills !== undefined && (
         <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-2">{pills}</div>
       )}
-      <div className="tw-mt-4 tw-max-w-3xl tw-space-y-4">{children}</div>
+      {/* Blocks snap to the measure (prose, notes, examples, small
+          tables) or to the full column (explorables, wide tables). */}
+      <div className="tw-mt-4 tw-space-y-4">{children}</div>
       {(rule !== undefined || sources.length > 0) && (
         <TdhDisclosure
-          className="tw-mt-5 tw-max-w-3xl"
+          className="tw-mt-5"
           tone="strong"
           summary={t(
             locale,
@@ -69,7 +72,9 @@ export default function StepSection({
         >
           <div className="tw-mt-1 tw-space-y-3">
             {ruleNote !== undefined && (
-              <p className="tw-m-0 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
+              <p
+                className={`tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300 ${TDH_MEASURE}`}
+              >
                 {ruleNote}
               </p>
             )}
@@ -116,7 +121,7 @@ export function Cited({
 }) {
   return (
     <p
-      className={`tw-m-0 tw-max-w-[36em] tw-text-base tw-leading-7 ${muted ? "tw-text-iron-300" : "tw-text-iron-200"}`}
+      className={`tw-m-0 tw-text-base tw-leading-7 ${TDH_MEASURE} ${muted ? "tw-text-iron-300" : "tw-text-iron-200"}`}
     >
       {typeof children === "string" ? noBreakTerms(children) : children}
     </p>
@@ -132,7 +137,9 @@ export function Example({
   readonly children: ReactNode;
 }) {
   return (
-    <div className="tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-bg-iron-900/60 tw-py-3 tw-pl-4 tw-pr-3">
+    <div
+      className={`tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-bg-iron-900/60 tw-py-3 tw-pl-4 tw-pr-3 ${TDH_MEASURE}`}
+    >
       <p className="tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
         {t(locale, "network.tdh.how.example")}
       </p>
@@ -141,4 +148,31 @@ export function Example({
       </div>
     </div>
   );
+}
+
+/** A one-line note under a table or diagram: a detail, never a paragraph. */
+export function Note({ children }: { readonly children: ReactNode }) {
+  return (
+    <p
+      className={`tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-400 ${TDH_MEASURE}`}
+    >
+      {typeof children === "string" ? noBreakTerms(children) : children}
+    </p>
+  );
+}
+
+/** A caution in a step: the limit of a rule, set off in amber. */
+export function Caution({ children }: { readonly children: ReactNode }) {
+  return (
+    <p
+      className={`tw-m-0 tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200 ${TDH_MEASURE}`}
+    >
+      {typeof children === "string" ? noBreakTerms(children) : children}
+    </p>
+  );
+}
+
+/** A small table, or any block read at the measure. */
+export function Measure({ children }: { readonly children: ReactNode }) {
+  return <div className={TDH_MEASURE}>{children}</div>;
 }

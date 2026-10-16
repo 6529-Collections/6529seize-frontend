@@ -101,8 +101,9 @@ a date is exactly eight digits naming a calendar date on or after 1970-01-01;
 no result until b + 1 is finalized
 block 2^64 - 1 has no block b + 1, so it is never B    # vector 74
 headers read for the cycle (b, b + 1, the search's, the decoded logs' blocks):
-    by block number, timestamps MUST strictly increase between every two;
-    the set need not be contiguous, else the cycle has no result
+    the set need not be contiguous
+    ordered by block number, timestamps MUST strictly increase between
+    every two headers, adjacent or not, else the cycle has no result
                                                        # vectors 34, 55
 the set always holds B stamped T: a log below B stamped at T or later, or
     block B stamped other than T, is invalid           # vectors 61, 62
@@ -112,6 +113,28 @@ no other order of decoded timestamps is checked: two of one block may differ,
     header set's timestamp for its block; MUST NOT refuse an input for these`;
 
 export const RULE_DAYS = "days(a) = (T - a) div day_s";
+
+/**
+ * P53 §11.3 (at 6529chain f840096): which Memes' claim limits are read for
+ * §5.2's floors, and the storage slots of the read, line for line.
+ */
+export const RULE_FLOOR_READ_CONDENSED = `read set: every Meme with a first mint in a block <= B
+          and minted + adj < edition_floor_threshold (300), eligible or not
+totalMax_i = getClaimForToken(memes, i).totalMax at B, 0 if the call reverts,
+             read from storage so every node reads the same slots:
+
+contract  manifold_lazy_claim (registry), Manifold's ERC1155LazyPayableClaim
+codeHash  0x3034e6a10a999c2a34a8f66c9df664cf37a6f7297b63ffa750e63c2fb5fdaabc
+storage   _claims slot 7, _claimTokenIds slot 8
+
+instanceId = storage[keccak256(uint256(i) || keccak256(address(memes) || uint256(8)))]
+word       = storage[keccak256(uint256(instanceId) || keccak256(address(memes) || uint256(7)))]
+protocol   = (word >> 192) & 0xff
+totalMax_i = (word >> 32) & 0xffffffff     if protocol is 1, 2 or 3
+           = 0                             if protocol is 0: no claim
+protocol above 3: the read is refused
+instance 0 is read like any other; a slot proven empty reads as 0
+other code at the contract: the read is unavailable, no result`;
 
 export const RULE_EDITIONS = `minted[i]  = sum of mint amounts of Meme i in blocks <= B
 adj[i]     = -2588 if i = 8 (FirstGM), else 0
@@ -128,21 +151,22 @@ count[to] += amount`;
 
 /** P26 §7.1: transaction netting (D131), every transaction, sinks included. */
 export const RULE_NETTING = `A transaction is the set of transfers with one (block, txIndex).
-For each transaction and (contract, tokenId), S = its transfers with
-amount > 0 and from != to. Every non-empty S is netted.
-(P26 names this set M; here it is S, because M is the cycle boundary.)
+For each transaction and (contract, tokenId), M = its transfers with
+amount > 0 and from != to. Every non-empty M is netted.
+(Here M is a set of transfers, P26's own name; it is not the cycle
+boundary M of section 4.)
 
-- For every address w in S, a sink included,
-  net(w) = the amount w receives in S - the amount it sends in S.
+- For every address w in M, a sink included,
+  net(w) = the amount w receives in M - the amount it sends in M.
 - Sources: the w with net(w) < 0, each with amount -net(w).
   Destinations: the w with net(w) > 0, each with amount net(w).
   Both lists are in ascending address order.
 - Pairing: repeatedly emit (head source, head destination, k), where k
   is the smaller of their remaining amounts, subtract k from both,
   and drop any head that reaches 0.
-- S is replaced by the emitted pairs, in order: each a transfer of k
+- M is replaced by the emitted pairs, in order: each a transfer of k
   copies with the transaction's block, timestamp and txHash, at the
-  position of S's first transfer.
+  position of M's first transfer.
 - Every |net(w)| MUST be below 2^64.`;
 
 /** P26 §7.1: the replay, after netting, in canonical order. */
@@ -363,8 +387,7 @@ ROOT(class, L) = H(class, uint64 len(L), bytes32 TOP(L))`;
 /** P26 §10, "Field types" and "Registry constraints", line for line. */
 export const RULE_REGISTRY_CONSTRAINTS_CONDENSED = `every field at its type (uint32, uint64, uint256, int64, address, bytes32);
     a value outside it: no registry, no hash, no result   # vectors 68, 70, 75
-read at its type, cut to fit never: a uint32 in 32 bits, every uint256 in
-    full                                                  # vectors 73, 75
+read at its type, never cut to fit: a uint32 in 32 bits, a uint256 in full  # vectors 73, 75
 season_starts starts at 1 and strictly increases       # §5.4
 every list field is strictly ascending, so it has no repeats  # vector 66
 sinks contains ZERO                                     # §3.4

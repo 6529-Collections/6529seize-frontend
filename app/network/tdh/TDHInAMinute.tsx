@@ -4,7 +4,7 @@ import { formatInteger, formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { MAX_BOOST_CENTS, MINUTE_EXAMPLE } from "./how-it-works/examples";
-import TdhSource from "./shared/TdhSource";
+import TdhSourcesNote from "./shared/TdhSourcesNote";
 import { TDH_FOCUS_RING, TDH_SERIES } from "./shared/tdhStyles";
 
 const STEPS = ["hold", "weigh", "boost"] as const;
@@ -175,7 +175,10 @@ function BoostPanel({ locale }: { readonly locale: SupportedLocale }) {
   );
 }
 
-/** The sources of the minute section, with what P, D, DEV and BUG mean. */
+/**
+ * The sources of an overview section, in one closed disclosure at its end,
+ * with what P, D, DEV and BUG numbers mean.
+ */
 export function TdhSourcesFootnote({
   locale,
   refs,
@@ -186,25 +189,25 @@ export function TdhSourcesFootnote({
   readonly legend?: boolean;
 }) {
   return (
-    <div className="tw-mt-6 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4 tw-text-sm tw-leading-6 tw-text-iron-300">
-      <p className="tw-m-0 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1">
-        <span className="tw-font-medium tw-text-iron-300">
-          {t(locale, "network.tdh.explainer.sources.label")}
-        </span>
-        <TdhSource refs={refs} locale={locale} />
-      </p>
-      {legend && (
-        <p className="tw-m-0 tw-mt-1 tw-max-w-[36em]">
-          {t(locale, "network.tdh.explainer.sources.legend")}{" "}
-          <a
-            href="#glossary"
-            className={`tw-text-iron-300 tw-underline tw-decoration-iron-600 tw-underline-offset-4 hover:tw-text-iron-50 ${TDH_FOCUS_RING}`}
-          >
-            {t(locale, "network.tdh.explainer.sources.glossary")}
-          </a>
-        </p>
-      )}
-    </div>
+    <TdhSourcesNote
+      locale={locale}
+      refs={refs}
+      {...(legend
+        ? {
+            note: (
+              <>
+                {t(locale, "network.tdh.explainer.sources.legend")}{" "}
+                <a
+                  href="#glossary"
+                  className={`tw-text-iron-300 tw-underline tw-decoration-iron-600 tw-underline-offset-4 hover:tw-text-iron-50 ${TDH_FOCUS_RING}`}
+                >
+                  {t(locale, "network.tdh.explainer.sources.glossary")}
+                </a>
+              </>
+            ),
+          }
+        : {})}
+    />
   );
 }
 
@@ -230,7 +233,7 @@ export default function TDHInAMinute({
       <h2
         id="tdh-minute-heading"
         tabIndex={-1}
-        className="tw-m-0 tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none min-[360px]:tw-text-2xl"
+        className="tw-m-0 tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none sm:tw-text-2xl"
       >
         {t(locale, "network.tdh.explainer.minute.title")}
       </h2>
@@ -252,14 +255,11 @@ export default function TDHInAMinute({
           </li>
         ))}
       </ol>
-      <p className="tw-m-0 tw-mt-4 tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-300 md:tw-pl-11">
-        {t(locale, "network.tdh.explainer.minute.otherRates")}
-      </p>
       <figure className="tw-m-0 tw-mt-8">
         <p className="tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
           {t(locale, "network.tdh.explainer.minute.exampleLabel")}
         </p>
-        <p className="tw-m-0 tw-mb-3 tw-mt-1 tw-max-w-[36em] tw-text-base tw-leading-7 tw-text-iron-300">
+        <p className="tw-m-0 tw-mb-3 tw-mt-1 tw-max-w-[38em] tw-text-base tw-leading-7 tw-text-iron-300">
           {t(locale, "network.tdh.explainer.minute.example")}
         </p>
         <div

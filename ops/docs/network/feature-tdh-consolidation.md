@@ -40,55 +40,54 @@ collector’s guide`.
 
 ## Guide Sections (`/network/tdh/consolidation`)
 
-1. Header: the promise (several wallets count as one collector; nothing moves),
-   the limit on 6529.io today with the recommendation to combine three,
-   which stay one collector under TDH-v1, in two lines, then the two dates
-   side by side (the fourth wallet's start date is loaded from the current
-   environment's settings) (when a fourth wallet can join on 6529.io, and the
-   cutover), a `Start guided setup` button to
-   `/safe-collecting/build-consolidation`, and a link to the safe collecting
-   setup as an arrow link. Below the button, a two-line note: from about
-   October 23, 2026, TDH-v1 groups at most three wallets and a fourth counts
-   on its own, with `How a group of four splits`, which opens the design
-   page's TDH-v1 section (the full rule and its worked example).
-   A figure, top-aligned with the heading, shows the vault, transaction,
-   social and old wallets becoming one collector, each with a neutral role
-   icon and the four tiles of equal height, the old wallet tagged `4th,
-until cutover`, and a line under it saying that from the cutover a fourth
-   wallet's cards stop adding to the others' sets and boost.
+1. Header: the promise (several wallets count as one collector), then one
+   status line: 6529.io accepts up to four consolidated wallets, a fourth
+   for links signed from the start date (loaded from the current
+   environment's settings); TDH-v1 allows three, and whether it allows four
+   is pending an owner decision. Nothing more is said about TDH-v1 and a
+   fourth wallet anywhere in the guide. A `Start guided setup` button to
+   `/safe-collecting/build-consolidation`, a link to the safe collecting
+   setup as an arrow link, and under the button `Nothing moves. Your NFTs
+   stay in the wallets they are in.` A figure, top-aligned with the
+   heading, shows the vault, transaction, social and old wallets becoming
+   one collector, each with a neutral role icon and the four tiles of equal
+   height, the old wallet tagged `A fourth wallet`.
 2. `Why combine`: the vault stays cold; TDH adds up; sets count across wallets;
    moving cards keeps holding time; old wallets keep their TDH; one profile and
    one collection (profile, leaderboards, Meme Card subscriptions). The six
    cards share one anatomy; one line of sources and one link to step 10 of
    How TDH is calculated sit under them.
 3. `Which wallets to combine`: the safe collecting roles, each with a
-   neutral role icon (no colour, so none reads as a status): vault (holds NFTs, never connects), transaction wallet
-   (buys, sells and trades; can manage the vault), social wallet (the hot
-   wallet that signs in to 6529), and an optional old wallet (a burned or
-   exposed address kept for its TDH). Three are enough for most
-   collectors, and they stay one collector under TDH-v1.
+   neutral role icon (no colour, so none reads as a status): vault (holds
+   NFTs, never connects), transaction wallet (buys, sells and trades; can
+   manage the vault), social wallet (the hot wallet that signs in to 6529),
+   and an optional old wallet (a burned or exposed address kept for its
+   TDH). Three are enough for most collectors.
 4. `How to set it up`: list your wallets by Ethereum address or ENS name and follow the signing steps. ENS names resolve to mainnet addresses before planning; unresolved names block the plan, and names resolving to the same address count as duplicates. A wallet signing for itself
    batches its links; a Delegation Manager sends one transaction per link
-   while the vault stays disconnected. The last step says that in a group
-   of four one wallet counts on its own from the cutover, with a link to
-   the design page's TDH-v1 section, and the first step says three are
-   recommended, inline. A note on signing order and a second
-   `Start guided setup` button. Guided setup itself shows the same warning
-   as soon as a fourth wallet is listed, with a checkbox (`I understand that
-from the cutover one of the four wallets counts on its own…`): until it
-   is ticked, the signing steps say `Confirm the note about a fourth wallet
-above to see the steps.` and none can be signed.
+   while the vault stays disconnected. The last step says when TDH updates
+   (until the cutover at the next daily snapshot; from the cutover as the
+   wallets are linked at that day's snapshot block). A note on signing
+   order and a second `Start guided setup` button. Guided setup itself
+   shows the same status as soon as a fourth wallet is listed (6529.io
+   counts all four as one collector; TDH-v1 allows three, and whether it
+   allows four is pending an owner decision), with a checkbox (`I
+   understand that TDH-v1 allows three wallets, and that whether it allows
+   four is pending an owner decision.`): until it is ticked, the signing
+   steps say `Confirm the note about a fourth wallet above to see the
+   steps.` and none can be signed.
 5. `Before you start`: every combined wallet can sign in as the profile;
    profiles merge permanently; combining is public and moves nothing.
 6. `Changing it later`: add, remove, lost or hacked wallet, and replacing a
    wallet when four are already combined.
-7. `Questions`: cost, moving NFTs, the limit (up to four on 6529.io today,
-   three recommended, with what TDH-v1 does with a fourth), friends, wallets
-   set up before the start date (which three stay together: in a group of
+7. `Questions`: cost, moving NFTs, the limit (up to four on 6529.io, a
+   fourth only with links signed from the start date; TDH-v1 allows three,
+   and whether it allows four is pending an owner decision), friends,
+   wallets set up before the start date (6529.io keeps three: in a group of
    four that all confirm each other, if D's three links were the last
-   confirmed, D–A, then D–B, then D–C, the three are C, D and B), profiles, wrong order, where to see it,
-   expiry, in the TDH pages' disclosure style. The copy uses typographic
-   apostrophes throughout.
+   confirmed, D–A, then D–B, then D–C, the three are D, C and B), profiles,
+   wrong order, where to see it, expiry, in the TDH pages' disclosure
+   style. The copy uses typographic apostrophes throughout.
 8. `Under the hood`: cards for the design page, the TDH explainer, the Wallet
    Checker and the Delegation Center.
 9. The TDH pager: previous `Verification`, next `Historic boosts`. `Under
@@ -97,50 +96,40 @@ the hood` is one list of links (the design page first), and the page has
 
 ## Design Page Sections (`/network/tdh/consolidation/design`)
 
-The intro leads with TDH-v1's outcome (at most three wallets from the
-cutover, so three are recommended), then the decision a collector needs, in
-one box above `On this page`: the rule in one line, the split of a group of
-four in two sentences, with a drawing of it in the style of How it works
-step 10 (D's links numbered D–A, D–B, D–C; B, C and D outlined as one
-identity; A in a ring of its own), and a link to the `TDH-v1` section; then
-an arrow link to the collector's guide.
+The intro says what the page is (the rules, the transactions and the
+analysis behind 6529.io's consolidation design), then the same status line
+as the guide, and that a collector needs none of it, with an arrow link to
+the collector's guide.
 
 1. `The rules`: every pair of wallets registers use case `999` both ways; up to
    four wallets; a fourth wallet counts only for links registered in both
    directions on or after the cutoff supplied by the current environment; the newest confirmed link
    wins; consolidations are for one collector; registrations do not expire;
    what consolidation changes for TDH and profiles, today and under TDH-v1
-   (the grouping at the snapshot block, at most three wallets). The
-   four-wallet rule card says it applies on 6529.io until the cutover. The
+   (the grouping counts as it stands at the snapshot block, DEV-9). The
    five short cards fill two columns from the top, and what consolidation
    changes, the long one, runs across the section under them. The page's contents are a numbered `On this page`
    list (a collapsed menu on phones, with the shared chevron).
-   `Under TDH-v1: at most three` follows: the full rule, with the worked
-   example (links D–A, then D–B, then D–C give C, D and B, and A alone), and
-   a link to step 10 of How TDH is calculated.
 2. `Add a wallet in four transactions`: the two steps (existing wallets each
    register one link to the new wallet, then the new wallet signs one
    `batchDelegations` transaction last), why the order matters, a table of
-   links and transactions for common changes (with a line above it: rows
-   with four wallets apply on 6529.io until the cutover), and a link to the
-   guided setup.
+   links and transactions for common changes, and a link to the guided
+   setup.
    Old return links and separate manager transactions can temporarily split
    the group despite following that order.
-3. `Try the signing order`: an interactive simulator using the backend
-   grouping rule. The example assumes no existing D return links and one
-   self-signed transaction per wallet; a status line above it says it
-   simulates 6529.io until the cutover, and a note says what TDH-v1 forms
-   from the same links. Before anyone signs it draws A, B and C as one
-   group and D alone; once all four are grouped it adds TDH-v1's outcome of
-   the same four wallets (B, C and D, and A on its own, when D's links were
-   confirmed D–A, D–B, D–C). Its buttons are the explorables' shared
-   button; `Start again` shows once there is a step to undo.
+3. `Try the signing order`: an interactive simulator using 6529.io's
+   grouping rule (newest confirmed link first, every member linked both
+   ways, up to four wallets). The example assumes no existing D return
+   links and one self-signed transaction per wallet. Before anyone signs it
+   draws A, B and C as one group and D alone. Its buttons are the
+   explorables' shared button; `Start again` shows once there is a step to
+   undo.
 4. `Remove or replace a wallet`: batch revocation, replacement order by group
    size, revocations for a lost or compromised wallet, and which part keeps the
    profile when a consolidation splits.
 5. `Why every pair: the alternatives we tested`: the full-mesh rule compared
    with majority, fan-out and single-link rules (the `Must sign` column's
-   tooltip says it counts existing wallets; from `xl` the columns have
+   tooltip says it counts existing wallets, and `Transactions`' that it counts those that add the fourth wallet; from `xl` the columns have
    fixed widths, so the short headers do not wrap), and a table of whether an
    outside wallet can be added when an attacker controls 0 to 3 wallets, as
    one compact grid at every width (a column per number of wallets).

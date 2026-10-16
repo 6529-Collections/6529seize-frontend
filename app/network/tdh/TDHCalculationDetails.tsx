@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import TdhDisclosure from "./shared/TdhDisclosure";
+import { noBreakTerms } from "./shared/noBreakTerms";
 import TDHSection, { TDH_FOCUS, TDH_PANEL, TDH_TEXT } from "./TDHSection";
 
 const FAQ_KEYS = ["sale", "transfer", "new", "set", "rate", "xtdh"] as const;
@@ -76,9 +77,11 @@ function GlossaryList({
             )}
           </dt>
           <dd className="tw-m-0 tw-mt-1 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300 md:tw-mt-0">
-            {t(
-              locale,
-              `network.tdh.explainer.glossary.${term}.def` as MessageKey
+            {noBreakTerms(
+              t(
+                locale,
+                `network.tdh.explainer.glossary.${term}.def` as MessageKey
+              )
             )}
           </dd>
         </div>

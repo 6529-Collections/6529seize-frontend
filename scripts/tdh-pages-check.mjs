@@ -45,6 +45,18 @@
  *   in its own font;
  * - a heading set smaller than the text under it: an h1 to h4 whose font
  *   size is below that of the paragraph that follows it;
+ * - a wrapped code line: on a desktop (1280 px and wider) any line of a rule
+ *   block's code (`[data-tdh-code-cell]`) that takes more than one line on
+ *   screen; on a phone, a wrapped code line whose continuation does not
+ *   hang to the right of its first line;
+ * - an SVG label that outranks the type around it: SVG text set larger on
+ *   screen than the heading of its section, or larger than 1.15 times body
+ *   text (18.4 px), the most a drawing is ever scaled (`MAX_SVG_SCALE`);
+ * - an empty card: on a desktop, a bordered card at least 480 px wide whose
+ *   content stops more than 30% of its width (and at least 220 px) short of
+ *   its right edge, so the card should snap to the measure or be filled;
+ * - the H1 too far down on a phone: in the phone view, the page's H1 must
+ *   start within the first 200 px, app banner and site header included;
  * - an error in the browser console or an uncaught page error. On the 404
  *   views two are expected and allowed: the browser's line for the 404
  *   itself, and the wallet SDK's check of the page's
@@ -209,6 +221,8 @@ function inspectPage(limits) {
   const MIN_FONT_PX = limits?.minFontPx ?? 12;
   const MIN_FIELD_PX = limits?.minFieldPx ?? 40;
   const MIN_TARGET_PX = 24;
+  const DESKTOP = limits?.desktop ?? false;
+  const PHONE = limits?.phone ?? false;
   const violations = [];
   const root = document.querySelector("main") ?? document.body;
   const vw = document.documentElement.clientWidth;
@@ -1027,6 +1041,150 @@ function inspectPage(limits) {
     }
   }
 
+  // 11. Wrapped code lines. A rule block's code cell is one line on a
+  // desktop; on a phone a wrapped line hangs: its continuation starts to
+  // the right of its first line, so it never reads as a line of its own.
+  const lineBoxes = (el) => {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const lines = [];
+    for (const rect of range.getClientRects()) {
+      if (rect.width < 1 || rect.height < 1) continue;
+      const line = lines.find((l) => Math.abs(l.top - rect.top) < 3);
+      if (line) {
+        line.left = Math.min(line.left, rect.left);
+      } else {
+        lines.push({ top: rect.top, left: rect.left });
+      }
+    }
+    return lines.sort((a, b) => a.top - b.top);
+  };
+  for (const cell of root.querySelectorAll("[data-tdh-code-cell]")) {
+    if (!isShown(cell)) continue;
+    const r = cell.getBoundingClientRect();
+    if (r.width < 1 || r.height < 1) continue;
+    // A clamped block hides its last lines: only the visible ones count.
+    const seen = clipRect(cell, r);
+    if (seen.bottom - seen.top < 2) continue;
+    const lines = lineBoxes(cell);
+    if (lines.length < 2) continue;
+    if (DESKTOP) {
+      add("code-wrap", cell, `${lines.length} lines at ${vw}px`);
+    } else if (PHONE) {
+      const first = lines[0].left;
+      const ch = Number.parseFloat(style(cell).fontSize) * 0.6;
+      if (lines.slice(1).some((line) => line.left < first + ch * 0.9)) {
+        add("code-hang", cell, "a wrapped line does not hang");
+      }
+    }
+  }
+
+  // 12. SVG labels never outrank the type around them: no larger than the
+  // heading of their section, and no larger than 1.15 times body text.
+  const headings = [...root.querySelectorAll("h1, h2, h3")].filter(isShown);
+  const sectionHeading = (el) => {
+    let found = null;
+    for (const heading of headings) {
+      // The last heading before the element, in document order.
+      if (heading.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING) {
+        found = heading;
+      } else {
+        break;
+      }
+    }
+    return found;
+  };
+  const MAX_LABEL_PX = 18.4;
+  for (const text of root.querySelectorAll("svg text")) {
+    if (!isShown(text) || !(text.textContent ?? "").trim()) continue;
+    const px =
+      Number.parseFloat(style(text).fontSize) *
+      Math.abs(text.getScreenCTM()?.a ?? 1);
+    const heading = sectionHeading(text);
+    const headingPx = heading ? Number.parseFloat(style(heading).fontSize) : Infinity;
+    if (px > MAX_LABEL_PX + 0.05) {
+      add("svg-label-size", text, `${px.toFixed(1)}px, above ${MAX_LABEL_PX}px`);
+    } else if (px > headingPx - 0.5) {
+      add("svg-label-size", text, `${px.toFixed(1)}px against a ${headingPx}px heading`);
+    }
+  }
+
+  // 13. Empty cards: a bordered card whose content stops far short of its
+  // right edge at desktop widths. It should snap to the reading measure,
+  // or its content should fill it (a second column, a right-hand figure).
+  if (DESKTOP) {
+    const contentRight = (card) => {
+      let right = -Infinity;
+      const walker = document.createTreeWalker(card, NodeFilter.SHOW_TEXT);
+      const range = document.createRange();
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        if (!(node.textContent ?? "").trim()) continue;
+        const owner = node.parentElement;
+        if (!owner || !isShown(owner) || owner.closest("svg")) continue;
+        range.selectNodeContents(node);
+        for (const rect of range.getClientRects()) {
+          if (rect.width > 0) right = Math.max(right, rect.right);
+        }
+      }
+      for (const el of card.querySelectorAll(
+        "svg, img, canvas, video, input, select, textarea, button, table, [role='img'], [role='progressbar'], meter, progress, pre"
+      )) {
+        if (!isShown(el)) continue;
+        const rect = el.getBoundingClientRect();
+        if (rect.width > 0) right = Math.max(right, rect.right);
+      }
+      // Blocks drawn with a background but no text (bars, meters, tiles).
+      for (const el of card.querySelectorAll("*")) {
+        const cs = style(el);
+        if (el.children.length > 0 || (el.textContent ?? "").trim()) continue;
+        if (parseColor(cs.backgroundColor)?.a > 0.05) {
+          const rect = el.getBoundingClientRect();
+          if (rect.width > 0 && rect.height > 0) right = Math.max(right, rect.right);
+        }
+      }
+      return right;
+    };
+    for (const card of root.querySelectorAll("div, section, article, aside, figure, li, a, details, ul, ol, dl, p")) {
+      if (!isShown(card) || card.closest("table, svg, pre")) continue;
+      const cs = style(card);
+      const bordered =
+        Number.parseFloat(cs.borderLeftWidth) >= 1 &&
+        Number.parseFloat(cs.borderRightWidth) >= 1 &&
+        cs.borderLeftStyle !== "none" &&
+        cs.borderRightStyle !== "none";
+      if (!bordered) continue;
+      const r = card.getBoundingClientRect();
+      const inner =
+        r.width -
+        Number.parseFloat(cs.paddingLeft) -
+        Number.parseFloat(cs.paddingRight) -
+        Number.parseFloat(cs.borderLeftWidth) -
+        Number.parseFloat(cs.borderRightWidth);
+      if (r.width < 480 || r.height < 40) continue;
+      const right = contentRight(card);
+      if (!Number.isFinite(right)) continue;
+      const innerRight =
+        r.right -
+        Number.parseFloat(cs.paddingRight) -
+        Number.parseFloat(cs.borderRightWidth);
+      const empty = innerRight - right;
+      if (empty > Math.max(220, inner * 0.3)) {
+        add("empty-card", card, `${Math.round(empty)}px of ${Math.round(inner)}px empty at the right`);
+      }
+    }
+  }
+
+  // 14. On a phone the H1 starts within the first 200 px of the page.
+  if (PHONE) {
+    const h1 = root.querySelector("h1");
+    if (h1 && isShown(h1)) {
+      const top = h1.getBoundingClientRect().top + window.scrollY;
+      if (top > 200.5) {
+        add("h1-offset", h1, `H1 starts at ${Math.round(top)}px`);
+      }
+    }
+  }
+
   return violations;
 }
 
@@ -1152,6 +1310,8 @@ async function checkView(browser, args, route, widthKey) {
     const limits = {
       minFontPx: view.minFontPx ?? 12,
       minFieldPx: view.hasTouch ? 44 : 40,
+      desktop: view.viewport.width >= 1280,
+      phone: view.hasTouch,
     };
     const closed = await guard(page.evaluate(inspectPage, limits));
     await guard(settle(page, true));

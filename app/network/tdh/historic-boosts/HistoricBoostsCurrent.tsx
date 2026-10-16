@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { formatInteger } from "@/i18n/format";
+import { formatInteger, formatUtcDate } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import BoostLadder from "../shared/BoostLadder";
 import { t } from "@/i18n/messages";
@@ -80,9 +80,11 @@ export function BoostTimeline({
             </span>
           </p>
           <span className="tw-mt-1 tw-flex tw-items-center tw-gap-2">
-            <span className="tw-relative tw-h-2 tw-flex-1 tw-overflow-hidden tw-rounded-full tw-bg-iron-800">
+            {/* The reach to the ceiling drawn on the bar's own track: a
+                dashed, lightly filled segment past today's value. */}
+            <span className="tw-relative tw-h-3 tw-flex-1 tw-overflow-hidden tw-rounded-full tw-bg-iron-800">
               <span
-                className="tw-absolute tw-inset-y-0 tw-left-0 tw-rounded-full tw-border tw-border-dashed tw-border-primary-400/60"
+                className="tw-absolute tw-inset-y-0 tw-left-0 tw-rounded-full tw-border-2 tw-border-dashed tw-border-primary-300/80 tw-bg-primary-400/15"
                 style={{ width: barWidth(CURRENT_RULE.ceiling) }}
               />
               <span
@@ -101,11 +103,7 @@ export function BoostTimeline({
                 date: formatShortDate(locale, CURRENT_RULE.valueDateIso),
               })}
             </span>
-            <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-right">
-              <span
-                aria-hidden="true"
-                className="tw-h-2 tw-w-4 tw-rounded-full tw-border tw-border-dashed tw-border-primary-400/60"
-              />
+            <span className="tw-text-right tw-text-primary-300">
               {m(locale, "network.tdhHistoric.timeline.reachLabel", {
                 value: formatMultiplier(locale, CURRENT_RULE.ceiling),
               })}
@@ -205,6 +203,11 @@ export function CurrentRuleRow({
           <span className="tw-mt-0.5 tw-block tw-text-[13px] tw-text-iron-400">
             {m(locale, "network.tdhHistoric.current.paying", {
               paying: formatInteger(locale, CURRENT_RULE.payingSeasons),
+              date: formatUtcDate(locale, CURRENT_RULE.valueDateIso, {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              }),
             })}
           </span>
         </td>
@@ -269,6 +272,11 @@ export function CurrentRuleCard({
           })}
           sub={m(locale, "network.tdhHistoric.current.paying", {
             paying: formatInteger(locale, CURRENT_RULE.payingSeasons),
+            date: formatUtcDate(locale, CURRENT_RULE.valueDateIso, {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            }),
           })}
         />
         <MobileSummaryMetric

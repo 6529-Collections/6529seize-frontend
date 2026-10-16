@@ -1,11 +1,7 @@
 "use client";
 
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
-import {
-  NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
-  NETWORK_REFERENCE_PAGE_CLASSES,
-  NETWORK_REFERENCE_SECTION_HEADING_CLASSES,
-} from "@/components/network/networkPageLayoutClasses";
+import { NETWORK_REFERENCE_SECTION_HEADING_CLASSES } from "@/components/network/networkPageLayoutClasses";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
@@ -15,7 +11,14 @@ import { useState } from "react";
 import TdhPager from "../shared/TdhPager";
 import TdhSource from "../shared/TdhSource";
 import TdhSubnav from "../shared/TdhSubnav";
-import { TDH_H1, TDH_LEDE, TDH_LINK } from "../shared/tdhStyles";
+import {
+  TDH_DROPDOWN_ROW,
+  TDH_H1,
+  TDH_LEDE,
+  TDH_LINK,
+  TDH_PAGE,
+  TDH_PAGE_HEADER_TOP,
+} from "../shared/tdhStyles";
 import type { TdhRules } from "../tdh-rules.helpers";
 import {
   BoostTimeline,
@@ -77,25 +80,21 @@ export default function TDHHistoricBoostsPage({
   };
 
   return (
-    <main className={NETWORK_REFERENCE_PAGE_CLASSES}>
+    <main className={TDH_PAGE}>
       <AboutContentsDropdown
-        className={NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES}
+        className={TDH_DROPDOWN_ROW}
         currentHref="/network/tdh/historic-boosts"
         desktopFlush
         withDivider
       />
       <article className="tw-mx-auto tw-max-w-6xl tw-pb-8">
         <TdhSubnav current="/network/tdh/historic-boosts" locale={locale} />
-        <header className="tw-pb-8 tw-pt-5 sm:tw-pb-10 sm:tw-pt-8">
+        <header className={`tw-pb-8 sm:tw-pb-10 ${TDH_PAGE_HEADER_TOP}`}>
           <h1 className={TDH_H1}>
             {m(locale, "network.tdhHistoric.hero.title")}
           </h1>
           <p className={`tw-mb-0 tw-mt-4 tw-max-w-[38em] ${TDH_LEDE}`}>
             {m(locale, "network.tdhHistoric.hero.intro")}
-          </p>
-          <p className="tw-mb-0 tw-mt-2 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
-            {m(locale, "network.tdhHistoric.hero.v1")}
-            <TdhSource refs={["P26 §10"]} locale={locale} />
           </p>
         </header>
 
@@ -127,7 +126,7 @@ export default function TDHHistoricBoostsPage({
             <CurrentLadder locale={locale} initialRules={rules} />
             <div className="tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
               <p className="tw-m-0">
-                {m(locale, "network.tdhHistoric.provenance")}
+                {m(locale, "network.tdhHistoric.provenance")}{" "}
                 <TdhSource refs={["P26 §10", "DEV-3"]} locale={locale} />
               </p>
               <ul className="tw-m-0 tw-mt-2 tw-list-none tw-space-y-1 tw-p-0">

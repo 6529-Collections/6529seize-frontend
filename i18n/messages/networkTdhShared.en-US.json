@@ -65,9 +65,9 @@
   "network.tdh.shared.pill.proposal": "Proposal, not adopted",
   "network.tdh.shared.ruleCondensed": "Exact rule, restated line by line",
   "network.tdh.shared.pill.toBePublished": "Source not public",
-  "network.tdh.shared.source.difftest": "Evidence: four-way differential tests, October 15, 2026",
+  "network.tdh.shared.source.difftest": "Evidence: four-way differential tests, October 15 and 16, 2026",
   "network.tdh.shared.source.doc.P28": "Canonical encodings",
-  "network.tdh.shared.difftest.caption": "Four rounds of differential tests, October 15, 2026",
+  "network.tdh.shared.difftest.caption": "Five rounds of differential tests, October 15 and 16, 2026",
   "network.tdh.shared.difftest.round": "Round",
   "network.tdh.shared.difftest.roundN": "Round {n}",
   "network.tdh.shared.difftest.cases": "Generated inputs",
@@ -96,8 +96,11 @@
   "network.tdh.shared.legend.neutral": "For information",
   "network.tdh.shared.showAllLines": "Show all {count} lines",
   "network.tdh.shared.showFewerLines": "Show fewer lines",
-  "network.tdh.shared.difftest.link": "The four rounds of differential tests, round by round",
+  "network.tdh.shared.difftest.link": "The five rounds of differential tests, round by round",
   "network.tdh.shared.difftest.otherVectors": "P26’s fifth round (f840096, October 16) added vectors 75 to 88: 76 to 79 settle round 4’s findings, and 75 and 80 to 88 pin its rulings on how each input value is typed and written (a day length as a 32-bit number, JSON integers and keys in one canonical form, the claim limit as a 32-bit number, one log per position). None changes a value of the 2026-10-11 cycle.",
-  "network.tdh.shared.pill.behindLatest": "Behind P26’s latest round",
-  "network.tdh.shared.scrollHint": "Scroll sideways →"
+  "network.tdh.shared.scrollHint": "Scroll sideways →",
+  "network.tdh.shared.sources": "Sources",
+  "network.tdh.shared.sourcesCount": "Sources ({count})",
+  "network.tdh.shared.difftest.found.5": "All four equal on all 30,000 main cases, and on every ruling of P26’s fifth round. Edge probes found one question for the vector format: a member it does not name in a transfer, an event or the cycle, which program B refuses and the other three ignore (E13).",
+  "network.tdh.shared.difftest.settled.5": "Open: E13, for the vector format"
 }

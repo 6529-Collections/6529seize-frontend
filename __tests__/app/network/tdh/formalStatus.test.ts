@@ -13,12 +13,20 @@ import {
 } from "@/app/network/tdh/formal/leanResults";
 import { BUNDLED_FORMAL_MANIFEST } from "@/lib/tdh/formal/bundledManifest";
 import roundFive from "./fixtures/roundFiveManifest.json";
+import roundThree from "./fixtures/roundThreeManifest.json";
 import {
   formalManifestSchema,
   type FormalManifest,
 } from "@/lib/tdh/formal/manifest";
 
-const manifest: FormalManifest = formalManifestSchema.parse(
+/**
+ * The feed's manifest of round 3 of the model (6529chain 7bf579a), as the
+ * page bundled it until the feed published round 5: the base these tests
+ * build older and newer rounds from.
+ */
+const manifest: FormalManifest = formalManifestSchema.parse(roundThree);
+/** The bundled copy: the feed's manifest of round 5 (6b32f3f). */
+const bundled: FormalManifest = formalManifestSchema.parse(
   BUNDLED_FORMAL_MANIFEST
 );
 
@@ -33,7 +41,7 @@ function statement(id: string) {
 /**
  * What round 4 of the model (6529chain f854661) adds to the audit and to
  * PROOFS.md's claims not proved, for a manifest of that round. Test data:
- * the bundled manifest is round 3's, and round 4's is not published yet.
+ * round 3's manifest with them added; round 4's was never published.
  */
 const ROUND_4_THEOREMS = [
   "checkInputTypes_perm",
@@ -106,7 +114,27 @@ function auditedCoverage(
 }
 
 describe("formal statements against the proof manifest", () => {
-  it("confirms every statement's own status from the bundled manifest", () => {
+  it("confirms every round-5 statement from the bundled copy of the feed's manifest", () => {
+    expect(bundled.source.commit.startsWith("6b32f3f")).toBe(true);
+    expect(leanRound(bundled)).toBe(5);
+    const statements = statementsFor(5);
+    const checks = checkStatements(statements, bundled);
+    for (const row of statements) {
+      expect([row.id, checks[row.id]?.status]).toEqual([row.id, row.status]);
+      expect(checks[row.id]?.unconfirmed).toEqual([]);
+    }
+    expect(manifestFigures(bundled)).toMatchObject({
+      proved: 78,
+      counterexamples: 11,
+      deferred: 9,
+      entries: 98,
+      audited: 85,
+      vectorsPassed: 89,
+      vectorsTotal: 89,
+    });
+  });
+
+  it("confirms every statement's own status from round 3's manifest", () => {
     expect(leanRound(manifest)).toBe(3);
     const statements = statementsFor(3);
     const checks = checkStatements(statements, manifest);

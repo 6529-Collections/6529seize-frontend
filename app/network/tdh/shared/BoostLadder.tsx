@@ -46,7 +46,10 @@ export default function BoostLadder({
     gradients: formatInteger(locale, gradients),
   };
   return (
-    <figure className="tw-m-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-p-4 sm:tw-p-5">
+    <figure
+      id="boost-figures"
+      className="tw-m-0 tw-scroll-mt-28 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-p-4 sm:tw-p-5"
+    >
       <figcaption className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
         {t(locale, "network.tdh.rules.ladder.title")}
       </figcaption>

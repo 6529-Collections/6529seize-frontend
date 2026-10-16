@@ -135,6 +135,12 @@ export interface ManifestFigures {
   readonly facts: number;
   readonly theoremsTdh: number;
   readonly theoremsP53: number;
+  /** The manifest's own summary: entries by status, and audited theorems. */
+  readonly proved: number;
+  readonly counterexamples: number;
+  readonly deferred: number;
+  readonly entries: number;
+  readonly audited: number;
 }
 
 export function manifestFigures(manifest: FormalManifest): ManifestFigures {
@@ -156,5 +162,10 @@ export function manifestFigures(manifest: FormalManifest): ManifestFigures {
     facts: manifest.facts.checks,
     theoremsTdh: manifest.summary.auditedTdh,
     theoremsP53: manifest.summary.auditedP53,
+    proved: manifest.summary.proved,
+    counterexamples: manifest.summary.counterexample,
+    deferred: manifest.summary.deferred,
+    entries: manifest.summary.entries,
+    audited: manifest.summary.audited,
   };
 }

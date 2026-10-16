@@ -125,7 +125,7 @@ describe("network pages render", () => {
       )
     ).toHaveAttribute("href", "/network/tdh#glossary");
     expect(
-      screen.getByText(/It counts toward your Level on 6529.io/)
+      screen.getByText(/It counts toward your Level, and is checked in public/)
     ).toBeInTheDocument();
     expect(screen.queryByText(/votes in waves/)).not.toBeInTheDocument();
   });
@@ -180,11 +180,19 @@ describe("network pages render", () => {
     );
     expect(screen.queryByText(/sample/i)).not.toBeInTheDocument();
     expect(
-      screen.getByText(/Each must pass every conformance vector/)
+      screen.getByText(/reproduce all 89 conformance vectors/)
     ).toBeInTheDocument();
+    // The Lean card says where the property stops: a mint and its burn
+    // inside one transaction (P26 §7.1, counterexamples H and I).
     expect(
       screen.getByText(
-        /cannot change any holding stack: which copies an address holds and when each was acquired/
+        /cannot change who holds which copies since when\. A mint and its burn there can still change eligibility/
+      )
+    ).toBeInTheDocument();
+    // The day's builds come from its file.
+    expect(
+      screen.getByText(
+        /Builds: Rust core validator@e127676, Python reference 6529chain@0621ed4/
       )
     ).toBeInTheDocument();
     expect(
@@ -235,7 +243,7 @@ describe("network pages render", () => {
     const metadata = await generateTDHMetadata();
     expect(metadata.title).toEqual("TDH: Total Days Held | Network");
     expect(metadata.description).toEqual(
-      `What TDH is, how to read your own, and how it is calculated, specified, proved and checked every day. | ${domain}`
+      `What TDH is, how to read your own, and how it is calculated, specified, proved and checked against 6529.io every day. | ${domain}`
     );
   });
 

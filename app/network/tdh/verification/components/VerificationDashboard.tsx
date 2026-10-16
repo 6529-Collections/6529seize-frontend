@@ -25,7 +25,6 @@ import {
   type Freshness,
 } from "@/lib/tdh/verification/states";
 import TdhPager from "../../shared/TdhPager";
-import TdhSource from "../../shared/TdhSource";
 import TdhStatusPill from "../../shared/TdhStatusPill";
 import TdhArrowLink from "../../shared/TdhArrowLink";
 import { TDH_CARD } from "../../shared/tdhStyles";
@@ -85,12 +84,7 @@ export function VerificationLede({
 }: {
   readonly locale: SupportedLocale;
 }) {
-  return (
-    <p className="tw-m-0">
-      {t(locale, "network.tdh.verify.lede")}
-      <TdhSource refs={["D132", "P53 §12"]} locale={locale} />
-    </p>
-  );
+  return <p className="tw-m-0">{t(locale, "network.tdh.verify.lede")}</p>;
 }
 
 /** The latest report, and a warning when reports are late or missing. */
@@ -170,7 +164,6 @@ function AwaitingState({
                 ? "network.tdh.verify.awaiting.bodyLate"
                 : "network.tdh.verify.awaiting.body"
             )}
-            <TdhSource refs={["D132"]} locale={locale} />
           </p>
           <TdhArrowLink href="/network/tdh/specification#evidence">
             {t(locale, "network.tdh.verify.awaiting.link")}
@@ -188,6 +181,42 @@ function AwaitingState({
       <TdhPager current="/network/tdh/verification" locale={locale} />
     </div>
   );
+}
+
+/** The index could not be loaded: the error, then how the comparison works. */
+function IndexError({
+  locale,
+  reason,
+}: {
+  readonly locale: SupportedLocale;
+  readonly reason: string;
+}) {
+  return (
+    <div className="tw-space-y-8">
+      <Notice tone="error" title={t(locale, "network.tdh.verify.error.title")}>
+        <p className="tw-m-0">
+          {reason === "config"
+            ? t(locale, "network.tdh.verify.error.config")
+            : t(locale, "network.tdh.verify.error.body")}
+        </p>
+        <VerificationRetry label={t(locale, "network.tdh.verify.retry")} />
+      </Notice>
+      <VerificationMethod locale={locale} />
+    </div>
+  );
+}
+
+/** Rust minus 6529.io for the day, from its file or else from the index. */
+function dayTotalDelta(
+  day: VerificationDay | null,
+  entry: VerificationIndexDay
+): number | null {
+  return day
+    ? totalDelta(
+        day.implementations.rust.totalTdh,
+        day.implementations.live?.totalTdh
+      )
+    : totalDelta(entry.totalTdh.rust, entry.totalTdh.live);
 }
 
 export default function VerificationDashboard({
@@ -214,22 +243,7 @@ export default function VerificationDashboard({
   }
 
   if (indexLoad.status === "error") {
-    return (
-      <div className="tw-space-y-8">
-        <Notice
-          tone="error"
-          title={t(locale, "network.tdh.verify.error.title")}
-        >
-          <p className="tw-m-0">
-            {indexLoad.reason === "config"
-              ? t(locale, "network.tdh.verify.error.config")
-              : t(locale, "network.tdh.verify.error.body")}
-          </p>
-          <VerificationRetry label={t(locale, "network.tdh.verify.retry")} />
-        </Notice>
-        <VerificationMethod locale={locale} />
-      </div>
-    );
+    return <IndexError locale={locale} reason={indexLoad.reason} />;
   }
 
   const index = indexLoad.index;
@@ -241,14 +255,10 @@ export default function VerificationDashboard({
   }
   const latest = latestIndexDay(index);
   const neighbours = dayNeighbours(index, entry.cycleDay);
-  const day = dayLoad?.status === "ok" ? dayLoad.day : null;
+  const loaded = dayLoad?.status === "ok" ? dayLoad : null;
+  const day = loaded?.day ?? null;
   const isLatest = latest?.cycleDay === entry.cycleDay;
-  const delta = day
-    ? totalDelta(
-        day.implementations.rust.totalTdh,
-        day.implementations.live?.totalTdh
-      )
-    : totalDelta(entry.totalTdh.rust, entry.totalTdh.live);
+  const delta = dayTotalDelta(day, entry);
   const missing = missingCycleDays(index);
   const freshness = latest ? reportFreshness(latest.cycleDay, now) : null;
   const agreementComplete = isAgreementComplete(day);
@@ -265,6 +275,7 @@ export default function VerificationDashboard({
               neighbours={neighbours}
               isLatest={isLatest}
               permalink={permalink}
+              daySha256={loaded?.sha256 ?? null}
             />
             <VerificationAgreementTiles
               locale={locale}
@@ -327,10 +338,12 @@ export default function VerificationDashboard({
       <VerificationProvenance
         locale={locale}
         day={day}
-        dayUrl={dayLoad?.status === "ok" ? dayLoad.dayUrl : null}
-        daySha256={dayLoad?.status === "ok" ? dayLoad.sha256 : null}
+        dayUrl={loaded?.dayUrl ?? null}
+        daySha256={loaded?.sha256 ?? null}
         previousDay={previousDay}
         indexUrl={indexLoad.indexUrl}
+        indexEntry={entry}
+        indexGeneratedAt={index.generatedAt ?? null}
       />
       <VerificationCheck locale={locale} day={day} cycleDay={entry.cycleDay} />
       <VerificationMethod locale={locale} />

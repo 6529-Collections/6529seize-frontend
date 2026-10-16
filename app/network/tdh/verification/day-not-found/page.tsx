@@ -28,10 +28,30 @@ const FIRST_DATE = new Date(FIRST_TDH_FEED_CYCLE_DAY * 86_400_000)
 
 /** The day asked for, as written, or as a cycle number when it is one. */
 function askedDay(value: string | string[] | undefined): string {
-  const raw = (Array.isArray(value) ? value[0] : value) ?? "";
+  const raw = firstValue(value);
   return /^[1-9]\d{0,6}$/.test(raw)
     ? formatInteger(DEFAULT_LOCALE, Number(raw))
     : raw.slice(0, 32);
+}
+
+function firstValue(value: string | string[] | undefined): string {
+  return (Array.isArray(value) ? value[0] : value) ?? "";
+}
+
+/**
+ * The cycle asked for when it has not closed yet: cycle N closes at 00:00
+ * UTC of its date, N days after January 1, 1970.
+ */
+function futureCycle(
+  value: string | string[] | undefined,
+  now: Date
+): number | null {
+  const raw = firstValue(value);
+  if (!/^[1-9]\d{0,6}$/.test(raw)) {
+    return null;
+  }
+  const cycle = Number(raw);
+  return cycle * 86_400_000 > now.getTime() ? cycle : null;
 }
 
 /**
@@ -51,6 +71,7 @@ export default async function TdhVerificationDayNotFound({
   const latest =
     indexLoad.status === "ok" ? latestIndexDay(indexLoad.index) : null;
   const now = new Date();
+  const future = futureCycle(day, now);
   const cutover = cutoverState(
     indexLoad.status === "ok" ? indexLoad.index.cutover : null,
     now
@@ -61,6 +82,7 @@ export default async function TdhVerificationDayNotFound({
       current="/network/tdh/verification"
       dropdownHref="/network/tdh/verification"
       documentTitle={t(locale, "network.tdh.verify.dayNotFoundTitle")}
+      eyebrow={t(locale, "network.tdh.verify.title")}
       title={
         asked
           ? t(locale, "network.tdh.verify.notFound.title", { day: asked })
@@ -68,10 +90,20 @@ export default async function TdhVerificationDayNotFound({
       }
       lede={
         <p className="tw-m-0">
-          {t(locale, "network.tdh.verify.notFound.body", {
-            first: formatCycleDate(locale, FIRST_DATE),
-            cycle: formatInteger(locale, FIRST_TDH_FEED_CYCLE_DAY),
-          })}
+          {future === null
+            ? t(locale, "network.tdh.verify.notFound.body", {
+                first: formatCycleDate(locale, FIRST_DATE),
+                cycle: formatInteger(locale, FIRST_TDH_FEED_CYCLE_DAY),
+              })
+            : t(locale, "network.tdh.verify.notFound.future", {
+                day: formatInteger(locale, future),
+                date: formatCycleDate(
+                  locale,
+                  new Date(future * 86_400_000).toISOString().slice(0, 10)
+                ),
+                first: formatCycleDate(locale, FIRST_DATE),
+                cycle: formatInteger(locale, FIRST_TDH_FEED_CYCLE_DAY),
+              })}
         </p>
       }
     >
@@ -88,7 +120,7 @@ export default async function TdhVerificationDayNotFound({
           />
         )}
         <div
-          className={`${TDH_CARD} tw-flex tw-flex-col tw-items-start tw-gap-3 tw-p-5`}
+          className={`${TDH_CARD} tw-flex tw-w-fit tw-max-w-full tw-flex-col tw-items-start tw-gap-3 tw-p-5`}
         >
           {latest && (
             <Link

@@ -101,33 +101,34 @@ interface RuleToken {
   readonly text: string;
 }
 
-const KEYWORDS: Record<RuleLanguage, ReadonlySet<string>> = {
-  pseudo: new Set([
-    "if",
-    "elif",
-    "else",
-    "for",
-    "each",
-    "in",
-    "while",
-    "repeat",
-    "and",
-    "or",
-    "not",
-    "unless",
-    "skip",
-    "continue",
-    "emit",
-    "append",
-    "remove",
-    "pop",
-    "invalid",
-    "none",
-    "true",
-    "false",
-    "MUST",
-    "NOT",
-  ]),
+/**
+ * Pseudocode keywords, tinted only where they act as keywords: a statement
+ * keyword at the start of a line's code (after its indentation), a second
+ * one right after it (`repeat while`), and an action after a block's colon
+ * (`...: skip`). Mid-line words such as "for the cycle", "in order" or
+ * "or later" are English and stay plain, as do `and`, `or`, `not` and `in`,
+ * which P26's pseudocode also uses as words.
+ */
+const PSEUDO_STATEMENTS: ReadonlySet<string> = new Set([
+  "if",
+  "elif",
+  "else",
+  "for",
+  "while",
+  "repeat",
+  "unless",
+]);
+const PSEUDO_ACTIONS: ReadonlySet<string> = new Set([
+  "append",
+  "remove",
+  "emit",
+  "skip",
+  "continue",
+  "return",
+  "pop",
+]);
+
+const KEYWORDS: Record<Exclude<RuleLanguage, "pseudo">, ReadonlySet<string>> = {
   lean: new Set([
     "theorem",
     "lemma",
@@ -149,6 +150,28 @@ const KEYWORDS: Record<RuleLanguage, ReadonlySet<string>> = {
   ]),
   shell: new Set(["lake", "python3", "validator", "build", "exe", "compute"]),
 };
+
+/**
+ * Whether the word at `index` of a pseudocode line is a keyword there: the
+ * line's first word or the word after it when both are statements, or an
+ * action that starts the line or follows a colon.
+ */
+function isPseudoKeyword(text: string, index: number, word: string): boolean {
+  const before = text.slice(0, index);
+  if (before.trim() === "") {
+    return PSEUDO_STATEMENTS.has(word) || PSEUDO_ACTIONS.has(word);
+  }
+  const previous = /([A-Za-z_]\w*)\s+$/.exec(before);
+  if (
+    previous?.[1] &&
+    before.trim() === previous[1] &&
+    PSEUDO_STATEMENTS.has(previous[1]) &&
+    PSEUDO_STATEMENTS.has(word)
+  ) {
+    return true;
+  }
+  return PSEUDO_ACTIONS.has(word) && /:\s+$/.test(before);
+}
 
 /** Rule names of the specification: tinted as functions. */
 const NAMES = new Set([
@@ -180,8 +203,15 @@ export function ruleTokens(
   language: RuleLanguage = "pseudo",
   options: { readonly keywords?: boolean } = {}
 ): RuleToken[] {
-  const keywords =
-    options.keywords === false ? new Set<string>() : KEYWORDS[language];
+  const tintKeywords = options.keywords !== false;
+  const isKeyword = (word: string, index: number): boolean => {
+    if (!tintKeywords) {
+      return false;
+    }
+    return language === "pseudo"
+      ? isPseudoKeyword(text, index, word)
+      : KEYWORDS[language].has(word);
+  };
   const tokens: RuleToken[] = [];
   let last = 0;
   const push = (kind: RuleToken["kind"], value: string) => {
@@ -200,7 +230,7 @@ export function ruleTokens(
       push("string", whole);
     } else if (number) {
       push("number", whole);
-    } else if (word && keywords.has(word)) {
+    } else if (word && isKeyword(word, index)) {
       push("keyword", whole);
     } else if (word && NAMES.has(word)) {
       push("name", whole);

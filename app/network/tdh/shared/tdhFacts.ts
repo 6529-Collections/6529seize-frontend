@@ -8,15 +8,14 @@
  * - P26 at f840096 (2026-10-16, its fifth round): §13 and
  *   `design/tdh-reference/README.md`; the commit records the Python
  *   reference's 89 of 89 with 1,257 checks and the Rust reference's 1,253.
- * - The validator's `crates/tdh-core/PORTING.md`: the version the daily job
- *   runs (validator e127676, deployed 2026-10-15) ports 6529chain 0621ed4,
- *   with 51 vectors and 976 checks; the validator's current code (round 4,
- *   merged at 28a6072 on 2026-10-15) ports a4db4ae and passes its 75, with
- *   1,207 checks. Program B (`crates/tdh-b`) passes the 75 of a4db4ae.
- *   Neither has followed P26's fifth round (vectors 75 to 88) yet.
- * - The validator's `tools/difftest/README.md`: four rounds of differential
- *   tests on 2026-10-15; P26's fifth round settled the fourth's findings
- *   (F8, F9, E12) on 2026-10-16.
+ * - The validator's development branch at 30bf8f9 (2026-10-16): the Rust
+ *   core (`crates/tdh-core/PORTING.md`) ports 6529chain f840096 and passes
+ *   all 89 vectors with 1,253 checks; program B (`crates/tdh-b`) passes all
+ *   89 with 1,184 checks of its own count. The builds the daily job runs
+ *   are read from each day's file, never fixed here.
+ * - The validator's `tools/difftest/README.md`: five rounds of differential
+ *   tests on 2026-10-15 and 16; P26's fifth round settled the fourth's
+ *   findings (F8, F9, E12); the fifth found E13, open.
  * - The Lean model's numbers come from its proof manifest, which the page
  *   reads from the feed; `LEAN_RUNS` in `formal/leanResults.ts` holds the
  *   runs the manifest does not carry.
@@ -36,11 +35,14 @@ export const P26 = {
   rustReferenceChecks: 1_253,
 } as const;
 
-/** P26's fourth round, which the validator's current code follows. */
-export const P26_ROUND_4 = {
-  commit: "a4db4ae",
-  vectorCount: 75,
-  rustChecks: 1_207,
+/**
+ * The validator's development branch the pages describe: the merge of P26's
+ * fifth round into the Rust core and program B (6529validator
+ * claude/blissful-perlman-914dca at 30bf8f9, 16 October 2026).
+ */
+export const VALIDATOR_DEVELOPMENT = {
+  commit: "30bf8f9",
+  date: "2026-10-16",
 } as const;
 
 /** The P26 round each program follows, and the vectors it passes. */
@@ -51,42 +53,61 @@ export const PROGRAM_CONFORMANCE = {
     vectors: 89,
     checks: P26.rustReferenceChecks,
   },
-  /** The version the daily job runs, and the validator's current code. */
-  rustCoreDaily: { specCommit: "0621ed4", vectors: 51, checks: 976 },
+  /** The validator's development branch: crates/tdh-core/PORTING.md. */
   rustCoreCurrent: {
-    specCommit: P26_ROUND_4.commit,
-    vectors: P26_ROUND_4.vectorCount,
-    checks: P26_ROUND_4.rustChecks,
-    merged: "28a6072",
+    specCommit: P26.commit,
+    vectors: 89,
+    checks: 1_253,
+    merged: VALIDATOR_DEVELOPMENT.commit,
   },
+  /** crates/tdh-b/README.md: its own count of the vectors' checks. */
   programBCurrent: {
-    specCommit: P26_ROUND_4.commit,
-    vectors: P26_ROUND_4.vectorCount,
-    merged: "28a6072",
+    specCommit: P26.commit,
+    vectors: 89,
+    checks: 1_184,
+    merged: VALIDATOR_DEVELOPMENT.commit,
   },
-  /** The Python reference the daily job runs. */
-  pythonDaily: { specCommit: "0621ed4", vectors: 51 },
 } as const;
 
 /**
- * The P26 commit each validator commit the daily job has run computes TDH
- * by: its `crates/tdh-core/PORTING.md` names the 6529chain commit it ports.
- * Both commits of the feed's first days port 0621ed4, with the same
- * tdh-core (51 vectors).
+ * What a build the daily job has run computes TDH by, when it is known:
+ * the P26 commit it follows and that commit's vectors. The pages never
+ * name the daily job's builds themselves: they read them from each day's
+ * file and look them up here, so a redeployed job shows its new builds at
+ * once, with no annotation until one is added. Sources: the validator's
+ * `crates/tdh-core/PORTING.md` at each commit (2b17216 and e127676 port
+ * 6529chain 0621ed4, with the same tdh-core; 30bf8f9 ports f840096, and
+ * 0d25aa6, deployed on 16 October 2026, changes only the daily tools after
+ * it) and the 6529chain commit of the Python reference (0621ed4, 51
+ * vectors; f840096, 89).
  */
-const RUST_CORE_SPEC: Readonly<Record<string, string>> = {
-  "2b17216": "0621ed4",
-  e127676: "0621ed4",
+const KNOWN_BUILDS: Readonly<
+  Record<string, { readonly spec: string; readonly vectors: number }>
+> = {
+  "2b17216": { spec: "0621ed4", vectors: 51 },
+  e127676: { spec: "0621ed4", vectors: 51 },
+  "30bf8f9": { spec: "f840096", vectors: 89 },
+  "0d25aa6": { spec: "f840096", vectors: 89 },
+  "0621ed4": { spec: "0621ed4", vectors: 51 },
+  f840096: { spec: "f840096", vectors: 89 },
 };
+
+/** The P26 commit and vectors of a daily build, when known. */
+export function knownBuild(
+  commit: string
+): { readonly spec: string; readonly vectors: number } | null {
+  return KNOWN_BUILDS[commit.slice(0, 7)] ?? null;
+}
 
 /** The P26 commit a validator commit's Rust core follows, when known. */
 export function rustCoreSpec(commit: string): string | null {
-  return RUST_CORE_SPEC[commit.slice(0, 7)] ?? null;
+  return knownBuild(commit)?.spec ?? null;
 }
 
 /**
- * The four-way differential tests of 15 October 2026 (tools/difftest): the
- * P26 commit that settled each round's findings, and the findings.
+ * The four-way differential tests of 15 and 16 October 2026 (the validator's
+ * tools/difftest/README.md): the P26 commit that settled each round's
+ * findings, and the findings. The fifth round's one finding, E13, is open.
  */
 export const DIFFTEST_ROUNDS = [
   {
@@ -112,5 +133,11 @@ export const DIFFTEST_ROUNDS = [
     edge: 5_000,
     settledBy: "f840096",
     findings: ["F8", "F9", "E12"],
+  },
+  {
+    cases: 30_000,
+    edge: 5_000,
+    settledBy: null,
+    findings: ["E13"],
   },
 ] as const;

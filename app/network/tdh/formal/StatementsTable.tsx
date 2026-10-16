@@ -218,7 +218,10 @@ export default function StatementsTable({
         >
           <thead className="tw-hidden md:tw-table-header-group">
             <tr>
-              <th scope="col" className={`${TDH_TH} tw-w-[28%]`}>
+              <th
+                scope="col"
+                className={`${TDH_TH} tw-w-[34%] xl:tw-w-[19rem]`}
+              >
                 {t(locale, "network.tdh.formal.statements.statement")}
               </th>
               <th scope="col" className={TDH_TH}>
@@ -251,15 +254,16 @@ export default function StatementsTable({
                           "network.tdh.formal.statements.showLean",
                           { title }
                         )}
-                        className={`-tw-ml-2 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-2 tw-text-left tw-text-sm tw-font-medium tw-text-iron-50 hover:tw-bg-iron-800 ${TDH_FOCUS_RING}`}
+                        className={`-tw-ml-2 tw-inline-flex tw-min-h-11 tw-items-start tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-2 tw-py-3 tw-text-left tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-50 hover:tw-bg-iron-800 ${TDH_FOCUS_RING}`}
                       >
+                        {/* Top-aligned with the title's first line. */}
                         <ChevronRightIcon
                           aria-hidden="true"
-                          className={`tw-size-4 tw-shrink-0 tw-text-iron-400 tw-transition-transform motion-reduce:tw-transition-none ${isOpen ? "tw-rotate-90" : ""}`}
+                          className={`tw-mt-0.5 tw-size-4 tw-shrink-0 tw-text-iron-400 tw-transition-transform motion-reduce:tw-transition-none ${isOpen ? "tw-rotate-90" : ""}`}
                         />
                         {title}
                       </button>
-                      <span className="tw-block tw-pl-6 tw-font-mono tw-text-xs tw-font-normal tw-text-iron-400">
+                      <span className="tw-block tw-pl-6 tw-font-mono tw-text-[0.8125rem] tw-font-normal tw-text-iron-300">
                         {/* Each reference keeps "P26 §8.3" together; the
                             line breaks only between references. */}
                         {row.refs

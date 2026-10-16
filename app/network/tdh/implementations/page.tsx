@@ -17,7 +17,7 @@ import TdhArrowLink from "../shared/TdhArrowLink";
 import TdhPageShell from "../shared/TdhPageShell";
 import TdhPager from "../shared/TdhPager";
 import TdhSection from "../shared/TdhSection";
-import TdhSource from "../shared/TdhSource";
+import TdhDisclosure from "../shared/TdhDisclosure";
 import TdhStatusPill, { TdhStatusLegend } from "../shared/TdhStatusPill";
 import {
   TDH_CAPTION,
@@ -37,7 +37,7 @@ import {
   MatrixLegend,
   type MatrixTone,
 } from "./ImplementationDiagrams";
-import ProgramCards from "./ProgramCards";
+import ProgramCards, { type DailyBuilds } from "./ProgramCards";
 import VectorAnatomy from "./VectorAnatomy";
 import VectorBrowser from "./VectorBrowser";
 import VectorFormat from "./VectorFormat";
@@ -115,7 +115,7 @@ const CHECKS = [
   { key: "proofs", refs: ["D119", "D128"] },
 ] as const;
 const PROSE =
-  "tw-m-0 tw-max-w-[36em] tw-text-base tw-leading-7 tw-text-iron-200";
+  "tw-m-0 tw-max-w-[34rem] tw-text-base tw-leading-7 tw-text-iron-200";
 
 function WhereItRuns({ locale }: { readonly locale: SupportedLocale }) {
   const columns = ["validator", "dailyJob", "site", "proof"] as const;
@@ -283,6 +283,11 @@ export default async function TdhImplementationsPage() {
     loadFormalManifest(),
   ]);
   const leanRun = conformanceRun(formal.manifest);
+  // The builds the daily comparison ran, from its latest day's file.
+  const daily: DailyBuilds | null =
+    summary?.kind === "data"
+      ? { rust: summary.rustCommit, python: summary.pythonCommit }
+      : null;
   const round = leanRound(formal.manifest);
   const lean = {
     passed: leanRun?.passed ?? 0,
@@ -317,33 +322,34 @@ export default async function TdhImplementationsPage() {
         title={t(locale, "network.tdh.impl.programs.title")}
         locale={locale}
         wide
+        sources={TABLE_SOURCES}
       >
         <div className="tw-space-y-4">
           <p className={PROSE}>
             {t(locale, "network.tdh.impl.programs.intro")}
           </p>
-          <ProgramCards locale={locale} lean={lean} />
+          <ProgramCards locale={locale} lean={lean} daily={daily} />
           <TdhStatusLegend
             locale={locale}
             tones={["success", "primary", "warning"]}
           />
-          <div className="tw-max-w-[36em] tw-space-y-2 tw-text-sm tw-leading-6 tw-text-iron-300">
-            <p className="tw-m-0">
-              {t(locale, "network.tdh.impl.conformanceNote")}
-              <TdhSource refs={["P26 §13"]} locale={locale} />
-            </p>
-            <p className="tw-m-0">{t(locale, "network.tdh.impl.checksNote")}</p>
-            <p className="tw-m-0">{t(locale, "network.tdh.impl.speedNote")}</p>
-            <p className="tw-m-0">
-              {t(locale, "network.tdh.impl.illustration")}
-            </p>
-          </div>
-          <p className="tw-m-0 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1 tw-text-sm tw-text-iron-400">
-            <span className="tw-font-medium tw-text-iron-300">
-              {t(locale, "network.tdh.explainer.sources.label")}
-            </span>
-            <TdhSource refs={TABLE_SOURCES} locale={locale} />
-          </p>
+          <TdhDisclosure summary={t(locale, "network.tdh.impl.notesSummary")}>
+            <div className="tw-max-w-[34rem] tw-space-y-2 tw-pb-2 tw-pl-6 tw-text-sm tw-leading-6 tw-text-iron-300">
+              <p className="tw-m-0">{t(locale, "network.tdh.impl.names")}</p>
+              <p className="tw-m-0">
+                {t(locale, "network.tdh.impl.conformanceNote")}
+              </p>
+              <p className="tw-m-0">
+                {t(locale, "network.tdh.impl.checksNote")}
+              </p>
+              <p className="tw-m-0">
+                {t(locale, "network.tdh.impl.speedNote")}
+              </p>
+              <p className="tw-m-0">
+                {t(locale, "network.tdh.impl.illustration")}
+              </p>
+            </div>
+          </TdhDisclosure>
         </div>
       </TdhSection>
 
@@ -351,16 +357,11 @@ export default async function TdhImplementationsPage() {
         id="written"
         title={t(locale, "network.tdh.impl.written.title")}
         locale={locale}
+        sources={["Clean room 2026-10-11", "D119", "P53 §11.3"]}
       >
         <div className="tw-space-y-4">
-          <p className={PROSE}>
-            {t(locale, "network.tdh.impl.written.body")}
-            <TdhSource refs={["Clean room 2026-10-11"]} locale={locale} />
-          </p>
-          <p className={PROSE}>
-            {t(locale, "network.tdh.impl.written.body2")}
-            <TdhSource refs={["D119"]} locale={locale} />
-          </p>
+          <p className={PROSE}>{t(locale, "network.tdh.impl.written.body")}</p>
+          <p className={PROSE}>{t(locale, "network.tdh.impl.written.body2")}</p>
           <LineageDiagram locale={locale} />
         </div>
       </TdhSection>
@@ -378,6 +379,7 @@ export default async function TdhImplementationsPage() {
         title={t(locale, "network.tdh.impl.checked.title")}
         locale={locale}
         wide
+        sources={[...CHECKS.flatMap((check) => check.refs), "P53 §4.5"]}
       >
         <div className="tw-space-y-6">
           <ol className="tw-m-0 tw-max-w-3xl tw-list-none tw-space-y-4 tw-p-0">
@@ -390,12 +392,11 @@ export default async function TdhImplementationsPage() {
                   {formatInteger(locale, index + 1)}
                 </span>
                 <div className="tw-min-w-0">
-                  <p className="tw-m-0 tw-max-w-[36em] tw-text-base tw-leading-7 tw-text-iron-300">
+                  <p className="tw-m-0 tw-max-w-[34rem] tw-text-base tw-leading-7 tw-text-iron-300">
                     <strong className="tw-font-semibold tw-text-iron-50">
                       {t(locale, `network.tdh.impl.checked.${check.key}.title`)}
                     </strong>{" "}
                     {t(locale, `network.tdh.impl.checked.${check.key}.body`)}
-                    <TdhSource refs={check.refs} locale={locale} />
                   </p>
                   {check.key === "daily" && (
                     <TdhArrowLink href="/network/tdh/verification">
@@ -414,9 +415,8 @@ export default async function TdhImplementationsPage() {
           <div id="difftest-rounds" className="tw-scroll-mt-28">
             <DifftestRounds locale={locale} />
           </div>
-          <p className="tw-m-0 tw-max-w-[36em] tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-4 tw-text-base tw-leading-7 tw-text-iron-200">
+          <p className="tw-m-0 tw-max-w-[34rem] tw-rounded-lg tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-base tw-leading-7 tw-text-iron-200">
             {t(locale, "network.tdh.impl.checked.after")}
-            <TdhSource refs={["P53 §4.5"]} locale={locale} />
           </p>
           <CheckMatrix locale={locale} lean={lean} />
         </div>
@@ -439,12 +439,10 @@ export default async function TdhImplementationsPage() {
         })}
         locale={locale}
         wide
+        sources={["P26 §13", "D116"]}
       >
         <div className="tw-space-y-4">
-          <p className={PROSE}>
-            {t(locale, "network.tdh.impl.vectors.intro")}
-            <TdhSource refs={["P26 §13", "D116"]} locale={locale} />
-          </p>
+          <p className={PROSE}>{t(locale, "network.tdh.impl.vectors.intro")}</p>
           <VectorFormat locale={locale} />
           <VectorAnatomy locale={locale} />
           <VectorBrowser locale={locale} />

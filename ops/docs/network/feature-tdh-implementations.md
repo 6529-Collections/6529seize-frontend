@@ -25,22 +25,27 @@ reference, the Lean model and 6529.io's current backend.
   the status pills' colours are the only ones in it: what it is, its status
   as a shared TDH status pill (for example `Runs in the daily comparison`,
   `Built, not in validator` or `Proposal, not adopted`, one line each, with
-  the palette's legend under the list; the Rust core and program B also
-  carry an amber `Behind P26's latest round`), the conformance vectors it
-  passes, the newest round first and the daily job's version under it, each
-  out of that round's own vectors (the Rust core: 75 of 75 at `a4db4ae`,
-  the development branch, then 51 of 51 at P26 `0621ed4`, the daily job;
-  program B 75 of 75; the Lean model 68 of 68 at its published build and
-  89 of 89 in round 5, not yet published). A marked count points to one
-  footnote under the table: not yet run on P26's fifth round, whose 14 new
-  vectors are pending. Then its compute time for one day (program B: not
-  measured yet; the Lean model's labelled with its build). Language, how it
-  was written, where it runs, the commits and the longer conformance and
-  speed notes open under one `Details` control at the row's end. An intro says which source is not public yet and gives a naming
-  key: program B is also the TDH code of proof program B, and proof
-  program A runs the validators' own code.
-  Under the cards, at prose width, one sentence each: the vectors added
-  since the fifth round change no value of a real day, that check counts
+  the palette's legend under the list), the conformance vectors it passes,
+  the newest build first and the daily comparison's build under it, each
+  out of that round's own vectors: the Rust core and program B 89 of 89 at
+  P26 `f840096` on the validator's development branch (`30bf8f9`, October
+  16, 2026); the Python and Rust references 89 of 89 at `f840096`; the Lean
+  model the published manifest's count. The daily comparison's builds are
+  read from the latest day's file (`implementations.rust.commit` and
+  `implementations.python.commit`, shown as `validator@…` and
+  `6529chain@…`), with
+  their vector count when the build is a known one (`KNOWN_BUILDS` in
+  `tdhFacts.ts`) and the build alone otherwise; no daily version is fixed in
+  the page. Then its compute time for one day (program B: not measured yet;
+  the Lean model's labelled with its build). Language, how it was written,
+  where it runs, the commits and the longer conformance and speed notes
+  open under one `Details` control at the row's end. An intro says that no
+  source is public yet (D116).
+  Under the cards, one closed disclosure (`Notes: names, vector counts,
+  check counts and times`) holds, one sentence each:
+  the naming key (program B is also the TDH code of proof program B, and
+  proof program A runs the validators' own code), that the later rounds'
+  vectors change no value of a real day, that check counts
   are each runner's own (1,257 in the Python reference, 1,253 in the Rust
   reference and the Lean model, for the same 89 vectors), what each compute
   time includes (the Rust reference's 0.6 s is computation alone, 2.9 s
@@ -66,17 +71,21 @@ reference, the Lean model and 6529.io's current backend.
   and the proof programs (being built), each date in a caption under the
   table so the headers stay on one line. Each cell has an icon and a word:
   now, planned or from a date, under test, or no, with a legend.
-- How they are checked: conformance vectors, differential replays, four
-  rounds of differential tests across four programs (a table, `#difftest-rounds`,
-  gives each round's inputs, findings and the P26 round that settled it, the
-  fourth's on October 16; the Specification and Formal model pages link to
-  it), the dual run in every validator (decided, not yet built
-  in), the daily comparison (scheduled daily from 16 October 2026), the
-  formal model, and proofs A and B, plus why Rust versus Python is the real
-  check after the cutover. A table shows which check covers which program,
-  with the same icons and legend, its cells at 14 px (the Lean cell is
-  `All 68¹`, with its footnote), and short notes at prose width; since P26's fifth
-  round the Rust reference also runs on the Lean model's random inputs. A
+- How they are checked: conformance vectors, differential replays, five
+  rounds of differential tests across the Lean model, the Python reference,
+  the Rust core and program B (a table, `#difftest-rounds`, gives each
+  round's inputs, findings and the P26 round that settled it; E13, from the
+  fifth round on October 16, is open for the vector format; the
+  Specification and Formal model pages link to it), the dual run in every
+  validator (the Rust core against program B before signing, the Python
+  reference an optional third check: decided, D125 and P53 §4.5, not yet
+  built in), the daily comparison (scheduled daily from 16 October 2026),
+  the formal model, and proofs A and B, plus why Rust versus Python is the
+  real check after the cutover. A table shows which check covers which
+  program, with the same icons and legend, its cells at 14 px, and short
+  notes at prose width: in CI, 6529chain's `tdh-formal.yml` runs 1,000
+  seeded random inputs through Lean, Python and the Rust reference on every
+  change, and the validator's CI runs the Rust core against program B. A
   note under the differential tests says where vectors 75 to 88 came from:
   76 to 79 settle round 4's findings, 75 and 80 to 88 the fifth round's
   rulings on input types.

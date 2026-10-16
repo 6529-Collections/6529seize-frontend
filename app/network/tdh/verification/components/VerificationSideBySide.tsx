@@ -8,7 +8,8 @@ import type {
 } from "@/lib/tdh/verification/schema";
 import TdhHeading from "../../shared/TdhHeading";
 import TdhCopyButton from "../../shared/TdhCopyButton";
-import TdhSource from "../../shared/TdhSource";
+import TdhDisclosure from "../../shared/TdhDisclosure";
+import TdhSourcesNote from "../../shared/TdhSourcesNote";
 import {
   TDH_LINK,
   TDH_TABLE,
@@ -360,11 +361,10 @@ export default function VerificationSideBySide({
         id="side"
         title={t(locale, "network.tdh.verify.side.heading")}
         locale={locale}
-        className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
+        className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-2xl"
       />
-      <p className="tw-m-0 tw-mt-2 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
+      <p className="tw-m-0 tw-mt-2 tw-max-w-[34rem] tw-text-sm tw-leading-6 tw-text-iron-300">
         {t(locale, "network.tdh.verify.side.caption")}
-        <TdhSource refs={["P53 §12"]} locale={locale} />
       </p>
       {/* One card per measure below lg, in one column, so no card is
           stretched beside a taller one; inside a card the three values sit
@@ -443,30 +443,50 @@ export default function VerificationSideBySide({
           </tbody>
         </table>
       </div>
-      <dl className="tw-m-0 tw-mt-4 tw-grid tw-max-w-[38em] tw-gap-y-3 tw-text-sm tw-leading-6">
-        {rustRoots !== null && (
-          <div>
-            <dt className="tw-font-medium tw-text-iron-100">
-              {t(locale, "network.tdh.verify.side.roots")}
+      {/* What two rows mean: a line each, the detail one click away. */}
+      <dl className="tw-m-0 tw-mt-4 tw-grid tw-max-w-[34rem] tw-gap-y-1 tw-text-sm tw-leading-6">
+        {(
+          [
+            ...(rustRoots === null
+              ? []
+              : [["roots", "rootsShort", "rootsHelp"] as const]),
+            ["runtime", "runtimeShort", "runtimeNote"] as const,
+          ] as const
+        ).map(([key, short, help]) => (
+          <div key={key}>
+            <dt className="tw-inline tw-font-medium tw-text-iron-100">
+              {t(locale, `network.tdh.verify.side.${key}`)}:{" "}
             </dt>
-            <dd className="tw-m-0 tw-text-iron-300">
-              {t(locale, "network.tdh.verify.side.rootsHelp")}
-              <TdhSource
-                refs={["P53 §4.2", "P28 §4.4", "P53 §4.6", "D130"]}
-                locale={locale}
-              />
+            <dd className="tw-m-0 tw-inline tw-text-iron-300">
+              {t(locale, `network.tdh.verify.side.${short}`)}
+            </dd>
+            {/* A dl's div holds only dt and dd, so the detail is a dd. */}
+            <dd className="tw-m-0">
+              <TdhDisclosure
+                summary={t(locale, "network.tdh.verify.side.more", {
+                  name: t(locale, `network.tdh.verify.side.${key}`),
+                })}
+                summaryClassName="tw-text-[13px]"
+              >
+                <p className="tw-m-0 tw-pb-2 tw-pl-6 tw-text-iron-300">
+                  {t(locale, `network.tdh.verify.side.${help}`)}
+                </p>
+              </TdhDisclosure>
             </dd>
           </div>
-        )}
-        <div>
-          <dt className="tw-font-medium tw-text-iron-100">
-            {t(locale, "network.tdh.verify.side.runtime")}
-          </dt>
-          <dd className="tw-m-0 tw-text-iron-300">
-            {t(locale, "network.tdh.verify.side.runtimeNote")}
-          </dd>
-        </div>
+        ))}
       </dl>
+      <TdhSourcesNote
+        locale={locale}
+        refs={[
+          "P53 §12",
+          "P53 §4.2",
+          "P28 §4.4",
+          "P53 §4.6",
+          "D130",
+          "P52 §3.4",
+        ]}
+      />
     </section>
   );
 }

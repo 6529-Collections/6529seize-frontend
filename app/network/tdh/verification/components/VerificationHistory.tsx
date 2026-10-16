@@ -10,7 +10,7 @@ import {
   VERDICT_TONE,
 } from "@/lib/tdh/verification/states";
 import TdhHeading from "../../shared/TdhHeading";
-import { WIDE_WIDTH } from "../../shared/TdhSvg";
+import { svgMaxWidth, WIDE_WIDTH } from "../../shared/TdhSvg";
 import TdhDisclosure from "../../shared/TdhDisclosure";
 import TdhStatusPill from "../../shared/TdhStatusPill";
 import {
@@ -109,6 +109,7 @@ function HistoryChart({
       role="img"
       aria-labelledby={`${titleId} ${descId}`}
       className="tw-block tw-h-auto tw-w-full"
+      style={{ maxWidth: svgMaxWidth(width) }}
     >
       <title id={titleId}>
         {t(locale, "network.tdh.verify.history.chartTitle", {
@@ -574,7 +575,7 @@ export default function VerificationHistory({
         id="history"
         title={t(locale, "network.tdh.verify.history.heading")}
         locale={locale}
-        className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
+        className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-2xl"
       />
       <p className="tw-m-0 tw-mt-2 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
         {t(locale, "network.tdh.verify.history.caption")}

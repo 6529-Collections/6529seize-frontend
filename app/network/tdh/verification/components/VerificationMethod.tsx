@@ -1,14 +1,9 @@
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import TdhHeading from "../../shared/TdhHeading";
-import TdhSource from "../../shared/TdhSource";
+import TdhSourcesNote from "../../shared/TdhSourcesNote";
 import type { TDH_SERIES } from "../../shared/tdhStyles";
-import {
-  NARROW_WIDTH,
-  TdhDiagramSwitch,
-  TdhSvg,
-  WIDE_WIDTH,
-} from "../../shared/TdhSvg";
+import { NARROW_WIDTH, TdhSvg, WIDE_WIDTH } from "../../shared/TdhSvg";
 import { svgBoxWidth } from "../../shared/svgText";
 import { isTdhProgram, ProgramGlyph } from "../../shared/TdhProgramMark";
 
@@ -124,35 +119,50 @@ function nodeWidth(labels: readonly string[]): number {
 /**
  * Wide: our computation and the object under test, converging on Compare.
  * Each column is as wide as its longest label in the site font, with room
- * on both sides, so no label touches its box or an arrow.
+ * on both sides, so no label touches its box or an arrow. `row` lays the
+ * comparison, the published files and this page out in one row to the
+ * right, for a column wide enough to hold it (a desktop window); `stacked`
+ * stacks them under Compare, for a tablet's column.
  */
-function FlowWide({ label }: { readonly label: (key: string) => string }) {
-  const arrow = "tdh-flow-wide-arrow";
+function FlowWide({
+  label,
+  layout,
+}: {
+  readonly label: (key: string) => string;
+  readonly layout: "stacked" | "row";
+}) {
+  const arrow = `tdh-flow-${layout}-arrow`;
+  const row = layout === "row";
   const w1 = nodeWidth([label("ethereum"), label("backend")]);
   const w2 = nodeWidth([label("rust"), label("python"), label("arweave")]);
   const w3 = nodeWidth([label("compare"), label("published"), label("page")]);
   const x2 = w1 + 36;
   const bus = x2 + w2 + 24;
   const x3 = bus + 28;
-  const width = Math.max(WIDE_WIDTH, x3 + w3);
+  const x4 = x3 + w3 + 40;
+  const x5 = x4 + w3 + 40;
+  const width = row ? x5 + w3 : Math.max(WIDE_WIDTH, x3 + w3);
   const ethereum: FlowBox = { x: 0, y: 26, w: w1, h: 40 };
   const rust: FlowBox = { x: x2, y: 26, w: w2, h: 40 };
   const python: FlowBox = { x: x2, y: 110, w: w2, h: 40 };
   const backend: FlowBox = { x: 0, y: 206, w: w1, h: 40 };
   const arweave: FlowBox = { x: x2, y: 206, w: w2, h: 40 };
   const compare: FlowBox = { x: x3, y: 110, w: w3, h: 40 };
-  const published: FlowBox = { x: x3, y: 186, w: w3, h: 40 };
-  const page: FlowBox = { x: x3, y: 262, w: w3, h: 40 };
+  const published: FlowBox = row
+    ? { x: x4, y: 110, w: w3, h: 40 }
+    : { x: x3, y: 186, w: w3, h: 40 };
+  const page: FlowBox = row
+    ? { x: x5, y: 110, w: w3, h: 40 }
+    : { x: x3, y: 262, w: w3, h: 40 };
   const into = compare.x - 2;
   const down = compare.x + compare.w / 2;
   return (
     <TdhSvg
-      id="tdh-flow-wide"
+      id={`tdh-flow-${layout}`}
       width={width}
-      height={304}
+      height={row ? 250 : 304}
       title={label("title")}
       desc={label("text")}
-      maxWidth={640}
     >
       <defs>
         <FlowArrow id={arrow} />
@@ -207,16 +217,33 @@ function FlowWide({ label }: { readonly label: (key: string) => string }) {
         className={FLOW_EDGE}
         markerEnd={`url(#${arrow})`}
       />
-      <path
-        d={`M${down},${compare.y + compare.h} V${published.y - 2}`}
-        className={FLOW_EDGE}
-        markerEnd={`url(#${arrow})`}
-      />
-      <path
-        d={`M${down},${published.y + published.h} V${page.y - 2}`}
-        className={FLOW_EDGE}
-        markerEnd={`url(#${arrow})`}
-      />
+      {row ? (
+        <>
+          <path
+            d={`M${compare.x + compare.w},130 H${published.x - 2}`}
+            className={FLOW_EDGE}
+            markerEnd={`url(#${arrow})`}
+          />
+          <path
+            d={`M${published.x + published.w},130 H${page.x - 2}`}
+            className={FLOW_EDGE}
+            markerEnd={`url(#${arrow})`}
+          />
+        </>
+      ) : (
+        <>
+          <path
+            d={`M${down},${compare.y + compare.h} V${published.y - 2}`}
+            className={FLOW_EDGE}
+            markerEnd={`url(#${arrow})`}
+          />
+          <path
+            d={`M${down},${published.y + published.h} V${page.y - 2}`}
+            className={FLOW_EDGE}
+            markerEnd={`url(#${arrow})`}
+          />
+        </>
+      )}
       <FlowNode
         box={ethereum}
         label={label("ethereum")}
@@ -280,7 +307,6 @@ function FlowNarrow({ label }: { readonly label: (key: string) => string }) {
       height={548}
       title={label("title")}
       desc={label("text")}
-      maxWidth={400}
     >
       <defs>
         <FlowArrow id={arrow} />
@@ -380,13 +406,20 @@ function DailyFlow({ locale }: { readonly locale: SupportedLocale }) {
       <figcaption className="tw-mb-3 tw-text-sm tw-font-medium tw-text-iron-200">
         {label("title")}
       </figcaption>
-      <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-p-4">
-        <TdhDiagramSwitch
-          narrow={<FlowNarrow label={label} />}
-          wide={<FlowWide label={label} />}
-        />
+      {/* Three drawings, each for its width: a column on phones, two
+          lanes stacked under Compare on a tablet, one row on a desktop. */}
+      <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-p-4 tw-@container">
+        <div className="@[34rem]:tw-hidden">
+          <FlowNarrow label={label} />
+        </div>
+        <div className="tw-hidden @[34rem]:tw-block @[59rem]:tw-hidden">
+          <FlowWide label={label} layout="stacked" />
+        </div>
+        <div className="tw-hidden @[59rem]:tw-block">
+          <FlowWide label={label} layout="row" />
+        </div>
       </div>
-      <p className="tw-m-0 tw-mt-3 tw-max-w-[36em] tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-300">
+      <p className="tw-m-0 tw-mt-3 tw-max-w-[34rem] tw-text-sm tw-leading-6 tw-text-iron-400">
         {label("sameCode")}
       </p>
     </figure>
@@ -416,17 +449,18 @@ export default function VerificationMethod({
         id="method"
         title={t(locale, "network.tdh.verify.method.heading")}
         locale={locale}
-        className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
+        className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-2xl"
       />
-      <div className="tw-mt-4 tw-grid tw-items-start tw-gap-8 xl:tw-grid-cols-2">
-        <div className="tw-min-w-0">
-          <DailyFlow locale={locale} />
-        </div>
-        <ol className="tw-m-0 tw-min-w-0 tw-max-w-[36em] tw-list-none tw-space-y-4 tw-p-0">
+      {/* The flow across the column, the steps under it at the reading
+          measure, in two columns from md, so no line runs long and neither
+          leaves a hole beside the other. */}
+      <div className="tw-mt-4 tw-space-y-6">
+        <DailyFlow locale={locale} />
+        <ol className="tw-m-0 tw-max-w-[34rem] tw-list-none tw-gap-x-10 tw-p-0 md:tw-max-w-none md:tw-columns-2">
           {STEPS.map((step, index) => (
             <li
               key={step.key}
-              className="tw-grid tw-grid-cols-[1.75rem_minmax(0,1fr)] tw-gap-3"
+              className="tw-mb-4 tw-grid tw-break-inside-avoid tw-grid-cols-[1.75rem_minmax(0,1fr)] tw-gap-3"
             >
               <span className="tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-text-xs tw-font-medium tw-tabular-nums tw-text-iron-200">
                 {index + 1}
@@ -442,16 +476,18 @@ export default function VerificationMethod({
                   locale,
                   `network.tdh.verify.method.${step.key}.body` as MessageKey
                 )}
-                <TdhSource refs={step.refs} locale={locale} />
               </p>
             </li>
           ))}
-          <li className="tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-700 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-300">
+          <li className="tw-mb-4 tw-break-inside-avoid tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-700 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, "network.tdh.verify.method.validators")}
-            <TdhSource refs={["P53 §12"]} locale={locale} />
           </li>
         </ol>
       </div>
+      <TdhSourcesNote
+        locale={locale}
+        refs={[...STEPS.flatMap((step) => step.refs), "P53 §12"]}
+      />
     </section>
   );
 }

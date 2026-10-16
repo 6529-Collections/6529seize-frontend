@@ -67,9 +67,12 @@ computes (both Rust commits of the first days port P26 `0621ed4`).
    collector's and the two burn addresses', and all 11,131 wallet
    records"), the verdict in words, previous and next day arrows, the
    snapshot block, and the history mode (`Not yet fully checked` or
-   `History fully checked`, with its meaning in one line beside it and a
-   `What this label means` disclosure that says the finalized block comes
-   from a public beacon server, with no pinned checkpoint yet). The two
+   `History fully checked`, with its meaning in one line beside it: the
+   history before the snapshot is taken as reported by public log servers,
+   and stays so, even once 6529's own Ethereum node is synced, until the
+   daily run checks it in full against that node; no date is given. A
+   `What this label means` disclosure says the finalized block comes from a
+   public beacon server, with no pinned checkpoint yet.) The two
    stack below `lg`. On a day that is not the latest, a neutral link back
    to the latest. The feed's
    identity counts include the two sink identities (the zero address and
@@ -79,12 +82,15 @@ computes (both Rust commits of the first days port P26 `0621ed4`).
    records equal, burn addresses included), each with a meter that keeps a
    visible sliver for any difference and a line for the wallets, the tiles
    aligned at their tops; the total
-   TDH, with Python − Rust and 6529.io − Rust as numbers and whether it is
-   the same in all three; and the cutover: a countdown with the week from
-   the start of the daily runs (October 16, 2026) to about October 23,
-   2026 (`7 days to go` on the dashboard; on a day's own page the planned
-   date, with `On this day: 9 days to go`), and `Switched on {date}` only
-   when a published file says the cutover is done. The total tile notes
+   TDH, with `Rust − 6529.io` and `Rust − Python` as numbers and whether it
+   is the same in all three; and the cutover: a countdown (`7 days to go`
+   on the dashboard; on a day's own page the planned date, with `On this
+   day: 9 days to go`) over one segment per daily run of the week from the
+   start of the daily runs (October 16, 2026) to about October 23, 2026
+   (`Daily run 1 of 7 before the cutover`, the runs so far filled), and
+   `Switched on {date}` only when a published file says the cutover is
+   done. Every difference on the dashboard and the day pages has one sign:
+   the Rust core minus the other program. The total tile notes
    that the total validators are to sign leaves out the two sinks, which
    the feed does not publish yet. Tile eyebrows keep the case of 6529.io
    (`CaseSafe`). One tile a row on phones, a 2 × 2 grid from a 26rem
@@ -120,12 +126,11 @@ computes (both Rust commits of the first days port P26 `0621ed4`).
    and wallet records, the counts by class (A to D) and by cause (DEV and BUG
    items link to the specification), and the totals' differences. The four
    classes are explained below it, with a note that no record is published,
-   the differences expected until the cutover (a group of four
-   consolidated wallets, until the owner decides, with, on a day whose
-   identity records are all equal, that there is none that day; and a sale
-   and a purchase of one card in different transactions of one block,
-   DEV-2, the one difference D132 names), each of which would show as class
-   D, and a short history of the DEV-2 cases that D131's netting settled.
+   the difference possible until the cutover (a sale and a purchase of one
+   card in different transactions of one block, DEV-2, the one difference
+   D132 names, which would show as class D; on a day whose identity records
+   are all equal, that there is none that day), and a short history of the
+   DEV-2 cases that D131's netting settled.
    A Rust–Python difference is class C (the new programs disagree), a
    difference from 6529.io class A or B only when the list of known ones
    explains it, else D; C and D both raise an alarm. The classes have an
@@ -141,14 +146,21 @@ computes (both Rust commits of the first days port P26 `0621ed4`).
    signed), then one column of facts, a label and a line or two of value
    each: snapshot block with an Etherscan link and hash, history mode with
    its meaning, rule version, registry hash (from the day's file, or the
-   specification's), code versions with the P26 commit each computes,
-   6529.io's files on Arweave with links to each transaction and file, and
-   the day before with its file's SHA-256. What each line means (the
+   specification's; the rule version and registry hash the Rust run states
+   count as the day's), code versions with the P26 commit each computes,
+   when the day's file names them the files by SHA-256 (the canonical
+   input, the identities and the wallets record files, each with whether
+   the Python reference's is the same file), 6529.io's files on Arweave
+   with links to each transaction and file and each file's SHA-256, the
+   day before with its file's SHA-256, and, when the feed writes them, when
+   the index and the day file were generated (`generatedAt`) and the day
+   file's own `sha256`, checked against the hash of the file as read. What
+   each line means (the
    history mode at length, the P26 commit the runs followed, where the
    registry hash comes from, the first days' runs, the upload signature)
    is in one disclosure under them. Then JSON download links, an RSS feed of every published day
-   (`/network/tdh/verification.rss`, one item per day with its verdict and
-   agreement), and the SHA-256 of the day file as the page read it (only
+   (`/network/tdh/verification.rss`, one item per day with its verdict,
+   agreement and totals, dated by the day's report), and the SHA-256 of the day file as the page read it (only
    the hash breaks on a phone).
 8. Check it yourself: what anyone can check today from public sources
    (6529.io's own API lists every day's upload with its Arweave link, and
@@ -185,7 +197,10 @@ computes (both Rust commits of the first days port P26 `0621ed4`).
   agreement counts; the page never reads the feed's `differences` list, which
   the job always publishes empty. Optional fields (`ruleVersion`,
   `registryHash`, `cutoffBlockHash`, `cutoffTimestamp`, `live.sha256`,
-  `rootsNote`) are shown when present.
+  `rootsNote`, the files' own `generatedAt` and `sha256`, each run's
+  `ruleVersion`, `ruleId`, `registryHash` and `binarySha256`, and the day's
+  `sources`: the SHA-256 of the canonical input and record files of each
+  run and of 6529.io's two files) are shown when present.
 - No index published yet (403, 404 or no days): the page says no daily
   report is published yet. There is no bundled or sample data in any
   environment; Jest tests serve a verbatim copy of the feed's first days

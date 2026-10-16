@@ -1,17 +1,21 @@
 import type { ReactNode } from "react";
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
-import {
-  NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
-  NETWORK_REFERENCE_PAGE_CLASSES,
-} from "@/components/network/networkPageLayoutClasses";
 import type { SupportedLocale } from "@/i18n/locales";
 import TdhPageTitle from "./TdhPageTitle";
 import TdhSubnav, { type TdhPageHref } from "./TdhSubnav";
-import { TDH_H1, TDH_LEDE } from "./tdhStyles";
+import {
+  TDH_DROPDOWN_ROW,
+  TDH_H1,
+  TDH_LEDE,
+  TDH_PAGE,
+  TDH_PAGE_HEADER_TOP,
+} from "./tdhStyles";
 
 /**
  * The frame of every TDH sub-page: the About contents menu, the TDH section
- * navigation, then a header with the H1, status pills and lede.
+ * navigation, then a header with the H1, status pills and lede. An optional
+ * eyebrow names the page the header belongs to (the 404 view's, for one); like
+ * the overview's, it shows from `md` up, where no section tab says it.
  */
 export default function TdhPageShell({
   locale,
@@ -19,6 +23,7 @@ export default function TdhPageShell({
   dropdownHref,
   documentTitle,
   title,
+  eyebrow,
   pills,
   lede,
   children,
@@ -29,16 +34,17 @@ export default function TdhPageShell({
   readonly dropdownHref: string;
   readonly documentTitle: string;
   readonly title: string;
+  readonly eyebrow?: string;
   readonly pills?: ReactNode;
   readonly lede?: ReactNode;
   readonly headerExtra?: ReactNode;
   readonly children: ReactNode;
 }) {
   return (
-    <div className={NETWORK_REFERENCE_PAGE_CLASSES}>
+    <div className={TDH_PAGE}>
       <TdhPageTitle title={documentTitle} />
       <AboutContentsDropdown
-        className={NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES}
+        className={TDH_DROPDOWN_ROW}
         currentHref={dropdownHref}
         locale={locale}
         desktopFlush
@@ -48,8 +54,13 @@ export default function TdhPageShell({
         <TdhSubnav current={current} locale={locale} />
         <header
           id="top"
-          className="tw-scroll-mt-24 tw-pb-8 tw-pt-5 sm:tw-pb-10 sm:tw-pt-8"
+          className={`tw-scroll-mt-24 tw-pb-8 sm:tw-pb-10 ${TDH_PAGE_HEADER_TOP}`}
         >
+          {eyebrow !== undefined && (
+            <p className="tw-m-0 tw-mb-3 tw-hidden tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wide tw-text-primary-300 md:tw-block">
+              {eyebrow}
+            </p>
+          )}
           <h1 className={TDH_H1}>{title}</h1>
           {pills !== undefined && (
             <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-2">

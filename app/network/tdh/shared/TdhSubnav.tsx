@@ -48,7 +48,7 @@ export default function TdhSubnav({
   return (
     <nav
       aria-label={t(locale, "network.tdh.shared.nav.label")}
-      className="tw-relative -tw-mx-3 tw-mb-2 tw-mt-1 lg:tw-mx-0"
+      className="tw-relative -tw-mx-3 tw-mb-2 tw-mt-0 md:tw-mt-1 lg:tw-mx-0"
     >
       <TdhSubnavScroll className="tw-overflow-x-auto tw-px-3 tw-scrollbar-none lg:tw-px-0">
         <ul className="tw-m-0 tw-flex tw-w-max tw-list-none tw-items-center tw-gap-1 tw-p-0">

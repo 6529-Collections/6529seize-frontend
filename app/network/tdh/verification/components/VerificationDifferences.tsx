@@ -9,7 +9,7 @@ import {
 } from "@/lib/tdh/verification/schema";
 import type { DayDifferences } from "@/lib/tdh/verification/states";
 import TdhHeading from "../../shared/TdhHeading";
-import TdhSource from "../../shared/TdhSource";
+import TdhSourcesNote from "../../shared/TdhSourcesNote";
 import { SPECIFICATION_PATH } from "../../shared/tdhSources";
 import { TDH_CARD, TDH_LINK } from "../../shared/tdhStyles";
 import { formatInteger, formatSigned } from "./verificationFormat";
@@ -125,11 +125,10 @@ export default function VerificationDifferences({
         id="diff"
         title={t(locale, "network.tdh.verify.diff.heading")}
         locale={locale}
-        className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
+        className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-2xl"
       />
-      <p className="tw-m-0 tw-mt-2 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
+      <p className="tw-m-0 tw-mt-2 tw-max-w-[34rem] tw-text-sm tw-leading-6 tw-text-iron-300">
         {t(locale, "network.tdh.verify.diff.lede")}
-        <TdhSource refs={["P38 §3.3"]} locale={locale} />
       </p>
       {/* The day, then the classes, each the full width: side by side the
           shorter card left a hole beside the taller. */}
@@ -205,10 +204,11 @@ export default function VerificationDifferences({
               )}
             </>
           )}
+          {/* One sign everywhere: the Rust core minus the other. */}
           {(differences.rustVsLive !== null ||
-            differences.pythonVsLive !== null) && (
-            <dl className="tw-m-0 tw-mt-5 tw-grid tw-grid-cols-1 tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4 min-[400px]:tw-grid-cols-2">
-              {(["rustVsLive", "pythonVsLive"] as const).map((key) => (
+            differences.rustVsPython !== null) && (
+            <dl className="tw-m-0 tw-mt-5 tw-grid tw-grid-cols-1 tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4 sm:tw-grid-cols-2">
+              {(["rustVsLive", "rustVsPython"] as const).map((key) => (
                 <div key={key}>
                   <dt className="tw-text-sm tw-text-iron-400">
                     {t(locale, `network.tdh.verify.diff.delta.${key}`)}
@@ -243,24 +243,27 @@ export default function VerificationDifferences({
           <p className="tw-m-0 tw-mt-4 tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, "network.tdh.verify.class.note")}
           </p>
-          <p className="tw-m-0 tw-mt-3 tw-max-w-[38em] tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
-            {t(locale, "network.tdh.verify.class.expected")}
-            {none && ` ${t(locale, "network.tdh.verify.class.expectedNone")}`}
-            <TdhSource refs={["P26 §6.3"]} locale={locale} />
-          </p>
-          <p className="tw-m-0 tw-mt-3 tw-max-w-[38em] tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
-            {t(locale, "network.tdh.verify.class.expectedDev2")}
-            <TdhSource refs={["DEV-2", "D132"]} locale={locale} />
-          </p>
+          <div className="tw-mt-3 tw-max-w-[34rem] tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+            <p className="tw-m-0 tw-font-semibold tw-text-iron-50">
+              {t(locale, "network.tdh.verify.class.expectedTitle")}
+            </p>
+            <p className="tw-m-0 tw-mt-0.5">
+              {t(locale, "network.tdh.verify.class.expectedDev2")}
+              {none && ` ${t(locale, "network.tdh.verify.class.expectedNone")}`}
+            </p>
+          </div>
         </div>
       </div>
-      <p className="tw-m-0 tw-mt-4 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
-        {t(locale, "network.tdh.verify.diff.history")}
-        <TdhSource refs={["DEV-2", "D131"]} locale={locale} />{" "}
+      <p className="tw-m-0 tw-mt-4 tw-max-w-[34rem] tw-text-sm tw-leading-6 tw-text-iron-300">
+        {t(locale, "network.tdh.verify.diff.history")}{" "}
         <Link href="/network/tdh/how-it-works#step-5" className={TDH_LINK}>
           {t(locale, "network.tdh.verify.diff.historyLink")}
         </Link>
       </p>
+      <TdhSourcesNote
+        locale={locale}
+        refs={["P38 §3.3", "DEV-2", "D131", "D132"]}
+      />
     </section>
   );
 }

@@ -97,6 +97,8 @@ export interface DayDifferences {
   }>;
   readonly rustVsLive: number | null;
   readonly pythonVsLive: number | null;
+  /** The Rust core's total minus the Python reference's: the same sign. */
+  readonly rustVsPython: number | null;
 }
 
 function differing(
@@ -119,6 +121,8 @@ function differing(
 export function dayDifferences(day: VerificationDay): DayDifferences {
   const live = day.implementations.live?.totalTdh ?? null;
   const python = day.implementations.python?.totalTdh ?? null;
+  const totalRustVsPython =
+    python === null ? null : day.implementations.rust.totalTdh - python;
   const summary = day.differenceSummary;
   if (summary !== null) {
     return {
@@ -134,6 +138,7 @@ export function dayDifferences(day: VerificationDay): DayDifferences {
         ),
       rustVsLive: summary.totalTdhDelta.rustVsLive,
       pythonVsLive: summary.totalTdhDelta.pythonVsLive,
+      rustVsPython: totalRustVsPython,
     };
   }
   const { rustVsLive, rustVsPython } = day.agreement;
@@ -150,6 +155,7 @@ export function dayDifferences(day: VerificationDay): DayDifferences {
     byCause: [],
     rustVsLive: totalDelta(day.implementations.rust.totalTdh, live),
     pythonVsLive: python === null || live === null ? null : python - live,
+    rustVsPython: totalRustVsPython,
   };
 }
 

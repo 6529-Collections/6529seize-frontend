@@ -6,10 +6,12 @@ import HowItWorksPage from "@/app/network/tdh/how-it-works/page";
 import ImplementationsPage from "@/app/network/tdh/implementations/page";
 import SpecificationPage from "@/app/network/tdh/specification/page";
 import VerificationDayPage from "@/app/network/tdh/verification/[cycleDay]/page";
+import DayNotFoundPage from "@/app/network/tdh/verification/day-not-found/page";
 import VerificationPage, {
   generateMetadata as generateVerificationMetadata,
 } from "@/app/network/tdh/verification/page";
-import { BUNDLED_FORMAL_MANIFEST } from "@/lib/tdh/formal/bundledManifest";
+import { statementsFor } from "@/app/network/tdh/formal/leanResults";
+import roundThree from "./fixtures/roundThreeManifest.json";
 import { PUBLIC_TDH_FEED_BASE } from "@/lib/tdh/verification/loadVerification.server";
 import {
   PUBLIC_FEED_DAYS,
@@ -153,8 +155,18 @@ describe("TDH sub-pages", () => {
     const rate = screen.getByRole("region", {
       name: "Change an edition and see its rate",
     });
-    // The rate, and the same rate at the edition's point on the curve.
-    expect(within(rate).getAllByText("12.71")).toHaveLength(2);
+    // The exact and the rounded rate, and the same rate at the edition's
+    // point on the chart, in its phone and its wide drawing.
+    expect(within(rate).getAllByText("12.71")).toHaveLength(4);
+    // The chart draws the 300 threshold and names the floor in its key.
+    expect(
+      within(rate).getByText("300 copies: floors end")
+    ).toBeInTheDocument();
+    expect(
+      within(rate).getByText(
+        "Rate used: below 300 copies the floor, edition 310"
+      )
+    ).toBeInTheDocument();
 
     const stack = screen.getByRole("region", {
       name: "Send and receive copies, and watch the stack",
@@ -200,7 +212,9 @@ describe("TDH sub-pages", () => {
     ).toBeInTheDocument();
     expect(container.textContent).not.toMatch(/github\.com/);
     expect(container.textContent).not.toMatch(/not yet in the text/);
-    expect(container.textContent).toMatch(/every one of the 89 conformance/);
+    expect(container.textContent).toMatch(
+      /reproduces all 89 conformance vectors/
+    );
     expect(container.textContent).toMatch(/commit f840096/);
     expect(container.textContent).toMatch(/removed: true left the chain/);
     expect(container.textContent).not.toMatch(/IN PLAIN WORDS|In plain words/);
@@ -227,8 +241,10 @@ describe("TDH sub-pages", () => {
     expect(document.getElementById("dev-2")).toBeNull();
   });
 
-  it("shows the formal model's proved, checked and refuted statements", async () => {
+  it("shows the formal model's statuses from its manifest, round 5", async () => {
     const user = userEvent.setup();
+    // No manifest on the feed in tests: the page shows its bundled copy of
+    // the feed's round-5 manifest (6b32f3f), and says so.
     const { container } = renderPage(await FormalPage());
     expect(
       screen.getByRole("heading", { level: 1, name: "Formal model" })
@@ -236,68 +252,52 @@ describe("TDH sub-pages", () => {
     expect(screen.queryByText("Planned")).toBeNull();
     expect(screen.queryByText("In progress")).toBeNull();
     // The statements tables only: the statuses legend has a pill of each.
-    expect(
-      container.querySelectorAll('table [data-tdh-pill="proved"]')
-    ).toHaveLength(8);
-    expect(
-      container.querySelectorAll('table [data-tdh-pill="shownFalse"]')
-    ).toHaveLength(4);
-    expect(
-      container.querySelectorAll('table [data-tdh-pill="byDefinition"]')
-    ).toHaveLength(1);
-    expect(
-      container.querySelectorAll('table [data-tdh-pill="deferred"]')
-    ).toHaveLength(1);
+    const statements = statementsFor(5);
+    const count = (status: string) =>
+      statements.filter((row) => row.status === status).length;
+    for (const status of [
+      "proved",
+      "shownFalse",
+      "byDefinition",
+      "deferred",
+    ] as const) {
+      expect(
+        container.querySelectorAll(`table [data-tdh-pill="${status}"]`)
+      ).toHaveLength(count(status));
+    }
     expect(
       container.querySelectorAll('table [data-tdh-pill="unverified"]')
     ).toHaveLength(0);
     expect(screen.getAllByText("Proposal, not adopted").length).toBeGreaterThan(
       0
     );
-    expect(screen.getByText("68 / 68")).toBeInTheDocument();
-    // Six proved statements, as the table's filter counts them; the card
-    // names last in, first out, a lemma about the model's stack.
-    expect(container.textContent).toMatch(/6statements about TDH-v1 proved/);
-    expect(container.textContent).toMatch(
-      /last in, first out for the model’s own stacks/
-    );
+    // The figures row is the manifest's own summary.
+    expect(screen.getByText("89 / 89")).toBeInTheDocument();
+    expect(container.textContent).toMatch(/78theorems proved/);
+    expect(container.textContent).toMatch(/11claims shown false/);
+    expect(container.textContent).toMatch(/9not proved here/);
     expect(container.textContent).not.toMatch(/cannot change TDH/);
     expect(container.textContent).not.toMatch(/and so no balance/);
     expect(container.textContent).toMatch(/It stops there/);
-    expect(screen.getByText("21,410")).toBeInTheDocument();
+    // The real day is evidence by evaluation, not proof.
+    expect(container.textContent).toMatch(/21,410/);
+    expect(container.textContent).toMatch(/evidence by evaluation/);
+    expect(container.textContent).not.toMatch(/so it computes real days/);
     expect(
       screen.getAllByText(/theorem replayHoldings_invariance/).length
     ).toBeGreaterThan(0);
-    // Outside production without a feed, the statuses come from the bundled
-    // copy of the manifest, and the page says so.
     expect(
       container.querySelector('[data-tdh-manifest="bundled"]')?.textContent
-    ).toMatch(/Model at 7bf579a.*bundled with this page/);
-    // The manifest's build follows P26 as of 1c69528, and its figures are
-    // in the builds panel once.
+    ).toMatch(/Model at 6b32f3f.*bundled with this page/);
     expect(
       container.querySelector('[data-tdh-manifest="bundled"]')?.textContent
-    ).toMatch(/P26 as of 1c69528.*68 of 68 vectors1,190 checks/);
-    // Round 5 of the model exists, but its manifest is not published: the
-    // builds panel shows its committed figures in a column of its own, under
-    // a pill, and the page keeps round 3's statements.
-    const note = container.querySelector("[data-tdh-round-note]");
-    expect(note?.textContent).toMatch(/Round 5 at 6b32f3f, October 16, 2026/);
-    expect(note?.textContent).toMatch(/89 of 89 vectors/);
-    expect(note?.textContent).toMatch(/55 \+ 30 theorems/);
-    expect(note?.textContent).toMatch(/46 fact checks/);
-    expect(
-      note?.querySelector('[data-tdh-pill="notPublished"]')
-    ).not.toBeNull();
-    expect(note?.textContent).toMatch(
-      /6825ffa47980ea9c7baa35470a6ddd24e7383fcbbe95bec4e237dfd0a7f537e5/
-    );
-    // No second section repeats them.
+    ).toMatch(/P26 as of f840096.*55 \+ 30 theorems.*46 fact checks/);
+    // Round 5 is the published build: no "next build" column.
+    expect(container.querySelector("[data-tdh-round-note]")).toBeNull();
     expect(container.querySelector("#next-build")).toBeNull();
-    expect(container.textContent).toMatch(
-      /the order of raw logs is not covered/
-    );
-    expect(container.textContent).not.toMatch(/The model from raw logs/);
+    // Since round 4 selection and decoding are in the model.
+    expect(container.textContent).toMatch(/Since round 4 \(f854661\)/);
+    expect(container.textContent).not.toMatch(/round 5 brings selection/);
     const toggle = screen.getByRole("button", {
       name: "Show the details of The first netting rule",
     });
@@ -307,7 +307,6 @@ describe("TDH sub-pages", () => {
       screen.getByText("The first netting rule against the current one")
     ).toBeInTheDocument();
     expect(screen.getByText("firstRule_reorder")).toBeInTheDocument();
-    expect(screen.getByText("In the proof manifest (5)")).toBeInTheDocument();
     const netting = screen.getByRole("button", {
       name: "Show the details of Netting invariance",
     });
@@ -320,10 +319,29 @@ describe("TDH sub-pages", () => {
     ).toBeGreaterThan(0);
   });
 
+  it("names round 5 as the next build while the feed publishes round 3", async () => {
+    serveFeed(roundThree);
+    const { container } = renderPage(await FormalPage());
+    expect(
+      container.querySelector('[data-tdh-manifest="published"]')?.textContent
+    ).toMatch(/Model at 7bf579a/);
+    const note = container.querySelector("[data-tdh-round-note]");
+    expect(note?.textContent).toMatch(/Round 5 at 6b32f3f, October 16, 2026/);
+    expect(note?.textContent).toMatch(/55 \+ 30 theorems/);
+    expect(note?.textContent).toMatch(/46 fact checks/);
+    expect(
+      note?.querySelector('[data-tdh-pill="notPublished"]')
+    ).not.toBeNull();
+    expect(note?.textContent).toMatch(
+      /6825ffa47980ea9c7baa35470a6ddd24e7383fcbbe95bec4e237dfd0a7f537e5/
+    );
+    expect(screen.getByText("68 / 68")).toBeInTheDocument();
+  });
+
   it("shows round 4's statements when the published manifest proves them", async () => {
     // Test data: the bundled manifest with round 4's theorems added, as a
     // manifest of that round would list them.
-    const base = BUNDLED_FORMAL_MANIFEST as {
+    const base = roundThree as unknown as {
       theorems: { id: string; status: string; leanName?: string | null }[];
     };
     const proved = base.theorems.find((entry) => entry.status === "proved");
@@ -402,10 +420,10 @@ describe("TDH sub-pages", () => {
       screen.getByRole("heading", { level: 1, name: "Implementations" })
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/None of their source is public:/)
+      screen.getByText(/None of their source is public yet/)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/The list follows 6529chain f840096/)
+      screen.getByText(/the list is P26’s as of f840096/)
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -415,7 +433,23 @@ describe("TDH sub-pages", () => {
     expect(screen.queryByText(/sample|test runs/i)).toBeNull();
     expect(
       screen.getByText(
-        "All 89 vectors (1,257 checks), at P26 f840096. The daily job runs it at 0621ed4, which had 51"
+        "All 89 vectors (1,257 checks), at P26 f840096. The daily comparison runs the 6529chain build each day’s page names"
+      )
+    ).toBeInTheDocument();
+    // The Rust core and program B on the validator's development branch;
+    // the daily comparison's builds read from the latest day's file.
+    expect(
+      screen.getAllByText("P26 f840096, validator development branch (30bf8f9)")
+        .length
+    ).toBe(2);
+    expect(
+      screen.getByText(
+        "P26 0621ed4, the daily comparison’s build (validator@e127676)"
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "P26 0621ed4, the daily comparison’s build (6529chain@0621ed4)"
       )
     ).toBeInTheDocument();
     expect(
@@ -423,7 +457,7 @@ describe("TDH sub-pages", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "68 of 68 vectors (1,190 checks), at P26 1c69528; every record of the 2026-10-11 cycle. Round 5 (6b32f3f), committed but not yet in a published manifest: 89 of 89 at P26 f840096."
+        "89 of 89 vectors (1,253 checks), at P26 f840096; every record of the 2026-10-11 cycle"
       )
     ).toBeInTheDocument();
     expect(screen.getByText("Built, not in validator")).toBeInTheDocument();
@@ -492,5 +526,33 @@ describe("TDH sub-pages", () => {
   it("sets the dashboard metadata", async () => {
     const metadata = await generateVerificationMetadata();
     expect(metadata.title).toBe("TDH verification | Network");
+  });
+
+  it("names the day asked for on the not-found view, and when a future cycle closes", async () => {
+    const { unmount } = renderPage(
+      await DayNotFoundPage({ searchParams: Promise.resolve({ day: "20739" }) })
+    );
+    expect(
+      screen.getByRole("heading", { level: 1, name: "No published day 20,739" })
+    ).toBeInTheDocument();
+    // The eyebrow ties the view to the dashboard it belongs to.
+    expect(
+      within(document.getElementById("top") as HTMLElement).getByText(
+        "TDH verification"
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/This address names no day the feed holds/)
+    ).toBeInTheDocument();
+    unmount();
+
+    renderPage(
+      await DayNotFoundPage({ searchParams: Promise.resolve({ day: "99999" }) })
+    );
+    expect(
+      screen.getByText(
+        /Cycle 99,999 closes at 00:00 UTC on .*, so it has no report yet/
+      )
+    ).toBeInTheDocument();
   });
 });

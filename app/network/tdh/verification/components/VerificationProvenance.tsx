@@ -3,9 +3,12 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { formatUtcDate } from "@/i18n/format";
 import type {
   VerificationDay,
   VerificationImplementation,
+  VerificationIndexDay,
+  VerificationRunFiles,
 } from "@/lib/tdh/verification/schema";
 import CaseSafe from "../../shared/CaseSafe";
 import TdhHeading from "../../shared/TdhHeading";
@@ -126,10 +129,13 @@ function UploadLine({
   locale,
   label,
   source,
+  sha256 = null,
 }: {
   readonly locale: SupportedLocale;
   readonly label: string;
   readonly source: string;
+  /** The SHA-256 of the file as the comparison read it, when stated. */
+  readonly sha256?: string | null;
 }) {
   const id = source.replace(/^arweave:/, "");
   return (
@@ -163,6 +169,84 @@ function UploadLine({
           {t(locale, "network.tdh.verify.provenance.file")}
         </a>
       </span>
+      {sha256 && (
+        <Hash
+          locale={locale}
+          value={sha256}
+          name={t(locale, "network.tdh.verify.provenance.liveFileSha", {
+            name: label,
+          })}
+          keep={6}
+        />
+      )}
+    </span>
+  );
+}
+
+/**
+ * One file the runs share, by SHA-256: the Rust core's, then whether the
+ * Python reference's is the same file.
+ */
+function FileLine({
+  locale,
+  label,
+  rust,
+  python,
+}: {
+  readonly locale: SupportedLocale;
+  readonly label: string;
+  readonly rust: string;
+  readonly python: string | null;
+}) {
+  return (
+    <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-0.5">
+      <span className="tw-w-20 tw-shrink-0 tw-text-sm tw-text-iron-400">
+        {label}
+      </span>
+      <Hash locale={locale} value={rust} name={label} keep={6} />
+      {python !== null &&
+        (python === rust ? (
+          <span className="tw-text-sm tw-text-success">
+            {t(locale, "network.tdh.verify.provenance.pythonSame")}
+          </span>
+        ) : (
+          <span className="tw-inline-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-text-sm tw-text-amber-200">
+            {t(locale, "network.tdh.verify.provenance.pythonOther")}
+            <Hash locale={locale} value={python} name={label} keep={6} />
+          </span>
+        ))}
+    </span>
+  );
+}
+
+/** The canonical input and the record files, when the day's file names them. */
+function RunFiles({
+  locale,
+  rust,
+  python,
+}: {
+  readonly locale: SupportedLocale;
+  readonly rust: VerificationRunFiles;
+  readonly python: VerificationRunFiles | null;
+}) {
+  const files = [
+    ["inputFile", rust.canonicalInputSha256, python?.canonicalInputSha256],
+    ["identityFile", rust.identitiesSha256, python?.identitiesSha256],
+    ["walletFile", rust.walletsSha256, python?.walletsSha256],
+  ] as const;
+  return (
+    <span className="tw-flex tw-flex-col tw-gap-1">
+      {files.map(([key, value, other]) =>
+        value === null ? null : (
+          <FileLine
+            key={key}
+            locale={locale}
+            label={t(locale, `network.tdh.verify.provenance.${key}`)}
+            rust={value}
+            python={other ?? null}
+          />
+        )
+      )}
     </span>
   );
 }
@@ -200,6 +284,94 @@ function Commits({
   );
 }
 
+const UTC_TIME = {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZoneName: "short",
+} as const;
+
+/**
+ * What the feed itself states about the day's file, when it states it:
+ * when the file and the index were written, and the SHA-256 the index (or
+ * the file) gives, checked against the SHA-256 of the bytes this page read.
+ * The publisher is adding these fields; until it does, the row is absent.
+ */
+function FeedStatement({
+  locale,
+  day,
+  entry,
+  indexGeneratedAt,
+  daySha256,
+}: {
+  readonly locale: SupportedLocale;
+  readonly day: VerificationDay | null;
+  readonly entry: VerificationIndexDay | null;
+  readonly indexGeneratedAt: string | null;
+  readonly daySha256: string | null;
+}) {
+  const generatedAt = day?.generatedAt ?? entry?.generatedAt ?? null;
+  const stated = entry?.sha256 ?? day?.sha256 ?? null;
+  if (generatedAt === null && stated === null && indexGeneratedAt === null) {
+    return null;
+  }
+  const line = "tw-flex tw-flex-wrap tw-items-center tw-gap-x-2";
+  return (
+    <Row label={t(locale, "network.tdh.verify.provenance.feed")}>
+      <span className="tw-flex tw-flex-col tw-gap-1">
+        {generatedAt !== null && (
+          <span className={line}>
+            <span className="tw-text-iron-400">
+              {t(locale, "network.tdh.verify.provenance.generatedAt")}
+            </span>
+            <time dateTime={generatedAt} className="tw-tabular-nums">
+              {formatUtcDate(locale, generatedAt, UTC_TIME)}
+            </time>
+          </span>
+        )}
+        {indexGeneratedAt !== null && (
+          <span className={line}>
+            <span className="tw-text-iron-400">
+              {t(locale, "network.tdh.verify.provenance.indexGeneratedAt")}
+            </span>
+            <time dateTime={indexGeneratedAt} className="tw-tabular-nums">
+              {formatUtcDate(locale, indexGeneratedAt, UTC_TIME)}
+            </time>
+          </span>
+        )}
+        {stated !== null && (
+          <span className={line}>
+            <span className="tw-text-iron-400">
+              {t(locale, "network.tdh.verify.provenance.feedSha")}
+            </span>
+            <Hash
+              locale={locale}
+              value={stated}
+              name={t(locale, "network.tdh.verify.provenance.feedSha")}
+            />
+            {daySha256 !== null && (
+              <span
+                className={
+                  stated === daySha256 ? "tw-text-success" : "tw-text-amber-200"
+                }
+              >
+                {t(
+                  locale,
+                  stated === daySha256
+                    ? "network.tdh.verify.provenance.feedShaMatch"
+                    : "network.tdh.verify.provenance.feedShaDiffer"
+                )}
+              </span>
+            )}
+          </span>
+        )}
+      </span>
+    </Row>
+  );
+}
+
 /** The day before a day, as its own page shows it. */
 export interface PreviousDay {
   readonly cycleDay: number;
@@ -226,9 +398,15 @@ export default function VerificationProvenance({
   daySha256 = null,
   previousDay = null,
   indexUrl,
+  indexEntry = null,
+  indexGeneratedAt = null,
 }: {
   readonly locale: SupportedLocale;
   readonly day: VerificationDay | null;
+  /** The day's entry in the index, for what the index states about it. */
+  readonly indexEntry?: VerificationIndexDay | null;
+  /** When the index was written, if it says. */
+  readonly indexGeneratedAt?: string | null;
   readonly dayUrl: string | null;
   /** The SHA-256 of the day file's bytes as the page read them. */
   readonly daySha256?: string | null;
@@ -241,6 +419,11 @@ export default function VerificationProvenance({
   const live = day?.implementations.live ?? null;
   const identityUpload = live?.sources?.identity ?? live?.source ?? null;
   const walletUpload = live?.sources?.wallet ?? null;
+  const liveFiles = day?.sources?.live ?? null;
+  const runFiles = day?.sources?.rust ?? null;
+  // The rule as the day states it: at the top of the file, or in the run.
+  const ruleVersion = day?.ruleVersion ?? rust?.ruleVersion ?? null;
+  const registryHash = day?.registryHash ?? rust?.registryHash ?? null;
   return (
     <section
       id="provenance"
@@ -251,7 +434,7 @@ export default function VerificationProvenance({
         id="provenance"
         title={t(locale, "network.tdh.verify.provenance.heading")}
         locale={locale}
-        className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
+        className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-2xl"
       />
       <div className={`${TDH_CARD} tw-mt-4 tw-p-5 sm:tw-p-6`}>
         {/* Where the data comes from, across the card in two lines; then
@@ -265,6 +448,13 @@ export default function VerificationProvenance({
           {t(locale, "network.tdh.verify.provenance.remote")}
         </p>
         <dl className="tw-m-0 tw-mt-5 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06] tw-border-0 tw-border-y tw-border-solid tw-border-white/[0.06]">
+          <FeedStatement
+            locale={locale}
+            day={day}
+            entry={indexEntry}
+            indexGeneratedAt={indexGeneratedAt}
+            daySha256={daySha256}
+          />
           {day && (
             <Row label={t(locale, "network.tdh.verify.provenance.snapshot")}>
               <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1">
@@ -311,22 +501,31 @@ export default function VerificationProvenance({
             </Row>
           )}
           <Row label={t(locale, "network.tdh.verify.provenance.rule")}>
-            {day?.ruleVersion
+            {ruleVersion
               ? t(locale, "network.tdh.verify.provenance.ruleFromFile", {
-                  version: day.ruleVersion,
+                  version: ruleVersion,
                 })
               : t(locale, "network.tdh.verify.provenance.ruleFromSpec")}
           </Row>
           <Row label={t(locale, "network.tdh.verify.provenance.registry")}>
             <Hash
               locale={locale}
-              value={day?.registryHash ?? REGISTRY_HASH}
+              value={registryHash ?? REGISTRY_HASH}
               name={t(locale, "network.tdh.verify.provenance.registry")}
             />
           </Row>
           {(rust?.commit ?? python?.commit) && (
             <Row label={t(locale, "network.tdh.verify.provenance.commits")}>
               <Commits locale={locale} rust={rust} python={python} />
+            </Row>
+          )}
+          {runFiles && (
+            <Row label={t(locale, "network.tdh.verify.provenance.files")}>
+              <RunFiles
+                locale={locale}
+                rust={runFiles}
+                python={day?.sources?.python ?? null}
+              />
             </Row>
           )}
           {day && (
@@ -344,6 +543,7 @@ export default function VerificationProvenance({
                       "network.tdh.verify.provenance.identityFile"
                     )}
                     source={identityUpload}
+                    sha256={liveFiles?.identity?.sha256 ?? live?.sha256 ?? null}
                   />
                   {walletUpload && walletUpload !== identityUpload && (
                     <UploadLine
@@ -353,6 +553,7 @@ export default function VerificationProvenance({
                         "network.tdh.verify.provenance.walletFile"
                       )}
                       source={walletUpload}
+                      sha256={liveFiles?.wallet?.sha256 ?? null}
                     />
                   )}
                 </span>
@@ -395,7 +596,6 @@ export default function VerificationProvenance({
                     ? "network.tdh.verify.mode.checked"
                     : "network.tdh.verify.mode.unchecked"
                 )}
-                <TdhSource refs={["D118", "P53 §11"]} locale={locale} />
               </li>
             )}
             {python?.commit && (
@@ -405,14 +605,16 @@ export default function VerificationProvenance({
                 })}
               </li>
             )}
-            {!day?.registryHash && (
+            {!registryHash && (
               <li>
                 {t(locale, "network.tdh.verify.provenance.registryFromSpec")}
-                <TdhSource refs={["P26 §10"]} locale={locale} />
               </li>
             )}
             {(rust?.commit ?? python?.commit) && (
               <li>{t(locale, "network.tdh.verify.provenance.commitsNote")}</li>
+            )}
+            {runFiles && (
+              <li>{t(locale, "network.tdh.verify.provenance.filesNote")}</li>
             )}
             {day && day.date < SCHEDULED_FROM && (
               <li>{t(locale, "network.tdh.verify.provenance.manualRun")}</li>
@@ -430,6 +632,12 @@ export default function VerificationProvenance({
               <li>{t(locale, "network.tdh.verify.provenance.previousNote")}</li>
             )}
           </ul>
+          <TdhSource
+            refs={["D118", "P53 §11", "P26 §10", "D116"]}
+            locale={locale}
+            block
+            className="tw-mt-2 tw-pb-2"
+          />
         </TdhDisclosure>
         <div className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-x-6 tw-gap-y-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4 tw-text-sm">
           {dayUrl && (

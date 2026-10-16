@@ -34,8 +34,9 @@ daily comparison use only the current schedule.
    2.00× once seasons 1–20 pay" in a muted line under it), seasons with a
    bonus ("Seasons 1–20", with "1–16 paying today" under it) and the
    Gradient bonus (`+0.02 each, up to
-3`), with sentence-case headers and `×`. Under the table, the same four
-   boost figures as the overview's Current boosts, on one scale (read on
+3`), with sentence-case headers and `×`. Under the table, at
+   `#boost-figures`, the four boost figures the TDH pages quote, on one
+   scale (the overview's Current boosts links here; read on
    the server; while the rules load, or if they fail, a panel of the same
    height holds the place, with `Reload rules`), and where the values come
    from in two sentences, with links pinned to commits: the historic boosts

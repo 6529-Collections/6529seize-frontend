@@ -52,6 +52,14 @@ export type VerificationSummary =
       readonly historyChecked: boolean | null;
       /** The day's snapshot block; null without its file. */
       readonly cutoffBlock: number | null;
+      /**
+       * The builds that computed the day, as its file names them: the
+       * validator commit of the Rust core and the 6529chain commit of the
+       * Python reference. Read from the feed, never fixed in the page, so a
+       * redeployed daily job shows its new builds by itself.
+       */
+      readonly rustCommit: string | null;
+      readonly pythonCommit: string | null;
       /** The track record: every published day, and those equal everywhere. */
       readonly record: TrackRecord;
     };
@@ -144,6 +152,8 @@ function summarizeDay(
     rustTotal: totals.rust,
     historyChecked: day === null ? null : day.mode === "checked",
     cutoffBlock: day?.cutoffBlock ?? null,
+    rustCommit: day?.implementations.rust.commit ?? null,
+    pythonCommit: day?.implementations.python?.commit ?? null,
     record,
   };
 }

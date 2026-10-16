@@ -1,6 +1,6 @@
 {
   "network.tdh.rules.title": "Current boosts",
-  "network.tdh.rules.intro": "Today’s boost values and the full schedule, from 6529.io’s current rule, boost schedule 1.4.",
+  "network.tdh.rules.intro": "Today’s boost values, from 6529.io’s current rule, boost schedule 1.4.",
   "network.tdh.rules.loading": "Loading current TDH rules…",
   "network.tdh.rules.error": "Current rules are temporarily unavailable. Try again to load the snapshot and boost schedule.",
   "network.tdh.rules.retry": "Reload rules",
@@ -9,7 +9,7 @@
   "network.tdh.rules.full.title": "A full set",
   "network.tdh.rules.full.multiplier": "{value}×",
   "network.tdh.rules.full.body": "Hold at least one of every eligible Meme: {count} in this snapshot, the current season’s eligible cards included. The first full set earns +{bonus}, the bonus of every season that pays, which is every season with a bonus except the current one.",
-  "network.tdh.rules.full.extra": "Each extra full set adds +{initial} × {decay}ⁿ, where n counts the extra sets before it, so the extra-set bonus approaches +{limit}. The rule rounds it to millionths, and rounded it reaches +{limit} at 33 full sets.",
+  "network.tdh.rules.full.extra": "Each extra full set adds +{initial} × {decay}ⁿ, where n counts the extra sets before it, so the extra-set bonus approaches a limit. The rule rounds it to millionths, and rounded it reaches +{limit} at 33 full sets.",
   "network.tdh.rules.partial.title": "Without a full set",
   "network.tdh.rules.partial.body": "Each eligible season you complete adds its bonus once. Multiple copies of a season set do not multiply that season’s bonus. These bonuses apply across all your eligible holdings.",
   "network.tdh.rules.season": "Season {season}: +{bonus}",
@@ -37,5 +37,6 @@
   "network.tdh.rules.ladder.fullSetAllSeasons": "A full set once seasons 1–{last} all pay",
   "network.tdh.rules.ladder.highestToday": "Today’s highest: a full set, extra full sets and {gradients} Gradients",
   "network.tdh.rules.ladder.highestEver": "The schedule’s highest: the same, once seasons 1–{last} all pay",
-  "network.tdh.rules.ladder.note": "Blue bars are reachable today; grey bars once later seasons are eligible. A season pays once a later season has begun, so the current season never does."
+  "network.tdh.rules.ladder.note": "Blue bars are reachable today; grey bars once later seasons are eligible. A season pays once a later season has begun, so the current season never does.",
+  "network.tdh.rules.ladder.link": "The four boost figures these pages quote, on one scale"
 }

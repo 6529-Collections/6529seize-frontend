@@ -14,14 +14,10 @@ import {
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
-import BoostLadder from "./shared/BoostLadder";
+import TdhArrowLink from "./shared/TdhArrowLink";
 import TdhDisclosure from "./shared/TdhDisclosure";
 import TDHSection, { TDH_PANEL, TDH_TEXT } from "./TDHSection";
-import {
-  getTdhBoostLadder,
-  tdhRulesSchema,
-  type TdhRules,
-} from "./tdh-rules.helpers";
+import { tdhRulesSchema, type TdhRules } from "./tdh-rules.helpers";
 
 /**
  * The cycle a snapshot belongs to: the day after its block, whose 00:00 UTC
@@ -32,8 +28,12 @@ function cycleDateOf(blockTimestamp: string): number {
   return (day + 1) * 86_400_000;
 }
 
+/** A bonus as the pages write it: two decimals at least (+0.10, not +0.1). */
 const formatBonus = (locale: SupportedLocale, value: number) =>
-  formatNumber(locale, value, { maximumFractionDigits: 6 });
+  formatNumber(locale, value, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 6,
+  });
 const formatMultiplier = (locale: SupportedLocale, value: number) =>
   formatNumber(locale, value, {
     minimumFractionDigits: 2,
@@ -100,6 +100,12 @@ export default function TDHCurrentRules({
         )}
       </div>
       {query.data && <Rules rules={query.data} locale={locale} />}
+      <TdhArrowLink
+        href="/network/tdh/historic-boosts#boost-figures"
+        className="tw-mt-4"
+      >
+        {t(locale, "network.tdh.rules.ladder.link")}
+      </TdhArrowLink>
       <nav
         aria-label={t(locale, "network.tdh.rules.links")}
         className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-3"
@@ -214,17 +220,10 @@ function Rules({
           </p>
         </li>
       </ul>
-      <BoostLadder
-        locale={locale}
-        values={getTdhBoostLadder(rules)}
-        eligibleMemes={snapshot.eligible_memes_count}
-        lastSeason={boost.season_schedule.last_boosted_season}
-        gradients={boost.gradients.max_count}
-      />
       <PartialSets rules={rules} locale={locale} />
       <TdhDisclosure
         tone="strong"
-        className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-px-4"
+        className="tw-border-0 tw-border-y tw-border-solid tw-border-white/[0.07]"
         summary={t(locale, "network.tdh.rules.details")}
       >
         <div className="tw-space-y-3 tw-pb-4 tw-pl-6">

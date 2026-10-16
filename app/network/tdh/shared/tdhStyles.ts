@@ -1,5 +1,28 @@
 /** Shared class names for the TDH pages (section 4 of the plan). */
+import {
+  NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
+  NETWORK_REFERENCE_PAGE_CLASSES,
+} from "@/components/network/networkPageLayoutClasses";
 import tableStyles from "./tdhTable.module.css";
+
+/**
+ * The frame of every TDH page. Below `md` the site's contents menu is
+ * hidden, so a phone shows one TDH navigation (the section tabs), and the
+ * page starts right under the site header: the H1 sits within the first
+ * 200 px of a 390 px phone, app banner included.
+ */
+export const TDH_PAGE = `${NETWORK_REFERENCE_PAGE_CLASSES} max-md:tw-pt-1`;
+export const TDH_DROPDOWN_ROW = `${NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES} max-md:tw-hidden`;
+/**
+ * The two widths a block of a TDH page snaps to: the reading measure, for
+ * prose, notes, callouts, examples and small tables (34rem, the same in px
+ * at every text size, so a 14 px note lines up with 16 px prose), and the
+ * full column, for wide tables, explorables and rule blocks.
+ */
+export const TDH_MEASURE = "tw-max-w-[34rem]";
+
+/** The header under the section tabs, above a page's H1. */
+export const TDH_PAGE_HEADER_TOP = "tw-pt-2 sm:tw-pt-8";
 
 /**
  * The TDH type scale, one for every page: H1 30 px on phones (26 px in a
@@ -29,8 +52,9 @@ export const TDH_TABLE_FRAME =
   "tw-relative tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07]";
 /** Every TDH table: full width, collapsed borders, no stray pseudo-cells. */
 export const TDH_TABLE = `tw-w-full tw-border-collapse tw-text-left tw-text-sm tw-leading-5 ${tableStyles["table"] ?? ""}`;
+/** A table's caption: a sentence, at 13 px, never shouted in capitals. */
 export const TDH_CAPTION =
-  "tw-px-4 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400";
+  "tw-px-4 tw-py-3 tw-text-left tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-300";
 export const TDH_TH =
   "tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-4 tw-py-2.5 tw-text-xs tw-font-medium tw-text-iron-400";
 export const TDH_TD =

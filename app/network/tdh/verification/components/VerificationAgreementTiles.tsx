@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
-import { formatPercent, selectPluralCategory } from "@/i18n/format";
+import { selectPluralCategory } from "@/i18n/format";
+import { cycleDayOfDate } from "@/lib/tdh/tdhV1Arithmetic";
 import type {
   VerificationAgreement,
   VerificationDay,
@@ -96,7 +97,7 @@ function CountTile({
   readonly locale: SupportedLocale;
   readonly label: string;
   readonly sub: string;
-  /** What the identity records include, under the sub-label. */
+  /** A line under the sub-label: what the comparison is made against. */
   readonly note?: string;
   readonly equal: number | null;
   readonly total: number | null;
@@ -162,6 +163,11 @@ function CountTile({
   );
 }
 
+/**
+ * The day's total, with the differences in the feed's one direction: Rust
+ * minus the other (`rustVsLive`), the same sign the strip, the difference
+ * panel and the day-by-day table use.
+ */
 function TotalTile({
   locale,
   rustTotal,
@@ -172,7 +178,7 @@ function TotalTile({
   readonly rustTotal: number;
   /** Rust minus 6529.io; null when 6529.io was not compared. */
   readonly delta: number | null;
-  /** Python minus Rust; null when the Python reference did not run. */
+  /** Rust minus Python; null when the Python reference did not run. */
   readonly pythonDelta: number | null;
 }) {
   const allEqual = delta === 0 && (pythonDelta === null || pythonDelta === 0);
@@ -181,13 +187,9 @@ function TotalTile({
     lines.push(t(locale, "network.tdh.verify.tiles.liveMissing"));
   } else if (delta !== 0) {
     lines.push(
-      t(
-        locale,
-        delta < 0
-          ? "network.tdh.verify.tiles.liveHigher"
-          : "network.tdh.verify.tiles.liveLower",
-        { amount: formatInteger(locale, Math.abs(delta)) }
-      )
+      t(locale, "network.tdh.verify.tiles.liveHigher", {
+        amount: formatSigned(locale, delta),
+      })
     );
   }
   if (pythonDelta !== null && pythonDelta !== 0) {
@@ -212,8 +214,8 @@ function TotalTile({
       <dl className="tw-m-0 tw-mt-3 tw-space-y-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-2 tw-text-sm tw-tabular-nums tw-leading-5">
         {(
           [
-            ["pythonMinusRust", pythonDelta],
-            ["liveMinusRust", delta === null ? null : -delta],
+            ["rustMinusLive", delta],
+            ["rustMinusPython", pythonDelta],
           ] as const
         ).map(([key, value]) => (
           <div key={key} className="tw-flex tw-justify-between tw-gap-3">
@@ -312,7 +314,7 @@ export function CutoverTile({
           )}
           <CutoverProgress
             locale={locale}
-            elapsed={cutover.elapsed}
+            days={cutover.days}
             plannedDate={cutover.plannedDate}
           />
         </>
@@ -323,30 +325,44 @@ export function CutoverTile({
   );
 }
 
-/** The week from the first daily run to the planned cutover (D132). */
+/**
+ * The week from the first daily run to the planned cutover (D132), one
+ * segment per daily run: the runs so far filled, the rest still to come.
+ */
 function CutoverProgress({
   locale,
-  elapsed,
+  days,
   plannedDate,
 }: {
   readonly locale: SupportedLocale;
-  readonly elapsed: number;
+  /** Days still to go to the planned cutover. */
+  readonly days: number;
   readonly plannedDate: string;
 }) {
+  const start = cycleDayOfDate(FIRST_REPORT_DATE);
+  const end = cycleDayOfDate(plannedDate);
+  const span = start === null || end === null ? 7 : Math.max(end - start, 1);
+  const run = Math.min(Math.max(span - days + 1, 1), span);
   const label = t(locale, "network.tdh.verify.cutover.progress", {
-    elapsed: formatPercent(locale, elapsed, 0),
+    run: formatInteger(locale, run),
+    span: formatInteger(locale, span),
   });
   return (
     <div className="tw-mt-3">
+      <span className="tw-block tw-text-sm tw-tabular-nums tw-text-iron-200">
+        {label}
+      </span>
       <span
-        role="img"
-        aria-label={label}
-        className="tw-relative tw-block tw-h-2 tw-w-full tw-overflow-hidden tw-rounded-full tw-bg-iron-800"
+        aria-hidden="true"
+        className="tw-mt-1.5 tw-grid tw-gap-1"
+        style={{ gridTemplateColumns: `repeat(${span}, minmax(0, 1fr))` }}
       >
-        <span
-          className="tw-absolute tw-inset-y-0 tw-left-0 tw-rounded-full tw-bg-primary-400"
-          style={{ width: `${Math.max(elapsed * 100, 3)}%` }}
-        />
+        {Array.from({ length: span }, (_, index) => (
+          <span
+            key={index}
+            className={`tw-h-2 tw-rounded-sm ${index < run ? "tw-bg-primary-400" : "tw-bg-iron-800"}`}
+          />
+        ))}
       </span>
       <span className="tw-mt-1.5 tw-flex tw-justify-between tw-gap-3 tw-text-sm tw-tabular-nums tw-text-iron-400">
         <span className="tw-min-w-0">
@@ -393,6 +409,7 @@ export default function VerificationAgreementTiles({
       locale={locale}
       label={t(locale, "network.tdh.verify.tiles.rustVsLive")}
       sub={sub}
+      note={t(locale, "network.tdh.verify.tiles.liveNote")}
       equal={rustVsLive?.identitiesEqual ?? null}
       total={rustVsLive?.identitiesTotal ?? null}
       walletsEqual={rustVsLive?.walletsEqual ?? null}
@@ -406,6 +423,7 @@ export default function VerificationAgreementTiles({
       locale={locale}
       label={t(locale, "network.tdh.verify.tiles.rustVsPython")}
       sub={sub}
+      note={t(locale, "network.tdh.verify.tiles.pythonNote")}
       equal={rustVsPython?.identitiesEqual ?? null}
       total={rustVsPython?.identitiesTotal ?? null}
       walletsEqual={rustVsPython?.walletsEqual ?? null}
@@ -439,7 +457,7 @@ export default function VerificationAgreementTiles({
           locale={locale}
           rustTotal={rustTotal}
           delta={totalDelta}
-          pythonDelta={pythonTotal === null ? null : pythonTotal - rustTotal}
+          pythonDelta={pythonTotal === null ? null : rustTotal - pythonTotal}
         />
         <CutoverTile
           locale={locale}

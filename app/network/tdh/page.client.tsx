@@ -1,15 +1,12 @@
 "use client";
 
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
-import {
-  NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
-  NETWORK_REFERENCE_PAGE_CLASSES,
-} from "@/components/network/networkPageLayoutClasses";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { VerificationSummary } from "@/lib/tdh/verification/summary.server";
 import TdhPager from "./shared/TdhPager";
+import { TDH_DROPDOWN_ROW, TDH_PAGE } from "./shared/tdhStyles";
 import TdhSubnav from "./shared/TdhSubnav";
 import {
   TDHGlossary,
@@ -66,9 +63,9 @@ export default function TDHMainPage({
   useTDHSectionHashFocus(SECTION_IDS, MOVED_ANCHORS);
 
   return (
-    <div className={NETWORK_REFERENCE_PAGE_CLASSES}>
+    <div className={TDH_PAGE}>
       <AboutContentsDropdown
-        className={NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES}
+        className={TDH_DROPDOWN_ROW}
         currentHref="/network/tdh"
         desktopFlush
         withDivider

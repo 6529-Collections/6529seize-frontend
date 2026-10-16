@@ -208,20 +208,19 @@ export default function TDHHero({
   readonly verification: VerificationSummary | null;
 }) {
   return (
-    <header className="tw-pb-10 tw-pt-6 sm:tw-pb-12 sm:tw-pt-10">
-      <div className="tw-grid tw-gap-8 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:tw-items-center lg:tw-gap-12">
+    <header className="tw-pb-10 tw-pt-2 sm:tw-pb-12 sm:tw-pt-10">
+      <div className="tw-grid tw-gap-8 lg:tw-grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:tw-items-center lg:tw-gap-12">
         <div>
-          <p className="tw-m-0 tw-mb-3 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wide tw-text-primary-300">
+          {/* On phones the section tabs above already say where you are,
+              so the H1 starts the page. */}
+          <p className="tw-m-0 tw-mb-3 tw-hidden tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wide tw-text-primary-300 md:tw-block">
             {t(locale, "network.tdh.explainer.title")}
           </p>
           <h1 className={TDH_H1}>
             {t(locale, "network.tdh.explainer.promise")}
           </h1>
-          <p className={`tw-mb-0 tw-mt-5 tw-max-w-2xl ${TDH_LEDE}`}>
+          <p className={`tw-mb-0 tw-mt-5 tw-max-w-[36em] ${TDH_LEDE}`}>
             {t(locale, "network.tdh.explainer.intro")}
-          </p>
-          <p className="tw-mb-0 tw-mt-3 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-300">
-            {t(locale, "network.tdh.explainer.why")}
           </p>
         </div>
         <FormulaStrip locale={locale} />

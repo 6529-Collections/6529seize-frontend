@@ -30,8 +30,7 @@ export type TdhPill =
   | "inDailyRun"
   | "followsLatest"
   | "builtNotInValidator"
-  | "underTest"
-  | "behindLatest";
+  | "underTest";
 
 /** A status tone: the pill's dot, and its row in the legend. */
 export type TdhTone = PillTone | "refuted";
@@ -75,7 +74,6 @@ const PILL_TONE: Record<TdhPill, TdhTone> = {
   followsLatest: "success",
   builtNotInValidator: "primary",
   underTest: "warning",
-  behindLatest: "warning",
 };
 
 export const TDH_TONE_DOT: Record<TdhTone, string> = {

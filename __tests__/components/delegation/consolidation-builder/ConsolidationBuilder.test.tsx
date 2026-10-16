@@ -221,11 +221,11 @@ function step(position: number) {
   return within(item);
 }
 
-/** Ticks the guided setup's confirmation of TDH-v1's three-wallet rule. */
+/** Ticks the guided setup's confirmation that TDH-v1 allows three wallets. */
 function acknowledgeFourthWallet() {
   fireEvent.click(
     screen.getByRole("checkbox", {
-      name: /from the cutover one of the four wallets counts on its own/,
+      name: /TDH-v1 allows three wallets, and that whether it allows four is pending/,
     })
   );
 }
@@ -718,7 +718,7 @@ describe("ConsolidationBuilder", () => {
     expect(step(1).getByRole("button", { name: "Sign Step 1" })).toBeEnabled();
   });
 
-  it("says what TDH-v1 does with a fourth wallet once one is listed", () => {
+  it("says plainly where TDH-v1 stands on a fourth wallet once one is listed", () => {
     renderBuilder();
     expect(
       screen.queryByTestId("consolidation-fourth-wallet-note")
@@ -726,7 +726,9 @@ describe("ConsolidationBuilder", () => {
     addFourthWallet();
     expect(
       screen.getByTestId("consolidation-fourth-wallet-note")
-    ).toHaveTextContent(/From then TDH-v1 groups at most three/);
+    ).toHaveTextContent(
+      /TDH-v1, the rule 6529\.io moves to about October 23, 2026, allows three; whether it allows four is pending an owner decision/
+    );
     expect(
       screen.getByRole("link", { name: "How consolidation works in TDH-v1" })
     ).toHaveAttribute("href", "/network/tdh/how-it-works#step-10");

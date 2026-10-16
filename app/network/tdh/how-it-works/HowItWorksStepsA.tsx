@@ -32,7 +32,13 @@ import DayCounter from "./explorables/DayCounter";
 import RateExplorer from "./explorables/RateExplorer";
 import StackSimulator from "./explorables/StackSimulator";
 import { RateCurveDiagram, StackDiagram } from "./HowItWorksDiagrams";
-import StepSection, { Cited, Example } from "./StepSection";
+import StepSection, {
+  Caution,
+  Cited,
+  Example,
+  Measure,
+  Note,
+} from "./StepSection";
 
 const CAPTION =
   "tw-px-4 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200";
@@ -92,48 +98,48 @@ function Step2({ locale }: { readonly locale: SupportedLocale }) {
       ruleSource="P26 §4.3"
     >
       <Cited locale={locale}>{t(locale, "network.tdh.how.s2.body")}</Cited>
-      <TdhTableFrame label={t(locale, "network.tdh.how.s2.tableCaption")}>
-        <table className={TDH_TABLE}>
-          <caption className={CAPTION}>
-            {t(locale, "network.tdh.how.s2.tableCaption")}
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col" className={TDH_TH}>
-                {t(locale, "network.tdh.how.s2.acquired")}
-              </th>
-              <th scope="col" className={TDH_TH_NUM}>
-                {t(locale, "network.tdh.how.s2.days")}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => {
-              const days = wholeDays(
-                EXAMPLE_SNAPSHOT_TIME,
-                EXAMPLE_SNAPSHOT_TIME - row.seconds
-              );
-              return (
-                <tr key={row.key}>
-                  <th scope="row" className={`${TDH_TD} tw-font-normal`}>
-                    {t(locale, `network.tdh.how.s2.${row.key}`)}
-                  </th>
-                  <td className={TDH_TD_NUM}>
-                    {row.key === "row2"
-                      ? t(locale, "network.tdh.how.s2.row2Days", {
-                          days: formatInteger(locale, days),
-                        })
-                      : formatInteger(locale, days)}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </TdhTableFrame>
-      <Cited locale={locale} muted>
-        {t(locale, "network.tdh.how.s2.reference")}
-      </Cited>
+      <Measure>
+        <TdhTableFrame label={t(locale, "network.tdh.how.s2.tableCaption")}>
+          <table className={TDH_TABLE}>
+            <caption className={CAPTION}>
+              {t(locale, "network.tdh.how.s2.tableCaption")}
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col" className={TDH_TH}>
+                  {t(locale, "network.tdh.how.s2.acquired")}
+                </th>
+                <th scope="col" className={TDH_TH_NUM}>
+                  {t(locale, "network.tdh.how.s2.days")}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => {
+                const days = wholeDays(
+                  EXAMPLE_SNAPSHOT_TIME,
+                  EXAMPLE_SNAPSHOT_TIME - row.seconds
+                );
+                return (
+                  <tr key={row.key}>
+                    <th scope="row" className={`${TDH_TD} tw-font-normal`}>
+                      {t(locale, `network.tdh.how.s2.${row.key}`)}
+                    </th>
+                    <td className={TDH_TD_NUM}>
+                      {row.key === "row2"
+                        ? t(locale, "network.tdh.how.s2.row2Days", {
+                            days: formatInteger(locale, days),
+                          })
+                        : formatInteger(locale, days)}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </TdhTableFrame>
+      </Measure>
+      <Note>{t(locale, "network.tdh.how.s2.reference")}</Note>
       <DayCounter locale={locale} />
     </StepSection>
   );
@@ -235,7 +241,15 @@ function Step5({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <StepSection
       locale={locale}
-      sources={["P26 §7.1", "D131", "D121", "Comparison Oct 14–15", "P26 §13"]}
+      sources={[
+        "P26 §7.1",
+        "P26 §3.3",
+        "P26 §5",
+        "D131",
+        "D121",
+        "Comparison Oct 14–15",
+        "P26 §13",
+      ]}
       step={5}
       title={t(locale, "network.tdh.how.s5.title")}
       rule={RULE_NETTING}
@@ -243,6 +257,7 @@ function Step5({ locale }: { readonly locale: SupportedLocale }) {
       ruleNote={t(locale, "network.tdh.how.s5.vectors")}
     >
       <Cited locale={locale}>{t(locale, "network.tdh.how.s5.body")}</Cited>
+      <Caution>{t(locale, "network.tdh.how.s5.limit")}</Caution>
       <Example locale={locale}>
         <p className="tw-m-0">{t(locale, "network.tdh.how.s5.example")}</p>
         <TdhTableFrame label={t(locale, "network.tdh.how.s5.tableCaption")}>
@@ -286,7 +301,7 @@ function Step5({ locale }: { readonly locale: SupportedLocale }) {
         </TdhTableFrame>
         <TransactionBoxDiagram locale={locale} />
       </Example>
-      <Cited locale={locale}>{t(locale, "network.tdh.how.s5.measured")}</Cited>
+      <Note>{t(locale, "network.tdh.how.s5.measured")}</Note>
       <TdhArrowLink href="/network/tdh/formal#statements">
         {t(locale, "network.tdh.how.s5.formalLink")}
       </TdhArrowLink>
@@ -306,50 +321,50 @@ function Step6({ locale }: { readonly locale: SupportedLocale }) {
     >
       <Cited locale={locale}>{t(locale, "network.tdh.how.s6.body")}</Cited>
       <Cited locale={locale}>{t(locale, "network.tdh.how.s6.floor")}</Cited>
-      <TdhTableFrame label={t(locale, "network.tdh.how.s6.tableCaption")}>
-        <table className={TDH_TABLE}>
-          <caption className={CAPTION}>
-            {t(locale, "network.tdh.how.s6.tableCaption")}
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col" className={TDH_TH_NUM}>
-                {t(locale, "network.tdh.how.s6.minted")}
-              </th>
-              <th scope="col" className={TDH_TH_NUM}>
-                {t(locale, "network.tdh.how.s6.claim")}
-              </th>
-              <th scope="col" className={TDH_TH_NUM}>
-                {t(locale, "network.tdh.how.s6.edition")}
-              </th>
-              <th scope="col" className={TDH_TH_NUM}>
-                {t(locale, "network.tdh.how.s6.rate")}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {EDITION_EXAMPLES.map((row) => (
-              <tr key={row.minted}>
-                <td className={TDH_TD_NUM}>
-                  {formatInteger(locale, row.minted)}
-                </td>
-                <td className={TDH_TD_NUM}>
-                  {formatInteger(locale, row.claimLimit)}
-                </td>
-                <td
-                  className={`${TDH_TD_NUM} tw-font-semibold tw-text-iron-50`}
-                >
-                  {formatInteger(locale, row.edition)}
-                </td>
-                <td className={TDH_TD_NUM}>{rateText(locale, row.cents)}</td>
+      <Measure>
+        <TdhTableFrame label={t(locale, "network.tdh.how.s6.tableCaption")}>
+          <table className={TDH_TABLE}>
+            <caption className={CAPTION}>
+              {t(locale, "network.tdh.how.s6.tableCaption")}
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col" className={TDH_TH_NUM}>
+                  {t(locale, "network.tdh.how.s6.minted")}
+                </th>
+                <th scope="col" className={TDH_TH_NUM}>
+                  {t(locale, "network.tdh.how.s6.claim")}
+                </th>
+                <th scope="col" className={TDH_TH_NUM}>
+                  {t(locale, "network.tdh.how.s6.edition")}
+                </th>
+                <th scope="col" className={TDH_TH_NUM}>
+                  {t(locale, "network.tdh.how.s6.rate")}
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </TdhTableFrame>
-      <Cited locale={locale} muted>
-        {t(locale, "network.tdh.how.s6.cycle")}
-      </Cited>
+            </thead>
+            <tbody>
+              {EDITION_EXAMPLES.map((row) => (
+                <tr key={row.minted}>
+                  <td className={TDH_TD_NUM}>
+                    {formatInteger(locale, row.minted)}
+                  </td>
+                  <td className={TDH_TD_NUM}>
+                    {formatInteger(locale, row.claimLimit)}
+                  </td>
+                  <td
+                    className={`${TDH_TD_NUM} tw-font-semibold tw-text-iron-50`}
+                  >
+                    {formatInteger(locale, row.edition)}
+                  </td>
+                  <td className={TDH_TD_NUM}>{rateText(locale, row.cents)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </TdhTableFrame>
+      </Measure>
+      <Note>{t(locale, "network.tdh.how.s6.cycle")}</Note>
       <RateExplorer locale={locale} />
     </StepSection>
   );
@@ -379,45 +394,47 @@ function Step7({ locale }: { readonly locale: SupportedLocale }) {
       ruleSource="P26 §8.1"
     >
       <Cited locale={locale}>{t(locale, "network.tdh.how.s7.body")}</Cited>
-      <TdhTableFrame label={t(locale, "network.tdh.how.s7.tableCaption")}>
-        <table className={TDH_TABLE}>
-          <caption className={CAPTION}>
-            {t(locale, "network.tdh.how.s7.tableCaption")}
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col" className={TDH_TH}>
-                {t(locale, "network.tdh.how.s7.card")}
-              </th>
-              <th scope="col" className={TDH_TH_NUM}>
-                {t(locale, "network.tdh.how.s7.edition")}
-              </th>
-              <th scope="col" className={TDH_TH_NUM}>
-                {t(locale, "network.tdh.how.s7.rate")}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {RATE_EXAMPLES.map((row) => (
-              <tr key={row.id}>
-                <th scope="row" className={`${TDH_TD} tw-font-normal`}>
-                  {t(locale, `network.tdh.how.s7.${row.id}`)}
+      <Measure>
+        <TdhTableFrame label={t(locale, "network.tdh.how.s7.tableCaption")}>
+          <table className={TDH_TABLE}>
+            <caption className={CAPTION}>
+              {t(locale, "network.tdh.how.s7.tableCaption")}
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col" className={TDH_TH}>
+                  {t(locale, "network.tdh.how.s7.card")}
                 </th>
-                <td className={TDH_TD_NUM}>{edition(row)}</td>
-                <td
-                  className={`${TDH_TD_NUM} tw-font-semibold tw-text-iron-50`}
-                >
-                  {rateText(locale, row.cents ?? 0)}
-                </td>
+                <th scope="col" className={TDH_TH_NUM}>
+                  {t(locale, "network.tdh.how.s7.edition")}
+                </th>
+                <th scope="col" className={TDH_TH_NUM}>
+                  {t(locale, "network.tdh.how.s7.rate")}
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </TdhTableFrame>
-      <RateCurveDiagram locale={locale} />
-      <Cited locale={locale} muted>
-        {t(locale, "network.tdh.how.s7.tie")}
-      </Cited>
+            </thead>
+            <tbody>
+              {RATE_EXAMPLES.map((row) => (
+                <tr key={row.id}>
+                  <th scope="row" className={`${TDH_TD} tw-font-normal`}>
+                    {t(locale, `network.tdh.how.s7.${row.id}`)}
+                  </th>
+                  <td className={TDH_TD_NUM}>{edition(row)}</td>
+                  <td
+                    className={`${TDH_TD_NUM} tw-font-semibold tw-text-iron-50`}
+                  >
+                    {rateText(locale, row.cents ?? 0)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </TdhTableFrame>
+      </Measure>
+      <Measure>
+        <RateCurveDiagram locale={locale} />
+      </Measure>
+      <Note>{t(locale, "network.tdh.how.s7.tie")}</Note>
     </StepSection>
   );
 }

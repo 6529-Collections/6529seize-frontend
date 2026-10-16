@@ -62,12 +62,11 @@ describe("ruleLines", () => {
 });
 
 describe("ruleTokens", () => {
-  it("tints keywords, numbers, strings and rule names, and leaves the rest", () => {
+  it("tints numbers, strings, rule names and a statement keyword", () => {
     const tokens = ruleTokens('if s = 1 and RATE(H, "x") > 0x1f', "pseudo");
     expect(tokens.filter((token) => token.kind !== "text")).toEqual([
       { kind: "keyword", text: "if" },
       { kind: "number", text: "1" },
-      { kind: "keyword", text: "and" },
       { kind: "name", text: "RATE" },
       { kind: "name", text: "H" },
       { kind: "string", text: '"x"' },
@@ -76,5 +75,31 @@ describe("ruleTokens", () => {
     expect(tokens.map((token) => token.text).join("")).toBe(
       'if s = 1 and RATE(H, "x") > 0x1f'
     );
+  });
+
+  it("tints only real keywords: statements that start a line, actions after a colon", () => {
+    const keywords = (text: string) =>
+      ruleTokens(text, "pseudo")
+        .filter((token) => token.kind === "keyword")
+        .map((token) => token.text);
+    expect(keywords("if from = to or amount = 0: skip")).toEqual([
+      "if",
+      "skip",
+    ]);
+    expect(keywords("repeat while |C| < 3")).toEqual(["repeat", "while"]);
+    expect(keywords("for each (c1, c2) in Q, in order:")).toEqual(["for"]);
+    // English words inside a line of pseudocode stay plain.
+    expect(keywords("headers read for the cycle, or later, or none")).toEqual(
+      []
+    );
+    expect(keywords("    append moved to stack[to]")).toEqual(["append"]);
+  });
+
+  it("tints Lean keywords wherever they are", () => {
+    expect(
+      ruleTokens("theorem t : True := by trivial", "lean")
+        .filter((token) => token.kind === "keyword")
+        .map((token) => token.text)
+    ).toEqual(["theorem", "by"]);
   });
 });

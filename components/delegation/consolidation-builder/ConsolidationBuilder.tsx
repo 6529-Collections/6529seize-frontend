@@ -236,8 +236,9 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
   const connectedIsSafe = connectedKey !== undefined && props.isSafeWallet;
 
   const [draft, setDraft] = useState<WalletDraft | null>(null);
-  // A fourth wallet counts on its own under TDH-v1 from the cutover; its
-  // steps open only once the collector confirms they have read that.
+  // TDH-v1 allows three wallets, and whether it allows four is pending an
+  // owner decision; a fourth wallet's steps open only once the collector
+  // confirms they have read that.
   const [fourthAcknowledged, setFourthAcknowledged] = useState(false);
   const defaultDraft = useMemo(
     () => createDraft(connectedKey ? [connectedKey] : []),

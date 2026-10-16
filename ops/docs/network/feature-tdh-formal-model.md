@@ -7,10 +7,12 @@ Parent: [Network Index](README.md)
 `/network/tdh/formal` explains the Lean 4 model of TDH-v1: what it
 reproduces, which properties of the rule are machine-checked proofs, which
 claims were shown false with counterexamples, and what the proofs do not
-cover. Every status comes from the model's proof manifest (below); the
-copy bundled with the page records the model at commit `7bf579a` of 6529's
-design repository (15 October 2026, Lean 4.35.0), beside P26 as last changed
-at `1c69528`. The model's source is in 6529's private design repository. A `Proposal, not adopted` pill
+cover. Every status and every count comes from the model's proof manifest
+(below), read from the feed at run time. Since October 16, 2026 the feed
+serves round 5, the model at commit `6b32f3f` of 6529's design repository
+(Lean 4.35.0), beside P26 as of `f840096`; the copy bundled with the page is
+that same file. The model's source is in 6529's private design repository.
+A `Proposal, not adopted` pill
 and a status line say that P26 stays the rule: it is proposed to the owner
 that the model become the normative definition of TDH-v1, which has not been
 decided.
@@ -25,22 +27,21 @@ decided.
 
 ## Content
 
+- One row of four figures, every one read from the manifest the page
+  loaded: theorems proved, claims shown false, claims not proved here, and
+  conformance vectors passed out of P26's. What each counts, and the
+  manifest's commit and generation time, are in one disclosure under them.
+  A new build changes them by itself; nothing in the page fixes a count the
+  manifest gives.
 - The builds behind the page, in one panel: the published build (model
   commit and date, Lean version, P26's last change, its vectors and checks,
-  theorems and fact checks, where its statuses were read from, the link to
-  the manifest JSON and the SHA-256 of the file served) and, while a newer
-  round is committed but not published, that round in the column beside it
-  under a `Not yet published` pill: its commit and date, the P26 round it
-  follows, its figures, the SHA-256 of its committed manifest and, in a
-  disclosure, what it changes. A line under both says every status and
-  count on the page is the published build's. Each build's figures appear
-  only there, so no paragraph below mixes two builds.
-- Four figure cards, each a number and a one-line label: statements about
-  TDH-v1 proved (counted as the table's filter counts them), draft claims
-  disproved, conformance vectors passed and records of a real day; what
-  each counts (the statements' names, the validator rules the model caught,
-  the checks and the P26 commit, the 2026-10-11 cycle) is in one disclosure
-  under them, with the theorem counts.
+  theorems and fact checks, where its statuses were read from, when the
+  manifest was generated, the link to the manifest JSON and the SHA-256 of
+  the file served). Only when the feed serves an earlier round than the one
+  the page knows is committed does a second column show that round under a
+  `Not yet published` pill (its commit and date, figures, the SHA-256 of its
+  committed manifest and, in a disclosure, what it changes); with round 5
+  published there is none.
 - Why write the rule again (the 23 choices a clean-room implementation had to
   make, two rated high, and the first netting rule the proofs refuted), and
   `Found by the model, and settled in the specifications`: the first
@@ -78,14 +79,18 @@ decided.
   token's balance and raw days stay the same while its eligibility does is
   marked not proved here (it follows from P26 §7.2's definitions); the first
   netting rule's row shows its five counterexamples.
-- What the model contains, labelled `At the published build` with its
-  commit: what it covers and what it leaves out, its runs (the vectors, the
-  2026-10-11 cycle from raw logs, the random inputs), and its modules by
-  P26 section. The day's log counts are given both ways: 414,007 through
-  the snapshot block, of 414,254 in the day's file.
-- What the proofs do not guarantee, labelled the same way, with a link to
-  the four rounds of differential tests on the Implementations page, which
-  lists what each round found.
+- What the model contains: what it covers and what it leaves out (since
+  round 4, `f854661`, selecting and decoding logs are definitions of the
+  model; round 5 adds the one-log rule and the strict reader), its runs (the
+  vectors, the 2026-10-11 cycle from raw logs, called evidence by
+  evaluation, which trusts Lean's compiler, not proof; the random inputs
+  against the Python reference; and, in CI, 1,000 seeded random inputs
+  through Lean, the Python reference and the Rust reference), and its
+  modules by P26 section. The day's log counts are given both ways: 414,007
+  through the snapshot block, of 414,254 in the day's file.
+- What the proofs do not guarantee, with a link to the five rounds of
+  differential tests on the Implementations page, which lists what each
+  round found.
 - Three layers of assurance across the section: the specification, the
   model and the programs as bands, each labelled with its layer, and the
   inputs under them, drawn dashed as partly in place (checked reads, D118,
@@ -102,7 +107,7 @@ tdh-vectors`; it is in 6529's private design repository), with the
 The page knows three rounds of the model and shows the one its manifest
 records (`leanRound` in `formalStatus.ts`):
 
-- Round 3 (the bundled copy and the feed's manifest, `7bf579a`): the model
+- Round 3 (`7bf579a`, the feed's manifest until October 16, 2026): the model
   starts from decoded inputs; order independence covers the decoded items,
   and raw log order is marked not covered.
 - Round 4 (a manifest that proves `computeCycleFromSource_perm`): the model
@@ -120,13 +125,14 @@ records (`leanRound` in `formalStatus.ts`):
   runs are the README's at `6b32f3f` (about 20 seconds from raw logs,
   1,127,150 random checks).
 
-While the published manifest records an earlier round than round 5, the
-builds panel shows round 5 in a column of its own, under a `Not yet
-published` pill, with the figures of its committed manifest (89 of 89
-vectors, 1,253 checks; 55 + 30 theorems; 46 fact checks), and says every
-status on the page is the published build's. Round 5's fact-check row also
-lists the facts it adds (an amount's type, `totalMax`'s, the one-log rule). The Implementations page's Lean card follows the same
-switch for its compute time, and adds round 5's vector count.
+The feed has published round 5's manifest since October 16, 2026 (89 of 89
+vectors, 1,253 checks; 55 + 30 theorems; 46 fact checks), and the bundled
+copy is that file (SHA-256 `24e2f16b…`). Should the feed serve an earlier
+round again, the builds panel shows round 5 in a column of its own, under a
+`Not yet published` pill, and says every status on the page is the published
+build's. Round 5's fact-check row lists the facts it adds (an amount's type,
+`totalMax`'s, the one-log rule). The Implementations page's Lean card
+follows the same switch for its compute time.
 
 The summary counts every proved statement of the TDH-v1 table, as the
 filter does; its card names last in, first out, a lemma about how the model
@@ -144,8 +150,8 @@ stores a stack.
   use Lean's standard axioms alone.
 - When the manifest is not published (403 or 404), cannot be loaded, fails
   validation or the base is misconfigured, the page shows the copy bundled with it
-  (`lib/tdh/formal/bundledManifest.ts`, a trimmed copy of the published file)
-  and says so. Refresh the copy after each new build of the model.
+  (`lib/tdh/formal/bundledManifest.json`, the published round-5 file, read
+  through `bundledManifest.ts`) and says so. Refresh the copy after each new build of the model.
 - Each statement (`app/network/tdh/formal/leanResults.ts`) names the manifest
   entries it rests on; its status stands only when the manifest confirms
   every one of them. The plain-English text, the quoted Lean statements and
@@ -154,7 +160,8 @@ stores a stack.
 - `__tests__/app/network/tdh/formalStatus.test.ts` checks every round: every
   statement of a round is confirmed by a manifest of that round (round 5's
   from the theorem entries of its committed manifest,
-  `__tests__/app/network/tdh/fixtures/roundFiveManifest.json`), every
+  `__tests__/app/network/tdh/fixtures/roundFiveManifest.json`; round 3's
+  from `roundThreeManifest.json`, the feed's earlier file), every
   audited theorem belongs to exactly one statement, and a manifest of an
   earlier round cannot confirm a later round's statements.
 

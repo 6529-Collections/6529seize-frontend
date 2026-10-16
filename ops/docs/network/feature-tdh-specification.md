@@ -11,11 +11,13 @@ section by section: each section in plain words beside the rule, either quoted
 line by line`): log selection and positions, decoding, mints and sinks, header order,
 delegation events, identities, records, totals, the numeric range and the
 registry's constraints. It opens with a
-map of how the sections feed each other and a symbol table, and lists the
-parameter registry and its hash, the 19 deviations from the old backend with
-their decisions, the 15 old-backend issues, the decisions the TDH pages cite,
-the evidence and the changes since 15 October. The header carries the rule
-version and a `Proposal, not adopted` pill, then one `Version` panel: the
+map of how the sections feed each other (from `md` up; phones go straight to
+the sections) and a symbol table, and lists the parameter registry and its
+hash, the 19 deviations from the old backend with their decisions, the 15
+old-backend issues, the decisions the TDH pages cite, the evidence and the
+changes since 15 October. The header carries the rule version and a
+`Proposal, not adopted` pill, then one closed `Version` disclosure
+(`Version: tdh-v1.0, specification P26 at f840096, October 16, 2026`): the
 rule version (not frozen until launch), the text (P26 at `f840096`), the
 SHA-256 of P26's file with a copy button, so the text it restates can be
 matched against the file later, where it is (P26, its vectors and the Lean
@@ -23,6 +25,13 @@ model in 6529's private design repository; the validator source, with a
 copy of the vectors, to be published when the owner decides, D116) and its
 status. Chips that cite P53, P38, P52 or P28
 name their document and say it is in 6529's private design repository.
+
+Reference material is collapsed so the rules carry the page: each section's
+source chips sit in one closed `Sources (n)` disclosure at its end, and the
+symbol table, the event-contract table, the floor read of P53 §11.3, the
+pair-state drawing, the cycle root and its trees, the registry table and
+its hash, the deviation and issue tables, the decisions and the changes
+since October 15 each open from one line.
 
 Every source chip on the TDH pages resolves to an anchor on this page, so no
 chip links to a private repository.
@@ -68,8 +77,8 @@ chip links to a private repository.
   property with the Lean theorem's form and both of its limits (whole
   transactions added or removed, and the canonical sort), where it stops
   (§5's mint facts read the steps), then §7.2's per-token values and §7.3's
-  records. The netting block names the transaction's set S, since M is the
-  cycle boundary. Under the replay, P26's note that removal is from the end
+  records. The netting block keeps P26's own name for a set of transfers,
+  M, with a note that it is not the cycle boundary M of section 4. Under the replay, P26's note that removal is from the end
   of the list and that, after a move inside an identity, an old timestamp
   can be removed first (legacy behaviour that MUST be kept). §7.3's example
   gives its premise: each Gradient with base 100.
@@ -86,8 +95,9 @@ chip links to a private repository.
   is computed (P28's `TAG`, `H`, `abi.encode` with the declared types, and
   the stored CE record) and tags the eight rows that restate formulas
   (`formula`: fixed by the rule version, not fields of the hashed record);
-  section 11 adds a note on groups of four wallets, which P26's list does
-  not yet hold. Section 13 has a `For implementers` box: what can be checked
+  section 11 adds one line on four wallets: 6529.io accepts four
+  consolidated wallets since October 15, 2026, while `tdh-v1.0` groups at
+  most three, and which applies is pending an owner decision. Section 13 has a `For implementers` box: what can be checked
   today (the registry hash and vector 36, restated in full on the
   Implementations page), the conformance vectors once published (D116), and
   the SHA-256 of P28 and P53 at `f840096`.
@@ -110,13 +120,16 @@ chip links to a private repository.
   its line, at the line's continuation indent. Keywords are tinted only in
   pseudocode, and not on a line of plain English; the restated prose rules
   get no keyword tint. Column-aligned blocks (§8.7's range) and shell
-  commands never wrap: they scroll, with a visible scrollbar. A block of 16 lines or more
-  shows its first lines and `Show all N lines` on phones; one of 28 lines
-  or more (§3.2's decoding), and the registry table, at every width.
+  commands never wrap: they scroll, with a visible scrollbar. At 1440 px
+  no line of an exact rule wraps; at 390 px a wrapped line keeps its hanging
+  indent (`scripts/tdh-pages-check.mjs` checks both). A block of one or two
+  lines is one compact row (the code, its source chip and the copy button);
+  a block of 16 lines or more shows its first lines and `Show all N lines`
+  at every width.
 - `Changes since October 15` says that two of the seven changes concern a
   real day's values: the edition-floor correction (a text that would have
   lowered 285 identities by 111,494 TDH on October 11) and D131's netting;
-  the vectors grew from 35 to 89. The four rounds of differential tests are
+  the vectors grew from 35 to 89. The five rounds of differential tests are
   linked to their table on the Implementations page.
 - Rule blocks longer than seven lines are numbered, and comments are set in
   a quieter colour. The deviations table's ID column is narrow; from `xl`

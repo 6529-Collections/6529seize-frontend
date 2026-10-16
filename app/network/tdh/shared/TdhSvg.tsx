@@ -18,6 +18,20 @@ import type { ReactNode } from "react";
 export const NARROW_WIDTH = 280;
 export const WIDE_WIDTH = 560;
 
+/**
+ * The most a drawing is ever scaled up. A diagram's text is set for its own
+ * width; scaled further, its labels (13 to 16 units) would grow past the
+ * prose and the headings around it. A diagram that needs more room is drawn
+ * wider, never scaled.
+ */
+const MAX_SVG_SCALE = 1.15;
+
+/** The largest on-screen width of a drawing `width` units wide. */
+export function svgMaxWidth(width: number, maxWidth?: number): number {
+  const cap = Math.round(width * MAX_SVG_SCALE);
+  return maxWidth === undefined ? cap : Math.min(maxWidth, cap);
+}
+
 export function TdhSvg({
   id,
   width,
@@ -35,8 +49,9 @@ export function TdhSvg({
   readonly title: string;
   readonly desc?: string;
   /**
-   * The largest size, in CSS px; by default 1.15 times the drawing, so its
-   * text stays close to the size of the prose around it.
+   * The largest size, in CSS px: at most, and by default, 1.15 times the
+   * drawing (`MAX_SVG_SCALE`), so its text stays close to the size of the
+   * prose around it and never outranks a heading.
    */
   readonly maxWidth?: number;
   readonly className?: string;
@@ -49,7 +64,7 @@ export function TdhSvg({
       role="img"
       aria-labelledby={desc ? `${id}-title ${id}-desc` : `${id}-title`}
       className={`tw-block tw-h-auto ${className}`}
-      style={{ maxWidth: maxWidth ?? Math.round(width * 1.15) }}
+      style={{ maxWidth: svgMaxWidth(width, maxWidth) }}
     >
       <title id={`${id}-title`}>{title}</title>
       {desc && <desc id={`${id}-desc`}>{desc}</desc>}

@@ -8,7 +8,8 @@ import { NARROW_WIDTH, TdhSvg } from "../TdhSvg";
  * movement, and the result, netted at the transaction boundary (D131), sits
  * inside the frame under the arcs: Wallet A never lost the copy. One compact drawing, phone
  * first: its text is 14 units, so it stays above 12 px in any column it is
- * shown in, and it grows to 1.4 times on wide screens.
+ * shown in, and it grows to 1.15 times at most, so no label outranks the
+ * step's heading.
  */
 export default function TransactionBoxDiagram({
   locale,
@@ -24,7 +25,6 @@ export default function TransactionBoxDiagram({
         height={200}
         title={t(locale, "network.tdh.how.s5.diagramTitle")}
         desc={t(locale, "network.tdh.how.s5.diagramDesc")}
-        maxWidth={392}
       >
         <defs>
           <marker
@@ -106,7 +106,7 @@ export default function TransactionBoxDiagram({
               x={wallet.x}
               y="90"
               textAnchor="middle"
-              fontSize="17"
+              fontSize="15"
               className="tw-fill-iron-50 tw-font-semibold"
             >
               {wallet.label}

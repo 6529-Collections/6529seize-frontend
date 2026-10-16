@@ -16,11 +16,11 @@ import { noBreakTerms } from "../shared/noBreakTerms";
 
 const STEP_COUNT = 14;
 /**
- * The port's tests, pinned to the commit that last changed them, so the link
- * keeps pointing at the tests this page was checked against.
+ * The port's tests, on the repository's main branch: the page and its tests
+ * ship together, so the link always shows the tests of the code that runs.
  */
 const PORT_TESTS =
-  "https://github.com/6529-Collections/6529seize-frontend/blob/76cf8af8a92e1ff378bfbcd67f000430f7724133/__tests__/lib/tdh/tdhV1Arithmetic.test.ts";
+  "https://github.com/6529-Collections/6529seize-frontend/blob/main/__tests__/lib/tdh/tdhV1Arithmetic.test.ts";
 
 // Step 14 counts the days compared so far, from the daily feed.
 export const revalidate = 600;
@@ -29,6 +29,11 @@ export default async function TdhHowItWorksPage() {
   const locale = DEFAULT_LOCALE;
   const summary = await loadVerificationSummary();
   const comparedDays = summary?.kind === "data" ? summary.record.days : null;
+  // Step 13: the latest compared day's total, when all three agreed on it.
+  const latestTotal =
+    summary?.kind === "data" && summary.totalsEqual === true
+      ? { date: summary.date, total: summary.rustTotal }
+      : null;
   const steps = Array.from({ length: STEP_COUNT }, (_, index) => index + 1);
   const stepTitles = Object.fromEntries(
     steps.map((step) => [
@@ -48,26 +53,28 @@ export default async function TdhHowItWorksPage() {
         <>
           <p className="tw-m-0">
             {noBreakTerms(t(locale, "network.tdh.how.lede"))}
-            <TdhSource refs={["D121", "D132"]} locale={locale} />
           </p>
           <TdhDisclosure
             summary={t(locale, "network.tdh.how.basisSummary")}
             summaryClassName="tw-text-base"
           >
-            <p className="tw-m-0 tw-max-w-[36em] tw-pl-6 tw-text-sm tw-leading-6 tw-text-iron-300">
-              {t(locale, "network.tdh.how.basis")}{" "}
-              <a
-                href={PORT_TESTS}
-                className={TDH_LINK}
-                rel="noopener noreferrer"
-              >
-                {t(locale, "network.tdh.how.basisTests")}
-              </a>
+            <div className="tw-space-y-2 tw-pb-2 tw-pl-6">
+              <p className="tw-m-0 tw-max-w-[34rem] tw-text-sm tw-leading-6 tw-text-iron-300">
+                {t(locale, "network.tdh.how.basis")}{" "}
+                <a
+                  href={PORT_TESTS}
+                  className={TDH_LINK}
+                  rel="noopener noreferrer"
+                >
+                  {t(locale, "network.tdh.how.basisTests")}
+                </a>
+              </p>
               <TdhSource
-                refs={["P26 §5.2", "Replay 2026-10-11"]}
+                refs={["D121", "D132", "P26 §5.2", "Replay 2026-10-11"]}
                 locale={locale}
+                block
               />
-            </p>
+            </div>
           </TdhDisclosure>
         </>
       }
@@ -93,7 +100,11 @@ export default async function TdhHowItWorksPage() {
         />
         <div className="tw-min-w-0">
           <HowItWorksStepsA locale={locale} />
-          <HowItWorksStepsB locale={locale} comparedDays={comparedDays} />
+          <HowItWorksStepsB
+            locale={locale}
+            comparedDays={comparedDays}
+            latestTotal={latestTotal}
+          />
           <TdhPager current="/network/tdh/how-it-works" locale={locale} />
         </div>
       </div>

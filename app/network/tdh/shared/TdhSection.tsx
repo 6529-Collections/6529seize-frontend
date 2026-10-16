@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import CaseSafe from "./CaseSafe";
 import TdhHeading from "./TdhHeading";
+import TdhSourcesNote from "./TdhSourcesNote";
 
 /**
  * A section of a TDH sub-page: a sticky heading column and a content column
@@ -17,6 +18,7 @@ export default function TdhSection({
   pills,
   children,
   wide = false,
+  sources = [],
 }: {
   readonly id: string;
   readonly title: string;
@@ -26,6 +28,8 @@ export default function TdhSection({
   readonly pills?: ReactNode;
   readonly children: ReactNode;
   readonly wide?: boolean;
+  /** Everything the section cites, in one closed disclosure at its end. */
+  readonly sources?: readonly string[];
 }) {
   return (
     <section
@@ -47,7 +51,7 @@ export default function TdhSection({
           id={id}
           title={title}
           locale={locale}
-          className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
+          className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-2xl"
         />
         {pills !== undefined && (
           <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-2">{pills}</div>
@@ -58,7 +62,10 @@ export default function TdhSection({
           </div>
         )}
       </div>
-      <div className="tw-min-w-0">{children}</div>
+      <div className="tw-min-w-0">
+        {children}
+        <TdhSourcesNote locale={locale} refs={sources} />
+      </div>
     </section>
   );
 }

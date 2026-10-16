@@ -49,16 +49,6 @@ function BuildFigureList({
     value === null ? "–" : formatInteger(locale, value);
   const items = [
     {
-      key: "vectors",
-      value: t(locale, "network.tdh.formal.builds.vectors", {
-        passed: n(figures.vectorsPassed),
-        total: n(figures.vectorsTotal),
-      }),
-      sub: t(locale, "network.tdh.formal.builds.vectorsSub", {
-        checks: n(figures.vectorChecks),
-      }),
-    },
-    {
       key: "theorems",
       value: t(locale, "network.tdh.formal.builds.theorems", {
         tdh: n(figures.theoremsTdh),
@@ -75,7 +65,7 @@ function BuildFigureList({
     },
   ] as const;
   return (
-    <ul className="tw-m-0 tw-mt-3 tw-grid tw-list-none tw-grid-cols-1 tw-gap-x-5 tw-gap-y-2 tw-p-0 min-[480px]:tw-grid-cols-3">
+    <ul className="tw-m-0 tw-mt-3 tw-grid tw-list-none tw-grid-cols-1 tw-gap-x-5 tw-gap-y-2 tw-p-0 sm:tw-grid-cols-2">
       {items.map((item) => (
         <li key={item.key} className="tw-min-w-0">
           <span className="tw-block tw-text-base tw-font-semibold tw-tabular-nums tw-text-iron-50">
@@ -130,6 +120,7 @@ export function BuildsPanel({
     readonly commitDate: string;
     readonly leanVersion: string;
     readonly specCommit: string | null;
+    readonly generatedAt?: string;
   };
   readonly source: BuildSource;
   /** Whether a newer round is committed and not yet published. */
@@ -142,7 +133,7 @@ export function BuildsPanel({
   return (
     <section
       aria-labelledby="tdh-builds-heading"
-      className={`${TDH_CARD} tw-mt-6 tw-overflow-hidden`}
+      className={`${TDH_CARD} tw-mt-4 tw-overflow-hidden`}
       data-tdh-builds=""
     >
       <h2 id="tdh-builds-heading" className="tw-sr-only">
@@ -179,32 +170,53 @@ export function BuildsPanel({
               })}
             />
           </p>
-          <BuildFigureList locale={locale} figures={published} />
-          <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
-            {t(
-              locale,
-              source.kind === "published"
-                ? "network.tdh.formal.builds.source.published"
-                : `network.tdh.formal.builds.source.${source.reason}`
-            )}
-          </p>
-          {source.kind === "published" && (
-            <>
-              <a
-                href={source.url}
-                className={`${TDH_LINK} tw-mt-1 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-text-sm`}
-              >
-                <ArrowDownTrayIcon aria-hidden="true" className="tw-size-4" />
-                {t(locale, "network.tdh.formal.manifest.json")}
-              </a>
-              {source.sha256 !== null && (
-                <Sha
-                  label={t(locale, "network.tdh.formal.builds.shaServed")}
-                  value={source.sha256}
-                />
+          <div className="tw-grid tw-gap-x-10 tw-gap-y-3 lg:tw-grid-cols-2">
+            <div className="tw-min-w-0">
+              <BuildFigureList locale={locale} figures={published} />
+            </div>
+            <div className="tw-min-w-0">
+              {published.generatedAt !== undefined && (
+                <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300 lg:tw-mt-0">
+                  {t(locale, "network.tdh.formal.builds.generated", {
+                    generated: formatUtcDate(locale, published.generatedAt, {
+                      ...LONG_DATE,
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      timeZoneName: "short",
+                    }),
+                  })}
+                </p>
               )}
-            </>
-          )}
+              <p className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-300">
+                {t(
+                  locale,
+                  source.kind === "published"
+                    ? "network.tdh.formal.builds.source.published"
+                    : `network.tdh.formal.builds.source.${source.reason}`
+                )}
+              </p>
+              {source.kind === "published" && (
+                <>
+                  <a
+                    href={source.url}
+                    className={`${TDH_LINK} tw-mt-1 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-text-sm`}
+                  >
+                    <ArrowDownTrayIcon
+                      aria-hidden="true"
+                      className="tw-size-4"
+                    />
+                    {t(locale, "network.tdh.formal.manifest.json")}
+                  </a>
+                  {source.sha256 !== null && (
+                    <Sha
+                      label={t(locale, "network.tdh.formal.builds.shaServed")}
+                      value={source.sha256}
+                    />
+                  )}
+                </>
+              )}
+            </div>
+          </div>
         </div>
         {showNext && (
           <div className="tw-min-w-0 tw-p-4 sm:tw-p-5" data-tdh-round-note="">
@@ -280,7 +292,7 @@ export function FoundByModel({ locale }: { readonly locale: SupportedLocale }) {
       <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
         {t(locale, "network.tdh.formal.found.title")}
       </h3>
-      <ul className="tw-m-0 tw-mt-3 tw-max-w-[38em] tw-list-none tw-space-y-2.5 tw-p-0">
+      <ul className="tw-m-0 tw-mt-3 tw-grid tw-list-none tw-gap-x-8 tw-gap-y-2.5 tw-p-0 xl:tw-grid-cols-2">
         {FOUND.map((key) => (
           <li
             key={key}

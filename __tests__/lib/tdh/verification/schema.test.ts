@@ -75,6 +75,33 @@ describe("verification schema", () => {
     expect(parseVerificationDay(withoutSummary).success).toBe(true);
   });
 
+  it("reads the feed's own generatedAt and sha256 when they are present", () => {
+    const day = PUBLIC_FEED_DAYS[20_741];
+    const sha = "a".repeat(64);
+    const withFields = parseVerificationDay({
+      ...day,
+      generatedAt: "2026-10-16T00:52:11Z",
+      sha256: sha,
+    });
+    expect(withFields.success).toBe(true);
+    expect(withFields.data?.generatedAt).toBe("2026-10-16T00:52:11Z");
+    expect(withFields.data?.sha256).toBe(sha);
+    // Absent, they read as null; malformed, the file is refused.
+    expect(parseVerificationDay(day).data?.generatedAt).toBeNull();
+    expect(
+      parseVerificationDay({ ...day, generatedAt: "yesterday" }).success
+    ).toBe(false);
+    expect(parseVerificationDay({ ...day, sha256: "xyz" }).success).toBe(false);
+    const index = parseVerificationIndex({
+      ...PUBLIC_FEED_INDEX,
+      generatedAt: "2026-10-16T00:52:12Z",
+      days: PUBLIC_FEED_INDEX.days.map((entry) => ({ ...entry, sha256: sha })),
+    });
+    expect(index.success).toBe(true);
+    expect(index.data?.generatedAt).toBe("2026-10-16T00:52:12Z");
+    expect(index.data?.days[0]?.sha256).toBe(sha);
+  });
+
   it("ignores unknown fields", () => {
     const parsed = parseVerificationDay({
       ...syntheticDay(),

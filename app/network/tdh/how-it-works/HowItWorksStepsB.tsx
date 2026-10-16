@@ -4,9 +4,9 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { baseTdh, finalTdh, rateCents } from "@/lib/tdh/tdhV1Arithmetic";
 import TdhArrowLink from "../shared/TdhArrowLink";
-import TdhSource from "../shared/TdhSource";
 import { RULE_BASE, RULE_BOOST, RULE_FINAL } from "../shared/tdhRules";
 import {
+  TDH_MEASURE,
   TDH_TABLE,
   TDH_TABLE_WRAP,
   TDH_TD,
@@ -20,7 +20,15 @@ import BoostBuilder from "./explorables/BoostBuilder";
 import HouseholdWalkthrough from "./explorables/HouseholdWalkthrough";
 import { IdentityGraphDiagram } from "./HowItWorksDiagrams";
 import { rateText } from "./HowItWorksStepsA";
-import StepSection, { Cited, Example } from "./StepSection";
+import { formatCycleDate } from "../verification/components/verificationFormat";
+import TdhDisclosure from "../shared/TdhDisclosure";
+import StepSection, {
+  Caution,
+  Cited,
+  Example,
+  Measure,
+  Note,
+} from "./StepSection";
 
 const HOLDINGS_CAPTION = "network.tdh.how.s12.holdingsCaption";
 const CAPTION =
@@ -35,7 +43,9 @@ function Bullets({
   readonly items: ReadonlyArray<{ readonly text: string }>;
 }) {
   return (
-    <ul className="tw-m-0 tw-max-w-[36em] tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-200 marker:tw-text-iron-500">
+    <ul
+      className={`tw-m-0 tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-200 marker:tw-text-iron-500 ${TDH_MEASURE}`}
+    >
       {items.map((item) => (
         <li key={item.text}>{item.text}</li>
       ))}
@@ -97,46 +107,55 @@ function Step9({ locale }: { readonly locale: SupportedLocale }) {
           { text: t(locale, "network.tdh.how.s9.fullSet") },
         ]}
       />
-      <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-200">
+      <Cited locale={locale}>
         {t(locale, "network.tdh.how.s9.tableIntro")}
-      </p>
-      <TdhTableFrame label={t(locale, "network.tdh.how.s9.tableCaption")}>
-        <table className={TDH_TABLE}>
-          <caption className={CAPTION}>
-            {t(locale, "network.tdh.how.s9.tableCaption")}
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col" className={TDH_TH}>
-                {t(locale, "network.tdh.how.s9.holdings")}
-              </th>
-              <th scope="col" className={TDH_TH_NUM}>
-                {t(locale, "network.tdh.how.s9.boost")}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {BOOST_EXAMPLES.map((row) => (
-              <tr key={row.id}>
-                <th scope="row" className={`${TDH_TD} tw-font-normal`}>
-                  {t(
-                    locale,
-                    `network.tdh.how.s9.ex.${row.id}` as Parameters<typeof t>[1]
-                  )}
-                </th>
-                <td
-                  className={`${TDH_TD_NUM} tw-font-semibold tw-text-iron-50`}
-                >
-                  {rateText(locale, row.betaCents)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </TdhTableFrame>
-      <Cited locale={locale} muted>
-        {t(locale, "network.tdh.how.s9.newest")}
       </Cited>
+      <Measure>
+        <TdhTableFrame label={t(locale, "network.tdh.how.s9.tableCaption")}>
+          <table className={TDH_TABLE}>
+            <caption className={CAPTION}>
+              {t(locale, "network.tdh.how.s9.tableCaption")}
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col" className={TDH_TH}>
+                  {t(locale, "network.tdh.how.s9.holdings")}
+                </th>
+                <th scope="col" className={TDH_TH_NUM}>
+                  {t(locale, "network.tdh.how.s9.boost")}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {BOOST_EXAMPLES.map((row) => (
+                <tr key={row.id}>
+                  <th scope="row" className={`${TDH_TD} tw-font-normal`}>
+                    {t(
+                      locale,
+                      `network.tdh.how.s9.ex.${row.id}` as Parameters<
+                        typeof t
+                      >[1]
+                    )}
+                  </th>
+                  <td
+                    className={`${TDH_TD_NUM} tw-font-semibold tw-text-iron-50`}
+                  >
+                    {rateText(locale, row.betaCents)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </TdhTableFrame>
+      </Measure>
+      <TdhDisclosure
+        className={TDH_MEASURE}
+        summary={t(locale, "network.tdh.how.s9.newestSummary")}
+      >
+        <p className="tw-m-0 tw-pb-2 tw-pl-6 tw-text-sm tw-leading-6 tw-text-iron-300">
+          {t(locale, "network.tdh.how.s9.newest")}
+        </p>
+      </TdhDisclosure>
       <BoostBuilder locale={locale} />
     </StepSection>
   );
@@ -146,31 +165,35 @@ function Step10({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <StepSection
       locale={locale}
-      sources={["P26 §6.1", "P26 §6.2", "P26 §6.3", "P26 §10", "DEV-12"]}
+      sources={[
+        "P26 §6.1",
+        "P26 §6.2",
+        "P26 §6.3",
+        "P26 §6.4",
+        "P26 §7.1",
+        "P26 §7.3",
+        "P26 §10",
+        "DEV-10",
+        "DEV-12",
+        "D121",
+      ]}
       step={10}
       title={t(locale, "network.tdh.how.s10.title")}
     >
       <Cited locale={locale}>{t(locale, "network.tdh.how.s10.body")}</Cited>
       <Cited locale={locale}>{t(locale, "network.tdh.how.s10.limit")}</Cited>
-      <p className="tw-m-0 tw-max-w-[38em] tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
-        {t(locale, "network.tdh.how.s10.fourth")}
-        <TdhSource refs={["P26 §6.3", "P26 §10"]} locale={locale} />
-      </p>
+      <Caution>{t(locale, "network.tdh.how.s10.fourth")}</Caution>
       <IdentityGraphDiagram locale={locale} />
       <p className="tw-m-0 tw-text-base tw-font-medium tw-leading-7 tw-text-iron-100">
         {t(locale, "network.tdh.how.s10.changes")}
       </p>
-      <ol className="tw-m-0 tw-max-w-[36em] tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-200 marker:tw-text-iron-500">
+      <ol
+        className={`tw-m-0 tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-200 marker:tw-text-iron-500 ${TDH_MEASURE}`}
+      >
         <li>{t(locale, "network.tdh.how.s10.change1")}</li>
         <li>{t(locale, "network.tdh.how.s10.change2")}</li>
-        <li>
-          {t(locale, "network.tdh.how.s10.change3")}
-          <TdhSource refs={["P26 §7.1", "P26 §7.3"]} locale={locale} />
-        </li>
-        <li>
-          {t(locale, "network.tdh.how.s10.change4")}
-          <TdhSource refs={["P26 §6.4", "DEV-10", "D121"]} locale={locale} />
-        </li>
+        <li>{t(locale, "network.tdh.how.s10.change3")}</li>
+        <li>{t(locale, "network.tdh.how.s10.change4")}</li>
       </ol>
       <Cited locale={locale} muted>
         {t(locale, "network.tdh.how.s10.delegation")}
@@ -213,11 +236,11 @@ function Step11({ locale }: { readonly locale: SupportedLocale }) {
           })}
         </p>
       </Example>
-      <Cited locale={locale} muted>
+      <Note>
         {t(locale, "network.tdh.how.s11.tie", {
           tie: formatInteger(locale, finalTdh(25, 114)),
         })}
-      </Cited>
+      </Note>
     </StepSection>
   );
 }
@@ -387,7 +410,17 @@ function Step12({ locale }: { readonly locale: SupportedLocale }) {
   );
 }
 
-function Step13({ locale }: { readonly locale: SupportedLocale }) {
+function Step13({
+  locale,
+  latestTotal,
+}: {
+  readonly locale: SupportedLocale;
+  /** The latest compared day's total, when all three agreed on it. */
+  readonly latestTotal: {
+    readonly date: string;
+    readonly total: number;
+  } | null;
+}) {
   return (
     <StepSection
       locale={locale}
@@ -396,8 +429,15 @@ function Step13({ locale }: { readonly locale: SupportedLocale }) {
       title={t(locale, "network.tdh.how.s13.title")}
     >
       <Cited locale={locale}>{t(locale, "network.tdh.how.s13.body")}</Cited>
-      <p className="tw-m-0 tw-flex tw-flex-col tw-items-start tw-gap-1 tw-rounded-lg tw-border tw-border-solid tw-border-success/30 tw-bg-success/[0.05] tw-px-4 tw-py-3 tw-text-base tw-leading-7 tw-text-iron-100">
-        {t(locale, "network.tdh.how.s13.verify")}
+      <p
+        className={`tw-m-0 tw-flex tw-flex-col tw-items-start tw-gap-1 tw-rounded-lg tw-border tw-border-solid tw-border-success/30 tw-bg-success/[0.05] tw-px-4 tw-py-3 tw-text-base tw-leading-7 tw-text-iron-100 ${TDH_MEASURE}`}
+      >
+        {latestTotal === null
+          ? t(locale, "network.tdh.how.s13.verify")
+          : t(locale, "network.tdh.how.s13.latest", {
+              date: formatCycleDate(locale, latestTotal.date),
+              total: formatInteger(locale, latestTotal.total),
+            })}
         <TdhArrowLink href="/network/tdh/verification">
           {t(locale, "network.tdh.how.s13.verifyLink")}
         </TdhArrowLink>
@@ -433,7 +473,6 @@ function Step14({
         "DEV-8",
         "DEV-2",
         "DEV-9",
-        "P26 §6.3",
       ]}
       step={14}
       title={t(locale, "network.tdh.how.s14.title")}
@@ -470,10 +509,16 @@ function Step14({
 export default function HowItWorksStepsB({
   locale,
   comparedDays = null,
+  latestTotal = null,
 }: {
   readonly locale: SupportedLocale;
   /** Days the daily comparison has published; null without the feed. */
   readonly comparedDays?: number | null;
+  /** The latest compared day's total, when all three agreed on it. */
+  readonly latestTotal?: {
+    readonly date: string;
+    readonly total: number;
+  } | null;
 }) {
   return (
     <>
@@ -482,7 +527,7 @@ export default function HowItWorksStepsB({
       <Step10 locale={locale} />
       <Step11 locale={locale} />
       <Step12 locale={locale} />
-      <Step13 locale={locale} />
+      <Step13 locale={locale} latestTotal={latestTotal} />
       <Step14 locale={locale} comparedDays={comparedDays} />
     </>
   );

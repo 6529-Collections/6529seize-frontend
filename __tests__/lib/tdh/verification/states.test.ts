@@ -95,7 +95,9 @@ describe("verification states", () => {
       next: 20_741,
       latest: 20_741,
     });
-    expect(latestIndexDay({ days: [], cutover: null })).toBeNull();
+    expect(
+      latestIndexDay({ days: [], cutover: null, generatedAt: null })
+    ).toBeNull();
     expect(missingCycleDays(index)).toEqual([]);
     const [first] = index.days;
     expect(
@@ -131,6 +133,7 @@ describe("verification states", () => {
       byCause: [{ cause: "unexplained", count: 2 }],
       rustVsLive: -120,
       pythonVsLive: -120,
+      rustVsPython: 0,
     });
     expect(dayHasDifferences(syntheticDay())).toBe(true);
     expect(dayVerdict(syntheticDay())).toBe("investigating");

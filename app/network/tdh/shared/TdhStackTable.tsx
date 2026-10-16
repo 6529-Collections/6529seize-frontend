@@ -72,7 +72,7 @@ export default function TdhStackTable({
           {rows.map((row) => (
             <tr
               key={row.key}
-              className="tw-grid tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-p-3 xl:tw-table-row xl:tw-rounded-none xl:tw-border-0 xl:tw-bg-transparent xl:tw-p-0"
+              className="tw-grid tw-grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] tw-gap-x-4 tw-gap-y-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-p-3 xl:tw-table-row xl:tw-rounded-none xl:tw-border-0 xl:tw-bg-transparent xl:tw-p-0"
             >
               {row.cells.map((cell, index) => {
                 const column = columns[index];
@@ -82,14 +82,17 @@ export default function TdhStackTable({
                     <th
                       key={column?.key ?? index}
                       scope="row"
-                      className={`${CELL} tw-font-medium tw-text-iron-50 ${extra}`}
+                      className={`${CELL} tw-col-span-full tw-font-medium tw-text-iron-50 ${extra}`}
                     >
                       {cell}
                     </th>
                   );
                 }
                 return (
-                  <td key={column?.key ?? index} className={`${CELL} ${extra}`}>
+                  <td
+                    key={column?.key ?? index}
+                    className={`${CELL} ${inlineColumns.includes(index) ? "" : "tw-col-span-full"} ${extra}`}
+                  >
                     <span
                       className={
                         inlineColumns.includes(index)

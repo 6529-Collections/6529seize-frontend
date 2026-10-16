@@ -42,14 +42,16 @@ collapsible `Exact rule` block quoting TDH-v1 (rule version `tdh-v1.0`).
   first lines and `Show all N lines`. Step prose is set at 16 px, 68
   characters a line.
 - The lede says P26 is a proposal that 6529.io computes from the cutover;
-  under it one line, `Every worked example here is computed in your
-browser`, opens to the basis: the P26 commit the in-browser arithmetic was
-  rechecked at (`f840096`), that the daily runs follow `0621ed4` with the
-  same rule version and registry hash, that the other figures are stated
-  from P26, its replay and the daily comparison, and a link to the port's
-  tests pinned to the commit that last changed them. Step 1 says the daily
-  runs take history from public log servers until 6529's own node is
-  synced, and links the dashboard's label. Step 10's link order uses
+  under it one closed disclosure, `How the examples are computed, and which
+  day each uses`, opens to the basis: the in-browser arithmetic is a
+  TypeScript port checked against the values the Python reference prints,
+  the other figures come from P26, its replay and the daily comparison,
+  the examples use the network of the October 11, 2026 cycle and the dates
+  the cycle of October 16, 2026, with the step sources and a link to the
+  port's tests. No daily build is named there: the dashboard names each
+  day's. Step 1 says the daily runs take history from public log servers,
+  taken as reported until the daily run checks it in full against 6529's
+  own node, and links the dashboard's label. Step 10's link order uses
   numbered badges; its link captions are set in the figure's sans, and a
   second identity is drawn in a second tint, with its own legend entry.
 
@@ -72,7 +74,11 @@ Each explorable is titled under a `Try it` eyebrow.
   history), with a link to step 10 beside it. Each wallet's copies stack upward from its
   name, the box only as tall as its copies.
 - Change an edition and see its rate (the rate explorer): copies minted and
-  claim limit to edition and rate.
+  claim limit to edition and rate. Its chart, labelled on both axes, draws
+  the rate used and the minted count alone as two lines with a key under
+  it, the 300-copy threshold where floors end as a vertical rule, and the
+  310 floor, so the jump at 300 copies shows; a point off the chart is
+  named at its edge.
 - Build a collection and see its boost (the boost builder): full sets and Gradients with steppers; complete seasons as
   toggle chips on a grid whose rows balance (6, 6 and 5 on phones; 9 and 8
   from `sm`; the current season dashed), then Genesis and Nakamoto; the
@@ -107,15 +113,14 @@ Each explorable is titled under a `Try it` eyebrow.
   different transactions of one block: a difference in the daily comparison
   until the cutover, the one D132 expects, and TDH-v1's value on 6529.io
   from then; it links to the dashboard's four classes.
-- Step 10 states the three-wallet limit of `tdh-v1.0` and what P26 §6.3
-  does with four wallets that all confirm each other (an identity of three,
-  from the newest link, and the fourth on its own), so a group of four that
-  6529.io's guide allows splits that way at the cutover unless the rule is
-  amended; step 14 lists it, and that consolidations count as they stand at
-  the snapshot block, among the cutover changes. Its link diagrams number
-  each link in on-chain order, draw links inside an identity heavier than
-  links between identities (dashed), and draw the four-wallet case as a V
-  into the shared wallet.
+- Step 10 states the three-wallet limit of `tdh-v1.0` (every pair
+  confirmed, groups formed newest confirmed link first) and, in one line,
+  that 6529.io accepts a fourth consolidated wallet since October 15, 2026
+  while TDH-v1 groups at most three, which applies being pending an owner
+  decision; step 14 lists the same line, and that consolidations count as
+  they stand at the snapshot block, among the cutover changes. Its link
+  diagrams number each link in on-chain order and draw links inside an
+  identity heavier than links between identities (dashed).
 - Diagrams are drawn phone first: the rate chart, the transaction and the
   link diagrams keep their text at 12 px or more at every width, and no
   drawn line crosses a label (`scripts/tdh-pages-check.mjs` checks both).

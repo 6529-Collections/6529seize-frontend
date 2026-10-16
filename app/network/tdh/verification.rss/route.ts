@@ -23,8 +23,9 @@ function escapeXml(value: string): string {
 /**
  * The daily comparison as an RSS 2.0 feed: one item per published day, with
  * its verdict and how many identity records agree, newest first, so a reader
- * hears of a difference as soon as the day is published. Items carry no
- * publication time: the index does not record one.
+ * hears of a difference as soon as the day is published. An item's date is
+ * the feed's own `generatedAt` for the day when the index states one, and
+ * otherwise the cycle's boundary, 00:00 UTC of its date.
  */
 export async function GET(): Promise<Response> {
   const locale = DEFAULT_LOCALE;
@@ -47,7 +48,7 @@ export async function GET(): Promise<Response> {
       date: formatCycleDate(locale, day.date),
       verdict,
     });
-    const description =
+    const agreement =
       day.identitiesTotal === null
         ? t(locale, "network.tdh.verify.rss.itemNoLive")
         : t(locale, "network.tdh.verify.rss.item", {
@@ -55,12 +56,28 @@ export async function GET(): Promise<Response> {
             total: formatInteger(locale, day.identitiesTotal),
             cycle: formatInteger(locale, day.cycleDay),
           });
+    const totals = t(locale, "network.tdh.verify.rss.itemTotals", {
+      rust: formatInteger(locale, day.totalTdh.rust),
+      python:
+        day.totalTdh.python === null
+          ? "–"
+          : formatInteger(locale, day.totalTdh.python),
+      live:
+        day.totalTdh.live === null
+          ? "–"
+          : formatInteger(locale, day.totalTdh.live),
+    });
+    const description = `${agreement} ${totals}`;
+    const published = new Date(
+      day.generatedAt ?? `${day.date}T00:00:00Z`
+    ).toUTCString();
     return [
       "    <item>",
       `      <title>${escapeXml(title)}</title>`,
       `      <link>${escapeXml(link)}</link>`,
       `      <guid isPermaLink="true">${escapeXml(link)}</guid>`,
       `      <description>${escapeXml(description)}</description>`,
+      `      <pubDate>${escapeXml(published)}</pubDate>`,
       "    </item>",
     ].join("\n");
   });

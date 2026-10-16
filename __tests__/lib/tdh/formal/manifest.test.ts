@@ -25,28 +25,28 @@ describe("formal manifest schema", () => {
   it("accepts the bundled manifest, a copy of the published one", () => {
     const manifest = bundled();
     expect(manifest.source.commit).toBe(
-      "7bf579a5433825b42975ebf03d96d0255b184c0c"
+      "6b32f3f63a348eb6c1c694a18a215f4ddca3c752"
     );
     expect(manifest.lean.version).toBe("4.35.0");
     expect(manifest.summary).toEqual({
-      proved: 63,
+      proved: 78,
       counterexample: 11,
-      deferred: 4,
-      entries: 78,
-      audited: 70,
-      auditedTdh: 40,
+      deferred: 9,
+      entries: 98,
+      audited: 85,
+      auditedTdh: 55,
       auditedP53: 30,
     });
     expect(conformanceRun(manifest)).toEqual({
       id: "p26",
-      passed: 68,
-      total: 68,
+      passed: 89,
+      total: 89,
       failed: 0,
-      checks: 1_190,
+      checks: 1_253,
     });
-    expect(manifest.facts.checks).toBe(21);
+    expect(manifest.facts.checks).toBe(46);
     expect(manifest.documents?.specification?.lastChange.slice(0, 7)).toBe(
-      "1c69528"
+      "f840096"
     );
   });
 

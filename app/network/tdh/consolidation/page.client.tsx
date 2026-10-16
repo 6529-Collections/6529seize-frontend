@@ -5,7 +5,6 @@ import {
   ArrowDownIcon,
   ArrowRightIcon,
   ArrowsRightLeftIcon,
-  CalendarDaysIcon,
   ChartBarIcon,
   ChatBubbleLeftRightIcon,
   CheckIcon,
@@ -16,10 +15,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { useId, type ComponentType, type SVGProps } from "react";
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
-import {
-  NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
-  NETWORK_REFERENCE_PAGE_CLASSES,
-} from "@/components/network/networkPageLayoutClasses";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import { useConsolidationPolicy } from "@/hooks/useConsolidationPolicy";
 import { useSetTitle } from "@/contexts/TitleContext";
@@ -28,12 +23,16 @@ import { formatDate, formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import TdhArrowLink from "../shared/TdhArrowLink";
-import { noBreakTerms } from "../shared/noBreakTerms";
+import TdhSourcesNote from "../shared/TdhSourcesNote";
 import TdhDisclosure from "../shared/TdhDisclosure";
 import TdhPager from "../shared/TdhPager";
-import TdhSource from "../shared/TdhSource";
 import TdhSubnav from "../shared/TdhSubnav";
-import { TDH_H1 } from "../shared/tdhStyles";
+import {
+  TDH_DROPDOWN_ROW,
+  TDH_H1,
+  TDH_PAGE,
+  TDH_PAGE_HEADER_TOP,
+} from "../shared/tdhStyles";
 import { TDHRelatedLinks } from "../TDHPageNavigation";
 import TDHSection, { TDH_PANEL, TDH_TEXT } from "../TDHSection";
 
@@ -106,16 +105,18 @@ export default function TDHConsolidationPage() {
   );
 
   return (
-    <div className={NETWORK_REFERENCE_PAGE_CLASSES}>
+    <div className={TDH_PAGE}>
       <AboutContentsDropdown
-        className={NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES}
+        className={TDH_DROPDOWN_ROW}
         currentHref="/network/tdh/consolidation"
         desktopFlush
         withDivider
       />
       <article className="tw-mx-auto tw-max-w-6xl tw-pb-8">
         <TdhSubnav current="/network/tdh/consolidation" locale={locale} />
-        <header className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-8 tw-pb-10 tw-pt-5 sm:tw-pt-8 lg:tw-grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:tw-gap-12">
+        <header
+          className={`tw-grid tw-grid-cols-1 tw-items-start tw-gap-8 tw-pb-10 lg:tw-grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:tw-gap-12 ${TDH_PAGE_HEADER_TOP}`}
+        >
           <div>
             <h1 className={TDH_H1}>
               {t(locale, "network.tdhConsolidation.title")}
@@ -123,31 +124,13 @@ export default function TDHConsolidationPage() {
             <p className="tw-mb-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-200 sm:tw-text-lg sm:tw-leading-8">
               {t(locale, "network.tdhConsolidation.lead")}
             </p>
-            <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
-              {t(locale, "network.tdhConsolidation.nothingMoves")}{" "}
+            {/* One status line: what 6529.io accepts, and what TDH-v1
+                allows, as the owner's open decision stands. */}
+            <p className="tw-mb-0 tw-mt-4 tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
               {limits
-                ? t(locale, "network.tdhConsolidation.limit", { limit, date })
+                ? t(locale, "network.tdhConsolidation.status", { limit, date })
                 : pendingLimits}
             </p>
-            <ol
-              aria-label={t(locale, "network.tdhConsolidation.timeline.label")}
-              className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-gap-2 tw-p-0 tw-text-sm tw-leading-6 sm:tw-grid-cols-2"
-            >
-              {(["fourth", "cutover"] as const).map((key) => (
-                <li
-                  key={key}
-                  className="tw-flex tw-items-start tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-iron-200"
-                >
-                  <CalendarDaysIcon
-                    aria-hidden="true"
-                    className="tw-mt-0.5 tw-size-4 tw-shrink-0 tw-text-iron-400"
-                  />
-                  {t(locale, `network.tdhConsolidation.timeline.${key}`, {
-                    date,
-                  })}
-                </li>
-              ))}
-            </ol>
             <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-center tw-gap-x-6 tw-gap-y-3">
               <ButtonLink href={GUIDED_SETUP_HREF} variant="primary" size="lg">
                 {t(locale, "network.tdhConsolidation.cta")}
@@ -157,17 +140,9 @@ export default function TDHConsolidationPage() {
                 {t(locale, "network.tdhConsolidation.safeCollectingLink")}
               </TdhArrowLink>
             </div>
-            {/* Two lines: the rule and the way to how it works; the worked
-                example (D–A, D–B, D–C) is on the design page. */}
-            <div className="tw-mt-6 tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
-              <p className="tw-m-0">
-                {noBreakTerms(t(locale, "network.tdhConsolidation.tdhv1Short"))}
-                <TdhSource refs={["P26 §6.3", "D132"]} locale={locale} />
-              </p>
-              <TdhArrowLink href={`${DESIGN_HREF}#tdh-v1`}>
-                {t(locale, "network.tdhConsolidation.tdhv1Link")}
-              </TdhArrowLink>
-            </div>
+            <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+              {t(locale, "network.tdhConsolidation.nothingMoves")}
+            </p>
           </div>
           <WalletsFigure locale={locale} />
         </header>
@@ -200,20 +175,16 @@ export default function TDHConsolidationPage() {
               </li>
             ))}
           </ul>
-          <div className="tw-mt-4 tw-flex tw-flex-col tw-items-start tw-gap-1">
-            <p className="tw-m-0 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1 tw-text-sm tw-text-iron-400">
-              <span className="tw-mr-1 tw-font-medium tw-text-iron-300">
-                {t(locale, "network.tdh.explainer.sources.label")}
-              </span>
-              <TdhSource
-                refs={["P26 §7.1", "P26 §7.3", "DEV-10", "D121"]}
-                locale={locale}
-              />
-            </p>
-            <TdhArrowLink href="/network/tdh/how-it-works#step-10">
-              {t(locale, "network.tdhConsolidation.benefits.ruleLink")}
-            </TdhArrowLink>
-          </div>
+          <TdhArrowLink
+            href="/network/tdh/how-it-works#step-10"
+            className="tw-mt-4"
+          >
+            {t(locale, "network.tdhConsolidation.benefits.ruleLink")}
+          </TdhArrowLink>
+          <TdhSourcesNote
+            locale={locale}
+            refs={["P26 §6.3", "P26 §7.1", "P26 §7.3", "DEV-10", "D121"]}
+          />
         </TDHSection>
 
         <TDHSection
@@ -279,14 +250,6 @@ export default function TDHConsolidationPage() {
                           }
                         )}
                   </p>
-                  {step === "done" && (
-                    <TdhArrowLink
-                      href={`${DESIGN_HREF}#tdh-v1`}
-                      className="tw-mt-1"
-                    >
-                      {t(locale, "network.tdhConsolidation.tdhv1Link")}
-                    </TdhArrowLink>
-                  )}
                 </div>
               </li>
             ))}
@@ -424,7 +387,7 @@ function WalletsFigure({ locale }: { readonly locale: SupportedLocale }) {
               <span className="tw-min-w-0 tw-flex-1 tw-text-sm tw-text-iron-200">
                 {t(locale, `network.tdhConsolidation.figure.${key}`)}
                 {key === "old" && (
-                  <span className="tw-block tw-text-sm tw-text-amber-200">
+                  <span className="tw-block tw-text-sm tw-text-iron-400">
                     {t(locale, "network.tdhConsolidation.figure.fourthTag")}
                   </span>
                 )}
@@ -454,9 +417,6 @@ function WalletsFigure({ locale }: { readonly locale: SupportedLocale }) {
           </ul>
         </div>
       </div>
-      <p className="tw-m-0 tw-mt-4 tw-text-sm tw-leading-5 tw-text-iron-300">
-        {t(locale, "network.tdhConsolidation.figure.fourthNote")}
-      </p>
     </figure>
   );
 }

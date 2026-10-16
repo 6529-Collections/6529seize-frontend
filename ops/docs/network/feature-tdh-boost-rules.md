@@ -28,10 +28,11 @@ boost rules.
 1. Read the header: `TDH`, the one-line promise (Total Days Held: the art
    you hold, and how long you have held it), the formula Days × Rate × Boost
    = TDH worked for one card (100 × 12.71 × 1.02 = 1,296), and a one-line
-   strip with the track record in bold (`Equal on 3 of 3 published days.`),
-   the latest cycle's identity and wallet records (the Python reference on
-   the Rust run's input) and a `Not yet fully checked` pill, linking to the
-   verification dashboard.
+   strip: the latest day's agreement between 6529.io, the Rust core and the
+   Python reference (on the Rust run's input), the track record in bold
+   (`Equal on 3 of 3 published days.`) and a `Not yet fully checked` pill,
+   linking to the verification dashboard. The `TDH` eyebrow shows from `md`
+   up, so on a phone the heading starts high on the screen.
 2. Read `TDH in a minute`: hold (whole days), weigh (a Meme's rate is the
    largest edition over its own; a Gradient's divides by the number of
    Gradients, 101, and a NextGen token's by its collection's size) and boost
@@ -52,19 +53,22 @@ October 11, 2026 cycle`, the day the specification was replayed against
    wallet records equal), how they were read (the Python reference on the
    Rust run's input; 6529.io's backend from its own indexer, its files
    fetched from Arweave and accepted only when its upload key's signature,
-   size and data root verify), every published day as a dot (the first two
-   computed on October 15, the scheduled runs from October 16), the
-   `Not yet fully checked` label, which links to the latest day's
-   provenance, with its meaning beside it, and a link to the dashboard;
+   size and data root verify; in one closed disclosure), the builds the
+   day's file names (`Builds: Rust core validator@…, Python reference
+   6529chain@…`), every published day as a dated chip, the `Not yet fully
+   checked` label, which links to the latest day's provenance, with its
+   meaning beside it (taken as reported until the daily run checks the
+   full history against 6529's own node, with no date), and a link to the
+   dashboard;
    then three points (written separately, each reproducing every
    conformance vector; specified in Lean as a proposal, with the netting
    theorem's hypotheses: every address's net movement, the burn addresses'
    included, and both versions of the day with a result; compared every
    day, scheduled from October 16); then `Found by the checks, before
 launch`, four dated findings (the edition-floor text corrected on
-   October 15, the first netting rule, the Lean model's counterexamples and
-   the differential tests), and a link to the Lean proof manifest on the
-   daily feed when it is published.
+   October 15, the first netting rule, the Lean model's counterexample to a
+   draft claim, and five rounds of differential tests, all settled but
+   E13), and a link to the Lean proof manifest on the daily feed.
 4. Use `Explain my TDH` to enter a profile handle or wallet-like identity.
    Its results use the same words as the other TDH pages (raw days, base
    TDH, boost, final TDH).
@@ -81,10 +85,9 @@ launch`, four dated findings (the edition-floor text corrected on
    pagination.
 6. Open `Current boosts` for today's values (read on the server, so they
    render with the page; a failed refresh in the browser keeps them): the
-   full-set boost and the Gradient bonus, then `Four boost figures, and how they relate`: a
-   full set today, a full set once seasons 1 to 20 pay, today's highest and
-   the schedule's highest on one scale from 1.00, the season bonuses as
-   ranges (for example `Seasons 1–16: +0.05 each`) with Genesis and
+   full-set boost and the Gradient bonus, an arrow link to the four boost
+   figures these pages quote, drawn on one scale on the Historic boosts
+   page (`#boost-figures`), the season bonuses as ranges (for example `Seasons 1–16: +0.05 each`) with Genesis and
    Nakamoto, and how the bonuses combine in a disclosure. Then `When your
 holdings change` for common questions about sales, transfers and new
    cards, and `Glossary` for the terms the TDH pages use (including netting,

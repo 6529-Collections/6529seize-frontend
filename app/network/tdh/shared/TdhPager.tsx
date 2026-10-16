@@ -10,7 +10,7 @@ import {
 } from "./TdhSubnav";
 import { TDH_FOCUS_RING } from "./tdhStyles";
 
-const CARD = `tw-group tw-flex tw-min-h-11 tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-1 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-4 tw-py-3 tw-no-underline tw-transition-colors hover:tw-border-primary-400/50 motion-reduce:tw-transition-none ${TDH_FOCUS_RING}`;
+const CARD = `tw-group tw-flex tw-min-h-11 tw-min-w-0 tw-flex-col sm:tw-w-[22rem] tw-gap-1 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-4 tw-py-3 tw-no-underline tw-transition-colors hover:tw-border-primary-400/50 motion-reduce:tw-transition-none ${TDH_FOCUS_RING}`;
 
 /**
  * The six core pages, then the consolidation guide and historic boosts, and
@@ -39,14 +39,10 @@ export default function TdhPager({
   return (
     <nav
       aria-label={t(locale, "network.tdh.shared.pager")}
-      className="tw-mt-12 tw-flex tw-flex-col tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8 sm:tw-flex-row"
+      className="tw-mt-12 tw-flex tw-flex-col tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8 sm:tw-flex-row sm:tw-justify-between"
     >
       {previous ? (
-        <Link
-          href={previous.href}
-          className={`${CARD} ${next ? "" : "sm:tw-max-w-[calc(50%_-_0.375rem)]"}`}
-          rel="prev"
-        >
+        <Link href={previous.href} className={CARD} rel="prev">
           <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-sm tw-text-iron-400">
             <ArrowLeftIcon aria-hidden="true" className="tw-size-3.5" />
             {t(locale, "network.tdh.shared.pager.previous")}
@@ -59,7 +55,7 @@ export default function TdhPager({
       {next ? (
         <Link
           href={next.href}
-          className={`${CARD} tw-items-end tw-text-right ${previous ? "" : "sm:tw-ml-auto sm:tw-max-w-[calc(50%_-_0.375rem)]"}`}
+          className={`${CARD} tw-items-end tw-text-right ${previous ? "" : "sm:tw-ml-auto"}`}
           rel="next"
         >
           <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-sm tw-text-iron-400">

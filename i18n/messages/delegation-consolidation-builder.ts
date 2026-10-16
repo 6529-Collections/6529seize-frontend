@@ -46,11 +46,11 @@ export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
   "delegation.consolidationBuilder.wallets.limitReached":
     "A consolidation can hold up to {limit} wallets.",
   "delegation.consolidationBuilder.wallets.fourthNote":
-    "A group of four: 6529.io counts all four wallets as one collector until the cutover, about October 23, 2026. From then TDH-v1 groups at most three, and one of the four counts on its own unless the rule is amended. Three wallets stay one collector either way.",
+    "A group of four: 6529.io counts all four wallets as one collector. TDH-v1, the rule 6529.io moves to about October 23, 2026, allows three; whether it allows four is pending an owner decision. Three wallets stay one collector either way.",
   "delegation.consolidationBuilder.wallets.fourthLink":
     "How consolidation works in TDH-v1",
   "delegation.consolidationBuilder.wallets.fourthAcknowledge":
-    "I understand that from the cutover one of the four wallets counts on its own, and its cards stop adding to the others’ sets and boost.",
+    "I understand that TDH-v1 allows three wallets, and that whether it allows four is pending an owner decision.",
   "delegation.consolidationBuilder.wallets.loadingGroup":
     "Loading your current consolidation…",
   "delegation.consolidationBuilder.wallets.groupError":

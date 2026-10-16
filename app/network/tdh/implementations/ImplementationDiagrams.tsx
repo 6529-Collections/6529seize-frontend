@@ -7,7 +7,7 @@ import {
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
-import { P26, PROGRAM_CONFORMANCE } from "../shared/tdhFacts";
+import { P26 } from "../shared/tdhFacts";
 import {
   TDH_CAPTION,
   type TDH_SERIES,
@@ -209,7 +209,6 @@ function LineageWide({
       height={326}
       title={title}
       desc={desc}
-      maxWidth={680}
     >
       <defs>
         <ArrowMarker id="lineage-wide-arrow" />
@@ -329,7 +328,6 @@ function LineageNarrow({
       height={496}
       title={title}
       desc={desc}
-      maxWidth={420}
     >
       <defs>
         <ArrowMarker id="lineage-narrow-arrow" />
@@ -531,27 +529,20 @@ const PLANNED: Cell = { tone: "later", label: "planned" };
 const SINCE: Cell = { tone: "now", label: "from16" };
 const UNDER_TEST: Cell = { tone: "test", label: "underTest" };
 const ALL_VECTORS: Cell = { tone: "now", label: "allVectors" };
-/** Program B: the vectors of P26's fourth round, which it follows. */
-const ROUND_4_VECTORS: Cell = {
-  tone: "review",
-  label: "ofVectors",
-  passed: PROGRAM_CONFORMANCE.programBCurrent.vectors,
-};
 /** The Lean model's cell, filled from its proof manifest. */
 const LEAN_VECTORS: Cell = { tone: "review", label: "ofVectors" };
 
 /**
- * Which check covers which program. Vectors: P26 has 89 since f840096; the
- * Rust core's daily version passes the 51 of 0621ed4, and the validator's
- * development branch, the Rust core and program B, the 75 of a4db4ae
- * (`shared/tdhFacts.ts`); the Lean model's count comes from its published
- * proof manifest. A whole real day: the references and the Lean model on
- * 2026-10-11 (P26 §13, the model's README), the Rust core in the daily runs;
- * program B has published none. Random and generated inputs: the four-way
- * differential tests ran the Rust core, program B, the Lean model and the
- * Python reference; since P26's fifth round (f840096) 6529chain's
- * tdh-formal workflow also runs the Rust reference on the Lean job's random
- * vectors, so Lean, Python and Rust are compared three ways there.
+ * Which check covers which program. Vectors: P26 has 89 since f840096, and
+ * the references, the Rust core and program B (the validator's development
+ * branch, 30bf8f9) pass all of them (`shared/tdhFacts.ts`); the Lean
+ * model's count comes from its published proof manifest. A whole real day:
+ * the references and the Lean model on 2026-10-11 (P26 §13, the model's
+ * README), the Rust core in the daily runs; program B has published none.
+ * Random and generated inputs: the five rounds of four-way differential
+ * tests ran the Rust core, program B, the Lean model and the Python
+ * reference, and 6529chain's tdh-formal workflow runs 1,000 seeded random
+ * inputs through Lean, Python and the Rust reference on every change.
  */
 const MATRIX_ROWS: ReadonlyArray<{
   readonly key: "vectors" | "fullDay" | "random" | "dual" | "daily" | "proofs";
@@ -560,9 +551,9 @@ const MATRIX_ROWS: ReadonlyArray<{
   {
     key: "vectors",
     cells: [
-      { tone: "review", label: "dailyVectors" },
       ALL_VECTORS,
-      ROUND_4_VECTORS,
+      ALL_VECTORS,
+      ALL_VECTORS,
       ALL_VECTORS,
       LEAN_VECTORS,
       N,
@@ -626,14 +617,6 @@ export function CheckMatrix({
                 newerPassed: formatInteger(locale, lean.newer.passed),
                 newerTotal: formatInteger(locale, lean.newer.total),
               }),
-      };
-    }
-    if (cell.label === "ofVectors") {
-      return {
-        tone: cell.tone,
-        label: t(locale, "network.tdh.impl.matrix.round4Vectors", {
-          passed: formatInteger(locale, cell.passed ?? 0),
-        }),
       };
     }
     return { tone: cell.tone, label: m(`matrix.${cell.label}`) };
@@ -713,7 +696,7 @@ export function CheckMatrix({
         </table>
       </div>
       <MatrixLegend locale={locale} />
-      <figcaption className="tw-mt-2 tw-max-w-[36em] tw-space-y-1 tw-text-sm tw-leading-6 tw-text-iron-300">
+      <figcaption className="tw-mt-2 tw-max-w-[34rem] tw-space-y-1 tw-text-sm tw-leading-6 tw-text-iron-400">
         {lean.newer !== null && (
           <p className="tw-m-0">
             {t(locale, "network.tdh.impl.matrix.leanNote", {

@@ -11,7 +11,7 @@ import {
 } from "./tdhStyles";
 
 /**
- * The four rounds of differential tests of 15 October 2026 as one compact
+ * The five rounds of differential tests of 15 and 16 October 2026 as one compact
  * table (the validator's tools/difftest/README.md): the generated inputs,
  * what each round found, and the P26 round that settled it. Rows become
  * cards below md.
@@ -72,7 +72,7 @@ export default function DifftestRounds({
                     {m(`found.${n}`)}
                   </td>
                   <td className={`${TDH_TD_STACK_MD} tw-text-iron-300`}>
-                    {m(`settled.${n}`, { commit: round.settledBy })}
+                    {m(`settled.${n}`, { commit: round.settledBy ?? "" })}
                   </td>
                 </tr>
               );
@@ -80,7 +80,7 @@ export default function DifftestRounds({
           </tbody>
         </table>
       </div>
-      <p className="tw-m-0 tw-max-w-[36em] tw-text-sm tw-leading-6 tw-text-iron-300">
+      <p className="tw-m-0 tw-max-w-[34rem] tw-text-sm tw-leading-6 tw-text-iron-400">
         {m("otherVectors")}
       </p>
     </div>

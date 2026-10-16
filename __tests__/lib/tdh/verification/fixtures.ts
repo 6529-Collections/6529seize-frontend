@@ -31,6 +31,10 @@ export function syntheticDay(
         historyRoot: null,
         rootsNote: null,
         runtimeMs: 612,
+        ruleVersion: null,
+        ruleId: null,
+        registryHash: null,
+        binarySha256: null,
       },
       python: {
         commit: "0f1e2d3c4b5a",
@@ -42,6 +46,10 @@ export function syntheticDay(
         historyRoot: null,
         rootsNote: "No Keccak tree.",
         runtimeMs: 4_300,
+        ruleVersion: null,
+        ruleId: null,
+        registryHash: null,
+        binarySha256: null,
       },
       live: {
         source: `arweave:${"A".repeat(43)}`,
@@ -77,6 +85,9 @@ export function syntheticDay(
       totalTdhDelta: { rustVsLive: -120, pythonVsLive: -120 },
     },
     verdict: "LIVE_UNEXPLAINED",
+    sources: null,
+    generatedAt: null,
+    sha256: null,
     ...overrides,
   };
 }
@@ -126,6 +137,8 @@ export function syntheticIndex(
         identitiesEqual: 10,
         identitiesTotal: 10,
         totalTdh: { rust: 9_900, python: 9_900, live: 9_900 },
+        generatedAt: null,
+        sha256: null,
       },
       {
         cycleDay: 20_741,
@@ -134,9 +147,12 @@ export function syntheticIndex(
         identitiesEqual: 9,
         identitiesTotal: 10,
         totalTdh: { rust: 10_000, python: 10_000, live: 10_120 },
+        generatedAt: null,
+        sha256: null,
       },
     ],
     cutover: null,
+    generatedAt: null,
     ...overrides,
   };
 }
