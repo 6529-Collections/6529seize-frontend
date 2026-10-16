@@ -295,7 +295,6 @@
     "__tests__/components/monitoring/AwsRumProvider.test.tsx": 1,
     "__tests__/components/navigation/BackButton.test.tsx": 2,
     "__tests__/components/navigation/BottomNavigation.test.tsx": 5,
-    "__tests__/components/network/NetworkPageLayout.test.tsx": 2,
     "__tests__/components/nextGen/admin/NextGenAdmin.test.tsx": 1,
     "__tests__/components/nextGen/admin/NextGenAdminAcceptAddressesAndPercentages.test.tsx": 10,
     "__tests__/components/nextGen/admin/NextGenAdminAirdropTokens.test.tsx": 5,
