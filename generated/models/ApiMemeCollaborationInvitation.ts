@@ -17,6 +17,10 @@ import { HttpFile } from '../http/http';
 export class ApiMemeCollaborationInvitation {
     'id': string;
     'profile': ApiMemeCollaboratorProfile;
+    /**
+    * Artist credit name confirmed on acceptance; null for legacy invitations.
+    */
+    'artist_name'?: string | null;
     'status': ApiMemeCollaborationInvitationStatusEnum;
 
     static readonly discriminator: string | undefined = undefined;
@@ -34,6 +38,12 @@ export class ApiMemeCollaborationInvitation {
             "name": "profile",
             "baseName": "profile",
             "type": "ApiMemeCollaboratorProfile",
+            "format": ""
+        },
+        {
+            "name": "artist_name",
+            "baseName": "artist_name",
+            "type": "string",
             "format": ""
         },
         {

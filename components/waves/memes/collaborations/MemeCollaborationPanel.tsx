@@ -94,7 +94,11 @@ export function MemeCollaborationPanel({
   const respond = async (
     invitation: ApiMemeCollaborationInvitation,
     action: ApiMemeCollaborationResponseRequestActionEnum,
-    consent?: { artwork_hash: string; terms_version: string }
+    consent?: {
+      artwork_hash: string;
+      terms_version: string;
+      artist_name: string;
+    }
   ) => {
     if (
       !data ||
@@ -117,6 +121,10 @@ export function MemeCollaborationPanel({
           action,
           artwork_hash: data.artwork_hash,
           terms_version: data.terms_version,
+          ...(action === ApiMemeCollaborationResponseRequestActionEnum.Accept &&
+          consent
+            ? { artist_name: consent.artist_name }
+            : {}),
         },
       });
       queryClient.setQueryData(queryKey, updated);
@@ -310,14 +318,16 @@ export function MemeCollaborationPanel({
           key={reviewVersion}
           state={data}
           saving={saving}
+          initialArtistName={connectedProfile.handle ?? ""}
           onClose={() => setReviewingId(null)}
-          onAccept={() => {
+          onAccept={(artistName) => {
             void respond(
               ownInvitation,
               ApiMemeCollaborationResponseRequestActionEnum.Accept,
               {
                 artwork_hash: data.artwork_hash,
                 terms_version: data.terms_version,
+                artist_name: artistName,
               }
             );
           }}

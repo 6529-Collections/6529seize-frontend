@@ -193,7 +193,7 @@ submitted. Voting starts immediately and does not wait for their replies.
 The final submission preview lists the profiles that will receive invitations.
 
 On artwork details, the submitter can expand **Manage invitations** to see every invitee and status or cancel a pending invitation. The compact row shows the number of pending replies. On an existing active submission, use **Add collaborators** to select more artists and **Send collaborator invitations**. This preserves the submission, votes and ranking, including when some collaborators have already accepted. Accepted artists cannot be removed; adding invitations does not unlock accepted artwork. The limit is 20 distinct invited profiles over the submission lifetime, including declined or cancelled invitations; the same profile cannot be invited twice. Submissions created before this feature also support invitations. Selected, closed or withdrawn submissions cannot receive more invitations. Each
-invitee can open the artwork from **Notifications → Invites** or go directly to artwork details and choose **Review invitation**. A modal shows the saved artwork details, media links, final acceptance wording and submission/minting terms. Check the review confirmation there before **Accept collaboration**, or close it with **Not now** without responding. **Decline** remains available on the artwork. They respond using their own profile; proxies cannot consent. Accepted artists appear once in public credits, without another accepted-invitation panel.
+invitee can open the artwork from **Notifications → Invites** or go directly to artwork details and choose **Review invitation**. A modal shows the saved artwork details, media links, final acceptance wording and submission/minting terms. Enter or edit your **Artist credit name** (up to 200 characters, initially your handle). This name is saved separately from your profile handle when accepting; editing it resets the confirmation. Check the review confirmation there before **Accept collaboration**, or close it with **Not now** without responding. **Decline** remains available on the artwork. They respond using their own profile; proxies cannot consent. Accepted artists appear once in public credits, without another accepted-invitation panel.
 Acceptance is final, with no withdrawal. The submitter cannot replace the
 accepted artwork or original artist name; replacing the submission requires
 fresh invitations. Admins can edit the final mint artwork and credits in Craft.
@@ -208,7 +208,7 @@ does not establish payment splits or change airdrop allocations.
 When the artwork is selected as the next mint, the accepted artist roster is
 saved and unanswered invitations close. Claims Builder populates initial mint credits with the submitter and
 collaborators who accepted before selection. Later responses cannot change this
-initial roster. Admins can edit the saved claim in Drop Forge, including adding
+initial roster. The Artist field uses ` & ` for exactly two credited artists and `, ` for three or more; SEIZE Artist Profile always uses comma-separated handles. No historical name lookup is performed. Admins can edit the saved claim in Drop Forge, including adding
 an artist who did not accept. Arweave publishes these final saved values. Such
 edits do not change invitation status or accepted-submission profile lists.
 The submission `Collab` trait follows confirmed collaboration, rather than

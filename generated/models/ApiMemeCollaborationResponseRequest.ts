@@ -17,6 +17,10 @@ export class ApiMemeCollaborationResponseRequest {
     'action': ApiMemeCollaborationResponseRequestActionEnum;
     'artwork_hash': string;
     'terms_version': string;
+    /**
+    * Artist credit name confirmed when accepting. Only valid for ACCEPT. Older clients may omit it, in which case the accepting profile handle is saved.
+    */
+    'artist_name'?: string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -38,6 +42,12 @@ export class ApiMemeCollaborationResponseRequest {
         {
             "name": "terms_version",
             "baseName": "terms_version",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "artist_name",
+            "baseName": "artist_name",
             "type": "string",
             "format": ""
         }    ];
