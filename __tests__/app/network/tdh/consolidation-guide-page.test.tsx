@@ -38,11 +38,11 @@ describe("TDHConsolidationPage (collector's guide)", () => {
     }
     expect(
       screen.getByRole("figure", {
-        name: "Up to four of your wallets count as one collector",
+        name: "Your wallets count as one collector: up to three under TDH-v1, and a fourth on 6529.io until the cutover",
       })
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/The fourth requires fresh links from October 12, 2026/)
+      screen.getByText(/A fourth needs fresh links from October 12, 2026/)
     ).toBeInTheDocument();
   });
 

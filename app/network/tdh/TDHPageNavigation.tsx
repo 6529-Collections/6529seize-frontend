@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import { ArrowRightIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useEffect } from "react";
 import { TDH_CARD_GRID, TDH_FOCUS, TDH_PANEL } from "./TDHSection";
@@ -96,12 +96,10 @@ export function TDHSectionNavigation({
       <details className="tw-group md:tw-hidden">
         <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-px-2 tw-text-sm tw-font-medium tw-text-iron-100 [&::-webkit-details-marker]:tw-hidden">
           {label}
-          <span
+          <ChevronDownIcon
             aria-hidden="true"
-            className="tw-text-iron-400 tw-transition-transform group-open:tw-rotate-180 motion-reduce:tw-transition-none"
-          >
-            ▾
-          </span>
+            className="tw-size-4 tw-shrink-0 tw-text-iron-400 tw-transition-transform group-open:tw-rotate-180 motion-reduce:tw-transition-none"
+          />
         </summary>
         {list("tw-grid-cols-1")}
       </details>

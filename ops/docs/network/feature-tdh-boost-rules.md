@@ -29,24 +29,33 @@ boost rules.
    you hold, and how long you have held it), the formula Days × Rate × Boost
    = TDH worked for one card (100 × 12.71 × 1.02 = 1,296), and a `Checked
    daily, in public` strip with the track record (days equal out of days
-   published), the history label and the latest cycle's result in one
-   sentence, linking to the verification dashboard.
+   published) and the latest cycle's result in one sentence, which says that
+   the Python reference computes from the Rust run's input and that the
+   history read is not yet checked against 6529's own Ethereum node, linking
+   to the verification dashboard.
 2. Read `TDH in a minute`: hold (whole days), weigh (edition rate) and boost
    (one multiplier), drawn for one copy of a 310-copy Meme held 100 days by a
    collector with one Gradient: 100 days x rate 12.71 = 1,271 base, x boost
    1.02 = 1,296 TDH from this card; the Gradient earns TDH of its own on top.
+   The example uses the October 11, 2026 cycle, the day the specification was
+   replayed against 6529.io, and the card's rate and boost are the same on
+   the latest day.
    The rate is drawn as two bars on one scale, and the boost as a scale from
    1.00 to 2.04, the highest boost on the October 11, 2026 cycle. Under it,
    what moves the number: without the Gradient 1,271, with one full set
    instead (1.80) 2,288. FirstGM (Meme #8) is introduced there as the
    reference card.
-3. Read `Checked daily, in public`: three points (written more than once and
-   tested against the specification's conformance vectors, specified in Lean
-   as a proposal, with what the proofs establish and where they stop,
-   compared every day with every difference counted and classed), each in two
-   or three lines, then one row with the track record and the latest day
-   (identity records equal, the two burn addresses' included) and its
-   history label, linking to the verification dashboard.
+3. Read `Checked daily, in public`: first the latest day from the feed, as
+   figures (the total TDH identical in all three, identity records and
+   wallet records equal) with every published day as a dot, the
+   `Not yet fully checked` label with its meaning beside it, and a link to
+   the dashboard; then three points (written separately and tested against
+   the specification's conformance vectors, specified in Lean as a
+   proposal, compared every day); then `Found by the checks, before
+   launch`, four dated findings (the edition-floor text corrected on
+   October 15, the first netting rule, the Lean model's counterexamples and
+   the differential tests), and a link to the Lean proof manifest on the
+   daily feed when it is published.
 4. Use `Explain my TDH` to enter a profile handle or wallet-like identity.
    Its results use the same words as the other TDH pages (raw days, base
    TDH, boost, final TDH).
@@ -54,13 +63,17 @@ boost rules.
    shows an empty state before submission, loading, not-found, and retryable
    error states, followed by the stored snapshot when available. When the
    snapshot is the latest compared day's and all three computations agreed
-   on every record, a line says this record was reproduced independently.
+   on every record, a line says this record was reproduced by two
+   separately written programs from one input, and by 6529.io. Each
+   collection's row says how many cards it holds.
 5. Expand collection holdings, boost details, and wallet information in a
    profile result. Holdings tables show token, copies, whole days, rate, base,
    and final TDH; collections with more than 20 tokens use Previous/Next
    pagination.
-6. Open `Current boosts` for today's values: the full-collection boost, the
-   Gradient bonus and the highest possible boost, the season bonuses as
+6. Open `Current boosts` for today's values: the full-collection boost and
+   the Gradient bonus, then `Four boost figures, and how they relate`: a
+   full set today, a full set once seasons 1 to 20 pay, today's highest and
+   the schedule's highest on one scale from 1.00, the season bonuses as
    ranges (for example `Seasons 1–16: +0.05 each`) with Genesis and
    Nakamoto, and how the bonuses combine in a disclosure. Then `When your
    holdings change` for common questions about sales, transfers and new

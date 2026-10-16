@@ -194,12 +194,15 @@ export default function VerificationDashboard({
   dayLoad,
   selected,
   now,
+  permalink = false,
 }: {
   readonly locale: SupportedLocale;
   readonly indexLoad: IndexLoad;
   readonly dayLoad: DayLoad | null;
   readonly selected: VerificationIndexDay | null;
   readonly now: Date;
+  /** A day's own page, a record: no live freshness, cutover as of the day. */
+  readonly permalink?: boolean;
 }) {
   if (indexLoad.status === "awaiting") {
     return <AwaitingState locale={locale} now={now} />;
@@ -261,8 +264,15 @@ export default function VerificationDashboard({
               locale={locale}
               day={day}
               totalDelta={delta}
-              cutover={cutover}
-              relativeCutover={isLatest}
+              cutover={
+                permalink
+                  ? cutoverState(
+                      index.cutover,
+                      new Date(`${entry.date}T00:00:00Z`)
+                    )
+                  : cutover
+              }
+              relativeCutover={!permalink}
             />
           </>
         ) : (
@@ -277,7 +287,7 @@ export default function VerificationDashboard({
           }
           now={now}
         />
-        {freshness && latest && (
+        {!permalink && freshness && latest && (
           <FreshnessLine
             locale={locale}
             freshness={freshness}
@@ -312,6 +322,7 @@ export default function VerificationDashboard({
         locale={locale}
         day={day}
         dayUrl={dayLoad?.status === "ok" ? dayLoad.dayUrl : null}
+        daySha256={dayLoad?.status === "ok" ? dayLoad.sha256 : null}
         indexUrl={indexLoad.indexUrl}
       />
       <VerificationCheck locale={locale} day={day} cycleDay={entry.cycleDay} />

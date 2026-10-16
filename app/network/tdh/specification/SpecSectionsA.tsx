@@ -543,12 +543,7 @@ export default function SpecSectionsA({
           <Plain locale={locale} refs={["P26 §7.2"]}>
             {t(locale, "network.tdh.spec.s7-2.body")}
           </Plain>
-          <Rule
-            locale={locale}
-            code={RULE_TOKEN_VALUES}
-            source="P26 §7.2"
-            title={t(locale, "network.tdh.spec.s7.values")}
-          />
+          <Rule locale={locale} code={RULE_TOKEN_VALUES} source="P26 §7.2" />
         </SpecSub>
         <SpecSub
           id="s7-3"

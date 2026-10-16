@@ -19,23 +19,31 @@ collapsible `Exact rule` block quoting TDH-v1 (rule version `tdh-v1.0`).
 
 ## Structure
 
-- A rail of the fourteen steps at the top, under their section titles, links
-  to each section: the calculation runs from step 1 to step 13 (network
-  totals, drawn as the result); step 12 (the worked example) and step 14
-  (what changes) are drawn apart.
+- On tablets, a rail of the fourteen steps at the top, under their section
+  titles, links to each section: the calculation runs from step 1 to step 13
+  (network totals, drawn as the result); step 12 (the worked example) and
+  step 14 (what changes) are drawn apart. From `lg` the sticky list of
+  steps beside them takes its place, so the steps never show twice.
 - A `Steps` list highlights the step in view (a sticky rail on desktop, a
   disclosure on phones; once that has scrolled away, a bar at the bottom of
   the screen names the step in view and opens the list).
 - Steps: one snapshot a day; whole days; which cards count; every copy has a
   timestamp (last in, first out); ownership read between transactions (D131,
-  marked `In the specification`, P26 §7.1); edition sizes and floors;
+  P26 §7.1); edition sizes and floors;
   rates; base TDH per card; the boost; consolidation; final TDH; a two-wallet
   worked example, with a link to Explain my TDH; network totals, with a link
   to the daily comparison; what changes at the cutover.
-- Each step's sources sit on one `Sources` line at its end, before its
-  `Exact rule` disclosure, so the prose reads as prose. Rule blocks name
-  `SINKS`, `cluster()` and `firstgm_burn_tx` in a comment; on phones a
-  trailing comment moves to a line of its own.
+- Each step's sources and its exact rule share one disclosure at its end
+  (`Exact rule and sources`, or `Sources` for a step without a rule), so
+  the prose reads as prose. Rule blocks name `SINKS`, `cluster()` and
+  `firstgm_burn_tx` in a comment; on phones code keeps its lines and
+  indentation and scrolls sideways inside its frame, with a shadow at a cut
+  edge, and a long block shows its first lines and `Show all N lines`.
+- The lede says P26 is a proposal that 6529.io computes from the cutover;
+  the basis line names the P26 commit the in-browser arithmetic was
+  rechecked at (`f840096`) and links its tests. Step 1 says the daily runs
+  take history from public log servers until 6529's own node is synced, and
+  links the dashboard's label. Step 10's link order uses numbered badges.
 
 ## Interactive Elements
 
@@ -48,8 +56,9 @@ on. Each has a `Reset` button and announces its result politely.
   (no native date input, so no date format can be misread), and the whole
   days.
 - Stack simulator: starts with one copy bought 30 days ago; buy, sell, move a
-  copy to Wallet B, advance time, and switch consolidation (off by default,
-  applied to the whole history). Each wallet's copies stack upward from its
+  copy to Wallet B, advance time, and switch consolidation with a switch in
+  the explorables' pill style (off by default, applied to the whole
+  history). Each wallet's copies stack upward from its
   name, the box only as tall as its copies.
 - Rate explorer: copies minted and claim limit to edition and rate.
 - Boost builder: full sets and Gradients with steppers; complete seasons,

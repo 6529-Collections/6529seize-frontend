@@ -68,7 +68,8 @@ describe("TDHCurrentRules", () => {
     fetchMock.mockResolvedValue(rules);
     renderRules("fr-FR");
 
-    expect(await screen.findByText(/1,75/)).toBeInTheDocument();
+    // The full set's card and the ladder both show it.
+    expect((await screen.findAllByText(/1,75/)).length).toBeGreaterThan(0);
     expect(screen.getByText(/Season 15/i)).toBeInTheDocument();
     expect(screen.queryByText(/Season 16/i)).not.toBeInTheDocument();
     expect(screen.getByText(/2,24/)).toBeInTheDocument();
@@ -131,9 +132,12 @@ describe("TDHCurrentRules", () => {
       fetchMock.mockResolvedValue(rules);
       renderWithQueryClient(<TDHCurrentRules locale={locale} />);
 
-      expect(await screen.findByText(`${fullMultiplier}×`)).toBeInTheDocument();
+      // The full set's card and the ladder's first rung.
+      expect((await screen.findAllByText(`${fullMultiplier}×`)).length).toBe(2);
       expect(screen.getByText(`${ceiling}×`)).toBeInTheDocument();
-      expect(screen.getByText("Highest possible")).toBeInTheDocument();
+      expect(
+        screen.getByText("Four boost figures, and how they relate")
+      ).toBeInTheDocument();
     }
   );
 });

@@ -196,11 +196,14 @@ export default function VerificationProvenance({
   locale,
   day,
   dayUrl,
+  daySha256 = null,
   indexUrl,
 }: {
   readonly locale: SupportedLocale;
   readonly day: VerificationDay | null;
   readonly dayUrl: string | null;
+  /** The SHA-256 of the day file's bytes as the page read them. */
+  readonly daySha256?: string | null;
   readonly indexUrl: string;
 }) {
   const rust = day?.implementations.rust ?? null;
@@ -218,12 +221,15 @@ export default function VerificationProvenance({
         id="provenance"
         title={t(locale, "network.tdh.verify.provenance.heading")}
         locale={locale}
-        className="tw-hyphens-auto tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
+        className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
       />
       <div className={`${TDH_CARD} tw-mt-4 tw-p-5 sm:tw-p-6`}>
         <dl className="tw-m-0 tw-grid tw-items-start tw-gap-x-8 tw-gap-y-5 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
           <Item label={t(locale, "network.tdh.verify.provenance.dataSource")}>
-            {t(locale, "network.tdh.verify.provenance.remote")}
+            {/* The feed's host name is one long word: it may break anywhere. */}
+            <span className="[overflow-wrap:anywhere]">
+              {t(locale, "network.tdh.verify.provenance.remote")}
+            </span>
           </Item>
           {day && (
             <Item label={t(locale, "network.tdh.verify.provenance.snapshot")}>
@@ -266,6 +272,13 @@ export default function VerificationProvenance({
                   version: day.ruleVersion,
                 })
               : t(locale, "network.tdh.verify.provenance.ruleFromSpec")}
+            {python?.commit && (
+              <span className="tw-mt-1 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
+                {t(locale, "network.tdh.verify.provenance.p26Run", {
+                  commit: python.commit.slice(0, 7),
+                })}
+              </span>
+            )}
           </Item>
           <Item label={t(locale, "network.tdh.verify.provenance.registry")}>
             <Hash
@@ -346,6 +359,13 @@ export default function VerificationProvenance({
             <ArrowDownTrayIcon aria-hidden="true" className="tw-size-4" />
             {t(locale, "network.tdh.verify.provenance.downloadIndex")}
           </a>
+          {daySha256 && (
+            <p className="tw-m-0 tw-basis-full tw-break-all tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-400">
+              {t(locale, "network.tdh.verify.provenance.daySha", {
+                hash: daySha256,
+              })}
+            </p>
+          )}
         </div>
       </div>
     </section>

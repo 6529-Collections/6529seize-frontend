@@ -46,7 +46,7 @@ export default function TdhSection({
           id={id}
           title={title}
           locale={locale}
-          className="tw-hyphens-auto tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
+          className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
         />
         {pills !== undefined && (
           <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-2">{pills}</div>

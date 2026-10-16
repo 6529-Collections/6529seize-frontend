@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { useState } from "react";
 import Button from "@/components/utils/button/Button";
-import { formatInteger, formatList, formatNumber } from "@/i18n/format";
+import {
+  formatInteger,
+  formatList,
+  formatNumber,
+  selectPluralCategory,
+} from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import TdhDisclosure from "./shared/TdhDisclosure";
@@ -82,11 +87,17 @@ function Collection({
     <TdhDisclosure
       tone="strong"
       className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 last:tw-border-b-0"
-      summary={t(locale, "network.tdh.profile.holdings", {
-        collection: collectionName,
-        count: formatInteger(locale, tokens.length),
-        tdh: formatInteger(locale, total),
-      })}
+      summary={t(
+        locale,
+        selectPluralCategory(locale, tokens.length) === "one"
+          ? "network.tdh.profile.holdings.one"
+          : "network.tdh.profile.holdings.other",
+        {
+          collection: collectionName,
+          count: formatInteger(locale, tokens.length),
+          tdh: formatInteger(locale, total),
+        }
+      )}
     >
       {!tokens.length ? (
         <p className={`${TDH_TEXT} tw-pb-4`}>

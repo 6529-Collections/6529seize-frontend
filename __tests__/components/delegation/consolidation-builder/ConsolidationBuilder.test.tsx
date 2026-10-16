@@ -690,6 +690,20 @@ describe("ConsolidationBuilder", () => {
     }
   });
 
+  it("says what TDH-v1 does with a fourth wallet once one is listed", () => {
+    renderBuilder();
+    expect(
+      screen.queryByTestId("consolidation-fourth-wallet-note")
+    ).not.toBeInTheDocument();
+    addFourthWallet();
+    expect(
+      screen.getByTestId("consolidation-fourth-wallet-note")
+    ).toHaveTextContent(/From then TDH-v1 groups at most three/);
+    expect(
+      screen.getByRole("link", { name: "How consolidation works in TDH-v1" })
+    ).toHaveAttribute("href", "/network/tdh/how-it-works#step-10");
+  });
+
   it("does not hold groups of three before activation", () => {
     jest.spyOn(Date, "now").mockReturnValue(BEFORE_ACTIVATION_MS);
     renderBuilder();

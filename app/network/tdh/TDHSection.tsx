@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { noBreakTerms } from "./shared/noBreakTerms";
 
 export const TDH_PANEL =
   "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/50";
@@ -30,9 +31,9 @@ export default function TDHSection({
         <h2
           id={`${id}-heading`}
           tabIndex={-1}
-          className="tw-m-0 tw-hyphens-auto tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none min-[360px]:tw-text-2xl"
+          className="tw-m-0 tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none min-[360px]:tw-text-2xl"
         >
-          {title}
+          {noBreakTerms(title)}
         </h2>
         {description && (
           <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">

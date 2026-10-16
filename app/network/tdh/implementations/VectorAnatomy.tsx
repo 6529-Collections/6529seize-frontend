@@ -20,14 +20,21 @@ import {
  * transfers in canonical order and the values a program must produce. Every
  * address, transaction and token in it is synthetic: A is 0x…a1, the
  * marketplace W 0x…ee and the buyer B 0x…b2. Transfers 4 to 8 share one
- * transaction (block 2000, txIndex 3), five days before the snapshot.
+ * transaction (block 2000, txIndex 3), five days before the snapshot. Ages
+ * are whole days before the vector's T, 1,791,676,799 (2026-10-10 23:59:59
+ * UTC); its registry lists one season, starting at Meme 1.
  */
+/** The vector's addresses, by the letters the derivation uses. */
+const NAMES: Readonly<Record<string, string>> = { a1: "A", ee: "W", b2: "B" };
+const who = (address: string, mint: string) =>
+  address === "mint" ? mint : (NAMES[address] ?? address);
 const SAME_TX_BLOCK = 2000;
 const VECTOR = {
   id: "36-erc1155-send-and-return",
   transfers: [
     {
       block: 1001,
+      age: 100,
       tx: 0,
       log: 0,
       token: "memes#1",
@@ -37,6 +44,7 @@ const VECTOR = {
     },
     {
       block: 1002,
+      age: 40,
       tx: 0,
       log: 0,
       token: "memes#1",
@@ -46,6 +54,7 @@ const VECTOR = {
     },
     {
       block: 1003,
+      age: 60,
       tx: 0,
       log: 0,
       token: "memes#2",
@@ -55,6 +64,7 @@ const VECTOR = {
     },
     {
       block: 2000,
+      age: 5,
       tx: 3,
       log: 0,
       token: "memes#1",
@@ -64,6 +74,7 @@ const VECTOR = {
     },
     {
       block: 2000,
+      age: 5,
       tx: 3,
       log: 1,
       token: "memes#2",
@@ -73,6 +84,7 @@ const VECTOR = {
     },
     {
       block: 2000,
+      age: 5,
       tx: 3,
       log: 2,
       token: "memes#1",
@@ -82,6 +94,7 @@ const VECTOR = {
     },
     {
       block: 2000,
+      age: 5,
       tx: 3,
       log: 3,
       token: "memes#2",
@@ -91,6 +104,7 @@ const VECTOR = {
     },
     {
       block: 2000,
+      age: 5,
       tx: 3,
       log: 4,
       token: "memes#2",
@@ -130,6 +144,9 @@ export default function VectorAnatomy({
           {m("intro")}
           <TdhSource refs={["P26 §13", "D131"]} locale={locale} />
         </p>
+        <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
+          {m("legend")}
+        </p>
       </figcaption>
       <div className="tw-mt-4 tw-grid tw-items-start tw-gap-4 xl:tw-grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <div className="tw-min-w-0">
@@ -154,6 +171,11 @@ export default function VectorAnatomy({
                     <span>
                       {m("log")} {row.log}
                     </span>
+                    <span>
+                      {t(locale, "network.tdh.impl.anatomy.ageValue", {
+                        days: formatInteger(locale, row.age),
+                      })}
+                    </span>
                     {sameTx && (
                       <span className="tw-text-primary-300">{m("sameTx")}</span>
                     )}
@@ -162,8 +184,7 @@ export default function VectorAnatomy({
                     {row.token}
                   </p>
                   <p className="tw-m-0 tw-mt-0.5 tw-font-mono tw-text-[13px] tw-text-iron-200">
-                    {row.from === "mint" ? m("mint") : `0x…${row.from}`} →{" "}
-                    {`0x…${row.to}`}
+                    {who(row.from, m("mint"))} → {who(row.to, m("mint"))}
                     <span className="tw-ml-2 tw-font-sans tw-tabular-nums tw-text-iron-300">
                       × {formatInteger(locale, row.amount)}
                     </span>
@@ -195,6 +216,9 @@ export default function VectorAnatomy({
                   <th scope="col" className={TDH_TH_NUM}>
                     {m("amount")}
                   </th>
+                  <th scope="col" className={TDH_TH_NUM}>
+                    {m("age")}
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -216,8 +240,7 @@ export default function VectorAnatomy({
                         {row.token}
                       </td>
                       <td className={`${TDH_TD} tw-font-mono tw-text-xs`}>
-                        {row.from === "mint" ? m("mint") : `0x…${row.from}`} →{" "}
-                        {`0x…${row.to}`}
+                        {who(row.from, m("mint"))} → {who(row.to, m("mint"))}
                         {sameTx && (
                           <span className="tw-ml-2 tw-font-sans tw-text-xs tw-text-primary-300">
                             {m("sameTx")}
@@ -226,6 +249,9 @@ export default function VectorAnatomy({
                       </td>
                       <td className={TDH_TD_NUM}>
                         {formatInteger(locale, row.amount)}
+                      </td>
+                      <td className={TDH_TD_NUM}>
+                        {formatInteger(locale, row.age)}
                       </td>
                     </tr>
                   );
@@ -285,6 +311,9 @@ export default function VectorAnatomy({
           {m("derivation")}:
         </span>{" "}
         {m("derivationBody")}
+      </p>
+      <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">
+        {m("boostBody")}
       </p>
     </figure>
   );

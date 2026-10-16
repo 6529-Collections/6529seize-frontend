@@ -74,7 +74,7 @@ function Cause({
 
 function ClassLegend({ locale }: { readonly locale: SupportedLocale }) {
   return (
-    <dl className="tw-m-0 tw-grid tw-gap-3 sm:tw-grid-cols-2">
+    <dl className="tw-m-0 tw-grid tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
       {DIFFERENCE_CLASSES.map((value) => (
         <div key={value} className="tw-flex tw-gap-2.5">
           <dt className="tw-pt-0.5">
@@ -125,13 +125,15 @@ export default function VerificationDifferences({
         id="diff"
         title={t(locale, "network.tdh.verify.diff.heading")}
         locale={locale}
-        className="tw-hyphens-auto tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
+        className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
       />
       <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
         {t(locale, "network.tdh.verify.diff.lede")}
         <TdhSource refs={["P38 §3.3"]} locale={locale} />
       </p>
-      <div className="tw-mt-4 tw-grid tw-items-start tw-gap-4 lg:tw-grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+      {/* The day, then the classes, each the full width: side by side the
+          shorter card left a hole beside the taller. */}
+      <div className="tw-mt-4 tw-space-y-4">
         <div className={`${TDH_CARD} tw-p-5 sm:tw-p-6`}>
           {none ? (
             <p className="tw-m-0 tw-flex tw-items-start tw-gap-3 tw-text-base tw-leading-7 tw-text-iron-100">
@@ -235,8 +237,12 @@ export default function VerificationDifferences({
           <div className="tw-mt-3">
             <ClassLegend locale={locale} />
           </div>
-          <p className="tw-m-0 tw-mt-4 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <p className="tw-m-0 tw-mt-4 tw-max-w-4xl tw-text-sm tw-leading-6 tw-text-iron-400">
             {t(locale, "network.tdh.verify.class.note")}
+          </p>
+          <p className="tw-m-0 tw-mt-3 tw-max-w-4xl tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+            {t(locale, "network.tdh.verify.class.expected")}
+            <TdhSource refs={["P26 §6.3"]} locale={locale} />
           </p>
         </div>
       </div>

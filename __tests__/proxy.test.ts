@@ -412,6 +412,24 @@ describe("proxy", () => {
       });
     });
 
+    it("answers a TDH verification day that cannot exist with a 404", async () => {
+      proxy = loadProxy(PRODUCTION_BASE_ENDPOINT);
+
+      const unknown = (await proxy(
+        createRequest("/network/tdh/verification/abc", {
+          origin: PRODUCTION_BASE_ENDPOINT,
+        })
+      )) as Response;
+      const published = await proxy(
+        createRequest("/network/tdh/verification/20740", {
+          origin: PRODUCTION_BASE_ENDPOINT,
+        })
+      );
+
+      expect(unknown.status).toBe(404);
+      expect(published).toEqual({ kind: "next" });
+    });
+
     it("still answers dot-prefixed paths with a plain 404 in production", async () => {
       proxy = loadProxy(PRODUCTION_BASE_ENDPOINT);
 

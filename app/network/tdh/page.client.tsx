@@ -50,8 +50,11 @@ const RELATED = [
 
 export default function TDHMainPage({
   verification = null,
+  manifestUrl = null,
 }: {
   readonly verification?: VerificationSummary | null;
+  /** The Lean proof manifest on the daily feed, when it is published. */
+  readonly manifestUrl?: string | null;
 }) {
   const locale = useBrowserLocale();
   useSetTitle(t(locale, "network.tdh.explainer.pageTitle"));
@@ -70,7 +73,11 @@ export default function TDHMainPage({
         <TdhSubnav current="/network/tdh" locale={locale} />
         <TDHHero locale={locale} verification={verification} />
         <TDHInAMinute locale={locale} />
-        <TDHVerifiedDaily locale={locale} summary={verification} />
+        <TDHVerifiedDaily
+          locale={locale}
+          summary={verification}
+          manifestUrl={manifestUrl}
+        />
         <TDHProfile locale={locale} verification={verification} />
         <TDHCurrentRules locale={locale} />
         <TDHHoldingChanges locale={locale} />

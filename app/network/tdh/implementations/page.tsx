@@ -13,6 +13,7 @@ import {
 import { leanRound } from "../formal/formalStatus";
 import { LEAN_LATEST_ROUND, LEAN_ROUND_5 } from "../formal/leanResults";
 import DifftestRounds from "../shared/DifftestRounds";
+import TdhArrowLink from "../shared/TdhArrowLink";
 import TdhPageShell from "../shared/TdhPageShell";
 import TdhPager from "../shared/TdhPager";
 import TdhSection from "../shared/TdhSection";
@@ -22,7 +23,6 @@ import {
   TDH_CAPTION,
   TDH_CARD,
   TDH_FOCUS_RING,
-  TDH_LINK,
   TDH_SERIES,
   TDH_TABLE,
   TDH_TABLE_FRAME,
@@ -322,9 +322,11 @@ export default async function TdhImplementationsPage() {
         title={t(locale, "network.tdh.impl.programs.title")}
         locale={locale}
         wide
-        pills={<TdhStatusPill pill="toBePublished" locale={locale} size="sm" />}
       >
         <div className="tw-space-y-4">
+          <p className={PROSE}>
+            {t(locale, "network.tdh.impl.programs.intro")}
+          </p>
           <ProgramCards locale={locale} lean={lean} />
           <TdhStatusLegend
             locale={locale}
@@ -391,36 +393,31 @@ export default async function TdhImplementationsPage() {
                 <span className="tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-text-xs tw-font-medium tw-tabular-nums tw-text-iron-200">
                   {formatInteger(locale, index + 1)}
                 </span>
-                <p className="tw-m-0 tw-text-[15px] tw-leading-7 tw-text-iron-300">
-                  <strong className="tw-font-semibold tw-text-iron-50">
-                    {t(locale, `network.tdh.impl.checked.${check.key}.title`)}
-                  </strong>{" "}
-                  {t(locale, `network.tdh.impl.checked.${check.key}.body`)}
-                  <TdhSource refs={check.refs} locale={locale} />
+                <div className="tw-min-w-0">
+                  <p className="tw-m-0 tw-text-[15px] tw-leading-7 tw-text-iron-300">
+                    <strong className="tw-font-semibold tw-text-iron-50">
+                      {t(locale, `network.tdh.impl.checked.${check.key}.title`)}
+                    </strong>{" "}
+                    {t(locale, `network.tdh.impl.checked.${check.key}.body`)}
+                    <TdhSource refs={check.refs} locale={locale} />
+                  </p>
                   {check.key === "daily" && (
-                    <>
-                      {" "}
-                      <Link
-                        href="/network/tdh/verification"
-                        className={TDH_LINK}
-                      >
-                        {t(locale, "network.tdh.impl.checked.daily.link")}
-                      </Link>
-                    </>
+                    <TdhArrowLink href="/network/tdh/verification">
+                      {t(locale, "network.tdh.impl.checked.daily.link")}
+                    </TdhArrowLink>
                   )}
                   {check.key === "lean" && (
-                    <>
-                      {" "}
-                      <Link href="/network/tdh/formal" className={TDH_LINK}>
-                        {t(locale, "network.tdh.impl.checked.lean.link")}
-                      </Link>
-                    </>
+                    <TdhArrowLink href="/network/tdh/formal">
+                      {t(locale, "network.tdh.impl.checked.lean.link")}
+                    </TdhArrowLink>
                   )}
-                </p>
+                </div>
               </li>
             ))}
           </ol>
-          <DifftestRounds locale={locale} />
+          <div id="difftest-rounds" className="tw-scroll-mt-28">
+            <DifftestRounds locale={locale} />
+          </div>
           <p className="tw-m-0 tw-max-w-3xl tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-4 tw-text-[15px] tw-leading-7 tw-text-iron-200">
             {t(locale, "network.tdh.impl.checked.after")}
             <TdhSource refs={["P53 §4.5"]} locale={locale} />

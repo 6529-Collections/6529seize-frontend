@@ -265,6 +265,12 @@ function Step12({ locale }: { readonly locale: SupportedLocale }) {
               </p>
               <dl className="tw-m-0 tw-mt-2 tw-grid tw-grid-cols-1 tw-gap-x-4 tw-gap-y-0.5 tw-text-sm tw-tabular-nums @[16rem]:tw-grid-cols-[auto_minmax(0,1fr)] @[16rem]:tw-gap-y-1 [&>dd]:tw-mb-1 @[16rem]:[&>dd]:tw-mb-0 @[16rem]:[&>dd]:tw-text-right">
                 <dt className="tw-text-iron-400">
+                  {t(locale, "network.tdh.how.s12.copies")}
+                </dt>
+                <dd className="tw-m-0 tw-text-iron-200">
+                  {formatInteger(locale, holding.days.length)}
+                </dd>
+                <dt className="tw-text-iron-400">
                   {t(locale, "network.tdh.how.s12.days")}
                 </dt>
                 <dd className="tw-m-0 tw-text-iron-200">

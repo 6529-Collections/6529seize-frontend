@@ -1,4 +1,5 @@
 import {
+  ArrowDownTrayIcon,
   ArrowRightIcon,
   BeakerIcon,
   CodeBracketIcon,
@@ -11,13 +12,17 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { reportsAreLate } from "@/lib/tdh/verification/states";
 import type { VerificationSummary } from "@/lib/tdh/verification/summary.server";
-import { formatCycleDate } from "./verification/components/verificationFormat";
+import {
+  formatCycleDate,
+  formatShortCycleDate,
+} from "./verification/components/verificationFormat";
 import { TdhSourcesFootnote } from "./TDHInAMinute";
 import TdhStatusPill from "./shared/TdhStatusPill";
-import { TDH_FOCUS_RING } from "./shared/tdhStyles";
+import { TDH_FOCUS_RING, TDH_LINK } from "./shared/tdhStyles";
 import TDHSection from "./TDHSection";
 
 type Icon = ComponentType<SVGProps<SVGSVGElement>>;
+type DataSummary = Extract<VerificationSummary, { kind: "data" }>;
 
 const POINTS: ReadonlyArray<{
   readonly key: "programs" | "formal" | "daily";
@@ -32,11 +37,13 @@ const POINTS: ReadonlyArray<{
   { key: "formal", href: "/network/tdh/formal", icon: ScaleIcon },
   { key: "daily", href: "/network/tdh/verification", icon: BeakerIcon },
 ];
+/** What the checks caught, oldest first (plan §5.2, "found by the checks"). */
+const FOUND = ["floors", "netting", "lean", "difftest"] as const;
 const SOURCES = ["P26 §13", "D125", "D131", "D132"] as const;
 
 function differenceSentence(
   locale: SupportedLocale,
-  summary: Extract<VerificationSummary, { kind: "data" }>
+  summary: DataSummary
 ): string {
   const count = formatInteger(locale, summary.differenceCount);
   const plural =
@@ -64,85 +71,242 @@ function differenceSentence(
   }
 }
 
-function LatestRow({
-  locale,
-  summary,
-  now,
-}: {
-  readonly locale: SupportedLocale;
-  readonly summary: VerificationSummary;
-  readonly now: Date;
-}) {
-  if (summary.kind === "awaiting") {
-    return (
-      <span className="tw-text-sm tw-leading-6 tw-text-iron-200">
-        {t(
-          locale,
-          reportsAreLate(now)
-            ? "network.tdh.explainer.verified.awaitingLate"
-            : "network.tdh.explainer.verified.awaiting"
-        )}
-      </span>
-    );
-  }
-  const allEqual =
+/** Whether the latest day agreed everywhere: every record and the totals. */
+function allAgreed(summary: DataSummary): boolean {
+  return (
     summary.sentence === "none" &&
     summary.totalsEqual === true &&
     summary.equal !== null &&
-    summary.equal === summary.total;
-  const values = {
-    date: formatCycleDate(locale, summary.date),
-    equal: formatInteger(locale, summary.equal ?? 0),
-    total: formatInteger(locale, summary.total ?? 0),
-  };
-  let latest: string;
-  if (allEqual) {
-    latest = t(locale, "network.tdh.explainer.verified.latestEqual", values);
-  } else {
-    latest = `${t(
-      locale,
-      summary.afterCutover
-        ? "network.tdh.explainer.verified.latestOtherAfter"
-        : "network.tdh.explainer.verified.latestOther",
-      values
-    )} ${differenceSentence(locale, summary)}`;
-  }
+    summary.equal === summary.total
+  );
+}
+
+/** One figure of the proof panel: a large number and what it counts. */
+function Figure({
+  value,
+  label,
+  wide = false,
+}: {
+  readonly value: string;
+  readonly label: string;
+  /** The total: a row of its own, in the largest type. */
+  readonly wide?: boolean;
+}) {
   return (
-    <>
-      <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-        <TdhStatusPill pill={summary.verdict} locale={locale} size="sm" />
-        {summary.historyChecked === false && (
-          <TdhStatusPill pill="unchecked" locale={locale} size="sm" />
-        )}
-      </span>
-      <span className="tw-text-sm tw-tabular-nums tw-leading-6 tw-text-iron-100">
-        <span className="tw-font-semibold tw-text-iron-50">
-          {t(locale, "network.tdh.explainer.verified.record", {
-            allEqual: formatInteger(locale, summary.record.allEqual),
-            days: formatInteger(locale, summary.record.days),
-            first: formatCycleDate(locale, summary.record.firstDate),
-          })}
-        </span>{" "}
-        {latest}
-      </span>
-    </>
+    <div className={`tw-min-w-0 ${wide ? "sm:tw-col-span-2" : ""}`}>
+      <p
+        className={`tw-m-0 tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50 ${wide ? "tw-text-xl min-[360px]:tw-text-3xl sm:tw-text-4xl" : "tw-text-xl sm:tw-text-2xl"}`}
+      >
+        {value}
+      </p>
+      <p className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-5 tw-text-iron-300">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+/** Every published day as a dot, oldest first: filled where all agreed. */
+function Streak({
+  locale,
+  summary,
+}: {
+  readonly locale: SupportedLocale;
+  readonly summary: DataSummary;
+}) {
+  const { record } = summary;
+  return (
+    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2">
+      <ol
+        className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-1.5 tw-p-0"
+        aria-label={t(locale, "network.tdh.explainer.verified.streakLabel")}
+      >
+        {record.results.map((day) => (
+          <li
+            key={day.date}
+            title={formatShortCycleDate(locale, day.date)}
+            className={`tw-size-3.5 tw-rounded-full tw-border tw-border-solid ${
+              day.equal
+                ? "tw-border-success tw-bg-success"
+                : "tw-border-amber-400 tw-bg-transparent"
+            }`}
+          >
+            <span className="tw-sr-only">
+              {t(
+                locale,
+                day.equal
+                  ? "network.tdh.explainer.verified.dayEqual"
+                  : "network.tdh.explainer.verified.dayOther",
+                { date: formatCycleDate(locale, day.date) }
+              )}
+            </span>
+          </li>
+        ))}
+      </ol>
+      <p className="tw-m-0 tw-text-sm tw-tabular-nums tw-leading-6 tw-text-iron-200">
+        {t(locale, "network.tdh.explainer.verified.record", {
+          allEqual: formatInteger(locale, record.allEqual),
+          days: formatInteger(locale, record.days),
+          first: formatCycleDate(locale, record.firstDate),
+        })}
+      </p>
+    </div>
   );
 }
 
 /**
- * The overview's "Checked daily, in public" section (plan §5.2): the three
- * reasons to trust the number, each in two lines with a link, then one
- * compact row with the track record and the latest day. The row is hidden
- * when the data could not be loaded, so the overview never fails on the
- * dashboard's account.
+ * The proof moment: the latest day's agreed total and record counts, and the
+ * track record as a streak, rendered from the feed; then the day's one
+ * caveat with its meaning, and the way into the dashboard.
+ */
+function ProofPanel({
+  locale,
+  summary,
+}: {
+  readonly locale: SupportedLocale;
+  readonly summary: DataSummary;
+}) {
+  const agreed = allAgreed(summary);
+  const date = formatCycleDate(locale, summary.date);
+  return (
+    <div
+      className="tw-mt-5 tw-rounded-xl tw-border tw-border-solid tw-border-success/25 tw-bg-success/[0.04] tw-p-4 sm:tw-p-5"
+      data-tdh-proof=""
+    >
+      <p className="tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
+        {t(locale, "network.tdh.explainer.verified.latest", { date })}
+      </p>
+      {agreed ? (
+        <>
+          <div className="tw-mt-3 tw-grid tw-gap-x-6 tw-gap-y-4 sm:tw-grid-cols-2">
+            <Figure
+              wide
+              value={formatInteger(locale, summary.rustTotal)}
+              label={t(locale, "network.tdh.explainer.verified.totalLabel")}
+            />
+            <Figure
+              value={t(locale, "network.tdh.explainer.verified.ofValue", {
+                equal: formatInteger(locale, summary.equal ?? 0),
+                total: formatInteger(locale, summary.total ?? 0),
+              })}
+              label={t(locale, "network.tdh.explainer.verified.identities")}
+            />
+            {summary.walletsTotal !== null && (
+              <Figure
+                value={t(locale, "network.tdh.explainer.verified.ofValue", {
+                  equal: formatInteger(locale, summary.walletsEqual ?? 0),
+                  total: formatInteger(locale, summary.walletsTotal),
+                })}
+                label={t(locale, "network.tdh.explainer.verified.wallets")}
+              />
+            )}
+          </div>
+          <p className="tw-m-0 tw-mt-3 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">
+            {t(locale, "network.tdh.explainer.verified.how")}
+          </p>
+        </>
+      ) : (
+        <p className="tw-m-0 tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-sm tw-leading-6 tw-text-iron-100">
+          <TdhStatusPill pill={summary.verdict} locale={locale} size="sm" />
+          <span>
+            {t(
+              locale,
+              summary.afterCutover
+                ? "network.tdh.explainer.verified.latestOtherAfter"
+                : "network.tdh.explainer.verified.latestOther",
+              {
+                date,
+                equal: formatInteger(locale, summary.equal ?? 0),
+                total: formatInteger(locale, summary.total ?? 0),
+              }
+            )}{" "}
+            {differenceSentence(locale, summary)}
+          </span>
+        </p>
+      )}
+      <div className="tw-mt-4 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4">
+        <Streak locale={locale} summary={summary} />
+      </div>
+      {summary.historyChecked === false && (
+        <p className="tw-m-0 tw-mt-3 tw-flex tw-flex-col tw-items-start tw-gap-2 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-flex-row sm:tw-items-baseline">
+          <TdhStatusPill pill="unchecked" locale={locale} size="sm" />
+          <span>
+            {t(locale, "network.tdh.explainer.verified.uncheckedMeans")}
+          </span>
+        </p>
+      )}
+      <Link
+        href="/network/tdh/verification"
+        className={`tw-group tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline hover:tw-text-primary-400 ${TDH_FOCUS_RING}`}
+      >
+        {t(locale, "network.tdh.explainer.verified.link")}
+        <ArrowRightIcon
+          aria-hidden="true"
+          className="tw-size-4 tw-transition-transform group-hover:tw-translate-x-0.5 motion-reduce:tw-transition-none"
+        />
+      </Link>
+    </div>
+  );
+}
+
+/** What the checks caught before launch, each with its date. */
+function FoundByChecks({
+  locale,
+  manifestUrl,
+}: {
+  readonly locale: SupportedLocale;
+  readonly manifestUrl: string | null;
+}) {
+  return (
+    <div className="tw-mt-6">
+      <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
+        {t(locale, "network.tdh.explainer.found.title")}
+      </h3>
+      <ul className="tw-m-0 tw-mt-3 tw-list-none tw-space-y-3 tw-p-0">
+        {FOUND.map((key) => (
+          <li
+            key={key}
+            className="tw-grid tw-grid-cols-[5.5rem_minmax(0,1fr)] tw-gap-3 tw-text-sm tw-leading-6 sm:tw-grid-cols-[6.5rem_minmax(0,1fr)]"
+          >
+            <span className="tw-font-medium tw-tabular-nums tw-text-iron-400">
+              {t(locale, `network.tdh.explainer.found.${key}.date`)}
+            </span>
+            <span className="tw-text-iron-200">
+              {t(locale, `network.tdh.explainer.found.${key}.body`)}
+            </span>
+          </li>
+        ))}
+      </ul>
+      {manifestUrl !== null && (
+        <a
+          href={manifestUrl}
+          className={`${TDH_LINK} tw-mt-4 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-text-sm`}
+        >
+          <ArrowDownTrayIcon aria-hidden="true" className="tw-size-4" />
+          {t(locale, "network.tdh.explainer.found.manifest")}
+        </a>
+      )}
+    </div>
+  );
+}
+
+/**
+ * The overview's "Checked daily, in public" section (plan §5.2): the proof
+ * panel with the latest day and the track record, the three reasons to trust
+ * the number, each with a link, and what the checks caught. The panel is
+ * left out when the data could not be loaded, so the overview never fails on
+ * the dashboard's account.
  */
 export default function TDHVerifiedDaily({
   locale,
   summary,
+  manifestUrl = null,
   now = new Date(),
 }: {
   readonly locale: SupportedLocale;
   readonly summary: VerificationSummary | null;
+  /** The Lean proof manifest published with the daily feed, if any. */
+  readonly manifestUrl?: string | null;
   readonly now?: Date;
 }) {
   return (
@@ -153,7 +317,20 @@ export default function TDHVerifiedDaily({
       <p className="tw-m-0 tw-max-w-3xl tw-text-[15px] tw-leading-7 tw-text-iron-200">
         {t(locale, "network.tdh.explainer.verified.body")}
       </p>
-      <ul className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-gap-3 tw-p-0 md:tw-grid-cols-3">
+      {summary?.kind === "data" && (
+        <ProofPanel locale={locale} summary={summary} />
+      )}
+      {summary?.kind === "awaiting" && (
+        <p className="tw-m-0 tw-mt-4 tw-text-sm tw-leading-6 tw-text-iron-200">
+          {t(
+            locale,
+            reportsAreLate(now)
+              ? "network.tdh.explainer.verified.awaitingLate"
+              : "network.tdh.explainer.verified.awaiting"
+          )}
+        </p>
+      )}
+      <ul className="tw-m-0 tw-mt-5 tw-grid tw-list-none tw-gap-3 tw-p-0 md:tw-grid-cols-3">
         {POINTS.map(({ key, href, icon: PointIcon }) => (
           <li key={key}>
             <Link
@@ -174,23 +351,7 @@ export default function TDHVerifiedDaily({
           </li>
         ))}
       </ul>
-      {summary !== null && (
-        <Link
-          href="/network/tdh/verification"
-          className={`tw-group tw-mt-4 tw-flex tw-flex-col tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 tw-px-4 tw-py-3.5 tw-no-underline tw-transition-colors hover:tw-border-primary-400/50 motion-reduce:tw-transition-none sm:tw-flex-row sm:tw-items-center sm:tw-justify-between sm:tw-px-5 ${TDH_FOCUS_RING}`}
-        >
-          <span className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1.5">
-            <LatestRow locale={locale} summary={summary} now={now} />
-          </span>
-          <span className="tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-primary-300">
-            {t(locale, "network.tdh.explainer.verified.link")}
-            <ArrowRightIcon
-              aria-hidden="true"
-              className="tw-size-4 tw-transition-transform group-hover:tw-translate-x-0.5 motion-reduce:tw-transition-none"
-            />
-          </span>
-        </Link>
-      )}
+      <FoundByChecks locale={locale} manifestUrl={manifestUrl} />
       <TdhSourcesFootnote locale={locale} refs={SOURCES} legend={false} />
     </TDHSection>
   );

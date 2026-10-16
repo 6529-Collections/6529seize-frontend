@@ -6,6 +6,7 @@ import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import TdhStatusPill, { type TdhPill } from "../shared/TdhStatusPill";
+import scrollStyles from "../shared/tdhScroll.module.css";
 import {
   TDH_CHIP_BUTTON,
   TDH_CHIP_OFF,
@@ -122,6 +123,11 @@ function ManifestEntries({
               {place && (
                 <span className="tw-font-mono tw-text-xs tw-text-iron-500">
                   {place}
+                </span>
+              )}
+              {entry.statement && entry.expected !== "deferred" && (
+                <span className="tw-basis-full tw-text-xs tw-leading-5 tw-text-iron-300">
+                  {entry.statement}
                 </span>
               )}
             </li>
@@ -294,10 +300,14 @@ export default function StatementsTable({
                             />
                           )}
                         {row.lean && (
+                          // Lean is layout-sensitive: on phones its lines keep
+                          // their indentation and scroll sideways.
                           <pre
                             role="region"
+                            tabIndex={0}
+                            data-tdh-scroll=""
                             aria-label={`${t(locale, "network.tdh.formal.statements.lean")}: ${title}`}
-                            className={`tw-m-0 tw-whitespace-pre-wrap tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-p-3 tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-100 [overflow-wrap:anywhere]`}
+                            className={`tw-m-0 tw-whitespace-pre tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-p-3 tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-100 max-sm:tw-overflow-x-auto sm:tw-whitespace-pre-wrap sm:[overflow-wrap:anywhere] ${scrollStyles["shadePhone"] ?? ""}`}
                           >
                             <code className="tw-font-mono tw-text-iron-100">
                               {row.lean}

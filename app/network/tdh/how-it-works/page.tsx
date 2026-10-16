@@ -6,6 +6,7 @@ import TdhPageShell from "../shared/TdhPageShell";
 import TdhPager from "../shared/TdhPager";
 import TdhScrollSpyNav from "../shared/TdhScrollSpyNav";
 import TdhSource from "../shared/TdhSource";
+import { TDH_LINK } from "../shared/tdhStyles";
 import { PipelineDiagram } from "./PipelineDiagram";
 import HowItWorksStepsA from "./HowItWorksStepsA";
 import HowItWorksStepsB from "./HowItWorksStepsB";
@@ -36,7 +37,14 @@ export default function TdhHowItWorksPage() {
             <TdhSource refs={["D121", "D132"]} locale={locale} />
           </p>
           <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-400">
-            {t(locale, "network.tdh.how.basis")}
+            {t(locale, "network.tdh.how.basis")}{" "}
+            <a
+              href="https://github.com/6529-Collections/6529seize-frontend/blob/main/__tests__/lib/tdh/tdhV1Arithmetic.test.ts"
+              className={TDH_LINK}
+              rel="noopener noreferrer"
+            >
+              {t(locale, "network.tdh.how.basisTests")}
+            </a>
             <TdhSource
               refs={["P26 §5.2", "Replay 2026-10-11"]}
               locale={locale}
@@ -45,7 +53,9 @@ export default function TdhHowItWorksPage() {
         </>
       }
       headerExtra={
-        <div className="tw-mt-6 tw-hidden md:tw-block">
+        // The rail is the steps' map on tablets; from lg the sticky list of
+        // steps beside them takes its place, so they are never shown twice.
+        <div className="tw-mt-6 tw-hidden md:tw-block lg:tw-hidden">
           <p className="tw-m-0 tw-mb-3 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
             {t(locale, "network.tdh.how.pipeline.title")}
           </p>

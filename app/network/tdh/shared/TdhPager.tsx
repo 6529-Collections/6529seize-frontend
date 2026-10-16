@@ -19,7 +19,10 @@ const CARD = `tw-group tw-flex tw-min-h-11 tw-min-w-0 tw-flex-1 tw-flex-col tw-g
 const SEQUENCE: ReadonlyArray<{ readonly href: string; readonly key: string }> =
   [...TDH_PAGES, ...TDH_MORE_PAGES];
 
-/** Previous and next page of the TDH section, at the end of each page. */
+/**
+ * Previous and next page of the TDH section, at the end of each page. A card
+ * with no partner (the first and last pages) takes the whole row.
+ */
 export default function TdhPager({
   current,
   locale,
@@ -47,9 +50,7 @@ export default function TdhPager({
             {label(previous.key)}
           </span>
         </Link>
-      ) : (
-        <span className="tw-hidden tw-flex-1 sm:tw-block" />
-      )}
+      ) : null}
       {next ? (
         <Link
           href={next.href}
@@ -64,9 +65,7 @@ export default function TdhPager({
             {label(next.key)}
           </span>
         </Link>
-      ) : (
-        <span className="tw-hidden tw-flex-1 sm:tw-block" />
-      )}
+      ) : null}
     </nav>
   );
 }

@@ -147,18 +147,27 @@ describe("network pages render", () => {
     // sentence.
     expect(
       screen.getByText(
-        /^Cycle of October 15, 2026 \(holdings at 23:59:59 UTC the day before\): 6529.io’s calculation and two separately written programs agreed on all 10,282 TDH records/
+        /^Cycle of October 15, 2026 \(holdings at the last Ethereum block before 00:00 UTC\): 6529.io, the Rust core and the Python reference, which computes from the Rust run’s input, agreed on all 10,282 TDH records/
       )
     ).toBeInTheDocument();
     expect(screen.getByText(/equal on 2 of 2 days/)).toBeInTheDocument();
-    // The checked-daily section's row: the record and the latest day.
+    // The checked-daily section's proof panel: the latest day's figures,
+    // every published day as a dot, and the record.
     expect(
       screen.getByText("Equal on 2 of 2 published days since October 14, 2026.")
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "Latest, October 15, 2026: all 10,282 identity records equal, the two burn addresses’ included."
-      )
+      screen.getByText("Latest day: October 15, 2026")
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("10,282 of 10,282").length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("list", { name: "Every published day, oldest first" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 3,
+        name: "Found by the checks, before launch",
+      })
     ).toBeInTheDocument();
     expect(screen.getAllByText("Not yet fully checked").length).toBeGreaterThan(
       0

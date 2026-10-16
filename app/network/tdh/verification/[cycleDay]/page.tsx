@@ -27,7 +27,7 @@ export const dynamic = "force-dynamic";
 type Params = Promise<{ cycleDay: string }>;
 
 function parseCycleDay(value: string): number | null {
-  return /^\d{1,7}$/.test(value) ? Number(value) : null;
+  return /^[1-9]\d{0,6}$/.test(value) ? Number(value) : null;
 }
 
 async function loadPermalink(value: string) {
@@ -93,6 +93,7 @@ export default async function TdhVerificationDayPage({
         dayLoad={dayLoad}
         selected={entry}
         now={new Date()}
+        permalink
       />
     </TdhPageShell>
   );
@@ -111,8 +112,9 @@ export async function generateMetadata({
       ? indexLoad.index.days.find((day) => day.cycleDay === value)
       : undefined;
   if (value === null || entry === undefined) {
-    // An unknown day: the page renders the not-found view (`notFound()`), so
-    // it gets a not-found title and is kept out of search results.
+    // An unknown day inside the feed's range (the proxy answers 404 for any
+    // other): the page renders the not-found view (`notFound()`), which Next
+    // marks noindex, so this sets only the title.
     return getAppMetadata(
       {
         title: t(DEFAULT_LOCALE, "network.tdh.verify.dayNotFoundTitle"),
@@ -121,10 +123,7 @@ export async function generateMetadata({
           "network.tdh.verify.metadataDescription"
         ),
       },
-      {
-        canonicalPath: "/network/tdh/verification",
-        robots: { index: false, follow: true },
-      }
+      { canonicalPath: "/network/tdh/verification" }
     );
   }
   const cycle = formatInteger(DEFAULT_LOCALE, value);

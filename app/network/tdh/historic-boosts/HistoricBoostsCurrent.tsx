@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
+import BoostLadder from "../shared/BoostLadder";
 import { TDH_LINK } from "../shared/tdhStyles";
+import { getTdhBoostLadder } from "../tdh-rules.helpers";
+import { useTdhRules } from "../TDHCurrentRules";
 import {
   CURRENT_KEY,
   CURRENT_RULE,
@@ -96,7 +99,11 @@ export function BoostTimeline({
                 date: formatShortDate(locale, CURRENT_RULE.valueDateIso),
               })}
             </span>
-            <span className="tw-text-right">
+            <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-right">
+              <span
+                aria-hidden="true"
+                className="tw-h-2 tw-w-4 tw-rounded-full tw-border tw-border-dashed tw-border-primary-400/60"
+              />
               {m(locale, "network.tdhHistoric.timeline.reachLabel", {
                 value: formatMultiplier(locale, CURRENT_RULE.ceiling),
               })}
@@ -146,11 +153,18 @@ export function CurrentRuleRow({
         <td
           className={`${TABLE_CELL_CLASS} tw-font-semibold tw-tabular-nums tw-text-iron-50`}
         >
-          {m(locale, "network.tdhHistoric.current.fullSet", {
-            today: formatMultiplier(locale, CURRENT_RULE.today),
-            date: formatShortDate(locale, CURRENT_RULE.valueDateIso),
-            ceiling: formatMultiplier(locale, CURRENT_RULE.ceiling),
-          })}
+          <span className="tw-block">
+            {m(locale, "network.tdhHistoric.current.fullSet", {
+              today: formatMultiplier(locale, CURRENT_RULE.today),
+              date: formatShortDate(locale, CURRENT_RULE.valueDateIso),
+            })}
+          </span>
+          <span className="tw-mt-0.5 tw-block tw-text-xs tw-font-normal tw-text-iron-400">
+            {m(locale, "network.tdhHistoric.current.fullSetReach", {
+              ceiling: formatMultiplier(locale, CURRENT_RULE.ceiling),
+              max: formatInteger(locale, CURRENT_RULE.maxSeason),
+            })}
+          </span>
         </td>
         <td className={`${TABLE_CELL_CLASS} tw-tabular-nums tw-text-iron-200`}>
           {m(locale, "network.tdhHistoric.current.seasons", {
@@ -210,11 +224,13 @@ export function CurrentRuleCard({
       <dl className="tw-m-0 tw-grid tw-grid-cols-[repeat(auto-fit,minmax(6.5rem,1fr))] tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3">
         <MobileSummaryMetric
           label={m(locale, "network.tdhHistoric.table.categoryA")}
-          value={m(locale, "network.tdhHistoric.current.fullSet", {
+          value={`${m(locale, "network.tdhHistoric.current.fullSet", {
             today: formatMultiplier(locale, CURRENT_RULE.today),
             date: formatShortDate(locale, CURRENT_RULE.valueDateIso),
+          })}; ${m(locale, "network.tdhHistoric.current.fullSetReach", {
             ceiling: formatMultiplier(locale, CURRENT_RULE.ceiling),
-          })}
+            max: formatInteger(locale, CURRENT_RULE.maxSeason),
+          })}`}
           valueClassName="tw-font-semibold tw-text-iron-50"
         />
         <MobileSummaryMetric
@@ -230,5 +246,30 @@ export function CurrentRuleCard({
         />
       </dl>
     </article>
+  );
+}
+
+/**
+ * Today’s four boost figures on one scale, from the current rules, as on
+ * the overview’s Current boosts: the same picture in both places.
+ */
+export function CurrentLadder({
+  locale,
+}: {
+  readonly locale: SupportedLocale;
+}) {
+  const query = useTdhRules();
+  if (!query.data) {
+    return null;
+  }
+  const rules = query.data;
+  return (
+    <BoostLadder
+      locale={locale}
+      values={getTdhBoostLadder(rules)}
+      eligibleMemes={rules.snapshot.eligible_memes_count}
+      lastSeason={rules.boost.season_schedule.last_boosted_season}
+      gradients={rules.boost.gradients.max_count}
+    />
   );
 }

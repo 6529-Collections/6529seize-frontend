@@ -36,7 +36,6 @@
   "network.tdh.profile.collection.memes": "The Memes",
   "network.tdh.profile.collection.gradients": "Gradients",
   "network.tdh.profile.collection.nextgen": "NextGen",
-  "network.tdh.profile.holdings": "{collection} · {tdh} TDH · Token IDs: {count}",
   "network.tdh.profile.noHoldings": "No holdings from this collection in the snapshot.",
   "network.tdh.profile.table": "{collection} snapshot calculation",
   "network.tdh.profile.token": "Token",
@@ -55,6 +54,8 @@
   "network.tdh.profile.pagination": "Tokens {start}–{end} of {total}",
   "network.tdh.profile.placeholder": "A profile handle, name.eth or 0x…",
   "network.tdh.profile.storedNote": "These are 6529.io’s stored values; until the cutover they come from its own backend, which the daily comparison checks against TDH-v1.",
-  "network.tdh.profile.reproduced": "Reproduced independently: for the cycle of {date}, this snapshot, the Rust core, the Python reference and 6529.io computed all {total} TDH records identically, this one included.",
-  "network.tdh.profile.reproducedLink": "See that day"
+  "network.tdh.profile.reproduced": "Reproduced by two separately written programs from one input, and by 6529.io: for the cycle of {date}, the Rust core, the Python reference (computing from the Rust run’s input) and 6529.io gave all {total} TDH records identically, this one included.",
+  "network.tdh.profile.reproducedLink": "See that day",
+  "network.tdh.profile.holdings.one": "{collection} · {tdh} TDH · {count} card",
+  "network.tdh.profile.holdings.other": "{collection} · {tdh} TDH · {count} cards"
 }

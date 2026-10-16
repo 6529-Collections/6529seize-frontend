@@ -30,9 +30,11 @@ export function SpecSection({
         id={id}
         title={title}
         locale={locale}
-        className="tw-hyphens-auto tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
+        className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
       />
-      <div className={`tw-mt-4 tw-space-y-5 ${wide ? "" : "tw-max-w-3xl"}`}>
+      {/* Prose keeps its own measure (Plain, PROSE); rule blocks and
+          tables take the whole column, so fewer code lines wrap. */}
+      <div className={`tw-mt-4 tw-space-y-5 ${wide ? "" : "tw-max-w-[60rem]"}`}>
         {children}
       </div>
     </section>
@@ -52,7 +54,10 @@ export function SpecSub({
   readonly children: ReactNode;
 }) {
   return (
-    <div id={id} className="tw-scroll-mt-24 tw-space-y-3">
+    <div
+      id={id}
+      className="tw-scroll-mt-24 tw-space-y-3 [&_[data-tdh-plain]]:tw-border-l-0 [&_[data-tdh-plain]]:tw-pl-0 [&_[data-tdh-plain]]:tw-text-[15px] [&_[data-tdh-plain]]:tw-text-iron-200"
+    >
       <TdhHeading
         id={id}
         title={title}
@@ -66,8 +71,10 @@ export function SpecSub({
 }
 
 /**
- * The rule in plain words, before the exact rule: set as the lede of its
- * subsection, with a primary rule at its side, so it needs no label.
+ * The rule in plain words, before the exact rule. A section's summary is set
+ * as its lede, with a primary rule at its side; inside a subsection the same
+ * paragraph is ordinary prose (SpecSub drops the rule), so thirteen sections
+ * do not read as one long quotation.
  */
 export function Plain({
   locale,
@@ -79,7 +86,10 @@ export function Plain({
   readonly children: ReactNode;
 }) {
   return (
-    <p className="tw-m-0 tw-max-w-3xl tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/50 tw-pl-4 tw-text-base tw-leading-7 tw-text-iron-100">
+    <p
+      data-tdh-plain=""
+      className="tw-m-0 tw-max-w-3xl tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/50 tw-pl-4 tw-text-base tw-leading-7 tw-text-iron-100"
+    >
       {children}
       {refs.length > 0 && <TdhSource refs={refs} locale={locale} />}
     </p>
@@ -106,7 +116,7 @@ export function Rule({
   const heading =
     title ?? (condensed ? t(locale, "network.tdh.shared.ruleCondensed") : null);
   return (
-    <div className="tw-max-w-3xl">
+    <div className="tw-min-w-0">
       <TdhRuleBlock
         code={code}
         source={source}

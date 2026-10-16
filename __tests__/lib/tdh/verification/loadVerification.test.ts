@@ -88,6 +88,27 @@ describe("createVerificationLoader", () => {
     await expect(loader.loadDay(1)).resolves.toEqual({ status: "not-found" });
   });
 
+  it("hashes a day file's bytes, so its page can show exactly what it read", async () => {
+    const body = JSON.stringify(syntheticDay());
+    const fetchImpl = fetchFrom({
+      [`${BASE}/days/20741.json`]: async () =>
+        new Response(body, {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        }),
+    });
+    const loader = createVerificationLoader({
+      base: BASE,
+      isProduction: true,
+      fetchImpl,
+    });
+    const { createHash } = await import("node:crypto");
+    await expect(loader.loadDay(20_741)).resolves.toMatchObject({
+      status: "ok",
+      sha256: createHash("sha256").update(body).digest("hex"),
+    });
+  });
+
   it("fetches and validates the index and a day from the data source", async () => {
     const fetchImpl = fetchFrom({
       [`${BASE}/index.json`]: async () => jsonResponse(syntheticIndex()),

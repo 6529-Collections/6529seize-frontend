@@ -60,16 +60,22 @@ function GlossaryList({
   readonly terms: readonly string[];
 }) {
   return (
-    <dl className="tw-m-0 tw-grid tw-gap-x-8 tw-gap-y-4 md:tw-grid-cols-2">
+    // One column: each term beside its definition from md, so a long
+    // definition never leaves a hole beside a short one.
+    <dl className="tw-m-0 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06]">
       {terms.map((term) => (
-        <div key={term} id={`glossary-${term}`} className="tw-scroll-mt-28">
-          <dt className="tw-text-sm tw-font-semibold tw-text-iron-50">
+        <div
+          key={term}
+          id={`glossary-${term}`}
+          className="tw-scroll-mt-28 tw-py-3 first:tw-pt-0 md:tw-grid md:tw-grid-cols-[11rem_minmax(0,1fr)] md:tw-gap-x-6"
+        >
+          <dt className="tw-text-sm tw-font-semibold tw-leading-6 tw-text-iron-50">
             {t(
               locale,
               `network.tdh.explainer.glossary.${term}.term` as MessageKey
             )}
           </dt>
-          <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-300">
+          <dd className="tw-m-0 tw-mt-1 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300 md:tw-mt-0">
             {t(
               locale,
               `network.tdh.explainer.glossary.${term}.def` as MessageKey

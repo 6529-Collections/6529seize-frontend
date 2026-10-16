@@ -1,15 +1,16 @@
 import type { ReactNode } from "react";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 import TdhDisclosure from "../shared/TdhDisclosure";
 import TdhHeading from "../shared/TdhHeading";
 import TdhRuleBlock from "../shared/TdhRuleBlock";
 import TdhSource from "../shared/TdhSource";
 
 /**
- * One numbered step of How TDH is calculated. The step's sources sit on one
- * line at its end, not beside every paragraph, so the prose reads as prose.
+ * One numbered step of How TDH is calculated. The step's sources and its
+ * exact rule share one disclosure at its end, so the prose reads as prose
+ * and fourteen steps do not each end in a row of chips.
  */
 export default function StepSection({
   locale,
@@ -47,37 +48,52 @@ export default function StepSection({
         id={id}
         title={title}
         locale={locale}
-        className="tw-mt-1 tw-hyphens-auto tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
+        className="tw-mt-1 tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
       />
       {pills !== undefined && (
         <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-2">{pills}</div>
       )}
       <div className="tw-mt-4 tw-max-w-3xl tw-space-y-4">{children}</div>
-      {sources.length > 0 && (
-        <p className="tw-m-0 tw-mt-4 tw-flex tw-max-w-3xl tw-flex-wrap tw-items-center tw-gap-x-1 tw-gap-y-1 tw-text-xs tw-text-iron-400">
-          <span className="tw-mr-1 tw-font-medium tw-text-iron-300">
-            {t(locale, "network.tdh.explainer.sources.label")}
-          </span>
-          <TdhSource refs={sources} locale={locale} block />
-        </p>
-      )}
-      {rule && (
+      {(rule !== undefined || sources.length > 0) && (
         <TdhDisclosure
           className="tw-mt-5 tw-max-w-3xl"
           tone="strong"
-          summary={t(locale, "network.tdh.shared.rule")}
+          summary={t(
+            locale,
+            disclosureLabel(rule !== undefined, sources.length > 0)
+          )}
         >
-          <div className="tw-mt-1">
-            <TdhRuleBlock
-              code={rule}
-              locale={locale}
-              {...(ruleSource ? { source: ruleSource } : {})}
-            />
+          <div className="tw-mt-1 tw-space-y-3">
+            {sources.length > 0 && (
+              <p className="tw-m-0 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1 tw-gap-y-1 tw-text-xs tw-text-iron-400">
+                <span className="tw-mr-1 tw-font-medium tw-text-iron-300">
+                  {t(locale, "network.tdh.explainer.sources.label")}
+                </span>
+                <TdhSource refs={sources} locale={locale} block />
+              </p>
+            )}
+            {rule !== undefined && (
+              <TdhRuleBlock
+                code={rule}
+                locale={locale}
+                {...(ruleSource ? { source: ruleSource } : {})}
+              />
+            )}
           </div>
         </TdhDisclosure>
       )}
     </section>
   );
+}
+
+/** The step disclosure's label: what it holds. */
+function disclosureLabel(hasRule: boolean, hasSources: boolean): MessageKey {
+  if (!hasRule) {
+    return "network.tdh.how.sourcesOnly";
+  }
+  return hasSources
+    ? "network.tdh.how.ruleAndSources"
+    : "network.tdh.shared.rule";
 }
 
 /** A paragraph of a step's prose; its sources are on the step's line. */

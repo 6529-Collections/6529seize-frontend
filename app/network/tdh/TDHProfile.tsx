@@ -87,7 +87,7 @@ export default function TDHProfile({
               autoCapitalize="none"
               spellCheck={false}
               placeholder={t(locale, "network.tdh.profile.placeholder")}
-              className={`tw-h-11 tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-950 tw-px-3 tw-text-base tw-text-iron-100 placeholder:tw-text-iron-500 ${TDH_FOCUS}`}
+              className={`tw-h-11 tw-min-w-0 tw-flex-none tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-950 tw-px-3 tw-text-base tw-text-iron-100 placeholder:tw-text-iron-500 sm:tw-flex-1 ${TDH_FOCUS}`}
             />
             <Button
               type="submit"

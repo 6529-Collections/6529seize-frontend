@@ -12,7 +12,7 @@ import TdhPager from "../shared/TdhPager";
 import TdhRuleBlock from "../shared/TdhRuleBlock";
 import TdhSection from "../shared/TdhSection";
 import TdhSource from "../shared/TdhSource";
-import TdhStatusPill, { TdhStatusLegend } from "../shared/TdhStatusPill";
+import TdhStatusPill from "../shared/TdhStatusPill";
 import {
   TDH_CAPTION,
   TDH_CARD,
@@ -24,7 +24,7 @@ import {
   TDH_TH,
   TDH_TH_NUM,
 } from "../shared/tdhStyles";
-import DifftestRounds from "../shared/DifftestRounds";
+import TdhArrowLink from "../shared/TdhArrowLink";
 import AssuranceLayers from "./AssuranceLayers";
 import {
   checkStatements,
@@ -48,6 +48,12 @@ import {
 import NettingFigure from "./NettingFigure";
 import { P26 } from "../shared/tdhFacts";
 import StatementsTable from "./StatementsTable";
+import {
+  FoundByModel,
+  NewerRound,
+  NewerRoundLine,
+  ProofLegend,
+} from "./FormalPanels";
 
 // The proof manifest is rechecked hourly (it changes only with a new build
 // of the model); a failed fetch falls back to the bundled copy until then.
@@ -211,12 +217,7 @@ function ManifestSource({
           spec: figures.specCommit.slice(0, 7),
         });
   return (
-    <div className="tw-mt-4 tw-flex tw-max-w-3xl tw-flex-col tw-items-start tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-px-4 tw-py-3 sm:tw-flex-row sm:tw-flex-wrap sm:tw-items-center sm:tw-gap-x-3">
-      <TdhStatusPill
-        pill={load.status === "published" ? "checkedBuild" : "bundled"}
-        locale={locale}
-        size="sm"
-      />
+    <div className="tw-mt-4 tw-flex tw-flex-col tw-items-start tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-px-4 tw-py-3 sm:tw-flex-row sm:tw-flex-wrap sm:tw-items-center sm:tw-gap-x-3">
       <p
         className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-sm tw-leading-6 tw-text-iron-300"
         data-tdh-manifest={load.status}
@@ -240,82 +241,6 @@ function ManifestSource({
         </a>
       )}
     </div>
-  );
-}
-
-/**
- * Shown while the published manifest records an earlier round of the model
- * than 6529's design repository has: the newest round's own figures, from
- * the manifest committed with it, beside a pill saying it is not published.
- */
-function NewerRound({ locale }: { readonly locale: SupportedLocale }) {
-  const r = LEAN_ROUND_5;
-  const n = (value: number) => formatInteger(locale, value);
-  const stats = [
-    {
-      key: "vectors",
-      value: t(locale, "network.tdh.formal.newer.vectors", {
-        passed: n(r.vectorsPassed),
-        total: n(r.vectorsTotal),
-      }),
-      sub: t(locale, "network.tdh.formal.newer.vectorsSub", {
-        checks: n(r.vectorChecks),
-        spec: r.specCommit,
-      }),
-    },
-    {
-      key: "theorems",
-      value: t(locale, "network.tdh.formal.newer.theorems", {
-        tdh: n(r.theoremsTdh),
-        p53: n(r.theoremsP53),
-      }),
-      sub: t(locale, "network.tdh.formal.newer.theoremsSub"),
-    },
-    {
-      key: "facts",
-      value: t(locale, "network.tdh.formal.newer.facts", {
-        facts: n(r.facts),
-      }),
-      sub: t(locale, "network.tdh.formal.newer.factsSub"),
-    },
-  ] as const;
-  return (
-    <section
-      aria-labelledby="tdh-formal-newer"
-      className="tw-mt-6 tw-max-w-3xl tw-rounded-lg tw-border tw-border-dashed tw-border-amber-400/40 tw-bg-amber-400/[0.04] tw-px-4 tw-py-3"
-      data-tdh-round-note
-    >
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2">
-        <TdhStatusPill pill="notPublished" locale={locale} size="sm" />
-        <h2
-          id="tdh-formal-newer"
-          className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-50"
-        >
-          {t(locale, "network.tdh.formal.newer.title", {
-            round: n(r.round),
-            date: formatUtcDate(locale, `${r.date}T00:00:00Z`, LONG_DATE),
-          })}
-        </h2>
-      </div>
-      <ul className="tw-m-0 tw-mt-3 tw-grid tw-list-none tw-grid-cols-1 tw-gap-x-6 tw-gap-y-2 tw-p-0 sm:tw-grid-cols-3">
-        {stats.map((stat) => (
-          <li key={stat.key} className="tw-min-w-0">
-            <span className="tw-block tw-text-base tw-font-semibold tw-tabular-nums tw-text-iron-50">
-              {stat.value}
-            </span>
-            <span className="tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
-              {stat.sub}
-            </span>
-          </li>
-        ))}
-      </ul>
-      <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
-        {t(locale, "network.tdh.formal.newer.body", {
-          round: n(r.round),
-          commit: r.commit,
-        })}
-      </p>
-    </section>
   );
 }
 
@@ -397,6 +322,9 @@ export default async function TdhFormalPage() {
   const featured = statements.find((row) => row.id === "netting");
   const p26 = statements.filter((row) => row.group === "p26");
   const p53 = statements.filter((row) => row.group === "p53");
+  const buildLabel = t(locale, "network.tdh.formal.atBuild", {
+    commit: figures.commit.slice(0, 7),
+  });
 
   return (
     <TdhPageShell
@@ -417,7 +345,6 @@ export default async function TdhFormalPage() {
       }
       headerExtra={
         <>
-          {round < LEAN_LATEST_ROUND && <NewerRound locale={locale} />}
           <SummaryBand
             locale={locale}
             figures={figures}
@@ -425,6 +352,7 @@ export default async function TdhFormalPage() {
             statements={statements}
             round={round}
           />
+          {round < LEAN_LATEST_ROUND && <NewerRoundLine locale={locale} />}
           <ManifestSource locale={locale} load={load} figures={figures} />
         </>
       }
@@ -444,6 +372,7 @@ export default async function TdhFormalPage() {
             {t(locale, "network.tdh.formal.why.body2")}
             <TdhSource refs={["P26 §7.1", "D131"]} locale={locale} />
           </p>
+          <FoundByModel locale={locale} />
         </div>
       </TdhSection>
 
@@ -474,7 +403,7 @@ export default async function TdhFormalPage() {
             </div>
             <NettingFigure locale={locale} />
           </div>
-          <div className="tw-mt-6 tw-grid tw-max-w-3xl tw-gap-4">
+          <div className="tw-mt-6 tw-grid tw-gap-4">
             <div className="tw-min-w-0">
               <TdhRuleBlock
                 code={featured.lean}
@@ -510,10 +439,7 @@ export default async function TdhFormalPage() {
           <p className={PROSE}>
             {t(locale, "network.tdh.formal.statements.intro")}
           </p>
-          <TdhStatusLegend
-            locale={locale}
-            tones={["success", "primary", "warning", "refuted", "neutral"]}
-          />
+          <ProofLegend locale={locale} />
           <div className="tw-space-y-3">
             <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
               {t(locale, "network.tdh.formal.statements.p26")}
@@ -556,6 +482,7 @@ export default async function TdhFormalPage() {
         id="contains"
         title={t(locale, "network.tdh.formal.contains.title")}
         locale={locale}
+        eyebrow={buildLabel}
         wide
       >
         <div className="tw-space-y-5">
@@ -580,12 +507,21 @@ export default async function TdhFormalPage() {
           <p className="tw-m-0 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
             {t(locale, byRound(round, "network.tdh.formal.contains.outside"))}
           </p>
+          {round < 4 && (
+            <p className="tw-m-0 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">
+              {t(locale, "network.tdh.formal.contains.nextBuild", {
+                commit: LEAN_ROUND_5.commit,
+              })}
+            </p>
+          )}
           <div className={TDH_TABLE_FRAME}>
             <table className={`${TDH_TABLE} tw-block md:tw-table`}>
               <caption
                 className={`${TDH_CAPTION} tw-block md:tw-table-caption`}
               >
-                {t(locale, "network.tdh.formal.module.caption")}
+                {t(locale, "network.tdh.formal.module.captionAt", {
+                  commit: figures.commit.slice(0, 7),
+                })}
               </caption>
               <thead className="tw-hidden md:tw-table-header-group">
                 <tr>
@@ -639,6 +575,7 @@ export default async function TdhFormalPage() {
         id="not"
         title={t(locale, "network.tdh.formal.not.title")}
         locale={locale}
+        eyebrow={buildLabel}
         wide
       >
         <ul className="tw-m-0 tw-max-w-3xl tw-list-none tw-space-y-4 tw-p-0">
@@ -663,6 +600,7 @@ export default async function TdhFormalPage() {
                   {
                     vectors: figure(locale, figures.vectorsTotal),
                     facts: formatInteger(locale, figures.facts),
+                    factsNext: formatInteger(locale, LEAN_ROUND_5.facts),
                   }
                 )}
                 {key === "inputs" && (
@@ -675,10 +613,25 @@ export default async function TdhFormalPage() {
             </li>
           ))}
         </ul>
-        <div className="tw-mt-6">
-          <DifftestRounds locale={locale} />
-        </div>
+        <TdhArrowLink
+          href="/network/tdh/implementations#difftest-rounds"
+          className="tw-mt-4"
+        >
+          {t(locale, "network.tdh.shared.difftest.link")}
+        </TdhArrowLink>
       </TdhSection>
+
+      {round < LEAN_LATEST_ROUND && (
+        <TdhSection
+          id="next-build"
+          title={t(locale, "network.tdh.formal.newer.sectionTitle")}
+          locale={locale}
+          pills={<TdhStatusPill pill="notPublished" locale={locale} />}
+          wide
+        >
+          <NewerRound locale={locale} />
+        </TdhSection>
+      )}
 
       <TdhSection
         id="layers"
@@ -695,26 +648,34 @@ export default async function TdhFormalPage() {
         locale={locale}
         wide
       >
-        <div className="tw-flex tw-max-w-3xl tw-flex-col tw-items-start tw-gap-3">
+        <div className="tw-flex tw-flex-col tw-items-start tw-gap-3">
           <p className={PROSE}>{t(locale, "network.tdh.formal.check.body")}</p>
           <div className="tw-w-full">
             <TdhRuleBlock
-              code={t(locale, "network.tdh.formal.check.commands", {
-                passed: figure(locale, figures.vectorsPassed),
-                total: figure(locale, figures.vectorsTotal),
-                checks: figure(locale, figures.vectorChecks),
-                nettingPassed: figure(locale, figures.nettingPassed),
-                nettingTotal: figure(locale, figures.nettingTotal),
-              })}
+              code={t(locale, "network.tdh.formal.check.commands")}
               locale={locale}
               title={t(locale, "network.tdh.formal.check.title")}
               label={t(locale, "network.tdh.formal.check.title")}
               wrap="words"
             />
           </div>
-          <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-dashed tw-border-iron-600 tw-px-3 tw-py-1 tw-text-xs tw-text-iron-300">
-            {t(locale, "network.tdh.shared.sourceToBePublished")}
-          </span>
+          <p className={PROSE}>
+            {t(locale, "network.tdh.formal.check.figures", {
+              commit: figures.commit.slice(0, 7),
+              passed: figure(locale, figures.vectorsPassed),
+              total: figure(locale, figures.vectorsTotal),
+              checks: figure(locale, figures.vectorChecks),
+              nettingPassed: figure(locale, figures.nettingPassed),
+              nettingTotal: figure(locale, figures.nettingTotal),
+            })}
+            {round < LEAN_LATEST_ROUND &&
+              ` ${t(locale, "network.tdh.formal.check.figuresNext", {
+                commit: LEAN_ROUND_5.commit,
+                passed: formatInteger(locale, LEAN_ROUND_5.vectorsPassed),
+                total: formatInteger(locale, LEAN_ROUND_5.vectorsTotal),
+                checks: formatInteger(locale, LEAN_ROUND_5.vectorChecks),
+              })}`}
+          </p>
         </div>
       </TdhSection>
       <TdhPager current="/network/tdh/formal" locale={locale} />

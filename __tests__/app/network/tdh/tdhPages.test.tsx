@@ -154,13 +154,11 @@ describe("TDH sub-pages", () => {
     const stack = screen.getByRole("region", { name: "Stack simulator" });
     expect(within(stack).getByText("Whole days: 30")).toBeInTheDocument();
     expect(
-      within(stack).getByRole("checkbox", { name: /consolidated/ })
+      within(stack).getByRole("switch", { name: /consolidated/ })
     ).not.toBeChecked();
 
     expect(screen.queryByText("Rule text being finalised")).toBeNull();
-    expect(screen.getAllByText("In the specification").length).toBeGreaterThan(
-      0
-    );
+    expect(screen.queryByText("In the specification")).toBeNull();
     expect(
       screen.getByRole("link", { name: /Next Specification/ })
     ).toHaveAttribute("href", "/network/tdh/specification");
@@ -230,20 +228,21 @@ describe("TDH sub-pages", () => {
     ).toBeInTheDocument();
     expect(screen.queryByText("Planned")).toBeNull();
     expect(screen.queryByText("In progress")).toBeNull();
-    expect(container.querySelectorAll('[data-tdh-pill="proved"]')).toHaveLength(
-      8
-    );
+    // The statements tables only: the statuses legend has a pill of each.
     expect(
-      container.querySelectorAll('[data-tdh-pill="shownFalse"]')
+      container.querySelectorAll('table [data-tdh-pill="proved"]')
+    ).toHaveLength(8);
+    expect(
+      container.querySelectorAll('table [data-tdh-pill="shownFalse"]')
     ).toHaveLength(4);
     expect(
-      container.querySelectorAll('[data-tdh-pill="byDefinition"]')
+      container.querySelectorAll('table [data-tdh-pill="byDefinition"]')
     ).toHaveLength(1);
     expect(
-      container.querySelectorAll('[data-tdh-pill="deferred"]')
+      container.querySelectorAll('table [data-tdh-pill="deferred"]')
     ).toHaveLength(1);
     expect(
-      container.querySelectorAll('[data-tdh-pill="unverified"]')
+      container.querySelectorAll('table [data-tdh-pill="unverified"]')
     ).toHaveLength(0);
     expect(screen.getAllByText("Proposal, not adopted").length).toBeGreaterThan(
       0
@@ -267,17 +266,22 @@ describe("TDH sub-pages", () => {
     // The manifest's build follows P26 as of 1c69528.
     expect(container.textContent).toMatch(/1,190 checks, P26 as of 1c69528/);
     // Round 5 of the model exists, but its manifest is not published: the
-    // page shows its committed figures beside a pill, and keeps round 3's
-    // statements.
+    // page shows its committed figures in a section of their own, and keeps
+    // round 3's statements, each labelled with the published build.
     const note = container.querySelector("[data-tdh-round-note]");
     expect(note?.textContent).toMatch(/Round 5 of the model, October 16, 2026/);
     expect(note?.textContent).toMatch(/89 of 89 vectors/);
     expect(note?.textContent).toMatch(/55 \+ 30 theorems/);
     expect(note?.textContent).toMatch(/46 fact checks/);
     expect(note?.textContent).toMatch(/at commit 6b32f3f/);
+    // It is its own section after the body, under a pill, and the header
+    // gives it one quiet line.
     expect(
-      note?.querySelector('[data-tdh-pill="notPublished"]')
+      container.querySelector('#next-build [data-tdh-pill="notPublished"]')
     ).not.toBeNull();
+    expect(container.textContent).toMatch(
+      /Round 5 of the model \(6b32f3f, October 16, 2026\) is committed but not yet published/
+    );
     expect(container.textContent).toMatch(
       /the order of raw logs is not covered/
     );
@@ -365,11 +369,11 @@ describe("TDH sub-pages", () => {
     expect(
       screen.getAllByText("Order independence, raw logs included").length
     ).toBeGreaterThan(0);
-    expect(container.querySelectorAll('[data-tdh-pill="proved"]')).toHaveLength(
-      9
-    );
     expect(
-      container.querySelectorAll('[data-tdh-pill="unverified"]')
+      container.querySelectorAll('table [data-tdh-pill="proved"]')
+    ).toHaveLength(9);
+    expect(
+      container.querySelectorAll('table [data-tdh-pill="unverified"]')
     ).toHaveLength(0);
     expect(container.textContent).toMatch(/414,254 logs/);
     expect(container.textContent).toMatch(/56 to 72 seconds/);
@@ -386,8 +390,8 @@ describe("TDH sub-pages", () => {
       screen.getByRole("heading", { level: 1, name: "Implementations" })
     ).toBeInTheDocument();
     expect(
-      screen.getAllByText("Source to be published").length
-    ).toBeGreaterThan(0);
+      screen.getByText(/None of their source is public yet/)
+    ).toBeInTheDocument();
     expect(
       screen.getByText(/The list follows 6529chain f840096/)
     ).toBeInTheDocument();
@@ -451,7 +455,7 @@ describe("TDH sub-pages", () => {
     expect(screen.getAllByText("Equal").length).toBeGreaterThan(0);
     expect(
       screen.getByText(
-        "Cycle of October 15, 2026 (holdings at 23:59:59 UTC the day before): the Rust core, the Python reference and 6529.io agreed on all 10,282 identity records, each collector’s and the two burn addresses’, and all 11,133 wallet records, to the last unit of TDH."
+        "Cycle of October 15, 2026 (holdings at the last Ethereum block before 00:00 UTC): the Rust core, the Python reference and 6529.io agreed on all 10,282 identity records, each collector’s and the two burn addresses’, and all 11,133 wallet records, to the last unit of TDH."
       )
     ).toBeInTheDocument();
 

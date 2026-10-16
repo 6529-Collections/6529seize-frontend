@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Button from "@/components/utils/button/Button";
 import EnsAddressInput from "@/components/utils/input/ens-address/EnsAddressInput";
 import { formatInteger } from "@/i18n/format";
@@ -277,6 +278,20 @@ export function ConsolidationBuilderWallets(
           </p>
         )}
       </div>
+      {entries.length >= 4 && (
+        <p
+          className="tw-mb-0 tw-mt-4 tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200"
+          data-testid="consolidation-fourth-wallet-note"
+        >
+          {t(locale, "delegation.consolidationBuilder.wallets.fourthNote")}{" "}
+          <Link
+            href="/network/tdh/how-it-works#step-10"
+            className="tw-whitespace-nowrap tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-400"
+          >
+            {t(locale, "delegation.consolidationBuilder.wallets.fourthLink")}
+          </Link>
+        </p>
+      )}
       <GroupLookupStatus
         locale={locale}
         state={props.groupLookupState}

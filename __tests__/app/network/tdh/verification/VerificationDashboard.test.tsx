@@ -52,7 +52,8 @@ function renderDashboard(
   indexLoad: IndexLoad,
   dayLoad: DayLoad | null,
   selectedCycleDay?: number,
-  now: Date = NOW
+  now: Date = NOW,
+  permalink = false
 ) {
   const selected =
     indexLoad.status === "ok"
@@ -69,6 +70,7 @@ function renderDashboard(
         dayLoad={dayLoad}
         selected={selected}
         now={now}
+        permalink={permalink}
       />
     </main>
   );
@@ -118,15 +120,15 @@ describe("VerificationDashboard", () => {
     if (!index.success || !day.success) {
       throw new Error("the public feed fixture no longer parses");
     }
+    // The dashboard itself, on its latest day (no day selected).
     const { container } = renderDashboard(
       remoteIndex(index.data),
-      okDay(day.data),
-      20_741
+      okDay(day.data)
     );
     expect(screen.queryByText(/sample/i)).not.toBeInTheDocument();
     expect(
       screen.getByText(
-        "Cycle of October 15, 2026 (holdings at 23:59:59 UTC the day before): the Rust core, the Python reference and 6529.io agreed on all 10,282 identity records, each collector’s and the two burn addresses’, and all 11,133 wallet records, to the last unit of TDH."
+        "Cycle of October 15, 2026 (holdings at the last Ethereum block before 00:00 UTC): the Rust core, the Python reference and 6529.io agreed on all 10,282 identity records, each collector’s and the two burn addresses’, and all 11,133 wallet records, to the last unit of TDH."
       )
     ).toBeInTheDocument();
     expect(screen.getAllByText("All equal").length).toBe(2);
@@ -168,7 +170,7 @@ describe("VerificationDashboard", () => {
     expect(screen.getAllByText("Investigating").length).toBeGreaterThan(0);
     expect(
       screen.getByText(
-        "Cycle of October 15, 2026 (holdings at 23:59:59 UTC the day before): 9 of 10 identity records were equal between the Rust core and 6529.io. Not every difference is explained yet, so an alarm was raised."
+        "Cycle of October 15, 2026 (holdings at the last Ethereum block before 00:00 UTC): 9 of 10 identity records were equal between the Rust core and 6529.io. Not every difference is explained yet, so an alarm was raised."
       )
     ).toBeInTheDocument();
     expect(screen.queryByText(/No differences/)).not.toBeInTheDocument();
@@ -302,7 +304,9 @@ describe("VerificationDashboard", () => {
         ],
       }),
       okDay(),
-      20_741,
+      // The dashboard itself: a day's own page is a record and shows no
+      // live freshness line.
+      undefined,
       new Date("2026-10-20T12:00:00Z")
     );
     expect(
@@ -341,10 +345,13 @@ describe("VerificationDashboard", () => {
     renderDashboard(
       remoteIndex(syntheticIndex()),
       okDay(syntheticEqualDay({ cycleDay: 20_740, date: "2026-10-14" })),
-      20_740
+      20_740,
+      NOW,
+      true
     );
+    // A day's own page counts down from that day, not from today.
     expect(screen.queryByText("In 8 days")).not.toBeInTheDocument();
-    expect(screen.getByText("About Oct 23")).toBeInTheDocument();
+    expect(screen.getByText("9 days to go")).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Not the latest day: go to the latest" })
     ).toHaveAttribute("href", "/network/tdh/verification");

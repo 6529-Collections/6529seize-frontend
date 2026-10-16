@@ -156,9 +156,23 @@ const CURVE_POINTS = [
 const LABEL_OFFSET: Readonly<Record<string, readonly [number, number]>> = {
   gradient: [12, -6],
   nextgen: [8, -12],
-  firstgm: [-10, -12],
+  // Left of its dot, level with it: above it, at the right end of the
+  // axis, the label crowded NextGen's on a phone.
+  firstgm: [-10, 0],
 };
 const PAIRED = new Set(["meme300", "meme310"]);
+
+/**
+ * How far a label's baseline sits below its offset: a label below its dot
+ * drops by most of its height, one level with it (dy 0) by a third, one
+ * above it not at all.
+ */
+function labelShift(dy: number, font: number): number {
+  if (dy > 0) {
+    return font * 0.6;
+  }
+  return dy === 0 ? font * 0.35 : 0;
+}
 
 /** One label for the 300- and 310-copy Memes, up and to the right of them. */
 function PairLabel({
@@ -339,7 +353,7 @@ function RateCurve({
             />
             <text
               x={px + dx}
-              y={py + dy + (dy > 0 ? font * 0.6 : 0)}
+              y={py + dy + labelShift(dy, font)}
               textAnchor={anchor}
               className="tw-fill-iron-50 tw-stroke-iron-950 tw-font-medium tw-tabular-nums"
               strokeWidth={4}
@@ -568,6 +582,50 @@ function IdentityGraph({ graph }: { readonly graph: (typeof GRAPHS)[number] }) {
 }
 
 /**
+ * A pattern's links in their order on chain, each with the same numbered
+ * badge the drawing uses, so the caption and the figure read alike.
+ */
+function LinkOrder({
+  locale,
+  graph,
+}: {
+  readonly locale: SupportedLocale;
+  readonly graph: (typeof GRAPHS)[number];
+}) {
+  return (
+    <p className="tw-m-0 tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-2.5 tw-gap-y-1 tw-text-[13px] tw-leading-5 tw-text-iron-300 sm:tw-justify-start xl:tw-justify-center">
+      <span className="tw-sr-only">
+        {t(locale, "network.tdh.how.s10.links")}:
+      </span>
+      {graph.links.map((link, index) => (
+        <span
+          key={link}
+          className="tw-inline-flex tw-items-center tw-gap-1 tw-whitespace-nowrap"
+        >
+          <span
+            aria-hidden="true"
+            className="tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-primary-400/70 tw-text-xs tw-font-semibold tw-tabular-nums tw-text-primary-300"
+          >
+            {formatInteger(locale, index + 1)}
+          </span>
+          <span className="tw-sr-only">
+            {t(locale, "network.tdh.how.s10.linkOrder", {
+              n: formatInteger(locale, index + 1),
+            })}
+          </span>
+          <span className="tw-font-mono">{`${link.slice(0, 1)}–${link.slice(1)}`}</span>
+        </span>
+      ))}
+      {graph.key === "row2" && (
+        <span className="tw-text-iron-400">
+          {t(locale, "network.tdh.how.s10.row2.note")}
+        </span>
+      )}
+    </p>
+  );
+}
+
+/**
  * Diagram 6: three link patterns and the identities they form (step 10).
  * Each pattern is its own small figure with an HTML caption, so it stays
  * legible on a phone.
@@ -588,12 +646,7 @@ export function IdentityGraphDiagram({
           >
             <IdentityGraph graph={graph} />
             <div className="tw-mt-2 tw-text-center sm:tw-mt-0 sm:tw-text-left xl:tw-mt-2 xl:tw-text-center">
-              <p className="tw-m-0 tw-font-mono tw-text-[13px] tw-leading-5 tw-text-iron-300">
-                {t(
-                  locale,
-                  `network.tdh.how.s10.${graph.key}.links` as MessageKey
-                )}
-              </p>
+              <LinkOrder locale={locale} graph={graph} />
               <p className="tw-m-0 tw-font-mono tw-text-[13px] tw-leading-5 tw-text-primary-300">
                 {t(
                   locale,

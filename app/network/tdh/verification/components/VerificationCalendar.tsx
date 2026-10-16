@@ -297,7 +297,7 @@ export default function VerificationCalendar({
         className="tw-mt-3 tw-overflow-x-auto tw-px-1 tw-pb-1 tw-pt-1 tw-scrollbar-none"
         focusSelector='[aria-current="date"]'
       >
-        <ol className="tw-m-0 tw-grid tw-list-none tw-auto-cols-[minmax(2rem,4.5rem)] tw-grid-flow-col tw-gap-1.5 tw-p-0">
+        <ol className="tw-m-0 tw-grid tw-list-none tw-auto-cols-[minmax(1.75rem,4.5rem)] tw-grid-flow-col tw-gap-1 tw-p-0 sm:tw-gap-1.5">
           {cells.map((cell, index) => (
             <li
               key={`${cell.kind}-${cell.kind === "day" ? cell.day.cycleDay : cell.cycleDay}`}
@@ -331,7 +331,7 @@ export default function VerificationCalendar({
           ))}
         </ol>
       </TdhSubnavScroll>
-      <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-2 tw-text-xs tw-text-iron-400 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+      <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-2 tw-text-xs tw-text-iron-400">
         <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-p-0">
           {LEGEND.map((state) => (
             <li

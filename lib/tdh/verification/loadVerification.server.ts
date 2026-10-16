@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { cache } from "react";
 import { getAppEnvironment } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";
@@ -68,6 +69,8 @@ export type DayLoad =
       readonly status: "ok";
       readonly day: VerificationDay;
       readonly dayUrl: string;
+      /** SHA-256 of the day file's bytes; null when they were not read. */
+      readonly sha256: string | null;
     }
   | { readonly status: "not-found" }
   | { readonly status: "error"; readonly reason: VerificationErrorReason };
@@ -105,7 +108,12 @@ export function resolveVerificationSource(
 }
 
 type FeedFetchResult =
-  | { readonly ok: true; readonly json: unknown }
+  | {
+      readonly ok: true;
+      readonly json: unknown;
+      /** SHA-256 of the body's bytes; null when they could not be read. */
+      readonly sha256: string | null;
+    }
   | {
       readonly ok: false;
       readonly reason: VerificationErrorReason;
@@ -131,7 +139,17 @@ export async function fetchFeedJson(
     return { ok: false, reason: "http", status: response.status };
   }
   try {
-    return { ok: true, json: (await response.json()) as unknown };
+    // Read the bytes once: they are both parsed and hashed, so a day's page
+    // can show the SHA-256 of exactly the file it was built from.
+    if (typeof response.arrayBuffer === "function") {
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      return {
+        ok: true,
+        json: JSON.parse(new TextDecoder().decode(bytes)) as unknown,
+        sha256: createHash("sha256").update(bytes).digest("hex"),
+      };
+    }
+    return { ok: true, json: (await response.json()) as unknown, sha256: null };
   } catch {
     return { ok: false, reason: "invalid" };
   }
@@ -193,7 +211,12 @@ export function createVerificationLoader(options: VerificationLoaderOptions) {
     if (!parsed.success || parsed.data.cycleDay !== cycleDay) {
       return { status: "error", reason: "invalid" };
     }
-    return { status: "ok", day: parsed.data, dayUrl: url.toString() };
+    return {
+      status: "ok",
+      day: parsed.data,
+      dayUrl: url.toString(),
+      sha256: result.sha256,
+    };
   }
 
   return { source, loadIndex, loadDay };

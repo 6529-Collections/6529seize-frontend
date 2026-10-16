@@ -28,7 +28,7 @@ export default function TdhSource({
   const chip = block ? `${CHIP} xl:tw-whitespace-normal` : CHIP;
   const layout = block
     ? "tw-flex tw-flex-wrap tw-gap-1"
-    : "tw-ml-1 tw-inline-flex tw-flex-wrap tw-gap-1 tw-align-baseline";
+    : "tw-ml-1 tw-inline [&>*]:tw-mr-1 [&>*]:tw-align-baseline [&>*:last-child]:tw-mr-0";
   return (
     <span className={`${layout} ${className}`} data-tdh-sources="">
       {refs.map((reference) => {
@@ -37,7 +37,7 @@ export default function TdhSource({
           return (
             <span
               key={reference}
-              className={`${chip} tw-border-iron-800 tw-text-iron-500`}
+              className={`${chip} tw-border-dashed tw-border-iron-700 tw-text-iron-500`}
               title={source.accessibleName}
             >
               <span aria-hidden="true">{source.label}</span>

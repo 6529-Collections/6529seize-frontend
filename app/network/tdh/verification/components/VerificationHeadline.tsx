@@ -70,6 +70,38 @@ function headlineSentence(
   }
 }
 
+/** The verdict as a short headline, above the full sentence. */
+function headlineShort(
+  locale: SupportedLocale,
+  day: VerificationDay,
+  verdict: VerdictState
+): string {
+  const live = day.agreement.rustVsLive;
+  const python =
+    day.implementations.python === null ? null : day.agreement.rustVsPython;
+  const counts = live ?? python;
+  const values = {
+    identities: formatInteger(locale, counts?.identitiesTotal ?? 0),
+    wallets: formatInteger(locale, counts?.walletsTotal ?? 0),
+    equal: formatInteger(locale, live?.identitiesEqual ?? 0),
+    total: formatInteger(locale, live?.identitiesTotal ?? 0),
+  };
+  const key = (name: string) =>
+    `network.tdh.verify.headline.short.${name}` as MessageKey;
+  switch (verdict) {
+    case "equal":
+      return t(locale, key("equal"), values);
+    case "explained":
+    case "investigating":
+    case "mismatch":
+    case "liveUnavailable":
+      return t(locale, key(verdict), values);
+    case "pending":
+    case "unknown":
+      return t(locale, key("unknown"), values);
+  }
+}
+
 function DayArrow({
   locale,
   target,
@@ -152,15 +184,21 @@ export default function VerificationHeadline({
               })}
             </span>
             {!isLatest && neighbours.latest !== null && (
+              // A neutral way to the latest day: an older day is not a
+              // problem with its data, so no warning colour.
               <Link
                 href="/network/tdh/verification"
-                className={`tw-rounded-full tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-400/[0.08] tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-medium tw-text-amber-100 tw-no-underline hover:tw-border-amber-300 ${TDH_FOCUS_RING}`}
+                className={`tw-inline-flex tw-items-center tw-gap-1 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-medium tw-text-iron-200 tw-no-underline hover:tw-border-primary-400/60 hover:tw-text-primary-300 ${TDH_FOCUS_RING}`}
               >
                 {t(locale, "network.tdh.verify.headline.notLatest")}
+                <ChevronRightIcon aria-hidden="true" className="tw-size-3.5" />
               </Link>
             )}
           </h2>
-          <p className="tw-m-0 tw-mt-3 tw-max-w-4xl tw-text-lg tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-50 sm:tw-text-xl sm:tw-leading-8">
+          <p className="tw-m-0 tw-mt-3 tw-max-w-4xl tw-text-balance tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-50 sm:tw-text-2xl sm:tw-leading-8">
+            {headlineShort(locale, day, verdict)}
+          </p>
+          <p className="tw-m-0 tw-mt-2 tw-max-w-4xl tw-text-base tw-leading-7 tw-text-iron-200">
             {headlineSentence(locale, day, verdict)}
           </p>
           <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
@@ -188,11 +226,21 @@ export default function VerificationHeadline({
           <TdhSource refs={["P26 §4.2"]} locale={locale} />
         </p>
         <div className="tw-min-w-0 lg:tw-max-w-md lg:tw-shrink-0">
-          <TdhStatusPill
-            pill={day.mode === "checked" ? "checked" : "unchecked"}
-            locale={locale}
-            size="sm"
-          />
+          <p className="tw-m-0 tw-flex tw-flex-col tw-items-start tw-gap-1.5 tw-text-sm tw-leading-6 tw-text-iron-300">
+            <TdhStatusPill
+              pill={day.mode === "checked" ? "checked" : "unchecked"}
+              locale={locale}
+              size="sm"
+            />
+            <span>
+              {t(
+                locale,
+                day.mode === "checked"
+                  ? "network.tdh.verify.mode.checkedShort"
+                  : "network.tdh.verify.mode.uncheckedShort"
+              )}
+            </span>
+          </p>
           <TdhDisclosure
             summary={t(locale, "network.tdh.verify.status.explain")}
           >

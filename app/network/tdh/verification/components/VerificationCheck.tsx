@@ -50,7 +50,7 @@ export default function VerificationCheck({
         id="check"
         title={t(locale, "network.tdh.verify.check.heading")}
         locale={locale}
-        className="tw-hyphens-auto tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
+        className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
       />
       <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
         {t(locale, "network.tdh.verify.check.intro")}
@@ -62,7 +62,15 @@ export default function VerificationCheck({
           </h3>
           <ol className="tw-m-0 tw-mt-3 tw-space-y-3 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-iron-500">
             <li className={STEP}>
-              {t(locale, "network.tdh.verify.check.upload")}
+              {t(locale, "network.tdh.verify.check.upload")}{" "}
+              <a
+                href="https://api.6529.io/api/consolidated_uploads"
+                className={`${TDH_LINK} tw-break-words`}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                {t(locale, "network.tdh.verify.check.apiLink")}
+              </a>
               {identityUpload && (
                 <>
                   {" "}

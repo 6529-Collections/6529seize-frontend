@@ -42,6 +42,8 @@ export interface CheckedEntry {
   readonly checks: number | null;
   readonly file: string | null;
   readonly line: number | null;
+  /** The manifest's English reading of the theorem or case. */
+  readonly statement: string | null;
 }
 
 export interface StatementCheck {
@@ -69,6 +71,7 @@ function checkEntry(
     checks: entry?.checks ?? null,
     file: entry?.file ?? null,
     line: entry?.line ?? null,
+    statement: entry?.statement ?? null,
   };
 }
 

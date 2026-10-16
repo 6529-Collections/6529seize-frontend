@@ -278,10 +278,43 @@ uint256[] season_starts
 
 registryHash = H("6529.TdhRegistry.v1", the fields above in order)
 
-# H is P28's keccak256(abi.encode(TAG(name), fields)), not the edition H.
-# The record is a CE struct of these fields in this order; a T[] field is a
-# CE list<T>, ascending. Boosts are in micro-units, additional_set_ratio in
-# 10^-4 and gradient_rate_minimum in cents.`;
+# H is P28's hash (below), not the edition H. Stored, the record is a CE
+# struct of these fields in this order; a T[] field is a CE list<T>,
+# ascending. Boosts are in micro-units, additional_set_ratio in 10^-4 and
+# gradient_rate_minimum in cents.`;
+
+/** P28 §1, §2.6 and §2.7: how H and the registry record are encoded. */
+export const RULE_REGISTRY_HASH = `TAG(name)    = keccak256(the ASCII bytes of name)
+H(name, f1, ..., fk) = keccak256(abi.encode(bytes32 TAG(name), f1, ..., fk))
+
+abi.encode, with the types declared above, in order:
+  address, uintN, intN, bytes32   one 32-byte word each, big-endian;
+                                  zero-extended, an int64 sign-extended
+  address[], uint256[]            a 32-byte offset in the field's place;
+                                  at the end, the list's length and then
+                                  its elements, one word each, in order
+
+stored record (CE struct)         the same fields in order, fixed-width
+                                  big-endian, no padding; a list is a
+                                  uint32 count then its elements
+the hash is taken over the typed values, never over the stored bytes`;
+
+/** P53 §4.2: the cycle root validators sign. */
+export const RULE_CYCLE_ROOT = `cycleRoot_N = H("6529.TdhCycleRoot.v1",
+  bytes32 NETWORK_ID,
+  uint32  cycleDay,         # N
+  uint64  boundary,         # t_N, Unix seconds
+  bytes32 tdhRuleId,        # H("6529.TdhRule.v1", keccak256("tdh-v1.0"),
+                            #   registryHash), P28 §4.5
+  uint64  cutoffNumber,     # B_N
+  bytes32 cutoffHash,       # hash(B_N)
+  uint64  cutoffTimestamp,  # ts(B_N), the age reference T of P26 §4.3
+  bytes32 walletRoot,       # P28 §4.4
+  uint32  walletCount,      # leaves in walletRoot
+  uint32  identityCount,    # non-sink identities with a wallet record
+  uint64  totalTDH,         # sum of identityTDH over non-sink identities
+  bytes32 tokenRoot,        # P28 §4.12
+  uint32  tokenCount)       # leaves in tokenRoot`;
 
 /** P26 §10, "Field types" and "Registry constraints", line for line. */
 export const RULE_REGISTRY_CONSTRAINTS_CONDENSED = `every field at its type (uint32, uint64, uint256, int64, address, bytes32);

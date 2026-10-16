@@ -14,10 +14,16 @@ single its holder out.
 
 `/network/tdh/verification/{cycleDay}` is the permalink for one day. It
 renders per request (`dynamic = "force-dynamic"`; the feed files are cached
-at the fetch level). Unknown days show the standard not-found page, titled
-`TDH verification: day not found` and marked `noindex`; the response status
-stays 200 because `app/network/loading.tsx` starts streaming before the
-page can call `notFound()`.
+at the fetch level). A path that cannot name a published day (not a cycle
+day in canonical form, before the feed's first day, 20,740, or after the
+latest closed cycle) gets a real 404 from the proxy
+(`lib/proxy/tdhVerificationDay.ts`). A day inside that range that the feed
+does not list shows the standard not-found page, titled `TDH verification:
+day not found` and marked `noindex` with one robots tag; its status stays
+200 because `app/network/loading.tsx` starts streaming before the page can
+call `notFound()`. A day's own page is a record: its cutover countdown is
+as of that day, it has no live freshness line, and Provenance shows the
+SHA-256 of the day file the page read.
 
 ## Location in the Site
 
@@ -37,55 +43,68 @@ page can call `notFound()`.
 
 ## What the Page Shows
 
-1. The headline: the verdict, the day and cycle, the day's result in one
-   sentence that names the cycle and when its holdings were read (for
-   example: "Cycle of October 16, 2026 (holdings at 23:59:59 UTC the day
-   before): the Rust core, the Python reference and 6529.io agreed on all
-   10,279 identity records, each collector's and the two burn addresses',
-   and all 11,131 wallet records"), the verdict in words, previous and next
-   day arrows, the snapshot block, and the history mode (`Not yet fully
-   checked` or `History fully checked`, with a `What this label means`
-   disclosure that says the finalized block comes from a public beacon
-   server, with no pinned checkpoint yet). The two stack below `lg`. On a
-   day that is not the latest, a link back to the latest. The feed's
+1. The headline: the verdict, the day and cycle, a short headline (for
+   example "Every record equal: 10,279 identities and 11,131 wallets"), then
+   the day's result in one sentence that names the cycle and when its
+   holdings were read (for example: "Cycle of October 16, 2026 (holdings at
+   the last Ethereum block before 00:00 UTC): the Rust core, the Python
+   reference and 6529.io agreed on all 10,279 identity records, each
+   collector's and the two burn addresses', and all 11,131 wallet
+   records"), the verdict in words, previous and next day arrows, the
+   snapshot block, and the history mode (`Not yet fully checked` or
+   `History fully checked`, with its meaning in one line beside it and a
+   `What this label means` disclosure that says the finalized block comes
+   from a public beacon server, with no pinned checkpoint yet). The two
+   stack below `lg`. On a day that is not the latest, a neutral link back
+   to the latest. The feed's
    identity counts include the two sink identities (the zero address and
    0x…dead), so the pages say identity records, not collectors.
 2. The day at a glance: identity records equal between the Rust core and
    6529.io and between the Rust core and Python, each with a meter that keeps a
    visible sliver for any difference and a line for the wallets; the total
-   TDH, with whether it is the same in all three; and the cutover: a
-   countdown with the week from the start of the daily runs (October 16,
-   2026) to about October 23, 2026 on the latest day, the planned date on
-   older days, and `Switched on {date}` only when a published file says the
-   cutover is done. One tile a row on phones, a 2 × 2 grid from a 26rem
+   TDH, with Python − Rust and 6529.io − Rust as numbers and whether it is
+   the same in all three; and the cutover: a countdown with the week from
+   the start of the daily runs (October 16, 2026) to about October 23,
+   2026, counted from today on the dashboard and from the day itself on a
+   day's own page, and `Switched on {date}` only when a published file
+   says the cutover is done. One tile a row on phones, a 2 × 2 grid from a 26rem
    column and one row of four from 56rem.
 3. Every day: one cell per day coloured and shaped by its verdict and
    linking to it (a missing 6529.io file is an outline, an unexplained
    difference carries `!`, a mismatch `×`), the total's difference under
    each as a number (0 when equal), dashed cells for days with no report
    and, while the cutover is ahead, the days still to come up to it, on
-   every day's page alike, with a legend. On phones the row scrolls inside
-   itself with edge fades, starting at the shown day. It also says which
+   every day's page alike, with a legend under the row. The cells shrink
+   to fit a phone; past about ten days the row scrolls inside itself with
+   edge fades, starting at the shown day. It also says which
    report is the latest, warns when reports are late, and counts days with no
    report.
 4. Side by side (one card per measure, in one column below `lg`): totals,
    identity and wallet record counts, the roots (Python
    computes none and is compared record by record), code versions as
-   `validator@…` and `6529chain@…` with copy buttons, run times and sources.
+   `validator@…` and `6529chain@…` with copy buttons, run times (the Rust
+   run's includes reading and checking Ethereum; computing a day takes about
+   0.6 s) and sources.
 5. Differences: when there are none, a plain statement that every identity
    and wallet record is equal; otherwise the number of differing identity
    and wallet records, the counts by class (A to D) and by cause (DEV and BUG
    items link to the specification), and the totals' differences. The four
-   classes are explained beside it, with a note that no record is published,
-   and a short history of the DEV-2 cases that D131's netting settled.
+   classes are explained below it, with a note that no record is published,
+   the difference expected until the owner decides (a group of four
+   consolidated wallets, which would show as class D), and a short history
+   of the DEV-2 cases that D131's netting settled.
 6. Day by day: a table of the days from `xl` (one card per day below), with
    days that have no report; from the seventh day wider screens show a chart
    drawn for the column width, with the table one click away.
-7. Provenance: data source, snapshot block with an Etherscan link, history
-   mode, rule version and registry hash (from the day's file, or the
-   specification's, labelled as such), code versions, and 6529.io's files on
-   Arweave with links to each transaction and file, and JSON download links.
-8. Check it yourself: what anyone can check today from public sources, what
+7. Provenance: data source (6529's feed, named with its CloudFront host),
+   snapshot block with an Etherscan link, history mode, rule version and
+   registry hash (from the day's file, or the specification's, labelled as
+   such) with the P26 commit the runs followed (the Python reference's), code
+   versions, and 6529.io's files on Arweave with links to each transaction
+   and file, JSON download links, and the SHA-256 of the day file as the
+   page read it.
+8. Check it yourself: what anyone can check today from public sources
+   (6529.io's own API lists every day's upload with its Arweave link), what
    that does not reach, the three commands that reproduce the day once the
    source is published (wrapped only between words, so no flag is split),
    and the roots and files to compare.

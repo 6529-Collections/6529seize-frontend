@@ -183,7 +183,7 @@ export function TdhSourcesFootnote({
   readonly legend?: boolean;
 }) {
   return (
-    <div className="tw-mt-6 tw-max-w-3xl tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4 tw-text-xs tw-leading-5 tw-text-iron-400">
+    <div className="tw-mt-6 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4 tw-text-xs tw-leading-5 tw-text-iron-400">
       <p className="tw-m-0 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1">
         <span className="tw-font-medium tw-text-iron-300">
           {t(locale, "network.tdh.explainer.sources.label")}
@@ -191,7 +191,7 @@ export function TdhSourcesFootnote({
         <TdhSource refs={refs} locale={locale} />
       </p>
       {legend && (
-        <p className="tw-m-0 tw-mt-1">
+        <p className="tw-m-0 tw-mt-1 tw-max-w-3xl">
           {t(locale, "network.tdh.explainer.sources.legend")}{" "}
           <a
             href="#glossary"
@@ -227,7 +227,7 @@ export default function TDHInAMinute({
       <h2
         id="tdh-minute-heading"
         tabIndex={-1}
-        className="tw-m-0 tw-hyphens-auto tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none min-[360px]:tw-text-2xl"
+        className="tw-m-0 tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none min-[360px]:tw-text-2xl"
       >
         {t(locale, "network.tdh.explainer.minute.title")}
       </h2>
@@ -283,12 +283,14 @@ export default function TDHInAMinute({
               })}
             </span>
           </span>
-          <span className="tw-mt-2 tw-block tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
-            {t(locale, "network.tdh.explainer.minute.resultNote")}
-          </span>
         </figcaption>
       </figure>
-      <div className="tw-mt-6 tw-max-w-3xl tw-space-y-2 tw-text-sm tw-leading-6 tw-text-iron-400">
+      {/* Three short notes side by side from md, under the three panels,
+          so the band keeps one measure. */}
+      <div className="tw-mt-6 tw-grid tw-gap-x-8 tw-gap-y-2 tw-text-sm tw-leading-6 tw-text-iron-400 md:tw-grid-cols-3">
+        <p className="tw-m-0">
+          {t(locale, "network.tdh.explainer.minute.resultNote")}
+        </p>
         <p className="tw-m-0">
           {t(locale, "network.tdh.explainer.minute.reference")}
         </p>
@@ -296,6 +298,8 @@ export default function TDHInAMinute({
           {t(locale, "network.tdh.explainer.minute.snapshot")}{" "}
           {t(locale, "network.tdh.explainer.eligible")}
         </p>
+      </div>
+      <div className="tw-mt-2">
         <Link
           href="/network/tdh/how-it-works"
           className={`tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline hover:tw-text-primary-400 ${TDH_FOCUS_RING}`}

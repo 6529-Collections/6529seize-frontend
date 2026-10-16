@@ -19,8 +19,17 @@ import {
 } from "../../TDHPageNavigation";
 import TdhSource from "../../shared/TdhSource";
 import TdhStackTable from "../../shared/TdhStackTable";
+import TdhTableFrame from "../../shared/TdhTableFrame";
 import TdhSubnav from "../../shared/TdhSubnav";
-import { TDH_H1, TDH_LEDE } from "../../shared/tdhStyles";
+import {
+  TDH_CAPTION,
+  TDH_H1,
+  TDH_LEDE,
+  TDH_TABLE,
+  TDH_TD,
+  TDH_TH,
+  tdhNarrowCell,
+} from "../../shared/tdhStyles";
 import TDHSection, { TDH_FOCUS, TDH_PANEL, TDH_TEXT } from "../../TDHSection";
 import ConsolidationOrderSimulator from "../ConsolidationOrderSimulator";
 
@@ -242,6 +251,11 @@ export default function TDHConsolidationDesignPage() {
                         limit,
                       })}
                 </p>
+                {rule === "limit" && (
+                  <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-amber-200">
+                    {t(locale, "network.tdhConsolidation.rules.limit.status")}
+                  </p>
+                )}
               </li>
             ))}
           </ul>
@@ -254,6 +268,9 @@ export default function TDHConsolidationDesignPage() {
           title={t(locale, "network.tdhConsolidation.order.title")}
           description={t(locale, "network.tdhConsolidation.order.description")}
         >
+          <p className="tw-m-0 tw-mb-4 tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+            {t(locale, "network.tdhConsolidation.order.status")}
+          </p>
           <ConsolidationOrderSimulator
             locale={locale}
             activationDate={date}
@@ -439,6 +456,74 @@ function AddWalletSection({ locale }: { readonly locale: SupportedLocale }) {
   );
 }
 
+/**
+ * Who can add an outside wallet: four rules by how many of your wallets an
+ * attacker controls, as one compact grid at every width (a phone included),
+ * so the comparison stays a comparison. It scrolls inside its frame only in
+ * a very narrow window.
+ */
+const RULE_TH = tdhNarrowCell(TDH_TH);
+const RULE_TD = tdhNarrowCell(TDH_TD);
+const COUNT_TH = TDH_TH.replace("tw-px-4", "tw-px-1.5");
+const COUNT_TD = TDH_TD.replace("tw-px-4", "tw-px-1.5");
+
+function AttackMatrix({ locale }: { readonly locale: SupportedLocale }) {
+  const caption = t(locale, "network.tdhConsolidation.why.matrix.caption");
+  return (
+    <TdhTableFrame label={caption}>
+      <table className={TDH_TABLE}>
+        <caption className={TDH_CAPTION}>{caption}</caption>
+        <thead>
+          <tr>
+            <th scope="col" className={`${RULE_TH} tw-min-w-[7rem]`}>
+              {t(locale, "network.tdhConsolidation.why.matrix.rule")}
+            </th>
+            {CONTROLLED_WALLET_COUNTS.map((count) => (
+              <th
+                key={count}
+                scope="col"
+                className={`${COUNT_TH} tw-w-10 tw-text-center tw-tabular-nums sm:tw-w-14`}
+              >
+                <span aria-hidden="true">{formatInteger(locale, count)}</span>
+                <span className="tw-sr-only">
+                  {t(locale, "network.tdhConsolidation.why.matrix.controls", {
+                    count: formatInteger(locale, count),
+                  })}
+                </span>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {RULE_COMPARISON.map((rule) => (
+            <tr key={rule.key}>
+              <th
+                scope="row"
+                className={`${RULE_TD} tw-font-medium tw-text-iron-100`}
+              >
+                {t(locale, `network.tdhConsolidation.why.rule.${rule.key}`)}
+              </th>
+              {CONTROLLED_WALLET_COUNTS.map((count) => (
+                <td
+                  key={count}
+                  className={`${COUNT_TD} tw-text-center ${rule.addable[count] ? "tw-font-semibold tw-text-error" : "tw-text-iron-400"}`}
+                >
+                  {t(
+                    locale,
+                    rule.addable[count]
+                      ? "network.tdhConsolidation.why.matrix.yes"
+                      : "network.tdhConsolidation.why.matrix.no"
+                  )}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </TdhTableFrame>
+  );
+}
+
 function WhyEveryPairSection({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <TDHSection
@@ -465,6 +550,7 @@ function WhyEveryPairSection({ locale }: { readonly locale: SupportedLocale }) {
             ],
             cellClassNames: { 2: "tw-tabular-nums" },
           }))}
+          inlineColumns={[1, 2]}
         />
 
         <div className="tw-space-y-3">
@@ -472,47 +558,10 @@ function WhyEveryPairSection({ locale }: { readonly locale: SupportedLocale }) {
             {t(locale, "network.tdhConsolidation.why.matrix.title")}
           </h3>
           <p className={TDH_TEXT}>
-            {t(locale, "network.tdhConsolidation.why.matrix.description")}
+            {t(locale, "network.tdhConsolidation.why.matrix.description")}{" "}
+            {t(locale, "network.tdhConsolidation.why.matrix.columns")}
           </p>
-          <TdhStackTable
-            label={t(locale, "network.tdhConsolidation.why.matrix.caption")}
-            columns={[
-              {
-                key: "rule",
-                label: t(locale, "network.tdhConsolidation.why.matrix.rule"),
-              },
-              ...CONTROLLED_WALLET_COUNTS.map((count) => ({
-                key: String(count),
-                label: t(
-                  locale,
-                  "network.tdhConsolidation.why.matrix.controls",
-                  {
-                    count: formatInteger(locale, count),
-                  }
-                ),
-              })),
-            ]}
-            rows={RULE_COMPARISON.map((rule) => ({
-              key: rule.key,
-              cells: [
-                t(locale, `network.tdhConsolidation.why.rule.${rule.key}`),
-                ...CONTROLLED_WALLET_COUNTS.map((count) =>
-                  t(
-                    locale,
-                    rule.addable[count]
-                      ? "network.tdhConsolidation.why.matrix.yes"
-                      : "network.tdhConsolidation.why.matrix.no"
-                  )
-                ),
-              ],
-              cellClassNames: Object.fromEntries(
-                CONTROLLED_WALLET_COUNTS.map((count, index) => [
-                  index + 1,
-                  rule.addable[count] ? "tw-text-error" : "tw-text-iron-300",
-                ])
-              ),
-            }))}
-          />
+          <AttackMatrix locale={locale} />
         </div>
 
         <p className={TDH_TEXT}>

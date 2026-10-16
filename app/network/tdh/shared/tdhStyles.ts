@@ -7,7 +7,7 @@ import tableStyles from "./tdhTable.module.css";
  * headings are 24 px (20 px under 360 px).
  */
 export const TDH_H1 =
-  "tw-m-0 tw-hyphens-auto tw-break-words tw-text-[1.625rem] tw-font-semibold tw-leading-[1.15] tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-[1.875rem] sm:tw-text-[2.5rem] sm:tw-leading-[1.1]";
+  "tw-m-0 tw-text-balance tw-break-words max-[359px]:tw-hyphens-auto tw-text-[1.625rem] tw-font-semibold tw-leading-[1.15] tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-[1.875rem] sm:tw-text-[2.5rem] sm:tw-leading-[1.1]";
 export const TDH_LEDE =
   "tw-text-base tw-leading-7 tw-text-iron-200 sm:tw-text-lg sm:tw-leading-8";
 

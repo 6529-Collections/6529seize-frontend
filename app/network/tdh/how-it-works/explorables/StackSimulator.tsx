@@ -5,7 +5,12 @@ import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import TdhDisclosure from "../../shared/TdhDisclosure";
-import { TDH_BUTTON, TDH_FOCUS_RING } from "../../shared/tdhStyles";
+import {
+  TDH_BUTTON,
+  TDH_CHIP_BUTTON,
+  TDH_CHIP_OFF,
+  TDH_CHIP_ON,
+} from "../../shared/tdhStyles";
 import ExplorableFrame from "./ExplorableFrame";
 
 type StackEvent = {
@@ -186,19 +191,25 @@ export default function StackSimulator({
         </button>
       </div>
       <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-        <label
-          htmlFor={toggleId}
-          className="tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-gap-2 tw-text-sm tw-text-iron-200"
+        {/* A switch in the explorables' pill style, not a native checkbox. */}
+        <button
+          id={toggleId}
+          type="button"
+          role="switch"
+          aria-checked={consolidated}
+          onClick={() => setConsolidated((value) => !value)}
+          className={`${TDH_CHIP_BUTTON} ${consolidated ? TDH_CHIP_ON : TDH_CHIP_OFF}`}
         >
-          <input
-            id={toggleId}
-            type="checkbox"
-            checked={consolidated}
-            onChange={(event) => setConsolidated(event.target.checked)}
-            className={`tw-form-checkbox tw-size-5 tw-shrink-0 tw-rounded tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400 disabled:tw-opacity-40 ${TDH_FOCUS_RING}`}
-          />
+          <span
+            aria-hidden="true"
+            className={`tw-relative tw-inline-flex tw-h-5 tw-w-9 tw-shrink-0 tw-items-center tw-rounded-full tw-transition-colors motion-reduce:tw-transition-none ${consolidated ? "tw-bg-primary-500" : "tw-bg-iron-700"}`}
+          >
+            <span
+              className={`tw-inline-block tw-size-4 tw-rounded-full tw-bg-iron-50 tw-transition-transform motion-reduce:tw-transition-none ${consolidated ? "tw-translate-x-[1.125rem]" : "tw-translate-x-0.5"}`}
+            />
+          </span>
           {t(locale, "network.tdh.how.stack.consolidated")}
-        </label>
+        </button>
         <span className="tw-rounded-full tw-bg-iron-800 tw-px-3 tw-py-1 tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100">
           {t(locale, "network.tdh.how.stack.day", {
             day: formatInteger(locale, today),

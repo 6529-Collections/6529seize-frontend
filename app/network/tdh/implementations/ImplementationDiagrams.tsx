@@ -581,7 +581,14 @@ export function CheckMatrix({
 }: {
   readonly locale: SupportedLocale;
   /** The Lean model's vector run, from its proof manifest. */
-  readonly lean: { readonly passed: number; readonly total: number };
+  readonly lean: {
+    readonly passed: number;
+    readonly total: number;
+    /** The P26 commit the model's build follows, short. */
+    readonly spec: string;
+    /** The next round's count, while it is not published. */
+    readonly newer: { readonly passed: number; readonly total: number } | null;
+  };
 }) {
   const m = (key: string) => t(locale, `network.tdh.impl.${key}` as MessageKey);
   const leanComplete =
@@ -593,15 +600,30 @@ export function CheckMatrix({
     if (cell === ALL_VECTORS || (cell === LEAN_VECTORS && leanComplete)) {
       return { tone: "now", label: all };
     }
+    // A count below P26's latest is a program one round behind, not a
+    // failure: say which round it passes in full.
+    if (cell === LEAN_VECTORS) {
+      return {
+        tone: cell.tone,
+        label:
+          lean.newer === null
+            ? t(locale, "network.tdh.impl.matrix.leanVectors", {
+                passed: formatInteger(locale, lean.passed),
+                spec: lean.spec,
+              })
+            : t(locale, "network.tdh.impl.matrix.leanVectorsNewer", {
+                passed: formatInteger(locale, lean.passed),
+                spec: lean.spec,
+                newerPassed: formatInteger(locale, lean.newer.passed),
+                newerTotal: formatInteger(locale, lean.newer.total),
+              }),
+      };
+    }
     if (cell.label === "ofVectors") {
       return {
         tone: cell.tone,
-        label: t(locale, "network.tdh.impl.matrix.ofVectors", {
-          passed: formatInteger(
-            locale,
-            cell === LEAN_VECTORS ? lean.passed : (cell.passed ?? 0)
-          ),
-          latest: formatInteger(locale, P26.vectorCount),
+        label: t(locale, "network.tdh.impl.matrix.round4Vectors", {
+          passed: formatInteger(locale, cell.passed ?? 0),
         }),
       };
     }

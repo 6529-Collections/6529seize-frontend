@@ -1,7 +1,6 @@
 import type { SupportedLocale } from "@/i18n/locales";
 import TdhTableFrame from "../shared/TdhTableFrame";
 import { t, type MessageKey } from "@/i18n/messages";
-import DifftestRounds from "../shared/DifftestRounds";
 import TdhArrowLink from "../shared/TdhArrowLink";
 import TdhCopyButton from "../shared/TdhCopyButton";
 import TdhSource from "../shared/TdhSource";
@@ -14,8 +13,10 @@ import {
   RULE_OUTPUT,
   RULE_RANGE,
   RULE_RATE_SPEC,
+  RULE_CYCLE_ROOT,
   RULE_REGISTRY,
   RULE_REGISTRY_CONSTRAINTS_CONDENSED,
+  RULE_REGISTRY_HASH,
   RULE_TOTALS_CONDENSED,
 } from "../shared/tdhRules";
 import {
@@ -136,6 +137,15 @@ export default function SpecSectionsB({
           {t(locale, "network.tdh.spec.s9.body")}
         </Plain>
         <Rule locale={locale} code={RULE_OUTPUT} source="P26 §9" />
+        <p className="tw-m-0 tw-max-w-3xl tw-text-[15px] tw-leading-7 tw-text-iron-200">
+          {t(locale, "network.tdh.spec.s9.root")}
+        </p>
+        <Rule
+          locale={locale}
+          code={RULE_CYCLE_ROOT}
+          source="P53 §4.2"
+          title={t(locale, "network.tdh.spec.s9.rootTitle")}
+        />
       </SpecSection>
 
       <SpecSection
@@ -233,6 +243,12 @@ export default function SpecSectionsB({
           </p>
         </div>
         <Rule locale={locale} code={RULE_REGISTRY} source="P26 §10" />
+        <Rule
+          locale={locale}
+          code={RULE_REGISTRY_HASH}
+          source="P28 §2.7"
+          title={t(locale, "network.tdh.spec.s10.hashRuleTitle")}
+        />
       </SpecSection>
 
       <SpecSection
@@ -245,6 +261,10 @@ export default function SpecSectionsB({
           {t(locale, "network.tdh.spec.s11.body")}
         </Plain>
         <DeviationsTable locale={locale} />
+        <p className="tw-m-0 tw-max-w-3xl tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+          {t(locale, "network.tdh.spec.s11.pending")}
+          <TdhSource refs={["P26 §6.3"]} locale={locale} />
+        </p>
       </SpecSection>
 
       <SpecSection
@@ -392,9 +412,12 @@ export default function SpecSectionsB({
                 </TdhArrowLink>
               )}
               {item.key === "difftest" && (
-                <div className="tw-mt-4">
-                  <DifftestRounds locale={locale} />
-                </div>
+                <TdhArrowLink
+                  href="/network/tdh/implementations#difftest-rounds"
+                  className="tw-mt-2"
+                >
+                  {t(locale, "network.tdh.shared.difftest.link")}
+                </TdhArrowLink>
               )}
             </article>
           ))}

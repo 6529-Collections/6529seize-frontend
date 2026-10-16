@@ -63,24 +63,31 @@ export interface TrackRecord {
   readonly allEqual: number;
   /** The first published day's date (YYYY-MM-DD). */
   readonly firstDate: string;
+  /** Every published day, oldest first: its date and whether all agreed. */
+  readonly results: readonly {
+    readonly date: string;
+    readonly equal: boolean;
+  }[];
 }
 
 /** The index's track record: days published, and days equal everywhere. */
 function trackRecord(index: VerificationIndex): TrackRecord {
   const days = index.days;
-  const allEqual = days.filter(
-    (day) =>
-      day.verdict === "OK" &&
-      day.identitiesTotal !== null &&
-      day.identitiesEqual === day.identitiesTotal &&
-      day.totalTdh.python === day.totalTdh.rust &&
-      day.totalTdh.live === day.totalTdh.rust
-  ).length;
+  const isEqual = (day: VerificationIndexDay) =>
+    day.verdict === "OK" &&
+    day.identitiesTotal !== null &&
+    day.identitiesEqual === day.identitiesTotal &&
+    day.totalTdh.python === day.totalTdh.rust &&
+    day.totalTdh.live === day.totalTdh.rust;
+  const allEqual = days.filter(isEqual).length;
+  const results = [...days]
+    .sort((a, b) => a.cycleDay - b.cycleDay)
+    .map((day) => ({ date: day.date, equal: isEqual(day) }));
   const firstDate = days.reduce(
     (first, day) => (day.date < first ? day.date : first),
     days[0]?.date ?? ""
   );
-  return { days: days.length, allEqual, firstDate };
+  return { days: days.length, allEqual, firstDate, results };
 }
 
 type DataSummary = Extract<VerificationSummary, { kind: "data" }>;
@@ -90,7 +97,12 @@ function summarizeDay(
   latest: VerificationIndexDay,
   day: VerificationDay | null,
   afterCutoverDone: boolean,
-  record: TrackRecord = { days: 1, allEqual: 0, firstDate: latest.date }
+  record: TrackRecord = {
+    days: 1,
+    allEqual: 0,
+    firstDate: latest.date,
+    results: [],
+  }
 ): DataSummary {
   const python =
     day !== null && day.implementations.python !== null

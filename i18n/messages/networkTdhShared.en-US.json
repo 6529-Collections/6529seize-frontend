@@ -42,7 +42,6 @@
   "network.tdh.shared.reset": "Reset",
   "network.tdh.shared.increase": "Increase {name}",
   "network.tdh.shared.decrease": "Decrease {name}",
-  "network.tdh.shared.sourceToBePublished": "Source to be published",
   "network.tdh.shared.headingLink": "Link to {heading}",
   "network.tdh.shared.linkCopied": "Link copied",
   "network.tdh.shared.onThisPage": "On this page",
@@ -64,7 +63,7 @@
   "network.tdh.shared.pager.next": "Next",
   "network.tdh.shared.pill.byDefinition": "By definition",
   "network.tdh.shared.pill.proposal": "Proposal, not adopted",
-  "network.tdh.shared.ruleCondensed": "Rule, line for line from P26",
+  "network.tdh.shared.ruleCondensed": "Exact rule, restated line by line",
   "network.tdh.shared.pill.toBePublished": "Source to be published",
   "network.tdh.shared.source.difftest": "Evidence: four-way differential tests, October 15, 2026",
   "network.tdh.shared.source.doc.P28": "Canonical encodings",
@@ -94,5 +93,8 @@
   "network.tdh.shared.legend.warning": "Provisional: a proposal, or not yet fully checked or published",
   "network.tdh.shared.legend.refuted": "Shown false",
   "network.tdh.shared.legend.error": "Two computations disagree",
-  "network.tdh.shared.legend.neutral": "For information"
+  "network.tdh.shared.legend.neutral": "For information",
+  "network.tdh.shared.showAllLines": "Show all {count} lines",
+  "network.tdh.shared.showFewerLines": "Show fewer lines",
+  "network.tdh.shared.difftest.link": "The four rounds of differential tests, round by round"
 }

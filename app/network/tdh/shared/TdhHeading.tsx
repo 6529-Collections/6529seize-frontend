@@ -1,6 +1,7 @@
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import TdhHeadingLink from "./TdhHeadingLink";
+import { noBreakTerms } from "./noBreakTerms";
 
 const INHERIT = {
   font: "inherit",
@@ -36,7 +37,7 @@ export default function TdhHeading({
         className="tw-m-0 tw-inline focus:tw-outline-none"
         style={INHERIT}
       >
-        {title}
+        {noBreakTerms(title)}
       </Tag>
       <TdhHeadingLink
         id={id}

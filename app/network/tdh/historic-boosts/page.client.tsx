@@ -18,6 +18,7 @@ import TdhSubnav from "../shared/TdhSubnav";
 import { TDH_H1, TDH_LEDE } from "../shared/tdhStyles";
 import {
   BoostTimeline,
+  CurrentLadder,
   CurrentRuleCard,
   CurrentRuleRow,
 } from "./HistoricBoostsCurrent";
@@ -104,6 +105,11 @@ export default function TDHHistoricBoostsPage() {
               locale={locale}
               onToggle={toggleRule}
             />
+            <CurrentLadder locale={locale} />
+            <p className="tw-m-0 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
+              {m(locale, "network.tdhHistoric.provenance")}
+              <TdhSource refs={["P26 §10", "DEV-3"]} locale={locale} />
+            </p>
           </div>
         </section>
         <TdhPager current="/network/tdh/historic-boosts" locale={locale} />
@@ -159,10 +165,11 @@ function HistoricRulesTable({
               >
                 {m(locale, "network.tdhHistoric.table.categoryC")}
               </th>
-              <th className={`${TABLE_HEADER_CLASS} tw-w-28`} scope="col">
-                <span className="tw-sr-only">
-                  {m(locale, "network.tdhHistoric.table.details")}
-                </span>
+              <th
+                className={`${TABLE_HEADER_CLASS} tw-w-28 tw-text-right`}
+                scope="col"
+              >
+                {m(locale, "network.tdhHistoric.table.details")}
               </th>
             </tr>
           </thead>

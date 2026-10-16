@@ -393,7 +393,7 @@ function DailyFlow({ locale }: { readonly locale: SupportedLocale }) {
           wide={<FlowWide label={label} />}
         />
       </div>
-      <p className="tw-m-0 tw-mt-3 tw-inline-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-dashed tw-border-primary-400/50 tw-px-3 tw-py-1 tw-text-xs tw-text-primary-300">
+      <p className="tw-m-0 tw-mt-3 tw-max-w-3xl tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-300">
         {label("sameCode")}
       </p>
     </figure>
@@ -423,7 +423,7 @@ export default function VerificationMethod({
         id="method"
         title={t(locale, "network.tdh.verify.method.heading")}
         locale={locale}
-        className="tw-hyphens-auto tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
+        className="tw-text-balance tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 min-[360px]:tw-text-2xl"
       />
       <div className="tw-mt-4 tw-space-y-8">
         <div className="tw-max-w-3xl">

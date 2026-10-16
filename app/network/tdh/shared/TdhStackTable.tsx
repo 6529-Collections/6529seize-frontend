@@ -13,6 +13,11 @@ interface TdhStackRow {
   readonly cellClassNames?: Readonly<Record<number, string>>;
 }
 
+const INLINE_LABEL =
+  "tw-mr-1.5 tw-inline tw-text-xs tw-font-medium tw-text-iron-400 xl:tw-hidden";
+const BLOCK_LABEL =
+  "tw-block tw-text-xs tw-font-medium tw-text-iron-400 xl:tw-hidden";
+
 const CELL =
   "tw-block tw-border-0 tw-p-0 tw-align-top tw-text-sm tw-leading-6 tw-text-iron-200 xl:tw-table-cell xl:tw-border-b xl:tw-border-solid xl:tw-border-white/[0.05] xl:tw-px-4 xl:tw-py-3";
 const HEADER =
@@ -28,10 +33,16 @@ export default function TdhStackTable({
   label,
   columns,
   rows,
+  inlineColumns = [],
 }: {
   readonly label: string;
   readonly columns: readonly TdhStackColumn[];
   readonly rows: readonly TdhStackRow[];
+  /**
+   * Columns with short values that a card shows on one line, label and
+   * value side by side, so the cards stay short on a phone.
+   */
+  readonly inlineColumns?: readonly number[];
 }) {
   return (
     <div className="xl:tw-overflow-hidden xl:tw-rounded-lg xl:tw-border xl:tw-border-solid xl:tw-border-white/[0.07]">
@@ -70,7 +81,13 @@ export default function TdhStackTable({
                 }
                 return (
                   <td key={column?.key ?? index} className={`${CELL} ${extra}`}>
-                    <span className="tw-block tw-text-xs tw-font-medium tw-text-iron-400 xl:tw-hidden">
+                    <span
+                      className={
+                        inlineColumns.includes(index)
+                          ? INLINE_LABEL
+                          : BLOCK_LABEL
+                      }
+                    >
                       {column?.label}
                     </span>
                     {cell}

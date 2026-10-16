@@ -14,10 +14,11 @@ import {
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
+import BoostLadder from "./shared/BoostLadder";
 import TdhDisclosure from "./shared/TdhDisclosure";
 import TDHSection, { TDH_PANEL, TDH_TEXT } from "./TDHSection";
 import {
-  getTdhFutureCeiling,
+  getTdhBoostLadder,
   tdhRulesSchema,
   type TdhRules,
 } from "./tdh-rules.helpers";
@@ -39,12 +40,9 @@ const formatMultiplier = (locale: SupportedLocale, value: number) =>
     maximumFractionDigits: 2,
   });
 
-export default function TDHCurrentRules({
-  locale,
-}: {
-  readonly locale: SupportedLocale;
-}) {
-  const query = useQuery({
+/** The current TDH rules from the API, shared by every page that shows them. */
+export function useTdhRules() {
+  return useQuery({
     queryKey: [QueryKey.TDH_RULES],
     queryFn: async ({ signal }) =>
       tdhRulesSchema.parse(
@@ -58,6 +56,14 @@ export default function TDHCurrentRules({
     staleTime: 5 * 60_000,
     retry: false,
   });
+}
+
+export default function TDHCurrentRules({
+  locale,
+}: {
+  readonly locale: SupportedLocale;
+}) {
+  const query = useTdhRules();
   return (
     <TDHSection
       id="tdh-1-4"
@@ -166,7 +172,7 @@ function Rules({
         })}{" "}
         {t(locale, "network.tdh.rules.snapshotNote")}
       </p>
-      <ul className="tw-m-0 tw-grid tw-list-none tw-gap-3 tw-p-0 sm:tw-grid-cols-3">
+      <ul className="tw-m-0 tw-grid tw-list-none tw-gap-3 tw-p-0 sm:tw-grid-cols-2">
         <li className={STAT}>
           <p className={STAT_LABEL}>
             {t(locale, "network.tdh.rules.full.title")}
@@ -201,26 +207,14 @@ function Rules({
             })}
           </p>
         </li>
-        <li className={STAT}>
-          <p className={STAT_LABEL}>
-            {t(locale, "network.tdh.rules.future.ceilingLabel")}
-          </p>
-          <p className={STAT_VALUE}>
-            {t(locale, "network.tdh.rules.future.ceiling", {
-              multiplier: formatMultiplier(locale, getTdhFutureCeiling(rules)),
-            })}
-          </p>
-          <p className={STAT_NOTE}>
-            {t(locale, "network.tdh.rules.future.ceilingShort", {
-              last: formatInteger(
-                locale,
-                boost.season_schedule.last_boosted_season
-              ),
-              gradients: formatInteger(locale, boost.gradients.max_count),
-            })}
-          </p>
-        </li>
       </ul>
+      <BoostLadder
+        locale={locale}
+        values={getTdhBoostLadder(rules)}
+        eligibleMemes={snapshot.eligible_memes_count}
+        lastSeason={boost.season_schedule.last_boosted_season}
+        gradients={boost.gradients.max_count}
+      />
       <PartialSets rules={rules} locale={locale} />
       <TdhDisclosure
         tone="strong"

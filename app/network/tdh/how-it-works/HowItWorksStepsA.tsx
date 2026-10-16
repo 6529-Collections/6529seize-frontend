@@ -1,4 +1,5 @@
 import { formatInteger, formatNumber } from "@/i18n/format";
+import TdhArrowLink from "../shared/TdhArrowLink";
 import TdhTableFrame from "../shared/TdhTableFrame";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -9,7 +10,6 @@ import {
   wholeDays,
 } from "@/lib/tdh/tdhV1Arithmetic";
 import TransactionBoxDiagram from "../shared/diagrams/TransactionBoxDiagram";
-import TdhStatusPill from "../shared/TdhStatusPill";
 import {
   RULE_CUTOFF,
   RULE_DAYS,
@@ -57,6 +57,12 @@ function Step1({ locale }: { readonly locale: SupportedLocale }) {
     >
       <Cited locale={locale}>{t(locale, "network.tdh.how.s1.body")}</Cited>
       <Cited locale={locale}>{t(locale, "network.tdh.how.s1.finality")}</Cited>
+      <Cited locale={locale} muted>
+        {t(locale, "network.tdh.how.s1.daily")}
+      </Cited>
+      <TdhArrowLink href="/network/tdh/verification">
+        {t(locale, "network.tdh.how.s1.dailyLink")}
+      </TdhArrowLink>
       <Example locale={locale}>
         <p className="tw-m-0">
           {t(locale, "network.tdh.how.s1.example", {
@@ -232,7 +238,6 @@ function Step5({ locale }: { readonly locale: SupportedLocale }) {
       sources={["P26 §7.1", "D131", "D121", "Comparison Oct 14–15", "P26 §13"]}
       step={5}
       title={t(locale, "network.tdh.how.s5.title")}
-      pills={<TdhStatusPill pill="inSpec" locale={locale} />}
       rule={RULE_NETTING}
       ruleSource="P26 §7.1"
     >

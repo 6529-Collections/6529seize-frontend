@@ -16,6 +16,7 @@ import {
   isStaticAssetPath,
   isUnservableDotPath,
 } from "@/lib/proxy/publicPaths";
+import { isImpossibleTdhVerificationDay } from "@/lib/proxy/tdhVerificationDay";
 import { publicEnv } from "./config/env";
 import { API_AUTH_COOKIE } from "./constants/constants";
 
@@ -343,6 +344,10 @@ export default async function proxy(req: NextRequest) {
       pathname.length > 1 && pathname.endsWith("/")
         ? pathname.slice(0, -1)
         : pathname;
+
+    if (isImpossibleTdhVerificationDay(normalizedPathname, Date.now())) {
+      return plainNotFoundResponse();
+    }
 
     const redirectTarget = normalizedPathname.startsWith("/my-stream")
       ? resolveMyStreamRedirect(req, normalizedPathname)

@@ -9,7 +9,6 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { VerificationSummary } from "@/lib/tdh/verification/summary.server";
 import { MINUTE_EXAMPLE } from "./how-it-works/examples";
-import TdhStatusPill from "./shared/TdhStatusPill";
 import { TDH_FOCUS_RING, TDH_H1, TDH_LEDE } from "./shared/tdhStyles";
 import { formatCycleDate } from "./verification/components/verificationFormat";
 
@@ -142,10 +141,11 @@ function stripSentence(
 }
 
 /**
- * The latest daily result near the top of the overview: the track record,
- * the latest day in one sentence, and its limit (history not yet fully
- * checked) beside it, so the claim carries its own caveat. The way into the
- * dashboard.
+ * The latest daily result near the top of the overview: the track record and
+ * the latest day in one sentence, with its limit (history not yet fully
+ * checked) in the same sentence, so the claim carries its own caveat. The
+ * status itself, with its pill, is in "Checked daily, in public"; this strip
+ * is the way into the dashboard.
  */
 function VerifiedStrip({
   locale,
@@ -180,12 +180,15 @@ function VerifiedStrip({
                 </span>
               )}
             </span>
-            {!awaiting && summary.historyChecked === false && (
-              <TdhStatusPill pill="unchecked" locale={locale} size="sm" />
-            )}
           </span>
           <span className="tw-text-sm tw-leading-6 tw-text-iron-200">
             {stripSentence(locale, summary)}
+            {!awaiting && summary.historyChecked === false && (
+              <span className="tw-text-iron-400">
+                {" "}
+                {t(locale, "network.tdh.explainer.strip.unchecked")}
+              </span>
+            )}
           </span>
         </span>
       </span>

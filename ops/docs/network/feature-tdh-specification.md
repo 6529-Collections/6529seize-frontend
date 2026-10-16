@@ -7,16 +7,18 @@ Parent: [Network Index](README.md)
 `/network/tdh/specification` restates specification P26 (TDH-v1, rule
 version `tdh-v1.0`, at commit `f840096`, its latest change, October 16, 2026)
 section by section: each section in plain words beside the rule, either quoted
-(`Exact rule`) or P26's prose rules line for line (`Rule, line for line from
-P26`): log selection and positions, decoding, mints and sinks, header order,
+(`Exact rule`) or P26's prose rules line for line (`Exact rule, restated
+line by line`): log selection and positions, decoding, mints and sinks, header order,
 delegation events, identities, records, totals, the numeric range and the
 registry's constraints. It opens with a
 map of how the sections feed each other and a symbol table, and lists the
 parameter registry and its hash, the 19 deviations from the old backend with
 their decisions, the 15 old-backend issues, the decisions the TDH pages cite,
 the evidence and the changes since 15 October. The header carries the rule
-version and a `Proposal, not adopted` pill, and says that P26's full text,
-its vectors and the Lean model are published with the source (D116).
+version (not frozen until launch) and a `Proposal, not adopted` pill, and
+says that P26's full text, its vectors and the Lean model are in 6529's
+private design repository, and that the validator source, which carries a
+copy of the vectors, is to be published when the owner decides (D116).
 
 Every source chip on the TDH pages resolves to an anchor on this page, so no
 chip links to a private repository.
@@ -59,13 +61,26 @@ chip links to a private repository.
   (§5's mint facts read the steps), then §7.2's per-token values and §7.3's
   records. The netting block names the transaction's set S, since M is the
   cycle boundary.
-- Section 13 has a `For implementers` box: the registry hash's encoding, the
-  output encoding and roots, and the edition-floor adapter are in documents
-  not yet published (P28, P53), and what to check against meanwhile.
-- The sections map draws the parameters (§10) under §5 to §8 with an arrow
-  into each, every node the same height from `xl`.
+- Section 9 quotes the cycle root validators are to sign (P53 §4.2);
+  section 10 gives how the registry hash is computed (P28's `TAG`, `H`,
+  `abi.encode` with the declared types, and the stored CE record); section
+  11 adds a note on groups of four wallets, which P26's list does not yet
+  hold. Section 13 has a `For implementers` box.
+- The sections map draws the parameter registry (§10) feeding sections 2 to
+  8, every node the same height from `xl`.
+- A subsection's plain words are ordinary prose; only a section's summary
+  carries the primary rule at its side. Rule blocks and tables take the
+  whole content column; prose keeps its measure.
 - Column-aligned blocks (§6.2's pair states, §8.7's range) never wrap and
-  scroll sideways inside their frame when the column is too narrow.
+  scroll sideways inside their frame when the column is too narrow, with a
+  shadow at a cut edge. On phones every exact rule keeps its lines and
+  scrolls the same way, and a block of 16 lines or more shows its first
+  lines and `Show all N lines`.
+- `Changes since October 15` says that two of the seven changes concern a
+  real day's values: the edition-floor correction (a text that would have
+  lowered 285 identities by 111,494 TDH on October 11) and D131's netting;
+  the vectors grew from 35 to 89. The four rounds of differential tests are
+  linked to their table on the Implementations page.
 - Rule blocks longer than seven lines are numbered, and comments are set in
   a quieter colour.
 - The page is static content; changing it is a reviewed content change

@@ -28,7 +28,14 @@
  *   SVG text whose contrast with what is drawn under it is below AA;
  * - broken table layouts: a <caption> taken out of flow (the sr-only
  *   caption that adds an anonymous column), or rows that do not span their
- *   table.
+ *   table;
+ * - controls too small to hit: a button, switch, select, summary or text
+ *   field under 24 x 24 px (WCAG 2.2 AA 2.5.8), and a text field or select
+ *   under 40 px tall, or 44 px in the phone view.
+ *
+ * A view whose page or browser crashes, or that does not finish within its
+ * time, fails at once with an error instead of stopping the run; a crashed
+ * browser is started again for the next view.
  *
  * Usage (a dev server or `next start` must be running):
  *
@@ -166,8 +173,10 @@ function parseArgs(argv) {
  * Runs in the page. Returns every violation of the geometric and type checks
  * inside <main>, plus the page-level overflow.
  */
-function inspectPage(minFontPx) {
-  const MIN_FONT_PX = minFontPx ?? 12;
+function inspectPage(limits) {
+  const MIN_FONT_PX = limits?.minFontPx ?? 12;
+  const MIN_FIELD_PX = limits?.minFieldPx ?? 40;
+  const MIN_TARGET_PX = 24;
   const violations = [];
   const root = document.querySelector("main") ?? document.body;
   const vw = document.documentElement.clientWidth;
@@ -628,7 +637,31 @@ function inspectPage(minFontPx) {
     }
   }
 
-  // 5. SVG text contrast against what is drawn under it.
+  // 5. Controls too small to hit (WCAG 2.5.8), and short text fields.
+  const FIELD = 'input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea';
+  const TARGET = `button, [role="button"], [role="switch"], summary, ${FIELD}`;
+  for (const el of root.querySelectorAll(TARGET)) {
+    if (!isShown(el)) continue;
+    const r = el.getBoundingClientRect();
+    if (r.width === 0 || r.height === 0) continue;
+    if (r.width < MIN_TARGET_PX - 0.5 || r.height < MIN_TARGET_PX - 0.5) {
+      add(
+        "small-target",
+        el,
+        `${Math.round(r.width)} x ${Math.round(r.height)} px, under ${MIN_TARGET_PX} x ${MIN_TARGET_PX}`
+      );
+      continue;
+    }
+    if (el.matches(FIELD) && r.height < MIN_FIELD_PX - 0.5) {
+      add(
+        "short-field",
+        el,
+        `${Math.round(r.height)} px tall, under ${MIN_FIELD_PX}`
+      );
+    }
+  }
+
+  // 6. SVG text contrast against what is drawn under it.
   const parseColor = (value) => {
     const m = /rgba?\(([^)]+)\)/.exec(value ?? "");
     if (!m) return null;
@@ -779,11 +812,22 @@ async function checkView(browser, args, route, widthKey) {
   const page = await context.newPage();
   const url = new URL(route, args.base).toString();
   const result = { route, width: view.label, violations: [], error: null };
-  try {
-    const response = await page.goto(url, {
-      waitUntil: "load",
-      timeout: args.timeout,
+  let crashed = null;
+  const crash = new Promise((_, reject) => {
+    page.on("crash", () => {
+      crashed = new Error("page crashed");
+      reject(crashed);
     });
+  });
+  crash.catch(() => {});
+  const guard = (promise) => Promise.race([promise, crash]);
+  try {
+    const response = await guard(
+      page.goto(url, {
+        waitUntil: "load",
+        timeout: args.timeout,
+      })
+    );
     const status = response?.status() ?? 0;
     if (status >= 400) {
       result.error = `HTTP ${status}`;
@@ -791,10 +835,14 @@ async function checkView(browser, args, route, widthKey) {
     }
     await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => {});
     // First as the page loads, every <details> closed; then all open.
-    await settle(page, false);
-    const closed = await page.evaluate(inspectPage, view.minFontPx ?? 12);
-    await settle(page, true);
-    const opened = await page.evaluate(inspectPage, view.minFontPx ?? 12);
+    await guard(settle(page, false));
+    const limits = {
+      minFontPx: view.minFontPx ?? 12,
+      minFieldPx: view.hasTouch ? 44 : 40,
+    };
+    const closed = await guard(page.evaluate(inspectPage, limits));
+    await guard(settle(page, true));
+    const opened = await guard(page.evaluate(inspectPage, limits));
     const seen = new Set();
     for (const [pass, list] of [
       ["closed", closed],
@@ -835,19 +883,39 @@ async function checkView(browser, args, route, widthKey) {
   } catch (error) {
     result.error = String(error?.message ?? error).split("\n")[0];
   } finally {
-    await context.close();
+    await context.close().catch(() => {});
   }
   return result;
+}
+
+/** A view that does not finish in time fails, so the run never hangs. */
+function withDeadline(promise, ms, label) {
+  let timer;
+  const deadline = new Promise((resolve) => {
+    timer = setTimeout(
+      () =>
+        resolve({
+          route: label.route,
+          width: label.width,
+          violations: [],
+          error: `view did not finish in ${Math.round(ms / 1000)} s`,
+        }),
+      ms
+    );
+  });
+  return Promise.race([promise, deadline]).finally(() => clearTimeout(timer));
 }
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   mkdirSync(args.out, { recursive: true });
-  const browser = await chromium.launch({
-    headless: true,
-    channel: args.channel,
-    timeout: 60_000,
-  });
+  const launch = () =>
+    chromium.launch({
+      headless: true,
+      channel: args.channel,
+      timeout: 60_000,
+    });
+  let browser = await launch();
   const results = [];
   try {
     let routes = args.routes ?? DEFAULT_ROUTES;
@@ -870,7 +938,15 @@ async function main() {
     for (const route of routes) {
       for (const width of args.widths) {
         const started = Date.now();
-        const result = await checkView(browser, args, route, width);
+        if (!browser.isConnected()) {
+          console.log("  (browser restarted after a crash)");
+          browser = await launch();
+        }
+        const result = await withDeadline(
+          checkView(browser, args, route, width),
+          args.timeout + 180_000,
+          { route, width: VIEWS[width].label }
+        );
         results.push(result);
         const status = result.error
           ? `ERROR ${result.error}`
@@ -889,7 +965,7 @@ async function main() {
       }
     }
   } finally {
-    await browser.close();
+    await browser.close().catch(() => {});
   }
   writeFileSync(
     path.join(args.out, "report.json"),

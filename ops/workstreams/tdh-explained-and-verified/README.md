@@ -51,8 +51,12 @@ element overflow, text that escapes its frame or is clipped, SVG text that
 is not 4 px inside the box drawn around it, sideways scrolling outside the
 marked scroll regions, text collisions, one word per line, text under 12 px
 (SVG included; 9 px in the 320 window), WCAG 2.2 AA failures from axe-core,
-SVG text contrast, and tables broken by an out-of-flow caption.
-`--widths 1024,360d` adds the other bands.
+SVG text contrast, tables broken by an out-of-flow caption, and controls
+too small to hit (a button, switch, select or summary under 24 x 24 px, a
+text field or select under 40 px tall, 44 px in the phone view). A view
+whose page or browser crashes, or that does not finish in time, fails at
+once instead of stopping the run. `--widths 1024,360d` adds the other
+bands.
 
 ## Open items before the cutover
 
@@ -61,8 +65,10 @@ SVG text contrast, and tables broken by an out-of-flow caption.
   identity of three from four wallets that all confirm each other (from the
   newest link) and the fourth counts on its own. The pages say so (step 10
   and step 14 of How it works, the overview's FAQ, both consolidation
-  pages); such groups split that way at the cutover unless the owner amends
-  P26. The guided setup itself does not warn yet.
+  pages, the specification's section 11 and the dashboard's classes); such
+  groups split that way at the cutover unless the owner amends P26. The
+  guides recommend three, and guided setup warns once a fourth wallet is
+  listed.
 - The Rust core and program B pass the 75 vectors of P26's fourth round in
   the validator's development branch (`28a6072`, 15 October 2026; the
   repository's main is not updated), not yet the fifth round's vectors 75
@@ -87,8 +93,11 @@ SVG text contrast, and tables broken by an out-of-flow caption.
   start of the daily runs (16 October 2026) to about 23 October 2026 (D132)
   and shows "Switched on" only when the feed says the cutover is done.
 - The feed could add SHA-256s of the canonical input and of the Rust and
-  Python record files, and the comparison tool's commit, so anyone can
-  compare files, not just roots.
+  Python record files, each day file's SHA-256 and the previous day's in
+  `index.json`, the rule version, registry hash and P26 commit of each run,
+  and the comparison tool's commit, so anyone can compare files, not just
+  roots (the feed's `publish_feed.py` is in the validator repository). Day
+  pages already show the SHA-256 of the file they read.
 - The Formal model page takes its statuses from the proof manifest
   (`formal/manifest.json` on the feed), falling back to the bundled copy
   (`lib/tdh/formal/bundledManifest.ts`, model at `7bf579a`); refresh the copy
@@ -97,15 +106,20 @@ SVG text contrast, and tables broken by an out-of-flow caption.
   switches when the published manifest proves `computeCycleFromSource_perm`
   or `canonicalTransfers_oneLog`. Publishing round 5's manifest
   (`design/tdh-lean/proof-manifest.json` at `6b32f3f`, with its source
-  fields) to the feed is the next step; it is outside this repository.
+  fields) to the feed is the next step; it is outside this repository. Until
+  then the page labels its body with the published build and gives round 5
+  a section of its own.
 - Vector 18's description in 6529chain names a real token and cycle
   ("Observed on 2026-10-11 (NextGen #...)"); the pages no longer show it
-  (the anatomy uses synthetic vector 36), but the description should be
-  made synthetic before the vectors are published (D116).
-- Unknown day permalinks show the not-found page with status 200:
-  `app/network/loading.tsx` starts streaming before the page can call
-  `notFound()`. The title says the day was not found and the page is
-  `noindex`.
+  (the anatomy uses vector 36) and no longer say the vector files are all
+  synthetic, but the vector should be made synthetic before the vectors are
+  published (D116).
+- A day permalink that cannot name a published day (not a canonical cycle
+  day, before 20,740 or after the latest closed cycle) gets a plain 404 from
+  `proxy.ts` (`lib/proxy/tdhVerificationDay.ts`). A day inside that range
+  that the feed does not list still shows the not-found page with status
+  200 (`app/network/loading.tsx` starts streaming before the page can call
+  `notFound()`), titled day not found and `noindex`.
 - History is labelled not yet fully checked until 6529's own Ethereum node
   (expected about 18 October 2026) is synced and the daily run checks the
   whole history against it.
