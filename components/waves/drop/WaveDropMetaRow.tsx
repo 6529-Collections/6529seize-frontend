@@ -52,7 +52,10 @@ export const WaveDropMetaRow = ({
     </div>
     {(drop.collaborators?.length ?? 0) > 0 && (
       <div className="tw-mt-3">
-        <MemeCollaboratorCredits collaborators={drop.collaborators} />
+        <MemeCollaboratorCredits
+          collaborators={drop.collaborators}
+          size="default"
+        />
       </div>
     )}
   </>

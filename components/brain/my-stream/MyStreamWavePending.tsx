@@ -95,7 +95,7 @@ export default function MyStreamWavePending({
               }`}
             >
               {preview?.parentWaveId && (
-                <div aria-hidden="true" className="tw-mb-0.5 tw-h-6 md:tw-mb-0">
+                <div aria-hidden="true" className="tw-h-6">
                   <div className="tw-h-2 tw-w-24 tw-rounded-md tw-bg-iron-800" />
                 </div>
               )}

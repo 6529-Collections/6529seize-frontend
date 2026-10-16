@@ -185,13 +185,13 @@ export function MemeCollaborationPanel({
     (item) => item.status === ApiMemeCollaborationInvitationStatusEnum.Pending
   ).length;
   return (
-    <div className="tw-mt-4 tw-space-y-3">
+    <div className="tailwind-scope tw-mt-4 tw-space-y-3">
       {isAuthor ? (
         <>
           {!!data.invitations.length && (
             <Button
-              variant="ghost"
-              size="sm"
+              variant="secondary"
+              size="lg"
               aria-expanded={expanded}
               aria-controls={invitationsId}
               onClick={() => setExpanded((value) => !value)}

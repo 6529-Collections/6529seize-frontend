@@ -74,15 +74,14 @@ export function MemeCollaboratorPicker({
     }
   };
   return (
-    <div className="tw-space-y-3">
+    <div className="tailwind-scope tw-space-y-3">
       <Button
-        variant="ghost"
-        size="sm"
+        variant="secondary"
+        size="lg"
         aria-expanded={expanded}
         aria-controls={contentId}
         disabled={disabled || resolving}
         onClick={() => setExpanded((value) => !value)}
-        className="tw-min-h-11 !tw-px-0"
       >
         {collaborators.length ? (
           <span>

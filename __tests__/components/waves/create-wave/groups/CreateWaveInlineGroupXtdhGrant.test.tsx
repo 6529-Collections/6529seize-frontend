@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
@@ -44,8 +44,23 @@ jest.mock("@/hooks/useXtdhGrantsSearchQuery", () => ({
 jest.mock("@/components/utils/input/identity/IdentitySearch", () => ({
   __esModule: true,
   IdentitySearchSize: { SM: "SM" },
-  default: function MockIdentitySearch() {
-    return <div>Grantor search</div>;
+  default: function MockIdentitySearch({
+    identity,
+    setIdentity,
+  }: {
+    readonly identity: string | null;
+    readonly setIdentity: (identity: string | null) => void;
+  }) {
+    return (
+      <label>
+        Grantor search
+        <input
+          aria-label="Grantor"
+          value={identity ?? ""}
+          onChange={(event) => setIdentity(event.target.value || null)}
+        />
+      </label>
+    );
   },
 }));
 
@@ -73,7 +88,11 @@ jest.mock(
     }
 );
 
-function TestEditor() {
+function TestEditor({
+  networkPresentation = false,
+}: {
+  readonly networkPresentation?: boolean;
+}) {
   const [draft, setDraft] = useState<ApiCreateGroup>(() => {
     const emptyDraft = createEmptyInlineGroupPayload();
     return {
@@ -89,6 +108,7 @@ function TestEditor() {
   return (
     <>
       <CreateWaveInlineGroupRuleEditor
+        networkPresentation={networkPresentation}
         draft={draft}
         activeRule={CreateWaveInlineGroupRuleType.XTDH_GRANT}
         onDraftChange={setDraft}
@@ -104,9 +124,52 @@ function TestEditor() {
 }
 
 describe("CreateWaveInlineGroupXtdhGrant", () => {
+  it.each(["collection", "grantor", "status"] as const)(
+    "shows Clear filters only after changing the Network %s filter and restores defaults",
+    async (filter) => {
+      const user = userEvent.setup();
+      render(<TestEditor networkPresentation />);
+      const clearFilters = () =>
+        screen.queryByRole("button", { name: "Clear filters" });
+      expect(clearFilters()).not.toBeInTheDocument();
+
+      if (filter === "collection") {
+        await user.type(
+          screen.getByRole("textbox", { name: "Collection name" }),
+          "Memes"
+        );
+      } else if (filter === "grantor") {
+        await user.type(
+          screen.getByRole("textbox", { name: "Grantor" }),
+          "alice"
+        );
+      } else {
+        await user.click(screen.getByRole("button", { name: "Pending" }));
+      }
+
+      await user.click(screen.getByRole("button", { name: "Clear filters" }));
+      await waitFor(() => expect(clearFilters()).not.toBeInTheDocument());
+      expect(
+        screen.getByRole("textbox", { name: "Collection name" })
+      ).toHaveValue("");
+      expect(screen.getByRole("textbox", { name: "Grantor" })).toHaveValue("");
+      expect(screen.getByRole("button", { name: "Granted" })).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      );
+      expect(screen.getByRole("button", { name: "Granted" })).toHaveFocus();
+      expect(
+        screen.getByRole("status", { name: "Selected grant" })
+      ).toHaveTextContent("none");
+    }
+  );
+
   it("searches first, then shows controls for the selected grant", async () => {
     const user = userEvent.setup();
     render(<TestEditor />);
+    expect(
+      screen.getByRole("button", { name: "Clear filters" })
+    ).toBeInTheDocument();
 
     expect(
       screen.queryByRole("textbox", { name: "Grant ID" })

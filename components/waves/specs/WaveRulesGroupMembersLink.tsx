@@ -11,6 +11,8 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { fetchSavedGroupMembersPage } from "@/services/api/group-members-api";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { useContext, useId } from "react";
+import { WaveInformationPanelContext } from "@/components/brain/mobile/WaveInformationPanelContext";
 
 export default function WaveRulesGroupMembersLink({
   groupId,
@@ -24,6 +26,8 @@ export default function WaveRulesGroupMembersLink({
   readonly linkLabel?: string | undefined;
 }) {
   const locale = useBrowserLocale();
+  const criteriaId = useId();
+  const informationPanel = useContext(WaveInformationPanelContext);
   const {
     data: members,
     isError: isMembersError,
@@ -83,13 +87,15 @@ export default function WaveRulesGroupMembersLink({
   }
 
   return (
-    <div className="tw-flex tw-max-w-full tw-flex-col tw-items-end tw-gap-1">
-      <Link
-        href={href}
-        aria-label={linkLabel ? `${linkLabel}: ${countLabel}` : countLabel}
-        title={groupName}
-        className="tw-inline-flex tw-min-h-11 tw-max-w-full tw-cursor-pointer tw-items-center tw-justify-end tw-break-words tw-rounded-md tw-text-right tw-text-iron-50 tw-underline tw-underline-offset-2 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300 desktop-hover:hover:tw-decoration-2 sm:tw-min-h-9"
-      >
+    <Link
+      href={href}
+      onNavigate={() => informationPanel?.prepareNavigation?.(href)}
+      aria-label={linkLabel ? `${linkLabel}: ${countLabel}` : countLabel}
+      aria-describedby={criteriaId}
+      title={groupName}
+      className="tw-inline-flex tw-min-h-11 tw-max-w-full tw-cursor-pointer tw-flex-col tw-items-end tw-justify-center tw-gap-0.5 tw-break-words tw-rounded-md tw-text-right tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300 sm:tw-min-h-9"
+    >
+      <span className="tw-inline-flex tw-underline tw-underline-offset-2">
         {areMembersLoading ? (
           <span className="tw-h-4 tw-w-28 tw-animate-pulse tw-rounded tw-bg-iron-700 motion-reduce:tw-animate-none">
             <span className="tw-sr-only">{countLabel}</span>
@@ -97,13 +103,14 @@ export default function WaveRulesGroupMembersLink({
         ) : (
           countLabel
         )}
-      </Link>
-      <p
+      </span>
+      <span
+        id={criteriaId}
         aria-live="polite"
-        className="tw-mb-0 tw-max-w-xl tw-break-words tw-text-right tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500"
+        className="tw-max-w-xl tw-break-words tw-text-right tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500"
       >
         {criteriaLabel}
-      </p>
-    </div>
+      </span>
+    </Link>
   );
 }
