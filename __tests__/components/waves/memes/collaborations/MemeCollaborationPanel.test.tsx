@@ -462,7 +462,6 @@ it("opens an empty manager for an eligible author and closes without submitting 
   mount({ ...pending, can_invite: true, invitations: [] });
   const trigger = await screen.findByRole("button", {
     name: "Manage collaborators",
-    exact: true,
   });
   expect(screen.queryByText("Select collaborator C")).not.toBeInTheDocument();
   fireEvent.click(trigger);

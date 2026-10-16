@@ -1856,7 +1856,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         page.getByRole("button", { name: "Add collaborators", exact: true })
       ).toHaveCount(0);
       await expect(manage).toHaveCSS("border-top-style", "solid");
-      const summary = manage.locator("xpath=ancestor::div[2]");
+      const summary = page
+        .getByRole("button", { name: /Manage collaborators/ })
+        .locator("xpath=ancestor::div[2]");
       const author = summary.getByRole("link", {
         name: fixture.drops[0].author.handle,
         exact: false,
