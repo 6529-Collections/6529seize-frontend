@@ -144,7 +144,10 @@ for (const app of [false, true]) {
       const bounds = await pending.boundingBox();
       const pendingHeader = app
         ? null
-        : await pending.locator(":scope > div").first().boundingBox();
+        : await pending
+            .getByRole("heading")
+            .locator("xpath=ancestor::div[contains(@class, 'tw-border-b')][1]")
+            .boundingBox();
       const pendingName = app
         ? null
         : await pending.getByRole("heading").locator("span").boundingBox();
@@ -181,7 +184,8 @@ for (const app of [false, true]) {
       expect(ready?.height).toBe(bounds?.height);
       if (pendingHeader) {
         const readyHeader = await page
-          .locator("#tabs-container h1")
+          .getByTestId("wave-content")
+          .getByRole("heading")
           .first()
           .locator("xpath=ancestor::div[contains(@class, 'tw-border-b')][1]")
           .boundingBox();
@@ -424,8 +428,8 @@ test("keeps the subwave title in place when parent navigation arrives", async ({
     const pending = page.getByTestId("wave-pending");
     await expect(pending.getByRole("heading")).toHaveText(NAME);
     const pendingHeader = await pending
-      .locator(":scope > div")
-      .first()
+      .getByRole("heading")
+      .locator("xpath=ancestor::div[contains(@class, 'tw-border-b')][1]")
       .boundingBox();
     const before = await pending
       .getByRole("heading")
@@ -434,7 +438,10 @@ test("keeps the subwave title in place when parent navigation arrives", async ({
     release();
     const ready = page.getByTestId("wave-content").getByRole("heading").first();
     await expect(ready).toHaveText(NAME);
-    const readyHeader = await ready
+    const readyHeader = await page
+      .getByTestId("wave-content")
+      .getByRole("heading")
+      .first()
       .locator("xpath=ancestor::div[contains(@class, 'tw-border-b')][1]")
       .boundingBox();
     expect(readyHeader?.height).toBe(pendingHeader?.height);
