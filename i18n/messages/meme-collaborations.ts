@@ -53,5 +53,13 @@ export const MEME_COLLABORATION_MESSAGES = {
   "memes.collaborations.updatedNotification":
     "An artwork collaboration invitation was updated.",
   "memes.collaborations.open": "Review artwork and collaboration",
+  "memes.collaborations.actorInvited": "invited you to collaborate on",
+  "memes.collaborations.actorAccepted":
+    "accepted your collaboration invitation for",
+  "memes.collaborations.recipientInvited": "You were invited to collaborate on",
+  "memes.collaborations.recipientAccepted":
+    "A collaborator accepted your collaboration invitation for",
+  "memes.collaborations.artworkFallback": "an artwork",
+  "memes.collaborations.viewArtwork": "View artwork",
   "memes.collaborations.reviewMedia": "Open artwork media for review",
 } as const;

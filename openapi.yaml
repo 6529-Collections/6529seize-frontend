@@ -33849,6 +33849,11 @@ components:
     ApiNotificationAdditionalContextV2:
       type: object
       properties:
+        artwork_name:
+          type: string
+          description: >-
+            Artwork name saved when a MEME_COLLABORATION invitation is sent or
+            accepted. Absent for older notifications.
         invitation_id:
           type: string
         actor_id:

@@ -1573,10 +1573,21 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     ).toEqual([]);
   });
 
-  test("spaces invitation and acceptance notifications without merging time and links", async ({
+  test("shows collaboration actors and named artwork in the standard notification header", async ({
     page,
   }, testInfo) => {
     await installCompetitionApi(page);
+    const origin = getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"]);
+    const response = await page.request.get(
+      `${origin}/api/v2/waves/${WAVE}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const fixture = await response.json();
+    const pfp =
+      "data:image/svg+xml;base64," +
+      Buffer.from(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28"><rect width="28" height="28" fill="#9b7ec8"/></svg>'
+      ).toString("base64");
     await page.route("**/api/v2/notifications**", (route) =>
       route.fulfill({
         json: {
@@ -1586,36 +1597,53 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
             cause: "MEME_COLLABORATION",
             created_at: Date.now() - 3 * 60 * 60 * 1000,
             read_at: null,
+            related_identity: {
+              ...fixture.drops[0].author,
+              id: `notification-actor-${index}`,
+              handle: index === 0 ? "phoebeum" : "prxt0",
+              pfp,
+            },
             additional_context: {
               event_type: event,
               wave_id: WAVE,
               drop_id: entryDropId("alpha"),
               invitation_id: `invite-${index}`,
+              artwork_name: "Test Cat",
             },
           })),
         },
       })
     );
     await page.goto("/notifications");
-    for (const copy of [
-      "You were invited to collaborate on an artwork.",
-      "A collaborator accepted your artwork invitation.",
+    for (const [handle, action, message] of [
+      ["phoebeum", "Review invitation", "invited you to collaborate on"],
+      ["prxt0", "View artwork", "accepted your collaboration invitation for"],
     ]) {
-      const message = page.getByText(copy, { exact: true });
-      await expect(message).toBeVisible();
-      const row = message.locator("..");
-      const link = row
-        .locator("..")
-        .getByRole("link", { name: "Review artwork and collaboration" });
+      const actor = page.getByRole("link", { name: handle, exact: true });
+      await expect(actor).toBeVisible();
+      await expect(actor).toHaveAttribute("href", `/${handle}`);
+      await expect(
+        page.getByRole("img", { name: handle, exact: true })
+      ).toBeVisible();
+      const row = actor.locator("xpath=ancestor::div[1]");
+      await expect(row.getByText(message, { exact: true })).toBeVisible();
+      const artwork = row.getByRole("link", { name: "Test Cat", exact: true });
+      const link = row.getByRole("link", { name: action, exact: true });
+      await expect(artwork).toBeVisible();
       await expect(link).toBeVisible();
-      const messageBox = await message.boundingBox();
-      const rowBox = await row.boundingBox();
+      const artworkHref = `/waves/${encodeURIComponent(WAVE)}?drop=${encodeURIComponent(entryDropId("alpha"))}`;
+      await expect(artwork).toHaveAttribute("href", artworkHref);
+      await expect(link).toHaveAttribute("href", artworkHref);
+      const actorBox = await actor.boundingBox();
+      const artworkBox = await artwork.boundingBox();
       const linkBox = await link.boundingBox();
-      expect(messageBox).not.toBeNull();
-      expect(rowBox).not.toBeNull();
+      expect(actorBox).not.toBeNull();
+      expect(artworkBox).not.toBeNull();
       expect(linkBox).not.toBeNull();
-      expect(Math.abs(messageBox!.x - linkBox!.x)).toBeLessThan(1);
-      expect(linkBox!.y).toBeGreaterThanOrEqual(rowBox!.y + rowBox!.height + 6);
+      expect(Math.abs(actorBox!.x - linkBox!.x)).toBeLessThan(1);
+      expect(linkBox!.y).toBeGreaterThanOrEqual(
+        artworkBox!.y + artworkBox!.height + 4
+      );
     }
     await expectNoHorizontalOverflow(page);
     await page.screenshot({
