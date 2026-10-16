@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import Button from "@/components/utils/button/Button";
 import IdentitySearch from "@/components/utils/input/identity/IdentitySearch";
 import type { SelectableIdentityOption } from "@/components/utils/input/profile-search/getSelectableIdentity";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -74,13 +75,14 @@ export function MemeCollaboratorPicker({
   };
   return (
     <div className="tw-space-y-3">
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="sm"
         aria-expanded={expanded}
         aria-controls={contentId}
         disabled={disabled || resolving}
         onClick={() => setExpanded((value) => !value)}
-        className="tw-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-text-sm tw-font-medium tw-text-iron-200 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50"
+        className="tw-min-h-11 !tw-px-0"
       >
         {collaborators.length ? (
           <span>
@@ -98,7 +100,7 @@ export function MemeCollaboratorPicker({
           aria-hidden="true"
           className={`tw-size-4 ${expanded ? "tw-rotate-180" : ""}`}
         />
-      </button>
+      </Button>
       <div id={contentId} hidden={!expanded} className="tw-space-y-3">
         <IdentitySearch
           key={collaborators.length}

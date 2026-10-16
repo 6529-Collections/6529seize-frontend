@@ -116,7 +116,7 @@ describe("SingleWaveDropInfoPanel", () => {
     }
   );
 
-  it.each([ApiDropType.Chat, ApiDropType.Participatory, ApiDropType.Winner])(
+  it.each([ApiDropType.Chat, ApiDropType.Winner])(
     "does not load invitations for an ordinary %s drop",
     (drop_type) => {
       render(
@@ -129,6 +129,19 @@ describe("SingleWaveDropInfoPanel", () => {
       ).not.toBeInTheDocument();
     }
   );
+
+  it("loads eligibility for lightweight submissions without credit or metadata", () => {
+    render(
+      <SingleWaveDropInfoPanel
+        drop={{
+          ...baseDrop,
+          drop_type: ApiDropType.Participatory,
+          collaborators: [],
+        }}
+      />
+    );
+    expect(screen.getByTestId("collaboration-panel")).toBeInTheDocument();
+  });
 
   it("does not mount invitation controls for restricted artwork", () => {
     render(

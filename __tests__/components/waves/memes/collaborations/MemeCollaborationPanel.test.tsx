@@ -86,6 +86,17 @@ function mount(data: ApiMemeCollaborationState = pending) {
   );
   return { ...result, client };
 }
+async function openReview() {
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Review invitation" })
+  );
+  return screen.findByRole("dialog", { name: "Review invitation" });
+}
+async function expandInvitations() {
+  fireEvent.click(
+    await screen.findByRole("button", { name: /Manage invitations/ })
+  );
+}
 beforeEach(() => {
   jest.clearAllMocks();
   viewer = "B";
@@ -93,7 +104,8 @@ beforeEach(() => {
 });
 
 it("requires reviewing the terms and sends consent for the exact artwork version", async () => {
-  mount();
+  const { client } = mount();
+  await openReview();
   const accept = await screen.findByRole("button", {
     name: "Accept collaboration",
   });
@@ -122,7 +134,12 @@ it("requires reviewing the terms and sends consent for the exact artwork version
       },
     })
   );
-  expect(await screen.findByText("Accepted")).toBeInTheDocument();
+  await waitFor(() =>
+    expect(
+      client.getQueryData([QueryKey.DROP, "collaborations", "drop", "B"])
+    ).toEqual(accepted)
+  );
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   expect(
     screen.queryByRole("button", { name: "Decline" })
   ).not.toBeInTheDocument();
@@ -131,6 +148,7 @@ it("requires reviewing the terms and sends consent for the exact artwork version
 it("shows the submitter cancellation controls and no way to accept on behalf of B", async () => {
   viewer = "A";
   mount();
+  await expandInvitations();
   expect(
     await screen.findByRole("button", { name: "Cancel invitation" })
   ).toBeInTheDocument();
@@ -141,6 +159,7 @@ it("shows the submitter cancellation controls and no way to accept on behalf of 
 
 it("requires fresh confirmation after the artwork or terms change", async () => {
   const { client } = mount();
+  await openReview();
   const accept = await screen.findByRole("button", {
     name: "Accept collaboration",
   });
@@ -154,7 +173,9 @@ it("requires fresh confirmation after the artwork or terms change", async () => 
   });
   await waitFor(() => {
     expect(screen.getByRole("checkbox")).not.toBeChecked();
-    expect(accept).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Accept collaboration" })
+    ).toBeDisabled();
   });
   expect(postMock).not.toHaveBeenCalled();
 });
@@ -210,6 +231,8 @@ it("shows the exact review snapshot and opens only safe media links", async () =
       animation_url: "javascript:alert(1)",
     },
   });
+  expect(screen.queryByText("Reviewed artwork")).not.toBeInTheDocument();
+  await openReview();
   expect(await screen.findByText("Reviewed artwork")).toBeInTheDocument();
   expect(screen.getByText("Reviewed description")).toBeInTheDocument();
   const links = screen.getAllByRole("link", {
@@ -231,7 +254,8 @@ it("offers response actions only for the connected invitee even if another pendi
       },
     ],
   });
-  await screen.findByText("@artistC");
+  await openReview();
+  expect(screen.queryByText("@artistC")).not.toBeInTheDocument();
   expect(
     screen.getAllByRole("button", { name: "Accept collaboration" })
   ).toHaveLength(1);
@@ -249,6 +273,7 @@ it("announces only the changed invitation status and keeps controls outside live
     ...pending,
     invitations: [pendingInvitation, otherInvitation],
   });
+  await expandInvitations();
   const statuses = await screen.findAllByRole("status");
   expect(statuses).toHaveLength(2);
   expect(statuses[0]).toHaveTextContent("@artistB: Pending acceptance");
@@ -311,6 +336,7 @@ it("keeps accepted collaborators and excludes already invited profiles when addi
   });
   const picker = await screen.findByText("Select collaborator C");
   expect(picker).toHaveAttribute("data-excluded", "B");
+  await expandInvitations();
   expect(screen.getByText("Accepted")).toBeInTheDocument();
   expect(
     screen.queryByRole("button", { name: "Cancel invitation" })
@@ -319,7 +345,7 @@ it("keeps accepted collaborators and excludes already invited profiles when addi
 it("does not offer invitations after selection or to another viewer", async () => {
   viewer = "B";
   mount({ ...pending, can_invite: false, closed: true });
-  await screen.findByText("Collaboration invitations");
+  await screen.findByText("Pending acceptance");
   expect(screen.queryByText("Select collaborator C")).not.toBeInTheDocument();
 });
 
@@ -328,5 +354,58 @@ it("does not render an empty invite section for a nonauthor even with a stale ca
   await waitFor(() => expect(fetchMock).toHaveBeenCalled());
   expect(
     screen.queryByRole("heading", { name: "Collaboration invitations" })
+  ).not.toBeInTheDocument();
+});
+
+it("keeps terms out of the page and resets confirmation when the review is dismissed", async () => {
+  mount();
+  await screen.findByRole("button", { name: "Review invitation" });
+  expect(screen.queryByText("Submission terms")).not.toBeInTheDocument();
+  expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+  const dialog = await openReview();
+  await waitFor(() =>
+    expect(
+      within(dialog).getByRole("heading", { name: "Review invitation" })
+    ).toHaveFocus()
+  );
+  expect(within(dialog).getByText("Submission terms")).toBeInTheDocument();
+  fireEvent.click(within(dialog).getByRole("checkbox"));
+  fireEvent.click(within(dialog).getByRole("button", { name: "Not now" }));
+  await waitFor(() =>
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+  );
+  await openReview();
+  expect(screen.getByRole("checkbox")).not.toBeChecked();
+  expect(postMock).not.toHaveBeenCalled();
+});
+it("shows an explicit pending count for the author and keeps history folded by default", async () => {
+  viewer = "A";
+  mount();
+  const manage = await screen.findByRole("button", {
+    name: /Manage invitations \(1\)/,
+  });
+  expect(manage).toHaveAttribute("aria-expanded", "false");
+  expect(manage).toHaveTextContent("1 pending");
+  expect(
+    screen.queryByRole("heading", { name: "Collaboration invitations" })
+  ).not.toBeInTheDocument();
+  fireEvent.click(manage);
+  expect(screen.getByText("@artistB")).toBeVisible();
+});
+it("does not repeat accepted attribution in a second invitee panel", async () => {
+  await act(async () => {
+    mount({
+      ...pending,
+      invitations: [
+        {
+          ...pendingInvitation,
+          status: ApiMemeCollaborationInvitationStatusEnum.Accepted,
+        },
+      ],
+    });
+  });
+  expect(screen.queryByText("Accepted")).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Review invitation" })
   ).not.toBeInTheDocument();
 });

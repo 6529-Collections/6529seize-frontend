@@ -1,6 +1,13 @@
 export const MEME_COLLABORATION_MESSAGES = {
   "memes.collaborations.sendInvitations": "Send collaborator invitations",
   "memes.collaborations.invited": "Collaborator invitations sent.",
+  "memes.collaborations.manage": "Manage invitations ({count})",
+  "memes.collaborations.pendingCount": "{count} pending",
+  "memes.collaborations.review": "Review invitation",
+  "memes.collaborations.notNow": "Not now",
+  "memes.collaborations.invitedYou":
+    "You’re invited to collaborate on this artwork.",
+  "memes.collaborations.previewInvites": "Invitations will be sent to:",
   "memes.collaborations.add": "Add collaborators",
   "memes.collaborations.selected": "Collaborators ({count})",
   "memes.collaborations.searching": "Searching…",
@@ -22,7 +29,7 @@ export const MEME_COLLABORATION_MESSAGES = {
   "memes.collaborations.decline": "Decline",
   "memes.collaborations.cancel": "Cancel invitation",
   "memes.collaborations.confirm":
-    "I have reviewed this artwork and agree to the collaboration acceptance and submission terms shown here.",
+    "I have reviewed the artwork and agree to the collaboration and submission terms.",
   "memes.collaborations.final":
     "Acceptance is final and cannot be withdrawn. The submitter cannot replace the accepted artwork. Admins can edit the final mint artwork and credits in Drop Forge.",
   "memes.collaborations.terms": "Submission and minting terms",

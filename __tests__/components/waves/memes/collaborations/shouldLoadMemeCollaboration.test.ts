@@ -26,3 +26,9 @@ it("does not load controls for restricted artwork or ordinary chat", () => {
     shouldLoadMemeCollaboration({ drop_type: ApiDropType.Chat, metadata })
   ).toBe(false);
 });
+
+it("loads pending invitations for lightweight submissions before metadata or credits are present", () => {
+  expect(
+    shouldLoadMemeCollaboration({ drop_type: ApiDropType.Participatory })
+  ).toBe(true);
+});

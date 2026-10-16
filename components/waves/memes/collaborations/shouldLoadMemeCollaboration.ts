@@ -7,12 +7,12 @@ export function shouldLoadMemeCollaboration(
     Partial<Pick<ApiDrop, "metadata" | "drop_type">>
 ): boolean {
   // Managed drops always carry the original credit, including an empty string.
-  // Accepted profiles also identify collaboration-aware copies of the drop.
+  // Lightweight submission copies may omit metadata and the managed marker.
+  // Ask the server for viewer eligibility rather than hiding pending invitations.
   return (
     drop.moderation?.can_view !== false &&
     (drop.submission_artist !== undefined ||
       (drop.collaborators?.length ?? 0) > 0 ||
-      (drop.drop_type === ApiDropType.Participatory &&
-        !!drop.metadata?.some((item) => item.data_key === "memeName")))
+      drop.drop_type === ApiDropType.Participatory)
   );
 }

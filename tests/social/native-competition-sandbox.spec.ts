@@ -1657,6 +1657,115 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     }
   });
 
+  test("reviews collaborator consent in a modal and displays accepted credit once", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    const origin = getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"]);
+    const response = await page.request.get(
+      `${origin}/api/v2/waves/${WAVE}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const fixture = await response.json();
+    const profile = {
+      id: PROFILE,
+      handle: "playwright",
+      display: "playwright",
+      pfp: null,
+    };
+    let accepted = false;
+    await page.route(`**/v2/drops/${entryDropId("alpha")}`, (route) =>
+      route.fulfill({
+        json: {
+          wave: fixture.wave,
+          drop: {
+            ...fixture.drops[0],
+            id: entryDropId("alpha"),
+            drop_type: "SUBMISSION",
+            author: {
+              ...fixture.drops[0].author,
+              id: "other-artist",
+              handle: "otherArtist",
+            },
+            title: "Collaboration artwork",
+            collaborators: accepted ? [profile] : [],
+          },
+        },
+      })
+    );
+    const state = () => ({
+      managed: true,
+      can_invite: false,
+      closed: false,
+      artwork_hash: "a".repeat(64),
+      terms_version: "b".repeat(64),
+      acceptance_copy:
+        "Acceptance is final and admins control final mint credits.",
+      terms: "The submission and minting terms for this artwork.",
+      collaborators: accepted ? [profile] : [],
+      invitations: [
+        { id: "invite", profile, status: accepted ? "ACCEPTED" : "PENDING" },
+      ],
+    });
+    await page.route(
+      `**/drops/${entryDropId("alpha")}/collaborations`,
+      (route) => route.fulfill({ json: state() })
+    );
+    await page.route(
+      `**/drops/${entryDropId("alpha")}/collaborations/invite/response`,
+      (route) => {
+        expect(route.request().method()).toBe("POST");
+        expect(route.request().postDataJSON()).toEqual({
+          action: "ACCEPT",
+          artwork_hash: "a".repeat(64),
+          terms_version: "b".repeat(64),
+        });
+        accepted = true;
+        return route.fulfill({ json: state() });
+      }
+    );
+    await page.goto(`${ROOT}/alpha?drop=${entryDropId("alpha")}`);
+    const review = page.getByRole("button", {
+      name: "Review invitation",
+      exact: true,
+    });
+    await expect(review).toBeVisible({ timeout: 30000 });
+    await expect(
+      page.getByText("The submission and minting terms for this artwork.", {
+        exact: true,
+      })
+    ).toHaveCount(0);
+    await review.click();
+    const dialog = page.getByRole("dialog", { name: "Review invitation" });
+    await expect(dialog).toBeVisible();
+    const accept = dialog.getByRole("button", {
+      name: "Accept collaboration",
+      exact: true,
+    });
+    await expect(accept).toBeDisabled();
+    await expect(
+      dialog.getByText("The submission and minting terms for this artwork.", {
+        exact: true,
+      })
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(dialog).toHaveCount(0);
+    await expect(review).toBeFocused();
+    await review.click();
+    await expect(dialog.getByRole("checkbox")).not.toBeChecked();
+    await dialog.getByRole("checkbox").check();
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("collaboration-review-modal.png"),
+    });
+    await accept.click();
+    await expect(dialog).toHaveCount(0);
+    await expect(
+      page.getByRole("link", { name: "@playwright", exact: true })
+    ).toHaveCount(1);
+    await expect(review).toHaveCount(0);
+  });
+
   test("renders frozen CHAT deep links with submission voting controls", async ({
     page,
   }) => {

@@ -148,6 +148,7 @@ export function MemesArtSubmissionStepContent({
       if (isPreviewMode && previewDrop) {
         return (
           <MemesSubmissionPreviewScreen
+            collaborators={form.collaborators}
             proposalCard={
               form.proposalFrame
                 ? {
