@@ -2339,6 +2339,7 @@ const WAVE_LOADING_MESSAGES = objectMessages("waves", {
   loadingError: "This wave could not be loaded.",
   loadingRetry: "Try again",
   loadingBack: "Back to wave list",
+  loadingBackMessages: "Back to messages",
   loadingStatus: "Loading waves",
   "drops.editorLoadingStatus": "Loading editor",
 } as const);

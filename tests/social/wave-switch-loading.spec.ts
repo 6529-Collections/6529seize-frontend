@@ -5,6 +5,7 @@ import {
   getSandboxApiOrigin,
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
+import { expectAxeClean } from "../support/a11yAssertions";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 
 const SOURCE = "00000000-0000-4000-8000-000000000529";
@@ -89,6 +90,7 @@ for (const app of [false, true]) {
     page,
     baseURL,
   }, testInfo) => {
+    // Capacitor uses the mobile layout; desktop web is exercised separately.
     test.skip(
       app && testInfo.project.name !== "web-mobile-chromium",
       "The native simulation uses the mobile viewport."
@@ -137,8 +139,15 @@ for (const app of [false, true]) {
       await expect(pending).toBeVisible();
       await expect(pending.getByRole("status")).toHaveText(`Loading ${NAME}…`);
       await expect(chat).toHaveCount(0);
+      await expectAxeClean(page, { include: ['[data-testid="wave-pending"]'] });
       await expectNoHorizontalOverflow(page);
       const bounds = await pending.boundingBox();
+      const pendingHeader = app
+        ? null
+        : await pending.locator(":scope > div").first().boundingBox();
+      const pendingName = app
+        ? null
+        : await pending.getByRole("heading").locator("span").boundingBox();
       // Hold the real query pending across painted frames; an endpoint-only
       // assertion misses the original all-black interval.
       const emptyFrames = await page.evaluate(
@@ -170,6 +179,25 @@ for (const app of [false, true]) {
       expect(ready?.x).toBe(bounds?.x);
       expect(ready?.width).toBe(bounds?.width);
       expect(ready?.height).toBe(bounds?.height);
+      if (pendingHeader) {
+        const readyHeader = await page
+          .locator("#tabs-container h1")
+          .first()
+          .locator("xpath=ancestor::div[contains(@class, 'tw-border-b')][1]")
+          .boundingBox();
+        expect(readyHeader?.height).toBe(pendingHeader.height);
+      }
+      if (pendingName) {
+        const readyName = await page
+          .getByTestId("wave-content")
+          .getByRole("heading")
+          .first()
+          .getByRole("button")
+          .boundingBox();
+        expect(readyName?.x).toBe(pendingName.x);
+        expect(readyName?.y).toBe(pendingName.y);
+        expect(readyName?.height).toBe(pendingName.height);
+      }
       await page.screenshot({
         path: testInfo.outputPath("cold-wave-ready.png"),
       });
@@ -216,8 +244,15 @@ test("keeps wave identity on failure and recovers with Retry", async ({
   await expect(pending.getByRole("alert")).toHaveText(
     "This wave could not be loaded."
   );
+  await expectAxeClean(page, { include: ['[data-testid="wave-pending"]'] });
+  const retry = pending.getByRole("button", { name: "Try again", exact: true });
+  await retry.focus();
+  await page.keyboard.press("Tab");
+  await page.keyboard.press("Shift+Tab");
+  await expect(retry).toBeFocused();
+  await expect(retry).toHaveCSS("outline-style", "solid");
   fail = false;
-  await pending.getByRole("button", { name: "Try again", exact: true }).click();
+  await page.keyboard.press("Enter");
   await expect(
     page.getByRole("region", { name: "Wave chat file upload area" })
   ).toBeVisible();
@@ -228,6 +263,7 @@ test("ignores late metadata after switching back to a cached wave", async ({
   page,
   baseURL,
 }, testInfo) => {
+  // This race requires two wave links visible together in the desktop sidebar.
   test.skip(
     testInfo.project.name !== "web-desktop-chromium",
     "Rapid sidebar switches use the desktop layout."
@@ -271,6 +307,142 @@ test("ignores late metadata after switching back to a cached wave", async ({
     await expect(
       page.getByTestId("wave-content").getByRole("heading").first()
     ).toHaveText(SOURCE_NAME);
+  } finally {
+    release();
+  }
+});
+
+for (const name of ["Sandbox Direct Message", "sandboxfriend"]) {
+  test(`keeps a cold DM header stable (${name})`, async ({ page, baseURL }) => {
+    const id = "00000000-0000-4000-8000-000000000532";
+    const apiOrigin = getSandboxApiOrigin(baseURL);
+    const overviewResponse = await page.request.get(
+      `${apiOrigin}/api/v2/waves`
+    );
+    const overview = (await overviewResponse.json()).data[0];
+    const waveResponse = await page.request.get(`${apiOrigin}/api/waves/${id}`);
+    const wave = await waveResponse.json();
+    await page.route("**/api/open-graph**", (route) =>
+      route.fulfill({ json: {} })
+    );
+    await page.route("**/api/v2/waves?**", (route) =>
+      route.fulfill({
+        json: {
+          data: [{ ...overview, id, name, is_dm_wave: true }],
+          page: 1,
+          next: false,
+        },
+      })
+    );
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await page.route(`**/api/waves/${id}`, async (route) => {
+      await gate;
+      await route.fulfill({ json: { ...wave, name } });
+    });
+    try {
+      await page.goto("/messages");
+      await page
+        .getByRole("link", { name, exact: true })
+        .filter({ visible: true })
+        .first()
+        .click();
+      const pending = page.getByTestId("wave-pending");
+      await expect(pending.getByRole("heading")).toHaveText(name);
+      const before = await pending.getByRole("heading").boundingBox();
+      release();
+      const ready = page
+        .getByTestId("wave-content")
+        .getByRole("heading")
+        .first();
+      await expect(ready).toHaveText(name);
+      const after = await ready.boundingBox();
+      expect(after?.x).toBe(before?.x);
+      expect(after?.y).toBe(before?.y);
+      expect(after?.height).toBe(before?.height);
+    } finally {
+      release();
+    }
+  });
+}
+
+test("keeps the subwave title in place when parent navigation arrives", async ({
+  page,
+  baseURL,
+}) => {
+  const apiOrigin = getSandboxApiOrigin(baseURL);
+  const overviewResponse = await page.request.get(`${apiOrigin}/api/v2/waves`);
+  const parent = (await overviewResponse.json()).data[0];
+  const child = { ...parent, id: TARGET, name: NAME, parent_wave: parent };
+  const waveResponse = await page.request.get(
+    `${apiOrigin}/api/waves/${TARGET}`
+  );
+  const wave = await waveResponse.json();
+  await page.route("**/api/open-graph**", (route) =>
+    route.fulfill({ json: {} })
+  );
+  await page.route("**/api/v2/waves?**", (route) =>
+    route.fulfill({
+      json: {
+        data: [{ ...parent, has_subwaves: true }],
+        page: 1,
+        next: false,
+      },
+    })
+  );
+  await page.route(`**/api/waves/${SOURCE}/subwaves?**`, (route) =>
+    route.fulfill({
+      json: {
+        data: [child],
+        page: 1,
+        next: false,
+      },
+    })
+  );
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route(`**/api/waves/${TARGET}`, async (route) => {
+    await gate;
+    await route.fulfill({ json: { ...wave, parent_wave: parent } });
+  });
+  try {
+    await page.goto("/waves");
+    await page
+      .getByRole("button", { name: /View.*subwave/ })
+      .filter({ visible: true })
+      .first()
+      .click();
+    await page
+      .getByRole("link", { name: NAME, exact: true })
+      .filter({ visible: true })
+      .first()
+      .click();
+    const pending = page.getByTestId("wave-pending");
+    await expect(pending.getByRole("heading")).toHaveText(NAME);
+    const pendingHeader = await pending
+      .locator(":scope > div")
+      .first()
+      .boundingBox();
+    const before = await pending
+      .getByRole("heading")
+      .locator("span")
+      .boundingBox();
+    release();
+    const ready = page.getByTestId("wave-content").getByRole("heading").first();
+    await expect(ready).toHaveText(NAME);
+    const readyHeader = await ready
+      .locator("xpath=ancestor::div[contains(@class, 'tw-border-b')][1]")
+      .boundingBox();
+    expect(readyHeader?.height).toBe(pendingHeader?.height);
+    const after = await ready.getByRole("button").boundingBox();
+    expect(after?.x).toBe(before?.x);
+    expect(after?.y).toBe(before?.y);
+    expect(after?.height).toBe(before?.height);
+    await expectNoHorizontalOverflow(page);
   } finally {
     release();
   }

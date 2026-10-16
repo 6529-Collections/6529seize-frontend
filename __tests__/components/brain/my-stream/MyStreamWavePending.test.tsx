@@ -4,6 +4,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 
 const mockSetActive = jest.fn();
 let mockIsApp = false;
+let mockPathname = "/waves/next";
 let mockLocale: SupportedLocale = "en-US";
 const preview = {
   id: "next",
@@ -11,6 +12,12 @@ const preview = {
   picture: null,
   contributors: [],
 };
+
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => ({ connectedProfile: null, activeProfileProxy: null }),
+}));
+
+jest.mock("next/navigation", () => ({ usePathname: () => mockPathname }));
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: () => ({
@@ -40,6 +47,7 @@ jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
 beforeEach(() => {
   jest.clearAllMocks();
   mockIsApp = false;
+  mockPathname = "/waves/next";
   mockLocale = "en-US";
 });
 
@@ -51,6 +59,10 @@ it.each<SupportedLocale>(["en-US", "en-GB", "fr-FR", "es-ES", "de-DE"])(
     expect(screen.getByRole("heading")).toHaveTextContent("Next Wave");
     expect(screen.getByRole("status")).toHaveTextContent("Loading Next Wave…");
     expect(screen.queryByRole("tab")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading")).toHaveAccessibleName("Next Wave");
+    expect(
+      screen.queryByRole("button", { name: "Next Wave" })
+    ).not.toBeInTheDocument();
   }
 );
 
@@ -65,7 +77,7 @@ it("updates the pending identity on rapid switches", () => {
   rerender(<MyStreamWavePending waveId="dm" />);
   expect(screen.getByRole("heading")).toHaveTextContent("A direct message");
   expect(screen.queryByText("Next Wave")).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: "Back to wave list" }));
+  fireEvent.click(screen.getByRole("button", { name: "Back to messages" }));
   expect(mockSetActive).toHaveBeenCalledWith(null, { isDirectMessage: true });
 });
 
@@ -99,4 +111,12 @@ it("preserves a competition's own recovery state", () => {
     "Competition unavailable"
   );
   expect(screen.queryByRole("status")).not.toBeInTheDocument();
+});
+
+it("keeps cold DM deep links in Messages even without a list preview", () => {
+  mockPathname = "/messages/unknown";
+  render(<MyStreamWavePending waveId="unknown" />);
+  expect(screen.getByRole("heading")).toHaveTextContent("Loading wave…");
+  fireEvent.click(screen.getByRole("button", { name: "Back to messages" }));
+  expect(mockSetActive).toHaveBeenCalledWith(null, { isDirectMessage: true });
 });
