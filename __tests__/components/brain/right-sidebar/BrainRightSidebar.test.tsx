@@ -336,23 +336,13 @@ describe("BrainRightSidebar", () => {
         setActiveTab={setActiveTab}
       />
     );
-    await user.click(
-      screen.getByRole("button", { name: "Links", exact: true })
-    );
-    await user.click(
-      screen.getByRole("button", { name: "Save later", exact: true })
-    );
-    await user.click(screen.getByRole("button", { name: "Back", exact: true }));
-    await user.click(
-      screen.getByRole("button", { name: "Admins", exact: true })
-    );
+    await user.click(screen.getByRole("button", { name: "Links" }));
+    await user.click(screen.getByRole("button", { name: "Save later" }));
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    await user.click(screen.getByRole("button", { name: "Admins" }));
     act(() => finishSave());
-    expect(
-      screen.getByRole("dialog", { name: "Edit admins", exact: true })
-    ).toBeVisible();
-    await user.click(screen.getByRole("button", { name: "Back", exact: true }));
-    expect(
-      screen.getByRole("button", { name: "Admins", exact: true })
-    ).toBeVisible();
+    expect(screen.getByRole("dialog", { name: "Edit admins" })).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    expect(screen.getByRole("button", { name: "Admins" })).toBeVisible();
   });
 });

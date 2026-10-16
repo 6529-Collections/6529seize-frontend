@@ -320,8 +320,8 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
         name: "Open notification settings",
       });
       await bell.tap();
-      // The phone uses About; the tablet retains its Wave details sidebar.
-      const choiceRole = width === 390 ? "checkbox" : "menuitemcheckbox";
+      // Both touch layouts keep notification preferences inside their information panel.
+      const choiceRole = "checkbox";
       await expect(page.getByRole("dialog")).toHaveCount(1);
       await expectReachable(page, choiceRole);
       const choice = page.getByRole(choiceRole, { name: BROADCAST });

@@ -1,5 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
+import { useSearchParams } from "next/navigation";
 import NetworkPageLayout from "@/components/network/NetworkPageLayout";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
@@ -34,6 +35,7 @@ function ActiveGroupProbe() {
 describe("NetworkPageLayout", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useSearchParams).mockReturnValue(new URLSearchParams());
 
     useDeviceInfoMock.mockReturnValue({
       isApp: false,
@@ -101,4 +103,34 @@ describe("NetworkPageLayout", () => {
       "test-group-id"
     );
   });
+
+  it.each([false, true])(
+    "initializes the linked group before member effects run (isApp=%s)",
+    (isApp) => {
+      useDeviceInfoMock.mockReturnValue({
+        isApp,
+        isMobileDevice: isApp,
+        hasTouchScreen: isApp,
+      });
+      jest
+        .mocked(useSearchParams)
+        .mockReturnValue(new URLSearchParams({ group: "linked-group" }));
+      const observedGroups: (string | null)[] = [];
+      function Members() {
+        const { activeGroupId } = useActiveGroup();
+        React.useEffect(() => {
+          observedGroups.push(activeGroupId);
+        }, [activeGroupId]);
+        return null;
+      }
+      render(
+        <ActiveGroupProvider>
+          <NetworkPageLayout>
+            <Members />
+          </NetworkPageLayout>
+        </ActiveGroupProvider>
+      );
+      expect(observedGroups).toEqual(["linked-group"]);
+    }
+  );
 });
