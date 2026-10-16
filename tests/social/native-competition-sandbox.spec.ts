@@ -1847,21 +1847,39 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(
         page.getByRole("button", { name: "Close panel", exact: true })
       ).toBeVisible();
-      const add = page.getByRole("button", {
+      const manage = page.getByRole("button", { name: /Manage collaborators/ });
+      await expect(manage).toBeVisible({ timeout: 30000 });
+      await expect(
+        page.getByRole("dialog", { name: "Manage collaborators" })
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("button", { name: "Add collaborators", exact: true })
+      ).toHaveCount(0);
+      await expect(manage).toHaveCSS("border-top-style", "solid");
+      const summary = manage.locator("xpath=ancestor::div[2]");
+      const author = summary.getByRole("link", {
+        name: fixture.drops[0].author.handle,
+        exact: false,
+      });
+      const manageBox = await manage.boundingBox();
+      const authorBox = await author.boundingBox();
+      expect(manageBox).not.toBeNull();
+      expect(authorBox).not.toBeNull();
+      expect(Math.abs(manageBox!.x - authorBox!.x)).toBeLessThan(1);
+      expect(manageBox!.height).toBeLessThanOrEqual(44);
+      await manage.click();
+      const manager = page.getByRole("dialog", {
+        name: "Manage collaborators",
+      });
+      await expect(manager).toBeVisible();
+      await expect(
+        manager.getByText("@artistD", { exact: true })
+      ).toBeVisible();
+      const add = manager.getByRole("button", {
         name: "Add collaborators",
         exact: true,
       });
-      await expect(add).toBeVisible({ timeout: 30000 });
-      const manage = page.getByRole("button", { name: /Manage invitations/ });
-      await expect(manage).toBeVisible();
-      const manageBox = await manage.boundingBox();
-      const addBox = await add.boundingBox();
-      expect(manageBox).not.toBeNull();
-      expect(addBox).not.toBeNull();
-      expect(Math.abs(manageBox!.x - addBox!.x)).toBeLessThan(1);
-      expect(Math.abs(manageBox!.height - addBox!.height)).toBeLessThan(1);
-      await expect(manage).toHaveCSS("border-top-style", "solid");
-      await expect(add).toHaveCSS("border-top-style", "solid");
+      await expect(add).toBeVisible();
       const search = page.getByRole("combobox", {
         name: "Invite a collaborating artist",
       });
@@ -1901,6 +1919,14 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(
         page.getByRole("button", { name: "Add collaborators", exact: true })
       ).toHaveAttribute("aria-expanded", "true");
+      await page.keyboard.press("Escape");
+      await expect(manager).toHaveCount(0);
+      await expect(manage).toBeFocused();
+      await manage.click();
+      await expect(manager).toBeVisible();
+      await manager.getByRole("button", { name: "Done", exact: true }).click();
+      await expect(manager).toHaveCount(0);
+      await expect(manage).toBeFocused();
     } finally {
       releaseSearch();
     }

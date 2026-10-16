@@ -1,8 +1,11 @@
 export const MEME_COLLABORATION_MESSAGES = {
   "memes.collaborations.sendInvitations": "Send collaborator invitations",
   "memes.collaborations.invited": "Collaborator invitations sent.",
-  "memes.collaborations.manage": "Manage invitations ({count})",
+  "memes.collaborations.manage": "Manage collaborators",
   "memes.collaborations.pendingCount": "{count} pending",
+  "memes.collaborations.done": "Done",
+  "memes.collaborations.closeManage": "Close collaborator management",
+  "memes.collaborations.emptyInvitations": "No invitations yet.",
   "memes.collaborations.review": "Review invitation",
   "memes.collaborations.artistName": "Artist credit name",
   "memes.collaborations.artistNameHint":

@@ -139,17 +139,17 @@ export const MemesSingleWaveDropInfoPanel = ({
           nicTotal={visibleNicTotal}
           repTotal={visibleRepTotal}
           onVoteClick={handleOpenVoting}
+          collaborationControls={
+            shouldLoadMemeCollaboration(drop) ? (
+              <MemeCollaborationPanel
+                key={drop.id}
+                dropId={drop.id}
+                authorId={drop.author.id}
+              />
+            ) : null
+          }
         />
 
-        {shouldLoadMemeCollaboration(drop) && (
-          <div className="tw-mx-auto tw-max-w-3xl tw-px-4">
-            <MemeCollaborationPanel
-              key={drop.id}
-              dropId={drop.id}
-              authorId={drop.author.id}
-            />
-          </div>
-        )}
         <div className="tw-my-8 tw-h-px tw-w-full tw-bg-white/10 md:tw-my-10"></div>
 
         <MemesDropDetailsSection
