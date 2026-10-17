@@ -69,6 +69,12 @@ jobs:
       - name: Check routes manifest classification
         run: ./bin/6529 run routes-manifest:check
 
+      # The main ESLint config keeps rules-of-hooks off and lint:changed only
+      # reports it on changed lines, so this repo-wide, non-type-aware check
+      # (eslint.config.hooks.mjs) catches a violation anywhere in the tree.
+      - name: Check Rules of Hooks across the repo
+        run: ./bin/6529 run lint:hooks
+
   debt-ratchet:
     name: Debt ratchet
     if: always()
