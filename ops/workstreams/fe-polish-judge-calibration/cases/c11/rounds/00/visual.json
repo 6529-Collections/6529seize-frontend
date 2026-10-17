@@ -1,0 +1,223 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "museum-home-consolidation-final",
+  "coverage": [
+    {
+      "route": "/museum/network",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/home-1440x1000-01..04"
+    },
+    {
+      "route": "/museum/network",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/home-820x1000-01..06"
+    },
+    {
+      "route": "/museum/network",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/home-390x844-01..10"
+    }
+  ],
+  "dimensions": {
+    "J02": {
+      "score": 7,
+      "evidence": [
+        "evidence/home-1440x1000-01.png",
+        "evidence/home-1440x1000-03.png",
+        "evidence/home-1440x1000-04.png",
+        "evidence/home-820x1000-05.png",
+        "evidence/home-390x844-06.png"
+      ],
+      "findings": ["V-001"],
+      "note": "The Museum sub-nav and hero-to-acquisitions order work. Below that, five text-only blocks repeat the same destinations: How it works three times, Explore the collection twice, All works twice and Keys and Gates twice."
+    },
+    "J03": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/home-1440x1000-01.png",
+        "evidence/home-1440x1000-02.png",
+        "evidence/home-820x1000-02.png",
+        "evidence/home-820x1000-03.png"
+      ],
+      "findings": ["V-002", "V-003"],
+      "note": "The desktop hero has strong hierarchy. In the Acquisitions section, the heading sits under a dead column and each card's program heading outranks its artwork title, and the lower sections all carry equal weight."
+    },
+    "J04": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/home-1440x1000-01.png",
+        "evidence/home-1440x1000-02.png",
+        "evidence/home-1440x1000-03.png"
+      ],
+      "findings": ["V-001", "V-004"],
+      "note": "The page is restrained, dark and art-led at the top, with no casino or SaaS styling. The four-label trust band reads as a template, artwork disappears from the lower ~60% of the page, and one work is framed with rounded corners while its neighbors are square."
+    },
+    "J05": {
+      "score": 7,
+      "evidence": [
+        "evidence/home-1440x1000-02.png",
+        "evidence/home-1440x1000-03.png",
+        "evidence/home-820x1000-02.png",
+        "evidence/home-820x1000-04.png",
+        "evidence/home-390x844-06.png"
+      ],
+      "findings": ["V-003", "V-005"],
+      "note": "Empty space builds up across the page: ~170-250 px of void above the Acquisitions heading, empty bands framed by double hairlines between sections, and long voids under the shorter acquisition cards."
+    },
+    "J06": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/home-1440x1000-02.png",
+        "evidence/home-820x1000-03.png",
+        "evidence/home-820x1000-06.png",
+        "evidence/home-390x844-04.png"
+      ],
+      "findings": ["V-002", "V-004", "V-008"],
+      "note": "Type roles are mostly consistent. Acquisition card headings fall out of line across each row, media corners are mixed, and wrapped footer lines end in stray separators."
+    },
+    "J10": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/home-820x1000-01.png",
+        "evidence/home-820x1000-02.png",
+        "evidence/home-390x844-01.png",
+        "evidence/home-390x844-02.png"
+      ],
+      "findings": ["V-006", "V-007"],
+      "note": "There is no horizontal overflow, and the 390 single-column stack works. At 820 the stacked hero pushes the H1 and both CTAs fully below the first viewport, and at 390 a persistent 80 px rail narrows content to ~278 px."
+    }
+  },
+  "checks": {},
+  "findings": [
+    {
+      "id": "V-001",
+      "targets": ["J02", "J04"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/home-1440x1000-03.png, evidence/home-1440x1000-04.png, evidence/home-820x1000-04.png, evidence/home-390x844-06.png",
+      "observation": "Below the Acquisitions row the page is a stack of text-only directories. (1) A band of four bold labels (Held by the 6529 Network, Governed through TDH, Art held on Ethereum, Open worldwide) with a 'How the Museum works' link. (2) 'Explore the collection' with All works / Artists / Projects tiles. (3) An Artists / Acquisitions / Research trio (Casey Reas, Keys and Gates, Research). (4) A 'How the Network Museum works' section that restates the band's facts and links 'Read about the Network Museum'. (5) Public record links. The how-it-works destination is offered three times (hero link, band link, section). 'Explore the collection' is both the hero CTA and a section heading. 'All works' appears in the Acquisitions header and again in the Explore tiles. Keys and Gates appears as a card and again in the trio. At 1440, roughly the lower 60% of the page shows no artwork.",
+      "consequence": "Visitors keep meeting the same destinations with no new information. The page stops following how people use a museum home (see the art, then choose a way in), and the label band reads as a templated trust strip rather than museum content.",
+      "change": "Reduce the lower half to two blocks. First, one wayfinding section: All works, Artists, Projects and Research, plus Keys and Gates only if it is not already a card above. Second, one 'How the Network Museum works' section that absorbs the four-label band and keeps a single link to About. Remove the band's separate 'How the Museum works' link. Retitle the Explore section so it does not repeat the hero CTA label (draft: 'Ways into the collection').",
+      "acceptance_check": "At 1440, 820 and 390, each destination (About / how it works, All works, Artists, Projects, Research, Keys and Gates) is linked at most once below the hero, outside the top nav. The four-label band no longer stands as its own section, and no section heading repeats a hero control label.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-002",
+      "targets": ["J03", "J06"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network · default · 1440x1000, 820x1000 · en-US",
+      "evidence": "evidence/home-1440x1000-02.png, evidence/home-820x1000-03.png, evidence/home-820x1000-04.png",
+      "observation": "Each Acquisitions card stacks an artwork caption (bold ~16px title, muted artist line), then a hairline, then a larger ~20px program heading, description and status line. Caption heights vary. The Patrolling caption runs a two-line title, a credit line and a 'View Wave publication' link, and the Themes and Variations artist line wraps. At 1440 the four program headings therefore start at about 713, 713, 808 and 733 px within the tile, and the status lines end at four different heights. At 820 the second row has the same offset. Because the program heading is larger than the artwork title, each card reads as two stacked items.",
+      "consequence": "The row cannot be scanned across. Visitors cannot tell at a glance whether a card represents a work or a program, and the long voids under the shorter cards look unfinished.",
+      "change": "Either option works. (a) Give the caption block a consistent height per row (grid subgrid or fixed caption rows), and move the credit line and 'View Wave publication' link into the program block footer beside the status line. (b) Make the program title the card's single heading and render the artwork title and artist as a muted caption directly under the image, without the intervening hairline.",
+      "acceptance_check": "At 1440 all four program headings share one top line. At 820 the two headings in each row share one top line. Each card has one dominant heading.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-003",
+      "targets": ["J03", "J05"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network · default · 1440x1000, 820x1000 · en-US",
+      "evidence": "evidence/home-1440x1000-02.png, evidence/home-820x1000-02.png",
+      "observation": "The Acquisitions header is split into two columns. The eyebrow and H2 sit at the bottom of the left column, while the intro paragraph and the 'All works' / 'Browse acquisitions' links fill the top of the right column. This leaves about 170 px of empty black above the heading at 1440 and about 250 px at 820, and the paragraph is read before the heading it introduces.",
+      "consequence": "The section opens on an empty block, the heading looks detached from its cards, and the reading order runs paragraph first, heading second.",
+      "change": "Top-align the heading column with the paragraph, or stack eyebrow, H2, paragraph and links in a single column as the 390 layout already does.",
+      "acceptance_check": "At 1440 and 820 the Acquisitions heading's top is level with or above the intro paragraph's top, and the empty area above the heading is no taller than about 48 px.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-004",
+      "targets": ["J06", "J04"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/home-1440x1000-02.png, evidence/home-820x1000-03.png, evidence/home-390x844-04.png",
+      "observation": "In the Acquisitions row, 'Patrolling the border between the Negev Desert and Jordan' renders with rounded corners. CENTURY #31, Take the Key!, Themes and Variations #210 and the hero artwork all render with square corners. This holds at all three widths.",
+      "consequence": "One work looks framed differently from its neighbors. That reads as a rendering slip rather than a curatorial choice and breaks the consistency of the gallery row.",
+      "change": "Use one corner treatment for every artwork frame on the page (square, matching the hero). If the rounding is baked into the delivered image rather than coming from CSS, serve an asset without it.",
+      "acceptance_check": "At 1440, 820 and 390, all four acquisition images and the hero image share the same corner radius.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-005",
+      "targets": ["J05"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/home-1440x1000-03.png, evidence/home-1440x1000-04.png, evidence/home-820x1000-04.png, evidence/home-820x1000-05.png, evidence/home-390x844-06.png",
+      "observation": "Several section boundaries stack two hairlines around empty space. Between the four-label band and 'Explore the collection' there is an empty band about 110 px tall bounded by two full-width rules at 1440 and 820 (about 80 px at 390). The Explore tiles' own bottom rules are followed about 110 px later by another full-width rule. 'Public record' floats in roughly 120 px of blank space before the Source and contribute bar.",
+      "consequence": "The empty bands look like missing content or accidental boxes, lengthen an already long page, and break the rhythm between sections.",
+      "change": "Use one divider per section boundary with a single consistent section gap. Drop either the tiles' bottom rules or the full-width rule that follows them, and tighten the space around Public record.",
+      "acceptance_check": "At 1440, 820 and 390, no two horizontal rules appear with nothing between them, and the gaps between sections are consistent.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-006",
+      "targets": ["J10"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network · default · 820x1000 · en-US",
+      "evidence": "evidence/home-820x1000-01.png, evidence/home-820x1000-02.png",
+      "observation": "At 820x1000 the hero stacks. The 692 px square artwork and its caption fill the first viewport, and the eyebrow, the H1 'A public museum for a network state', the intro and both CTAs only begin after about 1,000 px of scrolling. At 1440 the same content sits beside the artwork, and at 390 the H1 starts inside the first viewport.",
+      "consequence": "Tablet visitors land on an image with no heading and no entry action. 820 is the only pinned width where the page's purpose and primary action are entirely off-screen on arrival.",
+      "change": "Either keep the two-column hero from about 768 px, or cap the stacked hero image height (for example max-height around 60vh with object-contain and no cropping) so the H1 enters the first viewport.",
+      "acceptance_check": "At 820x1000 the H1 is at least partly visible in the first viewport, and the artwork is still shown whole at its native aspect ratio.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-007",
+      "targets": ["J10"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network · default · 390x844 · en-US",
+      "evidence": "evidence/home-390x844-01.png, evidence/home-390x844-03.png",
+      "observation": "At 390x844 the app shell's 80 px icon rail stays visible. Museum content runs in a column of about 278 px, the hero artwork renders about 278 px wide, and the Museum sub-nav wraps to two rows. The run record does not say whether the capture emulated a touch device.",
+      "consequence": "If phones see the same layout, chrome takes about 20% of the width away from the art and text.",
+      "change": "Recapture 390 with touch emulation. If the rail still appears on phones, hide it below the small breakpoint in favor of the shell's mobile navigation.",
+      "acceptance_check": "In a touch-emulated 390x844 capture, museum content spans the viewport minus 16 px side gutters.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-008",
+      "targets": ["J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network · default · 820x1000, 390x844 · en-US",
+      "evidence": "evidence/home-820x1000-06.png, evidence/home-390x844-09.png, evidence/home-390x844-10.png",
+      "observation": "When the global footer wraps at 820 and 390, some lines end in a '|' separator ('API |', '@punk6529 |', 'Privacy Policy |').",
+      "consequence": "Minor finish defect at the end of the page.",
+      "change": "Render the separators so they disappear at line wraps (pseudo-element separators or gap-spaced inline lists).",
+      "acceptance_check": "At 820 and 390, no footer line ends with a separator.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "Desktop hero: Themes and Variations #210 shown whole at a square ratio with no chrome over it, captioned with title and artist, beside the H1 and a single primary-blue 'Explore the collection' CTA with a quieter secondary link",
+    "Museum sub-nav (Collection, Artists, Acquisitions, Research, About) under the '6529 Network Museum' section title",
+    "Native aspect ratios on artwork (the CENTURY #31 circle on white and the Take the Key! portrait) with no cropping",
+    "Restrained dark palette: black surfaces, iron hairlines, blue spaced-caps eyebrows, no gradients, glows or decorative chrome",
+    "Muted small status lines under each acquisition ('Accessioned into the permanent Collection', 'Selected through an acquisition program; unminted') that sit below the content",
+    "Single-column 390 layout of the Acquisitions header and cards with no horizontal overflow",
+    "Public record links and the Source and contribute bar kept as low-emphasis end matter"
+  ]
+}

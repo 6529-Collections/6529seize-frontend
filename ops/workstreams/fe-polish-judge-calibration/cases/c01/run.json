@@ -1,0 +1,26 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "run_id": "calibration-c01",
+  "candidate": {
+    "commit": "04d8b1e250984d73c2c537794e6b83e2ed1f6721",
+    "build": "production"
+  },
+  "scope": {
+    "routes": ["/museum/network/about"],
+    "audience": "Visitors learning what the 6529 Network Museum is",
+    "primary_task": "Understand what the Museum holds, how it works, and where to go next",
+    "states": ["default"],
+    "viewports": ["1440x1000", "390x844"],
+    "locales": ["en-US"]
+  },
+  "not_applicable": {
+    "J08": "Screenshot-only calibration; interactions were not exercised",
+    "J11": "Screenshot-only calibration; no performance evidence was captured",
+    "J12": "Calibration evidence is en-US only",
+    "J09": "Screenshot-only calibration; only the populated state was captured",
+    "J13": "No wallet or chain interaction on this surface"
+  },
+  "budget": {
+    "repair_batches": 6
+  }
+}
