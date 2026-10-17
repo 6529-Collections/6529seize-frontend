@@ -9,7 +9,10 @@ import { TDH_CARD, TDH_LINK } from "../../shared/tdhStyles";
 import { arweaveTransactionUrl, etherscanBlockUrl } from "./verificationLinks";
 import { formatInteger, middleTruncate } from "./verificationFormat";
 
-/** The day's run, as the daily job's README gives it. */
+/**
+ * The day's run, the four steps of the daily job's README ("By hand"):
+ * compute, the Python reference, the three-way comparison and the feed.
+ */
 function dailyRunCommands(cycleDay: number): string {
   return `validator compute --day ${cycleDay} --out day/rust --store store
 python3 tools/tdh-daily/python_compute.py --chain ../6529chain \\
@@ -17,7 +20,9 @@ python3 tools/tdh-daily/python_compute.py --chain ../6529chain \\
     --rust-summary day/rust/summary.json --out day/python
 python3 -I tools/tdh-daily/three_way.py --day ${cycleDay} \\
     --rust day/rust --python day/python --out day/three-way \\
-    --chain ../6529chain --cache cache`;
+    --chain ../6529chain --cache cache
+python3 -I tools/tdh-daily/publish_feed.py --day-dir day --feed feed \\
+    --cache cache`;
 }
 
 const STEP = "tw-pl-1";

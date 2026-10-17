@@ -206,12 +206,14 @@ describe("VerificationDashboard", () => {
     expect(
       screen.getByText("the feed’s index states the same")
     ).toBeInTheDocument();
-    // A first day's file written on October 16: recomputed, not first run.
+    // A first day's file written on October 16 that names the first runs'
+    // builds: written later, never said to be recomputed from its time.
     expect(
       screen.getAllByText(
-        "First computed on October 15, 2026, before the scheduled daily runs began. This file was recomputed on October 16, 2026 at 00:51 UTC, by the builds this page names."
+        "First computed on October 15, 2026, before the scheduled daily runs began. This file was written on October 16, 2026 at 00:51 UTC."
       ).length
     ).toBeGreaterThan(0);
+    expect(screen.queryByText(/recomputed/)).toBeNull();
     // The totals tile and the strip use one direction: Rust minus the other.
     expect(screen.getAllByText("Rust − 6529.io").length).toBeGreaterThan(1);
     expect(screen.getByText("Rust − Python")).toBeInTheDocument();
@@ -281,6 +283,13 @@ describe("VerificationDashboard", () => {
     expect(
       container.querySelector(`code[title="0x${"5".repeat(64)}"]`)
     ).not.toBeNull();
+    // The input's hash is of its uncompressed text, which the Rust run
+    // wrote; equal hashes are said of what was hashed.
+    expect(
+      screen.getByText(/hashed as its uncompressed text, not as the \.gz file/)
+    ).toBeInTheDocument();
+    expect(screen.getByText(/which the Rust run wrote/)).toBeInTheDocument();
+    expect(screen.queryByText(/byte-identical/)).toBeNull();
   });
 
   it("never says there are no differences on a day whose counts say otherwise", () => {
@@ -350,6 +359,102 @@ describe("VerificationDashboard", () => {
           /three_way\.py --day 20741/.test(element.textContent ?? "")
       )
     ).toBeInTheDocument();
+    // The day's run is four steps: the publisher is the fourth.
+    expect(
+      screen.getByText(
+        (_, element) =>
+          element?.tagName === "CODE" &&
+          /publish_feed\.py --day-dir day --feed feed/.test(
+            element.textContent ?? ""
+          )
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByText(/A day’s run is four steps/)).toBeInTheDocument();
+    // The day's JSON gives the day's numbers, the index the strip and the
+    // table; the input's hash is of its uncompressed text, which Rust wrote.
+    expect(
+      screen.getByText(
+        /The day strip and the day-by-day table come from the feed’s index/
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/every number on this page/)).toBeNull();
+    // The RSS feed is capped, and says so.
+    expect(
+      screen.getByRole("link", {
+        name: "Follow the latest 60 published days (RSS)",
+      })
+    ).toHaveAttribute("href", "/network/tdh/verification.rss");
+  });
+
+  it("says a first day's file was recomputed only when it names other builds", () => {
+    const base = PUBLIC_FEED_DAYS[20_741];
+    if (base === undefined) {
+      throw new Error("the public feed fixture has no October 15");
+    }
+    const day = parseVerificationDay({
+      ...base,
+      generatedAt: "2026-10-16T15:59:14Z",
+      implementations: {
+        ...base.implementations,
+        rust: {
+          ...base.implementations.rust,
+          commit: "0d25aa6c4a60599662f56c18f8c4d6d208b6cff8",
+        },
+        python: {
+          ...base.implementations.python,
+          commit: "f8400962310de6636b256c3b53bbfddbdec8f329",
+        },
+      },
+    });
+    const index = parseVerificationIndex(PUBLIC_FEED_INDEX);
+    if (!day.success || !index.success) {
+      throw new Error("the public feed fixture no longer parses");
+    }
+    renderDashboard(remoteIndex(index.data), okDay(day.data));
+    expect(
+      screen.getAllByText(
+        "First computed on October 15, 2026, before the scheduled daily runs began, by builds other than those this file names. This file was written on October 16, 2026 at 15:59 UTC, recomputed by the builds this page names."
+      ).length
+    ).toBeGreaterThan(0);
+  });
+
+  it("never describes a checked day's history as taken as reported", () => {
+    renderDashboard(
+      remoteIndex(syntheticIndex()),
+      okDay(syntheticEqualDay({ mode: "checked" })),
+      20_741
+    );
+    expect(
+      screen.getAllByText(
+        "Read from Ethereum, every event checked against the block headers, then computed"
+      ).length
+    ).toBeGreaterThan(0);
+    expect(screen.queryByText(/the history as reported/)).toBeNull();
+    expect(
+      screen.queryByText(/The history before the snapshot is not yet checked/)
+    ).toBeNull();
+  });
+
+  it("writes a Rust and Python difference in the table as Rust minus Python", () => {
+    const index = syntheticIndex();
+    renderDashboard(
+      remoteIndex({
+        ...index,
+        days: index.days.map((entry) =>
+          entry.cycleDay === 20_740
+            ? {
+                ...entry,
+                verdict: "LIVE_UNAVAILABLE",
+                totalTdh: { rust: 9_900, python: 9_880, live: null },
+              }
+            : entry
+        ),
+      }),
+      okDay(),
+      20_741
+    );
+    expect(screen.getAllByText("Rust − Python: +20").length).toBeGreaterThan(0);
+    expect(screen.queryByText("−20")).toBeNull();
   });
 
   it("says when the Python reference did not run", () => {
@@ -382,9 +487,9 @@ describe("VerificationDashboard", () => {
       okDay(syntheticDay({ verdict: "LIVE_UNAVAILABLE" })),
       20_741
     );
-    expect(screen.getAllByText("6529.io file missing").length).toBeGreaterThan(
-      0
-    );
+    expect(
+      screen.getAllByText("6529.io file missing or unverified").length
+    ).toBeGreaterThan(0);
   });
 
   it("renders a listed day from the index when its own file is missing", () => {

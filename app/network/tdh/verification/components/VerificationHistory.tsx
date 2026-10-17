@@ -300,10 +300,13 @@ function rustPythonText(
   if (day.totalTdh.python === null) {
     return noValue;
   }
-  const delta = day.totalTdh.python - day.totalTdh.rust;
+  // One sign on every page: the Rust core minus the other side.
+  const delta = day.totalTdh.rust - day.totalTdh.python;
   return delta === 0
     ? t(locale, "network.tdh.verify.history.rustPythonTotals")
-    : formatSigned(locale, delta);
+    : t(locale, "network.tdh.verify.tiles.pythonDiffers", {
+        amount: formatSigned(locale, delta),
+      });
 }
 
 function optionalInteger(

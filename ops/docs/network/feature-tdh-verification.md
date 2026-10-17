@@ -19,7 +19,7 @@ at the fetch level). A path that cannot name a published day (not a cycle
 day in canonical form, before the feed's first day, 20,740, or after the
 latest closed cycle) is rewritten by the proxy
 (`lib/proxy/tdhVerificationDay.ts`) to the TDH pages' own not-found view,
-`/network/tdh/verification/day-not-found?day=…`, with a real 404 status and
+`/network/tdh/verification/day-not-found`, with a real 404 status and
 the site around it, under a `TDH verification` eyebrow at every width:
 `No published day 20,739`, or `No published day here` for an address that
 is not a cycle number (the page never repeats the text of the address);
@@ -31,11 +31,17 @@ before the feed's first day, that the days compared start with October 14,
 2026 and earlier days have no file here (6529.io's own uploads for them
 are listed by its public API), and a link to the October 11, 2026 replay
 in the specification's evidence; no day strip. Marked `noindex`. The address
-bar keeps the path asked for, and the access gate still runs first. A day
-inside that range that the feed does not list shows the standard not-found
-page, titled `TDH verification: day not found` and marked `noindex` with
-one robots tag; its status stays 200 because `app/network/loading.tsx`
-starts streaming before the page can call `notFound()`. A day's own page has
+bar keeps the path asked for, and the access gate still runs first. The
+rewrite carries the day as `?day=` only when it is a cycle number in
+canonical form; any other text of the address is dropped. A day inside that
+range that the feed's index does not list gets the same view and the same
+404: the proxy reads `index.json` (within 2.5 seconds, and again at most
+once a minute for a day it has not seen listed) and rewrites such a day
+too. Only when the proxy cannot read the index is the day left to the
+page, which then shows the standard not-found page, titled `TDH
+verification: day not found` and marked `noindex`, with status 200, because
+`app/network/loading.tsx` starts streaming before the page can call
+`notFound()`. A day's own page has
 a one-line lede (a lasting address for the day's comparison); its cutover
 tile shows the planned date, about October 23,
 2026, and that the day came before it; it has no live freshness line, the
@@ -43,12 +49,18 @@ headline card drops the date its title already gives, and Provenance shows
 the SHA-256 of the day file the page read and the day before it with its
 own file's SHA-256 and whether the index states the same, so days can be
 checked as a chain. The run that wrote a day's file is read from the file
-itself (`generatedAt`): for the first two days, first computed on October
-15, 2026, before the scheduled runs began, and recomputed when the file was
-written; for a later day whose file was written well after its 00:40 UTC
-run, that time and the builds that wrote it. Under the snapshot line a small
-amber mark says which it is (`Computed before the schedule`, `Recomputed
-later`, `Written after its scheduled run`), with the sentence as its
+itself (`generatedAt` and the builds it names): for the first two days,
+first computed on October 15, 2026, before the scheduled runs began, by the
+Rust core at validator `db72daa` (the daily job's README), `2b17216` or
+`e127676` (the files the feed first published) and the Python reference at
+6529chain `0621ed4`; a file of theirs written later that
+names other builds was recomputed by them, and one that names the same
+builds, or none, is said only to have been written later, since a file's
+time alone does not show a recomputation. For a later day whose file was
+written well after its 00:40 UTC run, that time and the builds that wrote
+it. Under the snapshot line a small amber mark says which it is
+(`Computed before the schedule`, `Recomputed later`, `Written later`,
+`Written after its scheduled run`), with the sentence as its
 tooltip and a link to Provenance, whose feed row gives the sentence. Each
 code version names the P26 commit it computes. Provenance says that a
 day's runs followed the P26 text these pages restate only when the day's
@@ -135,7 +147,9 @@ states no hash to compare.
    computes none and is compared record by record), code versions as
    `validator@…` and `6529chain@…` with copy buttons, run times and sources
    (the Rust core read the day from public Ethereum servers, the snapshot
-   checked and the history taken as reported; 6529.io's identities and
+   checked and the history taken as reported, or, on a day whose file says
+   `checked`, every event checked against the block headers; the run-time
+   note follows the same mode; 6529.io's identities and
    wallets files as two short links, their ids in a tooltip). Under the
    table, what each root binds (the cycle root, the wallet tree of non-sink
    wallet records, the history root over every log from the contracts'
@@ -163,7 +177,8 @@ states no hash to compare.
 6. Day by day: a table of the days from `xl` (one card per day below), with
    days that have no report, and per day whether Rust and Python agree
    (every record equal when the verdict is OK, records differ on
-   `RUST_PYTHON_MISMATCH`, else the totals); from the seventh day wider
+   `RUST_PYTHON_MISMATCH`, else whether the totals are equal, or
+   `Rust − Python` with its sign); from the seventh day wider
    screens show a chart drawn for the column width, with the table one
    click away.
 7. Provenance: the data source first (6529's feed, named with its
@@ -187,7 +202,10 @@ states no hash to compare.
    each line means (the
    history mode at length, the P26 commit the runs followed, where the
    registry hash comes from, the first days' runs, the upload signature)
-   is in one disclosure under them. Then JSON download links, an RSS feed of every published day
+   is in one disclosure under them. The files line says that the canonical
+   input's SHA-256 is of its uncompressed text, not of the `.gz` file, and
+   that the Rust run wrote that input. Then JSON download links, an RSS
+   feed of the latest 60 published days
    (`/network/tdh/verification.rss`, one item per day with its verdict,
    its agreement with 6529.io and between the Rust core and the Python
    reference, and its totals, dated when the feed wrote the day's file;
@@ -200,8 +218,12 @@ states no hash to compare.
    own record in the day's identities file and compare it with their
    profile and Explain my TDH), what that does not reach
    (the validator's source is to be published when the owner decides,
-   D116; the Python reference is in 6529's private design repository), the
-   three commands that reproduce the day with the source code (they never
+   D116; the Python reference is in 6529's private design repository), that
+   the day's JSON gives the day's numbers while the day strip and the
+   day-by-day table come from the feed's index, the
+   four commands that reproduce the day with the source code (compute, the
+   Python reference, the three-way comparison and the feed's publisher, as
+   the daily job's README gives them; they never
    wrap: the block scrolls sideways, so a soft wrap is never mistaken for a
    `\` continuation), and the roots and files to compare.
 9. How this works: the daily comparison as one graph (our computation and

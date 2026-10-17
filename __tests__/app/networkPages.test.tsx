@@ -13,7 +13,7 @@ import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithQueryClient } from "../utils/reactQuery";
 import React from "react";
-import { PUBLIC_TDH_FEED_BASE } from "@/lib/tdh/verification/loadVerification.server";
+import { PUBLIC_TDH_FEED_BASE } from "@/lib/tdh/verification/feedSource";
 import {
   PUBLIC_FEED_DAYS,
   PUBLIC_FEED_INDEX,

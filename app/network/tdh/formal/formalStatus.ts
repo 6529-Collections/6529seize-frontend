@@ -1,12 +1,14 @@
 import {
   conformanceRun,
   findFormalEntry,
+  formalEntryMatches,
   type FormalManifest,
   type FormalStatus,
 } from "@/lib/tdh/formal/manifest";
 import {
   LEAN_ROUND_4,
   LEAN_ROUND_5,
+  REFUTED_CLAIMS,
   type LeanRound,
   type LeanStatement,
   type StatementStatus,
@@ -152,9 +154,36 @@ export interface ManifestFigures {
   /** Counterexamples by how they are checked: a kernel theorem or #guard. */
   readonly counterexampleTheorems: number;
   readonly counterexampleEvaluations: number;
+  /** The claims those counterexamples show false (`refutedClaimCount`). */
+  readonly claimsShownFalse: number;
+  /** The counterexamples of the first netting rule, which refute one claim. */
+  readonly firstRuleCases: number;
   /** Claims not proved here, about TDH-v1 and about the validator rules. */
   readonly deferredTdh: number;
   readonly deferredP53: number;
+}
+
+/**
+ * How many claims the manifest's counterexamples show false: one for each
+ * claim of `REFUTED_CLAIMS` that has a counterexample in the manifest, and
+ * one for each counterexample the list does not name. Counterexamples are
+ * not claims: the first netting rule's five cases refute one.
+ */
+export function refutedClaimCount(manifest: FormalManifest): number {
+  const counterexamples = manifest.theorems.filter(
+    (entry) => entry.status === "counterexample"
+  );
+  const refutes = (
+    entry: (typeof counterexamples)[number],
+    claim: readonly string[]
+  ) => claim.some((name) => formalEntryMatches(entry, name));
+  const named = REFUTED_CLAIMS.filter((claim) =>
+    counterexamples.some((entry) => refutes(entry, claim))
+  ).length;
+  const unnamed = counterexamples.filter(
+    (entry) => !REFUTED_CLAIMS.some((claim) => refutes(entry, claim))
+  ).length;
+  return named + unnamed;
 }
 
 export function manifestFigures(manifest: FormalManifest): ManifestFigures {
@@ -191,6 +220,14 @@ export function manifestFigures(manifest: FormalManifest): ManifestFigures {
     counterexampleEvaluations: count(
       (entry) =>
         entry.status === "counterexample" && entry.checkedBy === "evaluation"
+    ),
+    claimsShownFalse: refutedClaimCount(manifest),
+    firstRuleCases: count(
+      (entry) =>
+        entry.status === "counterexample" &&
+        (REFUTED_CLAIMS[0] ?? []).some((name) =>
+          formalEntryMatches(entry, name)
+        )
     ),
     deferredTdh: count(
       (entry) => entry.status === "deferred" && entry.library === "tdh"

@@ -73,7 +73,9 @@ collector’s guide`.
    order and a second `Start guided setup` button. Guided setup itself
    shows the same status as soon as a fourth wallet is listed (6529.io
    counts all four as one collector; TDH-v1 allows three, and whether it
-   allows four is pending an owner decision), with a checkbox (`I
+   allows four is pending an owner decision; under TDH-v1's rule the group
+   is built from the newest confirmed links, so three of the four count as
+   one collector and the fourth counts on its own), with a checkbox (`I
    understand that TDH-v1 allows three wallets, and that whether it allows
    four is pending an owner decision.`): until it is ticked, the signing
    steps say `Confirm the note about a fourth wallet above to see the

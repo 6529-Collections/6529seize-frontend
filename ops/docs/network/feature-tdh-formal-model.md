@@ -28,12 +28,18 @@ decided.
 ## Content
 
 - One row of four figures, every one read from the manifest the page
-  loaded: theorems proved, claims shown false, claims not proved here, and
-  conformance vectors passed out of P26's. Under the theorems figure, one
-  line adds the theorems that establish counterexamples up to the audited
-  count and says how many proved theorems restate a definition. What each
-  counts, and the manifest's commit and generation time (24-hour clock),
-  are in one disclosure under them.
+  loaded and each with its unit: theorems proved, counterexamples (with the
+  claims they show false: the first netting rule's five cases refute one
+  claim, so 11 counterexamples refute 7 claims), limits not proved here,
+  and conformance vectors passed out of P26's. The first three carry the
+  colour of their outcome (holds, shown false, not covered). Under the
+  theorems figure, one line adds the theorems that establish
+  counterexamples up to the 85 that PROOFS.md documents and says how many
+  proved theorems restate a definition; its details add that the build's
+  audit covers every theorem and definition of the model (1,068 theorems
+  and 1,538 definitions at round 5). What each counts, and the manifest's
+  commit and generation time (24-hour clock), are in one disclosure under
+  them.
   A new build changes them by itself; nothing in the page fixes a count the
   manifest gives.
 - The builds behind the page, in one panel: the published build (model
@@ -47,8 +53,10 @@ decided.
   published there is none.
 - Why write the rule again (the 23 choices a clean-room implementation had to
   make, two rated high, and the first netting rule the proofs refuted), and
-  `Found by the model, and settled in the specifications`: the first
-  netting rule, cases H and I, F, G, the 19.99% cap (six passes where P53
+  `Found by the model, by program B and by a review, and settled in the
+  specifications`: the first netting rule (found by program B, five cases
+  then proved by the model), cases H (the model) and I (a review), F, G,
+  the 19.99% cap (six passes where P53
   said five, a valid key as part of being live, the level as one floor) and
   the exclusions recomputation finding.
 - What the netting theorem proves, and where it stops: netting invariance in
@@ -84,11 +92,14 @@ decided.
   of it, each `#guard` case with its number of checks. Lean code keeps its
   lines, and a long line wraps with a hanging indent. The replay row is
   `The replay succeeds on valid input`, with the transaction rules it
-  assumes. Four draft claims are shown false, among them that
+  assumes. Four statements of the TDH-v1 table are shown false, among them that
   steps inside a transaction never matter (counterexamples H and I); that a
   token's balance and raw days stay the same while its eligibility does is
   marked not proved here (it follows from P26 §7.2's definitions); the first
-  netting rule's row shows its five counterexamples.
+  netting rule's row shows its five counterexamples, each with what its
+  values measure (the network total, ZERO's record in case B under the
+  first rule, identity {A, B}'s final in case C); held = minted − burned
+  is `False by evaluation` (counterexample G is a `#guard`).
 - What the model contains, across the whole width: what it covers, its
   runs as a small table (the vectors; the 2026-10-11 cycle from raw logs;
   the random inputs against the Python reference locally and, in CI, 1,000
@@ -96,12 +107,17 @@ decided.
   reference), one line calling the day and the random inputs evidence by
   evaluation, which trusts Lean's compiler, not proof, what it leaves out
   (since round 4, `f854661`, selecting and decoding logs are definitions of
-  the model; round 5 adds the one-log rule and the strict reader), and its
-  modules by P26 section. The day's log counts are given both ways: 414,007
+  the model, checked by vectors and runs, not by a theorem; round 5 adds the
+  one-log rule, whose check a theorem proves enough,
+  `canonicalTransfers_oneLog`, and the strict reader, test tooling checked
+  by vectors only), and its modules by P26 section (`Tdh.Inputs` at round 5:
+  §2, §3, §5.2, §6.1). The day's log counts are given both ways: 414,007
   through the snapshot block, of 414,254 in the day's file.
 - What the proofs do not guarantee, with a link to the five rounds of
   differential tests on the Implementations page, which lists what each
-  round found.
+  round found. The Rust core is checked against the Python reference on
+  each day of the daily comparison; the Lean model matched it on one real
+  day, the October 11, 2026 cycle.
 - Three layers of assurance across the section: the specification, the
   model and the programs as bands, each labelled with its layer, and the
   inputs under them, drawn dashed as partly in place (checked reads, D118,
@@ -142,12 +158,15 @@ records (`leanRound` in `formalStatus.ts`):
 The feed has published round 5's manifest since October 16, 2026, and the
 bundled copy is that file (SHA-256 `24e2f16b…`); every count the page shows
 is read from the manifest it loads, never written into the page. The
-summary splits the claims shown false by how each counterexample is checked
-(a kernel-checked theorem or an evaluation, #guard), its details give the
+summary splits the counterexamples by how each is checked (a kernel-checked
+theorem or an evaluation, #guard) and counts the claims they show false
+(`refutedClaimCount`), its details give the
 arithmetic of proved and audited theorems, the statements table's filters
 count statements (each row says how many manifest entries it groups, and
 shows a one-line claim with the plain words behind its chevron), and every
-manifest entry is listed by status under the tables. A statement refuted
+manifest entry is listed by status under the tables, each group with its
+unit and colour (`Proved: 78 theorems`, `Counterexamples: 11, against 7
+claims`, `Not proved here: 9 limits`). A statement refuted
 only by evaluated counterexamples has its own status, `False by
 evaluation`; each status has a shape as well as a colour. Every section uses
 the heading rail, and `What the proofs do not guarantee` gives each item in

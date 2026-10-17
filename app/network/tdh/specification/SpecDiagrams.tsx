@@ -59,10 +59,12 @@ function Up() {
 
 /**
  * Diagram 1: how the sections of P26 feed each other, as a flow. Inputs to
- * events to the snapshot; eligibility and identities side by side; then
- * holdings, scores and the output. From `xl`, the parameters (§10) sit on a
- * bus line under §2 to §8, with an arrow up into each of them, as the label
- * says; every node is the same height. Each box links to its section.
+ * the snapshot, which comes from the finalized chain (§4.2), then the
+ * canonical events, the logs in blocks up to it (§3.1); eligibility and
+ * identities side by side; then holdings, scores and the output. From `xl`,
+ * the parameters (§10) sit on a bus line under §2 to §8, with an arrow up
+ * into each of them, as the label says; every node is the same height. Each
+ * box links to its section.
  */
 export function SectionMap({ locale }: { readonly locale: SupportedLocale }) {
   return (
@@ -74,9 +76,9 @@ export function SectionMap({ locale }: { readonly locale: SupportedLocale }) {
       <div className="tw-grid tw-max-w-md tw-gap-2 xl:tw-max-w-none xl:tw-grid-cols-[minmax(0,1fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1.3fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1fr)_1rem_minmax(0,1fr)] xl:tw-items-center xl:tw-gap-x-1.5 xl:tw-gap-y-1.5">
         <MapNode locale={locale} section={2} />
         <Across />
-        <MapNode locale={locale} section={3} />
-        <Across />
         <MapNode locale={locale} section={4} />
+        <Across />
+        <MapNode locale={locale} section={3} />
         <Across />
         <div className="tw-grid tw-grid-cols-1 tw-gap-2 min-[400px]:tw-grid-cols-2 xl:tw-grid-cols-1">
           <MapNode locale={locale} section={5} />

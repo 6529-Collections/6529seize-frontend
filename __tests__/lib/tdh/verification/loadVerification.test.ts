@@ -3,9 +3,9 @@
  */
 import {
   PUBLIC_TDH_FEED_BASE,
-  createVerificationLoader,
   resolveVerificationSource,
-} from "@/lib/tdh/verification/loadVerification.server";
+} from "@/lib/tdh/verification/feedSource";
+import { createVerificationLoader } from "@/lib/tdh/verification/loadVerification.server";
 import { syntheticDay, syntheticIndex } from "./fixtures";
 
 const BASE = "https://verification.example/tdh";

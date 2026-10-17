@@ -1,11 +1,11 @@
 import { cache } from "react";
 import { getAppEnvironment } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";
+import { resolveVerificationSource } from "@/lib/tdh/verification/feedSource";
 import {
   FORMAL_MANIFEST_REVALIDATE_SECONDS,
   fetchFeedJson,
   isNotPublishedStatus,
-  resolveVerificationSource,
 } from "@/lib/tdh/verification/loadVerification.server";
 import {
   formalManifestSchema,

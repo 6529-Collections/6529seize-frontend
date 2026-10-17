@@ -17,9 +17,13 @@ import {
   isUnservableDotPath,
 } from "@/lib/proxy/publicPaths";
 import {
+  createTdhListedDays,
   isImpossibleTdhVerificationDay,
+  possibleTdhVerificationDay,
   tdhDayNotFoundTarget,
 } from "@/lib/proxy/tdhVerificationDay";
+import { getAppEnvironment } from "@/config/appEnvironment";
+import { resolveVerificationSource } from "@/lib/tdh/verification/feedSource";
 import { publicEnv } from "./config/env";
 import { API_AUTH_COOKIE } from "./constants/constants";
 
@@ -94,6 +98,25 @@ const STREAM_REVIEW_DATA_PREFIX = "/review-data/6529-stream/";
 // BASE_ENDPOINT so request headers such as Host cannot switch it off.
 // Production and local development never call the API from proxy.
 const ACCESS_GATE_ENABLED = isStagingDeployment(publicEnv.BASE_ENDPOINT);
+
+/**
+ * The TDH feed's index, for day permalinks inside the feed's range: a day
+ * the index does not list gets the TDH not-found view with a real 404,
+ * which the day page, streaming under `app/network/loading.tsx`, cannot
+ * send. Same base URL as the pages' own loaders.
+ */
+const tdhListedDays = (() => {
+  const source = resolveVerificationSource(
+    publicEnv.NEXT_PUBLIC_TDH_VERIFICATION_BASE,
+    getAppEnvironment(publicEnv.BASE_ENDPOINT).isProduction
+  );
+  return createTdhListedDays({
+    indexUrl:
+      source.kind === "remote"
+        ? new URL("index.json", source.base).toString()
+        : null,
+  });
+})();
 
 /**
  * Proxy runs before Next serves `public/` and `_next/static`, so it cannot tell
@@ -360,9 +383,16 @@ export default async function proxy(req: NextRequest) {
         ? pathname.slice(0, -1)
         : pathname;
 
-    if (isImpossibleTdhVerificationDay(normalizedPathname, Date.now())) {
+    const now = Date.now();
+    const possibleDay = possibleTdhVerificationDay(normalizedPathname, now);
+    if (
+      isImpossibleTdhVerificationDay(normalizedPathname, now) ||
+      (possibleDay !== null && (await tdhListedDays.unlisted(possibleDay, now)))
+    ) {
       // The TDH pages' own not-found view, with the site around it, sent
-      // with a real 404 status, after the same access gate as any page.
+      // with a real 404 status, after the same access gate as any page: a
+      // day that cannot exist, or one inside the range the feed's index
+      // does not list.
       return (
         (await accessDenial(req, normalizedPathname)) ??
         NextResponse.rewrite(

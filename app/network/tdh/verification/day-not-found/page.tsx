@@ -12,9 +12,11 @@ import { TDH_BUTTON, TDH_CARD, TDH_LINK } from "../../shared/tdhStyles";
 import { verificationDayHref } from "../components/VerificationHeadline";
 import { formatCycleDate } from "../components/verificationFormat";
 
-// The proxy rewrites a day permalink that cannot name a published day here,
-// with status 404 (lib/proxy/tdhVerificationDay.ts); the address bar keeps
-// the path that was asked for.
+// The proxy rewrites a day permalink that names no published day here,
+// with status 404 (lib/proxy/tdhVerificationDay.ts): one that cannot exist,
+// and one inside the feed's range that its index does not list. The address
+// bar keeps the path that was asked for; `?day=` carries the day only when
+// it is a cycle number, so no other text of the address reaches the page.
 export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<{ day?: string | string[] }>;

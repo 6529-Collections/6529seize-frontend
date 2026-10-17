@@ -43,8 +43,10 @@ collapsible `Exact rule` block quoting TDH-v1 (rule version `tdh-v1.0`).
   characters a line.
 - The lede says P26 is a proposal that 6529.io computes from the cutover;
   under it one closed disclosure, `How the examples are computed, and which
-  day each uses`, opens to the basis: the in-browser arithmetic is a
-  TypeScript port checked against the values the Python reference prints,
+  day each uses`, opens to the basis: the examples' arithmetic is a
+  TypeScript port checked against the values the Python reference prints;
+  the tables are computed on 6529.io's server when it renders the page,
+  and only the five interactive examples run in the browser;
   the other figures come from P26, its replay and the daily comparison,
   the examples use the network of the October 11, 2026 cycle and the dates
   the cycle of October 16, 2026, with the step sources and a link to the
@@ -57,7 +59,8 @@ collapsible `Exact rule` block quoting TDH-v1 (rule version `tdh-v1.0`).
 
 ## Interactive Elements
 
-All compute in the browser for illustration; the computation of record is
+These five are the page's only examples that compute in the browser,
+for illustration; the computation of record is
 6529.io's backend until the cutover and the validators' Rust core from then
 on. Each has a `Reset` button and announces its result politely.
 
@@ -77,8 +80,13 @@ Each explorable is titled under a `Try it` eyebrow.
   claim limit to edition and rate. Its chart, labelled on both axes, draws
   the rate used and the minted count alone as two lines with a key under
   it, the 300-copy threshold where floors end as a vertical rule, and the
-  310 floor, so the jump at 300 copies shows; a point off the chart is
-  named at its edge.
+  floor, so the jump at 300 copies shows; a point off the chart is
+  named at its edge. Below 300 minted the floor applies only with a claim
+  (its limit, capped at 310), and the edition is the larger of the minted
+  count and the floor, as the key and the chart's description say in every
+  state; with no claim the key says there is no floor. The minted count
+  stops at 3,941, the network's largest eligible edition (H), since no
+  edition can exceed it.
 - Build a collection and see its boost (the boost builder): full sets and Gradients with steppers; complete seasons as
   toggle chips on a grid whose rows balance (6, 6 and 5 on phones; 9 and 8
   from `sm`; the current season dashed), then Genesis and Nakamoto; the
@@ -143,7 +151,8 @@ Each explorable is titled under a `Try it` eyebrow.
   and that TDH-v1 allows three; whether it allows four is pending an owner
   decision. Step 14 points to it as the open question. Its link
   diagrams number each link in on-chain order and draw links inside an
-  identity heavier than links between identities (dashed).
+  identity solid and heavier than links between identities, which are
+  dashed; the text alternative says the same.
 - Diagrams are drawn phone first: the rate chart, the transaction and the
   link diagrams keep their text at 12 px or more at every width, and no
   drawn line crosses a label (`scripts/tdh-pages-check.mjs` checks both).

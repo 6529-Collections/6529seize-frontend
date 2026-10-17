@@ -442,25 +442,73 @@ describe("proxy", () => {
     });
 
     it("answers a TDH verification day that cannot exist with the TDH not-found view and a 404", async () => {
-      proxy = loadProxy(PRODUCTION_BASE_ENDPOINT);
-
-      const unknown = await proxy(
-        createRequest("/network/tdh/verification/abc", {
-          origin: PRODUCTION_BASE_ENDPOINT,
-        })
+      jest.useFakeTimers({ now: new Date("2026-10-16T12:00:00Z") });
+      const fetchMock = jest.spyOn(globalThis, "fetch").mockImplementation(
+        async () =>
+          new Response(
+            JSON.stringify({
+              days: [{ cycleDay: 20_742 }, { cycleDay: 20_740 }],
+            }),
+            { status: 200 }
+          )
       );
-      const published = await proxy(
-        createRequest("/network/tdh/verification/20740", {
-          origin: PRODUCTION_BASE_ENDPOINT,
-        })
-      );
+      try {
+        proxy = loadProxy(PRODUCTION_BASE_ENDPOINT);
 
-      expect(unknown).toEqual({
-        kind: "rewrite",
-        url: "https://6529.io/network/tdh/verification/day-not-found?day=abc",
-        status: 404,
-      });
-      expect(published).toEqual({ kind: "next" });
+        const unknown = await proxy(
+          createRequest("/network/tdh/verification/abc", {
+            origin: PRODUCTION_BASE_ENDPOINT,
+          })
+        );
+        const published = await proxy(
+          createRequest("/network/tdh/verification/20740", {
+            origin: PRODUCTION_BASE_ENDPOINT,
+          })
+        );
+        // Inside the range, but not in the feed's index: the same 404.
+        const unlisted = await proxy(
+          createRequest("/network/tdh/verification/20741", {
+            origin: PRODUCTION_BASE_ENDPOINT,
+          })
+        );
+
+        // The address's text never reaches the view.
+        expect(unknown).toEqual({
+          kind: "rewrite",
+          url: "https://6529.io/network/tdh/verification/day-not-found",
+          status: 404,
+        });
+        expect(published).toEqual({ kind: "next" });
+        expect(unlisted).toEqual({
+          kind: "rewrite",
+          url: "https://6529.io/network/tdh/verification/day-not-found?day=20741",
+          status: 404,
+        });
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
+          "https://d379duzqnomz3w.cloudfront.net/index.json"
+        );
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it("leaves a TDH day to the page when the feed's index cannot be read", async () => {
+      jest.useFakeTimers({ now: new Date("2026-10-16T12:00:00Z") });
+      jest
+        .spyOn(globalThis, "fetch")
+        .mockImplementation(async () => new Response(null, { status: 503 }));
+      try {
+        proxy = loadProxy(PRODUCTION_BASE_ENDPOINT);
+        const response = await proxy(
+          createRequest("/network/tdh/verification/20741", {
+            origin: PRODUCTION_BASE_ENDPOINT,
+          })
+        );
+        expect(response).toEqual({ kind: "next" });
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it("still answers dot-prefixed paths with a plain 404 in production", async () => {

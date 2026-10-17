@@ -45,7 +45,7 @@ const TABLE_SOURCES = [
 const CHECKS = [
   { key: "vectors", refs: ["P26 §13"] },
   { key: "replays", refs: ["Replay 2026-10-11", "P26 §13"] },
-  { key: "difftest", refs: ["P26 §13", "Difftest Oct 15"] },
+  { key: "difftest", refs: ["P26 §13", "Difftest Oct 15–16"] },
   { key: "dual", refs: ["D125", "P53 §4.5"] },
   { key: "daily", refs: ["D132"] },
   { key: "lean", refs: [] },

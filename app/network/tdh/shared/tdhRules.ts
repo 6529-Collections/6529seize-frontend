@@ -95,11 +95,11 @@ days(a) = (T - a) div day_s                            # §4.3, for a <= T
 
 # The cycle date (§4.1)
 a date is exactly eight digits naming a calendar date on or after 1970-01-01;
-    anything else names no cycle                       # vector 74, case 1
+    anything else names no cycle                       # vector 74, cases 1-6
 
 # Header order (§4.2)
 no result until b + 1 is finalized
-block 2^64 - 1 has no block b + 1, so it is never B    # vector 74, case 2
+block 2^64 - 1 has no block b + 1, so it is never B    # vector 74, case 0
 headers read for the cycle (b, b + 1, the search's, the decoded logs' blocks):
     the set need not be contiguous
     ordered by block number, timestamps MUST strictly increase between

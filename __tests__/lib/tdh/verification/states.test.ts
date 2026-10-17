@@ -48,16 +48,38 @@ describe("verification states", () => {
   });
 
   it("says which run wrote a day's file, from the file itself", () => {
-    // The first two days: first computed on October 15, and recomputed
-    // when a later file says so.
+    // The first two days: first computed on October 15. A later file is
+    // recomputed only when it names other builds than those first runs;
+    // its time alone says only that it was written later.
     expect(dayRunNote("2026-10-14", null)).toEqual({ kind: "firstRun" });
     expect(dayRunNote("2026-10-15", "2026-10-15T14:59:00Z")).toEqual({
       kind: "firstRun",
     });
+    expect(
+      dayRunNote("2026-10-14", "2026-10-16T15:59:06Z", {
+        rust: "0d25aa6c4a60599662f56c18f8c4d6d208b6cff8",
+        python: "f8400962310de6636b256c3b53bbfddbdec8f329",
+      })
+    ).toEqual({ kind: "recomputed", generatedAt: "2026-10-16T15:59:06Z" });
     expect(dayRunNote("2026-10-14", "2026-10-16T15:59:06Z")).toEqual({
-      kind: "recomputed",
+      kind: "rewritten",
       generatedAt: "2026-10-16T15:59:06Z",
     });
+    for (const rust of ["db72daab2fc3", "2b172160e6da", "e1276762ec5c"]) {
+      expect(
+        dayRunNote("2026-10-15", "2026-10-16T00:51:40Z", {
+          rust,
+          python: "0621ed4651e7a3be37bfa1862648d0d0291215d5",
+        })
+      ).toEqual({ kind: "rewritten", generatedAt: "2026-10-16T00:51:40Z" });
+    }
+    // A commit the file gives as unknown names no other build.
+    expect(
+      dayRunNote("2026-10-15", "2026-10-16T00:51:40Z", {
+        rust: "unknown",
+        python: null,
+      })
+    ).toEqual({ kind: "rewritten", generatedAt: "2026-10-16T00:51:40Z" });
     // A scheduled day: nothing near its 00:40 UTC run, a note well after.
     expect(dayRunNote("2026-10-17", "2026-10-17T00:55:00Z")).toBeNull();
     expect(dayRunNote("2026-10-17", null)).toBeNull();

@@ -1,6 +1,6 @@
 # TDH, explained and verified
 
-Status: built on 15 October 2026 and revised through round 7 on 16 October 2026 on branch
+Status: built on 15 October 2026 and revised through round 8 on 16 October 2026 on branch
 `claude/tdh-explained-and-verified`; not yet reviewed, merged or deployed.
 
 Pages on 6529.io that explain TDH from a one-minute introduction to the
@@ -85,8 +85,9 @@ bands.
   the daily job is redeployed with one the list does not hold; until then
   the page shows the build without a count.
 - Five rounds of differential tests (15 and 16 October) raised F1 to F9 and
-  E1 to E13; P26's fifth round (`f840096`) settled all but E13, which is
-  open for the vector format.
+  E1 to E13; by P26's fifth round (`f840096`) all but E13 were settled, in
+  P26 or, for E8, in the vector format and the references; E13 is open for
+  the vector format.
 - The pages read 6529's public feed, `https://d379duzqnomz3w.cloudfront.net`,
   in every environment; `NEXT_PUBLIC_TDH_VERIFICATION_BASE` only overrides it.
   No sample or bundled verification data ships; Jest serves a verbatim copy
@@ -116,12 +117,16 @@ bands.
   (the anatomy uses vector 36) and no longer say the vector files are all
   synthetic, but the vector should be made synthetic before the vectors are
   published (D116).
-- A day permalink that cannot name a published day (not a canonical cycle
-  day, before 20,740 or after the latest closed cycle) gets a plain 404 from
-  `proxy.ts` (`lib/proxy/tdhVerificationDay.ts`). A day inside that range
-  that the feed does not list still shows the not-found page with status
-  200 (`app/network/loading.tsx` starts streaming before the page can call
-  `notFound()`), titled day not found and `noindex`.
+- A day permalink that names no published day gets the TDH not-found view
+  with a real 404 from `proxy.ts` (`lib/proxy/tdhVerificationDay.ts`): one
+  that is not a canonical cycle day, is before 20,740 or after the latest
+  closed cycle, and one inside that range that the feed's `index.json` does
+  not list (the proxy reads the index within 2.5 seconds, again at most once
+  a minute for a day it has not seen listed). Only when the proxy cannot
+  read the index does such a day fall to the page, which shows the
+  not-found page with status 200 (`app/network/loading.tsx` starts
+  streaming before the page can call `notFound()`), titled day not found
+  and `noindex`. The rewrite passes the day only when it is a number.
 - History is labelled not yet fully checked: it is taken as reported by
   public log servers, and stays so, even once 6529's own Ethereum node is
   synced, until the daily run checks the full history against that node.
