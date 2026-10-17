@@ -368,10 +368,17 @@ export function ProofLegend({ locale }: { readonly locale: SupportedLocale }) {
   );
 }
 
-const ENTRY_GROUPS: readonly FormalStatus[] = [
-  "proved",
-  "counterexample",
-  "deferred",
+/** The manifest's statuses, each with its outcome's colour (`PROOF_GROUPS`). */
+const ENTRY_GROUPS: readonly {
+  readonly status: FormalStatus;
+  readonly mark: string;
+}[] = [
+  { status: "proved", mark: "tw-rounded-full tw-bg-success" },
+  { status: "counterexample", mark: "tw-rounded-full tw-bg-rose-400" },
+  {
+    status: "deferred",
+    mark: "tw-rounded-full tw-border-[1.5px] tw-border-solid tw-border-iron-400",
+  },
 ];
 
 function manifestPill(entry: FormalManifest["theorems"][number]): TdhPill {
@@ -383,14 +390,19 @@ function manifestPill(entry: FormalManifest["theorems"][number]): TdhPill {
 
 /**
  * Every entry of the proof manifest, by status, so each headline count can
- * be found and audited: the statements above group these entries.
+ * be found and audited: the statements above group these entries. Each
+ * group says its unit: theorems, counterexamples (with the claims they
+ * refute) and limits.
  */
 export function AllManifestEntries({
   locale,
   manifest,
+  claims,
 }: {
   readonly locale: SupportedLocale;
   readonly manifest: FormalManifest;
+  /** The claims the counterexamples show false (`refutedClaimCount`). */
+  readonly claims: number;
 }) {
   return (
     <TdhDisclosure
@@ -400,24 +412,25 @@ export function AllManifestEntries({
       })}
     >
       <div className="tw-space-y-5 tw-pb-2 tw-pl-6">
-        {ENTRY_GROUPS.map((status) => {
+        {ENTRY_GROUPS.map(({ status, mark }) => {
           const entries = manifest.theorems.filter(
             (entry) => entry.status === status
           );
           if (entries.length === 0) {
             return null;
           }
+          const heading = t(locale, `network.tdh.formal.allEntries.${status}`, {
+            count: formatInteger(locale, entries.length),
+            claims: formatInteger(locale, claims),
+          });
           return (
-            <section
-              key={status}
-              aria-label={t(locale, `network.tdh.formal.allEntries.${status}`, {
-                count: formatInteger(locale, entries.length),
-              })}
-            >
-              <h4 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
-                {t(locale, `network.tdh.formal.allEntries.${status}`, {
-                  count: formatInteger(locale, entries.length),
-                })}
+            <section key={status} aria-label={heading}>
+              <h4 className="tw-m-0 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-text-iron-100">
+                <span
+                  aria-hidden="true"
+                  className={`tw-size-2 tw-shrink-0 ${mark}`}
+                />
+                {heading}
               </h4>
               <ul className="tw-m-0 tw-mt-2 tw-list-none tw-p-0">
                 {entries.map((entry) => (

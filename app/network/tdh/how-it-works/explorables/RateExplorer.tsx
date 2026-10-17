@@ -17,7 +17,15 @@ import IntegerField from "./IntegerField";
 
 const DEFAULT_MINTED = 149;
 const DEFAULT_CLAIM = 332;
+/**
+ * H, the largest eligible edition of the October 11 network (FirstGM's
+ * 3,941). P26 §5.2 takes H as the largest edition of every eligible Meme,
+ * so no card's edition can exceed it: the minted count stops at H, and the
+ * card is never larger than the network's largest edition.
+ */
 const H = EXAMPLE_NETWORK.largestEdition;
+/** P26 §5.2: a floor is the claim's limit, capped at 310. */
+const FLOOR_CAP = 310;
 
 /**
  * The explorer's chart: the rate a Meme gets against the copies minted, for
@@ -113,11 +121,21 @@ function MintedRateChart({
       width={width}
       height={height}
       title={t(locale, "network.tdh.how.rate.curveTitle")}
-      desc={t(locale, "network.tdh.how.rate.curveDesc", {
-        minted: formatInteger(locale, minted),
-        edition: formatInteger(locale, effectiveEdition(minted, claim).edition),
-        rate: fmtRate(cents / 100),
-      })}
+      desc={t(
+        locale,
+        claim > 0
+          ? "network.tdh.how.rate.curveDesc"
+          : "network.tdh.how.rate.curveDescNoClaim",
+        {
+          minted: formatInteger(locale, minted),
+          edition: formatInteger(
+            locale,
+            effectiveEdition(minted, claim).edition
+          ),
+          rate: fmtRate(cents / 100),
+          floor: formatInteger(locale, Math.min(claim, FLOOR_CAP)),
+        }
+      )}
       className="tw-mx-auto"
     >
       <text x={4} y={14} fontSize={font} className="tw-fill-iron-300">
@@ -235,7 +253,11 @@ function ChartKey({
   floor,
 }: {
   readonly locale: SupportedLocale;
-  /** The floor the claim sets below 300 copies; 0 without a claim. */
+  /**
+   * The floor the claim sets below 300 copies, its limit capped at 310; 0
+   * without a claim. The edition there is the larger of the minted count
+   * and the floor, so the line runs flat only where fewer are minted.
+   */
   readonly floor: number;
 }) {
   const item = "tw-flex tw-items-center tw-gap-2";
@@ -287,7 +309,12 @@ export default function RateExplorer({
   });
 
   let note: string;
-  if (minted >= EDITION_FLOOR_THRESHOLD) {
+  if (minted >= H) {
+    note = `${t(locale, "network.tdh.how.rate.thresholdNote")} ${t(
+      locale,
+      "network.tdh.how.rate.largestNote"
+    )}`;
+  } else if (minted >= EDITION_FLOOR_THRESHOLD) {
     note = t(locale, "network.tdh.how.rate.thresholdNote");
   } else if (floorApplied) {
     note = t(locale, "network.tdh.how.rate.floorNote", {
@@ -322,7 +349,7 @@ export default function RateExplorer({
                 label={label("minted")}
                 value={minted}
                 min={1}
-                max={5_000}
+                max={H}
                 onChange={setMinted}
                 increaseLabel={t(locale, "network.tdh.shared.increase", {
                   name: label("minted"),
@@ -408,7 +435,7 @@ export default function RateExplorer({
             </div>
             <ChartKey
               locale={locale}
-              floor={claim > 0 ? Math.min(claim, 310) : 0}
+              floor={claim > 0 ? Math.min(claim, FLOOR_CAP) : 0}
             />
           </figure>
         </div>

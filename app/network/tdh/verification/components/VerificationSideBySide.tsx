@@ -111,11 +111,18 @@ export default function VerificationSideBySide({
   rust,
   python,
   live,
+  historyChecked = false,
 }: {
   readonly locale: SupportedLocale;
   readonly rust: VerificationImplementation;
   readonly python: VerificationImplementation | null;
   readonly live: VerificationLive | null;
+  /**
+   * Whether the day's file says the history was checked (`mode`
+   * `checked`): the Rust core's source and run time are then described as
+   * checked, never as taken as reported.
+   */
+  readonly historyChecked?: boolean;
 }) {
   const notRun = t(locale, "network.tdh.verify.side.notRun");
   const notApplicable = t(locale, "network.tdh.impl.notApplicable");
@@ -321,7 +328,12 @@ export default function VerificationSideBySide({
     {
       key: "source",
       label: t(locale, "network.tdh.verify.side.source"),
-      rust: t(locale, "network.tdh.verify.side.computedRust"),
+      rust: t(
+        locale,
+        historyChecked
+          ? "network.tdh.verify.side.computedRustChecked"
+          : "network.tdh.verify.side.computedRust"
+      ),
       python:
         python === null ? (
           <Muted>{notRun}</Muted>
@@ -450,7 +462,11 @@ export default function VerificationSideBySide({
             ...(rustRoots === null
               ? []
               : [["roots", "rootsShort", "rootsHelp"] as const]),
-            ["runtime", "runtimeShort", "runtimeNote"] as const,
+            [
+              "runtime",
+              "runtimeShort",
+              historyChecked ? "runtimeNoteChecked" : "runtimeNote",
+            ] as const,
           ] as const
         ).map(([key, short, help]) => (
           <div key={key}>

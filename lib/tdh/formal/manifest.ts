@@ -161,17 +161,24 @@ export function parseFormalManifest(value: unknown) {
  * (`replay_ok`, `Stack.takeLast_some`), matched against the end of the full
  * Lean name.
  */
+/** Whether a manifest entry is the one a name gives: its id, or its Lean name in full or short. */
+export function formalEntryMatches(
+  entry: FormalTheorem,
+  name: string
+): boolean {
+  return (
+    entry.id === name ||
+    entry.leanName === name ||
+    (entry.leanName?.endsWith(`.${name}`) ?? false)
+  );
+}
+
 export function findFormalEntry(
   manifest: FormalManifest,
   name: string
 ): FormalTheorem | null {
   return (
-    manifest.theorems.find(
-      (entry) =>
-        entry.id === name ||
-        entry.leanName === name ||
-        (entry.leanName?.endsWith(`.${name}`) ?? false)
-    ) ?? null
+    manifest.theorems.find((entry) => formalEntryMatches(entry, name)) ?? null
   );
 }
 

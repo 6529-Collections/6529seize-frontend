@@ -143,9 +143,13 @@ function ManifestEntries({
   return (
     <div>
       <p className="tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
-        {t(locale, "network.tdh.formal.entry.heading", {
-          count: formatInteger(locale, entries.length),
-        })}
+        {t(
+          locale,
+          entries.length === 1
+            ? "network.tdh.formal.entry.heading.one"
+            : "network.tdh.formal.entry.heading.other",
+          { count: formatInteger(locale, entries.length) }
+        )}
       </p>
       <ul className="tw-m-0 tw-mt-2 tw-list-none tw-p-0">
         {entries.map((entry) => {

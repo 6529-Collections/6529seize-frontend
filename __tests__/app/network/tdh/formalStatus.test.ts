@@ -3,6 +3,7 @@ import {
   checkStatements,
   leanRound,
   manifestFigures,
+  refutedClaimCount,
 } from "@/app/network/tdh/formal/formalStatus";
 import {
   LEAN_ROUND_5,
@@ -313,5 +314,43 @@ describe("formal statements against the proof manifest", () => {
       theoremsTdh: 40,
       theoremsP53: 30,
     });
+  });
+
+  it("counts the claims the counterexamples show false, not the counterexamples", () => {
+    // Round 5: 11 counterexamples. The first netting rule's five cases
+    // refute one claim; H, I, G, F and the two validator-rule findings one
+    // each.
+    expect(manifestFigures(bundled)).toMatchObject({
+      counterexamples: 11,
+      counterexampleTheorems: 7,
+      counterexampleEvaluations: 4,
+      claimsShownFalse: 7,
+      firstRuleCases: 5,
+    });
+    expect(refutedClaimCount(bundled)).toBe(7);
+    // A counterexample the page does not know counts as a claim of its own.
+    const extra: FormalManifest = {
+      ...bundled,
+      theorems: [
+        ...bundled.theorems,
+        {
+          ...(bundled.theorems.find(
+            (entry) => entry.status === "counterexample"
+          ) as FormalManifest["theorems"][number]),
+          id: "9.case-Z",
+          leanName: null,
+        },
+      ],
+    };
+    expect(refutedClaimCount(extra)).toBe(8);
+  });
+
+  it("gives round 5's inputs module its P26 sections", () => {
+    expect(modulesFor(5).find((row) => row.module === "Tdh.Inputs")).toEqual(
+      expect.objectContaining({ section: "§2, §3, §5.2, §6.1" })
+    );
+    expect(modulesFor(4).find((row) => row.module === "Tdh.Inputs")).toEqual(
+      expect.objectContaining({ section: "§2, §3, §6.1" })
+    );
   });
 });

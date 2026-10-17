@@ -332,11 +332,11 @@ export default function SpecSectionsA({
         <div id="s4-1" className="tw-scroll-mt-24">
           <Plain>{t(locale, "network.tdh.spec.s4.body")}</Plain>
         </div>
-        <div id="s4-3" className="tw-scroll-mt-24">
+        <div id="s4-2" className="tw-scroll-mt-24">
           <Rule locale={locale} code={RULE_CUTOFF_SPEC} source="P26 §4.2" />
         </div>
         <Details
-          id="s4-2"
+          id="s4-3"
           items={(["day", "result", "ages", "order", "example"] as const).map(
             (key) => t(locale, `network.tdh.spec.s4.detail.${key}`)
           )}

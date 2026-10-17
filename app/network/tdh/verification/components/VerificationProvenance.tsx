@@ -8,6 +8,7 @@ import type {
   VerificationIndexDay,
   VerificationRunFiles,
 } from "@/lib/tdh/verification/schema";
+import { TDH_RSS_FEED_DAYS } from "@/lib/tdh/verification/states";
 import TdhHeading from "../../shared/TdhHeading";
 import TdhCopyButton from "../../shared/TdhCopyButton";
 import TdhSource from "../../shared/TdhSource";
@@ -622,7 +623,9 @@ export default function VerificationProvenance({
             className={`${TDH_LINK} tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5`}
           >
             <RssIcon aria-hidden="true" className="tw-size-4" />
-            {t(locale, "network.tdh.verify.provenance.rss")}
+            {t(locale, "network.tdh.verify.provenance.rss", {
+              days: formatInteger(locale, TDH_RSS_FEED_DAYS),
+            })}
           </a>
           {daySha256 && (
             <p className="tw-m-0 tw-basis-full tw-text-sm tw-leading-5 tw-text-iron-400">

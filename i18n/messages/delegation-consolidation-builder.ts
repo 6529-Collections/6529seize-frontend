@@ -46,7 +46,7 @@ export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
   "delegation.consolidationBuilder.wallets.limitReached":
     "A consolidation can hold up to {limit} wallets.",
   "delegation.consolidationBuilder.wallets.fourthNote":
-    "A group of four: 6529.io counts all four wallets as one collector. TDH-v1, the rule 6529.io moves to about October 23, 2026, allows three; whether it allows four is pending an owner decision. Three wallets stay one collector either way.",
+    "A group of four: 6529.io counts all four wallets as one collector. TDH-v1, the rule 6529.io moves to about October 23, 2026, allows three; whether it allows four is pending an owner decision. Under TDH-v1 as written, the group is built from the newest confirmed links: three of the four wallets count as one collector, and the fourth counts on its own.",
   "delegation.consolidationBuilder.wallets.fourthLink":
     "How consolidation works in TDH-v1",
   "delegation.consolidationBuilder.wallets.fourthAcknowledge":

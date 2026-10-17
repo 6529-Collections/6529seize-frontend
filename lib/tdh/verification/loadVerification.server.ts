@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { cache } from "react";
 import { getAppEnvironment } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";
+import { resolveVerificationSource } from "./feedSource";
 import {
   parseVerificationDay,
   parseVerificationIndex,
@@ -29,16 +30,12 @@ import {
  * `not-found`.
  */
 
-/** 6529's public TDH feed, written by the daily comparison job (D132). */
-export const PUBLIC_TDH_FEED_BASE = "https://d379duzqnomz3w.cloudfront.net/";
-
 const INDEX_REVALIDATE_SECONDS = 600;
 export const LATEST_DAY_REVALIDATE_SECONDS = 600;
 export const OLDER_DAY_REVALIDATE_SECONDS = 3_600;
 /** The Lean proof manifest changes only with a new build of the model. */
 export const FORMAL_MANIFEST_REVALIDATE_SECONDS = 3_600;
 const FETCH_TIMEOUT_MS = 8_000;
-const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "[::1]"]);
 /** What the feed answers for a file it does not hold (yet). */
 const NOT_PUBLISHED_STATUSES = new Set([403, 404]);
 
@@ -48,10 +45,6 @@ export function isNotPublishedStatus(status: number | undefined): boolean {
 }
 
 export type VerificationErrorReason = "config" | "network" | "http" | "invalid";
-
-type VerificationSource =
-  | { readonly kind: "remote"; readonly base: URL }
-  | { readonly kind: "invalid" };
 
 export type IndexLoad =
   | {
@@ -79,32 +72,6 @@ interface VerificationLoaderOptions {
   readonly base: string | undefined;
   readonly isProduction: boolean;
   readonly fetchImpl?: typeof fetch;
-}
-
-export function resolveVerificationSource(
-  base: string | undefined,
-  isProduction: boolean
-): VerificationSource {
-  const configured = base?.trim() ?? "";
-  const trimmed = configured.length === 0 ? PUBLIC_TDH_FEED_BASE : configured;
-  let url: URL;
-  try {
-    url = new URL(trimmed);
-  } catch {
-    return { kind: "invalid" };
-  }
-  const isLocalHttp =
-    url.protocol === "http:" && LOCAL_HOSTNAMES.has(url.hostname);
-  if (url.protocol !== "https:" && !(isLocalHttp && !isProduction)) {
-    return { kind: "invalid" };
-  }
-  if (url.username || url.password || url.search || url.hash) {
-    return { kind: "invalid" };
-  }
-  if (!url.pathname.endsWith("/")) {
-    url.pathname = `${url.pathname}/`;
-  }
-  return { kind: "remote", base: url };
 }
 
 type FeedFetchResult =

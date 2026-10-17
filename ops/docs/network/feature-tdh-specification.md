@@ -115,6 +115,11 @@ chip links to a private repository.
   The phone `Contents` pill is solid, 8 px off the bottom edge.
 - The evidence's replay links 6529.io's published identities and wallets
   files for 2026-10-11 on Arweave and its list of daily uploads.
+- The sections map runs inputs (§2), the snapshot (§4), canonical events
+  (§3): the snapshot block comes from the finalized chain, and §3 selects
+  the logs in blocks up to it. §4.2's rule block is anchored `#s4-2`, and the
+  details under it, whole days among them, `#s4-3`. The cutoff rule
+  cites vector 74's case 0 for the top block and cases 1-6 for dates.
 - The sections map draws the parameter registry (§10) on a bus line under
   sections 2 to 8, with an arrow up into each, every node the same height
   from `xl`. §6.2's state machine labels REVOKE's target as pending the

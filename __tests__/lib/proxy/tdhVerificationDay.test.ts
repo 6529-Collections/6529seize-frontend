@@ -5,7 +5,9 @@
 import {
   FIRST_TDH_FEED_CYCLE_DAY,
   TDH_DAY_NOT_FOUND_PATH,
+  createTdhListedDays,
   isImpossibleTdhVerificationDay,
+  possibleTdhVerificationDay,
   tdhDayNotFoundTarget,
 } from "@/lib/proxy/tdhVerificationDay";
 
@@ -62,12 +64,86 @@ describe("tdhDayNotFoundTarget", () => {
     expect(target.origin).toBe("https://6529.io");
   });
 
-  it("cuts a long segment to 32 characters", () => {
-    const segment = "x".repeat(80);
-    const target = tdhDayNotFoundTarget(
-      new URL(`https://6529.io/network/tdh/verification/${segment}`),
-      `/network/tdh/verification/${segment}`
-    );
-    expect(target.searchParams.get("day")).toHaveLength(32);
+  it("never carries text that is not a cycle number", () => {
+    for (const segment of ["x".repeat(80), "abc", "%3Cb%3E", "020742"]) {
+      const target = tdhDayNotFoundTarget(
+        new URL(`https://6529.io/network/tdh/verification/${segment}`),
+        `/network/tdh/verification/${segment}`
+      );
+      expect(target.pathname).toBe(TDH_DAY_NOT_FOUND_PATH);
+      expect(target.search).toBe("");
+    }
+  });
+});
+
+describe("possibleTdhVerificationDay", () => {
+  it("names a canonical day inside the feed's range, and nothing else", () => {
+    const path = (segment: string) => `/network/tdh/verification/${segment}`;
+    expect(possibleTdhVerificationDay(path("20741"), NOW)).toBe(20_741);
+    expect(possibleTdhVerificationDay(path("20743"), NOW)).toBeNull();
+    expect(possibleTdhVerificationDay(path("20739"), NOW)).toBeNull();
+    expect(possibleTdhVerificationDay(path("abc"), NOW)).toBeNull();
+    expect(possibleTdhVerificationDay("/network/tdh", NOW)).toBeNull();
+  });
+});
+
+describe("createTdhListedDays", () => {
+  const index = (days: readonly number[]) =>
+    ({
+      ok: true,
+      json: async () => ({ days: days.map((cycleDay) => ({ cycleDay })) }),
+    }) as Response;
+
+  it("answers 404 for a day inside the range that the index does not list", async () => {
+    const fetchImpl = jest.fn(async () => index([20_740, 20_742]));
+    const listed = createTdhListedDays({
+      indexUrl: "https://feed.example/index.json",
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    });
+    expect(await listed.unlisted(20_741, NOW)).toBe(true);
+    expect(await listed.unlisted(20_742, NOW)).toBe(false);
+    expect(await listed.unlisted(20_740, NOW)).toBe(false);
+    // A day the last read did not list waits a minute for the next read.
+    expect(await listed.unlisted(20_741, NOW + 1_000)).toBe(true);
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it("reads the index again for a day it has not seen listed, at most once a minute", async () => {
+    const fetchImpl = jest
+      .fn()
+      .mockResolvedValueOnce(index([20_740]))
+      .mockResolvedValueOnce(index([20_740, 20_741]));
+    const listed = createTdhListedDays({
+      indexUrl: "https://feed.example/index.json",
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    });
+    expect(await listed.unlisted(20_741, NOW)).toBe(true);
+    expect(await listed.unlisted(20_741, NOW + 61_000)).toBe(false);
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
+
+  it("leaves the day to the page when the index cannot be read", async () => {
+    const failing = jest.fn(async () => {
+      throw new Error("offline");
+    });
+    const listed = createTdhListedDays({
+      indexUrl: "https://feed.example/index.json",
+      fetchImpl: failing as unknown as typeof fetch,
+    });
+    expect(await listed.unlisted(20_741, NOW)).toBe(false);
+    // A feed that is down is not asked again within the minute.
+    expect(await listed.unlisted(20_741, NOW + 1_000)).toBe(false);
+    expect(failing).toHaveBeenCalledTimes(1);
+    const invalid = createTdhListedDays({
+      indexUrl: "https://feed.example/index.json",
+      fetchImpl: (async () =>
+        ({
+          ok: true,
+          json: async () => ({ days: "none" }),
+        }) as Response) as unknown as typeof fetch,
+    });
+    expect(await invalid.unlisted(20_741, NOW)).toBe(false);
+    const unconfigured = createTdhListedDays({ indexUrl: null });
+    expect(await unconfigured.unlisted(20_741, NOW)).toBe(false);
   });
 });

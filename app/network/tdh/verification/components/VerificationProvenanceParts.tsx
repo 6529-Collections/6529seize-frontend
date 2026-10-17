@@ -6,7 +6,7 @@ import type {
   VerificationDay,
   VerificationIndexDay,
 } from "@/lib/tdh/verification/schema";
-import { dayRunNote } from "@/lib/tdh/verification/states";
+import { dayRunNote, type DayBuilds } from "@/lib/tdh/verification/states";
 import CaseSafe from "../../shared/CaseSafe";
 import TdhCopyButton from "../../shared/TdhCopyButton";
 import { middleTruncate } from "./verificationFormat";
@@ -77,18 +77,28 @@ const UTC_TIME = {
   timeZoneName: "short",
 } as const;
 
+/** The builds a day's file names, for `dayRunNote`. */
+export function dayBuilds(day: VerificationDay): DayBuilds {
+  return {
+    rust: day.implementations.rust.commit ?? null,
+    python: day.implementations.python?.commit ?? null,
+  };
+}
+
 /**
- * What the day's file says about the run that wrote it, from its own date
- * and `generatedAt` (`dayRunNote`): the first runs of October 15, a later
- * recomputation, or a file written well after the scheduled run. Null when
- * the file was written by its scheduled run.
+ * What the day's file says about the run that wrote it, from its own date,
+ * `generatedAt` and builds (`dayRunNote`): the first runs of October 15, a
+ * recomputation by other builds, a later write, or a file written well
+ * after the scheduled run. Null when the file was written by its scheduled
+ * run.
  */
 export function dayRunNoteString(
   locale: SupportedLocale,
   date: string,
-  generatedAt: string | null
+  generatedAt: string | null,
+  builds: DayBuilds | null = null
 ): string | null {
-  const note = dayRunNote(date, generatedAt);
+  const note = dayRunNote(date, generatedAt, builds);
   if (note === null) {
     return null;
   }
@@ -107,25 +117,21 @@ export function dayRunNoteString(
       hourCycle: "h23",
     }),
   };
-  return t(
-    locale,
-    note.kind === "recomputed"
-      ? "network.tdh.verify.provenance.run.recomputed"
-      : "network.tdh.verify.provenance.run.later",
-    values
-  );
+  return t(locale, `network.tdh.verify.provenance.run.${note.kind}`, values);
 }
 
 function DayRunNoteText({
   locale,
   date,
   generatedAt,
+  builds,
 }: {
   readonly locale: SupportedLocale;
   readonly date: string;
   readonly generatedAt: string | null;
+  readonly builds: DayBuilds;
 }) {
-  const text = dayRunNoteString(locale, date, generatedAt);
+  const text = dayRunNoteString(locale, date, generatedAt, builds);
   return text === null ? null : <>{text}</>;
 }
 
@@ -181,7 +187,8 @@ export function FeedStatement({
 }) {
   const generatedAt = day?.generatedAt ?? entry?.generatedAt ?? null;
   const stated = entry?.sha256 ?? day?.sha256 ?? null;
-  const hasRunNote = day !== null && dayRunNote(day.date, generatedAt) !== null;
+  const hasRunNote =
+    day !== null && dayRunNote(day.date, generatedAt, dayBuilds(day)) !== null;
   if (
     generatedAt === null &&
     stated === null &&
@@ -210,6 +217,7 @@ export function FeedStatement({
               locale={locale}
               date={day.date}
               generatedAt={generatedAt}
+              builds={dayBuilds(day)}
             />
           </span>
         )}

@@ -84,20 +84,51 @@ function figure(locale: SupportedLocale, value: number | null): string {
 }
 
 /**
+ * A figure's outcome, in the three colours of the statuses below: what
+ * holds (green), what was shown false (rose) and what is not covered (a
+ * grey ring). The vectors are a run, not a status, so they have no mark.
+ */
+const SUMMARY_MARK = {
+  proved: "tw-size-2 tw-rounded-full tw-bg-success",
+  false: "tw-size-2 tw-rounded-full tw-bg-rose-400",
+  deferred:
+    "tw-size-2 tw-rounded-full tw-border-[1.5px] tw-border-solid tw-border-iron-400",
+  vectors: null,
+} as const;
+
+function SummaryMark({ kind }: { readonly kind: keyof typeof SUMMARY_MARK }) {
+  const mark = SUMMARY_MARK[kind];
+  if (mark === null) {
+    return null;
+  }
+  return (
+    <span
+      aria-hidden="true"
+      className={`tw-shrink-0 ${mark}`}
+      data-tdh-summary-mark={kind}
+    />
+  );
+}
+
+/**
  * The model's status in one row of figures, every one read from the proof
- * manifest the page loads: theorems proved, claims shown false, claims not
- * proved here, and the conformance vectors. A new build of the model
- * changes them by itself; nothing here is fixed in the page.
+ * manifest the page loads, each with its unit: theorems proved,
+ * counterexamples (and the claims they show false), limits not proved here,
+ * and the conformance vectors. A new build of the model changes them by
+ * itself; nothing here is fixed in the page.
  */
 function SummaryBand({
   locale,
   figures,
   byDefinition,
+  wholeAudit,
 }: {
   readonly locale: SupportedLocale;
   readonly figures: ManifestFigures;
   /** Proved entries that only restate how the model computes a value. */
   readonly byDefinition: number;
+  /** The round's whole-model audit, from its README; null before round 4. */
+  readonly wholeAudit: LeanRuns["wholeAudit"];
 }) {
   const proved = {
     entries: formatInteger(locale, figures.entries),
@@ -108,6 +139,12 @@ function SummaryBand({
     p53: formatInteger(locale, figures.theoremsP53),
     byDefinition: formatInteger(locale, byDefinition),
   };
+  const refuted = {
+    kernel: formatInteger(locale, figures.counterexampleTheorems),
+    evaluated: formatInteger(locale, figures.counterexampleEvaluations),
+    claims: formatInteger(locale, figures.claimsShownFalse),
+    firstRule: formatInteger(locale, figures.firstRuleCases),
+  };
   const items = [
     {
       key: "proved",
@@ -115,21 +152,27 @@ function SummaryBand({
       // How the headline reconciles with the builds card's audited count,
       // and how many of the proved theorems only restate a definition.
       sub: t(locale, "network.tdh.formal.summary.provedSub", proved),
-      body: t(locale, "network.tdh.formal.summary.provedBody", proved),
+      // The 85 are the theorems PROOFS.md documents; the audit itself
+      // covers every theorem and definition of the model.
+      body:
+        wholeAudit === null
+          ? t(locale, "network.tdh.formal.summary.provedBody", proved)
+          : `${t(locale, "network.tdh.formal.summary.provedBody", proved)} ${t(
+              locale,
+              "network.tdh.formal.summary.provedBodyWhole",
+              {
+                theorems: formatInteger(locale, wholeAudit.theorems),
+                definitions: formatInteger(locale, wholeAudit.definitions),
+              }
+            )}`,
     },
     {
       key: "false",
       value: formatInteger(locale, figures.counterexamples),
-      // How the counterexamples are checked, under the figure: a kernel
-      // theorem and an evaluation are not the same strength.
-      sub: t(locale, "network.tdh.formal.summary.falseSub", {
-        kernel: formatInteger(locale, figures.counterexampleTheorems),
-        evaluated: formatInteger(locale, figures.counterexampleEvaluations),
-      }),
-      body: t(locale, "network.tdh.formal.summary.falseBody", {
-        kernel: formatInteger(locale, figures.counterexampleTheorems),
-        evaluated: formatInteger(locale, figures.counterexampleEvaluations),
-      }),
+      // How the counterexamples are checked, and how many claims they
+      // refute: five of them are cases of one claim.
+      sub: t(locale, "network.tdh.formal.summary.falseSub", refuted),
+      body: t(locale, "network.tdh.formal.summary.falseBody", refuted),
     },
     {
       key: "deferred",
@@ -163,7 +206,8 @@ function SummaryBand({
             <p className="tw-m-0 tw-text-2xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl">
               {item.value}
             </p>
-            <p className="tw-m-0 tw-mt-1 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-200">
+            <p className="tw-m-0 tw-mt-1 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-200">
+              <SummaryMark kind={item.key} />
               <CaseSafe
                 text={t(
                   locale,
@@ -265,6 +309,14 @@ function FirstRuleCases({ locale }: { readonly locale: SupportedLocale }) {
                   locale,
                   `network.tdh.formal.cases.desc.${row.id}` as MessageKey
                 )}
+                {/* What the two values measure: not every case's pair is
+                    the network total. */}
+                <span className="tw-mt-0.5 tw-block tw-text-sm tw-text-iron-400">
+                  {t(
+                    locale,
+                    `network.tdh.formal.cases.measure.${row.measure}` as MessageKey
+                  )}
+                </span>
               </th>
               <td
                 className={`${TDH_TD_NUM} tw-border-0 tw-p-0 tw-text-amber-200 md:tw-border-b md:tw-border-solid md:tw-px-4 md:tw-py-3`}
@@ -406,6 +458,7 @@ export default async function TdhFormalPage() {
             locale={locale}
             figures={figures}
             byDefinition={byDefinition}
+            wholeAudit={runs.wholeAudit}
           />
           <BuildsPanel
             locale={locale}
@@ -533,7 +586,11 @@ export default async function TdhFormalPage() {
               caption={t(locale, "network.tdh.formal.statements.p53")}
             />
           </div>
-          <AllManifestEntries locale={locale} manifest={load.manifest} />
+          <AllManifestEntries
+            locale={locale}
+            manifest={load.manifest}
+            claims={figures.claimsShownFalse}
+          />
         </div>
       </TdhSection>
 
@@ -620,7 +677,7 @@ export default async function TdhFormalPage() {
         id="not"
         title={t(locale, "network.tdh.formal.not.title")}
         locale={locale}
-        sources={["D118", "D119", "Difftest Oct 15"]}
+        sources={["D118", "D119", "Difftest Oct 15–16"]}
       >
         <ul className="tw-m-0 tw-max-w-[34rem] tw-list-none tw-space-y-4 tw-p-0">
           {NOT_KEYS.map((key) => (
@@ -643,7 +700,9 @@ export default async function TdhFormalPage() {
                   <TdhDisclosure
                     summary={t(locale, "network.tdh.formal.not.more")}
                   >
-                    <p className="tw-m-0 tw-pb-2 tw-pl-6 tw-text-sm tw-leading-6 tw-text-iron-300">
+                    {/* A theorem's name is one long word: it may break
+                        anywhere rather than run past a narrow window. */}
+                    <p className="tw-m-0 tw-pb-2 tw-pl-6 tw-text-sm tw-leading-6 tw-text-iron-300 [overflow-wrap:anywhere]">
                       {t(
                         locale,
                         key === "inputs"

@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactElement } from "react";
 import FormalPage from "@/app/network/tdh/formal/page";
@@ -12,7 +12,7 @@ import VerificationPage, {
 } from "@/app/network/tdh/verification/page";
 import { statementsFor } from "@/app/network/tdh/formal/leanResults";
 import roundThree from "./fixtures/roundThreeManifest.json";
-import { PUBLIC_TDH_FEED_BASE } from "@/lib/tdh/verification/loadVerification.server";
+import { PUBLIC_TDH_FEED_BASE } from "@/lib/tdh/verification/feedSource";
 import {
   PUBLIC_FEED_DAYS,
   PUBLIC_FEED_INDEX,
@@ -162,10 +162,28 @@ describe("TDH sub-pages", () => {
     expect(
       within(rate).getByText("300 copies: floors end")
     ).toBeInTheDocument();
+    // The key says what the floor does in every state: the edition is the
+    // larger of the minted count and the floor, and only with a claim.
     expect(
       within(rate).getByText(
-        "Rate used: below 300 copies the floor, edition 310"
+        "Rate used: below 300 copies, the larger of the minted count and the floor, 310"
       )
+    ).toBeInTheDocument();
+    const [minted, claim] = within(rate).getAllByRole("spinbutton");
+    if (!minted || !claim) {
+      throw new Error("the rate explorer has two fields");
+    }
+    // No claim: no floor, and the key and the chart say so.
+    fireEvent.change(claim, { target: { value: "0" } });
+    expect(
+      within(rate).getByText("Rate used: no claim limit, so no floor")
+    ).toBeInTheDocument();
+    // A minted count never passes the network's largest edition, H.
+    expect(minted).toHaveAttribute("max", "3941");
+    fireEvent.change(minted, { target: { value: "5000" } });
+    expect(minted).toHaveValue(3941);
+    expect(
+      within(rate).getByText(/a larger edition would itself become H/)
     ).toBeInTheDocument();
 
     const stack = screen.getByRole("region", {
@@ -223,6 +241,25 @@ describe("TDH sub-pages", () => {
     expect(container.textContent).toMatch(/0x8888…888888/);
     expect(container.textContent).toMatch(/net\(w\) = the amount w receives/);
     expect(container.querySelector("#symbols")).not.toBeNull();
+    // §4.2's anchor is its rule block; vector 74's top block is case 0.
+    expect(container.querySelector("#s4-2")?.textContent).toMatch(
+      /block 2\^64 - 1 has no block b \+ 1, so it is never B/
+    );
+    expect(container.querySelector("#s4-2")?.textContent).toMatch(
+      /vector 74, case 0/
+    );
+    expect(container.textContent).not.toMatch(/vector 74, case 2/);
+    expect(container.querySelector("#s4-3")?.textContent).not.toMatch(
+      /block 2\^64 - 1/
+    );
+    // The section map: the snapshot (§4) before the canonical events (§3).
+    const figure = screen
+      .getByText("How the sections fit together")
+      .closest("figure");
+    const map = [...(figure?.querySelectorAll('a[href^="#s"]') ?? [])]
+      .map((link) => link.getAttribute("href"))
+      .filter((href) => href === "#s3" || href === "#s4");
+    expect(map).toEqual(["#s4", "#s3"]);
   });
 
   it("filters the specification's deviations", async () => {
@@ -268,10 +305,20 @@ describe("TDH sub-pages", () => {
     expect(
       container.querySelectorAll('table [data-tdh-pill="shownFalseEval"]')
     ).toHaveLength(count("shownFalse") - 1);
-    // The counterexamples' split and the audited arithmetic, from the
-    // manifest; every entry is listed.
-    expect(container.textContent).toMatch(/7 by theorem, 4 by evaluation/);
+    // The counterexamples' split, the claims they refute and the audited
+    // arithmetic, from the manifest; every entry is listed.
+    expect(container.textContent).toMatch(
+      /7 theorems, 4 evaluations; 7 claims shown false/
+    );
+    expect(container.textContent).toMatch(
+      /the 5 cases of the first netting rule refute one claim/
+    );
     expect(container.textContent).toMatch(/78 \+ 7 = 85/);
+    // The audit covers the whole model; the 85 are the documented ones.
+    expect(container.textContent).toMatch(
+      /1,068 theorems and 1,538 definitions/
+    );
+    expect(container.textContent).not.toMatch(/audited at every build/);
     expect(
       screen.getByText("All 98 manifest entries, by status")
     ).toBeInTheDocument();
@@ -283,9 +330,38 @@ describe("TDH sub-pages", () => {
     );
     // The figures row is the manifest's own summary.
     expect(screen.getByText("89 / 89")).toBeInTheDocument();
+    // Each count with its unit, the outcomes in three colours.
     expect(container.textContent).toMatch(/78theorems proved/);
-    expect(container.textContent).toMatch(/11claims shown false/);
-    expect(container.textContent).toMatch(/9not proved here/);
+    expect(container.textContent).toMatch(/11counterexamples/);
+    expect(container.textContent).toMatch(/9limits not proved here/);
+    expect(container.textContent).not.toMatch(/11claims shown false/);
+    expect(
+      [...container.querySelectorAll("[data-tdh-summary-mark]")].map((mark) =>
+        mark.getAttribute("data-tdh-summary-mark")
+      )
+    ).toEqual(["proved", "false", "deferred"]);
+    expect(screen.getByText("Proved: 78 theorems")).toBeInTheDocument();
+    expect(
+      screen.getByText("Counterexamples: 11, against 7 claims")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Not proved here: 9 limits")).toBeInTheDocument();
+    // The one-log rule has a theorem; only the strict reader is checked by
+    // vectors alone.
+    expect(container.textContent).toMatch(/canonicalTransfers_oneLog/);
+    expect(container.textContent).not.toMatch(
+      /round 5 adds the one-log rule and the strict reader; vectors and runs check them, no theorem does/
+    );
+    // One real day for the Lean model, not "whole real days".
+    expect(container.textContent).not.toMatch(/on whole real days/);
+    expect(container.textContent).toMatch(
+      /the Lean model matched it on one real day, October 11, 2026/
+    );
+    // Units and facts as the sources give them.
+    expect(container.textContent).not.toMatch(/Found by the model, and/);
+    expect(container.textContent).not.toMatch(/adds no content/);
+    expect(container.textContent).not.toMatch(/Proved false/);
+    expect(container.textContent).not.toMatch(/Totals from the model/);
+    expect(container.textContent).toMatch(/§2, §3, §5\.2, §6\.1/);
     expect(container.textContent).not.toMatch(/cannot change TDH/);
     expect(container.textContent).not.toMatch(/and so no balance/);
     expect(container.textContent).toMatch(/It stops there/);

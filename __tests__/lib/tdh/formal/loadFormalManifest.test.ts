@@ -4,7 +4,7 @@
 import { BUNDLED_FORMAL_MANIFEST } from "@/lib/tdh/formal/bundledManifest";
 import { createFormalManifestLoader } from "@/lib/tdh/formal/loadFormalManifest.server";
 import { formalManifestSchema } from "@/lib/tdh/formal/manifest";
-import { PUBLIC_TDH_FEED_BASE } from "@/lib/tdh/verification/loadVerification.server";
+import { PUBLIC_TDH_FEED_BASE } from "@/lib/tdh/verification/feedSource";
 
 const BASE = "https://verification.example/tdh";
 const URL = `${BASE}/formal/manifest.json`;

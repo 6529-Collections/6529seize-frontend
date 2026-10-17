@@ -28,17 +28,45 @@ export const FIRST_REPORT_DATE = "2026-10-16";
  */
 const FIRST_RUN_DATE = "2026-10-15";
 
+/**
+ * The newest published days the RSS feed lists
+ * (`/network/tdh/verification.rss`): not every day, once there are more.
+ */
+export const TDH_RSS_FEED_DAYS = 60;
+
 /** The daily job's run, minutes after a cycle's 00:00 UTC boundary. */
 const SCHEDULED_RUN_MINUTES = 40;
 /** A file written this long after its scheduled run is called a later run. */
 const LATE_AFTER_MS = 2 * 3_600_000;
 
 /**
+ * The builds of those first runs of October 15: the Rust core at validator
+ * db72daa (the validator's `tools/tdh-daily/README.md`, "Cycles 20,740 and
+ * 20,741"), 2b17216 and e127676 (the files the feed first published), and
+ * the Python reference at 6529chain 0621ed4.
+ */
+const FIRST_RUN_BUILDS = {
+  rust: ["db72daa", "2b17216", "e127676"],
+  python: ["0621ed4"],
+} as const;
+
+/** The builds a day's file names: the Rust core's and the Python reference's commits. */
+export interface DayBuilds {
+  readonly rust: string | null;
+  readonly python: string | null;
+}
+
+/**
  * What a day's file says about the run that wrote it, for the page's note:
  * - `firstRun`: a day before the scheduled runs, from the first runs of
  *   October 15 (the file states no later time);
  * - `recomputed`: a day before the scheduled runs whose file was written
- *   after October 15, by the builds the file names;
+ *   after October 15 and names other builds than those first runs: it was
+ *   computed again, by the builds the file names;
+ * - `rewritten`: such a file written after October 15 whose builds are
+ *   those of the first runs, or not stated: a later write, not shown to be
+ *   a recomputation (a file's time alone does not say the day was computed
+ *   again);
  * - `later`: a scheduled day whose file was written well after its 00:40
  *   UTC run (a retry or a rerun);
  * - null: the file is the day's scheduled run, or says nothing either way.
@@ -46,11 +74,29 @@ const LATE_AFTER_MS = 2 * 3_600_000;
 type DayRunNote =
   | { readonly kind: "firstRun" }
   | { readonly kind: "recomputed"; readonly generatedAt: string }
+  | { readonly kind: "rewritten"; readonly generatedAt: string }
   | { readonly kind: "later"; readonly generatedAt: string };
+
+/** Whether a file names a build other than the first runs' (by commit prefix). */
+function namesOtherBuilds(builds: DayBuilds | null): boolean {
+  if (builds === null) {
+    return false;
+  }
+  // A commit the file states as `unknown` names no build either way.
+  const other = (commit: string | null, first: readonly string[]) =>
+    commit !== null &&
+    /^[0-9a-f]{7}/.test(commit) &&
+    !first.some((build) => commit.startsWith(build));
+  return (
+    other(builds.rust, FIRST_RUN_BUILDS.rust) ||
+    other(builds.python, FIRST_RUN_BUILDS.python)
+  );
+}
 
 export function dayRunNote(
   date: string,
-  generatedAt: string | null
+  generatedAt: string | null,
+  builds: DayBuilds | null = null
 ): DayRunNote | null {
   const written = generatedAt === null ? Number.NaN : Date.parse(generatedAt);
   const known = generatedAt !== null && !Number.isNaN(written);
@@ -58,7 +104,9 @@ export function dayRunNote(
     if (!known || generatedAt.slice(0, 10) <= FIRST_RUN_DATE) {
       return { kind: "firstRun" };
     }
-    return { kind: "recomputed", generatedAt };
+    return namesOtherBuilds(builds)
+      ? { kind: "recomputed", generatedAt }
+      : { kind: "rewritten", generatedAt };
   }
   if (!known) {
     return null;

@@ -61,7 +61,10 @@ export default async function TdhVerificationDayPage({
   const { cycleDay } = await params;
   const loaded = await loadPermalink(cycleDay);
   // A day the index lists still renders from the index when its own file is
-  // missing; only a day the index does not list is not found.
+  // missing; only a day the index does not list is not found. The proxy has
+  // already answered such a day with a 404 whenever it could read the index
+  // (`lib/proxy/tdhVerificationDay.ts`); this is the fallback when it
+  // could not.
   if (loaded === null) {
     notFound();
   }
@@ -119,9 +122,9 @@ export async function generateMetadata({
       ? indexLoad.index.days.find((day) => day.cycleDay === value)
       : undefined;
   if (value === null || entry === undefined) {
-    // An unknown day inside the feed's range (the proxy answers 404 for any
-    // other): the page renders the not-found view (`notFound()`), which Next
-    // marks noindex, so this sets only the title.
+    // An unknown day the proxy could not check against the index (it
+    // answers 404 for every other): the page renders the not-found view
+    // (`notFound()`), which Next marks noindex, so this sets only the title.
     return getAppMetadata(
       {
         title: t(DEFAULT_LOCALE, "network.tdh.verify.dayNotFoundTitle"),

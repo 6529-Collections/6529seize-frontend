@@ -72,10 +72,12 @@ boost rules.
    every address's net movement, the burn addresses' included, and both
    versions of the day with a result; compared every day, scheduled from
    October 16); then `Fixed before the cutover`, four dated items of one
-   line each with the detail under `More` (the edition-floor text
-   corrected on October 15, the flaw program B found in the first netting
-   rule, what the Lean model showed netting does not guarantee, and five
-   rounds of differential tests, all settled but E13), and a link to the
+   line each with the detail under `More` (the edition-floor text,
+   measured on the October 11, 2026 cycle and corrected on October 15, the
+   flaw program B found in the first netting rule, what the Lean model
+   showed netting does not guarantee, and five rounds of differential
+   tests, all settled but E13, in P26 or, for E8, the vector format and the
+   references), and a link to the
    Lean proof manifest on the daily feed.
 5. In `Explain my TDH`, enter a profile handle or wallet-like identity.
    Its results use the same words as the other TDH pages (raw days, base

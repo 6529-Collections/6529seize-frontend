@@ -25,7 +25,7 @@ const EVIDENCE: Record<string, { anchor: string; key: MessageKey }> = {
     anchor: "evidence-comparison",
     key: "network.tdh.shared.source.comparison",
   },
-  "Difftest Oct 15": {
+  "Difftest Oct 15–16": {
     anchor: "evidence-difftest",
     key: "network.tdh.shared.source.difftest",
   },

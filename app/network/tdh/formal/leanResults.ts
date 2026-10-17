@@ -79,6 +79,15 @@ export interface LeanRuns {
   readonly randomInputs: number;
   readonly randomVectors: number;
   readonly randomChecks: number;
+  /**
+   * The whole-model audit (`Audit/All.lean`, from round 4): every theorem
+   * and definition of the model, the P53 models and the vector runner on
+   * Lean's three standard axioms; null for a round without it.
+   */
+  readonly wholeAudit: {
+    readonly theorems: number;
+    readonly definitions: number;
+  } | null;
 }
 
 /**
@@ -99,6 +108,7 @@ export const LEAN_RUNS: Readonly<Record<LeanRound, LeanRuns>> = {
     randomInputs: 6_000,
     randomVectors: 12_000,
     randomChecks: 1_272_930,
+    wholeAudit: null,
   },
   4: {
     readmeCommit: "f854661",
@@ -114,6 +124,8 @@ export const LEAN_RUNS: Readonly<Record<LeanRound, LeanRuns>> = {
     randomVectors: 12_000,
     // 195,510 (seed 6529) + 986,678 (seed 7).
     randomChecks: 1_182_188,
+    // PROOFS.md at f854661, "How they are checked".
+    wholeAudit: { theorems: 1_036, definitions: 1_458 },
   },
   5: {
     readmeCommit: "6b32f3f",
@@ -130,6 +142,8 @@ export const LEAN_RUNS: Readonly<Record<LeanRound, LeanRuns>> = {
     // 179,818 (seed 6529) + 947,332 (seed 7), against the Python reference
     // at f840096; all 40 + 210 files that are no vector fail.
     randomChecks: 1_127_150,
+    // PROOFS.md at 6b32f3f, "How they are checked".
+    wholeAudit: { theorems: 1_068, definitions: 1_538 },
   },
 };
 
@@ -626,16 +640,45 @@ inductive Corresponds :
 
 /**
  * P26 §7.1's first netting rule against the current one, from
- * Tdh/Proofs/Counterexamples.lean: two inputs that differ only inside one
- * transaction, and the totals each rule gives them.
+ * Tdh/Proofs/Counterexamples.lean at 6b32f3f: two inputs that differ only
+ * inside one transaction, and the values each rule gives them. Not every
+ * pair is a total: the file's table marks case B's first-rule values as
+ * ZERO's record (its current-rule values are the totals its `#guard`s
+ * check) and case C's as identity {A, B}'s final after a later sale.
+ * `measure` names the message (`network.tdh.formal.cases.measure.<key>`).
  */
 export const FIRST_RULE_CASES = [
-  { id: "A", first: [20, 190], current: [20, 20] },
-  { id: "B", first: [20, 10], current: [10, 10] },
-  { id: "C", first: [50, 100], current: [100, 100] },
-  { id: "D", first: [320, 490], current: [320, 320] },
-  { id: "E", first: [100, 20], current: [100, 100] },
+  { id: "A", first: [20, 190], current: [20, 20], measure: "total" },
+  { id: "B", first: [20, 10], current: [10, 10], measure: "B" },
+  { id: "C", first: [50, 100], current: [100, 100], measure: "C" },
+  { id: "D", first: [320, 490], current: [320, 320], measure: "total" },
+  { id: "E", first: [100, 20], current: [100, 100], measure: "total" },
 ] as const;
+
+/**
+ * The claims the manifest's counterexamples show false. The five cases of
+ * the first netting rule (A to E) refute one claim; each other counterexample
+ * refutes its own: H the property as P26 §7.1 first stated it (every value),
+ * I the one stated after H (stacks, balances and raws), G held = minted -
+ * burned, F total = sum of wallets, and the two validator-rule findings
+ * (PROOFS.md at 6b32f3f, sections 1 to 3, 5a and 5b). A counterexample the
+ * list does not name counts as a claim of its own.
+ */
+export const REFUTED_CLAIMS: readonly (readonly string[])[] = [
+  [
+    "firstRule_reorder",
+    "firstRule_sinks",
+    "firstRule_trigger",
+    "firstRule_insert",
+    "firstRule_mintBurn",
+  ],
+  ["1.case-H"],
+  ["1.case-I"],
+  ["2.case-G"],
+  ["3.case-F"],
+  ["fivePasses_wrong"],
+  ["pruned_recompute_shortens"],
+];
 
 interface ModelModule {
   readonly module: string;
@@ -645,7 +688,10 @@ interface ModelModule {
   readonly rounds?: readonly LeanRound[];
 }
 
-/** The model's files and the P26 sections they cover (README, "Layout"). */
+/**
+ * The model's files and the P26 sections they cover (README, "Layout", of
+ * each round).
+ */
 const MODEL_MODULES: readonly ModelModule[] = [
   { module: "Tdh.Basic, Tdh.Binary64", key: "basic", section: "§1" },
   {
@@ -663,7 +709,15 @@ const MODEL_MODULES: readonly ModelModule[] = [
     module: "Tdh.Inputs",
     key: "inputsTyped",
     section: "§2, §3, §6.1",
-    rounds: [4, 5],
+    rounds: [4],
+  },
+  {
+    // Round 5 reads the claims' totalMax at its type (§5.2) and adds the
+    // one-log rule to the canonical order (README at 6b32f3f, "Layout").
+    module: "Tdh.Inputs",
+    key: "inputsOneLog",
+    section: "§2, §3, §5.2, §6.1",
+    rounds: [5],
   },
   {
     module: "Tdh.Logs",

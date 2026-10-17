@@ -290,6 +290,85 @@ describe("TDH page facts", () => {
     noMessageMatches(/10 to 12 s/);
   });
 
+  it("keeps the deep fact check of round 7 (b4b6553052)", () => {
+    const text = (key: string) => MESSAGES[key] ?? "";
+    // Round 5 proves the one-log rule (canonicalTransfers_oneLog); only the
+    // strict reader is checked by vectors alone.
+    for (const key of [
+      "network.tdh.formal.not.inputs.body",
+      "network.tdh.formal.not.inputs.bodyRaw",
+    ]) {
+      expect(text(key)).toMatch(/canonicalTransfers_oneLog/);
+      expect(text(key)).toMatch(/checked by vectors only/);
+    }
+    noMessageMatches(/one-log rule and the strict reader; vectors and runs/);
+    // Counterexamples are not claims.
+    expect(text("network.tdh.formal.summary.false")).toBe("counterexamples");
+    expect(text("network.tdh.formal.summary.falseBody")).toMatch(
+      /Counterexamples are not claims/
+    );
+    // Not every first-rule value is a total; case G is an evaluation.
+    noMessageMatches(/^Totals from the model/);
+    expect(text("network.tdh.formal.st.firstRule.scope")).toMatch(
+      /ZERO’s record in case B under the first rule; and identity \{A, B\}’s final in case C/
+    );
+    expect(text("network.tdh.formal.st.minted.scope")).toMatch(
+      /^False by evaluation/
+    );
+    // The Lean model ran one real day; the 85 are the documented theorems,
+    // the audit covers every theorem and definition.
+    noMessageMatches(/on whole real days/);
+    noMessageMatches(/audited at every build/);
+    expect(text("network.tdh.formal.summary.provedBodyWhole")).toMatch(
+      /every theorem and every definition of the model/
+    );
+    noMessageMatches(/adds no content/);
+    noMessageMatches(/^Found by the model, and/);
+    // Overview: E8 was settled in the vector format; the floors were
+    // measured on October 11 and corrected on October 15.
+    noMessageMatches(/Each finding became a rule in P26/);
+    expect(text("network.tdh.explainer.found.difftest.body")).toMatch(
+      /for an event’s default use case \(E8\), in the vector format and the references/
+    );
+    expect(text("network.tdh.explainer.found.floors.body")).toMatch(
+      /measured on the October 11, 2026 cycle\. P26 was corrected on October 15, 2026/
+    );
+    noMessageMatches(/corrected the same day/);
+    // How it works: the tables are rendered on the server; links between
+    // identities are dashed; the floor needs a claim.
+    noMessageMatches(/^Every worked example is computed in your browser/);
+    expect(text("network.tdh.how.s10.graphDesc")).toMatch(
+      /a confirmed link between two identities a dashed line/
+    );
+    expect(text("network.tdh.how.rate.keyUsedFloor")).toMatch(
+      /the larger of the minted count and the floor/
+    );
+    // Implementations: D125's third check is not built; an event without a
+    // use case takes the registry's.
+    expect(text("network.tdh.impl.python.runsIn")).toMatch(
+      /not built yet, and nothing signs today/
+    );
+    expect(text("network.tdh.impl.format.key.consolidation_events")).toMatch(
+      /registry’s consolidation_use_case.*vector 65 sets 1000/
+    );
+    // Specification: the snapshot comes first, from the finalized chain.
+    noMessageMatches(/which set the snapshot/);
+    // Verification: four steps; the day's JSON gives the day's numbers;
+    // the input's hash is of its text; LIVE_UNAVAILABLE includes an upload
+    // that did not verify; the RSS feed is capped.
+    expect(text("network.tdh.verify.check.sourceBody")).toMatch(/four steps/);
+    noMessageMatches(/every number on this page/);
+    noMessageMatches(/byte-identical/);
+    expect(text("network.tdh.shared.pill.liveUnavailable")).toMatch(
+      /missing or unverified/
+    );
+    expect(text("network.tdh.verify.tiles.liveMissing")).toMatch(
+      /missing or did not verify/
+    );
+    noMessageMatches(/every published day \(RSS\)/);
+    expect(text("network.tdh.verify.provenance.rss")).toMatch(/\{days\}/);
+  });
+
   it("shows no sample data", () => {
     noMessageMatches(/\bsample\b/i);
   });

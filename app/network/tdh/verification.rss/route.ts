@@ -9,14 +9,14 @@ import {
   loadVerificationIndex,
 } from "@/lib/tdh/verification/loadVerification.server";
 import type { VerificationDay } from "@/lib/tdh/verification/schema";
-import { indexDayVerdict } from "@/lib/tdh/verification/states";
+import {
+  TDH_RSS_FEED_DAYS,
+  indexDayVerdict,
+} from "@/lib/tdh/verification/states";
 import { formatCycleDate } from "../verification/components/verificationFormat";
 
 // The feed follows the published index, as the dashboard does.
 export const revalidate = 600;
-
-/** The newest days the feed lists. */
-const FEED_DAYS = 60;
 
 function escapeXml(value: string): string {
   return value
@@ -32,9 +32,10 @@ function rssDate(value: string): string {
 }
 
 /**
- * The daily comparison as an RSS 2.0 feed: one item per published day, with
- * its verdict, how many identity records agree with 6529.io and between the
- * Rust core and the Python reference, and the totals, newest first, so a
+ * The daily comparison as an RSS 2.0 feed: one item for each of the newest
+ * `TDH_RSS_FEED_DAYS` published days, with its verdict, how many identity
+ * records agree with 6529.io and between the Rust core and the Python
+ * reference, and the totals, newest first, so a
  * reader hears of a difference as soon as the day is published. An item's
  * date is when the feed wrote the day's file (its `generatedAt`, from the
  * file or the index), else when the index was written, else the cycle's
@@ -49,7 +50,7 @@ export async function GET(): Promise<Response> {
     load.status === "ok"
       ? [...load.index.days]
           .sort((left, right) => right.cycleDay - left.cycleDay)
-          .slice(0, FEED_DAYS)
+          .slice(0, TDH_RSS_FEED_DAYS)
       : [];
   const files = await Promise.all(
     days.map(async (day, position): Promise<VerificationDay | null> => {
@@ -128,7 +129,11 @@ export async function GET(): Promise<Response> {
     "  <channel>",
     `    <title>${escapeXml(t(locale, "network.tdh.verify.rss.title"))}</title>`,
     `    <link>${escapeXml(dashboard)}</link>`,
-    `    <description>${escapeXml(t(locale, "network.tdh.verify.rss.description"))}</description>`,
+    `    <description>${escapeXml(
+      t(locale, "network.tdh.verify.rss.description", {
+        days: formatInteger(locale, TDH_RSS_FEED_DAYS),
+      })
+    )}</description>`,
     "    <language>en-us</language>",
     ...(indexWritten === null
       ? []

@@ -323,6 +323,7 @@ export default function VerificationDashboard({
             rust={day.implementations.rust}
             python={day.implementations.python}
             live={day.implementations.live}
+            historyChecked={day.mode === "checked"}
           />
           <VerificationDifferences
             locale={locale}

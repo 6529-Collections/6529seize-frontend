@@ -260,7 +260,14 @@ function ProofPanel({
           summary={t(locale, "network.tdh.explainer.verified.howSummary")}
         >
           <p className="tw-m-0 tw-max-w-[38em] tw-pb-2 tw-pl-6 tw-text-sm tw-leading-6 tw-text-iron-300">
-            {t(locale, "network.tdh.explainer.verified.how")}
+            {/* Said as the day's file states its mode: the history
+                taken as reported, or checked against the headers. */}
+            {t(
+              locale,
+              summary.historyChecked === true
+                ? "network.tdh.explainer.verified.howChecked"
+                : "network.tdh.explainer.verified.how"
+            )}
             {summary.rustCommit !== null &&
               ` ${t(locale, "network.tdh.explainer.verified.builds", {
                 rust: `validator@${shortCommit(summary.rustCommit)}`,

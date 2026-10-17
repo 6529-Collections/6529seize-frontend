@@ -76,7 +76,9 @@ reference, the Lean model and 6529.io's current backend.
   last open choice, the edition-floor adapter, is pinned in P53 §11.3.
 - Where each runs, and which checks cover it: one matrix, the full width
   of the page, with a column per program and a row per check or use (P26's
-  conformance vectors, a whole real day, random and generated inputs, the
+  conformance vectors, a whole real day (one, the October 11, 2026 cycle,
+  for the references and the Lean model; each day of the daily comparison
+  for the Rust core), random and generated inputs, the
   daily comparison, validator signing, 6529.io's published TDH and the
   zero-knowledge proofs). Each cell has an icon and a word: now, planned
   (said in the cell: `First check, planned`), from a date, under test, or
@@ -86,12 +88,15 @@ reference, the Lean model and 6529.io's current backend.
   the Rust core and program B (a table, `#difftest-rounds`, gives each
   round's findings in one line and the P26 round that settled it with the
   findings' codes, the generated inputs in its caption and each round's
-  findings in full in a disclosure; E13, from the
+  findings in full in a disclosure; each finding was settled in P26 or,
+  for E8, an event's default use case, in the vector format and the
+  references; E13, from the
   fifth round on October 16, is open for the vector format; the
   Specification and Formal model pages link to it), the dual run in every
   validator (the Rust core against program B before signing, the Python
   reference an optional third check: decided, D125 and P53 §4.5, not yet
-  built in), the daily comparison (days compared from October 14, 2026, the
+  built in, and the Python reference's own row says the same, with nothing
+  signing today), the daily comparison (days compared from October 14, 2026, the
   scheduled job every day since October 16), the formal model, and proofs A
   and B, plus why the Python reference is the independent check of the
   published day after the cutover, program B joining once it runs inside

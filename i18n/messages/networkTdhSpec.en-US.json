@@ -7,7 +7,7 @@
   "network.tdh.spec.plain": "In plain words",
   "network.tdh.spec.theRule": "The rule",
   "network.tdh.spec.mapTitle": "How the sections fit together",
-  "network.tdh.spec.mapDesc": "Inputs (section 2) feed canonical events (3), which set the snapshot (4). Eligibility and rates (5) and identities (6) both feed holdings (7), which feed scores (8) and the day’s output (9). The parameter registry (10) feeds sections 2 to 8: contract addresses, sinks, the day length, editions and rates, the consolidation use case and group size, and the boosts.",
+  "network.tdh.spec.mapDesc": "Inputs (section 2) give the snapshot (4): the snapshot block is taken from the finalized chain, and the canonical events (3) are the logs in blocks up to it. Eligibility and rates (5) and identities (6) both feed holdings (7), which feed scores (8) and the day’s output (9). The parameter registry (10) feeds sections 2 to 8: contract addresses, sinks, the day length, editions and rates, the consolidation use case and group size, and the boosts.",
   "network.tdh.spec.s1.title": "1. Scope and conventions",
   "network.tdh.spec.s1.body": "TDH-v1 defines, for one day, each wallet’s and identity’s balance, whole days, base, boost and final TDH per eligible token, and the network totals. Arithmetic is exact, with binary64 only at the ties of RATE and FINAL (sections 8.1 and 8.4), and every number and address comes from the registry (section 10). Ranks, xTDH, REP and upload files are out of scope.",
   "network.tdh.spec.s2.title": "2. Inputs",
