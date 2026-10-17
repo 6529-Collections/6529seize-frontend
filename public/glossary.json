@@ -104,6 +104,7 @@
         "public mint phase"
       ],
       "facts": [
+        "Process and Finalize runs one durable background operation across ordered subscription phases and finalization. Refresh restores status; completed subscription lists are read-only downloads. If EMMA access expires or is denied during input capture, Sign in to resume renews authorization and continues the same job without losing saved progress. Once inputs are captured, processing needs no login token. Correct other failures before retrying and reset stale input versions explicitly.",
         "EMMA is the Editor for Managing Multiphase Allowlists and the first reference implementation of Janus.",
         "Opening /emma while signed in goes directly to /emma/plans, including with a restored session and no live wallet connection. A connected wallet alone is not a signed-in session.",
         "Signed-out users at /emma see wallet guidance and a Connect wallet or Sign in action. Opening a plan while signed out preserves that plan destination through sign-in.",

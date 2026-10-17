@@ -48,6 +48,7 @@ interface UseLaunchClaimModalActionsParams {
   onChainClaimSpinnerVisible: boolean;
   setOnChainClaimSpinnerVisible: (visible: boolean) => void;
   showErrorToast: (message: string) => void;
+  executeManual: (write: () => void, label?: string) => Promise<void>;
   runConnectedAction: RunConnectedAction;
   state: LaunchClaimState;
 }
@@ -72,6 +73,7 @@ export function useLaunchClaimModalActions({
   onChainClaimSpinnerVisible,
   setOnChainClaimSpinnerVisible,
   showErrorToast,
+  executeManual,
   runConnectedAction,
   state,
 }: Readonly<UseLaunchClaimModalActionsParams>) {
@@ -94,6 +96,21 @@ export function useLaunchClaimModalActions({
     onChainClaimFetchStartedAtRef,
     onChainClaimSpinnerHideTimeoutRef,
   } = state;
+  const runManual = useCallback(
+    async (write: () => void, actionLabel: string) => {
+      try {
+        await executeManual(write, actionLabel);
+      } catch (error) {
+        pendingMintingClaimActionRef.current = null;
+        setClaimTxModal({
+          status: "error",
+          message: getErrorMessage(error, "Failed to submit transaction"),
+          actionLabel,
+        });
+      }
+    },
+    [executeManual, pendingMintingClaimActionRef, setClaimTxModal]
+  );
 
   const runMetadataLocationOnlyUpdate = useCallback(() => {
     if (!claim) {
@@ -153,28 +170,24 @@ export function useLaunchClaimModalActions({
         actionLabel: "Update Claim",
       });
       pendingMintingClaimActionRef.current = null;
-      try {
-        claimWrite.writeContract({
-          address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
-          abi: MEMES_MANIFOLD_PROXY_ABI,
-          chainId: forgeMintingChain.id,
-          functionName: "updateClaim",
-          args: [forgeMintingContract, BigInt(claimId), claimParameters],
-        });
-      } catch (error) {
-        pendingMintingClaimActionRef.current = null;
-        setClaimTxModal({
-          status: "error",
-          message: getErrorMessage(error, "Failed to submit transaction"),
-          actionLabel: "Update Claim",
-        });
-      }
+      void runManual(
+        () =>
+          claimWrite.writeContract({
+            address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
+            abi: MEMES_MANIFOLD_PROXY_ABI,
+            chainId: forgeMintingChain.id,
+            functionName: "updateClaim",
+            args: [forgeMintingContract, BigInt(claimId), claimParameters],
+          }),
+        "Update Claim"
+      );
     });
   }, [
     claim,
     isInitialized,
     manifoldClaim,
     claimWrite,
+    runManual,
     forgeMintingChain.id,
     forgeMintingContract,
     claimId,

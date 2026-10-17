@@ -368,6 +368,22 @@ export * from '../models/ApiDropCompetitionContext';
 export * from '../models/ApiDropContextProfileContext';
 export * from '../models/ApiDropCuration';
 export * from '../models/ApiDropCurationRequest';
+export * from '../models/ApiDropForgeAction';
+export * from '../models/ApiDropForgeControlRequest';
+export * from '../models/ApiDropForgeJob';
+export * from '../models/ApiDropForgeJobRequest';
+export * from '../models/ApiDropForgeLaunch';
+export * from '../models/ApiDropForgeListPage';
+export * from '../models/ApiDropForgeListPageRowsInner';
+export * from '../models/ApiDropForgeManualRequest';
+export * from '../models/ApiDropForgeManualResponse';
+export * from '../models/ApiDropForgePhase';
+export * from '../models/ApiDropForgePhaseInput';
+export * from '../models/ApiDropForgePlanRequest';
+export * from '../models/ApiDropForgeRecovery';
+export * from '../models/ApiDropForgeRecoveryAllocation';
+export * from '../models/ApiDropForgeRecoveryAttempt';
+export * from '../models/ApiDropForgeRecoveryRequest';
 export * from '../models/ApiDropGroupMention';
 export * from '../models/ApiDropHiddenState';
 export * from '../models/ApiDropId';
@@ -1268,6 +1284,22 @@ import { ApiDropCompetitionContext } from '../models/ApiDropCompetitionContext';
 import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileContext';
 import { ApiDropCuration } from '../models/ApiDropCuration';
 import { ApiDropCurationRequest } from '../models/ApiDropCurationRequest';
+import { ApiDropForgeAction        , ApiDropForgeActionKindEnum  , ApiDropForgeActionStateEnum         } from '../models/ApiDropForgeAction';
+import { ApiDropForgeControlRequest , ApiDropForgeControlRequestOperationEnum   } from '../models/ApiDropForgeControlRequest';
+import { ApiDropForgeJob     , ApiDropForgeJobKindEnum  , ApiDropForgeJobStatusEnum      } from '../models/ApiDropForgeJob';
+import { ApiDropForgeJobRequest  , ApiDropForgeJobRequestKindEnum     } from '../models/ApiDropForgeJobRequest';
+import { ApiDropForgeLaunch    , ApiDropForgeLaunchStateEnum             } from '../models/ApiDropForgeLaunch';
+import { ApiDropForgeListPage } from '../models/ApiDropForgeListPage';
+import { ApiDropForgeListPageRowsInner } from '../models/ApiDropForgeListPageRowsInner';
+import { ApiDropForgeManualRequest, ApiDropForgeManualRequestActionEnum  , ApiDropForgeManualRequestOperationEnum     } from '../models/ApiDropForgeManualRequest';
+import { ApiDropForgeManualResponse } from '../models/ApiDropForgeManualResponse';
+import { ApiDropForgePhase } from '../models/ApiDropForgePhase';
+import { ApiDropForgePhaseInput } from '../models/ApiDropForgePhaseInput';
+import { ApiDropForgePlanRequest } from '../models/ApiDropForgePlanRequest';
+import { ApiDropForgeRecovery    , ApiDropForgeRecoveryOutcomeEnum      } from '../models/ApiDropForgeRecovery';
+import { ApiDropForgeRecoveryAllocation } from '../models/ApiDropForgeRecoveryAllocation';
+import { ApiDropForgeRecoveryAttempt , ApiDropForgeRecoveryAttemptOperationEnum      } from '../models/ApiDropForgeRecoveryAttempt';
+import { ApiDropForgeRecoveryRequest     , ApiDropForgeRecoveryRequestOperationEnum   } from '../models/ApiDropForgeRecoveryRequest';
 import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
 import { ApiDropHiddenState } from '../models/ApiDropHiddenState';
 import { ApiDropId } from '../models/ApiDropId';
@@ -1920,6 +1952,18 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiCreateConnectionShareResponseTargetClientTypeEnum",
     "ApiCreateLegacyDesktopConnectionShareRequestClientTypeEnum",
     "ApiDecentralizedMediaProtocol",
+    "ApiDropForgeActionKindEnum",
+    "ApiDropForgeActionStateEnum",
+    "ApiDropForgeControlRequestOperationEnum",
+    "ApiDropForgeJobKindEnum",
+    "ApiDropForgeJobStatusEnum",
+    "ApiDropForgeJobRequestKindEnum",
+    "ApiDropForgeLaunchStateEnum",
+    "ApiDropForgeManualRequestActionEnum",
+    "ApiDropForgeManualRequestOperationEnum",
+    "ApiDropForgeRecoveryOutcomeEnum",
+    "ApiDropForgeRecoveryAttemptOperationEnum",
+    "ApiDropForgeRecoveryRequestOperationEnum",
     "ApiDropGroupMention",
     "ApiDropMainType",
     "ApiDropMediaStatus",
@@ -2430,6 +2474,22 @@ let typeMap: {[index: string]: any} = {
     "ApiDropContextProfileContext": ApiDropContextProfileContext,
     "ApiDropCuration": ApiDropCuration,
     "ApiDropCurationRequest": ApiDropCurationRequest,
+    "ApiDropForgeAction": ApiDropForgeAction,
+    "ApiDropForgeControlRequest": ApiDropForgeControlRequest,
+    "ApiDropForgeJob": ApiDropForgeJob,
+    "ApiDropForgeJobRequest": ApiDropForgeJobRequest,
+    "ApiDropForgeLaunch": ApiDropForgeLaunch,
+    "ApiDropForgeListPage": ApiDropForgeListPage,
+    "ApiDropForgeListPageRowsInner": ApiDropForgeListPageRowsInner,
+    "ApiDropForgeManualRequest": ApiDropForgeManualRequest,
+    "ApiDropForgeManualResponse": ApiDropForgeManualResponse,
+    "ApiDropForgePhase": ApiDropForgePhase,
+    "ApiDropForgePhaseInput": ApiDropForgePhaseInput,
+    "ApiDropForgePlanRequest": ApiDropForgePlanRequest,
+    "ApiDropForgeRecovery": ApiDropForgeRecovery,
+    "ApiDropForgeRecoveryAllocation": ApiDropForgeRecoveryAllocation,
+    "ApiDropForgeRecoveryAttempt": ApiDropForgeRecoveryAttempt,
+    "ApiDropForgeRecoveryRequest": ApiDropForgeRecoveryRequest,
     "ApiDropHiddenState": ApiDropHiddenState,
     "ApiDropId": ApiDropId,
     "ApiDropMedia": ApiDropMedia,

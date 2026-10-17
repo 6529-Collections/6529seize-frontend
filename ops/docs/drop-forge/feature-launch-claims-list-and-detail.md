@@ -69,6 +69,17 @@ The launch surface combines:
    data, and phase window fields, then run the initialize/update action.
 10. Run phase-specific airdrops when those sections are populated.
 
+## Default Phase Schedule
+
+The default windows use `Europe/Athens` wall time, including daylight saving:
+Phase 0 17:40–18:20, Phase 1 18:30–18:50, Phase 2 19:00–19:20, and
+public 19:20–17:00 the next day. Initialization and Phase 0 allocations precede
+17:40. Phase 1 subscriber allocations belong in 18:20–18:30; Phase 2 and public
+subscriber allocations belong in 18:50–19:00. The existing Phase 2 tab groups
+those two subscription lists. On-chain windows are editable; use the configured
+windows when operating a claim. Craft Launch uses these defaults for the automated
+plan; Launch exposes progress and transaction recovery controls.
+
 ## Common Scenarios
 
 - Queue browsing:
@@ -119,6 +130,18 @@ The launch surface combines:
     when live on-chain `totalMax` exists, that value becomes the active cap.
   - Entering a target above the active claim max snaps the field back to that
     cap and shows a toast explaining the limit.
+  - Automatic Research becomes eligible at `17:15 Europe/Athens` the following
+    day, fifteen minutes after Public minting closes. Its target is
+    `min(310, Craft edition size)`, and the quantity subtracts the fresh on-chain
+    total minted, including paid mints and earlier/manual airdrops. Edition 305
+    with 287 minted sends 18 tokens. Craft and the on-chain maximum must match;
+    a discrepancy blocks execution and alerts the operations wave.
+  - If the target is already filled, automation completes Research without a
+    transaction. Confirmed manual Research receipts reduce any remaining top-up.
+    Completion updates the Research toggle and action timeline; transaction
+    links and failures are reported to the dedicated wave. The manual target
+    input remains available for manual work; automation uses the fixed capped
+    target above. Pay Artist remains manual.
 - On-chain actions:
   - If the authorized wallet is not currently connected, selecting an on-chain
     action opens wallet connection and continues that action after connection.
@@ -224,3 +247,53 @@ The launch surface combines:
 - [Drop Forge Craft-to-Launch Flow](flow-drop-forge-craft-to-launch.md)
 - [Drop Forge Access and Claim Operations](troubleshooting-drop-forge-access-and-claims.md)
 - [Docs Home](../README.md)
+
+## Coordinated automation
+
+The page shows the durable automated action timeline and transaction links.
+Manual writes acquire a backend lease before the wallet prompt. Their hashes
+are registered for confirmed reconciliation; the worker credits completed
+allocations and runs only the remainder. Automation also marks completed airdrop
+groups in the existing controls. Pause/resume uses revision checks and cannot
+cancel signed transactions. If the wallet outcome is unknown, supply its hash
+or use safe cancellation; do not repeat the airdrop blindly. Transactions sent
+outside these controls require their evidence supplied separately.
+
+## Recover a stuck automatic transaction
+
+The transaction recovery panel shows the operational wallet, nonce, deadline,
+original and replacement transaction links, and the exact action allocations.
+Choose **Speed up transaction** while its execution window remains valid, or
+**Cancel pending transaction**. Review the explanation and confirm the request.
+You can also supply an existing replacement/cancellation hash for verification.
+
+Recovery runs in the background. The wallet stays reserved until finalized chain
+evidence proves which transaction won. A cancellation request can lose to the
+original transaction; a late successful original is credited and never replayed.
+
+A successful cancellation or reverted action leaves allocations outstanding.
+**Retry outstanding action** is available within the original window. After all
+minting closes, **Deliver outstanding allocations after minting** requests a
+reviewed delivery. Neither operation credits recipients until execution is proven.
+Unknown evidence or changed claim configuration keeps the operation blocked.
+Failures are posted to the operations wave and tag `@dropforgers6529`.
+
+## Automatic phase groups
+
+The automatic timeline groups opening initialization, artist/team and Phase 0
+airdrops together, then each phase update with its subscriber airdrops. Public
+configuration, metadata updates and post-mint Research have separate groups.
+Every action checks its own readiness: matching on-chain configuration and
+confirmed manual deliveries show **Skipped — already completed on-chain**.
+A failed funding, permission or initialization check shows the error on that
+action and retries automatically while its execution window remains open.
+An earlier failed or expired action does not stop later groups from checking
+readiness. Outstanding deliveries remain visible and are never assumed complete.
+
+Wave reports include successful transactions and their links, each failed attempt
+and error, and detected-complete skips. Missed windows are reported once and
+need operator reconciliation. An uncertain signed transaction still holds the
+operational nonce until its winner is proved; explicit Pause still stops new
+work. Research waits for outstanding fixed allocations to be reconciled.
+Manual airdrop completion requires actual confirmed mint events matching the
+recipient addresses and quantities; toggles or total supply alone are not proof.

@@ -3020,6 +3020,95 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  "dropForge.actionDone": "Completed",
+  "dropForge.actionFailed": "Failed",
+  "dropForge.actionSubmitted": "Submitted",
+  "dropForge.actionSkipped": "Skipped — already completed on-chain",
+  "dropForge.actionReadinessFailed": "Readiness check failed",
+  "dropForge.actionRetryWindow":
+    "Retries automatically while its execution window remains open. Later groups check their own readiness.",
+  "dropForge.openingGroup": "Opening: initialization and Phase 0 airdrops",
+  "dropForge.researchGroup": "Post-mint Research airdrop",
+  "dropForge.metadataGroup": "Published metadata updates",
+  "dropForge.phaseGroup": "Mint phase",
+  "dropForge.actionPending": "Pending",
+  "dropForge.manualHash": "Manual transaction hash",
+  "dropForge.recordTransaction": "Record transaction",
+  "dropForge.cancelManual": "Cancel unsubmitted manual operation",
+  "dropForge.resume": "Resume automatic execution",
+  "dropForge.pause": "Pause automatic execution",
+  "dropForge.inputsChanged":
+    "Inputs changed. Reset the distribution before processing again.",
+  "dropForge.launch": "Launch",
+  "dropForge.update": "Update Claim",
+  "dropForge.initializing": "Initializing…",
+  "dropForge.updating": "Updating…",
+  "dropForge.launched": "Launched. Phase operations will run automatically.",
+  "dropForge.manualPending": "Manual transaction in progress.",
+  "dropForge.publishFirst": "Save and publish Craft changes before continuing.",
+  "dropForge.retry": "Retry",
+  "dropForge.processing": "Processing and finalizing…",
+  "dropForge.process": "Process and Finalize",
+  "dropForge.resumeAuth": "Sign in to resume",
+  "dropForge.authRequired":
+    "EMMA access expired or was denied. Sign in to resume the same job; saved progress is preserved.",
+  "dropForge.completed": "Completed — lists are ready to download.",
+  "dropForge.inputsMissing":
+    "Complete Phase 0, Phase 1 and Phase 2 in EMMA first.",
+  "dropForge.download": "Download lists",
+  "dropForge.downloading": "Downloading…",
+  "dropForge.pendingLists": "Process and finalize to make lists available.",
+  "dropForge.syncCurrent": "Published metadata is synchronized.",
+  "dropForge.automation": "Automatic launch progress",
+  "dropForge.initialized": "Initialized",
+  "dropForge.processError": "Unable to start processing",
+  "dropForge.launchError": "Unable to request launch",
+  "dropForge.controlError": "Unable to change automatic execution",
+  "dropForge.recoveryError": "Unable to recover manual operation",
+  "dropForge.downloadError": "Unable to download completed lists",
+  "dropForge.manualRecoveryError": "Manual operation requires recovery",
+  "dropForge.previousManualError":
+    "Reconcile the previous manual transaction before starting another",
+  "dropForge.storageError":
+    "Browser storage is unavailable. Manual transactions require recovery storage.",
+  "dropForge.hashStorageError":
+    "Unable to save transaction {hash}. Keep this hash for manual recovery.",
+  "dropForge.winnerHash":
+    "Existing replacement or cancellation transaction hash",
+  "dropForge.recordWinner": "Verify existing transaction",
+  "dropForge.recordWinnerExplanation":
+    "Verify this transaction belongs to the exact operational wallet, nonce and action, or is its cancellation. The wallet remains reserved until canonical finality proves the outcome.",
+  "dropForge.transactionRecovery": "Transaction recovery",
+  "dropForge.transactionRecoveryError":
+    "Unable to request transaction recovery",
+  "dropForge.signer": "Operational wallet",
+  "dropForge.nonce": "Nonce",
+  "dropForge.executionDeadline": "Execution deadline (UTC)",
+  "dropForge.totalMinted": "Total minted at the winning block",
+  "dropForge.recoveryQueued": "Queued for signing",
+  "dropForge.recoveryWaiting":
+    "Recovery pending. The wallet remains reserved until the winning transaction is finalized.",
+  "dropForge.recoveryExecuted":
+    "The action executed and is finalized. Its allocations will not be replayed.",
+  "dropForge.recoveryOutstanding":
+    "The action did not execute. Its allocations remain outstanding.",
+  "dropForge.recoveryAllocations": "Inspect action allocations",
+  "dropForge.speedUp": "Speed up transaction",
+  "dropForge.cancelTransaction": "Cancel pending transaction",
+  "dropForge.retryOutstanding": "Retry outstanding action",
+  "dropForge.deliverRemaining": "Deliver outstanding allocations after minting",
+  "dropForge.confirmRecovery": "Confirm recovery request",
+  "dropForge.dismissRecovery": "Dismiss",
+  "dropForge.recoverySubmitting": "Requesting recovery…",
+  "dropForge.actionCancelled": "Transaction cancelled — work outstanding",
+  "dropForge.cancelTransactionExplanation":
+    "Request a cancellation using the same nonce. The original may still win. Undelivered allocations remain owed until delivery is confirmed.",
+  "dropForge.speedUpExplanation":
+    "Increase transaction fees while preserving the original nonce, recipients and quantities. The backend enforces the execution window and gas budget.",
+  "dropForge.retryOutstandingExplanation":
+    "Request delivery of outstanding work only after the backend verifies finalized cancellation or revert evidence. Previously delivered allocations are not replayed.",
+  "dropForge.transaction": "View transaction",
+
   "network.prenodes.title": "Prenodes",
   "network.prenodes.pageTitle": "Prenodes | Network",
   "network.prenodes.deprecation":

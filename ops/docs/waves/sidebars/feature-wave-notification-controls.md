@@ -36,7 +36,8 @@ behavior across thread header controls and sidebar wave rows.
 - Bell and mute tooltips appear with a mouse; touch users can tap the controls
   directly without a lingering tooltip.
 - The `Broadcast mentions` row, shown with the `@` icon, turns on notifications
-  for the admin-only `@all` and `@contributors` broadcasts.
+  for the admin-only `@all` and `@contributors` broadcasts. Toggling this row
+  preserves other group preferences, including `@dropforgers6529`.
 - The `All messages` row turns on notifications for every message.
 - While a mode toggle request runs, the clicked button shows a spinner and
   notification controls are temporarily disabled.
