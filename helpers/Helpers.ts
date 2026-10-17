@@ -388,10 +388,15 @@ export function containsEmojis(s: string) {
   return codePointRegex.test(s);
 }
 
+// Replaces "U+XXXX" tokens with the emoji character and returns plain text.
+// Callers must render the result as text (React escapes it), never as HTML.
 export function parseEmojis(s: string) {
   const regex = /U\+([\dA-Fa-f]{1,6})/g;
-  return s.replaceAll(regex, (_, hexValue) => {
-    return `&#x${hexValue};`;
+  return s.replaceAll(regex, (match, hexValue: string) => {
+    const codePoint = Number.parseInt(hexValue, 16);
+    const isScalarValue =
+      codePoint <= 0x10ffff && (codePoint < 0xd800 || codePoint > 0xdfff);
+    return isScalarValue ? String.fromCodePoint(codePoint) : match;
   });
 }
 
