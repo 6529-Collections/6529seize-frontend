@@ -89,6 +89,27 @@ reached), select the header restriction control to see the reason, then use
   orientation. Change the orientation or uncheck the option to remove the
   frame; resubmission does not nest one frame inside another.
 
+## Additional Action
+
+- In `Artwork Details`, check `Additional Action` if you are promising an event,
+  donation, physical item, airdrop, or another deliverable alongside the artwork.
+- The checkbox opens `Your plan (optional)`. Explain what you will do if selected,
+  who receives it, timing, and any costs or conditions. The plan can contain up to
+  `5000` characters and will be public with the submission.
+- Leaving the plan blank is allowed. Review then says
+  `Additional Action marked. No separate plan provided.`
+- Unchecking hides the field and keeps its text during the current modal session.
+  The hidden plan is excluded when you submit. Rechecking restores it.
+- `Additional Information` and optional `Preview` both show the action and plan
+  before submission. Use `Back` to return to `Artwork` and change them.
+- The submitted drop displays the plan in its own `Additional Action` section.
+  The marker is the artist's commitment and does not confirm approval or delivery.
+- Resubmitting restores the saved plan and checkbox. Existing artist bio and
+  commentary stay in their own fields; they are not copied into the plan.
+- Resubmission waits for the saved submission to load before opening its fields.
+  If loading fails, select `Retry loading submission` or `Close` and try later.
+- Closing the modal discards an unsaved plan with the rest of the draft.
+
 ## Common Scenarios
 
 - `I Agree & Continue` stays disabled until the agreement checkbox is checked.
@@ -173,6 +194,8 @@ reached), select the header restriction control to see the reason, then use
 - Interactive mode is fixed to `text/html`.
 - `Additional Information`, preview, and submit phases are documented in
   dedicated pages.
+- Localization fallback debt: Additional Action messages use the `en-US` source
+  copy for `en-GB`, `fr-FR`, `es-ES`, and `de-DE`.
 
 ## Related Pages
 

@@ -15,6 +15,7 @@ import { useWaveRankReward } from "@/hooks/waves/useWaveRankReward";
 import { useCallback, useMemo } from "react";
 import { MemesDropArtworkHero } from "./MemesDropArtworkHero";
 import { MemesDropDetailsSection } from "./MemesDropDetailsSection";
+import type { DropMetadataState } from "./useDropDetailMetadata";
 import { MemesDropSummarySection } from "./MemesDropSummarySection";
 import {
   DISABLED_DROP_VOTE_SUMMARY_STATE,
@@ -24,6 +25,7 @@ import {
 interface MemesSingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
   readonly voteSummary?: DropVoteSummaryState | undefined;
+  readonly metadataState?: DropMetadataState | undefined;
   readonly wave: ApiWave | null;
   readonly onClose?: (() => void) | undefined;
   readonly isVotingClosed?: boolean | undefined;
@@ -31,9 +33,11 @@ interface MemesSingleWaveDropInfoPanelProps {
   readonly outcomesVisible?: boolean | undefined;
 }
 
+/** Pass metadata readiness through the saved submission's information panel. */
 export const MemesSingleWaveDropInfoPanel = ({
   drop,
   voteSummary = DISABLED_DROP_VOTE_SUMMARY_STATE,
+  metadataState,
   wave,
   onClose,
   isVotingClosed = false,
@@ -144,6 +148,7 @@ export const MemesSingleWaveDropInfoPanel = ({
         <MemesDropDetailsSection
           drop={drop}
           voteSummary={voteSummary}
+          metadataState={metadataState}
           wave={wave}
           artworkMedia={artworkMedia}
           fileInfo={fileInfo}

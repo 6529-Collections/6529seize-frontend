@@ -286,6 +286,7 @@ export function useArtworkSubmissionMutation() {
       const metadataLengthValidation = getSubmissionMetadataLengthValidation({
         traits: data.traits,
         operationalData: data.operationalData,
+        isAdditionalActionPromised: data.isAdditionalActionPromised,
       });
       if (metadataLengthValidation.hasErrors) {
         const fields = metadataLengthValidation.errors

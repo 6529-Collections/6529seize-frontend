@@ -21,6 +21,8 @@ describe("AdditionalInfoStep", () => {
 
   const baseProps = {
     traits: baseTraits,
+    isAdditionalActionPromised: false,
+    additionalActionPlan: "",
     airdropEntries: [
       {
         id: "a1",
@@ -112,5 +114,57 @@ describe("AdditionalInfoStep", () => {
     expect(screen.getByRole("button", { name: "Back" })).toBeDisabled();
     await user.click(screen.getByRole("button", { name: "Back" }));
     expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
+  it("reviews the plan before direct submit, keeps blank plans optional, and ignores unchecked drafts", () => {
+    const { rerender } = render(
+      <AdditionalInfoStep
+        {...baseProps}
+        isAdditionalActionPromised
+        additionalActionPlan="A free exhibition if selected."
+      />
+    );
+    expect(
+      screen.getByText("A free exhibition if selected.")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Submit Artwork" })
+    ).toBeEnabled();
+    rerender(
+      <AdditionalInfoStep
+        {...baseProps}
+        isAdditionalActionPromised
+        additionalActionPlan=""
+      />
+    );
+    expect(
+      screen.getByText("Additional Action marked. No separate plan provided.")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Submit Artwork" })
+    ).toBeEnabled();
+    rerender(
+      <AdditionalInfoStep
+        {...baseProps}
+        isAdditionalActionPromised
+        additionalActionPlan={"p".repeat(5001)}
+      />
+    );
+    expect(
+      screen.getByRole("button", { name: "Submit Artwork" })
+    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Preview" })).toBeDisabled();
+    rerender(
+      <AdditionalInfoStep
+        {...baseProps}
+        additionalActionPlan={"p".repeat(5001)}
+      />
+    );
+    expect(
+      screen.getByText("No additional action marked.")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Submit Artwork" })
+    ).toBeEnabled();
   });
 });

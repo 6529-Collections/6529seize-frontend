@@ -26,6 +26,7 @@ interface UseArtworkSubmissionFormActionsParams {
   readonly shouldApplyProfileDefaults?: boolean | undefined;
 }
 
+/** Provide stable draft updates; changing the action marker does not discard its plan text. */
 export function useArtworkSubmissionFormActions({
   state,
   dispatch,
@@ -80,6 +81,14 @@ export function useArtworkSubmissionFormActions({
         type: "SET_TRAIT_FIELD",
         payload: { field, value },
       });
+    },
+    [dispatch]
+  );
+
+  /** Update the draft plan without changing its declaration checkbox. */
+  const setAdditionalActionPlan = useCallback(
+    (value: string) => {
+      dispatch({ type: "SET_ADDITIONAL_ACTION_PLAN", payload: value });
     },
     [dispatch]
   );
@@ -172,6 +181,7 @@ export function useArtworkSubmissionFormActions({
     handleContinueFromTerms,
     setAboutArtist,
     setAdditionalActionPromised,
+    setAdditionalActionPlan,
     setAdditionalMedia,
     setAgreements,
     setAirdropConfig,
