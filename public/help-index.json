@@ -7119,6 +7119,7 @@
       "keywords": ["drop", "edit", "description", "pinned", "time limit"],
       "facts": [
         "Edit is available for your own non-participatory drops. Ordinary drops have a five-minute edit window measured from creation or the latest edit.",
+        "You can save multiple edits within the edit window without reloading the page. Editing text preserves existing images and videos, including after a previous edit has saved.",
         "The wave's current description (pinned drop) can be edited by its author at any time. Replacing the pinned description makes the previous drop subject to the normal edit window again. Pinning does not grant other users permission to edit the drop.",
         "Open the drop action menu and choose Edit. Save the changed content; existing mentions, metadata and referenced NFTs are preserved. Editing a description still requires the usual wave access and content validation."
       ],
