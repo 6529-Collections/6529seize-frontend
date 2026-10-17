@@ -25,7 +25,7 @@ export default async function MemeLabCollectionPage({
   const collectionName = getMemeLabCollectionName(collection);
 
   return (
-    <main className={styles["main"]}>
+    <main className={styles["main"]} lang={locale}>
       <MemeLabCollection
         collectionName={collectionName}
         initialSort={getSearchParamValue(resolvedSearchParams.sort)}

@@ -102,7 +102,7 @@ export default async function ReMeme({
   const locale = await getRouteLocale(searchParams);
 
   return (
-    <main className={styles["main"]}>
+    <main className={styles["main"]} lang={locale}>
       <RememePage contract={contract} id={id} locale={locale} />
     </main>
   );
