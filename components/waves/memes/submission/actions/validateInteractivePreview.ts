@@ -11,6 +11,7 @@ import {
   isInteractiveMediaContentPathAllowed,
 } from "../constants/security";
 import type { InteractiveMediaProvider } from "../constants/media";
+import { discardResponse } from "@/lib/fetch/fetchDeadline";
 
 type GatewayRequestMethod = "HEAD" | "GET";
 
@@ -19,7 +20,18 @@ interface ValidateInteractivePreviewArgs {
   readonly path: string;
 }
 
+type GatewayOutcome =
+  | { readonly ok: true; readonly response: Response }
+  | { readonly ok: false; readonly reason: string };
+
 const MAX_BYTES_TO_PEEK = 1024;
+const MAX_GATEWAY_REDIRECTS = 3;
+const REDIRECT_STATUS_CODES: ReadonlySet<number> = new Set([
+  301, 302, 303, 307, 308,
+]);
+const HEAD_FALLBACK_STATUS_CODES: ReadonlySet<number> = new Set([
+  403, 405, 501,
+]);
 
 const isAllowedContentType = (contentType: string | null): boolean => {
   if (!contentType) {
@@ -84,12 +96,80 @@ const performGatewayRequest = async (
     return await fetch(url, {
       method,
       cache: "no-store",
-      redirect: "follow",
+      redirect: "manual",
       headers,
       signal: controller.signal,
     });
   } finally {
     clearTimeout(timeoutId);
+  }
+};
+
+const resolveRedirectTarget = (
+  response: Response,
+  currentUrl: string
+): string | null => {
+  const location = response.headers.get("location");
+  if (!location) {
+    return null;
+  }
+
+  try {
+    return new URL(location, currentUrl).toString();
+  } catch {
+    return null;
+  }
+};
+
+// Redirects are never followed implicitly: every hop must pass the same host
+// and path guard as the initial URL before another request is made.
+const requestGateway = async (
+  url: string,
+  method: GatewayRequestMethod
+): Promise<GatewayOutcome> => {
+  let currentUrl = url;
+
+  for (let redirects = 0; ; redirects += 1) {
+    const response = await performGatewayRequest(currentUrl, method);
+    if (!REDIRECT_STATUS_CODES.has(response.status)) {
+      return { ok: true, response };
+    }
+
+    discardResponse(response);
+    const nextUrl = resolveRedirectTarget(response, currentUrl);
+    if (!nextUrl || !ensureAllowedHost(nextUrl)) {
+      console.warn(
+        "[validateInteractivePreview] Blocking redirect to unapproved target",
+        { status: response.status }
+      );
+      return {
+        ok: false,
+        reason: "Gateway redirected to an unapproved host.",
+      };
+    }
+    if (redirects >= MAX_GATEWAY_REDIRECTS) {
+      return { ok: false, reason: "Gateway redirected too many times." };
+    }
+
+    currentUrl = nextUrl;
+  }
+};
+
+const attemptGatewayRequest = async (
+  url: string,
+  method: GatewayRequestMethod,
+  logContext: Record<string, unknown>
+): Promise<GatewayOutcome> => {
+  try {
+    return await requestGateway(url, method);
+  } catch (error) {
+    const label = method === "HEAD" ? "HEAD" : "Fallback GET";
+    console.error(`[validateInteractivePreview] ${label} request failed`, {
+      ...logContext,
+      targetUrl: url,
+      error,
+    });
+    return { ok: false, reason: "Unable to reach the content gateway." };
   }
 };
 
@@ -157,48 +237,15 @@ export async function validateInteractivePreview({
     };
   }
 
-  let response: Response;
-  try {
-    response = await performGatewayRequest(targetUrl, "HEAD");
-  } catch (error) {
-    console.error(
-      "[validateInteractivePreview] HEAD request failed",
-      {
-        provider,
-        path,
-        targetUrl,
-        error,
-      }
-    );
-    return {
-      ok: false,
-      reason: "Unable to reach the content gateway.",
-    };
+  const logContext = { provider, path };
+  let outcome = await attemptGatewayRequest(targetUrl, "HEAD", logContext);
+  if (outcome.ok && HEAD_FALLBACK_STATUS_CODES.has(outcome.response.status)) {
+    outcome = await attemptGatewayRequest(targetUrl, "GET", logContext);
   }
-
-  if (
-    response.status === 405 ||
-    response.status === 403 ||
-    response.status === 501
-  ) {
-    try {
-      response = await performGatewayRequest(targetUrl, "GET");
-    } catch (error) {
-      console.error(
-        "[validateInteractivePreview] Fallback GET request failed",
-        {
-          provider,
-          path,
-          targetUrl,
-          error,
-        }
-      );
-      return {
-        ok: false,
-        reason: "Unable to reach the content gateway.",
-      };
-    }
+  if (!outcome.ok) {
+    return { ok: false, reason: outcome.reason };
   }
+  const { response } = outcome;
 
   if (!response.ok && response.status !== 206) {
     return {
