@@ -1,4 +1,5 @@
 import { createSecurityHeaders } from "./securityHeaders";
+import { isE2eeFlagEnabled } from "./e2eeFlag";
 import { meebits445Headers } from "./meebits445Headers";
 import { PublicEnv } from "./env.schema";
 import { NextConfig } from "next";
@@ -133,6 +134,9 @@ export function sharedConfig(
                 allowUnsafeEval:
                   publicEnv.NODE_ENV === "development" ||
                   publicEnv.NODE_ENV === "local",
+                allowWasmUnsafeEval: isE2eeFlagEnabled(
+                  publicEnv.NEXT_PUBLIC_E2EE_DM_ENABLED
+                ),
                 webSocketEndpoint: publicEnv["WS_ENDPOINT"],
               }
             ),

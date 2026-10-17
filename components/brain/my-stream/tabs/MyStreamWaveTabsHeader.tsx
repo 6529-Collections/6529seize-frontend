@@ -48,6 +48,7 @@ import WaveJoinCta from "@/components/waves/header/WaveJoinCta";
 import CompactWaveActions from "./CompactWaveActions";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 import { BRAIN_RIGHT_SIDEBAR_ID } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
+import { PlaintextDmEncryptionNotice } from "@/components/e2ee/plaintext/PlaintextDmEncryptionNotice";
 
 const TRUNCATION_EPSILON_PX = 1;
 const WAVE_SCORE_LEARN_MORE_HREF = "/network/wave-score";
@@ -503,6 +504,13 @@ export default function MyStreamWaveTabsHeader({
             waveScoreLearnMoreHref={waveScoreLearnMoreHref}
             isDirectMessage={isDirectMessage}
           />
+          {/* Plaintext DMs (D109): quiet label + start an encrypted chat. */}
+          {isDirectMessage ? (
+            <PlaintextDmEncryptionNotice
+              wave={wave}
+              variant={isCompact ? "icon" : "inline"}
+            />
+          ) : null}
         </div>
         <div className={actionsClassName}>
           <WaveJoinCta wave={wave} tooltipId={headerActionsTooltipId} />
