@@ -107,4 +107,41 @@ describe("UserPageHeaderEditPfp", () => {
     await userEvent.click(screen.getByRole("button", { name: /cancel/i }));
     expect(onClose).toHaveBeenCalled();
   });
+
+  it("revokes the preview object URL when the file is replaced and on unmount", async () => {
+    const createObjectURL = jest.mocked(global.URL.createObjectURL);
+    const revokeObjectURL = jest.mocked(global.URL.revokeObjectURL);
+    createObjectURL.mockClear();
+    revokeObjectURL.mockClear();
+    createObjectURL
+      .mockReturnValueOnce("blob:first")
+      .mockReturnValueOnce("blob:second");
+
+    const { unmount } = render(
+      <AuthContext.Provider value={authCtx}>
+        <ReactQueryWrapperContext.Provider value={queryCtx}>
+          <UserPageHeaderEditPfp profile={profile} onClose={jest.fn()} />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByTestId("file"));
+    expect(createObjectURL).toHaveBeenCalledTimes(1);
+    expect(revokeObjectURL).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByTestId("file"));
+    expect(createObjectURL).toHaveBeenCalledTimes(2);
+    expect(revokeObjectURL).toHaveBeenCalledTimes(1);
+    expect(revokeObjectURL).toHaveBeenLastCalledWith("blob:first");
+
+    await userEvent.click(screen.getByTestId("meme"));
+    expect(revokeObjectURL).toHaveBeenCalledTimes(2);
+    expect(revokeObjectURL).toHaveBeenLastCalledWith("blob:second");
+
+    createObjectURL.mockReturnValueOnce("blob:third");
+    await userEvent.click(screen.getByTestId("file"));
+    unmount();
+    expect(revokeObjectURL).toHaveBeenCalledTimes(3);
+    expect(revokeObjectURL).toHaveBeenLastCalledWith("blob:third");
+  });
 });
