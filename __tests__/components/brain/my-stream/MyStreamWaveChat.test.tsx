@@ -189,7 +189,7 @@ jest.mock("@/contexts/wave/UnreadDividerContext", () => ({
 }));
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: () => ({
+  useMyStreamActions: () => ({
     fetchAroundSerialNo: mockFetchAroundSerialNo,
   }),
 }));

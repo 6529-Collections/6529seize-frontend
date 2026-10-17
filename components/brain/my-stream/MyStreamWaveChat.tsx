@@ -27,7 +27,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { t } from "@/i18n/messages";
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
@@ -211,7 +211,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const router = useRouter();
   const dmUnreadConversation = useDmUnreadConversation(wave.id);
   const isDirectMessage = isWaveDirectMessage(wave.id, wave);
-  const { fetchAroundSerialNo } = useMyStream();
+  const { fetchAroundSerialNo } = useMyStreamActions();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by MyStreamWave Suspense wrapper
   const searchParams = useSearchParams();
   const pathname = usePathname();

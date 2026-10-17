@@ -3,7 +3,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
@@ -34,7 +34,7 @@ export default function DropsListItemDeleteDropModal({
 }) {
   const { requestAuth, setToast } = useContext(AuthContext);
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
-  const { processDropRemoved } = useMyStream();
+  const { processDropRemoved } = useMyStreamActions();
 
   const contentType =
     drop.drop_type === ApiDropType.Participatory ? "Drop" : "Post";

@@ -8,7 +8,7 @@ import { trapTabFocus } from "@/components/utils/modal/focusTrap";
 import CreateDropReplyingWrapper from "@/components/waves/CreateDropReplyingWrapper";
 import type { DropMutationBody } from "@/components/waves/create-drop-content/drop-submission.types";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -220,7 +220,7 @@ export default function QuorumProposalDropModal({
   const { isSafeWallet, address } = useSeizeConnectContext();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
-  const { processIncomingDrop } = useMyStream();
+  const { processIncomingDrop } = useMyStreamActions();
   const { signDrop } = useDropSignature();
   const [values, setValues] = useState<QuorumProposalFormValues>(
     EMPTY_QUORUM_PROPOSAL_FORM_VALUES
@@ -463,7 +463,7 @@ export default function QuorumProposalDropModal({
       if (optimisticDrop) {
         void addOptimisticDrop({ drop: optimisticDrop });
         setTimeout(() => {
-          processIncomingDrop(
+          void processIncomingDrop(
             optimisticDrop,
             ProcessIncomingDropType.DROP_INSERT
           );
