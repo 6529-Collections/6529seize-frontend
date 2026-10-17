@@ -1,0 +1,32 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "run_id": "2026-10-15-museum-embeds",
+  "calibration": "uncalibrated",
+  "decision": "accepted",
+  "label": "judge-accepted (uncalibrated)",
+  "round": 0,
+  "file": "00",
+  "candidate": "5a826f65056ae64cb5f6c789699d8533c98baaa4",
+  "total": 8.595,
+  "applicable_weight": 100,
+  "failed_floors": [],
+  "failed_checks": [],
+  "open_required": [],
+  "unverified": {
+    "coverage": [],
+    "dimensions": [],
+    "checks": []
+  },
+  "errors": [],
+  "budget": {
+    "repair_batches": 6,
+    "used": 0,
+    "remaining": 6,
+    "no_progress_streak": 0,
+    "recovery_batch": false
+  },
+  "best": {
+    "round": 0,
+    "candidate": "5a826f65056ae64cb5f6c789699d8533c98baaa4"
+  }
+}
