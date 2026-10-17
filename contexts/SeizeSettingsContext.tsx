@@ -13,6 +13,7 @@ import { publicEnv } from "@/config/env";
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiSeizeSettings } from "@/generated/models/ApiSeizeSettings";
+import { resolveMemesWaveId } from "@/helpers/seize-settings.helpers";
 import { normalizeOptionalWaveId } from "@/helpers/waves/wave.helpers";
 import { fetchUrl } from "@/services/6529api";
 import { SeizeSettingsMode } from "@/types/enums";
@@ -23,12 +24,20 @@ type SeizeSettingsState = Omit<ApiSeizeSettings, "consolidation"> & {
   curation_wave_id: string | null;
 };
 
-type ApiSeizeSettingsResponse = Omit<
+// The provider fills defaults for the optional fields a response leaves out.
+export type ApiSeizeSettingsResponse = Omit<
   ApiSeizeSettings,
-  "auth" | "consolidation"
+  | "auth"
+  | "consolidation"
+  | "distribution_admin_wallets"
+  | "claims_admin_wallets"
 > & {
   auth?: ApiSeizeSettings["auth"] | undefined;
   consolidation?: ApiSeizeSettings["consolidation"] | undefined;
+  distribution_admin_wallets?:
+    | ApiSeizeSettings["distribution_admin_wallets"]
+    | undefined;
+  claims_admin_wallets?: ApiSeizeSettings["claims_admin_wallets"] | undefined;
 };
 
 const DEFAULT_AUTH_SETTINGS: ApiSeizeSettings["auth"] = {
@@ -56,6 +65,10 @@ const SeizeSettingsContext = createContext<
   SeizeSettingsContextType | undefined
 >(undefined);
 
+const SeizeSettingsSeedContext = createContext<
+  ((settings: ApiSeizeSettingsResponse) => void) | null
+>(null);
+
 export const SeizeSettingsProvider = ({
   children,
   mode = SeizeSettingsMode.REMOTE,
@@ -77,6 +90,36 @@ export const SeizeSettingsProvider = ({
   const [isLoaded, setIsLoaded] = useState(false);
   const [loadError, setLoadError] = useState<Error | null>(null);
   const isMountedRef = useRef(true);
+  const hasAppliedSettingsRef = useRef(false);
+
+  const applySettings = useCallback((settings: ApiSeizeSettingsResponse) => {
+    hasAppliedSettingsRef.current = true;
+    setSeizeSettings((previous) => ({
+      ...previous,
+      ...settings,
+      distribution_admin_wallets: settings.distribution_admin_wallets ?? [],
+      claims_admin_wallets: settings.claims_admin_wallets ?? [],
+      auth: settings.auth ?? previous.auth,
+      consolidation: settings.consolidation ?? null,
+      memes_wave_id: resolveMemesWaveId(settings.memes_wave_id),
+      curation_wave_id:
+        publicEnv.DEV_MODE_CURATION_WAVE_ID ?? settings.curation_wave_id,
+      quorum_wave_id:
+        publicEnv.DEV_MODE_QUORUM_WAVE_ID ?? settings.quorum_wave_id,
+    }));
+    setLoadError(null);
+    setIsLoaded(true);
+  }, []);
+
+  // A response this provider already applied is at least as fresh as a page's
+  // server copy, so a seed only fills settings that have not arrived yet.
+  const seedSeizeSettings = useCallback(
+    (settings: ApiSeizeSettingsResponse) => {
+      if (hasAppliedSettingsRef.current || !isMountedRef.current) return;
+      applySettings(settings);
+    },
+    [applySettings]
+  );
 
   const loadSeizeSettings = useCallback(
     async ({ reset = false }: { reset?: boolean | undefined } = {}) => {
@@ -92,22 +135,7 @@ export const SeizeSettingsProvider = ({
 
         if (!isMountedRef.current) return;
 
-        setSeizeSettings((previous) => ({
-          ...previous,
-          ...settings,
-          distribution_admin_wallets: settings.distribution_admin_wallets ?? [],
-          claims_admin_wallets: settings.claims_admin_wallets ?? [],
-          auth: settings.auth ?? previous.auth,
-          consolidation: settings.consolidation ?? null,
-          memes_wave_id:
-            publicEnv.DEV_MODE_MEMES_WAVE_ID ?? settings.memes_wave_id,
-          curation_wave_id:
-            publicEnv.DEV_MODE_CURATION_WAVE_ID ?? settings.curation_wave_id,
-          quorum_wave_id:
-            publicEnv.DEV_MODE_QUORUM_WAVE_ID ?? settings.quorum_wave_id,
-        }));
-        setLoadError(null);
-        setIsLoaded(true);
+        applySettings(settings);
       } catch (error) {
         if (!isMountedRef.current) return;
         console.error("Failed to fetch seize settings", error);
@@ -121,7 +149,7 @@ export const SeizeSettingsProvider = ({
         throw normalizedError;
       }
     },
-    []
+    [applySettings]
   );
 
   useEffect(() => {
@@ -229,10 +257,19 @@ export const SeizeSettingsProvider = ({
 
   return (
     <SeizeSettingsContext.Provider value={value}>
-      {children}
+      <SeizeSettingsSeedContext.Provider value={seedSeizeSettings}>
+        {children}
+      </SeizeSettingsSeedContext.Provider>
     </SeizeSettingsContext.Provider>
   );
 };
+
+/**
+ * Applies a settings response the server already fetched for this page, so
+ * consumers need not wait for the provider's own request. Settings the
+ * provider has already applied are kept.
+ */
+export const useSeizeSettingsSeed = () => useContext(SeizeSettingsSeedContext);
 
 export const useSeizeSettings = (): SeizeSettingsContextType => {
   const context = useContext(SeizeSettingsContext);

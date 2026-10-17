@@ -4,6 +4,7 @@ import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
 import { getRenderableWaveDecisionWinners } from "@/helpers/waves/wave-decision.helpers";
 import { toApiWaveMin } from "@/helpers/waves/wave.helpers";
 import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
+import { NEXT_MINT_DECISIONS_PAGE_SIZE } from "@/services/api/latest-drop-query";
 
 type NextMintDropState = {
   readonly nextMint: ApiDropV2View | null;
@@ -24,7 +25,7 @@ export const useNextMintDrop = (): NextMintDropState => {
   const { decisionPoints, isFetching } = useWaveDecisions({
     waveId: waveId ?? "",
     enabled: !!waveId,
-    pageSize: 1,
+    pageSize: NEXT_MINT_DECISIONS_PAGE_SIZE,
   });
 
   const latestDecision = decisionPoints[decisionPoints.length - 1];

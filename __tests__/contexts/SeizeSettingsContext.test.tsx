@@ -1,9 +1,12 @@
 import {
   SeizeSettingsProvider,
   useSeizeSettings,
+  useSeizeSettingsSeed,
+  type ApiSeizeSettingsResponse,
 } from "@/contexts/SeizeSettingsContext";
 import { SeizeSettingsMode } from "@/types/enums";
 import { render, screen, waitFor } from "@testing-library/react";
+import { useEffect } from "react";
 import { render as pureRender } from "@testing-library/react/pure";
 
 jest.mock("@/services/6529api", () => ({ fetchUrl: jest.fn() }));
@@ -192,4 +195,75 @@ test("hook outside provider throws", () => {
   expect(() => pureRender(<CallHook />)).toThrow(
     "useSeizeSettings must be used within a SeizeSettingsProvider"
   );
+});
+
+describe("useSeizeSettingsSeed", () => {
+  function SeizeSettingsSeed({
+    settings,
+  }: {
+    readonly settings: ApiSeizeSettingsResponse;
+  }) {
+    const seedSeizeSettings = useSeizeSettingsSeed();
+    useEffect(() => {
+      seedSeizeSettings?.(settings);
+    }, [seedSeizeSettings, settings]);
+    return null;
+  }
+
+  function Consumer() {
+    const { isLoaded, seizeSettings } = useSeizeSettings();
+    return (
+      <div>{`${isLoaded}-${seizeSettings.rememes_submission_tdh_threshold}-${seizeSettings.memes_wave_id}`}</div>
+    );
+  }
+
+  const seedSettings = {
+    rememes_submission_tdh_threshold: 7,
+    memes_wave_id: "seeded-memes-wave",
+    curation_wave_id: null,
+    quorum_wave_id: null,
+    announcements_wave_id: null,
+  };
+
+  test("applies a server response before the provider's own request returns", async () => {
+    fetchUrl.mockReturnValue(new Promise(() => undefined));
+
+    render(
+      <SeizeSettingsProvider>
+        <SeizeSettingsSeed settings={seedSettings} />
+        <Consumer />
+      </SeizeSettingsProvider>
+    );
+
+    // The development override still wins over the seeded wave id.
+    await waitFor(() =>
+      expect(screen.getByText("true-7-test-memes-wave-id")).toBeInTheDocument()
+    );
+  });
+
+  test("does not replace settings the provider already loaded", async () => {
+    fetchUrl.mockResolvedValue({
+      ...seedSettings,
+      rememes_submission_tdh_threshold: 3,
+    });
+
+    const { rerender } = render(
+      <SeizeSettingsProvider>
+        <Consumer />
+      </SeizeSettingsProvider>
+    );
+    await waitFor(() =>
+      expect(screen.getByText("true-3-test-memes-wave-id")).toBeInTheDocument()
+    );
+
+    rerender(
+      <SeizeSettingsProvider>
+        <SeizeSettingsSeed settings={seedSettings} />
+        <Consumer />
+      </SeizeSettingsProvider>
+    );
+
+    expect(screen.getByText("true-3-test-memes-wave-id")).toBeInTheDocument();
+    expect(fetchUrl).toHaveBeenCalledTimes(1);
+  });
 });

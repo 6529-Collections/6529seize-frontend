@@ -31,6 +31,17 @@ interface FetchWaveDecisionsV2Props {
   readonly signal?: AbortSignal | undefined;
 }
 
+/** Newest decisions first, one page at a time. */
+export const getWaveDecisionsPageParams = (
+  page: number,
+  pageSize: number
+): Record<string, string> => ({
+  sort_direction: "DESC",
+  sort: "decision_time",
+  page: page.toString(),
+  page_size: pageSize.toString(),
+});
+
 const getDecisionWinningContext = ({
   awards,
   decisionTime,
