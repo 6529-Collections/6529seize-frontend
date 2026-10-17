@@ -1,0 +1,30 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "profile": "museum",
+  "run_id": "2026-10-12-museum-about-polish",
+  "candidate": {
+    "commit": "a517ac2016f134bf21be086c77df1e8e7bd30e8b",
+    "build": "production"
+  },
+  "scope": {
+    "routes": ["/museum/network/about"],
+    "audience": "Visitors learning what the 6529 Network Museum is",
+    "primary_task": "Understand what the Museum holds, how it works, and where to go next",
+    "release_intent": "Give the Collection care section the same top divider as its sibling sections, and use one label, Explore the Collection, for the page's links to the Collection",
+    "viewports": ["1440x1000", "820x1000", "390x844"],
+    "locales": ["en-US"]
+  },
+  "not_applicable": {
+    "J08": "The route's interaction is plain links; there are no disclosures, galleries, or forms",
+    "J09": "Only the populated publication state is in scope; the shared publication-unavailable state is unchanged",
+    "J11": "Layout and copy only; no data-loading or rendering path changed",
+    "J12": "Museum routes render en-US by design; every Museum string comes from the en-US Museum messages",
+    "J13": "No wallet or chain interaction on this surface"
+  },
+  "budget": {
+    "repair_batches": 6
+  },
+  "decisions": [
+    "The LCL:3001 badge in the header marks a locally served build; production 6529.io does not show it. The 390x844 cell uses a Pixel 7 phone profile, so the app shows its mobile-app banner and touch header as it does for phone visitors."
+  ]
+}
