@@ -82,11 +82,20 @@ describe("Footer", () => {
 
     expect(appsLink).toHaveAttribute("href", "/about/6529-apps");
     expect(appsLink).toHaveAttribute("target", "_self");
-    expect(appsLink.previousElementSibling).toHaveTextContent("|");
-    expect(appsLink.previousElementSibling?.previousElementSibling).toBe(
-      licenseLink
-    );
-    expect(appsLink.nextElementSibling).toHaveTextContent("|");
-    expect(appsLink.nextElementSibling?.nextElementSibling).toBe(apiLink);
+    expect(appsLink.previousElementSibling).toBe(licenseLink);
+    expect(appsLink.nextElementSibling).toBe(apiLink);
+  });
+
+  it("spaces wrapping link rows with gaps instead of separator characters", () => {
+    render(<Footer />);
+
+    const footer = screen.getByRole("contentinfo");
+    expect(footer.textContent).not.toContain("|");
+    for (const row of Array.from(footer.children)) {
+      expect(row).toHaveClass("tw-flex-wrap", "tw-gap-x-5");
+      for (const item of Array.from(row.children)) {
+        expect(item.tagName).toBe("A");
+      }
+    }
   });
 });
