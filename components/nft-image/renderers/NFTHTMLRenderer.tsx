@@ -15,6 +15,7 @@ import {
   isMeebits445ViewerRepair,
   MEEBITS_445_VIEWER_PATH,
 } from "@/lib/media/meebits-445";
+import { getNftHtmlIframeSandbox } from "@/lib/media/nft-html-sandbox";
 
 const IFRAME_FALLBACK_TIMEOUT_MS = 8000;
 
@@ -94,7 +95,11 @@ export default function NFTHTMLRenderer(props: Readonly<BaseRendererProps>) {
           {...getNFTMediaRendererAttributes("html")}
           title={props.id}
           src={activeUrl}
-          sandbox={repaired ? "allow-scripts allow-downloads" : undefined}
+          sandbox={
+            repaired
+              ? "allow-scripts allow-downloads"
+              : getNftHtmlIframeSandbox(props.nft, originalSrc)
+          }
           referrerPolicy={repaired ? "no-referrer" : undefined}
           id={props.id ?? `iframe-${props.nft.id}`}
           key={`${props.nft.contract}-${props.nft.id}-${activeUrl}`}
