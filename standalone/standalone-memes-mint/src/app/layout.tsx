@@ -11,7 +11,13 @@ import { publicEnv } from "@/config/env";
 import { SeizeSettingsMode } from "@/types/enums";
 import type { Viewport } from "next";
 
-export const metadata = getAppMetadata();
+// Test exports (export-mint-page --test) stay out of search indexes. Prod
+// exports leave robots unset, so their metadata is unchanged.
+export const metadata = getAppMetadata(undefined, {
+  robots: publicEnv.STANDALONE_TEST_BUILD
+    ? { index: false, follow: false }
+    : undefined,
+});
 export const viewport: Viewport = {
   width: "device-width",
   viewportFit: "cover",

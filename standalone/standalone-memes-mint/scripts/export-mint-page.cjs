@@ -5,6 +5,7 @@ const {
   mkdirSync,
   mkdtempSync,
   readdirSync,
+  readFileSync,
   rmSync,
   rmdirSync,
   writeFileSync,
@@ -27,6 +28,8 @@ const finalOutputDir = distRootDir;
 
 const S3_BUCKET_PROD = "thememes.6529.io";
 const S3_BUCKET_TEST = "thememestest.6529.io";
+
+const NOINDEX_ROBOTS_META = '<meta name="robots" content="noindex, nofollow"';
 
 const STANDALONE_PUBLIC_FILES = [
   "6529.svg",
@@ -56,7 +59,8 @@ Usage:
   6529 run export-mint-page -- [options]
 
 Options:
-  --test   Use bucket ${S3_BUCKET_TEST} (BASE_ENDPOINT https://${S3_BUCKET_TEST}) unless STANDALONE_S3_BUCKET_TEST is set
+  --test   Use bucket ${S3_BUCKET_TEST} (BASE_ENDPOINT https://${S3_BUCKET_TEST}) unless STANDALONE_S3_BUCKET_TEST is set.
+           Every exported page is marked noindex, nofollow; the export fails if one is not.
   --sync   After export: aws s3 sync dist/ -> s3://<bucket>/ --delete, then CloudFront invalidation /* (distribution id from list-distributions --query ... contains(bucket hostname))
   --help   Show this message
 
@@ -77,7 +81,8 @@ Env overrides:
 `);
     process.exit(0);
   }
-  const known = new Set(["--test", "--sync", "--help", "-h"]);
+  // pnpm forwards the "--" separator from `pnpm run <script> -- <flags>`.
+  const known = new Set(["--test", "--sync", "--help", "-h", "--"]);
   for (const a of argv) {
     if (a.startsWith("-") && !known.has(a)) {
       console.error(`Unknown option: ${a} (try --help)`);
@@ -462,6 +467,26 @@ function removeArtifacts(dir) {
   }
 }
 
+function collectHtmlFiles(dir) {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      return collectHtmlFiles(fullPath);
+    }
+    return entry.name.endsWith(".html") ? [fullPath] : [];
+  });
+}
+
+function assertTestExportIsNoindex(dir) {
+  for (const file of collectHtmlFiles(dir)) {
+    if (!readFileSync(file, "utf8").includes(NOINDEX_ROBOTS_META)) {
+      throw new Error(
+        `Test export page is missing the noindex robots meta: ${path.relative(dir, file)}`
+      );
+    }
+  }
+}
+
 async function main() {
   const { useTest, doSync } = parseArgs(process.argv.slice(2));
   const tempRoot = createTempDir("standalone-mint-export-");
@@ -502,6 +527,7 @@ async function main() {
       {
         STANDALONE_BASE_ENDPOINT: baseEndpoint,
         STANDALONE_MAIN_SITE_BASE: mainSiteBase,
+        STANDALONE_TEST_BUILD: useTest ? "true" : "false",
       }
     );
 
@@ -537,6 +563,9 @@ async function main() {
       throw new Error(
         `Expected packaged artifact at ${stagedFinalOutputDir}/index.html, but it was not created.`
       );
+    }
+    if (useTest) {
+      assertTestExportIsNoindex(stagedFinalOutputDir);
     }
 
     replaceDirectoryContents(finalOutputDir, stagedFinalOutputDir);
