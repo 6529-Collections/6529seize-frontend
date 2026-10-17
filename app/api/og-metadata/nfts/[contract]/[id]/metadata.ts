@@ -1,4 +1,5 @@
 import { publicEnv } from "@/config/env";
+import { getStagingApiKey } from "@/config/serverEnv";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
@@ -105,7 +106,7 @@ export async function fetchNftCardMetadata(
   signal?.addEventListener("abort", abort, { once: true });
   if (signal?.aborted) abort();
   const timeout = setTimeout(abort, METADATA_TIMEOUT_MS);
-  const apiAuth = getUsableText(publicEnv.STAGING_API_KEY);
+  const apiAuth = getStagingApiKey() ?? null;
   const mayUsePublicApi =
     new URL(publicEnv.API_ENDPOINT).origin === STAGING_API_ORIGIN;
   let usePublicApi = false;

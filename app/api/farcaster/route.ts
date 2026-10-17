@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { publicEnv } from "@/config/env";
+import { getFarcasterWarpcastApiKey } from "@/config/serverEnv";
 import {
   BodyTooLargeError,
   UnsupportedContentTypeError,
@@ -48,7 +49,6 @@ import {
 
 const WARPCAST_API_BASE =
   publicEnv.FARCASTER_WARPCAST_API_BASE ?? "https://api.warpcast.com";
-const WARPCAST_API_KEY = publicEnv.FARCASTER_WARPCAST_API_KEY ?? undefined;
 
 const CAST_CACHE_TTL_MS = 20 * 60 * 1000;
 const PROFILE_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
@@ -136,8 +136,9 @@ const buildWarpcastUrl = (
     }
   }
 
-  if (WARPCAST_API_KEY) {
-    url.searchParams.set("key", WARPCAST_API_KEY);
+  const warpcastApiKey = getFarcasterWarpcastApiKey();
+  if (warpcastApiKey) {
+    url.searchParams.set("key", warpcastApiKey);
   }
 
   return url;

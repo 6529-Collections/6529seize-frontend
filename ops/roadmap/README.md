@@ -154,19 +154,16 @@ Already addressed on `origin/main` and not listed below:
 ### P1: Remove Secret-Like Values From Public Runtime Config
 
 `next.config.ts` still serializes the complete `publicEnv` into
-`PUBLIC_RUNTIME` and individual browser-bundled env values, including
-`STAGING_API_KEY`, `DEV_MODE_AUTH_JWT`, `FARCASTER_WARPCAST_API_KEY`, IPFS RPC
-endpoints, and `IPFS_MFS_PATH`. Client auth helpers still read staging/dev auth
-values from that public config.
+`PUBLIC_RUNTIME` and individual browser-bundled env values, including IPFS RPC
+endpoints and `IPFS_MFS_PATH`. `STAGING_API_KEY` and
+`FARCASTER_WARPCAST_API_KEY` are now server-only (`config/serverEnv.ts`). Dev
+auth values stay public for local development, but are ignored outside
+development and test runtimes and fail production builds for non-local hosts.
 
 Remediation:
 
-- Split truly public configuration from server-only secrets and operational
-  credentials.
-- Keep staging auth, dev auth JWTs, third-party API keys, and writable service
-  endpoints out of `next.config.ts env` and `.next/PUBLIC_RUNTIME.json`.
-- Fail production/staging builds when `USE_DEV_AUTH` or equivalent dev auth
-  values are enabled.
+- Keep writable service endpoints out of `next.config.ts env` and
+  `.next/PUBLIC_RUNTIME.json`.
 - Rotate any credential-like values that were ever deployed through the public
   runtime bundle.
 

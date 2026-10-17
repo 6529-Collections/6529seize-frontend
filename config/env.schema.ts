@@ -43,9 +43,10 @@ export const publicEnvSchema = z.object({
    * ────────────────
    * API KEYS / CREDENTIALS
    *   • OPTIONAL
+   *   • Everything here reaches the browser. Server-only credentials belong
+   *     in config/serverEnv.ts, never in this schema.
    * ────────────────
    */
-  STAGING_API_KEY: z.string().optional(),
   GIPHY_API_KEY: z.string().optional(),
 
   /**
@@ -74,6 +75,9 @@ export const publicEnvSchema = z.object({
   /**
    * ────────────────
    * AUTH / DEV MODE (all optional)
+   *   • Dev auth (USE_DEV_AUTH, DEV_MODE_AUTH_JWT, DEV_MODE_WALLET_ADDRESS)
+   *     only applies in development and test (config/devAuth.ts). Production
+   *     builds for a non-local BASE_ENDPOINT fail when any of them is set.
    * ────────────────
    */
   CORE_SCHEME: z.string().optional(),
@@ -95,7 +99,6 @@ export const publicEnvSchema = z.object({
     .string()
     .url("FARCASTER_WARPCAST_API_BASE must be a valid URL")
     .optional(),
-  FARCASTER_WARPCAST_API_KEY: z.string().optional(),
 
   /**
    * ────────────────
