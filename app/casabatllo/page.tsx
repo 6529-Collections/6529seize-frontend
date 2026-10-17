@@ -4,6 +4,8 @@ import MigratedWordPressStaticPage from "@/components/migrated-wordpress/Migrate
 import { getMigratedWordPressPageMetadata } from "@/components/migrated-wordpress/metadata";
 import { casabatlloMigratedWordPressPage as content } from "./content";
 
+export const dynamic = "force-static";
+
 export default function CasabatlloPage() {
   return <MigratedWordPressStaticPage content={content} />;
 }
