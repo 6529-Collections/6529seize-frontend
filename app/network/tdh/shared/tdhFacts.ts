@@ -106,8 +106,10 @@ export function rustCoreSpec(commit: string): string | null {
 
 /**
  * The four-way differential tests of 15 and 16 October 2026 (the validator's
- * tools/difftest/README.md): the P26 commit that settled each round's
- * findings, and the findings. The fifth round's one finding, E13, is open.
+ * tools/difftest/README.md): the 6529chain commit that settled each round's
+ * findings, and the findings. Each commit settled its round in P26, except
+ * the second round's E8, which 1c69528 settled in the vector format and the
+ * references. The fifth round's one finding, E13, is open.
  */
 export const DIFFTEST_ROUNDS = [
   {

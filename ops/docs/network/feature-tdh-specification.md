@@ -115,6 +115,11 @@ chip links to a private repository.
   The phone `Contents` pill is solid, 8 px off the bottom edge.
 - The evidence's replay links 6529.io's published identities and wallets
   files for 2026-10-11 on Arweave and its list of daily uploads.
+- The evidence's four-way differential tests say what became of the five
+  rounds' findings: the first four rounds' were settled and pinned by new
+  vectors, in P26 or, for E8 (an event's default use case), in the vector
+  format and the references; the fifth round's E13 is still open for the
+  vector format.
 - The sections map runs inputs (§2), the snapshot (§4), canonical events
   (§3): the snapshot block comes from the finalized chain, and §3 selects
   the logs in blocks up to it. §4.2's rule block is anchored `#s4-2`, and the

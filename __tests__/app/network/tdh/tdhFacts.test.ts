@@ -103,7 +103,7 @@ describe("TDH page facts", () => {
     noMessageMatches(/daily job (still )?runs/);
   });
 
-  it("counts five rounds of differential tests, all settled in P26 but E13", () => {
+  it("counts five rounds of differential tests, all settled but E13, E8 outside P26", () => {
     expect(DIFFTEST_ROUNDS).toHaveLength(5);
     expect(DIFFTEST_ROUNDS[3]?.settledBy).toBe(P26.commit);
     expect(DIFFTEST_ROUNDS[3]?.findings).toEqual(["F8", "F9", "E12"]);
@@ -111,6 +111,21 @@ describe("TDH page facts", () => {
       settledBy: null,
       findings: ["E13"],
     });
+    // The fifth round's E13 is open, and the second round's E8 was settled
+    // in the vector format and the references (6529chain 1c69528), not in
+    // P26's text: no copy says every round's findings became P26 rules.
+    noMessageMatches(
+      /\b(each|every) round[’']s findings (became|were|are)[^.]*\bP26\b(?![^.]*\bE8\b)/i
+    );
+    noMessageMatches(
+      /\bfindings became rules in P26\b|\ball settled in P26\b/i
+    );
+    expect(spec["network.tdh.spec.evidence.difftest.body"]).toMatch(
+      /\bE8\b[^.]*vector format and the references/
+    );
+    expect(spec["network.tdh.spec.evidence.difftest.body"]).toMatch(
+      /still open \(E13\)/
+    );
     noMessageMatches(
       /\bthree rounds of (differential|generated)|in three rounds\b/
     );
