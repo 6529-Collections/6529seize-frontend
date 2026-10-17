@@ -428,7 +428,7 @@
     "__tests__/components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRowMainAddress.test.tsx": 1,
     "__tests__/components/user/stats/UserPageStatsCollected.test.tsx": 4,
     "__tests__/components/user/stats/UserPageStatsTableShared.test.tsx": 1,
-    "__tests__/components/user/subscriptions/UserPageSubscriptions.test.tsx": 11,
+    "__tests__/components/user/subscriptions/UserPageSubscriptions.test.tsx": 8,
     "__tests__/components/user/subscriptions/UserPageSubscriptionsUpcoming.test.tsx": 2,
     "__tests__/components/user/user-page-header/banner/UserPageHeaderBanner.test.tsx": 1,
     "__tests__/components/user/user-page-header/name/ProfileCurationBadge.test.tsx": 1,

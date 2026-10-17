@@ -3718,6 +3718,9 @@ export const EN_US_MESSAGES = {
   "home.exploreWaves.status.loading": "Loading {label}",
   "home.exploreWaves.status.empty": "No {label}",
   "home.exploreWaves.status.showing": "Showing {count} {label}",
+  "home.exploreWaves.error.message":
+    "Could not load {label}. Please try again.",
+  "home.exploreWaves.error.retry": "Try again",
   "home.exploreWaves.viewAll": "View all",
   "waveChat.boostedDrops.display.description":
     "How boosted-drop cards show in chat.",
