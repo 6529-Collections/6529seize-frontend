@@ -1,4 +1,9 @@
 /**
+ * A frozen copy of `lib/tdh/tdhV1Arithmetic.ts` as it stood when
+ * `components/explained/engine/` replaced it (7f2f68700e), kept only as the
+ * oracle of `oracle.test.ts`: the engine must give its answers wherever the
+ * two overlap. No page imports it. Do not edit.
+ *
  * TDH-v1 arithmetic (specification P26, rule version `tdh-v1.0`, §4.3, §5.2,
  * §8). Used by the explanatory pages to compute their worked examples and the
  * explorables in the browser. The computation of record is the validators'

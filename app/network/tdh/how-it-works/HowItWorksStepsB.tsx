@@ -2,7 +2,12 @@ import { formatInteger, formatNumber } from "@/i18n/format";
 import TdhTableFrame from "../shared/TdhTableFrame";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { baseTdh, finalTdh, rateCents } from "@/lib/tdh/tdhV1Arithmetic";
+import {
+  REGISTRY_V14,
+  baseTdh,
+  finalTdh,
+  rateCents,
+} from "@/components/explained/engine/tdh";
 import TdhArrowLink from "../shared/TdhArrowLink";
 import { RULE_BASE, RULE_BOOST, RULE_FINAL } from "../shared/tdhRules";
 import {
@@ -250,8 +255,8 @@ function Step12({ locale }: { readonly locale: SupportedLocale }) {
   const rates: Record<string, number> = {
     firstgm: rateCents(H, 3_941) ?? 0,
     meme310: rateCents(H, 310) ?? 0,
-    gradient1: rateCents(H, 101, true) ?? 0,
-    gradient2: rateCents(H, 101, true) ?? 0,
+    gradient1: rateCents(H, 101, REGISTRY_V14.gradient_rate_minimum) ?? 0,
+    gradient2: rateCents(H, 101, REGISTRY_V14.gradient_rate_minimum) ?? 0,
     nextgen: rateCents(H, 1_000) ?? 0,
   };
   return (

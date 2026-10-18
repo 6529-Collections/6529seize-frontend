@@ -1,4 +1,4 @@
-import { cycleDayOfDate } from "@/lib/tdh/tdhV1Arithmetic";
+import { cycleDayOfDate } from "@/components/explained/engine/tdh";
 import type {
   DifferenceClass,
   VerificationCutover,

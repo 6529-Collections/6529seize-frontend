@@ -4,7 +4,7 @@ import { formatDate, formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import type { VerificationIndexDay } from "@/lib/tdh/verification/schema";
-import { cycleDayOfDate } from "@/lib/tdh/tdhV1Arithmetic";
+import { cycleDayOfDate } from "@/components/explained/engine/tdh";
 import {
   indexDayVerdict,
   totalDelta,
