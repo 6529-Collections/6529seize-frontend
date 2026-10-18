@@ -3,7 +3,7 @@
 import React from "react";
 import ProfileNameWithAiMarker from "@/components/common/profile/ProfileNameWithAiMarker";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import Link from "next/link";
 import Image from "next/image";
 import UserCICAndLevel, {
@@ -21,7 +21,7 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
 }) => {
   const authorIdentity = drop.author.handle ?? drop.author.primary_address;
   const resolvedPfp = drop.author.pfp
-    ? resolveIpfsUrlSync(drop.author.pfp)
+    ? getScaledImageUri(drop.author.pfp, ImageScale.W_AUTO_H_50)
     : null;
   const avatarAlt = drop.author.handle
     ? `${drop.author.handle}'s profile picture`

@@ -7,6 +7,9 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The `waves.drop.editing` record covers author-only editing, the normal edit
+window, and unlimited editing of the wave's current pinned description drop.
+
 The `about.6529-apps` record includes a concise `brief_answer` naming both
 6529 Mobile and 6529 Desktop and an `answer_links` footer to the official Apps
 page. The companion backend uses it for short availability/download requests
@@ -57,6 +60,18 @@ help-index sync and consumed by the existing backend loader.
 The `waves.notification-controls` record describes the notification subview inside the About sheet
 on phone layouts, dismissal back to About, and the anchored keyboard-accessible
 menu in desktop and tablet sidebars.
+
+The `network.identities-leaderboard` record describes the mobile filter's vertical
+criteria list, individual editors, Back navigation, preserved drafts, and
+readiness guidance available from the information button. The footer shows the
+criteria summary without an editing label; the top summary appears only for a
+selected group. Included identities omit repeated empty import messages and
+show a combined count once identities are selected or imported. The xTDH grant
+search shows Clear filters only when its search fields or status differ from
+the defaults; clearing restores Granted without removing a selected grant.
+On mobile, grant search fields and cards share one scroll area, with Load more
+after the last loaded card and sheet navigation and the bottom action accessible. Desktop retains
+the left-side criteria list, and saving still creates and applies a new group.
 
 ## Problem Statement
 

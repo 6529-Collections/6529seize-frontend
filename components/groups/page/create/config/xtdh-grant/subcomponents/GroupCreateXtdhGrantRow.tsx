@@ -148,7 +148,7 @@ export default function GroupCreateXtdhGrantRow({
       level={grantor.level}
       cicType={cicToType(grantor.cic)}
       size={ProfileBadgeSize.SMALL}
-      className={`tw-min-w-0 ${quiet ? "desktop-hover:[&_a:hover]:tw-text-iron-200 [&_a]:tw-text-iron-350 [&_p]:tw-m-0 [&_p]:tw-text-xxs [&_p]:tw-font-normal [&_p]:tw-text-iron-350" : ""} ${
+      className={`tw-min-w-0 ${quiet ? "desktop-hover:[&_a:hover]:tw-text-iron-200 [&_a]:tw-text-iron-300 [&_p]:tw-m-0 [&_p]:tw-text-xxs [&_p]:tw-font-normal [&_p]:tw-text-iron-300" : ""} ${
         shouldTruncateGrantor
           ? "[&>div>div]:tw-min-w-0 [&>div]:tw-min-w-0 [&_p]:tw-truncate"
           : ""

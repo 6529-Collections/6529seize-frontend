@@ -16,6 +16,12 @@ import {
   waitFor,
 } from "@testing-library/react";
 import type { ReactNode } from "react";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
 
 let mockProfileId: string | null = "profile-a";
 let mockProxyId: string | null = null;
@@ -117,6 +123,20 @@ describe("ReportsPreferencesSettings", () => {
     expect(screen.getByText("Reviewed · Content removed")).toBeVisible();
     expect(screen.getAllByText("The reported message")).toHaveLength(2);
     expect(screen.queryByText(/AI assessment/i)).not.toBeInTheDocument();
+  });
+
+  it("requests the 200x200 derivative of the reported author's picture", async () => {
+    jest
+      .mocked(fetchMyContentModerationReports)
+      .mockResolvedValue([report({ author_pfp: CDN_AVATAR_URL })]);
+    renderSettings();
+
+    const profileLink = await screen.findByRole("link", {
+      name: "Open alice's profile",
+    });
+    expect(getRequestedImageSrc(profileLink.querySelector("img"))).toContain(
+      scaledAvatarPath(ImageScale.W_200_H_200)
+    );
   });
 
   it("keeps removed content recognizable without linking to the removed drop", async () => {

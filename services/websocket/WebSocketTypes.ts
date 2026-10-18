@@ -62,6 +62,8 @@ export enum WebSocketStatus {
  */
 export const WEBSOCKET_RECONNECT_RESYNC_STAGGER_MAX_MS = 3_000;
 
+export const WEBSOCKET_RECOVERY_CAPABILITY = "resync_v1";
+
 /**
  * Callback type for message subscribers
  */

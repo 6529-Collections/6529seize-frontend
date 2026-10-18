@@ -199,15 +199,52 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await openGroupFilters(page);
     const filter = page.getByRole("dialog", { name: "Filter Network" });
     const narrowFilter = await page.evaluate(
-      () => window.matchMedia("(max-width: 1023px)").matches
+      () =>
+        window.matchMedia("(max-width: 1023px), (any-pointer: coarse)").matches
     );
     const choices = filter.getByRole("group", {
       name: "Filter Network",
       includeHidden: true,
     });
     const openCriterion = async (name: string | RegExp) => {
+      const back = filter.getByRole("button", { name: "Back", exact: true });
+      if (await back.isVisible()) await back.click();
       await choices.getByRole("button", { name, exact: true }).click();
     };
+    const readiness = filter.getByRole("button", { name: "Not ready yet." });
+    const guidance = page.getByRole("tooltip");
+    await expect(guidance).toBeHidden();
+    if (narrowFilter) {
+      await readiness.tap();
+    } else {
+      await readiness.hover();
+    }
+    await expect(guidance).toBeVisible();
+    await expect(guidance).toContainText(
+      "Finish the missing group rules before you create this group."
+    );
+    const guidanceBounds = await guidance.boundingBox();
+    const viewportWidth = await page.evaluate(() => window.innerWidth);
+    expect(guidanceBounds!.width).toBeGreaterThanOrEqual(240);
+    expect(guidanceBounds!.x).toBeGreaterThanOrEqual(0);
+    expect(guidanceBounds!.x + guidanceBounds!.width).toBeLessThanOrEqual(
+      viewportWidth
+    );
+    expect(
+      await guidance
+        .getByRole("paragraph")
+        .last()
+        .evaluate((element) =>
+          Number.parseFloat(getComputedStyle(element).lineHeight)
+        )
+    ).toBeGreaterThanOrEqual(19);
+    await choices
+      .getByRole("button", { name: "Identities", exact: true })
+      .focus();
+    await page.mouse.move(0, 0);
+    await expect(guidance).toBeHidden();
+    await readiness.focus();
+    await expect(guidance).toBeVisible();
     const levelInput = filter.getByRole("spinbutton", {
       name: "Level at least",
     });
@@ -223,9 +260,13 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       "xTDH Grant",
     ];
     await expect(choices.getByRole("button")).toHaveText(criteria);
-    await expect(
-      filter.getByRole("region", { name: "Identities" })
-    ).toBeVisible();
+    const identityEditor = filter.getByRole("region", { name: "Identities" });
+    if (narrowFilter) {
+      await expect(identityEditor).toBeHidden();
+      await expect(choices).toBeVisible();
+    } else {
+      await expect(identityEditor).toBeVisible();
+    }
     if (!narrowFilter) {
       const navigationBounds = await choices.boundingBox();
       const editorBounds = await filter
@@ -257,7 +298,16 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     });
     await expect(apply).toBeDisabled();
     await expect(apply).toBeInViewport({ ratio: 1 });
-    await expect(filter.getByText("After editing")).toBeInViewport();
+    await expect(filter.getByText("No criteria selected")).toBeInViewport();
+    await expect(
+      filter.getByText("Before editing", { exact: true })
+    ).toHaveCount(0);
+    await expect(
+      filter.getByText("After editing", { exact: true })
+    ).toHaveCount(0);
+    await expect(
+      filter.getByText("All Network members", { exact: true })
+    ).toHaveCount(0);
     const restingHeight = await choices.evaluate(
       (element) =>
         element.closest(".mobile-wrapper-dialog")?.getBoundingClientRect()
@@ -267,13 +317,14 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       const availableHeight = await page.evaluate(
         () => window.innerHeight - 64
       );
-      expect(restingHeight).toBeCloseTo(Math.min(640, availableHeight), 0);
-      const emptySpace = await choices.evaluate(
-        (element) =>
-          element.getBoundingClientRect().bottom -
-          (element.lastElementChild?.getBoundingClientRect().bottom ?? 0)
+      expect(restingHeight).toBeCloseTo(availableHeight, 0);
+      const navigationWidth = await choices.evaluate((element) => ({
+        width: element.clientWidth,
+        scrollWidth: element.scrollWidth,
+      }));
+      expect(navigationWidth.scrollWidth).toBeLessThanOrEqual(
+        navigationWidth.width
       );
-      expect(emptySpace).toBeLessThan(80);
     }
     if (narrowFilter) {
       const widths = await apply.evaluate((element) => ({
@@ -307,14 +358,60 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
           )
         )
         .toBeCloseTo(restingHeight ?? 0, 0);
-      await expect(choices).toBeInViewport({ ratio: 1 });
+      if (narrowFilter) {
+        await expect(choices).toBeHidden();
+        await expect(
+          filter.getByRole("button", { name: "Back", exact: true })
+        ).toBeInViewport({ ratio: 1 });
+      } else {
+        await expect(choices).toBeInViewport({ ratio: 1 });
+      }
     }
+    const clearGrantFilters = filter.getByRole("button", {
+      name: "Clear filters",
+      exact: true,
+    });
+    const collectionName = filter.getByRole("textbox", {
+      name: "Collection name",
+    });
+    await expect(clearGrantFilters).toHaveCount(0);
+    await collectionName.fill("Memes");
+    await expect(clearGrantFilters).toBeVisible();
+    await clearGrantFilters.click();
+    await expect(collectionName).toHaveValue("");
+    await expect(clearGrantFilters).toHaveCount(0);
+    await filter.getByRole("button", { name: "Pending", exact: true }).click();
+    await expect(clearGrantFilters).toBeVisible();
+    await clearGrantFilters.click();
+    await expect(
+      filter.getByRole("button", { name: "Granted", exact: true })
+    ).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      filter.getByRole("button", { name: "Granted", exact: true })
+    ).toBeFocused();
+    await expect(clearGrantFilters).toHaveCount(0);
+    await expect(apply).toBeDisabled();
     await openCriterion("Level");
     await levelInput.fill("10");
     await openCriterion("Identities");
     await expect(
       filter.getByText("No identities are explicitly included.")
     ).toBeVisible();
+    await expect(
+      filter.getByRole("heading", { name: "Find an identity to include" })
+    ).toHaveCount(0);
+    await expect(
+      filter.getByRole("textbox", { name: "Find an identity to include" })
+    ).toBeVisible();
+    await expect(
+      filter.getByText("No allowlist added.", { exact: true })
+    ).toHaveCount(0);
+    await expect(
+      filter.getByText("No CSV file added.", { exact: true })
+    ).toHaveCount(0);
+    await expect(
+      filter.getByText("0 unique identities included", { exact: true })
+    ).toHaveCount(0);
     const identityModes = filter.getByRole("tablist", {
       name: "Identity treatment",
     });
@@ -423,7 +520,7 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expectNoHorizontalOverflow(page);
   });
 
-  test("keeps criteria and Close visible while a narrow editor scrolls", async ({
+  test("keeps Back and Close visible while a narrow editor scrolls", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 620 });
@@ -434,6 +531,8 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     const level = filter.getByRole("spinbutton", { name: "Level at least" });
     await choices.getByRole("button", { name: "Level", exact: true }).click();
     await level.fill("10");
+    const back = filter.getByRole("button", { name: "Back", exact: true });
+    await back.click();
     await choices
       .getByRole("button", { name: "Identities", exact: true })
       .click();
@@ -441,7 +540,7 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       name: "Identities",
       exact: true,
     });
-    const choicesBeforeScroll = await choices.boundingBox();
+    const backBeforeScroll = await back.boundingBox();
     // Mobile WebKit does not support mouse.wheel. Scroll the real editor
     // directly and keep the same rendered-position and navigation guarantees.
     await identities.evaluate((element) => {
@@ -450,16 +549,19 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expect
       .poll(() => identities.evaluate((element) => element.scrollTop))
       .toBeGreaterThan(0);
-    await expect(choices).toBeInViewport({ ratio: 1 });
+    await expect(choices).toBeHidden();
+    await expect(back).toBeInViewport({ ratio: 1 });
     await expect
-      .poll(async () => (await choices.boundingBox())?.y)
-      .toBeCloseTo(choicesBeforeScroll?.y ?? 0, 0);
+      .poll(async () => (await back.boundingBox())?.y)
+      .toBeCloseTo(backBeforeScroll?.y ?? 0, 0);
     await expect(
       filter.getByRole("button", { name: "Close", exact: true })
     ).toBeInViewport({ ratio: 1 });
     await expect(
       filter.getByRole("button", { name: "Create and use new group" })
     ).toBeInViewport({ ratio: 1 });
+    await expect(identities).toBeFocused();
+    await back.click();
     await expect(
       choices.getByRole("button", { name: "Identities", exact: true })
     ).toBeFocused();
@@ -467,6 +569,141 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       .getByRole("button", { name: "Level Configured", exact: true })
       .click();
     await expect(level).toHaveValue("10");
+  });
+
+  test("scrolls mobile grant filters and paginated results together", async ({
+    page,
+  }) => {
+    const requestedPages: number[] = [];
+    await page.route("**/api/xtdh/grants?**", async (route) => {
+      const pageNumber = Number(
+        new URL(route.request().url()).searchParams.get("page")
+      );
+      requestedPages.push(pageNumber);
+      const offset = pageNumber === 1 ? 0 : 20;
+      const length = pageNumber === 1 ? 20 : 2;
+      await route.fulfill({
+        json: {
+          data: Array.from({ length }, (_, index) => ({
+            id: `scroll-grant-${offset + index + 1}`,
+            grantor: {
+              id: "scroll-grantor",
+              handle: "scroll-grantor",
+              pfp: null,
+              banner1_color: null,
+              banner2_color: null,
+              cic: 0,
+              rep: 0,
+              tdh: 0,
+              tdh_rate: 0,
+              xtdh: 0,
+              xtdh_rate: 0,
+              level: 1,
+              classification: "PSEUDONYM",
+              sub_classification: null,
+              primary_address: "0x0000000000000000000000000000000000000001",
+              subscribed_actions: [],
+              archived: false,
+              active_main_stage_submission_ids: [],
+              winner_main_stage_drop_ids: [],
+              artist_of_prevote_cards: [],
+              profile_wave_id: null,
+              is_wave_creator: false,
+            },
+            target_chain: "ETHEREUM_MAINNET",
+            target_contract: "0x0000000000000000000000000000000000000002",
+            target_token_mode: "ALL",
+            target_tokens_count: 1,
+            target_collection_name: `Scroll collection ${offset + index + 1}`,
+            created_at: 1700000000000,
+            updated_at: 1700000000000,
+            valid_from: 1700000000000,
+            valid_to: null,
+            rate: 1,
+            error_details: null,
+            status: "GRANTED",
+            is_irrevocable: false,
+            total_granted: 1,
+          })),
+          count: 22,
+          page: pageNumber,
+          next: pageNumber === 1,
+        },
+      });
+    });
+    await page.setViewportSize({ width: 390, height: 620 });
+    await gotoReady(page, "/network");
+    await openGroupFilters(page);
+    const filter = page.getByRole("dialog", { name: "Filter Network" });
+    await filter
+      .getByRole("button", { name: "xTDH Grant", exact: true })
+      .click();
+    const editor = filter.getByRole("region", {
+      name: "xTDH Grant",
+      exact: true,
+    });
+    const cards = editor.getByRole("button", { name: /Scroll collection / });
+    const loadMore = editor.getByRole("button", {
+      name: "Load more",
+      exact: true,
+    });
+    const collectionName = editor.getByRole("textbox", {
+      name: "Collection name",
+    });
+    await expect(cards).toHaveCount(20);
+    await expect(collectionName).toBeInViewport();
+    await expect(loadMore).not.toBeInViewport();
+    const list = editor.getByRole("list");
+    expect(
+      await list.evaluate((element) => {
+        let ancestor = element.parentElement;
+        let nestedScrollers = 0;
+        while (ancestor && ancestor.tagName !== "SECTION") {
+          if (
+            ["auto", "scroll"].includes(getComputedStyle(ancestor).overflowY) &&
+            ancestor.scrollHeight > ancestor.clientHeight + 1
+          )
+            nestedScrollers++;
+          ancestor = ancestor.parentElement;
+        }
+        return nestedScrollers;
+      })
+    ).toBe(0);
+    const back = filter.getByRole("button", { name: "Back", exact: true });
+    const headerBefore = await back.boundingBox();
+    await loadMore.scrollIntoViewIfNeeded();
+    await expect(collectionName).not.toBeInViewport();
+    await expect(loadMore).toBeInViewport({ ratio: 1 });
+    const lastCardBounds = await cards.last().boundingBox();
+    const loadMoreBounds = await loadMore.boundingBox();
+    expect(loadMoreBounds!.y).toBeGreaterThanOrEqual(
+      lastCardBounds!.y + lastCardBounds!.height
+    );
+    await expect(back).toBeInViewport({ ratio: 1 });
+    expect((await back.boundingBox())!.y).toBeCloseTo(headerBefore!.y, 0);
+    await expect(
+      filter.getByRole("button", { name: "Close", exact: true })
+    ).toBeInViewport({ ratio: 1 });
+    await expect(
+      filter.getByRole("button", { name: "Create and use new group" })
+    ).toBeInViewport({ ratio: 1 });
+    await loadMore.click();
+    await expect(cards).toHaveCount(22);
+    await expect(loadMore).toHaveCount(0);
+    expect(requestedPages).toEqual([1, 2]);
+    await cards.last().scrollIntoViewIfNeeded();
+    await expect(cards.last()).toBeInViewport({ ratio: 1 });
+    await expectNoHorizontalOverflow(page);
+    if (
+      !(await page.evaluate(() => matchMedia("(any-pointer: coarse)").matches))
+    ) {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await expect
+        .poll(() =>
+          list.evaluate((element) => element.parentElement?.clientHeight)
+        )
+        .toBe(320);
+    }
   });
 
   test("keeps the Network filter as a sheet at tablet and touch widths", async ({

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useDebounce } from "react-use";
 import IdentitySearch, {
   IdentitySearchSize,
@@ -52,7 +52,7 @@ const INITIAL_GRANT_FINDER_FILTERS: GrantFinderFilters = {
 const GRANT_PRESENTATIONS = {
   network: {
     titleWeight: "tw-font-medium",
-    description: "tw-mb-0 tw-mt-2 tw-text-xxs tw-leading-5 tw-text-iron-350",
+    description: "tw-mb-0 tw-mt-2 tw-text-xxs tw-leading-5 tw-text-iron-400",
     actionAlignment: "tw-justify-start",
     changeVariant: "secondary",
     actionSize: "sm",
@@ -101,6 +101,7 @@ export default function CreateWaveInlineGroupXtdhGrant({
   beneficiaryGrantMatchMode,
   setBeneficiaryGrant,
   networkPresentation = false,
+  scrollResultsWithEditor = false,
 }: {
   readonly beneficiaryGrantId: ApiCreateGroupDescription["is_beneficiary_of_grant_id"];
   readonly beneficiaryGrantMatchMode: ApiCreateGroupDescription["is_beneficiary_of_grant_match_mode"];
@@ -109,6 +110,7 @@ export default function CreateWaveInlineGroupXtdhGrant({
     matchMode: ApiCreateGroupDescription["is_beneficiary_of_grant_match_mode"]
   ) => void;
   readonly networkPresentation?: boolean;
+  readonly scrollResultsWithEditor?: boolean;
 }) {
   const presentation = networkPresentation
     ? GRANT_PRESENTATIONS.network
@@ -118,6 +120,7 @@ export default function CreateWaveInlineGroupXtdhGrant({
   const locale = useBrowserLocale();
 
   const [isChangingGrant, setIsChangingGrant] = useState(false);
+  const defaultStatusRef = useRef<HTMLButtonElement>(null);
   const [grantFinderFilters, setGrantFinderFilters] =
     useState<GrantFinderFilters>(INITIAL_GRANT_FINDER_FILTERS);
   const {
@@ -126,6 +129,12 @@ export default function CreateWaveInlineGroupXtdhGrant({
     targetCollectionFilter,
     targetCollectionInput,
   } = grantFinderFilters;
+  const hasFinderFilters =
+    selectedGrantor !== null ||
+    targetCollectionInput.length > 0 ||
+    targetCollectionFilter.length > 0 ||
+    selectedStatus !== INITIAL_GRANT_FINDER_FILTERS.selectedStatus;
+  const showClearFilters = !networkPresentation || hasFinderFilters;
   const showGrantFinder = !hasSelectedGrant || isChangingGrant;
   const lookupGrantId = hasSelectedGrant ? normalizedGrantId : null;
 
@@ -187,6 +196,7 @@ export default function CreateWaveInlineGroupXtdhGrant({
 
   const onResetFilters = () => {
     setGrantFinderFilters(INITIAL_GRANT_FINDER_FILTERS);
+    if (networkPresentation) defaultStatusRef.current?.focus();
   };
 
   return (
@@ -297,6 +307,11 @@ export default function CreateWaveInlineGroupXtdhGrant({
                   return (
                     <button
                       key={status}
+                      ref={
+                        status === INITIAL_GRANT_FINDER_FILTERS.selectedStatus
+                          ? defaultStatusRef
+                          : undefined
+                      }
                       type="button"
                       aria-pressed={isActive}
                       onClick={() =>
@@ -317,19 +332,20 @@ export default function CreateWaveInlineGroupXtdhGrant({
                 })}
               </div>
             </div>
-            {networkPresentation ? (
-              <button
-                type="button"
-                onClick={onResetFilters}
-                className="tw-min-h-8 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-py-1.5 tw-text-xxs tw-font-medium tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-100"
-              >
-                Clear filters
-              </button>
-            ) : (
-              <Button variant="tertiary" size="md" onClick={onResetFilters}>
-                Clear filters
-              </Button>
-            )}
+            {showClearFilters &&
+              (networkPresentation ? (
+                <button
+                  type="button"
+                  onClick={onResetFilters}
+                  className="tw-min-h-8 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-py-1.5 tw-text-xxs tw-font-medium tw-text-rose-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-rose-400 desktop-hover:hover:tw-text-rose-300"
+                >
+                  {t(locale, "waves.create.groups.xtdhGrant.clearFilters")}
+                </button>
+              ) : (
+                <Button variant="tertiary" size="md" onClick={onResetFilters}>
+                  {t(locale, "waves.create.groups.xtdhGrant.clearFilters")}
+                </Button>
+              ))}
           </div>
 
           <div className={presentation.results}>
@@ -341,7 +357,7 @@ export default function CreateWaveInlineGroupXtdhGrant({
             </div>
 
             <div
-              className={`tw-max-h-80 tw-overflow-y-auto ${presentation.resultsPadding}`}
+              className={`${scrollResultsWithEditor ? "tw-overflow-visible" : "tw-max-h-80 tw-overflow-y-auto"} ${presentation.resultsPadding}`}
             >
               {isLoading && !grants.length && (
                 <p className="tw-m-0 tw-rounded-lg tw-bg-iron-900 tw-p-4 tw-text-sm tw-text-iron-400">
