@@ -17,6 +17,8 @@ import {
   useResizeObserver,
 } from "masonic";
 import {
+  cloneElement,
+  isValidElement,
   useCallback,
   useEffect,
   useMemo,
@@ -24,6 +26,7 @@ import {
   useState,
   type Dispatch,
   type ReactElement,
+  type ReactNode,
   type SetStateAction,
 } from "react";
 
@@ -60,6 +63,37 @@ const EMPTY_VIEWPORT: PanelViewport = {
 const noop = () => {};
 
 const getDropKey = (drop: ExtendedDrop) => drop.stableKey;
+
+const isCellList = (children: ReactNode): children is readonly ReactNode[] =>
+  Array.isArray(children);
+
+// Masonic emits cells in interval-tree order, which changes as cards are
+// measured or resized. React then moves mounted cards, and moving the focused
+// card drops keyboard focus. Feed order keeps cards in place and Tab in order.
+const orderCellsByFeedIndex = (
+  grid: ReactElement,
+  indexByKey: ReadonlyMap<string, number>
+): ReactElement => {
+  if (!isValidElement<{ readonly children?: ReactNode }>(grid)) {
+    return grid;
+  }
+
+  const cells = grid.props.children;
+  if (!isCellList(cells)) {
+    return grid;
+  }
+
+  const getFeedIndex = (cell: ReactNode) =>
+    isValidElement(cell) && cell.key !== null
+      ? (indexByKey.get(cell.key) ?? Number.MAX_SAFE_INTEGER)
+      : Number.MAX_SAFE_INTEGER;
+
+  return cloneElement(
+    grid,
+    undefined,
+    [...cells].sort((left, right) => getFeedIndex(left) - getFeedIndex(right))
+  );
+};
 
 const getGridScrollTop = (
   scrollContainer: HTMLElement,
@@ -295,6 +329,10 @@ function CommunityCurationsVirtualMasonry({
   const { setWidth, width } = useElementWidth(gridElement);
   const viewport = usePanelViewport(scrollContainer, gridElement);
   const items = useMemo(() => [...drops], [drops]);
+  const indexByKey = useMemo(
+    () => new Map(items.map((drop, index) => [getDropKey(drop), index])),
+    [items]
+  );
   const resetKey = useMemo(
     () => items.slice(0, 8).map(getDropKey).join("|"),
     [items]
@@ -317,7 +355,7 @@ function CommunityCurationsVirtualMasonry({
     [setWidth]
   );
 
-  return useMasonry<ExtendedDrop>({
+  const grid = useMasonry<ExtendedDrop>({
     containerRef: setContainerRef,
     height: Math.max(viewport.height, 1),
     isScrolling: viewport.isScrolling,
@@ -330,6 +368,8 @@ function CommunityCurationsVirtualMasonry({
     resizeObserver,
     scrollTop: viewport.scrollTop,
   }) as ReactElement;
+
+  return orderCellsByFeedIndex(grid, indexByKey);
 }
 
 export default function CommunityCurationsMasonry({
