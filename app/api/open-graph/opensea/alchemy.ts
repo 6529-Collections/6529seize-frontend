@@ -1,7 +1,8 @@
 import { publicEnv } from "@/config/env";
 
 import { extractAlchemyMetadata } from "./shared";
-import type { AlchemyNftMetadata } from "./shared";
+import type { AlchemyNftMetadata, OpenSeaMetadataFetchResult } from "./shared";
+import { buildTokenIdCandidates } from "./tokenUri";
 
 const FETCH_TIMEOUT_MS = 8000;
 
@@ -125,7 +126,7 @@ type AlchemyMetadataCandidateFetcher = (
  * without a key (the desktop app), through the backend's proxy, which covers
  * Ethereum mainnet only. Null when neither applies.
  */
-export const resolveAlchemyMetadataFetcher = (
+const resolveAlchemyMetadataFetcher = (
   network: string,
   contractAddress: string,
   getApiKey: () => string
@@ -148,3 +149,111 @@ export const resolveAlchemyMetadataFetcher = (
       tokenIdCandidate
     );
 };
+
+/**
+ * Fetches a token's metadata on an Alchemy network, trying each spelling of
+ * the token id, and says why it fell back when it did. Shared by the OpenSea
+ * and Transient previews.
+ */
+export async function fetchNftMetadata(
+  network: string | undefined,
+  contractAddress: string,
+  tokenId: string,
+  getApiKey: () => string
+): Promise<OpenSeaMetadataFetchResult> {
+  if (!network) {
+    return {
+      kind: "fallback",
+      reason: "unsupported_chain",
+    };
+  }
+
+  const fetchCandidate = resolveAlchemyMetadataFetcher(
+    network,
+    contractAddress,
+    getApiKey
+  );
+  if (!fetchCandidate) {
+    return {
+      kind: "fallback",
+      reason: "missing_api_key",
+    };
+  }
+
+  const tokenIdCandidates = buildTokenIdCandidates(tokenId);
+  let lastHttpStatus: number | undefined;
+  let lastHttpTokenId: string | undefined;
+  let lastJsonError: string | undefined;
+  let lastJsonTokenId: string | undefined;
+  let lastTopLevelKeys: string[] = [];
+
+  for (const tokenIdCandidate of tokenIdCandidates) {
+    const candidateResult = await fetchCandidate(tokenIdCandidate);
+
+    if (candidateResult.kind === "success") {
+      return {
+        kind: "success",
+        metadata: candidateResult.metadata,
+        network,
+        requestedTokenId: tokenIdCandidate,
+        payloadTopLevelKeys: candidateResult.topLevelKeys,
+      };
+    }
+
+    if (candidateResult.kind === "http_error") {
+      lastHttpStatus = candidateResult.status;
+      lastHttpTokenId = tokenIdCandidate;
+      continue;
+    }
+
+    if (candidateResult.kind === "json_error") {
+      lastJsonError = candidateResult.errorMessage;
+      lastJsonTokenId = tokenIdCandidate;
+      continue;
+    }
+
+    if (candidateResult.kind === "metadata_missing") {
+      lastTopLevelKeys = candidateResult.topLevelKeys;
+      continue;
+    }
+
+    return {
+      kind: "fallback",
+      reason: "unexpected_error",
+      network,
+      requestedTokenId: tokenIdCandidate,
+      errorMessage: candidateResult.errorMessage,
+    };
+  }
+
+  if (lastHttpStatus !== undefined) {
+    return {
+      kind: "fallback",
+      reason: "alchemy_http_error",
+      network,
+      status: lastHttpStatus,
+      requestedTokenId: lastHttpTokenId,
+    };
+  }
+
+  if (lastJsonError) {
+    return {
+      kind: "fallback",
+      reason: "alchemy_json_error",
+      network,
+      requestedTokenId: lastJsonTokenId,
+      errorMessage: lastJsonError,
+    };
+  }
+
+  return {
+    kind: "fallback",
+    reason: "no_image_candidate",
+    network,
+    requestedTokenId: tokenIdCandidates.at(-1),
+    errorMessage:
+      lastTopLevelKeys.length > 0
+        ? `metadata_not_found_in_payload:${lastTopLevelKeys.join(",")}`
+        : "metadata_not_found_in_payload",
+  };
+}
