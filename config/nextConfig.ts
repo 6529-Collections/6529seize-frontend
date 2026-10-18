@@ -105,6 +105,12 @@ export function sharedConfig(
           destination: "/safe-collecting",
           permanent: true,
         },
+        {
+          // 6529 Explained's TDH chapter stays at /network/tdh (MAP.md §1).
+          source: "/explained/tdh",
+          destination: "/network/tdh",
+          permanent: true,
+        },
       ]);
     },
     logging: {

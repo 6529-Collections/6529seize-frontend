@@ -3,6 +3,8 @@ import { ES_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-dis
 import { ES_ES_DROP_REQUIREMENT_MESSAGES } from "@/i18n/messages/drop-requirements";
 import artworkShareMessages from "@/i18n/messages/artworkShare.es-ES.json";
 import explainedKitMessages from "@/i18n/messages/explainedKit.es-ES.json";
+import explainedHubMessages from "@/i18n/messages/explainedHub.es-ES.json";
+import explainedTdhOverviewMessages from "@/i18n/messages/explainedTdhOverview.es-ES.json";
 import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.es-ES.json";
 import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.es-ES.json";
 import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.es-ES.json";
@@ -38,6 +40,8 @@ export const ES_ES_MESSAGES = {
   "singleDrop.closeChat": "Cerrar chat",
   ...artworkShareMessages,
   ...explainedKitMessages,
+  ...explainedHubMessages,
+  ...explainedTdhOverviewMessages,
   ...profileCmsStudioMessages,
   ...profileCmsAgentMessages,
   ...studioTemplateDescriptions,

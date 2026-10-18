@@ -63,6 +63,13 @@ export function useTdhRules(initialRules: TdhRules | null = null) {
   });
 }
 
+/**
+ * The current boosts as one section. The overview no longer shows it (TDH
+ * v1.4's boosts are taught in How it works, part C); it stays for the
+ * Versions and boosts page to place, with its tests.
+ *
+ * @api Kept for the Versions and boosts page.
+ */
 export default function TDHCurrentRules({
   locale,
   initialRules = null,

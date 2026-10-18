@@ -8,7 +8,11 @@
       "genre": "H",
       "mockup": "hub.html",
       "lane": "P1",
-      "sources": ["app/explained/page.tsx", "app/explained/hub/**"],
+      "sources": [
+        "app/explained/page.tsx",
+        "app/explained/hub/**",
+        "app/explained/_lib/**"
+      ],
       "dependsOn": ["D89", "D116"],
       "checkedThrough": "D141",
       "states": [
@@ -26,7 +30,7 @@
       "genre": "E",
       "mockup": "tdh-overview.html",
       "lane": "P1",
-      "sources": ["app/network/tdh/*"],
+      "sources": ["app/network/tdh/*", "app/network/tdh/overview/**"],
       "dependsOn": ["D112", "D119", "D128", "D136", "D137"],
       "checkedThrough": "D141",
       "budget": { "words": 900, "firstScreen": 120, "figuresPer1000": 6 },
