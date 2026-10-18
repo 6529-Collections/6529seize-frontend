@@ -100,6 +100,8 @@ export default function ChapterBar({
       <div
         className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-0.5 tw-overflow-x-auto tw-pr-10 tw-scrollbar-none [mask-image:linear-gradient(90deg,#000_calc(100%-40px),transparent)]"
         data-chapter-scroll=""
+        // The layout gate's shared scroll frame: it scrolls sideways with an edge fade.
+        data-tdh-scroll=""
       >
         <GroupLabel>{kt(locale, "explained.kit.shell.read")}</GroupLabel>
         {chapter.read.map((page) => (

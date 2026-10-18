@@ -26,7 +26,7 @@ export interface ChapterIndexRow {
 }
 
 const ROW =
-  "tw-grid tw-grid-cols-[40px_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-gap-y-2 tw-py-5 md:tw-grid-cols-[72px_minmax(0,1fr)_280px_140px] md:tw-gap-x-6 md:tw-py-6";
+  "tw-grid tw-grid-cols-[40px_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-gap-y-2 tw-py-5 lg:tw-grid-cols-[72px_minmax(0,1fr)_280px_140px] lg:tw-gap-x-6 md:tw-py-6";
 
 export default function ChapterIndex({
   rows,
@@ -59,7 +59,7 @@ export default function ChapterIndex({
                 {row.question}
               </span>
             </span>
-            <span className="tw-col-start-2 tw-flex tw-flex-col tw-gap-1.5 tw-text-sm tw-leading-5 tw-text-iron-400 md:tw-col-start-3">
+            <span className="tw-col-start-2 tw-flex tw-flex-col tw-gap-1.5 tw-text-sm tw-leading-5 tw-text-iron-400 lg:tw-col-start-3">
               <Track
                 maturity={row.maturity}
                 locale={locale}
@@ -68,7 +68,7 @@ export default function ChapterIndex({
               />
               <span>{row.note}</span>
             </span>
-            <span className="tw-col-start-2 tw-justify-self-start md:tw-col-start-4 md:tw-justify-self-end">
+            <span className="tw-col-start-2 tw-justify-self-start lg:tw-col-start-4 lg:tw-justify-self-end">
               {live ? (
                 <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-base tw-font-semibold tw-text-primary-300">
                   {kt(locale, "explained.kit.chapters.read")}
