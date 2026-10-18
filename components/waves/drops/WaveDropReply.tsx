@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { type ReactNode, useMemo } from "react";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
@@ -97,7 +97,10 @@ export default function WaveDropReply({
                 <div className="tw-relative tw-z-10 tw-h-6 tw-w-6 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800">
                   {drop.author.pfp ? (
                     <Image
-                      src={resolveIpfsUrlSync(drop.author.pfp)}
+                      src={getScaledImageUri(
+                        drop.author.pfp,
+                        ImageScale.W_AUTO_H_50
+                      )}
                       alt={`${drop.author.handle}'s avatar`}
                       fill
                       sizes="24px"

@@ -175,6 +175,10 @@ export const NavigationHistoryProvider: React.FC<{
   );
 
   const goBack = useCallback(() => {
+    if (information?.returnFromNavigation) {
+      information.returnFromNavigation();
+      return;
+    }
     if (information?.request?.overlay) {
       information.close();
       return;

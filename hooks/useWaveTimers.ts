@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useMobileAppActivity } from "./useMobileAppActivity";
+import { usePageVisible } from "./usePageVisibility";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { Time } from "@/helpers/time";
 import type { TimeLeft } from "@/helpers/waves/time.utils";
@@ -46,7 +46,8 @@ interface WaveTimersResult {
  * Hook for handling timers in waves.
  *
  * This hook is designed to be used separately from useWave to control interval timers.
- * Mobile timers pause while the app/tab is inactive and catch up on resume.
+ * One timer ticks each second while the page is visible; it stops while the
+ * page is hidden (or the native app is inactive) and catches up on resume.
  *
  * @param wave The wave object
  * @returns Timer states
@@ -54,7 +55,7 @@ interface WaveTimersResult {
 export function useWaveTimers(
   wave: ApiWave | null | undefined
 ): WaveTimersResult {
-  const isAppActive = useMobileAppActivity();
+  const isPageVisible = usePageVisible();
   // Extract time period boundaries with stable fallback values
   const participationStartTime =
     wave?.participation.period?.min ?? FALLBACK_START_TIME;
@@ -166,7 +167,7 @@ export function useWaveTimers(
 
   // Initial calculation and setup of timers
   useEffect(() => {
-    if (!wave || !isAppActive) return;
+    if (!wave || !isPageVisible) return;
 
     // Do initial calculations
     const {
@@ -197,42 +198,19 @@ export function useWaveTimers(
       setVotingTimeLeft(timeLeft);
     };
 
-    const updateFirstDecisionStatus = () => {
-      const firstDecisionDone = calculateFirstDecisionStatus();
-      setIsFirstDecisionDone(firstDecisionDone);
+    // A single timer updates every value, so each second wakes the page once.
+    const timer = setInterval(() => {
+      updateParticipationTime();
+      updateVotingTime();
+      setIsFirstDecisionDone(calculateFirstDecisionStatus());
+    }, 1000);
 
-      // If first decision is done, clear this timer
-      return firstDecisionDone;
-    };
-
-    const participationTimer = setInterval(updateParticipationTime, 1000);
-    const votingTimer = setInterval(updateVotingTime, 1000);
-
-    // Only set up first decision timer if not already done
-    let firstDecisionTimer: NodeJS.Timeout | null = null;
-    if (!calculateFirstDecisionStatus()) {
-      firstDecisionTimer = setInterval(() => {
-        if (updateFirstDecisionStatus()) {
-          // Clear timer once first decision is done
-          if (firstDecisionTimer) {
-            clearInterval(firstDecisionTimer);
-            firstDecisionTimer = null;
-          }
-        }
-      }, 1000);
-    }
-
-    // Clean up intervals on unmount
     return () => {
-      clearInterval(participationTimer);
-      clearInterval(votingTimer);
-      if (firstDecisionTimer) {
-        clearInterval(firstDecisionTimer);
-      }
+      clearInterval(timer);
     };
   }, [
     wave,
-    isAppActive,
+    isPageVisible,
     participationStartTime,
     participationEndTime,
     votingStartTime,
