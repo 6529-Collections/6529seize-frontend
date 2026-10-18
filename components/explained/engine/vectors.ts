@@ -114,11 +114,8 @@ function list(v: JsonObject, key: string): readonly JsonValue[] {
   return Array.isArray(x) ? x : [];
 }
 
-/** The vector format's shape, checked before any value is read as input. */
-function checkFormat(v: JsonValue): asserts v is JsonObject {
-  if (!isObject(v)) {
-    throw new VectorFormatError("a vector is a JSON object");
-  }
+/** Only the format's keys, and each object or array member of its type. */
+function checkTopLevel(v: JsonObject): void {
   for (const key of Object.keys(v)) {
     if (!VECTOR_KEYS.has(key)) {
       throw new VectorFormatError(`unknown vector key ${key}`);
@@ -134,28 +131,45 @@ function checkFormat(v: JsonValue): asserts v is JsonObject {
       throw new VectorFormatError(`${key} is not a JSON array`);
     }
   }
+}
+
+function checkEntry(
+  key: string,
+  entry: JsonValue,
+  fields: readonly string[]
+): void {
+  if (!isObject(entry)) {
+    throw new VectorFormatError(`an entry of ${key} is not a JSON object`);
+  }
+  const missing = fields.find((f) => !(f in entry));
+  if (missing !== undefined) {
+    throw new VectorFormatError(`an entry of ${key} has no ${missing}`);
+  }
+  if (key === "cutoff_invalid" && !isObject(entry["headers"])) {
+    throw new VectorFormatError("a cutoff's headers is not a JSON object");
+  }
+}
+
+/** Every list entry has the fields the format names; returns the entries. */
+function checkEntries(v: JsonObject): Record<string, readonly JsonValue[]> {
   const entries: Record<string, readonly JsonValue[]> = {
     transfers: list(v, "transfers"),
     consolidation_events: list(v, "consolidation_events"),
     cutoff_invalid: [
       ...list(v, "cutoff_invalid"),
-      ...("cutoff" in v ? [v["cutoff"] as JsonValue] : []),
+      ...("cutoff" in v ? [v["cutoff"]] : []),
     ],
   };
   for (const [key, fields] of Object.entries(ENTRY_FIELDS)) {
     for (const entry of entries[key] ?? []) {
-      if (!isObject(entry)) {
-        throw new VectorFormatError(`an entry of ${key} is not a JSON object`);
-      }
-      const missing = fields.find((f) => !(f in entry));
-      if (missing !== undefined) {
-        throw new VectorFormatError(`an entry of ${key} has no ${missing}`);
-      }
-      if (key === "cutoff_invalid" && !isObject(entry["headers"])) {
-        throw new VectorFormatError("a cutoff's headers is not a JSON object");
-      }
+      checkEntry(key, entry, fields);
     }
   }
+  return entries;
+}
+
+/** Event kinds and transfer contracts are names the format knows. */
+function checkNames(entries: Record<string, readonly JsonValue[]>): void {
   for (const e of entries["consolidation_events"] ?? []) {
     const kind = (e as JsonObject)["kind"];
     if (kind !== "REGISTER" && kind !== "REVOKE") {
@@ -176,6 +190,10 @@ function checkFormat(v: JsonValue): asserts v is JsonObject {
       );
     }
   }
+}
+
+/** Cycle inputs need a cycle, raw logs their timestamps, params known names. */
+function checkCycleShape(v: JsonObject): void {
   if (!("cycle" in v) && CYCLE_KEYS.some((k) => k in v)) {
     throw new VectorFormatError(
       "a vector with cycle inputs or expected values needs cycle"
@@ -193,6 +211,16 @@ function checkFormat(v: JsonValue): asserts v is JsonObject {
       throw new VectorFormatError(`unknown registry parameter ${name}`);
     }
   }
+}
+
+/** The vector format's shape, checked before any value is read as input. */
+function checkFormat(v: JsonValue): asserts v is JsonObject {
+  if (!isObject(v)) {
+    throw new VectorFormatError("a vector is a JSON object");
+  }
+  checkTopLevel(v);
+  checkNames(checkEntries(v));
+  checkCycleShape(v);
 }
 
 export type VectorScope =
@@ -341,6 +369,37 @@ const TOTAL_FIELDS: Readonly<Record<string, keyof CycleResult["totals"]>> = {
   raw: "raw",
 };
 
+type TokenCollection = "memes" | "gradients" | "nextgen";
+const TOKEN_COLLECTIONS = new Set<string>(["memes", "gradients", "nextgen"]);
+
+/** A record's expected tokens, `collection#id` to fields. */
+function checkTokens(
+  chk: Checker,
+  prefix: string,
+  rec: CycleRecord,
+  expected: JsonValue | undefined
+): void {
+  for (const [tokenKey, fields] of Object.entries(
+    isObject(expected) ? expected : {}
+  )) {
+    const [collection, id] = tokenKey.split("#") as [string, string];
+    const token = TOKEN_COLLECTIONS.has(collection)
+      ? rec[collection as TokenCollection][id]
+      : undefined;
+    for (const [f, x] of Object.entries(isObject(fields) ? fields : {})) {
+      if (TOKEN_FIELDS.has(f as keyof TokenRecord)) {
+        chk.eq(
+          `${prefix} ${tokenKey}.${f}`,
+          token?.[f as keyof TokenRecord],
+          x
+        );
+      } else {
+        chk.fail(`${prefix} ${tokenKey}: unchecked field ${f}`);
+      }
+    }
+  }
+}
+
 function checkRecords(
   chk: Checker,
   label: string,
@@ -356,32 +415,15 @@ function checkRecords(
       continue;
     }
     for (const [field, value] of Object.entries(isObject(want) ? want : {})) {
-      if (field !== "tokens") {
-        const name = RECORD_FIELDS[field];
-        if (name === undefined) {
-          chk.fail(`${label} ${key}: unchecked field ${field}`);
-        } else {
-          chk.eq(`${label} ${key}.${field}`, rec[name], value);
-        }
+      if (field === "tokens") {
+        checkTokens(chk, `${label} ${key}`, rec, value);
         continue;
       }
-      for (const [tokenKey, fields] of Object.entries(
-        isObject(value) ? value : {}
-      )) {
-        const [collection, id] = tokenKey.split("#") as [string, string];
-        const token = (rec[collection as "memes" | "gradients" | "nextgen"] ??
-          {})[id];
-        for (const [f, x] of Object.entries(isObject(fields) ? fields : {})) {
-          if (!TOKEN_FIELDS.has(f as keyof TokenRecord)) {
-            chk.fail(`${label} ${key} ${tokenKey}: unchecked field ${f}`);
-          } else {
-            chk.eq(
-              `${label} ${key} ${tokenKey}.${f}`,
-              token?.[f as keyof TokenRecord],
-              x
-            );
-          }
-        }
+      const name = RECORD_FIELDS[field];
+      if (name === undefined) {
+        chk.fail(`${label} ${key}: unchecked field ${field}`);
+      } else {
+        chk.eq(`${label} ${key}.${field}`, rec[name], value);
       }
     }
   }
@@ -579,6 +621,57 @@ function scopeOf(v: JsonObject): VectorScope {
     : "cycle";
 }
 
+/** A cycle that must have no result: the rule that refused it is the note. */
+function checkNoResult(
+  chk: Checker,
+  v: JsonObject,
+  r: Registry
+): string | undefined {
+  try {
+    computeCycle(cycleInput(v, r), r);
+    chk.fail(`gave a result; expected none: ${show(v["expected_invalid"])}`);
+    return undefined;
+  } catch (error) {
+    if (!(error instanceof TdhInputInvalid)) {
+      throw error;
+    }
+    chk.checks++;
+    return error.message;
+  }
+}
+
+/** Runs an in-scope vector's checks; returns the note, if any. */
+function runChecks(
+  chk: Checker,
+  v: JsonObject,
+  scope: VectorScope,
+  r: Registry
+): string | undefined {
+  if (scope === "arithmetic") {
+    checkArithmetic(chk, v, r);
+  } else if (scope === "registry") {
+    checkRegistryHashes(chk, v);
+  } else if (scope === "cutoff") {
+    checkCutoff(chk, v, r);
+  } else if ("expected_invalid" in v) {
+    return checkNoResult(chk, v, r);
+  } else {
+    checkCycle(chk, v, r);
+  }
+  return undefined;
+}
+
+/** How a run that threw failed, for its failure line. */
+function failureKind(error: unknown): string {
+  if (error instanceof TdhOutsideEngineRange) {
+    return "outside the engine's range";
+  }
+  if (error instanceof VectorFormatError || error instanceof TypeError) {
+    return "not a vector";
+  }
+  return error instanceof TdhInputInvalid ? "no result" : "error";
+}
+
 /** Runs one vector, given its file name without `.json` and its text. */
 export function runVector(id: string, text: string): VectorRun {
   const chk = new Checker();
@@ -598,40 +691,10 @@ export function runVector(id: string, text: string): VectorRun {
         note: "Ethereum log decoding (P26 §3.1, §3.2, §6.1): the validators' readers",
       };
     }
-    const r = registryOf(v["params"]);
-    if (scope === "arithmetic") {
-      checkArithmetic(chk, v, r);
-    } else if (scope === "registry") {
-      checkRegistryHashes(chk, v);
-    } else if (scope === "cutoff") {
-      checkCutoff(chk, v, r);
-    } else if ("expected_invalid" in v) {
-      try {
-        computeCycle(cycleInput(v, r), r);
-        chk.fail(
-          `gave a result; expected none: ${show(v["expected_invalid"])}`
-        );
-      } catch (error) {
-        if (!(error instanceof TdhInputInvalid)) {
-          throw error;
-        }
-        chk.checks++;
-        note = error.message;
-      }
-    } else {
-      checkCycle(chk, v, r);
-    }
+    note = runChecks(chk, v, scope, registryOf(v["params"]));
   } catch (error) {
-    const kind =
-      error instanceof TdhOutsideEngineRange
-        ? "outside the engine's range"
-        : error instanceof VectorFormatError || error instanceof TypeError
-          ? "not a vector"
-          : error instanceof TdhInputInvalid
-            ? "no result"
-            : "error";
     chk.fail(
-      `${kind}: ${error instanceof Error ? error.message : String(error)}`
+      `${failureKind(error)}: ${error instanceof Error ? error.message : String(error)}`
     );
   }
   return {

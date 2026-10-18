@@ -104,10 +104,12 @@ function readTime(e: DelegationEvent): bigint | null {
 }
 
 function readKind(e: DelegationEvent): "REGISTER" | "REVOKE" {
-  if (e.kind !== "REGISTER" && e.kind !== "REVOKE") {
-    throw invalid(`${String(e.kind)} is no delegation event kind (P26 §6.1)`);
+  // A model or a vector may pass any value here, whatever the type says.
+  const kind: unknown = e.kind;
+  if (kind === "REGISTER" || kind === "REVOKE") {
+    return kind;
   }
-  return e.kind;
+  throw invalid(`${String(kind)} is no delegation event kind (P26 §6.1)`);
 }
 
 /**
@@ -219,7 +221,8 @@ export function clusters(state: PairState, r: Registry): ClusterResult {
   return clustersWith(state, rulesOf(r));
 }
 
-function clustersWith(state: PairState, rules: Rules): ClusterResult {
+/** Confirmed links, newest block first, within one block by pair key. */
+function confirmedLinks(state: PairState): PairRow[] {
   const confirmed = [...state.values()].filter((row) => row.confirmed);
   confirmed.sort((x, y) => {
     const bx = x.position[0];
@@ -229,22 +232,35 @@ function clustersWith(state: PairState, rules: Rules): ClusterResult {
     }
     return pairKey(x.w1, x.w2) < pairKey(y.w1, y.w2) ? -1 : 1;
   });
-  const linked = new Map<string, PairRow>();
-  for (const row of confirmed) {
-    linked.set(pairKey(row.w1, row.w2), row);
-  }
+  return confirmed;
+}
+
+type CanJoin = (group: readonly string[], wallet: string) => boolean;
+
+/**
+ * The join test: a wallet joins a group when it is linked with every member;
+ * from the ungated maximum on, only through a member whose links with all
+ * the others were registered both ways at or after activation. A refused
+ * join is recorded in `refusals`.
+ */
+function joinGate(
+  linked: ReadonlyMap<string, PairRow>,
+  rules: Rules,
+  refusals: GateRefusal[]
+): CanJoin {
   const fresh = (x: string, y: string): boolean => {
     const row = linked.get(pairKey(x, y));
+    // No link, or a direction never registered: not fresh.
+    const t1 = row?.t1 ?? null;
+    const t2 = row?.t2 ?? null;
     return (
-      row !== undefined &&
-      row.t1 !== null &&
-      row.t2 !== null &&
-      row.t1 >= rules.gateActivation &&
-      row.t2 >= rules.gateActivation
+      t1 !== null &&
+      t2 !== null &&
+      t1 >= rules.gateActivation &&
+      t2 >= rules.gateActivation
     );
   };
-  const refusals: GateRefusal[] = [];
-  const canJoin = (group: readonly string[], wallet: string): boolean => {
+  return (group, wallet) => {
     if (!group.every((x) => linked.has(pairKey(x, wallet)))) {
       return false;
     }
@@ -258,37 +274,59 @@ function clustersWith(state: PairState, rules: Rules): ClusterResult {
     }
     return hub;
   };
-  const queue = confirmed.map((row) => [row.w1, row.w2] as const);
-  const used = new Set<string>();
-  const groups: string[][] = [];
-  while (queue.length > 0) {
-    const [w1, w2] = queue.shift() as readonly [string, string];
-    if (used.has(w1) || used.has(w2)) {
-      continue;
-    }
-    const group = [w1, w2];
-    let added = true;
-    while (added && group.length < rules.maxWallets) {
-      added = false;
-      for (let i = 0; i < queue.length; i++) {
-        const [c1, c2] = queue[i] as readonly [string, string];
-        let wallet: string | null = null;
-        if (group.includes(c1) && !group.includes(c2) && !used.has(c2)) {
-          wallet = c2;
-        } else if (group.includes(c2) && !group.includes(c1) && !used.has(c1)) {
-          wallet = c1;
-        }
-        if (wallet !== null && canJoin(group, wallet)) {
-          group.push(wallet);
-          queue.splice(i, 1);
-          added = true;
-          break;
-        }
+}
+
+/** The wallet a queued link would add to the group, or null. */
+function joinerOf(
+  group: readonly string[],
+  link: readonly [string, string],
+  used: ReadonlySet<string>
+): string | null {
+  const [c1, c2] = link;
+  if (group.includes(c1) && !group.includes(c2) && !used.has(c2)) {
+    return c2;
+  }
+  if (group.includes(c2) && !group.includes(c1) && !used.has(c1)) {
+    return c1;
+  }
+  return null;
+}
+
+/**
+ * Grows a group up to `maxWallets`: the first queued link that adds a wallet
+ * the gate admits is taken out of the queue, and the scan starts again.
+ */
+function growGroup(
+  group: string[],
+  queue: (readonly [string, string])[],
+  used: ReadonlySet<string>,
+  canJoin: CanJoin,
+  maxWallets: number
+): void {
+  let added = true;
+  while (added && group.length < maxWallets) {
+    added = false;
+    for (let i = 0; i < queue.length; i++) {
+      const wallet = joinerOf(
+        group,
+        queue[i] as readonly [string, string],
+        used
+      );
+      if (wallet !== null && canJoin(group, wallet)) {
+        group.push(wallet);
+        queue.splice(i, 1);
+        added = true;
+        break;
       }
     }
-    group.forEach((w) => used.add(w));
-    groups.push(group.sort());
   }
+}
+
+/** Each wallet of a confirmed pair to its cluster; a lone wallet to itself. */
+function clusterOfWallet(
+  groups: readonly (readonly string[])[],
+  confirmed: readonly PairRow[]
+): Record<string, readonly string[]> {
   const of: Record<string, readonly string[]> = {};
   for (const group of groups) {
     for (const w of group) {
@@ -300,7 +338,35 @@ function clustersWith(state: PairState, rules: Rules): ClusterResult {
       of[w] ??= [w];
     }
   }
-  return { clusters: groups, of, refusals };
+  return of;
+}
+
+function clustersWith(state: PairState, rules: Rules): ClusterResult {
+  const confirmed = confirmedLinks(state);
+  const linked = new Map<string, PairRow>();
+  for (const row of confirmed) {
+    linked.set(pairKey(row.w1, row.w2), row);
+  }
+  const refusals: GateRefusal[] = [];
+  const canJoin = joinGate(linked, rules, refusals);
+  const queue = confirmed.map((row) => [row.w1, row.w2] as const);
+  const used = new Set<string>();
+  const groups: string[][] = [];
+  while (queue.length > 0) {
+    const [w1, w2] = queue.shift() as readonly [string, string];
+    if (used.has(w1) || used.has(w2)) {
+      continue;
+    }
+    const group = [w1, w2];
+    growGroup(group, queue, used, canJoin, rules.maxWallets);
+    group.forEach((w) => used.add(w));
+    groups.push(group.sort());
+  }
+  return {
+    clusters: groups,
+    of: clusterOfWallet(groups, confirmed),
+    refusals,
+  };
 }
 
 /** A delegation event read at its types (P26 §3.2, §6.1). */

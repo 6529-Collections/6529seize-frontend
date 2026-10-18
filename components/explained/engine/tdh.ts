@@ -254,7 +254,7 @@ function checkPositions(
     .sort((a, b) => comparePositions([a[0], a[2], 0n], [b[0], b[2], 0n]));
   order.forEach((p, i) => {
     const previous = order[i - 1];
-    if (previous && previous[0] === p[0] && p[1] < previous[1]) {
+    if (previous?.[0] === p[0] && p[1] < previous[1]) {
       throw invalid(
         `block ${p[0]}: a larger logIndex has a smaller txIndex (P26 §3.1, vector 53)`
       );
@@ -271,13 +271,11 @@ interface Eligibility {
   readonly rates: Map<string, number>;
 }
 
-/** P26 §5: eligibility, editions and rates, from the transfers before netting. */
-function eligibilityAndRates(
-  transfers: readonly CanonicalTransfer[],
-  T: bigint,
-  floors: ReadonlyMap<string, bigint>,
-  rules: Rules
-): Eligibility {
+/** Each token's first mint time and minted count, by `contract#id`. */
+function mintsOf(transfers: readonly CanonicalTransfer[]): {
+  readonly first: Map<string, bigint>;
+  readonly minted: Map<string, bigint>;
+} {
   const first = new Map<string, bigint>();
   const minted = new Map<string, bigint>();
   for (const t of transfers) {
@@ -291,7 +289,25 @@ function eligibilityAndRates(
     }
     minted.set(key, (minted.get(key) ?? 0n) + t.amount);
   }
-  const cutoff = T - rules.minAge;
+  return { first, minted };
+}
+
+interface EligibleTokens {
+  readonly memes: bigint[];
+  readonly gradients: Set<string>;
+  readonly nextgen: Set<string>;
+  /** Every Gradient minted, eligible or not: the Gradients' edition. */
+  readonly gradientCount: bigint;
+  /** NextGen tokens minted per collection. */
+  readonly perCollection: Map<bigint, bigint>;
+}
+
+/** P26 §5.1: the tokens first minted at least the minimum age before `T`. */
+function eligibleTokens(
+  first: ReadonlyMap<string, bigint>,
+  cutoff: bigint,
+  rules: Rules
+): EligibleTokens {
   const memes: bigint[] = [];
   const gradients = new Set<string>();
   const nextgen = new Set<string>();
@@ -315,6 +331,16 @@ function eligibilityAndRates(
     }
   }
   memes.sort(compareIds);
+  return { memes, gradients, nextgen, gradientCount, perCollection };
+}
+
+/** P26 §5.2: each eligible Meme's effective edition, and H, the largest. */
+function memeEditions(
+  memes: readonly bigint[],
+  minted: ReadonlyMap<string, bigint>,
+  floors: ReadonlyMap<string, bigint>,
+  rules: Rules
+): { readonly edition: Map<string, bigint>; readonly H: bigint } {
   const edition = new Map<string, bigint>();
   let H = 0n;
   for (const id of memes) {
@@ -328,6 +354,20 @@ function eligibilityAndRates(
     edition.set(id.toString(), E);
     H = E > H ? E : H;
   }
+  return { edition, H };
+}
+
+/** P26 §5: eligibility, editions and rates, from the transfers before netting. */
+function eligibilityAndRates(
+  transfers: readonly CanonicalTransfer[],
+  T: bigint,
+  floors: ReadonlyMap<string, bigint>,
+  rules: Rules
+): Eligibility {
+  const { first, minted } = mintsOf(transfers);
+  const { memes, gradients, nextgen, gradientCount, perCollection } =
+    eligibleTokens(first, T - rules.minAge, rules);
+  const { edition, H } = memeEditions(memes, minted, floors, rules);
   for (const x of [H, gradientCount, ...perCollection.values()]) {
     if (x >= RANGE_LIMIT) {
       throw invalid(
@@ -465,6 +505,13 @@ function tokenScores(
   return { balance, raw, base, aged, final: 0n, rate };
 }
 
+function collectionOf(contract: string, rules: Rules): Collection {
+  if (contract === rules.memes) {
+    return "memes";
+  }
+  return contract === rules.gradients ? "gradients" : "nextgen";
+}
+
 function walletRecords(
   stacks: Stacks,
   eligibility: Eligibility,
@@ -472,22 +519,15 @@ function walletRecords(
   rules: Rules
 ): Map<string, ExactRecord> {
   const wallets = new Map<string, ExactRecord>();
-  const eligibleMemes = new Set(eligibility.memes.map(String));
+  const eligibleIds: Readonly<Record<Collection, ReadonlySet<string>>> = {
+    memes: new Set(eligibility.memes.map(String)),
+    gradients: eligibility.gradients,
+    nextgen: eligibility.nextgen,
+  };
   for (const [key, perWallet] of stacks) {
     const [contract, id] = key.split("#") as [string, string];
-    const collection: Collection =
-      contract === rules.memes
-        ? "memes"
-        : contract === rules.gradients
-          ? "gradients"
-          : "nextgen";
-    const eligible =
-      collection === "memes"
-        ? eligibleMemes.has(id)
-        : collection === "gradients"
-          ? eligibility.gradients.has(id)
-          : eligibility.nextgen.has(id);
-    if (!eligible) {
+    const collection = collectionOf(contract, rules);
+    if (!eligibleIds[collection].has(id)) {
       continue;
     }
     const rate = eligibility.rates.get(key);

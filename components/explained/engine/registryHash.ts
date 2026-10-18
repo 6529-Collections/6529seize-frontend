@@ -27,8 +27,9 @@ function sortedList(value: unknown): unknown {
   if (!Array.isArray(value)) {
     return value;
   }
+  const list: readonly unknown[] = value;
   // The record holds each list ascending (P26 §10).
-  return [...value].sort((a: unknown, b: unknown) => {
+  return [...list].sort((a: unknown, b: unknown) => {
     if (typeof a === "bigint" && typeof b === "bigint") {
       if (a === b) {
         return 0;

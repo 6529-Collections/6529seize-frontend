@@ -30,48 +30,114 @@ export class VectorFormatError extends Error {
   override readonly name = "VectorFormatError";
 }
 
-const NUMBER = /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/y;
 const LITERALS: readonly (readonly [string, JsonValue])[] = [
   ["true", true],
   ["false", false],
   ["null", null],
 ];
 
-/** Parses JSON (RFC 8259) without losing any integer. */
-export function parseJsonExact(text: string): JsonValue {
-  let at = 0;
-  const fail = (what: string): never => {
-    throw new VectorFormatError(`${what} at offset ${at}`);
-  };
-  const space = (): void => {
-    while (at < text.length && " \t\n\r".includes(text[at] as string)) {
-      at++;
-    }
-  };
-  const string = (): string => {
-    const start = at;
+function isDigit(c: string | undefined): boolean {
+  return c !== undefined && c >= "0" && c <= "9";
+}
+
+function digitsEnd(text: string, from: number): number {
+  let at = from;
+  while (isDigit(text[at])) {
     at++;
-    while (at < text.length && text[at] !== '"') {
-      at += text[at] === "\\" ? 2 : 1;
-    }
-    if (at >= text.length) {
-      fail("an unterminated string");
-    }
+  }
+  return at;
+}
+
+/**
+ * The end of the JSON number starting at `start` (RFC 8259 §6:
+ * `-? (0 | [1-9] digits) (. digits)? ([eE] [+-]? digits)?`), or -1 when none
+ * starts there. A fraction or an exponent without digits is not part of it.
+ */
+function numberEnd(text: string, start: number): number {
+  let at = text[start] === "-" ? start + 1 : start;
+  if (text[at] === "0") {
     at++;
+  } else if (isDigit(text[at])) {
+    at = digitsEnd(text, at);
+  } else {
+    return -1;
+  }
+  if (text[at] === "." && isDigit(text[at + 1])) {
+    at = digitsEnd(text, at + 1);
+  }
+  if (text[at] === "e" || text[at] === "E") {
+    const sign = text[at + 1] === "+" || text[at + 1] === "-" ? 1 : 0;
+    if (isDigit(text[at + 1 + sign])) {
+      at = digitsEnd(text, at + 1 + sign);
+    }
+  }
+  return at;
+}
+
+/** A recursive-descent reader over one JSON text. */
+class ExactParser {
+  at = 0;
+
+  constructor(private readonly text: string) {}
+
+  fail(what: string): never {
+    throw new VectorFormatError(`${what} at offset ${this.at}`);
+  }
+
+  space(): void {
+    while (
+      this.at < this.text.length &&
+      " \t\n\r".includes(this.text[this.at] as string)
+    ) {
+      this.at++;
+    }
+  }
+
+  value(): JsonValue {
+    this.space();
+    const c = this.text[this.at];
+    if (c === "{") {
+      return this.object();
+    }
+    if (c === "[") {
+      return this.array();
+    }
+    if (c === '"') {
+      return this.string();
+    }
+    for (const [word, literal] of LITERALS) {
+      if (this.text.startsWith(word, this.at)) {
+        this.at += word.length;
+        return literal;
+      }
+    }
+    return this.number();
+  }
+
+  private string(): string {
+    const start = this.at;
+    this.at++;
+    while (this.at < this.text.length && this.text[this.at] !== '"') {
+      this.at += this.text[this.at] === "\\" ? 2 : 1;
+    }
+    if (this.at >= this.text.length) {
+      this.fail("an unterminated string");
+    }
+    this.at++;
     try {
-      return JSON.parse(text.slice(start, at)) as string;
+      return JSON.parse(this.text.slice(start, this.at)) as string;
     } catch {
-      return fail("an invalid string");
+      return this.fail("an invalid string");
     }
-  };
-  const number = (): JsonValue => {
-    NUMBER.lastIndex = at;
-    const match = NUMBER.exec(text);
-    if (match === null) {
-      return fail("not JSON");
+  }
+
+  private number(): JsonValue {
+    const end = numberEnd(this.text, this.at);
+    if (end < 0) {
+      return this.fail("not JSON");
     }
-    const literal = match[0];
-    at += literal.length;
+    const literal = this.text.slice(this.at, end);
+    this.at = end;
     if (/[.eE]/.test(literal)) {
       return new JsonNonInteger(literal);
     }
@@ -83,82 +149,76 @@ export function parseJsonExact(text: string): JsonValue {
       n >= -BigInt(Number.MAX_SAFE_INTEGER)
       ? Number(n)
       : n;
-  };
-  const value = (): JsonValue => {
-    space();
-    const c = text[at];
-    if (c === "{") {
-      at++;
-      const out: { [key: string]: JsonValue } = Object.create(null) as {
-        [key: string]: JsonValue;
-      };
-      space();
-      if (text[at] === "}") {
-        at++;
+  }
+
+  /** After a member or an element: true past the closing bracket, false past a comma. */
+  private closes(close: "}" | "]"): boolean {
+    this.space();
+    const c = this.text[this.at];
+    if (c === ",") {
+      this.at++;
+      return false;
+    }
+    if (c === close) {
+      this.at++;
+      return true;
+    }
+    return this.fail(`',' or '${close}' expected`);
+  }
+
+  private object(): JsonValue {
+    this.at++;
+    const out = Object.create(null) as { [key: string]: JsonValue };
+    this.space();
+    if (this.text[this.at] === "}") {
+      this.at++;
+      return out;
+    }
+    for (;;) {
+      this.space();
+      if (this.text[this.at] !== '"') {
+        this.fail("a member name expected");
+      }
+      const key = this.string();
+      if (Object.hasOwn(out, key)) {
+        this.fail(`the member ${JSON.stringify(key)} named twice`);
+      }
+      this.space();
+      if (this.text[this.at] !== ":") {
+        this.fail("':' expected");
+      }
+      this.at++;
+      out[key] = this.value();
+      if (this.closes("}")) {
         return out;
       }
-      for (;;) {
-        space();
-        if (text[at] !== '"') {
-          fail("a member name expected");
-        }
-        const key = string();
-        if (Object.hasOwn(out, key)) {
-          fail(`the member ${JSON.stringify(key)} named twice`);
-        }
-        space();
-        if (text[at] !== ":") {
-          fail("':' expected");
-        }
-        at++;
-        out[key] = value();
-        space();
-        if (text[at] === ",") {
-          at++;
-        } else if (text[at] === "}") {
-          at++;
-          return out;
-        } else {
-          fail("',' or '}' expected");
-        }
-      }
     }
-    if (c === "[") {
-      at++;
-      const out: JsonValue[] = [];
-      space();
-      if (text[at] === "]") {
-        at++;
+  }
+
+  private array(): JsonValue[] {
+    this.at++;
+    const out: JsonValue[] = [];
+    this.space();
+    if (this.text[this.at] === "]") {
+      this.at++;
+      return out;
+    }
+    for (;;) {
+      out.push(this.value());
+      if (this.closes("]")) {
         return out;
       }
-      for (;;) {
-        out.push(value());
-        space();
-        if (text[at] === ",") {
-          at++;
-        } else if (text[at] === "]") {
-          at++;
-          return out;
-        } else {
-          fail("',' or ']' expected");
-        }
-      }
     }
-    if (c === '"') {
-      return string();
-    }
-    for (const [word, literal] of LITERALS) {
-      if (text.startsWith(word, at)) {
-        at += word.length;
-        return literal;
-      }
-    }
-    return number();
-  };
-  const result = value();
-  space();
-  if (at !== text.length) {
-    fail("text after the JSON value");
+  }
+}
+
+/** Parses JSON (RFC 8259) without losing any integer. */
+export function parseJsonExact(text: string): JsonValue {
+  const parser = new ExactParser(text);
+  const result = parser.value();
+  parser.space();
+  if (parser.at !== text.length) {
+    parser.fail("text after the JSON value");
   }
   return result;
 }

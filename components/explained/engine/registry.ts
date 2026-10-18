@@ -434,10 +434,13 @@ export function rulesOf(r: Registry): Rules {
     throw invalid("rule_version is not a string");
   }
   const f = registryRecord(r);
-  const get = <T>(name: RegistryField): T => f.get(name) as T;
-  const big = (name: RegistryField): bigint => get<bigint>(name);
+  // registryRecord read each field at its type (REGISTRY_FIELDS).
+  const big = (name: RegistryField): bigint => f.get(name) as bigint;
+  const text = (name: RegistryField): string => f.get(name) as string;
+  const bigs = (name: RegistryField): bigint[] => f.get(name) as bigint[];
+  const texts = (name: RegistryField): string[] => f.get(name) as string[];
   const small = (name: RegistryField): number => Number(big(name));
-  const starts = get<bigint[]>("season_starts");
+  const starts = bigs("season_starts");
   if (starts[0] !== 1n || !ascending(starts)) {
     throw invalid(
       "season_starts must start at 1 and strictly increase (P26 §5.4, §10)"
@@ -449,13 +452,13 @@ export function rulesOf(r: Registry): Rules {
     "genesis_ids",
     "nakamoto_ids",
   ] as const) {
-    if (!ascending(get<(bigint | string)[]>(name))) {
+    if (!ascending(f.get(name) as (bigint | string)[])) {
       throw invalid(
         `registry list ${name} is not strictly ascending (P26 §10)`
       );
     }
   }
-  const sinks = get<string[]>("sinks");
+  const sinks = texts("sinks");
   if (!sinks.includes(ZERO)) {
     throw invalid("sinks must contain ZERO (P26 §3.4, §10)");
   }
@@ -477,21 +480,21 @@ export function rulesOf(r: Registry): Rules {
   }
   const rules: Rules = {
     ruleVersion: r.rule_version,
-    memes: get("memes"),
-    gradients: get("gradients"),
-    nextgen: get("nextgen"),
+    memes: text("memes"),
+    gradients: text("gradients"),
+    nextgen: text("nextgen"),
     nextgenDivisor: big("nextgen_collection_divisor"),
     sinks: new Set(sinks),
     minAge: big("eligibility_min_age_s"),
     dayS: big("day_s"),
     firstgmId: big("firstgm_id"),
     firstgmAdjustment: big("firstgm_edition_adjustment"),
-    firstgmBurnTx: get("firstgm_burn_tx"),
+    firstgmBurnTx: text("firstgm_burn_tx"),
     floorCap: big("edition_floor_cap"),
     floorThreshold: big("edition_floor_threshold"),
     gradientMinimum: small("gradient_rate_minimum"),
     useCase: big("consolidation_use_case"),
-    collections: new Set(get<string[]>("consolidation_collections")),
+    collections: new Set(texts("consolidation_collections")),
     maxWallets: small("consolidation_max_wallets"),
     ungatedMaxWallets: small("consolidation_ungated_max_wallets"),
     gateActivation: big("consolidation_gate_activation_s"),
@@ -499,9 +502,9 @@ export function rulesOf(r: Registry): Rules {
     lastBoostedSeason: small("last_boosted_season"),
     addFirst: big("additional_set_first"),
     addRatio: big("additional_set_ratio"),
-    genesisIds: get("genesis_ids"),
+    genesisIds: bigs("genesis_ids"),
     genesisBonus: small("genesis_bonus"),
-    nakamotoIds: get("nakamoto_ids"),
+    nakamotoIds: bigs("nakamoto_ids"),
     nakamotoBonus: small("nakamoto_bonus"),
     gradientBonus: small("gradient_bonus"),
     gradientMaxCount: small("gradient_max_count"),

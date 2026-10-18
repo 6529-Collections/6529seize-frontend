@@ -214,12 +214,10 @@ export function effectiveEdition(
   safeInteger(adjustment, "adjustment");
   const adjusted = BigInt(minted) + BigInt(adjustment);
   const claim = BigInt(totalMax);
-  const floor =
-    adjusted < rules.floorThreshold && claim > 0n
-      ? claim < rules.floorCap
-        ? claim
-        : rules.floorCap
-      : 0n;
+  let floor = 0n;
+  if (adjusted < rules.floorThreshold && claim > 0n) {
+    floor = claim < rules.floorCap ? claim : rules.floorCap;
+  }
   const edition = adjusted > floor ? adjusted : floor;
   return {
     edition: Number(edition),
@@ -305,6 +303,89 @@ function idKey(id: Uint): string {
   return BigInt(id).toString();
 }
 
+type Holds = (key: string) => boolean;
+
+/** The Meme part of a boost (P26 §8.3's `meme_u`) and the seasons it paid. */
+interface MemeBonus {
+  readonly seasons: number;
+  readonly extraSets: number;
+  readonly genesis: number;
+  readonly nakamoto: number;
+  readonly paid: readonly number[];
+}
+
+/** Complete sets of every eligible Meme: the minimum balance, or 0. */
+function fullSetsOf(
+  eligible: readonly string[],
+  balanceOf: (key: string) => bigint,
+  holds: Holds
+): bigint {
+  if (eligible.length === 0 || !eligible.every(holds)) {
+    return 0n;
+  }
+  return eligible.reduce(
+    (low, key) => (balanceOf(key) < low ? balanceOf(key) : low),
+    balanceOf(eligible[0] as string)
+  );
+}
+
+/** A full set pays every boostable season, plus ADD for the extra sets. */
+function fullSetBonus(
+  boostable: readonly Season[],
+  sets: bigint,
+  r: Registry
+): MemeBonus {
+  return {
+    seasons: boostable.reduce((sum, s) => sum + s.bonus, 0),
+    extraSets: additionalSetsMicro(sets, r),
+    genesis: 0,
+    nakamoto: 0,
+    paid: boostable.map((s) => s.id),
+  };
+}
+
+/** True when the record holds every Meme of a season whose end is known. */
+function holdsSeason(s: Season, holds: Holds): boolean {
+  if (s.end === null) {
+    return false;
+  }
+  for (let id = s.start; id <= s.end; id++) {
+    if (!holds(String(id))) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Without a full set, each complete boostable season pays; an incomplete
+ * Season 1 pays the Genesis and Nakamoto partials instead.
+ */
+function seasonsBonus(
+  boostable: readonly Season[],
+  holds: Holds,
+  r: Registry
+): MemeBonus {
+  const rules = rulesOf(r);
+  const holdsAll = (ids: readonly bigint[]): boolean =>
+    ids.every((id) => holds(idKey(id)));
+  const paid: number[] = [];
+  let seasons = 0;
+  let genesis = 0;
+  let nakamoto = 0;
+  for (const s of boostable) {
+    const complete = holdsSeason(s, holds);
+    if (s.id === 1 && !complete) {
+      genesis += holdsAll(rules.genesisIds) ? rules.genesisBonus : 0;
+      nakamoto += holdsAll(rules.nakamotoIds) ? rules.nakamotoBonus : 0;
+    } else if (complete) {
+      seasons += s.bonus;
+      paid.push(s.id);
+    }
+  }
+  return { seasons, extraSets: 0, genesis, nakamoto, paid };
+}
+
 /**
  * The boost of one record (P26 §8.3). `memesBal` maps eligible Meme ids
  * (decimal) to the record's balance; `gradients` is the number of distinct
@@ -330,61 +411,34 @@ export function boost(
   };
   const holds = (key: string): boolean =>
     eligibleSet.has(key) && balanceOf(key) > 0n;
-  let sets = 0n;
-  if (eligible.length > 0 && eligible.every(holds)) {
-    sets = eligible.reduce(
-      (low, key) => (balanceOf(key) < low ? balanceOf(key) : low),
-      balanceOf(eligible[0] as string)
-    );
-  }
+  const sets = fullSetsOf(eligible, balanceOf, holds);
   const boostable = boostableSeasons(seasons);
-  const paid: number[] = [];
-  let seasonsMicro = 0;
-  let extraSets = 0;
-  let genesis = 0;
-  let nakamoto = 0;
-  if (sets >= 1n) {
-    for (const s of boostable) {
-      seasonsMicro += s.bonus;
-      paid.push(s.id);
-    }
-    extraSets = additionalSetsMicro(sets, r);
-  } else {
-    for (const s of boostable) {
-      let complete = s.end !== null;
-      for (let id = s.start; complete && id <= (s.end ?? 0); id++) {
-        complete = holds(String(id));
-      }
-      if (s.id === 1 && !complete) {
-        if (rules.genesisIds.every((id) => holds(idKey(id)))) {
-          genesis += rules.genesisBonus;
-        }
-        if (rules.nakamotoIds.every((id) => holds(idKey(id)))) {
-          nakamoto += rules.nakamotoBonus;
-        }
-      } else if (complete) {
-        seasonsMicro += s.bonus;
-        paid.push(s.id);
-      }
-    }
-  }
+  const bonus =
+    sets >= 1n
+      ? fullSetBonus(boostable, sets, r)
+      : seasonsBonus(boostable, holds, r);
   const gradientsMicro =
     rules.gradientBonus * Math.min(gradients, rules.gradientMaxCount);
   const micro =
-    1_000_000 + seasonsMicro + extraSets + genesis + nakamoto + gradientsMicro;
+    1_000_000 +
+    bonus.seasons +
+    bonus.extraSets +
+    bonus.genesis +
+    bonus.nakamoto +
+    gradientsMicro;
   return {
     beta: halfUpRatio(micro, 10_000),
     micro,
     sets: sets <= MAX_SAFE ? Number(sets) : sets,
     branch: sets >= 1n ? "fullSet" : "seasons",
     parts: {
-      seasons: seasonsMicro,
-      extraSets,
-      genesis,
-      nakamoto,
+      seasons: bonus.seasons,
+      extraSets: bonus.extraSets,
+      genesis: bonus.genesis,
+      nakamoto: bonus.nakamoto,
       gradients: gradientsMicro,
     },
-    paidSeasons: paid,
+    paidSeasons: bonus.paid,
     boostable: boostable.map((s) => s.id),
   };
 }

@@ -297,7 +297,7 @@ function pushRun(runs: Run[], timestamp: bigint, count: bigint): void {
     return;
   }
   const last = runs.at(-1);
-  if (last && last.timestamp === timestamp) {
+  if (last?.timestamp === timestamp) {
     last.count += count;
   } else {
     runs.push({ timestamp, count });
@@ -351,28 +351,56 @@ export function replayHoldings(
     const key = tokenKey(t);
     const perWallet = stacks.get(key) ?? new Map<string, Run[]>();
     stacks.set(key, perWallet);
-    let moved: Run[] | null = null;
-    if (!rules.sinks.has(t.from)) {
-      const source = perWallet.get(t.from) ?? [];
-      if (stackLength(source) < t.amount) {
-        throw invalid(
-          `${t.from} sends more of ${key} than it holds after netting (P26 §7.1)`
-        );
-      }
-      moved = takeLast(source, t.amount);
-    }
+    const moved = debit(perWallet, t, key, rules);
     const destination = perWallet.get(t.to) ?? [];
     perWallet.set(t.to, destination);
-    if (rules.sinks.has(t.to)) {
-      // P26 §3.4: the FirstGM burn transaction is not credited to ZERO.
-      if (!(t.to === ZERO && t.tx === rules.firstgmBurnTx)) {
-        pushRun(destination, t.timestamp, t.amount);
-      }
-    } else if (moved !== null && (clusterOf[t.to] ?? [t.to]).includes(t.from)) {
-      moved.forEach((run) => pushRun(destination, run.timestamp, run.count));
-    } else {
-      pushRun(destination, t.timestamp, t.amount);
-    }
+    credit(destination, t, moved, clusterOf, rules);
   }
   return stacks;
+}
+
+/**
+ * Takes a netted transfer's copies off the sender's stack, the last received
+ * first; a sink sends from no stack (null).
+ */
+function debit(
+  perWallet: ReadonlyMap<string, Run[]>,
+  t: CanonicalTransfer,
+  key: string,
+  rules: Rules
+): Run[] | null {
+  if (rules.sinks.has(t.from)) {
+    return null;
+  }
+  const source = perWallet.get(t.from) ?? [];
+  if (stackLength(source) < t.amount) {
+    throw invalid(
+      `${t.from} sends more of ${key} than it holds after netting (P26 §7.1)`
+    );
+  }
+  return takeLast(source, t.amount);
+}
+
+/**
+ * Puts a netted transfer's copies on the receiver's stack: a move inside one
+ * identity keeps their timestamps, any other receipt is dated by the
+ * transfer, and the FirstGM burn transaction credits no one.
+ */
+function credit(
+  destination: Run[],
+  t: CanonicalTransfer,
+  moved: readonly Run[] | null,
+  clusterOf: Readonly<Record<string, readonly string[]>>,
+  rules: Rules
+): void {
+  if (rules.sinks.has(t.to)) {
+    // P26 §3.4: the FirstGM burn transaction is not credited to ZERO.
+    if (!(t.to === ZERO && t.tx === rules.firstgmBurnTx)) {
+      pushRun(destination, t.timestamp, t.amount);
+    }
+  } else if (moved !== null && (clusterOf[t.to] ?? [t.to]).includes(t.from)) {
+    moved.forEach((run) => pushRun(destination, run.timestamp, run.count));
+  } else {
+    pushRun(destination, t.timestamp, t.amount);
+  }
 }
