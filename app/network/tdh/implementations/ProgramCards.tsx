@@ -12,7 +12,7 @@ import {
   knownBuild,
   P26,
   PROGRAM_CONFORMANCE,
-  VALIDATOR_DEVELOPMENT,
+  VALIDATOR_BUILD,
 } from "../shared/tdhFacts";
 
 /** The Lean model's vector run, from its proof manifest. */
@@ -335,7 +335,7 @@ export default function ProgramCards({
           {t(locale, "network.tdh.impl.programs.vectorsNote", {
             count: formatInteger(locale, P26.vectorCount),
             spec: P26.commit,
-            commit: VALIDATOR_DEVELOPMENT.commit,
+            commit: VALIDATOR_BUILD.commit,
           })}
         </span>
       </p>

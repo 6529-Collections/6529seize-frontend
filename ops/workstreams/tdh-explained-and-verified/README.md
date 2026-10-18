@@ -89,9 +89,12 @@ bands.
   and step 14 of How it works, the overview's FAQ and glossary, both
   consolidation pages, the specification's section 6 and guided setup's
   note on a fourth wallet, which no longer asks for a confirmation).
-- The Rust core and program B pass all 104 vectors of P26 at `3bfa7b0` on
-  the validator's development branch (`a1463f9`, 18 October 2026), which
-  the daily job runs since that day. The daily comparison runs whatever
+- The Rust core and program B pass all 104 vectors of P26 at `3bfa7b0` in
+  the validator's build `a1463f9` (18 October 2026), which the daily job
+  runs since that day. `a1463f9` is on the sixth round's own branch, not on
+  the validator's development branch (still at `99f1ef0`, the round-5
+  core), so the copy calls it the validator's build, never the development
+  branch (`VALIDATOR_BUILD` in `shared/tdhFacts.ts`). The daily comparison runs whatever
   build each day's file names; the pages read it from there
   (`implementations.rust.commit`, `implementations.python.commit`) and
   know the vector counts of the builds listed in `KNOWN_BUILDS`

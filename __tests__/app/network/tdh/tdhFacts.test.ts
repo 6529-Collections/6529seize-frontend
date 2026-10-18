@@ -5,7 +5,7 @@ import {
   knownBuild,
   P26,
   PROGRAM_CONFORMANCE,
-  VALIDATOR_DEVELOPMENT,
+  VALIDATOR_BUILD,
 } from "@/app/network/tdh/shared/tdhFacts";
 import {
   VECTOR_COUNT,
@@ -38,8 +38,8 @@ import { PARAMETERS } from "@/app/network/tdh/specification/specData";
 /**
  * Guards for the dated facts the TDH pages repeat in many places: the
  * conformance vector set (P26 at 6529chain 3bfa7b0: 104 vectors, 01 to 103
- * and 12b), the Lean model's proof manifest, the validator's development
- * branch (a1463f9: the Rust core and program B on all 104), the daily
+ * and 12b), the Lean model's proof manifest, the validator's build
+ * (a1463f9: the Rust core and program B on all 104), the daily
  * job's builds (read from the feed, never fixed in the copy), the privacy of
  * the daily feed, and D136 and D137 (TDH v1.4, four-wallet consolidation).
  */
@@ -80,10 +80,12 @@ describe("TDH page facts", () => {
     }
     expect(PROGRAM_CONFORMANCE.python.vectors).toBe(P26.vectorCount);
     expect(PROGRAM_CONFORMANCE.rustReference.vectors).toBe(P26.vectorCount);
-    // The validator's development branch (a1463f9) follows P26 at 3bfa7b0
-    // (D136): the Rust core and program B pass all 104. Its software is
-    // numbered below 1.0 (D137).
-    expect(VALIDATOR_DEVELOPMENT).toMatchObject({
+    // The validator's build a1463f9 follows P26 at 3bfa7b0 (D136): the
+    // Rust core and program B pass all 104. Its software is numbered below
+    // 1.0 (D137). a1463f9 is not on the validator's development branch
+    // (still at 99f1ef0, the round-5 core), so the copy never says it is.
+    noMessageMatches(/development branch/);
+    expect(VALIDATOR_BUILD).toMatchObject({
       commit: "a1463f9",
       release: "0.1.0",
     });
@@ -519,6 +521,29 @@ describe("TDH page facts", () => {
         expect([key, text]).toEqual([key, expect.stringMatching(/tdh-v1\.0/)]);
       }
     }
+  });
+
+  it("keeps the fact check of D136 and D137 (f18652e795)", () => {
+    // Vector 90: the newest links seed the group, so the wallet the gate
+    // refuses is the old member A1, not D4, the wallet linked last (6529chain
+    // 3bfa7b0, its derivation); vector 97's refused wallet holds nothing.
+    expect(impl["network.tdh.impl.v.90-four-wallet-gate-fails"]).toMatch(
+      /the gate refuses the wallet that would join fourth, the old member A1, not D4$/
+    );
+    noMessageMatches(/so the gate refuses it$/);
+    noMessageMatches(/a refused fourth wallet gets fresh time/);
+    // DEV-11: 67269e2 was written on October 10 and reached the backend's
+    // main branch on October 14, 2026 (PR #2148).
+    expect(spec["network.tdh.spec.dev.11.old"]).toMatch(
+      /by pair key on the backend’s main branch since October 14, 2026 \(67269e2, written October 10\)$/
+    );
+    noMessageMatches(/pair key since October 10/);
+    // The feed's proof manifest adds generatedAt, source and documents, so
+    // its SHA-256 never equals the committed file's.
+    expect(formal["network.tdh.formal.builds.shaCommitted"]).toMatch(
+      /so its SHA-256 will differ/
+    );
+    noMessageMatches(/can be matched against it/);
   });
 
   it("shows no sample data", () => {

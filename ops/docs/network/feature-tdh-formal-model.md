@@ -52,8 +52,11 @@ decided.
   the file served). Only when the feed serves an earlier round than the one
   the page knows is committed does a second column show that round under a
   `Not yet published` pill (its commit and date, figures, the SHA-256 of its
-  committed manifest and, in a disclosure, what it changes); with round 5
-  published there is none.
+  committed manifest, which identifies the build, and, in a disclosure,
+  what it changes); with round 5 published there is none. The feed's copy
+  of a manifest adds `generatedAt`, `source` and `documents`, so its
+  SHA-256 never equals the committed file's, and the page says so rather
+  than offering the two hashes for matching.
 - Why write the rule again (the 23 choices a clean-room implementation had to
   make, two rated high, and the first netting rule the proofs refuted), and
   `Found by the model, by program B and by a review, and settled in the

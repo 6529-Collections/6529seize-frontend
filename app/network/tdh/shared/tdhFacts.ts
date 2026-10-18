@@ -9,8 +9,9 @@
  *   D137's names, TDH v1.4, rule version `tdh-v1.4`): §13 and
  *   `design/tdh-reference/README.md`; the commit records the Python
  *   reference's 104 of 104 with 1,311 checks and the Rust reference's 1,307.
- * - The validator's development branch at a1463f9 (2026-10-18, release
- *   0.1.0): the Rust core (`crates/tdh-core/PORTING.md`, 26d507d) ports
+ * - The validator's build a1463f9 (2026-10-18, release 0.1.0; on the
+ *   validator's branch of the sixth round, not yet on its development
+ *   branch, which is at 99f1ef0, the round-5 core): the Rust core (`crates/tdh-core/PORTING.md`, 26d507d) ports
  *   6529chain 3bfa7b0 and passes all 104 vectors with 1,307 checks;
  *   program B (`crates/tdh-b`, dda1459) passes all 104 with 1,238 checks
  *   of its own count. The builds the daily job runs are read from each
@@ -43,13 +44,16 @@ export const P26 = {
 } as const;
 
 /**
- * The validator's development branch the pages describe: P26 at 3bfa7b0 in
- * the Rust core and program B, and the sixth round of differential tests
- * (6529validator a1463f9, 18 October 2026), the build the daily job runs
- * since that day. Its software is numbered below 1.0: release 0.1.0
- * (D137); "Validator v1" is the design's name.
+ * The validator build the pages describe: P26 at 3bfa7b0 in the Rust core
+ * and program B, and the sixth round of differential tests (6529validator
+ * a1463f9, 18 October 2026). The copy calls it the validator's build
+ * a1463f9, never its development branch: a1463f9 is on the sixth round's
+ * own branch, and the development branch is still at 99f1ef0 (the round-5
+ * core, 89 vectors). The daily job runs it from that day, which the pages
+ * read from each day's file. Its software is numbered below 1.0: release
+ * 0.1.0 (D137); "Validator v1" is the design's name.
  */
-export const VALIDATOR_DEVELOPMENT = {
+export const VALIDATOR_BUILD = {
   commit: "a1463f9",
   date: "2026-10-18",
   release: "0.1.0",
@@ -63,19 +67,19 @@ export const PROGRAM_CONFORMANCE = {
     vectors: 104,
     checks: P26.rustReferenceChecks,
   },
-  /** The validator's development branch: crates/tdh-core/PORTING.md. */
+  /** The validator's build a1463f9: crates/tdh-core/PORTING.md. */
   rustCoreCurrent: {
     specCommit: P26.commit,
     vectors: 104,
     checks: 1_307,
-    merged: VALIDATOR_DEVELOPMENT.commit,
+    build: VALIDATOR_BUILD.commit,
   },
   /** crates/tdh-b/README.md: its own count of the vectors' checks. */
   programBCurrent: {
     specCommit: P26.commit,
     vectors: 104,
     checks: 1_238,
-    merged: VALIDATOR_DEVELOPMENT.commit,
+    build: VALIDATOR_BUILD.commit,
   },
 } as const;
 

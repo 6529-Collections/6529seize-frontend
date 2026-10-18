@@ -28,9 +28,10 @@ reference, the Lean model and 6529.io's current backend.
   the palette's legend under the list), the conformance vectors it passes,
   the newest build first and the daily comparison's build under it, each
   out of that round's own vectors: the Rust core and program B 104 of 104
-  at P26 `3bfa7b0` on the validator's development branch (`a1463f9`,
-  October 18, 2026; the Rust core's conformance names the validator's
-  release, 0.1.0, numbered below 1.0, D137); the Python and Rust references
+  at P26 `3bfa7b0` in the validator's build `a1463f9` (October 18, 2026,
+  not yet on the validator's development branch; the Rust core's
+  conformance names the validator's release, 0.1.0, numbered below 1.0,
+  D137); the Python and Rust references
   104 of 104 at `3bfa7b0`; the Lean model the published manifest's count,
   with round 6 (`2694e72`, 104 of 104), committed and not yet published,
   beside it. The daily comparison's builds are
