@@ -5,6 +5,7 @@ import path from "node:path";
 
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { getFrontendRoot } from "@/config/frontendRoot.server";
 import type { PublicReviewPageDefinition } from "@/lib/public-review/publicReviewTypes";
 import {
   getStreamReviewVersion,
@@ -12,7 +13,7 @@ import {
 } from "@/lib/public-review/streamReviewDefinition";
 
 const STREAM_VERSIONS_ROOT = path.resolve(
-  process.cwd(),
+  getFrontendRoot(),
   "content",
   "public-reviews",
   "6529-stream",
