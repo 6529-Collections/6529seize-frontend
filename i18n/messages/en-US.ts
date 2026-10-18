@@ -49,6 +49,7 @@ import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json"
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
 import { EN_US_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
+import { EN_US_DATE_COUNTDOWN_MESSAGES } from "@/i18n/messages/date-countdown";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
@@ -1593,6 +1594,7 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "xtdhGrant.change": "Change grant",
   "xtdhGrant.cancelChange": "Cancel change",
   "xtdhGrant.remove": "Remove grant",
+  "xtdhGrant.clearFilters": "Clear filters",
   done: "Done",
   enableChat: "Enable chat",
   allowAdminsToDeletePosts: "Allow admins to delete posts",
@@ -2340,6 +2342,12 @@ const NETWORK_GROUP_FILTER_MESSAGES = objectMessages("network.groupFilter", {
 } as const);
 
 const WAVE_LOADING_MESSAGES = objectMessages("waves", {
+  loadingWave: "Loading {name}…",
+  loadingWaveUnknown: "Loading wave…",
+  loadingError: "This wave could not be loaded.",
+  loadingRetry: "Try again",
+  loadingBack: "Back to wave list",
+  loadingBackMessages: "Back to messages",
   loadingStatus: "Loading waves",
   "drops.editorLoadingStatus": "Loading editor",
 } as const);
@@ -2736,6 +2744,11 @@ const XTDH_GRANT_MESSAGES = objectMessages("xtdh.grant", {
   "lastGrant.label": "Last grant",
 } as const);
 
+const WAVE_SLOW_MODE_NOTICE_MESSAGES = objectMessages("waves.slowMode.notice", {
+  cooldown: "Slow mode: send again in {countdown}",
+  interval: "Slow mode: one message every {interval}",
+} as const);
+
 const COLLECTION_DELEGATION_MESSAGES = objectMessages("delegation.collection", {
   "readError.message": "Unable to load delegation records for {collection}.",
   "readError.retry": "Try Again",
@@ -3104,6 +3117,7 @@ export const EN_US_MESSAGES = {
   "singleDrop.shared": "Link shared",
   "singleDrop.close": "Close",
   "singleDrop.closeLabel": "Close panel",
+  "singleDrop.loading": "Loading drop",
   "singleDrop.showChat": "Show chat",
   "singleDrop.hideChat": "Hide chat",
   "singleDrop.chatLabel": "Drop chat",
@@ -3257,6 +3271,7 @@ export const EN_US_MESSAGES = {
   ...IDENTITY_FILTER_MESSAGES,
   ...XTDH_COLLECTION_MESSAGES,
   ...XTDH_GRANT_MESSAGES,
+  ...WAVE_SLOW_MODE_NOTICE_MESSAGES,
   ...COLLECTION_DELEGATION_MESSAGES,
   ...DELEGATION_EXPIRY_MESSAGES,
   ...join6529Messages,
@@ -4491,6 +4506,7 @@ export const EN_US_MESSAGES = {
   ...LINK_PREVIEW_MESSAGES,
   ...COMMON_MESSAGES,
   ...EN_US_PAGINATION_MESSAGES,
+  ...EN_US_DATE_COUNTDOWN_MESSAGES,
   ...OPEN_DATA_DOWNLOAD_MESSAGES,
   ...DATE_PICKER_MESSAGES,
   ...MEME_DATA_TABLE_MESSAGES,

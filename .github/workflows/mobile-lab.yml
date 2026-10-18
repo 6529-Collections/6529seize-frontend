@@ -1,0 +1,144 @@
+name: Mobile lab
+
+# Mobile plan stage 0: after every successful web deploy, load the start
+# pages of the deployed site in phone emulation (Pixel 7, 4x CPU slowdown,
+# DevTools Fast 4G, signed out) and report transfer, JavaScript, largest
+# content, blocked time, heap, repeat-visit transfer and idle requests
+# against the stage 0 budgets. Budgets are reported, not enforced. The
+# runner's CPU differs from a developer machine, so compare runs of this
+# workflow with each other.
+
+on:
+  workflow_run:
+    workflows: ["Web Deploy - STAGING", "Web Deploy - PROD"]
+    types: [completed]
+    branches: [1a-staging, main]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Site to measure
+        type: choice
+        required: true
+        default: staging
+        options:
+          - staging
+          - production
+      pages:
+        description: Comma-separated pages (home, waves, meme, museum)
+        type: string
+        required: true
+        default: home,waves,meme,museum
+
+permissions:
+  contents: read
+
+run-name: Mobile lab ${{ github.event.workflow_run.name || inputs.target }}
+
+concurrency:
+  group: mobile-lab-${{ github.event.workflow_run.name || inputs.target }}
+  cancel-in-progress: false
+
+jobs:
+  measure:
+    name: Measure the deployed site
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    permissions:
+      contents: read
+    steps:
+      - name: Choose the site
+        id: target
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DEPLOY_WORKFLOW: ${{ github.event.workflow_run.name }}
+          INPUT_TARGET: ${{ inputs.target }}
+          INPUT_PAGES: ${{ inputs.pages }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = workflow_dispatch ]; then
+            target="$INPUT_TARGET"
+          else
+            case "$DEPLOY_WORKFLOW" in
+              "Web Deploy - STAGING") target=staging ;;
+              "Web Deploy - PROD") target=production ;;
+              *) echo "Unexpected workflow: $DEPLOY_WORKFLOW" >&2; exit 1 ;;
+            esac
+          fi
+          case "$target" in
+            staging) base=https://staging.6529.io ;;
+            production) base=https://6529.io ;;
+            *) echo "Unexpected target: $target" >&2; exit 1 ;;
+          esac
+          pages="${INPUT_PAGES:-home,waves,meme,museum}"
+          [[ "$pages" =~ ^[a-z]+(,[a-z]+)*$ ]]
+          {
+            echo "target=$target"
+            echo "base=$base"
+            echo "pages=$pages"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Check out the measurement scripts
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "22.17.1"
+          package-manager-cache: false
+
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable pnpm
+          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+
+      - name: Install Socket Firewall
+        id: socket-firewall
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
+        with:
+          mode: firewall
+
+      - name: Install frozen dependencies
+        env:
+          SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
+        run: ./bin/6529 ci
+
+      - name: Install Playwright dependencies
+        timeout-minutes: 15
+        run: ./bin/6529 exec playwright install-deps chromium
+
+      - name: Install Playwright browser
+        timeout-minutes: 10
+        run: ./bin/6529 exec playwright install chromium
+
+      - name: Measure
+        env:
+          BASE_URL: ${{ steps.target.outputs.base }}
+          PAGES: ${{ steps.target.outputs.pages }}
+          PLAYWRIGHT_STAGING_ACCESS_CODE: ${{ steps.target.outputs.target == 'staging' && secrets.PLAYWRIGHT_STAGING_ACCESS_CODE || '' }}
+        run: |
+          ./bin/6529 run lab:mobile --base "$BASE_URL" --pages "$PAGES" \
+            --coverage home --out-dir "$RUNNER_TEMP/mobile-lab"
+
+      - name: Report
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/mobile-lab/results.json" ]; then
+            ./bin/6529 run --silent lab:mobile:summary "$RUNNER_TEMP/mobile-lab/results.json" \
+              > "$RUNNER_TEMP/mobile-lab/summary.md"
+            cat "$RUNNER_TEMP/mobile-lab/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: mobile-lab-${{ steps.target.outputs.target }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/mobile-lab/
+          if-no-files-found: ignore
+          retention-days: 30

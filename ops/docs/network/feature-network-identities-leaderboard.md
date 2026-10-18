@@ -31,23 +31,42 @@ pagination, and profile links.
 
 - `Filter` opens `Filter Network` with all eight criteria visible in one list:
   `Identities`, `Level`, `TDH`, `NIC`, `Rep`, `Required NFTs`,
-  `Collection Access`, and `xTDH Grant`. On wide screens, the selected editor
-  sits beside the list with `Identities` open first. On narrow screens,
-  selecting a criterion opens its editor. `All filters` stays above the scrolling
-  fields and returns to the list; the current criterion stays beside it.
-  Switching keeps the draft's values. On phone widths, the trigger shows only
-  the filter icon. The mobile sheet keeps a compact, consistent height between
-  criteria. `Create and use new group` fills the content width on narrow screens.
+  `Collection Access`, and `xTDH Grant`. Desktop uses a left-side list with
+  `Identities` open first. On phones and touch tablets, the sheet opens with
+  a vertical list. Scroll down to reach any remaining rows; selecting a row
+  opens only that editor. `Back` stays at the top and returns to the list,
+  preserving the draft and returning focus to the selected row. A checkmark
+  identifies configured criteria. `Close` dismisses the sheet from either step.
+  On phone widths, the trigger shows only the filter icon. The mobile sheet
+  uses the available screen height and stays the same height between criteria.
+  `Create and use new group` fills the content width below the summary.
   Editors scroll above the keyboard, and EMMA allow-list results scroll within
-  the editor. While typing, `Before editing` and `After editing` visually
-  collapse to leave room for the fields; keyboard focus reveals their
-  member-preview controls, and status text remains available to screen readers.
-- `After editing` shows each selected criterion as a separate tag. Long tag
+  the editor. While typing, the criteria summary visually collapses to leave room
+  for the fields; keyboard focus reveals its member-preview control, and status
+  text remains available to screen readers.
+- In `Identities` > `Included`, search directly to add identities or use
+  `Include me`, an EMMA allowlist, or a CSV file. The empty view shows
+  `No identities are explicitly included.` without repeating empty import
+  messages. A combined unique-identity count appears after identities are
+  selected or imported; import results, file names, and errors remain visible.
+- In `xTDH Grant`, `Clear filters` appears after entering a collection name,
+  selecting a grantor, or choosing a status other than `Granted`. It clears
+  the grant search fields, restores `Granted`, and disappears again. It does
+  not remove a selected grant or other Network criteria. On phones and touch
+  tablets, the search fields and grant cards share one scroll area. `Load more`
+  follows the last loaded card; `Back`, `Close`, and the bottom action stay
+  accessible while browsing. Desktop keeps its separate results scroll area.
+- The footer shows each selected criterion as a separate tag. Long tag
   lists scroll within the summary, keeping `View members` and
   `Create and use new group` visible. A valid draft offers `View members`;
-  incomplete criteria show `Not ready yet.` and its guidance directly.
-- `Before editing` shows the current scope. With a selected group, its
-  criteria, count, and `View members` are visible without changing the draft.
+  an incomplete draft keeps the create action disabled. Select the information
+  button beside the summary to read `Not ready yet.` and its guidance.
+  The untouched filter does not open with a warning message.
+- When a group is selected, its name, criteria, count, and `View members`
+  appear at the top without changing the draft. On mobile, this summary
+  appears in the list step; use `Back` from an editor to return to it.
+  Without a selected group, the sheet starts directly with the criteria list.
+  The filter does not show `Before editing` or `After editing` labels.
 - Applying new criteria creates a saved group and immediately uses it as the
   Network scope. `Clear selected group` above the results clears the scope.
   The filter does not offer saved-group search or `Hide criteria and members`.

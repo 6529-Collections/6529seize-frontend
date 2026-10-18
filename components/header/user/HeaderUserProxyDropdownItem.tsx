@@ -1,4 +1,5 @@
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 export default function HeaderUserProxyDropdownItem({
   profileProxy,
@@ -24,7 +25,10 @@ export default function HeaderUserProxyDropdownItem({
       >
         {profileProxy.created_by.pfp ? (
           <img
-            src={profileProxy.created_by.pfp}
+            src={getScaledImageUri(
+              profileProxy.created_by.pfp,
+              ImageScale.W_AUTO_H_50
+            )}
             alt={`${profileProxy.created_by.handle} avatar`}
             className="tw-h-6 tw-w-6 tw-flex-none tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800"
           />

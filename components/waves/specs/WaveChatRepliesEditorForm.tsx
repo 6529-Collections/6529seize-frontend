@@ -12,7 +12,7 @@ interface WaveChatRepliesEditorFormProps {
 }
 
 const CHECKBOX_CLASS_NAME =
-  "tw-mt-0.5 tw-h-4 tw-w-4 tw-shrink-0 tw-rounded tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-900 tw-text-primary-500 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50";
+  "tw-form-checkbox tw-mt-0.5 tw-h-4 tw-w-4 tw-shrink-0 tw-rounded tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-900 tw-text-primary-500 focus:tw-ring-primary-400 focus:tw-ring-offset-0 disabled:tw-cursor-not-allowed disabled:tw-opacity-50";
 
 function ReplySettingCheckbox({
   checked,

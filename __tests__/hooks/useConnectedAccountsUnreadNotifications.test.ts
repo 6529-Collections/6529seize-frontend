@@ -1,27 +1,36 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { act, renderHook } from "@testing-library/react";
+import { createElement, type ReactNode } from "react";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useConnectedAccountsUnreadNotifications } from "@/hooks/useConnectedAccountsUnreadNotifications";
-import { act, renderHook } from "@testing-library/react";
+import type { ConnectedWalletAccount } from "@/services/auth/auth.utils";
 import { setNotificationRealtimeState } from "@/services/notifications/notification-realtime-state";
 
-const useQueryMock = jest.fn();
-const getQueryDataMock = jest.fn();
+type CapturedQueryOptions = {
+  readonly queryKey: readonly unknown[];
+  readonly refetchInterval: (query: {
+    readonly state: { readonly error: unknown };
+  }) => number | false;
+  readonly retry: (failureCount: number, error: unknown) => boolean;
+};
+
 const commonApiFetchMock = jest.fn();
 const isAuthJwtUsableMock = jest.fn();
-const createQueryContext = (signal = new AbortController().signal) => ({
-  signal,
+const mockCapturedQueries: CapturedQueryOptions[][] = [];
+
+jest.mock("@tanstack/react-query", () => {
+  const actual = jest.requireActual("@tanstack/react-query");
+  return {
+    ...actual,
+    useQueries: (
+      options: { readonly queries: CapturedQueryOptions[] },
+      client?: unknown
+    ) => {
+      mockCapturedQueries.push(options.queries);
+      return actual.useQueries(options, client);
+    },
+  };
 });
-
-jest.mock("@tanstack/react-query", () => ({
-  useQuery: (params: unknown) => useQueryMock(params),
-  useQueryClient: () => ({
-    getQueryData: getQueryDataMock,
-  }),
-}));
-
-jest.mock("@/hooks/useCapacitor", () => ({
-  __esModule: true,
-  default: () => ({ isCapacitor: false }),
-}));
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: (...args: unknown[]) => commonApiFetchMock(...args),
@@ -31,386 +40,288 @@ jest.mock("@/services/auth/auth.utils", () => ({
   isAuthJwtUsable: (...args: unknown[]) => isAuthJwtUsableMock(...args),
 }));
 
+const ACCOUNT_A: ConnectedWalletAccount = {
+  address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+  refreshToken: "refresh-token-a",
+  role: null,
+  jwt: "jwt-a",
+  profileId: "profile-a",
+  profileHandle: "alice",
+};
+const ACCOUNT_B: ConnectedWalletAccount = {
+  address: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+  refreshToken: "refresh-token-b",
+  role: null,
+  jwt: "jwt-b",
+  profileId: "profile-b",
+  profileHandle: "bob",
+};
+const ADDRESS_A = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+const ADDRESS_B = "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+
+type FetchParams = {
+  readonly headers: { readonly Authorization: string };
+  readonly signal: AbortSignal;
+};
+
+const requestsWithToken = (jwt: string): FetchParams[] =>
+  commonApiFetchMock.mock.calls
+    .map(([params]) => params as FetchParams)
+    .filter((params) => params.headers.Authorization === `Bearer ${jwt}`);
+
+const latestQueries = (): CapturedQueryOptions[] =>
+  mockCapturedQueries.at(-1) ?? [];
+
+const latestQueryFor = (address: string): CapturedQueryOptions => {
+  const query = latestQueries().find(
+    (options) =>
+      (options.queryKey[1] as { readonly account?: unknown }).account ===
+      address
+  );
+  if (!query) {
+    throw new Error(`No unread query for ${address}`);
+  }
+  return query;
+};
+
+const flush = async (ms = 0): Promise<void> => {
+  await act(async () => {
+    await jest.advanceTimersByTimeAsync(ms);
+  });
+};
+
 describe("useConnectedAccountsUnreadNotifications", () => {
+  let queryClient: QueryClient;
+
+  const renderUnreadCounts = (
+    initialAccounts: readonly ConnectedWalletAccount[]
+  ) =>
+    renderHook(
+      ({ accounts }) => useConnectedAccountsUnreadNotifications(accounts),
+      {
+        initialProps: { accounts: initialAccounts },
+        wrapper: ({ children }: { readonly children: ReactNode }) =>
+          createElement(QueryClientProvider, { client: queryClient }, children),
+      }
+    );
+
   beforeEach(() => {
+    jest.useFakeTimers();
     setNotificationRealtimeState(false);
-    useQueryMock.mockReset();
-    getQueryDataMock.mockReset();
+    mockCapturedQueries.length = 0;
     commonApiFetchMock.mockReset();
+    commonApiFetchMock.mockImplementation((params: FetchParams) =>
+      Promise.resolve({
+        unread_count: params.headers.Authorization === "Bearer jwt-a" ? 4 : 2,
+        notifications: [],
+      })
+    );
     isAuthJwtUsableMock.mockReset();
     isAuthJwtUsableMock.mockReturnValue(true);
-  });
-
-  it("uses a separate query key from active identity notifications", () => {
-    useQueryMock.mockReturnValue({ data: {} });
-
-    renderHook(() =>
-      useConnectedAccountsUnreadNotifications([
-        {
-          address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-          refreshToken: "refresh-token",
-          role: null,
-          jwt: "jwt-token",
-          profileId: null,
-          profileHandle: "alice",
-        },
-      ])
-    );
-
-    expect(useQueryMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        queryKey: [
-          QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS,
-          "connected-account-unread-counts",
-          "v2",
-          ["0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"],
-        ],
-      })
-    );
-  });
-
-  it("uses only a five-minute reconciliation poll when every account is synced", () => {
-    setNotificationRealtimeState(true, ["profile-1"]);
-    useQueryMock.mockReturnValue({ data: {} });
-
-    renderHook(() =>
-      useConnectedAccountsUnreadNotifications([
-        {
-          address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-          refreshToken: "refresh-token",
-          role: null,
-          jwt: "jwt-token",
-          profileId: "profile-1",
-          profileHandle: "alice",
-        },
-        {
-          address: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
-          refreshToken: "refresh-token-2",
-          role: null,
-          jwt: "jwt-token-2",
-          profileId: "profile-2",
-          profileHandle: "bob",
-        },
-      ])
-    );
-
-    expect(useQueryMock.mock.calls.at(-1)?.[0].refetchInterval).toBe(15000);
-
-    act(() => {
-      setNotificationRealtimeState(true, ["profile-1", "profile-2"]);
-    });
-
-    expect(useQueryMock.mock.calls.at(-1)?.[0].refetchInterval).toBe(300000);
-  });
-
-  it("does not enable polling for accounts without usable JWTs", () => {
-    isAuthJwtUsableMock.mockReturnValue(false);
-    useQueryMock.mockReturnValue({ data: {} });
-
-    renderHook(() =>
-      useConnectedAccountsUnreadNotifications([
-        {
-          address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-          refreshToken: "refresh-token",
-          role: null,
-          jwt: "expired-jwt",
-          profileId: null,
-          profileHandle: "alice",
-        },
-      ])
-    );
-
-    expect(useQueryMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        enabled: false,
-        queryKey: [
-          QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS,
-          "connected-account-unread-counts",
-          "v2",
-          [],
-        ],
-      })
-    );
-  });
-
-  it("does not retry terminal connected-account notification failures", () => {
-    useQueryMock.mockReturnValue({ data: {} });
-
-    renderHook(() =>
-      useConnectedAccountsUnreadNotifications([
-        {
-          address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-          refreshToken: "refresh-token",
-          role: null,
-          jwt: "jwt-token",
-          profileId: null,
-          profileHandle: "alice",
-        },
-      ])
-    );
-
-    const queryOptions = useQueryMock.mock.calls[0]?.[0];
-    expect(queryOptions.retry(0, { status: 401 })).toBe(false);
-    expect(queryOptions.retry(0, { status: 403 })).toBe(false);
-    expect(queryOptions.retry(0, { status: 503 })).toBe(true);
-  });
-
-  it("stops retrying other client errors but keeps retrying timeouts", () => {
-    useQueryMock.mockReturnValue({ data: {} });
-
-    renderHook(() =>
-      useConnectedAccountsUnreadNotifications([
-        {
-          address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-          refreshToken: "refresh-token",
-          role: null,
-          jwt: "jwt-token",
-          profileId: null,
-          profileHandle: "alice",
-        },
-      ])
-    );
-
-    const queryOptions = useQueryMock.mock.calls[0]?.[0];
-    expect(queryOptions.retry(0, { status: 400 })).toBe(false);
-    expect(queryOptions.retry(0, { status: 404 })).toBe(false);
-    expect(queryOptions.retry(0, { status: 429 })).toBe(false);
-    expect(queryOptions.retry(0, { status: 408 })).toBe(true);
-    expect(queryOptions.retry(3, { status: 503 })).toBe(false);
-  });
-
-  it("surfaces terminal connected-account failures instead of hiding them as successful polling", async () => {
-    commonApiFetchMock.mockRejectedValue({ status: 403 });
-    useQueryMock.mockReturnValue({ data: {} });
-
-    renderHook(() =>
-      useConnectedAccountsUnreadNotifications([
-        {
-          address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-          refreshToken: "refresh-token",
-          role: null,
-          jwt: "jwt-token",
-          profileId: null,
-          profileHandle: "alice",
-        },
-      ])
-    );
-
-    const queryOptions = useQueryMock.mock.calls[0]?.[0];
-    await expect(
-      queryOptions.queryFn(createQueryContext())
-    ).rejects.toMatchObject({
-      status: 403,
-      terminalNotificationAuth: true,
+    // Mirror the app's QueryClient defaults that affect refetch timing.
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { staleTime: 10_000, gcTime: Number.POSITIVE_INFINITY },
+      },
     });
   });
 
-  it("keeps transient connected-account failures best-effort", async () => {
-    commonApiFetchMock.mockRejectedValue({ status: 503 });
-    getQueryDataMock.mockReturnValue({
-      "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": 4,
-    });
-    useQueryMock.mockReturnValue({ data: {} });
-
-    renderHook(() =>
-      useConnectedAccountsUnreadNotifications([
-        {
-          address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-          refreshToken: "refresh-token",
-          role: null,
-          jwt: "jwt-token",
-          profileId: null,
-          profileHandle: "alice",
-        },
-      ])
-    );
-
-    const queryOptions = useQueryMock.mock.calls[0]?.[0];
-    await expect(queryOptions.queryFn(createQueryContext())).resolves.toEqual({
-      "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": 4,
-    });
+  afterEach(() => {
+    queryClient.clear();
+    setNotificationRealtimeState(false);
+    jest.clearAllTimers();
+    jest.useRealTimers();
   });
 
-  it("forwards one query AbortSignal to separate per-account requests", async () => {
-    commonApiFetchMock.mockResolvedValue({ unread_count: 1 });
-    useQueryMock.mockReturnValue({ data: {} });
-    const signal = new AbortController().signal;
+  it("keeps one query per account, separate from active identity notifications", async () => {
+    const { result, unmount } = renderUnreadCounts([ACCOUNT_A, ACCOUNT_B]);
+    await flush();
 
-    renderHook(() =>
-      useConnectedAccountsUnreadNotifications([
-        {
-          address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-          refreshToken: "refresh-token-a",
-          role: null,
-          jwt: "jwt-a",
-          profileId: "profile-1",
-          profileHandle: "alice",
-        },
-        {
-          address: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
-          refreshToken: "refresh-token-b",
-          role: null,
-          jwt: "jwt-b",
-          profileId: "profile-2",
-          profileHandle: "bob",
-        },
-      ])
-    );
-
-    const queryOptions = useQueryMock.mock.calls[0]?.[0];
-    await expect(
-      queryOptions.queryFn(createQueryContext(signal))
-    ).resolves.toEqual({
-      "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": 1,
-      "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": 1,
-    });
-
-    expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
-    expect(commonApiFetchMock).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({
-        headers: { Authorization: "Bearer jwt-a" },
-        signal,
-      })
-    );
-    expect(commonApiFetchMock).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({
-        headers: { Authorization: "Bearer jwt-b" },
-        signal,
-      })
-    );
-  });
-
-  it("preserves per-account counts when the shared query signal aborts", async () => {
-    const previousCounts = {
-      "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": 4,
-      "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": 2,
-    };
-    getQueryDataMock.mockReturnValue(previousCounts);
-    commonApiFetchMock.mockImplementation(
-      ({ signal }: { readonly signal: AbortSignal }) =>
-        new Promise((_, reject) => {
-          const rejectWithAbort = () => {
-            reject(new DOMException("The operation was aborted", "AbortError"));
-          };
-          if (signal.aborted) {
-            rejectWithAbort();
-            return;
-          }
-          signal.addEventListener("abort", rejectWithAbort, { once: true });
+    expect(
+      queryClient
+        .getQueryCache()
+        .findAll({
+          queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
         })
-    );
-    useQueryMock.mockReturnValue({ data: {} });
-    const abortController = new AbortController();
-
-    renderHook(() =>
-      useConnectedAccountsUnreadNotifications([
-        {
-          address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-          refreshToken: "refresh-token-a",
-          role: null,
-          jwt: "jwt-a",
-          profileId: "profile-1",
-          profileHandle: "alice",
-        },
-        {
-          address: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
-          refreshToken: "refresh-token-b",
-          role: null,
-          jwt: "jwt-b",
-          profileId: "profile-2",
-          profileHandle: "bob",
-        },
-      ])
-    );
-
-    const queryOptions = useQueryMock.mock.calls[0]?.[0];
-    const queryPromise = queryOptions.queryFn(
-      createQueryContext(abortController.signal)
-    );
-    abortController.abort();
-
-    await expect(queryPromise).resolves.toEqual(previousCounts);
-    expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+        .map((query) => query.queryKey)
+    ).toEqual([
+      [
+        QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS,
+        { account: ADDRESS_A, version: "v2" },
+      ],
+      [
+        QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS,
+        { account: ADDRESS_B, version: "v2" },
+      ],
+    ]);
+    expect(
+      queryClient
+        .getQueryCache()
+        .findAll({ queryKey: [QueryKey.IDENTITY_NOTIFICATIONS] })
+    ).toHaveLength(0);
+    expect(result.current).toEqual({ [ADDRESS_A]: 4, [ADDRESS_B]: 2 });
+    unmount();
   });
 
-  it("blocks only the failed account until that account gets a new token", async () => {
-    const accounts = [
-      {
-        address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        refreshToken: "refresh-token-a",
-        role: null,
-        jwt: "jwt-a",
-        profileId: null,
-        profileHandle: "alice",
-      },
-      {
-        address: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
-        refreshToken: "refresh-token-b",
-        role: null,
-        jwt: "jwt-b",
-        profileId: null,
-        profileHandle: "bob",
-      },
-    ];
-    commonApiFetchMock
-      .mockRejectedValueOnce({ status: 403 })
-      .mockResolvedValueOnce({ unread_count: 2 });
-    useQueryMock.mockReturnValue({ data: {} });
+  it("uses the five-minute reconciliation poll only for accounts the socket confirmed", () => {
+    setNotificationRealtimeState(true, ["profile-a"]);
+    const { unmount } = renderUnreadCounts([ACCOUNT_A, ACCOUNT_B]);
+    const idleQuery = { state: { error: undefined } };
 
-    const { rerender } = renderHook(
-      ({ connectedAccounts }) =>
-        useConnectedAccountsUnreadNotifications(connectedAccounts),
-      { initialProps: { connectedAccounts: accounts } }
-    );
+    expect(latestQueryFor(ADDRESS_A).refetchInterval(idleQuery)).toBe(300_000);
+    expect(latestQueryFor(ADDRESS_B).refetchInterval(idleQuery)).toBe(30_000);
 
-    const firstQueryOptions = useQueryMock.mock.calls[0]?.[0];
-    const terminalError = await firstQueryOptions
-      .queryFn(createQueryContext())
-      .catch((error: unknown) => error);
     act(() => {
-      expect(firstQueryOptions.retry(0, terminalError)).toBe(false);
+      setNotificationRealtimeState(true, ["profile-a", "profile-b"]);
     });
+    expect(latestQueryFor(ADDRESS_B).refetchInterval(idleQuery)).toBe(300_000);
 
-    expect(useQueryMock.mock.calls.at(-1)?.[0].queryKey.at(-1)).toEqual([
-      "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    act(() => {
+      setNotificationRealtimeState(false);
+    });
+    expect(latestQueryFor(ADDRESS_A).refetchInterval(idleQuery)).toBe(30_000);
+    expect(latestQueryFor(ADDRESS_B).refetchInterval(idleQuery)).toBe(30_000);
+    expect(
+      latestQueryFor(ADDRESS_A).refetchInterval({
+        state: { error: { status: 401 } },
+      })
+    ).toBe(false);
+    unmount();
+  });
+
+  it("does not create queries for accounts without usable JWTs", async () => {
+    isAuthJwtUsableMock.mockReturnValue(false);
+    const { result, unmount } = renderUnreadCounts([
+      ACCOUNT_A,
+      { ...ACCOUNT_B, jwt: null },
     ]);
+    await flush(60_000);
+
+    expect(latestQueries()).toHaveLength(0);
+    expect(commonApiFetchMock).not.toHaveBeenCalled();
+    expect(result.current).toEqual({});
+    unmount();
+  });
+
+  it("retries transient failures but never terminal auth or other client errors", () => {
+    const { unmount } = renderUnreadCounts([ACCOUNT_A]);
+    const { retry } = latestQueryFor(ADDRESS_A);
+
+    expect(retry(0, { status: 401 })).toBe(false);
+    expect(retry(0, { status: 403 })).toBe(false);
+    expect(retry(0, { status: 400 })).toBe(false);
+    expect(retry(0, { status: 404 })).toBe(false);
+    expect(retry(0, { status: 429 })).toBe(false);
+    expect(retry(0, { status: 408 })).toBe(true);
+    expect(retry(0, { status: 503 })).toBe(true);
+    expect(retry(3, { status: 503 })).toBe(false);
+    unmount();
+  });
+
+  it("sends each account's request with its own token and abort signal", async () => {
+    const { unmount } = renderUnreadCounts([ACCOUNT_A, ACCOUNT_B]);
+    await flush();
+
+    const [requestA] = requestsWithToken("jwt-a");
+    const [requestB] = requestsWithToken("jwt-b");
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+    expect(requestA).toEqual(
+      expect.objectContaining({
+        endpoint: "v2/notifications",
+        params: { limit: "1" },
+        cache: "no-store",
+      })
+    );
+    expect(requestA?.signal).toBeInstanceOf(AbortSignal);
+    expect(requestB?.signal).toBeInstanceOf(AbortSignal);
+    expect(requestA?.signal).not.toBe(requestB?.signal);
+    unmount();
+  });
+
+  it("keeps an account's last count through transient failures", async () => {
+    const { result, unmount } = renderUnreadCounts([ACCOUNT_A]);
+    await flush();
+    expect(result.current).toEqual({ [ADDRESS_A]: 4 });
+
+    commonApiFetchMock.mockRejectedValue({ status: 503 });
+    act(() => {
+      void queryClient.invalidateQueries({
+        queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
+      });
+    });
+    await flush(10_000);
+
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(5);
+    expect(result.current).toEqual({ [ADDRESS_A]: 4 });
+    unmount();
+  });
+
+  it("stops polling only the account that failed auth until it gets a new token", async () => {
+    commonApiFetchMock.mockImplementation((params: FetchParams) =>
+      params.headers.Authorization === "Bearer jwt-a"
+        ? Promise.reject({ status: 403 })
+        : Promise.resolve({ unread_count: 2, notifications: [] })
+    );
+    const { result, rerender, unmount } = renderUnreadCounts([
+      ACCOUNT_A,
+      ACCOUNT_B,
+    ]);
+    await flush();
+    await flush(60_000);
+
+    expect(requestsWithToken("jwt-a")).toHaveLength(1);
+    expect(requestsWithToken("jwt-b")).toHaveLength(3);
+    expect(result.current).toEqual({ [ADDRESS_B]: 2 });
 
     rerender({
-      connectedAccounts: [
-        { ...accounts[0], jwt: "jwt-a-after-reauth" },
-        accounts[1],
-      ],
+      accounts: [{ ...ACCOUNT_A, jwt: "jwt-a-after-reauth" }, ACCOUNT_B],
     });
+    await flush();
 
-    expect(useQueryMock.mock.calls.at(-1)?.[0].queryKey.at(-1)).toEqual([
-      "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-    ]);
+    expect(requestsWithToken("jwt-a-after-reauth")).toHaveLength(1);
+    expect(result.current).toEqual({ [ADDRESS_A]: 2, [ADDRESS_B]: 2 });
+    unmount();
   });
 
-  it("blocks connected-account fetches when the JWT expires between renders", async () => {
-    isAuthJwtUsableMock.mockReturnValueOnce(true).mockReturnValueOnce(false);
-    useQueryMock.mockReturnValue({ data: {} });
+  it("checks the token again right before each request", async () => {
+    isAuthJwtUsableMock.mockReturnValueOnce(true).mockReturnValue(false);
+    const { result, unmount } = renderUnreadCounts([ACCOUNT_A]);
+    await flush();
 
-    renderHook(() =>
-      useConnectedAccountsUnreadNotifications([
-        {
-          address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-          refreshToken: "refresh-token",
-          role: null,
-          jwt: "jwt-token",
-          profileId: null,
-          profileHandle: "alice",
-        },
-      ])
-    );
-
-    const queryOptions = useQueryMock.mock.calls[0]?.[0];
-    await expect(
-      queryOptions.queryFn(createQueryContext())
-    ).rejects.toMatchObject({ status: 401 });
     expect(commonApiFetchMock).not.toHaveBeenCalled();
+    expect(result.current).toEqual({});
+    unmount();
+  });
+
+  it("does not refetch accounts that stay connected when another account is added", async () => {
+    const { result, rerender, unmount } = renderUnreadCounts([ACCOUNT_A]);
+    await flush();
+
+    rerender({ accounts: [ACCOUNT_A, ACCOUNT_B] });
+    await flush();
+
+    expect(requestsWithToken("jwt-a")).toHaveLength(1);
+    expect(requestsWithToken("jwt-b")).toHaveLength(1);
+    expect(result.current).toEqual({ [ADDRESS_A]: 4, [ADDRESS_B]: 2 });
+    unmount();
+  });
+
+  it("returns the same counts object while the counts are unchanged", async () => {
+    const accounts = [ACCOUNT_A, ACCOUNT_B];
+    const { result, rerender, unmount } = renderUnreadCounts(accounts);
+    await flush();
+    const firstCounts = result.current;
+
+    rerender({ accounts });
+    act(() => {
+      void queryClient.invalidateQueries({
+        queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
+      });
+    });
+    await flush();
+
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(4);
+    expect(result.current).toBe(firstCounts);
+    unmount();
   });
 });
