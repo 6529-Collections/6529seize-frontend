@@ -14,7 +14,7 @@ import {
   toObjectRecord,
   truncateForLog,
 } from "./shared";
-import { fetchAlchemyMetadataCandidate } from "./alchemy";
+import { resolveAlchemyMetadataFetcher } from "./alchemy";
 import {
   TOKEN_URI_PREFIXED_PLACEHOLDER_PATTERN,
   buildTokenIdCandidates,
@@ -492,10 +492,12 @@ async function fetchOpenSeaNftMetadata(
     };
   }
 
-  let apiKey: string;
-  try {
-    apiKey = getAlchemyApiKey();
-  } catch {
+  const fetchCandidate = resolveAlchemyMetadataFetcher(
+    network,
+    context.contractAddress,
+    getAlchemyApiKey
+  );
+  if (!fetchCandidate) {
     return {
       kind: "fallback",
       reason: "missing_api_key",
@@ -510,12 +512,7 @@ async function fetchOpenSeaNftMetadata(
   let lastTopLevelKeys: string[] = [];
 
   for (const tokenIdCandidate of tokenIdCandidates) {
-    const candidateResult = await fetchAlchemyMetadataCandidate(
-      network,
-      apiKey,
-      context.contractAddress,
-      tokenIdCandidate
-    );
+    const candidateResult = await fetchCandidate(tokenIdCandidate);
 
     if (candidateResult.kind === "success") {
       return {

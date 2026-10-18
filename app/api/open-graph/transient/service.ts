@@ -5,7 +5,7 @@ import { publicEnv } from "@/config/env";
 import { normalizeDecentralizedMediaUrl } from "@/lib/media/decentralized-media";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
-import { fetchAlchemyMetadataCandidate } from "../opensea/alchemy";
+import { resolveAlchemyMetadataFetcher } from "../opensea/alchemy";
 import {
   TOKEN_URI_PREFIXED_PLACEHOLDER_PATTERN,
   buildTokenIdCandidates,
@@ -509,10 +509,12 @@ async function fetchTransientNftMetadata(
     };
   }
 
-  let apiKey: string;
-  try {
-    apiKey = getAlchemyApiKey();
-  } catch {
+  const fetchCandidate = resolveAlchemyMetadataFetcher(
+    network,
+    context.contractAddress,
+    getAlchemyApiKey
+  );
+  if (!fetchCandidate) {
     return {
       kind: "fallback",
       reason: "missing_api_key",
@@ -527,12 +529,7 @@ async function fetchTransientNftMetadata(
   let lastTopLevelKeys: string[] = [];
 
   for (const tokenIdCandidate of tokenIdCandidates) {
-    const candidateResult = await fetchAlchemyMetadataCandidate(
-      network,
-      apiKey,
-      context.contractAddress,
-      tokenIdCandidate
-    );
+    const candidateResult = await fetchCandidate(tokenIdCandidate);
 
     if (candidateResult.kind === "success") {
       return {
