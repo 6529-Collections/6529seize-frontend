@@ -1,6 +1,6 @@
 /**
- * The formal model page's statements about the Lean 4 model of TDH-v1, and
- * the results its proof manifest does not carry.
+ * The formal model page's statements about the Lean 4 model of TDH v1.4;
+ * the rounds of the model and their runs are in `leanRounds.ts`.
  *
  * Each statement names the manifest entries it rests on: the theorems that
  * prove it, the counterexamples that refute a claim, and the claims the
@@ -8,144 +8,21 @@
  * the manifest (`formal/manifest.json` on the TDH feed, or the copy bundled
  * with the page), and a statement whose entries the manifest does not
  * confirm shows as unverified. Lean statements are quoted verbatim, without
- * their proofs, from the model at 6529chain 7bf579a; those of rounds 4 and 5
- * from f854661 and 6b32f3f, where the earlier ones read the same.
+ * their proofs, from the model at 6529chain 7bf579a; those of rounds 4, 5
+ * and 6 from f854661, 6b32f3f and 2694e72, where the earlier ones read the
+ * same.
  *
- * The page knows three rounds of the model. Round 3 (manifest at 7bf579a)
+ * The page knows four rounds of the model. Round 3 (manifest at 7bf579a)
  * starts from decoded inputs; round 4 (6529chain f854661) starts from raw
  * logs and proves their order cannot matter; round 5 (6b32f3f) follows P26's
  * fifth round and proves that transfers at one log position share their
- * contract, sender and recipient. Which one a manifest records is read from
- * the manifest itself (`leanRound` in `formalStatus.ts`).
+ * contract, sender and recipient; round 6 (2694e72) follows D136's
+ * four-wallet consolidation and D137's names (TDH v1.4) and proves the
+ * limits of its clusters. Which one a manifest records is read from the
+ * manifest itself (`leanRound` in `formalStatus.ts`).
  */
 
-/** A round of the model the page can show. */
-export type LeanRound = 3 | 4 | 5;
-
-/** A round of the model, from its commit in 6529's design repository. */
-interface LeanRoundInfo {
-  readonly round: LeanRound;
-  readonly commit: string;
-  readonly date: string;
-  /** A theorem the round added: a manifest proving it is this round or later. */
-  readonly theorem: string;
-}
-
-export const LEAN_ROUND_4: LeanRoundInfo = {
-  round: 4,
-  commit: "f854661",
-  date: "2026-10-15",
-  theorem: "computeCycleFromSource_perm",
-};
-
-/**
- * Round 5 (6529chain 6b32f3f, 2026-10-16 01:24 UTC), which follows P26
- * f840096. Its proof manifest is committed with the model
- * (`design/tdh-lean/proof-manifest.json`); the figures below are that
- * manifest's, shown until the feed publishes it.
- */
-export const LEAN_ROUND_5 = {
-  round: 5,
-  commit: "6b32f3f",
-  date: "2026-10-16",
-  theorem: "canonicalTransfers_oneLog",
-  specCommit: "f840096",
-  vectorsPassed: 89,
-  vectorsTotal: 89,
-  vectorChecks: 1_253,
-  theoremsTdh: 55,
-  theoremsP53: 30,
-  facts: 46,
-  /** SHA-256 of design/tdh-lean/proof-manifest.json at 6b32f3f. */
-  manifestSha256:
-    "6825ffa47980ea9c7baa35470a6ddd24e7383fcbbe95bec4e237dfd0a7f537e5",
-} as const satisfies LeanRoundInfo & Record<string, unknown>;
-
-/** The newest round of the model the page knows. */
-export const LEAN_LATEST_ROUND: LeanRound = LEAN_ROUND_5.round;
-
-export interface LeanRuns {
-  /** The README commit whose "Results" section these figures are. */
-  readonly readmeCommit: string;
-  /** The logs in the 2026-10-11 cycle's file, after B included. */
-  readonly logsRead: number;
-  /** Those through the snapshot block B, which the cycle is computed from. */
-  readonly logsThroughB: number;
-  readonly fullDayRecords: number;
-  readonly fullDayTotal: number;
-  /** Seconds for the whole day from raw logs: about, or a range. */
-  readonly fullDaySeconds: readonly [number, number];
-  /** Random differential inputs, seeds 6529 and 7, each under both rules. */
-  readonly randomInputs: number;
-  readonly randomVectors: number;
-  readonly randomChecks: number;
-  /**
-   * The whole-model audit (`Audit/All.lean`, from round 4): every theorem
-   * and definition of the model, the P53 models and the vector runner on
-   * Lean's three standard axioms; null for a round without it.
-   */
-  readonly wholeAudit: {
-    readonly theorems: number;
-    readonly definitions: number;
-  } | null;
-}
-
-/**
- * Results of runs the manifest does not repeat, from the model's README:
- * round 3 at 6529chain 237c997, round 4 at f854661, round 5 at 6b32f3f.
- */
-export const LEAN_RUNS: Readonly<Record<LeanRound, LeanRuns>> = {
-  3: {
-    readmeCommit: "237c997",
-    // 414,007 logs through B, of 414,254 in the file; the later 247 are not
-    // decoded.
-    logsRead: 414_254,
-    logsThroughB: 414_007,
-    fullDayRecords: 21_410,
-    fullDayTotal: 2_061_888_816,
-    // About 15 s to read and parse the input, 30 s to compute.
-    fullDaySeconds: [45, 45],
-    randomInputs: 6_000,
-    randomVectors: 12_000,
-    randomChecks: 1_272_930,
-    wholeAudit: null,
-  },
-  4: {
-    readmeCommit: "f854661",
-    // All 414,254 logs read at their types; the 414,007 through B decoded.
-    logsRead: 414_254,
-    logsThroughB: 414_007,
-    fullDayRecords: 21_410,
-    fullDayTotal: 2_061_888_816,
-    // 19 to 29 s to read and parse, 38 to 42 s to type-check, decode and
-    // compute.
-    fullDaySeconds: [56, 72],
-    randomInputs: 6_000,
-    randomVectors: 12_000,
-    // 195,510 (seed 6529) + 986,678 (seed 7).
-    randomChecks: 1_182_188,
-    // PROOFS.md at f854661, "How they are checked".
-    wholeAudit: { theorems: 1_036, definitions: 1_458 },
-  },
-  5: {
-    readmeCommit: "6b32f3f",
-    // All 414,254 logs read at their types; the 414,007 through B decoded.
-    logsRead: 414_254,
-    logsThroughB: 414_007,
-    fullDayRecords: 21_410,
-    fullDayTotal: 2_061_888_816,
-    // Under 3 s to read and parse with the strict parser, about 17 s to
-    // type-check, select, decode and compute.
-    fullDaySeconds: [20, 20],
-    randomInputs: 6_000,
-    randomVectors: 12_000,
-    // 179,818 (seed 6529) + 947,332 (seed 7), against the Python reference
-    // at f840096; all 40 + 210 files that are no vector fail.
-    randomChecks: 1_127_150,
-    // PROOFS.md at 6b32f3f, "How they are checked".
-    wholeAudit: { theorems: 1_068, definitions: 1_538 },
-  },
-};
+import type { LeanRound } from "./leanRounds";
 
 /** A statement's status as the page shows it. */
 /**
@@ -177,6 +54,8 @@ export interface LeanStatement {
   readonly round4?: RoundChanges;
   /** Its entries and wording in round 5, on top of round 4's. */
   readonly round5?: RoundChanges;
+  /** Its entries and wording in round 6, on top of round 5's. */
+  readonly round6?: RoundChanges;
   readonly group: "p26" | "p53";
   /**
    * `lemma` for a statement about the model's own representation rather
@@ -405,7 +284,7 @@ theorem canonicalTransfers_oneLog (input : CycleInput) (out : Array Transfer)
   {
     id: "rawLogs",
     group: "p26",
-    rounds: [4, 5],
+    rounds: [4, 5, 6],
     refs: ["P26 §3.1", "P26 §3.2", "P26 §4.2", "P26 §6.1", "P26 §10"],
     status: "proved",
     proved: [
@@ -510,8 +389,58 @@ theorem Stack.takeLast_none (s : Stack) (n : Nat) (h : s.takeLast n = none) :
         "P26 §10",
       ],
     },
+    round6: {
+      copy: "factsRound6",
+      refs: [
+        "P26 §3.1",
+        "P26 §3.2",
+        "P26 §4.1",
+        "P26 §5.2",
+        "P26 §6.2",
+        "P26 §6.3",
+        "P26 §7.1",
+        "P26 §8.1",
+        "P26 §8.3",
+        "P26 §8.4",
+        "P26 §10",
+      ],
+    },
     file: "Tdh/Facts.lean",
     lean: null,
+  },
+  {
+    // D136's limits (PROOFS.md section 7 at 2694e72): a cluster's size, its
+    // confirmed links, and the gate past the ungated size.
+    id: "clusters",
+    group: "p26",
+    rounds: [6],
+    refs: ["P26 §6.2", "P26 §6.3", "P26 §10", "D136"],
+    status: "proved",
+    proved: [
+      "computeCycle_clusters",
+      "computeCycle_before_activation",
+      "clusters_spec",
+      "buildClusterMap_spec",
+      "pairState_rows",
+      "keptEvents_ok",
+    ],
+    counterexamples: NONE,
+    deferred: ["7.greedy-order", "7.pair-key-order", "7.backend-code"],
+    file: "Tdh/Proofs/Clusters.lean",
+    lean: `theorem computeCycle_clusters (p : Params) (v : Variant) (input : CycleInput) (out : CycleOutput)
+    (h : computeCycle p v input = .ok out) :
+    ∃ kept, keptEvents p input.cutoffBlock input.cutoffTime input.delegationEvents = .ok kept ∧
+      (∀ e ∈ kept, ∀ t, e.time = some t → t ≤ input.cutoffTime) ∧
+      ∀ c ∈ out.clusters.clusters.toList, c.Nodup ∧ c.length ≤ p.consolidationMaxWallets ∧
+        (∀ x ∈ c, ∀ y ∈ c, x ≠ y → ConfirmedLink (pairState kept) x y) ∧
+        (p.consolidationUngatedMaxWallets < c.length →
+          ∃ m ∈ c, ∀ x ∈ c, x ≠ m →
+            FreshLink p.consolidationGateActivationS (pairState kept) m x)
+
+theorem computeCycle_before_activation (p : Params) (v : Variant) (input : CycleInput)
+    (out : CycleOutput) (h : computeCycle p v input = .ok out)
+    (hT : input.cutoffTime < p.consolidationGateActivationS) :
+    ∀ c ∈ out.clusters.clusters.toList, c.length ≤ p.consolidationUngatedMaxWallets`,
   },
   {
     id: "minted",
@@ -620,6 +549,7 @@ export function statementsFor(round: LeanRound): readonly LeanStatement[] {
     ...statement,
     ...(round >= 4 ? statement.round4 : undefined),
     ...(round >= 5 ? statement.round5 : undefined),
+    ...(round >= 6 ? statement.round6 : undefined),
   }));
 }
 
@@ -717,17 +647,30 @@ const MODEL_MODULES: readonly ModelModule[] = [
     module: "Tdh.Inputs",
     key: "inputsOneLog",
     section: "§2, §3, §5.2, §6.1",
-    rounds: [5],
+    rounds: [5, 6],
   },
   {
     module: "Tdh.Logs",
     key: "logs",
     section: "§3.1, §3.2, §4.2, §6.1",
-    rounds: [4, 5],
+    rounds: [4, 5, 6],
   },
   { module: "Tdh.Cutoff", key: "cutoff", section: "§4" },
   { module: "Tdh.Eligibility", key: "eligibility", section: "§5" },
-  { module: "Tdh.Consolidation", key: "consolidation", section: "§6" },
+  {
+    module: "Tdh.Consolidation",
+    key: "consolidation",
+    section: "§6",
+    rounds: [3, 4, 5],
+  },
+  {
+    // Round 6: each direction's registration time, the pair-key order and
+    // the four-wallet gate (D136; README at 2694e72, "Layout").
+    module: "Tdh.Consolidation",
+    key: "consolidationGate",
+    section: "§4.2, §6",
+    rounds: [6],
+  },
   {
     module: "Tdh.Stack, Tdh.Holdings",
     key: "holdings",

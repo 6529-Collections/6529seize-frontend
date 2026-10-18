@@ -1,7 +1,7 @@
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
-import type { LeanRound } from "../formal/leanResults";
+import type { LeanRound } from "../formal/leanRounds";
 import TdhStatusPill from "../shared/TdhStatusPill";
 import {
   formatCycleDate,
@@ -70,11 +70,13 @@ const LEAN_SPEED: Record<LeanRound, MessageKey> = {
   3: "network.tdh.impl.lean.speed",
   4: "network.tdh.impl.lean.speedRaw",
   5: "network.tdh.impl.lean.speedRound5",
+  6: "network.tdh.impl.lean.speedRound6",
 };
 const LEAN_SPEED_SHORT: Record<LeanRound, MessageKey> = {
   3: "network.tdh.impl.speedShort.lean3",
   4: "network.tdh.impl.speedShort.lean4",
   5: "network.tdh.impl.speedShort.lean5",
+  6: "network.tdh.impl.speedShort.lean6",
 };
 
 function longText(

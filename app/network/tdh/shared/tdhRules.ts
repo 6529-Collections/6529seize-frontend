@@ -1,6 +1,7 @@
 /**
- * Rule blocks from specification P26 after its fifth round of 16 October
- * 2026 (6529chain commit f840096, rule version `tdh-v1.0`). Pseudocode is quoted verbatim;
+ * Rule blocks from specification P26 as of 18 October 2026 (6529chain
+ * commit 3bfa7b0: TDH v1.4, rule version `tdh-v1.4`, with D136's four-wallet
+ * consolidation). Pseudocode is quoted verbatim;
  * blocks named `..._CONDENSED` restate P26's prose rules line for line, with
  * the section or vector each line comes from. A `#` line names the step it
  * starts. Formulas, hashes and addresses are not translated. Updating them is
@@ -13,7 +14,7 @@ B64(x)     the IEEE-754 binary64 value nearest to x, ties to even; B64(0) = 0
 DAY        86400, the cycle length (§4.1); whole days use day_s (§4.3)
 ZERO       0x0000000000000000000000000000000000000000
 DEAD       0x000000000000000000000000000000000000dead
-SINKS      the registry's sinks (§10), {ZERO, DEAD} in tdh-v1.0`;
+SINKS      the registry's sinks (§10), {ZERO, DEAD} in tdh-v1.4`;
 
 /** P26 §3.1, its input rules line for line. */
 export const RULE_LOG_SELECTION_CONDENSED = `input log: address in {memes, gradients, nextgen, delegation}
@@ -108,6 +109,8 @@ headers read for the cycle (b, b + 1, the search's, the decoded logs' blocks):
 the set always holds B stamped T: a log below B stamped at T or later, or
     block B stamped other than T, is invalid           # vectors 61, 62
 a decoded transfer in a block <= B stamped after T: input invalid  # vector 54
+a decoded delegation event in a block <= B stamped after T: input invalid,
+    kept or not                                        # vector 100
 no other order of decoded timestamps is checked: two of one block may differ,
     they may fall as the block number rises, and one need not carry the
     header set's timestamp for its block; MUST NOT refuse an input for these`;
@@ -115,7 +118,7 @@ no other order of decoded timestamps is checked: two of one block may differ,
 export const RULE_DAYS = "days(a) = (T - a) div day_s";
 
 /**
- * P53 §11.3 (at 6529chain f840096): which Memes' claim limits are read for
+ * P53 §11.3 (at 6529chain 3bfa7b0): which Memes' claim limits are read for
  * §5.2's floors, and the storage slots of the read, line for line.
  */
 export const RULE_FLOOR_READ_CONDENSED = `read set: every Meme with a first mint in a block <= B
@@ -206,7 +209,7 @@ export const RULE_RATE = "RATE(n, d) = HALFUP( B64( B64(n / d) * 100 ) )";
 export const RULE_RATE_SPEC = `RATE(n, d) = HALFUP( B64( B64(n / d) * 100 ) )
 
 # Gradient minimum: replace B64(n / d) by B64(gradient_rate_minimum / 100)
-# when it is below it; with tdh-v1.0's 100 cents that is 1`;
+# when it is below it; with tdh-v1.4's 100 cents that is 1`;
 
 export const RULE_BASE = "BASE(r, raw) = (r * raw + 50) div 100";
 
@@ -232,15 +235,19 @@ beta   = HALFUP((10^6 + meme_u + grad_u) / 10^4)                     # cents`;
 export const RULE_FINAL = `FINAL(base, beta) = HALFUP( B64( base * B64(beta / 100) ) )
 final(record)     = sum of FINAL over the record's Meme, Gradient and NextGen tokens`;
 
-export const RULE_PAIR_STATE = `REGISTER(a, b):
-  no row                -> row (a, b, pos, false)
-  row (a, b, ...)       -> unchanged
-  row (b, a, ...)       -> row (b, a, pos, true)     # confirms or refreshes
+/**
+ * P26 §6.2: one row per unordered pair, with each direction's registration
+ * time (D136); `t` is the event's time, `-` an empty one.
+ */
+export const RULE_PAIR_STATE = `REGISTER(a, b) at t:
+  no row                       -> row (a, b, pos, false, t, -)
+  row (a, b, p, c, _, t2)      -> row (a, b, p, c, t, t2)       # a again: its time only
+  row (b, a, _, _, t1, _)      -> row (b, a, pos, true, t1, t)  # a confirms, or a (second) again
 REVOKE(a, b):
-  no row                -> unchanged
-  row (a, b, _, true)   -> row (b, a, pos, false)
-  row (a, b, _, false)  -> delete
-  row (b, a, ...)       -> row (b, a, pos, false)`;
+  no row                       -> unchanged
+  row (a, b, _, true, _, t2)   -> row (b, a, pos, false, t2, -)
+  row (a, b, _, false, _, _)   -> delete
+  row (b, a, _, _, t1, _)      -> row (b, a, pos, false, t1, -)`;
 
 /** P26 §6.1: the four delegation events and the filter, line for line. */
 export const RULE_DELEGATION_CONDENSED = `topics = [topic0, wallet w1, collection, delegationAddress w2]
@@ -257,24 +264,48 @@ two events at one position (block, txIndex, logIndex): input invalid,
 keep:       useCase = consolidation_use_case (999)
             and collection in consolidation_collections (memes, 0x8888...8888)
             and w1 != w2 and neither w1 nor w2 is a sink        # vector 57
-kept event: (position, REGISTER | REVOKE, w1, w2)`;
+kept event: (position, REGISTER | REVOKE, w1, w2, t)
+t:          the header timestamp of the event's block (§6.2); a decoded
+            event may have none, which counts as before activation  # vector 99`;
 
-export const RULE_CLUSTERS = `Q = confirmed rows sorted by position, newest first
-P = set of confirmed unordered pairs
+/**
+ * P26 §6.3 as of D136: the queue by block, then pair key, and the gate on a
+ * group past consolidation_ungated_max_wallets.
+ */
+export const RULE_CLUSTERS = `Q = confirmed rows, newest block first; within one block, by ascending
+    pair key
+P = the set of confirmed unordered pairs
+fresh(x, y): {x, y} in P, and both of its times are at or after
+    consolidation_gate_activation_s
+canJoin(C, n): {x, n} in P for every x in C, and either
+    |C| < consolidation_ungated_max_wallets (3), or
+    some m in C + [n] has fresh(m, x) for every other x in C + [n]
 used = {}
 while Q not empty:
     (w1, w2) = pop first of Q
     if w1 in used or w2 in used: continue
     C = [w1, w2]
-    repeat while |C| < consolidation_max_wallets (3)
+    repeat while |C| < consolidation_max_wallets (4)
           and the previous pass added a wallet:
         for each (c1, c2) in Q, in order:
             n = c2 if c1 in C, c2 not in C, c2 not in used
                 c1 if c2 in C, c1 not in C, c1 not in used
-            if n exists and {x, n} in P for every x in C:
+            if n exists and canJoin(C, n):
                 append n to C; remove (c1, c2) from Q; restart the pass
     used = used + C; emit cluster C
 every wallet of P not in used is a singleton cluster`;
+
+/**
+ * P26 §6.3's terms under the loop, line for line: the pair key, the
+ * activation time, a registration without a time and a refused candidate.
+ */
+export const RULE_CLUSTER_TERMS_CONDENSED = `pair key:   the pair's two lowercase addresses, sorted, joined with "-"
+activation: consolidation_gate_activation_s, 1,792,022,400 in tdh-v1.4
+            (2026-10-15 00:00:00 UTC), compared with block timestamps,
+            inclusive                                         # vector 91
+no time:    a registration without a time is not fresh        # vector 99
+refused:    a candidate that fails canJoin is skipped, and the scan goes
+            on to the next pair in Q                          # vector 90`;
 
 /** P26 §6.4-§6.5, line for line. */
 export const RULE_IDENTITY_CONDENSED = `cluster map: the state after all consolidation events in blocks <= B,
@@ -288,7 +319,7 @@ export const RULE_DAILY_RATE =
 /** P26 §8.5, line for line. */
 export const RULE_TOTALS_CONDENSED = `total_final                 = sum of identity finals, not of wallet finals
 total_final_excluding_sinks = total_final without the sink identities, one per
-                              registry sink (ZERO and DEAD in tdh-v1.0)
+                              registry sink (ZERO and DEAD in tdh-v1.4)
 total_base, total_raw       = sums of identity base and raw; diagnostic
 sink identities: never consensus participants, never in a consensus denominator`;
 
@@ -298,8 +329,10 @@ int64 firstgm_edition_adjustment; bytes32 firstgm_burn_tx;
 uint64 edition_floor_cap, edition_floor_threshold; address manifold_lazy_claim;
 uint32 gradient_rate_minimum; address delegation;
 uint256 consolidation_use_case; address[] consolidation_collections;
-uint32 consolidation_max_wallets, season_bonus, last_boosted_season,
-       additional_set_first, additional_set_ratio;
+uint32 consolidation_max_wallets, consolidation_ungated_max_wallets;
+uint64 consolidation_gate_activation_s;
+uint32 season_bonus, last_boosted_season, additional_set_first,
+       additional_set_ratio;
 uint256[] genesis_ids; uint32 genesis_bonus; uint256[] nakamoto_ids;
 uint32 nakamoto_bonus, gradient_bonus, gradient_max_count;
 uint256[] season_starts
@@ -336,7 +369,7 @@ the hash is taken over the typed values, never over the stored bytes`;
  */
 export const RULE_CYCLE_ROOT = `# TH(name, f1, ..., fk) = keccak256(abi.encode(bytes32 TAG(name), f1, ..., fk)),
 # P28's tagged hash (section 10), which P28 writes H
-# NETWORK_ID, v1's own network (P53 §3.1):
+# NETWORK_ID, the network of P53's design (P53 §3.1):
 NETWORK_ID = TH("6529.Network.v1", keccak256("6529-validator-1"),
                 keccak256("6529-validator-1 no genesis"))
            = 0x305a60a8768fcb3908a775373e58a0f8c60642dba778d8158c8cbd75284cd102
@@ -345,8 +378,8 @@ cycleRoot_N = TH("6529.TdhCycleRoot.v1",
   bytes32 NETWORK_ID,
   uint32  cycleDay,         # N
   uint64  boundary,         # t_N, Unix seconds
-  bytes32 tdhRuleId,        # TH("6529.TdhRule.v1", keccak256("tdh-v1.0"),
-                            #   registryHash), P28 §4.5
+  bytes32 tdhRuleId,        # TH("6529.TdhRule.v1", keccak256("tdh-v1.4"),
+                            #   registryHash), P28 §4.5; 0x772d61ed…ab3f
   uint64  cutoffNumber,     # B_N
   bytes32 cutoffHash,       # hash(B_N)
   uint64  cutoffTimestamp,  # ts(B_N), the age reference T of P26 §4.3
@@ -368,7 +401,7 @@ walletLeaf = TH("6529.TdhWalletLeaf.v1",
     bytes32 cid,              # the wallet's identity
     uint64  identityTDH,      # the identity's final TDH
     uint64  walletTDH,        # this wallet's own final TDH
-    uint8   walletCount)      # wallets in the identity, 1 to 3
+    uint8   walletCount)      # wallets in the identity, 1 to 4
     one leaf per wallet record whose identity is not a sink,
     ascending by address as an unsigned 160-bit integer
 walletRoot = ROOT("6529.TdhWalletRoot.v1", wallet leaves)
@@ -396,8 +429,8 @@ every list field is strictly ascending, so it has no repeats  # vector 66
 sinks contains ZERO                                     # §3.4
 day_s > 0 and nextgen_collection_divisor > 0
 additional_set_ratio < 10^4, a ratio below 1            # §8.3
-consolidation_max_wallets >= 2
-a registry that breaks one of these: the cycle has no result  # vector 60`;
+consolidation_max_wallets >= 2 and consolidation_ungated_max_wallets >= 2  # vector 101
+a registry that breaks one of these: the cycle has no result  # vectors 60, 66, 101`;
 
 export const RULE_SEASONS =
   "season_starts = 1, 48, 87, 119, 152, 181, 213, 246, 279, 311, 343, 375, 407, 439, 477, 516, 556";
@@ -409,11 +442,24 @@ total_final                                          < 2^53
 every net movement |net(w)| of §7.1's netting        < 2^64
 every balance and raw of a wallet or identity
     record, per token and in total                   < 2^64   # vector 58
-outside the range: no tdh-v1.0 result, and nothing is published`;
+outside the range: no tdh-v1.4 result, and nothing is published`;
 
 export const RULE_OUTPUT = `header   = (N, B, hash(B), T, rule_version, registry_hash)
 identity = (key, wallets, beta, final)
 token    = (contract, tokenId, balance, raw, base, final)`;
 
+/** P26 §10: the registry hash of `tdh-v1.4` (vector 28). */
 export const REGISTRY_HASH =
+  "0x3cfa0e6eae7b8769516597e117ecd55580ecb6b75194139f053d3e0ec09d9f36";
+
+/** P26 §10: `tdh-v1.4`'s rule ID, P28 §4.5's tdhRuleId. */
+export const RULE_ID =
+  "0x772d61ed465c80ed3a801927d81183895e4d1f37b069bb9ceaef959a7418ab3f";
+
+/**
+ * The registry hash P26 named `tdh-v1.0` until 18 October 2026, with the
+ * three-wallet registry; the name is retired (P26 §10, D137). The daily
+ * comparison's days before that date state it.
+ */
+export const RETIRED_REGISTRY_HASH_V1_0 =
   "0x74b4a8f96e3f1fbc3f44167bb42f0a18effb7a0f49d12bc8b88cdb3784c663d3";

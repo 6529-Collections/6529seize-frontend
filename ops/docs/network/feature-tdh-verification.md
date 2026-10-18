@@ -64,9 +64,12 @@ it. Under the snapshot line a small amber mark says which it is
 tooltip and a link to Provenance, whose feed row gives the sentence. Each
 code version names the P26 commit it computes. Provenance says that a
 day's runs followed the P26 text these pages restate only when the day's
-registry hash is that text's (tdh-v1.0 at `f840096`); otherwise it names
-the day's hash and says the runs may follow a later text, or that the file
-states no hash to compare.
+registry hash is that text's (tdh-v1.4 at `3bfa7b0`); a day computed under
+the retired name tdh-v1.0 (the three-wallet registry, `0x74b4a8f9…63d3`,
+before October 18, 2026) is said to follow that earlier text; any other
+hash is named and the runs may follow another text; or the file states no
+hash to compare. The rule row shows each day's own rule version and rule
+id, so the days before and after October 18 differ there.
 
 ## Location in the Site
 
@@ -274,6 +277,6 @@ states no hash to compare.
 ## Related Pages
 
 - [How TDH Is Calculated](feature-tdh-how-it-works.md)
-- [TDH-v1 Specification](feature-tdh-specification.md)
+- [TDH v1.4 Specification](feature-tdh-specification.md)
 - [TDH Implementations](feature-tdh-implementations.md)
 - [TDH Boost Rules](feature-tdh-boost-rules.md)

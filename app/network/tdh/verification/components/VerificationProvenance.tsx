@@ -15,7 +15,10 @@ import TdhSource from "../../shared/TdhSource";
 import TdhStatusPill from "../../shared/TdhStatusPill";
 import TdhDisclosure from "../../shared/TdhDisclosure";
 import { P26, rustCoreSpec } from "../../shared/tdhFacts";
-import { REGISTRY_HASH } from "../../shared/tdhRules";
+import {
+  REGISTRY_HASH,
+  RETIRED_REGISTRY_HASH_V1_0,
+} from "../../shared/tdhRules";
 import { TDH_CARD, TDH_LINK } from "../../shared/tdhStyles";
 import {
   DT,
@@ -294,6 +297,23 @@ function RegistryAgreement({
 }
 
 /**
+ * The note for a registry hash these pages know: the one they restate
+ * (`tdh-v1.4`), and the one days computed before 18 October 2026 name, the
+ * rules P26 called `tdh-v1.0` then (an earlier text, not a later one).
+ */
+const KNOWN_REGISTRY_NOTES: Readonly<
+  Record<
+    string,
+    | "network.tdh.verify.provenance.p26Run"
+    | "network.tdh.verify.provenance.p26RunRetired"
+  >
+> = {
+  [REGISTRY_HASH.toLowerCase()]: "network.tdh.verify.provenance.p26Run",
+  [RETIRED_REGISTRY_HASH_V1_0.toLowerCase()]:
+    "network.tdh.verify.provenance.p26RunRetired",
+};
+
+/**
  * Which P26 a day's runs followed, said only as far as the day's own
  * registry hash shows it: this page restates P26 at one commit, and a later
  * build may compute another text.
@@ -307,12 +327,12 @@ function p26RunNote(
   if (registryHash === null) {
     return t(locale, "network.tdh.verify.provenance.p26RunUnstated", values);
   }
-  return registryHash.toLowerCase() === REGISTRY_HASH.toLowerCase()
-    ? t(locale, "network.tdh.verify.provenance.p26Run", values)
-    : t(locale, "network.tdh.verify.provenance.p26RunOther", {
-        ...values,
-        hash: middleTruncate(registryHash),
-      });
+  return t(
+    locale,
+    KNOWN_REGISTRY_NOTES[registryHash.toLowerCase()] ??
+      "network.tdh.verify.provenance.p26RunOther",
+    { ...values, hash: middleTruncate(registryHash) }
+  );
 }
 
 /**

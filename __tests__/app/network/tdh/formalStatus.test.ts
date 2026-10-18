@@ -6,14 +6,18 @@ import {
   refutedClaimCount,
 } from "@/app/network/tdh/formal/formalStatus";
 import {
-  LEAN_ROUND_5,
   LEAN_STATEMENTS,
   modulesFor,
   statementsFor,
   type LeanStatement,
 } from "@/app/network/tdh/formal/leanResults";
+import {
+  LEAN_ROUND_5,
+  LEAN_ROUND_6,
+} from "@/app/network/tdh/formal/leanRounds";
 import { BUNDLED_FORMAL_MANIFEST } from "@/lib/tdh/formal/bundledManifest";
 import roundFive from "./fixtures/roundFiveManifest.json";
+import roundSix from "./fixtures/roundSixManifest.json";
 import roundThree from "./fixtures/roundThreeManifest.json";
 import {
   formalManifestSchema,
@@ -200,7 +204,10 @@ describe("formal statements against the proof manifest", () => {
     const early = checkStatements(statementsFor(4), manifest);
     expect(early["order"]?.status).toBe("unverified");
     expect(early["rawLogs"]?.status).toBe("unverified");
-    expect(LEAN_STATEMENTS.length).toBe(statementsFor(4).length);
+    // Every statement but round 6's clusters (D136) is about round 4 too.
+    expect(LEAN_STATEMENTS.filter((row) => row.id !== "clusters").length).toBe(
+      statementsFor(4).length
+    );
   });
 
   it("follows round 5 of the model from its committed manifest's entries", () => {
@@ -250,6 +257,69 @@ describe("formal statements against the proof manifest", () => {
     expect(leanRound(roundFourManifest())).toBe(4);
     const early = checkStatements(statementsFor(5), roundFourManifest());
     expect(early["order"]?.status).toBe("unverified");
+  });
+
+  it("follows round 6 of the model, D136's four-wallet rule, from its committed manifest", () => {
+    // 6529chain 2694e72's committed proof manifest, with the provenance the
+    // feed adds when it publishes one (source, documents, generatedAt).
+    const round6 = formalManifestSchema.parse(roundSix);
+    expect(leanRound(round6)).toBe(6);
+    const statements = statementsFor(6);
+    const checks = checkStatements(statements, round6);
+    for (const row of statements) {
+      expect([row.id, checks[row.id]?.status]).toEqual([
+        row.id,
+        expectedStatus(row),
+      ]);
+      expect(checks[row.id]?.unconfirmed).toEqual([]);
+    }
+    const { named, covered, audited } = auditedCoverage(statements, round6);
+    expect(audited).toBe(91);
+    expect(covered).toBe(audited);
+    expect(new Set(named).size).toBe(named.length);
+    expect(statements.find((row) => row.id === "clusters")?.status).toBe(
+      "proved"
+    );
+    expect(
+      checks["clusters"]?.entries
+        .filter((entry) => entry.expected === "deferred")
+        .map((entry) => entry.name)
+    ).toEqual(["7.greedy-order", "7.pair-key-order", "7.backend-code"]);
+    expect(statements.find((row) => row.id === "facts")?.copy).toBe(
+      "factsRound6"
+    );
+    expect(manifestFigures(round6)).toMatchObject({
+      vectorsPassed: 104,
+      vectorsTotal: 104,
+      vectorChecks: 1_307,
+      facts: 54,
+      theoremsTdh: 61,
+      theoremsP53: 30,
+      proved: 84,
+      counterexamples: 11,
+      deferred: 12,
+      audited: 91,
+    });
+    expect(manifestFigures(round6).specCommit?.startsWith("3bfa7b0")).toBe(
+      true
+    );
+    expect(LEAN_ROUND_6).toMatchObject({
+      vectorsPassed: 104,
+      vectorChecks: 1_307,
+      theoremsTdh: 61,
+      theoremsP53: 30,
+      facts: 54,
+      specCommit: "3bfa7b0",
+    });
+    expect(modulesFor(6).map((row) => row.key)).toEqual(
+      expect.arrayContaining(["consolidationGate", "logs", "inputsOneLog"])
+    );
+    expect(modulesFor(6).map((row) => row.key)).not.toContain("consolidation");
+    // The feed's round-5 manifest cannot confirm round 6's statements.
+    expect(leanRound(bundled)).toBe(5);
+    const early = checkStatements(statementsFor(6), bundled);
+    expect(early["clusters"]?.status).toBe("unverified");
+    expect(statementsFor(5).map((row) => row.id)).not.toContain("clusters");
   });
 
   it("shows a statement as unverified when the manifest lacks a theorem or disagrees", () => {

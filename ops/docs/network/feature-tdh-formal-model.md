@@ -4,17 +4,20 @@ Parent: [Network Index](README.md)
 
 ## Overview
 
-`/network/tdh/formal` explains the Lean 4 model of TDH-v1: what it
+`/network/tdh/formal` explains the Lean 4 model of TDH v1.4: what it
 reproduces, which properties of the rule are machine-checked proofs, which
 claims were shown false with counterexamples, and what the proofs do not
 cover. Every status and every count comes from the model's proof manifest
 (below), read from the feed at run time. Since October 16, 2026 the feed
 serves round 5, the model at commit `6b32f3f` of 6529's design repository
 (Lean 4.35.0), beside P26 as of `f840096`; the copy bundled with the page is
-that same file. The model's source is in 6529's private design repository.
+that same file. Round 6 (`2694e72`, October 18, 2026), which follows P26
+at `3bfa7b0` with D136's four-wallet consolidation, is committed and not yet
+published; the builds panel shows it beside the published build. The model's
+source is in 6529's private design repository.
 A `Proposal, not adopted` pill
 and a status line say that P26 stays the rule: it is proposed to the owner
-that the model become the normative definition of TDH-v1, which has not been
+that the model become the normative definition of TDH v1.4, which has not been
 decided.
 
 ## Location in the Site
@@ -76,7 +79,7 @@ decided.
   three colours (holds, shown false, not covered), each listing its
   methods by label and shape (kernel, definition, evaluation that trusts
   the compiler; a kernel or an evaluated counterexample; outside these
-  proofs), then one table for TDH-v1 and one for two validator rules. The
+  proofs), then one table for TDH v1.4 and one for two validator rules. The
   filters count statements, in the same three groups, and say that the
   figures at the top count manifest entries. Each row has a status
   (`Proved`, `By definition`, `Checked at build`, `Shown false`, `False by
@@ -92,7 +95,7 @@ decided.
   of it, each `#guard` case with its number of checks. Lean code keeps its
   lines, and a long line wraps with a hanging indent. The replay row is
   `The replay succeeds on valid input`, with the transaction rules it
-  assumes. Four statements of the TDH-v1 table are shown false, among them that
+  assumes. Four statements of the TDH v1.4 table are shown false, among them that
   steps inside a transaction never matter (counterexamples H and I); that a
   token's balance and raw days stay the same while its eligibility does is
   marked not proved here (it follows from P26 §7.2's definitions); the first
@@ -113,7 +116,7 @@ decided.
   by vectors only), and its modules by P26 section (`Tdh.Inputs` at round 5:
   §2, §3, §5.2, §6.1). The day's log counts are given both ways: 414,007
   through the snapshot block, of 414,254 in the day's file.
-- What the proofs do not guarantee, with a link to the five rounds of
+- What the proofs do not guarantee, with a link to the six rounds of
   differential tests on the Implementations page, which lists what each
   round found. The Rust core is checked against the Python reference on
   each day of the daily comparison; the Lean model matched it on one real
@@ -134,7 +137,7 @@ decided.
 
 ## Rounds of the model
 
-The page knows three rounds of the model and shows the one its manifest
+The page knows four rounds of the model and shows the one its manifest
 records (`leanRound` in `formalStatus.ts`):
 
 - Round 3 (`7bf579a`, the feed's manifest until October 16, 2026): the model
@@ -154,6 +157,19 @@ records (`leanRound` in `formalStatus.ts`):
   recipient, and that the header and claims maps are taken as fixed; the
   runs are the README's at `6b32f3f` (about 20 seconds from raw logs,
   1,127,150 random checks).
+- Round 6 (a manifest that proves `computeCycle_clusters`, 6529chain
+  `2694e72`, October 18, 2026): follows P26 at `3bfa7b0`, TDH v1.4 with
+  D136's four-wallet consolidation (rule version `tdh-v1.4`). A row `Group
+  sizes and the four-wallet gate` rests on the six theorems of PROOFS.md
+  section 7 (every identity within `consolidation_max_wallets` and
+  pairwise confirmed, a group past the ungated size only with a member
+  whose links with all the others are fresh, none past three on a day
+  before the activation time) and names its three limits (the greedy order,
+  the pair-key order checked by `#guard`, and that the text is 6529.io's
+  code); the facts row adds the four-wallet facts; the module table names
+  `Tdh.Consolidation` with the times, the pair-key order and the gate; the
+  runs are the README's at `2694e72` (about 36 seconds from raw logs,
+  1,092,730 random checks; audit 1,156 theorems and 1,576 definitions).
 
 The feed has published round 5's manifest since October 16, 2026, and the
 bundled copy is that file (SHA-256 `24e2f16b…`); every count the page shows
@@ -170,14 +186,16 @@ claims`, `Not proved here: 9 limits`). A statement refuted
 only by evaluated counterexamples has its own status, `False by
 evaluation`; each status has a shape as well as a colour. Every section uses
 the heading rail, and `What the proofs do not guarantee` gives each item in
-two lines with the rest under `More`. Should the feed serve an earlier
-round again, the builds panel shows round 5 in a column of its own, under a
-`Not yet published` pill, and says every status on the page is the published
-build's. Round 5's fact-check row lists the facts it adds (an amount's type,
+two lines with the rest under `More`. While the feed serves an earlier
+round, the builds panel shows round 6 in a column of its own, under a
+`Not yet published` pill, with its figures (104 of 104 vectors, 61 + 30
+theorems, 54 fact checks) and the SHA-256 of its committed manifest, and
+says every status on the page is the published build's; the page switches
+to round 6 by itself once the feed publishes its manifest. Round 5's fact-check row lists the facts it adds (an amount's type,
 `totalMax`'s, the one-log rule). The Implementations page's Lean card
 follows the same switch for its compute time.
 
-The summary counts every proved statement of the TDH-v1 table, as the
+The summary counts every proved statement of the TDH v1.4 table, as the
 filter does; its card names last in, first out, a lemma about how the model
 stores a stack.
 
@@ -203,12 +221,14 @@ stores a stack.
 - `__tests__/app/network/tdh/formalStatus.test.ts` checks every round: every
   statement of a round is confirmed by a manifest of that round (round 5's
   from the theorem entries of its committed manifest,
-  `__tests__/app/network/tdh/fixtures/roundFiveManifest.json`; round 3's
+  `__tests__/app/network/tdh/fixtures/roundFiveManifest.json`; round 6's
+  from `roundSixManifest.json`, its committed manifest with the feed's
+  provenance fields added; round 3's
   from `roundThreeManifest.json`, the feed's earlier file), every
   audited theorem belongs to exactly one statement, and a manifest of an
   earlier round cannot confirm a later round's statements.
 
 ## Related Pages
 
-- [TDH-v1 Specification](feature-tdh-specification.md)
+- [TDH v1.4 Specification](feature-tdh-specification.md)
 - [TDH Implementations](feature-tdh-implementations.md)

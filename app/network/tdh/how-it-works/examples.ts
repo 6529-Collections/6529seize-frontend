@@ -11,7 +11,7 @@ import {
 
 /**
  * Worked examples for How TDH is calculated. Every value is computed with the
- * TDH-v1 arithmetic from the network of the 2026-10-11 cycle, and Jest checks
+ * TDH v1.4 arithmetic from the network of the 2026-10-11 cycle, and Jest checks
  * each against the numbers the P26 Python reference printed (plan, Appendix A).
  */
 

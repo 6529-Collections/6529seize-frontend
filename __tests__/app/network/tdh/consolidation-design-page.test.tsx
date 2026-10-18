@@ -62,6 +62,26 @@ describe("TDHConsolidationDesignPage", () => {
     ).toBeInTheDocument();
   });
 
+  it("states the four-wallet rule plainly and draws a group that passes the gate and one that fails it", () => {
+    render(<TDHConsolidationDesignPage />);
+    const start = document.getElementById("consolidation-start");
+    // D136: a group of four needs one wallet with fresh links to all three.
+    expect(document.body.textContent).toMatch(
+      /A group of four counts only when one of its wallets has links with each of the other three registered in both directions on or after October 12, 2026/
+    );
+    expect(start?.textContent).toMatch(/A \+ B \+ C \+ D/);
+    expect(start?.textContent).toMatch(/B \+ C \+ D, and A alone/);
+    expect(start?.textContent).toMatch(
+      /Fresh: registered both ways from Oct 15, 2026/
+    );
+    expect(document.body.textContent).not.toMatch(
+      /pending an owner decision|TDH-v1\b|not TDH-v1/
+    );
+    expect(document.body.textContent).toMatch(
+      /6529\.io and TDH v1\.4 form groups the same way/
+    );
+  });
+
   it("points collectors back to the guide and the guided setup", () => {
     render(<TDHConsolidationDesignPage />);
 

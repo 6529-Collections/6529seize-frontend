@@ -35,7 +35,7 @@
  * - SVG text that a drawn line crosses: a path, line or polyline whose stroke
  *   runs through the text's box, or an arrowhead (marker) drawn inside it;
  * - case-significant text set in capitals by `text-transform`: a commit or
- *   hash, a 0x value, a domain such as 6529.io, or TDH-v1 and tdh-v1.0
+ *   hash, a 0x value, a domain such as 6529.io, or TDH v1.4 and tdh-v1.4
  *   (wrap it in the CaseSafe component, which keeps its case);
  * - a word split across two lines by `word-break: break-all` (apply it to
  *   the hash alone, never to the sentence around it);
@@ -855,7 +855,7 @@ function inspectPage(limits) {
 
   // 7. Case-significant text in capitals, and words split by break-all.
   const CASE_SIGNIFICANT =
-    /\b(?:0x[0-9a-fA-F…]+|(?=[0-9a-f]*\d)[0-9a-f]{7,64}|TDH-v1|tdh-v\d+\.\d+|tdh-v\d+|[a-z0-9-]+\.(?:io|eth|com|net|org))\b/;
+    /\b(?:0x[0-9a-fA-F…]+|(?=[0-9a-f]*\d)[0-9a-f]{7,64}|TDH v\d+\.\d+|tdh-v\d+\.\d+|tdh-v\d+|[a-z0-9-]+\.(?:io|eth|com|net|org))\b/;
   const caseWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   const caseFlagged = new Set();
   for (let node = caseWalker.nextNode(); node; node = caseWalker.nextNode()) {

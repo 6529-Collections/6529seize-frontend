@@ -221,21 +221,9 @@ function step(position: number) {
   return within(item);
 }
 
-/** Ticks the guided setup's confirmation that TDH-v1 allows three wallets. */
-function acknowledgeFourthWallet() {
-  fireEvent.click(
-    screen.getByRole("checkbox", {
-      name: /TDH-v1 allows three wallets, and that whether it allows four is pending/,
-    })
-  );
-}
-
-function addFourthWallet({ acknowledge = true } = {}) {
+function addFourthWallet() {
   fireEvent.click(screen.getByRole("button", { name: "Add Wallet" }));
   fireEvent.change(walletInput(4), { target: { value: D } });
-  if (acknowledge) {
-    acknowledgeFourthWallet();
-  }
 }
 
 beforeEach(() => {
@@ -702,36 +690,27 @@ describe("ConsolidationBuilder", () => {
     }
   });
 
-  it("opens a four-wallet group's steps only once the collector confirms the TDH-v1 note", () => {
-    renderBuilder();
-    addFourthWallet({ acknowledge: false });
-
-    expect(
-      screen.getByText(
-        "Confirm the note about a fourth wallet above to see the steps."
-      )
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: /^Sign Step/ })
-    ).not.toBeInTheDocument();
-    acknowledgeFourthWallet();
-    expect(step(1).getByRole("button", { name: "Sign Step 1" })).toBeEnabled();
-  });
-
-  it("says plainly where TDH-v1 stands on a fourth wallet once one is listed", () => {
+  it("says when a group of four counts once a fourth wallet is listed, and asks for no confirmation", () => {
     renderBuilder();
     expect(
       screen.queryByTestId("consolidation-fourth-wallet-note")
     ).not.toBeInTheDocument();
     addFourthWallet();
+    // D136: 6529.io and TDH v1.4 count a group of four alike, when one of
+    // its wallets has fresh links with the other three; the steps make it so.
     expect(
       screen.getByTestId("consolidation-fourth-wallet-note")
     ).toHaveTextContent(
-      /TDH-v1, the rule 6529\.io moves to about October 23, 2026, allows three; whether it allows four is pending an owner decision/
+      /A group of four counts as one collector only when one of its wallets has links with each of the other three registered in both directions from .+; with older links, three of them count\. The steps below register the links that need it, so all four count, on 6529\.io and in TDH v1\.4/
     );
     expect(
-      screen.getByRole("link", { name: "How consolidation works in TDH-v1" })
+      screen.getByTestId("consolidation-fourth-wallet-note")
+    ).not.toHaveTextContent(/pending|owner decision|TDH-v1/);
+    expect(
+      screen.getByRole("link", { name: "How a fourth wallet counts" })
     ).toHaveAttribute("href", "/network/tdh/how-it-works#step-10");
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+    expect(step(1).getByRole("button", { name: "Sign Step 1" })).toBeEnabled();
   });
 
   it("does not hold groups of three before activation", () => {
@@ -843,7 +822,6 @@ describe("ConsolidationBuilder", () => {
     fireEvent.change(walletInput(3), { target: { value: B } });
     fireEvent.click(screen.getByRole("button", { name: "Add Wallet" }));
     fireEvent.change(walletInput(4), { target: { value: C } });
-    acknowledgeFourthWallet();
 
     expect(stepHeadings()).toEqual(["Wallet 1 signs"]);
     expect(screen.queryByText(/Four-wallet consolidations/)).toBeNull();
@@ -893,7 +871,6 @@ describe("ConsolidationBuilder", () => {
     fireEvent.change(walletInput(3), { target: { value: "social.eth" } });
     fireEvent.click(screen.getByRole("button", { name: "Add Wallet" }));
     fireEvent.change(walletInput(4), { target: { value: "old.eth" } });
-    acknowledgeFourthWallet();
     expect(walletInput(1)).toHaveValue(`vault.eth - ${A}`);
     expect(screen.getByText("4 of 4 wallets")).toBeInTheDocument();
     expect(stepHeadings()).toEqual([

@@ -41,13 +41,17 @@ describe("TDHConsolidationPage (collector's guide)", () => {
         name: "Your wallets count as one collector",
       })
     ).toBeInTheDocument();
-    // One plain status line: what 6529.io accepts and what TDH-v1 allows,
-    // pending the owner's decision; nothing more.
+    // One plain status line (D136): up to three as before, a fourth only
+    // with fresh links, counted alike by 6529.io and TDH v1.4.
     expect(
       screen.getByText(
-        /a fourth for links signed from October 12, 2026.*TDH-v1 allows three; whether it allows four is pending an owner decision/
+        /^Up to 4 wallets: three as before, and a fourth only with links registered in both directions from October 12, 2026.*\. 6529\.io and TDH v1\.4, the rules the validators compute, count them the same way\.$/
       )
     ).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(
+      /pending an owner decision|TDH-v1\b/
+    );
+    expect(screen.getByText("4th: fresh links only")).toBeInTheDocument();
   });
 
   it("explains the benefits, the wallet roles and the steps in plain words", () => {

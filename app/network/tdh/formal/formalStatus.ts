@@ -6,22 +6,28 @@ import {
   type FormalStatus,
 } from "@/lib/tdh/formal/manifest";
 import {
-  LEAN_ROUND_4,
-  LEAN_ROUND_5,
   REFUTED_CLAIMS,
-  type LeanRound,
   type LeanStatement,
   type StatementStatus,
 } from "./leanResults";
+import {
+  LEAN_ROUND_4,
+  LEAN_ROUND_5,
+  LEAN_ROUND_6,
+  type LeanRound,
+} from "./leanRounds";
 
 /**
- * The round of the model a manifest records: 5 when it proves round 5's
- * one-log theorem, 4 when it proves round 4's order theorem for raw logs,
- * else 3.
+ * The round of the model a manifest records: 6 when it proves round 6's
+ * cluster theorem (D136), 5 when it proves round 5's one-log theorem, 4 when
+ * it proves round 4's order theorem for raw logs, else 3.
  */
 export function leanRound(manifest: FormalManifest): LeanRound {
   const proves = (name: string) =>
     findFormalEntry(manifest, name)?.status === "proved";
+  if (proves(LEAN_ROUND_6.theorem)) {
+    return 6;
+  }
   if (proves(LEAN_ROUND_5.theorem)) {
     return 5;
   }
@@ -158,7 +164,7 @@ export interface ManifestFigures {
   readonly claimsShownFalse: number;
   /** The counterexamples of the first netting rule, which refute one claim. */
   readonly firstRuleCases: number;
-  /** Claims not proved here, about TDH-v1 and about the validator rules. */
+  /** Claims not proved here, about TDH v1.4 and about the validator rules. */
   readonly deferredTdh: number;
   readonly deferredP53: number;
 }

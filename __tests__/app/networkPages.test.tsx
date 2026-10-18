@@ -205,7 +205,13 @@ describe("network pages render", () => {
     );
     expect(screen.queryByText(/sample/i)).not.toBeInTheDocument();
     expect(
-      screen.getByText(/reproduce all 89 conformance vectors/)
+      screen.getByText(/reproduce all 104 conformance vectors/)
+    ).toBeInTheDocument();
+    // D137, said once on the overview.
+    expect(
+      screen.getByText(
+        /TDH v1\.4 is 6529\.io’s name for its current TDH rules, and the validators compute them exactly/
+      )
     ).toBeInTheDocument();
     // The Lean card says where the property stops: a mint and its burn
     // inside one transaction (P26 §7.1, counterexamples H and I).

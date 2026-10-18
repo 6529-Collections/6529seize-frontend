@@ -11,6 +11,7 @@ import VerificationPage, {
   generateMetadata as generateVerificationMetadata,
 } from "@/app/network/tdh/verification/page";
 import { statementsFor } from "@/app/network/tdh/formal/leanResults";
+import roundSix from "./fixtures/roundSixManifest.json";
 import roundThree from "./fixtures/roundThreeManifest.json";
 import { PUBLIC_TDH_FEED_BASE } from "@/lib/tdh/verification/feedSource";
 import {
@@ -104,6 +105,18 @@ describe("TDH sub-pages", () => {
     for (let step = 1; step <= 14; step += 1) {
       expect(document.getElementById(`step-${step}`)).not.toBeNull();
     }
+    // Step 10 (D136): the fourth wallet stated plainly and drawn both ways,
+    // a valid group of four and one that fails the gate.
+    const step10 = document.getElementById("step-10")?.textContent ?? "";
+    expect(step10).toMatch(
+      /A fourth wallet counts only with fresh links: one wallet of the four must have links with each of the other three registered in both directions from October 15, 2026, 00:00 UTC/
+    );
+    expect(step10).toMatch(/A \+ B \+ C \+ D/);
+    expect(step10).toMatch(/B \+ C \+ D, and A alone/);
+    expect(step10).not.toMatch(/pending an owner|owner decision|TDH-v1/);
+    expect(document.getElementById("step-14")?.textContent).toMatch(
+      /Not a change: groups of four wallets count as 6529\.io counts them/
+    );
     expect(
       screen.getByRole("navigation", { name: "TDH pages" })
     ).toBeInTheDocument();
@@ -223,17 +236,42 @@ describe("TDH sub-pages", () => {
     for (let id = 1; id <= 15; id += 1) {
       expect(container.querySelector(`#bug-${id}`)).not.toBeNull();
     }
+    // TDH v1.4's registry hash and rule ID (P26 §10 at 3bfa7b0, D136).
     expect(
       screen.getByText(
-        "0x74b4a8f96e3f1fbc3f44167bb42f0a18effb7a0f49d12bc8b88cdb3784c663d3"
+        "0x3cfa0e6eae7b8769516597e117ecd55580ecb6b75194139f053d3e0ec09d9f36"
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "0x772d61ed465c80ed3a801927d81183895e4d1f37b069bb9ceaef959a7418ab3f"
       )
     ).toBeInTheDocument();
     expect(container.textContent).not.toMatch(/github\.com/);
     expect(container.textContent).not.toMatch(/not yet in the text/);
     expect(container.textContent).toMatch(
-      /reproduces all 89 conformance vectors/
+      /reproduces all 104 conformance vectors/
     );
-    expect(container.textContent).toMatch(/commit f840096/);
+    expect(container.textContent).toMatch(/commit 3bfa7b0/);
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: "The TDH v1.4 specification",
+      })
+    ).toBeInTheDocument();
+    // D136 in §6: the four-wallet rule stated plainly, nothing pending.
+    expect(container.querySelector("#s6-3")?.textContent).toMatch(
+      /A fourth wallet joins only if the group of four then has one wallet whose links with each of the other three were registered in both directions from October 15, 2026, 00:00 UTC/
+    );
+    expect(container.querySelector("#s6-3")?.textContent).toMatch(
+      /canJoin\(C, n\)/
+    );
+    expect(container.textContent).not.toMatch(/pending an owner decision/);
+    expect(container.textContent).not.toMatch(/TDH-v1\b/);
+    expect(container.querySelector("#evidence-four-wallets")).not.toBeNull();
+    expect(container.querySelector("#d136")).not.toBeNull();
+    expect(container.querySelector("#d137")).not.toBeNull();
+    expect(container.textContent).toMatch(/consolidation_ungated_max_wallets/);
     expect(container.textContent).toMatch(/removed: true left the chain/);
     expect(container.textContent).not.toMatch(/IN PLAIN WORDS|In plain words/);
     expect(container.textContent).toMatch(/ZERO -> ZERO is not a mint/);
@@ -378,9 +416,16 @@ describe("TDH sub-pages", () => {
     expect(
       container.querySelector('[data-tdh-manifest="bundled"]')?.textContent
     ).toMatch(/P26 as of f840096.*55 \+ 30 theorems.*46 fact checks/);
-    // Round 5 is the published build: no "next build" column.
-    expect(container.querySelector("[data-tdh-round-note]")).toBeNull();
+    // Round 6 (D136) is committed, not published: the builds panel names
+    // it beside the published round 5.
+    expect(
+      container.querySelector("[data-tdh-round-note]")?.textContent
+    ).toMatch(/Round 6 at 2694e72, October 18, 2026/);
     expect(container.querySelector("#next-build")).toBeNull();
+    // Round 6's cluster statement waits for its manifest.
+    expect(container.textContent).not.toMatch(
+      /Group sizes and the four-wallet gate/
+    );
     // Since round 4 selection and decoding are in the model.
     expect(container.textContent).toMatch(/Since round 4 \(f854661\)/);
     expect(container.textContent).not.toMatch(/round 5 brings selection/);
@@ -407,23 +452,47 @@ describe("TDH sub-pages", () => {
     ).toBeGreaterThan(0);
   });
 
-  it("names round 5 as the next build while the feed publishes round 3", async () => {
+  it("names round 6 as the next build while the feed publishes round 3", async () => {
     serveFeed(roundThree);
     const { container } = renderPage(await FormalPage());
     expect(
       container.querySelector('[data-tdh-manifest="published"]')?.textContent
     ).toMatch(/Model at 7bf579a/);
     const note = container.querySelector("[data-tdh-round-note]");
-    expect(note?.textContent).toMatch(/Round 5 at 6b32f3f, October 16, 2026/);
-    expect(note?.textContent).toMatch(/55 \+ 30 theorems/);
-    expect(note?.textContent).toMatch(/46 fact checks/);
+    expect(note?.textContent).toMatch(/Round 6 at 2694e72, October 18, 2026/);
+    expect(note?.textContent).toMatch(/Follows P26 at 3bfa7b0: TDH v1\.4/);
+    expect(note?.textContent).toMatch(/It passes all 104 vectors/);
+    expect(note?.textContent).toMatch(/61 \+ 30 theorems/);
+    expect(note?.textContent).toMatch(/54 fact checks/);
     expect(
       note?.querySelector('[data-tdh-pill="notPublished"]')
     ).not.toBeNull();
     expect(note?.textContent).toMatch(
-      /6825ffa47980ea9c7baa35470a6ddd24e7383fcbbe95bec4e237dfd0a7f537e5/
+      /cc5b11dca725c89bdbe11a8e013ca2633e690854ed921874632b7e58fa68f168/
     );
     expect(screen.getByText("68 / 68")).toBeInTheDocument();
+  });
+
+  it("switches to round 6 once the feed publishes its manifest", async () => {
+    serveFeed(roundSix);
+    const { container } = renderPage(await FormalPage());
+    expect(
+      container.querySelector('[data-tdh-manifest="published"]')?.textContent
+    ).toMatch(/Model at 2694e72.*P26 as of 3bfa7b0/);
+    // The newest round: no next-build column.
+    expect(container.querySelector("[data-tdh-round-note]")).toBeNull();
+    expect(screen.getByText("104 / 104")).toBeInTheDocument();
+    expect(
+      screen.getAllByText("Group sizes and the four-wallet gate").length
+    ).toBeGreaterThan(0);
+    expect(
+      container.querySelectorAll('table [data-tdh-pill="unverified"]')
+    ).toHaveLength(0);
+    expect(container.textContent).toMatch(/36 seconds/);
+    expect(container.textContent).toMatch(
+      /1,156 theorems and 1,576 definitions/
+    );
+    expect(container.textContent).toMatch(/§4\.2, §6/);
   });
 
   it("shows round 4's statements when the published manifest proves them", async () => {
@@ -474,10 +543,10 @@ describe("TDH sub-pages", () => {
       theorems,
     });
     const { container } = renderPage(await FormalPage());
-    // Round 5 is still newer than this round-4 manifest.
+    // Round 6 is newer than this round-4 manifest.
     expect(
       container.querySelector("[data-tdh-round-note]")?.textContent
-    ).toMatch(/Round 5 at 6b32f3f/);
+    ).toMatch(/Round 6 at 2694e72/);
     expect(
       container.querySelector('[data-tdh-manifest="published"]')
     ).not.toBeNull();
@@ -522,7 +591,7 @@ describe("TDH sub-pages", () => {
       )
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/the list is P26’s as of f840096/)
+      screen.getByText(/the list is P26’s as of 3bfa7b0/)
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -532,13 +601,13 @@ describe("TDH sub-pages", () => {
     expect(screen.queryByText(/sample|test runs/i)).toBeNull();
     expect(
       screen.getByText(
-        "All 89 vectors (1,257 checks), at P26 f840096. The daily comparison runs the 6529chain build each day’s page names"
+        "All 104 vectors (1,311 checks), at P26 3bfa7b0. The daily comparison runs the 6529chain build each day’s page names"
       )
     ).toBeInTheDocument();
     // One vectors figure a program, P26's commit said once under the
     // table; the builds that ran on the latest day, from its file.
     expect(
-      screen.getByText(/Vectors: all 89 of P26 at f840096/)
+      screen.getByText(/Vectors: all 104 of P26 at 3bfa7b0/)
     ).toBeInTheDocument();
     expect(
       screen.getByText("Ran on October 15, 2026: validator@e127676")
@@ -547,16 +616,18 @@ describe("TDH sub-pages", () => {
       screen.getByText("Ran on October 15, 2026: 6529chain@0621ed4")
     ).toBeInTheDocument();
     expect(
-      screen.getByText("All 89 vectors (1,253 checks), at P26 f840096")
+      screen.getByText("All 104 vectors (1,307 checks), at P26 3bfa7b0")
     ).toBeInTheDocument();
+    // The Lean model's published build is round 5, on P26 f840096; round 6,
+    // on 3bfa7b0, is committed and named beside it.
     expect(
       screen.getByText(
-        "89 of 89 vectors (1,253 checks), at P26 f840096; every record of the 2026-10-11 cycle"
+        /^89 of 89 vectors \(1,253 checks\), at P26 f840096; every record of the 2026-10-11 cycle\. Round 6 \(2694e72\), committed but not yet in a published manifest: 104 of 104 at P26 3bfa7b0\.$/
       )
     ).toBeInTheDocument();
     expect(screen.getByText("Built, not in validator")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "The 89 conformance vectors" })
+      screen.getByRole("heading", { name: "The 104 conformance vectors" })
     ).toBeInTheDocument();
     expect(screen.getByText("Inside one vector")).toBeInTheDocument();
     // Three more vectors in full, to check by hand before the files are
@@ -571,19 +642,24 @@ describe("TDH sub-pages", () => {
       name: "Filter vectors by topic",
     });
     expect(
-      screen.getByRole("table", { name: "Conformance vectors, 10 of 89 shown" })
+      screen.getByRole("table", {
+        name: "Conformance vectors, 10 of 104 shown",
+      })
     ).toBeInTheDocument();
     await user.click(
       within(filters).getByRole("button", { name: /No result/ })
     );
-    // "No result" is the 37 vectors whose whole expected output is no
+    // "No result" is the 39 vectors whose whole expected output is no
     // result (expected_invalid); 34 and 55 mix cases with and without one.
     expect(
-      screen.getByRole("table", { name: "Conformance vectors, 10 of 37 shown" })
+      screen.getByRole("table", { name: "Conformance vectors, 10 of 39 shown" })
     ).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Show all 37" }));
+    await user.click(screen.getByRole("button", { name: "Show all 39" }));
     expect(
-      screen.getByRole("table", { name: "Conformance vectors, 37 of 37 shown" })
+      screen.getByRole("table", { name: "Conformance vectors, 39 of 39 shown" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("100-invalid-delegation-event-after-cutoff")
     ).toBeInTheDocument();
     expect(
       screen.getByText("72-invalid-transfer-at-raw-transfer-log")

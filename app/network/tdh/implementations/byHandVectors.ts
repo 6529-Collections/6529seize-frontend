@@ -2,7 +2,8 @@
  * Three more conformance vectors restated in full, for checking an
  * implementation by hand before the vector files are published (D116):
  * 04-mid-period-transfer, 06-consolidation-age-carry and 23-identity-sums,
- * as their files state them at 6529chain f840096 (unchanged at 6b32f3f).
+ * as their files state them at 6529chain f840096 (unchanged at 6b32f3f and
+ * at 3bfa7b0).
  * Every address, transaction and token is synthetic. Ages are whole days
  * before each vector's T; a record not listed is not checked. Generated
  * from the vector files; do not edit by hand.

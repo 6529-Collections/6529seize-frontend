@@ -120,7 +120,7 @@ export function SectionMap({ locale }: { readonly locale: SupportedLocale }) {
   );
 }
 
-const TRANSITIONS = ["t1", "t2", "t3", "t4", "t5"] as const;
+const TRANSITIONS = ["t1", "t2", "t3", "t4", "t5", "t6"] as const;
 
 /** Diagram 2: the pair state machine of P26 §6.2. */
 export function PairStateMachine({
@@ -285,7 +285,7 @@ export function PairStateMachine({
           textAnchor="middle"
           className="tw-fill-iron-400 tw-font-mono tw-text-[13px]"
         >
-          REGISTER · refresh
+          REGISTER · new time
         </text>
       </svg>
     </figure>

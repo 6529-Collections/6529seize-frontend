@@ -126,11 +126,12 @@ export default function TDHConsolidationPage() {
             <p className="tw-mb-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-200 sm:tw-text-lg sm:tw-leading-8">
               {t(locale, "network.tdhConsolidation.lead")}
             </p>
-            {/* One status line: what 6529.io accepts, and what TDH-v1
-                allows, as the owner's open decision stands. */}
+            {/* One line on the limit: up to three as before, a fourth only
+                with fresh links, counted alike by 6529.io and TDH v1.4
+                (D136). Information, not a warning. */}
             <p
               id="consolidation-status"
-              className="tw-mb-0 tw-mt-4 tw-scroll-mt-28 tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200"
+              className="tw-mb-0 tw-mt-4 tw-scroll-mt-28 tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-500 tw-bg-iron-900/60 tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200"
             >
               {limits
                 ? t(locale, "network.tdhConsolidation.status", { limit, date })
@@ -420,7 +421,7 @@ function WalletsFigure({ locale }: { readonly locale: SupportedLocale }) {
               </span>
               {/* Beside the name when it fits, under it when not. */}
               {key === "old" && (
-                <span className="tw-ml-auto tw-text-xs tw-text-amber-200">
+                <span className="tw-ml-auto tw-text-xs tw-text-iron-300">
                   {t(locale, "network.tdhConsolidation.figure.fourthTag")}
                 </span>
               )}

@@ -19,17 +19,14 @@ import {
 import { BOOST_EXAMPLES, HOUSEHOLD_HOLDINGS, MINUTE_EXAMPLE } from "./examples";
 import BoostBuilder from "./explorables/BoostBuilder";
 import HouseholdWalkthrough from "./explorables/HouseholdWalkthrough";
-import { IdentityGraphDiagram } from "./HowItWorksDiagrams";
+import {
+  FourWalletDiagram,
+  IdentityGraphDiagram,
+} from "../shared/diagrams/IdentityGraphs";
 import { rateText } from "./HowItWorksStepsA";
 import { formatCycleDate } from "../verification/components/verificationFormat";
 import TdhDisclosure from "../shared/TdhDisclosure";
-import StepSection, {
-  Caution,
-  Cited,
-  Example,
-  Measure,
-  Note,
-} from "./StepSection";
+import StepSection, { Cited, Example, Measure, Note } from "./StepSection";
 
 const HOLDINGS_CAPTION = "network.tdh.how.s12.holdingsCaption";
 const CAPTION =
@@ -177,14 +174,16 @@ function Step10({ locale }: { readonly locale: SupportedLocale }) {
         "DEV-10",
         "DEV-12",
         "D121",
+        "D136",
       ]}
       step={10}
       title={t(locale, "network.tdh.how.s10.title")}
     >
       <Cited locale={locale}>{t(locale, "network.tdh.how.s10.body")}</Cited>
       <Cited locale={locale}>{t(locale, "network.tdh.how.s10.limit")}</Cited>
-      <Caution>{t(locale, "network.tdh.how.s10.fourth")}</Caution>
       <IdentityGraphDiagram locale={locale} />
+      <Cited locale={locale}>{t(locale, "network.tdh.how.s10.fourth")}</Cited>
+      <FourWalletDiagram locale={locale} />
       <p className="tw-m-0 tw-text-base tw-font-medium tw-leading-7 tw-text-iron-100">
         {t(locale, "network.tdh.how.s10.changes")}
       </p>
@@ -485,12 +484,13 @@ function Step14({ locale }: { readonly locale: SupportedLocale }) {
         "DEV-8",
         "DEV-2",
         "DEV-9",
+        "D136",
       ]}
       step={14}
       title={t(locale, "network.tdh.how.s14.title")}
     >
       <Cited locale={locale}>{t(locale, "network.tdh.how.s14.body")}</Cited>
-      {/* Three kinds of change, then the one open question; the
+      {/* Three kinds of change, then what does not change; the
           specification lists all nineteen differences. */}
       <Bullets
         locale={locale}
@@ -500,12 +500,12 @@ function Step14({ locale }: { readonly locale: SupportedLocale }) {
           { text: t(locale, "network.tdh.how.s14.consolidations") },
         ]}
       />
-      <Caution>
-        {t(locale, "network.tdh.how.s14.pending")}{" "}
+      <Cited locale={locale} muted>
+        {t(locale, "network.tdh.how.s14.same")}{" "}
         <a href="#step-10" className={TDH_LINK}>
-          {t(locale, "network.tdh.how.s14.pendingLink")}
+          {t(locale, "network.tdh.how.s14.sameLink")}
         </a>
-      </Caution>
+      </Cited>
       <div className="tw-flex tw-flex-col tw-items-start tw-gap-1">
         <TdhArrowLink href="/network/tdh/specification#s11">
           {t(locale, "network.tdh.how.s14.all")}

@@ -1,7 +1,9 @@
 # TDH, explained and verified
 
-Status: built on 15 October 2026 and revised through round 8 on 16 October 2026 on branch
-`claude/tdh-explained-and-verified`; not yet reviewed, merged or deployed.
+Status: built on 15 October 2026, revised through round 9 on 16 October 2026
+and updated for D136 and D137 (TDH v1.4, four-wallet consolidation) on 18
+October 2026 on branch `claude/tdh-explained-and-verified`; on staging, not
+yet merged into main.
 
 Pages on 6529.io that explain TDH from a one-minute introduction to the
 exact specification, its formal model and its implementations, plus a public
@@ -33,15 +35,26 @@ anchor headings, responsive SVG frames, stacked tables, the table style, and
 arithmetic is in `lib/tdh/tdhV1Arithmetic.ts`; the verification data
 contract, loader and states are in `lib/tdh/verification/`.
 
-The pages follow P26 at 6529chain `f840096` (its fifth round, of 16 October
-2026): 89 conformance vectors (01 to 88 and 12b). The Lean model's figures
-come from its proof manifest, read from the feed at run time; since 16
-October 2026 the feed serves round 5 (`6b32f3f`, P26 as of `f840096`, 89 of
-89), and the bundled copy is the same file. The daily comparison's builds
+The pages follow P26 at 6529chain `3bfa7b0` (18 October 2026: D136's
+four-wallet consolidation and D137's names): 104 conformance vectors (01 to
+103 and 12b). TDH v1.4 is 6529.io's name for its current rules, and its
+rule version is `tdh-v1.4` (registry hash `0x3cfa0e6e…9f36`, rule ID
+`0x772d61ed…ab3f`); P26 called it `tdh-v1.0` until that day. The
+validator software is numbered below 1.0 (0.1.0); "Validator v1" is a
+design name. The Lean model's figures come from its proof manifest, read
+from the feed at run time; the feed still serves round 5 (`6b32f3f`, P26 as
+of `f840096`, 89 of 89, three wallets), and the bundled copy is the same
+file. Round 6 (`2694e72`, P26 at `3bfa7b0`, 104 of 104, the cluster
+theorems) is committed and shown as the next build; the page switches to it
+by itself once the feed publishes its manifest
+(`__tests__/app/network/tdh/fixtures/roundSixManifest.json` is that
+manifest with the feed's provenance fields). The daily comparison's builds
 are read from each day's file, never fixed in the pages.
 `__tests__/app/network/tdh/tdhFacts.test.ts` guards the vector count, the
 Lean build, the netting wording, the corrections of the 16 October fact
-check, the absence of sample data and the feed's privacy wording.
+check, D136 and D137 (no old name, nothing pending, the rule and the
+registry values), the absence of sample data and the feed's privacy
+wording.
 
 Layout gate: `6529 run tdh-pages:check -- --base <url>` renders every TDH
 route in headless Chromium at 1440, 1280, 768, 390 (phone), 390 and 320
@@ -69,25 +82,28 @@ bands.
 
 ## Open items before the cutover
 
-- F1: 6529.io accepts a fourth consolidated wallet since 15 October 2026;
-  P26 rule version `tdh-v1.0` allows three. Whether TDH-v1 allows four is
-  pending an owner decision, and the pages say exactly that wherever
-  consolidation is explained (step 10 and step 14 of How it works, the
-  overview's FAQ and glossary, both consolidation pages, the
-  specification's section 11 and guided setup's note on a fourth wallet),
-  and nothing more.
-- The Rust core and program B pass all 89 vectors of P26's fifth round on
-  the validator's development branch (`30bf8f9`, 16 October 2026). The
-  daily comparison runs whatever build each day's file names; the pages
-  read it from there (`implementations.rust.commit`,
-  `implementations.python.commit`) and know the vector counts of the builds
-  listed in `KNOWN_BUILDS` (`shared/tdhFacts.ts`). Add a build there when
-  the daily job is redeployed with one the list does not hold; until then
-  the page shows the build without a count.
-- Five rounds of differential tests (15 and 16 October) raised F1 to F9 and
-  E1 to E13; by P26's fifth round (`f840096`) all but E13 were settled, in
-  P26 or, for E8, in the vector format and the references; E13 is open for
-  the vector format.
+- F1 is settled by D136 (18 October 2026): TDH v1.4 counts consolidations
+  of up to four wallets exactly as 6529.io does from 15 October 2026, and
+  the pages say so wherever consolidation is explained (step 10, with a
+  drawing of a group of four that passes the gate and one that fails it,
+  and step 14 of How it works, the overview's FAQ and glossary, both
+  consolidation pages, the specification's section 6 and guided setup's
+  note on a fourth wallet, which no longer asks for a confirmation).
+- The Rust core and program B pass all 104 vectors of P26 at `3bfa7b0` on
+  the validator's development branch (`a1463f9`, 18 October 2026), which
+  the daily job runs since that day. The daily comparison runs whatever
+  build each day's file names; the pages read it from there
+  (`implementations.rust.commit`, `implementations.python.commit`) and
+  know the vector counts of the builds listed in `KNOWN_BUILDS`
+  (`shared/tdhFacts.ts`). Add a build there when the daily job is
+  redeployed with one the list does not hold; until then the page shows
+  the build without a count. Days before 18 October name `tdh-v1.0`, and
+  Provenance says they follow that earlier, three-wallet text.
+- Six rounds of differential tests (15, 16 and 18 October) raised F1 to F9
+  and E1 to E13; by P26's fifth round (`f840096`) all but E13 were
+  settled, in P26 or, for E8, in the vector format and the references;
+  E13 is open for the vector format. The sixth, on TDH v1.4, found nothing
+  new.
 - The pages read 6529's public feed, `https://d379duzqnomz3w.cloudfront.net`,
   in every environment; `NEXT_PUBLIC_TDH_VERIFICATION_BASE` only overrides it.
   No sample or bundled verification data ships; Jest serves a verbatim copy
@@ -109,8 +125,9 @@ bands.
 - The Formal model page takes its statuses and figures from the proof
   manifest (`formal/manifest.json` on the feed), falling back to the bundled
   copy (`lib/tdh/formal/bundledManifest.json`, round 5 at `6b32f3f`);
-  refresh the copy and `leanResults.ts` with each new build of the model.
-  The page knows rounds 3 to 5 and switches by the theorems the manifest
+  refresh the copy and `leanResults.ts` with each new build of the model,
+  and refresh the bundled copy to round 6 once the feed publishes it. The
+  page knows rounds 3 to 6 and switches by the theorems the manifest
   proves.
 - Vector 18's description in 6529chain names a real token and cycle
   ("Observed on 2026-10-11 (NextGen #...)"); the pages no longer show it
@@ -147,7 +164,7 @@ bands.
   repository's `publish_feed.py`.
 - The implementations page restates vectors 04, 06 and 23 in full beside
   vector 36 (`implementations/byHandVectors.ts`, generated from their files
-  at `f840096`, unchanged at `6b32f3f`); regenerate it if those files
+  at `f840096`, unchanged at `3bfa7b0`); regenerate it if those files
   change.
 - I18n fallback debt: [network TDH pages](../i18n-fallbacks/tdh-explained-and-verified.md).
 

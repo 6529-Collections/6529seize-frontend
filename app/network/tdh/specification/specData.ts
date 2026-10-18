@@ -1,7 +1,7 @@
 /**
  * Structured content of the specification page: P26 §2's contracts and topic
  * hashes, §10's parameter registry, §11's deviations and §12's issues, pinned
- * to the P26 text of 15 October 2026. Values are quoted verbatim; their plain
+ * to the P26 text of 18 October 2026 (3bfa7b0, `tdh-v1.4`). Values are quoted verbatim; their plain
  * descriptions live in the `network.tdh.spec.*` messages.
  */
 
@@ -194,8 +194,18 @@ export const PARAMETERS = [
   },
   {
     name: "consolidation_max_wallets",
-    value: "3",
+    value: "4",
     key: "consolidation_max_wallets",
+  },
+  {
+    name: "consolidation_ungated_max_wallets",
+    value: "3",
+    key: "consolidation_ungated_max_wallets",
+  },
+  {
+    name: "consolidation_gate_activation_s",
+    value: "1,792,022,400 (2026-10-15 00:00:00 UTC)",
+    key: "consolidation_gate_activation_s",
   },
   { name: "base_multiplier", value: "1.00", key: "base_multiplier" },
   { name: "boost_decimals", value: "2", key: "boost_decimals" },
@@ -233,7 +243,7 @@ export const PARAMETERS = [
   },
 ] as const;
 
-type DeviationDecision = "adopted" | "dev2" | "kept" | "dev13";
+type DeviationDecision = "adopted" | "dev2" | "kept" | "dev13" | "dev11";
 export type DeviationGroup = "changes" | "kept" | "other";
 
 interface Deviation {
@@ -251,6 +261,9 @@ export const DEVIATIONS: readonly Deviation[] = Array.from(
     let decision: DeviationDecision = "adopted";
     if (id === 2) {
       decision = "dev2";
+    } else if (id === 11) {
+      // Settled by D136: P26 takes link ties by pair key, as 6529.io does.
+      decision = "dev11";
     } else if (id === 13) {
       decision = "dev13";
     } else if (KEPT.has(id)) {
@@ -290,4 +303,6 @@ export const DECISION_IDS = [
   "D130",
   "D131",
   "D132",
+  "D136",
+  "D137",
 ] as const;

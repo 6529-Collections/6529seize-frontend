@@ -30,14 +30,16 @@ import {
 } from "./formalStatus";
 import {
   FIRST_RULE_CASES,
-  LEAN_LATEST_ROUND,
-  LEAN_RUNS,
   modulesFor,
   NETTING_DEFINITIONS,
   statementsFor,
+} from "./leanResults";
+import {
+  LEAN_LATEST_ROUND,
+  LEAN_RUNS,
   type LeanRound,
   type LeanRuns,
-} from "./leanResults";
+} from "./leanRounds";
 import NettingFigure from "./NettingFigure";
 import StatementsTable from "./StatementsTable";
 import {
@@ -677,7 +679,7 @@ export default async function TdhFormalPage() {
         id="not"
         title={t(locale, "network.tdh.formal.not.title")}
         locale={locale}
-        sources={["D118", "D119", "Difftest Oct 15–16"]}
+        sources={["D118", "D119", "Difftest Oct 15–18"]}
       >
         <ul className="tw-m-0 tw-max-w-[34rem] tw-list-none tw-space-y-4 tw-p-0">
           {NOT_KEYS.map((key) => (

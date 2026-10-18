@@ -139,17 +139,12 @@ function getStepsState(input: {
   readonly hasGroupError: boolean;
   readonly hasReadError: boolean;
   readonly progress: readonly ConsolidationStepProgress[] | undefined;
-  /** Four wallets listed and TDH-v1's three-wallet rule not yet confirmed. */
-  readonly needsFourthAcknowledgement?: boolean;
 }): ConsolidationStepsState {
   if (input.isPrefilling) {
     return { kind: "loading" };
   }
   if (!input.isValid) {
     return { kind: "incomplete" };
-  }
-  if (input.needsFourthAcknowledgement) {
-    return { kind: "acknowledge" };
   }
   if (input.hasReadError) {
     return { kind: "error" };
@@ -236,10 +231,6 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
   const connectedIsSafe = connectedKey !== undefined && props.isSafeWallet;
 
   const [draft, setDraft] = useState<WalletDraft | null>(null);
-  // TDH-v1 allows three wallets, and whether it allows four is pending an
-  // owner decision; a fourth wallet's steps open only once the collector
-  // confirms they have read that.
-  const [fourthAcknowledged, setFourthAcknowledged] = useState(false);
   const defaultDraft = useMemo(
     () => createDraft(connectedKey ? [connectedKey] : []),
     [connectedKey]
@@ -406,9 +397,8 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
         locale={locale}
         maxWallets={limits?.maxWallets ?? null}
         preActivationSigningDate={preActivationSigningDate}
+        activationDate={activationDate}
         entries={entries}
-        fourthAcknowledged={fourthAcknowledged}
-        onFourthAcknowledgedChange={setFourthAcknowledged}
         issues={validation.issues}
         validCount={validation.wallets.length}
         connectedKey={connectedKey}
@@ -474,8 +464,6 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
             hasGroupError: groupData.isError,
             hasReadError: planState.hasReadError || managers.isError,
             progress,
-            needsFourthAcknowledgement:
-              validation.wallets.length >= 4 && !fourthAcknowledged,
           })}
           activationDate={signingOpensDate}
           walletResolving={props.walletResolving}

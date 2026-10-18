@@ -9,6 +9,7 @@ import TdhArrowLink from "../shared/TdhArrowLink";
 import TdhCopyButton from "../shared/TdhCopyButton";
 import {
   REGISTRY_HASH,
+  RULE_ID,
   RULE_BASE,
   RULE_BOOST,
   RULE_DAILY_RATE,
@@ -48,18 +49,18 @@ import {
 const PREVIEW_ROWS = 3;
 
 /**
- * SHA-256 of the two documents section 13 names, at 6529chain f840096, their
+ * SHA-256 of the two documents section 13 names, at 6529chain 3bfa7b0, their
  * latest change: P28 is design/canonical-encodings.md, P53
  * design/validator-v1.md.
  */
 const DOCUMENT_HASHES = [
   {
     key: "p28",
-    sha256: "524c5c9b8458ff08f9f082f667ba1fba936b407b8e477a214c3c93b4d78ea14c",
+    sha256: "5cf72413053a78c3e7e8b75df823934dbafcdce487a508af990bd7f31a252780",
   },
   {
     key: "p53",
-    sha256: "139c608ee2bcbc3986ba3240c056b50fe84036048aec5c26137143e828f1bfe3",
+    sha256: "0aa03515b30efe58a91dba55259eb82dd622c8026b94074de21dccd59e4d0a7c",
   },
 ] as const;
 
@@ -116,13 +117,20 @@ const ARITHMETIC = [
   { id: "s8-7", key: "s8-7", rule: RULE_RANGE, refs: ["P26 §8.7"] },
 ] as const;
 
-const CHANGES = ["floors", "netting", "inputs", "vectors"] as const;
+const CHANGES = [
+  "floors",
+  "netting",
+  "inputs",
+  "fourWallets",
+  "vectors",
+] as const;
 
 const EVIDENCE = [
   { id: "evidence-replay", key: "replay" },
   { id: "evidence-clean-room", key: "cleanRoom" },
   { id: "evidence-comparison", key: "comparison" },
   { id: "evidence-difftest", key: "difftest" },
+  { id: "evidence-four-wallets", key: "fourWallets" },
 ] as const;
 
 /**
@@ -346,6 +354,25 @@ export default function SpecSectionsB({
           <p className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, "network.tdh.spec.s10.hashNote")}
           </p>
+          <p className="tw-m-0 tw-mt-3 tw-text-sm tw-font-medium tw-text-iron-100">
+            {t(locale, "network.tdh.spec.s10.ruleId")}
+          </p>
+          <p className="tw-m-0 tw-mt-1 tw-flex tw-items-center tw-gap-1">
+            <code className="tw-min-w-0 tw-break-all tw-font-mono tw-text-xs tw-text-iron-200">
+              {RULE_ID}
+            </code>
+            <TdhCopyButton
+              value={RULE_ID}
+              label={t(locale, "network.tdh.shared.copyNamed", {
+                name: t(locale, "network.tdh.spec.s10.ruleId"),
+              })}
+              copiedLabel={t(locale, "network.tdh.shared.copied")}
+              failedLabel={t(locale, "network.tdh.shared.copyFailed")}
+            />
+          </p>
+          <p className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-300">
+            {t(locale, "network.tdh.spec.s10.ruleIdNote")}
+          </p>
         </div>
         <TdhDisclosure
           tone="strong"
@@ -547,7 +574,9 @@ export default function SpecSectionsB({
                 <dt className="tw-font-mono tw-text-sm tw-font-semibold tw-text-iron-50">
                   {id}
                 </dt>
-                <dd className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
+                {/* At the reading measure: a long decision wraps at about
+                    75 characters, not the card's full width. */}
+                <dd className="tw-m-0 tw-max-w-[38em] tw-text-sm tw-leading-6 tw-text-iron-300">
                   {t(locale, `network.tdh.spec.decision.${id}` as MessageKey)}
                 </dd>
               </div>

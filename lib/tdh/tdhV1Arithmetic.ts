@@ -1,5 +1,5 @@
 /**
- * TDH-v1 arithmetic (specification P26, rule version `tdh-v1.0`, §4.3, §5.2,
+ * TDH v1.4 arithmetic (specification P26, rule version `tdh-v1.4`, §4.3, §5.2,
  * §8). Used by the explanatory pages to compute their worked examples and the
  * explorables in the browser. The computation of record is the validators'
  * Rust core; this module only illustrates the same rule.
@@ -20,7 +20,7 @@ const NAKAMOTO_BONUS_U = 10_000;
 const GRADIENT_BONUS_U = 20_000;
 export const GRADIENT_MAX_COUNT = 5;
 
-/** The first Meme id of each season, from the `tdh-v1.0` registry (§10). */
+/** The first Meme id of each season, from the `tdh-v1.4` registry (§10). */
 const SEASON_STARTS = [
   1, 48, 87, 119, 152, 181, 213, 246, 279, 311, 343, 375, 407, 439, 477, 516,
   556,

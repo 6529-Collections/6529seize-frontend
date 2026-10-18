@@ -193,7 +193,7 @@ const NAMES = new Set([
 
 /**
  * Strings; names that carry digits, kept whole and plain (a section like
- * §3.2, a rule version like tdh-v1.0, DEV-10, BUG-15, ERC-1155); numbers,
+ * §3.2, a rule version like tdh-v1.4, DEV-10, BUG-15, ERC-1155); numbers,
  * never digits that follow a "." or "§"; and words.
  */
 const TOKEN =

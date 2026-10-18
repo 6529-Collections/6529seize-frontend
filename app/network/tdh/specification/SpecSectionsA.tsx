@@ -4,6 +4,7 @@ import TdhCopyButton from "../shared/TdhCopyButton";
 import TdhDisclosure from "../shared/TdhDisclosure";
 import TdhArrowLink from "../shared/TdhArrowLink";
 import {
+  RULE_CLUSTER_TERMS_CONDENSED,
   RULE_CLUSTERS,
   RULE_CONVENTIONS,
   RULE_CUTOFF_SPEC,
@@ -24,6 +25,7 @@ import {
   RULE_UNDERFLOW,
 } from "../shared/tdhRules";
 import {
+  TDH_LINK,
   TDH_TABLE,
   TDH_TABLE_FRAME,
   TDH_TD,
@@ -407,7 +409,7 @@ export default function SpecSectionsA({
         id="s6"
         title={t(locale, "network.tdh.spec.s6.title")}
         locale={locale}
-        sources={["DEV-10", "DEV-11", "DEV-12"]}
+        sources={["DEV-10", "DEV-11", "DEV-12", "D136"]}
       >
         <SpecSub
           id="s6-1"
@@ -450,8 +452,19 @@ export default function SpecSectionsA({
         >
           <Plain>{t(locale, "network.tdh.spec.s6-3.body")}</Plain>
           <Rule locale={locale} code={RULE_CLUSTERS} source="P26 §6.3" />
-          <p className="tw-m-0 tw-max-w-[34rem] tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
-            {t(locale, "network.tdh.spec.s11.pending")}
+          <Rule
+            locale={locale}
+            code={RULE_CLUSTER_TERMS_CONDENSED}
+            source="P26 §6.3"
+            condensed
+          />
+          {/* D136's equivalence with 6529.io's own code: evidence, not a
+              warning, so it reads as the paragraph under the rule. */}
+          <p className="tw-m-0 tw-max-w-[34rem] tw-text-sm tw-leading-6 tw-text-iron-300">
+            {t(locale, "network.tdh.spec.s6-3.checked")}{" "}
+            <a href="#evidence-four-wallets" className={TDH_LINK}>
+              {t(locale, "network.tdh.spec.s6-3.checkedLink")}
+            </a>
           </p>
           <TdhArrowLink href="/network/tdh/how-it-works#step-10">
             {t(locale, "network.tdh.spec.s6-3.example")}

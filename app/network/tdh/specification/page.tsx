@@ -15,11 +15,11 @@ import SpecSectionsA from "./SpecSectionsA";
 import SpecSectionsB from "./SpecSectionsB";
 
 /**
- * SHA-256 of design/tdh-v1-specification.md at 6529chain f840096, the text
- * this page restates.
+ * SHA-256 of design/tdh-v1-specification.md at 6529chain 3bfa7b0, the text
+ * this page restates (unchanged at 2694e72).
  */
 const P26_SHA256 =
-  "c7918b6d3275b8058401a166bf81f4880bbf072d11ce01b1525b21207cabb28d";
+  "e83e6a801c3c09fe0120d7dcca8b2330d7065c0a0c75f811fc8d90460b86643c";
 
 const VERSION_ROWS = ["rule", "text", "sha", "where", "status"] as const;
 
@@ -141,7 +141,7 @@ export default async function TdhSpecificationPage() {
       pills={
         <>
           <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-font-mono tw-text-xs tw-text-iron-200">
-            tdh-v1.0
+            tdh-v1.4
           </span>
           <TdhStatusPill pill="proposal" locale={locale} />
           <span className="tw-text-xs tw-text-iron-400 sm:tw-text-sm">

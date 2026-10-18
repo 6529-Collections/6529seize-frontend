@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * The proof manifest of the Lean model of TDH-v1, `formal/manifest.json` on
+ * The proof manifest of the Lean model of TDH v1.4, `formal/manifest.json` on
  * the public TDH feed. 6529's design repository writes it with
  * `design/tdh-lean/tools/manifest.py`, which builds the model at one commit
  * and records what the build established: the vectors it ran and, for every

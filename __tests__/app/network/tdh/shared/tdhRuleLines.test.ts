@@ -95,9 +95,9 @@ describe("ruleTokens", () => {
     expect(keywords("    append moved to stack[to]")).toEqual(["append"]);
   });
 
-  it("keeps names with digits whole and plain: §3.2, tdh-v1.0, DEV-10", () => {
+  it("keeps names with digits whole and plain: §3.2, tdh-v1.4, DEV-10", () => {
     const text =
-      'v = "x" # tdh-v1.0 (§3.2, §6.1), DEV-10, BUG-15 and ERC-1155: 2^64';
+      'v = "x" # tdh-v1.4 (§3.2, §6.1), DEV-10, BUG-15 and ERC-1155: 2^64';
     const tokens = ruleTokens(text, "pseudo");
     expect(
       tokens

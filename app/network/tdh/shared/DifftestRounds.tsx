@@ -17,9 +17,10 @@ function findingCodes(findings: readonly string[]): string {
 }
 
 /**
- * The five rounds of differential tests of 15 and 16 October 2026 as one compact
- * table (the validator's tools/difftest/README.md): what each round found,
- * in one line, and the P26 round that settled it with the findings' codes.
+ * The six rounds of differential tests of 15 to 18 October 2026 as one
+ * compact table (the validator's tools/difftest/README.md): what each round
+ * found, in one line, and the P26 round that settled it with the findings'
+ * codes; the sixth, on TDH v1.4, found nothing new.
  * The generated inputs, the same each round but the first, are in the
  * caption; each round's findings in full are one click away. Rows become
  * cards below md.
@@ -80,9 +81,11 @@ export default function DifftestRounds({
                     className={`${TDH_TD_STACK_MD} tw-text-sm tw-leading-6 tw-text-iron-300`}
                   >
                     {m(`settled.${n}`, { commit: round.settledBy ?? "" })}
-                    <span className="tw-block tw-font-mono tw-text-xs tw-text-iron-400">
-                      {findingCodes(round.findings)}
-                    </span>
+                    {round.findings.length > 0 && (
+                      <span className="tw-block tw-font-mono tw-text-xs tw-text-iron-400">
+                        {findingCodes(round.findings)}
+                      </span>
+                    )}
                   </td>
                 </tr>
               );

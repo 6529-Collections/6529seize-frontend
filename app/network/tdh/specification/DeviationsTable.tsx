@@ -34,6 +34,7 @@ const DECISION_TONE: Record<string, TdhTone> = {
   dev2: "primary",
   kept: "neutral",
   dev13: "neutral",
+  dev11: "success",
 };
 
 const CELL =

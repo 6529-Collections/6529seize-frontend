@@ -7,7 +7,8 @@ Parent: [Network Index](README.md)
 `/network/tdh/how-it-works` follows one day's TDH calculation in the order
 the computer does it, in fourteen steps. Each step has plain words, a worked
 example, source chips into the specification and, where it has one, a
-collapsible `Exact rule` block quoting TDH-v1 (rule version `tdh-v1.0`).
+collapsible `Exact rule` block quoting P26's TDH v1.4 (rule version
+`tdh-v1.4`).
 
 ## Location in the Site
 
@@ -100,7 +101,7 @@ Each explorable is titled under a `Try it` eyebrow.
 ## Notes
 
 - The worked examples and explorables come from a TypeScript port of the
-  TDH-v1 arithmetic, tested against values the Python reference printed;
+  TDH v1.4 arithmetic, tested against values the Python reference printed;
   the page's other figures are stated from P26, the replay and the daily
   comparison. Step 13 gives the latest compared day's total from the
   daily feed (the page revalidates every 10 minutes).
@@ -124,15 +125,18 @@ Each explorable is titled under a `Try it` eyebrow.
   checks) and the vectors that pin the rule are in its `Exact rule and
   sources` disclosure. Its transaction figure is centred, with the result
   inside its frame.
-- Step 14 says TDH-v1 removes what made today's result depend on timing,
-  database order or editable data, in three items: every input read as of
+- Step 14, `What changes when 6529.io switches to the Rust core`, says the
+  specification restates TDH v1.4, 6529.io's current rules, and removes
+  what made them depend on timing, database order or editable data, in
+  three items: every input read as of
   the snapshot block on the finalized chain, and complete, with seasons
   from a versioned list; netting within one transaction (D131, which
   6529.io's results already match, D132) and on-chain order across
   transactions of one block (DEV-2), where a sale and a purchase of one
   card can still differ until the cutover; and a consolidation change
-  counting from the next cycle. An amber line names the one open question,
-  a fourth consolidated wallet, with a link to step 10. It links all 19
+  counting from the next cycle. A quiet line says that groups of four are
+  not a change (they count as 6529.io counts them since October 15, 2026,
+  D136), with a link to step 10. It links all 19
   differences in the specification, today's comparison and the dashboard's
   four classes.
 - Step 12 says its rates are the October 11, 2026 cycle's, and its result
@@ -145,14 +149,22 @@ Each explorable is titled under a `Try it` eyebrow.
   full set that day (the newest is in season 17, the current season).
   Step 12's phone table writes a holding of two copies one copy a line
   (`200 d`, `+ 120 d`, `× 1.00`).
-- Step 10 states the three-wallet limit of `tdh-v1.0` (every pair
-  confirmed, groups formed newest confirmed link first) and, in one line,
-  that 6529.io accepts a fourth consolidated wallet since October 15, 2026,
-  and that TDH-v1 allows three; whether it allows four is pending an owner
-  decision. Step 14 points to it as the open question. Its link
+- Step 10 states the limit of `tdh-v1.4`: up to four wallets, every pair
+  confirmed, groups formed newest confirmed link first, links confirmed in
+  one block taken by ascending pair key, up to three wallets as before; then
+  its three-wallet link diagrams; then, in plain words, the fourth wallet
+  (D136): it counts only when one wallet of the four has links with each of
+  the other three registered in both directions from October 15, 2026,
+  00:00 UTC; older links never make a group of four; the specification and
+  6529.io group the same wallets. A second figure draws the same four
+  wallets and six links twice: one identity of four when D's three links
+  are fresh (drawn in green, with a legend item), and D, C and B with A
+  alone when every link predates October 15, which fails the gate. The link
   diagrams number each link in on-chain order and draw links inside an
   identity solid and heavier than links between identities, which are
-  dashed; the text alternative says the same.
+  dashed; each figure's text alternative says the same. The diagrams are
+  in `app/network/tdh/shared/diagrams/IdentityGraphs.tsx`, shared with the
+  consolidation design page.
 - Diagrams are drawn phone first: the rate chart, the transaction and the
   link diagrams keep their text at 12 px or more at every width, and no
   drawn line crosses a label (`scripts/tdh-pages-check.mjs` checks both).
@@ -166,5 +178,5 @@ Each explorable is titled under a `Try it` eyebrow.
 ## Related Pages
 
 - [TDH Verification Dashboard](feature-tdh-verification.md)
-- [TDH-v1 Specification](feature-tdh-specification.md)
+- [TDH v1.4 Specification](feature-tdh-specification.md)
 - [Wallet Consolidation](feature-tdh-consolidation.md)

@@ -5,10 +5,11 @@ Parent: [Network Index](README.md)
 ## Overview
 
 `/network/tdh/historic-boosts` documents 6529.io's archived boost schedules
-`1.3`, `1.2`, and `1.1`, labelled `Boost schedule 1.x` so they are not
-confused with TDH-v1, the exact written rule. Current boosts are on
-`/network/tdh`. The page says that TDH-v1 (rule version `tdh-v1.0`) and the
-daily comparison use only the current schedule.
+`1.3`, `1.2`, and `1.1`, labelled `Boost schedule 1.x`. Current boosts are
+on `/network/tdh`. The page says that schedule 1.4 is the boost of TDH
+v1.4, 6529.io's current rules (D137), which the specification restates
+exactly (rule version `tdh-v1.4`), and that the daily comparison checks
+only that schedule.
 
 ## Location in the Site
 

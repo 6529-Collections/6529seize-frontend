@@ -3,18 +3,18 @@ import type { ReactNode } from "react";
 /**
  * Text whose case carries meaning: a commit or other hex hash (at least
  * seven hex digits, one of them a digit), a 0x value, a domain such as
- * 6529.io or name.eth, and the rule names TDH-v1 and tdh-v1.0.
+ * 6529.io or name.eth, and the rule names TDH v1.4 and tdh-v1.4.
  *
  * @api Exported for its unit test and the layout gate's twin.
  */
 export const CASE_SIGNIFICANT =
-  /\b(?:0x[0-9a-fA-F…]+|(?=[0-9a-f]*\d)[0-9a-f]{7,64}|TDH-v1|tdh-v\d+\.\d+|tdh-v\d+|[a-z0-9-]+\.(?:io|eth|com|net|org))\b/g;
+  /\b(?:0x[0-9a-fA-F…]+|(?=[0-9a-f]*\d)[0-9a-f]{7,64}|TDH v\d+\.\d+|tdh-v\d+\.\d+|tdh-v\d+|[a-z0-9-]+\.(?:io|eth|com|net|org))\b/g;
 
 /**
  * A string for an eyebrow or label set in capitals (`text-transform:
  * uppercase`): every case-significant part stays as written, so a commit
  * reads 7bf579a, not 7BF579A, and 6529.io never becomes 6529.IO. A short
- * part also stays on one line, so TDH-v1 never breaks at its hyphen; a full
+ * part also stays on one line, so TDH v1.4 never breaks at its space; a full
  * hash may still wrap.
  */
 /** Parts up to this long never wrap: names, domains, short commits. */

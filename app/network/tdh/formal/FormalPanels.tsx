@@ -8,7 +8,7 @@ import TdhStatusPill from "../shared/TdhStatusPill";
 import { TDH_CARD, TDH_LINK } from "../shared/tdhStyles";
 import type { FormalManifest, FormalStatus } from "@/lib/tdh/formal/manifest";
 import type { TdhPill } from "../shared/TdhStatusPill";
-import { LEAN_ROUND_5 } from "./leanResults";
+import { LEAN_ROUND_6 } from "./leanRounds";
 
 /** Parts of the formal model page: the builds, what the model found, the legend. */
 
@@ -128,7 +128,7 @@ export function BuildsPanel({
   /** Whether a newer round is committed and not yet published. */
   readonly showNext: boolean;
 }) {
-  const r = LEAN_ROUND_5;
+  const r = LEAN_ROUND_6;
   const columns = showNext
     ? "lg:tw-grid-cols-2 lg:tw-divide-x lg:tw-divide-y-0"
     : "";

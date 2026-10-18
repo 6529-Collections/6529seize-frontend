@@ -1,10 +1,12 @@
 /**
- * The 89 conformance vectors of P26 §13 (01 to 88, and 12b, as of 6529chain
- * f840096) and their topics. Vectors 01-18 have hand-derived expected values
- * (18 updated for D131); 19-88 were generated with the Python reference and
- * their derivations checked by hand. 51-74 are the input rules made explicit
- * on 15 October 2026, in P26's second, third and fourth rounds that day;
- * 75-88 the input types settled in its fifth round, on 16 October.
+ * The 104 conformance vectors of P26 §13 (01 to 103, and 12b, as of
+ * 6529chain 3bfa7b0) and their topics. Vectors 01-18 have hand-derived
+ * expected values (18 updated for D131); 19-103 were generated with the
+ * Python reference and their derivations checked by hand. 51-74 are the
+ * input rules made explicit on 15 October 2026, in P26's second, third and
+ * fourth rounds that day; 75-88 the input types settled in its fifth round,
+ * on 16 October; 89-103 D136's four-wallet consolidation, on 18 October
+ * (28 and 73, which hash registries, were rehashed for its two new fields).
  */
 export const VECTOR_TOPICS = [
   "holdings",
@@ -190,13 +192,37 @@ export const VECTORS: ReadonlyArray<{
     topics: ["order", "noResult"],
   },
   { id: "88-cutoff-header-keys", topics: ["snapshot"] },
+  { id: "89-four-wallet-fresh-links", topics: ["consolidation"] },
+  { id: "90-four-wallet-gate-fails", topics: ["consolidation"] },
+  { id: "91-gate-boundary-second", topics: ["consolidation"] },
+  { id: "92-reregistration-refreshes-time", topics: ["consolidation"] },
+  { id: "93-revoke-clears-time", topics: ["consolidation"] },
+  { id: "94-gate-member-m", topics: ["consolidation"] },
+  { id: "95-same-block-pair-key-order", topics: ["consolidation", "order"] },
+  { id: "96-fifth-wallet-refused", topics: ["consolidation"] },
+  { id: "97-four-wallet-age-carry", topics: ["consolidation", "holdings"] },
+  { id: "98-raw-log-four-wallet", topics: ["consolidation", "decoding"] },
+  { id: "99-event-without-timestamp", topics: ["consolidation", "decoding"] },
+  {
+    id: "100-invalid-delegation-event-after-cutoff",
+    topics: ["snapshot", "noResult"],
+  },
+  {
+    id: "101-invalid-ungated-max-wallets",
+    topics: ["parameters", "noResult"],
+  },
+  {
+    id: "102-registry-gate-activation",
+    topics: ["parameters", "consolidation"],
+  },
+  { id: "103-registry-five-wallets", topics: ["parameters", "consolidation"] },
 ];
 
 /** Where the vector set is pinned: 6529chain's git tree of the directory. */
 export const VECTOR_SET = {
-  specCommit: "f840096",
+  specCommit: "3bfa7b0",
   path: "design/tdh-reference/vectors",
-  tree: "086e5ffbabc6758365eaaaf33db3c68dfbb8e22d",
+  tree: "839f99db404571ccbd4ba3b36b7cec97e59e68d7",
 } as const;
 
 export const VECTOR_COUNT = VECTORS.length;

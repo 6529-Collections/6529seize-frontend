@@ -52,8 +52,11 @@ boost rules.
    reference card.
 3. Use `Explain my TDH`, right after the minute: it looks up 6529.io's
    stored calculation for a profile or wallet, card by card, the values
-   the daily comparison tests against TDH-v1 (described below).
-4. Read `Checked daily, in public`: first the latest day from the feed, as
+   the daily comparison tests against the specification of TDH v1.4
+   (described below).
+4. Read `Checked daily, in public`: one sentence first, that TDH v1.4 is
+   6529.io's name for its current TDH rules and that the validators compute
+   them exactly (D137); then the latest day from the feed, as
    figures (the total TDH identical in all three, identity records and
    wallet records equal), how they were read (the Python reference on the
    Rust run's input; 6529.io's backend from its own indexer, its files
@@ -75,7 +78,7 @@ boost rules.
    line each with the detail under `More` (the edition-floor text,
    measured on the October 11, 2026 cycle and corrected on October 15, the
    flaw program B found in the first netting rule, what the Lean model
-   showed netting does not guarantee, and five rounds of differential
+   showed netting does not guarantee, and six rounds of differential
    tests, all settled but E13, in P26 or, for E8, the vector format and the
    references), and a link to the
    Lean proof manifest on the daily feed.
@@ -127,7 +130,10 @@ set before it contributes holding days. Internal transfers within the current
 confirmed consolidation group preserve the original acquisition time. A sale
 or transfer outside that group removes the outgoing contribution; a later
 external purchase starts a new holding period. Delegation alone does not
-consolidate wallets.
+consolidate wallets. A consolidation holds up to four wallets: three as
+before, and a fourth only when one wallet has links with each of the other
+three registered in both directions from October 15, 2026 (D136); 6529.io
+and TDH v1.4 count them the same way.
 
 ## Edition Weight and Burns
 

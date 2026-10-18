@@ -1,12 +1,13 @@
-# TDH-v1 Specification
+# TDH v1.4 Specification
 
 Parent: [Network Index](README.md)
 
 ## Overview
 
-`/network/tdh/specification` restates specification P26 (TDH-v1, rule
-version `tdh-v1.0`, at commit `f840096`, its latest change, October 16, 2026)
-section by section: each section in plain words beside the rule, either quoted
+`/network/tdh/specification` restates specification P26 (TDH v1.4, 6529.io's
+name for its current TDH rules, D137; rule version `tdh-v1.4`, which P26
+called `tdh-v1.0` until October 18, 2026; at commit `3bfa7b0`, its latest
+change, October 18, 2026) section by section: each section in plain words beside the rule, either quoted
 (`Exact rule`) or P26's prose rules line for line (`Exact rule, restated
 line by line`): log selection and positions, decoding, mints and sinks, header order,
 delegation events, identities, records, totals, the numeric range and the
@@ -18,8 +19,8 @@ old-backend issues, the decisions the TDH pages cite, the evidence and the
 changes since 15 October. The header carries the rule version, a
 `Proposal, not adopted` pill and P26's SHA-256, shortened with a copy
 button, beside the version line, then one closed `Version` disclosure
-(`Version: tdh-v1.0, specification P26 at f840096, October 16, 2026`): the
-rule version (not frozen until launch), the text (P26 at `f840096`), the
+(`Version: tdh-v1.4, specification P26 at 3bfa7b0, October 18, 2026`): the
+rule version (not frozen until launch), the text (P26 at `3bfa7b0`), the
 SHA-256 of P26's file with a copy button, so the text it restates can be
 matched against the file later, where it is (P26, its vectors and the Lean
 model in 6529's private design repository; the validator source, with a
@@ -40,8 +41,8 @@ chip links to a private repository.
 ## Location in the Site
 
 - Route: `/network/tdh/specification`
-- Page heading: `The TDH-v1 specification`
-- Browser title: `The TDH-v1 specification | Network`
+- Page heading: `The TDH v1.4 specification`
+- Browser title: `The TDH v1.4 specification | Network`
 - About contents menu: `TDH specification`
 - TDH section navigation: `Specification`
 
@@ -50,20 +51,23 @@ chip links to a private repository.
 - `#symbols`; sections `#s1` to `#s13`, subsections such as `#s3-1`,
   `#s5-2`, `#s7-3` and `#s8-4`.
 - Deviations `#dev-1` to `#dev-19`, issues `#bug-1` to `#bug-15`.
-- Decisions `#d112`, `#d116`, `#d118`, `#d119`, `#d121`, `#d122`, `#d125`,
-  `#d128`, `#d130`, `#d131`, `#d132`.
+- Decisions `#d112`, `#d116`, `#d118`, `#d119`, `#d120`, `#d121`, `#d122`,
+  `#d125`, `#d128`, `#d130`, `#d131`, `#d132`, `#d136`, `#d137`.
 - Evidence `#evidence-replay`, `#evidence-clean-room`, `#evidence-comparison`,
-  `#evidence-difftest`; changes `#changes`.
+  `#evidence-difftest`, `#evidence-four-wallets`; changes `#changes`.
 
 ## Interactive Elements
 
 - Contents list that highlights the section in view.
 - A link button beside each heading copies the section address.
-- Copy buttons on rule blocks, contract addresses and the registry hash.
+- Copy buttons on rule blocks, contract addresses, the registry hash and
+  the rule ID.
 - Deviation filter: `All`, `Can change values`, `Kept as before`. From
   `xl` the deviations are one table; below it each is one line (its id,
   whether it can change values, and its rule in a line) that opens to its
-  decision, the old backend's behaviour, TDH-v1's and the measured effect.
+  decision, the old backend's behaviour, TDH v1.4's and the measured effect.
+  DEV-11, the order of link ties, is marked `Settled by D136` in green:
+  P26 now takes ties by pair key, as 6529.io does.
   Those that can change values start open, and a link to `#dev-2` opens its
   row. A legend sits under the list. Section 11 uses the whole content
   width, and its decision dots use the one TDH status palette.
@@ -98,9 +102,22 @@ chip links to a private repository.
   is computed (P28's `TAG`, `H`, `abi.encode` with the declared types, and
   the stored CE record) and tags the eight rows that restate formulas
   (`formula`: fixed by the rule version, not fields of the hashed record);
-  section 6.3 adds one line on four wallets: 6529.io accepts four
-  consolidated wallets since October 15, 2026, and `tdh-v1.0` allows three;
-  whether it allows four is pending an owner decision. P28's tagged
+  section 6 states D136's four-wallet consolidation plainly: §6.1 says each
+  delegation event carries its block's timestamp (and one stamped after the
+  snapshot in a block up to it has no result, vector 100), §6.2 that each
+  direction keeps its wallet's latest registration time (the state machine
+  and its six transitions in words), and §6.3 that links confirmed in one
+  block are taken by ascending pair key, up to three wallets group as
+  before, and a fourth joins only if one wallet has links with each of the
+  other three registered in both directions from October 15, 2026, 00:00
+  UTC; P26 and 6529.io group wallets identically. §6.3 quotes the loop with
+  `fresh` and `canJoin`, restates its terms line by line (the pair key, the
+  activation time, a registration without a time, a refused candidate),
+  and says in one line how it was checked against 6529.io's own code, with
+  a link to the evidence. Section 10 lists the two new registry fields,
+  `consolidation_ungated_max_wallets` (3) and
+  `consolidation_gate_activation_s` (1,792,022,400), and gives
+  `tdh-v1.4`'s registry hash and rule ID with copy buttons. P28's tagged
   hash is written `TH` on the page (P28 writes `H`), so `H` stays the
   largest edition. Sections 11 and 12 show their first three rows inline,
   with `Show all 19 differences` and `Show all 15 issues`. Section 13 has a `For implementers` checklist: values and
@@ -109,17 +126,20 @@ chip links to a private repository.
   04, 06, 23 and 36, restated in full on the Implementations page), then
   one line: no vector checks a root, the rest of P28 is not needed, and the
   other vectors are to be published with the validator code (D116); the
-  SHA-256 of P28 and P53 at `f840096` are in a disclosure.
+  SHA-256 of P28 and P53 at `3bfa7b0` are in a disclosure.
 - Syntax tinting keeps names with digits whole and plain: a section
-  (`§3.2`), the rule version (`tdh-v1.0`), `DEV-10`, `BUG-15`, `ERC-1155`.
+  (`§3.2`), the rule version (`tdh-v1.4`), `DEV-10`, `BUG-15`, `ERC-1155`.
   The phone `Contents` pill is solid, 8 px off the bottom edge.
 - The evidence's replay links 6529.io's published identities and wallets
   files for 2026-10-11 on Arweave and its list of daily uploads.
-- The evidence's four-way differential tests say what became of the five
+- The evidence's four-way differential tests say what became of the six
   rounds' findings: the first four rounds' were settled and pinned by new
   vectors, in P26 or, for E8 (an event's default use case), in the vector
   format and the references; the fifth round's E13 is still open for the
-  vector format.
+  vector format; the sixth, on TDH v1.4, found nothing new. A further
+  evidence entry gives the check of the four-wallet consolidation against
+  6529.io's own code (100,000 random link graphs, the real history to
+  October 18, 2026, and 6529.io's stored rows).
 - The sections map runs inputs (§2), the snapshot (§4), canonical events
   (§3): the snapshot block comes from the finalized chain, and §3 selects
   the logs in blocks up to it. §4.2's rule block is anchored `#s4-2`, and the
@@ -150,11 +170,12 @@ chip links to a private repository.
   lines is one compact row (the code, its source chip and the copy button);
   a block of 16 lines or more shows its first lines and `Show all N lines`
   at every width.
-- `Changes since October 15` says that two of the seven changes concern a
+- `Changes since October 15` says that two of the eight changes concern a
   real day's values: the edition-floor correction (a text that would have
   lowered 285 identities by 111,494 TDH on October 11) and D131's netting;
-  the vectors grew from 35 to 89. The five rounds of differential tests are
-  linked to their table on the Implementations page.
+  D136's four-wallet rule changes no day compared so far; the vectors grew
+  from 35 to 104. The six rounds of differential tests are linked to their
+  table on the Implementations page.
 - Rule blocks longer than seven lines are numbered, and comments are set in
   a quieter colour. The deviations table's ID column is narrow; from `xl`
   the `Can change values` mark heads the effect instead.

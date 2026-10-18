@@ -21,14 +21,27 @@ import verify from "@/i18n/messages/networkTdhVerify.en-US.json";
 import consolidation from "@/i18n/messages/networkTdhConsolidation.en-US.json";
 import shared from "@/i18n/messages/networkTdhShared.en-US.json";
 import historic from "@/i18n/messages/networkTdh.en-US.json";
+import profile from "@/i18n/messages/networkTdhProfile.en-US.json";
+import metrics from "@/i18n/messages/networkMetrics.en-US.json";
+import about from "@/i18n/messages/about.en-US.json";
+import { DELEGATION_CONSOLIDATION_BUILDER_MESSAGES as builder } from "@/i18n/messages/delegation-consolidation-builder";
+import {
+  REGISTRY_HASH,
+  RETIRED_REGISTRY_HASH_V1_0,
+  RULE_CLUSTERS,
+  RULE_ID,
+  RULE_PAIR_STATE,
+  RULE_REGISTRY,
+} from "@/app/network/tdh/shared/tdhRules";
+import { PARAMETERS } from "@/app/network/tdh/specification/specData";
 
 /**
  * Guards for the dated facts the TDH pages repeat in many places: the
- * conformance vector set (P26 at 6529chain f840096: 89 vectors, 01 to 88 and
- * 12b), the Lean model's proof manifest, the validator's development branch
- * (30bf8f9: the Rust core and program B on all 89), the daily job's builds
- * (read from the feed, never fixed in the copy), and the privacy of the
- * daily feed.
+ * conformance vector set (P26 at 6529chain 3bfa7b0: 104 vectors, 01 to 103
+ * and 12b), the Lean model's proof manifest, the validator's development
+ * branch (a1463f9: the Rust core and program B on all 104), the daily
+ * job's builds (read from the feed, never fixed in the copy), the privacy of
+ * the daily feed, and D136 and D137 (TDH v1.4, four-wallet consolidation).
  */
 const MESSAGES: Record<string, string> = {
   ...explainer,
@@ -40,6 +53,10 @@ const MESSAGES: Record<string, string> = {
   ...consolidation,
   ...shared,
   ...historic,
+  ...profile,
+  ...metrics,
+  ...about,
+  ...builder,
 };
 
 function noMessageMatches(pattern: RegExp) {
@@ -49,12 +66,13 @@ function noMessageMatches(pattern: RegExp) {
 }
 
 describe("TDH page facts", () => {
-  it("lists P26's 89 conformance vectors, from one set of facts", () => {
-    expect(VECTOR_COUNT).toBe(89);
+  it("lists P26's 104 conformance vectors, from one set of facts", () => {
+    expect(VECTOR_COUNT).toBe(104);
     expect(VECTOR_COUNT).toBe(P26.vectorCount);
+    expect(P26.commit).toBe("3bfa7b0");
     expect(VECTOR_SET.specCommit).toBe(P26.commit);
     expect(VECTORS.at(-1)?.id.startsWith(String(P26.lastVector))).toBe(true);
-    expect(new Set(VECTORS.map((vector) => vector.id)).size).toBe(89);
+    expect(new Set(VECTORS.map((vector) => vector.id)).size).toBe(104);
     for (const vector of VECTORS) {
       expect(
         (impl as Record<string, string>)[`network.tdh.impl.v.${vector.id}`]
@@ -62,13 +80,17 @@ describe("TDH page facts", () => {
     }
     expect(PROGRAM_CONFORMANCE.python.vectors).toBe(P26.vectorCount);
     expect(PROGRAM_CONFORMANCE.rustReference.vectors).toBe(P26.vectorCount);
-    // The validator's development branch (30bf8f9) follows P26's fifth
-    // round: the Rust core and program B pass all 89.
-    expect(VALIDATOR_DEVELOPMENT.commit).toBe("30bf8f9");
+    // The validator's development branch (a1463f9) follows P26 at 3bfa7b0
+    // (D136): the Rust core and program B pass all 104. Its software is
+    // numbered below 1.0 (D137).
+    expect(VALIDATOR_DEVELOPMENT).toMatchObject({
+      commit: "a1463f9",
+      release: "0.1.0",
+    });
     expect(PROGRAM_CONFORMANCE.rustCoreCurrent).toMatchObject({
       specCommit: P26.commit,
       vectors: P26.vectorCount,
-      checks: 1_253,
+      checks: 1_307,
     });
     expect(PROGRAM_CONFORMANCE.programBCurrent).toMatchObject({
       specCommit: P26.commit,
@@ -97,20 +119,35 @@ describe("TDH page facts", () => {
       spec: "f840096",
       vectors: 89,
     });
+    // Redeployed on 18 October 2026: TDH v1.4, D136.
+    expect(knownBuild("a1463f9d9e316c17e0c2371628ad4d0f4f561627")).toEqual({
+      spec: "3bfa7b0",
+      vectors: 104,
+    });
+    expect(knownBuild("3bfa7b052202e40b0f178ee6de7f75f86ba5261c")).toEqual({
+      spec: "3bfa7b0",
+      vectors: 104,
+    });
     expect(knownBuild("abcdef0123456789")).toBeNull();
     // The copy never names the daily job's build: the pages read it.
     noMessageMatches(/\be127676\b|\b2b17216\b/);
     noMessageMatches(/daily job (still )?runs/);
   });
 
-  it("counts five rounds of differential tests, all settled but E13, E8 outside P26", () => {
-    expect(DIFFTEST_ROUNDS).toHaveLength(5);
-    expect(DIFFTEST_ROUNDS[3]?.settledBy).toBe(P26.commit);
+  it("counts six rounds of differential tests, all settled but E13, E8 outside P26", () => {
+    expect(DIFFTEST_ROUNDS).toHaveLength(6);
+    expect(DIFFTEST_ROUNDS[3]?.settledBy).toBe("f840096");
     expect(DIFFTEST_ROUNDS[3]?.findings).toEqual(["F8", "F9", "E12"]);
-    expect(DIFFTEST_ROUNDS.at(-1)).toMatchObject({
+    expect(DIFFTEST_ROUNDS[4]).toMatchObject({
       settledBy: null,
       findings: ["E13"],
     });
+    // The sixth, on TDH v1.4, found nothing new.
+    expect(DIFFTEST_ROUNDS.at(-1)).toMatchObject({
+      settledBy: null,
+      findings: [],
+    });
+    noMessageMatches(/\bfive rounds of (differential|generated)/i);
     // The fifth round's E13 is open, and the second round's E8 was settled
     // in the vector format and the references (6529chain 1c69528), not in
     // P26's text: no copy says every round's findings became P26 rules.
@@ -143,6 +180,16 @@ describe("TDH page facts", () => {
         expect([key, text]).toEqual([
           key,
           expect.stringMatching(/fourth round|a4db4ae/),
+        ]);
+      }
+    }
+    // P26's fifth round had 89 vectors; 89 is only ever stated as that
+    // round's (f840096) or the Lean model's published build's.
+    for (const [key, text] of Object.entries(MESSAGES)) {
+      if (/\b89 (conformance )?vectors\b|\ball 89\b|\b89 of\b/.test(text)) {
+        expect([key, text]).toEqual([
+          key,
+          expect.stringMatching(/f840096|fifth round|round 5/),
         ]);
       }
     }
@@ -228,7 +275,9 @@ describe("TDH page facts", () => {
   it("keeps the fact list of 16 October 2026, round 6", () => {
     // History stays unchecked until the full check runs against 6529's own
     // node; no date is tied to it.
-    noMessageMatches(/October 18|Oct 18|2026-10-18/);
+    noMessageMatches(
+      /(fully checked|full (history|check))[^.]*\b(October|Oct) \d+|\b(October|Oct) \d+[^.]*(is|be|gets?) fully checked/
+    );
     noMessageMatches(/until 6529’s own Ethereum node[^.]*is synced\.$/);
     // The cutover is "about October 23" (D132), never a fixed date.
     for (const [key, text] of Object.entries(MESSAGES)) {
@@ -382,6 +431,94 @@ describe("TDH page facts", () => {
     );
     noMessageMatches(/every published day \(RSS\)/);
     expect(text("network.tdh.verify.provenance.rss")).toMatch(/\{days\}/);
+  });
+
+  it("follows D137: TDH v1.4, rule version tdh-v1.4, the validator below 1.0", () => {
+    // The old name is gone from every message.
+    noMessageMatches(/TDH-v1\b/);
+    // tdh-v1.0 only ever as the name P26 used until October 18, 2026.
+    for (const [key, text] of Object.entries(MESSAGES)) {
+      if (/tdh-v1\.0/.test(text)) {
+        expect([key, text]).toEqual([
+          key,
+          expect.stringMatching(/until (October 18|18 October), 2026|retired/),
+        ]);
+      }
+    }
+    // Said once, on the overview: TDH v1.4 is 6529.io's name for its
+    // current rules, and the validators compute them exactly.
+    const once = Object.entries(explainer).filter(([, text]) =>
+      /TDH v1\.4 is 6529\.io’s name for its current TDH rules, and the validators compute them exactly/.test(
+        text
+      )
+    );
+    expect(once).toHaveLength(1);
+    // "Validator v1" only ever as the design's name.
+    for (const [key, text] of Object.entries(MESSAGES)) {
+      if (/Validator v1\b/.test(text)) {
+        expect([key, text]).toEqual([
+          key,
+          expect.stringMatching(/design’s name|design name/),
+        ]);
+      }
+    }
+    expect(explainer["network.tdh.explainer.glossary.validator.def"]).toMatch(
+      /numbered below 1\.0, at 0\.1\.0/
+    );
+  });
+
+  it("follows D136: four wallets, as 6529.io counts them, with nothing pending", () => {
+    noMessageMatches(/pending an owner decision|whether it allows four/i);
+    noMessageMatches(/[Pp]ending an owner/);
+    // The rule stated plainly where consolidation is explained.
+    expect(how["network.tdh.how.s10.fourth"]).toMatch(
+      /one wallet of the four must have links with each of the other three registered in both directions from October 15, 2026, 00:00 UTC/
+    );
+    expect(spec["network.tdh.spec.s6-3.body"]).toMatch(
+      /Up to three wallets group as before\. A fourth wallet joins only if the group of four then has one wallet whose links with each of the other three were registered in both directions from October 15, 2026, 00:00 UTC.*P26 and 6529\.io group wallets identically/
+    );
+    expect(consolidation["network.tdhConsolidation.rules.limit.body"]).toMatch(
+      /Up to three count as before\. A group of four counts only when one of its wallets has links with each of the other three registered in both directions/
+    );
+    expect(
+      builder["delegation.consolidationBuilder.wallets.fourthNote"]
+    ).toMatch(/on 6529\.io and in TDH v1\.4/);
+    // The rule blocks and the registry: P26 §6.2, §6.3 and §10 at 3bfa7b0.
+    expect(RULE_PAIR_STATE).toMatch(/REGISTER\(a, b\) at t:/);
+    expect(RULE_CLUSTERS).toMatch(/canJoin\(C, n\)/);
+    expect(RULE_CLUSTERS).toMatch(/consolidation_max_wallets \(4\)/);
+    expect(RULE_CLUSTERS).toMatch(/by ascending\s+pair key/);
+    expect(RULE_REGISTRY).toMatch(
+      /uint32 consolidation_max_wallets, consolidation_ungated_max_wallets;\nuint64 consolidation_gate_activation_s;/
+    );
+    expect(
+      PARAMETERS.map((row) => [row.name, row.value]).filter(([name]) =>
+        name.startsWith("consolidation_")
+      )
+    ).toEqual(
+      expect.arrayContaining([
+        ["consolidation_max_wallets", "4"],
+        ["consolidation_ungated_max_wallets", "3"],
+        [
+          "consolidation_gate_activation_s",
+          "1,792,022,400 (2026-10-15 00:00:00 UTC)",
+        ],
+      ])
+    );
+    // tdh-v1.4's registry hash and rule ID (P26 §10, vector 28).
+    expect(REGISTRY_HASH).toBe(
+      "0x3cfa0e6eae7b8769516597e117ecd55580ecb6b75194139f053d3e0ec09d9f36"
+    );
+    expect(RULE_ID).toBe(
+      "0x772d61ed465c80ed3a801927d81183895e4d1f37b069bb9ceaef959a7418ab3f"
+    );
+    expect(RETIRED_REGISTRY_HASH_V1_0).not.toBe(REGISTRY_HASH);
+    // The retired hash is only ever named as tdh-v1.0's.
+    for (const [key, text] of Object.entries(MESSAGES)) {
+      if (/0x74b4a8f9|0x63e242fa/.test(text)) {
+        expect([key, text]).toEqual([key, expect.stringMatching(/tdh-v1\.0/)]);
+      }
+    }
   });
 
   it("shows no sample data", () => {

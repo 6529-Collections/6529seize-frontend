@@ -84,7 +84,7 @@
   "about.contents.descriptions.primaryAddress": "Set and understand primary wallet addresses.",
   "about.contents.descriptions.tdh": "Total Days Held, calculation rules, and network context.",
   "about.contents.descriptions.tdhHowItWorks": "One day’s TDH calculation, step by step, with worked examples you can change.",
-  "about.contents.descriptions.tdhSpecification": "TDH-v1, the exact rule, section by section in plain words beside the formulas.",
+  "about.contents.descriptions.tdhSpecification": "TDH v1.4, the exact rule, section by section in plain words beside the formulas.",
   "about.contents.descriptions.tdhFormal": "The rule in Lean 4: what is proved, what was shown false, and what the proofs do not cover.",
   "about.contents.descriptions.tdhImplementations": "The programs that compute TDH and how they are checked against each other.",
   "about.contents.descriptions.tdhVerification": "Rust, Python and 6529.io TDH compared side by side every day.",

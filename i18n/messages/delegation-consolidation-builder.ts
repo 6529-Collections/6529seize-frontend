@@ -46,11 +46,9 @@ export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
   "delegation.consolidationBuilder.wallets.limitReached":
     "A consolidation can hold up to {limit} wallets.",
   "delegation.consolidationBuilder.wallets.fourthNote":
-    "A group of four: 6529.io counts all four wallets as one collector. TDH-v1, the rule 6529.io moves to about October 23, 2026, allows three; whether it allows four is pending an owner decision. Under TDH-v1 as written, the group is built from the newest confirmed links: three of the four wallets count as one collector, and the fourth counts on its own.",
+    "A group of four counts as one collector only when one of its wallets has links with each of the other three registered in both directions from {date}; with older links, three of them count. The steps below register the links that need it, so all four count, on 6529.io and in TDH v1.4, the rules the validators compute.",
   "delegation.consolidationBuilder.wallets.fourthLink":
-    "How consolidation works in TDH-v1",
-  "delegation.consolidationBuilder.wallets.fourthAcknowledge":
-    "I understand that TDH-v1 allows three wallets, and that whether it allows four is pending an owner decision.",
+    "How a fourth wallet counts",
   "delegation.consolidationBuilder.wallets.loadingGroup":
     "Loading your current consolidation…",
   "delegation.consolidationBuilder.wallets.groupError":
@@ -67,8 +65,6 @@ export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
     "One transaction per wallet. Wallets already in your consolidation sign first; new wallets sign last.",
   "delegation.consolidationBuilder.steps.incomplete":
     "Enter at least two valid wallets to see the steps.",
-  "delegation.consolidationBuilder.steps.acknowledge":
-    "Confirm the note about a fourth wallet above to see the steps.",
   "delegation.consolidationBuilder.steps.loading": "Checking registered links…",
   "delegation.consolidationBuilder.steps.readError":
     "Couldn’t check the registered links.",

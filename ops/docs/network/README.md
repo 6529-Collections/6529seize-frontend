@@ -43,7 +43,7 @@ reference routes.
 - [xTDH Rules and Distribution Formula](feature-xtdh-formulas.md)
 - [TDH Boost Rules](feature-tdh-boost-rules.md)
 - [How TDH Is Calculated](feature-tdh-how-it-works.md)
-- [TDH-v1 Specification](feature-tdh-specification.md)
+- [TDH v1.4 Specification](feature-tdh-specification.md)
 - [TDH Formal Model](feature-tdh-formal-model.md)
 - [TDH Implementations](feature-tdh-implementations.md)
 - [TDH Verification Dashboard](feature-tdh-verification.md)

@@ -170,6 +170,13 @@ wallet, in a safe order.
   four-wallet consolidations count only for links registered from the cutoff,
   and every step opens ten minutes later, a few minutes later, so no link can land
   before the start.
+- With four wallets listed, a grey note under the wallet list says when a
+  group of four counts: only when one of its wallets has links with each of
+  the other three registered in both directions from the cutoff; with older
+  links three of them count. The steps register the links that need it, so
+  all four count, on 6529.io and in TDH v1.4, the rules the validators
+  compute (D136). It links to step 10 of How TDH is calculated and asks for
+  no confirmation.
 - Before the activation cutoff, a small note under the wallet counter gives
   the current environment's four-wallet signing opening time in UTC. You can
   prepare a plan in advance. The note disappears at the cutoff, including in

@@ -1,6 +1,6 @@
 {
   "network.tdh.profile.title": "Explain my TDH",
-  "network.tdh.profile.intro": "Look up a public profile or wallet to follow 6529.io’s stored calculation for it, card by card: the values the daily comparison tests against TDH-v1. No wallet connection is needed.",
+  "network.tdh.profile.intro": "Look up a public profile or wallet to follow 6529.io’s stored calculation for it, card by card: the values the daily comparison tests against the specification of TDH v1.4. No wallet connection is needed.",
   "network.tdh.profile.input": "Profile handle, ENS name or wallet address",
   "network.tdh.profile.submit": "Explain TDH",
   "network.tdh.profile.loading": "Loading the TDH snapshot…",
@@ -53,7 +53,7 @@
   "network.tdh.profile.next": "Next tokens",
   "network.tdh.profile.pagination": "Tokens {start}–{end} of {total}",
   "network.tdh.profile.placeholder": "A profile handle, name.eth or 0x…",
-  "network.tdh.profile.storedNote": "These are 6529.io’s stored values; until the cutover they come from its own backend, which the daily comparison checks against TDH-v1.",
+  "network.tdh.profile.storedNote": "These are 6529.io’s stored values; until the cutover they come from its own backend, which the daily comparison checks against the specification of TDH v1.4.",
   "network.tdh.profile.reproduced": "Reproduced by two separately written programs from one input, and by 6529.io: for the cycle of {date}, the Rust core, the Python reference (computing from the Rust run’s input) and 6529.io gave all {identities} identity records and {wallets} wallet records identically, this one included.",
   "network.tdh.profile.reproducedLink": "See that day",
   "network.tdh.profile.holdings.one": "{collection} · {tdh} TDH · {count} card",

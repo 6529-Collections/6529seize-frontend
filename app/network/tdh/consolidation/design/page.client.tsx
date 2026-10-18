@@ -13,6 +13,7 @@ import {
   useTDHSectionHashFocus,
 } from "../../TDHPageNavigation";
 import TdhArrowLink from "../../shared/TdhArrowLink";
+import { FourWalletDiagram } from "../../shared/diagrams/IdentityGraphs";
 import TdhPager from "../../shared/TdhPager";
 import TdhStackTable from "../../shared/TdhStackTable";
 import TdhTableFrame from "../../shared/TdhTableFrame";
@@ -217,7 +218,7 @@ export default function TDHConsolidationDesignPage() {
                 })
               : pendingLimits}
           </p>
-          <p className="tw-mb-0 tw-mt-4 tw-max-w-[34rem] tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.05] tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+          <p className="tw-mb-0 tw-mt-4 tw-max-w-[34rem] tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-500 tw-bg-iron-900/60 tw-py-2 tw-pl-4 tw-pr-3 tw-text-sm tw-leading-6 tw-text-iron-200">
             {limits
               ? t(locale, "network.tdhConsolidation.status", { limit, date })
               : pendingLimits}
@@ -358,6 +359,9 @@ export default function TDHConsolidationDesignPage() {
                 </li>
               ))}
             </ul>
+            {/* The gate drawn: the same four wallets and six links, fresh
+                (a group of four) and old (three, and one alone). */}
+            <FourWalletDiagram locale={locale} />
             <p className={`${TDH_PANEL} ${TDH_TEXT} tw-p-5`}>
               {t(locale, "network.tdhConsolidation.start.data", {
                 snapshotDate: formatDate(locale, LIVE_SNAPSHOT.date, {

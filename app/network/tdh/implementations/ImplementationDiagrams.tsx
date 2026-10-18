@@ -536,13 +536,13 @@ const LEAN_VECTORS: Cell = { tone: "review", label: "ofVectors" };
 /**
  * Where each program runs and which check covers it, in one matrix: the
  * checks, then the places a program's result is used (validator signing,
- * 6529.io, the proof programs). Vectors: P26 has 89 since f840096, and
+ * 6529.io, the proof programs). Vectors: P26 has 104 since 3bfa7b0, and
  * the references, the Rust core and program B (the validator's development
- * branch, 30bf8f9) pass all of them (`shared/tdhFacts.ts`); the Lean
+ * branch, a1463f9) pass all of them (`shared/tdhFacts.ts`); the Lean
  * model's count comes from its published proof manifest. A whole real day:
  * the references and the Lean model on 2026-10-11 (P26 §13, the model's
  * README), the Rust core in the daily runs; program B has published none.
- * Random and generated inputs: the five rounds of four-way differential
+ * Random and generated inputs: the six rounds of four-way differential
  * tests ran the Rust core, program B, the Lean model and the Python
  * reference, and 6529chain's tdh-formal workflow runs 1,000 seeded random
  * inputs through Lean, Python and the Rust reference on every change.

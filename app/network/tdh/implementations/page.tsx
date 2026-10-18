@@ -11,7 +11,7 @@ import {
   type VerificationSummary,
 } from "@/lib/tdh/verification/summary.server";
 import { leanRound } from "../formal/formalStatus";
-import { LEAN_LATEST_ROUND, LEAN_ROUND_5 } from "../formal/leanResults";
+import { LEAN_LATEST_ROUND, LEAN_ROUND_6 } from "../formal/leanRounds";
 import DifftestRounds from "../shared/DifftestRounds";
 import TdhArrowLink from "../shared/TdhArrowLink";
 import TdhPageShell from "../shared/TdhPageShell";
@@ -45,7 +45,7 @@ const TABLE_SOURCES = [
 const CHECKS = [
   { key: "vectors", refs: ["P26 §13"] },
   { key: "replays", refs: ["Replay 2026-10-11", "P26 §13"] },
-  { key: "difftest", refs: ["P26 §13", "Difftest Oct 15–16"] },
+  { key: "difftest", refs: ["P26 §13", "Difftest Oct 15–18"] },
   { key: "dual", refs: ["D125", "P53 §4.5"] },
   { key: "daily", refs: ["D132"] },
   { key: "lean", refs: [] },
@@ -130,10 +130,10 @@ export default async function TdhImplementationsPage() {
     newer:
       round < LEAN_LATEST_ROUND
         ? {
-            passed: LEAN_ROUND_5.vectorsPassed,
-            total: LEAN_ROUND_5.vectorsTotal,
-            spec: LEAN_ROUND_5.specCommit,
-            commit: LEAN_ROUND_5.commit,
+            passed: LEAN_ROUND_6.vectorsPassed,
+            total: LEAN_ROUND_6.vectorsTotal,
+            spec: LEAN_ROUND_6.specCommit,
+            commit: LEAN_ROUND_6.commit,
           }
         : null,
   };
@@ -173,6 +173,7 @@ export default async function TdhImplementationsPage() {
                   python: formatInteger(locale, P26.pythonChecks),
                   rust: formatInteger(locale, P26.rustReferenceChecks),
                   lean: formatInteger(locale, lean.checks),
+                  leanVectors: formatInteger(locale, lean.total),
                 })}
               </p>
               <p className="tw-m-0">

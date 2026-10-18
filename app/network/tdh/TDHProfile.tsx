@@ -32,7 +32,7 @@ import {
 } from "./tdh-profile.helpers";
 
 /**
- * The registry's sinks in tdh-v1.0 (P26 §3.4, §10): the zero address and
+ * The registry's sinks in tdh-v1.4 (P26 §3.4, §10): the zero address and
  * 0x…dead. Their records count in the total but never as participants.
  */
 const SINK_ADDRESSES: ReadonlySet<string> = new Set([
