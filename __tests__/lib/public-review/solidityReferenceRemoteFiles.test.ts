@@ -24,6 +24,11 @@ const INDEX_RELATIVE = path.join(
   "index.json"
 );
 const hasFixture = existsSync(path.join(FIXTURE_ROOT, INDEX_RELATIVE));
+if (!hasFixture && process.env["CI"]) {
+  throw new Error(
+    "Missing Solidity reference fixture for the remote file tests"
+  );
+}
 const describeFixture = hasFixture ? describe : describe.skip;
 const IDENTITY = STREAM_SOLIDITY_REFERENCE_IDENTITY;
 const SITE = "https://6529.io";
