@@ -16,7 +16,57 @@ type AlchemyMetadataCandidateResult =
   | { readonly kind: "metadata_missing"; readonly topLevelKeys: string[] }
   | { readonly kind: "unexpected_error"; readonly errorMessage: string };
 
-export const fetchAlchemyMetadataCandidate = async (
+/**
+ * Requests NFT metadata with a timeout and classifies the outcome.
+ * `selectNft` picks the token's metadata object out of the response body.
+ */
+const requestMetadataCandidate = async (
+  url: string,
+  init: RequestInit,
+  selectNft: (payload: unknown) => unknown
+): Promise<AlchemyMetadataCandidateResult> => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+  let response: Response;
+  try {
+    response = await fetch(url, { ...init, signal: controller.signal });
+    clearTimeout(timeout);
+  } catch (error) {
+    clearTimeout(timeout);
+    return {
+      kind: "unexpected_error",
+      errorMessage: error instanceof Error ? error.message : "unknown",
+    };
+  }
+
+  if (!response.ok) {
+    return { kind: "http_error", status: response.status };
+  }
+
+  let payload: unknown;
+  try {
+    payload = (await response.json()) as unknown;
+  } catch (error) {
+    return {
+      kind: "json_error",
+      errorMessage: error instanceof Error ? error.message : "unknown",
+    };
+  }
+
+  const { metadata, topLevelKeys } = extractAlchemyMetadata(selectNft(payload));
+  if (!metadata) {
+    return { kind: "metadata_missing", topLevelKeys };
+  }
+
+  return {
+    kind: "success",
+    metadata,
+    topLevelKeys,
+  };
+};
+
+const fetchAlchemyMetadataCandidate = (
   network: string,
   apiKey: string,
   contractAddress: string,
@@ -27,121 +77,46 @@ export const fetchAlchemyMetadataCandidate = async (
   );
   endpoint.searchParams.set("contractAddress", contractAddress);
   endpoint.searchParams.set("tokenId", tokenIdCandidate);
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-
-  let response: Response;
-  try {
-    response = await fetch(endpoint.toString(), {
-      headers: { Accept: "application/json" },
-      signal: controller.signal,
-    });
-    clearTimeout(timeout);
-  } catch (error) {
-    clearTimeout(timeout);
-    return {
-      kind: "unexpected_error",
-      errorMessage: error instanceof Error ? error.message : "unknown",
-    };
-  }
-
-  if (!response.ok) {
-    return { kind: "http_error", status: response.status };
-  }
-
-  let payload: unknown;
-  try {
-    payload = (await response.json()) as unknown;
-  } catch (error) {
-    return {
-      kind: "json_error",
-      errorMessage: error instanceof Error ? error.message : "unknown",
-    };
-  }
-
-  const { metadata, topLevelKeys } = extractAlchemyMetadata(payload);
-  if (!metadata) {
-    return { kind: "metadata_missing", topLevelKeys };
-  }
-
-  return {
-    kind: "success",
-    metadata,
-    topLevelKeys,
-  };
+  return requestMetadataCandidate(
+    endpoint.toString(),
+    { headers: { Accept: "application/json" } },
+    (payload) => payload
+  );
 };
 
 /**
  * Fetches NFT metadata through the backend's Alchemy proxy, for builds that
- * have no Alchemy key (the desktop app). The proxy serves Ethereum mainnet.
+ * have no Alchemy key (the desktop app). The proxy serves Ethereum mainnet
+ * and answers `{ tokens: [...] }`.
  */
-export const fetchProxyMetadataCandidate = async (
+const fetchProxyMetadataCandidate = (
   contractAddress: string,
   tokenIdCandidate: string
-): Promise<AlchemyMetadataCandidateResult> => {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+): Promise<AlchemyMetadataCandidateResult> =>
+  requestMetadataCandidate(
+    `${publicEnv.API_ENDPOINT}/alchemy-proxy/token-metadata`,
+    {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        ...(publicEnv.STAGING_API_KEY
+          ? { "x-6529-auth": publicEnv.STAGING_API_KEY }
+          : {}),
+      },
+      body: JSON.stringify({
+        address: contractAddress,
+        tokenIds: [tokenIdCandidate],
+        chain: "ethereum",
+      }),
+    },
+    (payload) => {
+      const tokens = (payload as { readonly tokens?: unknown } | null)?.tokens;
+      return Array.isArray(tokens) ? (tokens[0] as unknown) : undefined;
+    }
+  );
 
-  let response: Response;
-  try {
-    response = await fetch(
-      `${publicEnv.API_ENDPOINT}/alchemy-proxy/token-metadata`,
-      {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          ...(publicEnv.STAGING_API_KEY
-            ? { "x-6529-auth": publicEnv.STAGING_API_KEY }
-            : {}),
-        },
-        body: JSON.stringify({
-          address: contractAddress,
-          tokenIds: [tokenIdCandidate],
-          chain: "ethereum",
-        }),
-        signal: controller.signal,
-      }
-    );
-    clearTimeout(timeout);
-  } catch (error) {
-    clearTimeout(timeout);
-    return {
-      kind: "unexpected_error",
-      errorMessage: error instanceof Error ? error.message : "unknown",
-    };
-  }
-
-  if (!response.ok) {
-    return { kind: "http_error", status: response.status };
-  }
-
-  let payload: unknown;
-  try {
-    payload = (await response.json()) as unknown;
-  } catch (error) {
-    return {
-      kind: "json_error",
-      errorMessage: error instanceof Error ? error.message : "unknown",
-    };
-  }
-
-  const tokens = (payload as { readonly tokens?: unknown } | null)?.tokens;
-  const token = Array.isArray(tokens) ? (tokens[0] as unknown) : undefined;
-  const { metadata, topLevelKeys } = extractAlchemyMetadata(token);
-  if (!metadata) {
-    return { kind: "metadata_missing", topLevelKeys };
-  }
-
-  return {
-    kind: "success",
-    metadata,
-    topLevelKeys,
-  };
-};
-
-export type AlchemyMetadataCandidateFetcher = (
+type AlchemyMetadataCandidateFetcher = (
   tokenIdCandidate: string
 ) => Promise<AlchemyMetadataCandidateResult>;
 
