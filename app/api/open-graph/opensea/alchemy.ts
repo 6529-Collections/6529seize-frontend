@@ -18,23 +18,22 @@ type AlchemyMetadataCandidateResult =
   | { readonly kind: "unexpected_error"; readonly errorMessage: string };
 
 /**
- * Requests NFT metadata with a timeout and classifies the outcome.
- * `selectNft` picks the token's metadata object out of the response body.
+ * Requests NFT metadata and classifies the outcome. The timeout covers the
+ * body as well as the headers. `selectNft` picks the token's metadata object
+ * out of the response body.
  */
 const requestMetadataCandidate = async (
   url: string,
   init: RequestInit,
   selectNft: (payload: unknown) => unknown
 ): Promise<AlchemyMetadataCandidateResult> => {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-
   let response: Response;
   try {
-    response = await fetch(url, { ...init, signal: controller.signal });
-    clearTimeout(timeout);
+    response = await fetch(url, {
+      ...init,
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
   } catch (error) {
-    clearTimeout(timeout);
     return {
       kind: "unexpected_error",
       errorMessage: error instanceof Error ? error.message : "unknown",
