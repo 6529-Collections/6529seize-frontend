@@ -3,8 +3,9 @@ import type { ReactNode } from "react";
 import { formatInteger, formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
-import { EXAMPLE_NETWORK, rateCents } from "@/lib/tdh/tdhV1Arithmetic";
+import { REGISTRY_V14, rateCents } from "@/components/explained/engine/tdh";
 import { TDH_SERIES } from "../shared/tdhStyles";
+import { EXAMPLE_NETWORK } from "./exampleNetwork";
 import {
   NARROW_WIDTH,
   TdhDiagramSwitch,
@@ -212,7 +213,7 @@ function PairPoints({
   readonly font: number;
 }) {
   const label = (copies: number) => {
-    const cents = rateCents(H, copies, false) ?? 0;
+    const cents = rateCents(H, copies) ?? 0;
     return t(locale, "network.tdh.how.s7.pointLabel", {
       copies: formatInteger(locale, copies),
       rate: formatNumber(locale, cents / 100, {
@@ -377,7 +378,12 @@ function RateCurve({
         className="tw-stroke-iron-300"
       />
       {CURVE_POINTS.map((point) => {
-        const cents = rateCents(H, point.edition, point.minimumOne) ?? 0;
+        const cents =
+          rateCents(
+            H,
+            point.edition,
+            point.minimumOne ? REGISTRY_V14.gradient_rate_minimum : undefined
+          ) ?? 0;
         const px = x(point.edition);
         const py = y(cents / 100);
         const [dx, dy, anchor] = LABEL_PLACE[
@@ -424,9 +430,9 @@ function RateCurve({
       <PairPoints
         locale={locale}
         x300={x(300)}
-        y300={y((rateCents(H, 300, false) ?? 0) / 100)}
+        y300={y((rateCents(H, 300) ?? 0) / 100)}
         x310={x(310)}
-        y310={y((rateCents(H, 310, false) ?? 0) / 100)}
+        y310={y((rateCents(H, 310) ?? 0) / 100)}
         font={font}
       />
       <text

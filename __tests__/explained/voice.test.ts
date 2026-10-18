@@ -133,8 +133,12 @@ describe("no amber", () => {
   const kitFiles = roots
     .flatMap((dir) => walk(dir))
     .filter((file) => !file.endsWith("voice.ts"));
+  // A page built on the kit imports its UI. The engine (lane E) is
+  // arithmetic, not UI: the TDH pages that only compute with it keep their
+  // own colours until their chapter lane rebuilds them on the kit.
+  const KIT_UI_IMPORT = /@\/components\/explained\/(?!engine\/)/;
   const kitUsers = walk(path.join(ROOT, "app")).filter((file) =>
-    readFileSync(file, "utf8").includes("@/components/explained/")
+    KIT_UI_IMPORT.test(readFileSync(file, "utf8"))
   );
 
   it("scans the kit and every page built on it", () => {

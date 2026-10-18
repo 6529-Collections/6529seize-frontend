@@ -5,13 +5,13 @@ import { formatInteger, formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
-  EXAMPLE_NETWORK,
-  GRADIENT_MAX_COUNT,
-  boost,
+  REGISTRY_V14,
+  boostOfHoldings,
   seasonsFor,
-  type BoostBreakdown,
-} from "@/lib/tdh/tdhV1Arithmetic";
+  type BoostResult,
+} from "@/components/explained/engine/tdh";
 import { MAX_BOOST_CENTS } from "../examples";
+import { EXAMPLE_NETWORK } from "../exampleNetwork";
 import {
   TDH_CHIP_BUTTON,
   TDH_CHIP_OFF,
@@ -20,16 +20,19 @@ import {
 import ExplorableFrame from "./ExplorableFrame";
 import IntegerField from "./IntegerField";
 
-const SEASONS = seasonsFor(EXAMPLE_NETWORK.eligibleMemes);
+const SEASONS = seasonsFor(EXAMPLE_NETWORK.eligibleMemes, REGISTRY_V14).map(
+  (season) => season.id
+);
 const CURRENT_SEASON = SEASONS.at(-1) ?? 0;
+const GRADIENT_MAX_COUNT = REGISTRY_V14.gradient_max_count;
 
 /** Five parts, five distinct hues; the legend names each one too. */
 const PARTS = [
-  { key: "seasons", field: "seasonsMicro", dot: "tw-bg-sky-400" },
-  { key: "extra", field: "additionalSetsMicro", dot: "tw-bg-indigo-300" },
-  { key: "genesis", field: "genesisMicro", dot: "tw-bg-emerald-400" },
-  { key: "nakamoto", field: "nakamotoMicro", dot: "tw-bg-amber-300" },
-  { key: "gradients", field: "gradientsMicro", dot: "tw-bg-fuchsia-400" },
+  { key: "seasons", field: "seasons", dot: "tw-bg-sky-400" },
+  { key: "extra", field: "extraSets", dot: "tw-bg-indigo-300" },
+  { key: "genesis", field: "genesis", dot: "tw-bg-emerald-400" },
+  { key: "nakamoto", field: "nakamoto", dot: "tw-bg-amber-300" },
+  { key: "gradients", field: "gradients", dot: "tw-bg-fuchsia-400" },
 ] as const;
 
 function multiplier(locale: SupportedLocale, cents: number): string {
@@ -57,12 +60,12 @@ function BoostLadder({
   breakdown,
 }: {
   readonly locale: SupportedLocale;
-  readonly breakdown: BoostBreakdown;
+  readonly breakdown: BoostResult;
 }) {
   const span = (MAX_BOOST_CENTS - 100) * 10_000;
   const share = (microValue: number) =>
     Math.min(Math.max((microValue / span) * 100, 0), 100);
-  const marker = share((breakdown.betaCents - 100) * 10_000);
+  const marker = share((breakdown.beta - 100) * 10_000);
   let shift = "-50%";
   if (marker > 85) {
     shift = "-100%";
@@ -74,7 +77,7 @@ function BoostLadder({
       className="tw-block"
       role="img"
       aria-label={t(locale, "network.tdh.how.boostBuilder.ladderDesc", {
-        boost: multiplier(locale, breakdown.betaCents),
+        boost: multiplier(locale, breakdown.beta),
       })}
     >
       <span className="tw-relative tw-block tw-pt-6">
@@ -85,11 +88,11 @@ function BoostLadder({
             transform: `translateX(${shift})`,
           }}
         >
-          {multiplier(locale, breakdown.betaCents)}
+          {multiplier(locale, breakdown.beta)}
         </span>
         <span className="tw-relative tw-flex tw-h-4 tw-overflow-hidden tw-rounded-full tw-bg-iron-800">
           {PARTS.map((part) => {
-            const width = share(breakdown[part.field]);
+            const width = share(breakdown.parts[part.field]);
             return width > 0 ? (
               <span
                 key={part.key}
@@ -124,14 +127,11 @@ export default function BoostBuilder({
   const [seasons, setSeasons] = useState<ReadonlySet<number>>(new Set());
   const [genesis, setGenesis] = useState(false);
   const [nakamoto, setNakamoto] = useState(false);
-  const breakdown = boost({
-    fullSets,
-    gradients,
-    completeSeasons: [...seasons],
-    genesis,
-    nakamoto,
-    nMemes: EXAMPLE_NETWORK.eligibleMemes,
-  });
+  const breakdown = boostOfHoldings(
+    { fullSets, gradients, completeSeasons: [...seasons], genesis, nakamoto },
+    EXAMPLE_NETWORK.eligibleMemes,
+    REGISTRY_V14
+  );
   const reset = () => {
     setFullSets(0);
     setGradients(1);
@@ -287,7 +287,7 @@ export default function BoostBuilder({
       >
         <span className="tw-block tw-text-2xl tw-font-semibold tw-tabular-nums tw-text-iron-50">
           {t(locale, "network.tdh.how.boostBuilder.result", {
-            boost: multiplier(locale, breakdown.betaCents),
+            boost: multiplier(locale, breakdown.beta),
           })}
         </span>
         <span className="tw-mt-3 tw-block">
@@ -311,7 +311,7 @@ export default function BoostBuilder({
                 className={`tw-size-2 tw-rounded-full ${part.dot}`}
               />
               {t(locale, `network.tdh.how.boostBuilder.part.${part.key}`)}{" "}
-              {micro(locale, breakdown[part.field])}
+              {micro(locale, breakdown.parts[part.field])}
             </span>
           ))}
         </span>

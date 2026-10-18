@@ -9,18 +9,18 @@ import {
 } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import {
-  DAY_SECONDS,
-  EXAMPLE_SNAPSHOT_TIME,
-  wholeDays,
-} from "@/lib/tdh/tdhV1Arithmetic";
+import { REGISTRY_V14, wholeDays } from "@/components/explained/engine/tdh";
 import {
   TDH_CHIP_BUTTON,
   TDH_CHIP_OFF,
   TDH_CHIP_ON,
 } from "../../shared/tdhStyles";
+import { EXAMPLE_SNAPSHOT_TIME } from "../exampleNetwork";
 import ExplorableFrame from "./ExplorableFrame";
 import IntegerField from "./IntegerField";
+
+/** Whole days use the registry's `day_s` (P26 §4.3). */
+const DAY_SECONDS = REGISTRY_V14.day_s;
 
 const PRESETS = [
   { key: "preset1", seconds: 100 * DAY_SECONDS + 23 * 3_600 },
@@ -56,7 +56,7 @@ export default function DayCounter({
         (next.offsetMinutes ?? minutes) * 60
     );
 
-  const whole = wholeDays(EXAMPLE_SNAPSHOT_TIME, acquired);
+  const whole = wholeDays(EXAMPLE_SNAPSHOT_TIME, acquired, DAY_SECONDS);
   const remainder = offset % DAY_SECONDS;
   const result = t(
     locale,

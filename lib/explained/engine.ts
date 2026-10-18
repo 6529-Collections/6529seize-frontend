@@ -1,19 +1,23 @@
 import {
+  REGISTRY_V14,
   additionalSetsMicro,
   baseTdh,
-  boost,
+  boostOfHoldings,
   effectiveEdition,
   finalTdh,
   rateCents,
-} from "@/lib/tdh/tdhV1Arithmetic";
+  type Registry,
+} from "@/components/explained/engine/tdh";
 
 /**
  * The one seam between the facts layer and the TDH engine. Release 1's
- * engine is `engine/tdh.ts` (lane E: the registry-driven port of the
- * mockups' engine, which passes P26's in-scope vectors and the D136
- * checks); until it lands this adapter wraps today's TDH arithmetic, which
- * computes the same rates, editions and boosts. Swapping engines changes
- * this file only.
+ * engine is `components/explained/engine/tdh.ts` (lane E: the
+ * registry-driven port of P26, which passes P26's in-scope conformance
+ * vectors and the D136 checks). This adapter computes on that engine with
+ * the TDH v1.4 registry; swapping engines or registries changes this file
+ * only. `__tests__/explained/engineSeam.test.ts` checks that the engine's
+ * registry, registry hash, rule ID and vector count agree with the record
+ * snapshot synced from 6529chain.
  */
 export interface BoostQuery {
   /** Complete sets of every eligible Meme. */
@@ -47,17 +51,29 @@ export interface EngineAdapter {
   additionalSetsMicro(sets: number): number;
 }
 
+/** The rule registry every value of the adapter is computed on. */
+const REGISTRY: Registry = REGISTRY_V14;
+
 export const ENGINE: EngineAdapter = {
-  name: "the TDH v1.4 arithmetic (lib/tdh/tdhV1Arithmetic.ts)",
+  name: `the ${REGISTRY.rule_version} engine (components/explained/engine/tdh.ts)`,
   rateCents(numerator, edition, minimumOne = false) {
-    const cents = rateCents(numerator, edition, minimumOne);
+    const cents = rateCents(
+      numerator,
+      edition,
+      minimumOne ? REGISTRY.gradient_rate_minimum : undefined
+    );
     if (cents === null) {
       throw new RangeError(`no rate for an edition of ${edition}`);
     }
     return cents;
   },
   effectiveEdition(minted, claimLimit) {
-    return effectiveEdition(minted, claimLimit);
+    const { edition, floorApplied } = effectiveEdition(
+      minted,
+      claimLimit,
+      REGISTRY
+    );
+    return { edition, floorApplied };
   },
   baseTdh(cents, days) {
     return baseTdh(cents, days);
@@ -66,16 +82,19 @@ export const ENGINE: EngineAdapter = {
     return finalTdh(base, betaCents);
   },
   boostCents(query) {
-    return boost({
-      fullSets: query.fullSets,
-      gradients: query.gradients,
-      completeSeasons: query.completeSeasons,
-      genesis: query.genesis,
-      nakamoto: query.nakamoto,
-      nMemes: query.nMemes,
-    }).betaCents;
+    return boostOfHoldings(
+      {
+        fullSets: query.fullSets,
+        gradients: query.gradients,
+        completeSeasons: query.completeSeasons,
+        genesis: query.genesis,
+        nakamoto: query.nakamoto,
+      },
+      query.nMemes,
+      REGISTRY
+    ).beta;
   },
   additionalSetsMicro(sets) {
-    return additionalSetsMicro(sets);
+    return additionalSetsMicro(sets, REGISTRY);
   },
 };

@@ -7,7 +7,11 @@ import {
   householdScenario,
 } from "@/app/network/tdh/how-it-works/examples";
 import { replayStacks } from "@/app/network/tdh/how-it-works/explorables/StackSimulator";
-import { EXAMPLE_NETWORK, boost } from "@/lib/tdh/tdhV1Arithmetic";
+import { EXAMPLE_NETWORK } from "@/app/network/tdh/how-it-works/exampleNetwork";
+import {
+  REGISTRY_V14,
+  boostOfHoldings,
+} from "@/components/explained/engine/tdh";
 
 // The worked examples of How TDH is calculated, checked against the numbers
 // the P26 Python reference printed (plan, Appendix A).
@@ -57,14 +61,17 @@ describe("How TDH is calculated: worked examples", () => {
 
   it("reaches the highest boost from 8 full sets: 7 sets round to 2.03, 33 sets to 2.04", () => {
     const highest = (fullSets: number) =>
-      boost({
-        fullSets,
-        gradients: 5,
-        completeSeasons: [],
-        genesis: false,
-        nakamoto: false,
-        nMemes: EXAMPLE_NETWORK.eligibleMemes,
-      }).betaCents;
+      boostOfHoldings(
+        {
+          fullSets,
+          gradients: 5,
+          completeSeasons: [],
+          genesis: false,
+          nakamoto: false,
+        },
+        EXAMPLE_NETWORK.eligibleMemes,
+        REGISTRY_V14
+      ).beta;
     expect([highest(7), highest(8), highest(33)]).toEqual([203, 204, 204]);
     expect(MAX_BOOST_CENTS).toBe(204);
   });

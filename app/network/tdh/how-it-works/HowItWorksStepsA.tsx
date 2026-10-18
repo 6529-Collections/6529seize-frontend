@@ -4,11 +4,11 @@ import TdhTableFrame from "../shared/TdhTableFrame";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
-  DAY_SECONDS,
-  EXAMPLE_SNAPSHOT_TIME,
+  REGISTRY_V14,
+  cycleBoundary,
   cycleDayOfDate,
   wholeDays,
-} from "@/lib/tdh/tdhV1Arithmetic";
+} from "@/components/explained/engine/tdh";
 import TransactionBoxDiagram from "../shared/diagrams/TransactionBoxDiagram";
 import {
   RULE_CUTOFF,
@@ -29,6 +29,7 @@ import {
   tdhNarrowCell,
 } from "../shared/tdhStyles";
 import { EDITION_EXAMPLES, RATE_EXAMPLES } from "./examples";
+import { EXAMPLE_SNAPSHOT_TIME } from "./exampleNetwork";
 import DayCounter from "./explorables/DayCounter";
 import RateExplorer from "./explorables/RateExplorer";
 import StackSimulator from "./explorables/StackSimulator";
@@ -68,7 +69,7 @@ function Step1({ locale }: { readonly locale: SupportedLocale }) {
         <p className="tw-m-0">
           {t(locale, "network.tdh.how.s1.example", {
             cycle: formatInteger(locale, cycle),
-            boundary: formatInteger(locale, cycle * DAY_SECONDS),
+            boundary: formatInteger(locale, cycleBoundary(cycle)),
             snapshot: formatInteger(locale, EXAMPLE_SNAPSHOT_TIME),
           })}
         </p>
@@ -84,10 +85,11 @@ function Step1({ locale }: { readonly locale: SupportedLocale }) {
 }
 
 function Step2({ locale }: { readonly locale: SupportedLocale }) {
+  const day = REGISTRY_V14.day_s;
   const rows = [
-    { key: "row1", seconds: 100 * DAY_SECONDS + 23 * 3_600 },
+    { key: "row1", seconds: 100 * day + 23 * 3_600 },
     { key: "row2", seconds: 23 * 3_600 },
-    { key: "row3", seconds: DAY_SECONDS },
+    { key: "row3", seconds: day },
   ] as const;
   return (
     <StepSection
@@ -119,7 +121,8 @@ function Step2({ locale }: { readonly locale: SupportedLocale }) {
               {rows.map((row) => {
                 const days = wholeDays(
                   EXAMPLE_SNAPSHOT_TIME,
-                  EXAMPLE_SNAPSHOT_TIME - row.seconds
+                  EXAMPLE_SNAPSHOT_TIME - row.seconds,
+                  day
                 );
                 return (
                   <tr key={row.key}>

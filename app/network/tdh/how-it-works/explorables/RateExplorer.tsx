@@ -5,13 +5,13 @@ import { formatInteger, formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
-  EDITION_FLOOR_THRESHOLD,
-  EXAMPLE_NETWORK,
-  effectiveEdition,
+  REGISTRY_V14,
+  effectiveEdition as editionOf,
   isRateHalfCentTie,
   rateCents,
-} from "@/lib/tdh/tdhV1Arithmetic";
+} from "@/components/explained/engine/tdh";
 import { TdhSvg } from "../../shared/TdhSvg";
+import { EXAMPLE_NETWORK } from "../exampleNetwork";
 import ExplorableFrame from "./ExplorableFrame";
 import IntegerField from "./IntegerField";
 
@@ -24,8 +24,14 @@ const DEFAULT_CLAIM = 332;
  * card is never larger than the network's largest edition.
  */
 const H = EXAMPLE_NETWORK.largestEdition;
-/** P26 §5.2: a floor is the claim's limit, capped at 310. */
-const FLOOR_CAP = 310;
+/** P26 §5.2: a floor is the claim's limit, capped at the registry's 310. */
+const FLOOR_CAP = REGISTRY_V14.edition_floor_cap;
+/** P26 §5.2: floors apply only below the Nakamoto Threshold of 300 (D89). */
+const EDITION_FLOOR_THRESHOLD = REGISTRY_V14.edition_floor_threshold;
+
+function effectiveEdition(minted: number, claim: number) {
+  return editionOf(minted, claim, REGISTRY_V14);
+}
 
 /**
  * The explorer's chart: the rate a Meme gets against the copies minted, for

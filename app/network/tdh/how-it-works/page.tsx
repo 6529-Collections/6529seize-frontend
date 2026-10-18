@@ -16,11 +16,12 @@ import { noBreakTerms } from "../shared/noBreakTerms";
 
 const STEP_COUNT = 14;
 /**
- * The port's tests, on the repository's main branch: the page and its tests
- * ship together, so the link always shows the tests of the code that runs.
+ * The engine's tests, on the repository's main branch: the page and its
+ * tests ship together, so the link always shows the tests of the code that
+ * runs (the specification's vectors are in the same folder).
  */
 const PORT_TESTS =
-  "https://github.com/6529-Collections/6529seize-frontend/blob/main/__tests__/lib/tdh/tdhV1Arithmetic.test.ts";
+  "https://github.com/6529-Collections/6529seize-frontend/tree/main/__tests__/components/explained/engine";
 
 // Step 13 shows the latest compared day's total, from the daily feed.
 export const revalidate = 600;

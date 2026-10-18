@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { cycleDayOfDate } from "@/lib/tdh/tdhV1Arithmetic";
+import { cycleDayOfDate } from "@/components/explained/engine/tdh";
 
 /**
  * The public TDH verification files, published every day by 6529's daily

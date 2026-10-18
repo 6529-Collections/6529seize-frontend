@@ -1,10 +1,11 @@
 import { BY_HAND_VECTORS } from "@/app/network/tdh/implementations/byHandVectors";
 import { VECTORS } from "@/app/network/tdh/implementations/vectors";
 import {
+  REGISTRY_V14,
   additionalSetsMicro,
   baseTdh,
   finalTdh,
-} from "@/lib/tdh/tdhV1Arithmetic";
+} from "@/components/explained/engine/tdh";
 
 /**
  * The three vectors the implementations page restates in full (04, 06 and
@@ -45,7 +46,9 @@ describe("vectors restated for checking by hand", () => {
     const a04 = v04?.records.find((record) => record.wallets[0] === "a1");
     expect(a04?.raw).toBe(2 * 30);
     expect(a04?.base).toBe(baseTdh(100, 60));
-    expect(100 + Math.round(additionalSetsMicro(2) / 10_000)).toBe(a04?.boostC);
+    expect(
+      100 + Math.round(additionalSetsMicro(2, REGISTRY_V14) / 10_000)
+    ).toBe(a04?.boostC);
     expect(finalTdh(a04?.base ?? 0, a04?.boostC ?? 0)).toBe(a04?.final);
     // 06: B's copy keeps its 200 days inside the identity.
     const identity = v06?.records.find((record) => record.kind === "identity");

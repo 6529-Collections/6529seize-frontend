@@ -30,8 +30,10 @@ Shared pieces live in `app/network/tdh/shared/` (section navigation, pager,
 source chips, status pills, rule blocks, copy buttons, arrow links, inline
 anchor headings, responsive SVG frames, stacked tables, the table style, and
 `tdhFacts.ts`, the one place for the counts and commits the pages state). The
-arithmetic is in `lib/tdh/tdhV1Arithmetic.ts`; the verification data
-contract, loader and states are in `lib/tdh/verification/`.
+arithmetic is the 6529 Explained engine, `components/explained/engine/tdh.ts`
+(TDH v1.4, checked against P26's conformance vectors; it replaced
+`lib/tdh/tdhV1Arithmetic.ts`); the verification data contract, loader and
+states are in `lib/tdh/verification/`.
 
 The pages follow P26 at 6529chain `f840096` (its fifth round, of 16 October
 2026): 89 conformance vectors (01 to 88 and 12b). The Lean model's figures
@@ -133,8 +135,8 @@ bands.
   The pages give no date for it.
 - The Playwright spec `tests/pages/network-tdh-explained.spec.ts` is not yet
   registered in a pack; `tests/pages/` specs run with the full E2E suite.
-- How it works links the arithmetic port's tests on `main`
-  (`__tests__/lib/tdh/tdhV1Arithmetic.test.ts`); the file reaches `main`
+- How it works links the engine's tests on `main`
+  (`__tests__/components/explained/engine/`); the folder reaches `main`
   with the merge. Check that link, and the pages' other `main` links, after
   the merge and before the pages are announced.
 - Feed-side, not in this branch: a day file is replaced in place when the

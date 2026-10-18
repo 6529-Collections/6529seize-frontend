@@ -126,7 +126,7 @@
     "routes-manifest:check": "node scripts/require-6529-command.cjs && node scripts/routes-manifest.cjs",
     "routes-manifest:update": "node scripts/require-6529-command.cjs && node scripts/routes-manifest.cjs --update",
     "tdh-pages:check": "node scripts/require-6529-command.cjs && node scripts/tdh-pages-check.mjs",
-    "explained:check": "node scripts/require-6529-command.cjs && cross-env NODE_ENV=test jest --silent --verbose=false --coverage=false __tests__/explained",
+    "explained:check": "node scripts/require-6529-command.cjs && cross-env NODE_ENV=test jest --silent --verbose=false --coverage=false __tests__/explained __tests__/components/explained",
     "explained:gates": "node scripts/require-6529-command.cjs && node scripts/explained/gates.mjs",
     "explained:compare": "node scripts/require-6529-command.cjs && node scripts/explained/compare-mockups.mjs",
     "explained:sync-record": "node scripts/require-6529-command.cjs && node scripts/explained/sync-record.mjs",

@@ -5,9 +5,10 @@ name: 6529 Explained gates
 
 # SCORECARD.md §3 in CI for 6529 Explained: the facts layer (an unknown key
 # fails), the drift check against the decision record's snapshot, the voice
-# and number lints and the kit's tests; then the rendered gates (render,
-# measure, states, axe and the readers' checks) on every registered page
-# built on the kit, at 1440 and 390, and in de-DE at 390.
+# and number lints, the kit's tests and the engine's conformance tests; then
+# the rendered gates (render, measure, states, axe and the readers' checks)
+# on every registered page built on the kit, at 1440 and 390, and in de-DE
+# at 390.
 
 on:
   pull_request:
@@ -22,6 +23,7 @@ on:
       - "i18n/messages/explained*.json"
       - "scripts/explained/**"
       - "__tests__/explained/**"
+      - "__tests__/components/explained/**"
       - ".github/workflows/explained-gates.yml"
   workflow_dispatch:
 
@@ -34,7 +36,7 @@ concurrency:
 
 jobs:
   static:
-    name: Explained / facts, drift, voice, kit tests
+    name: Explained / facts, drift, voice, kit and engine tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -76,7 +78,7 @@ jobs:
           SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 ci
 
-      - name: Facts, drift check, voice and number lints, kit tests
+      - name: Facts, drift check, voice and number lints, kit and engine tests
         run: ./bin/6529 run explained:check
 
   rendered:
