@@ -151,3 +151,7 @@ ops/skills/6529-agent-login/*agent-login*.js
 
 # Generated from the pinned PDF.js dependency before dev/build.
 /public/pdfjs/
+
+# 6529 Explained gate and mockup-comparison output (scripts/explained).
+/.explained-gates/
+/.explained-compare/
