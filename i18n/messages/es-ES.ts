@@ -2,6 +2,7 @@ import { ES_ES_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
 import { ES_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import { ES_ES_DROP_REQUIREMENT_MESSAGES } from "@/i18n/messages/drop-requirements";
 import artworkShareMessages from "@/i18n/messages/artworkShare.es-ES.json";
+import explainedKitMessages from "@/i18n/messages/explainedKit.es-ES.json";
 import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.es-ES.json";
 import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.es-ES.json";
 import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.es-ES.json";
@@ -36,6 +37,7 @@ export const ES_ES_MESSAGES = {
   "singleDrop.chatLabel": "Chat del drop",
   "singleDrop.closeChat": "Cerrar chat",
   ...artworkShareMessages,
+  ...explainedKitMessages,
   ...profileCmsStudioMessages,
   ...profileCmsAgentMessages,
   ...studioTemplateDescriptions,

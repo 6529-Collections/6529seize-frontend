@@ -2,6 +2,7 @@ import { DE_DE_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
 import { DE_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import { DE_DE_DROP_REQUIREMENT_MESSAGES } from "@/i18n/messages/drop-requirements";
 import artworkShareMessages from "@/i18n/messages/artworkShare.de-DE.json";
+import explainedKitMessages from "@/i18n/messages/explainedKit.de-DE.json";
 import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.de-DE.json";
 import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.de-DE.json";
 import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.de-DE.json";
@@ -38,6 +39,7 @@ export const DE_DE_MESSAGES = {
   "singleDrop.chatLabel": "Drop-Chat",
   "singleDrop.closeChat": "Chat schließen",
   ...artworkShareMessages,
+  ...explainedKitMessages,
   ...profileCmsStudioMessages,
   ...profileCmsAgentMessages,
   ...studioTemplateDescriptions,

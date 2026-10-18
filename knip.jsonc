@@ -136,7 +136,13 @@
       "standalone/standalone-memes-mint/src/tailwind.config.cjs": ["exports"],
       "utils/sentry-client-filters.ts": ["exports", "types"],
       "lib/fetch/ssrFetch.ts": ["exports"],
-      "config/serverEnv.ts": ["exports"]
+      "config/serverEnv.ts": ["exports"],
+      // 6529 Explained kit (release 1, lane K): the shared components and the
+      // facts layer the chapter pages import. The dev-only kit gallery reaches
+      // most of it; the rest is the kit's public API for the chapter lanes.
+      // Remove these exemptions as the chapter pages land and import them.
+      "components/explained/**": ["exports", "types"],
+      "lib/explained/**": ["exports", "types"]
     },
     "ignoreFiles": [
       "__mocks__/**",
