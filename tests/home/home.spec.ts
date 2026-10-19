@@ -4,7 +4,7 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
-import { devices } from "@playwright/test";
+import { devices, type Page } from "@playwright/test";
 import { getAppEnvironment } from "../../config/appEnvironment";
 import {
   isDesktopWebProject,
@@ -14,6 +14,103 @@ import { gateSidebarHydration } from "../support/sidebarHydration";
 import { installSectionTrackingFixture } from "../support/sectionTrackingFixture";
 import { installReadonlyMutationGuard } from "../support/readonlyMutationGuard";
 import { RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
+
+const loadingTestArtwork = {
+  id: 536,
+  name: "Homepage loading test artwork",
+  artist: "Test artist",
+  artist_seize_handle: "",
+  image: "https://6529.io/home-loading-fixture.png",
+  scaled: "https://6529.io/home-loading-fixture.png",
+  animation: null,
+  floor_price: 0,
+  collection: "The Memes",
+  season: 1,
+};
+
+async function installLoadingTestArtwork(page: Page) {
+  await page.route("**/home-loading-fixture.png", (route) =>
+    route.fulfill({
+      contentType: "image/svg+xml",
+      body: '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="#777"/></svg>',
+    })
+  );
+  await page.route("https://rpc.walletconnect.org/**", (route) =>
+    route.abort()
+  );
+}
+
+test("homepage artwork survives slow settings and failed mint status @smoke @medium @large", async ({
+  page,
+}) => {
+  await installLoadingTestArtwork(page);
+  await page.route("**/api/memes_latest", (route) =>
+    route.fulfill({ json: loadingTestArtwork })
+  );
+  let releaseSettings!: () => void;
+  const settingsReady = new Promise<void>((resolve) => {
+    releaseSettings = resolve;
+  });
+  await page.route("**/api/settings", async (route) => {
+    await settingsReady;
+    await route.fallback();
+  });
+  try {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const artwork = page
+      .getByRole("main")
+      .locator('[data-home-section="Latest drop"]');
+    await expect(
+      artwork.getByRole("link", { name: loadingTestArtwork.name, exact: true })
+    ).toBeVisible();
+    const image = artwork.getByRole("img", {
+      name: loadingTestArtwork.name,
+      exact: true,
+    });
+    await expect(image).toBeVisible();
+    await expect
+      .poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth))
+      .toBeGreaterThan(0);
+    releaseSettings();
+    await expect(
+      artwork.getByText("Unavailable", { exact: true }).first()
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    await expect(image).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+  } finally {
+    releaseSettings();
+  }
+});
+
+test("homepage artwork request has a visible failure and retry @smoke @medium @large", async ({
+  page,
+}) => {
+  await installLoadingTestArtwork(page);
+  let failing = true;
+  await page.route("**/api/memes_latest", (route) =>
+    failing
+      ? route.fulfill({
+          status: 503,
+          json: { error: "Temporarily unavailable" },
+        })
+      : route.fulfill({ json: loadingTestArtwork })
+  );
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await expect(
+    page
+      .getByRole("alert")
+      .filter({ hasText: "We couldn’t load the latest artwork." })
+  ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+  failing = false;
+  await page.getByRole("button", { name: "Try again", exact: true }).click();
+  await expect(
+    page.getByRole("link", { name: loadingTestArtwork.name, exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Try again", exact: true })
+  ).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+});
 
 test.describe("Home Page @smoke @medium @large", () => {
   test.beforeEach(async ({ page }) => {
