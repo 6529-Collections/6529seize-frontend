@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
+import { isCompetitionPathname } from "@/helpers/competition.helpers";
 import { getWaveIdFromPathname } from "@/helpers/navigation.helpers";
 import { useEffect, type ReactNode } from "react";
 import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
@@ -136,7 +137,9 @@ function getWavesContent({
 function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   const { contentState } = useAuthenticatedContent();
   const pathname = usePathname();
-  const hasRouteWave = Boolean(getWaveIdFromPathname(pathname));
+  const hasRouteWave =
+    Boolean(getWaveIdFromPathname(pathname)) &&
+    !isCompetitionPathname(pathname);
   const { isApp } = useDeviceInfo();
 
   // The chat/feed views manage their own internal scroll, so WavesLayout locks

@@ -397,7 +397,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
       {createOverlay}
       {effectiveDropId && (
         <div className={dropOverlayClass}>
-          {isDropOpen && drop ? (
+          {isDropOpen ? (
             <BrainDesktopDrop
               drop={{
                 type: DropSize.FULL,

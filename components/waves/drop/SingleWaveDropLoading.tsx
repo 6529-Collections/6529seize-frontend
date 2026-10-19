@@ -2,7 +2,9 @@
 
 import { useEffect } from "react";
 
-import SpinnerLoader from "@/components/common/SpinnerLoader";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
@@ -59,7 +61,17 @@ export default function SingleWaveDropLoading({
             )}
           </>
         ) : (
-          <SpinnerLoader text={t(locale, "singleDrop.loading")} />
+          <div
+            role="status"
+            aria-label={t(locale, "singleDrop.loading")}
+            aria-busy="true"
+            className="tw-flex tw-flex-col tw-items-center tw-gap-3"
+          >
+            <CircleLoader size={CircleLoaderSize.XLARGE} />
+            <span className="tw-text-sm tw-text-iron-400">
+              {t(locale, "singleDrop.loading")}
+            </span>
+          </div>
         )}
       </div>
     </div>
