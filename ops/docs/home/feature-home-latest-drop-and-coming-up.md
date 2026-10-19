@@ -238,11 +238,13 @@ Use this page for visibility rules, state switches, and route targets.
 
 ### Homepage loading-message localization fallback debt
 
-- The artwork error, retry labels, and unavailable mint stats use the `en-US`
-  fallback in partial `en-GB`, `de-DE`, `es-ES`, and `fr-FR` dictionaries.
+- The artwork error, retry labels, Coming Up labels and loading status, and
+  unavailable mint stats use the `en-US` fallback in partial `en-GB`, `de-DE`,
+  `es-ES`, and `fr-FR` dictionaries.
 - Non-English visitors may see these short messages in English. Frontend i18n
-  follow-up should add reviewed translations for `home.latestDrop.*` and
-  `home.nowMinting.stats.unavailable` and check their responsive presentation.
+  follow-up should add reviewed translations for `home.latestDrop.*`,
+  `home.comingUp.*`, and `home.nowMinting.stats.unavailable` and check their
+  responsive presentation.
 
 ### `/about/subscriptions` localization fallback debt
 

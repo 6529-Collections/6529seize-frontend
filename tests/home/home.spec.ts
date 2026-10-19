@@ -150,15 +150,22 @@ for (const hasBoostedDrops of [false, true]) {
       });
       await expect(openDrop).toBeVisible();
       await expect(
-        page.getByRole("link", { name: /example\.com/ })
+        page.getByRole("link", {
+          name: "example.com example.com/boosted-startup-preview",
+          exact: true,
+        })
       ).toHaveAttribute("href", previewUrl);
       await expectNoHorizontalOverflow(page);
       // The preview is its own link; use the card's keyboard action to open the drop.
       await openDrop.focus();
-      await openDrop.press("Enter");
-      await expect(page).toHaveURL(
-        new RegExp(`/waves/${comingUpWave.id}\\?serialNo=42$`)
-      );
+      // Navigation includes cold route compilation in the development CI server.
+      await Promise.all([
+        page.waitForURL(
+          new RegExp(`/waves/${comingUpWave.id}\\?serialNo=42$`),
+          { waitUntil: "domcontentloaded" }
+        ),
+        openDrop.press("Enter"),
+      ]);
     } finally {
       boostedReady.resolve();
     }
@@ -188,16 +195,20 @@ test("Coming Up retains cards across navigation and a failed refresh @smoke @med
   ).toBeVisible();
   expect(requests).toBe(1);
 
-  await page.getByRole("link", { name: "Start here", exact: true }).click();
-  await expect(page).toHaveURL(/\/join-6529$/);
+  await Promise.all([
+    page.waitForURL(/\/join-6529$/, { waitUntil: "domcontentloaded" }),
+    page.getByRole("link", { name: "Start here", exact: true }).click(),
+  ]);
   await page.goBack();
   await expect(
     comingUp.getByRole("link", { name: "Coming Up artwork 3", exact: true })
   ).toBeVisible();
   expect(requests).toBe(1);
 
-  await page.getByRole("link", { name: "Start here", exact: true }).click();
-  await expect(page).toHaveURL(/\/join-6529$/);
+  await Promise.all([
+    page.waitForURL(/\/join-6529$/, { waitUntil: "domcontentloaded" }),
+    page.getByRole("link", { name: "Start here", exact: true }).click(),
+  ]);
   await page.clock.fastForward(61_000);
   failing = true;
   const failedRefresh = page.waitForResponse(
