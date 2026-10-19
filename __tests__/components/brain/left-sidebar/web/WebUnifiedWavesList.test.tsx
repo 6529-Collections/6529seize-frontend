@@ -167,3 +167,19 @@ it("keeps the selected Pinned collection loading until its separate request fini
   rerender(<WebUnifiedWavesList {...props} isPinnedWavesLoading={false} />);
   expect(receivedLoading).toBe(false);
 });
+
+it("pauses and re-arms infinite scrolling around a background refresh", () => {
+  localStorage.setItem("wave-sidebar-collection", "joined");
+  const props = {
+    waves: [],
+    fetchNextPage: jest.fn(),
+    hasNextPage: true,
+    isFetchingNextPage: false,
+    onHover: jest.fn(),
+    scrollContainerRef: React.createRef<HTMLDivElement>(),
+  };
+  const { rerender } = render(<WebUnifiedWavesList {...props} isFetching />);
+  expect(jest.mocked(useInfiniteScroll).mock.calls.at(-1)?.[1]).toBe(true);
+  rerender(<WebUnifiedWavesList {...props} isFetching={false} />);
+  expect(jest.mocked(useInfiniteScroll).mock.calls.at(-1)?.[1]).toBe(false);
+});
