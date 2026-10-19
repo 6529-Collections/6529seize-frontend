@@ -143,9 +143,11 @@ export default function CreateWave({
   const { isApp } = useDeviceInfo();
   const { contentContainerStyle } = useLayout();
   const isNativeRoute = isApp && isCreateWavePathname(pathname);
+  // Flex sizing can outgrow height alone when a criteria editor expands.
+  // Keep the measured limit so this region remains the native scroll owner.
   const measuredOrFallbackStyle: CSSProperties =
     contentContainerStyle.height !== undefined
-      ? contentContainerStyle
+      ? { ...contentContainerStyle, maxHeight: contentContainerStyle.height }
       : { height: "100dvh", maxHeight: "100dvh" };
   const nativeBoundedStyle: CSSProperties | undefined = isNativeRoute
     ? measuredOrFallbackStyle

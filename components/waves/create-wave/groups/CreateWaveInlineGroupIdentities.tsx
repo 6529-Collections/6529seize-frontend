@@ -43,6 +43,8 @@ interface CreateWaveInlineGroupIdentitiesProps {
   ) => void;
   readonly resultsLayout?: GroupCreateIdentitiesSearchResultsLayout;
   readonly simplifyIncludedCopy?: boolean;
+  readonly showIdentityTotal?: boolean;
+  readonly mobilePresentation?: boolean;
 }
 
 function getModeConfig(
@@ -197,23 +199,25 @@ function IdentityControlsRow({
   includeMeLabel,
   isCurrentUserIncluded,
   isIncludedMode,
+  mobilePresentation,
   onCurrentUserToggle,
   onRemove,
   selectedWalletCount,
 }: {
   readonly activeIdentities: readonly CommunityMemberMinimal[];
   readonly currentUserIdentity: CommunityMemberMinimal | null;
-  readonly emptyText: string;
+  readonly emptyText: string | null;
   readonly includeMeLabel: string;
   readonly isCurrentUserIncluded: boolean;
   readonly isIncludedMode: boolean;
+  readonly mobilePresentation: boolean;
   readonly onCurrentUserToggle: (checked: boolean) => void;
   readonly onRemove: (wallet: string) => void;
   readonly selectedWalletCount: number;
 }) {
   const showRow =
     activeIdentities.length > 0 ||
-    selectedWalletCount === 0 ||
+    (selectedWalletCount === 0 && emptyText !== null) ||
     (isIncludedMode && !!currentUserIdentity);
   if (!showRow) {
     return null;
@@ -224,10 +228,11 @@ function IdentityControlsRow({
       {activeIdentities.length > 0 && (
         <GroupIdentitySelectedList
           identities={activeIdentities}
+          mobilePresentation={mobilePresentation}
           onRemove={onRemove}
         />
       )}
-      {selectedWalletCount === 0 && (
+      {selectedWalletCount === 0 && emptyText !== null && (
         <p className="tw-m-0 tw-text-xs tw-font-normal tw-text-iron-400">
           {emptyText}
         </p>
@@ -250,8 +255,10 @@ function IdentityStatus({
 }: {
   readonly isOverIdentityLimit: boolean;
   readonly limitText: string | null;
-  readonly totalText: string;
+  readonly totalText: string | null;
 }) {
+  if (totalText === null && limitText === null) return null;
+
   const toneClasses = isOverIdentityLimit
     ? "tw-text-error"
     : "tw-text-iron-400";
@@ -261,8 +268,12 @@ function IdentityStatus({
       role="status"
       className={`tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-2 tw-text-xs tw-font-medium tw-leading-relaxed ${toneClasses}`}
     >
-      <p className="tw-m-0">{totalText}</p>
-      {limitText ? <p className="tw-mb-0 tw-mt-1">{limitText}</p> : null}
+      {totalText !== null && <p className="tw-m-0">{totalText}</p>}
+      {limitText !== null && (
+        <p className={totalText === null ? "tw-m-0" : "tw-mb-0 tw-mt-1"}>
+          {limitText}
+        </p>
+      )}
     </div>
   );
 }
@@ -279,6 +290,8 @@ export default function CreateWaveInlineGroupIdentities(
     onIncludedIdentityRemove,
     resultsLayout = "popover",
     simplifyIncludedCopy = false,
+    showIdentityTotal = true,
+    mobilePresentation = false,
   } = props;
   const { connectedProfile } = useAuth();
   const locale = useBrowserLocale();
@@ -310,7 +323,9 @@ export default function CreateWaveInlineGroupIdentities(
     identities: excludedIdentities,
     walletSources: excludedWalletSources,
   });
-  const identitiesHelperText = t(locale, emptyHelperKey);
+  const identitiesHelperText = simplifyIncludedCopy
+    ? null
+    : t(locale, emptyHelperKey);
   const searchLabel = t(locale, searchLabelKey);
   const searchPlaceholder = t(locale, searchPlaceholderKey);
   const isOverIdentityLimit = selectedWallets.length > identityLimit;
@@ -351,8 +366,10 @@ export default function CreateWaveInlineGroupIdentities(
     },
   ];
   return (
-    <div className="tw-space-y-4">
-      <div className="tw-w-fit">
+    <div
+      className={`tw-space-y-4 ${mobilePresentation ? "[&_label:has([role=switch])]:tw-w-full [&_label:has([role=switch])]:tw-justify-between" : ""}`}
+    >
+      <div data-group-criteria-tabs className="tw-w-fit">
         <CommonTabs<InlineIdentityMode>
           items={modeItems}
           activeItem={mode}
@@ -366,12 +383,16 @@ export default function CreateWaveInlineGroupIdentities(
         />
       </div>
 
-      <div className="tw-space-y-3">
-        {!hideRedundantCopy && (
-          <h3 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
-            {searchLabel}
-          </h3>
-        )}
+      <div
+        className={
+          mobilePresentation
+            ? "tw-min-w-0 tw-space-y-3 tw-rounded-xl tw-bg-iron-900 tw-p-4"
+            : "tw-space-y-3"
+        }
+      >
+        <h3 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
+          {searchLabel}
+        </h3>
         <GroupCreateIdentitiesSearch
           key={mode}
           selectedWallets={selectedWallets}
@@ -396,6 +417,7 @@ export default function CreateWaveInlineGroupIdentities(
           )}
           isCurrentUserIncluded={isCurrentUserIncluded}
           isIncludedMode={isIncludedMode}
+          mobilePresentation={mobilePresentation}
           onCurrentUserToggle={(checked) =>
             updateCurrentUserSelection({
               checked,
@@ -412,7 +434,8 @@ export default function CreateWaveInlineGroupIdentities(
       <CreateWaveInlineGroupWalletSources
         quiet
         networkPresentation
-        hideEmptyMessages={hideRedundantCopy}
+        mobilePresentation={mobilePresentation}
+        hideEmptyMessages={simplifyIncludedCopy}
         direction={mode}
         sources={activeWalletSources}
         onChange={onWalletSourcesChange}
@@ -421,7 +444,7 @@ export default function CreateWaveInlineGroupIdentities(
         <IdentityStatus
           isOverIdentityLimit={isOverIdentityLimit}
           limitText={limitText}
-          totalText={totalText}
+          totalText={showIdentityTotal ? totalText : null}
         />
       )}
       {showCurrentUserExcludedWarning && (
