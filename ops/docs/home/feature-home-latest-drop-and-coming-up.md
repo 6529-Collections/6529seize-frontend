@@ -91,7 +91,17 @@ Use this page for visibility rules, state switches, and route targets.
 - Leaderboard still loading while `NEXT MINT` is ready:
   - `Coming up` can render with only the `NEXT MINT` card.
 - `Coming up` initial load with no ready cards and no `NEXT MINT` card:
-  - Three skeleton cards render until data is ready.
+  - Three skeleton cards render while the required requests are loading.
+- Returning to `Coming up` during the same app session:
+  - Recently loaded leader cards remain available for up to five minutes after
+    leaving the page. Older results refresh in the background when returning.
+  - Pull-to-refresh keeps loaded leader cards visible while updating them.
+  - A failed update keeps those cards visible.
+  - Closing the app or changing the signed-in identity can clear saved cards.
+- Slow current-artwork or mint-status details:
+  - Leader cards can appear independently.
+  - `NEXT MINT` appears only after the current artwork and mint status are
+    known; an unresolved current artwork is not treated as a different mint.
 - `Coming up` after load with no cards:
   - The full section is hidden.
 - In `Coming up` leader cards:
@@ -180,7 +190,7 @@ Use this page for visibility rules, state switches, and route targets.
 - In countdown error state, the `Next drop ...` status strip is not shown.
 - On touch devices, interactive HTML media can require `Tap to load` before
   playback.
-- If app settings do not include `memes_wave_id`, `Coming up` stays hidden.
+- Until app settings include `memes_wave_id`, `Coming up` stays hidden.
 
 ## Failure and Recovery
 
@@ -228,11 +238,13 @@ Use this page for visibility rules, state switches, and route targets.
 
 ### Homepage loading-message localization fallback debt
 
-- The artwork error, retry labels, and unavailable mint stats use the `en-US`
-  fallback in partial `en-GB`, `de-DE`, `es-ES`, and `fr-FR` dictionaries.
+- The artwork error, retry labels, Coming Up labels and loading status, and
+  unavailable mint stats use the `en-US` fallback in partial `en-GB`, `de-DE`,
+  `es-ES`, and `fr-FR` dictionaries.
 - Non-English visitors may see these short messages in English. Frontend i18n
-  follow-up should add reviewed translations for `home.latestDrop.*` and
-  `home.nowMinting.stats.unavailable` and check their responsive presentation.
+  follow-up should add reviewed translations for `home.latestDrop.*`,
+  `home.comingUp.*`, and `home.nowMinting.stats.unavailable` and check their
+  responsive presentation.
 
 ### `/about/subscriptions` localization fallback debt
 
