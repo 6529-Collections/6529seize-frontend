@@ -20,16 +20,23 @@ export default function PublicWaveFeedGate({
   const myStream = useMyStreamOptional();
   const { activeContentTab } = useContentTab();
   const hydrated = useHasHydrated();
-  const [readyWaveId, setReadyWaveId] = useState<string | null>(null);
+  const [readiness, setReadiness] = useState<{
+    waveId: string;
+    token: symbol;
+  } | null>(null);
   const activeWaveId = myStream?.activeWave.id ?? null;
   const markReady = useCallback(() => {
-    if (activeWaveId === waveId) setReadyWaveId(waveId);
+    if (activeWaveId !== waveId) return;
+    const token = Symbol();
+    setReadiness({ waveId, token });
+    return () =>
+      setReadiness((current) => (current?.token === token ? null : current));
   }, [activeWaveId, waveId]);
   const hasMismatchedActiveWave =
     hydrated && activeWaveId !== null && activeWaveId !== waveId;
   const showFallback =
     !hasMismatchedActiveWave &&
-    readyWaveId !== waveId &&
+    readiness?.waveId !== waveId &&
     (!hydrated || activeContentTab === MyStreamWaveTab.CHAT);
 
   return (

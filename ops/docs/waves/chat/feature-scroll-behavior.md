@@ -23,7 +23,7 @@ On Apple mobile only, new drops can stay pending until you return to bottom.
 ## User Journey
 
 1. Open a wave or direct-message thread.
-2. Public waves can show server-rendered post text in the chat layout while the interactive thread initializes. Text and drop links remain readable without JavaScript. This content stays until the thread has rendered, including through wallet/profile restoration; it does not switch to a discovery-card skeleton. Threads without a public preview show their loading state.
+2. Public waves can show server-rendered post text in the chat layout while the interactive thread initializes. Text and drop links remain readable without JavaScript. This content stays until the thread has rendered, including through wallet/profile restoration; it does not switch to a discovery-card skeleton. Returning to a previously opened wave or reloading its chat keeps the preview until that chat is ready again. Threads without a public preview show their loading state.
 3. If no drops exist, the thread shows `Start the conversation`.
 4. While pinned at visual bottom, incoming drops keep the view at latest.
 5. Scroll up to read history; the thread stops pinning and keeps your place.

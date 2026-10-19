@@ -483,6 +483,9 @@ for (const app of [false, true]) {
         baseURL
       );
     const dropId = "ux-unavailable-drop";
+    await page.route("**/api/open-graph**", (route) =>
+      route.fulfill({ json: {} })
+    );
     let release!: () => void;
     const gate = new Promise<void>((resolve) => {
       release = resolve;
@@ -513,6 +516,11 @@ for (const app of [false, true]) {
       await expect(
         pending.getByRole("status", { name: "Loading drop" })
       ).toBeVisible();
+      // The route fallback can paint before the interactive query mounts.
+      // Its Close control identifies the actual pending detail surface.
+      await expect(
+        pending.getByRole("button", { name: "Close panel" })
+      ).toBeVisible();
       const uncoveredFrames = await page.evaluate(
         () =>
           new Promise<number>((resolve) => {
@@ -541,8 +549,11 @@ for (const app of [false, true]) {
       expect(uncoveredFrames).toBe(0);
       await expectNoHorizontalOverflow(page);
       release();
+      // Preserve the application's automatic retry budget (three retries with
+      // exponential backoff) before expecting the terminal recovery state.
       await expect(pending.getByRole("alert")).toHaveText(
-        "This drop could not be loaded."
+        "This drop could not be loaded.",
+        { timeout: 15000 }
       );
       const close = pending.getByRole("button", { name: "Close panel" });
       await expect(close).toBeFocused();

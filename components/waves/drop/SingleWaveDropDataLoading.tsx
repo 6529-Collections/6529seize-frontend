@@ -7,14 +7,14 @@ export default function SingleWaveDropDataLoading({
 }: {
   readonly data: Pick<
     ReturnType<typeof useSingleWaveDropData>,
-    "isWaveError" | "refetchWave"
+    "isWaveError" | "isWaveFetching" | "refetchWave"
   >;
   readonly onClose: () => void;
 }) {
   return (
     <SingleWaveDropLoading
       onClose={onClose}
-      isError={data.isWaveError}
+      isError={data.isWaveError && !data.isWaveFetching}
       onRetry={() => {
         void data.refetchWave();
       }}

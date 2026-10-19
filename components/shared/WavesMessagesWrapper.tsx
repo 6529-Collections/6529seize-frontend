@@ -145,6 +145,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
     data: drop,
     error: dropError,
     refetch: refetchDrop,
+    isFetching: isDropFetching,
   } = useQuery<ApiDrop>({
     queryKey: getDropQueryKey(effectiveDropId),
     queryFn: () => {
@@ -260,7 +261,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
                     ) : (
                       <SingleWaveDropLoading
                         onClose={onDropClose}
-                        isError={!!dropError}
+                        isError={!!dropError && !isDropFetching}
                         onRetry={() => {
                           void refetchDrop();
                         }}

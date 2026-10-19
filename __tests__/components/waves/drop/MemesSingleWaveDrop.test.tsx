@@ -10,6 +10,7 @@ jest.mock("@/components/content-moderation/ContentModerationDropGate", () => ({
 const mockApprovalStatus = jest.fn();
 const mockRefetchWave = jest.fn();
 let mockWaveError = false;
+let mockWaveFetching = false;
 let mockWrapperProps: any;
 let mockInfoPanelProps: any;
 
@@ -34,6 +35,7 @@ jest.mock("@/components/waves/drop/useSingleWaveDropData", () => ({
     drop: { id: "d1", wave: { id: "w1" } },
     wave: mockWaveError ? undefined : { id: "w1" },
     isWaveError: mockWaveError,
+    isWaveFetching: mockWaveFetching,
     refetchWave: mockRefetchWave,
     extendedDrop: { id: "d1", wave: { id: "w1" } },
   }),
@@ -51,6 +53,7 @@ jest.mock("@/hooks/waves/useWaveMetadata", () => ({
 describe("MemesSingleWaveDrop", () => {
   beforeEach(() => {
     mockWaveError = false;
+    mockWaveFetching = false;
     mockRefetchWave.mockClear();
     mockWrapperProps = undefined;
     mockInfoPanelProps = undefined;
@@ -84,7 +87,7 @@ describe("MemesSingleWaveDrop", () => {
 
   it("offers recovery when wave metadata fails instead of spinning indefinitely", () => {
     mockWaveError = true;
-    render(
+    const { rerender } = render(
       <MemesSingleWaveDrop
         drop={{ id: "d1", wave: { id: "w1" } } as any}
         onClose={jest.fn()}
@@ -95,6 +98,20 @@ describe("MemesSingleWaveDrop", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(mockRefetchWave).toHaveBeenCalledTimes(1);
+    mockWaveFetching = true;
+    rerender(
+      <MemesSingleWaveDrop
+        drop={{ id: "d1", wave: { id: "w1" } } as any}
+        onClose={jest.fn()}
+      />
+    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Try again" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("status", { name: "Loading drop" })
+    ).toBeInTheDocument();
     expect(screen.queryByTestId("wrapper")).not.toBeInTheDocument();
   });
 

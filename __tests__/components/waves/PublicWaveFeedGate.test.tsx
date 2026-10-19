@@ -144,4 +144,42 @@ describe("PublicWaveFeedGate", () => {
       screen.getByText("Leaderboard loading").parentElement
     ).not.toHaveAttribute("inert");
   });
+
+  it("requires a fresh readiness signal after returning to an already-ready wave", () => {
+    const view = (ready: boolean) => (
+      <PublicWaveFeedGate
+        fallback={<div>Server public feed</div>}
+        waveId="wave-1"
+      >
+        <InteractiveFeed key={mockActiveWaveId} ready={ready} />
+      </PublicWaveFeedGate>
+    );
+    const { rerender } = render(view(true));
+    expect(screen.queryByText("Server public feed")).not.toBeInTheDocument();
+    mockActiveWaveId = "wave-2";
+    rerender(view(true));
+    mockActiveWaveId = "wave-1";
+    rerender(view(false));
+    expect(screen.getByText("Server public feed")).toBeInTheDocument();
+    rerender(view(true));
+    expect(screen.queryByText("Server public feed")).not.toBeInTheDocument();
+  });
+
+  it("clears readiness when the consuming feed unmounts or begins loading again", () => {
+    const view = (child: React.ReactNode) => (
+      <PublicWaveFeedGate
+        fallback={<div>Server public feed</div>}
+        waveId="wave-1"
+      >
+        {child}
+      </PublicWaveFeedGate>
+    );
+    const { rerender } = render(view(<InteractiveFeed ready />));
+    rerender(view(<InteractiveFeed />));
+    expect(screen.getByText("Server public feed")).toBeInTheDocument();
+    rerender(view(<InteractiveFeed ready />));
+    expect(screen.queryByText("Server public feed")).not.toBeInTheDocument();
+    rerender(view(<div>Chat loading</div>));
+    expect(screen.getByText("Server public feed")).toBeInTheDocument();
+  });
 });

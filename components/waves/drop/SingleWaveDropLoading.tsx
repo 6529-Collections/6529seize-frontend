@@ -94,7 +94,10 @@ export default function SingleWaveDropLoading({
               <button
                 type="button"
                 className={buttonClass}
-                onClick={onRetry}
+                onClick={() => {
+                  closeRef.current?.focus({ preventScroll: true });
+                  onRetry();
+                }}
                 onKeyDown={onControlKeyDown}
               >
                 {t(locale, "waves.loadingRetry")}

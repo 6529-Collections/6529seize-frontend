@@ -65,3 +65,23 @@ it("keeps error recovery and Close keyboard accessible", () => {
   });
   expect(onClose).toHaveBeenCalledTimes(1);
 });
+
+it("keeps focus inside the panel when a retry replaces its button with loading", () => {
+  const onRetry = jest.fn();
+  const onClose = jest.fn();
+  const { rerender } = render(
+    <SingleWaveDropLoading onClose={onClose} isError onRetry={onRetry} />
+  );
+  const retry = screen.getByRole("button", { name: "Try again" });
+  retry.focus();
+  fireEvent.click(retry);
+  expect(onRetry).toHaveBeenCalledTimes(1);
+  rerender(<SingleWaveDropLoading onClose={onClose} onRetry={onRetry} />);
+  const close = screen.getByRole("button", { name: "Close panel" });
+  expect(close).toHaveFocus();
+  expect(
+    screen.queryByRole("button", { name: "Try again" })
+  ).not.toBeInTheDocument();
+  fireEvent.keyDown(close, { key: "Escape" });
+  expect(onClose).toHaveBeenCalledTimes(1);
+});

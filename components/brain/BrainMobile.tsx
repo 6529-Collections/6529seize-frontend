@@ -131,6 +131,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     data: drop,
     error: dropError,
     refetch: refetchDrop,
+    isFetching: isDropFetching,
   } = useQuery<ApiDrop>({
     queryKey: getDropQueryKey(effectiveDropId),
     queryFn: () => {
@@ -410,7 +411,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
           ) : (
             <SingleWaveDropLoading
               onClose={onDropClose}
-              isError={!!dropError}
+              isError={!!dropError && !isDropFetching}
               onRetry={() => {
                 void refetchDrop();
               }}

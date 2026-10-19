@@ -360,12 +360,30 @@ describe("WavesMessagesWrapper", () => {
       error: new Error("Unavailable"),
       refetch: retry,
     });
-    renderWrapper();
+    const { rerender } = renderWrapper();
     expect(screen.getByRole("alert")).toHaveTextContent(
       "This drop could not be loaded."
     );
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(retry).toHaveBeenCalledTimes(1);
+    mockUseQuery.mockReturnValue({
+      data: undefined,
+      error: new Error("Unavailable"),
+      refetch: retry,
+      isFetching: true,
+    });
+    rerender(
+      <WavesMessagesWrapper>
+        <MainContentProbe />
+      </WavesMessagesWrapper>
+    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Try again" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("status", { name: "Loading drop" })
+    ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Close panel" }));
     expect(mockRouterReplace).toHaveBeenCalledWith("/waves", { scroll: false });
   });

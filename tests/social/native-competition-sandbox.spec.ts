@@ -540,6 +540,33 @@ async function installCompetitionApi(
     else body = pageResult([]);
     return route.fulfill({ json: body });
   });
+  const recordedDrop = (id: string) => ({
+    ...entryFixture.drops[0],
+    id: entryDropId(id),
+    drop_type: "CHAT",
+    title: `Recorded ${id} entry`,
+    content: `Immutable ${id} entry content`,
+  });
+  // The detail overlay reads the batch endpoint; keep it consistent with the
+  // single-drop fixture rather than accidentally asserting the covered card.
+  await page.route("**/v2/drops?**", async (route) => {
+    const ids =
+      new URL(route.request().url()).searchParams.get("ids")?.split(",") ?? [];
+    const owners = competitions.filter((item) =>
+      ids.includes(entryDropId(item.id))
+    );
+    if (owners.length === 0) return route.fallback();
+    return route.fulfill({
+      json: {
+        data: owners.map((owner) => ({
+          ...recordedDrop(owner.id),
+          wave: entryFixture.wave,
+        })),
+        page: 1,
+        next: false,
+      },
+    });
+  });
   await page.route("**/v2/drops/*", async (route) => {
     const dropId = new URL(route.request().url()).pathname.split("/").at(-1);
     const owner = competitions.find((item) => entryDropId(item.id) === dropId);
@@ -547,13 +574,7 @@ async function installCompetitionApi(
     return route.fulfill({
       json: {
         wave: entryFixture.wave,
-        drop: {
-          ...entryFixture.drops[0],
-          id: dropId,
-          drop_type: "CHAT",
-          title: `Recorded ${owner.id} entry`,
-          content: `Immutable ${owner.id} entry content`,
-        },
+        drop: recordedDrop(owner.id),
       },
     });
   });
@@ -1734,12 +1755,16 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
   }) => {
     await installCompetitionApi(page);
     await page.goto(`${ROOT}/alpha?drop=${entryDropId("alpha")}`);
+    const detail = page.locator("[data-video-viewport]").filter({
+      has: page.getByRole("button", { name: "Close panel", exact: true }),
+    });
     await expect(
-      page.getByText("Recorded alpha entry", { exact: true })
+      detail.getByText("Recorded alpha entry", { exact: true })
     ).toBeVisible({ timeout: 30000 });
     await expect(
-      page.getByRole("button", { name: "Vote", exact: true })
+      detail.getByRole("button", { name: "Vote", exact: true })
     ).toBeVisible();
+    await expect(page.getByTestId("single-drop-loading")).toHaveCount(0);
   });
 
   test("saves and resumes a native draft through the existing configuration controls", async ({
