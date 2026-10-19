@@ -42,6 +42,8 @@ import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRe
 
 // Define nested structures for context data
 interface WavesContextData {
+  readonly hasLoadingError?: boolean | undefined;
+  readonly retryLoading?: (() => void) | undefined;
   readonly isPinnedWavesLoading?: boolean;
   readonly list: MinimalWave[];
   readonly isFetching: boolean;
@@ -579,6 +581,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
         : null;
 
     const waves: WavesContextData = {
+      hasLoadingError: mainWavesData.hasLoadingError,
+      retryLoading: mainWavesData.retryLoading,
       isPinnedWavesLoading: mainWavesData.isPinnedWavesLoading,
       list: wavesHookData.waves,
       // A list still waiting for its first request reads as loading, so the
@@ -652,6 +656,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   }, [
     wavesHookData.waves,
     mainWavesData.isPinnedWavesLoading,
+    mainWavesData.hasLoadingError,
+    mainWavesData.retryLoading,
     isMainWavesListEnabled,
     wavesHookData.isFetching,
     wavesHookData.isFetchingNextPage,

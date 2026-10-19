@@ -209,7 +209,10 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     status: followedActivityWavesStatus,
     refetch: followedActivityWavesRefetch,
     refetchIfStale: followedActivityWavesRefetchIfStale,
+    hasLoadingError: hasFollowedActivityWavesError,
+    retryLoading: retryFollowedActivityWaves,
   } = useWavesV2({
+    joinedSnapshot: true,
     overviewType: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
     pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
     following: isConnectedIdentity,
@@ -725,6 +728,8 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       hasNextPage: hasMainWavesNextPage,
       fetchNextPage: fetchNextPageStable,
       status: mainWavesStatus,
+      hasLoadingError: isJoinedMode && hasFollowedActivityWavesError,
+      retryLoading: retryFollowedActivityWaves,
 
       // Pinned waves metadata - now includes ALL pinned waves with isPinned flag
       pinnedWaves: allPinnedWaves,
@@ -758,6 +763,9 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       hasMainWavesNextPage,
       fetchNextPageStable,
       mainWavesStatus,
+      isJoinedMode,
+      hasFollowedActivityWavesError,
+      retryFollowedActivityWaves,
       mainWaves,
       allPinnedWaves,
       isPinnedWavesLoading,

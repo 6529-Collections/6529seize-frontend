@@ -13,8 +13,11 @@ import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useAuth } from "@/components/auth/Auth";
+import { JoinedWavesListRecovery } from "../waves/JoinedWavesListRecovery";
 
 interface WebUnifiedWavesListProps {
+  readonly hasLoadingError?: boolean | undefined;
+  readonly retryLoading?: (() => void) | undefined;
   readonly waves: MinimalWave[];
   readonly fetchNextPage: () => void;
   readonly hasNextPage: boolean | undefined;
@@ -30,6 +33,8 @@ interface WebUnifiedWavesListProps {
 const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
   const {
     waves,
+    hasLoadingError = false,
+    retryLoading,
     fetchNextPage,
     hasNextPage,
     isFetching,
@@ -56,8 +61,11 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
 
   // Use the custom hook for infinite scroll
   useInfiniteScroll(
-    !isSearching && (isCollapsed || collection !== "pinned") && hasNextPage,
-    isFetchingNextPage,
+    !hasLoadingError &&
+      !isSearching &&
+      (isCollapsed || collection !== "pinned") &&
+      hasNextPage,
+    collectionFetching || isFetchingNextPage,
     fetchNextPage,
     scrollContainerRef,
     sentinelRef,
@@ -85,7 +93,16 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
         />
 
         {/* Empty state */}
-        {!isSearching && (
+        {!isSearching && !isCollapsed && collection === "joined" && (
+          <JoinedWavesListRecovery
+            hasError={hasLoadingError}
+            hasNextPage={hasNextPage === true}
+            isFetching={collectionFetching || isFetchingNextPage}
+            onLoadMore={fetchNextPage}
+            onRetry={retryLoading ?? fetchNextPage}
+          />
+        )}
+        {!isSearching && !hasLoadingError && (
           <UnifiedWavesListEmpty
             sortedWaves={waves}
             isFetching={collectionFetching}

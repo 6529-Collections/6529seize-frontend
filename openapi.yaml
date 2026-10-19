@@ -19679,6 +19679,57 @@ paths:
                 $ref: "#/components/schemas/ApiWaveOverviewPage"
         "400":
           description: Invalid request
+  /v2/waves/joined:
+    get:
+      tags:
+        - WavesV2
+      summary: List joined waves using a stable snapshot
+      description: >-
+        Freezes the activity-ordered IDs of joined non-DM root waves, including
+        parents of joined subwaves, for 15 minutes. Continue with next_cursor;
+        activity changes cannot skip waves between pages. Each page rechecks
+        current membership and visibility. New memberships appear on refresh.
+        Cursors are bound to the authenticated non-proxy profile and page size.
+        Existing page-number pagination at /v2/waves is unchanged.
+      operationId: getJoinedWaves
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/waves/joined-waves.handler"
+          name: handleGetJoinedWaves
+      parameters:
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: cursor
+          in: query
+          description: Opaque next_cursor from the preceding page; omit to refresh.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Joined waves from one stable snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiJoinedWavesPage"
+        "400":
+          description: Invalid cursor or page size
+        "401":
+          description: Authentication required
+        "403":
+          description: A non-proxy profile is required
+        "410":
+          description: Snapshot expired or unavailable; restart without a cursor
+        "503":
+          description: Snapshot storage unavailable; retry without losing loaded waves
   /v2/waves/active-votes:
     get:
       tags:
@@ -33120,6 +33171,25 @@ components:
           type: number
           format: int64
           nullable: true
+    ApiJoinedWavesPage:
+      type: object
+      required:
+        - data
+        - next_cursor
+        - snapshot_expires_at
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveOverview"
+        next_cursor:
+          type: string
+          nullable: true
+          description: Continue this snapshot, or null when all IDs have been scanned.
+        snapshot_expires_at:
+          type: integer
+          format: int64
+          description: Snapshot expiry as Unix epoch milliseconds.
     ApiLightDrop:
       type: object
       required:
