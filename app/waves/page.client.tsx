@@ -8,9 +8,11 @@ import WavesView from "@/components/waves/WavesView";
 export default function WavesPageClient({
   publicFeedFallback = null,
   publicFeedWaveId = null,
+  waveName,
 }: {
   readonly publicFeedFallback?: ReactNode;
   readonly publicFeedWaveId?: string | null;
+  readonly waveName?: string | undefined;
 }) {
   return (
     <>
@@ -19,6 +21,7 @@ export default function WavesPageClient({
           key={publicFeedWaveId}
           fallback={publicFeedFallback}
           waveId={publicFeedWaveId}
+          waveName={waveName}
         >
           <WavesView />
         </PublicWaveFeedGate>

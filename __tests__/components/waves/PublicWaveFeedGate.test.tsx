@@ -28,7 +28,7 @@ describe("PublicWaveFeedGate", () => {
     jest.clearAllMocks();
   });
 
-  it("keeps the fallback visible while the interactive feed is loading", () => {
+  it("retains public HTML alongside the quiet loader until chat renders", () => {
     render(
       <PublicWaveFeedGate
         fallback={<div>Server public feed</div>}
@@ -39,6 +39,7 @@ describe("PublicWaveFeedGate", () => {
     );
 
     expect(screen.getByText("Server public feed")).toBeInTheDocument();
+    expect(screen.getByTestId("wave-chat-loading")).toBeInTheDocument();
     const interactiveSurface =
       screen.getByText("Interactive feed").parentElement;
     expect(interactiveSurface).toHaveAttribute("inert");
@@ -84,6 +85,9 @@ describe("PublicWaveFeedGate", () => {
       </PublicWaveFeedGate>
     );
     expect(html).toContain("Public post text");
+    expect(html).toContain("wave-chat-loading");
+    expect(html).toContain('class="publicFeed"');
+    expect(html).not.toContain('class="enhanced"');
     expect(html).toContain("/waves/wave-1?drop=post");
   });
 

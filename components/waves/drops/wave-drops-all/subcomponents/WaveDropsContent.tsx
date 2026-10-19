@@ -1,7 +1,5 @@
 import { usePublicWaveFeedReady } from "@/components/waves/PublicWaveFeedReady";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "@/components/distribution-plan-tool/common/CircleLoader";
+import WaveChatLoading from "@/components/waves/WaveChatLoading";
 import WaveDropsEmptyPlaceholder from "@/components/waves/drops/WaveDropsEmptyPlaceholder";
 import { useUnreadDivider } from "@/contexts/wave/UnreadDividerContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -115,9 +113,11 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   if (isHydrating || (isInitialLoading && !hasDropError)) {
     // When the hook is still hydrating, keep showing the loader instead of the empty state.
     return (
-      <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-py-10">
-        <CircleLoader size={CircleLoaderSize.XXLARGE} />
-      </div>
+      <WaveChatLoading
+        showHeader={false}
+        showTabs={false}
+        showComposer={false}
+      />
     );
   }
 

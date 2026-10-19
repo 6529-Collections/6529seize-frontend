@@ -1,3 +1,8 @@
+let mockContentState = "ready";
+jest.mock("@/hooks/useAuthenticatedContent", () => ({
+  useAuthenticatedContent: () => ({ contentState: mockContentState }),
+}));
+
 import { fireEvent, render, screen } from "@testing-library/react";
 import WebBrainLeftSidebarWaves from "@/components/brain/left-sidebar/web/WebBrainLeftSidebarWaves";
 
@@ -45,8 +50,22 @@ const mockStream = (isFetching: boolean) => {
 
 describe("WebBrainLeftSidebarWaves", () => {
   beforeEach(() => {
+    mockContentState = "ready";
     jest.clearAllMocks();
     mockStream(false);
+  });
+
+  it("keeps the list pending during wallet/profile restoration, then allows a real empty result", () => {
+    mockContentState = "loading";
+    const { rerender, getByTestId } = render(
+      <WebBrainLeftSidebarWaves scrollContainerRef={{ current: null }} />
+    );
+    expect(getByTestId("list")).toHaveAttribute("data-fetching", "true");
+    mockContentState = "ready";
+    rerender(
+      <WebBrainLeftSidebarWaves scrollContainerRef={{ current: null }} />
+    );
+    expect(getByTestId("list")).toHaveAttribute("data-fetching", "false");
   });
 
   it("requests the main Waves list once when the sidebar mounts", () => {

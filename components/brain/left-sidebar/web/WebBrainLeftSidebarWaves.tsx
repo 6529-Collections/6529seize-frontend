@@ -1,3 +1,4 @@
+import { useAuthenticatedContent } from "@/hooks/useAuthenticatedContent";
 import React, { useEffect } from "react";
 import WebUnifiedWavesList from "./WebUnifiedWavesList";
 import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
@@ -14,6 +15,7 @@ const WebBrainLeftSidebarWaves: React.FC<WebBrainLeftSidebarWavesProps> = ({
   showProfileFeedShortcut = true,
 }) => {
   const { waves, registerWave, requestMainWavesList } = useMyStream();
+  const { contentState } = useAuthenticatedContent();
 
   useEffect(() => requestMainWavesList(), [requestMainWavesList]);
 
@@ -28,7 +30,7 @@ const WebBrainLeftSidebarWaves: React.FC<WebBrainLeftSidebarWavesProps> = ({
       waves={waves.list}
       fetchNextPage={onNextPage}
       hasNextPage={waves.hasNextPage}
-      isFetching={waves.isFetching}
+      isFetching={waves.isFetching || contentState === "loading"}
       isPinnedWavesLoading={waves.isPinnedWavesLoading ?? false}
       isFetchingNextPage={waves.isFetchingNextPage}
       hasLoadingError={waves.hasLoadingError}

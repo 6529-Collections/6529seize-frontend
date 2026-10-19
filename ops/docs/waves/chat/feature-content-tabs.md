@@ -33,6 +33,14 @@ without a forced loading screen. If loading fails, the wave identity stays visib
 and **Try again** retries the request; competition views keep their own recovery
 controls.
 
+On an initial Chat visit, the header, tab area and composer space use one quiet
+loading frame until chat is ready. Temporary text-only posts and large post-card
+shimmers do not appear between those stages in browsers with JavaScript enabled.
+The waves list stays pending while the account restores, rather than reporting
+an empty collection. Public post text and links remain available in the server
+HTML; browsers with JavaScript disabled retain the readable public preview.
+Images can continue loading inside their own media frames after chat appears.
+
 Explicit tab, competition, curation and message links retain their destinations.
 Browser Back/Forward and native app Back restore the section from that visit
 when it is still available, ahead of the wave's latest remembered choice.

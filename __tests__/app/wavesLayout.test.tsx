@@ -8,6 +8,7 @@ let mockPendingRoute: Promise<void>;
 let mockSearchParams = new URLSearchParams();
 
 jest.mock("next/navigation", () => ({
+  usePathname: () => "/waves",
   useSearchParams: () => mockSearchParams,
 }));
 

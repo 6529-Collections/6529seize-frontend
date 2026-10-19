@@ -4,6 +4,7 @@ import MessagesLoading from "@/app/messages/loading";
 import WavesLoading from "@/app/waves/loading";
 
 jest.mock("next/navigation", () => ({
+  usePathname: () => "/waves",
   useSearchParams: () => new URLSearchParams(),
 }));
 

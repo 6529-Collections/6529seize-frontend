@@ -427,7 +427,7 @@ describe("WaveDropsAll", () => {
 
       renderComponent();
 
-      expect(screen.getByTestId("circle-loader")).toBeInTheDocument();
+      expect(screen.getByTestId("wave-chat-loading")).toBeInTheDocument();
       expect(screen.queryByTestId("empty-placeholder")).not.toBeInTheDocument();
     });
 
@@ -442,7 +442,7 @@ describe("WaveDropsAll", () => {
 
       renderComponent();
 
-      expect(screen.getByTestId("circle-loader")).toBeInTheDocument();
+      expect(screen.getByTestId("wave-chat-loading")).toBeInTheDocument();
       expect(screen.queryByTestId("drops-list")).not.toBeInTheDocument();
     });
 
@@ -1677,7 +1677,7 @@ describe("WaveDropsAll", () => {
       renderComponent();
 
       // Should show the loader instead of the empty placeholder while hydrating
-      expect(screen.getByTestId("circle-loader")).toBeInTheDocument();
+      expect(screen.getByTestId("wave-chat-loading")).toBeInTheDocument();
       expect(screen.queryByTestId("drops-list")).not.toBeInTheDocument();
       expect(screen.queryByTestId("empty-placeholder")).not.toBeInTheDocument();
     });
