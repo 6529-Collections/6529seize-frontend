@@ -1,4 +1,5 @@
 import type { CountdownData } from "@/hooks/useMintCountdownState";
+import { usePageVisible } from "@/hooks/usePageVisibility";
 import { formatCountdownVerbose } from "@/utils/timeFormatters";
 import {
   ArrowRightIcon,
@@ -98,8 +99,14 @@ const LiveCountdown = memo(
       formatCountdownVerbose(targetTimestampSeconds)
     );
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const isPageVisible = usePageVisible();
 
     useEffect(() => {
+      // Hidden pages do not tick; showing the page again catches up at once.
+      if (!isPageVisible) {
+        return;
+      }
+
       const targetMs = targetTimestampSeconds * 1000;
 
       const tick = () => {
@@ -122,7 +129,7 @@ const LiveCountdown = memo(
         }
         timerRef.current = null;
       };
-    }, [targetTimestampSeconds]);
+    }, [isPageVisible, targetTimestampSeconds]);
 
     return <span role="timer">{display}</span>;
   }

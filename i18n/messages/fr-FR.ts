@@ -8,9 +8,11 @@ import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUplo
 import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.fr-FR.json";
 import { FR_FR_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { FR_FR_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
+import { FR_FR_GLOBAL_ERROR_MESSAGES } from "@/i18n/messages/global-error";
 import { FR_FR_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { FR_FR_CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
 import { FR_FR_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
+import { FR_FR_DATE_COUNTDOWN_MESSAGES } from "@/i18n/messages/date-countdown";
 import { FR_FR_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { FR_FR_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { FR_FR_THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
@@ -630,6 +632,7 @@ export const FR_FR_MESSAGES = {
   ...FR_FR_QR_SCANNER_MESSAGES,
   ...FR_FR_CAPACITOR_CONNECT_MESSAGES,
   ...FR_FR_NEW_VERSION_TOAST_MESSAGES,
+  ...FR_FR_GLOBAL_ERROR_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel":
     "Zone d'envoi de fichiers du chat de wave",
   "waves.chat.guidelinesDialog.title": "Directives de la wave",
@@ -1046,6 +1049,7 @@ export const FR_FR_MESSAGES = {
   "waves.proposalCard.tabLabels.errorReserved":
     "Les libellés ne peuvent pas correspondre aux onglets existants.",
   ...FR_FR_PAGINATION_MESSAGES,
+  ...FR_FR_DATE_COUNTDOWN_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} restant ce tour",
   "memes.quickVote.unrated": "{count} non notés",
   "memes.quickVote.summary": "{leftThisRound}, {unrated}",
@@ -1191,6 +1195,11 @@ export const FR_FR_MESSAGES = {
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
   "theMemes.detail.live.artwork.mintDateLabel": "Date de mint :",
+  "theMemes.mint.openWebMint": "Minter sur 6529.io",
+  "theMemes.mint.connect.connectedProfile": "Profil connecté",
+  "theMemes.mint.connect.profileStats": "TDH : {tdh} - Niveau : {level}",
+  "theMemes.mint.connect.mintForMe": "Minter pour moi",
+  "theMemes.mint.connect.mintForFren": "Minter pour un fren",
   ...FR_FR_THE_MEMES_COLLECTORS_MESSAGES,
   "theMemes.sorting.regionLabel": "Tri des memes",
   "theMemes.sorting.sortBy": "Trier par",

@@ -1,9 +1,7 @@
-import {
-  ProfileProxyActionStatus,
-  ProfileProxySide,
-} from "@/entities/IProxy";
+import { ProfileProxyActionStatus, ProfileProxySide } from "@/entities/IProxy";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { Tooltip } from "react-tooltip";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 const STATUS_CLASSES: Record<ProfileProxyActionStatus, string> = {
   [ProfileProxyActionStatus.ACTIVE]:
@@ -44,21 +42,24 @@ export default function ProxyActionRowStatus({
 }) {
   return (
     <>
-      <div 
-        className="tw-inline-flex tw-space-x-2 lg:tw-min-w-[6.6rem]"
+      <div
+        className={`tw-inline-flex tw-items-center tw-gap-1.5 ${side === ProfileProxySide.GRANTED ? "tw-min-w-24" : ""}`}
         data-tooltip-id={`proxy-status-${statusOwnerProfile.id}`}
       >
         {statusOwnerProfile.pfp ? (
           <img
-            src={statusOwnerProfile.pfp}
+            src={getScaledImageUri(
+              statusOwnerProfile.pfp,
+              ImageScale.W_AUTO_H_50
+            )}
             alt="Profile picture"
-            className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
+            className="tw-h-[22px] tw-w-[22px] tw-flex-none tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/[0.08]"
           />
         ) : (
-          <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
+          <div className="tw-h-[22px] tw-w-[22px] tw-flex-none tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/[0.08]"></div>
         )}
         <div
-          className={`${STATUS_CLASSES[status]} tw-text-center tw-rounded-full tw-flex-none tw-py-1 tw-px-2.5 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset`}
+          className={`${STATUS_CLASSES[status]} tw-flex-none tw-rounded-full tw-px-2 tw-py-0.5 tw-text-center tw-text-[11px] tw-font-medium tw-leading-4 tw-ring-1 tw-ring-inset`}
         >
           {STATUS_LABELS[side][status]}
         </div>

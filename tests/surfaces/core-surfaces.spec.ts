@@ -39,7 +39,8 @@ async function forceExpandedDesktopSidebar(page: Page) {
 async function openWaveScoreFromSearch(page: Page, searchButton: Locator) {
   await searchButton.click();
   const searchInput = page.locator("#header-search-input");
-  await expect(searchInput).toBeVisible();
+  // The search modal loads on demand, so the first open waits for its chunk.
+  await expect(searchInput).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
   await searchInput.fill("wave score");
   const result = page.getByRole("option", { name: WAVE_SCORE_RESULT }).first();
   await expect(result).toBeVisible();
@@ -232,16 +233,16 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     await expectLinkHref(page, "Levels", "/network/levels");
   });
 
-  test("Delegation Center renders disconnected-safe choices", async ({
+  test("Safe Collecting renders disconnected-safe choices", async ({
     page,
   }) => {
-    await gotoReady(page, "/delegation/delegation-center");
+    await gotoReady(page, "/safe-collecting");
 
     await expect(
-      page.getByRole("heading", { level: 1, name: "Delegation Center" })
+      page.getByRole("heading", { level: 1, name: "Safe Collecting" })
     ).toBeVisible();
     await expect(
-      page.getByText("These actions do not transfer NFTs.")
+      page.getByRole("heading", { name: "All tools", exact: true })
     ).toBeVisible();
     for (const name of REQUIRED_DELEGATION_ACTIONS) {
       await expect(
@@ -254,10 +255,8 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     await expect(page.getByRole("button", { name: /The Memes/ })).toBeVisible();
   });
 
-  test("Delegation FAQ child article renders article navigation", async ({
-    page,
-  }) => {
-    await gotoReady(page, "/delegation/delegation-faq/register-delegation");
+  test("FAQ child article renders article navigation", async ({ page }) => {
+    await gotoReady(page, "/safe-collecting/faq/register-delegation");
 
     await expect(
       page.getByRole("navigation", { name: "Breadcrumb" })
@@ -267,10 +266,10 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     ).toBeVisible();
     await expect(
       page.getByRole("link", { name: "All FAQ topics" })
-    ).toHaveAttribute("href", "/delegation/delegation-faq");
+    ).toHaveAttribute("href", "/safe-collecting/faq");
     await expect(
       page.getByRole("navigation", {
-        name: "Delegation FAQ article navigation",
+        name: "FAQ article navigation",
       })
     ).toBeVisible();
   });

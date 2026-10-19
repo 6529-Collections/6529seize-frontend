@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useWaveInformationPanel } from "@/components/brain/mobile/WaveInformationPanelContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Cog6ToothIcon,
@@ -192,12 +193,23 @@ export default function MyStreamWaveCurationTabMenu({
   onReorderPosts,
   isProfileActionPending = false,
 }: MyStreamWaveCurationTabMenuProps) {
+  const dialogTypography =
+    permissionMode === "profile"
+      ? {
+          title:
+            "!tw-text-lg tw-font-semibold !tw-text-iron-100 md:!tw-text-xl",
+          message: "tw-text-md tw-font-normal tw-leading-6 tw-text-iron-300",
+        }
+      : undefined;
   const queryClient = useQueryClient();
   const { connectedProfile, requestAuth, setToast } = useAuth();
   const locale = useBrowserLocale();
   const { updateProfileWave, isPending: isProfileWavePending } =
     useProfileWaveMutation(connectedProfile);
-  const [isEditOpen, setIsEditOpen] = useState(false);
+  const editPanel = useWaveInformationPanel(
+    t(locale, "profileCuration.editor.editTitle")
+  );
+  const editTriggerRef = useRef<HTMLButtonElement>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const isSettingProfileCuration =
@@ -304,12 +316,29 @@ export default function MyStreamWaveCurationTabMenu({
     onChooseAnotherSourceWave,
     onHideFromProfile,
     onReorderPosts,
-    onEdit: () => setIsEditOpen(true),
+    onEdit: () => editPanel.open(editTriggerRef.current),
     onSetAsProfileCuration: () => {
       void updateProfileWave(wave.id, curation.id);
     },
     onDelete: () => setIsDeleteOpen(true),
   });
+  const styledMenuItems =
+    permissionMode === "profile"
+      ? menuItems.map((item) => ({
+          ...item,
+          label: (
+            <span
+              className={
+                item.kind === "section"
+                  ? "tw-text-label tw-font-medium"
+                  : "tw-text-sm tw-font-medium"
+              }
+            >
+              {item.label}
+            </span>
+          ),
+        }))
+      : menuItems;
   const shouldUseMobileBottomSheet =
     hasProfileActions && isMobileLayoutViewport;
   const isMenuDisabled =
@@ -329,14 +358,29 @@ export default function MyStreamWaveCurationTabMenu({
       {triggerLabel && <span>{triggerLabel}</span>}
     </>
   );
+  let menuTrigger = triggerContent;
+  if (isConfiguration) {
+    menuTrigger = (
+      <button type="button" ref={editTriggerRef} className={triggerClassName}>
+        {triggerContent}
+      </button>
+    );
+  } else if (triggerLabel) {
+    menuTrigger = (
+      <Button variant="tertiary" size="sm">
+        {triggerContent}
+      </Button>
+    );
+  }
 
   return (
     <>
       {shouldUseMobileBottomSheet ? (
         <CompactMenuMobileBottomSheet
           title={triggerLabel ?? t(locale, "profileCuration.header.manage")}
+          titleClassName={dialogTypography?.title}
           ariaLabel={t(locale, "profileCuration.manage.menuAria")}
-          items={menuItems}
+          items={styledMenuItems}
           trigger={triggerContent}
           renderTriggerButton={({
             ariaLabel,
@@ -361,33 +405,27 @@ export default function MyStreamWaveCurationTabMenu({
       ) : (
         <CompactMenu
           triggerClassName={triggerClassName}
-          trigger={
-            triggerLabel && !isConfiguration ? (
-              <Button variant="tertiary" size="sm">
-                {triggerContent}
-              </Button>
-            ) : (
-              triggerContent
-            )
-          }
-          triggerAsChild={!!triggerLabel && !isConfiguration}
+          trigger={menuTrigger}
+          triggerAsChild={isConfiguration || !!triggerLabel}
           aria-label={
             isConfiguration
               ? triggerAriaLabel
               : t(locale, "profileCuration.manage.menuAria")
           }
-          items={menuItems}
+          items={styledMenuItems}
+          menuClassName={editPanel.isInSheet ? "tw-z-[1020]" : undefined}
           itemsWrapperClassName={hasProfileActions ? "tw-pt-2" : undefined}
           menuWidthClassName={isConfiguration ? "tw-w-52" : "tw-w-64"}
           disabled={isMenuDisabled}
         />
       )}
 
-      {isEditOpen && (
+      {editPanel.isOpen && (
         <MyStreamWaveCurationCreateDialog
           wave={wave}
-          isOpen={isEditOpen}
-          onClose={() => setIsEditOpen(false)}
+          isOpen
+          onClose={editPanel.close}
+          panelContainer={editPanel.isInSheet ? editPanel.container : undefined}
           onSaved={() => undefined}
           curation={curation}
           permissionMode={permissionMode}
@@ -395,6 +433,8 @@ export default function MyStreamWaveCurationTabMenu({
       )}
 
       <MobileWrapperConfirmationDialog
+        titleClassName={dialogTypography?.title}
+        messageClassName={dialogTypography?.message}
         isOpen={isDeleteOpen}
         onClose={() => setIsDeleteOpen(false)}
         onConfirm={() => deleteMutation.mutate()}

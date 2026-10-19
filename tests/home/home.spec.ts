@@ -4,7 +4,7 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
-import { devices } from "@playwright/test";
+import { devices, type Page } from "@playwright/test";
 import { buildSync } from "esbuild";
 import { getAppEnvironment } from "../../config/appEnvironment";
 import {
@@ -15,6 +15,415 @@ import { gateSidebarHydration } from "../support/sidebarHydration";
 import { installSectionTrackingFixture } from "../support/sectionTrackingFixture";
 import { installReadonlyMutationGuard } from "../support/readonlyMutationGuard";
 import { RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
+
+const loadingTestArtwork = {
+  id: 536,
+  name: "Homepage loading test artwork",
+  artist: "Test artist",
+  artist_seize_handle: "",
+  image: "https://6529.io/home-loading-fixture.png",
+  scaled: "https://6529.io/home-loading-fixture.png",
+  animation: null,
+  floor_price: 0,
+  collection: "The Memes",
+  season: 1,
+};
+
+async function installLoadingTestArtwork(page: Page) {
+  await page.route("**/home-loading-fixture.png", (route) =>
+    route.fulfill({
+      contentType: "image/svg+xml",
+      body: '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="#777"/></svg>',
+    })
+  );
+  await page.route("https://rpc.walletconnect.org/**", (route) =>
+    route.abort()
+  );
+}
+
+const comingUpWave = {
+  id: "00000000-0000-4000-8000-000000000529",
+  name: "Coming Up fixture",
+};
+const comingUpSettings = { memes_wave_id: comingUpWave.id };
+const comingUpLeaderboard = {
+  wave: comingUpWave,
+  count: 3,
+  page: 1,
+  next: false,
+  drops: [1, 2, 3].map((rank) => ({
+    id: `coming-up-${rank}`,
+    serial_no: rank,
+    title: `Coming Up artwork ${rank}`,
+    drop_type: "SUBMISSION",
+    created_at: 1,
+    is_signed: false,
+    hide_link_preview: false,
+    parts_count: 1,
+    boosts: 0,
+    author: {
+      id: "coming-up-artist",
+      handle: "coming-up-artist",
+      level: 1,
+      primary_address: "0x0000000000000000000000000000000000000529",
+      classification: "PSEUDONYM",
+      badges: {},
+    },
+  })),
+};
+const comingUpLeaderboardPattern = (url: URL) =>
+  /\/api\/v2\/waves\/[^/]+\/leaderboard$/.test(url.pathname) &&
+  url.searchParams.get("page_size") === "3";
+
+async function installComingUpFixture(page: Page) {
+  await installLoadingTestArtwork(page);
+  await page.route("**/api/settings", (route) =>
+    route.fulfill({ json: comingUpSettings })
+  );
+  await page.route("**/api/memes_latest", (route) =>
+    route.fulfill({ json: loadingTestArtwork })
+  );
+  await page.route("**/api/v2/waves/*/decisions?*", (route) =>
+    route.fulfill({ json: { data: [], page: 1, count: 0, next: false } })
+  );
+}
+
+for (const hasBoostedDrops of [false, true]) {
+  test(`Coming Up loads while boosted cards are pending, with ${hasBoostedDrops ? "populated" : "empty"} results @smoke @medium @large`, async ({
+    page,
+  }) => {
+    await installComingUpFixture(page);
+    await page.route(comingUpLeaderboardPattern, (route) =>
+      route.fulfill({ json: comingUpLeaderboard })
+    );
+    const previewUrl = "https://example.com/boosted-startup-preview";
+    const boostedDrop = {
+      ...comingUpLeaderboard.drops[0],
+      id: "boosted-startup",
+      serial_no: 42,
+      drop_type: "CHAT",
+      boosts: 5,
+      content: previewUrl,
+      wave: comingUpWave,
+      moderation: { status: "VISIBLE", can_view: true },
+    };
+    const boostedReady = Promise.withResolvers<void>();
+    await page.route("**/api/v2/boosted-drops?*", async (route) => {
+      await boostedReady.promise;
+      await route.fulfill({
+        json: {
+          data: hasBoostedDrops ? [boostedDrop] : [],
+          page: 1,
+          count: hasBoostedDrops ? 1 : 0,
+          next: false,
+        },
+      });
+    });
+    await page.route("**/api/open-graph*", (route) =>
+      route.fulfill({ status: 503, json: {} })
+    );
+
+    try {
+      await page.goto("/", { waitUntil: "domcontentloaded" });
+      const comingUp = page.getByRole("region", {
+        name: "Coming up",
+        exact: true,
+      });
+      await expect(
+        comingUp.getByRole("link", { name: "Coming Up artwork 3", exact: true })
+      ).toBeVisible();
+      await expect(page.getByText("Loading...", { exact: true })).toBeVisible();
+
+      boostedReady.resolve();
+      await expect(page.getByText("Loading...", { exact: true })).toHaveCount(
+        0
+      );
+      if (!hasBoostedDrops) {
+        await expect(
+          page.getByText("Boosted Drops", { exact: true })
+        ).toHaveCount(0);
+        return;
+      }
+
+      const openDrop = page.getByRole("button", {
+        name: "Open boosted drop from coming-up-artist",
+        exact: true,
+      });
+      await expect(openDrop).toBeVisible();
+      await expect(
+        page.getByRole("link", {
+          name: "example.com example.com/boosted-startup-preview",
+          exact: true,
+        })
+      ).toHaveAttribute("href", previewUrl);
+      await expectNoHorizontalOverflow(page);
+      // The preview is its own link; use the card's keyboard action to open the drop.
+      await openDrop.focus();
+      // Navigation includes cold route compilation in the development CI server.
+      await Promise.all([
+        page.waitForURL(
+          new RegExp(`/waves/${comingUpWave.id}\\?serialNo=42$`),
+          { waitUntil: "domcontentloaded" }
+        ),
+        openDrop.press("Enter"),
+      ]);
+    } finally {
+      boostedReady.resolve();
+    }
+  });
+}
+
+test("Coming Up retains cards across navigation and a failed refresh @smoke @medium @large", async ({
+  page,
+}) => {
+  await page.clock.install();
+  await installComingUpFixture(page);
+  let requests = 0;
+  let failing = false;
+  await page.route(comingUpLeaderboardPattern, (route) => {
+    requests += 1;
+    return failing
+      ? route.fulfill({
+          status: 503,
+          json: { error: "Temporarily unavailable" },
+        })
+      : route.fulfill({ json: comingUpLeaderboard });
+  });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const comingUp = page.getByRole("region", { name: "Coming up", exact: true });
+  await expect(
+    comingUp.getByRole("link", { name: "Coming Up artwork 3", exact: true })
+  ).toBeVisible();
+  expect(requests).toBe(1);
+
+  await Promise.all([
+    page.waitForURL(/\/join-6529$/, { waitUntil: "domcontentloaded" }),
+    page.getByRole("link", { name: "Start here", exact: true }).click(),
+  ]);
+  await page.goBack();
+  await expect(
+    comingUp.getByRole("link", { name: "Coming Up artwork 3", exact: true })
+  ).toBeVisible();
+  expect(requests).toBe(1);
+
+  await Promise.all([
+    page.waitForURL(/\/join-6529$/, { waitUntil: "domcontentloaded" }),
+    page.getByRole("link", { name: "Start here", exact: true }).click(),
+  ]);
+  await page.clock.fastForward(61_000);
+  failing = true;
+  const failedRefresh = page.waitForResponse(
+    (response) =>
+      comingUpLeaderboardPattern(new URL(response.url())) &&
+      response.status() === 503
+  );
+  await page.goBack();
+  await failedRefresh;
+  await expect(
+    comingUp.getByRole("link", { name: "Coming Up artwork 3", exact: true })
+  ).toBeVisible();
+  await expect(comingUp.getByRole("alert")).toHaveCount(0);
+  await expect(
+    comingUp.getByRole("button", { name: "Try again", exact: true })
+  ).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+});
+
+for (const slowEndpoint of ["leaderboard", "settings"] as const) {
+  test(`Coming Up accepts ${slowEndpoint} responses after 15 seconds @smoke @medium @large`, async ({
+    page,
+  }) => {
+    await page.clock.install();
+    await installComingUpFixture(page);
+    let requests = 0;
+    let releaseResponse!: () => void;
+    const responseReady = new Promise<void>((resolve) => {
+      releaseResponse = resolve;
+    });
+    await page.route(comingUpLeaderboardPattern, async (route) => {
+      if (slowEndpoint === "leaderboard") {
+        requests += 1;
+        await responseReady;
+      }
+      await route.fulfill({ json: comingUpLeaderboard });
+    });
+    if (slowEndpoint === "settings") {
+      await page.route("**/api/settings", async (route) => {
+        requests += 1;
+        await responseReady;
+        await route.fulfill({ json: comingUpSettings });
+      });
+    }
+    try {
+      await page.goto("/", { waitUntil: "domcontentloaded" });
+      const comingUp = page.getByRole("region", {
+        name: "Coming up",
+        exact: true,
+      });
+      await expect.poll(() => requests).toBe(1);
+      await page.clock.fastForward(20_000);
+      if (slowEndpoint === "leaderboard") {
+        await expect(comingUp.getByRole("status")).toHaveText(
+          "Loading upcoming artwork…"
+        );
+      } else {
+        await expect(comingUp).toHaveCount(0);
+      }
+      await expect(comingUp.getByRole("alert")).toHaveCount(0);
+      await expect(
+        comingUp.getByRole("button", { name: "Try again", exact: true })
+      ).toHaveCount(0);
+      expect(requests).toBe(1);
+      releaseResponse();
+      await expect(
+        comingUp.getByRole("link", { name: "Coming Up artwork 3", exact: true })
+      ).toBeVisible();
+      await expect(comingUp.getByRole("status")).toHaveCount(0);
+      expect(requests).toBe(1);
+      await expectNoHorizontalOverflow(page);
+    } finally {
+      releaseResponse();
+    }
+  });
+}
+
+test("Coming Up does not mislabel the current artwork while Latest Drop is delayed @smoke @medium @large", async ({
+  page,
+}) => {
+  await installComingUpFixture(page);
+  await page.route(comingUpLeaderboardPattern, (route) =>
+    route.fulfill({ json: comingUpLeaderboard })
+  );
+  await page.route("**/api/v2/waves/*/decisions?*", (route) =>
+    route.fulfill({
+      json: {
+        page: 1,
+        count: 1,
+        next: false,
+        data: [
+          {
+            decision_time: 1,
+            winners: [
+              {
+                place: 1,
+                awards: [],
+                drop: {
+                  ...comingUpLeaderboard.drops[0],
+                  title: loadingTestArtwork.name,
+                },
+              },
+            ],
+          },
+        ],
+      },
+    })
+  );
+  let releaseArtwork!: () => void;
+  const artworkReady = new Promise<void>((resolve) => {
+    releaseArtwork = resolve;
+  });
+  await page.route("**/api/memes_latest", async (route) => {
+    await artworkReady;
+    await route.fulfill({ json: loadingTestArtwork });
+  });
+  try {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const comingUp = page.getByRole("region", {
+      name: "Coming up",
+      exact: true,
+    });
+    await expect(
+      comingUp.getByRole("link", { name: "Coming Up artwork 3", exact: true })
+    ).toBeVisible();
+    await expect(comingUp.getByText("NEXT MINT", { exact: true })).toHaveCount(
+      0
+    );
+    releaseArtwork();
+    await expect(
+      page.getByRole("link", { name: loadingTestArtwork.name, exact: true })
+    ).toBeVisible();
+    await expect(comingUp.getByText("NEXT MINT", { exact: true })).toHaveCount(
+      0
+    );
+    await expect(
+      comingUp.getByRole("link", { name: "Coming Up artwork 3", exact: true })
+    ).toBeVisible();
+  } finally {
+    releaseArtwork();
+  }
+});
+
+test("homepage artwork survives slow settings and failed mint status @smoke @medium @large", async ({
+  page,
+}) => {
+  await installLoadingTestArtwork(page);
+  await page.route("**/api/memes_latest", (route) =>
+    route.fulfill({ json: loadingTestArtwork })
+  );
+  let releaseSettings!: () => void;
+  const settingsReady = new Promise<void>((resolve) => {
+    releaseSettings = resolve;
+  });
+  await page.route("**/api/settings", async (route) => {
+    await settingsReady;
+    await route.fallback();
+  });
+  try {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const artwork = page
+      .getByRole("main")
+      .locator('[data-home-section="Latest drop"]');
+    await expect(
+      artwork.getByRole("link", { name: loadingTestArtwork.name, exact: true })
+    ).toBeVisible();
+    const image = artwork.getByRole("img", {
+      name: loadingTestArtwork.name,
+      exact: true,
+    });
+    await expect(image).toBeVisible();
+    await expect
+      .poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth))
+      .toBeGreaterThan(0);
+    releaseSettings();
+    await expect(
+      artwork.getByText("Unavailable", { exact: true }).first()
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    await expect(image).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+  } finally {
+    releaseSettings();
+  }
+});
+
+test("homepage artwork request has a visible failure and retry @smoke @medium @large", async ({
+  page,
+}) => {
+  await installLoadingTestArtwork(page);
+  let failing = true;
+  await page.route("**/api/memes_latest", (route) =>
+    failing
+      ? route.fulfill({
+          status: 503,
+          json: { error: "Temporarily unavailable" },
+        })
+      : route.fulfill({ json: loadingTestArtwork })
+  );
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await expect(
+    page
+      .getByRole("alert")
+      .filter({ hasText: "We couldn’t load the latest artwork." })
+  ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+  failing = false;
+  await page.getByRole("button", { name: "Try again", exact: true }).click();
+  await expect(
+    page.getByRole("link", { name: loadingTestArtwork.name, exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Try again", exact: true })
+  ).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+});
 
 test.describe("Home Page @smoke @medium @large", () => {
   test.beforeEach(async ({ page }) => {

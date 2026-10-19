@@ -12,7 +12,7 @@ import Link from "next/link";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { CompactMenu } from "@/components/compact-menu";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
 import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
 import {
@@ -277,7 +277,7 @@ const HeaderTitleContent = ({
                 aria-label={t(locale, "waves.information.open", {
                   name: displayWave.name,
                 })}
-                className="tw-flex tw-min-h-8 tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                className="tw-flex tw-min-h-6 tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
               >
                 <span className="tw-w-full tw-truncate tw-text-sm tw-font-semibold">
                   {displayWave.name}
@@ -493,13 +493,16 @@ export default function AppHeader() {
   const pathname = usePathname();
   const params = useParams();
   const { canGoBack } = useNavigationHistoryContext();
+  const information = useWaveInformation();
   const { profile } = useIdentity({
     handleOrWallet: address ?? null,
     initialProfile: null,
   });
 
   const pfp = getHeaderProfilePfp({ activeProfileProxy, profile });
-  const resolvedPfp = pfp ? resolveIpfsUrlSync(pfp) : null;
+  const resolvedPfp = pfp
+    ? getScaledImageUri(pfp, ImageScale.W_AUTO_H_50)
+    : null;
   const menuAvatarSrc = resolvedPfp ?? DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP;
 
   const connectionIndicator = getConnectionProfileIndicator({
@@ -590,6 +593,7 @@ export default function AppHeader() {
     : null;
 
   const showBackButton =
+    Boolean(information?.returnFromNavigation) ||
     isInsideWave ||
     isCreateRoute ||
     isProfileWavesFeedView ||

@@ -47,6 +47,15 @@ describe("AboutFAQ", () => {
     expect(profileImage).toHaveAttribute("height", "846");
   });
 
+  it("expands NIC only as Network Identity Check", () => {
+    const { container } = render(<AboutFAQ />);
+
+    expect(screen.getByText("Network Identity Check (NIC)").tagName).toBe(
+      "DT"
+    );
+    expect(container).not.toHaveTextContent(/network identity credit/i);
+  });
+
   it("makes the wallet anchor target programmatically focusable", () => {
     render(<AboutFAQ />);
 

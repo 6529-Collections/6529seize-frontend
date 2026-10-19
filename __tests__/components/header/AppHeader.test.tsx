@@ -9,6 +9,12 @@ import {
 import React from "react";
 import AppHeader from "@/components/header/AppHeader";
 import { PROFILE_DOUBLE_ACTIVATE_DELAY_MS } from "@/components/header/profile-activation.constants";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
 
 const mockShare = jest.fn();
 const mockNativeCanShare = jest.fn();
@@ -564,6 +570,17 @@ describe("AppHeader", () => {
     });
     const img = screen.getByRole("img", { name: "pfp" });
     expect(img).toBeInTheDocument();
+  });
+
+  it("requests the AUTOx50 derivative of a CDN profile picture", () => {
+    setup({
+      address: "0xabc",
+      profile: { pfp: CDN_AVATAR_URL },
+      asPath: "/waves",
+    });
+    expect(
+      getRequestedImageSrc(screen.getByRole("img", { name: "pfp" }))
+    ).toContain(scaledAvatarPath(ImageScale.W_AUTO_H_50));
   });
 
   it("uses the fallback avatar when an active proxy has no creator pfp", () => {

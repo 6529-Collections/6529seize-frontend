@@ -9,6 +9,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { AuthContext } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 const MIN_SEARCH_LENGTH = 3;
 function classNames(...classes: unknown[]) {
@@ -85,7 +86,10 @@ export default function ProxyCreateTargetSearch({
           <div className="tw-flex tw-items-center tw-gap-x-3">
             {profileProxy.granted_to.pfp ? (
               <img
-                src={profileProxy.granted_to.pfp}
+                src={getScaledImageUri(
+                  profileProxy.granted_to.pfp,
+                  ImageScale.W_AUTO_H_50
+                )}
                 alt="Profile picture"
                 className="tw-h-6 tw-w-6 tw-flex-none tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
               />
@@ -99,7 +103,7 @@ export default function ProxyCreateTargetSearch({
               type="button"
               aria-label="Remove selected profile"
               onClick={() => onTargetSelect(null)}
-              className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none"
+              className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
             >
               <svg
                 className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-red"
@@ -153,7 +157,7 @@ export default function ProxyCreateTargetSearch({
                     classNames(
                       "tw-relative tw-cursor-pointer tw-select-none tw-rounded-lg tw-px-2 tw-py-2 tw-transition tw-duration-300 tw-ease-out",
                       active
-                        ? "tw-bg-iron-700 tw-font-medium tw-text-iron-50"
+                        ? "tw-bg-iron-700 tw-font-medium tw-text-iron-50 tw-ring-2 tw-ring-inset tw-ring-primary-400"
                         : ""
                     )
                   }
@@ -162,7 +166,10 @@ export default function ProxyCreateTargetSearch({
                     <div className="tw-flex tw-items-center">
                       {profile.pfp ? (
                         <img
-                          src={profile.pfp}
+                          src={getScaledImageUri(
+                            profile.pfp,
+                            ImageScale.W_AUTO_H_50
+                          )}
                           alt="Profile picture"
                           className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-full"
                         />

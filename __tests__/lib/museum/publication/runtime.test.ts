@@ -496,6 +496,28 @@ describe("Museum publication build snapshot", () => {
     expect(parseMuseumPublicationBuildSnapshot(tampered)).toBeUndefined();
   });
 
+  it.each([
+    "2026-08-02T12:00:00",
+    "2026-08-02",
+    "Aug 2 2026",
+    "2026-02-30T12:00:00Z",
+  ])(
+    "refuses to create or accept a snapshot with the lenient timestamp %j",
+    (generatedAt) => {
+      expect(() =>
+        createMuseumPublicationBuildSnapshot(publication, generatedAt)
+      ).toThrow("publication_build_snapshot_timestamp_invalid");
+
+      const snapshot = createMuseumPublicationBuildSnapshot(
+        publication,
+        "2026-08-02T12:00:00.000Z"
+      );
+      expect(
+        parseMuseumPublicationBuildSnapshot({ ...snapshot, generatedAt })
+      ).toBeUndefined();
+    }
+  );
+
   it("rejects a snapshot dated beyond the clock-skew bound", () => {
     const now = Date.parse("2026-08-02T12:00:00.000Z");
     const snapshot = createMuseumPublicationBuildSnapshot(

@@ -26,7 +26,7 @@ and mobile app layouts.
   `/xtdh` (`xTDH Allocations Dashboard`), `/nft-activity`, `/meme-calendar`,
   collection routes, tools routes, and about routes including `6529 Apps`
   (`/about/6529-apps`) grouped under `About 6529`,
-  `Collections & Minting`, `Network & Reputation`, `Delegation & Wallets`,
+  `Collections & Minting`, `Network & Reputation`, `Safe Collecting`,
   `Data & Developer Tools`, and `Legal`.
 
 ## Features

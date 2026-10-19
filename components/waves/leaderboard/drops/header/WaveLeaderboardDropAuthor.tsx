@@ -9,7 +9,7 @@ import UserCICAndLevel, {
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import ApprovalStatusBadge from "@/components/waves/approval/ApprovalStatusBadge";
 import { isOfficiallyApprovedDrop } from "@/helpers/waves/approve-wave.helpers";
 import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
@@ -41,7 +41,10 @@ export const WaveLeaderboardDropAuthorAvatar: React.FC<
             <div className="tw-h-full tw-w-full tw-max-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
               <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-text-center">
                 <Image
-                  src={resolveIpfsUrlSync(drop.author.pfp)}
+                  src={getScaledImageUri(
+                    drop.author.pfp,
+                    ImageScale.W_AUTO_H_50
+                  )}
                   alt="Profile picture"
                   width={40}
                   height={40}

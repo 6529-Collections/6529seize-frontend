@@ -69,15 +69,15 @@
         "Competition links use /waves/{waveId}/competitions/{competitionId}; an entry link adds ?entry={entryId}. Explicit competition and entry links preserve that competition across tabs, reload and Back/Forward even when another competition becomes the default.",
         "In competition setup, Competition type offers Rank and Approve in a desktop dropdown or a bottom sheet on smaller screens, including the app. The current choice is marked. Selecting a type closes the picker; dismissing it leaves the choice unchanged.",
         "In the app, the competition setup editor keeps the focused name or description field above the keyboard and action bar. Closing the keyboard restores the editor's full height.",
-        "In the native app, the competition collection filters and Votes subtabs use the same compact pills as wave information. More opens remaining collection choices and shows the selected choice's name after selection. Dismissing More leaves the selection unchanged. Desktop and mobile web also use compact pills for collection filters, with all available filters visible. Votes subtabs retain underlined styling on web; published competitions keep the shared wave-level navigation.",
+        "In the native app, the competition collection filters and Votes subtabs use the same compact pills as wave information. More opens remaining collection choices and shows the selected choice's name after selection. Dismissing More leaves the selection unchanged. Desktop and mobile web also use compact pills for collection filters, with all available filters visible. Votes subtabs use the same compact pills on desktop and mobile web. Decision-pause notices appear below the Votes pills. Entry-submission eligibility notices appear only in Leaderboard, not in My Votes, All votes, or Activity; published competitions keep the shared wave-level navigation.",
         "When switching to a competition route, its controls appear after navigation completes, so a newly opened sort sheet or form stays in that view.",
         "A wave link targeting a specific chat message remains in Chat even when the link also names another section. The message target takes priority over that conflicting destination.",
-        "Ordinary wave navigation restores each wave’s last selected valid tab in the same browser or app, including after reloads or app restarts. Main Stage can remember Leaderboard while Maybes Bar independently remembers Chat. Switching waves keeps the wave list in place and opens the remembered section directly; pending competition data loads in that section without opening Chat or Competitions first. With no valid remembered choice, Chat is the fallback, including Memes and completed waves. Loading or refreshing competition data does not override deliberate Chat selections. Remembered competition views retain their competition identity; if the default changes, ordinary entry falls back to Chat. Explicit tab and competition links retain their destination. Competition tabs use the default unless an explicit selection supplies another competition. One eligible competition wins; otherwise the earliest-starting running competition wins, including paused decisions. With none running, the soonest upcoming wins over history; otherwise the most recently ended wins, including archived completed history. Drafts, archived never-published drafts and cancelled competitions are excluded. With none eligible, shared chat remains usable. Chat and every selected published competition share one wave-level row: Chat, competition views, Votes, Settings, then Competitions when available, then curations. Votes contains My Votes, All votes and Activity, scoped to the selected competition. Settings renders its access, rules, appearance and pause history, including original competitions stored in wave settings. About and wave Configuration live in the information panel. Select the wave name to open it; mobile Close or Back returns to the original competition, tab, curation and scroll. Administrators retain Competitions; other viewers see it for more than one visible competition. Unknown counts or permissions keep it hidden until administrator access or more than one visible competition is established. Direct collection links remain readable. Temporary refresh failures retain loaded competition content and its selected section; rejected access or an unavailable competition shows a retryable error in that section. Explicit competition choices and open forms keep their original competition.",
+        "Ordinary wave navigation restores each wave’s last selected valid tab in the same browser or app, including after reloads or app restarts. Main Stage can remember Leaderboard while Maybes Bar independently remembers Chat. Switching waves keeps the wave list in place and opens the remembered section directly; pending competition data loads in that section without opening Chat or Competitions first. With no valid remembered choice, Chat is the fallback, including Memes and completed waves. Loading or refreshing competition data does not override deliberate Chat selections. Remembered competition views retain their competition identity; if the default changes, ordinary entry falls back to Chat. Explicit tab and competition links retain their destination. Competition tabs use the default unless an explicit selection supplies another competition. One eligible competition wins; otherwise the earliest-starting running competition wins, including paused decisions. With none running, the soonest upcoming wins over history; otherwise the most recently ended wins, including archived completed history. Drafts, archived never-published drafts and cancelled competitions are excluded. With none eligible, shared chat remains usable. Chat and every selected published competition share one wave-level row: Chat, competition views, Votes, Settings, then Competitions when available, then curations. Votes contains My Votes, All votes and Activity, scoped to the selected competition. Settings renders its access, rules, appearance and pause history, including original competitions stored in wave settings. About and wave Configuration live in the information panel. Select the wave name to open it; mobile Close or the device’s Back action returns to the original competition, tab, curation and scroll. Administrators retain Competitions; other viewers see it for more than one visible competition. Unknown counts or permissions keep it hidden until administrator access or more than one visible competition is established. Direct collection links remain readable. Temporary refresh failures retain loaded competition content and its selected section; rejected access or an unavailable competition shows a retryable error in that section. Explicit competition choices and open forms keep their original competition.",
         "Routine background competition refreshes keep established tabs in place. The Competitions tab updates when refreshed competition data or permissions change, not merely because another request starts.",
         "Where the competition experience is available, creating a wave opens shared chat without creating a competition. The Competitions tab is available to wave administrators for management, and to other viewers only when more than one visible competition is established. Users with competition creation permission open Competitions, then + Competition beside the collection filter pills, to configure a competition afterward.",
         "Wave administrators can create Rank or Approve drafts and publish them. Drafts are visible only to wave administrators. Approve requires a whole-number approval threshold greater than zero. The competition setup editor saves changes automatically. Incomplete input is retained on this device; valid drafts sync to the server. Next highlights invalid voting settings. Opening a draft goes directly to the setup wizard with saved settings prefilled. Close editor returns to the competition list and preserves the draft without publishing. The final step has Previous, Close editor and Publish; Publish saves the latest edits before publication. Whole competition means one voting budget across that competition’s entries. Competition guidelines apply to its entries and voting; chat guidelines belong to the shared wave. Published types cannot change; after the first entry, credit, signing, submission, timing, decision and outcome rules are fixed. Participation and voting access groups, title, description and presentation can still be updated while published.",
         "Each entry creates a dedicated competition drop that belongs to exactly one competition. Chat messages cannot become competition entries, and competition drops cannot be reused in another competition. Competition submissions cannot be edited, including unsigned submissions. Delete removes the entry from all competition views and direct entry links. There are no Withdraw or Disqualify actions. Existing drop-deletion permissions apply.",
-        "The wave header and tabs stay visible. Every selected published competition renders directly under the single wave tab row. The collection opens from Competitions. + Competition beside the collection filter pills opens setup directly; existing drafts open from their collection cards. The Competitions tab shows a badge counting active and upcoming competitions, hidden at zero; drafts and completed competitions do not count. The collection offers Active and upcoming, Completed, Drafts for administrators, and All. The app uses compact pills with More for remaining filters; desktop and mobile web show all available collection filters as compact pills. Create beside the wave tabs contains eligible New curation and New subwave actions. On desktop, mouse opening leaves actions unhighlighted; keyboard opening and arrow keys highlight options for selection. The separate + Competition action appears only in the Competitions collection for users with competition creation permission. Mobile uses a bottom sheet with short action descriptions; selecting an action closes the sheet before its form opens. Competition cards show the start date and any configured end date, using Starts or Ends for future dates and Started or Ended for past dates. Competition views include Leaderboard, Winners, Outcomes, Votes and Settings. Votes has My Votes, All votes and Activity subtabs scoped to the chosen competition. The leaderboard uses the familiar schedule or approval-status bar, list/grid controls, sorting and rich drop cards with the Drop action. Winners use Rank podium/timeline or Approve result cards; Outcomes use expandable reward cards; My votes uses editable rows and reset controls; All votes shows profile rows and vote totals. Open Settings for an overview with the competition type, status, name, description and guidelines, followed by Participation, Voting and Winners settings cards. Administrators can use Edit competition details on the overview card to edit the name, description and guidelines together in place, then Save changes or Cancel. Published competitions no longer open a separate editing wizard. Administrators can use the gear beside Participation or Voting Access to edit its criteria, including after entries have been submitted. Access changes preserve existing entries, votes, outcomes and decision progress. Administrators can expand Appearance and labels below these cards to edit the submission button label, proposal card display, Approve tab labels and outcome visibility, with Save changes and Cancel in that section. Approve competitions default to Proposals and Approved; custom tab labels apply to that competition. Drafts also have Finish draft setup for unpublished execution settings. Select Chat to return to the conversation. Competition drop cards in shared chat show the competition name beneath the author, linked to that competition, plus the entry’s current total, your vote, rank, and voter count. The voter dropdown shows the entry’s voters and vote history. Voting credit is independent per competition. Voting on a competition drop from shared chat uses that entry’s competition credit type, available budget, and rules. A budget can be shared across that competition or apply per entry. Zero removes a vote; negative values depend on the rules. Winning or deleting an entry releases its active voting spend. Deleted entries and their votes no longer appear in competition views.",
+        "The wave header and tabs stay visible. Every selected published competition renders directly under the single wave tab row. The collection opens from Competitions. + Competition beside the collection filter pills opens setup directly; existing drafts open from their collection cards. The Competitions tab shows a badge counting active and upcoming competitions, hidden at zero; drafts and completed competitions do not count. The collection offers Active and upcoming, Completed, Drafts for administrators, and All. The app uses compact pills with More for remaining filters; desktop and mobile web show all available collection filters as compact pills. Create beside the wave tabs contains eligible New curation and New subwave actions. On desktop, mouse opening leaves actions unhighlighted; keyboard opening and arrow keys highlight options for selection. The separate + Competition action appears only in the Competitions collection for users with competition creation permission. Mobile uses a bottom sheet with short action descriptions; selecting an action closes the sheet before its form opens. Competition cards show the start date and any configured end date, using Starts or Ends for future dates and Started or Ended for past dates. Competition views include Leaderboard, Winners, Outcomes, Votes and Settings. Votes has My Votes, All votes and Activity subtabs scoped to the chosen competition. The leaderboard uses the familiar schedule or approval-status bar, list/grid controls, sorting and rich drop cards with the Drop action. Winners use Rank podium/timeline or Approve result cards; Outcomes use expandable reward cards; My votes uses editable rows and reset controls; All votes shows profile rows and vote totals. Profiles load as their rows approach the visible area. If one profile fails, its row keeps the rank and total and shows Profile unavailable with Try again; retry reloads only that profile. Open Settings for an overview with the competition type, status, name, description and guidelines, followed by Participation, Voting and Winners settings cards. Administrators can use Edit competition details on the overview card to edit the name, description and guidelines together in place, then Save changes or Cancel. Published competitions no longer open a separate editing wizard. Administrators can use the gear beside Participation or Voting Access to edit its criteria, including after entries have been submitted. Access changes preserve existing entries, votes, outcomes and decision progress. Administrators can expand Appearance and labels below these cards to edit the submission button label, proposal card display, Approve tab labels and outcome visibility, with Save changes and Cancel in that section. Approve competitions default to Proposals and Approved; custom tab labels apply to that competition. Drafts also have Finish draft setup for unpublished execution settings. Select Chat to return to the conversation. Competition drop cards in shared chat show the competition name beneath the author, linked to that competition, plus the entry’s current total, your vote, rank, and voter count. The voter dropdown shows the entry’s voters and vote history. Voting credit is independent per competition. Voting on a competition drop from shared chat uses that entry’s competition credit type, available budget, and rules. A budget can be shared across that competition or apply per entry. Zero removes a vote; negative values depend on the rules. Winning or deleting an entry releases its active voting spend. Deleted entries and their votes no longer appear in competition views.",
         "Competition winner notifications link to the relevant competition or entry. Competition status changes and entry deletion do not send notifications or appear in the notification feed.",
         "Pause decisions stops winner selection while otherwise eligible entries and votes remain available. In Settings, Pause decisions and Resume decisions sit beside Pause history, alongside the other Settings sections. Pausing requires a non-blank reason in the confirmation dialog. Anyone who can view the competition can see each pause’s dates and reason in Pause history, including after resuming. Older pauses without a reason show No reason recorded. Approve may finalize accepted votes after voting closes when a hold or pause finishes. Competitions complete through their configured rules; administrators cannot manually end or cancel them. Archive moves a draft or completed competition into history. Terminal competitions can be cloned into new drafts but cannot reopen.",
         "Main Stage privileges belong only to an explicitly designated competition. Other competitions in the same wave do not inherit them. A wave containing native competition history cannot be deleted, and ordinary chat-history deletion preserves competition content.",
@@ -687,9 +687,11 @@
         "It highlights the current or upcoming Meme Card mint, discovery sections, and 6529 mission content.",
         "Coming up shows the next mint when available and current vote leaders. On mobile, swipe horizontally through the cards; keyboard users can tab through their links. Tablet and desktop show a grid. Status and mint date or TDH have their own row above uncropped artwork. Card titles open the drop, artist names open profiles, and View all opens the wave.",
         "After the current Meme mint ends, the homepage keeps Latest Drop through a configurable grace period before replacing it with a mapped Next Drop.",
+        "The latest artwork can appear while mint status and next-winner details are still loading. If artwork data fails to load, use Try again. Mint-status failures leave the artwork visible with unavailable stats; loaded artwork stays visible during background refreshes.",
+        "Coming up keeps recently loaded leader cards visible when returning during the same app session and during pull-to-refresh. Failed updates preserve available cards. NEXT MINT waits for confirmed current-artwork and mint-status information; leader cards can load independently.",
         "Latest Drop groups title and artist first, then stats with Edition Details beneath them, then Your allowance above Subscription Minting, and the countdown and mint action at the bottom.",
         "A mapped Latest Drop adds Main Stage Submission -> View as the last Edition Details row, and a mapped Next Drop shows a The Memes #{id} pill linked to the Meme card.",
-        "The home mint panel can surface The Memes subscription awareness with read-only status, subscription info, and Set up or Manage actions for the profile Subscriptions tab.",
+        "The home mint panel can surface The Memes subscription awareness with read-only status, subscription info, and Set up or Manage actions for the profile Subscriptions tab. On native iOS outside the US, or while the country check is loading, the row is not shown; on every platform it appears just after the page loads rather than in the first render.",
         "Use it when users ask where to start or where the current mint is surfaced."
       ],
       "canonical_path": "/",
@@ -704,6 +706,7 @@
       "source_refs": [
         "components/home/newcomer/HomeNewcomerIntro.tsx",
         "components/home/next-mint-leading/NextMintLeadingSection.tsx",
+        "components/home/now-minting/LatestDropSection.tsx",
         "ops/docs/home/feature-home-latest-drop-and-coming-up.md",
         "ops/docs/home/README.md",
         "ops/docs/home/feature-home-header-and-mission.md",
@@ -974,7 +977,7 @@
         "/drop-forge",
         "/discover",
         "/network",
-        "/delegation/delegation-center"
+        "/safe-collecting"
       ],
       "tags": ["navigation", "ui"],
       "source_refs": [
@@ -1175,7 +1178,7 @@
         "/the-memes",
         "/{user}/subscriptions",
         "/open-data/meme-subscriptions",
-        "/delegation/delegation-center"
+        "/safe-collecting"
       ],
       "tags": ["join", "navigation", "getting-started", "waves"],
       "source_refs": [
@@ -1220,9 +1223,9 @@
       ],
       "facts": [
         "The About index page lives at /about.",
-        "It groups About pages into About 6529, Collections & Minting, Network & Reputation, Delegation & Wallets, Data & Developer Tools, and Legal link cards with right-arrow affordances.",
-        "Collections & Minting includes About The Memes, Subscription Minting, Meme Lab, 6529 Gradient, and Minting links.",
-        "Network & Reputation includes TDH, xTDH Overview, xTDH Allocations Dashboard, Network Health, Network Definitions, Levels, Network TDH Stats, Network Nerd, Prenodes, and TDH Historic Boosts links.",
+        "It groups About pages into About 6529, Collections & Minting, Network & Reputation, Safe Collecting, Data & Developer Tools, and Legal link cards with right-arrow affordances.",
+        "Collections & Minting includes About The Memes, Subscription Minting, Meme Lab, 6529 Gradient, Minting and GDRC, with GDRC last. Safe Collecting contains Safe Collecting, TAP Guide, FAQ, Consolidation Use Cases, Wallet Checker, App Wallets when supported, and Primary Address last.",
+        "Network & Reputation includes TDH, xTDH Overview, xTDH Allocations Dashboard, Network Health, Network Definitions, Levels, Network TDH Stats, Network Nerd, and TDH Historic Boosts links.",
         "Data & Developer Tools includes API, EMMA, Block Finder, Open Data, ReMemes Data, Team Data, royalties, network metrics, and subscription-gated data links.",
         "Use the About index when users want to browse all About pages or find the right policy, collection, minting, delegation, wallet, network, open-data, or technical page."
       ],
@@ -1241,8 +1244,8 @@
         "/network/levels",
         "/network/health/network-tdh",
         "/network/nerd",
-        "/network/prenodes",
-        "/network/tdh/historic-boosts"
+        "/network/tdh/historic-boosts",
+        "/network/tdh/consolidation"
       ],
       "tags": ["about", "navigation", "getting-started"],
       "source_refs": [
@@ -1623,7 +1626,7 @@
         "GDRC is separate from NFT Delegation and is not the Global Delegation Rights Contract.",
         "The page states that 6529 supports the Global Digital Rights Charter 1.",
         "The page links to digitalrightscharter.org and displays the full text of GDRC1.",
-        "The About index lists GDRC under Delegation & Wallets."
+        "The About index lists GDRC as the final item under Collections & Minting."
       ],
       "canonical_path": "/about/gdrc1",
       "related_paths": ["/about/faq"],
@@ -1632,36 +1635,6 @@
         "components/about/AboutGDRC1.tsx",
         "components/about/about.routes.ts"
       ]
-    },
-    {
-      "id": "about.nft-delegation",
-      "kind": "route",
-      "title": "NFT Delegation",
-      "aliases": [
-        "nft delegation",
-        "about nft delegation",
-        "delegation about page",
-        "where do i start delegation"
-      ],
-      "keywords": [
-        "nft",
-        "delegation",
-        "delegate",
-        "wallet",
-        "center",
-        "about"
-      ],
-      "facts": [
-        "The NFT Delegation about page lives at /about/nft-delegation.",
-        "The page sends users to the Delegation Center to get started with delegation."
-      ],
-      "canonical_path": "/about/nft-delegation",
-      "related_paths": [
-        "/delegation/delegation-center",
-        "/delegation/delegation-faq"
-      ],
-      "tags": ["about", "delegation"],
-      "source_refs": ["components/about/AboutNFTDelegation.tsx"]
     },
     {
       "id": "about.ens",
@@ -1899,6 +1872,7 @@
         "Sign out all clears every connected profile in one visible transition without switching through the remaining profiles.",
         "On the native app, logout removes that profile from push delivery on this phone unless another connected wallet still uses the same profile; Sign out all removes every profile registration for this installation, including stale profiles missing locally. Other devices stay connected. Offline cleanup retries when the app reconnects, so pushes can continue until the server accepts it.",
         "If wallet connection is not working, retry from the header wallet controls and confirm the wallet modal is completed before using write actions.",
+        "On the web, signed-out visitors load wallet connection services on their first connect, so that first Connect can take a moment; the button shows a spinner until the wallet dialog opens. If loading fails, select Connect again to retry.",
         "If Post cannot finish its session check, the draft stays in the composer. Wait for loading to finish, check the connection, complete sign-in if prompted, then retry Post. A stalled session check expires so a later attempt can check again; it does not automatically post the draft.",
         "If Post asks you to reconnect or reactions show Please reconnect your wallet, the saved profile can still be visible even though its session cannot renew. Reconnect that profile from the wallet account controls, then retry the action. Save your draft before logging out or reloading; failed authentication keeps it in the composer, and reactions are not automatically retried after sign-in.",
         "Protected pages show a loading placeholder while wallet identity and the required profile are being restored; connect-wallet, profile-setup, and permission messages appear after those checks settle. Public browsing, Search, and Share remain available while account-dependent controls load.",
@@ -2066,6 +2040,7 @@
       "facts": [
         "The Profile Curation tab lives at /{user}/curations and presents the profile's selected named Curation.",
         "On an owner's empty Curation tab, Create Curation asks for a name and prepares the required access, public source Wave, Curation, and profile connection.",
+        "Mobile Curation setup and edit sheets use Close or a downward header swipe to leave without submitting; desktop dialogs also offer Cancel.",
         "If the owner has no profile handle, Go to Identity opens /{user} so profile setup can be completed first.",
         "After guided setup succeeds, Add post opens automatically; if post creation succeeds but Curation membership fails, Retry add reuses the created post.",
         "Owners see Add post as the primary action. Manage separates profile display actions from Curation actions: Hide from profile keeps the Curation, source Wave, and posts, while Delete Curation deletes the Curation but keeps its source Wave and posts.",
@@ -2128,7 +2103,7 @@
       ],
       "facts": [
         "A user's Meme Card subscription controls and history live under /{user}/subscriptions.",
-        "On native iOS when the detected country is not US or is unknown, subscription controls stay hidden and direct or deep-linked visits return to the profile Identity tab without showing subscription content.",
+        "On native iOS when the detected country is not US or is unknown, subscription controls stay hidden and direct or deep-linked visits return to the profile Identity tab without showing subscription content once the country check settles (a failed check counts as unknown); US iOS deep links wait for the check and then keep the Subscriptions tab, and web and Android never wait for the country check. On every platform the Subscriptions tab and the profile-header subscription status are added just after the page loads rather than in the first render.",
         "The tab leads with subscription coverage: status, consecutive intended drops funded, funded-through and next-unfunded Meme context, and an authoritative top-up deadline only when one is available.",
         "The tab also shows exact ETH balance, raw mint capacity, airdrop address, manual or automatic mode, edition preference, upcoming drops, and history when subscriptions are available.",
         "Tap, hover, or focus the Airdrop Address to read its full value when the phone layout truncates it.",
@@ -2183,13 +2158,14 @@
       ],
       "facts": [
         "The Profile Proxy tab exposes profile proxy relationships and actions.",
+        "All, Received, and Granted filters remain visible as tabs on phone, tablet, and desktop. Arrow keys switch tabs; Home and End select the first and last tab.",
         "Proxy features help a profile allow another account to perform supported actions without handing over the primary wallet.",
         "Current proxy action creation supports Allocate Rep and Allocate NIC actions with a granted Credit amount and read-only Spent total.",
         "Proxy action availability and profile rating behavior depend on whether the active proxy has the relevant Allocate Rep or Allocate NIC permission.",
         "Proxy and delegation are related concepts but live in separate product areas."
       ],
       "canonical_path": "/{user}/proxy",
-      "related_paths": ["/{user}/proxy", "/delegation/delegation-center"],
+      "related_paths": ["/{user}/proxy", "/safe-collecting"],
       "tags": ["profiles", "proxy", "glossary"],
       "source_refs": [
         "ops/docs/profiles/tabs/feature-proxy-tab.md",
@@ -2253,6 +2229,7 @@
         "The section shows up to three tags and uses a +N more chip when additional tags exist; controls wrap at narrow widths.",
         "Manage and +N more open the inline Quick Tags manager inside the same Brain-tab card.",
         "On mobile, New Quick Tag and existing-tag editing open in a bottom sheet; on wider screens, create and edit forms remain inline.",
+        "The mobile Quick Tag editor uses Back, Close, or a downward header swipe to discard edits. The inline editor keeps Cancel.",
         "The section is hidden on other profiles and while acting through a proxy.",
         "Quick Tags do not have a dedicated profile tab or route."
       ],
@@ -2276,7 +2253,10 @@
         "tdh meaning",
         "tdh rate",
         "hodl rate",
-        "total dynamic head"
+        "total dynamic head",
+        "tdh rank ties",
+        "tdh tie-break",
+        "same TDH different ranks"
       ],
       "keywords": [
         "tdh",
@@ -2295,7 +2275,11 @@
         "category",
         "sets",
         "leaderboard",
-        "levels"
+        "levels",
+        "rank",
+        "ranking",
+        "ties",
+        "tie-break"
       ],
       "facts": [
         "TDH means Total Days Held.",
@@ -2321,12 +2305,19 @@
         "Distinct Gradients add the configured per-token bonus up to the configured count limit. The page derives the eventual rounded multiplier ceiling from the full season schedule, additional-set series and Gradient limit.",
         "The displayed future ceiling is conditional: future cards must become eligible and can make a previously complete collection incomplete.",
         "Rates are rounded before wallet and token-level TDH rounding; consolidated wallets preserve qualifying internal-transfer ages, recompute the boost, and sum per-token rounded final contributions.",
-        "TDH is used throughout the network, including profiles, leaderboards, Levels, groups, Network views, Waves voting and eligibility, and public data."
+        "TDH is used throughout the network, including profiles, leaderboards, Levels, groups, Network views, Waves voting and eligibility, and public data.",
+        "TDH ranks are consecutive positions starting at 1; equal displayed TDH does not give wallets or consolidations a shared rank.",
+        "Overall TDH ranks compare boosted TDH, unboosted TDH, Gradients TDH and NextGen TDH, in that order, highest first.",
+        "Memes, Gradients and NextGen collection ranks compare that collection's boosted TDH, unboosted TDH and NFT balance, then total NFT balance, highest first. Owners of an individual Meme card compare that card's TDH, then total boosted TDH, highest first.",
+        "A complete tie uses the lowercase wallet address in ascending order, or the consolidation key made from lowercase wallet addresses sorted in ascending order and joined with hyphens. Backend and native 6529 Desktop use the same ranking rules; tie-breaks change positions without changing holdings, TDH scores or boosts.",
+        "Individual Gradient and NextGen token rankings compare token TDH highest first, then numeric token ID lowest first.",
+        "A collection rank of -1 means there is no positive boosted TDH for that collection. Empty singleton wallets are omitted from TDH rankings; wallets with eligible NFTs or membership in a multi-wallet consolidation remain included even when TDH is zero."
       ],
       "canonical_path": "/network/tdh",
       "related_paths": [
         "/network/definitions",
         "/network/tdh/historic-boosts",
+        "/network/tdh/consolidation",
         "/network/health/network-tdh",
         "/network/levels"
       ],
@@ -2335,6 +2326,94 @@
         "ops/docs/network/feature-tdh-boost-rules.md",
         "ops/docs/network/feature-network-definitions.md"
       ]
+    },
+    {
+      "id": "network.tdh-consolidation",
+      "kind": "route",
+      "title": "Combine Your Wallets",
+      "aliases": [
+        "combine your wallets",
+        "combine wallets",
+        "wallet consolidation",
+        "consolidate wallets",
+        "four wallet consolidation",
+        "4 wallet consolidation",
+        "add a fourth wallet",
+        "why consolidate",
+        "consolidation benefits",
+        "which wallets to consolidate",
+        "old wallet tdh"
+      ],
+      "keywords": [
+        "consolidation",
+        "consolidate",
+        "combine",
+        "wallets",
+        "fourth",
+        "tdh",
+        "vault",
+        "profile",
+        "guided setup"
+      ],
+      "facts": [
+        "The Combine Your Wallets page at /network/tdh/consolidation is the collector's guide to wallet consolidation: why to combine wallets, which ones, how to set it up with the guided setup, and what to know before starting.",
+        "Combining (consolidating) up to four wallets a collector owns makes them count as one collector: TDH adds up, cards spread over several wallets count toward full sets, seasons and the Genesis, Nakamoto and Gradient boosts, and moving a card between combined wallets keeps its holding time.",
+        "Combined wallets share one profile; any of them can sign in. Cards are counted together on the profile, on the collector leaderboards and for Meme Card subscriptions. Nothing moves: NFTs stay in the wallets they are in.",
+        "The recommended safe collecting setup gives each wallet one job: a vault (ideally a SAFE or hardware wallet) that holds NFTs and never connects, a transaction wallet for buying, selling and trading, and a hot social wallet that signs in to 6529, votes, posts, mints and pays for subscriptions. Three wallets is enough to start; the optional fourth is usually a burned or exposed old address combined only so its TDH keeps counting.",
+        "The guided setup at /safe-collecting/build-consolidation accepts Ethereum addresses or ENS names and shows which wallet signs next. ENS names resolve to mainnet addresses before planning; unresolved names and duplicate wallets block the plan. Each wallet signing for itself can register its links in one transaction; a Delegation Manager signs one transaction per link while the vault stays disconnected. The guide shows the current environment’s activation cutoff from backend settings. Guided signing opens ten minutes later; staging can open before production.",
+        "Every combined wallet can sign in as the profile, change the primary address and choose where airdrops go, so only a collector's own wallets should be combined. Profiles merge permanently; the handle and picture come from the profile with the highest CIC.",
+        "Signing out of order, renewing old return links or sending a joining wallet's links as separate manager transactions can temporarily split the wallets and reduce TDH-wave votes. The guided setup enforces signing order but cannot make separate manager transactions atomic.",
+        "The technical rules and the analysis behind the four-wallet design are on a separate page, /network/tdh/consolidation/design."
+      ],
+      "canonical_path": "/network/tdh/consolidation",
+      "related_paths": [
+        "/safe-collecting/build-consolidation",
+        "/network/tdh/consolidation/design",
+        "/network/tdh",
+        "/safe-collecting/wallet-checker",
+        "/safe-collecting"
+      ],
+      "tags": ["network", "tdh", "consolidation", "delegation"],
+      "source_refs": ["ops/docs/network/feature-tdh-consolidation.md"]
+    },
+    {
+      "id": "network.tdh-consolidation-design",
+      "kind": "route",
+      "title": "How Wallet Consolidation Works",
+      "aliases": [
+        "how consolidation works",
+        "consolidation rules",
+        "consolidation analysis",
+        "consolidation security",
+        "why every pair",
+        "consolidation signing order",
+        "consolidation simulator",
+        "full mesh consolidation"
+      ],
+      "keywords": [
+        "consolidation",
+        "rules",
+        "mesh",
+        "order",
+        "batch",
+        "security",
+        "analysis",
+        "simulator"
+      ],
+      "facts": [
+        "The How Wallet Consolidation Works page at /network/tdh/consolidation/design sets out the exact rules behind 6529 wallet consolidation, an interactive signing-order simulator and the tested security analysis of the four-wallet design. The simulator models transactions after the displayed environment cutoff, uses the backend wallet limits, and waits when those limits are unavailable.",
+        "Every pair of wallets in a consolidation registers a Consolidation (use case 999) in both directions on the NFTDelegation contract, on Any Collection or The Memes. Two wallets need 2 registrations, three need 6 and four need 12; with batchDelegations each wallet signing for itself signs one transaction; managers send one transaction per link.",
+        "A fourth wallet counts only when its links to the other three were registered in both directions on or after the activation cutoff supplied by this environment’s backend settings. Wallets are grouped from confirmed links, newest first, so completing a link with a new wallet moves a member out of its group.",
+        "The page compares the full-mesh rule with cheaper alternatives and shows that only full mesh stops any subset of a collector's wallets from adding an outside wallet."
+      ],
+      "canonical_path": "/network/tdh/consolidation/design",
+      "related_paths": [
+        "/network/tdh/consolidation",
+        "/network/tdh",
+        "/safe-collecting/build-consolidation"
+      ],
+      "tags": ["network", "tdh", "consolidation", "delegation"],
+      "source_refs": ["ops/docs/network/feature-tdh-consolidation.md"]
     },
     {
       "id": "network.definitions",
@@ -2976,9 +3055,10 @@
         "On desktop with no selected Wave, /waves shows the latest posts from members' effective public Profile Wave curations, newest first.",
         "Each latest-profile-post card identifies the author, posting time, and originating Profile Wave; curated replies can also appear. On mobile web and in the native app, the default /waves view remains a Wave navigator with no separate Profile Waves Feed card, and the feed icon at the far right of the plain Waves heading opens the cross-Wave feed at /waves?view=profile-feed. On desktop, the same feed icon clears the selected wave to show Profile Waves Feed. The heading is not clickable. Header actions are feed then create on desktop, with Profile Waves Feed and Create Wave tooltips. Create uses a compact white button. The mobile list shows only feed; the app keeps create in its top bar. The Profile Waves Feed content header has a Discover Waves link with a compass, aligned right on desktop and below the description on small screens. The expanded sidebar has no separate feed row.",
         "From the mobile web Profile Waves Feed, Waves returns to the Wave list. Opening a feed post enters its Wave conversation, and browser Back returns to the feed.",
-        "Announcements uses a compact row with its timestamp, unread state and score shield. Active Votes rows also have a score shield that opens score details. The current wave highlights in Active Votes as well as in the collection list below when it appears in both. In Worth Checking Out, each avatar and its bottom-right score shield form one wave navigation link; hovering or focusing the combined link shows score details.",
+        "Announcements uses a compact row with its timestamp, unread state and score shield. A row-sized placeholder reserves its space while it first loads. Active Votes rows also have a score shield that opens score details. The current wave highlights in Active Votes as well as in the collection list below when it appears in both. In Worth Checking Out, each avatar and its bottom-right score shield form one wave navigation link; hovering or focusing the combined link shows score details.",
         "While Find a wave is open, sidebar scores remain visible but their details cards are temporarily unavailable, including for an empty search field. Closing search restores score hover, focus and selection. Recommendation links remain available while searching.",
         "Every Worth Checking Out recommendation also appears in All at its recent-activity position; Joined normally includes only waves the user has joined.",
+        "Joined waves load in batches without skipping entries when new activity changes their order. Recent activity includes joined, unmuted subwaves. Muting a wave removes its own activity from the ordering. More rows load near the bottom, with Load more joined waves as a fallback. Failed loads keep existing rows available and show Retry. Expired lists refresh automatically, and newly joined waves appear on refresh.",
         "Switching All and Joined preserves list position instead of jumping to the active wave; a shorter list can clamp the position. Selecting another wave reveals its active row again.",
         "A Wave opened from a direct link remains visible and highlighted in the left sidebar even when it is not followed, pinned, or present in the loaded overview; this temporary route context does not join or pin it.",
         "When a direct link opens a subwave, the sidebar surfaces its visible parent, loads and expands the subwave list, reveals the selected child row, and keeps that parent tree ahead of paginated activity rows so every sibling remains reachable.",
@@ -3354,7 +3434,10 @@
         "Wave Configuration contains wave access, chat availability, links, slow mode, curations, chat history deletion and personal display preferences. Selected competition access, rules, appearance and pauses belong to Settings in the main row.",
         "Voter lists and vote activity are available in Votes, under All votes and Activity. Both follow the chosen competition; they are absent from the information panel.",
         "On mobile, selecting the wave name opens a dismissible information panel containing About, REP and Configuration. About includes the pinned drop.",
-        "Closing mobile information or using Back returns to the original competition, tab, curation and scroll position. The underlying view stays mounted.",
+        "Swipe down from the mobile information panel's handle or header, select Close, tap outside, press Escape, or use Back to return to the original competition, tab, curation and scroll position. The underlying view stays mounted. Scrolling the panel content does not dismiss it; short or canceled header drags return it to its open position.",
+        "On mobile, Configuration gear controls open editors inside the information panel. Back, browser Back or Escape returns to Configuration without submitting changes; Save returns after a successful update. Failed saves keep the editor open for retry. Configuration retains its selected tab and scroll position. Close or a downward header swipe dismisses the whole panel.",
+        "On tablet-sized layouts, the overlay side panel also keeps these editors inside the panel. Back or Escape returns to the selected information tab.",
+        "In Configuration's Curations section, the plus button creates a curation and a row gear manages an existing curation. Create curation and Edit curation use the same mobile information sheet or tablet panel at its existing height. Group selection stays inside the form. Back discards the draft and returns to Configuration; Close or a downward header swipe dismisses the panel. Successful saves return to Configuration, while a failed save keeps the draft open. Desktop forms remain separate dialogs.",
         "Selecting a section switches information for the active wave without navigating away from the thread."
       ],
       "canonical_path": "/waves",
@@ -3865,10 +3948,12 @@
         "The Access row uses Chat access wording; `Anyone` means no chat access group is attached, independently of whether chat is enabled.",
         "Rank and Approve Configuration shows Chat status separately from Chat access, so disabled chat does not look like the same thing as an unrestricted chat access group.",
         "Access groups available to the current viewer—including authorized private groups and direct-message groups for their eligible authenticated members or creators—link from Configuration to a filtered Network view that shows both the group criteria and current members; Configuration displays a live eligible-member count instead of the generated group name.",
+        "After following a member count from the mobile Wave information sheet to Network, the app header Back button or browser Back returns to the same Wave, selected information tab, and scroll position. Changing Network filters preserves that return destination.",
         "Use the Clear selected group button in Network to close the group summary and return to the default member view.",
         "A scoped group hidden from the current viewer is labeled `Private group` without a link, name, id, author, criteria, or membership details.",
         "Network does not reuse a selected group's cached criteria or members after the authenticated viewer changes, or while opening a different group.",
-        "When chat is disabled, slow mode and disable-links settings are hidden because they only apply when chat is enabled."
+        "When chat is disabled, slow mode and disable-links settings are hidden because they only apply when chat is enabled.",
+        "Wave setting editors inside the mobile information sheet or tablet panel use Back to discard changes and return to Configuration, or Close and a downward header swipe to dismiss the sheet. They omit a duplicate Cancel button; desktop setting popovers keep Cancel. Save applies the edit, and a failed save keeps the draft open for retry."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves?create=wave"],
@@ -3946,12 +4031,16 @@
       "facts": [
         "Wave leaderboard docs cover winners, my votes, top voters, sales, sorting, price filters, decision timelines, and drop eligibility states.",
         "Leaderboard availability depends on the wave type and configuration.",
-        "Use the selected competition’s main Leaderboard tab to inspect its entries and ranking."
+        "Use the selected competition’s main Leaderboard tab to inspect its entries and ranking.",
+        "Full wave leaderboard list, grid, and Memes gallery views update scores and ranks live while preserving the visible artwork's position. During touch or momentum scrolling, scores keep updating and card reordering waits until scrolling settles."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
       "tags": ["waves", "leaderboard"],
-      "source_refs": ["ops/docs/waves/leaderboard/README.md"]
+      "source_refs": [
+        "ops/docs/waves/leaderboard/README.md",
+        "ops/docs/waves/leaderboard/feature-drop-states.md"
+      ]
     },
     {
       "id": "waves.memes-submission",
@@ -3999,7 +4088,7 @@
         "In the Artwork step, Add a proposal card frame (optional) is off by default. Select it and choose Vertical or Horizontal to add a thin animated border with four black-and-white 6529 logos around an image, video, or interactive HTML. It is unavailable for GLB models.",
         "The proposal frame says this is a proposal to do something and the artwork may change. Submitting publishes HTML that embeds the original media and creates a framed still for gallery views. Video and HTML submissions still require a preview image in Additional Information. Select the top-right logo to pause the animation; reduced-motion preferences stop it automatically.",
         "Resubmitting a framed submission restores the original artwork and orientation. Uncheck the proposal frame option to remove it or change orientation without nesting another frame. A preview or frame-publishing failure stops submission and can be retried.",
-        "Memes Quick Vote opens from the Uncast Power card or compact bolt-count trigger in supported Waves footers when an authenticated non-proxy profile has remaining voting power and unrated submissions.",
+        "Memes Quick Vote opens from the Uncast Power card or compact bolt-count trigger in supported Waves footers when an authenticated non-proxy profile has remaining voting power and unrated submissions. Below 768px, its close button stays at the top left through loading, loaded, error and restart states; at 768px and wider it stays at the top right. Close is available and takes keyboard focus during loading. The loading header matches the space for the two-line counts. Escape or clicking the backdrop closes the dialog and returns focus to the opener.",
         "The Quick Vote dialog shows submission counts at the top and remaining voting power above the bottom controls: Change vote amount on the left, Vote in the center, and Skip on the right.",
         "Quick Vote custom entry starts closed. Open Change vote amount to type an amount, then select Vote or press Enter. Closing the editor retains the draft for reopening on the same submission; typing alone does not save it as a remembered amount. Selecting a remembered amount submits that vote.",
         "In the native app's mobile layout, the Quick Vote dialog shrinks when the keyboard opens to keep the amount input and voting controls above it.",
@@ -4024,6 +4113,49 @@
         "ops/docs/waves/memes/feature-memes-quick-vote.md",
         "ops/docs/waves/leaderboard/feature-drop-entry-and-eligibility.md",
         "ops/docs/waves/troubleshooting-wave-navigation-and-posting.md"
+      ]
+    },
+    {
+      "id": "waves.memes-voting-checkpoint",
+      "kind": "business_rule",
+      "title": "The Memes voting checkpoint time",
+      "aliases": [
+        "memes checkpoint",
+        "memes voting checkpoint",
+        "checkpoint time",
+        "checkpoint schedule",
+        "when is the memes checkpoint",
+        "memes voting cutoff",
+        "what time does memes voting end",
+        "17:00 GMT checkpoint"
+      ],
+      "keywords": [
+        "memes",
+        "checkpoint",
+        "voting",
+        "schedule",
+        "utc",
+        "time zone",
+        "cutoff",
+        "24hv",
+        "monday",
+        "wednesday",
+        "friday"
+      ],
+      "facts": [
+        "The Memes voting checkpoints are Monday, Wednesday and Friday at 16:00 UTC, all year. The time is fixed in UTC, so it is 17:00 in London only during British Summer Time.",
+        "At each checkpoint the top submission on the leaderboard is selected, ranked by 24-Hour Vote (24HV): a weighted average of the TDH voted during the 24 hours before the checkpoint.",
+        "The Memes wave FAQ tab (How Does Voting Work?) and /about/apply (Checkpoint Schedule) state the checkpoint in UTC. After the page loads they add the viewer's own time zone in parentheses, for example (your time: Mon, Wed, Fri 09:00 PDT) for Los Angeles in summer.",
+        "The local note names the weekday because a viewer east of UTC can see the checkpoint on the next day: in Auckland the Monday, Wednesday and Friday checkpoints read Tuesday, Thursday and Saturday in the morning. It follows daylight saving in the viewer's zone and is left out for a viewer whose zone is UTC.",
+        "The wave FAQ takes the time of day from the wave's decision schedule and shows 16:00 UTC when that is not available."
+      ],
+      "canonical_path": "/about/apply",
+      "related_paths": ["/waves", "/the-memes"],
+      "tags": ["waves", "memes", "voting", "time"],
+      "source_refs": [
+        "ops/docs/waves/memes/feature-memes-voting-checkpoints.md",
+        "components/about/AboutApply.tsx",
+        "components/brain/my-stream/MyStreamWaveFAQ.tsx"
       ]
     },
     {
@@ -4142,33 +4274,48 @@
     {
       "id": "delegation.overview",
       "kind": "route",
-      "title": "Delegation center",
+      "title": "Safe Collecting",
       "aliases": [
+        "safe collecting",
+        "collect safely",
+        "delegation center",
         "delegation",
         "delegate",
         "delegations",
-        "delegation center",
-        "delegation manager"
+        "delegation manager",
+        "vault setup",
+        "wallet setup",
+        "tap setup",
+        "keep my vault cold"
       ],
       "keywords": [
+        "safe",
+        "collecting",
         "delegation",
         "delegate",
         "wallet",
         "vault",
+        "manager",
         "airdrop",
-        "mapping",
-        "checker"
+        "consolidation",
+        "tap"
       ],
       "facts": [
-        "Delegation lets one wallet authorize another wallet for supported 6529 uses.",
-        "The delegation center provides wallet checking, action flows, collection management, and section navigation.",
-        "Delegation is useful for vault/hot-wallet patterns and airdrop-related workflows."
+        "Safe Collecting at /safe-collecting (formerly the Delegation Center) explains and sets up 6529's safe collecting system: keep NFTs in a vault that never connects to anything, and use 6529 from a hot wallet, while TDH, delegations, airdrops and subscriptions keep working as if every wallet were one.",
+        "The former /delegation URLs permanently redirect to the equivalent /safe-collecting pages, preserving query parameters and section anchors. Wallet Architecture is now /safe-collecting/tap-guide, and the FAQ and its articles are under /safe-collecting/faq.",
+        "It follows the Three Address Protocol (TAP): a vault (ideally a SAFE with hardware-wallet signers, or a hardware wallet) that holds NFTs and never connects; a transaction wallet on a hardware wallet that buys, sells and trades and acts as the vault's Delegation Manager; a hot social wallet that signs in to 6529, votes, posts, mints and pays for subscriptions and holds no NFTs; and optionally an old, burned or exposed address kept combined for its TDH.",
+        "The recommended setup for new collectors: the vault signs once to set its ENS name and appoint the transaction wallet as Delegation Manager (use case 998) on Any Collection; the guided setup combines the wallets with the manager signing for the vault; optionally the manager delegates minting to the social wallet; airdrops without a delegation go to the wallet with the most TDH, usually the vault.",
+        "When a wallet is connected, the Your setup section lists the profile's wallets with TDH, primary and connected badges, which wallet manages which, minting and airdrop delegations, and a checklist with links to fix missing steps.",
+        "The page links to every tool: guided consolidation, appointing a manager, minting and airdrop delegations, primary address, locks, revoking, and the Wallet Checker. The original delegation, consolidation and Delegation Manager forms and Manage by Collection are under All tools.",
+        "A Delegation Manager cannot move NFTs but can register anything in the vault's name, including consolidations and more managers; an expiry date does not limit it, only revoking does, and revoking it does not undo what it registered."
       ],
-      "canonical_path": "/delegation/delegation-center",
+      "canonical_path": "/safe-collecting",
       "related_paths": [
-        "/delegation/wallet-checker",
-        "/delegation-mapping-tool",
-        "/consolidation-mapping-tool"
+        "/safe-collecting/tap-guide",
+        "/safe-collecting/build-consolidation",
+        "/safe-collecting/register-sub-delegation",
+        "/safe-collecting/wallet-checker",
+        "/network/tdh/consolidation"
       ],
       "tags": ["delegation", "wallet", "glossary"],
       "source_refs": [
@@ -4225,7 +4372,7 @@
         "partial results"
       ],
       "facts": [
-        "Wallet Checker lives at /delegation/wallet-checker.",
+        "Wallet Checker lives at /safe-collecting/wallet-checker.",
         "Wallet Checker is a read-only diagnostics page for one wallet.",
         "It checks delegations, delegation managers, and consolidation relationships for an entered Ethereum address or .eth ENS.",
         "It can show Delegations, Active Minting Delegation for The Memes, Delegation Managers, Consolidations, Active Consolidation, and Incomplete Consolidation.",
@@ -4235,11 +4382,11 @@
         "Recommendations wait until the separately loaded active-consolidation request settles. A failed linked-wallet request keeps the successfully loaded records, so partial results do not prove that every link was checked.",
         "Wallet Checker does not invent links: if a pair is entirely absent in both directions, it produces no recommendation for that pair. The six-linked-wallet cap can also limit coverage for a wallet with many stray links. Listed registrations are distinct from the backend's active counted consolidation; the checker neither registers links nor activates four-wallet support."
       ],
-      "canonical_path": "/delegation/wallet-checker",
+      "canonical_path": "/safe-collecting/wallet-checker",
       "related_paths": [
-        "/delegation/wallet-architecture",
-        "/delegation/consolidation-use-cases",
-        "/delegation/delegation-center"
+        "/safe-collecting/tap-guide",
+        "/safe-collecting/consolidation-use-cases",
+        "/safe-collecting"
       ],
       "tags": ["delegation", "wallet", "checker", "diagnostics"],
       "source_refs": [
@@ -4294,18 +4441,18 @@
       "facts": [
         "A consolidation connects wallets you control so 6529 can treat them together for supported metrics such as TDH, total cards, and unique cards; it is consolidation use case #999.",
         "Natural phrases such as adding, linking, pairing, or setting up another wallet refer to this consolidation flow when the goal is for 6529 to treat wallets together for supported metrics.",
-        "To register a consolidation, open Register Consolidation from the Delegation Center, choose the collection, enter the Consolidating With address, submit, and execute the transaction.",
+        "To register a consolidation, open Register Consolidation from Safe Collecting, choose the collection, enter the Consolidating With address, submit, and execute the transaction.",
         "For TDH consolidation, use Any Collection or The Memes.",
         "Consolidation must be reciprocal: two wallets each register the link to the other, and groups of 3 or 4 wallets need every pair linked in both directions.",
         "Each wallet signing for itself can register all of its links in one transaction with the NFTDelegation batchDelegations function (up to 5 links per call). A Delegation Manager sends one transaction per link. When adding a wallet to an existing group, the existing wallets register their links to it first and the new wallet sends its batch last. Existing return links or a manager sending the new wallet's links individually can still cause a temporary split and reduce TDH-wave votes.",
         "A consolidation is not a delegation of NFT utility, but every wallet in it is a full key to the profile, so only consolidate your own wallets."
       ],
-      "canonical_path": "/delegation/delegation-faq/register-consolidation",
+      "canonical_path": "/safe-collecting/faq/register-consolidation",
       "related_paths": [
-        "/delegation/wallet-architecture",
-        "/delegation/consolidation-use-cases",
-        "/delegation/delegation-faq/reference-consolidations-4address",
-        "/delegation/register-consolidation"
+        "/safe-collecting/tap-guide",
+        "/safe-collecting/consolidation-use-cases",
+        "/safe-collecting/faq/reference-consolidations-4address",
+        "/safe-collecting/register-consolidation"
       ],
       "tags": ["delegation", "consolidation", "wallet", "faq"],
       "source_refs": [
@@ -4323,8 +4470,7 @@
         "register consolidation form",
         "open register consolidation",
         "where is register consolidation",
-        "register a consolidation form",
-        "add another wallet"
+        "register a consolidation form"
       ],
       "keywords": [
         "consolidation",
@@ -4339,19 +4485,19 @@
         "999"
       ],
       "facts": [
-        "The Register Consolidation form is the Delegation Center action for connecting wallets you control for supported 6529 metrics.",
+        "The Register Consolidation form is a Safe Collecting action for connecting wallets you control for supported 6529 metrics.",
         "The form requires a connected wallet, Collection, and Consolidating With address.",
-        "Profile owners can open this form from Add another wallet beside Wallet Checker in ID Statements / Consolidated Addresses; the entry is hidden while a proxy profile is active.",
-        "The normal form explains registering from the connected wallet, then connecting the other wallet and registering the return link. Each wallet needs ETH for gas; the link is public and existing profile data may be combined. NFTs stay in their wallets.",
+        "Add another wallet in the profile’s Wallet section opens the guided Build a Consolidation setup at /safe-collecting/build-consolidation, not this form.",
+        "The normal form explains that a consolidation holds up to 4 wallets and every pair of wallets registers a link in both directions, so every wallet signs and needs ETH for gas; the link is public and existing profile data may be combined. NFTs stay in their wallets. It links to the guided setup.",
         "For TDH consolidation, use Any Collection or The Memes."
       ],
-      "canonical_path": "/delegation/register-consolidation",
+      "canonical_path": "/safe-collecting/register-consolidation",
       "related_paths": [
-        "/delegation/delegation-faq/register-consolidation",
-        "/delegation/wallet-architecture",
-        "/delegation/consolidation-use-cases",
-        "/delegation/delegation-center",
-        "/delegation/assign-primary-address"
+        "/safe-collecting/faq/register-consolidation",
+        "/safe-collecting/tap-guide",
+        "/safe-collecting/consolidation-use-cases",
+        "/safe-collecting",
+        "/safe-collecting/assign-primary-address"
       ],
       "tags": ["delegation", "consolidation", "wallet"],
       "source_refs": [
@@ -4361,12 +4507,72 @@
       ]
     },
     {
+      "id": "delegation.build-consolidation",
+      "kind": "workflow",
+      "title": "Build a Consolidation (guided setup)",
+      "link_label": "Build a Consolidation",
+      "aliases": [
+        "build a consolidation",
+        "guided consolidation",
+        "guided setup",
+        "consolidate four wallets",
+        "add a fourth wallet",
+        "add another wallet",
+        "add a wallet to my consolidation",
+        "consolidation signing order",
+        "one transaction per wallet",
+        "consolidate a cold vault",
+        "sign consolidation as delegation manager"
+      ],
+      "keywords": [
+        "consolidation",
+        "consolidate",
+        "guided",
+        "wallets",
+        "batch",
+        "order",
+        "fourth",
+        "sign",
+        "999"
+      ],
+      "facts": [
+        "Guided Setup reads its wallet limits and activation/signing-open times from the selected backend. Missing wallet limits pause guided signing and adding wallet rows; Try Again reloads settings. With valid limits but unavailable activation dates, two- and three-wallet plans continue while four-wallet signing waits.",
+        "Build a Consolidation is Safe Collecting's guided setup for linking up to 4 wallets you control. Open it from Guided Setup on the Consolidations card, from Add another wallet in the profile’s Wallet section, or from the link in the Register Consolidation form.",
+        "Before the activation cutoff, a subtle note under the wallet counter shows the selected environment's four-wallet signing opening time in UTC. Plans can be prepared in advance. The note disappears at the cutoff, including in an open tab; four-wallet signing remains held until the separate opening time.",
+        "Every pair of wallets in a consolidation registers use case 999 in both directions. The guide reads which directions are already registered on-chain (Any Collection or The Memes) and plans one transaction per wallet: a single registration for one missing link, or one batch for several.",
+        "The connected wallet and its current consolidation are prefilled. Wallets already in that consolidation sign first and new wallets sign last; signing out of order temporarily splits the consolidation and can reduce TDH-wave votes.",
+        "Each step can be signed only by its own wallet or by that wallet's Delegation Manager, and only after every earlier step is confirmed on-chain. Switch the connected wallet between steps; the wallet list stays in place.",
+        "A vault never has to connect: if the connected wallet is the vault's Delegation Manager on Any Collection (use case 998), the vault's step shows Sign for Wallet N as its manager and the manager registers each of the vault's links as a separate transaction (Link n of total). When a manager signs for a joining wallet with several links, the consolidation can be split until the last link confirms, which can reduce TDH-wave votes, so the step asks to send them back to back. A manager appointed only for The Memes cannot sign these links. Appoint one from the tip in Before you start (/safe-collecting/register-sub-delegation).",
+        "A connected Safe cannot sign its own step here, because a Safe confirms a transaction only after its co-signers approve; appoint a Delegation Manager for the Safe on Any Collection and connect the manager to sign the Safe's links (see Using a SAFE at /safe-collecting/faq/using-safe).",
+        "A four-wallet consolidation counts only when one member has all three of its links registered in both directions from the current environment’s activation cutoff. Every step of a four-wallet plan waits until ten minutes after that cutoff, as shown in Guided Setup; staging can open before production; groups of two or three are not held.",
+        "For a four-wallet plan the guide also checks when 6529 recorded each link. A joining wallet's older links are registered again in the signer's step so they count. After a step confirms, a link 6529 has not recorded yet shows Waiting for 6529 to record this link (usually about a minute) instead of asking for another signature.",
+        "Every wallet in a consolidation can sign in as the profile and act for it, so only consolidate wallets you control. Profiles merge permanently, the profile with the highest CIC keeps its handle, and a wallet already in another consolidation leaves it."
+      ],
+      "canonical_path": "/safe-collecting/build-consolidation",
+      "related_paths": [
+        "/safe-collecting/register-consolidation",
+        "/safe-collecting/faq/register-consolidation",
+        "/safe-collecting",
+        "/safe-collecting/wallet-checker",
+        "/safe-collecting/register-sub-delegation",
+        "/safe-collecting/faq/using-safe"
+      ],
+      "tags": ["delegation", "consolidation", "wallet"],
+      "source_refs": ["ops/docs/delegation/feature-delegation-action-flows.md"]
+    },
+    {
       "id": "delegation.wallet-architecture",
       "kind": "workflow",
-      "title": "Wallet Architecture",
+      "title": "The Three Address Protocol (TAP)",
       "aliases": [
+        "tap guide",
         "wallet architecture",
         "three address protocol",
+        "how do i keep my nfts safe",
+        "how not to get phished",
+        "nft phishing protection",
+        "good tap great tap",
+        "social wallet",
         "architecture",
         "what is tap",
         "tap wallet architecture",
@@ -4394,27 +4600,42 @@
         "gnosis",
         "tap",
         "phishing",
-        "malware"
+        "malware",
+        "social",
+        "hardware",
+        "multisig",
+        "drainer"
       ],
       "facts": [
-        "The recommended architecture separates a vault wallet for long-term NFT storage, a transaction wallet for trusted marketplace activity, and a minting wallet for unknown or higher-risk minting activity.",
-        "The docs call this the Three Address Protocol, or TAP, and explain how separate wallets reduce phishing, malware, and malicious-site risk.",
-        "A higher-security version can use SAFE, formerly Gnosis Safe, as the vault wallet, while a more convenient minting wallet can be a hot or mobile wallet.",
-        "Use the consolidation docs and Register Consolidation form when you want those wallets treated together for supported 6529 metrics.",
-        "For consolidation metrics, 6529 recognizes up to 4 addresses as one consolidation group when every pair is linked in both directions; a fourth address counts only for links registered on or after 15 October 2026 00:00 UTC."
+        "/safe-collecting/tap-guide is the TAP Guide tab of the delegation pages: a plain-language guide titled The Three Address Protocol (TAP), the way to never have your grail NFTs phished. It works with any wallet app.",
+        "The one rule: never connect a wallet that holds your NFTs to a link you saw on X or Discord.",
+        "TAP gives three wallets three jobs. The vault (ice-cold; ideally a SAFE with hardware-wallet signers, or a hardware wallet) holds the NFTs you are not trading and never connects to anything, not even 6529; if you mint from it, it is not a vault. The transaction wallet (warm; a hardware wallet) holds NFTs you are buying, selling or trading and only connects to recognized marketplaces. The social wallet (hot; any wallet app; older guides call it the minting wallet) holds no NFTs and only a little ETH and is used for signing in to 6529, voting, posting and minting.",
+        "An optional fourth wallet is an old or exposed address, such as a burned hot wallet or a doxxed vault: stop using it and combine it with your other wallets so its TDH keeps counting. Creators should create new work from a dedicated hardware-wallet address.",
+        "A hardware wallet protects against malware on your computer, but it signs whatever you approve, so it cannot protect you if you connect it to a drainer. TAP protects against that; both together is best.",
+        "Good TAP: a wallet app address as the social wallet and two hardware wallet addresses as the transaction wallet and vault. Great TAP uses a SAFE multisig vault, for example 2-of-3 with hardware-wallet signers; Great TAP is how 6529 runs.",
+        "On 6529, combining the wallets makes them one collector (TDH, sets, one profile) and any of them can sign in, so the vault never has to. The vault signs once to appoint the transaction wallet as its Delegation Manager, which then registers everything for it; a minting delegation lets the social wallet mint with the vault's eligibility; with no delegation, airdrops go to the wallet with the most TDH, usually the vault.",
+        "A Delegation Manager cannot move NFTs but can register anything in the vault's name and revoke its entries; revoking the manager does not undo what it registered, and a manager's expiry date is ignored. A vault that locks consolidation for Any Collection cannot be linked to new wallets, even with a stolen manager key, until the vault itself unlocks.",
+        "The page's primary button, Set up your wallets, opens /safe-collecting#safe-setup; it also links to /network/tdh/consolidation, the guided setup, Register Delegation Manager, Register Delegation, Using a SAFE, the FAQ and Wallet Checker. The earlier long-form Wallet Architecture article remains at /safe-collecting/faq/reference-overview-wallet-architecture.",
+        "For consolidation metrics, 6529 recognizes up to 4 addresses as one consolidation group when every pair is linked in both directions; a fourth address counts only for links registered on or after the current environment’s activation cutoff."
       ],
-      "canonical_path": "/delegation/wallet-architecture",
+      "canonical_path": "/safe-collecting/tap-guide",
       "related_paths": [
-        "/delegation/wallet-checker",
-        "/delegation/consolidation-use-cases",
-        "/delegation/delegation-faq/register-consolidation",
-        "/delegation/register-consolidation",
-        "/delegation/delegation-faq"
+        "/safe-collecting",
+        "/network/tdh/consolidation",
+        "/safe-collecting/build-consolidation",
+        "/safe-collecting/register-sub-delegation",
+        "/safe-collecting/register-delegation",
+        "/safe-collecting/faq/using-safe",
+        "/safe-collecting/faq",
+        "/safe-collecting/wallet-checker",
+        "/safe-collecting/faq/reference-overview-wallet-architecture"
       ],
-      "tags": ["delegation", "wallet", "security", "architecture"],
+      "tags": ["delegation", "wallet", "security", "architecture", "tap"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-10-15/html/reference-overview-wallet-architecture.html",
-        "components/delegation/delegation-page-metadata.ts"
+        "components/delegation/tap-guide/TapGuide.tsx",
+        "i18n/messages/delegationTapGuide.en-US.json",
+        "components/delegation/delegation-page-metadata.ts",
+        "public/delegation-content/delegation-docs-2026-10-15/html/reference-overview-wallet-architecture.html"
       ]
     },
     {
@@ -4478,20 +4699,20 @@
       "facts": [
         "Consolidations help 6529 treat multiple wallets controlled by one collector together for metrics such as total cards, unique cards, TDH, and related collection metrics.",
         "6529 recognizes up to 4 addresses as one consolidation group, and every pair of addresses in the group must register consolidation use case #999 with each other in both directions.",
-        "The fourth address counts only for links registered on or after 15 October 2026 00:00 UTC: a group of 4 counts when one of its addresses has all three of its links registered in both directions from then. Before then, groups count at most 3 addresses; groups of 2 or 3 are unchanged and older registrations stay valid.",
+        "The fourth address counts only for links registered on or after the current environment’s activation cutoff: a group of 4 counts when one of its addresses has all three of its links registered in both directions from then. Before then, groups count at most 3 addresses; groups of 2 or 3 are unchanged and older registrations stay valid.",
         "Registration capacity and effective counted group size are different: users can create records involving more addresses, but no more than 4 addresses count together, and when links conflict the newest confirmed link wins.",
         "Each wallet signing for itself can register all of its links in one transaction with batchDelegations; a Delegation Manager sends one transaction per link. When adding a wallet to an existing group, the existing members register their links to it first and the new wallet sends its batch last. This avoids a temporary split when the new wallet has no existing return links. Old return links, signing out of order, or a manager sending the new wallet's links individually can temporarily split the group, re-run profile merges, and reduce TDH-wave votes above the lower TDH; those votes are not restored.",
         "To replace a wallet without dropping below three, add the new wallet as the fourth, then remove the old one: if it still has its key, it sends one batch revocation to all the others; if the key is lost, each remaining wallet revokes its link to it.",
         "Every wallet in a consolidation is a full key to the profile: it can sign in as the profile, set the primary address, and redirect airdrops. Consolidations are for one person's wallets, not for multiple individuals, and consolidation registrations do not expire.",
         "When a consolidation splits, profile retention uses a mature primary-address delegation (50,400 processed blocks, roughly seven days) before TDH fallback. This does not delay primary-address changes. Subscription balances and upcoming choices have separate merge rules; on a split, subscriptions follow the highest-TDH resulting group rather than the profile-retention winner."
       ],
-      "canonical_path": "/delegation/consolidation-use-cases",
+      "canonical_path": "/safe-collecting/consolidation-use-cases",
       "related_paths": [
-        "/delegation/wallet-architecture",
-        "/delegation/delegation-faq/register-consolidation",
-        "/delegation/delegation-faq/reference-consolidations-4address",
-        "/delegation/register-consolidation",
-        "/delegation/delegation-faq",
+        "/safe-collecting/tap-guide",
+        "/safe-collecting/faq/register-consolidation",
+        "/safe-collecting/faq/reference-consolidations-4address",
+        "/safe-collecting/register-consolidation",
+        "/safe-collecting/faq",
         "/consolidation-mapping-tool"
       ],
       "tags": ["delegation", "consolidation", "wallet", "tdh"],
@@ -4507,7 +4728,7 @@
     {
       "id": "delegation.faq",
       "kind": "route",
-      "title": "Delegation FAQ",
+      "title": "FAQ",
       "aliases": [
         "delegation faq",
         "delegation how to",
@@ -4532,13 +4753,13 @@
       ],
       "facts": [
         "It indexes how-to articles for registering delegations, delegation managers, consolidations, SAFE transaction-builder flows, supported use cases, viewing records, updating, revoking, locking, and unlocking wallets.",
-        "Use it when users ask broad Delegation Center how-to questions or ask where the delegation docs live."
+        "Use it when users ask broad Safe Collecting how-to questions or ask where the delegation docs live."
       ],
-      "canonical_path": "/delegation/delegation-faq",
+      "canonical_path": "/safe-collecting/faq",
       "related_paths": [
-        "/delegation/delegation-center",
-        "/delegation/wallet-architecture",
-        "/delegation/consolidation-use-cases"
+        "/safe-collecting",
+        "/safe-collecting/tap-guide",
+        "/safe-collecting/consolidation-use-cases"
       ],
       "tags": ["delegation", "faq", "docs"],
       "source_refs": [
@@ -4550,7 +4771,7 @@
       "id": "delegation.wallet-management-clarification",
       "kind": "workflow",
       "title": "Wallet Connection and Management Clarification",
-      "link_label": "Delegation Center",
+      "link_label": "Safe Collecting",
       "aliases": [
         "connected wallet or consolidation",
         "connect another wallet",
@@ -4562,15 +4783,15 @@
       "facts": [
         "Connecting another wallet to the site is different from consolidating wallets so 6529 treats them together for supported metrics.",
         "Removing or replacing the currently connected wallet is different from changing an on-chain consolidation record.",
-        "If the goal is to stop wallets being treated together, open View/Manage in the Delegation Center and revoke the relevant consolidation record.",
+        "If the goal is to stop wallets being treated together, open Safe Collecting, go to All tools, Manage by Collection, and revoke the relevant consolidation record.",
         "If the goal is to replace an address on an existing consolidation record, use Update in View/Manage.",
         "If the question is only about the site's currently connected wallet, clarify that it is a connection question rather than a consolidation change."
       ],
-      "canonical_path": "/delegation/delegation-center",
+      "canonical_path": "/safe-collecting",
       "related_paths": [
-        "/delegation/delegation-faq/manage-revoke",
-        "/delegation/delegation-faq/manage-update",
-        "/delegation/delegation-faq/register-consolidation"
+        "/safe-collecting/faq/manage-revoke",
+        "/safe-collecting/faq/manage-update",
+        "/safe-collecting/faq/register-consolidation"
       ],
       "tags": ["delegation", "wallet", "consolidation", "management"],
       "source_refs": [
@@ -4613,15 +4834,15 @@
         "view"
       ],
       "facts": [
-        "To revoke a delegation, delegation manager, or consolidation, open the Delegation Center and choose View/Manage for the relevant collection.",
+        "To revoke a delegation, delegation manager, or consolidation, open Safe Collecting, go to All tools, Manage by Collection, and choose the relevant collection.",
         "On the Manage/View Collection page, find the address or record you want to revoke and click Revoke.",
         "Execute the transaction to remove the delegation, manager permission, or consolidation record."
       ],
-      "canonical_path": "/delegation/delegation-faq/manage-revoke",
+      "canonical_path": "/safe-collecting/faq/manage-revoke",
       "related_paths": [
-        "/delegation/delegation-center",
-        "/delegation/delegation-faq",
-        "/delegation/delegation-faq/revoke-delegation-using-sub-delegation"
+        "/safe-collecting",
+        "/safe-collecting/faq",
+        "/safe-collecting/faq/revoke-delegation-using-sub-delegation"
       ],
       "tags": ["delegation", "workflow", "faq", "revoke"],
       "source_refs": [
@@ -4660,15 +4881,12 @@
         "manage"
       ],
       "facts": [
-        "To update a delegation, delegation manager, or consolidation, open View/Manage in the Delegation Center for the relevant collection.",
+        "To update a delegation, delegation manager, or consolidation, open Safe Collecting, go to All tools, Manage by Collection, and choose the relevant collection.",
         "Find the address or record you want to update, click Update, adjust the delegated wallet, expiry, or token scope, then submit.",
         "Execute the transaction to apply the update."
       ],
-      "canonical_path": "/delegation/delegation-faq/manage-update",
-      "related_paths": [
-        "/delegation/delegation-center",
-        "/delegation/delegation-faq"
-      ],
+      "canonical_path": "/safe-collecting/faq/manage-update",
+      "related_paths": ["/safe-collecting", "/safe-collecting/faq"],
       "tags": ["delegation", "workflow", "faq", "update"],
       "source_refs": [
         "public/delegation-content/delegation-docs-2026-10-15/html/manage-update.html"
@@ -4697,18 +4915,20 @@
         "utility"
       ],
       "facts": [
-        "To register a delegation, open Delegation Center, choose Register Delegation, choose the collection, enter the delegate wallet, select a use case such as #1 All, choose expiry and token scope, then submit and execute the transaction.",
-        "A delegation lets another wallet use NFT utility without moving the NFT from the delegator wallet."
+        "To register a delegation, open Safe Collecting, choose Register Delegation, choose the collection, enter the delegate wallet, select a use case such as #1 All, choose expiry and token scope, then submit and execute the transaction.",
+        "A delegation lets another wallet use NFT utility without moving the NFT from the delegator wallet.",
+        "Ordinary minting and airdrop delegations are checked against their expiry by 6529 readers. A token-specific delegation is distinct from an all-token delegation. Safe and batch registrations retain their individual expiry and token scope; review Tokens and Expiry in Wallet Checker."
       ],
-      "canonical_path": "/delegation/delegation-faq/register-delegation",
+      "canonical_path": "/safe-collecting/faq/register-delegation",
       "related_paths": [
-        "/delegation/register-delegation",
-        "/delegation/delegation-center",
-        "/delegation/wallet-architecture"
+        "/safe-collecting/register-delegation",
+        "/safe-collecting",
+        "/safe-collecting/tap-guide"
       ],
       "tags": ["delegation", "workflow", "faq"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-10-15/html/register-delegation.html"
+        "public/delegation-content/delegation-docs-2026-10-15/html/register-delegation.html",
+        "ops/docs/delegation/feature-delegation-action-flows.md"
       ]
     },
     {
@@ -4737,18 +4957,20 @@
       ],
       "facts": [
         "A delegation manager gives a manager wallet permission to maintain delegations and consolidations for another wallet.",
-        "The docs describe registering a manager from the vault wallet to a delegated wallet, then using that delegated wallet to register future delegations or consolidations."
+        "The docs describe registering a manager from the vault wallet to a delegated wallet, then using that delegated wallet to register future delegations or consolidations.",
+        "A manager can register consolidations and additional managers within its authorized collection scope. Its expiry date does not end its contract authority: revoke the manager permission to remove it. Revoking a manager does not undo records it already created; review those separately."
       ],
-      "canonical_path": "/delegation/delegation-faq/register-sub-delegation",
+      "canonical_path": "/safe-collecting/faq/register-sub-delegation",
       "related_paths": [
-        "/delegation/register-sub-delegation",
-        "/delegation/delegation-faq/register-delegation-using-sub-delegation",
-        "/delegation/delegation-faq/revoke-delegation-using-sub-delegation"
+        "/safe-collecting/register-sub-delegation",
+        "/safe-collecting/faq/register-delegation-using-sub-delegation",
+        "/safe-collecting/faq/revoke-delegation-using-sub-delegation"
       ],
       "tags": ["delegation", "manager", "wallet", "faq"],
       "source_refs": [
         "public/delegation-content/delegation-docs-2026-10-15/html/register-sub-delegation.html",
-        "public/delegation-content/delegation-docs-2026-10-15/html/register-delegation-using-sub-delegation.html"
+        "public/delegation-content/delegation-docs-2026-10-15/html/register-delegation-using-sub-delegation.html",
+        "ops/docs/delegation/feature-safe-collecting.md"
       ]
     },
     {
@@ -4778,10 +5000,10 @@
         "The docs show using the SAFE Transaction Builder with the NFTDelegation.com contract to register delegation manager rights.",
         "The SAFE flow uses the Any Collection value, no-expiry value, use case 998 for Delegation Management, allTokens true, tokenId 0, then creates and sends the batch transaction."
       ],
-      "canonical_path": "/delegation/delegation-faq/using-safe",
+      "canonical_path": "/safe-collecting/faq/using-safe",
       "related_paths": [
-        "/delegation/wallet-architecture",
-        "/delegation/delegation-faq/register-sub-delegation"
+        "/safe-collecting/tap-guide",
+        "/safe-collecting/faq/register-sub-delegation"
       ],
       "tags": ["delegation", "safe", "wallet", "faq"],
       "source_refs": [
@@ -4814,7 +5036,7 @@
       "canonical_path": "/delegation-mapping-tool",
       "related_paths": [
         "/consolidation-mapping-tool",
-        "/delegation/wallet-checker"
+        "/safe-collecting/wallet-checker"
       ],
       "tags": ["delegation", "tools"],
       "source_refs": ["ops/docs/delegation/feature-wallet-checker.md"]
@@ -5794,7 +6016,8 @@
         "On Apple mobile while the reader is not pinned to the bottom, newest drops can be held behind the new-messages control until the user reveals them.",
         "Thread reply views listen for drop updates and refetch replies, so a thread can lag briefly even when the notification arrives.",
         "Connectivity problems can make feeds or counts appear stale until reconnect or refresh.",
-        "The realtime troubleshooting docs cover connection recovery and expected limitations."
+        "The realtime troubleshooting docs cover connection recovery and expected limitations.",
+        "After the connection recovers, the app returns to the foreground, or the server asks it to repair missed live updates, active data refreshes after a short staggered delay. Repeated refresh requests are combined and hidden tabs wait until visible. Individual events are not guaranteed to replay. Signing out still stops the authenticated connection."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/notifications", "/nft-activity"],
@@ -5868,7 +6091,6 @@
         "nic",
         "what is nic",
         "what does nic stand for",
-        "network identity credits",
         "network identity check",
         "rate nic",
         "rep dialog",
@@ -5892,7 +6114,7 @@
       "facts": [
         "The combined Identity tab is the default profile tab at /{user}; /{user}/identity is a legacy redirect.",
         "NIC is the 6529 network identity trust signal shown on profile identity surfaces.",
-        "App copy refers to NIC as Network Identity Credits in the FAQ and Network Identity Check in the profile identity header.",
+        "App copy expands NIC as Network Identity Check (D142) in both the About FAQ and the profile identity header.",
         "The Identity tab surfaces profile identity, REP behavior, NIC ratings, NIC statements, and activity log behavior where available.",
         "On mobile, a compact selector switches between Total Rep, NIC, and ID Statements without changing the profile URL.",
         "Grant REP keeps its compact category pills and existing search and selection behavior, including similarly named categories remaining separate and selectable.",
@@ -5937,14 +6159,15 @@
       ],
       "facts": [
         "Identity statements are managed from profile identity surfaces on /{user}.",
-        "On mobile, select the ID Statements score card to open a compact statements card without repeating the profile heading or description; eligible owners see Add at the right of the Consolidated Addresses header.",
-        "Statement sections include Consolidated Addresses, Social Media Accounts, NFT Accounts, Contact, and Social Media Verification Posts.",
+        "On mobile, select the ID Statements score card to open the addresses and statements card. The personalized Wallet heading and wallet controls come first; below a divider, the ID Statements heading has an information button and compact Add action for eligible owners.",
+        "The profile’s Wallet section precedes ID Statements. Statement groups include Social Media Accounts, NFT Accounts, Contact, and Social Media Verification Posts; there is no separate Consolidated Addresses label.",
+        "The information tooltip beside ID Statements explains that statements are optional and permanently public, social accounts are self-declared and 6529 does not connect to them or verify account ownership or posts, and the community rates statement accuracy. Open it on hover, keyboard focus or tap; Escape, an outside click, or a page-scrolling gesture dismisses it. Automatic page adjustments and scrolling inside the tooltip keep it open. During initial page loading, the information button stays disabled until it can respond.",
         "Eligible profile owners use Add to open a bottom sheet on mobile or a dialog on desktop, choose a statement group and platform, and can return with Back to statement types before saving.",
         "Social Media Accounts, NFT Accounts, and Contact use compact icon rows for platform selection; pointer hover and keyboard focus reveal each platform name, and the selected option has a stronger outline.",
-        "On mobile, the add-statements sheet presents four compact statement groups, keeps public-visibility notes under About identity statements, and provides header close, back, backdrop, Escape, and swipe-down dismissal paths.",
+        "On mobile, the add-statements sheet presents four compact statement groups, keeps an optional and permanently public notice visible throughout the Add flow, and provides header close, back, backdrop, Escape, and swipe-down dismissal paths.",
         "On mobile web and Capacitor, deeper add-statement forms stay above the software keyboard and keep their focused fields and Save/Cancel actions reachable by scrolling.",
         "Consolidated wallet rows expand to show the full address and ENS name when available as full-field copy controls, plus labeled mobile links to Etherscan and OpenSea.",
-        "Add another wallet appears beside Wallet Checker for the connected profile owner when no proxy profile is active and a primary or consolidated wallet address is available. It opens /delegation/register-consolidation without prefilling Collection or Consolidating With; it is separate from Add for identity statements.",
+        "The profile’s personalized Wallet heading uses the viewed profile’s name, for example prxt0's Wallet, and stays singular for multiple addresses. The right-side count uses the profile’s address count and the current settings limit, for example 1 of 4 addresses or 2 of 4 addresses. It stays hidden until limits are known or when the profile has no addresses; a failed settings refresh keeps previously loaded limits. Add another wallet shares an equal-width row with Wallet Checker for the connected profile owner when no proxy profile is active, a primary or consolidated wallet address is available, and the profile has fewer than 4 wallets; it opens the guided Build a Consolidation flow at /safe-collecting/build-consolidation. At 4 wallets the owner sees a maximum-reached note instead. It is separate from Add for identity statements.",
         "URL-capable statement rows open from the row and show a right-aligned external-link cue; Copy remains an independent inline action that does not open the destination, while eligible owners can also Delete.",
         "NFT Accounts includes Ninfa and Other. Other asks for a display name such as AOTM and a secure HTTPS URL, then shows the display name with the destination hostname.",
         "New NFT account links must use HTTPS, cannot contain URL credentials, reject duplicate normalized URLs, and are limited to 20 per profile; Ninfa links must use ninfa.io or a ninfa.io subdomain.",
@@ -5954,8 +6177,8 @@
       "canonical_path": "/{user}",
       "related_paths": [
         "/{user}/identity",
-        "/delegation/wallet-checker",
-        "/delegation/register-consolidation"
+        "/safe-collecting/wallet-checker",
+        "/safe-collecting/build-consolidation"
       ],
       "tags": ["profiles", "identity", "statements"],
       "source_refs": ["ops/docs/profiles/tabs/feature-identity-statements.md"]
@@ -5999,7 +6222,7 @@
         "If no mature primary-address delegation applies, profile retention falls back to the resulting group with the highest TDH, then the previous primary address for a tie, then stable group-key ordering. A recently selected primary address alone does not guarantee retaining the profile."
       ],
       "canonical_path": "/about/primary-address",
-      "related_paths": ["/{user}", "/delegation/assign-primary-address"],
+      "related_paths": ["/{user}", "/safe-collecting/assign-primary-address"],
       "tags": ["profiles", "identity", "wallet"],
       "source_refs": [
         "ops/docs/profiles/about/feature-primary-address-reference-table.md",
@@ -6031,6 +6254,7 @@
       ],
       "facts": [
         "The profile Identity tab includes activity logs for REP and NIC where data is available.",
+        "Activity logs show three compact row placeholders while loading and No Activity Log when no entries match.",
         "Desktop activity logs support matter filters such as All, REP, and NIC plus direction filters such as All, Incoming, and Outgoing.",
         "Mobile splits REP activity under the Rep subview and NIC activity under the Identity subview."
       ],
@@ -6224,9 +6448,10 @@
       ],
       "keywords": ["xtdh", "granted", "grant", "create", "profile", "owner"],
       "facts": [
-        "The xTDH granted view lists grants and documents grant actions.",
-        "Open a grant's Show tokens disclosure to view its token artwork. Missing artwork shows the token ID; a failed thumbnail shows Load Error while the token details remain visible. Close and reopen the disclosure to retry the image.",
+        "The xTDH granted view lists grants and documents grant actions. Collection thumbnails show an NFT placeholder when artwork is missing or cannot load.",
+        "Open a grant's Show tokens disclosure to view its token artwork. If indexed artwork is missing, the grid can recover artwork and placeholder names from original Arweave or IPFS metadata. Unavailable artwork shows the token ID; a failed thumbnail shows Load Error while the token details remain visible. Close and reopen the disclosure to retry the image.",
         "A create-new-grant flow is available where owner permissions allow it.",
+        "A grant with an end shows Last grant: the final daily xTDH run that can add xTDH for it, at 00:00 UTC on the UTC date of the grant's end. It is shown in UTC, so every viewer sees the same run.",
         "Use profile xTDH for profile-specific grants and Network xTDH for global context."
       ],
       "canonical_path": "/{user}/xtdh",
@@ -6320,9 +6545,9 @@
         "worth checking out"
       ],
       "facts": [
-        "Worth Checking Out comes first and Active Votes follows as separate collapsible sections in the Waves sidebar, each with its own description and view-all link, including for signed-out visitors.",
+        "Worth Checking Out comes first and Active Votes follows as separate collapsible sections in the Waves sidebar, including for signed-out visitors. While content first loads, each shows quiet avatar or vote-row placeholders and a screen-reader loading announcement. Descriptions appear with loaded content. Only successful empty requests show the empty message, without a description. Failures offer Try again. Loading more votes preserves the existing rows and description. Headings and View all links remain available.",
         "Active Votes shows ongoing TDH votes in a scrollable window three compact rows tall. Scroll to load additional pages, or use Load more. The total count stays visible when collapsed. The currently open wave is highlighted here, even when it is also highlighted in the collection list. Its compact header includes a separate View all link aligned to the right, with the collapse chevron beside the title, available even when collapsed; the link opens /discover?view=active-votes without toggling the section. Direct messages and their subwaves are excluded even when readable. Each wave sets its own voting rules.",
-        "Worth Checking Out shows up to six highly rated waves, excluding followed waves for signed-in personal viewers, with fewer previews on narrow screens. Its sidebar description is Highly rated waves for signed-out visitors, without following language. The full discovery page uses Active discussions for signed-out visitors and Newest waves for the Newest sort. It has its own compact height. The header’s separate View all link stays available when collapsed and opens /discover?view=recommendations&sort=QUALITY.",
+        "Worth Checking Out shows up to six highly rated waves, excluding followed waves for signed-in personal viewers, with fewer previews on narrow screens. Its sidebar description is Highly rated waves you don’t follow for both signed-in and signed-out visitors. The full discovery page uses Active discussions for signed-out visitors and Newest waves for the Newest sort. It has its own compact height. The header’s separate View all link stays available when collapsed and opens /discover?view=recommendations&sort=QUALITY.",
         "If there are no active votes, Active Votes shows No active TDH votes right now in a compact area. Its heading, zero count and view-all link remain available. Loading and request errors are distinct from empty results; retrying a failed next page keeps previously loaded votes.",
         "Both sidebar discovery sections start expanded. Each heading toggles only its own content, and each collapsed state is saved locally in this browser across visits. The chevron points down when expanded and right when collapsed. The former shared tab and collapse preferences are no longer used.",
         "Discover Waves is a labeled link in the Profile Waves Feed header and a searchable destination that routes to /discover. Worth Checking Out is the first tab and default; Active Votes is second. The sidebar follows the same order, with direct View all links to each tab.",
@@ -6364,6 +6589,7 @@
         "curation"
       ],
       "facts": [
+        "When switching to a wave that needs to load, its name and picture from the wave list appear immediately with a quiet loading state. Shared links without an available wave name show Loading wave…. Recently opened waves use available content without a forced loading screen. If loading fails, the wave identity stays visible and Try again retries; competition views retain their own recovery controls.",
         "Wave content tabs organize the visible wave content area. App tabs and their content share the same availability rules. An unavailable legacy competition section opens Leaderboard, or Submissions after voting ends, and selects that visible tab.",
         "While a section opens, the tab row stays visually steady and screen readers announce loading when needed. Fast switches have no minimum waiting time or required loading screen. Switching only the section within the same page does not reload the page; the section can still show its own loading state when its data is not available. Competition controls become active after their destination opens, so sort sheets and forms stay in the selected view.",
         "Memes wave tabs start with Chat, followed by Leaderboard or Submissions after voting ends, Winners when available, and Votes, with My Votes, All votes and Activity subtabs. Other available sections follow these tabs.",
@@ -6693,6 +6919,28 @@
       ]
     },
     {
+      "id": "waves.drop.editing",
+      "kind": "workflow",
+      "title": "Edit a drop or wave description",
+      "aliases": [
+        "edit message",
+        "edit description",
+        "description edit time limit"
+      ],
+      "keywords": ["drop", "edit", "description", "pinned", "time limit"],
+      "facts": [
+        "Edit is available for your own non-participatory drops. Ordinary drops have a five-minute edit window measured from creation or the latest edit.",
+        "You can save multiple edits within the edit window without reloading the page. Editing text preserves existing images and videos, including after a previous edit has saved.",
+        "The wave's current description (pinned drop) can be edited by its author at any time. Replacing the pinned description makes the previous drop subject to the normal edit window again. Pinning does not grant other users permission to edit the drop.",
+        "Open the drop action menu and choose Edit. Save the changed content; existing mentions, metadata and referenced NFTs are preserved. Editing a description still requires the usual wave access and content validation."
+      ],
+      "canonical_path": "/waves",
+      "tags": ["waves", "drops", "editing", "description"],
+      "source_refs": [
+        "ops/docs/waves/composer/feature-edit-mention-preservation.md"
+      ]
+    },
+    {
       "id": "waves.composer.body-length-limits",
       "kind": "business_rule",
       "title": "Wave drop text and payload limits",
@@ -6768,6 +7016,7 @@
         "Available controls depend on permissions and the current wave state.",
         "Unavailable submission actions use a lock icon at every width. Hover, focus, or select the lock for the full restriction reason; the Memes How to Submit helper keeps its desktop label and opens nomination guidance.",
         "Wave picture edit and link sharing are separate header features.",
+        "Owners can select the three-dot Open options button in About for profile-wave actions and Delete. In the mobile information sheet and tablet overlay, Wave options opens inside the same panel. The mobile sheet keeps its height when opening options or setting editors and when returning with Back. Back returns to About and Close dismisses the panel. Delete requires confirmation; cancelling it returns to Wave options.",
         "A wave you have not joined shows a Join button first in the conversation header's top-right controls."
       ],
       "canonical_path": "/waves",
@@ -6841,9 +7090,10 @@
       ],
       "facts": [
         "The bell button opens wave notification preferences after a connected non-proxy profile has joined the wave.",
+        "On phone layouts, notification choices open as a subview inside the same About sheet, which shrinks to fit the two options. Selecting an option, Back, the phone’s Back action, or Escape returns to About and restores focus to the bell. Close or tapping outside dismisses the whole sheet. Returning to About restores its full height, content, and scroll position.",
+        "Desktop and tablet sidebars use an anchored notification menu with arrow-key navigation and Escape to return to the bell.",
         "The notification menu has a Broadcast mentions option with an @ icon; it controls notifications for both @all and @contributors.",
         "The notification menu has an All messages option for every-message notifications.",
-        "When all-message notifications are over the follower limit, the notification menu shows an inline follower-limit note; if the option is already enabled, users can still turn it off.",
         "The speaker control mutes waves before or after joining.",
         "When a wave is muted, the red speaker-muted Muted control unmutes it.",
         "Muted waves suppress unread indicators and realtime unread accumulation but can still be opened manually.",
@@ -7167,12 +7417,13 @@
       "keywords": ["waves", "leaderboard", "votes", "my", "tab"],
       "facts": [
         "The My Votes tab is documented under wave leaderboard features.",
+        "Signed-out viewers see Connect your wallet to participate and a Connect Wallet button in My Votes. Select it to open the usual wallet connection flow. All votes and Activity remain available without connecting.",
         "It helps a user inspect their own voting activity where the wave supports it.",
         "Availability depends on wave type, eligibility, and voting state.",
         "Click a row outside its controls or use the checkbox beside the artwork to select or deselect its vote for reset. Use its artwork or title buttons to open the drop; these buttons support Enter and Space. Vote controls and profile links keep their own actions. Selecting text does not toggle the row. Select all selects loaded rows for reset. Row selection is disabled during reset and when voting is closed.",
         "Reset votes opens a confirmation showing the selected count. Confirming sets those votes to zero; cancelling leaves votes unchanged.",
         "Rows can include an Explain action that opens a normal drop reply prefilled with a vote rationale prefix without submitting or changing the vote.",
-        "Open Votes, then My Votes. All votes and Activity are its other subtabs. All three follow the chosen competition, and voteTab preserves the selected subtab in a link."
+        "Open Votes, then My Votes. All votes and Activity are its other subtabs. These three views use compact rounded pills below the main wave tabs on desktop, mobile web, and the app. My Votes rows span the full wave content pane, with padding inside each row for its controls. All three follow the chosen competition, and voteTab preserves the selected subtab in a link. Activity keeps the vote change and drop creator below the voter on screens narrower than 768px, with the time and View drop in chat action on the first line."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
@@ -7304,8 +7555,10 @@
         "controls"
       ],
       "facts": [
-        "Filter opens Filter Network on Identities with all eight criteria available: Identities, Level, TDH, NIC, Rep, Required NFTs, Collection Access, and xTDH Grant. Criteria form a left-side list on desktop. On smaller screens they stay in one horizontal row above the scrolling fields and scroll sideways when they do not fit. Close dismisses the sheet. Switching criteria preserves the draft. The mobile sheet keeps a compact, consistent height between criteria, and Create and use new group fills the content width on narrow screens. Editors and EMMA allow-list results scroll above the keyboard. While typing, Before editing and After editing visually collapse to leave room for the fields; keyboard focus reveals member-preview controls, and status text stays available to screen readers.",
-        "After editing shows selected criteria as separate tags and View members for valid criteria. Long tag lists scroll while the preview and create action remain visible. Incomplete criteria show Not ready yet. and its guidance directly. Before editing shows the current scope and, with a selected group, its criteria, count, and View members without an extra disclosure step. Create and use new group saves the criteria as a new group and immediately applies it to the Network member list. Clear selected group above the results clears the scope.",
+        "Filter opens Filter Network with all eight criteria available: Identities, Level, TDH, NIC, Rep, Required NFTs, Collection Access, and xTDH Grant. Desktop keeps a left-side list with Identities open first. Phones and touch tablets open a vertical list; scroll down to reach the remaining rows. Selecting a row opens only its editor. Back returns to the list with the draft preserved and focus restored to the selected row. Configured rows have a checkmark. Close dismisses either step. The mobile sheet uses the available screen height, keeps its height between criteria, and anchors Create and use new group below the summary. Editors and EMMA allow-list results scroll above the keyboard. While typing, the criteria summary visually collapses to leave room for the fields; keyboard focus reveals its member-preview control, and status text remains available to screen readers.",
+        "The footer shows selected criteria as separate tags and View members for valid criteria. Long tag lists scroll while the preview and create action remain visible. An incomplete draft keeps the create action disabled; select the information button beside the summary to read Not ready yet. and its guidance. The untouched filter does not open with a warning message. When a group is selected, its name, criteria, count, and View members appear at the top. On mobile this summary is in the list step, reached with Back from an editor. Without a selected group, the sheet starts directly with the criteria list. The filter does not show Before editing or After editing labels. Create and use new group saves the criteria as a new group and immediately applies it to the Network member list. Clear selected group above the results clears the scope.",
+        "In Identities > Included, search directly to add identities or use Include me, an EMMA allowlist, or a CSV file. The empty view shows No identities are explicitly included. without repeating empty import messages. A combined unique-identity count appears after identities are selected or imported; import results, file names, and errors remain visible.",
+        "In xTDH Grant, Clear filters appears after entering a collection name, selecting a grantor, or choosing a status other than Granted. It clears the grant search fields, restores Granted, and disappears again. It does not remove a selected grant or other Network criteria. On phones and touch tablets, the search fields and grant cards share one scroll area. Load more follows the last loaded card, while Back, Close, and the bottom action stay accessible. Desktop keeps its separate results scroll area.",
         "When a group is already active, reopening the filter prefills its criteria and identity lists. Saving edits creates a new group without mutating the original.",
         "Signed-in users with active Network criteria can use REP everyone matching criteria or NIC everyone matching criteria below the selected Network filter name to grant credits to every matching member.",
         "Criteria-matched bulk REP requires an amount and category; bulk NIC requires an amount. The actions are hidden when criteria are empty, loading, unavailable, or the viewer is signed out.",
@@ -7398,13 +7651,13 @@
     {
       "id": "network.prenodes",
       "kind": "route",
-      "title": "Prenodes status",
+      "title": "Prenodes deprecation",
       "aliases": ["prenodes", "prenode", "prenodes status", "node status"],
       "keywords": ["network", "prenodes", "status", "node"],
       "facts": [
-        "Prenodes status lives at /network/prenodes.",
-        "The page documents loading, empty, error, access, and permission behavior.",
-        "Use it when users ask where prenode status information is displayed."
+        "6529 Prenodes have been deprecated. Use the 6529 Desktop app to calculate TDH.",
+        "The existing /network/prenodes URL remains available with a deprecation notice and a link to /about/6529-apps.",
+        "Prenodes is no longer listed in About navigation. The page no longer displays or requests the registry."
       ],
       "canonical_path": "/network/prenodes",
       "related_paths": ["/network"],
@@ -7586,6 +7839,7 @@
       ],
       "facts": [
         "The Memes mint route lives at /the-memes/mint.",
+        "On native iOS when the detected country is not US or is unknown, the mint page, recipient selection, mint count and SEIZE controls are absent and direct or deep-linked visits to /the-memes/mint return to /the-memes without an unavailable message once the country check settles (a failed check counts as unknown); US iOS deep links wait for the check and keep the Mint on 6529.io handoff, and web and Android keep the mint page.",
         "Mint flow docs explain entry points, common scenarios, and recovery.",
         "If a remembered profile's authorized wallet is disconnected, the mint page hides the duplicate Connect control; selecting SEIZE opens wallet connection and continues when the same wallet reconnects and transaction details are unchanged.",
         "Selecting a different already-authenticated wallet switches the active profile and cancels the old pending mint so refreshed recipient, eligibility, price, and transaction details can be reviewed before selecting SEIZE again; an unauthenticated wallet must complete normal authentication first.",
@@ -7645,6 +7899,7 @@
         "The top Meme number control uses Show mint schedule; the lower calendar control uses Find mint date because it moves the calendar to that mint.",
         "A selected published Meme provides an Open Meme link to /the-memes/{id}; upcoming or unrevealed Memes do not receive speculative artwork links.",
         "The page heading appears first; clock panels and the calendar grid appear once browser JavaScript is ready, using the browser clock and local timezone. Viewing the schedule does not require connecting a wallet.",
+        "In Local mode the calendar grid shows each mint on the viewer's local start date and highlights the viewer's today, so east of UTC (for example New Zealand) Monday/Wednesday/Friday mints can appear on the next day. UTC mode uses UTC dates. The calendar guide lists minting days as Monday / Wednesday / Friday (UTC) and, in Local mode, the viewer's own weekdays.",
         "The home page can also surface current or upcoming mint information.",
         "The calendar models past, current, and future Meme Card mint timing from Monday/Wednesday/Friday cadence plus explicit skip, extra, and reschedule overrides.",
         "The public calendar API exposes /api/meme-calendar/next, /api/meme-calendar/current, and /api/meme-calendar/{id}.",
@@ -8074,18 +8329,19 @@
       ],
       "facts": [
         "The Tools index page lives at /tools as a direct secondary route, not a primary sidebar or app drawer destination.",
-        "It groups label-only tool cards with right-arrow affordances into NFT Delegation, The Memes Tools, Builder Tools, and Open Data.",
-        "The Tools index links to delegation utilities, Subscriptions Report, Meme Accounting, Meme Gas, App Wallets when supported, API, EMMA, Block Finder, and Open Data routes.",
+        "It groups label-only tool cards with right-arrow affordances into Safe Collecting, The Memes Tools, Builder Tools, and Open Data.",
+        "The Tools index links to delegation utilities, Subscriptions Report, Meme Accounting, Meme Gas, App Wallets when supported, API, EMMA, Block Finder, World Time Zones, and Open Data routes.",
         "Subscription-only links are hidden in restricted iOS contexts, and App Wallets is hidden when app-wallet support is unavailable.",
         "Private operator routes and local-only tools are not listed on the public Tools index.",
         "Primary menu discovery for user-facing tools, developer routes, and Open Data remains under About."
       ],
       "canonical_path": "/tools",
       "related_paths": [
-        "/delegation/delegation-center",
+        "/safe-collecting",
         "/tools/subscriptions-report",
         "/tools/api",
         "/tools/block-finder",
+        "/tools/time-zones",
         "/emma",
         "/open-data"
       ],
@@ -8279,6 +8535,45 @@
       ]
     },
     {
+      "id": "tools.time-zones",
+      "kind": "route",
+      "title": "World Time Zones",
+      "aliases": [
+        "world time zones",
+        "time zone map",
+        "timezone map",
+        "world clock",
+        "utc offset",
+        "what time is it in"
+      ],
+      "keywords": [
+        "tools",
+        "time zone",
+        "timezone",
+        "utc",
+        "offset",
+        "daylight saving",
+        "map",
+        "clock"
+      ],
+      "facts": [
+        "World Time Zones lives at /tools/time-zones and is listed under Builder Tools on /tools and under About -> Data & Developer Tools.",
+        "It shows a live UTC clock, the viewer's own time zone, a world map with one dot per IANA time zone at its principal city colored by the zone's current UTC offset, optional night-side shading, and a searchable, sortable table of every IANA time zone.",
+        "Hover, tap or focus a map dot to see its city, zone name, IANA zone, local time, UTC offset and daylight saving status. With the map focused, arrow keys move between zones from west to east. Alias zones such as Europe/Amsterdam and Etc zones are in the table without a dot.",
+        "Table search matches city, IANA zone, region, zone name, or a numeric offset such as +5:30; the unfiltered list starts with 40 rows and Show all expands it.",
+        "Times, offsets, zone names and daylight saving status come from the browser's IANA Time Zone Database through Intl; the page makes no API requests and pauses updates while the tab is hidden.",
+        "The map uses public-domain data: Natural Earth land outlines and zone locations from the IANA Time Zone Database. The page credits both in a Data sources section."
+      ],
+      "canonical_path": "/tools/time-zones",
+      "related_paths": ["/tools", "/tools/block-finder"],
+      "tags": ["tools", "time-zones"],
+      "source_refs": [
+        "app/tools/time-zones/page.tsx",
+        "components/tools/time-zones/WorldTimeZonesExplorer.tsx",
+        "ops/docs/api-tool/feature-world-time-zones.md"
+      ]
+    },
+    {
       "id": "delegation.action-flows",
       "kind": "workflow",
       "title": "Delegation write action routes",
@@ -8299,9 +8594,10 @@
       "facts": [
         "Delegation write action routes are documented under Delegation docs.",
         "Routes have input, validation, query-parameter, feedback, and transaction-state rules.",
-        "Users should start from the Delegation Center when unsure which delegation action to take."
+        "Users should start from Safe Collecting when unsure which delegation action to take.",
+        "Registration and primary-address pages show Back to Safe Collecting while the wallet connection restores and when disconnected, including when a profile is still signed in. The link returns to /safe-collecting without requiring a wallet connection. Connected forms have a close button with a tooltip available on hover and keyboard focus."
       ],
-      "canonical_path": "/delegation/delegation-center",
+      "canonical_path": "/safe-collecting",
       "related_paths": ["/delegation-mapping-tool"],
       "tags": ["delegation", "actions"],
       "source_refs": [
@@ -8330,7 +8626,7 @@
         "It covers entry points, user journey, transaction feedback, and edge cases.",
         "Use it for questions about managing delegation at collection scope."
       ],
-      "canonical_path": "/delegation/delegation-center",
+      "canonical_path": "/safe-collecting",
       "related_paths": ["/delegation-mapping-tool"],
       "tags": ["delegation", "collections"],
       "source_refs": [
@@ -8498,14 +8794,11 @@
       "keywords": ["delegation", "mapping", "tool", "wallet"],
       "facts": [
         "The Delegation Mapping Tool lives at /delegation-mapping-tool.",
-        "Use the Delegation Center for current delegation workflows and the mapping tool for delegation mapping context.",
+        "Use Safe Collecting for current delegation workflows and the mapping tool for delegation mapping context.",
         "Consolidation mapping is a separate tool at /consolidation-mapping-tool."
       ],
       "canonical_path": "/delegation-mapping-tool",
-      "related_paths": [
-        "/delegation/delegation-center",
-        "/consolidation-mapping-tool"
-      ],
+      "related_paths": ["/safe-collecting", "/consolidation-mapping-tool"],
       "tags": ["delegation", "tools"],
       "source_refs": ["app/delegation-mapping-tool/page.tsx"]
     },
@@ -9165,7 +9458,8 @@
         "Invalid RPC URL means the test could not read the block/logs. Check the endpoint, network, provider credentials, and service availability. For throttling, rate-limit or history errors, inspect worker Logs and use an endpoint with adequate Ethereum historical log access and request allowance. Do not assume a paid provider is required.",
         "Deactivate leaves that provider saved but inactive. With no active provider, scheduled workers are disabled. Built-in default providers cannot be deleted; an inactive custom provider exposes Delete.",
         "RPC provider configuration is for the local Ethereum workers; it is different from the IPFS RPC port shown in About. The TDH page TestNet Mode Phase 1 label does not mean you should select an Ethereum testnet endpoint.",
-        "Do not post your full authenticated RPC URL or API key in chat or logs shared for support. Share the provider name and a redacted error instead."
+        "Do not post your full authenticated RPC URL or API key in chat or logs shared for support. Share the provider name and a redacted error instead.",
+        "Desktop releases with native four-wallet indexing require historical contract-state reads (archive eth_call), not just old transaction logs. A provider can pass the connection test but fail the delegation replay. Check NFTDelegation Logs, select an archive-capable Ethereum RPC and rerun that worker to resume."
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
@@ -9177,7 +9471,8 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/RpcProviderModal.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/RpcProviders.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/db/db.ts",
-        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts"
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts",
+        "https://github.com/6529-Collections/6529-core/blob/2e8b4b2c2e3f5464b9c3639fcbe5fd817b648ed3/ops/docs/native-four-wallet-consolidation.md"
       ],
       "brief_answer": "Open **6529 Desktop > ETH Transactions > RPC Providers > Providers List** and click **Set Active** on your provider. If none is saved, use **Add RPC Provider**, enter an Ethereum mainnet RPC URL, **Test** it, enter a Provider Name, then **Add** and **Set Active**. Saving alone does not activate it; never share a URL containing API credentials."
     },
@@ -9216,7 +9511,8 @@
         "Worker cards show their schedule, status, progress, and message. Expand Logs for details. Idle or Completed between runs is normal; Disabled calls for checking the active RPC provider. A waiting message can mean a prerequisite checkpoint or another worker must finish.",
         "Advanced Options > Run Now requests an immediate run without changing the schedule. Stop ends the current non-TDH execution, but the next scheduled run can start again; it is not a permanent disable switch.",
         "TDH is coordinated with NFT/delegation work and transaction repairs. Respect a busy or queued response rather than repeatedly clicking recovery actions. Transactions must reach the TDH target block, and NFTDelegation must reach it too.",
-        "An interrupted transaction reconciliation resumes from its saved range on restart with an active provider. An interrupted TDH calculation reruns from scratch on restart; it does not continue a partially calculated result."
+        "An interrupted transaction reconciliation resumes from its saved range on restart with an active provider. An interrupted TDH calculation reruns from scratch on restart; it does not continue a partially calculated result.",
+        "In desktop releases with the native four-wallet index upgrade, the first NFTDelegation run automatically replays delegation history. Progress is saved and resumes after interruption; live indexed rows remain available until the replay completes. A disabled NFTDelegation worker must be enabled or run manually for the upgrade."
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
@@ -9227,7 +9523,8 @@
         "ops/docs/desktop/feature-workers-and-tdh.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduler.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduled-worker.ts",
-        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx"
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/2e8b4b2c2e3f5464b9c3639fcbe5fd817b648ed3/ops/docs/native-four-wallet-consolidation.md"
       ],
       "brief_answer": "With an active RPC provider and the app open, 6529 Desktop workers sync automatically. Check their progress and Logs under **6529 Desktop > ETH Transactions**. Transactions and NFTDelegation must catch up before TDH calculation can finish. Which worker is stalled, and what status or redacted error does it show?"
     },
@@ -9268,7 +9565,8 @@
         "Compare Last Block first, then total TDH and Merkle Root. Different snapshot blocks can explain different values. A Merkle Root hashes the address/TDH results; a missing reference root is N/A and is not proof your node is wrong.",
         "The page describes TestNet Mode Phase 1: comparison with the 6529.io reference. Phase 2 node-only consensus is described as future behavior, not something already active. This label is separate from Live/Test backend builds and does not switch Ethereum to a testnet.",
         "Transaction repairs or resets can mark the existing result stale and show Transaction history changed — recalculation required. Recalculate after repair completes or wait for the next scheduled TDH run. Marking stale alone does not immediately start a fresh calculation.",
-        "If the app closes during TDH work, an active provider allows a fresh rerun on restart after worker guards permit it. The bot cannot read your local TDH values or fix your node remotely."
+        "If the app closes during TDH work, an active provider allows a fresh rerun on restart after worker guards permit it. The bot cannot read your local TDH values or fix your node remotely.",
+        "During the native four-wallet delegation-index upgrade, TDH waits for replay even if the previous checkpoint was caught up. Waiting for native delegation timestamp/scope replay to complete is expected. Existing displayed TDH can remain stale until replay finishes and a scheduled or manual recalculation runs."
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
@@ -9280,7 +9578,8 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduler.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/tdh-worker/index.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/tdh-worker/tdh-worker.helpers.ts",
-        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/tdh-calculation/TDHValidation.tsx"
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/tdh-calculation/TDHValidation.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/2e8b4b2c2e3f5464b9c3639fcbe5fd817b648ed3/ops/docs/native-four-wallet-consolidation.md"
       ],
       "brief_answer": "6529 Desktop calculates TDH automatically at **00:15 UTC** while the app is open and its prerequisites are synced. View it under **6529 Desktop > TDH Calculation**. For a manual run, use the TDH worker’s **Advanced Options > Recalculate TDH Now**; it replaces the local TDH result and does not repair transaction history."
     },
@@ -9333,7 +9632,8 @@
         "Use Transactions > Advanced Options > Rebuild Ownership only when the stored transaction history is believed correct but local ownership balances are inconsistent. It cannot recover missing transfers. After history/ownership repairs complete, recalculate TDH.",
         "If NFTs or metadata are missing or inconsistent, use NFTs > Advanced Options > Full Refresh first; it refreshes chain/metadata without deleting local NFT rows. If rediscovery is needed, NFTs > Advanced Options > Reset opens Reset All NFTs, which deletes local NFT records and resyncs them. There is no button named Full Recovery.",
         "More disruptive transaction recovery is Transactions > Advanced Options > Reset to Block: it deletes transactions after the chosen block and rebuilds ownership before resync. Use Min Block in that dialog for a full resync from the earliest supported block; Transactions does not expose a separate Reset button. Read the confirmation, choose the smallest justified recovery, allow inputs to catch up, then recalculate TDH. These local repairs do not change on-chain holdings and are not reasons to delete wallets or the app database.",
-        "For a persistent failure, share app version and OS from 6529 Desktop > About, the two Last Block values, failing worker/status, and a redacted error or transaction hash. The bot cannot inspect the device; never share wallet secrets or credential-bearing RPC URLs."
+        "For a persistent failure, share app version and OS from 6529 Desktop > About, the two Last Block values, failing worker/status, and a redacted error or transaction hash. The bot cannot inspect the device; never share wallet secrets or credential-bearing RPC URLs.",
+        "For a desktop build with native four-wallet indexing, first check whether NFTDelegation is upgrading its index. Let an active replay finish; for historical-state errors, select an archive-capable RPC and rerun NFTDelegation. Recalculate TDH after replay, before escalating to transaction reconciliation or resets."
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
@@ -9347,7 +9647,8 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/tdh-calculation/TDHValidation.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/transactions-worker/transaction-reconciliation.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduled-worker.ts",
-        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts"
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts",
+        "https://github.com/6529-Collections/6529-core/blob/2e8b4b2c2e3f5464b9c3639fcbe5fd817b648ed3/ops/docs/native-four-wallet-consolidation.md"
       ],
       "brief_answer": "In **6529 Desktop > TDH Calculation**, are the two **Last Block** values identical? Which row does not match: **TDH**, **Last Block**, or **Merkle Root**? Different blocks can explain different results; an unavailable reference root is not evidence of corruption."
     },
@@ -10010,7 +10311,7 @@
       ],
       "facts": [
         "6529 Desktop wallets are stored in the installed 6529 Desktop application and its 6529 Desktop wallet controls are not available in 6529 Mobile or an ordinary browser.",
-        "6529 Mobile has separate App Wallets stored in the native app environment. Use Connect > App Wallets or open App Wallets under About > Delegation & Wallets when app-wallet support is enabled.",
+        "6529 Mobile has separate App Wallets stored in the native app environment. Use Connect > App Wallets or open App Wallets under About > Safe Collecting when app-wallet support is enabled.",
         "A 6529 Desktop wallet does not automatically appear on mobile. Do not send a recovery phrase, private key, or password to the help bot."
       ],
       "canonical_path": "/tools/app-wallets",
@@ -10053,7 +10354,7 @@
       ],
       "facts": [
         "App Wallets are wallets stored in the 6529 Mobile environment using native secure storage. They are separate from 6529 Desktop wallets in 6529 Desktop and from external wallets offered through the External Wallets connection flow.",
-        "Open About > Delegation & Wallets > App Wallets, or open Connect > App Wallets to choose an existing app-local wallet or start Create App Wallet. The App Wallets menu appears only when native app-wallet support is available.",
+        "Open About > Safe Collecting > App Wallets, or open Connect > App Wallets to choose an existing app-local wallet or start Create App Wallet. The App Wallets menu appears only when native app-wallet support is available.",
         "The App Wallets page lists locally stored wallets and provides Create Wallet, Import Wallet, and wallet-detail actions. Never send a wallet password, mnemonic, or private key to the help bot."
       ],
       "canonical_path": "/tools/app-wallets",
@@ -10566,6 +10867,50 @@
       "brief_answer": "For the **{{percentage}}%** recovery range in **6529 Desktop**, check the TDH worker **Logs** and share the redacted error. Let any active work finish; do not widen reconciliation or start a reset because calculation failed. Once calculation completes successfully, do TDH and Merkle Root now match 6529.io at the same Last Block?\n\nRange: {{percentage}}% of blocks {{minimum_block}}–{{checkpoint}}.",
       "reconciliation_min_block": 13360860,
       "answer_links": []
+    },
+    {
+      "id": "desktop.delegation-index-upgrade",
+      "kind": "workflow",
+      "title": "Desktop delegation index upgrade and replay",
+      "aliases": [
+        "waiting for valid consolidation settings",
+        "desktop tdh settings unavailable",
+        "desktop delegation replay",
+        "nftdelegation upgrade",
+        "waiting for native delegation timestamp scope replay",
+        "desktop four wallet upgrade",
+        "archive rpc delegation error"
+      ],
+      "keywords": [
+        "settings",
+        "backend",
+        "activation",
+        "desktop",
+        "nftdelegation",
+        "delegation",
+        "replay",
+        "upgrade",
+        "archive",
+        "historical state",
+        "tdh"
+      ],
+      "facts": [
+        "Core reads the four-wallet activation cutoff from its selected backend settings. When TDH waits for valid consolidation settings, previous results remain displayed; check connectivity and the backend’s settings availability, then retry Recalculate TDH Now. This wait is separate from historical Ethereum RPC replay. A changed backend or cutoff forces full TDH recalculation rather than mixing older groups with new incremental results.",
+        "This procedure applies to desktop builds containing the native four-wallet delegation-index upgrade. Older installed builds do not gain native four-wallet support from a website renderer update alone.",
+        "The first NFTDelegation worker run rebuilds its delegation history automatically while preserving live indexed rows and existing displayed TDH. TDH calculations wait for replay completion. Progress is saved; interruption resumes from the last committed chunk.",
+        "Keep an archive-capable Ethereum RPC active. If NFTDelegation Logs report historical-state failures, switch to a suitable provider and rerun NFTDelegation to resume. Do not delete wallets or the app database to solve an archive RPC error.",
+        "After replay completes, run 6529 Desktop > TDH Calculation > Advanced Options > Recalculate TDH Now or allow the normal scheduled calculation. Compare Last Block before comparing TDH and Merkle Root.",
+        "NFTDelegation Reset restarts this upgrade replay; it does not itself scan Ethereum and should not be used merely because a replay is still progressing."
+      ],
+      "brief_answer": "In a desktop build with the native four-wallet index upgrade, NFTDelegation replays its history automatically and TDH waits. Let it finish. If Logs show a historical-state error, select an archive-capable Ethereum RPC and rerun NFTDelegation; saved replay progress resumes. Recalculate TDH after completion. Do not delete wallets or the app database.",
+      "canonical_path": "/about/6529-apps",
+      "tags": ["desktop-core"],
+      "source_refs": [
+        "ops/docs/desktop/feature-workers-and-tdh.md",
+        "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
+        "https://github.com/6529-Collections/6529-core/blob/2e8b4b2c2e3f5464b9c3639fcbe5fd817b648ed3/ops/docs/native-four-wallet-consolidation.md",
+        "https://github.com/6529-Collections/6529-core/blob/2e8b4b2c2e3f5464b9c3639fcbe5fd817b648ed3/electron-src/scheduled-tasks/workers/tdh-worker/index.ts"
+      ]
     }
   ]
 }

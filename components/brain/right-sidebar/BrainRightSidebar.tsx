@@ -1,6 +1,13 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -27,6 +34,10 @@ import {
   type SidebarTab,
 } from "./BrainRightSidebarTypes";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
+import { WaveInformationPanelContext } from "../mobile/WaveInformationPanelContext";
+import MobileWrapperDialogHeader from "@/components/mobile-wrapper-dialog/MobileWrapperDialogHeader";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export { SidebarTab } from "./BrainRightSidebarTypes";
 
@@ -234,6 +245,39 @@ const OverlaySidebar = ({
   children,
 }: OverlaySidebarProps) => {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const titleRef = useRef<HTMLElement>(null);
+  const locale = useBrowserLocale();
+  const contentId = useId();
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
+  const [subview, setSubview] = useState<{
+    view: string;
+    title: string;
+  } | null>(null);
+  const [wasOpen, setWasOpen] = useState(isOpen);
+  if (wasOpen !== isOpen) {
+    setWasOpen(isOpen);
+    setSubview(null);
+  }
+  const panel = useMemo(
+    () => ({
+      view: subview?.view ?? "about",
+      contentId,
+      container,
+      open: (view: string, title: string) => setSubview({ view, title }),
+      // A save from an earlier editor must not close the editor opened since.
+      back: () =>
+        setSubview((current) =>
+          current?.view === subview?.view ? null : current
+        ),
+    }),
+    [subview, contentId, container]
+  );
+
+  useEffect(() => {
+    if (!subview) return;
+    const frame = requestAnimationFrame(() => titleRef.current?.focus());
+    return () => cancelAnimationFrame(frame);
+  }, [subview]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -276,7 +320,21 @@ const OverlaySidebar = ({
             key="overlay-sidebar"
             open={true}
             onClose={close}
-            aria-label={panelLabel}
+            aria-label={subview?.title ?? panelLabel}
+            onKeyDown={(event) => {
+              if (
+                subview &&
+                event.key === "Escape" &&
+                !event.defaultPrevented &&
+                event.target instanceof Element &&
+                event.target.closest(
+                  '[role="dialog"], [role="alertdialog"]'
+                ) === event.currentTarget
+              ) {
+                event.preventDefault();
+                panel.back();
+              }
+            }}
             className="tailwind-scope tw-relative tw-z-[100]"
             initial={false}
             animate={{ opacity: 1 }}
@@ -286,7 +344,7 @@ const OverlaySidebar = ({
               data-testid="brain-right-sidebar-backdrop"
               aria-hidden="true"
               onClick={close}
-              className="tw-fixed tw-inset-0 tw-z-[90] tw-bg-gray-700/75 tw-backdrop-blur-[1px] tw-will-change-[opacity]"
+              className="tw-fixed tw-inset-0 tw-z-[90] tw-bg-gradient-to-l tw-from-iron-950/80 tw-to-iron-950/60 tw-will-change-[opacity]"
               initial={prefersReducedMotion ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{
@@ -334,7 +392,32 @@ const OverlaySidebar = ({
                     />
                   </button>
                 </div>
-                {children}
+                <WaveInformationPanelContext.Provider value={panel}>
+                  <div
+                    hidden={subview !== null}
+                    className="tw-h-full tw-min-h-0"
+                  >
+                    {children}
+                  </div>
+                  {subview && (
+                    <MobileWrapperDialogHeader
+                      title={subview.title}
+                      titleRef={titleRef}
+                      onBack={panel.back}
+                      onClose={close}
+                      showDesktopCloseButton={false}
+                      className="tw-pt-4"
+                      backLabel={t(locale, "common.back")}
+                      closeLabel={t(locale, "common.close")}
+                    />
+                  )}
+                  <div
+                    id={contentId}
+                    ref={setContainer}
+                    hidden={!subview}
+                    className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-pb-6"
+                  />
+                </WaveInformationPanelContext.Provider>
               </DialogPanel>
             </m.div>
           </Dialog>
@@ -387,7 +470,7 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
     return <InlineSidebar {...presentationProps} />;
   }
 
-  return <OverlaySidebar {...presentationProps} close={close} />;
+  return <OverlaySidebar key={waveId} {...presentationProps} close={close} />;
 };
 
 export default BrainRightSidebar;

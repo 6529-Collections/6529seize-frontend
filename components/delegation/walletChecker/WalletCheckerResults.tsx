@@ -1,5 +1,4 @@
 import Address from "@/components/address/Address";
-import { NEVER_DATE } from "@/constants/constants";
 import type { Delegation } from "@/entities/IDelegation";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -15,6 +14,11 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Fragment } from "react";
 import { ALL_USE_CASES, SUPPORTED_COLLECTIONS } from "../delegation-constants";
+import {
+  formatDelegationExpiryLocal,
+  getViewerTimeZone,
+  isNonExpiringDelegationExpiry,
+} from "../delegation-expiry";
 import { DELEGATION_CARD_CLASS_NAME } from "../delegation-ui";
 
 const TABLE_CLASS =
@@ -81,19 +85,12 @@ function getConsolidationKey(
   ].join("-");
 }
 
-function formatExpiry(myDate: number) {
-  const date = new Date(myDate * 1000);
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(date.getUTCDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
 function getDateDisplay(myDate: number, locale: SupportedLocale) {
-  if (myDate === NEVER_DATE) {
+  // 0 shares the "never" meaning, so it can never render as 1 Jan 1970.
+  if (isNonExpiringDelegationExpiry(myDate)) {
     return t(locale, "delegation.collection.walletChecker.never");
   }
-  return formatExpiry(myDate);
+  return formatDelegationExpiryLocal(locale, myDate, getViewerTimeZone());
 }
 
 function CheckedWalletAddress(
@@ -327,9 +324,7 @@ function DelegationsResults(
                       "delegation.collection.walletChecker.labels.expiry"
                     )}{" "}
                     <b>
-                      {props.activeDelegation.expiry === NEVER_DATE
-                        ? t(locale, "delegation.collection.walletChecker.never")
-                        : formatExpiry(props.activeDelegation.expiry)}
+                      {getDateDisplay(props.activeDelegation.expiry, locale)}
                     </b>
                   </span>
                 )}

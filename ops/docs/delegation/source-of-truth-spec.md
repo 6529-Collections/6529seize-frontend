@@ -38,7 +38,7 @@ text, docs, and tests.
   must be linked in both directions (on Any Collection or The Memes; either
   works for each direction). A fourth wallet counts only when one member's three
   links were each registered in both directions on or after
-  2026-10-15 00:00 UTC; before that, groups count at most 3 wallets, and groups
+  the activation cutoff supplied by this environment’s settings; before that, groups count at most 3 wallets, and groups
   of 2 or 3 keep their older registrations. When links conflict, the newest
   confirmed link wins. Consolidation registrations do not expire. It is not a
   delegation of NFT utility, but every wallet in a consolidation is a full key
@@ -89,8 +89,9 @@ feature docs. This includes:
 
 Article body copy lives in the delegation content package. This includes:
 
-- Wallet Architecture.
-- Delegation FAQ landing.
+- Wallet Architecture (the legacy article, now served at
+  `/safe-collecting/faq/reference-overview-wallet-architecture`).
+- FAQ landing.
 - Consolidation Use Cases.
 - All FAQ child article bodies.
 - Article screenshots, diagrams, captions, tables, and long-form explanations.
@@ -101,6 +102,11 @@ the versioned public bundle under `public/delegation-content/{version}/html`.
 Article assets must stay in `content/delegation/assets` and be mirrored into
 the same versioned public bundle. Do not point reviewed articles at mutable S3
 screenshots, diagrams, ABI files, or other instructional assets.
+
+Exception: `/safe-collecting/tap-guide` renders the TAP Guide, a native
+React page whose copy lives in `i18n/messages/delegationTapGuide.en-US.json`.
+It replaced the Wallet Architecture article on that route; the article itself is
+unchanged in the bundle.
 
 ## Delivery Architecture
 
@@ -149,7 +155,7 @@ article changes as a new package version instead of editing the pinned one:
   `public/delegation-content/{new-version}/html` and edit the copy.
 - Add new articles to `articles` in `content/delegation/manifest.json` (title,
   summary, and group; the build fills the rest). Manifest order sets the FAQ
-  previous/next order, and the Delegation FAQ index article must link each new
+  previous/next order, and the FAQ index article must link each new
   FAQ child article.
 - Update the default version in the build and publish scripts and the publish
   workflow input, or set `DELEGATION_DOCS_VERSION`, before building.
@@ -176,6 +182,7 @@ article changes as a new package version instead of editing the pinned one:
 
    The manual GitHub workflow `Publish Delegation Docs Content` runs the same
    script with repository secrets/vars.
+
 7. Pin the root CID using 6529-controlled infrastructure. The publish script
    uses `pin=true` when calling the internal node.
 8. Save the receipt from `tmp/delegation-docs-publish`. It records the root CID,
@@ -196,8 +203,8 @@ and normal builds must package the checked-in versioned bundle.
 
 ## Route Copy Standards
 
-Use the singular label `Delegation FAQ` everywhere. Do not use
-`Delegation FAQs`.
+Use the singular label `FAQ` everywhere. Do not use
+`FAQs`.
 
 Browser titles must follow:
 
@@ -207,21 +214,21 @@ Browser titles must follow:
 
 Core route titles:
 
-| Route | Title |
-| --- | --- |
-| `/delegation/delegation-center` | Delegation Center |
-| `/delegation/wallet-architecture` | Wallet Architecture |
-| `/delegation/delegation-faq` | Delegation FAQ |
-| `/delegation/consolidation-use-cases` | Consolidation Use Cases |
-| `/delegation/wallet-checker` | Wallet Checker |
-| `/delegation/register-delegation` | Register Delegation |
-| `/delegation/register-consolidation` | Register Consolidation |
-| `/delegation/register-sub-delegation` | Register Delegation Manager |
-| `/delegation/assign-primary-address` | Assign Primary Address |
-| `/delegation/any-collection` | Any Collection Delegations |
-| `/delegation/the-memes` | The Memes Delegations |
-| `/delegation/meme-lab` | Meme Lab Delegations |
-| `/delegation/6529-gradient` | 6529 Gradient Delegations |
+| Route                                 | Title                            |
+| ------------------------------------- | -------------------------------- |
+| `/safe-collecting`                   | Safe Collecting                  |
+| `/safe-collecting/tap-guide`     | The Three Address Protocol (TAP) |
+| `/safe-collecting/faq`          | FAQ                   |
+| `/safe-collecting/consolidation-use-cases` | Consolidation Use Cases          |
+| `/safe-collecting/wallet-checker`          | Wallet Checker                   |
+| `/safe-collecting/register-delegation`     | Register Delegation              |
+| `/safe-collecting/register-consolidation`  | Register Consolidation           |
+| `/safe-collecting/register-sub-delegation` | Register Delegation Manager      |
+| `/safe-collecting/assign-primary-address`  | Assign Primary Address           |
+| `/safe-collecting/any-collection`          | Any Collection Delegations       |
+| `/safe-collecting/the-memes`               | The Memes Delegations            |
+| `/safe-collecting/meme-lab`                | Meme Lab Delegations             |
+| `/safe-collecting/6529-gradient`           | 6529 Gradient Delegations        |
 
 Delegation Center must work as a decision page. The user should be able to
 distinguish:
@@ -253,7 +260,7 @@ Required wrapper behavior:
 
 - Breadcrumb navigation with the current page marked as current text, not a
   link.
-- Back link to Delegation FAQ.
+- Back link to FAQ.
 - One-sentence summary.
 - Previous/next navigation in FAQ order.
 - Specific route metadata.
@@ -302,9 +309,11 @@ content work, not normal frontend refactoring.
 
 Priority order:
 
-1. Wallet Architecture: add the TAP summary, three-wallet role table, and clear
-   security rule before the long explanation.
-2. Delegation FAQ: add orientation, group links by user goal, and keep labels
+1. Wallet Architecture: superseded. `/safe-collecting/tap-guide` now
+   renders the native, message-backed TAP Guide
+   (`components/delegation/tap-guide/TapGuide.tsx`); the legacy article body is
+   kept unchanged in the bundle.
+2. FAQ: add orientation, group links by user goal, and keep labels
    singular and scannable.
 3. Consolidation Use Cases: replace generic use-case headings with descriptive
    headings.
@@ -322,7 +331,7 @@ Each article rewrite must preserve these invariants:
   understate it: every consolidated wallet is a full key to the profile.
 - Keep consolidation limits accurate: up to 4 wallets, every pair linked in
   both directions, and a fourth wallet only for links registered on or after
-  2026-10-15 00:00 UTC.
+  the activation cutoff supplied by this environment’s settings.
 - Do not imply delegation manager rights are low-risk.
 - Do not imply locks revoke existing outgoing records.
 - Keep contract use-case numbers accurate.
@@ -332,34 +341,33 @@ Each article rewrite must preserve these invariants:
 
 Use this status table before starting new delegation work.
 
-| Work item | Status | Source of truth |
-| --- | --- | --- |
-| No-wallet write-route panels | Built | React UI |
-| Action-specific submit labels and intros | Built | React UI |
-| Route-specific metadata | Built | React route metadata |
-| Delegation Center decision copy | Built | React UI |
-| Wallet Checker framing and states | Built | React UI |
-| Collection page intros and disconnected state | Built | React UI |
-| FAQ child wrapper navigation | Built | React wrapper |
-| Repo-reviewed article package | Built | `content/delegation` |
-| Hash-verified runtime loader | Built | `delegationContent.ts` |
-| IPFS root CID publish | Built, pending credentials/config | `publish-delegation-docs-content.mjs` plus manual workflow |
-| CloudFront/S3 acceleration mirror | Built optional path, pending config | CID/version-addressed mirror |
-| Full article body rewrite package | Pending | `public/delegation-content/{version}/html` |
-| Image caption/alt pass for article bodies | Pending | `public/delegation-content/{version}/html` |
-| Similar S3 content migrations outside delegation | Future | Separate specs |
+| Work item                                        | Status                              | Source of truth                                            |
+| ------------------------------------------------ | ----------------------------------- | ---------------------------------------------------------- |
+| No-wallet write-route panels                     | Built                               | React UI                                                   |
+| Action-specific submit labels and intros         | Built                               | React UI                                                   |
+| Route-specific metadata                          | Built                               | React route metadata                                       |
+| Delegation Center decision copy                  | Built                               | React UI                                                   |
+| Wallet Checker framing and states                | Built                               | React UI                                                   |
+| Collection page intros and disconnected state    | Built                               | React UI                                                   |
+| FAQ child wrapper navigation                     | Built                               | React wrapper                                              |
+| TAP Guide (`/safe-collecting/tap-guide`)    | Built                               | React UI, `i18n/messages/delegationTapGuide.en-US.json`    |
+| Repo-reviewed article package                    | Built                               | `content/delegation`                                       |
+| Hash-verified runtime loader                     | Built                               | `delegationContent.ts`                                     |
+| IPFS root CID publish                            | Built, pending credentials/config   | `publish-delegation-docs-content.mjs` plus manual workflow |
+| CloudFront/S3 acceleration mirror                | Built optional path, pending config | CID/version-addressed mirror                               |
+| Full article body rewrite package                | Pending                             | `public/delegation-content/{version}/html`                 |
+| Image caption/alt pass for article bodies        | Pending                             | `public/delegation-content/{version}/html`                 |
+| Similar S3 content migrations outside delegation | Future                              | Separate specs                                             |
 
 Recommended next agent tickets:
 
-1. Rewrite Wallet Architecture in the versioned public bundle and regenerate
-   the manifest.
-2. Rewrite Delegation FAQ landing and Consolidation Use Cases.
-3. Rewrite the three registration FAQ articles.
-4. Add an article image alt/caption audit across all 27 article bodies.
-5. Publish the reviewed bundle to IPFS and update the manifest root CID.
-6. Configure optional CID/version-addressed CloudFront mirror and verify hash
+1. Rewrite FAQ landing and Consolidation Use Cases.
+2. Rewrite the three registration FAQ articles.
+3. Add an article image alt/caption audit across all 27 article bodies.
+4. Publish the reviewed bundle to IPFS and update the manifest root CID.
+5. Configure optional CID/version-addressed CloudFront mirror and verify hash
    behavior.
-7. Inventory other S3-rendered content areas and create separate migration
+6. Inventory other S3-rendered content areas and create separate migration
    specs.
 
 ## Out Of Scope

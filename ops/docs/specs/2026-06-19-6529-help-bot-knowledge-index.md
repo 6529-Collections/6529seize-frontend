@@ -11,6 +11,9 @@ The `home.overview` record explains the Coming up mobile swipe row, keyboard
 navigation through card links, tablet/desktop grid, and drop, profile and wave
 destinations.
 
+The `waves.drop.editing` record covers author-only editing, the normal edit
+window, and unlimited editing of the wave's current pinned description drop.
+
 The `about.6529-apps` record includes a concise `brief_answer` naming both
 6529 Mobile and 6529 Desktop and an `answer_links` footer to the official Apps
 page. The companion backend uses it for short availability/download requests
@@ -34,10 +37,14 @@ controls. It also explains that app tabs already in view keep their position
 when selected. It does not promise instant data or a loading screen on every switch.
 
 The Wave discovery record describes the independent Active Votes and Worth Checking Out
-sidebar sections, their explanations and view-all destinations. It covers the
-scrollable three-row voting window, pagination, compact empty/error states and
+sidebar sections, their explanations and view-all destinations. It describes
+quiet loading placeholders, explanations that appear with content, empty messages
+only after successful empty requests, and retry without discarding loaded votes.
+It covers the scrollable three-row voting window, pagination, compact empty/error states and
 independently persisted collapse preferences. Worth Checking Out comes first
 and retains its own compact preview height.
+The Memes Quick Vote record describes its persistent top-left close below 768px,
+top-right close at wider widths, matching loading header and focus restoration.
 
 The `delegation.wallet-checker` record covers linked-wallet reads with a
 six-counterparty cap, pair deduplication, relevant missing-reverse-link
@@ -57,6 +64,22 @@ data refreshes. The profile subscription record also explains how tapping,
 hovering, or focusing the address reveals its full value on compact layouts.
 These remain frontend-owned facts published through the existing
 help-index sync and consumed by the existing backend loader.
+
+The `waves.notification-controls` record describes the notification subview inside the About sheet
+on phone layouts, dismissal back to About, and the anchored keyboard-accessible
+menu in desktop and tablet sidebars.
+
+The `network.identities-leaderboard` record describes the mobile filter's vertical
+criteria list, individual editors, Back navigation, preserved drafts, and
+readiness guidance available from the information button. The footer shows the
+criteria summary without an editing label; the top summary appears only for a
+selected group. Included identities omit repeated empty import messages and
+show a combined count once identities are selected or imported. The xTDH grant
+search shows Clear filters only when its search fields or status differ from
+the defaults; clearing restores Granted without removing a selected grant.
+On mobile, grant search fields and cards share one scroll area, with Load more
+after the last loaded card and sheet navigation and the bottom action accessible. Desktop retains
+the left-side criteria list, and saving still creates and applies a new group.
 
 ## Problem Statement
 

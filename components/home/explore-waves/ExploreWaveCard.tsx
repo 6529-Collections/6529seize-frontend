@@ -338,7 +338,7 @@ export function ExploreWaveCard({
       data-home-action="Open wave"
       href={waveHref}
       prefetch={false}
-      className={`${compact ? "tw-flex-row" : cardDirectionClassName} ${cardSurfaceClassName} ${cardInteractionClassName} tw-group tw-relative tw-flex tw-h-full tw-overflow-hidden tw-border tw-border-solid tw-text-left tw-no-underline tw-shadow-[0_10px_28px_rgba(0,0,0,0.2)] tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 motion-reduce:tw-transform-none motion-reduce:tw-transition-none`}
+      className={`${compact ? "tw-flex-row" : cardDirectionClassName} ${cardSurfaceClassName} ${cardInteractionClassName} tw-group tw-relative tw-flex tw-h-full tw-overflow-hidden tw-border tw-border-solid tw-text-left tw-no-underline tw-shadow-[0_10px_28px_rgba(0,0,0,0.2)] tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 motion-reduce:tw-transform-none motion-reduce:tw-transition-none`}
       aria-label={cardAriaLabel}
     >
       {compact && (

@@ -22,6 +22,7 @@ import {
   type RefObject,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -167,6 +168,7 @@ export default function QuickDirectMessages() {
 
   const waves = directMessages.list;
   const isVisible = Boolean(isDesktop && connectedProfile?.handle && showWaves);
+  const isPanelOpen = isVisible && state.view !== "closed";
   const isLauncherCoveringInteractive =
     useIsQuickDmLauncherCoveringInteractive({
       isEnabled: isVisible && state.view === "closed",
@@ -190,7 +192,16 @@ export default function QuickDirectMessages() {
     currentConversationUnread?.unread_count ?? 0
   );
 
-  useEffect(() => requestDirectMessagesList(), [requestDirectMessagesList]);
+  // The closed launcher's badge uses the DM unread summary, so the DM list
+  // loads only while the panel is open. A layout effect enables it before the
+  // panel paints, so the first frame shows loading rather than the empty state.
+  useLayoutEffect(() => {
+    if (!isPanelOpen) {
+      return;
+    }
+
+    return requestDirectMessagesList();
+  }, [isPanelOpen, requestDirectMessagesList]);
 
   const measureLauncherZone = useCallback(() => {
     if (typeof globalThis.window === "undefined") {

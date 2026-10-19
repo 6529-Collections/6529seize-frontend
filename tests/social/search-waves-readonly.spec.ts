@@ -191,8 +191,9 @@ async function openHeaderSearch(page: Page) {
   await expect(searchButton).toBeEnabled({ timeout: NAVIGATION_TIMEOUT_MS });
   await searchButton.click();
   const searchInput = page.locator("#header-search-input");
-  await expect(searchInput).toBeVisible();
-  await expect(searchInput).toBeFocused();
+  // The search modal loads on demand, so the first open waits for its chunk.
+  await expect(searchInput).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+  await expect(searchInput).toBeFocused({ timeout: NAVIGATION_TIMEOUT_MS });
   return { searchButton, searchInput };
 }
 
@@ -310,8 +311,9 @@ async function openLocalWaveSearchModal(page: Page) {
     })
     .click();
   const searchInput = page.locator("#wave-drops-search-input");
-  await expect(searchInput).toBeVisible();
-  await expect(searchInput).toBeFocused();
+  // The search modal loads on demand, so the first open waits for its chunk.
+  await expect(searchInput).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+  await expect(searchInput).toBeFocused({ timeout: NAVIGATION_TIMEOUT_MS });
 
   return {
     expectedQueryWaveId: LOCAL_ACTIVE_WAVE_ID,
@@ -369,8 +371,12 @@ async function openSearchOnFirstWaveWithSearch(page: Page) {
     if (hasWaveSearch) {
       await searchMessagesButton.click();
       const searchInput = page.locator("#wave-drops-search-input");
-      await expect(searchInput).toBeVisible();
-      await expect(searchInput).toBeFocused();
+      await expect(searchInput).toBeVisible({
+        timeout: NAVIGATION_TIMEOUT_MS,
+      });
+      await expect(searchInput).toBeFocused({
+        timeout: NAVIGATION_TIMEOUT_MS,
+      });
       return { searchInput, wavePath };
     }
   }
@@ -390,6 +396,16 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       "Touch target geometry is mobile-only"
     );
     await gotoReady(page, "/waves");
+    // The server shell is replaced as the mobile list hydrates. Measure the
+    // interactive controls only after a data row confirms that it has mounted.
+    await expect(
+      page
+        .getByRole("region", {
+          name: /All recent waves list|Regular waves list/,
+        })
+        .getByRole("link")
+        .first()
+    ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
     const shortcuts = [
       page.getByRole("link", { name: "Profile Waves Feed", exact: true }),
       page.getByRole("button", { name: "Find a wave…", exact: true }),
@@ -586,12 +602,23 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       await activeToggle.click();
     if ((await recommendationsToggle.getAttribute("aria-expanded")) === "false")
       await recommendationsToggle.click();
-    await expect(
-      discovery.getByText("Community decisions powered by TDH.")
-    ).toBeVisible();
-    await expect(
-      discovery.getByText("Highly rated waves.", { exact: true })
-    ).toBeVisible();
+    // A successfully empty section has only its empty message; descriptions
+    // accompany real content, never initial loading or an empty result.
+    for (const [description, empty] of [
+      ["Community decisions powered by TDH.", "No active TDH votes right now."],
+      ["Highly rated waves you don’t follow.", "No recommendations right now."],
+    ] as const) {
+      await expect(
+        discovery
+          .getByText(description, { exact: true })
+          .or(discovery.getByText(empty, { exact: true }))
+      ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+      if (await discovery.getByText(empty, { exact: true }).isVisible()) {
+        await expect(
+          discovery.getByText(description, { exact: true })
+        ).toHaveCount(0);
+      }
+    }
     const voteList = discovery.getByRole("region", {
       name: "Active voting waves",
     });
@@ -647,6 +674,39 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       })
     ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
     await expectNoHorizontalOverflow(page);
+  });
+
+  test("delegation page search discovers the Safe Collecting family without legacy titles", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/");
+    const { searchInput } = await openHeaderSearch(page);
+    await searchInput.fill("delegation");
+    await page.getByRole("tab", { name: /^Pages/ }).click();
+    for (const [title, path] of [
+      ["Safe Collecting", "/safe-collecting"],
+      ["TAP Guide", "/safe-collecting/tap-guide"],
+      ["FAQ", "/safe-collecting/faq"],
+      ["Consolidation Use Cases", "/safe-collecting/consolidation-use-cases"],
+      ["Wallet Checker", "/safe-collecting/wallet-checker"],
+    ] as const) {
+      // Options that are themselves links to this path.
+      const result = page
+        .getByRole("option")
+        .locator(`xpath=self::a[@href="${path}"]`);
+      await expect(result).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+      await expect(result).toContainText(title);
+    }
+    await expect(
+      page
+        .getByRole("option")
+        .locator('xpath=self::a[starts-with(@href, "/delegation/")]')
+    ).toHaveCount(0);
+    await expect(
+      page
+        .getByRole("option")
+        .locator('xpath=self::a[@href="/about/nft-delegation"]')
+    ).toHaveCount(0);
   });
 
   test("global header search preserves keyboard flow and page navigation", async ({

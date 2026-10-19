@@ -34,27 +34,27 @@ const TOOLS_CONTENTS_NAV_GROUPS = [
     items: [
       {
         id: "delegation-center",
-        href: "/delegation/delegation-center",
+        href: "/safe-collecting",
         labelKey: "tools.contents.pages.delegationCenter",
       },
       {
         id: "wallet-architecture",
-        href: "/delegation/wallet-architecture",
+        href: "/safe-collecting/tap-guide",
         labelKey: "tools.contents.pages.walletArchitecture",
       },
       {
         id: "delegation-faq",
-        href: "/delegation/delegation-faq",
+        href: "/safe-collecting/faq",
         labelKey: "tools.contents.pages.delegationFaq",
       },
       {
         id: "consolidation-use-cases",
-        href: "/delegation/consolidation-use-cases",
+        href: "/safe-collecting/consolidation-use-cases",
         labelKey: "tools.contents.pages.consolidationUseCases",
       },
       {
         id: "wallet-checker",
-        href: "/delegation/wallet-checker",
+        href: "/safe-collecting/wallet-checker",
         labelKey: "tools.contents.pages.walletChecker",
       },
     ],
@@ -107,6 +107,11 @@ const TOOLS_CONTENTS_NAV_GROUPS = [
         id: "block-finder",
         href: "/tools/block-finder",
         labelKey: "tools.contents.pages.blockFinder",
+      },
+      {
+        id: "time-zones",
+        href: "/tools/time-zones",
+        labelKey: "tools.contents.pages.timeZones",
       },
     ],
   },

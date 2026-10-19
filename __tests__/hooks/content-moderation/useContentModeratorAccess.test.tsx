@@ -150,7 +150,7 @@ describe("useContentModeratorAccess identity privacy", () => {
       await act(async () => {
         await client.invalidateQueries();
       });
-      expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(1);
+      expect(fetchContentModeratorAccess).not.toHaveBeenCalled();
 
       jest
         .mocked(fetchContentModeratorAccess)
@@ -160,7 +160,7 @@ describe("useContentModeratorAccess identity privacy", () => {
       rerender();
       expect(result.current.data).toBeUndefined();
       await waitFor(() => expect(result.current.data?.moderator).toBe(false));
-      expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(2);
+      expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(1);
     }
   );
 
@@ -319,4 +319,79 @@ it("keeps a failed initial check identifiable during a manual retry until the se
   await act(async () => finishRetry?.(access));
   await waitFor(() => expect(result.current.isSuccess).toBe(true));
   expect(result.current.data?.moderator).toBe(true);
+});
+
+describe("useContentModeratorAccess refresh policy", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockProfileId = "moderator-1";
+    mockProxy = null;
+    mockDirectSession = true;
+    mockUseRoleScope = false;
+    mockRole = undefined;
+    jest.mocked(fetchContentModeratorAccess).mockResolvedValue(access);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it("keeps access fresh for five minutes instead of refetching on every mount", async () => {
+    const client = new QueryClient();
+    client.setQueryData(accessKey, access);
+    const first = mountAccess(client);
+    first.unmount();
+    const second = mountAccess(client);
+
+    expect(second.result.current.data?.moderator).toBe(true);
+    expect(fetchContentModeratorAccess).not.toHaveBeenCalled();
+    second.unmount();
+
+    client.setQueryData(accessKey, access, {
+      updatedAt: Date.now() - 5 * 60_000 - 1,
+    });
+    const stale = mountAccess(client);
+    await waitFor(() =>
+      expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(1)
+    );
+    stale.unmount();
+  });
+
+  it("refreshes a confirmed moderator every five minutes, not every minute", async () => {
+    jest.useFakeTimers();
+    const { unmount } = mountAccess(new QueryClient());
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(0);
+    });
+    expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(5 * 60_000 - 1);
+    });
+    expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(1);
+    });
+    expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(2);
+    unmount();
+  });
+
+  it("stops polling once the profile is confirmed as a non-moderator", async () => {
+    jest.useFakeTimers();
+    jest
+      .mocked(fetchContentModeratorAccess)
+      .mockResolvedValue({ ...access, moderator: false });
+    const { unmount } = mountAccess(new QueryClient());
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(0);
+    });
+    expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(30 * 60_000);
+    });
+    expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(1);
+    unmount();
+  });
 });

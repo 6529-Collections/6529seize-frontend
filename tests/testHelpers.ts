@@ -191,7 +191,12 @@ export {
   type AxeViolationAllowance,
 } from "./support/a11yAssertions";
 export {
+  expectActiveOptionIndicator,
+  expectFocusedLinksShowIndicator,
+  expectKeyboardFocusIndicator,
+  expectKeyboardFocusOutline,
   expectKeyboardFocusVisibleWithinTabs,
+  expectNoOutlineOnPointerFocus,
   getFocusedElementSummary,
   pressTab,
   type FocusSummary,

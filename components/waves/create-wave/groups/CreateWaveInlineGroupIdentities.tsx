@@ -42,6 +42,7 @@ interface CreateWaveInlineGroupIdentitiesProps {
     update: Partial<InlineGroupWalletSources>
   ) => void;
   readonly resultsLayout?: GroupCreateIdentitiesSearchResultsLayout;
+  readonly simplifyIncludedCopy?: boolean;
 }
 
 function getModeConfig(
@@ -277,11 +278,13 @@ export default function CreateWaveInlineGroupIdentities(
     onIncludedIdentitySelect,
     onIncludedIdentityRemove,
     resultsLayout = "popover",
+    simplifyIncludedCopy = false,
   } = props;
   const { connectedProfile } = useAuth();
   const locale = useBrowserLocale();
   const [mode, setMode] = useState<InlineIdentityMode>("included");
   const isIncludedMode = mode === "included";
+  const hideRedundantCopy = simplifyIncludedCopy && isIncludedMode;
   const {
     activeIdentities,
     activeWalletSources,
@@ -364,9 +367,11 @@ export default function CreateWaveInlineGroupIdentities(
       </div>
 
       <div className="tw-space-y-3">
-        <h3 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
-          {searchLabel}
-        </h3>
+        {!hideRedundantCopy && (
+          <h3 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
+            {searchLabel}
+          </h3>
+        )}
         <GroupCreateIdentitiesSearch
           key={mode}
           selectedWallets={selectedWallets}
@@ -407,15 +412,18 @@ export default function CreateWaveInlineGroupIdentities(
       <CreateWaveInlineGroupWalletSources
         quiet
         networkPresentation
+        hideEmptyMessages={hideRedundantCopy}
         direction={mode}
         sources={activeWalletSources}
         onChange={onWalletSourcesChange}
       />
-      <IdentityStatus
-        isOverIdentityLimit={isOverIdentityLimit}
-        limitText={limitText}
-        totalText={totalText}
-      />
+      {(!hideRedundantCopy || selectedWallets.length > 0) && (
+        <IdentityStatus
+          isOverIdentityLimit={isOverIdentityLimit}
+          limitText={limitText}
+          totalText={totalText}
+        />
+      )}
       {showCurrentUserExcludedWarning && (
         <p
           role="status"

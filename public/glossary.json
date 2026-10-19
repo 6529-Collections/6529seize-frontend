@@ -66,33 +66,6 @@
       ]
     },
     {
-      "id": "delegation.overview",
-      "term": "Delegation center",
-      "aliases": [
-        "delegation",
-        "delegate",
-        "delegations",
-        "delegation center",
-        "delegation manager"
-      ],
-      "facts": [
-        "Delegation lets one wallet authorize another wallet for supported 6529 uses.",
-        "The delegation center provides wallet checking, action flows, collection management, and section navigation.",
-        "Delegation is useful for vault/hot-wallet patterns and airdrop-related workflows."
-      ],
-      "canonical_path": "/delegation/delegation-center",
-      "related_paths": [
-        "/delegation/wallet-checker",
-        "/delegation-mapping-tool",
-        "/consolidation-mapping-tool"
-      ],
-      "tags": [
-        "delegation",
-        "wallet",
-        "glossary"
-      ]
-    },
-    {
       "id": "waves.drop",
       "term": "Drop",
       "aliases": [
@@ -430,7 +403,6 @@
         "nic",
         "what is nic",
         "what does nic stand for",
-        "network identity credits",
         "network identity check",
         "rate nic",
         "rep dialog",
@@ -442,7 +414,7 @@
       "facts": [
         "The combined Identity tab is the default profile tab at /{user}; /{user}/identity is a legacy redirect.",
         "NIC is the 6529 network identity trust signal shown on profile identity surfaces.",
-        "App copy refers to NIC as Network Identity Credits in the FAQ and Network Identity Check in the profile identity header.",
+        "App copy expands NIC as Network Identity Check (D142) in both the About FAQ and the profile identity header.",
         "The Identity tab surfaces profile identity, REP behavior, NIC ratings, NIC statements, and activity log behavior where available.",
         "On mobile, a compact selector switches between Total Rep, NIC, and ID Statements without changing the profile URL.",
         "Grant REP keeps its compact category pills and existing search and selection behavior, including similarly named categories remaining separate and selectable.",
@@ -477,6 +449,7 @@
       ],
       "facts": [
         "The Profile Proxy tab exposes profile proxy relationships and actions.",
+        "All, Received, and Granted filters remain visible as tabs on phone, tablet, and desktop. Arrow keys switch tabs; Home and End select the first and last tab.",
         "Proxy features help a profile allow another account to perform supported actions without handing over the primary wallet.",
         "Current proxy action creation supports Allocate Rep and Allocate NIC actions with a granted Credit amount and read-only Spent total.",
         "Proxy action availability and profile rating behavior depend on whether the active proxy has the relevant Allocate Rep or Allocate NIC permission.",
@@ -485,7 +458,7 @@
       "canonical_path": "/{user}/proxy",
       "related_paths": [
         "/{user}/proxy",
-        "/delegation/delegation-center"
+        "/safe-collecting"
       ],
       "tags": [
         "profiles",
@@ -507,6 +480,7 @@
         "The section shows up to three tags and uses a +N more chip when additional tags exist; controls wrap at narrow widths.",
         "Manage and +N more open the inline Quick Tags manager inside the same Brain-tab card.",
         "On mobile, New Quick Tag and existing-tag editing open in a bottom sheet; on wider screens, create and edit forms remain inline.",
+        "The mobile Quick Tag editor uses Back, Close, or a downward header swipe to discard edits. The inline editor keeps Cancel.",
         "The section is hidden on other profiles and while acting through a proxy.",
         "Quick Tags do not have a dedicated profile tab or route."
       ],
@@ -579,6 +553,45 @@
       ]
     },
     {
+      "id": "delegation.overview",
+      "term": "Safe Collecting",
+      "aliases": [
+        "safe collecting",
+        "collect safely",
+        "delegation center",
+        "delegation",
+        "delegate",
+        "delegations",
+        "delegation manager",
+        "vault setup",
+        "wallet setup",
+        "tap setup",
+        "keep my vault cold"
+      ],
+      "facts": [
+        "Safe Collecting at /safe-collecting (formerly the Delegation Center) explains and sets up 6529's safe collecting system: keep NFTs in a vault that never connects to anything, and use 6529 from a hot wallet, while TDH, delegations, airdrops and subscriptions keep working as if every wallet were one.",
+        "The former /delegation URLs permanently redirect to the equivalent /safe-collecting pages, preserving query parameters and section anchors. Wallet Architecture is now /safe-collecting/tap-guide, and the FAQ and its articles are under /safe-collecting/faq.",
+        "It follows the Three Address Protocol (TAP): a vault (ideally a SAFE with hardware-wallet signers, or a hardware wallet) that holds NFTs and never connects; a transaction wallet on a hardware wallet that buys, sells and trades and acts as the vault's Delegation Manager; a hot social wallet that signs in to 6529, votes, posts, mints and pays for subscriptions and holds no NFTs; and optionally an old, burned or exposed address kept combined for its TDH.",
+        "The recommended setup for new collectors: the vault signs once to set its ENS name and appoint the transaction wallet as Delegation Manager (use case 998) on Any Collection; the guided setup combines the wallets with the manager signing for the vault; optionally the manager delegates minting to the social wallet; airdrops without a delegation go to the wallet with the most TDH, usually the vault.",
+        "When a wallet is connected, the Your setup section lists the profile's wallets with TDH, primary and connected badges, which wallet manages which, minting and airdrop delegations, and a checklist with links to fix missing steps.",
+        "The page links to every tool: guided consolidation, appointing a manager, minting and airdrop delegations, primary address, locks, revoking, and the Wallet Checker. The original delegation, consolidation and Delegation Manager forms and Manage by Collection are under All tools.",
+        "A Delegation Manager cannot move NFTs but can register anything in the vault's name, including consolidations and more managers; an expiry date does not limit it, only revoking does, and revoking it does not undo what it registered."
+      ],
+      "canonical_path": "/safe-collecting",
+      "related_paths": [
+        "/safe-collecting/tap-guide",
+        "/safe-collecting/build-consolidation",
+        "/safe-collecting/register-sub-delegation",
+        "/safe-collecting/wallet-checker",
+        "/network/tdh/consolidation"
+      ],
+      "tags": [
+        "delegation",
+        "wallet",
+        "glossary"
+      ]
+    },
+    {
       "id": "network.tdh",
       "term": "TDH",
       "aliases": [
@@ -589,7 +602,10 @@
         "tdh meaning",
         "tdh rate",
         "hodl rate",
-        "total dynamic head"
+        "total dynamic head",
+        "tdh rank ties",
+        "tdh tie-break",
+        "same TDH different ranks"
       ],
       "facts": [
         "TDH means Total Days Held.",
@@ -615,12 +631,19 @@
         "Distinct Gradients add the configured per-token bonus up to the configured count limit. The page derives the eventual rounded multiplier ceiling from the full season schedule, additional-set series and Gradient limit.",
         "The displayed future ceiling is conditional: future cards must become eligible and can make a previously complete collection incomplete.",
         "Rates are rounded before wallet and token-level TDH rounding; consolidated wallets preserve qualifying internal-transfer ages, recompute the boost, and sum per-token rounded final contributions.",
-        "TDH is used throughout the network, including profiles, leaderboards, Levels, groups, Network views, Waves voting and eligibility, and public data."
+        "TDH is used throughout the network, including profiles, leaderboards, Levels, groups, Network views, Waves voting and eligibility, and public data.",
+        "TDH ranks are consecutive positions starting at 1; equal displayed TDH does not give wallets or consolidations a shared rank.",
+        "Overall TDH ranks compare boosted TDH, unboosted TDH, Gradients TDH and NextGen TDH, in that order, highest first.",
+        "Memes, Gradients and NextGen collection ranks compare that collection's boosted TDH, unboosted TDH and NFT balance, then total NFT balance, highest first. Owners of an individual Meme card compare that card's TDH, then total boosted TDH, highest first.",
+        "A complete tie uses the lowercase wallet address in ascending order, or the consolidation key made from lowercase wallet addresses sorted in ascending order and joined with hyphens. Backend and native 6529 Desktop use the same ranking rules; tie-breaks change positions without changing holdings, TDH scores or boosts.",
+        "Individual Gradient and NextGen token rankings compare token TDH highest first, then numeric token ID lowest first.",
+        "A collection rank of -1 means there is no positive boosted TDH for that collection. Empty singleton wallets are omitted from TDH rankings; wallets with eligible NFTs or membership in a multi-wallet consolidation remain included even when TDH is zero."
       ],
       "canonical_path": "/network/tdh",
       "related_paths": [
         "/network/definitions",
         "/network/tdh/historic-boosts",
+        "/network/tdh/consolidation",
         "/network/health/network-tdh",
         "/network/levels"
       ],
@@ -822,9 +845,10 @@
         "On desktop with no selected Wave, /waves shows the latest posts from members' effective public Profile Wave curations, newest first.",
         "Each latest-profile-post card identifies the author, posting time, and originating Profile Wave; curated replies can also appear. On mobile web and in the native app, the default /waves view remains a Wave navigator with no separate Profile Waves Feed card, and the feed icon at the far right of the plain Waves heading opens the cross-Wave feed at /waves?view=profile-feed. On desktop, the same feed icon clears the selected wave to show Profile Waves Feed. The heading is not clickable. Header actions are feed then create on desktop, with Profile Waves Feed and Create Wave tooltips. Create uses a compact white button. The mobile list shows only feed; the app keeps create in its top bar. The Profile Waves Feed content header has a Discover Waves link with a compass, aligned right on desktop and below the description on small screens. The expanded sidebar has no separate feed row.",
         "From the mobile web Profile Waves Feed, Waves returns to the Wave list. Opening a feed post enters its Wave conversation, and browser Back returns to the feed.",
-        "Announcements uses a compact row with its timestamp, unread state and score shield. Active Votes rows also have a score shield that opens score details. The current wave highlights in Active Votes as well as in the collection list below when it appears in both. In Worth Checking Out, each avatar and its bottom-right score shield form one wave navigation link; hovering or focusing the combined link shows score details.",
+        "Announcements uses a compact row with its timestamp, unread state and score shield. A row-sized placeholder reserves its space while it first loads. Active Votes rows also have a score shield that opens score details. The current wave highlights in Active Votes as well as in the collection list below when it appears in both. In Worth Checking Out, each avatar and its bottom-right score shield form one wave navigation link; hovering or focusing the combined link shows score details.",
         "While Find a wave is open, sidebar scores remain visible but their details cards are temporarily unavailable, including for an empty search field. Closing search restores score hover, focus and selection. Recommendation links remain available while searching.",
         "Every Worth Checking Out recommendation also appears in All at its recent-activity position; Joined normally includes only waves the user has joined.",
+        "Joined waves load in batches without skipping entries when new activity changes their order. Recent activity includes joined, unmuted subwaves. Muting a wave removes its own activity from the ordering. More rows load near the bottom, with Load more joined waves as a fallback. Failed loads keep existing rows available and show Retry. Expired lists refresh automatically, and newly joined waves appear on refresh.",
         "Switching All and Joined preserves list position instead of jumping to the active wave; a shorter list can clamp the position. Selecting another wave reveals its active row again.",
         "A Wave opened from a direct link remains visible and highlighted in the left sidebar even when it is not followed, pinned, or present in the loaded overview; this temporary route context does not join or pin it.",
         "When a direct link opens a subwave, the sidebar surfaces its visible parent, loads and expands the subwave list, reveals the selected child row, and keeps that parent tree ahead of paginated activity rows so every sibling remains reachable.",

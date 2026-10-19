@@ -1,4 +1,4 @@
-import mixpanel from "mixpanel-browser";
+import mixpanel from "mixpanel-browser/dist/mixpanel-core.cjs.js";
 import type { BatchSdk } from "@/services/analytics/mixpanelBatching";
 
 type Kind = "events" | "people" | "groups";
