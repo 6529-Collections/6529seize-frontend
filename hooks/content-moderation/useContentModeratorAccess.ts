@@ -12,7 +12,7 @@ export { CONTENT_MODERATOR_ACCESS_QUERY_KEY } from "./useContentModerationStateS
 const MODERATOR_ACCESS_REFRESH_MS = 60_000;
 
 // Access can only change mid-session for moderators: revocation is also pushed
-// by the 401/403 handlers, and the open-report indicator is live state. A
+// by the 401/403 handlers, and the manual-review indicator is live state. A
 // profile already confirmed as a non-moderator has nothing to refresh, so it
 // stops polling and picks up a new grant on its next stale mount.
 const getModeratorAccessRefetchInterval = (query: {

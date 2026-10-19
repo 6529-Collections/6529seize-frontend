@@ -93,6 +93,8 @@ export default function ModerationReviewCases({
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (page) => page.next_cursor ?? undefined,
     retry: false,
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
     gcTime: 0,
   });
   const items = query.data?.pages.flatMap((page) => page.items) ?? [];

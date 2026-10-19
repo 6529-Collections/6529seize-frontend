@@ -286,6 +286,29 @@ describe("ContentModerationPageClient pagination", () => {
     };
   }
 
+  it("refreshes the visible queue when new manual work arrives without leaving WatchTower", async () => {
+    jest.useFakeTimers();
+    jest
+      .mocked(fetchModerationReviewCases)
+      .mockResolvedValueOnce({ items: [], next_cursor: null })
+      .mockResolvedValue({ items: [caseFixture()], next_cursor: null });
+    const view = renderReviewQueue();
+    try {
+      expect(
+        await screen.findByText("There are no items needing review.")
+      ).toBeVisible();
+      expect(screen.queryByText("Case 1")).not.toBeInTheDocument();
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(60_100);
+      });
+      expect(await screen.findByText("Case 1")).toBeVisible();
+      expect(screen.getByRole("link", { name: "Review case" })).toBeVisible();
+    } finally {
+      view.unmount();
+      jest.useRealTimers();
+    }
+  });
+
   it("shows a check-only case, with matching top and tab counts even when there are no reports", async () => {
     mockOpenReportCount = 0;
     mockReviewCaseCount = 1;
