@@ -53,12 +53,15 @@ it("hands focus to the loaded panel when the covered opener remains inert", asyn
 
 it("keeps error recovery and Close keyboard accessible", () => {
   const onRetry = jest.fn();
-  render(
-    <SingleWaveDropLoading onClose={jest.fn()} isError onRetry={onRetry} />
-  );
+  const onClose = jest.fn();
+  render(<SingleWaveDropLoading onClose={onClose} isError onRetry={onRetry} />);
   expect(screen.getByRole("alert")).toHaveTextContent(
     "This drop could not be loaded."
   );
   fireEvent.click(screen.getByRole("button", { name: "Try again" }));
   expect(onRetry).toHaveBeenCalledTimes(1);
+  fireEvent.keyDown(screen.getByRole("button", { name: "Try again" }), {
+    key: "Escape",
+  });
+  expect(onClose).toHaveBeenCalledTimes(1);
 });

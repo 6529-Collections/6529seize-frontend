@@ -25,6 +25,8 @@ const WavesView: React.FC = () => {
 
   let content: React.ReactNode = null;
 
+  // A URL-selected wave is not evidence that wallet/profile resolution is done.
+  // Preserve the auth gate that the outer layout applied before this handoff.
   if (contentState === "loading") {
     content = <WavesRouteLoading />;
   } else if (serialisedWaveId) {

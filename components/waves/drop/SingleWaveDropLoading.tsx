@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type KeyboardEvent } from "react";
 
 import CircleLoader, {
   CircleLoaderSize,
@@ -41,7 +41,7 @@ export default function SingleWaveDropLoading({
   isError = false,
 }: SingleWaveDropLoadingProps) {
   const locale = useBrowserLocale();
-  const panelRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const hasClose = !!onClose;
   useEffect(() => {
@@ -56,26 +56,17 @@ export default function SingleWaveDropLoading({
   const buttonClass =
     "tw-min-h-11 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
 
+  const onControlKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (!onClose || event.defaultPrevented || event.key !== "Escape") return;
+    event.preventDefault();
+    event.stopPropagation();
+    onClose();
+  };
+
   return (
-    <div
+    <section
       ref={panelRef}
-      role="region"
       aria-label={t(locale, "singleDrop.loading")}
-      onKeyDown={(event) => {
-        if (
-          !onClose ||
-          event.defaultPrevented ||
-          event.key !== "Escape" ||
-          !(event.target instanceof Node) ||
-          !event.currentTarget.contains(event.target) ||
-          (event.target instanceof Element &&
-            event.target.closest('[role="dialog"], dialog'))
-        )
-          return;
-        event.preventDefault();
-        event.stopPropagation();
-        onClose();
-      }}
       className="tailwind-scope tw-relative tw-flex tw-h-full tw-min-h-80 tw-w-full tw-flex-1 tw-flex-col tw-bg-iron-950"
       data-testid="single-drop-loading"
     >
@@ -86,6 +77,7 @@ export default function SingleWaveDropLoading({
             type="button"
             className={buttonClass}
             onClick={onClose}
+            onKeyDown={onControlKeyDown}
             aria-label={t(locale, "singleDrop.closeLabel")}
           >
             {t(locale, "singleDrop.close")}
@@ -99,7 +91,12 @@ export default function SingleWaveDropLoading({
               {t(locale, "singleDrop.loadError")}
             </p>
             {onRetry && (
-              <button type="button" className={buttonClass} onClick={onRetry}>
+              <button
+                type="button"
+                className={buttonClass}
+                onClick={onRetry}
+                onKeyDown={onControlKeyDown}
+              >
                 {t(locale, "waves.loadingRetry")}
               </button>
             )}
@@ -117,6 +114,6 @@ export default function SingleWaveDropLoading({
           </output>
         )}
       </div>
-    </div>
+    </section>
   );
 }

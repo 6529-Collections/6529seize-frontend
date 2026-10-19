@@ -641,6 +641,7 @@ export const ES_ES_MESSAGES = {
     "Inténtalo de nuevo antes de enviar tu mensaje.",
   ...stormComposerEsMessages,
   "waves.loadingStatus": "Cargando waves",
+  "waves.threadLoadError": "No se ha podido cargar este hilo.",
   "waves.gifPicker.open": "Añadir GIF",
   "waves.gifPicker.dialogTitle": "Busqueda de GIF",
   "waves.gifPicker.searchPlaceholder": "Buscar GIF",

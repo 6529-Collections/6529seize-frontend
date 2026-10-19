@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import SingleWaveDropLoading from "./SingleWaveDropLoading";
+import SingleWaveDropDataLoading from "./SingleWaveDropDataLoading";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { useWaveOutcomeVisibility } from "@/hooks/waves/useWaveMetadata";
@@ -19,8 +19,8 @@ export const MemesSingleWaveDrop: React.FC<MemesSingleWaveDropProps> = ({
   drop: initialDrop,
   onClose,
 }) => {
-  const { drop, wave, extendedDrop, voteSummary, isWaveError, refetchWave } =
-    useSingleWaveDropData(initialDrop, onClose);
+  const data = useSingleWaveDropData(initialDrop, onClose);
+  const { drop, wave, extendedDrop, voteSummary } = data;
   const outcomesVisible = useWaveOutcomeVisibility(wave);
   const {
     winningThreshold,
@@ -32,15 +32,7 @@ export const MemesSingleWaveDrop: React.FC<MemesSingleWaveDropProps> = ({
   });
 
   if (!extendedDrop || !wave || !drop) {
-    return (
-      <SingleWaveDropLoading
-        onClose={onClose}
-        isError={isWaveError}
-        onRetry={() => {
-          void refetchWave();
-        }}
-      />
-    );
+    return <SingleWaveDropDataLoading data={data} onClose={onClose} />;
   }
 
   return (

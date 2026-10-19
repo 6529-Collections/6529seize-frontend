@@ -107,6 +107,28 @@ describe("PublicWaveFeedGate", () => {
     expect(interactiveSurface).toHaveAttribute("aria-hidden", "false");
   });
 
+  it("ignores another wave's readiness when returning to the server fallback wave", () => {
+    mockActiveWaveId = "wave-2";
+    const { rerender } = render(
+      <PublicWaveFeedGate
+        fallback={<div>Server public feed</div>}
+        waveId="wave-1"
+      >
+        <InteractiveFeed ready />
+      </PublicWaveFeedGate>
+    );
+    mockActiveWaveId = "wave-1";
+    rerender(
+      <PublicWaveFeedGate
+        fallback={<div>Server public feed</div>}
+        waveId="wave-1"
+      >
+        <InteractiveFeed />
+      </PublicWaveFeedGate>
+    );
+    expect(screen.getByText("Server public feed")).toBeInTheDocument();
+  });
+
   it("does not cover a remembered Leaderboard with the server Chat fallback while its feed is pending", () => {
     mockContentTab = MyStreamWaveTab.LEADERBOARD;
     render(

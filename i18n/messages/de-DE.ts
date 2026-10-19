@@ -645,6 +645,7 @@ export const DE_DE_MESSAGES = {
     "Versuche es erneut, bevor du deine Nachricht sendest.",
   ...stormComposerDeMessages,
   "waves.loadingStatus": "Waves werden geladen",
+  "waves.threadLoadError": "Dieser Thread konnte nicht geladen werden.",
   "waves.gifPicker.open": "GIF hinzufügen",
   "waves.gifPicker.dialogTitle": "GIF-Suche",
   "waves.gifPicker.searchPlaceholder": "GIFs suchen",

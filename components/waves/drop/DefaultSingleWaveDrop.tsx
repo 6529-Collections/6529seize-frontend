@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import SingleWaveDropLoading from "./SingleWaveDropLoading";
+import SingleWaveDropDataLoading from "./SingleWaveDropDataLoading";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { SingleWaveDropWrapper } from "./SingleWaveDropWrapper";
@@ -18,8 +18,8 @@ export const DefaultSingleWaveDrop: React.FC<DefaultSingleWaveDropProps> = ({
   drop: initialDrop,
   onClose,
 }) => {
-  const { drop, wave, extendedDrop, voteSummary, isWaveError, refetchWave } =
-    useSingleWaveDropData(initialDrop, onClose);
+  const data = useSingleWaveDropData(initialDrop, onClose);
+  const { drop, wave, extendedDrop, voteSummary } = data;
   const {
     winningThreshold,
     winningThresholdMinDurationMs,
@@ -30,15 +30,7 @@ export const DefaultSingleWaveDrop: React.FC<DefaultSingleWaveDropProps> = ({
   });
 
   if (!extendedDrop || !wave || !drop) {
-    return (
-      <SingleWaveDropLoading
-        onClose={onClose}
-        isError={isWaveError}
-        onRetry={() => {
-          void refetchWave();
-        }}
-      />
-    );
+    return <SingleWaveDropDataLoading data={data} onClose={onClose} />;
   }
 
   return (

@@ -631,6 +631,7 @@ export const EN_GB_MESSAGES = {
   "waves.chat.guidelinesDialog.loadErrorDescription":
     "Please try again before sending your message.",
   "waves.loadingStatus": "Loading waves",
+  "waves.threadLoadError": "This thread could not be loaded.",
   "waves.gifPicker.open": "Add GIF",
   "waves.gifPicker.dialogTitle": "GIF search",
   "waves.gifPicker.searchPlaceholder": "Search GIFs",

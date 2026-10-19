@@ -58,6 +58,9 @@ On Apple mobile only, new drops can stay pending until you return to bottom.
 
 ## Failure and Recovery
 
+- If a drop's thread fails to load, an error and `Try again` replace the empty
+  conversation prompt. Already loaded replies remain visible during a failure.
+
 - If loading older pages fails, already loaded drops stay visible; scroll up again or refresh.
 - If pending/new-message controls appear out of sync, return to bottom and retry.
 - If scroll state feels stale after major layout changes, refresh the thread.

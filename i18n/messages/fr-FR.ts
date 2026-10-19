@@ -651,6 +651,7 @@ export const FR_FR_MESSAGES = {
     "Réessayez avant d’envoyer votre message.",
   ...stormComposerFrMessages,
   "waves.loadingStatus": "Chargement des waves",
+  "waves.threadLoadError": "Ce fil de discussion n’a pas pu être chargé.",
   "waves.gifPicker.open": "Ajouter un GIF",
   "waves.gifPicker.dialogTitle": "Recherche de GIF",
   "waves.gifPicker.searchPlaceholder": "Rechercher des GIF",

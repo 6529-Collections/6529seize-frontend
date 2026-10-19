@@ -2343,6 +2343,7 @@ const WAVE_LOADING_MESSAGES = objectMessages("waves", {
   loadingWave: "Loading {name}…",
   loadingWaveUnknown: "Loading wave…",
   loadingError: "This wave could not be loaded.",
+  threadLoadError: "This thread could not be loaded.",
   loadingRetry: "Try again",
   loadingBack: "Back to wave list",
   loadingBackMessages: "Back to messages",
