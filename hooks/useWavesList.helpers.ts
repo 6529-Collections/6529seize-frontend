@@ -240,3 +240,29 @@ export const getViewerIdentityKey = ({
 
   return `${normalizedAddress}:primary`;
 };
+
+export const getLatestKnownActivityTimestamp = (
+  wave: Pick<
+    SidebarWave,
+    "latestDropTimestamp" | "latestFollowedSubwaveDropTimestamp"
+  >
+) =>
+  Math.max(
+    wave.latestDropTimestamp ?? 0,
+    wave.latestFollowedSubwaveDropTimestamp ?? 0
+  );
+
+export const getFirstUnreadSerialNo = (
+  left: number | null,
+  right: number | null
+): number | null => {
+  if (left === null) {
+    return right;
+  }
+
+  if (right === null) {
+    return left;
+  }
+
+  return Math.min(left, right);
+};
