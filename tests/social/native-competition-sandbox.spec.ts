@@ -1,7 +1,7 @@
 import { writeFile } from "node:fs/promises";
 import composerSandboxConstants from "../support/composerSandboxConstants.json";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
-import type { Frame, Locator, Page } from "@playwright/test";
+import type { Frame, Locator, Page, WebSocketRoute } from "@playwright/test";
 import type { ApiDropAndWave } from "@/generated/models/ApiDropAndWave";
 import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2PageWithoutCount";
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
@@ -656,6 +656,64 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  test("repairs live state after a refresh marker and a server normal close", async ({
+    page,
+  }) => {
+    const sockets: WebSocketRoute[] = [];
+    const apiPort = new URL(
+      getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])
+    ).port;
+    await page.routeWebSocket(
+      (url) => url.port === apiPort,
+      (socket) => {
+        sockets.push(socket);
+        socket.onMessage((message) => {
+          const frame = JSON.parse(String(message)) as { type?: string };
+          if (frame.type === "AUTHENTICATE")
+            socket.send(JSON.stringify({ type: "AUTHENTICATED", data: {} }));
+          if (frame.type === "SYNC_NOTIFICATION_IDENTITIES")
+            socket.send(
+              JSON.stringify({
+                type: "NOTIFICATION_IDENTITIES_SYNCED",
+                data: { profile_ids: [PROFILE] },
+              })
+            );
+        });
+      }
+    );
+    await installCompetitionApi(page);
+    let reads = 0;
+    page.on("request", (request) => {
+      if (new URL(request.url()).pathname.endsWith("/competitions/alpha"))
+        reads++;
+    });
+    await page.goto(`${ROOT}/alpha`);
+    await expect(
+      page.getByText("Immutable alpha entry content", { exact: true })
+    ).toBeVisible({ timeout: 30000 });
+    await expect.poll(() => sockets.length).toBeGreaterThan(0);
+    const beforeMarker = reads;
+    sockets[sockets.length - 1]!.send(
+      JSON.stringify({ type: "RESYNC_REQUIRED", data: {} })
+    );
+    await expect
+      .poll(() => reads, { timeout: 15000 })
+      .toBeGreaterThan(beforeMarker);
+    const beforeClose = reads;
+    const connectionCount = sockets.length;
+    sockets[sockets.length - 1]!.close({
+      code: 1000,
+      reason: "Listener recovery",
+    });
+    await expect
+      .poll(() => sockets.length, { timeout: 15000 })
+      .toBeGreaterThan(connectionCount);
+    // No competition event is sent after reconnect: recovery itself must refetch.
+    await expect
+      .poll(() => reads, { timeout: 15000 })
+      .toBeGreaterThan(beforeClose);
+  });
+
   test.afterEach(async ({ page }, testInfo) => {
     if (testInfo.status !== testInfo.expectedStatus) {
       const failurePath = testInfo.outputPath(
@@ -1716,46 +1774,52 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       Buffer.from(
         '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28"><rect width="28" height="28" fill="#9b7ec8"/></svg>'
       ).toString("base64");
-    await page.route("**/api/v2/notifications**", (route) =>
-      route.fulfill({
+    const notifications = ["INVITED", "ACCEPTED"].map((event, index) => ({
+      id: 5000 - index,
+      cause: "MEME_COLLABORATION",
+      created_at: Date.now() - 3 * 60 * 60 * 1000,
+      read_at: null,
+      related_identity: {
+        ...fixture.drops[0].author,
+        id: `notification-actor-${index}`,
+        handle: index === 0 ? "phoebeum" : "prxt0",
+        pfp,
+      },
+      additional_context: {
+        event_type: event,
+        wave_id: WAVE,
+        drop_id: entryDropId("alpha"),
+        invitation_id: `invite-${index}`,
+        artwork_name: "Test Cat",
+      },
+    }));
+    await page.route("**/api/v2/notifications**", (route) => {
+      const before = new URL(route.request().url()).searchParams.get(
+        "id_less_than"
+      );
+      return route.fulfill({
         json: {
           unread_count: 2,
-          notifications: ["INVITED", "ACCEPTED"].map((event, index) => ({
-            id: 5000 - index,
-            cause: "MEME_COLLABORATION",
-            created_at: Date.now() - 3 * 60 * 60 * 1000,
-            read_at: null,
-            related_identity: {
-              ...fixture.drops[0].author,
-              id: `notification-actor-${index}`,
-              handle: index === 0 ? "phoebeum" : "prxt0",
-              pfp,
-            },
-            additional_context: {
-              event_type: event,
-              wave_id: WAVE,
-              drop_id: entryDropId("alpha"),
-              invitation_id: `invite-${index}`,
-              artwork_name: "Test Cat",
-            },
-          })),
+          notifications: notifications.filter(
+            (item) => before === null || item.id < Number(before)
+          ),
         },
-      })
-    );
+      });
+    });
     await page.goto("/notifications");
     for (const [handle, action, message] of [
       ["phoebeum", "Review invitation", "invited you to collaborate on"],
       ["prxt0", "View artwork", "accepted your collaboration invitation for"],
     ] as const) {
-      const actor = page.getByRole("link", { name: handle, exact: true });
+      const row = page
+        .getByText(message, { exact: true })
+        .locator("xpath=ancestor::div[3]");
+      const actor = row.getByRole("link", { name: handle, exact: true });
       await expect(actor).toBeVisible();
       await expect(actor).toHaveAttribute("href", `/${handle}`);
       await expect(
-        page.getByRole("img", { name: handle, exact: true })
+        row.getByRole("img", { name: handle, exact: true })
       ).toBeVisible();
-      const row = page
-        .getByRole("link", { name: handle, exact: true })
-        .locator("xpath=ancestor::div[1]");
       await expect(row.getByText(message, { exact: true })).toBeVisible();
       const artwork = row.getByRole("link", { name: "Test Cat", exact: true });
       await expect(artwork).toBeVisible();
