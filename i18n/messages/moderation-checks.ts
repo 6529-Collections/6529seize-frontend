@@ -1,4 +1,9 @@
 export const MODERATION_CHECK_MESSAGES = {
+  "contentModeration.moderator.tabs.needsReview": "Needs review",
+  "contentModeration.moderator.tabs.needsReviewCompact": "Review",
+  "checks.queue.userReport": "User report",
+  "checks.queue.automatedCheck": "Automated check",
+  "checks.queue.empty": "There are no items needing review.",
   "checks.operation.CREATE": "Create",
   "checks.operation.UPDATE": "Update",
   "checks.operation.SAVE": "Save",
@@ -30,7 +35,7 @@ export const MODERATION_CHECK_MESSAGES = {
   "checks.count.rejected_today": "Rejected checks today",
   "checks.count.evaluator_failures_today": "Evaluator failures today",
   "checks.count.help":
-    "Today is measured in UTC. Counts cover all items, independently of filters.",
+    "Needs review counts open user reports and checks awaiting review. Today is measured in UTC. Counts are independent of filters.",
   "checks.filters": "Filter checks",
   "checks.filter.subject_type": "Content type",
   "checks.filter.outcome": "Check outcome",
