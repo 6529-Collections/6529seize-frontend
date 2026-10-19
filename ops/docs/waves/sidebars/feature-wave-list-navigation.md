@@ -50,6 +50,13 @@ Wave and DM rows in the left list control which thread is open.
   to `/discover`; the sidebar keeps the two section-specific `View all` links.
   The collapsed rail retains its icon-only feed link.
 - Browser back/forward keeps the active row and URL in sync.
+- Joined waves load in batches without skipping a wave when new activity moves
+  it higher in the list. The order uses recent wave activity, including joined,
+  unmuted subwaves. Muting a wave removes its own activity from the ordering.
+- More joined waves load near the bottom. `Load more joined waves` is also
+  available below the loaded rows. If loading fails, the existing rows stay
+  available and `Retry` resumes loading. An expired list refreshes automatically
+  without mixing its old and new batches. Newly joined waves appear on refresh.
 - In the native app, swipe right from the left edge of a standard wave detail
   view to return to the Waves list.
 
