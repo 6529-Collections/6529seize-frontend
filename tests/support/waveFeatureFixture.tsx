@@ -223,6 +223,8 @@ function Fixture() {
           style={{ height: 220, width: 300, overflow: "auto" }}
         >
           <SidebarDiscovery
+            recommendationsStatus="success"
+            onRetryRecommendations={undefined}
             previewItems={
               new URLSearchParams(location.search).has("recommendations")
                 ? [

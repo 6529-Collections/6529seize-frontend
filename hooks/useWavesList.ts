@@ -107,7 +107,12 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     isAuthenticated,
   } = useAuth();
   const { address, hasValidWalletAuth } = useSeizeConnectContext();
-  const { seizeSettings, isAnnouncementsWave } = useSeizeSettings();
+  const {
+    seizeSettings,
+    isAnnouncementsWave,
+    isLoaded: settingsLoaded,
+    loadError: settingsError,
+  } = useSeizeSettings();
   const isEnabled = options.enabled !== false;
   const activeWave = options.activeWave ?? null;
   const activeSidebarContext = useMemo(
@@ -161,6 +166,8 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
   const {
     waves: highlyRatedWaves,
     isFetching: isHighlyRatedWavesFetching,
+    status: recommendationsStatus,
+    retryLoading: retryRecommendations,
     refetch: highlyRatedWavesRefetch,
     refetchIfStale: highlyRatedWavesRefetchIfStale,
   } = useWavesV2({
@@ -731,6 +738,18 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       hasLoadingError: isJoinedMode && hasFollowedActivityWavesError,
       retryLoading: retryFollowedActivityWaves,
 
+      recommendationsStatus: shouldLoadMainWaves
+        ? recommendationsStatus
+        : ("pending" as const),
+      retryRecommendations,
+      isAnnouncementsLoading:
+        (!settingsLoaded && !settingsError) ||
+        Boolean(
+          announcementsWaveId &&
+          !announcementWave &&
+          (!shouldLoadMainWaves || announcementQueryLoading)
+        ),
+
       // Pinned waves metadata - now includes ALL pinned waves with isPinned flag
       pinnedWaves: allPinnedWaves,
       isPinnedWavesLoading,
@@ -758,6 +777,11 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     }),
     [
       allWaves,
+      recommendationsStatus,
+      retryRecommendations,
+      settingsLoaded,
+      settingsError,
+      announcementsWaveId,
       isMainWavesFetching,
       isMainWavesFetchingNextPage,
       hasMainWavesNextPage,

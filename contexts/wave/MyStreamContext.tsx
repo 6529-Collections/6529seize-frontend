@@ -42,6 +42,9 @@ import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRe
 
 // Define nested structures for context data
 interface WavesContextData {
+  readonly recommendationsStatus?: "pending" | "error" | "success";
+  readonly retryRecommendations?: (() => void) | undefined;
+  readonly isAnnouncementsLoading?: boolean;
   readonly hasLoadingError?: boolean | undefined;
   readonly retryLoading?: (() => void) | undefined;
   readonly isPinnedWavesLoading?: boolean;
@@ -581,6 +584,9 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
         : null;
 
     const waves: WavesContextData = {
+      recommendationsStatus: mainWavesData.recommendationsStatus,
+      retryRecommendations: mainWavesData.retryRecommendations,
+      isAnnouncementsLoading: mainWavesData.isAnnouncementsLoading,
       hasLoadingError: mainWavesData.hasLoadingError,
       retryLoading: mainWavesData.retryLoading,
       isPinnedWavesLoading: mainWavesData.isPinnedWavesLoading,
@@ -656,6 +662,9 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   }, [
     wavesHookData.waves,
     mainWavesData.isPinnedWavesLoading,
+    mainWavesData.recommendationsStatus,
+    mainWavesData.retryRecommendations,
+    mainWavesData.isAnnouncementsLoading,
     mainWavesData.hasLoadingError,
     mainWavesData.retryLoading,
     isMainWavesListEnabled,

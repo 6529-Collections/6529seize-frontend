@@ -1935,3 +1935,46 @@ test("indicates loading when pinned wave is still loading", () => {
   const { result } = renderHook(() => useWavesList(), { wrapper });
   expect(result.current.isPinnedWavesLoading).toBe(true);
 });
+
+test("keeps recommendation status independent of activity loading and exposes its own retry", () => {
+  const retryRecommendations = jest.fn();
+  let status = "pending";
+  useWavesV2Mock.mockImplementation(({ pageSize }) => ({
+    waves: [],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    refetch: jest.fn(),
+    status: pageSize === 10 ? status : "success",
+    retryLoading: retryRecommendations,
+  }));
+  const { result, rerender } = renderHook(() => useWavesList());
+  expect(result.current.recommendationsStatus).toBe("pending");
+  status = "error";
+  rerender();
+  expect(result.current.recommendationsStatus).toBe("error");
+  result.current.retryRecommendations();
+  expect(retryRecommendations).toHaveBeenCalledTimes(1);
+  status = "success";
+  rerender();
+  expect(result.current.recommendationsStatus).toBe("success");
+});
+test("reserves announcements while settings load and releases the space when none is configured", () => {
+  useSeizeSettingsMock.mockReturnValue({
+    seizeSettings: { announcements_wave_id: null },
+    isAnnouncementsWave: () => false,
+    isLoaded: false,
+    loadError: null,
+  });
+  const { result, rerender } = renderHook(() => useWavesList());
+  expect(result.current.isAnnouncementsLoading).toBe(true);
+  useSeizeSettingsMock.mockReturnValue({
+    seizeSettings: { announcements_wave_id: null },
+    isAnnouncementsWave: () => false,
+    isLoaded: true,
+    loadError: null,
+  });
+  rerender();
+  expect(result.current.isAnnouncementsLoading).toBe(false);
+});

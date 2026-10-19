@@ -98,6 +98,7 @@ describe("effective App PR CI plan", () => {
     "i18n/messages/competitions.ts",
     "tests/social/native-competition-sandbox.spec.ts",
     "tests/social/wave-switch-loading.spec.ts",
+    "tests/social/wave-loading-sandbox.spec.ts",
     "components/brain/my-stream/MyStreamWavePending.tsx",
     "tests/support/composerSandboxServer.cjs",
     "components/waves/WavesMobile.tsx",
