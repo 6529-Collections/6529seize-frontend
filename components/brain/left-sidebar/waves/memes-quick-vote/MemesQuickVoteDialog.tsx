@@ -45,7 +45,6 @@ interface MemesQuickVoteDialogContentProps {
   readonly leftThisRoundCount: number;
   readonly latestUsedAmount: number | null;
   readonly nextDrop: MemesQuickVoteDialogProps["nextDrop"];
-  readonly onClose: () => void;
   readonly recentAmounts: number[];
   readonly sessionId: number;
   readonly submitVote: MemesQuickVoteDialogProps["submitVote"];
@@ -284,7 +283,6 @@ function MemesQuickVoteDialogContent({
   leftThisRoundCount,
   latestUsedAmount,
   nextDrop,
-  onClose,
   recentAmounts,
   sessionId,
   submitVote,
@@ -293,7 +291,6 @@ function MemesQuickVoteDialogContent({
   unratedCount,
   votingLabel,
 }: MemesQuickVoteDialogContentProps) {
-  const locale = useBrowserLocale();
   const ratingRange = useMemo(
     () => getQuickVoteRatingRange(activeDrop),
     [activeDrop]
@@ -522,34 +519,6 @@ function MemesQuickVoteDialogContent({
 
   return (
     <div className="tw-flex tw-h-full tw-flex-col md:tw-grid md:tw-min-h-0 md:tw-grid-cols-[minmax(0,1.22fr)_minmax(25rem,1fr)] md:tw-items-stretch">
-      {isMobile && (
-        <div className="tw-flex tw-shrink-0 tw-items-center tw-justify-between tw-px-5 tw-pb-5 tw-pt-[calc(env(safe-area-inset-top,0px)+1rem)] md:tw-hidden">
-          <button
-            type="button"
-            onClick={onClose}
-            data-autofocus="true"
-            className="tw-inline-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.04] tw-text-iron-300 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 active:tw-bg-white/10"
-            aria-label={t(locale, "memes.quickVote.closeDialog")}
-          >
-            <XMarkIcon className="tw-size-5 tw-shrink-0" />
-          </button>
-
-          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-gap-1 tw-px-2 tw-text-center tw-text-xs tw-tabular-nums tw-leading-4">
-            <span className="tw-font-semibold tw-text-iron-300">
-              {t(locale, "memes.quickVote.leftThisRound", {
-                count: formatInteger(locale, leftThisRoundCount),
-              })}
-            </span>
-            <span className="tw-text-iron-400">
-              {t(locale, "memes.quickVote.unrated", {
-                count: formatInteger(locale, unratedCount),
-              })}
-            </span>
-          </div>
-          <div className="tw-size-11 tw-shrink-0" aria-hidden="true" />
-        </div>
-      )}
-
       {isMobile ? (
         <div className="tw-relative tw-z-10 tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-flex-col tw-overflow-hidden">
           <MemesQuickVotePreviewPane
@@ -603,7 +572,9 @@ export default function MemesQuickVoteDialog({
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const previousBodyOverflowRef = useRef("");
   const isMobile = useMediaQuery(QUICK_VOTE_MOBILE_QUERY);
-  const showStandaloneStateShellClose = activeDrop === null && !isExhausted;
+  const showCounts = activeDrop !== null && !isRestartingRound && !isExhausted;
+  const showLoadingHeader =
+    !activeDrop && !hasDiscoveryError && !isRestartingRound && !isExhausted;
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -687,7 +658,6 @@ export default function MemesQuickVoteDialog({
           leftThisRoundCount={leftThisRoundCount}
           latestUsedAmount={latestUsedAmount}
           nextDrop={nextDrop}
-          onClose={onClose}
           recentAmounts={recentAmounts}
           sessionId={sessionId}
           submitVote={submitVote}
@@ -721,19 +691,43 @@ export default function MemesQuickVoteDialog({
           <div className="tw-relative tw-flex tw-h-[calc(100%_-_var(--native-keyboard-inset-bottom,0px))] tw-max-h-full tw-w-full tw-flex-col tw-overflow-hidden tw-bg-[#0a0a0a] tw-shadow-[0_0_80px_rgba(0,0,0,0.8)] tw-transition-[height] tw-duration-[var(--native-keyboard-layout-transition-duration,0ms)] tw-ease-out motion-reduce:tw-transition-none md:tw-h-[38rem] md:tw-max-h-[min(calc(100vh-3rem),38rem)] md:tw-max-w-[68rem] md:tw-rounded-2xl md:tw-border md:tw-border-solid md:tw-border-white/10">
             <button
               type="button"
-              data-autofocus={
-                !isMobile || showStandaloneStateShellClose ? "true" : undefined
-              }
+              data-autofocus="true"
               onClick={onClose}
-              className={`tw-absolute tw-right-4 tw-top-[calc(env(safe-area-inset-top,0px)+0.75rem)] tw-z-20 tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.05] tw-text-iron-400 tw-shadow-inner tw-backdrop-blur-md tw-transition-colors active:tw-bg-white/10 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-text-white md:tw-right-6 md:tw-top-6 ${
-                showStandaloneStateShellClose
-                  ? "tw-inline-flex md:tw-inline-flex"
-                  : "tw-hidden md:tw-inline-flex"
-              }`}
+              className="tw-absolute tw-left-5 tw-top-[calc(env(safe-area-inset-top,0px)+1rem)] tw-z-20 tw-inline-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.04] tw-text-iron-300 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 active:tw-bg-white/10 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-text-white md:tw-left-auto md:tw-right-6 md:tw-top-6 md:tw-bg-white/[0.05] md:tw-text-iron-400 md:tw-shadow-inner md:tw-backdrop-blur-md"
               aria-label={t(locale, "memes.quickVote.closeDialog")}
             >
               <XMarkIcon className="tw-size-5 tw-shrink-0" />
             </button>
+
+            <div className="tw-flex tw-shrink-0 tw-items-center tw-justify-between tw-px-5 tw-pb-5 tw-pt-[calc(env(safe-area-inset-top,0px)+1rem)] md:tw-hidden">
+              <div className="tw-size-11 tw-shrink-0" aria-hidden="true" />
+              <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-gap-1 tw-px-2 tw-text-center tw-text-xs tw-tabular-nums tw-leading-4">
+                {showCounts && (
+                  <>
+                    <span className="tw-font-semibold tw-text-iron-300">
+                      {t(locale, "memes.quickVote.leftThisRound", {
+                        count: formatInteger(locale, leftThisRoundCount),
+                      })}
+                    </span>
+                    <span className="tw-text-iron-400">
+                      {t(locale, "memes.quickVote.unrated", {
+                        count: formatInteger(locale, unratedCount),
+                      })}
+                    </span>
+                  </>
+                )}
+                {showLoadingHeader && (
+                  <div
+                    aria-hidden="true"
+                    className="tw-flex tw-animate-pulse tw-flex-col tw-items-center tw-gap-1 motion-reduce:tw-animate-none"
+                  >
+                    <div className="tw-h-4 tw-w-28 tw-rounded-md tw-bg-iron-800/60" />
+                    <div className="tw-h-4 tw-w-20 tw-rounded-md tw-bg-iron-800/60" />
+                  </div>
+                )}
+              </div>
+              <div className="tw-size-11 tw-shrink-0" aria-hidden="true" />
+            </div>
 
             <div className="tw-relative tw-z-10 tw-min-h-0 tw-flex-1 tw-overflow-hidden md:tw-p-0">
               {dialogBody}

@@ -10,6 +10,7 @@ import { useWaveDiscoveryViewer } from "@/hooks/useWaveDiscoveryViewer";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { SidebarActiveVotes } from "./SidebarActiveVotes";
+import { SidebarRecommendationsSkeleton } from "./SidebarDiscoverySkeletons";
 import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
 import { waveFeatureAttributes } from "@/services/analytics/waveFeatureUsage";
 import {
@@ -101,10 +102,14 @@ function DiscoverySection({
 
 export function SidebarDiscovery({
   previewItems,
+  recommendationsStatus,
+  onRetryRecommendations,
   isTouchPreview,
   scoreDetailsDisabled = false,
 }: {
   readonly previewItems: readonly HighlyRatedWavePreviewItem[];
+  readonly recommendationsStatus: "pending" | "error" | "success";
+  readonly onRetryRecommendations: (() => void) | undefined;
   readonly isTouchPreview: boolean;
   readonly scoreDetailsDisabled?: boolean;
 }) {
@@ -139,24 +144,45 @@ export function SidebarDiscovery({
           setRecommendationsPreference(String(!recommendationsCollapsed))
         }
       >
-        <p className="tw-m-0 tw-mb-2 tw-text-[11px] tw-leading-4 tw-text-iron-500">
-          {t(
-            locale,
-            canUseCollections
-              ? "waves.discovery.recommendationsDescription"
-              : "waves.discovery.publicRecommendationsDescription"
-          )}
-        </p>
-        {previewItems.length > 0 ? (
-          <HighlyRatedWavesToggle
-            compactTouchPadding
-            isTouchPreview={isTouchPreview}
-            scoreDetailsDisabled={scoreDetailsDisabled}
-            paddingClassName="tw-px-0"
-            previewItems={[...previewItems]}
-          />
-        ) : (
-          <p className="tw-m-0 tw-py-2 tw-text-xs tw-text-iron-400">
+        {previewItems.length > 0 && (
+          <>
+            <p className="tw-m-0 tw-mb-2 tw-text-[11px] tw-leading-4 tw-text-iron-500">
+              {t(
+                locale,
+                canUseCollections
+                  ? "waves.discovery.recommendationsDescription"
+                  : "waves.discovery.publicRecommendationsDescription"
+              )}
+            </p>
+            <HighlyRatedWavesToggle
+              compactTouchPadding
+              isTouchPreview={isTouchPreview}
+              scoreDetailsDisabled={scoreDetailsDisabled}
+              paddingClassName="tw-px-0"
+              previewItems={[...previewItems]}
+            />
+          </>
+        )}
+        {previewItems.length === 0 && recommendationsStatus === "pending" && (
+          <SidebarRecommendationsSkeleton isTouchPreview={isTouchPreview} />
+        )}
+        {recommendationsStatus === "error" && (
+          <p
+            role="alert"
+            className="tw-m-0 tw-flex tw-min-h-12 tw-flex-wrap tw-items-center tw-gap-x-1 tw-py-2 tw-text-xs tw-leading-4 tw-text-iron-400"
+          >
+            <span>{t(locale, "waves.discovery.recommendationsError")}</span>
+            <button
+              type="button"
+              onClick={onRetryRecommendations}
+              className="tw-inline-flex tw-min-h-8 tw-items-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-leading-4 tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            >
+              {t(locale, "waves.discovery.retry")}
+            </button>
+          </p>
+        )}
+        {previewItems.length === 0 && recommendationsStatus === "success" && (
+          <p className="tw-m-0 tw-text-xs tw-leading-4 tw-text-iron-400">
             {t(locale, "waves.discovery.emptyRecommendations")}
           </p>
         )}
@@ -170,9 +196,6 @@ export function SidebarDiscovery({
         collapsed={activeCollapsed}
         onToggle={() => setActivePreference(String(!activeCollapsed))}
       >
-        <p className="tw-m-0 tw-mb-2 tw-text-[11px] tw-leading-4 tw-text-iron-500">
-          {t(locale, "waves.discovery.activeVotesDescription")}
-        </p>
         <SidebarActiveVotes
           votes={votes}
           collapsed={activeCollapsed}
