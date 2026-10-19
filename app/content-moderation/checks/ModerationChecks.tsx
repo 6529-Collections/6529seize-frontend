@@ -16,6 +16,7 @@ import {
 } from "./checks.helpers";
 import CheckFilters from "./CheckFilters";
 import CheckDetail from "./CheckDetail";
+import CaseReports from "./CaseReports";
 
 export default function ModerationChecks({
   profileId,
@@ -71,6 +72,14 @@ export default function ModerationChecks({
       <p className="tw-text-sm tw-leading-6 tw-text-iron-400">
         {t(locale, "checks.privateNotice")}
       </p>
+      {filters.case_id && (
+        <CaseReports
+          key={`${profileId}:${filters.case_id}`}
+          caseId={filters.case_id}
+          profileId={profileId}
+          initiallyOpen={source === "report"}
+        />
+      )}
       <div className={selection ? "tw-hidden lg:tw-block" : ""}>
         <CheckFilters
           key={params.toString()}

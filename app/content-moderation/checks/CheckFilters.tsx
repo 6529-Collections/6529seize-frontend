@@ -50,6 +50,14 @@ export default function CheckFilters({
         {t(locale, "checks.filters")}
       </summary>
       <form onSubmit={submit} className="tw-mt-3 tw-space-y-4">
+        {filters.case_id && (
+          <>
+            <input type="hidden" name="case_id" value={filters.case_id} />
+            <p className="tw-text-sm tw-text-iron-300">
+              {t(locale, "checks.caseFilter")}
+            </p>
+          </>
+        )}
         <div className="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
           {Object.entries(CHECK_FILTER_OPTIONS).map(([name, options]) => (
             <label

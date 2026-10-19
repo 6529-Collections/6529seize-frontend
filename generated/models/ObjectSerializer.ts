@@ -550,6 +550,8 @@ export * from '../models/ApiModerationCheckPage';
 export * from '../models/ApiModerationCounts';
 export * from '../models/ApiModerationCurrentState';
 export * from '../models/ApiModerationEvaluation';
+export * from '../models/ApiModerationReviewCase';
+export * from '../models/ApiModerationReviewCasePage';
 export * from '../models/ApiNft';
 export * from '../models/ApiNftActivityEvent';
 export * from '../models/ApiNftActivityPage';
@@ -1451,6 +1453,8 @@ import { ApiModerationCheckPage } from '../models/ApiModerationCheckPage';
 import { ApiModerationCounts } from '../models/ApiModerationCounts';
 import { ApiModerationCurrentState, ApiModerationCurrentStateProfileStatusEnum  , ApiModerationCurrentStateDropStatusEnum        } from '../models/ApiModerationCurrentState';
 import { ApiModerationEvaluation    , ApiModerationEvaluationOutcomeEnum           } from '../models/ApiModerationEvaluation';
+import { ApiModerationReviewCase, ApiModerationReviewCaseCheckOutcomeEnum    , ApiModerationReviewCaseSubjectTypeEnum            } from '../models/ApiModerationReviewCase';
+import { ApiModerationReviewCasePage } from '../models/ApiModerationReviewCasePage';
 import { ApiNft      , ApiNftTokenTypeEnum                               } from '../models/ApiNft';
 import { ApiNftActivityEvent , ApiNftActivityEventKindEnum                   } from '../models/ApiNftActivityEvent';
 import { ApiNftActivityPage } from '../models/ApiNftActivityPage';
@@ -1991,6 +1995,8 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiModerationCurrentStateProfileStatusEnum",
     "ApiModerationCurrentStateDropStatusEnum",
     "ApiModerationEvaluationOutcomeEnum",
+    "ApiModerationReviewCaseCheckOutcomeEnum",
+    "ApiModerationReviewCaseSubjectTypeEnum",
     "ApiNftTokenTypeEnum",
     "ApiNftActivityEventKindEnum",
     "ApiNftLinkMediaPreviewStatusEnum",
@@ -2595,6 +2601,8 @@ let typeMap: {[index: string]: any} = {
     "ApiModerationCounts": ApiModerationCounts,
     "ApiModerationCurrentState": ApiModerationCurrentState,
     "ApiModerationEvaluation": ApiModerationEvaluation,
+    "ApiModerationReviewCase": ApiModerationReviewCase,
+    "ApiModerationReviewCasePage": ApiModerationReviewCasePage,
     "ApiNft": ApiNft,
     "ApiNftActivityEvent": ApiNftActivityEvent,
     "ApiNftActivityPage": ApiNftActivityPage,

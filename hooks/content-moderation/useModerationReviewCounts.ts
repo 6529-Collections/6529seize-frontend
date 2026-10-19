@@ -5,7 +5,7 @@ import { MODERATION_CHECKS_QUERY_KEY } from "@/services/content-moderation/conte
 export function useModerationReviewCounts(
   profileId: string | null | undefined,
   enabled: boolean,
-  openReportCount: number | undefined
+  caseCount: number | undefined
 ) {
   const query = useQuery({
     queryKey: [...MODERATION_CHECKS_QUERY_KEY, profileId, "counts"],
@@ -17,9 +17,6 @@ export function useModerationReviewCounts(
   });
   return {
     ...query,
-    needsReviewCount:
-      enabled && query.isSuccess && openReportCount !== undefined
-        ? query.data.needs_review + openReportCount
-        : undefined,
+    needsReviewCount: enabled ? caseCount : undefined,
   };
 }

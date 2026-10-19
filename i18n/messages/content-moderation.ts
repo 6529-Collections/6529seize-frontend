@@ -173,7 +173,7 @@ export const CONTENT_MODERATION_MESSAGES = {
     "Couldn't check your WatchTower access. Try again.",
   "contentModeration.moderator.retryAccess": "Retry permission check",
   "contentModeration.moderator.openReportsIndicator":
-    "Open reports need review",
+    "Cases need manual review",
   "contentModeration.moderator.loadError": "Couldn't load WatchTower.",
   "contentModeration.moderator.reason": "Moderator note (optional)",
   "contentModeration.moderator.reasonPlaceholder":

@@ -9,7 +9,7 @@ import { CONTENT_MODERATOR_ACCESS_QUERY_KEY } from "./useContentModerationStateS
 
 export { CONTENT_MODERATOR_ACCESS_QUERY_KEY } from "./useContentModerationStateScope";
 
-const MODERATOR_ACCESS_REFRESH_MS = 5 * 60_000;
+const MODERATOR_ACCESS_REFRESH_MS = 60_000;
 
 // Access can only change mid-session for moderators: revocation is also pushed
 // by the 401/403 handlers, and the open-report indicator is live state. A

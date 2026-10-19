@@ -91,6 +91,8 @@ export function readCheckFilters(
   params: Pick<URLSearchParams, "get">
 ): ModerationCheckFilters {
   const values: Record<string, string | number> = {};
+  const caseId = params.get("case_id");
+  if (caseId && /^[a-f0-9]{64}$/.test(caseId)) values["case_id"] = caseId;
   for (const [key, options] of Object.entries(CHECK_FILTER_OPTIONS)) {
     const value = params.get(key);
     if (value && (options as readonly string[]).includes(value))
