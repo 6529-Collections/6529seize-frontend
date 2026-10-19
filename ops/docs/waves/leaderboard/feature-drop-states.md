@@ -47,6 +47,10 @@ This page covers:
   after loading completes with zero rows.
 - List and sidebar pagination auto-loads on scroll and shows a thin loading bar.
 - Grid and gallery pagination uses `Load more drops` and `Loading more...`.
+- Live competition updates refresh scores and ranks while keeping the visible
+  artwork in place in full list, grid, and Memes gallery views.
+- During touch or momentum scrolling, scores keep updating and card reordering
+  waits until scrolling settles. Loaded pages stay available.
 
 ## Edge Cases
 
@@ -72,6 +76,8 @@ This page covers:
 - The compact sidebar has separate failure presentation.
 - If pagination fails, already rendered entries remain visible and users can
   retry with scroll/load-more actions.
+- When an update removes the artwork you were viewing, the view keeps a
+  surviving visible neighbour in place when one is available.
 - Reloading the thread restarts loading and attempts a fresh fetch.
 
 ## Limitations / Notes

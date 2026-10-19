@@ -328,6 +328,9 @@ async function invalidateCompetitionScope(
 ) {
   await Promise.all([
     client.invalidateQueries({
+      queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId }],
+    }),
+    client.invalidateQueries({
       queryKey: [QueryKey.WAVE, { wave_id: waveId }],
     }),
     client.invalidateQueries({

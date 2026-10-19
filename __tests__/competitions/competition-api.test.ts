@@ -58,11 +58,13 @@ describe("explicit competition transport", () => {
         "entries",
       ],
       [QueryKey.DROPS, { waveId: "wave" }],
+      [QueryKey.DROPS_LEADERBOARD, { waveId: "wave", sort: "RANK" }],
+      [QueryKey.DROPS_LEADERBOARD, { waveId: "elsewhere", sort: "RANK" }],
     ];
     keys.forEach((key) => client.setQueryData(key, { value: true }));
     await invalidateCompetition(client, identity);
     expect(keys.map((key) => client.getQueryState(key)?.isInvalidated)).toEqual(
-      [true, true, false, true, false]
+      [true, true, false, true, false, true, false]
     );
   });
   it("resolves an active decision pause beyond the first history page", async () => {
