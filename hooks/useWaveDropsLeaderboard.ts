@@ -32,6 +32,7 @@ export enum WaveDropsLeaderboardSort {
 
 interface UseWaveDropsLeaderboardProps {
   readonly waveId: string;
+  readonly pageSize?: number | undefined;
   readonly sort?: WaveDropsLeaderboardSort | undefined;
   readonly enabled?: boolean | undefined;
   readonly maxPages?: number | undefined;
@@ -61,6 +62,7 @@ interface CanonicalPriceFilters {
 
 interface LeaderboardQueryKeyInput {
   readonly waveId: string;
+  readonly pageSize: number;
   readonly sort: WaveDropsLeaderboardSort;
   readonly sortDirection: "ASC" | "DESC" | undefined;
   readonly maxPages: number | undefined;
@@ -72,7 +74,6 @@ interface LeaderboardParamsInput extends Omit<
   "maxPages"
 > {
   readonly pageParam: number | null;
-  readonly pageSize: number;
 }
 
 interface FetchLeaderboardPageInput extends LeaderboardParamsInput {
@@ -132,6 +133,7 @@ const getCanonicalPriceFilters = ({
 
 const buildLeaderboardQueryKey = ({
   waveId,
+  pageSize,
   sort,
   sortDirection,
   maxPages,
@@ -141,7 +143,7 @@ const buildLeaderboardQueryKey = ({
     QueryKey.DROPS_LEADERBOARD,
     {
       waveId,
-      page_size: WAVE_DROPS_PARAMS.limit,
+      page_size: pageSize,
       sort,
       sort_direction: sortDirection,
       page_window: maxPages ?? null,
@@ -304,6 +306,7 @@ const useRemoveDropsQueryOnUnmount = ({
 
 export function useWaveDropsLeaderboard({
   waveId,
+  pageSize = WAVE_DROPS_PARAMS.limit,
   sort = WaveDropsLeaderboardSort.RANK,
   enabled = true,
   maxPages,
@@ -325,12 +328,13 @@ export function useWaveDropsLeaderboard({
     () =>
       buildLeaderboardQueryKey({
         waveId,
+        pageSize,
         sort,
         sortDirection,
         maxPages,
         priceFilters: canonicalPriceFilters,
       }),
-    [canonicalPriceFilters, maxPages, sort, sortDirection, waveId]
+    [canonicalPriceFilters, maxPages, pageSize, sort, sortDirection, waveId]
   );
 
   const {
@@ -358,7 +362,7 @@ export function useWaveDropsLeaderboard({
       fetchLeaderboardPage({
         waveId,
         pageParam,
-        pageSize: WAVE_DROPS_PARAMS.limit,
+        pageSize,
         sort,
         sortDirection,
         priceFilters: canonicalPriceFilters,
