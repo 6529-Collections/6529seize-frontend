@@ -85,10 +85,8 @@ export function MemeCollaborationReviewDialog({
               <XMarkIcon aria-hidden="true" className="tw-size-5" />
             </Button>
           </div>
-          <div
-            role="region"
+          <section
             aria-label={t(locale, "memes.collaborations.reviewContents")}
-            tabIndex={0}
             className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-px-4 tw-py-6 tw-text-sm tw-leading-6 tw-text-iron-200 md:tw-px-8"
           >
             <div className="tw-mx-auto tw-max-w-5xl tw-space-y-5">
@@ -125,7 +123,7 @@ export function MemeCollaborationReviewDialog({
                 </section>
               )}
             </div>
-          </div>
+          </section>
           <div className="tw-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] tw-pt-4 md:tw-px-8">
             <div className="tw-mx-auto tw-max-w-5xl tw-space-y-3 tw-text-sm tw-text-iron-200">
               <div className="tw-space-y-2">
