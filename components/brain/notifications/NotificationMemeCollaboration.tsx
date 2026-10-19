@@ -68,7 +68,9 @@ export default function NotificationMemeCollaboration({
   return (
     <div className="tailwind-scope tw-min-w-0 tw-py-3">
       {actor ? (
-        <NotificationHeader author={actor}>{content}</NotificationHeader>
+        <NotificationHeader author={actor} align="center">
+          {content}
+        </NotificationHeader>
       ) : (
         <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-leading-6 [overflow-wrap:anywhere]">
           {content}
