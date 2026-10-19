@@ -73,7 +73,7 @@ stale, stop arriving, or do not recover after auth changes.
 - Live-update listeners remain registered while the websocket reconnects, but
   events can only arrive while its status is `connected`.
 - Once token checks pass and the socket reconnects, live updates resume without
-  a full app restart.
+  a full app restart. Active data also refreshes after a short staggered delay, even when no new live event arrives. Returning to the tab or app requests the same reconciliation.
 - If issues persist across multiple health cycles, refresh the tab for a clean
   websocket session.
 - If only `/nft-activity` or `/network/activity` is stale, use those feed docs

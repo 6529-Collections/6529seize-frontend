@@ -6005,7 +6005,8 @@
         "On Apple mobile while the reader is not pinned to the bottom, newest drops can be held behind the new-messages control until the user reveals them.",
         "Thread reply views listen for drop updates and refetch replies, so a thread can lag briefly even when the notification arrives.",
         "Connectivity problems can make feeds or counts appear stale until reconnect or refresh.",
-        "The realtime troubleshooting docs cover connection recovery and expected limitations."
+        "The realtime troubleshooting docs cover connection recovery and expected limitations.",
+        "After the connection recovers, the app returns to the foreground, or the server asks it to repair missed live updates, active data refreshes after a short staggered delay. Repeated refresh requests are combined and hidden tabs wait until visible. Individual events are not guaranteed to replay. Signing out still stops the authenticated connection."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/notifications", "/nft-activity"],
@@ -6079,7 +6080,6 @@
         "nic",
         "what is nic",
         "what does nic stand for",
-        "network identity credits",
         "network identity check",
         "rate nic",
         "rep dialog",
@@ -6103,7 +6103,7 @@
       "facts": [
         "The combined Identity tab is the default profile tab at /{user}; /{user}/identity is a legacy redirect.",
         "NIC is the 6529 network identity trust signal shown on profile identity surfaces.",
-        "App copy refers to NIC as Network Identity Credits in the FAQ and Network Identity Check in the profile identity header.",
+        "App copy expands NIC as Network Identity Check (D142) in both the About FAQ and the profile identity header.",
         "The Identity tab surfaces profile identity, REP behavior, NIC ratings, NIC statements, and activity log behavior where available.",
         "On mobile, a compact selector switches between Total Rep, NIC, and ID Statements without changing the profile URL.",
         "Grant REP keeps its compact category pills and existing search and selection behavior, including similarly named categories remaining separate and selectable.",
@@ -6921,6 +6921,7 @@
       "keywords": ["drop", "edit", "description", "pinned", "time limit"],
       "facts": [
         "Edit is available for your own non-participatory drops. Ordinary drops have a five-minute edit window measured from creation or the latest edit.",
+        "You can save multiple edits within the edit window without reloading the page. Editing text preserves existing images and videos, including after a previous edit has saved.",
         "The wave's current description (pinned drop) can be edited by its author at any time. Replacing the pinned description makes the previous drop subject to the normal edit window again. Pinning does not grant other users permission to edit the drop.",
         "Open the drop action menu and choose Edit. Save the changed content; existing mentions, metadata and referenced NFTs are preserved. Editing a description still requires the usual wave access and content validation."
       ],

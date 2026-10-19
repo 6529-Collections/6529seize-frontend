@@ -404,7 +404,6 @@
         "nic",
         "what is nic",
         "what does nic stand for",
-        "network identity credits",
         "network identity check",
         "rate nic",
         "rep dialog",
@@ -416,7 +415,7 @@
       "facts": [
         "The combined Identity tab is the default profile tab at /{user}; /{user}/identity is a legacy redirect.",
         "NIC is the 6529 network identity trust signal shown on profile identity surfaces.",
-        "App copy refers to NIC as Network Identity Credits in the FAQ and Network Identity Check in the profile identity header.",
+        "App copy expands NIC as Network Identity Check (D142) in both the About FAQ and the profile identity header.",
         "The Identity tab surfaces profile identity, REP behavior, NIC ratings, NIC statements, and activity log behavior where available.",
         "On mobile, a compact selector switches between Total Rep, NIC, and ID Statements without changing the profile URL.",
         "Grant REP keeps its compact category pills and existing search and selection behavior, including similarly named categories remaining separate and selectable.",
