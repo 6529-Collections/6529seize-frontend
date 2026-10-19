@@ -46,7 +46,7 @@ export default function NowMintingStatsGrid({
   const editionSize = isError
     ? t(locale, "home.nowMinting.stats.unavailable")
     : manifoldClaim &&
-      formatEditionSize(manifoldClaim).replace(/\s*\/\s*/, "/");
+      formatEditionSize(manifoldClaim).replace(" / ", "/");
   const mintPrice = isError
     ? t(locale, "home.nowMinting.stats.unavailable")
     : manifoldClaim && formatClaimCost(manifoldClaim);
