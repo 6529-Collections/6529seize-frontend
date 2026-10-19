@@ -21,6 +21,7 @@ import {
   getAiRecommendationText,
 } from "@/services/content-moderation/content-moderation-formatters";
 import {
+  MODERATION_CHECKS_QUERY_KEY,
   MODERATION_QUEUE_QUERY_KEY,
   SUSPENDED_MODERATION_PROFILES_QUERY_KEY,
 } from "@/services/content-moderation/content-moderation-query";
@@ -34,7 +35,6 @@ import PendingModerationChecks from "./checks/PendingModerationChecks";
 import { fetchModerationChecks } from "@/services/api/moderation-checks-api";
 import { ApiModerationCheckReviewStatusEnum } from "@/generated/models/ApiModerationCheck";
 import { useModerationReviewCounts } from "@/hooks/content-moderation/useModerationReviewCounts";
-import { MODERATION_CHECKS_QUERY_KEY } from "@/services/content-moderation/content-moderation-query";
 import ModerationCheckCounts from "./checks/ModerationCheckCounts";
 import {
   formatEvidence,

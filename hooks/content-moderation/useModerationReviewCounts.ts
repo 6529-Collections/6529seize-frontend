@@ -3,7 +3,7 @@ import { fetchModerationCounts } from "@/services/api/moderation-checks-api";
 import { MODERATION_CHECKS_QUERY_KEY } from "@/services/content-moderation/content-moderation-query";
 
 export function useModerationReviewCounts(
-  profileId: string | undefined,
+  profileId: string | null | undefined,
   enabled: boolean,
   openReportCount: number | undefined
 ) {
