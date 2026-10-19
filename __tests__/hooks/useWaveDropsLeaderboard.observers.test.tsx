@@ -1,5 +1,6 @@
 import { createDeferredPromise } from "@/__tests__/utils/deferredPromise";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { createGeneralQueryHandlers } from "@/components/react-query-wrapper/ReactQueryWrapper.generalHandlers";
 import type { ApiDropsLeaderboardPage } from "@/generated/models/ApiDropsLeaderboardPage";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
@@ -146,11 +147,14 @@ describe("useWaveDropsLeaderboard observer cleanup", () => {
   it("keeps the three-card homepage response separate from the full leaderboard", async () => {
     fetchLeaderboardMock.mockImplementation(async ({ params }) => ({
       ...populatedPage,
-      drops: Array.from({ length: Number(params["page_size"]) }, (_, index) => ({
-        ...drop,
-        id: `drop-${index}`,
-        serial_no: index + 1,
-      })),
+      drops: Array.from(
+        { length: Number(params["page_size"]) },
+        (_, index) => ({
+          ...drop,
+          id: `drop-${index}`,
+          serial_no: index + 1,
+        })
+      ),
     }));
     const { result } = renderHook(
       () => ({
@@ -264,4 +268,136 @@ describe("useWaveDropsLeaderboard observer cleanup", () => {
       expect(queryClient.getQueryCache().get(query.queryHash)).toBeUndefined();
     }
   );
+
+  it("keeps the homepage result after leaving it and the full leaderboard", async () => {
+    fetchLeaderboardMock.mockResolvedValue(populatedPage);
+    const home = renderHook(
+      () =>
+        useWaveDropsLeaderboard({
+          waveId: wave.id,
+          pageSize: 3,
+          retainOnUnmount: true,
+        }),
+      { wrapper }
+    );
+    await waitFor(() => expect(home.result.current.drops).toHaveLength(1));
+    home.unmount();
+
+    const full = renderHook(
+      () => useWaveDropsLeaderboard({ waveId: wave.id }),
+      { wrapper }
+    );
+    await waitFor(() => expect(full.result.current.drops).toHaveLength(1));
+    full.unmount();
+
+    const returnedHome = renderHook(
+      () =>
+        useWaveDropsLeaderboard({
+          waveId: wave.id,
+          pageSize: 3,
+          retainOnUnmount: true,
+        }),
+      { wrapper }
+    );
+    expect(returnedHome.result.current.drops[0]?.title).toBe(drop.title);
+    expect(returnedHome.result.current.isFetching).toBe(false);
+    expect(fetchLeaderboardMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps cards during a refresh and after that refresh fails", async () => {
+    fetchLeaderboardMock.mockResolvedValueOnce(populatedPage);
+    const home = renderHook(
+      () =>
+        useWaveDropsLeaderboard({
+          waveId: wave.id,
+          pageSize: 3,
+          retainOnUnmount: true,
+        }),
+      { wrapper }
+    );
+    await waitFor(() => expect(home.result.current.drops).toHaveLength(1));
+    const refresh = createDeferredPromise<ApiDropsLeaderboardPage>();
+    fetchLeaderboardMock.mockReturnValue(refresh.promise);
+    act(() => {
+      void home.result.current.refetch();
+    });
+    await waitFor(() => expect(home.result.current.isFetching).toBe(true));
+    expect(home.result.current.drops[0]?.title).toBe(drop.title);
+    await act(async () => {
+      refresh.reject(new Error("temporarily unavailable"));
+    });
+    await waitFor(() => expect(home.result.current.isError).toBe(true), {
+      timeout: 5_000,
+    });
+    expect(home.result.current.drops[0]?.title).toBe(drop.title);
+    expect(fetchLeaderboardMock).toHaveBeenCalledTimes(5);
+  });
+
+  it("still discards retained viewer data when authentication changes", async () => {
+    fetchLeaderboardMock.mockResolvedValueOnce(populatedPage);
+    const home = renderHook(
+      () =>
+        useWaveDropsLeaderboard({
+          waveId: wave.id,
+          pageSize: 3,
+          retainOnUnmount: true,
+        }),
+      { wrapper }
+    );
+    await waitFor(() => expect(home.result.current.drops).toHaveLength(1));
+    home.unmount();
+    createGeneralQueryHandlers(
+      queryClient,
+      jest.fn()
+    ).invalidateAuthSensitiveQueries();
+    fetchLeaderboardMock.mockResolvedValueOnce({ ...populatedPage, drops: [] });
+    const nextViewer = renderHook(
+      () =>
+        useWaveDropsLeaderboard({
+          waveId: wave.id,
+          pageSize: 3,
+          retainOnUnmount: true,
+        }),
+      { wrapper }
+    );
+    expect(nextViewer.result.current.drops).toEqual([]);
+    await waitFor(() =>
+      expect(nextViewer.result.current.isFetching).toBe(false)
+    );
+    expect(fetchLeaderboardMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("allows a slow homepage request to finish after 15 seconds", async () => {
+    jest.useFakeTimers();
+    try {
+      const pending = createDeferredPromise<ApiDropsLeaderboardPage>();
+      fetchLeaderboardMock.mockReturnValue(pending.promise);
+      const home = renderHook(
+        () =>
+          useWaveDropsLeaderboard({
+            waveId: wave.id,
+            pageSize: 3,
+            retainOnUnmount: true,
+          }),
+        { wrapper }
+      );
+      const signal = fetchLeaderboardMock.mock.calls[0]?.[0].signal;
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(20_000);
+      });
+      expect(home.result.current.isError).toBe(false);
+      expect(home.result.current.isFetching).toBe(true);
+      expect(signal?.aborted).toBe(false);
+      expect(fetchLeaderboardMock).toHaveBeenCalledTimes(1);
+      await act(async () => {
+        pending.resolve(populatedPage);
+        await jest.advanceTimersByTimeAsync(0);
+      });
+      expect(home.result.current.drops[0]?.title).toBe(drop.title);
+      expect(home.result.current.isFetching).toBe(false);
+      home.unmount();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 });

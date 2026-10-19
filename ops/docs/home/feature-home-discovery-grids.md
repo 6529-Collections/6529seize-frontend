@@ -33,7 +33,8 @@ why a section can disappear.
 
 1. `Boosted Drops` loads from the boosted feed:
    - While loading: section stays visible with `Loading...`.
-   - When data is ready: cards render in a responsive grid.
+   - When data is ready: cards render in a responsive grid. Card placeholders
+     can appear briefly while previews load; other home sections stay usable.
    - If the request fails or returns no cards: section is hidden.
 2. Users select a boosted card to open that drop in wave chat context.
 3. `Most active waves` loads hot waves:
