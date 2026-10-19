@@ -77,6 +77,9 @@ being created do not show the Share action.
 
 ## Common Scenarios
 
+- On a wave drop link, the browser tab keeps the linked drop's title after the
+  wave loads. Submission links show the submission title and author, such as
+  `TestIntern by @phoebeum`. Closing the drop restores the wave tab title.
 - `Open` keeps the current route and keeps existing query params.
 - `Open` is hidden for chat-type drops.
 - Temporary drops (`temp-*`) disable `Copy link`.

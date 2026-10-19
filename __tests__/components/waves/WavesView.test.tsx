@@ -6,6 +6,7 @@ jest.mock("@/hooks/useAuthenticatedContent", () => ({
   useAuthenticatedContent: () => ({ contentState: mockContentState }),
 }));
 jest.mock("next/navigation", () => ({
+  usePathname: () => "/waves",
   useSearchParams: () => new URLSearchParams(),
 }));
 

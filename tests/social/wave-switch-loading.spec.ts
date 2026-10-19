@@ -6,6 +6,7 @@ import {
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
 import { expectAxeClean } from "../support/a11yAssertions";
+import { gateSidebarHydration } from "../support/sidebarHydration";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 
 const SOURCE = "00000000-0000-4000-8000-000000000529";
@@ -20,6 +21,53 @@ useLocalSandboxMutationGuard(
 );
 test.afterEach(async ({ page }) => {
   await page.unrouteAll({ behavior: "wait" });
+});
+
+test("opens a public wave on a quiet chat frame before hydration", async ({
+  page,
+}, testInfo) => {
+  await page.route("**/api/open-graph**", (route) =>
+    route.fulfill({ json: {} })
+  );
+  const hydration = await gateSidebarHydration(page);
+  const loading = page
+    .getByTestId("wave-chat-loading")
+    .filter({ visible: true })
+    .first();
+  const preview = page.getByRole("region", {
+    name: SOURCE_NAME,
+    includeHidden: true,
+  });
+  try {
+    await page.goto(`/waves/${SOURCE}?tab=chat`, { waitUntil: "commit" });
+    await hydration.waitForDownloads();
+    await expect(loading).toBeVisible();
+    // The same semantic feed is in the server response, but must never be
+    // painted as a temporary alternate chat in a JavaScript-enabled browser.
+    await expect(
+      preview.getByRole("article", { includeHidden: true })
+    ).toHaveCount(1);
+    await expect(
+      preview.getByRole("link", { includeHidden: true })
+    ).toHaveAttribute("href", new RegExp(`/waves/${SOURCE}\\?drop=`));
+    await expect(preview).toBeHidden();
+    await expect(
+      loading.getByRole("heading", { name: SOURCE_NAME })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("wave-before-hydration.png"),
+    });
+  } finally {
+    hydration.release();
+  }
+  await expect(
+    page.getByRole("region", { name: "Wave chat file upload area" })
+  ).toBeVisible({ timeout: 60000 });
+  await expect(loading).toHaveCount(0);
+  await expect(
+    page.getByText("No waves in this collection yet", { exact: true })
+  ).toBeHidden();
 });
 
 async function installWaveList(page: Page, baseURL: string | undefined) {

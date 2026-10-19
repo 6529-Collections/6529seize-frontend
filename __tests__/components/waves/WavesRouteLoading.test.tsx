@@ -1,8 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import WavesRouteLoading from "@/components/waves/WavesRouteLoading";
 
+let mockPathname = "/waves/wave-1";
 let mockSearchParams = new URLSearchParams();
 jest.mock("next/navigation", () => ({
+  usePathname: () => mockPathname,
   useSearchParams: () => mockSearchParams,
 }));
 
@@ -21,5 +23,19 @@ it("keeps the wave loader for ordinary wave navigation", () => {
   mockSearchParams = new URLSearchParams();
   render(<WavesRouteLoading />);
   expect(screen.getByTestId("stream-route-loading-shell")).toBeInTheDocument();
+  expect(screen.getByTestId("wave-chat-loading")).toBeInTheDocument();
   expect(screen.queryByTestId("single-drop-loading")).not.toBeInTheDocument();
 });
+
+it.each(["/waves", "/waves/create", "/waves/wave-1/competitions"])(
+  "keeps %s on its own loading surface",
+  (pathname) => {
+    mockPathname = pathname;
+    mockSearchParams = new URLSearchParams();
+    render(<WavesRouteLoading />);
+    expect(
+      screen.getByTestId("stream-route-loading-shell")
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("wave-chat-loading")).not.toBeInTheDocument();
+  }
+);
