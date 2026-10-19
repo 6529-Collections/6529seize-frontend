@@ -3,7 +3,13 @@ import {
   useSeizeSettings,
 } from "@/contexts/SeizeSettingsContext";
 import { SeizeSettingsMode } from "@/types/enums";
-import { render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { render as pureRender } from "@testing-library/react/pure";
 
 jest.mock("@/services/6529api", () => ({ fetchUrl: jest.fn() }));
@@ -11,6 +17,52 @@ const { fetchUrl } = jest.requireMock("@/services/6529api");
 
 beforeEach(() => {
   fetchUrl.mockReset();
+});
+
+test("times out stalled settings and recovers through the existing reload action", async () => {
+  jest.useFakeTimers();
+  const consoleErrorSpy = jest
+    .spyOn(console, "error")
+    .mockImplementation(() => {});
+  fetchUrl.mockImplementationOnce(() => new Promise(() => {}));
+  function Consumer() {
+    const { isLoaded, isLoading, loadError, loadSeizeSettings } =
+      useSeizeSettings();
+    return (
+      <div>
+        <p>{isLoaded ? "Ready" : (loadError?.name ?? "Loading")}</p>
+        <button
+          disabled={isLoading}
+          onClick={() => void loadSeizeSettings().catch(() => undefined)}
+        >
+          Retry settings
+        </button>
+      </div>
+    );
+  }
+  try {
+    const view = render(
+      <SeizeSettingsProvider>
+        <Consumer />
+      </SeizeSettingsProvider>
+    );
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(15_000);
+    });
+    expect(screen.getByText("TimeoutError")).toBeInTheDocument();
+    expect(fetchUrl.mock.calls[0][1].signal.aborted).toBe(true);
+    expect(fetchUrl).toHaveBeenCalledTimes(1);
+    fetchUrl.mockResolvedValueOnce({ memes_wave_id: "recovered-wave" });
+    fireEvent.click(screen.getByRole("button", { name: "Retry settings" }));
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(0);
+    });
+    expect(screen.getByText("Ready")).toBeInTheDocument();
+    view.unmount();
+  } finally {
+    consoleErrorSpy.mockRestore();
+    jest.useRealTimers();
+  }
 });
 
 test("provides settings and helper", async () => {
@@ -57,7 +109,8 @@ test("provides settings and helper", async () => {
     ).toBeInTheDocument()
   );
   expect(fetchUrl).toHaveBeenCalledWith(
-    "https://api.test.6529.io/api/settings"
+    "https://api.test.6529.io/api/settings",
+    { signal: expect.any(AbortSignal) }
   );
 });
 
