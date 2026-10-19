@@ -396,6 +396,16 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       "Touch target geometry is mobile-only"
     );
     await gotoReady(page, "/waves");
+    // The server shell is replaced as the mobile list hydrates. Measure the
+    // interactive controls only after a data row confirms that it has mounted.
+    await expect(
+      page
+        .getByRole("region", {
+          name: /All recent waves list|Regular waves list/,
+        })
+        .getByRole("link")
+        .first()
+    ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
     const shortcuts = [
       page.getByRole("link", { name: "Profile Waves Feed", exact: true }),
       page.getByRole("button", { name: "Find a wave…", exact: true }),
