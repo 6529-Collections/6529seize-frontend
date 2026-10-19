@@ -437,50 +437,35 @@ describe("CreateWaveGroupInlinePanel", () => {
       const user = userEvent.setup();
       const onCreateGroup = jest.fn().mockResolvedValue(createdGroup);
       renderInlinePanel({ onCreateGroup });
-      await user.click(
-        screen.getByRole("button", { name: "Edit", exact: true })
-      );
+      await user.click(screen.getByRole("button", { name: "Edit" }));
       expect(screen.queryByTestId("identities-panel")).not.toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: "Identities", exact: true })
-      ).toHaveFocus();
+      expect(screen.getByRole("button", { name: "Identities" })).toHaveFocus();
       expect(
         screen.getByRole("group", { name: "Group criteria" })
       ).toBeVisible();
+      await user.click(screen.getByRole("button", { name: "Identities" }));
       await user.click(
-        screen.getByRole("button", { name: "Identities", exact: true })
+        screen.getByRole("button", { name: "include identity" })
       );
       await user.click(
-        screen.getByRole("button", { name: "include identity", exact: true })
-      );
-      await user.click(
-        screen.getByRole("button", { name: "exclude identity", exact: true })
+        screen.getByRole("button", { name: "exclude identity" })
       );
       await user.click(
         screen.getByRole("button", {
           name: "include EMMA wallets",
-          exact: true,
         })
       );
       await user.click(
-        screen.getByRole("button", { name: "exclude CSV wallets", exact: true })
+        screen.getByRole("button", { name: "exclude CSV wallets" })
       );
-      await user.click(
-        screen.getByRole("button", { name: "Back", exact: true })
-      );
+      await user.click(screen.getByRole("button", { name: "Back" }));
       expect(
         screen.getByRole("button", { name: "Identities Configured" })
       ).toHaveFocus();
       expect(screen.queryByTestId("identities-panel")).not.toBeInTheDocument();
-      await user.click(
-        screen.getByRole("button", { name: "Rep", exact: true })
-      );
-      await user.click(
-        screen.getByRole("button", { name: "set rep min", exact: true })
-      );
-      await user.click(
-        screen.getByRole("button", { name: "Back", exact: true })
-      );
+      await user.click(screen.getByRole("button", { name: "Rep" }));
+      await user.click(screen.getByRole("button", { name: "set rep min" }));
+      await user.click(screen.getByRole("button", { name: "Back" }));
       expect(
         screen.getByRole("button", { name: "Rep Configured" })
       ).toHaveFocus();
@@ -493,9 +478,7 @@ describe("CreateWaveGroupInlinePanel", () => {
       expect(
         screen.getByTestId("restored-excluded-identities")
       ).toHaveTextContent("0xDEF");
-      await user.click(
-        screen.getByRole("button", { name: "Back", exact: true })
-      );
+      await user.click(screen.getByRole("button", { name: "Back" }));
       await user.click(
         screen.getByRole("switch", { name: "Hide criteria and members" })
       );
@@ -519,9 +502,7 @@ describe("CreateWaveGroupInlinePanel", () => {
           })
         )
       );
-      expect(
-        screen.getByRole("button", { name: "Edit", exact: true })
-      ).toBeVisible();
+      expect(screen.getByRole("button", { name: "Edit" })).toBeVisible();
     }
   );
 
@@ -529,20 +510,14 @@ describe("CreateWaveGroupInlinePanel", () => {
     useMediaQueryMock.mockReturnValue(false);
     const user = userEvent.setup();
     renderInlinePanel();
-    await user.click(screen.getByRole("button", { name: "Edit", exact: true }));
-    await user.click(screen.getByRole("button", { name: "Rep", exact: true }));
-    await user.click(
-      screen.getByRole("button", { name: "set rep min", exact: true })
-    );
-    await user.click(
-      screen.getByRole("button", { name: "Cancel", exact: true })
-    );
-    await user.click(screen.getByRole("button", { name: "Edit", exact: true }));
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    await user.click(screen.getByRole("button", { name: "Rep" }));
+    await user.click(screen.getByRole("button", { name: "set rep min" }));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    expect(screen.getByRole("button", { name: "Rep" })).toBeVisible();
     expect(
-      screen.getByRole("button", { name: "Rep", exact: true })
-    ).toBeVisible();
-    expect(
-      screen.queryByRole("button", { name: "Back", exact: true })
+      screen.queryByRole("button", { name: "Back" })
     ).not.toBeInTheDocument();
     expect(screen.queryByTestId("rule-rep")).not.toBeInTheDocument();
   });

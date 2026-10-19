@@ -240,7 +240,6 @@ describe("CreateWaveInlineGroupXtdhGrant", () => {
       render(<TestEditor networkPresentation={networkPresentation} />);
       const selection = screen.getByRole("group", {
         name: "xTDH Grant Beneficiary",
-        exact: true,
       });
       expect(selection).not.toHaveFocus();
       expect(

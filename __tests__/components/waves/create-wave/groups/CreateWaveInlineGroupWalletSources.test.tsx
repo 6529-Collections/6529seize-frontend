@@ -234,17 +234,13 @@ describe("CreateWaveInlineGroupWalletSources", () => {
       { handle: "tester" },
       true
     );
+    expect(screen.getByRole("heading", { name: "EMMA" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "CSV file" })).toBeVisible();
     expect(
-      screen.getByRole("heading", { name: "EMMA", exact: true })
-    ).toBeVisible();
-    expect(
-      screen.getByRole("heading", { name: "CSV file", exact: true })
-    ).toBeVisible();
-    expect(
-      screen.queryByRole("button", { name: "EMMA", exact: true })
+      screen.queryByRole("button", { name: "EMMA" })
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "CSV file", exact: true })
+      screen.queryByRole("button", { name: "CSV file" })
     ).not.toBeInTheDocument();
     const upload = screen.getByLabelText(
       "Choose a CSV file of identities to exclude"
@@ -326,9 +322,7 @@ describe("CreateWaveInlineGroupWalletSources", () => {
       null,
       true
     );
-    expect(
-      screen.getByRole("heading", { name: "EMMA", exact: true })
-    ).toBeVisible();
+    expect(screen.getByRole("heading", { name: "EMMA" })).toBeVisible();
     expect(screen.getByRole("alert")).toBeVisible();
     expect(screen.getByRole("button", { name: "Try again" })).toBeVisible();
     expect(
