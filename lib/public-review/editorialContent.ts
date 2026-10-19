@@ -5,19 +5,24 @@ import path from "node:path";
 
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { getFrontendRoot } from "@/config/frontendRoot.server";
 import type { PublicReviewPageDefinition } from "@/lib/public-review/publicReviewTypes";
 import {
   getStreamReviewVersion,
   STREAM_REVIEW_SLUG,
 } from "@/lib/public-review/streamReviewDefinition";
 
-const STREAM_VERSIONS_ROOT = path.resolve(
-  process.cwd(),
-  "content",
-  "public-reviews",
-  "6529-stream",
-  "versions"
-);
+// Resolved on each load, so the desktop app's DESKTOP_RENDERER_DIR applies
+// whenever it is set relative to this module's import.
+function getStreamVersionsRoot(): string {
+  return path.resolve(
+    getFrontendRoot(),
+    "content",
+    "public-reviews",
+    "6529-stream",
+    "versions"
+  );
+}
 
 export class PublicReviewEditorialContentError extends Error {
   public constructor(message: string, options?: ErrorOptions) {
@@ -38,7 +43,7 @@ export async function loadStreamEditorialContent(
   }
 
   const editorialRoot = path.resolve(
-    STREAM_VERSIONS_ROOT,
+    getStreamVersionsRoot(),
     version,
     "editorial"
   );
