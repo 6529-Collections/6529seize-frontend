@@ -4226,12 +4226,16 @@
       "facts": [
         "Wave leaderboard docs cover winners, my votes, top voters, sales, sorting, price filters, decision timelines, and drop eligibility states.",
         "Leaderboard availability depends on the wave type and configuration.",
-        "Use the selected competition’s main Leaderboard tab to inspect its entries and ranking."
+        "Use the selected competition’s main Leaderboard tab to inspect its entries and ranking.",
+        "Full wave leaderboard list, grid, and Memes gallery views update scores and ranks live while preserving the visible artwork's position. During touch or momentum scrolling, scores keep updating and card reordering waits until scrolling settles."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
       "tags": ["waves", "leaderboard"],
-      "source_refs": ["ops/docs/waves/leaderboard/README.md"]
+      "source_refs": [
+        "ops/docs/waves/leaderboard/README.md",
+        "ops/docs/waves/leaderboard/feature-drop-states.md"
+      ]
     },
     {
       "id": "waves.memes-submission",
