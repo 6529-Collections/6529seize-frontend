@@ -3090,6 +3090,268 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     expect(sandbox.requests).toHaveLength(0);
   });
 
+  for (const app of [false, true]) {
+    for (const view of ["List view", "Grid view"]) {
+      test(`keeps live Main Stage artwork anchored after ranking refresh (${app ? "app" : "web"}, ${view})`, async ({
+        page,
+      }, testInfo) => {
+        test.skip(
+          app && testInfo.project.name !== "web-mobile-chromium",
+          "Native branch simulation uses the mobile viewport."
+        );
+        if (app)
+          await installSurfaceSimulation(
+            page.context(),
+            "capacitor-android-sim",
+            process.env["PLAYWRIGHT_BASE_URL"]
+          );
+        const sockets: WebSocketRoute[] = [];
+        await page.routeWebSocket(
+          (url) =>
+            url.port ===
+            new URL(getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"]))
+              .port,
+          (socket) => {
+            sockets.push(socket);
+            socket.onMessage((message) => {
+              const frame = JSON.parse(String(message)) as { type?: string };
+              if (frame.type === "AUTHENTICATE")
+                socket.send(
+                  JSON.stringify({ type: "AUTHENTICATED", data: {} })
+                );
+              if (frame.type === "SYNC_NOTIFICATION_IDENTITIES")
+                socket.send(
+                  JSON.stringify({
+                    type: "NOTIFICATION_IDENTITIES_SYNCED",
+                    data: { profile_ids: [PROFILE] },
+                  })
+                );
+            });
+          }
+        );
+        const sandbox = await installCompetitionApi(
+          page,
+          false,
+          true,
+          MEMES_WAVE
+        );
+        sandbox.onlyCompetition("alpha");
+        await sandbox.legacyPrimary("alpha");
+        const response = await page.request.get(
+          `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${MEMES_WAVE}/drops`
+        );
+        const fixture = await response.json();
+        fixture.wave.id = MEMES_WAVE;
+        let order = Array.from({ length: 80 }, (_, index) => index);
+        let refreshed = false;
+        let leaderboardReads = 0;
+        await page.route(
+          `**/api/v2/waves/${MEMES_WAVE}/leaderboard*`,
+          (route) => {
+            leaderboardReads++;
+            const pageNumber = Number(
+              new URL(route.request().url()).searchParams.get("page") ?? 1
+            );
+            return route.fulfill({
+              json: {
+                wave: fixture.wave,
+                drops: order
+                  .slice((pageNumber - 1) * 50, pageNumber * 50)
+                  .map((index) => ({
+                    ...fixture.drops[0],
+                    id: `00000000-0000-4000-8000-${String(index + 9000).padStart(12, "0")}`,
+                    serial_no: index + 9000,
+                    title: `Live artwork ${index}`,
+                    media: [
+                      {
+                        url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aS5cAAAAASUVORK5CYII=",
+                        mime_type: "image/png",
+                      },
+                    ],
+                    drop_type: "SUBMISSION",
+                    submission_context: {
+                      status: "ACTIVE",
+                      has_metadata: false,
+                      voting: {
+                        is_open: true,
+                        total_votes_given: refreshed ? 900000 : 1000,
+                        current_calculated_vote: refreshed ? 900000 : 1000,
+                        predicted_final_vote: refreshed ? 900000 : 1000,
+                        voters_count: 1,
+                        place: order.indexOf(index) + 1,
+                        context_profile_context: {
+                          can_vote: true,
+                          min: -1000,
+                          max: 1000,
+                          current: 0,
+                        },
+                      },
+                    },
+                  })),
+                count: 80,
+                page: pageNumber,
+                next: pageNumber === 1,
+              },
+            });
+          }
+        );
+        await page.goto(
+          `/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard`
+        );
+        await page.getByRole("tab", { name: view, exact: true }).click();
+        const list = page.getByRole("list", {
+          name: "Leaderboard drops",
+          exact: true,
+        });
+        await expect(list).toBeVisible({ timeout: 30000 });
+        const scroller = page
+          .getByRole("list", { name: "Leaderboard drops", exact: true })
+          .locator(
+            'xpath=ancestor::div[contains(@class,"tw-overflow-y-auto")][1]'
+          );
+        await scroller.evaluate((element) =>
+          element.scrollTo({ top: element.scrollHeight, behavior: "instant" })
+        );
+        if (view === "Grid view")
+          await page
+            .getByRole("button", { name: "Load more drops", exact: true })
+            .click();
+        await expect.poll(() => leaderboardReads).toBeGreaterThanOrEqual(2);
+        await expect(list.getByRole("listitem").first()).toHaveAttribute(
+          "aria-setsize",
+          "80"
+        );
+        await scroller.evaluate((element) => {
+          element.setAttribute("data-scroll-visit", "original");
+          element.scrollTo({
+            top: element.scrollHeight * 0.6,
+            behavior: "instant",
+          });
+        });
+        await expect
+          .poll(() => scroller.evaluate((element) => element.scrollTop))
+          .toBeGreaterThan(1000);
+        const readAnchor = () =>
+          list.evaluate((element) => {
+            const container = element.closest(".tw-overflow-y-auto")!;
+            const viewport = container.getBoundingClientRect();
+            const card = Array.from(
+              element.querySelectorAll<HTMLElement>(
+                "[data-leaderboard-drop-id]"
+              )
+            ).find((candidate) => {
+              const bounds = candidate.getBoundingClientRect();
+              return (
+                bounds.bottom > viewport.top + 100 &&
+                bounds.top < viewport.bottom - 100
+              );
+            });
+            return card
+              ? {
+                  id: card.dataset["leaderboardDropId"]!,
+                  offset: card.getBoundingClientRect().top - viewport.top,
+                }
+              : null;
+          });
+        let currentAnchor = await readAnchor();
+        await expect
+          .poll(async () => {
+            currentAnchor = await readAnchor();
+            return currentAnchor !== null;
+          })
+          .toBe(true);
+        const anchor = currentAnchor;
+        if (!anchor) throw new Error("Visible artwork anchor missing");
+        await list.evaluate((element) =>
+          element.setAttribute("data-list-visit", "original")
+        );
+        const anchorCard = page
+          .getByRole("list", { name: "Leaderboard drops", exact: true })
+          .locator(`[data-leaderboard-drop-id="${anchor.id}"]`);
+        const originalPosition = await anchorCard.getAttribute(
+          "data-leaderboard-logical-index"
+        );
+        const readsBefore = leaderboardReads;
+        const touch = app ? await page.context().newCDPSession(page) : null;
+        if (touch) {
+          await scroller.evaluate((element) => {
+            for (const type of ["touchstart", "touchend", "touchcancel"])
+              element.addEventListener(
+                type,
+                () => element.setAttribute("data-last-touch", type),
+                { passive: true }
+              );
+          });
+          const box = await scroller.boundingBox();
+          await touch.send("Input.dispatchTouchEvent", {
+            type: "touchStart",
+            touchPoints: [{ x: box!.x + 2, y: box!.y + 200, id: 1 }],
+          });
+          await expect(scroller).toHaveAttribute(
+            "data-last-touch",
+            "touchstart"
+          );
+        }
+        order = [...order.slice(12), ...order.slice(0, 12)];
+        refreshed = true;
+        await expect.poll(() => sockets.length).toBeGreaterThan(0);
+        sockets[sockets.length - 1]!.send(
+          JSON.stringify({
+            type: "COMPETITION_UPDATE",
+            data: {
+              event_id: "live-ranking",
+              event_version: 1,
+              event_type: "COMPETITION_LEADERBOARD_UPDATED",
+              wave_id: MEMES_WAVE,
+              competition_id: "alpha",
+            },
+          })
+        );
+        await expect.poll(() => leaderboardReads).toBeGreaterThan(readsBefore);
+        await expect(anchorCard).toContainText("900,000");
+        await expect(scroller).toHaveAttribute("data-scroll-visit", "original");
+        await expect(list).toHaveAttribute("data-list-visit", "original");
+        if (touch) {
+          await expect(scroller).toHaveAttribute(
+            "data-last-touch",
+            "touchstart"
+          );
+          await expect(anchorCard).toHaveAttribute(
+            "data-leaderboard-logical-index",
+            originalPosition!
+          );
+          await touch.send("Input.dispatchTouchEvent", {
+            type: "touchEnd",
+            touchPoints: [],
+          });
+          await touch.detach();
+        }
+        await expect(anchorCard).not.toHaveAttribute(
+          "data-leaderboard-logical-index",
+          originalPosition!
+        );
+        await expect
+          .poll(() =>
+            anchorCard.evaluate((element) => {
+              const container = element.closest(".tw-overflow-y-auto")!;
+              return (
+                element.getBoundingClientRect().top -
+                container.getBoundingClientRect().top
+              );
+            })
+          )
+          .toBeCloseTo(anchor.offset, 0);
+        await expect(scroller).toHaveAttribute("data-scroll-visit", "original");
+        await page.screenshot({
+          path: testInfo.outputPath(
+            `live-scroll-${app ? "app" : "web"}-${view.split(" ")[0]}.png`
+          ),
+        });
+        expect(sandbox.requests).toHaveLength(0);
+      });
+    }
+  }
+
   test("creates a chat-only hub with no implicit competition", async ({
     page,
   }) => {
