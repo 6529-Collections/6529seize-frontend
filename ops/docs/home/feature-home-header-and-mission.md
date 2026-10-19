@@ -27,11 +27,16 @@ sections:
 
 1. Open `/`.
 2. The header shows:
-   - Label: `6529`
-   - Headline: `Building a decentralized network state`
-3. Logged-out visitors see two actions beneath the main headline:
+   - Brand label: `6529`, at 12px with medium weight and subtle letter spacing
+   - Left-aligned headline: `Building a decentralized network state`, with
+     `network state` on a separate line in the same color
+3. Logged-out visitors see two actions beneath the main headline, aligned with
+   its left edge:
    - `Start here`, which opens `/join-6529`
    - `Connect wallet`, which opens the wallet connection flow
+   - Both actions keep the same rounded corners at every breakpoint. Below the
+     medium breakpoint, they share an equal-width row with 48px touch targets;
+     larger layouts use 44px buttons at the left edge.
 4. The latest-drop slot follows the newcomer actions directly.
 5. A heart shortcut is visible on `/`:
    - Larger layouts: fixed near the top-right of the hero area
@@ -40,10 +45,15 @@ sections:
    - Tooltip/title: `Network health`
 6. The latest-drop slot resolves independently.
 7. Below that slot, the mission block renders with:
-   - Heading: `6529 is a network society`
-   - Supporting mission paragraph
-   - Uppercase line: `The long-term goal is nation-scale positive impact.`
-   - Quote-card region labeled `Mission statement`
+   - Subtle blue-grey radial background glow
+   - Heading: `6529 is a network society`, with medium weight and muted color
+   - Muted mission paragraph, left-aligned at every screen size
+   - Muted uppercase line: `The long-term goal is nation-scale positive impact.`,
+     introduced by a green dot
+   - Supporting region labeled `Mission statement`, with Montserrat text in a
+     rounded box with a faint border and background. It is vertically centered
+     beside the heading, paragraph, and goal on desktop, and sits below the goal
+     on smaller screens.
 8. Selecting the heart icon opens `/network/health`.
 
 ## Common Scenarios
@@ -58,7 +68,10 @@ sections:
 
 ## Edge Cases
 
-- On reduced-motion settings, heart animation is disabled.
+- The desktop homepage health shortcut stays still, with a subtle colour change
+  on hover and a visible keyboard-focus ring.
+- Action arrows move slightly on hover or keyboard focus. Reduced-motion
+  settings keep arrows still and make colour changes immediate.
 - While wallet state is initializing or connecting, the page does not assume
   the visitor is logged out. The newcomer actions appear once that state
   resolves.

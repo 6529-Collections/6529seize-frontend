@@ -15,6 +15,10 @@ details, including deleted-post and missing-context notices. Needs review is the
 default queue for labeled user reports and automated checks, with a shared
 summary/tab total and a compatible older open-reports link.
 
+The `home.overview` record explains the Coming up mobile swipe row, keyboard
+navigation through card links, tablet/desktop grid, and drop, profile and wave
+destinations.
+
 The `waves.drop.editing` record covers author-only editing, the normal edit
 window, and unlimited editing of the wave's current pinned description drop.
 
