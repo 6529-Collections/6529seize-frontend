@@ -25,10 +25,10 @@ export default function NowMintingStatsGrid({
   floorPrice,
 }: NowMintingStatsGridProps) {
   const locale = useBrowserLocale();
-  const { claim: manifoldClaim } = useDropForgeManifoldClaim(nftId);
+  const { claim: manifoldClaim, isError } = useDropForgeManifoldClaim(nftId);
   const { contract } = useDropForgeMintingConfig();
   const status = manifoldClaim?.status;
-  const isStatusLoading = !manifoldClaim;
+  const isStatusLoading = !manifoldClaim && !isError;
 
   const { connectedProfile } = useAuth();
   const { balance, isLoading: isBalanceLoading } = useNftBalance({
@@ -37,15 +37,19 @@ export default function NowMintingStatsGrid({
     tokenId: nftId,
   });
 
-  const statusLabel = manifoldClaim
-    ? formatClaimStatus(manifoldClaim)
-    : undefined;
-  const statusTone = manifoldClaim?.isDropComplete ? "ended" : status;
+  const statusLabel = isError
+    ? t(locale, "home.nowMinting.stats.unavailable")
+    : manifoldClaim && formatClaimStatus(manifoldClaim);
+  const claimStatusTone = manifoldClaim?.isDropComplete ? "ended" : status;
+  const statusTone = isError ? undefined : claimStatusTone;
 
-  const editionSize = manifoldClaim
-    ? formatEditionSize(manifoldClaim).replace(/\s*\/\s*/, "/")
-    : undefined;
-  const mintPrice = manifoldClaim ? formatClaimCost(manifoldClaim) : undefined;
+  const editionSize = isError
+    ? t(locale, "home.nowMinting.stats.unavailable")
+    : manifoldClaim &&
+      formatEditionSize(manifoldClaim).replace(" / ", "/");
+  const mintPrice = isError
+    ? t(locale, "home.nowMinting.stats.unavailable")
+    : manifoldClaim && formatClaimCost(manifoldClaim);
 
   const balanceTooltip =
     balance > 0

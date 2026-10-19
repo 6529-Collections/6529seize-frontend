@@ -143,6 +143,30 @@ describe("useWaveDropsLeaderboard observer cleanup", () => {
     queryClient.clear();
   });
 
+  it("keeps the three-card homepage response separate from the full leaderboard", async () => {
+    fetchLeaderboardMock.mockImplementation(async ({ params }) => ({
+      ...populatedPage,
+      drops: Array.from({ length: Number(params["page_size"]) }, (_, index) => ({
+        ...drop,
+        id: `drop-${index}`,
+        serial_no: index + 1,
+      })),
+    }));
+    const { result } = renderHook(
+      () => ({
+        home: useWaveDropsLeaderboard({ waveId: wave.id, pageSize: 3 }),
+        full: useWaveDropsLeaderboard({ waveId: wave.id }),
+      }),
+      { wrapper }
+    );
+
+    await waitFor(() => {
+      expect(result.current.home.drops).toHaveLength(3);
+      expect(result.current.full.drops).toHaveLength(50);
+    });
+    expect(fetchLeaderboardMock).toHaveBeenCalledTimes(2);
+  });
+
   it.each([
     {
       name: "the same query key",
