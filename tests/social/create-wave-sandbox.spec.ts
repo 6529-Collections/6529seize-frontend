@@ -1,4 +1,6 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
+import { installGroupGrantFixtures } from "../support/groupGrantFixtures";
+import { installSurfaceSimulation } from "../support/surfaceSimulation";
 
 import {
   expect,
@@ -354,6 +356,157 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("keeps native Create Wave scrolling after opening Identities", async ({
+    page,
+    baseURL,
+    isMobile,
+    browserName,
+  }) => {
+    test.skip(
+      !isMobile || browserName !== "chromium",
+      "Trusted swipe input is covered by the mobile Chromium project."
+    );
+    await page.setViewportSize({ width: 390, height: 640 });
+    await installSurfaceSimulation(
+      page.context(),
+      "capacitor-ios-sim",
+      baseURL
+    );
+    await gotoCreateWave(page);
+    const flow = page
+      .getByLabel(/Wave Name/)
+      .locator("xpath=ancestor::*[@data-flow-title]/div[1]");
+    const initialBounds = await flow.boundingBox();
+    await openOptionalSettings(page);
+    const access = page.getByRole("group", {
+      name: "Who can access this wave",
+      exact: true,
+    });
+    await access.getByRole("button", { name: "Edit", exact: true }).tap();
+    await access.getByRole("button", { name: /^Identities/ }).tap();
+    await expect(
+      access.getByRole("region", { name: "Identities", exact: true })
+    ).toBeFocused();
+    const bounds = await flow.boundingBox();
+    expect(bounds!.y).toBeCloseTo(initialBounds!.y, 0);
+    const before = await flow.evaluate((element) => element.scrollTop);
+    await swipeWaveForm(
+      page,
+      bounds!.x + bounds!.width / 2,
+      bounds!.y + bounds!.height * 0.65,
+      -200
+    );
+    await expect
+      .poll(() => flow.evaluate((element) => element.scrollTop))
+      .toBeGreaterThan(before + 50);
+    const optional = page.getByRole("button", { name: /^Optional settings/ });
+    await optional.tap();
+    await expect(optional).toHaveAttribute("aria-expanded", "false");
+    const collapsed = await flow.evaluate((element) => element.scrollTop);
+    await swipeWaveForm(
+      page,
+      bounds!.x + bounds!.width / 2,
+      bounds!.y + 100,
+      200
+    );
+    await expect
+      .poll(() => flow.evaluate((element) => element.scrollTop))
+      .toBeLessThan(collapsed - 50);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  for (const surface of ["modal", "native"] as const) {
+    test(`keeps a selected xTDH grant in view after a long list (${surface})`, async ({
+      page,
+      baseURL,
+      isMobile,
+    }) => {
+      test.skip(
+        surface === "native" && !isMobile,
+        "Native layout uses the mobile project."
+      );
+      if (isMobile) await page.setViewportSize({ width: 390, height: 640 });
+      await installGroupGrantFixtures(page);
+      if (surface === "native") {
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          baseURL
+        );
+        await gotoCreateWave(page);
+      } else {
+        await installExternalDataFixtures(page);
+        await page.goto("/waves?create=wave", {
+          waitUntil: "domcontentloaded",
+        });
+        await waitForRouteReady(page);
+        await expect(
+          page.getByRole("heading", { name: "Create Wave", exact: true })
+        ).toBeVisible();
+        await dismissNextDevTools(page);
+      }
+      const flow = page
+        .getByLabel(/Wave Name/)
+        .locator("xpath=ancestor::*[@data-flow-title]/div[1]");
+      await openOptionalSettings(page);
+      const access = page.getByRole("group", {
+        name: "Who can access this wave",
+        exact: true,
+      });
+      await access.getByRole("button", { name: "Edit", exact: true }).click();
+      await openGroupCriterion(access, "xTDH Grant");
+      const selection = access.getByRole("group", {
+        name: "xTDH Grant Beneficiary",
+        exact: true,
+      });
+      const cards = selection.getByRole("button", {
+        name: /Scroll collection /,
+      });
+      await expect(cards).toHaveCount(20);
+      await selection
+        .getByRole("button", { name: "Load more", exact: true })
+        .click();
+      await expect(cards).toHaveCount(22);
+      const lastCard = cards
+        .last()
+        .getByText("Scroll collection 22", { exact: true });
+      await lastCard.scrollIntoViewIfNeeded();
+      await expect(
+        selection.getByText("xTDH Grant Beneficiary", { exact: true })
+      ).not.toBeInViewport();
+      const beforeSelectionBounds = await flow.boundingBox();
+      await lastCard.click();
+      await expect(selection).toBeFocused();
+      await expect(
+        selection.getByText("Scroll collection 22", { exact: true })
+      ).toBeInViewport({ ratio: 1 });
+      await expect(
+        selection.getByRole("textbox", { name: "Collection name" })
+      ).toHaveCount(0);
+      expect((await flow.boundingBox())!.y).toBeCloseTo(
+        beforeSelectionBounds!.y,
+        0
+      );
+
+      await selection
+        .getByRole("button", { name: "Change grant", exact: true })
+        .click();
+      await cards.last().scrollIntoViewIfNeeded();
+      // Keyboard activation of the same grant must also restore a stable focus target.
+      await cards.last().press("Enter");
+      await expect(selection).toBeFocused();
+      await expect(
+        selection.getByText("Scroll collection 22", { exact: true })
+      ).toBeInViewport({ ratio: 1 });
+      await selection
+        .getByRole("button", { name: "Remove grant", exact: true })
+        .click();
+      await expect(cards).toHaveCount(22);
+      await expectNoHorizontalOverflow(page);
+      await expectNoUnsafeSandboxMutations(baseURL);
+    });
+  }
+
   test("scrolls the wave form with the pointer inside Admins", async ({
     page,
     baseURL,
@@ -376,23 +529,19 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       exact: true,
     });
     const choices = criteria.getByRole("button");
-    const desktopCriteria = await page.evaluate(
-      () => window.matchMedia("(min-width: 1024px)").matches
-    );
+    const desktopCriteria = !(await usesMobileGroupCriteria(page));
     const positions = await choices.evaluateAll((buttons) =>
       buttons.map((button) => {
         const bounds = button.getBoundingClientRect();
         return { x: bounds.x, y: bounds.y };
       })
     );
-    const alignedPositions = positions.map((position) =>
-      desktopCriteria ? position.x : position.y
-    );
+    const alignedPositions = positions.map((position) => position.x);
     expect(
       Math.max(...alignedPositions) - Math.min(...alignedPositions)
     ).toBeLessThan(1);
+    expect(positions.at(-1)!.y).toBeGreaterThan(positions[0]!.y);
     if (desktopCriteria) {
-      expect(positions.at(-1)!.y).toBeGreaterThan(positions[0]!.y);
       const criteriaBounds = await criteria.boundingBox();
       const editorBounds = await admins
         .getByRole("region", { name: "Identities", exact: true })
@@ -413,6 +562,36 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       expect(horizontalScroll.left).toBeGreaterThan(0);
     }
     await choices.first().focus();
+    if (!desktopCriteria) {
+      await choices.first().press("Enter");
+      await expect(
+        admins.getByRole("button", { name: "Back", exact: true })
+      ).toBeInViewport({ ratio: 1 });
+      const backBounds = await admins
+        .getByRole("button", { name: "Back", exact: true })
+        .boundingBox();
+      const cancel = admins.getByRole("button", {
+        name: "Cancel",
+        exact: true,
+      });
+      await expect(cancel).toBeInViewport({ ratio: 1 });
+      const cancelBounds = await cancel.boundingBox();
+      expect(backBounds).not.toBeNull();
+      expect(cancelBounds).not.toBeNull();
+      expect(cancelBounds!.x).toBeGreaterThan(
+        backBounds!.x + backBounds!.width
+      );
+      expect(cancelBounds!.y + cancelBounds!.height / 2).toBeCloseTo(
+        backBounds!.y + backBounds!.height / 2,
+        0
+      );
+      await expect(
+        admins.getByRole("region", { name: "Identities", exact: true })
+      ).toBeFocused();
+      await admins.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(choices.first()).toBeFocused();
+      await choices.first().press("Enter");
+    }
     const included = admins.getByRole("tab", { name: "Included", exact: true });
     await included.scrollIntoViewIfNeeded();
     const scrollPosition = () =>
@@ -445,6 +624,156 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("keeps identity imports available in distinct mobile sections", async ({
+    page,
+    baseURL,
+  }) => {
+    await gotoCreateWave(page);
+    await openOptionalSettings(page);
+    const access = page.getByRole("group", {
+      name: "Who can access this wave",
+      exact: true,
+    });
+    await access.getByRole("button", { name: "Edit", exact: true }).click();
+    await openGroupCriterion(access, "Identities");
+    const mobile = await usesMobileGroupCriteria(page);
+    const emma = access.getByRole("heading", { name: "EMMA", exact: true });
+    const csv = access.getByRole("heading", { name: "CSV file", exact: true });
+    const search = access.getByRole("textbox", {
+      name: "Search allowlists",
+      exact: true,
+    });
+    await expect(emma).toBeVisible();
+    await expect(csv).toBeVisible();
+    await expect(search).toBeVisible();
+    await expect(
+      access.getByRole("button", { name: "EMMA", exact: true })
+    ).toHaveCount(0);
+    await expect(
+      access.getByRole("button", { name: "CSV file", exact: true })
+    ).toHaveCount(0);
+    const emmaBounds = await emma.evaluate((el) =>
+      el.closest("section")!.getBoundingClientRect().toJSON()
+    );
+    const csvBounds = await csv.evaluate((el) =>
+      el.closest("section")!.getBoundingClientRect().toJSON()
+    );
+    const identityModes = access.getByRole("tablist", {
+      name: "Identity treatment",
+    });
+    const modesBounds = await identityModes.boundingBox();
+    if (mobile) {
+      expect(modesBounds!.width).toBeCloseTo(emmaBounds.width, 0);
+      const includedBounds = await identityModes
+        .getByRole("tab", { name: "Included", exact: true })
+        .boundingBox();
+      const excludedBounds = await identityModes
+        .getByRole("tab", { name: "Excluded", exact: true })
+        .boundingBox();
+      expect(includedBounds!.width).toBeCloseTo(excludedBounds!.width, 0);
+      expect(excludedBounds!.x + excludedBounds!.width).toBeCloseTo(
+        modesBounds!.x + modesBounds!.width - 5,
+        0
+      );
+      expect(
+        await access.evaluate((el) => getComputedStyle(el).paddingLeft)
+      ).toBe("0px");
+      expect(csvBounds.top).toBeGreaterThan(emmaBounds.bottom);
+      expect(csvBounds.left).toBeCloseTo(emmaBounds.left, 0);
+    } else {
+      expect(modesBounds!.width).toBeLessThan(emmaBounds.width);
+      expect(csvBounds.left).toBeGreaterThan(emmaBounds.right);
+      expect(csvBounds.top).toBeCloseTo(emmaBounds.top, 0);
+    }
+    await expect(
+      access.getByRole("heading", {
+        name: "Find an identity to include",
+        exact: true,
+      })
+    ).toBeVisible();
+    await expect(
+      access.getByText("No identities are explicitly included.", {
+        exact: true,
+      })
+    ).toHaveCount(0);
+    await access.getByRole("tab", { name: "Excluded", exact: true }).click();
+    await expect(
+      access.getByRole("heading", {
+        name: "Find an identity to exclude",
+        exact: true,
+      })
+    ).toBeVisible();
+    await expect(
+      access.getByRole("textbox", {
+        name: "Find an identity to exclude",
+        exact: true,
+      })
+    ).toHaveAttribute("placeholder", "Search identities to exclude...");
+    await expect(
+      access.getByText("No identities are explicitly excluded.", {
+        exact: true,
+      })
+    ).toHaveCount(0);
+    await expect(
+      access.getByText("No allowlist added.", { exact: true })
+    ).toHaveCount(0);
+    await expect(
+      access.getByText("No CSV file added.", { exact: true })
+    ).toHaveCount(0);
+    await access.getByRole("tab", { name: "Included", exact: true }).click();
+    if (mobile) {
+      const summary = page
+        .getByRole("group", { name: "Who can access this wave", exact: true })
+        .locator("[data-group-criteria-summary]");
+      const uploadBounds = await access
+        .getByLabel("Choose a CSV file of identities to include")
+        .boundingBox();
+      const summaryBounds = await summary.boundingBox();
+      expect(summaryBounds!.y).toBeGreaterThan(
+        uploadBounds!.y + uploadBounds!.height
+      );
+      expect(
+        await summary.evaluate((element) => ({
+          background: getComputedStyle(element).backgroundColor,
+          borderWidth: getComputedStyle(element).borderTopWidth,
+        }))
+      ).toEqual({ background: "rgb(28, 28, 33)", borderWidth: "0px" });
+      await summary.scrollIntoViewIfNeeded();
+      await expect(summary).toBeInViewport({ ratio: 1 });
+    }
+    const upload = access.getByLabel(
+      "Choose a CSV file of identities to include"
+    );
+    await upload.setInputFiles({
+      name: "members.csv",
+      mimeType: "text/csv",
+      buffer: Buffer.from(`${SANDBOX_WALLET}\n${SANDBOX_WALLET}`),
+    });
+    await expect(access.getByText(/^1 identity added/)).toBeVisible();
+    await expect(search).toBeVisible();
+    await expect(
+      access.getByText("members.csv", { exact: true })
+    ).toBeVisible();
+    await expect(
+      access.getByText("1 explicitly included user", { exact: true })
+    ).toBeVisible();
+    await access
+      .getByRole("button", { name: "Remove CSV file", exact: true })
+      .click();
+    await expect(access.getByText("members.csv", { exact: true })).toHaveCount(
+      0
+    );
+    // Removing the import preserves the same wallet added through Include me.
+    await expect(
+      access.getByRole("button", { name: /Remove playwright, wallet/ })
+    ).toBeVisible();
+    await expect(
+      access.getByText("1 explicitly included user", { exact: true })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("creates, attaches, and restores a rule-based access group", async ({
     baseURL,
     page,
@@ -460,17 +789,45 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       name: "Who can access this wave",
     });
     await accessGroup.getByRole("button", { name: "Edit" }).click();
-    await expect(accessGroup.getByText("Before editing")).toBeVisible();
+    await expect(accessGroup.getByText("Before editing")).toHaveCount(0);
+    await expect(accessGroup.getByText("After editing")).toHaveCount(0);
+    await openGroupCriterion(accessGroup, "Identities");
+    await expect(accessGroup.getByText("No allowlist added.")).toHaveCount(0);
+    await expect(accessGroup.getByText("No CSV file added.")).toHaveCount(0);
+    await expect(
+      accessGroup.getByRole("heading", { name: "Find an identity to include" })
+    ).toBeVisible();
+    await expect(
+      accessGroup.getByRole("textbox", { name: "Find an identity to include" })
+    ).toBeVisible();
+    await expect(
+      accessGroup.getByRole("textbox", { name: "Find an identity to include" })
+    ).toHaveAttribute("placeholder", "Search identities to include...");
     await page
       .getByRole("button", { name: /Customize other permissions/ })
       .click();
     await expect(
       accessGroup.getByRole("region", { name: "Identities", exact: true })
     ).toBeVisible();
-    await accessGroup
-      .getByRole("button", { name: "Level", exact: true })
-      .click();
+    await openGroupCriterion(accessGroup, "Level");
     await accessGroup.getByLabel("Level at least").fill("3");
+    if (await usesMobileGroupCriteria(page)) {
+      await accessGroup
+        .getByRole("button", { name: "Back", exact: true })
+        .click();
+      await expect(
+        accessGroup.getByRole("button", {
+          name: "Level Configured",
+          exact: true,
+        })
+      ).toBeFocused();
+      await openGroupCriterion(accessGroup, "Identities");
+      await expect(
+        accessGroup.getByRole("button", { name: /Remove playwright, wallet/ })
+      ).toBeVisible();
+      await openGroupCriterion(accessGroup, "Level");
+      await expect(accessGroup.getByLabel("Level at least")).toHaveValue("3");
+    }
     await page.getByRole("heading", { name: "Access", exact: true }).click();
     await expect(accessGroup.getByLabel("Level at least")).toHaveValue("3");
     await expect(
@@ -488,10 +845,16 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await accessGroup
       .getByRole("button", { name: "Edit", exact: true })
       .click();
+    await openGroupCriterion(accessGroup, "Identities");
     await expect(
       accessGroup.getByRole("button", { name: /Remove playwright, wallet/ })
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
+    if (await usesMobileGroupCriteria(page)) {
+      await accessGroup
+        .getByRole("button", { name: "Back", exact: true })
+        .click();
+    }
     const configuredLevel = accessGroup.getByRole("button", {
       name: /Level.*Configured/,
     });
@@ -500,12 +863,8 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       exact: true,
     });
     const cancelBounds = await cancel.boundingBox();
-    const beforeEditing = accessGroup.getByText("Before editing", {
-      exact: true,
-    });
-    const beforeEditingBounds = await beforeEditing.boundingBox();
-    const headerContentRight = await beforeEditing.evaluate((element) => {
-      const header = element.parentElement!;
+    const headerContentRight = await cancel.evaluate((element) => {
+      const header = element.parentElement!.parentElement!;
       const style = getComputedStyle(header);
       return (
         header.getBoundingClientRect().right -
@@ -514,19 +873,29 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       );
     });
     expect(cancelBounds).not.toBeNull();
-    expect(beforeEditingBounds).not.toBeNull();
     expect(cancelBounds!.x + cancelBounds!.width).toBeCloseTo(
       headerContentRight,
       0
     );
-    expect(cancelBounds!.y + cancelBounds!.height / 2).toBeCloseTo(
-      beforeEditingBounds!.y + beforeEditingBounds!.height / 2,
-      0
+    const criteriaBounds = await configuredLevel.boundingBox();
+    expect(criteriaBounds).not.toBeNull();
+    expect(cancelBounds!.y + cancelBounds!.height).toBeLessThan(
+      criteriaBounds!.y
     );
     await expect(configuredLevel).not.toHaveAttribute("aria-current");
     await configuredLevel.click();
     await expect(accessGroup.getByLabel("Level at least")).toHaveValue("3");
-    await expect(configuredLevel).toHaveAttribute("aria-current", "true");
+    await expect(
+      accessGroup.getByRole("region", { name: "Level", exact: true })
+    ).toBeVisible();
+    if (await usesMobileGroupCriteria(page)) {
+      await expect(
+        accessGroup.getByRole("button", { name: "Back", exact: true })
+      ).toBeInViewport({ ratio: 1 });
+      await expect(configuredLevel).toBeHidden();
+    } else {
+      await expect(configuredLevel).toHaveAttribute("aria-current", "true");
+    }
     await accessGroup
       .getByRole("button", { name: "Cancel", exact: true })
       .click();
@@ -1670,6 +2039,22 @@ async function checkWaveConfiguration(page: Page) {
   await expectNoHorizontalOverflow(page);
 }
 
+async function usesMobileGroupCriteria(page: Page) {
+  return page.evaluate(
+    () =>
+      !window.matchMedia("(min-width: 1024px)").matches ||
+      window.matchMedia("(any-pointer: coarse)").matches
+  );
+}
+
+async function openGroupCriterion(group: Locator, name: string) {
+  const back = group.getByRole("button", { name: "Back", exact: true });
+  if (await back.isVisible()) await back.click();
+  await group
+    .getByRole("button", { name: new RegExp(`^${name}( Configured)?$`) })
+    .click();
+}
+
 async function gotoCreateWave(page: Page) {
   await installExternalDataFixtures(page);
   await page.goto("/waves/create", { waitUntil: "domcontentloaded" });
@@ -1728,4 +2113,32 @@ async function installExternalDataFixtures(page: Page) {
       status: 200,
     });
   });
+}
+
+async function swipeWaveForm(
+  page: Page,
+  x: number,
+  y: number,
+  distance: number
+) {
+  const touch = await page.context().newCDPSession(page);
+  try {
+    await touch.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [{ x, y }],
+    });
+    for (let step = 1; step <= 6; step++) {
+      await touch.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ x, y: y + (distance * step) / 6 }],
+      });
+      await page.evaluate(() => new Promise(requestAnimationFrame));
+    }
+    await touch.send("Input.dispatchTouchEvent", {
+      type: "touchEnd",
+      touchPoints: [],
+    });
+  } finally {
+    await touch.detach();
+  }
 }
