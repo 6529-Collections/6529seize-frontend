@@ -2033,6 +2033,7 @@
       "facts": [
         "The Profile Curation tab lives at /{user}/curations and presents the profile's selected named Curation.",
         "On an owner's empty Curation tab, Create Curation asks for a name and prepares the required access, public source Wave, Curation, and profile connection.",
+        "Mobile Curation setup and edit sheets use Close or a downward header swipe to leave without submitting; desktop dialogs also offer Cancel.",
         "If the owner has no profile handle, Go to Identity opens /{user} so profile setup can be completed first.",
         "After guided setup succeeds, Add post opens automatically; if post creation succeeds but Curation membership fails, Retry add reuses the created post.",
         "Owners see Add post as the primary action. Manage separates profile display actions from Curation actions: Hide from profile keeps the Curation, source Wave, and posts, while Delete Curation deletes the Curation but keeps its source Wave and posts.",
@@ -2221,6 +2222,7 @@
         "The section shows up to three tags and uses a +N more chip when additional tags exist; controls wrap at narrow widths.",
         "Manage and +N more open the inline Quick Tags manager inside the same Brain-tab card.",
         "On mobile, New Quick Tag and existing-tag editing open in a bottom sheet; on wider screens, create and edit forms remain inline.",
+        "The mobile Quick Tag editor uses Back, Close, or a downward header swipe to discard edits. The inline editor keeps Cancel.",
         "The section is hidden on other profiles and while acting through a proxy.",
         "Quick Tags do not have a dedicated profile tab or route."
       ],
@@ -3424,7 +3426,10 @@
         "Wave Configuration contains wave access, chat availability, links, slow mode, curations, chat history deletion and personal display preferences. Selected competition access, rules, appearance and pauses belong to Settings in the main row.",
         "Voter lists and vote activity are available in Votes, under All votes and Activity. Both follow the chosen competition; they are absent from the information panel.",
         "On mobile, selecting the wave name opens a dismissible information panel containing About, REP and Configuration. About includes the pinned drop.",
-        "Closing mobile information or using Back returns to the original competition, tab, curation and scroll position. The underlying view stays mounted.",
+        "Swipe down from the mobile information panel's handle or header, select Close, tap outside, press Escape, or use Back to return to the original competition, tab, curation and scroll position. The underlying view stays mounted. Scrolling the panel content does not dismiss it; short or canceled header drags return it to its open position.",
+        "On mobile, Configuration gear controls open editors inside the information panel. Back, browser Back or Escape returns to Configuration without submitting changes; Save returns after a successful update. Failed saves keep the editor open for retry. Configuration retains its selected tab and scroll position. Close or a downward header swipe dismisses the whole panel.",
+        "On tablet-sized layouts, the overlay side panel also keeps these editors inside the panel. Back or Escape returns to the selected information tab.",
+        "In Configuration's Curations section, the plus button creates a curation and a row gear manages an existing curation. Create curation and Edit curation use the same mobile information sheet or tablet panel at its existing height. Group selection stays inside the form. Back discards the draft and returns to Configuration; Close or a downward header swipe dismisses the panel. Successful saves return to Configuration, while a failed save keeps the draft open. Desktop forms remain separate dialogs.",
         "Selecting a section switches information for the active wave without navigating away from the thread."
       ],
       "canonical_path": "/waves",
@@ -3935,10 +3940,12 @@
         "The Access row uses Chat access wording; `Anyone` means no chat access group is attached, independently of whether chat is enabled.",
         "Rank and Approve Configuration shows Chat status separately from Chat access, so disabled chat does not look like the same thing as an unrestricted chat access group.",
         "Access groups available to the current viewer—including authorized private groups and direct-message groups for their eligible authenticated members or creators—link from Configuration to a filtered Network view that shows both the group criteria and current members; Configuration displays a live eligible-member count instead of the generated group name.",
+        "After following a member count from the mobile Wave information sheet to Network, the app header Back button or browser Back returns to the same Wave, selected information tab, and scroll position. Changing Network filters preserves that return destination.",
         "Use the Clear selected group button in Network to close the group summary and return to the default member view.",
         "A scoped group hidden from the current viewer is labeled `Private group` without a link, name, id, author, criteria, or membership details.",
         "Network does not reuse a selected group's cached criteria or members after the authenticated viewer changes, or while opening a different group.",
-        "When chat is disabled, slow mode and disable-links settings are hidden because they only apply when chat is enabled."
+        "When chat is disabled, slow mode and disable-links settings are hidden because they only apply when chat is enabled.",
+        "Wave setting editors inside the mobile information sheet or tablet panel use Back to discard changes and return to Configuration, or Close and a downward header swipe to dismiss the sheet. They omit a duplicate Cancel button; desktop setting popovers keep Cancel. Save applies the edit, and a failed save keeps the draft open for retry."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves?create=wave"],
@@ -5997,7 +6004,8 @@
         "On Apple mobile while the reader is not pinned to the bottom, newest drops can be held behind the new-messages control until the user reveals them.",
         "Thread reply views listen for drop updates and refetch replies, so a thread can lag briefly even when the notification arrives.",
         "Connectivity problems can make feeds or counts appear stale until reconnect or refresh.",
-        "The realtime troubleshooting docs cover connection recovery and expected limitations."
+        "The realtime troubleshooting docs cover connection recovery and expected limitations.",
+        "After the connection recovers, the app returns to the foreground, or the server asks it to repair missed live updates, active data refreshes after a short staggered delay. Repeated refresh requests are combined and hidden tabs wait until visible. Individual events are not guaranteed to replay. Signing out still stops the authenticated connection."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/notifications", "/nft-activity"],
@@ -6071,7 +6079,6 @@
         "nic",
         "what is nic",
         "what does nic stand for",
-        "network identity credits",
         "network identity check",
         "rate nic",
         "rep dialog",
@@ -6095,7 +6102,7 @@
       "facts": [
         "The combined Identity tab is the default profile tab at /{user}; /{user}/identity is a legacy redirect.",
         "NIC is the 6529 network identity trust signal shown on profile identity surfaces.",
-        "App copy refers to NIC as Network Identity Credits in the FAQ and Network Identity Check in the profile identity header.",
+        "App copy expands NIC as Network Identity Check (D142) in both the About FAQ and the profile identity header.",
         "The Identity tab surfaces profile identity, REP behavior, NIC ratings, NIC statements, and activity log behavior where available.",
         "On mobile, a compact selector switches between Total Rep, NIC, and ID Statements without changing the profile URL.",
         "Grant REP keeps its compact category pills and existing search and selection behavior, including similarly named categories remaining separate and selectable.",
@@ -6911,6 +6918,7 @@
       "keywords": ["drop", "edit", "description", "pinned", "time limit"],
       "facts": [
         "Edit is available for your own non-participatory drops. Ordinary drops have a five-minute edit window measured from creation or the latest edit.",
+        "You can save multiple edits within the edit window without reloading the page. Editing text preserves existing images and videos, including after a previous edit has saved.",
         "The wave's current description (pinned drop) can be edited by its author at any time. Replacing the pinned description makes the previous drop subject to the normal edit window again. Pinning does not grant other users permission to edit the drop.",
         "Open the drop action menu and choose Edit. Save the changed content; existing mentions, metadata and referenced NFTs are preserved. Editing a description still requires the usual wave access and content validation."
       ],
@@ -6996,6 +7004,7 @@
         "Available controls depend on permissions and the current wave state.",
         "Unavailable submission actions use a lock icon at every width. Hover, focus, or select the lock for the full restriction reason; the Memes How to Submit helper keeps its desktop label and opens nomination guidance.",
         "Wave picture edit and link sharing are separate header features.",
+        "Owners can select the three-dot Open options button in About for profile-wave actions and Delete. In the mobile information sheet and tablet overlay, Wave options opens inside the same panel. The mobile sheet keeps its height when opening options or setting editors and when returning with Back. Back returns to About and Close dismisses the panel. Delete requires confirmation; cancelling it returns to Wave options.",
         "A wave you have not joined shows a Join button first in the conversation header's top-right controls."
       ],
       "canonical_path": "/waves",
@@ -7534,8 +7543,10 @@
         "controls"
       ],
       "facts": [
-        "Filter opens Filter Network on Identities with all eight criteria available: Identities, Level, TDH, NIC, Rep, Required NFTs, Collection Access, and xTDH Grant. Criteria form a left-side list on desktop. On smaller screens they stay in one horizontal row above the scrolling fields and scroll sideways when they do not fit. Close dismisses the sheet. Switching criteria preserves the draft. The mobile sheet keeps a compact, consistent height between criteria, and Create and use new group fills the content width on narrow screens. Editors and EMMA allow-list results scroll above the keyboard. While typing, Before editing and After editing visually collapse to leave room for the fields; keyboard focus reveals member-preview controls, and status text stays available to screen readers.",
-        "After editing shows selected criteria as separate tags and View members for valid criteria. Long tag lists scroll while the preview and create action remain visible. Incomplete criteria show Not ready yet. and its guidance directly. Before editing shows the current scope and, with a selected group, its criteria, count, and View members without an extra disclosure step. Create and use new group saves the criteria as a new group and immediately applies it to the Network member list. Clear selected group above the results clears the scope.",
+        "Filter opens Filter Network with all eight criteria available: Identities, Level, TDH, NIC, Rep, Required NFTs, Collection Access, and xTDH Grant. Desktop keeps a left-side list with Identities open first. Phones and touch tablets open a vertical list; scroll down to reach the remaining rows. Selecting a row opens only its editor. Back returns to the list with the draft preserved and focus restored to the selected row. Configured rows have a checkmark. Close dismisses either step. The mobile sheet uses the available screen height, keeps its height between criteria, and anchors Create and use new group below the summary. Editors and EMMA allow-list results scroll above the keyboard. While typing, the criteria summary visually collapses to leave room for the fields; keyboard focus reveals its member-preview control, and status text remains available to screen readers.",
+        "The footer shows selected criteria as separate tags and View members for valid criteria. Long tag lists scroll while the preview and create action remain visible. An incomplete draft keeps the create action disabled; select the information button beside the summary to read Not ready yet. and its guidance. The untouched filter does not open with a warning message. When a group is selected, its name, criteria, count, and View members appear at the top. On mobile this summary is in the list step, reached with Back from an editor. Without a selected group, the sheet starts directly with the criteria list. The filter does not show Before editing or After editing labels. Create and use new group saves the criteria as a new group and immediately applies it to the Network member list. Clear selected group above the results clears the scope.",
+        "In Identities > Included, search directly to add identities or use Include me, an EMMA allowlist, or a CSV file. The empty view shows No identities are explicitly included. without repeating empty import messages. A combined unique-identity count appears after identities are selected or imported; import results, file names, and errors remain visible.",
+        "In xTDH Grant, Clear filters appears after entering a collection name, selecting a grantor, or choosing a status other than Granted. It clears the grant search fields, restores Granted, and disappears again. It does not remove a selected grant or other Network criteria. On phones and touch tablets, the search fields and grant cards share one scroll area. Load more follows the last loaded card, while Back, Close, and the bottom action stay accessible. Desktop keeps its separate results scroll area.",
         "When a group is already active, reopening the filter prefills its criteria and identity lists. Saving edits creates a new group without mutating the original.",
         "Signed-in users with active Network criteria can use REP everyone matching criteria or NIC everyone matching criteria below the selected Network filter name to grant credits to every matching member.",
         "Criteria-matched bulk REP requires an amount and category; bulk NIC requires an amount. The actions are hidden when criteria are empty, loading, unavailable, or the viewer is signed out.",

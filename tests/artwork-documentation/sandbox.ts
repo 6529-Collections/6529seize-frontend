@@ -165,6 +165,7 @@ export async function installDocumentationSandbox(
   const socketUrl = new URL(origin);
   socketUrl.protocol = "ws:";
   socketUrl.searchParams.set("delivery_capability", "durable_updates_v1");
+  socketUrl.searchParams.set("recovery_capability", "resync_v1");
   await page.routeWebSocket(socketUrl.href, (socket) => {
     socket.onMessage(() => {});
   });

@@ -146,6 +146,9 @@ describe("WebSocketProvider", () => {
     expect(url.searchParams.getAll("delivery_capability")).toEqual([
       "durable_updates_v1",
     ]);
+    expect(url.searchParams.getAll("recovery_capability")).toEqual([
+      "resync_v1",
+    ]);
     expect(url.searchParams.has("token")).toBe(false);
     expect(url.href).not.toContain("fresh-token");
   });
@@ -215,7 +218,7 @@ describe("WebSocketProvider", () => {
 
       expect(result.current.status).toBe(WebSocketStatus.CONNECTING);
       expect(globalThis.WebSocket).toHaveBeenCalledWith(
-        "ws://test/?delivery_capability=durable_updates_v1"
+        "ws://test/?delivery_capability=durable_updates_v1&recovery_capability=resync_v1"
       );
 
       const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
@@ -239,7 +242,7 @@ describe("WebSocketProvider", () => {
       });
 
       expect(globalThis.WebSocket).toHaveBeenCalledWith(
-        "ws://test/?delivery_capability=durable_updates_v1"
+        "ws://test/?delivery_capability=durable_updates_v1&recovery_capability=resync_v1"
       );
     });
 
@@ -257,7 +260,7 @@ describe("WebSocketProvider", () => {
       });
 
       expect(globalThis.WebSocket).toHaveBeenCalledWith(
-        "ws://test/?delivery_capability=durable_updates_v1"
+        "ws://test/?delivery_capability=durable_updates_v1&recovery_capability=resync_v1"
       );
 
       const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
@@ -292,7 +295,7 @@ describe("WebSocketProvider", () => {
 
       expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
       expect(globalThis.WebSocket).toHaveBeenLastCalledWith(
-        "ws://test/?delivery_capability=durable_updates_v1"
+        "ws://test/?delivery_capability=durable_updates_v1&recovery_capability=resync_v1"
       );
 
       const reconnectedWs = (
@@ -419,7 +422,7 @@ describe("WebSocketProvider", () => {
 
       expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
       expect(globalThis.WebSocket).toHaveBeenLastCalledWith(
-        "ws://test/?delivery_capability=durable_updates_v1"
+        "ws://test/?delivery_capability=durable_updates_v1&recovery_capability=resync_v1"
       );
     });
 
@@ -739,7 +742,7 @@ describe("WebSocketProvider", () => {
 
       expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
       expect(globalThis.WebSocket).toHaveBeenLastCalledWith(
-        "ws://test/?delivery_capability=durable_updates_v1"
+        "ws://test/?delivery_capability=durable_updates_v1&recovery_capability=resync_v1"
       );
 
       const ws2 = (
@@ -969,6 +972,15 @@ describe("WebSocketProvider", () => {
   });
 
   describe("Error Handling - Security & Edge Cases", () => {
+    it("handles an invalid connection URL without throwing", () => {
+      const wrapper = createWrapper({ url: "invalid-url" });
+      const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
+        wrapper,
+      });
+      expect(() => act(() => result.current.connect("token"))).not.toThrow();
+      expect(result.current.status).toBe(WebSocketStatus.DISCONNECTED);
+      expect(globalThis.WebSocket).not.toHaveBeenCalled();
+    });
     it("handles WebSocket constructor errors", () => {
       jest.useFakeTimers();
 
@@ -1050,7 +1062,7 @@ describe("WebSocketProvider", () => {
       expect(ws1.close).toHaveBeenCalled();
       expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
       expect(globalThis.WebSocket).toHaveBeenLastCalledWith(
-        "ws://test/?delivery_capability=durable_updates_v1"
+        "ws://test/?delivery_capability=durable_updates_v1&recovery_capability=resync_v1"
       );
 
       expect(result.current.status).toBe(WebSocketStatus.CONNECTING);
@@ -1390,7 +1402,7 @@ describe("WebSocketProvider", () => {
       expect(result.current.status).toBe(WebSocketStatus.CONNECTED);
       expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
       expect(globalThis.WebSocket).toHaveBeenLastCalledWith(
-        "ws://test/?delivery_capability=durable_updates_v1"
+        "ws://test/?delivery_capability=durable_updates_v1&recovery_capability=resync_v1"
       );
     });
   });

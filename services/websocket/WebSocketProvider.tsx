@@ -11,7 +11,11 @@ import type {
   SubscriberMap,
   WebSocketMessage,
 } from "./WebSocketTypes";
-import { setWebSocketMessageMetadata, WebSocketStatus } from "./WebSocketTypes";
+import {
+  setWebSocketMessageMetadata,
+  WebSocketStatus,
+  WEBSOCKET_RECOVERY_CAPABILITY,
+} from "./WebSocketTypes";
 import { applyDelayJitter } from "@/helpers/jitter.helpers";
 import { asNonEmptyString } from "@/lib/text/nonEmptyString";
 import { ensureActiveSession } from "../auth/session-readiness";
@@ -311,9 +315,13 @@ export function WebSocketProvider({
       setStatus(WebSocketStatus.CONNECTING);
 
       try {
-        // Public capability only: old backends ignore it; auth stays message-based.
+        // Public capabilities only; authentication remains message-based.
         const url = new URL(config.url);
         url.searchParams.set("delivery_capability", "durable_updates_v1");
+        url.searchParams.set(
+          "recovery_capability",
+          WEBSOCKET_RECOVERY_CAPABILITY
+        );
         // Create new WebSocket connection
         const ws = new WebSocket(url.toString());
 
@@ -356,7 +364,7 @@ export function WebSocketProvider({
           handleMessage(event);
         };
 
-        ws.onclose = (event) => {
+        ws.onclose = () => {
           if (wsRef.current !== ws) {
             return;
           }
@@ -366,14 +374,14 @@ export function WebSocketProvider({
           wsRef.current = null;
           setStatus(WebSocketStatus.DISCONNECTED);
 
-          const shouldReconnect =
-            event.code !== 1000 && !isManualDisconnectRef.current;
+          // API Gateway may close a slow listener with code 1000. Only a local
+          // intentional disconnect should suppress normal authenticated recovery.
+          const shouldReconnect = !isManualDisconnectRef.current;
           const freshToken = shouldReconnect
             ? (getAuthJwt() ?? reconnectTokenRef.current)
             : undefined;
 
-          // Only attempt reconnect for unexpected closure (not code 1000)
-          // and if this wasn't a manual disconnect
+          // Reconnect server-initiated closures, including normal transport closes.
           if (shouldReconnect) {
             // Get fresh token before reconnecting
             if (freshToken) {
