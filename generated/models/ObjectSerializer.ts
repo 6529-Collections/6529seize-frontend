@@ -480,6 +480,7 @@ export * from '../models/ApiIdentitySubscriptionTargetType';
 export * from '../models/ApiIdentityWaveParticipation';
 export * from '../models/ApiIncomingIdentitySubscriptionsPage';
 export * from '../models/ApiIntRange';
+export * from '../models/ApiJoinedWavesPage';
 export * from '../models/ApiLightDrop';
 export * from '../models/ApiLoginRequest';
 export * from '../models/ApiLoginResponse';
@@ -1396,6 +1397,7 @@ import { ApiIdentitySubscriptionTargetType } from '../models/ApiIdentitySubscrip
 import { ApiIdentityWaveParticipation } from '../models/ApiIdentityWaveParticipation';
 import { ApiIncomingIdentitySubscriptionsPage } from '../models/ApiIncomingIdentitySubscriptionsPage';
 import { ApiIntRange } from '../models/ApiIntRange';
+import { ApiJoinedWavesPage } from '../models/ApiJoinedWavesPage';
 import { ApiLightDrop               } from '../models/ApiLightDrop';
 import { ApiLoginRequest } from '../models/ApiLoginRequest';
 import { ApiLoginResponse } from '../models/ApiLoginResponse';
@@ -2571,6 +2573,7 @@ let typeMap: {[index: string]: any} = {
     "ApiIdentityWaveParticipation": ApiIdentityWaveParticipation,
     "ApiIncomingIdentitySubscriptionsPage": ApiIncomingIdentitySubscriptionsPage,
     "ApiIntRange": ApiIntRange,
+    "ApiJoinedWavesPage": ApiJoinedWavesPage,
     "ApiLightDrop": ApiLightDrop,
     "ApiLoginRequest": ApiLoginRequest,
     "ApiLoginResponse": ApiLoginResponse,
