@@ -10,13 +10,10 @@ export function SidebarRecommendationsSkeleton({
 }) {
   const locale = useBrowserLocale();
   return (
-    <div
-      role="status"
-      aria-label={t(locale, "waves.discovery.loadingRecommendations")}
-    >
-      <span className="tw-sr-only">
+    <div>
+      <output className="tw-sr-only">
         {t(locale, "waves.discovery.loadingRecommendations")}
-      </span>
+      </output>
       <div
         aria-hidden="true"
         className="tw-animate-pulse motion-reduce:tw-animate-none"
@@ -40,10 +37,10 @@ export function SidebarRecommendationsSkeleton({
 export function SidebarVotesSkeleton() {
   const locale = useBrowserLocale();
   return (
-    <div role="status" aria-label={t(locale, "waves.discovery.loadingVotes")}>
-      <span className="tw-sr-only">
+    <div>
+      <output className="tw-sr-only">
         {t(locale, "waves.discovery.loadingVotes")}
-      </span>
+      </output>
       <div
         aria-hidden="true"
         className="tw-animate-pulse motion-reduce:tw-animate-none"
@@ -69,14 +66,10 @@ export function SidebarVotesSkeleton() {
 export function SidebarAnnouncementSkeleton() {
   const locale = useBrowserLocale();
   return (
-    <div
-      role="status"
-      aria-label={t(locale, "waves.discovery.loadingAnnouncements")}
-      className="tw-px-4"
-    >
-      <span className="tw-sr-only">
+    <div className="tw-px-4">
+      <output className="tw-sr-only">
         {t(locale, "waves.discovery.loadingAnnouncements")}
-      </span>
+      </output>
       <div
         aria-hidden="true"
         className="tw-flex tw-h-12 tw-animate-pulse tw-items-center tw-gap-3 motion-reduce:tw-animate-none"

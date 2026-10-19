@@ -182,7 +182,7 @@ export function SidebarDiscovery({
           </p>
         )}
         {previewItems.length === 0 && recommendationsStatus === "success" && (
-          <p className="tw-m-0 tw-py-2 tw-text-xs tw-text-iron-400">
+          <p className="tw-m-0 tw-text-xs tw-leading-4 tw-text-iron-400">
             {t(locale, "waves.discovery.emptyRecommendations")}
           </p>
         )}

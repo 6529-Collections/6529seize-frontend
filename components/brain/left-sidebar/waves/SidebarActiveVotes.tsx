@@ -146,7 +146,7 @@ export function SidebarActiveVotes({
               </p>
             )}
             {isEmpty && (
-              <output className="tw-flex tw-min-h-12 tw-items-center tw-py-2 tw-text-xs tw-italic tw-leading-4 tw-text-iron-400">
+              <output className="tw-block tw-text-xs tw-italic tw-leading-4 tw-text-iron-400">
                 {t(locale, "waves.discovery.emptyVotes")}
               </output>
             )}

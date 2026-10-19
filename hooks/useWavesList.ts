@@ -29,6 +29,8 @@ import {
   buildMainWaves,
   getActiveSidebarContext,
   getConnectedIdentity,
+  getFirstUnreadSerialNo,
+  getLatestKnownActivityTimestamp,
   getHasAuthenticatedProfile,
   getMainWavesFetching,
   getModeValue,
@@ -59,32 +61,6 @@ const HIGHLY_RATED_QUERY_PAGE_SIZE = 10;
 // not intended to hide user-visible subwaves.
 const isExpectedRootSidebarWave = (wave: SidebarWave) =>
   wave.parentWaveId === null;
-
-const getLatestKnownActivityTimestamp = (
-  wave: Pick<
-    SidebarWave,
-    "latestDropTimestamp" | "latestFollowedSubwaveDropTimestamp"
-  >
-) =>
-  Math.max(
-    wave.latestDropTimestamp ?? 0,
-    wave.latestFollowedSubwaveDropTimestamp ?? 0
-  );
-
-const getFirstUnreadSerialNo = (
-  left: number | null,
-  right: number | null
-): number | null => {
-  if (left === null) {
-    return right;
-  }
-
-  if (right === null) {
-    return left;
-  }
-
-  return Math.min(left, right);
-};
 
 const noopWaveAction = (_waveId: string) => {};
 const noopListAction = () => {};

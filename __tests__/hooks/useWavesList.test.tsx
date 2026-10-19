@@ -1869,6 +1869,8 @@ test("exposes fallback announcement query loading state when unresolved", () => 
   const loadingAnnouncementRefetch = jest.fn();
 
   useSeizeSettingsMock.mockReturnValue({
+    isLoaded: true,
+    loadError: null,
     seizeSettings: {
       announcements_wave_id: "4",
     },
@@ -1888,6 +1890,7 @@ test("exposes fallback announcement query loading state when unresolved", () => 
   expect(result.current.announcementWave).toBeNull();
   expect(result.current.trackedAnnouncementWave).toBeNull();
   expect(result.current.announcementQueryLoading).toBe(true);
+  expect(result.current.isAnnouncementsLoading).toBe(true);
   expect(result.current.announcementQueryError).toBeNull();
   expect(result.current.announcementRefetch).toBe(loadingAnnouncementRefetch);
   expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: true });
@@ -1898,6 +1901,8 @@ test("exposes fallback announcement query error when unresolved", () => {
   const announcementQueryError = new Error("Failed to load announcement wave");
 
   useSeizeSettingsMock.mockReturnValue({
+    isLoaded: true,
+    loadError: null,
     seizeSettings: {
       announcements_wave_id: "4",
     },
@@ -1918,6 +1923,7 @@ test("exposes fallback announcement query error when unresolved", () => {
   expect(result.current.trackedAnnouncementWave).toBeNull();
   expect(result.current.announcementQueryLoading).toBe(false);
   expect(result.current.announcementQueryError).toBe(announcementQueryError);
+  expect(result.current.isAnnouncementsLoading).toBe(false);
   expect(result.current.announcementRefetch).toBe(failedAnnouncementRefetch);
   expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: true });
 });
@@ -1977,4 +1983,30 @@ test("reserves announcements while settings load and releases the space when non
   });
   rerender();
   expect(result.current.isAnnouncementsLoading).toBe(false);
+});
+
+test("reserves deferred discovery until the mounted list enables requests, then settles errors", () => {
+  useSeizeSettingsMock.mockReturnValue({
+    seizeSettings: { announcements_wave_id: "4" },
+    isAnnouncementsWave: (id: string) => id === "4",
+    isLoaded: true,
+    loadError: null,
+  });
+  useWaveByIdMock.mockReturnValue({
+    wave: null,
+    isLoading: false,
+    error: new Error("Announcement unavailable"),
+    refetch: announcementRefetchMock,
+  });
+  const { result, rerender } = renderHook(
+    ({ enabled }) => useWavesList({ enabled }),
+    { initialProps: { enabled: false }, wrapper }
+  );
+  expect(result.current.recommendationsStatus).toBe("pending");
+  expect(result.current.isAnnouncementsLoading).toBe(true);
+  expect(result.current.announcementQueryError).toBeNull();
+  rerender({ enabled: true });
+  expect(result.current.recommendationsStatus).toBe("success");
+  expect(result.current.isAnnouncementsLoading).toBe(false);
+  expect(result.current.announcementQueryError).toBeInstanceOf(Error);
 });

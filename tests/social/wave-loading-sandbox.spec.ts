@@ -99,7 +99,9 @@ test("discovery reserves space while loading and retains its controls", async ({
     await page.goto("/waves", { waitUntil: "domcontentloaded" });
     const discovery = discoveryRegion(page);
     for (const name of ["Loading recommendations…", "Loading votes…"]) {
-      await expect(discovery.getByRole("status", { name })).toBeVisible();
+      await expect(
+        discovery.getByRole("status").filter({ hasText: name })
+      ).toBeVisible();
     }
     await expect(
       discovery.getByText(
@@ -129,13 +131,17 @@ test("discovery reserves space while loading and retains its controls", async ({
       "false"
     );
     await expect(
-      discovery.getByRole("status", { name: "Loading recommendations…" })
+      discovery
+        .getByRole("status")
+        .filter({ hasText: "Loading recommendations…" })
     ).toBeHidden();
     await recommendationToggle.click();
     await expect(recommendationToggle).toHaveAttribute("aria-expanded", "true");
     const before = (await discovery.boundingBox())!;
     expect(
-      await discovery
+      await page
+        .getByRole("region", { name: "Wave discovery", exact: true })
+        .filter({ visible: true })
         .locator(".tw-animate-pulse")
         .first()
         .evaluate((element) => getComputedStyle(element).animationName)
@@ -149,14 +155,15 @@ test("discovery reserves space while loading and retains its controls", async ({
       discovery.getByText("Community decisions powered by TDH.")
     ).toBeVisible();
     await expect(
-      discovery.getByRole("status", { name: /Loading/ })
+      discovery.getByRole("status").filter({ hasText: /Loading/ })
     ).toHaveCount(0);
     const loaded = (await discovery.boundingBox())!;
     expect(Math.abs(loaded.height - before.height)).toBeLessThanOrEqual(12);
     announcements.release();
     await expect(
       page
-        .getByRole("status", { name: "Loading announcements…" })
+        .getByRole("status")
+        .filter({ hasText: "Loading announcements…" })
         .filter({ visible: true })
     ).toHaveCount(0);
     expect(
@@ -225,6 +232,18 @@ test("discovery errors retry to genuinely empty sections without descriptions", 
   await expect(
     discovery.getByText(/Highly rated waves|Community decisions/)
   ).toHaveCount(0);
+  for (const [sectionName, emptyMessage] of [
+    ["Worth Checking Out", "No recommendations right now."],
+    ["Active Votes", "No active TDH votes right now."],
+  ] as const) {
+    const section = discovery.getByRole("region", {
+      name: sectionName,
+      exact: true,
+    });
+    const heading = (await section.getByRole("heading").boundingBox())!;
+    const message = (await section.getByText(emptyMessage).boundingBox())!;
+    expect(message.y - (heading.y + heading.height)).toBeLessThanOrEqual(4);
+  }
 });
 
 for (const width of [375, 390, 768, 1024, 1440]) {

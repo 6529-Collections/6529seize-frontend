@@ -317,16 +317,14 @@ it("shows a quiet recommendation placeholder until the request succeeds, then re
       recommendationsStatus="pending"
     />
   );
-  expect(
-    screen.getByRole("status", { name: "Loading recommendations…" })
-  ).toBeInTheDocument();
+  expect(screen.getByText("Loading recommendations…")).toBeInTheDocument();
   expect(screen.queryByText("Highly rated waves.")).not.toBeInTheDocument();
   expect(
     screen.queryByText("No recommendations right now.")
   ).not.toBeInTheDocument();
   rerender(<SidebarDiscovery {...discoveryProps} />);
   expect(
-    screen.queryByRole("status", { name: "Loading recommendations…" })
+    screen.queryByText("Loading recommendations…")
   ).not.toBeInTheDocument();
   expect(screen.getByText("Highly rated waves.")).toBeVisible();
   expect(
@@ -372,9 +370,7 @@ it("withholds the vote description during loading and empty states but preserves
   mockVotes.data = undefined;
   mockVotes.isPending = true;
   const { rerender } = renderDiscovery();
-  expect(
-    screen.getByRole("status", { name: "Loading votes…" })
-  ).toBeInTheDocument();
+  expect(screen.getByText("Loading votes…")).toBeInTheDocument();
   expect(
     screen.queryByText("Community decisions powered by TDH.")
   ).not.toBeInTheDocument();
