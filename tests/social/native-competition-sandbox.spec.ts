@@ -1,7 +1,7 @@
 import { writeFile } from "node:fs/promises";
 import composerSandboxConstants from "../support/composerSandboxConstants.json";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
-import type { Frame, Locator, Page } from "@playwright/test";
+import type { Frame, Locator, Page, WebSocketRoute } from "@playwright/test";
 import { expectCompetitionScroll } from "../support/competitionScroll";
 import {
   monitorRememberedLeaderboard,
@@ -626,6 +626,64 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  test("repairs live state after a refresh marker and a server normal close", async ({
+    page,
+  }) => {
+    const sockets: WebSocketRoute[] = [];
+    const apiPort = new URL(
+      getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])
+    ).port;
+    await page.routeWebSocket(
+      (url) => url.port === apiPort,
+      (socket) => {
+        sockets.push(socket);
+        socket.onMessage((message) => {
+          const frame = JSON.parse(String(message)) as { type?: string };
+          if (frame.type === "AUTHENTICATE")
+            socket.send(JSON.stringify({ type: "AUTHENTICATED", data: {} }));
+          if (frame.type === "SYNC_NOTIFICATION_IDENTITIES")
+            socket.send(
+              JSON.stringify({
+                type: "NOTIFICATION_IDENTITIES_SYNCED",
+                data: { profile_ids: [PROFILE] },
+              })
+            );
+        });
+      }
+    );
+    await installCompetitionApi(page);
+    let reads = 0;
+    page.on("request", (request) => {
+      if (new URL(request.url()).pathname.endsWith("/competitions/alpha"))
+        reads++;
+    });
+    await page.goto(`${ROOT}/alpha`);
+    await expect(
+      page.getByText("Immutable alpha entry content", { exact: true })
+    ).toBeVisible({ timeout: 30000 });
+    await expect.poll(() => sockets.length).toBeGreaterThan(0);
+    const beforeMarker = reads;
+    sockets[sockets.length - 1]!.send(
+      JSON.stringify({ type: "RESYNC_REQUIRED", data: {} })
+    );
+    await expect
+      .poll(() => reads, { timeout: 15000 })
+      .toBeGreaterThan(beforeMarker);
+    const beforeClose = reads;
+    const connectionCount = sockets.length;
+    sockets[sockets.length - 1]!.close({
+      code: 1000,
+      reason: "Listener recovery",
+    });
+    await expect
+      .poll(() => sockets.length, { timeout: 15000 })
+      .toBeGreaterThan(connectionCount);
+    // No competition event is sent after reconnect: recovery itself must refetch.
+    await expect
+      .poll(() => reads, { timeout: 15000 })
+      .toBeGreaterThan(beforeClose);
+  });
+
   test.afterEach(async ({ page }, testInfo) => {
     if (testInfo.status !== testInfo.expectedStatus) {
       const failurePath = testInfo.outputPath(
