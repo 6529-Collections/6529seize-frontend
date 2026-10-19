@@ -61,7 +61,13 @@ export async function installGroupGrantFixtures(page: Page) {
   await page.route("**/api/xtdh/grants/scroll-grant-*", async (route) => {
     const id = new URL(route.request().url()).pathname.split("/").at(-1);
     const grant = grants.find((candidate) => candidate.id === id);
-    if (!grant) throw new Error(`Unknown fixture grant: ${id}`);
+    if (!grant) {
+      await route.fulfill({
+        status: 404,
+        json: { message: `Unknown fixture grant: ${id}` },
+      });
+      return;
+    }
     await route.fulfill({ json: grant });
   });
   return requestedPages;

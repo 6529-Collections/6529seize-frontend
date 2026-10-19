@@ -373,7 +373,9 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       baseURL
     );
     await gotoCreateWave(page);
-    const flow = page.locator("[data-flow-title] > div").first();
+    const flow = page
+      .getByLabel(/Wave Name/)
+      .locator("xpath=ancestor::*[@data-flow-title]/div[1]");
     const initialBounds = await flow.boundingBox();
     await openOptionalSettings(page);
     const access = page.getByRole("group", {
@@ -443,7 +445,9 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
         ).toBeVisible();
         await dismissNextDevTools(page);
       }
-      const flow = page.locator("[data-flow-title] > div").first();
+      const flow = page
+        .getByLabel(/Wave Name/)
+        .locator("xpath=ancestor::*[@data-flow-title]/div[1]");
       await openOptionalSettings(page);
       const access = page.getByRole("group", {
         name: "Who can access this wave",
@@ -718,7 +722,9 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     ).toHaveCount(0);
     await access.getByRole("tab", { name: "Included", exact: true }).click();
     if (mobile) {
-      const summary = access.locator("[data-group-criteria-summary]");
+      const summary = page
+        .getByRole("group", { name: "Who can access this wave", exact: true })
+        .locator("[data-group-criteria-summary]");
       const uploadBounds = await access
         .getByLabel("Choose a CSV file of identities to include")
         .boundingBox();

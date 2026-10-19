@@ -261,7 +261,11 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       "Collection Access",
       "xTDH Grant",
     ];
-    await expect(choices.locator("[data-criterion]")).toHaveText(criteria);
+    await expect(
+      filter
+        .getByRole("group", { name: "Filter Network", includeHidden: true })
+        .locator("[data-criterion]")
+    ).toHaveText(criteria);
     const identityEditor = filter.getByRole("region", { name: "Identities" });
     if (narrowFilter) {
       await expect(identityEditor).toBeHidden();
@@ -580,7 +584,9 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       name: "Identities",
       exact: true,
     });
-    const summary = identities.locator("[data-group-criteria-summary]");
+    const summary = filter
+      .getByRole("region", { name: "Identities", exact: true })
+      .locator("[data-group-criteria-summary]");
     await expect(summary).toHaveCount(1);
     await expect(summary).not.toBeInViewport();
     const apply = filter.getByRole("button", {
@@ -768,7 +774,9 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expect(
       filter.getByRole("textbox", { name: "Collection name" })
     ).toBeVisible();
-    const sheet = filter.locator(".mobile-wrapper-dialog");
+    const sheet = page
+      .getByRole("dialog", { name: "Filter Network" })
+      .locator(".mobile-wrapper-dialog");
     // The native phone supplies these CSS variables. This checks browser layout,
     // not the OS keyboard or its animation frame rate.
     const geometry = await sheet.evaluate(async (element) => {
