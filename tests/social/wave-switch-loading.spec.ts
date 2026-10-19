@@ -523,12 +523,18 @@ for (const app of [false, true]) {
       ).toBeVisible();
       const uncoveredFrames = await page.evaluate(
         () =>
-          new Promise<number>((resolve) => {
+          new Promise<string[]>((resolve) => {
             const started = performance.now();
-            let uncovered = 0;
+            const uncovered: string[] = [];
             const sample = () => {
-              const pane = document.querySelector(
-                '[data-testid="single-drop-loading"]'
+              // Auth restoration can also mount a route loader inside the
+              // inert wave. Measure the foreground panel, not that hidden copy.
+              const pane = Array.from(
+                document.querySelectorAll('[data-testid="single-drop-loading"]')
+              ).find(
+                (candidate) =>
+                  candidate.checkVisibility() &&
+                  !candidate.closest('[inert], [aria-hidden="true"]')
               );
               const bounds = pane?.getBoundingClientRect();
               const top =
@@ -537,8 +543,27 @@ for (const app of [false, true]) {
                   bounds.x + bounds.width / 2,
                   bounds.y + bounds.height / 2
                 );
-              if (!pane || !bounds?.height || !top || !pane.contains(top))
-                uncovered++;
+              if (!pane || !bounds?.height || !top || !pane.contains(top)) {
+                uncovered.push(
+                  JSON.stringify({
+                    bounds,
+                    hit: top?.outerHTML.slice(0, 300),
+                    viewportHit: document
+                      .elementFromPoint(innerWidth / 2, innerHeight / 2)
+                      ?.outerHTML.slice(0, 300),
+                    panels: Array.from(
+                      document.querySelectorAll(
+                        '[data-testid="single-drop-loading"]'
+                      )
+                    ).map((node) => ({
+                      visible: node.checkVisibility(),
+                      hiddenAncestor: node
+                        .closest('[inert], [aria-hidden="true"]')
+                        ?.outerHTML.slice(0, 300),
+                    })),
+                  })
+                );
+              }
               if (performance.now() - started < 250)
                 requestAnimationFrame(sample);
               else resolve(uncovered);
@@ -546,7 +571,7 @@ for (const app of [false, true]) {
             requestAnimationFrame(sample);
           })
       );
-      expect(uncoveredFrames).toBe(0);
+      expect(uncoveredFrames).toEqual([]);
       await expectNoHorizontalOverflow(page);
       release();
       // Preserve the application's automatic retry budget (three retries with

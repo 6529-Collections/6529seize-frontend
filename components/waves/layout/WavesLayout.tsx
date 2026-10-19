@@ -12,6 +12,7 @@ import {
   scheduleMobileLaunchFlush,
 } from "../../../utils/monitoring/mobileLaunchTiming";
 import WavesMobile from "../WavesMobile";
+import WavesRouteLoading from "../WavesRouteLoading";
 import useBodyScrollLock from "@/hooks/useBodyScrollLock";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -32,7 +33,11 @@ const WAVES_CONTENT_STATE_NEEDS_PROFILE = "needs-profile";
 const WAVES_CONTENT_STATE_NOT_AVAILABLE = "not-available";
 
 function WavesBranchLoadingFallback() {
-  return <div className="tw-flex tw-min-h-screen tw-flex-1 tw-bg-black" />;
+  return (
+    <div className="tw-flex tw-min-h-screen tw-flex-1 tw-bg-black">
+      <WavesRouteLoading showSidebar />
+    </div>
+  );
 }
 
 const WavesDesktop = dynamic<WavesBranchProps>(

@@ -1755,9 +1755,12 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
   }) => {
     await installCompetitionApi(page);
     await page.goto(`${ROOT}/alpha?drop=${entryDropId("alpha")}`);
-    const detail = page.locator("[data-video-viewport]").filter({
-      has: page.getByRole("button", { name: "Close panel", exact: true }),
-    });
+    const detail = page
+      .getByRole("main")
+      .locator("[data-video-viewport]")
+      .filter({
+        has: page.getByRole("button", { name: "Close panel", exact: true }),
+      });
     await expect(
       detail.getByText("Recorded alpha entry", { exact: true })
     ).toBeVisible({ timeout: 30000 });
