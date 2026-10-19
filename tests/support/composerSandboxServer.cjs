@@ -2535,6 +2535,14 @@ const mockApiExactReadRoutes = new Map([
   ],
   ["/api/v2/official-waves", () => [localWaveOverview]],
   [
+    "/api/v2/waves/joined",
+    () => ({
+      data: [],
+      next_cursor: null,
+      snapshot_expires_at: Date.now() + 900000,
+    }),
+  ],
+  [
     `/api/v2/waves/${SANDBOX_WAVE_ID}/metadata`,
     () =>
       sandboxWaveGuidelinesEnabled
