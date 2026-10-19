@@ -166,6 +166,7 @@ const mockFetchContentModerationBlockActivity =
 const createQueueItem = (index: number): ApiContentModerationQueueItem => ({
   id: `report-${index}`,
   drop_id: `drop-${index}`,
+  drop_deleted: false,
   reporter_profile_id: `reporter-${index}`,
   reporter_handle: `reporter${index}`,
   reporter_pfp: null,
@@ -174,7 +175,10 @@ const createQueueItem = (index: number): ApiContentModerationQueueItem => ({
   author_pfp: null,
   author_status: ApiModeratedProfileStatus.Active,
   reason: ApiContentModerationReportReason.Other,
-  content_snapshot: { parts: [{ content: `content-${index}` }] },
+  content_snapshot: {
+    wave_id: "wave-1",
+    parts: [{ content: `content-${index}` }],
+  },
   status: ApiContentModerationReportStatus.Open,
   created_at: Date.UTC(2026, 7, 24, 10, index % 60),
   report_count: 1,
@@ -568,6 +572,58 @@ describe("ContentModerationPageClient pagination", () => {
     expect(globalThis.location.pathname).toBe(
       "/content-moderation/block-activity"
     );
+  });
+
+  it.each([false, true])(
+    "links the actual original post and labels deleted=%s",
+    async (deleted) => {
+      const item = createQueueItem(1);
+      item.drop_deleted = deleted;
+      item.content_snapshot = {
+        wave_id: "wave-1",
+        parts: [{ content: "https://example.com/unrelated-embedded-link" }],
+      };
+      mockFetchContentModerationQueue.mockResolvedValue([item]);
+      render(
+        <QueryClientProvider client={new QueryClient()}>
+          <ContentModerationPageClient />
+        </QueryClientProvider>
+      );
+      expect(
+        await screen.findByRole("link", { name: "Open original post" })
+      ).toHaveAttribute("href", "/waves/wave-1?drop=drop-1");
+      expect(
+        screen.getByText(deleted ? "State: Deleted" : "State: Visible")
+      ).toBeVisible();
+      expect(
+        screen.getByRole("link", { name: "Review evidence and decide" })
+      ).toHaveAttribute("href", "/content-moderation/checks?report=report-1");
+      if (deleted) {
+        expect(screen.queryByText("State: Visible")).not.toBeInTheDocument();
+        expect(
+          screen.getByText(/The original post has been deleted/)
+        ).toBeVisible();
+      }
+    }
+  );
+
+  it("shows a deleted resolution in preserved report history", async () => {
+    mockFetchContentModerationQueue.mockResolvedValue([
+      {
+        ...createQueueItem(1),
+        drop_deleted: true,
+        status: ApiContentModerationReportStatus.ResolvedDeleted,
+        resolution_reason: "Closed after post deletion.",
+      },
+    ]);
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <ContentModerationPageClient />
+      </QueryClientProvider>
+    );
+    expect(await screen.findByText("Resolved: Post deleted")).toBeVisible();
+    expect(screen.getByText("Closed after post deletion.")).toBeVisible();
+    expect(screen.getByText("content-1")).toBeVisible();
   });
 
   it("identifies the profile that submitted each report", async () => {

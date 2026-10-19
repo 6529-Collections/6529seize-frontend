@@ -49,6 +49,14 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.report.underReview": "Reported · Under review",
   "contentModeration.report.noActionTaken": "Reviewed · No action taken",
   "contentModeration.report.contentRemoved": "Reviewed · Content removed",
+  "contentModeration.report.contentDeleted": "Resolved · Post deleted",
+  "contentModeration.report.outcomeDeleted": "Post deleted",
+  "contentModeration.originalPost.open": "Open original post",
+  "contentModeration.originalPost.deleted": "Deleted",
+  "contentModeration.originalPost.deletedHelp":
+    "The original post has been deleted and may be unavailable at this link. Review the saved report evidence below.",
+  "contentModeration.originalPost.unavailable":
+    "Original post link unavailable: the saved Wave or post ID is missing or invalid.",
   "contentModeration.report.outcomeTitle": "Report outcome",
   "contentModeration.report.outcomePendingDescription":
     "Your report is awaiting moderator review.",
