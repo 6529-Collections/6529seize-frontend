@@ -1,7 +1,7 @@
 import { writeFile } from "node:fs/promises";
 import composerSandboxConstants from "../support/composerSandboxConstants.json";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
-import type { Frame, Locator, Page } from "@playwright/test";
+import type { Frame, Locator, Page, WebSocketRoute } from "@playwright/test";
 import { expectCompetitionScroll } from "../support/competitionScroll";
 import {
   monitorRememberedLeaderboard,
@@ -626,6 +626,64 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  test("repairs live state after a refresh marker and a server normal close", async ({
+    page,
+  }) => {
+    const sockets: WebSocketRoute[] = [];
+    const apiPort = new URL(
+      getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])
+    ).port;
+    await page.routeWebSocket(
+      (url) => url.port === apiPort,
+      (socket) => {
+        sockets.push(socket);
+        socket.onMessage((message) => {
+          const frame = JSON.parse(String(message)) as { type?: string };
+          if (frame.type === "AUTHENTICATE")
+            socket.send(JSON.stringify({ type: "AUTHENTICATED", data: {} }));
+          if (frame.type === "SYNC_NOTIFICATION_IDENTITIES")
+            socket.send(
+              JSON.stringify({
+                type: "NOTIFICATION_IDENTITIES_SYNCED",
+                data: { profile_ids: [PROFILE] },
+              })
+            );
+        });
+      }
+    );
+    await installCompetitionApi(page);
+    let reads = 0;
+    page.on("request", (request) => {
+      if (new URL(request.url()).pathname.endsWith("/competitions/alpha"))
+        reads++;
+    });
+    await page.goto(`${ROOT}/alpha`);
+    await expect(
+      page.getByText("Immutable alpha entry content", { exact: true })
+    ).toBeVisible({ timeout: 30000 });
+    await expect.poll(() => sockets.length).toBeGreaterThan(0);
+    const beforeMarker = reads;
+    sockets[sockets.length - 1]!.send(
+      JSON.stringify({ type: "RESYNC_REQUIRED", data: {} })
+    );
+    await expect
+      .poll(() => reads, { timeout: 15000 })
+      .toBeGreaterThan(beforeMarker);
+    const beforeClose = reads;
+    const connectionCount = sockets.length;
+    sockets[sockets.length - 1]!.close({
+      code: 1000,
+      reason: "Listener recovery",
+    });
+    await expect
+      .poll(() => sockets.length, { timeout: 15000 })
+      .toBeGreaterThan(connectionCount);
+    // No competition event is sent after reconnect: recovery itself must refetch.
+    await expect
+      .poll(() => reads, { timeout: 15000 })
+      .toBeGreaterThan(beforeClose);
+  });
+
   test.afterEach(async ({ page }, testInfo) => {
     if (testInfo.status !== testInfo.expectedStatus) {
       const failurePath = testInfo.outputPath(
@@ -2143,6 +2201,154 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     expect(sandbox.requests).toHaveLength(0);
   });
 
+  test("keeps joined waves complete across pagination failure, refresh, and the DMs round trip", async ({
+    page,
+  }, testInfo) => {
+    // This scenario exercises four independent page initializations on both
+    // desktop and the simulated native shell.
+    test.setTimeout(120000);
+    const app = testInfo.project.name === "web-mobile-chromium";
+    await installCompetitionApi(page);
+    if (app)
+      await installSurfaceSimulation(
+        page.context(),
+        "capacitor-ios-sim",
+        testInfo.project.use.baseURL
+      );
+    const fixture = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
+    );
+    const { wave: overview } = await fixture.json();
+    const joined = Array.from({ length: 45 }, (_, index) => ({
+      ...overview,
+      id: `00000000-0000-4000-8000-${String(index + 700).padStart(12, "0")}`,
+      name: `Joined wave ${String(index + 1).padStart(2, "0")}`,
+      parent_wave: null,
+      has_subwaves: false,
+      last_drop_time: Date.now() - index * 1000,
+      context_profile_context: {
+        ...overview.context_profile_context,
+        subscribed: true,
+        pinned: false,
+        followed_subwaves_count: 0,
+      },
+    }));
+    let failContinuation = true;
+    const requested: string[] = [];
+    const offsets = new Map([
+      ["joined-continuation-alpha", 20],
+      ["joined-continuation-beta", 40],
+    ]);
+    await page.route("**/api/v2/waves/joined?**", async (route) => {
+      const cursor = new URL(route.request().url()).searchParams.get("cursor");
+      requested.push(cursor ?? "first");
+      if (cursor && failContinuation) {
+        await route.fulfill({
+          status: 503,
+          json: { error: "Joined waves temporarily unavailable" },
+        });
+        return;
+      }
+      const offset = cursor ? offsets.get(cursor) : 0;
+      if (offset === undefined) {
+        await route.fulfill({ status: 400, json: { error: "Unknown cursor" } });
+        return;
+      }
+      await route.fulfill({
+        json: {
+          data: joined.slice(offset, offset + 20),
+          next_cursor:
+            offset === 0
+              ? "joined-continuation-alpha"
+              : offset === 20
+                ? "joined-continuation-beta"
+                : null,
+          snapshot_expires_at: Date.now() + 900000,
+        },
+      });
+    });
+    const selectJoined = async () => {
+      await page
+        .getByRole("button", { name: "Joined", exact: true })
+        .filter({ visible: true })
+        .click();
+    };
+    const finishPagination = async () => {
+      const lastWave = page
+        .getByRole("link", { name: "Joined wave 45", exact: true })
+        .filter({ visible: true });
+      for (let attempt = 0; attempt < 4; attempt += 1) {
+        await page
+          .getByRole("region", { name: "Following waves list", exact: true })
+          .evaluate((list) => {
+            let container = list.parentElement;
+            while (
+              container &&
+              !["auto", "scroll"].includes(
+                getComputedStyle(container).overflowY
+              )
+            )
+              container = container.parentElement;
+            if (container) container.scrollTop = container.scrollHeight;
+          });
+        const more = page.getByRole("button", {
+          name: "Load more joined waves",
+          exact: true,
+        });
+        if (await more.count()) {
+          // Reaching the button can itself start automatic pagination. The final
+          // response may remove it before Playwright finishes the click.
+          await more.click({ timeout: 1500 }).catch(async (error: unknown) => {
+            if (await more.count()) throw error;
+          });
+        }
+        if (await lastWave.count()) break;
+      }
+      await expect(lastWave).toBeVisible();
+      await expect(
+        page.getByRole("button", {
+          name: "Load more joined waves",
+          exact: true,
+        })
+      ).toHaveCount(0);
+    };
+    await page.goto("/waves", { waitUntil: "domcontentloaded" });
+    await selectJoined();
+    const more = page.getByRole("button", {
+      name: "Load more joined waves",
+      exact: true,
+    });
+    await more.click();
+    const retry = page.getByRole("button", {
+      name: "Retry loading joined waves",
+      exact: true,
+    });
+    await expect(retry).toBeVisible({ timeout: 30000 });
+    await expect(
+      page
+        .getByRole("status")
+        .filter({ hasText: "Some joined waves could not be loaded." })
+    ).toBeVisible();
+    failContinuation = false;
+    await retry.click();
+    await finishPagination();
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await finishPagination();
+    // Both destinations rebuild the real sidebar and retain the saved collection.
+    await page.goto("/messages", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/messages$/);
+    await page.goto("/waves", { waitUntil: "domcontentloaded" });
+    await finishPagination();
+    expect(requested).toContain("joined-continuation-alpha");
+    expect(requested).toContain("joined-continuation-beta");
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("joined-waves-pagination.png"),
+      animations: "disabled",
+      style: "nextjs-portal { visibility: hidden; }",
+    });
+  });
+
   test("aligns Waves collection filters with the search control", async ({
     page,
   }, testInfo) => {
@@ -3031,6 +3237,268 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expectNoHorizontalOverflow(page);
     expect(sandbox.requests).toHaveLength(0);
   });
+
+  for (const app of [false, true]) {
+    for (const view of ["List view", "Grid view"]) {
+      test(`keeps live Main Stage artwork anchored after ranking refresh (${app ? "app" : "web"}, ${view})`, async ({
+        page,
+      }, testInfo) => {
+        test.skip(
+          app && testInfo.project.name !== "web-mobile-chromium",
+          "Native branch simulation uses the mobile viewport."
+        );
+        if (app)
+          await installSurfaceSimulation(
+            page.context(),
+            "capacitor-android-sim",
+            process.env["PLAYWRIGHT_BASE_URL"]
+          );
+        const sockets: WebSocketRoute[] = [];
+        await page.routeWebSocket(
+          (url) =>
+            url.port ===
+            new URL(getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"]))
+              .port,
+          (socket) => {
+            sockets.push(socket);
+            socket.onMessage((message) => {
+              const frame = JSON.parse(String(message)) as { type?: string };
+              if (frame.type === "AUTHENTICATE")
+                socket.send(
+                  JSON.stringify({ type: "AUTHENTICATED", data: {} })
+                );
+              if (frame.type === "SYNC_NOTIFICATION_IDENTITIES")
+                socket.send(
+                  JSON.stringify({
+                    type: "NOTIFICATION_IDENTITIES_SYNCED",
+                    data: { profile_ids: [PROFILE] },
+                  })
+                );
+            });
+          }
+        );
+        const sandbox = await installCompetitionApi(
+          page,
+          false,
+          true,
+          MEMES_WAVE
+        );
+        sandbox.onlyCompetition("alpha");
+        await sandbox.legacyPrimary("alpha");
+        const response = await page.request.get(
+          `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${MEMES_WAVE}/drops`
+        );
+        const fixture = await response.json();
+        fixture.wave.id = MEMES_WAVE;
+        let order = Array.from({ length: 80 }, (_, index) => index);
+        let refreshed = false;
+        let leaderboardReads = 0;
+        await page.route(
+          `**/api/v2/waves/${MEMES_WAVE}/leaderboard*`,
+          (route) => {
+            leaderboardReads++;
+            const pageNumber = Number(
+              new URL(route.request().url()).searchParams.get("page") ?? 1
+            );
+            return route.fulfill({
+              json: {
+                wave: fixture.wave,
+                drops: order
+                  .slice((pageNumber - 1) * 50, pageNumber * 50)
+                  .map((index) => ({
+                    ...fixture.drops[0],
+                    id: `00000000-0000-4000-8000-${String(index + 9000).padStart(12, "0")}`,
+                    serial_no: index + 9000,
+                    title: `Live artwork ${index}`,
+                    media: [
+                      {
+                        url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aS5cAAAAASUVORK5CYII=",
+                        mime_type: "image/png",
+                      },
+                    ],
+                    drop_type: "SUBMISSION",
+                    submission_context: {
+                      status: "ACTIVE",
+                      has_metadata: false,
+                      voting: {
+                        is_open: true,
+                        total_votes_given: refreshed ? 900000 : 1000,
+                        current_calculated_vote: refreshed ? 900000 : 1000,
+                        predicted_final_vote: refreshed ? 900000 : 1000,
+                        voters_count: 1,
+                        place: order.indexOf(index) + 1,
+                        context_profile_context: {
+                          can_vote: true,
+                          min: -1000,
+                          max: 1000,
+                          current: 0,
+                        },
+                      },
+                    },
+                  })),
+                count: 80,
+                page: pageNumber,
+                next: pageNumber === 1,
+              },
+            });
+          }
+        );
+        await page.goto(
+          `/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard`
+        );
+        await page.getByRole("tab", { name: view, exact: true }).click();
+        const list = page.getByRole("list", {
+          name: "Leaderboard drops",
+          exact: true,
+        });
+        await expect(list).toBeVisible({ timeout: 30000 });
+        const scroller = page
+          .getByRole("list", { name: "Leaderboard drops", exact: true })
+          .locator(
+            'xpath=ancestor::div[contains(@class,"tw-overflow-y-auto")][1]'
+          );
+        await scroller.evaluate((element) =>
+          element.scrollTo({ top: element.scrollHeight, behavior: "instant" })
+        );
+        if (view === "Grid view")
+          await page
+            .getByRole("button", { name: "Load more drops", exact: true })
+            .click();
+        await expect.poll(() => leaderboardReads).toBeGreaterThanOrEqual(2);
+        await expect(list.getByRole("listitem").first()).toHaveAttribute(
+          "aria-setsize",
+          "80"
+        );
+        await scroller.evaluate((element) => {
+          element.setAttribute("data-scroll-visit", "original");
+          element.scrollTo({
+            top: element.scrollHeight * 0.6,
+            behavior: "instant",
+          });
+        });
+        await expect
+          .poll(() => scroller.evaluate((element) => element.scrollTop))
+          .toBeGreaterThan(1000);
+        const readAnchor = () =>
+          list.evaluate((element) => {
+            const container = element.closest(".tw-overflow-y-auto")!;
+            const viewport = container.getBoundingClientRect();
+            const card = Array.from(
+              element.querySelectorAll<HTMLElement>(
+                "[data-leaderboard-drop-id]"
+              )
+            ).find((candidate) => {
+              const bounds = candidate.getBoundingClientRect();
+              return (
+                bounds.bottom > viewport.top + 100 &&
+                bounds.top < viewport.bottom - 100
+              );
+            });
+            return card
+              ? {
+                  id: card.dataset["leaderboardDropId"]!,
+                  offset: card.getBoundingClientRect().top - viewport.top,
+                }
+              : null;
+          });
+        let currentAnchor = await readAnchor();
+        await expect
+          .poll(async () => {
+            currentAnchor = await readAnchor();
+            return currentAnchor !== null;
+          })
+          .toBe(true);
+        const anchor = currentAnchor;
+        if (!anchor) throw new Error("Visible artwork anchor missing");
+        await list.evaluate((element) =>
+          element.setAttribute("data-list-visit", "original")
+        );
+        const anchorCard = page
+          .getByRole("list", { name: "Leaderboard drops", exact: true })
+          .locator(`[data-leaderboard-drop-id="${anchor.id}"]`);
+        const originalPosition = await anchorCard.getAttribute(
+          "data-leaderboard-logical-index"
+        );
+        const readsBefore = leaderboardReads;
+        const touch = app ? await page.context().newCDPSession(page) : null;
+        if (touch) {
+          await scroller.evaluate((element) => {
+            for (const type of ["touchstart", "touchend", "touchcancel"])
+              element.addEventListener(
+                type,
+                () => element.setAttribute("data-last-touch", type),
+                { passive: true }
+              );
+          });
+          const box = await scroller.boundingBox();
+          await touch.send("Input.dispatchTouchEvent", {
+            type: "touchStart",
+            touchPoints: [{ x: box!.x + 2, y: box!.y + 200, id: 1 }],
+          });
+          await expect(scroller).toHaveAttribute(
+            "data-last-touch",
+            "touchstart"
+          );
+        }
+        order = [...order.slice(12), ...order.slice(0, 12)];
+        refreshed = true;
+        await expect.poll(() => sockets.length).toBeGreaterThan(0);
+        sockets[sockets.length - 1]!.send(
+          JSON.stringify({
+            type: "COMPETITION_UPDATE",
+            data: {
+              event_id: "live-ranking",
+              event_version: 1,
+              event_type: "COMPETITION_LEADERBOARD_UPDATED",
+              wave_id: MEMES_WAVE,
+              competition_id: "alpha",
+            },
+          })
+        );
+        await expect.poll(() => leaderboardReads).toBeGreaterThan(readsBefore);
+        await expect(anchorCard).toContainText("900,000");
+        await expect(scroller).toHaveAttribute("data-scroll-visit", "original");
+        await expect(list).toHaveAttribute("data-list-visit", "original");
+        if (touch) {
+          await expect(scroller).toHaveAttribute(
+            "data-last-touch",
+            "touchstart"
+          );
+          await expect(anchorCard).toHaveAttribute(
+            "data-leaderboard-logical-index",
+            originalPosition!
+          );
+          await touch.send("Input.dispatchTouchEvent", {
+            type: "touchEnd",
+            touchPoints: [],
+          });
+          await touch.detach();
+        }
+        await expect(anchorCard).not.toHaveAttribute(
+          "data-leaderboard-logical-index",
+          originalPosition!
+        );
+        await expect
+          .poll(() =>
+            anchorCard.evaluate((element) => {
+              const container = element.closest(".tw-overflow-y-auto")!;
+              return (
+                element.getBoundingClientRect().top -
+                container.getBoundingClientRect().top
+              );
+            })
+          )
+          .toBeCloseTo(anchor.offset, 0);
+        await expect(scroller).toHaveAttribute("data-scroll-visit", "original");
+        await page.screenshot({
+          path: testInfo.outputPath(
+            `live-scroll-${app ? "app" : "web"}-${view.split(" ")[0]}.png`
+          ),
+        });
+        expect(sandbox.requests).toHaveLength(0);
+      });
+    }
+  }
 
   test("creates a chat-only hub with no implicit competition", async ({
     page,

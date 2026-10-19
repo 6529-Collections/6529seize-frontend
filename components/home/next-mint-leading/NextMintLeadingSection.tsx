@@ -35,6 +35,7 @@ export function NextMintLeadingSection() {
 
   const { drops, isFetching: isLeaderboardFetching } = useWaveDropsLeaderboard({
     waveId: waveId ?? "",
+    pageSize: 3,
     sort: WaveDropsLeaderboardSort.RATING_PREDICTION,
     enabled: !!waveId,
   });

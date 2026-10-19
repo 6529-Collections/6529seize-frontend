@@ -45,8 +45,9 @@ Use this page for visibility rules, state switches, and route targets.
 ## User Journey
 
 1. Open `/`.
-2. The top slot shows a loading placeholder while current mint data, claim
-   status, and next-winner data resolve.
+2. The top slot shows a loading placeholder while the latest artwork data
+   loads. The artwork appears as soon as it is available, while mint status
+   and next-winner details can continue loading.
 3. The top slot then chooses one mode:
    - `Latest Drop` while the current mint is active and for the configured
      grace period after its scheduled end, or when no next winner is available.
@@ -183,6 +184,13 @@ Use this page for visibility rules, state switches, and route targets.
 
 ## Failure and Recovery
 
+- If the latest artwork data fails to load, the top slot shows an error and
+  a `Try again` button. The button shows `Trying again…` during the retry.
+- A mint-status failure does not hide the artwork. Mint-dependent stats show
+  `Unavailable`, and the countdown shows its error state until status recovers.
+- Loaded artwork stays visible during background refreshes, including a
+  refresh that fails. The homepage switches to `Next Drop` only after mint
+  completion is confirmed, the grace period has elapsed, and a winner is ready.
 - If latest-drop or coming-up content looks stale, refresh `/` to rerun home
   queries.
 - If latest-drop actions fail, open routes directly:
@@ -217,6 +225,14 @@ Use this page for visibility rules, state switches, and route targets.
 - `Coming up` cards use path-style routes (`/waves/{waveId}?drop=...`).
 - `NEXT MINT` timestamps are displayed in the viewer's local timezone/locale.
 - No auth or wallet gate is required to view these sections.
+
+### Homepage loading-message localization fallback debt
+
+- The artwork error, retry labels, and unavailable mint stats use the `en-US`
+  fallback in partial `en-GB`, `de-DE`, `es-ES`, and `fr-FR` dictionaries.
+- Non-English visitors may see these short messages in English. Frontend i18n
+  follow-up should add reviewed translations for `home.latestDrop.*` and
+  `home.nowMinting.stats.unavailable` and check their responsive presentation.
 
 ### `/about/subscriptions` localization fallback debt
 

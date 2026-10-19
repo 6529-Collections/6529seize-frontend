@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { mainnet } from "viem/chains";
 import { useReadContract } from "wagmi";
 import { wallTimeToUtcInstantInZone } from "@/components/meme-calendar/meme-calendar.helpers";
@@ -253,6 +253,7 @@ interface ManifoldClaimReadValues {
 interface UseManifoldClaimResult {
   claim: ManifoldClaim | undefined;
   isFetching: boolean;
+  isError: boolean;
   refetch: () => Promise<unknown>;
 }
 
@@ -563,20 +564,19 @@ export function useManifoldClaim({
 
   useEffect(() => {
     if (readContract.error) {
-      setClaim((prevClaim) => {
-        if (!prevClaim) return;
-        return {
-          ...prevClaim,
-          isError: true,
-        };
-      });
       onError?.();
     }
   }, [readContract.error, onError]);
 
+  const claimWithError = useMemo(
+    () => (claim ? { ...claim, isError: !!readContract.error } : undefined),
+    [claim, readContract.error]
+  );
+
   return {
-    claim,
+    claim: claimWithError,
     isFetching: readContract.isFetching,
+    isError: !!readContract.error,
     refetch: async () => {
       await readContract.refetch();
     },

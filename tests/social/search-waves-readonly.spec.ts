@@ -396,6 +396,16 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       "Touch target geometry is mobile-only"
     );
     await gotoReady(page, "/waves");
+    // The server shell is replaced as the mobile list hydrates. Measure the
+    // interactive controls only after a data row confirms that it has mounted.
+    await expect(
+      page
+        .getByRole("region", {
+          name: /All recent waves list|Regular waves list/,
+        })
+        .getByRole("link")
+        .first()
+    ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
     const shortcuts = [
       page.getByRole("link", { name: "Profile Waves Feed", exact: true }),
       page.getByRole("button", { name: "Find a wave…", exact: true }),
@@ -592,12 +602,23 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       await activeToggle.click();
     if ((await recommendationsToggle.getAttribute("aria-expanded")) === "false")
       await recommendationsToggle.click();
-    await expect(
-      discovery.getByText("Community decisions powered by TDH.")
-    ).toBeVisible();
-    await expect(
-      discovery.getByText("Highly rated waves.", { exact: true })
-    ).toBeVisible();
+    // A successfully empty section has only its empty message; descriptions
+    // accompany real content, never initial loading or an empty result.
+    for (const [description, empty] of [
+      ["Community decisions powered by TDH.", "No active TDH votes right now."],
+      ["Highly rated waves you don’t follow.", "No recommendations right now."],
+    ] as const) {
+      await expect(
+        discovery
+          .getByText(description, { exact: true })
+          .or(discovery.getByText(empty, { exact: true }))
+      ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+      if (await discovery.getByText(empty, { exact: true }).isVisible()) {
+        await expect(
+          discovery.getByText(description, { exact: true })
+        ).toHaveCount(0);
+      }
+    }
     const voteList = discovery.getByRole("region", {
       name: "Active voting waves",
     });

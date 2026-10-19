@@ -127,7 +127,7 @@ const createDialogProps = (
 describe("MemesQuickVoteDialog", () => {
   const originalShowModal = HTMLDialogElement.prototype.showModal;
   const originalClose = HTMLDialogElement.prototype.close;
-  const originalRequestAnimationFrame = global.requestAnimationFrame;
+  const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
 
   beforeAll(() => {
     Object.defineProperty(HTMLDialogElement.prototype, "showModal", {
@@ -142,10 +142,10 @@ describe("MemesQuickVoteDialog", () => {
         this.open = false;
       },
     });
-    global.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+    globalThis.requestAnimationFrame = ((callback: FrameRequestCallback) => {
       callback(0);
       return 0;
-    }) as typeof global.requestAnimationFrame;
+    }) as typeof globalThis.requestAnimationFrame;
   });
 
   afterAll(() => {
@@ -168,7 +168,7 @@ describe("MemesQuickVoteDialog", () => {
       delete (HTMLDialogElement.prototype as Partial<HTMLDialogElement>).close;
     }
 
-    global.requestAnimationFrame = originalRequestAnimationFrame;
+    globalThis.requestAnimationFrame = originalRequestAnimationFrame;
   });
 
   beforeEach(() => {
@@ -343,6 +343,69 @@ describe("MemesQuickVoteDialog", () => {
     });
 
     expect(submitVote).toHaveBeenCalledWith(activeDrop, -100);
+  });
+
+  it.each([false, true])(
+    "keeps the same focused close button through loading, loaded, error, restart and done states (mobile %s)",
+    (mobile) => {
+      mockIsMobile = mobile;
+      const props = createDialogProps({ activeDrop: null });
+      const { rerender } = render(<MemesQuickVoteDialog {...props} />);
+      const close = screen.getByRole("button", { name: "Close quick vote" });
+      act(() => jest.advanceTimersToNextFrame());
+      expect(close).toHaveFocus();
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Loading your next meme"
+      );
+      for (const state of [
+        { activeDrop: createDrop() },
+        { activeDrop: null, hasDiscoveryError: true },
+        { activeDrop: null, isRestartingRound: true },
+        { activeDrop: null, isExhausted: true },
+      ]) {
+        rerender(<MemesQuickVoteDialog {...props} {...state} />);
+        expect(screen.getByRole("button", { name: "Close quick vote" })).toBe(
+          close
+        );
+        expect(close).toHaveFocus();
+      }
+      fireEvent.click(close);
+      expect(props.onClose).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it("allows dismissal during loading and restores focus to the opener", () => {
+    const props = createDialogProps({ activeDrop: null, isOpen: false });
+    const { rerender } = render(
+      <>
+        <button type="button">Open quick vote</button>
+        <MemesQuickVoteDialog {...props} />
+      </>
+    );
+    const opener = screen.getByRole("button", { name: "Open quick vote" });
+    opener.focus();
+    rerender(
+      <>
+        <button type="button">Open quick vote</button>
+        <MemesQuickVoteDialog {...props} isOpen />
+      </>
+    );
+    act(() => jest.advanceTimersToNextFrame());
+    expect(
+      screen.getByRole("button", { name: "Close quick vote" })
+    ).toHaveFocus();
+    fireEvent(
+      screen.getByRole("dialog"),
+      new Event("cancel", { cancelable: true })
+    );
+    expect(props.onClose).toHaveBeenCalledTimes(1);
+    rerender(
+      <>
+        <button type="button">Open quick vote</button>
+        <MemesQuickVoteDialog {...props} />
+      </>
+    );
+    expect(opener).toHaveFocus();
   });
 
   it("does not render active drop content while closed", () => {
