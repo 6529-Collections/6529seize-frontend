@@ -87,6 +87,84 @@ async function installComingUpFixture(page: Page) {
   );
 }
 
+for (const hasBoostedDrops of [false, true]) {
+  test(`Coming Up loads while boosted cards are pending, with ${hasBoostedDrops ? "populated" : "empty"} results @smoke @medium @large`, async ({
+    page,
+  }) => {
+    await installComingUpFixture(page);
+    await page.route(comingUpLeaderboardPattern, (route) =>
+      route.fulfill({ json: comingUpLeaderboard })
+    );
+    const previewUrl = "https://example.com/boosted-startup-preview";
+    const boostedDrop = {
+      ...comingUpLeaderboard.drops[0],
+      id: "boosted-startup",
+      serial_no: 42,
+      drop_type: "CHAT",
+      boosts: 5,
+      content: previewUrl,
+      wave: comingUpWave,
+      moderation: { status: "VISIBLE", can_view: true },
+    };
+    const boostedReady = Promise.withResolvers<void>();
+    await page.route("**/api/v2/boosted-drops?*", async (route) => {
+      await boostedReady.promise;
+      await route.fulfill({
+        json: {
+          data: hasBoostedDrops ? [boostedDrop] : [],
+          page: 1,
+          count: hasBoostedDrops ? 1 : 0,
+          next: false,
+        },
+      });
+    });
+    await page.route("**/api/open-graph*", (route) =>
+      route.fulfill({ status: 503, json: {} })
+    );
+
+    try {
+      await page.goto("/", { waitUntil: "domcontentloaded" });
+      const comingUp = page.getByRole("region", {
+        name: "Coming up",
+        exact: true,
+      });
+      await expect(
+        comingUp.getByRole("link", { name: "Coming Up artwork 3", exact: true })
+      ).toBeVisible();
+      await expect(page.getByText("Loading...", { exact: true })).toBeVisible();
+
+      boostedReady.resolve();
+      await expect(page.getByText("Loading...", { exact: true })).toHaveCount(
+        0
+      );
+      if (!hasBoostedDrops) {
+        await expect(
+          page.getByText("Boosted Drops", { exact: true })
+        ).toHaveCount(0);
+        return;
+      }
+
+      const openDrop = page.getByRole("button", {
+        name: "Open boosted drop from coming-up-artist",
+        exact: true,
+      });
+      await expect(openDrop).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: /example\.com/ })
+      ).toHaveAttribute("href", previewUrl);
+      await expectNoHorizontalOverflow(page);
+      // The preview is its own link; use the card's keyboard action to open the drop.
+      await openDrop.focus();
+      await openDrop.press("Enter");
+      await expect(page).toHaveURL(
+        new RegExp(`/waves/${comingUpWave.id}\\?serialNo=42$`)
+      );
+    } finally {
+      boostedReady.resolve();
+    }
+  });
+}
+
 test("Coming Up retains cards across navigation and recovers a failed refresh @smoke @medium @large", async ({
   page,
 }) => {
