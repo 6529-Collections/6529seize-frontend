@@ -397,6 +397,11 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
 
   const ariaSetSize = hasNextPage || hasPreviousPage ? -1 : items.length;
   const gridColumnsClassName = getGridColumnsClassName(columns);
+  const revealIndex = useCallback(
+    (index: number) =>
+      virtualizer.scrollToIndex(index, { align: "start", behavior: "auto" }),
+    [virtualizer]
+  );
 
   return (
     <WaveLeaderboardScrollAnchor
@@ -407,9 +412,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
       columns={columns}
       leadingItemCount={leadingItemCount}
       masonry={isMasonryLayout}
-      revealIndex={(index) =>
-        virtualizer.scrollToIndex(index, { align: "start", behavior: "auto" })
-      }
+      revealIndex={revealIndex}
     >
       {isFetchingPreviousPage ? (
         <span className="tw-sr-only" role="status" aria-live="polite">

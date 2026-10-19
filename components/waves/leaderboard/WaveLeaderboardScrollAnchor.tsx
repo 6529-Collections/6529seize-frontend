@@ -3,6 +3,10 @@
 import { Component } from "react";
 import type { ReactNode, RefObject } from "react";
 
+// Allow virtual rows to mount and measure, without repeatedly correcting a
+// layout that cannot settle. Any new user gesture cancels these retries sooner.
+const MAX_RESTORE_FRAMES = 10;
+
 interface AnchorCandidate {
   readonly dropId: string;
   readonly offset: number;
@@ -52,6 +56,7 @@ export class WaveLeaderboardScrollAnchor extends Component<
       !container ||
       container.scrollTop <= 0 ||
       (previous.columns === columns &&
+        previous.masonry === this.props.masonry &&
         previous.leadingItemCount === this.props.leadingItemCount &&
         previous.itemIds.length === itemIds.length &&
         previous.itemIds.every((id, index) => id === itemIds[index]))
@@ -112,7 +117,7 @@ export class WaveLeaderboardScrollAnchor extends Component<
     const candidate = this.pending?.candidates.find(({ dropId }) =>
       itemIds.includes(dropId)
     );
-    if (!container || !candidate || attempt >= 10) {
+    if (!container || !candidate || attempt >= MAX_RESTORE_FRAMES) {
       this.cancel();
       return;
     }

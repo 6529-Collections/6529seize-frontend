@@ -27,12 +27,13 @@ export function useScrollStableLeaderboardItems<T>(
     let timer: ReturnType<typeof setTimeout> | undefined;
     let touching = false;
     const retainOrder = () => {
+      const snapshot = latest.current;
       setScrollOrder((current) =>
         current?.windowKey === windowKey
           ? current
           : {
               windowKey,
-              ids: latest.current.items.map(latest.current.getItemId),
+              ids: snapshot.items.map(snapshot.getItemId),
             }
       );
     };
@@ -54,13 +55,22 @@ export function useScrollStableLeaderboardItems<T>(
       touching = false;
       settle();
     };
+    // Keep scores/ranks live for the entire gesture. A maximum retention timer
+    // would move cards under an uninterrupted scroll. scrollend reconciles as
+    // soon as wheel/trackpad/momentum scrolling ends; the idle timer is a fallback.
+    const scrollEnd = () => {
+      clearTimeout(timer);
+      if (!touching) setScrollOrder(null);
+    };
     container.addEventListener("scroll", scroll, { passive: true });
+    container.addEventListener("scrollend", scrollEnd, { passive: true });
     container.addEventListener("touchstart", touchStart, { passive: true });
     container.addEventListener("touchend", touchEnd, { passive: true });
     container.addEventListener("touchcancel", touchEnd, { passive: true });
     return () => {
       clearTimeout(timer);
       container.removeEventListener("scroll", scroll);
+      container.removeEventListener("scrollend", scrollEnd);
       container.removeEventListener("touchstart", touchStart);
       container.removeEventListener("touchend", touchEnd);
       container.removeEventListener("touchcancel", touchEnd);

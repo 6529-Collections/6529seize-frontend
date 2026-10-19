@@ -3204,9 +3204,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           exact: true,
         });
         await expect(list).toBeVisible({ timeout: 30000 });
-        const scroller = list.locator(
-          'xpath=ancestor::div[contains(@class,"tw-overflow-y-auto")][1]'
-        );
+        const scroller = page
+          .getByRole("list", { name: "Leaderboard drops", exact: true })
+          .locator(
+            'xpath=ancestor::div[contains(@class,"tw-overflow-y-auto")][1]'
+          );
         await scroller.evaluate((element) =>
           element.scrollTo({ top: element.scrollHeight, behavior: "instant" })
         );
@@ -3215,6 +3217,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
             .getByRole("button", { name: "Load more drops", exact: true })
             .click();
         await expect.poll(() => leaderboardReads).toBeGreaterThanOrEqual(2);
+        await expect(list.getByRole("listitem").first()).toHaveAttribute(
+          "aria-setsize",
+          "80"
+        );
         await scroller.evaluate((element) => {
           element.setAttribute("data-scroll-visit", "original");
           element.scrollTo({
@@ -3225,27 +3231,43 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         await expect
           .poll(() => scroller.evaluate((element) => element.scrollTop))
           .toBeGreaterThan(1000);
-        const anchor = await list.evaluate((element) => {
-          const container = element.closest(".tw-overflow-y-auto")!;
-          const viewport = container.getBoundingClientRect();
-          const card = Array.from(
-            element.querySelectorAll<HTMLElement>("[data-leaderboard-drop-id]")
-          ).find((candidate) => {
-            const bounds = candidate.getBoundingClientRect();
-            return (
-              bounds.bottom > viewport.top + 100 &&
-              bounds.top < viewport.bottom - 100
-            );
+        const readAnchor = () =>
+          list.evaluate((element) => {
+            const container = element.closest(".tw-overflow-y-auto")!;
+            const viewport = container.getBoundingClientRect();
+            const card = Array.from(
+              element.querySelectorAll<HTMLElement>(
+                "[data-leaderboard-drop-id]"
+              )
+            ).find((candidate) => {
+              const bounds = candidate.getBoundingClientRect();
+              return (
+                bounds.bottom > viewport.top + 100 &&
+                bounds.top < viewport.bottom - 100
+              );
+            });
+            return card
+              ? {
+                  id: card.dataset["leaderboardDropId"]!,
+                  offset: card.getBoundingClientRect().top - viewport.top,
+                }
+              : null;
           });
-          if (!card) throw new Error("Visible artwork anchor missing");
-          return {
-            id: card.dataset["leaderboardDropId"]!,
-            offset: card.getBoundingClientRect().top - viewport.top,
-          };
-        });
-        const anchorCard = list.locator(
-          `[data-leaderboard-drop-id="${anchor.id}"]`
+        let currentAnchor = await readAnchor();
+        await expect
+          .poll(async () => {
+            currentAnchor = await readAnchor();
+            return currentAnchor !== null;
+          })
+          .toBe(true);
+        const anchor = currentAnchor;
+        if (!anchor) throw new Error("Visible artwork anchor missing");
+        await list.evaluate((element) =>
+          element.setAttribute("data-list-visit", "original")
         );
+        const anchorCard = page
+          .getByRole("list", { name: "Leaderboard drops", exact: true })
+          .locator(`[data-leaderboard-drop-id="${anchor.id}"]`);
         const originalPosition = await anchorCard.getAttribute(
           "data-leaderboard-logical-index"
         );
@@ -3288,6 +3310,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         await expect.poll(() => leaderboardReads).toBeGreaterThan(readsBefore);
         await expect(anchorCard).toContainText("900,000");
         await expect(scroller).toHaveAttribute("data-scroll-visit", "original");
+        await expect(list).toHaveAttribute("data-list-visit", "original");
         if (touch) {
           await expect(scroller).toHaveAttribute(
             "data-last-touch",

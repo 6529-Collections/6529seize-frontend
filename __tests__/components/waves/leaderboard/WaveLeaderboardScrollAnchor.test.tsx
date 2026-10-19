@@ -6,6 +6,25 @@ import { useScrollStableLeaderboardItems } from "@/components/waves/leaderboard/
 const getId = (item: { id: string; score: number }) => item.id;
 const revealIndex = jest.fn();
 
+function StableItems({
+  items,
+}: {
+  readonly items: { id: string; score: number }[];
+}) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const stable = useScrollStableLeaderboardItems(
+    items,
+    getId,
+    ref,
+    "wave:rank"
+  );
+  return (
+    <div ref={ref} data-testid="stable">
+      {stable.map(({ id, score }) => `${id}:${score}`).join(",")}
+    </div>
+  );
+}
+
 function Harness({
   ids,
   windowKey = "wave:rank",
@@ -152,24 +171,6 @@ it("does not correct scrolling when an update leaves card positions unchanged", 
 });
 
 it("keeps scores live during touch and momentum scrolling, then applies the new order", () => {
-  function StableItems({
-    items,
-  }: {
-    readonly items: { id: string; score: number }[];
-  }) {
-    const ref = useRef<HTMLDivElement | null>(null);
-    const stable = useScrollStableLeaderboardItems(
-      items,
-      getId,
-      ref,
-      "wave:rank"
-    );
-    return (
-      <div ref={ref} data-testid="stable">
-        {stable.map(({ id, score }) => `${id}:${score}`).join(",")}
-      </div>
-    );
-  }
   const { rerender } = render(
     <StableItems
       items={[
@@ -196,4 +197,57 @@ it("keeps scores live during touch and momentum scrolling, then applies the new 
   expect(screen.getByTestId("stable")).toHaveTextContent("a:20,b:30");
   act(() => jest.advanceTimersByTime(100));
   expect(screen.getByTestId("stable")).toHaveTextContent("b:30,a:20");
+});
+
+it("keeps values live throughout continuous desktop scrolling and reconciles at scrollend", () => {
+  const { rerender } = render(
+    <StableItems
+      items={[
+        { id: "a", score: 20 },
+        { id: "b", score: 10 },
+      ]}
+    />
+  );
+  const scroller = screen.getByTestId("stable");
+  for (let score = 30; score < 42; score++) {
+    fireEvent.scroll(scroller);
+    rerender(
+      <StableItems
+        items={[
+          { id: "b", score },
+          { id: "a", score: 20 },
+        ]}
+      />
+    );
+    act(() => jest.advanceTimersByTime(100));
+    expect(scroller).toHaveTextContent(`a:20,b:${score}`);
+  }
+  fireEvent(scroller, new Event("scrollend"));
+  expect(scroller).toHaveTextContent("b:41,a:20");
+});
+
+it("does not let a scrollend event move artwork while a finger is still down", () => {
+  const { rerender } = render(
+    <StableItems
+      items={[
+        { id: "a", score: 20 },
+        { id: "b", score: 10 },
+      ]}
+    />
+  );
+  const scroller = screen.getByTestId("stable");
+  fireEvent.touchStart(scroller);
+  rerender(
+    <StableItems
+      items={[
+        { id: "b", score: 30 },
+        { id: "a", score: 20 },
+      ]}
+    />
+  );
+  fireEvent(scroller, new Event("scrollend"));
+  expect(scroller).toHaveTextContent("a:20,b:30");
+  fireEvent.touchEnd(scroller);
+  act(() => jest.advanceTimersByTime(180));
+  expect(scroller).toHaveTextContent("b:30,a:20");
 });
