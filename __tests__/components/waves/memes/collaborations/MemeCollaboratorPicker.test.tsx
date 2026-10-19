@@ -65,7 +65,7 @@ it("counts existing invitations toward the maximum and disables selection while 
   const { rerender } = render(
     <MemeCollaboratorPicker
       collaborators={[]}
-      excludedIds={Array.from({ length: 20 }, (_, i) => String(i))}
+      excludedIds={Array.from({ length: 5 }, (_, i) => String(i))}
       onChange={jest.fn()}
     />
   );
@@ -107,4 +107,39 @@ it("starts collapsed and preserves selected collaborators when folded", () => {
     screen.getByRole("button", { name: "Remove invitation for artistB" })
   );
   expect(onChange).toHaveBeenCalledWith([]);
+});
+
+it("explains why a declined recipient cannot be invited again without consuming capacity", async () => {
+  const onChange = jest.fn();
+  render(
+    <MemeCollaboratorPicker
+      collaborators={[]}
+      declinedIds={["B"]}
+      excludedIds={["B"]}
+      occupiedCount={0}
+      onChange={onChange}
+    />
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Add collaborators" }));
+  fireEvent.click(screen.getByText("Search profile"));
+  expect(await screen.findByRole("alert")).toHaveTextContent("declined");
+  expect(screen.getByText("0 of 5 collaborator slots used")).toBeVisible();
+  expect(onChange).not.toHaveBeenCalled();
+});
+it("allows a cancelled recipient to be selected again", async () => {
+  const onChange = jest.fn();
+  render(
+    <MemeCollaboratorPicker
+      collaborators={[]}
+      occupiedCount={0}
+      onChange={onChange}
+    />
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Add collaborators" }));
+  fireEvent.click(screen.getByText("Search profile"));
+  await waitFor(() =>
+    expect(onChange).toHaveBeenCalledWith([
+      expect.objectContaining({ id: "B" }),
+    ])
+  );
 });

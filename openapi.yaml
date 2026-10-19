@@ -29119,7 +29119,7 @@ components:
           $ref: "#/components/schemas/ApiCreateDropPollRequest"
         collaborator_ids:
           type: array
-          maxItems: 20
+          maxItems: 5
           description: >-
             Profile IDs invited to collaborate. Included in the signed payload.
             An empty array opts into managed artist credits.
@@ -35020,7 +35020,7 @@ components:
         collaborator_ids:
           type: array
           minItems: 1
-          maxItems: 20
+          maxItems: 5
           items:
             type: string
     ApiMemeCollaborationResponseRequest:
@@ -35087,8 +35087,9 @@ components:
         invitations:
           type: array
           description: >-
-            All invitations for the submitter, otherwise only the viewer's own
-            invitations.
+            Current invitation per profile for the submitter, otherwise only the
+            viewer's current invitation. Cancelled attempts remain in internal
+            history.
           items:
             $ref: "#/components/schemas/ApiMemeCollaborationInvitation"
     ApiMemeCollaboratorProfile:

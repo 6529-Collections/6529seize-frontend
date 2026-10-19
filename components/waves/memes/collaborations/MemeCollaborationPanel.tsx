@@ -4,6 +4,8 @@ import { MemeCollaborationManageDialog } from "./MemeCollaborationManageDialog";
 import type { ApiMemeCollaboratorProfile } from "@/generated/models/ApiMemeCollaboratorProfile";
 import type { ApiMemeCollaborationInviteRequest } from "@/generated/models/ApiMemeCollaborationInviteRequest";
 import { useState } from "react";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { useMemeCollaborationRealtime } from "./useMemeCollaborationRealtime";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
@@ -22,11 +24,11 @@ import { t } from "@/i18n/messages";
 import Button from "@/components/utils/button/Button";
 import { MemeCollaborationReviewDialog } from "./MemeCollaborationReviewDialog";
 
-const STATUS_MESSAGES = {
+const RECIPIENT_STATUS_MESSAGES = {
   PENDING: "memes.collaborations.pending",
   ACCEPTED: "memes.collaborations.accepted",
-  DECLINED: "memes.collaborations.declined",
-  CANCELLED: "memes.collaborations.cancelled",
+  DECLINED: "memes.collaborations.recipientDeclined",
+  CANCELLED: "memes.collaborations.recipientCancelled",
   CLOSED: "memes.collaborations.closed",
 } as const;
 export function MemeCollaborationPanel({
@@ -55,13 +57,14 @@ export function MemeCollaborationPanel({
       }),
     enabled: !!connectedProfile?.id,
   });
+  useMemeCollaborationRealtime(dropId, connectedProfile?.id ?? undefined);
   const reviewVersion = data
     ? `${connectedProfile?.id ?? ""}:${dropId}:${data.artwork_hash}:${data.terms_version}`
     : null;
   const [saving, setSaving] = useState(false);
   const [selected, setSelected] = useState<ApiMemeCollaboratorProfile[]>([]);
-  const invite = async () => {
-    if (!data?.can_invite || saving || !selected.length) return;
+  const invite = async (profiles = selected) => {
+    if (!data?.can_invite || saving || !profiles.length) return;
     setSaving(true);
     try {
       const { success } = await requestAuth();
@@ -71,18 +74,24 @@ export function MemeCollaborationPanel({
         ApiMemeCollaborationState
       >({
         endpoint: `drops/${dropId}/collaborations`,
-        body: { collaborator_ids: selected.map((profile) => profile.id) },
+        body: { collaborator_ids: profiles.map((profile) => profile.id) },
       });
       queryClient.setQueryData(queryKey, updated);
-      setSelected([]);
+      setSelected((current) =>
+        current.filter(
+          (item) => !profiles.some((profile) => profile.id === item.id)
+        )
+      );
       setToast({
         message: t(locale, "memes.collaborations.invited"),
         type: "success",
       });
-    } catch {
+    } catch (invitationError) {
       void refetch();
       setToast({
-        message: t(locale, "memes.collaborations.saveError"),
+        message:
+          getToastErrorDetails(invitationError) ??
+          t(locale, "memes.collaborations.saveError"),
         type: "error",
       });
     } finally {
@@ -214,6 +223,9 @@ export function MemeCollaborationPanel({
               onInvite={() => {
                 void invite();
               }}
+              onReinvite={(profile) => {
+                void invite([profile]);
+              }}
               onCancel={(invitation) => {
                 void respond(
                   invitation,
@@ -255,7 +267,7 @@ export function MemeCollaborationPanel({
           ) : (
             ownInvitation && (
               <output className="tw-text-iron-400">
-                {t(locale, STATUS_MESSAGES[ownInvitation.status])}
+                {t(locale, RECIPIENT_STATUS_MESSAGES[ownInvitation.status])}
               </output>
             )
           )}
