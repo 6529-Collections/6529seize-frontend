@@ -42,6 +42,7 @@ function notification(event: string): INotificationMemeCollaboration {
 it.each([
   ["INVITED", "invited you to collaborate on", "Review invitation"],
   ["ACCEPTED", "accepted your collaboration invitation for", "View artwork"],
+  ["CANCELLED", "cancelled your collaboration invitation for", "View artwork"],
 ])(
   "renders the %s actor avatar, profile and named artwork with the correct action",
   (event, message, action) => {
@@ -118,7 +119,7 @@ it("uses the artwork fallback when a saved title contains only whitespace", () =
   expect(screen.getByRole("link", { name: "an artwork" })).toBeVisible();
 });
 
-it.each(["INVITED", "ACCEPTED"] as const)(
+it.each(["INVITED", "ACCEPTED", "CANCELLED"] as const)(
   "renders the fetched and adapted %s notification with its actor and named artwork",
   async (event_type) => {
     jest.mocked(commonApiFetch).mockResolvedValue({

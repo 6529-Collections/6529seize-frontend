@@ -14,6 +14,11 @@ import { ApiMemeCollaborationInvitationStatusEnum } from "@/generated/models/Api
 import type { ApiMemeCollaborationState } from "@/generated/models/ApiMemeCollaborationState";
 
 jest.mock(
+  "@/components/waves/memes/collaborations/useMemeCollaborationRealtime",
+  () => ({ useMemeCollaborationRealtime: jest.fn() })
+);
+
+jest.mock(
   "@/components/waves/memes/collaborations/MemeCollaboratorPicker",
   () => ({
     MemeCollaboratorPicker: ({
@@ -206,7 +211,9 @@ it("does not expose pending names to public viewers or offer late acceptance", a
     ],
   });
   expect(
-    await screen.findByText("Closed at mint selection")
+    await screen.findByText(
+      "This invitation closed because the artwork was selected for minting."
+    )
   ).toBeInTheDocument();
   expect(
     screen.queryByRole("button", { name: "Accept collaboration" })
@@ -451,7 +458,7 @@ it("cancels a pending invitation and updates its status in management", async ()
       },
     })
   );
-  expect(await screen.findByText("Cancelled")).toBeVisible();
+  expect(await screen.findByText("Invitation cancelled")).toBeVisible();
   expect(
     screen.queryByRole("button", { name: "Cancel invitation" })
   ).not.toBeInTheDocument();
@@ -474,4 +481,102 @@ it("opens an empty manager for an eligible author and closes without submitting 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
   );
   expect(postMock).not.toHaveBeenCalled();
+});
+
+it.each([
+  [
+    "CANCELLED",
+    "Your collaboration invitation was cancelled by the submitter.",
+  ],
+  ["DECLINED", "You declined this collaboration invitation."],
+  [
+    "CLOSED",
+    "This invitation closed because the artwork was selected for minting.",
+  ],
+] as const)("explains recipient status %s", async (status, message) => {
+  viewer = "B";
+  mount({
+    ...pending,
+    invitations: [
+      {
+        ...pendingInvitation,
+        status: status as ApiMemeCollaborationInvitationStatusEnum,
+      },
+    ],
+  });
+  expect(await screen.findByText(message)).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Review invitation" })
+  ).not.toBeInTheDocument();
+});
+it("offers reinviting cancelled recipients and keeps declined recipients excluded", async () => {
+  viewer = "A";
+  mount({
+    ...pending,
+    can_invite: true,
+    invitations: [
+      {
+        ...pendingInvitation,
+        status: ApiMemeCollaborationInvitationStatusEnum.Cancelled,
+      },
+      {
+        id: "declined",
+        profile: { id: "D", handle: "artistD", display: "artistD", pfp: null },
+        status: ApiMemeCollaborationInvitationStatusEnum.Declined,
+      },
+    ],
+  });
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Manage collaborators" })
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Invite again" }));
+
+  await waitFor(() =>
+    expect(postMock).toHaveBeenCalledWith(
+      expect.objectContaining({ body: { collaborator_ids: ["B"] } })
+    )
+  );
+});
+it("keeps the artist name, confirmation and actions outside the scrollable review body and renders formatted terms", async () => {
+  viewer = "B";
+  mount({ ...pending, terms: "**Important terms**" });
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Review invitation" })
+  );
+  const name = await screen.findByRole("textbox", {
+    name: "Artist credit name",
+  });
+  const checkbox = screen.getByRole("checkbox");
+  const footer = name.closest("div.tw-shrink-0");
+  expect(footer).not.toBeNull();
+  expect(footer).toContainElement(checkbox);
+  expect(footer).toContainElement(
+    screen.getByRole("button", { name: "Accept collaboration" })
+  );
+  expect(screen.getByText("Important terms").tagName).toBe("STRONG");
+});
+
+it("shows an authoritative capacity error if another invitation uses the last slot", async () => {
+  viewer = "A";
+  mount({ ...pending, can_invite: true });
+  fireEvent.click(
+    await screen.findByRole("button", { name: /Manage collaborators/ })
+  );
+  fireEvent.click(
+    screen.getByRole("button", { name: "Select collaborator C" })
+  );
+  postMock.mockRejectedValueOnce(
+    new Error("You can have up to 5 pending or accepted collaborators")
+  );
+  fireEvent.click(
+    screen.getByRole("button", { name: "Send collaborator invitations" })
+  );
+  await waitFor(() =>
+    expect(setToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "error",
+        message: "You can have up to 5 pending or accepted collaborators.",
+      })
+    )
+  );
 });

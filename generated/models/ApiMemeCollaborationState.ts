@@ -30,7 +30,7 @@ export class ApiMemeCollaborationState {
     'terms': string | null;
     'collaborators': Array<ApiMemeCollaboratorProfile>;
     /**
-    * All invitations for the submitter, otherwise only the viewer\'s own invitations.
+    * Current invitation per profile for the submitter, otherwise only the viewer\'s current invitation. Cancelled attempts remain in internal history.
     */
     'invitations': Array<ApiMemeCollaborationInvitation>;
 

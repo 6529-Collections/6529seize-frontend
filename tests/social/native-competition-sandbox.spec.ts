@@ -1874,10 +1874,17 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         title: "Collaboration artwork",
       },
     }));
+    let invitationsSent = false;
     await page.route(
       `**/drops/${entryDropId("alpha")}/collaborations`,
-      (route) =>
-        route.fulfill({
+      (route) => {
+        if (route.request().method() === "POST") {
+          expect(route.request().postDataJSON()).toEqual({
+            collaborator_ids: ["artist-c"],
+          });
+          invitationsSent = true;
+        }
+        return route.fulfill({
           json: {
             managed: true,
             can_invite: true,
@@ -1888,6 +1895,20 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
             terms: null,
             collaborators: [],
             invitations: [
+              ...(invitationsSent
+                ? [
+                    {
+                      id: "sent-invite",
+                      profile: {
+                        id: "artist-c",
+                        handle: "artistC",
+                        display: "artistC",
+                        pfp: null,
+                      },
+                      status: "PENDING",
+                    },
+                  ]
+                : []),
               {
                 id: "existing-invite",
                 profile: {
@@ -1900,7 +1921,8 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
               },
             ],
           },
-        })
+        });
+      }
     );
     let releaseSearch!: () => void;
     const searchGate = new Promise<void>((resolve) => {
@@ -2003,6 +2025,42 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(
         page.getByRole("button", { name: "Add collaborators", exact: true })
       ).toHaveAttribute("aria-expanded", "true");
+      await search.fill("art");
+      await page
+        .getByRole("option")
+        .filter({ hasText: "artistC" })
+        .getByRole("button")
+        .click();
+      await manager
+        .getByRole("button", {
+          name: "Send collaborator invitations",
+          exact: true,
+        })
+        .click();
+      const toastMessage = page.getByText("Collaborator invitations sent.", {
+        exact: true,
+      });
+      await expect(toastMessage).toBeVisible();
+      await expect(manager).toBeVisible();
+      const toastLayer = await toastMessage.evaluate((element) => {
+        let layer = 0;
+        for (
+          let node: Element | null = element;
+          node;
+          node = node.parentElement
+        ) {
+          const value = Number.parseInt(getComputedStyle(node).zIndex, 10);
+          if (Number.isFinite(value)) layer = Math.max(layer, value);
+        }
+        return layer;
+      });
+      const dialogLayer = await manager.evaluate((element) =>
+        Number.parseInt(getComputedStyle(element).zIndex, 10)
+      );
+      expect(toastLayer).toBeGreaterThan(dialogLayer);
+      await expect(
+        manager.getByText("@artistC", { exact: true })
+      ).toBeVisible();
       await page.keyboard.press("Escape");
       await expect(manager).toHaveCount(0);
       await expect(manage).toBeFocused();
@@ -2066,7 +2124,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       terms_version: "b".repeat(64),
       acceptance_copy:
         "Acceptance is final and admins control final mint credits.",
-      terms: "The submission and minting terms for this artwork.",
+      terms: `The submission and minting terms for this artwork.
+
+${"Additional terms for review.\n\n".repeat(30)}`,
       collaborators: accepted ? [profile] : [],
       invitations: [
         { id: "invite", profile, status: accepted ? "ACCEPTED" : "PENDING" },
@@ -2127,6 +2187,39 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       exact: true,
     });
     await expect(artistName).toHaveValue("playwright");
+    const panelWidth = await dialog
+      .getByRole("heading", { name: "Review invitation", exact: true })
+      .evaluate(
+        (heading) =>
+          heading.parentElement!.parentElement!.getBoundingClientRect().width
+      );
+    const viewport = page.viewportSize()!;
+    expect(panelWidth).toBeGreaterThanOrEqual(
+      Math.min(1280, viewport.width - 32) - 2
+    );
+    const checkboxBefore = await dialog.getByRole("checkbox").boundingBox();
+    const nameBefore = await artistName.boundingBox();
+    const reviewContents = dialog.getByRole("region", {
+      name: "Artwork and terms",
+      exact: true,
+    });
+    await reviewContents.evaluate((element) => {
+      element.scrollTop = element.scrollHeight;
+    });
+    const checkboxAfter = await dialog.getByRole("checkbox").boundingBox();
+    const nameAfter = await artistName.boundingBox();
+    expect(checkboxBefore).not.toBeNull();
+    expect(checkboxAfter).not.toBeNull();
+    expect(nameBefore).not.toBeNull();
+    expect(nameAfter).not.toBeNull();
+    expect(Math.abs(checkboxBefore!.y - checkboxAfter!.y)).toBeLessThanOrEqual(
+      1
+    );
+    expect(Math.abs(nameBefore!.y - nameAfter!.y)).toBeLessThanOrEqual(1);
+    expect(checkboxAfter!.y + checkboxAfter!.height).toBeLessThanOrEqual(
+      viewport.height
+    );
+
     await artistName.fill("   ");
     await dialog.getByRole("checkbox").check();
     await expect(accept).toBeDisabled();

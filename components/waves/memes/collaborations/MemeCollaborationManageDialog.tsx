@@ -39,6 +39,7 @@ export function MemeCollaborationManageDialog({
   onClose,
   onInvite,
   onCancel,
+  onReinvite,
 }: {
   readonly state: ApiMemeCollaborationState;
   readonly canInvite: boolean;
@@ -47,8 +48,14 @@ export function MemeCollaborationManageDialog({
   readonly onSelectionChange: (profiles: ApiMemeCollaboratorProfile[]) => void;
   readonly onClose: () => void;
   readonly onInvite: () => void;
+  readonly onReinvite: (profile: ApiMemeCollaboratorProfile) => void;
   readonly onCancel: (invitation: ApiMemeCollaborationInvitation) => void;
 }) {
+  const occupiedCount = state.invitations.filter(
+    (item) =>
+      item.status === ApiMemeCollaborationInvitationStatusEnum.Pending ||
+      item.status === ApiMemeCollaborationInvitationStatusEnum.Accepted
+  ).length;
   const locale = useBrowserLocale();
   const headingRef = useRef<HTMLHeadingElement>(null);
   return (
@@ -120,6 +127,24 @@ export function MemeCollaborationManageDialog({
                         {t(locale, STATUS_MESSAGES[invitation.status])}
                       </output>
                     </div>
+                    {canInvite &&
+                      invitation.status ===
+                        ApiMemeCollaborationInvitationStatusEnum.Cancelled && (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          disabled={
+                            saving ||
+                            selected.length + occupiedCount >= 5 ||
+                            selected.some(
+                              (item) => item.id === invitation.profile.id
+                            )
+                          }
+                          onClick={() => onReinvite(invitation.profile)}
+                        >
+                          {t(locale, "memes.collaborations.inviteAgain")}
+                        </Button>
+                      )}
                     {!state.closed &&
                       invitation.status ===
                         ApiMemeCollaborationInvitationStatusEnum.Pending && (
@@ -145,7 +170,21 @@ export function MemeCollaborationManageDialog({
                 <MemeCollaboratorPicker
                   collaborators={selected}
                   onChange={onSelectionChange}
-                  excludedIds={state.invitations.map((item) => item.profile.id)}
+                  excludedIds={state.invitations
+                    .filter(
+                      (item) =>
+                        item.status !==
+                        ApiMemeCollaborationInvitationStatusEnum.Cancelled
+                    )
+                    .map((item) => item.profile.id)}
+                  declinedIds={state.invitations
+                    .filter(
+                      (item) =>
+                        item.status ===
+                        ApiMemeCollaborationInvitationStatusEnum.Declined
+                    )
+                    .map((item) => item.profile.id)}
+                  occupiedCount={occupiedCount}
                   disabled={saving}
                   compact
                 />

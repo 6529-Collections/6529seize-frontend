@@ -14,8 +14,9 @@ export default function NotificationMemeCollaboration({
   const context = notification.additional_context;
   const invited = context.event_type === "INVITED";
   const accepted = context.event_type === "ACCEPTED";
+  const cancelled = context.event_type === "CANCELLED";
   const actor =
-    (invited || accepted) && notification.related_identity?.handle
+    (invited || accepted || cancelled) && notification.related_identity?.handle
       ? notification.related_identity
       : null;
   const artworkHref =
@@ -42,6 +43,13 @@ export default function NotificationMemeCollaboration({
           ? "memes.collaborations.actorAccepted"
           : "memes.collaborations.recipientAccepted"
       );
+    if (cancelled)
+      return t(
+        locale,
+        actor
+          ? "memes.collaborations.actorCancelled"
+          : "memes.collaborations.recipientCancelledNotification"
+      );
     return t(locale, "memes.collaborations.updatedNotification");
   };
   const content = (
@@ -49,7 +57,7 @@ export default function NotificationMemeCollaboration({
       <span className="tw-text-sm tw-font-normal tw-text-iron-400">
         {message()}
       </span>
-      {(invited || accepted) &&
+      {(invited || accepted || cancelled) &&
         (artworkHref ? (
           <Link
             href={artworkHref}

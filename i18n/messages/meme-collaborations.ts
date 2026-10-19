@@ -4,6 +4,8 @@ export const MEME_COLLABORATION_MESSAGES = {
   "memes.collaborations.manage": "Manage collaborators",
   "memes.collaborations.pendingCount": "{count} pending",
   "memes.collaborations.done": "Done",
+  "memes.collaborations.reviewContents": "Artwork and terms",
+  "memes.collaborations.closeReview": "Close invitation review",
   "memes.collaborations.closeManage": "Close collaborator management",
   "memes.collaborations.emptyInvitations": "No invitations yet.",
   "memes.collaborations.review": "Review invitation",
@@ -20,14 +22,32 @@ export const MEME_COLLABORATION_MESSAGES = {
   "memes.collaborations.searchError":
     "Couldn’t load profiles. Try searching again.",
   "memes.collaborations.mintHint":
-    "Artists who accept before mint selection are included in the initial claim credits.",
+    "Artists who accept before the artwork is selected for minting are included in the initial claim credits.",
   "memes.collaborations.title": "Collaborators",
   "memes.collaborations.search": "Invite a collaborating artist",
   "memes.collaborations.hint":
     "Collaborators receive an invitation and appear publicly after accepting. Voting can start before they accept.",
   "memes.collaborations.remove": "Remove invitation for {handle}",
-  "memes.collaborations.invalid":
-    "Choose a different profile with a handle. You can invite up to 20 collaborators.",
+  "memes.collaborations.error.unavailable":
+    "This profile is unavailable or has no handle. Choose another profile.",
+  "memes.collaborations.error.self":
+    "You are already credited as the submitter.",
+  "memes.collaborations.error.duplicate":
+    "This profile is already selected or has an invitation.",
+  "memes.collaborations.error.declined":
+    "This person declined the invitation and cannot be invited again.",
+  "memes.collaborations.error.limit":
+    "You can have up to 5 pending or accepted collaborators.",
+  "memes.collaborations.capacity": "{count} of 5 collaborator slots used",
+  "memes.collaborations.inviteAgain": "Invite again",
+  "memes.collaborations.recipientCancelled":
+    "Your collaboration invitation was cancelled by the submitter.",
+  "memes.collaborations.recipientDeclined":
+    "You declined this collaboration invitation.",
+  "memes.collaborations.actorCancelled":
+    "cancelled your collaboration invitation for",
+  "memes.collaborations.recipientCancelledNotification":
+    "Your collaboration invitation was cancelled for",
   "memes.collaborations.loadError": "Couldn't load collaboration invitations.",
   "memes.collaborations.retry": "Try again",
   "memes.collaborations.invitations": "Collaboration invitations",
@@ -42,13 +62,14 @@ export const MEME_COLLABORATION_MESSAGES = {
   "memes.collaborations.pending": "Pending acceptance",
   "memes.collaborations.accepted": "Accepted",
   "memes.collaborations.declined": "Declined",
-  "memes.collaborations.cancelled": "Cancelled",
-  "memes.collaborations.closed": "Closed at mint selection",
+  "memes.collaborations.cancelled": "Invitation cancelled",
+  "memes.collaborations.closed":
+    "This invitation closed because the artwork was selected for minting.",
   "memes.collaborations.saved": "Collaboration invitation updated.",
   "memes.collaborations.saveError":
     "Couldn't update the invitation. Review the artwork and try again.",
   "memes.collaborations.forge":
-    "Claims Builder populated the initial credits from artists who accepted before mint selection. Admins can edit the final artwork and credits here.",
+    "Claims Builder populated the initial credits from artists who accepted before the artwork was selected for minting. Admins can edit the final artwork and credits here.",
   "memes.collaborations.invitedNotification":
     "You were invited to collaborate on an artwork.",
   "memes.collaborations.acceptedNotification":

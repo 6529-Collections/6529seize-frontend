@@ -26,10 +26,14 @@ export function MemeCollaboratorPicker({
   collaborators,
   onChange,
   excludedIds = EMPTY_PROFILE_IDS,
+  declinedIds = EMPTY_PROFILE_IDS,
+  occupiedCount = excludedIds.length,
   disabled = false,
   compact = false,
 }: {
   readonly excludedIds?: readonly string[];
+  readonly declinedIds?: readonly string[];
+  readonly occupiedCount?: number;
   readonly disabled?: boolean;
   readonly compact?: boolean;
   readonly collaborators: ApiMemeCollaboratorProfile[];
@@ -40,24 +44,32 @@ export function MemeCollaboratorPicker({
   const [expanded, setExpanded] = useState(collaborators.length > 0);
   const contentId = useId();
   const [resolving, setResolving] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<
+    "unavailable" | "self" | "duplicate" | "declined" | "limit" | null
+  >(null);
   const select = async (option: SelectableIdentityOption | null) => {
     if (!option || resolving || disabled) return;
     setResolving(true);
-    setError(false);
+    setError(null);
     try {
       const profile = await commonApiFetch<ApiIdentity>({
         endpoint: `identities/${encodeURIComponent(option.profileId ?? option.value)}`,
       });
-      if (
-        !profile.id ||
-        !profile.handle ||
-        profile.id === connectedProfile?.id ||
+      if (!profile.id || !profile.handle) {
+        setError("unavailable");
+        return;
+      }
+      let problem: typeof error = null;
+      if (profile.id === connectedProfile?.id) problem = "self";
+      else if (declinedIds.includes(profile.id)) problem = "declined";
+      else if (
         collaborators.some((item) => item.id === profile.id) ||
-        excludedIds.includes(profile.id) ||
-        collaborators.length + excludedIds.length >= 20
-      ) {
-        setError(true);
+        excludedIds.includes(profile.id)
+      )
+        problem = "duplicate";
+      else if (collaborators.length + occupiedCount >= 5) problem = "limit";
+      if (problem) {
+        setError(problem);
         return;
       }
       onChange([
@@ -70,7 +82,7 @@ export function MemeCollaboratorPicker({
         },
       ]);
     } catch {
-      setError(true);
+      setError("unavailable");
     } finally {
       setResolving(false);
     }
@@ -116,9 +128,7 @@ export function MemeCollaboratorPicker({
           iconPositionClassName="tw-top-6 -tw-translate-y-1/2"
           inputClassName="tw-h-12 tw-leading-5"
           disabled={
-            disabled ||
-            resolving ||
-            collaborators.length + excludedIds.length >= 20
+            disabled || resolving || collaborators.length + occupiedCount >= 5
           }
         />
         {!!collaborators.length && (
@@ -163,9 +173,14 @@ export function MemeCollaboratorPicker({
         )}
         {error && (
           <p role="alert" className="tw-m-0 tw-text-sm tw-text-rose-300">
-            {t(locale, "memes.collaborations.invalid")}
+            {t(locale, `memes.collaborations.error.${error}`)}
           </p>
         )}
+        <p className="tw-m-0 tw-text-sm tw-text-iron-400">
+          {t(locale, "memes.collaborations.capacity", {
+            count: occupiedCount + collaborators.length,
+          })}
+        </p>
         <p className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-300">
           {t(locale, "memes.collaborations.hint")}
         </p>
