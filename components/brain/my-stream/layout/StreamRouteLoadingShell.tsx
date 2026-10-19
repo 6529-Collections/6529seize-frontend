@@ -43,14 +43,13 @@ export default function StreamRouteLoadingShell({
     <div
       className="tailwind-scope tw-w-full tw-min-w-0 tw-flex-1 tw-bg-black tw-text-iron-50"
       style={routeLoadingMinHeightStyle}
-      role={variant === "wave" ? undefined : "status"}
-      aria-live={variant === "wave" ? undefined : "polite"}
-      aria-label={variant === "wave" ? undefined : ariaLabel}
       data-testid="stream-route-loading-shell"
     >
-      <span className="tw-sr-only" aria-hidden={variant === "wave"}>
-        {ariaLabel}
-      </span>
+      {variant !== "wave" && (
+        <output className="tw-sr-only" aria-label={ariaLabel}>
+          {ariaLabel}
+        </output>
+      )}
       <div
         className="tw-flex tw-min-w-0 tw-overflow-hidden"
         style={routeLoadingMinHeightStyle}

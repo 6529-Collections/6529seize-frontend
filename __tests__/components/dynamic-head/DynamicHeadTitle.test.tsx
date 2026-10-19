@@ -5,6 +5,7 @@ let mockTitle = "6529.io";
 let mockIsTitleOwned = false;
 let mockTitlePathname: string | null = "/network";
 let mockPathname = "/network";
+let mockSearchParams = new URLSearchParams();
 
 jest.mock("@/contexts/TitleContext", () => ({
   DEFAULT_TITLE: "6529.io",
@@ -17,6 +18,7 @@ jest.mock("@/contexts/TitleContext", () => ({
 
 jest.mock("next/navigation", () => ({
   usePathname: () => mockPathname,
+  useSearchParams: () => mockSearchParams,
 }));
 
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
@@ -36,6 +38,7 @@ describe("DynamicHeadTitle", () => {
     mockIsTitleOwned = false;
     mockTitlePathname = "/network";
     mockPathname = "/network";
+    mockSearchParams = new URLSearchParams();
   });
 
   it("re-asserts an owned title after a later head commit overwrites it", async () => {
@@ -210,6 +213,109 @@ describe("DynamicHeadTitle", () => {
       window.history.pushState({}, "", "/");
     }
   });
+
+  it.each(["drop=first", "serialNo=42"])(
+    "preserves streamed drop metadata while the background wave updates (%s)",
+    async (query) => {
+      mockPathname = "/waves/wave-1";
+      mockTitlePathname = mockPathname;
+      mockSearchParams = new URLSearchParams(query);
+      mockIsTitleOwned = true;
+      mockTitle = "Main Stage | Brain";
+      document.title = "TestIntern by @phoebeum";
+
+      const view = render(<DynamicHeadTitle />);
+      expect(document.title).toBe("TestIntern by @phoebeum");
+
+      mockTitle = "(3 new messages) Main Stage | Brain";
+      view.rerender(<DynamicHeadTitle />);
+      document.title = "Updated submission by @artist";
+      await flushObservers();
+      expect(document.title).toBe("Updated submission by @artist");
+    }
+  );
+
+  it("does not apply an unowned fallback over drop metadata", async () => {
+    mockPathname = "/waves/wave-1";
+    mockTitlePathname = mockPathname;
+    mockSearchParams = new URLSearchParams("drop=first");
+    document.title = "";
+    const view = render(<DynamicHeadTitle />);
+    expect(document.title).toBe("");
+    document.title = "TestIntern by @phoebeum";
+    mockTitle = "Waves | Brain";
+    view.rerender(<DynamicHeadTitle />);
+    await flushObservers();
+    expect(document.title).toBe("TestIntern by @phoebeum");
+  });
+
+  it("releases an old observer before a same-path drop navigation commits", async () => {
+    mockPathname = "/waves/wave-1";
+    mockTitlePathname = mockPathname;
+    mockIsTitleOwned = true;
+    mockTitle = "Main Stage | Brain";
+    window.history.replaceState({}, "", mockPathname);
+    const view = render(<DynamicHeadTitle />);
+    expect(document.title).toBe("Main Stage | Brain");
+
+    try {
+      // The browser moves and commits metadata before React can clean up
+      // the wave observer. That observer must already have released ownership.
+      window.history.pushState({}, "", `${mockPathname}?drop=first`);
+      document.title = "First submission by @artist";
+      await flushObservers();
+      expect(document.title).toBe("First submission by @artist");
+      // A background update can render before navigation's search params
+      // have caught up. It must not claim the new URL on the old wave's behalf.
+      mockTitle = "(1 new message) Main Stage | Brain";
+      view.rerender(<DynamicHeadTitle />);
+      await flushObservers();
+      expect(document.title).toBe("First submission by @artist");
+      mockTitle = "Main Stage | Brain";
+      mockSearchParams = new URLSearchParams("drop=first");
+      view.rerender(<DynamicHeadTitle />);
+
+      mockSearchParams = new URLSearchParams("drop=second");
+      window.history.pushState({}, "", `${mockPathname}?drop=second`);
+      document.title = "Second submission by @artist";
+      view.rerender(<DynamicHeadTitle />);
+      await flushObservers();
+      expect(document.title).toBe("Second submission by @artist");
+
+      // Close (or Back to the wave) restores chat ownership.
+      mockSearchParams = new URLSearchParams();
+      window.history.replaceState({}, "", mockPathname);
+      view.rerender(<DynamicHeadTitle />);
+      expect(document.title).toBe("Main Stage | Brain");
+      document.title = "Main Stage";
+      await flushObservers();
+      expect(document.title).toBe("Main Stage | Brain");
+
+      // Returning to a drop through history gives metadata ownership again.
+      mockSearchParams = new URLSearchParams("drop=first");
+      window.history.replaceState({}, "", `${mockPathname}?drop=first`);
+      document.title = "First submission by @artist";
+      view.rerender(<DynamicHeadTitle />);
+      await flushObservers();
+      expect(document.title).toBe("First submission by @artist");
+    } finally {
+      view.unmount();
+      window.history.replaceState({}, "", "/");
+    }
+  });
+
+  it.each(["/network", "/waves/wave-1/competitions/competition-1"])(
+    "keeps explicit title ownership outside wave metadata routes (%s)",
+    (pathname) => {
+      mockPathname = pathname;
+      mockTitlePathname = pathname;
+      mockSearchParams = new URLSearchParams("drop=first");
+      mockIsTitleOwned = true;
+      mockTitle = "Explicit page title";
+      render(<DynamicHeadTitle />);
+      expect(document.title).toBe("Explicit page title");
+    }
+  );
 
   it("stops re-asserting after unmount", async () => {
     mockTitle = "Network Metrics | Open Data";

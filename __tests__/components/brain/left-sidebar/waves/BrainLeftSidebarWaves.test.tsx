@@ -54,6 +54,14 @@ describe("BrainLeftSidebarWaves", () => {
     mockContentState = "ready";
     rerender(<BrainLeftSidebarWaves scrollContainerRef={{ current: null }} />);
     expect(getByTestId("list")).toHaveAttribute("data-fetching", "false");
+    // Re-authentication may resolve again during the same session. Once it
+    // settles, an empty result must not remain latched in the loading state.
+    mockContentState = "loading";
+    rerender(<BrainLeftSidebarWaves scrollContainerRef={{ current: null }} />);
+    expect(getByTestId("list")).toHaveAttribute("data-fetching", "true");
+    mockContentState = "ready";
+    rerender(<BrainLeftSidebarWaves scrollContainerRef={{ current: null }} />);
+    expect(getByTestId("list")).toHaveAttribute("data-fetching", "false");
   });
 
   it("calls fetchNextPage when list requests next page", () => {

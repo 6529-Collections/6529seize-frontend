@@ -66,6 +66,18 @@ describe("WebBrainLeftSidebarWaves", () => {
       <WebBrainLeftSidebarWaves scrollContainerRef={{ current: null }} />
     );
     expect(getByTestId("list")).toHaveAttribute("data-fetching", "false");
+    // Re-authentication may resolve again during the same session. Once it
+    // settles, an empty result must not remain latched in the loading state.
+    mockContentState = "loading";
+    rerender(
+      <WebBrainLeftSidebarWaves scrollContainerRef={{ current: null }} />
+    );
+    expect(getByTestId("list")).toHaveAttribute("data-fetching", "true");
+    mockContentState = "ready";
+    rerender(
+      <WebBrainLeftSidebarWaves scrollContainerRef={{ current: null }} />
+    );
+    expect(getByTestId("list")).toHaveAttribute("data-fetching", "false");
   });
 
   it("requests the main Waves list once when the sidebar mounts", () => {

@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 
+import styles from "@/components/waves/PublicWaveFeedGate.module.css";
 import PublicWaveFeedGate from "@/components/waves/PublicWaveFeedGate";
+import WaveChatLoading from "@/components/waves/WaveChatLoading";
 import { MyStreamWaveTab } from "@/types/waves.types";
 
 let mockContentTab = MyStreamWaveTab.CHAT;
@@ -40,12 +42,26 @@ describe("PublicWaveFeedGate", () => {
 
     expect(screen.getByText("Server public feed")).toBeInTheDocument();
     expect(screen.getByTestId("wave-chat-loading")).toBeInTheDocument();
+    expect(screen.getAllByRole("status")).toHaveLength(1);
     const interactiveSurface =
       screen.getByText("Interactive feed").parentElement;
     expect(interactiveSurface).toHaveAttribute("inert");
     expect(interactiveSurface).toHaveAttribute("aria-hidden", "true");
 
     expect(screen.getByText("Server public feed")).toBeInTheDocument();
+  });
+
+  it("exposes one status while the covered interactive chat has its own loader", () => {
+    render(
+      <PublicWaveFeedGate
+        waveId="wave-1"
+        fallback={<div>Server public feed</div>}
+      >
+        <WaveChatLoading showHeader={false} />
+      </PublicWaveFeedGate>
+    );
+    expect(screen.getAllByRole("status", { hidden: true })).toHaveLength(2);
+    expect(screen.getAllByRole("status")).toHaveLength(1);
   });
 
   it("keeps the server feed until the consuming chat has rendered, then hands off", () => {
@@ -86,8 +102,8 @@ describe("PublicWaveFeedGate", () => {
     );
     expect(html).toContain("Public post text");
     expect(html).toContain("wave-chat-loading");
-    expect(html).toContain('class="publicFeed"');
-    expect(html).not.toContain('class="enhanced"');
+    expect(html).toContain(`class="${styles["publicFeed"]}"`);
+    expect(html).not.toContain(styles["enhanced"]);
     expect(html).toContain("/waves/wave-1?drop=post");
   });
 

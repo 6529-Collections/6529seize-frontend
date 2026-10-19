@@ -25,8 +25,6 @@ export default function WaveChatLoading({
     <div
       className="tailwind-scope tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-bg-iron-950"
       data-testid="wave-chat-loading"
-      role="status"
-      aria-label={label}
     >
       {showHeader && (
         <div className="tw-flex tw-min-h-16 tw-shrink-0 tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 md:tw-min-h-[68px]">
@@ -57,7 +55,9 @@ export default function WaveChatLoading({
         </div>
       )}
       <div className="tw-flex tw-min-h-0 tw-flex-1 tw-items-center tw-justify-center tw-p-6">
-        <p className="tw-m-0 tw-text-sm tw-text-iron-400">{label}</p>
+        <output aria-label={label} className="tw-text-sm tw-text-iron-400">
+          {label}
+        </output>
       </div>
       {showComposer && (
         <div
