@@ -245,7 +245,7 @@ function ActionMenuItem({
       <button
         type="button"
         onClick={onClick}
-        className={`tw-flex tw-w-full tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm data-[focus]:tw-bg-iron-800 ${
+        className={`tw-flex tw-w-full tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm data-[focus]:tw-bg-iron-800 data-[focus]:tw-ring-2 data-[focus]:tw-ring-inset data-[focus]:tw-ring-primary-400 ${
           tone === "danger" ? "tw-text-rose-300" : "tw-text-iron-100"
         }`}
       >
@@ -273,13 +273,13 @@ function MessageActionsMenu({
     <Menu>
       <MenuButton
         aria-label={t(locale, "e2ee.message.actions")}
-        className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-300 tw-opacity-100 tw-transition-opacity data-[open]:tw-opacity-100 hover:tw-text-iron-50 focus-visible:tw-opacity-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:tw-opacity-0 desktop-hover:group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100"
+        className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-300 tw-opacity-100 tw-transition-opacity data-[open]:tw-opacity-100 hover:tw-text-iron-50 focus-visible:tw-opacity-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:tw-opacity-0 desktop-hover:group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100 touch-only:tw-opacity-100"
       >
         <EllipsisHorizontalIcon aria-hidden="true" className="tw-size-5" />
       </MenuButton>
       <MenuItems
         anchor="bottom end"
-        className="tailwind-scope tw-z-[1001] tw-mt-1 tw-w-56 tw-rounded-xl tw-bg-iron-950 tw-p-1.5 tw-shadow-2xl tw-ring-1 tw-ring-iron-700/80 focus:tw-outline-none"
+        className="tailwind-scope tw-z-[1001] tw-mt-1 tw-w-56 tw-rounded-xl tw-bg-iron-950 tw-p-1.5 tw-shadow-2xl tw-ring-1 tw-ring-iron-700/80 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
       >
         <div className="tw-flex tw-justify-between tw-gap-1 tw-px-1 tw-pb-1">
           {QUICK_REACTIONS.map((reaction) => {
@@ -293,7 +293,7 @@ function MessageActionsMenu({
                   onClick={() => actions.onReact(message, reaction, !mine)}
                   aria-pressed={mine}
                   aria-label={t(locale, "e2ee.message.reactWith", { reaction })}
-                  className={`tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-base data-[focus]:tw-bg-iron-800 ${
+                  className={`tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-base data-[focus]:tw-bg-iron-800 data-[focus]:tw-ring-2 data-[focus]:tw-ring-inset data-[focus]:tw-ring-primary-400 ${
                     mine ? "tw-ring-1 tw-ring-iron-700" : ""
                   }`}
                 >

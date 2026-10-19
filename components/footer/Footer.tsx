@@ -1,10 +1,16 @@
 import { AboutSection } from "@/types/enums";
 
+const FOOTER_LINK_CLASSES =
+  "tw-whitespace-nowrap tw-rounded-sm tw-py-2 tw-text-xs tw-font-medium tw-text-iron-500 tw-no-underline tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-text-iron-200 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-text-iron-200 motion-reduce:tw-transition-none";
+const FOOTER_ROW_CLASSES =
+  "tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-5 tw-gap-y-0 tw-px-6 md:tw-gap-x-6 md:tw-gap-y-2 md:tw-px-0";
+
 export default function Footer() {
   function printLink(href: string, text: string, newTab: boolean = false) {
     const target = newTab ? "_blank" : "_self";
     return (
       <a
+        className={FOOTER_LINK_CLASSES}
         href={href}
         target={target}
         rel={newTab ? "noopener noreferrer" : undefined}
@@ -23,6 +29,7 @@ export default function Footer() {
     const target = newTab ? "_blank" : "_self";
     return (
       <a
+        className={FOOTER_LINK_CLASSES}
         href={href}
         target={target}
         rel={newTab ? "noopener noreferrer" : undefined}
@@ -31,7 +38,7 @@ export default function Footer() {
         <img
           width="0"
           height="0"
-          style={{ height: "18px", width: "auto" }}
+          className="tw-h-[18px] tw-w-auto tw-align-middle tw-opacity-70 min-[801px]:tw-align-bottom"
           src={img}
           alt={text}
           loading="lazy"
@@ -43,10 +50,10 @@ export default function Footer() {
 
   return (
     <footer
-      className="tailwind-scope tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-900"
+      className="tailwind-scope tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-900 tw-bg-black tw-px-8 tw-pb-[calc(1.5rem+env(safe-area-inset-bottom))] tw-pt-8 tw-text-sm tw-leading-[18px] md:tw-pb-8"
       id="footer"
     >
-      <span className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-5 tw-gap-y-2">
+      <span className={FOOTER_ROW_CLASSES}>
         {printLinkWithImage(
           "https://x.com/punk6529",
           "/twitter.png",
@@ -63,7 +70,7 @@ export default function Footer() {
           "6529-Collections"
         )}
       </span>
-      <span className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-5 tw-gap-y-2">
+      <span className={FOOTER_ROW_CLASSES}>
         {printLink(
           `/about/${AboutSection.TERMS_OF_SERVICE}`,
           "Terms of Service"
