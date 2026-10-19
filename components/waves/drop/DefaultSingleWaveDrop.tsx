@@ -18,10 +18,8 @@ export const DefaultSingleWaveDrop: React.FC<DefaultSingleWaveDropProps> = ({
   drop: initialDrop,
   onClose,
 }) => {
-  const { drop, wave, extendedDrop, voteSummary } = useSingleWaveDropData(
-    initialDrop,
-    onClose
-  );
+  const { drop, wave, extendedDrop, voteSummary, isWaveError, refetchWave } =
+    useSingleWaveDropData(initialDrop, onClose);
   const {
     winningThreshold,
     winningThresholdMinDurationMs,
@@ -32,7 +30,15 @@ export const DefaultSingleWaveDrop: React.FC<DefaultSingleWaveDropProps> = ({
   });
 
   if (!extendedDrop || !wave || !drop) {
-    return <SingleWaveDropLoading onClose={onClose} />;
+    return (
+      <SingleWaveDropLoading
+        onClose={onClose}
+        isError={isWaveError}
+        onRetry={() => {
+          void refetchWave();
+        }}
+      />
+    );
   }
 
   return (

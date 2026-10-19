@@ -62,6 +62,16 @@ function getValidDropId(rawDropId: string | null): string | undefined {
     : undefined;
 }
 
+function getChatLayoutTransition(
+  prefersReducedMotion: boolean | null,
+  isInlineRightOpen: boolean
+): Transition {
+  if (prefersReducedMotion) return { duration: 0 };
+  return isInlineRightOpen
+    ? BRAIN_RIGHT_SIDEBAR_ENTER_TRANSITION
+    : BRAIN_RIGHT_SIDEBAR_EXIT_TRANSITION;
+}
+
 const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   children,
   defaultPath = "/waves",
@@ -193,12 +203,10 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   const canInlineRight = !isMobile && (isLargeDesktop || breakpoint === "LG");
   const rightVariant = canInlineRight ? "inline" : "overlay";
   const isInlineRightOpen = shouldShowRightSidebar && rightVariant === "inline";
-  let chatLayoutTransition: Transition = { duration: 0 };
-  if (!prefersReducedMotion) {
-    chatLayoutTransition = isInlineRightOpen
-      ? BRAIN_RIGHT_SIDEBAR_ENTER_TRANSITION
-      : BRAIN_RIGHT_SIDEBAR_EXIT_TRANSITION;
-  }
+  const chatLayoutTransition = getChatLayoutTransition(
+    prefersReducedMotion,
+    isInlineRightOpen
+  );
 
   // Handle error state for drop loading
   if (dropError && effectiveDropId) {

@@ -120,6 +120,11 @@ being created do not show the Share action.
 
 ## Failure and Recovery
 
+- Pending drop panels focus `Close`. `Escape` closes the panel while focus is
+  inside it; focus in a separate dialog does not dismiss the pending drop.
+- If the drop's wave details cannot load, the panel offers `Try again` and
+  `Close` instead of continuing to spin.
+
 - If clipboard access is blocked, copy can fail without `Copied!`; restore
   clipboard access and try again.
 - If a serial link targets older history, loading can take longer before the

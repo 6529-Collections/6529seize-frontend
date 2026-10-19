@@ -21,7 +21,11 @@ export const useSingleWaveDropData = (
     onClose();
   }, [onClose]);
 
-  const { data: wave } = useWaveData({
+  const {
+    data: wave,
+    isError: isWaveError,
+    refetch: refetchWave,
+  } = useWaveData({
     waveId: initialDrop.wave.id,
     onWaveNotFound,
   });
@@ -70,5 +74,5 @@ export const useSingleWaveDropData = (
     [drop, initialDrop.stableHash, initialDrop.stableKey]
   );
 
-  return { drop, wave, extendedDrop, voteSummary };
+  return { drop, wave, extendedDrop, voteSummary, isWaveError, refetchWave };
 };

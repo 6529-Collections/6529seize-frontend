@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemesSingleWaveDrop } from "@/components/waves/drop/MemesSingleWaveDrop";
 
 jest.mock("@/components/content-moderation/ContentModerationDropGate", () => ({
@@ -8,6 +8,8 @@ jest.mock("@/components/content-moderation/ContentModerationDropGate", () => ({
 }));
 
 const mockApprovalStatus = jest.fn();
+const mockRefetchWave = jest.fn();
+let mockWaveError = false;
 let mockWrapperProps: any;
 let mockInfoPanelProps: any;
 
@@ -30,7 +32,9 @@ jest.mock("@/components/waves/drop/MemesSingleWaveDropInfoPanel", () => ({
 jest.mock("@/components/waves/drop/useSingleWaveDropData", () => ({
   useSingleWaveDropData: () => ({
     drop: { id: "d1", wave: { id: "w1" } },
-    wave: { id: "w1" },
+    wave: mockWaveError ? undefined : { id: "w1" },
+    isWaveError: mockWaveError,
+    refetchWave: mockRefetchWave,
     extendedDrop: { id: "d1", wave: { id: "w1" } },
   }),
 }));
@@ -46,6 +50,8 @@ jest.mock("@/hooks/waves/useWaveMetadata", () => ({
 
 describe("MemesSingleWaveDrop", () => {
   beforeEach(() => {
+    mockWaveError = false;
+    mockRefetchWave.mockClear();
     mockWrapperProps = undefined;
     mockInfoPanelProps = undefined;
     mockApprovalStatus.mockReset();
@@ -74,6 +80,22 @@ describe("MemesSingleWaveDrop", () => {
 
     expect(screen.getByTestId("wrapper")).toBeInTheDocument();
     expect(screen.getByTestId("info-panel")).toHaveAttribute("data-wave", "w1");
+  });
+
+  it("offers recovery when wave metadata fails instead of spinning indefinitely", () => {
+    mockWaveError = true;
+    render(
+      <MemesSingleWaveDrop
+        drop={{ id: "d1", wave: { id: "w1" } } as any}
+        onClose={jest.fn()}
+      />
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "This drop could not be loaded."
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(mockRefetchWave).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId("wrapper")).not.toBeInTheDocument();
   });
 
   it("passes approval lock props into wrapper and info panel", () => {

@@ -7222,7 +7222,7 @@
         "Native-app touchscreen leaderboard cards show non-interactive media previews, using a provided poster image when available; open the submission for media controls. Media-format and additional-action-promise badges are informational, not separate tap or keyboard-focus actions.",
         "Browser views, including mobile browsers, retain their author profile links and media interactions; the native-app whole-card touch rule does not apply there.",
         "Wave-level sharing is handled in the wave header.",
-        "Opening a drop URL shows the single-drop panel immediately with Loading drop while data loads, rather than flashing the underlying wave. A failed load offers Try again and Close; Escape closes a pending panel."
+        "Opening a drop URL shows the single-drop panel immediately with Loading drop while data loads, rather than flashing the underlying wave. A failed drop or wave-details load offers Try again and Close. Pending panels focus Close; Escape closes the panel while focus is inside it and leaves separate dialogs alone."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],

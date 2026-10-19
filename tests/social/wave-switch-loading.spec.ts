@@ -544,7 +544,9 @@ for (const app of [false, true]) {
       await expect(pending.getByRole("alert")).toHaveText(
         "This drop could not be loaded."
       );
-      await pending.getByRole("button", { name: "Close panel" }).click();
+      const close = pending.getByRole("button", { name: "Close panel" });
+      await expect(close).toBeFocused();
+      await page.keyboard.press("Escape");
       await expect(page).not.toHaveURL(/drop=/);
     } finally {
       release();
