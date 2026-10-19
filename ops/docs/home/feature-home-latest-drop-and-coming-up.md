@@ -55,9 +55,15 @@ Use this page for visibility rules, state switches, and route targets.
 4. `Latest Drop` groups its details beside the artwork: title and artist;
    stats with `Edition Details` directly below; `Your allowance` followed by
    subscription awareness; and the countdown and mint action at the bottom.
+   `Edition`, `Status`, `Mint price`, and `Floor` share one row at 640px and
+   wider, with a two-column layout on smaller screens.
    Countdown states are `Upcoming`, `Live`, `Mint Complete`, or `Error`. When
    the card has an explicit Main Stage mapping, edition details also includes
    `Main Stage Submission` → `View`.
+   The countdown keeps each unit directly beside its number, for example `8m`
+   and `5s`. Days appear first when at least 24 hours remain. Zero
+   days, hours, and minutes are omitted; seconds always remain visible. The
+   timer strip keeps the same height across screen sizes.
    `Edition Details` opens and closes with a brief transition, or immediately
    when reduced motion is enabled. Collapsed links are excluded from keyboard
    navigation. File type and dimensions appear inside `Edition Details` when
@@ -72,9 +78,11 @@ Use this page for visibility rules, state switches, and route targets.
 7. `View all` opens `/waves/{waveId}` for that wave.
 
 On mobile, `Coming up` is a horizontal row: swipe to reveal the remaining
-cards, which snap into place. The next card peeks in from the right. Tablet
-uses two columns and desktop uses three. Status and mint date or TDH appear
-over the artwork; the title and artist links sit below. Artwork retains its
+cards, which snap into place with a stop at each card so a swipe does not
+skip over the next snap position. The next card peeks in from the right. Tablet
+uses two columns and desktop uses three. Status and mint date or TDH have a
+dedicated row above the artwork that wraps when needed without covering it;
+the title and artist links sit below. Artwork retains its
 proportions without cropping. Keyboard users can tab through the links to
 bring each card into view.
 
@@ -113,7 +121,8 @@ bring each card into view.
 - Main Stage submission and Meme card links are omitted when their explicit
   backend mapping is unavailable; home does not infer a relationship.
 - The home `Next Drop` artwork panel includes a labeled local-time `Mint Date`
-  alongside its wave, submission time, and rating details.
+  alongside its wave, submission time, and rating details. These statistics sit
+  below the title and creator, above `Your allowance` and subscriptions.
 - On phone browsers and the mobile app, still artwork fills the panel width
   at its natural aspect ratio and keeps its details below the image.
 - On iOS outside the US, the countdown `Mint` button is hidden.

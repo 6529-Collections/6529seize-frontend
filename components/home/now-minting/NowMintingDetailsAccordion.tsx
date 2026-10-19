@@ -62,7 +62,7 @@ export default function NowMintingDetailsAccordion({
     <details className={clsx("tw-group", styles["disclosure"])}>
       <summary
         data-home-action="Toggle edition details"
-        className="tw-flex tw-min-h-6 tw-cursor-pointer tw-list-none tw-items-center tw-gap-2 tw-rounded-sm tw-text-sm tw-font-medium tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-50 motion-safe:tw-transition-colors motion-safe:tw-duration-200 [&::-webkit-details-marker]:tw-hidden"
+        className="tw-flex tw-min-h-6 tw-cursor-pointer tw-list-none tw-items-center tw-gap-2 tw-rounded-sm tw-text-sm tw-font-medium tw-text-iron-400 focus-visible:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-50 motion-safe:tw-transition-colors motion-safe:tw-duration-200 motion-safe:tw-ease-out [&::-webkit-details-marker]:tw-hidden"
       >
         <span>{t(locale, "home.nowMinting.editionDetails.toggle")}</span>
         <ChevronRightIcon
@@ -84,7 +84,7 @@ export default function NowMintingDetailsAccordion({
           <Link
             data-home-action="View distribution plan"
             href={`/the-memes/${nftId}/distribution`}
-            className="tw-text-iron-200 hover:tw-text-iron-50 motion-safe:tw-transition-colors motion-safe:tw-duration-200"
+            className="tw-rounded-sm tw-text-iron-200 focus-visible:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300 motion-safe:tw-transition-colors motion-safe:tw-duration-200 motion-safe:tw-ease-out"
           >
             {t(locale, "home.nowMinting.editionDetails.view")}
           </Link>

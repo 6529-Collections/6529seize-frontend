@@ -50,22 +50,22 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
 
   return (
     <div className="tw-group tw-min-w-0 tw-snap-start tw-text-left">
-      <div className="tw-relative tw-flex tw-h-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-transition-[border-color,transform] tw-duration-200 desktop-hover:hover:tw-border-white/20 motion-reduce:tw-transition-none motion-safe:md:desktop-hover:hover:-tw-translate-y-0.5">
-        <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-top-0 tw-z-10 tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-2 tw-bg-gradient-to-b tw-from-black/70 tw-to-transparent tw-px-3.5 tw-pb-7 tw-pt-3.5">
-          <div className="tw-flex tw-items-center tw-gap-2 tw-rounded-md tw-bg-black/60 tw-px-2 tw-py-1">
+      <div className="tw-relative tw-flex tw-h-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-transition-colors tw-duration-200 tw-ease-out focus-within:tw-border-white/20 desktop-hover:hover:tw-border-white/20 motion-reduce:tw-transition-none">
+        <div className="tw-flex tw-shrink-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-px-3.5 tw-py-3">
+          <div className="tw-flex tw-items-center tw-gap-2 tw-px-2">
             <span
               aria-hidden="true"
               className="tw-size-1.5 tw-shrink-0 tw-rounded-full tw-bg-emerald-500"
             />
-            <span className="tw-text-[10.5px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.06em] tw-text-emerald-400">
+            <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-emerald-400">
               NEXT MINT
             </span>
           </div>
-          <span className="tw-rounded-md tw-bg-black/60 tw-px-2 tw-py-1 tw-text-[11px] tw-font-medium tw-tabular-nums tw-leading-4 tw-text-white/90 md:tw-text-xs">
+          <span className="tw-px-2 tw-text-xs tw-font-medium tw-tabular-nums tw-leading-4 tw-text-iron-500">
             {timestamp}
           </span>
         </div>
-        <div className="tw-relative tw-flex tw-aspect-[4/5] tw-w-full tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950">
+        <div className="tw-relative tw-flex tw-aspect-[3/4] tw-w-full tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950">
           <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center [&>div]:tw-mx-0">
             {media ? (
               <DropListItemContentMedia
@@ -99,7 +99,7 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
                 isDirectMessage: false,
                 isApp: false,
               })}
-              className="tw-m-0 tw-line-clamp-2 tw-min-h-6 tw-min-w-0 tw-flex-1 tw-text-[15px] tw-font-semibold tw-leading-6 tw-tracking-tight tw-text-white tw-no-underline focus-visible:tw-rounded-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 md:tw-text-base"
+              className="tw-m-0 tw-line-clamp-2 tw-min-h-6 tw-min-w-0 tw-flex-1 tw-text-[17px] tw-font-semibold tw-leading-[1.3] tw-tracking-[-0.015em] tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-rounded-sm focus-visible:tw-text-iron-300 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none md:tw-text-lg"
             >
               {title}
             </Link>
@@ -107,14 +107,14 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
           <Link
             data-home-action="Open artist profile"
             href={`/${author.handle ?? author.primary_address}`}
-            className="tw-flex tw-min-h-6 tw-min-w-0 tw-items-center tw-gap-2 tw-no-underline focus-visible:tw-rounded-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
+            className="tw-group/artist tw-flex tw-min-h-6 tw-min-w-0 tw-items-center tw-gap-2 tw-no-underline focus-visible:tw-rounded-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
           >
             <ProfileAvatar
               pfpUrl={author.pfp}
               alt={author.handle ?? "Artist"}
               size={ProfileBadgeSize.SMALL}
             />
-            <span className="tw-min-w-0 tw-truncate tw-text-xs tw-text-iron-400 desktop-hover:hover:tw-text-white">
+            <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors tw-duration-200 tw-ease-out group-focus-visible/artist:tw-text-white desktop-hover:group-hover/artist:tw-text-white motion-reduce:tw-transition-none">
               {author.handle ?? "Anonymous"}
             </span>
           </Link>
