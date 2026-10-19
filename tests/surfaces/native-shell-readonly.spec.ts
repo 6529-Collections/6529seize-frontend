@@ -739,26 +739,16 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         "true"
       );
     }
-    const summaryIsCompact = (target = summary) =>
-      target.evaluate((element) => {
-        for (
-          let parent = element.parentElement;
-          parent;
-          parent = parent.parentElement
-        ) {
-          const style = getComputedStyle(parent);
-          if (
-            style.position === "absolute" &&
-            style.clip !== "auto" &&
-            parent.getBoundingClientRect().width <= 1
-          )
-            return true;
-        }
-        return false;
-      });
-    await expect.poll(summaryIsCompact).toBe(true);
-    // Compact the visual footer without removing its summary from the
-    // accessibility tree; preview actions become visible when focused.
+    // The mobile summary scrolls after the editor, as requested, instead of
+    // occupying or being visually hidden within the fixed action footer.
+    const summaryCard = filter
+      .getByRole("region", { name: "Level", exact: true })
+      .locator("[data-group-criteria-summary]");
+    await expect(summaryCard).toContainText("Level at least 10");
+    await expect
+      .poll(() => summaryCard.evaluate((element) => element.clientHeight))
+      .toBeGreaterThan(1);
+    await expect(summary).toBeVisible();
     await expect
       .poll(() => filter.ariaSnapshot())
       .toContain("Level at least 10");
@@ -809,7 +799,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await expect(preview).toBeFocused();
     await expect(preview).toBeInViewport({ ratio: 1 });
     await input.focus();
-    await expect.poll(summaryIsCompact).toBe(true);
+    await expect(summary).toBeVisible();
     await filter.getByRole("button", { name: "Back", exact: true }).click();
     await filter
       .getByRole("group", { name: "Filter Network", exact: true })
