@@ -219,10 +219,10 @@ Other assessments remain in the occasional moderator queue without changing
 the post's global visibility.
 
 Members of the **6529 Dev Team** group can review open reports in **WatchTower** at
-`/content-moderation`, which defaults to **Open reports**. All tabs share the
+`/content-moderation`, which defaults to **Needs review**. All tabs share the
 site's bordered page frame and consistent content padding:
 
-- **Open reports**: `/content-moderation/open-reports`
+- **Needs review**: `/content-moderation/needs-review` (older `/content-moderation/open-reports` links also open this queue)
 - **Checks**: `/content-moderation/checks`
 - **Resolved reports**: `/content-moderation/resolved-reports`
 - **Suspended profiles**: `/content-moderation/suspended-profiles`
@@ -233,6 +233,17 @@ refresh open the selected tab, and browser Back and Forward restore previous
 tab selections. Arrow keys, Home, and End move focus between tabs; Enter or
 Space activates the focused tab. Unknown tab URLs show the not-found page.
 On narrow screens, a labelled selector switches between the same views.
+
+**Needs review** combines open user reports and automated checks awaiting human
+review. Cards identify **User report** or **Automated check** and open the
+appropriate evidence and actions. Each source loads more independently. The tab
+badge and **Items needing review** summary show the same total: open reports plus
+checks marked Needs review. They count separate tasks, so a report and a check
+about the same post can both appear. Marking a check reviewed does not resolve
+its open reports; each remains until its own review task is completed. **Checks**
+retains the full history, including reviewed checks. An empty queue is shown only
+when both sources load successfully and contain no items; a failed source shows
+an error and **Retry** while the other source remains available.
 
 The summary shows items needing review, quarantined posts, rejected checks
 today, and evaluator failures today. These totals cover all items independently

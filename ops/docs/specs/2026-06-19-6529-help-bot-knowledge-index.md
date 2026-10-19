@@ -11,7 +11,9 @@ The `content-moderation.controls` record covers WatchTower’s Deleted state,
 reasoned and confirmed resolution of open reports for a deleted post, retained
 evidence and history, and the distinction from Mark reviewed. It also describes
 the dedicated original-post links on report cards and published-post check
-details, including deleted-post and missing-context notices.
+details, including deleted-post and missing-context notices. Needs review is the
+default queue for labeled user reports and automated checks, with a shared
+summary/tab total and a compatible older open-reports link.
 
 The `waves.drop.editing` record covers author-only editing, the normal edit
 window, and unlimited editing of the wave's current pinned description drop.

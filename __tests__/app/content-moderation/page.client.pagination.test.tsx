@@ -2,6 +2,11 @@ let mockConnectionState = "connected";
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({ connectionState: mockConnectionState }),
 }));
+import {
+  fetchModerationChecks,
+  fetchModerationCounts,
+} from "@/services/api/moderation-checks-api";
+import { checkFixture } from "./checks/check.fixture";
 import BlockActivityFeed from "@/app/content-moderation/BlockActivityFeed";
 import ContentModerationPageClient from "@/app/content-moderation/page.client";
 import {
@@ -75,6 +80,7 @@ function render(ui: ReactNode) {
 
 let mockFetchingProfile = false;
 let mockCanModerate = true;
+let mockOpenReportCount = 51;
 let mockAccessState = "success";
 const mockRefetchAccess = jest.fn();
 let mockProfileId: string | null = "moderator-1";
@@ -97,7 +103,7 @@ jest.mock("@/hooks/content-moderation/useContentModeratorAccess", () => ({
     data: {
       moderator: mockCanModerate,
       has_open_reports: true,
-      open_report_count: 51,
+      open_report_count: mockOpenReportCount,
       resolved_report_count: 0,
       suspended_profile_count: 0,
     },
@@ -215,10 +221,209 @@ describe("ContentModerationPageClient pagination", () => {
     jest.mocked(fetchSuspendedModerationProfiles).mockResolvedValue([]);
     mockFetchingProfile = false;
     mockCanModerate = true;
+    mockOpenReportCount = 51;
+    jest
+      .mocked(fetchModerationChecks)
+      .mockReset()
+      .mockResolvedValue({ items: [], next_cursor: null });
+    jest.mocked(fetchModerationCounts).mockReset().mockResolvedValue({
+      needs_review: 0,
+      quarantined: 0,
+      rejected_today: 0,
+      evaluator_failures_today: 0,
+    });
     mockAccessState = "success";
     mockProfileId = "moderator-1";
     mockActiveProfileProxy = null;
     mockBlockActivityIntersection = null;
+  });
+
+  function renderReviewQueue(
+    client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  ) {
+    return render(
+      <QueryClientProvider client={client}>
+        <ContentModerationPageClient />
+      </QueryClientProvider>
+    );
+  }
+
+  it("shows the pending automated check when there are no user reports and shares the summary total", async () => {
+    mockOpenReportCount = 0;
+    mockFetchContentModerationQueue.mockResolvedValue([]);
+    jest.mocked(fetchModerationCounts).mockResolvedValue({
+      needs_review: 1,
+      quarantined: 0,
+      rejected_today: 0,
+      evaluator_failures_today: 0,
+    });
+    jest
+      .mocked(fetchModerationChecks)
+      .mockResolvedValue({ items: [checkFixture().check], next_cursor: null });
+    renderReviewQueue();
+    expect(await screen.findByText("Synthetic test content")).toBeVisible();
+    expect(screen.getByText("Automated check")).toBeVisible();
+    expect(
+      await screen.findByRole("tab", {
+        name: "Needs review (1)",
+        selected: true,
+      })
+    ).toBeVisible();
+    expect(
+      screen.getByText("Items needing review").nextElementSibling
+    ).toHaveTextContent("1");
+    expect(screen.getByRole("link", { name: "Review check" })).toHaveAttribute(
+      "href",
+      "/content-moderation/checks?check=check-1"
+    );
+    expect(
+      screen.queryByText("There are no items needing review.")
+    ).not.toBeInTheDocument();
+    expect(fetchModerationChecks).toHaveBeenCalledWith(
+      { review_status: "NEEDS_REVIEW" },
+      undefined,
+      expect.any(AbortSignal)
+    );
+  });
+
+  it("labels both kinds of review task and counts both even when they concern the same post", async () => {
+    mockOpenReportCount = 1;
+    mockFetchContentModerationQueue.mockResolvedValue([createQueueItem(1)]);
+    jest.mocked(fetchModerationCounts).mockResolvedValue({
+      needs_review: 1,
+      quarantined: 0,
+      rejected_today: 0,
+      evaluator_failures_today: 0,
+    });
+    jest.mocked(fetchModerationChecks).mockResolvedValue({
+      items: [{ ...checkFixture().check, published_subject_id: "drop-1" }],
+      next_cursor: null,
+    });
+    renderReviewQueue();
+    expect(
+      await screen.findByRole("tab", { name: "Needs review (2)" })
+    ).toBeVisible();
+    expect(await screen.findByText("User report")).toBeVisible();
+    expect(screen.getByText("Automated check")).toBeVisible();
+    expect(
+      screen.getByText("Items needing review").nextElementSibling
+    ).toHaveTextContent("2");
+  });
+
+  it("paginates pending checks independently of reports", async () => {
+    mockFetchContentModerationQueue.mockResolvedValue([]);
+    jest
+      .mocked(fetchModerationChecks)
+      .mockResolvedValueOnce({
+        items: [checkFixture().check],
+        next_cursor: "next-check",
+      })
+      .mockResolvedValueOnce({
+        items: [
+          { ...checkFixture().check, id: "check-2", preview: "Second check" },
+        ],
+        next_cursor: null,
+      });
+    renderReviewQueue();
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Load more checks" })
+    );
+    expect(await screen.findByText("Second check")).toBeVisible();
+    expect(fetchModerationChecks).toHaveBeenLastCalledWith(
+      { review_status: "NEEDS_REVIEW" },
+      "next-check",
+      expect.any(AbortSignal)
+    );
+    expect(mockFetchContentModerationQueue).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps reports visible on check failure and retries without showing an empty queue", async () => {
+    mockFetchContentModerationQueue.mockResolvedValue([createQueueItem(1)]);
+    jest
+      .mocked(fetchModerationChecks)
+      .mockRejectedValueOnce(new Error("unavailable"))
+      .mockResolvedValueOnce({
+        items: [checkFixture().check],
+        next_cursor: null,
+      });
+    renderReviewQueue();
+    expect(await screen.findByText("content-1")).toBeVisible();
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Couldn't load checks"
+    );
+    expect(
+      screen.queryByText("There are no items needing review.")
+    ).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(await screen.findByText("Synthetic test content")).toBeVisible();
+  });
+
+  it.each([false, true])(
+    "shows and retries report failures while checks succeed (hasCheck=%s)",
+    async (hasCheck) => {
+      mockFetchContentModerationQueue
+        .mockRejectedValueOnce(new Error("report queue unavailable"))
+        .mockResolvedValueOnce([createQueueItem(1)]);
+      jest
+        .mocked(fetchModerationChecks)
+        .mockResolvedValue({
+          items: hasCheck ? [checkFixture().check] : [],
+          next_cursor: null,
+        });
+      renderReviewQueue();
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "Couldn't load WatchTower."
+      );
+      expect(
+        screen.queryByText("There are no items needing review.")
+      ).not.toBeInTheDocument();
+      if (hasCheck)
+        expect(await screen.findByText("Synthetic test content")).toBeVisible();
+      await userEvent.click(screen.getByRole("button", { name: "Retry" }));
+      expect(await screen.findByText("content-1")).toBeVisible();
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      expect(fetchModerationChecks).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it("refreshes the pending queue and its shared total after a review invalidates moderation data", async () => {
+    mockOpenReportCount = 0;
+    mockFetchContentModerationQueue.mockResolvedValue([]);
+    jest
+      .mocked(fetchModerationCounts)
+      .mockResolvedValueOnce({
+        needs_review: 1,
+        quarantined: 0,
+        rejected_today: 0,
+        evaluator_failures_today: 0,
+      })
+      .mockResolvedValue({
+        needs_review: 0,
+        quarantined: 0,
+        rejected_today: 0,
+        evaluator_failures_today: 0,
+      });
+    jest
+      .mocked(fetchModerationChecks)
+      .mockResolvedValueOnce({
+        items: [checkFixture().check],
+        next_cursor: null,
+      })
+      .mockResolvedValue({ items: [], next_cursor: null });
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    renderReviewQueue(client);
+    expect(await screen.findByText("Synthetic test content")).toBeVisible();
+    await act(async () => {
+      await client.invalidateQueries({
+        queryKey: BLOCK_ACTIVITY_QUERY_KEY.slice(0, 1),
+      });
+    });
+    expect(
+      await screen.findByText("There are no items needing review.")
+    ).toBeVisible();
+    expect(screen.getByRole("tab", { name: "Needs review (0)" })).toBeVisible();
   });
 
   it("hides stale authorization on failure and retries without treating it as denial", async () => {
@@ -286,6 +491,7 @@ describe("ContentModerationPageClient pagination", () => {
 
   describe.each(["proxy", "signed out"])("when %s", (identity) => {
     it.each([
+      "needs-review",
       "open-reports",
       "resolved-reports",
       "suspended-profiles",
@@ -295,6 +501,10 @@ describe("ContentModerationPageClient pagination", () => {
       async (tab) => {
         globalThis.history.replaceState(null, "", `/content-moderation/${tab}`);
         mockFetchContentModerationQueue.mockResolvedValue([createQueueItem(1)]);
+        jest.mocked(fetchModerationChecks).mockResolvedValue({
+          items: [checkFixture().check],
+          next_cursor: null,
+        });
         mockFetchContentModerationBlockActivity.mockResolvedValue([
           createBlockActivityItem(1),
         ]);
@@ -329,6 +539,9 @@ describe("ContentModerationPageClient pagination", () => {
         expect(screen.getByText("No moderator access")).toBeVisible();
         expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
         expect(screen.queryByRole("tabpanel")).not.toBeInTheDocument();
+        expect(
+          screen.queryByText("Synthetic test content")
+        ).not.toBeInTheDocument();
         expect(screen.queryByRole("link")).not.toBeInTheDocument();
         jest.clearAllMocks();
         mockFetchContentModerationQueue.mockReset();
@@ -340,6 +553,8 @@ describe("ContentModerationPageClient pagination", () => {
         expect(mockFetchContentModerationQueue).not.toHaveBeenCalled();
         expect(mockFetchContentModerationBlockActivity).not.toHaveBeenCalled();
         expect(fetchSuspendedModerationProfiles).not.toHaveBeenCalled();
+        expect(fetchModerationChecks).not.toHaveBeenCalled();
+        expect(fetchModerationCounts).not.toHaveBeenCalled();
       }
     );
   });
@@ -451,7 +666,8 @@ describe("ContentModerationPageClient pagination", () => {
   );
 
   it.each([
-    ["open-reports", "Open reports", "There are no open reports."],
+    ["needs-review", "Needs review", "There are no items needing review."],
+    ["open-reports", "Needs review", "There are no items needing review."],
     ["resolved-reports", "Resolved reports", "There are no resolved reports."],
     [
       "suspended-profiles",
@@ -523,7 +739,7 @@ describe("ContentModerationPageClient pagination", () => {
     act(() => globalThis.history.back());
     await waitFor(() =>
       expect(
-        screen.getByRole("tab", { name: /Open reports/, selected: true })
+        screen.getByRole("tab", { name: /Needs review/, selected: true })
       ).toBeVisible()
     );
     act(() => globalThis.history.forward());
@@ -560,7 +776,7 @@ describe("ContentModerationPageClient pagination", () => {
         <ContentModerationPageClient />
       </QueryClientProvider>
     );
-    screen.getByRole("tab", { name: /Open reports/ }).focus();
+    screen.getByRole("tab", { name: /Needs review/ }).focus();
     await userEvent.keyboard("{ArrowLeft}");
     expect(screen.getByRole("tab", { name: "Block activity" })).toHaveFocus();
     expect(globalThis.location.pathname).toBe("/content-moderation");
@@ -781,12 +997,12 @@ describe("ContentModerationPageClient pagination", () => {
         name: "WatchTower - Content Moderation",
       })
     ).toBeVisible();
-    expect(screen.getByRole("tab", { name: "Open reports (51)" })).toHaveClass(
+    expect(screen.getByRole("tab", { name: "Needs review (51)" })).toHaveClass(
       "tw-flex-1",
       "sm:tw-flex-none"
     );
-    expect(screen.getByText("Open")).toHaveClass("sm:tw-hidden");
-    expect(screen.getByText("Open reports")).toHaveClass(
+    expect(screen.getByText("Review")).toHaveClass("sm:tw-hidden");
+    expect(screen.getByText("Needs review")).toHaveClass(
       "tw-hidden",
       "sm:tw-inline"
     );
@@ -837,7 +1053,7 @@ describe("ContentModerationPageClient pagination", () => {
       </QueryClientProvider>
     );
 
-    await screen.findByText("There are no open reports.");
+    await screen.findByText("There are no items needing review.");
     await userEvent.click(
       screen.getByRole("tab", { name: /Resolved reports/ })
     );

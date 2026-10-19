@@ -21,6 +21,7 @@ import {
   getAiRecommendationText,
 } from "@/services/content-moderation/content-moderation-formatters";
 import {
+  MODERATION_CHECKS_QUERY_KEY,
   MODERATION_QUEUE_QUERY_KEY,
   SUSPENDED_MODERATION_PROFILES_QUERY_KEY,
 } from "@/services/content-moderation/content-moderation-query";
@@ -30,6 +31,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense, useMemo } from "react";
 import ModerationChecks from "./checks/ModerationChecks";
+import PendingModerationChecks from "./checks/PendingModerationChecks";
+import { fetchModerationChecks } from "@/services/api/moderation-checks-api";
+import { ApiModerationCheckReviewStatusEnum } from "@/generated/models/ApiModerationCheck";
+import { useModerationReviewCounts } from "@/hooks/content-moderation/useModerationReviewCounts";
 import ModerationCheckCounts from "./checks/ModerationCheckCounts";
 import {
   formatEvidence,
@@ -59,8 +64,8 @@ function normalizePathname(pathname: string | null): string {
   return pathname ?? "";
 }
 
-function isReportsTab(tab: ModerationTab): tab is "OPEN" | "RESOLVED" {
-  return tab === "OPEN" || tab === "RESOLVED";
+function isReportsTab(tab: ModerationTab): tab is "REVIEW" | "RESOLVED" {
+  return tab === "REVIEW" || tab === "RESOLVED";
 }
 
 function getModeratorPermissions(
@@ -95,6 +100,40 @@ function getActiveDataState(
   return queueState;
 }
 
+function ModerationQueueEmptyState({
+  tab,
+  reportCount,
+  pendingCheckCount,
+  reportsState,
+  checksLoaded,
+}: {
+  readonly tab: ModerationTab;
+  readonly reportCount: number;
+  readonly pendingCheckCount: number;
+  readonly reportsState: ModerationDataState;
+  readonly checksLoaded: boolean;
+}) {
+  const locale = useBrowserLocale();
+  if (
+    !isReportsTab(tab) ||
+    reportCount > 0 ||
+    reportsState.isLoading ||
+    reportsState.isError
+  )
+    return null;
+  if (tab === "REVIEW" && (!checksLoaded || pendingCheckCount > 0)) return null;
+  return (
+    <p className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-iron-400">
+      {t(
+        locale,
+        tab === "REVIEW"
+          ? "checks.queue.empty"
+          : "contentModeration.moderator.emptyResolved"
+      )}
+    </p>
+  );
+}
+
 function ModerationQueueCard({
   item,
 }: {
@@ -118,6 +157,11 @@ function ModerationQueueCard({
 
   return (
     <article className="tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5">
+      {!isResolved && (
+        <p className="tw-mb-3 tw-mt-0 tw-text-xs tw-font-semibold tw-text-iron-400">
+          {t(locale, "checks.queue.userReport")}
+        </p>
+      )}
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 tw-text-xs tw-text-iron-200">
         <span className="tw-inline-flex tw-items-center tw-gap-2">
           {authorPfp ? (
@@ -340,7 +384,7 @@ export default function ContentModerationPageClient() {
   const profileId = connectedProfile?.id;
   const pathname = usePathname();
   const activeTab =
-    getModerationTab(normalizePathname(pathname).split("/")[2]) ?? "OPEN";
+    getModerationTab(normalizePathname(pathname).split("/")[2]) ?? "REVIEW";
   const accessQuery = useContentModeratorAccess();
   const hasModeratorIdentity =
     Boolean(connectedProfile?.id) &&
@@ -352,6 +396,27 @@ export default function ContentModerationPageClient() {
       hasModeratorIdentity,
       isAuthResolving(connectionState, fetchingProfile)
     );
+  const countsQuery = useModerationReviewCounts(
+    profileId,
+    moderatorContentReady,
+    accessQuery.isSuccess ? accessQuery.data?.open_report_count : undefined
+  );
+  const pendingChecksQuery = useInfiniteQuery({
+    queryKey: [...MODERATION_CHECKS_QUERY_KEY, profileId, "needs-review"],
+    queryFn: ({ pageParam, signal }) =>
+      fetchModerationChecks(
+        { review_status: ApiModerationCheckReviewStatusEnum.NeedsReview },
+        pageParam,
+        signal
+      ),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (page) => page.next_cursor ?? undefined,
+    enabled: moderatorContentReady && activeTab === "REVIEW",
+    retry: false,
+    gcTime: 0,
+  });
+  const pendingChecks =
+    pendingChecksQuery.data?.pages.flatMap((page) => page.items) ?? [];
   const reportsTabActive = isReportsTab(activeTab);
   const reportsView = activeTab === "RESOLVED" ? "RESOLVED" : "OPEN";
   const queueQuery = useInfiniteQuery({
@@ -440,12 +505,12 @@ export default function ContentModerationPageClient() {
           />
         )}
       {moderatorContentReady && profileId && (
-        <ModerationCheckCounts key={profileId} profileId={profileId} />
+        <ModerationCheckCounts query={countsQuery} />
       )}
       {moderatorContentReady && (
         <ContentModerationTabs
           activeTab={activeTab}
-          openCount={accessQuery.data?.open_report_count ?? 0}
+          reviewCount={countsQuery.needsReviewCount}
           resolvedCount={accessQuery.data?.resolved_report_count ?? 0}
           suspendedCount={accessQuery.data?.suspended_profile_count ?? 0}
         />
@@ -470,29 +535,57 @@ export default function ContentModerationPageClient() {
             <ModerationChecks key={profileId} profileId={profileId} />
           </Suspense>
         )}
+        {moderatorContentReady &&
+          activeTab === "REVIEW" &&
+          pendingChecksQuery.isLoading &&
+          !activeDataState.isLoading && (
+            <output className="tw-mt-8 tw-block tw-text-sm tw-text-iron-400">
+              {t(locale, "checks.loading")}
+            </output>
+          )}
+        {moderatorContentReady &&
+          activeTab === "REVIEW" &&
+          pendingChecksQuery.isError && (
+            <div role="alert" className="tw-mt-6 tw-text-sm tw-text-iron-300">
+              <p>{t(locale, "checks.error")}</p>
+              <button
+                type="button"
+                className="tw-min-h-11 tw-rounded-lg tw-bg-iron-900 tw-px-4 tw-text-iron-100 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                onClick={() => void pendingChecksQuery.refetch()}
+              >
+                {t(locale, "checks.retry")}
+              </button>
+            </div>
+          )}
         {moderatorContentReady && activeDataState.isLoading && (
           <output className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-iron-400">
             {t(locale, "contentModeration.moderator.loading")}
           </output>
         )}
         {moderatorContentReady && activeDataState.isError && (
-          <p role="alert" className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-red">
-            {t(locale, "contentModeration.moderator.loadError")}
-          </p>
+          <div role="alert" className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-red">
+            <p>{t(locale, "contentModeration.moderator.loadError")}</p>
+            {reportsTabActive && (
+              <button
+                type="button"
+                className="tw-min-h-11 tw-rounded-lg tw-bg-iron-900 tw-px-4 tw-text-iron-100 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                disabled={queueQuery.isFetching}
+                onClick={() => void queueQuery.refetch()}
+              >
+                {t(locale, "checks.retry")}
+              </button>
+            )}
+          </div>
         )}
-        {moderatorContentReady &&
-          reportsTabActive &&
-          queueItems.length === 0 &&
-          !queueQuery.isLoading && (
-            <p className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-iron-400">
-              {t(
-                locale,
-                activeTab === "OPEN"
-                  ? "contentModeration.moderator.empty"
-                  : "contentModeration.moderator.emptyResolved"
-              )}
-            </p>
-          )}
+        {moderatorContentReady && (
+          <ModerationQueueEmptyState
+            tab={activeTab}
+            reportCount={queueItems.length}
+            pendingCheckCount={pendingChecks.length}
+            reportsState={queueQuery}
+            checksLoaded={pendingChecksQuery.isSuccess}
+          />
+        )}
         {moderatorContentReady && reportsTabActive && queueItems.length > 0 && (
           <div className="tw-mt-8 tw-space-y-5">
             {queueItems.map((item) => (
@@ -516,6 +609,14 @@ export default function ContentModerationPageClient() {
               </div>
             )}
           </div>
+        )}
+        {moderatorContentReady && activeTab === "REVIEW" && (
+          <PendingModerationChecks
+            items={pendingChecks}
+            hasMore={pendingChecksQuery.hasNextPage}
+            loadingMore={pendingChecksQuery.isFetchingNextPage}
+            onLoadMore={() => void pendingChecksQuery.fetchNextPage()}
+          />
         )}
         {moderatorContentReady &&
           activeTab === "SUSPENDED" &&
