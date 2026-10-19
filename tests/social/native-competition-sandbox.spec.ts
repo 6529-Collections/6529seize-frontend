@@ -1821,6 +1821,24 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         row.getByRole("img", { name: handle, exact: true })
       ).toBeVisible();
       await expect(row.getByText(message, { exact: true })).toBeVisible();
+      const avatarBox = await row
+        .getByRole("img", { name: handle, exact: true })
+        .boundingBox();
+      const textBox = await row
+        .getByText(message, { exact: true })
+        .locator("xpath=ancestor::div[1]")
+        .boundingBox();
+      expect(avatarBox).not.toBeNull();
+      expect(textBox).not.toBeNull();
+      expect(
+        Math.abs(
+          avatarBox!.y +
+            avatarBox!.height / 2 -
+            textBox!.y -
+            textBox!.height / 2
+        )
+      ).toBeLessThanOrEqual(1);
+
       const artwork = row.getByRole("link", { name: "Test Cat", exact: true });
       await expect(artwork).toBeVisible();
       await expect(
