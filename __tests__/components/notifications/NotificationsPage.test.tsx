@@ -93,10 +93,10 @@ describe("NotificationsPage", () => {
         name: "Loading notifications",
       });
       expect(loadingStatus).toBeInTheDocument();
-      expect(loadingStatus.parentElement).toHaveAttribute(
-        "style",
-        "height: 640px; max-height: 640px;"
-      );
+      expect(
+        loadingStatus.closest("[data-testid=notifications-loading]")
+          ?.parentElement
+      ).toHaveAttribute("style", "height: 640px; max-height: 640px;");
       expect(screen.queryByText("Connect wallet gate")).not.toBeInTheDocument();
     }
   );

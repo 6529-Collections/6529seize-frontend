@@ -388,6 +388,24 @@ describe("BrainMobile", () => {
     globalThis.history.replaceState(null, "", "/");
   });
 
+  it("covers the native wave as soon as the URL requests a drop", () => {
+    mockPathname = "/waves/wave-1";
+    mockSearchParams.set("drop", "d1");
+    const { rerender } = render(<BrainMobile>child</BrainMobile>);
+    expect(
+      screen.getByRole("status", { name: "Loading drop" })
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("drop")).not.toBeInTheDocument();
+    dropData = { id: "old-drop" };
+    rerender(<BrainMobile>child</BrainMobile>);
+    expect(screen.getByTestId("single-drop-loading")).toBeInTheDocument();
+    expect(screen.queryByTestId("drop")).not.toBeInTheDocument();
+    dropData = { id: "d1" };
+    rerender(<BrainMobile>child</BrainMobile>);
+    expect(screen.queryByTestId("single-drop-loading")).not.toBeInTheDocument();
+    expect(screen.getByTestId("drop")).toBeInTheDocument();
+  });
+
   it("renders BrainDesktopDrop when drop is open", () => {
     mockSearchParams.set("drop", "d1");
     dropData = { id: "d1" };

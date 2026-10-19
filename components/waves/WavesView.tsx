@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+import { useAuthenticatedContent } from "@/hooks/useAuthenticatedContent";
+import WavesRouteLoading from "./WavesRouteLoading";
 import CommunityCurations from "@/components/community-curations/CommunityCurations";
 import MyStreamWave from "../brain/my-stream/MyStreamWave";
 import BrainContent from "../brain/content/BrainContent";
@@ -13,6 +15,7 @@ import { t } from "@/i18n/messages";
 
 const WavesView: React.FC = () => {
   const myStream = useMyStreamOptional();
+  const { contentState } = useAuthenticatedContent();
   const { isApp } = useDeviceInfo();
   const locale = useBrowserLocale();
 
@@ -22,7 +25,9 @@ const WavesView: React.FC = () => {
 
   let content: React.ReactNode = null;
 
-  if (serialisedWaveId) {
+  if (contentState === "loading") {
+    content = <WavesRouteLoading />;
+  } else if (serialisedWaveId) {
     content = (
       <MyStreamWave
         key={`wave-${serialisedWaveId}`}

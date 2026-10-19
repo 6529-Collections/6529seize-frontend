@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 
 import PublicWaveFeedGate from "@/components/waves/PublicWaveFeedGate";
 import { MyStreamWaveTab } from "@/types/waves.types";
@@ -8,45 +8,23 @@ jest.mock("@/components/brain/ContentTabContext", () => ({
   useContentTab: () => ({ activeContentTab: mockContentTab }),
 }));
 
-type TestWaveMessages = {
-  readonly isLoading: boolean;
-  readonly drops: readonly { readonly id: string }[];
-};
+import { usePublicWaveFeedReady } from "@/components/waves/PublicWaveFeedReady";
+import { renderToString } from "react-dom/server";
 
 let mockActiveWaveId: string | null = "wave-1";
-let mockWaveMessages: TestWaveMessages | undefined;
-const mockListeners = new Set<() => void>();
-
-const mockTestStore = {
-  getData: jest.fn(() => mockWaveMessages),
-  subscribe: jest.fn((_waveId: string, listener: () => void) => {
-    mockListeners.add(listener);
-  }),
-  unsubscribe: jest.fn((_waveId: string, listener: () => void) => {
-    mockListeners.delete(listener);
-  }),
-};
-
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStreamOptional: () => ({
-    activeWave: { id: mockActiveWaveId },
-    waveMessagesStore: mockTestStore,
-  }),
+  useMyStreamOptional: () => ({ activeWave: { id: mockActiveWaveId } }),
 }));
 
-const publishMessages = (nextMessages: TestWaveMessages | undefined) => {
-  mockWaveMessages = nextMessages;
-  for (const listener of mockListeners) {
-    listener();
-  }
-};
+function InteractiveFeed({ ready = false }: { readonly ready?: boolean }) {
+  usePublicWaveFeedReady(ready);
+  return <button type="button">Interactive feed</button>;
+}
 
 describe("PublicWaveFeedGate", () => {
   beforeEach(() => {
     mockActiveWaveId = "wave-1";
     mockContentTab = MyStreamWaveTab.CHAT;
-    mockWaveMessages = undefined;
-    mockListeners.clear();
     jest.clearAllMocks();
   });
 
@@ -56,7 +34,7 @@ describe("PublicWaveFeedGate", () => {
         fallback={<div>Server public feed</div>}
         waveId="wave-1"
       >
-        <button type="button">Interactive feed</button>
+        <InteractiveFeed />
       </PublicWaveFeedGate>
     );
 
@@ -66,32 +44,47 @@ describe("PublicWaveFeedGate", () => {
     expect(interactiveSurface).toHaveAttribute("inert");
     expect(interactiveSurface).toHaveAttribute("aria-hidden", "true");
 
-    act(() => {
-      publishMessages({ isLoading: true, drops: [] });
-    });
-
     expect(screen.getByText("Server public feed")).toBeInTheDocument();
   });
 
-  it("unmounts the fallback when the interactive feed reaches a terminal state", () => {
-    render(
+  it("keeps the server feed until the consuming chat has rendered, then hands off", () => {
+    const { rerender } = render(
       <PublicWaveFeedGate
         fallback={<div>Server public feed</div>}
         waveId="wave-1"
       >
-        <button type="button">Interactive feed</button>
+        <InteractiveFeed />
       </PublicWaveFeedGate>
     );
 
-    act(() => {
-      publishMessages({ isLoading: false, drops: [{ id: "drop-1" }] });
-    });
+    expect(screen.getByText("Server public feed")).toBeInTheDocument();
+    rerender(
+      <PublicWaveFeedGate
+        fallback={<div>Server public feed</div>}
+        waveId="wave-1"
+      >
+        <InteractiveFeed ready />
+      </PublicWaveFeedGate>
+    );
 
     expect(screen.queryByText("Server public feed")).not.toBeInTheDocument();
     const interactiveSurface =
       screen.getByText("Interactive feed").parentElement;
     expect(interactiveSurface).not.toHaveAttribute("inert");
     expect(interactiveSurface).toHaveAttribute("aria-hidden", "false");
+  });
+
+  it("keeps post text and links in the server HTML for crawlers without JavaScript", () => {
+    const html = renderToString(
+      <PublicWaveFeedGate
+        waveId="wave-1"
+        fallback={<a href="/waves/wave-1?drop=post">Public post text</a>}
+      >
+        <InteractiveFeed />
+      </PublicWaveFeedGate>
+    );
+    expect(html).toContain("Public post text");
+    expect(html).toContain("/waves/wave-1?drop=post");
   });
 
   it("does not show content for a different active wave after hydration", () => {
@@ -102,7 +95,7 @@ describe("PublicWaveFeedGate", () => {
         fallback={<div>Server public feed</div>}
         waveId="wave-1"
       >
-        <button type="button">Interactive feed</button>
+        <InteractiveFeed />
       </PublicWaveFeedGate>
     );
 

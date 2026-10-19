@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import SingleWaveDropLoading from "./SingleWaveDropLoading";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { useWaveOutcomeVisibility } from "@/hooks/waves/useWaveMetadata";
@@ -33,7 +34,7 @@ export const MemesSingleWaveDrop: React.FC<MemesSingleWaveDropProps> = ({
   });
 
   if (!extendedDrop || !wave || !drop) {
-    return null;
+    return <SingleWaveDropLoading onClose={onClose} />;
   }
 
   return (

@@ -1,3 +1,4 @@
+import { usePublicWaveFeedReady } from "@/components/waves/PublicWaveFeedReady";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
@@ -105,6 +106,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
     !waveMessages.isLoadingNextPage &&
     dropsCount === 0;
   const isHydrating = !waveMessages;
+  usePublicWaveFeedReady(!isHydrating && !isInitialLoading);
 
   if (isHydrating || isInitialLoading) {
     // When the hook is still hydrating, keep showing the loader instead of the empty state.

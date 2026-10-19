@@ -31,6 +31,8 @@ export const FR_FR_MESSAGES = {
   "singleDrop.shared": "Lien partagé",
   "singleDrop.close": "Fermer",
   "singleDrop.closeLabel": "Fermer le panneau",
+  "singleDrop.loading": "Chargement du drop",
+  "singleDrop.loadError": "Impossible de charger ce drop.",
   "singleDrop.showChat": "Afficher le chat",
   "singleDrop.hideChat": "Masquer le chat",
   "singleDrop.chatLabel": "Chat du drop",

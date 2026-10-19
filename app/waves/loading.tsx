@@ -1,11 +1,11 @@
-import StreamRouteLoadingShell from "@/components/brain/my-stream/layout/StreamRouteLoadingShell";
+import { Suspense } from "react";
+import WavesRouteLoading from "@/components/waves/WavesRouteLoading";
+import SingleWaveDropLoading from "@/components/waves/drop/SingleWaveDropLoading";
 
 export default function Loading() {
   return (
-    <StreamRouteLoadingShell
-      ariaLabel="Loading waves"
-      variant="waves"
-      showSidebar={false}
-    />
+    <Suspense fallback={<SingleWaveDropLoading />}>
+      <WavesRouteLoading />
+    </Suspense>
   );
 }

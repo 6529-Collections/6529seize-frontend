@@ -48,6 +48,7 @@ Drop-level `Open` / `Open drop` actions and link-card `Open link` /
 2. Choose `Open` / `Open drop` from drop actions, or tap a leaderboard card in
    the touchscreen native app, when you want focused single-drop view.
 3. The app sets `drop={dropId}` in the current URL and opens single-drop view.
+   The single-drop panel appears immediately with `Loading drop` while its data loads, including on direct URL entry. It covers the underlying wave instead of briefly displaying chat first. The existing submission layout appears when ready. If loading fails, the panel shows an error with `Try again` and `Close`; Escape also closes the pending panel.
 4. For preview or quote cards, open `Link actions`.
 5. The card menu shows `Copy link` and `Open link`.
 6. `Copy link` copies the card's original referenced URL.

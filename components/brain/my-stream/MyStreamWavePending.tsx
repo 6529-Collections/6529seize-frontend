@@ -1,5 +1,7 @@
 "use client";
 
+import { usePublicWaveFeedReady } from "@/components/waves/PublicWaveFeedReady";
+
 import type { ReactNode } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { getDirectMessageProfileHref } from "@/helpers/waves/direct-message-profile.helpers";
@@ -26,6 +28,7 @@ export default function MyStreamWavePending({
   onRetry,
   children,
 }: MyStreamWavePendingProps) {
+  usePublicWaveFeedReady(isError);
   const { waves, directMessages, activeWave } = useMyStream();
   const { isApp } = useDeviceInfo();
   const { connectedProfile, activeProfileProxy } = useAuth();

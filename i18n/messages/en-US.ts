@@ -2951,8 +2951,7 @@ const OPEN_DATA_DOWNLOAD_MESSAGES = objectMessages("openData.downloads", {
 } as const);
 
 const DATE_PICKER_MESSAGES = objectMessages("datePicker", {
-  utcNote:
-    "Dates are in UTC. The latest date you can select is today in UTC.",
+  utcNote: "Dates are in UTC. The latest date you can select is today in UTC.",
   afterTodayError: "Dates cannot be later than today in UTC.",
 } as const);
 
@@ -3112,6 +3111,7 @@ export const EN_US_MESSAGES = {
   "singleDrop.close": "Close",
   "singleDrop.closeLabel": "Close panel",
   "singleDrop.loading": "Loading drop",
+  "singleDrop.loadError": "This drop could not be loaded.",
   "singleDrop.showChat": "Show chat",
   "singleDrop.hideChat": "Hide chat",
   "singleDrop.chatLabel": "Drop chat",

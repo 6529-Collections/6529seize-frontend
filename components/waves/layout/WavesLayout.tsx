@@ -1,6 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
+import { getWaveIdFromPathname } from "@/helpers/navigation.helpers";
 import { useEffect, type ReactNode } from "react";
 import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
@@ -133,6 +135,8 @@ function getWavesContent({
 // Main layout content that uses the Layout context
 function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   const { contentState } = useAuthenticatedContent();
+  const pathname = usePathname();
+  const hasRouteWave = Boolean(getWaveIdFromPathname(pathname));
   const { isApp } = useDeviceInfo();
 
   // The chat/feed views manage their own internal scroll, so WavesLayout locks
@@ -168,7 +172,7 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   if (shouldRenderWavesContent) {
     content = getWavesContent({
       children:
-        contentState === WAVES_CONTENT_STATE_LOADING ? (
+        contentState === WAVES_CONTENT_STATE_LOADING && !hasRouteWave ? (
           <WavesContentLoadingFallback />
         ) : (
           children

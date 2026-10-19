@@ -15,6 +15,7 @@ import { DropSize } from "../../helpers/waves/drop.helpers";
 import { useSidebarState } from "../../hooks/useSidebarState";
 import { useAuth } from "../auth/Auth";
 import BrainDesktopDrop from "../brain/BrainDesktopDrop";
+import SingleWaveDropLoading from "@/components/waves/drop/SingleWaveDropLoading";
 import WebBrainLeftSidebar from "../brain/left-sidebar/web/WebLeftSidebar";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import BrainRightSidebar, {
@@ -130,7 +131,11 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
     }
   }, [waveId, isRightSidebarOpen, closeRightSidebar]);
 
-  const { data: drop, error: dropError } = useQuery<ApiDrop>({
+  const {
+    data: drop,
+    error: dropError,
+    refetch: refetchDrop,
+  } = useQuery<ApiDrop>({
     queryKey: getDropQueryKey(effectiveDropId),
     queryFn: () => {
       if (!effectiveDropId) {
@@ -181,10 +186,9 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   const shouldShowLeftSidebar =
     showLeftSidebar && (!isMobile || (!hasWave && !canShowMainContent));
   const shouldShowMainContent = canShowMainContent;
-  const shouldShowDropOverlay =
-    isDropOpen && drop !== undefined && shouldShowMainContent;
+  const shouldShowDropOverlay = !!effectiveDropId && shouldShowMainContent;
   const shouldShowRightSidebar = Boolean(
-    isRightSidebarOpen && waveId && !isDropOpen
+    isRightSidebarOpen && waveId && !effectiveDropId
   );
   const canInlineRight = !isMobile && (isLargeDesktop || breakpoint === "LG");
   const rightVariant = canInlineRight ? "inline" : "overlay";
@@ -224,20 +228,36 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
                     transition={{ layout: chatLayoutTransition }}
                     className="tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-grow tw-flex-col tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-will-change-transform"
                   >
-                    {children}
+                    <div
+                      className="tw-flex tw-h-full tw-min-h-0 tw-flex-1 tw-flex-col"
+                      aria-hidden={shouldShowDropOverlay}
+                      inert={shouldShowDropOverlay ? true : undefined}
+                    >
+                      {children}
+                    </div>
                   </m.div>
                 )}
                 {shouldShowDropOverlay && (
                   <div className="tw-fixed tw-inset-y-0 tw-left-[var(--left-rail,0px)] tw-right-0 tw-z-[1010] lg:tw-absolute lg:tw-inset-0 lg:tw-z-[1010]">
-                    <BrainDesktopDrop
-                      drop={{
-                        type: DropSize.FULL,
-                        ...drop,
-                        stableKey: drop.id,
-                        stableHash: drop.id,
-                      }}
-                      onClose={onDropClose}
-                    />
+                    {isDropOpen && drop ? (
+                      <BrainDesktopDrop
+                        drop={{
+                          type: DropSize.FULL,
+                          ...drop,
+                          stableKey: drop.id,
+                          stableHash: drop.id,
+                        }}
+                        onClose={onDropClose}
+                      />
+                    ) : (
+                      <SingleWaveDropLoading
+                        onClose={onDropClose}
+                        isError={!!dropError}
+                        onRetry={() => {
+                          void refetchDrop();
+                        }}
+                      />
+                    )}
                   </div>
                 )}
                 <BrainRightSidebar

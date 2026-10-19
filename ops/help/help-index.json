@@ -5862,7 +5862,8 @@
         "The Subscriptions filter includes transition-based coverage alerts with runway, Meme context, authoritative deadline when available, and exact minimum top-up action.",
         "On native iOS when the detected country is not US or is unknown, subscription coverage feed items, their filter and the device settings entry are hidden; social follow notifications remain available.",
         "Notification rows may be missing or stale if loading, permissions, or realtime connectivity are disrupted.",
-        "Unread-count polling pauses in backgrounded Capacitor apps and hidden mobile browser tabs, preserving cached counts and refreshing on return. Browser realtime notification delivery stays connected."
+        "Unread-count polling pauses in backgrounded Capacitor apps and hidden mobile browser tabs, preserving cached counts and refreshing on return. Browser realtime notification delivery stays connected.",
+        "Route preparation, wallet restoration, profile loading and the first notifications fetch use one consistent Loading notifications indicator, without a separate route shimmer."
       ],
       "canonical_path": "/notifications",
       "related_paths": ["/waves"],
@@ -7223,7 +7224,8 @@
         "In the native mobile app on a touchscreen, tapping the title, media, description, or free space of a Memes leaderboard List or artwork Grid card opens the submission. In List view, the username opens the author's profile, while the avatar and author badges open the submission. In Grid view, the username opens the submission. Explicit vote, rating, and other action buttons keep their own actions.",
         "Native-app touchscreen leaderboard cards show non-interactive media previews, using a provided poster image when available; open the submission for media controls. Media-format and additional-action-promise badges are informational, not separate tap or keyboard-focus actions.",
         "Browser views, including mobile browsers, retain their author profile links and media interactions; the native-app whole-card touch rule does not apply there.",
-        "Wave-level sharing is handled in the wave header."
+        "Wave-level sharing is handled in the wave header.",
+        "Opening a drop URL shows the single-drop panel immediately with Loading drop while data loads, rather than flashing the underlying wave. A failed load offers Try again and Close; Escape closes a pending panel."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],

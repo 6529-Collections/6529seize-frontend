@@ -1,5 +1,7 @@
 "use client";
 
+import NotificationsLoading from "@/components/notifications/NotificationsLoading";
+
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import {
@@ -110,6 +112,10 @@ export default function Notifications({
     };
   } else if (isApp) {
     bottomPaddingClassName = floatingDockClearanceClassName;
+  }
+
+  if (contentState.isLoadingProfile || contentState.showLoader) {
+    return <NotificationsLoading />;
   }
 
   return (

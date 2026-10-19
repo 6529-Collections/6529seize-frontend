@@ -466,3 +466,88 @@ test("keeps the subwave title in place when parent navigation arrives", async ({
     release();
   }
 });
+
+for (const app of [false, true]) {
+  test(`keeps deep-linked drop loading over the wave (${app ? "app" : "web"})`, async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    test.skip(
+      app && testInfo.project.name !== "web-mobile-chromium",
+      "Native simulation uses the mobile viewport."
+    );
+    if (app)
+      await installSurfaceSimulation(
+        page.context(),
+        "capacitor-ios-sim",
+        baseURL
+      );
+    const dropId = "ux-unavailable-drop";
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await page.route("**/api/v2/drops?**", async (route) => {
+      if (
+        !new URL(route.request().url()).searchParams
+          .get("ids")
+          ?.split(",")
+          .includes(dropId)
+      )
+        return route.fallback();
+      await gate;
+      return route.fulfill({
+        status: 404,
+        json: { error: "Drop unavailable" },
+      });
+    });
+    try {
+      await page.goto(`/waves/${SOURCE}?drop=${dropId}`, {
+        waitUntil: "domcontentloaded",
+      });
+      const pending = page
+        .getByTestId("single-drop-loading")
+        .filter({ visible: true })
+        .first();
+      await expect(pending).toBeVisible({ timeout: 60000 });
+      await expect(
+        pending.getByRole("status", { name: "Loading drop" })
+      ).toBeVisible();
+      const uncoveredFrames = await page.evaluate(
+        () =>
+          new Promise<number>((resolve) => {
+            const started = performance.now();
+            let uncovered = 0;
+            const sample = () => {
+              const pane = document.querySelector(
+                '[data-testid="single-drop-loading"]'
+              );
+              const bounds = pane?.getBoundingClientRect();
+              const top =
+                bounds &&
+                document.elementFromPoint(
+                  bounds.x + bounds.width / 2,
+                  bounds.y + bounds.height / 2
+                );
+              if (!pane || !bounds?.height || !top || !pane.contains(top))
+                uncovered++;
+              if (performance.now() - started < 250)
+                requestAnimationFrame(sample);
+              else resolve(uncovered);
+            };
+            requestAnimationFrame(sample);
+          })
+      );
+      expect(uncoveredFrames).toBe(0);
+      await expectNoHorizontalOverflow(page);
+      release();
+      await expect(pending.getByRole("alert")).toHaveText(
+        "This drop could not be loaded."
+      );
+      await pending.getByRole("button", { name: "Close panel" }).click();
+      await expect(page).not.toHaveURL(/drop=/);
+    } finally {
+      release();
+    }
+  });
+}
