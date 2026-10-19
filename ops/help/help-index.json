@@ -685,6 +685,7 @@
         "Authenticated visitors keep the dashboard-first home experience.",
         "It highlights the current or upcoming Meme Card mint, discovery sections, and 6529 mission content.",
         "After the current Meme mint ends, the homepage keeps Latest Drop through a configurable grace period before replacing it with a mapped Next Drop.",
+        "The latest artwork can appear while mint status and next-winner details are still loading. If artwork data fails to load, use Try again. Mint-status failures leave the artwork visible with unavailable stats; loaded artwork stays visible during background refreshes.",
         "Latest Drop groups title and artist first, then stats with Edition Details beneath them, then Your allowance above Subscription Minting, and the countdown and mint action at the bottom.",
         "A mapped Latest Drop adds Main Stage Submission -> View as the last Edition Details row, and a mapped Next Drop shows a The Memes #{id} pill linked to the Meme card.",
         "The home mint panel can surface The Memes subscription awareness with read-only status, subscription info, and Set up or Manage actions for the profile Subscriptions tab. On native iOS outside the US, or while the country check is loading, the row is not shown; on every platform it appears just after the page loads rather than in the first render.",
@@ -701,6 +702,8 @@
       "tags": ["home", "navigation"],
       "source_refs": [
         "components/home/newcomer/HomeNewcomerIntro.tsx",
+        "components/home/now-minting/LatestDropSection.tsx",
+        "ops/docs/home/feature-home-latest-drop-and-coming-up.md",
         "ops/docs/home/README.md",
         "ops/docs/home/feature-home-header-and-mission.md",
         "ops/docs/home/flow-home-landing-and-section-navigation.md"
@@ -4030,12 +4033,16 @@
       "facts": [
         "Wave leaderboard docs cover winners, my votes, top voters, sales, sorting, price filters, decision timelines, and drop eligibility states.",
         "Leaderboard availability depends on the wave type and configuration.",
-        "Use the selected competition’s main Leaderboard tab to inspect its entries and ranking."
+        "Use the selected competition’s main Leaderboard tab to inspect its entries and ranking.",
+        "Full wave leaderboard list, grid, and Memes gallery views update scores and ranks live while preserving the visible artwork's position. During touch or momentum scrolling, scores keep updating and card reordering waits until scrolling settles."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
       "tags": ["waves", "leaderboard"],
-      "source_refs": ["ops/docs/waves/leaderboard/README.md"]
+      "source_refs": [
+        "ops/docs/waves/leaderboard/README.md",
+        "ops/docs/waves/leaderboard/feature-drop-states.md"
+      ]
     },
     {
       "id": "waves.memes-submission",
@@ -6157,7 +6164,7 @@
         "Identity statements are managed from profile identity surfaces on /{user}.",
         "On mobile, select the ID Statements score card to open the addresses and statements card. The personalized Wallet heading and wallet controls come first; below a divider, the ID Statements heading has an information button and compact Add action for eligible owners.",
         "The profile’s Wallet section precedes ID Statements. Statement groups include Social Media Accounts, NFT Accounts, Contact, and Social Media Verification Posts; there is no separate Consolidated Addresses label.",
-        "The information tooltip beside ID Statements explains that statements are optional and permanently public, social accounts are self-declared and 6529 does not connect to them or verify account ownership or posts, and the community rates statement accuracy. Open it on hover, keyboard focus or tap; Escape or an outside click dismisses it.",
+        "The information tooltip beside ID Statements explains that statements are optional and permanently public, social accounts are self-declared and 6529 does not connect to them or verify account ownership or posts, and the community rates statement accuracy. Open it on hover, keyboard focus or tap; Escape, an outside click, or a page-scrolling gesture dismisses it. Automatic page adjustments and scrolling inside the tooltip keep it open. During initial page loading, the information button stays disabled until it can respond.",
         "Eligible profile owners use Add to open a bottom sheet on mobile or a dialog on desktop, choose a statement group and platform, and can return with Back to statement types before saving.",
         "Social Media Accounts, NFT Accounts, and Contact use compact icon rows for platform selection; pointer hover and keyboard focus reveal each platform name, and the selected option has a stronger outline.",
         "On mobile, the add-statements sheet presents four compact statement groups, keeps an optional and permanently public notice visible throughout the Add flow, and provides header close, back, backdrop, Escape, and swipe-down dismissal paths.",
