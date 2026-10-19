@@ -2235,6 +2235,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     }));
     let failContinuation = true;
     const requested: string[] = [];
+    const offsets = new Map([
+      ["joined-continuation-alpha", 20],
+      ["joined-continuation-beta", 40],
+    ]);
     await page.route("**/api/v2/waves/joined?**", async (route) => {
       const cursor = new URL(route.request().url()).searchParams.get("cursor");
       requested.push(cursor ?? "first");
@@ -2245,12 +2249,20 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         });
         return;
       }
-      const offset = cursor ? Number(cursor.split(":")[1]) : 0;
+      const offset = cursor ? offsets.get(cursor) : 0;
+      if (offset === undefined) {
+        await route.fulfill({ status: 400, json: { error: "Unknown cursor" } });
+        return;
+      }
       await route.fulfill({
         json: {
           data: joined.slice(offset, offset + 20),
           next_cursor:
-            offset + 20 < joined.length ? `snapshot:${offset + 20}` : null,
+            offset === 0
+              ? "joined-continuation-alpha"
+              : offset === 20
+                ? "joined-continuation-beta"
+                : null,
           snapshot_expires_at: Date.now() + 900000,
         },
       });
@@ -2327,8 +2339,8 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(page).toHaveURL(/\/messages$/);
     await page.goto("/waves", { waitUntil: "domcontentloaded" });
     await finishPagination();
-    expect(requested).toContain("snapshot:20");
-    expect(requested).toContain("snapshot:40");
+    expect(requested).toContain("joined-continuation-alpha");
+    expect(requested).toContain("joined-continuation-beta");
     await expectNoHorizontalOverflow(page);
     await page.screenshot({
       path: testInfo.outputPath("joined-waves-pagination.png"),

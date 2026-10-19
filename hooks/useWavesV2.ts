@@ -196,11 +196,18 @@ export const useWavesV2 = ({
       if (query.isFetching) return;
       void query
         .fetchNextPage({ cancelRefetch: false })
-        .then((result) => {
+        .then(async (result) => {
           // Refetch starts at page one and atomically replaces all loaded pages.
           // Never append a fresh first page to the expired snapshot's pages.
           if (getQueryErrorStatus(result.error) === 410) {
-            void query.refetch({ cancelRefetch: false });
+            const refreshed = await query.refetch({ cancelRefetch: false });
+            if (
+              !refreshed.isError &&
+              typeof refreshed.data?.pages.at(-1)?.nextCursor === "string"
+            ) {
+              // Preserve the request to advance after rebuilding the loaded chain.
+              await query.fetchNextPage({ cancelRefetch: false });
+            }
           }
         })
         .catch(() => undefined);

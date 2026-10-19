@@ -1,4 +1,3 @@
-import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { JoinedWavesListRecovery } from "@/components/brain/left-sidebar/waves/JoinedWavesListRecovery";
 
@@ -22,6 +21,7 @@ it("offers manual pagination and disables it during a request", () => {
   expect(onLoadMore).toHaveBeenCalledTimes(1);
   rerender(<JoinedWavesListRecovery {...props} isFetching />);
   expect(screen.getByRole("button")).toBeDisabled();
+  expect(screen.getByRole("button")).toHaveAttribute("aria-busy", "true");
 });
 
 it("announces an incomplete list and retries without replacing its existing rows", () => {

@@ -32,6 +32,7 @@ export function JoinedWavesListRecovery({
         size="sm"
         fullWidth
         disabled={isFetching}
+        aria-busy={isFetching}
         onClick={hasError ? onRetry : onLoadMore}
         aria-label={t(
           locale,

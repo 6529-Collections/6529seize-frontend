@@ -135,3 +135,23 @@ it("does not expose the previous profile's snapshot while a different profile lo
   rerender({ identity: "bob" });
   expect(result.current.waves).toEqual([]);
 });
+
+it("resumes the requested next page after an expired snapshot refresh", async () => {
+  api
+    .mockResolvedValueOnce(page(ids("a", 0, 20), "snapshot-a:20"))
+    .mockRejectedValueOnce(failure(410))
+    .mockResolvedValueOnce(page(ids("b", 0, 20), "snapshot-b:20"))
+    .mockResolvedValueOnce(page(ids("b", 20, 40), null));
+  const { result } = setup();
+  await waitFor(() => expect(result.current.waves).toHaveLength(20));
+  act(() => result.current.fetchNextPage());
+  await waitFor(() =>
+    expect(result.current.waves.map((wave) => wave.id)).toEqual(ids("b", 0, 40))
+  );
+  expect(api.mock.calls.map(([request]) => request.cursor)).toEqual([
+    undefined,
+    "snapshot-a:20",
+    undefined,
+    "snapshot-b:20",
+  ]);
+});

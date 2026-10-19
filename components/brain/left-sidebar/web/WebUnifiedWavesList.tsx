@@ -65,7 +65,7 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
       !isSearching &&
       (isCollapsed || collection !== "pinned") &&
       hasNextPage,
-    isFetchingNextPage,
+    collectionFetching || isFetchingNextPage,
     fetchNextPage,
     scrollContainerRef,
     sentinelRef,
