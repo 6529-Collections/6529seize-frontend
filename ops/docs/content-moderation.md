@@ -243,7 +243,7 @@ about the same post can both appear. Marking a check reviewed does not resolve
 its open reports; each remains until its own review task is completed. **Checks**
 retains the full history, including reviewed checks. An empty queue is shown only
 when both sources load successfully and contain no items; a failed source shows
-an error while the other source remains available.
+an error and **Retry** while the other source remains available.
 
 The summary shows items needing review, quarantined posts, rejected checks
 today, and evaluator failures today. These totals cover all items independently

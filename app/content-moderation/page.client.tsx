@@ -100,6 +100,40 @@ function getActiveDataState(
   return queueState;
 }
 
+function ModerationQueueEmptyState({
+  tab,
+  reportCount,
+  pendingCheckCount,
+  reportsState,
+  checksLoaded,
+}: {
+  readonly tab: ModerationTab;
+  readonly reportCount: number;
+  readonly pendingCheckCount: number;
+  readonly reportsState: ModerationDataState;
+  readonly checksLoaded: boolean;
+}) {
+  const locale = useBrowserLocale();
+  if (
+    !isReportsTab(tab) ||
+    reportCount > 0 ||
+    reportsState.isLoading ||
+    reportsState.isError
+  )
+    return null;
+  if (tab === "REVIEW" && (!checksLoaded || pendingCheckCount > 0)) return null;
+  return (
+    <p className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-iron-400">
+      {t(
+        locale,
+        tab === "REVIEW"
+          ? "checks.queue.empty"
+          : "contentModeration.moderator.emptyResolved"
+      )}
+    </p>
+  );
+}
+
 function ModerationQueueCard({
   item,
 }: {
@@ -529,26 +563,29 @@ export default function ContentModerationPageClient() {
           </output>
         )}
         {moderatorContentReady && activeDataState.isError && (
-          <p role="alert" className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-red">
-            {t(locale, "contentModeration.moderator.loadError")}
-          </p>
+          <div role="alert" className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-red">
+            <p>{t(locale, "contentModeration.moderator.loadError")}</p>
+            {reportsTabActive && (
+              <button
+                type="button"
+                className="tw-min-h-11 tw-rounded-lg tw-bg-iron-900 tw-px-4 tw-text-iron-100 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                disabled={queueQuery.isFetching}
+                onClick={() => void queueQuery.refetch()}
+              >
+                {t(locale, "checks.retry")}
+              </button>
+            )}
+          </div>
         )}
-        {moderatorContentReady &&
-          reportsTabActive &&
-          queueItems.length === 0 &&
-          !queueQuery.isLoading &&
-          !queueQuery.isError &&
-          (activeTab !== "REVIEW" ||
-            (pendingChecksQuery.isSuccess && pendingChecks.length === 0)) && (
-            <p className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-iron-400">
-              {t(
-                locale,
-                activeTab === "REVIEW"
-                  ? "checks.queue.empty"
-                  : "contentModeration.moderator.emptyResolved"
-              )}
-            </p>
-          )}
+        {moderatorContentReady && (
+          <ModerationQueueEmptyState
+            tab={activeTab}
+            reportCount={queueItems.length}
+            pendingCheckCount={pendingChecks.length}
+            reportsState={queueQuery}
+            checksLoaded={pendingChecksQuery.isSuccess}
+          />
+        )}
         {moderatorContentReady && reportsTabActive && queueItems.length > 0 && (
           <div className="tw-mt-8 tw-space-y-5">
             {queueItems.map((item) => (

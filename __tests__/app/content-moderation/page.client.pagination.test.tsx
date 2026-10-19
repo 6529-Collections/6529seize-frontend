@@ -358,6 +358,34 @@ describe("ContentModerationPageClient pagination", () => {
     expect(await screen.findByText("Synthetic test content")).toBeVisible();
   });
 
+  it.each([false, true])(
+    "shows and retries report failures while checks succeed (hasCheck=%s)",
+    async (hasCheck) => {
+      mockFetchContentModerationQueue
+        .mockRejectedValueOnce(new Error("report queue unavailable"))
+        .mockResolvedValueOnce([createQueueItem(1)]);
+      jest
+        .mocked(fetchModerationChecks)
+        .mockResolvedValue({
+          items: hasCheck ? [checkFixture().check] : [],
+          next_cursor: null,
+        });
+      renderReviewQueue();
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "Couldn't load WatchTower."
+      );
+      expect(
+        screen.queryByText("There are no items needing review.")
+      ).not.toBeInTheDocument();
+      if (hasCheck)
+        expect(await screen.findByText("Synthetic test content")).toBeVisible();
+      await userEvent.click(screen.getByRole("button", { name: "Retry" }));
+      expect(await screen.findByText("content-1")).toBeVisible();
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      expect(fetchModerationChecks).toHaveBeenCalledTimes(1);
+    }
+  );
+
   it("refreshes the pending queue and its shared total after a review invalidates moderation data", async () => {
     mockOpenReportCount = 0;
     mockFetchContentModerationQueue.mockResolvedValue([]);
@@ -473,12 +501,10 @@ describe("ContentModerationPageClient pagination", () => {
       async (tab) => {
         globalThis.history.replaceState(null, "", `/content-moderation/${tab}`);
         mockFetchContentModerationQueue.mockResolvedValue([createQueueItem(1)]);
-        jest
-          .mocked(fetchModerationChecks)
-          .mockResolvedValue({
-            items: [checkFixture().check],
-            next_cursor: null,
-          });
+        jest.mocked(fetchModerationChecks).mockResolvedValue({
+          items: [checkFixture().check],
+          next_cursor: null,
+        });
         mockFetchContentModerationBlockActivity.mockResolvedValue([
           createBlockActivityItem(1),
         ]);
