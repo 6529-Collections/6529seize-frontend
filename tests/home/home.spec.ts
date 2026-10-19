@@ -57,11 +57,16 @@ test("homepage artwork survives slow settings and failed mint status @smoke @med
   });
   try {
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    const artwork = page.locator('[data-home-section="Latest drop"]');
+    const artwork = page
+      .getByRole("main")
+      .locator('[data-home-section="Latest drop"]');
     await expect(
       artwork.getByRole("link", { name: loadingTestArtwork.name, exact: true })
     ).toBeVisible();
-    const image = artwork.locator("img").first();
+    const image = artwork.getByRole("img", {
+      name: loadingTestArtwork.name,
+      exact: true,
+    });
     await expect(image).toBeVisible();
     await expect
       .poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth))
