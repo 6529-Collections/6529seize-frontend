@@ -16,6 +16,7 @@ export default function WavesPageClient({
     <>
       {publicFeedFallback !== null && publicFeedWaveId !== null ? (
         <PublicWaveFeedGate
+          key={publicFeedWaveId}
           fallback={publicFeedFallback}
           waveId={publicFeedWaveId}
         >

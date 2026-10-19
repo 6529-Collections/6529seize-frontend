@@ -1,3 +1,4 @@
+import { usePublicWaveFeedReady } from "@/components/waves/PublicWaveFeedReady";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
@@ -11,6 +12,8 @@ import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { RefObject, Ref } from "react";
 import { WaveDropsMessageListSection } from "./WaveDropsMessageListSection";
 import { WaveDropsTypingIndicator } from "./WaveDropsTypingIndicator";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 type WaveMessagesResult = ReturnType<
   typeof useVirtualizedWaveDrops
@@ -93,6 +96,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   isVotingClosed = false,
   isVotingControlsLocked = false,
 }) => {
+  const locale = useBrowserLocale();
   const { unreadDividerSerialNo, setUnreadDividerSerialNo } =
     useUnreadDivider();
 
@@ -105,8 +109,10 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
     !waveMessages.isLoadingNextPage &&
     dropsCount === 0;
   const isHydrating = !waveMessages;
+  const hasDropError = !!waveMessages?.isError;
+  usePublicWaveFeedReady(!isHydrating && (hasDropError || !isInitialLoading));
 
-  if (isHydrating || isInitialLoading) {
+  if (isHydrating || (isInitialLoading && !hasDropError)) {
     // When the hook is still hydrating, keep showing the loader instead of the empty state.
     return (
       <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-py-10">
@@ -115,12 +121,33 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
     );
   }
 
+  const errorNotice = hasDropError ? (
+    <div className="tw-flex tw-flex-col tw-items-center tw-gap-3 tw-p-4">
+      <p role="alert" className="tw-m-0 tw-text-sm tw-text-iron-300">
+        {t(locale, "waves.threadLoadError")}
+      </p>
+      {waveMessages.retryDropMessages && (
+        <button
+          type="button"
+          disabled={waveMessages.isLoading}
+          onClick={() => {
+            void waveMessages.retryDropMessages?.();
+          }}
+          className="tw-min-h-11 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50"
+        >
+          {t(locale, "waves.loadingRetry")}
+        </button>
+      )}
+    </div>
+  ) : null;
+
   if (dropsCount === 0) {
-    return <WaveDropsEmptyPlaceholder dropId={dropId} />;
+    return errorNotice ?? <WaveDropsEmptyPlaceholder dropId={dropId} />;
   }
 
   return (
     <>
+      {errorNotice}
       <WaveDropsMessageListSection
         waveMessages={waveMessages}
         dropId={dropId}

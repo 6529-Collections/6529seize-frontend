@@ -1,6 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import WavesView from "@/components/waves/WavesView";
 
+let mockContentState = "ready";
+jest.mock("@/hooks/useAuthenticatedContent", () => ({
+  useAuthenticatedContent: () => ({ contentState: mockContentState }),
+}));
+jest.mock("next/navigation", () => ({
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 let activeWaveId: string | null = null;
 let isApp = false;
 
@@ -36,8 +44,20 @@ jest.mock("@/components/brain/content/BrainContent", () => ({
 
 describe("WavesView", () => {
   beforeEach(() => {
+    mockContentState = "ready";
     activeWaveId = null;
     isApp = false;
+  });
+
+  it("keeps auth-loading waves on a wave loader instead of mounting discovery or chat", () => {
+    mockContentState = "loading";
+    activeWaveId = "wave-1";
+    render(<WavesView />);
+    expect(
+      screen.getByTestId("stream-route-loading-shell")
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("profile-feed")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("wave")).not.toBeInTheDocument();
   });
 
   it("adds a breakpoint-hidden Wave list link to the profile feed", () => {

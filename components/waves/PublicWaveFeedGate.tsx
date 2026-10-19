@@ -1,14 +1,12 @@
 "use client";
 
-import { type ReactNode, useCallback, useSyncExternalStore } from "react";
+import { type ReactNode, useCallback, useState } from "react";
 
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import { useContentTab } from "@/components/brain/ContentTabContext";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { MyStreamWaveTab } from "@/types/waves.types";
-
-const subscribeToHydration = () => () => {};
-const getHydratedSnapshot = () => true;
-const getServerHydratedSnapshot = () => false;
+import { PublicWaveFeedReadyContext } from "./PublicWaveFeedReady";
 
 export default function PublicWaveFeedGate({
   children,
@@ -21,60 +19,42 @@ export default function PublicWaveFeedGate({
 }) {
   const myStream = useMyStreamOptional();
   const { activeContentTab } = useContentTab();
-  const store = myStream?.waveMessagesStore;
-  const hydrated = useSyncExternalStore(
-    subscribeToHydration,
-    getHydratedSnapshot,
-    getServerHydratedSnapshot
-  );
-
-  const getSnapshot = useCallback(
-    () => store?.getData(waveId),
-    [store, waveId]
-  );
-  const subscribe = useCallback(
-    (onStoreChange: () => void) => {
-      if (!store) {
-        return () => {};
-      }
-
-      const listener = () => onStoreChange();
-      store.subscribe(waveId, listener);
-      return () => store.unsubscribe(waveId, listener);
-    },
-    [store, waveId]
-  );
-  const waveMessages = useSyncExternalStore(
-    subscribe,
-    getSnapshot,
-    () => undefined
-  );
-
+  const hydrated = useHasHydrated();
+  const [readiness, setReadiness] = useState<{
+    waveId: string;
+    token: symbol;
+  } | null>(null);
   const activeWaveId = myStream?.activeWave.id ?? null;
+  const markReady = useCallback(() => {
+    if (activeWaveId !== waveId) return;
+    const token = Symbol();
+    setReadiness({ waveId, token });
+    return () =>
+      setReadiness((current) => (current?.token === token ? null : current));
+  }, [activeWaveId, waveId]);
   const hasMismatchedActiveWave =
     hydrated && activeWaveId !== null && activeWaveId !== waveId;
-  const hasInteractiveFeed =
-    waveMessages !== undefined && !waveMessages.isLoading;
-
   const showFallback =
     !hasMismatchedActiveWave &&
-    !hasInteractiveFeed &&
+    readiness?.waveId !== waveId &&
     (!hydrated || activeContentTab === MyStreamWaveTab.CHAT);
 
   return (
-    <div className="tailwind-scope tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
-      <div
-        aria-hidden={showFallback}
-        className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col"
-        inert={showFallback ? true : undefined}
-      >
-        {children}
-      </div>
-      {showFallback ? (
-        <div className="tw-absolute tw-inset-0 tw-z-10 tw-overflow-y-auto tw-bg-iron-950">
-          {fallback}
+    <PublicWaveFeedReadyContext value={markReady}>
+      <div className="tailwind-scope tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
+        <div
+          aria-hidden={showFallback}
+          className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col"
+          inert={showFallback ? true : undefined}
+        >
+          {children}
         </div>
-      ) : null}
-    </div>
+        {showFallback ? (
+          <div className="tw-absolute tw-inset-0 tw-z-10 tw-overflow-y-auto tw-bg-iron-950">
+            {fallback}
+          </div>
+        ) : null}
+      </div>
+    </PublicWaveFeedReadyContext>
   );
 }
