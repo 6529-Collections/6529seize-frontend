@@ -3717,9 +3717,6 @@ export const EN_US_MESSAGES = {
   "home.comingUp.subtitle": "Next in queue and current vote leaders",
   "home.comingUp.viewAll": "View all",
   "home.comingUp.loading": "Loading upcoming artwork…",
-  "home.comingUp.error": "We couldn’t load upcoming artwork. Please try again.",
-  "home.comingUp.refreshError":
-    "Some upcoming artwork couldn’t be updated. Please try again.",
   "home.nowMinting.stats.unavailable": "Unavailable",
   "home.nowMinting.stats.edition": "Edition",
   "home.nowMinting.stats.status": "Status",

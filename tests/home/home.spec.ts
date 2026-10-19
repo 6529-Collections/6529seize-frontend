@@ -165,7 +165,7 @@ for (const hasBoostedDrops of [false, true]) {
   });
 }
 
-test("Coming Up retains cards across navigation and recovers a failed refresh @smoke @medium @large", async ({
+test("Coming Up retains cards across navigation and a failed refresh @smoke @medium @large", async ({
   page,
 }) => {
   await page.clock.install();
@@ -200,92 +200,80 @@ test("Coming Up retains cards across navigation and recovers a failed refresh @s
   await expect(page).toHaveURL(/\/join-6529$/);
   await page.clock.fastForward(61_000);
   failing = true;
+  const failedRefresh = page.waitForResponse(
+    (response) =>
+      comingUpLeaderboardPattern(new URL(response.url())) &&
+      response.status() === 503
+  );
   await page.goBack();
-  await expect(comingUp.getByRole("alert")).toContainText(
-    "couldn’t be updated"
-  );
-  await expect(
-    comingUp.getByRole("link", { name: "Coming Up artwork 3", exact: true })
-  ).toBeVisible();
-  expect(requests).toBe(2);
-  failing = false;
-  await comingUp
-    .getByRole("button", { name: "Try again", exact: true })
-    .click();
-  await expect(comingUp.getByRole("alert")).toHaveCount(0);
-  expect(requests).toBe(3);
-  await expectNoHorizontalOverflow(page);
-});
-
-test("Coming Up stops a stalled request and supports retry @smoke @medium @large", async ({
-  page,
-}) => {
-  await page.clock.install();
-  await installComingUpFixture(page);
-  let requests = 0;
-  let stalled = true;
-  await page.route(comingUpLeaderboardPattern, async (route) => {
-    requests += 1;
-    if (!stalled) await route.fulfill({ json: comingUpLeaderboard });
-  });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
-  const comingUp = page.getByRole("region", { name: "Coming up", exact: true });
-  await expect.poll(() => requests).toBe(1);
-  await expect(comingUp.getByRole("status")).toHaveText(
-    "Loading upcoming artwork…"
-  );
-  await page.clock.fastForward(15_001);
-  await expect(comingUp.getByRole("alert")).toContainText(
-    "couldn’t load upcoming artwork"
-  );
-  await expect(comingUp.getByRole("status")).toHaveCount(0);
-  expect(requests).toBe(1);
-  stalled = false;
-  await comingUp
-    .getByRole("button", { name: "Try again", exact: true })
-    .click();
+  await failedRefresh;
   await expect(
     comingUp.getByRole("link", { name: "Coming Up artwork 3", exact: true })
   ).toBeVisible();
   await expect(comingUp.getByRole("alert")).toHaveCount(0);
-  expect(requests).toBe(2);
-  await expectNoHorizontalOverflow(page);
-});
-
-test("Coming Up can retry failed initial settings @smoke @medium @large", async ({
-  page,
-}) => {
-  await installComingUpFixture(page);
-  let failing = true;
-  await page.route("**/api/settings", (route) =>
-    failing
-      ? route.fulfill({
-          status: 503,
-          json: { error: "Temporarily unavailable" },
-        })
-      : route.fulfill({ json: comingUpSettings })
-  );
-  await page.route(comingUpLeaderboardPattern, (route) =>
-    route.fulfill({ json: comingUpLeaderboard })
-  );
-  await page.goto("/", { waitUntil: "domcontentloaded" });
-  const comingUp = page.getByRole("region", { name: "Coming up", exact: true });
-  await expect(comingUp.getByRole("alert")).toContainText(
-    "couldn’t load upcoming artwork"
-  );
   await expect(
-    comingUp.getByRole("link", { name: "View all", exact: true })
+    comingUp.getByRole("button", { name: "Try again", exact: true })
   ).toHaveCount(0);
-  failing = false;
-  await comingUp
-    .getByRole("button", { name: "Try again", exact: true })
-    .click();
-  await expect(
-    comingUp.getByRole("link", { name: "Coming Up artwork 3", exact: true })
-  ).toBeVisible();
-  await expect(comingUp.getByRole("alert")).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
 });
+
+for (const slowEndpoint of ["leaderboard", "settings"] as const) {
+  test(`Coming Up accepts ${slowEndpoint} responses after 15 seconds @smoke @medium @large`, async ({
+    page,
+  }) => {
+    await page.clock.install();
+    await installComingUpFixture(page);
+    let requests = 0;
+    let releaseResponse!: () => void;
+    const responseReady = new Promise<void>((resolve) => {
+      releaseResponse = resolve;
+    });
+    await page.route(comingUpLeaderboardPattern, async (route) => {
+      if (slowEndpoint === "leaderboard") {
+        requests += 1;
+        await responseReady;
+      }
+      await route.fulfill({ json: comingUpLeaderboard });
+    });
+    if (slowEndpoint === "settings") {
+      await page.route("**/api/settings", async (route) => {
+        requests += 1;
+        await responseReady;
+        await route.fulfill({ json: comingUpSettings });
+      });
+    }
+    try {
+      await page.goto("/", { waitUntil: "domcontentloaded" });
+      const comingUp = page.getByRole("region", {
+        name: "Coming up",
+        exact: true,
+      });
+      await expect.poll(() => requests).toBe(1);
+      await page.clock.fastForward(20_000);
+      if (slowEndpoint === "leaderboard") {
+        await expect(comingUp.getByRole("status")).toHaveText(
+          "Loading upcoming artwork…"
+        );
+      } else {
+        await expect(comingUp).toHaveCount(0);
+      }
+      await expect(comingUp.getByRole("alert")).toHaveCount(0);
+      await expect(
+        comingUp.getByRole("button", { name: "Try again", exact: true })
+      ).toHaveCount(0);
+      expect(requests).toBe(1);
+      releaseResponse();
+      await expect(
+        comingUp.getByRole("link", { name: "Coming Up artwork 3", exact: true })
+      ).toBeVisible();
+      await expect(comingUp.getByRole("status")).toHaveCount(0);
+      expect(requests).toBe(1);
+      await expectNoHorizontalOverflow(page);
+    } finally {
+      releaseResponse();
+    }
+  });
+}
 
 test("Coming Up does not mislabel the current artwork while Latest Drop is delayed @smoke @medium @large", async ({
   page,

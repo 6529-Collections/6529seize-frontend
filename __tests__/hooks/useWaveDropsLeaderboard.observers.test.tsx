@@ -312,13 +312,12 @@ describe("useWaveDropsLeaderboard observer cleanup", () => {
           waveId: wave.id,
           pageSize: 3,
           retainOnUnmount: true,
-          requestTimeoutMs: 15_000,
         }),
       { wrapper }
     );
     await waitFor(() => expect(home.result.current.drops).toHaveLength(1));
     const refresh = createDeferredPromise<ApiDropsLeaderboardPage>();
-    fetchLeaderboardMock.mockReturnValueOnce(refresh.promise);
+    fetchLeaderboardMock.mockReturnValue(refresh.promise);
     act(() => {
       void home.result.current.refetch();
     });
@@ -327,9 +326,11 @@ describe("useWaveDropsLeaderboard observer cleanup", () => {
     await act(async () => {
       refresh.reject(new Error("temporarily unavailable"));
     });
-    await waitFor(() => expect(home.result.current.isError).toBe(true));
+    await waitFor(() => expect(home.result.current.isError).toBe(true), {
+      timeout: 5_000,
+    });
     expect(home.result.current.drops[0]?.title).toBe(drop.title);
-    expect(fetchLeaderboardMock).toHaveBeenCalledTimes(2);
+    expect(fetchLeaderboardMock).toHaveBeenCalledTimes(5);
   });
 
   it("still discards retained viewer data when authentication changes", async () => {
@@ -366,7 +367,7 @@ describe("useWaveDropsLeaderboard observer cleanup", () => {
     expect(fetchLeaderboardMock).toHaveBeenCalledTimes(2);
   });
 
-  it("ends a stalled homepage request without automatic timeout retries", async () => {
+  it("allows a slow homepage request to finish after 15 seconds", async () => {
     jest.useFakeTimers();
     try {
       const pending = createDeferredPromise<ApiDropsLeaderboardPage>();
@@ -377,18 +378,23 @@ describe("useWaveDropsLeaderboard observer cleanup", () => {
             waveId: wave.id,
             pageSize: 3,
             retainOnUnmount: true,
-            requestTimeoutMs: 15_000,
           }),
         { wrapper }
       );
       const signal = fetchLeaderboardMock.mock.calls[0]?.[0].signal;
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(15_001);
+        await jest.advanceTimersByTimeAsync(20_000);
       });
-      expect(home.result.current.isError).toBe(true);
-      expect(home.result.current.isFetching).toBe(false);
-      expect(signal?.aborted).toBe(true);
+      expect(home.result.current.isError).toBe(false);
+      expect(home.result.current.isFetching).toBe(true);
+      expect(signal?.aborted).toBe(false);
       expect(fetchLeaderboardMock).toHaveBeenCalledTimes(1);
+      await act(async () => {
+        pending.resolve(populatedPage);
+        await jest.advanceTimersByTimeAsync(0);
+      });
+      expect(home.result.current.drops[0]?.title).toBe(drop.title);
+      expect(home.result.current.isFetching).toBe(false);
       home.unmount();
     } finally {
       jest.useRealTimers();

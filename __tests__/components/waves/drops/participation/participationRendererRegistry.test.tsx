@@ -64,7 +64,6 @@ const createSeizeSettingsContext = (
   isAnnouncementsWave: () => false,
   isMemesSubmission: () => false,
   isLoaded: true,
-  isLoading: false,
   loadError: null,
   loadSeizeSettings: jest.fn().mockResolvedValue(undefined),
   ...overrides,

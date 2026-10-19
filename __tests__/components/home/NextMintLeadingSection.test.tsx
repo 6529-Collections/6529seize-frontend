@@ -1,15 +1,11 @@
 import { NextMintLeadingSection } from "@/components/home/next-mint-leading/NextMintLeadingSection";
-import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { useNextMintDrop } from "@/hooks/useNextMintDrop";
 import { useNowMintingStatus } from "@/hooks/useNowMintingStatus";
 import type { ManifoldClaimStatus } from "@/hooks/useManifoldClaim";
 import { useWaveDropsLeaderboard } from "@/hooks/useWaveDropsLeaderboard";
 import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 
-jest.mock("@/contexts/SeizeSettingsContext", () => ({
-  useSeizeSettings: jest.fn(),
-}));
 jest.mock("@/hooks/useNextMintDrop", () => ({ useNextMintDrop: jest.fn() }));
 jest.mock("@/hooks/useNowMintingStatus", () => ({
   useNowMintingStatus: jest.fn(),
@@ -32,11 +28,9 @@ jest.mock("@/components/home/next-mint-leading/NextMintCard", () => ({
   ),
 }));
 
-const settingsMock = jest.mocked(useSeizeSettings);
 const mintMock = jest.mocked(useNowMintingStatus);
 const winnerMock = jest.mocked(useNextMintDrop);
 const leaderboardMock = jest.mocked(useWaveDropsLeaderboard);
-const getSettings = () => settingsMock.getMockImplementation()!();
 const getMint = () => mintMock.getMockImplementation()!();
 const getWinner = () => winnerMock.getMockImplementation()!();
 const getLeaderboard = () =>
@@ -51,31 +45,6 @@ const leaders = ["First artwork", "Second artwork", "Third artwork"].map(
 
 beforeEach(() => {
   jest.clearAllMocks();
-  settingsMock.mockReturnValue({
-    seizeSettings: {
-      rememes_submission_tdh_threshold: 0,
-      memes_wave_id: "main-stage",
-      curation_wave_id: null,
-      quorum_wave_id: null,
-      announcements_wave_id: null,
-      distribution_admin_wallets: [],
-      claims_admin_wallets: [],
-      auth: {
-        structured_signatures_required: false,
-        session_v2_migration_deadline: null,
-      },
-      consolidation: null,
-    },
-    isMemesWave: jest.fn(),
-    isCurationWave: jest.fn(),
-    isQuorumWave: jest.fn(),
-    isAnnouncementsWave: jest.fn(),
-    isMemesSubmission: jest.fn(),
-    isLoaded: true,
-    isLoading: false,
-    loadError: null,
-    loadSeizeSettings: jest.fn().mockResolvedValue(undefined),
-  });
   mintMock.mockReturnValue({
     nft: { id: 563, name: "Current artwork" },
     status: "active" as ManifoldClaimStatus,
@@ -89,9 +58,6 @@ beforeEach(() => {
     isReady: true,
     isSettingsLoaded: true,
     isFetching: false,
-    isError: false,
-    isPaused: false,
-    refetch: jest.fn().mockResolvedValue(undefined),
   });
   leaderboardMock.mockReturnValue({
     drops: leaders,
@@ -107,7 +73,6 @@ beforeEach(() => {
     isFetchingPreviousPage: false,
     isFetching: false,
     isError: false,
-    isPaused: false,
     refetch: jest.fn().mockResolvedValue(undefined),
     manualFetch: jest.fn().mockResolvedValue(undefined),
   });
@@ -166,55 +131,51 @@ it("shows the confirmed next mint with two leaders", () => {
 });
 
 it.each([false, true])(
-  "shows failure and retries only the leaderboard with cached cards=%s",
+  "does not add error or retry UI after a failed refresh with cached cards=%s",
   (cached) => {
-    const leaderboard = {
+    leaderboardMock.mockReturnValue({
       ...getLeaderboard(),
       drops: cached ? leaders : [],
       isError: true,
-    };
-    leaderboardMock.mockReturnValue(leaderboard);
+    });
     render(<NextMintLeadingSection />);
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      cached ? "couldn’t be updated" : "couldn’t load"
-    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Try again" })
+    ).not.toBeInTheDocument();
     expect(screen.queryAllByRole("article")).toHaveLength(cached ? 3 : 0);
-    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
-    expect(leaderboard.refetch).toHaveBeenCalledTimes(1);
-    expect(getWinner().refetch).not.toHaveBeenCalled();
-    expect(getSettings().loadSeizeSettings).not.toHaveBeenCalled();
+    expect(screen.queryAllByRole("region", { name: "Coming up" })).toHaveLength(
+      cached ? 1 : 0
+    );
   }
 );
 
-it("recovers failed initial settings without needing a wave ID", () => {
-  const settings = {
-    ...getSettings(),
-    isLoaded: false,
-    loadError: new Error("offline"),
-  };
-  settingsMock.mockReturnValue(settings);
+it("stays hidden while initial settings are unavailable", () => {
   winnerMock.mockReturnValue({ ...getWinner(), waveId: null, isReady: false });
   leaderboardMock.mockReturnValue({ ...getLeaderboard(), drops: [] });
   render(<NextMintLeadingSection />);
-  expect(screen.getByRole("region", { name: "Coming up" })).toBeInTheDocument();
   expect(
-    screen.queryByRole("link", { name: "View all" })
+    screen.queryByRole("region", { name: "Coming up" })
   ).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: "Try again" }));
-  expect(settings.loadSeizeSettings).toHaveBeenCalledTimes(1);
+  expect(
+    screen.queryByRole("button", { name: "Try again" })
+  ).not.toBeInTheDocument();
 });
 
-it("offers recovery for a paused offline query", () => {
+it("keeps the loading state while a request is pending", () => {
   leaderboardMock.mockReturnValue({
     ...getLeaderboard(),
     drops: [],
-    isPaused: true,
     isFetching: true,
   });
   render(<NextMintLeadingSection />);
-  expect(screen.getByRole("alert")).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "Try again" })).toBeEnabled();
-  expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  expect(screen.getByRole("status")).toHaveTextContent(
+    "Loading upcoming artwork…"
+  );
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Try again" })
+  ).not.toBeInTheDocument();
 });
 
 it("keeps a successful empty result hidden even if optional mint details are pending", () => {

@@ -6,7 +6,6 @@ import { prepareWaveDecisionPoint } from "@/helpers/waves/wave-decision.helpers"
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import { fetchWaveDecisionsV2 } from "@/services/api/wave-decisions-v2-api";
-import { withRequestTimeout } from "@/lib/fetch/withRequestTimeout";
 
 interface UseWaveDecisionsProps {
   readonly waveId: string;
@@ -14,7 +13,6 @@ interface UseWaveDecisionsProps {
   readonly enabled?: boolean | undefined;
   readonly loadAllPages?: boolean | undefined;
   readonly pageSize?: number | undefined;
-  readonly requestTimeoutMs?: number | undefined;
 }
 
 const DEFAULT_PAGE = 1;
@@ -43,7 +41,6 @@ export function useWaveDecisions({
   enabled = true,
   loadAllPages = false,
   pageSize,
-  requestTimeoutMs,
 }: UseWaveDecisionsProps) {
   const resolvedPageSize = getValidPageSize(pageSize);
   const {
@@ -53,7 +50,6 @@ export function useWaveDecisions({
     refetch,
     isFetching,
     isLoading,
-    isPaused,
     fetchNextPage,
     hasNextPage,
     isFetchNextPageError,
@@ -69,28 +65,23 @@ export function useWaveDecisions({
     }) => {
       const currentPage = pageParam ?? DEFAULT_PAGE;
 
-      return await withRequestTimeout(
-        (requestSignal) =>
-          fetchWaveDecisionsV2({
-            waveId,
-            wave,
-            params: {
-              sort_direction: "DESC",
-              sort: "decision_time",
-              page: currentPage.toString(),
-              page_size: resolvedPageSize.toString(),
-            },
-            signal: requestSignal,
-          }),
-        { signal, timeoutMs: requestTimeoutMs }
-      );
+      return await fetchWaveDecisionsV2({
+        waveId,
+        wave,
+        params: {
+          sort_direction: "DESC",
+          sort: "decision_time",
+          page: currentPage.toString(),
+          page_size: resolvedPageSize.toString(),
+        },
+        signal,
+      });
     },
     initialPageParam: DEFAULT_PAGE,
     getNextPageParam: (lastPage) =>
       lastPage.next ? lastPage.page + 1 : undefined,
     enabled,
     staleTime: DEFAULT_STALE_TIME,
-    ...(requestTimeoutMs === undefined ? {} : { retry: false }),
   });
 
   useEffect(() => {
@@ -162,7 +153,6 @@ export function useWaveDecisions({
     refetch,
     isFetching,
     isLoading,
-    isPaused,
     hasLoadedAllPages,
     isLoadingAllPages,
     isLoadingAllPagesError,

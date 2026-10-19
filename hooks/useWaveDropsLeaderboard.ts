@@ -13,7 +13,6 @@ import {
   mapToExtendedDrops,
 } from "@/helpers/waves/wave-drops.helpers";
 import { fetchWaveLeaderboardV2 } from "@/services/api/wave-drops-v2-api";
-import { withRequestTimeout } from "@/lib/fetch/withRequestTimeout";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo } from "react";
 
@@ -38,7 +37,6 @@ interface UseWaveDropsLeaderboardProps {
   readonly enabled?: boolean | undefined;
   readonly maxPages?: number | undefined;
   readonly retainOnUnmount?: boolean | undefined;
-  readonly requestTimeoutMs?: number | undefined;
   readonly minPrice?: number | undefined;
   readonly maxPrice?: number | undefined;
   readonly priceCurrency?: string | undefined;
@@ -316,7 +314,6 @@ export function useWaveDropsLeaderboard({
   enabled = true,
   maxPages,
   retainOnUnmount = false,
-  requestTimeoutMs,
   minPrice,
   maxPrice,
   priceCurrency,
@@ -356,7 +353,6 @@ export function useWaveDropsLeaderboard({
     isFetching,
     isFetchingNextPage,
     isFetchingPreviousPage,
-    isPaused,
     refetch,
   } = useInfiniteQuery({
     queryKey,
@@ -367,19 +363,15 @@ export function useWaveDropsLeaderboard({
       readonly pageParam: number | null;
       readonly signal?: AbortSignal | undefined;
     }) =>
-      withRequestTimeout(
-        (requestSignal) =>
-          fetchLeaderboardPage({
-            waveId,
-            pageParam,
-            pageSize,
-            sort,
-            sortDirection,
-            priceFilters: canonicalPriceFilters,
-            signal: requestSignal,
-          }),
-        { signal, timeoutMs: requestTimeoutMs }
-      ),
+      fetchLeaderboardPage({
+        waveId,
+        pageParam,
+        pageSize,
+        sort,
+        sortDirection,
+        priceFilters: canonicalPriceFilters,
+        signal,
+      }),
     initialPageParam: null,
     getNextPageParam: (lastPage: ApiDropsLeaderboardPage) =>
       getNextLeaderboardPageParam({ lastPage, sort }),
@@ -390,8 +382,6 @@ export function useWaveDropsLeaderboard({
     meta: { retainOnUnmount },
     refetchOnWindowFocus: retainOnUnmount,
     ...getDefaultQueryRetry(),
-    // A bounded read offers explicit retry instead of multiplying its deadline.
-    ...(requestTimeoutMs === undefined ? {} : { retry: false }),
   });
 
   const visiblePages = useMemo(
@@ -432,7 +422,6 @@ export function useWaveDropsLeaderboard({
     hasNextPage,
     hasPreviousPage,
     isError,
-    isPaused,
     isFetchNextPageError,
     isFetchPreviousPageError,
     isFetching: isQueryEnabled && (isFetching || (!hasInitialized && !isError)),

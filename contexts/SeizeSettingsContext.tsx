@@ -15,7 +15,6 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiSeizeSettings } from "@/generated/models/ApiSeizeSettings";
 import { normalizeOptionalWaveId } from "@/helpers/waves/wave.helpers";
 import { fetchUrl } from "@/services/6529api";
-import { withRequestTimeout } from "@/lib/fetch/withRequestTimeout";
 import { SeizeSettingsMode } from "@/types/enums";
 import type { ReactNode } from "react";
 
@@ -47,7 +46,6 @@ type SeizeSettingsContextType = {
   // True once at least one fetch succeeds; stays true during background refreshes
   // unless callers opt into reset=true before reloading.
   isLoaded: boolean;
-  isLoading: boolean;
   loadError: Error | null;
   loadSeizeSettings: (options?: {
     reset?: boolean | undefined;
@@ -77,33 +75,22 @@ export const SeizeSettingsProvider = ({
     consolidation: null,
   });
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<Error | null>(null);
   const isMountedRef = useRef(true);
-  const requestRef = useRef<AbortController | null>(null);
 
   const loadSeizeSettings = useCallback(
     async ({ reset = false }: { reset?: boolean | undefined } = {}) => {
-      requestRef.current?.abort();
-      const controller = new AbortController();
-      requestRef.current = controller;
-      setIsLoading(true);
-      setLoadError(null);
       if (reset && isMountedRef.current) {
         setIsLoaded(false);
+        setLoadError(null);
       }
 
       try {
-        const settings = await withRequestTimeout(
-          (signal) =>
-            fetchUrl<ApiSeizeSettingsResponse>(
-              `${publicEnv.API_ENDPOINT}/api/settings`,
-              { signal: signal ?? null }
-            ),
-          { signal: controller.signal, timeoutMs: 15_000 }
+        const settings = await fetchUrl<ApiSeizeSettingsResponse>(
+          `${publicEnv.API_ENDPOINT}/api/settings`
         );
 
-        if (!isMountedRef.current || requestRef.current !== controller) return;
+        if (!isMountedRef.current) return;
 
         setSeizeSettings((previous) => ({
           ...previous,
@@ -122,7 +109,7 @@ export const SeizeSettingsProvider = ({
         setLoadError(null);
         setIsLoaded(true);
       } catch (error) {
-        if (!isMountedRef.current || requestRef.current !== controller) return;
+        if (!isMountedRef.current) return;
         console.error("Failed to fetch seize settings", error);
         const normalizedError =
           error instanceof Error ? error : new Error(String(error));
@@ -132,11 +119,6 @@ export const SeizeSettingsProvider = ({
           setIsLoaded(false);
         }
         throw normalizedError;
-      } finally {
-        if (isMountedRef.current && requestRef.current === controller) {
-          requestRef.current = null;
-          setIsLoading(false);
-        }
       }
     },
     []
@@ -159,8 +141,6 @@ export const SeizeSettingsProvider = ({
 
     return () => {
       isMountedRef.current = false;
-      requestRef.current?.abort();
-      requestRef.current = null;
     };
   }, [loadSeizeSettings, mode]);
 
@@ -231,7 +211,6 @@ export const SeizeSettingsProvider = ({
       isAnnouncementsWave,
       isMemesSubmission,
       isLoaded,
-      isLoading,
       loadError,
       loadSeizeSettings,
     }),
@@ -243,7 +222,6 @@ export const SeizeSettingsProvider = ({
       isAnnouncementsWave,
       isMemesSubmission,
       isLoaded,
-      isLoading,
       loadError,
       loadSeizeSettings,
     ]

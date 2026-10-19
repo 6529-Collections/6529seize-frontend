@@ -8,7 +8,6 @@ import {
 } from "@/hooks/useWaveDropsLeaderboard";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { shouldShowNextWinnerInComingUp } from "@/helpers/mint-visibility.helpers";
-import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
@@ -25,12 +24,6 @@ const SKELETON_KEYS = [
 export function NextMintLeadingSection() {
   const locale = useBrowserLocale();
   const {
-    isLoaded: isSettingsLoaded,
-    isLoading: isSettingsLoading,
-    loadError: settingsError,
-    loadSeizeSettings,
-  } = useSeizeSettings();
-  const {
     nft: nowMinting,
     status: mintStatus,
     isDropComplete: isNowMintingComplete,
@@ -39,25 +32,16 @@ export function NextMintLeadingSection() {
     nextMint,
     nextMintTitle,
     waveId,
+    isReady,
     isFetching: isWinnersFetching,
-    isError: isWinnersError,
-    isPaused: isWinnersPaused,
-    refetch: refetchWinners,
   } = useNextMintDrop();
 
-  const {
-    drops,
-    isFetching: isLeaderboardFetching,
-    isError: isLeaderboardError,
-    isPaused: isLeaderboardPaused,
-    refetch: refetchLeaderboard,
-  } = useWaveDropsLeaderboard({
+  const { drops, isFetching: isLeaderboardFetching } = useWaveDropsLeaderboard({
     waveId: waveId ?? "",
     pageSize: 3,
     sort: WaveDropsLeaderboardSort.RATING_PREDICTION,
     enabled: !!waveId,
     retainOnUnmount: true,
-    requestTimeoutMs: 15_000,
   });
 
   const currentTitle = nowMinting?.name.trim().toLowerCase();
@@ -79,32 +63,10 @@ export function NextMintLeadingSection() {
 
   const leading = drops.slice(0, leadingCount);
   const hasCards = showNextMint || leading.length > 0;
-  const hasError =
-    !!settingsError ||
-    isLeaderboardError ||
-    isWinnersError ||
-    isLeaderboardPaused ||
-    isWinnersPaused;
-  const isFetching =
-    isSettingsLoading ||
-    (!isSettingsLoaded && !settingsError) ||
-    isWinnersFetching ||
-    isLeaderboardFetching;
-  const isRetrying =
-    isSettingsLoading ||
-    (isLeaderboardError && isLeaderboardFetching && !isLeaderboardPaused) ||
-    (isWinnersError && isWinnersFetching && !isWinnersPaused);
+  const isFetching = isWinnersFetching || isLeaderboardFetching;
 
-  const retryFailedRequests = () => {
-    if (settingsError) void loadSeizeSettings().catch(() => undefined);
-    if (isLeaderboardError || isLeaderboardPaused) void refetchLeaderboard();
-    if (isWinnersError || isWinnersPaused) void refetchWinners();
-  };
-
-  if (isSettingsLoaded && !waveId && !settingsError) {
-    return null;
-  }
-  if (!hasCards && !isFetching && !hasError) return null;
+  if (!isReady || !waveId) return null;
+  if (!hasCards && !isFetching) return null;
 
   const sectionClassName =
     "tw-px-4 md:tw-px-6 lg:tw-px-8 tw-relative tw-z-10 tw-@container tw-pb-10 md:tw-pb-16";
@@ -121,20 +83,18 @@ export function NextMintLeadingSection() {
           {t(locale, "home.comingUp.subtitle")}
         </p>
       </div>
-      {waveId && (
-        <Link
-          data-home-action="View all"
-          href={getWaveRoute({
-            waveId,
-            isDirectMessage: false,
-            isApp: false,
-          })}
-          className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-white"
-        >
-          <span>{t(locale, "home.comingUp.viewAll")}</span>
-          <ArrowRightIcon className="tw-size-4 tw-flex-shrink-0" aria-hidden />
-        </Link>
-      )}
+      <Link
+        data-home-action="View all"
+        href={getWaveRoute({
+          waveId,
+          isDirectMessage: false,
+          isApp: false,
+        })}
+        className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-white"
+      >
+        <span>{t(locale, "home.comingUp.viewAll")}</span>
+        <ArrowRightIcon className="tw-size-4 tw-flex-shrink-0" aria-hidden />
+      </Link>
     </div>
   );
 
@@ -146,37 +106,13 @@ export function NextMintLeadingSection() {
     >
       <div>
         {header}
-        {hasError && (
-          <div className="tw-mb-6">
-            <p role="alert" className="tw-text-sm tw-text-iron-300">
-              {t(
-                locale,
-                hasCards ? "home.comingUp.refreshError" : "home.comingUp.error"
-              )}
-            </p>
-            <button
-              type="button"
-              disabled={isRetrying}
-              onClick={retryFailedRequests}
-              className="tw-min-h-11 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50"
-            >
-              {t(
-                locale,
-                isRetrying
-                  ? "home.latestDrop.retrying"
-                  : "home.latestDrop.retry"
-              )}
-            </button>
-          </div>
-        )}
-        {!hasCards && !hasError && (
+        {!hasCards && (
           <p role="status" className="tw-sr-only">
             {t(locale, "home.comingUp.loading")}
           </p>
         )}
         <div className="tw-grid tw-grid-cols-1 tw-gap-6 md:tw-grid-cols-2 lg:tw-grid-cols-3 lg:tw-gap-8">
           {!hasCards &&
-            !hasError &&
             SKELETON_KEYS.map((key) => (
               <NextMintLeadingSkeletonCard key={key} />
             ))}

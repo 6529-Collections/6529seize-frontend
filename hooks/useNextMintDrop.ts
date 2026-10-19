@@ -12,9 +12,6 @@ type NextMintDropState = {
   readonly isReady: boolean;
   readonly isSettingsLoaded: boolean;
   readonly isFetching: boolean;
-  readonly isError: boolean;
-  readonly isPaused: boolean;
-  readonly refetch: () => Promise<unknown>;
 };
 
 export const useNextMintDrop = (): NextMintDropState => {
@@ -24,13 +21,11 @@ export const useNextMintDrop = (): NextMintDropState => {
     enabled: !!waveId,
   });
 
-  const { decisionPoints, isFetching, isError, isPaused, refetch } =
-    useWaveDecisions({
-      waveId: waveId ?? "",
-      enabled: !!waveId,
-      pageSize: 1,
-      requestTimeoutMs: 15_000,
-    });
+  const { decisionPoints, isFetching } = useWaveDecisions({
+    waveId: waveId ?? "",
+    enabled: !!waveId,
+    pageSize: 1,
+  });
 
   const latestDecision = decisionPoints[decisionPoints.length - 1];
   const rawNextMint = (getRenderableWaveDecisionWinners(
@@ -56,8 +51,5 @@ export const useNextMintDrop = (): NextMintDropState => {
     isReady: isLoaded && !!waveId,
     isSettingsLoaded: isLoaded,
     isFetching: isFetching || (!isLoaded && !!waveId),
-    isError,
-    isPaused,
-    refetch,
   };
 };

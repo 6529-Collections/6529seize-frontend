@@ -151,7 +151,6 @@ const renderComp = (
     isFetchNextPageError: false,
     isFetchPreviousPageError: false,
     isError: false,
-    isPaused: false,
     isFetching: false,
     isFetchingNextPage: false,
     refetch: jest.fn(),
