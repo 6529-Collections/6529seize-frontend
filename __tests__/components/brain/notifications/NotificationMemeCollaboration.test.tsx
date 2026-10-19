@@ -54,11 +54,14 @@ it.each([
       "/phoebeum"
     );
     expect(screen.getByText(message)).toBeVisible();
-    for (const label of ["Test Cat", action])
-      expect(screen.getByRole("link", { name: label })).toHaveAttribute(
-        "href",
-        "/waves/wave%2F1?drop=drop%2F1"
-      );
+    expect(screen.getByRole("link", { name: "Test Cat" })).toHaveAttribute(
+      "href",
+      "/waves/wave%2F1?drop=drop%2F1"
+    );
+    expect(
+      screen.queryByRole("link", { name: action })
+    ).not.toBeInTheDocument();
+    expect(screen.getAllByRole("link")).toHaveLength(2);
     expect(screen.getByText("Timestamp")).toBeVisible();
   }
 );
@@ -161,10 +164,6 @@ it.each(["INVITED", "ACCEPTED"] as const)(
       "href",
       "/waves/wave%2F1?drop=drop%2F1"
     );
-    expect(
-      screen.getByRole("link", {
-        name: event_type === "INVITED" ? "Review invitation" : "View artwork",
-      })
-    ).toBeVisible();
+    expect(screen.getAllByRole("link")).toHaveLength(2);
   }
 );

@@ -97,7 +97,7 @@ async function openReview() {
 }
 async function expandInvitations() {
   fireEvent.click(
-    await screen.findByRole("button", { name: /Manage invitations/ })
+    await screen.findByRole("button", { name: /Manage collaborators/ })
   );
 }
 beforeEach(() => {
@@ -303,6 +303,7 @@ it("lets the author invite collaborators on an existing unmanaged artwork withou
   requestAuth.mockResolvedValue({ success: true });
   postMock.mockResolvedValue({ ...pending, can_invite: true });
   mount({ ...pending, managed: false, can_invite: true, invitations: [] });
+  await expandInvitations();
   fireEvent.click(await screen.findByText("Select collaborator C"));
   fireEvent.click(
     screen.getByRole("button", { name: "Send collaborator invitations" })
@@ -326,9 +327,9 @@ it("keeps accepted collaborators and excludes already invited profiles when addi
       },
     ],
   });
+  await expandInvitations();
   const picker = await screen.findByText("Select collaborator C");
   expect(picker).toHaveAttribute("data-excluded", "B");
-  await expandInvitations();
   expect(screen.getByText("Accepted")).toBeInTheDocument();
   expect(
     screen.queryByRole("button", { name: "Cancel invitation" })
@@ -370,13 +371,16 @@ it("keeps terms out of the page and resets confirmation when the review is dismi
   expect(screen.getByRole("checkbox")).not.toBeChecked();
   expect(postMock).not.toHaveBeenCalled();
 });
-it("shows an explicit pending count for the author and keeps history folded by default", async () => {
+it("shows one compact author entry point without public credits and keeps invitations in a dialog", async () => {
   viewer = "A";
   mount();
   const manage = await screen.findByRole("button", {
-    name: /Manage invitations \(1\)/,
+    name: /Manage collaborators/,
   });
-  expect(manage).toHaveAttribute("aria-expanded", "false");
+  expect(manage).toHaveAttribute("aria-haspopup", "dialog");
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  expect(screen.queryByText("@artistB")).not.toBeInTheDocument();
+  expect(screen.queryByText("Select collaborator C")).not.toBeInTheDocument();
   expect(manage).toHaveTextContent("1 pending");
   expect(
     screen.queryByRole("heading", { name: "Collaboration invitations" })
@@ -419,4 +423,55 @@ it("requires a nonblank credit name and fresh confirmation after editing it", as
   expect(accept).toBeDisabled();
   fireEvent.click(screen.getByRole("checkbox"));
   expect(accept).toBeEnabled();
+});
+
+it("cancels a pending invitation and updates its status in management", async () => {
+  viewer = "A";
+  const cancelled = {
+    ...pending,
+    invitations: [
+      {
+        ...pendingInvitation,
+        status: ApiMemeCollaborationInvitationStatusEnum.Cancelled,
+      },
+    ],
+  };
+  postMock.mockResolvedValue(cancelled);
+  mount();
+  fetchMock.mockResolvedValue(cancelled);
+  await expandInvitations();
+  fireEvent.click(screen.getByRole("button", { name: "Cancel invitation" }));
+  await waitFor(() =>
+    expect(postMock).toHaveBeenCalledWith({
+      endpoint: "drops/drop/collaborations/invitation/response",
+      body: {
+        action: "CANCEL",
+        artwork_hash: pending.artwork_hash,
+        terms_version: pending.terms_version,
+      },
+    })
+  );
+  expect(await screen.findByText("Cancelled")).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Cancel invitation" })
+  ).not.toBeInTheDocument();
+});
+
+it("opens an empty manager for an eligible author and closes without submitting invitations", async () => {
+  viewer = "A";
+  mount({ ...pending, can_invite: true, invitations: [] });
+  const trigger = await screen.findByRole("button", {
+    name: "Manage collaborators",
+  });
+  expect(screen.queryByText("Select collaborator C")).not.toBeInTheDocument();
+  fireEvent.click(trigger);
+  const dialog = await screen.findByRole("dialog", {
+    name: "Manage collaborators",
+  });
+  expect(within(dialog).getByText("No invitations yet.")).toBeVisible();
+  fireEvent.click(within(dialog).getByRole("button", { name: "Done" }));
+  await waitFor(() =>
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+  );
+  expect(postMock).not.toHaveBeenCalled();
 });

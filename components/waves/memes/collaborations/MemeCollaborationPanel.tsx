@@ -1,9 +1,9 @@
 "use client";
 
-import { MemeCollaboratorPicker } from "./MemeCollaboratorPicker";
+import { MemeCollaborationManageDialog } from "./MemeCollaborationManageDialog";
 import type { ApiMemeCollaboratorProfile } from "@/generated/models/ApiMemeCollaboratorProfile";
 import type { ApiMemeCollaborationInviteRequest } from "@/generated/models/ApiMemeCollaborationInviteRequest";
-import { useId, useState } from "react";
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
@@ -39,8 +39,7 @@ export function MemeCollaborationPanel({
   const { connectedProfile, requestAuth, setToast } = useAuth();
   const locale = useBrowserLocale();
   const queryClient = useQueryClient();
-  const invitationsId = useId();
-  const [expanded, setExpanded] = useState(false);
+  const [managing, setManaging] = useState(false);
   const [reviewingId, setReviewingId] = useState<string | null>(null);
   const queryKey = [
     QueryKey.DROP,
@@ -76,7 +75,6 @@ export function MemeCollaborationPanel({
       });
       queryClient.setQueryData(queryKey, updated);
       setSelected([]);
-      setExpanded(true);
       setToast({
         message: t(locale, "memes.collaborations.invited"),
         type: "success",
@@ -185,94 +183,44 @@ export function MemeCollaborationPanel({
     (item) => item.status === ApiMemeCollaborationInvitationStatusEnum.Pending
   ).length;
   return (
-    <div className="tailwind-scope tw-mt-4 tw-space-y-3">
+    <div className="tailwind-scope tw-mt-6 tw-space-y-3">
       {isAuthor ? (
         <>
-          {!!data.invitations.length && (
-            <Button
-              variant="secondary"
-              size="lg"
-              aria-expanded={expanded}
-              aria-controls={invitationsId}
-              onClick={() => setExpanded((value) => !value)}
-            >
-              {t(locale, "memes.collaborations.manage", {
-                count: data.invitations.length,
-              })}
-              {!!pendingCount && (
-                <span className="tw-text-iron-400">
-                  {t(locale, "memes.collaborations.pendingCount", {
-                    count: pendingCount,
-                  })}
-                </span>
-              )}
-            </Button>
-          )}
-          <div id={invitationsId} hidden={!expanded}>
-            <ul
-              aria-label={t(locale, "memes.collaborations.invitations")}
-              className="tw-m-0 tw-list-none tw-space-y-2 tw-p-0"
-            >
-              {data.invitations.map((invitation) => (
-                <li
-                  key={invitation.id}
-                  className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-text-sm"
-                >
-                  <span className="tw-text-iron-100">
-                    @{invitation.profile.handle}
-                  </span>
-                  <output
-                    aria-live="polite"
-                    aria-atomic="true"
-                    className="tw-text-iron-400"
-                  >
-                    <span className="tw-sr-only">
-                      @{invitation.profile.handle}:{" "}
-                    </span>
-                    {t(locale, STATUS_MESSAGES[invitation.status])}
-                  </output>
-                  {!data.closed &&
-                    invitation.status ===
-                      ApiMemeCollaborationInvitationStatusEnum.Pending && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        loading={saving}
-                        onClick={() => {
-                          void respond(
-                            invitation,
-                            ApiMemeCollaborationResponseRequestActionEnum.Cancel
-                          );
-                        }}
-                      >
-                        {t(locale, "memes.collaborations.cancel")}
-                      </Button>
-                    )}
-                </li>
-              ))}
-            </ul>
-          </div>
-          {canInvite && (
-            <div className="tw-space-y-3">
-              <MemeCollaboratorPicker
-                collaborators={selected}
-                onChange={setSelected}
-                excludedIds={data.invitations.map((item) => item.profile.id)}
-                disabled={saving}
-              />
-              {!!selected.length && (
-                <Button
-                  variant="primary"
-                  size="sm"
-                  loading={saving}
-                  onClick={() => {
-                    void invite();
-                  }}
-                >
-                  {t(locale, "memes.collaborations.sendInvitations")}
-                </Button>
-              )}
-            </div>
+          <Button
+            variant="secondary"
+            size={null}
+            className="tw-h-auto tw-min-h-9 tw-max-w-full tw-whitespace-normal tw-px-3 tw-py-2 tw-text-sm !tw-font-normal"
+            aria-haspopup="dialog"
+            onClick={() => setManaging(true)}
+          >
+            {t(locale, "memes.collaborations.manage")}
+            {!!pendingCount && (
+              <span className="tw-text-iron-400">
+                ·{" "}
+                {t(locale, "memes.collaborations.pendingCount", {
+                  count: pendingCount,
+                })}
+              </span>
+            )}
+          </Button>
+          {managing && (
+            <MemeCollaborationManageDialog
+              state={data}
+              canInvite={canInvite}
+              saving={saving}
+              selected={selected}
+              onSelectionChange={setSelected}
+              onClose={() => setManaging(false)}
+              onInvite={() => {
+                void invite();
+              }}
+              onCancel={(invitation) => {
+                void respond(
+                  invitation,
+                  ApiMemeCollaborationResponseRequestActionEnum.Cancel
+                );
+              }}
+            />
           )}
         </>
       ) : (

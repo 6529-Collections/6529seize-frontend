@@ -27,9 +27,11 @@ export function MemeCollaboratorPicker({
   onChange,
   excludedIds = EMPTY_PROFILE_IDS,
   disabled = false,
+  compact = false,
 }: {
   readonly excludedIds?: readonly string[];
   readonly disabled?: boolean;
+  readonly compact?: boolean;
   readonly collaborators: ApiMemeCollaboratorProfile[];
   readonly onChange: (profiles: ApiMemeCollaboratorProfile[]) => void;
 }) {
@@ -77,7 +79,7 @@ export function MemeCollaboratorPicker({
     <div className="tailwind-scope tw-space-y-3">
       <Button
         variant="secondary"
-        size="lg"
+        size={compact ? "md" : "lg"}
         aria-expanded={expanded}
         aria-controls={contentId}
         disabled={disabled || resolving}
