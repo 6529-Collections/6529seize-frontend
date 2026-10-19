@@ -7,6 +7,12 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The `content-moderation.controls` record covers WatchTower’s Deleted state,
+reasoned and confirmed resolution of open reports for a deleted post, retained
+evidence and history, and the distinction from Mark reviewed. It also describes
+the dedicated original-post links on report cards and published-post check
+details, including deleted-post and missing-context notices.
+
 The `waves.drop.editing` record covers author-only editing, the normal edit
 window, and unlimited editing of the wave's current pinned description drop.
 

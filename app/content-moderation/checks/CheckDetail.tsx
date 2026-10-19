@@ -24,6 +24,8 @@ import {
 import CheckEvidence, { InertEvidence } from "./CheckEvidence";
 import CheckActions from "./CheckActions";
 import CheckHistory from "./CheckHistory";
+import ModerationOriginalPostLink from "@/components/content-moderation/ModerationOriginalPostLink";
+import { ApiModerationCheckSubjectTypeEnum } from "@/generated/models/ApiModerationCheck";
 
 const SECTIONS = [
   "savedEvidence",
@@ -122,6 +124,7 @@ export default function CheckDetail({
     title.current?.focus();
   }, []);
   const detail = query.data;
+  const originalWaveId: unknown = detail?.check.scope["wave_id"];
   let detailTitle = t(locale, "checks.loadingDetail");
   if (detail) {
     detailTitle =
@@ -186,6 +189,20 @@ export default function CheckDetail({
             {checkValueLabel(locale, detail.check.policy_family)} ·{" "}
             {checkValueLabel(locale, detail.check.review_status)}
           </p>
+          {detail.current_state.deleted && (
+            <p className="tw-mt-3 tw-text-sm tw-font-semibold tw-text-iron-100">
+              {t(locale, "contentModeration.originalPost.deleted")}
+            </p>
+          )}
+          {detail.check.subject_type ===
+            ApiModerationCheckSubjectTypeEnum.Drop &&
+            detail.check.published_subject_id && (
+              <ModerationOriginalPostLink
+                dropId={detail.check.published_subject_id}
+                waveId={originalWaveId}
+                deleted={detail.current_state.deleted}
+              />
+            )}
           {detail.evidence_expired && (
             <output className="tw-block tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-p-3 tw-text-sm tw-leading-6 tw-text-iron-200">
               {t(locale, "checks.evidenceExpired")}

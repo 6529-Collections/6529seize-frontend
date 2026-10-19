@@ -123,19 +123,20 @@ neither action withdraws the report. If the post is visible, the compact
 control appears inside that post rather than as an ambiguous line between
 posts. Hovering it shows the full state, and clicking or tapping it opens the
 report details. The full viewer-facing states are **Reported · Awaiting
-review**, **Reviewed · No action taken**, and **Reviewed · Content removed**.
+review**, **Reviewed · No action taken**, **Reviewed · Content removed**, and
+**Resolved · Post deleted**.
 Only the reporter sees this personal report state. Internal moderator notes,
 AI details, moderator identity, and other reporters are never exposed.
 
-Clicking or tapping a post's reporter-only **Reported** or **Reviewed** control
+Clicking or tapping a post's reporter-only status control
 opens a dedicated report-status view rather than reopening the action form. An
 open report shows that it is awaiting review and offers **Withdraw report**.
-Resolved reports show **Report reviewed** with **No action taken** or **Content
-removed** and no stale Report, Hide, or Block checkboxes. A successful
-withdrawal closes the dialog and leaves the post hidden. Withdrawal is
+Resolved reports show **Report reviewed** with **No action taken**, **Content
+removed**, or **Post deleted** and no stale Report, Hide, or Block checkboxes.
+A successful withdrawal closes the dialog and leaves the post hidden. Withdrawal is
 auditable, does not affect other reporters, and does not become available again
 after resolution. The same profile cannot report the unchanged post again
-after either reviewed outcome, while other profiles may still report it
+after a resolved outcome, while other profiles may still report it
 independently. Withdrawing an open report permits that profile to submit a
 later report. Blocking remains an independent profile action.
 
@@ -266,8 +267,16 @@ The action panel offers only actions valid for that item and requires a reason:
   reviewed revision. This changes presentation without overwriting the
   author's stored text.
 - Published posts support visibility decisions and author posting controls.
+- Deleted reported posts show **Deleted**, with **Resolve reports — post
+  deleted** while open reports remain. Enter a reason and confirm to close
+  all open reports for that post and move them to Resolved reports with the
+  **Post deleted** outcome. The open-report count and navigation indicator
+  refresh after saving. Saved evidence, reporter history, and decision history
+  remain available. Resolution does not restore the post or change author
+  posting access.
 - **Re-evaluate** records a new evaluator result without undoing an explicit
-  human decision. **Mark reviewed** adds a reason to the decision history.
+  human decision. **Mark reviewed** adds a reason to the decision history;
+  it does not resolve open reports for the post.
 
 An item that changed during review requires **Load latest version** before
 another decision. A failed request can be retried safely with the same
@@ -290,7 +299,15 @@ AI summary with expandable detail, and keeps audit history available. A neutral
 AI category is omitted; a substantive category is labelled **Potential
 category** to make clear that it is not the moderator decision. Select
 **Review evidence and decide** to open the report's saved revision in Checks,
-review the applicable effect, select a decision, enter a reason, and confirm:
+review the applicable effect, select a decision, enter a reason, and confirm.
+Report cards and published-post check details also provide a separate **Open
+original post** link to that exact post in its saved Wave context. This link
+is independent of links inside saved content. Deleted posts retain the link
+with a notice that the original may be unavailable; review the saved evidence
+in WatchTower. If the saved Wave or post ID is missing or invalid, a clear
+link-unavailable message replaces the link.
+
+For live posts:
 
 - **Allow** keeps or restores the post to visible and closes its reports;
 - **Quarantine** hides it globally while its reports stay open; and

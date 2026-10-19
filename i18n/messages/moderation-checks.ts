@@ -121,6 +121,11 @@ export const MODERATION_CHECK_MESSAGES = {
   "checks.action.BLOCK": "Uphold rejection",
   "checks.action.REVOKE_OVERRIDE": "Revoke override or permit",
   "checks.action.MARK_REVIEWED": "Mark reviewed",
+  "checks.action.RESOLVE_DELETED_REPORT": "Resolve reports — post deleted",
+  "checks.deletedReportHelp":
+    "This post has been deleted. Resolve reports — post deleted closes all its open reports with a reason and removes them from the open queue. Saved evidence and decision history remain available; the post is not restored.",
+  "checks.markReviewedHelp":
+    "Mark reviewed records a review of this check. It does not resolve the post’s open reports.",
   "checks.action.SUPPRESS": "Suppress this field",
   "checks.action.RESTORE": "Restore this revision",
   "checks.action.QUARANTINE": "Quarantine post",

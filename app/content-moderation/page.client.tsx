@@ -3,6 +3,7 @@
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { isAuthResolving } from "@/components/auth/authResolution";
 import { useAuth } from "@/components/auth/Auth";
+import ModerationOriginalPostLink from "@/components/content-moderation/ModerationOriginalPostLink";
 import ContentModerationAccessError from "@/components/content-moderation/ContentModerationAccessError";
 import ContentModerationNoAccess from "@/components/content-moderation/ContentModerationNoAccess";
 import type { ApiContentModerationQueueItem } from "@/generated/models/ApiContentModerationQueueItem";
@@ -112,6 +113,7 @@ function ModerationQueueCard({
   const reporterPfp = getSafeAssetUrl(item.reporter_pfp);
   const reporterLabel = item.reporter_handle ?? item.reporter_profile_id;
 
+  const originalWaveId: unknown = item.content_snapshot["wave_id"];
   const isResolved = item.status !== ApiContentModerationReportStatus.Open;
 
   return (
@@ -207,10 +209,17 @@ function ModerationQueueCard({
         <span aria-hidden="true">·</span>
         <span>
           {t(locale, "contentModeration.moderator.currentState", {
-            state: formatContentModerationEnum(item.moderation.status),
+            state: item.drop_deleted
+              ? t(locale, "contentModeration.originalPost.deleted")
+              : formatContentModerationEnum(item.moderation.status),
           })}
         </span>
       </div>
+      <ModerationOriginalPostLink
+        dropId={item.drop_id}
+        waveId={originalWaveId}
+        deleted={item.drop_deleted}
+      />
       <pre className="tw-mb-0 tw-mt-4 tw-max-h-72 tw-overflow-auto tw-whitespace-pre-wrap tw-break-words tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-font-sans tw-text-base tw-leading-7 tw-text-iron-50">
         {content || t(locale, "contentModeration.moderator.noTextContent")}
       </pre>
@@ -295,7 +304,10 @@ function ModerationQueueCard({
         <div className="tw-mt-5 tw-rounded-xl tw-bg-iron-900/55 tw-p-4">
           <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
             {t(locale, "contentModeration.moderator.resolvedAs", {
-              decision: formatContentModerationEnum(item.status),
+              decision:
+                item.status === ApiContentModerationReportStatus.ResolvedDeleted
+                  ? t(locale, "contentModeration.report.outcomeDeleted")
+                  : formatContentModerationEnum(item.status),
             })}
           </p>
           {item.resolution_reason && (
