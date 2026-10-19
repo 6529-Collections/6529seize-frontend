@@ -114,7 +114,9 @@ it("shows both sections in order with both view-all links", () => {
   ).toBeTruthy();
   expect(active).toHaveTextContent("23");
   expect(screen.getByText("Rare Pepe acquisition")).toBeVisible();
-  expect(screen.getByText("Highly rated waves.")).toBeVisible();
+  expect(
+    screen.getByText("Highly rated waves you don’t follow.")
+  ).toBeVisible();
   expect(
     screen.getByRole("link", { name: "View all active votes" })
   ).toHaveAttribute("href", "/discover?view=active-votes");
@@ -318,7 +320,9 @@ it("shows a quiet recommendation placeholder until the request succeeds, then re
     />
   );
   expect(screen.getByText("Loading recommendations…")).toBeInTheDocument();
-  expect(screen.queryByText("Highly rated waves.")).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("Highly rated waves you don’t follow.")
+  ).not.toBeInTheDocument();
   expect(
     screen.queryByText("No recommendations right now.")
   ).not.toBeInTheDocument();
@@ -326,7 +330,9 @@ it("shows a quiet recommendation placeholder until the request succeeds, then re
   expect(
     screen.queryByText("Loading recommendations…")
   ).not.toBeInTheDocument();
-  expect(screen.getByText("Highly rated waves.")).toBeVisible();
+  expect(
+    screen.getByText("Highly rated waves you don’t follow.")
+  ).toBeVisible();
   expect(
     screen.getByRole("link", { name: "Open Recommended wave" })
   ).toBeVisible();
@@ -334,7 +340,9 @@ it("shows a quiet recommendation placeholder until the request succeeds, then re
 it("shows only the recommendation empty message after a successful empty response", () => {
   render(<SidebarDiscovery {...discoveryProps} previewItems={[]} />);
   expect(screen.getByText("No recommendations right now.")).toBeVisible();
-  expect(screen.queryByText("Highly rated waves.")).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("Highly rated waves you don’t follow.")
+  ).not.toBeInTheDocument();
 });
 it("offers retry for recommendations instead of presenting a failed request as empty", () => {
   render(
@@ -350,7 +358,9 @@ it("offers retry for recommendations instead of presenting a failed request as e
   expect(
     screen.queryByText("No recommendations right now.")
   ).not.toBeInTheDocument();
-  expect(screen.queryByText("Highly rated waves.")).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("Highly rated waves you don’t follow.")
+  ).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Try again" }));
   expect(mockRetryRecommendations).toHaveBeenCalledTimes(1);
 });
@@ -361,7 +371,9 @@ it("keeps successful previews visible when a background recommendation refresh f
   expect(
     screen.getByRole("link", { name: "Open Recommended wave" })
   ).toBeVisible();
-  expect(screen.getByText("Highly rated waves.")).toBeVisible();
+  expect(
+    screen.getByText("Highly rated waves you don’t follow.")
+  ).toBeVisible();
   expect(screen.getByRole("alert")).toHaveTextContent(
     "Couldn’t load recommendations."
   );

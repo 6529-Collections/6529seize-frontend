@@ -4575,7 +4575,8 @@ export const EN_US_MESSAGES = {
     "Community decisions powered by TDH.",
   "waves.discovery.recommendationsDescription":
     "Highly rated waves you don’t follow.",
-  "waves.discovery.publicRecommendationsDescription": "Highly rated waves.",
+  "waves.discovery.publicRecommendationsDescription":
+    "Highly rated waves you don’t follow.",
   "waves.discovery.activeDiscussions": "Active discussions",
   "waves.discovery.unfollowedDiscussions":
     "Active discussions you are not yet following",

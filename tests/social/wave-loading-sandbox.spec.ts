@@ -149,7 +149,7 @@ test("discovery reserves space while loading and retains its controls", async ({
     await page.screenshot({ path: testInfo.outputPath("sidebar-loading.png") });
     content.release();
     await expect(
-      discovery.getByText(/^Highly rated waves(?: you don’t follow)?\.$/)
+      discovery.getByText("Highly rated waves you don’t follow.")
     ).toBeVisible();
     await expect(
       discovery.getByText("Community decisions powered by TDH.")

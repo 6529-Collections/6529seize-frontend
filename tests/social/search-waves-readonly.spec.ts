@@ -606,7 +606,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     // accompany real content, never initial loading or an empty result.
     for (const [description, empty] of [
       ["Community decisions powered by TDH.", "No active TDH votes right now."],
-      ["Highly rated waves.", "No recommendations right now."],
+      ["Highly rated waves you don’t follow.", "No recommendations right now."],
     ] as const) {
       await expect(
         discovery

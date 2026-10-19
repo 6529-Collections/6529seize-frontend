@@ -77,7 +77,7 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
 - Each expanded section shows its short explanation together with loaded content, available to
   signed-in and signed-out visitors. Active Votes says “Community decisions
   powered by TDH.” Worth Checking Out says “Highly rated waves you don’t follow.”
-  Signed-out visitors see “Highly rated waves.”
+  The same wording appears for signed-out visitors.
 - While content first loads, each expanded section shows quiet placeholders shaped
   like its avatars or three vote rows. Descriptions, loading sentences and empty
   messages stay hidden; screen readers receive a loading announcement. Titles,
