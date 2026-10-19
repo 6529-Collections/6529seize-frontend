@@ -429,6 +429,7 @@ const PACKS = [
         "tests/social/native-competition-sandbox.spec.ts",
         "tests/social/wave-notification-settings-sandbox.spec.ts",
         "tests/social/wave-switch-loading.spec.ts",
+        "tests/social/wave-loading-sandbox.spec.ts",
       ],
       {
         ...AUTH_SANDBOX_ENV,

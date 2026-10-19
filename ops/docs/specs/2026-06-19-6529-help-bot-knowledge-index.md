@@ -33,10 +33,14 @@ controls. It also explains that app tabs already in view keep their position
 when selected. It does not promise instant data or a loading screen on every switch.
 
 The Wave discovery record describes the independent Active Votes and Worth Checking Out
-sidebar sections, their explanations and view-all destinations. It covers the
-scrollable three-row voting window, pagination, compact empty/error states and
+sidebar sections, their explanations and view-all destinations. It describes
+quiet loading placeholders, explanations that appear with content, empty messages
+only after successful empty requests, and retry without discarding loaded votes.
+It covers the scrollable three-row voting window, pagination, compact empty/error states and
 independently persisted collapse preferences. Worth Checking Out comes first
 and retains its own compact preview height.
+The Memes Quick Vote record describes its persistent top-left close below 768px,
+top-right close at wider widths, matching loading header and focus restoration.
 
 The `delegation.wallet-checker` record covers linked-wallet reads with a
 six-counterparty cap, pair deduplication, relevant missing-reverse-link

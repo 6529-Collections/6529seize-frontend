@@ -2956,8 +2956,7 @@ const OPEN_DATA_DOWNLOAD_MESSAGES = objectMessages("openData.downloads", {
 } as const);
 
 const DATE_PICKER_MESSAGES = objectMessages("datePicker", {
-  utcNote:
-    "Dates are in UTC. The latest date you can select is today in UTC.",
+  utcNote: "Dates are in UTC. The latest date you can select is today in UTC.",
   afterTodayError: "Dates cannot be later than today in UTC.",
 } as const);
 
@@ -4578,7 +4577,8 @@ export const EN_US_MESSAGES = {
     "Community decisions powered by TDH.",
   "waves.discovery.recommendationsDescription":
     "Highly rated waves you don’t follow.",
-  "waves.discovery.publicRecommendationsDescription": "Highly rated waves.",
+  "waves.discovery.publicRecommendationsDescription":
+    "Highly rated waves you don’t follow.",
   "waves.discovery.activeDiscussions": "Active discussions",
   "waves.discovery.unfollowedDiscussions":
     "Active discussions you are not yet following",
@@ -4596,6 +4596,13 @@ export const EN_US_MESSAGES = {
   "waves.discovery.nextDecision": "Next decision {date}",
   "waves.discovery.emptyVotes": "No active TDH votes right now.",
   "waves.discovery.emptyRecommendations": "No recommendations right now.",
+  "waves.discovery.loadingRecommendations": "Loading recommendations…",
+  "waves.discovery.loadingVotes": "Loading votes…",
+  "waves.discovery.loadingAnnouncements": "Loading announcements…",
+  "waves.discovery.recommendationsError": "Couldn’t load recommendations.",
+  "waves.discovery.votesError": "Couldn’t load votes.",
+  "memes.quickVote.loading":
+    "Loading your next meme and your recent quick-vote amounts.",
   "waves.discovery.loading": "Loading waves…",
   "waves.discovery.error": "Couldn’t load waves.",
   "waves.discovery.retry": "Try again",
