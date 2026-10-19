@@ -239,14 +239,10 @@ const getMetricsSummaryLabel = (
   return metrics.map((metric) => metric.ariaLabel).join(". ");
 };
 
-export function ExploreWaveCard({
-  wave,
-  headingDetails,
-  isApp = false,
-  compact = false,
-  horizontalOnMobile = false,
-  subtleHover = false,
-}: ExploreWaveCardProps) {
+function getWaveCardClassNames(
+  horizontalOnMobile: boolean,
+  subtleHover: boolean
+) {
   const cardInteractionClassName = subtleHover
     ? "tw-transition-colors tw-duration-200 focus-visible:tw-border-white/20 desktop-hover:hover:tw-border-white/20 active:tw-border-white/20"
     : "tw-transform-gpu tw-transition-[transform,border-color,box-shadow] tw-duration-300 desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-shadow-[0_14px_34px_rgba(0,0,0,0.36)]";
@@ -268,6 +264,34 @@ export function ExploreWaveCard({
   const contentPaddingClassName = horizontalOnMobile
     ? "tw-px-4 tw-py-3.5 md:tw-px-5 md:tw-py-[18px]"
     : "tw-px-4 tw-pb-4 tw-pt-2";
+  return {
+    cardInteractionClassName,
+    imageInteractionClassName,
+    cardDirectionClassName,
+    cardSurfaceClassName,
+    titleClassName,
+    imageSizeClassName,
+    contentPaddingClassName,
+  };
+}
+
+export function ExploreWaveCard({
+  wave,
+  headingDetails,
+  isApp = false,
+  compact = false,
+  horizontalOnMobile = false,
+  subtleHover = false,
+}: ExploreWaveCardProps) {
+  const {
+    cardInteractionClassName,
+    imageInteractionClassName,
+    cardDirectionClassName,
+    cardSurfaceClassName,
+    titleClassName,
+    imageSizeClassName,
+    contentPaddingClassName,
+  } = getWaveCardClassNames(horizontalOnMobile, subtleHover);
   const waveHref = getWaveRoute({
     waveId: wave.id,
     isDirectMessage: wave.isDirectMessage,

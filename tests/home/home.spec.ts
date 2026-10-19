@@ -427,6 +427,11 @@ test("homepage artwork request has a visible failure and retry @smoke @medium @l
 
 test.describe("Home Page @smoke @medium @large", () => {
   test.beforeEach(async ({ page }) => {
+    // Layout and hover assertions must not depend on a live voting round.
+    await installComingUpFixture(page);
+    await page.route(comingUpLeaderboardPattern, (route) =>
+      route.fulfill({ json: comingUpLeaderboard })
+    );
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
   });
@@ -453,8 +458,16 @@ test.describe("Home Page @smoke @medium @large", () => {
     const waveLink = page.getByRole("link", { name: /^View wave / }).first();
     await expect(waveLink).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
 
-    const imageArea = waveLink.locator(":scope > div").first();
-    const details = waveLink.locator(":scope > div").last();
+    const imageArea = page
+      .getByRole("link", { name: /^View wave / })
+      .first()
+      .locator(":scope > div")
+      .first();
+    const details = page
+      .getByRole("link", { name: /^View wave / })
+      .first()
+      .locator(":scope > div")
+      .last();
     const imageBox = await imageArea.boundingBox();
     const detailsBox = await details.boundingBox();
     if (!imageBox || !detailsBox) {
@@ -514,7 +527,9 @@ test.describe("Home Page @smoke @medium @large", () => {
     // Both section actions belong in the header and must leave the title clear.
     for (const section of [
       comingUp,
-      page.locator('[data-home-section="Explore waves"]'),
+      page
+        .getByRole("heading", { name: "Tired of bot replies?", exact: true })
+        .locator('xpath=ancestor::*[@data-home-section="Explore waves"]'),
     ]) {
       await expect(
         section.getByRole("link", { name: "View all", exact: true })
@@ -553,8 +568,12 @@ test.describe("Home Page @smoke @medium @large", () => {
     }
 
     if (isNarrowViewport) {
-      const carousel = comingUp.locator(".tw-snap-x");
-      const cards = carousel.locator(":scope > div");
+      const carousel = page
+        .getByRole("region", { name: "Coming up", exact: true })
+        .locator(".tw-snap-x");
+      const cards = page
+        .getByRole("region", { name: "Coming up", exact: true })
+        .locator(".tw-snap-x > div");
       if ((await cards.count()) > 1) {
         // A directional scroll beyond the next card must stop at that card,
         // instead of skipping it. Check both forward and backward movement.
@@ -585,7 +604,9 @@ test.describe("Home Page @smoke @medium @large", () => {
       }
     }
 
-    const footer = page.locator("footer#footer");
+    const footer = page
+      .getByRole("link", { name: "Terms of Service", exact: true })
+      .locator("xpath=ancestor::footer");
     await footer.scrollIntoViewIfNeeded();
     await expect(
       footer.getByRole("link", { name: "Terms of Service" })
@@ -624,8 +645,13 @@ test.describe("Home Page @smoke @medium @large", () => {
     // Use the real component and app CSS with a deterministic duration. This
     // checks the longest timer layout independently of the live mint phase.
     const styles = await page
-      .locator('link[rel="stylesheet"]')
-      .evaluateAll((links) => links.map((link) => link.outerHTML).join(""));
+      .locator("head")
+      .evaluate((head) =>
+        Array.from(
+          head.querySelectorAll('link[rel="stylesheet"]'),
+          (link) => link.outerHTML
+        ).join("")
+      );
     const fixtureUrl = new URL("/__countdown-layout-fixture", page.url()).href;
     await page.route(fixtureUrl, (route) =>
       route.fulfill({
@@ -707,10 +733,13 @@ test.describe("Home Page @smoke @medium @large", () => {
       name: "View all",
       exact: true,
     });
-    const arrow = viewAll.locator("svg");
-    const secondaryActions = page.locator(
-      '[data-home-action="Connect wallet"], [data-home-action="View all"]'
-    );
+    const arrow = page
+      .getByRole("region", { name: "Coming up", exact: true })
+      .getByRole("link", { name: "View all", exact: true })
+      .locator("svg");
+    const secondaryActions = page
+      .getByRole("button", { name: "Connect wallet", exact: true })
+      .or(page.getByRole("link", { name: "View all", exact: true }));
     await expect(secondaryActions).toHaveCount(3);
     const isNarrowViewport = await page.evaluate(() => innerWidth < 768);
     for (const action of await secondaryActions.all()) {
@@ -736,20 +765,18 @@ test.describe("Home Page @smoke @medium @large", () => {
 
     await page.emulateMedia({ reducedMotion: "no-preference" });
     if (isDesktopWebProject(testInfo.project.name)) {
-      const dropTitle = page
-        .locator(
-          '[data-home-section="Latest drop"], [data-home-section="Next drop"]'
-        )
-        .locator(
-          '[data-home-action="Open artwork"], [data-home-action="Open drop"]'
-        );
+      const dropTitle = page.getByRole("link", {
+        name: loadingTestArtwork.name,
+        exact: true,
+      });
       await expect(dropTitle).toBeVisible();
       await dropTitle.hover();
       await expect(dropTitle).toHaveCSS("color", "rgb(206, 207, 212)");
 
-      const comingUpTitle = comingUp
-        .locator('[data-home-action="Open drop"]')
-        .first();
+      const comingUpTitle = comingUp.getByRole("link", {
+        name: "Coming Up artwork 1",
+        exact: true,
+      });
       await comingUpTitle.hover();
       await expect(comingUpTitle).toHaveCSS("color", "rgb(206, 207, 212)");
 
@@ -761,7 +788,7 @@ test.describe("Home Page @smoke @medium @large", () => {
         "rgba(255, 255, 255, 0.2)"
       );
       await expect(waveLink).toHaveCSS("transform", "none");
-      await expect(waveLink.locator("img")).toHaveCSS("transform", "none");
+      await expect(waveLink.getByRole("img")).toHaveCSS("transform", "none");
       expect(await waveLink.boundingBox()).toEqual(before);
 
       await viewAll.hover();

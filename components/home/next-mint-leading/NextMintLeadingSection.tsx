@@ -114,9 +114,9 @@ export function NextMintLeadingSection() {
       <div>
         {header}
         {!hasCards && (
-          <p role="status" className="tw-sr-only">
+          <output className="tw-sr-only">
             {t(locale, "home.comingUp.loading")}
-          </p>
+          </output>
         )}
         <div className={CARD_LAYOUT_CLASS_NAME}>
           {!hasCards &&
