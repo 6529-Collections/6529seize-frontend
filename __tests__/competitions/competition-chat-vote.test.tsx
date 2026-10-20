@@ -1,11 +1,23 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useLayoutEffect } from "react";
+import * as competitionVoteCache from "@/components/react-query-wrapper/utils/updateCompetitionVoteInCache";
 import { SingleWaveDropVote } from "@/components/waves/drop/SingleWaveDropVote";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiCompetitionCreditBudget } from "@/generated/models/ApiCompetitionCreditBudget";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
+import { useCompetitionViewer } from "@/hooks/competitions/useCompetitionQueries";
 import {
   fetchDropCompetitionContext,
   fetchCompetitionCredits,
   setCompetitionVote,
+  invalidateCompetition,
 } from "@/services/api/competitions-api";
 
 jest.mock(
@@ -22,7 +34,7 @@ jest.mock("@/components/auth/Auth", () => ({
   }),
 }));
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
-  useCompetitionViewer: () => "viewer:self",
+  useCompetitionViewer: jest.fn(() => "viewer:self"),
 }));
 jest.mock("@/hooks/competitions/useCompetitionSignature", () => ({
   useCompetitionSignatureFor: () => jest.fn(),
@@ -34,6 +46,8 @@ jest.mock("@/helpers/competition.helpers", () => ({
   isMultiCompetitionEnabled: () => true,
   newCompetitionRequestKey: () => "request-key",
   isRejectedCompetitionCommand: () => false,
+  isCompetitionAccessError: jest.requireActual("@/helpers/competition.helpers")
+    .isCompetitionAccessError,
 }));
 jest.mock("@/services/api/competitions-api", () => ({
   fetchDropCompetitionContext: jest.fn(),
@@ -67,28 +81,58 @@ const context = {
     status: "ACTIVE",
   },
 };
-function mount(voteMode: "slider" | "numeric" = "numeric") {
+const knownContext = {
+  viewer: "viewer:self",
+  waveId: "wave",
+  dropId: "drop",
+  data: context,
+};
+const initialBudget = {
+  competition_id: "competition",
+  profile_id: "viewer",
+  entry_id: "entry",
+  credit_type: "TDH_PLUS_XTDH",
+  credit_scope: "WAVE",
+  available: 1500,
+  spent: 0,
+  remaining: 1500,
+  current_vote: 0,
+  min_vote: -1500,
+  max_vote: 1500,
+} as ApiCompetitionCreditBudget;
+function mount(
+  voteMode: "slider" | "numeric" = "numeric",
+  voteDrop: ApiDrop = drop,
+  onClose?: () => void
+) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
-  return render(
+  const rendered = render(
     <QueryClientProvider client={client}>
-      <SingleWaveDropVote drop={drop} voteMode={voteMode} />
+      <SingleWaveDropVote
+        drop={voteDrop}
+        voteMode={voteMode}
+        onVoteRequestStarted={onClose}
+      />
     </QueryClientProvider>
   );
+  return { ...rendered, client };
 }
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.mocked(useCompetitionViewer).mockReturnValue("viewer:self");
   jest.mocked(fetchDropCompetitionContext).mockResolvedValue(context as never);
-  jest.mocked(fetchCompetitionCredits).mockResolvedValue({
-    available: 1500,
-    spent: 0,
-    remaining: 1500,
-    current_vote: 0,
-    min_vote: -1500,
-    max_vote: 1500,
-  } as never);
-  jest.mocked(setCompetitionVote).mockResolvedValue({} as never);
+  jest.mocked(fetchCompetitionCredits).mockResolvedValue(initialBudget);
+  jest
+    .mocked(setCompetitionVote)
+    .mockImplementation(async (_identity, _entry, body) => ({
+      ...initialBudget,
+      current_vote: body.value,
+      spent: Math.abs(body.value),
+      remaining: initialBudget.available - Math.abs(body.value),
+    }));
+  jest.mocked(invalidateCompetition).mockResolvedValue(undefined);
 });
 it("uses the entry budget and competition vote endpoint despite the parent wave's zero limits", async () => {
   mount();
@@ -119,6 +163,65 @@ it("keeps slider mode with the competition range", async () => {
     expect(slider).toHaveAttribute("min", "-1500");
   }
 });
+it("uses the passed competition and entry without another lookup and fetches fresh vote credits", async () => {
+  const voteDrop = { ...drop, competition_context: knownContext };
+  mount("numeric", voteDrop);
+  const input = await screen.findByRole("spinbutton", { name: "Your vote" });
+  expect(fetchDropCompetitionContext).not.toHaveBeenCalled();
+  expect(fetchCompetitionCredits).toHaveBeenCalledWith(
+    { waveId: "wave", competitionId: "competition" },
+    "entry",
+    expect.any(AbortSignal)
+  );
+  fireEvent.change(input, { target: { value: "-25" } });
+  fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+  await waitFor(() =>
+    expect(setCompetitionVote).toHaveBeenCalledWith(
+      { waveId: "wave", competitionId: "competition" },
+      "entry",
+      { value: -25, config_version: 4, idempotency_key: "request-key" }
+    )
+  );
+});
+it.each([
+  { ...knownContext, viewer: "other:self" },
+  { ...knownContext, viewer: "viewer:proxy" },
+  { ...knownContext, waveId: "other" },
+  { ...knownContext, dropId: "other" },
+  {
+    ...knownContext,
+    data: { ...context, entry: { ...context.entry, drop_id: "other" } },
+  },
+  {
+    ...knownContext,
+    data: { ...context, entry: { ...context.entry, competition_id: "other" } },
+  },
+])(
+  "resolves context again when passed context belongs to another viewer or artwork (%j)",
+  async (provided) => {
+    const voteDrop = { ...drop, competition_context: provided };
+    mount("numeric", voteDrop);
+    await screen.findByRole("spinbutton", { name: "Your vote" });
+    expect(fetchDropCompetitionContext).toHaveBeenCalledWith(
+      "wave",
+      "drop",
+      expect.any(AbortSignal)
+    );
+  }
+);
+it("uses an already resolved legacy context without repeating the lookup", async () => {
+  const voteDrop = {
+    ...drop,
+    competition_context: {
+      ...knownContext,
+      data: { competition: null, entry: null },
+    },
+  };
+  mount("numeric", voteDrop);
+  expect(await screen.findByText("Legacy voting")).toBeInTheDocument();
+  expect(fetchDropCompetitionContext).not.toHaveBeenCalled();
+  expect(fetchCompetitionCredits).not.toHaveBeenCalled();
+});
 it("keeps legacy voting for a verified legacy drop", async () => {
   jest
     .mocked(fetchDropCompetitionContext)
@@ -135,4 +238,159 @@ it("does not fall back to the wrong voting endpoint when lookup fails", async ()
   expect(await screen.findByRole("alert")).toBeInTheDocument();
   expect(screen.queryByText("Legacy voting")).not.toBeInTheDocument();
   expect(fetchCompetitionCredits).not.toHaveBeenCalled();
+});
+it("closes after confirmation with fresh credits while background refresh is still pending", async () => {
+  let finishRefresh!: () => void;
+  jest.mocked(invalidateCompetition).mockReturnValue(
+    new Promise<void>((resolve) => {
+      finishRefresh = resolve;
+    })
+  );
+  const onClose = jest.fn();
+  const { client } = mount("numeric", drop, onClose);
+  const input = await screen.findByRole("spinbutton", { name: "Your vote" });
+  fireEvent.change(input, { target: { value: "25" } });
+  fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+  await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+  expect(
+    client.getQueryData([
+      QueryKey.COMPETITION_CREDITS,
+      {
+        wave_id: "wave",
+        competition_id: "competition",
+        viewer: "viewer:self",
+        entry_id: "entry",
+      },
+    ])
+  ).toMatchObject({ current_vote: 25, spent: 25, remaining: 1475 });
+  expect(screen.queryByText("Saving…")).not.toBeInTheDocument();
+  finishRefresh();
+});
+it("keeps the confirmed vote when a background refresh fails", async () => {
+  jest
+    .mocked(invalidateCompetition)
+    .mockRejectedValue(new Error("Refresh failed"));
+  const { client } = mount();
+  const input = await screen.findByRole("spinbutton", { name: "Your vote" });
+  fireEvent.change(input, { target: { value: "-25" } });
+  fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+  await screen.findByText("Saved");
+  expect(input).toHaveValue(-25);
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(fetchCompetitionCredits).toHaveBeenCalledTimes(1);
+  jest
+    .mocked(fetchCompetitionCredits)
+    .mockRejectedValue(
+      Object.assign(new Error("Temporary refresh failure"), { status: 503 })
+    );
+  await act(async () => {
+    await client.refetchQueries({ queryKey: [QueryKey.COMPETITION_CREDITS] });
+  });
+  expect(input).toHaveValue(-25);
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  jest
+    .mocked(fetchCompetitionCredits)
+    .mockRejectedValue(
+      Object.assign(new Error("Access denied"), { status: 403 })
+    );
+  await act(async () => {
+    await client.refetchQueries({ queryKey: [QueryKey.COMPETITION_CREDITS] });
+  });
+  expect(await screen.findByRole("alert")).toBeInTheDocument();
+});
+it("does not close another modal when a submitted form unmounts before confirmation", async () => {
+  let confirm!: (value: ApiCompetitionCreditBudget) => void;
+  jest.mocked(setCompetitionVote).mockReturnValue(
+    new Promise<ApiCompetitionCreditBudget>((resolve) => {
+      confirm = resolve;
+    })
+  );
+  const onClose = jest.fn();
+  const { unmount } = mount("numeric", drop, onClose);
+  const input = await screen.findByRole("spinbutton", { name: "Your vote" });
+  fireEvent.change(input, { target: { value: "25" } });
+  fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+  await waitFor(() => expect(setCompetitionVote).toHaveBeenCalledTimes(1));
+  unmount();
+  confirm({ ...initialBudget, current_vote: 25, spent: 25, remaining: 1475 });
+  await waitFor(() => expect(invalidateCompetition).toHaveBeenCalled());
+  expect(onClose).not.toHaveBeenCalled();
+});
+it("invalidates the old viewer during commit before passive effects can flush", async () => {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  client.setQueryData(
+    [QueryKey.COMPETITION_HUB, { wave_id: "wave", viewer: "viewer:self" }],
+    { legacy_primary_competition_id: "competition" }
+  );
+  const legacyKey = [QueryKey.DROPS_LEADERBOARD, { waveId: "wave" }];
+  const legacy = {
+    pages: [
+      { drops: [{ id: "drop", context_profile_context: { rating: 0 } }] },
+    ],
+    pageParams: [1],
+  };
+  client.setQueryData(legacyKey, legacy);
+  let releaseCache!: () => void;
+  const cacheGate = new Promise<void>((resolve) => {
+    releaseCache = resolve;
+  });
+  let checkViewer: (() => boolean) | undefined;
+  let currentDuringCommit: boolean | undefined;
+  const updateCache = competitionVoteCache.updateCompetitionVoteInCache;
+  const updateSpy = jest
+    .spyOn(competitionVoteCache, "updateCompetitionVoteInCache")
+    .mockImplementation(async (queryClient, result) => {
+      checkViewer = result.isCurrentViewer;
+      await cacheGate;
+      await updateCache(queryClient, result);
+    });
+  const onClose = jest.fn();
+  function VoteHarness({ switched }: { readonly switched: boolean }) {
+    useLayoutEffect(() => {
+      if (switched) {
+        currentDuringCommit = checkViewer?.();
+        releaseCache();
+      }
+    }, [switched]);
+    return (
+      <QueryClientProvider client={client}>
+        <SingleWaveDropVote
+          drop={drop}
+          voteMode="numeric"
+          onVoteRequestStarted={onClose}
+        />
+      </QueryClientProvider>
+    );
+  }
+  try {
+    const { rerender } = render(<VoteHarness switched={false} />);
+    const input = await screen.findByRole("spinbutton", { name: "Your vote" });
+    fireEvent.change(input, { target: { value: "25" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+    await waitFor(() => expect(checkViewer).toBeDefined());
+    jest.mocked(useCompetitionViewer).mockReturnValue("viewer:proxy");
+    rerender(<VoteHarness switched />);
+    expect(currentDuringCommit).toBe(false);
+    await waitFor(() => expect(invalidateCompetition).toHaveBeenCalled());
+    expect(onClose).not.toHaveBeenCalled();
+    expect(client.getQueryData(legacyKey)).toBe(legacy);
+  } finally {
+    releaseCache();
+    updateSpy.mockRestore();
+    client.clear();
+  }
+});
+it("keeps voting open when saving the vote fails", async () => {
+  jest.mocked(setCompetitionVote).mockRejectedValue(new Error("Save failed"));
+  const onClose = jest.fn();
+  mount("numeric", drop, onClose);
+  const input = await screen.findByRole("spinbutton", { name: "Your vote" });
+  fireEvent.change(input, { target: { value: "25" } });
+  fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+  await screen.findByRole("alert");
+  expect(onClose).not.toHaveBeenCalled();
+  expect(invalidateCompetition).not.toHaveBeenCalled();
+  expect(screen.queryByText("Saved")).not.toBeInTheDocument();
 });

@@ -172,6 +172,12 @@ it("refreshes the card when competition votes are invalidated", async () => {
   );
   const { result } = renderHook(() => useCompetitionDrop(drop), { wrapper });
   await waitFor(() => expect(result.current.rating).toBe(120));
+  expect(result.current.competition_context).toEqual({
+    viewer: "viewer:self",
+    waveId: "wave",
+    dropId: "drop",
+    data: context,
+  });
   jest.mocked(fetchDropCompetitionContext).mockResolvedValue({
     ...context,
     vote_summary: { ...context.vote_summary!, rating: 250, user_vote: 100 },
@@ -182,6 +188,9 @@ it("refreshes the card when competition votes are invalidated", async () => {
   });
   await waitFor(() => expect(result.current.rating).toBe(250));
   expect(result.current.context_profile_context?.rating).toBe(100);
+  expect(result.current.competition_context?.data.vote_summary?.user_vote).toBe(
+    100
+  );
 });
 it("resolves scoped submission data before rendering a drop deep link", async () => {
   const client = new QueryClient({
