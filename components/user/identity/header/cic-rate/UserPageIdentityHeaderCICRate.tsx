@@ -20,6 +20,8 @@ import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyAct
 import UserPageIdentityHeaderCICRateStats from "./UserPageIdentityHeaderCICRateStats";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t, tRich } from "@/i18n/messages";
 
 const CIC_FOCUS_RING_CLASS_NAME = "focus:tw-ring-primary-400";
 
@@ -28,11 +30,13 @@ export default function UserPageIdentityHeaderCICRate({
   isTooltip,
   onSuccess,
   onCancel,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly profile: ApiIdentity;
   readonly isTooltip: boolean;
   readonly onSuccess?: () => void;
   readonly onCancel?: () => void;
+  readonly locale?: SupportedLocale;
 }) {
   const { address } = useSeizeConnectContext();
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
@@ -254,7 +258,7 @@ export default function UserPageIdentityHeaderCICRate({
               htmlFor="nic-rating-input"
               className="tw-block tw-text-sm tw-font-normal tw-text-iron-400 [overflow-wrap:anywhere]"
             >
-              Your total NIC Rating of {profile.query}:
+              {t(locale, "user.rate.nic.label", { profile: profile.query ?? "" })}
             </label>
             <div className="tw-mt-2 tw-flex tw-items-stretch tw-gap-3">
               {rateInput}
@@ -266,7 +270,7 @@ export default function UserPageIdentityHeaderCICRate({
                 size="md"
                 className="tw-shrink-0 !tw-text-xs touch-only:tw-h-11"
               >
-                Rate
+                {t(locale, "user.rate.submit")}
               </Button>
             </div>
             {adjustmentHelper}
@@ -277,8 +281,13 @@ export default function UserPageIdentityHeaderCICRate({
               htmlFor="nic-rating-input"
               className="tw-mb-2 tw-block tw-text-sm tw-font-normal tw-text-iron-400"
             >
-              Your total NIC Rating of{" "}
-              <span className="tw-whitespace-nowrap">{profile.query}</span>
+              {tRich(locale, "user.rate.nic.label", {
+                profile: (
+                  <span key="profile" className="tw-whitespace-nowrap">
+                    {profile.query}
+                  </span>
+                ),
+              })}
             </label>
             {rateInput}
 
@@ -293,7 +302,7 @@ export default function UserPageIdentityHeaderCICRate({
                 size="xl"
                 fullWidth
               >
-                Rate
+                {t(locale, "user.rate.submit")}
               </Button>
               {onCancel && (
                 <Button onClick={onCancel} variant="ghost" size="lg" fullWidth>

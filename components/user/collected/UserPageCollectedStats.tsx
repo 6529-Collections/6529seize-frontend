@@ -109,6 +109,7 @@ export default function UserPageCollectedStats({
         Boolean(url.searchParams.get(SEARCH_PARAM_ACTIVITY)));
     url.searchParams.set("details", wasOpen ? "closed" : "open");
     scrollOnOpenRef.current = !wasOpen && autoScrollDetailsOnOpen;
+    // Next preserves its internal history state and synchronizes useSearchParams.
     globalThis.history.replaceState(null, "", url);
   };
 

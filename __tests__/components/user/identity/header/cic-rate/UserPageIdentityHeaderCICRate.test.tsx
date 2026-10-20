@@ -5,6 +5,11 @@ import UserPageIdentityHeaderCICRate from "@/components/user/identity/header/cic
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  DEFAULT_LOCALE,
+  SUPPORTED_LOCALES,
+  type SupportedLocale,
+} from "@/i18n/locales";
 
 jest.mock(
   "@/components/user/identity/header/cic-rate/UserPageIdentityHeaderCICRateStats",
@@ -35,7 +40,7 @@ describe.each([false, true])(
       }));
     });
 
-    function setup(auth?: any) {
+    function setup(auth?: any, locale: SupportedLocale = DEFAULT_LOCALE) {
       const authValue = {
         requestAuth: jest.fn().mockResolvedValue({ success: true }),
         setToast: jest.fn(),
@@ -50,12 +55,26 @@ describe.each([false, true])(
             <UserPageIdentityHeaderCICRate
               profile={{ query: "bob", handle: "bob" } as any}
               isTooltip={isTooltip}
+              locale={locale}
             />
           </ReactQueryWrapperContext.Provider>
         </AuthContext.Provider>
       );
       return { authValue, queryCtx };
     }
+
+    it.each(SUPPORTED_LOCALES)(
+      "keeps its accessible label and action readable in %s",
+      (locale) => {
+        setup(undefined, locale);
+        expect(
+          screen.getByLabelText("Your total NIC Rating of bob:")
+        ).toBeInTheDocument();
+        expect(
+          screen.getByRole("button", { name: "Rate", exact: true })
+        ).toBeDisabled();
+      }
+    );
 
     it("allows manual NIC entry without starting authentication or saving", async () => {
       const user = userEvent.setup();

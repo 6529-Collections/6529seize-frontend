@@ -235,6 +235,16 @@ describe("UserPageCollectedStats", () => {
     expect(globalThis.location.search).toContain("collection=memelab&page=3");
     expect(globalThis.location.hash).toBe("#collected-card-memelab-65");
     expect(mockRouterReplace).not.toHaveBeenCalled();
+    rerender(
+      <UserPageCollectedStats
+        profile={profile}
+        activeAddress={null}
+        initialStatsData={buildInitialStatsData()}
+      />
+    );
+    expect(
+      screen.getByRole("button", { name: "Hide Details", exact: true })
+    ).toHaveAttribute("aria-expanded", "true");
     rerender(<></>);
   });
 

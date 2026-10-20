@@ -88,6 +88,28 @@ function hasBackDestination(history: readonly StackEntry[], index: number) {
   return false;
 }
 
+function getHistoryRoutePath(url: string, pathname: string): string {
+  if (pathname.startsWith("/[user]")) return mainSegment(url);
+
+  const [pathOnly = "", searchOnly = ""] = url.split("?");
+  const activeWaveId = getActiveWaveIdFromUrl({
+    pathname: pathOnly,
+    searchParams: new URLSearchParams(searchOnly),
+  });
+  const isWaveRoute =
+    Boolean(activeWaveId) &&
+    (pathOnly === "/" ||
+      pathOnly.startsWith("/waves") ||
+      pathOnly.startsWith("/messages"));
+
+  if (isWaveRoute && activeWaveId) {
+    return pathOnly.startsWith("/messages")
+      ? getMessagePathRoute(activeWaveId)
+      : getWavePathRoute(activeWaveId);
+  }
+  return url.split(/[?#]/)[0]!;
+}
+
 export const NavigationHistoryProvider: React.FC<{
   readonly children: ReactNode;
 }> = ({ children }) => {
@@ -168,30 +190,7 @@ export const NavigationHistoryProvider: React.FC<{
     if (url === prevPathRef.current) return;
     prevPathRef.current = url;
 
-    const isProfile = pathname?.startsWith("/[user]");
-    const [pathOnly, searchOnly = ""] = url.split("?");
-    const activeWaveId = getActiveWaveIdFromUrl({
-      pathname: pathOnly,
-      searchParams: new URLSearchParams(searchOnly),
-    });
-    const isWaveRoute =
-      Boolean(activeWaveId) &&
-      (pathOnly === "/" ||
-        pathOnly?.startsWith("/waves") ||
-        pathOnly?.startsWith("/messages"));
-
-    let pathKey: string;
-    if (isProfile) {
-      pathKey = mainSegment(url);
-    } else if (isWaveRoute && activeWaveId) {
-      const isMessagesRoute = pathOnly?.startsWith("/messages");
-      pathKey = isMessagesRoute
-        ? getMessagePathRoute(activeWaveId)
-        : getWavePathRoute(activeWaveId);
-    } else {
-      pathKey = url.split(/[?#]/)[0]!;
-    }
-
+    const pathKey = getHistoryRoutePath(url, pathname);
     let i = historyRef.current.length - 1;
     while (i >= 0 && historyRef.current[i]?.type === "view") i -= 1;
     const lastRoute = i >= 0 ? historyRef.current[i] : null;
