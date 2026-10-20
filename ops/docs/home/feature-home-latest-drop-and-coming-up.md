@@ -190,6 +190,8 @@ Use this page for visibility rules, state switches, and route targets.
 - In countdown error state, the `Next drop ...` status strip is not shown.
 - On touch devices, interactive HTML media can require `Tap to load` before
   playback.
+- When `NEXT MINT` is ready before the leaders, it stays visible beside two
+  loading placeholders. The placeholders disappear when the leader request finishes.
 - Until app settings include `memes_wave_id`, `Coming up` stays hidden.
 
 ## Failure and Recovery
