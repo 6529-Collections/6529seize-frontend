@@ -4,7 +4,10 @@ import { ApiCompetitionLifecycle } from "@/generated/models/ApiCompetitionLifecy
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 
 import { useEffect, useMemo, useState } from "react";
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
+import {
+  isMultiCompetitionEnabled,
+  isCompetitionAccessError,
+} from "@/helpers/competition.helpers";
 import { useCompetition } from "@/contexts/CompetitionContext";
 import { useCompetitionResource } from "@/hooks/competitions/useCompetitionQueries";
 import { useCompetitionEntryDrops } from "@/hooks/competitions/useCompetitionEntryDrops";
@@ -112,7 +115,10 @@ export default function CompetitionLeaderboard({
             const entry = entries[index]!;
             if (dropQuery.isPending)
               return <CompetitionState key={entry.entry_id} />;
-            if (dropQuery.isError)
+            if (
+              dropQuery.isError &&
+              (!dropQuery.data || isCompetitionAccessError(dropQuery.error))
+            )
               return (
                 <CompetitionState
                   key={entry.entry_id}

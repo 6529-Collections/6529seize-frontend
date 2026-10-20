@@ -78,6 +78,12 @@ it("hydrates rich cards with competition totals and approval timing", async () =
   await waitFor(() => expect(result.current[0]?.isSuccess).toBe(true));
   expect(result.current[0]?.data?.drop).toMatchObject({
     competition_id: "comp",
+    competition_context: {
+      viewer: "viewer:self",
+      waveId: "wave",
+      dropId: "drop",
+      data: context,
+    },
     rating: 39,
     over_threshold_since_ms: 100,
     context_profile_context: { rating: 20 },
