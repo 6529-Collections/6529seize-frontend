@@ -180,7 +180,7 @@ export function ExploreWavesSection({
         <div className={headerClassName}>
           <div className={titleClassName}>
             {headingVariant === "page" ? (
-              <div className="tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-3 tw-@container/discovery-heading">
+              <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-3 tw-@container/discovery-heading">
                 <h1 className="tw-m-0 tw-min-w-0 tw-text-2xl tw-font-semibold tw-leading-8 tw-text-white">
                   {effectiveTitle}
                 </h1>

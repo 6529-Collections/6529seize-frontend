@@ -113,9 +113,9 @@ export function ScoreFormulaLink() {
       <ButtonLink
         href="/network/wave-score"
         variant="secondary"
-        size={null}
+        size="sm"
         aria-label={label}
-        className="tw-min-h-11 tw-min-w-11 tw-px-3 tw-text-xs motion-reduce:tw-transition-none"
+        className="motion-reduce:tw-transition-none"
       >
         <CalculatorIcon className="tw-size-4 tw-shrink-0" aria-hidden="true" />
         <span className="tw-hidden @[36rem]/discovery-heading:tw-inline">
