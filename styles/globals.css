@@ -475,32 +475,6 @@ h5:not(.tailwind-scope h5) {
   padding: 10px !important;
 }
 
-#footer {
-  font-size: 14px;
-  background-color: black;
-  padding: 2rem;
-  line-height: 18px;
-}
-#footer img {
-  height: 18px;
-  vertical-align: bottom;
-}
-@media only screen and (max-width: 800px) {
-  #footer img {
-    height: 14px;
-    vertical-align: middle;
-  }
-}
-#footer a {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  text-decoration: none;
-  white-space: nowrap;
-}
-#footer a:hover {
-  opacity: 0.75;
-}
-
 .twitter-share-button {
   background-color: #1d9bf0 !important;
   height: 30px;

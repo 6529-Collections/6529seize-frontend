@@ -5,6 +5,7 @@ import {
   waitForRouteReady,
 } from "../testHelpers";
 import { devices, type Page } from "@playwright/test";
+import { buildSync } from "esbuild";
 import { getAppEnvironment } from "../../config/appEnvironment";
 import {
   isDesktopWebProject,
@@ -86,6 +87,160 @@ async function installComingUpFixture(page: Page) {
     route.fulfill({ json: { data: [], page: 1, count: 0, next: false } })
   );
 }
+
+for (const cardCount of [1, 3]) {
+  test(`Coming Up sizes ${cardCount} cards for the available width @smoke @medium @large`, async ({
+    page,
+  }, testInfo) => {
+    await installComingUpFixture(page);
+    await page.route(comingUpLeaderboardPattern, (route) =>
+      route.fulfill({
+        json: {
+          ...comingUpLeaderboard,
+          count: cardCount,
+          drops: comingUpLeaderboard.drops.slice(0, cardCount),
+        },
+      })
+    );
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const carousel = page
+      .getByRole("region", { name: "Coming up", exact: true })
+      .locator(".tw-snap-x");
+    await expect(
+      carousel.getByRole("link", { name: /^Coming Up artwork / })
+    ).toHaveCount(cardCount);
+    const widths = isMobileWebProject(testInfo.project.name)
+      ? [320, 639, 640, 767]
+      : [1280];
+    for (const width of widths) {
+      await page.setViewportSize({ width, height: 900 });
+      const geometry = await carousel.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          available:
+            element.clientWidth -
+            Number.parseFloat(style.paddingLeft) -
+            Number.parseFloat(style.paddingRight),
+          card: element.firstElementChild!.getBoundingClientRect().width,
+          overflow: element.scrollWidth - element.clientWidth,
+        };
+      });
+      if (width < 768) {
+        expect(geometry.card).toBeCloseTo(
+          geometry.available * (cardCount === 1 && width < 640 ? 1 : 0.8),
+          0
+        );
+        expect(geometry.overflow > 1).toBe(cardCount > 1);
+      } else {
+        expect(geometry.card).toBeLessThan(geometry.available / 2);
+        expect(geometry.overflow).toBeLessThanOrEqual(1);
+      }
+      await expectNoHorizontalOverflow(page);
+    }
+    await carousel.scrollIntoViewIfNeeded();
+    await carousel.screenshot({
+      path: testInfo.outputPath(`coming-up-${cardCount}-cards.png`),
+    });
+  });
+}
+
+test("Coming Up keeps collaborator credits compact and accessible @smoke @medium @large", async ({
+  page,
+}, testInfo) => {
+  await installComingUpFixture(page);
+  const collaborators = Array.from({ length: 5 }, (_, index) => ({
+    id: `credit-${index}`,
+    handle: `collaborator-with-a-long-name-${index}`,
+    display: `Collaborator ${index}`,
+    pfp: loadingTestArtwork.image,
+  }));
+  await page.route("**/api/identities/credit-*", (route) =>
+    route.fulfill({ status: 503, json: { error: "Unavailable" } })
+  );
+  await page.route(comingUpLeaderboardPattern, (route) =>
+    route.fulfill({
+      json: {
+        ...comingUpLeaderboard,
+        drops: comingUpLeaderboard.drops.map((drop, index) => ({
+          ...drop,
+          author: { ...drop.author, pfp: loadingTestArtwork.image },
+          collaborators:
+            index === 0 ? collaborators : collaborators.slice(0, 2 - index),
+        })),
+      },
+    })
+  );
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const section = page.getByRole("region", { name: "Coming up", exact: true });
+  const more = section.getByRole("link", {
+    name: "+3 more View all collaborators on this drop",
+  });
+  await expect(more).toHaveText("+3 more View all collaborators on this drop");
+  await expect(more).toHaveAttribute(
+    "href",
+    `/waves/${comingUpWave.id}?drop=coming-up-1`
+  );
+  await more.scrollIntoViewIfNeeded();
+  const layout = await more.evaluate((link) => {
+    const credit = link.parentElement!.parentElement!.parentElement!;
+    const stack = credit.firstElementChild!;
+    const names = credit.lastElementChild!;
+    const avatarBoxes = Array.from(stack.children).map((avatar) =>
+      avatar.getBoundingClientRect().toJSON()
+    );
+    return {
+      avatars: stack.querySelectorAll("img").length,
+      avatarBoxes,
+      stackRight: stack.getBoundingClientRect().right,
+      namesLeft: names.getBoundingClientRect().left,
+      overflow: credit.scrollWidth > credit.clientWidth,
+      firstZ: getComputedStyle(stack.firstElementChild!).zIndex,
+      secondZ: getComputedStyle(stack.children[1]!).zIndex,
+      nameStyles: Array.from(names.querySelectorAll("a[title]")).map(
+        (name) => ({
+          ellipsis: getComputedStyle(name).textOverflow,
+          whiteSpace: getComputedStyle(name).whiteSpace,
+        })
+      ),
+    };
+  });
+  expect(layout.avatars).toBe(4);
+  expect(layout.avatarBoxes[1]!.left).toBeLessThan(
+    layout.avatarBoxes[0]!.right
+  );
+  expect(Number(layout.firstZ)).toBeGreaterThan(Number(layout.secondZ));
+  expect(layout.namesLeft).toBeGreaterThan(layout.stackRight);
+  expect(layout.overflow).toBe(false);
+  for (const styles of layout.nameStyles) {
+    expect(styles).toEqual({ ellipsis: "ellipsis", whiteSpace: "nowrap" });
+  }
+  if (isDesktopWebProject(testInfo.project.name)) {
+    const artists = section.getByRole("link", {
+      name: "coming-up-artist",
+      exact: true,
+    });
+    await expect(artists.first()).toHaveCSS("color", "rgb(147, 147, 159)");
+    await artists.first().hover();
+    await expect(artists.first()).toHaveCSS("color", "rgb(206, 207, 212)");
+    const soloArtistName = section
+      .getByRole("link", { name: "coming-up-artist", exact: true })
+      .nth(2)
+      .locator("span");
+    await expect(soloArtistName).toHaveCSS("color", "rgb(147, 147, 159)");
+    for (const name of [artists.first(), soloArtistName]) {
+      await expect(name).toHaveCSS("font-size", "14px");
+      await expect(name).toHaveCSS("font-weight", "500");
+    }
+    await artists.nth(2).hover();
+    await expect(soloArtistName).toHaveCSS("color", "rgb(255, 255, 255)");
+  }
+  await more.focus();
+  await expect(more).toBeFocused();
+  await expectNoHorizontalOverflow(page);
+  await section.screenshot({
+    path: testInfo.outputPath("collaborator-credits.png"),
+  });
+});
 
 for (const hasBoostedDrops of [false, true]) {
   test(`Coming Up loads while boosted cards are pending, with ${hasBoostedDrops ? "populated" : "empty"} results @smoke @medium @large`, async ({
@@ -426,6 +581,11 @@ test("homepage artwork request has a visible failure and retry @smoke @medium @l
 
 test.describe("Home Page @smoke @medium @large", () => {
   test.beforeEach(async ({ page }) => {
+    // Layout and hover assertions must not depend on a live voting round.
+    await installComingUpFixture(page);
+    await page.route(comingUpLeaderboardPattern, (route) =>
+      route.fulfill({ json: comingUpLeaderboard })
+    );
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
   });
@@ -451,6 +611,284 @@ test.describe("Home Page @smoke @medium @large", () => {
 
     const waveLink = page.getByRole("link", { name: /^View wave / }).first();
     await expect(waveLink).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+
+    const imageArea = page
+      .getByRole("link", { name: /^View wave / })
+      .first()
+      .locator(":scope > div")
+      .first();
+    const details = page
+      .getByRole("link", { name: /^View wave / })
+      .first()
+      .locator(":scope > div")
+      .last();
+    const imageBox = await imageArea.boundingBox();
+    const detailsBox = await details.boundingBox();
+    if (!imageBox || !detailsBox) {
+      throw new Error(
+        "The wave card image and details must have visible bounds"
+      );
+    }
+
+    if (await page.evaluate(() => globalThis.innerWidth < 768)) {
+      expect(imageBox.x + imageBox.width).toBeLessThanOrEqual(detailsBox.x);
+      expect(imageBox.y).toBeCloseTo(detailsBox.y, 1);
+      expect(imageBox.height).toBeCloseTo(detailsBox.height, 1);
+    } else {
+      expect(imageBox.y + imageBox.height).toBeLessThanOrEqual(detailsBox.y);
+    }
+
+    // Activity belongs under the title; the scores stay at the card bottom
+    // even when a description takes fewer lines than its neighbors.
+    for (const card of await page
+      .getByRole("link", { name: /^View wave / })
+      .all()) {
+      const layout = await card.evaluate((element) => {
+        const body = element.lastElementChild!;
+        const [title, activity, description, metrics] = Array.from(
+          body.children
+        );
+        return {
+          title: title!.getBoundingClientRect().toJSON(),
+          activity: activity!.getBoundingClientRect().toJSON(),
+          description: description!.getBoundingClientRect().toJSON(),
+          metrics: metrics!.getBoundingClientRect().toJSON(),
+          body: body.getBoundingClientRect().toJSON(),
+          paddingBottom: Number.parseFloat(
+            getComputedStyle(body).paddingBottom
+          ),
+        };
+      });
+      expect(layout.activity.top).toBeGreaterThanOrEqual(layout.title.bottom);
+      expect(layout.description.top).toBeGreaterThanOrEqual(
+        layout.activity.bottom
+      );
+      expect(layout.metrics.top).toBeGreaterThanOrEqual(
+        layout.description.bottom
+      );
+      expect(layout.body.bottom - layout.metrics.bottom).toBeCloseTo(
+        layout.paddingBottom,
+        0
+      );
+    }
+
+    const comingUp = page.getByRole("region", {
+      name: "Coming up",
+      exact: true,
+    });
+    await expect(comingUp).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    const isNarrowViewport = await page.evaluate(() => innerWidth < 768);
+    const viewportWidth = await page.evaluate(() => innerWidth);
+    let sectionTitleSize = "24px";
+    if (viewportWidth < 768) sectionTitleSize = "20px";
+    else if (viewportWidth < 1024) sectionTitleSize = "22px";
+    await expect(page.getByText(/^(Latest|Next) Drop$/)).toHaveCSS(
+      "font-size",
+      sectionTitleSize
+    );
+    await expect(page.getByText(/^(Latest|Next) Drop$/)).toHaveCSS(
+      "margin-bottom",
+      "20px"
+    );
+    // Both section actions belong in the header and must leave the title clear.
+    for (const section of [
+      comingUp,
+      page
+        .getByRole("heading", { name: "Tired of bot replies?", exact: true })
+        .locator('xpath=ancestor::*[@data-home-section="Explore waves"]'),
+    ]) {
+      await expect(
+        section.getByRole("link", { name: "View all", exact: true })
+      ).toHaveCount(1);
+      await expect(section.getByRole("heading", { level: 2 })).toHaveCSS(
+        "font-size",
+        sectionTitleSize
+      );
+      const subtitle = section
+        .getByRole("heading", { level: 2 })
+        .locator("xpath=following-sibling::p");
+      await expect(subtitle).toHaveCSS("font-size", "14px");
+      await expect(subtitle).toHaveCSS("margin-top", "4px");
+      await expect(
+        section.getByRole("heading", { level: 2 }).locator("../..")
+      ).toHaveCSS("margin-bottom", "20px");
+      expect(
+        await section.evaluate((section) => {
+          const heading = section.querySelector("h2");
+          const link = section.querySelector('[data-home-action="View all"]');
+          if (!heading || !link) return false;
+          if (link.parentElement !== heading.parentElement?.parentElement)
+            return false;
+          const range = document.createRange();
+          range.selectNodeContents(heading);
+          const linkBox = link.getBoundingClientRect();
+          return Array.from(range.getClientRects()).every(
+            (textBox) =>
+              textBox.right <= linkBox.left ||
+              textBox.bottom <= linkBox.top ||
+              textBox.left >= linkBox.right ||
+              textBox.top >= linkBox.bottom
+          );
+        })
+      ).toBe(true);
+
+      if (isNarrowViewport) {
+        const subtitleGap = await section.evaluate((section) => {
+          const subtitle = section.querySelector("p")!;
+          const link = section.querySelector('[data-home-action="View all"]')!;
+          return (
+            subtitle.getBoundingClientRect().top -
+            link.getBoundingClientRect().bottom
+          );
+        });
+        // The requested compact header uses a 4px subtitle gap; the action
+        // remains contained within the title row rather than hanging below it.
+        expect(subtitleGap).toBeGreaterThanOrEqual(4);
+      }
+    }
+
+    if (isNarrowViewport) {
+      const carousel = page
+        .getByRole("region", { name: "Coming up", exact: true })
+        .locator(".tw-snap-x");
+      const cards = page
+        .getByRole("region", { name: "Coming up", exact: true })
+        .locator(".tw-snap-x > div");
+      if ((await cards.count()) > 1) {
+        // A directional scroll beyond the next card must stop at that card,
+        // instead of skipping it. Check both forward and backward movement.
+        const nextCardOffset = await carousel.evaluate((element) => {
+          const first = element.children[0]!.getBoundingClientRect();
+          const second = element.children[1]!.getBoundingClientRect();
+          element.scrollBy({
+            left: element.clientWidth * 2,
+            behavior: "instant",
+          });
+          return Math.min(
+            second.left - first.left,
+            element.scrollWidth - element.clientWidth
+          );
+        });
+        await expect
+          .poll(() => carousel.evaluate((element) => element.scrollLeft))
+          .toBeCloseTo(nextCardOffset, 0);
+        await carousel.evaluate((element) => {
+          element.scrollBy({
+            left: -element.clientWidth * 2,
+            behavior: "instant",
+          });
+        });
+        await expect
+          .poll(() => carousel.evaluate((element) => element.scrollLeft))
+          .toBe(0);
+      }
+    }
+
+    const footer = page
+      .getByRole("link", { name: "Terms of Service", exact: true })
+      .locator("xpath=ancestor::footer");
+    await footer.scrollIntoViewIfNeeded();
+    await expect(
+      footer.getByRole("link", { name: "Terms of Service" })
+    ).toBeVisible();
+    expect(
+      await footer.evaluate((element) => {
+        const bounds = element.getBoundingClientRect();
+        const links = Array.from(element.querySelectorAll("a"), (link) =>
+          link.getBoundingClientRect()
+        );
+        return links.every(
+          (box, index) =>
+            box.left >= bounds.left &&
+            box.right <= bounds.right &&
+            links
+              .slice(index + 1)
+              .every(
+                (other) =>
+                  box.right <= other.left ||
+                  box.left >= other.right ||
+                  box.bottom <= other.top ||
+                  box.top >= other.bottom
+              )
+        );
+      })
+    ).toBe(true);
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test("keeps a countdown with days inside the original timer height", async ({
+    page,
+  }, testInfo) => {
+    if (isMobileWebProject(testInfo.project.name)) {
+      await page.setViewportSize({ width: 320, height: 800 });
+    }
+    // Use the real component and app CSS with a deterministic duration. This
+    // checks the longest timer layout independently of the live mint phase.
+    const styles = await page
+      .locator("head")
+      .evaluate((head) =>
+        Array.from(
+          head.querySelectorAll('link[rel="stylesheet"]'),
+          (link) => link.outerHTML
+        ).join("")
+      );
+    const fixtureUrl = new URL("/__countdown-layout-fixture", page.url()).href;
+    await page.route(fixtureUrl, (route) =>
+      route.fulfill({
+        contentType: "text/html",
+        body: `<html><head><meta name="viewport" content="width=device-width, initial-scale=1">${styles}</head><body>
+        <main class="tailwind-scope" style="width:calc(100% - 64px);max-width:384px;margin:32px auto">
+          <div id="countdown-fixture"></div>
+        </main>
+      </body></html>`,
+      })
+    );
+    await page.goto(fixtureUrl);
+    const script = buildSync({
+      stdin: {
+        resolveDir: process.cwd(),
+        contents: `
+          import { createElement } from 'react';
+          import { createRoot } from 'react-dom/client';
+          import Countdown from './components/home/now-minting/NowMintingCountdownActive';
+          createRoot(document.getElementById('countdown-fixture')).render(
+            createElement(Countdown, { countdown: {
+              title: 'Phase 0 (Allowlist) Starts In',
+              targetDate: Math.floor(Date.now() / 1000) + 12 * 86400 + 23 * 3600 + 59 * 60 + 59,
+              showAllowlistInfo: true,
+              showMintBtn: false,
+              isActive: false
+            } })
+          );
+        `,
+      },
+      bundle: true,
+      format: "iife",
+      jsx: "automatic",
+      define: { "process.env.NODE_ENV": '"production"', "process.env": "{}" },
+      write: false,
+    });
+    await page.addScriptTag({ content: script.outputFiles[0]!.text });
+    const timer = page.getByRole("timer");
+    await expect(timer).toHaveText(/^12d : 23h : 59m : \d{2}s$/);
+    await expect(timer).toHaveCSS(
+      "font-size",
+      (await page.evaluate(() => innerWidth < 768)) ? "20px" : "24px"
+    );
+    await page.evaluate(() => document.fonts.ready);
+    const bounds = await timer.evaluate((element) => ({
+      timer: element.getBoundingClientRect().toJSON(),
+      box: element
+        .parentElement!.parentElement!.getBoundingClientRect()
+        .toJSON(),
+    }));
+    expect(bounds.box.height).toBe(56);
+    expect(bounds.timer.left).toBeGreaterThanOrEqual(bounds.box.left);
+    expect(bounds.timer.right).toBeLessThanOrEqual(bounds.box.right);
+    expect(bounds.timer.top).toBeGreaterThanOrEqual(bounds.box.top);
+    expect(bounds.timer.bottom).toBeLessThanOrEqual(bounds.box.bottom);
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({ path: testInfo.outputPath("countdown-days.png") });
   });
 
   test("should expose the network health route", async ({ page }) => {
@@ -460,6 +898,108 @@ test.describe("Home Page @smoke @medium @large", () => {
 
     await expect(healthLink).toBeVisible();
     await expect(healthLink).toHaveAttribute("href", "/network/health");
+  });
+
+  test("keeps homepage hover feedback subtle and respects reduced motion", async ({
+    page,
+  }, testInfo) => {
+    const waveLink = page.getByRole("link", { name: /^View wave / }).first();
+    await expect(waveLink).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    const comingUp = page.getByRole("region", {
+      name: "Coming up",
+      exact: true,
+    });
+    const viewAll = comingUp.getByRole("link", {
+      name: "View all",
+      exact: true,
+    });
+    const arrow = page
+      .getByRole("region", { name: "Coming up", exact: true })
+      .getByRole("link", { name: "View all", exact: true })
+      .locator("svg");
+    const secondaryActions = page
+      .getByRole("button", { name: "Connect wallet", exact: true })
+      .or(page.getByRole("link", { name: "View all", exact: true }));
+    await expect(secondaryActions).toHaveCount(3);
+    const isNarrowViewport = await page.evaluate(() => innerWidth < 768);
+    for (const action of await secondaryActions.all()) {
+      const isViewAll =
+        (await action.getAttribute("data-home-action")) === "View all";
+      const isMobileViewAllLink = isNarrowViewport && isViewAll;
+      const borderOpacity = isViewAll ? 0.15 : 0.2;
+      if (isMobileViewAllLink) {
+        await expect(action).toHaveCSS("border-width", "0px");
+        await expect(action).toHaveCSS("height", "28px");
+      } else {
+        await expect(action).toHaveCSS("border-width", "1px");
+        await expect(action).toHaveCSS(
+          "border-color",
+          `rgba(255, 255, 255, ${borderOpacity})`
+        );
+      }
+      await expect(action).toHaveCSS(
+        "background-color",
+        isMobileViewAllLink ? "rgba(0, 0, 0, 0)" : "rgba(255, 255, 255, 0.04)"
+      );
+    }
+
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    if (isDesktopWebProject(testInfo.project.name)) {
+      const dropTitle = page.getByRole("link", {
+        name: loadingTestArtwork.name,
+        exact: true,
+      });
+      await expect(dropTitle).toBeVisible();
+      await dropTitle.hover();
+      await expect(dropTitle).toHaveCSS("color", "rgb(206, 207, 212)");
+
+      const comingUpTitle = comingUp.getByRole("link", {
+        name: "Coming Up artwork 1",
+        exact: true,
+      });
+      await comingUpTitle.hover();
+      await expect(comingUpTitle).toHaveCSS("color", "rgb(206, 207, 212)");
+
+      await waveLink.scrollIntoViewIfNeeded();
+      const before = await waveLink.boundingBox();
+      await waveLink.hover();
+      await expect(waveLink).toHaveCSS(
+        "border-color",
+        "rgba(255, 255, 255, 0.2)"
+      );
+      await expect(waveLink).toHaveCSS("transform", "none");
+      await expect(waveLink.getByRole("img")).toHaveCSS("transform", "none");
+      expect(await waveLink.boundingBox()).toEqual(before);
+
+      await viewAll.hover();
+      await expect(arrow).toHaveCSS("transform", "matrix(1, 0, 0, 1, 2, 0)");
+
+      for (const action of await secondaryActions.all()) {
+        await action.hover();
+        await expect(action).toHaveCSS(
+          "border-color",
+          "rgba(255, 255, 255, 0.3)"
+        );
+        await expect(action).toHaveCSS(
+          "background-color",
+          "rgba(255, 255, 255, 0.08)"
+        );
+      }
+    }
+
+    await page.keyboard.press("Tab");
+    await viewAll.focus();
+    await expect(viewAll).toBeFocused();
+    await expect(viewAll).not.toHaveCSS("box-shadow", "none");
+    await expect(arrow).toHaveCSS("transform", "matrix(1, 0, 0, 1, 2, 0)");
+
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await expect(arrow).toHaveCSS("transform", "none");
+    await expect(arrow).toHaveCSS("transition-property", "none");
+    await expect(viewAll).toHaveCSS("transition-property", "none");
+    await expect(waveLink).toHaveCSS("transition-property", "none");
+    await expect(viewAll).not.toHaveCSS("box-shadow", "none");
+    await expectNoHorizontalOverflow(page);
   });
 
   if (process.env["PLAYWRIGHT_ENV"] === "production") {

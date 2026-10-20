@@ -97,6 +97,40 @@ describe("ExploreWaveCard", () => {
     expect(screen.getByText("No drops yet")).toBeInTheDocument();
   });
 
+  it("renders a plain-text homepage description between activity and scores", () => {
+    render(
+      <ExploreWaveCard
+        horizontalOnMobile
+        wave={createWave({
+          descriptionDrop: {
+            contents:
+              "**Punk6529's** [book list](https://example.com/books) and _discussion_",
+            media: [],
+          },
+          waveScore: {
+            visibility_score: 96,
+            quality_score: 90,
+            hotness_score: 98,
+            rep_sort_score: 76,
+          } as SidebarWave["waveScore"],
+        })}
+      />
+    );
+
+    const description = screen.getByText("Punk6529's book list and discussion");
+    const activity = screen.getByText(/2m ago · 3/i);
+    const score = screen.getByText("Score");
+    expect(mockContentDisplay).not.toHaveBeenCalled();
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+    expect(description.childElementCount).toBe(0);
+    expect(activity.compareDocumentPosition(description)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(description.compareDocumentPosition(score)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+  });
+
   it("shows labelled score, hotness, and REP values in one icon row", () => {
     render(
       <ExploreWaveCard

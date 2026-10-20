@@ -24,13 +24,13 @@ export default function NowMintingHeader({
 
   return (
     <div className="tw-flex tw-flex-col">
-      <div className="tw-flex tw-min-h-5 tw-flex-wrap tw-items-center">
+      <div className="tw-flex tw-min-h-5 tw-flex-wrap tw-items-center [&>span]:tw-font-semibold [&>span]:tw-leading-4 [&>span]:tw-tracking-[0.08em]">
         <MainStageMemeCardPill memeCardId={cardNumber} variant="subtle" />
       </div>
       <Link
         data-home-action="Open artwork"
         href={`/the-memes/${cardNumber}`}
-        className="tw-mt-2 tw-w-fit tw-max-w-full tw-text-balance tw-rounded-sm tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none md:tw-text-3xl"
+        className="tw-mt-2 tw-w-fit tw-max-w-full tw-text-balance tw-rounded-sm tw-text-2xl tw-font-semibold tw-leading-[1.15] tw-tracking-[-0.025em] tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none md:tw-text-3xl"
       >
         {title}
       </Link>
