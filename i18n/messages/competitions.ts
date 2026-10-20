@@ -178,6 +178,7 @@ export const COMPETITION_MESSAGES = {
   "competitions.entryTitle": "Entry title",
   "competitions.entryContent": "Entry content",
   "competitions.terms": "I agree to this competition’s terms.",
+  "competitions.termsRequired": "Accept the competition’s terms to submit.",
   "competitions.delete": "Delete",
   "competitions.openEntry": "Open entry",
   "competitions.viewDrop": "View in shared chat",

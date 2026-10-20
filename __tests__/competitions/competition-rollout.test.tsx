@@ -106,15 +106,25 @@ it("keeps published edit links in Settings", () => {
   expect(screen.queryByText("Native draft editor")).toBeNull();
   expect(screen.getByRole("tabpanel", { name: "Settings" })).toBeVisible();
 });
-it("opens the permitted original rule editor and returns to its Settings on close", () => {
-  mockCompetition.permissions.edit_rules_after_activity = true;
-  render(<CompetitionDetail waveId="wave" competitionId="native" />);
-  expect(screen.getByText("Native draft editor")).toBeVisible();
-  fireEvent.click(screen.getByRole("button", { name: "Close editor" }));
-  expect(mockReplace).toHaveBeenCalledWith(
-    "/waves/wave/competitions/native?tab=rules"
-  );
-});
+it.each([
+  ["edit=1", "tab=rules"],
+  [
+    "edit=1&competition=native&serialNo=42&filter=one&filter=two&tab=leaderboard",
+    "competition=native&serialNo=42&filter=one&filter=two&tab=rules",
+  ],
+])(
+  "closes the permitted original rule editor in Settings and preserves the query %s",
+  (search, expectedSearch) => {
+    mockSearch = search;
+    mockCompetition.permissions.edit_rules_after_activity = true;
+    render(<CompetitionDetail waveId="wave" competitionId="native" />);
+    expect(screen.getByText("Native draft editor")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Close editor" }));
+    expect(mockReplace).toHaveBeenCalledWith(
+      `/waves/wave/competitions/native?${expectedSearch}`
+    );
+  }
+);
 it("uses the shared competition view for the original primary", () => {
   mockPrimary = "native";
   render(<CompetitionDetail waveId="wave" competitionId="native" />);
@@ -195,7 +205,7 @@ it("keeps the entry action in the competition view and exposes details and manag
   ).toBeVisible();
 });
 
-it.each(["", "tab=rules", "edit=1"])(
+it.each(["", "tab=rules", "edit=1", "edit=1&competition=native&serialNo=42"])(
   "opens drafts directly in the setup wizard for query %s",
   (search) => {
     mockSearch = search;

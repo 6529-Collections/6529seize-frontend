@@ -186,13 +186,16 @@ export function NativeCompetitionContent({
       <CompetitionDraftEditor
         wave={wave}
         competition={competition}
-        onClose={() =>
+        onClose={() => {
+          const params = new URLSearchParams(search.toString());
+          params.delete("edit");
+          params.set("tab", "rules");
           router.replace(
             competition.lifecycle === ApiCompetitionLifecycle.Draft
               ? getCompetitionsRoute(wave.id)
-              : `${pathname}?tab=rules`
-          )
-        }
+              : `${pathname}?${params.toString()}`
+          );
+        }}
       />
     );
   return (
