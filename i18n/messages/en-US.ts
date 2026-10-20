@@ -147,6 +147,7 @@ const USER_COLLECTED_STATS_MESSAGES = namespaceMessages(
     ["details.show", "Details"],
     ["details.hide", "Hide Details"],
     ["details.unavailable", "Stats are unavailable for this profile."],
+    ["details.loading", "Loading collection details…"],
     ["seasons.title", "Seasons"],
     ["seasons.startedCount", "{started}/{total} started"],
     ["seasons.showLess", "Show less"],
@@ -1341,6 +1342,9 @@ const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
 
 const USER_CIC_TYPE_MESSAGES = objectMessages("user.cicType", {
   details: "Network ID Check details",
+  title: "Network ID Check",
+  description:
+    "Does the community believe this profile accurately represents its identity?",
 } as const);
 
 const FOLLOWERS_MESSAGES = objectMessages("followers", {
@@ -2562,6 +2566,8 @@ const PROFILE_ACTIVITY_RATE_MESSAGES = objectMessages("profileActivity.rate", {
 
 const USER_RATE_MESSAGES = objectMessages("user.rate", {
   "subtitle.waveRep": "give Wave REP for",
+  "nic.label": "Your total NIC Rating of {profile}:",
+  submit: "Rate",
 } as const);
 
 const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
