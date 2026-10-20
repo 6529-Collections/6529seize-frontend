@@ -4,6 +4,11 @@ import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import type { Frame, Locator, Page, WebSocketRoute } from "@playwright/test";
 import { expectCompetitionScroll } from "../support/competitionScroll";
 import {
+  expectNativeLeaderboardArtwork,
+  expectNativeLeaderboardReady,
+  observeNativeLeaderboard,
+} from "../support/nativeLeaderboard";
+import {
   monitorRememberedLeaderboard,
   retainDesktopWaveSidebar,
 } from "../support/waveNavigationContinuity";
@@ -6555,6 +6560,96 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       releaseNavigation();
     }
   });
+
+  for (const populated of [false, true]) {
+    test(`validates the live native leaderboard contract with ${populated ? "populated" : "empty"} data`, async ({
+      page,
+    }, testInfo) => {
+      const sandbox = await installCompetitionApi(
+        page,
+        false,
+        true,
+        MEMES_WAVE
+      );
+      sandbox.onlyCompetition("alpha");
+      await sandbox.legacyPrimary("alpha");
+      if (testInfo.project.name === "web-mobile-chromium")
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      const response = await page.request.get(
+        `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${MEMES_WAVE}/drops`
+      );
+      expect(response.ok()).toBe(true);
+      const fixture = await response.json();
+      fixture.wave.id = MEMES_WAVE;
+      const artworkId = "00000000-0000-4000-8000-000000009529";
+      const drops = populated
+        ? [
+            {
+              ...fixture.drops[0],
+              id: entryDropId("alpha"),
+              title: "Text entry before artwork",
+              drop_type: "SUBMISSION",
+              media: [],
+            },
+            {
+              ...fixture.drops[0],
+              id: artworkId,
+              title: "Native response artwork",
+              drop_type: "SUBMISSION",
+              media: [
+                {
+                  url: "https://d3lqz0a4bldqgf.cloudfront.net/drops/live-native-contract.png",
+                  mime_type: "image/png",
+                },
+              ],
+            },
+          ]
+        : [];
+      await page.route(
+        /https:\/\/d3lqz0a4bldqgf\.cloudfront\.net\/drops\/(?:[^?]*\/)?live-native-contract\.png(?:\?.*)?$/,
+        (route) =>
+          route.fulfill({
+            contentType: "image/png",
+            path: "public/test-wave-icon.png",
+          })
+      );
+      await installArtworkCompetitionResources(
+        page,
+        MEMES_WAVE,
+        fixture.wave,
+        () => drops
+      );
+      const observed = observeNativeLeaderboard(page, MEMES_WAVE);
+      try {
+        await page.goto(`/waves/${MEMES_WAVE}?tab=leaderboard`);
+        const { competition: selected, data } =
+          await observed.originalLeaderboard();
+        expect(data.data).toHaveLength(populated ? 2 : 0);
+        await expectNativeLeaderboardReady(page);
+        await expectNativeLeaderboardArtwork(
+          page,
+          selected,
+          data,
+          observed.reads
+        );
+        if (populated) {
+          const card = page
+            .getByRole("list", { name: "Leaderboard drops", exact: true })
+            .locator(`[data-leaderboard-drop-id="${artworkId}"]`)
+            .locator(`[data-competition-entry="entry-${artworkId}"]`);
+          await expect(card).toContainText("Native response artwork");
+        }
+        expect(sandbox.requests).toEqual([]);
+        await expectNoHorizontalOverflow(page);
+      } finally {
+        observed.dispose();
+      }
+    });
+  }
 
   for (const surface of ["web", "app"] as const) {
     test(`preserves populated legacy Main Stage artwork in ${surface} views`, async ({
