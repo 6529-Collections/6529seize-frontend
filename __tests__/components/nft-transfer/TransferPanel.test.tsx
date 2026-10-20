@@ -120,6 +120,11 @@ describe("TransferPanel", () => {
     expect(screen.getByLabelText("Collapse panel")).toBeInTheDocument();
   });
 
+  afterEach(() => {
+    document.body.style.overflow = "";
+    jest.restoreAllMocks();
+  });
+
   it("restores scrolling and removes the Escape listener when unmounted expanded", () => {
     mockUseTransfer.mockReturnValue({
       enabled: true,
@@ -142,7 +147,5 @@ describe("TransferPanel", () => {
       "keydown",
       expect.any(Function)
     );
-    removeListener.mockRestore();
-    document.body.style.overflow = "";
   });
 });

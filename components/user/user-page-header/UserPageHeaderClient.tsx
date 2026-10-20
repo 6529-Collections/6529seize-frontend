@@ -483,6 +483,7 @@ export default function UserPageHeaderClient({
       });
     },
     enabled: !!profile.id,
+    staleTime: 60_000,
   });
   const profileEnabledAt =
     enabledAt === undefined ? initialProfileEnabledAt : enabledAt;

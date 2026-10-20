@@ -62,6 +62,7 @@ const mockUseSearchParams = useSearchParams as jest.Mock;
 describe("UserPageLayout", () => {
   beforeEach(() => {
     mockUseSetTitle.mockClear();
+    mockReactQueryContext.setProfile.mockClear();
     mockUseParams.mockReturnValue({ user: "testuser" });
     mockUsePathname.mockReturnValue("/testuser");
     mockUseRouter.mockReturnValue({ push: jest.fn(), replace: jest.fn() });
@@ -96,6 +97,7 @@ describe("UserPageLayout", () => {
     expect(screen.getByTestId("user-page-header")).toBeInTheDocument();
     expect(screen.getByTestId("user-page-tabs")).toBeInTheDocument();
     expect(screen.getByText("Content")).toBeInTheDocument();
+    expect(mockReactQueryContext.setProfile).not.toHaveBeenCalled();
   });
 
   it("uses the complete server title unchanged during hydration", () => {

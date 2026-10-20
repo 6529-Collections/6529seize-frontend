@@ -16,13 +16,17 @@ test("keeps the profile shell and scroll while the last tab click wins", async (
     name: "Profile sections",
   });
   // The underline is positioned after hydration; SSR alone isn't interactive.
-  await expect(navigation.locator('span[aria-hidden="true"]')).toHaveCSS(
-    "opacity",
-    "1"
-  );
-  const main = await page.locator("[data-profile-shell]").elementHandle();
+  await expect(
+    page
+      .getByRole("navigation", { name: "Profile sections" })
+      .locator('span[aria-hidden="true"]')
+  ).toHaveCSS("opacity", "1");
+  const main = await page.getByRole("main").last().elementHandle();
   const navElement = await navigation.elementHandle();
-  const content = page.locator("[data-profile-tab-content]");
+  const content = page
+    .getByRole("main")
+    .last()
+    .locator("[data-profile-tab-content]");
   await page.evaluate(() =>
     globalThis.scrollTo({ top: 200, behavior: "instant" })
   );
@@ -66,7 +70,8 @@ test("keeps the profile shell and scroll while the last tab click wins", async (
     expect(visited).not.toContain(`/${PROFILE_HANDLE}/collected`);
     expect(
       await page
-        .locator("[data-profile-shell]")
+        .getByRole("main")
+        .last()
         .evaluate((current, previous) => current === previous, main)
     ).toBe(true);
     expect(

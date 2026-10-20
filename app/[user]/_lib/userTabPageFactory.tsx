@@ -82,6 +82,16 @@ const normalizeSearchParams = (
   }, {} as UserSearchParams);
 };
 
+const serializeSearchParams = (query: UserSearchParams): string => {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    for (const entry of Array.isArray(value) ? value : [value]) {
+      if (entry !== undefined) params.append(key, entry);
+    }
+  }
+  return params.toString();
+};
+
 const isNotFoundError = (error: unknown): boolean => {
   if (
     error === null ||
@@ -213,14 +223,8 @@ export function createUserTabPage<
       return redirect(needsRedirect.redirect.destination);
     }
     if (needsXtdhDefault) {
-      const redirectParams = new URLSearchParams();
-      for (const [key, value] of Object.entries(query)) {
-        for (const entry of Array.isArray(value) ? value : [value]) {
-          if (entry !== undefined) redirectParams.append(key, entry);
-        }
-      }
       return redirect(
-        `/${encodeURIComponent(user)}/xtdh?${redirectParams.toString()}`
+        `/${encodeURIComponent(user)}/xtdh?${serializeSearchParams(query)}`
       );
     }
 

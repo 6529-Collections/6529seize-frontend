@@ -3,7 +3,9 @@
 import { useRouter } from "next/navigation";
 import {
   createContext,
+  useCallback,
   useContext,
+  useMemo,
   useOptimistic,
   useTransition,
   type ReactNode,
@@ -27,21 +29,27 @@ export default function UserPageNavigation({
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  // Optimistic state updates immediately and resets when navigation settles.
   const [pendingTab, setPendingTab] = useOptimistic<UserPageTabKey | null>(
     null
   );
 
-  const navigate = (href: string, tab: UserPageTabKey) => {
-    startTransition(() => {
-      setPendingTab(tab);
-      router.push(href, { scroll: false });
-    });
-  };
+  const navigate = useCallback(
+    (href: string, tab: UserPageTabKey) => {
+      startTransition(() => {
+        setPendingTab(tab);
+        router.push(href, { scroll: false });
+      });
+    },
+    [router, setPendingTab, startTransition]
+  );
+  const value = useMemo(
+    () => ({ pendingTab: isPending ? pendingTab : null, navigate }),
+    [isPending, pendingTab, navigate]
+  );
 
   return (
-    <UserPageNavigationContext
-      value={{ pendingTab: isPending ? pendingTab : null, navigate }}
-    >
+    <UserPageNavigationContext value={value}>
       {children}
     </UserPageNavigationContext>
   );

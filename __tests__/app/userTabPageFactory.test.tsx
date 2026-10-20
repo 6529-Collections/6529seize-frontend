@@ -245,9 +245,38 @@ describe("user tab page via createUserTabPage", () => {
     });
     await Page({
       params: Promise.resolve({ user: "alice" }),
-      searchParams: Promise.resolve({ tab, sub: "all" }),
+      searchParams: Promise.resolve({ tab, sub: "all", address: "0x1" }),
     });
     expect(redirectMock).not.toHaveBeenCalled();
+    expect(userPageNeedsRedirect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        req: { query: { user: "alice", tab, sub: "all", address: "0x1" } },
+      })
+    );
+  });
+
+  it("combines canonical-profile and missing xTDH tab redirects", async () => {
+    const actual = jest.requireActual<
+      typeof import("@/helpers/server.helpers")
+    >("@/helpers/server.helpers");
+    jest
+      .mocked(userPageNeedsRedirect)
+      .mockImplementationOnce(actual.userPageNeedsRedirect);
+    jest.mocked(getUserProfile).mockResolvedValueOnce({
+      handle: "alice",
+    } as Awaited<ReturnType<typeof getUserProfile>>);
+    const { Page } = createUserTabPage({
+      subroute: "xtdh",
+      Tab: DummyCollectedTab,
+    });
+    await Page({
+      params: Promise.resolve({ user: "0xalias" }),
+      searchParams: Promise.resolve({ locale: "et-EE", address: "0x1" }),
+    });
+    expect(redirectMock).toHaveBeenCalledTimes(1);
+    expect(redirectMock).toHaveBeenCalledWith(
+      "/alice/xtdh?locale=et-EE&address=0x1&tab=granted"
+    );
   });
 
   it("turns a structured missing-profile response into a route 404", async () => {
