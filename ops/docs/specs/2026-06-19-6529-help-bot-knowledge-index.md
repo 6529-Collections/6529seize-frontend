@@ -227,6 +227,11 @@ save/share-and-paste flow, and explains preparation failures and device-dependen
 share destinations.
 It does not claim automatic posting or successful publication after a handoff.
 
+The profile tab record covers immediate selection feedback, the persistent header,
+scroll preservation with natural settling for shorter content, and clearing
+Collected transfer selections when leaving that tab. It preserves shared
+`address` and `locale` parameters and describes the xTDH Granted default.
+
 The profile website studio records cover 39 editable templates (23 original
 compositions and 16 credited Memes inspirations), page and menu editing, image
 uploads, indexed wallet galleries, and the profile header's published Website
