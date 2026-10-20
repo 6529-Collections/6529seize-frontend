@@ -260,6 +260,41 @@ describe("fetchWaveDropsFeedV2", () => {
     jest.clearAllMocks();
   });
 
+  it.each([true, false])(
+    "preserves optional collaborator credits in feed and leaderboard drops (present: %s)",
+    async (hasCredits) => {
+      const collaborators = [
+        {
+          id: "credit-id",
+          handle: "collaborator",
+          display: "Collaborator",
+          pfp: null,
+        },
+      ];
+      const source = {
+        ...createDrop(1),
+        ...(hasCredits ? { collaborators } : {}),
+      };
+      commonApiFetchMock.mockResolvedValueOnce({ wave, drops: [source] });
+
+      const result = await fetchWaveDropsFeedV2({
+        waveId: "wave-1",
+        limit: 20,
+      });
+      const leaderboardDrop = mapLeaderboardDropV2({
+        drop: source,
+        wave: waveMin,
+      });
+
+      expect(result.drops[0]?.collaborators).toEqual(
+        hasCredits ? collaborators : []
+      );
+      expect(leaderboardDrop.collaborators).toEqual(
+        hasCredits ? collaborators : []
+      );
+    }
+  );
+
   it("uses ApiDropV2 as part one without fetching the part endpoint", async () => {
     commonApiFetchMock.mockResolvedValueOnce({
       wave,

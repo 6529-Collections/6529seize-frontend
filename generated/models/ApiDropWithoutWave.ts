@@ -26,12 +26,14 @@ import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTa
 import { ApiDropType } from '../models/ApiDropType';
 import { ApiDropViewerModerationContext } from '../models/ApiDropViewerModerationContext';
 import { ApiDropWinningContext } from '../models/ApiDropWinningContext';
+import { ApiMemeCollaboratorProfile } from '../models/ApiMemeCollaboratorProfile';
 import { ApiMentionedWave } from '../models/ApiMentionedWave';
 import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiReplyToDropResponse } from '../models/ApiReplyToDropResponse';
 import { HttpFile } from '../http/http';
 
 export class ApiDropWithoutWave {
+    'collaborators'?: Array<ApiMemeCollaboratorProfile>;
     /**
     * False when a winner has no saved at-decision voter records. The voter count is then unknown, not zero. Omitted by older servers.
     */
@@ -87,6 +89,12 @@ export class ApiDropWithoutWave {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "collaborators",
+            "baseName": "collaborators",
+            "type": "Array<ApiMemeCollaboratorProfile>",
+            "format": ""
+        },
         {
             "name": "voters_count_available",
             "baseName": "voters_count_available",
