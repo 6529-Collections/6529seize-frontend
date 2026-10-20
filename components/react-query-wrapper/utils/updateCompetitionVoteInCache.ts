@@ -71,8 +71,7 @@ export async function updateCompetitionVoteInCache(
     { wave_id: waveId, drop_id: dropId, viewer },
   ];
   const resourceKey = [QueryKey.COMPETITION_RESOURCE, scope];
-  const updateLegacyLeaderboard = () =>
-    result.isCurrentViewer() &&
+  const isLegacyPrimary =
     client.getQueryData<ApiWaveV3>([
       QueryKey.COMPETITION_HUB,
       { wave_id: waveId, viewer },
@@ -83,7 +82,7 @@ export async function updateCompetitionVoteInCache(
       creditKey,
       contextKey,
       resourceKey,
-      ...(updateLegacyLeaderboard()
+      ...(isLegacyPrimary && result.isCurrentViewer()
         ? [[QueryKey.DROPS_LEADERBOARD, { waveId }]]
         : []),
     ].map((queryKey) => client.cancelQueries({ queryKey }))
@@ -148,6 +147,7 @@ export async function updateCompetitionVoteInCache(
               ? {
                   ...vote,
                   value: currentVote,
+                  // Per-entry spend is ABS(value); budget.spent covers the scope.
                   credit_spent: Math.abs(currentVote),
                 }
               : vote
@@ -155,7 +155,8 @@ export async function updateCompetitionVoteInCache(
         })),
       }
   );
-  if (updateLegacyLeaderboard()) {
+  // Cancellation can outlive the viewer; this shared cache has no viewer key.
+  if (isLegacyPrimary && result.isCurrentViewer()) {
     client.setQueriesData<InfiniteData<ApiDropsLeaderboardPage>>(
       { queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId }] },
       (old) =>

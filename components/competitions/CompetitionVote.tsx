@@ -171,7 +171,10 @@ export function CompetitionVoteForm({
       </p>
     );
   if (credit.isPending) return <CompetitionState />;
-  if (!credit.data || isCompetitionAccessError(credit.error))
+  if (
+    credit.isError &&
+    (!credit.data || isCompetitionAccessError(credit.error))
+  )
     return (
       <CompetitionState
         error

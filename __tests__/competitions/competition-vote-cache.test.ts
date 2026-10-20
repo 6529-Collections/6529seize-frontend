@@ -214,6 +214,46 @@ it("does not patch a legacy leaderboard for an additional native competition", a
   expect(client.getQueryData(key)).toBe(old);
 });
 
+it("does not publish the prior viewer's vote to shared data when cancellation changes the viewer", async () => {
+  client.setQueryData(
+    [QueryKey.COMPETITION_HUB, { wave_id: "wave", viewer: scope.viewer }],
+    { legacy_primary_competition_id: "competition" }
+  );
+  const key = [QueryKey.DROPS_LEADERBOARD, { waveId: "wave" }];
+  const old = {
+    pages: [
+      { drops: [{ id: "drop", context_profile_context: { rating: 10 } }] },
+    ],
+    pageParams: [1],
+  };
+  client.setQueryData(key, old);
+  let isCurrentViewer = true;
+  let started!: () => void;
+  const ready = new Promise<void>((resolve) => {
+    started = resolve;
+  });
+  const read = client
+    .fetchQuery({
+      queryKey: creditKey,
+      queryFn: ({ signal }) => {
+        signal.addEventListener("abort", () => {
+          isCurrentViewer = false;
+        });
+        started();
+        return new Promise<ApiCompetitionCreditBudget>(() => undefined);
+      },
+    })
+    .catch(() => undefined);
+  await ready;
+  await updateCompetitionVoteInCache(client, {
+    ...result,
+    isCurrentViewer: () => isCurrentViewer,
+  });
+  await read;
+  expect(client.getQueryData(key)).toBe(old);
+  expect(client.getQueryData(creditKey)).toEqual(budget);
+});
+
 it("cancels an older credit read so it cannot undo the saved vote", async () => {
   let release!: () => void;
   let started!: () => void;
