@@ -6,6 +6,8 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useLayoutEffect } from "react";
+import * as competitionVoteCache from "@/components/react-query-wrapper/utils/updateCompetitionVoteInCache";
 import { SingleWaveDropVote } from "@/components/waves/drop/SingleWaveDropVote";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiCompetitionCreditBudget } from "@/generated/models/ApiCompetitionCreditBudget";
@@ -313,6 +315,72 @@ it("does not close another modal when a submitted form unmounts before confirmat
   confirm({ ...initialBudget, current_vote: 25, spent: 25, remaining: 1475 });
   await waitFor(() => expect(invalidateCompetition).toHaveBeenCalled());
   expect(onClose).not.toHaveBeenCalled();
+});
+it("invalidates the old viewer during commit before passive effects can flush", async () => {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  client.setQueryData(
+    [QueryKey.COMPETITION_HUB, { wave_id: "wave", viewer: "viewer:self" }],
+    { legacy_primary_competition_id: "competition" }
+  );
+  const legacyKey = [QueryKey.DROPS_LEADERBOARD, { waveId: "wave" }];
+  const legacy = {
+    pages: [
+      { drops: [{ id: "drop", context_profile_context: { rating: 0 } }] },
+    ],
+    pageParams: [1],
+  };
+  client.setQueryData(legacyKey, legacy);
+  let releaseCache!: () => void;
+  const cacheGate = new Promise<void>((resolve) => {
+    releaseCache = resolve;
+  });
+  let checkViewer: (() => boolean) | undefined;
+  let currentDuringCommit: boolean | undefined;
+  const updateCache = competitionVoteCache.updateCompetitionVoteInCache;
+  const updateSpy = jest
+    .spyOn(competitionVoteCache, "updateCompetitionVoteInCache")
+    .mockImplementation(async (queryClient, result) => {
+      checkViewer = result.isCurrentViewer;
+      await cacheGate;
+      await updateCache(queryClient, result);
+    });
+  const onClose = jest.fn();
+  function VoteHarness({ switched }: { readonly switched: boolean }) {
+    useLayoutEffect(() => {
+      if (switched) {
+        currentDuringCommit = checkViewer?.();
+        releaseCache();
+      }
+    }, [switched]);
+    return (
+      <QueryClientProvider client={client}>
+        <SingleWaveDropVote
+          drop={drop}
+          voteMode="numeric"
+          onVoteRequestStarted={onClose}
+        />
+      </QueryClientProvider>
+    );
+  }
+  try {
+    const { rerender } = render(<VoteHarness switched={false} />);
+    const input = await screen.findByRole("spinbutton", { name: "Your vote" });
+    fireEvent.change(input, { target: { value: "25" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+    await waitFor(() => expect(checkViewer).toBeDefined());
+    jest.mocked(useCompetitionViewer).mockReturnValue("viewer:proxy");
+    rerender(<VoteHarness switched />);
+    expect(currentDuringCommit).toBe(false);
+    await waitFor(() => expect(invalidateCompetition).toHaveBeenCalled());
+    expect(onClose).not.toHaveBeenCalled();
+    expect(client.getQueryData(legacyKey)).toBe(legacy);
+  } finally {
+    releaseCache();
+    updateSpy.mockRestore();
+    client.clear();
+  }
 });
 it("keeps voting open when saving the vote fails", async () => {
   jest.mocked(setCompetitionVote).mockRejectedValue(new Error("Save failed"));

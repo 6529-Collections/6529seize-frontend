@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
@@ -65,7 +65,8 @@ export function CompetitionVoteForm({
   const { requestAuth, connectedProfile } = useAuth();
   const viewer = useCompetitionViewer();
   const currentViewer = useRef<string | null | undefined>(viewer);
-  useEffect(() => {
+  // Async vote completions must see viewer changes and unmounts at commit.
+  useLayoutEffect(() => {
     currentViewer.current = viewer;
     return () => {
       currentViewer.current = undefined;
