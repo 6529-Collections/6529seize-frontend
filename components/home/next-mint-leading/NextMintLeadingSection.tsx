@@ -26,7 +26,7 @@ const SKELETON_KEYS = [
 ];
 
 const CARD_LAYOUT_CLASS_NAME =
-  "-tw-mx-4 tw-grid tw-auto-cols-[80%] tw-grid-flow-col tw-snap-x tw-snap-mandatory tw-scroll-px-4 tw-gap-3 tw-overflow-x-auto tw-overscroll-x-contain tw-px-4 tw-py-1 tw-scrollbar-none [&>*]:tw-snap-always md:tw-mx-0 md:tw-auto-cols-auto md:tw-grid-flow-row md:tw-grid-cols-2 md:tw-gap-4 md:tw-overflow-visible md:tw-px-0 lg:tw-grid-cols-3 lg:tw-gap-5";
+  "-tw-mx-4 tw-grid tw-grid-flow-col tw-snap-x tw-snap-mandatory tw-scroll-px-4 tw-gap-3 tw-overflow-x-auto tw-overscroll-x-contain tw-px-4 tw-py-1 tw-scrollbar-none [&>*]:tw-snap-always md:tw-mx-0 md:tw-auto-cols-auto md:tw-grid-flow-row md:tw-grid-cols-2 md:tw-gap-4 md:tw-overflow-visible md:tw-px-0 lg:tw-grid-cols-3 lg:tw-gap-5";
 
 export function NextMintLeadingSection() {
   const locale = useBrowserLocale();
@@ -70,6 +70,10 @@ export function NextMintLeadingSection() {
 
   const leading = drops.slice(0, leadingCount);
   const hasCards = showNextMint || leading.length > 0;
+  const cardWidthClassName =
+    leading.length + Number(showNextMint) === 1
+      ? "tw-auto-cols-[100%] sm:tw-auto-cols-[80%]"
+      : "tw-auto-cols-[80%]";
   const isFetching = isWinnersFetching || isLeaderboardFetching;
 
   if (!isReady || !waveId) return null;
@@ -78,15 +82,15 @@ export function NextMintLeadingSection() {
   const sectionClassName =
     "tw-px-4 md:tw-px-6 lg:tw-px-8 tw-relative tw-z-10 tw-@container tw-pb-10 md:tw-pb-16";
   const header = (
-    <div className="tw-relative tw-mb-5 tw-block md:tw-mb-6 md:tw-flex md:tw-items-end md:tw-justify-between md:tw-gap-4">
+    <div className="tw-relative tw-mb-5 tw-block md:tw-flex md:tw-items-end md:tw-justify-between md:tw-gap-4">
       <div className="tw-min-w-0">
         <h2
           id="coming-up-heading"
-          className="tw-m-0 tw-pr-24 tw-text-2xl tw-font-semibold tw-leading-[1.15] tw-tracking-[-0.025em] tw-text-iron-50 md:tw-pr-0 md:tw-text-[26px] lg:tw-text-3xl"
+          className="tw-m-0 tw-pr-24 tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-[-0.03em] tw-text-iron-50 md:tw-pr-0 md:tw-text-[22px] lg:tw-text-2xl"
         >
           {t(locale, "home.comingUp.title")}
         </h2>
-        <p className="tw-mb-0 tw-mt-2 tw-text-[15px] tw-font-normal tw-leading-[1.55] tw-text-iron-400 md:tw-mt-2.5 md:tw-text-base">
+        <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-font-normal tw-leading-[1.55] tw-text-iron-400">
           {t(locale, "home.comingUp.subtitle")}
         </p>
       </div>
@@ -118,7 +122,7 @@ export function NextMintLeadingSection() {
             {t(locale, "home.comingUp.loading")}
           </output>
         )}
-        <div className={CARD_LAYOUT_CLASS_NAME}>
+        <div className={`${CARD_LAYOUT_CLASS_NAME} ${cardWidthClassName}`}>
           {!hasCards &&
             SKELETON_KEYS.map((key) => (
               <NextMintLeadingSkeletonCard key={key} />

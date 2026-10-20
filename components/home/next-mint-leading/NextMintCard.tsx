@@ -1,8 +1,5 @@
 "use client";
 
-import ProfileAvatar, {
-  ProfileBadgeSize,
-} from "@/components/common/profile/ProfileAvatar";
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { getNextMintStart } from "@/components/meme-calendar/meme-calendar.helpers";
@@ -12,9 +9,13 @@ import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import Link from "next/link";
+import {
+  ComingUpArtistCredits,
+  type ComingUpCreditSource,
+} from "./ComingUpArtistCredits";
 
 interface NextMintCardProps {
-  readonly drop: ApiDrop;
+  readonly drop: ApiDrop & ComingUpCreditSource;
 }
 
 const formatNextMintDateTime = (date: Date): string => {
@@ -104,20 +105,16 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
               {title}
             </Link>
           </div>
-          <Link
-            data-home-action="Open artist profile"
-            href={`/${author.handle ?? author.primary_address}`}
-            className="tw-group/artist tw-flex tw-min-h-6 tw-min-w-0 tw-items-center tw-gap-2 tw-no-underline focus-visible:tw-rounded-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
-          >
-            <ProfileAvatar
-              pfpUrl={author.pfp}
-              alt={author.handle ?? "Artist"}
-              size={ProfileBadgeSize.SMALL}
-            />
-            <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors tw-duration-200 tw-ease-out group-focus-visible/artist:tw-text-white desktop-hover:group-hover/artist:tw-text-white motion-reduce:tw-transition-none">
-              {author.handle ?? "Anonymous"}
-            </span>
-          </Link>
+          <ComingUpArtistCredits
+            author={author}
+            collaborators={drop.collaborators}
+            dropHref={getWaveRoute({
+              waveId: drop.wave.id,
+              extraParams: { drop: drop.id },
+              isDirectMessage: false,
+              isApp: false,
+            })}
+          />
         </div>
       </div>
     </div>

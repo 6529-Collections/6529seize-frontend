@@ -88,6 +88,154 @@ async function installComingUpFixture(page: Page) {
   );
 }
 
+for (const cardCount of [1, 3]) {
+  test(`Coming Up sizes ${cardCount} cards for the available width @smoke @medium @large`, async ({
+    page,
+  }, testInfo) => {
+    await installComingUpFixture(page);
+    await page.route(comingUpLeaderboardPattern, (route) =>
+      route.fulfill({
+        json: {
+          ...comingUpLeaderboard,
+          count: cardCount,
+          drops: comingUpLeaderboard.drops.slice(0, cardCount),
+        },
+      })
+    );
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const carousel = page
+      .getByRole("region", { name: "Coming up", exact: true })
+      .locator(".tw-snap-x");
+    await expect(
+      carousel.getByRole("link", { name: /^Coming Up artwork / })
+    ).toHaveCount(cardCount);
+    const widths = isMobileWebProject(testInfo.project.name)
+      ? [320, 639, 640, 767]
+      : [1280];
+    for (const width of widths) {
+      await page.setViewportSize({ width, height: 900 });
+      const geometry = await carousel.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          available:
+            element.clientWidth -
+            Number.parseFloat(style.paddingLeft) -
+            Number.parseFloat(style.paddingRight),
+          card: element.firstElementChild!.getBoundingClientRect().width,
+          overflow: element.scrollWidth - element.clientWidth,
+        };
+      });
+      if (width < 768) {
+        expect(geometry.card).toBeCloseTo(
+          geometry.available * (cardCount === 1 && width < 640 ? 1 : 0.8),
+          0
+        );
+        expect(geometry.overflow > 1).toBe(cardCount > 1);
+      } else {
+        expect(geometry.card).toBeLessThan(geometry.available / 2);
+        expect(geometry.overflow).toBeLessThanOrEqual(1);
+      }
+      await expectNoHorizontalOverflow(page);
+    }
+    await carousel.scrollIntoViewIfNeeded();
+    await carousel.screenshot({
+      path: testInfo.outputPath(`coming-up-${cardCount}-cards.png`),
+    });
+  });
+}
+
+test("Coming Up keeps collaborator credits compact and accessible @smoke @medium @large", async ({
+  page,
+}, testInfo) => {
+  await installComingUpFixture(page);
+  const collaborators = Array.from({ length: 5 }, (_, index) => ({
+    id: `credit-${index}`,
+    handle: `collaborator-with-a-long-name-${index}`,
+    display: `Collaborator ${index}`,
+    pfp: loadingTestArtwork.image,
+  }));
+  await page.route("**/api/identities/credit-*", (route) =>
+    route.fulfill({ status: 503, json: { error: "Unavailable" } })
+  );
+  await page.route(comingUpLeaderboardPattern, (route) =>
+    route.fulfill({
+      json: {
+        ...comingUpLeaderboard,
+        drops: comingUpLeaderboard.drops.map((drop, index) => ({
+          ...drop,
+          author: { ...drop.author, pfp: loadingTestArtwork.image },
+          collaborators:
+            index === 0 ? collaborators : collaborators.slice(0, 2 - index),
+        })),
+      },
+    })
+  );
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const section = page.getByRole("region", { name: "Coming up", exact: true });
+  const more = section.getByRole("link", {
+    name: "View all collaborators on this drop",
+  });
+  await expect(more).toHaveText("+3 more");
+  await expect(more).toHaveAttribute(
+    "href",
+    `/waves/${comingUpWave.id}?drop=coming-up-1`
+  );
+  await more.scrollIntoViewIfNeeded();
+  const layout = await more.evaluate((link) => {
+    const credit = link.parentElement!.parentElement!.parentElement!;
+    const stack = credit.firstElementChild!;
+    const names = credit.lastElementChild!;
+    const avatarBoxes = Array.from(stack.children).map((avatar) =>
+      avatar.getBoundingClientRect().toJSON()
+    );
+    return {
+      avatars: stack.querySelectorAll("img").length,
+      avatarBoxes,
+      stackRight: stack.getBoundingClientRect().right,
+      namesLeft: names.getBoundingClientRect().left,
+      overflow: credit.scrollWidth > credit.clientWidth,
+      firstZ: getComputedStyle(stack.firstElementChild!).zIndex,
+      secondZ: getComputedStyle(stack.children[1]!).zIndex,
+      nameStyles: Array.from(names.querySelectorAll("a[title]")).map(
+        (name) => ({
+          ellipsis: getComputedStyle(name).textOverflow,
+          whiteSpace: getComputedStyle(name).whiteSpace,
+        })
+      ),
+    };
+  });
+  expect(layout.avatars).toBe(4);
+  expect(layout.avatarBoxes[1]!.left).toBeLessThan(
+    layout.avatarBoxes[0]!.right
+  );
+  expect(Number(layout.firstZ)).toBeGreaterThan(Number(layout.secondZ));
+  expect(layout.namesLeft).toBeGreaterThan(layout.stackRight);
+  expect(layout.overflow).toBe(false);
+  for (const styles of layout.nameStyles) {
+    expect(styles).toEqual({ ellipsis: "ellipsis", whiteSpace: "nowrap" });
+  }
+  if (isDesktopWebProject(testInfo.project.name)) {
+    const artists = section.locator('[data-home-action="Open artist profile"]');
+    await expect(artists.first()).toHaveCSS("color", "rgb(147, 147, 159)");
+    await artists.first().hover();
+    await expect(artists.first()).toHaveCSS("color", "rgb(206, 207, 212)");
+    const soloArtistName = artists.nth(2).locator("span");
+    await expect(soloArtistName).toHaveCSS("color", "rgb(147, 147, 159)");
+    for (const name of [artists.first(), soloArtistName]) {
+      await expect(name).toHaveCSS("font-size", "14px");
+      await expect(name).toHaveCSS("font-weight", "500");
+    }
+    await artists.nth(2).hover();
+    await expect(soloArtistName).toHaveCSS("color", "rgb(255, 255, 255)");
+  }
+  await more.focus();
+  await expect(more).toBeFocused();
+  await expectNoHorizontalOverflow(page);
+  await section.screenshot({
+    path: testInfo.outputPath("collaborator-credits.png"),
+  });
+});
+
 for (const hasBoostedDrops of [false, true]) {
   test(`Coming Up loads while boosted cards are pending, with ${hasBoostedDrops ? "populated" : "empty"} results @smoke @medium @large`, async ({
     page,
@@ -524,6 +672,18 @@ test.describe("Home Page @smoke @medium @large", () => {
     });
     await expect(comingUp).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     const isNarrowViewport = await page.evaluate(() => innerWidth < 768);
+    const viewportWidth = await page.evaluate(() => innerWidth);
+    let sectionTitleSize = "24px";
+    if (viewportWidth < 768) sectionTitleSize = "20px";
+    else if (viewportWidth < 1024) sectionTitleSize = "22px";
+    await expect(page.getByText(/^(Latest|Next) Drop$/)).toHaveCSS(
+      "font-size",
+      sectionTitleSize
+    );
+    await expect(page.getByText(/^(Latest|Next) Drop$/)).toHaveCSS(
+      "margin-bottom",
+      "20px"
+    );
     // Both section actions belong in the header and must leave the title clear.
     for (const section of [
       comingUp,
@@ -534,6 +694,17 @@ test.describe("Home Page @smoke @medium @large", () => {
       await expect(
         section.getByRole("link", { name: "View all", exact: true })
       ).toHaveCount(1);
+      await expect(section.getByRole("heading", { level: 2 })).toHaveCSS(
+        "font-size",
+        sectionTitleSize
+      );
+      const subtitle = section.locator("h2 + p");
+      await expect(subtitle).toHaveCSS("font-size", "14px");
+      await expect(subtitle).toHaveCSS("margin-top", "4px");
+      await expect(subtitle.locator("..").locator("..")).toHaveCSS(
+        "margin-bottom",
+        "20px"
+      );
       expect(
         await section.evaluate((section) => {
           const heading = section.querySelector("h2");
@@ -563,7 +734,9 @@ test.describe("Home Page @smoke @medium @large", () => {
             link.getBoundingClientRect().bottom
           );
         });
-        expect(subtitleGap).toBeGreaterThanOrEqual(6);
+        // The requested compact header uses a 4px subtitle gap; the action
+        // remains contained within the title row rather than hanging below it.
+        expect(subtitleGap).toBeGreaterThanOrEqual(4);
       }
     }
 
