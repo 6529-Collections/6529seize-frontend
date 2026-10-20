@@ -33,8 +33,17 @@ Use this page for visibility rules, state switches, and route targets.
   - Subscription info link: `/about/subscriptions`
   - Connected profile subscription link: `/{user}/subscriptions`
 - `Coming up` actions:
+  - Below 640px, a single card fills the available width. From 640px to 767px,
+    it uses the standard card width. Multiple cards keep the horizontal swipe
+    layout with a glimpse of the following card below tablet width.
   - Card title: `/waves/{waveId}?drop={dropId}`
   - Card author: `/{handle}` or `/{primaryAddress}`
+  - Collaborating cards combine the artist and accepted collaborators in one
+    credit block. Up to four overlapping avatars include the artist first;
+    two collaborator handles appear below the artist, with long names truncated.
+    Remaining collaborators are counted in `+N` and `+N more`; `+N more` opens
+    the drop's full credits. Visible names link to profiles, without level or
+    trophy badges in the card.
   - Section `View all`: `/waves/{waveId}`
 
 ## Entry Points
