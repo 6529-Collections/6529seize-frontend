@@ -28532,6 +28532,11 @@ components:
         - is_additional_action_promised
         - hide_link_preview
       properties:
+        collaborators:
+          type: array
+          description: Accepted collaborators only. Pending invitations are private.
+          items:
+            $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
         voters_count_available:
           type: boolean
           description: >-
@@ -29293,6 +29298,11 @@ components:
         - drop_type
         - hide_link_preview
       properties:
+        collaborators:
+          type: array
+          description: Accepted collaborators only. Pending invitations are private.
+          items:
+            $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
         id:
           type: string
         serial_no:
@@ -29586,6 +29596,10 @@ components:
         - is_additional_action_promised
         - hide_link_preview
       properties:
+        collaborators:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
         voters_count_available:
           type: boolean
           description: >-
@@ -32300,6 +32314,22 @@ components:
           minimum: 1
         drop_id:
           type: string
+    ApiMemeCollaboratorProfile:
+      type: object
+      required:
+        - id
+        - handle
+        - display
+      properties:
+        id:
+          type: string
+        handle:
+          type: string
+        display:
+          type: string
+        pfp:
+          type: string
+          nullable: true
     ApiMemesExtendedData:
       type: object
       description: >-

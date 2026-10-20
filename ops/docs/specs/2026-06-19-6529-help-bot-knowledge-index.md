@@ -7,6 +7,10 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The `home.overview` record explains the Coming up mobile swipe row, keyboard
+navigation through card links, tablet/desktop grid, and drop, profile and wave
+destinations.
+
 The `waves.drop.editing` record covers author-only editing, the normal edit
 window, and unlimited editing of the wave's current pinned description drop.
 
