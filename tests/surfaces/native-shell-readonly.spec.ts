@@ -253,7 +253,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         `/${PROFILE_HANDLE}/collected?collection=memes&szn=1&details=closed`
       );
       await expect(
-        page.locator('[data-profile-section="Filters"]')
+        page.getByRole("main").locator('[data-profile-section="Filters"]')
       ).toBeVisible({
         timeout: RESPONSE_TIMEOUT_MS,
       });
@@ -298,7 +298,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       // A document navigation starts a fresh app history for each deep link.
       await gotoReady(page, path);
       await expect(
-        page.locator('[data-mobile-bottom-nav-dock="true"]')
+        page.getByRole("navigation", { name: "Primary navigation", exact: true })
       ).toBeVisible();
       await expect(
         page.getByRole("button", { name: "Back", exact: true })
@@ -315,7 +315,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     );
     await gotoReady(page, "/about");
     await expect(
-      page.locator('[data-mobile-bottom-nav-dock="true"]')
+      page.getByRole("navigation", { name: "Primary navigation", exact: true })
     ).toBeVisible();
     await page
       .getByRole("button", { name: "Search 6529", exact: true })
@@ -332,7 +332,9 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       .getByRole("navigation", { name: "Profile sections" })
       .getByRole("link", { name: "Collected", exact: true })
       .click();
-    await expect(page.locator('[data-profile-section="Filters"]')).toBeVisible({
+    await expect(
+      page.getByRole("main").locator('[data-profile-section="Filters"]')
+    ).toBeVisible({
       timeout: RESPONSE_TIMEOUT_MS,
     });
     await page

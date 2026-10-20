@@ -23,7 +23,9 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       `/${PROFILE_HANDLE}/collected?collection=memes&details=closed`
     );
     // Filters mount after the profile has hydrated and its initial cards load.
-    await expect(page.locator('[data-profile-section="Filters"]')).toBeVisible({
+    await expect(
+      page.getByRole("main").locator('[data-profile-section="Filters"]')
+    ).toBeVisible({
       timeout: RESPONSE_TIMEOUT_MS,
     });
     let releaseDetails!: () => void;
@@ -86,6 +88,7 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       releaseDetails();
     }
     const clippedHeight = await page
+      .getByRole("main")
       .locator('[data-profile-section="Collection details"]')
       .evaluate(async (panel) => {
         while (!panel.querySelector("#collected-details-heading")) {
@@ -133,7 +136,7 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
         `/${PROFILE_HANDLE}/collected?collection=memes&szn=1&details=closed`
       );
       await expect(
-        page.locator('[data-profile-section="Filters"]')
+        page.getByRole("main").locator('[data-profile-section="Filters"]')
       ).toBeVisible({
         timeout: RESPONSE_TIMEOUT_MS,
       });
