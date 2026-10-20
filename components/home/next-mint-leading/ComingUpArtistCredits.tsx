@@ -27,9 +27,13 @@ export interface ComingUpCreditSource {
   }[];
 }
 
+const EMPTY_COLLABORATORS: NonNullable<
+  ComingUpCreditSource["collaborators"]
+> = [];
+
 export function ComingUpArtistCredits({
   author,
-  collaborators = [],
+  collaborators = EMPTY_COLLABORATORS,
   dropHref,
 }: {
   readonly author: ApiDrop["author"];
