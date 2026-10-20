@@ -138,7 +138,7 @@ export default function MyStreamWaveCreateActionsMenu({
             trigger={trigger}
             triggerClassName={buttonClassName}
             items={menuItems}
-            itemClassName={MOBILE_ACTION_ITEM_CLASSES}
+            itemClassName={`${MOBILE_ACTION_ITEM_CLASSES} tw-px-0`}
           />
         ) : (
           <CompactMenu

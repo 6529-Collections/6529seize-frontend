@@ -242,7 +242,7 @@ export function DiscoverWaveControls({
                 onSortChange(option.value);
                 setSortOpen(false);
               }}
-              className={`${MOBILE_ACTION_ITEM_CLASSES} tw-min-h-12 aria-pressed:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
+              className={`${MOBILE_ACTION_ITEM_CLASSES} tw-min-h-12 tw-px-3 aria-pressed:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
             >
               <span className={`${MOBILE_ACTION_ICON_CLASSES} tw-self-center`}>
                 <ScoreSortIcon sort={option.value} className="tw-size-5" />
