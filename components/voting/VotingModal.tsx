@@ -71,7 +71,7 @@ const VotingModal: React.FC<VotingModalProps> = ({ drop, isOpen, onClose }) => {
       aria-modal="true"
       aria-labelledby={titleId}
       tabIndex={-1}
-      className="tailwind-scope tw-fixed tw-inset-0 tw-z-1000 tw-flex tw-items-center tw-justify-center tw-bg-gray-700/75 tw-outline-none"
+      className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1020] tw-flex tw-items-center tw-justify-center tw-bg-gray-700/75 tw-outline-none"
       onClick={(e) => e.stopPropagation()}
     >
       <div

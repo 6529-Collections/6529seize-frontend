@@ -98,5 +98,16 @@ export function useCompetitionDrop(drop: ExtendedDrop) {
     refetchInterval: (query) =>
       query.state.data?.competition ? 15_000 : false,
   });
-  return applyCompetitionDropSummary(drop, context.data);
+  const resolvedDrop = applyCompetitionDropSummary(drop, context.data);
+  return context.data
+    ? {
+        ...resolvedDrop,
+        competition_context: {
+          viewer,
+          waveId: drop.wave.id,
+          dropId: drop.id,
+          data: context.data,
+        },
+      }
+    : resolvedDrop;
 }

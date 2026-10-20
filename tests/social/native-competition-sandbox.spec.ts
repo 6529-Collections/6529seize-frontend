@@ -464,7 +464,9 @@ async function installCompetitionApi(
     const budget = () => ({
       competition_id: id,
       profile_id: PROFILE,
-      entry_id: url.searchParams.get("entry_id"),
+      entry_id:
+        url.searchParams.get("entry_id") ??
+        (resource.startsWith("entries/") ? resource.split("/")[1] : null),
       credit_type: "TDH",
       credit_scope: "WAVE",
       available: 100,
@@ -586,14 +588,19 @@ async function installCompetitionApi(
       ids.includes(entryDropId(item.id))
     );
     if (owners.length === 0) return route.fallback();
+    const response = await route.fetch();
+    const body = await response.json();
     return route.fulfill({
+      response,
       json: {
-        data: owners.map((owner) => ({
-          ...recordedDrop(owner.id),
-          wave: entryFixture.wave,
-        })),
-        page: 1,
-        next: false,
+        ...body,
+        data: [
+          ...body.data,
+          ...owners.map((owner) => ({
+            ...recordedDrop(owner.id),
+            wave: entryFixture.wave,
+          })),
+        ],
       },
     });
   });
@@ -2272,9 +2279,13 @@ ${"Additional terms for review.\n\n".repeat(30)}`,
 
   test("renders frozen CHAT deep links with submission voting controls", async ({
     page,
-  }) => {
-    await installCompetitionApi(page);
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page);
     await page.goto(`${ROOT}/alpha?drop=${entryDropId("alpha")}`);
+    // The development-only indicator can cover the mobile Save vote button.
+    await page.addStyleTag({
+      content: "nextjs-portal { display: none !important; }",
+    });
     const detail = page
       .getByRole("main")
       .locator("[data-video-viewport]")
@@ -2288,6 +2299,122 @@ ${"Additional terms for review.\n\n".repeat(30)}`,
       detail.getByRole("button", { name: "Vote", exact: true })
     ).toBeVisible();
     await expect(page.getByTestId("single-drop-loading")).toHaveCount(0);
+    let contextLookups = 0;
+    await page.route(
+      `**/v3/waves/${WAVE}/drops/${entryDropId("alpha")}/competition-context`,
+      (route) => {
+        contextLookups++;
+        return route.fulfill({ status: 503, json: { message: "Unavailable" } });
+      }
+    );
+    await detail.getByRole("button", { name: "Vote", exact: true }).click();
+    const dialog = page.getByRole("dialog", { name: "Vote for this artwork" });
+    const save = dialog.getByRole("button", { name: "Save vote", exact: true });
+    await expect(save).toBeVisible();
+    expect(contextLookups).toBe(0);
+    await expect(dialog.getByText(/Enter a whole number between/)).toHaveCount(
+      0
+    );
+    for (const limit of ["-100", "+100"]) {
+      const label = dialog.getByText(limit, { exact: true });
+      await expect(label).toBeVisible();
+      await expect
+        .poll(async () => {
+          const labelBox = await label.boundingBox();
+          const saveBox = await save.boundingBox();
+          return labelBox && saveBox
+            ? saveBox.y - labelBox.y - labelBox.height
+            : Number.NEGATIVE_INFINITY;
+        })
+        .toBeGreaterThanOrEqual(12);
+    }
+    await page.screenshot({
+      path: testInfo.outputPath("competition-vote-slider.png"),
+    });
+    await save.click({ trial: true });
+    await expectNoHorizontalOverflow(page);
+    await dialog.getByRole("button", { name: "Numeric", exact: true }).click();
+    const input = dialog.getByRole("spinbutton", { name: "Your vote" });
+    await expect(input).toHaveAttribute("min", "-100");
+    await expect(input).toHaveAttribute("max", "100");
+    await expect(dialog.getByText(/Enter a whole number between/)).toHaveCount(
+      0
+    );
+    await input.fill("-25");
+    let holdRefresh = false;
+    let releaseRefresh!: () => void;
+    const refreshGate = new Promise<void>((resolve) => {
+      releaseRefresh = resolve;
+    });
+    await page.route("**/api/**", async (route) => {
+      const request = route.request();
+      if (request.method() === "PUT" && request.url().endsWith("/votes/me")) {
+        holdRefresh = true;
+      } else if (holdRefresh && request.method() === "GET") {
+        await refreshGate;
+      }
+      return route.fallback();
+    });
+    try {
+      await save.click();
+      await expect(dialog).toHaveCount(0);
+      expect(sandbox.requests).toHaveLength(1);
+      expect(sandbox.requests[0]?.body).toMatchObject({ value: -25 });
+      await detail.getByRole("button", { name: "Vote", exact: true }).click();
+      await dialog
+        .getByRole("button", { name: "Numeric", exact: true })
+        .click();
+      await expect(input).toHaveValue("-25");
+      await expect(dialog.getByText("75", { exact: true })).toBeVisible();
+      await expect(
+        dialog.getByText("Loading competition…", { exact: true })
+      ).toHaveCount(0);
+      const refreshed = page.waitForResponse(
+        (response) =>
+          response.url().includes("/competitions/alpha/credits/me") &&
+          response.ok()
+      );
+      releaseRefresh();
+      await refreshed;
+      await expect(input).toHaveValue("-25");
+      await expect(dialog.getByText("75", { exact: true })).toBeVisible();
+    } finally {
+      releaseRefresh();
+    }
+  });
+
+  test("reuses competition entry context when voting from list and grid cards", async ({
+    page,
+  }) => {
+    await installCompetitionApi(page);
+    await page.goto(`${ROOT}/alpha`);
+    const card = page
+      .getByRole("main")
+      .locator('[data-competition-entry="entry-alpha"]');
+    await expect(
+      card.getByRole("button", { name: "Vote", exact: true })
+    ).toBeVisible({ timeout: 30000 });
+    let contextLookups = 0;
+    await page.route(
+      `**/v3/waves/${WAVE}/drops/${entryDropId("alpha")}/competition-context`,
+      (route) => {
+        contextLookups++;
+        return route.fulfill({ status: 503, json: { message: "Unavailable" } });
+      }
+    );
+    for (const view of ["List view", "Grid view"]) {
+      await page.getByRole("tab", { name: view, exact: true }).click();
+      await card.getByRole("button", { name: "Vote", exact: true }).click();
+      const dialog = page.getByRole("dialog", {
+        name: "Vote for this artwork",
+      });
+      await expect(
+        dialog.getByRole("button", { name: "Save vote", exact: true })
+      ).toBeVisible();
+      expect(contextLookups).toBe(0);
+      await dialog.getByRole("button", { name: /^Close(?: modal)?$/ }).click();
+      await expect(dialog).toHaveCount(0);
+    }
   });
 
   test("saves and resumes a native draft through the existing configuration controls", async ({

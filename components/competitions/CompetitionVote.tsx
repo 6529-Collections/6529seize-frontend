@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
@@ -15,6 +15,7 @@ import { useCompetitionSignatureFor } from "@/hooks/competitions/useCompetitionS
 import {
   newCompetitionRequestKey,
   isRejectedCompetitionCommand,
+  isCompetitionAccessError,
 } from "@/helpers/competition.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -33,6 +34,7 @@ import type {
 } from "@/components/waves/drop/SingleWaveDropVote.types";
 import SingleWaveDropVoteSlider from "@/components/waves/drop/SingleWaveDropVoteSlider";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+import { updateCompetitionVoteInCache } from "@/components/react-query-wrapper/utils/updateCompetitionVoteInCache";
 
 interface CompetitionVoteProps {
   readonly entryId: string;
@@ -62,6 +64,14 @@ export function CompetitionVoteForm({
   };
   const { requestAuth, connectedProfile } = useAuth();
   const viewer = useCompetitionViewer();
+  const currentViewer = useRef<string | null | undefined>(viewer);
+  // Async vote completions must see viewer changes and unmounts at commit.
+  useLayoutEffect(() => {
+    currentViewer.current = viewer;
+    return () => {
+      currentViewer.current = undefined;
+    };
+  }, [viewer]);
   const locale = useBrowserLocale();
   const creditLabel =
     WAVE_VOTING_LABELS[competition.voting.credit_type as ApiWaveCreditType];
@@ -131,12 +141,22 @@ export function CompetitionVoteForm({
           );
         pending.current = { actor: viewer, body };
       }
-      await setCompetitionVote(identity, entryId, body);
+      const budget = await setCompetitionVote(identity, entryId, body);
       pending.current = null;
-      setDraft(null);
-      setSaved(true);
-      await invalidateCompetition(client, identity);
-      onVoteSuccess?.();
+      await updateCompetitionVoteInCache(client, {
+        ...identity,
+        viewer,
+        entryId,
+        dropId,
+        budget,
+        isCurrentViewer: () => currentViewer.current === viewer,
+      });
+      if (currentViewer.current === viewer) {
+        setDraft(null);
+        setSaved(true);
+        onVoteSuccess?.();
+      }
+      void invalidateCompetition(client, identity).catch(() => undefined);
     } catch (error) {
       if (isRejectedCompetitionCommand(error)) pending.current = null;
       setFailed(true);
@@ -152,7 +172,10 @@ export function CompetitionVoteForm({
       </p>
     );
   if (credit.isPending) return <CompetitionState />;
-  if (credit.isError)
+  if (
+    credit.isError &&
+    (!credit.data || isCompetitionAccessError(credit.error))
+  )
     return (
       <CompetitionState
         error
@@ -226,6 +249,9 @@ export function CompetitionVoteForm({
         )}
       </form>
     );
+  const errorDescriptionId = failed
+    ? `competition-vote-error-${entryId}`
+    : undefined;
   return (
     <div className="tw-space-y-3">
       <CompetitionCredits budget={credit.data} />
@@ -239,7 +265,7 @@ export function CompetitionVoteForm({
       >
         {voteMode === "slider" ? (
           <fieldset
-            className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0"
+            className="tw-m-0 tw-min-w-0 tw-border-0 tw-px-0 tw-pb-6 tw-pt-0"
             disabled={busy || disabled || !competition.permissions.vote}
           >
             <legend className="tw-sr-only">
@@ -281,10 +307,7 @@ export function CompetitionVoteForm({
                 value={value}
                 disabled={busy || disabled || !competition.permissions.vote}
                 aria-invalid={!valid}
-                aria-describedby={[
-                  `competition-vote-range-${entryId}`,
-                  ...(failed ? [`competition-vote-error-${entryId}`] : []),
-                ].join(" ")}
+                aria-describedby={errorDescriptionId}
                 onChange={(event) => {
                   setDraft({ source, value: event.target.value });
                   setSaved(false);
@@ -300,20 +323,6 @@ export function CompetitionVoteForm({
         >
           {t(locale, busy ? "competitions.saving" : "competitions.vote")}
         </button>
-        {min !== null &&
-          min !== undefined &&
-          max !== null &&
-          max !== undefined && (
-            <p
-              id={`competition-vote-range-${entryId}`}
-              className="tw-text-xs tw-text-iron-400"
-            >
-              {t(locale, "competitions.voteRange", {
-                min: formatInteger(locale, min),
-                max: formatInteger(locale, max),
-              })}
-            </p>
-          )}
         {(disabled || !competition.permissions.vote) && (
           <p className="tw-text-sm tw-text-iron-400">
             {t(locale, "competitions.voteClosed")}
