@@ -271,8 +271,21 @@ describe("fetchWaveDropsFeedV2", () => {
           pfp: null,
         },
       ];
-      const source = {
+      const source: ApiDropV2 = {
         ...createDrop(1),
+        updated_at: 1000,
+        author: {
+          ...identity,
+          badges: {
+            artist_of_main_stage_submissions: 0,
+            artist_of_memes: 0,
+          },
+        },
+        context_profile_context: {
+          boosted: false,
+          bookmarked: false,
+          subscribed: false,
+        },
         ...(hasCredits ? { collaborators } : {}),
       };
       commonApiFetchMock.mockResolvedValueOnce({ wave, drops: [source] });
