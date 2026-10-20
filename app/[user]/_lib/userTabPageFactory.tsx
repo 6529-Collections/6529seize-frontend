@@ -1,6 +1,17 @@
 import { TransferProvider } from "@/components/nft-transfer/TransferState";
 import { getAppMetadata } from "@/components/providers/metadata";
-import UserPageLayout from "@/components/user/layout/UserPageLayout";
+import UserPageClientHydrator from "@/components/user/layout/UserPageClientHydrator";
+import UserPageDropModal from "@/components/user/layout/UserPageDropModal";
+import UserPageTabTransition from "@/components/user/layout/UserPageTabTransition";
+import { getUserPageHeaderState } from "@/components/user/user-page-header/UserPageHeader";
+import { getHandlesFromProfile } from "@/components/react-query-wrapper/profileQueryHandles";
+import { getIdentityQueryKey } from "@/services/api/identity-query";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
+import { cache } from "react";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getMetadataForUserPage, getUserPageTitle } from "@/helpers/Helpers";
@@ -111,6 +122,23 @@ const loadProfile = async (
   }
 };
 
+export const getUserPageProfile = cache(
+  async (user: string): Promise<ApiIdentity> => {
+    if (!user || isProbeLikeUserSlug(user)) {
+      notFound();
+    }
+    const headers = await getAppCommonHeaders();
+    const result = await loadProfile(user.toLowerCase(), headers);
+    if (!result.ok) {
+      if (isNotFoundError(result.error)) {
+        notFound();
+      }
+      throw result.error;
+    }
+    return result.profile;
+  }
+);
+
 const loadPublicProfileBio = async (
   user: string,
   headers: Record<string, string>
@@ -168,15 +196,12 @@ export function createUserTabPage<
     const normalizedUser = user.toLowerCase();
     const resolvedSearchParams = searchParams ? await searchParams : undefined;
     const query: UserSearchParams = normalizeSearchParams(resolvedSearchParams);
-    const headers = await getAppCommonHeaders();
-    const profileResult = await loadProfile(normalizedUser, headers);
-    if (!profileResult.ok) {
-      if (isNotFoundError(profileResult.error)) {
-        notFound();
-      }
-      throw profileResult.error;
+    const profileUpdatedAt = Date.now();
+    const profile = await getUserPageProfile(user);
+    const needsXtdhDefault = subroute === "xtdh" && query["tab"] === undefined;
+    if (needsXtdhDefault) {
+      query["tab"] = "granted";
     }
-    const profile = profileResult.profile;
 
     const needsRedirect = userPageNeedsRedirect({
       profile,
@@ -185,9 +210,25 @@ export function createUserTabPage<
     });
 
     if (needsRedirect) {
-      redirect(needsRedirect.redirect.destination);
+      return redirect(needsRedirect.redirect.destination);
+    }
+    if (needsXtdhDefault) {
+      const redirectParams = new URLSearchParams();
+      for (const [key, value] of Object.entries(query)) {
+        for (const entry of Array.isArray(value) ? value : [value]) {
+          if (entry !== undefined) redirectParams.append(key, entry);
+        }
+      }
+      return redirect(
+        `/${encodeURIComponent(user)}/xtdh?${redirectParams.toString()}`
+      );
     }
 
+    const headerStatePromise = getUserPageHeaderState(
+      normalizedUser,
+      profile.id,
+      profile.handle?.toLowerCase() ?? null
+    );
     const extraProps = getTabProps
       ? await getTabProps({ profile, query })
       : ({} as TExtra);
@@ -197,30 +238,45 @@ export function createUserTabPage<
     const profilePath = `/${encodeURIComponent(canonicalUser)}${
       subroute ? `/${subroute}` : ""
     }`;
+    const queryClient = new QueryClient();
+    for (const handle of new Set([
+      normalizedUser,
+      ...getHandlesFromProfile(profile),
+    ])) {
+      queryClient.setQueryData(getIdentityQueryKey(handle), profile, {
+        updatedAt: profileUpdatedAt,
+      });
+    }
+    const headerState = await headerStatePromise;
 
-    const TabComponent = (
-      <>
+    return (
+      <HydrationBoundary
+        state={{
+          mutations: [],
+          queries: [...dehydrate(queryClient).queries, ...headerState.queries],
+        }}
+      >
         <JsonLdScript
           data={buildProfilePageJsonLd({
             profile,
             path: profilePath,
           })}
         />
-        <UserPageLayout
-          profile={profile}
-          handleOrWallet={normalizedUser}
+        <UserPageClientHydrator
           pageTitle={getUserPageTitle(profile, subroute)}
-        >
-          <Tab profile={profile} {...extraProps} />
-        </UserPageLayout>
-      </>
+        />
+        <UserPageDropModal />
+        <UserPageTabTransition>
+          {enableTransfer ? (
+            <TransferProvider>
+              <Tab profile={profile} {...extraProps} />
+            </TransferProvider>
+          ) : (
+            <Tab profile={profile} {...extraProps} />
+          )}
+        </UserPageTabTransition>
+      </HydrationBoundary>
     );
-
-    if (enableTransfer) {
-      return <TransferProvider>{TabComponent}</TransferProvider>;
-    }
-
-    return TabComponent;
   }
 
   async function generateMetadata({
@@ -265,13 +321,16 @@ export function createUserTabPage<
       canonicalUserPath && subroute
         ? `${canonicalUserPath}/${subroute}`
         : canonicalUserPath;
-    return getAppMetadata(getMetadataForUserPage(profile, subroute, publicBio), {
-      canonicalPath,
-      robots: {
-        index: !PROFILE_NOINDEX_SUBROUTES.has(subroute),
-        follow: true,
-      },
-    });
+    return getAppMetadata(
+      getMetadataForUserPage(profile, subroute, publicBio),
+      {
+        canonicalPath,
+        robots: {
+          index: !PROFILE_NOINDEX_SUBROUTES.has(subroute),
+          follow: true,
+        },
+      }
+    );
   }
 
   return { Page, generateMetadata };
