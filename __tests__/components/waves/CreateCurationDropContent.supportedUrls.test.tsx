@@ -92,6 +92,31 @@ const createContent = (
 );
 
 describe("CreateCurationDropContent supported URLs", () => {
+  it("associates native terms with the version-pinned acceptance checkbox", async () => {
+    const user = userEvent.setup();
+    const terms = "Accept this competition’s original artwork requirements.";
+    render(
+      createContent({
+        wave: {
+          ...wave,
+          competition: {
+            id: "selected",
+            wave_id: wave.id,
+            config_version: 4,
+            participation: { terms },
+          },
+        },
+      })
+    );
+    const checkbox = screen.getByRole("checkbox", {
+      name: "I agree to this competition’s terms.",
+    });
+    expect(checkbox).toHaveAccessibleDescription(terms);
+    expect(checkbox).not.toBeChecked();
+    await user.click(checkbox);
+    expect(checkbox).toBeChecked();
+  });
+
   it("toggles supported URLs inline in leaderboard variant without opening a new modal", async () => {
     const user = userEvent.setup();
 

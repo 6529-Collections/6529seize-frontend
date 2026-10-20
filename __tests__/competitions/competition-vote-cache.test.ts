@@ -150,7 +150,7 @@ it("leaves other viewers, competitions, waves and entry-specific budgets untouch
 });
 
 it.each([true, false])(
-  "updates a legacy leaderboard only for its primary competition and current viewer (%s)",
+  "keeps retired leaderboard data independent for an original competition and viewer (%s)",
   async (isCurrent) => {
     client.setQueryData(
       [QueryKey.COMPETITION_HUB, { wave_id: "wave", viewer: scope.viewer }],
@@ -177,23 +177,7 @@ it.each([true, false])(
       ...result,
       isCurrentViewer: () => isCurrent,
     });
-    expect(client.getQueryData(key)).toEqual(
-      isCurrent
-        ? {
-            ...old,
-            pages: [
-              {
-                drops: [
-                  {
-                    ...old.pages[0]!.drops[0],
-                    context_profile_context: { rating: -25 },
-                  },
-                ],
-              },
-            ],
-          }
-        : old
-    );
+    expect(client.getQueryData(key)).toBe(old);
   }
 );
 

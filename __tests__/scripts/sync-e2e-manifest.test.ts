@@ -99,7 +99,6 @@ describe("E2E pack manifest", () => {
       ],
       projects: ["web-desktop-chromium", "web-mobile-chromium"],
       env: {
-        NEXT_PUBLIC_FEATURE_MULTI_COMPETITION: "true",
         PLAYWRIGHT_BASE_URL: "http://localhost:3297",
       },
     });

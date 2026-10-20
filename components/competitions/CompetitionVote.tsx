@@ -48,6 +48,7 @@ export function CompetitionVoteForm({
   voteMode = "numeric",
   size,
   onVoteSuccess,
+  onExplainVote,
   entryId,
   dropId,
   disabled,
@@ -57,6 +58,9 @@ export function CompetitionVoteForm({
   readonly voteMode?: SingleWaveDropVoteMode | undefined;
   readonly size?: SingleWaveDropVoteSize | undefined;
   readonly onVoteSuccess?: (() => void) | undefined;
+  readonly onExplainVote?:
+    | ((voteTotal: number, voteChange: number) => void)
+    | undefined;
 }) {
   const identity = {
     waveId: competition.wave_id,
@@ -93,6 +97,11 @@ export function CompetitionVoteForm({
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [lastVote, setLastVote] = useState<{
+    source: string;
+    total: number;
+    change: number;
+  } | null>(null);
   const pending = useRef<{
     actor: string | null;
     body: ApiSetCompetitionVoteRequest;
@@ -154,6 +163,11 @@ export function CompetitionVoteForm({
       if (currentViewer.current === viewer) {
         setDraft(null);
         setSaved(true);
+        setLastVote({
+          source,
+          total: numeric,
+          change: numeric - (credit.data?.current_vote ?? 0),
+        });
         onVoteSuccess?.();
       }
       void invalidateCompetition(client, identity).catch(() => undefined);
@@ -239,6 +253,30 @@ export function CompetitionVoteForm({
             max: formatInteger(locale, max ?? 0),
           })}
         </p>
+        {onExplainVote && (
+          <button
+            type="button"
+            className={`${COMPETITION_BUTTON} tw-mt-2 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-3`}
+            disabled={
+              busy ||
+              disabled ||
+              !competition.permissions.vote ||
+              credit.data.current_vote === null ||
+              credit.data.current_vote === 0
+            }
+            onClick={() => {
+              const total = credit.data.current_vote ?? 0;
+              onExplainVote(
+                total,
+                lastVote?.source === source && lastVote.total === total
+                  ? lastVote.change
+                  : 0
+              );
+            }}
+          >
+            {t(locale, "waves.voteRationale.explain")}
+          </button>
+        )}
         {failed && (
           <p
             role="alert"

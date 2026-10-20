@@ -1,6 +1,5 @@
 "use client";
 
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import { useQuery } from "@tanstack/react-query";
 import type { ApiNotificationsResponseV2 } from "@/generated/models/ApiNotificationsResponseV2";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -62,7 +61,7 @@ export function useUnreadNotifications(
         auth: authFingerprint,
         limit: "1",
         version: "v2",
-        ...(isMultiCompetitionEnabled() ? { includeCompetitions: true } : {}),
+        includeCompetitions: true,
       },
     ],
     queryFn: async ({ signal }) => {
@@ -78,9 +77,7 @@ export function useUnreadNotifications(
         },
         params: {
           limit: "1",
-          ...(isMultiCompetitionEnabled()
-            ? { include_competitions: "true" }
-            : {}),
+          include_competitions: "true",
         },
         cache: "no-store",
         errorMode: "structured",

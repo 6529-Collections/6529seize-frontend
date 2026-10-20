@@ -24,6 +24,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useCompetitionNavigation } from "@/contexts/CompetitionNavigationContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { isCompetitionSubmissionHistory } from "@/helpers/competition-lifecycle.helpers";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 import {
   getApproveWaveTabLabelsFromMetadata,
@@ -429,12 +430,17 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
           else if (tab === MyStreamWaveTab.POLLS) badgeCount = unansweredPolls;
           return {
             key: tab,
-            label: getTabLabel({
-              approveLabels,
-              isApproveWave: selectedIsApprove,
-              tab,
-              locale,
-            }),
+            label:
+              nativeDefault &&
+              tab === MyStreamWaveTab.LEADERBOARD &&
+              isCompetitionSubmissionHistory(nativeDefault)
+                ? t(locale, "competitions.submissions")
+                : getTabLabel({
+                    approveLabels,
+                    isApproveWave: selectedIsApprove,
+                    tab,
+                    locale,
+                  }),
             panelId: getContentTabPanelId(tab),
             badgeCount,
           };

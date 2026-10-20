@@ -162,6 +162,19 @@ describe("publicEnvSchema BASE_ENDPOINT (Zod)", () => {
       ).MEDIA_RESOLVER_ENDPOINT
     ).toBe("https://media.example.com");
   });
+
+  it("retains signed-message and E2EE staging flags while stripping the retired competition flag", () => {
+    const parsed = freshImportPublicEnvSchema().parse(
+      buildInput({
+        NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: "true",
+        NEXT_PUBLIC_E2EE_DM_ENABLED: "true",
+        NEXT_PUBLIC_FEATURE_MULTI_COMPETITION: "true",
+      })
+    );
+    expect(parsed.NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES).toBe("true");
+    expect(parsed.NEXT_PUBLIC_E2EE_DM_ENABLED).toBe("true");
+    expect(parsed).not.toHaveProperty("NEXT_PUBLIC_FEATURE_MULTI_COMPETITION");
+  });
 });
 
 describe("config/env.ts publicEnv loader", () => {

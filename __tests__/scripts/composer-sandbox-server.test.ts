@@ -7,7 +7,7 @@ const serverPath = path.join(
   "tests/support/composerSandboxServer.cjs"
 );
 
-function loadSandbox(apiOnly?: string) {
+function loadSandbox(apiOnly?: string, env: Record<string, string> = {}) {
   const child = { on: jest.fn(), kill: jest.fn(), killed: false };
   const spawn = jest.fn(() => child);
   const spawnSync = jest.fn(() => ({ status: 0 }));
@@ -23,6 +23,9 @@ function loadSandbox(apiOnly?: string) {
     path,
     child_process: { spawn, spawnSync },
     dotenv: { config: jest.fn() },
+    "./e2ee/e2eeSandboxApi.cjs": {
+      createE2eeSandboxApi: jest.fn(() => ({})),
+    },
     "./composerSandboxConstants.json": JSON.parse(
       fs.readFileSync(
         path.join(path.dirname(serverPath), "composerSandboxConstants.json"),
@@ -40,6 +43,7 @@ function loadSandbox(apiOnly?: string) {
   );
   const context = {
     readFixture: (_pathname: string): unknown => undefined,
+    readPublicRuntime: (): Record<string, unknown> => ({}),
     require: requireFixture,
     __dirname: path.dirname(serverPath),
     Buffer,
@@ -50,6 +54,7 @@ function loadSandbox(apiOnly?: string) {
         PORT: "3295",
         PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4295",
         PLAYWRIGHT_COMPOSER_SANDBOX_API_ONLY: apiOnly,
+        ...env,
       },
       execPath: process.execPath,
       on: jest.fn(),
@@ -58,10 +63,17 @@ function loadSandbox(apiOnly?: string) {
   };
   vm.runInNewContext(
     fs.readFileSync(serverPath, "utf8") +
-      "\nglobalThis.readFixture = (pathname) => mockApiPatternReadRoutes.find((route) => route.pattern.test(pathname))?.response();",
+      "\nglobalThis.readFixture = (pathname) => mockApiPatternReadRoutes.find((route) => route.pattern.test(pathname))?.response();" +
+      "\nglobalThis.readPublicRuntime = buildPublicRuntime;",
     context
   );
-  return { server, spawn, spawnSync, readFixture: context.readFixture };
+  return {
+    server,
+    spawn,
+    spawnSync,
+    readFixture: context.readFixture,
+    readPublicRuntime: context.readPublicRuntime,
+  };
 }
 
 describe("composer sandbox API-only mode", () => {
@@ -93,6 +105,17 @@ describe("composer sandbox API-only mode", () => {
       );
     }
   );
+
+  it("retains the encrypted sandbox runtime flag without the retired competition flag", () => {
+    const result = loadSandbox("1", { PLAYWRIGHT_E2EE_SANDBOX: "1" });
+    const runtime = result.readPublicRuntime();
+    expect(runtime["NEXT_PUBLIC_E2EE_DM_ENABLED"]).toBe("true");
+    expect(runtime).not.toHaveProperty("NEXT_PUBLIC_FEATURE_MULTI_COMPETITION");
+    expect(result.spawn).not.toHaveBeenCalled();
+    expect(loadSandbox("1").readPublicRuntime()).not.toHaveProperty(
+      "NEXT_PUBLIC_E2EE_DM_ENABLED"
+    );
+  });
 });
 
 it("returns explicit unmanaged invitation state for ordinary sandbox drops", () => {

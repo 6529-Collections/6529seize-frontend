@@ -5,6 +5,8 @@ import type { ReactNode } from "react";
 import { useSingleWaveDropData } from "@/components/waves/drop/useSingleWaveDropData";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { ApiCompetition } from "@/generated/models/ApiCompetition";
+import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { fetchDropVoteSummaryByIdV2 } from "@/services/api/drop-vote-summary-api";
 import {
@@ -156,6 +158,73 @@ describe("useSingleWaveDropData", () => {
         ],
       })
     );
+  });
+
+  it("projects native competition presentation while retaining parent wave loading, failure and retry controls", async () => {
+    const competition = Object.assign(new ApiCompetition(), {
+      id: "selected",
+      wave_id: "wave-1",
+      title: "Selected competition",
+      type: ApiCompetitionType.Rank,
+      voting: {},
+      participation: { signature_required: true },
+      permissions: { submit: true, vote: true },
+      winners: { max_winners: 2 },
+      decisions: {},
+    });
+    const parentWave = {
+      id: "wave-1",
+      name: "Shared CHAT",
+      wave: { type: ApiWaveType.Chat },
+      voting: { creditor: null },
+      participation: {},
+    };
+    const refetchWave = jest.fn();
+    useWaveDataMock.mockReturnValue({
+      data: parentWave,
+      isError: false,
+      isFetching: true,
+      refetch: refetchWave,
+    });
+    const initialDrop = {
+      ...createInitialDrop("drop-1"),
+      drop_type: ApiDropType.Participatory,
+      competition_context: { data: { competition } },
+    };
+    const onClose = jest.fn();
+    const { result, rerender } = renderHook(
+      () => useSingleWaveDropData(initialDrop, onClose),
+      { wrapper: createWrapper() }
+    );
+    await waitFor(() => expect(result.current.drop.metadata).toHaveLength(2));
+    expect(result.current.wave).toMatchObject({
+      id: parentWave.id,
+      name: competition.title,
+      wave: { type: ApiWaveType.Rank },
+      participation: { signature_required: true },
+      competition,
+    });
+    expect(parentWave.wave.type).toBe(ApiWaveType.Chat);
+    expect(result.current.isWaveError).toBe(false);
+    expect(result.current.isWaveFetching).toBe(true);
+    expect(result.current.refetchWave).toBe(refetchWave);
+    expect(fetchDropVoteSummaryByIdV2Mock).toHaveBeenCalledTimes(1);
+
+    useWaveDataMock.mockReturnValue({
+      data: undefined,
+      isError: true,
+      isFetching: false,
+      refetch: refetchWave,
+    });
+    rerender();
+    expect(result.current.wave).toBeUndefined();
+    expect(result.current.isWaveError).toBe(true);
+    expect(result.current.isWaveFetching).toBe(false);
+    expect(result.current.refetchWave).toBe(refetchWave);
+    result.current.refetchWave();
+    expect(refetchWave).toHaveBeenCalledTimes(1);
+    useWaveDataMock.mock.calls.at(-1)![0].onWaveNotFound();
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it("switches directly to a new initial drop without exposing stale detail data", async () => {

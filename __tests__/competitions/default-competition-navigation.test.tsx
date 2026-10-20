@@ -332,7 +332,7 @@ it("ignores a fresh old-wave restoration after native Back commits the list URL"
   expect(mockReplace).not.toHaveBeenCalled();
 });
 
-it("does not navigate on selection errors, disabled rollout or direct messages", () => {
+it("does not navigate on selection errors or direct messages", () => {
   mockError = true;
   const { rerender } = renderHook(() =>
     useDefaultCompetitionNavigation(wave, true)
@@ -340,11 +340,7 @@ it("does not navigate on selection errors, disabled rollout or direct messages",
   expect(mockReplace).not.toHaveBeenCalled();
   mockReplace.mockClear();
   mockError = false;
-  mockEnabled = false;
   rerender();
-  expect(mockReplace).not.toHaveBeenCalled();
-  mockReplace.mockClear();
-  mockEnabled = true;
   renderHook(() =>
     useDefaultCompetitionNavigation(
       {

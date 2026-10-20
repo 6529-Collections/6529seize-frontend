@@ -6076,7 +6076,27 @@ paths:
               - real_time_rating
               - submitted_at
               - trend
+              - price
             default: rating
+        - name: price_currency
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: min_price
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 0
+        - name: max_price
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 0
         - name: direction
           in: query
           required: false
@@ -27911,6 +27931,17 @@ components:
           type: boolean
         administer:
           type: boolean
+        edit_rules_after_activity:
+          type: boolean
+          description: >-
+            Whether this administrator may update established competition rules
+            after entries or votes exist. Individual rule protections still
+            apply.
+        edit_credit_rules:
+          type: boolean
+          description: >-
+            Whether this administrator may edit established voting credit rules.
+            Historical votes permanently lock those rules.
     ApiCompetitionRulesInput:
       type: object
       additionalProperties: false
@@ -29875,6 +29906,10 @@ components:
           $ref: "#/components/schemas/ApiCreateNewWaveChatConfig"
         admin_group:
           $ref: "#/components/schemas/ApiCreateNewWaveScope"
+        admin_drop_deletion_enabled:
+          type: boolean
+          default: false
+          description: Allow wave administrators to delete drops.
         parent_wave_id:
           type: string
           nullable: true

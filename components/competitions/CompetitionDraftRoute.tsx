@@ -4,7 +4,6 @@ import { useCompetitionHub } from "@/hooks/competitions/useCompetitionQueries";
 import { useWaveData } from "@/hooks/useWaveData";
 import {
   getCompetitionsRoute,
-  isMultiCompetitionEnabled,
   isCompetitionAccessError,
 } from "@/helpers/competition.helpers";
 import { CompetitionState } from "./CompetitionState";
@@ -30,8 +29,7 @@ export default function CompetitionDraftRoute({
   const accessRejected = [hub.error, wave.error].some(isCompetitionAccessError);
   if (
     accessRejected ||
-    (!(hub.data && wave.data) && (hub.isError || wave.isError)) ||
-    !isMultiCompetitionEnabled()
+    (!(hub.data && wave.data) && (hub.isError || wave.isError))
   )
     content = <CompetitionState error />;
   else if (hub.data && wave.data)

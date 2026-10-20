@@ -190,6 +190,8 @@ The default controls navigation; it grants no participation, voting or Main
 Stage privileges. Main Stage privileges apply only to an explicitly designated
 competition, never automatically to all competitions in its wave.
 
+Original competitions and newer competitions use the same leaderboard, Votes, winners and Settings views. **My Votes** retains vote editing, selected-vote reset and **Explain vote**, which opens a reply in the shared wave chat. Main Stage retains its artwork submission wizard and artwork views; Curation retains supported-URL submissions and price sorting and filters; Quorum retains its proposal wizard. These experiences belong only to the competition with the corresponding designation.
+
 ## Related Pages
 
 - [Competitions](README.md)

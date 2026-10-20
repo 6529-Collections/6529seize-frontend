@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import {
-  isMultiCompetitionEnabled,
   isCompetitionPathname,
   getCompetitionIdFromPathname,
   getCompetitionRoute,
@@ -60,7 +59,6 @@ export function useDefaultCompetitionNavigation(
     search.get("restore") === "1";
   const resolve =
     enabled &&
-    isMultiCompetitionEnabled() &&
     Boolean(wave) &&
     matchesRoute &&
     !wave?.chat.scope.group?.is_direct_message &&
@@ -74,7 +72,6 @@ export function useDefaultCompetitionNavigation(
     !isCompetitionPathname(pathname) && !hasWaveDestination(search);
   const restore = Boolean(
     enabled &&
-    isMultiCompetitionEnabled() &&
     wave &&
     !wave.chat.scope.group?.is_direct_message &&
     ordinaryEntry &&
@@ -206,7 +203,6 @@ export function useDefaultCompetitionNavigation(
   ]);
   const explicitConfiguration = Boolean(
     enabled &&
-    isMultiCompetitionEnabled() &&
     wave &&
     !wave.chat.scope.group?.is_direct_message &&
     !isCompetitionPathname(pathname) &&
