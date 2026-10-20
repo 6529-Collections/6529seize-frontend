@@ -248,6 +248,9 @@ export function CompetitionVoteForm({
         )}
       </form>
     );
+  const errorDescriptionId = failed
+    ? `competition-vote-error-${entryId}`
+    : undefined;
   return (
     <div className="tw-space-y-3">
       <CompetitionCredits budget={credit.data} />
@@ -303,9 +306,7 @@ export function CompetitionVoteForm({
                 value={value}
                 disabled={busy || disabled || !competition.permissions.vote}
                 aria-invalid={!valid}
-                aria-describedby={
-                  failed ? `competition-vote-error-${entryId}` : undefined
-                }
+                aria-describedby={errorDescriptionId}
                 onChange={(event) => {
                   setDraft({ source, value: event.target.value });
                   setSaved(false);
