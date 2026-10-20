@@ -111,7 +111,7 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
           </div>
           <ComingUpArtistCredits
             author={author}
-            collaborators={drop.collaborators}
+            collaborators={drop.collaborators ?? []}
             dropHref={getWaveRoute({
               waveId: drop.wave.id,
               extraParams: { drop: drop.id },

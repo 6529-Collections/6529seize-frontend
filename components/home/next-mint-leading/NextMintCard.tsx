@@ -107,7 +107,7 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
           </div>
           <ComingUpArtistCredits
             author={author}
-            collaborators={drop.collaborators}
+            collaborators={drop.collaborators ?? []}
             dropHref={getWaveRoute({
               waveId: drop.wave.id,
               extraParams: { drop: drop.id },
