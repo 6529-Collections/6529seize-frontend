@@ -30,8 +30,8 @@ jest.mock("@/components/home/explore-waves/ExploreWavesSection", () => ({
     latestExploreProps = props;
     return (
       <div>
-        {props.headerActions}
-        {props.headerControls}
+        {props["headerActions"]}
+        {props["headerControls"]}
       </div>
     );
   },
@@ -142,20 +142,22 @@ describe("DiscoverWaveExplorer", () => {
   it("keeps the current threshold and unrelated URL parameters when choosing a score sort", () => {
     searchParams = "filter=SCORE_50&locale=en-GB";
     render(<DiscoverWaveExplorer />);
-    fireEvent.click(screen.getByRole("tab", { name: "Quality", exact: true }));
+    fireEvent.click(screen.getByRole("tab", { name: "Quality" }));
     expect(replaceMock).toHaveBeenLastCalledWith(
       "/discover?filter=SCORE_50&locale=en-GB&sort=QUALITY",
       { scroll: false }
     );
   });
 
-  it("updates thresholds with the keyboard while keeping the selected sort", () => {
+  it("updates thresholds with the keyboard while keeping the selected sort", async () => {
     searchParams = "sort=QUALITY";
     render(<DiscoverWaveExplorer />);
-    fireEvent.keyDown(screen.getByRole("radio", { name: "All", exact: true }), {
+    fireEvent.keyDown(screen.getByRole("radio", { name: "All" }), {
       key: "End",
     });
-    expect(screen.getByRole("radio", { name: "REP 60+" })).toHaveFocus();
+    await waitFor(() =>
+      expect(screen.getByRole("radio", { name: "REP 60+" })).toHaveFocus()
+    );
     expect(replaceMock).toHaveBeenLastCalledWith(
       "/discover?sort=QUALITY&filter=REP_60",
       { scroll: false }
@@ -181,9 +183,10 @@ describe("DiscoverWaveExplorer", () => {
       "Newest",
       "Latest Posts",
     ]) {
-      expect(
-        within(sheet).getByRole("button", { name, exact: true })
-      ).toHaveAttribute("aria-pressed", String(name === "Quality"));
+      expect(within(sheet).getByRole("button", { name })).toHaveAttribute(
+        "aria-pressed",
+        String(name === "Quality")
+      );
     }
     fireEvent.click(
       within(sheet).getByRole("button", { name: "Latest Posts" })

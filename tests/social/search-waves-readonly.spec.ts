@@ -418,6 +418,9 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     const compactSort = page.getByRole("button", {
       name: /^Wave discovery sort: /,
     });
+    if (testInfo.project.use.isMobile) {
+      await expect(compactSort).toBeVisible();
+    }
     if (await compactSort.isVisible()) {
       await activate(compactSort);
       const sheet = page.getByRole("dialog", { name: "Wave discovery sort" });
@@ -485,6 +488,12 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       threshold.getByRole("radio", { name: "REP 60+" })
     ).toBeChecked();
     await expect(page).toHaveURL(/filter=REP_60&sort=QUALITY/);
+    await expect(
+      threshold.getByRole("radio", { name: "REP 60+" })
+    ).toBeFocused();
+    await expect(
+      threshold.getByRole("radio", { name: "REP 60+" })
+    ).toBeInViewport({ ratio: 1 });
     await page.getByRole("tab", { name: "Active Votes", exact: true }).click();
     await expect(page).toHaveURL(
       /filter=REP_60&sort=QUALITY&view=active-votes/

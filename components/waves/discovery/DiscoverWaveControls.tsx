@@ -70,10 +70,15 @@ function onRadioKeyDown<T extends string>(
   event.preventDefault();
   const nextValue = options[nextIndex]?.value;
   if (!nextValue) return;
-  event.currentTarget.parentElement
-    ?.querySelector<HTMLElement>(`[data-radio-value="${nextValue}"]`)
-    ?.focus();
+  const radioGroup = event.currentTarget.parentElement;
   onChange(nextValue);
+  requestAnimationFrame(() => {
+    const nextRadio = radioGroup?.querySelector<HTMLElement>(
+      `[data-radio-value="${nextValue}"]`
+    );
+    nextRadio?.focus();
+    nextRadio?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  });
 }
 
 function ScoreSortIcon({ sort }: { readonly sort: DiscoverSort }) {
@@ -201,7 +206,7 @@ export function DiscoverWaveControls({
                     onFilterChange
                   )
                 }
-                className="motion-reduce:tw-transition-none"
+                className="tw-scroll-mx-1 motion-reduce:tw-transition-none"
               >
                 {t(locale, option.label)}
               </Button>
