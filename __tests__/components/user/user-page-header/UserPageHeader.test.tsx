@@ -239,10 +239,13 @@ describe("UserPageHeader", () => {
       block: jest.fn().mockResolvedValue(undefined),
       unblock: jest.fn(),
     });
-    (useQuery as jest.Mock).mockReturnValue({
+    (useQuery as jest.Mock).mockImplementation(({ queryKey }) => ({
       isFetched: true,
-      data: [{ statement_type: "BIO", statement_group: "GENERAL" }],
-    });
+      data:
+        queryKey[0] === "PROFILE_CIC_STATEMENTS"
+          ? [{ statement_type: "BIO", statement_group: "GENERAL" }]
+          : undefined,
+    }));
   });
 
   it("opens developer profile review without changing personal block state", async () => {
