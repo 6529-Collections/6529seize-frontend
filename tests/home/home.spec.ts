@@ -215,11 +215,17 @@ test("Coming Up keeps collaborator credits compact and accessible @smoke @medium
     expect(styles).toEqual({ ellipsis: "ellipsis", whiteSpace: "nowrap" });
   }
   if (isDesktopWebProject(testInfo.project.name)) {
-    const artists = section.locator('[data-home-action="Open artist profile"]');
+    const artists = section.getByRole("link", {
+      name: "coming-up-artist",
+      exact: true,
+    });
     await expect(artists.first()).toHaveCSS("color", "rgb(147, 147, 159)");
     await artists.first().hover();
     await expect(artists.first()).toHaveCSS("color", "rgb(206, 207, 212)");
-    const soloArtistName = artists.nth(2).locator("span");
+    const soloArtistName = section
+      .getByRole("link", { name: "coming-up-artist", exact: true })
+      .nth(2)
+      .locator("span");
     await expect(soloArtistName).toHaveCSS("color", "rgb(147, 147, 159)");
     for (const name of [artists.first(), soloArtistName]) {
       await expect(name).toHaveCSS("font-size", "14px");
@@ -698,13 +704,14 @@ test.describe("Home Page @smoke @medium @large", () => {
         "font-size",
         sectionTitleSize
       );
-      const subtitle = section.locator("h2 + p");
+      const subtitle = section
+        .getByRole("heading", { level: 2 })
+        .locator("xpath=following-sibling::p");
       await expect(subtitle).toHaveCSS("font-size", "14px");
       await expect(subtitle).toHaveCSS("margin-top", "4px");
-      await expect(subtitle.locator("..").locator("..")).toHaveCSS(
-        "margin-bottom",
-        "20px"
-      );
+      await expect(
+        section.getByRole("heading", { level: 2 }).locator("../..")
+      ).toHaveCSS("margin-bottom", "20px");
       expect(
         await section.evaluate((section) => {
           const heading = section.querySelector("h2");
