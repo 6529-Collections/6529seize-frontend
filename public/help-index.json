@@ -2001,6 +2001,8 @@
       "facts": [
         "Profile tabs split profile content into sections such as Identity, Curation, Collected, Subscriptions, Proxy, Brain, and xTDH.",
         "The default Identity tab opens at /{user}; legacy /{user}/identity redirects there.",
+        "Selecting a profile tab immediately highlights it and shows loading feedback while needed. The header and banner remain in place, vertical scroll is preserved within the destination's available height, and the latest tab selection wins. Leaving Collected exits transfer mode and clears transfer selections.",
+        "Profile tab links retain address and locale. The xTDH tab opens with tab=granted; other tab-specific filters do not carry between main profile tabs.",
         "Other profile tabs can be opened directly through routes such as /{user}/curations or /{user}/collected.",
         "Unavailable or gated tabs can be hidden depending on profile state and feature visibility rules."
       ],
@@ -2048,7 +2050,7 @@
       "related_paths": ["/{user}", "/waves"],
       "tags": ["profiles", "curation", "waves", "posts"],
       "source_refs": [
-        "app/[user]/curations/page.tsx",
+        "app/[user]/(profile)/curations/page.tsx",
         "components/user/waves/UserPageProfileWave.tsx",
         "components/user/waves/UserPageProfileCurationSetupDialog.tsx",
         "ops/docs/profiles/tabs/feature-curation-tab.md"
@@ -6320,7 +6322,7 @@
       ],
       "tags": ["profiles", "collected", "nfts"],
       "source_refs": [
-        "app/[user]/collected/page.tsx",
+        "app/[user]/(profile)/collected/page.tsx",
         "ops/docs/profiles/tabs/feature-collected-tab.md",
         "components/user/collected/stats/useCollectedStatsData.ts",
         "components/user/collected/stats/subcomponents/CollectedStatsHeader.tsx",
@@ -6403,7 +6405,7 @@
       "related_paths": ["/network/xtdh"],
       "tags": ["profiles", "xtdh"],
       "source_refs": [
-        "app/[user]/xtdh/page.tsx",
+        "app/[user]/(profile)/xtdh/page.tsx",
         "ops/docs/profiles/tabs/feature-xtdh-tab.md"
       ]
     },

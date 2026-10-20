@@ -1065,6 +1065,7 @@ const USER_COLLECTED_STATS_TDH_HISTORY_MESSAGES = objectMessages(
 
 const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
   navigationLabel: "Profile sections",
+  loading: "Loading profile section…",
   scrollLeft: "Scroll profile sections left",
   scrollRight: "Scroll profile sections right",
   identity: "Identity",
