@@ -18,6 +18,8 @@ import {
 const fixture = minimalPackage as unknown as CmsPackageV1;
 
 function staticProfileSegments(directory: string): string[] {
+  // Only the fixed app/[user] root and local route-group Dirent names reach this call.
+  // eslint-disable-next-line security/detect-non-literal-fs-filename
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     if (!entry.isDirectory()) return [];
     if (/^\(.+\)$/.test(entry.name))
