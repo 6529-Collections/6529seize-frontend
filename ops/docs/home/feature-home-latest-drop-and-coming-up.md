@@ -89,7 +89,9 @@ Use this page for visibility rules, state switches, and route targets.
     shows a `The Memes #{id}` pill linked to that card.
   - `Coming up` hides `NEXT MINT` and shows up to 3 leaders.
 - Leaderboard still loading while `NEXT MINT` is ready:
-  - `Coming up` can render with only the `NEXT MINT` card.
+  - `NEXT MINT` stays visible beside two loading placeholders when no leader
+    cards are available yet. The placeholders disappear when the leader request
+    finishes.
 - `Coming up` initial load with no ready cards and no `NEXT MINT` card:
   - Three skeleton cards render while the required requests are loading.
 - Returning to `Coming up` during the same app session:
