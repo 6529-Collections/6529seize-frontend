@@ -71,12 +71,15 @@ menu in desktop and tablet sidebars.
 
 The `network.identities-leaderboard` record describes the mobile filter's vertical
 criteria list, individual editors, Back navigation, preserved drafts, and
-readiness guidance available from the information button. The footer shows the
-criteria summary without an editing label; the top summary appears only for a
-selected group. Included identities omit repeated empty import messages and
-show a combined count once identities are selected or imported. The xTDH grant
-search shows Clear filters only when its search fields or status differ from
-the defaults; clearing restores Granted without removing a selected grant.
+readiness guidance available from the information button. On mobile, the selected
+criteria summary is a filled card at the end of the list or editor, scrolling
+with the content while only the create action remains fixed. Desktop keeps the
+summary beside the action. Create Wave uses the matching mobile summary card
+in the form's scroll flow. The top summary appears only for a selected group.
+Both identity tabs omit repeated empty-selection and import messages, and the
+bottom summary retains the combined counts. The xTDH grant
+search shows Clear filters only when a collection name or grantor is set;
+clearing preserves the active status tab without removing a selected grant.
 On mobile, grant search fields and cards share one scroll area, with Load more
 after the last loaded card and sheet navigation and the bottom action accessible. Desktop retains
 the left-side criteria list, and saving still creates and applies a new group.
@@ -712,3 +715,38 @@ The media playback record also describes contained still artwork on the
 homepage, Meme detail, and expanded Wave submissions: the shared usable-screen
 height cap, desktop homepage details-height limit, natural-height full-width
 mobile homepage images without reserved gaps, and stable Meme image frame.
+
+## Create Wave criteria navigation
+
+Create Wave access editing uses a vertical category list on smaller screens and
+touch devices. Selecting a category opens its fields; the shared Back control
+returns to the list and preserves the pending criteria. Desktop keeps its
+left-side criteria list. The help corpus distinguishes this from Configuration
+access editors, which retain their compact horizontal navigation.
+
+Create Wave also uses Network Filter’s concise Included copy and shared readiness
+tooltip. The editor omits Before editing and After editing captions and the default
+Everyone summary during editing, while preserving saved-group details, draft
+criteria, member previews, privacy, and save/cancel behavior. Configuration retains
+its existing comparison captions.
+
+Inside a Create Wave mobile category, the shared Back and Cancel actions occupy
+one row, with Back on the left and Cancel on the right; their behavior is unchanged.
+
+Create Wave and Network Filter omit the intermediate combined identity total in
+both Included and Excluded. The bottom criteria summary retains the counts, while
+individual source counts, limit warnings, import errors, and creator warnings remain.
+
+Create Wave and Network Filter use distinct stacked identity, EMMA, and CSV
+sections on phones and touch tablets. Search and upload controls remain visible,
+alongside source results, loading, errors, retry, and removal. Desktop retains its
+two-column import layout.
+
+Both Included and Excluded omit the empty EMMA and CSV source messages in Create
+Wave and Network Filter.
+
+Both identity tabs show a title above the search field: Find an identity to include
+or Find an identity to exclude. The placeholders are Search identities to
+include... and Search identities to exclude..., respectively.
+Create Wave and Network Filter omit empty-selection sentences in both tabs while
+preserving limits, errors, warnings, and the bottom criteria summary.
