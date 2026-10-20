@@ -219,9 +219,8 @@ export function DiscoverWaveControls({
         onClose={() => setSortOpen(false)}
         title={sortLabel}
         focusTitleOnOpen
-        noPadding
       >
-        <div className="tw-space-y-1 tw-px-3 tw-pb-3">
+        <div className="tw-space-y-1 tw-px-4 tw-pt-4 sm:tw-px-6">
           {SORT_OPTIONS.map((option) => (
             <Button
               key={option.value}
