@@ -11,8 +11,8 @@ type ProfileLoadResult =
   | { readonly ok: false; readonly error: unknown };
 
 /**
- * Request-scoped profile loaders shared by `generateMetadata`, the profile page
- * and the profile header.
+ * Request-scoped profile loaders shared by `generateMetadata`, the profile
+ * layout and header, and the profile tab pages.
  *
  * `React.cache` memoizes per server request only: nothing is shared between
  * requests or users, so the cookie-derived auth headers read inside each loader

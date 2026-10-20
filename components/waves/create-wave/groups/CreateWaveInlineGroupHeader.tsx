@@ -7,6 +7,7 @@ import { ActionButton } from "./CreateWaveInlineGroupButtons";
 export default function CreateWaveInlineGroupHeader({
   currentGroupLabel,
   showCurrentGroupTitle,
+  showSummary = true,
   unsavedGroupDescription,
   unsavedGroupSummary,
   membersPreview,
@@ -17,6 +18,7 @@ export default function CreateWaveInlineGroupHeader({
 }: {
   readonly currentGroupLabel: string;
   readonly showCurrentGroupTitle: boolean;
+  readonly showSummary?: boolean;
   readonly unsavedGroupDescription: string | null;
   readonly unsavedGroupSummary: string | null;
   readonly membersPreview?: ReactNode | undefined;
@@ -58,31 +60,36 @@ export default function CreateWaveInlineGroupHeader({
           </p>
         ) : null}
         {onCancel && (
-          <ActionButton
-            icon={
-              <XMarkIcon
-                aria-hidden="true"
-                className="tw-size-3.5 tw-flex-shrink-0"
-              />
-            }
-            label={t(locale, "waves.create.actions.cancel")}
-            disabled={disabled}
-            quiet={quiet}
-            active
-            onClick={onCancel}
-          />
-        )}
-        {membersPreview === null || membersPreview === undefined ? (
-          <p className="tw-col-span-full tw-m-0 tw-max-w-full tw-truncate tw-text-left tw-text-sm tw-font-semibold tw-text-iron-100">
-            {currentGroupLabel}
-          </p>
-        ) : (
-          <div
-            className={`tw-col-span-full ${quiet ? "tw-w-full" : "tw-mt-1.5"}`}
-          >
-            {membersPreview}
+          <div className="tw-col-start-2 tw-row-start-1 tw-justify-self-end">
+            <ActionButton
+              icon={
+                <XMarkIcon
+                  aria-hidden="true"
+                  className="tw-size-3.5 tw-flex-shrink-0"
+                />
+              }
+              label={t(locale, "waves.create.actions.cancel")}
+              disabled={disabled}
+              quiet={quiet}
+              active
+              onClick={onCancel}
+            />
           </div>
         )}
+        {showSummary &&
+          (membersPreview === null || membersPreview === undefined ? (
+            <p
+              className={`${showCurrentGroupTitle ? "tw-col-span-full" : "tw-col-start-1 tw-row-start-1"} tw-m-0 tw-max-w-full tw-truncate tw-text-left tw-text-sm tw-font-semibold tw-text-iron-100`}
+            >
+              {currentGroupLabel}
+            </p>
+          ) : (
+            <div
+              className={`${showCurrentGroupTitle ? "tw-col-span-full" : "tw-col-start-1 tw-row-start-1"} ${quiet ? "tw-w-full" : "tw-mt-1.5"}`}
+            >
+              {membersPreview}
+            </div>
+          ))}
       </div>
 
       {unsavedGroupSummary && (

@@ -1,5 +1,22 @@
-import { render, screen } from "@testing-library/react";
+jest.mock("@/contexts/TitleContext", () => ({ useSetTitle: jest.fn() }));
+jest.mock("@/components/user/layout/UserPageDropModal", () => () => (
+  <div data-testid="drop-modal" />
+));
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import React from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useSetTitle } from "@/contexts/TitleContext";
+import {
+  useIsTransferModeActive,
+  useTransfer,
+} from "@/components/nft-transfer/TransferState";
+import { ContractType } from "@/types/enums";
 
 // Outside a React server render `cache` is a pass-through, so model its
 // per-request memoization to verify the page and metadata share loads.
@@ -55,10 +72,17 @@ jest.mock("@/components/providers/metadata", () => ({
 
 import * as Helpers from "@/helpers/Helpers";
 
+jest.mock("@/components/user/layout/UserPageTabTransition", () => ({
+  __esModule: true,
+  default: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="tab-transition">{children}</div>
+  ),
+}));
+
 jest.mock("@/components/user/layout/UserPageLayout", () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="layout">{children}</div>
+    <div data-testid="profile-layout">{children}</div>
   ),
 }));
 
@@ -70,14 +94,16 @@ jest.mock("next/navigation", () => ({
   },
 }));
 
+import ProfileLayout from "@/app/[user]/(profile)/layout";
 import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
+import { getUserPageHeaderState } from "@/components/user/user-page-header/UserPageHeader";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { commonApiFetch } from "@/services/api/common-api";
 import {
   getUserProfile,
   userPageNeedsRedirect,
 } from "@/helpers/server.helpers";
-import { loadProfileStatements } from "@/helpers/user-page.server";
 
 function DummyCollectedTab({ profile }: { readonly profile: any }) {
   return <div data-testid="collected">COLLECTED:{profile.handle}</div>;
@@ -86,6 +112,11 @@ function DummyCollectedTab({ profile }: { readonly profile: any }) {
 const memoStores = (
   jest.requireMock("react") as { __memoStores: Array<Map<string, unknown>> }
 ).__memoStores;
+
+const statementsRequestCount = () =>
+  (commonApiFetch as jest.Mock).mock.calls.filter(([request]) =>
+    String(request.endpoint).endsWith("/cic/statements")
+  ).length;
 
 const buildFactory = () =>
   createUserTabPage({
@@ -98,6 +129,7 @@ describe("user tab page via createUserTabPage", () => {
     jest.clearAllMocks();
     memoStores.forEach((store) => store.clear());
     redirectMock.mockClear();
+    (commonApiFetch as jest.Mock).mockResolvedValue([]);
     (getUserProfile as jest.Mock).mockImplementation(
       async ({ user }: { user: string }) => ({
         handle: user,
@@ -110,7 +142,7 @@ describe("user tab page via createUserTabPage", () => {
     (userPageNeedsRedirect as jest.Mock).mockReturnValue(null);
   });
 
-  it("renders layout + tab when no redirect is needed", async () => {
+  it("renders tab when no redirect is needed", async () => {
     const { Page } = buildFactory();
 
     const element = await Page({
@@ -123,6 +155,9 @@ describe("user tab page via createUserTabPage", () => {
     expect(await screen.findByTestId("collected")).toHaveTextContent(
       "COLLECTED:alice"
     );
+    expect(screen.getByTestId("tab-transition")).not.toContainElement(
+      screen.getByTestId("drop-modal")
+    );
 
     expect(getUserProfile).toHaveBeenCalledWith({
       user: "alice",
@@ -134,6 +169,163 @@ describe("user tab page via createUserTabPage", () => {
       subroute: "collected",
     });
     expect(redirectMock).not.toHaveBeenCalled();
+  });
+
+  it("hydrates profile aliases and preserves a newer client edit", async () => {
+    const profile = {
+      handle: "alice",
+      wallets: [{ wallet: "0xABC", display: "Alice.eth" }],
+    };
+    (getUserProfile as jest.Mock).mockResolvedValue(profile);
+    const client = new QueryClient();
+    const edited = { ...profile, handle: "edited" };
+    client.setQueryData(["PROFILE", "alice"], edited, {
+      updatedAt: Date.now() + 10_000,
+    });
+    const { Page } = buildFactory();
+    const element = await Page({
+      params: Promise.resolve({ user: "Alice" }),
+    });
+    render(
+      <QueryClientProvider client={client}>{element}</QueryClientProvider>
+    );
+    expect(client.getQueryData(["PROFILE", "alice"])).toEqual(edited);
+    expect(client.getQueryData(["PROFILE", "0xabc"])).toEqual(profile);
+    expect(client.getQueryData(["PROFILE", "alice.eth"])).toEqual(profile);
+    expect(useSetTitle).toHaveBeenCalledWith(
+      expect.stringContaining("Collected")
+    );
+    client.clear();
+  });
+
+  it("keeps transfer selections during filters and clears them when leaving Collected", async () => {
+    function TransferTab() {
+      const transfer = useTransfer();
+      return (
+        <button
+          onClick={() => {
+            transfer.setEnabled(true);
+            transfer.select({
+              key: "MEMES:1",
+              contract: "0xabc",
+              contractType: ContractType.ERC721,
+              tokenId: 1,
+            });
+          }}
+        >
+          Selected: {transfer.count}
+        </button>
+      );
+    }
+    function TransferMode() {
+      return (
+        <output>Transfer mode: {String(useIsTransferModeActive())}</output>
+      );
+    }
+    const collected = createUserTabPage({
+      subroute: "collected",
+      Tab: TransferTab,
+      enableTransfer: true,
+    });
+    const identity = createUserTabPage({
+      subroute: "",
+      Tab: DummyCollectedTab,
+    });
+    const client = new QueryClient();
+    const wrap = (page: React.ReactNode) => (
+      <QueryClientProvider client={client}>
+        <TransferMode />
+        {page}
+      </QueryClientProvider>
+    );
+    const params = Promise.resolve({ user: "alice" });
+    const view = render(wrap(await collected.Page({ params })));
+    fireEvent.click(screen.getByRole("button", { name: "Selected: 0" }));
+    expect(screen.getByText("Transfer mode: true")).toBeInTheDocument();
+    view.rerender(
+      wrap(
+        await collected.Page({
+          params,
+          searchParams: Promise.resolve({ address: "0xabc" }),
+        })
+      )
+    );
+    expect(
+      screen.getByRole("button", { name: "Selected: 1" })
+    ).toBeInTheDocument();
+    view.rerender(wrap(await identity.Page({ params })));
+    expect(screen.getByText("Transfer mode: false")).toBeInTheDocument();
+    view.rerender(wrap(await collected.Page({ params })));
+    expect(
+      screen.getByRole("button", { name: "Selected: 0" })
+    ).toBeInTheDocument();
+    client.clear();
+  });
+
+  it("normalizes only a missing xTDH tab and preserves repeated query parameters", async () => {
+    const { Page } = createUserTabPage({
+      subroute: "xtdh",
+      Tab: DummyCollectedTab,
+    });
+    await Page({
+      params: Promise.resolve({ user: "alice" }),
+      searchParams: Promise.resolve({
+        locale: "et-EE",
+        address: ["0x1", "0x2"],
+      }),
+    });
+    expect(redirectMock).toHaveBeenCalledWith(
+      "/alice/xtdh?locale=et-EE&address=0x1&address=0x2&tab=granted"
+    );
+  });
+
+  it.each([
+    "received",
+    "active",
+    "pending",
+    "revoked",
+    "failed",
+    "unknown",
+    "",
+  ])("preserves an explicit xTDH tab value %s", async (tab) => {
+    const { Page } = createUserTabPage({
+      subroute: "xtdh",
+      Tab: DummyCollectedTab,
+    });
+    await Page({
+      params: Promise.resolve({ user: "alice" }),
+      searchParams: Promise.resolve({ tab, sub: "all", address: "0x1" }),
+    });
+    expect(redirectMock).not.toHaveBeenCalled();
+    expect(userPageNeedsRedirect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        req: { query: { user: "alice", tab, sub: "all", address: "0x1" } },
+      })
+    );
+  });
+
+  it("combines canonical-profile and missing xTDH tab redirects", async () => {
+    const actual = jest.requireActual<
+      typeof import("@/helpers/server.helpers")
+    >("@/helpers/server.helpers");
+    jest
+      .mocked(userPageNeedsRedirect)
+      .mockImplementationOnce(actual.userPageNeedsRedirect);
+    jest.mocked(getUserProfile).mockResolvedValueOnce({
+      handle: "alice",
+    } as Awaited<ReturnType<typeof getUserProfile>>);
+    const { Page } = createUserTabPage({
+      subroute: "xtdh",
+      Tab: DummyCollectedTab,
+    });
+    await Page({
+      params: Promise.resolve({ user: "0xalias" }),
+      searchParams: Promise.resolve({ locale: "et-EE", address: "0x1" }),
+    });
+    expect(redirectMock).toHaveBeenCalledTimes(1);
+    expect(redirectMock).toHaveBeenCalledWith(
+      "/alice/xtdh?locale=et-EE&address=0x1&tab=granted"
+    );
   });
 
   it("turns a structured missing-profile response into a route 404", async () => {
@@ -247,16 +439,18 @@ describe("user tab page via createUserTabPage", () => {
     });
   });
 
-  it("loads the identity once when the page and its metadata render together", async () => {
+  it("loads the identity once when the layout, page and metadata render together", async () => {
     const { Page, generateMetadata } = buildFactory();
     const params = Promise.resolve({ user: "Alice" });
 
     await Promise.all([
+      ProfileLayout({ params, children: null }),
       Page({ params, searchParams: Promise.resolve({}) } as any),
       generateMetadata({ params } as any),
     ]);
 
     expect(getUserProfile).toHaveBeenCalledTimes(1);
+    expect(statementsRequestCount()).toBe(1);
   });
 
   it.each([
@@ -269,15 +463,51 @@ describe("user tab page via createUserTabPage", () => {
 
       await generateMetadata({ params: Promise.resolve({ user: routeUser }) });
       // The header passes the lowercased route identity it was rendered with.
-      await loadProfileStatements(headerIdentity);
+      await getUserPageHeaderState(headerIdentity, null, null);
 
-      expect(commonApiFetch).toHaveBeenCalledTimes(1);
+      expect(statementsRequestCount()).toBe(1);
       expect(commonApiFetch).toHaveBeenCalledWith({
         endpoint,
         headers: { "x-test": "1" },
       });
     }
   );
+
+  it("renders the tab before the header requests finish, then applies the header snapshot", async () => {
+    let resolveStatements: (statements: unknown) => void = () => undefined;
+    (commonApiFetch as jest.Mock).mockImplementation(
+      ({ endpoint }: { endpoint: string }) =>
+        endpoint.endsWith("/cic/statements")
+          ? new Promise((resolve) => {
+              resolveStatements = resolve;
+            })
+          : Promise.resolve(null)
+    );
+    const client = new QueryClient();
+    const { Page } = buildFactory();
+
+    const element = await Page({ params: Promise.resolve({ user: "Alice" }) });
+    render(
+      <QueryClientProvider client={client}>{element}</QueryClientProvider>
+    );
+
+    expect(screen.getByTestId("collected")).toHaveTextContent(
+      "COLLECTED:alice"
+    );
+    const statementsKey = [QueryKey.PROFILE_CIC_STATEMENTS, "alice"];
+    expect(client.getQueryData(statementsKey)).toBeUndefined();
+
+    await waitFor(() => expect(statementsRequestCount()).toBe(1));
+    const statements = [{ statement_type: "BIO", statement_value: "Bio" }];
+    await act(async () => {
+      resolveStatements(statements);
+    });
+
+    await waitFor(() =>
+      expect(client.getQueryData(statementsKey)).toEqual(statements)
+    );
+    client.clear();
+  });
 
   it("requests the public bio while the identity request is still pending", async () => {
     let resolveProfile: (profile: unknown) => void = () => undefined;

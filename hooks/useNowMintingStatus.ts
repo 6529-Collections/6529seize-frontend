@@ -10,18 +10,21 @@ type NowMintingStatus = {
   readonly isDropComplete: boolean;
   readonly isStatusLoading: boolean;
   readonly error: unknown;
+  readonly refetch: () => Promise<unknown>;
 };
 
 export const useNowMintingStatus = (): NowMintingStatus => {
-  const { nft, isFetching, error } = useNowMinting();
-  const { claim } = useDropForgeManifoldClaim(nft?.id ?? -1);
+  const { nft, isFetching, error, refetch } = useNowMinting();
+  const { claim, isError } = useDropForgeManifoldClaim(nft?.id ?? -1);
+  const currentClaim = claim?.identifier === nft?.id ? claim : undefined;
 
   return {
     nft,
     isFetching,
-    status: claim?.status ?? null,
-    isDropComplete: claim?.isDropComplete ?? false,
-    isStatusLoading: !!nft && !claim,
+    status: currentClaim?.status ?? null,
+    isDropComplete: currentClaim?.isDropComplete ?? false,
+    isStatusLoading: !!nft && !currentClaim && !isError,
     error,
+    refetch,
   };
 };

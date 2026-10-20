@@ -1,7 +1,7 @@
 import { writeFile } from "node:fs/promises";
 import composerSandboxConstants from "../support/composerSandboxConstants.json";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
-import type { Frame, Page } from "@playwright/test";
+import type { Frame, Locator, Page, WebSocketRoute } from "@playwright/test";
 import { expectCompetitionScroll } from "../support/competitionScroll";
 import {
   monitorRememberedLeaderboard,
@@ -22,6 +22,44 @@ const entryDropId = (id: string) =>
     ? "00000000-0000-4000-8000-000000000532"
     : "00000000-0000-4000-8000-000000000533";
 const ROOT = `/waves/${WAVE}/competitions`;
+
+async function expectSheetTop(sheet: Locator, top: number) {
+  await expect
+    .poll(async () => {
+      const header = await sheet
+        .getByTestId("mobile-dialog-header")
+        .boundingBox();
+      return header ? Math.abs(header.y - top) : Number.POSITIVE_INFINITY;
+    })
+    .toBeLessThanOrEqual(1);
+}
+
+async function swipeVertically(page: Page, target: Locator, distance: number) {
+  await target.click({ trial: true });
+  const box = await target.boundingBox();
+  expect(box).not.toBeNull();
+  const x = box!.x + box!.width / 2;
+  const y = box!.y + Math.min(box!.height / 2, 120);
+  const touch = await page.context().newCDPSession(page);
+  try {
+    await touch.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [{ x, y, id: 1 }],
+    });
+    for (const fraction of [0.2, 0.5, 0.8, 1]) {
+      await touch.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ x, y: y + distance * fraction, id: 1 }],
+      });
+    }
+    await touch.send("Input.dispatchTouchEvent", {
+      type: "touchEnd",
+      touchPoints: [],
+    });
+  } finally {
+    await touch.detach();
+  }
+}
 async function openNewCompetition(page: Page) {
   await page.getByRole("link", { name: "Competition", exact: true }).click();
 }
@@ -588,6 +626,64 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  test("repairs live state after a refresh marker and a server normal close", async ({
+    page,
+  }) => {
+    const sockets: WebSocketRoute[] = [];
+    const apiPort = new URL(
+      getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])
+    ).port;
+    await page.routeWebSocket(
+      (url) => url.port === apiPort,
+      (socket) => {
+        sockets.push(socket);
+        socket.onMessage((message) => {
+          const frame = JSON.parse(String(message)) as { type?: string };
+          if (frame.type === "AUTHENTICATE")
+            socket.send(JSON.stringify({ type: "AUTHENTICATED", data: {} }));
+          if (frame.type === "SYNC_NOTIFICATION_IDENTITIES")
+            socket.send(
+              JSON.stringify({
+                type: "NOTIFICATION_IDENTITIES_SYNCED",
+                data: { profile_ids: [PROFILE] },
+              })
+            );
+        });
+      }
+    );
+    await installCompetitionApi(page);
+    let reads = 0;
+    page.on("request", (request) => {
+      if (new URL(request.url()).pathname.endsWith("/competitions/alpha"))
+        reads++;
+    });
+    await page.goto(`${ROOT}/alpha`);
+    await expect(
+      page.getByText("Immutable alpha entry content", { exact: true })
+    ).toBeVisible({ timeout: 30000 });
+    await expect.poll(() => sockets.length).toBeGreaterThan(0);
+    const beforeMarker = reads;
+    sockets[sockets.length - 1]!.send(
+      JSON.stringify({ type: "RESYNC_REQUIRED", data: {} })
+    );
+    await expect
+      .poll(() => reads, { timeout: 15000 })
+      .toBeGreaterThan(beforeMarker);
+    const beforeClose = reads;
+    const connectionCount = sockets.length;
+    sockets[sockets.length - 1]!.close({
+      code: 1000,
+      reason: "Listener recovery",
+    });
+    await expect
+      .poll(() => sockets.length, { timeout: 15000 })
+      .toBeGreaterThan(connectionCount);
+    // No competition event is sent after reconnect: recovery itself must refetch.
+    await expect
+      .poll(() => reads, { timeout: 15000 })
+      .toBeGreaterThan(beforeClose);
+  });
+
   test.afterEach(async ({ page }, testInfo) => {
     if (testInfo.status !== testInfo.expectedStatus) {
       const failurePath = testInfo.outputPath(
@@ -1313,6 +1409,20 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(
         dialog.getByRole("heading", { name: "Chat", exact: true })
       ).toBeVisible();
+      const content = page
+        .getByRole("dialog")
+        .locator(".tw-overflow-y-auto")
+        .filter({
+          has: page.getByRole("heading", { name: "Chat", exact: true }),
+        })
+        .last();
+      await swipeVertically(page, content, -90);
+      await expect
+        .poll(() => content.evaluate((element) => element.scrollTop))
+        .toBeGreaterThan(0);
+      await expect(
+        dialog.getByRole("button", { name: "Close", exact: true })
+      ).toBeVisible();
       await page.screenshot({
         path: testInfo.outputPath("wave-information-mobile.png"),
         fullPage: true,
@@ -1329,6 +1439,15 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await opener.click();
       await page.keyboard.press("Escape");
       await expect(dialog).toHaveCount(0);
+      await expect(opener).toBeFocused();
+      await expect(activity).toHaveAttribute("aria-selected", "true");
+      await opener.click();
+      const header = dialog.getByTestId("mobile-dialog-header");
+      await swipeVertically(page, header, 10);
+      await expect(header).toBeVisible();
+      await swipeVertically(page, header, 90);
+      await expect(dialog).toHaveCount(0);
+      await expect(page).toHaveURL(destination);
       await expect(opener).toBeFocused();
       await expect(activity).toHaveAttribute("aria-selected", "true");
       await opener.click();
@@ -1351,6 +1470,73 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expectNoHorizontalOverflow(page);
     });
   }
+  test("keeps native wave identity compact without a description", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-mobile-chromium",
+      "Native touch header layout."
+    );
+    await installCompetitionApi(page);
+    await installSurfaceSimulation(
+      page.context(),
+      "capacitor-ios-sim",
+      testInfo.project.use.baseURL
+    );
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/waves/${WAVE}`
+    );
+    expect(response.ok()).toBe(true);
+    const wave = await response.json();
+    wave.parent_wave = {
+      ...wave,
+      id: PROFILE,
+      name: "Follow the repository with an intentionally long parent wave name",
+      pfp: null,
+      creator: wave.author,
+      description_drop: { contents: null, media: [] },
+    };
+    wave.description_drop.parts = [];
+    await page.route(`**/api/waves/${WAVE}`, (route) =>
+      route.fulfill({ json: wave })
+    );
+    await page.goto(`${ROOT}/beta?tab=votes`);
+    const title = page.getByRole("button", {
+      name: /^About Local Composer Sandbox Wave/,
+    });
+    const parent = page
+      .getByRole("navigation", { name: "Wave hierarchy", exact: true })
+      .first();
+    for (const width of [320, 430, 768]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(title).toBeVisible();
+      await expect(parent).toBeVisible();
+      await expect
+        .poll(async () => {
+          const parentBox = await parent.boundingBox();
+          const titleBox = await title.boundingBox();
+          if (!parentBox || !titleBox) return Number.POSITIVE_INFINITY;
+          return Math.abs(titleBox.y - parentBox.y - parentBox.height);
+        })
+        .toBeLessThanOrEqual(1);
+      await expect
+        .poll(() =>
+          title.evaluate((element) => element.getBoundingClientRect().height)
+        )
+        .toBe(24);
+      await expect
+        .poll(() =>
+          parent.evaluate(
+            (element) => element.scrollWidth - element.clientWidth
+          )
+        )
+        .toBeLessThanOrEqual(1);
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath(`compact-native-header-${width}.png`),
+      });
+    }
+  });
   test("isolates parallel votes and content and preserves back, forward and shared chat", async ({
     page,
   }, testInfo) => {
@@ -1948,6 +2134,13 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("dialog", { name: "Create", exact: true })
     ).toHaveCount(0);
+    const cancelCuration = curationDialog.getByRole("button", {
+      name: "Cancel",
+      exact: true,
+    });
+    if (testInfo.project.name === "web-mobile-chromium")
+      await expect(cancelCuration).toBeHidden();
+    else await expect(cancelCuration).toBeVisible();
     await page.screenshot({
       path: testInfo.outputPath("wave-create-curation-handoff.png"),
       animations: "disabled",
@@ -2006,6 +2199,154 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     });
     await expectNoHorizontalOverflow(page);
     expect(sandbox.requests).toHaveLength(0);
+  });
+
+  test("keeps joined waves complete across pagination failure, refresh, and the DMs round trip", async ({
+    page,
+  }, testInfo) => {
+    // This scenario exercises four independent page initializations on both
+    // desktop and the simulated native shell.
+    test.setTimeout(120000);
+    const app = testInfo.project.name === "web-mobile-chromium";
+    await installCompetitionApi(page);
+    if (app)
+      await installSurfaceSimulation(
+        page.context(),
+        "capacitor-ios-sim",
+        testInfo.project.use.baseURL
+      );
+    const fixture = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
+    );
+    const { wave: overview } = await fixture.json();
+    const joined = Array.from({ length: 45 }, (_, index) => ({
+      ...overview,
+      id: `00000000-0000-4000-8000-${String(index + 700).padStart(12, "0")}`,
+      name: `Joined wave ${String(index + 1).padStart(2, "0")}`,
+      parent_wave: null,
+      has_subwaves: false,
+      last_drop_time: Date.now() - index * 1000,
+      context_profile_context: {
+        ...overview.context_profile_context,
+        subscribed: true,
+        pinned: false,
+        followed_subwaves_count: 0,
+      },
+    }));
+    let failContinuation = true;
+    const requested: string[] = [];
+    const offsets = new Map([
+      ["joined-continuation-alpha", 20],
+      ["joined-continuation-beta", 40],
+    ]);
+    await page.route("**/api/v2/waves/joined?**", async (route) => {
+      const cursor = new URL(route.request().url()).searchParams.get("cursor");
+      requested.push(cursor ?? "first");
+      if (cursor && failContinuation) {
+        await route.fulfill({
+          status: 503,
+          json: { error: "Joined waves temporarily unavailable" },
+        });
+        return;
+      }
+      const offset = cursor ? offsets.get(cursor) : 0;
+      if (offset === undefined) {
+        await route.fulfill({ status: 400, json: { error: "Unknown cursor" } });
+        return;
+      }
+      await route.fulfill({
+        json: {
+          data: joined.slice(offset, offset + 20),
+          next_cursor:
+            offset === 0
+              ? "joined-continuation-alpha"
+              : offset === 20
+                ? "joined-continuation-beta"
+                : null,
+          snapshot_expires_at: Date.now() + 900000,
+        },
+      });
+    });
+    const selectJoined = async () => {
+      await page
+        .getByRole("button", { name: "Joined", exact: true })
+        .filter({ visible: true })
+        .click();
+    };
+    const finishPagination = async () => {
+      const lastWave = page
+        .getByRole("link", { name: "Joined wave 45", exact: true })
+        .filter({ visible: true });
+      for (let attempt = 0; attempt < 4; attempt += 1) {
+        await page
+          .getByRole("region", { name: "Following waves list", exact: true })
+          .evaluate((list) => {
+            let container = list.parentElement;
+            while (
+              container &&
+              !["auto", "scroll"].includes(
+                getComputedStyle(container).overflowY
+              )
+            )
+              container = container.parentElement;
+            if (container) container.scrollTop = container.scrollHeight;
+          });
+        const more = page.getByRole("button", {
+          name: "Load more joined waves",
+          exact: true,
+        });
+        if (await more.count()) {
+          // Reaching the button can itself start automatic pagination. The final
+          // response may remove it before Playwright finishes the click.
+          await more.click({ timeout: 1500 }).catch(async (error: unknown) => {
+            if (await more.count()) throw error;
+          });
+        }
+        if (await lastWave.count()) break;
+      }
+      await expect(lastWave).toBeVisible();
+      await expect(
+        page.getByRole("button", {
+          name: "Load more joined waves",
+          exact: true,
+        })
+      ).toHaveCount(0);
+    };
+    await page.goto("/waves", { waitUntil: "domcontentloaded" });
+    await selectJoined();
+    const more = page.getByRole("button", {
+      name: "Load more joined waves",
+      exact: true,
+    });
+    await more.click();
+    const retry = page.getByRole("button", {
+      name: "Retry loading joined waves",
+      exact: true,
+    });
+    await expect(retry).toBeVisible({ timeout: 30000 });
+    await expect(
+      page
+        .getByRole("status")
+        .filter({ hasText: "Some joined waves could not be loaded." })
+    ).toBeVisible();
+    failContinuation = false;
+    await retry.click();
+    await finishPagination();
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await finishPagination();
+    // Both destinations rebuild the real sidebar and retain the saved collection.
+    await page.goto("/messages", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/messages$/);
+    await page.goto("/waves", { waitUntil: "domcontentloaded" });
+    await finishPagination();
+    expect(requested).toContain("joined-continuation-alpha");
+    expect(requested).toContain("joined-continuation-beta");
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("joined-waves-pagination.png"),
+      animations: "disabled",
+      style: "nextjs-portal { visibility: hidden; }",
+    });
   });
 
   test("aligns Waves collection filters with the search control", async ({
@@ -2897,6 +3238,268 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     expect(sandbox.requests).toHaveLength(0);
   });
 
+  for (const app of [false, true]) {
+    for (const view of ["List view", "Grid view"]) {
+      test(`keeps live Main Stage artwork anchored after ranking refresh (${app ? "app" : "web"}, ${view})`, async ({
+        page,
+      }, testInfo) => {
+        test.skip(
+          app && testInfo.project.name !== "web-mobile-chromium",
+          "Native branch simulation uses the mobile viewport."
+        );
+        if (app)
+          await installSurfaceSimulation(
+            page.context(),
+            "capacitor-android-sim",
+            process.env["PLAYWRIGHT_BASE_URL"]
+          );
+        const sockets: WebSocketRoute[] = [];
+        await page.routeWebSocket(
+          (url) =>
+            url.port ===
+            new URL(getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"]))
+              .port,
+          (socket) => {
+            sockets.push(socket);
+            socket.onMessage((message) => {
+              const frame = JSON.parse(String(message)) as { type?: string };
+              if (frame.type === "AUTHENTICATE")
+                socket.send(
+                  JSON.stringify({ type: "AUTHENTICATED", data: {} })
+                );
+              if (frame.type === "SYNC_NOTIFICATION_IDENTITIES")
+                socket.send(
+                  JSON.stringify({
+                    type: "NOTIFICATION_IDENTITIES_SYNCED",
+                    data: { profile_ids: [PROFILE] },
+                  })
+                );
+            });
+          }
+        );
+        const sandbox = await installCompetitionApi(
+          page,
+          false,
+          true,
+          MEMES_WAVE
+        );
+        sandbox.onlyCompetition("alpha");
+        await sandbox.legacyPrimary("alpha");
+        const response = await page.request.get(
+          `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${MEMES_WAVE}/drops`
+        );
+        const fixture = await response.json();
+        fixture.wave.id = MEMES_WAVE;
+        let order = Array.from({ length: 80 }, (_, index) => index);
+        let refreshed = false;
+        let leaderboardReads = 0;
+        await page.route(
+          `**/api/v2/waves/${MEMES_WAVE}/leaderboard*`,
+          (route) => {
+            leaderboardReads++;
+            const pageNumber = Number(
+              new URL(route.request().url()).searchParams.get("page") ?? 1
+            );
+            return route.fulfill({
+              json: {
+                wave: fixture.wave,
+                drops: order
+                  .slice((pageNumber - 1) * 50, pageNumber * 50)
+                  .map((index) => ({
+                    ...fixture.drops[0],
+                    id: `00000000-0000-4000-8000-${String(index + 9000).padStart(12, "0")}`,
+                    serial_no: index + 9000,
+                    title: `Live artwork ${index}`,
+                    media: [
+                      {
+                        url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aS5cAAAAASUVORK5CYII=",
+                        mime_type: "image/png",
+                      },
+                    ],
+                    drop_type: "SUBMISSION",
+                    submission_context: {
+                      status: "ACTIVE",
+                      has_metadata: false,
+                      voting: {
+                        is_open: true,
+                        total_votes_given: refreshed ? 900000 : 1000,
+                        current_calculated_vote: refreshed ? 900000 : 1000,
+                        predicted_final_vote: refreshed ? 900000 : 1000,
+                        voters_count: 1,
+                        place: order.indexOf(index) + 1,
+                        context_profile_context: {
+                          can_vote: true,
+                          min: -1000,
+                          max: 1000,
+                          current: 0,
+                        },
+                      },
+                    },
+                  })),
+                count: 80,
+                page: pageNumber,
+                next: pageNumber === 1,
+              },
+            });
+          }
+        );
+        await page.goto(
+          `/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard`
+        );
+        await page.getByRole("tab", { name: view, exact: true }).click();
+        const list = page.getByRole("list", {
+          name: "Leaderboard drops",
+          exact: true,
+        });
+        await expect(list).toBeVisible({ timeout: 30000 });
+        const scroller = page
+          .getByRole("list", { name: "Leaderboard drops", exact: true })
+          .locator(
+            'xpath=ancestor::div[contains(@class,"tw-overflow-y-auto")][1]'
+          );
+        await scroller.evaluate((element) =>
+          element.scrollTo({ top: element.scrollHeight, behavior: "instant" })
+        );
+        if (view === "Grid view")
+          await page
+            .getByRole("button", { name: "Load more drops", exact: true })
+            .click();
+        await expect.poll(() => leaderboardReads).toBeGreaterThanOrEqual(2);
+        await expect(list.getByRole("listitem").first()).toHaveAttribute(
+          "aria-setsize",
+          "80"
+        );
+        await scroller.evaluate((element) => {
+          element.setAttribute("data-scroll-visit", "original");
+          element.scrollTo({
+            top: element.scrollHeight * 0.6,
+            behavior: "instant",
+          });
+        });
+        await expect
+          .poll(() => scroller.evaluate((element) => element.scrollTop))
+          .toBeGreaterThan(1000);
+        const readAnchor = () =>
+          list.evaluate((element) => {
+            const container = element.closest(".tw-overflow-y-auto")!;
+            const viewport = container.getBoundingClientRect();
+            const card = Array.from(
+              element.querySelectorAll<HTMLElement>(
+                "[data-leaderboard-drop-id]"
+              )
+            ).find((candidate) => {
+              const bounds = candidate.getBoundingClientRect();
+              return (
+                bounds.bottom > viewport.top + 100 &&
+                bounds.top < viewport.bottom - 100
+              );
+            });
+            return card
+              ? {
+                  id: card.dataset["leaderboardDropId"]!,
+                  offset: card.getBoundingClientRect().top - viewport.top,
+                }
+              : null;
+          });
+        let currentAnchor = await readAnchor();
+        await expect
+          .poll(async () => {
+            currentAnchor = await readAnchor();
+            return currentAnchor !== null;
+          })
+          .toBe(true);
+        const anchor = currentAnchor;
+        if (!anchor) throw new Error("Visible artwork anchor missing");
+        await list.evaluate((element) =>
+          element.setAttribute("data-list-visit", "original")
+        );
+        const anchorCard = page
+          .getByRole("list", { name: "Leaderboard drops", exact: true })
+          .locator(`[data-leaderboard-drop-id="${anchor.id}"]`);
+        const originalPosition = await anchorCard.getAttribute(
+          "data-leaderboard-logical-index"
+        );
+        const readsBefore = leaderboardReads;
+        const touch = app ? await page.context().newCDPSession(page) : null;
+        if (touch) {
+          await scroller.evaluate((element) => {
+            for (const type of ["touchstart", "touchend", "touchcancel"])
+              element.addEventListener(
+                type,
+                () => element.setAttribute("data-last-touch", type),
+                { passive: true }
+              );
+          });
+          const box = await scroller.boundingBox();
+          await touch.send("Input.dispatchTouchEvent", {
+            type: "touchStart",
+            touchPoints: [{ x: box!.x + 2, y: box!.y + 200, id: 1 }],
+          });
+          await expect(scroller).toHaveAttribute(
+            "data-last-touch",
+            "touchstart"
+          );
+        }
+        order = [...order.slice(12), ...order.slice(0, 12)];
+        refreshed = true;
+        await expect.poll(() => sockets.length).toBeGreaterThan(0);
+        sockets[sockets.length - 1]!.send(
+          JSON.stringify({
+            type: "COMPETITION_UPDATE",
+            data: {
+              event_id: "live-ranking",
+              event_version: 1,
+              event_type: "COMPETITION_LEADERBOARD_UPDATED",
+              wave_id: MEMES_WAVE,
+              competition_id: "alpha",
+            },
+          })
+        );
+        await expect.poll(() => leaderboardReads).toBeGreaterThan(readsBefore);
+        await expect(anchorCard).toContainText("900,000");
+        await expect(scroller).toHaveAttribute("data-scroll-visit", "original");
+        await expect(list).toHaveAttribute("data-list-visit", "original");
+        if (touch) {
+          await expect(scroller).toHaveAttribute(
+            "data-last-touch",
+            "touchstart"
+          );
+          await expect(anchorCard).toHaveAttribute(
+            "data-leaderboard-logical-index",
+            originalPosition!
+          );
+          await touch.send("Input.dispatchTouchEvent", {
+            type: "touchEnd",
+            touchPoints: [],
+          });
+          await touch.detach();
+        }
+        await expect(anchorCard).not.toHaveAttribute(
+          "data-leaderboard-logical-index",
+          originalPosition!
+        );
+        await expect
+          .poll(() =>
+            anchorCard.evaluate((element) => {
+              const container = element.closest(".tw-overflow-y-auto")!;
+              return (
+                element.getBoundingClientRect().top -
+                container.getBoundingClientRect().top
+              );
+            })
+          )
+          .toBeCloseTo(anchor.offset, 0);
+        await expect(scroller).toHaveAttribute("data-scroll-visit", "original");
+        await page.screenshot({
+          path: testInfo.outputPath(
+            `live-scroll-${app ? "app" : "web"}-${view.split(" ")[0]}.png`
+          ),
+        });
+        expect(sandbox.requests).toHaveLength(0);
+      });
+    }
+  }
+
   test("creates a chat-only hub with no implicit competition", async ({
     page,
   }) => {
@@ -3679,6 +4282,688 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       fullPage: true,
     });
   });
+
+  test("keeps Cancel in desktop Wave setting popovers", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "Desktop popover coverage."
+    );
+    await installCompetitionApi(page);
+    await page.goto(`/waves/${WAVE}?tab=chat`);
+    await openWaveInformation(page);
+    await page.getByRole("tab", { name: "Configuration", exact: true }).click();
+    const trigger = page.getByRole("button", {
+      name: "Edit links",
+      exact: true,
+    });
+    await trigger.click();
+    const editor = page.getByRole("dialog", {
+      name: "Edit links",
+      exact: true,
+    });
+    const checkbox = editor.getByRole("checkbox", {
+      name: "Disable links",
+      exact: true,
+    });
+    const checked = await checkbox.isChecked();
+    await checkbox.setChecked(!checked);
+    await editor.getByRole("button", { name: "Cancel", exact: true }).click();
+    await expect(editor).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+    await trigger.click();
+    await expect(checkbox).toBeChecked({ checked });
+  });
+
+  test("keeps Configuration editors inside the tablet information panel", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-mobile-chromium",
+      "Tablet touch coverage."
+    );
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await installCompetitionApi(page);
+    await page.route(`**/api/waves/${WAVE}/curations`, (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "tablet-art",
+            name: "Art",
+            wave_id: WAVE,
+            group_id: composerSandboxConstants.previewGroupId,
+            created_at: 1,
+            updated_at: 1,
+            priority_order: 1,
+          },
+        ],
+      })
+    );
+    await page.goto(`/waves/${WAVE}?tab=chat`);
+    await openWaveInformation(page);
+    const panel = page.getByRole("dialog");
+    const configuration = panel.getByRole("tab", {
+      name: "Configuration",
+      exact: true,
+    });
+    await configuration.click();
+    for (const label of [
+      "Edit links",
+      "Edit Visibility access",
+      "Edit Chat access",
+      "Edit Admins access",
+    ]) {
+      const trigger = panel.getByRole("button", { name: label, exact: true });
+      await trigger.click();
+      await expect(panel).toHaveCount(1);
+      await expect(panel).toHaveAccessibleName(label);
+      await expect(configuration).toBeHidden();
+      if (label === "Edit links")
+        await expect(
+          panel.getByRole("button", { name: "Cancel", exact: true })
+        ).toHaveCount(0);
+      await panel
+        .getByRole("button", {
+          name: label === "Edit links" ? "Save" : "Save changes",
+          exact: true,
+        })
+        .click({ trial: true });
+      await page.screenshot({
+        path: testInfo.outputPath(`tablet-${label.split(" ")[1]}.png`),
+      });
+      if (label === "Edit Admins access") await page.keyboard.press("Escape");
+      else
+        await panel.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(trigger).toBeFocused();
+      await expect(configuration).toHaveAttribute("aria-selected", "true");
+      await expectNoHorizontalOverflow(page);
+    }
+    await panel
+      .getByRole("button", { name: "Edit links", exact: true })
+      .click();
+    await panel
+      .getByRole("button", { name: "Close wave details", exact: true })
+      .click();
+    await expect(panel).toHaveCount(0);
+    await openWaveInformation(page);
+    await expect(configuration).toBeVisible();
+    await configuration.click();
+    const curationTrigger = panel.getByRole("button", {
+      name: "Configure Art",
+      exact: true,
+    });
+    await curationTrigger.click();
+    await page
+      .getByRole("menuitem", { name: "Edit Curation", exact: true })
+      .click();
+    const curationEditor = page.getByRole("dialog", {
+      name: "Edit curation",
+      exact: true,
+    });
+    await expect(
+      curationEditor.getByRole("textbox", { name: "Name", exact: true })
+    ).toHaveValue("Art");
+    await expect(page.getByRole("dialog")).toHaveCount(1);
+    await expect(
+      curationEditor.getByRole("button", { name: "Cancel", exact: true })
+    ).toHaveCount(0);
+    await curationEditor
+      .getByRole("button", { name: "Back", exact: true })
+      .click();
+    await expect(curationEditor).toHaveCount(0);
+    await expect(configuration).toHaveAttribute("aria-selected", "true");
+    await expect(curationTrigger).toBeFocused();
+  });
+
+  for (const surface of ["web", "ios", "android"] as const) {
+    test(`keeps curation create and edit inside the ${surface} Wave sheet`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      test.skip(
+        testInfo.project.name !== "web-mobile-chromium",
+        "Touch sheet coverage."
+      );
+      if (surface !== "web")
+        await installSurfaceSimulation(
+          page.context(),
+          surface === "ios" ? "capacitor-ios-sim" : "capacitor-android-sim",
+          baseURL
+        );
+      await installCompetitionApi(page);
+      let curation = {
+        id: "sheet-art",
+        name: "Art",
+        wave_id: WAVE,
+        group_id: composerSandboxConstants.previewGroupId,
+        created_at: 1,
+        updated_at: 1,
+        priority_order: 1,
+      };
+      await page.route(`**/api/waves/${WAVE}/curations`, (route) =>
+        route.fulfill({ json: [curation] })
+      );
+      let failSave = true;
+      let writes = 0;
+      await page.route(
+        `**/api/waves/${WAVE}/curations/${curation.id}`,
+        async (route) => {
+          expect(route.request().method()).toBe("POST");
+          writes++;
+          if (failSave)
+            return route.fulfill({
+              status: 500,
+              json: { error: "Sandbox curation save failed" },
+            });
+          const body = route.request().postDataJSON();
+          curation = { ...curation, name: body.name, group_id: body.group_id };
+          await route.fulfill({ json: curation });
+        }
+      );
+      await page.goto(`/waves/${WAVE}?tab=chat`);
+      await openWaveInformation(page);
+      const sheet = page.getByRole("dialog");
+      const configuration = sheet.getByRole("tab", {
+        name: "Configuration",
+        exact: true,
+      });
+      await configuration.click();
+      const create = sheet.getByRole("button", {
+        name: "Create curation",
+        exact: true,
+      });
+      await create.click({ trial: true });
+      const header = await sheet
+        .getByTestId("mobile-dialog-header")
+        .boundingBox();
+      expect(header).not.toBeNull();
+      await create.click();
+      await expect(sheet).toHaveCount(1);
+      await expect(sheet).toHaveAccessibleName("Create curation");
+      await expectSheetTop(sheet, header!.y);
+      await expect(
+        sheet.getByRole("button", { name: "Cancel", exact: true })
+      ).toHaveCount(0);
+      const name = sheet.getByRole("textbox", { name: "Name", exact: true });
+      await name.fill("Unsaved curation");
+      await expect(
+        sheet.getByRole("button", { name: "Create", exact: true })
+      ).toBeDisabled();
+      await sheet.getByRole("button", { name: /Active collectors/ }).click();
+      await sheet
+        .getByRole("button", { name: "Change group", exact: true })
+        .click();
+      const groupSearch = sheet.getByRole("textbox", {
+        name: "Search by group name",
+        exact: true,
+      });
+      await expect(groupSearch).toBeVisible();
+      await expect(groupSearch).toBeFocused();
+      await page.evaluate(() => {
+        const viewport = globalThis.visualViewport!;
+        Object.defineProperty(viewport, "height", {
+          configurable: true,
+          value: globalThis.innerHeight - 350,
+        });
+        viewport.dispatchEvent(new Event("resize"));
+      });
+      await expect
+        .poll(() =>
+          groupSearch.evaluate((element) => {
+            const bounds = element.getBoundingClientRect();
+            let container = element.parentElement;
+            while (
+              container &&
+              !/(auto|scroll)/.test(getComputedStyle(container).overflowY)
+            )
+              container = container.parentElement;
+            if (!container)
+              throw new Error("Curation scroll container missing");
+            const visible = container.getBoundingClientRect();
+            return bounds.top >= visible.top && bounds.bottom <= visible.bottom;
+          })
+        )
+        .toBe(true);
+      await page.evaluate(() => {
+        const viewport = globalThis.visualViewport!;
+        Object.defineProperty(viewport, "height", {
+          configurable: true,
+          value: globalThis.innerHeight,
+        });
+        viewport.dispatchEvent(new Event("resize"));
+      });
+      await expect(sheet).toHaveCount(1);
+      await sheet
+        .getByRole("button", { name: "Back to selected group", exact: true })
+        .click();
+      await expect(name).toHaveValue("Unsaved curation");
+      await sheet.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(create).toBeFocused();
+      await expect(configuration).toHaveAttribute("aria-selected", "true");
+      await create.click();
+      await expect(name).toHaveValue("");
+      await page.goBack();
+      await expect(create).toBeFocused();
+      const configure = sheet.getByRole("button", {
+        name: "Configure Art",
+        exact: true,
+      });
+      await configure.click();
+      await page
+        .getByRole("menuitem", { name: "Edit Curation", exact: true })
+        .click();
+      await expect(sheet).toHaveCount(1);
+      await expect(sheet).toHaveAccessibleName("Edit curation");
+      await expectSheetTop(sheet, header!.y);
+      await expect(name).toHaveValue("Art");
+      await name.fill("Updated art");
+      await sheet.getByRole("button", { name: "Save", exact: true }).click();
+      await expect(
+        page
+          .getByRole("alert")
+          .filter({ hasText: "Sandbox curation save failed" })
+      ).toBeVisible();
+      await expect(name).toHaveValue("Updated art");
+      await expect(sheet).toHaveAccessibleName("Edit curation");
+      failSave = false;
+      await sheet.getByRole("button", { name: "Save", exact: true }).click();
+      await expect(configuration).toHaveAttribute("aria-selected", "true");
+      await expect(
+        sheet.getByRole("button", {
+          name: "Configure Updated art",
+          exact: true,
+        })
+      ).toBeFocused();
+      expect(writes).toBe(2);
+      await create.click();
+      await page.screenshot({
+        path: testInfo.outputPath(`embedded-curation-${surface}.png`),
+      });
+      await swipeVertically(
+        page,
+        sheet.getByTestId("mobile-dialog-header"),
+        180
+      );
+      await expect(sheet).toHaveCount(0);
+      await openWaveInformation(page);
+      await expect(configuration).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+    });
+
+    test(`opens owner options inside the ${surface} Wave sheet and returns with Back`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      test.skip(
+        testInfo.project.name !== "web-mobile-chromium",
+        "Touch sheet coverage."
+      );
+      if (surface !== "web")
+        await installSurfaceSimulation(
+          page.context(),
+          surface === "ios" ? "capacitor-ios-sim" : "capacitor-android-sim",
+          baseURL
+        );
+      await installCompetitionApi(page);
+      await page.goto(`/waves/${WAVE}?tab=chat`);
+      const originalUrl = page.url();
+      await openWaveInformation(page);
+      const options = page.getByRole("button", {
+        name: "Open options",
+        exact: true,
+      });
+      await options.click({ trial: true });
+      const initialHeader = await page
+        .getByTestId("mobile-dialog-header")
+        .boundingBox();
+      expect(initialHeader).not.toBeNull();
+      for (const backAction of ["button", "escape", "browser"] as const) {
+        await options.click();
+        const sheet = page.getByRole("dialog", {
+          name: "Wave options",
+          exact: true,
+        });
+        await expect(page.getByRole("dialog")).toHaveCount(1);
+        await expectSheetTop(sheet, initialHeader!.y);
+        await expect(
+          sheet.getByRole("heading", { name: "Wave options", exact: true })
+        ).toBeVisible();
+        await sheet
+          .getByRole("button", { name: "Delete", exact: true })
+          .click();
+        const confirmation = page.getByRole("dialog", {
+          name: "Delete wave",
+          exact: true,
+        });
+        await expect(
+          confirmation.getByRole("heading", {
+            name: "Delete wave",
+            exact: true,
+          })
+        ).toBeVisible();
+        await confirmation
+          .getByRole("button", { name: "Cancel", exact: true })
+          .click();
+        await expect(confirmation).toHaveCount(0);
+        await expectSheetTop(sheet, initialHeader!.y);
+        await expect(
+          sheet.getByRole("heading", { name: "Wave options", exact: true })
+        ).toBeVisible();
+        await sheet
+          .getByRole("button", { name: "Delete", exact: true })
+          .click({ trial: true });
+        if (backAction === "button")
+          await sheet
+            .getByRole("button", { name: "Back", exact: true })
+            .click();
+        else if (backAction === "escape") await page.keyboard.press("Escape");
+        else await page.goBack();
+        await expect(options).toBeFocused();
+        await expectSheetTop(page.getByRole("dialog"), initialHeader!.y);
+        await expect(
+          page.getByRole("tab", { name: "About", exact: true })
+        ).toBeVisible();
+      }
+      await options.click();
+      await page.screenshot({
+        path: testInfo.outputPath(`owner-options-${surface}.png`),
+      });
+      await page.getByRole("button", { name: "Close", exact: true }).click();
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+      await expect(page).toHaveURL(originalUrl);
+      await openWaveInformation(page);
+      await expect(options).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+    });
+
+    test(`returns from Network to the ${surface} Wave Configuration sheet`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      test.skip(
+        testInfo.project.name !== "web-mobile-chromium",
+        "Touch sheet coverage."
+      );
+      if (surface !== "web")
+        await installSurfaceSimulation(
+          page.context(),
+          surface === "ios" ? "capacitor-ios-sim" : "capacitor-android-sim",
+          baseURL
+        );
+      await installCompetitionApi(page);
+      const response = await page.request.get(
+        `${getSandboxApiOrigin(baseURL)}/api/waves/${WAVE}`
+      );
+      const wave = await response.json();
+      wave.wave.admin_group.group = {
+        id: composerSandboxConstants.previewGroupId,
+        name: "Active collectors",
+        is_hidden: false,
+      };
+      await page.route(`**/api/waves/${WAVE}`, (route) =>
+        route.fulfill({ json: wave })
+      );
+      await page.goto(`/waves/${WAVE}?tab=chat&search=art%20work`);
+      await openWaveInformation(page);
+      const sheet = page.getByRole("dialog");
+      const configuration = sheet.getByRole("tab", {
+        name: "Configuration",
+        exact: true,
+      });
+      await configuration.click();
+      const memberLink = sheet.getByRole("link", {
+        name: /^Inspect Active collectors group criteria and members:/,
+      });
+      await expect(memberLink).toBeVisible();
+      const scrollTop = await memberLink.evaluate((element) => {
+        let parent = element.parentElement;
+        while (parent && getComputedStyle(parent).overflowY !== "auto")
+          parent = parent.parentElement;
+        if (!parent)
+          throw new Error("Wave information scroll container missing");
+        parent.scrollTop = 60;
+        return parent.scrollTop;
+      });
+      expect(scrollTop).toBeGreaterThan(0);
+      const originalUrl = page.url();
+      await memberLink.click();
+      await expect(page).toHaveURL(
+        new RegExp(
+          `/network\\?.*group=${composerSandboxConstants.previewGroupId}`
+        ),
+        { timeout: 30000 }
+      );
+      await expect(
+        page.getByRole("button", { name: "Clear selected group", exact: true })
+      ).toBeVisible();
+      await expect(sheet).toHaveCount(0);
+      if (surface === "web") await page.goBack();
+      else
+        await page.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(page).toHaveURL(originalUrl);
+      await expect(configuration).toHaveAttribute("aria-selected", "true");
+      await expect(memberLink).toBeVisible();
+      await expect
+        .poll(() =>
+          memberLink.evaluate((element) => {
+            let parent = element.parentElement;
+            while (parent && getComputedStyle(parent).overflowY !== "auto")
+              parent = parent.parentElement;
+            return parent?.scrollTop;
+          })
+        )
+        .toBe(scrollTop);
+      await page.screenshot({
+        path: testInfo.outputPath(`network-return-${surface}.png`),
+      });
+      await sheet.getByRole("button", { name: "Close", exact: true }).click();
+      await expect(sheet).toHaveCount(0);
+      await expect(page).toHaveURL(originalUrl);
+    });
+
+    test(`edits Configuration inside the ${surface} Wave sheet and returns with Back`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      test.skip(
+        testInfo.project.name !== "web-mobile-chromium",
+        "Touch sheet coverage."
+      );
+      if (surface !== "web")
+        await installSurfaceSimulation(
+          page.context(),
+          surface === "ios" ? "capacitor-ios-sim" : "capacitor-android-sim",
+          baseURL
+        );
+      await installCompetitionApi(page);
+      const response = await page.request.get(
+        `${getSandboxApiOrigin(baseURL)}/api/waves/${WAVE}`
+      );
+      const wave = await response.json();
+      wave.chat.links_disabled = false;
+      wave.visibility.scope.group = {
+        id: composerSandboxConstants.previewGroupId,
+        name: "Active collectors",
+        is_hidden: false,
+      };
+      let failSave = true;
+      let writes = 0;
+      await page.route(`**/api/waves/${WAVE}`, async (route) => {
+        if (route.request().method() === "POST") {
+          writes++;
+          if (failSave)
+            return route.fulfill({
+              status: 500,
+              json: { error: "Sandbox save failed" },
+            });
+          wave.chat = { ...wave.chat, ...route.request().postDataJSON().chat };
+        }
+        await route.fulfill({ json: wave });
+      });
+      await page.goto(`/waves/${WAVE}?tab=chat`);
+      await openWaveInformation(page);
+      const sheet = page.getByRole("dialog");
+      await sheet
+        .getByRole("tab", { name: "Configuration", exact: true })
+        .click();
+      const links = sheet.getByRole("button", {
+        name: "Edit links",
+        exact: true,
+      });
+      await links.scrollIntoViewIfNeeded();
+      const row = sheet
+        .getByRole("button", { name: "Edit links", exact: true })
+        .locator("..");
+      const labelBox = await row
+        .getByText("Links", { exact: true })
+        .boundingBox();
+      const iconBox = await sheet
+        .getByRole("button", { name: "Edit links", exact: true })
+        .locator("svg")
+        .boundingBox();
+      expect(labelBox).not.toBeNull();
+      expect(iconBox).not.toBeNull();
+      expect(
+        Math.abs(
+          labelBox!.y + labelBox!.height / 2 - iconBox!.y - iconBox!.height / 2
+        )
+      ).toBeLessThanOrEqual(1);
+      const originalUrl = page.url();
+      await page.screenshot({
+        path: testInfo.outputPath(`configuration-${surface}.png`),
+      });
+      const initialHeader = await sheet
+        .getByTestId("mobile-dialog-header")
+        .boundingBox();
+      expect(initialHeader).not.toBeNull();
+
+      await links.click();
+      await expect(sheet).toHaveCount(1);
+      await expect(sheet).toHaveAccessibleName("Edit links");
+      await expectSheetTop(sheet, initialHeader!.y);
+      await expect(
+        sheet.getByRole("button", { name: "Back", exact: true })
+      ).toBeVisible();
+      const checkbox = sheet.getByRole("checkbox", {
+        name: "Disable links",
+        exact: true,
+      });
+      await expect(checkbox).toHaveCSS("appearance", "none");
+      await expect(checkbox).toHaveCSS("background-color", "rgb(28, 28, 33)");
+      await expect(
+        sheet.getByRole("button", { name: "Cancel", exact: true })
+      ).toHaveCount(0);
+      await checkbox.check();
+      await expect(checkbox).toHaveCSS("background-image", /data:image/);
+      await sheet.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(links).toBeFocused();
+      await expectSheetTop(sheet, initialHeader!.y);
+      expect(writes).toBe(0);
+      await expect(
+        sheet.getByRole("tab", { name: "Configuration", exact: true })
+      ).toHaveAttribute("aria-selected", "true");
+      await links.click();
+      await expect(checkbox).not.toBeChecked();
+      await checkbox.check();
+      await sheet.getByRole("button", { name: "Save", exact: true }).click();
+      await expect(
+        page.getByText("Couldn't save these wave settings.", { exact: true })
+      ).toBeVisible();
+      await expect(checkbox).toBeChecked();
+      await expect(sheet).toHaveAccessibleName("Edit links");
+      failSave = false;
+      await sheet.getByRole("button", { name: "Save", exact: true }).click();
+      await expect(links).toBeFocused();
+      await expect(row.getByText("Disabled", { exact: true })).toBeVisible();
+      expect(writes).toBe(2);
+
+      for (const label of [
+        "Edit Visibility access",
+        "Edit Chat access",
+        "Edit Admins access",
+      ]) {
+        const trigger = sheet.getByRole("button", { name: label, exact: true });
+        await trigger.click();
+        await expect(sheet).toHaveCount(1);
+        await expect(sheet).toHaveAccessibleName(label);
+        await expectSheetTop(sheet, initialHeader!.y);
+        await expect(
+          sheet.getByRole("button", { name: "Back", exact: true })
+        ).toBeVisible();
+        await expect(
+          sheet.getByRole("button", { name: "Save changes", exact: true })
+        ).toBeVisible();
+        await expectNoHorizontalOverflow(page);
+        if (label === "Edit Visibility access") {
+          await sheet
+            .getByRole("button", { name: "Make wave public", exact: true })
+            .click();
+          const confirmation = page.getByRole("dialog", {
+            name: "Make wave public?",
+            exact: true,
+          });
+          await expect(
+            confirmation.getByRole("heading", {
+              name: "Make wave public?",
+              exact: true,
+            })
+          ).toBeVisible();
+          await confirmation
+            .getByRole("button", { name: "Make public", exact: true })
+            .click({ trial: true });
+          await confirmation
+            .getByRole("button", { name: "Cancel", exact: true })
+            .click();
+          await expect(confirmation).toHaveCount(0);
+          await expect(sheet).toHaveCount(1);
+          await expect(sheet).toHaveAccessibleName(label);
+        }
+        await page.screenshot({
+          path: testInfo.outputPath(
+            `configuration-${surface}-${label.split(" ")[1]}.png`
+          ),
+        });
+        if (label === "Edit Chat access") await page.goBack();
+        else if (label === "Edit Admins access")
+          await page.keyboard.press("Escape");
+        else
+          await sheet
+            .getByRole("button", { name: "Back", exact: true })
+            .click();
+        await expect(trigger).toBeFocused();
+        await expect(
+          sheet.getByRole("tab", { name: "Configuration", exact: true })
+        ).toHaveAttribute("aria-selected", "true");
+        await expect(page).toHaveURL(originalUrl);
+      }
+      expect(writes).toBe(2);
+      await links.click();
+      if (surface === "web") {
+        // A history entry without its optional title still needs a named sheet.
+        await page.evaluate(() => {
+          const state = { ...window.history.state };
+          delete state.waveInformationViewTitle;
+          window.history.replaceState(state, "");
+        });
+        await page.goBack();
+        await expect(links).toBeFocused();
+        await page.goForward();
+        await expect(sheet).toHaveAccessibleName(`About ${wave.name}`);
+        await expect(checkbox).toBeVisible();
+      }
+      await swipeVertically(
+        page,
+        sheet.getByTestId("mobile-dialog-header"),
+        90
+      );
+      await expect(sheet).toHaveCount(0);
+      await expect(page).toHaveURL(originalUrl);
+      await expect
+        .poll(() => page.evaluate(() => window.history.state?.waveInformation))
+        .toBeUndefined();
+    });
+  }
 
   test("keeps wave Configuration in the information panel and competition appearance in Settings", async ({
     page,

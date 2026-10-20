@@ -181,7 +181,7 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
               heading.closest(".mobile-wrapper-dialog")?.getBoundingClientRect()
                 .height
           )
-      ).toBeLessThan((originalHeight ?? 0) / 2);
+      ).toBeCloseTo(originalHeight ?? 0, 0);
       await expect(
         choices.getByRole("button", { name: "Back", exact: true })
       ).toBeVisible();
@@ -320,8 +320,8 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
         name: "Open notification settings",
       });
       await bell.tap();
-      // The phone uses About; the tablet retains its Wave details sidebar.
-      const choiceRole = width === 390 ? "checkbox" : "menuitemcheckbox";
+      // Both touch layouts keep notification preferences inside their information panel.
+      const choiceRole = "checkbox";
       await expect(page.getByRole("dialog")).toHaveCount(1);
       await expectReachable(page, choiceRole);
       const choice = page.getByRole(choiceRole, { name: BROADCAST });

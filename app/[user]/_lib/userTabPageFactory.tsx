@@ -1,6 +1,18 @@
 import { TransferProvider } from "@/components/nft-transfer/TransferState";
 import { getAppMetadata } from "@/components/providers/metadata";
-import UserPageLayout from "@/components/user/layout/UserPageLayout";
+import UserPageClientHydrator from "@/components/user/layout/UserPageClientHydrator";
+import UserPageDropModal from "@/components/user/layout/UserPageDropModal";
+import UserPageTabTransition from "@/components/user/layout/UserPageTabTransition";
+import { getUserPageHeaderState } from "@/components/user/user-page-header/UserPageHeader";
+import UserPageHeaderRefresh from "@/components/user/user-page-header/UserPageHeaderRefresh";
+import { getHandlesFromProfile } from "@/components/react-query-wrapper/profileQueryHandles";
+import { getIdentityQueryKey } from "@/services/api/identity-query";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
+import { cache } from "react";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getMetadataForUserPage, getUserPageTitle } from "@/helpers/Helpers";
@@ -67,6 +79,16 @@ const normalizeSearchParams = (
   }, {} as UserSearchParams);
 };
 
+const serializeSearchParams = (query: UserSearchParams): string => {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    for (const entry of Array.isArray(value) ? value : [value]) {
+      if (entry !== undefined) params.append(key, entry);
+    }
+  }
+  return params.toString();
+};
+
 const isNotFoundError = (error: unknown): boolean => {
   if (
     error === null ||
@@ -95,6 +117,24 @@ const isProbeLikeUserSlug = (user: string): boolean => {
   const normalized = user.trim().toLowerCase();
   return PROBE_USER_SUFFIXES.some((suffix) => normalized.endsWith(suffix));
 };
+
+// The identity request itself is shared with generateMetadata through
+// loadUserProfile, so the layout, page and metadata make one request.
+export const getUserPageProfile = cache(
+  async (user: string): Promise<ApiIdentity> => {
+    if (!user || isProbeLikeUserSlug(user)) {
+      notFound();
+    }
+    const result = await loadUserProfile(user.toLowerCase());
+    if (!result.ok) {
+      if (isNotFoundError(result.error)) {
+        notFound();
+      }
+      throw result.error;
+    }
+    return result.profile;
+  }
+);
 
 const loadPublicProfileBio = async (user: string): Promise<string | null> => {
   try {
@@ -145,21 +185,19 @@ export function createUserTabPage<
     }
 
     const normalizedUser = user.toLowerCase();
+    const profileUpdatedAt = Date.now();
     // The identity request and the search params are independent, so they
-    // resolve together. The existence check below still runs before anything
-    // renders or suspends, which keeps unknown profiles on a real 404 status.
-    const [resolvedSearchParams, profileResult] = await Promise.all([
+    // resolve together. The existence check still runs before anything renders
+    // or suspends, which keeps unknown profiles on a real 404 status.
+    const [resolvedSearchParams, profile] = await Promise.all([
       searchParams,
-      loadUserProfile(normalizedUser),
+      getUserPageProfile(user),
     ]);
     const query: UserSearchParams = normalizeSearchParams(resolvedSearchParams);
-    if (!profileResult.ok) {
-      if (isNotFoundError(profileResult.error)) {
-        notFound();
-      }
-      throw profileResult.error;
+    const needsXtdhDefault = subroute === "xtdh" && query["tab"] === undefined;
+    if (needsXtdhDefault) {
+      query["tab"] = "granted";
     }
-    const profile = profileResult.profile;
 
     const needsRedirect = userPageNeedsRedirect({
       profile,
@@ -168,9 +206,19 @@ export function createUserTabPage<
     });
 
     if (needsRedirect) {
-      redirect(needsRedirect.redirect.destination);
+      return redirect(needsRedirect.redirect.destination);
+    }
+    if (needsXtdhDefault) {
+      return redirect(
+        `/${encodeURIComponent(user)}/xtdh?${serializeSearchParams(query)}`
+      );
     }
 
+    const headerStatePromise = getUserPageHeaderState(
+      normalizedUser,
+      profile.id,
+      profile.handle?.toLowerCase() ?? null
+    );
     const extraProps = getTabProps
       ? await getTabProps({ profile, query })
       : ({} as TExtra);
@@ -180,30 +228,42 @@ export function createUserTabPage<
     const profilePath = `/${encodeURIComponent(canonicalUser)}${
       subroute ? `/${subroute}` : ""
     }`;
+    const queryClient = new QueryClient();
+    for (const handle of new Set([
+      normalizedUser,
+      ...getHandlesFromProfile(profile),
+    ])) {
+      queryClient.setQueryData(getIdentityQueryKey(handle), profile, {
+        updatedAt: profileUpdatedAt,
+      });
+    }
 
-    const TabComponent = (
-      <>
+    return (
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        {/* The header snapshot streams after the tab instead of holding back
+            the first flush; the layout's header shares the same requests. */}
+        <UserPageHeaderRefresh state={headerStatePromise} />
         <JsonLdScript
           data={buildProfilePageJsonLd({
             profile,
             path: profilePath,
           })}
         />
-        <UserPageLayout
-          profile={profile}
-          handleOrWallet={normalizedUser}
+        <UserPageClientHydrator
           pageTitle={getUserPageTitle(profile, subroute)}
-        >
-          <Tab profile={profile} {...extraProps} />
-        </UserPageLayout>
-      </>
+        />
+        <UserPageDropModal />
+        <UserPageTabTransition>
+          {enableTransfer ? (
+            <TransferProvider>
+              <Tab profile={profile} {...extraProps} />
+            </TransferProvider>
+          ) : (
+            <Tab profile={profile} {...extraProps} />
+          )}
+        </UserPageTabTransition>
+      </HydrationBoundary>
     );
-
-    if (enableTransfer) {
-      return <TransferProvider>{TabComponent}</TransferProvider>;
-    }
-
-    return TabComponent;
   }
 
   async function generateMetadata({
@@ -222,8 +282,8 @@ export function createUserTabPage<
 
     const normalizedUser = resolvedParams.user.toLowerCase();
     // The public bio only needs the route identity, so it loads alongside the
-    // profile instead of after it. The loaders are request-memoized, which lets
-    // the page and its header reuse both responses instead of refetching them.
+    // profile instead of after it. Both loaders are request-memoized, so the
+    // layout, page and header reuse these responses instead of refetching.
     const profilePromise = loadUserProfile(normalizedUser);
     const publicBioPromise = loadPublicProfileBio(normalizedUser);
     const profileResult = await profilePromise;
@@ -252,13 +312,16 @@ export function createUserTabPage<
       canonicalUserPath && subroute
         ? `${canonicalUserPath}/${subroute}`
         : canonicalUserPath;
-    return getAppMetadata(getMetadataForUserPage(profile, subroute, publicBio), {
-      canonicalPath,
-      robots: {
-        index: !PROFILE_NOINDEX_SUBROUTES.has(subroute),
-        follow: true,
-      },
-    });
+    return getAppMetadata(
+      getMetadataForUserPage(profile, subroute, publicBio),
+      {
+        canonicalPath,
+        robots: {
+          index: !PROFILE_NOINDEX_SUBROUTES.has(subroute),
+          follow: true,
+        },
+      }
+    );
   }
 
   return { Page, generateMetadata };

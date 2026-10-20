@@ -48,6 +48,7 @@ import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json"
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
 import { EN_US_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
+import { EN_US_DATE_COUNTDOWN_MESSAGES } from "@/i18n/messages/date-countdown";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
@@ -1063,6 +1064,7 @@ const USER_COLLECTED_STATS_TDH_HISTORY_MESSAGES = objectMessages(
 
 const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
   navigationLabel: "Profile sections",
+  loading: "Loading profile section…",
   scrollLeft: "Scroll profile sections left",
   scrollRight: "Scroll profile sections right",
   identity: "Identity",
@@ -1373,6 +1375,10 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   filterAll: "All",
   filterJoined: "Joined",
   joinedEmptyMessage: "No joined waves to display",
+  joinedLoadError: "Some joined waves could not be loaded.",
+  joinedRetry: "Retry",
+  joinedRetryLabel: "Retry loading joined waves",
+  joinedLoadMore: "Load more joined waves",
   announcementWavesAriaLabel: "Announcement waves",
   highlyRatedAriaLabel: "Worth checking out waves",
   pinnedAriaLabel: "Pinned waves",
@@ -1592,6 +1598,7 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "xtdhGrant.change": "Change grant",
   "xtdhGrant.cancelChange": "Cancel change",
   "xtdhGrant.remove": "Remove grant",
+  "xtdhGrant.clearFilters": "Clear filters",
   done: "Done",
   enableChat: "Enable chat",
   allowAdminsToDeletePosts: "Allow admins to delete posts",
@@ -2334,6 +2341,12 @@ const NETWORK_GROUP_FILTER_MESSAGES = objectMessages("network.groupFilter", {
 } as const);
 
 const WAVE_LOADING_MESSAGES = objectMessages("waves", {
+  loadingWave: "Loading {name}…",
+  loadingWaveUnknown: "Loading wave…",
+  loadingError: "This wave could not be loaded.",
+  loadingRetry: "Try again",
+  loadingBack: "Back to wave list",
+  loadingBackMessages: "Back to messages",
   loadingStatus: "Loading waves",
   "drops.editorLoadingStatus": "Loading editor",
 } as const);
@@ -2730,6 +2743,11 @@ const XTDH_GRANT_MESSAGES = objectMessages("xtdh.grant", {
   "lastGrant.label": "Last grant",
 } as const);
 
+const WAVE_SLOW_MODE_NOTICE_MESSAGES = objectMessages("waves.slowMode.notice", {
+  cooldown: "Slow mode: send again in {countdown}",
+  interval: "Slow mode: one message every {interval}",
+} as const);
+
 const COLLECTION_DELEGATION_MESSAGES = objectMessages("delegation.collection", {
   "readError.message": "Unable to load delegation records for {collection}.",
   "readError.retry": "Try Again",
@@ -2938,8 +2956,7 @@ const OPEN_DATA_DOWNLOAD_MESSAGES = objectMessages("openData.downloads", {
 } as const);
 
 const DATE_PICKER_MESSAGES = objectMessages("datePicker", {
-  utcNote:
-    "Dates are in UTC. The latest date you can select is today in UTC.",
+  utcNote: "Dates are in UTC. The latest date you can select is today in UTC.",
   afterTodayError: "Dates cannot be later than today in UTC.",
 } as const);
 
@@ -3098,6 +3115,7 @@ export const EN_US_MESSAGES = {
   "singleDrop.shared": "Link shared",
   "singleDrop.close": "Close",
   "singleDrop.closeLabel": "Close panel",
+  "singleDrop.loading": "Loading drop",
   "singleDrop.showChat": "Show chat",
   "singleDrop.hideChat": "Hide chat",
   "singleDrop.chatLabel": "Drop chat",
@@ -3251,6 +3269,7 @@ export const EN_US_MESSAGES = {
   ...IDENTITY_FILTER_MESSAGES,
   ...XTDH_COLLECTION_MESSAGES,
   ...XTDH_GRANT_MESSAGES,
+  ...WAVE_SLOW_MODE_NOTICE_MESSAGES,
   ...COLLECTION_DELEGATION_MESSAGES,
   ...DELEGATION_EXPIRY_MESSAGES,
   ...join6529Messages,
@@ -3690,6 +3709,15 @@ export const EN_US_MESSAGES = {
   "home.nowMinting.editionDetails.season": "Season",
   "home.nowMinting.editionDetails.distributionPlan": "Distribution Plan",
   "home.nowMinting.editionDetails.view": "View",
+  "home.latestDrop.error":
+    "We couldn’t load the latest artwork. Please try again.",
+  "home.latestDrop.retry": "Try again",
+  "home.latestDrop.retrying": "Trying again…",
+  "home.comingUp.title": "Coming up",
+  "home.comingUp.subtitle": "Next in queue and current vote leaders",
+  "home.comingUp.viewAll": "View all",
+  "home.comingUp.loading": "Loading upcoming artwork…",
+  "home.nowMinting.stats.unavailable": "Unavailable",
   "home.nowMinting.stats.edition": "Edition",
   "home.nowMinting.stats.status": "Status",
   "home.nowMinting.stats.mintPrice": "Mint price",
@@ -4483,6 +4511,7 @@ export const EN_US_MESSAGES = {
   ...LINK_PREVIEW_MESSAGES,
   ...COMMON_MESSAGES,
   ...EN_US_PAGINATION_MESSAGES,
+  ...EN_US_DATE_COUNTDOWN_MESSAGES,
   ...OPEN_DATA_DOWNLOAD_MESSAGES,
   ...DATE_PICKER_MESSAGES,
   ...MEME_DATA_TABLE_MESSAGES,
@@ -4551,7 +4580,8 @@ export const EN_US_MESSAGES = {
     "Community decisions powered by TDH.",
   "waves.discovery.recommendationsDescription":
     "Highly rated waves you don’t follow.",
-  "waves.discovery.publicRecommendationsDescription": "Highly rated waves.",
+  "waves.discovery.publicRecommendationsDescription":
+    "Highly rated waves you don’t follow.",
   "waves.discovery.activeDiscussions": "Active discussions",
   "waves.discovery.unfollowedDiscussions":
     "Active discussions you are not yet following",
@@ -4569,6 +4599,13 @@ export const EN_US_MESSAGES = {
   "waves.discovery.nextDecision": "Next decision {date}",
   "waves.discovery.emptyVotes": "No active TDH votes right now.",
   "waves.discovery.emptyRecommendations": "No recommendations right now.",
+  "waves.discovery.loadingRecommendations": "Loading recommendations…",
+  "waves.discovery.loadingVotes": "Loading votes…",
+  "waves.discovery.loadingAnnouncements": "Loading announcements…",
+  "waves.discovery.recommendationsError": "Couldn’t load recommendations.",
+  "waves.discovery.votesError": "Couldn’t load votes.",
+  "memes.quickVote.loading":
+    "Loading your next meme and your recent quick-vote amounts.",
   "waves.discovery.loading": "Loading waves…",
   "waves.discovery.error": "Couldn’t load waves.",
   "waves.discovery.retry": "Try again",

@@ -1,6 +1,12 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import HeaderProxyNewModal from "@/components/header/proxy/HeaderProxyNewModal";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
 
 let clickAwayCb: () => void;
 let keyPressCb: () => void;
@@ -34,6 +40,23 @@ describe("HeaderProxyNewModal", () => {
     fireEvent.keyDown(window, { key: "Escape" });
     keyPressCb();
     expect(onClose).toHaveBeenCalledWith(false);
+  });
+
+  it("requests AUTOx50 derivatives for both profile pictures", () => {
+    render(
+      <HeaderProxyNewModal
+        connectedProfile={{ ...connectedProfile, pfp: CDN_AVATAR_URL }}
+        proxyGrantor={{ ...proxyGrantor, pfp: CDN_AVATAR_URL }}
+        onClose={jest.fn()}
+      />
+    );
+    const sources = screen
+      .getAllByAltText("Profile Picture")
+      .map(getRequestedImageSrc);
+    expect(sources).toHaveLength(3);
+    for (const src of sources) {
+      expect(src).toContain(scaledAvatarPath(ImageScale.W_AUTO_H_50));
+    }
   });
 
   it("toggles dontShowAgain and passes value on close", () => {

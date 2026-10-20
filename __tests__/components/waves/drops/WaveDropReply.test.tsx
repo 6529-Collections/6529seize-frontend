@@ -2,6 +2,12 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import React from "react";
 import WaveDropReply from "@/components/waves/drops/WaveDropReply";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
 
 jest.mock("@/components/waves/drops/DropLoading", () => () => (
   <div data-testid="loading" />
@@ -94,6 +100,22 @@ describe("WaveDropReply", () => {
       ][0];
     expect(lastCallProps.textClassName).not.toContain("tw-block");
     expect(lastCallProps.linkify).toBe(false);
+  });
+
+  it("requests the AUTOx50 derivative of the replied author's profile picture", () => {
+    hookData.drop = {
+      id: "d",
+      author: { handle: "alice", pfp: CDN_AVATAR_URL },
+      serial_no: 1,
+      moderation: {
+        status: ApiDropModerationStatus.Visible,
+        can_view: true,
+      },
+    } as any;
+    render(<WaveDropReply {...baseProps} />);
+    expect(
+      getRequestedImageSrc(screen.getByAltText("alice's avatar"))
+    ).toContain(scaledAvatarPath(ImageScale.W_AUTO_H_50));
   });
 
   it("does not clip a globally moderated tombstone", () => {

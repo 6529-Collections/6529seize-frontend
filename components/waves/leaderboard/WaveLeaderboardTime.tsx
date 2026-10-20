@@ -18,6 +18,7 @@ import { CompactDroppingPhaseCard } from "./time/CompactDroppingPhaseCard";
 import { CompactVotingPhaseCard } from "./time/CompactVotingPhaseCard";
 import { CompactWinnerAnnouncement } from "./time/CompactWinnerAnnouncement";
 import { useWave } from "@/hooks/useWave";
+import { useVisibleInterval } from "@/hooks/usePageVisibility";
 import { Time } from "@/helpers/time";
 
 interface WaveLeaderboardTimeProps {
@@ -90,18 +91,10 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
     filteredDecisions.find((decision) => decision.timestamp > currentMillis)
       ?.timestamp ?? null;
 
-  useEffect(() => {
-    if (typeof nextDecisionTime !== "number") {
-      return;
-    }
-
-    const intervalId = globalThis.setInterval(() => {
-      setCurrentMillis(Time.currentMillis());
-    }, 1000);
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [nextDecisionTime]);
+  useVisibleInterval(
+    () => setCurrentMillis(Time.currentMillis()),
+    typeof nextDecisionTime === "number" ? 1000 : null
+  );
 
   useEffect(() => {
     if (nextDecisionTime !== null) {

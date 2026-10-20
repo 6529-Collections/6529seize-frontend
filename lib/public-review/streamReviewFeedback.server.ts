@@ -2,6 +2,7 @@ import "next/dist/compiled/server-only";
 
 import { connection } from "next/server";
 
+import { isDesktopRenderer } from "@/config/frontendRoot.server";
 import { getPublicReviewEnvironment } from "@/config/publicReviews";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -31,17 +32,22 @@ import {
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_SLUG,
 } from "@/lib/public-review/streamReviewDefinition";
-import { resolvePublicReviewDiscussionDestination } from "@/services/api/public-review/destination.server";
+import {
+  fetchSitePublicReviewDiscussionDestination,
+  resolvePublicReviewDiscussionDestination,
+} from "@/services/api/public-review/destination.server";
 import {
   PUBLIC_REVIEW_EXPLOITABLE_SECURITY_TYPE,
   PUBLIC_REVIEW_FEEDBACK_SCHEMA_VERSION,
   type PublicReviewDiscussionDestination,
+  type PublicReviewEnvironment,
   type PublicReviewFeedbackConfig,
   type PublicReviewPageContext,
   type PublicReviewPageOption,
 } from "@/services/api/public-review/types";
 
 const STREAM_REVIEW_FEEDBACK_DESTINATION_KEY = "stream-review";
+const STREAM_REVIEW_DESTINATION_API_PATH = `/api/public-reviews/${STREAM_REVIEW_SLUG}/destination`;
 
 export const STREAM_REVIEW_TECHNICAL_FEEDBACK_PAGES = [
   {
@@ -309,20 +315,44 @@ export async function createStreamReviewFeedbackConfig({
   };
 }
 
-export async function resolveStreamReviewFeedbackDestination(
+function getStreamReviewFeedbackEnvironment(
   baseEndpoint: string
-): Promise<PublicReviewDiscussionDestination> {
-  await connection();
+): PublicReviewEnvironment {
   const environment = getPublicReviewEnvironment(baseEndpoint);
   if (environment === "disabled") {
     throw new Error(
       "Public review feedback cannot resolve outside an enabled environment."
     );
   }
+  return environment;
+}
+
+/**
+ * The destination from this server's own configuration, which the site's
+ * destination API serves to the desktop app.
+ */
+export function resolveConfiguredStreamReviewFeedbackDestination(
+  baseEndpoint: string
+): PublicReviewDiscussionDestination {
   return resolvePublicReviewDiscussionDestination({
-    environment,
+    environment: getStreamReviewFeedbackEnvironment(baseEndpoint),
     logicalKey: STREAM_REVIEW_FEEDBACK_DESTINATION_KEY,
   });
+}
+
+export async function resolveStreamReviewFeedbackDestination(
+  baseEndpoint: string
+): Promise<PublicReviewDiscussionDestination> {
+  await connection();
+  if (isDesktopRenderer()) {
+    return fetchSitePublicReviewDiscussionDestination({
+      environment: getStreamReviewFeedbackEnvironment(baseEndpoint),
+      logicalKey: STREAM_REVIEW_FEEDBACK_DESTINATION_KEY,
+      path: STREAM_REVIEW_DESTINATION_API_PATH,
+      siteOrigin: baseEndpoint,
+    });
+  }
+  return resolveConfiguredStreamReviewFeedbackDestination(baseEndpoint);
 }
 
 export function createStreamEditorialFeedbackPageContext({
