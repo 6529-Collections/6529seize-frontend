@@ -173,9 +173,9 @@ test("Coming Up keeps collaborator credits compact and accessible @smoke @medium
   await page.goto("/", { waitUntil: "domcontentloaded" });
   const section = page.getByRole("region", { name: "Coming up", exact: true });
   const more = section.getByRole("link", {
-    name: "View all collaborators on this drop",
+    name: "+3 more View all collaborators on this drop",
   });
-  await expect(more).toHaveText("+3 more");
+  await expect(more).toHaveText("+3 more View all collaborators on this drop");
   await expect(more).toHaveAttribute(
     "href",
     `/waves/${comingUpWave.id}?drop=coming-up-1`
