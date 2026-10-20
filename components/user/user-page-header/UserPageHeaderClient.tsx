@@ -28,6 +28,7 @@ import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { useIdentity } from "@/hooks/useIdentity";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { toProfileIdentitySegment } from "@/helpers/profile-identity-segment";
 import { commonApiFetch } from "@/services/api/common-api";
 
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
@@ -403,14 +404,21 @@ function useProfileHeaderData({
   readonly initialFollowersCount: number | null;
 }) {
   const hasHydrated = useHasHydrated();
+  // Same endpoint as the server loader that primed this query, so a refresh
+  // never requests a differently encoded path for the same identity.
+  const statementsSegment = toProfileIdentitySegment(handleOrWallet);
+  // No initialData: an empty server snapshot (for example after a failed
+  // request) must not count as fresh data, or the client would skip its own
+  // fetch. Until data arrives the server snapshot below is shown instead.
   const { data: statements } = useQuery<CicStatement[]>({
     queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, handleOrWallet],
-    queryFn: async () =>
-      await commonApiFetch<CicStatement[]>({
-        endpoint: `profiles/${handleOrWallet}/cic/statements`,
-      }),
-    enabled: !!handleOrWallet,
-    initialData: initialStatements,
+    queryFn:
+      statementsSegment === null
+        ? skipToken
+        : async () =>
+            await commonApiFetch<CicStatement[]>({
+              endpoint: `profiles/${statementsSegment}/cic/statements`,
+            }),
     staleTime: 60_000,
   });
   const { data: enabledAt } = useQuery<string | null>({
@@ -438,6 +446,8 @@ function useProfileHeaderData({
   });
 
   return {
+    // Before hydration, and until the client has statements of its own, show
+    // exactly what the server rendered.
     statements: (hasHydrated ? statements : undefined) ?? initialStatements,
     profileEnabledAt:
       hasHydrated && enabledAt !== undefined

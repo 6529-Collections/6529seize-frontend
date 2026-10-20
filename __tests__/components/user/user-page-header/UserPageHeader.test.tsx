@@ -17,6 +17,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useIdentity } from "@/hooks/useIdentity";
+import { commonApiFetch } from "@/services/api/common-api";
 import { useProfileBlockState } from "@/hooks/content-moderation/useProfileBlockState";
 import { useContentModeratorAccess } from "@/hooks/content-moderation/useContentModeratorAccess";
 
@@ -184,6 +185,10 @@ jest.mock("@/hooks/content-moderation/useContentModeratorAccess", () => ({
   useContentModeratorAccess: jest.fn(),
 }));
 jest.mock("@/hooks/useIdentity", () => ({ useIdentity: jest.fn() }));
+jest.mock("@/services/api/common-api", () => ({
+  ...jest.requireActual("@/services/api/common-api"),
+  commonApiFetch: jest.fn(),
+}));
 jest.mock("next/navigation", () => ({
   useParams: jest.fn(),
   useRouter: jest.fn(),
@@ -300,6 +305,45 @@ describe("UserPageHeader", () => {
     );
     expect(block).not.toHaveBeenCalled();
     expect(unblock).not.toHaveBeenCalled();
+  });
+
+  it("refreshes statements from the canonical identity segment without seeding empty data", async () => {
+    useParamsMock.mockReturnValue({ user: "Br%C3%9Cder" });
+    try {
+      render(
+        <AuthContext.Provider value={auth}>
+          <UserPageHeaderClient
+            profile={{ ...profile, id: "profile-bruder" }}
+            handleOrWallet="br%c3%9cder"
+            fallbackMainAddress="0x1"
+            defaultBanner1="#000000"
+            defaultBanner2="#111111"
+            initialStatements={[]}
+            profileEnabledAt={null}
+            followersCount={null}
+            cmsWebsiteHref={null}
+          />
+        </AuthContext.Provider>
+      );
+
+      const statementsQuery = (useQuery as jest.Mock).mock.calls
+        .map(([options]) => options)
+        .findLast(
+          (options) => options.queryKey[0] === "PROFILE_CIC_STATEMENTS"
+        );
+      expect(statementsQuery).toBeDefined();
+      // An empty server snapshot must not count as fresh client data.
+      expect(statementsQuery).not.toHaveProperty("initialData");
+      expect(typeof statementsQuery.queryFn).toBe("function");
+
+      await statementsQuery.queryFn();
+      // The same segment the server loader requests for this identity.
+      expect(commonApiFetch).toHaveBeenLastCalledWith({
+        endpoint: "profiles/br%C3%BCder/cic/statements",
+      });
+    } finally {
+      useParamsMock.mockReturnValue({ user: "bob" });
+    }
   });
 
   it("does not expose profile suspension controls to non-moderators", () => {
