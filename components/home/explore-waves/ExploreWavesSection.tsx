@@ -160,7 +160,7 @@ export function ExploreWavesSection({
         });
   const hasHeaderAdditions = Boolean(headerControls);
   const headerSpacingClassName =
-    headingVariant === "page" ? "tw-mb-10 md:tw-mb-12" : "tw-mb-5 md:tw-mb-6";
+    headingVariant === "page" ? "tw-mb-10 md:tw-mb-12" : "tw-mb-5";
   const headerClassName = hasHeaderAdditions
     ? "tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-5"
     : `tw-relative ${headerSpacingClassName} tw-block md:tw-flex md:tw-items-end md:tw-justify-between md:tw-gap-4`;
@@ -189,7 +189,7 @@ export function ExploreWavesSection({
               </h1>
             ) : (
               <h2
-                className={`tw-m-0 tw-text-balance tw-text-2xl tw-font-semibold tw-leading-[1.15] tw-tracking-[-0.025em] tw-text-iron-50 md:tw-text-[26px] lg:tw-text-3xl ${viewAllHref ? "tw-pr-24 md:tw-pr-0" : ""}`}
+                className={`tw-m-0 tw-text-balance tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-[-0.03em] tw-text-iron-50 md:tw-text-[22px] lg:tw-text-2xl ${viewAllHref ? "tw-pr-24 md:tw-pr-0" : ""}`}
               >
                 {effectiveTitle}
               </h2>
@@ -199,7 +199,7 @@ export function ExploreWavesSection({
                 className={
                   headingVariant === "page"
                     ? "tw-mb-0 tw-mt-2 tw-text-base tw-text-iron-500"
-                    : "tw-mb-0 tw-mt-2 tw-text-[15px] tw-font-normal tw-leading-[1.55] tw-text-iron-400 md:tw-mt-2.5 md:tw-text-base"
+                    : "tw-mb-0 tw-mt-1 tw-text-sm tw-font-normal tw-leading-[1.55] tw-text-iron-400"
                 }
               >
                 {effectiveSubtitle}

@@ -1,8 +1,5 @@
 "use client";
 
-import ProfileAvatar, {
-  ProfileBadgeSize,
-} from "@/components/common/profile/ProfileAvatar";
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
@@ -16,10 +13,13 @@ import {
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import Link from "next/link";
-import { MemeCollaboratorCredits } from "@/components/waves/memes/collaborations/MemeCollaboratorCredits";
+import {
+  ComingUpArtistCredits,
+  type ComingUpCreditSource,
+} from "./ComingUpArtistCredits";
 
 interface LeadingCardProps {
-  readonly drop: ExtendedDrop;
+  readonly drop: ExtendedDrop & ComingUpCreditSource;
   readonly rank: number;
 }
 
@@ -109,21 +109,16 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
               {title}
             </Link>
           </div>
-          <Link
-            data-home-action="Open artist profile"
-            href={`/${author.handle ?? author.primary_address}`}
-            className="tw-group/artist tw-flex tw-min-h-6 tw-min-w-0 tw-items-center tw-gap-2 tw-no-underline focus-visible:tw-rounded-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
-          >
-            <ProfileAvatar
-              pfpUrl={author.pfp}
-              alt={author.handle ?? "Artist"}
-              size={ProfileBadgeSize.SMALL}
-            />
-            <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors tw-duration-200 tw-ease-out group-focus-visible/artist:tw-text-white desktop-hover:group-hover/artist:tw-text-white motion-reduce:tw-transition-none">
-              {author.handle ?? "Anonymous"}
-            </span>
-          </Link>
-          <MemeCollaboratorCredits collaborators={drop.collaborators} />
+          <ComingUpArtistCredits
+            author={author}
+            collaborators={drop.collaborators ?? []}
+            dropHref={getWaveRoute({
+              waveId: drop.wave.id,
+              extraParams: { drop: drop.id },
+              isDirectMessage: false,
+              isApp: false,
+            })}
+          />
         </div>
       </div>
     </div>
