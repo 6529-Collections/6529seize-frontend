@@ -3,6 +3,7 @@ import { jwtDecode } from "jwt-decode";
 import { publicEnv } from "@/config/env";
 import { API_AUTH_COOKIE, MAX_CONNECTED_PROFILES } from "@/constants/constants";
 import { safeLocalStorage } from "@/helpers/safeLocalStorage";
+import { getDevAuthTestOverride } from "./devAuthTestOverride";
 import { removeNativeRefreshToken } from "./native-refresh-token-storage";
 
 export const WALLET_AUTH_COOKIE = "wallet-auth";
@@ -505,7 +506,7 @@ export const getStagingAuth = (): string | null => {
 
 export const getAuthJwt = () => {
   if (publicEnv.USE_DEV_AUTH === "true") {
-    return publicEnv.DEV_MODE_AUTH_JWT ?? null;
+    return getDevAuthTestOverride()?.jwt ?? publicEnv.DEV_MODE_AUTH_JWT ?? null;
   }
   return (
     Cookies.get(WALLET_AUTH_COOKIE) ??
@@ -568,7 +569,11 @@ export const getRefreshToken = () => {
 
 export const getWalletAddress = () => {
   if (publicEnv.USE_DEV_AUTH === "true") {
-    return publicEnv.DEV_MODE_WALLET_ADDRESS ?? null;
+    return (
+      getDevAuthTestOverride()?.wallet ??
+      publicEnv.DEV_MODE_WALLET_ADDRESS ??
+      null
+    );
   }
   const activeAccount = getActiveAccountFromAccounts(getStoredAccounts());
   if (activeAccount?.address) return activeAccount.address;

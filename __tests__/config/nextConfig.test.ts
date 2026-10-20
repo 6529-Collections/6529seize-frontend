@@ -60,6 +60,29 @@ describe("shared Next config", () => {
     });
   });
 
+  it("allows WebAssembly compilation only in encrypted-messages builds", async () => {
+    const scriptSrcFor = async (env: PublicEnv): Promise<string> => {
+      const headers = await sharedConfig(env, "").headers?.();
+      const csp = headers
+        ?.flatMap((entry) => entry.headers)
+        .find((header) => header.key === "Content-Security-Policy")?.value;
+      return (
+        csp
+          ?.split(";")
+          .map((directive) => directive.trim())
+          .find((directive) => directive.startsWith("script-src ")) ?? ""
+      );
+    };
+
+    expect(await scriptSrcFor(publicEnv)).not.toContain("'wasm-unsafe-eval'");
+    expect(
+      await scriptSrcFor({ ...publicEnv, NEXT_PUBLIC_E2EE_DM_ENABLED: "false" })
+    ).not.toContain("'wasm-unsafe-eval'");
+    expect(
+      await scriptSrcFor({ ...publicEnv, NEXT_PUBLIC_E2EE_DM_ENABLED: "true" })
+    ).toContain("'wasm-unsafe-eval'");
+  });
+
   describe("htmlLimitedBots", () => {
     const CHROME_USER_AGENT =
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";

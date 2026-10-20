@@ -98,6 +98,11 @@ let sandboxRuleGroupSequence = 0;
 const sandboxRuleGroups = new Map();
 const sandboxRuleGroupWallets = new Map();
 const MAX_REQUEST_BODY_BYTES = 16 * 1024;
+// Multi-user end-to-end encrypted messages (D109) for the E2EE pack only.
+const isE2eeSandbox = process.env.PLAYWRIGHT_E2EE_SANDBOX === "1";
+const e2eeSandboxApi = isE2eeSandbox
+  ? require("./e2ee/e2eeSandboxApi.cjs").createE2eeSandboxApi({ corsHeaders })
+  : null;
 
 function encodeJwtPart(value) {
   return Buffer.from(JSON.stringify(value)).toString("base64url");
@@ -2555,7 +2560,10 @@ const mockApiExactReadRoutes = new Map([
           ]
         : [],
   ],
-  [`/api/waves/${SANDBOX_DM_WAVE_ID}`, () => dmWave],
+  [
+    `/api/waves/${SANDBOX_DM_WAVE_ID}`,
+    () => e2eeSandboxApi?.decorateDirectMessageWave(dmWave) ?? dmWave,
+  ],
   [
     `/api/v2/waves/${SANDBOX_DM_WAVE_ID}/drops`,
     () => ({ wave: dmWaveOverview, drops: [currentDirectMessageDrop()] }),
@@ -2993,6 +3001,11 @@ async function handleRequest(req, res) {
     return;
   }
 
+  // E2EE bodies exceed the composer body cap, so this layer reads its own.
+  if (await e2eeSandboxApi?.handle(req, res, { method, url, pathname })) {
+    return;
+  }
+
   if (handleDiagnostics(method, pathname, res)) {
     return;
   }
@@ -3044,6 +3057,7 @@ function buildPublicRuntime() {
       process.env.MEDIA_RESOLVER_ENDPOINT || "https://media.6529.io",
     NEXT_PUBLIC_FEATURE_MULTI_COMPETITION:
       process.env.NEXT_PUBLIC_FEATURE_MULTI_COMPETITION || "false",
+    ...(isE2eeSandbox ? { NEXT_PUBLIC_E2EE_DM_ENABLED: "true" } : {}),
     NODE_ENV: "development",
     PORT: String(frontendPort),
     WS_ENDPOINT: mockWsOrigin,
