@@ -70,8 +70,10 @@ export function NextMintLeadingSection() {
 
   const leading = drops.slice(0, leadingCount);
   const hasCards = showNextMint || leading.length > 0;
+  const showLoadingCards =
+    !hasCards || (isLeaderboardFetching && leading.length === 0);
   const cardWidthClassName =
-    leading.length + Number(showNextMint) === 1
+    !showLoadingCards && leading.length + Number(showNextMint) === 1
       ? "tw-auto-cols-[100%] sm:tw-auto-cols-[80%]"
       : "tw-auto-cols-[80%]";
   const isFetching = isWinnersFetching || isLeaderboardFetching;
@@ -117,20 +119,20 @@ export function NextMintLeadingSection() {
     >
       <div>
         {header}
-        {!hasCards && (
+        {showLoadingCards && (
           <output className="tw-sr-only">
             {t(locale, "home.comingUp.loading")}
           </output>
         )}
         <div className={`${CARD_LAYOUT_CLASS_NAME} ${cardWidthClassName}`}>
-          {!hasCards &&
-            SKELETON_KEYS.map((key) => (
-              <NextMintLeadingSkeletonCard key={key} />
-            ))}
           {showNextMint && nextMint && <NextMintCard drop={nextMint} />}
           {leading.map((drop, index) => (
             <LeadingCard key={drop.id} drop={drop} rank={index + 1} />
           ))}
+          {showLoadingCards &&
+            SKELETON_KEYS.slice(0, leadingCount).map((key) => (
+              <NextMintLeadingSkeletonCard key={key} />
+            ))}
         </div>
       </div>
     </section>
@@ -141,6 +143,7 @@ const NextMintLeadingSkeletonCard = () => {
   return (
     <div
       aria-hidden="true"
+      data-testid="coming-up-loading-card"
       className="tw-min-w-0 tw-snap-start tw-text-left motion-reduce:[&_*]:tw-animate-none"
     >
       <div className="tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950">
