@@ -83,6 +83,28 @@ describe("UserPageHeaderRefresh", () => {
     expect(client.getQueryData(statementsKey)).toBeUndefined();
   });
 
+  it("accepts the thenable a Server Component promise arrives as", async () => {
+    // React's flight client hands Client Components a thenable whose then()
+    // registers callbacks but returns nothing, unlike Promise.prototype.then.
+    let deliver: (value: DehydratedState) => void = () => undefined;
+    const flightThenable = {
+      then(onFulfilled: (value: DehydratedState) => void) {
+        deliver = onFulfilled;
+      },
+    } as unknown as Promise<DehydratedState>;
+
+    renderRefresh(flightThenable);
+    // Promise.resolve() subscribes to a thenable on the next microtask.
+    await act(async () => {
+      await Promise.resolve();
+    });
+    await act(async () => {
+      deliver(snapshotWith(["server bio"], 1000));
+    });
+
+    expect(client.getQueryData(statementsKey)).toEqual(["server bio"]);
+  });
+
   it("leaves the cache unchanged when the snapshot fails", async () => {
     const snapshot = deferred<DehydratedState>();
     renderRefresh(snapshot.promise);

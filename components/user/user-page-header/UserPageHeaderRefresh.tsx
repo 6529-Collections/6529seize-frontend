@@ -25,8 +25,10 @@ export default function UserPageHeaderRefresh({
 
   useEffect(() => {
     let active = true;
-    // A failed snapshot keeps the header's current data.
-    state
+    // A promise passed from a Server Component arrives as React's own
+    // thenable, whose then() does not return a promise, so wrap it before
+    // chaining. A failed snapshot keeps the header's current data.
+    Promise.resolve(state)
       .then((snapshot) => {
         if (active) {
           hydrate(queryClient, snapshot);
