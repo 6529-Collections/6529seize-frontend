@@ -42,11 +42,15 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     const routeFetches: string[] = [];
     page.on("request", (request) => {
       const url = new URL(request.url());
+      const headers = request.headers();
+      // Visible profile tabs can prefetch this route independently of Details.
+      // Count navigation fetches so the toggle must still avoid a server round trip.
       if (
         url.pathname === `/${PROFILE_HANDLE}/collected` &&
-        request.headers()["rsc"] === "1"
+        headers["rsc"] === "1" &&
+        !headers["next-router-prefetch"]
       ) {
-        routeFetches.push(url.pathname);
+        routeFetches.push(url.pathname + url.search);
       }
     });
     try {
