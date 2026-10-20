@@ -73,7 +73,11 @@ it("caps the stack at four avatars and links to the remaining credits", () => {
   const { container } = mount(collaborators);
   expect(container.querySelectorAll("img")).toHaveLength(4);
   expect(screen.getByText("+2")).toBeInTheDocument();
-  expect(screen.getByText("+3 more")).toHaveAttribute("href", dropHref);
+  expect(
+    screen.getByRole("link", {
+      name: "+3 more View all collaborators on this drop",
+    })
+  ).toHaveAttribute("href", dropHref);
   expect(screen.getByRole("link", { name: "usrname-1" })).toBeInTheDocument();
   expect(
     screen.queryByRole("link", { name: "usrname-2" })
