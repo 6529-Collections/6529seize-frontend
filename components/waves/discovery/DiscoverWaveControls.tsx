@@ -1,0 +1,244 @@
+"use client";
+
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import Button from "@/components/utils/button/Button";
+import ButtonLink from "@/components/utils/button/ButtonLink";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
+import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
+import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import {
+  ArrowsUpDownIcon,
+  CalculatorIcon,
+  CalendarDaysIcon,
+  CheckIcon,
+  ChevronDownIcon,
+  ClockIcon,
+  FireIcon,
+  ScaleIcon,
+  ShieldCheckIcon,
+  Squares2X2Icon,
+} from "@heroicons/react/24/outline";
+import { useState, type KeyboardEvent } from "react";
+
+export type DiscoverScoreFilter = "ALL" | "SCORE_50" | "HOT_60" | "REP_60";
+export type DiscoverSort = ApiWaveScoreSort | "NEWEST" | "LATEST_POSTS";
+
+export const SORT_OPTIONS = [
+  { value: ApiWaveScoreSort.Balanced, label: "waves.discovery.sort.balanced" },
+  { value: ApiWaveScoreSort.Quality, label: "waves.discovery.sort.quality" },
+  { value: ApiWaveScoreSort.Hotness, label: "waves.discovery.sort.hot" },
+  { value: ApiWaveScoreSort.Rep, label: "waves.discovery.sort.rep" },
+  { value: "NEWEST", label: "waves.discovery.sort.newest" },
+  { value: "LATEST_POSTS", label: "waves.discovery.sort.latestPosts" },
+] as const;
+
+const FILTER_OPTIONS = [
+  { value: "ALL", label: "waves.discovery.filter.all" },
+  { value: "SCORE_50", label: "waves.discovery.filter.score" },
+  { value: "HOT_60", label: "waves.discovery.filter.hot" },
+  { value: "REP_60", label: "waves.discovery.filter.rep" },
+] as const;
+
+function onRadioKeyDown<T extends string>(
+  event: KeyboardEvent<HTMLButtonElement>,
+  options: readonly { readonly value: T }[],
+  activeValue: T,
+  onChange: (value: T) => void
+) {
+  const currentIndex = options.findIndex(({ value }) => value === activeValue);
+  let nextIndex: number;
+  switch (event.key) {
+    case "ArrowRight":
+    case "ArrowDown":
+      nextIndex = (currentIndex + 1) % options.length;
+      break;
+    case "ArrowLeft":
+    case "ArrowUp":
+      nextIndex = (currentIndex - 1 + options.length) % options.length;
+      break;
+    case "Home":
+      nextIndex = 0;
+      break;
+    case "End":
+      nextIndex = options.length - 1;
+      break;
+    default:
+      return;
+  }
+  event.preventDefault();
+  const nextValue = options[nextIndex]?.value;
+  if (!nextValue) return;
+  event.currentTarget.parentElement
+    ?.querySelector<HTMLElement>(`[data-radio-value="${nextValue}"]`)
+    ?.focus();
+  onChange(nextValue);
+}
+
+function ScoreSortIcon({ sort }: { readonly sort: DiscoverSort }) {
+  const icons = {
+    [ApiWaveScoreSort.Balanced]: Squares2X2Icon,
+    [ApiWaveScoreSort.Quality]: ShieldCheckIcon,
+    [ApiWaveScoreSort.Hotness]: FireIcon,
+    [ApiWaveScoreSort.Rep]: ScaleIcon,
+    NEWEST: CalendarDaysIcon,
+    LATEST_POSTS: ClockIcon,
+  };
+  const Icon = icons[sort];
+  return <Icon className="tw-size-4 tw-shrink-0" aria-hidden="true" />;
+}
+
+export function ScoreFormulaLink() {
+  const locale = useBrowserLocale();
+  const label = t(locale, "waves.discovery.scoreFormula");
+  return (
+    <CustomTooltip content={label} placement="bottom">
+      <ButtonLink
+        href="/network/wave-score"
+        variant="ghost"
+        size={null}
+        aria-label={label}
+        className="tw-min-h-11 tw-min-w-11 tw-text-xs"
+      >
+        <CalculatorIcon className="tw-size-4 tw-shrink-0" aria-hidden="true" />
+        <span className="tw-hidden @[36rem]/discovery-heading:tw-inline">
+          {label}
+        </span>
+      </ButtonLink>
+    </CustomTooltip>
+  );
+}
+
+export function DiscoverWaveControls({
+  activeFilter,
+  activeSort,
+  scoreFiltersEnabled,
+  onFilterChange,
+  onSortChange,
+}: {
+  readonly activeFilter: DiscoverScoreFilter;
+  readonly activeSort: DiscoverSort;
+  readonly scoreFiltersEnabled: boolean;
+  readonly onFilterChange: (filter: DiscoverScoreFilter) => void;
+  readonly onSortChange: (sort: DiscoverSort) => void;
+}) {
+  const locale = useBrowserLocale();
+  const [sortOpen, setSortOpen] = useState(false);
+  const sortLabel = t(locale, "waves.discovery.sort.label");
+  const currentLabel = t(
+    locale,
+    SORT_OPTIONS.find(({ value }) => value === activeSort)?.label ??
+      "waves.discovery.sort.balanced"
+  );
+
+  return (
+    <fieldset className="tw-m-0 tw-w-full tw-min-w-0 tw-border-0 tw-p-0 tw-@container/discovery-controls">
+      <legend className="tw-sr-only">
+        {t(locale, "waves.discovery.controls")}
+      </legend>
+      <div className="tw-flex tw-items-center tw-gap-2 tw-overflow-x-auto tw-p-1 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700 @[56rem]/discovery-controls:tw-justify-between">
+        <Button
+          variant="tertiary"
+          size="sm"
+          aria-label={t(locale, "waves.discovery.sort.open", {
+            sort: currentLabel,
+          })}
+          aria-haspopup="dialog"
+          aria-expanded={sortOpen}
+          onClick={() => setSortOpen(true)}
+          className="@[56rem]/discovery-controls:tw-hidden motion-reduce:tw-transition-none"
+        >
+          <ArrowsUpDownIcon className="tw-size-4" aria-hidden="true" />
+          {currentLabel}
+          <ChevronDownIcon className="tw-size-3" aria-hidden="true" />
+        </Button>
+        <div className="tw-hidden tw-shrink-0 @[56rem]/discovery-controls:tw-block">
+          <CommonTabs<DiscoverSort>
+            items={SORT_OPTIONS.map((option) => ({
+              key: option.value,
+              value: option.value,
+              label: t(locale, option.label),
+              icon: <ScoreSortIcon sort={option.value} />,
+            }))}
+            activeItem={activeSort}
+            filterLabel={sortLabel}
+            setSelected={onSortChange}
+            size="sm"
+            fill={false}
+          />
+        </div>
+        <span
+          aria-hidden="true"
+          className="tw-mx-1 tw-h-5 tw-w-px tw-shrink-0 tw-bg-iron-800 @[56rem]/discovery-controls:tw-hidden"
+        />
+        <div
+          role="radiogroup"
+          aria-label={t(locale, "waves.discovery.filter.label")}
+          aria-disabled={!scoreFiltersEnabled}
+          className="tw-flex tw-shrink-0 tw-items-center tw-gap-1.5"
+        >
+          {FILTER_OPTIONS.map((option) => {
+            const selected = activeFilter === option.value;
+            return (
+              <Button
+                key={option.value}
+                variant={
+                  selected && scoreFiltersEnabled ? "primary" : "tertiary"
+                }
+                size="xs"
+                role="radio"
+                aria-checked={selected}
+                disabled={!scoreFiltersEnabled}
+                tabIndex={scoreFiltersEnabled && selected ? 0 : -1}
+                data-radio-value={option.value}
+                onClick={() => onFilterChange(option.value)}
+                onKeyDown={(event) =>
+                  onRadioKeyDown(
+                    event,
+                    FILTER_OPTIONS,
+                    activeFilter,
+                    onFilterChange
+                  )
+                }
+                className="motion-reduce:tw-transition-none"
+              >
+                {t(locale, option.label)}
+              </Button>
+            );
+          })}
+        </div>
+      </div>
+      <MobileWrapperDialog
+        isOpen={sortOpen}
+        onClose={() => setSortOpen(false)}
+        title={sortLabel}
+        focusTitleOnOpen
+        noPadding
+      >
+        <div className="tw-space-y-1 tw-px-3 tw-pb-3">
+          {SORT_OPTIONS.map((option) => (
+            <Button
+              key={option.value}
+              variant={activeSort === option.value ? "secondary" : "ghost"}
+              size="xl"
+              fullWidth
+              aria-pressed={activeSort === option.value}
+              onClick={() => {
+                onSortChange(option.value);
+                setSortOpen(false);
+              }}
+              className="tw-text-left motion-reduce:tw-transition-none"
+            >
+              <ScoreSortIcon sort={option.value} />
+              <span className="tw-flex-1">{t(locale, option.label)}</span>
+              {activeSort === option.value && (
+                <CheckIcon className="tw-size-4" aria-hidden="true" />
+              )}
+            </Button>
+          ))}
+        </div>
+      </MobileWrapperDialog>
+    </fieldset>
+  );
+}
