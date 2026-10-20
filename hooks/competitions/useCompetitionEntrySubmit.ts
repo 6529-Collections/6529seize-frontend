@@ -29,7 +29,13 @@ export function useCompetitionEntrySubmit(competition: ApiCompetition | null) {
   return async (content: ApiCreateDropRequest) => {
     if (content.wave_id !== competition?.wave_id)
       throw new Error("Competition entry scope is required");
-    const { signature_message: _message, ...unsigned } = content;
+    // Native commands sign the content separately from the legacy drop envelope.
+    const {
+      signature_message: _message,
+      signer_address: _signer,
+      is_safe_signature: _safeSignature,
+      ...unsigned
+    } = content;
     const drop = { ...unsigned, signature: null };
     const fingerprint = JSON.stringify({
       drop,

@@ -9,6 +9,9 @@ import {
   invalidateCompetition,
 } from "@/services/api/competitions-api";
 import { fetchDropV2ById } from "@/services/api/wave-drops-v2-api";
+import { transformToApiRequest } from "@/components/waves/memes/submission/utils/artworkSubmissionRequest";
+import { getInitialTraitsValues } from "@/components/waves/memes/traits/schema";
+import { ApiDropType } from "@/generated/models/ApiDropType";
 
 let mockViewer = "viewer:self";
 const mockSign = jest.fn();
@@ -93,6 +96,97 @@ it("signs and creates in the explicit competition scope without a legacy drop si
     null
   );
 });
+it.each([true, false])(
+  "submits artwork with native signature_required=%s without legacy signer fields and retains its retry command",
+  async (signatureRequired) => {
+    const artwork = Object.assign(
+      transformToApiRequest({
+        waveId: "wave",
+        traits: {
+          ...getInitialTraitsValues(),
+          title: " Native artwork ",
+          description: "Artwork with managed artist credits",
+          artist: "Artist",
+        },
+        media: {
+          url: "ipfs://native-artwork",
+          mime_type: "image/png",
+          media_upload_id: "artwork-upload",
+        },
+        signerAddress: "0xartist",
+        isSafeSignature: true,
+        isAdditionalActionPromised: true,
+      }),
+      {
+        collaborator_ids: ["artist-2"],
+        signature: "legacy-drop-signature",
+        signature_message: "legacy-drop-message",
+        reply_to: { drop_id: "parent-drop", drop_part_id: 1 },
+      }
+    );
+    jest
+      .mocked(createCompetitionEntry)
+      .mockRejectedValueOnce(new Error("Offline"));
+    const { result } = setup({
+      ...competition,
+      participation: {
+        ...competition.participation,
+        signature_required: signatureRequired,
+      },
+    });
+    await act(async () => {
+      await expect(result.current(artwork)).rejects.toThrow("Offline");
+    });
+    const request = jest.mocked(createCompetitionEntry).mock.calls[0]![1];
+    expect(request.drop).toEqual({
+      wave_id: "wave",
+      drop_type: ApiDropType.Participatory,
+      is_additional_action_promised: true,
+      title: "Native artwork",
+      parts: artwork.parts,
+      referenced_nfts: artwork.referenced_nfts,
+      mentioned_users: artwork.mentioned_users,
+      metadata: artwork.metadata,
+      collaborator_ids: ["artist-2"],
+      reply_to: artwork.reply_to,
+      signature: null,
+    });
+    for (const field of [
+      "signature_message",
+      "signer_address",
+      "is_safe_signature",
+    ])
+      expect(request.drop).not.toHaveProperty(field);
+    if (signatureRequired) {
+      expect(mockSign).toHaveBeenCalledWith(
+        "ENTRY_CREATE",
+        { drop: request.drop, drop_id: null },
+        null,
+        null
+      );
+      expect(mockSign.mock.calls[0]![1].drop).toBe(request.drop);
+    } else {
+      expect(mockSign).not.toHaveBeenCalled();
+      expect(request).not.toHaveProperty("signature");
+    }
+    await act(async () => {
+      await result.current({
+        ...artwork,
+        signature: "other-legacy-signature",
+        signature_message: "other-legacy-message",
+        signer_address: "0xother-legacy-signer",
+        is_safe_signature: false,
+      });
+    });
+    const retry = jest.mocked(createCompetitionEntry).mock.calls[1]![1];
+    expect(retry).toBe(request);
+    expect(retry.idempotency_key).toBe(request.idempotency_key);
+    expect(mockSign).toHaveBeenCalledTimes(signatureRequired ? 1 : 0);
+    expect(artwork.signer_address).toBe("0xartist");
+    expect(artwork.is_safe_signature).toBe(true);
+    expect(artwork.signature).toBe("legacy-drop-signature");
+  }
+);
 it("reuses the same signed command after an uncertain create response", async () => {
   jest
     .mocked(createCompetitionEntry)
