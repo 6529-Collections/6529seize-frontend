@@ -9,7 +9,7 @@ const VARIANT_CLASSES = {
     "tw-bg-iron-900/60 tw-px-10 tw-py-3 tw-text-center tw-tabular-nums tw-text-2xl tw-font-medium tw-leading-tight tw-tracking-tight",
   form: "tw-bg-iron-900 tw-h-[46px] tw-py-3 tw-pl-16 tw-pr-4 tw-text-left tw-text-lg tw-font-medium tw-leading-5",
   tooltip:
-    "tw-bg-iron-900/60 tw-h-10 touch-only:tw-h-11 tw-px-10 tw-text-center tw-tabular-nums tw-text-base tw-font-medium tw-leading-6",
+    "tw-bg-iron-900 tw-h-10 touch-only:tw-h-11 tw-px-10 tw-text-center tw-tabular-nums tw-text-base tw-font-medium tw-leading-6",
 };
 
 const getValueStr = (val: string): string => {

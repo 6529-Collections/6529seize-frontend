@@ -191,7 +191,7 @@ describe("UserPageCollectedStats", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Details", exact: true })
+      screen.getByRole("button", { name: "Details" })
     );
     expect(screen.getByRole("status")).toHaveTextContent(
       "Loading collection details"
@@ -199,7 +199,7 @@ describe("UserPageCollectedStats", () => {
     fireEvent.click(screen.getByRole("button", { name: "Hide Details" }));
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Details", exact: true })
+      screen.getByRole("button", { name: "Details" })
     ).toHaveAttribute("aria-expanded", "false");
     expect(mockRouterReplace).not.toHaveBeenCalled();
     await act(async () => {
@@ -225,7 +225,7 @@ describe("UserPageCollectedStats", () => {
     );
     // Hold the router subscription still to exercise repeated clicks before a render.
     mockReplace.mockImplementation(() => undefined);
-    const button = screen.getByRole("button", { name: "Details", exact: true });
+    const button = screen.getByRole("button", { name: "Details" });
     fireEvent.click(button);
     fireEvent.click(button);
     fireEvent.click(button);
@@ -243,7 +243,7 @@ describe("UserPageCollectedStats", () => {
       />
     );
     expect(
-      screen.getByRole("button", { name: "Hide Details", exact: true })
+      screen.getByRole("button", { name: "Hide Details" })
     ).toHaveAttribute("aria-expanded", "true");
     rerender(<></>);
   });

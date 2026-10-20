@@ -71,7 +71,7 @@ describe.each([false, true])(
           screen.getByLabelText("Your total NIC Rating of bob:")
         ).toBeInTheDocument();
         expect(
-          screen.getByRole("button", { name: "Rate", exact: true })
+          screen.getByRole("button", { name: "Rate" })
         ).toBeDisabled();
       }
     );
