@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  ACTION_LABEL_CLASSES,
+  MOBILE_ACTION_ICON_CLASSES,
+  MOBILE_ACTION_ITEM_CLASSES,
+} from "@/components/compact-menu/constants";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import Button from "@/components/utils/button/Button";
 import ButtonLink from "@/components/utils/button/ButtonLink";
@@ -81,7 +86,13 @@ function onRadioKeyDown<T extends string>(
   });
 }
 
-function ScoreSortIcon({ sort }: { readonly sort: DiscoverSort }) {
+function ScoreSortIcon({
+  sort,
+  className = "tw-size-4 tw-shrink-0",
+}: {
+  readonly sort: DiscoverSort;
+  readonly className?: string;
+}) {
   const icons = {
     [ApiWaveScoreSort.Balanced]: Squares2X2Icon,
     [ApiWaveScoreSort.Quality]: ShieldCheckIcon,
@@ -91,7 +102,7 @@ function ScoreSortIcon({ sort }: { readonly sort: DiscoverSort }) {
     LATEST_POSTS: ClockIcon,
   };
   const Icon = icons[sort];
-  return <Icon className="tw-size-4 tw-shrink-0" aria-hidden="true" />;
+  return <Icon className={className} aria-hidden="true" />;
 }
 
 export function ScoreFormulaLink() {
@@ -101,10 +112,10 @@ export function ScoreFormulaLink() {
     <CustomTooltip content={label} placement="bottom">
       <ButtonLink
         href="/network/wave-score"
-        variant="ghost"
+        variant="secondary"
         size={null}
         aria-label={label}
-        className="tw-min-h-11 tw-min-w-11 tw-text-xs"
+        className="tw-min-h-11 tw-min-w-11 tw-px-3 tw-text-xs motion-reduce:tw-transition-none"
       >
         <CalculatorIcon className="tw-size-4 tw-shrink-0" aria-hidden="true" />
         <span className="tw-hidden @[36rem]/discovery-heading:tw-inline">
@@ -218,28 +229,36 @@ export function DiscoverWaveControls({
         isOpen={sortOpen}
         onClose={() => setSortOpen(false)}
         title={sortLabel}
+        titleClassName="tw-text-lg tw-font-semibold"
         focusTitleOnOpen
       >
         <div className="tw-space-y-1 tw-px-4 tw-pt-4 sm:tw-px-6">
           {SORT_OPTIONS.map((option) => (
-            <Button
+            <button
               key={option.value}
-              variant={activeSort === option.value ? "secondary" : "ghost"}
-              size="xl"
-              fullWidth
+              type="button"
               aria-pressed={activeSort === option.value}
               onClick={() => {
                 onSortChange(option.value);
                 setSortOpen(false);
               }}
-              className="tw-text-left motion-reduce:tw-transition-none"
+              className={`${MOBILE_ACTION_ITEM_CLASSES} tw-min-h-12 aria-pressed:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
             >
-              <ScoreSortIcon sort={option.value} />
-              <span className="tw-flex-1">{t(locale, option.label)}</span>
+              <span className={`${MOBILE_ACTION_ICON_CLASSES} tw-self-center`}>
+                <ScoreSortIcon sort={option.value} className="tw-size-5" />
+              </span>
+              <span
+                className={`${ACTION_LABEL_CLASSES} tw-min-w-0 tw-flex-1 tw-self-center`}
+              >
+                {t(locale, option.label)}
+              </span>
               {activeSort === option.value && (
-                <CheckIcon className="tw-size-4" aria-hidden="true" />
+                <CheckIcon
+                  className="tw-size-5 tw-shrink-0 tw-self-center"
+                  aria-hidden="true"
+                />
               )}
-            </Button>
+            </button>
           ))}
         </div>
       </MobileWrapperDialog>
