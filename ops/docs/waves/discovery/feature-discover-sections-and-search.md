@@ -47,6 +47,9 @@ Newest and Latest Posts disable score thresholds and reset them to All.
 Sort and threshold choices remain in the URL when switching between discovery
 tabs. Use `Score formula` beside the heading to open the score explanation; on
 compact layouts, the calculator icon has the same accessible name and tooltip.
+The score page keeps the originating Discover view, including its sort and
+threshold. In the app, use Back in the header to return to that view. The page's
+`Back to previous page` link provides the same return path on the web.
 
 Selecting a wave opens its thread. Existing auth and access rules still apply
 when interacting there.

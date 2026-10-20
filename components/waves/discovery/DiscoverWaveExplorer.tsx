@@ -91,6 +91,8 @@ function RecommendationsExplorer() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const currentQuery = normalizeDiscoveryParams(searchParams).toString();
+  const returnTo = currentQuery ? `${pathname}?${currentQuery}` : pathname;
   const activeSort = parseSort(searchParams?.get(SORT_PARAM) ?? null);
   const activeFilter = parseFilter(searchParams?.get(FILTER_PARAM) ?? null);
   const filterScores = useMemo(
@@ -173,7 +175,7 @@ function RecommendationsExplorer() {
       })}
       showEmptyState={true}
       emptyStateLabel={t(locale, "waves.discovery.filter.empty")}
-      headerActions={<ScoreFormulaLink />}
+      headerActions={<ScoreFormulaLink returnTo={returnTo} />}
       headerControls={
         <DiscoverWaveControls
           activeFilter={visibleActiveFilter}

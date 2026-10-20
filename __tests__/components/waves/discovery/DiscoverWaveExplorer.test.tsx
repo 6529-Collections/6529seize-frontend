@@ -130,14 +130,22 @@ describe("DiscoverWaveExplorer", () => {
     });
   });
 
-  it("keeps the formula link outside the discovery controls", () => {
-    render(<DiscoverWaveExplorer />);
-    const formula = screen.getByRole("link", { name: "Score formula" });
-    expect(formula).toHaveAttribute("href", "/network/wave-score");
-    expect(
-      screen.getByRole("group", { name: "Discovery controls" })
-    ).not.toContainElement(formula);
-  });
+  it.each(["", "filter=REP_60&sort=QUALITY&locale=en-GB"])(
+    "keeps the formula link outside the controls and preserves its origin: %s",
+    (query) => {
+      searchParams = query;
+      render(<DiscoverWaveExplorer />);
+      const formula = screen.getByRole("link", { name: "Score formula" });
+      const href = new URL(formula.getAttribute("href")!, "https://6529.io");
+      expect(href.pathname).toBe("/network/wave-score");
+      expect(href.searchParams.get("returnTo")).toBe(
+        query ? `/discover?${query}` : "/discover"
+      );
+      expect(
+        screen.getByRole("group", { name: "Discovery controls" })
+      ).not.toContainElement(formula);
+    }
+  );
 
   it("keeps the current threshold and unrelated URL parameters when choosing a score sort", () => {
     searchParams = "filter=SCORE_50&locale=en-GB";

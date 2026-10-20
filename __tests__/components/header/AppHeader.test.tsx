@@ -448,6 +448,57 @@ describe("AppHeader", () => {
     ).toBeInTheDocument();
   });
 
+  it("returns from the score page to the exact Discover view in the app", () => {
+    const returnTo = "/discover?sort=QUALITY&filter=REP_60";
+    setup({
+      address: null,
+      asPath: "/network/wave-score",
+      query: { returnTo },
+      canGoBack: false,
+    });
+    expect(screen.getByTestId("back")).toHaveAttribute(
+      "data-return-to",
+      returnTo
+    );
+  });
+
+  it("uses navigation history for a score page without an explicit origin", () => {
+    setup({ address: null, asPath: "/network/wave-score", canGoBack: true });
+    expect(screen.getByTestId("back")).toHaveAttribute("data-return-to", "");
+  });
+
+  it.each([
+    undefined,
+    "https://example.com",
+    "//example.com",
+    "/network/wave-score",
+  ])(
+    "keeps a safe back destination for a direct score page visit: %s",
+    (returnTo) => {
+      setup({
+        address: null,
+        asPath: "/network/wave-score",
+        query: returnTo ? { returnTo } : {},
+        canGoBack: false,
+      });
+      expect(screen.getByTestId("back")).toHaveAttribute(
+        "data-return-to",
+        "/about"
+      );
+    }
+  );
+
+  it("keeps the menu action on web score page headers", () => {
+    useCapacitor.mockReturnValue({ isCapacitor: false });
+    setup({
+      address: null,
+      asPath: "/network/wave-score",
+      query: { returnTo: "/discover" },
+      canGoBack: true,
+    });
+    expect(screen.queryByTestId("back")).not.toBeInTheDocument();
+  });
+
   it("uses the native back button for a collected token origin", () => {
     const returnTo =
       "/Shelby/collected?collection=memelab#collected-card-memelab-65";

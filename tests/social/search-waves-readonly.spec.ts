@@ -410,7 +410,14 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       exact: true,
     });
     await expect(formula).toBeVisible();
-    await expect(formula).toHaveAttribute("href", "/network/wave-score");
+    const formulaUrl = new URL(
+      (await formula.getAttribute("href"))!,
+      page.url()
+    );
+    expect(formulaUrl.pathname).toBe("/network/wave-score");
+    expect(formulaUrl.searchParams.get("returnTo")).toBe(
+      "/discover?filter=SCORE_50"
+    );
     await expect(
       threshold.getByRole("radio", { name: "Score 50+" })
     ).toBeChecked();
@@ -505,6 +512,27 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       threshold.getByRole("radio", { name: "REP 60+" })
     ).toBeChecked();
     await expectNoHorizontalOverflow(page);
+
+    const discoverUrl = page.url();
+    await activate(formula);
+    await expect(
+      page.getByRole("heading", {
+        name: "Wave score transparency",
+        exact: true,
+      })
+    ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+    if (testInfo.project.name === "capacitor-ios-sim") {
+      await activate(page.getByRole("button", { name: "Back", exact: true }));
+    } else {
+      await activate(
+        page.getByRole("link", { name: "Back to previous page", exact: true })
+      );
+    }
+    await expect(page).toHaveURL(discoverUrl);
+    await expect(
+      threshold.getByRole("radio", { name: "REP 60+" })
+    ).toBeChecked();
+    await expect(formula).toBeVisible();
   });
 
   test("mobile wave shortcuts keep generous touch areas around compact buttons", async ({

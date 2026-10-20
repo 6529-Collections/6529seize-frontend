@@ -106,20 +106,20 @@ function ScoreSortIcon({
   return <Icon className={className} aria-hidden="true" />;
 }
 
-export function ScoreFormulaLink() {
+export function ScoreFormulaLink({ returnTo }: { readonly returnTo: string }) {
   const locale = useBrowserLocale();
   const label = t(locale, "waves.discovery.scoreFormula");
   const tooltipId = buildTooltipId("discover-score-formula", useId());
   return (
     <>
       <ButtonLink
-        href="/network/wave-score"
+        href={{ pathname: "/network/wave-score", query: { returnTo } }}
         variant="secondary"
         size={null}
         aria-label={label}
         data-tooltip-id={tooltipId}
         data-tooltip-content={label}
-        className="tw-size-9 tw-text-xs motion-reduce:tw-transition-none @[36rem]/discovery-heading:tw-w-auto @[36rem]/discovery-heading:tw-px-3"
+        className="tw-size-9 tw-text-xs @[36rem]/discovery-heading:tw-w-auto @[36rem]/discovery-heading:tw-px-3 motion-reduce:tw-transition-none"
       >
         <CalculatorIcon className="tw-size-4 tw-shrink-0" aria-hidden="true" />
         <span className="tw-hidden @[36rem]/discovery-heading:tw-inline">
