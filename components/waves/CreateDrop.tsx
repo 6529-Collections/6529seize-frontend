@@ -448,8 +448,7 @@ export default function CreateDrop({
 
   const addDropMutation = useMutation({
     mutationFn: async (body: QueuedDropMutationBody) => {
-      if (nativeCompetition && body.drop.drop_type !== ApiDropType.Chat)
-        return submitCompetitionEntry(body.drop);
+      if (body.nativeEntrySubmit) return body.nativeEntrySubmit(body.drop);
       return commonApiPost<ApiCreateDropRequest, ApiDrop>({
         endpoint: `drops`,
         body: body.drop,
@@ -611,13 +610,16 @@ export default function CreateDrop({
         return false;
       }
 
-      const queuedDropRequest: QueuedDropMutationBody =
-        slowModeChatReservation === null
-          ? dropRequest
-          : {
-              ...dropRequest,
-              slowModeChatReservation,
-            };
+      const queuedDropRequest: QueuedDropMutationBody = {
+        ...dropRequest,
+        ...(slowModeChatReservation === null
+          ? {}
+          : { slowModeChatReservation }),
+        nativeEntrySubmit:
+          nativeCompetition && dropRequest.drop.drop_type !== ApiDropType.Chat
+            ? submitCompetitionEntry
+            : undefined,
+      };
 
       // Add to queue
       queueRef.current.push(queuedDropRequest);
@@ -649,9 +651,11 @@ export default function CreateDrop({
     },
     [
       markChatSubmitted,
+      nativeCompetition,
       onDropAddedToQueue,
       processNextDrop,
       reserveSlowModeChatQueueSlot,
+      submitCompetitionEntry,
       unreadDividerContext,
     ]
   );
