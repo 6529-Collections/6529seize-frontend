@@ -9,6 +9,8 @@ import type { Virtualizer } from "@tanstack/react-virtual";
 import type { RefObject, ReactNode } from "react";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Button from "@/components/utils/button/Button";
+import { WaveLeaderboardScrollAnchor } from "./WaveLeaderboardScrollAnchor";
+import { useScrollStableLeaderboardItems } from "./useScrollStableLeaderboardItems";
 
 type LeaderboardVirtualLayout = "list" | "grid" | "gallery";
 type LeaderboardColumnCount = 1 | 2 | 3;
@@ -160,12 +162,6 @@ export function useLeaderboardLeadingItemCount({
   return ledger.leadingItemCount;
 }
 
-interface VisibleAnchor {
-  readonly dropId: string;
-  readonly logicalIndex: number;
-  readonly top: number;
-}
-
 interface WaveLeaderboardVirtualizedRowsProps<TItem> {
   readonly items: readonly TItem[];
   readonly getItemId: (item: TItem) => string;
@@ -188,7 +184,7 @@ interface WaveLeaderboardVirtualizedRowsProps<TItem> {
 }
 
 export function WaveLeaderboardVirtualizedRows<TItem>({
-  items,
+  items: liveItems,
   getItemId,
   leadingItemCount,
   windowKey,
@@ -209,7 +205,13 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
 }: WaveLeaderboardVirtualizedRowsProps<TItem>) {
   const locale = useBrowserLocale();
   const rootRef = useRef<HTMLDivElement | null>(null);
-  const anchorRef = useRef<VisibleAnchor | null>(null);
+  const items = useScrollStableLeaderboardItems(
+    liveItems,
+    getItemId,
+    scrollContainerRef,
+    windowKey
+  );
+  const itemIds = useMemo(() => items.map(getItemId), [items, getItemId]);
   const previousTriggerKeyRef = useRef<string | null>(null);
   const nextTriggerKeyRef = useRef<string | null>(null);
   const [columns, setColumns] = useState<LeaderboardColumnCount>(() =>
@@ -222,39 +224,6 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
   const rowCount = Math.ceil(logicalItemCount / columns);
   const virtualItemCount = isMasonryLayout ? logicalItemCount : rowCount;
   const estimateRowHeight = estimatedRowHeight ?? getEstimatedRowHeight(layout);
-
-  const captureVisibleAnchor = useCallback(() => {
-    const root = rootRef.current;
-    const scrollContainer = scrollContainerRef.current;
-    if (!root || !scrollContainer) {
-      return;
-    }
-
-    const viewportTop = scrollContainer.getBoundingClientRect().top;
-    const candidates = root.querySelectorAll<HTMLElement>(
-      "[data-leaderboard-drop-id]"
-    );
-    const firstVisible = Array.from(candidates).find(
-      (candidate) => candidate.getBoundingClientRect().bottom > viewportTop
-    );
-    if (!firstVisible) {
-      return;
-    }
-
-    const dropId = firstVisible.dataset["leaderboardDropId"];
-    const logicalIndex = Number(
-      firstVisible.dataset["leaderboardLogicalIndex"]
-    );
-    if (!dropId || !Number.isFinite(logicalIndex)) {
-      return;
-    }
-
-    anchorRef.current = {
-      dropId,
-      logicalIndex,
-      top: firstVisible.getBoundingClientRect().top,
-    };
-  }, [scrollContainerRef]);
 
   useLayoutEffect(() => {
     const root = rootRef.current;
@@ -270,7 +239,6 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
       if (columnsRef.current === nextColumns) {
         return;
       }
-      captureVisibleAnchor();
       columnsRef.current = nextColumns;
       setColumns(nextColumns);
     };
@@ -284,7 +252,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
     const observer = new globalThis.ResizeObserver(updateColumns);
     observer.observe(root);
     return () => observer.disconnect();
-  }, [captureVisibleAnchor, layout]);
+  }, [layout]);
 
   useLayoutEffect(() => {
     const root = rootRef.current;
@@ -427,58 +395,25 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
       leadingItemCount
   )?.index;
 
-  useLayoutEffect(() => {
-    const anchor = anchorRef.current;
-    const root = rootRef.current;
-    const scrollContainer = scrollContainerRef.current;
-    if (!anchor || !root || !scrollContainer) {
-      return;
-    }
-
-    const anchoredDrop = Array.from(
-      root.querySelectorAll<HTMLElement>("[data-leaderboard-drop-id]")
-    ).find(
-      (candidate) => candidate.dataset["leaderboardDropId"] === anchor.dropId
-    );
-    if (anchoredDrop) {
-      scrollContainer.scrollTo({
-        top:
-          scrollContainer.scrollTop +
-          anchoredDrop.getBoundingClientRect().top -
-          anchor.top,
-      });
-      anchorRef.current = null;
-      return;
-    }
-
-    if (!items.some((item) => getItemId(item) === anchor.dropId)) {
-      anchorRef.current = null;
-      return;
-    }
-
-    virtualizer.scrollToIndex(
-      isMasonryLayout
-        ? anchor.logicalIndex
-        : Math.floor(anchor.logicalIndex / columns),
-      {
-        align: "start",
-      }
-    );
-  }, [
-    columns,
-    getItemId,
-    items,
-    isMasonryLayout,
-    leadingItemCount,
-    scrollContainerRef,
-    virtualizer,
-  ]);
-
   const ariaSetSize = hasNextPage || hasPreviousPage ? -1 : items.length;
   const gridColumnsClassName = getGridColumnsClassName(columns);
+  const revealIndex = useCallback(
+    (index: number) =>
+      virtualizer.scrollToIndex(index, { align: "start", behavior: "auto" }),
+    [virtualizer]
+  );
 
   return (
-    <div ref={rootRef} className="tw-w-full tw-min-w-0 tw-@container">
+    <WaveLeaderboardScrollAnchor
+      rootRef={rootRef}
+      scrollContainerRef={scrollContainerRef}
+      itemIds={itemIds}
+      windowKey={windowKey}
+      columns={columns}
+      leadingItemCount={leadingItemCount}
+      masonry={isMasonryLayout}
+      revealIndex={revealIndex}
+    >
       {isFetchingPreviousPage ? (
         <span className="tw-sr-only" role="status" aria-live="polite">
           {t(locale, "waves.leaderboard.loadingEarlier")}
@@ -703,6 +638,6 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
           </Button>
         </div>
       ) : null}
-    </div>
+    </WaveLeaderboardScrollAnchor>
   );
 }

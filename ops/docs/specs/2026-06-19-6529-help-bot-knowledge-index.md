@@ -7,6 +7,9 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The `waves.drop.editing` record covers author-only editing, the normal edit
+window, and unlimited editing of the wave's current pinned description drop.
+
 The `about.6529-apps` record includes a concise `brief_answer` naming both
 6529 Mobile and 6529 Desktop and an `answer_links` footer to the official Apps
 page. The companion backend uses it for short availability/download requests
@@ -30,10 +33,14 @@ controls. It also explains that app tabs already in view keep their position
 when selected. It does not promise instant data or a loading screen on every switch.
 
 The Wave discovery record describes the independent Active Votes and Worth Checking Out
-sidebar sections, their explanations and view-all destinations. It covers the
-scrollable three-row voting window, pagination, compact empty/error states and
+sidebar sections, their explanations and view-all destinations. It describes
+quiet loading placeholders, explanations that appear with content, empty messages
+only after successful empty requests, and retry without discarding loaded votes.
+It covers the scrollable three-row voting window, pagination, compact empty/error states and
 independently persisted collapse preferences. Worth Checking Out comes first
 and retains its own compact preview height.
+The Memes Quick Vote record describes its persistent top-left close below 768px,
+top-right close at wider widths, matching loading header and focus restoration.
 
 The `delegation.wallet-checker` record covers linked-wallet reads with a
 six-counterparty cap, pair deduplication, relevant missing-reverse-link
@@ -57,6 +64,21 @@ help-index sync and consumed by the existing backend loader.
 The `waves.notification-controls` record describes the notification subview inside the About sheet
 on phone layouts, dismissal back to About, and the anchored keyboard-accessible
 menu in desktop and tablet sidebars.
+
+The `network.identities-leaderboard` record describes the mobile filter's vertical
+criteria list, individual editors, Back navigation, preserved drafts, and
+readiness guidance available from the information button. On mobile, the selected
+criteria summary is a filled card at the end of the list or editor, scrolling
+with the content while only the create action remains fixed. Desktop keeps the
+summary beside the action. Create Wave uses the matching mobile summary card
+in the form's scroll flow. The top summary appears only for a selected group.
+Both identity tabs omit repeated empty-selection and import messages, and the
+bottom summary retains the combined counts. The xTDH grant
+search shows Clear filters only when a collection name or grantor is set;
+clearing preserves the active status tab without removing a selected grant.
+On mobile, grant search fields and cards share one scroll area, with Load more
+after the last loaded card and sheet navigation and the bottom action accessible. Desktop retains
+the left-side criteria list, and saving still creates and applies a new group.
 
 ## Problem Statement
 
@@ -200,6 +222,11 @@ It distinguishes link composers from file sharing, includes Instagram's
 save/share-and-paste flow, and explains preparation failures and device-dependent
 share destinations.
 It does not claim automatic posting or successful publication after a handoff.
+
+The profile tab record covers immediate selection feedback, the persistent header,
+scroll preservation with natural settling for shorter content, and clearing
+Collected transfer selections when leaving that tab. It preserves shared
+`address` and `locale` parameters and describes the xTDH Granted default.
 
 The profile website studio records cover 39 editable templates (23 original
 compositions and 16 credited Memes inspirations), page and menu editing, image
@@ -689,3 +716,38 @@ The media playback record also describes contained still artwork on the
 homepage, Meme detail, and expanded Wave submissions: the shared usable-screen
 height cap, desktop homepage details-height limit, natural-height full-width
 mobile homepage images without reserved gaps, and stable Meme image frame.
+
+## Create Wave criteria navigation
+
+Create Wave access editing uses a vertical category list on smaller screens and
+touch devices. Selecting a category opens its fields; the shared Back control
+returns to the list and preserves the pending criteria. Desktop keeps its
+left-side criteria list. The help corpus distinguishes this from Configuration
+access editors, which retain their compact horizontal navigation.
+
+Create Wave also uses Network Filter’s concise Included copy and shared readiness
+tooltip. The editor omits Before editing and After editing captions and the default
+Everyone summary during editing, while preserving saved-group details, draft
+criteria, member previews, privacy, and save/cancel behavior. Configuration retains
+its existing comparison captions.
+
+Inside a Create Wave mobile category, the shared Back and Cancel actions occupy
+one row, with Back on the left and Cancel on the right; their behavior is unchanged.
+
+Create Wave and Network Filter omit the intermediate combined identity total in
+both Included and Excluded. The bottom criteria summary retains the counts, while
+individual source counts, limit warnings, import errors, and creator warnings remain.
+
+Create Wave and Network Filter use distinct stacked identity, EMMA, and CSV
+sections on phones and touch tablets. Search and upload controls remain visible,
+alongside source results, loading, errors, retry, and removal. Desktop retains its
+two-column import layout.
+
+Both Included and Excluded omit the empty EMMA and CSV source messages in Create
+Wave and Network Filter.
+
+Both identity tabs show a title above the search field: Find an identity to include
+or Find an identity to exclude. The placeholders are Search identities to
+include... and Search identities to exclude..., respectively.
+Create Wave and Network Filter omit empty-selection sentences in both tabs while
+preserving limits, errors, warnings, and the bottom criteria summary.

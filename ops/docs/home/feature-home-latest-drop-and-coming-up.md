@@ -45,8 +45,9 @@ Use this page for visibility rules, state switches, and route targets.
 ## User Journey
 
 1. Open `/`.
-2. The top slot shows a loading placeholder while current mint data, claim
-   status, and next-winner data resolve.
+2. The top slot shows a loading placeholder while the latest artwork data
+   loads. The artwork appears as soon as it is available, while mint status
+   and next-winner details can continue loading.
 3. The top slot then chooses one mode:
    - `Latest Drop` while the current mint is active and for the configured
      grace period after its scheduled end, or when no next winner is available.
@@ -88,9 +89,21 @@ Use this page for visibility rules, state switches, and route targets.
     shows a `The Memes #{id}` pill linked to that card.
   - `Coming up` hides `NEXT MINT` and shows up to 3 leaders.
 - Leaderboard still loading while `NEXT MINT` is ready:
-  - `Coming up` can render with only the `NEXT MINT` card.
+  - `NEXT MINT` stays visible beside two loading placeholders when no leader
+    cards are available yet. The placeholders disappear when the leader request
+    finishes.
 - `Coming up` initial load with no ready cards and no `NEXT MINT` card:
-  - Three skeleton cards render until data is ready.
+  - Three skeleton cards render while the required requests are loading.
+- Returning to `Coming up` during the same app session:
+  - Recently loaded leader cards remain available for up to five minutes after
+    leaving the page. Older results refresh in the background when returning.
+  - Pull-to-refresh keeps loaded leader cards visible while updating them.
+  - A failed update keeps those cards visible.
+  - Closing the app or changing the signed-in identity can clear saved cards.
+- Slow current-artwork or mint-status details:
+  - Leader cards can appear independently.
+  - `NEXT MINT` appears only after the current artwork and mint status are
+    known; an unresolved current artwork is not treated as a different mint.
 - `Coming up` after load with no cards:
   - The full section is hidden.
 - In `Coming up` leader cards:
@@ -179,10 +192,17 @@ Use this page for visibility rules, state switches, and route targets.
 - In countdown error state, the `Next drop ...` status strip is not shown.
 - On touch devices, interactive HTML media can require `Tap to load` before
   playback.
-- If app settings do not include `memes_wave_id`, `Coming up` stays hidden.
+- Until app settings include `memes_wave_id`, `Coming up` stays hidden.
 
 ## Failure and Recovery
 
+- If the latest artwork data fails to load, the top slot shows an error and
+  a `Try again` button. The button shows `Trying again…` during the retry.
+- A mint-status failure does not hide the artwork. Mint-dependent stats show
+  `Unavailable`, and the countdown shows its error state until status recovers.
+- Loaded artwork stays visible during background refreshes, including a
+  refresh that fails. The homepage switches to `Next Drop` only after mint
+  completion is confirmed, the grace period has elapsed, and a winner is ready.
 - If latest-drop or coming-up content looks stale, refresh `/` to rerun home
   queries.
 - If latest-drop actions fail, open routes directly:
@@ -217,6 +237,16 @@ Use this page for visibility rules, state switches, and route targets.
 - `Coming up` cards use path-style routes (`/waves/{waveId}?drop=...`).
 - `NEXT MINT` timestamps are displayed in the viewer's local timezone/locale.
 - No auth or wallet gate is required to view these sections.
+
+### Homepage loading-message localization fallback debt
+
+- The artwork error, retry labels, Coming Up labels and loading status, and
+  unavailable mint stats use the `en-US` fallback in partial `en-GB`, `de-DE`,
+  `es-ES`, and `fr-FR` dictionaries.
+- Non-English visitors may see these short messages in English. Frontend i18n
+  follow-up should add reviewed translations for `home.latestDrop.*`,
+  `home.comingUp.*`, and `home.nowMinting.stats.unavailable` and check their
+  responsive presentation.
 
 ### `/about/subscriptions` localization fallback debt
 

@@ -8,6 +8,8 @@ import {
 } from "@/hooks/useWaveDropsLeaderboard";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { shouldShowNextWinnerInComingUp } from "@/helpers/mint-visibility.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { LeadingCard } from "./LeadingCard";
@@ -20,9 +22,10 @@ const SKELETON_KEYS = [
 ];
 
 export function NextMintLeadingSection() {
+  const locale = useBrowserLocale();
   const {
     nft: nowMinting,
-    isFetching: isNowMintingFetching,
+    status: mintStatus,
     isDropComplete: isNowMintingComplete,
   } = useNowMintingStatus();
   const {
@@ -35,46 +38,51 @@ export function NextMintLeadingSection() {
 
   const { drops, isFetching: isLeaderboardFetching } = useWaveDropsLeaderboard({
     waveId: waveId ?? "",
+    pageSize: 3,
     sort: WaveDropsLeaderboardSort.RATING_PREDICTION,
     enabled: !!waveId,
+    retainOnUnmount: true,
   });
 
-  // Compare with nowMinting name (case-insensitive, trimmed)
-  // Only treat as same when both values exist; otherwise treat as not equal
-  const isNextMintSameAsNowMinting =
-    !!nowMinting?.name &&
-    !!nextMintTitle &&
-    nowMinting.name.toLowerCase().trim() === nextMintTitle.toLowerCase().trim();
+  const currentTitle = nowMinting?.name.trim().toLowerCase();
+  const nextTitle = nextMintTitle?.trim().toLowerCase();
 
-  // Determine what to show
   const canShowNextMint = shouldShowNextWinnerInComingUp({
     isMintEnded: isNowMintingComplete,
     nextMintExists: !!nextMint,
   });
+  // Unknown current artwork or mint status must not be mistaken for a new mint.
+  // The leader cards do not depend on either of these optional details.
   const showNextMint =
-    canShowNextMint && !!nextMint && !isNextMintSameAsNowMinting;
+    canShowNextMint &&
+    mintStatus !== null &&
+    !!currentTitle &&
+    !!nextTitle &&
+    currentTitle !== nextTitle;
   const leadingCount = showNextMint ? 2 : 3;
 
-  // Get top drops from leaderboard
   const leading = drops.slice(0, leadingCount);
+  const hasCards = showNextMint || leading.length > 0;
+  const showLoadingCards =
+    !hasCards || (isLeaderboardFetching && leading.length === 0);
+  const isFetching = isWinnersFetching || isLeaderboardFetching;
 
-  const isFetching =
-    isNowMintingFetching || isWinnersFetching || isLeaderboardFetching;
-
-  if (!isReady || !waveId) {
-    return null;
-  }
+  if (!isReady || !waveId) return null;
+  if (!hasCards && !isFetching) return null;
 
   const sectionClassName =
     "tw-px-4 md:tw-px-6 lg:tw-px-8 tw-relative tw-z-10 tw-@container tw-pb-10 md:tw-pb-16";
   const header = (
     <div className="tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-4 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
       <div>
-        <h2 className="tw-m-0 tw-text-xl tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 md:tw-text-2xl">
-          Coming up
+        <h2
+          id="home-coming-up"
+          className="tw-m-0 tw-text-xl tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 md:tw-text-2xl"
+        >
+          {t(locale, "home.comingUp.title")}
         </h2>
         <p className="tw-mb-0 tw-mt-3 tw-text-[11px] tw-font-normal tw-uppercase tw-leading-relaxed tw-tracking-[0.14em] tw-text-iron-500 sm:tw-text-xs">
-          Next in queue and current vote leaders
+          {t(locale, "home.comingUp.subtitle")}
         </p>
       </div>
       <Link
@@ -86,40 +94,34 @@ export function NextMintLeadingSection() {
         })}
         className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-white"
       >
-        <span>View all</span>
+        <span>{t(locale, "home.comingUp.viewAll")}</span>
         <ArrowRightIcon className="tw-size-4 tw-flex-shrink-0" aria-hidden />
       </Link>
     </div>
   );
 
-  if (isFetching && !showNextMint && leading.length === 0) {
-    return (
-      <section className={sectionClassName}>
-        <div>
-          {header}
-          <div className="tw-grid tw-grid-cols-1 tw-gap-6 md:tw-grid-cols-2 lg:tw-grid-cols-3 lg:tw-gap-8">
-            {SKELETON_KEYS.map((key) => (
-              <NextMintLeadingSkeletonCard key={key} />
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (!showNextMint && leading.length === 0) {
-    return null;
-  }
-
   return (
-    <section data-home-section="Coming up" className={sectionClassName}>
+    <section
+      data-home-section="Coming up"
+      aria-labelledby="home-coming-up"
+      className={sectionClassName}
+    >
       <div>
         {header}
+        {showLoadingCards && (
+          <p role="status" className="tw-sr-only">
+            {t(locale, "home.comingUp.loading")}
+          </p>
+        )}
         <div className="tw-grid tw-grid-cols-1 tw-gap-6 md:tw-grid-cols-2 lg:tw-grid-cols-3 lg:tw-gap-8">
-          {showNextMint && <NextMintCard drop={nextMint} />}
+          {showNextMint && nextMint && <NextMintCard drop={nextMint} />}
           {leading.map((drop, index) => (
             <LeadingCard key={drop.id} drop={drop} rank={index + 1} />
           ))}
+          {showLoadingCards &&
+            SKELETON_KEYS.slice(0, leadingCount).map((key) => (
+              <NextMintLeadingSkeletonCard key={key} />
+            ))}
         </div>
       </div>
     </section>
@@ -128,7 +130,11 @@ export function NextMintLeadingSection() {
 
 const NextMintLeadingSkeletonCard = () => {
   return (
-    <div className="tw-flex tw-flex-col tw-text-left">
+    <div
+      aria-hidden="true"
+      data-testid="coming-up-loading-card"
+      className="tw-flex tw-flex-col tw-text-left motion-reduce:[&_*]:tw-animate-none"
+    >
       <div className="tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950">
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-2 tw-border-b tw-border-white/10 tw-bg-iron-900 tw-px-2.5 tw-py-1.5 sm:tw-px-3 sm:tw-py-2">
           <div className="tw-h-4 tw-w-24 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />

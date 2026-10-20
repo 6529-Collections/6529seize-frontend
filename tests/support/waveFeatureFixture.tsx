@@ -24,6 +24,7 @@ import {
   initAnalytics,
   trackAnalyticsEvent,
 } from "@/services/analytics/mixpanel";
+import { loadMixpanelSdk } from "@/services/analytics/mixpanelSdk";
 
 export const AuthContext = createContext({
   connectedProfile: null,
@@ -222,6 +223,8 @@ function Fixture() {
           style={{ height: 220, width: 300, overflow: "auto" }}
         >
           <SidebarDiscovery
+            recommendationsStatus="success"
+            onRetryRecommendations={undefined}
             previewItems={
               new URLSearchParams(location.search).has("recommendations")
                 ? [
@@ -272,4 +275,7 @@ function Fixture() {
 }
 
 const root = document.getElementById("root");
-if (root) createRoot(root).render(<Fixture />);
+// The app downloads the SDK when consent first allows analytics. Load it before
+// rendering so the fixture's synchronous consent controls drive the same SDK.
+if (root)
+  void loadMixpanelSdk().then(() => createRoot(root).render(<Fixture />));

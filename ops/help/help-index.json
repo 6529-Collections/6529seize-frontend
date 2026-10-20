@@ -685,6 +685,8 @@
         "Authenticated visitors keep the dashboard-first home experience.",
         "It highlights the current or upcoming Meme Card mint, discovery sections, and 6529 mission content.",
         "After the current Meme mint ends, the homepage keeps Latest Drop through a configurable grace period before replacing it with a mapped Next Drop.",
+        "The latest artwork can appear while mint status and next-winner details are still loading. If artwork data fails to load, use Try again. Mint-status failures leave the artwork visible with unavailable stats; loaded artwork stays visible during background refreshes.",
+        "Coming up keeps recently loaded leader cards visible when returning during the same app session and during pull-to-refresh. Failed updates preserve available cards. NEXT MINT waits for confirmed current-artwork and mint-status information; leader cards can load independently. When NEXT MINT appears first, two loading placeholders remain until the leader request finishes.",
         "Latest Drop groups title and artist first, then stats with Edition Details beneath them, then Your allowance above Subscription Minting, and the countdown and mint action at the bottom.",
         "A mapped Latest Drop adds Main Stage Submission -> View as the last Edition Details row, and a mapped Next Drop shows a The Memes #{id} pill linked to the Meme card.",
         "The home mint panel can surface The Memes subscription awareness with read-only status, subscription info, and Set up or Manage actions for the profile Subscriptions tab. On native iOS outside the US, or while the country check is loading, the row is not shown; on every platform it appears just after the page loads rather than in the first render.",
@@ -701,6 +703,8 @@
       "tags": ["home", "navigation"],
       "source_refs": [
         "components/home/newcomer/HomeNewcomerIntro.tsx",
+        "components/home/now-minting/LatestDropSection.tsx",
+        "ops/docs/home/feature-home-latest-drop-and-coming-up.md",
         "ops/docs/home/README.md",
         "ops/docs/home/feature-home-header-and-mission.md",
         "ops/docs/home/flow-home-landing-and-section-navigation.md"
@@ -1872,6 +1876,7 @@
         "Sign out all clears every connected profile in one visible transition without switching through the remaining profiles.",
         "On the native app, logout removes that profile from push delivery on this phone unless another connected wallet still uses the same profile; Sign out all removes every profile registration for this installation, including stale profiles missing locally. Other devices stay connected. Offline cleanup retries when the app reconnects, so pushes can continue until the server accepts it.",
         "If wallet connection is not working, retry from the header wallet controls and confirm the wallet modal is completed before using write actions.",
+        "On the web, signed-out visitors load wallet connection services on their first connect, so that first Connect can take a moment; the button shows a spinner until the wallet dialog opens. If loading fails, select Connect again to retry.",
         "If Post cannot finish its session check, the draft stays in the composer. Wait for loading to finish, check the connection, complete sign-in if prompted, then retry Post. A stalled session check expires so a later attempt can check again; it does not automatically post the draft.",
         "If Post asks you to reconnect or reactions show Please reconnect your wallet, the saved profile can still be visible even though its session cannot renew. Reconnect that profile from the wallet account controls, then retry the action. Save your draft before logging out or reloading; failed authentication keeps it in the composer, and reactions are not automatically retried after sign-in.",
         "Protected pages show a loading placeholder while wallet identity and the required profile are being restored; connect-wallet, profile-setup, and permission messages appear after those checks settle. Public browsing, Search, and Share remain available while account-dependent controls load.",
@@ -2003,6 +2008,8 @@
       "facts": [
         "Profile tabs split profile content into sections such as Identity, Curation, Collected, Subscriptions, Proxy, Brain, and xTDH.",
         "The default Identity tab opens at /{user}; legacy /{user}/identity redirects there.",
+        "Selecting a profile tab immediately highlights it and shows loading feedback while needed. The header and banner remain in place, vertical scroll is preserved within the destination's available height, and the latest tab selection wins. Leaving Collected exits transfer mode and clears transfer selections.",
+        "Profile tab links retain address and locale. The xTDH tab opens with tab=granted; other tab-specific filters do not carry between main profile tabs.",
         "Other profile tabs can be opened directly through routes such as /{user}/curations or /{user}/collected.",
         "Unavailable or gated tabs can be hidden depending on profile state and feature visibility rules."
       ],
@@ -2039,6 +2046,7 @@
       "facts": [
         "The Profile Curation tab lives at /{user}/curations and presents the profile's selected named Curation.",
         "On an owner's empty Curation tab, Create Curation asks for a name and prepares the required access, public source Wave, Curation, and profile connection.",
+        "Mobile Curation setup and edit sheets use Close or a downward header swipe to leave without submitting; desktop dialogs also offer Cancel.",
         "If the owner has no profile handle, Go to Identity opens /{user} so profile setup can be completed first.",
         "After guided setup succeeds, Add post opens automatically; if post creation succeeds but Curation membership fails, Retry add reuses the created post.",
         "Owners see Add post as the primary action. Manage separates profile display actions from Curation actions: Hide from profile keeps the Curation, source Wave, and posts, while Delete Curation deletes the Curation but keeps its source Wave and posts.",
@@ -2049,7 +2057,7 @@
       "related_paths": ["/{user}", "/waves"],
       "tags": ["profiles", "curation", "waves", "posts"],
       "source_refs": [
-        "app/[user]/curations/page.tsx",
+        "app/[user]/(profile)/curations/page.tsx",
         "components/user/waves/UserPageProfileWave.tsx",
         "components/user/waves/UserPageProfileCurationSetupDialog.tsx",
         "ops/docs/profiles/tabs/feature-curation-tab.md"
@@ -2227,6 +2235,7 @@
         "The section shows up to three tags and uses a +N more chip when additional tags exist; controls wrap at narrow widths.",
         "Manage and +N more open the inline Quick Tags manager inside the same Brain-tab card.",
         "On mobile, New Quick Tag and existing-tag editing open in a bottom sheet; on wider screens, create and edit forms remain inline.",
+        "The mobile Quick Tag editor uses Back, Close, or a downward header swipe to discard edits. The inline editor keeps Cancel.",
         "The section is hidden on other profiles and while acting through a proxy.",
         "Quick Tags do not have a dedicated profile tab or route."
       ],
@@ -3052,9 +3061,10 @@
         "On desktop with no selected Wave, /waves shows the latest posts from members' effective public Profile Wave curations, newest first.",
         "Each latest-profile-post card identifies the author, posting time, and originating Profile Wave; curated replies can also appear. On mobile web and in the native app, the default /waves view remains a Wave navigator with no separate Profile Waves Feed card, and the feed icon at the far right of the plain Waves heading opens the cross-Wave feed at /waves?view=profile-feed. On desktop, the same feed icon clears the selected wave to show Profile Waves Feed. The heading is not clickable. Header actions are feed then create on desktop, with Profile Waves Feed and Create Wave tooltips. Create uses a compact white button. The mobile list shows only feed; the app keeps create in its top bar. The Profile Waves Feed content header has a Discover Waves link with a compass, aligned right on desktop and below the description on small screens. The expanded sidebar has no separate feed row.",
         "From the mobile web Profile Waves Feed, Waves returns to the Wave list. Opening a feed post enters its Wave conversation, and browser Back returns to the feed.",
-        "Announcements uses a compact row with its timestamp, unread state and score shield. Active Votes rows also have a score shield that opens score details. The current wave highlights in Active Votes as well as in the collection list below when it appears in both. In Worth Checking Out, each avatar and its bottom-right score shield form one wave navigation link; hovering or focusing the combined link shows score details.",
+        "Announcements uses a compact row with its timestamp, unread state and score shield. A row-sized placeholder reserves its space while it first loads. Active Votes rows also have a score shield that opens score details. The current wave highlights in Active Votes as well as in the collection list below when it appears in both. In Worth Checking Out, each avatar and its bottom-right score shield form one wave navigation link; hovering or focusing the combined link shows score details.",
         "While Find a wave is open, sidebar scores remain visible but their details cards are temporarily unavailable, including for an empty search field. Closing search restores score hover, focus and selection. Recommendation links remain available while searching.",
         "Every Worth Checking Out recommendation also appears in All at its recent-activity position; Joined normally includes only waves the user has joined.",
+        "Joined waves load in batches without skipping entries when new activity changes their order. Recent activity includes joined, unmuted subwaves. Muting a wave removes its own activity from the ordering. More rows load near the bottom, with Load more joined waves as a fallback. Failed loads keep existing rows available and show Retry. Expired lists refresh automatically, and newly joined waves appear on refresh.",
         "Switching All and Joined preserves list position instead of jumping to the active wave; a shorter list can clamp the position. Selecting another wave reveals its active row again.",
         "A Wave opened from a direct link remains visible and highlighted in the left sidebar even when it is not followed, pinned, or present in the loaded overview; this temporary route context does not join or pin it.",
         "When a direct link opens a subwave, the sidebar surfaces its visible parent, loads and expands the subwave list, reveals the selected child row, and keeps that parent tree ahead of paginated activity rows so every sibling remains reachable.",
@@ -3269,14 +3279,15 @@
         "Optional sections are named for their contents instead of repeating Advanced settings. They show Customized for non-default values and open automatically when a hidden field needs attention.",
         "The Access step initially shows one Who can access this wave control. By default, that group can also chat and, for Rank and Approve waves, submit and vote; only the creator can administer the wave.",
         "Customize other permissions expands the separate chat, submission, voting, and admin group controls when a wave needs different access rules.",
-        "Each Access row offers one Edit action with a pencil icon and no Choose group action. Edit opens Identities immediately alongside the rule choices, supports explicitly included and excluded identities, and Next or Review wave stays disabled until the pending replacement is saved or cancelled. Clicking elsewhere in the Create Wave modal keeps the open criteria editor and its draft available; cancelling is not needed to return to the filters. Cancel sits at the far right of the Before editing header row, including on mobile, and discards the pending edit.",
+        "Each Access row offers one Edit action with a pencil icon and no Choose group action. On desktop, Edit opens Identities alongside the rule choices. On smaller screens and touch devices, Edit opens a vertical category list; selecting a category opens its fields, and Back returns to the list without discarding the draft. Explicitly included and excluded identities remain supported, and Next or Review wave stays disabled until the pending replacement is saved or cancelled. Clicking elsewhere in the Create Wave modal keeps the open criteria editor and its draft available; cancelling is not needed to return to the filters. Cancel sits at the far right above the criteria and discards the pending edit. Inside a mobile category, Back and Cancel share one row: Back returns to the categories; Cancel discards the pending edit.",
         "The inline criteria editor includes a Hide criteria and members switch. Its tooltip explains that the criteria and member list remain visible to group members but are hidden from everyone else. The switch starts off for a new inline group, preserves the setting copied from the current assignment, and applies the current setting when Save changes is selected.",
-        "The inline Identities editor can add either included or excluded identities through profile search, an authenticated EMMA allowlist, or a dragged or selected CSV file. Source wallets are normalized and deduplicated, source choices persist while the group remains an unsaved draft, and the latest include or exclude action wins when the same wallet appears on both sides.",
+        "In xTDH Grant, Clear filters appears only when a collection name or grantor is set. It clears those search fields and keeps the active status tab; changing status tabs alone does not show the action.",
+        "The inline Identities editor can add either included or excluded identities through profile search, an authenticated EMMA allowlist, or a dragged or selected CSV file. Included and Excluded show Find an identity to include or Find an identity to exclude above the Search identities to include... or Search identities to exclude... input, respectively. Both tabs omit the empty-selection sentence, empty allowlist or file messages, and zero-total line. Included and Excluded omit the duplicate combined identity count and retain the bottom criteria summary; selected-source counts, errors, limits, and creator warnings remain. Neither Included nor Excluded shows No allowlist added. or No CSV file added. when its import sections are empty. On phones and touch tablets, direct identity selection, EMMA, and CSV file appear in distinct stacked sections. The allowlist search and file upload are always visible. Selected source names, imported counts, loading states, errors, retry, and removal remain available. Desktop keeps its existing two-column import layout. Source wallets are normalized and deduplicated, source choices persist while the group remains an unsaved draft, and the latest include or exclude action wins when the same wallet appears on both sides.",
         "Inline group identity search ranks exact, prefix, and substring profile-handle matches before ENS-only matches, then orders each match group by profile level, highest first.",
-        "An empty access, drop, vote, or chat scope is labeled Everyone. During editing, matching Before editing and After editing summaries compare the applied and proposed audiences.",
+        "An empty access, drop, vote, or chat scope is labeled Everyone outside editing. Create Wave uses the same concise criteria copy as Network Filter: editing hides the default Everyone summary and the Before editing and After editing captions. Selected saved-group details and the proposed criteria remain available. An incomplete draft shows the shared readiness information tooltip beside its summary. On mobile, the criteria summary is a filled card after the editor content and scrolls with the Create Wave form.",
         "A selected saved access group shows its current eligible identity count; View members opens a paginated, searchable member browser without leaving wave creation.",
-        "A valid draft exposes View members from its After editing summary; there is no separate Preview matches, Close, or Discard draft action.",
-        "Criteria appear in a left-side list on desktop in Create Wave, Configuration access editors, and Network Filter. On smaller screens they stay in one horizontal row above the fields; scroll sideways when the options do not fit. Keyboard focus brings each option into view. The open criterion has a calm filled background and is announced as pressed. A check plus an accessible Configured state marks criteria with values independently of which editor is open. Scrolling over an inline access editor scrolls the surrounding Create Wave form.",
+        "A valid draft exposes View members from its criteria summary; there is no separate Preview matches, Close, or Discard draft action.",
+        "Criteria appear in a left-side list on desktop in Create Wave, Configuration access editors, and Network Filter. Create Wave and Network Filter use a vertical category list on smaller screens and touch devices. Select a category to open its fields; the shared Back button returns to the list and restores category focus without discarding changes. Configuration access editors retain a horizontally scrolling row on smaller screens. Keyboard focus brings each option into view. The open desktop criterion has a calm filled background and is announced as current. A check plus an accessible Configured state marks criteria with values independently of which editor is open. Scrolling over an inline access editor scrolls the surrounding Create Wave form.",
         "Make wave public changes access to Everyone and also changes chat, submission, or voting only when that row still matched access at click time; independently customized rows and Admins remain unchanged.",
         "A chat, submission, or voting row that differs from access offers Match wave access to copy the current access group and resume default synchronization.",
         "Group membership previews use current profile, reputation, and ownership data, so the matching identities can change over time.",
@@ -3430,7 +3441,10 @@
         "Wave Configuration contains wave access, chat availability, links, slow mode, curations, chat history deletion and personal display preferences. Selected competition access, rules, appearance and pauses belong to Settings in the main row.",
         "Voter lists and vote activity are available in Votes, under All votes and Activity. Both follow the chosen competition; they are absent from the information panel.",
         "On mobile, selecting the wave name opens a dismissible information panel containing About, REP and Configuration. About includes the pinned drop.",
-        "Closing mobile information or using Back returns to the original competition, tab, curation and scroll position. The underlying view stays mounted.",
+        "Swipe down from the mobile information panel's handle or header, select Close, tap outside, press Escape, or use Back to return to the original competition, tab, curation and scroll position. The underlying view stays mounted. Scrolling the panel content does not dismiss it; short or canceled header drags return it to its open position.",
+        "On mobile, Configuration gear controls open editors inside the information panel. Back, browser Back or Escape returns to Configuration without submitting changes; Save returns after a successful update. Failed saves keep the editor open for retry. Configuration retains its selected tab and scroll position. Close or a downward header swipe dismisses the whole panel.",
+        "On tablet-sized layouts, the overlay side panel also keeps these editors inside the panel. Back or Escape returns to the selected information tab.",
+        "In Configuration's Curations section, the plus button creates a curation and a row gear manages an existing curation. Create curation and Edit curation use the same mobile information sheet or tablet panel at its existing height. Group selection stays inside the form. Back discards the draft and returns to Configuration; Close or a downward header swipe dismisses the panel. Successful saves return to Configuration, while a failed save keeps the draft open. Desktop forms remain separate dialogs.",
         "Selecting a section switches information for the active wave without navigating away from the thread."
       ],
       "canonical_path": "/waves",
@@ -3889,7 +3903,7 @@
       ],
       "facts": [
         "Selecting an access-row gear in Wave Configuration opens the group editor directly without an intermediate context menu.",
-        "The Configuration modal opens on Identities in the same criteria editor as wave creation, including the privacy row, configured criteria rows, Before editing and After editing summaries, Cancel, and Save changes. Wave access editors do not offer Choose group. It preloads the row's rules, included and excluded identities, NFT and grant requirements, and criteria/member privacy setting.",
+        "The Configuration modal opens on Identities in the shared criteria editor, including the privacy row, configured criteria rows, Before editing and After editing summaries, Cancel, and Save changes. Configuration retains those comparison captions; Create Wave uses the simplified Network Filter copy. Wave access editors do not offer Choose group. It preloads the row's rules, included and excluded identities, NFT and grant requirements, and criteria/member privacy setting.",
         "A public access row starts a new criteria draft with the editor's primary wallet explicitly included by default; Include me can be turned off from Identities.",
         "An already restricted row keeps its saved included and excluded identities and does not add the editor automatically.",
         "Included and Excluded use segmented tabs across Create Wave, Edit access, and Network Filter. Saved wallets resolve to profile pictures and handles, with ENS or a shortened wallet address for wallets without profiles. Each saved wallet remains independently removable and is labelled to distinguish multiple wallets belonging to one profile. Long lists show 20 wallets per page. Loading or failed lookups do not block editing or saving; Retry profile lookup retries a failed lookup.",
@@ -3941,10 +3955,12 @@
         "The Access row uses Chat access wording; `Anyone` means no chat access group is attached, independently of whether chat is enabled.",
         "Rank and Approve Configuration shows Chat status separately from Chat access, so disabled chat does not look like the same thing as an unrestricted chat access group.",
         "Access groups available to the current viewer—including authorized private groups and direct-message groups for their eligible authenticated members or creators—link from Configuration to a filtered Network view that shows both the group criteria and current members; Configuration displays a live eligible-member count instead of the generated group name.",
+        "After following a member count from the mobile Wave information sheet to Network, the app header Back button or browser Back returns to the same Wave, selected information tab, and scroll position. Changing Network filters preserves that return destination.",
         "Use the Clear selected group button in Network to close the group summary and return to the default member view.",
         "A scoped group hidden from the current viewer is labeled `Private group` without a link, name, id, author, criteria, or membership details.",
         "Network does not reuse a selected group's cached criteria or members after the authenticated viewer changes, or while opening a different group.",
-        "When chat is disabled, slow mode and disable-links settings are hidden because they only apply when chat is enabled."
+        "When chat is disabled, slow mode and disable-links settings are hidden because they only apply when chat is enabled.",
+        "Wave setting editors inside the mobile information sheet or tablet panel use Back to discard changes and return to Configuration, or Close and a downward header swipe to dismiss the sheet. They omit a duplicate Cancel button; desktop setting popovers keep Cancel. Save applies the edit, and a failed save keeps the draft open for retry."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves?create=wave"],
@@ -4022,12 +4038,16 @@
       "facts": [
         "Wave leaderboard docs cover winners, my votes, top voters, sales, sorting, price filters, decision timelines, and drop eligibility states.",
         "Leaderboard availability depends on the wave type and configuration.",
-        "Use the selected competition’s main Leaderboard tab to inspect its entries and ranking."
+        "Use the selected competition’s main Leaderboard tab to inspect its entries and ranking.",
+        "Full wave leaderboard list, grid, and Memes gallery views update scores and ranks live while preserving the visible artwork's position. During touch or momentum scrolling, scores keep updating and card reordering waits until scrolling settles."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
       "tags": ["waves", "leaderboard"],
-      "source_refs": ["ops/docs/waves/leaderboard/README.md"]
+      "source_refs": [
+        "ops/docs/waves/leaderboard/README.md",
+        "ops/docs/waves/leaderboard/feature-drop-states.md"
+      ]
     },
     {
       "id": "waves.memes-submission",
@@ -4075,7 +4095,7 @@
         "In the Artwork step, Add a proposal card frame (optional) is off by default. Select it and choose Vertical or Horizontal to add a thin animated border with four black-and-white 6529 logos around an image, video, or interactive HTML. It is unavailable for GLB models.",
         "The proposal frame says this is a proposal to do something and the artwork may change. Submitting publishes HTML that embeds the original media and creates a framed still for gallery views. Video and HTML submissions still require a preview image in Additional Information. Select the top-right logo to pause the animation; reduced-motion preferences stop it automatically.",
         "Resubmitting a framed submission restores the original artwork and orientation. Uncheck the proposal frame option to remove it or change orientation without nesting another frame. A preview or frame-publishing failure stops submission and can be retried.",
-        "Memes Quick Vote opens from the Uncast Power card or compact bolt-count trigger in supported Waves footers when an authenticated non-proxy profile has remaining voting power and unrated submissions.",
+        "Memes Quick Vote opens from the Uncast Power card or compact bolt-count trigger in supported Waves footers when an authenticated non-proxy profile has remaining voting power and unrated submissions. Below 768px, its close button stays at the top left through loading, loaded, error and restart states; at 768px and wider it stays at the top right. Close is available and takes keyboard focus during loading. The loading header matches the space for the two-line counts. Escape or clicking the backdrop closes the dialog and returns focus to the opener.",
         "The Quick Vote dialog shows submission counts at the top and remaining voting power above the bottom controls: Change vote amount on the left, Vote in the center, and Skip on the right.",
         "Quick Vote custom entry starts closed. Open Change vote amount to type an amount, then select Vote or press Enter. Closing the editor retains the draft for reopening on the same submission; typing alone does not save it as a remembered amount. Selecting a remembered amount submits that vote.",
         "In the native app's mobile layout, the Quick Vote dialog shrinks when the keyboard opens to keep the amount input and voting controls above it.",
@@ -6003,7 +6023,8 @@
         "On Apple mobile while the reader is not pinned to the bottom, newest drops can be held behind the new-messages control until the user reveals them.",
         "Thread reply views listen for drop updates and refetch replies, so a thread can lag briefly even when the notification arrives.",
         "Connectivity problems can make feeds or counts appear stale until reconnect or refresh.",
-        "The realtime troubleshooting docs cover connection recovery and expected limitations."
+        "The realtime troubleshooting docs cover connection recovery and expected limitations.",
+        "After the connection recovers, the app returns to the foreground, or the server asks it to repair missed live updates, active data refreshes after a short staggered delay. Repeated refresh requests are combined and hidden tabs wait until visible. Individual events are not guaranteed to replay. Signing out still stops the authenticated connection."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/notifications", "/nft-activity"],
@@ -6077,7 +6098,6 @@
         "nic",
         "what is nic",
         "what does nic stand for",
-        "network identity credits",
         "network identity check",
         "rate nic",
         "rep dialog",
@@ -6101,7 +6121,7 @@
       "facts": [
         "The combined Identity tab is the default profile tab at /{user}; /{user}/identity is a legacy redirect.",
         "NIC is the 6529 network identity trust signal shown on profile identity surfaces.",
-        "App copy refers to NIC as Network Identity Credits in the FAQ and Network Identity Check in the profile identity header.",
+        "App copy expands NIC as Network Identity Check (D142) in both the About FAQ and the profile identity header.",
         "The Identity tab surfaces profile identity, REP behavior, NIC ratings, NIC statements, and activity log behavior where available.",
         "On mobile, a compact selector switches between Total Rep, NIC, and ID Statements without changing the profile URL.",
         "Grant REP keeps its compact category pills and existing search and selection behavior, including similarly named categories remaining separate and selectable.",
@@ -6148,7 +6168,7 @@
         "Identity statements are managed from profile identity surfaces on /{user}.",
         "On mobile, select the ID Statements score card to open the addresses and statements card. The personalized Wallet heading and wallet controls come first; below a divider, the ID Statements heading has an information button and compact Add action for eligible owners.",
         "The profile’s Wallet section precedes ID Statements. Statement groups include Social Media Accounts, NFT Accounts, Contact, and Social Media Verification Posts; there is no separate Consolidated Addresses label.",
-        "The information tooltip beside ID Statements explains that statements are optional and permanently public, social accounts are self-declared and 6529 does not connect to them or verify account ownership or posts, and the community rates statement accuracy. Open it on hover, keyboard focus or tap; Escape or an outside click dismisses it.",
+        "The information tooltip beside ID Statements explains that statements are optional and permanently public, social accounts are self-declared and 6529 does not connect to them or verify account ownership or posts, and the community rates statement accuracy. Open it on hover, keyboard focus or tap; Escape, an outside click, or a page-scrolling gesture dismisses it. Automatic page adjustments and scrolling inside the tooltip keep it open. During initial page loading, the information button stays disabled until it can respond.",
         "Eligible profile owners use Add to open a bottom sheet on mobile or a dialog on desktop, choose a statement group and platform, and can return with Back to statement types before saving.",
         "Social Media Accounts, NFT Accounts, and Contact use compact icon rows for platform selection; pointer hover and keyboard focus reveal each platform name, and the selected option has a stronger outline.",
         "On mobile, the add-statements sheet presents four compact statement groups, keeps an optional and permanently public notice visible throughout the Add flow, and provides header close, back, backdrop, Escape, and swipe-down dismissal paths.",
@@ -6307,7 +6327,7 @@
       ],
       "tags": ["profiles", "collected", "nfts"],
       "source_refs": [
-        "app/[user]/collected/page.tsx",
+        "app/[user]/(profile)/collected/page.tsx",
         "ops/docs/profiles/tabs/feature-collected-tab.md",
         "components/user/collected/stats/useCollectedStatsData.ts",
         "components/user/collected/stats/subcomponents/CollectedStatsHeader.tsx",
@@ -6390,7 +6410,7 @@
       "related_paths": ["/network/xtdh"],
       "tags": ["profiles", "xtdh"],
       "source_refs": [
-        "app/[user]/xtdh/page.tsx",
+        "app/[user]/(profile)/xtdh/page.tsx",
         "ops/docs/profiles/tabs/feature-xtdh-tab.md"
       ]
     },
@@ -6532,9 +6552,9 @@
         "worth checking out"
       ],
       "facts": [
-        "Worth Checking Out comes first and Active Votes follows as separate collapsible sections in the Waves sidebar, each with its own description and view-all link, including for signed-out visitors.",
+        "Worth Checking Out comes first and Active Votes follows as separate collapsible sections in the Waves sidebar, including for signed-out visitors. While content first loads, each shows quiet avatar or vote-row placeholders and a screen-reader loading announcement. Descriptions appear with loaded content. Only successful empty requests show the empty message, without a description. Failures offer Try again. Loading more votes preserves the existing rows and description. Headings and View all links remain available.",
         "Active Votes shows ongoing TDH votes in a scrollable window three compact rows tall. Scroll to load additional pages, or use Load more. The total count stays visible when collapsed. The currently open wave is highlighted here, even when it is also highlighted in the collection list. Its compact header includes a separate View all link aligned to the right, with the collapse chevron beside the title, available even when collapsed; the link opens /discover?view=active-votes without toggling the section. Direct messages and their subwaves are excluded even when readable. Each wave sets its own voting rules.",
-        "Worth Checking Out shows up to six highly rated waves, excluding followed waves for signed-in personal viewers, with fewer previews on narrow screens. Its sidebar description is Highly rated waves for signed-out visitors, without following language. The full discovery page uses Active discussions for signed-out visitors and Newest waves for the Newest sort. It has its own compact height. The header’s separate View all link stays available when collapsed and opens /discover?view=recommendations&sort=QUALITY.",
+        "Worth Checking Out shows up to six highly rated waves, excluding followed waves for signed-in personal viewers, with fewer previews on narrow screens. Its sidebar description is Highly rated waves you don’t follow for both signed-in and signed-out visitors. The full discovery page uses Active discussions for signed-out visitors and Newest waves for the Newest sort. It has its own compact height. The header’s separate View all link stays available when collapsed and opens /discover?view=recommendations&sort=QUALITY.",
         "If there are no active votes, Active Votes shows No active TDH votes right now in a compact area. Its heading, zero count and view-all link remain available. Loading and request errors are distinct from empty results; retrying a failed next page keeps previously loaded votes.",
         "Both sidebar discovery sections start expanded. Each heading toggles only its own content, and each collapsed state is saved locally in this browser across visits. The chevron points down when expanded and right when collapsed. The former shared tab and collapse preferences are no longer used.",
         "Discover Waves is a labeled link in the Profile Waves Feed header and a searchable destination that routes to /discover. Worth Checking Out is the first tab and default; Active Votes is second. The sidebar follows the same order, with direct View all links to each tab.",
@@ -6576,6 +6596,7 @@
         "curation"
       ],
       "facts": [
+        "When switching to a wave that needs to load, its name and picture from the wave list appear immediately with a quiet loading state. Shared links without an available wave name show Loading wave…. Recently opened waves use available content without a forced loading screen. If loading fails, the wave identity stays visible and Try again retries; competition views retain their own recovery controls.",
         "Wave content tabs organize the visible wave content area. App tabs and their content share the same availability rules. An unavailable legacy competition section opens Leaderboard, or Submissions after voting ends, and selects that visible tab.",
         "While a section opens, the tab row stays visually steady and screen readers announce loading when needed. Fast switches have no minimum waiting time or required loading screen. Switching only the section within the same page does not reload the page; the section can still show its own loading state when its data is not available. Competition controls become active after their destination opens, so sort sheets and forms stay in the selected view.",
         "Memes wave tabs start with Chat, followed by Leaderboard or Submissions after voting ends, Winners when available, and Votes, with My Votes, All votes and Activity subtabs. Other available sections follow these tabs.",
@@ -6905,6 +6926,28 @@
       ]
     },
     {
+      "id": "waves.drop.editing",
+      "kind": "workflow",
+      "title": "Edit a drop or wave description",
+      "aliases": [
+        "edit message",
+        "edit description",
+        "description edit time limit"
+      ],
+      "keywords": ["drop", "edit", "description", "pinned", "time limit"],
+      "facts": [
+        "Edit is available for your own non-participatory drops. Ordinary drops have a five-minute edit window measured from creation or the latest edit.",
+        "You can save multiple edits within the edit window without reloading the page. Editing text preserves existing images and videos, including after a previous edit has saved.",
+        "The wave's current description (pinned drop) can be edited by its author at any time. Replacing the pinned description makes the previous drop subject to the normal edit window again. Pinning does not grant other users permission to edit the drop.",
+        "Open the drop action menu and choose Edit. Save the changed content; existing mentions, metadata and referenced NFTs are preserved. Editing a description still requires the usual wave access and content validation."
+      ],
+      "canonical_path": "/waves",
+      "tags": ["waves", "drops", "editing", "description"],
+      "source_refs": [
+        "ops/docs/waves/composer/feature-edit-mention-preservation.md"
+      ]
+    },
+    {
       "id": "waves.composer.body-length-limits",
       "kind": "business_rule",
       "title": "Wave drop text and payload limits",
@@ -6980,6 +7023,7 @@
         "Available controls depend on permissions and the current wave state.",
         "Unavailable submission actions use a lock icon at every width. Hover, focus, or select the lock for the full restriction reason; the Memes How to Submit helper keeps its desktop label and opens nomination guidance.",
         "Wave picture edit and link sharing are separate header features.",
+        "Owners can select the three-dot Open options button in About for profile-wave actions and Delete. In the mobile information sheet and tablet overlay, Wave options opens inside the same panel. The mobile sheet keeps its height when opening options or setting editors and when returning with Back. Back returns to About and Close dismisses the panel. Delete requires confirmation; cancelling it returns to Wave options.",
         "A wave you have not joined shows a Join button first in the conversation header's top-right controls."
       ],
       "canonical_path": "/waves",
@@ -7518,8 +7562,10 @@
         "controls"
       ],
       "facts": [
-        "Filter opens Filter Network on Identities with all eight criteria available: Identities, Level, TDH, NIC, Rep, Required NFTs, Collection Access, and xTDH Grant. Criteria form a left-side list on desktop. On smaller screens they stay in one horizontal row above the scrolling fields and scroll sideways when they do not fit. Close dismisses the sheet. Switching criteria preserves the draft. The mobile sheet keeps a compact, consistent height between criteria, and Create and use new group fills the content width on narrow screens. Editors and EMMA allow-list results scroll above the keyboard. While typing, Before editing and After editing visually collapse to leave room for the fields; keyboard focus reveals member-preview controls, and status text stays available to screen readers.",
-        "After editing shows selected criteria as separate tags and View members for valid criteria. Long tag lists scroll while the preview and create action remain visible. Incomplete criteria show Not ready yet. and its guidance directly. Before editing shows the current scope and, with a selected group, its criteria, count, and View members without an extra disclosure step. Create and use new group saves the criteria as a new group and immediately applies it to the Network member list. Clear selected group above the results clears the scope.",
+        "Filter opens Filter Network with all eight criteria available: Identities, Level, TDH, NIC, Rep, Required NFTs, Collection Access, and xTDH Grant. Desktop keeps a left-side list with Identities open first. Phones and touch tablets open a vertical list; scroll down to reach the remaining rows. Selecting a row opens only its editor. Back returns to the list with the draft preserved and focus restored to the selected row. Configured rows have a checkmark. Close dismisses either step. The mobile sheet uses the available screen height, keeps its height between criteria, and keeps only Create and use new group in a fixed bottom action area. Editors and EMMA allow-list results scroll above the keyboard. The mobile criteria summary scrolls with the content rather than taking space from the editor while typing.",
+        "The summary shows selected criteria as separate tags and View members for valid criteria. On mobile, the summary is a filled card at the end of the category list or editor content. Its tags, member count, and View members scroll together, and long tag lists expand with the card. Only the create action stays fixed at the bottom. Desktop keeps the summary beside the action and scrolls long tag lists within the summary. An incomplete draft keeps the create action disabled; select the information button beside the summary to read Not ready yet. and its guidance. The untouched filter does not open with a warning message. When a group is selected, its name, criteria, count, and View members appear at the top. On mobile this summary is in the list step, reached with Back from an editor. Without a selected group, the sheet starts directly with the criteria list. The filter does not show Before editing or After editing labels. Create and use new group saves the criteria as a new group and immediately applies it to the Network member list. Clear selected group above the results clears the scope.",
+        "In Identities > Included, search directly to add identities or use Include me, an EMMA allowlist, or a CSV file. Find an identity to include appears above the Search identities to include... input. Excluded shows Find an identity to exclude above the Search identities to exclude... input. Both tabs omit the empty-selection sentence and empty import messages. Included and Excluded omit the duplicate combined identity count and retain the bottom criteria summary. Individual import counts, file names, limit warnings, and errors remain visible. Neither Included nor Excluded shows No allowlist added. or No CSV file added. when its import sections are empty. On phones and touch tablets, direct identity selection, EMMA, and CSV file appear in distinct stacked sections. The allowlist search and file upload are always visible. Selected source names, imported counts, loading states, errors, retry, and removal remain available. Desktop keeps its existing two-column import layout.",
+        "In xTDH Grant, Clear filters appears after entering a collection name or selecting a grantor. Switching status tabs alone does not show it. It clears the grant search fields, keeps the active status tab, and disappears again. It does not remove a selected grant or other Network criteria. On phones and touch tablets, the search fields and grant cards share one scroll area. Load more follows the last loaded card, while Back, Close, and the bottom action stay accessible. Desktop keeps its separate results scroll area.",
         "When a group is already active, reopening the filter prefills its criteria and identity lists. Saving edits creates a new group without mutating the original.",
         "Signed-in users with active Network criteria can use REP everyone matching criteria or NIC everyone matching criteria below the selected Network filter name to grant credits to every matching member.",
         "Criteria-matched bulk REP requires an amount and category; bulk NIC requires an amount. The actions are hidden when criteria are empty, loading, unavailable, or the viewer is signed out.",

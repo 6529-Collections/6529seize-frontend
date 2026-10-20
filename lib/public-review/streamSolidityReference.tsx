@@ -95,6 +95,7 @@ export function getStreamSolidityReferenceReader({
   }
   defaultReader ??= createSolidityReferenceReader({
     identity: STREAM_SOLIDITY_REFERENCE_IDENTITY,
+    remoteOrigin: publicEnv.BASE_ENDPOINT,
   });
   return defaultReader;
 }

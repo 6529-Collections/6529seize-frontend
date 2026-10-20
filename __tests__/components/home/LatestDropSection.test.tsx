@@ -1,9 +1,14 @@
 import LatestDropSection from "@/components/home/now-minting/LatestDropSection";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 const mockUseLatestDropTransitionReady = jest.fn();
 const mockUseNextMintDrop = jest.fn();
 const mockUseNowMintingStatus = jest.fn();
+const mockRefetch = jest.fn();
+
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: () => "en-US",
+}));
 
 jest.mock("@/hooks/useNextMintDrop", () => ({
   useNextMintDrop: () => mockUseNextMintDrop(),
@@ -20,8 +25,18 @@ jest.mock("@/components/home/now-minting/useLatestDropTransitionReady", () => ({
 
 jest.mock("@/components/home/now-minting/NowMintingSection", () => ({
   __esModule: true,
-  default: ({ nft }: { readonly nft?: { readonly id: number } }) => (
-    <div data-testid="latest-drop" data-token-id={nft?.id}>
+  default: ({
+    nft,
+    isFetching,
+  }: {
+    readonly nft?: { readonly id: number };
+    readonly isFetching: boolean;
+  }) => (
+    <div
+      data-testid="latest-drop"
+      data-token-id={nft?.id}
+      data-loading={!nft && isFetching}
+    >
       Latest Drop
     </div>
   ),
@@ -38,11 +53,14 @@ jest.mock("@/components/home/now-minting/LatestDropNextMintSection", () => ({
 
 describe("LatestDropSection", () => {
   beforeEach(() => {
+    mockRefetch.mockReset();
     mockUseNowMintingStatus.mockReturnValue({
       nft: { id: 536 },
       isFetching: false,
       isDropComplete: true,
       isStatusLoading: false,
+      error: null,
+      refetch: mockRefetch,
     });
     mockUseNextMintDrop.mockReturnValue({
       nextMint: { id: "next-drop" },
@@ -51,6 +69,115 @@ describe("LatestDropSection", () => {
       isSettingsLoaded: true,
     });
     mockUseLatestDropTransitionReady.mockReturnValue(false);
+  });
+
+  it.each(["mint status", "settings", "winner"])(
+    "renders available artwork without waiting for %s",
+    (pending) => {
+      mockUseNowMintingStatus.mockReturnValue({
+        nft: { id: 536 },
+        isFetching: false,
+        isDropComplete: false,
+        isStatusLoading: pending === "mint status",
+      });
+      mockUseNextMintDrop.mockReturnValue({
+        nextMint: null,
+        waveId: pending === "settings" ? null : "main-stage-wave",
+        isFetching: pending === "winner",
+        isSettingsLoaded: pending !== "settings",
+      });
+
+      render(<LatestDropSection />);
+
+      expect(screen.getByTestId("latest-drop")).toHaveAttribute(
+        "data-token-id",
+        "536"
+      );
+      expect(screen.getByTestId("latest-drop")).toHaveAttribute(
+        "data-loading",
+        "false"
+      );
+      expect(screen.queryByTestId("next-drop")).not.toBeInTheDocument();
+    }
+  );
+
+  it("keeps a confirmed next drop mounted while data refreshes", () => {
+    mockUseLatestDropTransitionReady.mockReturnValue(true);
+    const { rerender } = render(<LatestDropSection />);
+    const nextDrop = screen.getByTestId("next-drop");
+
+    mockUseNowMintingStatus.mockReturnValue({
+      nft: { id: 536 },
+      isFetching: true,
+      isDropComplete: true,
+    });
+    mockUseNextMintDrop.mockReturnValue({
+      nextMint: { id: "next-drop" },
+      isFetching: true,
+      isSettingsLoaded: true,
+      waveId: "main-stage-wave",
+    });
+    rerender(<LatestDropSection />);
+
+    expect(screen.getByTestId("next-drop")).toBe(nextDrop);
+    expect(screen.queryByTestId("latest-drop")).not.toBeInTheDocument();
+  });
+
+  it("keeps cached artwork visible after a failed background refresh", () => {
+    mockUseNowMintingStatus.mockReturnValue({
+      nft: { id: 536 },
+      isFetching: false,
+      isDropComplete: false,
+      error: new Error("offline"),
+    });
+    render(<LatestDropSection />);
+    expect(screen.getByTestId("latest-drop")).toHaveAttribute(
+      "data-token-id",
+      "536"
+    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("offers recovery after an initial artwork failure", () => {
+    mockUseNowMintingStatus.mockReturnValue({
+      nft: undefined,
+      isFetching: false,
+      isDropComplete: false,
+      error: new Error("offline"),
+      refetch: mockRefetch,
+    });
+    const { rerender } = render(<LatestDropSection />);
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "We couldn’t load the latest artwork"
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(mockRefetch).toHaveBeenCalledTimes(1);
+
+    mockUseNowMintingStatus.mockReturnValue({
+      nft: { id: 536 },
+      isFetching: false,
+      isDropComplete: false,
+      error: null,
+    });
+    rerender(<LatestDropSection />);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByTestId("latest-drop")).toHaveAttribute(
+      "data-token-id",
+      "536"
+    );
+  });
+
+  it("shows a skeleton only while the artwork itself is initially loading", () => {
+    mockUseNowMintingStatus.mockReturnValue({
+      nft: undefined,
+      isFetching: true,
+      isDropComplete: false,
+    });
+    render(<LatestDropSection />);
+    expect(screen.getByTestId("latest-drop")).toHaveAttribute(
+      "data-loading",
+      "true"
+    );
   });
 
   it("keeps the latest drop during the post-mint grace period", () => {

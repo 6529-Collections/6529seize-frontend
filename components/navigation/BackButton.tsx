@@ -15,6 +15,7 @@ import {
   getWaveHomeRoute,
 } from "@/helpers/navigation.helpers";
 import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
+import { useWaveInformation } from "@/contexts/WaveInformationContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
 import { useExitActiveWave } from "./useExitActiveWave";
 import { isCompetitionPathname } from "@/helpers/competition.helpers";
@@ -34,6 +35,7 @@ export default function BackButton({
   const myStream = useMyStreamOptional();
   const exitActiveWave = useExitActiveWave();
   const { goBack, goBackTo } = useNavigationHistoryContext();
+  const information = useWaveInformation();
 
   const waveId =
     myStream?.activeWave.id ??
@@ -79,6 +81,10 @@ export default function BackButton({
 
   const handleClick = () => {
     if (loading) return;
+    if (information?.returnFromNavigation) {
+      information.returnFromNavigation();
+      return;
+    }
 
     // Create routes → go to base route
     if (pathname === "/waves/create") {

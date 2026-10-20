@@ -7,7 +7,7 @@ import UserCICAndLevel, {
 } from "@/components/user/utils/UserCICAndLevel";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { SingleWaveDropPosition } from "@/components/waves/drop/SingleWaveDropPosition";
-import { ImageScale } from "@/helpers/image.helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -143,7 +143,7 @@ function MyVoteAuthor({ author }: { readonly author: ExtendedDrop["author"] }) {
       <div className="tw-relative tw-size-6 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10">
         {author.pfp ? (
           <Image
-            src={author.pfp}
+            src={getScaledImageUri(author.pfp, ImageScale.W_AUTO_H_50)}
             alt=""
             width={24}
             height={24}
@@ -200,7 +200,10 @@ function MyVoteVoters({ drop }: { readonly drop: ExtendedDrop }) {
                 {voter.profile.pfp ? (
                   <Image
                     className="tw-size-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
-                    src={voter.profile.pfp}
+                    src={getScaledImageUri(
+                      voter.profile.pfp,
+                      ImageScale.W_AUTO_H_50
+                    )}
                     width={24}
                     height={24}
                     unoptimized
