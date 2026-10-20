@@ -9,8 +9,9 @@ import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrappe
 import Button from "@/components/utils/button/Button";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
-import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
+import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
+import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
@@ -25,7 +26,7 @@ import {
   ShieldCheckIcon,
   Squares2X2Icon,
 } from "@heroicons/react/24/outline";
-import { useState, type KeyboardEvent } from "react";
+import { useId, useState, type KeyboardEvent } from "react";
 
 export type DiscoverScoreFilter = "ALL" | "SCORE_50" | "HOT_60" | "REP_60";
 export type DiscoverSort = ApiWaveScoreSort | "NEWEST" | "LATEST_POSTS";
@@ -108,21 +109,37 @@ function ScoreSortIcon({
 export function ScoreFormulaLink() {
   const locale = useBrowserLocale();
   const label = t(locale, "waves.discovery.scoreFormula");
+  const tooltipId = buildTooltipId("discover-score-formula", useId());
   return (
-    <CustomTooltip content={label} placement="bottom">
+    <>
       <ButtonLink
         href="/network/wave-score"
         variant="secondary"
-        size="sm"
+        size={null}
         aria-label={label}
-        className="motion-reduce:tw-transition-none"
+        data-tooltip-id={tooltipId}
+        data-tooltip-content={label}
+        className="tw-size-9 tw-text-xs motion-reduce:tw-transition-none @[36rem]/discovery-heading:tw-w-auto @[36rem]/discovery-heading:tw-px-3"
       >
         <CalculatorIcon className="tw-size-4 tw-shrink-0" aria-hidden="true" />
         <span className="tw-hidden @[36rem]/discovery-heading:tw-inline">
           {label}
         </span>
       </ButtonLink>
-    </CustomTooltip>
+      <BodyPortalTooltip
+        id={tooltipId}
+        place="bottom"
+        offset={8}
+        opacity={1}
+        style={TOOLTIP_STYLES}
+        closeEvents={{ mouseleave: true, blur: true, click: true }}
+        globalCloseEvents={{
+          escape: true,
+          clickOutsideAnchor: true,
+          scroll: true,
+        }}
+      />
+    </>
   );
 }
 
