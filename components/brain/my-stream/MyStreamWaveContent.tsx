@@ -303,7 +303,10 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   } = participation;
   const { isVotingControlsLocked: isApprovalVotingControlsLocked } =
     useApprovalWaveStatus({ wave: submissionWave });
-  const showGalleryToggle = wave?.wave.type === ApiWaveType.Chat && !isDm;
+  const showGalleryToggle =
+    wave?.wave.type === ApiWaveType.Chat &&
+    !isDm &&
+    !isCompetitionPathname(pathname);
   const hasSerialTarget = searchParams.get("serialNo") !== null;
   const submissionExperience = useMemo(
     () =>

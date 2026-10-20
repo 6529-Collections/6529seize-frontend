@@ -14,6 +14,7 @@ import { useWaveData } from "@/hooks/useWaveData";
 import { CompetitionState } from "@/components/competitions/CompetitionState";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiCompetition } from "@/generated/models/ApiCompetition";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 const mockUseCompetitionSubmissionWave = jest.fn(
   (wave: ApiWave | null | undefined, enabled = true) => ({
@@ -73,6 +74,9 @@ const mockSetViewMode = jest.fn();
 const mockToggleViewMode = jest.fn();
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
+const mockSharedWaveTabs = jest.fn((_props: { showGalleryToggle: boolean }) => (
+  <div data-testid="tabs" />
+));
 const mockMemesArtSubmissionModal = jest.fn((props: any) =>
   props.isOpen ? <div data-testid="memes-submit-modal" /> : null
 );
@@ -270,7 +274,8 @@ jest.mock("@/components/waves/winners/WaveWinners", () => ({
 }));
 
 jest.mock("@/components/brain/my-stream/tabs/MyStreamWaveTabs", () => ({
-  MyStreamWaveTabs: () => <div data-testid="tabs" />,
+  MyStreamWaveTabs: (props: { showGalleryToggle: boolean }) =>
+    mockSharedWaveTabs(props),
 }));
 
 jest.mock("@/components/brain/my-stream/MyStreamWaveDesktopTabs", () => ({
@@ -354,6 +359,28 @@ describe("MyStreamWave registration", () => {
       );
     });
   });
+
+  it.each([
+    { pathname: "/waves/wave-1", visible: true },
+    { pathname: "/waves/wave-1/competitions/alpha", visible: false },
+  ])(
+    "scopes the shared Chat gallery action on $pathname with a native submission target",
+    ({ pathname, visible }) => {
+      mockPathname = pathname;
+      mockResolvedWave = {
+        ...mockWave,
+        wave: { ...mockWave.wave, type: ApiWaveType.Chat },
+      };
+      renderWave();
+      expect(mockUseCompetitionSubmissionWave).toHaveBeenCalledWith(
+        mockResolvedWave,
+        true
+      );
+      expect(mockSharedWaveTabs).toHaveBeenCalledWith(
+        expect.objectContaining({ showGalleryToggle: visible })
+      );
+    }
+  );
 
   it.each([
     "/waves/wave-1/competitions",

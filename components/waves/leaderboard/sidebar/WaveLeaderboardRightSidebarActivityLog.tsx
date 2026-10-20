@@ -19,7 +19,10 @@ import {
 } from "@/helpers/waves/wave-right-panel.helpers";
 
 interface WaveLeaderboardRightSidebarActivityLogProps {
-  readonly log: ApiWaveLog;
+  // Historical wire rows can retain SQL NULL despite the published Date model.
+  readonly log: Omit<ApiWaveLog, "created_at"> & {
+    readonly created_at: Date | null;
+  };
   readonly creditType: ApiWaveCreditType;
   readonly onDropClick: (() => void) | null;
 }
@@ -114,9 +117,11 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
       </Link>
 
       <div className="tw-col-start-2 tw-row-start-1 tw-flex tw-items-center tw-justify-end tw-gap-1 md:tw-col-start-4">
-        <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-tabular-nums tw-text-iron-400">
-          {getTimeAgoShort(new Date(log.created_at).getTime())}
-        </span>
+        {log.created_at !== null && (
+          <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-tabular-nums tw-text-iron-400">
+            {getTimeAgoShort(new Date(log.created_at).getTime())}
+          </span>
+        )}
         {onDropClick && (
           <WaveLeaderboardRightSidebarActivityLogDrop
             onDropClick={onDropClick}
