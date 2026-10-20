@@ -130,6 +130,57 @@ it("shows the confirmed next mint with two leaders", () => {
   expect(screen.queryByText("Third artwork")).not.toBeInTheDocument();
 });
 
+it.each(["loaded", "empty", "failed"])(
+  "keeps two leader placeholders beside a ready next mint until the request is %s",
+  (outcome) => {
+    winnerMock.mockReturnValue({
+      ...getWinner(),
+      nextMint: winner,
+      nextMintTitle: winner.title ?? null,
+    });
+    leaderboardMock.mockReturnValue({
+      ...getLeaderboard(),
+      drops: [],
+      isFetching: true,
+    });
+    const { rerender } = render(<NextMintLeadingSection />);
+    expect(screen.getByRole("article", { name: "Next mint" })).toBeVisible();
+    expect(screen.getAllByTestId("coming-up-loading-card")).toHaveLength(2);
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Loading upcoming artwork…"
+    );
+
+    leaderboardMock.mockReturnValue({
+      ...getLeaderboard(),
+      drops: outcome === "loaded" ? leaders : [],
+      isFetching: false,
+      isError: outcome === "failed",
+    });
+    rerender(<NextMintLeadingSection />);
+    expect(screen.getByRole("article", { name: "Next mint" })).toBeVisible();
+    expect(screen.queryAllByTestId("coming-up-loading-card")).toHaveLength(0);
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("article")).toHaveLength(
+      outcome === "loaded" ? 3 : 1
+    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  }
+);
+
+it("keeps cached leaders visible beside next mint during refresh", () => {
+  winnerMock.mockReturnValue({
+    ...getWinner(),
+    nextMint: winner,
+    nextMintTitle: winner.title ?? null,
+  });
+  leaderboardMock.mockReturnValue({ ...getLeaderboard(), isFetching: true });
+  render(<NextMintLeadingSection />);
+  expect(screen.getAllByRole("article")).toHaveLength(3);
+  expect(screen.queryAllByTestId("coming-up-loading-card")).toHaveLength(0);
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
+});
+
 it.each([false, true])(
   "does not add error or retry UI after a failed refresh with cached cards=%s",
   (cached) => {
