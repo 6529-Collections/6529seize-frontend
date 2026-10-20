@@ -162,12 +162,15 @@ export function ComingUpArtistCredits({
           {extraNames > 0 && (
             <Link
               href={dropHref}
-              aria-label={t(locale, "home.comingUp.credits.viewAllCredits")}
               className={`tw-shrink-0 tw-text-iron-500 desktop-hover:hover:tw-text-white ${CREDIT_LINK_CLASS}`}
             >
               {t(locale, "home.comingUp.credits.moreNames", {
                 count: formatNumber(locale, extraNames),
               })}
+              <span className="tw-sr-only">
+                {" "}
+                {t(locale, "home.comingUp.credits.viewAllCredits")}
+              </span>
             </Link>
           )}
         </div>
