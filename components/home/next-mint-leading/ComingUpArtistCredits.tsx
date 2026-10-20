@@ -19,13 +19,7 @@ const CREDIT_AVATAR_CLASS =
   "tw-relative tw-block tw-size-7 tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-2 tw-ring-iron-950 tw-transition-[margin,transform] tw-duration-200 tw-ease-out after:tw-pointer-events-none after:tw-absolute after:tw-inset-0 after:tw-rounded-lg after:tw-shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] after:tw-content-[''] motion-safe:desktop-hover:hover:-tw-translate-y-px motion-reduce:tw-transition-none";
 
 // Credits are optional while API environments roll out collaboration support.
-export interface ComingUpCreditSource {
-  readonly collaborators?: readonly {
-    readonly id: string;
-    readonly handle: string;
-    readonly pfp?: string | null;
-  }[];
-}
+export type ComingUpCreditSource = Pick<ApiDrop, "collaborators">;
 
 const EMPTY_COLLABORATORS: NonNullable<
   ComingUpCreditSource["collaborators"]
