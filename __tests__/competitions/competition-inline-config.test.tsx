@@ -1,3 +1,4 @@
+import CompetitionApprovalThresholds from "@/components/competitions/CompetitionApprovalThresholds";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import CompetitionOverview from "@/components/competitions/CompetitionOverview";
@@ -10,6 +11,7 @@ import {
 import { WAVE_DISPLAY_METADATA_KEYS as keys } from "@/helpers/waves/wave-metadata.helpers";
 import type { ReactNode } from "react";
 
+let mockLegacyPrimary: string | null = null;
 const mockCompetition = {
   id: "competition",
   wave_id: "wave",
@@ -20,7 +22,13 @@ const mockCompetition = {
   computed_phase: "VOTING_OPEN",
   config_version: 4,
   permissions: { administer: true },
-  decisions: { strategy: {} },
+  decisions: {
+    strategy: {},
+    winning_min_threshold: 10,
+    winning_threshold_min_duration_ms: 5000,
+  },
+  participation: { starts_at: 0, ends_at: 100000 },
+  voting: { ends_at: 100000 },
   presentation: [
     { data_key: keys.customRules, data_value: "Current guidelines" },
     { data_key: keys.submissionButtonLabel, data_value: "Submit art" },
@@ -41,7 +49,7 @@ const config = {
 jest.mock("@/contexts/CompetitionContext", () => ({
   useCompetition: () => ({
     competition: mockCompetition,
-    hub: { legacy_primary_competition_id: null },
+    hub: { legacy_primary_competition_id: mockLegacyPrimary },
   }),
 }));
 jest.mock("@/components/auth/Auth", () => ({
@@ -74,6 +82,7 @@ function setup(component: ReactNode) {
 }
 beforeEach(() => {
   jest.clearAllMocks();
+  mockLegacyPrimary = null;
   mockCompetition.permissions.administer = true;
   mockCompetition.config_version = 4;
   mockCompetition.type = "RANK";
@@ -81,43 +90,49 @@ beforeEach(() => {
   jest.mocked(updateCompetition).mockResolvedValue(mockCompetition as never);
   jest.mocked(invalidateCompetition).mockResolvedValue(undefined);
 });
-it("edits name, description and guidelines in place while preserving execution rules and appearance", async () => {
-  setup(<CompetitionOverview />);
-  fireEvent.click(
-    screen.getByRole("button", { name: "Edit competition details" })
-  );
-  fireEvent.change(screen.getByLabelText("Competition name"), {
-    target: { value: "New name" },
-  });
-  fireEvent.change(screen.getByLabelText("Description"), {
-    target: { value: "New description" },
-  });
-  fireEvent.change(screen.getByLabelText("Guidelines"), {
-    target: { value: "New guidelines" },
-  });
-  fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
-  await waitFor(() =>
-    expect(updateCompetition).toHaveBeenCalledWith(
-      { waveId: "wave", competitionId: "competition" },
-      {
-        idempotency_key: "request-key",
-        config_version: 4,
-        config: {
-          ...config,
-          title: "New name",
-          description: "New description",
-          presentation: [
-            config.presentation[1],
-            { data_key: keys.customRules, data_value: "New guidelines" },
-          ],
-        },
-      }
-    )
-  );
-  await waitFor(() =>
-    expect(screen.queryByLabelText("Competition name")).not.toBeInTheDocument()
-  );
-});
+it.each([null, "competition"])(
+  "edits name, description and guidelines using the same competition configuration for original primary %s",
+  async (primary) => {
+    mockLegacyPrimary = primary;
+    setup(<CompetitionOverview />);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Edit competition details" })
+    );
+    fireEvent.change(screen.getByLabelText("Competition name"), {
+      target: { value: "New name" },
+    });
+    fireEvent.change(screen.getByLabelText("Description"), {
+      target: { value: "New description" },
+    });
+    fireEvent.change(screen.getByLabelText("Guidelines"), {
+      target: { value: "New guidelines" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+    await waitFor(() =>
+      expect(updateCompetition).toHaveBeenCalledWith(
+        { waveId: "wave", competitionId: "competition" },
+        {
+          idempotency_key: "request-key",
+          config_version: 4,
+          config: {
+            ...config,
+            title: "New name",
+            description: "New description",
+            presentation: [
+              config.presentation[1],
+              { data_key: keys.customRules, data_value: "New guidelines" },
+            ],
+          },
+        }
+      )
+    );
+    await waitFor(() =>
+      expect(
+        screen.queryByLabelText("Competition name")
+      ).not.toBeInTheDocument()
+    );
+  }
+);
 it("requires a non-blank title and cancels without saving", () => {
   setup(<CompetitionOverview />);
   fireEvent.click(
@@ -239,4 +254,61 @@ it("saves custom Approve tab labels in the competition presentation", async () =
       { data_key: keys.approvedTabLabel, data_value: "Accepted" },
     ])
   );
+});
+
+it.each([null, "competition"])(
+  "edits approval thresholds through the native config for primary %s",
+  async (primary) => {
+    mockLegacyPrimary = primary;
+    mockCompetition.type = "APPROVE";
+    setup(<CompetitionApprovalThresholds />);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Edit approval thresholds" })
+    );
+    fireEvent.change(screen.getByLabelText("Winning threshold"), {
+      target: { value: "25" },
+    });
+    fireEvent.change(screen.getByLabelText("Threshold hold (seconds)"), {
+      target: { value: "10" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+    await waitFor(() =>
+      expect(updateCompetition).toHaveBeenCalledWith(
+        { waveId: "wave", competitionId: "competition" },
+        expect.objectContaining({
+          config_version: 4,
+          config: {
+            ...config,
+            rules: {
+              ...config.rules,
+              winning_threshold: 25,
+              winning_threshold_min_duration_ms: 10000,
+            },
+          },
+        })
+      )
+    );
+  }
+);
+it("keeps approval thresholds invalid when fractional or longer than the approval window", () => {
+  setup(<CompetitionApprovalThresholds />);
+  fireEvent.click(
+    screen.getByRole("button", { name: "Edit approval thresholds" })
+  );
+  const save = screen.getByRole("button", { name: "Save changes" });
+  fireEvent.change(screen.getByLabelText("Winning threshold"), {
+    target: { value: "1.5" },
+  });
+  expect(save).toBeDisabled();
+  fireEvent.change(screen.getByLabelText("Winning threshold"), {
+    target: { value: "1" },
+  });
+  fireEvent.change(screen.getByLabelText("Threshold hold (seconds)"), {
+    target: { value: "101" },
+  });
+  expect(save).toBeDisabled();
+  fireEvent.change(screen.getByLabelText("Threshold hold (seconds)"), {
+    target: { value: "" },
+  });
+  expect(save).toBeEnabled();
 });

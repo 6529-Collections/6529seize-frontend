@@ -1,5 +1,8 @@
 "use client";
 
+import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
+import { useCompetitionEntrySubmit } from "@/hooks/competitions/useCompetitionEntrySubmit";
+
 import { useRef, useState, useCallback, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
 import type { CreateDropConfig } from "@/entities/IDrop";
@@ -117,6 +120,8 @@ export default function CreateDrop({
     wave,
   });
   const { isMemesWave, isCurationWave, isQuorumWave } = useWave(wave);
+  const nativeCompetition = presentationCompetition(wave);
+  const submitCompetitionEntry = useCompetitionEntrySubmit(nativeCompetition);
   const resolvedSubmissionExperience = resolveWaveSubmissionExperience({
     isMemesWave,
     isCurationWave,
@@ -443,6 +448,8 @@ export default function CreateDrop({
 
   const addDropMutation = useMutation({
     mutationFn: async (body: QueuedDropMutationBody) => {
+      if (nativeCompetition && body.drop.drop_type !== ApiDropType.Chat)
+        return submitCompetitionEntry(body.drop);
       return commonApiPost<ApiCreateDropRequest, ApiDrop>({
         endpoint: `drops`,
         body: body.drop,

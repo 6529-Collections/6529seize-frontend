@@ -90,7 +90,7 @@ const getParentWaveItem = (wave: ApiWave): MobileWaveSubwaveItem => {
           pfp: contributor.pfp ?? "",
           identity: contributor.handle ?? null,
         })) ?? [],
-      type: parentWave.has_competition ? ApiWaveType.Rank : ApiWaveType.Chat,
+      type: ApiWaveType.Chat,
       muted: parentWave.context_profile_context?.muted ?? false,
       unreadDropsCount: parentWave.context_profile_context?.unread_drops ?? 0,
     };

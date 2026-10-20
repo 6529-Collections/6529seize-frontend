@@ -1,5 +1,9 @@
 "use client";
 
+import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -70,6 +74,14 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
   termsSignatureFlowEnabled = true,
 }) => {
   const { isApp } = useDeviceInfo();
+  const locale = useBrowserLocale();
+  const nativeCompetition = presentationCompetition(wave);
+  const [acceptedTermsVersion, setAcceptedTermsVersion] = useState<
+    number | null
+  >(null);
+  const nativeTerms = nativeCompetition?.participation.terms ?? null;
+  const termsAccepted =
+    !nativeTerms || acceptedTermsVersion === nativeCompetition?.config_version;
   const { editingDropId } = useEditingDrop();
   const { isSafeWallet, address } = useSeizeConnectContext();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
@@ -112,7 +124,7 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
     return normalizeCurationDropInput(urlValue);
   }, [urlValue]);
 
-  const canSubmit = !!normalizedCurationUrl && !submitting;
+  const canSubmit = !!normalizedCurationUrl && !submitting && termsAccepted;
   const isInvalid = showLiveValidation && !!curationValidation;
   const invalidHelperText =
     curationValidation?.helperText ?? DEFAULT_HELPER_TEXT;
@@ -125,7 +137,7 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
       if (requestBody.drop_type === ApiDropType.Chat) {
         return requestBody;
       }
-      if (!wave.participation.signature_required) {
+      if (nativeCompetition || !wave.participation.signature_required) {
         return requestBody;
       }
 
@@ -178,11 +190,16 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
         document.dispatchEvent(event);
       });
     },
-    [wave.participation.signature_required, wave.participation.terms, signDrop]
+    [
+      nativeCompetition,
+      wave.participation.signature_required,
+      wave.participation.terms,
+      signDrop,
+    ]
   );
 
   const submitCurationDrop = useCallback(async () => {
-    if (submitting) {
+    if (submitting || !termsAccepted) {
       return;
     }
 
@@ -299,6 +316,7 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
     }
   }, [
     submitting,
+    termsAccepted,
     urlValue,
     requestAuth,
     activeDrop,
@@ -366,6 +384,26 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
         onCancelReplyQuote={onCancelReplyQuote}
         dropId={dropId}
       />
+      {nativeTerms && (
+        <div className="tw-mb-4 tw-space-y-3 tw-text-sm tw-text-iron-300">
+          <p className="tw-whitespace-pre-wrap">{nativeTerms}</p>
+          <label className="tw-flex tw-items-start tw-gap-3">
+            <input
+              type="checkbox"
+              checked={termsAccepted}
+              disabled={submitting}
+              onChange={(event) =>
+                setAcceptedTermsVersion(
+                  event.target.checked
+                    ? (nativeCompetition?.config_version ?? null)
+                    : null
+                )
+              }
+            />
+            <span>{t(locale, "competitions.terms")}</span>
+          </label>
+        </div>
+      )}
       {isLeaderboardVariant ? (
         <div className="tw-flex tw-w-full tw-flex-col tw-gap-3.5">
           <CreateCurationDropUrlInput

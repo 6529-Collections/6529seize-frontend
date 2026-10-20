@@ -24,7 +24,7 @@ jest.mock("next/navigation", () => ({
 jest.mock("@/contexts/CompetitionContext", () => ({
   useCompetition: () => ({
     wave: { id: "wave" },
-    competition: { id: "native", wave_id: "wave" },
+    competition: { id: "native", wave_id: "wave", capabilities: [] },
   }),
 }));
 jest.mock("@/hooks/competitions/useCompetitionEntryDrops", () => ({

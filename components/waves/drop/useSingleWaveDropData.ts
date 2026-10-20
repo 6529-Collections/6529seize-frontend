@@ -1,5 +1,6 @@
 "use client";
 
+import { competitionPresentationWave } from "@/helpers/competition-presentation.helpers";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -21,10 +22,16 @@ export const useSingleWaveDropData = (
     onClose();
   }, [onClose]);
 
-  const { data: wave } = useWaveData({
+  const { data: parentWave } = useWaveData({
     waveId: initialDrop.wave.id,
     onWaveNotFound,
   });
+
+  const competition = initialDrop.competition_context?.data.competition;
+  const wave =
+    parentWave && competition
+      ? competitionPresentationWave(parentWave, competition)
+      : parentWave;
 
   const { data: hydratedMetadata } = useQuery({
     queryKey: [

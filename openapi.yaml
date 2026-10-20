@@ -5974,7 +5974,27 @@ paths:
               - real_time_rating
               - submitted_at
               - trend
+              - price
             default: rating
+        - name: price_currency
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: min_price
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 0
+        - name: max_price
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 0
         - name: direction
           in: query
           required: false
@@ -26295,6 +26315,17 @@ components:
           type: boolean
         administer:
           type: boolean
+        edit_rules_after_activity:
+          type: boolean
+          description: >-
+            Whether this administrator may update established competition rules
+            after entries or votes exist. Individual rule protections still
+            apply.
+        edit_credit_rules:
+          type: boolean
+          description: >-
+            Whether this administrator may edit established voting credit rules.
+            Historical votes permanently lock those rules.
     ApiCompetitionRulesInput:
       type: object
       additionalProperties: false
@@ -28242,6 +28273,10 @@ components:
           $ref: "#/components/schemas/ApiCreateNewWaveChatConfig"
         admin_group:
           $ref: "#/components/schemas/ApiCreateNewWaveScope"
+        admin_drop_deletion_enabled:
+          type: boolean
+          default: false
+          description: Allow wave administrators to delete drops.
         parent_wave_id:
           type: string
           nullable: true
@@ -28532,11 +28567,6 @@ components:
         - is_additional_action_promised
         - hide_link_preview
       properties:
-        collaborators:
-          type: array
-          description: Accepted collaborators only. Pending invitations are private.
-          items:
-            $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
         voters_count_available:
           type: boolean
           description: >-
@@ -28655,6 +28685,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropNftLink"
+        collaborators:
+          type: array
+          description: Accepted collaborators only. Pending invitations are private.
+          items:
+            $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
     ApiDropAndDropVote:
       type: object
       required:
@@ -29298,11 +29333,6 @@ components:
         - drop_type
         - hide_link_preview
       properties:
-        collaborators:
-          type: array
-          description: Accepted collaborators only. Pending invitations are private.
-          items:
-            $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
         id:
           type: string
         serial_no:
@@ -29388,6 +29418,11 @@ components:
           $ref: "#/components/schemas/ApiDropPoll"
         wave:
           $ref: "#/components/schemas/ApiWaveOverview"
+        collaborators:
+          type: array
+          description: Accepted collaborators only. Pending invitations are private.
+          items:
+            $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
     ApiDropV2ContextProfileContext:
       type: object
       required:
@@ -29596,10 +29631,6 @@ components:
         - is_additional_action_promised
         - hide_link_preview
       properties:
-        collaborators:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
         voters_count_available:
           type: boolean
           description: >-
@@ -29716,6 +29747,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropNftLink"
+        collaborators:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
     ApiDropWithoutWavesPageWithoutCount:
       type: object
       required:

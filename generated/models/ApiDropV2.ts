@@ -33,10 +33,6 @@ import { ApiWaveOverview } from '../models/ApiWaveOverview';
 import { HttpFile } from '../http/http';
 
 export class ApiDropV2 {
-    /**
-    * Accepted collaborators only. Pending invitations are private.
-    */
-    'collaborators'?: Array<ApiMemeCollaboratorProfile>;
     'id': string;
     'serial_no': number;
     'created_at': number;
@@ -69,18 +65,16 @@ export class ApiDropV2 {
     'moderation'?: ApiDropModeration;
     'poll'?: ApiDropPoll;
     'wave'?: ApiWaveOverview;
+    /**
+    * Accepted collaborators only. Pending invitations are private.
+    */
+    'collaborators'?: Array<ApiMemeCollaboratorProfile>;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
-        {
-            "name": "collaborators",
-            "baseName": "collaborators",
-            "type": "Array<ApiMemeCollaboratorProfile>",
-            "format": ""
-        },
         {
             "name": "id",
             "baseName": "id",
@@ -253,6 +247,12 @@ export class ApiDropV2 {
             "name": "wave",
             "baseName": "wave",
             "type": "ApiWaveOverview",
+            "format": ""
+        },
+        {
+            "name": "collaborators",
+            "baseName": "collaborators",
+            "type": "Array<ApiMemeCollaboratorProfile>",
             "format": ""
         }    ];
 

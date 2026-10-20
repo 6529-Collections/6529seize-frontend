@@ -29,7 +29,6 @@ import {
   isCompetitionPathname,
   getCompetitionTab,
   getCompetitionsRoute,
-  isMultiCompetitionEnabled,
 } from "@/helpers/competition.helpers";
 import { useCompetitionNavigation } from "@/contexts/CompetitionNavigationContext";
 import {
@@ -38,6 +37,7 @@ import {
 } from "@/helpers/default-competition.helpers";
 import { hasWaveDestination } from "@/hooks/useWaveTabPreference";
 import { useContentTab } from "../ContentTabContext";
+import { isCompetitionSubmissionHistory } from "@/helpers/competition-lifecycle.helpers";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 import {
   getApproveWaveTabLabelsFromMetadata,
@@ -137,6 +137,13 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     : outcomesVisible;
   const approveLabels = getApproveWaveTabLabelsFromMetadata(nativePresentation);
   const nativeTabLabel = (tab: (typeof COMPETITION_TABS)[number]) => {
+    if (tab === "outcomes") return t(locale, "competitions.outcomeTab");
+    if (
+      tab === "leaderboard" &&
+      nativeCompetition &&
+      isCompetitionSubmissionHistory(nativeCompetition)
+    )
+      return t(locale, "competitions.submissions");
     if (nativeCompetition?.type === ApiCompetitionType.Approve) {
       if (tab === "leaderboard") return approveLabels.approvals;
       if (tab === "decisions") return approveLabels.approved;
@@ -162,7 +169,6 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   const effectiveActiveView =
     (flat && isCompetitionRoute) ||
     (!isCompetitionRoute &&
-      isMultiCompetitionEnabled() &&
       !hasWaveDestination(searchParams) &&
       waveCompetitionTabs[activeContentTab] !== undefined)
       ? (selectedLegacyView as unknown as BrainView)

@@ -12,6 +12,33 @@ import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
 import { useCompetitionEvents } from "@/hooks/competitions/useCompetitionEvents";
 import { useWaveData } from "@/hooks/useWaveData";
 import { CompetitionState } from "@/components/competitions/CompetitionState";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiCompetition } from "@/generated/models/ApiCompetition";
+
+const mockUseCompetitionSubmissionWave = jest.fn(
+  (wave: ApiWave | null | undefined, enabled = true) => ({
+    wave:
+      wave && enabled
+        ? {
+            ...wave,
+            competition: Object.assign(new ApiCompetition(), {
+              id: "primary",
+              wave_id: wave.id,
+              presentation: [],
+              capabilities: [],
+            }),
+          }
+        : null,
+    pending: false,
+    retry: jest.fn(),
+  })
+);
+jest.mock("@/hooks/competitions/useCompetitionSubmissionWave", () => ({
+  useCompetitionSubmissionWave: (
+    wave: ApiWave | null | undefined,
+    enabled?: boolean
+  ) => mockUseCompetitionSubmissionWave(wave, enabled),
+}));
 
 jest.mock("@/hooks/competitions/useCompetitionEvents", () => ({
   useCompetitionEvents: jest.fn(),
@@ -54,7 +81,7 @@ let mockPathname = "/waves/wave-1";
 const mockWave = {
   id: "wave-1",
   name: "Wave 1",
-  chat: { authenticated_user_eligible: true },
+  chat: { authenticated_user_eligible: true, scope: { group: null } },
   voting: { authenticated_user_eligible: true },
   participation: {
     authenticated_user_eligible: true,
@@ -317,6 +344,10 @@ describe("MyStreamWave registration", () => {
 
     await waitFor(() => {
       expect(mockRegisterWave).toHaveBeenCalledWith("wave-1", true);
+      expect(mockUseCompetitionSubmissionWave).toHaveBeenCalledWith(
+        mockResolvedWave,
+        true
+      );
       expect(mockCompleteInitialRegistration).toHaveBeenCalledWith("wave-1");
       expect(mockUpdateAvailableTabs).toHaveBeenCalledWith(
         expect.objectContaining({ waveId: "wave-1" })
