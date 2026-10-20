@@ -21,7 +21,7 @@ export async function expectNativeLeaderboardReady(
     exact: true,
   });
   const empty = region.getByRole("status").filter({
-    hasText: new RegExp(`^${EMPTY_LEADERBOARD.replaceAll(".", "\\.")}$`),
+    hasText: EMPTY_LEADERBOARD,
   });
   if (expectedEmpty === undefined) {
     await expect
@@ -101,6 +101,8 @@ export function observeNativeLeaderboard(page: Page, waveId: string) {
           url.pathname === `/waves/${waveId}/competitions/${competition.id}`,
         { timeout: RESPONSE_TIMEOUT_MS }
       );
+      // Initial Main Stage RANK maps to native rating with no cursor. A later
+      // page or another sort would not verify the initial leaderboard view.
       const response = await read(
         (url) =>
           url.pathname === `${competitionPath}/leaderboard` &&
@@ -129,37 +131,67 @@ export async function expectNativeLeaderboardArtwork(
   await expectNativeLeaderboardReady(page, data.data.length === 0);
   if (data.data.length === 0) return;
 
-  let artwork: { entryId: string; drop: ApiDropAndWave } | undefined;
+  const entriesByDrop = new Map(
+    data.data.map((entry) => [entry.drop_id, entry])
+  );
+  let hydrated: { entryId: string; drop: ApiDropAndWave }[] = [];
   await expect
     .poll(
       async () => {
-        for (const entry of data.data) {
-          const response = reads.find(
-            (item) =>
-              new URL(item.url()).pathname === `/api/v2/drops/${entry.drop_id}`
+        // Only mounted rows hydrate; offscreen API rows need no extra reads.
+        const mountedDropIds = await leaderboardRegion(page)
+          .getByRole("list", { name: "Leaderboard drops", exact: true })
+          .getByRole("listitem")
+          .evaluateAll((items) =>
+            items
+              .map((item) => item.getAttribute("data-leaderboard-drop-id"))
+              .filter((id): id is string => id !== null)
           );
-          if (!response?.ok()) continue;
+        if (mountedDropIds.length === 0) return false;
+        const completed: typeof hydrated = [];
+        for (const dropId of mountedDropIds) {
+          const entry = entriesByDrop.get(dropId);
+          expect(
+            entry,
+            "Rendered drop must belong to the native page"
+          ).toBeDefined();
+          if (!entry) throw new Error("Rendered native entry missing");
+          const response = reads.find(
+            (item) => new URL(item.url()).pathname === `/api/v2/drops/${dropId}`
+          );
+          if (!response) return false;
+          expect(response.ok(), "Rendered rich drop read must succeed").toBe(
+            true
+          );
           const drop: ApiDropAndWave = await response.json();
-          if (!drop.drop.media?.length) continue;
           expect(drop.wave.id).toBe(competition.wave_id);
           expect(drop.drop.id).toBe(entry.drop_id);
-          artwork = { entryId: entry.entry_id, drop };
-          return true;
+          // This marker appears only after context validation AND rich content
+          // hydration. A loading/error wrapper cannot count as a text-only card.
+          const card = leaderboardRegion(page)
+            .getByRole("list", { name: "Leaderboard drops", exact: true })
+            .locator(`[data-leaderboard-drop-id="${dropId}"]`)
+            .locator(`[data-competition-entry="${entry.entry_id}"]`);
+          if (!(await card.isVisible())) return false;
+          completed.push({ entryId: entry.entry_id, drop });
         }
-        return false;
+        hydrated = completed;
+        return true;
       },
       {
         timeout: RESPONSE_TIMEOUT_MS,
-        message: "Expected a hydrated media-bearing native leaderboard entry",
+        message: "Expected rendered native entries to finish scoped hydration",
       }
     )
     .toBe(true);
-  if (!artwork) throw new Error("Native leaderboard artwork missing");
+  const artwork = hydrated.find((item) => item.drop.drop.media?.length);
+  if (!artwork) return;
   const card = leaderboardRegion(page)
     .getByRole("list", { name: "Leaderboard drops", exact: true })
     .locator(`[data-leaderboard-drop-id="${artwork.drop.drop.id}"]`)
     .locator(`[data-competition-entry="${artwork.entryId}"]`);
   await expect(card).toBeVisible();
+  await card.scrollIntoViewIfNeeded();
   // Restrict images to the media primitive so an author avatar cannot satisfy
   // this check; retain video/audio/interactive/3D artwork support.
   await expect(

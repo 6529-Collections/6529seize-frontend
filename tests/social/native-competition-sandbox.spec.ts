@@ -7084,8 +7084,8 @@ ${"Additional terms for review.\n\n".repeat(30)}`,
     }
   });
 
-  for (const populated of [false, true]) {
-    test(`validates the live native leaderboard contract with ${populated ? "populated" : "empty"} data`, async ({
+  for (const variant of ["empty", "populated", "text-only"] as const) {
+    test(`validates the live native leaderboard contract with ${variant} data`, async ({
       page,
     }, testInfo) => {
       const sandbox = await installCompetitionApi(
@@ -7109,29 +7109,36 @@ ${"Additional terms for review.\n\n".repeat(30)}`,
       const fixture = await response.json();
       fixture.wave.id = MEMES_WAVE;
       const artworkId = "00000000-0000-4000-8000-000000009529";
-      const drops = populated
-        ? [
-            {
-              ...fixture.drops[0],
-              id: entryDropId("alpha"),
-              title: "Text entry before artwork",
-              drop_type: "SUBMISSION",
-              media: [],
-            },
-            {
-              ...fixture.drops[0],
-              id: artworkId,
-              title: "Native response artwork",
-              drop_type: "SUBMISSION",
-              media: [
-                {
-                  url: "https://d3lqz0a4bldqgf.cloudfront.net/drops/live-native-contract.png",
-                  mime_type: "image/png",
-                },
-              ],
-            },
-          ]
-        : [];
+      const drops =
+        variant !== "empty"
+          ? [
+              {
+                ...fixture.drops[0],
+                id: entryDropId("alpha"),
+                title: "Text entry before artwork",
+                drop_type: "SUBMISSION",
+                media: [],
+              },
+              {
+                ...fixture.drops[0],
+                id: artworkId,
+                title:
+                  variant === "populated"
+                    ? "Native response artwork"
+                    : "Another native text entry",
+                drop_type: "SUBMISSION",
+                media:
+                  variant === "populated"
+                    ? [
+                        {
+                          url: "https://d3lqz0a4bldqgf.cloudfront.net/drops/live-native-contract.png",
+                          mime_type: "image/png",
+                        },
+                      ]
+                    : [],
+              },
+            ]
+          : [];
       await page.route(
         /https:\/\/d3lqz0a4bldqgf\.cloudfront\.net\/drops\/(?:[^?]*\/)?live-native-contract\.png(?:\?.*)?$/,
         (route) =>
@@ -7146,29 +7153,79 @@ ${"Additional terms for review.\n\n".repeat(30)}`,
         fixture.wave,
         () => drops
       );
+      let releaseHydration = () => {};
+      let heldDrops = 0;
+      if (variant === "text-only") {
+        const hydrationReady = new Promise<void>((resolve) => {
+          releaseHydration = resolve;
+        });
+        await page.route("**/api/v2/drops/*", async (route) => {
+          heldDrops += 1;
+          await hydrationReady;
+          return route.fallback();
+        });
+      }
       const observed = observeNativeLeaderboard(page, MEMES_WAVE);
       try {
         await page.goto(`/waves/${MEMES_WAVE}?tab=leaderboard`);
         const { competition: selected, data } =
           await observed.originalLeaderboard();
-        expect(data.data).toHaveLength(populated ? 2 : 0);
-        await expectNativeLeaderboardReady(page);
-        await expectNativeLeaderboardArtwork(
-          page,
-          selected,
-          data,
-          observed.reads
-        );
-        if (populated) {
+        expect(data.data).toHaveLength(variant === "empty" ? 0 : 2);
+        await expectNativeLeaderboardReady(page, variant === "empty");
+        let hydrationValidated = false;
+        await Promise.all([
+          expectNativeLeaderboardArtwork(
+            page,
+            selected,
+            data,
+            observed.reads
+          ).then(() => {
+            hydrationValidated = true;
+          }),
+          (async () => {
+            if (variant !== "text-only") return;
+            await expect.poll(() => heldDrops).toBeGreaterThan(0);
+            await expect(
+              page.getByRole("tab", { name: "Grid view", exact: true })
+            ).toHaveAttribute("aria-selected", "true");
+            await expect(
+              page
+                .getByRole("list", {
+                  name: "Leaderboard drops",
+                  exact: true,
+                })
+                .locator("[data-competition-entry]")
+            ).toHaveCount(0);
+            expect(hydrationValidated).toBe(false);
+            releaseHydration();
+          })(),
+        ]);
+        if (variant !== "empty") {
           const card = page
             .getByRole("list", { name: "Leaderboard drops", exact: true })
             .locator(`[data-leaderboard-drop-id="${artworkId}"]`)
             .locator(`[data-competition-entry="entry-${artworkId}"]`);
-          await expect(card).toContainText("Native response artwork");
+          await expect(card).toContainText(
+            variant === "populated"
+              ? "Native response artwork"
+              : "Another native text entry"
+          );
+          if (variant === "populated")
+            await expect(
+              page
+                .getByRole("list", {
+                  name: "Leaderboard drops",
+                  exact: true,
+                })
+                .locator(`[data-leaderboard-drop-id="${artworkId}"]`)
+                .locator(`[data-competition-entry="entry-${artworkId}"]`)
+                .locator('img[alt="Media content"]')
+            ).toBeVisible();
         }
         expect(sandbox.requests).toEqual([]);
         await expectNoHorizontalOverflow(page);
       } finally {
+        releaseHydration();
         observed.dispose();
       }
     });
