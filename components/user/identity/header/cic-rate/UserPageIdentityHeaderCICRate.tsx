@@ -210,8 +210,8 @@ export default function UserPageIdentityHeaderCICRate({
 
   const rateInput = (
     <div
-      className={`tw-relative tw-flex tw-w-full ${
-        isTooltip ? "tw-mt-2 sm:tw-max-w-[12rem]" : "tw-mt-2"
+      className={`tw-relative tw-flex tw-w-full tw-min-w-0 ${
+        isTooltip ? "tw-flex-1" : "tw-mt-2"
       }`}
     >
       <UserPageRateInput
@@ -219,7 +219,7 @@ export default function UserPageIdentityHeaderCICRate({
         onChange={setAdjustedRatingStr}
         minMax={minMaxValues}
         isProxy={isProxy}
-        variant={isTooltip ? "compact" : "form"}
+        variant={isTooltip ? "tooltip" : "form"}
         inputId="nic-rating-input"
         focusRingClassName={CIC_FOCUS_RING_CLASS_NAME}
         required
@@ -250,34 +250,24 @@ export default function UserPageIdentityHeaderCICRate({
       <form onSubmit={onSubmit} className="tw-mt-6">
         {isTooltip ? (
           <>
-            <div className="tw-flex tw-flex-col tw-items-stretch tw-gap-3 sm:tw-flex-row sm:tw-items-end">
-              <div className="tw-min-w-0 tw-flex-1">
-                <label
-                  htmlFor="nic-rating-input"
-                  className="tw-block tw-text-sm tw-font-normal tw-text-iron-400 sm:tw-max-w-[12rem]"
-                >
-                  Your total NIC Rating of{" "}
-                  <span className="[overflow-wrap:anywhere]">
-                    {profile.query}:
-                  </span>
-                </label>
-                {rateInput}
-              </div>
-              <div className="tw-w-full tw-flex-shrink-0 sm:tw-w-auto">
-                <div className="tw-inline-flex tw-w-full tw-items-end tw-space-x-6 sm:tw-w-auto">
-                  <Button
-                    type="submit"
-                    disabled={isSaveDisabled}
-                    loading={mutating}
-                    variant="success"
-                    size="xl"
-                    fullWidth
-                    className="sm:tw-w-auto"
-                  >
-                    Rate
-                  </Button>
-                </div>
-              </div>
+            <label
+              htmlFor="nic-rating-input"
+              className="tw-block tw-text-sm tw-font-normal tw-text-iron-400 [overflow-wrap:anywhere]"
+            >
+              Your total NIC Rating of {profile.query}:
+            </label>
+            <div className="tw-mt-2 tw-flex tw-items-stretch tw-gap-3">
+              {rateInput}
+              <Button
+                type="submit"
+                disabled={isSaveDisabled}
+                loading={mutating}
+                variant="success"
+                size="md"
+                className="tw-shrink-0 !tw-text-xs touch-only:tw-h-11"
+              >
+                Rate
+              </Button>
             </div>
             {adjustmentHelper}
           </>

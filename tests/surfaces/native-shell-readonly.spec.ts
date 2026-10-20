@@ -2,7 +2,9 @@ import { defineMobileVideoBatteryTest } from "../media/mobileVideoBatteryCases";
 import type { Locator, Page } from "@playwright/test";
 
 import { expect, test } from "../testHelpers";
-import { gotoReady } from "../support/routeReadiness";
+import { gotoReady, RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
+import { PROFILE_HANDLE } from "../social/profileReadonlyHelpers";
+import { expectUrlState } from "../support/urlState";
 import {
   isCapacitorSimulationProject,
   isElectronSimulationProject,
@@ -238,6 +240,117 @@ async function readNotificationHistoryPushCount(page: Page) {
 }
 
 test.describe("Native and Electron simulated shell read-only coverage @surface @medium @readonly", () => {
+  test("Collect Back restores the Collected filters and source action", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "Native app Back contract"
+    );
+    for (const action of ["Manage orders", "Complete my set"]) {
+      await gotoReady(
+        page,
+        `/${PROFILE_HANDLE}/collected?collection=memes&szn=1&details=closed`
+      );
+      await expect(
+        page.locator('[data-profile-section="Filters"]')
+      ).toBeVisible({
+        timeout: RESPONSE_TIMEOUT_MS,
+      });
+      const source = new URL(page.url());
+      const link = page.getByRole("link", { name: action, exact: true });
+      await link.scrollIntoViewIfNeeded();
+      const destination = new URL(
+        (await link.getAttribute("href"))!,
+        page.url()
+      );
+      expect(destination.searchParams.has("returnTo")).toBe(true);
+      await link.click();
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname ===
+          (action === "Manage orders" ? "/collect/orders" : "/collect")
+      );
+      await page.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(page).toHaveURL((url) => url.pathname === source.pathname);
+      await expectUrlState(page, (url) =>
+        ["collection", "szn", "details"].every(
+          (key) => url.searchParams.get(key) === source.searchParams.get(key)
+        )
+      );
+      await expect(
+        page.getByRole("link", { name: action, exact: true })
+      ).toBeFocused();
+      await expect(
+        page.getByRole("link", { name: action, exact: true })
+      ).toBeInViewport();
+    }
+  });
+
+  for (const path of ["/collect", "/collect/orders"]) {
+    test(`fresh ${path} does not offer a false Back destination`, async ({
+      page,
+    }, testInfo) => {
+      test.skip(
+        !isCapacitorSimulationProject(testInfo.project.name),
+        "Native app Back contract"
+      );
+      // A document navigation starts a fresh app history for each deep link.
+      await gotoReady(page, path);
+      await expect(
+        page.locator('[data-mobile-bottom-nav-dock="true"]')
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Back", exact: true })
+      ).toHaveCount(0);
+    });
+  }
+
+  test("Back remains usable after returning from Orders to a profile", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "Native app Back contract"
+    );
+    await gotoReady(page, "/about");
+    await expect(
+      page.locator('[data-mobile-bottom-nav-dock="true"]')
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Search 6529", exact: true })
+      .click();
+    await page
+      .getByRole("combobox", { name: "Search 6529", exact: true })
+      .fill(PROFILE_HANDLE);
+    await page
+      .getByRole("option")
+      .filter({ hasText: PROFILE_HANDLE })
+      .first()
+      .click();
+    await page
+      .getByRole("navigation", { name: "Profile sections" })
+      .getByRole("link", { name: "Collected", exact: true })
+      .click();
+    await expect(page.locator('[data-profile-section="Filters"]')).toBeVisible({
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
+    await page
+      .getByRole("link", { name: "Manage orders", exact: true })
+      .click();
+    await expectUrlState(page, (url) => url.pathname === "/collect/orders");
+    await page.getByRole("button", { name: "Back", exact: true }).click();
+    await expectUrlState(
+      page,
+      (url) => url.pathname === `/${PROFILE_HANDLE}/collected`
+    );
+    await expect(
+      page.getByRole("button", { name: "Back", exact: true })
+    ).toBeEnabled();
+    await page.getByRole("button", { name: "Back", exact: true }).click();
+    await expectUrlState(page, (url) => url.pathname === "/about");
+  });
+
   test("native profile artwork opens above the app header and closes back to the profile", async ({
     page,
   }, testInfo) => {

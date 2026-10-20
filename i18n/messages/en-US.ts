@@ -147,6 +147,7 @@ const USER_COLLECTED_STATS_MESSAGES = namespaceMessages(
     ["details.show", "Details"],
     ["details.hide", "Hide Details"],
     ["details.unavailable", "Stats are unavailable for this profile."],
+    ["details.loading", "Loading collection details…"],
     ["seasons.title", "Seasons"],
     ["seasons.startedCount", "{started}/{total} started"],
     ["seasons.showLess", "Show less"],
