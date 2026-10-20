@@ -886,9 +886,19 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           ).length
       )
       .toBe(1);
-    await expect(
-      page.getByRole("button", { name: "Explain", exact: true })
-    ).toBeEnabled();
+    const explainVote = page.getByRole("button", {
+      name: "Explain",
+      exact: true,
+    });
+    await expect(explainVote).toBeEnabled();
+    await explainVote.click();
+    const cancelRationale = page.getByRole("button", {
+      name: "Cancel reply",
+      exact: true,
+    });
+    await expect(cancelRationale).toBeVisible();
+    await cancelRationale.click();
+    await expect(explainVote).toBeFocused();
     await page.getByRole("tab", { name: "Settings", exact: true }).click();
     await page
       .getByRole("button", { name: "Edit competition details", exact: true })

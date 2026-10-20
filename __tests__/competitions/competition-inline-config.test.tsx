@@ -10,6 +10,13 @@ import {
 } from "@/services/api/competitions-api";
 import { WAVE_DISPLAY_METADATA_KEYS as keys } from "@/helpers/waves/wave-metadata.helpers";
 import type { ReactNode } from "react";
+import { SUPPORTED_LOCALES, type SupportedLocale } from "@/i18n/locales";
+import { loadLocaleMessages, t } from "@/i18n/messages";
+
+let mockLocale: SupportedLocale = "en-US";
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: () => mockLocale,
+}));
 
 let mockLegacyPrimary: string | null = null;
 const mockCompetition = {
@@ -27,8 +34,11 @@ const mockCompetition = {
     winning_min_threshold: 10,
     winning_threshold_min_duration_ms: 5000,
   },
-  participation: { starts_at: 0, ends_at: 100000 },
-  voting: { ends_at: 100000 },
+  participation: {
+    starts_at: 0 as number | null,
+    ends_at: 100000 as number | null,
+  },
+  voting: { ends_at: 100000 as number | null },
   presentation: [
     { data_key: keys.customRules, data_value: "Current guidelines" },
     { data_key: keys.submissionButtonLabel, data_value: "Submit art" },
@@ -83,6 +93,10 @@ function setup(component: ReactNode) {
 beforeEach(() => {
   jest.clearAllMocks();
   mockLegacyPrimary = null;
+  mockLocale = "en-US";
+  mockCompetition.participation.starts_at = 0;
+  mockCompetition.participation.ends_at = 100000;
+  mockCompetition.voting.ends_at = 100000;
   mockCompetition.permissions.administer = true;
   mockCompetition.config_version = 4;
   mockCompetition.type = "RANK";
@@ -290,7 +304,7 @@ it.each([null, "competition"])(
     );
   }
 );
-it("keeps approval thresholds invalid when fractional or longer than the approval window", () => {
+it("keeps approval thresholds invalid when fractional or longer than the approval window", async () => {
   setup(<CompetitionApprovalThresholds />);
   fireEvent.click(
     screen.getByRole("button", { name: "Edit approval thresholds" })
@@ -300,6 +314,13 @@ it("keeps approval thresholds invalid when fractional or longer than the approva
     target: { value: "1.5" },
   });
   expect(save).toBeDisabled();
+  expect(screen.getByLabelText("Winning threshold")).toHaveAttribute(
+    "aria-invalid",
+    "true"
+  );
+  expect(
+    screen.getByLabelText("Winning threshold")
+  ).toHaveAccessibleDescription("Enter a positive whole number.");
   fireEvent.change(screen.getByLabelText("Winning threshold"), {
     target: { value: "1" },
   });
@@ -307,8 +328,82 @@ it("keeps approval thresholds invalid when fractional or longer than the approva
     target: { value: "101" },
   });
   expect(save).toBeDisabled();
+  expect(screen.getByLabelText("Winning threshold")).toHaveAttribute(
+    "aria-invalid",
+    "false"
+  );
+  expect(screen.getByLabelText("Threshold hold (seconds)")).toHaveAttribute(
+    "aria-invalid",
+    "true"
+  );
+  expect(
+    screen.getByLabelText("Threshold hold (seconds)")
+  ).toHaveAccessibleDescription(
+    /The hold cannot exceed the competition’s approval window/
+  );
   fireEvent.change(screen.getByLabelText("Threshold hold (seconds)"), {
     target: { value: "" },
   });
   expect(save).toBeEnabled();
+  expect(screen.getByLabelText("Threshold hold (seconds)")).toHaveAttribute(
+    "aria-invalid",
+    "false"
+  );
+  fireEvent.click(save);
+  await waitFor(() =>
+    expect(updateCompetition).toHaveBeenCalledWith(
+      { waveId: "wave", competitionId: "competition" },
+      expect.objectContaining({
+        config: expect.objectContaining({
+          rules: expect.objectContaining({
+            winning_threshold: 1,
+            winning_threshold_min_duration_ms: 0,
+          }),
+        }),
+      })
+    )
+  );
+});
+
+it.each(SUPPORTED_LOCALES)(
+  "names the threshold controls and terms in supported locale %s",
+  async (locale) => {
+    await loadLocaleMessages(locale);
+    mockLocale = locale;
+    setup(<CompetitionApprovalThresholds />);
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: t(locale, "competitions.editThresholds"),
+      })
+    );
+    for (const key of [
+      "competitions.rulesLabel.threshold",
+      "competitions.thresholdHoldSeconds",
+      "competitions.terms",
+    ] as const)
+      expect(t(locale, key).trim()).not.toBe("");
+    expect(
+      screen.getByRole("textbox", {
+        name: t(locale, "competitions.rulesLabel.threshold"),
+      })
+    ).toHaveAccessibleName(t(locale, "competitions.rulesLabel.threshold"));
+    expect(
+      screen.getByRole("textbox", {
+        name: t(locale, "competitions.thresholdHoldSeconds"),
+      })
+    ).toHaveAccessibleName(t(locale, "competitions.thresholdHoldSeconds"));
+  }
+);
+
+it("allows a safe whole-second hold when the approval window has no end", () => {
+  mockCompetition.participation.ends_at = null;
+  mockCompetition.voting.ends_at = null;
+  setup(<CompetitionApprovalThresholds />);
+  fireEvent.click(
+    screen.getByRole("button", { name: "Edit approval thresholds" })
+  );
+  fireEvent.change(screen.getByLabelText("Threshold hold (seconds)"), {
+    target: { value: "86400" },
+  });
+  expect(screen.getByRole("button", { name: "Save changes" })).toBeEnabled();
 });

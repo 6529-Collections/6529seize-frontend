@@ -97,7 +97,7 @@ export async function installNativeCompetitionCreationApi(page: Page) {
   };
   await page.route(
     `**/api/v3/waves/${CREATED_COMPETITION_WAVE_ID}**`,
-    async (route) => {
+    (route) => {
       const request = route.request();
       const path = new URL(request.url()).pathname;
       const suffix =

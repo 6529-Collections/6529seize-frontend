@@ -51,9 +51,18 @@ export default function CompetitionMyVotes() {
     key: number;
   } | null>(null);
   const rationaleSequence = useRef(0);
+  const rationaleTrigger = useRef<HTMLElement | null>(null);
+  const closeRationale = () => {
+    setRationale(null);
+    rationaleTrigger.current?.focus();
+  };
   const explainVote = (drop: ExtendedDrop, total: number, change: number) => {
     const partId = drop.parts.at(0)?.part_id;
     if (partId === undefined) return;
+    rationaleTrigger.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
     rationaleSequence.current += 1;
     setRationale({
       drop,
@@ -234,8 +243,10 @@ export default function CompetitionMyVotes() {
                   dropId={vote.drop_id}
                   disabled={isClosed || resetting}
                   compact
-                  onExplainVote={(total, change) =>
-                    explainVote(entryDrop, total, change)
+                  onExplainVote={
+                    entryDrop.parts.at(0)?.part_id === undefined
+                      ? undefined
+                      : (total, change) => explainVote(entryDrop, total, change)
                   }
                 />
               }
@@ -248,8 +259,8 @@ export default function CompetitionMyVotes() {
                     drop: rationale.drop,
                     partId: rationale.partId,
                   }}
-                  onCancelReplyQuote={() => setRationale(null)}
-                  onDropAddedToQueue={() => setRationale(null)}
+                  onCancelReplyQuote={closeRationale}
+                  onDropAddedToQueue={closeRationale}
                   wave={wave}
                   dropId={null}
                   fixedDropMode={DropMode.CHAT}

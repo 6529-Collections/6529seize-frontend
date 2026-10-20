@@ -251,6 +251,11 @@ export const COMPETITION_MESSAGES = {
   "competitions.thresholdHoldSeconds": "Threshold hold (seconds)",
   "competitions.thresholdHoldHelp":
     "Use 0 for immediate approval. The hold cannot exceed the approval window.",
+  "competitions.thresholdInvalid": "Enter a positive whole number.",
+  "competitions.thresholdHoldInvalid":
+    "Enter whole seconds, or leave blank for no hold.",
+  "competitions.thresholdHoldWindow":
+    "The hold cannot exceed the competition’s approval window.",
   "competitions.rulesLabel.threshold": "Winning threshold",
   "competitions.rulesLabel.hold": "Threshold hold",
   "competitions.rulesLabel.lock": "Voting time lock",

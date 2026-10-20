@@ -229,9 +229,9 @@ export default function CompetitionLeaderboard({
         )}
         {!entries.length &&
           (isCompetitionSubmissionHistory(competition) ? (
-            <p role="status" className="tw-p-6 tw-text-sm tw-text-iron-500">
+            <output className="tw-block tw-p-6 tw-text-sm tw-text-iron-500">
               {t(locale, "competitions.noSubmissions")}
-            </p>
+            </output>
           ) : (
             <CompetitionState empty />
           ))}

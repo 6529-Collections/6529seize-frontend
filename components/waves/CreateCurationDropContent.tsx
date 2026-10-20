@@ -19,6 +19,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -75,6 +76,7 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
 }) => {
   const { isApp } = useDeviceInfo();
   const locale = useBrowserLocale();
+  const termsId = useId();
   const nativeCompetition = presentationCompetition(wave);
   const [acceptedTermsVersion, setAcceptedTermsVersion] = useState<
     number | null
@@ -386,10 +388,13 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
       />
       {nativeTerms && (
         <div className="tw-mb-4 tw-space-y-3 tw-text-sm tw-text-iron-300">
-          <p className="tw-whitespace-pre-wrap">{nativeTerms}</p>
+          <p id={termsId} className="tw-whitespace-pre-wrap">
+            {nativeTerms}
+          </p>
           <label className="tw-flex tw-items-start tw-gap-3">
             <input
               type="checkbox"
+              aria-describedby={termsId}
               checked={termsAccepted}
               disabled={submitting}
               onChange={(event) =>

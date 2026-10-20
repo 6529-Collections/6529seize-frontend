@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useCompetition } from "@/contexts/CompetitionContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import {
@@ -17,6 +17,7 @@ function ThresholdForm({ onClose }: { readonly onClose: () => void }) {
   const { competition } = useCompetition();
   const locale = useBrowserLocale();
   const editor = useCompetitionConfigUpdate();
+  const id = useId();
   const [threshold, setThreshold] = useState(
     String(competition.decisions.winning_min_threshold ?? "")
   );
@@ -31,11 +32,20 @@ function ThresholdForm({ onClose }: { readonly onClose: () => void }) {
   const duration = hold === null ? null : hold * 1000;
   const starts = competition.participation.starts_at;
   const ends = competition.voting.ends_at ?? competition.participation.ends_at;
-  const invalid =
-    count === null ||
-    duration === null ||
-    !Number.isSafeInteger(duration) ||
-    (starts !== null && ends !== null && duration > Math.max(0, ends - starts));
+  const thresholdInvalid = count === null;
+  let durationError: string | null = null;
+  if (duration === null || !Number.isSafeInteger(duration))
+    durationError = t(locale, "competitions.thresholdHoldInvalid");
+  else if (
+    starts !== null &&
+    ends !== null &&
+    duration > Math.max(0, ends - starts)
+  )
+    durationError = t(locale, "competitions.thresholdHoldWindow");
+  const invalid = thresholdInvalid || durationError !== null;
+  const holdDescription = durationError
+    ? `${id}-help ${id}-hold-error`
+    : `${id}-help`;
   return (
     <form
       className="tw-space-y-3"
@@ -60,32 +70,56 @@ function ThresholdForm({ onClose }: { readonly onClose: () => void }) {
         disabled={editor.busy}
         className="tw-m-0 tw-space-y-3 tw-border-0 tw-p-0"
       >
-        <label className="tw-block tw-space-y-2">
+        <label htmlFor={`${id}-count`} className="tw-block tw-space-y-2">
           <span>{t(locale, "competitions.rulesLabel.threshold")}</span>
           <input
+            id={`${id}-count`}
             className={COMPETITION_INPUT}
             inputMode="numeric"
             pattern="[0-9]+"
             required
+            aria-invalid={thresholdInvalid}
+            aria-describedby={
+              thresholdInvalid ? `${id}-count-error` : undefined
+            }
             value={threshold}
             onChange={(event) => setThreshold(event.target.value)}
           />
         </label>
-        <label className="tw-block tw-space-y-2">
+        {thresholdInvalid && (
+          <p
+            id={`${id}-count-error`}
+            role="alert"
+            className="tw-m-0 tw-text-red"
+          >
+            {t(locale, "competitions.thresholdInvalid")}
+          </p>
+        )}
+        <label htmlFor={`${id}-hold`} className="tw-block tw-space-y-2">
           <span>{t(locale, "competitions.thresholdHoldSeconds")}</span>
           <input
+            id={`${id}-hold`}
             className={COMPETITION_INPUT}
             inputMode="numeric"
             pattern="[0-9]+"
-            required
             value={seconds}
             onChange={(event) => setSeconds(event.target.value)}
-            aria-describedby="competition-threshold-help"
+            aria-invalid={durationError !== null}
+            aria-describedby={holdDescription}
           />
         </label>
-        <p id="competition-threshold-help" className="tw-m-0 tw-text-iron-400">
+        <p id={`${id}-help`} className="tw-m-0 tw-text-iron-400">
           {t(locale, "competitions.thresholdHoldHelp")}
         </p>
+        {durationError && (
+          <p
+            id={`${id}-hold-error`}
+            role="alert"
+            className="tw-m-0 tw-text-red"
+          >
+            {durationError}
+          </p>
+        )}
       </fieldset>
       <CompetitionConfigSaveActions
         busy={editor.busy}
