@@ -2,13 +2,15 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import {
   dehydrate,
+  type DehydratedState,
+  hashKey,
   HydrationBoundary,
   QueryClient,
 } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import type { ProfileActivityLog } from "@/entities/IProfile";
+import type { CicStatement, ProfileActivityLog } from "@/entities/IProfile";
 import { SortDirection } from "@/entities/ISort";
 import type { CountlessPage } from "@/helpers/Types";
 import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
@@ -70,6 +72,29 @@ function extractProfileEnabledAt(
   return new Date(createdAt).toISOString();
 }
 
+const statementsKey = (handle: string) => [
+  QueryKey.PROFILE_CIC_STATEMENTS,
+  handle,
+];
+const headerFieldKey = (
+  handle: string,
+  field: "enabledAt" | "cmsWebsiteHref"
+) => [QueryKey.PROFILE_HEADER, handle, field];
+const followersKey = (profileId: string | null) => [
+  QueryKey.IDENTITY_FOLLOWERS,
+  { profile_id: profileId, page_size: 1 },
+];
+
+function getSnapshotData<T>(
+  state: DehydratedState,
+  queryKey: readonly unknown[],
+  fallback: T
+): T {
+  const queryHash = hashKey(queryKey);
+  const query = state.queries.find((entry) => entry.queryHash === queryHash);
+  return query ? (query.state.data as T) : fallback;
+}
+
 // Layout and page share these request-local reads. Pages continue refreshing the
 // data on navigation even though the header's DOM now belongs to the layout.
 export const getUserPageHeaderState = cache(
@@ -84,29 +109,22 @@ export const getUserPageHeaderState = cache(
     await Promise.allSettled([
       // Shared with generateMetadata's public bio lookup in the same request.
       loadProfileStatements(normalizedHandle).then((data) => {
-        return queryClient.setQueryData(
-          [QueryKey.PROFILE_CIC_STATEMENTS, normalizedHandle],
-          data,
-          { updatedAt }
-        );
+        return queryClient.setQueryData(statementsKey(normalizedHandle), data, {
+          updatedAt,
+        });
       }),
       fetchProfileEnabledLog(normalizedHandle, headers).then((data) => {
         return queryClient.setQueryData(
-          [QueryKey.PROFILE_HEADER, normalizedHandle, "enabledAt"],
+          headerFieldKey(normalizedHandle, "enabledAt"),
           extractProfileEnabledAt(data),
           { updatedAt }
         );
       }),
       fetchFollowers(profileId, headers).then((data) => {
         if (data !== null) {
-          return queryClient.setQueryData(
-            [
-              QueryKey.IDENTITY_FOLLOWERS,
-              { profile_id: profileId, page_size: 1 },
-            ],
-            data,
-            { updatedAt }
-          );
+          return queryClient.setQueryData(followersKey(profileId), data, {
+            updatedAt,
+          });
         }
         return null;
       }),
@@ -115,7 +133,7 @@ export const getUserPageHeaderState = cache(
         : Promise.resolve(null)
       ).then((site) => {
         return queryClient.setQueryData(
-          [QueryKey.PROFILE_HEADER, normalizedHandle, "cmsWebsiteHref"],
+          headerFieldKey(normalizedHandle, "cmsWebsiteHref"),
           site
             ? getCmsPublicPath(site.cmsPackage, site.cmsPackage.site.base_path)
             : null,
@@ -152,6 +170,11 @@ export default async function UserPageHeader({
   const defaultBanner1 = getRandomColor();
   const defaultBanner2 = getRandomColor();
 
+  // The header streams in after the rest of the page, whose components may
+  // already have created these shared queries (HydrationBoundary fills an
+  // existing query only in an effect, which never runs on the server) or
+  // filled them in the browser. The header renders this snapshot until it has
+  // hydrated, so its server HTML and its hydration render always match.
   return (
     <HydrationBoundary state={state}>
       <UserPageHeaderClient
@@ -160,10 +183,28 @@ export default async function UserPageHeader({
         fallbackMainAddress={fallbackMainAddress}
         defaultBanner1={defaultBanner1}
         defaultBanner2={defaultBanner2}
-        initialStatements={[]}
-        profileEnabledAt={null}
-        followersCount={null}
-        cmsWebsiteHref={null}
+        initialStatements={getSnapshotData<CicStatement[]>(
+          state,
+          statementsKey(normalizedHandle),
+          []
+        )}
+        profileEnabledAt={getSnapshotData<string | null>(
+          state,
+          headerFieldKey(normalizedHandle, "enabledAt"),
+          null
+        )}
+        followersCount={
+          getSnapshotData<ApiIncomingIdentitySubscriptionsPage | null>(
+            state,
+            followersKey(profile.id),
+            null
+          )?.count ?? null
+        }
+        cmsWebsiteHref={getSnapshotData<string | null>(
+          state,
+          headerFieldKey(normalizedHandle, "cmsWebsiteHref"),
+          null
+        )}
       />
     </HydrationBoundary>
   );

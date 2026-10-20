@@ -1,11 +1,16 @@
 import React from "react";
 import {
+  act,
   fireEvent,
   render,
   screen,
   waitFor,
   within,
 } from "@testing-library/react";
+import { hydrateRoot, type Root } from "react-dom/client";
+import { renderToString } from "react-dom/server";
+import type { CicStatement } from "@/entities/IProfile";
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import UserPageHeaderClient from "@/components/user/user-page-header/UserPageHeaderClient";
 import { AuthContext } from "@/components/auth/Auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -677,5 +682,85 @@ describe("UserPageHeader", () => {
     expect(
       screen.queryByRole("link", { name: "Open bob website" })
     ).not.toBeInTheDocument();
+  });
+
+  it("hydrates the streamed header from its server snapshot when the shared cache filled first", async () => {
+    const bio = [
+      {
+        statement_type: STATEMENT_TYPE.BIO,
+        statement_group: STATEMENT_GROUP.GENERAL,
+      } as CicStatement,
+    ];
+    let cachedStatements: CicStatement[] | undefined;
+    (useQuery as jest.Mock).mockImplementation(({ queryKey }) => ({
+      isFetched: true,
+      data:
+        queryKey[0] === "PROFILE_CIC_STATEMENTS" ? cachedStatements : undefined,
+    }));
+    // The server snapshot has no statements, e.g. because its request failed.
+    const header = () => (
+      <AuthContext.Provider value={auth}>
+        <UserPageHeaderClient
+          profile={profile}
+          handleOrWallet="bob"
+          fallbackMainAddress="0x1"
+          defaultBanner1="#000000"
+          defaultBanner2="#111111"
+          initialStatements={[]}
+          profileEnabledAt={null}
+          followersCount={null}
+          cmsWebsiteHref={null}
+        />
+      </AuthContext.Provider>
+    );
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    container.innerHTML = renderToString(header());
+    expect(within(container).queryByTestId("about")).not.toBeInTheDocument();
+
+    // Another part of the profile page fetched the statements in the browser
+    // before the streamed header hydrated.
+    cachedStatements = bio;
+    const onRecoverableError = jest.fn();
+    let root: Root | undefined;
+    await act(async () => {
+      root = hydrateRoot(container, header(), { onRecoverableError });
+    });
+
+    expect(onRecoverableError).not.toHaveBeenCalled();
+    expect(within(container).getByTestId("about")).toBeInTheDocument();
+    act(() => root?.unmount());
+    container.remove();
+  });
+
+  it("server-renders the snapshot bio while the shared statements query is still empty", () => {
+    // The page's own statements section creates this query before the
+    // streamed header renders, so the server cache has no data for it yet.
+    (useQuery as jest.Mock).mockImplementation(() => ({
+      isFetched: false,
+      data: undefined,
+    }));
+    const html = renderToString(
+      <AuthContext.Provider value={auth}>
+        <UserPageHeaderClient
+          profile={profile}
+          handleOrWallet="bob"
+          fallbackMainAddress="0x1"
+          defaultBanner1="#000000"
+          defaultBanner2="#111111"
+          initialStatements={[
+            {
+              statement_type: STATEMENT_TYPE.BIO,
+              statement_group: STATEMENT_GROUP.GENERAL,
+            } as CicStatement,
+          ]}
+          profileEnabledAt={null}
+          followersCount={null}
+          cmsWebsiteHref={null}
+        />
+      </AuthContext.Provider>
+    );
+
+    expect(html).toContain('data-testid="about"');
   });
 });
