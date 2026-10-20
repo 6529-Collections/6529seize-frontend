@@ -38,13 +38,16 @@ const REVIEW_CODE =
 // must not render it. Adding an importer here needs that check.
 const SHARED_REVIEW_IMPORTERS = [
   "app/api/public-reviews/[review]/declarations/route.ts",
+  "app/api/public-reviews/[review]/destination/route.ts",
   "app/stream/page.tsx",
   "config/publicReviews.ts",
   "hooks/useSidebarSections.ts",
 ];
-// Server-only: it may load review copy, which stays out of client bundles.
+// Server-only API routes: they may load review copy, which stays out of
+// client bundles.
 const SERVER_ONLY_IMPORTERS = new Set([
   "app/api/public-reviews/[review]/declarations/route.ts",
+  "app/api/public-reviews/[review]/destination/route.ts",
 ]);
 // These read review copy while they load, so each must load on its own: the
 // declarations API route loads the feedback module without any review layout.
