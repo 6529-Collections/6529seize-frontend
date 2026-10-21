@@ -105,9 +105,9 @@ export default function CheckFilters({
         </label>
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-4">
           {dirty && (
-            <span role="status" className="tw-text-xs tw-text-iron-400">
+            <output className="tw-text-xs tw-text-iron-400">
               {t(locale, "checks.unappliedChanges")}
-            </span>
+            </output>
           )}
           <button
             type="button"
