@@ -139,9 +139,11 @@ describe("MemeSeasonGridDropdown", () => {
     await flushPromises();
 
     const button = screen.getByRole("button", { name: /Season: All Seasons/i });
-    jest.spyOn(button, "getBoundingClientRect").mockReturnValue(
-      DOMRect.fromRect({ x: 200, y: 52, width: 240, height: 48 })
-    );
+    jest
+      .spyOn(button, "getBoundingClientRect")
+      .mockReturnValue(
+        DOMRect.fromRect({ x: 200, y: 52, width: 240, height: 48 })
+      );
     jest
       .spyOn(HTMLElement.prototype, "offsetWidth", "get")
       .mockReturnValue(288);
@@ -268,7 +270,7 @@ describe("MemeSeasonGridDropdown", () => {
     fireEvent.click(button);
 
     const szn2Button = screen.getByRole("menuitem", { name: /SZN 2/i });
-    expect(szn2Button).toHaveClass("tw-bg-iron-900");
+    expect(szn2Button).toHaveClass("tw-bg-iron-800");
     expect(szn2Button).toHaveClass("tw-border-0");
     expect(szn2Button).toHaveClass("tw-text-iron-300");
   });
