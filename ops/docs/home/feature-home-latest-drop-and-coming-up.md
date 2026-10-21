@@ -54,9 +54,10 @@ Use this page for visibility rules, state switches, and route targets.
 ## User Journey
 
 1. Open `/`.
-2. The top slot shows a loading placeholder while the latest artwork data
-   loads. The artwork appears as soon as it is available, while mint status
-   and next-winner details can continue loading.
+2. The top slot shows a loading placeholder until the initial artwork,
+   mint-status, and next-winner checks finish. It then displays the selected
+   artwork without briefly showing the previous drop first. Already loaded
+   artwork stays visible during background refreshes.
 3. The top slot then chooses one mode:
    - `Latest Drop` while the current mint is active and for the configured
      grace period after its scheduled end, or when no next winner is available.
