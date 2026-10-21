@@ -25,9 +25,9 @@ individual check history. Back to list appears on mobile; desktop uses the
 visible list without a redundant back button. Automated outcome is distinct
 from deletion and manual review status.
 
-The `home.overview` record explains the Coming up mobile swipe row, keyboard
-navigation through card links, tablet/desktop grid, and drop, profile and wave
-destinations.
+The `home.overview` record explains the Coming up full-width vertical card
+list below 768px, keyboard navigation through card links, tablet/desktop grid,
+and drop, profile and wave destinations.
 
 The `waves.drop.editing` record covers author-only editing, the normal edit
 window, and unlimited editing of the wave's current pinned description drop.
