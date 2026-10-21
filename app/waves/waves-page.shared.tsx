@@ -307,6 +307,7 @@ export async function renderWavesPageContent({
     <WavesPageClient
       publicFeedFallback={publicFeedFallback}
       publicFeedWaveId={publicFeed?.ok ? publicFeed.waveId : null}
+      waveName={context.wave?.name}
     />
   );
 
@@ -336,9 +337,7 @@ export async function renderWavesPageContent({
                 waveId={context.waveId}
               />
             </Suspense>
-            <Suspense fallback={null}>
-              {wavesPageClient}
-            </Suspense>
+            <Suspense fallback={null}>{wavesPageClient}</Suspense>
           </WaveServerFeedSeedGate>
         ) : (
           <Suspense fallback={null}>{wavesPageClient}</Suspense>
@@ -424,7 +423,9 @@ export async function buildWavesMetadata(
       title: t(DEFAULT_LOCALE, "waves.pageMetadata.title", { waveName }),
       description,
       ogImage: `/api/og-metadata/waves/${encodeURIComponent(waveId)}`,
-      ogImageAlt: t(DEFAULT_LOCALE, "waves.pageMetadata.ogImageAlt", { waveName }),
+      ogImageAlt: t(DEFAULT_LOCALE, "waves.pageMetadata.ogImageAlt", {
+        waveName,
+      }),
     }),
     metadataOptions
   );
