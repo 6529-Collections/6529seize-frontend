@@ -29,6 +29,10 @@ import { useAuth } from "../auth/Auth";
 import { getConnectionProfileIndicator } from "../auth/connection-state-indicator";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import BackButton from "../navigation/BackButton";
+import {
+  DEFAULT_BACK_HREF,
+  sanitizeReturnTo,
+} from "@/components/waves/discovery/wave-score-transparency/scoreUtils";
 import Spinner from "../utils/Spinner";
 import AppSidebar from "./AppSidebar";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
@@ -605,11 +609,18 @@ export default function AppHeader() {
       )
     : null;
 
+  const isWaveScorePage = isCapacitor && pathname === "/network/wave-score";
+  const waveScoreFallbackHref = canGoBack ? undefined : DEFAULT_BACK_HREF;
+  const waveScoreReturnTo = isWaveScorePage
+    ? (sanitizeReturnTo(searchParams.get("returnTo")) ?? waveScoreFallbackHref)
+    : undefined;
+
   const showBackButton =
     Boolean(information?.returnFromNavigation) ||
     isInsideWave ||
     isCreateRoute ||
     isProfileWavesFeedView ||
+    isWaveScorePage ||
     preferencesProfileReturnTo !== null ||
     profileCollectedReturnContext !== null ||
     collectProfileReturnContext !== null ||
@@ -702,6 +713,7 @@ export default function AppHeader() {
                 preferencesProfileReturnTo ??
                 profileCollectedReturnContext?.href ??
                 collectProfileReturnContext?.href ??
+                waveScoreReturnTo ??
                 (isProfileWavesFeedView ? "/waves" : undefined)
               }
             />
