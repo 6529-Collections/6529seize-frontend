@@ -477,6 +477,44 @@ async function installArtworkCompetitionResources(
     }
   );
   await page.route(
+    `**/api/v3/waves/${waveId}/competitions/alpha/entry-contexts*`,
+    (route) => {
+      const ids =
+        new URL(route.request().url()).searchParams
+          .get("entry_ids")
+          ?.split(",") ?? [];
+      return route.fulfill({
+        json: {
+          competition: {
+            ...competition("alpha", "Parallel Alpha"),
+            wave_id: waveId,
+            capabilities: ["MAIN_STAGE"],
+          },
+          data: getDrops()
+            .filter((drop) => ids.includes(entry(drop.id).id))
+            .map((drop) => ({
+              entry: entry(drop.id),
+              vote_summary: summary(drop),
+              awards: [],
+            })),
+        },
+      });
+    }
+  );
+  await page.route("**/api/v2/drops?**", (route) => {
+    const ids =
+      new URL(route.request().url()).searchParams.get("ids")?.split(",") ?? [];
+    const drops = getDrops().filter((drop) => ids.includes(drop.id));
+    if (!drops.length) return route.fallback();
+    return route.fulfill({
+      json: {
+        data: drops.map((drop) => ({ ...drop, wave: fixtureWave })),
+        page: 1,
+        next: false,
+      },
+    });
+  });
+  await page.route(
     `**/api/v3/waves/${waveId}/drops/*/competition-context`,
     async (route) => {
       const id = new URL(route.request().url()).pathname.split("/").at(-2);
@@ -693,6 +731,26 @@ async function installCompetitionApi(
     } else if (!selected)
       return route.fulfill({ status: 404, json: { message: "Not found" } });
     else if (!resource) body = selected;
+    else if (resource === "entry-contexts")
+      body = {
+        competition: selected,
+        data: (url.searchParams.get("entry_ids")?.split(",") ?? [])
+          .filter((entryId) => entryId === entry(id).id)
+          .map(() => ({
+            entry: entry(id),
+            awards: [],
+            vote_summary: {
+              rating: votes[id] ?? 0,
+              realtime_rating: votes[id] ?? 0,
+              rating_prediction: votes[id] ?? 0,
+              user_vote: votes[id] ?? 0,
+              rank: 1,
+              raters_count: votes[id] ? 1 : 0,
+              top_raters: [],
+              over_threshold_since_ms: null,
+            },
+          })),
+      };
     else if (resource === "activity") body = [];
     else if (resource === "configuration")
       body = configurations.get(id) ?? competitionConfiguration(selected);
@@ -2783,6 +2841,69 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await page.screenshot({
       path: testInfo.outputPath("accepted-collaborator-profile.png"),
     });
+  });
+
+  test("restores Vote with reply in the competition vote dialog", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page);
+    const replies: Record<string, unknown>[] = [];
+    await page.route("**/api/drops", async (route) => {
+      if (route.request().method() !== "POST") return route.fallback();
+      const body = route.request().postDataJSON() as Record<string, unknown>;
+      replies.push(body);
+      return route.fulfill({
+        json: {
+          ...body,
+          id: "00000000-0000-4000-8000-000000000590",
+          wave: { id: WAVE },
+          author: { id: PROFILE },
+          created_at: Date.now(),
+          parts: [
+            { part_id: 1, content: "My competition rationale", media: [] },
+          ],
+        },
+      });
+    });
+    await page.goto(`${ROOT}/alpha?drop=${entryDropId("alpha")}`);
+    await dismissNextDevTools(page);
+    const detail = page
+      .getByRole("main")
+      .locator("[data-video-viewport]")
+      .filter({
+        has: page.getByRole("button", { name: "Close panel", exact: true }),
+      });
+    await expect(
+      detail.getByText("Recorded alpha entry", { exact: true })
+    ).toBeVisible({ timeout: 30000 });
+    await detail.getByRole("button", { name: "Vote", exact: true }).click();
+    const dialog = page.getByRole("dialog", { name: "Vote for this artwork" });
+    const toggle = dialog.getByRole("switch", { name: "Vote with reply" });
+    await expect(toggle).not.toBeChecked();
+    await dialog.getByRole("button", { name: "Numeric", exact: true }).click();
+    await dialog.getByRole("spinbutton", { name: "Your vote" }).fill("25");
+    await dialog.getByText("Vote with reply", { exact: true }).click();
+    await expect(toggle).toBeChecked();
+    const rationale = dialog.getByLabel("Optional rationale reply");
+    await expect(rationale).toHaveValue(
+      "Vote rationale (+25 at time of posting):\n\n"
+    );
+    await rationale.fill("My competition rationale");
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("competition-vote-with-reply.png"),
+    });
+    await dialog
+      .getByRole("button", { name: "Save vote", exact: true })
+      .click();
+    await expect.poll(() => replies.length).toBe(1);
+    expect(sandbox.requests[0]?.body).toMatchObject({ value: 25 });
+    expect(replies[0]).toMatchObject({
+      wave_id: WAVE,
+      reply_to: { drop_id: entryDropId("alpha"), drop_part_id: 1 },
+      parts: [expect.objectContaining({ content: "My competition rationale" })],
+    });
+    await expect(dialog).toHaveCount(0);
   });
 
   test("renders frozen CHAT deep links with submission voting controls", async ({

@@ -2,11 +2,15 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { useCompetitionEntryDrops } from "@/hooks/competitions/useCompetitionEntryDrops";
-import { fetchDropCompetitionContext } from "@/services/api/competitions-api";
+import { fetchCompetitionEntryDrop } from "@/services/api/competition-entry-drops-api";
 
 jest.mock("@/contexts/CompetitionContext", () => ({
   useCompetition: () => ({
-    competition: { id: "competition", wave_id: "wave" },
+    competition: {
+      id: "competition",
+      wave_id: "wave",
+      permissions: { vote: true },
+    },
   }),
 }));
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
@@ -14,14 +18,17 @@ jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
 }));
 jest.mock("@/services/api/competitions-api", () => ({
   competitionScope: () => ({ wave_id: "wave", competition_id: "competition" }),
-  fetchDropCompetitionContext: jest.fn(),
+}));
+
+jest.mock("@/services/api/competition-entry-drops-api", () => ({
+  fetchCompetitionEntryDrop: jest.fn(),
 }));
 
 it("aborts offscreen queued context lookups after a fast virtual range jump", async () => {
   const signals = new Map<string, AbortSignal>();
   jest
-    .mocked(fetchDropCompetitionContext)
-    .mockImplementation((_wave, dropId, signal) => {
+    .mocked(fetchCompetitionEntryDrop)
+    .mockImplementation((_identity, _viewer, _entryId, dropId, signal) => {
       signals.set(dropId, signal!);
       return new Promise(() => undefined);
     });

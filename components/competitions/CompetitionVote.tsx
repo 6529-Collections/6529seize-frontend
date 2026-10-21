@@ -1,5 +1,5 @@
 "use client";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
@@ -42,6 +42,28 @@ interface CompetitionVoteProps {
   readonly disabled: boolean;
 }
 
+export function useCompetitionVoteBudget(
+  competition: ApiCompetition,
+  entryId: string
+) {
+  const { connectedProfile } = useAuth();
+  const viewer = useCompetitionViewer();
+  const identity = {
+    waveId: competition.wave_id,
+    competitionId: competition.id,
+  };
+  return useQuery({
+    queryKey: [
+      QueryKey.COMPETITION_CREDITS,
+      { ...competitionScope(identity), viewer, entry_id: entryId },
+    ],
+    queryFn: ({ signal }) => fetchCompetitionCredits(identity, entryId, signal),
+    enabled: Boolean(connectedProfile),
+    retry: false,
+    staleTime: 0,
+  });
+}
+
 export function CompetitionVoteForm({
   competition,
   compact = false,
@@ -49,11 +71,26 @@ export function CompetitionVoteForm({
   size,
   onVoteSuccess,
   onExplainVote,
+  controlledDraft,
+  reply,
   entryId,
   dropId,
   disabled,
 }: CompetitionVoteProps & {
   readonly competition: ApiCompetition;
+  readonly controlledDraft?:
+    | {
+        readonly value: string;
+        readonly onChange: (value: string | null) => void;
+      }
+    | undefined;
+  readonly reply?:
+    | {
+        readonly content: ReactNode;
+        readonly isValid: boolean;
+        readonly onVoteApplied: () => Promise<void>;
+      }
+    | undefined;
   readonly compact?: boolean;
   readonly voteMode?: SingleWaveDropVoteMode | undefined;
   readonly size?: SingleWaveDropVoteSize | undefined;
@@ -81,16 +118,7 @@ export function CompetitionVoteForm({
     WAVE_VOTING_LABELS[competition.voting.credit_type as ApiWaveCreditType];
   const client = useQueryClient();
   const sign = useCompetitionSignatureFor(competition);
-  const credit = useQuery({
-    queryKey: [
-      QueryKey.COMPETITION_CREDITS,
-      { ...competitionScope(identity), viewer, entry_id: entryId },
-    ],
-    queryFn: ({ signal }) => fetchCompetitionCredits(identity, entryId, signal),
-    enabled: Boolean(connectedProfile),
-    retry: false,
-    staleTime: 0,
-  });
+  const credit = useCompetitionVoteBudget(competition, entryId);
   const [draft, setDraft] = useState<{ source: string; value: string } | null>(
     null
   );
@@ -108,9 +136,14 @@ export function CompetitionVoteForm({
   } | null>(null);
   const source = `${competition.id}:${entryId}:${viewer ?? "anonymous"}`;
   const value =
-    draft?.source === source
+    controlledDraft?.value ??
+    (draft?.source === source
       ? draft.value
-      : String(credit.data?.current_vote ?? 0);
+      : String(credit.data?.current_vote ?? 0));
+  const setVoteDraft = (next: string) => {
+    if (controlledDraft) controlledDraft.onChange(next);
+    else setDraft({ source, value: next });
+  };
   const numeric = Number(value);
   const min = credit.data?.min_vote;
   const max = credit.data?.max_vote;
@@ -124,7 +157,14 @@ export function CompetitionVoteForm({
     numeric >= min &&
     numeric <= max;
   const submit = async () => {
-    if (busy || !valid || disabled || !competition.permissions.vote) return;
+    if (
+      busy ||
+      !valid ||
+      reply?.isValid === false ||
+      disabled ||
+      !competition.permissions.vote
+    )
+      return;
     setBusy(true);
     setFailed(false);
     setSaved(false);
@@ -162,12 +202,14 @@ export function CompetitionVoteForm({
       });
       if (currentViewer.current === viewer) {
         setDraft(null);
+        controlledDraft?.onChange(null);
         setSaved(true);
         setLastVote({
           source,
           total: numeric,
           change: numeric - (credit.data?.current_vote ?? 0),
         });
+        void reply?.onVoteApplied();
         onVoteSuccess?.();
       }
       void invalidateCompetition(client, identity).catch(() => undefined);
@@ -219,9 +261,7 @@ export function CompetitionVoteForm({
             min={min ?? undefined}
             max={max ?? undefined}
             value={value}
-            onChange={(event) =>
-              setDraft({ source, value: event.target.value })
-            }
+            onChange={(event) => setVoteDraft(event.target.value)}
             disabled={busy || disabled || !competition.permissions.vote}
             aria-invalid={!valid}
             aria-describedby={`competition-vote-range-${entryId}`}
@@ -316,12 +356,9 @@ export function CompetitionVoteForm({
               size={size}
               label={creditLabel}
               setVoteValue={(next) => {
-                setDraft({
-                  source,
-                  value: String(
-                    typeof next === "function" ? next(numeric) : next
-                  ),
-                });
+                setVoteDraft(
+                  String(typeof next === "function" ? next(numeric) : next)
+                );
                 setSaved(false);
               }}
             />
@@ -347,17 +384,24 @@ export function CompetitionVoteForm({
                 aria-invalid={!valid}
                 aria-describedby={errorDescriptionId}
                 onChange={(event) => {
-                  setDraft({ source, value: event.target.value });
+                  setVoteDraft(event.target.value);
                   setSaved(false);
                 }}
               />
             </div>
           </>
         )}
+        {reply?.content}
         <button
           type="submit"
           className={COMPETITION_BUTTON}
-          disabled={busy || disabled || !competition.permissions.vote || !valid}
+          disabled={
+            busy ||
+            disabled ||
+            !competition.permissions.vote ||
+            !valid ||
+            reply?.isValid === false
+          }
         >
           {t(locale, busy ? "competitions.saving" : "competitions.vote")}
         </button>
