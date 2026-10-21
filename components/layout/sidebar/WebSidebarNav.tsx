@@ -62,8 +62,8 @@ const WebSidebarNav = React.forwardRef<
   const { canAccessLanding: showDropForge } = useDropForgePermissions();
   const moderatorAccess = useContentModeratorAccess();
   const showModeration = moderatorAccess.data?.moderator === true;
-  const hasOpenModerationReports =
-    moderatorAccess.data?.has_open_reports === true;
+  const hasPendingModerationCases =
+    (moderatorAccess.data?.needs_review_count ?? 0) > 0;
   const { hasUnread: hasUnreadMessages } = useUnreadIndicator({
     type: "messages",
     handle: connectedProfile?.handle ?? null,
@@ -482,7 +482,7 @@ const WebSidebarNav = React.forwardRef<
               }
               collapsed={isCollapsed}
               label={t(DEFAULT_LOCALE, "contentModeration.moderator.menu")}
-              hasIndicator={hasOpenModerationReports}
+              hasIndicator={hasPendingModerationCases}
               indicatorLabel={t(
                 DEFAULT_LOCALE,
                 "contentModeration.moderator.openReportsIndicator"

@@ -211,6 +211,7 @@ export const COMPETITION_MESSAGES = {
   "competitions.notification.ended": "Competition ended",
   "competitions.notification.cancelled": "Competition cancelled",
   "competitions.notification.winners": "New competition results",
+  "competitions.notification.resultsFor": "Results are in for {competition}",
   "competitions.notification.paused": "Competition decisions paused",
   "competitions.notification.resumed": "Competition decisions resumed",
   "competitions.discardTitle": "Close with unsaved changes?",

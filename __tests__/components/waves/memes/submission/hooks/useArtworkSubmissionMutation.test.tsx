@@ -147,6 +147,41 @@ describe("useArtworkSubmissionMutation", () => {
     expect(prepareProposalCard).not.toHaveBeenCalled();
   });
 
+  it("keeps initial collaborators in the signed and posted submission payload", async () => {
+    const signDrop = jest.fn(async () => ({
+      success: true,
+      signature: "signed",
+    }));
+    mockUseDropSignature.mockReturnValue({ signDrop, isLoading: false });
+    mockCommonApiPost.mockResolvedValue({ id: "created" } as ApiDrop);
+    const { result } = setupHook();
+    await act(async () => {
+      await result.current.submitArtwork(
+        {
+          ...submissionData,
+          collaborators: [
+            { id: "B", handle: "artistB", display: "artistB", pfp: null },
+          ],
+        },
+        "0xabc",
+        false,
+        submitOptions
+      );
+    });
+    expect(signDrop).toHaveBeenCalledWith(
+      expect.objectContaining({
+        drop: expect.objectContaining({ collaborator_ids: ["B"] }),
+      })
+    );
+    expect(mockCommonApiPost).toHaveBeenCalledWith({
+      endpoint: "drops/",
+      body: expect.objectContaining({
+        collaborator_ids: ["B"],
+        signature: "signed",
+      }),
+    });
+  });
+
   it("unlocks retry and returns to idle when signing is canceled", async () => {
     const signDrop = jest.fn(async () => ({ success: false }));
     mockUseDropSignature.mockReturnValue({ signDrop, isLoading: false });

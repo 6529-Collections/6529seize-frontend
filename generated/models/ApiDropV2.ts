@@ -33,6 +33,14 @@ import { ApiWaveOverview } from '../models/ApiWaveOverview';
 import { HttpFile } from '../http/http';
 
 export class ApiDropV2 {
+    /**
+    * Original submitter artist credit before accepted collaborator credits are appended.
+    */
+    'submission_artist'?: string;
+    /**
+    * Accepted collaborators only. Pending invitations are private.
+    */
+    'collaborators'?: Array<ApiMemeCollaboratorProfile>;
     'id': string;
     'serial_no': number;
     'created_at': number;
@@ -65,16 +73,24 @@ export class ApiDropV2 {
     'moderation'?: ApiDropModeration;
     'poll'?: ApiDropPoll;
     'wave'?: ApiWaveOverview;
-    /**
-    * Accepted collaborators only. Pending invitations are private.
-    */
-    'collaborators'?: Array<ApiMemeCollaboratorProfile>;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "submission_artist",
+            "baseName": "submission_artist",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "collaborators",
+            "baseName": "collaborators",
+            "type": "Array<ApiMemeCollaboratorProfile>",
+            "format": ""
+        },
         {
             "name": "id",
             "baseName": "id",
@@ -247,12 +263,6 @@ export class ApiDropV2 {
             "name": "wave",
             "baseName": "wave",
             "type": "ApiWaveOverview",
-            "format": ""
-        },
-        {
-            "name": "collaborators",
-            "baseName": "collaborators",
-            "type": "Array<ApiMemeCollaboratorProfile>",
             "format": ""
         }    ];
 

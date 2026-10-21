@@ -33,9 +33,8 @@ Use this page for visibility rules, state switches, and route targets.
   - Subscription info link: `/about/subscriptions`
   - Connected profile subscription link: `/{user}/subscriptions`
 - `Coming up` actions:
-  - Below 640px, a single card fills the available width. From 640px to 767px,
-    it uses the standard card width. Multiple cards keep the horizontal swipe
-    layout with a glimpse of the following card below tablet width.
+  - Below 768px, cards stack vertically at full width with space between them.
+    Tablet uses two columns and desktop uses three.
   - Card title: `/waves/{waveId}?drop={dropId}`
   - Card author: `/{handle}` or `/{primaryAddress}`
   - Collaborating cards combine the artist and accepted collaborators in one
@@ -88,13 +87,14 @@ Use this page for visibility rules, state switches, and route targets.
    - Top leaderboard cards from the same wave, sorted by prediction rating
 7. `View all` opens `/waves/{waveId}` for that wave.
 
-On mobile, `Coming up` is a horizontal row: swipe to reveal the remaining
-cards, which snap into place with a stop at each card so a swipe does not
-skip over the next snap position. The next card peeks in from the right. Tablet
+On mobile below 768px, `Coming up` is a vertical list of full-width cards
+with 24px between them. Scroll the page to see the remaining cards. Tablet
 uses two columns and desktop uses three. Status and mint date or TDH have a
 dedicated row above the artwork that wraps when needed without covering it;
 the title and artist links sit below. Artwork retains its
-proportions without cropping. Keyboard users can tab through the links to
+proportions without cropping. On phones, loaded still images use their natural
+height at the card width, like Latest Drop. Tablet and desktop keep the 3:4
+artwork frame. Keyboard users can tab through the links to
 bring each card into view.
 
 ## Common Scenarios
@@ -191,7 +191,10 @@ bring each card into view.
   blue read-only `Subscription Minting` box, a non-mutating on/off toggle,
   optional `xN` user subscribed count when already subscribed, an
   `xN subscribers` total, a contextual profile-subscriptions action, and a
-  right-edge question-mark info link.
+  right-edge question-mark info link. Below 640px, the title and toggle have
+  their own row, the coverage and subscription count use the full width below,
+  and the profile action and info link share the bottom row. Wider layouts keep
+  the profile action beside the title.
 - For a connected non-proxy profile, the awareness row can also show the
   compact runway summary, for example
   `Automatic · 0.18 ETH · 4 drops funded`. Its action follows the coverage

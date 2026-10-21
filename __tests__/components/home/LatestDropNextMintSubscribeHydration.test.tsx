@@ -188,7 +188,10 @@ describe("Home subscription row visibility around hydration", () => {
       expect(space).not.toBeNull();
       expect(space).toBeEmptyDOMElement();
       expect(space).toHaveAttribute("aria-hidden", "true");
-      expect(space).toHaveClass("tw-min-h-[5.375rem]");
+      expect(space).toHaveClass(
+        "tw-min-h-[6.875rem]",
+        "sm:tw-min-h-[5.375rem]"
+      );
     }
   );
 

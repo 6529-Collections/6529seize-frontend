@@ -1,3 +1,4 @@
+import type { ApiMemeCollaboratorProfile } from "@/generated/models/ApiMemeCollaboratorProfile";
 import { getInitialTraitsValues } from "@/components/waves/memes/traits/schema";
 import type { ProposalCardLayout } from "@/lib/proposal-card/document";
 import { getProposalCardMimeType } from "@/lib/proposal-card/media";
@@ -57,6 +58,7 @@ export interface SubmissionAgreement {
 }
 
 export type FormAction =
+  | { type: "SET_COLLABORATORS"; payload: ApiMemeCollaboratorProfile[] }
   | { type: "SET_PROPOSAL_FRAME"; payload: ProposalCardLayout | null }
   | { type: "SET_STEP"; payload: SubmissionStep }
   | { type: "SET_AGREEMENTS"; payload: SubmissionAgreement | null }
@@ -91,6 +93,7 @@ export type FormAction =
   | { type: "SET_ABOUT_ARTIST"; payload: string };
 
 export interface FormState {
+  collaborators?: ApiMemeCollaboratorProfile[];
   proposalFrame: ProposalCardLayout | null;
   currentStep: SubmissionStep;
   acceptedAgreement: SubmissionAgreement | null;
@@ -373,6 +376,7 @@ export const createInitialState = ({
   const existingMedia = initialDraft?.existingMedia ?? null;
 
   const state: FormState = {
+    collaborators: [],
     proposalFrame: initialDraft?.proposalFrame ?? null,
     currentStep: SubmissionStep.AGREEMENT,
     acceptedAgreement: null,
@@ -400,6 +404,8 @@ export const createInitialState = ({
 
 export function formReducer(state: FormState, action: FormAction): FormState {
   switch (action.type) {
+    case "SET_COLLABORATORS":
+      return { ...state, collaborators: action.payload };
     case "SET_PROPOSAL_FRAME":
       return { ...state, proposalFrame: action.payload };
     case "SET_STEP":

@@ -89,7 +89,7 @@ function SubscriptionAction({
   onClick?: (() => void | Promise<void>) | undefined;
 }>) {
   const className =
-    "tw-group/action tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-md tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-[0.08em] tw-text-primary-300 tw-no-underline tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:hover:tw-text-white focus:tw-outline-none focus-visible:tw-text-white focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black disabled:tw-cursor-wait disabled:tw-opacity-60 motion-reduce:tw-transition-none";
+    "tw-group/action tw-col-start-1 tw-row-start-3 tw-min-h-7 tw-justify-self-start sm:tw-col-start-2 sm:tw-row-start-1 sm:tw-min-h-0 sm:tw-justify-self-end tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-md tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-[0.08em] tw-text-primary-300 tw-no-underline tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:hover:tw-text-white focus:tw-outline-none focus-visible:tw-text-white focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black disabled:tw-cursor-wait disabled:tw-opacity-60 motion-reduce:tw-transition-none";
   const handleClick = () => {
     Promise.resolve(onClick?.()).catch((error: unknown) => {
       console.error("Failed to open profile subscriptions", error);
@@ -206,14 +206,15 @@ function SubscriptionsCountText({
 // Invisible stand-in for the row's height so content below does not jump when
 // the row replaces it: 2 x 0.875rem padding, 2px border, 1.25rem label line,
 // 0.5rem gap and 1.75rem detail line (86px). Used while the platform is unknown (the
-// server HTML and the first hydration render). It carries no text, icon, link
-// or control, so it is not purchasing UI.
+// server HTML and the first hydration render). Phones put the action on its
+// own row, reserving 110px. It carries no text, icon, link or control, so it is
+// not purchasing UI.
 export function MemeSubscriptionAwarenessRowSpace() {
   return (
     <div
       aria-hidden="true"
       data-testid="meme-subscription-awareness-row-space"
-      className="tw-min-h-[5.375rem] tw-w-full"
+      className="tw-min-h-[6.875rem] tw-w-full sm:tw-min-h-[5.375rem]"
     />
   );
 }
@@ -261,8 +262,8 @@ export default function MemeSubscriptionAwarenessRow({
   return (
     <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/25 tw-bg-primary-500/10 tw-px-4 tw-py-3.5 tw-shadow-[0_15px_40px_rgba(0,0,0,0.38)]">
       <div className="tw-relative tw-z-10 tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-gap-x-3 tw-gap-y-2">
-        <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-          <div className="tw-text-sm tw-font-semibold tw-leading-none tw-tracking-[-0.01em] tw-text-primary-300">
+        <div className="tw-col-span-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 sm:tw-col-span-1">
+          <div className="tw-text-sm tw-font-semibold tw-leading-5 tw-tracking-[-0.01em] tw-text-primary-300 sm:tw-leading-none">
             {t(locale, "home.mintSubscriptions.awarenessLabel")}
           </div>
           <ReadonlySubscriptionToggle
@@ -292,7 +293,7 @@ export default function MemeSubscriptionAwarenessRow({
           />
         </SubscriptionAction>
 
-        <div className="tw-flex tw-min-h-7 tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-text-xs tw-font-medium tw-leading-4 tw-text-primary-300/70">
+        <div className="tw-col-span-2 tw-col-start-1 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-text-xs tw-font-medium tw-leading-4 tw-text-primary-300/70 sm:tw-col-span-1 sm:tw-min-h-7">
           {profileCoverageSummary ? (
             <span className="tw-font-semibold tw-text-iron-200">
               {profileCoverageSummary}
@@ -310,7 +311,7 @@ export default function MemeSubscriptionAwarenessRow({
             safeSubscriptionsCount={safeSubscriptionsCount}
           />
         </div>
-        <div className="tw-flex tw-min-h-7 tw-items-center tw-justify-end">
+        <div className="tw-col-start-2 tw-row-start-3 tw-flex tw-min-h-7 tw-items-center tw-justify-end sm:tw-row-start-2">
           <SubscriptionInfoLink
             href={ABOUT_SUBSCRIPTIONS_HREF}
             label={t(locale, "home.mintSubscriptions.infoLinkAriaLabel")}

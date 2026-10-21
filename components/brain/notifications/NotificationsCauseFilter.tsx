@@ -67,7 +67,10 @@ const NOTIFICATION_FILTERS: readonly NotificationFilterOption[] = [
   },
   {
     id: "invites",
-    cause: [ApiNotificationCause.WaveCreated],
+    cause: [
+      ApiNotificationCause.WaveCreated,
+      ApiNotificationCause.MemeCollaboration,
+    ],
     labelKey: "notifications.filter.option.invites",
   },
   {

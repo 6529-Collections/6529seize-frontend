@@ -1,4 +1,6 @@
 "use client";
+import { MemeCollaboratorPicker } from "@/components/waves/memes/collaborations/MemeCollaboratorPicker";
+import type { ApiMemeCollaboratorProfile } from "@/generated/models/ApiMemeCollaboratorProfile";
 
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
@@ -21,6 +23,10 @@ import { ProposalCardOption } from "../components/ProposalCardOption";
 import { getProposalCardMimeType } from "@/lib/proposal-card/media";
 
 interface ArtworkStepProps {
+  readonly collaborators?: ApiMemeCollaboratorProfile[];
+  readonly onCollaboratorsChange?: (
+    profiles: ApiMemeCollaboratorProfile[]
+  ) => void;
   readonly proposalFrame?: ProposalCardLayout | null;
   readonly onProposalFrameChange?: (layout: ProposalCardLayout | null) => void;
   readonly traits: TraitsData;
@@ -71,6 +77,8 @@ interface ArtworkStepProps {
  * appearance based on the current submission phase.
  */
 const ArtworkStep: React.FC<ArtworkStepProps> = ({
+  collaborators = [],
+  onCollaboratorsChange,
   proposalFrame,
   onProposalFrameChange,
   traits,
@@ -274,6 +282,15 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
 
   const renderArtworkTraitsPanel = () => (
     <MemesArtSubmissionTraits
+      hideCollab
+      collaboratorPicker={
+        onCollaboratorsChange ? (
+          <MemeCollaboratorPicker
+            collaborators={collaborators}
+            onChange={onCollaboratorsChange}
+          />
+        ) : undefined
+      }
       traits={traits}
       setTraits={setTraits}
       validationErrors={validation.errors}
