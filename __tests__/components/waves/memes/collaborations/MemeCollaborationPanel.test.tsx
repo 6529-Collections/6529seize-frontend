@@ -412,6 +412,23 @@ it("fits the browser keyboard viewport and releases its listeners when review cl
     expect(container?.style.getPropertyValue("--review-viewport-top")).toBe(
       "20px"
     );
+    const creditName = within(dialog).getByRole("textbox", {
+      name: "Artist credit name",
+    });
+    const reveal = jest.fn();
+    Object.defineProperty(creditName, "scrollIntoView", { value: reveal });
+    act(() => creditName.focus());
+    await waitFor(() =>
+      expect(reveal).toHaveBeenCalledWith({
+        block: "nearest",
+        inline: "nearest",
+      })
+    );
+    act(() => creditName.blur());
+    reveal.mockClear();
+    // Refocusing must reveal the field even when no resize event is delivered.
+    act(() => creditName.focus());
+    await waitFor(() => expect(reveal).toHaveBeenCalledTimes(1));
     expect(screen.getByRole("checkbox")).not.toBeChecked();
     act(() => {
       viewport.scale = 2;

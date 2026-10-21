@@ -59,6 +59,18 @@ export function MemeCollaborationReviewDialog({
   const viewportRef = useCallback((element: HTMLDivElement | null) => {
     const viewport = globalThis.visualViewport;
     if (!element || !viewport) return;
+    let focusFrame: number | undefined;
+    const revealFocusedField = () => {
+      if (focusFrame !== undefined) globalThis.cancelAnimationFrame(focusFrame);
+      // Focus can move between keyboard layouts without a delivered size change.
+      focusFrame = globalThis.requestAnimationFrame(() => {
+        focusFrame = undefined;
+        const focused = document.activeElement;
+        if (focused instanceof HTMLInputElement && element.contains(focused)) {
+          focused.scrollIntoView({ block: "nearest", inline: "nearest" });
+        }
+      });
+    };
     const fitViewport = () => {
       // Preserve browser zoom; native shells also retain their own inset.
       if (viewport.scale > 1) {
@@ -74,19 +86,18 @@ export function MemeCollaborationReviewDialog({
         "--review-viewport-top",
         `${viewport.offsetTop}px`
       );
+      revealFocusedField();
     };
     fitViewport();
-    const observer = new ResizeObserver(() => {
-      const focused = document.activeElement;
-      if (focused instanceof HTMLInputElement && element.contains(focused)) {
-        focused.scrollIntoView({ block: "nearest" });
-      }
-    });
+    const observer = new ResizeObserver(revealFocusedField);
     observer.observe(element);
+    element.addEventListener("focusin", revealFocusedField);
     viewport.addEventListener("resize", fitViewport);
     viewport.addEventListener("scroll", fitViewport, { passive: true });
     return () => {
       observer.disconnect();
+      if (focusFrame !== undefined) globalThis.cancelAnimationFrame(focusFrame);
+      element.removeEventListener("focusin", revealFocusedField);
       viewport.removeEventListener("resize", fitViewport);
       viewport.removeEventListener("scroll", fitViewport);
     };
@@ -202,7 +213,7 @@ export function MemeCollaborationReviewDialog({
                       setArtistName(event.target.value);
                       setConfirmed(false);
                     }}
-                    className="tw-form-input tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-base tw-text-iron-100 tw-ring-1 tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 md:tw-max-w-md"
+                    className="tw-form-input tw-block tw-min-h-11 tw-w-full tw-scroll-my-2 tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-base tw-text-iron-100 tw-ring-1 tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 md:tw-max-w-md"
                   />
                   <p
                     id={`${artistNameId}-hint`}
