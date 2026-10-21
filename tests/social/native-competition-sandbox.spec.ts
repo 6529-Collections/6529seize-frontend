@@ -1801,6 +1801,12 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       detail.getByRole("button", { name: "Vote", exact: true })
     ).toBeVisible();
     await expect(page.getByTestId("single-drop-loading")).toHaveCount(0);
+    // Finish the backing leaderboard's initial lookup before measuring modal requests.
+    await expect(
+      page
+        .getByRole("main", { includeHidden: true })
+        .locator('[data-competition-entry="entry-alpha"]')
+    ).toBeAttached({ timeout: 30000 });
     let contextLookups = 0;
     await page.route(
       `**/v3/waves/${WAVE}/drops/${entryDropId("alpha")}/competition-context`,
