@@ -81,13 +81,21 @@ jest.mock("@/components/navigation/ViewContext", () => ({
 }));
 
 let dropData: any = null;
+let mockDropError: Error | null = null;
+let mockDropFetching = false;
+const mockRefetchDrop = jest.fn();
 let waveData: any = null;
 let mockIsCompleted = false;
 let mockFirstDecisionDone = true;
 
 jest.mock("@tanstack/react-query", () => ({
   keepPreviousData: {},
-  useQuery: jest.fn(() => ({ data: dropData })),
+  useQuery: jest.fn(() => ({
+    data: dropData,
+    error: mockDropError,
+    isFetching: mockDropFetching,
+    refetch: mockRefetchDrop,
+  })),
 }));
 
 jest.mock("@/hooks/useWaveData", () => ({
@@ -356,6 +364,8 @@ describe("BrainMobile", () => {
     mockReplace.mockClear();
     mockCurrentWaveView = null;
     dropData = null;
+    mockDropError = null;
+    mockDropFetching = false;
     waveData = null;
     isApp = true;
     mockActiveWaveId = null;
@@ -386,6 +396,42 @@ describe("BrainMobile", () => {
   afterEach(() => {
     jest.restoreAllMocks();
     globalThis.history.replaceState(null, "", "/");
+  });
+
+  it("covers the native wave as soon as the URL requests a drop", () => {
+    mockPathname = "/waves/wave-1";
+    mockSearchParams.set("drop", "d1");
+    const { rerender } = render(<BrainMobile>child</BrainMobile>);
+    expect(
+      screen.getByRole("status", { name: "Loading…" })
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("drop")).not.toBeInTheDocument();
+    dropData = { id: "old-drop" };
+    rerender(<BrainMobile>child</BrainMobile>);
+    expect(screen.getByTestId("single-drop-loading")).toBeInTheDocument();
+    expect(screen.queryByTestId("drop")).not.toBeInTheDocument();
+    dropData = { id: "d1" };
+    rerender(<BrainMobile>child</BrainMobile>);
+    expect(screen.queryByTestId("single-drop-loading")).not.toBeInTheDocument();
+    expect(screen.getByTestId("drop")).toBeInTheDocument();
+  });
+
+  it("shows pending feedback during a retry that retains the previous error", () => {
+    mockSearchParams.set("drop", "d1");
+    mockDropError = new Error("Unavailable");
+    const { rerender } = render(<BrainMobile>child</BrainMobile>);
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(mockRefetchDrop).toHaveBeenCalledTimes(1);
+    mockDropFetching = true;
+    rerender(<BrainMobile>child</BrainMobile>);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Try again" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("status", { name: "Loading…" })
+    ).toBeInTheDocument();
   });
 
   it("renders BrainDesktopDrop when drop is open", () => {
