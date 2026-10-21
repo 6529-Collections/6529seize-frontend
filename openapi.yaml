@@ -8192,6 +8192,16 @@ paths:
       description: Deprecated. Use GET /v2/drops instead.
       operationId: getLatestDrops
       parameters:
+        - name: public_only
+          in: query
+          description: >-
+            Only return drops from publicly viewable waves, excluding direct
+            messages and subwaves with private parents. Authentication still
+            supplies viewer-specific drop context. Defaults to false.
+          required: false
+          schema:
+            type: boolean
+            default: false
         - name: limit
           in: query
           description: How many drops to return (10 by default)
