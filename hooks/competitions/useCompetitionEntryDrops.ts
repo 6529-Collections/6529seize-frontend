@@ -83,13 +83,22 @@ export function useCompetitionEntryDrops(
     () => JSON.stringify([identity, viewer, cards?.updatedAt, entries]),
     [identity, viewer, cards?.updatedAt, entries]
   );
+  const projections = useMemo(
+    () =>
+      entries.map((reference) => ({
+        reference,
+        key: keyFor(reference),
+        data: seedFor(reference),
+      })),
+    [entries, keyFor, seedFor]
+  );
   const queries = useQueries({
-    queries: entries.map((reference) => ({
-      queryKey: keyFor(reference),
-      initialData: () => seedFor(reference),
+    queries: projections.map(({ reference, key, data }) => ({
+      queryKey: key,
+      initialData: () => data,
       ...(cards ? { initialDataUpdatedAt: cards.updatedAt } : {}),
       queryFn: async ({ signal }: { signal: AbortSignal }) => {
-        const previous = client.getQueryData<PresentedDrop>(keyFor(reference));
+        const previous = client.getQueryData<PresentedDrop>(key);
         const result = await fetchCompetitionEntryDrop(
           identity,
           viewer,
@@ -99,8 +108,7 @@ export function useCompetitionEntryDrops(
           cards ? { wave: waveMin, original: previous?.drop } : undefined
         );
         // A newer list response may have refreshed content while summaries loaded.
-        const latest =
-          cards && client.getQueryData<PresentedDrop>(keyFor(reference));
+        const latest = cards && client.getQueryData<PresentedDrop>(key);
         if (cards && latest === null) return null;
         return presentCompetitionEntryDrop(
           result && latest ? { ...result, original: latest.drop } : result,
@@ -124,16 +132,14 @@ export function useCompetitionEntryDrops(
     if (!cards) return;
     if (seeded.current === visit) return;
     seeded.current = visit;
-    for (const reference of entries) {
-      const key = keyFor(reference);
+    for (const { key, data } of projections) {
       const current = client.getQueryState(key);
       if (current && current.dataUpdatedAt > cards.updatedAt) continue;
-      const data = seedFor(reference);
       if (cards.updatedAt > 0)
         client.setQueryData(key, data ?? null, {
           updatedAt: cards.updatedAt,
         });
     }
-  }, [cards, visit, entries, client, keyFor, seedFor]);
+  }, [cards, visit, client, projections]);
   return queries;
 }
