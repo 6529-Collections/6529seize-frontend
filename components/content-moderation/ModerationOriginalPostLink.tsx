@@ -13,12 +13,26 @@ export default function ModerationOriginalPostLink({
   dropId,
   waveId,
   deleted,
+  evidenceRetained,
 }: {
   readonly dropId: string;
   readonly waveId: unknown;
   readonly deleted: boolean;
+  readonly evidenceRetained?: boolean | undefined;
 }) {
   const locale = useBrowserLocale();
+  if (deleted) {
+    return (
+      <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
+        {t(
+          locale,
+          evidenceRetained
+            ? "contentModeration.originalPost.deletedHelp"
+            : "contentModeration.originalPost.deletedWithoutEvidence"
+        )}
+      </p>
+    );
+  }
   const href =
     safeId(dropId) && safeId(waveId)
       ? getWaveRoute({
@@ -41,11 +55,6 @@ export default function ModerationOriginalPostLink({
       ) : (
         <p className="tw-m-0 tw-text-sm tw-text-iron-400">
           {t(locale, "contentModeration.originalPost.unavailable")}
-        </p>
-      )}
-      {deleted && (
-        <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
-          {t(locale, "contentModeration.originalPost.deletedHelp")}
         </p>
       )}
     </div>

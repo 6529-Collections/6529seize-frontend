@@ -231,6 +231,7 @@ function ModerationQueueCard({
         dropId={item.drop_id}
         waveId={originalWaveId}
         deleted={item.drop_deleted}
+        evidenceRetained={item.content_snapshot["evidence_expired"] !== true}
       />
       <pre className="tw-mb-0 tw-mt-4 tw-max-h-72 tw-overflow-auto tw-whitespace-pre-wrap tw-break-words tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-font-sans tw-text-base tw-leading-7 tw-text-iron-50">
         {content || t(locale, "contentModeration.moderator.noTextContent")}

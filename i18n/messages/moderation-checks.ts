@@ -1,14 +1,26 @@
+const NEEDS_REVIEW = "Needs review";
+
 export const MODERATION_CHECK_MESSAGES = {
   "checks.caseAuthor": "Author: {profile}",
   "checks.caseReports": "User reports for this case",
   "checks.reviewReport": "Review report",
-  "checks.caseOutcome": "Check outcome: {outcome}",
+  "checks.caseOutcome": "Automated outcome: {outcome}",
+  "checks.automatedOutcome": "Automated outcome: {outcome}",
+  "checks.backToNeedsReview": "Back to Needs review",
+  "checks.needsReview": NEEDS_REVIEW,
+  "checks.allChecks": "All checks",
+  "checks.selectedCase": "Selected",
+  "checks.reviewCaseDetails": "Case details",
+  "checks.reviewWorkspace": NEEDS_REVIEW,
+  "checks.caseChecks": "Checks for this case",
+  "checks.caseResolved": "This case no longer needs review.",
+  "checks.selectCase": "Select a case to review.",
   "checks.caseFilter":
     "Showing checks for this case. Clear filters to return to all checks.",
   "checks.caseRequirements":
     "Open reports: {reports} · Checks needing review: {checks}",
   "checks.reviewCase": "Review case",
-  "contentModeration.moderator.tabs.needsReview": "Needs review",
+  "contentModeration.moderator.tabs.needsReview": NEEDS_REVIEW,
   "contentModeration.moderator.tabs.needsReviewCompact": "Review",
   "checks.queue.userReport": "User report",
   "checks.queue.automatedCheck": "Automated check",
@@ -72,7 +84,7 @@ export const MODERATION_CHECK_MESSAGES = {
   "checks.outcome.PENDING": "Pending",
   "checks.policy.PUBLIC_FIELDS": "Public-facing text",
   "checks.policy.WAVE_CONTENT": "Wave safety",
-  "checks.review.NEEDS_REVIEW": "Needs review",
+  "checks.review.NEEDS_REVIEW": NEEDS_REVIEW,
   "checks.review.REVIEWED": "Reviewed",
   "checks.trigger.SUBMISSION": "Submission",
   "checks.trigger.REPORT": "Report",

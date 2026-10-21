@@ -2,6 +2,7 @@
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
+import { ApiModerationCheckReviewStatusEnum } from "@/generated/models/ApiModerationCheck";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate } from "@/i18n/format";
 import { t } from "@/i18n/messages";
@@ -17,15 +18,34 @@ import {
 import CheckFilters from "./CheckFilters";
 import CheckDetail from "./CheckDetail";
 import CaseReports from "./CaseReports";
+import ModerationReviewWorkspace from "./ModerationReviewWorkspace";
 
 export default function ModerationChecks({
   profileId,
 }: {
   readonly profileId: string;
 }) {
-  const locale = useBrowserLocale();
   const search = useSearchParams();
   const params = new URLSearchParams(search.toString());
+  const filters = readCheckFilters(params);
+  const manualQueue =
+    filters.review_status === ApiModerationCheckReviewStatusEnum.NeedsReview &&
+    Object.keys(filters).every(
+      (key) => key === "review_status" || key === "case_id"
+    );
+  if (manualQueue)
+    return <ModerationReviewWorkspace profileId={profileId} params={params} />;
+  return <ModerationCheckHistory profileId={profileId} params={params} />;
+}
+
+function ModerationCheckHistory({
+  profileId,
+  params,
+}: {
+  readonly profileId: string;
+  readonly params: URLSearchParams;
+}) {
+  const locale = useBrowserLocale();
   const filters = readCheckFilters(params);
   const selection =
     safeCheckId(params.get("check")) ??
@@ -149,7 +169,9 @@ export default function ModerationChecks({
                   <span className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-text-sm tw-font-semibold tw-text-iron-100">
                     <span>{checkValueLabel(locale, item.subject_type)}</span>
                     <span className="tw-rounded-md tw-bg-iron-800 tw-px-2 tw-py-1 tw-text-xs tw-text-iron-200">
-                      {checkValueLabel(locale, item.outcome)}
+                      {t(locale, "checks.automatedOutcome", {
+                        outcome: checkValueLabel(locale, item.outcome),
+                      })}
                     </span>
                   </span>
                   <span className="tw-mt-2 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">

@@ -352,7 +352,7 @@ describe("ContentModerationPageClient pagination", () => {
     expect(screen.getByText("User report")).toBeVisible();
     expect(screen.getByText("Automated check")).toBeVisible();
     expect(screen.getByText(/Reported for.*Spam/)).toBeVisible();
-    expect(screen.getByText("Check outcome: Rejected")).toBeVisible();
+    expect(screen.getByText("Automated outcome: Rejected")).toBeVisible();
     expect(
       screen.getByText("Open reports: 3 · Checks needing review: 2")
     ).toBeVisible();
@@ -823,9 +823,16 @@ describe("ContentModerationPageClient pagination", () => {
           <ContentModerationPageClient />
         </QueryClientProvider>
       );
-      expect(
-        await screen.findByRole("link", { name: "Open original post" })
-      ).toHaveAttribute("href", "/waves/wave-1?drop=drop-1");
+      await screen.findByText(deleted ? "State: Deleted" : "State: Visible");
+      if (deleted) {
+        expect(
+          screen.queryByRole("link", { name: "Open original post" })
+        ).not.toBeInTheDocument();
+      } else {
+        expect(
+          screen.getByRole("link", { name: "Open original post" })
+        ).toHaveAttribute("href", "/waves/wave-1?drop=drop-1");
+      }
       expect(
         screen.getByText(deleted ? "State: Deleted" : "State: Visible")
       ).toBeVisible();
@@ -835,7 +842,7 @@ describe("ContentModerationPageClient pagination", () => {
       if (deleted) {
         expect(screen.queryByText("State: Visible")).not.toBeInTheDocument();
         expect(
-          screen.getByText(/The original post has been deleted/)
+          screen.getByText("Original post deleted. Saved evidence retained.")
         ).toBeVisible();
       }
     }
