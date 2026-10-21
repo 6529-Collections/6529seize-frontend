@@ -43,8 +43,10 @@ Profile tab routes live under `/{user}`.
 4. Tab visibility rules run for the current viewer, device, and Waves context.
 5. If the tab stays visible, the route remains selected; otherwise the app
    falls back to the first visible tab and keeps the current query string.
-6. Selecting another tab immediately highlights it and shows a loading placeholder
-   while its content is being fetched. The header, banner, and tab bar remain in place.
+6. Selecting another tab immediately highlights it and hides the previous tab's
+   content. A loading placeholder appears only if the switch takes longer than
+   100 ms. Content appears as soon as it is ready. The header, banner, and tab bar
+   remain in place.
 7. Tab switches preserve your vertical scroll position. Shorter content can reduce
    the available scroll distance naturally. Fresh loads start at the top, and
    browser Back and Forward restore navigation positions.
