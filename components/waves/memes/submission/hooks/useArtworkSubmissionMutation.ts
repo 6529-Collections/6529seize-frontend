@@ -1,6 +1,7 @@
 "use client";
 
 import type { ApiCompetition } from "@/generated/models/ApiCompetition";
+import type { ApiMemeCollaboratorProfile } from "@/generated/models/ApiMemeCollaboratorProfile";
 import { useOptionalCompetition } from "@/contexts/CompetitionContext";
 import { useCompetitionEntrySubmit } from "@/hooks/competitions/useCompetitionEntrySubmit";
 import { useAuth } from "@/components/auth/Auth";
@@ -32,6 +33,7 @@ import {
  * Interface for the artwork submission data
  */
 interface ArtworkSubmissionData {
+  collaborators?: ApiMemeCollaboratorProfile[];
   proposalFrame?: ProposalCardLayout | null | undefined;
   imageFile?: File | undefined;
   existingMedia?:
@@ -342,6 +344,7 @@ async function prepareArtworkRequest({
 
   // Step 2: Transform data to API format
   const transformedRequest = transformToApiRequest({
+    collaboratorIds: data.collaborators?.map((profile) => profile.id) ?? [],
     waveId: data.waveId,
     traits: data.traits,
     operationalData,

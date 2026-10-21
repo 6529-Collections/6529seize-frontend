@@ -7,6 +7,8 @@ import { getFormSections } from "./traits/schema";
 import type { TraitsData } from "./submission/types/TraitsData";
 
 interface MemesArtSubmissionTraitsProps {
+  readonly hideCollab?: boolean;
+  readonly collaboratorPicker?: React.ReactNode;
   readonly traits: TraitsData;
   readonly setTraits: (traits: Partial<TraitsData>) => void;
   readonly showTitle?: boolean | undefined;
@@ -25,6 +27,8 @@ interface MemesArtSubmissionTraitsProps {
  * Simplified implementation with direct updates to the central state
  */
 const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
+  hideCollab = false,
+  collaboratorPicker,
   traits,
   setTraits,
   showTitle = true,
@@ -62,8 +66,14 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
   );
 
   const formSections = React.useMemo(
-    () => getFormSections(userProfile, readOnlyOverrides),
-    [userProfile, readOnlyOverrides]
+    () =>
+      getFormSections(userProfile, readOnlyOverrides).map((section) => ({
+        ...section,
+        fields: section.fields.filter(
+          (field) => !hideCollab || field.field !== "collab"
+        ),
+      })),
+    [userProfile, readOnlyOverrides, hideCollab]
   );
 
   return (
@@ -124,6 +134,7 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
                     {artistField && renderField(artistField)}
                     {profileField && renderField(profileField)}
                   </div>
+                  {collaboratorPicker}
                   {remainingFields.map((field) => renderField(field))}
                 </div>
               </Section>

@@ -23,6 +23,9 @@ export default function ContentModerationReportStatusButton({
   } else if (status === ApiContentModerationReportStatus.ResolvedRemoved) {
     fullLabel = t(locale, "contentModeration.report.contentRemoved");
   }
+  if (status === ApiContentModerationReportStatus.ResolvedDeleted) {
+    fullLabel = t(locale, "contentModeration.report.contentDeleted");
+  }
   const shortLabel = t(
     locale,
     isOpen
@@ -30,7 +33,8 @@ export default function ContentModerationReportStatusButton({
       : "contentModeration.report.reviewedShort"
   );
   const visibleLabel =
-    status === ApiContentModerationReportStatus.ResolvedAllowed
+    status === ApiContentModerationReportStatus.ResolvedAllowed ||
+    status === ApiContentModerationReportStatus.ResolvedDeleted
       ? fullLabel
       : shortLabel;
 

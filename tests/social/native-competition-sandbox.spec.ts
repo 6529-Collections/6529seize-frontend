@@ -2,6 +2,9 @@ import { writeFile } from "node:fs/promises";
 import composerSandboxConstants from "../support/composerSandboxConstants.json";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import type { Frame, Locator, Page, WebSocketRoute } from "@playwright/test";
+import type { ApiDropAndWave } from "@/generated/models/ApiDropAndWave";
+import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2PageWithoutCount";
+import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { expectCompetitionScroll } from "../support/competitionScroll";
 import {
   expectNativeLeaderboardArtwork,
@@ -249,6 +252,33 @@ const pageResult = (data: unknown[]) => ({
   next_cursor: null,
   has_more: false,
 });
+
+async function installCollaborationDropFixture(
+  page: Page,
+  getFixture: () => ApiDropAndWave
+) {
+  const dropId = getFixture().drop.id;
+  // Competition cards fetch one drop; the detail overlay batches its read.
+  // Keep both views on the same fixture, including post-acceptance refreshes.
+  await page.route(`**/v2/drops/${dropId}`, (route) =>
+    route.fulfill({ json: getFixture() })
+  );
+  await page.route(
+    (url) =>
+      url.pathname.endsWith("/v2/drops") &&
+      url.searchParams.get("ids") === dropId,
+    (route) => {
+      const { drop, wave } = getFixture();
+      return route.fulfill({
+        json: {
+          data: [{ ...drop, wave }],
+          page: 1,
+          next: false,
+        } satisfies ApiDropV2PageWithoutCount,
+      });
+    }
+  );
+}
 const competition = (id: string, title: string) => ({
   id,
   wave_id: WAVE,
@@ -2064,6 +2094,717 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         /hydration|hydrated|cannot be a (?:child|descendant)/i.test(error)
       )
     ).toEqual([]);
+  });
+
+  test("shows collaboration actors and named artwork in the standard notification header", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    const origin = getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"]);
+    const response = await page.request.get(
+      `${origin}/api/v2/waves/${WAVE}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const fixture = await response.json();
+    const pfp =
+      "data:image/svg+xml;base64," +
+      Buffer.from(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28"><rect width="28" height="28" fill="#9b7ec8"/></svg>'
+      ).toString("base64");
+    const notifications = ["INVITED", "ACCEPTED"].map((event, index) => ({
+      id: 5000 - index,
+      cause: "MEME_COLLABORATION",
+      created_at: Date.now() - 3 * 60 * 60 * 1000,
+      read_at: null,
+      related_identity: {
+        ...fixture.drops[0].author,
+        id: `notification-actor-${index}`,
+        handle: index === 0 ? "phoebeum" : "prxt0",
+        pfp,
+      },
+      additional_context: {
+        event_type: event,
+        wave_id: WAVE,
+        drop_id: entryDropId("alpha"),
+        invitation_id: `invite-${index}`,
+        artwork_name: "Test Cat",
+      },
+    }));
+    await page.route("**/api/v2/notifications**", (route) => {
+      const before = new URL(route.request().url()).searchParams.get(
+        "id_less_than"
+      );
+      return route.fulfill({
+        json: {
+          unread_count: 2,
+          notifications: notifications.filter(
+            (item) => before === null || item.id < Number(before)
+          ),
+        },
+      });
+    });
+    await page.goto("/notifications");
+    for (const [handle, action, message] of [
+      ["phoebeum", "Review invitation", "invited you to collaborate on"],
+      ["prxt0", "View artwork", "accepted your collaboration invitation for"],
+    ] as const) {
+      const row = page
+        .getByText(message, { exact: true })
+        .locator("xpath=ancestor::div[3]");
+      const actor = row.getByRole("link", { name: handle, exact: true });
+      await expect(actor).toBeVisible();
+      await expect(actor).toHaveAttribute("href", `/${handle}`);
+      await expect(
+        row.getByRole("img", { name: handle, exact: true })
+      ).toBeVisible();
+      await expect(row.getByText(message, { exact: true })).toBeVisible();
+      const avatarBox = await row
+        .getByRole("img", { name: handle, exact: true })
+        .boundingBox();
+      const textBox = await row
+        .getByText(message, { exact: true })
+        .locator("xpath=ancestor::div[1]")
+        .boundingBox();
+      expect(avatarBox).not.toBeNull();
+      expect(textBox).not.toBeNull();
+      expect(
+        Math.abs(
+          avatarBox!.y +
+            avatarBox!.height / 2 -
+            textBox!.y -
+            textBox!.height / 2
+        )
+      ).toBeLessThanOrEqual(1);
+
+      const artwork = row.getByRole("link", { name: "Test Cat", exact: true });
+      await expect(artwork).toBeVisible();
+      await expect(
+        row.getByRole("link", { name: action, exact: true })
+      ).toHaveCount(0);
+      await expect(row.getByRole("link")).toHaveCount(2);
+      const artworkHref = `/waves/${encodeURIComponent(WAVE)}?drop=${encodeURIComponent(entryDropId("alpha"))}`;
+      await expect(artwork).toHaveAttribute("href", artworkHref);
+    }
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("collaboration-notifications.png"),
+    });
+  });
+
+  test("aligns competition result notifications and wraps long titles", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    const titles = [
+      "The Memes - Main Stage",
+      "CompetitionWithAnUnbrokenName".repeat(8),
+    ];
+    const notifications = titles.map((title, index) => ({
+      id: 6000 - index,
+      cause: "COMPETITION_LIFECYCLE",
+      created_at: Date.now() - 3 * 60 * 60 * 1000,
+      read_at: null,
+      related_identity: null,
+      related_drops: [],
+      additional_context: {
+        event_id: `results-${index}`,
+        event_type: "COMPETITION_DECISION_COMPLETED",
+        wave_id: WAVE,
+        competition_id: "alpha",
+        competition_title: title,
+        ...(index === 0 ? { entry_id: "alpha-entry" } : {}),
+      },
+    }));
+    await page.route("**/api/v2/notifications**", (route) => {
+      const before = new URL(route.request().url()).searchParams.get(
+        "id_less_than"
+      );
+      return route.fulfill({
+        json: {
+          unread_count: notifications.length,
+          notifications: notifications.filter(
+            (item) => before === null || item.id < Number(before)
+          ),
+        },
+      });
+    });
+    await page.goto("/notifications");
+    for (const [index, title] of titles.entries()) {
+      const link = page.getByRole("link", { name: title, exact: true });
+      await expect(link).toBeVisible();
+      await expect(link).toHaveAttribute(
+        "href",
+        `${ROOT}/alpha${index === 0 ? "?entry=alpha-entry" : ""}`
+      );
+      await link.scrollIntoViewIfNeeded();
+      const layout = await link.evaluate((element) => {
+        const content = element.parentElement!;
+        const row = content.parentElement!;
+        const icon = row.querySelector("svg")!;
+        const iconBox = icon.getBoundingClientRect();
+        const contentBox = content.getBoundingClientRect();
+        const prefix = document.createRange();
+        prefix.selectNodeContents(content.firstChild!);
+        const prefixTop = prefix.getBoundingClientRect().top;
+        const firstLinkTop = element.getClientRects()[0]!.top;
+        return {
+          text: content.textContent,
+          links: row.querySelectorAll("a").length,
+          iconHidden: icon.getAttribute("aria-hidden"),
+          centered: Math.abs(
+            iconBox.y +
+              iconBox.height / 2 -
+              contentBox.y -
+              contentBox.height / 2
+          ),
+          separated: contentBox.left > iconBox.right,
+          overflow: row.scrollWidth > row.clientWidth,
+          wrapped: element.getClientRects().length > 1,
+          sameLine: Math.abs(prefixTop - firstLinkTop) <= 1,
+          fontSize: getComputedStyle(element).fontSize,
+          bodyFontSize: getComputedStyle(content).fontSize,
+          textDecoration: getComputedStyle(element).textDecorationLine,
+        };
+      });
+      expect(layout.text).toContain(`Results are in for ${title}`);
+      expect(layout.links).toBe(1);
+      expect(layout.iconHidden).toBe("true");
+      expect(layout.centered).toBeLessThanOrEqual(1);
+      expect(layout.separated).toBe(true);
+      expect(layout.overflow).toBe(false);
+      expect(layout.fontSize).toBe(layout.bodyFontSize);
+      expect(layout.textDecoration).toBe("none");
+      if (index === 1) expect(layout.wrapped).toBe(true);
+      if (index === 0 && page.viewportSize()!.width >= 1024)
+        expect(layout.sameLine).toBe(true);
+      await link.focus();
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Shift+Tab");
+      await expect(link).toBeFocused();
+      await expect(link).toHaveCSS("outline-style", "solid");
+    }
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("competition-results-notifications.png"),
+    });
+  });
+
+  test("keeps collaborator search, selected chips and disclosure usable", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    const origin = getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"]);
+    const response = await page.request.get(
+      `${origin}/api/v2/waves/${WAVE}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const fixture = await response.json();
+    await installCollaborationDropFixture(page, () => ({
+      wave: fixture.wave,
+      drop: {
+        ...fixture.drops[0],
+        id: entryDropId("alpha"),
+        submission_artist: "playwright",
+        author: { ...fixture.drops[0].author, id: PROFILE },
+        title: "Collaboration artwork",
+      },
+    }));
+    let invitationsSent = false;
+    await page.route(
+      `**/drops/${entryDropId("alpha")}/collaborations`,
+      (route) => {
+        if (route.request().method() === "POST") {
+          expect(route.request().postDataJSON()).toEqual({
+            collaborator_ids: ["artist-c"],
+          });
+          invitationsSent = true;
+        }
+        return route.fulfill({
+          json: {
+            managed: true,
+            can_invite: true,
+            closed: false,
+            artwork_hash: "a".repeat(64),
+            terms_version: "b".repeat(64),
+            acceptance_copy: "Acceptance is final.",
+            terms: null,
+            collaborators: [],
+            invitations: [
+              ...(invitationsSent
+                ? [
+                    {
+                      id: "sent-invite",
+                      profile: {
+                        id: "artist-c",
+                        handle: "artistC",
+                        display: "artistC",
+                        pfp: null,
+                      },
+                      status: "PENDING",
+                    },
+                  ]
+                : []),
+              {
+                id: "existing-invite",
+                profile: {
+                  id: "artist-d",
+                  handle: "artistD",
+                  display: "artistD",
+                  pfp: null,
+                },
+                status: "PENDING",
+              },
+            ],
+          },
+        });
+      }
+    );
+    let releaseSearch!: () => void;
+    const searchGate = new Promise<void>((resolve) => {
+      releaseSearch = resolve;
+    });
+    await page.route("**/community-members?**", async (route) => {
+      await searchGate;
+      return route.fulfill({
+        json: [
+          {
+            profile_id: "artist-c",
+            handle: "artistC",
+            display: "artistC",
+            wallet: "0x0000000000000000000000000000000000000003",
+            primary_wallet: "0x0000000000000000000000000000000000000003",
+            pfp: null,
+          },
+        ],
+      });
+    });
+    await page.route("**/identities/artist-c", (route) =>
+      route.fulfill({ json: { id: "artist-c", handle: "artistC", pfp: null } })
+    );
+    try {
+      await page.goto(`${ROOT}/alpha?drop=${entryDropId("alpha")}`);
+      await expect(
+        page.getByRole("button", { name: "Close panel", exact: true })
+      ).toBeVisible();
+      const manage = page.getByRole("button", { name: /Manage collaborators/ });
+      await expect(manage).toBeVisible({ timeout: 30000 });
+      await expect(
+        page.getByRole("dialog", { name: "Manage collaborators" })
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("button", { name: "Add collaborators", exact: true })
+      ).toHaveCount(0);
+      await expect(manage).toHaveCSS("border-top-style", "solid");
+      const summary = page
+        .getByRole("button", { name: /Manage collaborators/ })
+        .locator("xpath=ancestor::div[2]");
+      const author = summary.getByRole("link", {
+        name: fixture.drops[0].author.handle,
+        exact: false,
+      });
+      const manageBox = await manage.boundingBox();
+      const authorBox = await author.boundingBox();
+      expect(manageBox).not.toBeNull();
+      expect(authorBox).not.toBeNull();
+      expect(Math.abs(manageBox!.x - authorBox!.x)).toBeLessThan(1);
+      expect(manageBox!.height).toBeLessThanOrEqual(44);
+      await manage.click();
+      const manager = page.getByRole("dialog", {
+        name: "Manage collaborators",
+      });
+      await expect(manager).toBeVisible();
+      await expect(
+        manager.getByText("@artistD", { exact: true })
+      ).toBeVisible();
+      const add = manager.getByRole("button", {
+        name: "Add collaborators",
+        exact: true,
+      });
+      await expect(add).toBeVisible();
+      const search = page.getByRole("combobox", {
+        name: "Invite a collaborating artist",
+      });
+      await expect(search).toHaveCount(0);
+      await add.click();
+      await search.fill("art");
+      await expect(
+        page.getByRole("status").filter({ hasText: "Searching…" })
+      ).toBeVisible();
+      await expect(page.getByText("No results", { exact: true })).toHaveCount(
+        0
+      );
+      releaseSearch();
+      await page
+        .getByRole("option")
+        .filter({ hasText: "artistC" })
+        .getByRole("button")
+        .click();
+      await expect(
+        page.getByRole("button", { name: "Remove invitation for artistC" })
+      ).toBeVisible();
+      const fold = page.getByRole("button", {
+        name: "Collaborators (1)",
+        exact: true,
+      });
+      await fold.click();
+      await expect(search).toHaveCount(0);
+      await fold.click();
+      await expect(page.getByText("@artistC", { exact: true })).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("collaborator-picker.png"),
+      });
+      await page
+        .getByRole("button", { name: "Remove invitation for artistC" })
+        .click();
+      await expect(
+        page.getByRole("button", { name: "Add collaborators", exact: true })
+      ).toHaveAttribute("aria-expanded", "true");
+      await search.fill("art");
+      await page
+        .getByRole("option")
+        .filter({ hasText: "artistC" })
+        .getByRole("button")
+        .click();
+      await manager
+        .getByRole("button", {
+          name: "Send collaborator invitations",
+          exact: true,
+        })
+        .click();
+      const toastMessage = page.getByText("Collaborator invitations sent.", {
+        exact: true,
+      });
+      await expect(toastMessage).toBeVisible();
+      await expect(manager).toBeVisible();
+      const toastLayer = await toastMessage.evaluate((element) => {
+        let layer = 0;
+        for (
+          let node: Element | null = element;
+          node;
+          node = node.parentElement
+        ) {
+          const value = Number.parseInt(getComputedStyle(node).zIndex, 10);
+          if (Number.isFinite(value)) layer = Math.max(layer, value);
+        }
+        return layer;
+      });
+      const dialogLayer = await manager.evaluate((element) =>
+        Number.parseInt(getComputedStyle(element).zIndex, 10)
+      );
+      expect(toastLayer).toBeGreaterThan(dialogLayer);
+      await expect(
+        manager.getByText("@artistC", { exact: true })
+      ).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(manager).toHaveCount(0);
+      await expect(manage).toBeFocused();
+      await manage.click();
+      await expect(manager).toBeVisible();
+      await manager.getByRole("button", { name: "Done", exact: true }).click();
+      await expect(manager).toHaveCount(0);
+      await expect(manage).toBeFocused();
+    } finally {
+      releaseSearch();
+    }
+  });
+
+  test("reviews collaborator consent in a modal and displays accepted credit once", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    const origin = getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"]);
+    const response = await page.request.get(
+      `${origin}/api/v2/waves/${WAVE}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const fixture = await response.json();
+    const profile = {
+      id: PROFILE,
+      handle: "playwright",
+      display: "playwright",
+      pfp: null,
+    };
+    await page.route(`**/identities/${PROFILE.toLowerCase()}`, (route) =>
+      route.fulfill({
+        json: {
+          ...fixture.drops[0].author,
+          id: PROFILE,
+          handle: "playwright",
+          level: 21,
+        },
+      })
+    );
+    let accepted = false;
+    await installCollaborationDropFixture(page, () => ({
+      wave: fixture.wave,
+      drop: {
+        ...fixture.drops[0],
+        id: entryDropId("alpha"),
+        drop_type: ApiDropMainType.Submission,
+        author: {
+          ...fixture.drops[0].author,
+          id: "other-artist",
+          handle: "otherArtist",
+        },
+        title: "Collaboration artwork",
+        collaborators: accepted ? [profile] : [],
+      },
+    }));
+    const state = () => ({
+      managed: true,
+      can_invite: false,
+      closed: false,
+      artwork_hash: "a".repeat(64),
+      terms_version: "b".repeat(64),
+      acceptance_copy:
+        "Acceptance is final and admins control final mint credits.",
+      artwork: {
+        name: "Collaboration artwork",
+        description: "The saved artwork description for invitation review.",
+        image_url: "https://images.example.com/artwork.jpg",
+        animation_url: null,
+      },
+      terms: `The submission and minting terms for this artwork.
+
+${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
+      collaborators: accepted ? [profile] : [],
+      invitations: [
+        { id: "invite", profile, status: accepted ? "ACCEPTED" : "PENDING" },
+      ],
+    });
+    await page.route(
+      `**/drops/${entryDropId("alpha")}/collaborations`,
+      (route) => route.fulfill({ json: state() })
+    );
+    await page.route(
+      `**/drops/${entryDropId("alpha")}/collaborations/invite/response`,
+      (route) => {
+        expect(route.request().method()).toBe("POST");
+        expect(route.request().postDataJSON()).toEqual({
+          action: "ACCEPT",
+          artist_name: "Playwright Artist",
+          artwork_hash: "a".repeat(64),
+          terms_version: "b".repeat(64),
+        });
+        accepted = true;
+        return route.fulfill({ json: state() });
+      }
+    );
+    await page.goto(`${ROOT}/alpha?drop=${entryDropId("alpha")}`);
+    await expect(
+      page.getByRole("button", { name: "Close panel", exact: true })
+    ).toBeVisible();
+    const review = page.getByRole("button", {
+      name: "Review invitation",
+      exact: true,
+    });
+    await expect(review).toBeVisible({ timeout: 30000 });
+    await expect(
+      page.getByText("The submission and minting terms for this artwork.", {
+        exact: true,
+      })
+    ).toHaveCount(0);
+    await review.click();
+    const dialog = page.getByRole("dialog", { name: "Review invitation" });
+    await expect(dialog).toBeVisible();
+    const accept = dialog.getByRole("button", {
+      name: "Accept collaboration",
+      exact: true,
+    });
+    await expect(accept).toBeDisabled();
+    await expect(
+      dialog.getByText("The submission and minting terms for this artwork.", {
+        exact: true,
+      })
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(dialog).toHaveCount(0);
+    await expect(review).toBeFocused();
+    await review.click();
+    await expect(dialog.getByRole("checkbox")).not.toBeChecked();
+    const artistName = dialog.getByRole("textbox", {
+      name: "Artist credit name",
+      exact: true,
+    });
+    await expect(artistName).toHaveValue("playwright");
+    const panelWidth = await dialog
+      .getByRole("heading", { name: "Review invitation", exact: true })
+      .evaluate(
+        (heading) =>
+          heading.parentElement!.parentElement!.getBoundingClientRect().width
+      );
+    const viewport = page.viewportSize()!;
+    expect(panelWidth).toBeGreaterThanOrEqual(
+      Math.min(1280, viewport.width - 32) - 2
+    );
+    const checkboxBefore = await dialog.getByRole("checkbox").boundingBox();
+    const nameBefore = await artistName.boundingBox();
+    const reviewContents = dialog.getByRole("region", {
+      name: "Artwork and terms",
+      exact: true,
+    });
+    const contentsBox = await reviewContents.boundingBox();
+    expect(contentsBox).not.toBeNull();
+    expect(contentsBox!.height).toBeGreaterThan(viewport.height * 0.4);
+    expect(
+      await reviewContents.evaluate(
+        (element) =>
+          [...element.querySelectorAll<HTMLElement>("*")].filter(
+            (child) =>
+              /auto|scroll/.test(getComputedStyle(child).overflowY) &&
+              child.scrollHeight > child.clientHeight
+          ).length
+      )
+    ).toBe(0);
+    await reviewContents.evaluate((element) => {
+      element.scrollTop = element.scrollHeight;
+    });
+    await expect(
+      dialog.getByText("End of submission terms.", { exact: true })
+    ).toBeInViewport();
+    await expect(
+      dialog.getByRole("heading", {
+        name: "Collaboration artwork",
+        exact: true,
+      })
+    ).not.toBeInViewport();
+    const checkboxAfter = await dialog.getByRole("checkbox").boundingBox();
+    const nameAfter = await artistName.boundingBox();
+    expect(checkboxBefore).not.toBeNull();
+    expect(checkboxAfter).not.toBeNull();
+    expect(nameBefore).not.toBeNull();
+    expect(nameAfter).not.toBeNull();
+    expect(Math.abs(checkboxBefore!.y - checkboxAfter!.y)).toBeLessThanOrEqual(
+      1
+    );
+    expect(Math.abs(nameBefore!.y - nameAfter!.y)).toBeLessThanOrEqual(1);
+    expect(checkboxAfter!.y + checkboxAfter!.height).toBeLessThanOrEqual(
+      viewport.height
+    );
+
+    // Short phones/landscape use one body-and-footer scroller, preserving the header.
+    for (const size of [
+      { width: 320, height: 480 },
+      { width: viewport.width, height: 320 },
+    ]) {
+      await page.setViewportSize(size);
+      await expect
+        .poll(() =>
+          reviewContents.evaluate((element) => ({
+            bodyOverflow: getComputedStyle(element).overflowY,
+            layoutOverflow: getComputedStyle(element.parentElement!).overflowY,
+          }))
+        )
+        .toEqual({ bodyOverflow: "visible", layoutOverflow: "auto" });
+      await artistName.scrollIntoViewIfNeeded();
+      await expect(artistName).toBeInViewport({ ratio: 1 });
+      await dialog.getByRole("checkbox").scrollIntoViewIfNeeded();
+      await expect(dialog.getByRole("checkbox")).toBeInViewport({ ratio: 1 });
+      await accept.scrollIntoViewIfNeeded();
+      await expect(accept).toBeInViewport({ ratio: 1 });
+      await expect(
+        dialog.getByRole("button", {
+          name: "Close invitation review",
+          exact: true,
+        })
+      ).toBeInViewport({ ratio: 1 });
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath(
+          `collaboration-review-${size.width}-${size.height}.png`
+        ),
+      });
+    }
+    await page.setViewportSize(viewport);
+
+    // Simulate browser and native keyboard heights without claiming physical-device coverage.
+    for (const keyboard of ["browser", "native"] as const) {
+      await artistName.focus();
+      await page.evaluate((mode) => {
+        const visual = globalThis.visualViewport!;
+        if (mode === "native") {
+          document.documentElement.style.setProperty(
+            "--native-keyboard-inset-bottom",
+            `${globalThis.innerHeight - 300}px`
+          );
+        } else {
+          Object.defineProperty(visual, "height", {
+            configurable: true,
+            value: 300,
+          });
+          Object.defineProperty(visual, "offsetTop", {
+            configurable: true,
+            value: 12,
+          });
+          visual.dispatchEvent(new Event("resize"));
+        }
+      }, keyboard);
+      await expect(artistName).toBeFocused();
+      await expect
+        .poll(() =>
+          artistName.evaluate((element) => {
+            let scroller = element.parentElement;
+            while (
+              scroller &&
+              !/auto|scroll/.test(getComputedStyle(scroller).overflowY)
+            )
+              scroller = scroller.parentElement;
+            if (!scroller)
+              throw new Error("Invitation review scroller missing");
+            const field = element.getBoundingClientRect();
+            const visible = scroller.getBoundingClientRect();
+            return field.top >= visible.top && field.bottom <= visible.bottom;
+          })
+        )
+        .toBe(true);
+      await expect(artistName).toHaveValue("playwright");
+      await expect(dialog.getByRole("checkbox")).not.toBeChecked();
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath(
+          `collaboration-review-${keyboard}-keyboard.png`
+        ),
+      });
+      await artistName.evaluate((element) => element.blur());
+      await page.evaluate(() => {
+        document.documentElement.style.removeProperty(
+          "--native-keyboard-inset-bottom"
+        );
+        const visual = globalThis.visualViewport!;
+        Reflect.deleteProperty(visual, "height");
+        Reflect.deleteProperty(visual, "offsetTop");
+        visual.dispatchEvent(new Event("resize"));
+      });
+    }
+
+    await artistName.fill("   ");
+    await dialog.getByRole("checkbox").check();
+    await expect(accept).toBeDisabled();
+    await artistName.fill("Playwright Artist");
+    await expect(dialog.getByRole("checkbox")).not.toBeChecked();
+    await dialog.getByRole("checkbox").check();
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("collaboration-review-modal.png"),
+    });
+    await accept.click();
+    await expect(dialog).toHaveCount(0);
+    await expect(
+      page
+        .getByRole("list", { name: "Collaborators", exact: true })
+        .getByRole("link", { name: "playwright", exact: true })
+    ).toHaveCount(1);
+    await expect(review).toHaveCount(0);
+    await expect(
+      page
+        .getByRole("list", { name: "Collaborators", exact: true })
+        .getByText("21", { exact: true })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("accepted-collaborator-profile.png"),
+    });
   });
 
   test("renders frozen CHAT deep links with submission voting controls", async ({

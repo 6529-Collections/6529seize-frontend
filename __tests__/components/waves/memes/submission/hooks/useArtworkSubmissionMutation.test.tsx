@@ -137,6 +137,27 @@ describe("useArtworkSubmissionMutation", () => {
     expect(prepareProposalCard).not.toHaveBeenCalled();
   });
 
+  it("passes initial collaborators to the native signed submission command", async () => {
+    const { result } = setupHook();
+    await act(async () => {
+      await result.current.submitArtwork(
+        {
+          ...submissionData,
+          collaborators: [
+            { id: "B", handle: "artistB", display: "artistB", pfp: null },
+          ],
+        },
+        "0xabc",
+        false,
+        submitOptions
+      );
+    });
+    expect(mockNativeEntry).toHaveBeenCalledWith(
+      expect.objectContaining({ collaborator_ids: ["B"] })
+    );
+    expect(mockCommonApiPost).not.toHaveBeenCalled();
+  });
+
   it("unlocks retry and returns to idle when signing is canceled", async () => {
     mockNativeEntry.mockRejectedValue(
       Object.assign(new Error("Canceled"), { code: 4001 })

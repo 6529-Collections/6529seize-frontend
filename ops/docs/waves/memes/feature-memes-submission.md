@@ -181,3 +181,43 @@ reached), select the header restriction control to see the reason, then use
 - [Wave Leaderboard Drop Entry and Eligibility](../leaderboard/feature-drop-entry-and-eligibility.md)
 - [Wave Drop Content Display](../drop-actions/feature-content-display.md)
 - [Interactive HTML Media Rendering](../../media/rendering/feature-interactive-html-rendering.md)
+
+## Collaborator invitations
+
+Invitations are available only on The Memes Main Stage, including its designated native competition. Only the submitter needs to satisfy submission eligibility and allowance requirements. Collaborators need a profile and must accept personally.
+
+In Basic Information, expand **Add collaborators**, then use **Invite a collaborating artist** to select up to 5
+other profiles. Selected artists appear as avatar chips with a remove control. The section can be folded without clearing selections; its heading shows the selected count. Opening the section alone does not mark the artwork as a collaboration. Selected profiles receive an invitation when the artwork is
+submitted. Voting starts immediately and does not wait for their replies.
+
+The final submission preview lists the profiles that will receive invitations.
+
+On artwork details, the submitter opens **Manage collaborators** to see every invitee and status in a popup or cancel a pending invitation. The compact button shows the number of pending replies and remains visible even before anyone accepts, when there is no public Collaborators section. In the popup for an existing active submission, use **Add collaborators** to select more artists and **Send collaborator invitations**. Close with **Done**, the close button or Escape; closing does not send invitations. This preserves the submission, votes and ranking, including when some collaborators have already accepted. Accepted artists cannot be removed; adding invitations does not unlock accepted artwork. The limit is five pending or accepted collaborators, plus the submitter. Cancelled and declined invitations free capacity. After author cancellation, use **Invite again** to send that person a fresh invitation; they must review and accept again. Declined invitations cannot be resent. The management popup shows one current row per recipient; earlier attempts remain in internal history. Existing accepted credits are retained. Submissions created before this feature also support invitations. Selected, closed or withdrawn submissions cannot receive more invitations. Each
+invitee can open the artwork from **Notifications → Invites** or go directly to artwork details and choose **Review invitation**. A modal matches the submission dialog width and renders the saved artwork details, media links, final acceptance wording and formatted submission/minting terms in one scrolling body, without a separate terms scrollbar. The Artist credit name, confirmation checkbox and response buttons stay in a compact footer. On short screens or when the keyboard leaves little room, the body and footer scroll together below the visible header so every field and action remains reachable. Enter or edit your **Artist credit name** (up to 200 characters, initially your handle). This name is saved separately from your profile handle when accepting; editing it resets the confirmation. Check the review confirmation there before **Accept collaboration**, or close it with **Not now** without responding. **Decline** remains available on the artwork. They respond using their own profile; proxies cannot consent. Accepted artists appear once in public credits, without another accepted-invitation panel.
+Acceptance is final, with no withdrawal. The submitter cannot replace the
+accepted artwork or original artist name; replacing the submission requires
+fresh invitations. Admins can edit the final mint artwork and credits in Craft.
+
+Public submission cards and details show only accepted collaborators. Details show their avatar, handle, level and profile badges in the same style as the submitter. Previews use smaller profile rows with the same identity information. Profile links and avatars remain available if the additional level/badge lookup fails. Pending
+names are private to the submitter and their own invitee. Accepted submissions
+appear on each collaborating artist's profile with the same active/winner
+status, votes and result. There is one entry and one submitter; collaborators do
+not gain editing rights or consume another submission allowance. Attribution
+does not establish payment splits or change airdrop allocations.
+
+When the artwork is selected as the next mint, the accepted artist roster is
+saved and unanswered invitations close. Claims Builder populates initial mint credits with the submitter and
+collaborators who accepted before selection. Later responses cannot change this
+initial roster. The Artist field uses ` & ` for exactly two credited artists and `, ` for three or more; SEIZE Artist Profile always uses comma-separated handles. No historical name lookup is performed. Admins can edit the saved claim in Drop Forge, including adding
+an artist who did not accept. Arweave publishes these final saved values. Such
+edits do not change invitation status or accepted-submission profile lists.
+The submission `Collab` trait follows confirmed collaboration, rather than
+merely sending an invitation.
+
+Resubmission starts a new invitation set and restores the original submitter's
+artist credit. Deleting an unminted submission closes its pending invitations.
+Existing cards and claims retain their historical artist credits.
+
+Collaboration notifications show the actor’s avatar and linked handle, the saved artwork name, and the time using the standard notification header. For both invitations and acceptances, the artwork name is the single link to the submission; there is no separate action link. Older notifications without a saved name show “an artwork”; an unavailable actor profile uses neutral wording.
+
+Invitation, acceptance and author-cancellation notifications show the acting artist and link the saved artwork name. Push notifications include the actor and artwork name, respecting the existing mention preferences/device settings. Cancellation is explained privately to the recipient as cancellation of their invitation. A declined invitation says that the recipient declined; an unanswered invitation closed by selection says “This invitation closed because the artwork was selected for minting.” Decline and selection closure do not create additional push messages. API mutations refresh the author and recipient through profile-scoped websocket invalidations; accepted public credits refresh separately. Open details recover missed updates on reconnect and window focus.

@@ -125,6 +125,23 @@ describe("ReportsPreferencesSettings", () => {
     expect(screen.queryByText(/AI assessment/i)).not.toBeInTheDocument();
   });
 
+  it("labels a deleted resolution without implying no action or moderator removal", async () => {
+    jest
+      .mocked(fetchMyContentModerationReports)
+      .mockResolvedValue([
+        report({ status: ApiContentModerationReportStatus.ResolvedDeleted }),
+      ]);
+    renderSettings();
+    expect(await screen.findByText("Resolved · Post deleted")).toBeVisible();
+    expect(
+      screen.queryByText("Reviewed · No action taken")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Withdraw report" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("The reported message")).toBeVisible();
+  });
+
   it("requests the 200x200 derivative of the reported author's picture", async () => {
     jest
       .mocked(fetchMyContentModerationReports)

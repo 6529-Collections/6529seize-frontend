@@ -105,7 +105,14 @@ describe("fetchWaveDecisionsV2", () => {
         {
           decision_time: 2000,
           winners: [
-            { place: 1, awards: [], drop: createWinnerDrop(count, available) },
+            {
+              place: 1,
+              awards: [],
+              drop: {
+                ...createWinnerDrop(count, available),
+                submission_artist: "",
+              },
+            },
           ],
         },
       ],
@@ -120,6 +127,7 @@ describe("fetchWaveDecisionsV2", () => {
       params: { page: "1" },
     });
     const winner = result.data[0]?.winners[0]?.drop;
+    expect(winner).toHaveProperty("submission_artist", "");
 
     expect(commonApiFetchMock).toHaveBeenCalledWith({
       endpoint: "v2/waves/wave-1/decisions",
