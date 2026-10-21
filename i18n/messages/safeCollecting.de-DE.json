@@ -97,7 +97,7 @@
   "safeCollecting.setup.fresh.wallets.body": "Ein Tresor (idealerweise ein SAFE mit Hardware-Wallet-Unterzeichnern), eine Transaktions-Wallet auf einer Hardware-Wallet und eine Social-Wallet in einer beliebigen Wallet-App.",
   "safeCollecting.setup.fresh.wallets.action": "TAP-Leitfaden lesen",
   "safeCollecting.setup.fresh.manager.title": "Einmal mit deinem Tresor signieren",
-  "safeCollecting.setup.fresh.manager.body": "Gib deinem Tresor einen ENS-Namen und benenne deine Transaktions-Wallet als seinen Delegationsverwalter für Jede Sammlung. Das ist die letzte Transaktion deines Tresors: Danach signiert sein Verwalter für ihn.",
+  "safeCollecting.setup.fresh.manager.body": "Gib deinem Tresor einen ENS-Namen und benenne deine Transaktions-Wallet als seinen Delegationsverwalter für „Any Collection“. Das ist die letzte Transaktion deines Tresors: Danach signiert sein Verwalter für ihn.",
   "safeCollecting.setup.fresh.manager.action": "Verwalter benennen",
   "safeCollecting.setup.fresh.manager.safe": "SAFE verwenden",
   "safeCollecting.setup.fresh.combine.title": "Wallets konsolidieren",

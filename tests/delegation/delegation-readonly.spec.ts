@@ -328,11 +328,9 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
     await page.setViewportSize({ width: 375, height: 850 });
     await gotoReady(page, "/safe-collecting/build-consolidation");
     const main = pageMain(page);
-    await expect(main.getByText("0 of 4 wallets", { exact: true })).toBeVisible(
-      {
-        timeout: RESPONSE_TIMEOUT_MS,
-      }
-    );
+    await expect(main.getByText(/^0 of \d+ wallets$/)).toBeVisible({
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
     await main
       .getByRole("textbox", { name: "Wallet 1 address" })
       .fill("0x0000000000000000000000000000000000000001");

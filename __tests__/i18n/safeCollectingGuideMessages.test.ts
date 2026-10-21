@@ -7,6 +7,7 @@ import tapGuide from "@/i18n/messages/delegationTapGuide.en-US.json";
 import consolidation from "@/i18n/messages/networkTdhConsolidation.en-US.json";
 
 const guideMessages = { ...safeCollecting, ...tapGuide, ...consolidation };
+/** Lists interpolation tokens, preserving repetitions for parity checks. */
 const placeholders = (value: string) => value.match(/\{\w+\}/g)?.sort() ?? [];
 
 // Check the registered dictionaries, so an omitted import cannot silently

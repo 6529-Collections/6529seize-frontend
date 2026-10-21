@@ -88,7 +88,7 @@
   "delegation.tapGuide.caveats.manager": "Un gestor de delegaciones no puede mover tus NFT, pero puede registrar cualquier cosa en nombre de tu bóveda: consolidarla con otra cartera, redirigir el mint y los airdrops, establecer su dirección principal y nombrar más gestores. También puede revocar los registros de la bóveda. Usa una cartera de hardware.",
   "delegation.tapGuide.caveats.revoke": "Revocar a un gestor no deshace lo que registró. Revisa esos registros y revócalos también.",
   "delegation.tapGuide.caveats.expiry": "El contrato nunca impone las fechas de caducidad. Solo las respetan las aplicaciones que las comprueban; el registro permanece hasta revocarlo. La fecha de caducidad de un gestor se ignora por completo.",
-  "delegation.tapGuide.caveats.lock": "Tu bóveda puede bloquear la consolidación para Cualquier colección. Entonces no se le puede vincular ninguna cartera, ni siquiera con una clave de gestor robada, y su gestor no puede desbloquearla. La bóveda debe desbloquearse antes de añadir una cartera.",
+  "delegation.tapGuide.caveats.lock": "Tu bóveda puede bloquear la consolidación para «Any Collection». Entonces no se le puede vincular ninguna cartera, ni siquiera con una clave de gestor robada, y su gestor no puede desbloquearla. La bóveda debe desbloquearse antes de añadir una cartera.",
   "delegation.tapGuide.caveats.signIn": "Cada cartera consolidada puede iniciar sesión en tu perfil, incluida tu cartera social. Esta sigue sin contener NFT.",
   "delegation.tapGuide.caveats.airdropAll": "Si tu bóveda delega «Todo» a otra cartera, los airdrops siguen esa delegación salvo que una delegación de «Airdrop» apunte a la bóveda.",
   "delegation.tapGuide.learn.title": "Más información",

@@ -97,7 +97,7 @@
   "safeCollecting.setup.fresh.wallets.body": "Una bóveda (idealmente un SAFE con firmantes que usan carteras de hardware), una cartera de transacciones de hardware y una cartera social en cualquier aplicación de cartera.",
   "safeCollecting.setup.fresh.wallets.action": "Leer la guía TAP",
   "safeCollecting.setup.fresh.manager.title": "Desde tu bóveda, firmar una vez",
-  "safeCollecting.setup.fresh.manager.body": "Asigna un nombre ENS a tu bóveda y nombra a tu cartera de transacciones como su gestor de delegaciones para Cualquier colección. Esa es la última transacción de tu bóveda: a partir de entonces, su gestor firma por ella.",
+  "safeCollecting.setup.fresh.manager.body": "Asigna un nombre ENS a tu bóveda y nombra a tu cartera de transacciones como su gestor de delegaciones para «Any Collection». Esa es la última transacción de tu bóveda: a partir de entonces, su gestor firma por ella.",
   "safeCollecting.setup.fresh.manager.action": "Nombrar un gestor",
   "safeCollecting.setup.fresh.manager.safe": "Usar un SAFE",
   "safeCollecting.setup.fresh.combine.title": "Consolidar tus carteras",
