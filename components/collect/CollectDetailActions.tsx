@@ -29,6 +29,9 @@ import {
   NEXTGEN_CONTRACT,
 } from "@/constants/constants";
 import { revealMarketDepth } from "@/components/nft-market-depth/market-depth-disclosure";
+import CollectDetailActionRow, {
+  CollectDetailMobileActions,
+} from "./CollectDetailActionRow";
 
 const CollectTradeController = lazy(() => import("./CollectTradeController"));
 const MAX_DETAIL_LOOKUP_PAGES = 100;
@@ -43,6 +46,7 @@ interface CollectDetailActionsProps {
   readonly title: string;
   readonly locale: SupportedLocale;
   readonly onMarketChange?: () => void;
+  readonly mobileSticky?: boolean;
 }
 
 function isExactAsset(
@@ -182,10 +186,13 @@ function DetailTrade({
 }
 
 function DetailActions(props: CollectDetailActionsProps) {
+  const offerClassName = props.mobileSticky
+    ? `${ACTION_CLASS} max-sm:tw-border-iron-800 max-sm:tw-bg-iron-950`
+    : ACTION_CLASS;
   const viewMarket = (
     <button
       type="button"
-      className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-0 tw-text-[13px] tw-font-normal tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-100"
+      className={`tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-0 tw-text-[13px] tw-font-normal tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-100 ${props.mobileSticky ? "max-sm:tw-rounded-lg max-sm:tw-border max-sm:tw-border-solid max-sm:tw-border-iron-800 max-sm:tw-bg-iron-950 max-sm:tw-px-3" : ""}`}
       onClick={() =>
         revealMarketDepth(
           {
@@ -217,18 +224,83 @@ function DetailActions(props: CollectDetailActionsProps) {
   };
   return (
     <div className="tw-w-full">
-      <DetailTrade
-        key={purchaseSession}
-        collection={props.collection}
-        tokenId={props.tokenId}
-        locale={props.locale}
-        action="buy"
-        inlineBuy
-        onClose={() => setPurchaseSession((value) => value + 1)}
-        renderSecondaryActions={(assetKey) => (
-          <>
+      <CollectDetailMobileActions.Provider
+        value={
+          props.mobileSticky ? (
             <button
-              ref={visibleOffer}
+              type="button"
+              aria-label={t(props.locale, "collect.actionFor", {
+                action: t(props.locale, OFFER_MESSAGE_KEY),
+                title: props.title,
+              })}
+              className={offerClassName}
+              onClick={(event) => {
+                opener.current = event.currentTarget;
+                setAction("offer");
+              }}
+            >
+              {t(props.locale, OFFER_MESSAGE_KEY)}
+            </button>
+          ) : null
+        }
+      >
+        <DetailTrade
+          key={purchaseSession}
+          collection={props.collection}
+          tokenId={props.tokenId}
+          locale={props.locale}
+          action="buy"
+          inlineBuy
+          onClose={() => setPurchaseSession((value) => value + 1)}
+          renderSecondaryActions={(assetKey) => (
+            <>
+              <button
+                ref={visibleOffer}
+                type="button"
+                aria-label={t(props.locale, "collect.actionFor", {
+                  action: t(props.locale, OFFER_MESSAGE_KEY),
+                  title: props.title,
+                })}
+                onClick={(event) => {
+                  opener.current = event.currentTarget;
+                  setAction("offer");
+                }}
+                className={offerClassName}
+              >
+                {t(props.locale, OFFER_MESSAGE_KEY)}
+              </button>
+              {assetKey && (
+                <div data-collect-owner-action>
+                  <CollectOwnerAction
+                    assetKey={assetKey}
+                    onList={(trigger) => {
+                      opener.current = trigger;
+                      setAction("list");
+                    }}
+                  />
+                </div>
+              )}
+              <CollectTradeActions
+                actions={ACTIONS}
+                title={props.title}
+                locale={props.locale}
+                onTrade={(nextAction, trigger) => {
+                  opener.current = trigger;
+                  setAction(nextAction);
+                }}
+              />
+            </>
+          )}
+          {...(props.onMarketChange
+            ? { onMarketChange: props.onMarketChange }
+            : {})}
+        />
+        <div
+          hidden={inlineLookup.data !== undefined}
+          className={inlineLookup.data === undefined ? "" : "tw-hidden"}
+        >
+          <CollectDetailActionRow active={inlineLookup.data === undefined}>
+            <button
               type="button"
               aria-label={t(props.locale, "collect.actionFor", {
                 action: t(props.locale, OFFER_MESSAGE_KEY),
@@ -238,19 +310,10 @@ function DetailActions(props: CollectDetailActionsProps) {
                 opener.current = event.currentTarget;
                 setAction("offer");
               }}
-              className={ACTION_CLASS}
+              className={offerClassName}
             >
               {t(props.locale, OFFER_MESSAGE_KEY)}
             </button>
-            {assetKey && (
-              <CollectOwnerAction
-                assetKey={assetKey}
-                onList={(trigger) => {
-                  opener.current = trigger;
-                  setAction("list");
-                }}
-              />
-            )}
             <CollectTradeActions
               actions={ACTIONS}
               title={props.title}
@@ -260,44 +323,9 @@ function DetailActions(props: CollectDetailActionsProps) {
                 setAction(nextAction);
               }}
             />
-          </>
-        )}
-        {...(props.onMarketChange
-          ? { onMarketChange: props.onMarketChange }
-          : {})}
-      />
-      <div
-        hidden={inlineLookup.data !== undefined}
-        className={
-          inlineLookup.data === undefined
-            ? "tw-flex tw-flex-wrap tw-items-center tw-gap-2"
-            : "tw-hidden"
-        }
-      >
-        <button
-          type="button"
-          aria-label={t(props.locale, "collect.actionFor", {
-            action: t(props.locale, OFFER_MESSAGE_KEY),
-            title: props.title,
-          })}
-          onClick={(event) => {
-            opener.current = event.currentTarget;
-            setAction("offer");
-          }}
-          className={ACTION_CLASS}
-        >
-          {t(props.locale, OFFER_MESSAGE_KEY)}
-        </button>
-        <CollectTradeActions
-          actions={ACTIONS}
-          title={props.title}
-          locale={props.locale}
-          onTrade={(nextAction, trigger) => {
-            opener.current = trigger;
-            setAction(nextAction);
-          }}
-        />
-      </div>
+          </CollectDetailActionRow>
+        </div>
+      </CollectDetailMobileActions.Provider>
       <div className="tw-mt-1">{viewMarket}</div>
       {action && (
         <CollectTradeDialog open title={props.title} onClose={close}>

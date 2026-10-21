@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
+import { usePathname } from "next/navigation";
 import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 import { useSidebarController } from "../../hooks/useSidebarController";
 import { SidebarProvider, useSidebarState } from "../../hooks/useSidebarState";
@@ -17,6 +18,11 @@ interface WebLayoutProps {
 }
 
 const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
+  const pathname = usePathname();
+  const isMemeCard = /^\/the-memes\/\d+\/?$/.test(pathname);
+  const smallClassName = isMemeCard
+    ? "tw-overflow-x-clip tw-bg-black"
+    : "tw-overflow-auto tw-bg-black";
   const {
     isSidebarReady,
     isMobile,
@@ -58,7 +64,7 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
     <div
       className={
         isSmall
-          ? "tw-overflow-auto tw-bg-black"
+          ? smallClassName
           : "layout-root tw-relative tw-flex tw-w-full tw-justify-between"
       }
       style={isSmall ? undefined : cssVars}

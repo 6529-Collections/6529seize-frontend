@@ -321,6 +321,80 @@ beforeEach(() => {
 });
 
 describe("MarketDepthTradeActions", () => {
+  function renderOwnerGatedOffer() {
+    return render(
+      <MarketDepthTradeProvider
+        contract={MEMES_CONTRACT}
+        tokenId="8"
+        locale="en-US"
+        onMarketChange={jest.fn()}
+        ownerOffersOnly
+      >
+        <MarketDepthOrderAction
+          compact
+          order={offerRow(HASH, "offer")}
+          locale="en-US"
+        />
+        <MarketDepthOrderAction order={depthOrder()} locale="en-US" />
+      </MarketDepthTradeProvider>
+    );
+  }
+
+  it("hides Sell until this profile owns the exact card, keeping Collect available", async () => {
+    mockFetchOwnership.mockResolvedValue({
+      account: { profile_id: "profile-1" },
+      requirements: [{ holdings: [] }],
+    });
+    renderOwnerGatedOffer();
+    expect(screen.queryByRole("button", { name: "Sell" })).toBeNull();
+    await waitFor(() => expect(mockFetchOwnership).toHaveBeenCalled());
+    expect(screen.queryByRole("button", { name: "Sell" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Collect" })).toBeEnabled();
+  });
+
+  it("retains Sell for an owner without opening or submitting a trade", async () => {
+    ownedAsset();
+    renderOwnerGatedOffer();
+    expect(await screen.findByRole("button", { name: "Sell" })).toBeEnabled();
+    expect(mockFetchExactOrder).not.toHaveBeenCalled();
+    expect(mockTrade).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    {
+      profile: "other-profile",
+      assetKey: ASSET_KEY,
+      quantity: "3",
+      wallet: "0x3333333333333333333333333333333333333333",
+    },
+    {
+      profile: "profile-1",
+      assetKey: `${ASSET_KEY}0`,
+      quantity: "3",
+      wallet: "0x3333333333333333333333333333333333333333",
+    },
+    {
+      profile: "profile-1",
+      assetKey: ASSET_KEY,
+      quantity: "0",
+      wallet: "0x3333333333333333333333333333333333333333",
+    },
+    { profile: "profile-1", assetKey: ASSET_KEY, quantity: "3", wallet: MAKER },
+  ])(
+    "does not show Sell for mismatched or empty holdings: %j",
+    async ({ profile, assetKey, quantity, wallet }) => {
+      mockFetchOwnership.mockResolvedValue({
+        account: { profile_id: profile },
+        requirements: [
+          { holdings: [{ asset_key: assetKey, wallet, quantity }] },
+        ],
+      });
+      renderOwnerGatedOffer();
+      await waitFor(() => expect(mockFetchOwnership).toHaveBeenCalled());
+      expect(screen.queryByRole("button", { name: "Sell" })).toBeNull();
+    }
+  );
+
   it("blocks background publication throughout an exact check, selection and batch review until deselection", async () => {
     const interaction = jest.fn();
     const resolve = deferExactOrders();

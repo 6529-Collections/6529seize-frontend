@@ -53,6 +53,7 @@ interface MarketDepthPanelProps {
   readonly refreshKey?: number;
   readonly actions?: ReactNode | ((refresh: () => void) => ReactNode);
   readonly embedded?: boolean;
+  readonly ownerOffersOnly?: boolean;
   readonly active?: boolean;
   readonly onReveal?: () => void;
   readonly focusedOrderHash?: string | null;
@@ -194,6 +195,7 @@ export default function MarketDepthPanel({
   actions,
   refreshKey = 0,
   embedded = false,
+  ownerOffersOnly = false,
   active = true,
   onReveal,
   focusedOrderHash,
@@ -511,7 +513,7 @@ export default function MarketDepthPanel({
       tabIndex={embedded ? -1 : undefined}
       aria-labelledby={`${id}-heading`}
       aria-busy={effectiveStatus === "loading"}
-      className={`${embedded ? "tw-outline-none" : "tw-mt-8 tw-border-t tw-pt-5"} tw-min-w-0 tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-white/10 tw-text-sm tw-leading-5 before:tw-content-none after:tw-content-none [&_*]:before:tw-content-none [&_*]:after:tw-content-none`}
+      className={`${embedded ? "tw-outline-none max-sm:tw-border-t-0" : "tw-mt-8 tw-border-t tw-pt-5"} tw-min-w-0 tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-white/10 tw-text-sm tw-leading-5 before:tw-content-none after:tw-content-none [&_*]:before:tw-content-none [&_*]:after:tw-content-none`}
     >
       <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-x-4 tw-gap-y-2">
         <div className="tw-min-w-0 tw-flex-1">
@@ -591,6 +593,7 @@ export default function MarketDepthPanel({
 
       {effectiveStatus === "ready" && data && (
         <MarketDepthTradeProvider
+          ownerOffersOnly={ownerOffersOnly}
           contract={contract}
           tokenId={String(tokenId)}
           locale={resolvedLocale}

@@ -53,6 +53,63 @@ function isProductionBaseURL(baseURL?: string) {
 }
 
 test.describe("Media, mint, and detail read-only coverage @surface @medium @large @readonly", () => {
+  test("preserves Meme card controls while scrolling and switching phone tabs", async ({
+    page,
+    isMobile,
+  }) => {
+    await gotoReady(page, "/the-memes/1");
+    const actions = page.locator("[data-collect-inline-actions]");
+    await expect(actions).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    const sticky = page.locator("[data-collect-sticky-actions]");
+    if (!isMobile) {
+      await expect(sticky).toBeHidden();
+      await expect(
+        page.getByRole("button", { name: /^Show all .* properties$/ })
+      ).toBeHidden();
+      return;
+    }
+    await actions.scrollIntoViewIfNeeded();
+    await expect(sticky).toHaveAttribute("aria-hidden", "true");
+    const nav = page.getByRole("navigation", { name: "Meme page sections" });
+    await nav.evaluate((element) => element.scrollIntoView({ block: "start" }));
+    await page.evaluate(() => window.scrollBy(0, 240));
+    await expect(sticky).toHaveAttribute("aria-hidden", "false");
+    await expect(
+      sticky.getByRole("button", { name: /^Make an offer:/ })
+    ).toBeVisible();
+    await expect
+      .poll(async () => (await nav.boundingBox())?.y)
+      .toBeLessThanOrEqual(1);
+    const showProperties = page.getByRole("button", {
+      name: /^Show all .* properties$/,
+    });
+    await expect(showProperties).toBeVisible();
+    await showProperties.click();
+    await expect(
+      page.getByRole("button", { name: "Show fewer", exact: true }).last()
+    ).toHaveAttribute("aria-expanded", "true");
+    await nav.getByRole("button", { name: "Collectors", exact: true }).click();
+    await expect(page).toHaveURL(/focus=collectors/);
+    await expect(page.locator("#nft-leaderboard ol li").first()).toBeVisible({
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
+    await expect(
+      page.getByRole("combobox", { name: "Sort collectors" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Download.*CSV/i })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await nav.getByRole("button", { name: "History", exact: true }).click();
+    await expect(page).toHaveURL(/focus=activity/);
+    await expect(
+      nav.getByRole("button", { name: "History", exact: true })
+    ).toBeInViewport();
+    await expect(
+      page.getByRole("tab", { name: "Card Activity" })
+    ).toBeVisible();
+  });
+
   test("renders The Memes card detail shell", async ({ page }) => {
     await gotoReady(page, "/the-memes/1");
 

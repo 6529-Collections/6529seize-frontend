@@ -12,6 +12,7 @@ import { isCollectProfileWallet } from "./collect-recipient.helpers";
 import type { CollectTradeDraft } from "./collect.types";
 import { marketAmount } from "./market.adapters";
 import { MARKET_ZERO } from "./market-validation";
+import CollectDetailActionRow from "./CollectDetailActionRow";
 
 type Props = ComponentProps<typeof CollectTradeForm> & {
   readonly amountWei: string | null;
@@ -44,8 +45,29 @@ export default function CollectInlineBuyForm(props: Props) {
   const message = invalid
     ? t(locale, `collect.trade.invalid.${invalid}`, { max: props.maxQuantity })
     : props.error;
+  const buyButton = (
+    <Button
+      form={id}
+      type="submit"
+      variant="action"
+      size="lg"
+      loading={props.loading}
+      disabled={
+        props.amountWei === null ||
+        Boolean(props.disabledReason) ||
+        (external && !props.draft.acknowledgeExternalRecipient)
+      }
+    >
+      {props.amountWei === null
+        ? t(locale, "collect.action.buy")
+        : t(locale, "collect.buy.atPrice", {
+            price: marketAmount(props.amountWei, MARKET_ZERO),
+          })}
+    </Button>
+  );
   return (
     <form
+      id={id}
       className="tw-space-y-3"
       onSubmit={(event) => {
         event.preventDefault();
@@ -126,31 +148,17 @@ export default function CollectInlineBuyForm(props: Props) {
           {props.disabledReason}
         </p>
       )}
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-        <Button
-          type="submit"
-          variant="action"
-          size="lg"
-          loading={props.loading}
-          disabled={
-            props.amountWei === null ||
-            Boolean(props.disabledReason) ||
-            (external && !props.draft.acknowledgeExternalRecipient)
-          }
-        >
-          {props.amountWei === null
-            ? t(locale, "collect.action.buy")
-            : t(locale, "collect.buy.atPrice", {
-                price: marketAmount(props.amountWei, MARKET_ZERO),
-              })}
-        </Button>
+      <CollectDetailActionRow primaryAction={buyButton}>
         {props.secondaryActions !== null &&
           props.secondaryActions !== undefined && (
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+            <div
+              data-collect-secondary-actions
+              className="tw-flex tw-flex-wrap tw-items-center tw-gap-2"
+            >
               {props.secondaryActions}
             </div>
           )}
-      </div>
+      </CollectDetailActionRow>
       <CollectDeliveryControl
         profile={props.recipientProfile}
         payingWallet={props.makerLabel}

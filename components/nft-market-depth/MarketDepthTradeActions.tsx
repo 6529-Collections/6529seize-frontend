@@ -18,6 +18,9 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { formatNumber } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { fetchCollectAssetOwnership } from "@/services/api/collect-api";
+import { useQuery } from "@tanstack/react-query";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { fetchExactMarketOrder } from "@/services/api/market-api";
 import { getStructuredApiErrorStatus } from "@/services/api/common-api";
 import {
@@ -123,6 +126,7 @@ function TradeLoading({ locale }: { readonly locale: SupportedLocale }) {
 }
 
 export function MarketDepthTradeProvider({
+  ownerOffersOnly = false,
   contract,
   tokenId,
   locale,
@@ -130,6 +134,7 @@ export function MarketDepthTradeProvider({
   onInteractionChange,
   children,
 }: {
+  readonly ownerOffersOnly?: boolean;
   readonly contract: string;
   readonly tokenId: string;
   readonly locale: SupportedLocale;
@@ -140,6 +145,7 @@ export function MarketDepthTradeProvider({
   if (marketDepthCollectFamily(contract) === null) return children;
   return (
     <MarketDepthTradeScope
+      ownerOffersOnly={ownerOffersOnly}
       contract={contract}
       tokenId={tokenId}
       locale={locale}
@@ -174,6 +180,7 @@ function MarketDepthTradeScope(
 }
 
 function SupportedMarketDepthTradeProvider({
+  ownerOffersOnly,
   contract,
   tokenId,
   locale,
@@ -181,6 +188,7 @@ function SupportedMarketDepthTradeProvider({
   onInteractionChange,
   children,
 }: {
+  readonly ownerOffersOnly: boolean;
   readonly contract: string;
   readonly tokenId: string;
   readonly locale: SupportedLocale;
@@ -190,6 +198,47 @@ function SupportedMarketDepthTradeProvider({
 }) {
   const auth = useAuth();
   const connection = useSeizeConnectContext();
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  const ownershipAssetKey = `1:${contract.toLowerCase()}:${tokenId}`;
+  const ownerWallets = collectProfileWallets(auth.connectedProfile).map(
+    (wallet) => wallet.wallet.toLowerCase()
+  );
+  const membership = [...ownerWallets]
+    .sort((left, right) => left.localeCompare(right))
+    .join(":");
+  const profileId = auth.connectedProfile?.id;
+  const ownership = useQuery({
+    queryKey: [
+      QueryKey.COLLECT_ANALYSIS,
+      "owner",
+      profileId,
+      membership,
+      ownershipAssetKey,
+    ],
+    queryFn: ({ signal }) => {
+      if (!profileId) throw new Error("COLLECT_PROFILE_REQUIRED");
+      return fetchCollectAssetOwnership(profileId, ownershipAssetKey, signal);
+    },
+    enabled:
+      ownerOffersOnly &&
+      !hideNftPurchasing &&
+      Boolean(profileId && ownerWallets.length),
+    staleTime: 15_000,
+  });
+  const canSell =
+    !ownerOffersOnly ||
+    Boolean(
+      profileId &&
+      ownership.data?.account.profile_id === profileId &&
+      ownership.data.requirements.some((requirement) =>
+        requirement.holdings.some(
+          (holding) =>
+            holding.asset_key === ownershipAssetKey &&
+            ownerWallets.includes(holding.wallet.toLowerCase()) &&
+            /^[1-9][0-9]{0,77}$/.test(holding.quantity)
+        )
+      )
+    );
   const [selected, setSelectedState] = useState<
     readonly MarketDepthListingSelection[]
   >([]);
@@ -544,6 +593,8 @@ function SupportedMarketDepthTradeProvider({
 
   const value = useMemo<TradeContextValue>(
     () => ({
+      canSell,
+      subduedOffers: ownerOffersOnly,
       selected,
       rowStates,
       selectionBusy: reviewState.busy,
@@ -553,6 +604,8 @@ function SupportedMarketDepthTradeProvider({
       connectOwnerWallet: connection.seizeConnect,
     }),
     [
+      canSell,
+      ownerOffersOnly,
       acceptOffer,
       connection.seizeConnect,
       rowStates,

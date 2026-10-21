@@ -114,7 +114,8 @@ const asset: ApiCollectAsset = {
 function renderActions(
   tokenId = "5",
   onMarketChange?: () => void,
-  collection: CollectTradeCollection = "memes"
+  collection: CollectTradeCollection = "memes",
+  mobileSticky = false
 ) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: 0 } },
@@ -126,6 +127,7 @@ function renderActions(
         tokenId={token}
         title="Meme Five"
         locale="en-US"
+        mobileSticky={mobileSticky}
         {...(onMarketChange ? { onMarketChange } : {})}
       />
     </QueryClientProvider>
@@ -370,6 +372,22 @@ it("retries inline lookup failure without another action", async () => {
     asset.asset_key
   );
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+});
+it("keeps a sticky offer available when artwork lookup fails", async () => {
+  mockFetchAssets.mockRejectedValue(new Error("temporary failure"));
+  renderActions("5", undefined, "memes", true);
+  await screen.findByRole("alert");
+  const sticky = document.querySelector<HTMLElement>(
+    "[data-collect-sticky-actions]"
+  );
+  expect(sticky).not.toBeNull();
+  expect(
+    within(sticky!).getByRole("button", {
+      name: "Make an offer: Meme Five",
+      hidden: true,
+    })
+  ).toBeEnabled();
+  expect(sticky).not.toHaveTextContent("Collect");
 });
 it.each(["loading", "error"])(
   "returns focus after closing offer %s",

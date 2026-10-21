@@ -7784,6 +7784,8 @@
       ],
       "facts": [
         "Individual Meme Card pages live at /the-memes/{id}.",
+        "On phones, artwork leads the Meme Card page, with ownership, format switching and media actions underneath. Tabs stay at the top while scrolling. When inline market actions are off screen, a bottom bar repeats the available Collect and Make an offer actions above app navigation. Delivery, owner actions and the additional-actions menu remain available in the inline section.",
+        "On phones, long descriptions have Read more and Show less controls. Properties initially show six tiles; Show all N properties reveals the rest and Show fewer restores the preview. Collectors uses list rows with all card and total metrics, compact numbers with exact accessible values, sorting, search, CSV download and pagination. Sell appears in Meme offers only after ownership of the exact card is confirmed for the current profile; everyone can still browse offers.",
         "Use /the-memes/{id} for a specific Meme Card number such as Meme #1 or The Memes #1.",
         "Meme Card preview/data surfaces expose fields such as edition size, TDH rate, season, mint date, and supply when available.",
         "Upcoming unresolved Meme Card pages show mint timing and subscription awareness; positive card ids also show a Distribution Plan link for that card.",

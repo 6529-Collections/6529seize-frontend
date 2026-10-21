@@ -11,6 +11,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import type { ReactNode } from "react";
 import CollectInlineBuyForm from "./CollectInlineBuyForm";
 import CollectTradeForm from "./CollectTradeForm";
+import CollectDetailActionRow from "./CollectDetailActionRow";
 import { CollectOrderBook } from "./CollectOrderPicker";
 import type { CollectTradeAction, CollectTradeDraft } from "./collect.types";
 import {
@@ -177,9 +178,9 @@ function InlineTradeForm({
         </p>
         {props.secondaryActions !== undefined &&
           props.secondaryActions !== null && (
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+            <CollectDetailActionRow>
               {props.secondaryActions}
-            </div>
+            </CollectDetailActionRow>
           )}
       </div>
     );

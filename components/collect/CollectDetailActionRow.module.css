@@ -1,0 +1,58 @@
+@media (max-width: 639px) {
+  .inlineActions > button,
+  .inlineActions > [data-collect-secondary-actions] > button,
+  .stickyActions > button {
+    height: 44px;
+    min-width: 0;
+    flex: 1;
+    white-space: nowrap;
+    border-radius: 8px;
+    padding-inline: 14px;
+  }
+
+  .inlineActions > button[type="submit"] {
+    padding-inline: 8px;
+  }
+
+  .inlineActions > [data-collect-secondary-actions] {
+    display: contents;
+  }
+
+  .inlineActions [data-collect-owner-action] {
+    order: 3;
+    width: 100%;
+  }
+
+  .inlineActions [data-collect-owner-action]:empty {
+    display: none;
+  }
+
+  .inlineActions button[aria-haspopup="menu"] {
+    border: 1px solid #26272b;
+    background: #131316;
+  }
+}
+
+@media (max-width: 359px) {
+  .inlineActions > button,
+  .inlineActions > [data-collect-secondary-actions] > button {
+    padding-inline: 8px;
+    font-size: 13px;
+  }
+  .inlineActions > button[type="submit"] {
+    padding-inline: 4px;
+    font-size: 12px;
+  }
+}
+
+/* Portalled sheets and dialogs must also hide the duplicate tab stops. */
+:global(
+    body:has(
+      dialog[open],
+      [aria-modal="true"]:not(dialog):not([hidden]):not([aria-hidden="true"])
+    )
+  )
+  .stickyActions {
+  visibility: hidden;
+  pointer-events: none;
+}
