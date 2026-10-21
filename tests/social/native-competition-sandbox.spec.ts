@@ -1776,6 +1776,12 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       detail.getByRole("button", { name: "Vote", exact: true })
     ).toBeVisible();
+    // Finish the backing leaderboard's initial lookup before measuring modal requests.
+    await expect(
+      page
+        .getByRole("main", { includeHidden: true })
+        .locator('[data-competition-entry="entry-alpha"]')
+    ).toBeAttached({ timeout: 30000 });
     let contextLookups = 0;
     await page.route(
       `**/v3/waves/${WAVE}/drops/${entryDropId("alpha")}/competition-context`,
