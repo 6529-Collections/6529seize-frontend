@@ -254,10 +254,16 @@ it("waits for a fresh marked restoration and commits it without another route re
   expect(replaceState).not.toHaveBeenCalled();
   mockFetchedAfterMount = true;
   rerender();
-  expect(replaceState).toHaveBeenCalledWith(
-    { retained: "history-value" },
+  expect(replaceState).toHaveBeenNthCalledWith(
+    1,
+    null,
     "",
     "/waves/wave/competitions/alpha?tab=leaderboard&divider=42"
+  );
+  expect(replaceState).toHaveBeenNthCalledWith(
+    2,
+    { retained: "history-value" },
+    ""
   );
   expect(mockReplace).not.toHaveBeenCalled();
   replaceState.mockRestore();

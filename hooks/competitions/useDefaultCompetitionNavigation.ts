@@ -104,12 +104,13 @@ export function useDefaultCompetitionNavigation(
       });
       return;
     }
-    // This marker belongs to client restoration, so removing it only commits
-    // the already mounted destination without another server navigation.
+    // Use the documented external History update so Next synchronizes URL hooks.
+    // Restore app metadata afterward, keeping refreshed router state authoritative.
+    const previousState = globalThis.history.state;
+    globalThis.history.replaceState(null, "", `${pathname}?${params}`);
     globalThis.history.replaceState(
-      globalThis.history.state,
-      "",
-      `${pathname}?${params}`
+      { ...previousState, ...globalThis.history.state },
+      ""
     );
   }, [
     restoringSelection,
