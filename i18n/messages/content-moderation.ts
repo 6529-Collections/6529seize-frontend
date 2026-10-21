@@ -54,7 +54,9 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.originalPost.open": "Open original post",
   "contentModeration.originalPost.deleted": "Deleted",
   "contentModeration.originalPost.deletedHelp":
-    "The original post has been deleted and may be unavailable at this link. Review the saved report evidence below.",
+    "Original post deleted. Saved evidence retained.",
+  "contentModeration.originalPost.deletedWithoutEvidence":
+    "Original post deleted.",
   "contentModeration.originalPost.unavailable":
     "Original post link unavailable: the saved Wave or post ID is missing or invalid.",
   "contentModeration.report.outcomeTitle": "Report outcome",

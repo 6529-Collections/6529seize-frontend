@@ -241,12 +241,27 @@ evaluations still running are excluded until they finish or enter failure
 recovery. Rejected new-post
 submissions without a published post remain separate cases; public fields group
 by their subject across revisions. Each row identifies User report, Automated
-check, or both, shows its outstanding requirements, report reason or check
-outcome, and links directly to Review case. The related Checks view is filtered
-to that case and its pending revisions. User reports for this case exposes all
-related open reports, reporter notes and direct report review links, with its
-own pagination. It opens automatically when reviewing a report. Clear filters
-to see the full check history.
+check, or both, shows its outstanding requirements, report reason or
+**Automated outcome**, and links directly to **Review case**. An automated
+Allowed or Rejected outcome records the evaluator's assessment; it does not
+mean the post still exists or that manual review is complete.
+
+**Review case** opens a review workspace with the complete Needs review case
+list on the left and the selected case on the right on desktop. The selected
+row has a visible highlight and **Selected** label. Select another case on the
+left to switch details without returning to the queue. Opening a case does not
+restrict the left list to that case. The right side keeps **User reports for
+this case**, reporter notes, direct report review links and any remaining check
+revisions scoped to the selected case. Report and check lists have their own
+pagination. A report-only case stays in the left list after its check is marked
+reviewed, until the report is resolved. **Back to Needs review** returns to the
+queue; on mobile the selected detail occupies the view with this back action.
+
+The **Needs review** quick filter selects the full manual-review case queue
+and clears advanced filters. It is active when opening **Review case**.
+**All checks** opens check history. Applying advanced filters instead browses
+individual saved checks, so those filtered history rows are not the unique-case
+attention count.
 
 The Needs review badge and Items needing review summary show the same unique
 case count, which also controls the sidebar attention dot. The dot appears for
@@ -294,8 +309,10 @@ The action panel offers only actions valid for that item and requires a reason:
   reviewed revision. This changes presentation without overwriting the
   author's stored text.
 - Published posts support visibility decisions and author posting controls.
-- Deleted reported posts show **Deleted**, with **Resolve reports — post
-  deleted** while open reports remain. Enter a reason and confirm to close
+- Deleted reported posts show a red **Deleted** pill on the queue card, the
+  review workspace's left-hand case row and the detail panel, with **Resolve
+  reports — post deleted** while open reports remain. Enter a reason and confirm
+  to close
   all open reports for that post and move them to Resolved reports with the
   **Post deleted** outcome. The open-report count and navigation indicator
   refresh after saving. Saved evidence, reporter history, and decision history
@@ -327,12 +344,18 @@ AI category is omitted; a substantive category is labelled **Potential
 category** to make clear that it is not the moderator decision. Select
 **Review evidence and decide** to open the report's saved revision in Checks,
 review the applicable effect, select a decision, enter a reason, and confirm.
-Report cards and published-post check details also provide a separate **Open
+Live-post cards and published-post check details provide a separate **Open
 original post** link to that exact post in its saved Wave context. This link
-is independent of links inside saved content. Deleted posts retain the link
-with a notice that the original may be unavailable; review the saved evidence
-in WatchTower. If the saved Wave or post ID is missing or invalid, a clear
+is independent of links inside saved content. Deleted posts hide that action.
+Where evidence remains available, the detail explains **Original post deleted.
+Saved evidence retained.** Expired or unavailable evidence is not described as
+retained. If a live post's saved Wave or post ID is missing or invalid, a clear
 link-unavailable message replaces the link.
+
+Saved-text previews include a post's retained title and textual parts, including
+titleless posts, rather than claiming there is no preview when saved post text
+is available. The preview is a short extract; the evidence section retains the
+saved input. Expired evidence remains unavailable.
 
 For live posts:
 

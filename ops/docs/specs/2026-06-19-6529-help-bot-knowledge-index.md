@@ -7,13 +7,20 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
-The `content-moderation.controls` record covers WatchTower’s Deleted state,
+The `content-moderation.controls` record covers WatchTower's red Deleted pills,
 reasoned and confirmed resolution of open reports for a deleted post, retained
-evidence and history, and the distinction from Mark reviewed. It also describes
-the dedicated original-post links on report cards and published-post check
-details, including deleted-post and missing-context notices. Needs review is the
-default queue of unique subject-based cases covering user reports and pending
-checks, with a shared sidebar signal and summary/tab count and a compatible older open-reports link.
+evidence and history, and the distinction from Mark reviewed. Live originals
+have a dedicated post link; deleted posts hide that action and identify saved
+evidence without claiming expired evidence remains available. Saved previews
+include post titles and textual parts. Needs review is the default queue of
+unique subject-based cases covering user reports and pending checks, with a
+shared sidebar signal and summary/tab count and a compatible older
+open-reports link. Review case opens all outstanding cases on the left with the
+selected case highlighted and its reports, checks and evidence on the right.
+The Needs review quick filter clears advanced filters to restore that full
+queue; All checks and advanced filters browse individual check history.
+Back to Needs review returns from the detail. Automated outcome is distinct
+from deletion and manual review status.
 
 The `home.overview` record explains the Coming up mobile swipe row, keyboard
 navigation through card links, tablet/desktop grid, and drop, profile and wave

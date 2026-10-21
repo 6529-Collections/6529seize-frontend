@@ -20,6 +20,13 @@ it.each([
   expect(t(locale, "checks.action.RESOLVE_DELETED_REPORT")).toBe(
     "Resolve reports — post deleted"
   );
+  expect(t(locale, "contentModeration.originalPost.deletedHelp")).toBe(
+    "Original post deleted. Saved evidence retained."
+  );
+  expect(t(locale, "checks.backToNeedsReview")).toBe("Back to Needs review");
+  expect(t(locale, "checks.automatedOutcome", { outcome: "Allowed" })).toBe(
+    "Automated outcome: Allowed"
+  );
 });
 
 it.each([
@@ -50,7 +57,36 @@ it("rejects an invalid post ID instead of constructing a different destination",
     />
   );
   expect(screen.queryByRole("link")).not.toBeInTheDocument();
-  expect(screen.getByText(/The original post has been deleted/)).toBeVisible();
+  expect(screen.getByText("Original post deleted.")).toBeVisible();
+});
+
+it("hides even a valid original link when the post is deleted", () => {
+  render(
+    <ModerationOriginalPostLink
+      dropId="actual-drop"
+      waveId="actual-wave"
+      deleted={true}
+      evidenceRetained={true}
+    />
+  );
+  expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  expect(
+    screen.getByText("Original post deleted. Saved evidence retained.")
+  ).toBeVisible();
+});
+
+it("does not promise retained evidence when it is unavailable", () => {
+  render(
+    <ModerationOriginalPostLink
+      dropId="actual-drop"
+      waveId="actual-wave"
+      deleted={true}
+      evidenceRetained={false}
+    />
+  );
+  expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  expect(screen.getByText("Original post deleted.")).toBeVisible();
+  expect(screen.queryByText(/Saved evidence retained/)).not.toBeInTheDocument();
 });
 
 it("encodes valid opaque IDs into the trusted relative route", () => {

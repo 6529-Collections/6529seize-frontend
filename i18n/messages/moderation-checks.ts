@@ -2,7 +2,17 @@ export const MODERATION_CHECK_MESSAGES = {
   "checks.caseAuthor": "Author: {profile}",
   "checks.caseReports": "User reports for this case",
   "checks.reviewReport": "Review report",
-  "checks.caseOutcome": "Check outcome: {outcome}",
+  "checks.caseOutcome": "Automated outcome: {outcome}",
+  "checks.automatedOutcome": "Automated outcome: {outcome}",
+  "checks.backToNeedsReview": "Back to Needs review",
+  "checks.needsReview": "Needs review",
+  "checks.allChecks": "All checks",
+  "checks.selectedCase": "Selected",
+  "checks.reviewCaseDetails": "Case details",
+  "checks.reviewWorkspace": "Needs review",
+  "checks.caseChecks": "Checks for this case",
+  "checks.caseResolved": "This case no longer needs review.",
+  "checks.selectCase": "Select a case to review.",
   "checks.caseFilter":
     "Showing checks for this case. Clear filters to return to all checks.",
   "checks.caseRequirements":

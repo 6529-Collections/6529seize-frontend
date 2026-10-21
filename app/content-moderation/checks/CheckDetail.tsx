@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   type ApiModerationCheckDetail,
@@ -25,6 +25,7 @@ import CheckEvidence, { InertEvidence } from "./CheckEvidence";
 import CheckActions from "./CheckActions";
 import CheckHistory from "./CheckHistory";
 import ModerationOriginalPostLink from "@/components/content-moderation/ModerationOriginalPostLink";
+import ModerationDeletedBadge from "@/components/content-moderation/ModerationDeletedBadge";
 import { ApiModerationCheckSubjectTypeEnum } from "@/generated/models/ApiModerationCheck";
 
 const SECTIONS = [
@@ -91,11 +92,19 @@ export default function CheckDetail({
   source,
   profileId,
   onClose,
+  backLabel = "checks.back",
+  onDetailLoaded,
+  caseContext,
 }: {
   readonly id: string;
   readonly source: "check" | "report" | "profile";
   readonly profileId: string;
   readonly onClose: () => void;
+  readonly backLabel?: MessageKey | undefined;
+  readonly caseContext?: ReactNode;
+  readonly onDetailLoaded?:
+    | ((detail: ApiModerationCheckDetail) => void)
+    | undefined;
 }) {
   const locale = useBrowserLocale();
   const client = useQueryClient();
@@ -124,6 +133,9 @@ export default function CheckDetail({
     title.current?.focus();
   }, []);
   const detail = query.data;
+  useEffect(() => {
+    if (detail) onDetailLoaded?.(detail);
+  }, [detail, onDetailLoaded]);
   const originalWaveId: unknown = detail?.check.scope["wave_id"];
   let detailTitle = t(locale, "checks.loadingDetail");
   if (detail) {
@@ -144,16 +156,19 @@ export default function CheckDetail({
       aria-labelledby="moderation-check-title"
     >
       <button type="button" className={checkButtonClass} onClick={onClose}>
-        {t(locale, "checks.back")}
+        {t(locale, backLabel)}
       </button>
-      <h2
-        ref={title}
-        tabIndex={-1}
-        id="moderation-check-title"
-        className="tw-mb-0 tw-mt-5 tw-text-lg tw-font-semibold tw-text-iron-50 focus:tw-outline-none"
-      >
-        {detailTitle}
-      </h2>
+      <div className="tw-mt-5 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+        <h2
+          ref={title}
+          tabIndex={-1}
+          id="moderation-check-title"
+          className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50 focus:tw-outline-none"
+        >
+          {detailTitle}
+        </h2>
+        {detail?.current_state.deleted && <ModerationDeletedBadge />}
+      </div>
       {query.isLoading && (
         <output className="tw-block tw-text-sm tw-text-iron-400">
           {t(locale, "checks.loadingDetail")}
@@ -185,15 +200,12 @@ export default function CheckDetail({
       {detail && !query.isError && (
         <>
           <p className="tw-mt-2 tw-text-sm tw-text-iron-300">
-            {checkValueLabel(locale, detail.check.outcome)} ·{" "}
-            {checkValueLabel(locale, detail.check.policy_family)} ·{" "}
+            {t(locale, "checks.automatedOutcome", {
+              outcome: checkValueLabel(locale, detail.check.outcome),
+            })}{" "}
+            · {checkValueLabel(locale, detail.check.policy_family)} ·{" "}
             {checkValueLabel(locale, detail.check.review_status)}
           </p>
-          {detail.current_state.deleted && (
-            <p className="tw-mt-3 tw-text-sm tw-font-semibold tw-text-iron-100">
-              {t(locale, "contentModeration.originalPost.deleted")}
-            </p>
-          )}
           {detail.check.subject_type ===
             ApiModerationCheckSubjectTypeEnum.Drop &&
             detail.check.published_subject_id && (
@@ -201,8 +213,12 @@ export default function CheckDetail({
                 dropId={detail.check.published_subject_id}
                 waveId={originalWaveId}
                 deleted={detail.current_state.deleted}
+                evidenceRetained={!detail.evidence_expired}
               />
             )}
+          {caseContext && (
+            <div className="tw-mt-5 tw-space-y-4">{caseContext}</div>
+          )}
           {detail.evidence_expired && (
             <output className="tw-block tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-p-3 tw-text-sm tw-leading-6 tw-text-iron-200">
               {t(locale, "checks.evidenceExpired")}
