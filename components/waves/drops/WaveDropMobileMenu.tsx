@@ -529,18 +529,29 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
               }`}
             >
               {showGuestCopyOnly ? (
-                showCopyOption && (
-                  <>
-                    <WaveDropMobileMenuCopyText
-                      drop={drop}
-                      onCopy={closeMenu}
-                    />
-                    <WaveDropMobileMenuCopyLink
-                      drop={drop}
-                      onCopy={closeMenu}
-                    />
-                  </>
-                )
+                <>
+                  {showCopyOption && (
+                    <>
+                      <WaveDropMobileMenuCopyText
+                        drop={drop}
+                        onCopy={closeMenu}
+                      />
+                      <WaveDropMobileMenuCopyLink
+                        drop={drop}
+                        onCopy={closeMenu}
+                      />
+                    </>
+                  )}
+                  {/* Anyone can check a signature; reading needs no sign-in. */}
+                  <DropSignatureMenuItem
+                    dropId={drop.id}
+                    onSelect={() => {
+                      closeMenu();
+                      setIsSignatureOpen(true);
+                    }}
+                    mobile
+                  />
+                </>
               ) : (
                 <WaveDropMobileMenuAuthenticatedActions
                   extendedDrop={extendedDrop}
