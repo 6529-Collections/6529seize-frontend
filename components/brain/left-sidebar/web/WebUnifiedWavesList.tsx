@@ -13,6 +13,8 @@ import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useAuth } from "@/components/auth/Auth";
+import { isAuthResolving } from "@/components/auth/authResolution";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { JoinedWavesListRecovery } from "../waves/JoinedWavesListRecovery";
 
 interface WebUnifiedWavesListProps {
@@ -52,10 +54,15 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
   const [search] = useWaveSidebarSearch(key ?? "guest");
   const isSearching = !isCollapsed && Boolean(search.trim());
   const collection = canUseCollections ? savedCollection : "all";
+  const { connectedProfile, activeProfileProxy, fetchingProfile } = useAuth();
+  const { connectionState } = useSeizeConnectContext();
+  // This list already consumes the wallet identity through discovery. Keep
+  // its empty state pending until wallet and profile restoration settle.
   const collectionFetching =
-    isFetching || (collection === "pinned" && isPinnedWavesLoading);
+    isFetching ||
+    isAuthResolving(connectionState, fetchingProfile) ||
+    (collection === "pinned" && isPinnedWavesLoading);
   const [following] = useShowFollowingWaves();
-  const { connectedProfile, activeProfileProxy } = useAuth();
   const isJoinedFilterActive =
     following && !!connectedProfile?.handle && !activeProfileProxy;
 
