@@ -1,114 +1,126 @@
 "use client";
 
-import { useQueries } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { useCompetition } from "@/contexts/CompetitionContext";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { ApiCompetitionEntryStatus } from "@/generated/models/ApiCompetitionEntryStatus";
-import { ApiDropType } from "@/generated/models/ApiDropType";
-import { DropSize } from "@/helpers/waves/drop.helpers";
-import { fetchCompetitionEntryDrop } from "@/services/api/competition-entry-drops-api";
+import type { ApiCompetitionEntryContext } from "@/generated/models/ApiCompetitionEntryContext";
+import {
+  competitionCardDrop,
+  fetchCompetitionEntryDrop,
+} from "@/services/api/competition-entry-drops-api";
 import { competitionScope } from "@/services/api/competitions-api";
-import { competitionAward } from "@/helpers/competition-presentation.helpers";
-import { applyCompetitionDropSummary } from "./useCompetitionDrop";
+import { getWaveMin } from "@/services/api/drop-v2-mappers";
+import { presentCompetitionEntryDrop } from "@/helpers/competition-entry-drop.helpers";
 import { useCompetitionViewer } from "./useCompetitionQueries";
 
 interface CompetitionEntryReference {
   readonly entryId: string;
   readonly dropId: string;
 }
+interface CardPage {
+  readonly contexts: readonly ApiCompetitionEntryContext[];
+  readonly updatedAt: number;
+}
+type PresentedDrop = ReturnType<typeof presentCompetitionEntryDrop>;
 
 export function useCompetitionEntryDrops(
-  entries: readonly CompetitionEntryReference[]
+  entries: readonly CompetitionEntryReference[],
+  cards?: CardPage
 ) {
-  const { competition } = useCompetition();
+  const { competition, wave } = useCompetition();
+  const client = useQueryClient();
+  const seeded = useRef<string | null>(null);
   const viewer = useCompetitionViewer();
-  const identity = {
-    waveId: competition.wave_id,
-    competitionId: competition.id,
-  };
-  return useQueries({
-    queries: entries.map(({ entryId, dropId }) => ({
-      queryKey: [
-        QueryKey.COMPETITION_RESOURCE,
-        { ...competitionScope(identity), viewer },
-        "drop",
-        entryId,
-        dropId,
-      ],
-      queryFn: async ({ signal }: { signal: AbortSignal }) => {
-        const result = await fetchCompetitionEntryDrop(
+  const identity = useMemo(
+    () => ({
+      waveId: competition.wave_id,
+      competitionId: competition.id,
+    }),
+    [competition.wave_id, competition.id]
+  );
+  const waveMin = useMemo(
+    () => getWaveMin(wave, identity.waveId),
+    [wave, identity.waveId]
+  );
+  const cardMode = Boolean(cards);
+  const keyFor = useCallback(
+    ({ entryId, dropId }: CompetitionEntryReference) => [
+      QueryKey.COMPETITION_RESOURCE,
+      { ...competitionScope(identity), viewer },
+      cardMode ? "card" : "drop",
+      entryId,
+      dropId,
+    ],
+    [identity, viewer, cardMode]
+  );
+  const seedFor = useCallback(
+    ({ entryId, dropId }: CompetitionEntryReference) => {
+      try {
+        const context = cards?.contexts.find(
+          (item) => item.entry.id === entryId
+        );
+        if (!context) return cards && cards.updatedAt > 0 ? null : undefined;
+        if (context.entry.competition_id !== competition.id) return null;
+        const original = competitionCardDrop(context, waveMin);
+        if (original?.id !== dropId) return null;
+        return presentCompetitionEntryDrop(
+          { ...context, competition, original },
           identity,
           viewer,
           entryId,
-          dropId,
-          signal
+          dropId
         );
-        if (!result) return null;
-        const {
-          original,
-          entry,
-          competition: currentCompetition,
-          vote_summary,
-          awards,
-        } = result;
-        const context = {
-          entry,
-          competition: currentCompetition,
-          vote_summary,
-        };
-        if (
-          ![
-            ApiCompetitionEntryStatus.Active,
-            ApiCompetitionEntryStatus.Winner,
-          ].includes(entry.status)
-        )
-          return null;
-        const drop = applyCompetitionDropSummary(
-          {
-            ...original,
-            type: DropSize.FULL,
-            stableKey: `${identity.competitionId}:${entryId}`,
-            stableHash: `${identity.competitionId}:${entryId}`,
-            competition_context: {
-              viewer,
-              waveId: identity.waveId,
-              dropId,
-              data: context,
-            },
-          },
-          context
+      } catch {
+        // Invalid embedded content must not crash rendering or cross parent scopes.
+        return null;
+      }
+    },
+    [cards, competition, waveMin, identity, viewer]
+  );
+  const visit = useMemo(
+    () => JSON.stringify([identity, viewer, cards?.updatedAt, entries]),
+    [identity, viewer, cards?.updatedAt, entries]
+  );
+  const projections = useMemo(
+    () =>
+      entries.map((reference) => ({
+        reference,
+        key: keyFor(reference),
+        data: seedFor(reference),
+      })),
+    [entries, keyFor, seedFor]
+  );
+  const queries = useQueries({
+    queries: projections.map(({ reference, key, data }) => ({
+      queryKey: key,
+      initialData: () => data,
+      ...(cards ? { initialDataUpdatedAt: cards.updatedAt } : {}),
+      queryFn: async ({ signal }: { signal: AbortSignal }) => {
+        const previous = client.getQueryData<PresentedDrop>(key);
+        const result = await fetchCompetitionEntryDrop(
+          identity,
+          viewer,
+          reference.entryId,
+          reference.dropId,
+          signal,
+          cards ? { wave: waveMin, original: previous?.drop } : undefined
         );
-        drop.wave = {
-          ...drop.wave,
-          authenticated_user_eligible_to_vote:
-            context.competition.permissions.vote,
-          forbid_negative_votes:
-            context.competition.voting.forbid_negative_votes,
-        };
-        if (context.entry.status === ApiCompetitionEntryStatus.Winner) {
-          drop.drop_type = ApiDropType.Winner;
-          drop.winning_context = {
-            place: context.entry.rank ?? 1,
-            decision_time: context.entry.won_at ?? context.entry.submitted_at,
-            awards: awards
-              .filter(
-                (award) =>
-                  award.entry_id === context.entry.id &&
-                  award.decision_id === context.entry.decision_id
-              )
-              .map(competitionAward),
-          };
-        }
-        return { entry: context.entry, drop, awards };
+        // A newer list response may have refreshed content while summaries loaded.
+        const latest = cards && client.getQueryData<PresentedDrop>(key);
+        if (cards && latest === null) return null;
+        return presentCompetitionEntryDrop(
+          result && latest ? { ...result, original: latest.drop } : result,
+          identity,
+          viewer,
+          reference.entryId,
+          reference.dropId
+        );
       },
-      staleTime: 15_000,
+      staleTime: cards ? 60_000 : 15_000,
       refetchInterval: (query: {
-        state: {
-          data:
-            | { entry: { status: ApiCompetitionEntryStatus } }
-            | null
-            | undefined;
-        };
+        state: { data: PresentedDrop | undefined };
       }) =>
         query.state.data?.entry.status === ApiCompetitionEntryStatus.Winner
           ? false
@@ -116,4 +128,18 @@ export function useCompetitionEntryDrops(
       retry: false,
     })),
   });
+  useEffect(() => {
+    if (!cards) return;
+    if (seeded.current === visit) return;
+    seeded.current = visit;
+    for (const { key, data } of projections) {
+      const current = client.getQueryState(key);
+      if (current && current.dataUpdatedAt > cards.updatedAt) continue;
+      if (cards.updatedAt > 0)
+        client.setQueryData(key, data ?? null, {
+          updatedAt: cards.updatedAt,
+        });
+    }
+  }, [cards, visit, client, projections]);
+  return queries;
 }

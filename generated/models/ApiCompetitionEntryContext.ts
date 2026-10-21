@@ -14,9 +14,19 @@
 import { ApiCompetitionAward } from '../models/ApiCompetitionAward';
 import { ApiCompetitionDropVoteSummary } from '../models/ApiCompetitionDropVoteSummary';
 import { ApiCompetitionEntry } from '../models/ApiCompetitionEntry';
+import { ApiDropMetadataV2 } from '../models/ApiDropMetadataV2';
+import { ApiDropV2 } from '../models/ApiDropV2';
 import { HttpFile } from '../http/http';
 
 export class ApiCompetitionEntryContext {
+    /**
+    * First-part card content, present when include=cards.
+    */
+    'drop'?: ApiDropV2;
+    /**
+    * Complete card metadata, present when include=cards.
+    */
+    'metadata'?: Array<ApiDropMetadataV2>;
     'entry': ApiCompetitionEntry;
     'vote_summary': ApiCompetitionDropVoteSummary;
     'awards': Array<ApiCompetitionAward>;
@@ -26,6 +36,18 @@ export class ApiCompetitionEntryContext {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "drop",
+            "baseName": "drop",
+            "type": "ApiDropV2",
+            "format": ""
+        },
+        {
+            "name": "metadata",
+            "baseName": "metadata",
+            "type": "Array<ApiDropMetadataV2>",
+            "format": ""
+        },
         {
             "name": "entry",
             "baseName": "entry",
