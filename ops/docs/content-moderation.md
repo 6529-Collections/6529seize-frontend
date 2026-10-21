@@ -234,16 +234,32 @@ tab selections. Arrow keys, Home, and End move focus between tabs; Enter or
 Space activates the focused tab. Unknown tab URLs show the not-found page.
 On narrow screens, a labelled selector switches between the same views.
 
-**Needs review** combines open user reports and automated checks awaiting human
-review. Cards identify **User report** or **Automated check** and open the
-appropriate evidence and actions. Each source loads more independently. The tab
-badge and **Items needing review** summary show the same total: open reports plus
-checks marked Needs review. They count separate tasks, so a report and a check
-about the same post can both appear. Marking a check reviewed does not resolve
-its open reports; each remains until its own review task is completed. **Checks**
-retains the full history, including reviewed checks. An empty queue is shown only
-when both sources load successfully and contain no items; a failed source shows
-an error and **Retry** while the other source remains available.
+**Needs review** contains one row per case requiring manual attention. Reports
+and check revisions about the same post share a row, including multiple user
+reports. A standalone check awaiting human review also creates a case. Automated
+evaluations still running are excluded until they finish or enter failure
+recovery. Rejected new-post
+submissions without a published post remain separate cases; public fields group
+by their subject across revisions. Each row identifies User report, Automated
+check, or both, shows its outstanding requirements, report reason or check
+outcome, and links directly to Review case. The related Checks view is filtered
+to that case and its pending revisions. User reports for this case exposes all
+related open reports, reporter notes and direct report review links, with its
+own pagination. It opens automatically when reviewing a report. Clear filters
+to see the full check history.
+
+The Needs review badge and Items needing review summary show the same unique
+case count, which also controls the sidebar attention dot. The dot appears for
+any manual review case, including check-only cases with no user reports. It
+refreshes every minute while the app is active and after your moderation
+actions. Opening WatchTower does not clear it. A case remains until all of its
+open reports and pending checks are handled; Mark reviewed alone does not close
+reports. The dot disappears when no cases remain. This is an in-app indicator.
+
+The case list has cursor pagination. A failed load shows Retry and preserves
+already loaded cases. An empty message appears only after a successful empty
+response. **Checks** retains the full check history and **Resolved reports**
+retains closed reports.
 
 The summary shows items needing review, quarantined posts, rejected checks
 today, and evaluator failures today. These totals cover all items independently
@@ -349,7 +365,7 @@ reason, or pending report details.
 The WatchTower link is shown only when the server confirms that the signed-in
 profile belongs to the **6529 Dev Team** group. Sign in with a wallet linked to
 that profile and use a direct profile session; proxy sessions cannot use
-WatchTower. A red indicator appears while the queue contains open reports;
+WatchTower. A red indicator appears while any case needs manual review;
 the client refreshes this lightweight state periodically while active, without
 a WebSocket. The backend checks every moderator request; hiding the link is not
 the authorization boundary. A user who opens `/content-moderation` without

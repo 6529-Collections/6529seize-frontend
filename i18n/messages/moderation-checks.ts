@@ -1,4 +1,13 @@
 export const MODERATION_CHECK_MESSAGES = {
+  "checks.caseAuthor": "Author: {profile}",
+  "checks.caseReports": "User reports for this case",
+  "checks.reviewReport": "Review report",
+  "checks.caseOutcome": "Check outcome: {outcome}",
+  "checks.caseFilter":
+    "Showing checks for this case. Clear filters to return to all checks.",
+  "checks.caseRequirements":
+    "Open reports: {reports} · Checks needing review: {checks}",
+  "checks.reviewCase": "Review case",
   "contentModeration.moderator.tabs.needsReview": "Needs review",
   "contentModeration.moderator.tabs.needsReviewCompact": "Review",
   "checks.queue.userReport": "User report",
@@ -35,7 +44,7 @@ export const MODERATION_CHECK_MESSAGES = {
   "checks.count.rejected_today": "Rejected checks today",
   "checks.count.evaluator_failures_today": "Evaluator failures today",
   "checks.count.help":
-    "Needs review counts open user reports and checks awaiting review. Today is measured in UTC. Counts are independent of filters.",
+    "Needs review counts unique cases with open reports or checks awaiting manual review. Today is measured in UTC. Counts are independent of filters.",
   "checks.filters": "Filter checks",
   "checks.filter.subject_type": "Content type",
   "checks.filter.outcome": "Check outcome",
