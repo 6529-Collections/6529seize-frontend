@@ -16,7 +16,7 @@ const FilterButton = forwardRef<HTMLButtonElement, FilterButtonProps>(
       ref={ref}
       disabled={disabled}
       size={size}
-      variant={selected && !disabled ? "primary" : "filter"}
+      variant={selected && !disabled ? "filterSelected" : "filter"}
       className={`motion-reduce:tw-transition-none ${className}`}
     />
   )

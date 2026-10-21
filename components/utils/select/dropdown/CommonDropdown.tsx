@@ -61,6 +61,24 @@ function getDefaultSizeClass(size: string) {
   return "tw-py-2.5 tw-text-xs";
 }
 
+function getContentClasses(isEditorial: boolean, isToolbar: boolean) {
+  let labelClassName = "tw-font-semibold tw-text-iron-500";
+  if (isEditorial) {
+    labelClassName =
+      "tw-shrink-0 tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-500";
+  } else if (isToolbar) {
+    labelClassName = "tw-shrink-0 tw-font-medium tw-text-iron-500";
+  }
+  let valueClassName = "";
+  if (isEditorial) {
+    valueClassName = "tw-truncate tw-text-iron-200 group-hover:tw-text-white";
+  } else if (isToolbar) {
+    valueClassName =
+      "tw-min-w-0 tw-truncate tw-font-semibold tw-text-iron-200 group-hover:tw-text-white";
+  }
+  return { labelClassName, valueClassName };
+}
+
 export default function CommonDropdown<T, U = unknown>(
   props: CommonSelectProps<T, U>
 ) {
@@ -149,20 +167,10 @@ export default function CommonDropdown<T, U = unknown>(
       className: `${size === "sm" ? "tw-h-8" : "tw-h-9"} tw-relative tw-w-auto tw-pl-2.5 tw-pr-8 tw-text-left tw-text-xs tw-ring-0 tw-shadow-none focus-visible:tw-outline-offset-[-2px] motion-reduce:tw-transition-none`,
     });
   }
-  let labelClassName = "tw-font-semibold tw-text-iron-500";
-  if (isEditorial) {
-    labelClassName =
-      "tw-shrink-0 tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-500";
-  } else if (isToolbar) {
-    labelClassName = "tw-shrink-0 tw-font-medium tw-text-iron-500";
-  }
-  let valueClassName = "";
-  if (isEditorial) {
-    valueClassName = "tw-truncate tw-text-iron-200 group-hover:tw-text-white";
-  } else if (isToolbar) {
-    valueClassName =
-      "tw-min-w-0 tw-truncate tw-font-semibold tw-text-iron-200 group-hover:tw-text-white";
-  }
+  const { labelClassName, valueClassName } = getContentClasses(
+    isEditorial,
+    isToolbar
+  );
   let chevronClassName = isEditorial
     ? "tw-pointer-events-none tw-inline-flex tw-shrink-0 tw-items-center tw-text-iron-500 group-hover:tw-text-iron-300"
     : "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 -tw-mr-1 tw-flex tw-items-center tw-pr-3.5";
