@@ -58,6 +58,7 @@ beforeEach(() => {
     isReady: true,
     isSettingsLoaded: true,
     isFetching: false,
+    isLoading: false,
   });
   leaderboardMock.mockReturnValue({
     drops: leaders,

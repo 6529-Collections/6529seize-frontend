@@ -6,6 +6,15 @@ import {
 } from "../testHelpers";
 import { devices, type Page } from "@playwright/test";
 import { buildSync } from "esbuild";
+import {
+  decodeFunctionData,
+  encodeFunctionResult,
+  multicall3Abi,
+  toFunctionSelector,
+  zeroAddress,
+  zeroHash,
+} from "viem";
+import { MEMES_MANIFOLD_PROXY_ABI } from "../../abis/abis";
 import { getAppEnvironment } from "../../config/appEnvironment";
 import {
   isDesktopWebProject,
@@ -37,7 +46,8 @@ async function installLoadingTestArtwork(page: Page) {
     })
   );
   await page.route("https://rpc.walletconnect.org/**", (route) =>
-    route.abort()
+    // A terminal response exercises the unavailable state without transport retries.
+    route.fulfill({ status: 400, json: { error: "Fixture RPC unavailable" } })
   );
 }
 
@@ -495,7 +505,7 @@ test("Coming Up does not mislabel the current artwork while Latest Drop is delay
     releaseArtwork();
     await expect(
       page.getByRole("link", { name: loadingTestArtwork.name, exact: true })
-    ).toBeVisible();
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await expect(comingUp.getByText("NEXT MINT", { exact: true })).toHaveCount(
       0
     );
@@ -507,7 +517,7 @@ test("Coming Up does not mislabel the current artwork while Latest Drop is delay
   }
 });
 
-test("homepage artwork survives slow settings and failed mint status @smoke @medium @large", async ({
+test("homepage waits for initial settings and recovers from failed mint status @smoke @medium @large", async ({
   page,
 }) => {
   await installLoadingTestArtwork(page);
@@ -518,27 +528,29 @@ test("homepage artwork survives slow settings and failed mint status @smoke @med
   const settingsReady = new Promise<void>((resolve) => {
     releaseSettings = resolve;
   });
+  await page.route("**/api/v2/waves/*/decisions?*", (route) =>
+    route.fulfill({ json: { data: [], page: 1, count: 0, next: false } })
+  );
   await page.route("**/api/settings", async (route) => {
     await settingsReady;
-    await route.fallback();
+    await route.fulfill({ json: comingUpSettings });
   });
   try {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     const artwork = page
       .getByRole("main")
       .locator('[data-home-section="Latest drop"]');
-    await expect(
-      artwork.getByRole("link", { name: loadingTestArtwork.name, exact: true })
-    ).toBeVisible();
+    await expect(page.getByText("Latest Drop", { exact: true })).toBeVisible();
+    await expect(artwork).toHaveCount(0);
+    releaseSettings();
     const image = artwork.getByRole("img", {
       name: loadingTestArtwork.name,
       exact: true,
     });
-    await expect(image).toBeVisible();
+    await expect(image).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await expect
       .poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth))
       .toBeGreaterThan(0);
-    releaseSettings();
     await expect(
       artwork.getByText("Unavailable", { exact: true }).first()
     ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
@@ -546,6 +558,158 @@ test("homepage artwork survives slow settings and failed mint status @smoke @med
     await expectNoHorizontalOverflow(page);
   } finally {
     releaseSettings();
+  }
+});
+
+test("homepage selects Next Drop without flashing the previous artwork @smoke @medium @large", async ({
+  page,
+}) => {
+  await installComingUpFixture(page);
+  const winner = {
+    ...comingUpLeaderboard.drops[0],
+    id: "next-drop-loading-fixture",
+    title: "Upcoming artwork fixture",
+    wave: comingUpWave,
+    media: [{ mime_type: "image/png", url: loadingTestArtwork.image }],
+    metadata: [],
+    collaborators: [],
+    submission_context: {
+      meme_card_id: 537,
+      voting: { current_calculated_vote: 0 },
+    },
+  };
+  await page.route(`**/api/waves/${comingUpWave.id}`, (route) =>
+    route.fulfill({
+      json: {
+        ...comingUpWave,
+        author: winner.author,
+        description_drop: { id: "description" },
+        voting: { scope: {}, credit_type: "TDH" },
+        participation: { scope: {} },
+        chat: { scope: {} },
+        visibility: { scope: {} },
+        wave: { admin_group: {} },
+      },
+    })
+  );
+  let releaseWinner!: () => void;
+  const winnerReady = new Promise<void>((resolve) => {
+    releaseWinner = resolve;
+  });
+  await page.route("**/api/v2/waves/*/decisions?*", async (route) => {
+    await winnerReady;
+    await route.fulfill({
+      json: {
+        data: [
+          {
+            decision_time: 1,
+            winners: [{ place: 1, awards: [], drop: winner }],
+          },
+        ],
+        page: 1,
+        count: 1,
+        next: false,
+      },
+    });
+  });
+  const claimResult = encodeFunctionResult({
+    abi: MEMES_MANIFOLD_PROXY_ABI,
+    functionName: "getClaimForToken",
+    result: [
+      1n,
+      {
+        total: 328,
+        totalMax: 328,
+        walletMax: 0,
+        startDate: 1,
+        endDate: 2,
+        storageProtocol: 0,
+        merkleRoot: zeroHash,
+        location: "",
+        tokenId: 536n,
+        cost: 0n,
+        paymentReceiver: zeroAddress,
+        erc20: zeroAddress,
+        signingAddress: zeroAddress,
+      },
+    ],
+  });
+  let releaseStatus!: () => void;
+  const statusReady = new Promise<void>((resolve) => {
+    releaseStatus = resolve;
+  });
+  const selector = toFunctionSelector("getClaimForToken(address,uint256)");
+  await page.route("https://rpc.walletconnect.org/**", async (route) => {
+    const rpc = route.request().postDataJSON();
+    if (rpc.method !== "eth_call") {
+      await route.abort();
+      return;
+    }
+    await statusReady;
+    let result = claimResult;
+    if (!rpc.params[0].data.startsWith(selector)) {
+      const { args, functionName } = decodeFunctionData({
+        abi: multicall3Abi,
+        data: rpc.params[0].data,
+      });
+      if (functionName !== "aggregate3")
+        throw new Error("Unexpected fixture RPC call");
+      result = encodeFunctionResult({
+        abi: multicall3Abi,
+        functionName,
+        result: args[0].map((call) => ({
+          success: call.callData.startsWith(selector),
+          returnData: call.callData.startsWith(selector) ? claimResult : "0x",
+        })),
+      });
+    }
+    await route.fulfill({ json: { jsonrpc: "2.0", id: rpc.id, result } });
+  });
+  await page.addInitScript(() => {
+    new MutationObserver(() => {
+      if (document.querySelector('[data-home-section="Latest drop"]')) {
+        document.documentElement.dataset["previousDropRendered"] = "true";
+      }
+    }).observe(document, { childList: true, subtree: true });
+  });
+  try {
+    const artworkResponse = page.waitForResponse("**/api/memes_latest");
+    const statusRequest = page.waitForRequest(
+      (request) =>
+        request.url().startsWith("https://rpc.walletconnect.org/") &&
+        request.postDataJSON()?.method === "eth_call"
+    );
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await artworkResponse;
+    await statusRequest;
+    await expect(page.getByText("Latest Drop", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("main").locator('[data-home-section="Latest drop"]')
+    ).toHaveCount(0);
+    const winnerResponse = page.waitForResponse(
+      "**/api/v2/waves/*/decisions?*"
+    );
+    releaseWinner();
+    await winnerResponse;
+    await expect(
+      page.getByRole("link", { name: winner.title, exact: true })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("main").locator('[data-home-section="Latest drop"]')
+    ).toHaveCount(0);
+    releaseStatus();
+    await expect(page.getByText("Next Drop", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: winner.title, exact: true })
+    ).toBeVisible();
+    await expect(page.locator("html")).not.toHaveAttribute(
+      "data-previous-drop-rendered",
+      "true"
+    );
+    await expectNoHorizontalOverflow(page);
+  } finally {
+    releaseWinner();
+    releaseStatus();
   }
 });
 
@@ -572,7 +736,7 @@ test("homepage artwork request has a visible failure and retry @smoke @medium @l
   await page.getByRole("button", { name: "Try again", exact: true }).click();
   await expect(
     page.getByRole("link", { name: loadingTestArtwork.name, exact: true })
-  ).toBeVisible();
+  ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
   await expect(
     page.getByRole("button", { name: "Try again", exact: true })
   ).toHaveCount(0);
@@ -949,7 +1113,7 @@ test.describe("Home Page @smoke @medium @large", () => {
         name: loadingTestArtwork.name,
         exact: true,
       });
-      await expect(dropTitle).toBeVisible();
+      await expect(dropTitle).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
       await dropTitle.hover();
       await expect(dropTitle).toHaveCSS("color", "rgb(206, 207, 212)");
 
