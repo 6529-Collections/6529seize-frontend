@@ -98,10 +98,13 @@ test("keeps the profile shell and scroll while the last tab click wins", async (
     ).toHaveAttribute("aria-current", "page");
     expect(await page.evaluate(() => globalThis.scrollY)).toBe(originalScroll);
     // A slow navigation reveals the placeholder while the response is held.
-    await expect(content.locator(":scope > div").last()).toHaveCSS(
-      "opacity",
-      "1"
-    );
+    await expect(
+      page
+        .getByRole("main")
+        .last()
+        .locator("[data-profile-tab-content] > div")
+        .last()
+    ).toHaveCSS("opacity", "1");
 
     const xtdh = navigation.getByRole("link", { name: /xTDH/ });
     await xtdh.click();
@@ -113,13 +116,13 @@ test("keeps the profile shell and scroll while the last tab click wins", async (
         url.searchParams.get("tab") === "granted"
     );
     await expect(content).toHaveAttribute("aria-busy", "false");
-    await expect(content.locator(":scope > div").first()).toHaveCSS(
-      "opacity",
-      "1"
-    );
-    await expect(content.locator(":scope > div").first()).not.toHaveAttribute(
-      "inert"
-    );
+    const destination = page
+      .getByRole("main")
+      .last()
+      .locator("[data-profile-tab-content] > div")
+      .first();
+    await expect(destination).toHaveCSS("opacity", "1");
+    await expect(destination).not.toHaveAttribute("inert");
     expect(visited).not.toContain(`/${PROFILE_HANDLE}/collected`);
     expect(
       await page
