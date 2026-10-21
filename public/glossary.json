@@ -345,6 +345,7 @@
       ],
       "facts": [
         "Network wave score has a dedicated route at /network/wave-score.",
+        "In the app, the score page has a Back button in the header. It returns to the originating page when supplied, including Discover sort and threshold settings; otherwise it uses app navigation history, or About on a direct visit with no history.",
         "Use this route when users ask where wave score information lives.",
         "Wave REP is a TDH-credit REP signal for a wave; it is signed and log-scaled before weighting in Wave Score.",
         "Wave REP is the largest single quality component on the Wave Score transparency page.",
