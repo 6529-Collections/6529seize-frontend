@@ -10,6 +10,7 @@ interface NotificationHeaderProps {
   readonly children: React.ReactNode; // Content AFTER the user link (e.g. "replied • 2h")
   readonly actions?: React.ReactNode | undefined; // Follow button(s)
   readonly authorClassName?: string | undefined;
+  readonly align?: "start" | "center";
 }
 
 export default function NotificationHeader({
@@ -17,12 +18,15 @@ export default function NotificationHeader({
   children,
   actions,
   authorClassName = "tw-text-sm",
+  align = "start",
 }: NotificationHeaderProps) {
   const { activeSrc, isPlaceholder, unoptimized, handleError } =
     useGatewayImageLoadState(author.pfp);
 
   return (
-    <div className="tw-flex tw-items-start tw-gap-x-3">
+    <div
+      className={`tw-flex tw-gap-x-3 ${align === "center" ? "tw-items-center" : "tw-items-start"}`}
+    >
       <div className="tw-relative tw-h-7 tw-w-7 tw-flex-shrink-0">
         {!isPlaceholder && activeSrc ? (
           <Image

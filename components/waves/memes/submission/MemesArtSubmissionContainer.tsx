@@ -291,6 +291,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
       operationalData,
       isAdditionalActionPromised,
       acceptedAgreement,
+      collaborators,
       proposalFrame,
     } = form.getSubmissionData();
     if (
@@ -331,6 +332,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
         {
           ...(media.selectedFile ? { imageFile: media.selectedFile } : {}),
           proposalFrame,
+          collaborators,
           ...(media.existingMedia
             ? { existingMedia: media.existingMedia }
             : {}),
@@ -366,6 +368,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
           mimeType: media.externalMimeType,
         },
         proposalFrame,
+        collaborators,
         traits,
         operationalData,
         isAdditionalActionPromised,
