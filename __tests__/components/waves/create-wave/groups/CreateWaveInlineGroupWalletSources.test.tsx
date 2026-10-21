@@ -53,7 +53,8 @@ const requestAuth = jest.fn().mockResolvedValue({ success: true });
 function renderSources(
   direction: "included" | "excluded" = "included",
   initialSources: WalletSources = createEmptyInlineGroupWalletSources(),
-  connectedProfile: { readonly handle: string } | null = { handle: "tester" }
+  connectedProfile: { readonly handle: string } | null = { handle: "tester" },
+  mobilePresentation = false
 ) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -64,6 +65,7 @@ function renderSources(
     return (
       <CreateWaveInlineGroupWalletSources
         direction={direction}
+        mobilePresentation={mobilePresentation}
         sources={sources}
         onChange={(update) =>
           setSources((current) => ({ ...current, ...update }))
@@ -223,5 +225,108 @@ describe("CreateWaveInlineGroupWalletSources", () => {
       },
     });
     expect(screen.getByRole("alert")).toHaveTextContent("Choose a CSV file.");
+  });
+  it("keeps mobile sections visible with CSV results, errors, and removal", async () => {
+    const user = userEvent.setup();
+    renderSources(
+      "excluded",
+      createEmptyInlineGroupWalletSources(),
+      { handle: "tester" },
+      true
+    );
+    expect(screen.getByRole("heading", { name: "EMMA" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "CSV file" })).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "EMMA" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "CSV file" })
+    ).not.toBeInTheDocument();
+    const upload = screen.getByLabelText(
+      "Choose a CSV file of identities to exclude"
+    );
+    expect(upload).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Search allowlists" })
+    ).toBeVisible();
+    await user.upload(
+      upload,
+      new File(["0x1111111111111111111111111111111111111111"], "excluded.csv", {
+        type: "text/csv",
+      })
+    );
+    expect(await screen.findByText("1 identity added")).toBeVisible();
+    expect(screen.getByText("excluded.csv")).toBeVisible();
+    expect(screen.getByText("1 identity added")).toBeVisible();
+    await user.upload(
+      upload,
+      new File(["invalid"], "empty.csv", { type: "text/csv" })
+    );
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "No valid Ethereum wallet addresses were found."
+    );
+    expect(screen.getByRole("alert")).toBeVisible();
+    expect(screen.getByText("empty.csv")).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Remove CSV file" }));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.queryByText("empty.csv")).not.toBeInTheDocument();
+  });
+
+  it("loads an EMMA source in its mobile section and keeps removal available", async () => {
+    let resolveLoad!: (
+      result: Awaited<ReturnType<typeof distributionPlanApiFetch>>
+    ) => void;
+    distributionPlanApiFetchMock.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveLoad = resolve;
+        })
+    );
+    const user = userEvent.setup();
+    renderSources(
+      "included",
+      createEmptyInlineGroupWalletSources(),
+      { handle: "tester" },
+      true
+    );
+    await user.click(screen.getByRole("button", { name: "Search allowlists" }));
+    await waitFor(() =>
+      expect(distributionPlanApiFetchMock).toHaveBeenCalledTimes(1)
+    );
+    expect(screen.getByRole("status")).toBeVisible();
+    expect(screen.getByText("Core contributors")).toBeVisible();
+    resolveLoad({
+      success: true,
+      data: [{ wallet: "0x1111111111111111111111111111111111111111" }],
+    });
+    expect(await screen.findByText("1 identity added")).toBeVisible();
+    expect(distributionPlanApiFetchMock).toHaveBeenCalledTimes(1);
+    await user.click(
+      screen.getByRole("button", { name: "Remove EMMA allowlist" })
+    );
+    expect(screen.queryByText("1 identity added")).not.toBeInTheDocument();
+  });
+
+  it("keeps EMMA authentication errors and retry available in its mobile section", async () => {
+    renderSources(
+      "included",
+      {
+        ...createEmptyInlineGroupWalletSources(),
+        selectedAllowlist: {
+          id: "allowlist-1",
+          name: "Core contributors",
+          description: "",
+          createdAt: 1,
+        },
+      },
+      null,
+      true
+    );
+    expect(screen.getByRole("heading", { name: "EMMA" })).toBeVisible();
+    expect(screen.getByRole("alert")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Try again" })).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Remove EMMA allowlist" })
+    ).toBeVisible();
   });
 });

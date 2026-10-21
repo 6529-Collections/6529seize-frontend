@@ -44,6 +44,7 @@ import { t } from "@/i18n/messages";
 import WavePicture from "@/components/waves/WavePicture";
 import { getDirectMessageProfileHref } from "@/helpers/waves/direct-message-profile.helpers";
 import {
+  getProfileCollectedReturnContext,
   getProfileCollectedTokenReturnContext,
   PROFILE_COLLECTED_RETURN_PARAM,
 } from "@/helpers/profile-collected-navigation";
@@ -585,11 +586,18 @@ export default function AppHeader() {
     connectedProfile?.handle
       ? `/${encodeURIComponent(connectedProfile.handle)}`
       : null;
+  const isNativeCollectRoute =
+    isCapacitor && (pathname === "/collect" || pathname === "/collect/orders");
   const profileCollectedReturnContext = isCapacitor
     ? getProfileCollectedTokenReturnContext({
         pathname,
         returnTo: searchParams.get(PROFILE_COLLECTED_RETURN_PARAM),
       })
+    : null;
+  const collectProfileReturnContext = isNativeCollectRoute
+    ? getProfileCollectedReturnContext(
+        searchParams.get(PROFILE_COLLECTED_RETURN_PARAM)
+      )
     : null;
 
   const showBackButton =
@@ -599,6 +607,8 @@ export default function AppHeader() {
     isProfileWavesFeedView ||
     preferencesProfileReturnTo !== null ||
     profileCollectedReturnContext !== null ||
+    collectProfileReturnContext !== null ||
+    (isNativeCollectRoute && canGoBack) ||
     (isProfilePage && canGoBack);
   const pfpImage = (
     <div className="tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0">
@@ -686,6 +696,7 @@ export default function AppHeader() {
               returnTo={
                 preferencesProfileReturnTo ??
                 profileCollectedReturnContext?.href ??
+                collectProfileReturnContext?.href ??
                 (isProfileWavesFeedView ? "/waves" : undefined)
               }
             />

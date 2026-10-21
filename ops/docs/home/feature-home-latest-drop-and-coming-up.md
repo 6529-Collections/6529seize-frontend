@@ -33,8 +33,17 @@ Use this page for visibility rules, state switches, and route targets.
   - Subscription info link: `/about/subscriptions`
   - Connected profile subscription link: `/{user}/subscriptions`
 - `Coming up` actions:
+  - Below 640px, a single card fills the available width. From 640px to 767px,
+    it uses the standard card width. Multiple cards keep the horizontal swipe
+    layout with a glimpse of the following card below tablet width.
   - Card title: `/waves/{waveId}?drop={dropId}`
   - Card author: `/{handle}` or `/{primaryAddress}`
+  - Collaborating cards combine the artist and accepted collaborators in one
+    credit block. Up to four overlapping avatars include the artist first;
+    two collaborator handles appear below the artist, with long names truncated.
+    Remaining collaborators are counted in `+N` and `+N more`; `+N more` opens
+    the drop's full credits. Visible names link to profiles, without level or
+    trophy badges in the card.
   - Section `View all`: `/waves/{waveId}`
 
 ## Entry Points
@@ -56,9 +65,15 @@ Use this page for visibility rules, state switches, and route targets.
 4. `Latest Drop` groups its details beside the artwork: title and artist;
    stats with `Edition Details` directly below; `Your allowance` followed by
    subscription awareness; and the countdown and mint action at the bottom.
+   `Edition`, `Status`, `Mint price`, and `Floor` share one row at 640px and
+   wider, with a two-column layout on smaller screens.
    Countdown states are `Upcoming`, `Live`, `Mint Complete`, or `Error`. When
    the card has an explicit Main Stage mapping, edition details also includes
    `Main Stage Submission` → `View`.
+   The countdown keeps each unit directly beside its number, for example `8m`
+   and `5s`. Days appear first when at least 24 hours remain. Zero
+   days, hours, and minutes are omitted; seconds always remain visible. The
+   timer strip keeps the same height across screen sizes.
    `Edition Details` opens and closes with a brief transition, or immediately
    when reduced motion is enabled. Collapsed links are excluded from keyboard
    navigation. File type and dimensions appear inside `Edition Details` when
@@ -71,6 +86,15 @@ Use this page for visibility rules, state switches, and route targets.
      ended, and next-winner title differs from current mint title)
    - Top leaderboard cards from the same wave, sorted by prediction rating
 7. `View all` opens `/waves/{waveId}` for that wave.
+
+On mobile, `Coming up` is a horizontal row: swipe to reveal the remaining
+cards, which snap into place with a stop at each card so a swipe does not
+skip over the next snap position. The next card peeks in from the right. Tablet
+uses two columns and desktop uses three. Status and mint date or TDH have a
+dedicated row above the artwork that wraps when needed without covering it;
+the title and artist links sit below. Artwork retains its
+proportions without cropping. Keyboard users can tab through the links to
+bring each card into view.
 
 ## Common Scenarios
 
@@ -89,9 +113,21 @@ Use this page for visibility rules, state switches, and route targets.
     shows a `The Memes #{id}` pill linked to that card.
   - `Coming up` hides `NEXT MINT` and shows up to 3 leaders.
 - Leaderboard still loading while `NEXT MINT` is ready:
-  - `Coming up` can render with only the `NEXT MINT` card.
+  - `NEXT MINT` stays visible beside two loading placeholders when no leader
+    cards are available yet. The placeholders disappear when the leader request
+    finishes.
 - `Coming up` initial load with no ready cards and no `NEXT MINT` card:
-  - Three skeleton cards render until data is ready.
+  - Three skeleton cards render while the required requests are loading.
+- Returning to `Coming up` during the same app session:
+  - Recently loaded leader cards remain available for up to five minutes after
+    leaving the page. Older results refresh in the background when returning.
+  - Pull-to-refresh keeps loaded leader cards visible while updating them.
+  - A failed update keeps those cards visible.
+  - Closing the app or changing the signed-in identity can clear saved cards.
+- Slow current-artwork or mint-status details:
+  - Leader cards can appear independently.
+  - `NEXT MINT` appears only after the current artwork and mint status are
+    known; an unresolved current artwork is not treated as a different mint.
 - `Coming up` after load with no cards:
   - The full section is hidden.
 - In `Coming up` leader cards:
@@ -107,7 +143,8 @@ Use this page for visibility rules, state switches, and route targets.
 - Main Stage submission and Meme card links are omitted when their explicit
   backend mapping is unavailable; home does not infer a relationship.
 - The home `Next Drop` artwork panel includes a labeled local-time `Mint Date`
-  alongside its wave, submission time, and rating details.
+  alongside its wave, submission time, and rating details. These statistics sit
+  below the title and creator, above `Your allowance` and subscriptions.
 - On phone browsers and the mobile app, still artwork fills the panel width
   at its natural aspect ratio and keeps its details below the image.
 - On iOS outside the US, the countdown `Mint` button is hidden.
@@ -180,7 +217,7 @@ Use this page for visibility rules, state switches, and route targets.
 - In countdown error state, the `Next drop ...` status strip is not shown.
 - On touch devices, interactive HTML media can require `Tap to load` before
   playback.
-- If app settings do not include `memes_wave_id`, `Coming up` stays hidden.
+- Until app settings include `memes_wave_id`, `Coming up` stays hidden.
 
 ## Failure and Recovery
 
@@ -228,11 +265,13 @@ Use this page for visibility rules, state switches, and route targets.
 
 ### Homepage loading-message localization fallback debt
 
-- The artwork error, retry labels, and unavailable mint stats use the `en-US`
-  fallback in partial `en-GB`, `de-DE`, `es-ES`, and `fr-FR` dictionaries.
+- The artwork error, retry labels, Coming Up labels and loading status, and
+  unavailable mint stats use the `en-US` fallback in partial `en-GB`, `de-DE`,
+  `es-ES`, and `fr-FR` dictionaries.
 - Non-English visitors may see these short messages in English. Frontend i18n
-  follow-up should add reviewed translations for `home.latestDrop.*` and
-  `home.nowMinting.stats.unavailable` and check their responsive presentation.
+  follow-up should add reviewed translations for `home.latestDrop.*`,
+  `home.comingUp.*`, and `home.nowMinting.stats.unavailable` and check their
+  responsive presentation.
 
 ### `/about/subscriptions` localization fallback debt
 

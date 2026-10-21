@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import CompetitionLeaderboard from "@/components/competitions/CompetitionLeaderboard";
 let mockType = "RANK";
+let mockDropError: { status: number } | null = null;
 jest.mock("@/contexts/CompetitionContext", () => ({
   useCompetition: () => ({
     wave: { id: "wave" },
@@ -24,6 +25,8 @@ jest.mock("@/helpers/competition-presentation.helpers", () => ({
 }));
 jest.mock("@/helpers/competition.helpers", () => ({
   isMultiCompetitionEnabled: () => true,
+  isCompetitionAccessError: jest.requireActual("@/helpers/competition.helpers")
+    .isCompetitionAccessError,
 }));
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useCompetitionResource: (_identity: unknown, resource: string) => ({
@@ -43,7 +46,13 @@ jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   }),
 }));
 jest.mock("@/hooks/competitions/useCompetitionEntryDrops", () => ({
-  useCompetitionEntryDrops: () => [{ data: { drop: { id: "drop" } } }],
+  useCompetitionEntryDrops: () => [
+    {
+      data: { drop: { id: "drop" } },
+      isError: mockDropError !== null,
+      error: mockDropError,
+    },
+  ],
 }));
 jest.mock("@/hooks/competitions/useCompetitionDropNavigation", () => ({
   useCompetitionDropNavigation: () => jest.fn(),
@@ -90,12 +99,26 @@ jest.mock("@/components/competitions/CompetitionLoadMore", () => ({
 jest.mock("@/components/competitions/CompetitionState", () => ({
   CompetitionState: () => null,
 }));
+beforeEach(() => {
+  mockType = "RANK";
+  mockDropError = null;
+});
 it("uses the existing Rank schedule, controls and cards", () => {
   mockType = "RANK";
   render(<CompetitionLeaderboard />);
   expect(screen.getByText("Rank schedule")).toBeVisible();
   expect(screen.getByText("Existing toolbar")).toBeVisible();
   expect(screen.getByText("Rich card rank 5000")).toBeVisible();
+});
+it("retains loaded artwork during a temporary refresh failure but hides it when access is revoked", () => {
+  const { rerender } = render(<CompetitionLeaderboard />);
+  expect(screen.getByText("Rich card rank 5000")).toBeVisible();
+  mockDropError = { status: 503 };
+  rerender(<CompetitionLeaderboard />);
+  expect(screen.getByText("Rich card rank 5000")).toBeVisible();
+  mockDropError = { status: 403 };
+  rerender(<CompetitionLeaderboard />);
+  expect(screen.queryByText("Rich card rank 5000")).not.toBeInTheDocument();
 });
 it("uses the existing Approve status and threshold presentation", () => {
   mockType = "APPROVE";

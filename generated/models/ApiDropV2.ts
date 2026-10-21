@@ -25,6 +25,7 @@ import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
 import { ApiDropV2ContextProfileContext } from '../models/ApiDropV2ContextProfileContext';
 import { ApiDropViewerModerationContext } from '../models/ApiDropViewerModerationContext';
 import { ApiIdentityOverview } from '../models/ApiIdentityOverview';
+import { ApiMemeCollaboratorProfile } from '../models/ApiMemeCollaboratorProfile';
 import { ApiMentionedWaveV2 } from '../models/ApiMentionedWaveV2';
 import { ApiReplyToDropV2 } from '../models/ApiReplyToDropV2';
 import { ApiSubmissionDropContext } from '../models/ApiSubmissionDropContext';
@@ -32,6 +33,10 @@ import { ApiWaveOverview } from '../models/ApiWaveOverview';
 import { HttpFile } from '../http/http';
 
 export class ApiDropV2 {
+    /**
+    * Accepted collaborators only. Pending invitations are private.
+    */
+    'collaborators'?: Array<ApiMemeCollaboratorProfile>;
     'id': string;
     'serial_no': number;
     'created_at': number;
@@ -70,6 +75,12 @@ export class ApiDropV2 {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "collaborators",
+            "baseName": "collaborators",
+            "type": "Array<ApiMemeCollaboratorProfile>",
+            "format": ""
+        },
         {
             "name": "id",
             "baseName": "id",

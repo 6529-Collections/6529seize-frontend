@@ -23,6 +23,13 @@ opens the full Memes set when no season is selected. Gradients opens the full
 Gradients set; Pebbles opens its trait-set planner. Collected and Pebbles Trait
 Sets also link to relevant collecting goals.
 
+In the native app, the header Back button returns from Collect or Manage orders
+to the page you came from, keeping its URL filters. Returning to a
+[profile's Collected tab](../profiles/tabs/feature-collected-tab.md) through
+its collecting actions also restores focus and scroll to that action.
+Opening Collect or Manage orders directly without earlier app navigation keeps
+the menu button instead. On the web, use the browser's Back button.
+
 Supported artwork pages place a priced **Collect** action near the artwork summary,
 before artwork details and [**Listings & offers**](feature-card-market-depth.md).
 Gradients and Pebbles show the title and artwork before these actions; the full
