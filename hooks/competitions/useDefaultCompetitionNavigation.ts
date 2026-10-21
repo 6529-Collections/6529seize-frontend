@@ -106,10 +106,18 @@ export function useDefaultCompetitionNavigation(
     }
     // Use the documented external History update so Next synchronizes URL hooks.
     // Restore app metadata afterward, keeping refreshed router state authoritative.
-    const previousState = globalThis.history.state;
+    const previousState: unknown = globalThis.history.state;
     globalThis.history.replaceState(null, "", `${pathname}?${params}`);
+    const currentState: unknown = globalThis.history.state;
     globalThis.history.replaceState(
-      { ...previousState, ...globalThis.history.state },
+      {
+        ...(typeof previousState === "object" && previousState !== null
+          ? previousState
+          : {}),
+        ...(typeof currentState === "object" && currentState !== null
+          ? currentState
+          : {}),
+      },
       ""
     );
   }, [
