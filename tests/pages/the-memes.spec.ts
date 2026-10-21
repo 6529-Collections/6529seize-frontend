@@ -71,8 +71,28 @@ test.describe("The Memes Page @smoke @medium @large", () => {
     const portraitViewport = page.viewportSize();
     if (!portraitViewport)
       throw new Error("Expected a configured phone viewport");
-    await page.setViewportSize({ width: 844, height: 390 });
-    await expect(sortBar).toHaveCSS("position", "static");
+    for (const width of [640, 844]) {
+      await page.setViewportSize({ width, height: 390 });
+      await expect(sortBar).toHaveCSS("position", "static");
+      await expect
+        .poll(async () => {
+          const direction = await page
+            .getByRole("button", { name: "Sort ascending", exact: true })
+            .boundingBox();
+          const selectedSort = await page
+            .getByRole("button", { name: "Volume: 7 Days", exact: true })
+            .boundingBox();
+          return direction && selectedSort
+            ? Math.abs(
+                direction.y +
+                  direction.height / 2 -
+                  (selectedSort.y + selectedSort.height / 2)
+              )
+            : Infinity;
+        })
+        .toBeLessThan(1);
+      await expectNoHorizontalOverflow(page);
+    }
     await page.setViewportSize(portraitViewport);
     await expect(
       page.getByRole("button", { name: "Volume: 7 Days", exact: true })
