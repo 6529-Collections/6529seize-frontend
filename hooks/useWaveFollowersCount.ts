@@ -13,13 +13,12 @@ export function useWaveFollowersCount(waveId: string) {
     queryKey: getWaveFollowersCountQueryKey(waveId),
     queryFn: async ({ signal }) => {
       const page = await commonApiFetch<ApiIncomingIdentitySubscriptionsPage>({
-        endpoint: `/identity-subscriptions/incoming/WAVE/${waveId}`,
+        endpoint: `identity-subscriptions/incoming/WAVE/${waveId}`,
         params: { page_size: "1" },
         signal,
       });
       return page.count;
     },
     staleTime: 30_000,
-    refetchInterval: 60_000,
   });
 }

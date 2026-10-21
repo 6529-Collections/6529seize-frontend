@@ -214,7 +214,7 @@ export const toggleWaveFollowing = ({
   });
   queryClient
     .invalidateQueries({
-      queryKey: [QueryKey.WAVE_FOLLOWERS],
+      queryKey: [QueryKey.WAVE_FOLLOWERS, { wave_id: waveId }],
     })
     .catch(() => undefined);
   queryClient

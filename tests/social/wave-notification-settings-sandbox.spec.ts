@@ -57,6 +57,7 @@ async function installPreferences(
     }
   );
   return {
+    wave,
     writes,
     failUpdate: () => {
       fail = true;
@@ -103,6 +104,73 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
   test.afterEach(async ({ page }) => {
     await page.unrouteAll({ behavior: "wait" });
   });
+
+  for (const [locale, label, description] of [
+    ["en-US", "View joined followers", "Joined followers: 2."],
+    ["en-GB", "View joined followers", "Joined followers: 2."],
+    ["de-DE", "Beigetretene Follower anzeigen", "Beigetretene Follower: 2."],
+    ["fr-FR", "Afficher les membres", "Membres : 2."],
+    ["es-ES", "Ver miembros", "Miembros: 2."],
+  ] as const) {
+    test(`uses the eligible Joined count and opens followers with the keyboard in ${locale}`, async ({
+      page,
+      baseURL,
+    }) => {
+      await page.addInitScript((preferredLocale) => {
+        Object.defineProperty(navigator, "language", {
+          configurable: true,
+          value: preferredLocale,
+        });
+        Object.defineProperty(navigator, "languages", {
+          configurable: true,
+          value: [preferredLocale],
+        });
+      }, locale);
+      const api = await installPreferences(page, baseURL);
+      api.wave.metrics.subscribers_count = 999;
+      const followers = ["eligible-one", "eligible-two"].map((handle) => ({
+        identity: { ...api.wave.author, id: handle, handle, pfp: null },
+        actions: ["DROP_CREATED"],
+      }));
+      await page.route(
+        `**/api/identity-subscriptions/incoming/WAVE/${WAVE}**`,
+        (route) => {
+          const size = Number(
+            new URL(route.request().url()).searchParams.get("page_size")
+          );
+          return route.fulfill({
+            json: {
+              data: followers.slice(0, size),
+              count: 2,
+              page: 1,
+              next: size < 2,
+            },
+          });
+        }
+      );
+      await page.goto(`/waves/${WAVE}?locale=${locale}`);
+      await page
+        .getByRole("button", { name: `About ${TITLE}`, exact: true })
+        .first()
+        .click();
+      const joined = page.getByRole("button", {
+        name: label,
+        exact: true,
+      });
+      await expect(joined).toHaveAccessibleDescription(description);
+      await expect(joined).toContainText("2");
+      await expect(joined).not.toContainText("999");
+      await expectNoHorizontalOverflow(page);
+      await joined.focus();
+      await expect(joined).toBeFocused();
+      await page.keyboard.press("Enter");
+      const list = page.getByRole("list").filter({ hasText: "eligible-one" });
+      await expect(list.getByRole("listitem")).toHaveCount(2);
+      await expect(list).toContainText("eligible-one");
+      await expect(list).toContainText("eligible-two");
+      await expectNoHorizontalOverflow(page);
+    });
+  }
 
   for (const surface of ["web", "ios", "android"] as const) {
     test(`opens and dismisses reachable notification choices in the ${surface} About sheet`, async ({

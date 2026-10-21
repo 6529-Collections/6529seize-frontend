@@ -22,6 +22,13 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.es-ES.json";
 
 export const ES_ES_MESSAGES = {
+  "waves.sidebar.rightPanel.followers.label": "Miembros",
+  "waves.sidebar.rightPanel.followers.open": "Ver miembros",
+  "waves.sidebar.rightPanel.followers.loading":
+    "Cargando el número de miembros…",
+  "waves.sidebar.rightPanel.followers.unavailable":
+    "Número de miembros no disponible.",
+  "waves.sidebar.rightPanel.followers.count": "Miembros: {count}.",
   ...ES_SUBMISSION_DISCOVERY_MESSAGES,
   ...ES_ES_DROP_REQUIREMENT_MESSAGES,
   ...ES_ES_DROP_METADATA_MESSAGES,

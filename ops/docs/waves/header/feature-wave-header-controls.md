@@ -26,7 +26,8 @@ the wave. Followers who lose access are hidden and return if they qualify again;
 their subscription is preserved. Subwave followers must also retain access to
 the parent wave. Losing posting or voting permission alone does not hide a
 follower who can still read the wave. The count shows a dash while loading or
-when unavailable and refreshes periodically while `About` is open.
+when unavailable. It updates when the follower list loads and after joining
+or leaving the wave.
 
 ## Location in the Site
 

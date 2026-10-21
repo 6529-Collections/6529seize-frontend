@@ -31,7 +31,13 @@ export function useWaveFollowers(waveId: string) {
         wave_id: waveId,
       },
     ],
-    queryFn: async ({ pageParam }: { pageParam: number | null }) => {
+    queryFn: async ({
+      pageParam,
+      signal,
+    }: {
+      pageParam: number | null;
+      signal: AbortSignal;
+    }) => {
       const params: Record<string, string> = {
         ...query,
       };
@@ -39,9 +45,12 @@ export function useWaveFollowers(waveId: string) {
         params["page"] = `${pageParam}`;
       }
       const page = await commonApiFetch<ApiIncomingIdentitySubscriptionsPage>({
-        endpoint: `/identity-subscriptions/incoming/WAVE/${waveId}`,
+        endpoint: `identity-subscriptions/incoming/WAVE/${waveId}`,
         params,
+        signal,
       });
+      // The endpoint total is independent of page size. Keep About aligned
+      // with the latest list response without another count request.
       queryClient.setQueryData(
         getWaveFollowersCountQueryKey(waveId),
         page.count

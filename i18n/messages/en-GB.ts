@@ -18,6 +18,11 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-GB.json";
 
 export const EN_GB_MESSAGES = {
+  "waves.sidebar.rightPanel.followers.label": "Joined",
+  "waves.sidebar.rightPanel.followers.open": "View joined followers",
+  "waves.sidebar.rightPanel.followers.loading": "Loading joined count…",
+  "waves.sidebar.rightPanel.followers.unavailable": "Joined count unavailable.",
+  "waves.sidebar.rightPanel.followers.count": "Joined followers: {count}.",
   "network.groupFilter.filter": "Filter",
   "network.groupFilter.all": "All filters",
   "network.groupFilter.level": "Level",

@@ -24,7 +24,7 @@ it.each([0, 7])(
     }) => Promise<number>;
     await expect(queryFn({ signal: controller.signal })).resolves.toBe(count);
     expect(commonApiFetch).toHaveBeenLastCalledWith({
-      endpoint: "/identity-subscriptions/incoming/WAVE/wave",
+      endpoint: "identity-subscriptions/incoming/WAVE/wave",
       params: { page_size: "1" },
       signal: controller.signal,
     });

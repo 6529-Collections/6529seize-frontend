@@ -49,16 +49,22 @@ test("does not fetch when less than request size", () => {
   expect(fetchNextPage).not.toHaveBeenCalled();
 });
 
-test("refreshes the header count from a loaded follower page", async () => {
-  useInfiniteQueryMock.mockReturnValue({ data: undefined, status: "pending" });
-  jest
-    .mocked(commonApiFetch)
-    .mockResolvedValue({ data: [], count: 3, page: 1, next: false });
-  renderHook(() => useWaveFollowers("w1"));
-  const options = useInfiniteQueryMock.mock.calls.at(-1)![0];
-  await options.queryFn({ pageParam: null });
-  expect(setQueryData).toHaveBeenCalledWith(
-    getWaveFollowersCountQueryKey("w1"),
-    3
-  );
-});
+test.each([null, 2])(
+  "refreshes the header count from follower page %s",
+  async (pageParam) => {
+    useInfiniteQueryMock.mockReturnValue({
+      data: undefined,
+      status: "pending",
+    });
+    jest
+      .mocked(commonApiFetch)
+      .mockResolvedValue({ data: [], count: 3, page: 1, next: false });
+    renderHook(() => useWaveFollowers("w1"));
+    const options = useInfiniteQueryMock.mock.calls.at(-1)![0];
+    await options.queryFn({ pageParam, signal: new AbortController().signal });
+    expect(setQueryData).toHaveBeenCalledWith(
+      getWaveFollowersCountQueryKey("w1"),
+      3
+    );
+  }
+);
