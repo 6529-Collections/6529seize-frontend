@@ -6695,6 +6695,13 @@ paths:
       security:
         - bearerAuth: []
       parameters:
+        - name: case_id
+          in: query
+          required: false
+          description: Opaque review case ID; groups all revisions of the same subject.
+          schema:
+            type: string
+            pattern: ^[a-f0-9]{64}$
         - name: subject_type
           in: query
           required: false
@@ -6796,6 +6803,48 @@ paths:
           description: Developer access required; proxies are not allowed
         "409":
           description: Reviewed revision changed or action key conflicts
+  /content-moderation/checks/cases:
+    get:
+      tags:
+        - Content moderation
+      summary: getModerationReviewCases
+      operationId: getModerationReviewCases
+      description: >-
+        One case per subject with open reports or checks requiring manual
+        review. Grouping happens before pagination.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: before
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: moderation-review
+        handler:
+          import: "@/api/content-moderation/moderation-review.handlers"
+          name: handleGetModerationReviewCases
+      responses:
+        "200":
+          description: Private developer case queue
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiModerationReviewCasePage"
+        "403":
+          description: Developer access required; proxies are not allowed
   /content-moderation/checks/counts:
     get:
       tags:
@@ -7152,6 +7201,13 @@ paths:
       security:
         - bearerAuth: []
       parameters:
+        - name: case_id
+          in: query
+          required: false
+          description: Scope reports to one opaque review case, before pagination.
+          schema:
+            type: string
+            pattern: ^[a-f0-9]{64}$
         - name: limit
           in: query
           required: false
@@ -28933,6 +28989,13 @@ components:
         - resolved_report_count
         - suspended_profile_count
       properties:
+        needs_review_count:
+          type: integer
+          format: int64
+          description: >-
+            Unique cases requiring manual review, including open reports and
+            pending checks. Optional for rolling compatibility; current servers
+            always return it.
         moderator:
           type: boolean
         has_open_reports:
@@ -36036,6 +36099,81 @@ components:
         completed_at:
           type: integer
           format: int64
+          nullable: true
+    ApiModerationReviewCase:
+      type: object
+      required:
+        - id
+        - subject_type
+        - open_report_count
+        - pending_check_count
+        - check_id
+        - report_id
+        - created_at
+        - preview
+        - drop_id
+        - wave_id
+        - drop_deleted
+      properties:
+        check_outcome:
+          type: string
+          nullable: true
+          enum:
+            - ALLOW
+            - REJECT
+            - ERROR
+            - PENDING
+            - null
+        report_reason:
+          type: string
+          nullable: true
+        id:
+          type: string
+          description: Opaque subject-based case ID shared across revisions and reports.
+        subject_type:
+          type: string
+          enum:
+            - REP_CATEGORY
+            - PROFILE_BIO
+            - GROUP_NAME
+            - DROP
+        open_report_count:
+          type: integer
+        pending_check_count:
+          type: integer
+        check_id:
+          type: string
+          nullable: true
+        report_id:
+          type: string
+          nullable: true
+        created_at:
+          type: integer
+          format: int64
+          description: Creation time of the most recent outstanding requirement.
+        preview:
+          type: string
+          nullable: true
+        drop_id:
+          type: string
+          nullable: true
+        wave_id:
+          type: string
+          nullable: true
+        drop_deleted:
+          type: boolean
+    ApiModerationReviewCasePage:
+      type: object
+      required:
+        - items
+        - next_cursor
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiModerationReviewCase"
+        next_cursor:
+          type: string
           nullable: true
     ApiNft:
       type: object
