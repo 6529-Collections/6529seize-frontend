@@ -254,14 +254,25 @@ restrict the left list to that case. The right side keeps **User reports for
 this case**, reporter notes, direct report review links and any remaining check
 revisions scoped to the selected case. Report and check lists have their own
 pagination. A report-only case stays in the left list after its check is marked
-reviewed, until the report is resolved. **Back to Needs review** returns to the
-queue; on mobile the selected detail occupies the view with this back action.
+reviewed, until the report is resolved. On desktop, use the visible left list
+to switch cases. On mobile, the selected detail occupies the view and **Back to
+list** returns to the Needs review queue. Check-history details also keep this
+back action on mobile; desktop details do not show a redundant back button.
 
-The **Needs review** quick filter selects the full manual-review case queue
-and clears advanced filters. It is active when opening **Review case**.
-**All checks** opens check history. Applying advanced filters instead browses
-individual saved checks, so those filtered history rows are not the unique-case
-attention count.
+The compact filter bar has one **Needs review only** toggle and **Filter
+checks**. The toggle applies immediately: on selects review status Needs review,
+and off removes that status restriction. Other applied filters remain in place.
+With no other filters, Needs review shows the complete unique-case queue; other
+filter combinations browse individual check history, whose rows are not the
+unique-case attention count.
+
+**Filter checks** opens or closes the advanced controls only when selected.
+Changing a field prepares an edit and shows **Unapplied changes**; the list and
+toggle update when you choose **Apply filters**. Only the applied review status
+controls the toggle. Changing the quick toggle keeps other unfinished edits
+pending, updates the review-status field, and preserves whether the panel is
+open or closed. Collapsing the panel preserves edits. **Clear filters** removes
+both applied filters and unfinished edits without closing the panel.
 
 The Needs review badge and Items needing review summary show the same unique
 case count, which also controls the sidebar attention dot. The dot appears for

@@ -88,6 +88,7 @@ export default function CheckDetail({
   profileId,
   onClose,
   backLabel = "checks.back",
+  mobileBackOnly = false,
   caseContext,
 }: {
   readonly id: string;
@@ -95,6 +96,7 @@ export default function CheckDetail({
   readonly profileId: string;
   readonly onClose: () => void;
   readonly backLabel?: MessageKey | undefined;
+  readonly mobileBackOnly?: boolean;
   readonly caseContext?: ReactNode;
 }) {
   const locale = useBrowserLocale();
@@ -127,10 +129,16 @@ export default function CheckDetail({
       className="tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-p-4 sm:tw-p-6"
       aria-labelledby="moderation-check-title"
     >
-      <button type="button" className={checkButtonClass} onClick={onClose}>
+      <button
+        type="button"
+        className={`${checkButtonClass} ${mobileBackOnly ? "lg:tw-hidden" : ""}`}
+        onClick={onClose}
+      >
         {t(locale, backLabel)}
       </button>
-      <div className="tw-mt-5 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+      <div
+        className={`tw-mt-5 tw-flex tw-flex-wrap tw-items-center tw-gap-3 ${mobileBackOnly ? "lg:tw-mt-0" : ""}`}
+      >
         <h2
           ref={title}
           tabIndex={-1}

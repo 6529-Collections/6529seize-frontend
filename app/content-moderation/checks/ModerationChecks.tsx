@@ -33,9 +33,33 @@ export default function ModerationChecks({
     Object.keys(filters).every(
       (key) => key === "review_status" || key === "case_id"
     );
-  if (manualQueue)
-    return <ModerationReviewWorkspace profileId={profileId} params={params} />;
-  return <ModerationCheckHistory profileId={profileId} params={params} />;
+  const locale = useBrowserLocale();
+  const selection =
+    safeCheckId(params.get("check")) ??
+    safeCheckId(params.get("report")) ??
+    safeCheckId(params.get("profile"));
+  return (
+    <div className="tw-mt-6 tw-min-w-0">
+      {!manualQueue && (
+        <>
+          <p className="tw-text-sm tw-leading-6 tw-text-iron-300">
+            {t(locale, "checks.policyNotice")}
+          </p>
+          <p className="tw-text-sm tw-leading-6 tw-text-iron-400">
+            {t(locale, "checks.privateNotice")}
+          </p>
+        </>
+      )}
+      <div className={selection ? "tw-hidden lg:tw-block" : ""}>
+        <CheckFilters params={params} onApply={navigateChecks} />
+      </div>
+      {manualQueue ? (
+        <ModerationReviewWorkspace profileId={profileId} params={params} />
+      ) : (
+        <ModerationCheckHistory profileId={profileId} params={params} />
+      )}
+    </div>
+  );
 }
 
 function ModerationCheckHistory({
@@ -85,13 +109,7 @@ function ModerationCheckHistory({
     });
   }
   return (
-    <div className="tw-mt-6 tw-min-w-0">
-      <p className="tw-text-sm tw-leading-6 tw-text-iron-300">
-        {t(locale, "checks.policyNotice")}
-      </p>
-      <p className="tw-text-sm tw-leading-6 tw-text-iron-400">
-        {t(locale, "checks.privateNotice")}
-      </p>
+    <div className="tw-min-w-0">
       {filters.case_id && (
         <CaseReports
           key={`${profileId}:${filters.case_id}`}
@@ -100,13 +118,6 @@ function ModerationCheckHistory({
           initiallyOpen={source === "report"}
         />
       )}
-      <div className={selection ? "tw-hidden lg:tw-block" : ""}>
-        <CheckFilters
-          key={params.toString()}
-          params={params}
-          onApply={navigateChecks}
-        />
-      </div>
       <div
         className={`tw-mt-6 tw-grid tw-min-w-0 tw-gap-5 ${selection ? "lg:tw-grid-cols-[minmax(16rem,2fr)_minmax(0,3fr)]" : ""}`}
       >
@@ -220,6 +231,8 @@ function ModerationCheckHistory({
             id={selection}
             source={source}
             profileId={profileId}
+            mobileBackOnly
+            backLabel="checks.backToList"
             onClose={closeCheck}
           />
         )}
