@@ -30,7 +30,7 @@
   "delegation.tapGuide.roles.transaction.connects": "Solo mercados reconocidos",
   "delegation.tapGuide.roles.transaction.rule.marketplaces": "Conéctala solo a mercados que reconozcas.",
   "delegation.tapGuide.roles.transaction.rule.move": "Tras comprar, mueve el NFT a tu bóveda.",
-  "delegation.tapGuide.roles.transaction.rule.manager": "En 6529, nómbrala gestor de delegaciones de tu bóveda para que la bóveda nunca firme.",
+  "delegation.tapGuide.roles.transaction.rule.manager": "En 6529, nómbrala gestor de delegaciones de tu bóveda para que, después de nombrarla, la bóveda no tenga que firmar.",
   "delegation.tapGuide.roles.social.name": "Cartera social",
   "delegation.tapGuide.roles.social.temperature": "Caliente",
   "delegation.tapGuide.roles.social.kind": "Cualquier aplicación de cartera. Esta es tu cartera caliente; las guías antiguas la llaman cartera de mint.",

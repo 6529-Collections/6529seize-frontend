@@ -30,7 +30,7 @@
   "delegation.tapGuide.roles.transaction.connects": "Nur bekannten Marktplätzen",
   "delegation.tapGuide.roles.transaction.rule.marketplaces": "Verbinde sie nur mit Marktplätzen, die du kennst.",
   "delegation.tapGuide.roles.transaction.rule.move": "Verschiebe den NFT nach dem Kauf in deinen Tresor.",
-  "delegation.tapGuide.roles.transaction.rule.manager": "Benenne sie auf 6529 zum Delegationsverwalter deines Tresors, damit der Tresor nie signieren muss.",
+  "delegation.tapGuide.roles.transaction.rule.manager": "Benenne sie auf 6529 zum Delegationsverwalter deines Tresors, damit der Tresor danach nicht mehr signieren muss.",
   "delegation.tapGuide.roles.social.name": "Social-Wallet",
   "delegation.tapGuide.roles.social.temperature": "Heiß",
   "delegation.tapGuide.roles.social.kind": "Eine beliebige Wallet-App. Das ist deine Hot-Wallet; ältere Leitfäden nennen sie Minting-Wallet.",

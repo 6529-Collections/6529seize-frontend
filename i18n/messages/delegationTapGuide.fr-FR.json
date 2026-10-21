@@ -30,7 +30,7 @@
   "delegation.tapGuide.roles.transaction.connects": "Des places de marché reconnues uniquement",
   "delegation.tapGuide.roles.transaction.rule.marketplaces": "Ne le connectez qu’à des places de marché que vous connaissez.",
   "delegation.tapGuide.roles.transaction.rule.move": "Après l’achat, déplacez le NFT vers votre coffre.",
-  "delegation.tapGuide.roles.transaction.rule.manager": "Sur 6529, faites-en le gestionnaire de délégation de votre coffre, pour que celui-ci n’ait jamais à signer.",
+  "delegation.tapGuide.roles.transaction.rule.manager": "Sur 6529, faites-en le gestionnaire de délégation de votre coffre, pour que votre coffre n’ait plus besoin de signer après la désignation du gestionnaire.",
   "delegation.tapGuide.roles.social.name": "Portefeuille social",
   "delegation.tapGuide.roles.social.temperature": "Chaud",
   "delegation.tapGuide.roles.social.kind": "N’importe quelle application de portefeuille. C’est votre portefeuille connecté ; les anciens guides l’appellent portefeuille de mint.",
