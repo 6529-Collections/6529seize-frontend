@@ -7,6 +7,7 @@ import type { TraitsData } from "../types/TraitsData";
 import { buildSubmissionMetadata } from "./submissionMetadata";
 
 export const transformToApiRequest = (data: {
+  collaboratorIds?: string[];
   waveId: string;
   traits: TraitsData;
   operationalData?: OperationalData | undefined;
@@ -26,6 +27,7 @@ export const transformToApiRequest = (data: {
   } = data;
 
   return {
+    collaborator_ids: data.collaboratorIds ?? [],
     wave_id: waveId,
     drop_type: ApiDropType.Participatory,
     is_additional_action_promised: isAdditionalActionPromised,
@@ -38,7 +40,10 @@ export const transformToApiRequest = (data: {
     ],
     referenced_nfts: [],
     mentioned_users: [],
-    metadata: buildSubmissionMetadata({ traits, operationalData }),
+    metadata: buildSubmissionMetadata({
+      traits: { ...traits, collab: false },
+      operationalData,
+    }),
     signature: null,
     is_safe_signature: isSafeSignature,
     signer_address: signerAddress,

@@ -173,7 +173,24 @@ export type INotificationCompetitionLifecycle = Omit<
   };
 };
 
+export type INotificationMemeCollaboration = Omit<
+  NotificationBase,
+  "related_identity"
+> & {
+  readonly cause: ApiNotificationCause.MemeCollaboration;
+  readonly related_identity?: ApiProfileMin | null;
+  readonly additional_context: {
+    readonly actor_id?: string;
+    readonly artwork_name?: string;
+    readonly event_type: string;
+    readonly wave_id: string;
+    readonly drop_id: string;
+    readonly invitation_id: string;
+  };
+};
+
 export type TypedNotification =
+  | INotificationMemeCollaboration
   | INotificationCompetitionLifecycle
   | INotificationIdentitySubscribed
   | INotificationIdentityMentioned

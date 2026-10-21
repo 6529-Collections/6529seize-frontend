@@ -13,6 +13,7 @@ import {
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import Link from "next/link";
+import clsx from "clsx";
 import {
   ComingUpArtistCredits,
   type ComingUpCreditSource,
@@ -72,7 +73,7 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
   })();
 
   return (
-    <div className="tw-group tw-min-w-0 tw-snap-start tw-text-left">
+    <div className="tw-group tw-min-w-0 tw-text-left">
       <div className="tw-relative tw-flex tw-h-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-transition-colors tw-duration-200 tw-ease-out focus-within:tw-border-white/20 desktop-hover:hover:tw-border-white/20 motion-reduce:tw-transition-none">
         <div className="tw-flex tw-shrink-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-px-3.5 tw-py-3">
           <span
@@ -84,7 +85,14 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
             {formatNumberWithCommas(drop.rating)} TDH
           </span>
         </div>
-        <div className="tw-relative tw-flex tw-aspect-[3/4] tw-w-full tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950">
+        <div
+          data-testid="coming-up-artwork"
+          className={clsx(
+            "tw-relative tw-flex tw-aspect-[3/4] tw-w-full tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950",
+            media?.mime_type.startsWith("image/") &&
+              "max-md:has-[img.tw-opacity-100]:tw-aspect-auto max-md:[&_[data-drop-image-content]]:tw-relative max-md:[&_[data-drop-image-content]]:tw-block max-md:[&_img]:!tw-relative max-md:[&_img]:tw-block max-md:[&_img]:!tw-h-auto max-md:[&_img]:!tw-max-h-none"
+          )}
+        >
           <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center [&>div]:tw-mx-0">
             {mediaContent}
           </div>

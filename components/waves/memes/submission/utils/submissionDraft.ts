@@ -114,6 +114,8 @@ const buildTraitsDraft = (drop: ApiDrop): TraitsData => {
     }
   });
 
+  traits.artist = drop.submission_artist ?? traits.artist;
+  traits.collab = false;
   traits.title = metadata.get("title") ?? drop.title ?? traits.title;
   traits.description =
     metadata.get("description") ??
