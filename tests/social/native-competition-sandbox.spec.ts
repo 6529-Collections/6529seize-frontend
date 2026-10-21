@@ -1662,8 +1662,15 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         await expect(submissionNotice).toHaveCount(0);
       }
       if (!legacy) {
+        if (testInfo.project.name === "web-desktop-chromium")
+          await page.setViewportSize({ width: 1920, height: 1080 });
         await page.goto(`${ROOT}/alpha?tab=leaderboard`);
-        await expect(submissionNotice).toBeVisible();
+        await expectNativeLeaderboardReady(page);
+        await expect(submissionNotice).toHaveCount(0);
+        await expectNoHorizontalOverflow(page);
+        await page.screenshot({
+          path: testInfo.outputPath("leaderboard-without-submission-notice.png"),
+        });
       }
       expect(sandbox.requests).toHaveLength(0);
     });
