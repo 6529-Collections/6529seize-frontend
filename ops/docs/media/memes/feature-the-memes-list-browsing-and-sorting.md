@@ -39,8 +39,10 @@
   an in-sheet close button. Select an option, tap outside, press Escape, or drag
   the sheet header down to dismiss. Focus returns to the trigger on dismissal.
 - Tablet and desktop grids retain their existing layout. Desktop Year and Season
-  dropdowns use the same light fill for selected options as the mobile sheets, and their
-  triggers match the compact filters in a profile’s Collected view.
+  dropdowns use the same light fill for selected options as the mobile sheets,
+  and their triggers match the compact filters in a profile’s Collected view.
+- Sort options use the same compact buttons on every screen size, with a light
+  fill for the selected sort and a segmented direction control.
 
 ## URL Query Model
 

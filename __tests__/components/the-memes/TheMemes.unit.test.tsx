@@ -22,7 +22,6 @@ describe("TheMemes helpers", () => {
     });
     expect(screen.getByText("Volume:")).not.toHaveClass("tw-uppercase");
     expect(button).toHaveClass("focus-visible:tw-outline-primary-400");
-    expect(button).toHaveClass("sm:focus-visible:tw-outline-none");
-    expect(button).toHaveClass("sm:focus-visible:tw-ring-inset");
+    expect(button).toHaveClass("focus-visible:tw-outline-offset-2");
   });
 });

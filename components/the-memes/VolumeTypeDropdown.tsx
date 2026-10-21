@@ -11,10 +11,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRef, useState } from "react";
 
 const VOLUME_TYPES = Object.values(VolumeType);
-const VOLUME_TRIGGER_LABEL_CLASS =
-  "tw-shrink-0 tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-500";
-const VOLUME_TRIGGER_VALUE_CLASS =
-  "tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200 group-hover:tw-text-white";
 
 export default function VolumeTypeDropdown({
   isVolumeSort,
@@ -61,26 +57,22 @@ export default function VolumeTypeDropdown({
           volumeType: selectedVolumeLabel,
         })}
         onClick={() => setIsOpen(!isOpen)}
-        className={`tw-group tw-relative tw-m-0 tw-no-underline sm:tw-h-auto sm:tw-shrink sm:tw-rounded-md sm:tw-border-0 sm:tw-bg-transparent sm:tw-px-0.5 sm:tw-py-1 sm:tw-text-sm sm:tw-font-semibold sm:tw-leading-5 sm:tw-shadow-none sm:after:tw-absolute sm:after:-tw-bottom-0.5 sm:after:tw-left-0 sm:after:tw-h-px sm:after:tw-w-full sm:after:tw-origin-left sm:after:tw-transition-transform sm:after:tw-duration-200 sm:after:tw-content-[''] sm:focus:tw-outline-none sm:focus-visible:tw-text-iron-100 sm:focus-visible:tw-outline-none sm:focus-visible:tw-ring-2 sm:focus-visible:tw-ring-inset sm:focus-visible:tw-ring-primary-400 sm:active:tw-bg-transparent sm:desktop-hover:hover:tw-bg-transparent max-sm:[&_span]:tw-text-xs max-sm:[&_span]:tw-text-inherit ${
-          isVolumeSort
-            ? "sm:tw-text-white sm:after:tw-scale-x-100 sm:after:tw-bg-primary-400 sm:active:tw-text-white sm:desktop-hover:hover:tw-text-white"
-            : "sm:tw-text-iron-500 sm:after:tw-scale-x-0 sm:after:tw-bg-iron-700 sm:hover:after:tw-scale-x-100 sm:desktop-hover:hover:tw-text-iron-200"
-        }`}
+        className="tw-m-0"
       >
         <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5">
-          <span className={VOLUME_TRIGGER_LABEL_CLASS}>
+          <span className="tw-shrink-0 tw-whitespace-nowrap">
             {t(resolvedLocale, "theMemes.volume.trigger")}
             {isVolumeSort ? ":" : ""}
           </span>
           {isVolumeSort && (
-            <span className={VOLUME_TRIGGER_VALUE_CLASS}>
+            <span className="tw-truncate">
               {selectedVolumeLabel}
             </span>
           )}
         </span>
         <FontAwesomeIcon
           icon={faChevronDown}
-          className={`tw-h-3 tw-w-3 tw-shrink-0 tw-text-iron-500 tw-transition-transform tw-duration-200 group-hover:tw-text-iron-300 ${
+          className={`tw-h-3 tw-w-3 tw-shrink-0 tw-transition-transform tw-duration-200 ${
             isOpen ? "tw-rotate-180" : ""
           }`}
           aria-hidden="true"

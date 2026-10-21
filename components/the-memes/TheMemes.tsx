@@ -531,16 +531,16 @@ export default function TheMemesComponent({
           initialDataRef.current = undefined;
           setSortDir(direction);
         }}
-        className={`tw-m-0 tw-inline-flex tw-h-7 tw-w-6 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-transition tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none max-sm:tw-size-[26px] max-sm:tw-rounded-md max-sm:aria-pressed:tw-bg-iron-700 ${
+        className={`tw-m-0 tw-inline-flex tw-size-[26px] tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none ${
           isActive
-            ? "tw-bg-white/[0.06] tw-text-white"
-            : "tw-text-iron-500 hover:tw-bg-white/[0.04] hover:tw-text-iron-200"
+            ? "tw-bg-iron-700 tw-text-white"
+            : "tw-bg-transparent tw-text-iron-500 hover:tw-bg-white/[0.04] hover:tw-text-iron-200"
         }`}
       >
         <FontAwesomeIcon
           aria-hidden="true"
           icon={icon}
-          className="tw-size-4 max-sm:tw-size-[13px]"
+          className="tw-size-[13px]"
         />
       </button>
     );
@@ -684,11 +684,11 @@ export default function TheMemesComponent({
             className="tw-mb-5 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800/80 tw-pb-4 max-sm:tw-sticky max-sm:tw-top-0 max-sm:tw-z-30 max-sm:-tw-mx-4 max-sm:tw-mb-3.5 max-sm:tw-border-iron-800/90 max-sm:tw-bg-[#0D0D0F] max-sm:tw-py-2.5 max-sm:tw-pl-4"
           >
             <div className="tw-flex tw-flex-col tw-gap-x-6 tw-gap-y-2 max-sm:tw-flex-row max-sm:tw-items-center max-sm:tw-gap-2.5 md:tw-flex-row md:tw-items-start">
-              <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-1 max-sm:tw-gap-2.5">
-                <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500 max-sm:tw-text-[10px]">
+              <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-2.5">
+                <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500">
                   {t(locale, "theMemes.sorting.sortBy")}
                 </span>
-                <fieldset className="tw-m-0 tw-flex tw-shrink-0 tw-items-center tw-border-0 tw-p-0 max-sm:tw-h-8 max-sm:tw-gap-0.5 max-sm:tw-rounded-lg max-sm:tw-border max-sm:tw-border-solid max-sm:tw-border-iron-800 max-sm:tw-bg-iron-950 max-sm:tw-p-0.5">
+                <fieldset className="tw-m-0 tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0.5">
                   <legend className="tw-sr-only">
                     {t(locale, "theMemes.sorting.directionLegend")}
                   </legend>
@@ -706,7 +706,7 @@ export default function TheMemesComponent({
               </div>
               <div
                 ref={sortOptionsRef}
-                className="tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-overflow-x-auto tw-overflow-y-hidden tw-pb-1 [-ms-overflow-style:none] [scrollbar-width:none] max-sm:tw-flex-1 max-sm:tw-gap-1.5 max-sm:tw-py-1 max-sm:tw-pl-3 max-sm:tw-pr-4 max-sm:[mask-image:linear-gradient(to_right,transparent,#000_12px,#000_calc(100%-28px),transparent)] sm:tw-flex-wrap sm:tw-overflow-visible sm:tw-pb-0 [&::-webkit-scrollbar]:tw-hidden"
+                className="tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-gap-1.5 tw-overflow-x-auto tw-overflow-y-hidden tw-pb-1 [-ms-overflow-style:none] [scrollbar-width:none] max-sm:tw-flex-1 max-sm:tw-py-1 max-sm:tw-pl-3 max-sm:tw-pr-4 max-sm:[mask-image:linear-gradient(to_right,transparent,#000_12px,#000_calc(100%-28px),transparent)] sm:tw-flex-wrap sm:tw-overflow-visible sm:tw-pb-0 [&::-webkit-scrollbar]:tw-hidden"
               >
                 {Object.values(MemesSort)
                   .filter((v) => v !== MemesSort.VOLUME)
