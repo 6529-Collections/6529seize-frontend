@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CompetitionMyVotes from "@/components/competitions/CompetitionMyVotes";
+import { useCompetitionEntryDrops } from "@/hooks/competitions/useCompetitionEntryDrops";
 
 let mockParts: { part_id: number }[] = [{ part_id: 1 }];
 jest.mock("@/contexts/CompetitionContext", () => ({
@@ -34,6 +35,11 @@ jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
         {
           data: [
             { entry_id: "entry", drop_id: "drop", entry_status: "ACTIVE" },
+            {
+              entry_id: "winner",
+              drop_id: "winner-drop",
+              entry_status: "WINNER",
+            },
           ],
         },
       ],
@@ -41,14 +47,14 @@ jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   }),
 }));
 jest.mock("@/hooks/competitions/useCompetitionEntryDrops", () => ({
-  useCompetitionEntryDrops: () => [
+  useCompetitionEntryDrops: jest.fn(() => [
     {
       data: {
         entry: { status: "ACTIVE" },
         drop: { id: "drop", parts: mockParts },
       },
     },
-  ],
+  ]),
 }));
 jest.mock("@/hooks/competitions/useCompetitionDropNavigation", () => ({
   useCompetitionDropNavigation: () => jest.fn(),
@@ -115,4 +121,11 @@ it("omits the reply action when a malformed entry has no replyable part", () => 
   mockParts = [];
   render(<CompetitionMyVotes />);
   expect(screen.queryByRole("button", { name: "Explain vote" })).toBeNull();
+});
+
+it("excludes past winners before loading active My Votes cards", () => {
+  render(<CompetitionMyVotes />);
+  expect(useCompetitionEntryDrops).toHaveBeenLastCalledWith([
+    { entryId: "entry", dropId: "drop" },
+  ]);
 });

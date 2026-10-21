@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useLayoutEffect } from "react";
 import * as competitionVoteCache from "@/components/react-query-wrapper/utils/updateCompetitionVoteInCache";
 import { SingleWaveDropVote } from "@/components/waves/drop/SingleWaveDropVote";
+import { commonApiPost } from "@/services/api/common-api";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiCompetitionCreditBudget } from "@/generated/models/ApiCompetitionCreditBudget";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
@@ -30,8 +31,16 @@ jest.mock(
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
     connectedProfile: { id: "viewer" },
+    setToast: jest.fn(),
     requestAuth: async () => ({ success: true }),
   }),
+}));
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => ({ address: "0x123", isSafeWallet: false }),
+}));
+jest.mock("@/services/api/common-api", () => ({
+  ...jest.requireActual("@/services/api/common-api"),
+  commonApiPost: jest.fn(),
 }));
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useCompetitionViewer: jest.fn(() => "viewer:self"),
@@ -393,4 +402,57 @@ it("keeps voting open when saving the vote fails", async () => {
   expect(onClose).not.toHaveBeenCalled();
   expect(invalidateCompetition).not.toHaveBeenCalled();
   expect(screen.queryByText("Saved")).not.toBeInTheDocument();
+});
+
+const replyDrop = {
+  ...drop,
+  wave: { ...drop.wave, authenticated_user_eligible_to_chat: true },
+  parts: [{ part_id: 7 }],
+} as ApiDrop;
+it("restores Vote with reply for proxy competition votes after the vote succeeds", async () => {
+  jest.mocked(useCompetitionViewer).mockReturnValue("viewer:proxy");
+  jest.mocked(commonApiPost).mockResolvedValue({ id: "reply" } as never);
+  mount("numeric", replyDrop);
+  const input = await screen.findByRole("spinbutton", { name: "Your vote" });
+  fireEvent.change(input, { target: { value: "25" } });
+  fireEvent.click(screen.getByRole("switch", { name: "Vote with reply" }));
+  const rationale = screen.getByLabelText("Optional rationale reply");
+  expect(rationale).toHaveValue("Vote rationale (+25 at time of posting):\n\n");
+  fireEvent.change(rationale, { target: { value: "Proxy vote rationale" } });
+  fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+  await waitFor(() =>
+    expect(commonApiPost).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "drops",
+        body: expect.objectContaining({
+          wave_id: "wave",
+          reply_to: { drop_id: "drop", drop_part_id: 7 },
+          parts: [expect.objectContaining({ content: "Proxy vote rationale" })],
+        }),
+      })
+    )
+  );
+  expect(setCompetitionVote).toHaveBeenCalledTimes(1);
+});
+it("blocks empty enabled replies before submitting a vote", async () => {
+  mount("numeric", replyDrop);
+  await screen.findByRole("spinbutton", { name: "Your vote" });
+  fireEvent.click(screen.getByRole("switch", { name: "Vote with reply" }));
+  fireEvent.change(screen.getByLabelText("Optional rationale reply"), {
+    target: { value: " " },
+  });
+  expect(screen.getByRole("button", { name: "Save vote" })).toBeDisabled();
+  expect(setCompetitionVote).not.toHaveBeenCalled();
+});
+it("does not post a reply if saving the competition vote fails", async () => {
+  jest
+    .mocked(setCompetitionVote)
+    .mockRejectedValueOnce(new Error("Save failed"));
+  mount("numeric", replyDrop);
+  const input = await screen.findByRole("spinbutton", { name: "Your vote" });
+  fireEvent.change(input, { target: { value: "25" } });
+  fireEvent.click(screen.getByRole("switch", { name: "Vote with reply" }));
+  fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+  await screen.findByRole("alert");
+  expect(commonApiPost).not.toHaveBeenCalled();
 });
