@@ -8673,6 +8673,9 @@ paths:
         or null when the current content is not author signed. Returns 404 when
         the caller cannot read the drop.
       operationId: getDropSignedEvents
+      security:
+        - bearerAuth: []
+        - {}
       x-6529-router:
         enabled: true
         auth: optional
