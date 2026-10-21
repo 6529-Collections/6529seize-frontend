@@ -39,7 +39,11 @@ test.describe("The Memes Page @smoke @medium @large", () => {
       .getByRole("link", { name: /View .+, card #/ })
       .first();
     await expect(firstCard).toBeVisible();
-    const frame = firstCard.locator(":scope > div").first();
+    const frame = page
+      .getByRole("link", { name: /View .+, card #/ })
+      .first()
+      .locator(":scope > div")
+      .first();
     await expect
       .poll(async () => {
         const box = await frame.boundingBox();
@@ -107,7 +111,7 @@ test.describe("The Memes Page @smoke @medium @large", () => {
           })
         )
         .toBeLessThan(24);
-      await expect(page.locator('[role="dialog"] [data-enter]')).toHaveCount(0);
+      await expect(page.getByRole("dialog").locator("[data-enter]")).toHaveCount(0);
       await page.keyboard.press("Escape");
       await expect(heading).toBeHidden();
       await expect(trigger).toBeFocused();
