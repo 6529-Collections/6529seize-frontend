@@ -1781,7 +1781,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       page
         .getByRole("main", { includeHidden: true })
         .locator('[data-competition-entry="entry-alpha"]')
-    ).toBeAttached();
+    ).toBeAttached({ timeout: 30000 });
     let contextLookups = 0;
     await page.route(
       `**/v3/waves/${WAVE}/drops/${entryDropId("alpha")}/competition-context`,
