@@ -340,7 +340,11 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
       .getByRole("textbox", { name: "Wallet 2 address" })
       .fill("0x0000000000000000000000000000000000000002");
     await expect(main.getByText(/^Connect Wallet 1 \(/)).toBeVisible();
-    await expect(main.getByText(/^Connect Wallet 2 \(/)).toBeVisible();
+    await expect(
+      main.getByText("Available once the earlier steps are confirmed.", {
+        exact: true,
+      })
+    ).toBeVisible();
     await expectNoHorizontalOverflow(page);
     await expect(
       main.getByRole("button", { name: /^Sign (Step|for) / })
@@ -474,3 +478,48 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
     });
   }
 });
+
+// Representative browser cases cover each newly translated guide family.
+// Dictionary completeness and interpolation across every locale live in Jest.
+for (const guide of [
+  {
+    locale: "en-GB",
+    path: "/network/tdh/consolidation",
+    heading: "Combine your wallets",
+    link: "How your wallets fit together",
+  },
+  {
+    locale: "fr-FR",
+    path: "/safe-collecting",
+    heading: "Collectionner en sécurité",
+    link: "Configurer vos portefeuilles",
+  },
+  {
+    locale: "es-ES",
+    path: "/safe-collecting/tap-guide",
+    heading: "El Three Address Protocol",
+    link: "Configurar tus carteras",
+  },
+  {
+    locale: "de-DE",
+    path: "/network/tdh/consolidation/design",
+    heading: "So funktioniert die Wallet-Konsolidierung",
+    link: "Leitfaden für Sammler lesen",
+  },
+] as const) {
+  test.describe(`${guide.locale} collecting guide @surface @medium @large @readonly`, () => {
+    test.use({ locale: guide.locale });
+
+    test("renders translated guide copy on a narrow screen", async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 375, height: 850 });
+      await gotoReady(page, guide.path);
+      await expectHeading(page, guide.heading);
+      await expect(
+        page.getByRole("link", { name: guide.link, exact: true })
+      ).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+    });
+  });
+}
