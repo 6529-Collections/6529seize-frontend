@@ -60,10 +60,15 @@ function CompetitionLeaderboardEntry({
   readonly isVotingClosed: boolean;
 }) {
   const { wave, competition } = useCompetition();
-  const [dropQuery] = useCompetitionEntryDrops(
-    [{ entryId: entry.entry_id, dropId: entry.drop_id }],
-    { contexts: contextCard ? [contextCard] : [], updatedAt }
+  const references = useMemo(
+    () => [{ entryId: entry.entry_id, dropId: entry.drop_id }],
+    [entry.entry_id, entry.drop_id]
   );
+  const cards = useMemo(
+    () => ({ contexts: contextCard ? [contextCard] : [], updatedAt }),
+    [contextCard, updatedAt]
+  );
+  const [dropQuery] = useCompetitionEntryDrops(references, cards);
   const { LeaderboardDrop } = useWaveLeaderboardRendererSet(
     wave.id,
     competition.capabilities

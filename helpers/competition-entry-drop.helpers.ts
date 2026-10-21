@@ -8,7 +8,7 @@ import { DropSize } from "@/helpers/waves/drop.helpers";
 import { competitionAward } from "@/helpers/competition-presentation.helpers";
 import { applyCompetitionDropSummary } from "@/hooks/competitions/useCompetitionDrop";
 
-export type CompetitionEntryDrop = ApiCompetitionEntryContext & {
+type CompetitionEntryDrop = ApiCompetitionEntryContext & {
   competition: ApiCompetition;
   original: ApiDrop;
 };

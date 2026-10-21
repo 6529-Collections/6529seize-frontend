@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { useCompetition } from "@/contexts/CompetitionContext";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
@@ -33,33 +33,56 @@ export function useCompetitionEntryDrops(
   const client = useQueryClient();
   const seeded = useRef<string | null>(null);
   const viewer = useCompetitionViewer();
-  const identity = {
-    waveId: competition.wave_id,
-    competitionId: competition.id,
-  };
-  const waveMin = getWaveMin(wave, identity.waveId);
-  const keyFor = ({ entryId, dropId }: CompetitionEntryReference) => [
-    QueryKey.COMPETITION_RESOURCE,
-    { ...competitionScope(identity), viewer },
-    cards ? "card" : "drop",
-    entryId,
-    dropId,
-  ];
-  const seedFor = ({ entryId, dropId }: CompetitionEntryReference) => {
-    const context = cards?.contexts.find((item) => item.entry.id === entryId);
-    if (!context) return cards && cards.updatedAt > 0 ? null : undefined;
-    if (context.entry.competition_id !== competition.id)
-      throw new Error("Invalid competition card parent");
-    const original = competitionCardDrop(context, waveMin);
-    if (original?.id !== dropId) return null;
-    return presentCompetitionEntryDrop(
-      { ...context, competition, original },
-      identity,
-      viewer,
+  const identity = useMemo(
+    () => ({
+      waveId: competition.wave_id,
+      competitionId: competition.id,
+    }),
+    [competition.wave_id, competition.id]
+  );
+  const waveMin = useMemo(
+    () => getWaveMin(wave, identity.waveId),
+    [wave, identity.waveId]
+  );
+  const cardMode = Boolean(cards);
+  const keyFor = useCallback(
+    ({ entryId, dropId }: CompetitionEntryReference) => [
+      QueryKey.COMPETITION_RESOURCE,
+      { ...competitionScope(identity), viewer },
+      cardMode ? "card" : "drop",
       entryId,
-      dropId
-    );
-  };
+      dropId,
+    ],
+    [identity, viewer, cardMode]
+  );
+  const seedFor = useCallback(
+    ({ entryId, dropId }: CompetitionEntryReference) => {
+      try {
+        const context = cards?.contexts.find(
+          (item) => item.entry.id === entryId
+        );
+        if (!context) return cards && cards.updatedAt > 0 ? null : undefined;
+        if (context.entry.competition_id !== competition.id) return null;
+        const original = competitionCardDrop(context, waveMin);
+        if (original?.id !== dropId) return null;
+        return presentCompetitionEntryDrop(
+          { ...context, competition, original },
+          identity,
+          viewer,
+          entryId,
+          dropId
+        );
+      } catch {
+        // Invalid embedded content must not crash rendering or cross parent scopes.
+        return null;
+      }
+    },
+    [cards, competition, waveMin, identity, viewer]
+  );
+  const visit = useMemo(
+    () => JSON.stringify([identity, viewer, cards?.updatedAt, entries]),
+    [identity, viewer, cards?.updatedAt, entries]
+  );
   const queries = useQueries({
     queries: entries.map((reference) => ({
       queryKey: keyFor(reference),
@@ -78,6 +101,7 @@ export function useCompetitionEntryDrops(
         // A newer list response may have refreshed content while summaries loaded.
         const latest =
           cards && client.getQueryData<PresentedDrop>(keyFor(reference));
+        if (cards && latest === null) return null;
         return presentCompetitionEntryDrop(
           result && latest ? { ...result, original: latest.drop } : result,
           identity,
@@ -98,16 +122,18 @@ export function useCompetitionEntryDrops(
   });
   useEffect(() => {
     if (!cards) return;
-    const visit = JSON.stringify([identity, viewer, cards.updatedAt, entries]);
     if (seeded.current === visit) return;
     seeded.current = visit;
     for (const reference of entries) {
+      const key = keyFor(reference);
+      const current = client.getQueryState(key);
+      if (current && current.dataUpdatedAt > cards.updatedAt) continue;
       const data = seedFor(reference);
       if (cards.updatedAt > 0)
-        client.setQueryData(keyFor(reference), data ?? null, {
+        client.setQueryData(key, data ?? null, {
           updatedAt: cards.updatedAt,
         });
     }
-  });
+  }, [cards, visit, entries, client, keyFor, seedFor]);
   return queries;
 }

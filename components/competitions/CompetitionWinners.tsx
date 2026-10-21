@@ -1,4 +1,5 @@
 "use client";
+import { useMemo } from "react";
 import { ApiCompetitionCapability } from "@/generated/models/ApiCompetitionCapability";
 import { useWaveProposalCardPresentation } from "@/hooks/waves/useWaveProposalCardPresentation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -37,14 +38,23 @@ export default function CompetitionWinners() {
     limit: "10",
     include: "cards",
   });
-  const entries = query.data?.pages.flatMap((page) => page.data) ?? [];
-  const drops = useCompetitionEntryDrops(
-    entries.map((entry) => ({ entryId: entry.id, dropId: entry.drop_id })),
-    {
+  const entries = useMemo(
+    () => query.data?.pages.flatMap((page) => page.data) ?? [],
+    [query.data]
+  );
+  const references = useMemo(
+    () =>
+      entries.map((entry) => ({ entryId: entry.id, dropId: entry.drop_id })),
+    [entries]
+  );
+  const cards = useMemo(
+    () => ({
       contexts: query.data?.pages.flatMap((page) => page.cards ?? []) ?? [],
       updatedAt: query.dataUpdatedAt,
-    }
+    }),
+    [query.data, query.dataUpdatedAt]
   );
+  const drops = useCompetitionEntryDrops(references, cards);
   const onDropClick = useCompetitionDropNavigation();
   if (query.isPending) return <CompetitionState />;
   const haveDrops = drops.some((drop) => drop.data);
