@@ -568,7 +568,7 @@ for (const app of [false, true]) {
         .first();
       await expect(pending).toBeVisible({ timeout: 60000 });
       await expect(
-        pending.getByRole("status", { name: "Loading drop" })
+        pending.getByRole("status", { name: "Loading…" })
       ).toBeVisible();
       // The route fallback can paint before the interactive query mounts.
       // Its Close control identifies the actual pending detail surface.
@@ -631,7 +631,7 @@ for (const app of [false, true]) {
       // Preserve the application's automatic retry budget (three retries with
       // exponential backoff) before expecting the terminal recovery state.
       await expect(pending.getByRole("alert")).toHaveText(
-        "This drop could not be loaded.",
+        "This content could not be loaded.",
         { timeout: 15000 }
       );
       const close = pending.getByRole("button", { name: "Close panel" });

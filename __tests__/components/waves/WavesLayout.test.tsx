@@ -127,7 +127,7 @@ describe("WavesLayout", () => {
     mockDesktopLoading = true;
     render(<WavesLayout>Wave content</WavesLayout>);
     expect(
-      screen.getByRole("status", { name: "Loading drop" })
+      screen.getByRole("status", { name: "Loading…" })
     ).toBeInTheDocument();
     expect(screen.queryByText("Wave content")).not.toBeInTheDocument();
     expect(

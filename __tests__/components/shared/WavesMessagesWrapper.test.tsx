@@ -316,7 +316,7 @@ describe("WavesMessagesWrapper", () => {
       mockIsRightSidebarOpen = true;
       const { rerender } = renderWrapper();
       expect(
-        screen.getByRole("status", { name: "Loading drop" })
+        screen.getByRole("status", { name: "Loading…" })
       ).toBeInTheDocument();
       expect(screen.getByTestId("main-content").parentElement).toHaveAttribute(
         "inert"
@@ -362,7 +362,7 @@ describe("WavesMessagesWrapper", () => {
     });
     const { rerender } = renderWrapper();
     expect(screen.getByRole("alert")).toHaveTextContent(
-      "This drop could not be loaded."
+      "This content could not be loaded."
     );
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(retry).toHaveBeenCalledTimes(1);
@@ -382,7 +382,7 @@ describe("WavesMessagesWrapper", () => {
       screen.queryByRole("button", { name: "Try again" })
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("status", { name: "Loading drop" })
+      screen.getByRole("status", { name: "Loading…" })
     ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Close panel" }));
     expect(mockRouterReplace).toHaveBeenCalledWith("/waves", { scroll: false });
