@@ -46,8 +46,10 @@
   dropdowns use the same light fill for selected options as the mobile sheets,
   and their triggers use equal widths and the same compact styling as a profile’s
   Collected view at every screen size.
-- Sort options use the same compact buttons on every screen size, with a light
-  fill for the selected sort and a segmented direction control.
+- The selected sort keeps the same light filled chip at every screen size.
+  Below 1024px, inactive options remain outlined chips. At 1024px and wider,
+  inactive options use gray text without a visible border or background, with a
+  faint fill on hover. Year and Season keep their framed dropdown triggers.
 
 ## URL Query Model
 

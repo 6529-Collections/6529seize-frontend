@@ -18,6 +18,7 @@ export default function TheMemesSortButton(
   return (
     <FilterButton
       selected={isActive}
+      desktopText
       aria-pressed={isActive}
       aria-label={t(props.locale, "theMemes.sorting.sortButtonLabel", {
         sort: label,

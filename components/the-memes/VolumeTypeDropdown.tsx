@@ -50,6 +50,7 @@ export default function VolumeTypeDropdown({
       <FilterButton
         ref={buttonRef}
         selected={isVolumeSort}
+        desktopText
         aria-haspopup="true"
         aria-pressed={isVolumeSort}
         aria-expanded={isOpen}
@@ -65,9 +66,7 @@ export default function VolumeTypeDropdown({
             {isVolumeSort ? ":" : ""}
           </span>
           {isVolumeSort && (
-            <span className="tw-truncate">
-              {selectedVolumeLabel}
-            </span>
+            <span className="tw-truncate">{selectedVolumeLabel}</span>
           )}
         </span>
         <FontAwesomeIcon
