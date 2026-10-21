@@ -1,5 +1,8 @@
 "use client";
 
+import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
+import { useCompetitionEntrySubmit } from "@/hooks/competitions/useCompetitionEntrySubmit";
+
 import { useRef, useState, useCallback, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
 import type { CreateDropConfig } from "@/entities/IDrop";
@@ -117,6 +120,8 @@ export default function CreateDrop({
     wave,
   });
   const { isMemesWave, isCurationWave, isQuorumWave } = useWave(wave);
+  const nativeCompetition = presentationCompetition(wave);
+  const submitCompetitionEntry = useCompetitionEntrySubmit(nativeCompetition);
   const resolvedSubmissionExperience = resolveWaveSubmissionExperience({
     isMemesWave,
     isCurationWave,
@@ -442,8 +447,10 @@ export default function CreateDrop({
   );
 
   const addDropMutation = useMutation({
-    mutationFn: async (body: QueuedDropMutationBody) =>
-      await postDrop(body.drop, { errorMode: "structured" }),
+    mutationFn: async (body: QueuedDropMutationBody) => {
+      if (body.nativeEntrySubmit) return body.nativeEntrySubmit(body.drop);
+      return await postDrop(body.drop, { errorMode: "structured" });
+    },
     onSuccess: (serverDrop, body) => {
       if (body.dropId) {
         if (isWaveRepliesCollapsed(wave))
@@ -599,13 +606,16 @@ export default function CreateDrop({
         return false;
       }
 
-      const queuedDropRequest: QueuedDropMutationBody =
-        slowModeChatReservation === null
-          ? dropRequest
-          : {
-              ...dropRequest,
-              slowModeChatReservation,
-            };
+      const queuedDropRequest: QueuedDropMutationBody = {
+        ...dropRequest,
+        ...(slowModeChatReservation === null
+          ? {}
+          : { slowModeChatReservation }),
+        nativeEntrySubmit:
+          nativeCompetition && dropRequest.drop.drop_type !== ApiDropType.Chat
+            ? submitCompetitionEntry
+            : undefined,
+      };
 
       // Add to queue
       queueRef.current.push(queuedDropRequest);
@@ -637,9 +647,11 @@ export default function CreateDrop({
     },
     [
       markChatSubmitted,
+      nativeCompetition,
       onDropAddedToQueue,
       processNextDrop,
       reserveSlowModeChatQueueSlot,
+      submitCompetitionEntry,
       unreadDividerContext,
     ]
   );

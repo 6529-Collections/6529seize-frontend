@@ -1,3 +1,8 @@
+import {
+  installNativeCompetitionCreationApi,
+  CREATED_COMPETITION_ID,
+  CREATED_COMPETITION_WAVE_ID,
+} from "../support/nativeCompetitionCreationApi";
 import type { Locator, Page } from "@playwright/test";
 import { installGroupGrantFixtures } from "../support/groupGrantFixtures";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
@@ -137,7 +142,8 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     ).toHaveCount(0);
     expect(
       (await fetchSandboxRequests(baseURL)).filter(
-        (request) => request.method === "POST" && request.path === "/api/waves"
+        (request) =>
+          request.method === "POST" && request.path === "/api/v3/waves"
       )
     ).toEqual([]);
 
@@ -147,9 +153,22 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expect(review.getByText(originalPost, { exact: true })).toHaveCount(
       0
     );
+    const creation = page.waitForResponse(
+      (response) =>
+        response.request().method() === "POST" &&
+        new URL(response.url()).pathname === "/api/v3/waves"
+    );
     await page
       .getByRole("button", { name: "Confirm and create", exact: true })
       .click();
+    const created = await creation;
+    expect(
+      created.ok(),
+      JSON.stringify({
+        response: await created.text(),
+        body: created.request().postDataJSON(),
+      })
+    ).toBe(true);
     await expect(page).toHaveURL(
       new RegExp(`/waves/${SANDBOX_CREATED_WAVE_ID}$`),
       { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
@@ -158,7 +177,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       expect.arrayContaining([
         expect.objectContaining({
           method: "POST",
-          path: "/api/waves",
+          path: "/api/v3/waves",
           body: expect.objectContaining({
             name: SANDBOX_CREATED_WAVE_NAME,
             description: editedPost,
@@ -284,7 +303,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
           (await fetchSandboxRequests(baseURL)).filter(
             (request) =>
               request.method === "POST" &&
-              ["/api/groups", "/api/waves"].includes(request.path)
+              ["/api/groups", "/api/v3/waves"].includes(request.path)
           ),
         {
           timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
@@ -298,7 +317,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
             kind: "allowed-sandbox-mutation",
           }),
           expect.objectContaining({
-            path: "/api/waves",
+            path: "/api/v3/waves",
             kind: "allowed-sandbox-mutation",
           }),
         ])
@@ -343,7 +362,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
         }),
         expect.objectContaining({
           method: "POST",
-          path: "/api/waves",
+          path: "/api/v3/waves",
           kind: "allowed-sandbox-mutation",
           body: expect.objectContaining({
             name: SANDBOX_CREATED_WAVE_NAME,
@@ -1084,16 +1103,16 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
-  test("shows the default rank schedule controls", async ({
+  test("shows the default rank competition schedule controls", async ({
     baseURL,
     page,
   }) => {
     await gotoCreateWave(page);
     await page.getByLabel(/Wave Name/).fill("Sandbox Schedule Summary Wave");
-    await chooseWaveType(page, "Rank");
+    await openCompetitionSetup(page, "Rank");
     await nextStepButton(page).click();
     await expect(
-      page.getByRole("heading", { name: "Access", level: 2 })
+      page.getByRole("group", { name: "Who can drop", exact: true })
     ).toBeVisible();
     await nextStepButton(page).click();
 
@@ -1131,14 +1150,14 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
-  test("creates a perpetual rank wave after choosing the mode on the overview", async ({
+  test("publishes a perpetual rank competition after choosing the mode on Setup", async ({
     baseURL,
     page,
   }, testInfo) => {
     await gotoCreateWave(page);
 
     await page.getByLabel(/Wave Name/).fill(SANDBOX_PERPETUAL_WAVE_NAME);
-    await chooseWaveType(page, "Rank");
+    await openCompetitionSetup(page, "Rank");
 
     // The scheduling mode is chosen up front on the Overview step.
     const announceRadio = page.getByRole("radio", {
@@ -1152,7 +1171,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await nextStepButton(page).click();
 
     await expect(
-      page.getByRole("heading", { name: "Access", level: 2 })
+      page.getByRole("group", { name: "Who can drop", exact: true })
     ).toBeVisible();
     await nextStepButton(page).click();
 
@@ -1186,7 +1205,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     ).toBeVisible();
     await previousStepButton(page).click();
     await expect(
-      page.getByRole("heading", { name: "Access", level: 2 })
+      page.getByRole("group", { name: "Who can drop", exact: true })
     ).toBeVisible();
     await previousStepButton(page).click();
     await expect(perpetualRadio).toBeVisible();
@@ -1212,7 +1231,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await appearanceToggle.click();
     await nextStepButton(page).click();
     await expect(
-      page.getByRole("heading", { name: "Access", level: 2 })
+      page.getByRole("group", { name: "Who can drop", exact: true })
     ).toBeVisible();
     await nextStepButton(page).click();
 
@@ -1231,7 +1250,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     // A perpetual wave has no outcomes to configure, so the step disappears
     // from the flow entirely.
     await expect(
-      page.getByRole("navigation", { name: "Progress" }).getByText("Outcomes")
+      page.getByRole("heading", { name: "Outcomes", exact: true })
     ).toBeHidden();
 
     await nextStepButton(page).click();
@@ -1253,53 +1272,23 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("heading", { name: "Guidelines", level: 2, exact: true })
     ).toBeVisible();
-    await nextStepButton(page).click();
-    await expect(
-      page.getByText("Give a good description of your wave")
-    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
-    await fillDescription(page, SANDBOX_PERPETUAL_WAVE_DESCRIPTION);
-    await completeWaveReview(page);
+    await publishCompetition(page);
 
-    // The sandbox mock only whitelists a rank body with a null decision
-    // strategy, open-ended periods and zero outcomes; anything else would be
-    // rejected as an unsafe mutation and fail this poll.
-    await expect
-      .poll(
-        async () =>
-          (await fetchSandboxRequests(baseURL)).filter(
-            (request) =>
-              request.method === "POST" && request.path === "/api/waves"
-          ),
-        {
-          timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
-          message:
-            "Expected the perpetual rank wave submit to reach the sandbox mock API.",
-        }
-      )
-      .toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            path: "/api/waves",
-            kind: "allowed-sandbox-mutation",
-            body: expect.objectContaining({
-              name: SANDBOX_PERPETUAL_WAVE_NAME,
-              admin_group_id: SANDBOX_ADMIN_GROUP_ID,
-              description: SANDBOX_PERPETUAL_WAVE_DESCRIPTION,
-              wave_type: "RANK",
-              decisions_strategy: null,
-              voting_period_max: null,
-              participation_period_max: null,
-              outcomes_count: 0,
-            }),
-          }),
-        ])
-      );
-
-    await expect(page).toHaveURL(
-      new RegExp(`/waves/${SANDBOX_CREATED_WAVE_ID}$`),
-      { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+    expect(nativeCreationFixtures.get(page)?.configuration()).toMatchObject({
+      title: SANDBOX_PERPETUAL_WAVE_NAME,
+      description: SANDBOX_PERPETUAL_WAVE_DESCRIPTION,
+      rules: { type: "RANK", decisions_strategy: null },
+      participation: { period: { max: null } },
+      voting: { period: { max: null } },
+      outcomes: [],
+    });
+    await page.goto(
+      `/waves/${CREATED_COMPETITION_WAVE_ID}/competitions/${CREATED_COMPETITION_ID}?tab=rules`
     );
-    await checkWaveConfiguration(page);
+    await expect(
+      page.getByRole("heading", { name: "Participation", exact: true }).first()
+    ).toBeVisible();
+
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
@@ -1309,10 +1298,10 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await gotoCreateWave(page);
 
     await page.getByLabel(/Wave Name/).fill("Sandbox Rank Defaults Wave");
-    await chooseWaveType(page, "Rank");
+    await openCompetitionSetup(page, "Rank");
     await nextStepButton(page).click();
     await expect(
-      page.getByRole("heading", { name: "Access", level: 2 })
+      page.getByRole("group", { name: "Who can drop", exact: true })
     ).toBeVisible();
     await nextStepButton(page).click();
 
@@ -1385,21 +1374,20 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await nextStepButton(page).click();
     // The description composer speaks to its context now.
     await expect(
-      page.getByText("Give a good description of your wave")
-    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
-    await expect(page.getByText("Describe your wave").first()).toBeVisible();
+      page.getByRole("button", { name: "Publish", exact: true })
+    ).toBeVisible();
     // No submit: this walk only verifies flow feedback, so the mutation
     // guard must stay silent throughout.
   });
 
-  test("creates a scheduled rank wave with an announcement and a manual outcome", async ({
+  test("publishes a scheduled rank competition with an announcement and a manual outcome", async ({
     baseURL,
     page,
   }) => {
     await gotoCreateWave(page);
 
     await page.getByLabel(/Wave Name/).fill(SANDBOX_SCHEDULED_WAVE_NAME);
-    await chooseWaveType(page, "Rank");
+    await openCompetitionSetup(page, "Rank");
 
     // "Announce Winners" is the default scheduling mode; keep it.
     await expect(
@@ -1408,7 +1396,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await nextStepButton(page).click();
 
     await expect(
-      page.getByRole("heading", { name: "Access", level: 2 })
+      page.getByRole("group", { name: "Who can drop", exact: true })
     ).toBeVisible();
     await nextStepButton(page).click();
 
@@ -1455,87 +1443,53 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("heading", { name: "Guidelines", level: 2, exact: true })
     ).toBeVisible();
-    await nextStepButton(page).click();
-    await expect(
-      page.getByText("Give a good description of your wave")
-    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
-    await fillDescription(page, SANDBOX_SCHEDULED_WAVE_DESCRIPTION);
-    await completeWaveReview(page);
+    await publishCompetition(page);
 
-    // The sandbox mock only whitelists a rank body with exactly one
-    // non-rolling decision point and exactly this manual outcome; anything
-    // else is rejected as an unsafe mutation and fails this poll.
-    await expect
-      .poll(
-        async () =>
-          (await fetchSandboxRequests(baseURL)).filter(
-            (request) =>
-              request.method === "POST" && request.path === "/api/waves"
-          ),
+    const configuration = nativeCreationFixtures.get(page)?.configuration();
+    expect(configuration).toMatchObject({
+      title: SANDBOX_SCHEDULED_WAVE_NAME,
+      description: SANDBOX_SCHEDULED_WAVE_DESCRIPTION,
+      rules: {
+        type: "RANK",
+        decisions_strategy: {
+          first_decision_time: expect.any(Number),
+          subsequent_decisions: [],
+          is_rolling: false,
+        },
+      },
+      outcomes: [
         {
-          timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
-          message:
-            "Expected the scheduled rank wave submit to reach the sandbox mock API.",
-        }
-      )
-      .toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            path: "/api/waves",
-            kind: "allowed-sandbox-mutation",
-            body: expect.objectContaining({
-              name: SANDBOX_SCHEDULED_WAVE_NAME,
-              admin_group_id: SANDBOX_ADMIN_GROUP_ID,
-              description: SANDBOX_SCHEDULED_WAVE_DESCRIPTION,
-              wave_type: "RANK",
-              decisions_strategy: expect.objectContaining({
-                first_decision_time: expect.any(Number),
-                subsequent_decisions: [],
-                is_rolling: false,
-              }),
-              // The wave closes at its only announcement, so both periods
-              // carry that timestamp as their end (asserted exactly by the
-              // sandbox allowlist).
-              voting_period_max: expect.any(Number),
-              participation_period_max: expect.any(Number),
-              outcomes_count: 1,
-              outcomes: [
-                {
-                  type: "MANUAL",
-                  description: SANDBOX_SCHEDULED_OUTCOME_TITLE,
-                  distribution: [
-                    {
-                      amount: 1,
-                      description: SANDBOX_SCHEDULED_OUTCOME_TITLE,
-                    },
-                  ],
-                },
-              ],
-            }),
-          }),
-        ])
-      );
-
-    await expect(page).toHaveURL(
-      new RegExp(`/waves/${SANDBOX_CREATED_WAVE_ID}$`),
-      { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+          type: "MANUAL",
+          description: SANDBOX_SCHEDULED_OUTCOME_TITLE,
+          distribution: [
+            { amount: 1, description: SANDBOX_SCHEDULED_OUTCOME_TITLE },
+          ],
+        },
+      ],
+    });
+    expect(configuration?.participation.period?.max).toBe(
+      configuration?.rules.decisions_strategy?.first_decision_time
     );
+    expect(configuration?.voting.period?.max).toBe(
+      configuration?.rules.decisions_strategy?.first_decision_time
+    );
+
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
-  test("keeps the ranking mode choice out of approve wave dates", async ({
+  test("keeps the ranking mode choice out of approve competition dates", async ({
     page,
   }) => {
     await gotoCreateWave(page);
 
     await page.getByLabel(/Wave Name/).fill("Sandbox Approve Wave");
-    await chooseWaveType(page, "Approve");
+    await openCompetitionSetup(page, "Approve");
     // The ranking-mode choice is a Rank-only concept, on Overview included.
     await expect(page.getByText("Perpetual Ranking")).toBeHidden();
     await nextStepButton(page).click();
 
     await expect(
-      page.getByRole("heading", { name: "Access", level: 2 })
+      page.getByRole("group", { name: "Who can drop", exact: true })
     ).toBeVisible();
     await nextStepButton(page).click();
 
@@ -1651,7 +1605,7 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     await expect(page.getByText("Click to upload")).toBeHidden();
 
     await page.getByLabel(/Wave Name/).fill("Advanced Overview Wave");
-    await chooseWaveType(page, "Approve");
+    await openCompetitionSetup(page, "Approve");
 
     const advancedSettings = page.getByRole("button", {
       name: /Appearance and labels/,
@@ -1736,11 +1690,11 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     await expect(page.getByLabel(/Wave Name/)).toBeFocused();
 
     await page.getByLabel(/Wave Name/).fill("Mobile Rank Layout Wave");
-    await chooseWaveType(page, "Rank");
+    await openCompetitionSetup(page, "Rank");
     await nextStepButton(page).click();
 
     await expect(
-      page.getByRole("heading", { name: "Access", level: 2 })
+      page.getByRole("group", { name: "Who can drop", exact: true })
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
     await nextStepButton(page).click();
 
@@ -1830,107 +1784,75 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     await expectNoHorizontalOverflow(page);
   });
 
-  test("autosaves a draft after leaving Overview and resumes it", async ({
+  test("autosaves native competition appearance after leaving Setup and resumes it", async ({
     page,
   }) => {
-    await installExternalDataFixtures(page);
-    await page.goto("/waves/create", { waitUntil: "domcontentloaded" });
-    await waitForRouteReady(page);
-    await dismissNextDevTools(page);
-    await expect(page.getByLabel(/Wave Name/)).toBeVisible({
-      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
-    });
-
-    // On the very first visit there is nothing to resume: no Saved Drafts
-    // card at all.
-    const savedDraftsToggle = page.getByRole("button", {
-      name: "Saved Drafts",
-    });
-    await expect(savedDraftsToggle).toBeHidden();
-
-    const draftName = "Draft Resume Wave";
-    await page.locator("#create-wave-name").fill(draftName);
-    await chooseWaveType(page, "Rank");
-    const overviewAdvancedSettings = page.getByRole("button", {
+    await gotoCreateWave(page);
+    const draftName = "Draft Resume Competition";
+    await page.getByLabel(/Wave Name/).fill(draftName);
+    await openCompetitionSetup(page, "Rank");
+    const appearance = page.getByRole("button", {
       name: /Appearance and labels/,
     });
-    await overviewAdvancedSettings.click();
+    await appearance.click();
     await page.getByText("Full proposal", { exact: true }).click();
-    await overviewAdvancedSettings.click();
-    await expect(overviewAdvancedSettings).toContainText("Customized");
-    // Moving to Access must persist the latest Rank settings, including edits
-    // made after the named Chat draft first became eligible for autosave.
+    await page.getByLabel("Submission button label").fill("Saved entry label");
+    await appearance.click();
+    await expect(appearance).toContainText("Customized");
     await nextStepButton(page).click();
     await expect(
-      page.getByRole("heading", { name: "Access", level: 2 })
-    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
-
-    // Wait for the debounced autosave to actually land on disk before
-    // reloading — otherwise the test races the persist and the "tab death"
-    // wipes a draft that was never written.
+      page.getByRole("group", { name: "Who can drop", exact: true })
+    ).toBeVisible();
+    const fixture = nativeCreationFixtures.get(page)!;
     await expect
-      .poll(
-        async () =>
-          page.evaluate(
-            (name) =>
-              Object.keys(window.localStorage)
-                .filter((key) => key.startsWith("create-wave-drafts:v2:"))
-                .flatMap((key) =>
-                  JSON.parse(window.localStorage.getItem(key) ?? "[]")
-                )
-                .find((draft) => draft.config.overview.name === name)?.config,
-            draftName
-          ),
-        { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
-      )
-      .toMatchObject({
-        overview: { name: draftName, type: "RANK" },
-        display: { proposalCards: { mode: "standard" } },
-      });
-
-    // Reload the page: a real tab death / crash. The in-memory config is
-    // gone, but the on-device draft must survive and be offered on Overview.
+      .poll(() => fixture.configuration()?.presentation)
+      .toEqual(
+        expect.arrayContaining([
+          {
+            data_key: "wave_display.submission.button_label",
+            data_value: "Saved entry label",
+          },
+        ])
+      );
     await page.reload({ waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
     await dismissNextDevTools(page);
-
-    // The Saved Drafts card appears, collapsed by default.
-    await expect(savedDraftsToggle).toBeVisible({
-      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
-    });
-    await expect(savedDraftsToggle).toHaveAttribute("aria-expanded", "false");
-    // The empty name field proves the reload really reset in-memory state.
-    await expect(page.locator("#create-wave-name")).toHaveValue("");
-
-    // Expand, then resume — the load button's name starts with the draft
-    // name (then "Saved …"), so anchoring wins over the delete button.
-    await savedDraftsToggle.click();
-    await page
-      .getByRole("button", { name: new RegExp(`^${draftName}`) })
-      .click();
-    await expect(page.locator("#create-wave-name")).toHaveValue(draftName);
-    await expect(overviewAdvancedSettings).toHaveAttribute(
-      "aria-expanded",
-      "false"
+    await expect(
+      page.getByLabel("Competition name", { exact: true })
+    ).toHaveValue(draftName);
+    await expect(appearance).toHaveAttribute("aria-expanded", "false");
+    await expect(appearance).toContainText("Customized");
+    await appearance.click();
+    await expect(page.getByLabel("Submission button label")).toHaveValue(
+      "Saved entry label"
     );
-    await expect(overviewAdvancedSettings).toContainText("Customized");
-    await overviewAdvancedSettings.click();
     await expect(
       page.getByRole("radio", { name: "Full proposal" })
     ).toBeChecked();
-
-    // Deleting the only draft removes the whole Saved Drafts card.
-    await page.reload({ waitUntil: "domcontentloaded" });
-    await waitForRouteReady(page);
-    await dismissNextDevTools(page);
-    await expect(savedDraftsToggle).toBeVisible({
-      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
-    });
-    await savedDraftsToggle.click();
     await page
-      .getByRole("button", { name: new RegExp(`Delete draft.*${draftName}`) })
+      .getByRole("button", { name: "Close editor", exact: true })
       .click();
-    await expect(savedDraftsToggle).toBeHidden();
+    await expect(page).toHaveURL(
+      new RegExp(`/waves/${CREATED_COMPETITION_WAVE_ID}/competitions$`)
+    );
+    await page.getByRole("tab", { name: "Drafts", exact: true }).click();
+    await page
+      .getByRole("link")
+      .filter({
+        has: page.getByRole("heading", { name: draftName, exact: true }),
+      })
+      .click();
+    await expect(
+      page.getByLabel("Competition name", { exact: true })
+    ).toHaveValue(draftName);
+    await appearance.click();
+    await expect(page.getByLabel("Submission button label")).toHaveValue(
+      "Saved entry label"
+    );
+    await expect(
+      page.getByRole("radio", { name: "Full proposal" })
+    ).toBeChecked();
+    await expectNoHorizontalOverflow(page);
   });
 
   test("manages multiple drafts newest-first without overflow", async ({
@@ -2014,31 +1936,6 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
   });
 });
 
-async function checkWaveConfiguration(page: Page) {
-  const mobile = (page.viewportSize()?.width ?? 1280) < 768;
-  await page
-    .getByRole("button", {
-      name: mobile ? "Wave details" : "Show right sidebar",
-      exact: true,
-    })
-    .click();
-  const details = page
-    .getByRole("complementary", { name: "Wave details" })
-    .or(page.getByRole("dialog", { name: "Wave details" }));
-  await details
-    .getByRole("tab", { name: "Configuration", exact: true })
-    .click();
-  await expect(
-    details.getByRole("heading", { name: "Chat", exact: true })
-  ).toBeVisible();
-  // Proposal appearance now belongs to competition Settings; its validation
-  // and cancellation are covered by the native/legacy competition sandbox.
-  await expect(
-    details.getByRole("button", { name: "Edit proposal card settings" })
-  ).toHaveCount(0);
-  await expectNoHorizontalOverflow(page);
-}
-
 async function usesMobileGroupCriteria(page: Page) {
   return page.evaluate(
     () =>
@@ -2073,10 +1970,43 @@ async function openOptionalSettings(page: Page) {
     await toggle.click();
 }
 
-async function chooseWaveType(page: Page, type: "Rank" | "Approve") {
-  await page.getByRole("button", { name: /^Other wave types/ }).click();
-  await page.getByText(type, { exact: true }).click();
-  await page.getByRole("button", { name: "Change type", exact: true }).click();
+const nativeCreationFixtures = new WeakMap<
+  Page,
+  Awaited<ReturnType<typeof installNativeCompetitionCreationApi>>
+>();
+
+async function openCompetitionSetup(page: Page, type: "Rank" | "Approve") {
+  const title = await page.getByLabel(/Wave Name/).inputValue();
+  const fixture = await installNativeCompetitionCreationApi(page);
+  nativeCreationFixtures.set(page, fixture);
+  await page.goto(`/waves/${CREATED_COMPETITION_WAVE_ID}/competitions/new`);
+  const name = page.getByLabel("Competition name", { exact: true });
+  await expect(name).toBeVisible({
+    timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+  });
+  await name.fill(title);
+  if (type === "Approve") {
+    await page
+      .getByRole("combobox", { name: "Competition type", exact: true })
+      .click();
+    await page.getByRole("option", { name: "Approve", exact: true }).click();
+  }
+  const description =
+    title === SANDBOX_PERPETUAL_WAVE_NAME
+      ? SANDBOX_PERPETUAL_WAVE_DESCRIPTION
+      : SANDBOX_SCHEDULED_WAVE_DESCRIPTION;
+  await page.getByLabel("Description", { exact: true }).fill(description);
+  await dismissNextDevTools(page);
+}
+
+async function publishCompetition(page: Page) {
+  await nextStepButton(page).click();
+  await page.getByRole("button", { name: "Publish", exact: true }).click();
+  await expect(page).toHaveURL(
+    new RegExp(`/competitions/${CREATED_COMPETITION_ID}$`),
+    { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+  );
+  expect(nativeCreationFixtures.get(page)?.published()).toBe(true);
 }
 
 async function completeWaveReview(page: Page) {

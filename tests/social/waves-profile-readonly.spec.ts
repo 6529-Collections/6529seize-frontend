@@ -9,6 +9,11 @@ import { expectUrlState } from "../support/urlState";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import { expectCompetitionScroll } from "../support/competitionScroll";
 import {
+  expectNativeLeaderboardArtwork,
+  expectNativeLeaderboardReady,
+  observeNativeLeaderboard,
+} from "../support/nativeLeaderboard";
+import {
   monitorRememberedLeaderboard,
   retainDesktopWaveSidebar,
 } from "../support/waveNavigationContinuity";
@@ -722,11 +727,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
           { timeout: 30000 }
         );
         await expect(leaderboardContent).toBeVisible({ timeout: 30000 });
-        await expect(
-          page
-            .getByRole("list", { name: "Leaderboard drops", exact: true })
-            .or(page.getByText("No drops to show", { exact: true }))
-        ).toBeVisible({ timeout: 30000 });
+        await expectNativeLeaderboardReady(page);
         await expect(chat).toHaveCount(0);
         await expect(
           page.getByText(
@@ -859,82 +860,53 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     ).toBe(true);
     const settings = await settingsResult.json();
     expect(settings.memes_wave_id).toMatch(/^[0-9a-f-]{36}$/i);
-    await gotoReady(page, `/waves/${settings.memes_wave_id}`);
-    const navigation = page.getByRole("navigation", { name: "Wave sections" });
-    await expect(
-      navigation.getByRole("button", { name: /^(Chat|Leaderboard|Winners)$/ })
-    ).toHaveText(["Chat", "Leaderboard", "Winners"], {
-      timeout: RESPONSE_TIMEOUT_MS,
-    });
-    await testInfo.attach("main-stage-chat-first-app-tabs", {
-      body: await page.screenshot(),
-      contentType: "image/png",
-    });
-    const [response] = await Promise.all([
-      page.waitForResponse(
-        (candidate) => {
-          const url = new URL(candidate.url());
-          return (
-            candidate.request().method() === "GET" &&
-            url.pathname ===
-              `/api/v2/waves/${settings.memes_wave_id}/leaderboard` &&
-            url.searchParams.get("sort") === "RANK"
-          );
-        },
-        { timeout: RESPONSE_TIMEOUT_MS }
-      ),
-      navigation
+    const observed = observeNativeLeaderboard(page, settings.memes_wave_id);
+    try {
+      await gotoReady(page, `/waves/${settings.memes_wave_id}`);
+      const navigation = page.getByRole("navigation", {
+        name: "Wave sections",
+      });
+      await expect(
+        navigation.getByRole("button", { name: /^(Chat|Leaderboard|Winners)$/ })
+      ).toHaveText(["Chat", "Leaderboard", "Winners"], {
+        timeout: RESPONSE_TIMEOUT_MS,
+      });
+      await testInfo.attach("main-stage-chat-first-app-tabs", {
+        body: await page.screenshot(),
+        contentType: "image/png",
+      });
+      await navigation
         .getByRole("button", { name: "Leaderboard", exact: true })
-        .click(),
-    ]);
-    expect(
-      response.ok(),
-      `Main Stage leaderboard returned HTTP ${response.status()}`
-    ).toBe(true);
-    const data = await response.json();
-    expect(data.wave.id).toBe(settings.memes_wave_id);
-    await testInfo.attach("main-stage-leaderboard-counts", {
-      body: JSON.stringify({
-        waveId: settings.memes_wave_id,
-        route: new URL(page.url()).pathname,
-        sort: "RANK",
-        count: data.count,
-        returned: data.drops.length,
-        withMedia: data.drops.filter((drop: { media?: unknown[] }) =>
-          Boolean(drop.media?.length)
-        ).length,
-      }),
-      contentType: "application/json",
-    });
-    expect(data.count).toBeGreaterThanOrEqual(0);
-    const artwork = data.drops.find((drop: { media?: unknown[] }) =>
-      Boolean(drop.media?.length)
-    );
-    await page.getByRole("tab", { name: "Grid view", exact: true }).click();
-    if (!artwork) {
-      await expect(
-        page.getByText("No drops to show", { exact: true })
-      ).toBeVisible();
-      await expect(
-        page.getByRole("list", { name: "Leaderboard drops" })
-      ).toHaveCount(0);
-      return;
+        .click();
+      const { competition, data } = await observed.originalLeaderboard();
+      await testInfo.attach("main-stage-leaderboard-counts", {
+        body: JSON.stringify({
+          waveId: settings.memes_wave_id,
+          competitionId: competition.id,
+          route: new URL(page.url()).pathname,
+          sort: "rating",
+          returned: data.data.length,
+          hasMore: data.has_more,
+          entries: data.data.map((entry) => ({
+            entryId: entry.entry_id,
+            dropId: entry.drop_id,
+          })),
+        }),
+        contentType: "application/json",
+      });
+      await expectNativeLeaderboardArtwork(
+        page,
+        competition,
+        data,
+        observed.reads
+      );
+      await testInfo.attach("main-stage-app-leaderboard", {
+        body: await page.screenshot(),
+        contentType: "image/png",
+      });
+    } finally {
+      observed.dispose();
     }
-    await expect(
-      page.getByRole("list", { name: "Leaderboard drops" })
-    ).toBeVisible();
-    await expect(
-      page
-        .getByRole("list", { name: "Leaderboard drops" })
-        .locator(`[data-leaderboard-drop-id="${artwork.id}"]`)
-    ).toBeVisible();
-    await expect(
-      page.getByText("No drops to show", { exact: true })
-    ).toHaveCount(0);
-    await testInfo.attach("main-stage-app-leaderboard", {
-      body: await page.screenshot(),
-      contentType: "image/png",
-    });
   });
 
   test("preserves Main Stage's dedicated tabs, timeline, and winner cards", async ({
