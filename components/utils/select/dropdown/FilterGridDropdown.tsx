@@ -1,8 +1,7 @@
 "use client";
 
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { useAnimate } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import FilterGridDropdownItemsWrapper from "./FilterGridDropdownItemsWrapper";
 
 interface FilterGridDropdownItem<TValue extends string | number> {
@@ -30,22 +29,12 @@ export default function FilterGridDropdown<TValue extends string | number>({
   readonly triggerAriaLabel: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [iconScope, animateIcon] = useAnimate();
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const activeItem = useMemo(
     () => items.find((item) => item.value === selectedValue) ?? null,
     [items, selectedValue]
   );
-
-  useEffect(() => {
-    if (!iconScope.current) return;
-    if (isOpen) {
-      animateIcon(iconScope.current, { rotate: 0 });
-    } else {
-      animateIcon(iconScope.current, { rotate: -90 });
-    }
-  }, [animateIcon, iconScope, isOpen]);
 
   const activeLabel = triggerLabel ?? activeItem?.label ?? allItemLabel;
 
@@ -81,8 +70,7 @@ export default function FilterGridDropdown<TValue extends string | number>({
           {activeLabel}
           <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 -tw-mr-1 tw-flex tw-items-center tw-pr-3.5">
             <ChevronDownIcon
-              ref={iconScope}
-              className="tw-h-5 tw-w-5"
+              className={`tw-h-5 tw-w-5 tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${isOpen ? "tw-rotate-180" : ""}`}
               aria-hidden="true"
             />
           </div>

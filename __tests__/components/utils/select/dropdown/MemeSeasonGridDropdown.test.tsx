@@ -48,7 +48,6 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 jest.mock("framer-motion", () => ({
-  useAnimate: () => [{ current: null }, jest.fn()],
   AnimatePresence: ({ children }: any) => <>{children}</>,
   motion: {
     div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
