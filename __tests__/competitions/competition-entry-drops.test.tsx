@@ -101,9 +101,11 @@ it("renders embedded cards without another request, accepts page updates and cle
   rerender({ contexts: [], updatedAt: Date.now() + 400 });
   await waitFor(() => expect(result.current[0]?.data).toBeNull());
   await act(async () => {
-    complete({ ...context, original: confirmed.drop } as Awaited<
-      ReturnType<typeof fetchCompetitionEntryDrop>
-    >);
+    complete({
+      ...context,
+      original: confirmed.drop,
+      competition: confirmed.drop.competition_context!.data.competition!,
+    });
     await refreshing;
   });
   expect(result.current[0]?.data).toBeNull();
