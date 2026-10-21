@@ -26,7 +26,7 @@ const SKELETON_KEYS = [
 ];
 
 const CARD_LAYOUT_CLASS_NAME =
-  "-tw-mx-4 tw-grid tw-grid-flow-col tw-snap-x tw-snap-mandatory tw-scroll-px-4 tw-gap-3 tw-overflow-x-auto tw-overscroll-x-contain tw-px-4 tw-py-1 tw-scrollbar-none [&>*]:tw-snap-always md:tw-mx-0 md:tw-auto-cols-auto md:tw-grid-flow-row md:tw-grid-cols-2 md:tw-gap-4 md:tw-overflow-visible md:tw-px-0 lg:tw-grid-cols-3 lg:tw-gap-5";
+  "tw-grid tw-grid-cols-1 tw-gap-6 tw-py-1 md:tw-grid-cols-2 md:tw-gap-4 lg:tw-grid-cols-3 lg:tw-gap-5";
 
 export function NextMintLeadingSection() {
   const locale = useBrowserLocale();
@@ -72,10 +72,6 @@ export function NextMintLeadingSection() {
   const hasCards = showNextMint || leading.length > 0;
   const showLoadingCards =
     !hasCards || (isLeaderboardFetching && leading.length === 0);
-  const cardWidthClassName =
-    !showLoadingCards && leading.length + Number(showNextMint) === 1
-      ? "tw-auto-cols-[100%] sm:tw-auto-cols-[80%]"
-      : "tw-auto-cols-[80%]";
   const isFetching = isWinnersFetching || isLeaderboardFetching;
 
   if (!isReady || !waveId) return null;
@@ -124,7 +120,7 @@ export function NextMintLeadingSection() {
             {t(locale, "home.comingUp.loading")}
           </output>
         )}
-        <div className={`${CARD_LAYOUT_CLASS_NAME} ${cardWidthClassName}`}>
+        <div data-testid="coming-up-cards" className={CARD_LAYOUT_CLASS_NAME}>
           {showNextMint && nextMint && <NextMintCard drop={nextMint} />}
           {leading.map((drop, index) => (
             <LeadingCard key={drop.id} drop={drop} rank={index + 1} />
@@ -144,7 +140,7 @@ const NextMintLeadingSkeletonCard = () => {
     <div
       aria-hidden="true"
       data-testid="coming-up-loading-card"
-      className="tw-min-w-0 tw-snap-start tw-text-left motion-reduce:[&_*]:tw-animate-none"
+      className="tw-min-w-0 tw-text-left motion-reduce:[&_*]:tw-animate-none"
     >
       <div className="tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950">
         <div className="tw-flex tw-shrink-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-px-3.5 tw-py-3">
