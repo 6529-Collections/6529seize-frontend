@@ -99,6 +99,52 @@ test.describe("The Memes Page @smoke @medium @large", () => {
     ).toBeInViewport({ ratio: 1 });
   });
 
+  test("desktop sort fades follow horizontal overflow", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      isMobileSurfaceProject(testInfo.project.name),
+      "Desktop scroll-driven fade contract"
+    );
+    const row = page
+      .getByRole("button", { name: "Sort by Age", exact: true })
+      .locator("..");
+    const supportsScrollTimeline = await page.evaluate(() =>
+      CSS.supports("animation-timeline", "scroll(self inline)")
+    );
+    const overflow = () =>
+      row.evaluate((element) => element.scrollWidth - element.clientWidth);
+
+    await page.setViewportSize({ width: 820, height: 900 });
+    await expect.poll(overflow).toBeGreaterThan(0);
+    await expect(row).toHaveCSS("--fade-l", "0px");
+    await expect(row).toHaveCSS(
+      "--fade-r",
+      supportsScrollTimeline ? "32px" : "0px"
+    );
+
+    await row.evaluate((element) => element.scrollTo(element.scrollWidth, 0));
+    await expect
+      .poll(() => row.evaluate((element) => element.scrollLeft))
+      .toBeGreaterThan(0);
+    await expect
+      .poll(() =>
+        row.evaluate((element) => {
+          const style = getComputedStyle(element);
+          return ["--fade-l", "--fade-r"].map((property) =>
+            Math.round(Number.parseFloat(style.getPropertyValue(property)))
+          );
+        })
+      )
+      .toEqual([supportsScrollTimeline ? 32 : 0, 0]);
+
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await expect.poll(overflow).toBe(0);
+    await expect(row).toHaveCSS("--fade-l", "0px");
+    await expect(row).toHaveCSS("--fade-r", "0px");
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("phone collection filters use sheets and restore trigger focus", async ({
     page,
   }, testInfo) => {
