@@ -21,7 +21,7 @@ describe("LazySingleWaveDrop", () => {
     // No awaiting yet: the chunk cannot have arrived.
     const status = screen.getByRole("status");
     expect(status).toHaveAttribute("aria-busy", "true");
-    expect(status).toHaveTextContent("Loading drop");
+    expect(status).toHaveTextContent("Loading…");
     expect(screen.queryByTestId("single-drop")).toBeNull();
 
     expect(await screen.findByTestId("single-drop")).toBeVisible();
