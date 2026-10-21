@@ -71,7 +71,7 @@ test.describe("The Memes Page @smoke @medium @large", () => {
     const portraitViewport = page.viewportSize();
     if (!portraitViewport)
       throw new Error("Expected a configured phone viewport");
-    for (const width of [640, 844]) {
+    for (const width of [640, 844, 1024, 1280, 1440]) {
       await page.setViewportSize({ width, height: 390 });
       await expect(sortBar).toHaveCSS("position", "static");
       await expect

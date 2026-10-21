@@ -32,9 +32,10 @@
 - Below 640px, Year and Season sit side by side above a sticky sort bar.
 - The slideshow button sits beside the title and collection link when there is
   room, and wraps below them with a small gap on narrow screens.
-- Below 1024px, the sort label, direction control, and options stay on one row.
-  Swipe the options horizontally to reach every sort. The active option moves
-  into view when selected, without scrolling the page vertically.
+- The sort label, direction control, and options stay on one row at every screen
+  size. When the options do not fit, scroll them horizontally to reach every sort.
+  The active option moves into view when selected, without scrolling the page
+  vertically.
 - Cards use square, contained artwork previews in two columns. Each card keeps
   its name, active sort metric, token number, media badge, and signed-in ownership
   status. Long names show up to two lines; open the card for its full name.

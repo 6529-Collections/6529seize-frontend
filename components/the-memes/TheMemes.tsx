@@ -682,7 +682,7 @@ export default function TheMemesComponent({
             aria-label={t(locale, "theMemes.sorting.regionLabel")}
             className="tw-mb-5 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800/80 tw-pb-4 max-sm:tw-sticky max-sm:tw-top-0 max-sm:tw-z-30 max-sm:-tw-mx-4 max-sm:tw-mb-3.5 max-sm:tw-border-iron-800/90 max-sm:tw-bg-[#0D0D0F] max-sm:tw-py-2.5 max-sm:tw-pl-4"
           >
-            <div className="tw-flex tw-items-center tw-gap-2.5 lg:tw-items-start lg:tw-gap-6">
+            <div className="tw-flex tw-items-center tw-gap-2.5">
               <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-2.5">
                 <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500">
                   {t(locale, "theMemes.sorting.sortBy")}
@@ -705,7 +705,7 @@ export default function TheMemesComponent({
               </div>
               <div
                 ref={sortOptionsRef}
-                className="tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-gap-1.5 tw-overflow-x-auto tw-overflow-y-hidden tw-pb-1 [-ms-overflow-style:none] [scrollbar-width:none] max-lg:tw-flex-1 max-lg:tw-py-1 max-lg:tw-pl-3 max-lg:tw-pr-4 max-lg:[mask-image:linear-gradient(to_right,transparent,#000_12px,#000_calc(100%-28px),transparent)] lg:tw-flex-wrap lg:tw-overflow-visible lg:tw-pb-0 [&::-webkit-scrollbar]:tw-hidden"
+                className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-items-center tw-gap-1.5 tw-overflow-x-auto tw-overflow-y-hidden tw-py-1 tw-pl-3 tw-pr-4 [-ms-overflow-style:none] [mask-image:linear-gradient(to_right,transparent,#000_12px,#000_calc(100%-28px),transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:tw-hidden"
               >
                 {Object.values(MemesSort)
                   .filter((v) => v !== MemesSort.VOLUME)
