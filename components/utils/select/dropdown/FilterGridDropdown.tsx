@@ -12,6 +12,7 @@ interface FilterGridDropdownItem<TValue extends string | number> {
 
 export default function FilterGridDropdown<TValue extends string | number>({
   disabled = false,
+  compactMobileTrigger = false,
   filterLabel,
   items,
   onSelect,
@@ -21,6 +22,7 @@ export default function FilterGridDropdown<TValue extends string | number>({
   triggerAriaLabel,
 }: {
   readonly disabled?: boolean | undefined;
+  readonly compactMobileTrigger?: boolean | undefined;
   readonly filterLabel: string;
   readonly items: readonly FilterGridDropdownItem<TValue>[];
   readonly onSelect: (value: TValue | null) => void;
@@ -55,10 +57,10 @@ export default function FilterGridDropdown<TValue extends string | number>({
   };
 
   const getMenuItemClassName = (isActive: boolean) =>
-    `tw-flex tw-min-w-0 tw-items-center tw-justify-center tw-gap-x-1 tw-whitespace-nowrap tw-rounded-md tw-border tw-border-solid tw-px-2 tw-py-2 tw-text-sm tw-font-medium tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
+    `max-lg:tw-min-h-11 max-lg:tw-rounded-lg max-lg:tw-border-0 motion-reduce:tw-transition-none tw-flex tw-min-w-0 tw-items-center tw-justify-center tw-gap-x-1 tw-whitespace-nowrap tw-rounded-md tw-border tw-border-solid tw-px-2 tw-py-2 tw-text-sm tw-font-medium tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
       isActive
-        ? "tw-bg-primary-500/20 tw-border-primary-500 tw-text-primary-300"
-        : "tw-bg-transparent tw-border-iron-700 tw-text-iron-200 hover:tw-bg-iron-800"
+        ? "tw-bg-primary-500/20 tw-border-primary-500 tw-text-primary-300 max-lg:tw-bg-iron-200 max-lg:tw-text-iron-950 max-lg:tw-font-semibold"
+        : "tw-bg-transparent tw-border-iron-700 tw-text-iron-200 hover:tw-bg-iron-800 max-lg:tw-bg-iron-900 max-lg:tw-text-iron-300"
     }`;
 
   return (
@@ -72,7 +74,7 @@ export default function FilterGridDropdown<TValue extends string | number>({
           aria-expanded={isOpen}
           onClick={() => setIsOpen(!isOpen)}
           disabled={disabled}
-          className={`${
+          className={`${compactMobileTrigger ? "max-sm:tw-h-9 max-sm:tw-border max-sm:tw-border-solid max-sm:tw-border-iron-800 max-sm:tw-bg-iron-950 max-sm:tw-py-0 max-sm:tw-pl-3 max-sm:tw-pr-8 max-sm:tw-text-iron-100 max-sm:tw-ring-0 max-sm:[&_svg]:tw-size-3 max-sm:[&_svg]:!tw-rotate-0 max-sm:[&_svg]:tw-text-iron-500" : ""} ${
             disabled
               ? "tw-text-iron-400 tw-opacity-50"
               : "tw-text-iron-300 hover:tw-ring-iron-600"
@@ -101,6 +103,7 @@ export default function FilterGridDropdown<TValue extends string | number>({
           className={`tw-col-span-full tw-w-full ${getMenuItemClassName(
             selectedValue === null
           )}`}
+          aria-current={selectedValue === null ? "true" : undefined}
           role="menuitem"
         >
           <span className="tw-whitespace-nowrap">{allItemLabel}</span>
@@ -111,6 +114,7 @@ export default function FilterGridDropdown<TValue extends string | number>({
             type="button"
             onClick={() => handleSelect(item.value)}
             className={getMenuItemClassName(selectedValue === item.value)}
+            aria-current={selectedValue === item.value ? "true" : undefined}
             role="menuitem"
           >
             <span className="tw-whitespace-nowrap">{item.label}</span>

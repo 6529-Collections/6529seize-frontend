@@ -27,6 +27,19 @@
   - `/the-memes?sort=meme&sort_dir=asc&szn=12`
   - `/the-memes?sort=age&sort_dir=asc&year=4`
 
+## Phone Layout
+
+- Below 640px, Year and Season sit side by side above a sticky sort bar.
+- Swipe the sort row horizontally to reach every sort option. The active option
+  moves into view when selected, without scrolling the page vertically.
+- Cards use square, contained artwork previews in two columns. Each card keeps
+  its name, active sort metric, token number, media badge, and signed-in ownership
+  status. Long names show up to two lines; open the card for its full name.
+- Below 1024px, Collection, Year, Season, and Volume open bottom sheets with
+  an in-sheet close button. Select an option, tap outside, press Escape, or drag
+  the sheet header down to dismiss. Focus returns to the trigger on dismissal.
+- Tablet and desktop grids retain their existing layout.
+
 ## URL Query Model
 
 - `sort` accepts these normalized values:

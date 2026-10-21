@@ -1,5 +1,6 @@
 "use client";
 
+import FilterButton from "@/components/utils/button/FilterButton";
 import CommonDropdownItemsWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsWrapper";
 import { getVolumeTypeLabel } from "@/components/the-memes/theMemesI18n";
 import { VolumeType } from "@/entities/INFT";
@@ -50,19 +51,20 @@ export default function VolumeTypeDropdown({
       data-testid="dropdown"
       className="tailwind-scope tw-relative tw-inline-flex tw-shrink-0"
     >
-      <button
+      <FilterButton
         ref={buttonRef}
-        type="button"
+        selected={isVolumeSort}
         aria-haspopup="true"
+        aria-pressed={isVolumeSort}
         aria-expanded={isOpen}
         aria-label={t(resolvedLocale, "theMemes.volume.triggerWithValue", {
           volumeType: selectedVolumeLabel,
         })}
         onClick={() => setIsOpen(!isOpen)}
-        className={`tw-group tw-relative tw-m-0 tw-inline-flex tw-shrink-0 tw-cursor-pointer tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-bg-transparent tw-px-0.5 tw-py-1 tw-text-left tw-no-underline tw-shadow-none tw-transition-colors tw-duration-200 after:tw-absolute after:-tw-bottom-0.5 after:tw-left-0 after:tw-h-px after:tw-w-full after:tw-origin-left after:tw-transition-transform after:tw-duration-200 after:tw-content-[''] focus:tw-outline-none focus-visible:tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 sm:tw-shrink ${
+        className={`tw-group tw-relative tw-m-0 tw-no-underline sm:tw-h-auto sm:tw-shrink sm:tw-rounded-md sm:tw-border-0 sm:tw-bg-transparent sm:tw-px-0.5 sm:tw-py-1 sm:tw-text-sm sm:tw-font-semibold sm:tw-leading-5 sm:tw-shadow-none sm:after:tw-absolute sm:after:-tw-bottom-0.5 sm:after:tw-left-0 sm:after:tw-h-px sm:after:tw-w-full sm:after:tw-origin-left sm:after:tw-transition-transform sm:after:tw-duration-200 sm:after:tw-content-[''] sm:focus:tw-outline-none sm:focus-visible:tw-text-iron-100 sm:focus-visible:tw-outline-none sm:focus-visible:tw-ring-2 sm:focus-visible:tw-ring-inset sm:focus-visible:tw-ring-primary-400 sm:active:tw-bg-transparent sm:desktop-hover:hover:tw-bg-transparent max-sm:[&_span]:tw-text-xs max-sm:[&_span]:tw-text-inherit ${
           isVolumeSort
-            ? "tw-text-white after:tw-scale-x-100 after:tw-bg-primary-400"
-            : "tw-text-iron-500 after:tw-scale-x-0 after:tw-bg-iron-700 hover:tw-text-iron-200 hover:after:tw-scale-x-100"
+            ? "sm:tw-text-white sm:after:tw-scale-x-100 sm:after:tw-bg-primary-400 sm:active:tw-text-white sm:desktop-hover:hover:tw-text-white"
+            : "sm:tw-text-iron-500 sm:after:tw-scale-x-0 sm:after:tw-bg-iron-700 sm:hover:after:tw-scale-x-100 sm:desktop-hover:hover:tw-text-iron-200"
         }`}
       >
         <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5">
@@ -83,7 +85,7 @@ export default function VolumeTypeDropdown({
           }`}
           aria-hidden="true"
         />
-      </button>
+      </FilterButton>
 
       <CommonDropdownItemsWrapper
         isOpen={isOpen}
@@ -107,9 +109,12 @@ export default function VolumeTypeDropdown({
                 type="button"
                 data-testid="item"
                 role="menuitem"
+                aria-current={isActive ? "true" : undefined}
                 onClick={() => handleSelect(volumeType)}
                 className={`${
-                  isMobile ? "tw-px-4 tw-py-3" : "tw-px-3 tw-py-2"
+                  isMobile
+                    ? "tw-min-h-12 tw-px-3 tw-py-3 max-lg:tw-rounded-lg max-lg:tw-text-[15px]"
+                    : "tw-px-3 tw-py-2"
                 } tw-box-border tw-flex tw-w-full tw-max-w-full tw-items-center tw-justify-between tw-gap-x-2 tw-overflow-hidden tw-rounded-md tw-border-0 tw-bg-transparent tw-text-left tw-text-sm tw-font-medium tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
                   isActive ? "tw-bg-iron-800 tw-text-iron-100" : ""
                 }`}
@@ -120,7 +125,7 @@ export default function VolumeTypeDropdown({
                 {isActive && (
                   <FontAwesomeIcon
                     icon={faCheck}
-                    className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-primary-300"
+                    className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-primary-300 max-lg:tw-text-white"
                     aria-hidden="true"
                   />
                 )}

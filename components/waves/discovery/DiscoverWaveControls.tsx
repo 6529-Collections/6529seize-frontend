@@ -7,6 +7,7 @@ import {
 } from "@/components/compact-menu/constants";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import Button from "@/components/utils/button/Button";
+import FilterButton from "@/components/utils/button/FilterButton";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
@@ -214,12 +215,9 @@ export function DiscoverWaveControls({
           {FILTER_OPTIONS.map((option) => {
             const selected = activeFilter === option.value;
             return (
-              <Button
+              <FilterButton
                 key={option.value}
-                variant={
-                  selected && scoreFiltersEnabled ? "primary" : "tertiary"
-                }
-                size="xs"
+                selected={selected}
                 role="radio"
                 aria-checked={selected}
                 disabled={!scoreFiltersEnabled}
@@ -237,7 +235,7 @@ export function DiscoverWaveControls({
                 className="tw-scroll-mx-1 motion-reduce:tw-transition-none"
               >
                 {t(locale, option.label)}
-              </Button>
+              </FilterButton>
             );
           })}
         </div>

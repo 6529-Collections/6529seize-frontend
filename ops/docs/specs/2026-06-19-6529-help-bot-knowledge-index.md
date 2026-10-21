@@ -87,6 +87,11 @@ On mobile, grant search fields and cards share one scroll area, with Load more
 after the last loaded card and sheet navigation and the bottom action accessible. Desktop retains
 the left-side criteria list, and saving still creates and applies a new group.
 
+The `the-memes.list-sorting` record explains the phone's sticky, horizontally
+scrollable sort controls, side-by-side Year and Season filters, bottom sheets,
+and square card previews. Existing sorting, query, and detail-page guidance
+continues to apply.
+
 ## Problem Statement
 
 Users often ask practical product questions in Waves instead of finding the

@@ -7733,6 +7733,8 @@
         "The Memes list browsing and sorting behavior is documented under media docs.",
         "URL query state can affect list filtering and sorting, including year and season filters.",
         "On The Memes list, Year scopes the Season dropdown; invalid year and season combinations reset back to the unfiltered list.",
+        "On phones below 640px, the sort bar stays visible while browsing. Swipe its options horizontally to find every sort. Year and Season filters sit side by side; Collection, Year, Season, and Volume use bottom sheets below 1024px.",
+        "Phone cards show square artwork previews, the active sort metric, token number, media badge, and signed-in ownership status. Open a card for its full name and details.",
         "Use individual Meme Card pages for card-specific details."
       ],
       "canonical_path": "/the-memes",
