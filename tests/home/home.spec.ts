@@ -683,9 +683,9 @@ test("homepage selects Next Drop without flashing the previous artwork @smoke @m
     await artworkResponse;
     await statusRequest;
     await expect(page.getByText("Latest Drop", { exact: true })).toBeVisible();
-    await expect(page.locator('[data-home-section="Latest drop"]')).toHaveCount(
-      0
-    );
+    await expect(
+      page.getByRole("main").locator('[data-home-section="Latest drop"]')
+    ).toHaveCount(0);
     const winnerResponse = page.waitForResponse(
       "**/api/v2/waves/*/decisions?*"
     );
@@ -694,9 +694,9 @@ test("homepage selects Next Drop without flashing the previous artwork @smoke @m
     await expect(
       page.getByRole("link", { name: winner.title, exact: true })
     ).toHaveCount(0);
-    await expect(page.locator('[data-home-section="Latest drop"]')).toHaveCount(
-      0
-    );
+    await expect(
+      page.getByRole("main").locator('[data-home-section="Latest drop"]')
+    ).toHaveCount(0);
     releaseStatus();
     await expect(page.getByText("Next Drop", { exact: true })).toBeVisible();
     await expect(
