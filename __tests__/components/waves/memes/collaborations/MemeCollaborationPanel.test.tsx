@@ -378,6 +378,83 @@ it("keeps terms out of the page and resets confirmation when the review is dismi
   expect(screen.getByRole("checkbox")).not.toBeChecked();
   expect(postMock).not.toHaveBeenCalled();
 });
+
+it("fits the browser keyboard viewport and releases its listeners when review closes", async () => {
+  const realViewport = globalThis.visualViewport;
+  const viewport = Object.assign(new EventTarget(), {
+    height: 700,
+    offsetTop: 0,
+    scale: 1,
+  });
+  Object.defineProperty(globalThis, "visualViewport", {
+    configurable: true,
+    value: viewport,
+  });
+  const addListener = jest.spyOn(viewport, "addEventListener");
+  const removeListener = jest.spyOn(viewport, "removeEventListener");
+  try {
+    mount();
+    const dialog = await openReview();
+    const container = within(dialog).getByRole("heading", {
+      name: "Review invitation",
+    }).parentElement?.parentElement?.parentElement;
+    expect(container?.style.getPropertyValue("--review-viewport-height")).toBe(
+      "700px"
+    );
+    act(() => {
+      viewport.height = 300;
+      viewport.offsetTop = 20;
+      viewport.dispatchEvent(new Event("resize"));
+    });
+    expect(container?.style.getPropertyValue("--review-viewport-height")).toBe(
+      "300px"
+    );
+    expect(container?.style.getPropertyValue("--review-viewport-top")).toBe(
+      "20px"
+    );
+    const creditName = within(dialog).getByRole("textbox", {
+      name: "Artist credit name",
+    });
+    const reveal = jest.fn();
+    Object.defineProperty(creditName, "scrollIntoView", { value: reveal });
+    act(() => creditName.focus());
+    await waitFor(() =>
+      expect(reveal).toHaveBeenCalledWith({
+        block: "nearest",
+        inline: "nearest",
+      })
+    );
+    act(() => creditName.blur());
+    reveal.mockClear();
+    // Refocusing must reveal the field even when no resize event is delivered.
+    act(() => creditName.focus());
+    await waitFor(() => expect(reveal).toHaveBeenCalledTimes(1));
+    expect(screen.getByRole("checkbox")).not.toBeChecked();
+    act(() => {
+      viewport.scale = 2;
+      viewport.dispatchEvent(new Event("resize"));
+    });
+    expect(container?.style.getPropertyValue("--review-viewport-height")).toBe(
+      ""
+    );
+    fireEvent.click(within(dialog).getByRole("button", { name: "Not now" }));
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    for (const event of ["resize", "scroll"]) {
+      const listener = addListener.mock.calls.find(
+        ([name]) => name === event
+      )?.[1];
+      expect(removeListener).toHaveBeenCalledWith(event, listener);
+    }
+    expect(postMock).not.toHaveBeenCalled();
+  } finally {
+    Object.defineProperty(globalThis, "visualViewport", {
+      configurable: true,
+      value: realViewport,
+    });
+  }
+});
 it("shows one compact author entry point without public credits and keeps invitations in a dialog", async () => {
   viewer = "A";
   mount();

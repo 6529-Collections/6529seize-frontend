@@ -11,7 +11,7 @@ export const MEME_COLLABORATION_MESSAGES = {
   "memes.collaborations.review": "Review invitation",
   "memes.collaborations.artistName": "Artist credit name",
   "memes.collaborations.artistNameHint":
-    "Choose the name used to credit you on this artwork. Your profile handle stays separate. This name is saved when you accept.",
+    "Saved with your acceptance. Your profile handle stays separate.",
   "memes.collaborations.notNow": "Not now",
   "memes.collaborations.invitedYou":
     "You’re invited to collaborate on this artwork.",
