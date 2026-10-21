@@ -688,7 +688,7 @@
         "Coming up shows the next mint when available and current vote leaders. Below 640px, a single card fills the available width; from 640px to 767px it uses the standard card width. Multiple cards use horizontal swiping below tablet width. Keyboard users can tab through their links. Tablet and desktop show a grid. Status and mint date or TDH have their own row above uncropped artwork. Card titles open the drop, artist names open profiles, and View all opens the wave.",
         "Coming up cards with collaborators show overlapping avatars beside the artist, with up to two collaborator names on a quieter line below. Up to four avatars are shown including the artist; extra avatars use a +N chip. The +N more link opens the drop to see all collaborators. Visible names open their profiles.",
         "After the current Meme mint ends, the homepage keeps Latest Drop through a configurable grace period before replacing it with a mapped Next Drop.",
-        "The latest artwork can appear while mint status and next-winner details are still loading. If artwork data fails to load, use Try again. Mint-status failures leave the artwork visible with unavailable stats; loaded artwork stays visible during background refreshes.",
+        "The top artwork slot shows a loading placeholder until the initial mint-status and next-winner checks finish, then displays the selected artwork without briefly showing the previous drop. If artwork data fails to load, use Try again. Mint-status failures leave the artwork visible with unavailable stats; loaded artwork stays visible during background refreshes.",
         "Coming up keeps recently loaded leader cards visible when returning during the same app session and during pull-to-refresh. Failed updates preserve available cards. NEXT MINT waits for confirmed current-artwork and mint-status information; leader cards can load independently. When NEXT MINT appears first, two loading placeholders remain until the leader request finishes.",
         "Latest Drop groups title and artist first, then stats with Edition Details beneath them, then Your allowance above Subscription Minting, and the countdown and mint action at the bottom.",
         "A mapped Latest Drop adds Main Stage Submission -> View as the last Edition Details row, and a mapped Next Drop shows a The Memes #{id} pill linked to the Meme card.",
@@ -2005,7 +2005,7 @@
       "facts": [
         "Profile tabs split profile content into sections such as Identity, Curation, Collected, Subscriptions, Proxy, Brain, and xTDH.",
         "The default Identity tab opens at /{user}; legacy /{user}/identity redirects there.",
-        "Selecting a profile tab immediately highlights it and shows loading feedback while needed. The header and banner remain in place, vertical scroll is preserved within the destination's available height, and the latest tab selection wins. Leaving Collected exits transfer mode and clears transfer selections.",
+        "Selecting a profile tab immediately highlights it and hides the previous content. The loading placeholder appears only if the switch takes longer than 100 ms; ready content appears immediately. The header and banner remain in place, vertical scroll is preserved within the destination's available height, and the latest tab selection wins. Leaving Collected exits transfer mode and clears transfer selections.",
         "Profile tab links retain address and locale. The xTDH tab opens with tab=granted; other tab-specific filters do not carry between main profile tabs.",
         "Other profile tabs can be opened directly through routes such as /{user}/curations or /{user}/collected.",
         "Unavailable or gated tabs can be hidden depending on profile state and feature visibility rules."
@@ -6546,6 +6546,7 @@
         "worth checking out"
       ],
       "facts": [
+        "On /discover, Worth Checking Out offers Balanced, Quality, Hot, REP, Newest, and Latest Posts sorts. Compact layouts show the current sort in a button that opens a bottom sheet; selecting an option closes it, and Escape, the close button, or the backdrop dismisses it. Wider content areas show all six sorts inline. The same row contains All, Score 50+, Hot 60+, and REP 60+ threshold buttons and can scroll on narrow screens. Newest and Latest Posts disable thresholds and reset to All. Sort and threshold URL settings persist across discovery tabs. Score formula sits beside the heading, becoming a labeled calculator icon on compact layouts. It preserves the originating Discover view, sort, and threshold. On the score page, the app header Back button and the page's Back to previous page link return to that view.",
         "Worth Checking Out comes first and Active Votes follows as separate collapsible sections in the Waves sidebar, including for signed-out visitors. While content first loads, each shows quiet avatar or vote-row placeholders and a screen-reader loading announcement. Descriptions appear with loaded content. Only successful empty requests show the empty message, without a description. Failures offer Try again. Loading more votes preserves the existing rows and description. Headings and View all links remain available.",
         "Active Votes shows ongoing TDH votes in a scrollable window three compact rows tall. Scroll to load additional pages, or use Load more. The total count stays visible when collapsed. The currently open wave is highlighted here, even when it is also highlighted in the collection list. Its compact header includes a separate View all link aligned to the right, with the collapse chevron beside the title, available even when collapsed; the link opens /discover?view=active-votes without toggling the section. Direct messages and their subwaves are excluded even when readable. Each wave sets its own voting rules.",
         "Worth Checking Out shows up to six highly rated waves, excluding followed waves for signed-in personal viewers, with fewer previews on narrow screens. Its sidebar description is Highly rated waves you don’t follow for both signed-in and signed-out visitors. The full discovery page uses Active discussions for signed-out visitors and Newest waves for the Newest sort. It has its own compact height. The header’s separate View all link stays available when collapsed and opens /discover?view=recommendations&sort=QUALITY.",
@@ -7635,6 +7636,7 @@
       ],
       "facts": [
         "Network wave score has a dedicated route at /network/wave-score.",
+        "In the app, the score page has a Back button in the header. It returns to the originating page when supplied, including Discover sort and threshold settings; otherwise it uses app navigation history, or About on a direct visit with no history.",
         "Use this route when users ask where wave score information lives.",
         "Wave REP is a TDH-credit REP signal for a wave; it is signed and log-scaled before weighting in Wave Score.",
         "Wave REP is the largest single quality component on the Wave Score transparency page.",
@@ -7646,7 +7648,8 @@
       "tags": ["network", "waves", "glossary"],
       "source_refs": [
         "app/network/wave-score/page.tsx",
-        "components/waves/discovery/WaveScoreTransparencyPage.tsx"
+        "components/waves/discovery/WaveScoreTransparencyPage.tsx",
+        "components/header/AppHeader.tsx"
       ]
     },
     {

@@ -5,19 +5,21 @@ import { useNowMintingStatus } from "@/hooks/useNowMintingStatus";
 import { shouldShowNextMintInLatestDrop } from "@/helpers/mint-visibility.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { useState } from "react";
 import LatestDropNextMintSection from "./LatestDropNextMintSection";
 import NowMintingSection from "./NowMintingSection";
 import { useLatestDropTransitionReady } from "./useLatestDropTransitionReady";
 
 export default function LatestDropSection() {
   const locale = useBrowserLocale();
-  const { nft, isFetching, isDropComplete, error, refetch } =
+  const { nft, isFetching, isDropComplete, isStatusLoading, error, refetch } =
     useNowMintingStatus();
-  const { nextMint } = useNextMintDrop();
+  const { nextMint, isLoading: isNextMintLoading } = useNextMintDrop();
   const isLatestDropTransitionReady = useLatestDropTransitionReady({
     isDropComplete,
     mintNumber: nft?.id,
   });
+  const [resolvedMintNumber, setResolvedMintNumber] = useState<number>();
 
   if (!nft && error !== null && error !== undefined) {
     return (
@@ -40,8 +42,21 @@ export default function LatestDropSection() {
     );
   }
 
+  const isDecisionLoading =
+    isStatusLoading ||
+    isNextMintLoading ||
+    isLatestDropTransitionReady === null;
+  // Detail hooks can retry a failed status query when they mount. Keep this
+  // mint's resolved panel mounted instead of restarting the initial decision.
+  if (nft && !isDecisionLoading && resolvedMintNumber !== nft.id) {
+    setResolvedMintNumber(nft.id);
+  }
+  if (isDecisionLoading && (!nft || resolvedMintNumber !== nft.id)) {
+    return <NowMintingSection nft={undefined} isFetching />;
+  }
+
   const shouldShowNextMint = shouldShowNextMintInLatestDrop({
-    isMintEnded: isLatestDropTransitionReady,
+    isMintEnded: isLatestDropTransitionReady === true,
     nextMintExists: !!nextMint,
   });
 
@@ -49,7 +64,6 @@ export default function LatestDropSection() {
     return <LatestDropNextMintSection drop={nextMint} />;
   }
 
-  // Mint status and the next winner enhance the available artwork. Neither
-  // an auxiliary outage nor a background refresh should replace it with a skeleton.
+  // Initial selection waits for the decision; cached data stays visible on refresh.
   return <NowMintingSection nft={nft} isFetching={isFetching} />;
 }
