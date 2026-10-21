@@ -35,10 +35,15 @@ export default function CompetitionWinners() {
   const query = useCompetitionResource(identity, "winners", {
     direction: "DESC",
     limit: "10",
+    include: "cards",
   });
   const entries = query.data?.pages.flatMap((page) => page.data) ?? [];
   const drops = useCompetitionEntryDrops(
-    entries.map((entry) => ({ entryId: entry.id, dropId: entry.drop_id }))
+    entries.map((entry) => ({ entryId: entry.id, dropId: entry.drop_id })),
+    {
+      contexts: query.data?.pages.flatMap((page) => page.cards ?? []) ?? [],
+      updatedAt: query.dataUpdatedAt,
+    }
   );
   const onDropClick = useCompetitionDropNavigation();
   if (query.isPending) return <CompetitionState />;

@@ -212,6 +212,7 @@ it("keeps curation price filtering and sorting scoped to the selected competitio
     "leaderboard",
     {
       sort: "price",
+      include: "cards",
       direction: "ASC",
       price_currency: "ETH",
       min_price: "0.1",

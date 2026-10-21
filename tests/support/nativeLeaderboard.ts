@@ -159,6 +159,31 @@ export async function expectNativeLeaderboardArtwork(
             "Rendered drop must belong to the native page"
           ).toBeDefined();
           if (!entry) throw new Error("Rendered native entry missing");
+          const embedded = data.cards?.find(
+            (item) => item.entry.id === entry.entry_id
+          );
+          if (embedded?.drop) {
+            expect(embedded.entry.competition_id).toBe(competition.id);
+            expect(embedded.entry.wave_id).toBe(competition.wave_id);
+            expect(embedded.drop.id).toBe(entry.drop_id);
+            if (embedded.drop.wave)
+              expect(embedded.drop.wave.id).toBe(competition.wave_id);
+            completed.push({
+              entryId: entry.entry_id,
+              drop: {
+                drop: embedded.drop,
+                wave:
+                  embedded.drop.wave ??
+                  ({ id: competition.wave_id } as ApiDropAndWave["wave"]),
+              },
+            });
+            const renderedCard = leaderboardRegion(page)
+              .getByRole("list", { name: "Leaderboard drops", exact: true })
+              .locator(`[data-leaderboard-drop-id="${dropId}"]`)
+              .locator(`[data-competition-entry="${entry.entry_id}"]`);
+            if (!(await renderedCard.isVisible())) return false;
+            continue;
+          }
           const response =
             reads.find(
               (item) =>

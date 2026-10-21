@@ -2,12 +2,17 @@ import type { ApiCompetitionEntryContextPage } from "@/generated/models/ApiCompe
 import type { ApiCompetitionEntryContext } from "@/generated/models/ApiCompetitionEntryContext";
 import type { ApiCompetition } from "@/generated/models/ApiCompetition";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
+import {
+  mapLeaderboardDropV2,
+  fetchDropsV2ByIds,
+} from "@/services/api/wave-drops-v2-api";
+import { mapPriorityMetadataV2ToDropMetadata } from "@/services/api/drop-v2-mappers";
 import { commonApiFetch } from "@/services/api/common-api";
 import {
   competitionEndpoint,
   type CompetitionIdentity,
 } from "@/services/api/competitions-api";
-import { fetchDropsV2ByIds } from "@/services/api/wave-drops-v2-api";
 
 type EntryDrop = ApiCompetitionEntryContext & {
   competition: ApiCompetition;
@@ -19,8 +24,21 @@ type Lookup = {
   signal: AbortSignal;
   resolve: (value: EntryDrop | null) => void;
   reject: (error: unknown) => void;
+  card?: { wave: ApiWaveMin; original?: ApiDrop | undefined } | undefined;
 };
 const pending = new Map<string, Set<Lookup>>();
+
+function originalForLookup(
+  lookup: Lookup,
+  context: ApiCompetitionEntryContext | undefined,
+  drops: ReadonlyMap<string, ApiDrop>
+) {
+  if (!lookup.card) return drops.get(lookup.dropId);
+  if (lookup.card.original) return lookup.card.original;
+  return context
+    ? (competitionCardDrop(context, lookup.card.wave) ?? undefined)
+    : undefined;
+}
 
 async function loadBatch(identity: CompetitionIdentity, lookups: Lookup[]) {
   const controller = new AbortController();
@@ -29,6 +47,7 @@ async function loadBatch(identity: CompetitionIdentity, lookups: Lookup[]) {
   };
   for (const lookup of lookups) lookup.signal.addEventListener("abort", abort);
   try {
+    const cards = lookups.some((lookup) => lookup.card !== undefined);
     const [contexts, drops] = await Promise.all([
       commonApiFetch<ApiCompetitionEntryContextPage>({
         endpoint: `${competitionEndpoint(identity)}/entry-contexts`,
@@ -36,15 +55,20 @@ async function loadBatch(identity: CompetitionIdentity, lookups: Lookup[]) {
           entry_ids: [...new Set(lookups.map((item) => item.entryId))].join(
             ","
           ),
+          ...(cards && lookups.some((lookup) => !lookup.card?.original)
+            ? { include: "cards" }
+            : {}),
         },
         signal: controller.signal,
         errorMode: "structured",
       }),
-      fetchDropsV2ByIds({
-        dropIds: [...new Set(lookups.map((item) => item.dropId))],
-        signal: controller.signal,
-        includeFullMetadata: true,
-      }),
+      cards
+        ? Promise.resolve([])
+        : fetchDropsV2ByIds({
+            dropIds: [...new Set(lookups.map((item) => item.dropId))],
+            signal: controller.signal,
+            includeFullMetadata: true,
+          }),
     ]);
     if (
       contexts.competition.id !== identity.competitionId ||
@@ -59,7 +83,7 @@ async function loadBatch(identity: CompetitionIdentity, lookups: Lookup[]) {
       try {
         if (lookup.signal.aborted) continue;
         const context = entriesById.get(lookup.entryId);
-        const original = dropsById.get(lookup.dropId);
+        const original = originalForLookup(lookup, context, dropsById);
         if (!context || !original) {
           lookup.resolve(null);
           continue;
@@ -96,10 +120,16 @@ export function fetchCompetitionEntryDrop(
   viewer: string | null,
   entryId: string,
   dropId: string,
-  signal: AbortSignal
+  signal: AbortSignal,
+  card?: { wave: ApiWaveMin; original?: ApiDrop | undefined }
 ): Promise<EntryDrop | null> {
   if (signal.aborted) return Promise.reject(signal.reason);
-  const key = JSON.stringify([identity.waveId, identity.competitionId, viewer]);
+  const key = JSON.stringify([
+    identity.waveId,
+    identity.competitionId,
+    viewer,
+    Boolean(card),
+  ]);
   return new Promise((resolve, reject) => {
     let group = pending.get(key);
     if (!group) {
@@ -119,6 +149,7 @@ export function fetchCompetitionEntryDrop(
       signal,
       resolve: finish,
       reject: fail,
+      card,
     };
     const abort = () => {
       group.delete(lookup);
@@ -135,4 +166,31 @@ export function fetchCompetitionEntryDrop(
     signal.addEventListener("abort", abort, { once: true });
     group.add(lookup);
   });
+}
+
+/** List cards need only the first part; opening a drop uses the full drop reader. */
+export function competitionCardDrop(
+  context: ApiCompetitionEntryContext,
+  wave: ApiWaveMin
+): ApiDrop | null {
+  const { drop, entry } = context;
+  if (!drop) return null;
+  if (
+    drop.id !== entry.drop_id ||
+    entry.wave_id !== wave.id ||
+    (drop.wave && drop.wave.id !== wave.id)
+  )
+    throw new Error("Invalid competition card");
+  const priority = mapPriorityMetadataV2ToDropMetadata(drop);
+  const priorityKeys = new Set(priority.map((item) => item.data_key));
+  return {
+    ...mapLeaderboardDropV2({ drop, wave }),
+    wave,
+    metadata: [
+      ...priority,
+      ...(context.metadata ?? [])
+        .filter((item) => !priorityKeys.has(item.data_key))
+        .map(({ data_key, data_value }) => ({ data_key, data_value })),
+    ],
+  };
 }

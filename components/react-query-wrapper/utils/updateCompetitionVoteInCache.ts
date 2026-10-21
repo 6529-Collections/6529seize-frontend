@@ -102,27 +102,28 @@ export async function updateCompetitionVoteInCache(
     { queryKey: contextKey },
     (old) => (old ? updateContext(old) : old)
   );
-  client.setQueriesData<{ entry: ApiCompetitionEntry; drop: ExtendedDrop }>(
-    { queryKey: [...resourceKey, "drop", entryId, dropId] },
-    (old) => {
-      if (!old) return old;
-      const known = old.drop.competition_context;
-      return {
-        ...old,
-        drop: {
-          ...updateOwnVote(old.drop, budget, currentVote),
-          ...(known?.viewer === viewer
-            ? {
-                competition_context: {
-                  ...known,
-                  data: updateContext(known.data),
-                },
-              }
-            : {}),
-        },
-      };
-    }
-  );
+  for (const projection of ["drop", "card"])
+    client.setQueriesData<{ entry: ApiCompetitionEntry; drop: ExtendedDrop }>(
+      { queryKey: [...resourceKey, projection, entryId, dropId] },
+      (old) => {
+        if (!old) return old;
+        const known = old.drop.competition_context;
+        return {
+          ...old,
+          drop: {
+            ...updateOwnVote(old.drop, budget, currentVote),
+            ...(known?.viewer === viewer
+              ? {
+                  competition_context: {
+                    ...known,
+                    data: updateContext(known.data),
+                  },
+                }
+              : {}),
+          },
+        };
+      }
+    );
   client.setQueriesData<InfiniteData<ApiCompetitionMyVotePage>>(
     { queryKey: [...resourceKey, "votes/me"] },
     (old) =>
