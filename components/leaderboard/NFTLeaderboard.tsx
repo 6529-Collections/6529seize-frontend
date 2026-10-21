@@ -13,7 +13,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { cicToType, numberWithCommas } from "@/helpers/Helpers";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { formatInteger } from "@/i18n/format";
+import { formatInteger, selectPluralCategory } from "@/i18n/format";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
 import { DATA_TABLE_HEADER_TEXT_CLASS_NAME } from "@/components/utils/table/tableStyles";
@@ -23,6 +23,11 @@ import type { CICType } from "@/entities/IProfile";
 import type { DBResponse } from "@/entities/IDBResponse";
 import { LeaderboardCollector } from "./LeaderboardCollector";
 import { LEADERBOARD_ROW_CLASS_NAME } from "./leaderboardTableStyles";
+import {
+  NFTLeaderboardMobileRows,
+  NFTLeaderboardMobileSort,
+} from "./NFTLeaderboardMobile";
+import styles from "./NFTLeaderboard.module.css";
 import {
   SearchModalDisplay,
   SearchWalletsDisplay,
@@ -246,7 +251,7 @@ export function setScrollPosition() {
   }
 }
 
-enum Sort {
+export enum Sort {
   balance = "balance",
   tdh__raw = "tdh__raw",
   boosted_tdh = "boosted_tdh",
@@ -438,7 +443,9 @@ function CollectorsCsvDownloadControls({
   const isCsvDownloading = csvStatus === "downloading";
 
   return (
-    <div className="tw-flex tw-flex-col tw-items-end tw-gap-2">
+    <div
+      className={`${styles["actions"] ?? ""} tw-flex tw-flex-col tw-items-end tw-gap-2`}
+    >
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-3">
         <Button
           type="button"
@@ -452,7 +459,7 @@ function CollectorsCsvDownloadControls({
             "theMemes.detail.collectors.downloadCsvAriaLabel"
           )}
         >
-          <span className="tw-whitespace-nowrap">
+          <span className="tw-hidden tw-whitespace-nowrap lg:tw-inline">
             {isCsvDownloading
               ? t(locale, "theMemes.detail.collectors.downloadingCsv")
               : t(locale, "theMemes.detail.collectors.downloadCsv")}
@@ -630,8 +637,10 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
       className="tw-scroll-mt-24 tw-pt-8"
       id="nft-leaderboard"
     >
-      <div className="tw-mb-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-        <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
+      <div
+        className={`${styles["header"] ?? ""} tw-mb-0.5 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 lg:tw-mb-4`}
+      >
+        <h3 className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-[17px] tw-font-semibold tw-leading-[22px] tw-text-iron-50 lg:tw-flex-none lg:tw-text-lg lg:tw-leading-7 lg:tw-text-iron-100">
           {t(locale, "theMemes.detail.collectors.leaderboardTitle")}
         </h3>
         <CollectorsCsvDownloadControls
@@ -642,14 +651,63 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
           sort={sort.sort}
           sortDirection={sort.sort_direction}
         >
-          <SearchWalletsDisplay
-            searchWallets={searchWallets}
-            setSearchWallets={setSearchWallets}
-            setShowSearchModal={setShowSearchModal}
-          />
+          <div className={styles["search"]}>
+            <SearchWalletsDisplay
+              searchWallets={searchWallets}
+              setSearchWallets={setSearchWallets}
+              setShowSearchModal={setShowSearchModal}
+            />
+          </div>
         </CollectorsCsvDownloadControls>
       </div>
-      <div className="tw-overflow-x-auto">
+      <p className="tw-mb-3.5 tw-mt-0.5 tw-text-[13px] tw-leading-[18px] tw-text-iron-500 lg:tw-hidden">
+        {t(
+          locale,
+          selectPluralCategory(locale, totalResults) === "one"
+            ? "theMemes.detail.collectors.countOne"
+            : "theMemes.detail.collectors.countOther",
+          { count: formatInteger(locale, totalResults) }
+        )}
+      </p>
+      <NFTLeaderboardMobileSort
+        locale={locale}
+        sort={sort.sort}
+        direction={sort.sort_direction}
+        options={[
+          {
+            value: Sort.balance,
+            label: t(locale, "theMemes.detail.collectors.balance"),
+          },
+          {
+            value: Sort.boosted_tdh,
+            label: t(locale, "theMemes.detail.collectors.tdh"),
+          },
+          {
+            value: Sort.tdh__raw,
+            label: t(locale, "theMemes.detail.collectors.unweightedTdh"),
+          },
+          {
+            value: Sort.total_balance,
+            label: t(locale, "theMemes.detail.collectors.totalBalance"),
+          },
+          {
+            value: Sort.total_boosted_tdh,
+            label: t(locale, "theMemes.detail.collectors.totalTdh"),
+          },
+          {
+            value: Sort.total_tdh__raw,
+            label: t(locale, "theMemes.detail.collectors.totalUnweightedTdh"),
+          },
+        ]}
+        onSort={(value) => setSort({ ...sort, sort: value })}
+        onDirection={(value) => setSort({ ...sort, sort_direction: value })}
+      />
+      <NFTLeaderboardMobileRows
+        locale={locale}
+        leaderboard={leaderboard}
+        sort={sort.sort}
+      />
+      <div className="tw-hidden tw-overflow-x-auto lg:tw-block">
         <table className="tw-w-full tw-min-w-[23rem] tw-border-collapse md:tw-min-w-[1040px]">
           <thead>
             <tr>
@@ -733,7 +791,9 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
         </div>
       )}
       {totalResults > 0 && (
-        <div className="tw-flex tw-justify-center tw-pb-3 tw-pt-4">
+        <div
+          className={`${styles["pagination"] ?? ""} tw-flex tw-justify-center tw-pb-3 tw-pt-4`}
+        >
           <Pagination
             page={page}
             pageSize={PAGE_SIZE}

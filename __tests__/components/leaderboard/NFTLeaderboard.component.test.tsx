@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import NFTLeaderboard from "@/components/leaderboard/NFTLeaderboard";
@@ -75,7 +75,9 @@ describe("NFTLeaderboard component", () => {
   it("fetches data and paginates", async () => {
     commonApiFetch.mockResolvedValue({ count: 1, data: [collector] });
     renderLeaderboard();
-    const collectorRow = (await screen.findByText("alice")).closest("tr");
+    const collectorRow = (
+      await within(screen.getByRole("table")).findByText("alice")
+    ).closest("tr");
     expect(collectorRow).toHaveClass(
       "tw-group",
       "even:tw-bg-iron-900/70",
@@ -117,7 +119,7 @@ describe("NFTLeaderboard component", () => {
 
     try {
       renderLeaderboard();
-      await screen.findByText("alice");
+      await within(screen.getByRole("table")).findByText("alice");
       commonApiFetch.mockClear();
       commonApiFetch.mockResolvedValueOnce({ count: 1, data: [collector] });
 
@@ -163,7 +165,7 @@ describe("NFTLeaderboard component", () => {
   it("shows an error when the collectors CSV download fails", async () => {
     commonApiFetch.mockResolvedValue({ count: 1, data: [collector] });
     renderLeaderboard();
-    await screen.findByText("alice");
+    await within(screen.getByRole("table")).findByText("alice");
     commonApiFetch.mockClear();
     commonApiFetch.mockRejectedValueOnce(new Error("download failed"));
 
@@ -176,5 +178,110 @@ describe("NFTLeaderboard component", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Couldn't download collectors CSV. Please try again."
     );
+  });
+
+  it.each([
+    ["Balance", "balance"],
+    ["TDH", "boosted_tdh"],
+    ["Unweighted TDH", "tdh__raw"],
+    ["Total balance", "total_balance"],
+    ["Total TDH", "total_boosted_tdh"],
+    ["Total unweighted TDH", "total_tdh__raw"],
+  ])(
+    "keeps direction while choosing %s and resets the page",
+    async (label, key) => {
+      commonApiFetch.mockResolvedValue({
+        count: 79,
+        page: 1,
+        data: [collector],
+      });
+      renderLeaderboard();
+      await within(screen.getByRole("list")).findByText("alice");
+      await userEvent.click(
+        screen.getByRole("button", { name: "Sort ascending", exact: true })
+      );
+      await userEvent.click(screen.getByTestId("next"));
+      await userEvent.click(
+        within(
+          screen.getByRole("group", { name: "Sort collectors by" })
+        ).getByRole("button", { name: label, exact: true })
+      );
+      await waitFor(() =>
+        expect(commonApiFetch).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            endpoint: expect.stringContaining(
+              `page=1&sort=${key}&sort_direction=ASC`
+            ),
+          })
+        )
+      );
+      expect(
+        screen.getByRole("button", { name: "Sort ascending", exact: true })
+      ).toHaveAttribute("aria-pressed", "true");
+      await userEvent.click(
+        screen.getByRole("button", { name: "Sort descending", exact: true })
+      );
+      await waitFor(() =>
+        expect(commonApiFetch).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            endpoint: expect.stringContaining(
+              `sort=${key}&sort_direction=DESC`
+            ),
+          })
+        )
+      );
+    }
+  );
+
+  it("retains previous rows while loading and uses TDH ranks for filtered results", async () => {
+    commonApiFetch.mockResolvedValueOnce({
+      count: 79,
+      page: 1,
+      data: [collector],
+    });
+    renderLeaderboard();
+    const list = within(screen.getByRole("list"));
+    await list.findByText("alice");
+    let finishRequest: (value: unknown) => void = () => undefined;
+    commonApiFetch.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finishRequest = resolve;
+        })
+    );
+    await userEvent.click(screen.getByTestId("search"));
+    expect(list.getByText("alice")).toBeInTheDocument();
+    finishRequest({
+      count: 1,
+      page: 1,
+      data: [{ ...collector, tdh_rank: 87 }],
+    });
+    await waitFor(() => expect(list.getByText("87")).toBeInTheDocument());
+    expect(screen.getByText("1 collector")).toBeInTheDocument();
+  });
+
+  it("shows compact totals with exact accessible values and preserves zero", async () => {
+    commonApiFetch.mockResolvedValue({
+      count: 1,
+      page: 1,
+      data: [
+        {
+          ...collector,
+          boosted_tdh: 0,
+          total_balance: 99999,
+          total_boosted_tdh: 181123456,
+          total_tdh__raw: 379701,
+        },
+      ],
+    });
+    renderLeaderboard();
+    const list = within(screen.getByRole("list"));
+    await list.findByText("alice");
+    expect(list.getByText("181.1M")).toBeInTheDocument();
+    expect(list.getByText("Total TDH: 181,123,456")).toBeInTheDocument();
+    expect(list.getByText("379.7K")).toBeInTheDocument();
+    expect(list.getByText("99,999")).toBeInTheDocument();
+    expect(list.getByText("This card TDH: 0")).toBeInTheDocument();
+    expect(list.getByText("card", { exact: true })).toBeInTheDocument();
   });
 });

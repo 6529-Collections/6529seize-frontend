@@ -99,6 +99,20 @@
 
 ## Common Scenarios
 
+- In `Collectors`, phones and tablets show a collector list with this card's
+  balance, TDH and unweighted TDH, followed by totals across all cards. Choose
+  Balance, TDH, Unweighted TDH, Total balance, Total TDH or Total unweighted TDH
+  in the scrolling sort bar; the separate arrows set ascending or descending
+  order. Choosing a metric keeps the current direction and highlights its values.
+- The collector count reflects the current identity filters. Use the search icon
+  to filter by one or several identities; remove chips to broaden the results.
+  Filtered results retain each collector's TDH rank. Pages contain 25 collectors.
+- Large mobile values use compact notation from 100,000, with exact displayed
+  values available to assistive technology. Download CSV exports all matching
+  collectors with full numeric values in the selected order. Its icon shows
+  progress, announces completion, and reports a download failure for retry.
+- The desktop Collectors table shows the same information in columns. Sorting
+  and paging keep the previous rows visible while the next results load.
 - In Overview, explore `More by {artist}` for up to four other published Meme
   Cards per credited artist directly after the description, before detailed metadata.
   Cards are ordered by newest card number first. Each preview
@@ -217,6 +231,14 @@
 - Remediation: add reviewed entries to the four locale dictionaries, then check
   visible and accessible names, long-label wrapping, and expansion controls in
   each locale.
+
+## Collectors Translation Follow-up
+
+- Collectors mobile labels use the `theMemes.detail.collectors.*` message keys.
+  New metric, count and sort labels currently fall back to English in French,
+  Spanish and German; values use the selected locale's number formatting.
+  Frontend localization maintainers should add reviewed translations and check
+  longer labels at phone widths.
 
 ## Related Pages
 

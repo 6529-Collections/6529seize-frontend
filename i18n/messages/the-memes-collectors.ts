@@ -36,8 +36,8 @@ function buildTheMemesCollectorsMessages(
   ) as TheMemesCollectorsMessageMap;
 }
 
-export const EN_US_THE_MEMES_COLLECTORS_MESSAGES =
-  buildTheMemesCollectorsMessages([
+export const EN_US_THE_MEMES_COLLECTORS_MESSAGES = {
+  ...buildTheMemesCollectorsMessages([
     "Collectors leaderboard",
     "Download CSV",
     "Preparing CSV",
@@ -45,7 +45,25 @@ export const EN_US_THE_MEMES_COLLECTORS_MESSAGES =
     "Couldn't download collectors CSV. Please try again.",
     "Preparing collectors CSV.",
     "Collectors CSV download ready.",
-  ]);
+  ]),
+  "theMemes.detail.collectors.countOne": "{count} collector",
+  "theMemes.detail.collectors.countOther": "{count} collectors",
+  "theMemes.detail.collectors.cardOne": "card",
+  "theMemes.detail.collectors.cardOther": "cards",
+  "theMemes.detail.collectors.sortBy": "Sort collectors by",
+  "theMemes.detail.collectors.rank": "Rank",
+  "theMemes.detail.collectors.balance": "Balance",
+  "theMemes.detail.collectors.tdh": "TDH",
+  "theMemes.detail.collectors.unweightedTdh": "Unweighted TDH",
+  "theMemes.detail.collectors.unweighted": "Unweighted",
+  "theMemes.detail.collectors.allCards": "All cards",
+  "theMemes.detail.collectors.cardTdh": "This card TDH",
+  "theMemes.detail.collectors.cardUnweightedTdh": "This card unweighted TDH",
+  "theMemes.detail.collectors.totalBalance": "Total balance",
+  "theMemes.detail.collectors.totalTdh": "Total TDH",
+  "theMemes.detail.collectors.totalUnweightedTdh": "Total unweighted TDH",
+  "theMemes.detail.collectors.metricValue": "{label}: {value}",
+};
 
 export const DE_DE_THE_MEMES_COLLECTORS_MESSAGES =
   buildTheMemesCollectorsMessages([
