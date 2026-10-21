@@ -57,10 +57,10 @@ export default function FilterGridDropdown<TValue extends string | number>({
   };
 
   const getMenuItemClassName = (isActive: boolean) =>
-    `max-lg:tw-min-h-11 max-lg:tw-rounded-lg max-lg:tw-border-0 motion-reduce:tw-transition-none tw-flex tw-min-w-0 tw-items-center tw-justify-center tw-gap-x-1 tw-whitespace-nowrap tw-rounded-md tw-border tw-border-solid tw-px-2 tw-py-2 tw-text-sm tw-font-medium tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
+    `tw-flex tw-min-h-11 tw-min-w-0 tw-items-center tw-justify-center tw-gap-x-1 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-px-2 tw-py-2 tw-text-sm tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 motion-reduce:tw-transition-none ${
       isActive
-        ? "tw-bg-primary-500/20 tw-border-primary-500 tw-text-primary-300 max-lg:tw-bg-iron-200 max-lg:tw-text-iron-950 max-lg:tw-font-semibold"
-        : "tw-bg-transparent tw-border-iron-700 tw-text-iron-200 hover:tw-bg-iron-800 max-lg:tw-bg-iron-900 max-lg:tw-text-iron-300"
+        ? "tw-bg-iron-200 tw-font-semibold tw-text-iron-950"
+        : "tw-bg-iron-900 tw-font-medium tw-text-iron-300 hover:tw-bg-iron-800"
     }`;
 
   return (

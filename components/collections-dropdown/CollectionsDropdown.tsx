@@ -173,7 +173,7 @@ export default function CollectionsDropdown(props: Readonly<Props>) {
               {collection.id === props.activePage && (
                 <FontAwesomeIcon
                   icon={faCheck}
-                  className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-primary-300 max-lg:tw-text-white"
+                  className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-primary-300"
                   aria-hidden="true"
                 />
               )}

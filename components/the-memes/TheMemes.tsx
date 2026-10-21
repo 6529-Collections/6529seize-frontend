@@ -18,6 +18,7 @@ import {
 import { getTheMemesBrowseHref } from "@/components/the-memes/theMemesRouteParams";
 import type { TheMemesInitialData } from "@/app/the-memes/theMemesInitialData";
 import VolumeTypeDropdown from "@/components/the-memes/VolumeTypeDropdown";
+import DropdownToolbar from "@/components/utils/select/dropdown/DropdownToolbar";
 import FilterGridDropdown from "@/components/utils/select/dropdown/FilterGridDropdown";
 import MemeSeasonGridDropdown from "@/components/utils/select/dropdown/MemeSeasonGridDropdown";
 import { publicEnv } from "@/config/env";
@@ -657,7 +658,8 @@ export default function TheMemesComponent({
                     className="max-sm:tw-col-start-1 max-sm:tw-row-start-2 max-sm:tw-min-h-10 max-sm:tw-px-0 max-sm:tw-text-[13px] max-sm:tw-text-iron-400 max-sm:[&>svg]:tw-size-3"
                   />
                 </div>
-                <div
+                <DropdownToolbar
+                  desktopOnly
                   className="tw-grid tw-w-full tw-shrink-0 tw-grid-cols-[max-content_minmax(0,max-content)] tw-gap-2 max-sm:tw-mt-1 sm:tw-w-auto sm:tw-grid-cols-[9rem_13rem]"
                   data-dropdown-menu-align="end"
                 >
@@ -689,7 +691,7 @@ export default function TheMemesComponent({
                     allSeasonsLabel={allSeasonsLabel}
                     locale={locale}
                   />
-                </div>
+                </DropdownToolbar>
               </div>
             </div>
           </header>
