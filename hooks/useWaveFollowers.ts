@@ -1,14 +1,16 @@
 "use client";
 
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
 import type { ApiIdentityAndSubscriptionActions } from "@/generated/models/ApiIdentityAndSubscriptionActions";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { getWaveFollowersCountQueryKey } from "@/hooks/useWaveFollowersCount";
 const REQUEST_SIZE = 100;
 
 export function useWaveFollowers(waveId: string) {
+  const queryClient = useQueryClient();
   const query = {
     page_size: `${REQUEST_SIZE}`,
   };
@@ -36,10 +38,15 @@ export function useWaveFollowers(waveId: string) {
       if (pageParam) {
         params["page"] = `${pageParam}`;
       }
-      return await commonApiFetch<ApiIncomingIdentitySubscriptionsPage>({
+      const page = await commonApiFetch<ApiIncomingIdentitySubscriptionsPage>({
         endpoint: `/identity-subscriptions/incoming/WAVE/${waveId}`,
         params,
       });
+      queryClient.setQueryData(
+        getWaveFollowersCountQueryKey(waveId),
+        page.count
+      );
+      return page;
     },
     initialPageParam: null,
     getNextPageParam: (lastPage) => (lastPage.next ? lastPage.page + 1 : null),
