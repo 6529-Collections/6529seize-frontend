@@ -1,11 +1,12 @@
 "use client";
 
 import clsx from "clsx";
+import { getButtonClasses } from "@/components/utils/button/buttonStyles";
 import { useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { SortDirection } from "@/entities/ISort";
 import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
-import type { CommonSelectItemProps } from "../CommonSelect";
+import type { CommonSelectItemProps, CommonSelectProps } from "../CommonSelect";
 
 export type CommonTabsActiveTone = "neutral" | "primary";
 
@@ -22,6 +23,7 @@ export default function CommonTabsTab<T, U = unknown>(
       readonly fill?: boolean | undefined;
       readonly size?: "sm" | "md" | "tabs" | undefined;
       readonly activeTone?: CommonTabsActiveTone | undefined;
+      readonly variant?: CommonSelectProps<T, U>["variant"];
     }
   >
 ) {
@@ -36,6 +38,7 @@ export default function CommonTabsTab<T, U = unknown>(
     fill = true,
     size = "md",
     activeTone = "neutral",
+    variant = "default",
   } = props;
 
   const isActive = item.value === activeItem;
@@ -63,11 +66,36 @@ export default function CommonTabsTab<T, U = unknown>(
       ? item.tooltip
       : undefined;
 
+  let buttonClasses = `${dynamicClasses} ${
+    disabled ? "tw-cursor-not-allowed tw-opacity-60" : ""
+  } ${fill ? "tw-flex-1" : ""} ${
+    size === "sm"
+      ? "tw-px-3 tw-py-1.5 tw-text-xs"
+      : "tw-px-3 tw-py-1.5 tw-text-sm"
+  } tw-flex tw-items-center tw-justify-center tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-font-medium tw-leading-5 tw-transition-all tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`;
+  if (variant === "filter") {
+    buttonClasses = getButtonClasses({
+      variant: isActive ? "primary" : "tertiary",
+      size: "xs",
+      className:
+        "focus-visible:tw-outline-offset-[-2px] motion-reduce:tw-transition-none",
+    });
+  } else if (variant === "sub-view") {
+    buttonClasses = clsx(
+      "tw-flex tw-h-8 tw-items-center tw-justify-center tw-gap-2 tw-whitespace-nowrap tw-rounded-full tw-border-0 tw-px-3 tw-text-xs tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 motion-reduce:tw-transition-none",
+      isActive
+        ? "tw-bg-white/[0.08] tw-font-semibold tw-text-iron-50"
+        : "tw-bg-transparent tw-font-medium tw-text-iron-500 active:tw-bg-white/[0.06] desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-iron-200"
+    );
+  }
+
   return (
     <div
       className={clsx(
-        "tw-flex tw-rounded-lg tw-p-[1px]",
-        fill ? "tw-flex-1" : undefined
+        "tw-flex",
+        variant === "filter" || variant === "sub-view"
+          ? "tw-flex-none"
+          : clsx("tw-rounded-lg tw-p-[1px]", fill && "tw-flex-1")
       )}
     >
       <button
@@ -82,13 +110,7 @@ export default function CommonTabsTab<T, U = unknown>(
         onKeyDown={onKeyDown}
         onMouseEnter={() => !disabled && setShouldRotate(true)}
         onMouseLeave={() => !disabled && setShouldRotate(false)}
-        className={`${dynamicClasses} ${
-          disabled ? "tw-cursor-not-allowed tw-opacity-60" : ""
-        } ${fill ? "tw-flex-1" : ""} ${
-          size === "sm"
-            ? "tw-px-3 tw-py-1.5 tw-text-xs"
-            : "tw-px-3 tw-py-1.5 tw-text-sm"
-        } tw-flex tw-items-center tw-justify-center tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-font-medium tw-leading-5 tw-transition-all tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
+        className={buttonClasses}
       >
         {item.icon}
         {item.label}
@@ -103,6 +125,9 @@ export default function CommonTabsTab<T, U = unknown>(
               direction={isActive ? sortDirection : SortDirection.DESC}
               isActive={isActive}
               shouldRotate={isActive && shouldRotate}
+              activeClassName={
+                variant === "filter" ? "tw-text-current" : undefined
+              }
             />
           </span>
         )}

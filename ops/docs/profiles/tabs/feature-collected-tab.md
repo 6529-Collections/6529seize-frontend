@@ -128,6 +128,9 @@ Transfer mode is part of the Native collected view (not a separate route).
    - `Native` for profile card holdings.
    - `Network` for xTDH token holdings.
 6. Apply filters:
+   - Filter controls use compact 32px buttons. On desktop, view and sort options
+     are individual chips with a light selected state; smaller screens keep
+     the dropdowns and mobile option sheets.
    - Native collection: `All`, `The Memes`, `Gradients`, `NextGen`, `Meme Lab`.
    - Network collection: contract list from current xTDH collections.
    - Memes-only filters: `Seized` and `Season`.

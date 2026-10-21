@@ -534,6 +534,7 @@ export default function MemePage({
       >
         <div className="tw-w-fit tw-max-w-full">
           <CommonTabs<MEME_HISTORY_TAB>
+            variant="sub-view"
             items={visibleHistoryTabItems}
             activeItem={activeHistoryTab}
             filterLabel={t(locale, "theMemes.detail.history.ariaLabel")}

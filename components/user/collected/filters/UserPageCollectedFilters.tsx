@@ -151,7 +151,7 @@ export default function UserPageCollectedFilters({
   };
 
   return (
-    <DropdownToolbar className="tw-relative tw-w-full">
+    <DropdownToolbar size="sm" className="tw-relative tw-w-full">
       <div
         ref={scrollContainerRef}
         className="tw-w-full tw-overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:tw-hidden"
@@ -171,6 +171,7 @@ export default function UserPageCollectedFilters({
                 "user.collected.filters.view"
               )}
               size="sm"
+              variant="filter"
             />
 
             {activeMainTab === MainTab.NATIVE && (
@@ -213,6 +214,7 @@ export default function UserPageCollectedFilters({
             {filters.collection !== CollectedCollectionType.NETWORK && (
               <UserAddressesSelectDropdown
                 wallets={profile.wallets ?? []}
+                variant="filter"
                 containerRef={containerRef}
                 onActiveAddress={() => undefined}
                 onAddressChange={onAddressChange}
