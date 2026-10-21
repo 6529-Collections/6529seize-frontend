@@ -56,27 +56,31 @@ async function loadBatch(identity: CompetitionIdentity, lookups: Lookup[]) {
     );
     const dropsById = new Map(drops.map((drop) => [drop.id, drop]));
     for (const lookup of lookups) {
-      if (lookup.signal.aborted) continue;
-      const context = entriesById.get(lookup.entryId);
-      const original = dropsById.get(lookup.dropId);
-      if (!context || !original) {
-        lookup.resolve(null);
-        continue;
+      try {
+        if (lookup.signal.aborted) continue;
+        const context = entriesById.get(lookup.entryId);
+        const original = dropsById.get(lookup.dropId);
+        if (!context || !original) {
+          lookup.resolve(null);
+          continue;
+        }
+        if (
+          context.entry.competition_id !== identity.competitionId ||
+          context.entry.wave_id !== identity.waveId ||
+          context.entry.drop_id !== lookup.dropId ||
+          original.wave.id !== identity.waveId
+        ) {
+          lookup.reject(new Error("Invalid competition entry"));
+          continue;
+        }
+        lookup.resolve({
+          ...context,
+          competition: contexts.competition,
+          original,
+        });
+      } catch (error) {
+        lookup.reject(error);
       }
-      if (
-        context.entry.competition_id !== identity.competitionId ||
-        context.entry.wave_id !== identity.waveId ||
-        context.entry.drop_id !== lookup.dropId ||
-        original.wave.id !== identity.waveId
-      ) {
-        lookup.reject(new Error("Invalid competition entry"));
-        continue;
-      }
-      lookup.resolve({
-        ...context,
-        competition: contexts.competition,
-        original,
-      });
     }
   } catch (error) {
     for (const lookup of lookups) lookup.reject(error);

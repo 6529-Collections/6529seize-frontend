@@ -96,3 +96,36 @@ it("does not render entries omitted by the scoped batch endpoint", async () => {
   await waitFor(() => expect(result.current[0]?.isSuccess).toBe(true));
   expect(result.current[0]?.data).toBeNull();
 });
+
+it("preserves scoped awards on hydrated winner cards", async () => {
+  const award = {
+    id: "award",
+    decision_id: "decision",
+    entry_id: "entry",
+    outcome_position: 0,
+    type: "MANUAL",
+    description: "Minted on The Memes",
+    credit: null,
+    rep_category: null,
+    amount: null,
+  };
+  jest
+    .mocked(fetchCompetitionEntryDrop)
+    .mockResolvedValue({
+      ...context,
+      entry: {
+        ...context.entry,
+        status: "WINNER",
+        rank: 1,
+        won_at: 100,
+        decision_id: "decision",
+      },
+      awards: [award],
+      original: { id: "drop", wave: { id: "wave" }, parts: [] },
+    } as never);
+  const { result } = setup();
+  await waitFor(() => expect(result.current[0]?.isSuccess).toBe(true));
+  expect(result.current[0]?.data?.drop.winning_context?.awards).toEqual([
+    { type: "MANUAL", description: "Minted on The Memes" },
+  ]);
+});

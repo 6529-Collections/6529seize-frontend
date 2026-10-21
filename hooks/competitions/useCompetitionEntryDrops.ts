@@ -8,6 +8,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { fetchCompetitionEntryDrop } from "@/services/api/competition-entry-drops-api";
 import { competitionScope } from "@/services/api/competitions-api";
+import { competitionAward } from "@/helpers/competition-presentation.helpers";
 import { applyCompetitionDropSummary } from "./useCompetitionDrop";
 import { useCompetitionViewer } from "./useCompetitionQueries";
 
@@ -89,13 +90,29 @@ export function useCompetitionEntryDrops(
           drop.winning_context = {
             place: context.entry.rank ?? 1,
             decision_time: context.entry.won_at ?? context.entry.submitted_at,
-            awards: [],
+            awards: awards
+              .filter(
+                (award) =>
+                  award.entry_id === context.entry.id &&
+                  award.decision_id === context.entry.decision_id
+              )
+              .map(competitionAward),
           };
         }
         return { entry: context.entry, drop, awards };
       },
       staleTime: 15_000,
-      refetchInterval: competition.permissions.vote ? 30_000 : false,
+      refetchInterval: (query: {
+        state: {
+          data:
+            | { entry: { status: ApiCompetitionEntryStatus } }
+            | null
+            | undefined;
+        };
+      }) =>
+        query.state.data?.entry.status === ApiCompetitionEntryStatus.Winner
+          ? false
+          : 30_000,
       retry: false,
     })),
   });

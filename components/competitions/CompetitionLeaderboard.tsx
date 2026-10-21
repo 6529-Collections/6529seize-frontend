@@ -70,6 +70,7 @@ function CompetitionLeaderboardEntry({
   if (!dropQuery || dropQuery.isPending)
     return (
       <div
+        aria-busy="true"
         className={
           viewMode === "list" ? "tw-min-h-[560px]" : "tw-min-h-[520px]"
         }

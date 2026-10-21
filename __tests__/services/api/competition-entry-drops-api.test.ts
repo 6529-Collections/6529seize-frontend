@@ -31,7 +31,11 @@ beforeEach(() => {
     async ({ params }) =>
       ({
         competition: { id: "comp", wave_id: "wave" },
-        data: String(params?.["entry_ids"]).split(",").map(item),
+        data: String(
+          (params as Record<string, string> | undefined)?.["entry_ids"]
+        )
+          .split(",")
+          .map(item),
       }) as never
   );
   jest
@@ -94,4 +98,20 @@ it("cancels offscreen cards without cancelling cards still visible", async () =>
   expect(commonApiFetch).toHaveBeenCalledWith(
     expect.objectContaining({ params: { entry_ids: "visible" } })
   );
+});
+
+it("keeps other visible cards available when one entry fails membership validation", async () => {
+  jest.mocked(commonApiFetch).mockResolvedValue({
+    competition: { id: "comp", wave_id: "wave" },
+    data: [
+      { ...item("bad"), entry: { ...item("bad").entry, drop_id: "wrong" } },
+      item("good"),
+    ],
+  } as never);
+  const results = await Promise.allSettled([request("bad"), request("good")]);
+  expect(results[0]).toMatchObject({ status: "rejected" });
+  expect(results[1]).toMatchObject({
+    status: "fulfilled",
+    value: { entry: { id: "good" } },
+  });
 });
