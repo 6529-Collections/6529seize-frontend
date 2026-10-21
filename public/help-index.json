@@ -7255,6 +7255,7 @@
         "Signed-out visitors who select Join are taken to the wallet connect flow; after signing in, select Join again.",
         "The header Join is not shown for direct messages, proxy sessions, or connected wallets whose profile has not loaded.",
         "A subwave is joined separately from its parent wave.",
+        "The Joined count in About and its follower list include followers who can currently access the wave and, for subwaves, its parent. Followers who lose access are hidden without losing their subscription and return if they qualify again. Losing posting or voting permission alone does not hide someone who can still read the wave.",
         "Joined waves offer the bell notification menu; muting is separate from joining."
       ],
       "canonical_path": "/waves",

@@ -108,6 +108,9 @@ describe("toggleWaveFollowing", () => {
       client.getQueryData<CachedSidebarWaves>(officialWavesKey)?.[0]?.subscribed
     ).toBe(false);
     expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE_FOLLOWERS, { wave_id: "w1" }],
+    });
+    expect(invalidateSpy).toHaveBeenCalledWith({
       queryKey: [QueryKey.WAVES_V2],
     });
     expect(invalidateSpy).toHaveBeenCalledWith({

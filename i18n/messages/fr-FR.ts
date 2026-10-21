@@ -30,6 +30,13 @@ export const FR_FR_MESSAGES = {
   ...safeCollectingMessages,
   ...delegationTapGuideMessages,
   ...networkTdhConsolidationMessages,
+  "waves.sidebar.rightPanel.followers.label": "Membres",
+  "waves.sidebar.rightPanel.followers.open": "Afficher les membres",
+  "waves.sidebar.rightPanel.followers.loading":
+    "Chargement du nombre de membres…",
+  "waves.sidebar.rightPanel.followers.unavailable":
+    "Nombre de membres indisponible.",
+  "waves.sidebar.rightPanel.followers.count": "Membres : {count}.",
   ...FR_SUBMISSION_DISCOVERY_MESSAGES,
   ...FR_FR_DROP_REQUIREMENT_MESSAGES,
   ...FR_FR_DROP_METADATA_MESSAGES,
