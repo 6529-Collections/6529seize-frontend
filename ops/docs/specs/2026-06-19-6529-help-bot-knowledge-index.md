@@ -17,9 +17,12 @@ unique subject-based cases covering user reports and pending checks, with a
 shared sidebar signal and summary/tab count and a compatible older
 open-reports link. Review case opens all outstanding cases on the left with the
 selected case highlighted and its reports, checks and evidence on the right.
-The Needs review quick filter clears advanced filters to restore that full
-queue; All checks and advanced filters browse individual check history.
-Back to Needs review returns from the detail. Automated outcome is distinct
+The Needs review only toggle applies review status immediately, preserving other
+applied filters. Filter checks opens advanced controls explicitly; edits remain
+pending until Apply filters synchronizes the results and toggle. Quick toggles
+preserve other drafts and the panel's open/closed state. Additional filters browse
+individual check history. Back to list appears on mobile; desktop uses the
+visible list without a redundant back button. Automated outcome is distinct
 from deletion and manual review status.
 
 The `home.overview` record explains the Coming up mobile swipe row, keyboard

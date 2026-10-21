@@ -105,14 +105,17 @@ it("supports workspace navigation and labels the loaded automated outcome", asyn
         id="check-1"
         source="check"
         profileId="dev-1"
-        backLabel="checks.backToNeedsReview"
+        backLabel="checks.backToList"
+        mobileBackOnly
         onClose={onClose}
       />
     </QueryClientProvider>
   );
   await screen.findByRole("heading", { name: "About text" });
   expect(screen.getByText(/Automated outcome: Rejected/)).toBeVisible();
-  fireEvent.click(screen.getByRole("button", { name: "Back to Needs review" }));
+  const back = screen.getByRole("button", { name: "Back to list" });
+  expect(back).toHaveClass("lg:tw-hidden");
+  fireEvent.click(back);
   expect(onClose).toHaveBeenCalledTimes(1);
 });
 

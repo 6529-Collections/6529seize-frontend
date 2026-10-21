@@ -52,7 +52,7 @@ jest.mock("@/app/content-moderation/checks/CheckDetail", () => ({
       <aside aria-label="Case detail">
         <span>{id}</span>
         {caseContext}
-        <button onClick={onClose}>Back to Needs review</button>
+        <button onClick={onClose}>Back to list</button>
       </aside>
     );
   },
@@ -212,7 +212,7 @@ it("switches selected cases without narrowing the left queue and returns to Need
   expect(
     new URLSearchParams(globalThis.location.search).get("report")
   ).toBeNull();
-  fireEvent.click(screen.getByRole("button", { name: "Back to Needs review" }));
+  fireEvent.click(screen.getByRole("button", { name: "Back to list" }));
   expect(globalThis.location.pathname).toBe("/content-moderation/needs-review");
   await waitFor(() =>
     expect(screen.getByRole("button", { name: "Returned case" })).toHaveFocus()
@@ -258,22 +258,26 @@ it("resolves a direct non-representative report selection to the post case witho
     screen.getByRole("button", { name: /Category awaiting review/ })
   ).toBeVisible();
 });
-it("offers one-click Needs review and All checks presets", async () => {
+it("keeps filter disclosure and drafts while switching between history and the case queue", async () => {
   mount("/content-moderation/checks");
-  expect(screen.getByRole("button", { name: "Needs review" })).toHaveAttribute(
-    "aria-pressed",
-    "false"
-  );
-  fireEvent.click(screen.getByRole("button", { name: "Needs review" }));
+  const toggle = screen.getByRole("switch", { name: "Needs review only" });
+  const disclosure = screen.getByRole("button", { name: "Filter checks" });
+  expect(toggle).not.toBeChecked();
+  fireEvent.click(disclosure);
+  fireEvent.change(screen.getByLabelText("Profile ID"), {
+    target: { value: "draft-author" },
+  });
+  fireEvent.click(toggle);
   await screen.findByRole("button", { name: /Report-only case/ });
-  expect(screen.getByRole("button", { name: "Needs review" })).toHaveAttribute(
-    "aria-pressed",
-    "true"
-  );
-  fireEvent.click(screen.getByRole("button", { name: "All checks" }));
+  expect(toggle).toBeChecked();
+  expect(disclosure).toHaveAttribute("aria-expanded", "true");
+  expect(screen.getByLabelText("Profile ID")).toHaveValue("draft-author");
+  expect(
+    new URLSearchParams(globalThis.location.search).has("profile_id")
+  ).toBe(false);
+  fireEvent.click(toggle);
   expect(globalThis.location.search).toBe("");
-  expect(screen.getByRole("button", { name: "All checks" })).toHaveAttribute(
-    "aria-pressed",
-    "true"
-  );
+  expect(toggle).not.toBeChecked();
+  expect(disclosure).toHaveAttribute("aria-expanded", "true");
+  expect(screen.getByLabelText("Profile ID")).toHaveValue("draft-author");
 });

@@ -7,7 +7,6 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { CaseSummary, useModerationReviewCases } from "./ModerationReviewCases";
 import CheckDetail from "./CheckDetail";
-import CheckFilters from "./CheckFilters";
 import CaseReports from "./CaseReports";
 import CaseChecks from "./CaseChecks";
 import useModerationCheckDetail from "./useModerationCheckDetail";
@@ -80,14 +79,7 @@ export default function ModerationReviewWorkspace({
     navigateChecks(next);
   }
   return (
-    <div className="tw-mt-6 tw-min-w-0">
-      <div className={selection ? "tw-hidden lg:tw-block" : ""}>
-        <CheckFilters
-          key={params.toString()}
-          params={params}
-          onApply={navigateChecks}
-        />
-      </div>
+    <div className="tw-min-w-0">
       <div
         className={`tw-mt-6 tw-grid tw-min-w-0 tw-gap-5 ${selection ? "lg:tw-grid-cols-[minmax(16rem,2fr)_minmax(0,3fr)]" : ""}`}
       >
@@ -192,7 +184,8 @@ export default function ModerationReviewWorkspace({
               id={selection}
               source={source}
               profileId={profileId}
-              backLabel="checks.backToNeedsReview"
+              mobileBackOnly
+              backLabel="checks.backToList"
               onClose={backToNeedsReview}
             />
           </div>
