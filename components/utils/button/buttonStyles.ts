@@ -27,7 +27,7 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   tertiary:
     "tw-border-iron-800 tw-bg-iron-950 tw-text-iron-100 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white active:tw-bg-black",
   filter:
-    "tw-border-iron-800 tw-bg-iron-950 tw-text-iron-400 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100 active:tw-bg-black",
+    "tw-border-iron-800 tw-bg-iron-950 tw-text-iron-400 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100 active:tw-bg-black lg:tw-border-transparent lg:tw-bg-transparent lg:tw-shadow-none lg:active:tw-bg-iron-900 lg:desktop-hover:hover:tw-border-transparent lg:desktop-hover:hover:tw-bg-iron-900/50",
   success:
     "tw-border-emerald-600 tw-bg-emerald-600 tw-text-white desktop-hover:hover:tw-border-emerald-500 desktop-hover:hover:tw-bg-emerald-500 active:tw-border-emerald-700 active:tw-bg-emerald-700",
   positiveToggle:

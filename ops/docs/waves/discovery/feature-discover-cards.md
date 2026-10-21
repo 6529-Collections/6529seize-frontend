@@ -53,6 +53,10 @@ from home discovery.
   reserving the Discover card height.
 - Artwork is subtly desaturated at rest and returns to full color on hover or
   keyboard focus. Touch cards retain full color.
+- Sort and score filters use the shared filter style: at 1024px and wider,
+  inactive options are gray text with a faint hover fill; the selected option
+  keeps a light filled chip. Smaller screens retain bordered chips and the
+  existing compact sort sheet.
 - Sort and score-filter groups share a row when space allows and wrap when
   needed. On narrow screens, each group keeps its horizontal scrolling.
 - Use `/discover` as the larger browse surface when home six-card discovery is

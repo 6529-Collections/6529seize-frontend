@@ -189,6 +189,7 @@ export function DiscoverWaveControls({
         </Button>
         <div className="tw-hidden tw-shrink-0 @[56rem]/discovery-controls:tw-block">
           <CommonTabs<DiscoverSort>
+            variant="filter"
             items={SORT_OPTIONS.map((option) => ({
               key: option.value,
               value: option.value,

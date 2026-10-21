@@ -50,7 +50,6 @@ export default function VolumeTypeDropdown({
       <FilterButton
         ref={buttonRef}
         selected={isVolumeSort}
-        desktopText
         aria-haspopup="true"
         aria-pressed={isVolumeSort}
         aria-expanded={isOpen}

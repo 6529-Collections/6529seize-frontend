@@ -6,33 +6,18 @@ type FilterButtonProps = Omit<
   "variant"
 > & {
   readonly selected: boolean;
-  readonly desktopText?: boolean;
 };
 
 /** Shared filter appearance; callers keep their button or radio semantics. */
 const FilterButton = forwardRef<HTMLButtonElement, FilterButtonProps>(
-  (
-    {
-      selected,
-      desktopText = false,
-      disabled,
-      size = "xs",
-      className = "",
-      ...props
-    },
-    ref
-  ) => (
+  ({ selected, disabled, size = "xs", className = "", ...props }, ref) => (
     <Button
       {...props}
       ref={ref}
       disabled={disabled}
       size={size}
       variant={selected && !disabled ? "primary" : "filter"}
-      className={`motion-reduce:tw-transition-none ${
-        desktopText && !selected
-          ? "lg:tw-border-transparent lg:tw-bg-transparent lg:tw-shadow-none lg:active:tw-bg-iron-900 lg:desktop-hover:hover:tw-border-transparent lg:desktop-hover:hover:tw-bg-iron-900/50"
-          : ""
-      } ${className}`}
+      className={`motion-reduce:tw-transition-none ${className}`}
     />
   )
 );

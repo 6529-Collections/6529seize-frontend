@@ -75,7 +75,7 @@ export default function CommonTabsTab<T, U = unknown>(
   } tw-flex tw-items-center tw-justify-center tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-font-medium tw-leading-5 tw-transition-all tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`;
   if (variant === "filter") {
     buttonClasses = getButtonClasses({
-      variant: isActive ? "primary" : "tertiary",
+      variant: isActive ? "primary" : "filter",
       size: "xs",
       className:
         "focus-visible:tw-outline-offset-[-2px] motion-reduce:tw-transition-none",
