@@ -30,6 +30,8 @@
 ## Phone Layout
 
 - Below 640px, Year and Season sit side by side above a sticky sort bar.
+- The slideshow button sits beside the title and collection link when there is
+  room, and wraps below them with a small gap on narrow screens.
 - Swipe the sort row horizontally to reach every sort option. The active option
   moves into view when selected, without scrolling the page vertically.
 - Cards use square, contained artwork previews in two columns. Each card keeps

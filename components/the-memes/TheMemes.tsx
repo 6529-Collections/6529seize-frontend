@@ -620,26 +620,28 @@ export default function TheMemesComponent({
           <header className="tw-pb-5 max-sm:tw-pb-2">
             <div className="tw-flex tw-flex-col tw-gap-4">
               <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-                <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 max-sm:tw-grid max-sm:tw-grid-cols-[minmax(0,1fr)_auto] max-sm:tw-gap-x-2 max-sm:tw-gap-y-0 sm:tw-w-auto sm:tw-justify-start">
-                  <div className="tw-min-w-0 min-[1200px]:tw-hidden">
-                    <CollectionsDropdown activePage="memes" variant="title" />
+                <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 max-sm:tw-gap-x-2 max-sm:tw-gap-y-1 sm:tw-w-auto sm:tw-justify-start">
+                  <div className="tw-min-w-0 max-sm:tw-flex max-sm:tw-max-w-full max-sm:tw-flex-col max-sm:tw-items-start sm:tw-contents">
+                    <div className="tw-min-w-0 min-[1200px]:tw-hidden">
+                      <CollectionsDropdown activePage="memes" variant="title" />
+                    </div>
+                    <h1 className="tw-m-0 tw-hidden tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl min-[1200px]:tw-block">
+                      {t(locale, "theMemes.title")}
+                    </h1>
+                    <CollectEntryLink
+                      collection="memes"
+                      intent={activeSeason ? "season" : "full_set"}
+                      definitionId={
+                        activeSeason ? String(activeSeason.id) : "memes"
+                      }
+                      locale={locale}
+                      complete
+                      className="max-sm:tw-min-h-10 max-sm:tw-px-0 max-sm:tw-text-[13px] max-sm:tw-text-iron-400 sm:tw-order-2 max-sm:[&>svg]:tw-size-3"
+                    />
                   </div>
-                  <h1 className="tw-m-0 tw-hidden tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl min-[1200px]:tw-block">
-                    {t(locale, "theMemes.title")}
-                  </h1>
                   <LFGButton
                     contract={MEMES_CONTRACT}
-                    className="max-sm:tw-col-start-2 max-sm:tw-row-span-2 max-sm:tw-row-start-1 max-sm:tw-h-9 max-sm:tw-text-[13px] max-[360px]:tw-px-2 max-[360px]:tw-text-xs"
-                  />
-                  <CollectEntryLink
-                    collection="memes"
-                    intent={activeSeason ? "season" : "full_set"}
-                    definitionId={
-                      activeSeason ? String(activeSeason.id) : "memes"
-                    }
-                    locale={locale}
-                    complete
-                    className="max-sm:tw-col-start-1 max-sm:tw-row-start-2 max-sm:tw-min-h-10 max-sm:tw-px-0 max-sm:tw-text-[13px] max-sm:tw-text-iron-400 max-sm:[&>svg]:tw-size-3"
+                    className="max-sm:tw-h-9 max-sm:tw-text-[13px] sm:tw-order-1"
                   />
                 </div>
                 <DropdownToolbar

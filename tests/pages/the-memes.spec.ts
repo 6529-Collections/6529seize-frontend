@@ -155,6 +155,25 @@ test.describe("The Memes Page @smoke @medium @large", () => {
     };
     await expect(page).toHaveURL(/sort=age&sort_dir=asc/);
     const memesHeader = await measureHeader();
+    const phoneViewport = page.viewportSize();
+    if (!phoneViewport) throw new Error("Expected a configured phone viewport");
+    const lfg = page.getByRole("button", { name: "LFG: Start the Show!" });
+    const measureLfgGap = () =>
+      lfg.evaluate((element) => {
+        const link = element
+          .closest("header")
+          ?.querySelector('a[href^="/collect"]');
+        return link
+          ? element.getBoundingClientRect().y -
+              link.getBoundingClientRect().bottom
+          : Infinity;
+      });
+    await page.setViewportSize({ ...phoneViewport, width: 320 });
+    await expect.poll(measureLfgGap).toBeGreaterThanOrEqual(0);
+    await expect.poll(measureLfgGap).toBeLessThanOrEqual(8);
+    await expectNoHorizontalOverflow(page);
+    await page.setViewportSize(phoneViewport);
+    await expect.poll(measureLfgGap).toBeLessThan(0);
     await page.getByRole("button", { name: "Collection: The Memes" }).click();
     await page
       .getByRole("menuitem", { name: "6529 Gradient", exact: true })
