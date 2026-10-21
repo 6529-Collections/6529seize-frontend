@@ -107,7 +107,9 @@ tabs. The collection lets you choose a different competition at any time.
    removes it. Negative votes are available only where the rules permit them.
 4. Competitions open on **Leaderboard**. Use the wave tab row for the selected competition. The leaderboard
    uses the familiar list/grid controls, sorting, rich drop cards and **Drop**
-   action. Rank competitions show the schedule; Approve competitions show
+   action. When entries are closed or your profile cannot submit, the leaderboard
+   omits the generic submission notice; submission forms still show eligibility feedback.
+   Rank competitions show the schedule; Approve competitions show
    approval thresholds, progress and approved counts. Winners use the existing
    podium or timeline for Rank and approved-drop cards for Approve. Outcomes
    use expandable reward cards; My votes shows editable vote rows and reset
