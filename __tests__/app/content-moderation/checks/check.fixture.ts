@@ -48,6 +48,8 @@ export function checkFixture(
       profile_status: null,
       drop_status: null,
       published: false,
+      deleted: false,
+      open_report_count: 0,
       suppressed: false,
       revision: null,
     },
