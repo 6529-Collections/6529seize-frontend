@@ -34,7 +34,6 @@ import { HttpFile } from '../http/http';
 
 export class ApiCurationDrop {
     'drop_priority_order': number | null;
-    'collaborators'?: Array<ApiMemeCollaboratorProfile>;
     /**
     * False when a winner has no saved at-decision voter records. The voter count is then unknown, not zero. Omitted by older servers.
     */
@@ -84,6 +83,7 @@ export class ApiCurationDrop {
     'hide_link_preview': boolean;
     'poll'?: ApiDropPoll;
     'nft_links'?: Array<ApiDropNftLink>;
+    'collaborators'?: Array<ApiMemeCollaboratorProfile>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -95,12 +95,6 @@ export class ApiCurationDrop {
             "baseName": "drop_priority_order",
             "type": "number",
             "format": "int64"
-        },
-        {
-            "name": "collaborators",
-            "baseName": "collaborators",
-            "type": "Array<ApiMemeCollaboratorProfile>",
-            "format": ""
         },
         {
             "name": "voters_count_available",
@@ -304,6 +298,12 @@ export class ApiCurationDrop {
             "name": "nft_links",
             "baseName": "nft_links",
             "type": "Array<ApiDropNftLink>",
+            "format": ""
+        },
+        {
+            "name": "collaborators",
+            "baseName": "collaborators",
+            "type": "Array<ApiMemeCollaboratorProfile>",
             "format": ""
         }    ];
 

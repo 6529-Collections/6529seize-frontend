@@ -35,10 +35,6 @@ import { HttpFile } from '../http/http';
 
 export class ApiDrop {
     /**
-    * Accepted collaborators only. Pending invitations are private.
-    */
-    'collaborators'?: Array<ApiMemeCollaboratorProfile>;
-    /**
     * False when a winner has no saved at-decision voter records. The voter count is then unknown, not zero. Omitted by older servers.
     */
     'voters_count_available'?: boolean;
@@ -88,18 +84,16 @@ export class ApiDrop {
     'hide_link_preview': boolean;
     'poll'?: ApiDropPoll;
     'nft_links'?: Array<ApiDropNftLink>;
+    /**
+    * Accepted collaborators only. Pending invitations are private.
+    */
+    'collaborators'?: Array<ApiMemeCollaboratorProfile>;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
-        {
-            "name": "collaborators",
-            "baseName": "collaborators",
-            "type": "Array<ApiMemeCollaboratorProfile>",
-            "format": ""
-        },
         {
             "name": "voters_count_available",
             "baseName": "voters_count_available",
@@ -308,6 +302,12 @@ export class ApiDrop {
             "name": "nft_links",
             "baseName": "nft_links",
             "type": "Array<ApiDropNftLink>",
+            "format": ""
+        },
+        {
+            "name": "collaborators",
+            "baseName": "collaborators",
+            "type": "Array<ApiMemeCollaboratorProfile>",
             "format": ""
         }    ];
 
