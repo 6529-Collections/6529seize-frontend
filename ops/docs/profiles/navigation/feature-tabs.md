@@ -43,6 +43,12 @@ Profile tab routes live under `/{user}`.
 4. Tab visibility rules run for the current viewer, device, and Waves context.
 5. If the tab stays visible, the route remains selected; otherwise the app
    falls back to the first visible tab and keeps the current query string.
+6. Selecting another tab immediately highlights it and shows a loading placeholder
+   while its content is being fetched. The header, banner, and tab bar remain in place.
+7. Tab switches preserve your vertical scroll position. Shorter content can reduce
+   the available scroll distance naturally. Fresh loads start at the top, and
+   browser Back and Forward restore navigation positions.
+8. If you select another tab while a switch is pending, the latest selection wins.
 
 ## Tab Visibility Rules
 
@@ -70,7 +76,8 @@ Profile tab routes live under `/{user}`.
 
 ## Query-String Behavior
 
-- Clicking a profile tab keeps only `?address=...` and drops other query keys.
+- Clicking a profile tab keeps `address` and `locale` and drops other tab-specific
+  query keys. The xTDH tab opens with `tab=granted`.
 - Canonical-handle redirects keep query params, remove `user`, and normalize repeated query keys into comma-separated values (for example `?x=a&x=b` becomes `?x=a,b`).
 
 ## Common Scenarios
@@ -112,7 +119,8 @@ Profile tab routes live under `/{user}`.
 
 - Tab visibility depends on current Waves availability, device/country gating,
   and ownership context.
-- Tab clicks intentionally keep only the `address` query key.
+- Tab clicks intentionally keep only the shared `address` and `locale` query keys.
+- Leaving Collected exits transfer mode and clears transfer selections.
 - Legacy route coverage is limited to the documented aliases above.
 
 ## Related Pages

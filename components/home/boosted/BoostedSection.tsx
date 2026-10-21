@@ -4,10 +4,20 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { useBoostedDrops } from "@/hooks/useBoostedDrops";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
-import BoostedDropCardHome from "./BoostedDropCardHome";
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
+
+// Rich previews are only needed when the API returns boosted cards.
+const BoostedDropCardHome = dynamic(() => import("./BoostedDropCardHome"), {
+  loading: () => (
+    <div
+      aria-hidden="true"
+      className="tw-h-64 tw-rounded-xl tw-bg-iron-900 motion-safe:tw-animate-pulse"
+    />
+  ),
+});
 
 const BOOSTED_DROPS_LIMIT = 50;
 const MAX_ROWS = 3;

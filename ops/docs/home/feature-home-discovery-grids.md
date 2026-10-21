@@ -33,19 +33,41 @@ why a section can disappear.
 
 1. `Boosted Drops` loads from the boosted feed:
    - While loading: section stays visible with `Loading...`.
-   - When data is ready: cards render in a responsive grid.
+   - When data is ready: cards render in a responsive grid. Card placeholders
+     can appear briefly while previews load; other home sections stay usable.
    - If the request fails or returns no cards: section is hidden.
 2. Users select a boosted card to open that drop in wave chat context.
 3. `Most active waves` loads hot waves:
    - While loading: six skeleton cards render.
    - When data is ready: up to six cards render with wave metadata.
-   - Cards use the artwork-led wave-card design shared with `/discover`, with
-     the description, labelled scores, and activity metadata below the image.
+   - Below `768px`, the image fills the left third of each card and stretches
+     its full height, with the name, description, labelled scores, and activity
+     metadata on the right.
+     Names and description previews use one line. The grid has one
+     column below `640px` and two columns from `640px`.
+   - From `768px`, cards place details below the image, with a gradient that
+     blends the bottom of the image into the card. From `1024px`, the grid has
+     three columns.
    - If the request fails or returns no waves: section is hidden.
 4. Users select a wave card to open that wave, or use `View all` to open
    `/waves`.
 
 ## Common Scenarios
+
+- Homepage cards use a short border-colour transition without lifting or
+  zooming artwork. Wave titles highlight on hover and keyboard focus.
+- From `768px`, both homepage `View all` buttons share the outlined treatment of
+  `Connect wallet`, with a softer resting border and a stronger border on hover,
+  and have a small arrow movement. Reduced-motion settings disable movement and
+  transitions while preserving visible focus feedback.
+- Both `Coming up` and the waves section place `View all` in the section header.
+  On small screens it is a plain text link with an arrow beside the title,
+  leaving clear space above the subtitle. From `768px` it becomes a compact
+  bordered button on the right. The waves list ends with its last card, without
+  a second action beneath it.
+- Section headings use matching sizes, and wave cards use larger rounded corners
+  with a subtle border. The site footer separates its wrapping links with space
+  and adds bottom spacing for devices with a safe area.
 
 - Boosted grid card limits:
   - Mobile (`<640px`): up to 6 cards
@@ -54,10 +76,11 @@ why a section can disappear.
 - Boosted card with profile fallback:
   - Footer shows `Anonymous` when the author has no handle.
 - Most active waves card with recent activity:
-  - Shows relative last-drop time and drops count.
-  - Shows a two-line description-drop preview when the wave description has
-    usable content.
-  - Shows labelled Score, Hot, and REP metrics below the description.
+  - Shows relative last-drop time and drops count directly below the wave name.
+  - Shows the description as plain text, without Markdown formatting: one line
+    below `768px`, up to two lines on larger layouts, aligned to the top.
+  - Keeps labelled Score, Hot, and REP metrics at the bottom of the card,
+    separated from the description by a subtle line.
 - Most active waves card with no activity:
   - Shows `No drops yet`.
 - Most active waves card with activity but no description content:
@@ -70,8 +93,8 @@ why a section can disappear.
   the compact preview row.
 - Preview content comes from the wave description drop, not the latest chat
   message.
-- If the description drop is empty, whitespace-only, or media-free, the card
-  still opens the wave route without a compact preview row.
+- If the description drop has no usable text, the card keeps its spacing and
+  still opens the wave route. Image and media previews are omitted here.
 - Cards can route to `/messages` for direct-message waves.
 
 ## Failure and Recovery
@@ -85,8 +108,9 @@ why a section can disappear.
 
 - `Boosted Drops` has no `View all` action on the homepage.
 - `Most active waves` is capped to six cards on home.
-- The dedicated `/discover` route uses the same card design with up to 20
-  results, no subtitle, no footer link, and backend exclude-followed filtering.
+- The dedicated `/discover` route keeps its own description preview and
+  metadata layout, with up to 20 results, no subtitle, no footer link, and
+  backend exclude-followed filtering.
 - Boosted ranking uses a recent boost window and updates while the page stays open.
 
 ## Related Pages

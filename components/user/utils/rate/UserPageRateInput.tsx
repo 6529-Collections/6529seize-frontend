@@ -4,6 +4,14 @@ import type { RefObject } from "react";
 const INPUT_CLASS_NAME =
   "tw-touch-manipulation tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-rounded-lg tw-border-0 tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none";
 
+const VARIANT_CLASSES = {
+  compact:
+    "tw-bg-iron-900/60 tw-px-10 tw-py-3 tw-text-center tw-tabular-nums tw-text-2xl tw-font-medium tw-leading-tight tw-tracking-tight",
+  form: "tw-bg-iron-900 tw-h-[46px] tw-py-3 tw-pl-16 tw-pr-4 tw-text-left tw-text-lg tw-font-medium tw-leading-5",
+  tooltip:
+    "tw-bg-iron-900 tw-h-10 touch-only:tw-h-11 tw-px-10 tw-text-center tw-tabular-nums tw-text-base tw-font-medium tw-leading-6",
+};
+
 const getValueStr = (val: string): string => {
   if (val.length > 1 && val.startsWith("0")) {
     return val.slice(1);
@@ -27,7 +35,7 @@ export default function UserPageRateInput({
   readonly minMax: { min: number; max: number };
   readonly isProxy: boolean;
   readonly inputRef?: RefObject<HTMLInputElement | null>;
-  readonly variant?: "compact" | "form";
+  readonly variant?: "compact" | "form" | "tooltip";
   readonly inputId?: string;
   readonly focusRingClassName?: string;
   readonly required?: boolean;
@@ -64,7 +72,7 @@ export default function UserPageRateInput({
         className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-4 tw-flex tw-items-center tw-gap-3 tw-text-iron-500"
       >
         <span
-          className={`tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-0.5 ${variant === "form" ? "tw-translate-y-0.5" : ""}`}
+          className={`tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-0.5 ${variant === "compact" ? "" : "tw-translate-y-0.5"}`}
         >
           <svg className="tw-size-3.5" viewBox="0 0 24 24" fill="none">
             <path
@@ -100,7 +108,7 @@ export default function UserPageRateInput({
         className={`${
           focusRingClassName ??
           (isValidValue ? "focus:tw-ring-primary-400" : "focus:tw-ring-red")
-        } ${INPUT_CLASS_NAME} ${variant === "form" ? "tw-bg-iron-900 tw-h-[46px] tw-py-3 tw-pl-16 tw-pr-4 tw-text-left tw-text-lg tw-font-medium tw-leading-5" : "tw-bg-iron-900/60 tw-px-10 tw-py-3 tw-text-center tw-tabular-nums tw-text-2xl tw-font-medium tw-leading-tight tw-tracking-tight"}`}
+        } ${INPUT_CLASS_NAME} ${VARIANT_CLASSES[variant]}`}
       />
     </div>
   );

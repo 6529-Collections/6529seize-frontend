@@ -2,6 +2,8 @@
 
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { useUserPageNavigation } from "./UserPageNavigation";
+import { getUserProfileTabsMessage } from "./user-tabs.messages";
 
 export default function UserPageTabTransition({
   children,
@@ -9,13 +11,41 @@ export default function UserPageTabTransition({
   readonly children: ReactNode;
 }) {
   const pathname = usePathname();
+  const isPending = !!useUserPageNavigation()?.pendingTab;
 
   return (
-    <div
-      key={pathname}
-      className="tw-transform-gpu motion-safe:tw-animate-in motion-safe:tw-fade-in motion-safe:tw-slide-in-from-right-1 motion-safe:tw-duration-150 motion-safe:tw-ease-out motion-reduce:tw-animate-none"
-    >
-      {children}
-    </div>
+    <>
+      <output className="tw-sr-only">
+        {isPending
+          ? getUserProfileTabsMessage("user.profile.tabs.loading")
+          : ""}
+      </output>
+      <div
+        className="tw-relative"
+        aria-busy={isPending}
+        data-profile-tab-content
+      >
+        <div
+          key={pathname}
+          inert={isPending}
+          style={{ visibility: isPending ? "hidden" : undefined }}
+          className="motion-safe:tw-animate-in motion-safe:tw-fade-in motion-safe:tw-slide-in-from-right-1 tw-transform-gpu motion-safe:tw-duration-150 motion-safe:tw-ease-out motion-reduce:tw-animate-none"
+        >
+          {children}
+        </div>
+        {isPending && (
+          <div className="tw-absolute tw-inset-x-0 tw-top-0">
+            <div
+              aria-hidden="true"
+              className="tw-space-y-4 motion-safe:tw-animate-pulse"
+            >
+              <div className="tw-h-8 tw-w-40 tw-rounded-lg tw-bg-iron-800" />
+              <div className="tw-h-24 tw-rounded-xl tw-bg-iron-900" />
+              <div className="tw-h-24 tw-rounded-xl tw-bg-iron-900" />
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 }

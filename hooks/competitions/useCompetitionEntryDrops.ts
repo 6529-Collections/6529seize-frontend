@@ -70,6 +70,12 @@ export function useCompetitionEntryDrops(
             type: DropSize.FULL,
             stableKey: `${identity.competitionId}:${entryId}`,
             stableHash: `${identity.competitionId}:${entryId}`,
+            competition_context: {
+              viewer,
+              waveId: identity.waveId,
+              dropId,
+              data: context,
+            },
           },
           context
         );

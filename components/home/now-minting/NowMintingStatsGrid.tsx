@@ -58,7 +58,7 @@ export default function NowMintingStatsGrid({
   const showBalance = connectedProfile && !isBalanceLoading;
 
   const editionValue = (
-    <span className="tw-flex tw-items-center tw-gap-2">
+    <span className="tw-flex tw-items-center tw-gap-2 sm:tw-flex-wrap">
       {editionSize}
       {showBalance && (
         <>
@@ -95,7 +95,7 @@ export default function NowMintingStatsGrid({
   );
 
   return (
-    <div className="tw-grid tw-grid-cols-2 tw-gap-x-8 tw-gap-y-5">
+    <div className="tw-grid tw-grid-cols-2 tw-gap-x-8 tw-gap-y-5 sm:tw-grid-cols-[repeat(4,auto)] sm:tw-gap-x-3">
       <NowMintingStatsItem
         appearance="compact"
         compactLabelSize="large"
@@ -114,16 +114,20 @@ export default function NowMintingStatsGrid({
         appearance="compact"
         compactLabelSize="large"
         label={t(locale, "home.nowMinting.stats.mintPrice")}
-        value={
-          <span className="tw-font-semibold tw-text-iron-100">{mintPrice}</span>
-        }
+        value={<span className="sm:tw-whitespace-normal">{mintPrice}</span>}
         isLoading={isStatusLoading}
       />
       <NowMintingStatsItem
         appearance="compact"
         compactLabelSize="large"
         label={t(locale, "home.nowMinting.stats.floor")}
-        value={<span className="tw-text-iron-400">{floorPrice}</span>}
+        value={
+          <span
+            className={`sm:tw-whitespace-normal ${floorPrice === "N/A" ? "tw-text-iron-500" : ""}`}
+          >
+            {floorPrice}
+          </span>
+        }
       />
     </div>
   );

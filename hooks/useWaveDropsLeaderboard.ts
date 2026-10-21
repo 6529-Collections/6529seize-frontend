@@ -36,6 +36,7 @@ interface UseWaveDropsLeaderboardProps {
   readonly sort?: WaveDropsLeaderboardSort | undefined;
   readonly enabled?: boolean | undefined;
   readonly maxPages?: number | undefined;
+  readonly retainOnUnmount?: boolean | undefined;
   readonly minPrice?: number | undefined;
   readonly maxPrice?: number | undefined;
   readonly priceCurrency?: string | undefined;
@@ -298,7 +299,9 @@ const useRemoveDropsQueryOnUnmount = ({
       queryClient.removeQueries({
         queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId }],
         // Other mounted views can share this wave's cache and in-flight requests.
-        predicate: (query) => query.getObserversCount() === 0,
+        predicate: (query) =>
+          query.getObserversCount() === 0 &&
+          query.meta?.["retainOnUnmount"] !== true,
       });
     };
   }, [waveId, queryClient]);
@@ -310,6 +313,7 @@ export function useWaveDropsLeaderboard({
   sort = WaveDropsLeaderboardSort.RANK,
   enabled = true,
   maxPages,
+  retainOnUnmount = false,
   minPrice,
   maxPrice,
   priceCurrency,
@@ -375,6 +379,8 @@ export function useWaveDropsLeaderboard({
     ...(maxPages === undefined ? {} : { maxPages }),
     enabled: isQueryEnabled,
     staleTime: 60000,
+    meta: { retainOnUnmount },
+    refetchOnWindowFocus: retainOnUnmount,
     ...getDefaultQueryRetry(),
   });
 
