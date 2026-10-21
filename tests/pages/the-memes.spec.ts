@@ -137,6 +137,7 @@ test.describe("The Memes Page @smoke @medium @large", () => {
         };
       });
     };
+    await expect(page).toHaveURL(/sort=age&sort_dir=asc/);
     const memesHeader = await measureHeader();
     await page.getByRole("button", { name: "Collection: The Memes" }).click();
     await page
