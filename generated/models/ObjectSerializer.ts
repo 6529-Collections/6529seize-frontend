@@ -557,6 +557,8 @@ export * from '../models/ApiModerationCheckPage';
 export * from '../models/ApiModerationCounts';
 export * from '../models/ApiModerationCurrentState';
 export * from '../models/ApiModerationEvaluation';
+export * from '../models/ApiModerationReviewCase';
+export * from '../models/ApiModerationReviewCasePage';
 export * from '../models/ApiNft';
 export * from '../models/ApiNftActivityEvent';
 export * from '../models/ApiNftActivityPage';
@@ -1192,7 +1194,7 @@ import { ApiContentModerationDropDecisionResponse   } from '../models/ApiContent
 import { ApiContentModerationProfileListItem         } from '../models/ApiContentModerationProfileListItem';
 import { ApiContentModerationProfileStatusRequest   } from '../models/ApiContentModerationProfileStatusRequest';
 import { ApiContentModerationProfileStatusResponse   } from '../models/ApiContentModerationProfileStatusResponse';
-import { ApiContentModerationQueueItem                             } from '../models/ApiContentModerationQueueItem';
+import { ApiContentModerationQueueItem                              } from '../models/ApiContentModerationQueueItem';
 import { ApiContentModerationRecommendation } from '../models/ApiContentModerationRecommendation';
 import { ApiContentModerationReportReason } from '../models/ApiContentModerationReportReason';
 import { ApiContentModerationReportRequest     } from '../models/ApiContentModerationReportRequest';
@@ -1463,8 +1465,10 @@ import { ApiModerationCheck , ApiModerationCheckSubjectTypeEnum      , ApiModera
 import { ApiModerationCheckDetail       , ApiModerationCheckDetailActionEffectEnum    } from '../models/ApiModerationCheckDetail';
 import { ApiModerationCheckPage } from '../models/ApiModerationCheckPage';
 import { ApiModerationCounts } from '../models/ApiModerationCounts';
-import { ApiModerationCurrentState, ApiModerationCurrentStateProfileStatusEnum  , ApiModerationCurrentStateDropStatusEnum      } from '../models/ApiModerationCurrentState';
+import { ApiModerationCurrentState, ApiModerationCurrentStateProfileStatusEnum  , ApiModerationCurrentStateDropStatusEnum        } from '../models/ApiModerationCurrentState';
 import { ApiModerationEvaluation    , ApiModerationEvaluationOutcomeEnum           } from '../models/ApiModerationEvaluation';
+import { ApiModerationReviewCase, ApiModerationReviewCaseCheckOutcomeEnum    , ApiModerationReviewCaseSubjectTypeEnum            } from '../models/ApiModerationReviewCase';
+import { ApiModerationReviewCasePage } from '../models/ApiModerationReviewCasePage';
 import { ApiNft      , ApiNftTokenTypeEnum                               } from '../models/ApiNft';
 import { ApiNftActivityEvent , ApiNftActivityEventKindEnum                   } from '../models/ApiNftActivityEvent';
 import { ApiNftActivityPage } from '../models/ApiNftActivityPage';
@@ -2007,6 +2011,8 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiModerationCurrentStateProfileStatusEnum",
     "ApiModerationCurrentStateDropStatusEnum",
     "ApiModerationEvaluationOutcomeEnum",
+    "ApiModerationReviewCaseCheckOutcomeEnum",
+    "ApiModerationReviewCaseSubjectTypeEnum",
     "ApiNftTokenTypeEnum",
     "ApiNftActivityEventKindEnum",
     "ApiNftLinkMediaPreviewStatusEnum",
@@ -2618,6 +2624,8 @@ let typeMap: {[index: string]: any} = {
     "ApiModerationCounts": ApiModerationCounts,
     "ApiModerationCurrentState": ApiModerationCurrentState,
     "ApiModerationEvaluation": ApiModerationEvaluation,
+    "ApiModerationReviewCase": ApiModerationReviewCase,
+    "ApiModerationReviewCasePage": ApiModerationReviewCasePage,
     "ApiNft": ApiNft,
     "ApiNftActivityEvent": ApiNftActivityEvent,
     "ApiNftActivityPage": ApiNftActivityPage,
