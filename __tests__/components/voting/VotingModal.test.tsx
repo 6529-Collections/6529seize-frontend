@@ -59,7 +59,7 @@ describe("VotingModal", () => {
     render(<VotingModal drop={drop} isOpen={true} onClose={jest.fn()} />);
 
     expect(screen.getByRole("dialog")).toHaveClass(
-      "tw-z-1000",
+      "tw-z-[1020]",
       "tw-bg-gray-700/75"
     );
     expect(screen.getByTestId("vote")).toHaveAttribute(

@@ -14,6 +14,7 @@ import Link from "next/link";
 import { useId, type ReactNode } from "react";
 import { Tooltip } from "react-tooltip";
 import { ABOUT_SUBSCRIPTIONS_HREF } from "../../user/subscriptions/subscriptionNavigation";
+import { HOME_ACTION_ARROW_CLASSES } from "../homeInteractionStyles";
 
 function ReadonlySubscriptionToggle({
   checked,
@@ -40,7 +41,7 @@ function ReadonlySubscriptionToggle({
           data-checked={checked ? "true" : "false"}
           data-testid="readonly-subscription-toggle-visual"
           className={clsx(
-            "tw-pointer-events-none tw-inline-flex tw-h-5 tw-w-9 tw-items-center tw-rounded-full tw-p-0.5 tw-ring-1 tw-ring-inset tw-transition-colors",
+            "tw-pointer-events-none tw-inline-flex tw-h-5 tw-w-9 tw-items-center tw-rounded-full tw-p-0.5 tw-ring-1 tw-ring-inset tw-transition-colors tw-duration-200 tw-ease-out motion-reduce:tw-transition-none",
             checked
               ? "tw-bg-primary-500 tw-shadow-[0_0_14px_rgba(64,106,254,0.35)] tw-ring-primary-300/70"
               : "tw-bg-black/35 tw-ring-primary-400/30"
@@ -49,7 +50,7 @@ function ReadonlySubscriptionToggle({
           <span
             data-testid="readonly-subscription-toggle-thumb"
             className={clsx(
-              "tw-size-3.5 tw-rounded-full tw-ring-1 tw-ring-inset tw-transition-transform",
+              "tw-size-3.5 tw-rounded-full tw-ring-1 tw-ring-inset tw-transition-transform tw-duration-200 tw-ease-out motion-reduce:tw-transition-none",
               checked
                 ? "tw-translate-x-4 tw-bg-white tw-shadow-[0_1px_4px_rgba(0,0,0,0.55)] tw-ring-black/[15%]"
                 : "tw-translate-x-0 tw-bg-iron-400 tw-shadow-sm tw-ring-black/10"
@@ -88,7 +89,7 @@ function SubscriptionAction({
   onClick?: (() => void | Promise<void>) | undefined;
 }>) {
   const className =
-    "tw-group/action tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-md tw-text-[10.5px] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-[0.14em] tw-text-primary-300 tw-no-underline tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black disabled:tw-cursor-wait disabled:tw-opacity-60 motion-reduce:tw-transition-none";
+    "tw-group/action tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-md tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-[0.08em] tw-text-primary-300 tw-no-underline tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:hover:tw-text-white focus:tw-outline-none focus-visible:tw-text-white focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black disabled:tw-cursor-wait disabled:tw-opacity-60 motion-reduce:tw-transition-none";
   const handleClick = () => {
     Promise.resolve(onClick?.()).catch((error: unknown) => {
       console.error("Failed to open profile subscriptions", error);
@@ -141,7 +142,7 @@ function SubscriptionInfoLink({
         aria-label={label}
         data-tooltip-id={tooltipId}
         data-tooltip-content={label}
-        className="desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-size-7 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-text-primary-300/70 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
+        className="desktop-hover:hover:tw-text-primary-200 focus-visible:tw-text-primary-200 tw-inline-flex tw-size-7 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-text-primary-300/70 tw-no-underline tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black motion-reduce:tw-transition-none"
       >
         {children}
       </Link>
@@ -203,9 +204,8 @@ function SubscriptionsCountText({
 }
 
 // Invisible stand-in for the row's height so content below does not jump when
-// the row replaces it: 2 x 1.25rem padding, 2px border, 1.25rem label line,
-// 0.75rem gap and 1.75rem detail line (about 102px; measured 101.3 to 102px at
-// 375px and 1280px viewports). Used only while the platform is unknown (the
+// the row replaces it: 2 x 0.875rem padding, 2px border, 1.25rem label line,
+// 0.5rem gap and 1.75rem detail line (86px). Used while the platform is unknown (the
 // server HTML and the first hydration render). It carries no text, icon, link
 // or control, so it is not purchasing UI.
 export function MemeSubscriptionAwarenessRowSpace() {
@@ -213,7 +213,7 @@ export function MemeSubscriptionAwarenessRowSpace() {
     <div
       aria-hidden="true"
       data-testid="meme-subscription-awareness-row-space"
-      className="tw-min-h-[6.375rem] tw-w-full"
+      className="tw-min-h-[5.375rem] tw-w-full"
     />
   );
 }
@@ -259,12 +259,8 @@ export default function MemeSubscriptionAwarenessRow({
         : "home.mintSubscriptions.action.setUp"
     );
   return (
-    <div className="tw-group tw-relative tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/25 tw-bg-primary-500/10 tw-p-5 tw-shadow-[0_15px_40px_rgba(0,0,0,0.38)]">
-      <span
-        aria-hidden="true"
-        className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-primary-400/[0.045] tw-opacity-0 tw-transition-opacity tw-duration-500 tw-ease-[cubic-bezier(0.22,1,0.36,1)] group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100 motion-reduce:tw-transition-none"
-      />
-      <div className="tw-relative tw-z-10 tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-gap-x-4 tw-gap-y-3">
+    <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/25 tw-bg-primary-500/10 tw-px-4 tw-py-3.5 tw-shadow-[0_15px_40px_rgba(0,0,0,0.38)]">
+      <div className="tw-relative tw-z-10 tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-gap-x-3 tw-gap-y-2">
         <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
           <div className="tw-text-sm tw-font-semibold tw-leading-none tw-tracking-[-0.01em] tw-text-primary-300">
             {t(locale, "home.mintSubscriptions.awarenessLabel")}
@@ -291,7 +287,7 @@ export default function MemeSubscriptionAwarenessRow({
         >
           <span aria-hidden="true">{actionLabel}</span>
           <ArrowRightIcon
-            className="tw-size-4 tw-transform-gpu tw-transition-transform tw-duration-300 tw-ease-out desktop-hover:group-hover/action:tw-translate-x-0.5 motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
+            className={HOME_ACTION_ARROW_CLASSES}
             aria-hidden="true"
           />
         </SubscriptionAction>

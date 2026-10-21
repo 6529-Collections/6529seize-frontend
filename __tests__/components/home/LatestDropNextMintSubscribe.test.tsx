@@ -154,12 +154,14 @@ describe("LatestDropNextMintSubscribe", () => {
 
     const awarenessLabel = screen.getByText("Subscription Minting");
     expect(awarenessLabel).toBeInTheDocument();
-    const awarenessRow = awarenessLabel.closest(".tw-group");
+    const awarenessRow = container.firstElementChild;
+    expect(awarenessRow).toContainElement(awarenessLabel);
     expect(awarenessRow).toHaveClass(
-      "tw-rounded-lg",
+      "tw-rounded-xl",
       "tw-border-primary-400/25",
       "tw-bg-primary-500/10",
-      "tw-p-5"
+      "tw-px-4",
+      "tw-py-3.5"
     );
     expect(awarenessRow).not.toHaveClass(
       "tw-rounded-2xl",
