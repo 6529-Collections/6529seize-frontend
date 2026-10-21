@@ -9,6 +9,7 @@ import { fetchContentModerationQueue } from "@/services/api/content-moderation-a
 import { formatContentModerationEnum } from "@/services/content-moderation/content-moderation-formatters";
 import { MODERATION_CHECKS_QUERY_KEY } from "@/services/content-moderation/content-moderation-query";
 import { checkButtonClass } from "./checks.helpers";
+import CaseQueryFeedback from "./CaseQueryFeedback";
 
 export default function CaseReports({
   caseId,
@@ -55,26 +56,15 @@ export default function CaseReports({
       </summary>
       {open && (
         <div className="tw-mt-4 tw-space-y-4">
-          {query.isLoading && (
-            <output>{t(locale, "contentModeration.moderator.loading")}</output>
-          )}
-          {query.isError && (
-            <div role="alert">
-              <p>{t(locale, "contentModeration.moderator.loadError")}</p>
-              <button
-                type="button"
-                className={checkButtonClass}
-                onClick={() => void query.refetch()}
-              >
-                {t(locale, "checks.retry")}
-              </button>
-            </div>
-          )}
-          {query.isSuccess && items.length === 0 && (
-            <p className="tw-text-sm tw-text-iron-400">
-              {t(locale, "contentModeration.moderator.empty")}
-            </p>
-          )}
+          <CaseQueryFeedback
+            query={query}
+            empty={items.length === 0}
+            messages={{
+              loading: "contentModeration.moderator.loading",
+              error: "contentModeration.moderator.loadError",
+              empty: "contentModeration.moderator.empty",
+            }}
+          />
           {items.map((item) => (
             <div
               key={item.id}

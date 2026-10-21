@@ -2,6 +2,7 @@
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
+import { ApiModerationCheckReviewStatusEnum } from "@/generated/models/ApiModerationCheck";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate } from "@/i18n/format";
 import { t } from "@/i18n/messages";
@@ -28,7 +29,7 @@ export default function ModerationChecks({
   const params = new URLSearchParams(search.toString());
   const filters = readCheckFilters(params);
   const manualQueue =
-    filters.review_status === "NEEDS_REVIEW" &&
+    filters.review_status === ApiModerationCheckReviewStatusEnum.NeedsReview &&
     Object.keys(filters).every(
       (key) => key === "review_status" || key === "case_id"
     );

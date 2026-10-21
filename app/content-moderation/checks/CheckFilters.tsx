@@ -3,6 +3,7 @@
 import { useId, type FormEvent } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { ApiModerationCheckReviewStatusEnum } from "@/generated/models/ApiModerationCheck";
 import {
   CHECK_FILTER_OPTIONS,
   checkValueLabel,
@@ -22,7 +23,7 @@ export default function CheckFilters({
   const id = useId();
   const filters = readCheckFilters(params);
   const needsReviewActive =
-    filters.review_status === "NEEDS_REVIEW" &&
+    filters.review_status === ApiModerationCheckReviewStatusEnum.NeedsReview &&
     Object.keys(filters).every(
       (key) => key === "review_status" || key === "case_id"
     );
@@ -50,11 +51,8 @@ export default function CheckFilters({
   }
   return (
     <div>
-      <div
-        className="tw-mt-4 tw-flex tw-flex-wrap tw-gap-2"
-        role="group"
-        aria-label={t(locale, "checks.filters")}
-      >
+      <fieldset className="tw-m-0 tw-mt-4 tw-flex tw-min-w-0 tw-flex-wrap tw-gap-2 tw-border-0 tw-p-0">
+        <legend className="tw-sr-only">{t(locale, "checks.filters")}</legend>
         <button
           type="button"
           className={presetClass}
@@ -73,7 +71,7 @@ export default function CheckFilters({
         >
           {t(locale, "checks.allChecks")}
         </button>
-      </div>
+      </fieldset>
       <details
         className="tw-mt-6 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4"
         open={Object.keys(filters).length > 0}
@@ -82,14 +80,16 @@ export default function CheckFilters({
           {t(locale, "checks.filters")}
         </summary>
         <form onSubmit={submit} className="tw-mt-3 tw-space-y-4">
-          {filters.case_id && filters.review_status !== "NEEDS_REVIEW" && (
-            <>
-              <input type="hidden" name="case_id" value={filters.case_id} />
-              <p className="tw-text-sm tw-text-iron-300">
-                {t(locale, "checks.caseFilter")}
-              </p>
-            </>
-          )}
+          {filters.case_id &&
+            filters.review_status !==
+              ApiModerationCheckReviewStatusEnum.NeedsReview && (
+              <>
+                <input type="hidden" name="case_id" value={filters.case_id} />
+                <p className="tw-text-sm tw-text-iron-300">
+                  {t(locale, "checks.caseFilter")}
+                </p>
+              </>
+            )}
           <div className="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
             {Object.entries(CHECK_FILTER_OPTIONS).map(([name, options]) => (
               <label

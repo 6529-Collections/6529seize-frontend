@@ -13,9 +13,12 @@ import ModerationChecks from "@/app/content-moderation/checks/ModerationChecks";
 import {
   fetchModerationChecks,
   fetchModerationReviewCases,
+  fetchModerationCheck,
+  fetchModerationReportCheck,
 } from "@/services/api/moderation-checks-api";
 import { fetchContentModerationQueue } from "@/services/api/content-moderation-api";
 import type { ApiModerationReviewCase } from "@/generated/models/ApiModerationReviewCase";
+import { ApiModerationCheckSubjectTypeEnum } from "@/generated/models/ApiModerationCheck";
 import { MODERATION_CHECKS_QUERY_KEY } from "@/services/content-moderation/content-moderation-query";
 import { checkFixture } from "./check.fixture";
 
@@ -25,6 +28,8 @@ jest.mock("@/hooks/useBrowserLocale", () => ({
 jest.mock("@/services/api/moderation-checks-api", () => ({
   fetchModerationChecks: jest.fn(),
   fetchModerationReviewCases: jest.fn(),
+  fetchModerationCheck: jest.fn(),
+  fetchModerationReportCheck: jest.fn(),
 }));
 jest.mock("@/services/api/content-moderation-api", () => ({
   fetchContentModerationQueue: jest.fn(),
@@ -34,22 +39,12 @@ jest.mock("@/app/content-moderation/checks/CheckDetail", () => ({
   default: function Detail({
     id,
     onClose,
-    onDetailLoaded,
     caseContext,
   }: {
     id: string;
     caseContext?: React.ReactNode;
     onClose: () => void;
-    onDetailLoaded: (detail: ReturnType<typeof checkFixture>) => void;
   }) {
-    useEffect(() => {
-      const detail = checkFixture();
-      detail.check.id = id === "rep-check" ? "rep-check" : "post-check";
-      detail.check.subject_type = "DROP" as typeof detail.check.subject_type;
-      detail.check.published_subject_id =
-        id === "rep-check" ? null : "deleted-post";
-      onDetailLoaded?.(detail);
-    }, [id, onDetailLoaded]);
     return (
       <aside aria-label="Case detail">
         <span>{id}</span>
@@ -149,6 +144,18 @@ beforeEach(() => {
     .mocked(fetchModerationChecks)
     .mockResolvedValue({ items: [], next_cursor: null });
   jest.mocked(fetchContentModerationQueue).mockResolvedValue([]);
+  const detailForSelection = async (id: string) => {
+    const detail = checkFixture();
+    detail.check.id = id === "rep-check" ? "rep-check" : "post-check";
+    detail.check.subject_type = ApiModerationCheckSubjectTypeEnum.Drop;
+    detail.check.published_subject_id =
+      id === "rep-check" ? null : "deleted-post";
+    return detail;
+  };
+  jest.mocked(fetchModerationCheck).mockImplementation(detailForSelection);
+  jest
+    .mocked(fetchModerationReportCheck)
+    .mockImplementation(detailForSelection);
 });
 it("shows the entire unique-case queue beside a highlighted report selection, including report-only work", async () => {
   mount();

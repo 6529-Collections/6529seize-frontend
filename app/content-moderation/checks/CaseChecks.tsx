@@ -9,6 +9,7 @@ import { t } from "@/i18n/messages";
 import { fetchModerationChecks } from "@/services/api/moderation-checks-api";
 import { MODERATION_CHECKS_QUERY_KEY } from "@/services/content-moderation/content-moderation-query";
 import { checkButtonClass, checkValueLabel } from "./checks.helpers";
+import CaseQueryFeedback from "./CaseQueryFeedback";
 
 export default function CaseChecks({
   caseId,
@@ -50,24 +51,15 @@ export default function CaseChecks({
       <summary className="tw-min-h-11 tw-cursor-pointer tw-content-center tw-text-sm tw-font-semibold tw-text-iron-100 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400">
         {t(locale, "checks.caseChecks")}
       </summary>
-      {query.isLoading && <output>{t(locale, "checks.loading")}</output>}
-      {query.isError && (
-        <div role="alert">
-          <p>{t(locale, "checks.error")}</p>
-          <button
-            type="button"
-            className={checkButtonClass}
-            onClick={() => void query.refetch()}
-          >
-            {t(locale, "checks.retry")}
-          </button>
-        </div>
-      )}
-      {query.isSuccess && items.length === 0 && (
-        <p className="tw-text-sm tw-text-iron-400">
-          {t(locale, "checks.empty")}
-        </p>
-      )}
+      <CaseQueryFeedback
+        query={query}
+        empty={items.length === 0}
+        messages={{
+          loading: "checks.loading",
+          error: "checks.error",
+          empty: "checks.empty",
+        }}
+      />
       <ul className="tw-m-0 tw-list-none tw-space-y-2 tw-p-0">
         {items.map((item) => (
           <li key={item.id}>

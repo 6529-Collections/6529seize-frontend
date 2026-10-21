@@ -21,6 +21,7 @@ export function CaseSummary({
   readonly heading?: boolean;
 }) {
   const locale = useBrowserLocale();
+  const Title = heading ? "h2" : "span";
   return (
     <>
       <span className="tw-flex tw-flex-wrap tw-gap-2 tw-text-xs tw-font-semibold tw-text-iron-300">
@@ -35,15 +36,10 @@ export function CaseSummary({
           </span>
         )}
       </span>
-      <span className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-base tw-font-semibold tw-text-iron-100">
-        <span
-          role={heading ? "heading" : undefined}
-          aria-level={heading ? 2 : undefined}
-        >
-          {checkValueLabel(locale, item.subject_type)}
-        </span>
+      <Title className="tw-mb-0 tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-base tw-font-semibold tw-text-iron-100">
+        {checkValueLabel(locale, item.subject_type)}
         {item.drop_deleted && <ModerationDeletedBadge />}
-      </span>
+      </Title>
       <span className="tw-mb-0 tw-mt-2 tw-block tw-text-sm tw-text-iron-400">
         {t(locale, "checks.caseRequirements", {
           reports: formatInteger(locale, item.open_report_count),
@@ -73,7 +69,7 @@ export function CaseSummary({
   );
 }
 
-export function CaseCard({ item }: { readonly item: ApiModerationReviewCase }) {
+function CaseCard({ item }: { readonly item: ApiModerationReviewCase }) {
   const locale = useBrowserLocale();
   const params = new URLSearchParams({
     case_id: item.id,

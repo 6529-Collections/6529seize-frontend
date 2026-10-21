@@ -1,17 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   type ApiModerationCheckDetail,
   ApiModerationCheckDetailActionEffectEnum,
 } from "@/generated/models/ApiModerationCheckDetail";
-import {
-  fetchModerationCheck,
-  fetchModerationReportCheck,
-  fetchModerationProfileCheck,
-} from "@/services/api/moderation-checks-api";
-import { MODERATION_CHECKS_QUERY_KEY } from "@/services/content-moderation/content-moderation-query";
 import { getStructuredApiErrorStatus } from "@/services/api/common-api";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate, formatInteger } from "@/i18n/format";
@@ -27,6 +21,7 @@ import CheckHistory from "./CheckHistory";
 import ModerationOriginalPostLink from "@/components/content-moderation/ModerationOriginalPostLink";
 import ModerationDeletedBadge from "@/components/content-moderation/ModerationDeletedBadge";
 import { ApiModerationCheckSubjectTypeEnum } from "@/generated/models/ApiModerationCheck";
+import useModerationCheckDetail from "./useModerationCheckDetail";
 
 const SECTIONS = [
   "savedEvidence",
@@ -93,7 +88,6 @@ export default function CheckDetail({
   profileId,
   onClose,
   backLabel = "checks.back",
-  onDetailLoaded,
   caseContext,
 }: {
   readonly id: string;
@@ -102,9 +96,6 @@ export default function CheckDetail({
   readonly onClose: () => void;
   readonly backLabel?: MessageKey | undefined;
   readonly caseContext?: ReactNode;
-  readonly onDetailLoaded?:
-    | ((detail: ApiModerationCheckDetail) => void)
-    | undefined;
 }) {
   const locale = useBrowserLocale();
   const client = useQueryClient();
@@ -112,30 +103,11 @@ export default function CheckDetail({
   const [section, setSection] = useState<Section>("savedEvidence");
   const [reviewGeneration, setReviewGeneration] = useState(0);
   const [decisionSaved, setDecisionSaved] = useState(false);
-  const queryKey = [
-    ...MODERATION_CHECKS_QUERY_KEY,
-    profileId,
-    "detail",
-    source,
-    id,
-  ];
-  const query = useQuery({
-    queryKey,
-    queryFn: ({ signal }) => {
-      if (source === "report") return fetchModerationReportCheck(id, signal);
-      if (source === "profile") return fetchModerationProfileCheck(id, signal);
-      return fetchModerationCheck(id, signal);
-    },
-    retry: false,
-    gcTime: 0,
-  });
+  const { query, queryKey } = useModerationCheckDetail(profileId, source, id);
   useEffect(() => {
     title.current?.focus();
   }, []);
   const detail = query.data;
-  useEffect(() => {
-    if (detail) onDetailLoaded?.(detail);
-  }, [detail, onDetailLoaded]);
   const originalWaveId: unknown = detail?.check.scope["wave_id"];
   let detailTitle = t(locale, "checks.loadingDetail");
   if (detail) {
@@ -216,7 +188,7 @@ export default function CheckDetail({
                 evidenceRetained={!detail.evidence_expired}
               />
             )}
-          {caseContext && (
+          {caseContext !== undefined && caseContext !== null && (
             <div className="tw-mt-5 tw-space-y-4">{caseContext}</div>
           )}
           {detail.evidence_expired && (

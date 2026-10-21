@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useState } from "react";
 import type { ApiModerationCheckDetail } from "@/generated/models/ApiModerationCheckDetail";
+import { ApiModerationCheckSubjectTypeEnum } from "@/generated/models/ApiModerationCheck";
 import type { ApiModerationReviewCase } from "@/generated/models/ApiModerationReviewCase";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -10,6 +10,7 @@ import CheckDetail from "./CheckDetail";
 import CheckFilters from "./CheckFilters";
 import CaseReports from "./CaseReports";
 import CaseChecks from "./CaseChecks";
+import useModerationCheckDetail from "./useModerationCheckDetail";
 import {
   checkButtonClass,
   navigateChecks,
@@ -17,16 +18,10 @@ import {
   safeCheckId,
 } from "./checks.helpers";
 
-type DetailIdentity = {
-  selection: string;
-  checkId: string;
-  dropId: string | null;
-};
-
 function selectedCase(
   items: ApiModerationReviewCase[],
   params: URLSearchParams,
-  identity: DetailIdentity | null
+  detail: ApiModerationCheckDetail | undefined
 ) {
   const caseId = readCheckFilters(params).case_id;
   const report = safeCheckId(params.get("report"));
@@ -36,10 +31,12 @@ function selectedCase(
       item.id === caseId ||
       (!!report && item.report_id === report) ||
       (!!check && item.check_id === check) ||
-      (!!identity &&
-        identity.selection === (check ?? report) &&
-        (item.check_id === identity.checkId ||
-          (!!identity.dropId && item.drop_id === identity.dropId)))
+      (!!detail &&
+        (item.check_id === detail.check.id ||
+          (detail.check.subject_type ===
+            ApiModerationCheckSubjectTypeEnum.Drop &&
+            !!detail.check.published_subject_id &&
+            item.drop_id === detail.check.published_subject_id)))
   );
 }
 
@@ -57,29 +54,12 @@ export default function ModerationReviewWorkspace({
   const report = safeCheckId(params.get("report"));
   const selection = check ?? report;
   const source = check ? "check" : "report";
-  const [identity, setIdentity] = useState<DetailIdentity | null>(null);
-  const onDetailLoaded = useCallback(
-    (detail: ApiModerationCheckDetail) => {
-      if (!selection) return;
-      const next = {
-        selection,
-        checkId: detail.check.id,
-        dropId:
-          detail.check.subject_type === "DROP"
-            ? detail.check.published_subject_id
-            : null,
-      };
-      setIdentity((previous) =>
-        previous?.selection === next.selection &&
-        previous.checkId === next.checkId &&
-        previous.dropId === next.dropId
-          ? previous
-          : next
-      );
-    },
-    [selection]
+  const { query: detailQuery } = useModerationCheckDetail(
+    profileId,
+    source,
+    selection
   );
-  const activeCase = selectedCase(items, params, identity);
+  const activeCase = selectedCase(items, params, detailQuery.data);
   const caseId = activeCase?.id ?? readCheckFilters(params).case_id;
   function backToNeedsReview() {
     globalThis.history.pushState(null, "", "/content-moderation/needs-review");
@@ -196,15 +176,13 @@ export default function ModerationReviewWorkspace({
                       initiallyOpen={source === "report"}
                     />
                   )}
-                  {caseId && !!activeCase?.pending_check_count && (
+                  {caseId && (activeCase?.pending_check_count ?? 0) > 0 && (
                     <CaseChecks
                       key={`${profileId}:${caseId}`}
                       caseId={caseId}
                       profileId={profileId}
                       selectedCheckId={
-                        identity?.selection === selection
-                          ? identity.checkId
-                          : (check ?? undefined)
+                        detailQuery.data?.check.id ?? check ?? undefined
                       }
                     />
                   )}
@@ -214,7 +192,6 @@ export default function ModerationReviewWorkspace({
               id={selection}
               source={source}
               profileId={profileId}
-              onDetailLoaded={onDetailLoaded}
               backLabel="checks.backToNeedsReview"
               onClose={backToNeedsReview}
             />

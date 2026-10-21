@@ -95,11 +95,10 @@ it.each([false, true])(
   }
 );
 
-it("supports workspace navigation and reports the loaded selection", async () => {
+it("supports workspace navigation and labels the loaded automated outcome", async () => {
   const detail = checkFixture({ allowed_actions: [] });
   jest.mocked(fetchModerationCheck).mockResolvedValue(detail);
   const onClose = jest.fn();
-  const onDetailLoaded = jest.fn();
   render(
     <QueryClientProvider client={new QueryClient()}>
       <CheckDetail
@@ -108,12 +107,10 @@ it("supports workspace navigation and reports the loaded selection", async () =>
         profileId="dev-1"
         backLabel="checks.backToNeedsReview"
         onClose={onClose}
-        onDetailLoaded={onDetailLoaded}
       />
     </QueryClientProvider>
   );
   await screen.findByRole("heading", { name: "About text" });
-  expect(onDetailLoaded).toHaveBeenCalledWith(detail);
   expect(screen.getByText(/Automated outcome: Rejected/)).toBeVisible();
   fireEvent.click(screen.getByRole("button", { name: "Back to Needs review" }));
   expect(onClose).toHaveBeenCalledTimes(1);
