@@ -70,6 +70,7 @@ const READONLY_SPECS = {
   collections: ["tests/collections/nextgen-collections-readonly.spec.ts"],
   publicGroupsTools: [
     "tests/public-groups-tools/public-groups-tools-readonly.spec.ts",
+    "tests/public-groups-tools/world-time-zones-readonly.spec.ts",
   ],
   adminGuards: ["tests/admin/admin-destructive-guards-readonly.spec.ts"],
   publicContent: ["tests/content/public-content-readonly.spec.ts"],
@@ -427,6 +428,8 @@ const PACKS = [
       [
         "tests/social/native-competition-sandbox.spec.ts",
         "tests/social/wave-notification-settings-sandbox.spec.ts",
+        "tests/social/wave-switch-loading.spec.ts",
+        "tests/social/wave-loading-sandbox.spec.ts",
       ],
       {
         ...AUTH_SANDBOX_ENV,

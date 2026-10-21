@@ -6076,7 +6076,27 @@ paths:
               - real_time_rating
               - submitted_at
               - trend
+              - price
             default: rating
+        - name: price_currency
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: min_price
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 0
+        - name: max_price
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 0
         - name: direction
           in: query
           required: false
@@ -6675,6 +6695,13 @@ paths:
       security:
         - bearerAuth: []
       parameters:
+        - name: case_id
+          in: query
+          required: false
+          description: Opaque review case ID; groups all revisions of the same subject.
+          schema:
+            type: string
+            pattern: ^[a-f0-9]{64}$
         - name: subject_type
           in: query
           required: false
@@ -6776,6 +6803,48 @@ paths:
           description: Developer access required; proxies are not allowed
         "409":
           description: Reviewed revision changed or action key conflicts
+  /content-moderation/checks/cases:
+    get:
+      tags:
+        - Content moderation
+      summary: getModerationReviewCases
+      operationId: getModerationReviewCases
+      description: >-
+        One case per subject with open reports or checks requiring manual
+        review. Grouping happens before pagination.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: before
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: moderation-review
+        handler:
+          import: "@/api/content-moderation/moderation-review.handlers"
+          name: handleGetModerationReviewCases
+      responses:
+        "200":
+          description: Private developer case queue
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiModerationReviewCasePage"
+        "403":
+          description: Developer access required; proxies are not allowed
   /content-moderation/checks/counts:
     get:
       tags:
@@ -7132,6 +7201,13 @@ paths:
       security:
         - bearerAuth: []
       parameters:
+        - name: case_id
+          in: query
+          required: false
+          description: Scope reports to one opaque review case, before pagination.
+          schema:
+            type: string
+            pattern: ^[a-f0-9]{64}$
         - name: limit
           in: query
           required: false
@@ -7927,6 +8003,94 @@ paths:
           description: Invalid request
         "403":
           description: Forbidden - not a Subscription Admin
+  /drops/{drop_id}/collaborations:
+    get:
+      operationId: getMemeCollaborationState
+      tags:
+        - Drops
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/meme-collaborations/meme-collaborations.handlers"
+          name: getMemeCollaborationState
+      parameters:
+        - in: path
+          name: drop_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Public accepted artists and viewer-scoped invitations.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMemeCollaborationState"
+    post:
+      operationId: inviteMemeCollaborators
+      tags:
+        - Drops
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/meme-collaborations/meme-collaborations.handlers"
+          name: inviteMemeCollaborators
+      parameters:
+        - in: path
+          name: drop_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMemeCollaborationInviteRequest"
+      responses:
+        "200":
+          description: Invitations appended to the active Main Stage submission.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMemeCollaborationState"
+  /drops/{drop_id}/collaborations/{invitation_id}/response:
+    post:
+      operationId: respondToMemeCollaboration
+      tags:
+        - Drops
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/meme-collaborations/meme-collaborations.handlers"
+          name: respondToMemeCollaboration
+      parameters:
+        - in: path
+          name: drop_id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: invitation_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMemeCollaborationResponseRequest"
+      responses:
+        "200":
+          description: Public accepted artists and viewer-scoped invitations.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMemeCollaborationState"
   /light-drops:
     get:
       tags:
@@ -18216,6 +18380,57 @@ paths:
                 $ref: "#/components/schemas/ApiWaveOverviewPage"
         "400":
           description: Invalid request
+  /v2/waves/joined:
+    get:
+      tags:
+        - WavesV2
+      summary: List joined waves using a stable snapshot
+      description: >-
+        Freezes the activity-ordered IDs of joined non-DM root waves, including
+        parents of joined subwaves, for 15 minutes. Continue with next_cursor;
+        activity changes cannot skip waves between pages. Each page rechecks
+        current membership and visibility. New memberships appear on refresh.
+        Cursors are bound to the authenticated non-proxy profile and page size.
+        Existing page-number pagination at /v2/waves is unchanged.
+      operationId: getJoinedWaves
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/waves/joined-waves.handler"
+          name: handleGetJoinedWaves
+      parameters:
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: cursor
+          in: query
+          description: Opaque next_cursor from the preceding page; omit to refresh.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Joined waves from one stable snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiJoinedWavesPage"
+        "400":
+          description: Invalid cursor or page size
+        "401":
+          description: Authentication required
+        "403":
+          description: A non-proxy profile is required
+        "410":
+          description: Snapshot expired or unavailable; restart without a cursor
+        "503":
+          description: Snapshot storage unavailable; retry without losing loaded waves
   /v2/waves/active-votes:
     get:
       tags:
@@ -26397,6 +26612,17 @@ components:
           type: boolean
         administer:
           type: boolean
+        edit_rules_after_activity:
+          type: boolean
+          description: >-
+            Whether this administrator may update established competition rules
+            after entries or votes exist. Individual rule protections still
+            apply.
+        edit_credit_rules:
+          type: boolean
+          description: >-
+            Whether this administrator may edit established voting credit rules.
+            Historical votes permanently lock those rules.
     ApiCompetitionRulesInput:
       type: object
       additionalProperties: false
@@ -27065,6 +27291,7 @@ components:
       required:
         - id
         - drop_id
+        - drop_deleted
         - reporter_profile_id
         - reporter_handle
         - reporter_pfp
@@ -27086,6 +27313,11 @@ components:
           format: uuid
         drop_id:
           type: string
+        drop_deleted:
+          type: boolean
+          description: >-
+            Whether the original reported post no longer exists. Saved evidence
+            remains available.
         reporter_profile_id:
           type: string
         reporter_handle:
@@ -27307,6 +27539,7 @@ components:
         - OPEN
         - RESOLVED_ALLOWED
         - RESOLVED_REMOVED
+        - RESOLVED_DELETED
         - WITHDRAWN
     ApiContentModerationReportWithdrawalResponse:
       type: object
@@ -27381,6 +27614,13 @@ components:
         - resolved_report_count
         - suspended_profile_count
       properties:
+        needs_review_count:
+          type: integer
+          format: int64
+          description: >-
+            Unique cases requiring manual review, including open reports and
+            pending checks. Optional for rolling compatibility; current servers
+            always return it.
         moderator:
           type: boolean
         has_open_reports:
@@ -27603,6 +27843,14 @@ components:
             $ref: "#/components/schemas/ApiDropGroupMention"
         poll:
           $ref: "#/components/schemas/ApiCreateDropPollRequest"
+        collaborator_ids:
+          type: array
+          maxItems: 5
+          description: >-
+            Profile IDs invited to collaborate. Included in the signed payload.
+            An empty array opts into managed artist credits.
+          items:
+            type: string
         hide_link_preview:
           type: boolean
           description: >-
@@ -28346,6 +28594,10 @@ components:
           $ref: "#/components/schemas/ApiCreateNewWaveChatConfig"
         admin_group:
           $ref: "#/components/schemas/ApiCreateNewWaveScope"
+        admin_drop_deletion_enabled:
+          type: boolean
+          default: false
+          description: Allow wave administrators to delete drops.
         parent_wave_id:
           type: string
           nullable: true
@@ -28822,6 +29074,16 @@ components:
         - is_additional_action_promised
         - hide_link_preview
       properties:
+        submission_artist:
+          type: string
+          description: >-
+            Original submitter artist credit before accepted collaborator
+            credits are appended.
+        collaborators:
+          type: array
+          description: Accepted collaborators only. Pending invitations are private.
+          items:
+            $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
         voters_count_available:
           type: boolean
           description: >-
@@ -29607,6 +29869,16 @@ components:
         - drop_type
         - hide_link_preview
       properties:
+        submission_artist:
+          type: string
+          description: >-
+            Original submitter artist credit before accepted collaborator
+            credits are appended.
+        collaborators:
+          type: array
+          description: Accepted collaborators only. Pending invitations are private.
+          items:
+            $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
         id:
           type: string
         serial_no:
@@ -29900,6 +30172,15 @@ components:
         - is_additional_action_promised
         - hide_link_preview
       properties:
+        submission_artist:
+          type: string
+          description: >-
+            Original submitter artist credit before accepted collaborator
+            credits are appended.
+        collaborators:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
         voters_count_available:
           type: boolean
           description: >-
@@ -30829,6 +31110,25 @@ components:
           type: number
           format: int64
           nullable: true
+    ApiJoinedWavesPage:
+      type: object
+      required:
+        - data
+        - next_cursor
+        - snapshot_expires_at
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveOverview"
+        next_cursor:
+          type: string
+          nullable: true
+          description: Continue this snapshot, or null when all IDs have been scanned.
+        snapshot_expires_at:
+          type: integer
+          format: int64
+          description: Snapshot expiry as Unix epoch milliseconds.
     ApiLightDrop:
       type: object
       required:
@@ -32595,6 +32895,158 @@ components:
           minimum: 1
         drop_id:
           type: string
+    ApiMemeCollaborationArtwork:
+      type: object
+      required:
+        - name
+        - description
+        - image_url
+        - animation_url
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        image_url:
+          type: string
+          nullable: true
+        animation_url:
+          type: string
+          nullable: true
+    ApiMemeCollaborationCredit:
+      type: object
+      required:
+        - artist
+        - artist_profiles
+        - collab
+      properties:
+        artist:
+          type: string
+        artist_profiles:
+          type: string
+        collab:
+          type: boolean
+    ApiMemeCollaborationInvitation:
+      type: object
+      required:
+        - id
+        - profile
+        - status
+      properties:
+        id:
+          type: string
+        profile:
+          $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
+        artist_name:
+          type: string
+          nullable: true
+          description: >-
+            Artist credit name confirmed on acceptance; null for legacy
+            invitations.
+        status:
+          type: string
+          enum:
+            - PENDING
+            - ACCEPTED
+            - DECLINED
+            - CANCELLED
+            - CLOSED
+    ApiMemeCollaborationInviteRequest:
+      type: object
+      required:
+        - collaborator_ids
+      properties:
+        collaborator_ids:
+          type: array
+          minItems: 1
+          maxItems: 5
+          items:
+            type: string
+    ApiMemeCollaborationResponseRequest:
+      type: object
+      required:
+        - action
+        - artwork_hash
+        - terms_version
+      properties:
+        action:
+          type: string
+          enum:
+            - ACCEPT
+            - DECLINE
+            - CANCEL
+        artwork_hash:
+          type: string
+        terms_version:
+          type: string
+        artist_name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: >-
+            Artist credit name confirmed when accepting. Only valid for ACCEPT.
+            Older clients may omit it, in which case the accepting profile
+            handle is saved.
+    ApiMemeCollaborationState:
+      type: object
+      required:
+        - managed
+        - closed
+        - artwork_hash
+        - terms_version
+        - acceptance_copy
+        - terms
+        - collaborators
+        - invitations
+      properties:
+        can_invite:
+          type: boolean
+          description: >-
+            Whether this viewer can append invitations to this active Memes Main
+            Stage artwork.
+        artwork:
+          $ref: "#/components/schemas/ApiMemeCollaborationArtwork"
+        managed:
+          type: boolean
+        closed:
+          type: boolean
+        artwork_hash:
+          type: string
+        terms_version:
+          type: string
+        acceptance_copy:
+          type: string
+        terms:
+          type: string
+          nullable: true
+        collaborators:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
+        invitations:
+          type: array
+          description: >-
+            Current invitation per profile for the submitter, otherwise only the
+            viewer's current invitation. Cancelled attempts remain in internal
+            history.
+          items:
+            $ref: "#/components/schemas/ApiMemeCollaborationInvitation"
+    ApiMemeCollaboratorProfile:
+      type: object
+      required:
+        - id
+        - handle
+        - display
+      properties:
+        id:
+          type: string
+        handle:
+          type: string
+        display:
+          type: string
+        pfp:
+          type: string
+          nullable: true
     ApiMemesExtendedData:
       type: object
       description: >-
@@ -33132,6 +33584,7 @@ components:
         - BLOCK
         - REVOKE_OVERRIDE
         - MARK_REVIEWED
+        - RESOLVE_DELETED_REPORT
         - SUPPRESS
         - RESTORE
         - QUARANTINE
@@ -33386,6 +33839,8 @@ components:
         - profile_status
         - drop_status
         - published
+        - deleted
+        - open_report_count
         - suppressed
         - revision
       properties:
@@ -33406,6 +33861,17 @@ components:
             - null
         published:
           type: boolean
+        deleted:
+          type: boolean
+          description: >-
+            A previously published post no longer exists. This does not
+            represent a moderation removal.
+        open_report_count:
+          type: integer
+          minimum: 0
+          description: >-
+            Number of open reports for this published post, including reports of
+            earlier revisions.
         suppressed:
           type: boolean
         revision:
@@ -33467,6 +33933,81 @@ components:
         completed_at:
           type: integer
           format: int64
+          nullable: true
+    ApiModerationReviewCase:
+      type: object
+      required:
+        - id
+        - subject_type
+        - open_report_count
+        - pending_check_count
+        - check_id
+        - report_id
+        - created_at
+        - preview
+        - drop_id
+        - wave_id
+        - drop_deleted
+      properties:
+        check_outcome:
+          type: string
+          nullable: true
+          enum:
+            - ALLOW
+            - REJECT
+            - ERROR
+            - PENDING
+            - null
+        report_reason:
+          type: string
+          nullable: true
+        id:
+          type: string
+          description: Opaque subject-based case ID shared across revisions and reports.
+        subject_type:
+          type: string
+          enum:
+            - REP_CATEGORY
+            - PROFILE_BIO
+            - GROUP_NAME
+            - DROP
+        open_report_count:
+          type: integer
+        pending_check_count:
+          type: integer
+        check_id:
+          type: string
+          nullable: true
+        report_id:
+          type: string
+          nullable: true
+        created_at:
+          type: integer
+          format: int64
+          description: Creation time of the most recent outstanding requirement.
+        preview:
+          type: string
+          nullable: true
+        drop_id:
+          type: string
+          nullable: true
+        wave_id:
+          type: string
+          nullable: true
+        drop_deleted:
+          type: boolean
+    ApiModerationReviewCasePage:
+      type: object
+      required:
+        - items
+        - next_cursor
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiModerationReviewCase"
+        next_cursor:
+          type: string
           nullable: true
     ApiNft:
       type: object
@@ -33938,6 +34479,15 @@ components:
     ApiNotificationAdditionalContextV2:
       type: object
       properties:
+        artwork_name:
+          type: string
+          description: >-
+            Artwork name saved when a MEME_COLLABORATION invitation is sent or
+            accepted. Absent for older notifications.
+        invitation_id:
+          type: string
+        actor_id:
+          type: string
         event_id:
           type: string
           description: Stable idempotency identifier for COMPETITION_LIFECYCLE.
@@ -34068,6 +34618,7 @@ components:
         - PRIORITY_ALERT
         - SUBSCRIPTION_COVERAGE
         - COMPETITION_LIFECYCLE
+        - MEME_COLLABORATION
     ApiNotificationDropReactedReactor:
       type: object
       required:
@@ -40528,6 +41079,8 @@ components:
         - name
         - attributes
       properties:
+        collaboration_credit:
+          $ref: "#/components/schemas/ApiMemeCollaborationCredit"
         drop_id:
           type: string
         contract:

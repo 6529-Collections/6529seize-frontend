@@ -8,6 +8,8 @@ import {
   waitForRouteReady,
 } from "../testHelpers";
 
+import { isCapacitorSimulationProject } from "../support/surfaceSimulation";
+
 const plan = {
   id: "emma-layout-fixture",
   name: `${"Long distribution plan name ".repeat(4)}${"N".repeat(80)}`,
@@ -175,11 +177,55 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
           label: "create DM action",
           locator: page
             .getByRole("button", { name: /Create DM|New direct message/i })
+            .or(page.getByRole("link", { name: "Create DM", exact: true }))
             .first(),
         },
       ],
       "the authenticated messages shell"
     );
+  });
+
+  test("opens New message from the messages action and returns without creating a conversation", async ({
+    page,
+  }, testInfo) => {
+    await gotoReady(page, "/messages", { readySelector: "#messages-content" });
+    const nativeAction = page.getByRole("link", {
+      name: "Create DM",
+      exact: true,
+    });
+    const isNative = isCapacitorSimulationProject(testInfo.project.name);
+    const action = isNative
+      ? nativeAction
+      : page
+          .getByRole("button", { name: /^(Create DM|New direct message)$/ })
+          .first();
+    await action.click();
+    await expect(page).toHaveURL((url) =>
+      isNative
+        ? url.pathname === "/messages/create"
+        : url.pathname === "/messages" &&
+          url.searchParams.get("create") === "dm"
+    );
+    await expect(
+      page.getByRole("textbox", { name: "To:", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Message", exact: true })
+    ).toBeDisabled();
+    await expectWalletGateAbsent(page);
+
+    if (isNative) {
+      await page.goBack();
+    } else {
+      await page
+        .getByRole("button", { name: "Close new direct message modal" })
+        .click();
+    }
+    await expect(page).toHaveURL(
+      (url) => url.pathname === "/messages" && !url.searchParams.has("create")
+    );
+    await expect(action).toBeVisible();
+    await expectNoHorizontalOverflow(page);
   });
 
   test("opens the guided consolidation flow from the own-profile wallet entry", async ({
@@ -194,7 +240,7 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
 
     const walletChecker = page.getByRole("link", { name: "Wallet Checker" });
     await expect(walletChecker).toBeVisible();
-    await expect(page.getByText(/^\d of 4 wallets$/).first()).toBeVisible();
+    await expect(page.getByText(/^\d of 4 addresses$/).first()).toBeVisible();
     const addWallet = page.getByRole("link", {
       name: "Add another wallet",
       exact: true,
@@ -204,8 +250,8 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       "href",
       "/safe-collecting/build-consolidation"
     );
-    const addressesHeading = page.getByRole("heading", {
-      name: /Addresses$/,
+    const walletHeading = page.getByRole("heading", {
+      name: `${PROFILE_HANDLE}${PROFILE_HANDLE.endsWith("s") ? "'" : "'s"} Wallet`,
       level: 3,
     });
     const statementsHeading = page.getByRole("heading", {
@@ -213,10 +259,10 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       level: 3,
     });
     const addStatement = page.getByRole("button", { name: "Add", exact: true });
-    await expect(addressesHeading).toBeVisible();
+    await expect(walletHeading).toBeVisible();
     await expect(statementsHeading).toBeVisible();
     await expect(addStatement).toBeVisible();
-    await expect(addressesHeading).toHaveCSS("font-size", "18px");
+    await expect(walletHeading).toHaveCSS("font-size", "18px");
     await expect(statementsHeading).toHaveCSS("font-size", "18px");
     const statementHelp = page.getByRole("button", {
       name: "About identity statements",
@@ -342,6 +388,27 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(page.getByText("Edition Preference")).toBeVisible();
     await expect(page.getByText("Upcoming Drops")).toBeVisible();
     await expect(page.getByText("Subscription History")).toBeVisible();
+  });
+
+  test("scrolls to and focuses the top-up section from the notification link", async ({
+    page,
+  }) => {
+    const path = `${PROFILE_BASE_PATH}/subscriptions`;
+    const hash = "#profile-subscriptions-top-up";
+
+    // The section mounts after hydration, so the browser's own hash scroll
+    // finds nothing. Read-only: navigates and observes, never submits.
+    await page.goto(`${path}${hash}`, { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await expect(page).toHaveURL(
+      (url) => url.pathname === path && url.hash === hash
+    );
+
+    const topUp = page.getByRole("region", { name: "Top up" });
+    const heading = page.getByRole("heading", { level: 2, name: "Top up" });
+    await expect(topUp).toHaveAttribute("id", hash.slice(1));
+    await expect(heading).toBeFocused();
+    await expect(heading).toBeInViewport();
   });
 
   test("renders the own-profile proxy shell without creating a proxy", async ({

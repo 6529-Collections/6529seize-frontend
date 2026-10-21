@@ -13,8 +13,13 @@ import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useAuth } from "@/components/auth/Auth";
+import { isAuthResolving } from "@/components/auth/authResolution";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { JoinedWavesListRecovery } from "../waves/JoinedWavesListRecovery";
 
 interface WebUnifiedWavesListProps {
+  readonly hasLoadingError?: boolean | undefined;
+  readonly retryLoading?: (() => void) | undefined;
   readonly waves: MinimalWave[];
   readonly fetchNextPage: () => void;
   readonly hasNextPage: boolean | undefined;
@@ -30,6 +35,8 @@ interface WebUnifiedWavesListProps {
 const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
   const {
     waves,
+    hasLoadingError = false,
+    retryLoading,
     fetchNextPage,
     hasNextPage,
     isFetching,
@@ -47,17 +54,25 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
   const [search] = useWaveSidebarSearch(key ?? "guest");
   const isSearching = !isCollapsed && Boolean(search.trim());
   const collection = canUseCollections ? savedCollection : "all";
+  const { connectedProfile, activeProfileProxy, fetchingProfile } = useAuth();
+  const { connectionState } = useSeizeConnectContext();
+  // This list already consumes the wallet identity through discovery. Keep
+  // its empty state pending until wallet and profile restoration settle.
   const collectionFetching =
-    isFetching || (collection === "pinned" && isPinnedWavesLoading);
+    isFetching ||
+    isAuthResolving(connectionState, fetchingProfile) ||
+    (collection === "pinned" && isPinnedWavesLoading);
   const [following] = useShowFollowingWaves();
-  const { connectedProfile, activeProfileProxy } = useAuth();
   const isJoinedFilterActive =
     following && !!connectedProfile?.handle && !activeProfileProxy;
 
   // Use the custom hook for infinite scroll
   useInfiniteScroll(
-    !isSearching && (isCollapsed || collection !== "pinned") && hasNextPage,
-    isFetchingNextPage,
+    !hasLoadingError &&
+      !isSearching &&
+      (isCollapsed || collection !== "pinned") &&
+      hasNextPage,
+    collectionFetching || isFetchingNextPage,
     fetchNextPage,
     scrollContainerRef,
     sentinelRef,
@@ -85,7 +100,16 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
         />
 
         {/* Empty state */}
-        {!isSearching && (
+        {!isSearching && !isCollapsed && collection === "joined" && (
+          <JoinedWavesListRecovery
+            hasError={hasLoadingError}
+            hasNextPage={hasNextPage === true}
+            isFetching={collectionFetching || isFetchingNextPage}
+            onLoadMore={fetchNextPage}
+            onRetry={retryLoading ?? fetchNextPage}
+          />
+        )}
+        {!isSearching && !hasLoadingError && (
           <UnifiedWavesListEmpty
             sortedWaves={waves}
             isFetching={collectionFetching}

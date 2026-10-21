@@ -87,7 +87,7 @@ import RootBlockGuardPlugin from "@/components/drops/create/lexical/plugins/Root
 import { $selectEndOfRootBlock } from "@/components/drops/create/lexical/utils/rootContent";
 import { processSplitMentions } from "./editDropMentionReconstruction";
 
-interface EditDropLexicalProps {
+export interface EditDropLexicalProps {
   readonly initialContent: string;
   readonly initialMentions: ApiDropMentionedUser[];
   readonly initialGroupMentions: ApiDropGroupMention[];
@@ -263,9 +263,7 @@ function FocusPlugin({ isApp }: { isApp: boolean }) {
     const focusEditor = () => {
       editor.focus();
       requestAnimationFrame(() => {
-        const contentEditable = document.querySelector(
-          '[contenteditable="true"]'
-        ) as HTMLElement;
+        const contentEditable = editor.getRootElement();
         if (contentEditable && document.activeElement !== contentEditable) {
           contentEditable.focus();
           contentEditable.click();

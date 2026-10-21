@@ -17,6 +17,7 @@ import {
 import {
   isMultiCompetitionEnabled,
   isRejectedCompetitionCommand,
+  isCompetitionAccessError,
   newCompetitionRequestKey,
 } from "@/helpers/competition.helpers";
 import type { ApiSetCompetitionVoteRequest } from "@/generated/models/ApiSetCompetitionVoteRequest";
@@ -115,12 +116,12 @@ export default function CompetitionMyVotes() {
 
   if (!viewer)
     return (
-      <p className="tw-p-4 tw-text-sm tw-italic tw-text-iron-400">
+      <p className="tw-p-4 tw-text-sm tw-italic tw-text-iron-500">
         {t(locale, "competitions.signIn")}
       </p>
     );
   if (query.isPending) return <CompetitionState />;
-  if (query.isError)
+  if (query.isError && (!query.data || isCompetitionAccessError(query.error)))
     return <CompetitionState error retry={() => void query.refetch()} />;
   return (
     <div>
@@ -151,14 +152,17 @@ export default function CompetitionMyVotes() {
         }
       />
       {!votes.length && (
-        <p className="tw-py-10 tw-text-center tw-text-sm tw-italic tw-text-iron-500">
+        <p className="tw-px-2 tw-py-10 tw-text-left tw-text-sm tw-italic tw-text-iron-500 sm:tw-px-4">
           {t(locale, "waves.myVotes.empty")}
         </p>
       )}
       {drops.map((result, index) => {
         const vote = votes[index]!;
         if (result.isPending) return <CompetitionState key={vote.entry_id} />;
-        if (result.isError)
+        if (
+          result.isError &&
+          (!result.data || isCompetitionAccessError(result.error))
+        )
           return (
             <CompetitionState
               key={vote.entry_id}

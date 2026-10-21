@@ -123,19 +123,20 @@ neither action withdraws the report. If the post is visible, the compact
 control appears inside that post rather than as an ambiguous line between
 posts. Hovering it shows the full state, and clicking or tapping it opens the
 report details. The full viewer-facing states are **Reported · Awaiting
-review**, **Reviewed · No action taken**, and **Reviewed · Content removed**.
+review**, **Reviewed · No action taken**, **Reviewed · Content removed**, and
+**Resolved · Post deleted**.
 Only the reporter sees this personal report state. Internal moderator notes,
 AI details, moderator identity, and other reporters are never exposed.
 
-Clicking or tapping a post's reporter-only **Reported** or **Reviewed** control
+Clicking or tapping a post's reporter-only status control
 opens a dedicated report-status view rather than reopening the action form. An
 open report shows that it is awaiting review and offers **Withdraw report**.
-Resolved reports show **Report reviewed** with **No action taken** or **Content
-removed** and no stale Report, Hide, or Block checkboxes. A successful
-withdrawal closes the dialog and leaves the post hidden. Withdrawal is
+Resolved reports show **Report reviewed** with **No action taken**, **Content
+removed**, or **Post deleted** and no stale Report, Hide, or Block checkboxes.
+A successful withdrawal closes the dialog and leaves the post hidden. Withdrawal is
 auditable, does not affect other reporters, and does not become available again
 after resolution. The same profile cannot report the unchanged post again
-after either reviewed outcome, while other profiles may still report it
+after a resolved outcome, while other profiles may still report it
 independently. Withdrawing an open report permits that profile to submit a
 later report. Blocking remains an independent profile action.
 
@@ -218,10 +219,10 @@ Other assessments remain in the occasional moderator queue without changing
 the post's global visibility.
 
 Members of the **6529 Dev Team** group can review open reports in **WatchTower** at
-`/content-moderation`, which defaults to **Open reports**. All tabs share the
+`/content-moderation`, which defaults to **Needs review**. All tabs share the
 site's bordered page frame and consistent content padding:
 
-- **Open reports**: `/content-moderation/open-reports`
+- **Needs review**: `/content-moderation/needs-review` (older `/content-moderation/open-reports` links also open this queue)
 - **Checks**: `/content-moderation/checks`
 - **Resolved reports**: `/content-moderation/resolved-reports`
 - **Suspended profiles**: `/content-moderation/suspended-profiles`
@@ -232,6 +233,59 @@ refresh open the selected tab, and browser Back and Forward restore previous
 tab selections. Arrow keys, Home, and End move focus between tabs; Enter or
 Space activates the focused tab. Unknown tab URLs show the not-found page.
 On narrow screens, a labelled selector switches between the same views.
+
+**Needs review** contains one row per case requiring manual attention. Reports
+and check revisions about the same post share a row, including multiple user
+reports. A standalone check awaiting human review also creates a case. Automated
+evaluations still running are excluded until they finish or enter failure
+recovery. Rejected new-post
+submissions without a published post remain separate cases; public fields group
+by their subject across revisions. Each row identifies User report, Automated
+check, or both, shows its outstanding requirements, report reason or
+**Automated outcome**, and links directly to **Review case**. An automated
+Allowed or Rejected outcome records the evaluator's assessment; it does not
+mean the post still exists or that manual review is complete.
+
+**Review case** opens a review workspace with the complete Needs review case
+list on the left and the selected case on the right on desktop. The selected
+row has a visible highlight and **Selected** label. Select another case on the
+left to switch details without returning to the queue. Opening a case does not
+restrict the left list to that case. The right side keeps **User reports for
+this case**, reporter notes, direct report review links and any remaining check
+revisions scoped to the selected case. Report and check lists have their own
+pagination. A report-only case stays in the left list after its check is marked
+reviewed, until the report is resolved. On desktop, use the visible left list
+to switch cases. On mobile, the selected detail occupies the view and **Back to
+list** returns to the Needs review queue. Check-history details also keep this
+back action on mobile; desktop details do not show a redundant back button.
+
+The compact filter bar has one **Needs review only** toggle and **Filter
+checks**. The toggle applies immediately: on selects review status Needs review,
+and off removes that status restriction. Other applied filters remain in place.
+With no other filters, Needs review shows the complete unique-case queue; other
+filter combinations browse individual check history, whose rows are not the
+unique-case attention count.
+
+**Filter checks** opens or closes the advanced controls only when selected.
+Changing a field prepares an edit and shows **Unapplied changes**; the list and
+toggle update when you choose **Apply filters**. Only the applied review status
+controls the toggle. Changing the quick toggle keeps other unfinished edits
+pending, updates the review-status field, and preserves whether the panel is
+open or closed. Collapsing the panel preserves edits. **Clear filters** removes
+both applied filters and unfinished edits without closing the panel.
+
+The Needs review badge and Items needing review summary show the same unique
+case count, which also controls the sidebar attention dot. The dot appears for
+any manual review case, including check-only cases with no user reports. It
+refreshes every minute while the app is active and after your moderation
+actions. Opening WatchTower does not clear it. A case remains until all of its
+open reports and pending checks are handled; Mark reviewed alone does not close
+reports. The dot disappears when no cases remain. This is an in-app indicator.
+
+The case list has cursor pagination. A failed load shows Retry and preserves
+already loaded cases. An empty message appears only after a successful empty
+response. **Checks** retains the full check history and **Resolved reports**
+retains closed reports.
 
 The summary shows items needing review, quarantined posts, rejected checks
 today, and evaluator failures today. These totals cover all items independently
@@ -266,8 +320,18 @@ The action panel offers only actions valid for that item and requires a reason:
   reviewed revision. This changes presentation without overwriting the
   author's stored text.
 - Published posts support visibility decisions and author posting controls.
+- Deleted reported posts show a red **Deleted** pill on the queue card, the
+  review workspace's left-hand case row and the detail panel, with **Resolve
+  reports — post deleted** while open reports remain. Enter a reason and confirm
+  to close
+  all open reports for that post and move them to Resolved reports with the
+  **Post deleted** outcome. The open-report count and navigation indicator
+  refresh after saving. Saved evidence, reporter history, and decision history
+  remain available. Resolution does not restore the post or change author
+  posting access.
 - **Re-evaluate** records a new evaluator result without undoing an explicit
-  human decision. **Mark reviewed** adds a reason to the decision history.
+  human decision. **Mark reviewed** adds a reason to the decision history;
+  it does not resolve open reports for the post.
 
 An item that changed during review requires **Load latest version** before
 another decision. A failed request can be retried safely with the same
@@ -290,7 +354,21 @@ AI summary with expandable detail, and keeps audit history available. A neutral
 AI category is omitted; a substantive category is labelled **Potential
 category** to make clear that it is not the moderator decision. Select
 **Review evidence and decide** to open the report's saved revision in Checks,
-review the applicable effect, select a decision, enter a reason, and confirm:
+review the applicable effect, select a decision, enter a reason, and confirm.
+Live-post cards and published-post check details provide a separate **Open
+original post** link to that exact post in its saved Wave context. This link
+is independent of links inside saved content. Deleted posts hide that action.
+Where evidence remains available, the detail explains **Original post deleted.
+Saved evidence retained.** Expired or unavailable evidence is not described as
+retained. If a live post's saved Wave or post ID is missing or invalid, a clear
+link-unavailable message replaces the link.
+
+Saved-text previews include a post's retained title and textual parts, including
+titleless posts, rather than claiming there is no preview when saved post text
+is available. The preview is a short extract; the evidence section retains the
+saved input. Expired evidence remains unavailable.
+
+For live posts:
 
 - **Allow** keeps or restores the post to visible and closes its reports;
 - **Quarantine** hides it globally while its reports stay open; and
@@ -321,7 +399,7 @@ reason, or pending report details.
 The WatchTower link is shown only when the server confirms that the signed-in
 profile belongs to the **6529 Dev Team** group. Sign in with a wallet linked to
 that profile and use a direct profile session; proxy sessions cannot use
-WatchTower. A red indicator appears while the queue contains open reports;
+WatchTower. A red indicator appears while any case needs manual review;
 the client refreshes this lightweight state periodically while active, without
 a WebSocket. The backend checks every moderator request; hiding the link is not
 the authorization boundary. A user who opens `/content-moderation` without

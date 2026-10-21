@@ -8,9 +8,11 @@ import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUplo
 import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.de-DE.json";
 import { DE_DE_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { DE_DE_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
+import { DE_DE_GLOBAL_ERROR_MESSAGES } from "@/i18n/messages/global-error";
 import { DE_DE_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { DE_DE_CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
 import { DE_DE_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
+import { DE_DE_DATE_COUNTDOWN_MESSAGES } from "@/i18n/messages/date-countdown";
 import { DE_DE_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { DE_DE_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { DE_DE_THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
@@ -31,6 +33,8 @@ export const DE_DE_MESSAGES = {
   "singleDrop.shared": "Link geteilt",
   "singleDrop.close": "Schließen",
   "singleDrop.closeLabel": "Panel schließen",
+  "singleDrop.loading": "Wird geladen…",
+  "singleDrop.loadError": "Dieser Inhalt konnte nicht geladen werden.",
   "singleDrop.showChat": "Chat anzeigen",
   "singleDrop.hideChat": "Chat ausblenden",
   "singleDrop.chatLabel": "Drop-Chat",
@@ -624,6 +628,7 @@ export const DE_DE_MESSAGES = {
   ...DE_DE_QR_SCANNER_MESSAGES,
   ...DE_DE_CAPACITOR_CONNECT_MESSAGES,
   ...DE_DE_NEW_VERSION_TOAST_MESSAGES,
+  ...DE_DE_GLOBAL_ERROR_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel":
     "Datei-Upload-Bereich für den Wave-Chat",
   "waves.chat.guidelinesDialog.title": "Wave-Richtlinien",
@@ -640,6 +645,7 @@ export const DE_DE_MESSAGES = {
     "Versuche es erneut, bevor du deine Nachricht sendest.",
   ...stormComposerDeMessages,
   "waves.loadingStatus": "Waves werden geladen",
+  "waves.threadLoadError": "Dieser Thread konnte nicht geladen werden.",
   "waves.gifPicker.open": "GIF hinzufügen",
   "waves.gifPicker.dialogTitle": "GIF-Suche",
   "waves.gifPicker.searchPlaceholder": "GIFs suchen",
@@ -1038,6 +1044,7 @@ export const DE_DE_MESSAGES = {
   "waves.proposalCard.tabLabels.errorReserved":
     "Bezeichnungen dürfen nicht mit vorhandenen Tabs übereinstimmen.",
   ...DE_DE_PAGINATION_MESSAGES,
+  ...DE_DE_DATE_COUNTDOWN_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} in dieser Runde übrig",
   "memes.quickVote.unrated": "{count} unbewertet",
   "memes.quickVote.summary": "{leftThisRound}, {unrated}",
@@ -1184,6 +1191,11 @@ export const DE_DE_MESSAGES = {
   "theMemes.documentTitle": "The Memes | Sammlungen",
   "theMemes.description.collections": "Sammlungen",
   "theMemes.detail.live.artwork.mintDateLabel": "Mint-Datum:",
+  "theMemes.mint.openWebMint": "Auf 6529.io minten",
+  "theMemes.mint.connect.connectedProfile": "Verbundenes Profil",
+  "theMemes.mint.connect.profileStats": "TDH: {tdh} - Stufe: {level}",
+  "theMemes.mint.connect.mintForMe": "Für mich minten",
+  "theMemes.mint.connect.mintForFren": "Für einen Fren minten",
   ...DE_DE_THE_MEMES_COLLECTORS_MESSAGES,
   "theMemes.sorting.regionLabel": "Meme-Sortierung",
   "theMemes.sorting.sortBy": "Sortieren nach",

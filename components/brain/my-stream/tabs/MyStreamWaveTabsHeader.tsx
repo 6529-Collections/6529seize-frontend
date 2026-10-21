@@ -19,7 +19,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
 import { AnnouncementWaveIcon } from "@/components/brain/left-sidebar/waves/SidebarIconTile";
 import type { SetActiveContentTab } from "@/components/brain/ContentTabContext";
-import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
+import LazyHeaderSearchModal from "@/components/header/header-search/LazyHeaderSearchModal";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -33,7 +33,10 @@ import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPr
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
 import { MyStreamWaveTab } from "@/types/waves.types";
-import WaveDropsSearchModal from "@/components/waves/drops/search/WaveDropsSearchModal";
+import LazyWaveDropsSearchModal, {
+  preloadWaveDropsSearchModal,
+  useWaveDropsSearchModalEarlyPreload,
+} from "@/components/waves/drops/search/LazyWaveDropsSearchModal";
 import WaveDescriptionPopover from "@/components/waves/header/WaveDescriptionPopover";
 import WavePicture from "../../../waves/WavePicture";
 import { WaveTrustSignals } from "@/components/waves/WaveTrustSignals";
@@ -224,7 +227,7 @@ function MyStreamWaveHeaderIdentity({
                 aria-label={t(locale, "waves.information.open", {
                   name: wave.name,
                 })}
-                className="tw-block tw-min-h-6 tw-max-w-full tw-truncate tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                className="tw-block tw-min-h-6 tw-max-w-full tw-truncate tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-sm tw-font-normal tw-leading-6 tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
               >
                 {wave.name}
               </button>
@@ -264,7 +267,7 @@ function MyStreamWaveHeaderIdentity({
                 aria-label={t(locale, "waves.information.open", {
                   name: wave.name,
                 })}
-                className="tw-block tw-min-h-6 tw-max-w-full tw-truncate tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                className="tw-block tw-min-h-6 tw-max-w-full tw-truncate tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-sm tw-font-normal tw-leading-6 tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
               >
                 {wave.name}
               </button>
@@ -301,11 +304,21 @@ export default function MyStreamWaveTabsHeader({
   const { isApp } = useDeviceInfo();
   const { connectedProfile, activeProfileProxy } = useAuth();
   const [openSearch, setOpenSearch] = useState<OpenSearch>(null);
+
+  // Warm the wave search modal from the visitor's first interaction (or when
+  // idle), so the first open does not wait on the network. The chunk stays out
+  // of first-load JS.
+  useWaveDropsSearchModalEarlyPreload();
   const descriptionPreviewRef = useRef<HTMLSpanElement>(null);
   const [isDescriptionPreviewTruncated, setIsDescriptionPreviewTruncated] =
     useState(false);
   const waveChatScroll = useWaveChatScrollOptional();
   const isDirectMessage = getWaveIsDirectMessage(wave);
+  // Reserve the description row's space even when it is empty, matching the
+  // pending header so metadata cannot move the divider and chat tabs.
+  const headerMinHeight = wave.parent_wave
+    ? "md:tw-min-h-[91px]"
+    : "md:tw-min-h-[69px]";
   const connectedHandle = connectedProfile?.handle?.toLowerCase() ?? null;
   const waveAuthorHandle =
     (wave as RuntimeSafeWave).author?.handle?.toLowerCase() ?? null;
@@ -463,7 +476,9 @@ export default function MyStreamWaveTabsHeader({
 
   return (
     <>
-      <div className={headerClassName}>
+      <div
+        className={`${headerClassName} ${isDirectMessage ? "" : headerMinHeight}`}
+      >
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-2 tw-self-start tw-pt-0.5">
           {showBackButton && (
             <button
@@ -500,6 +515,8 @@ export default function MyStreamWaveTabsHeader({
           <button
             type="button"
             onClick={() => setOpenSearch("wave")}
+            onPointerEnter={preloadWaveDropsSearchModal}
+            onFocus={preloadWaveDropsSearchModal}
             aria-label={searchMessagesLabel}
             data-tooltip-id={headerActionsTooltipId}
             data-tooltip-content={searchMessagesLabel}
@@ -537,7 +554,7 @@ export default function MyStreamWaveTabsHeader({
         </div>
       </div>
       <MyStreamActionTooltip id={headerActionsTooltipId} />
-      <WaveDropsSearchModal
+      <LazyWaveDropsSearchModal
         isOpen={openSearch === "wave"}
         onClose={() => setOpenSearch(null)}
         wave={wave}
@@ -545,7 +562,10 @@ export default function MyStreamWaveTabsHeader({
         onSearchAll={() => setOpenSearch("site")}
       />
       {openSearch === "site" && (
-        <HeaderSearchModal onClose={() => setOpenSearch(null)} wave={null} />
+        <LazyHeaderSearchModal
+          onClose={() => setOpenSearch(null)}
+          wave={null}
+        />
       )}
     </>
   );

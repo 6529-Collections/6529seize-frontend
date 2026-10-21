@@ -114,6 +114,26 @@ describe("AppUserConnect", () => {
     expect(screen.getByTestId("scanner")).toBeInTheDocument();
   });
 
+  it("shows a busy connect button until the wallet connection opens", async () => {
+    const { seizeConnectFresh, onNavigate } = setup(undefined, false);
+    let finishOpening!: () => void;
+    seizeConnectFresh.mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          finishOpening = resolve;
+        })
+    );
+    const btn = screen.getByRole("button", { name: "Connect" });
+
+    fireEvent.click(btn);
+    expect(btn).toHaveAttribute("aria-busy", "true");
+    expect(onNavigate).not.toHaveBeenCalled();
+
+    finishOpening();
+    await waitFor(() => expect(onNavigate).toHaveBeenCalled());
+    await waitFor(() => expect(btn).not.toHaveAttribute("aria-busy"));
+  });
+
   it("renders disconnect options when wallet is connected", async () => {
     const { seizeDisconnect, seizeDisconnectAndLogout, onNavigate } = setup(
       "0xabc",

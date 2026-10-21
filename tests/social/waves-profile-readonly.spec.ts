@@ -291,7 +291,16 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       "https://nft2-cdn.alchemy.com/cdn-cgi/image/width=250,height=250,fit=scale-down/eth-mainnet/a3062b74e1b4d79fdab0ca1ec5a92615";
     const cloudinaryThumbnail =
       "https://res.cloudinary.com/alchemyapi/image/upload/thumbnailv2/eth-mainnet/136dc79022a5b971800cf8405adb5cea_ea0b833e";
-    const thumbnails = [alchemyThumbnail, cloudinaryThumbnail, null];
+    const thumbnails = [
+      alchemyThumbnail,
+      cloudinaryThumbnail,
+      null,
+      null,
+      null,
+    ];
+    const tokenUri =
+      "https://arweave.net/fLAMSnWmzM9tAso6xMRSSPC2ZYaRoqjRnqGKaxk7vRQ";
+    let collectionImageUrl = "null";
     let releaseMetadata: () => void;
     const metadataReady = new Promise<void>((resolve) => {
       releaseMetadata = resolve;
@@ -300,7 +309,10 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     // Control grant/token data while exercising the deployed disclosure, grid,
     // real CDN responses and image optimizer in both environments.
     const grantId = "thumbnail-fixture";
-    const tokens = ["1", "2", "3"].map((token) => ({ token, xtdh: 1 }));
+    const tokens = ["1", "2", "3", "17", "18"].map((token) => ({
+      token,
+      xtdh: 1,
+    }));
     const grantsPage: ApiXTdhGrantsPage = {
       data: [
         {
@@ -362,6 +374,34 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await page.route(tokensRoute, (route) =>
       route.fulfill({ json: tokensPage })
     );
+    await page.route("**/api/alchemy/contracts", (route) => {
+      const body = route.request().postDataJSON() as {
+        contracts: { address: string; chain: string }[];
+      };
+      return route.fulfill({
+        json: {
+          contracts: body.contracts.map((contract) => ({
+            ...contract,
+            metadata: {
+              address: contract.address,
+              name: "Thumbnail fixture collection",
+              tokenType: "ERC721",
+              openSeaMetadata: { imageUrl: collectionImageUrl },
+            },
+          })),
+        },
+      });
+    });
+    await page.route(
+      "https://media.6529.io/arweave/fLAMSnWmzM9tAso6xMRSSPC2ZYaRoqjRnqGKaxk7vRQ",
+      (route) =>
+        route.fulfill({
+          json: {
+            name: "Recovered original artwork",
+            image: cloudinaryThumbnail,
+          },
+        })
+    );
     await page.route("**/api/alchemy/token-metadata", async (route) => {
       await metadataReady;
       const body = route.request().postDataJSON() as { tokenIds: string[] };
@@ -369,13 +409,28 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         json: {
           tokens: body.tokenIds.map((tokenId, index) => ({
             tokenId,
-            name: `Thumbnail fixture ${index}`,
+            name: tokenId === "18" ? "#18" : `Thumbnail fixture ${index}`,
+            ...(tokenId === "18" ? { tokenUri } : {}),
             image: { thumbnailUrl: thumbnails[index % thumbnails.length] },
+            ...(tokenId === "17"
+              ? {
+                  raw: {
+                    metadata: { original_image_url: cloudinaryThumbnail },
+                  },
+                }
+              : {}),
           })),
         },
       });
     });
     await gotoReady(page, `/${PROFILE_HANDLE}/xtdh?tab=granted`);
+    await expect(page.getByText("NFT", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("img", {
+        name: "Thumbnail fixture collection",
+        exact: true,
+      })
+    ).toHaveCount(0);
     await page
       .getByRole("button", { name: /^Show [\d,]+ tokens$/ })
       .first()
@@ -389,7 +444,12 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     } finally {
       releaseMetadata!();
     }
-    for (const name of ["Thumbnail fixture 0", "Thumbnail fixture 1"]) {
+    for (const name of [
+      "Thumbnail fixture 0",
+      "Thumbnail fixture 1",
+      "Thumbnail fixture 3",
+      "Recovered original artwork",
+    ]) {
       const image = tokenList.getByRole("img", { name, exact: true });
       await image.scrollIntoViewIfNeeded();
       await expect(image).toBeVisible();
@@ -404,6 +464,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         )
         .toBe(true);
     }
+    await expect(
+      tokenList
+        .getByText("#3", { exact: true })
+        .and(page.getByRole("list", { name: "Selected tokens" }).locator("div"))
+    ).toBeVisible();
     const source = await tokenList
       .getByRole("img", { name: "Thumbnail fixture 0", exact: true })
       .getAttribute("src");
@@ -412,7 +477,8 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
 
     await captureSafeScreenshot(page, test.info(), "grant-thumbnail-artwork");
 
-    // A fresh browser load must also replace a real image-network failure.
+    // A fresh browser load must also replace real collection/token image failures.
+    collectionImageUrl = alchemyThumbnail;
     await page.route("**/_next/image?**", async (route) => {
       const sourceUrl = new URL(route.request().url()).searchParams.get("url");
       if (sourceUrl === alchemyThumbnail) {
@@ -427,6 +493,13 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       .getByRole("button", { name: /^Show [\d,]+ tokens$/ })
       .first()
       .click();
+    await expect(page.getByText("NFT", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("img", {
+        name: "Thumbnail fixture collection",
+        exact: true,
+      })
+    ).toHaveCount(0);
     await expect(
       tokenList.getByRole("img", { name: "Failed to load thumbnail" }).first()
     ).toBeVisible();
@@ -1311,14 +1384,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     ).toBeVisible();
     await aboutPanel.getByRole("tab", { name: "About", exact: true }).click();
     await expect(page.getByText("Created by", { exact: true })).toHaveCount(0);
-    const creationDate = page
-      .getByRole("complementary", { name: "Wave details" })
-      .locator("time[datetime]")
-      .or(
-        page
-          .getByRole("dialog", { name: "Wave details" })
-          .locator("time[datetime]")
-      );
+    // Pinned drops can render their own dates inside link previews. Select the
+    // wave's creation date explicitly instead of every date in the panel.
+    const creationDate = aboutPanel.getByTestId("wave-creation-date");
     await expect(creationDate).toBeVisible();
     await expect(creationDate).toHaveAttribute(
       "datetime",
@@ -1407,12 +1475,82 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         test.info(),
         "profile-activity-loading"
       );
+
+      // Releasing the held request starts the network round trip; it does not
+      // mean the activity data has arrived. Keep network and render readiness
+      // separate, and fail explicitly if the activity endpoint returns an error.
+      const activityResponse = page.waitForResponse(
+        (response) => {
+          const url = new URL(response.url());
+          return (
+            response.request().method() === "GET" &&
+            url.pathname === "/api/profile-logs" &&
+            url.searchParams.get("profile") === PROFILE_HANDLE
+          );
+        },
+        { timeout: RESPONSE_TIMEOUT_MS }
+      );
+      releaseLogs();
+      const response = await activityResponse;
+      expect(
+        response.ok(),
+        `Profile activity request returned HTTP ${response.status()}`
+      ).toBe(true);
+      await expect(
+        response.finished(),
+        "Profile activity response must complete successfully"
+      ).resolves.toBeNull();
+      await expect(
+        page.getByRole("status", { name: "Loading activity log" })
+      ).toHaveCount(0);
     } finally {
       releaseLogs();
     }
-    await expect(
-      page.getByRole("status", { name: "Loading activity log" })
-    ).toHaveCount(0);
+  });
+
+  test("waits for identity guidance hydration before accepting activation", async ({
+    page,
+  }) => {
+    // Desktop-only SSR check: mobile requires hydrated tab navigation to reveal
+    // this panel, so it cannot expose the button while scripts are held. The
+    // existing profile-shell test still covers mobile guidance activation.
+    test.skip(
+      (page.viewportSize()?.width ?? 1280) < 1024,
+      "The mobile statements panel requires hydrated tab navigation."
+    );
+    let releaseScripts: () => void = () => undefined;
+    const scriptsReady = new Promise<void>((resolve) => {
+      releaseScripts = resolve;
+    });
+    await page.route("**/_next/static/chunks/**", async (route) => {
+      if (new URL(route.request().url()).pathname.endsWith(".js")) {
+        await scriptsReady;
+      }
+      await route.continue();
+    });
+    const guidanceButton = page.getByRole("button", {
+      name: "About identity statements",
+      exact: true,
+    });
+    const guidance = page.getByRole("tooltip", {
+      name: /All statements are optional\./,
+    });
+    try {
+      // Commit waits for the document response, allowing inspection of server
+      // markup while client scripts remain held at the browser boundary.
+      await page.goto(`/${PROFILE_HANDLE}`, { waitUntil: "commit" });
+      await expect(guidanceButton).toBeVisible();
+      await expect(guidanceButton).toBeDisabled();
+    } finally {
+      releaseScripts();
+    }
+    await expect(guidanceButton).toBeEnabled();
+    await guidanceButton.click();
+    await expect(guidanceButton).toHaveAttribute("aria-expanded", "true");
+    await expect(guidance).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(guidanceButton).toHaveAttribute("aria-expanded", "false");
+    await expect(guidance).toHaveCount(0);
   });
 
   test("renders the stable public profile shell read-only", async ({
@@ -1451,7 +1589,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(
       page.getByRole("link", { name: "Add another wallet" })
     ).toHaveCount(0);
-    const walletCount = page.getByText(/^\d of 4 wallets$/).first();
+    const walletCount = page.getByText(/^\d of 4 addresses$/).first();
     await expect(walletCount).toBeVisible();
     await expect
       .poll(() =>
@@ -1466,27 +1604,31 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       )
       .toBeLessThanOrEqual(2);
     await expectNoHorizontalOverflow(page);
-    const addressesHeading = page.getByRole("heading", {
-      name: /Addresses$/,
+    const walletHeading = page.getByRole("heading", {
+      name: `${PROFILE_HANDLE}'s Wallet`,
       level: 3,
     });
     const statementsHeading = page.getByRole("heading", {
       name: /ID Statements$/,
       level: 3,
     });
-    await expect(addressesHeading).toBeVisible();
+    await expect(walletHeading).toBeVisible();
     await expect(statementsHeading).toBeVisible();
-    const addressesBox = await addressesHeading.boundingBox();
+    const walletBox = await walletHeading.boundingBox();
     const statementsBox = await statementsHeading.boundingBox();
-    expect(addressesBox).not.toBeNull();
+    expect(walletBox).not.toBeNull();
     expect(statementsBox).not.toBeNull();
-    expect(addressesBox!.y).toBeLessThan(statementsBox!.y);
+    expect(walletBox!.y).toBeLessThan(statementsBox!.y);
     await expect(
       page.getByText("Consolidated Addresses", { exact: true })
     ).toHaveCount(0);
-    await page
-      .getByRole("button", { name: "About identity statements", exact: true })
-      .click();
+    const guidanceButton = page.getByRole("button", {
+      name: "About identity statements",
+      exact: true,
+    });
+    await expect(guidanceButton).toBeEnabled();
+    await guidanceButton.scrollIntoViewIfNeeded();
+    await guidanceButton.click();
     await expect(
       page.getByRole("button", {
         name: "About identity statements",
@@ -1496,6 +1638,22 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     // A scroll-into-view event can arrive after the opening click. It must
     // not dismiss guidance when the trigger has already reached its position.
     await page.evaluate(() => document.dispatchEvent(new Event("scroll")));
+    // Production also adjusted page scroll by 3px after guidance opened. A
+    // programmatic adjustment must reposition the popup instead of closing it.
+    const adjusted = await page.evaluate(async () => {
+      const scroller = document.scrollingElement;
+      if (!scroller) return false;
+      const before = scroller.scrollTop;
+      scroller.scrollBy({
+        top: before >= 3 ? -3 : 3,
+        behavior: "instant",
+      });
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+      );
+      return scroller.scrollTop !== before;
+    });
+    expect(adjusted).toBe(true);
     await page.mouse.move(0, 0);
     await expect(
       page.getByRole("button", {
@@ -1503,7 +1661,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         exact: true,
       })
     ).toHaveAttribute("aria-expanded", "true");
-    const guidance = page.getByRole("tooltip");
+    // Statement-row tooltips can still be closing while guidance is open.
+    // Select its existing accessible name instead of every tooltip on the page.
+    const guidance = page.getByRole("tooltip", {
+      name: /All statements are optional\./,
+    });
     await expect(guidance).toBeVisible();
     const guidanceBox = await guidance.boundingBox();
     expect(guidanceBox).not.toBeNull();
@@ -1533,7 +1695,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       .getByRole("button", { name: "About identity statements", exact: true })
       .click();
     await expect(guidance).toBeVisible();
-    await addressesHeading.click();
+    await walletHeading.click();
     await expect(guidance).toBeHidden();
     await expect(guidance).toHaveCount(0);
 
@@ -1542,7 +1704,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       exact: true,
     });
     for (const interaction of ["focus", "click"] as const) {
-      await addressesHeading.click();
+      await walletHeading.click();
       if (interaction === "focus") {
         await helpButton.focus();
       } else {

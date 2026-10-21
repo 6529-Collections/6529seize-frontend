@@ -1,3 +1,4 @@
+import { MEME_COLLABORATION_MESSAGES } from "@/i18n/messages/meme-collaborations";
 import emmaMessages from "@/i18n/messages/emma.en-US.json";
 import { EN_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import waveCreationMessages from "@/i18n/messages/wave-creation.en-US.json";
@@ -42,10 +43,13 @@ import networkTdhProfileMessages from "@/i18n/messages/networkTdhProfile.en-US.j
 import networkTdhRulesMessages from "@/i18n/messages/networkTdhRules.en-US.json";
 import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
+import utcScheduleMessages from "@/i18n/messages/utcSchedule.en-US.json";
+import worldTimeZonesMessages from "@/i18n/messages/worldTimeZones.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
 import { EN_US_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
+import { EN_US_DATE_COUNTDOWN_MESSAGES } from "@/i18n/messages/date-countdown";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
@@ -57,6 +61,7 @@ import { CONTENT_MODERATION_MESSAGES } from "@/i18n/messages/content-moderation"
 import { SIGNED_MESSAGES_MESSAGES } from "@/i18n/messages/signed-messages";
 import { MODERATION_CHECK_MESSAGES } from "@/i18n/messages/moderation-checks";
 import { EULA_MESSAGES } from "@/i18n/messages/eula";
+import { GLOBAL_ERROR_MESSAGES } from "@/i18n/messages/global-error";
 import { PROFILE_CURATION_MESSAGES } from "@/i18n/messages/profile-curation";
 import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-documentation";
 import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artwork-documentation-integration";
@@ -144,6 +149,7 @@ const USER_COLLECTED_STATS_MESSAGES = namespaceMessages(
     ["details.show", "Details"],
     ["details.hide", "Hide Details"],
     ["details.unavailable", "Stats are unavailable for this profile."],
+    ["details.loading", "Loading collection details…"],
     ["seasons.title", "Seasons"],
     ["seasons.startedCount", "{started}/{total} started"],
     ["seasons.showLess", "Show less"],
@@ -1061,6 +1067,7 @@ const USER_COLLECTED_STATS_TDH_HISTORY_MESSAGES = objectMessages(
 
 const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
   navigationLabel: "Profile sections",
+  loading: "Loading profile section…",
   scrollLeft: "Scroll profile sections left",
   scrollRight: "Scroll profile sections right",
   identity: "Identity",
@@ -1117,7 +1124,7 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
   "user.profile.identity.statements",
   {
     heading: "{name} ID Statements",
-    addressesHeading: "{name} Addresses",
+    walletHeading: "{name} Wallet",
     description: "Public identity links and consolidated wallet addresses.",
     consolidatedAddresses: "Consolidated addresses",
     help: "About identity statements",
@@ -1129,7 +1136,7 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     addWallet: "Add another wallet",
     addWalletDescription:
       "Link another wallet you control. Your NFTs stay in their wallets.",
-    walletCount: "{count} of {limit} wallets",
+    walletCount: "{count} of {limit} addresses",
     walletLimitReached:
       "This consolidation has the maximum of {limit} wallets.",
     delegationCenter: "Safe Collecting",
@@ -1337,6 +1344,9 @@ const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
 
 const USER_CIC_TYPE_MESSAGES = objectMessages("user.cicType", {
   details: "Network ID Check details",
+  title: "Network ID Check",
+  description:
+    "Does the community believe this profile accurately represents its identity?",
 } as const);
 
 const FOLLOWERS_MESSAGES = objectMessages("followers", {
@@ -1371,6 +1381,10 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   filterAll: "All",
   filterJoined: "Joined",
   joinedEmptyMessage: "No joined waves to display",
+  joinedLoadError: "Some joined waves could not be loaded.",
+  joinedRetry: "Retry",
+  joinedRetryLabel: "Retry loading joined waves",
+  joinedLoadMore: "Load more joined waves",
   announcementWavesAriaLabel: "Announcement waves",
   highlyRatedAriaLabel: "Worth checking out waves",
   pinnedAriaLabel: "Pinned waves",
@@ -1590,6 +1604,7 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "xtdhGrant.change": "Change grant",
   "xtdhGrant.cancelChange": "Cancel change",
   "xtdhGrant.remove": "Remove grant",
+  "xtdhGrant.clearFilters": "Clear filters",
   done: "Done",
   enableChat: "Enable chat",
   allowAdminsToDeletePosts: "Allow admins to delete posts",
@@ -2332,7 +2347,15 @@ const NETWORK_GROUP_FILTER_MESSAGES = objectMessages("network.groupFilter", {
 } as const);
 
 const WAVE_LOADING_MESSAGES = objectMessages("waves", {
+  loadingWave: "Loading {name}…",
+  loadingWaveUnknown: "Loading wave…",
+  loadingError: "This wave could not be loaded.",
+  threadLoadError: "This thread could not be loaded.",
+  loadingRetry: "Try again",
+  loadingBack: "Back to wave list",
+  loadingBackMessages: "Back to messages",
   loadingStatus: "Loading waves",
+  "drops.editorLoadingStatus": "Loading editor",
 } as const);
 
 const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
@@ -2546,6 +2569,8 @@ const PROFILE_ACTIVITY_RATE_MESSAGES = objectMessages("profileActivity.rate", {
 
 const USER_RATE_MESSAGES = objectMessages("user.rate", {
   "subtitle.waveRep": "give Wave REP for",
+  "nic.label": "Your total NIC Rating of {profile}:",
+  submit: "Rate",
 } as const);
 
 const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
@@ -2723,6 +2748,15 @@ const XTDH_COLLECTION_MESSAGES = objectMessages("xtdh.collections", {
   "search.emptyTitle": "No collections found for “{query}”",
 } as const);
 
+const XTDH_GRANT_MESSAGES = objectMessages("xtdh.grant", {
+  "lastGrant.label": "Last grant",
+} as const);
+
+const WAVE_SLOW_MODE_NOTICE_MESSAGES = objectMessages("waves.slowMode.notice", {
+  cooldown: "Slow mode: send again in {countdown}",
+  interval: "Slow mode: one message every {interval}",
+} as const);
+
 const COLLECTION_DELEGATION_MESSAGES = objectMessages("delegation.collection", {
   "readError.message": "Unable to load delegation records for {collection}.",
   "readError.retry": "Try Again",
@@ -2768,6 +2802,9 @@ const COLLECTION_DELEGATION_MESSAGES = objectMessages("delegation.collection", {
   "row.status.incomplete": "consolidation incomplete",
   "row.status.unavailable": "consolidation status unavailable",
   "row.consolidationMissing": "{label} consolidation missing",
+  "row.expiry.nonExpiring": "active - non-expiring",
+  "row.expiry.expired": "expired",
+  "row.expiry.active": "active - expires {date}",
   "row.label.incoming": "Incoming",
   "row.label.outgoing": "Outgoing",
   "outgoing.selectBulk": "Select {wallet} for bulk revoke",
@@ -2852,6 +2889,17 @@ const COLLECTION_DELEGATION_MESSAGES = objectMessages("delegation.collection", {
     "Register Consolidation from {from} to {to}",
 } as const);
 
+const DELEGATION_EXPIRY_MESSAGES = objectMessages("delegation.expiry", {
+  inputLabel: "Expiry Date",
+  timeZone:
+    "The delegation ends at the end of the selected day in your time zone ({zone}).",
+  preview: "Expires {local} ({utc})",
+  previewEmpty: "Select a date to see the exact expiry time.",
+  "error.missing": "Missing or invalid Expiry",
+  "error.tooSoon":
+    "Choose a later expiry date. The delegation must stay active for at least 1 hour after you submit.",
+} as const);
+
 const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   "wave.byAuthor": "by {author}",
   "wave.serial": "Wave #{serial}",
@@ -2914,6 +2962,11 @@ const OPEN_DATA_DOWNLOAD_MESSAGES = objectMessages("openData.downloads", {
   "columns.date": "Date",
   "columns.link": "Link",
   "columns.tokenId": "Token ID",
+} as const);
+
+const DATE_PICKER_MESSAGES = objectMessages("datePicker", {
+  utcNote: "Dates are in UTC. The latest date you can select is today in UTC.",
+  afterTodayError: "Dates cannot be later than today in UTC.",
 } as const);
 
 const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
@@ -2980,6 +3033,7 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  ...MEME_COLLABORATION_MESSAGES,
   "network.prenodes.title": "Prenodes",
   "network.prenodes.pageTitle": "Prenodes | Network",
   "network.prenodes.deprecation":
@@ -3071,6 +3125,8 @@ export const EN_US_MESSAGES = {
   "singleDrop.shared": "Link shared",
   "singleDrop.close": "Close",
   "singleDrop.closeLabel": "Close panel",
+  "singleDrop.loading": "Loading…",
+  "singleDrop.loadError": "This content could not be loaded.",
   "singleDrop.showChat": "Show chat",
   "singleDrop.hideChat": "Hide chat",
   "singleDrop.chatLabel": "Drop chat",
@@ -3223,7 +3279,10 @@ export const EN_US_MESSAGES = {
   "linkPreview.twitter.article.read": "Read article: {title}",
   ...IDENTITY_FILTER_MESSAGES,
   ...XTDH_COLLECTION_MESSAGES,
+  ...XTDH_GRANT_MESSAGES,
+  ...WAVE_SLOW_MODE_NOTICE_MESSAGES,
   ...COLLECTION_DELEGATION_MESSAGES,
+  ...DELEGATION_EXPIRY_MESSAGES,
   ...join6529Messages,
   "nextgen.brand": "NextGen",
   "nextgen.navigation.featured": "Featured",
@@ -3661,6 +3720,19 @@ export const EN_US_MESSAGES = {
   "home.nowMinting.editionDetails.season": "Season",
   "home.nowMinting.editionDetails.distributionPlan": "Distribution Plan",
   "home.nowMinting.editionDetails.view": "View",
+  "home.latestDrop.error":
+    "We couldn’t load the latest artwork. Please try again.",
+  "home.latestDrop.retry": "Try again",
+  "home.latestDrop.retrying": "Trying again…",
+  "home.comingUp.title": "Coming up",
+  "home.comingUp.credits.withNames": "with {names}",
+  "home.comingUp.credits.moreNames": "+{count} more",
+  "home.comingUp.credits.viewAllCredits": "View all collaborators on this drop",
+  "home.comingUp.credits.anonymousArtist": "Anonymous",
+  "home.comingUp.subtitle": "Next in queue and current vote leaders",
+  "home.comingUp.viewAll": "View all",
+  "home.comingUp.loading": "Loading upcoming artwork…",
+  "home.nowMinting.stats.unavailable": "Unavailable",
   "home.nowMinting.stats.edition": "Edition",
   "home.nowMinting.stats.status": "Status",
   "home.nowMinting.stats.mintPrice": "Mint price",
@@ -3691,6 +3763,11 @@ export const EN_US_MESSAGES = {
   "theMemes.description.collections": "Collections",
   "theMemes.mint.metadata.description":
     "View the latest mint from The Memes collection.",
+  "theMemes.mint.openWebMint": "Mint on 6529.io",
+  "theMemes.mint.connect.connectedProfile": "Connected Profile",
+  "theMemes.mint.connect.profileStats": "TDH: {tdh} - Level: {level}",
+  "theMemes.mint.connect.mintForMe": "Mint for me",
+  "theMemes.mint.connect.mintForFren": "Mint for fren",
   "theMemes.title": "The Memes",
   "theMemes.sorting.regionLabel": "Meme sorting",
   "theMemes.sorting.sortBy": "Sort by",
@@ -4435,6 +4512,8 @@ export const EN_US_MESSAGES = {
   ...networkTdhRulesMessages,
   ...delegationTapGuideMessages,
   ...toolsMessages,
+  ...utcScheduleMessages,
+  ...worldTimeZonesMessages,
   ...ABOUT_TECH_MESSAGES,
   ...REVIEWBOT_USAGE_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
@@ -4447,13 +4526,16 @@ export const EN_US_MESSAGES = {
   ...LINK_PREVIEW_MESSAGES,
   ...COMMON_MESSAGES,
   ...EN_US_PAGINATION_MESSAGES,
+  ...EN_US_DATE_COUNTDOWN_MESSAGES,
   ...OPEN_DATA_DOWNLOAD_MESSAGES,
+  ...DATE_PICKER_MESSAGES,
   ...MEME_DATA_TABLE_MESSAGES,
   ...HEADER_SEARCH_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,
   ...PUBLIC_REVIEW_MESSAGES,
   ...EULA_MESSAGES,
+  ...GLOBAL_ERROR_MESSAGES,
   ...TITLE_CONTEXT_MESSAGES,
   ...WAVE_NAVIGATION_MESSAGES,
   ...MY_STREAM_CURATION_MESSAGES,
@@ -4514,7 +4596,8 @@ export const EN_US_MESSAGES = {
     "Community decisions powered by TDH.",
   "waves.discovery.recommendationsDescription":
     "Highly rated waves you don’t follow.",
-  "waves.discovery.publicRecommendationsDescription": "Highly rated waves.",
+  "waves.discovery.publicRecommendationsDescription":
+    "Highly rated waves you don’t follow.",
   "waves.discovery.activeDiscussions": "Active discussions",
   "waves.discovery.unfollowedDiscussions":
     "Active discussions you are not yet following",
@@ -4532,6 +4615,30 @@ export const EN_US_MESSAGES = {
   "waves.discovery.nextDecision": "Next decision {date}",
   "waves.discovery.emptyVotes": "No active TDH votes right now.",
   "waves.discovery.emptyRecommendations": "No recommendations right now.",
+  "waves.discovery.loadingRecommendations": "Loading recommendations…",
+  "waves.discovery.loadingVotes": "Loading votes…",
+  "waves.discovery.loadingAnnouncements": "Loading announcements…",
+  "waves.discovery.recommendationsError": "Couldn’t load recommendations.",
+  "waves.discovery.votesError": "Couldn’t load votes.",
+  "memes.quickVote.loading":
+    "Loading your next meme and your recent quick-vote amounts.",
+  "waves.discovery.controls": "Discovery controls",
+  "waves.discovery.scoreFormula": "Score formula",
+  "waves.discovery.sort.label": "Wave discovery sort",
+  "waves.discovery.sort.open": "Wave discovery sort: {sort}",
+  "waves.discovery.sort.balanced": "Balanced",
+  "waves.discovery.sort.quality": "Quality",
+  "waves.discovery.sort.hot": "Hot",
+  "waves.discovery.sort.rep": "REP",
+  "waves.discovery.sort.newest": "Newest",
+  "waves.discovery.sort.latestPosts": "Latest Posts",
+  "waves.discovery.sort.status": "{sort} waves",
+  "waves.discovery.filter.label": "Wave score threshold",
+  "waves.discovery.filter.all": "All",
+  "waves.discovery.filter.score": "Score 50+",
+  "waves.discovery.filter.hot": "Hot 60+",
+  "waves.discovery.filter.rep": "REP 60+",
+  "waves.discovery.filter.empty": "No waves match these filters.",
   "waves.discovery.loading": "Loading waves…",
   "waves.discovery.error": "Couldn’t load waves.",
   "waves.discovery.retry": "Try again",

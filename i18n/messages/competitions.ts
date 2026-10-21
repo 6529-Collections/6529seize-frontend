@@ -61,6 +61,8 @@ export const COMPETITION_MESSAGES = {
   "competitions.error":
     "This competition could not be loaded. It may be unavailable or you may not have access.",
   "competitions.retry": "Try again",
+  "competitions.voterProfileUnavailable": "Profile unavailable",
+  "competitions.retryVoterProfile": "Retry profile at rank {rank}",
   "competitions.empty": "No competitions here yet. Chat is always available.",
   "competitions.parallel":
     "Each competition has its own entries, voting credits, and results. All competitions share this wave’s chat.",
@@ -209,6 +211,7 @@ export const COMPETITION_MESSAGES = {
   "competitions.notification.ended": "Competition ended",
   "competitions.notification.cancelled": "Competition cancelled",
   "competitions.notification.winners": "New competition results",
+  "competitions.notification.resultsFor": "Results are in for {competition}",
   "competitions.notification.paused": "Competition decisions paused",
   "competitions.notification.resumed": "Competition decisions resumed",
   "competitions.discardTitle": "Close with unsaved changes?",

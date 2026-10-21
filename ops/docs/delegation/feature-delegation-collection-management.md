@@ -40,7 +40,8 @@ delegations for one collection scope.
 - Review row details:
   - wallet label (ENS + address when ENS resolves)
   - token scope (`all tokens` or `token ID`)
-  - expiry (`active - non-expiring`, `active - expires YYYY-MM-DD`, `expired`)
+  - expiry (`active - non-expiring`, `active - expires <date, time and time
+    zone>` in your local time, `expired`)
 - For consolidations, check status:
   - `consolidation active`
   - `consolidation incomplete` with tooltip (`Incoming consolidation missing` or
@@ -114,7 +115,9 @@ delegations for one collection scope.
 ## Limitations / Notes
 
 - Data is wallet/account specific.
-- Reads poll every 10 seconds; updates are not pushed in real time.
+- Reads load once and refresh when you return to the tab. After a write
+  confirms, they re-check every few seconds for about 30 seconds, then stop;
+  updates are not pushed in real time.
 - Field-level write form requirements are documented in
   [Delegation Write Action Routes](feature-delegation-action-flows.md).
 

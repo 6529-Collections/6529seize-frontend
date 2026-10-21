@@ -5,7 +5,7 @@
 Identity statements are managed inside the combined `Identity` tab on `/{user}`.
 This surface includes:
 
-- The profile’s `Addresses` section, followed by its `ID Statements` heading
+- The profile’s `Wallet` section, followed by its `ID Statements` heading
 - `Social Media Accounts`
 - `NFT Accounts`
 - `Contact`
@@ -13,7 +13,7 @@ This surface includes:
 
 On mobile, selecting the `ID Statements` score card opens the addresses and
 statements card. Desktop shows the same content in the right side of the
-combined Identity layout. The profile’s personalized `Addresses` heading comes
+combined Identity layout. The profile’s personalized `Wallet` heading comes
 first, with its wallet rows and actions directly below. A divider introduces the
 profile’s `ID Statements` heading, information button, and compact owner-only
 `Add` action. Both section headings use the same compact 18px type on desktop
@@ -23,7 +23,12 @@ and mobile, with natural wrapping for longer names. There is no separate
 The information button beside `ID Statements` opens a tooltip on hover, keyboard
 focus, or tap. It explains that statements are optional and permanently public,
 that social accounts are self-declared and unverified by 6529, and that the
-community rates statement accuracy. Escape or clicking outside dismisses it.
+community rates statement accuracy. Escape, clicking outside, or a page-scrolling
+gesture dismisses it. Automatic page adjustments keep the tooltip open and
+aligned with its information button; scrolling inside the tooltip also keeps it
+open.
+While the page is initially loading, the information button stays disabled until
+it can respond to hover, focus, and taps.
 
 ## Location in the Site
 
@@ -43,7 +48,7 @@ community rates statement accuracy. Escape or clicking outside dismisses it.
 ## User Journey
 
 1. Open `/{user}` and show the `ID Statements` surface.
-2. Review the profile’s `Addresses`, then its `ID Statements` sections.
+2. Review the profile’s `Wallet`, then its `ID Statements` sections.
 3. If `Add` is visible, open the add-statements sheet on mobile or dialog on
    desktop.
 4. Review the visible note that statements are optional and fully and permanently
@@ -106,8 +111,15 @@ OpenSea` actions. Desktop retains compact external-link actions.
 - `Primary` badge marks the active primary wallet.
 - `Wallet Checker` is shown when the profile has a primary or consolidated
   wallet address.
-- The personalized `Addresses` header shows the wallet count against the
-  4-wallet limit, for example `2 of 4 wallets`.
+- The personalized `Wallet` heading uses the viewed profile’s name, for example
+  `prxt0's Wallet`, and stays singular even when several addresses belong to the
+  profile. The right-aligned count shows the profile’s addresses against the
+  current maximum from settings, for example `1 of 4 addresses` or
+  `2 of 4 addresses`.
+- The count is hidden until wallet limits are available, or when there are no
+  profile addresses. A failed settings refresh retains the last loaded limits;
+  without known limits, the heading and wallet rows remain visible without a
+  bare or guessed count.
 - `Wallet Checker` and `Add another wallet` share equal-width columns when both
   are available. The wallet helper sentence wraps naturally with the available
   width.

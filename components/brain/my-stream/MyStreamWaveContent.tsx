@@ -12,6 +12,7 @@ import {
 import { useContentTab } from "../ContentTabContext";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import MyStreamWaveChat from "./MyStreamWaveChat";
+import MyStreamWavePending from "./MyStreamWavePending";
 import MyStreamWaveCurationContent from "./curations/MyStreamWaveCurationContent";
 import { useWaveData } from "@/hooks/useWaveData";
 import { useDrop } from "@/hooks/useDrop";
@@ -59,6 +60,7 @@ import {
 } from "@/helpers/waves/wave-submission-experience.helpers";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
+import { editDropLexicalLoader } from "@/components/waves/drops/editDropLexicalLoader";
 import type {
   ChatSubmitDropAction,
   ChatSubmitDropState,
@@ -113,7 +115,12 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     serverFeedSeed: { completeInitialRegistration },
   } = useMyStream();
   const { updateEligibility } = useWaveEligibility();
-  const { data: wave } = useWaveData({
+  const {
+    data: wave,
+    isError,
+    isFetching,
+    refetch,
+  } = useWaveData({
     waveId,
     onWaveNotFound: isCompetitionPathname(pathname)
       ? undefined
@@ -209,6 +216,11 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     : searchParams.get("curation");
   const loadedWaveId = wave?.id ?? null;
   const { editingDropId, setEditingDropId } = useEditingDrop();
+
+  // Warm the drop editor from the visitor's first interaction (or when idle),
+  // so the first edit does not wait on the network. The chunk stays out of
+  // first-load JS.
+  editDropLexicalLoader.usePreloadEarly();
   const requestedEditPostId = searchParams.get("editPost") ?? "";
   const { drop: requestedEditPost } = useDrop({
     dropId: requestedEditPostId,
@@ -535,9 +547,15 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
 
   // Early return if no wave data - all hooks must be called before this
   if (!wave) {
-    return isCompetitionPathname(pathname)
-      ? (competitionContent ?? null)
-      : null;
+    return (
+      <MyStreamWavePending
+        waveId={waveId}
+        isError={isError && !isFetching}
+        onRetry={() => void refetch()}
+      >
+        {isCompetitionPathname(pathname) ? competitionContent : undefined}
+      </MyStreamWavePending>
+    );
   }
 
   const activeChatSubmitDropState: ChatSubmitDropState | null =
@@ -628,6 +646,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     <div
       className="tailwind-scope tw-relative tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-col"
       key={stableWaveKey}
+      data-testid="wave-content"
     >
       {competitionOnly ? (
         <div className="tw-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950">

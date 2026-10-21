@@ -1,5 +1,5 @@
 import WavesMessagesWrapper from "@/components/shared/WavesMessagesWrapper";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
 let mockBreakpoint = "LG";
@@ -12,6 +12,7 @@ const mockChildMounted = jest.fn();
 const mockCloseRightSidebar = jest.fn();
 const mockRouterReplace = jest.fn();
 const mockUseQuery = jest.fn();
+const mockRequestMainWavesList = jest.fn();
 
 jest.mock("react-use", () => ({
   createBreakpoint: () => () => mockBreakpoint,
@@ -89,6 +90,12 @@ jest.mock("@/components/auth/Auth", () => ({
 
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ contentContainerStyle: {} }),
+}));
+
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
+  useMyStreamOptional: () => ({
+    requestMainWavesList: mockRequestMainWavesList,
+  }),
 }));
 
 jest.mock("@/contexts/wave/WaveChatScrollContext", () => ({
@@ -300,6 +307,87 @@ describe("WavesMessagesWrapper", () => {
     );
   });
 
+  it.each(["S", "LG"])(
+    "covers the wave immediately while fetching a deep-linked drop (%s)",
+    (breakpoint) => {
+      mockBreakpoint = breakpoint;
+      mockWaveId = "wave-1";
+      mockEffectiveDropId = "drop-1";
+      mockIsRightSidebarOpen = true;
+      const { rerender } = renderWrapper();
+      expect(
+        screen.getByRole("status", { name: "Loading…" })
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("main-content").parentElement).toHaveAttribute(
+        "inert"
+      );
+      expect(screen.getByTestId("right-sidebar")).toHaveAttribute(
+        "data-open",
+        "false"
+      );
+      // keepPreviousData may still contain a different drop; it must not flash.
+      mockUseQuery.mockReturnValue({
+        data: { id: "previous-drop" },
+        error: null,
+      });
+      rerender(
+        <WavesMessagesWrapper>
+          <MainContentProbe />
+        </WavesMessagesWrapper>
+      );
+      expect(screen.getByTestId("single-drop-loading")).toBeInTheDocument();
+      expect(screen.queryByTestId("drop-overlay")).not.toBeInTheDocument();
+      mockUseQuery.mockReturnValue({ data: { id: "drop-1" }, error: null });
+      rerender(
+        <WavesMessagesWrapper>
+          <MainContentProbe />
+        </WavesMessagesWrapper>
+      );
+      expect(screen.getByTestId("drop-overlay")).toBeInTheDocument();
+      expect(
+        screen.queryByTestId("single-drop-loading")
+      ).not.toBeInTheDocument();
+    }
+  );
+
+  it("keeps failed drop loads in the detail surface with retry and close actions", () => {
+    mockWaveId = "wave-1";
+    mockEffectiveDropId = "drop-1";
+    mockSearchParams.set("drop", "drop-1");
+    const retry = jest.fn();
+    mockUseQuery.mockReturnValue({
+      data: undefined,
+      error: new Error("Unavailable"),
+      refetch: retry,
+    });
+    const { rerender } = renderWrapper();
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "This content could not be loaded."
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(retry).toHaveBeenCalledTimes(1);
+    mockUseQuery.mockReturnValue({
+      data: undefined,
+      error: new Error("Unavailable"),
+      refetch: retry,
+      isFetching: true,
+    });
+    rerender(
+      <WavesMessagesWrapper>
+        <MainContentProbe />
+      </WavesMessagesWrapper>
+    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Try again" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("status", { name: "Loading…" })
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Close panel" }));
+    expect(mockRouterReplace).toHaveBeenCalledWith("/waves", { scroll: false });
+  });
+
   it("suppresses the sidebar while a drop overlay is open", () => {
     mockWaveId = "wave-1";
     mockIsRightSidebarOpen = true;
@@ -317,6 +405,23 @@ describe("WavesMessagesWrapper", () => {
       "data-open",
       "false"
     );
+  });
+
+  it("requests the main Waves list on Waves pages even when the sidebar is hidden", () => {
+    mockBreakpoint = "S";
+    mockWaveId = "wave-1";
+
+    renderWrapper();
+
+    expect(screen.queryByTestId("left-sidebar")).not.toBeInTheDocument();
+    expect(mockRequestMainWavesList).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not request the main Waves list on Messages pages", () => {
+    renderWrapper({ defaultPath: "/messages" });
+
+    expect(screen.getByTestId("left-sidebar")).toBeInTheDocument();
+    expect(mockRequestMainWavesList).not.toHaveBeenCalled();
   });
 
   it("keeps the open sidebar controller mounted when switching waves", () => {
