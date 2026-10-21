@@ -30,10 +30,14 @@ test("opens a public wave on a quiet chat frame before hydration", async ({
     route.fulfill({ json: {} })
   );
   const hydration = await gateSidebarHydration(page);
-  const loading = page
+  const loadingFrames = page
     .getByTestId("wave-chat-loading")
-    .filter({ visible: true })
-    .first();
+    .filter({ visible: true });
+  // The covered interactive chat can have its own loader in the DOM. Select
+  // the exposed frame by its accessible heading rather than document order.
+  const loading = loadingFrames.filter({
+    has: page.getByRole("heading", { name: SOURCE_NAME, exact: true }),
+  });
   const preview = page.getByRole("region", {
     name: SOURCE_NAME,
     includeHidden: true,
@@ -64,7 +68,7 @@ test("opens a public wave on a quiet chat frame before hydration", async ({
   await expect(
     page.getByRole("region", { name: "Wave chat file upload area" })
   ).toBeVisible({ timeout: 60000 });
-  await expect(loading).toHaveCount(0);
+  await expect(loadingFrames).toHaveCount(0);
   await expect(
     page.getByText("No waves in this collection yet", { exact: true })
   ).toBeHidden();
