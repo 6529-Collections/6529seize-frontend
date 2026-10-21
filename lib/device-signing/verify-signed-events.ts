@@ -171,6 +171,21 @@ const CONTENT_KINDS: ReadonlySet<number> = new Set([
 ]);
 
 /** The grant message commits to exactly the key, scopes and expiry stored. */
+/**
+ * Grants count only when the wallet signed them on a 6529 site: 6529.io, a
+ * subdomain, or the site this check runs on (local builds and mirrors).
+ */
+function isAllowedGrantDomain(domain: string): boolean {
+  const host = domain.toLowerCase();
+  const currentHost =
+    typeof globalThis.location === "object"
+      ? globalThis.location.host.toLowerCase()
+      : "";
+  return (
+    host === "6529.io" || host.endsWith(".6529.io") || host === currentHost
+  );
+}
+
 const isGrantMessageConsistent = (grant: ApiDeviceGrantProof): boolean => {
   if (!same(hashMessage(grant.message), grant.id)) {
     return false;
@@ -178,6 +193,9 @@ const isGrantMessageConsistent = (grant: ApiDeviceGrantProof): boolean => {
   const parsed = parseDeviceGrantMessage(grant.message);
   return (
     parsed !== null &&
+    isAllowedGrantDomain(parsed.domain) &&
+    same(parsed.domain, grant.domain) &&
+    parsed.chainId === grant.chain_id &&
     same(parsed.address, grant.wallet) &&
     same(parsed.deviceKeyHex, grant.device_key) &&
     parsed.scopes.join(",") === grant.scopes.join(",") &&

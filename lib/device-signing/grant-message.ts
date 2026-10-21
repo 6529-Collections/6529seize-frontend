@@ -27,6 +27,30 @@ interface DeviceGrantTerms {
 
 interface ParsedDeviceGrantMessage extends DeviceGrantTerms {
   readonly address: string;
+  /** The SIWE domain (host) the wallet was shown. */
+  readonly domain: string;
+  /** The SIWE Chain ID line. */
+  readonly chainId: number;
+}
+
+const CHAIN_ID_PREFIX = "Chain ID: ";
+
+/** The host of a SIWE header origin such as "https://6529.io". */
+function parseHeaderDomain(origin: string): string | null {
+  if (!origin.includes("://")) {
+    return origin.length > 0 ? origin.toLowerCase() : null;
+  }
+  try {
+    return new URL(origin).host.toLowerCase() || null;
+  } catch {
+    return null;
+  }
+}
+
+function parseChainId(lines: readonly string[]): number | null {
+  const line = lines.find((candidate) => candidate.startsWith(CHAIN_ID_PREFIX));
+  const value = line ? Number(line.slice(CHAIN_ID_PREFIX.length)) : Number.NaN;
+  return Number.isSafeInteger(value) && value > 0 ? value : null;
 }
 
 const formatEnglishList = (items: readonly string[]): string => {
@@ -151,12 +175,19 @@ export function parseDeviceGrantMessage(
   ) {
     return null;
   }
+  const domain = parseHeaderDomain(header.slice(0, -SIWE_HEADER_SUFFIX.length));
+  const chainId = parseChainId(lines);
   const resources = getResourceLines(lines);
   const terms = resources ? parseGrantResource(resources) : null;
-  if (!terms || statement !== renderDeviceGrantStatement(terms)) {
+  if (
+    !terms ||
+    domain === null ||
+    chainId === null ||
+    statement !== renderDeviceGrantStatement(terms)
+  ) {
     return null;
   }
-  return { ...terms, address };
+  return { ...terms, address, domain, chainId };
 }
 
 /**
