@@ -20,7 +20,9 @@ useLocalSandboxMutationGuard(
   "Requires the local sandbox."
 );
 test.afterEach(async ({ page }) => {
-  await page.unrouteAll({ behavior: "wait" });
+  // Assertions and explicit gates have finished. Let page disposal cancel any
+  // remaining bundle handlers instead of draining background work here.
+  await page.unrouteAll({ behavior: "ignoreErrors" });
 });
 
 test("opens a public wave on a quiet chat frame before hydration", async ({
