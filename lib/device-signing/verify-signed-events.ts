@@ -48,11 +48,35 @@ interface DisplayedDropContent {
   }[];
 }
 
+const same = (left: string, right: string): boolean =>
+  left.toLowerCase() === right.toLowerCase();
+
+/** The drop the reader opened: events must belong to it to count. */
+interface ExpectedDrop {
+  readonly dropId: string;
+  readonly waveId: string;
+  /**
+   * The author's wallets (its consolidation, from the profile data); an
+   * event signed under another wallet's grant is not the author's.
+   */
+  readonly authorWallets: readonly string[];
+}
+
 interface VerifyOptions {
   readonly verifyContractSignature?: ContractSignatureVerifier | undefined;
   /** When given, the current content is "signed" only if it matches. */
   readonly displayed?: DisplayedDropContent | undefined;
+  /** When given, only events of this drop, wave and author count. */
+  readonly expected?: ExpectedDrop | undefined;
 }
+
+const belongsToExpectedDrop = (
+  event: ApiDeviceSignedEvent,
+  expected: ExpectedDrop | undefined
+): boolean =>
+  expected === undefined ||
+  (same(event.wave, expected.waveId) &&
+    expected.authorWallets.some((wallet) => same(wallet, event.author)));
 
 const countOf = (value: unknown): number =>
   Array.isArray(value) ? value.length : 0;
@@ -145,9 +169,6 @@ const CONTENT_KINDS: ReadonlySet<number> = new Set([
   DeviceEventKind.POST,
   DeviceEventKind.EDIT,
 ]);
-
-const same = (left: string, right: string): boolean =>
-  left.toLowerCase() === right.toLowerCase();
 
 /** The grant message commits to exactly the key, scopes and expiry stored. */
 const isGrantMessageConsistent = (grant: ApiDeviceGrantProof): boolean => {
@@ -315,7 +336,11 @@ async function verifyContentEvents(
           grantChecks.set(grantId, grantCheck);
         }
         const walletSignature = await grantCheck;
-        if (!walletSignature || !(await verifyEvent(event, grant))) {
+        if (
+          !walletSignature ||
+          !belongsToExpectedDrop(event, options.expected) ||
+          !(await verifyEvent(event, grant))
+        ) {
           return null;
         }
         return { event, grant, walletSignature };
@@ -334,6 +359,9 @@ export async function verifyDropSignedEvents(
   data: ApiDropSignedEvents,
   options: VerifyOptions = {}
 ): Promise<DropSignatureVerdict> {
+  if (options.expected && !same(data.drop_id, options.expected.dropId)) {
+    return { status: "invalid" };
+  }
   const hasContentEvents = data.events.some((event) =>
     CONTENT_KINDS.has(event.kind)
   );

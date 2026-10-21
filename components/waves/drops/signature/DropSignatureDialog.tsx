@@ -15,7 +15,10 @@ import {
   type ContractSignatureVerifier,
   toDisplayedDropContent,
 } from "@/lib/device-signing/verify-signed-events";
-import { fetchDropSignedEvents } from "@/services/api/device-grants-api";
+import {
+  fetchAuthorWallets,
+  fetchDropSignedEvents,
+} from "@/services/api/device-grants-api";
 import {
   Dialog,
   DialogBackdrop,
@@ -35,7 +38,9 @@ import { usePublicClient } from "wagmi";
 interface DropSignatureDialogProps {
   readonly dropId: string;
   /** The drop as shown; its content is checked against the signed body. */
-  readonly drop?: Pick<ApiDrop, "title" | "parts"> | undefined;
+  readonly drop?:
+    | Pick<ApiDrop, "title" | "parts" | "wave" | "author">
+    | undefined;
   readonly isOpen: boolean;
   readonly onClose: () => void;
 }
@@ -171,14 +176,22 @@ function DropSignatureDialogContent({
   const content = drop ? toDisplayedDropContent(drop) : undefined;
   const query = useQuery({
     queryKey: [QueryKey.DROP_SIGNED_EVENTS, dropId, content ?? null],
-    queryFn: async ({ signal }) =>
-      await verifyDropSignedEvents(
-        await fetchDropSignedEvents(dropId, signal),
-        {
-          verifyContractSignature,
-          displayed: content,
-        }
-      ),
+    queryFn: async ({ signal }) => {
+      const [signedEvents, authorWallets] = await Promise.all([
+        fetchDropSignedEvents(dropId, signal),
+        drop
+          ? fetchAuthorWallets(drop.author.primary_address, signal)
+          : Promise.resolve(undefined),
+      ]);
+      return await verifyDropSignedEvents(signedEvents, {
+        verifyContractSignature,
+        displayed: content,
+        expected:
+          drop && authorWallets
+            ? { dropId, waveId: drop.wave.id, authorWallets }
+            : undefined,
+      });
+    },
     enabled: isOpen,
     staleTime: 60_000,
     retry: 1,

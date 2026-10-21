@@ -183,6 +183,43 @@ describe("drop signature verification in the browser", () => {
     });
   });
 
+  it("only counts events of the opened drop, its wave and its author", async () => {
+    const grant = await createGrant();
+    const post = await createEvent(grant, {
+      kind: 1,
+      seq: 1_760_000_000_000,
+      body: { parts: [{ content: "gm" }] },
+    });
+    const data = signedEvents([post], [grant], post.id);
+    const expected = (overrides: Record<string, unknown> = {}) => ({
+      dropId: DROP_ID,
+      waveId: WAVE_ID,
+      authorWallets: [wallet.address],
+      ...overrides,
+    });
+
+    await expect(
+      verifyDropSignedEvents(data, { expected: expected() })
+    ).resolves.toMatchObject({ status: "signed" });
+    // A consolidation wallet of the author also counts.
+    await expect(
+      verifyDropSignedEvents(data, {
+        expected: expected({
+          authorWallets: [otherWallet.address, wallet.address.toLowerCase()],
+        }),
+      })
+    ).resolves.toMatchObject({ status: "signed" });
+    for (const mismatch of [
+      { dropId: "another-drop" },
+      { waveId: "another-wave" },
+      { authorWallets: [otherWallet.address] },
+    ]) {
+      await expect(
+        verifyDropSignedEvents(data, { expected: expected(mismatch) })
+      ).resolves.toEqual({ status: "invalid" });
+    }
+  });
+
   it("builds the shown content from a drop", () => {
     expect(
       toDisplayedDropContent({
