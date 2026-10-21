@@ -7507,11 +7507,16 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         const hydrationReady = new Promise<void>((resolve) => {
           releaseHydration = resolve;
         });
-        await page.route("**/api/v2/drops/*", async (route) => {
-          heldDrops += 1;
-          await hydrationReady;
-          return route.fallback();
-        });
+        await page.route(
+          (url) =>
+            url.pathname === "/api/v2/drops" ||
+            /^\/api\/v2\/drops\/[^/]+$/.test(url.pathname),
+          async (route) => {
+            heldDrops += 1;
+            await hydrationReady;
+            return route.fallback();
+          }
+        );
       }
       const observed = observeNativeLeaderboard(page, MEMES_WAVE);
       try {
