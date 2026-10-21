@@ -1,6 +1,12 @@
 @media (max-width: 639px) {
+  .inlineActions {
+    align-items: flex-start;
+  }
+
   .inlineActions > button,
   .inlineActions > [data-collect-secondary-actions] > button,
+  .inlineActions [data-collect-owner-action] > button,
+  .inlineActions [data-collect-owner-action] > div > button:first-child,
   .stickyActions > button {
     height: 44px;
     min-width: 0;
@@ -10,16 +16,33 @@
     padding-inline: 14px;
   }
 
+  .inlineActions > button,
+  .inlineActions > [data-collect-secondary-actions] > button,
+  .inlineActions [data-collect-owner-action] > button,
+  .inlineActions [data-collect-owner-action] > div > button:first-child {
+    padding-inline: 12px;
+  }
+
   .inlineActions > button[type="submit"] {
-    padding-inline: 8px;
+    flex-basis: 100%;
+    font-size: 16px;
   }
 
   .inlineActions > [data-collect-secondary-actions] {
     display: contents;
   }
 
+  .inlineActions > button:not([type="submit"]),
+  .inlineActions > [data-collect-secondary-actions] > button,
   .inlineActions [data-collect-owner-action] {
-    order: 3;
+    /* Equal outer widths after the 44px menu and two 8px gaps. */
+    flex: 1 1 calc((100% - 60px) / 2);
+    min-width: 0;
+  }
+
+  .inlineActions [data-collect-owner-action] > button,
+  .inlineActions [data-collect-owner-action] > div > button:first-child {
+    flex-basis: 100%;
     width: 100%;
   }
 
@@ -34,14 +57,16 @@
 }
 
 @media (max-width: 359px) {
-  .inlineActions > button,
-  .inlineActions > [data-collect-secondary-actions] > button {
+  .stickyActions > button {
+    padding-inline: 8px;
+  }
+
+  .inlineActions > button:not([type="submit"]),
+  .inlineActions > [data-collect-secondary-actions] > button,
+  .inlineActions [data-collect-owner-action] > button,
+  .inlineActions [data-collect-owner-action] > div > button:first-child {
     padding-inline: 8px;
     font-size: 13px;
-  }
-  .inlineActions > button[type="submit"] {
-    padding-inline: 4px;
-    font-size: 12px;
   }
 }
 

@@ -48,6 +48,10 @@ distinct from an unlisted artwork.
 focus to the market. The price summary and order levels appear immediately,
 without a second accordion. Switching tabs retains selections and active reviews.
 Memes, Meme Lab, Gradients and Pebbles use the same trading controls and review layout.
+On phones, **Change** beside **Deliver to** on an artwork page opens the receiving
+wallet picker in a bottom sheet. Choose a profile wallet, use **Send to a fren**,
+or enter a wallet address, then choose **Done** to return to the artwork. Desktop
+keeps the inline picker. Changing delivery does not submit a purchase.
 Meme Lab supports trades on individual card pages; the set planner, Lowest
 listings and TDH tools cover Memes, Gradients and Pebbles.
 Memes and Meme Lab show traits, metadata and original files below the description
@@ -70,6 +74,8 @@ list it; profile consolidation does not grant another wallet permission to sign.
 Before connecting, **List** opens the wallet connection flow so ownership
 can be checked.
 The more-actions menu contains **Review offers**.
+On phones, an offer sheet that needs a wallet shows **Connect wallet** at full
+width directly below the wallet guidance, before **Review offer**.
 If ownership is still loading, **List** stays visible but unavailable.
 If that check fails, choose **Try again** beside the action.
 

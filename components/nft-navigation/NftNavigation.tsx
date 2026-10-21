@@ -21,7 +21,7 @@ export default function NftNavigation(
     endIndex: number;
     fullscreenElementId?: string | undefined;
     params?: SearchParamsSource | undefined;
-    mobileSquare?: boolean;
+    square?: boolean;
   }>
 ) {
   const locale = useBrowserLocale();
@@ -57,7 +57,7 @@ export default function NftNavigation(
   function printNavigation() {
     return (
       <span
-        className={`tw-flex tw-items-center tw-justify-center tw-gap-2 ${props.mobileSquare ? "max-sm:[&>*]:tw-rounded-lg max-sm:[&>*]:tw-border-iron-800 max-sm:[&>*]:tw-bg-iron-950 max-sm:[&>*]:tw-shadow-none" : ""}`}
+        className={`tw-flex tw-items-center tw-justify-center tw-gap-2 ${props.square ? "[&>*]:tw-rounded-lg [&>*]:tw-border-iron-800 [&>*]:tw-bg-iron-950 [&>*]:tw-shadow-none" : ""}`}
       >
         {isFirst ? (
           <span

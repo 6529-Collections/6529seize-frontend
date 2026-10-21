@@ -3,7 +3,7 @@
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
-import { useId, useState } from "react";
+import { useId, useState, type ReactNode } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import CollectRecipientPicker from "./CollectRecipientPicker";
 import CollectOrderExpiryPicker from "./CollectOrderExpiryPicker";
@@ -30,6 +30,7 @@ interface CollectTradeFormProps {
   readonly disabledReason?: string | undefined;
   readonly loading: boolean;
   readonly error?: string | undefined;
+  readonly connectWalletAction?: ReactNode;
   readonly onChange: (draft: CollectTradeDraft) => void;
   readonly onPrepare: (draft: CollectTradeDraft) => void;
 }
@@ -96,6 +97,22 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
         </span>
       )}
     </div>
+  );
+  const reviewButton = (
+    <Button
+      type="submit"
+      variant="action"
+      size="md"
+      className="tw-min-h-12 tw-text-sm tw-font-medium"
+      fullWidth
+      loading={props.loading}
+      disabled={
+        Boolean(props.disabledReason) ||
+        (external && !props.draft.acknowledgeExternalRecipient)
+      }
+    >
+      {t(locale, REVIEW_LABELS[props.action] ?? "collect.trade.prepare")}
+    </Button>
   );
   return (
     <form
@@ -241,20 +258,16 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
           {props.disabledReason}
         </p>
       )}
-      <Button
-        type="submit"
-        variant="action"
-        size="md"
-        className="tw-min-h-12 tw-text-sm tw-font-medium"
-        fullWidth
-        loading={props.loading}
-        disabled={
-          Boolean(props.disabledReason) ||
-          (external && !props.draft.acknowledgeExternalRecipient)
-        }
-      >
-        {t(locale, REVIEW_LABELS[props.action] ?? "collect.trade.prepare")}
-      </Button>
+      {Boolean(props.connectWalletAction) ? (
+        <div className="tw-flex tw-flex-col tw-items-start tw-gap-6 max-sm:tw-gap-3">
+          <div className="tw-w-full sm:tw-order-last sm:tw-w-auto">
+            {props.connectWalletAction}
+          </div>
+          {reviewButton}
+        </div>
+      ) : (
+        reviewButton
+      )}
     </form>
   );
 }

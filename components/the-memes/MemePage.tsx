@@ -681,7 +681,7 @@ export default function MemePage({
               <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-3 md:tw-flex-wrap md:tw-justify-start">
                 <div className="tw-order-2 tw-flex tw-shrink-0 tw-justify-end md:tw-order-1">
                   <NftNavigation
-                    mobileSquare
+                    square
                     nftId={nft.id}
                     path="/the-memes"
                     startIndex={1}
@@ -697,7 +697,7 @@ export default function MemePage({
                       name: nft.name,
                     })}
                   >
-                    <span className="tw-mb-0 tw-shrink-0 tw-text-[13px] tw-font-medium tw-leading-[18px] tw-text-iron-500 sm:tw-text-2xl sm:tw-font-normal sm:tw-leading-tight sm:tw-text-iron-400">
+                    <span className="tw-mb-0 tw-shrink-0 tw-text-[13px] tw-font-medium tw-leading-[18px] tw-text-iron-500 sm:tw-text-2xl sm:tw-font-normal sm:tw-text-iron-400">
                       {t(locale, "theMemes.detail.heading.card", {
                         tokenId: formatInteger(locale, nft.id),
                       })}
@@ -706,7 +706,7 @@ export default function MemePage({
                       aria-hidden="true"
                       className="tw-mx-2.5 tw-hidden tw-h-5 tw-w-px tw-self-center tw-bg-white/[0.16] sm:tw-block sm:tw-h-6 md:tw-mx-3"
                     />
-                    <span className="tw-mb-0 tw-min-w-0 tw-whitespace-normal tw-break-words tw-text-[22px] tw-font-semibold tw-leading-7 tw-tracking-[-0.01em] tw-text-iron-50 sm:tw-text-2xl sm:tw-leading-tight sm:tw-tracking-normal sm:tw-text-iron-100 md:tw-truncate">
+                    <span className="tw-mb-0 tw-min-w-0 tw-whitespace-normal tw-break-words tw-text-[22px] tw-font-semibold tw-leading-7 tw-tracking-[-0.01em] tw-text-iron-50 sm:tw-text-2xl sm:tw-tracking-normal sm:tw-text-iron-100 md:tw-truncate">
                       {nft.name}
                     </span>
                   </h1>
@@ -753,7 +753,6 @@ export default function MemePage({
               locale={locale}
               persistentContent={
                 <MarketDepthPanel
-                  ownerOffersOnly
                   focusedOrderHash={searchParams.get("order")}
                   contract={MEMES_CONTRACT}
                   tokenId={nft.id}

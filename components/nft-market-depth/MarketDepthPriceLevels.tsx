@@ -48,7 +48,7 @@ export default function MarketDepthPriceLevels({
   const [showAll, setShowAll] = useState(false);
   const [openPrice, setOpenPrice] = useState<string | null>(null);
   const [openedOrderHash, setOpenedOrderHash] = useState<string | null>(null);
-  const tradeActionsAvailable = useMarketDepthTradeActionsAvailable(side);
+  const tradeActionsAvailable = useMarketDepthTradeActionsAvailable();
   const priceWidth = tradeActionsAvailable
     ? "tw-w-[64%] sm:tw-w-[40%]"
     : "tw-w-full sm:tw-w-[38%]";

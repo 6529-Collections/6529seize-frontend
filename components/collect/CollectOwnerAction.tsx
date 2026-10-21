@@ -19,9 +19,11 @@ const ACTION_CLASS =
 export default function CollectOwnerAction({
   assetKey,
   onList,
+  className = "",
 }: {
   readonly assetKey: string;
   readonly onList: (trigger: HTMLButtonElement) => void;
+  readonly className?: string;
 }) {
   const locale = useBrowserLocale();
   const { connectedProfile } = useAuth();
@@ -72,7 +74,7 @@ export default function CollectOwnerAction({
     return (
       <button
         type="button"
-        className={ACTION_CLASS}
+        className={`${ACTION_CLASS} ${className}`}
         onClick={connection.seizeConnect}
       >
         {t(locale, "collect.menu.list")}
@@ -85,7 +87,7 @@ export default function CollectOwnerAction({
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2">
         <button
           type="button"
-          className={`${ACTION_CLASS} disabled:tw-opacity-50`}
+          className={`${ACTION_CLASS} ${className} disabled:tw-opacity-50`}
           disabled
           aria-describedby={ownershipStatusId}
         >
@@ -139,7 +141,7 @@ export default function CollectOwnerAction({
     <div>
       <button
         type="button"
-        className={ACTION_CLASS}
+        className={`${ACTION_CLASS} ${className}`}
         onClick={(event) => {
           if (canList) onList(event.currentTarget);
           else setChooseOwner((value) => !value);

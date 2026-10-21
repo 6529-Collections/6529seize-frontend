@@ -10,6 +10,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { fetchCollectAssets } from "@/services/api/collect-api";
 import { useQuery } from "@tanstack/react-query";
+import { ChevronRightIcon } from "@heroicons/react/20/solid";
 import { lazy, Suspense, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { collectAssetIdentity } from "./collect.adapters";
@@ -186,13 +187,14 @@ function DetailTrade({
 }
 
 function DetailActions(props: CollectDetailActionsProps) {
-  const offerClassName = props.mobileSticky
-    ? `${ACTION_CLASS} max-sm:tw-border-iron-800 max-sm:tw-bg-iron-950`
-    : ACTION_CLASS;
+  const mobileActionClassName = props.mobileSticky
+    ? "max-sm:tw-border-iron-800 max-sm:tw-bg-iron-950"
+    : "";
+  const offerClassName = `${ACTION_CLASS} ${mobileActionClassName}`;
   const viewMarket = (
     <button
       type="button"
-      className={`tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-0 tw-text-[13px] tw-font-normal tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-100 ${props.mobileSticky ? "max-sm:tw-rounded-lg max-sm:tw-border max-sm:tw-border-solid max-sm:tw-border-iron-800 max-sm:tw-bg-iron-950 max-sm:tw-px-3" : ""}`}
+      className={`tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-0 tw-text-[13px] tw-font-normal tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-100 ${props.mobileSticky ? "max-sm:tw-w-full max-sm:tw-justify-between max-sm:tw-text-sm max-sm:tw-font-medium max-sm:tw-text-iron-300" : ""}`}
       onClick={() =>
         revealMarketDepth(
           {
@@ -206,6 +208,12 @@ function DetailActions(props: CollectDetailActionsProps) {
       }
     >
       {t(props.locale, "marketDepth.view")}
+      {props.mobileSticky && (
+        <ChevronRightIcon
+          aria-hidden="true"
+          className="tw-hidden tw-size-4 tw-shrink-0 tw-text-iron-500 max-sm:tw-block"
+        />
+      )}
     </button>
   );
   const inlineLookup = useCollectDetailAsset(props.collection, props.tokenId);
@@ -223,7 +231,9 @@ function DetailActions(props: CollectDetailActionsProps) {
     });
   };
   return (
-    <div className="tw-w-full">
+    <div
+      className={`tw-w-full ${props.mobileSticky ? "max-sm:[&_[data-collect-connect-wallet]]:!tw-mt-2 max-sm:[&_[data-collect-connect-wallet]]:tw-h-11 max-sm:[&_[data-collect-connect-wallet]]:tw-w-full max-sm:[&_[data-collect-trade-status]:empty]:tw-hidden" : ""}`}
+    >
       <CollectDetailMobileActions.Provider
         value={
           props.mobileSticky ? (
@@ -273,6 +283,7 @@ function DetailActions(props: CollectDetailActionsProps) {
                 <div data-collect-owner-action>
                   <CollectOwnerAction
                     assetKey={assetKey}
+                    className={mobileActionClassName}
                     onList={(trigger) => {
                       opener.current = trigger;
                       setAction("list");
@@ -326,7 +337,11 @@ function DetailActions(props: CollectDetailActionsProps) {
           </CollectDetailActionRow>
         </div>
       </CollectDetailMobileActions.Provider>
-      <div className="tw-mt-1">{viewMarket}</div>
+      <div
+        className={props.mobileSticky ? "tw-mt-1 max-sm:tw-mt-2" : "tw-mt-1"}
+      >
+        {viewMarket}
+      </div>
       {action && (
         <CollectTradeDialog open title={props.title} onClose={close}>
           <DetailTrade

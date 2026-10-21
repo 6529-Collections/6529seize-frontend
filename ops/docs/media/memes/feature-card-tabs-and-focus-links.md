@@ -102,6 +102,10 @@
 - On phones, the artwork appears before mint and subscription panels, with
   ownership, format switching and media actions below it. The tab row stays at
   the top while scrolling; swipe the row to reach all four tabs.
+- On phones, the inline Collect button fills its own row. Make an offer, the
+  available List action and the additional-actions menu share the next row.
+  View listings & offers remains a text action below the delivery and wallet
+  controls.
 - When the inline market actions leave the screen, a bottom bar repeats the
   available Collect and Make an offer actions. In the app it sits above bottom
   navigation and stays behind open dialogs. Delivery, owner actions and the
@@ -110,13 +114,6 @@
   the full description and `Show less` restores the preview. Properties show
   the first six tiles; `Show all N properties` reveals the remainder and
   `Show fewer` restores the preview. Short sections need no disclosure.
-- On phones, Collectors displays list rows with the same card and total
-  balances, TDH and unweighted TDH. Use the sort selector, search, CSV download
-  and pagination as usual. Compact numbers retain exact accessible values;
-  the CSV contains the full values.
-- Sell appears in the Meme card's offers only after ownership of the card is
-  confirmed for the current profile. Offer information remains visible when
-  signed out or without holdings.
 - In Overview, explore `More by {artist}` for up to four other published Meme
   Cards per credited artist directly after the description, before detailed metadata.
   Cards are ordered by newest card number first. Each preview
@@ -210,8 +207,7 @@
   deferred shared-timeline debt.
 - Non-source locales fall back to `en-US` for this detail surface until
   reviewed translations are added.
-- Mobile disclosure, collector-detail and sorting labels use the same
-  progressive localization fallback; compact numbers follow the selected locale.
+- Mobile disclosure labels use the same progressive localization fallback.
 - Primary tabs expose selected state with `aria-pressed`; History tabs use the
   shared tablist pattern with `aria-selected` and arrow-key navigation.
 - Deferred loading applies to artwork details, References, Collectors,

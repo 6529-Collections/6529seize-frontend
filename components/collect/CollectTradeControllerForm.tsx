@@ -219,8 +219,10 @@ function InlineTradeForm({
 
 function StandardTradeForm({
   props,
+  connectWalletAction,
 }: {
   readonly props: CollectTradeControllerFormProps;
+  readonly connectWalletAction: ReactNode;
 }) {
   return (
     <CollectTradeForm
@@ -252,6 +254,7 @@ function StandardTradeForm({
       }
       loading={props.preparing}
       error={props.error}
+      connectWalletAction={connectWalletAction}
       onChange={props.onChange}
       onPrepare={props.onPrepare}
     />
@@ -261,10 +264,26 @@ function StandardTradeForm({
 export default function CollectTradeControllerForm(
   props: CollectTradeControllerFormProps
 ) {
+  const connectInsideOffer = !props.inlineBuy && props.action === "offer";
+  const connectWalletAction = props.showConnect ? (
+    <Button
+      data-collect-connect-wallet
+      variant="secondary"
+      className={
+        connectInsideOffer ? "max-sm:tw-min-h-11 max-sm:tw-w-full" : undefined
+      }
+      onClick={props.onConnect}
+    >
+      {t(props.locale, "collect.connect")}
+    </Button>
+  ) : null;
   const tradeForm = props.inlineBuy ? (
     <InlineTradeForm props={props} />
   ) : (
-    <StandardTradeForm props={props} />
+    <StandardTradeForm
+      props={props}
+      connectWalletAction={connectInsideOffer ? connectWalletAction : null}
+    />
   );
 
   return (
@@ -293,11 +312,7 @@ export default function CollectTradeControllerForm(
             {t(props.locale, "collect.retry")}
           </Button>
         )}
-      {props.showConnect && (
-        <Button variant="secondary" onClick={props.onConnect}>
-          {t(props.locale, "collect.connect")}
-        </Button>
-      )}
+      {!connectInsideOffer && connectWalletAction}
     </>
   );
 }

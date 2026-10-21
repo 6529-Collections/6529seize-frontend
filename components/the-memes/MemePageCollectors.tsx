@@ -22,7 +22,6 @@ export function MemePageCollectorsSubMenu(props: {
         )}
         <div className="tw-pt-3">
           <NFTLeaderboard
-            mobileList
             contract={props.nft.contract}
             nftId={props.nft.id}
             locale={locale}

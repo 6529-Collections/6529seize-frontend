@@ -21,7 +21,6 @@ import Pagination from "../pagination/Pagination";
 import { SortDirection } from "@/entities/ISort";
 import type { CICType } from "@/entities/IProfile";
 import type { DBResponse } from "@/entities/IDBResponse";
-import NFTLeaderboardMobile, { Sort } from "./NFTLeaderboardMobile";
 import { LeaderboardCollector } from "./LeaderboardCollector";
 import { LEADERBOARD_ROW_CLASS_NAME } from "./leaderboardTableStyles";
 import {
@@ -45,7 +44,6 @@ interface Props {
   contract: string;
   nftId: number;
   locale?: SupportedLocale | undefined;
-  mobileList?: boolean;
 }
 
 export const PAGE_SIZE = 25;
@@ -246,6 +244,15 @@ export function setScrollPosition() {
       behavior: "smooth",
     });
   }
+}
+
+enum Sort {
+  balance = "balance",
+  tdh__raw = "tdh__raw",
+  boosted_tdh = "boosted_tdh",
+  total_balance = "total_balance",
+  total_tdh__raw = "total_tdh__raw",
+  total_boosted_tdh = "total_boosted_tdh",
 }
 
 type CsvDownloadStatus = "idle" | "downloading" | "success" | "error";
@@ -642,18 +649,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
           />
         </CollectorsCsvDownloadControls>
       </div>
-      {props.mobileList && (
-        <NFTLeaderboardMobile
-          leaderboard={leaderboard}
-          totalResults={totalResults}
-          sort={sort}
-          setSort={setSort}
-          locale={locale}
-        />
-      )}
-      <div
-        className={`tw-overflow-x-auto ${props.mobileList ? "tw-hidden sm:tw-block" : ""}`}
-      >
+      <div className="tw-overflow-x-auto">
         <table className="tw-w-full tw-min-w-[23rem] tw-border-collapse md:tw-min-w-[1040px]">
           <thead>
             <tr>

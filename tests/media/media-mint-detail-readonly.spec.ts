@@ -68,7 +68,34 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
       ).toBeHidden();
       return;
     }
+    await expect(
+      page.getByText("Loading this artwork…", { exact: true })
+    ).toBeHidden({ timeout: RESPONSE_TIMEOUT_MS });
+    await expect(
+      page.getByText("Loading listings", { exact: true })
+    ).toBeHidden({ timeout: RESPONSE_TIMEOUT_MS });
+    await expect(actions).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await actions.scrollIntoViewIfNeeded();
+    const changeDelivery = page.getByRole("button", {
+      name: "Change",
+      exact: true,
+    });
+    await expect(changeDelivery).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    await changeDelivery.click();
+    const deliverySheet = page.getByRole("dialog", {
+      name: "Deliver to",
+      exact: true,
+    });
+    await expect(
+      deliverySheet.getByRole("heading", { name: "Deliver to", exact: true })
+    ).toBeVisible();
+    await expect(deliverySheet).toHaveAttribute("aria-modal", "true");
+    await expect(sticky).toBeHidden();
+    await deliverySheet
+      .getByRole("button", { name: "Done", exact: true })
+      .click();
+    await expect(deliverySheet).toHaveCount(0);
+    await expect(changeDelivery).toBeFocused();
     await expect(sticky).toHaveAttribute("aria-hidden", "true");
     const nav = page.getByRole("navigation", { name: "Meme page sections" });
     await nav.evaluate((element) => element.scrollIntoView({ block: "start" }));
@@ -90,11 +117,15 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     ).toHaveAttribute("aria-expanded", "true");
     await nav.getByRole("button", { name: "Collectors", exact: true }).click();
     await expect(page).toHaveURL(/focus=collectors/);
-    await expect(page.locator("#nft-leaderboard ol li").first()).toBeVisible({
-      timeout: RESPONSE_TIMEOUT_MS,
-    });
+    await expect(page.locator("#nft-leaderboard tbody tr").first()).toBeVisible(
+      {
+        timeout: RESPONSE_TIMEOUT_MS,
+      }
+    );
     await expect(
-      page.getByRole("combobox", { name: "Sort collectors" })
+      page
+        .getByRole("button", { name: "Sort Balance ascending", exact: true })
+        .first()
     ).toBeVisible();
     await expect(
       page.getByRole("button", { name: /Download.*CSV/i })

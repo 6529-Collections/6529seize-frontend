@@ -38,7 +38,7 @@ const ARTWORK_LABEL_CLASS =
 const CREATOR_NAME_CLASS =
   "tw-min-w-0 tw-break-words tw-text-sm tw-font-semibold tw-leading-none tw-text-white tw-no-underline md:tw-text-lg";
 const INLINE_METRIC_LABEL_CLASS =
-  "tw-text-[13px] sm:tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400";
+  "tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400";
 const MARKET_METRIC_LABEL_BASE_CLASS =
   "tw-mb-1 md:tw-mb-2 tw-text-[13px] sm:tw-text-sm tw-font-medium tw-leading-5";
 const MARKET_METRIC_VALUE_CLASS =

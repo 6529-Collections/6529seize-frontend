@@ -221,7 +221,7 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
       message === t(locale, "collect.trade.broadcastUnknown")
     );
   const actionSlot = (
-    <div className="tw-space-y-3">
+    <div data-collect-trade-status className="tw-space-y-3">
       {review && review.warnings.length > 0 && (
         <ul className="tw-m-0 tw-space-y-2 tw-pl-4 tw-text-[13px] tw-leading-5 tw-text-iron-300">
           {review.warnings.map((warning) => (

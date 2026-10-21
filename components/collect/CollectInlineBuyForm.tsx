@@ -160,6 +160,7 @@ export default function CollectInlineBuyForm(props: Props) {
           )}
       </CollectDetailActionRow>
       <CollectDeliveryControl
+        mobileSheet
         profile={props.recipientProfile}
         payingWallet={props.makerLabel}
         value={recipient}

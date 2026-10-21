@@ -39,8 +39,6 @@ export interface RowState {
 }
 
 export interface TradeContextValue {
-  readonly canSell?: boolean;
-  readonly subduedOffers?: boolean;
   readonly selected: readonly MarketDepthListingSelection[];
   readonly rowStates: Readonly<Record<string, RowState>>;
   readonly selectionBusy: boolean;
@@ -68,16 +66,10 @@ export function rowMatches(
   );
 }
 
-export function useMarketDepthTradeActionsAvailable(
-  side?: "ask" | "bid"
-): boolean {
+export function useMarketDepthTradeActionsAvailable(): boolean {
   const context = useContext(TradeContext);
   const { hideNftPurchasing } = useNftPurchasingVisibility();
-  return (
-    context !== null &&
-    !hideNftPurchasing &&
-    (side !== "bid" || context.canSell !== false)
-  );
+  return context !== null && !hideNftPurchasing;
 }
 
 export function MarketDepthLevelAction({
@@ -112,7 +104,7 @@ export function MarketDepthLevelAction({
       transferFocus.current = button.ownerDocument.activeElement === button;
     };
   }, []);
-  if (!context || (side === "bid" && context.canSell === false)) return null;
+  if (!context) return null;
   if (order)
     return (
       <MarketDepthOrderAction
@@ -129,7 +121,7 @@ export function MarketDepthLevelAction({
         type="button"
         variant="action"
         size={null}
-        className={`${COMPACT_ACTION_CLASS} ${side === "bid" && context.subduedOffers ? "max-sm:!tw-border-iron-800 max-sm:!tw-bg-iron-900 max-sm:!tw-text-iron-200" : ""}`}
+        className={COMPACT_ACTION_CLASS}
         aria-expanded={open}
         aria-controls={panelId}
         onClick={onClick}
@@ -161,11 +153,7 @@ export function MarketDepthOrderAction({
   readonly actionRef?: Ref<HTMLButtonElement> | undefined;
 }) {
   const context = useContext(TradeContext);
-  if (
-    !context ||
-    (order.side === ApiMarketOrderSideEnum.Bid && context.canSell === false)
-  )
-    return null;
+  if (!context) return null;
   const state = context.rowStates[order.order_key];
   const selected = context.selected.some((item) => rowMatches(item, order));
   const unverifiedOffer =
@@ -192,7 +180,7 @@ export function MarketDepthOrderAction({
             type="button"
             variant={selected ? "secondary" : "action"}
             size={null}
-            className={`${compact ? COMPACT_ACTION_CLASS : ACTION_CLASS} ${order.side === ApiMarketOrderSideEnum.Bid && context.subduedOffers ? "max-sm:!tw-border-iron-800 max-sm:!tw-bg-iron-900 max-sm:!tw-text-iron-200" : ""}`}
+            className={compact ? COMPACT_ACTION_CLASS : ACTION_CLASS}
             aria-label={t(
               locale,
               order.side === ApiMarketOrderSideEnum.Ask
