@@ -6,11 +6,8 @@ import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { ApiCompetitionEntryStatus } from "@/generated/models/ApiCompetitionEntryStatus";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { DropSize } from "@/helpers/waves/drop.helpers";
-import { fetchDropV2ById } from "@/services/api/wave-drops-v2-api";
-import {
-  competitionScope,
-  fetchDropCompetitionContext,
-} from "@/services/api/competitions-api";
+import { fetchCompetitionEntryDrop } from "@/services/api/competition-entry-drops-api";
+import { competitionScope } from "@/services/api/competitions-api";
 import { applyCompetitionDropSummary } from "./useCompetitionDrop";
 import { useCompetitionViewer } from "./useCompetitionQueries";
 
@@ -38,32 +35,33 @@ export function useCompetitionEntryDrops(
         dropId,
       ],
       queryFn: async ({ signal }: { signal: AbortSignal }) => {
-        const context = await fetchDropCompetitionContext(
-          identity.waveId,
+        const result = await fetchCompetitionEntryDrop(
+          identity,
+          viewer,
+          entryId,
           dropId,
           signal
         );
-        if (!context.entry || !context.competition) return null;
-        if (
-          context.entry.id !== entryId ||
-          context.competition.id !== identity.competitionId
-        ) {
-          throw new Error("Invalid competition entry");
-        }
+        if (!result) return null;
+        const {
+          original,
+          entry,
+          competition: currentCompetition,
+          vote_summary,
+          awards,
+        } = result;
+        const context = {
+          entry,
+          competition: currentCompetition,
+          vote_summary,
+        };
         if (
           ![
             ApiCompetitionEntryStatus.Active,
             ApiCompetitionEntryStatus.Winner,
-          ].includes(context.entry.status)
+          ].includes(entry.status)
         )
           return null;
-        // Native competition drops are immutable; hydrate the original rich
-        // content only after checking membership and visibility in this scope.
-        const original = await fetchDropV2ById(dropId, signal, {
-          includeFullMetadata: true,
-        });
-        if (original.wave.id !== identity.waveId)
-          throw new Error("Invalid competition parent");
         const drop = applyCompetitionDropSummary(
           {
             ...original,
@@ -94,10 +92,10 @@ export function useCompetitionEntryDrops(
             awards: [],
           };
         }
-        return { entry: context.entry, drop };
+        return { entry: context.entry, drop, awards };
       },
       staleTime: 15_000,
-      refetchInterval: 30_000,
+      refetchInterval: competition.permissions.vote ? 30_000 : false,
       retry: false,
     })),
   });

@@ -81,7 +81,9 @@ export default function CompetitionMyVotes() {
     {},
     !!viewer
   );
-  const votes = query.data?.pages.flatMap((page) => page.data) ?? [];
+  const votes = (query.data?.pages.flatMap((page) => page.data) ?? []).filter(
+    (vote) => vote.entry_status === ApiCompetitionEntryStatus.Active
+  );
   const drops = useCompetitionEntryDrops(
     votes.map((vote) => ({ entryId: vote.entry_id, dropId: vote.drop_id }))
   );

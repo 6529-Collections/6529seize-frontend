@@ -5801,6 +5801,65 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}/competitions/{competition_id}/entry-contexts:
+    get:
+      tags:
+        - CompetitionsV3
+      summary: Read up to 50 visible entry contexts and their awards in one batch
+      operationId: getCompetitionEntryContextsV3
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        typeImportGroup: competitions-v3
+        handler:
+          import: "@/api/competitions/competition-entry-contexts.handler"
+          name: handleGetCompetitionEntryContextsV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: entry_ids
+          in: query
+          required: true
+          description: >-
+            Comma-separated entry UUIDs, at most 50. Invisible entries are
+            omitted.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1849
+      responses:
+        "200":
+          description: Visible entries with current voting summaries and scoped awards
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionEntryContextPage"
+        "400":
+          description: Invalid identifiers or more than 50 entries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+        "404":
+          description: Competition is not visible in this wave
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
   /v3/waves/{wave_id}/competitions/{competition_id}/entries/{entry_id}:
     get:
       tags:
@@ -6199,7 +6258,7 @@ paths:
     get:
       tags:
         - CompetitionsV3
-      summary: List winner entries with stable competition context
+      summary: List winner entries by win time, newest first by default
       operationId: listCompetitionWinnersV3
       security:
         - bearerAuth: []
@@ -6231,7 +6290,7 @@ paths:
           schema:
             allOf:
               - $ref: "#/components/schemas/ApiCompetitionSortDirection"
-            default: ASC
+            default: DESC
         - name: cursor
           in: query
           required: false
@@ -26086,6 +26145,35 @@ components:
           type: string
           format: uuid
           nullable: true
+    ApiCompetitionEntryContext:
+      type: object
+      additionalProperties: false
+      required:
+        - entry
+        - vote_summary
+        - awards
+      properties:
+        entry:
+          $ref: "#/components/schemas/ApiCompetitionEntry"
+        vote_summary:
+          $ref: "#/components/schemas/ApiCompetitionDropVoteSummary"
+        awards:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionAward"
+    ApiCompetitionEntryContextPage:
+      type: object
+      additionalProperties: false
+      required:
+        - competition
+        - data
+      properties:
+        competition:
+          $ref: "#/components/schemas/ApiCompetition"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionEntryContext"
     ApiCompetitionEntryPage:
       type: object
       additionalProperties: false

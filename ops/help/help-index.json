@@ -7415,7 +7415,7 @@
         "minted card"
       ],
       "facts": [
-        "Wave Winners tab behavior is documented under leaderboard features.",
+        "Winners shows the most recent win first and loads older winners through Load more.",
         "When the winner voter list at decision time was not saved, the card shows Voters unavailable instead of zero. Select it for an explanation and open Vote log to inspect any recorded changes. The final score remains visible; current allocations cannot establish the historical voter list.",
         "Availability depends on wave decision state and whether the wave has winner outcomes.",
         "Single-decision and multi-decision waves have different winner display behavior.",
@@ -7441,7 +7441,7 @@
       ],
       "keywords": ["waves", "leaderboard", "votes", "my", "tab"],
       "facts": [
-        "The My Votes tab is documented under wave leaderboard features.",
+        "My Votes shows active submissions with a nonzero personal vote. Past winners are excluded while their historical vote records are preserved.",
         "Signed-out viewers see Connect your wallet to participate and a Connect Wallet button in My Votes. Select it to open the usual wallet connection flow. All votes and Activity remain available without connecting.",
         "It helps a user inspect their own voting activity where the wave supports it.",
         "Availability depends on wave type, eligibility, and voting state.",

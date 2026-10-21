@@ -74,7 +74,10 @@ function CompetitionLeaderboardEntry({
           viewMode === "list" ? "tw-min-h-[560px]" : "tw-min-h-[520px]"
         }
       >
-        <CompetitionState />
+        <div
+          aria-hidden="true"
+          className="tw-h-[480px] tw-animate-pulse tw-rounded-xl tw-bg-iron-900 motion-reduce:tw-animate-none"
+        />
       </div>
     );
   if (
