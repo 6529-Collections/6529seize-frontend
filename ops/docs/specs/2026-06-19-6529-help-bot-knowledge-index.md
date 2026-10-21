@@ -43,6 +43,9 @@ only after successful empty requests, and retry without discarding loaded votes.
 It covers the scrollable three-row voting window, pagination, compact empty/error states and
 independently persisted collapse preferences. Worth Checking Out comes first
 and retains its own compact preview height.
+The discovery and Network wave score records also describe returning from Score
+formula: the app header Back control restores the originating Discover URL and
+its selected sort and threshold; the page link provides the same return on web.
 The Memes Quick Vote record describes its persistent top-left close below 768px,
 top-right close at wider widths, matching loading header and focus restoration.
 

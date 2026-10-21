@@ -520,7 +520,6 @@
     "__tests__/components/waves/CreateDropReplyingWrapper.test.tsx": 2,
     "__tests__/components/waves/CreateDropStormPart.test.tsx": 1,
     "__tests__/components/waves/CreateDropSubmit.test.tsx": 1,
-    "__tests__/components/waves/discovery/DiscoverWaveExplorer.test.tsx": 1,
     "__tests__/components/waves/drop/DefaultSingleWaveDrop.test.tsx": 1,
     "__tests__/components/waves/drop/MemesSingleWaveDrop.test.tsx": 1,
     "__tests__/components/waves/drop/MemesSingleWaveDropInfoPanel.test.tsx": 2,
