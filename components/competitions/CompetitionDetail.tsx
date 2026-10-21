@@ -140,13 +140,6 @@ export function NativeCompetitionContent({
           {t(locale, "competitions.paused")}
         </output>
       )}
-      {tab === "leaderboard" &&
-        !search.get("entry") &&
-        !competition.permissions.submit && (
-          <p className="tw-text-sm tw-text-iron-400">
-            {t(locale, "competitions.submitClosed")}
-          </p>
-        )}
       {entering && isMainStage && (
         <MemesArtSubmissionModal
           isOpen
