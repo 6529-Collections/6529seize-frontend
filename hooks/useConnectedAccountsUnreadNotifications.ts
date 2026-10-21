@@ -1,6 +1,5 @@
 "use client";
 
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import { useQueries, type UseQueryResult } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -98,9 +97,7 @@ const fetchUnreadCountForAccount = async (
       endpoint: "v2/notifications",
       params: {
         limit: "1",
-        ...(isMultiCompetitionEnabled()
-          ? { include_competitions: "true" }
-          : {}),
+        include_competitions: "true",
       },
       headers: {
         Authorization: `Bearer ${jwt}`,
@@ -150,9 +147,7 @@ export function useConnectedAccountsUnreadNotifications(
       }),
     [accounts, terminalJwtFingerprintByAccount]
   );
-  const responseVersion = isMultiCompetitionEnabled()
-    ? "v2-native-competitions"
-    : "v2";
+  const responseVersion = "v2-native-competitions";
 
   const blockAccountUntilNewToken = useCallback(
     (addressKey: string, jwtFingerprint: string) => {

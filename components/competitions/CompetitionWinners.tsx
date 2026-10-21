@@ -1,4 +1,8 @@
 "use client";
+import { ApiCompetitionCapability } from "@/generated/models/ApiCompetitionCapability";
+import { useWaveProposalCardPresentation } from "@/hooks/waves/useWaveProposalCardPresentation";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 
 import { useEffect } from "react";
@@ -21,6 +25,13 @@ import { CompetitionLoadMore } from "./CompetitionLoadMore";
 
 export default function CompetitionWinners() {
   const { competition, wave } = useCompetition();
+  const locale = useBrowserLocale();
+  const proposalCardPresentation = useWaveProposalCardPresentation(wave.id);
+  const contentPresentation = competition.capabilities.includes(
+    ApiCompetitionCapability.Quorum
+  )
+    ? "quorumCompact"
+    : proposalCardPresentation;
   const identity = { waveId: wave.id, competitionId: competition.id };
   const query = useCompetitionResource(identity, "winners");
   const awards = useCompetitionResource(identity, "awards");
@@ -100,8 +111,9 @@ export default function CompetitionWinners() {
         onDropClick={onDropClick}
         winners={winners}
         isApprovalWave
-        emptyMessage="No drops approved yet"
+        emptyMessage={t(locale, "competitions.noApprovedEntries")}
         outcomesVisible={outcomesVisible}
+        contentPresentation={contentPresentation}
       />
     );
   } else if (multiDecision) {
@@ -112,6 +124,7 @@ export default function CompetitionWinners() {
         decisionPoints={[...groups.values()]}
         isLoading={false}
         outcomesVisible={outcomesVisible}
+        contentPresentation={contentPresentation}
       />
     );
   } else {
@@ -128,6 +141,7 @@ export default function CompetitionWinners() {
           winners={winners}
           onDropClick={onDropClick}
           outcomesVisible={outcomesVisible}
+          contentPresentation={contentPresentation}
         />
       </>
     );
