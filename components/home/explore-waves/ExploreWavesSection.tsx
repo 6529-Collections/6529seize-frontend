@@ -43,6 +43,7 @@ interface ExploreWavesSectionProps {
   readonly visibilityTier?: ApiWaveVisibilityTier | undefined;
   readonly statusLabel?: string | undefined;
   readonly headerControls?: ReactNode | undefined;
+  readonly headerActions?: ReactNode | undefined;
   readonly showEmptyState?: boolean | undefined;
   readonly emptyStateLabel?: string | undefined;
 }
@@ -65,6 +66,7 @@ export function ExploreWavesSection({
   visibilityTier,
   statusLabel,
   headerControls,
+  headerActions,
   showEmptyState = false,
   emptyStateLabel,
 }: ExploreWavesSectionProps) {
@@ -162,11 +164,11 @@ export function ExploreWavesSection({
   const headerSpacingClassName =
     headingVariant === "page" ? "tw-mb-10 md:tw-mb-12" : "tw-mb-5";
   const headerClassName = hasHeaderAdditions
-    ? "tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-5"
+    ? "tw-mb-5 tw-flex tw-flex-col tw-items-start tw-gap-4 md:tw-mb-8"
     : `tw-relative ${headerSpacingClassName} tw-block md:tw-flex md:tw-items-end md:tw-justify-between md:tw-gap-4`;
   const titleClassName =
     headingVariant === "page"
-      ? "tw-w-full tw-max-w-4xl tw-text-left"
+      ? "tw-w-full tw-min-w-0 tw-text-left"
       : "tw-min-w-0 tw-text-left";
 
   return (
@@ -184,9 +186,12 @@ export function ExploreWavesSection({
         <div className={headerClassName}>
           <div className={titleClassName}>
             {headingVariant === "page" ? (
-              <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-leading-8 tw-text-white">
-                {effectiveTitle}
-              </h1>
+              <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-3 tw-@container/discovery-heading">
+                <h1 className="tw-m-0 tw-min-w-0 tw-text-2xl tw-font-semibold tw-leading-8 tw-text-white">
+                  {effectiveTitle}
+                </h1>
+                {headerActions}
+              </div>
             ) : (
               <h2
                 className={`tw-m-0 tw-text-balance tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-[-0.03em] tw-text-iron-50 md:tw-text-[22px] lg:tw-text-2xl ${viewAllHref ? "tw-pr-24 md:tw-pr-0" : ""}`}
