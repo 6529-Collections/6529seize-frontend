@@ -42,6 +42,8 @@ export const EN_GB_MESSAGES = {
   "singleDrop.shared": "Link shared",
   "singleDrop.close": "Close",
   "singleDrop.closeLabel": "Close panel",
+  "singleDrop.loading": "Loading…",
+  "singleDrop.loadError": "This content could not be loaded.",
   "singleDrop.showChat": "Show chat",
   "singleDrop.hideChat": "Hide chat",
   "singleDrop.chatLabel": "Drop chat",
@@ -635,6 +637,7 @@ export const EN_GB_MESSAGES = {
   "waves.chat.guidelinesDialog.loadErrorDescription":
     "Please try again before sending your message.",
   "waves.loadingStatus": "Loading waves",
+  "waves.threadLoadError": "This thread could not be loaded.",
   "waves.gifPicker.open": "Add GIF",
   "waves.gifPicker.dialogTitle": "GIF search",
   "waves.gifPicker.searchPlaceholder": "Search GIFs",
