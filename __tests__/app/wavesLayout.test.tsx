@@ -51,7 +51,7 @@ it("shows a neutral wave skeleton until the shared route can render", async () =
 it("shows the drop detail loader directly while a deep-linked route is suspended", async () => {
   mockSearchParams.set("drop", "submission-1");
   render(<WavesRouteLayout>Loaded submission</WavesRouteLayout>);
-  expect(screen.getByRole("status", { name: "Loading drop" })).toBeVisible();
+  expect(screen.getByRole("status", { name: "Loading…" })).toBeVisible();
   expect(
     screen.queryByTestId("stream-route-loading-shell")
   ).not.toBeInTheDocument();
@@ -62,6 +62,6 @@ it("shows the drop detail loader directly while a deep-linked route is suspended
   });
   expect(screen.getByText("Loaded submission")).toBeVisible();
   expect(
-    screen.queryByRole("status", { name: "Loading drop" })
+    screen.queryByRole("status", { name: "Loading…" })
   ).not.toBeInTheDocument();
 });

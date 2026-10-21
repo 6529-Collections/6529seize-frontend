@@ -403,7 +403,7 @@ describe("BrainMobile", () => {
     mockSearchParams.set("drop", "d1");
     const { rerender } = render(<BrainMobile>child</BrainMobile>);
     expect(
-      screen.getByRole("status", { name: "Loading drop" })
+      screen.getByRole("status", { name: "Loading…" })
     ).toBeInTheDocument();
     expect(screen.queryByTestId("drop")).not.toBeInTheDocument();
     dropData = { id: "old-drop" };
@@ -430,7 +430,7 @@ describe("BrainMobile", () => {
       screen.queryByRole("button", { name: "Try again" })
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("status", { name: "Loading drop" })
+      screen.getByRole("status", { name: "Loading…" })
     ).toBeInTheDocument();
   });
 

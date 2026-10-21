@@ -21,6 +21,8 @@ import stormComposerFrMessages from "@/i18n/messages/stormComposer.fr-FR.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.fr-FR.json";
 
+const LOADING_LABEL = "Chargement…";
+
 export const FR_FR_MESSAGES = {
   ...FR_SUBMISSION_DISCOVERY_MESSAGES,
   ...FR_FR_DROP_REQUIREMENT_MESSAGES,
@@ -31,8 +33,8 @@ export const FR_FR_MESSAGES = {
   "singleDrop.shared": "Lien partagé",
   "singleDrop.close": "Fermer",
   "singleDrop.closeLabel": "Fermer le panneau",
-  "singleDrop.loading": "Chargement du drop",
-  "singleDrop.loadError": "Impossible de charger ce drop.",
+  "singleDrop.loading": LOADING_LABEL,
+  "singleDrop.loadError": "Impossible de charger ce contenu.",
   "singleDrop.showChat": "Afficher le chat",
   "singleDrop.hideChat": "Masquer le chat",
   "singleDrop.chatLabel": "Chat du drop",
@@ -120,7 +122,7 @@ export const FR_FR_MESSAGES = {
     "La publication a échoué. Veuillez réessayer.",
   "profileCms.builder.history.title": "Historique des versions",
   "profileCms.builder.history.refresh": "Actualiser",
-  "profileCms.builder.history.loading": "Chargement…",
+  "profileCms.builder.history.loading": LOADING_LABEL,
   "profileCms.builder.history.unavailable":
     "Connectez-vous en tant que propriétaire de ce profil pour voir les versions publiées.",
   "profileCms.builder.history.failed":
@@ -210,7 +212,7 @@ export const FR_FR_MESSAGES = {
   "user.brain.sidebar.retry": "Réessayer",
   "user.brain.sidebar.retryLoadMore": "Réessayer d’en charger davantage",
   "user.brain.sidebar.loadMore": "Charger plus",
-  "user.brain.sidebar.loadingMore": "Chargement…",
+  "user.brain.sidebar.loadingMore": LOADING_LABEL,
   "user.brain.sidebar.allWavesLoaded": "Toutes les Waves sont chargées.",
   "user.brain.sidebar.more": "Plus",
   "user.brain.sidebar.showLess": "Afficher moins",
@@ -1092,7 +1094,7 @@ export const FR_FR_MESSAGES = {
     "Impossible de charger d’autres drops. Sélectionnez Réessayer pour relancer le chargement.",
   "waves.leaderboard.retryMore": "Réessayer de charger d’autres drops",
   "waves.leaderboard.loadMore": "Charger plus de drops",
-  "waves.leaderboard.loadingMoreButton": "Chargement…",
+  "waves.leaderboard.loadingMoreButton": LOADING_LABEL,
   "waves.leaderboard.grid.untitled": "Drop sans titre",
   "waves.leaderboard.grid.readFull": "Tout lire",
   "waves.leaderboard.grid.open": "Ouvrir",

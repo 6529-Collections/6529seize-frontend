@@ -56,7 +56,7 @@ it("keeps error recovery and Close keyboard accessible", () => {
   const onClose = jest.fn();
   render(<SingleWaveDropLoading onClose={onClose} isError onRetry={onRetry} />);
   expect(screen.getByRole("alert")).toHaveTextContent(
-    "This drop could not be loaded."
+    "This content could not be loaded."
   );
   fireEvent.click(screen.getByRole("button", { name: "Try again" }));
   expect(onRetry).toHaveBeenCalledTimes(1);

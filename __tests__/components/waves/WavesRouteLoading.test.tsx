@@ -11,9 +11,7 @@ jest.mock("next/navigation", () => ({
 it("uses the drop detail loader immediately when the URL names a drop", () => {
   mockSearchParams = new URLSearchParams("drop=submission-1");
   render(<WavesRouteLoading />);
-  expect(
-    screen.getByRole("status", { name: "Loading drop" })
-  ).toBeInTheDocument();
+  expect(screen.getByRole("status", { name: "Loading…" })).toBeInTheDocument();
   expect(
     screen.queryByTestId("stream-route-loading-shell")
   ).not.toBeInTheDocument();
