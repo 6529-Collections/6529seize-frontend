@@ -1883,6 +1883,104 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     });
   });
 
+  test("aligns competition result notifications and wraps long titles", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    const titles = [
+      "The Memes - Main Stage",
+      "CompetitionWithAnUnbrokenName".repeat(8),
+    ];
+    const notifications = titles.map((title, index) => ({
+      id: 6000 - index,
+      cause: "COMPETITION_LIFECYCLE",
+      created_at: Date.now() - 3 * 60 * 60 * 1000,
+      read_at: null,
+      related_identity: null,
+      related_drops: [],
+      additional_context: {
+        event_id: `results-${index}`,
+        event_type: "COMPETITION_DECISION_COMPLETED",
+        wave_id: WAVE,
+        competition_id: "alpha",
+        competition_title: title,
+        ...(index === 0 ? { entry_id: "alpha-entry" } : {}),
+      },
+    }));
+    await page.route("**/api/v2/notifications**", (route) => {
+      const before = new URL(route.request().url()).searchParams.get(
+        "id_less_than"
+      );
+      return route.fulfill({
+        json: {
+          unread_count: notifications.length,
+          notifications: notifications.filter(
+            (item) => before === null || item.id < Number(before)
+          ),
+        },
+      });
+    });
+    await page.goto("/notifications");
+    for (const [index, title] of titles.entries()) {
+      const link = page.getByRole("link", { name: title, exact: true });
+      await expect(link).toBeVisible();
+      await expect(link).toHaveAttribute(
+        "href",
+        `${ROOT}/alpha${index === 0 ? "?entry=alpha-entry" : ""}`
+      );
+      await link.scrollIntoViewIfNeeded();
+      const layout = await link.evaluate((element) => {
+        const content = element.parentElement!;
+        const row = content.parentElement!;
+        const icon = row.querySelector("svg")!;
+        const iconBox = icon.getBoundingClientRect();
+        const contentBox = content.getBoundingClientRect();
+        const prefix = document.createRange();
+        prefix.selectNodeContents(content.firstChild!);
+        const prefixTop = prefix.getBoundingClientRect().top;
+        const firstLinkTop = element.getClientRects()[0]!.top;
+        return {
+          text: content.textContent,
+          links: row.querySelectorAll("a").length,
+          iconHidden: icon.getAttribute("aria-hidden"),
+          centered: Math.abs(
+            iconBox.y +
+              iconBox.height / 2 -
+              contentBox.y -
+              contentBox.height / 2
+          ),
+          separated: contentBox.left > iconBox.right,
+          overflow: row.scrollWidth > row.clientWidth,
+          wrapped: element.getClientRects().length > 1,
+          sameLine: Math.abs(prefixTop - firstLinkTop) <= 1,
+          fontSize: getComputedStyle(element).fontSize,
+          bodyFontSize: getComputedStyle(content).fontSize,
+          textDecoration: getComputedStyle(element).textDecorationLine,
+        };
+      });
+      expect(layout.text).toContain(`Results are in for ${title}`);
+      expect(layout.links).toBe(1);
+      expect(layout.iconHidden).toBe("true");
+      expect(layout.centered).toBeLessThanOrEqual(1);
+      expect(layout.separated).toBe(true);
+      expect(layout.overflow).toBe(false);
+      expect(layout.fontSize).toBe(layout.bodyFontSize);
+      expect(layout.textDecoration).toBe("none");
+      if (index === 1) expect(layout.wrapped).toBe(true);
+      if (index === 0 && page.viewportSize()!.width >= 1024)
+        expect(layout.sameLine).toBe(true);
+      await link.focus();
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Shift+Tab");
+      await expect(link).toBeFocused();
+      await expect(link).toHaveCSS("outline-style", "solid");
+    }
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("competition-results-notifications.png"),
+    });
+  });
+
   test("keeps collaborator search, selected chips and disclosure usable", async ({
     page,
   }, testInfo) => {

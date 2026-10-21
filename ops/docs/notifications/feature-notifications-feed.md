@@ -91,6 +91,10 @@ Browser realtime notification delivery remains connected while the tab is hidden
 
 ## Row and Action Behavior
 
+- Competition result notifications show a trophy beside “Results are in for”
+  and the linked competition name, followed by a timestamp. The row wraps long
+  names on mobile and desktop. The name opens the relevant competition or entry.
+
 - Notifications are separated by spacing, and timestamps use secondary emphasis.
 - Long profile names, wave names, rating categories, and fallback details wrap
   within the row. Keyboard focus visibly identifies profile and wave links and
