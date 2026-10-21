@@ -29799,7 +29799,7 @@ components:
         - CONTRIBUTORS
         - ADMINS
         - DEVS_6529
-        - DROP_FORGERS_6529
+        - DROPS_6529
     ApiDropHiddenState:
       type: object
       required:

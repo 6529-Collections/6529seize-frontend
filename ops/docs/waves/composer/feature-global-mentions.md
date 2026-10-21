@@ -35,7 +35,7 @@ Wave creators and admins can also use the broadcast mentions `@all` and
 - `@admins` notifies the Wave creator and profiles in the `Admins` scope.
 - `@devs6529` notifies the platform-configured 6529 developer profiles that
   can view the Wave.
-- Drop Forge operational reports can include `@dropforgers6529`, which targets
+- Drop Forge operational reports can include `@drops6529`, which targets
   platform-configured Drop Forge profiles that can view the Wave. The token
   remains visible in the report and is reserved from personal Quick Tags.
 - The `Broadcast mentions` notification preference controls both `@all` and

@@ -37,7 +37,7 @@ behavior across thread header controls and sidebar wave rows.
   directly without a lingering tooltip.
 - The `Broadcast mentions` row, shown with the `@` icon, turns on notifications
   for the admin-only `@all` and `@contributors` broadcasts. Toggling this row
-  preserves other group preferences, including `@dropforgers6529`.
+  preserves other group preferences, including `@drops6529`.
 - The `All messages` row turns on notifications for every message.
 - While a mode toggle request runs, the clicked button shows a spinner and
   notification controls are temporarily disabled.

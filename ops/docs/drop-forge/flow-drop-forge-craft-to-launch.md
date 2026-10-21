@@ -35,7 +35,7 @@ The Launch page shows automation state, action progress, transaction links and
 recovery controls. Pausing cannot revoke signed/submitted transactions. A lost
 wallet outcome remains paused until its hash or safe cancellation is reconciled.
 The dedicated operations wave records actions and errors; errors tag the
-configured `@dropforgers6529` group.
+configured `@drops6529` group.
 
 Craft and contract-admin access remain distinct. Owner-only admin management
 and Pay Artist remain manual. If automation is disabled, coordinated controls

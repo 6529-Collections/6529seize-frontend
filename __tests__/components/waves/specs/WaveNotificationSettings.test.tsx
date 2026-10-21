@@ -358,9 +358,9 @@ describe("WaveNotificationSettings", () => {
             ? [
                 ApiDropGroupMention.All,
                 ApiDropGroupMention.Contributors,
-                ApiDropGroupMention.DropForgers6529,
+                ApiDropGroupMention.Drops6529,
               ]
-            : [ApiDropGroupMention.DropForgers6529],
+            : [ApiDropGroupMention.Drops6529],
         },
         refetch: jest.fn(),
       });
@@ -376,8 +376,8 @@ describe("WaveNotificationSettings", () => {
           body: {
             subscribed: true,
             enabled_group_notifications: enabled
-              ? [ApiDropGroupMention.DropForgers6529]
-              : [ApiDropGroupMention.All, ApiDropGroupMention.DropForgers6529],
+              ? [ApiDropGroupMention.Drops6529]
+              : [ApiDropGroupMention.All, ApiDropGroupMention.Drops6529],
           },
         })
       );

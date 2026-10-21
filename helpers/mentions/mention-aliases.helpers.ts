@@ -18,7 +18,7 @@ const RESERVED_MENTION_ALIASES = new Set([
   "developers",
   "6529devs",
   "devs6529",
-  "dropforgers6529",
+  "drops6529",
 ]);
 
 export const normalizeMentionAlias = (value: string) =>

@@ -18,5 +18,5 @@ export enum ApiDropGroupMention {
     Contributors = 'CONTRIBUTORS',
     Admins = 'ADMINS',
     Devs6529 = 'DEVS_6529',
-    DropForgers6529 = 'DROP_FORGERS_6529'
+    Drops6529 = 'DROPS_6529'
 }
