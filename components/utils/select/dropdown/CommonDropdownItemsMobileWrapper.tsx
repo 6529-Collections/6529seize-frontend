@@ -36,7 +36,6 @@ export default function CommonDropdownItemsMobileWrapper({
       noPadding
       headerClassName="tw-pt-3"
       titleClassName="tw-text-[17px]"
-      overlayClassName="tw-bg-black/60"
       surfaceClassName="!tw-rounded-t-xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-bg-iron-950"
     >
       <ul
