@@ -197,8 +197,7 @@ describe("production artifact metadata without build secrets", () => {
       ],
     });
     expect(result.status).not.toBe(0);
-    expect(result.jobReads).toBeGreaterThan(1);
-    expect(result.jobReads).toBeLessThanOrEqual(48);
+    expect(result.jobReads).toBe(48);
     expect(result.output).toBe("");
   });
 
