@@ -2251,9 +2251,15 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       terms_version: "b".repeat(64),
       acceptance_copy:
         "Acceptance is final and admins control final mint credits.",
+      artwork: {
+        name: "Collaboration artwork",
+        description: "The saved artwork description for invitation review.",
+        image_url: "https://images.example.com/artwork.jpg",
+        animation_url: null,
+      },
       terms: `The submission and minting terms for this artwork.
 
-${"Additional terms for review.\n\n".repeat(30)}`,
+${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       collaborators: accepted ? [profile] : [],
       invitations: [
         { id: "invite", profile, status: accepted ? "ACCEPTED" : "PENDING" },
@@ -2330,9 +2336,31 @@ ${"Additional terms for review.\n\n".repeat(30)}`,
       name: "Artwork and terms",
       exact: true,
     });
+    const contentsBox = await reviewContents.boundingBox();
+    expect(contentsBox).not.toBeNull();
+    expect(contentsBox!.height).toBeGreaterThan(viewport.height * 0.4);
+    expect(
+      await reviewContents.evaluate(
+        (element) =>
+          [...element.querySelectorAll<HTMLElement>("*")].filter(
+            (child) =>
+              /auto|scroll/.test(getComputedStyle(child).overflowY) &&
+              child.scrollHeight > child.clientHeight
+          ).length
+      )
+    ).toBe(0);
     await reviewContents.evaluate((element) => {
       element.scrollTop = element.scrollHeight;
     });
+    await expect(
+      dialog.getByText("End of submission terms.", { exact: true })
+    ).toBeInViewport();
+    await expect(
+      dialog.getByRole("heading", {
+        name: "Collaboration artwork",
+        exact: true,
+      })
+    ).not.toBeInViewport();
     const checkboxAfter = await dialog.getByRole("checkbox").boundingBox();
     const nameAfter = await artistName.boundingBox();
     expect(checkboxBefore).not.toBeNull();
@@ -2346,6 +2374,101 @@ ${"Additional terms for review.\n\n".repeat(30)}`,
     expect(checkboxAfter!.y + checkboxAfter!.height).toBeLessThanOrEqual(
       viewport.height
     );
+
+    // Short phones/landscape use one body-and-footer scroller, preserving the header.
+    for (const size of [
+      { width: 320, height: 480 },
+      { width: viewport.width, height: 320 },
+    ]) {
+      await page.setViewportSize(size);
+      await expect
+        .poll(() =>
+          reviewContents.evaluate((element) => ({
+            bodyOverflow: getComputedStyle(element).overflowY,
+            layoutOverflow: getComputedStyle(element.parentElement!).overflowY,
+          }))
+        )
+        .toEqual({ bodyOverflow: "visible", layoutOverflow: "auto" });
+      await artistName.scrollIntoViewIfNeeded();
+      await expect(artistName).toBeInViewport({ ratio: 1 });
+      await dialog.getByRole("checkbox").scrollIntoViewIfNeeded();
+      await expect(dialog.getByRole("checkbox")).toBeInViewport({ ratio: 1 });
+      await accept.scrollIntoViewIfNeeded();
+      await expect(accept).toBeInViewport({ ratio: 1 });
+      await expect(
+        dialog.getByRole("button", {
+          name: "Close invitation review",
+          exact: true,
+        })
+      ).toBeInViewport({ ratio: 1 });
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath(
+          `collaboration-review-${size.width}-${size.height}.png`
+        ),
+      });
+    }
+    await page.setViewportSize(viewport);
+
+    // Simulate browser and native keyboard heights without claiming physical-device coverage.
+    for (const keyboard of ["browser", "native"] as const) {
+      await artistName.focus();
+      await page.evaluate((mode) => {
+        const visual = globalThis.visualViewport!;
+        if (mode === "native") {
+          document.documentElement.style.setProperty(
+            "--native-keyboard-inset-bottom",
+            `${globalThis.innerHeight - 300}px`
+          );
+        } else {
+          Object.defineProperty(visual, "height", {
+            configurable: true,
+            value: 300,
+          });
+          Object.defineProperty(visual, "offsetTop", {
+            configurable: true,
+            value: 12,
+          });
+          visual.dispatchEvent(new Event("resize"));
+        }
+      }, keyboard);
+      await expect(artistName).toBeFocused();
+      await expect
+        .poll(() =>
+          artistName.evaluate((element) => {
+            let scroller = element.parentElement;
+            while (
+              scroller &&
+              !/auto|scroll/.test(getComputedStyle(scroller).overflowY)
+            )
+              scroller = scroller.parentElement;
+            if (!scroller)
+              throw new Error("Invitation review scroller missing");
+            const field = element.getBoundingClientRect();
+            const visible = scroller.getBoundingClientRect();
+            return field.top >= visible.top && field.bottom <= visible.bottom;
+          })
+        )
+        .toBe(true);
+      await expect(artistName).toHaveValue("playwright");
+      await expect(dialog.getByRole("checkbox")).not.toBeChecked();
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath(
+          `collaboration-review-${keyboard}-keyboard.png`
+        ),
+      });
+      await artistName.evaluate((element) => element.blur());
+      await page.evaluate(() => {
+        document.documentElement.style.removeProperty(
+          "--native-keyboard-inset-bottom"
+        );
+        const visual = globalThis.visualViewport!;
+        Reflect.deleteProperty(visual, "height");
+        Reflect.deleteProperty(visual, "offsetTop");
+        visual.dispatchEvent(new Event("resize"));
+      });
+    }
 
     await artistName.fill("   ");
     await dialog.getByRole("checkbox").check();
