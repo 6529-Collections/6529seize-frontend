@@ -170,7 +170,7 @@ export default function ModerationReviewWorkspace({
                 <>
                   {caseId && (
                     <CaseReports
-                      key={`${profileId}:${caseId}`}
+                      key={`${profileId}:${caseId}:reports`}
                       caseId={caseId}
                       profileId={profileId}
                       initiallyOpen={source === "report"}
@@ -178,7 +178,7 @@ export default function ModerationReviewWorkspace({
                   )}
                   {caseId && (activeCase?.pending_check_count ?? 0) > 0 && (
                     <CaseChecks
-                      key={`${profileId}:${caseId}`}
+                      key={`${profileId}:${caseId}:checks`}
                       caseId={caseId}
                       profileId={profileId}
                       selectedCheckId={
