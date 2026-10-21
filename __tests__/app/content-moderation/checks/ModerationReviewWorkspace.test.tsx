@@ -17,7 +17,10 @@ import {
   fetchModerationReportCheck,
 } from "@/services/api/moderation-checks-api";
 import { fetchContentModerationQueue } from "@/services/api/content-moderation-api";
-import type { ApiModerationReviewCase } from "@/generated/models/ApiModerationReviewCase";
+import {
+  type ApiModerationReviewCase,
+  ApiModerationReviewCaseCheckOutcomeEnum,
+} from "@/generated/models/ApiModerationReviewCase";
 import { ApiModerationCheckSubjectTypeEnum } from "@/generated/models/ApiModerationCheck";
 import { MODERATION_CHECKS_QUERY_KEY } from "@/services/content-moderation/content-moderation-query";
 import { checkFixture } from "./check.fixture";
@@ -86,7 +89,7 @@ const rep = fixture({
   report_id: null,
   check_id: "rep-check",
   preview: "Category awaiting review",
-  check_outcome: "REJECT" as ApiModerationReviewCase["check_outcome"],
+  check_outcome: ApiModerationReviewCaseCheckOutcomeEnum.Reject,
 });
 const reportOnly = fixture({
   id: "c".repeat(64),
