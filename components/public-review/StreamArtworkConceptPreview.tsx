@@ -6,6 +6,7 @@ import { usePublicReviewFeedbackPanelCoordination } from "@/components/public-re
 import { formatInteger, formatNumber, formatPercent } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 
 type PreviewStepId = "artwork" | "plan" | "approval" | "collector" | "history";
 
