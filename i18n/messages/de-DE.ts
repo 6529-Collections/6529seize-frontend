@@ -1,3 +1,6 @@
+import safeCollectingMessages from "@/i18n/messages/safeCollecting.de-DE.json";
+import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.de-DE.json";
+import networkTdhConsolidationMessages from "@/i18n/messages/networkTdhConsolidation.de-DE.json";
 import { DE_DE_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
 import { DE_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import { DE_DE_DROP_REQUIREMENT_MESSAGES } from "@/i18n/messages/drop-requirements";
@@ -24,6 +27,9 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.de-DE.jso
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  ...safeCollectingMessages,
+  ...delegationTapGuideMessages,
+  ...networkTdhConsolidationMessages,
   ...DE_SUBMISSION_DISCOVERY_MESSAGES,
   ...DE_DE_DROP_REQUIREMENT_MESSAGES,
   ...DE_DE_DROP_METADATA_MESSAGES,
