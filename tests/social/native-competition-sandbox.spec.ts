@@ -2586,6 +2586,12 @@ ${"Additional terms for review.\n\n".repeat(30)}`,
       detail.getByRole("button", { name: "Vote", exact: true })
     ).toBeVisible();
     await expect(page.getByTestId("single-drop-loading")).toHaveCount(0);
+    // Finish the backing leaderboard's initial lookup before measuring modal requests.
+    await expect(
+      page
+        .getByRole("main", { includeHidden: true })
+        .locator('[data-competition-entry="entry-alpha"]')
+    ).toBeAttached({ timeout: 30000 });
     let releaseContext!: () => void;
     const contextGate = new Promise<void>((resolve) => {
       releaseContext = resolve;
