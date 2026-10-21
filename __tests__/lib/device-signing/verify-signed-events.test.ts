@@ -220,6 +220,44 @@ describe("drop signature verification in the browser", () => {
     }
   });
 
+  it("binds the grant to a 6529 domain and to its stored domain and chain", async () => {
+    const verdictFor = async (grant: ApiDeviceGrantProof) => {
+      const post = await createEvent(grant, {
+        kind: 1,
+        seq: 1_760_000_000_000,
+        body: { parts: [{ content: "gm" }] },
+      });
+      return verifyDropSignedEvents(signedEvents([post], [grant], post.id));
+    };
+    const grant = await createGrant();
+    await expect(verdictFor(grant)).resolves.toMatchObject({
+      status: "signed",
+    });
+    await expect(verdictFor({ ...grant, domain: "6529.io" })).resolves.toEqual({
+      status: "invalid",
+    });
+    await expect(verdictFor({ ...grant, chain_id: 10 })).resolves.toEqual({
+      status: "invalid",
+    });
+
+    // A grant the wallet signed on another site never counts.
+    const foreign = buildVectorGrantMessage({
+      address: wallet.address,
+    }).replace(
+      "https://staging.6529.io wants you",
+      "https://evil.example wants you"
+    );
+    await expect(
+      verdictFor({
+        ...grant,
+        domain: "evil.example",
+        message: foreign,
+        id: hashMessage(foreign),
+        wallet_signature: await wallet.signMessage({ message: foreign }),
+      })
+    ).resolves.toEqual({ status: "invalid" });
+  });
+
   it("builds the shown content from a drop", () => {
     expect(
       toDisplayedDropContent({

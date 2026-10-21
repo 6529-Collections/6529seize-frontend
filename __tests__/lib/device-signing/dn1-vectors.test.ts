@@ -149,6 +149,8 @@ describe("DN1 shared contract vectors", () => {
       deviceKeyHex: VECTORS.deviceKey,
       scopes: ["post", "edit", "delete", "react"],
       expiresAtSeconds: VECTORS.grantExpiresAtSeconds,
+      domain: "staging.6529.io",
+      chainId: 1,
     });
   });
 });
