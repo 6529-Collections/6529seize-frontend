@@ -12,7 +12,6 @@ interface FilterGridDropdownItem<TValue extends string | number> {
 
 export default function FilterGridDropdown<TValue extends string | number>({
   disabled = false,
-  compactMobileTrigger = false,
   filterLabel,
   items,
   onSelect,
@@ -22,7 +21,6 @@ export default function FilterGridDropdown<TValue extends string | number>({
   triggerAriaLabel,
 }: {
   readonly disabled?: boolean | undefined;
-  readonly compactMobileTrigger?: boolean | undefined;
   readonly filterLabel: string;
   readonly items: readonly FilterGridDropdownItem<TValue>[];
   readonly onSelect: (value: TValue | null) => void;
@@ -74,7 +72,7 @@ export default function FilterGridDropdown<TValue extends string | number>({
           aria-expanded={isOpen}
           onClick={() => setIsOpen(!isOpen)}
           disabled={disabled}
-          className={`${compactMobileTrigger ? "max-sm:tw-h-9 max-sm:tw-border max-sm:tw-border-solid max-sm:tw-border-iron-800 max-sm:tw-bg-iron-950 max-sm:tw-py-0 max-sm:tw-pl-3 max-sm:tw-pr-8 max-sm:tw-text-iron-100 max-sm:tw-ring-0 max-sm:[&_svg]:tw-size-3 max-sm:[&_svg]:!tw-rotate-0 max-sm:[&_svg]:tw-text-iron-500" : ""} ${
+          className={`${
             disabled
               ? "tw-text-iron-400 tw-opacity-50"
               : "tw-text-iron-300 hover:tw-ring-iron-600"

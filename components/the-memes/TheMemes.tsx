@@ -645,12 +645,10 @@ export default function TheMemesComponent({
                   />
                 </div>
                 <DropdownToolbar
-                  desktopOnly
-                  className="tw-grid tw-w-full tw-shrink-0 tw-grid-cols-[max-content_minmax(0,max-content)] tw-gap-2 max-sm:tw-mt-1 sm:tw-w-auto sm:tw-grid-cols-[9rem_13rem]"
+                  className="tw-grid tw-w-fit tw-max-w-full tw-shrink-0 tw-grid-cols-2 tw-gap-2 max-sm:tw-mt-1"
                   data-dropdown-menu-align="end"
                 >
                   <FilterGridDropdown
-                    compactMobileTrigger
                     filterLabel={yearFilterLabel}
                     items={yearOptions.map((year) => ({
                       value: year.id,
@@ -669,7 +667,6 @@ export default function TheMemesComponent({
                     )}
                   />
                   <MemeSeasonGridDropdown
-                    compactMobileTrigger
                     selected={activeSeason}
                     setSelected={handleSeasonChange}
                     initialSeasonId={activeSeasonId}

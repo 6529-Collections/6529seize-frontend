@@ -12,7 +12,6 @@ interface MemeSeasonGridDropdownProps {
   readonly setSelected: (season: MemeSeason | null) => void;
   readonly initialSeasonId?: number | null | undefined;
   readonly disabled?: boolean | undefined;
-  readonly compactMobileTrigger?: boolean | undefined;
   readonly seasons?: readonly MemeSeason[] | undefined;
   readonly allSeasonsLabel?: string | undefined;
   readonly locale?: SupportedLocale | undefined;
@@ -23,7 +22,6 @@ export default function MemeSeasonGridDropdown({
   setSelected,
   initialSeasonId,
   disabled = false,
-  compactMobileTrigger = false,
   seasons,
   allSeasonsLabel,
   locale = DEFAULT_LOCALE,
@@ -74,7 +72,6 @@ export default function MemeSeasonGridDropdown({
   return (
     <FilterGridDropdown
       disabled={disabled}
-      compactMobileTrigger={compactMobileTrigger}
       filterLabel={seasonFilterLabel}
       items={availableSeasons.map((season) => ({
         value: season.id,

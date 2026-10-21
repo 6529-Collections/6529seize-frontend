@@ -43,7 +43,8 @@
   the sheet header down to dismiss. Focus returns to the trigger on dismissal.
 - Tablet and desktop grids retain their existing layout. Desktop Year and Season
   dropdowns use the same light fill for selected options as the mobile sheets,
-  and their triggers match the compact filters in a profile’s Collected view.
+  and their triggers use equal widths and the same compact styling as a profile’s
+  Collected view at every screen size.
 - Sort options use the same compact buttons on every screen size, with a light
   fill for the selected sort and a segmented direction control.
 
@@ -99,8 +100,8 @@
    from page one. When controls change quickly, only results for the latest
    selection appear; earlier requests cannot append cards or change pagination.
 10. When sorting by `Meme`, cards are grouped under meme headings. Heading order
-   follows `sort_dir`; cards inside each heading are ordered by card id
-   ascending.
+    follows `sort_dir`; cards inside each heading are ordered by card id
+    ascending.
 11. Scroll near the page bottom to load more pages.
 12. Open a card to navigate to `/the-memes/{id}`.
 
