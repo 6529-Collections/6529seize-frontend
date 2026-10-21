@@ -6,6 +6,7 @@ export type ButtonVariant =
   | "action"
   | "secondary"
   | "tertiary"
+  | "filter"
   | "success"
   | "positiveToggle"
   | "negativeToggle"
@@ -25,6 +26,8 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
     "tw-border-white/10 tw-bg-white/[0.07] tw-text-iron-100 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-iron-50 active:tw-bg-white/5",
   tertiary:
     "tw-border-iron-800 tw-bg-iron-950 tw-text-iron-100 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white active:tw-bg-black",
+  filter:
+    "tw-border-iron-800 tw-bg-iron-950 tw-text-iron-400 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100 active:tw-bg-black",
   success:
     "tw-border-emerald-600 tw-bg-emerald-600 tw-text-white desktop-hover:hover:tw-border-emerald-500 desktop-hover:hover:tw-bg-emerald-500 active:tw-border-emerald-700 active:tw-bg-emerald-700",
   positiveToggle:
