@@ -4697,7 +4697,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect
           .poll(() => scroller.evaluate((element) => element.scrollTop))
           .toBeGreaterThan(1000);
-        await expect(list.locator('[aria-busy="true"]')).toHaveCount(0);
+        await expect(
+          page
+            .getByRole("list", { name: "Leaderboard drops", exact: true })
+            .locator('[aria-busy="true"]')
+        ).toHaveCount(0);
         const readAnchor = () =>
           list.evaluate((element) => {
             const container = element.closest(".tw-overflow-y-auto")!;
@@ -4844,7 +4848,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
               (await readAnchor())?.logicalIndex ?? Number.POSITIVE_INFINITY
           )
           .toBeLessThan(currentIndex);
-        await expect(list.locator('[aria-busy="true"]')).toHaveCount(0);
+        await expect(
+          page
+            .getByRole("list", { name: "Leaderboard drops", exact: true })
+            .locator('[aria-busy="true"]')
+        ).toHaveCount(0);
         const reverseIndex = (await readAnchor())!.logicalIndex;
         await move(1);
         await expect
@@ -4853,7 +4861,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
               (await readAnchor())?.logicalIndex ?? Number.NEGATIVE_INFINITY
           )
           .toBeGreaterThan(reverseIndex);
-        await expect(list.locator('[aria-busy="true"]')).toHaveCount(0);
+        await expect(
+          page
+            .getByRole("list", { name: "Leaderboard drops", exact: true })
+            .locator('[aria-busy="true"]')
+        ).toHaveCount(0);
         await page.screenshot({
           path: testInfo.outputPath(
             `live-scroll-${app ? "app" : "web"}-${view.split(" ")[0]}.png`
