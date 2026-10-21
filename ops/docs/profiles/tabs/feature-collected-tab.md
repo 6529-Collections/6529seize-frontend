@@ -77,11 +77,17 @@ Transfer mode is part of the Native collected view (not a separate route).
      clears the Memes season filter
    - unopened Meme seasons can appear as `Unseized` chips
 3. Click `Details` to expand the integrated stats panel.
+   - The panel opens and closes without waiting for a page reload. While its
+     data loads, it shows `Loading collection details…` inside the open panel.
+     On small screens, opening also brings the panel into view.
    - Closing Details keeps its selected activity tab, filters, and page. It stays
      closed when returning from artwork; reopening restores those selections.
    - On mobile, both `Overview` and both `Memes Breakdown By Season` sections
      start closed under `Collected` and `Activity Overview`. Tap a section title
      to open its table. Desktop starts with these sections open.
+   - `Complete my set` and `Manage orders` open collecting tools. In the native
+     app, the header Back button returns to the same Collected filters and page,
+     then restores focus and scroll to the action you opened.
 4. In `Details`, review:
    - `Collected` totals and per-season Meme tables
      - collected details headings, table headers, row labels, and per-season

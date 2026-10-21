@@ -1,7 +1,10 @@
 "use client";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
+import {
+  isMultiCompetitionEnabled,
+  isCompetitionAccessError,
+} from "@/helpers/competition.helpers";
 import { useCompetition } from "@/contexts/CompetitionContext";
 import { useCompetitionEntryDrops } from "@/hooks/competitions/useCompetitionEntryDrops";
 import { useCompetitionDropNavigation } from "@/hooks/competitions/useCompetitionDropNavigation";
@@ -24,7 +27,7 @@ export default function CompetitionEntryCard({
   const [query] = useCompetitionEntryDrops([{ entryId, dropId }]);
   const onDropClick = useCompetitionDropNavigation();
   if (!query || query.isPending) return <CompetitionState />;
-  if (query.isError)
+  if (query.isError && (!query.data || isCompetitionAccessError(query.error)))
     return <CompetitionState error retry={() => void query.refetch()} />;
   if (!query.data) return null;
   const openDrop = (drop: ExtendedDrop) => {

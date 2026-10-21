@@ -9,6 +9,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import Button from "@/components/utils/button/Button";
 import ButtonLink from "@/components/utils/button/ButtonLink";
+import { HOME_ACTION_ARROW_CLASSES } from "../homeInteractionStyles";
 
 export default function HomeNewcomerIntro() {
   const locale = useBrowserLocale();
@@ -36,22 +37,22 @@ export default function HomeNewcomerIntro() {
     <section
       data-home-section="Get started"
       aria-labelledby="home-newcomer-title"
-      className="tw-px-4 tw-pb-2 tw-pt-5 md:tw-mx-auto md:tw-max-w-3xl md:tw-px-6 md:tw-pb-4 lg:tw-px-8"
+      className="tw-px-4 tw-pb-2 md:tw-px-6 md:tw-pb-4 lg:tw-px-8"
     >
       <h2 id="home-newcomer-title" className="tw-sr-only">
         {t(locale, "home.newcomer.title")}
       </h2>
-      <div className="tw-flex tw-flex-wrap tw-gap-2 md:tw-justify-center">
+      <div className="tw-grid tw-grid-cols-2 tw-gap-2.5 md:tw-flex md:tw-flex-wrap md:tw-gap-3 desktop-hover:[&>button:hover]:tw-border-white/30 desktop-hover:[&>button:hover]:tw-bg-white/[0.08] [&>button]:tw-border-white/20 [&>button]:tw-bg-white/[0.04]">
         <ButtonLink
           data-home-action="Get started"
           href="/join-6529"
           size="lg"
-          className="tw-min-w-32 tw-flex-1 md:tw-flex-none"
+          className="tw-group/action tw-min-w-32 tw-flex-1 motion-reduce:tw-transition-none max-md:tw-min-h-12 md:tw-flex-none"
         >
           <span>{t(locale, "home.newcomer.startAction")}</span>
           <ArrowRightIcon
             aria-hidden="true"
-            className="tw-size-4 tw-flex-shrink-0"
+            className={HOME_ACTION_ARROW_CLASSES}
           />
         </ButtonLink>
         <Button
@@ -63,7 +64,7 @@ export default function HomeNewcomerIntro() {
           onClick={() => {
             void handleConnect();
           }}
-          className="tw-min-w-32 tw-flex-1 md:tw-flex-none"
+          className="tw-min-w-32 tw-flex-1 motion-reduce:tw-transition-none max-md:tw-min-h-12 md:tw-flex-none"
         >
           {t(
             locale,

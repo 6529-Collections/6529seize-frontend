@@ -65,6 +65,7 @@ const mapDecisionDropV2 = ({
   const replyTo = mapReplyToDrop(drop);
 
   return {
+    collaborators: drop.collaborators ?? [],
     id: drop.id,
     serial_no: drop.serial_no,
     drop_type: ApiDropType.Winner,
