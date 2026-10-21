@@ -67,6 +67,16 @@ test.describe("The Memes Page @smoke @medium @large", () => {
     await expect(
       page.getByRole("button", { name: "Volume: 7 Days", exact: true })
     ).toBeInViewport();
+
+    const portraitViewport = page.viewportSize();
+    if (!portraitViewport)
+      throw new Error("Expected a configured phone viewport");
+    await page.setViewportSize({ width: 844, height: 390 });
+    await expect(sortBar).toHaveCSS("position", "static");
+    await page.setViewportSize(portraitViewport);
+    await expect(
+      page.getByRole("button", { name: "Volume: 7 Days", exact: true })
+    ).toBeInViewport({ ratio: 1 });
   });
 
   test("phone collection filters use sheets and restore trigger focus", async ({
@@ -111,7 +121,9 @@ test.describe("The Memes Page @smoke @medium @large", () => {
           })
         )
         .toBeLessThan(24);
-      await expect(page.getByRole("dialog").locator("[data-enter]")).toHaveCount(0);
+      await expect(
+        page.getByRole("dialog").locator("[data-enter]")
+      ).toHaveCount(0);
       await page.keyboard.press("Escape");
       await expect(heading).toBeHidden();
       await expect(trigger).toBeFocused();

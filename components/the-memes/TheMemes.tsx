@@ -8,6 +8,7 @@ import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import TheMemesCard from "@/components/the-memes/TheMemesCard";
 import TheMemesSortButton from "@/components/the-memes/TheMemesSortButton";
+import useMemesSortVisibility from "@/components/the-memes/useMemesSortVisibility";
 import {
   getAllSeasonsLabel,
   getMemeApiSeasonIds,
@@ -190,7 +191,6 @@ export default function TheMemesComponent({
 
   const { connectedProfile } = useContext(AuthContext);
   const initialDataRef = useRef(initialData);
-  const sortOptionsRef = useRef<HTMLDivElement>(null);
 
   const [seasonId, setSeasonId] = useState<number | null>(null);
   const [yearId, setYearId] = useState<number | null>(null);
@@ -212,25 +212,9 @@ export default function TheMemesComponent({
   const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);
   const [sort, setSort] = useState<MemesSort>(MemesSort.AGE);
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.ALL_TIME);
+  const sortOptionsRef = useMemesSortVisibility(sort, volumeType);
 
   useSetTitle(t(locale, "theMemes.documentTitle"));
-
-  useEffect(() => {
-    const scroller = sortOptionsRef.current;
-    if (!scroller || scroller.scrollWidth <= scroller.clientWidth) return;
-    const selected = scroller.querySelector<HTMLElement>(
-      '[aria-pressed="true"]'
-    );
-    if (!selected) return;
-    // Scroll only the horizontal strip; scrollIntoView would also move the page.
-    const strip = scroller.getBoundingClientRect();
-    const option = selected.getBoundingClientRect();
-    if (option.left < strip.left + 12) {
-      scroller.scrollLeft += option.left - strip.left - 12;
-    } else if (option.right > strip.right - 28) {
-      scroller.scrollLeft += option.right - strip.right + 28;
-    }
-  }, [sort, volumeType]);
 
   useEffect(() => {
     const initialSortDir = getInitialSortDirection(searchParams);

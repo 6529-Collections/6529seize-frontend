@@ -39,7 +39,7 @@
   an in-sheet close button. Select an option, tap outside, press Escape, or drag
   the sheet header down to dismiss. Focus returns to the trigger on dismissal.
 - Tablet and desktop grids retain their existing layout. Desktop Year and Season
-  dropdowns use the same light selected options as the mobile sheets, and their
+  dropdowns use the same light fill for selected options as the mobile sheets, and their
   triggers match the compact filters in a profile’s Collected view.
 
 ## URL Query Model
