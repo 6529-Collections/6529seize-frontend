@@ -53,7 +53,6 @@ export const EN_US_THE_MEMES_COLLECTORS_MESSAGES = {
   "theMemes.detail.collectors.balance": "Balance",
   "theMemes.detail.collectors.tdh": "TDH",
   "theMemes.detail.collectors.unweightedTdh": "Unweighted TDH",
-  "theMemes.detail.collectors.unweighted": "Unweighted",
   "theMemes.detail.collectors.allCards": "All cards",
   "theMemes.detail.collectors.thisCard": "This card",
   "theMemes.detail.collectors.cardTdh": "This card TDH",

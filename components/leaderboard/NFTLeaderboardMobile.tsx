@@ -216,10 +216,10 @@ export function NFTLeaderboardMobileRows({
             active={sort === "boosted_tdh"}
           />
           <MobileMetric
-            className="tw-text-iron-300"
+            className="tw-text-iron-300 [&>span:last-child>span:first-child]:tw-whitespace-normal"
             locale={locale}
             value={lead.tdh__raw}
-            label={t(locale, "theMemes.detail.collectors.unweighted")}
+            label={t(locale, "theMemes.detail.collectors.unweightedTdh")}
             accessibleLabel={t(
               locale,
               "theMemes.detail.collectors.cardUnweightedTdh"
@@ -255,7 +255,7 @@ export function NFTLeaderboardMobileRows({
             className="tw-text-iron-400 [&>span:last-child>span:first-child]:tw-hidden"
             locale={locale}
             value={lead.total_tdh__raw}
-            label={t(locale, "theMemes.detail.collectors.unweighted")}
+            label={t(locale, "theMemes.detail.collectors.unweightedTdh")}
             accessibleLabel={t(
               locale,
               "theMemes.detail.collectors.totalUnweightedTdh"
