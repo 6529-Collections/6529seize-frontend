@@ -273,6 +273,8 @@ export default function WaveDropsSearchModal({
     resultWaveId: string,
     isDirectMessage: boolean
   ) => {
+    // The callback scrolls the originating page's wave. Changing the search
+    // scope does not navigate that page, so other waves require a route change.
     if (resultWaveId === wave.id) onSelectSerialNo(serialNo);
     else
       router.push(

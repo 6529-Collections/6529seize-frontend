@@ -209,18 +209,18 @@ describe("useWaveDropsSearch", () => {
     });
     expect(fetchWaveDropsSearchV2).not.toHaveBeenCalled();
   });
-});
 
-it("disables global search below the minimum text length", () => {
-  renderHook(() =>
-    useWaveDropsSearch({
-      wave: null,
-      term: "lo",
-      enabled: true,
-      allowGlobalSearch: true,
-    })
-  );
-  expect(useInfiniteQueryMock).toHaveBeenLastCalledWith(
-    expect.objectContaining({ enabled: false })
-  );
+  it("disables global search below the minimum text length", () => {
+    renderHook(() =>
+      useWaveDropsSearch({
+        wave: null,
+        term: "lo",
+        enabled: true,
+        allowGlobalSearch: true,
+      })
+    );
+    expect(useInfiniteQueryMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ enabled: false })
+    );
+  });
 });
