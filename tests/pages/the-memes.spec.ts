@@ -78,14 +78,14 @@ test.describe("The Memes Page @smoke @medium @large", () => {
             (element) => getComputedStyle(element, "::after").backgroundColor
           )
         )
-        .toBe(editorial ? "rgb(255, 255, 255)" : "rgba(0, 0, 0, 0)");
+        .toBe(editorial ? "rgb(82, 139, 255)" : "rgba(0, 0, 0, 0)");
       if (editorial) {
         expect(
           await age.evaluate((element) => ({
             color: getComputedStyle(element, "::after").backgroundColor,
             height: getComputedStyle(element, "::after").height,
           }))
-        ).toEqual({ color: "rgb(255, 255, 255)", height: "1px" });
+        ).toEqual({ color: "rgb(82, 139, 255)", height: "1px" });
       }
       await expectNoHorizontalOverflow(page);
     }
@@ -118,7 +118,7 @@ test.describe("The Memes Page @smoke @medium @large", () => {
             (element) => getComputedStyle(element, "::after").backgroundColor
           )
         )
-        .toBe(editorial ? "rgb(255, 255, 255)" : "rgba(0, 0, 0, 0)");
+        .toBe(editorial ? "rgb(82, 139, 255)" : "rgba(0, 0, 0, 0)");
     }
   });
 
