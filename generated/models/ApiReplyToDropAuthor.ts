@@ -15,7 +15,7 @@ import { HttpFile } from '../http/http';
 
 export class ApiReplyToDropAuthor {
     'handle': string;
-    'pfp': string;
+    'pfp'?: string;
 
     static readonly discriminator: string | undefined = undefined;
 
