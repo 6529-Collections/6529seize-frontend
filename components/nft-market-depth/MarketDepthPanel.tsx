@@ -665,7 +665,7 @@ export default function MarketDepthPanel({
                       </p>
                     )}
                 </div>
-                <div className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-x-12 tw-gap-y-10 md:tw-grid-cols-2">
+                <div className="tw-grid tw-grid-cols-2 tw-items-start tw-gap-x-4 tw-gap-y-6 md:tw-gap-x-12 md:tw-gap-y-10">
                   {displayedSides.map(
                     ({ book, side, levels, summary }, index) => {
                       const value =
@@ -690,10 +690,10 @@ export default function MarketDepthPanel({
                             `${book?.currency.address ?? "empty"}-${side}`
                           }
                           hidden={!summary && !open}
-                          className={`${!summary && !open ? "tw-hidden" : "tw-flex"} tw-min-w-0 tw-flex-col`}
+                          className={`${!summary && !open ? "tw-hidden" : "tw-contents md:tw-flex"} tw-min-w-0 tw-flex-col`}
                         >
                           {summary && (
-                            <div className="tw-flex tw-items-start tw-justify-between tw-gap-4 tw-pb-4">
+                            <div className="tw-order-first tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-justify-between tw-gap-1 md:tw-flex-row md:tw-gap-4 md:tw-pb-4">
                               <dl className="tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
                                 <dt className="tw-m-0 tw-text-meta tw-font-medium tw-leading-[18px] tw-text-iron-500">
                                   {t(resolvedLocale, summary)}
@@ -715,21 +715,21 @@ export default function MarketDepthPanel({
                           <div
                             id={`${id}-side-${index}`}
                             hidden={!open}
-                            className="[overflow-anchor:none]"
+                            className="tw-col-span-2 tw-min-w-0 [overflow-anchor:none] max-md:empty:tw-hidden"
                           >
                             {book && levels.length > 0 && (
                               <>
                                 <div
                                   className={
                                     summary
-                                      ? ""
+                                      ? "tw-pb-2 md:tw-pb-0"
                                       : "tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-3 tw-gap-y-1 tw-pb-2"
                                   }
                                 >
                                   <h3
                                     className={
                                       summary
-                                        ? "tw-sr-only"
+                                        ? "tw-m-0 tw-min-w-0 tw-break-words tw-text-[15px] tw-font-medium tw-text-iron-200 md:tw-sr-only"
                                         : "tw-m-0 tw-min-w-0 tw-break-words tw-text-[15px] tw-font-medium tw-text-iron-200"
                                     }
                                   >

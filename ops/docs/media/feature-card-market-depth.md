@@ -37,8 +37,10 @@ rank and the next rank skips those ties. A card without a recorded ranking shows
 ## Read listings and offers
 
 The summaries show the lowest captured listing in ETH and the highest captured
-offer in WETH. Each summary sits above its own list, with the order count
-beside the label. The columns stack on narrow screens, listings before offers.
+offer in WETH. On desktop, each summary sits above its own list, with the order
+count beside the label. On narrow screens, both summaries stay together above
+the lists so the highest offer is visible before scrolling through listings.
+The lists stack below them, listings before offers, with their own headings.
 A side without quotes retains its summary with an unavailable value and no table.
 Each price list starts with up to ten levels. Use Show all levels to reveal the complete list, and Show fewer levels to return to the
 short view.
@@ -49,7 +51,7 @@ keyboard focus. Subtle horizontal separators distinguish the remaining rows,
 and the expand arrow stays beside the price. Each level
 shows its unit price and quantity at that price. Total shows the cumulative quoted quantity. On narrow screens,
 quantity and total appear below the exact price, with **Collect** or **Sell** in
-a separate column. The price and quantity area opens the details together;
+a separate column. Prices and actions have an inset from the row edges. The price and quantity area opens the details together;
 compact blue actions retain a full touch target, and Show all levels spans the
 list width. Expanded orders align with the list. Expand a price row to
 inspect the captured orders behind that quote, including quoted remaining

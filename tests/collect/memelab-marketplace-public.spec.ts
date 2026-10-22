@@ -410,11 +410,28 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
     const offerSummary = (await market
       .getByText("Highest offer · WETH", { exact: true })
       .boundingBox())!;
-    expect(offerSummary.y).toBeGreaterThan(
-      listingTable.y + listingTable.height
+    const listingSummary = (await market
+      .getByText("Lowest listing · ETH", { exact: true })
+      .boundingBox())!;
+    expect(offerSummary.y).toBeCloseTo(listingSummary.y, 0);
+    expect(offerSummary.x).toBeGreaterThan(listingSummary.x);
+    expect(offerSummary.y + offerSummary.height).toBeLessThan(listingTable.y);
+    expect(listingSummary.y + listingSummary.height).toBeLessThan(
+      listingTable.y
     );
-    expect(offerSummary.y).toBeLessThan(tableBounds.y);
+    for (const name of ["Listings · ETH", "Offers · WETH"]) {
+      const title = market.getByRole("heading", { name, exact: true });
+      expect((await title.boundingBox())!.height).toBeGreaterThan(1);
+    }
     expect((await firstLevel.boundingBox())!.x).toBeCloseTo(tableBounds.x, 0);
+    const mobilePrice = (await firstLevel
+      .getByText("0.020", { exact: true })
+      .boundingBox())!;
+    expect(mobilePrice.x - tableBounds.x).toBeCloseTo(12, 0);
+    const mobileAction = (await sell.boundingBox())!;
+    expect(
+      tableBounds.x + tableBounds.width - mobileAction.x - mobileAction.width
+    ).toBeCloseTo(12, 0);
     expect((await row.boundingBox())!.height).toBeLessThanOrEqual(65);
     expect((await showAll.boundingBox())!.width).toBeCloseTo(
       tableBounds.width,
@@ -509,12 +526,8 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
   const rightSummary = (await market
     .getByText("Highest offer · WETH", { exact: true })
     .boundingBox())!;
-  if (isMobile) {
-    expect(rightSummary.y).toBeGreaterThan(leftSummary.y);
-  } else {
-    expect(rightSummary.y).toBeCloseTo(leftSummary.y, 0);
-    expect(rightSummary.x).toBeGreaterThan(leftSummary.x);
-  }
+  expect(rightSummary.y).toBeCloseTo(leftSummary.y, 0);
+  expect(rightSummary.x).toBeGreaterThan(leftSummary.x);
   await page.screenshot({
     path: info.outputPath("meme-lab-marketplace.png"),
     fullPage: true,

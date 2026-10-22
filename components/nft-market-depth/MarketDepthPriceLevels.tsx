@@ -88,7 +88,7 @@ export default function MarketDepthPriceLevels({
             <tr>
               <th
                 scope="col"
-                className={`${tradeActionsAvailable ? "tw-w-[56%]" : "tw-w-full"} tw-pl-0 tw-text-left sm:tw-w-auto sm:tw-pl-5 sm:tw-pr-3`}
+                className={`${tradeActionsAvailable ? "tw-w-1/2" : "tw-w-full"} tw-pl-0 tw-text-left sm:tw-w-auto sm:tw-pl-5 sm:tw-pr-3`}
               >
                 <span className="tw-sr-only sm:tw-not-sr-only">
                   {t(locale, "marketDepth.table.price")}
@@ -111,7 +111,7 @@ export default function MarketDepthPriceLevels({
               {tradeActionsAvailable && (
                 <th
                   scope="col"
-                  className="tw-w-[44%] tw-pr-0 @2xl:tw-w-[120px] sm:tw-w-28 sm:tw-pr-2.5"
+                  className="tw-w-1/2 tw-pr-3 @2xl:tw-w-[120px] sm:tw-w-28 sm:tw-pr-2.5"
                 >
                   <span className="tw-sr-only">
                     {t(locale, "marketDepth.table.action")}
@@ -163,7 +163,7 @@ export default function MarketDepthPriceLevels({
                         )}
                         title={level.unit_price}
                         onClick={toggleDetails}
-                        className="tw-font-inherit tw-flex tw-min-h-[60px] tw-w-full tw-flex-col tw-items-start tw-justify-center tw-gap-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-left tw-text-[15px] tw-font-medium tw-tabular-nums tw-text-iron-200 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 sm:tw-min-h-12 sm:tw-flex-row sm:tw-items-center sm:tw-justify-start sm:tw-gap-2"
+                        className="tw-font-inherit tw-flex tw-min-h-[60px] tw-w-full tw-flex-col tw-items-start tw-justify-center tw-gap-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-2 tw-pl-3 tw-pr-0 tw-text-left tw-text-[15px] tw-font-medium tw-tabular-nums tw-text-iron-200 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 sm:tw-min-h-12 sm:tw-flex-row sm:tw-items-center sm:tw-justify-start sm:tw-gap-2 sm:tw-px-0"
                       >
                         <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
                           <span className="tw-min-w-0 [overflow-wrap:anywhere]">
@@ -205,7 +205,7 @@ export default function MarketDepthPriceLevels({
                     </td>
                     {tradeActionsAvailable && (
                       <td
-                        className={`${cellClass} ${best ? "tw-rounded-r-xl" : ""} tw-break-words tw-py-1 tw-pl-2 tw-pr-0 tw-align-middle sm:tw-pr-2.5`}
+                        className={`${cellClass} ${best ? "tw-rounded-r-xl" : ""} tw-break-words tw-py-1 tw-pl-2 tw-pr-3 tw-align-middle sm:tw-pr-2.5`}
                       >
                         <MarketDepthLevelAction
                           order={singleOrder}
