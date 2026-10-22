@@ -289,6 +289,7 @@ export default function AdvancedWaveSearchInput({
           <div
             id="advanced-search-options"
             role="listbox"
+            onMouseDown={(event) => event.preventDefault()}
             aria-label={t(locale, "waves.drops.searchModal.advanced.filters")}
           >
             {pending
