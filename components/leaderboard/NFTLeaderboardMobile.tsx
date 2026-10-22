@@ -54,7 +54,7 @@ export function NFTLeaderboardMobileSort({
   }, [sort]);
 
   return (
-    <div className="tw-mb-2 tw-flex tw-items-center tw-gap-2 lg:tw-hidden">
+    <div className="tw-mb-2 tw-flex tw-items-center tw-gap-2 md:tw-hidden">
       <fieldset className="tw-m-0 tw-flex tw-h-8 tw-shrink-0 tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0.5">
         <legend className="tw-sr-only">
           {t(locale, "theMemes.sorting.directionLegend")}
@@ -156,13 +156,13 @@ export function NFTLeaderboardMobileRows({
 }>) {
   return (
     <ol
-      className="tw-m-0 tw-list-none tw-p-0 lg:tw-hidden"
+      className="tw-m-0 tw-list-none tw-p-0 md:tw-hidden"
       aria-label={t(locale, "theMemes.detail.collectors.leaderboardTitle")}
     >
       {leaderboard.map((lead) => (
         <li
           key={lead.consolidation_key}
-          className="tw-grid tw-grid-cols-[24px_32px_minmax(0,0.62fr)_minmax(0,0.76fr)_minmax(0,1.24fr)] tw-items-baseline tw-gap-x-2 tw-gap-y-1 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 tw-text-xs tw-font-normal tw-tabular-nums tw-leading-4 max-[380px]:tw-text-[11px] md:tw-grid-cols-[24px_44px_104px_120px_minmax(0,1fr)]"
+          className="tw-grid tw-grid-cols-[24px_32px_minmax(0,0.62fr)_minmax(0,0.76fr)_minmax(0,1.24fr)] tw-items-baseline tw-gap-x-2 tw-gap-y-1 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 tw-text-xs tw-font-normal tw-tabular-nums tw-leading-4 max-[380px]:tw-text-[11px]"
         >
           <span className="tw-self-center tw-font-medium tw-text-iron-500">
             <span className="tw-sr-only">

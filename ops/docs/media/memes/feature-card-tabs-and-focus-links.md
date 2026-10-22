@@ -99,8 +99,8 @@
 
 ## Common Scenarios
 
-- In `Collectors`, phones and tablets show a collector list with this card's
-  balance, TDH and unweighted TDH in a `This card` row, with `All cards` totals
+- In `Collectors`, screens narrower than 768 px show a collector list with this
+  card's balance, TDH and unweighted TDH in a `This card` row, with `All cards` totals
   aligned underneath. The collector's name has its own row above the values. Choose
   Balance, TDH, Unweighted TDH, Total balance, Total TDH or Total unweighted TDH
   in the scrolling sort bar; the separate arrows set ascending or descending
@@ -112,8 +112,9 @@
   values available to assistive technology. Download CSV exports all matching
   collectors with full numeric values in the selected order. Its icon shows
   progress, announces completion, and reports a download failure for retry.
-- The desktop Collectors table shows the same information in columns. Sorting
-  and paging keep the previous rows visible while the next results load.
+- At 768 px and wider, the Collectors table shows the same information in
+  columns. Sorting and paging keep the previous rows visible while the next
+  results load.
 - In Overview, explore `More by {artist}` for up to four other published Meme
   Cards per credited artist directly after the description, before detailed metadata.
   Cards are ordered by newest card number first. Each preview

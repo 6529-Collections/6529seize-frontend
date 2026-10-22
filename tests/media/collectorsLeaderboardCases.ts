@@ -63,7 +63,7 @@ export function defineCollectorsLeaderboardTests() {
     const list = page.getByRole("list", { name: "Collectors leaderboard" });
     const initialWidth = page.viewportSize()?.width ?? 1280;
 
-    if (initialWidth >= 1024) {
+    if (initialWidth >= 768) {
       await expect(list).toBeHidden();
       await expect(section.getByRole("table").getByRole("row")).toHaveCount(27);
       await expect(
@@ -88,8 +88,10 @@ export function defineCollectorsLeaderboardTests() {
     );
     await expect(list.getByRole("listitem").nth(1)).toContainText("1 card");
 
-    for (const width of [320, 360, 375, 380, 381, 390, 430, 640, 768, 1023]) {
+    for (const width of [320, 360, 375, 380, 381, 390, 430, 640, 767]) {
       await page.setViewportSize({ width, height: 844 });
+      await expect(list).toBeVisible();
+      await expect(section.getByRole("table")).toBeHidden();
       await expectNoHorizontalOverflow(page);
       const overflow = await list
         .getByRole("listitem")
@@ -129,6 +131,16 @@ export function defineCollectorsLeaderboardTests() {
         .boundingBox();
       expect(csvSize?.width).toBe(36);
       expect(csvSize?.height).toBe(36);
+    }
+    for (const width of [768, 1023, 1024]) {
+      await page.setViewportSize({ width, height: 844 });
+      await expect(list).toBeHidden();
+      await expect(section.getByRole("table")).toBeVisible();
+      await expect(section.getByRole("table").getByRole("row")).toHaveCount(27);
+      await expect(
+        page.getByRole("group", { name: "Sort collectors by" })
+      ).toBeHidden();
+      await expectNoHorizontalOverflow(page);
     }
     await page.setViewportSize({ width: 390, height: 844 });
     const sortGroup = page.getByRole("group", { name: "Sort collectors by" });
