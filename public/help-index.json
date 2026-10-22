@@ -7642,6 +7642,8 @@
       "keywords": ["waves", "leaderboard", "votes", "my", "tab"],
       "facts": [
         "My Votes shows active submissions with a nonzero personal vote. Past winners are excluded while their historical vote records are preserved.",
+        "My Votes orders rows by signed personal vote value, highest first, then by vote time, oldest first. Scrolling to the bottom loads more rows automatically; Load more remains available for manual retry. Vote inputs load as their rows approach the visible area.",
+        "If an entry preview is unavailable, My Votes keeps the personal vote visible with Preview unavailable, native vote controls and Try again, without showing hidden artwork or author details.",
         "Signed-out viewers see Connect your wallet to participate and a Connect Wallet button in My Votes. Select it to open the usual wallet connection flow. All votes and Activity remain available without connecting.",
         "It helps a user inspect their own voting activity where the wave supports it.",
         "Availability depends on wave type, eligibility, and voting state.",

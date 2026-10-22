@@ -58,6 +58,7 @@ import MyStreamWaveCreateActionsMenu from "./tabs/MyStreamWaveCreateActionsMenu"
 import MyStreamWaveCurationTabMenu from "./tabs/MyStreamWaveCurationTabMenu";
 import MobileTabsScrollControls from "./MobileTabsScrollControls";
 import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
+import { useWaveChatPrefetch } from "@/hooks/competitions/useWaveChatPrefetch";
 
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
@@ -275,6 +276,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const searchParams = useSearchParams();
   const { ref: featureUsageRef } = useWaveFeatureUsage("wave_tabs", wave.id);
   const pathname = usePathname();
+  const prefetchChat = useWaveChatPrefetch();
 
   const locale = useBrowserLocale();
   const { flat, nativeCompetition } = useCompetitionNavigation();
@@ -430,6 +432,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
           else if (tab === MyStreamWaveTab.POLLS) badgeCount = unansweredPolls;
           return {
             key: tab,
+            onIntent: tab === MyStreamWaveTab.CHAT ? prefetchChat : undefined,
             label:
               nativeDefault &&
               tab === MyStreamWaveTab.LEADERBOARD &&
@@ -457,6 +460,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       unansweredPolls,
       activeCompetitionCount,
       effectiveCompetitionId,
+      prefetchChat,
       nativeDefault,
       selectedIsApprove,
       locale,

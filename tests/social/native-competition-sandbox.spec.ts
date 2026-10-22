@@ -564,6 +564,7 @@ async function installArtworkCompetitionResources(
     if (!drop) return route.fallback();
     return route.fulfill({ json: { wave: fixtureWave, drop } });
   });
+  return { entry, card };
 }
 
 async function installCompetitionApi(
@@ -837,7 +838,7 @@ async function installCompetitionApi(
     else if (resource === `entries/entry-${id}`) body = entry(id);
     else body = pageResult([]);
     if (
-      resource === "leaderboard" &&
+      (resource === "leaderboard" || resource === "votes/me") &&
       url.searchParams.get("include") === "cards"
     )
       body = { ...(body as Record<string, unknown>), cards: [card(id)] };
@@ -1631,6 +1632,21 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       const bounds = (await row.boundingBox())!;
       expect(Math.abs(bounds.x - available.x)).toBeLessThanOrEqual(1);
       expect(Math.abs(bounds.width - available.width)).toBeLessThanOrEqual(1);
+      const voteControls = row
+        .getByRole("spinbutton", { name: "Your vote", exact: true })
+        .locator("..");
+      await expect(voteControls).toBeVisible();
+      const controlsBounds = (await voteControls.boundingBox())!;
+      if (testInfo.project.name === "web-mobile-chromium") {
+        expect(Math.abs(controlsBounds.x - bounds.x - 8)).toBeLessThanOrEqual(
+          1
+        );
+        expect(
+          Math.abs(controlsBounds.width - bounds.width + 16)
+        ).toBeLessThanOrEqual(1);
+      } else {
+        expect(controlsBounds.x).toBeGreaterThan(bounds.x + bounds.width / 2);
+      }
       const selectAll = panel.getByRole("button", {
         name: "Select all",
         exact: true,
@@ -1731,6 +1747,121 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       expect(sandbox.requests).toHaveLength(0);
     });
   }
+
+  test("loads My Votes cards without full drops and fetches more on scroll", async ({
+    page,
+  }) => {
+    await installCompetitionApi(page);
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const fixture = await response.json();
+    const artworks = Array.from({ length: 51 }, (_, index) => ({
+      ...fixture.drops[0],
+      id: `my-voted-drop-${index}`,
+      drop_type: "SUBMISSION",
+      title: `My voted artwork ${index}`,
+      submission_context: {
+        status: "ACTIVE",
+        has_metadata: true,
+        voting: {
+          is_open: true,
+          total_votes_given: 100,
+          current_calculated_vote: 100,
+          predicted_final_vote: 100,
+          voters_count: 1,
+          place: index + 1,
+          context_profile_context: {
+            can_vote: true,
+            min: -1000,
+            max: 1000,
+            current: 1,
+          },
+        },
+      },
+    }));
+    const resources = await installArtworkCompetitionResources(
+      page,
+      WAVE,
+      fixture.wave,
+      () => artworks
+    );
+    const listReads: URL[] = [];
+    const budgetEntries = new Set<string>();
+    const fullDropReads: string[] = [];
+    page.on("request", (request) => {
+      const url = new URL(request.url());
+      if (
+        url.pathname.endsWith("/credits/me") &&
+        url.searchParams.has("entry_id")
+      )
+        budgetEntries.add(url.searchParams.get("entry_id")!);
+      if (
+        url.pathname === "/api/v2/drops" &&
+        url.searchParams.get("ids")?.includes("my-voted-drop-")
+      )
+        fullDropReads.push(url.pathname);
+      if (url.pathname.includes("/v2/drops/my-voted-drop-"))
+        fullDropReads.push(url.pathname);
+    });
+    await page.route(
+      "**/v3/waves/*/competitions/alpha/votes/me?**",
+      (route) => {
+        const url = new URL(route.request().url());
+        listReads.push(url);
+        const start = Number(url.searchParams.get("cursor") ?? 0);
+        const end = start + Number(url.searchParams.get("limit") ?? 50);
+        const items = artworks.slice(start, end);
+        return route.fulfill({
+          json: {
+            data: items.map((drop) => ({
+              entry_id: resources.entry(drop.id).id,
+              drop_id: drop.id,
+              value: 1,
+              credit_spent: 1,
+              entry_status: "ACTIVE",
+            })),
+            cards: items
+              .filter((drop) => drop.id !== "my-voted-drop-9")
+              .map(resources.card),
+            has_more: end < artworks.length,
+            next_cursor: end < artworks.length ? String(end) : null,
+          },
+        });
+      }
+    );
+    await page.goto(`${ROOT}/alpha?tab=votes`);
+    const panel = page.getByRole("tabpanel", { name: "My Votes", exact: true });
+    await expect(panel.getByRole("article")).toHaveCount(50);
+    await expect(
+      panel.getByRole("spinbutton", { name: "Your vote", exact: true }).first()
+    ).toBeVisible();
+    expect(budgetEntries.size).toBeGreaterThan(0);
+    expect(budgetEntries.size).toBeLessThan(50);
+    expect(listReads[0]!.searchParams.get("include")).toBe("cards");
+    expect(fullDropReads).toEqual([]);
+    const unavailable = panel
+      .getByRole("article")
+      .filter({ hasText: "Preview unavailable" });
+    await expect(unavailable).toHaveCount(1);
+    await expect(
+      unavailable.getByText("Your vote: 1", { exact: true })
+    ).toBeVisible();
+    await unavailable.scrollIntoViewIfNeeded();
+    await expect(
+      unavailable.getByRole("spinbutton", { name: "Your vote", exact: true })
+    ).toBeVisible();
+    await panel
+      .getByRole("button", { name: "Load more", exact: true })
+      .scrollIntoViewIfNeeded();
+    await expect(panel.getByRole("article")).toHaveCount(51);
+    expect(
+      listReads.some((url) => url.searchParams.get("cursor") === "50")
+    ).toBe(true);
+    expect(fullDropReads).toEqual([]);
+    await expectNoHorizontalOverflow(page);
+  });
 
   for (const legacy of [false, true]) {
     test(`scrolls overflowing ${legacy ? "legacy" : "native"} Settings and vote Activity`, async ({
@@ -2007,6 +2138,14 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       if (message.type() === "error") consoleErrors.push(message.text());
     });
     const sandbox = await installCompetitionApi(page);
+    const readPublicPreviewCount = async () => {
+      const origin = getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"]);
+      const response = await page.request.get(
+        `${origin}/__composer-sandbox/public-preview`
+      );
+      expect(response.ok()).toBe(true);
+      return (await response.json()).reads as number;
+    };
     await page.goto(ROOT);
     await dismissNextDevTools(page);
     await expect(
@@ -2154,6 +2293,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("spinbutton", { name: "Your vote" })
     ).toHaveValue("0");
+    expect(await readPublicPreviewCount()).toBe(0);
     await page.getByRole("tab", { name: "Chat", exact: true }).click();
     await expect(page).toHaveURL(
       new RegExp(`/waves/${WAVE}\\?tab=chat&competition=beta$`),
@@ -2164,6 +2304,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("link", { name: "Competition", exact: true })
     ).toHaveCount(0);
+    expect(await readPublicPreviewCount()).toBe(0);
     const competitionsTab = page.getByRole("tab", {
       name: /^Competitions(?:\s+\d+\+?)?$/,
     });
@@ -2189,6 +2330,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         /hydration|hydrated|cannot be a (?:child|descendant)/i.test(error)
       )
     ).toEqual([]);
+    const documentResponse = await page.request.get(
+      `/waves/${WAVE}?tab=chat&competition=beta`
+    );
+    expect(documentResponse.ok()).toBe(true);
+    expect(await readPublicPreviewCount()).toBe(1);
   });
 
   test("shows collaboration actors and named artwork in the standard notification header", async ({
