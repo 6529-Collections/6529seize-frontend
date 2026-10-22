@@ -125,6 +125,7 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
   page,
   context,
   baseURL,
+  isMobile,
 }, info) => {
   expect(new URL(baseURL ?? "").hostname).toMatch(/^(localhost|127\.0\.0\.1)$/);
   await context.addCookies([
@@ -275,6 +276,20 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
   ).toHaveCount(0);
   await expect(market).toHaveAttribute("tabindex", "-1");
   await expect(market).toHaveCSS("border-top-width", "0px");
+  if (!isMobile) {
+    for (const [summary, heading] of [
+      ["Lowest listing · ETH", "Listings · ETH"],
+      ["Highest offer · WETH", "Offers · WETH"],
+    ] as const) {
+      const summaryBounds = (await market
+        .getByText(summary, { exact: true })
+        .boundingBox())!;
+      const headingBounds = (await market
+        .getByRole("heading", { name: heading, exact: true })
+        .boundingBox())!;
+      expect(summaryBounds.x).toBeCloseTo(headingBounds.x, 0);
+    }
+  }
   const offers = market.getByRole("table", { name: "Offers for WETH" });
   const levels = offers.getByRole("button", { name: /^Offers at / });
   await expect(levels).toHaveCount(10);

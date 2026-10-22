@@ -608,7 +608,7 @@ export default function MarketDepthPanel({
               </>
             ) : (
               <>
-                <dl className="tw-m-0 tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-5 sm:tw-flex sm:tw-flex-wrap sm:tw-gap-x-16">
+                <dl className="tw-m-0 tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-5 sm:tw-gap-x-8">
                   <div className="tw-min-w-0 tw-max-w-full">
                     <dt className="tw-mb-2 tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-400">
                       {t(resolvedLocale, "marketDepth.bestAsk")}

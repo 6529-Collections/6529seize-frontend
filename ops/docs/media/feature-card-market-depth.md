@@ -37,8 +37,10 @@ rank and the next rank skips those ties. A card without a recorded ranking shows
 ## Read listings and offers
 
 The summaries show the lowest captured listing in ETH and the highest captured
-offer in WETH. Each price list starts with up to ten levels. Use Show all levels
-to reveal the complete list, and Show fewer levels to return to the short view.
+offer in WETH. When the two lists appear side by side, each summary aligns
+with its matching list. Each price list starts with up to ten levels. Use Show
+all levels to reveal the complete list, and Show fewer levels to return to the
+short view.
 Listings are ordered from lowest price upward and
 offers from highest price downward. Price rows stay unboxed, with the expand
 arrow beside the price. Each level shows its unit price and quantity
