@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
+import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 import { SortDirection } from "@/entities/ISort";
 import {
   formatInteger,
@@ -55,13 +55,13 @@ export function NFTLeaderboardMobileSort({
 
   return (
     <div className="tw-mb-2 tw-flex tw-items-center tw-gap-2 md:tw-hidden">
-      <fieldset className="tw-m-0 tw-flex tw-h-8 tw-shrink-0 tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0.5">
+      <fieldset className="tw-m-0 tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-gap-0.5 tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-p-0.5">
         <legend className="tw-sr-only">
           {t(locale, "theMemes.sorting.directionLegend")}
         </legend>
         {[SortDirection.ASC, SortDirection.DESC].map((value) => {
           const Icon =
-            value === SortDirection.ASC ? ChevronUpIcon : ChevronDownIcon;
+            value === SortDirection.ASC ? ArrowUpIcon : ArrowDownIcon;
           return (
             <button
               key={value}
@@ -74,9 +74,9 @@ export function NFTLeaderboardMobileSort({
                   : "theMemes.sorting.descendingLabel"
               )}
               onClick={() => onDirection(value)}
-              className={`tw-flex tw-size-[26px] tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${direction === value ? "tw-bg-iron-700 tw-text-white" : "tw-bg-transparent tw-text-iron-500"}`}
+              className={`tw-m-0 tw-inline-flex tw-size-7 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none ${direction === value ? "tw-bg-iron-700 tw-text-white" : "tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-text-iron-200"}`}
             >
-              <Icon className="tw-size-4" aria-hidden="true" />
+              <Icon className="tw-size-[13px]" aria-hidden="true" />
             </button>
           );
         })}
