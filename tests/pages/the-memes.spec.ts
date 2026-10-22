@@ -209,7 +209,17 @@ test.describe("The Memes Page @smoke @medium @large", () => {
     const overflow = () =>
       row.evaluate((element) => element.scrollWidth - element.clientWidth);
 
+    // Wait for URL normalization and fonts before testing manual scrolling.
+    await expect(page).toHaveURL(/sort=age&sort_dir=asc/);
+    await page.evaluate(() => document.fonts.ready.then(() => undefined));
     await page.setViewportSize({ width: 820, height: 900 });
+    // Let resize observers finish keeping the selected option in view first.
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+        })
+    );
     await expect.poll(overflow).toBeGreaterThan(0);
     await expect(row).toHaveCSS("--fade-l", "0px");
     await expect(row).toHaveCSS(

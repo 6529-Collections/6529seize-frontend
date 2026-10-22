@@ -697,10 +697,10 @@ export default function TheMemesComponent({
                   )}
                 </fieldset>
               </div>
-              {/* A 1px timeline extension lets Chromium clear the fade when overflow disappears. */}
+              {/* End padding contains fractional overflow; the timeline extension clears stale fades. */}
               <div
                 ref={sortOptionsRef}
-                className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-items-center tw-gap-1.5 tw-overflow-x-auto tw-overflow-y-hidden tw-py-1 tw-pl-3 tw-pr-4 [-ms-overflow-style:none] [scrollbar-width:none] max-sm:[mask-image:linear-gradient(to_right,transparent,#000_12px,#000_calc(100%-28px),transparent)] sm:tw-pr-0 sm:[animation-fill-mode:both] sm:[animation-name:scroll-edge-fade] sm:[animation-range-end:calc(100%_+_1px)] sm:[animation-timeline:scroll(self_inline)] sm:[animation-timing-function:linear] sm:[mask-image:linear-gradient(to_right,transparent,#000_var(--fade-l),#000_calc(100%_-_var(--fade-r)),transparent)] [&::-webkit-scrollbar]:tw-hidden lg:[body:not(.capacitor-native)_&]:tw-justify-between lg:[body:not(.capacitor-native)_&]:tw-gap-4"
+                className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-items-center tw-gap-1.5 tw-overflow-x-auto tw-overflow-y-hidden tw-py-1 tw-pl-3 tw-pr-4 [-ms-overflow-style:none] [scrollbar-width:none] max-sm:[mask-image:linear-gradient(to_right,transparent,#000_12px,#000_calc(100%-28px),transparent)] sm:tw-pr-px sm:[animation-fill-mode:both] sm:[animation-name:scroll-edge-fade] sm:[animation-range-end:calc(100%_+_1px)] sm:[animation-timeline:scroll(self_inline)] sm:[animation-timing-function:linear] sm:[mask-image:linear-gradient(to_right,transparent,#000_var(--fade-l),#000_calc(100%_-_var(--fade-r)),transparent)] [&::-webkit-scrollbar]:tw-hidden lg:[body:not(.capacitor-native)_&]:tw-justify-between lg:[body:not(.capacitor-native)_&]:tw-gap-4"
               >
                 {Object.values(MemesSort)
                   .filter((v) => v !== MemesSort.VOLUME)
