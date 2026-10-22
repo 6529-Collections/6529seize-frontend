@@ -85,6 +85,10 @@ const PUBLIC_REVIEW_METADATA_KEYS = [
 ];
 const PUBLIC_REVIEW_CONTEXT_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const PUBLIC_REVIEW_VERSION_PATTERN = /^\d{4}-\d{2}-\d{2}\.\d+$/;
+const PUBLIC_REVIEW_SECTION_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const PUBLIC_REVIEW_PAGE_TITLE_PATTERN = /^\*\*Page:\*\* \[([^[\]\n]+)\]\(/m;
+const PUBLIC_REVIEW_SECTION_TITLE_PATTERN = /^\*\*Section:\*\* ([^\n]+)$/m;
 const CREATED_AT = 1713744000000;
 const PREVIEW_URL = "https://example.com/6529-composer-preview";
 const publicScope = { group: null };
@@ -1201,6 +1205,12 @@ function parsePublicReviewContext(metadata) {
   }
 }
 
+function getPublicReviewContent(part) {
+  return isPlainObject(part) && typeof part.content === "string"
+    ? part.content
+    : null;
+}
+
 function isExpectedPublicReviewMetadata(metadata) {
   if (
     !Array.isArray(metadata) ||
@@ -1232,9 +1242,11 @@ function isExpectedPublicReviewMetadata(metadata) {
     typeof context.submissionId === "string" &&
     PUBLIC_REVIEW_CONTEXT_PATTERN.test(context.submissionId) &&
     context.reviewId === "6529-stream" &&
-    context.reviewVersion === "2026-08-01.1" &&
+    typeof context.reviewVersion === "string" &&
+    PUBLIC_REVIEW_VERSION_PATTERN.test(context.reviewVersion) &&
     context.pageId === "overview" &&
-    context.sectionId === "what-stream-is-designed-to-hold-together"
+    typeof context.sectionId === "string" &&
+    PUBLIC_REVIEW_SECTION_ID_PATTERN.test(context.sectionId)
   );
 }
 
@@ -1260,13 +1272,30 @@ function isExpectedPublicReviewDropBody(body) {
     return false;
   }
 
+  const content = Array.isArray(body.parts)
+    ? getPublicReviewContent(body.parts[0])
+    : null;
+  if (!isExpectedPublicReviewMetadata(body.metadata) || content === null) {
+    return false;
+  }
+
+  // The review version, page title and section title follow the review
+  // content, so the spec asserts their exact current values. The mock still
+  // requires the fixed feedback layout around the submitted context.
+  const { reviewVersion } = parsePublicReviewContext(body.metadata);
+  const pageTitle = PUBLIC_REVIEW_PAGE_TITLE_PATTERN.exec(content)?.[1];
+  const sectionTitle = PUBLIC_REVIEW_SECTION_TITLE_PATTERN.exec(content)?.[1];
+  if (pageTitle === undefined || sectionTitle === undefined) {
+    return false;
+  }
+
   const expectedContent = [
     "## Product or UX",
     PUBLIC_REVIEW_COMMENT,
-    "**Review:** 6529 Stream Contract Review (2026-08-01.1)",
-    `**Page:** [Overview](${frontendBaseUrl}/reviews/6529-stream/versions/2026-08-01.1)`,
+    `**Review:** 6529 Stream Contract Review (${reviewVersion})`,
+    `**Page:** [${pageTitle}](${frontendBaseUrl}/reviews/6529-stream)`,
     "**Suspected severity:** Medium",
-    "**Section:** What Stream is designed to hold together",
+    `**Section:** ${sectionTitle}`,
     `### Why this matters\n\n${PUBLIC_REVIEW_WHY_IT_MATTERS}`,
     `### Suggested change\n\n${PUBLIC_REVIEW_SUGGESTED_CHANGE}`,
   ].join("\n\n");
@@ -1289,8 +1318,7 @@ function isExpectedPublicReviewDropBody(body) {
     Array.isArray(body.mentioned_groups) &&
     body.mentioned_groups.length === 0 &&
     Array.isArray(body.mentioned_waves) &&
-    body.mentioned_waves.length === 0 &&
-    isExpectedPublicReviewMetadata(body.metadata)
+    body.mentioned_waves.length === 0
   );
 }
 

@@ -1,4 +1,13 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
+
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import {
+  getStreamReviewPageHref,
+  getStreamReviewVersion,
+  STREAM_REVIEW_DEFINITION,
+} from "@/lib/public-review/streamReviewDefinition";
+import { STREAM_REVIEW_ENTRY_PAGES } from "@/lib/public-review/streamReviewEntryGuides";
 
 import {
   expect,
@@ -26,6 +35,15 @@ const PUBLIC_REVIEW_METADATA_KEYS = [
   "context",
 ] as const;
 
+// Review titles, versions and page lists change with each review snapshot, so
+// derive them from the review definition instead of copying rendered copy.
+const ACTIVE_REVIEW_VERSION = STREAM_REVIEW_DEFINITION.activeVersion;
+const OVERVIEW_GUIDE = STREAM_REVIEW_ENTRY_PAGES.find(
+  (page) => page.id === "overview"
+);
+const SAVED_REVIEW_PAGES =
+  getStreamReviewVersion(ACTIVE_REVIEW_VERSION)?.pages ?? [];
+
 test.describe.configure({ mode: "serial" });
 
 test.describe("Stream review feedback local sandbox @auth @medium @local-only", () => {
@@ -43,6 +61,9 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
     baseURL,
     page,
   }, testInfo) => {
+    expect(OVERVIEW_GUIDE).toBeDefined();
+    const overviewTitle = t(DEFAULT_LOCALE, OVERVIEW_GUIDE!.titleKey);
+    const overviewHref = getStreamReviewPageHref({ page: OVERVIEW_GUIDE! });
     const isDesktop = testInfo.project.name === "web-desktop-chromium";
     const emulatesSafeArea = testInfo.project.name === "web-mobile-chromium";
     const safeAreaSession = emulatesSafeArea
@@ -57,7 +78,7 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
         "true"
       );
     });
-    await gotoStreamReview(page);
+    await gotoStreamReview(page, overviewHref, overviewTitle);
 
     const feedbackPanel = page.locator("#public-review-feedback");
     const feedbackToggle = page.locator(
@@ -65,33 +86,22 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
     );
     await expect(feedbackToggle).toBeVisible();
     if (!isDesktop) {
+      // Current review guides use the compact menu; the page position appears
+      // only on saved snapshots and is covered by the pagination test below.
       const mobileNavigationToggle = page
         .locator("summary")
-        .filter({ hasText: "Review navigation" });
+        .filter({ hasText: "Contents" });
       const mobileNavigationDisclosure =
         mobileNavigationToggle.locator("xpath=..");
-      const pagePosition = page.getByText("Page 1 of 14", { exact: true });
-      const [navigationBounds, pagePositionBounds, feedbackBounds] =
-        await Promise.all([
-          mobileNavigationToggle.boundingBox(),
-          pagePosition.boundingBox(),
-          feedbackToggle.boundingBox(),
-        ]);
-      expect(navigationBounds).not.toBeNull();
-      expect(pagePositionBounds).not.toBeNull();
-      expect(feedbackBounds).not.toBeNull();
-      expect(
-        Math.abs(navigationBounds!.y - feedbackBounds!.y)
-      ).toBeLessThanOrEqual(1);
-      expect(
-        Math.abs(
-          pagePositionBounds!.y +
-            pagePositionBounds!.height / 2 -
-            (feedbackBounds!.y + feedbackBounds!.height / 2)
-        )
-      ).toBeLessThanOrEqual(1);
+      await expectToolbarControlsAligned(
+        mobileNavigationToggle,
+        feedbackToggle
+      );
 
-      const reviewHeading = page.getByRole("heading", { name: "Overview" });
+      const reviewHeading = page.getByRole("heading", {
+        level: 1,
+        name: overviewTitle,
+      });
       const reviewHeadingTop = await reviewHeading.evaluate(
         (element) => element.getBoundingClientRect().top
       );
@@ -133,9 +143,7 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
         width: 900,
         height: mobileViewport!.height,
       });
-      await expect(
-        page.locator('section[aria-label="Review status"] > div')
-      ).toHaveCSS("flex-direction", "column");
+      await expectReviewStatusStacked(page);
 
       await feedbackToggle.click();
       await expect(feedbackToggle).toHaveAttribute("aria-expanded", "true");
@@ -267,9 +275,11 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
       await expect(select).toHaveCSS("font-size", expectedFieldFontSize);
       await expect(select).toHaveClass(/tw-appearance-none/);
     }
-    await commentOnSelect.selectOption(
-      "what-stream-is-designed-to-hold-together"
+    const feedbackSection = await getFirstVisibleFeedbackSection(
+      page,
+      commentOnSelect
     );
+    await commentOnSelect.selectOption(feedbackSection.id);
     await feedbackTypeSelect.selectOption("product-or-ux");
     await severitySelect.selectOption("medium");
     await feedbackPanel
@@ -323,6 +333,16 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
       )
       .toHaveLength(1);
 
+    const expectedContent = [
+      "## Product or UX",
+      PUBLIC_REVIEW_COMMENT,
+      `**Review:** ${STREAM_REVIEW_DEFINITION.title} (${ACTIVE_REVIEW_VERSION})`,
+      `**Page:** [${overviewTitle}](${new URL(overviewHref, page.url()).toString()})`,
+      "**Suspected severity:** Medium",
+      `**Section:** ${feedbackSection.title}`,
+      `### Why this matters\n\n${PUBLIC_REVIEW_WHY_IT_MATTERS}`,
+      `### Suggested change\n\n${PUBLIC_REVIEW_SUGGESTED_CHANGE}`,
+    ].join("\n\n");
     const [dropRequest] = dropRequests;
     expect(
       dropRequest,
@@ -332,16 +352,16 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
       body: expect.objectContaining({
         wave_id: "00000000-0000-4000-8000-000000000529",
         drop_type: "CHAT",
-        content: expect.stringContaining(PUBLIC_REVIEW_COMMENT),
+        content: expectedContent,
         metadata_count: 4,
         metadata_keys: PUBLIC_REVIEW_METADATA_KEYS,
         review_type: "product-or-ux",
         review_severity: "medium",
         review_context: expect.objectContaining({
           reviewId: "6529-stream",
-          reviewVersion: "2026-08-01.1",
-          pageId: "overview",
-          sectionId: "what-stream-is-designed-to-hold-together",
+          reviewVersion: ACTIVE_REVIEW_VERSION,
+          pageId: OVERVIEW_GUIDE!.id,
+          sectionId: feedbackSection.id,
         }),
         signature: null,
         is_safe_signature: false,
@@ -353,17 +373,166 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
     await expectNoUnsafeSandboxMutations(baseURL);
     await safeAreaSession?.detach();
   });
+
+  test("shows the saved snapshot page position and steps to the next page", async ({
+    baseURL,
+    page,
+  }, testInfo) => {
+    const [firstPage, secondPage] = SAVED_REVIEW_PAGES;
+    expect(firstPage).toBeDefined();
+    expect(secondPage).toBeDefined();
+    const pageCount = SAVED_REVIEW_PAGES.length;
+    const firstPageTitle = t(DEFAULT_LOCALE, firstPage!.titleKey);
+    const secondPageTitle = t(DEFAULT_LOCALE, secondPage!.titleKey);
+    const firstPageHref = getStreamReviewPageHref({
+      page: firstPage!,
+      version: ACTIVE_REVIEW_VERSION,
+    });
+    const secondPageHref = getStreamReviewPageHref({
+      page: secondPage!,
+      version: ACTIVE_REVIEW_VERSION,
+    });
+    await gotoStreamReview(page, firstPageHref, firstPageTitle);
+
+    const pagePosition = page.getByText(`Page 1 of ${pageCount}`, {
+      exact: true,
+    });
+    await expect(pagePosition).toBeVisible();
+    if (testInfo.project.name !== "web-desktop-chromium") {
+      const feedbackToggle = page.locator(
+        'button[aria-controls="public-review-feedback"]'
+      );
+      await expectToolbarControlsAligned(
+        page.locator("summary").filter({ hasText: "Review navigation" }),
+        feedbackToggle,
+        pagePosition
+      );
+    }
+
+    const pageSequence = page.getByRole("navigation", {
+      name: "Previous and next contract review pages",
+    });
+    await expect(pageSequence.getByRole("link")).toHaveCount(1);
+    const nextPageLink = pageSequence.getByRole("link", {
+      name: secondPageTitle,
+    });
+    await expect(nextPageLink).toHaveAttribute("href", secondPageHref);
+    await nextPageLink.click();
+
+    await expect(page).toHaveURL(new URL(secondPageHref, page.url()).href, {
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(
+      page.getByRole("heading", { level: 1, name: secondPageTitle })
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await expect(
+      page.getByText(`Page 2 of ${pageCount}`, { exact: true })
+    ).toBeVisible();
+    await expect(
+      pageSequence.getByRole("link", { name: firstPageTitle })
+    ).toHaveAttribute("href", firstPageHref);
+
+    await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
 });
 
-async function gotoStreamReview(page: Page) {
-  await page.goto("/reviews/6529-stream", {
+async function gotoStreamReview(page: Page, href: string, title: string) {
+  await page.goto(href, {
     waitUntil: "domcontentloaded",
   });
   await waitForRouteReady(page);
-  await expect(page).toHaveURL(/\/reviews\/6529-stream$/);
+  await expect(page).toHaveURL(new URL(href, page.url()).href);
   await expect(
-    page.getByRole("heading", { level: 1, name: "Overview" })
+    page.getByRole("heading", { level: 1, name: title })
   ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+  // The app shell marks its first client render. Waiting for it keeps clicks
+  // off server-rendered controls and lets hydrated chrome, such as the phone
+  // app banner, settle before the spec measures review layout.
+  await expect(page.getByRole("main").first().locator("..")).toHaveAttribute(
+    "data-sidebar-ready",
+    "true",
+    { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+  );
   await dismissNextDevTools(page);
   await expectNoHorizontalOverflow(page);
+}
+
+/** Keeps the mobile review toolbar controls on one row. */
+async function expectToolbarControlsAligned(
+  navigationToggle: Locator,
+  feedbackToggle: Locator,
+  pagePosition?: Locator
+) {
+  const [navigationBounds, feedbackBounds, pagePositionBounds] =
+    await Promise.all([
+      navigationToggle.boundingBox(),
+      feedbackToggle.boundingBox(),
+      pagePosition?.boundingBox() ?? null,
+    ]);
+  expect(navigationBounds).not.toBeNull();
+  expect(feedbackBounds).not.toBeNull();
+  expect(Math.abs(navigationBounds!.y - feedbackBounds!.y)).toBeLessThanOrEqual(
+    1
+  );
+  if (!pagePosition) {
+    return;
+  }
+  expect(pagePositionBounds).not.toBeNull();
+  expect(
+    Math.abs(
+      pagePositionBounds!.y +
+        pagePositionBounds!.height / 2 -
+        (feedbackBounds!.y + feedbackBounds!.height / 2)
+    )
+  ).toBeLessThanOrEqual(1);
+}
+
+/** Expects the narrow status layout, with status details below the explanation. */
+async function expectReviewStatusStacked(page: Page) {
+  const reviewStatusLayout = page.locator(
+    'section[aria-label="Review status"] > div'
+  );
+  await expect
+    .poll(
+      () =>
+        reviewStatusLayout.evaluate((layout) => {
+          const [, explanation, statusDetails] = Array.from(layout.children);
+          if (!explanation || !statusDetails) {
+            return false;
+          }
+          return (
+            statusDetails.getBoundingClientRect().top >=
+            explanation.getBoundingClientRect().bottom
+          );
+        }),
+      {
+        message:
+          "Expected review status details to stack below the explanation.",
+      }
+    )
+    .toBe(true);
+}
+
+/** Returns the first section option, after checking every option targets a page heading. */
+async function getFirstVisibleFeedbackSection(
+  page: Page,
+  commentOnSelect: Locator
+) {
+  const sectionOptions = (
+    await commentOnSelect.locator("option").evaluateAll((options) =>
+      options.map((option) => ({
+        id: (option as HTMLOptionElement).value,
+        title: option.textContent?.trim() ?? "",
+      }))
+    )
+  ).filter((option) => option.id !== "");
+  expect(sectionOptions.length).toBeGreaterThan(0);
+  for (const option of sectionOptions) {
+    await expect(
+      page.locator(`article h2[id="${option.id}"]`),
+      `Expected "Comment on" option ${option.id} to target a heading on this page.`
+    ).toHaveCount(1);
+  }
+  return sectionOptions[0]!;
 }
