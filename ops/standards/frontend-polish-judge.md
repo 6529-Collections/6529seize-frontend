@@ -1,7 +1,8 @@
 # Frontend Polish Judge
 
-Rubric version: `fe-polish-judge/2.0`. Calibration status: **uncalibrated**
-(see [Calibration](#calibration)).
+Rubric version: `fe-polish-judge/2.1`. Calibration status: **partially
+calibrated**: single-round verdicts are calibrated, the repair loop is not (see
+[Calibration](#calibration)).
 
 ## Purpose
 
@@ -62,7 +63,7 @@ Pin these before the baseline judgment. A genuine scope change starts a new run.
 - viewports, locales, and auth context (see [Evidence](#evidence)); the
   coverage cells are the combinations of routes, states, viewports, and
   locales, or an explicit list when only some combinations matter
-- dimensions marked N/A, each with a scope-based reason
+- dimensions and S checks marked N/A, each with a scope-based reason
 - reference surfaces and any approved product decisions or exclusions
 - repair budget (default six batches)
 
@@ -151,6 +152,13 @@ cannot be averaged away by strong scores elsewhere.
 - **S6 No dark patterns.** No false urgency, unbacked countdowns, preselected
   maximum quantities, hidden fees, or confusable controls (such as "Connect"
   that silently requests a signature).
+
+A run scoped to part of a flow may pin S1–S5 N/A in the run record when the
+reviewed states exclude the stage the check governs and the candidate does not
+change that stage. For example, a run on the success modal of an unchanged mint
+flow pins S4 with "Rejection and failure states are unchanged and not
+reviewed". S3 still applies to that run. S6 and the I and M checks cannot be
+pinned.
 
 ## 6529 Style
 
@@ -330,7 +338,13 @@ run record:
 
 - **Viewports:** desktop `1440 x 1000` and mobile `390 x 844`; add tablet
   `820 x 1000` when the layout changes between them. The Museum profile always
-  uses all three.
+  uses all three. Capture phone widths with mobile device emulation (touch
+  input and a mobile user agent): the app switches to its touch layout on
+  touch-first devices, so a narrow desktop window shows a different layout.
+- **Complete captures:** a full-page capture reaches the end of the page, after
+  lazy content, media posters, and fonts have loaded. A truncated capture or
+  media that failed to load in the capture is an evidence gap: the judge marks
+  it unverified instead of filing a product finding.
 - **Locales:** `en-US` always; add `de-DE` for text expansion when the touched
   copy is message-backed; all five supported locales when the change is a
   localization change. The app reads the browser language, so set the browser
@@ -395,17 +409,33 @@ plain links.
 
 ## Calibration
 
-The 8.5 target is not yet a calibrated guarantee. Until a calibration record
-exists, report a judge acceptance as "judge-accepted (uncalibrated)", do not use
-it to claim a surface is polished or production-ready, and have a human spot
-check the result before relying on it autonomously.
+Status: **partially calibrated**. The record in
+[`ops/workstreams/fe-polish-judge-calibration/`](../workstreams/fe-polish-judge-calibration/README.md)
+(2026-10-12) calibrates single-round verdicts for the judge model
+`claude-opus-5-5` with this rubric and judge prompt:
 
-Calibrate against a small labeled set: Museum workstreams under
-`ops/workstreams/museum-*` already hold screenshot evidence with three-reviewer
-dispositions; the mint progress and success modal workstreams hold crypto flow
-evidence. Add pages that need no changes, restrained excellent pages, and seeded
-failures (brief leakage, fake profundity, governance theater, invented metrics,
-premature transaction success, unexplained approvals, mobile breakage, and
-untranslated flows). Measure repeat-score variance, false rejections,
-unnecessary edits, convergence, time, and token cost. Pin the judge model and
-prompt version; a model or prompt change requires a rerun and a version bump.
+- **Detection:** the judge caught every seeded defect (brief leakage, fake
+  profundity, governance theater, invented metrics, internal leakage, and false
+  urgency) at the expected check and severity. It also decisively rejected the
+  one surface a human had rejected.
+- **Bar:** the judge is stricter than past human review. Production pages and
+  human-passed Museum pages drew required P2 findings. Most were real defects
+  or defensible judgment calls. Capture artifacts were the main source of false
+  findings and are now treated as evidence gaps.
+- **Repeatability:** on identical evidence, totals moved by 0.2 and the decision
+  held. The tail of P2 findings varied, which the late-admission rule keeps from
+  churning the loop.
+
+Report acceptance with the scoring script's label, `judge-accepted (partially
+calibrated)`. The repair loop itself is not calibrated: convergence, unnecessary
+edits, and rounds to acceptance are unmeasured. Until a loop calibration is
+recorded, have a human spot-check an accepted surface before calling it
+polished or production-ready.
+
+Pin the judge model and prompt. A model or judge-prompt change requires
+rerunning the calibration set and recording the result. A change to scoring
+rules or check definitions also bumps the rubric version. The next calibration
+should run a builder–judge loop on pages with known defects, add pages a human
+confirms need no change at the 8.5 bar, exercise interaction states and
+locales, and seed the failure types not yet covered: premature transaction
+success, unexplained approvals, mobile breakage, and untranslated flows.

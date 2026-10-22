@@ -1,0 +1,197 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "museum-pre-art-first-production",
+  "coverage": [
+    {
+      "route": "/museum/network",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/home-1440x1000-01.png"
+    },
+    {
+      "route": "/museum/network",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/home-390x844-01.png"
+    },
+    {
+      "route": "/museum/network/gifts/[accessionId]",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/gift-1440x1000-01.png"
+    },
+    {
+      "route": "/museum/network/objects/[objectId]",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/object-1440x1000-01.png"
+    },
+    {
+      "route": "/museum/network/programs/[programId]",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/program-1440x1000-01.png"
+    }
+  ],
+  "dimensions": {
+    "J07": {
+      "score": 5.0,
+      "evidence": [
+        "evidence/home-1440x1000-01.png",
+        "evidence/home-390x844-01.png",
+        "evidence/gift-1440x1000-01.png",
+        "evidence/object-1440x1000-01.png",
+        "evidence/program-1440x1000-01.png"
+      ],
+      "findings": [
+        "E-001",
+        "E-002",
+        "E-003",
+        "E-004",
+        "E-005",
+        "E-006",
+        "E-007",
+        "E-008"
+      ],
+      "note": "The facts are careful and there is no hype, but the copy a visitor reads is buried under release and record metadata: a branch name ('main'), '199 declared files', a SHA-256 hash, record IDs and an operator warning. Status chips show raw enum values, the same lede sentence appears three times, the copy uses internal process words ('lot', 'gate', 'custody reference', 'receipt evidence'), and the object label has no plain date or medium line. Judged from the first captured viewport of each page only."
+    }
+  },
+  "checks": {
+    "I1": "pass",
+    "I2": "fail",
+    "I3": "pass"
+  },
+  "findings": [
+    {
+      "id": "E-001",
+      "targets": ["I2", "J07"],
+      "severity": "P1",
+      "status": "open",
+      "where": "/museum/network, /museum/network/gifts/[accessionId], /museum/network/objects/[objectId], /museum/network/programs/[programId] · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/home-1440x1000-01.png",
+      "observation": "Every route shows release-pipeline status above its content. The masthead meta reads 'Canonical Museum release · main', and a banner reads 'Verified from the canonical Museum release / Canonical Museum release · main · Observed Aug 2, 2026 · 199 declared files' with 'View release manifest' and 'GitHub' links. The program page footer describes how the website itself works: 'Public records are rendered from a verified Museum release. The website does not infer accession, ownership, rights, or preservation completion from a transfer or a selected outcome.' The same content appears at 390 (home-390x844-01.png), where it takes up much of the first screen.",
+      "consequence": "Visitors see a git branch name, a build file count and deployment wording before any museum content, on every page. The page reads like a release dashboard, not a publication. The banner says 'Verified', but the program status says 'Unverified', which leaves the reader unsure what has actually been checked.",
+      "change": "Remove '· main' and '199 declared files' from all visitor copy. Remove the per-route banner and masthead meta. Put provenance in one quiet line on Overview or Methodology, for example 'Records published from the Museum's public release of Aug 2, 2026 · View source records', linking to the manifest. Remove the program page footer's description of website rendering, or move it to Methodology rewritten for visitors: 'A transfer alone does not make a work part of the collection; each record shows its current status.'",
+      "acceptance_check": "At 1440 and 390, no route in the set shows 'main', 'declared files', 'canonical Museum release' or 'rendered from' above or below the page content. A source or manifest link can still be reached from Overview or Methodology.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-002",
+      "targets": ["I2", "J07"],
+      "severity": "P1",
+      "status": "open",
+      "where": "/museum/network · default · 1440x1000 · en-US",
+      "evidence": "evidence/home-1440x1000-01.png",
+      "observation": "Under the H2 'The 6529 Network Museum', the overview body begins with record metadata run together as one paragraph: 'Record ID: 6529NM-POL-001 Authority class: founding institutional note Source: https://6529networkmuseum_thememes.ar.io/ Source HTML observed: 2026-08-01 UTC Source HTML SHA-256: sha256:75889ed2…ff28b8d4'. Next comes an operator note: 'This is a text transcription of the permanent institutional note. Current operational facts, especially custody configuration and program status, must be reverified before action.'",
+      "consequence": "The first body text a visitor reads is a machine record dump with labels that run into each other, plus a staff instruction to 'reverify before action'. It exposes internal IDs and hashes and tells the public that the museum's own facts may be wrong, with no idea where to check.",
+      "change": "Remove the record ID, authority class, 'Source HTML observed' and the SHA-256 hash from the body. If attribution is needed, add one labeled line under the text, such as 'Source: founding institutional note, published Aug 1, 2026', with the link. Replace the reverify sentence with something a visitor can act on, such as 'For current program and custody status, see Programs and Accessions.'",
+      "acceptance_check": "The overview body has no hash, no 'Record ID', no 'Authority class', no 'Source HTML' and no 'reverified before action'. Any source attribution is a single readable sentence with its link.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-003",
+      "targets": ["J07"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network (1440x1000, 390x844); /museum/network/gifts/[accessionId], /museum/network/objects/[objectId], /museum/network/programs/[programId] (1440x1000) · default · en-US",
+      "evidence": "evidence/home-1440x1000-01.png",
+      "observation": "The overview has the sentence 'The 6529 Network Museum is a permanent cultural collection held for stewardship, research, interpretation, preservation, and public access.' three times: as the hero lede, verbatim under 'MISSION / Culture held in public', and almost verbatim in 'Purpose'. The H2 'The 6529 Network Museum' repeats the eyebrow. The gift, object and program routes each reprint the H1 'A public collection for internet-native art' and the same lede above their own title, so 'CENTURY #31' and 'Casey Reas donation from punk6529' are smaller headings below the generic museum headline.",
+      "consequence": "Readers meet the same sentence again and again before reaching anything new. On detail pages, the largest heading does not name the work or record being shown, which weakens the title hierarchy and makes the pages hard to tell apart.",
+      "change": "Keep the lede sentence once, in the overview hero. Either remove the 'Culture held in public' summary or give it content the hero does not already state, and remove the redundant 'The 6529 Network Museum' H2. On gift, object and program routes, replace the repeated H1 and lede with a compact '6529 Network Museum' breadcrumb so the record title is the main heading.",
+      "acceptance_check": "On each route the lede sentence appears at most once. On the gift, object and program routes, the largest heading on the page is that record's own title.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-004",
+      "targets": ["I2", "J07"],
+      "severity": "P1",
+      "status": "open",
+      "where": "/museum/network/programs/[programId], /museum/network/objects/[objectId], /museum/network/gifts/[accessionId] · default · 1440x1000 · en-US",
+      "evidence": "evidence/program-1440x1000-01.png",
+      "observation": "The program status chip shows a raw enum in Title Case that joins two states: 'Selection Complete Acquisition And Accession Unverified'. The object page shows a record-type chip, 'Accession object record', next to 'Accessioned' (object-1440x1000-01.png). The gift chips use Title Case: 'Formally Accepted' (gift-1440x1000-01.png).",
+      "consequence": "The program chip can be read as 'Selection Complete Acquisition' plus 'Accession Unverified', so a visitor cannot tell whether the works have been acquired. That is a misleading status line. 'Accession object record' is a schema label and means nothing to a visitor.",
+      "change": "Split the program status into sentence-case parts, for example 'Selection complete' and 'Acquisition and accession not yet verified', using only states the record holds. Remove the 'Accession object record' chip. Use sentence case for all status chips ('Formally accepted').",
+      "acceptance_check": "Each status chip on these routes states one condition in sentence case. No chip shows a record-type or enum label. The program status cannot be read as acquisition complete.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-005",
+      "targets": ["J07"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/gifts/[accessionId], /museum/network/objects/[objectId] · default · 1440x1000 · en-US",
+      "evidence": "evidence/gift-1440x1000-01.png",
+      "observation": "The gift subtitle is a generic methodology disclaimer, not a description of this gift: 'A transfer or custody reference is not, by itself, an accession. Each lot keeps its current gate visible.' Field labels are internal: 'CUSTODY REFERENCE' (networkmuseum.6529.eth) and 'RECEIPT EVIDENCE', whose value is a full 66-character transaction hash with the date. 'Completion limits' is a section heading followed only by '—'. On the object page, the back link 'Back to accession' does not say which accession, and 'Technical evidence' is internal wording (object-1440x1000-01.png).",
+      "consequence": "The visitor learns the museum's process vocabulary ('lot', 'gate', 'custody reference', 'receipt evidence') instead of what this gift is. The full hash crowds out readable facts, and the empty dash section looks broken.",
+      "change": "Replace the subtitle with a sentence about this gift, for example 'Seven works by Casey REAS, given to the Museum by punk6529.' Rename 'Custody reference' to 'Held at' and 'Receipt evidence' to 'Transfer', and show the hash shortened (0xbdde…0498) with the date and an explorer link. Hide 'Completion limits' when it has no value. Make the back link name its destination, for example 'Back to Casey Reas donation from punk6529'.",
+      "acceptance_check": "The gift page subtitle describes the gift. No label uses 'gate', 'custody reference' or 'receipt evidence'. No full-length hash is shown as a primary value. No section renders with only a dash. The object back link names the gift.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-006",
+      "targets": ["J07"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/objects/[objectId] · default · 1440x1000 · en-US",
+      "evidence": "evidence/object-1440x1000-01.png",
+      "observation": "Under 'CENTURY #31 / Casey REAS' there is no plain label line with date and medium. The first paragraph reads like a verification log: 'On-chain generative software associated with an ERC-721 token on Ethereum; Art Blocks records a token hash. Determinism of live behavior has not yet been independently verified.' The fine print reads: 'This token is one comparative state in a three-token CENTURY sample… it is not an artist-defined triptych.' The 'Artist statement' panel contains a third-person paraphrase ('The artist describes CENTURY as…') with no source.",
+      "consequence": "A visitor cannot see the basic facts (year, medium, platform) at a glance. The lead text puts an internal QA caveat ahead of the work. The 'Artist statement' heading promises the artist's own words but shows an unattributed paraphrase.",
+      "change": "Add one label line before the interpretive text, built from the record: 'Casey REAS, CENTURY #31, <year from record>. Generative software on Art Blocks; ERC-721 token on Ethereum.' Move the determinism caveat into 'Technical evidence'. Rewrite the sample note plainly: 'One of three CENTURY outputs in the collection, shown together to compare how one program varies line, color, slicing, and motion.' Rename 'Artist statement' to 'About the work', or quote the artist's actual words with their source.",
+      "acceptance_check": "The object page shows a label line with artist, title, date and medium before any interpretive text. The lead paragraph has no verification caveat. The statement heading matches its content, and any quotation names its source.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-007",
+      "targets": ["J07"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/programs/[programId] · default · 1440x1000 · en-US",
+      "evidence": "evidence/program-1440x1000-01.png",
+      "observation": "On the program route, the eyebrow 'PROGRAMS' repeats the heading 'Programs', and the program itself, 'Keys and Gates', appears only as a card title under the internal code '6529NM-AP-01'. Its subtitle starts in lowercase: 'photographs of access, control, and exit'. The intro is abstract: 'Programs give the Museum a curatorial frame, a public process, and a documented route from selection to acquisition.'",
+      "consequence": "The page title does not name the program the visitor opened. The intro describes programs in general terms without saying who selects works or what happens next. The lowercase subtitle and internal code look like source fields pasted in unedited.",
+      "change": "Make 'Keys and Gates' the page heading with the subtitle 'Photographs of access, control, and exit'. Remove the duplicate eyebrow. Replace the intro with one plain sentence from the record that says who selected the 16 works and what step comes next. Move the program code into a secondary details line, or drop it.",
+      "acceptance_check": "The program route's main heading is the program name. No eyebrow repeats the heading. The subtitle starts with a capital letter. No internal code sits above the title. The intro names the selection mechanism or is removed.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-008",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/gifts/[accessionId], /museum/network/objects/[objectId] · default · 1440x1000 · en-US",
+      "evidence": "evidence/gift-1440x1000-01.png",
+      "observation": "The artist's name has two forms: 'Casey Reas donation from punk6529' on the gift page and 'Casey REAS' on the object page (object-1440x1000-01.png).",
+      "consequence": "Small inconsistency between connected records.",
+      "change": "Use one form of the artist's name throughout, following the record's styling (for example 'Casey REAS').",
+      "acceptance_check": "The gift and object pages show the artist's name in the same form.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "The overview H1 'A public collection for internet-native art': specific, plain and accurate",
+    "The credit line 'Gift of punk6529', in standard museum form",
+    "Accession and object numbers (6529NM.2026.001, 6529NM.2026.001.01) as museum identifiers",
+    "The record's factual caution: it separates transfer from accession and shows unverified states instead of overclaiming; keep this substance in plainer wording",
+    "The interpretive point about how CENTURY varies line, color, slicing and motion across the three sampled outputs",
+    "Plain section navigation labels: Overview, Collections, Accessions, Programs, Governance, Methodology",
+    "No hype, crypto slang or invented metrics; counts such as '7' objects and '16 selected works' are concrete"
+  ]
+}

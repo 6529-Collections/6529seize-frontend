@@ -1,0 +1,28 @@
+{
+  "rubric_version": "fe-polish-judge/2.1",
+  "run_id": "calibration-c23",
+  "candidate": {
+    "commit": "mint-success-modal-review",
+    "build": "production"
+  },
+  "scope": {
+    "routes": ["/the-memes/mint"],
+    "audience": "Collectors minting a Meme card, including people new to wallets",
+    "primary_task": "Mint a Meme card and understand what happened",
+    "states": ["success"],
+    "viewports": ["1440x900", "390x844"],
+    "locales": ["en-US"]
+  },
+  "not_applicable": {
+    "J08": "Screenshot-only calibration; interactions were not exercised",
+    "J11": "Screenshot-only calibration; no performance evidence was captured",
+    "J12": "Calibration evidence is en-US only",
+    "S1": "The mint form before the wallet opens is unchanged and not reviewed",
+    "S2": "Wallet selection and network switching happen before the reviewed states and are unchanged",
+    "S4": "Rejection and failure states are unchanged and not reviewed",
+    "S5": "A Meme mint requests no token approval or delegation"
+  },
+  "budget": {
+    "repair_batches": 6
+  }
+}
