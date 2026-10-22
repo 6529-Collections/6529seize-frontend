@@ -1,3 +1,6 @@
+import safeCollectingMessages from "@/i18n/messages/safeCollecting.fr-FR.json";
+import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.fr-FR.json";
+import networkTdhConsolidationMessages from "@/i18n/messages/networkTdhConsolidation.fr-FR.json";
 import { FR_FR_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
 import { FR_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import { FR_FR_DROP_REQUIREMENT_MESSAGES } from "@/i18n/messages/drop-requirements";
@@ -24,6 +27,9 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.fr-FR.jso
 const LOADING_LABEL = "Chargement…";
 
 export const FR_FR_MESSAGES = {
+  ...safeCollectingMessages,
+  ...delegationTapGuideMessages,
+  ...networkTdhConsolidationMessages,
   ...FR_SUBMISSION_DISCOVERY_MESSAGES,
   ...FR_FR_DROP_REQUIREMENT_MESSAGES,
   ...FR_FR_DROP_METADATA_MESSAGES,

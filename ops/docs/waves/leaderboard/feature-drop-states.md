@@ -35,8 +35,15 @@ This page covers:
 
 - Completed submission cards retain their score and voter summary. Select the
   voter count to inspect voters or the vote log; voting remains closed.
+- Cards appear with each competition leaderboard page. Background score
+  refreshes keep loaded artwork visible; opening a card loads its full drop.
 - List first load shows `Loading drops...`.
 - Grid first load shows skeleton cards.
+- Non-Memes `Grid view` and `Content only` cards show artwork previews for
+  supported NFT marketplace links when the drop has no uploaded media.
+  `Content only` hides the text summary for those previews. Unsupported links
+  remain readable as text; unavailable NFT previews show the marketplace
+  fallback card.
 - Memes gallery first load shows `Loading drops...` while first media results
   are pending.
 - Standard list empty state shows `No drops to show`.

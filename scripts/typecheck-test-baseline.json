@@ -479,7 +479,6 @@
     "__tests__/components/utils/RepCategorySearchDropdown.test.tsx": 1,
     "__tests__/components/utils/select/dropdown/CommonDropdown.test.tsx": 1,
     "__tests__/components/utils/select/dropdown/CommonDropdownItem.test.tsx": 5,
-    "__tests__/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper.test.tsx": 1,
     "__tests__/components/utils/select/dropdown/CommonDropdownItemsWrapper.test.tsx": 1,
     "__tests__/components/utils/select/dropdown/MemeSeasonGridDropdown.test.tsx": 11,
     "__tests__/components/utils/time/CommonTimeSelect.test.tsx": 1,

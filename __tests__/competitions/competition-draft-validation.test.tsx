@@ -20,6 +20,12 @@ import {
 } from "@/services/api/competitions-api";
 
 let mockConfiguration: ApiCompetitionDraftInput | undefined;
+let mockHasEntries = false;
+let mockStepProps: {
+  lockSubmissionStrategy?: boolean;
+  lockOutcomeDefinitions?: boolean;
+  lockVotingCredits?: boolean;
+} = {};
 const mockRequestAuth = jest.fn().mockResolvedValue({ success: true });
 const mockReplace = jest.fn();
 jest.mock("next/navigation", () => ({
@@ -44,7 +50,10 @@ jest.mock("@/hooks/groups/useGroupMutations", () => ({
 }));
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useCompetitionViewer: () => "admin:self",
-  useCompetitionResource: () => ({ isError: false }),
+  useCompetitionResource: () => ({
+    isError: false,
+    data: { pages: [{ data: mockHasEntries ? [{}] : [] }] },
+  }),
 }));
 jest.mock("@/components/waves/create-wave/hooks/useMemeCardCount", () => ({
   useMemeCardCount: () => ({}),
@@ -80,10 +89,15 @@ jest.mock("@/components/waves/create-wave/CreateWaveStepContent", () => {
     __esModule: true,
     default: ({
       controller,
+      ...locks
     }: {
       controller: ReturnType<typeof useWaveConfig>;
-    }) =>
-      controller.step === CreateWaveStep.VOTING ? (
+      lockSubmissionStrategy?: boolean;
+      lockOutcomeDefinitions?: boolean;
+      lockVotingCredits?: boolean;
+    }) => {
+      mockStepProps = locks;
+      return controller.step === CreateWaveStep.VOTING ? (
         <Threshold
           threshold={controller.config.approval.threshold}
           error={controller.errors.includes(
@@ -91,7 +105,10 @@ jest.mock("@/components/waves/create-wave/CreateWaveStepContent", () => {
           )}
           setThreshold={controller.onThresholdChange}
         />
-      ) : null,
+      ) : (
+        <output>{controller.step}</output>
+      );
+    },
   };
 });
 jest.mock("@/services/api/competitions-api", () => ({
@@ -119,15 +136,147 @@ const draft = {
   id: "draft",
   lifecycle: "DRAFT",
   config_version: 1,
+  permissions: {},
 } as ApiCompetition;
 
 beforeEach(() => {
   jest.clearAllMocks();
   localStorage.clear();
   mockConfiguration = undefined;
+  mockHasEntries = false;
+  mockStepProps = {};
   HTMLElement.prototype.scrollIntoView = jest.fn();
 });
 afterEach(() => jest.useRealTimers());
+
+it.each([false, true])(
+  "retains published original rule editing and protects credits when permitted=%s",
+  (editCredits) => {
+    const form = renderHook(() =>
+      useWaveConfig({ initialWaveType: ApiWaveType.Rank })
+    );
+    mockConfiguration = competitionFormToDraft(
+      {
+        ...form.result.current.config,
+        overview: {
+          ...form.result.current.config.overview,
+          name: "Original competition",
+        },
+        dates: { ...form.result.current.config.dates, ongoingRanking: true },
+      },
+      ""
+    );
+    form.unmount();
+    mockHasEntries = true;
+    render(
+      <CompetitionDraftEditor
+        wave={wave}
+        competition={
+          {
+            ...draft,
+            lifecycle: "PUBLISHED",
+            permissions: {
+              edit_rules_after_activity: true,
+              edit_credit_rules: editCredits,
+            },
+          } as ApiCompetition
+        }
+        onClose={jest.fn()}
+      />
+    );
+    expect(
+      screen.getByRole("combobox", { name: "Competition type" })
+    ).toBeDisabled();
+    for (let step = 0; step < 2; step++)
+      fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(mockStepProps).toMatchObject({
+      lockSubmissionStrategy: true,
+      lockOutcomeDefinitions: true,
+      lockVotingCredits: !editCredits,
+    });
+    expect(screen.getByText("DATES", { exact: true })).toBeInTheDocument();
+  }
+);
+
+it("keeps sibling rule editing locked after accepted entries", () => {
+  const form = renderHook(() =>
+    useWaveConfig({ initialWaveType: ApiWaveType.Rank })
+  );
+  mockConfiguration = competitionFormToDraft(
+    {
+      ...form.result.current.config,
+      overview: {
+        ...form.result.current.config.overview,
+        name: "Sibling competition",
+      },
+    },
+    ""
+  );
+  form.unmount();
+  mockHasEntries = true;
+  render(
+    <CompetitionDraftEditor
+      wave={wave}
+      competition={
+        { ...draft, lifecycle: "PUBLISHED", permissions: {} } as ApiCompetition
+      }
+      onClose={jest.fn()}
+    />
+  );
+  for (let step = 0; step < 2; step++)
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+  expect(screen.getByText("RULES", { exact: true })).toBeInTheDocument();
+});
+
+it("saves a published original through review without publishing again", async () => {
+  const form = renderHook(() =>
+    useWaveConfig({ initialWaveType: ApiWaveType.Rank })
+  );
+  mockConfiguration = competitionFormToDraft(
+    {
+      ...form.result.current.config,
+      overview: {
+        ...form.result.current.config.overview,
+        name: "Original competition",
+      },
+      dates: { ...form.result.current.config.dates, ongoingRanking: true },
+    },
+    ""
+  );
+  form.unmount();
+  mockHasEntries = true;
+  const onClose = jest.fn();
+  render(
+    <CompetitionDraftEditor
+      wave={wave}
+      competition={
+        {
+          ...draft,
+          lifecycle: "PUBLISHED",
+          permissions: {
+            edit_rules_after_activity: true,
+            edit_credit_rules: false,
+          },
+        } as ApiCompetition
+      }
+      onClose={onClose}
+    />
+  );
+  fireEvent.change(screen.getByRole("textbox", { name: "Description" }), {
+    target: { value: "Updated original" },
+  });
+  for (let step = 0; step < 6; step++)
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+  fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+  await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+  expect(updateCompetition).toHaveBeenCalledWith(
+    { waveId: "wave", competitionId: "draft" },
+    expect.objectContaining({
+      config: expect.objectContaining({ description: "Updated original" }),
+    })
+  );
+  expect(performCompetitionAction).not.toHaveBeenCalled();
+});
 
 it("keeps an incomplete Approve draft locally and validates the threshold before the next step", async () => {
   jest.useFakeTimers();

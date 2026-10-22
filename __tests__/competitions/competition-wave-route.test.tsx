@@ -149,11 +149,12 @@ it("renders a native selection directly in the wave without another shell", () =
   expect(screen.getAllByTestId("persistent-shell")).toHaveLength(1);
 });
 
-it("uses direct legacy content when the selected competition is the legacy primary", () => {
+it("uses competition resources when the selected competition is the original primary", () => {
   mockHubQuery.data!.legacy_primary_competition_id = "alpha";
   render(routeTree());
   expect(screen.getAllByTestId("wave")).toHaveLength(1);
-  expect(screen.getByText("Direct legacy content")).toBeVisible();
+  expect(screen.queryByText("Direct legacy content")).toBeNull();
+  expect(screen.getByTestId("native")).toBeVisible();
   expect(screen.queryByTestId("detail")).toBeNull();
 });
 
@@ -298,6 +299,8 @@ it("resets the previous viewer's form while retaining the persistent shell", () 
 it("does not reuse cached selected data when the wave or competition changes", () => {
   const { rerender } = render(routeTree());
   const shell = screen.getByTestId("persistent-shell");
+  const input = screen.getByLabelText("Entry text");
+  fireEvent.change(input, { target: { value: "Previous wave submission" } });
   mockPathname = "/waves/other-wave/competitions/beta";
   rerender(routeTree("beta", "other-wave"));
   expect(screen.getByTestId("persistent-shell")).toBe(shell);
@@ -316,6 +319,8 @@ it("does not reuse cached selected data when the wave or competition changes", (
   };
   rerender(routeTree("beta", "other-wave"));
   expect(screen.getByTestId("native")).toBeVisible();
+  expect(screen.getByLabelText("Entry text")).not.toBe(input);
+  expect(screen.getByLabelText("Entry text")).toHaveValue("");
 });
 
 it("preserves draft presentation after publication until leaving the visit", () => {

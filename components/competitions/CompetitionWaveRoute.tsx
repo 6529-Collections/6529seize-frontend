@@ -1,12 +1,10 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import { useCompetitionRoute } from "@/contexts/CompetitionRouteContext";
 import MyStreamWave from "@/components/brain/my-stream/MyStreamWave";
 import CompetitionDetail, {
   NativeCompetitionContent,
 } from "./CompetitionDetail";
-import { getCompetitionTab } from "@/helpers/competition.helpers";
 import { CompetitionState } from "./CompetitionState";
 
 export default function CompetitionWaveRoute({
@@ -16,7 +14,6 @@ export default function CompetitionWaveRoute({
   readonly waveId: string;
   readonly competitionId: string;
 }) {
-  const search = useSearchParams();
   const route = useCompetitionRoute();
   const ready =
     route.waveId === waveId && route.competitionId === competitionId
@@ -29,12 +26,7 @@ export default function CompetitionWaveRoute({
     content = (
       <CompetitionDetail waveId={waveId} competitionId={competitionId} />
     );
-  else {
-    const legacy = ready.hub.legacy_primary_competition_id === competitionId;
-    const tab = getCompetitionTab(search.get("tab"));
-    if (!legacy || tab === "rules" || tab === "votes")
-      content = <NativeCompetitionContent embedded />;
-  }
+  else content = <NativeCompetitionContent embedded />;
   return (
     <MyStreamWave
       key={`${waveId}:${competitionId}:${route.viewer ?? "anonymous"}`}

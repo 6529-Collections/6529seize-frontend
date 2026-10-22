@@ -2,7 +2,8 @@
 
 ## Overview
 
-`My Votes` lists drops where your current vote is not `0`.
+`My Votes` lists active submissions where your current vote is not `0`.
+Past winners are excluded; their historical vote records remain preserved.
 You can update votes one row at a time, reset selected rows to `0`, or open a
 prefilled reply for explaining a vote.
 
