@@ -4035,6 +4035,7 @@
         "Wave leaderboard docs cover winners, my votes, top voters, sales, sorting, price filters, decision timelines, and drop eligibility states.",
         "Leaderboard availability depends on the wave type and configuration.",
         "Use the selected competition’s main Leaderboard tab to inspect its entries and ranking.",
+        "Competition leaderboard cards appear with each page. Background score refreshes keep loaded artwork visible; opening a card loads its full drop.",
         "Full wave leaderboard list, grid, and Memes gallery views update scores and ranks live while preserving the visible artwork's position. During touch or momentum scrolling, scores keep updating and card reordering waits until scrolling settles."
       ],
       "canonical_path": "/waves",
@@ -7409,6 +7410,7 @@
       ],
       "facts": [
         "Winners shows the most recent win first and loads older winners through Load more.",
+        "Winner cards appear with each page. Background score refreshes keep loaded artwork visible; opening a winner loads its full drop.",
         "When the winner voter list at decision time was not saved, the card shows Voters unavailable instead of zero. Select it for an explanation and open Vote log to inspect any recorded changes. The final score remains visible; current allocations cannot establish the historical voter list.",
         "Availability depends on wave decision state and whether the wave has winner outcomes.",
         "Single-decision and multi-decision waves have different winner display behavior.",

@@ -83,7 +83,7 @@ it("shows available winners while another winner is still loading", () => {
   expect(mockResource).toHaveBeenCalledWith(
     { waveId: "wave", competitionId: "comp" },
     "winners",
-    { direction: "DESC", limit: "10" }
+    { direction: "DESC", limit: "10", include: "cards" }
   );
 });
 it("keeps available winners visible when another card fails", () => {

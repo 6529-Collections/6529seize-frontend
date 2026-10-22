@@ -4,6 +4,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { ApiCompetitionLifecycle } from "@/generated/models/ApiCompetitionLifecycle";
 
+import type { ApiCompetitionEntryContext } from "@/generated/models/ApiCompetitionEntryContext";
 import type { ApiCompetitionLeaderboardEntry } from "@/generated/models/ApiCompetitionLeaderboardEntry";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 
@@ -48,16 +49,26 @@ function CompetitionLeaderboardEntry({
   viewMode,
   sort,
   isVotingClosed,
+  contextCard,
+  updatedAt,
 }: {
   readonly entry: ApiCompetitionLeaderboardEntry;
+  readonly contextCard: ApiCompetitionEntryContext | undefined;
+  readonly updatedAt: number;
   readonly viewMode: LeaderboardViewMode;
   readonly sort: WaveDropsLeaderboardSort;
   readonly isVotingClosed: boolean;
 }) {
   const { wave, competition } = useCompetition();
-  const [dropQuery] = useCompetitionEntryDrops([
-    { entryId: entry.entry_id, dropId: entry.drop_id },
-  ]);
+  const references = useMemo(
+    () => [{ entryId: entry.entry_id, dropId: entry.drop_id }],
+    [entry.entry_id, entry.drop_id]
+  );
+  const cards = useMemo(
+    () => ({ contexts: contextCard ? [contextCard] : [], updatedAt }),
+    [contextCard, updatedAt]
+  );
+  const [dropQuery] = useCompetitionEntryDrops(references, cards);
   const { LeaderboardDrop } = useWaveLeaderboardRendererSet(
     wave.id,
     competition.capabilities
@@ -161,6 +172,7 @@ export default function CompetitionLeaderboard({
       }).some((item) => item.value === value)
   );
   const query = useCompetitionResource(identity, "leaderboard", {
+    include: "cards",
     sort: sorts[sort] ?? "rating",
     ...(sort === WaveDropsLeaderboardSort.PRICE ? { direction: "ASC" } : {}),
     ...(isCuration && priceRange.minPrice !== undefined
@@ -261,6 +273,10 @@ export default function CompetitionLeaderboard({
           renderItem={(entry) => (
             <CompetitionLeaderboardEntry
               entry={entry}
+              contextCard={query.data?.pages
+                .flatMap((page) => page.cards ?? [])
+                .find((item) => item.entry.id === entry.entry_id)}
+              updatedAt={query.dataUpdatedAt}
               viewMode={viewMode}
               sort={sort}
               isVotingClosed={ended || maxReached}

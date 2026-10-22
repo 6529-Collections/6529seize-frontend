@@ -253,11 +253,19 @@ const pageResult = (data: unknown[]) => ({
   has_more: false,
 });
 
+const collaborationFixtures = new WeakMap<
+  Page,
+  Map<string, () => ApiDropAndWave>
+>();
+
 async function installCollaborationDropFixture(
   page: Page,
   getFixture: () => ApiDropAndWave
 ) {
   const dropId = getFixture().drop.id;
+  const fixtures = collaborationFixtures.get(page) ?? new Map();
+  fixtures.set(dropId, getFixture);
+  collaborationFixtures.set(page, fixtures);
   // Competition cards fetch one drop; the detail overlay batches its read.
   // Keep both views on the same fixture, including post-acceptance refreshes.
   await page.route(`**/v2/drops/${dropId}`, (route) =>
@@ -451,6 +459,13 @@ async function installArtworkCompetitionResources(
       over_threshold_since_ms: null,
     };
   };
+  const card = (drop: SandboxArtwork) => ({
+    entry: entry(drop.id),
+    vote_summary: summary(drop),
+    awards: [],
+    drop: { ...drop, wave: fixtureWave },
+    metadata: drop["priority_metadata"] ?? [],
+  });
   await page.route(
     `**/api/v3/waves/${waveId}/competitions/alpha/leaderboard*`,
     (route) => {
@@ -470,6 +485,9 @@ async function installArtworkCompetitionResources(
             rank: start + index + 1,
             submitted_at: 1,
           })),
+          ...(url.searchParams.get("include") === "cards"
+            ? { cards: drops.slice(start, end).map(card) }
+            : {}),
           has_more: end < drops.length,
           next_cursor: end < drops.length ? String(end) : null,
         },
@@ -496,6 +514,13 @@ async function installArtworkCompetitionResources(
               entry: entry(drop.id),
               vote_summary: summary(drop),
               awards: [],
+              ...(new URL(route.request().url()).searchParams.get("include") ===
+              "cards"
+                ? {
+                    drop: { ...drop, wave: fixtureWave },
+                    metadata: drop["priority_metadata"] ?? [],
+                  }
+                : {}),
             })),
         },
       });
@@ -610,6 +635,22 @@ async function installCompetitionApi(
     rank: null,
     won_at: null,
     decision_id: null,
+  });
+  const card = (id: string) => ({
+    entry: entry(id),
+    awards: [],
+    drop: recordedDrop(id),
+    metadata: [],
+    vote_summary: {
+      rating: votes[id] ?? 0,
+      realtime_rating: votes[id] ?? 0,
+      rating_prediction: votes[id] ?? 0,
+      user_vote: votes[id] ?? 0,
+      rank: 1,
+      raters_count: votes[id] ? 1 : 0,
+      top_raters: [],
+      over_threshold_since_ms: null,
+    },
   });
   await page.route("**/v3/waves/**", async (route) => {
     const url = new URL(route.request().url());
@@ -739,6 +780,9 @@ async function installCompetitionApi(
           .map(() => ({
             entry: entry(id),
             awards: [],
+            ...(url.searchParams.get("include") === "cards"
+              ? { drop: recordedDrop(id), metadata: [] }
+              : {}),
             vote_summary: {
               rating: votes[id] ?? 0,
               realtime_rating: votes[id] ?? 0,
@@ -792,6 +836,11 @@ async function installCompetitionApi(
       };
     else if (resource === `entries/entry-${id}`) body = entry(id);
     else body = pageResult([]);
+    if (
+      resource === "leaderboard" &&
+      url.searchParams.get("include") === "cards"
+    )
+      body = { ...(body as Record<string, unknown>), cards: [card(id)] };
     return route.fulfill({ json: body });
   });
   const recordedDrop = (id: string) => ({
@@ -800,6 +849,7 @@ async function installCompetitionApi(
     drop_type: "CHAT",
     title: `Recorded ${id} entry`,
     content: `Immutable ${id} entry content`,
+    ...collaborationFixtures.get(page)?.get(entryDropId(id))?.().drop,
   });
   // The detail overlay reads the batch endpoint; keep it consistent with the
   // single-drop fixture rather than accidentally asserting the covered card.
@@ -7441,6 +7491,105 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     }
   });
 
+  test("renders winners without legacy drop or metadata loading", async ({
+    page,
+  }) => {
+    const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${MEMES_WAVE}/drops`
+    );
+    const fixture = await response.json();
+    const winner = {
+      id: "entry-alpha",
+      wave_id: MEMES_WAVE,
+      competition_id: "alpha",
+      drop_id: entryDropId("alpha"),
+      submitter: { id: PROFILE, handle: "playwright", pfp: null },
+      status: "WINNER",
+      config_version: 1,
+      submitted_at: 1,
+      won_at: 2000,
+      decision_id: "winner-decision",
+      rank: 1,
+    };
+    await page.route(
+      `**/v3/waves/${MEMES_WAVE}/competitions/alpha/winners*`,
+      (route) => {
+        expect(new URL(route.request().url()).searchParams.get("include")).toBe(
+          "cards"
+        );
+        return route.fulfill({
+          json: {
+            ...pageResult([winner]),
+            cards: [
+              {
+                entry: winner,
+                awards: [],
+                metadata: [{ data_key: "Artist", data_value: "Direct artist" }],
+                vote_summary: {
+                  rating: 123,
+                  realtime_rating: 123,
+                  rating_prediction: 123,
+                  user_vote: 0,
+                  rank: 1,
+                  raters_count: 2,
+                  top_raters: [],
+                },
+                drop: {
+                  ...fixture.drops[0],
+                  id: winner.drop_id,
+                  title: "Direct native winner",
+                  media: [],
+                  submission_context: {
+                    status: "WINNER",
+                    voting: {
+                      is_open: false,
+                      total_votes_given: 123,
+                      current_calculated_vote: 123,
+                      predicted_final_vote: 123,
+                      voters_count: 2,
+                      place: 1,
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        });
+      }
+    );
+    let legacyReads = 0;
+    let release = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await page.route(
+      (url) =>
+        url.pathname === "/api/v2/drops" ||
+        /^\/api\/v2\/drops\/[^/]+(?:\/metadata)?$/.test(url.pathname),
+      async (route) => {
+        legacyReads += 1;
+        await gate;
+        return route.fallback();
+      }
+    );
+    try {
+      await page.goto(`/waves/${MEMES_WAVE}/competitions/alpha?tab=decisions`);
+      await expect(
+        page
+          .getByRole("heading", { name: "Direct native winner", exact: true })
+          .first()
+      ).toBeVisible();
+      expect(legacyReads).toBe(0);
+      await expectNoHorizontalOverflow(page);
+      expect(sandbox.requests).toEqual([]);
+    } finally {
+      release();
+    }
+  });
+
   for (const variant of ["empty", "populated", "text-only"] as const) {
     test(`validates the live native leaderboard contract with ${variant} data`, async ({
       page,
@@ -7534,34 +7683,16 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           await observed.originalLeaderboard();
         expect(data.data).toHaveLength(variant === "empty" ? 0 : 2);
         await expectNativeLeaderboardReady(page, variant === "empty");
-        let hydrationValidated = false;
-        await Promise.all([
-          expectNativeLeaderboardArtwork(
-            page,
-            selected,
-            data,
-            observed.reads
-          ).then(() => {
-            hydrationValidated = true;
-          }),
-          (async () => {
-            if (variant !== "text-only") return;
-            await expect.poll(() => heldDrops).toBeGreaterThan(0);
-            await expect(
-              page.getByRole("tab", { name: "Grid view", exact: true })
-            ).toHaveAttribute("aria-selected", "true");
-            await expect(
-              page
-                .getByRole("list", {
-                  name: "Leaderboard drops",
-                  exact: true,
-                })
-                .locator("[data-competition-entry]")
-            ).toHaveCount(0);
-            expect(hydrationValidated).toBe(false);
-            releaseHydration();
-          })(),
-        ]);
+        await expectNativeLeaderboardArtwork(
+          page,
+          selected,
+          data,
+          observed.reads
+        );
+        if (variant === "text-only") {
+          // Native list cards must render while the legacy readers remain stalled.
+          expect(heldDrops).toBe(0);
+        }
         if (variant !== "empty") {
           const card = page
             .getByRole("list", { name: "Leaderboard drops", exact: true })

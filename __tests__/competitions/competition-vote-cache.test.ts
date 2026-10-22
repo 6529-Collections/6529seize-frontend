@@ -76,6 +76,8 @@ it("publishes confirmed credits and the viewer's vote without guessing totals or
       },
     },
   });
+  const cardKey = [...resourceKey, "card", "entry", "drop"];
+  client.setQueryData(cardKey, client.getQueryData(dropKey));
   const votesKey = [...resourceKey, "votes/me", {}];
   const votes = {
     pageParams: [null, "older"],
@@ -118,6 +120,7 @@ it("publishes confirmed credits and the viewer's vote without guessing totals or
       competition_context: { data: { vote_summary: { user_vote: -25 } } },
     },
   });
+  expect(client.getQueryData(cardKey)).toEqual(client.getQueryData(dropKey));
   expect(client.getQueryData(votesKey)).toEqual({
     ...votes,
     pages: [

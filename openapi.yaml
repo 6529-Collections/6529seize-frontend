@@ -5841,9 +5841,17 @@ paths:
             type: string
             minLength: 1
             maxLength: 1849
+        - name: include
+          in: query
+          required: false
+          description: Include renderable cards without legacy voting enrichment.
+          schema:
+            type: string
+            enum:
+              - cards
       responses:
         "200":
-          description: Visible entries with current voting summaries and scoped awards
+          description: Visible entries with current voting summaries and scoped awards; include=cards also returns optional first-part content and metadata.
           content:
             application/json:
               schema:
@@ -6077,6 +6085,14 @@ paths:
             minimum: 1
             maximum: 100
             default: 50
+        - name: include
+          in: query
+          required: false
+          description: Include renderable cards without legacy voting enrichment.
+          schema:
+            type: string
+            enum:
+              - cards
       responses:
         "200":
           description: Rating order with current legacy tie rules and stable ID tie breaker
@@ -6307,6 +6323,14 @@ paths:
             minimum: 1
             maximum: 100
             default: 50
+        - name: include
+          in: query
+          required: false
+          description: Include renderable cards without legacy voting enrichment.
+          schema:
+            type: string
+            enum:
+              - cards
       responses:
         "200":
           description: Winner entry page
@@ -26153,6 +26177,15 @@ components:
         - vote_summary
         - awards
       properties:
+        drop:
+          description: First-part card content, present when include=cards.
+          allOf:
+            - $ref: "#/components/schemas/ApiDropV2"
+        metadata:
+          description: Complete card metadata, present when include=cards.
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropMetadataV2"
         entry:
           $ref: "#/components/schemas/ApiCompetitionEntry"
         vote_summary:
@@ -26182,6 +26215,11 @@ components:
         - next_cursor
         - has_more
       properties:
+        cards:
+          description: Authorized card content and native summaries when include=cards. May be a sparse subset in a different order than data; join by entry.id, never by array position.
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionEntryContext"
         data:
           type: array
           items:
@@ -26296,6 +26334,11 @@ components:
         - next_cursor
         - has_more
       properties:
+        cards:
+          description: Authorized card content and native summaries when include=cards. May be a sparse subset in a different order than data; join by entry.id, never by array position.
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionEntryContext"
         data:
           type: array
           items:
