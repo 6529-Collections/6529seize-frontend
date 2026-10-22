@@ -462,6 +462,40 @@ describe("fetchWaveDropsFeedV2", () => {
     expect(result.drops[0]?.poll).toEqual(poll);
   });
 
+  it("preserves a reply author without a profile picture", async () => {
+    commonApiFetchMock.mockResolvedValueOnce({
+      wave,
+      drops: [
+        {
+          ...createDrop(1),
+          reply_to_drop: {
+            id: "parent-1",
+            serial_no: 42,
+            content: "parent text",
+            author: { handle: "parent-author" },
+            moderation: {
+              status: ApiDropModerationStatus.Visible,
+              can_view: true,
+            },
+          },
+        },
+      ],
+    });
+
+    const result = await fetchWaveDropsFeedV2({
+      waveId: "wave-1",
+      limit: 20,
+    });
+
+    expect(result.drops[0]?.reply_to?.drop).toMatchObject({
+      id: "parent-1",
+      serial_no: 42,
+      author: { handle: "parent-author", pfp: null },
+      parts: [{ part_id: 1, content: "parent text" }],
+      moderation: { status: ApiDropModerationStatus.Visible, can_view: true },
+    });
+  });
+
   it("carries collapsed-thread reply counts onto hydrated drops", async () => {
     commonApiFetchMock.mockResolvedValueOnce({
       wave,

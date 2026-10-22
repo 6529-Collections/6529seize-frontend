@@ -39335,7 +39335,6 @@ components:
       type: object
       required:
         - handle
-        - pfp
       properties:
         handle:
           type: string
