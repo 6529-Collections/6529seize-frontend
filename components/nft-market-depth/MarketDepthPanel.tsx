@@ -149,7 +149,7 @@ function AboutPrices({
         {t(locale, "marketDepth.about.title")}
         <span
           aria-hidden="true"
-          className="tw-text-iron-500 tw-transition-transform group-open:tw-rotate-45 motion-reduce:tw-transition-none"
+          className="tw-flex tw-size-5 tw-shrink-0 tw-items-center tw-justify-center tw-text-xl tw-font-normal tw-leading-none tw-text-iron-400 tw-transition-transform group-open:tw-rotate-45 motion-reduce:tw-transition-none"
         >
           +
         </span>
