@@ -39,17 +39,17 @@ export default function CollectCheckoutScreen({
         <div className="tw-fixed tw-inset-0 tw-overflow-y-auto tw-overscroll-contain tw-bg-iron-950 tw-scrollbar-thin tw-scrollbar-track-iron-950 tw-scrollbar-thumb-iron-700">
           <DialogPanel className="tw-flex tw-min-h-dvh tw-flex-col tw-pb-[env(safe-area-inset-bottom)]">
             <header className="tw-sticky tw-top-0 tw-z-30 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-bg-iron-950/95 tw-backdrop-blur">
-              <div className="tw-mx-auto tw-grid tw-max-w-4xl tw-grid-cols-1 tw-items-center tw-gap-1 tw-px-5 tw-py-3 sm:tw-grid-cols-[1fr_auto_1fr] sm:tw-gap-4 sm:tw-px-8">
+              <div className="tw-mx-auto tw-flex tw-max-w-4xl tw-items-center tw-gap-4 tw-px-5 tw-py-3 sm:tw-px-8">
                 <button
                   type="button"
                   disabled={busy}
                   onClick={onClose}
-                  className="tw-flex tw-min-h-11 tw-items-center tw-gap-2 tw-justify-self-start tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50 desktop-hover:hover:tw-text-white"
+                  className="tw-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50 desktop-hover:hover:tw-text-white"
                 >
                   <ArrowLeftIcon aria-hidden="true" className="tw-size-4" />
                   {t(locale, "collect.checkout.back")}
                 </button>
-                <DialogTitle className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100 max-sm:tw-row-start-1 max-sm:tw-text-center">
+                <DialogTitle className="tw-sr-only">
                   {t(locale, "collect.checkout.title")}
                 </DialogTitle>
               </div>

@@ -633,11 +633,17 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
     exact: true,
   });
   await expect(
+    purchaseReview.getByRole("button", {
+      name: "Back to collecting",
+      exact: true,
+    })
+  ).toBeVisible();
+  await expect(
     purchaseReview.getByRole("heading", {
       name: "Review your purchase",
       exact: true,
     })
-  ).toBeVisible();
+  ).toHaveCSS("clip", "rect(0px, 0px, 0px, 0px)");
   await expect(
     purchaseReview.getByRole("button", { name: "Connect wallet", exact: true })
   ).toBeVisible();
