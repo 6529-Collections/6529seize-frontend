@@ -253,6 +253,7 @@ export function defineCollectorsLeaderboardTests() {
     }
     await farSort.click();
     await expect(farSort).toHaveAttribute("aria-pressed", "true");
+    await expect(farSort).toBeInViewport({ ratio: 1 });
     await expect(
       page.getByRole("button", { name: "Sort descending", exact: true })
     ).toHaveAttribute("aria-pressed", "true");
@@ -262,7 +263,7 @@ export function defineCollectorsLeaderboardTests() {
     await expect(
       page.getByRole("button", { name: "Sort ascending", exact: true })
     ).toHaveAttribute("aria-pressed", "true");
-    await expect(farSort).toBeInViewport();
+    await expect(farSort).toBeInViewport({ ratio: 1 });
 
     await page.getByRole("button", { name: "Next page", exact: true }).click();
     await expect(
