@@ -103,8 +103,8 @@
 
 - In `Collectors`, screens narrower than 768 px show a collector list with this
   card's metrics in a `This card` row, with a `Total` row aligned underneath.
-  A single header row labels the Balance, TDH and Unweighted TDH columns above
-  both rows of values. The stat block starts under the avatar. On very narrow
+  Each collector has one header row labelling the Balance, TDH and Unweighted TDH
+  columns above both rows of values. The stat block starts under the avatar. On very narrow
   screens, the list scrolls horizontally so labels and values stay on one line.
   Swipe sideways, or focus the list and use the arrow keys, to see all columns.
   The collector's name has its own row above the values. Choose
