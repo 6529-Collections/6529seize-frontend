@@ -5,6 +5,7 @@ import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import NextGenContractWriteStatus from "@/components/nextGen/NextGenContractWriteStatus";
+import NextGenLoadError from "@/components/nextGen/NextGenLoadError";
 import Button from "@/components/utils/button/Button";
 import {
   NEXTGEN_CHAIN_ID,
@@ -65,7 +66,7 @@ export function getJsonData(keccak: string, data: unknown) {
 interface Props {
   collection: NextGenCollection;
   available_supply: number;
-  mint_price: number;
+  mint_price: bigint;
   mint_counts: TokensPerAddress;
   delegators: string[];
   mintForAddress: (mintForAddress: string) => void;
@@ -73,11 +74,21 @@ interface Props {
   refreshMintCounts: () => void;
 }
 
-function getMintValue(mintCount: number, mintPrice: number) {
-  if (!mintCount || !mintPrice) {
-    return BigInt(0);
+// The price is wei as a bigint end to end: it is above Number.MAX_SAFE_INTEGER
+// for ordinary prices, so any Number round trip would change the value sent.
+function getMintValue(mintCount: number, mintPrice: bigint): bigint {
+  if (!Number.isSafeInteger(mintCount) || mintCount <= 0 || mintPrice <= 0n) {
+    return 0n;
   }
-  return BigInt(mintPrice * mintCount);
+  return mintPrice * BigInt(mintCount);
+}
+
+function toCurrentProof(
+  activeProof: { proof: ProofResponse | undefined; index: number } | undefined
+) {
+  return activeProof?.proof
+    ? { index: activeProof.index, proof: activeProof.proof }
+    : undefined;
 }
 
 export default function NextGenMintWidget(props: Readonly<Props>) {
@@ -94,6 +105,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
   >();
   const [originalProofs, setOriginalProofs] = useState<ProofResponse[]>([]);
   const [fetchingProofs, setFetchingProofs] = useState<boolean>(false);
+  const [proofsFailedFor, setProofsFailedFor] = useState<string>();
 
   const alStatus = getStatusFromDates(
     props.collection.allowlist_start,
@@ -123,6 +135,10 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     setErrors,
   } = useMintSharedState();
 
+  const proofsFailed =
+    !fetchingProofs &&
+    proofsFailedFor === `${props.collection.merkle_root}/${mintForAddress}`;
+
   useEffect(() => {
     props.mintForAddress(mintForAddress);
   }, [mintForAddress]);
@@ -150,42 +166,62 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     };
   }
 
+  // Proofs belong to one (collection, mint-for address). When that key changes
+  // (or on unmount) the in-flight request is aborted and everything held for
+  // the old key is dropped, so a late response can never be applied to (or used
+  // for) a different address.
   useEffect(() => {
     if (address && props.collection.allowlist_end > 0) {
       if (mintForAddress) {
+        const controller = new AbortController();
         setFetchingProofs(true);
         const merkleRoot = props.collection.merkle_root;
         const url = `${publicEnv.API_ENDPOINT}/api/nextgen/proofs/${merkleRoot}/${mintForAddress}`;
-        fetchUrl<ProofResponse[]>(url).then((response: ProofResponse[]) => {
-          const proofResponses: ProofResponse[] = [];
-          if (response.length > 0) {
-            proofResponses.push({
-              keccak: response[0]?.keccak!,
-              spots: response[0]?.spots!,
-              info: response[0]?.info!,
-              proof: response[0]?.proof!,
-            });
-            for (let i = 1; i < response.length; i++) {
-              const spots = response[i]?.spots! - response[i - 1]?.spots!;
-              proofResponses.push({
-                keccak: response[i]?.keccak!,
-                spots: spots,
-                info: response[i]?.info,
-                proof: response[i]?.proof!,
-              });
+        fetchUrl<ProofResponse[]>(url, { signal: controller.signal })
+          .then((response: ProofResponse[]) => {
+            if (controller.signal.aborted) {
+              return;
             }
-          }
-          const activeProof = findActiveProof(proofResponses);
-          setProofResponse(proofResponses);
-          setCurrentProof({
-            ...activeProof!,
-            proof: activeProof!.proof!,
+            const proofResponses: ProofResponse[] = [];
+            if (response.length > 0) {
+              proofResponses.push({
+                keccak: response[0]?.keccak!,
+                spots: response[0]?.spots!,
+                info: response[0]?.info!,
+                proof: response[0]?.proof!,
+              });
+              for (let i = 1; i < response.length; i++) {
+                const spots = response[i]?.spots! - response[i - 1]?.spots!;
+                proofResponses.push({
+                  keccak: response[i]?.keccak!,
+                  spots: spots,
+                  info: response[i]?.info,
+                  proof: response[i]?.proof!,
+                });
+              }
+            }
+            setProofResponse(proofResponses);
+            setCurrentProof(toCurrentProof(findActiveProof(proofResponses)));
+            setOriginalProofs(response);
+            setProofsFailedFor(undefined);
+            setFetchingProofs(false);
+          })
+          .catch(() => {
+            if (!controller.signal.aborted) {
+              setProofsFailedFor(`${merkleRoot}/${mintForAddress}`);
+              setFetchingProofs(false);
+            }
           });
-          setOriginalProofs(response);
+        return () => {
+          controller.abort();
+          setProofResponse([]);
+          setCurrentProof(undefined);
+          setOriginalProofs([]);
           setFetchingProofs(false);
-        });
+        };
       }
     }
+    return undefined;
   }, [props.collection, address, mintForAddress]);
 
   const mintWrite = useWriteContract();
@@ -434,7 +470,11 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
             }}
           />
         </div>
+        {alStatus === Status.LIVE && proofsFailed && (
+          <NextGenLoadError message="nextgen.loadError.allowlistProofs" />
+        )}
         {alStatus === Status.LIVE &&
+          !proofsFailed &&
           (fetchingProofs ? (
             <output
               aria-label="Loading allowlist proofs"
@@ -531,11 +571,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
           hash={mintWrite.data}
           error={mintWrite.error}
           onSuccess={() => {
-            const currentProof = findActiveProof(originalProofs);
-            setCurrentProof({
-              ...currentProof!,
-              proof: currentProof!.proof!,
-            });
+            setCurrentProof(toCurrentProof(findActiveProof(originalProofs)));
             props.refreshMintCounts();
           }}
         />
