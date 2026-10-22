@@ -4,7 +4,10 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
-import { isMobileSurfaceProject } from "../support/surfaceSimulation";
+import {
+  isCapacitorSimulationProject,
+  isMobileSurfaceProject,
+} from "../support/surfaceSimulation";
 
 test.describe("The Memes Page @smoke @medium @large", () => {
   test.beforeEach(async ({ page }) => {
@@ -26,6 +29,61 @@ test.describe("The Memes Page @smoke @medium @large", () => {
     }
 
     await expect(page.locator("h1", { hasText: "The Memes" })).toBeVisible();
+  });
+
+  test("sort options keep pills on mobile and native apps and use underlines on desktop web", async ({
+    page,
+  }, testInfo) => {
+    const age = page.getByRole("button", { name: "Sort by Age", exact: true });
+    const edition = page.getByRole("button", {
+      name: "Sort by Edition Size",
+      exact: true,
+    });
+    const isNative = isCapacitorSimulationProject(testInfo.project.name);
+    if (isNative) {
+      await expect(page.locator("body")).toHaveClass(/capacitor-native/);
+    }
+
+    for (const width of [390, 1023, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      const editorial = width >= 1024 && !isNative;
+      await expect(age).toHaveAttribute("aria-pressed", "true");
+      await expect(age).toHaveCSS(
+        "background-color",
+        editorial ? "rgba(0, 0, 0, 0)" : "rgb(236, 236, 238)"
+      );
+      await expect(age).toHaveCSS(
+        "color",
+        editorial ? "rgb(255, 255, 255)" : "rgb(19, 19, 22)"
+      );
+      await expect(edition).toHaveCSS("color", "rgb(147, 147, 159)");
+      await expect(edition).toHaveCSS(
+        "background-color",
+        editorial ? "rgba(0, 0, 0, 0)" : "rgb(28, 28, 33)"
+      );
+      await expect
+        .poll(() =>
+          age.evaluate(
+            (element) => getComputedStyle(element, "::after").backgroundColor
+          )
+        )
+        .toBe(editorial ? "rgb(82, 139, 255)" : "rgba(0, 0, 0, 0)");
+      if (editorial) {
+        expect(
+          await age.evaluate((element) => ({
+            color: getComputedStyle(element, "::after").backgroundColor,
+            height: getComputedStyle(element, "::after").height,
+          }))
+        ).toEqual({ color: "rgb(82, 139, 255)", height: "1px" });
+      }
+      await expectNoHorizontalOverflow(page);
+    }
+
+    await edition.press("Enter");
+    await expect(edition).toHaveAttribute("aria-pressed", "true");
+    await expect(age).toHaveAttribute("aria-pressed", "false");
+    await expect(page).toHaveURL(/sort=edition_size/);
+    await expect(edition).toBeFocused();
   });
 
   test("phone cards stay square and sorting stays reachable while browsing", async ({
