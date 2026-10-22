@@ -217,7 +217,7 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
                 }))
               : [],
             best_ask: bid ? null : "0.04",
-            best_bid: bid ? "0.02" : null,
+            best_bid: bid ? captured(true, 0).unit_price : null,
             ask_order_count: bid ? 0 : 1,
             bid_order_count: bid ? 13 : 0,
           })),
