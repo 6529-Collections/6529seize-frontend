@@ -429,20 +429,23 @@ export default function MemePage({
 
     const hasMintingBox = isLastCard;
     const artworkColumnBaseClassName =
-      "tw-relative lg:tw-flex lg:tw-flex-col lg:tw-self-stretch";
+      "tw-relative lg:tw-sticky lg:tw-top-6 lg:tw-flex lg:tw-flex-col lg:tw-self-start";
     const cardHeaderClassName = hasMintingBox
       ? "tw-mb-6 tw-grid tw-grid-cols-1 tw-gap-y-0 lg:tw-grid-cols-[minmax(0,11fr)_minmax(0,9fr)] lg:tw-items-center lg:tw-gap-x-16"
       : "tw-mb-6 tw-grid tw-grid-cols-1 tw-gap-x-10 lg:tw-grid-cols-[minmax(0,11fr)_minmax(0,9fr)] xl:tw-gap-x-16";
     const artworkColumnClassName = hasMintingBox
-      ? `${artworkColumnBaseClassName} tw-order-1 tw-self-start sm:tw-order-2 sm:tw-mt-6 lg:tw-order-none lg:tw-col-start-1 lg:tw-row-start-1 lg:tw-mt-0`
+      ? `${artworkColumnBaseClassName} tw-order-2 tw-mt-6 tw-self-start lg:tw-order-none lg:tw-col-start-1 lg:tw-row-start-1 lg:tw-mt-0`
       : artworkColumnBaseClassName;
     const detailsColumnClassName = hasMintingBox
-      ? "tw-contents [&>*:first-child]:tw-order-2 sm:[&>*:first-child]:tw-order-1 [&>*:nth-child(2)]:tw-order-3 [&>*:nth-child(2)]:tw-pt-0 lg:tw-col-start-2 lg:tw-row-start-1 lg:tw-block lg:[&>*]:tw-order-none lg:[&>*]:tw-w-full lg:[&>*:nth-child(2)]:tw-pt-6"
+      ? "tw-contents [&>*:first-child]:tw-order-1 [&>*:nth-child(2)]:tw-order-3 [&>*:nth-child(2)]:tw-pt-0 lg:tw-col-start-2 lg:tw-row-start-1 lg:tw-block lg:[&>*]:tw-order-none lg:[&>*]:tw-w-full lg:[&>*:nth-child(2)]:tw-pt-6"
       : undefined;
 
     return (
       <div className={cardHeaderClassName}>
-        <div className={artworkColumnClassName}>
+        <div
+          data-testid="meme-artwork-column"
+          className={artworkColumnClassName}
+        >
           <div
             className={`${styles["nftImageWrapper"] ?? ""} tw-relative -tw-mx-4 sm:tw-mx-0 lg:tw-flex-1`}
           >
@@ -472,7 +475,7 @@ export default function MemePage({
         </div>
         <div className={detailsColumnClassName}>
           {isLastCard && (
-            <div className="tw-mt-4 tw-w-full tw-space-y-3 sm:tw-mt-0">
+            <div className="tw-w-full tw-space-y-3">
               <NowMintingCountdown
                 nftId={nft.id}
                 contract={MEMES_CONTRACT}

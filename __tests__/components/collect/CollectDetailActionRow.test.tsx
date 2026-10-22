@@ -1,5 +1,5 @@
 import CollectDetailActionRow, {
-  CollectDetailMobileActions,
+  CollectDetailLayout,
 } from "@/components/collect/CollectDetailActionRow";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 
@@ -47,8 +47,11 @@ it("duplicates the current actions only off screen and submits the original form
   const submit = jest.fn();
   const offer = jest.fn();
   const view = render(
-    <CollectDetailMobileActions.Provider
-      value={<button onClick={offer}>Make an offer</button>}
+    <CollectDetailLayout.Provider
+      value={{
+        offerAction: <button onClick={offer}>Make an offer</button>,
+        marketLink: null,
+      }}
     >
       <form
         id="purchase"
@@ -69,7 +72,7 @@ it("duplicates the current actions only off screen and submits the original form
           </button>
         </CollectDetailActionRow>
       </form>
-    </CollectDetailMobileActions.Provider>
+    </CollectDetailLayout.Provider>
   );
   const sticky = document.querySelector<HTMLElement>(
     "[data-collect-sticky-actions]"
@@ -94,11 +97,13 @@ it("duplicates the current actions only off screen and submits the original form
 it("keeps unlisted actions above the measured native navigation without adding Collect", () => {
   mockNative = true;
   render(
-    <CollectDetailMobileActions.Provider value={<button>Make an offer</button>}>
+    <CollectDetailLayout.Provider
+      value={{ offerAction: <button>Make an offer</button>, marketLink: null }}
+    >
       <CollectDetailActionRow>
         <button>Make an offer</button>
       </CollectDetailActionRow>
-    </CollectDetailMobileActions.Provider>
+    </CollectDetailLayout.Provider>
   );
   intersection(false);
   const sticky = document.querySelector<HTMLElement>(

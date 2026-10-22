@@ -12,8 +12,11 @@ import {
 import { createPortal } from "react-dom";
 import styles from "./CollectDetailActionRow.module.css";
 
-// Only the Meme detail page opts in; all other inline trade surfaces keep their layout.
-export const CollectDetailMobileActions = createContext<ReactNode>(null);
+// Only the Meme detail page opts in; other inline trade surfaces keep their layout.
+export const CollectDetailLayout = createContext<{
+  readonly offerAction: ReactNode;
+  readonly marketLink: ReactNode;
+} | null>(null);
 
 export default function CollectDetailActionRow({
   children,
@@ -24,8 +27,8 @@ export default function CollectDetailActionRow({
   readonly primaryAction?: ReactNode;
   readonly active?: boolean;
 }) {
-  const offerAction = useContext(CollectDetailMobileActions);
-  if (!Boolean(offerAction) || !active) {
+  const layout = useContext(CollectDetailLayout);
+  if (!layout || !active) {
     return (
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
         {primaryAction}
@@ -34,7 +37,10 @@ export default function CollectDetailActionRow({
     );
   }
   return (
-    <MobileActionRow primaryAction={primaryAction} offerAction={offerAction}>
+    <MobileActionRow
+      primaryAction={primaryAction}
+      offerAction={layout.offerAction}
+    >
       {children}
     </MobileActionRow>
   );
@@ -67,6 +73,7 @@ function MobileActionRow({
       <div
         ref={observeRow}
         data-collect-inline-actions
+        data-testid="collect-inline-actions"
         className={`tw-flex tw-flex-wrap tw-items-center tw-gap-2 ${styles["inlineActions"] ?? ""}`}
       >
         {primaryAction}
@@ -76,6 +83,7 @@ function MobileActionRow({
         createPortal(
           <div
             data-collect-sticky-actions
+            data-testid="collect-sticky-actions"
             aria-hidden={!offscreen}
             inert={!offscreen}
             style={{ bottom: isCapacitor ? spaces.mobileNavSpace || 104 : 0 }}

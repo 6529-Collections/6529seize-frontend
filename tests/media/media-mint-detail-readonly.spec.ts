@@ -2,6 +2,7 @@ import { defineMobileVideoBatteryTest } from "./mobileVideoBatteryCases";
 import {
   defineNftImageLayoutTests,
   expectContainedImage,
+  expectMemeArtworkScrolling,
 } from "./imageArtworkLayoutCases";
 import type { Page } from "@playwright/test";
 
@@ -58,22 +59,109 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     isMobile,
   }) => {
     await gotoReady(page, "/the-memes/1");
-    const actions = page.locator("[data-collect-inline-actions]");
+    const actions = page.getByTestId("collect-inline-actions");
     await expect(actions).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
-    const sticky = page.locator("[data-collect-sticky-actions]");
-    if (!isMobile) {
-      await expect(sticky).toBeHidden();
-      await expect(
-        page.getByRole("button", { name: /^Show all .* properties$/ })
-      ).toBeHidden();
-      return;
-    }
     await expect(
       page.getByText("Loading this artwork…", { exact: true })
     ).toBeHidden({ timeout: RESPONSE_TIMEOUT_MS });
     await expect(
       page.getByText("Loading listings", { exact: true })
     ).toBeHidden({ timeout: RESPONSE_TIMEOUT_MS });
+    await expectMemeArtworkScrolling(page);
+    const offer = actions.getByRole("button", { name: /^Make an offer:/ });
+    await offer.focus();
+    await offer.click();
+    const offerDialog = page.getByRole("dialog");
+    const offerConnect = offerDialog.getByRole("button", {
+      name: "Connect wallet",
+      exact: true,
+    });
+    const offerReview = offerDialog.getByRole("button", {
+      name: "Review offer",
+      exact: true,
+    });
+    await expect(offerConnect).toBeVisible();
+    await offerConnect.scrollIntoViewIfNeeded();
+    await expect(offerConnect).toBeInViewport();
+    await expect(offerConnect).toHaveCount(1);
+    await expect(offerReview).toBeDisabled();
+    const guidanceBox = (await offerDialog
+      .getByText("Connect a wallet in this profile to prepare this action.", {
+        exact: true,
+      })
+      .boundingBox())!;
+    const connectionBox = (await offerConnect.boundingBox())!;
+    const priceBox = (await offerDialog
+      .getByRole("textbox", { name: "Unit price (WETH)", exact: true })
+      .boundingBox())!;
+    expect(guidanceBox.y + guidanceBox.height).toBeLessThan(priceBox.y);
+    expect(connectionBox.y + connectionBox.height).toBeLessThan(priceBox.y);
+    await expect(offerConnect).toHaveAttribute("type", "button");
+    await page.keyboard.press("Escape");
+    await expect(offerDialog).toHaveCount(0);
+    await expect(offer).toBeFocused();
+    const sticky = page.getByTestId("collect-sticky-actions");
+    if (!isMobile) {
+      await expect(sticky).toBeHidden();
+      await expect(
+        page.getByRole("button", { name: /^Show all .* properties$/ })
+      ).toBeHidden();
+      const collect = actions.getByRole("button", { name: /^Collect [0-9]/ });
+      await expect(collect).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+      await expect(collect).toBeDisabled();
+      const connect = page.getByRole("button", {
+        name: "Connect wallet",
+        exact: true,
+      });
+      const market = page.getByRole("button", {
+        name: "View listings & offers",
+        exact: true,
+      });
+      await expect(connect).toHaveCount(1);
+      await expect(market).toHaveCount(1);
+      const connectBox = (await connect.boundingBox())!;
+      const actionsBox = (await actions.boundingBox())!;
+      const collectBox = (await collect.boundingBox())!;
+      const offerBox = (await actions
+        .getByRole("button", { name: /^Make an offer:/ })
+        .boundingBox())!;
+      const marketBox = (await market.boundingBox())!;
+      expect(connectBox.y + connectBox.height).toBeLessThan(actionsBox.y);
+      expect(collectBox.width).toBeGreaterThan(offerBox.width);
+      expect(marketBox.y).toBeGreaterThanOrEqual(
+        actionsBox.y + actionsBox.height
+      );
+      await page.getByRole("button", { name: "Change", exact: true }).click();
+      await expect(
+        page.getByRole("dialog", { name: "Deliver to", exact: true })
+      ).toHaveCount(0);
+      await page.getByRole("button", { name: "Done", exact: true }).click();
+      const moreActions = actions.getByRole("button", {
+        name: /^More trading actions/,
+      });
+      await moreActions.click();
+      const menu = page.getByRole("menu");
+      const reviewOffers = menu.getByRole("menuitem", {
+        name: /^Review offers:/,
+      });
+      await expect(menu).toBeFocused();
+      await expect(menu).not.toHaveAttribute("aria-activedescendant");
+      await expect(reviewOffers).not.toBeFocused();
+      await expect(reviewOffers).toHaveCSS("box-shadow", "none");
+      await page.keyboard.press("ArrowDown");
+      await expect(menu).toHaveAttribute(
+        "aria-activedescendant",
+        (await reviewOffers.getAttribute("id"))!
+      );
+      await expect(reviewOffers).not.toHaveCSS("box-shadow", "none");
+      await page.keyboard.press("Escape");
+      await expect(menu).toHaveCount(0);
+      await expect(moreActions).toBeFocused();
+      await market.click();
+      await expect(page).toHaveURL(/focus=listings-and-offers/);
+      await expectNoHorizontalOverflow(page);
+      return;
+    }
     await expect(actions).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await actions.scrollIntoViewIfNeeded();
     const changeDelivery = page.getByRole("button", {
@@ -117,11 +205,18 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     ).toHaveAttribute("aria-expanded", "true");
     await nav.getByRole("button", { name: "Collectors", exact: true }).click();
     await expect(page).toHaveURL(/focus=collectors/);
-    await expect(page.locator("#nft-leaderboard tbody tr").first()).toBeVisible(
-      {
-        timeout: RESPONSE_TIMEOUT_MS,
-      }
-    );
+    await expect(
+      page
+        .getByRole("table")
+        .filter({
+          has: page.getByRole("button", {
+            name: "Sort Balance ascending",
+            exact: true,
+          }),
+        })
+        .getByRole("row")
+        .nth(1)
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await expect(
       page
         .getByRole("button", { name: "Sort Balance ascending", exact: true })

@@ -99,13 +99,22 @@
 
 ## Common Scenarios
 
-- On phones, the artwork appears before mint and subscription panels, with
-  ownership, format switching and media actions below it. The tab row stays at
-  the top while scrolling; swipe the row to reach all four tabs.
-- On phones, the inline Collect button fills its own row. Make an offer, the
-  available List action and the additional-actions menu share the next row.
-  View listings & offers remains a text action below the delivery and wallet
-  controls.
+- On desktop, the artwork stays in the left column while the adjacent card
+  details scroll. It stops at the end of that section, before the tabs. On
+  smaller screens the artwork scrolls normally with the page.
+- On desktop, market actions sit in one bordered panel. When a wallet connection
+  is required, the guidance and Connect wallet button appear above a divider.
+  Collect has the most space in the action row and uses a neutral disabled style
+  until it is available. Delivery controls and the View listings & offers text
+  action share the footer, wrapping when space is limited.
+- On phones and tablets, the latest card's countdown and Subscription Minting
+  panel appear above the artwork. Ownership, format switching and media actions
+  stay below the artwork. The tab row stays at the top while scrolling on phones;
+  swipe the row to reach all four tabs.
+- On phones, the inline market actions sit inside one bordered panel. The Collect
+  button fills its own row. Make an offer, the available List action and the
+  additional-actions menu share the next row. View listings & offers remains a
+  text action below the delivery and wallet controls inside the same panel.
 - When the inline market actions leave the screen, a bottom bar repeats the
   available Collect and Make an offer actions. In the app it sits above bottom
   navigation and stays behind open dialogs. Delivery, owner actions and the

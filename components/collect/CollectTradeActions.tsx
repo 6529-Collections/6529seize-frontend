@@ -75,6 +75,7 @@ export default function CollectTradeActions({
         {secondary.length > 0 && (
           <CompactMenu
             aria-label={t(locale, "collect.moreActions", { title })}
+            autoFocusItem={false}
             triggerAsChild
             trigger={
               <button
@@ -89,6 +90,7 @@ export default function CollectTradeActions({
               </button>
             }
             menuWidthClassName="tw-w-64"
+            menuClassName="[&:focus-visible_[data-focus]]:!tw-ring-2"
             itemClassName="tw-min-h-11"
             items={secondary.map(({ action, disabledReason }) => {
               const Icon = ACTION_ICONS[action];

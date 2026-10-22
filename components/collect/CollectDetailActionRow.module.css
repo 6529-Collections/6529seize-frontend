@@ -1,3 +1,70 @@
+@media (min-width: 1024px) {
+  .detailPanel {
+    container: collect-detail / inline-size;
+  }
+
+  /* The form owns the desktop footer; loading and review retain the outer link. */
+  .detailPanel:has([data-collect-inline-buy]) > [data-collect-market-link],
+  .detailPanel [data-collect-trade-status]:empty {
+    display: none;
+  }
+
+  .inlineActions {
+    align-items: flex-start;
+  }
+
+  .inlineActions > button[type="submit"] {
+    flex: 1 1 140px;
+    min-width: 0;
+    padding-inline: 12px;
+  }
+
+  .inlineActions > button[type="submit"]:disabled {
+    border-color: #26272b;
+    background: #26272b;
+    color: #93939f;
+    box-shadow: none;
+    opacity: 1;
+  }
+
+  .inlineActions > [data-collect-secondary-actions] {
+    display: contents;
+  }
+
+  .inlineActions [data-collect-owner-action]:empty {
+    display: none;
+  }
+
+  .inlineActions button[aria-haspopup="menu"] {
+    border: 1px solid rgb(255 255 255 / 10%);
+  }
+
+  .detailPanel [data-collect-detail-footer] > :first-child {
+    flex-basis: 230px;
+  }
+
+  .detailPanel [data-collect-detail-footer] > :last-child {
+    margin-left: auto;
+  }
+
+  .detailPanel
+    [data-collect-detail-footer]
+    > :first-child:has([aria-expanded="true"]) {
+    flex-basis: 100%;
+  }
+
+  @container collect-detail (max-width: 390px) {
+    .inlineActions > button[type="submit"] {
+      flex-basis: 100%;
+    }
+
+    .inlineActions > button:not([type="submit"]),
+    .inlineActions > [data-collect-secondary-actions] > button {
+      flex: 1;
+    }
+  }
+}
+
 @media (max-width: 639px) {
   .inlineActions {
     align-items: flex-start;
@@ -35,9 +102,14 @@
   .inlineActions > button:not([type="submit"]),
   .inlineActions > [data-collect-secondary-actions] > button,
   .inlineActions [data-collect-owner-action] {
-    /* Equal outer widths after the 44px menu and two 8px gaps. */
-    flex: 1 1 calc((100% - 60px) / 2);
-    min-width: 0;
+    flex: 1 1 0;
+    min-width: 44px;
+  }
+
+  .inlineActions > button:not([type="submit"]),
+  .inlineActions > [data-collect-secondary-actions] > button {
+    /* Keep the offer label readable when panel padding limits row width. */
+    min-width: max-content;
   }
 
   .inlineActions [data-collect-owner-action] > button,

@@ -31,8 +31,9 @@ import {
 } from "@/constants/constants";
 import { revealMarketDepth } from "@/components/nft-market-depth/market-depth-disclosure";
 import CollectDetailActionRow, {
-  CollectDetailMobileActions,
+  CollectDetailLayout,
 } from "./CollectDetailActionRow";
+import styles from "./CollectDetailActionRow.module.css";
 
 const CollectTradeController = lazy(() => import("./CollectTradeController"));
 const MAX_DETAIL_LOOKUP_PAGES = 100;
@@ -187,6 +188,9 @@ function DetailTrade({
 }
 
 function DetailActions(props: CollectDetailActionsProps) {
+  const panelClassName = props.mobileSticky
+    ? `${styles["detailPanel"] ?? ""} max-sm:tw-rounded-xl max-sm:tw-border max-sm:tw-border-solid max-sm:tw-border-iron-800 max-sm:tw-bg-iron-900 max-sm:tw-p-4 lg:tw-rounded-xl lg:tw-border lg:tw-border-solid lg:tw-border-iron-800 lg:tw-bg-iron-900 lg:tw-p-5 max-sm:[&_[data-collect-connect-wallet]]:!tw-mt-2 max-sm:[&_[data-collect-connect-wallet]]:tw-h-11 max-sm:[&_[data-collect-connect-wallet]]:tw-w-full max-sm:[&_[data-collect-trade-status]:empty]:tw-hidden`
+    : "";
   const mobileActionClassName = props.mobileSticky
     ? "max-sm:tw-border-iron-800 max-sm:tw-bg-iron-950"
     : "";
@@ -231,27 +235,30 @@ function DetailActions(props: CollectDetailActionsProps) {
     });
   };
   return (
-    <div
-      className={`tw-w-full ${props.mobileSticky ? "max-sm:[&_[data-collect-connect-wallet]]:!tw-mt-2 max-sm:[&_[data-collect-connect-wallet]]:tw-h-11 max-sm:[&_[data-collect-connect-wallet]]:tw-w-full max-sm:[&_[data-collect-trade-status]:empty]:tw-hidden" : ""}`}
-    >
-      <CollectDetailMobileActions.Provider
+    <div className={`tw-w-full ${panelClassName}`}>
+      <CollectDetailLayout.Provider
         value={
-          props.mobileSticky ? (
-            <button
-              type="button"
-              aria-label={t(props.locale, "collect.actionFor", {
-                action: t(props.locale, OFFER_MESSAGE_KEY),
-                title: props.title,
-              })}
-              className={offerClassName}
-              onClick={(event) => {
-                opener.current = event.currentTarget;
-                setAction("offer");
-              }}
-            >
-              {t(props.locale, OFFER_MESSAGE_KEY)}
-            </button>
-          ) : null
+          props.mobileSticky
+            ? {
+                marketLink: viewMarket,
+                offerAction: (
+                  <button
+                    type="button"
+                    aria-label={t(props.locale, "collect.actionFor", {
+                      action: t(props.locale, OFFER_MESSAGE_KEY),
+                      title: props.title,
+                    })}
+                    className={offerClassName}
+                    onClick={(event) => {
+                      opener.current = event.currentTarget;
+                      setAction("offer");
+                    }}
+                  >
+                    {t(props.locale, OFFER_MESSAGE_KEY)}
+                  </button>
+                ),
+              }
+            : null
         }
       >
         <DetailTrade
@@ -336,8 +343,9 @@ function DetailActions(props: CollectDetailActionsProps) {
             />
           </CollectDetailActionRow>
         </div>
-      </CollectDetailMobileActions.Provider>
+      </CollectDetailLayout.Provider>
       <div
+        data-collect-market-link
         className={props.mobileSticky ? "tw-mt-1 max-sm:tw-mt-2" : "tw-mt-1"}
       >
         {viewMarket}

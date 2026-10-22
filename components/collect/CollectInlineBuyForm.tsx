@@ -3,7 +3,13 @@
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { useId, useState, type ComponentProps, type ReactNode } from "react";
+import {
+  useContext,
+  useId,
+  useState,
+  type ComponentProps,
+  type ReactNode,
+} from "react";
 import { getAddress, isAddress } from "viem";
 import type CollectTradeForm from "./CollectTradeForm";
 import CollectDeliveryControl from "./CollectDeliveryControl";
@@ -12,7 +18,9 @@ import { isCollectProfileWallet } from "./collect-recipient.helpers";
 import type { CollectTradeDraft } from "./collect.types";
 import { marketAmount } from "./market.adapters";
 import { MARKET_ZERO } from "./market-validation";
-import CollectDetailActionRow from "./CollectDetailActionRow";
+import CollectDetailActionRow, {
+  CollectDetailLayout,
+} from "./CollectDetailActionRow";
 
 type Props = ComponentProps<typeof CollectTradeForm> & {
   readonly amountWei: string | null;
@@ -20,10 +28,12 @@ type Props = ComponentProps<typeof CollectTradeForm> & {
   readonly secondaryActions?: ReactNode;
   readonly quantityStep?: string;
   readonly onSplitDelivery?: (() => void) | undefined;
+  readonly desktopConnectionHeader?: boolean;
 };
 
 export default function CollectInlineBuyForm(props: Props) {
   const locale = useBrowserLocale();
+  const detailLayout = useContext(CollectDetailLayout);
   const id = useId();
   const [invalid, setInvalid] =
     useState<ReturnType<typeof validateCollectTrade>>(null);
@@ -68,6 +78,7 @@ export default function CollectInlineBuyForm(props: Props) {
   return (
     <form
       id={id}
+      data-collect-inline-buy
       className="tw-space-y-3"
       onSubmit={(event) => {
         event.preventDefault();
@@ -143,7 +154,7 @@ export default function CollectInlineBuyForm(props: Props) {
       {props.disabledReason && (
         <p
           role="status"
-          className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-300"
+          className={`tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-300 ${props.desktopConnectionHeader ? "lg:tw-hidden" : ""}`}
         >
           {props.disabledReason}
         </p>
@@ -159,16 +170,34 @@ export default function CollectInlineBuyForm(props: Props) {
             </div>
           )}
       </CollectDetailActionRow>
-      <CollectDeliveryControl
-        mobileSheet
-        profile={props.recipientProfile}
-        payingWallet={props.makerLabel}
-        value={recipient}
-        disabled={props.loading}
-        invalid={invalid === "recipient"}
-        errorId={`${id}-error`}
-        onChange={(value) => change({ recipient: value })}
-      />
+      <div
+        data-collect-detail-footer
+        className={
+          detailLayout
+            ? "lg:tw-flex lg:tw-flex-wrap lg:tw-items-start lg:tw-justify-between lg:tw-gap-x-4"
+            : undefined
+        }
+      >
+        <div
+          className={detailLayout ? "lg:tw-min-w-0 lg:tw-flex-1" : undefined}
+        >
+          <CollectDeliveryControl
+            mobileSheet
+            profile={props.recipientProfile}
+            payingWallet={props.makerLabel}
+            value={recipient}
+            disabled={props.loading}
+            invalid={invalid === "recipient"}
+            errorId={`${id}-error`}
+            onChange={(value) => change({ recipient: value })}
+          />
+        </div>
+        {detailLayout && (
+          <div className="tw-hidden lg:tw-block lg:tw-shrink-0">
+            {detailLayout.marketLink}
+          </div>
+        )}
+      </div>
       {props.onSplitDelivery && (
         <button
           type="button"

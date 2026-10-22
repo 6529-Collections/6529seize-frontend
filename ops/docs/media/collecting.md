@@ -74,8 +74,9 @@ list it; profile consolidation does not grant another wallet permission to sign.
 Before connecting, **List** opens the wallet connection flow so ownership
 can be checked.
 The more-actions menu contains **Review offers**.
-On phones, an offer sheet that needs a wallet shows **Connect wallet** at full
-width directly below the wallet guidance, before **Review offer**.
+An offer dialog that needs a wallet groups the wallet guidance and **Connect
+wallet** at the top, before the price and quantity fields. The button wraps to
+its own full-width row when space is limited.
 If ownership is still loading, **List** stays visible but unavailable.
 If that check fails, choose **Try again** beside the action.
 

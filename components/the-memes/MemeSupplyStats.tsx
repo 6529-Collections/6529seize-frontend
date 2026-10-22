@@ -30,7 +30,7 @@ export default function MemeSupplyStats({
       : formatInteger(locale, value);
 
   return (
-    <section className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-6 md:tw-py-8">
+    <section className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-2 tw-pt-6 has-[details[open]]:tw-pb-6 md:tw-pt-8 md:has-[details[open]]:tw-pb-8">
       <dl className="tw-m-0 tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-6">
         {[
           {

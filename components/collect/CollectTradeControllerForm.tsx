@@ -8,10 +8,12 @@ import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
-import type { ReactNode } from "react";
+import { useContext, type ReactNode } from "react";
 import CollectInlineBuyForm from "./CollectInlineBuyForm";
 import CollectTradeForm from "./CollectTradeForm";
-import CollectDetailActionRow from "./CollectDetailActionRow";
+import CollectDetailActionRow, {
+  CollectDetailLayout,
+} from "./CollectDetailActionRow";
 import { CollectOrderBook } from "./CollectOrderPicker";
 import type { CollectTradeAction, CollectTradeDraft } from "./collect.types";
 import {
@@ -121,8 +123,10 @@ function getNoInlineOrderMessage({
 
 function InlineTradeForm({
   props,
+  desktopConnectionHeader,
 }: {
   readonly props: CollectTradeControllerFormProps;
+  readonly desktopConnectionHeader: boolean;
 }) {
   const noInlineOrder = getNoInlineOrderMessage(props);
   // An eligible alternative supplies edit bounds only, never a selected price or request.
@@ -206,6 +210,9 @@ function InlineTradeForm({
           : null
       }
       disabledReason={noInlineOrder ?? props.disabledReason}
+      desktopConnectionHeader={
+        desktopConnectionHeader && noInlineOrder === undefined
+      }
       loading={props.preparing}
       error={props.error}
       secondaryActions={props.secondaryActions}
@@ -264,26 +271,62 @@ function StandardTradeForm({
 export default function CollectTradeControllerForm(
   props: CollectTradeControllerFormProps
 ) {
+  const detailLayout = useContext(CollectDetailLayout);
+  const desktopConnectionHeader =
+    Boolean(detailLayout) && props.inlineBuy && props.showConnect;
   const connectInsideOffer = !props.inlineBuy && props.action === "offer";
+  let connectClassName: string | undefined;
+  if (connectInsideOffer) {
+    connectClassName = "tw-min-h-11 tw-w-full";
+  } else if (desktopConnectionHeader) {
+    connectClassName = "lg:tw-hidden";
+  }
   const connectWalletAction = props.showConnect ? (
     <Button
       data-collect-connect-wallet
-      variant="secondary"
-      className={
-        connectInsideOffer ? "max-sm:tw-min-h-11 max-sm:tw-w-full" : undefined
-      }
+      variant={connectInsideOffer ? "primary" : "secondary"}
+      className={connectClassName}
       onClick={props.onConnect}
     >
       {t(props.locale, "collect.connect")}
     </Button>
   ) : null;
   const tradeForm = props.inlineBuy ? (
-    <InlineTradeForm props={props} />
+    <InlineTradeForm
+      props={props}
+      desktopConnectionHeader={desktopConnectionHeader}
+    />
   ) : (
     <StandardTradeForm
       props={props}
       connectWalletAction={connectInsideOffer ? connectWalletAction : null}
     />
+  );
+
+  const formContent = desktopConnectionHeader ? (
+    <div>
+      <div
+        data-collect-connection-header
+        className="tw-hidden lg:-tw-mx-5 lg:-tw-mt-5 lg:tw-mb-5 lg:tw-flex lg:tw-flex-wrap lg:tw-items-center lg:tw-justify-between lg:tw-gap-4 lg:tw-border-0 lg:tw-border-b lg:tw-border-solid lg:tw-border-iron-800 lg:tw-px-5 lg:tw-py-5"
+      >
+        <p
+          role="status"
+          className="tw-m-0 tw-min-w-0 tw-flex-[1_1_160px] tw-text-sm tw-leading-5 tw-text-iron-300"
+        >
+          {props.disabledReason}
+        </p>
+        <Button
+          data-collect-connect-wallet
+          variant="primary"
+          onClick={props.onConnect}
+        >
+          {t(props.locale, "collect.connect")}
+        </Button>
+      </div>
+      {tradeForm}
+    </div>
+  ) : (
+    tradeForm
   );
 
   return (
@@ -303,7 +346,7 @@ export default function CollectTradeControllerForm(
           locale={props.locale}
         />
       )}
-      {tradeForm}
+      {formContent}
       {props.inlineBuy &&
         !props.fixedOrder &&
         !props.ordersLoading &&
