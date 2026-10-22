@@ -7,6 +7,10 @@ import {
   sanitizeEndpointGroup,
   sanitizeRouteFamily,
 } from "./monitoring/mobileLaunchTimingSanitizers";
+import {
+  sanitizeSentryExceptionValue,
+  sanitizeSentryText as sanitizeString,
+} from "./monitoring/sentryTextSanitizer";
 
 const REDACTED = "[Filtered]";
 const THIRD_PARTY = "third-party";
@@ -15,10 +19,6 @@ const URL_IS_FIRST_PARTY_API_KEY = "url.is_first_party_api";
 const UNUSABLE_URL_TOKENS = new Set(
   "[filtered] [redacted] filtered unknown".split(" ")
 );
-const JWT_PATTERN = /eyJ[A-Za-z0-9-_]+\.eyJ[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+/g;
-const STRIPE_KEY_PATTERN = /\b(sk|pk)_[a-zA-Z0-9]{16,}\b/g;
-const BEARER_PATTERN = /\bBearer\s+([A-Za-z0-9._~+/=-]+)\b/g;
-const BASIC_PATTERN = /\bBasic\s+([A-Za-z0-9+/=]+)\b/g;
 const ROUTE_SPAN_OPERATION_PATTERN = /^(?:navigation|pageload)(?:\.|$)/;
 const STATIC_RESOURCE_ROOT_SEGMENTS = new Set(
   ".well-known _next api assets cdn-cgi favicon.ico fonts icons images manifest.json robots.txt sitemap.xml static".split(
@@ -374,16 +374,6 @@ function sanitizeHostAttribution(value: unknown): string {
 
   const parsed = parseHostValue(normalized);
   return parsed ? classifyHostAttribution(parsed.hostname) : THIRD_PARTY;
-}
-
-function sanitizeString(value: string): string {
-  if (!value) return value;
-  let sanitized = value;
-  sanitized = sanitized.replace(JWT_PATTERN, REDACTED);
-  sanitized = sanitized.replace(STRIPE_KEY_PATTERN, REDACTED);
-  sanitized = sanitized.replace(BEARER_PATTERN, "Bearer " + REDACTED);
-  sanitized = sanitized.replace(BASIC_PATTERN, "Basic " + REDACTED);
-  return sanitized.length > 2048 ? sanitized.slice(0, 2048) : sanitized;
 }
 
 export function sanitizeUrlString(value: unknown): unknown {
@@ -761,16 +751,7 @@ export function sanitizeSentryEvent<T extends Event>(event: T): T {
   if (next.exception?.values) {
     next.exception = {
       ...next.exception,
-      values: next.exception.values.map((v) => {
-        const value = { ...v };
-        if (typeof value.value === "string") {
-          value.value = sanitizeString(value.value);
-        }
-        if (typeof value.type === "string") {
-          value.type = sanitizeString(value.type);
-        }
-        return value;
-      }),
+      values: next.exception.values.map(sanitizeSentryExceptionValue),
     };
   }
 
