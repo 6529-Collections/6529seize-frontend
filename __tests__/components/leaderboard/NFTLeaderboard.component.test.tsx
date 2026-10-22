@@ -427,6 +427,10 @@ describe("NFTLeaderboard component", () => {
     expect(list.getByText("379.7K")).toBeInTheDocument();
     expect(list.getByText("99,999")).toBeInTheDocument();
     expect(list.getByText("This card TDH: 0")).toBeInTheDocument();
-    expect(list.getByText("card", { exact: true })).toBeInTheDocument();
+    expect(list.getByText("This card balance: 1")).toBeInTheDocument();
+    expect(list.getByText("Total", { exact: true })).toBeInTheDocument();
+    for (const label of ["Balance", "TDH", "Unweighted TDH"]) {
+      expect(list.getByText(label, { exact: true })).toBeInTheDocument();
+    }
   });
 });

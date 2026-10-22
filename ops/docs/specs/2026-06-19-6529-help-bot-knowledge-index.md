@@ -149,7 +149,8 @@ The card records preserve `focus=the-art` deep links to the Memes and Meme Lab
 **Overview**, where artwork details follow the description. The **Listings & offers**
 tab opens the market directly without another accordion. Primary and History tab changes keep the tab row visible and
 show the selected section from its top while deferred content loads.
-The Memes card record also describes the mobile Collectors list, its six sort
+The Memes card record also describes the mobile Collectors list, with Balance,
+TDH and Unweighted TDH headers over This card and Total rows, its six sort
 metrics and separate direction arrows, identity filtering, 25-row pagination,
 and full-value CSV export. Screens 768 px and wider use the sortable table.
 Compact values are presentation only.

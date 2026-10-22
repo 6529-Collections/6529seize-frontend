@@ -100,8 +100,10 @@
 ## Common Scenarios
 
 - In `Collectors`, screens narrower than 768 px show a collector list with this
-  card's balance, TDH and unweighted TDH in a `This card` row, with `All cards` totals
-  aligned underneath. The collector's name has its own row above the values. Choose
+  card's metrics in a `This card` row, with a `Total` row aligned underneath.
+  A single header row labels the Balance, TDH and Unweighted TDH columns above
+  both rows of values.
+  The collector's name has its own row above the values. Choose
   Balance, TDH, Unweighted TDH, Total balance, Total TDH or Total unweighted TDH
   in the scrolling sort bar; the separate arrows set ascending or descending
   order. Choosing a metric keeps the current direction and highlights its values.

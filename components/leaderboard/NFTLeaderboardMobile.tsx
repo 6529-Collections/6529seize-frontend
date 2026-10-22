@@ -2,11 +2,7 @@ import { useEffect, useRef } from "react";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 import Button from "@/components/utils/button/Button";
 import { SortDirection } from "@/entities/ISort";
-import {
-  formatInteger,
-  formatNumber,
-  selectPluralCategory,
-} from "@/i18n/format";
+import { formatInteger, formatNumber } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import type { NftTDHRanked, Sort } from "./NFTLeaderboard";
@@ -109,14 +105,12 @@ export function NFTLeaderboardMobileSort({
 function MobileMetric({
   locale,
   value,
-  label,
   accessibleLabel,
   active,
   className,
 }: Readonly<{
   locale: SupportedLocale;
   value: number;
-  label: string;
   accessibleLabel: string;
   active: boolean;
   className: string;
@@ -134,14 +128,9 @@ function MobileMetric({
       <span
         aria-hidden="true"
         title={exact}
-        className="tw-flex tw-min-w-0 tw-items-baseline tw-gap-1 max-[359px]:tw-flex-wrap max-[359px]:tw-gap-y-0"
+        className={`tw-font-medium ${active ? "tw-text-iron-50" : "tw-text-inherit"}`}
       >
-        <span className="tw-order-1 tw-text-iron-500">{label}</span>
-        <span
-          className={`tw-font-medium ${active ? "tw-text-iron-50" : "tw-text-inherit"}`}
-        >
-          {formatMobileValue(locale, value)}
-        </span>
+        {formatMobileValue(locale, value)}
       </span>
     </span>
   );
@@ -181,45 +170,43 @@ export function NFTLeaderboardMobileRows({
               level={lead.level}
             />
           </div>
+          <span aria-hidden="true" className="tw-col-span-2" />
+          <span aria-hidden="true" className="tw-self-end tw-text-iron-500">
+            {t(locale, "theMemes.detail.collectors.balance")}
+          </span>
+          <span aria-hidden="true" className="tw-self-end tw-text-iron-500">
+            {t(locale, "theMemes.detail.collectors.tdh")}
+          </span>
+          <span aria-hidden="true" className="tw-self-end tw-text-iron-500">
+            {t(locale, "theMemes.detail.collectors.unweightedTdh")}
+          </span>
           <span
             aria-hidden="true"
-            className="tw-col-span-2 tw-whitespace-nowrap tw-text-iron-600"
+            className="tw-col-span-2 tw-whitespace-nowrap tw-text-iron-500"
           >
             {t(locale, "theMemes.detail.collectors.thisCard")}
-          </span>
-          <span className="tw-flex tw-min-w-0 tw-items-baseline tw-gap-1 tw-whitespace-nowrap max-[359px]:tw-flex-wrap max-[359px]:tw-gap-y-0">
-            <span className="tw-sr-only">
-              {formatInteger(locale, lead.balance)}{" "}
-            </span>
-            <span
-              aria-hidden="true"
-              title={formatInteger(locale, lead.balance)}
-              className={`tw-font-medium ${sort === "balance" ? "tw-text-iron-50" : "tw-text-iron-300"}`}
-            >
-              {formatMobileValue(locale, lead.balance)}{" "}
-            </span>
-            <span className="tw-text-iron-500">
-              {t(
-                locale,
-                selectPluralCategory(locale, lead.balance) === "one"
-                  ? "theMemes.detail.collectors.cardOne"
-                  : "theMemes.detail.collectors.cardOther"
-              )}
-            </span>
           </span>
           <MobileMetric
             className="tw-text-iron-300"
             locale={locale}
+            value={lead.balance}
+            accessibleLabel={t(
+              locale,
+              "theMemes.detail.collectors.cardBalance"
+            )}
+            active={sort === "balance"}
+          />
+          <MobileMetric
+            className="tw-text-iron-300"
+            locale={locale}
             value={lead.boosted_tdh}
-            label={t(locale, "theMemes.detail.collectors.tdh")}
             accessibleLabel={t(locale, "theMemes.detail.collectors.cardTdh")}
             active={sort === "boosted_tdh"}
           />
           <MobileMetric
-            className="tw-text-iron-300 [&>span:last-child>span:first-child]:tw-whitespace-normal"
+            className="tw-text-iron-300"
             locale={locale}
             value={lead.tdh__raw}
-            label={t(locale, "theMemes.detail.collectors.unweightedTdh")}
             accessibleLabel={t(
               locale,
               "theMemes.detail.collectors.cardUnweightedTdh"
@@ -228,15 +215,14 @@ export function NFTLeaderboardMobileRows({
           />
           <span
             aria-hidden="true"
-            className="tw-col-span-2 tw-whitespace-nowrap tw-text-iron-600"
+            className="tw-col-span-2 tw-whitespace-nowrap tw-text-iron-500"
           >
-            {t(locale, "theMemes.detail.collectors.allCards")}
+            {t(locale, "theMemes.detail.collectors.total")}
           </span>
           <MobileMetric
-            className="tw-text-iron-400 [&>span:last-child>span:first-child]:tw-hidden"
+            className="tw-text-iron-400"
             locale={locale}
             value={lead.total_balance}
-            label={t(locale, "theMemes.detail.collectors.allCards")}
             accessibleLabel={t(
               locale,
               "theMemes.detail.collectors.totalBalance"
@@ -244,18 +230,16 @@ export function NFTLeaderboardMobileRows({
             active={sort === "total_balance"}
           />
           <MobileMetric
-            className="tw-text-iron-400 [&>span:last-child>span:first-child]:tw-hidden"
+            className="tw-text-iron-400"
             locale={locale}
             value={lead.total_boosted_tdh}
-            label={t(locale, "theMemes.detail.collectors.tdh")}
             accessibleLabel={t(locale, "theMemes.detail.collectors.totalTdh")}
             active={sort === "total_boosted_tdh"}
           />
           <MobileMetric
-            className="tw-text-iron-400 [&>span:last-child>span:first-child]:tw-hidden"
+            className="tw-text-iron-400"
             locale={locale}
             value={lead.total_tdh__raw}
-            label={t(locale, "theMemes.detail.collectors.unweightedTdh")}
             accessibleLabel={t(
               locale,
               "theMemes.detail.collectors.totalUnweightedTdh"

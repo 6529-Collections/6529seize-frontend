@@ -94,7 +94,9 @@ export function defineCollectorsLeaderboardTests() {
     await expect(list.getByRole("listitem").first()).toContainText(
       "This card TDH: 0"
     );
-    await expect(list.getByRole("listitem").nth(1)).toContainText("1 card");
+    await expect(list.getByRole("listitem").nth(1)).toContainText(
+      "This card balance: 1"
+    );
 
     await csvButton.hover();
     await expect(csvTooltip).toBeVisible();
@@ -118,6 +120,10 @@ export function defineCollectorsLeaderboardTests() {
         );
       expect(overflow, `Collector rows overflow at ${width}px`).toBe(false);
       const firstRow = list.getByRole("listitem").first();
+      await expect(firstRow.getByText("Total", { exact: true })).toBeVisible();
+      for (const label of ["Balance", "TDH", "Unweighted TDH"]) {
+        await expect(firstRow.getByText(label, { exact: true })).toBeVisible();
+      }
       const statFontSizes = await list
         .getByRole("listitem")
         .first()
@@ -137,8 +143,9 @@ export function defineCollectorsLeaderboardTests() {
         .getByText(/^collector-with-/)
         .boundingBox();
       const balanceBounds = await firstRow
-        .getByText("cards", { exact: true })
+        .getByText("This card balance: 111", { exact: true })
         .locator("..")
+        .getByText("111", { exact: true })
         .boundingBox();
       if (!nameBounds || !balanceBounds) {
         throw new Error("Collector name and balance must have visible bounds");
