@@ -79,7 +79,10 @@ For **Collect**, the site checks that exact listing and adds it to your selectio
 Set **Quantity** for supported editions, or choose
 **Remove** to take it out. Some listings must be collected as a complete lot.
 
-Select one or more listings, then choose **Review selected listings**. The site
+Selected listings keep **Quantity** inside the highlighted row group. While any
+listing is selected, **Review selected listings** stays in a sticky bottom bar
+within Listings & offers, above mobile navigation. The bar disappears when the
+selection is empty. The site
 checks each selected order again before opening the purchase review. Choose your
 delivery wallet using the same **Deliver to · Change** picker as minting, including
 your consolidated wallets or **Send to a fren**. Review the total, fees and gas
@@ -89,7 +92,9 @@ delivery address and offers **Price breakdown**, **Exact amounts** and
 changed terms require another review. Supported purchases and deliveries succeed
 together in one transaction or all revert; a revert can still cost gas.
 The selection review fills the screen with a persistent **Back to collecting**
-control. **Deliver all to** sets a common destination; **Change delivery for this
+control. The selection screen groups its existing wallet connection message and
+**Default delivery** controls, with the estimate and review actions at the bottom.
+**Deliver all to** sets a common destination; **Change delivery for this
 artwork** retains per-item exceptions and split details. **Remove** checks and
 requotes the remaining exact orders; a failed update keeps the original review.
 Removing the last item closes an unsigned review only after pending-purchase

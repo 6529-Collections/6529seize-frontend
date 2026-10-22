@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 import path from "node:path";
 
 const LAB = "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb";
@@ -27,6 +28,7 @@ const listing = {
   side: "LISTING",
   quantity: "3",
   available_quantity: "3",
+  purchase_quantity: "1",
   quantity_step: "1",
   currency: ZERO,
   total_wei: "120000000000000000",
@@ -178,6 +180,20 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
           provider: "fixture",
           creator_fees: "REQUIRED",
           platform_fee_bps: 0,
+        },
+      });
+    if (url.pathname === `/api/market/orders/${listing.identity.order_hash}`)
+      return route.fulfill({ json: listing });
+    if (url.pathname === "/api/market/batch-capabilities")
+      return route.fulfill({
+        json: {
+          available: true,
+          chain_id: 1,
+          currency: ZERO,
+          execution_policy: "ALL_OR_REVERT",
+          max_orders: 128,
+          max_allocations: 256,
+          max_calldata_bytes: 1048576,
         },
       });
     if (url.pathname === "/api/market/orders")
@@ -530,6 +546,122 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
     ).toBeLessThanOrEqual(width + 1);
   }
   await page.setViewportSize(originalViewport);
+  const collect = market.getByRole("button", { name: "Collect", exact: true });
+  await collect.click();
+  const remove = market.getByRole("button", { name: "Remove", exact: true });
+  await expect(remove).toHaveAttribute("aria-pressed", "true");
+  const quantity = market.getByRole("textbox", {
+    name: "Quantity",
+    exact: true,
+  });
+  await expect(quantity).toHaveValue("1");
+  await quantity.fill("2");
+  const selectedPrice = market
+    .getByRole("row")
+    .filter({ has: page.getByRole("button", { name: "Remove", exact: true }) })
+    .getByRole("cell")
+    .first();
+  await expect(selectedPrice).toHaveCSS(
+    "background-color",
+    "rgba(63, 105, 252, 0.12)"
+  );
+  const reviewSelected = market.getByRole("button", {
+    name: "Review selected listings (1)",
+    exact: true,
+  });
+  const bar = market
+    .getByRole("button", { name: "Review selected listings (1)", exact: true })
+    .locator("..");
+  await expect(bar).toHaveCSS("position", "sticky");
+  await quantity.scrollIntoViewIfNeeded();
+  await expect(reviewSelected).toBeInViewport();
+  await levels.nth(5).scrollIntoViewIfNeeded();
+  await expect(reviewSelected).toBeInViewport();
+  const dock = page
+    .getByRole("navigation", { name: "Primary navigation", exact: true })
+    .locator('[data-mobile-bottom-nav-dock="true"]');
+  if (await dock.isVisible()) {
+    const barBounds = (await bar.boundingBox())!;
+    expect(barBounds.y + barBounds.height).toBeLessThanOrEqual(
+      (await dock.boundingBox())!.y
+    );
+  }
+  await page.screenshot({
+    path: info.outputPath("market-depth-selection.png"),
+    fullPage: false,
+  });
+  // Audit the selected controls; arbitrary scroll offsets can partially reveal
+  // another table row behind the sticky bar. Verify focused rows clear it below.
+  const selectedScan = await new AxeBuilder({ page })
+    .include('table:has([aria-pressed="true"])')
+    .include("[data-market-depth-selection-bar]")
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+    .analyze();
+  expect(selectedScan.violations).toEqual([]);
+  await levels.nth(6).focus();
+  const focusedLevelBounds = (await levels.nth(6).boundingBox())!;
+  expect(focusedLevelBounds.y + focusedLevelBounds.height).toBeLessThanOrEqual(
+    (await bar.boundingBox())!.y
+  );
+  await reviewSelected.click();
+  const purchaseReview = page.getByRole("dialog", {
+    name: "Review your purchase",
+    exact: true,
+  });
+  await expect(
+    purchaseReview.getByRole("heading", {
+      name: "Review your purchase",
+      exact: true,
+    })
+  ).toBeVisible();
+  await expect(
+    purchaseReview.getByRole("button", { name: "Connect wallet", exact: true })
+  ).toBeVisible();
+  await expect(
+    purchaseReview.getByRole("button", {
+      name: "Review live total",
+      exact: true,
+    })
+  ).toBeDisabled();
+  await expect(
+    purchaseReview.getByRole("button", {
+      name: "Review live total",
+      exact: true,
+    })
+  ).toBeInViewport();
+  await expect(
+    purchaseReview.getByText("#70 · Quantity 2", { exact: true })
+  ).toBeVisible();
+  await page.screenshot({
+    path: info.outputPath("market-depth-purchase-review.png"),
+    fullPage: false,
+  });
+  const reviewScan = await new AxeBuilder({ page })
+    .include('[role="dialog"]')
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+    .analyze();
+  expect(reviewScan.violations).toEqual([]);
+  await purchaseReview
+    .getByRole("button", { name: "Change", exact: true })
+    .click();
+  await expect(
+    purchaseReview.getByRole("textbox", {
+      name: "Or enter a wallet address directly",
+      exact: true,
+    })
+  ).toBeVisible();
+  await purchaseReview
+    .getByRole("button", { name: "Done", exact: true })
+    .click();
+  await purchaseReview
+    .getByRole("button", { name: "Back to selection", exact: true })
+    .click();
+  await expect(purchaseReview).toHaveCount(0);
+  await expect(reviewSelected).toBeFocused();
+  await expect(quantity).toHaveValue("2");
+  await remove.click();
+  await expect(reviewSelected).toHaveCount(0);
+  await expect(quantity).toHaveCount(0);
   expect(lookups).toContain("memelab");
   expect(lookups).not.toContain("memes");
   const offer = page.getByRole("button", {

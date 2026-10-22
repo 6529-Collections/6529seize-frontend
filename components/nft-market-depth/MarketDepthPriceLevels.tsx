@@ -75,7 +75,7 @@ export default function MarketDepthPriceLevels({
   }
 
   return (
-    <div className="tw-min-w-0 tw-@container">
+    <div className="tw-min-w-0 tw-@container [&_button]:tw-scroll-mb-40 [&_input]:tw-scroll-mb-40">
       <div className="tw-min-w-0">
         <table className="tw-w-full tw-table-fixed tw-border-separate tw-border-spacing-x-0 tw-border-spacing-y-1 tw-text-right tw-text-meta tw-leading-5">
           <caption className="tw-sr-only">
@@ -143,7 +143,7 @@ export default function MarketDepthPriceLevels({
               };
               return (
                 <Fragment key={level.unit_price}>
-                  <tr className="tw-group">
+                  <tr className="tw-group [&:has([aria-pressed=true])>td:first-child]:tw-rounded-bl-none [&:has([aria-pressed=true])>td:first-child]:tw-rounded-tl-xl [&:has([aria-pressed=true])>td:first-child]:tw-shadow-[inset_2px_0_0_theme(colors.primary-500)] [&:has([aria-pressed=true])>td:last-child]:tw-rounded-br-none [&:has([aria-pressed=true])>td:last-child]:tw-rounded-tr-xl [&:has([aria-pressed=true])>td]:tw-border-b-transparent [&:has([aria-pressed=true])>td]:tw-bg-primary-500/[0.12]">
                     <td
                       className={`${cellClass} ${best ? "tw-rounded-l-xl" : ""} ${best && !tradeActionsAvailable ? "tw-rounded-r-xl sm:tw-rounded-r-none" : ""} tw-py-0 tw-pl-0 tw-text-left sm:tw-pl-5 sm:tw-pr-3`}
                     >

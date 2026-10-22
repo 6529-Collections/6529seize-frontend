@@ -250,9 +250,11 @@ export function MarketDepthOrderFeedback({
     )
   );
   const feedback = (
-    <div className="tw-space-y-2 tw-pb-4 tw-pt-2 tw-text-left">
+    <div
+      className={`tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-pb-4 tw-pt-2 tw-text-left ${tableRow ? "tw-px-3 sm:tw-px-5" : ""}`}
+    >
       {selected && (
-        <label className="tw-inline-grid tw-gap-1.5 tw-text-meta tw-text-iron-400">
+        <label className="tw-inline-flex tw-items-center tw-gap-3 tw-text-meta tw-text-iron-400">
           <span>{t(locale, "marketDepth.trade.quantity")}</span>
           <input
             type="text"
@@ -266,7 +268,7 @@ export function MarketDepthOrderFeedback({
             onChange={(event) =>
               context.updateQuantity(order, event.currentTarget.value)
             }
-            className="tw-font-inherit tw-h-11 tw-w-24 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-text-sm tw-tabular-nums tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            className="tw-font-inherit tw-h-11 tw-w-16 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-text-center tw-text-sm tw-tabular-nums tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
           />
         </label>
       )}
@@ -279,7 +281,7 @@ export function MarketDepthOrderFeedback({
         <p
           id={quantityErrorId}
           role="alert"
-          className="tw-m-0 tw-text-xs tw-text-rose-200"
+          className="tw-m-0 tw-w-full tw-text-xs tw-text-rose-200"
         >
           {t(locale, "marketDepth.trade.quantityInvalid")}
         </p>
@@ -309,7 +311,14 @@ export function MarketDepthOrderFeedback({
     <NftPurchasingGate>
       {tableRow ? (
         <tr>
-          <td colSpan={4} className="tw-p-0">
+          <td
+            colSpan={4}
+            className={
+              selected
+                ? "tw-relative tw-rounded-b-xl tw-bg-primary-500/[0.12] tw-p-0 tw-shadow-[inset_2px_0_0_theme(colors.primary-500)] before:tw-absolute before:tw-inset-x-0 before:tw-top-[-4px] before:tw-h-1 before:tw-bg-primary-500/[0.12] before:tw-shadow-[inset_2px_0_0_theme(colors.primary-500)] before:!tw-content-['']"
+                : "tw-p-0"
+            }
+          >
             {feedback}
           </td>
         </tr>
