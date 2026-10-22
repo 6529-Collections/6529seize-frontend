@@ -105,12 +105,15 @@ export const reconcileIdentityFollowingAfterBlockChange = async (
   profileHandle: string | null | undefined
 ): Promise<void> => {
   if (profileHandle) {
-    queryClient.setQueryData<ApiIdentitySubscriptionActions>(
-      [QueryKey.IDENTITY_FOLLOWING_ACTIONS, profileHandle],
+    queryClient.setQueriesData<ApiIdentitySubscriptionActions>(
+      { queryKey: [QueryKey.IDENTITY_FOLLOWING_ACTIONS, profileHandle] },
       { actions: [] }
     );
   }
   await Promise.allSettled([
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.IDENTITY_FOLLOWING],
+    }),
     queryClient.invalidateQueries({
       queryKey: [QueryKey.IDENTITY_FOLLOWING_ACTIONS],
     }),

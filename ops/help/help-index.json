@@ -6392,18 +6392,31 @@
     {
       "id": "profiles.followers-tab",
       "kind": "route",
-      "title": "Profile followers",
-      "aliases": ["followers", "profile followers", "who follows profile"],
+      "title": "Profile followers and your following list",
+      "aliases": [
+        "followers",
+        "profile followers",
+        "who follows profile",
+        "following",
+        "who I follow",
+        "find people I follow"
+      ],
       "keywords": ["profile", "followers", "following", "social"],
       "facts": [
-        "Profile followers live at /{user}/followers.",
-        "Use this route when users ask where to see follower relationships for a profile.",
-        "Follower information is profile-specific, not a Network-wide leaderboard."
+        "Open Followers in a profile's header to see its followers in a dialog or mobile sheet. The legacy /{user}/followers route redirects to the profile.",
+        "On your own signed-in profile, Following appears beside Followers with the total number of identities you follow. Open it to rediscover profiles by their image, handle and level, visit profile links, or unfollow them.",
+        "Scroll or choose Load more for additional followed identities. Follow/unfollow actions refresh the list and total.",
+        "Following is hidden when signed out, viewing someone else's profile, or using a profile proxy. Public following lists for other identities are not available.",
+        "If Following shows Unavailable or a list request fails, open the list and choose Retry. A failed request is not a zero count or an empty list."
       ],
-      "canonical_path": "/{user}/followers",
-      "related_paths": ["/{user}"],
+      "canonical_path": "/{user}",
+      "related_paths": ["/{user}/followers"],
       "tags": ["profiles", "followers"],
-      "source_refs": ["app/[user]/followers/page.tsx"]
+      "source_refs": [
+        "app/[user]/followers/page.tsx",
+        "components/user/following/UserPageFollowing.tsx",
+        "ops/docs/profiles/navigation/feature-header-summary.md"
+      ]
     },
     {
       "id": "profiles.xtdh-tab",

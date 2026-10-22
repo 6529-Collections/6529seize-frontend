@@ -111,7 +111,7 @@ function buildSyntheticJwt() {
       sub: SANDBOX_WALLET.toLowerCase(),
       iat: 1760000000,
       exp: 2000000000,
-      role: "",
+      role: null,
     }),
     "",
   ].join(".");
@@ -133,6 +133,10 @@ const localProfile = {
   query: SANDBOX_HANDLE,
   handle: SANDBOX_HANDLE,
   normalised_handle: SANDBOX_HANDLE,
+  consolidation_key: "",
+  display: SANDBOX_HANDLE,
+  banner1: null,
+  banner2: null,
   pfp: null,
   banner1_color: null,
   banner2_color: null,
@@ -2607,6 +2611,7 @@ const mockApiExactReadRoutes = new Map([
   ["/api/v2/boosted-drops", () => emptyPage()],
   ["/api/v2/drops", () => emptyPage()],
   ["/api/mention-aliases", () => []],
+  ["/api/content-moderation/blocked-profiles", () => []],
   ["/api/feed", () => []],
 ]);
 
@@ -2623,6 +2628,30 @@ const mockApiPatternReadRoutes = [
       terms: null,
       collaborators: [],
       invitations: [],
+    }),
+  },
+  {
+    pattern: /^\/api\/profiles\/[^/]+\/(rep|cic)\/overview$/,
+    response: () => ({
+      total_rep: 0,
+      total_cic: 0,
+      authenticated_user_contribution: null,
+      contributor_count: 0,
+      contributors: emptyPage(),
+    }),
+  },
+  { pattern: /^\/api\/profiles\/[^/]+\/cic\/statements$/, response: () => [] },
+  {
+    pattern: /^\/api\/identities\/following-artist-0$/,
+    response: () => ({
+      ...localProfile,
+      id: "following-0",
+      handle: "following-artist-0",
+      normalised_handle: "following-artist-0",
+      query: "following-artist-0",
+      wallets: [],
+      primary_wallet: "0x0000000000000000000000000000000000000001",
+      primary_address: "0x0000000000000000000000000000000000000001",
     }),
   },
   { pattern: /^\/api\/waves\/[^/]+$/, response: () => localWave },

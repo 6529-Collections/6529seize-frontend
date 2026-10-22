@@ -1,8 +1,27 @@
 import { QueryClient } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
-import { invalidateContentModerationPresentation } from "@/services/content-moderation/content-moderation-query";
+import {
+  invalidateContentModerationPresentation,
+  reconcileIdentityFollowingAfterBlockChange,
+} from "@/services/content-moderation/content-moderation-query";
 
 describe("content moderation query invalidation", () => {
+  it("clears scoped follow actions and refreshes the private list after blocking", async () => {
+    const client = new QueryClient();
+    const key = [
+      QueryKey.IDENTITY_FOLLOWING_ACTIONS,
+      "artist",
+      { identityId: "owner" },
+    ];
+    client.setQueryData(key, { actions: ["DROP_CREATED"] });
+    client.setQueryData([QueryKey.IDENTITY_FOLLOWING, "owner"], { count: 1 });
+    await reconcileIdentityFollowingAfterBlockChange(client, "artist");
+    expect(client.getQueryData(key)).toEqual({ actions: [] });
+    expect(
+      client.getQueryState([QueryKey.IDENTITY_FOLLOWING, "owner"])
+        ?.isInvalidated
+    ).toBe(true);
+  });
   it("attempts every presentation invalidation when one rejects", async () => {
     const queryClient = new QueryClient();
     const invalidateSpy = jest
