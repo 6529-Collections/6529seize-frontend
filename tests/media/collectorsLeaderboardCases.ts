@@ -61,9 +61,17 @@ export function defineCollectorsLeaderboardTests() {
       .locator("..")
       .locator("..");
     const list = page.getByRole("list", { name: "Collectors leaderboard" });
+    const csvButton = section.getByRole("button", {
+      name: "Download collectors leaderboard as CSV",
+    });
+    const csvTooltip = page
+      .getByRole("tooltip")
+      .filter({ hasText: "Download CSV" });
     const initialWidth = page.viewportSize()?.width ?? 1280;
 
     if (initialWidth >= 768) {
+      await csvButton.focus();
+      await expect(csvTooltip).toBeHidden();
       await expect(list).toBeHidden();
       await expect(section.getByRole("table").getByRole("row")).toHaveCount(27);
       await expect(
@@ -87,6 +95,16 @@ export function defineCollectorsLeaderboardTests() {
       "This card TDH: 0"
     );
     await expect(list.getByRole("listitem").nth(1)).toContainText("1 card");
+
+    await csvButton.hover();
+    await expect(csvTooltip).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(csvTooltip).toBeHidden();
+    await csvButton.focus();
+    await expect(csvTooltip).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(csvTooltip).toBeHidden();
+    await csvButton.blur();
 
     for (const width of [320, 360, 375, 380, 381, 390, 430, 640, 767]) {
       await page.setViewportSize({ width, height: 844 });
@@ -135,6 +153,9 @@ export function defineCollectorsLeaderboardTests() {
     for (const width of [768, 1023, 1024]) {
       await page.setViewportSize({ width, height: 844 });
       await expect(list).toBeHidden();
+      await csvButton.focus();
+      await expect(csvTooltip).toBeHidden();
+      await csvButton.blur();
       await expect(section.getByRole("table")).toBeVisible();
       await expect(section.getByRole("table").getByRole("row")).toHaveCount(27);
       await expect(
@@ -181,9 +202,9 @@ export function defineCollectorsLeaderboardTests() {
     await expect(
       page.getByRole("button", { name: "Next page", exact: true })
     ).toBeHidden();
-    await expect(
-      section.getByText("1 collector", { exact: true })
-    ).toHaveCount(0);
+    await expect(section.getByText("1 collector", { exact: true })).toHaveCount(
+      0
+    );
 
     const download = page.waitForEvent("download");
     await section

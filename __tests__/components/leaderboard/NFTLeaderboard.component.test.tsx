@@ -99,6 +99,37 @@ describe("NFTLeaderboard component", () => {
     );
   });
 
+  it("shows the CSV tooltip on hover and keyboard focus without downloading", async () => {
+    const user = userEvent.setup();
+    commonApiFetch.mockResolvedValue({ count: 1, data: [collector] });
+    renderLeaderboard();
+    await within(screen.getByRole("table")).findByText("alice");
+    commonApiFetch.mockClear();
+    const downloadButton = screen.getByRole("button", {
+      name: "Download collectors leaderboard as CSV",
+    });
+
+    await user.hover(downloadButton);
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(
+      "Download CSV"
+    );
+    await user.unhover(downloadButton);
+    await waitFor(() =>
+      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+    );
+
+    await user.tab();
+    expect(downloadButton).toHaveFocus();
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(
+      "Download CSV"
+    );
+    await user.keyboard("{Escape}");
+    await waitFor(() =>
+      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+    );
+    expect(commonApiFetch).not.toHaveBeenCalled();
+  });
+
   it("downloads a collectors CSV for the current leaderboard request", async () => {
     commonApiFetch.mockResolvedValue({ count: 1, data: [collector] });
     const createObjectURL = jest.fn(() => "blob:collectors");

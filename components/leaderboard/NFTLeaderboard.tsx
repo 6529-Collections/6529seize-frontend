@@ -4,6 +4,7 @@ import {
   type ReactNode,
   useCallback,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -16,6 +17,8 @@ import { t } from "@/i18n/messages";
 import { formatInteger } from "@/i18n/format";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
+import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { DATA_TABLE_HEADER_TEXT_CLASS_NAME } from "@/components/utils/table/tableStyles";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "@/entities/ISort";
@@ -361,6 +364,7 @@ function CollectorsCsvDownloadControls({
   sortDirection: SortDirection;
 }>) {
   const csvAbortControllerRef = useRef<AbortController | null>(null);
+  const csvTooltipId = useId();
   const [csvDownloadState, setCsvDownloadState] = useState<
     Readonly<{
       status: CsvDownloadStatus;
@@ -440,6 +444,12 @@ function CollectorsCsvDownloadControls({
   ]);
 
   const isCsvDownloading = csvStatus === "downloading";
+  const csvButtonLabel = t(
+    locale,
+    isCsvDownloading
+      ? "theMemes.detail.collectors.downloadingCsv"
+      : "theMemes.detail.collectors.downloadCsv"
+  );
 
   return (
     <div className="tw-flex tw-flex-col tw-items-end tw-gap-2 max-md:tw-contents max-md:[&>div>button]:tw-size-9 max-md:[&>div>button]:tw-shrink-0 max-md:[&>div>button]:tw-rounded-lg max-md:[&>div>button]:tw-border-iron-800 max-md:[&>div>button]:tw-bg-iron-950 max-md:[&>div>button]:tw-p-0 max-md:[&>div>button]:tw-text-iron-300 max-md:[&>div]:tw-contents max-md:[&>p]:tw-order-2 max-md:[&>p]:tw-w-full">
@@ -449,6 +459,7 @@ function CollectorsCsvDownloadControls({
           onClick={handleCsvDownload}
           disabled={isCsvDownloading}
           aria-busy={isCsvDownloading}
+          data-tooltip-id={csvTooltipId}
           variant="secondary"
           size="sm"
           aria-label={t(
@@ -457,9 +468,7 @@ function CollectorsCsvDownloadControls({
           )}
         >
           <span className="tw-hidden tw-whitespace-nowrap md:tw-inline">
-            {isCsvDownloading
-              ? t(locale, "theMemes.detail.collectors.downloadingCsv")
-              : t(locale, "theMemes.detail.collectors.downloadCsv")}
+            {csvButtonLabel}
           </span>
           <FontAwesomeIcon
             icon={isCsvDownloading ? faSpinner : faDownload}
@@ -469,6 +478,14 @@ function CollectorsCsvDownloadControls({
         </Button>
         {children}
       </div>
+      <BodyPortalTooltip
+        id={csvTooltipId}
+        content={csvButtonLabel}
+        place="top"
+        className="md:!tw-hidden"
+        style={TOOLTIP_STYLES}
+        globalCloseEvents={{ escape: true, scroll: true, resize: true }}
+      />
       <span className="tw-sr-only" role="status" aria-live="polite">
         {csvStatusMessage}
       </span>

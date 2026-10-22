@@ -111,7 +111,8 @@
 - Large mobile values use compact notation from 100,000, with exact displayed
   values available to assistive technology. Download CSV exports all matching
   collectors with full numeric values in the selected order. Its icon shows
-  progress, announces completion, and reports a download failure for retry.
+  a tooltip on hover or keyboard focus when the text label is hidden. The button
+  shows progress, announces completion, and reports a download failure for retry.
 - At 768 px and wider, the Collectors table shows the same information in
   columns. Sorting and paging keep the previous rows visible while the next
   results load.
