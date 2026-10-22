@@ -8,6 +8,7 @@ import {
 import { memo, useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import ButtonLink from "@/components/utils/button/ButtonLink";
+import { HOME_ACTION_ARROW_CLASSES } from "../homeInteractionStyles";
 
 interface NowMintingCountdownActiveProps {
   readonly countdown: CountdownData;
@@ -17,7 +18,7 @@ export default function NowMintingCountdownActive({
   countdown,
 }: NowMintingCountdownActiveProps) {
   return (
-    <div className="tw-relative tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-3 tw-text-left md:tw-p-4">
+    <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900 tw-p-4 tw-text-left md:tw-p-5">
       {countdown.showAllowlistInfo && (
         <Tooltip
           id="allowlist-info"
@@ -36,8 +37,8 @@ export default function NowMintingCountdownActive({
           }}
         />
       )}
-      <div className="tw-mb-4 tw-flex tw-items-center tw-justify-between">
-        <span className="tw-py-0.5 tw-text-xs tw-font-semibold tw-text-iron-300">
+      <div className="tw-mb-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2">
+        <span className="tw-whitespace-nowrap tw-py-0.5 tw-text-xs tw-font-semibold tw-text-iron-100">
           {countdown.title}
         </span>
         <div className="tw-flex tw-items-center tw-gap-2">
@@ -45,13 +46,13 @@ export default function NowMintingCountdownActive({
             <InformationCircleIcon
               data-tooltip-id="allowlist-info"
               data-tooltip-content="The timer displays the current time remaining for a specific phase of the drop. Please refer to the distribution plan to check if you are in the allowlist."
-              className="tw-size-5 tw-cursor-help tw-text-iron-400 hover:tw-text-iron-300"
+              className="tw-size-5 tw-cursor-help tw-text-iron-400 tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none"
             />
           )}
           {countdown.isActive ? (
             <div className="tw-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-success/20 tw-bg-success/10 tw-px-2 tw-py-0.5">
               <span className="tw-relative tw-flex tw-h-2 tw-w-2">
-                <span className="tw-absolute tw-inline-flex tw-h-full tw-w-full tw-animate-ping tw-rounded-full tw-bg-success/60" />
+                <span className="tw-absolute tw-inline-flex tw-h-full tw-w-full tw-rounded-full tw-bg-success/60 motion-safe:tw-animate-ping" />
                 <span className="tw-relative tw-inline-flex tw-h-2 tw-w-2 tw-rounded-full tw-bg-success" />
               </span>
               <span className="tw-text-[10px] tw-font-semibold tw-text-success/80">
@@ -59,15 +60,15 @@ export default function NowMintingCountdownActive({
               </span>
             </div>
           ) : (
-            <div className="tw-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-amber-500/20 tw-bg-amber-500/10 tw-px-2 tw-py-0.5">
-              <span className="tw-text-[10px] tw-font-semibold tw-text-amber-400">
+            <div className="tw-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-transparent tw-bg-amber-500/10 tw-px-2 tw-py-0.5">
+              <span className="tw-text-[11px] tw-font-semibold tw-text-amber-400">
                 Upcoming
               </span>
             </div>
           )}
         </div>
       </div>
-      <div className="tw-flex tw-h-14 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-white/10 tw-bg-iron-950 tw-shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]">
+      <div className="tw-flex tw-h-14 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-white/[0.06] tw-bg-black/30 tw-shadow-none">
         <div className="tw-text-xl tw-font-bold tw-tabular-nums tw-text-iron-50 md:tw-text-2xl">
           <LiveCountdown targetTimestampSeconds={countdown.targetDate} />
         </div>
@@ -77,13 +78,13 @@ export default function NowMintingCountdownActive({
         <ButtonLink
           data-home-action="Mint"
           href="/the-memes/mint"
-          size="md"
+          size="lg"
           fullWidth
-          className="tw-mt-3"
+          className="tw-group/action tw-mt-3 motion-reduce:tw-transition-none"
         >
           Mint
           <ArrowRightIcon
-            className="tw-size-4 tw-flex-shrink-0"
+            className={HOME_ACTION_ARROW_CLASSES}
             strokeWidth={2}
           />
         </ButtonLink>
@@ -130,7 +131,7 @@ const LiveCountdown = memo(
       };
     }, [isPageVisible, targetTimestampSeconds]);
 
-    return <span>{display}</span>;
+    return <span role="timer">{display}</span>;
   }
 );
 

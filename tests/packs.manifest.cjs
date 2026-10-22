@@ -429,10 +429,10 @@ const PACKS = [
         "tests/social/native-competition-sandbox.spec.ts",
         "tests/social/wave-notification-settings-sandbox.spec.ts",
         "tests/social/wave-switch-loading.spec.ts",
+        "tests/social/wave-loading-sandbox.spec.ts",
       ],
       {
         ...AUTH_SANDBOX_ENV,
-        NEXT_PUBLIC_FEATURE_MULTI_COMPETITION: "true",
         PLAYWRIGHT_BASE_URL: "http://localhost:3297",
         PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3297",
         PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4297",

@@ -7,6 +7,28 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The `content-moderation.controls` record covers WatchTower's red Deleted pills,
+reasoned and confirmed resolution of open reports for a deleted post, retained
+evidence and history, and the distinction from Mark reviewed. Live originals
+have a dedicated post link; deleted posts hide that action and identify saved
+evidence without claiming expired evidence remains available. Saved previews
+include post titles and textual parts. Needs review is the default queue of
+unique subject-based cases covering user reports and pending checks, with a
+shared sidebar signal and summary/tab count and a compatible older
+open-reports link. Review case opens all outstanding cases on the left with the
+selected case highlighted and its reports, checks and evidence on the right.
+The Needs review only toggle applies review status immediately, preserving other
+applied filters. Filter checks opens advanced controls explicitly; edits remain
+pending until Apply filters synchronizes the results and toggle. Quick toggles
+preserve other drafts and the panel's open/closed state. Additional filters browse
+individual check history. Back to list appears on mobile; desktop uses the
+visible list without a redundant back button. Automated outcome is distinct
+from deletion and manual review status.
+
+The `home.overview` record explains the Coming up full-width vertical card
+list below 768px, keyboard navigation through card links, tablet/desktop grid,
+and drop, profile and wave destinations.
+
 The `waves.drop.editing` record covers author-only editing, the normal edit
 window, and unlimited editing of the wave's current pinned description drop.
 
@@ -33,10 +55,17 @@ controls. It also explains that app tabs already in view keep their position
 when selected. It does not promise instant data or a loading screen on every switch.
 
 The Wave discovery record describes the independent Active Votes and Worth Checking Out
-sidebar sections, their explanations and view-all destinations. It covers the
-scrollable three-row voting window, pagination, compact empty/error states and
+sidebar sections, their explanations and view-all destinations. It describes
+quiet loading placeholders, explanations that appear with content, empty messages
+only after successful empty requests, and retry without discarding loaded votes.
+It covers the scrollable three-row voting window, pagination, compact empty/error states and
 independently persisted collapse preferences. Worth Checking Out comes first
 and retains its own compact preview height.
+The discovery and Network wave score records also describe returning from Score
+formula: the app header Back control restores the originating Discover URL and
+its selected sort and threshold; the page link provides the same return on web.
+The Memes Quick Vote record describes its persistent top-left close below 768px,
+top-right close at wider widths, matching loading header and focus restoration.
 
 The `delegation.wallet-checker` record covers linked-wallet reads with a
 six-counterparty cap, pair deduplication, relevant missing-reverse-link
@@ -63,12 +92,15 @@ menu in desktop and tablet sidebars.
 
 The `network.identities-leaderboard` record describes the mobile filter's vertical
 criteria list, individual editors, Back navigation, preserved drafts, and
-readiness guidance available from the information button. The footer shows the
-criteria summary without an editing label; the top summary appears only for a
-selected group. Included identities omit repeated empty import messages and
-show a combined count once identities are selected or imported. The xTDH grant
-search shows Clear filters only when its search fields or status differ from
-the defaults; clearing restores Granted without removing a selected grant.
+readiness guidance available from the information button. On mobile, the selected
+criteria summary is a filled card at the end of the list or editor, scrolling
+with the content while only the create action remains fixed. Desktop keeps the
+summary beside the action. Create Wave uses the matching mobile summary card
+in the form's scroll flow. The top summary appears only for a selected group.
+Both identity tabs omit repeated empty-selection and import messages, and the
+bottom summary retains the combined counts. The xTDH grant
+search shows Clear filters only when a collection name or grantor is set;
+clearing preserves the active status tab without removing a selected grant.
 On mobile, grant search fields and cards share one scroll area, with Load more
 after the last loaded card and sheet navigation and the bottom action accessible. Desktop retains
 the left-side criteria list, and saving still creates and applies a new group.
@@ -215,6 +247,11 @@ It distinguishes link composers from file sharing, includes Instagram's
 save/share-and-paste flow, and explains preparation failures and device-dependent
 share destinations.
 It does not claim automatic posting or successful publication after a handoff.
+
+The profile tab record covers immediate selection feedback, the persistent header,
+scroll preservation with natural settling for shorter content, and clearing
+Collected transfer selections when leaving that tab. It preserves shared
+`address` and `locale` parameters and describes the xTDH Granted default.
 
 The profile website studio records cover 39 editable templates (23 original
 compositions and 16 credited Memes inspirations), page and menu editing, image
@@ -704,3 +741,50 @@ The media playback record also describes contained still artwork on the
 homepage, Meme detail, and expanded Wave submissions: the shared usable-screen
 height cap, desktop homepage details-height limit, natural-height full-width
 mobile homepage images without reserved gaps, and stable Meme image frame.
+
+## Meme collaborator invitations
+
+The Memes submission record covers multiple profile invitations, final consent,
+private pending names, accepted collaborator profile attribution, and the
+next-mint selection cutoff. The Craft documentation covers accepted collaborators as initial claim
+credits, admin editing of final mint artwork and traits, and Arweave publication
+of the saved claim without invitation checks. The frontend corpus records
+that pending invitations never delay voting or minting, and that attribution
+confers neither editing rights nor payment/airdrop arrangements.
+
+## Create Wave criteria navigation
+
+Create Wave access editing uses a vertical category list on smaller screens and
+touch devices. Selecting a category opens its fields; the shared Back control
+returns to the list and preserves the pending criteria. Desktop keeps its
+left-side criteria list. The help corpus distinguishes this from Configuration
+access editors, which retain their compact horizontal navigation.
+
+Create Wave also uses Network Filter’s concise Included copy and shared readiness
+tooltip. The editor omits Before editing and After editing captions and the default
+Everyone summary during editing, while preserving saved-group details, draft
+criteria, member previews, privacy, and save/cancel behavior. Configuration retains
+its existing comparison captions.
+
+Inside a Create Wave mobile category, the shared Back and Cancel actions occupy
+one row, with Back on the left and Cancel on the right; their behavior is unchanged.
+
+Create Wave and Network Filter omit the intermediate combined identity total in
+both Included and Excluded. The bottom criteria summary retains the counts, while
+individual source counts, limit warnings, import errors, and creator warnings remain.
+
+Create Wave and Network Filter use distinct stacked identity, EMMA, and CSV
+sections on phones and touch tablets. Search and upload controls remain visible,
+alongside source results, loading, errors, retry, and removal. Desktop retains its
+two-column import layout.
+
+Both Included and Excluded omit the empty EMMA and CSV source messages in Create
+Wave and Network Filter.
+
+Both identity tabs show a title above the search field: Find an identity to include
+or Find an identity to exclude. The placeholders are Search identities to
+include... and Search identities to exclude..., respectively.
+Create Wave and Network Filter omit empty-selection sentences in both tabs while
+preserving limits, errors, warnings, and the bottom criteria summary.
+
+Competition list corrections: My Votes includes only active nonzero votes; archived winner votes remain retained. Winners paginate by win time newest first.

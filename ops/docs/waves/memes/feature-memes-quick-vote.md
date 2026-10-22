@@ -27,7 +27,8 @@ participatory submissions in the configured memes wave.
 
 1. Open quick vote from any available trigger.
 2. Quick vote opens a full dialog skeleton while it loads the unrated memes
-   queue and remembered vote amounts.
+   queue and remembered vote amounts. The close button is available and receives
+   initial keyboard focus during loading.
 3. Review the current meme preview, including artwork, title, description,
    author, and timestamp. Submission counts appear at the top; remaining voting
    power appears above the voting controls.
@@ -56,6 +57,10 @@ participatory submissions in the configured memes wave.
   Select `Change vote amount` to open it. Closing the editor keeps the typed
   draft for reopening on the same submission; typing alone does not save a
   remembered amount for later submissions.
+- Below 768px, the close button stays at the top left through loading, loaded,
+  error and restart states. The loading header reserves the same space as the
+  two-line submission counts. At 768px and wider, close stays at the top right.
+  Escape and clicking the backdrop close the dialog; focus returns to the opener.
 - In the native app's mobile layout, the dialog shrinks when the keyboard opens
   to keep the amount input and voting controls above it.
 - Remembered amounts appear above the control bar while custom entry is closed.

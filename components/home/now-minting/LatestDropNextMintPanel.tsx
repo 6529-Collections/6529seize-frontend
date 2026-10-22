@@ -1,4 +1,5 @@
 "use client";
+import { MemeCollaboratorCredits } from "@/components/waves/memes/collaborations/MemeCollaboratorCredits";
 
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
@@ -66,7 +67,7 @@ const subscribeToMinuteClock = (onStoreChange: () => void) => {
 
 export function LatestDropNextMintPanelSkeleton() {
   return (
-    <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-shadow-[0_24px_60px_rgba(0,0,0,0.2)]">
+    <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-shadow-[0_24px_60px_rgba(0,0,0,0.2)] motion-reduce:[&_*]:tw-animate-none">
       <div className="tw-grid tw-grid-cols-1 tw-items-stretch lg:tw-grid-cols-12 xl:tw-grid-cols-9">
         <div className="tw-flex tw-p-0 lg:tw-col-span-6 xl:tw-col-span-5">
           <div className="tw-relative tw-min-h-[clamp(360px,65vw,640px)] tw-w-full tw-bg-iron-800/50 motion-safe:tw-animate-pulse" />
@@ -211,7 +212,7 @@ export default function LatestDropNextMintPanel({
               <Link
                 data-home-action="Open drop"
                 href={`/waves?wave=${drop.wave.id}&drop=${drop.id}`}
-                className="tw-mt-3 tw-w-fit tw-max-w-full tw-text-balance tw-rounded-sm tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none md:tw-text-3xl"
+                className="tw-mt-3 tw-w-fit tw-max-w-full tw-text-balance tw-rounded-sm tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none md:tw-text-3xl"
               >
                 {title}
               </Link>
@@ -239,14 +240,7 @@ export default function LatestDropNextMintPanel({
                 />
               </div>
 
-              {nextMintCardId && (
-                <div className="tw-mt-8 tw-flex tw-flex-col tw-gap-3">
-                  {hasMappedMemeCard ? (
-                    <LatestDropAllowlistStatus tokenId={mappedMemeCardId} />
-                  ) : null}
-                  <LatestDropNextMintSubscribe tokenId={nextMintCardId} />
-                </div>
-              )}
+              <MemeCollaboratorCredits collaborators={drop.collaborators} />
             </div>
 
             <div className="tw-grid tw-grid-cols-2 tw-gap-x-8 tw-gap-y-5">
@@ -258,7 +252,7 @@ export default function LatestDropNextMintPanel({
                     <Link
                       data-home-action="Open wave"
                       href={`/waves/${drop.wave.id}`}
-                      className="tw-inline-flex tw-max-w-full tw-items-center tw-text-iron-200 tw-no-underline desktop-hover:hover:tw-text-iron-100"
+                      className="tw-inline-flex tw-max-w-full tw-items-center tw-rounded-sm tw-text-iron-200 tw-no-underline tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300 motion-reduce:tw-transition-none"
                     >
                       <span className="tw-min-w-0 tw-truncate">
                         {drop.wave.name}
@@ -286,6 +280,15 @@ export default function LatestDropNextMintPanel({
                 />
               </div>
             </div>
+
+            {nextMintCardId !== null && (
+              <div className="tw-flex tw-flex-col tw-gap-3">
+                {hasMappedMemeCard ? (
+                  <LatestDropAllowlistStatus tokenId={mappedMemeCardId} />
+                ) : null}
+                <LatestDropNextMintSubscribe tokenId={nextMintCardId} />
+              </div>
+            )}
           </div>
         </div>
       </div>

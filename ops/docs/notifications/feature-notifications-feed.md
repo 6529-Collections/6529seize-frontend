@@ -33,11 +33,11 @@ with a multi-select cause filter, grouped reactions, and inline drop previews.
   `You need to set up a profile to continue.` with
   `Create a profile to access notifications.` and `Create profile`. The action
   opens the connected wallet's profile setup route.
-- Profile loading: `Loading profile...`.
+- Profile loading: the same `Loading notifications` indicator used during route preparation and wallet restoration.
 - Proxy profile active:
   `Notifications are not available while you are using a profile proxy.` with
   `Switch to primary profile`.
-- Initial feed load: `Loading notifications...`.
+- Route preparation, wallet restoration, profile loading, and the initial feed fetch use one consistent `Loading notifications` indicator. There is no separate route shimmer before the feed loader.
 - First-load failure: error copy with `Try again`.
 - First-load timeout:
   `Loading notifications is taking longer than expected. Please try again.`
@@ -90,6 +90,10 @@ Browser realtime notification delivery remains connected while the tab is hidden
     running-low, or action-required state.
 
 ## Row and Action Behavior
+
+- Competition result notifications show a trophy beside “Results are in for”
+  and the linked competition name, followed by a timestamp. The row wraps long
+  names on mobile and desktop. The name opens the relevant competition or entry.
 
 - Notifications are separated by spacing, and timestamps use secondary emphasis.
 - Long profile names, wave names, rating categories, and fallback details wrap
@@ -164,19 +168,6 @@ Browser realtime notification delivery remains connected while the tab is hidden
 - Cause filters only affect `/notifications` results.
 - If auth expires, the page can trigger one re-auth request automatically after
   an unauthorized notifications error.
-
-### Localization fallback debt
-
-- Route or component: `/notifications` wallet connection loader.
-- Untranslated surface: the loader's accessible status label.
-- Current fallback behavior: all supported locales use the canonical `en-US`
-  `Loading notifications` status while this route has no local message family.
-- User impact: the loading state remains accessible and functional, but its
-  announcement is English-only.
-- Owner or follow-up issue: frontend i18n backlog.
-- Expected remediation path: move the notifications loading and recovery copy,
-  including accessible names, into one shared message family and verify its
-  fallback behavior across all supported locales.
 
 ## Related Pages
 

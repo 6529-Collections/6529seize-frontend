@@ -1,3 +1,4 @@
+import { MEME_COLLABORATION_MESSAGES } from "@/i18n/messages/meme-collaborations";
 import emmaMessages from "@/i18n/messages/emma.en-US.json";
 import { EN_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import waveCreationMessages from "@/i18n/messages/wave-creation.en-US.json";
@@ -147,6 +148,7 @@ const USER_COLLECTED_STATS_MESSAGES = namespaceMessages(
     ["details.show", "Details"],
     ["details.hide", "Hide Details"],
     ["details.unavailable", "Stats are unavailable for this profile."],
+    ["details.loading", "Loading collection details…"],
     ["seasons.title", "Seasons"],
     ["seasons.startedCount", "{started}/{total} started"],
     ["seasons.showLess", "Show less"],
@@ -1064,6 +1066,7 @@ const USER_COLLECTED_STATS_TDH_HISTORY_MESSAGES = objectMessages(
 
 const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
   navigationLabel: "Profile sections",
+  loading: "Loading profile section…",
   scrollLeft: "Scroll profile sections left",
   scrollRight: "Scroll profile sections right",
   identity: "Identity",
@@ -1340,6 +1343,9 @@ const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
 
 const USER_CIC_TYPE_MESSAGES = objectMessages("user.cicType", {
   details: "Network ID Check details",
+  title: "Network ID Check",
+  description:
+    "Does the community believe this profile accurately represents its identity?",
 } as const);
 
 const FOLLOWERS_MESSAGES = objectMessages("followers", {
@@ -1374,6 +1380,10 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   filterAll: "All",
   filterJoined: "Joined",
   joinedEmptyMessage: "No joined waves to display",
+  joinedLoadError: "Some joined waves could not be loaded.",
+  joinedRetry: "Retry",
+  joinedRetryLabel: "Retry loading joined waves",
+  joinedLoadMore: "Load more joined waves",
   announcementWavesAriaLabel: "Announcement waves",
   highlyRatedAriaLabel: "Worth checking out waves",
   pinnedAriaLabel: "Pinned waves",
@@ -2339,6 +2349,7 @@ const WAVE_LOADING_MESSAGES = objectMessages("waves", {
   loadingWave: "Loading {name}…",
   loadingWaveUnknown: "Loading wave…",
   loadingError: "This wave could not be loaded.",
+  threadLoadError: "This thread could not be loaded.",
   loadingRetry: "Try again",
   loadingBack: "Back to wave list",
   loadingBackMessages: "Back to messages",
@@ -2557,6 +2568,8 @@ const PROFILE_ACTIVITY_RATE_MESSAGES = objectMessages("profileActivity.rate", {
 
 const USER_RATE_MESSAGES = objectMessages("user.rate", {
   "subtitle.waveRep": "give Wave REP for",
+  "nic.label": "Your total NIC Rating of {profile}:",
+  submit: "Rate",
 } as const);
 
 const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
@@ -2951,8 +2964,7 @@ const OPEN_DATA_DOWNLOAD_MESSAGES = objectMessages("openData.downloads", {
 } as const);
 
 const DATE_PICKER_MESSAGES = objectMessages("datePicker", {
-  utcNote:
-    "Dates are in UTC. The latest date you can select is today in UTC.",
+  utcNote: "Dates are in UTC. The latest date you can select is today in UTC.",
   afterTodayError: "Dates cannot be later than today in UTC.",
 } as const);
 
@@ -3020,6 +3032,7 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  ...MEME_COLLABORATION_MESSAGES,
   "network.prenodes.title": "Prenodes",
   "network.prenodes.pageTitle": "Prenodes | Network",
   "network.prenodes.deprecation":
@@ -3111,7 +3124,8 @@ export const EN_US_MESSAGES = {
   "singleDrop.shared": "Link shared",
   "singleDrop.close": "Close",
   "singleDrop.closeLabel": "Close panel",
-  "singleDrop.loading": "Loading drop",
+  "singleDrop.loading": "Loading…",
+  "singleDrop.loadError": "This content could not be loaded.",
   "singleDrop.showChat": "Show chat",
   "singleDrop.hideChat": "Hide chat",
   "singleDrop.chatLabel": "Drop chat",
@@ -3705,6 +3719,19 @@ export const EN_US_MESSAGES = {
   "home.nowMinting.editionDetails.season": "Season",
   "home.nowMinting.editionDetails.distributionPlan": "Distribution Plan",
   "home.nowMinting.editionDetails.view": "View",
+  "home.latestDrop.error":
+    "We couldn’t load the latest artwork. Please try again.",
+  "home.latestDrop.retry": "Try again",
+  "home.latestDrop.retrying": "Trying again…",
+  "home.comingUp.title": "Coming up",
+  "home.comingUp.credits.withNames": "with {names}",
+  "home.comingUp.credits.moreNames": "+{count} more",
+  "home.comingUp.credits.viewAllCredits": "View all collaborators on this drop",
+  "home.comingUp.credits.anonymousArtist": "Anonymous",
+  "home.comingUp.subtitle": "Next in queue and current vote leaders",
+  "home.comingUp.viewAll": "View all",
+  "home.comingUp.loading": "Loading upcoming artwork…",
+  "home.nowMinting.stats.unavailable": "Unavailable",
   "home.nowMinting.stats.edition": "Edition",
   "home.nowMinting.stats.status": "Status",
   "home.nowMinting.stats.mintPrice": "Mint price",
@@ -4567,7 +4594,8 @@ export const EN_US_MESSAGES = {
     "Community decisions powered by TDH.",
   "waves.discovery.recommendationsDescription":
     "Highly rated waves you don’t follow.",
-  "waves.discovery.publicRecommendationsDescription": "Highly rated waves.",
+  "waves.discovery.publicRecommendationsDescription":
+    "Highly rated waves you don’t follow.",
   "waves.discovery.activeDiscussions": "Active discussions",
   "waves.discovery.unfollowedDiscussions":
     "Active discussions you are not yet following",
@@ -4585,6 +4613,30 @@ export const EN_US_MESSAGES = {
   "waves.discovery.nextDecision": "Next decision {date}",
   "waves.discovery.emptyVotes": "No active TDH votes right now.",
   "waves.discovery.emptyRecommendations": "No recommendations right now.",
+  "waves.discovery.loadingRecommendations": "Loading recommendations…",
+  "waves.discovery.loadingVotes": "Loading votes…",
+  "waves.discovery.loadingAnnouncements": "Loading announcements…",
+  "waves.discovery.recommendationsError": "Couldn’t load recommendations.",
+  "waves.discovery.votesError": "Couldn’t load votes.",
+  "memes.quickVote.loading":
+    "Loading your next meme and your recent quick-vote amounts.",
+  "waves.discovery.controls": "Discovery controls",
+  "waves.discovery.scoreFormula": "Score formula",
+  "waves.discovery.sort.label": "Wave discovery sort",
+  "waves.discovery.sort.open": "Wave discovery sort: {sort}",
+  "waves.discovery.sort.balanced": "Balanced",
+  "waves.discovery.sort.quality": "Quality",
+  "waves.discovery.sort.hot": "Hot",
+  "waves.discovery.sort.rep": "REP",
+  "waves.discovery.sort.newest": "Newest",
+  "waves.discovery.sort.latestPosts": "Latest Posts",
+  "waves.discovery.sort.status": "{sort} waves",
+  "waves.discovery.filter.label": "Wave score threshold",
+  "waves.discovery.filter.all": "All",
+  "waves.discovery.filter.score": "Score 50+",
+  "waves.discovery.filter.hot": "Hot 60+",
+  "waves.discovery.filter.rep": "REP 60+",
+  "waves.discovery.filter.empty": "No waves match these filters.",
   "waves.discovery.loading": "Loading waves…",
   "waves.discovery.error": "Couldn’t load waves.",
   "waves.discovery.retry": "Try again",

@@ -20,7 +20,13 @@ if (typeof window !== "undefined") {
 }
 
 import React from "react";
-import { render, screen, waitFor, act } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  act,
+  fireEvent,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import WaveDropsAll from "@/components/waves/drops/wave-drops-all";
 import { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
@@ -189,6 +195,8 @@ const createMockDrop = (overrides: Partial<ApiDrop> = {}): ApiDrop =>
   }) as ApiDrop;
 
 type WaveMessagesMock = {
+  isError?: boolean;
+  retryDropMessages?: () => void;
   isLoading?: boolean | undefined;
   isLoadingNextPage?: boolean | undefined;
   hasNextPage?: boolean | undefined;
@@ -419,7 +427,7 @@ describe("WaveDropsAll", () => {
 
       renderComponent();
 
-      expect(screen.getByTestId("circle-loader")).toBeInTheDocument();
+      expect(screen.getByTestId("wave-chat-loading")).toBeInTheDocument();
       expect(screen.queryByTestId("empty-placeholder")).not.toBeInTheDocument();
     });
 
@@ -434,7 +442,7 @@ describe("WaveDropsAll", () => {
 
       renderComponent();
 
-      expect(screen.getByTestId("circle-loader")).toBeInTheDocument();
+      expect(screen.getByTestId("wave-chat-loading")).toBeInTheDocument();
       expect(screen.queryByTestId("drops-list")).not.toBeInTheDocument();
     });
 
@@ -466,6 +474,30 @@ describe("WaveDropsAll", () => {
       expect(screen.getByTestId("empty-placeholder")).toBeInTheDocument();
       expect(screen.queryByTestId("drops-list")).not.toBeInTheDocument();
     });
+
+    it.each([false, true])(
+      "shows thread recovery without losing cached drops (cached: %s)",
+      (cached) => {
+        const retryDropMessages = jest.fn();
+        setupMocks({
+          waveMessages: {
+            isError: true,
+            retryDropMessages,
+            drops: cached ? [createMockDrop()] : [],
+          },
+        });
+        renderComponent({ dropId: "target-drop" });
+        expect(screen.getByRole("alert")).toHaveTextContent(
+          "This thread could not be loaded."
+        );
+        expect(
+          screen.queryByTestId("empty-placeholder")
+        ).not.toBeInTheDocument();
+        expect(!!screen.queryByTestId("drops-list")).toBe(cached);
+        fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+        expect(retryDropMessages).toHaveBeenCalledTimes(1);
+      }
+    );
   });
 
   describe("Content Rendering", () => {
@@ -1645,7 +1677,7 @@ describe("WaveDropsAll", () => {
       renderComponent();
 
       // Should show the loader instead of the empty placeholder while hydrating
-      expect(screen.getByTestId("circle-loader")).toBeInTheDocument();
+      expect(screen.getByTestId("wave-chat-loading")).toBeInTheDocument();
       expect(screen.queryByTestId("drops-list")).not.toBeInTheDocument();
       expect(screen.queryByTestId("empty-placeholder")).not.toBeInTheDocument();
     });

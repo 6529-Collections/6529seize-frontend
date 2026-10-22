@@ -1,8 +1,5 @@
 "use client";
 
-import ProfileAvatar, {
-  ProfileBadgeSize,
-} from "@/components/common/profile/ProfileAvatar";
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
@@ -16,9 +13,14 @@ import {
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import Link from "next/link";
+import clsx from "clsx";
+import {
+  ComingUpArtistCredits,
+  type ComingUpCreditSource,
+} from "./ComingUpArtistCredits";
 
 interface LeadingCardProps {
-  readonly drop: ExtendedDrop;
+  readonly drop: ExtendedDrop & ComingUpCreditSource;
   readonly rank: number;
 }
 
@@ -71,25 +73,32 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
   })();
 
   return (
-    <div className="tw-group tw-flex tw-flex-col tw-text-left tw-transition-all tw-duration-500">
-      <div className="tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-transition-colors group-hover:tw-border-white/10">
-        <div className="tw-flex tw-flex-col tw-items-start tw-gap-1 tw-border-b tw-border-white/10 tw-bg-iron-900 tw-px-2.5 tw-py-1.5 @sm:tw-flex-row @sm:tw-items-center @sm:tw-justify-between sm:tw-px-3 sm:tw-py-2">
+    <div className="tw-group tw-min-w-0 tw-text-left">
+      <div className="tw-relative tw-flex tw-h-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-transition-colors tw-duration-200 tw-ease-out focus-within:tw-border-white/20 desktop-hover:hover:tw-border-white/20 motion-reduce:tw-transition-none">
+        <div className="tw-flex tw-shrink-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-px-3.5 tw-py-3">
           <span
-            className={`tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-wide ${rankLabelClass}`}
+            className={`tw-px-2 tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] ${rankLabelClass}`}
           >
             {rank === 1 ? "LEADING" : `${formatOrdinal(rank)} PLACE`}
           </span>
-          <span className="tw-font-mono tw-text-xs tw-text-white/50">
+          <span className="tw-px-2 tw-text-xs tw-font-medium tw-tabular-nums tw-leading-4 tw-text-iron-500">
             {formatNumberWithCommas(drop.rating)} TDH
           </span>
         </div>
-        <div className="tw-relative tw-flex tw-aspect-[3/4] tw-max-h-[clamp(320px,70vw,500px)] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950">
-          <div className="tw-[&>div]:tw-mx-0 tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-transition-transform tw-duration-700 tw-ease-out group-hover:tw-scale-105">
+        <div
+          data-testid="coming-up-artwork"
+          className={clsx(
+            "tw-relative tw-flex tw-aspect-[3/4] tw-w-full tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950",
+            media?.mime_type.startsWith("image/") &&
+              "max-md:has-[img.tw-opacity-100]:tw-aspect-auto max-md:[&_[data-drop-image-content]]:tw-relative max-md:[&_[data-drop-image-content]]:tw-block max-md:[&_img]:!tw-relative max-md:[&_img]:tw-block max-md:[&_img]:!tw-h-auto max-md:[&_img]:!tw-max-h-none"
+          )}
+        >
+          <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center [&>div]:tw-mx-0">
             {mediaContent}
           </div>
         </div>
-        <div className="tw-flex tw-flex-col tw-gap-3 tw-border-t tw-border-white/10 tw-px-3 tw-py-3 sm:tw-px-4">
-          <div className="tw-flex tw-items-center tw-gap-2">
+        <div className="tw-flex tw-flex-col tw-gap-2.5 tw-px-4 tw-pb-4 tw-pt-3.5 md:tw-px-5 md:tw-pb-5 md:tw-pt-4">
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
             <MediaTypeBadge
               mimeType={media?.mime_type}
               dropId={drop.id}
@@ -103,25 +112,21 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
                 isDirectMessage: false,
                 isApp: false,
               })}
-              className="tw-m-0 tw-line-clamp-2 tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-200 tw-no-underline tw-transition-colors group-hover:tw-text-white @lg:tw-line-clamp-1"
+              className="tw-m-0 tw-line-clamp-2 tw-min-h-6 tw-min-w-0 tw-text-[17px] tw-font-semibold tw-leading-[1.3] tw-tracking-[-0.015em] tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-rounded-sm focus-visible:tw-text-iron-300 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none md:tw-text-lg"
             >
               {title}
             </Link>
           </div>
-          <Link
-            data-home-action="Open artist profile"
-            href={`/${author.handle ?? author.primary_address}`}
-            className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-no-underline"
-          >
-            <ProfileAvatar
-              pfpUrl={author.pfp}
-              alt={author.handle ?? "Artist"}
-              size={ProfileBadgeSize.SMALL}
-            />
-            <span className="tw-min-w-0 tw-truncate tw-text-xs tw-text-white/50 desktop-hover:hover:tw-text-white">
-              {author.handle ?? "Anonymous"}
-            </span>
-          </Link>
+          <ComingUpArtistCredits
+            author={author}
+            collaborators={drop.collaborators ?? []}
+            dropHref={getWaveRoute({
+              waveId: drop.wave.id,
+              extraParams: { drop: drop.id },
+              isDirectMessage: false,
+              isApp: false,
+            })}
+          />
         </div>
       </div>
     </div>

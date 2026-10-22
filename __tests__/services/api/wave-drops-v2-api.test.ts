@@ -260,10 +260,58 @@ describe("fetchWaveDropsFeedV2", () => {
     jest.clearAllMocks();
   });
 
+  it.each([true, false])(
+    "preserves optional collaborator credits in feed and leaderboard drops (present: %s)",
+    async (hasCredits) => {
+      const collaborators = [
+        {
+          id: "credit-id",
+          handle: "collaborator",
+          display: "Collaborator",
+          pfp: null,
+        },
+      ];
+      const source: ApiDropV2 = {
+        ...createDrop(1),
+        updated_at: 1000,
+        author: {
+          ...identity,
+          badges: {
+            artist_of_main_stage_submissions: 0,
+            artist_of_memes: 0,
+          },
+        },
+        context_profile_context: {
+          boosted: false,
+          bookmarked: false,
+          subscribed: false,
+        },
+        ...(hasCredits ? { collaborators } : {}),
+      };
+      commonApiFetchMock.mockResolvedValueOnce({ wave, drops: [source] });
+
+      const result = await fetchWaveDropsFeedV2({
+        waveId: "wave-1",
+        limit: 20,
+      });
+      const leaderboardDrop = mapLeaderboardDropV2({
+        drop: source,
+        wave: waveMin,
+      });
+
+      expect(result.drops[0]?.collaborators).toEqual(
+        hasCredits ? collaborators : []
+      );
+      expect(leaderboardDrop.collaborators).toEqual(
+        hasCredits ? collaborators : []
+      );
+    }
+  );
+
   it("uses ApiDropV2 as part one without fetching the part endpoint", async () => {
     commonApiFetchMock.mockResolvedValueOnce({
       wave,
-      drops: [createDrop(1)],
+      drops: [{ ...createDrop(1), submission_artist: "" }],
     });
 
     const result = await fetchWaveDropsFeedV2({
@@ -271,6 +319,7 @@ describe("fetchWaveDropsFeedV2", () => {
       limit: 20,
     });
 
+    expect(result.drops[0]).toHaveProperty("submission_artist", "");
     expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
     expect(commonApiFetchMock).not.toHaveBeenCalledWith(
       expect.objectContaining({
@@ -411,6 +460,40 @@ describe("fetchWaveDropsFeedV2", () => {
     });
 
     expect(result.drops[0]?.poll).toEqual(poll);
+  });
+
+  it("preserves a reply author without a profile picture", async () => {
+    commonApiFetchMock.mockResolvedValueOnce({
+      wave,
+      drops: [
+        {
+          ...createDrop(1),
+          reply_to_drop: {
+            id: "parent-1",
+            serial_no: 42,
+            content: "parent text",
+            author: { handle: "parent-author" },
+            moderation: {
+              status: ApiDropModerationStatus.Visible,
+              can_view: true,
+            },
+          },
+        },
+      ],
+    });
+
+    const result = await fetchWaveDropsFeedV2({
+      waveId: "wave-1",
+      limit: 20,
+    });
+
+    expect(result.drops[0]?.reply_to?.drop).toMatchObject({
+      id: "parent-1",
+      serial_no: 42,
+      author: { handle: "parent-author", pfp: null },
+      parts: [{ part_id: 1, content: "parent text" }],
+      moderation: { status: ApiDropModerationStatus.Visible, can_view: true },
+    });
   });
 
   it("carries collapsed-thread reply counts onto hydrated drops", async () => {
@@ -1095,4 +1178,15 @@ describe("fetchDropsV2ByIds", () => {
 
     expect(result).toEqual([]);
   });
+});
+
+it("preserves an empty original artist on managed leaderboard submissions", () => {
+  const mapped = mapLeaderboardDropV2({
+    drop: {
+      ...createEnrichableDrop(),
+      submission_artist: "",
+    } as unknown as ApiDropV2,
+    wave: waveMin,
+  });
+  expect(mapped).toHaveProperty("submission_artist", "");
 });

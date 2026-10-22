@@ -1,5 +1,7 @@
 "use client";
 
+import { MemeCollaborationPanel } from "@/components/waves/memes/collaborations/MemeCollaborationPanel";
+import { shouldLoadMemeCollaboration } from "@/components/waves/memes/collaborations/shouldLoadMemeCollaboration";
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import { useVotingModalState } from "@/components/voting/useVotingModalState";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -137,6 +139,15 @@ export const MemesSingleWaveDropInfoPanel = ({
           nicTotal={visibleNicTotal}
           repTotal={visibleRepTotal}
           onVoteClick={handleOpenVoting}
+          collaborationControls={
+            shouldLoadMemeCollaboration(drop) ? (
+              <MemeCollaborationPanel
+                key={drop.id}
+                dropId={drop.id}
+                authorId={drop.author.id}
+              />
+            ) : null
+          }
         />
 
         <div className="tw-my-8 tw-h-px tw-w-full tw-bg-white/10 md:tw-my-10"></div>

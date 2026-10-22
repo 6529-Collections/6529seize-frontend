@@ -50,6 +50,13 @@ Wave and DM rows in the left list control which thread is open.
   to `/discover`; the sidebar keeps the two section-specific `View all` links.
   The collapsed rail retains its icon-only feed link.
 - Browser back/forward keeps the active row and URL in sync.
+- Joined waves load in batches without skipping a wave when new activity moves
+  it higher in the list. The order uses recent wave activity, including joined,
+  unmuted subwaves. Muting a wave removes its own activity from the ordering.
+- More joined waves load near the bottom. `Load more joined waves` is also
+  available below the loaded rows. If loading fails, the existing rows stay
+  available and `Retry` resumes loading. An expired list refreshes automatically
+  without mixing its old and new batches. Newly joined waves appear on refresh.
 - In the native app, swipe right from the left edge of a standard wave detail
   view to return to the Waves list.
 
@@ -67,18 +74,25 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
   more pages load near the bottom, with a `Load more` button as a fallback.
   A thin scrollbar and bottom fade indicate more content below. The count stays
   visible when collapsed. The description and view-all link stay outside the list.
-- Each expanded section starts with its own short explanation, available to
+- Each expanded section shows its short explanation together with loaded content, available to
   signed-in and signed-out visitors. Active Votes says “Community decisions
   powered by TDH.” Worth Checking Out says “Highly rated waves you don’t follow.”
-  Signed-out visitors see “Highly rated waves.”
-- Empty Active Votes shows `No active TDH votes right now.` in a compact area.
+  The same wording appears for signed-out visitors.
+- While content first loads, each expanded section shows quiet placeholders shaped
+  like its avatars or three vote rows. Descriptions, loading sentences and empty
+  messages stay hidden; screen readers receive a loading announcement. Titles,
+  collapse controls and `View all` links remain available.
+- Empty Worth Checking Out shows only `No recommendations right now.` after a
+  successful request. Empty Active Votes shows only `No active TDH votes right now.` in a compact area.
   Loading and request failures are separate states; failed pages can be retried
-  without discarding previously loaded votes. Both view-all links remain available.
+  without discarding previously loaded votes or their description. Recommendations
+  also offer `Try again` after a failed request. Both view-all links remain available.
 - Each heading toggles only its own section. The chevron beside the title points down when open
   and right when closed. Both collapse preferences persist locally in this browser
   across visits, including signed-out visits, and are shared across profiles on
   the same browser/device. The old shared tab preference is no longer used.
 - Announcements keeps its megaphone, timestamp, unread state and score shield in a compact row.
+  A row-sized placeholder reserves space while Announcements is first loading.
 - Active Votes rows include the wave score shield; select it for score details without opening the wave.
 - Worth Checking Out shows up to six spaced previews, with fewer on narrow screens,
   with score shields overlapping the bottom-right corner of each avatar.
@@ -110,7 +124,10 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
   while the page is running. Refresh starts with an empty search and restores
   the last selected All / Pinned / Joined collection. The list area below the tabs shows a small centered spinner only while the
   selected collection has no rows and is loading. Existing rows refresh silently;
-  an empty message appears only after loading finishes.
+  an empty message appears only after loading finishes. Wallet restoration keeps
+  an empty list pending even before an address is available. Once wallet and
+  profile loading settle, a genuinely empty guest or connected list can show
+  its empty message.
 - This uses the existing name matching. Typo tolerance and relevance changes
   are outside this redesign. Unread state, pin controls and subwaves remain on
   normal collection rows; the DM list retains its existing behavior.

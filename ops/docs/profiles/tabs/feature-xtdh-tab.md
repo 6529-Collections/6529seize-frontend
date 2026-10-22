@@ -29,7 +29,8 @@ Profile tab visibility and profile-route fallback rules are owned by:
 - `tab=pending|revoked|failed` opens `Granted` and selects that status tab.
 - `tab=active|granted` opens `Granted` and selects `Active`.
 - Unknown `tab` values fall back to `Granted` `Active`.
-- If `tab` is missing, the page rewrites the URL to `tab=granted`.
+- If `tab` is missing, the route redirects to `tab=granted` before opening the
+  xTDH content. The profile tab and Active status selector use this URL directly.
 
 View-specific query keys:
 

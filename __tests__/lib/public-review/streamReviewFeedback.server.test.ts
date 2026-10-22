@@ -257,4 +257,35 @@ describe("Stream review feedback manifest binding", () => {
     });
     expect(connection).toHaveBeenCalledTimes(1);
   });
+
+  it("asks the site for the destination in the desktop app", async () => {
+    delete process.env[DESTINATIONS_ENV];
+    process.env["DESKTOP_RENDERER_DIR"] = "/desktop/renderer";
+    const originalFetch = globalThis.fetch;
+    const fetchMock = jest.fn(async (_url: URL | string) => ({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        environment: "staging",
+        logicalKey: "stream-review",
+        waveId: STAGING_WAVE_ID,
+      }),
+    }));
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    try {
+      await expect(
+        resolveStreamReviewFeedbackDestination("https://staging.6529.io")
+      ).resolves.toEqual({
+        environment: "staging",
+        logicalKey: "stream-review",
+        waveId: STAGING_WAVE_ID,
+      });
+      expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
+        `https://staging.6529.io/api/public-reviews/${STREAM_REVIEW_SLUG}/destination`
+      );
+    } finally {
+      globalThis.fetch = originalFetch;
+      delete process.env["DESKTOP_RENDERER_DIR"];
+    }
+  });
 });

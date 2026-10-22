@@ -387,6 +387,154 @@ async function openSearchOnFirstWaveWithSearch(page: Page) {
 }
 
 test.describe("Search and wave-detail read-only coverage @surface @medium @large @readonly", () => {
+  test("discovery filters preserve URL state and the compact sort sheet restores focus", async ({
+    page,
+  }, testInfo) => {
+    const activate = (control: Locator) =>
+      testInfo.project.use.hasTouch ? control.tap() : control.click();
+    await page.route("**/api/v2/waves?*", async (route) => {
+      await fulfillLocalReadOnlyFixture(route, {
+        status: 200,
+        json: { page: 1, next: false, count: 0, data: [] },
+      });
+    });
+    await gotoReady(page, "/discover?filter=SCORE_50");
+    await expect(
+      page.getByText("No waves match these filters.", { exact: true }).last()
+    ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+    const threshold = page.getByRole("radiogroup", {
+      name: "Wave score threshold",
+    });
+    const formula = page.getByRole("link", {
+      name: "Score formula",
+      exact: true,
+    });
+    await expect(formula).toBeVisible();
+    const formulaUrl = new URL(
+      (await formula.getAttribute("href"))!,
+      page.url()
+    );
+    expect(formulaUrl.pathname).toBe("/network/wave-score");
+    expect(formulaUrl.searchParams.get("returnTo")).toBe(
+      "/discover?filter=SCORE_50"
+    );
+    await expect(
+      threshold.getByRole("radio", { name: "Score 50+" })
+    ).toBeChecked();
+
+    const compactSort = page.getByRole("button", {
+      name: /^Wave discovery sort: /,
+    });
+    if (testInfo.project.use.isMobile) {
+      await expect(compactSort).toBeVisible();
+    }
+    if (await compactSort.isVisible()) {
+      await activate(compactSort);
+      const sheet = page.getByRole("dialog", { name: "Wave discovery sort" });
+      await expect(
+        sheet.getByRole("heading", { name: "Wave discovery sort" })
+      ).toBeVisible();
+      for (const name of [
+        "Balanced",
+        "Quality",
+        "Hot",
+        "REP",
+        "Newest",
+        "Latest Posts",
+      ]) {
+        const option = sheet.getByRole("button", { name, exact: true });
+        await expect(option).toBeVisible();
+        await expect(option).toBeInViewport();
+        // Wait for the shared sheet animation to settle without selecting.
+        await option.click({ trial: true });
+        expect((await option.boundingBox())!.height).toBeGreaterThanOrEqual(48);
+      }
+      await expect(
+        sheet.getByRole("heading", { name: "Wave discovery sort" })
+      ).toBeFocused();
+      // The shared dialog must be outside the transformed page main.
+      expect(
+        await sheet.evaluate((element) => element.closest("main"))
+      ).toBeNull();
+      await page.keyboard.press("Escape");
+      await expect(sheet).not.toBeAttached();
+      await expect(compactSort).toBeFocused();
+      await activate(compactSort);
+      await expect(
+        sheet.getByRole("heading", { name: "Wave discovery sort" })
+      ).toBeFocused();
+      if (testInfo.project.use.hasTouch) await page.touchscreen.tap(10, 10);
+      else await page.mouse.click(10, 10);
+      await expect(sheet).not.toBeAttached();
+      await expect(compactSort).toBeFocused();
+      await activate(compactSort);
+      await activate(
+        sheet.getByRole("button", { name: "Quality", exact: true })
+      );
+      await expect(sheet).not.toBeAttached();
+      await expect(compactSort).toBeFocused();
+      await expect(compactSort).toHaveAccessibleName(
+        "Wave discovery sort: Quality"
+      );
+    } else {
+      const sorts = page.getByRole("tablist", {
+        name: "Wave discovery sort",
+        exact: true,
+      });
+      await expect(sorts.getByRole("tab")).toHaveCount(6);
+      await sorts
+        .getByRole("tab", { name: "Balanced", exact: true })
+        .press("ArrowRight");
+      await expect(
+        sorts.getByRole("tab", { name: "Quality", exact: true })
+      ).toBeFocused();
+    }
+    await expect(page).toHaveURL(/filter=SCORE_50&sort=QUALITY/);
+    await threshold.getByRole("radio", { name: "Score 50+" }).press("End");
+    await expect(
+      threshold.getByRole("radio", { name: "REP 60+" })
+    ).toBeChecked();
+    await expect(page).toHaveURL(/filter=REP_60&sort=QUALITY/);
+    await expect(
+      threshold.getByRole("radio", { name: "REP 60+" })
+    ).toBeFocused();
+    await expect(
+      threshold.getByRole("radio", { name: "REP 60+" })
+    ).toBeInViewport({ ratio: 1 });
+    await page.getByRole("tab", { name: "Active Votes", exact: true }).click();
+    await expect(page).toHaveURL(
+      /filter=REP_60&sort=QUALITY&view=active-votes/
+    );
+    await page
+      .getByRole("tab", { name: "Worth Checking Out", exact: true })
+      .click();
+    await expect(
+      threshold.getByRole("radio", { name: "REP 60+" })
+    ).toBeChecked();
+    await expectNoHorizontalOverflow(page);
+
+    const discoverUrl = page.url();
+    await activate(formula);
+    await expect(
+      page.getByRole("heading", {
+        name: "Wave score transparency",
+        exact: true,
+      })
+    ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+    if (testInfo.project.name === "capacitor-ios-sim") {
+      await activate(page.getByRole("button", { name: "Back", exact: true }));
+    } else {
+      await activate(
+        page.getByRole("link", { name: "Back to previous page", exact: true })
+      );
+    }
+    await expect(page).toHaveURL(discoverUrl);
+    await expect(
+      threshold.getByRole("radio", { name: "REP 60+" })
+    ).toBeChecked();
+    await expect(formula).toBeVisible();
+  });
+
   test("mobile wave shortcuts keep generous touch areas around compact buttons", async ({
     page,
   }, testInfo) => {
@@ -396,6 +544,16 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       "Touch target geometry is mobile-only"
     );
     await gotoReady(page, "/waves");
+    // The server shell is replaced as the mobile list hydrates. Measure the
+    // interactive controls only after a data row confirms that it has mounted.
+    await expect(
+      page
+        .getByRole("region", {
+          name: /All recent waves list|Regular waves list/,
+        })
+        .getByRole("link")
+        .first()
+    ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
     const shortcuts = [
       page.getByRole("link", { name: "Profile Waves Feed", exact: true }),
       page.getByRole("button", { name: "Find a wave…", exact: true }),
@@ -592,12 +750,23 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       await activeToggle.click();
     if ((await recommendationsToggle.getAttribute("aria-expanded")) === "false")
       await recommendationsToggle.click();
-    await expect(
-      discovery.getByText("Community decisions powered by TDH.")
-    ).toBeVisible();
-    await expect(
-      discovery.getByText("Highly rated waves.", { exact: true })
-    ).toBeVisible();
+    // A successfully empty section has only its empty message; descriptions
+    // accompany real content, never initial loading or an empty result.
+    for (const [description, empty] of [
+      ["Community decisions powered by TDH.", "No active TDH votes right now."],
+      ["Highly rated waves you don’t follow.", "No recommendations right now."],
+    ] as const) {
+      await expect(
+        discovery
+          .getByText(description, { exact: true })
+          .or(discovery.getByText(empty, { exact: true }))
+      ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+      if (await discovery.getByText(empty, { exact: true }).isVisible()) {
+        await expect(
+          discovery.getByText(description, { exact: true })
+        ).toHaveCount(0);
+      }
+    }
     const voteList = discovery.getByRole("region", {
       name: "Active voting waves",
     });

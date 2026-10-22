@@ -95,10 +95,10 @@ describe("E2E pack manifest", () => {
         "tests/social/native-competition-sandbox.spec.ts",
         "tests/social/wave-notification-settings-sandbox.spec.ts",
         "tests/social/wave-switch-loading.spec.ts",
+        "tests/social/wave-loading-sandbox.spec.ts",
       ],
       projects: ["web-desktop-chromium", "web-mobile-chromium"],
       env: {
-        NEXT_PUBLIC_FEATURE_MULTI_COMPETITION: "true",
         PLAYWRIGHT_BASE_URL: "http://localhost:3297",
       },
     });
