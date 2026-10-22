@@ -113,6 +113,21 @@ describe("WaveLeaderboardRightSidebarActivityLog", () => {
     expect(timestamp).not.toHaveClass("tw-uppercase");
   });
 
+  it("retains a historical activity row without inventing an epoch timestamp", () => {
+    renderComponent({
+      log: {
+        ...mockLog,
+        created_at: null,
+        invoker_proxy: { id: "original-proxy" },
+      },
+    });
+    expect(screen.getByText("voter_user")).toBeInTheDocument();
+    expect(screen.getByTitle("Drop creator: author_user")).toBeInTheDocument();
+    expect(getByExactTextContent("1,000 Rep")).toBeInTheDocument();
+    expect(screen.getByTestId("drop-click-button")).toBeInTheDocument();
+    expect(screen.queryByText("5m")).toBeNull();
+  });
+
   it("groups the recipient with the vote details and a decorative arrow", () => {
     renderComponent();
 

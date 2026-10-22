@@ -166,7 +166,7 @@ export const mapApiWaveOverviewToSidebarWave = (
     name: wave.name,
     createdAt: wave.created_at,
     creator: wave.creator,
-    type: wave.has_competition ? ApiWaveType.Rank : ApiWaveType.Chat,
+    type: ApiWaveType.Chat,
     picture: wave.pfp ?? null,
     contributors:
       wave.contributors?.map((contributor) => ({

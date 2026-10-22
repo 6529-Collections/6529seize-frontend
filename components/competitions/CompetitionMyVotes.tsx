@@ -3,6 +3,12 @@ import { ApiCompetitionEntryStatus } from "@/generated/models/ApiCompetitionEntr
 
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 
+import PrivilegedDropCreator, {
+  DropMode,
+} from "@/components/waves/PrivilegedDropCreator";
+import { ActiveDropAction } from "@/types/dropInteractionTypes";
+import { getVoteRationaleReplyMarkdown } from "@/helpers/waves/vote-rationale.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
@@ -15,7 +21,6 @@ import {
   invalidateCompetition,
 } from "@/services/api/competitions-api";
 import {
-  isMultiCompetitionEnabled,
   isRejectedCompetitionCommand,
   isCompetitionAccessError,
   newCompetitionRequestKey,
@@ -36,16 +41,49 @@ import { CompetitionLoadMore } from "./CompetitionLoadMore";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 export default function CompetitionMyVotes() {
-  const { competition } = useCompetition();
+  const { competition, wave } = useCompetition();
   const viewer = useCompetitionViewer();
   const locale = useBrowserLocale();
+  const [rationale, setRationale] = useState<{
+    drop: ExtendedDrop;
+    partId: number;
+    markdown: string;
+    key: number;
+  } | null>(null);
+  const rationaleSequence = useRef(0);
+  const rationaleTrigger = useRef<HTMLElement | null>(null);
+  const closeRationale = () => {
+    setRationale(null);
+    rationaleTrigger.current?.focus();
+  };
+  const explainVote = (drop: ExtendedDrop, total: number, change: number) => {
+    const partId = drop.parts.at(0)?.part_id;
+    if (partId === undefined) return;
+    rationaleTrigger.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    rationaleSequence.current += 1;
+    setRationale({
+      drop,
+      partId,
+      markdown: getVoteRationaleReplyMarkdown({
+        voteTotal: total,
+        voteChange: change,
+        locale,
+      }),
+      key: rationaleSequence.current,
+    });
+  };
   const query = useCompetitionResource(
     { waveId: competition.wave_id, competitionId: competition.id },
     "votes/me",
     {},
     !!viewer
   );
-  const votes = query.data?.pages.flatMap((page) => page.data) ?? [];
+  const votes = (query.data?.pages.flatMap((page) => page.data) ?? []).filter(
+    (vote) => vote.entry_status === ApiCompetitionEntryStatus.Active
+  );
   const drops = useCompetitionEntryDrops(
     votes.map((vote) => ({ entryId: vote.entry_id, dropId: vote.drop_id }))
   );
@@ -80,7 +118,6 @@ export default function CompetitionMyVotes() {
     const vote = votes.find((item) => item.drop_id === dropId);
     if (
       vote?.entry_status !== ApiCompetitionEntryStatus.Active ||
-      !isMultiCompetitionEnabled() ||
       !competition.permissions.vote
     )
       throw new Error("Vote cannot be reset");
@@ -130,10 +167,12 @@ export default function CompetitionMyVotes() {
         haveDrops={selectable.length > 0}
         selected={selected}
         allItemsSelected={allSelected}
-        availableVotes={credits.data?.remaining ?? null}
-        isVotingClosed={
-          !isMultiCompetitionEnabled() || !competition.permissions.vote
+        availableVotes={
+          competition.voting.credit_scope === "WAVE"
+            ? (credits.data?.remaining ?? null)
+            : null
         }
+        isVotingClosed={!competition.permissions.vote}
         resetVote={resetVote}
         onResettingChange={setResetting}
         onToggleSelectAll={() =>
@@ -171,8 +210,8 @@ export default function CompetitionMyVotes() {
             />
           );
         if (!result.data) return null;
+        const entryDrop = result.data.drop;
         const isClosed =
-          !isMultiCompetitionEnabled() ||
           !competition.permissions.vote ||
           result.data.entry.status !== ApiCompetitionEntryStatus.Active;
         return (
@@ -206,9 +245,33 @@ export default function CompetitionMyVotes() {
                   dropId={vote.drop_id}
                   disabled={isClosed || resetting}
                   compact
+                  onExplainVote={
+                    entryDrop.parts.at(0)?.part_id === undefined
+                      ? undefined
+                      : (total, change) => explainVote(entryDrop, total, change)
+                  }
                 />
               }
             />
+            {rationale?.drop.id === vote.drop_id && (
+              <div className="tw-mx-2 tw-mb-6 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/30 tw-bg-iron-950 tw-px-4 tw-py-3 sm:tw-mx-4">
+                <PrivilegedDropCreator
+                  activeDrop={{
+                    action: ActiveDropAction.REPLY,
+                    drop: rationale.drop,
+                    partId: rationale.partId,
+                  }}
+                  onCancelReplyQuote={closeRationale}
+                  onDropAddedToQueue={closeRationale}
+                  wave={wave}
+                  dropId={null}
+                  fixedDropMode={DropMode.CHAT}
+                  focusOnInitialActiveDrop
+                  initialMarkdown={rationale.markdown}
+                  initialMarkdownKey={`${rationale.drop.id}:${rationale.key}`}
+                />
+              </div>
+            )}
           </div>
         );
       })}

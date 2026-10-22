@@ -1,14 +1,12 @@
 "use client";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 
-import {
-  isMultiCompetitionEnabled,
-  isCompetitionAccessError,
-} from "@/helpers/competition.helpers";
+import { isCompetitionAccessError } from "@/helpers/competition.helpers";
 import { useCompetition } from "@/contexts/CompetitionContext";
 import { useCompetitionEntryDrops } from "@/hooks/competitions/useCompetitionEntryDrops";
 import { useCompetitionDropNavigation } from "@/hooks/competitions/useCompetitionDropNavigation";
-import { DefaultWaveLeaderboardDrop } from "@/components/waves/leaderboard/drops/DefaultWaveLeaderboardDrop";
+import { useWaveLeaderboardRendererSet } from "@/components/waves/leaderboard/leaderboardRendererRegistry";
+import { competitionPresentationWave } from "@/helpers/competition-presentation.helpers";
 import { CompetitionState } from "./CompetitionState";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
@@ -23,7 +21,11 @@ export default function CompetitionEntryCard({
   readonly disabled?: boolean;
   readonly onOpenDrop?: (() => void) | undefined;
 }) {
-  const { competition } = useCompetition();
+  const { competition, wave } = useCompetition();
+  const { LeaderboardDrop } = useWaveLeaderboardRendererSet(
+    wave.id,
+    competition.capabilities
+  );
   const [query] = useCompetitionEntryDrops([{ entryId, dropId }]);
   const onDropClick = useCompetitionDropNavigation();
   if (!query || query.isPending) return <CompetitionState />;
@@ -36,10 +38,12 @@ export default function CompetitionEntryCard({
   };
   return (
     <div id={`entry-${entryId}`} data-competition-entry={entryId}>
-      <DefaultWaveLeaderboardDrop
+      <LeaderboardDrop
         drop={query.data.drop}
         onDropClick={openDrop}
         onDropContentClick={openDrop}
+        onOpenDrop={onOpenDrop}
+        wave={competitionPresentationWave(wave, competition)}
         winningThreshold={
           competition.type === ApiCompetitionType.Approve
             ? competition.winners.winning_min_threshold
@@ -49,10 +53,7 @@ export default function CompetitionEntryCard({
           competition.winners.winning_threshold_min_duration_ms
         }
         isVotingClosed={disabled}
-        isVotingControlsLocked={
-          !isMultiCompetitionEnabled() || !competition.permissions.vote
-        }
-        mediaContainerHeightClassName="tw-h-96"
+        isVotingControlsLocked={!competition.permissions.vote}
       />
     </div>
   );

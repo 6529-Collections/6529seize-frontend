@@ -1,4 +1,3 @@
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdentitySubscriptionTargetAction";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
@@ -8,8 +7,9 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { fetchNotificationsV2 } from "@/services/api/notifications-v2-api";
 import type { INotificationDropReacted } from "@/types/feed.types";
 
+const mockRetiredCompetitionFlag = jest.fn(() => false);
 jest.mock("@/helpers/competition.helpers", () => ({
-  isMultiCompetitionEnabled: jest.fn(() => false),
+  isMultiCompetitionEnabled: () => mockRetiredCompetitionFlag(),
 }));
 
 jest.mock("@/services/api/common-api", () => ({
@@ -88,7 +88,7 @@ const drop = {
 describe("fetchNotificationsV2", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(isMultiCompetitionEnabled).mockReturnValue(false);
+    mockRetiredCompetitionFlag.mockReturnValue(false);
   });
 
   it.each(["INVITED", "ACCEPTED"])(
@@ -164,7 +164,7 @@ describe("fetchNotificationsV2", () => {
   });
 
   it("opts in to native notifications only when enabled", async () => {
-    jest.mocked(isMultiCompetitionEnabled).mockReturnValue(true);
+    mockRetiredCompetitionFlag.mockReturnValue(true);
     jest
       .mocked(commonApiFetch)
       .mockResolvedValue({ unread_count: 0, notifications: [] });
@@ -212,6 +212,7 @@ describe("fetchNotificationsV2", () => {
         errorMode: "structured",
         params: {
           limit: "30",
+          include_competitions: "true",
           id_less_than: "99",
           cause: ApiNotificationCause.DropReacted,
         },

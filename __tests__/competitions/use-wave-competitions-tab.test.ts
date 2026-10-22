@@ -1,6 +1,5 @@
 import { renderHook } from "@testing-library/react";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import {
   useCompetitionHub,
   useCompetitionList,
@@ -44,11 +43,11 @@ it.each([
   { canCreate: true, visibleCount: 0, enabled: true, expected: true },
   { canCreate: false, visibleCount: 1, enabled: true, expected: true },
   { canCreate: false, visibleCount: 0, enabled: true, expected: false },
-  { canCreate: true, visibleCount: 1, enabled: false, expected: false },
+  { canCreate: true, visibleCount: 1, enabled: false, expected: true },
 ])(
   "tracks competition availability for $canCreate / $visibleCount / $enabled",
-  ({ canCreate, visibleCount, enabled, expected }) => {
-    (isMultiCompetitionEnabled as jest.Mock).mockReturnValue(enabled);
+  ({ canCreate, visibleCount, expected }) => {
+    // Competition availability follows API access, independently of old rollout settings.
     (useCompetitionHub as jest.Mock).mockReturnValue({
       isSuccess: true,
       data: { permissions: { create_competition: canCreate } },
@@ -72,7 +71,6 @@ it.each([
 it.each([0, 3])(
   "counts only active/upcoming competitions and hides a zero badge (%s)",
   (activeCount) => {
-    (isMultiCompetitionEnabled as jest.Mock).mockReturnValue(true);
     (useCompetitionHub as jest.Mock).mockReturnValue({
       isSuccess: true,
       data: { permissions: { create_competition: true } },
@@ -103,7 +101,6 @@ it.each([0, 3])(
 );
 
 it("loads every active page before showing a count", () => {
-  (isMultiCompetitionEnabled as jest.Mock).mockReturnValue(true);
   (useCompetitionHub as jest.Mock).mockReturnValue({
     isSuccess: true,
     data: { permissions: { create_competition: true } },
@@ -130,7 +127,6 @@ it("loads every active page before showing a count", () => {
 
 function configureSingleCompetition() {
   mockAuth = { isAuthenticated: true, connectedProfile: { id: "viewer" } };
-  (isMultiCompetitionEnabled as jest.Mock).mockReturnValue(true);
   (useDefaultCompetition as jest.Mock).mockReturnValue({
     isSuccess: true,
     isFetching: false,

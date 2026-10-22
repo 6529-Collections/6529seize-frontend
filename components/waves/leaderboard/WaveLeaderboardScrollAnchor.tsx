@@ -26,6 +26,7 @@ interface Props {
   readonly leadingItemCount: number;
   readonly masonry: boolean;
   readonly revealIndex: (index: number) => void;
+  readonly retainOnContentResize?: boolean | undefined;
 }
 
 /** React's snapshot lifecycle reads the old DOM before a ranking update commits. */
@@ -35,11 +36,21 @@ export class WaveLeaderboardScrollAnchor extends Component<
   ScrollSnapshot | null
 > {
   private frame: number | undefined;
+  private resizeObserver: ResizeObserver | undefined;
   private pending: ScrollSnapshot | null = null;
   private readonly cancelForInteraction = () => this.cancel();
 
   override componentDidMount() {
     const root = this.props.rootRef.current;
+    if (root && this.props.retainOnContentResize) {
+      this.resizeObserver = new ResizeObserver(() => {
+        if (this.pending && this.props.retainOnContentResize) {
+          if (this.frame !== undefined) cancelAnimationFrame(this.frame);
+          this.restore(0);
+        }
+      });
+      this.resizeObserver.observe(root);
+    }
     for (const type of ["touchstart", "pointerdown", "wheel", "keydown"]) {
       root?.addEventListener(type, this.cancelForInteraction, {
         passive: true,
@@ -92,6 +103,7 @@ export class WaveLeaderboardScrollAnchor extends Component<
 
   override componentWillUnmount() {
     this.cancel();
+    this.resizeObserver?.disconnect();
     const root = this.props.rootRef.current;
     for (const type of ["touchstart", "pointerdown", "wheel", "keydown"]) {
       root?.removeEventListener(type, this.cancelForInteraction);
@@ -117,6 +129,10 @@ export class WaveLeaderboardScrollAnchor extends Component<
     const candidate = this.pending?.candidates.find(({ dropId }) =>
       itemIds.includes(dropId)
     );
+    if (attempt >= MAX_RESTORE_FRAMES && this.props.retainOnContentResize) {
+      this.frame = undefined;
+      return;
+    }
     if (!container || !candidate || attempt >= MAX_RESTORE_FRAMES) {
       this.cancel();
       return;
@@ -139,7 +155,8 @@ export class WaveLeaderboardScrollAnchor extends Component<
           behavior: "instant",
         });
       else {
-        this.cancel();
+        if (this.props.retainOnContentResize) this.frame = undefined;
+        else this.cancel();
         return;
       }
     } else {
