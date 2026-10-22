@@ -85,7 +85,16 @@ If lookup returns nothing (no alias match, IAM, or the distribution is past the 
 
 ## Public assets
 
-Only files listed in `scripts/export-mint-page.cjs` (`STANDALONE_PUBLIC_FILES`) are copied from the repo `public/` into the standalone app before build. Add entries there if the mint UI references new root-level static files.
+Only files listed in `scripts/export-mint-page.cjs` (`STANDALONE_PUBLIC_FILES`) are copied from the repo `public/` into the standalone app before build. Add entries there if the mint UI references new root-level static files. The export aborts when a listed file is missing.
+
+The tab icon is the production favicon pair (`favicon.png` and `favicon.svg`, the same files the main app links from `getProductionAppEnvironment()`). `src/app/layout.tsx` links both, so keep them in `STANDALONE_PUBLIC_FILES`.
+
+## Static export constraints
+
+`output: "export"` rejects code the main app can use freely. Keep these in mind when the mint page's import graph grows:
+
+- **No Server Actions.** Next fails the build ("Server Actions are not supported with static export") if any `"use server"` module is reachable from `src/app/layout.tsx` or `src/app/page.tsx`, even behind a lazy `import()`. The shared `Providers` component statically imports the Quick Direct Messages gate, which lazily loads the wave chat UI and, through the Memes submission form, a Server Action. This build never mounts Quick Direct Messages (`enableMyStream={false}`), so `src/tsconfig.json` maps that one import to the empty `src/components/NoQuickDirectMessagesGate.tsx`. `__tests__/contracts/standalone-mint-export.test.ts` walks the import graph and fails if a Server Action becomes reachable.
+- **Statically rendered layout.** `src/app/layout.tsx` exports `dynamic = "force-static"` so providers that call `useSearchParams()` also prerender the generated `/_not-found` page.
 
 ## Help
 
