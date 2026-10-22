@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
+import Button from "@/components/utils/button/Button";
 import { SortDirection } from "@/entities/ISort";
 import {
   formatInteger,
@@ -88,16 +89,17 @@ export function NFTLeaderboardMobileSort({
         className="-tw-mr-4 tw-flex tw-min-w-0 tw-flex-1 tw-gap-1.5 tw-overflow-x-auto tw-py-1 tw-pl-3 tw-pr-7 [mask-image:linear-gradient(to_right,transparent,#000_12px,#000_calc(100%-28px),transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:tw-hidden"
       >
         {options.map(({ value, label }) => (
-          <button
+          <Button
             key={value}
             ref={sort === value ? selected : undefined}
-            type="button"
+            variant={sort === value ? "primary" : "tertiary"}
+            size="xs"
             aria-pressed={sort === value}
             onClick={() => onSort(value)}
-            className={`tw-h-8 tw-shrink-0 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-px-2.5 tw-text-xs tw-font-semibold focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-1 focus-visible:tw-outline-primary-400 ${sort === value ? "tw-border-iron-200 tw-bg-iron-200 tw-text-iron-950" : "tw-border-iron-800 tw-bg-iron-950 tw-text-iron-100"}`}
+            className="motion-reduce:tw-transition-none"
           >
             {label}
-          </button>
+          </Button>
         ))}
       </div>
     </div>
