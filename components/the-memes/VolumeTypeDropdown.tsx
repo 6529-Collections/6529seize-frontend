@@ -9,6 +9,7 @@ import { t } from "@/i18n/messages";
 import { faCheck, faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRef, useState } from "react";
+import { getMemesSortButtonClasses } from "./theMemesSortStyles";
 
 const VOLUME_TYPES = Object.values(VolumeType);
 
@@ -57,7 +58,7 @@ export default function VolumeTypeDropdown({
           volumeType: selectedVolumeLabel,
         })}
         onClick={() => setIsOpen(!isOpen)}
-        className="tw-m-0"
+        className={getMemesSortButtonClasses(isVolumeSort)}
       >
         <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5">
           <span className="tw-shrink-0 tw-whitespace-nowrap">

@@ -3,6 +3,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { MemesSort } from "@/types/enums";
 import { getMemesSortLabel } from "./theMemesI18n";
+import { getMemesSortButtonClasses } from "./theMemesSortStyles";
 
 export default function TheMemesSortButton(
   props: Readonly<{
@@ -23,11 +24,7 @@ export default function TheMemesSortButton(
         sort: label,
       })}
       onClick={props.select}
-      className={`tw-relative tw-m-0 tw-no-underline lg:[body:not(.capacitor-native)_&]:tw-h-auto lg:[body:not(.capacitor-native)_&]:tw-rounded-none lg:[body:not(.capacitor-native)_&]:tw-border-0 lg:[body:not(.capacitor-native)_&]:tw-bg-transparent lg:[body:not(.capacitor-native)_&]:tw-px-0.5 lg:[body:not(.capacitor-native)_&]:tw-py-1 lg:[body:not(.capacitor-native)_&]:tw-text-sm lg:[body:not(.capacitor-native)_&]:tw-font-medium lg:[body:not(.capacitor-native)_&]:tw-leading-5 lg:[body:not(.capacitor-native)_&]:tw-shadow-none lg:[body:not(.capacitor-native)_&]:after:tw-absolute lg:[body:not(.capacitor-native)_&]:after:-tw-bottom-0.5 lg:[body:not(.capacitor-native)_&]:after:tw-left-0 lg:[body:not(.capacitor-native)_&]:after:tw-h-px lg:[body:not(.capacitor-native)_&]:after:tw-w-full lg:[body:not(.capacitor-native)_&]:after:tw-origin-left lg:[body:not(.capacitor-native)_&]:after:tw-transition-transform lg:[body:not(.capacitor-native)_&]:after:tw-duration-200 lg:[body:not(.capacitor-native)_&]:after:tw-content-[''] lg:[body:not(.capacitor-native)_&]:focus-visible:tw-outline-offset-0 lg:[body:not(.capacitor-native)_&]:active:tw-bg-transparent lg:[body:not(.capacitor-native)_&]:desktop-hover:hover:tw-bg-transparent lg:[body:not(.capacitor-native)_&]:motion-reduce:after:tw-transition-none ${
-        isActive
-          ? "lg:[body:not(.capacitor-native)_&]:tw-text-white lg:[body:not(.capacitor-native)_&]:after:tw-scale-x-100 lg:[body:not(.capacitor-native)_&]:after:tw-bg-primary-400 lg:[body:not(.capacitor-native)_&]:active:tw-text-white lg:[body:not(.capacitor-native)_&]:desktop-hover:hover:tw-text-white"
-          : "lg:[body:not(.capacitor-native)_&]:tw-text-iron-400 lg:[body:not(.capacitor-native)_&]:after:tw-scale-x-0 lg:[body:not(.capacitor-native)_&]:after:tw-bg-iron-700 lg:[body:not(.capacitor-native)_&]:desktop-hover:hover:tw-text-iron-200 lg:[body:not(.capacitor-native)_&]:desktop-hover:hover:after:tw-scale-x-100"
-      }`}
+      className={getMemesSortButtonClasses(isActive)}
     >
       {label}
     </FilterButton>

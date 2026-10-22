@@ -39,6 +39,12 @@ test.describe("The Memes Page @smoke @medium @large", () => {
       name: "Sort by Edition Size",
       exact: true,
     });
+    const volume = page.getByRole("button", {
+      name: "Volume: All Time",
+      exact: true,
+    });
+    // The initial URL normalization completes once the season filters are ready.
+    await expect(page).toHaveURL(/sort=age/);
     const isNative = isCapacitorSimulationProject(testInfo.project.name);
     if (isNative) {
       await expect(page.locator("body")).toHaveClass(/capacitor-native/);
@@ -57,6 +63,11 @@ test.describe("The Memes Page @smoke @medium @large", () => {
         editorial ? "rgb(255, 255, 255)" : "rgb(19, 19, 22)"
       );
       await expect(edition).toHaveCSS("color", "rgb(147, 147, 159)");
+      await expect(volume).toHaveCSS("color", "rgb(147, 147, 159)");
+      await expect(volume).toHaveCSS(
+        "background-color",
+        editorial ? "rgba(0, 0, 0, 0)" : "rgb(28, 28, 33)"
+      );
       await expect(edition).toHaveCSS(
         "background-color",
         editorial ? "rgba(0, 0, 0, 0)" : "rgb(28, 28, 33)"
@@ -84,6 +95,31 @@ test.describe("The Memes Page @smoke @medium @large", () => {
     await expect(age).toHaveAttribute("aria-pressed", "false");
     await expect(page).toHaveURL(/sort=edition_size/);
     await expect(edition).toBeFocused();
+
+    await volume.press("Enter");
+    await page.getByRole("menuitem", { name: "7 Days", exact: true }).click();
+    const selectedVolume = page.getByRole("button", {
+      name: "Volume: 7 Days",
+      exact: true,
+    });
+    await expect(page).toHaveURL(/sort=volume_days_7/);
+    await expect(selectedVolume).toHaveAttribute("aria-pressed", "true");
+    await expect(selectedVolume).toHaveAttribute("aria-expanded", "false");
+    for (const width of [390, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      const editorial = width >= 1024 && !isNative;
+      await expect(selectedVolume).toHaveCSS(
+        "background-color",
+        editorial ? "rgba(0, 0, 0, 0)" : "rgb(236, 236, 238)"
+      );
+      await expect
+        .poll(() =>
+          selectedVolume.evaluate(
+            (element) => getComputedStyle(element, "::after").backgroundColor
+          )
+        )
+        .toBe(editorial ? "rgb(82, 139, 255)" : "rgba(0, 0, 0, 0)");
+    }
   });
 
   test("phone cards stay square and sorting stays reachable while browsing", async ({
