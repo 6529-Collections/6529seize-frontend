@@ -4043,6 +4043,7 @@
         "Leaderboard availability depends on the wave type and configuration.",
         "Use the selected competition’s main Leaderboard tab to inspect its entries and ranking.",
         "Competition leaderboard cards appear with each page. Background score refreshes keep loaded artwork visible; opening a card loads its full drop.",
+        "Non-Memes Grid view and Content only cards show previews for supported NFT marketplace links when no media is uploaded. Content only hides the text summary for those previews. Unsupported links stay readable as text, and unavailable NFT previews show a marketplace fallback card.",
         "Full wave leaderboard list, grid, and Memes gallery views update scores and ranks live while preserving the visible artwork's position. During touch or momentum scrolling, scores keep updating and card reordering waits until scrolling settles."
       ],
       "canonical_path": "/waves",

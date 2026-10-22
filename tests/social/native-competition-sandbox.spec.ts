@@ -3086,6 +3086,81 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     }
   });
 
+  test("shows linked NFT artwork in grid and content-only leaderboard views", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    const origin = getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"]);
+    const response = await page.request.get(
+      `${origin}/api/v2/waves/${WAVE}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const fixture = await response.json();
+    const href =
+      "https://www.transient.xyz/nfts/ethereum/0x29171a6d9471ff51f9501da8ef7373afeabd3eac/1";
+    const mediaUri =
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/linked-nft.png";
+    await page.route(
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/**/linked-nft.png",
+      (route) =>
+        route.fulfill({
+          path: "public/artwork-documentation/examples/an-alteration.png",
+          contentType: "image/png",
+        })
+    );
+    await installCollaborationDropFixture(page, () => ({
+      wave: fixture.wave,
+      drop: {
+        ...fixture.drops[0],
+        id: entryDropId("alpha"),
+        title: null,
+        content: href,
+        media: [],
+      },
+    }));
+    let nftLinkReads = 0;
+    await page.route(
+      (url) => url.pathname === "/api/nft-link",
+      (route) => {
+        nftLinkReads += 1;
+        return route.fulfill({
+          headers: { "Access-Control-Allow-Origin": "*" },
+          json: {
+            is_enrichable: true,
+            validation_error: null,
+            data: {
+              name: "Linked NFT artwork",
+              media_uri: mediaUri,
+              last_successfully_updated: Date.now(),
+            },
+          },
+        });
+      }
+    );
+    await page.goto(`${ROOT}/alpha?tab=leaderboard`, {
+      waitUntil: "domcontentloaded",
+    });
+    for (const view of ["Grid view", "Content only"]) {
+      await page.getByRole("tab", { name: view, exact: true }).click();
+      const card = page.getByTestId(
+        `wave-leaderboard-grid-item-${entryDropId("alpha")}`
+      );
+      await expect.poll(() => nftLinkReads).toBeGreaterThan(0);
+      const artwork = card.getByTestId("manifold-item-media").locator("img");
+      await expect(artwork).toBeVisible({ timeout: 30000 });
+      await expect
+        .poll(() =>
+          artwork.evaluate((image: HTMLImageElement) => image.naturalWidth)
+        )
+        .toBeGreaterThan(0);
+      await expect(artwork).toHaveCSS("opacity", "1");
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath(`linked-nft-${view}.png`),
+      });
+    }
+  });
+
   test("reuses competition entry context when voting from list and grid cards", async ({
     page,
   }) => {
