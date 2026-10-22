@@ -24,6 +24,13 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.de-DE.jso
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  "waves.sidebar.rightPanel.followers.label": "Beigetreten",
+  "waves.sidebar.rightPanel.followers.open": "Beigetretene Follower anzeigen",
+  "waves.sidebar.rightPanel.followers.loading":
+    "Anzahl der beigetretenen Follower wird geladen…",
+  "waves.sidebar.rightPanel.followers.unavailable":
+    "Anzahl der beigetretenen Follower nicht verfügbar.",
+  "waves.sidebar.rightPanel.followers.count": "Beigetretene Follower: {count}.",
   ...DE_SUBMISSION_DISCOVERY_MESSAGES,
   ...DE_DE_DROP_REQUIREMENT_MESSAGES,
   ...DE_DE_DROP_METADATA_MESSAGES,

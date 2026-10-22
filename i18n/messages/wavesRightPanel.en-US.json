@@ -1,4 +1,9 @@
 {
+  "waves.sidebar.rightPanel.followers.label": "Joined",
+  "waves.sidebar.rightPanel.followers.open": "View joined followers",
+  "waves.sidebar.rightPanel.followers.loading": "Loading joined count…",
+  "waves.sidebar.rightPanel.followers.unavailable": "Joined count unavailable.",
+  "waves.sidebar.rightPanel.followers.count": "Joined followers: {count}.",
   "waves.sidebar.rightPanel.ariaLabel": "Wave details",
   "waves.sidebar.rightPanel.loading": "Loading wave details…",
   "waves.sidebar.rightPanel.error": "Wave details couldn't be loaded.",

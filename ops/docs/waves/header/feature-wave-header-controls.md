@@ -21,6 +21,14 @@ Users can:
 - Rename the wave and update the picture (when edit-eligible on non-DM waves)
 - Open author options such as profile-wave actions and `Delete`
 
+The `Joined` count and follower list include followers who can currently access
+the wave. Followers who lose access are hidden and return if they qualify again;
+their subscription is preserved. Subwave followers must also retain access to
+the parent wave. Losing posting or voting permission alone does not hide a
+follower who can still read the wave. The count shows a dash while loading or
+when unavailable. It updates when the follower list loads and after joining
+or leaving the wave.
+
 ## Location in the Site
 
 - Right-sidebar `About` tab on:
