@@ -1,7 +1,8 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import NFTLeaderboard from "@/components/leaderboard/NFTLeaderboard";
+import { createDeferredPromise } from "@/__tests__/utils/deferredPromise";
 
 jest.mock("@/components/leaderboard/LeaderboardCollector", () => ({
   LeaderboardCollector: (p: any) => <div>{p.handle}</div>,
@@ -64,6 +65,12 @@ describe("NFTLeaderboard component", () => {
     primary_wallet: "0xprimary",
   };
 
+  type LeaderboardResponse = {
+    count: number;
+    page: number;
+    data: (typeof collector)[];
+  };
+
   beforeAll(() => {
     Element.prototype.scrollIntoView = jest.fn();
   });
@@ -97,6 +104,110 @@ describe("NFTLeaderboard component", () => {
         })
       )
     );
+  });
+
+  it("does not show an empty result before the initial request finishes", async () => {
+    const request = createDeferredPromise<LeaderboardResponse>();
+    commonApiFetch.mockReturnValueOnce(request.promise);
+    renderLeaderboard();
+
+    expect(screen.queryByText("No Results found")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("next")).not.toBeInTheDocument();
+    expect(commonApiFetch).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      request.resolve({ count: 0, page: 1, data: [] });
+    });
+
+    expect(await screen.findByText("No Results found")).toBeInTheDocument();
+    expect(screen.queryByTestId("next")).not.toBeInTheDocument();
+  });
+
+  it("ignores out-of-order sort responses and aborts obsolete requests", async () => {
+    const olderSort = createDeferredPromise<LeaderboardResponse>();
+    const newerSort = createDeferredPromise<LeaderboardResponse>();
+    const pendingDirection = createDeferredPromise<LeaderboardResponse>();
+    commonApiFetch
+      .mockResolvedValueOnce({ count: 1, page: 1, data: [collector] })
+      .mockReturnValueOnce(olderSort.promise)
+      .mockReturnValueOnce(newerSort.promise)
+      .mockReturnValueOnce(pendingDirection.promise);
+    const { unmount } = renderLeaderboard();
+    const list = within(screen.getByRole("list"));
+    await list.findByText("alice");
+    const sortGroup = within(
+      screen.getByRole("group", { name: "Sort collectors by" })
+    );
+
+    await userEvent.click(
+      sortGroup.getByRole("button", { name: "TDH", exact: true })
+    );
+    const olderSignal: AbortSignal = commonApiFetch.mock.calls[1][0].signal;
+    await userEvent.click(
+      sortGroup.getByRole("button", { name: "Unweighted TDH", exact: true })
+    );
+    expect(olderSignal.aborted).toBe(true);
+    expect(list.getByText("alice")).toBeInTheDocument();
+
+    await act(async () => {
+      newerSort.resolve({
+        count: 1,
+        page: 1,
+        data: [{ ...collector, handle: "newer-result" }],
+      });
+    });
+    await list.findByText("newer-result");
+
+    await act(async () => {
+      olderSort.resolve({
+        count: 1,
+        page: 1,
+        data: [{ ...collector, handle: "stale-result" }],
+      });
+    });
+    expect(list.getByText("newer-result")).toBeInTheDocument();
+    expect(list.queryByText("stale-result")).not.toBeInTheDocument();
+    expect(
+      within(screen.getByRole("table")).getByText("newer-result")
+    ).toBeInTheDocument();
+    expect(commonApiFetch).toHaveBeenCalledTimes(3);
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Sort ascending", exact: true })
+    );
+    const activeSignal: AbortSignal = commonApiFetch.mock.calls[3][0].signal;
+    expect(activeSignal.aborted).toBe(false);
+    unmount();
+    expect(activeSignal.aborted).toBe(true);
+    await act(async () => {
+      pendingDirection.resolve({ count: 0, page: 1, data: [] });
+    });
+  });
+
+  it("keeps previous page ranks until the next page arrives", async () => {
+    const nextPage = createDeferredPromise<LeaderboardResponse>();
+    commonApiFetch
+      .mockResolvedValueOnce({ count: 79, page: 1, data: [collector] })
+      .mockReturnValueOnce(nextPage.promise);
+    renderLeaderboard();
+    const list = within(screen.getByRole("list"));
+    await list.findByText("alice");
+
+    await userEvent.click(screen.getByTestId("next"));
+    expect(list.getByText("Rank").parentElement).toHaveTextContent(/^Rank 1$/);
+    expect(list.getByText("alice")).toBeInTheDocument();
+    expect(screen.queryByText("No Results found")).not.toBeInTheDocument();
+
+    await act(async () => {
+      nextPage.resolve({
+        count: 79,
+        page: 2,
+        data: [{ ...collector, handle: "next-page-collector" }],
+      });
+    });
+    await list.findByText("next-page-collector");
+    expect(list.getByText("Rank").parentElement).toHaveTextContent(/^Rank 26$/);
+    expect(commonApiFetch).toHaveBeenCalledTimes(2);
   });
 
   it("shows the CSV tooltip on hover and keyboard focus without downloading", async () => {
