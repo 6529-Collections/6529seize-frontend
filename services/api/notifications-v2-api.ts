@@ -304,7 +304,14 @@ const handleUnknownNotificationCause = (
 const mapVotingCreditsReturnedNotification = (
   notification: ApiNotificationV2
 ): INotificationVotingCreditsReturned[] => {
-  const context = notification.additional_context;
+  const rawContext: unknown = notification.additional_context;
+  if (
+    rawContext === null ||
+    typeof rawContext !== "object" ||
+    Array.isArray(rawContext)
+  )
+    return [];
+  const context = rawContext as ApiNotificationAdditionalContextV2;
   if (
     !context.event_id ||
     !context.wave_id ||

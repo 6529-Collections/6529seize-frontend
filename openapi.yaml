@@ -34422,9 +34422,9 @@ components:
         - ALL_DROPS
         - PRIORITY_ALERT
         - SUBSCRIPTION_COVERAGE
-        - VOTING_CREDITS_RETURNED
         - COMPETITION_LIFECYCLE
         - MEME_COLLABORATION
+        - VOTING_CREDITS_RETURNED
     ApiNotificationDropReactedReactor:
       type: object
       required:

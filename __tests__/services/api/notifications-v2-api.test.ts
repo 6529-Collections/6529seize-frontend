@@ -555,6 +555,29 @@ describe("fetchNotificationsV2", () => {
       consoleErrorSpy.mockRestore();
     }
   });
+  it.each([null, undefined])(
+    "ignores returned-credit rows with missing context (%s)",
+    async (additional_context) => {
+      (commonApiFetch as jest.Mock).mockResolvedValue({
+        unread_count: 1,
+        notifications: [
+          {
+            id: 100,
+            cause: ApiNotificationCause.VotingCreditsReturned,
+            created_at: 1000,
+            read_at: null,
+            related_identity: null,
+            related_drops: [],
+            additional_context,
+          },
+        ],
+      });
+      expect(
+        (await fetchNotificationsV2({ limit: "30" })).notifications
+      ).toEqual([]);
+    }
+  );
+
   it("maps returned credits after deletion without a related drop or actor", async () => {
     const context = {
       event_id: "release",
@@ -595,7 +618,7 @@ describe("fetchNotificationsV2", () => {
     ]);
   });
 
-  it.each([0, -5, Number.NaN, Number.MAX_SAFE_INTEGER + 1])(
+  it.each([0, -5, 1.5, Number.NaN, Number.MAX_SAFE_INTEGER + 1])(
     "ignores malformed returned credit amounts (%s)",
     async (amount) => {
       (commonApiFetch as jest.Mock).mockResolvedValue({
