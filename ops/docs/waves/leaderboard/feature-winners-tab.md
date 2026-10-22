@@ -30,6 +30,11 @@ right sidebar, and what users see for loading and empty states.
 
 ## Main Thread Behavior
 
+Winner pages load by win time, newest first, with older winners available through
+**Load more**. Available cards stay visible while remaining entries load or retry.
+Cards appear with each winner page; background score refreshes keep loaded
+artwork visible. Opening a winner loads its full drop.
+
 ### Single-decision waves
 
 - Podium shows first, second, and third place when available.

@@ -1,8 +1,8 @@
-# Wave Creation Voting Configuration
+# Competition Setup Voting Configuration
 
 ## Overview
 
-Use `Voting` in `Rank` and `Approve` wave creation to define how votes are
+Use `Voting` in `Rank` and `Approve` competition setup to define how votes are
 counted.
 Pick the vote mode, optional `Rep` scope, optional time-weighted averaging, and
 approve-wave threshold behavior.
@@ -13,12 +13,7 @@ behavior tuning are in an expandable section named for those controls.
 
 ## Location in the Site
 
-- Full-page create route: `/waves/create`
-- Desktop create-wave modal mode (`?create=wave`) on:
-  - `/waves`
-  - `/waves/{waveId}`
-  - `/messages`
-  - `/messages/{waveId}`
+- Competition setup: `/waves/{waveId}/competitions/new`
 - Step label: `Voting`
 - User-reachable in `Rank` and `Approve` creation
 
@@ -47,14 +42,14 @@ behavior tuning are in an expandable section named for those controls.
    - `Rep Category`, or
    - `Profile` (identity search)
 3. Choose whether voting power applies to the `Whole wave` or `Each drop`.
-4. For `Approve` waves, set the visible `Approval threshold`.
+4. For `Approve` competitions, set the visible `Approval threshold`.
 5. Open `Vote limits and behavior` for Rank, or `Vote limits, behavior,
    and timing` for Approve, only when tuning is needed.
 6. Optionally set `Vote cap per identity`.
 7. Set `Allow Negative Votes`.
 8. Optional: enable `Time-Weighted Voting` and set `Averaging Interval` in
    `Minutes` or `Hours`.
-9. For `Approve` waves, choose `No hold` or `Require hold time`.
+9. For `Approve` competitions, choose `No hold` or `Require hold time`.
 10. If hold time is required, set `Minimum time above threshold` in `Minutes` or
    `Hours`.
 11. Click `Next` to continue to `Outcomes`, or to `Guidelines` for
@@ -104,22 +99,22 @@ behavior tuning are in an expandable section named for those controls.
 
 - Creator-facing voting options are only `TDH + XTDH`, `TDH`, `Rep`, and
   `Memes TDH`.
-- `Allow Negative Votes` is interactive for `Rank` and `Approve` waves.
-- Time-weighted voting is available for `Rank` and `Approve` waves.
-- Approval threshold and hold time are available for `Approve` waves.
+- `Allow Negative Votes` is interactive for `Rank` and `Approve` competitions.
+- Time-weighted voting is available for `Rank` and `Approve` competitions.
+- Approval threshold and hold time are available for `Approve` competitions.
 - `Approve` is available in the create-wave type picker.
 
 ## Related Pages
 
-- [Wave Creation Index](README.md)
-- [Wave Create Modal Entry Points](feature-modal-entry-points.md)
-- [Wave Creation Setup Step](feature-overview-step.md)
-- [Wave Creation Group Access and Permissions](feature-groups-step.md)
-- [Wave Creation Schedule](feature-dates-step.md)
-- [Wave Creation Drop Settings](feature-drops-step.md)
-- [Wave Creation Guidelines Step](feature-rules-step.md)
-- [Wave Creation Outcomes Step](feature-outcomes-step.md)
-- [Wave Drop Vote Slider](../drop-actions/feature-vote-slider.md)
-- [Wave Drop Vote Summary and Modal](../drop-actions/feature-vote-summary-and-modal.md)
-- [Wave Leaderboard Drop States](../leaderboard/feature-drop-states.md)
-- [Docs Home](../../README.md)
+- [Competition Setup Index](../../create/README.md)
+- [Wave Create Modal Entry Points](../../create/feature-modal-entry-points.md)
+- [Competition Setup Setup Step](../../create/feature-overview-step.md)
+- [Competition Setup Group Access and Permissions](../../create/feature-groups-step.md)
+- [Competition Setup Schedule](feature-dates-step.md)
+- [Competition Setup Drop Settings](feature-drops-step.md)
+- [Competition Setup Guidelines Step](../../create/feature-rules-step.md)
+- [Competition Setup Outcomes Step](feature-outcomes-step.md)
+- [Wave Drop Vote Slider](../../drop-actions/feature-vote-slider.md)
+- [Wave Drop Vote Summary and Modal](../../drop-actions/feature-vote-summary-and-modal.md)
+- [Wave Leaderboard Drop States](../../leaderboard/feature-drop-states.md)
+- [Docs Home](../../../README.md)

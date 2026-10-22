@@ -786,3 +786,5 @@ or Find an identity to exclude. The placeholders are Search identities to
 include... and Search identities to exclude..., respectively.
 Create Wave and Network Filter omit empty-selection sentences in both tabs while
 preserving limits, errors, warnings, and the bottom criteria summary.
+
+Competition list corrections: My Votes includes only active nonzero votes; archived winner votes remain retained. Winners paginate by win time newest first.

@@ -5801,6 +5801,73 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}/competitions/{competition_id}/entry-contexts:
+    get:
+      tags:
+        - CompetitionsV3
+      summary: Read up to 50 visible entry contexts and their awards in one batch
+      operationId: getCompetitionEntryContextsV3
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        typeImportGroup: competitions-v3
+        handler:
+          import: "@/api/competitions/competition-entry-contexts.handler"
+          name: handleGetCompetitionEntryContextsV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: entry_ids
+          in: query
+          required: true
+          description: >-
+            Comma-separated entry UUIDs, at most 50. Invisible entries are
+            omitted.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1849
+        - name: include
+          in: query
+          required: false
+          description: Include renderable cards without legacy voting enrichment.
+          schema:
+            type: string
+            enum:
+              - cards
+      responses:
+        "200":
+          description: Visible entries with current voting summaries and scoped awards; include=cards also returns optional first-part content and metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionEntryContextPage"
+        "400":
+          description: Invalid identifiers or more than 50 entries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+        "404":
+          description: Competition is not visible in this wave
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
   /v3/waves/{wave_id}/competitions/{competition_id}/entries/{entry_id}:
     get:
       tags:
@@ -6018,6 +6085,14 @@ paths:
             minimum: 1
             maximum: 100
             default: 50
+        - name: include
+          in: query
+          required: false
+          description: Include renderable cards without legacy voting enrichment.
+          schema:
+            type: string
+            enum:
+              - cards
       responses:
         "200":
           description: Rating order with current legacy tie rules and stable ID tie breaker
@@ -6199,7 +6274,7 @@ paths:
     get:
       tags:
         - CompetitionsV3
-      summary: List winner entries with stable competition context
+      summary: List winner entries by win time, newest first by default
       operationId: listCompetitionWinnersV3
       security:
         - bearerAuth: []
@@ -6231,7 +6306,7 @@ paths:
           schema:
             allOf:
               - $ref: "#/components/schemas/ApiCompetitionSortDirection"
-            default: ASC
+            default: DESC
         - name: cursor
           in: query
           required: false
@@ -6248,6 +6323,14 @@ paths:
             minimum: 1
             maximum: 100
             default: 50
+        - name: include
+          in: query
+          required: false
+          description: Include renderable cards without legacy voting enrichment.
+          schema:
+            type: string
+            enum:
+              - cards
       responses:
         "200":
           description: Winner entry page
@@ -8090,6 +8173,16 @@ paths:
       description: Deprecated. Use GET /v2/drops instead.
       operationId: getLatestDrops
       parameters:
+        - name: public_only
+          in: query
+          description: >-
+            Only return drops from publicly viewable waves, excluding direct
+            messages and subwaves with private parents. Authentication still
+            supplies viewer-specific drop context. Defaults to false.
+          required: false
+          schema:
+            type: boolean
+            default: false
         - name: limit
           in: query
           description: How many drops to return (10 by default)
@@ -26076,6 +26169,44 @@ components:
           type: string
           format: uuid
           nullable: true
+    ApiCompetitionEntryContext:
+      type: object
+      additionalProperties: false
+      required:
+        - entry
+        - vote_summary
+        - awards
+      properties:
+        drop:
+          description: First-part card content, present when include=cards.
+          allOf:
+            - $ref: "#/components/schemas/ApiDropV2"
+        metadata:
+          description: Complete card metadata, present when include=cards.
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropMetadataV2"
+        entry:
+          $ref: "#/components/schemas/ApiCompetitionEntry"
+        vote_summary:
+          $ref: "#/components/schemas/ApiCompetitionDropVoteSummary"
+        awards:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionAward"
+    ApiCompetitionEntryContextPage:
+      type: object
+      additionalProperties: false
+      required:
+        - competition
+        - data
+      properties:
+        competition:
+          $ref: "#/components/schemas/ApiCompetition"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionEntryContext"
     ApiCompetitionEntryPage:
       type: object
       additionalProperties: false
@@ -26084,6 +26215,11 @@ components:
         - next_cursor
         - has_more
       properties:
+        cards:
+          description: Authorized card content and native summaries when include=cards. May be a sparse subset in a different order than data; join by entry.id, never by array position.
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionEntryContext"
         data:
           type: array
           items:
@@ -26198,6 +26334,11 @@ components:
         - next_cursor
         - has_more
       properties:
+        cards:
+          description: Authorized card content and native summaries when include=cards. May be a sparse subset in a different order than data; join by entry.id, never by array position.
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionEntryContext"
         data:
           type: array
           items:

@@ -180,7 +180,9 @@ interface WaveLeaderboardVirtualizedRowsProps<TItem> {
   readonly isFetchPreviousPageError: boolean;
   readonly autoLoadNext?: boolean | undefined;
   readonly estimatedRowHeight?: number | undefined;
+  readonly overscan?: number | undefined;
   readonly measureLoadedRowsAtNaturalHeight?: boolean | undefined;
+  readonly retainAnchorOnContentResize?: boolean | undefined;
 }
 
 export function WaveLeaderboardVirtualizedRows<TItem>({
@@ -201,7 +203,9 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
   isFetchPreviousPageError,
   autoLoadNext = false,
   estimatedRowHeight,
+  overscan,
   measureLoadedRowsAtNaturalHeight = false,
+  retainAnchorOnContentResize = false,
 }: WaveLeaderboardVirtualizedRowsProps<TItem>) {
   const locale = useBrowserLocale();
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -384,7 +388,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
     getItemKey: getVirtualRowKey,
     lanes: isMasonryLayout ? columns : 1,
     gap: isMasonryLayout ? 16 : 0,
-    overscan: virtualizerOverscan,
+    overscan: overscan ?? virtualizerOverscan,
     scrollMargin,
     onChange: handleVirtualizerChange,
   });
@@ -398,9 +402,21 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
   const ariaSetSize = hasNextPage || hasPreviousPage ? -1 : items.length;
   const gridColumnsClassName = getGridColumnsClassName(columns);
   const revealIndex = useCallback(
-    (index: number) =>
-      virtualizer.scrollToIndex(index, { align: "start", behavior: "auto" }),
-    [virtualizer]
+    (index: number) => {
+      if (!retainAnchorOnContentResize) {
+        virtualizer.scrollToIndex(index, { align: "start", behavior: "auto" });
+        return;
+      }
+      // Our resize-aware anchor owns subsequent corrections and cancellation.
+      // TanStack's ongoing scrollToIndex reconciliation can fight a new gesture.
+      const offset = virtualizer.getOffsetForIndex(index, "start")?.[0];
+      if (offset !== undefined)
+        scrollContainerRef.current?.scrollTo({
+          top: offset,
+          behavior: "instant",
+        });
+    },
+    [virtualizer, retainAnchorOnContentResize, scrollContainerRef]
   );
 
   return (
@@ -413,6 +429,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
       leadingItemCount={leadingItemCount}
       masonry={isMasonryLayout}
       revealIndex={revealIndex}
+      retainOnContentResize={retainAnchorOnContentResize}
     >
       {isFetchingPreviousPage ? (
         <span className="tw-sr-only" role="status" aria-live="polite">

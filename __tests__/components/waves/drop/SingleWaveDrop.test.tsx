@@ -10,7 +10,7 @@ jest.mock("@/components/waves/drop/singleWaveDropRendererRegistry", () => ({
 }));
 
 describe("SingleWaveDrop", () => {
-  const drop: any = { wave: { id: "w1" } };
+  const drop: any = { id: "drop-1", wave: { id: "w1" } };
   const onClose = jest.fn();
 
   beforeEach(() => {
@@ -24,7 +24,10 @@ describe("SingleWaveDrop", () => {
 
     render(<SingleWaveDrop drop={drop} onClose={onClose} />);
 
-    expect(useWaveSingleWaveDropRendererSet).toHaveBeenCalledWith("w1");
+    expect(useWaveSingleWaveDropRendererSet).toHaveBeenCalledWith(
+      "w1",
+      undefined
+    );
     expect(screen.getByTestId("quorum")).toBeInTheDocument();
   });
 });

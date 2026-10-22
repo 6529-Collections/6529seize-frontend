@@ -13,6 +13,7 @@ import type {
 import { useCompetitionViewer } from "@/hooks/competitions/useCompetitionQueries";
 import { fetchDropCompetitionContext } from "@/services/api/competitions-api";
 import { CompetitionVoteForm } from "./CompetitionVote";
+import CompetitionVoteWithReply from "./CompetitionVoteWithReply";
 import { CompetitionState } from "./CompetitionState";
 
 interface CompetitionAwareDropVoteProps {
@@ -79,8 +80,14 @@ export default function CompetitionAwareDropVote(
   if (!resolvedContext) return <CompetitionState />;
   const { competition, entry } = resolvedContext;
   if (!competition || !entry) return props.fallback;
+  const canReply =
+    drop.wave.authenticated_user_eligible_to_chat === true &&
+    drop.parts.at(0)?.part_id !== undefined;
+  const VoteForm = canReply ? CompetitionVoteWithReply : CompetitionVoteForm;
   return (
-    <CompetitionVoteForm
+    <VoteForm
+      key={`${viewer ?? "anonymous"}:${entry.id}`}
+      drop={drop}
       competition={competition}
       entryId={entry.id}
       dropId={entry.drop_id}
