@@ -102,8 +102,9 @@ export function MemePageActivity(
           <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-200">
             {t(locale, "theMemes.detail.tabs.cardActivity")}
           </h3>
-          <div className="tw-w-full tw-shrink-0 md:tw-w-72">
+          <div className="tw-ml-auto tw-w-auto tw-shrink-0">
             <CommonDropdown
+              variant="filter"
               items={activityTypeItems}
               activeItem={activityTypeFilter}
               filterLabel={t(

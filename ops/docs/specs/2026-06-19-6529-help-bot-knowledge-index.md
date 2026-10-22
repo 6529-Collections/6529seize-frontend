@@ -105,6 +105,11 @@ On mobile, grant search fields and cards share one scroll area, with Load more
 after the last loaded card and sheet navigation and the bottom action accessible. Desktop retains
 the left-side criteria list, and saving still creates and applies a new group.
 
+The `the-memes.list-sorting` record explains the phone's sticky, horizontally
+scrollable sort controls, side-by-side Year and Season filters, bottom sheets,
+and square card previews. Existing sorting, query, and detail-page guidance
+continues to apply.
+
 ## Problem Statement
 
 Users often ask practical product questions in Waves instead of finding the
@@ -167,6 +172,13 @@ The card records preserve `focus=the-art` deep links to the Memes and Meme Lab
 **Overview**, where artwork details follow the description. The **Listings & offers**
 tab opens the market directly without another accordion. Primary and History tab changes keep the tab row visible and
 show the selected section from its top while deferred content loads.
+The Memes card record also describes the mobile Collectors list, with Balance,
+TDH and Unweighted TDH headers over This card and Total rows, its six sort
+metrics and separate direction arrows, identity filtering, 25-row pagination,
+and full-value CSV export. On narrow screens the list scrolls horizontally by
+swipe or keyboard, keeping labels and values on one line. Screens 768 px and
+wider use the sortable table.
+Compact values are presentation only.
 The Listings and Offers record distinguishes direct **Collect** and **Sell**
 actions for one order from the explicit choice among multiple orders at a price.
 Market browsing facts describe quiet periodic updates while visible and idle,
