@@ -19,6 +19,7 @@ import VersionReloadScreen, {
 import { VERSION_RELOAD_BOOTSTRAP_SCRIPT } from "@/components/version-update/versionReload";
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
 import { NATIVE_IOS_BOOTSTRAP_SCRIPT } from "@/components/eula/nativeIosBootstrap";
+import { canServerRenderNftPurchasing } from "@/components/common/nftPurchasingRequest";
 import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
 import MobileLaunchTimingReporter from "@/components/monitoring/MobileLaunchTimingReporter";
 import LayoutWrapper from "@/components/providers/LayoutWrapper";
@@ -72,6 +73,10 @@ export default async function RootLayout({
   const initialOrigin = getRequestOrigin(requestHeaders);
   const initialIsIos = cookieStore.get(NATIVE_IOS_COOKIE)?.value === "true";
   const initialEulaConsentVersion = cookieStore.get(CONSENT_EULA_COOKIE)?.value;
+  const serverRendersNftPurchasing = canServerRenderNftPurchasing({
+    hasNativeIosCookie: cookieStore.has(NATIVE_IOS_COOKIE),
+    userAgent: requestHeaders.get("user-agent"),
+  });
 
   return (
     // Headless UI may add its focus-visible marker before React hydrates when
@@ -138,6 +143,7 @@ export default async function RootLayout({
             <Providers
               initialIsIos={initialIsIos}
               initialEulaConsentVersion={initialEulaConsentVersion}
+              canServerRenderNftPurchasing={serverRendersNftPurchasing}
             >
               <DynamicHeadTitle />
               <LayoutWrapper>{children}</LayoutWrapper>
