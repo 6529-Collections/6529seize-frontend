@@ -120,3 +120,19 @@ it("Backspace on an empty query removes the author first and retains input focus
   expect(callbacks.onWaveChange).not.toHaveBeenCalled();
   expect(input).toHaveFocus();
 });
+
+it("selects a suggestion when pointer focus would otherwise blur to no target", async () => {
+  const callbacks = mount({ query: "from: ali" });
+  const input = screen.getByRole("combobox");
+  fireEvent.focus(input);
+  const option = await screen.findByRole("option", { name: "@ alice" });
+  // Safari can blur the input without focusing the clicked button. Model that
+  // default action only when the mousedown event has not been cancelled.
+  if (fireEvent.mouseDown(option)) {
+    fireEvent.blur(input, { relatedTarget: null });
+  }
+  fireEvent.mouseUp(option);
+  fireEvent.click(option);
+  expect(callbacks.onAuthorChange).toHaveBeenCalledWith(author);
+  expect(input).toHaveFocus();
+});
