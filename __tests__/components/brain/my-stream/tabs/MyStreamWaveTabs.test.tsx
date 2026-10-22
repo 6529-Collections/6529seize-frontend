@@ -38,6 +38,7 @@ describe("MyStreamWaveTabs", () => {
     render(
       <MyStreamWaveTabs
         wave={wave}
+        competitionSubmissionReady
         viewMode="chat"
         onToggleViewMode={mockToggleViewMode}
         showGalleryToggle={false}
@@ -57,6 +58,20 @@ describe("MyStreamWaveTabs", () => {
         viewMode="chat"
         onToggleViewMode={mockToggleViewMode}
         showGalleryToggle={true}
+      />
+    );
+    expect(screen.getByTestId("default")).toBeInTheDocument();
+    expect(screen.queryByTestId("meme")).toBeNull();
+  });
+
+  it("keeps the shared tabs while the native submission target is unresolved", () => {
+    (useWave as jest.Mock).mockReturnValue({ isMemesWave: true });
+    render(
+      <MyStreamWaveTabs
+        wave={wave}
+        viewMode="chat"
+        onToggleViewMode={mockToggleViewMode}
+        showGalleryToggle={false}
       />
     );
     expect(screen.getByTestId("default")).toBeInTheDocument();

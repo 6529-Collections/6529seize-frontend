@@ -137,6 +137,7 @@ export function useArtworkSubmissionFormActions({
     const { artworkUrl, isAdditionalActionPromised, operationalData, traits } =
       state;
     return {
+      collaborators: state.collaborators ?? [],
       imageUrl: artworkUrl,
       traits: {
         ...traits,

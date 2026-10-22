@@ -30,11 +30,13 @@ function Harness({
   windowKey = "wave:rank",
   mountedIds = ids,
   columns = 1,
+  retainOnContentResize = false,
 }: {
   readonly ids: string[];
   readonly windowKey?: string;
   readonly mountedIds?: string[];
   readonly columns?: number;
+  readonly retainOnContentResize?: boolean;
 }) {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -49,6 +51,7 @@ function Harness({
         leadingItemCount={0}
         masonry={false}
         revealIndex={revealIndex}
+        retainOnContentResize={retainOnContentResize}
       >
         <div ref={rootRef}>
           {mountedIds.map((id) => (
@@ -250,4 +253,44 @@ it("does not let a scrollend event move artwork while a finger is still down", (
   fireEvent.touchEnd(scroller);
   act(() => jest.advanceTimersByTime(180));
   expect(scroller).toHaveTextContent("b:30,a:20");
+});
+
+it("retains a ranking anchor while native rich content hydrates and releases it on a new gesture", () => {
+  const previousObserver = globalThis.ResizeObserver;
+  let notifyResize: ResizeObserverCallback | undefined;
+  const observer = {
+    observe: jest.fn(),
+    disconnect: jest.fn(),
+    unobserve: jest.fn(),
+  };
+  Object.defineProperty(globalThis, "ResizeObserver", {
+    configurable: true,
+    value: jest.fn((callback: ResizeObserverCallback) => {
+      notifyResize = callback;
+      return observer;
+    }),
+  });
+  try {
+    const { rerender } = render(
+      <Harness ids={["a", "b", "c", "d"]} retainOnContentResize />
+    );
+    const scroller = screen.getByTestId("scroller");
+    scroller.scrollTop = 210;
+    rerender(<Harness ids={["d", "a", "b", "c"]} retainOnContentResize />);
+    act(() => jest.advanceTimersByTime(20));
+    expect(scroller.scrollTop).toBe(310);
+    const card = screen.getByText("c");
+    card.setAttribute("data-position", "4");
+    act(() => notifyResize?.([], observer));
+    expect(scroller.scrollTop).toBe(410);
+    fireEvent.wheel(card);
+    card.setAttribute("data-position", "5");
+    act(() => notifyResize?.([], observer));
+    expect(scroller.scrollTop).toBe(410);
+  } finally {
+    Object.defineProperty(globalThis, "ResizeObserver", {
+      configurable: true,
+      value: previousObserver,
+    });
+  }
 });

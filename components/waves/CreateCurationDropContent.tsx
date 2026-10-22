@@ -1,5 +1,9 @@
 "use client";
 
+import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -15,6 +19,8 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -70,6 +76,33 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
   termsSignatureFlowEnabled = true,
 }) => {
   const { isApp } = useDeviceInfo();
+  const locale = useBrowserLocale();
+  const termsId = useId();
+  const nativeCompetition = presentationCompetition(wave);
+  const termsKey = nativeCompetition
+    ? JSON.stringify([
+        nativeCompetition.wave_id,
+        nativeCompetition.id,
+        nativeCompetition.config_version,
+      ])
+    : null;
+  const latestTermsKey = useRef<string | null | undefined>(termsKey);
+  useLayoutEffect(() => {
+    latestTermsKey.current = termsKey;
+    return () => {
+      latestTermsKey.current = undefined;
+    };
+  }, [termsKey]);
+  const [acceptedTermsKey, setAcceptedTermsKey] = useState<string | null>(null);
+  const [attemptedTermsKey, setAttemptedTermsKey] = useState<string | null>(
+    null
+  );
+  const nativeTerms = nativeCompetition?.participation.terms ?? null;
+  const termsAccepted = !nativeTerms || acceptedTermsKey === termsKey;
+  const termsInvalid = !termsAccepted && attemptedTermsKey === termsKey;
+  const termsDescription = termsInvalid
+    ? `${termsId} ${termsId}-error`
+    : termsId;
   const { editingDropId } = useEditingDrop();
   const { isSafeWallet, address } = useSeizeConnectContext();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
@@ -112,7 +145,7 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
     return normalizeCurationDropInput(urlValue);
   }, [urlValue]);
 
-  const canSubmit = !!normalizedCurationUrl && !submitting;
+  const canSubmit = !!normalizedCurationUrl && !submitting && termsAccepted;
   const isInvalid = showLiveValidation && !!curationValidation;
   const invalidHelperText =
     curationValidation?.helperText ?? DEFAULT_HELPER_TEXT;
@@ -125,7 +158,7 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
       if (requestBody.drop_type === ApiDropType.Chat) {
         return requestBody;
       }
-      if (!wave.participation.signature_required) {
+      if (nativeCompetition || !wave.participation.signature_required) {
         return requestBody;
       }
 
@@ -178,11 +211,20 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
         document.dispatchEvent(event);
       });
     },
-    [wave.participation.signature_required, wave.participation.terms, signDrop]
+    [
+      nativeCompetition,
+      wave.participation.signature_required,
+      wave.participation.terms,
+      signDrop,
+    ]
   );
 
   const submitCurationDrop = useCallback(async () => {
     if (submitting) {
+      return;
+    }
+    if (!termsAccepted) {
+      setAttemptedTermsKey(termsKey);
       return;
     }
 
@@ -196,7 +238,7 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
 
     try {
       const { success } = await requestAuth();
-      if (!success) {
+      if (!success || latestTermsKey.current !== termsKey) {
         return;
       }
 
@@ -237,7 +279,7 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
       };
 
       const updatedDropRequest = await getUpdatedDropRequest(requestBody);
-      if (!updatedDropRequest) {
+      if (!updatedDropRequest || latestTermsKey.current !== termsKey) {
         return;
       }
 
@@ -299,6 +341,8 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
     }
   }, [
     submitting,
+    termsAccepted,
+    termsKey,
     urlValue,
     requestAuth,
     activeDrop,
@@ -366,6 +410,36 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
         onCancelReplyQuote={onCancelReplyQuote}
         dropId={dropId}
       />
+      {nativeTerms && (
+        <div className="tw-mb-4 tw-space-y-3 tw-text-sm tw-text-iron-300">
+          <p id={termsId} className="tw-whitespace-pre-wrap">
+            {nativeTerms}
+          </p>
+          <label className="tw-flex tw-items-start tw-gap-3">
+            <input
+              type="checkbox"
+              aria-describedby={termsDescription}
+              aria-invalid={termsInvalid || undefined}
+              checked={termsAccepted}
+              disabled={submitting}
+              onChange={(event) => {
+                setAcceptedTermsKey(event.target.checked ? termsKey : null);
+                setAttemptedTermsKey(null);
+              }}
+            />
+            <span>{t(locale, "competitions.terms")}</span>
+          </label>
+          {termsInvalid && (
+            <p
+              id={`${termsId}-error`}
+              role="alert"
+              className="tw-m-0 tw-text-red"
+            >
+              {t(locale, "competitions.termsRequired")}
+            </p>
+          )}
+        </div>
+      )}
       {isLeaderboardVariant ? (
         <div className="tw-flex tw-w-full tw-flex-col tw-gap-3.5">
           <CreateCurationDropUrlInput

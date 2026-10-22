@@ -1,4 +1,5 @@
 "use client";
+import type { ApiMemeCollaboratorProfile } from "@/generated/models/ApiMemeCollaboratorProfile";
 
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -105,7 +106,14 @@ export function useArtworkSubmissionForm(
     [acceptedAgreement, formActions, traits]
   );
 
+  const setCollaborators = useCallback(
+    (profiles: ApiMemeCollaboratorProfile[]) =>
+      dispatch({ type: "SET_COLLABORATORS", payload: profiles }),
+    []
+  );
   return {
+    collaborators: state.collaborators ?? [],
+    setCollaborators,
     proposalFrame: state.proposalFrame,
     setProposalFrame,
     currentStep: agreements ? state.currentStep : SubmissionStep.AGREEMENT,

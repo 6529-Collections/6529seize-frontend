@@ -34,6 +34,10 @@ import { HttpFile } from '../http/http';
 
 export class ApiDropV2 {
     /**
+    * Original submitter artist credit before accepted collaborator credits are appended.
+    */
+    'submission_artist'?: string;
+    /**
     * Accepted collaborators only. Pending invitations are private.
     */
     'collaborators'?: Array<ApiMemeCollaboratorProfile>;
@@ -75,6 +79,12 @@ export class ApiDropV2 {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "submission_artist",
+            "baseName": "submission_artist",
+            "type": "string",
+            "format": ""
+        },
         {
             "name": "collaborators",
             "baseName": "collaborators",

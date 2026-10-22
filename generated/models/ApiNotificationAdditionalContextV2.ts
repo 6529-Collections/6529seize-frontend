@@ -23,6 +23,12 @@ import { HttpFile } from '../http/http';
 */
 export class ApiNotificationAdditionalContextV2 {
     /**
+    * Artwork name saved when a MEME_COLLABORATION invitation is sent or accepted. Absent for older notifications.
+    */
+    'artwork_name'?: string;
+    'invitation_id'?: string;
+    'actor_id'?: string;
+    /**
     * Stable idempotency identifier for COMPETITION_LIFECYCLE.
     */
     'event_id'?: string;
@@ -68,6 +74,24 @@ export class ApiNotificationAdditionalContextV2 {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "artwork_name",
+            "baseName": "artwork_name",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "invitation_id",
+            "baseName": "invitation_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "actor_id",
+            "baseName": "actor_id",
+            "type": "string",
+            "format": ""
+        },
         {
             "name": "event_id",
             "baseName": "event_id",
