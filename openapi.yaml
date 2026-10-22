@@ -4803,7 +4803,10 @@ paths:
           name: handleListCompetitionMyVotesV3
       responses:
         "200":
-          description: Command result or identical idempotent replay.
+          description: >-
+            Paged active nonzero personal votes, ordered by vote value
+            descending and vote time ascending; include=cards adds authorized
+            lightweight entry content and summaries.
           content:
             application/json:
               schema:
