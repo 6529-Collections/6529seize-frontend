@@ -146,7 +146,7 @@ function AboutPrices({
 
   return (
     <details className="tw-group tw-min-w-0">
-      <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-start tw-gap-2 tw-rounded-lg tw-text-xs tw-font-medium tw-text-iron-400 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 sm:tw-min-h-8 sm:touch-only:tw-min-h-11 [&::-webkit-details-marker]:tw-hidden">
+      <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-start tw-gap-2 tw-rounded-lg tw-text-meta tw-font-medium tw-text-iron-400 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 sm:tw-min-h-8 sm:touch-only:tw-min-h-11 [&::-webkit-details-marker]:tw-hidden">
         {t(locale, "marketDepth.about.title")}
         <span
           aria-hidden="true"
@@ -155,7 +155,7 @@ function AboutPrices({
           +
         </span>
       </summary>
-      <div className="tw-mt-1.5 tw-rounded-xl tw-bg-white/[0.025] tw-px-5 tw-py-4 tw-text-meta tw-leading-5 tw-text-iron-400">
+      <div className="tw-mt-1.5 tw-rounded-xl tw-bg-white/[0.025] tw-px-5 tw-py-4 tw-text-xs tw-leading-5 tw-text-iron-400">
         <p className="tw-m-0">{t(locale, "marketDepth.about.description")}</p>
         {hasUnpricedCollectionOrders && (
           <p className="tw-mb-0 tw-mt-2">
@@ -695,11 +695,11 @@ export default function MarketDepthPanel({
                           {summary && (
                             <div className="tw-order-first tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-justify-between tw-gap-1 md:tw-flex-row md:tw-gap-4 md:tw-pb-4">
                               <dl className="tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
-                                <dt className="tw-m-0 tw-text-meta tw-font-medium tw-leading-[18px] tw-text-iron-500">
+                                <dt className="tw-m-0 tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-500">
                                   {t(resolvedLocale, summary)}
                                 </dt>
                                 <dd
-                                  className={`tw-m-0 tw-text-xl tw-font-medium tw-tabular-nums tw-leading-[26px] tw-tracking-[-0.01em] [overflow-wrap:anywhere] ${value ? "tw-text-iron-50" : "tw-text-iron-600"}`}
+                                  className={`tw-m-0 tw-text-sm tw-font-medium tw-tabular-nums tw-tracking-[-0.01em] [overflow-wrap:anywhere] sm:tw-text-base ${value ? "tw-text-iron-50" : "tw-text-iron-600"}`}
                                 >
                                   <DecimalValue
                                     locale={resolvedLocale}
@@ -729,8 +729,8 @@ export default function MarketDepthPanel({
                                   <h3
                                     className={
                                       summary
-                                        ? "tw-m-0 tw-min-w-0 tw-break-words tw-text-[15px] tw-font-medium tw-text-iron-200 md:tw-sr-only"
-                                        : "tw-m-0 tw-min-w-0 tw-break-words tw-text-[15px] tw-font-medium tw-text-iron-200"
+                                        ? "tw-m-0 tw-min-w-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-200 md:tw-sr-only"
+                                        : "tw-m-0 tw-min-w-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-200"
                                     }
                                   >
                                     {t(

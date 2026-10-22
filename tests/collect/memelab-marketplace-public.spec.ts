@@ -297,6 +297,12 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
         .getByRole("table", { name: table, exact: true })
         .boundingBox())!;
       expect(summaryBounds.x).toBeCloseTo(tableBounds.x, 0);
+      await expect(
+        market
+          .getByText(summary, { exact: true })
+          .locator("..")
+          .getByRole("definition")
+      ).toHaveCSS("font-size", "16px");
       const hiddenHeading = market.getByRole("heading", {
         name: heading,
         exact: true,
@@ -309,6 +315,7 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
   const levels = offers.getByRole("button", { name: /^Offers at / });
   await expect(levels).toHaveCount(10);
   const firstLevel = levels.first();
+  await expect(firstLevel).toHaveCSS("font-size", "13px");
   await firstLevel.focus();
   await page.keyboard.press("Enter");
   await expect(firstLevel).toBeFocused();
@@ -422,7 +429,15 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
     for (const name of ["Listings · ETH", "Offers · WETH"]) {
       const title = market.getByRole("heading", { name, exact: true });
       expect((await title.boundingBox())!.height).toBeGreaterThan(1);
+      await expect(title).toHaveCSS("font-size", "14px");
     }
+    await expect(
+      market
+        .getByText("Highest offer · WETH", { exact: true })
+        .locator("..")
+        .getByRole("definition")
+    ).toHaveCSS("font-size", "14px");
+    await expect(firstLevel).toHaveCSS("font-size", "13px");
     expect((await firstLevel.boundingBox())!.x).toBeCloseTo(tableBounds.x, 0);
     const mobilePrice = (await firstLevel
       .getByText("0.020", { exact: true })
@@ -447,6 +462,7 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
       sell,
       market.getByRole("button", { name: "Collect", exact: true }),
     ]) {
+      await expect(action).toHaveCSS("font-size", "13px");
       expect((await action.boundingBox())!.width).toBeCloseTo(80, 0);
       await expect(action).toHaveCSS("background-clip", "padding-box");
       await expect(action).toHaveCSS("border-top-width", "5px");

@@ -163,7 +163,7 @@ export default function MarketDepthPriceLevels({
                         )}
                         title={level.unit_price}
                         onClick={toggleDetails}
-                        className="tw-font-inherit tw-flex tw-min-h-[60px] tw-w-full tw-flex-col tw-items-start tw-justify-center tw-gap-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-2 tw-pl-3 tw-pr-0 tw-text-left tw-text-[15px] tw-font-medium tw-tabular-nums tw-text-iron-200 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 sm:tw-min-h-12 sm:tw-flex-row sm:tw-items-center sm:tw-justify-start sm:tw-gap-2 sm:tw-px-0"
+                        className="tw-font-inherit tw-flex tw-min-h-[60px] tw-w-full tw-flex-col tw-items-start tw-justify-center tw-gap-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-2 tw-pl-3 tw-pr-0 tw-text-left tw-text-meta tw-font-medium tw-tabular-nums tw-text-iron-200 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 sm:tw-min-h-12 sm:tw-flex-row sm:tw-items-center sm:tw-justify-start sm:tw-gap-2 sm:tw-px-0"
                       >
                         <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
                           <span className="tw-min-w-0 [overflow-wrap:anywhere]">
@@ -194,7 +194,7 @@ export default function MarketDepthPriceLevels({
                       </button>
                     </td>
                     <td
-                      className={`${cellClass} tw-hidden tw-break-words tw-py-2.5 tw-text-sm tw-text-iron-300 sm:tw-table-cell sm:tw-px-3`}
+                      className={`${cellClass} tw-hidden tw-break-words tw-py-2.5 tw-text-meta tw-text-iron-300 sm:tw-table-cell sm:tw-px-3`}
                     >
                       {formatInteger(locale, level.quantity)}
                     </td>

@@ -34,7 +34,7 @@ const COMPACT_ACTION_CLASS =
 // The transparent 5px edges keep a 44px target around the 34px mobile surface.
 // Clipping the background also gives the visible surface an 8px corner radius.
 const MOBILE_TRADE_ACTION_CLASS =
-  "max-sm:tw-w-20 max-sm:tw-flex-wrap max-sm:tw-gap-x-1 max-sm:tw-rounded-[8px/13px] max-sm:tw-border-x-0 max-sm:tw-border-y-[5px] max-sm:!tw-border-transparent max-sm:tw-bg-clip-padding max-sm:tw-px-1 max-sm:tw-py-0 max-sm:tw-text-xs max-sm:tw-leading-4 max-sm:tw-shadow-none max-sm:tw-ring-0";
+  "max-sm:tw-w-20 max-sm:tw-flex-wrap max-sm:tw-gap-x-1 max-sm:tw-rounded-[8px/13px] max-sm:tw-border-x-0 max-sm:tw-border-y-[5px] max-sm:!tw-border-transparent max-sm:tw-bg-clip-padding max-sm:tw-px-1 max-sm:tw-py-0 max-sm:tw-text-meta max-sm:tw-leading-4 max-sm:tw-shadow-none max-sm:tw-ring-0";
 
 const OUTLINED_LEVEL_ACTION_CLASS =
   "!tw-border-white/[0.12] !tw-bg-transparent !tw-text-iron-200 !tw-shadow-none !tw-ring-0 enabled:group-hover:!tw-border-primary-500 enabled:group-hover:!tw-bg-primary-500 enabled:group-hover:!tw-text-white focus-visible:!tw-border-primary-500 focus-visible:!tw-bg-primary-500 focus-visible:!tw-text-white max-sm:!tw-border-transparent max-sm:!tw-shadow-[inset_0_0_0_1px_rgb(255_255_255_/_0.12)] max-sm:enabled:group-hover:!tw-border-transparent max-sm:focus-visible:!tw-border-transparent";
