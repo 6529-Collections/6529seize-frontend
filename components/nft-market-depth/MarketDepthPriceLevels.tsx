@@ -143,7 +143,7 @@ export default function MarketDepthPriceLevels({
               };
               return (
                 <Fragment key={level.unit_price}>
-                  <tr className="tw-group [&:has([aria-pressed=true])>td:first-child]:tw-rounded-bl-none [&:has([aria-pressed=true])>td:first-child]:tw-rounded-tl-xl [&:has([aria-pressed=true])>td:first-child]:tw-shadow-[inset_2px_0_0_theme(colors.primary-500)] [&:has([aria-pressed=true])>td:last-child]:tw-rounded-br-none [&:has([aria-pressed=true])>td:last-child]:tw-rounded-tr-xl [&:has([aria-pressed=true])>td]:tw-border-b-transparent [&:has([aria-pressed=true])>td]:tw-bg-primary-500/[0.12]">
+                  <tr className="tw-group [&:has([aria-pressed=true])>td:first-child]:tw-rounded-bl-none [&:has([aria-pressed=true])>td:first-child]:tw-rounded-tl-xl [&:has([aria-pressed=true])>td:first-child]:tw-shadow-[inset_1px_0_0_theme(colors.iron.800),inset_0_1px_0_theme(colors.iron.800)] [&:has([aria-pressed=true])>td:last-child]:tw-rounded-br-none [&:has([aria-pressed=true])>td:last-child]:tw-rounded-tr-xl [&:has([aria-pressed=true])>td:last-child]:tw-shadow-[inset_-1px_0_0_theme(colors.iron.800),inset_0_1px_0_theme(colors.iron.800)] [&:has([aria-pressed=true])>td]:tw-border-b-transparent [&:has([aria-pressed=true])>td]:tw-bg-iron-900 [&:has([aria-pressed=true])>td]:tw-shadow-[inset_0_1px_0_theme(colors.iron.800)]">
                     <td
                       className={`${cellClass} ${best ? "tw-rounded-l-xl" : ""} ${best && !tradeActionsAvailable ? "tw-rounded-r-xl sm:tw-rounded-r-none" : ""} tw-py-0 tw-pl-0 tw-text-left sm:tw-pl-5 sm:tw-pr-3`}
                     >

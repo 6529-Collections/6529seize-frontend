@@ -316,7 +316,7 @@ export function MarketDepthOrderFeedback({
             colSpan={4}
             className={
               selected
-                ? "tw-relative tw-rounded-b-xl tw-bg-primary-500/[0.12] tw-p-0 tw-shadow-[inset_2px_0_0_theme(colors.primary-500)] before:tw-absolute before:tw-inset-x-0 before:tw-top-[-4px] before:tw-h-1 before:tw-bg-primary-500/[0.12] before:tw-shadow-[inset_2px_0_0_theme(colors.primary-500)] before:!tw-content-['']"
+                ? "tw-relative tw-rounded-b-xl tw-bg-iron-900 tw-p-0 tw-shadow-[inset_1px_0_0_theme(colors.iron.800),inset_-1px_0_0_theme(colors.iron.800),inset_0_-1px_0_theme(colors.iron.800)] before:tw-absolute before:tw-inset-x-0 before:tw-top-[-4px] before:tw-h-1 before:tw-bg-iron-900 before:tw-shadow-[inset_1px_0_0_theme(colors.iron.800),inset_-1px_0_0_theme(colors.iron.800)] before:!tw-content-['']"
                 : "tw-p-0"
             }
           >

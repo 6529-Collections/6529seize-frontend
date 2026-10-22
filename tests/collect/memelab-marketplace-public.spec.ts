@@ -588,10 +588,7 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
     .filter({ has: page.getByRole("button", { name: "Remove", exact: true }) })
     .getByRole("cell")
     .first();
-  await expect(selectedPrice).toHaveCSS(
-    "background-color",
-    "rgba(63, 105, 252, 0.12)"
-  );
+  await expect(selectedPrice).toHaveCSS("background-color", "rgb(28, 28, 33)");
   const reviewSelected = market.getByRole("button", {
     name: "Review selected listings (1)",
     exact: true,

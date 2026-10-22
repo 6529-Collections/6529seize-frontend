@@ -79,7 +79,7 @@ For **Collect**, the site checks that exact listing and adds it to your selectio
 Set **Quantity** for supported editions, or choose
 **Remove** to take it out. Some listings must be collected as a complete lot.
 
-Selected listings keep **Quantity** inside the highlighted row group. While any
+Selected listings keep **Quantity** inside the same neutral card. While any
 listing is selected, **Review selected listings** stays in a sticky bottom bar
 within Listings & offers, above mobile navigation. The bar disappears when the
 selection is empty. The site
