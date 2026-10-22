@@ -27,7 +27,6 @@ import {
   NFTLeaderboardMobileRows,
   NFTLeaderboardMobileSort,
 } from "./NFTLeaderboardMobile";
-import styles from "./NFTLeaderboard.module.css";
 import {
   SearchModalDisplay,
   SearchWalletsDisplay,
@@ -443,9 +442,7 @@ function CollectorsCsvDownloadControls({
   const isCsvDownloading = csvStatus === "downloading";
 
   return (
-    <div
-      className={`${styles["actions"] ?? ""} tw-flex tw-flex-col tw-items-end tw-gap-2`}
-    >
+    <div className="tw-flex tw-flex-col tw-items-end tw-gap-2 max-lg:tw-contents max-lg:[&>div>button]:tw-size-9 max-lg:[&>div>button]:tw-shrink-0 max-lg:[&>div>button]:tw-rounded-lg max-lg:[&>div>button]:tw-border-iron-800 max-lg:[&>div>button]:tw-bg-iron-950 max-lg:[&>div>button]:tw-p-0 max-lg:[&>div>button]:tw-text-iron-300 max-lg:[&>div]:tw-contents max-lg:[&>p]:tw-order-2 max-lg:[&>p]:tw-w-full">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-3">
         <Button
           type="button"
@@ -637,9 +634,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
       className="tw-scroll-mt-24 tw-pt-8"
       id="nft-leaderboard"
     >
-      <div
-        className={`${styles["header"] ?? ""} tw-mb-0.5 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 lg:tw-mb-4`}
-      >
+      <div className="tw-mb-0.5 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 max-lg:tw-gap-x-2 max-lg:tw-gap-y-1 lg:tw-mb-4">
         <h3 className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-[17px] tw-font-semibold tw-leading-[22px] tw-text-iron-50 lg:tw-flex-none lg:tw-text-lg lg:tw-leading-7 lg:tw-text-iron-100">
           {t(locale, "theMemes.detail.collectors.leaderboardTitle")}
         </h3>
@@ -651,7 +646,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
           sort={sort.sort}
           sortDirection={sort.sort_direction}
         >
-          <div className={styles["search"]}>
+          <div className="tw-contents max-lg:[&>span>button:last-of-type]:tw-size-9 max-lg:[&>span>button:last-of-type]:tw-shrink-0 max-lg:[&>span>button:last-of-type]:tw-rounded-lg max-lg:[&>span>button:last-of-type]:tw-border-iron-800 max-lg:[&>span>button:last-of-type]:tw-bg-iron-950 max-lg:[&>span>button:last-of-type]:tw-p-0 max-lg:[&>span>button:last-of-type]:tw-text-iron-300 max-lg:[&>span>button:last-of-type_svg]:tw-size-3.5 max-lg:[&>span>button:not(:last-of-type)]:tw-order-1 max-lg:[&>span>button:not(:last-of-type)]:tw-min-w-0 max-lg:[&>span>button:not(:last-of-type)]:tw-max-w-full max-lg:[&>span>span>span]:tw-truncate max-lg:[&>span>span]:tw-order-1 max-lg:[&>span>span]:tw-min-w-0 max-lg:[&>span>span]:tw-max-w-full max-lg:[&>span]:tw-contents">
             <SearchWalletsDisplay
               searchWallets={searchWallets}
               setSearchWallets={setSearchWallets}
@@ -791,9 +786,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
         </div>
       )}
       {totalResults > 0 && (
-        <div
-          className={`${styles["pagination"] ?? ""} tw-flex tw-justify-center tw-pb-3 tw-pt-4`}
-        >
+        <div className="tw-flex tw-justify-center tw-pb-3 tw-pt-4 max-lg:[&>span>button:first-child]:tw-size-9 max-lg:[&>span>button:first-child]:tw-rounded-lg max-lg:[&>span>button:first-child]:tw-border max-lg:[&>span>button:first-child]:tw-border-solid max-lg:[&>span>button:first-child]:tw-border-iron-800 max-lg:[&>span>button:first-child]:tw-bg-iron-950 max-lg:[&>span>button:first-child]:tw-text-iron-200 max-lg:[&>span>button:last-child]:tw-size-9 max-lg:[&>span>button:last-child]:tw-rounded-lg max-lg:[&>span>button:last-child]:tw-border max-lg:[&>span>button:last-child]:tw-border-solid max-lg:[&>span>button:last-child]:tw-border-iron-800 max-lg:[&>span>button:last-child]:tw-bg-iron-950 max-lg:[&>span>button:last-child]:tw-text-iron-200 max-lg:[&>span>button]:tw-text-sm max-lg:[&>span>span]:tw-text-sm max-lg:[&>span]:tw-gap-2 max-lg:[&>span]:tw-text-sm max-lg:[&>span]:tw-text-iron-400 max-lg:[&_input]:tw-h-9 max-lg:[&_input]:tw-w-12 max-lg:[&_input]:tw-rounded-lg max-lg:[&_input]:tw-border max-lg:[&_input]:tw-border-solid max-lg:[&_input]:tw-border-iron-800 max-lg:[&_input]:tw-bg-iron-950 max-lg:[&_input]:tw-text-center max-lg:[&_input]:tw-text-sm max-lg:[&_input]:tw-text-iron-100 max-lg:[&_svg]:tw-w-3.5">
           <Pagination
             page={page}
             pageSize={PAGE_SIZE}
