@@ -119,10 +119,9 @@ export default function MarketDepthPriceLevels({
             </tr>
           </thead>
           <tbody>
-            {visibleLevels.map((level, index) => {
-              const best = index === 0;
+            {visibleLevels.map((level) => {
               const cellClass =
-                "tw-h-[54px] tw-bg-white/[0.025] tw-tabular-nums tw-transition-colors tw-duration-200 group-hover:tw-bg-white/[0.045] motion-reduce:tw-transition-none";
+                "tw-h-[54px] tw-bg-transparent tw-tabular-nums tw-transition-colors tw-duration-200 group-hover:tw-bg-white/[0.02] motion-reduce:tw-transition-none";
               const open = openPrice === level.unit_price;
               const panelId = disclosureId + "-" + level.unit_price;
               const levelOrders = getLevelOrders(
@@ -162,7 +161,7 @@ export default function MarketDepthPriceLevels({
                         )}
                         title={level.unit_price}
                         onClick={toggleDetails}
-                        className={`tw-font-inherit tw-flex tw-min-h-12 tw-w-full tw-items-center tw-justify-start tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-left tw-text-[15px] tw-tabular-nums hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 ${best ? "tw-font-semibold tw-text-white" : "tw-font-medium tw-text-iron-200"}`}
+                        className="tw-font-inherit tw-flex tw-min-h-12 tw-w-full tw-items-center tw-justify-start tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-left tw-text-[15px] tw-font-medium tw-tabular-nums tw-text-iron-200 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400"
                       >
                         <span className="tw-min-w-0 [overflow-wrap:anywhere]">
                           {formatDecimal(locale, level.unit_price)}

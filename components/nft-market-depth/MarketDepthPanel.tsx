@@ -610,11 +610,11 @@ export default function MarketDepthPanel({
               <>
                 <dl className="tw-m-0 tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-5 sm:tw-flex sm:tw-flex-wrap sm:tw-gap-x-16">
                   <div className="tw-min-w-0 tw-max-w-full">
-                    <dt className="tw-mb-2 tw-text-[11px] tw-font-medium tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-500">
+                    <dt className="tw-mb-2 tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-400">
                       {t(resolvedLocale, "marketDepth.bestAsk")}
                     </dt>
                     <dd
-                      className={`tw-m-0 tw-text-xl tw-font-medium tw-tabular-nums tw-leading-[30px] tw-tracking-[-0.01em] [overflow-wrap:anywhere] sm:tw-text-2xl ${ethBook?.best_ask ? "tw-text-iron-50" : "tw-text-iron-600"}`}
+                      className={`tw-m-0 tw-text-xl tw-font-medium tw-tabular-nums tw-leading-[30px] tw-tracking-[-0.01em] [overflow-wrap:anywhere] ${ethBook?.best_ask ? "tw-text-iron-50" : "tw-text-iron-600"}`}
                     >
                       <DecimalValue
                         locale={resolvedLocale}
@@ -623,11 +623,11 @@ export default function MarketDepthPanel({
                     </dd>
                   </div>
                   <div className="tw-min-w-0 tw-max-w-full">
-                    <dt className="tw-mb-2 tw-text-[11px] tw-font-medium tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-500">
+                    <dt className="tw-mb-2 tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-400">
                       {t(resolvedLocale, "marketDepth.bestBid")}
                     </dt>
                     <dd
-                      className={`tw-m-0 tw-text-xl tw-font-medium tw-tabular-nums tw-leading-[30px] tw-tracking-[-0.01em] [overflow-wrap:anywhere] sm:tw-text-2xl ${wethBook?.best_bid ? "tw-text-iron-50" : "tw-text-iron-600"}`}
+                      className={`tw-m-0 tw-text-xl tw-font-medium tw-tabular-nums tw-leading-[30px] tw-tracking-[-0.01em] [overflow-wrap:anywhere] ${wethBook?.best_bid ? "tw-text-iron-50" : "tw-text-iron-600"}`}
                     >
                       <DecimalValue
                         locale={resolvedLocale}

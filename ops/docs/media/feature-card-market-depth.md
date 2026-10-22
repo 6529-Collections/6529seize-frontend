@@ -40,8 +40,8 @@ The summaries show the lowest captured listing in ETH and the highest captured
 offer in WETH. Each price list starts with up to ten levels. Use Show all levels
 to reveal the complete list, and Show fewer levels to return to the short view.
 Listings are ordered from lowest price upward and
-offers from highest price downward. Price rows use soft neutral surfaces, with
-the expand arrow beside the price. Each level shows its unit price and quantity
+offers from highest price downward. Price rows stay unboxed, with the expand
+arrow beside the price. Each level shows its unit price and quantity
 at that price. Total shows the cumulative quoted quantity. On narrow screens,
 quantity and total appear below the exact price, with **Collect** or **Sell** in
 a separate column. Expand a price row to
