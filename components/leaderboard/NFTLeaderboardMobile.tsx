@@ -156,7 +156,7 @@ export function NFTLeaderboardMobileRows({
       {leaderboard.map((lead) => (
         <li
           key={lead.consolidation_key}
-          className="tw-grid tw-min-w-[22rem] tw-grid-cols-[24px_max-content_minmax(0,0.62fr)_minmax(0,0.76fr)_minmax(0,1.24fr)] tw-items-baseline tw-gap-x-2 tw-gap-y-1 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 tw-text-xs tw-font-normal tw-tabular-nums tw-leading-4 max-[380px]:tw-text-[11px]"
+          className="tw-grid tw-min-w-[22rem] tw-grid-cols-[24px_minmax(0,1fr)] tw-items-baseline tw-gap-x-2 tw-gap-y-1 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 tw-text-xs tw-font-normal tw-tabular-nums tw-leading-4 max-[380px]:tw-text-[11px]"
         >
           <span className="tw-self-center tw-font-medium tw-text-iron-500">
             <span className="tw-sr-only">
@@ -164,7 +164,7 @@ export function NFTLeaderboardMobileRows({
             </span>
             {formatInteger(locale, lead.rank)}
           </span>
-          <div className="tw-col-span-4 tw-mb-2 tw-min-w-0 tw-self-center">
+          <div className="tw-mb-2 tw-min-w-0 tw-self-center">
             <LeaderboardCollector
               handle={lead.handle}
               consolidationKey={lead.consolidation_key}
@@ -173,91 +173,93 @@ export function NFTLeaderboardMobileRows({
               level={lead.level}
             />
           </div>
-          <span aria-hidden="true" className="tw-col-span-2" />
-          <span
-            aria-hidden="true"
-            className="tw-self-end tw-whitespace-nowrap tw-text-iron-500"
-          >
-            {t(locale, "theMemes.detail.collectors.balance")}
-          </span>
-          <span
-            aria-hidden="true"
-            className="tw-self-end tw-whitespace-nowrap tw-text-iron-500"
-          >
-            {t(locale, "theMemes.detail.collectors.tdh")}
-          </span>
-          <span
-            aria-hidden="true"
-            className="tw-self-end tw-whitespace-nowrap tw-text-iron-500"
-          >
-            {t(locale, "theMemes.detail.collectors.unweightedTdh")}
-          </span>
-          <span
-            aria-hidden="true"
-            className="tw-col-start-2 tw-whitespace-nowrap tw-pr-3 tw-text-iron-500"
-          >
-            {t(locale, "theMemes.detail.collectors.thisCard")}
-          </span>
-          <MobileMetric
-            className="tw-text-iron-300"
-            locale={locale}
-            value={lead.balance}
-            accessibleLabel={t(
-              locale,
-              "theMemes.detail.collectors.cardBalance"
-            )}
-            active={sort === "balance"}
-          />
-          <MobileMetric
-            className="tw-text-iron-300"
-            locale={locale}
-            value={lead.boosted_tdh}
-            accessibleLabel={t(locale, "theMemes.detail.collectors.cardTdh")}
-            active={sort === "boosted_tdh"}
-          />
-          <MobileMetric
-            className="tw-text-iron-300"
-            locale={locale}
-            value={lead.tdh__raw}
-            accessibleLabel={t(
-              locale,
-              "theMemes.detail.collectors.cardUnweightedTdh"
-            )}
-            active={sort === "tdh__raw"}
-          />
-          <span
-            aria-hidden="true"
-            className="tw-col-start-2 tw-whitespace-nowrap tw-pr-3 tw-text-iron-500"
-          >
-            {t(locale, "theMemes.detail.collectors.total")}
-          </span>
-          <MobileMetric
-            className="tw-text-iron-400"
-            locale={locale}
-            value={lead.total_balance}
-            accessibleLabel={t(
-              locale,
-              "theMemes.detail.collectors.totalBalance"
-            )}
-            active={sort === "total_balance"}
-          />
-          <MobileMetric
-            className="tw-text-iron-400"
-            locale={locale}
-            value={lead.total_boosted_tdh}
-            accessibleLabel={t(locale, "theMemes.detail.collectors.totalTdh")}
-            active={sort === "total_boosted_tdh"}
-          />
-          <MobileMetric
-            className="tw-text-iron-400"
-            locale={locale}
-            value={lead.total_tdh__raw}
-            accessibleLabel={t(
-              locale,
-              "theMemes.detail.collectors.totalUnweightedTdh"
-            )}
-            active={sort === "total_tdh__raw"}
-          />
+          <div className="tw-col-start-2 tw-grid tw-grid-cols-[repeat(4,max-content)] tw-items-baseline tw-justify-between tw-gap-x-5 tw-gap-y-1">
+            <span aria-hidden="true" />
+            <span
+              aria-hidden="true"
+              className="tw-self-end tw-whitespace-nowrap tw-text-iron-500"
+            >
+              {t(locale, "theMemes.detail.collectors.balance")}
+            </span>
+            <span
+              aria-hidden="true"
+              className="tw-self-end tw-whitespace-nowrap tw-text-iron-500"
+            >
+              {t(locale, "theMemes.detail.collectors.tdh")}
+            </span>
+            <span
+              aria-hidden="true"
+              className="tw-self-end tw-whitespace-nowrap tw-text-iron-500"
+            >
+              {t(locale, "theMemes.detail.collectors.unweightedTdh")}
+            </span>
+            <span
+              aria-hidden="true"
+              className="tw-whitespace-nowrap tw-text-iron-500"
+            >
+              {t(locale, "theMemes.detail.collectors.thisCard")}
+            </span>
+            <MobileMetric
+              className="tw-text-iron-300"
+              locale={locale}
+              value={lead.balance}
+              accessibleLabel={t(
+                locale,
+                "theMemes.detail.collectors.cardBalance"
+              )}
+              active={sort === "balance"}
+            />
+            <MobileMetric
+              className="tw-text-iron-300"
+              locale={locale}
+              value={lead.boosted_tdh}
+              accessibleLabel={t(locale, "theMemes.detail.collectors.cardTdh")}
+              active={sort === "boosted_tdh"}
+            />
+            <MobileMetric
+              className="tw-text-iron-300"
+              locale={locale}
+              value={lead.tdh__raw}
+              accessibleLabel={t(
+                locale,
+                "theMemes.detail.collectors.cardUnweightedTdh"
+              )}
+              active={sort === "tdh__raw"}
+            />
+            <span
+              aria-hidden="true"
+              className="tw-whitespace-nowrap tw-text-iron-500"
+            >
+              {t(locale, "theMemes.detail.collectors.total")}
+            </span>
+            <MobileMetric
+              className="tw-text-iron-400"
+              locale={locale}
+              value={lead.total_balance}
+              accessibleLabel={t(
+                locale,
+                "theMemes.detail.collectors.totalBalance"
+              )}
+              active={sort === "total_balance"}
+            />
+            <MobileMetric
+              className="tw-text-iron-400"
+              locale={locale}
+              value={lead.total_boosted_tdh}
+              accessibleLabel={t(locale, "theMemes.detail.collectors.totalTdh")}
+              active={sort === "total_boosted_tdh"}
+            />
+            <MobileMetric
+              className="tw-text-iron-400"
+              locale={locale}
+              value={lead.total_tdh__raw}
+              accessibleLabel={t(
+                locale,
+                "theMemes.detail.collectors.totalUnweightedTdh"
+              )}
+              active={sort === "total_tdh__raw"}
+            />
+          </div>
         </li>
       ))}
     </ol>

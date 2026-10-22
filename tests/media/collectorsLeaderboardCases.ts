@@ -127,7 +127,7 @@ export function defineCollectorsLeaderboardTests() {
       const statHeights = await list
         .getByRole("listitem")
         .first()
-        .locator(":scope > span")
+        .locator(":scope > span, :scope > div:last-child > span")
         .evaluateAll((cells) =>
           cells.map((cell) => cell.getBoundingClientRect().height)
         );
@@ -138,7 +138,7 @@ export function defineCollectorsLeaderboardTests() {
       const statFontSizes = await list
         .getByRole("listitem")
         .first()
-        .locator(":scope > span")
+        .locator(":scope > span, :scope > div:last-child > span")
         .evaluateAll((cells) =>
           cells.flatMap((cell) =>
             [cell, ...cell.querySelectorAll('span[aria-hidden="true"]')].map(
@@ -164,6 +164,27 @@ export function defineCollectorsLeaderboardTests() {
         // The avatar starts at the profile link's left edge.
         expect(Math.abs(identityBounds.x - scopeBounds.x)).toBeLessThan(1);
       }
+      const [scope, balance, tdh, unweighted] = await Promise.all(
+        ["This card", "Balance", "TDH", "Unweighted TDH"].map((label) =>
+          firstRow.getByText(label, { exact: true }).boundingBox()
+        )
+      );
+      const rowBounds = await firstRow.boundingBox();
+      if (!scope || !balance || !tdh || !unweighted || !rowBounds) {
+        throw new Error("Collector stat groups must have visible bounds");
+      }
+      const gaps = [
+        balance.x - scope.x - scope.width,
+        tdh.x - balance.x - balance.width,
+        unweighted.x - tdh.x - tdh.width,
+      ];
+      expect(Math.min(...gaps)).toBeGreaterThanOrEqual(19);
+      expect(Math.max(...gaps) - Math.min(...gaps)).toBeLessThan(1);
+      expect(
+        Math.abs(
+          unweighted.x + unweighted.width - rowBounds.x - rowBounds.width
+        )
+      ).toBeLessThan(1);
       const csvSize = await section
         .getByRole("button", { name: "Download collectors leaderboard as CSV" })
         .boundingBox();
