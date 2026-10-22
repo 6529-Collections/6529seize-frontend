@@ -75,6 +75,17 @@ it("refreshes loaded pages after a vote moves across a page boundary", async () 
   try {
     await observer.refetch();
     await observer.fetchNextPage();
+    const inactiveKey = [...resourceKey, "votes/me", {}];
+    const inactiveRead = jest.fn(
+      async () => observer.getCurrentResult().data!.pages[0]!
+    );
+    await client.fetchInfiniteQuery({
+      queryKey: inactiveKey,
+      initialPageParam: 0,
+      queryFn: inactiveRead,
+      getNextPageParam: (page) => page.next_cursor,
+    });
+    inactiveRead.mockClear();
     reads.length = 0;
     order = ["entry", "other", "last"];
     await updateCompetitionVoteInCache(client, result);
@@ -88,6 +99,8 @@ it("refreshes loaded pages after a vote moves across a page boundary", async () 
     releaseRefresh();
     await overlappingNextPage;
     expect(reads).toEqual([0, 1]);
+    expect(client.getQueryState(inactiveKey)?.isInvalidated).toBe(true);
+    expect(inactiveRead).not.toHaveBeenCalled();
     await observer.fetchNextPage({ cancelRefetch: false });
     expect(
       observer
