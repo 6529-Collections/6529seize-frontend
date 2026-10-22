@@ -50,9 +50,9 @@
   editorial text style: white text and a blue underline for the selected
   option, with gray inactive text. The options spread across the available row
   width. Sort direction uses up/down arrows with an unframed desktop toggle.
-  On phones, the sort label is visually hidden but remains available to screen
-  readers. Smaller screens and the native app keep the shared soft gray pills
-  and light selected pill. Year and Season keep their framed dropdown triggers.
+  The sort label stays visible at every screen size. Smaller screens and the
+  native app keep the shared soft gray pills and light selected pill. Year and
+  Season keep their framed dropdown triggers.
 
 ## URL Query Model
 

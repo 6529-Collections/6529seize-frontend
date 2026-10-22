@@ -678,7 +678,7 @@ export default function TheMemesComponent({
           >
             <div className="tw-flex tw-items-center tw-gap-2.5">
               <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-2.5">
-                <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500 max-sm:tw-sr-only">
+                <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500">
                   {t(locale, "theMemes.sorting.sortBy")}
                 </span>
                 <fieldset className="tw-m-0 tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-gap-0.5 tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-p-0.5 lg:[body:not(.capacitor-native)_&]:tw-ml-0.5 lg:[body:not(.capacitor-native)_&]:tw-h-7 lg:[body:not(.capacitor-native)_&]:tw-bg-transparent lg:[body:not(.capacitor-native)_&]:tw-p-0">
