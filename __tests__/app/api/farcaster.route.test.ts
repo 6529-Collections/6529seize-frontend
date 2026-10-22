@@ -15,6 +15,12 @@ jest.mock("next/server", () => ({
   NextRequest: class {},
 }));
 
+let mockWarpcastApiKey: string | undefined;
+
+jest.mock("@/config/serverEnv", () => ({
+  getFarcasterWarpcastApiKey: () => mockWarpcastApiKey,
+}));
+
 /**
  * Mock URL guard error used to exercise guard failure handling.
  */
@@ -133,6 +139,7 @@ describe("farcaster API route", () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     mockFetch.mockReset();
+    mockWarpcastApiKey = undefined;
     global.fetch = mockFetch as unknown as typeof fetch;
     await loadRoute();
   });
@@ -198,8 +205,35 @@ describe("farcaster API route", () => {
     );
     const [requestUrl, init] = mockFetch.mock.calls[0];
     expect(requestUrl.toString()).toContain("/v2/cast");
+    expect(new URL(requestUrl.toString()).searchParams.has("key")).toBe(false);
     expect(init?.headers).toEqual(
       expect.objectContaining({ "user-agent": expect.any(String) })
+    );
+  });
+
+  it("adds the server-only Warpcast API key to Warpcast API requests", async () => {
+    mockWarpcastApiKey = "server-warpcast-key";
+    mockFetch.mockResolvedValueOnce(
+      createJsonResponse({
+        result: {
+          cast: {
+            hash: "0xabc",
+            text: "Hello",
+            author: { fid: 1, username: "alice" },
+          },
+        },
+      })
+    );
+
+    await GET({
+      nextUrl: new URL(
+        "https://api.local/farcaster?url=https://warpcast.com/alice/0xabc"
+      ),
+    } as unknown as Parameters<typeof GET>[0]);
+
+    const [requestUrl] = mockFetch.mock.calls[0];
+    expect(new URL(requestUrl.toString()).searchParams.get("key")).toBe(
+      "server-warpcast-key"
     );
   });
 
