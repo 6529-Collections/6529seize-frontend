@@ -158,6 +158,10 @@ Browser realtime notification delivery remains connected while the tab is hidden
   events refresh the active notification feed and unread indicators without
   waiting for the previous 30-second poll. The event contains only the target
   profile ID; notification rows remain REST-authoritative.
+- An open feed reloads only its newest page for these events and keeps the older
+  pages you already scrolled through; if the newest page does not connect to the
+  loaded rows, for example after many new notifications at once, every loaded
+  page is reloaded.
 - Connected secondary accounts subscribe with their own stored JWTs and refresh
   only when the backend acknowledges those profile subscriptions.
 - REST polling remains as a 30-second active-profile / 15-second
