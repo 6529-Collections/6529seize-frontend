@@ -5,7 +5,8 @@
 `My Votes` lists active submissions where your current vote is not `0`.
 Past winners are excluded; their historical vote records remain preserved.
 Rows are ordered by your vote value, highest first. Equal votes are ordered by
-vote time, oldest first.
+vote time, oldest first. Saving a vote refreshes the loaded pages to reflect its
+new position before more rows load.
 You can update votes one row at a time, reset selected rows to `0`, or open a
 prefilled reply for explaining a vote.
 
@@ -107,6 +108,10 @@ while each profile loads. The placeholders stay still when reduced motion is ena
 - Bulk reset runs one selected row at a time.
 
 ## Failure and Recovery
+
+- If an entry preview is unavailable, its personal vote remains visible with
+  **Preview unavailable**, vote controls, and **Try again**. The entry's hidden
+  artwork and author details are not displayed.
 
 - If an All votes profile fails to load, its row keeps the rank and vote total
   and shows **Profile unavailable** with a compact **Try again** button. Retry

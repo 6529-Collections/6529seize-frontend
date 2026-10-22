@@ -3,7 +3,7 @@ import {
   dehydrate,
   HydrationBoundary,
 } from "@tanstack/react-query";
-import { Suspense, cache, use } from "react";
+import { Suspense, cache } from "react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
@@ -46,17 +46,6 @@ import {
 } from "@/utils/monitoring/serverRouteTelemetry";
 
 export type WavesSearchParams = RouteSearchParams;
-
-function PublicWaveFeedPreview({
-  promise,
-}: {
-  readonly promise: ReturnType<typeof fetchPublicWaveFeed>;
-}) {
-  const feed = use(promise);
-  return feed.ok && feed.items.length > 0 ? (
-    <PublicWaveFeed feed={feed} />
-  ) : null;
-}
 
 type WaveRequestContext = {
   readonly waveId: string | null;
@@ -217,10 +206,12 @@ export async function renderWavesPageContent({
   waveId,
   searchParams,
   routeContext = "waves",
+  includePublicPreview = true,
 }: {
   waveId: string | null;
   searchParams: WavesSearchParams;
   routeContext?: "waves" | "messages" | undefined;
+  readonly includePublicPreview?: boolean;
 }) {
   if (waveId === null) {
     return traceServerRouteData(
@@ -294,6 +285,7 @@ export async function renderWavesPageContent({
         })
       : null;
   const publicFeedPromise =
+    includePublicPreview &&
     routeContext === "waves" &&
     context.waveId &&
     context.wave &&
@@ -309,15 +301,15 @@ export async function renderWavesPageContent({
           JSON.stringify(context.headers)
         )
       : null;
-  const publicFeedFallback = publicFeedPromise ? (
-    <Suspense fallback={null}>
-      <PublicWaveFeedPreview promise={publicFeedPromise} />
-    </Suspense>
-  ) : null;
+  const publicFeed = publicFeedPromise ? await publicFeedPromise : null;
+  const publicFeedFallback =
+    publicFeed?.ok && publicFeed.items.length > 0 ? (
+      <PublicWaveFeed feed={publicFeed} />
+    ) : null;
   const wavesPageClient = (
     <WavesPageClient
       publicFeedFallback={publicFeedFallback}
-      publicFeedWaveId={publicFeedPromise ? context.waveId : null}
+      publicFeedWaveId={publicFeed?.ok ? publicFeed.waveId : null}
       waveName={context.wave?.name}
     />
   );

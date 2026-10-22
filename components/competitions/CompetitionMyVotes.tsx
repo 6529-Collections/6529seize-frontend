@@ -42,18 +42,65 @@ import { useCompetitionEntryDrops } from "@/hooks/competitions/useCompetitionEnt
 import { useCompetitionDropNavigation } from "@/hooks/competitions/useCompetitionDropNavigation";
 import MyStreamWaveMyVote from "@/components/brain/my-stream/votes/MyStreamWaveMyVote";
 import { CompetitionVoteForm } from "./CompetitionVote";
-import { CompetitionState } from "./CompetitionState";
+import { CompetitionState, COMPETITION_BUTTON } from "./CompetitionState";
 import { CompetitionLoadMore } from "./CompetitionLoadMore";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useInView } from "@/hooks/useInView";
+import { formatInteger } from "@/i18n/format";
+import type { ApiCompetitionMyVote } from "@/generated/models/ApiCompetitionMyVote";
 
 function VisibleVoteInput(props: ComponentProps<typeof CompetitionVoteForm>) {
   const [ref, visible] = useInView<HTMLDivElement>({ rootMargin: "200px 0px" });
   return (
-    <div ref={ref}>
-      <CompetitionVoteForm {...props} budgetEnabled={visible} />
-    </div>
+    <CompetitionVoteForm
+      {...props}
+      budgetEnabled={visible}
+      budgetVisibilityRef={ref}
+    />
+  );
+}
+
+function UnavailableVote({
+  vote,
+  retry,
+  disabled,
+}: {
+  readonly vote: ApiCompetitionMyVote;
+  readonly retry: () => void;
+  readonly disabled: boolean;
+}) {
+  const { competition } = useCompetition();
+  const locale = useBrowserLocale();
+  const [ref, visible] = useInView<HTMLElement>({ rootMargin: "200px 0px" });
+  return (
+    <article
+      ref={ref}
+      aria-label={`${t(locale, "competitions.voteValue")}: ${formatInteger(locale, vote.value)}`}
+      className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-p-4"
+    >
+      <p className="tw-text-sm tw-text-iron-400">
+        {t(locale, "drop.media.previewUnavailable")}
+      </p>
+      <p className="tw-text-sm tw-text-iron-200">
+        {t(locale, "competitions.voteValue")}:{" "}
+        {formatInteger(locale, vote.value)}
+      </p>
+      <button
+        type="button"
+        className={`${COMPETITION_BUTTON} tw-mb-3`}
+        onClick={retry}
+      >
+        {t(locale, "competitions.retry")}
+      </button>
+      <CompetitionVoteForm
+        competition={competition}
+        entryId={vote.entry_id}
+        dropId={vote.drop_id}
+        disabled={disabled}
+        budgetEnabled={visible}
+      />
+    </article>
   );
 }
 
@@ -226,7 +273,9 @@ export default function CompetitionMyVotes() {
   if (query.isPending) return <CompetitionState />;
   if (query.isError && (!query.data || isCompetitionAccessError(query.error)))
     return <CompetitionState error retry={() => void query.refetch()} />;
-  const loadingDrops = drops.some((result) => result.isPending);
+  const loadingDrops = drops.some(
+    (result) => result.isPending && result.isFetching
+  );
   return (
     <div>
       <MyStreamWaveMyVotesReset
@@ -264,19 +313,22 @@ export default function CompetitionMyVotes() {
       )}
       {drops.map((result, index) => {
         const vote = votes[index]!;
-        if (result.isPending) return null;
+        if (result.isPending && result.isFetching) return null;
         if (
-          result.isError &&
-          (!result.data || isCompetitionAccessError(result.error))
+          !result.data ||
+          (result.isError && isCompetitionAccessError(result.error))
         )
           return (
-            <CompetitionState
+            <UnavailableVote
               key={vote.entry_id}
-              error
-              retry={() => void result.refetch()}
+              vote={vote}
+              disabled={!competition.permissions.vote || resetting}
+              retry={() => {
+                void result.refetch();
+                void query.refetch();
+              }}
             />
           );
-        if (!result.data) return null;
         const entryDrop = result.data.drop;
         const isClosed =
           !competition.permissions.vote ||

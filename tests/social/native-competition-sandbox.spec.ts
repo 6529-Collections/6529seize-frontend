@@ -1628,6 +1628,21 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       const bounds = (await row.boundingBox())!;
       expect(Math.abs(bounds.x - available.x)).toBeLessThanOrEqual(1);
       expect(Math.abs(bounds.width - available.width)).toBeLessThanOrEqual(1);
+      const voteControls = row
+        .getByRole("spinbutton", { name: "Your vote", exact: true })
+        .locator("..");
+      await expect(voteControls).toBeVisible();
+      const controlsBounds = (await voteControls.boundingBox())!;
+      if (testInfo.project.name === "web-mobile-chromium") {
+        expect(Math.abs(controlsBounds.x - bounds.x - 8)).toBeLessThanOrEqual(
+          1
+        );
+        expect(
+          Math.abs(controlsBounds.width - bounds.width + 16)
+        ).toBeLessThanOrEqual(1);
+      } else {
+        expect(controlsBounds.x).toBeGreaterThan(bounds.x + bounds.width / 2);
+      }
       const selectAll = panel.getByRole("button", {
         name: "Select all",
         exact: true,
@@ -1803,7 +1818,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
               credit_spent: 1,
               entry_status: "ACTIVE",
             })),
-            cards: items.map(resources.card),
+            cards: items
+              .filter((drop) => drop.id !== "my-voted-drop-9")
+              .map(resources.card),
             has_more: end < artworks.length,
             next_cursor: end < artworks.length ? String(end) : null,
           },
@@ -1820,6 +1837,17 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     expect(budgetEntries.size).toBeLessThan(50);
     expect(listReads[0]!.searchParams.get("include")).toBe("cards");
     expect(fullDropReads).toEqual([]);
+    const unavailable = panel
+      .getByRole("article")
+      .filter({ hasText: "Preview unavailable" });
+    await expect(unavailable).toHaveCount(1);
+    await expect(
+      unavailable.getByText("Your vote: 1", { exact: true })
+    ).toBeVisible();
+    await unavailable.scrollIntoViewIfNeeded();
+    await expect(
+      unavailable.getByRole("spinbutton", { name: "Your vote", exact: true })
+    ).toBeVisible();
     await panel
       .getByRole("button", { name: "Load more", exact: true })
       .scrollIntoViewIfNeeded();

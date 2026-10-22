@@ -13,7 +13,13 @@ export function useWaveChatPrefetch() {
   const router = useRouter();
   const client = useQueryClient();
   return useCallback(() => {
-    if (!isCompetitionPathname(pathname) || client.isFetching() > 0) return;
+    if (
+      !isCompetitionPathname(pathname) ||
+      client.isFetching({
+        predicate: (query) => query.state.data === undefined,
+      }) > 0
+    )
+      return;
     const href = getSharedWaveTabRoute(pathname, MyStreamWaveTab.CHAT);
     if (!href) return;
     router.prefetch(href);

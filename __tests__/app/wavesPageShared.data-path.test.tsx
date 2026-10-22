@@ -296,7 +296,7 @@ describe("renderWavesPageContent data paths", () => {
     await Promise.resolve();
   });
 
-  it("returns interactive Chat while the public preview is still loading", async () => {
+  it("does not request a public preview during client navigation", async () => {
     const publicWave = { ...wave, visibility: { scope: { group: null } } };
     (commonApiFetch as jest.Mock).mockResolvedValue(publicWave);
     mockFetchPublicWaveFeed.mockReturnValue(new Promise(() => {}));
@@ -304,9 +304,10 @@ describe("renderWavesPageContent data paths", () => {
     const rendered = await renderWavesPageContent({
       waveId: publicWave.id,
       searchParams: { tab: "chat", competition: "selected" },
+      includePublicPreview: false,
     });
 
-    expect(mockFetchPublicWaveFeed).toHaveBeenCalledWith(publicWave.id);
+    expect(mockFetchPublicWaveFeed).not.toHaveBeenCalled();
     render(rendered);
     expect(screen.getByTestId("waves-page-client")).toBeInTheDocument();
   });

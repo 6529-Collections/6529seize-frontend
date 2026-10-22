@@ -144,4 +144,7 @@ export async function updateCompetitionVoteInCache(
         })),
       }
   );
+  // Vote value controls list order. Re-read loaded pages from the first cursor
+  // before pagination continues; patching values alone leaves old boundaries.
+  void client.invalidateQueries({ queryKey: [...resourceKey, "votes/me"] });
 }
