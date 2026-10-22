@@ -35,9 +35,10 @@ const listing = {
   start_time: "1",
   end_time: "2000000000",
 };
-const captured = (bid: boolean) => ({
-  order_key: bid ? "lab-offer" : "lab-listing",
-  order_id: "0x" + (bid ? "b" : "a").repeat(64),
+const captured = (bid: boolean, index = 0) => ({
+  order_key: bid ? `lab-offer-${index}` : "lab-listing",
+  order_id:
+    "0x" + (bid ? (index + 11).toString(16).padStart(64, "0") : "a".repeat(64)),
   source: "opensea",
   protocol: SEAPORT,
   collection_slug: "memelab6529",
@@ -52,8 +53,10 @@ const captured = (bid: boolean) => ({
     symbol: bid ? "WETH" : "ETH",
     decimals: 18,
   },
-  total_price_raw: bid ? "60000000000000000" : listing.total_wei,
-  unit_price: bid ? "0.02" : "0.04",
+  total_price_raw: bid
+    ? String(BigInt(20 - index) * 3_000_000_000_000_000n)
+    : listing.total_wei,
+  unit_price: bid ? `0.${String(20 - index).padStart(3, "0")}` : "0.04",
   starts_at: new Date(1000).toISOString(),
   expires_at: new Date(2000000000000).toISOString(),
   observed_at: new Date().toISOString(),
@@ -203,22 +206,23 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
                   },
                 ],
             bids: bid
-              ? [
-                  {
-                    unit_price: "0.02",
-                    quantity: "3",
-                    cumulative_quantity: "3",
-                    order_count: 1,
-                  },
-                ]
+              ? Array.from({ length: 12 }, (_, index) => ({
+                  unit_price: captured(true, index).unit_price,
+                  quantity: "3",
+                  cumulative_quantity: String((index + 1) * 3),
+                  order_count: 1,
+                }))
               : [],
             best_ask: bid ? null : "0.04",
             best_bid: bid ? "0.02" : null,
             ask_order_count: bid ? 0 : 1,
-            bid_order_count: bid ? 1 : 0,
+            bid_order_count: bid ? 12 : 0,
           })),
-          orders: [captured(false), captured(true)],
-          order_count: 2,
+          orders: [
+            captured(false),
+            ...Array.from({ length: 12 }, (_, index) => captured(true, index)),
+          ],
+          order_count: 13,
           next: null,
           criteria_order_count: 0,
           notes: [],
@@ -264,11 +268,82 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
     market.getByRole("button", { name: "Collect", exact: true })
   ).toBeVisible();
   await expect(
-    market.getByRole("button", { name: "Sell", exact: true })
+    market.getByRole("button", { name: "Sell", exact: true }).first()
   ).toBeVisible();
   await expect(
     page.getByRole("button", { name: /^(Refresh|Refresh orders)$/ })
   ).toHaveCount(0);
+  await expect(market).toHaveAttribute("tabindex", "-1");
+  await expect(market).toHaveCSS("border-top-width", "0px");
+  const offers = market.getByRole("table", { name: "Offers for WETH" });
+  const levels = offers.getByRole("button", { name: /^Offers at / });
+  await expect(levels).toHaveCount(10);
+  const firstLevel = levels.first();
+  await firstLevel.focus();
+  await page.keyboard.press("Enter");
+  await expect(firstLevel).toBeFocused();
+  await expect(firstLevel).toHaveAttribute("aria-expanded", "true");
+  await expect(
+    offers.getByText("Quoted quantity", { exact: true })
+  ).toBeVisible();
+  await page.keyboard.press("Enter");
+  await expect(firstLevel).toHaveAttribute("aria-expanded", "false");
+  const showAll = market.getByRole("button", { name: "Show all levels" });
+  await showAll.click();
+  await expect(levels).toHaveCount(12);
+  await market.getByRole("button", { name: "Show fewer levels" }).click();
+  await expect(levels).toHaveCount(10);
+  const about = market.getByText("About these prices");
+  await about.focus();
+  await page.keyboard.press("Enter");
+  await expect(
+    market.getByText(/Listings can share the same seller inventory/)
+  ).toBeVisible();
+  await page.keyboard.press("Enter");
+  const row = offers.getByRole("row").filter({
+    has: page.getByRole("button", {
+      name: "Offers at 0.020 WETH",
+      exact: true,
+    }),
+  });
+  const priceBounds = (await firstLevel.boundingBox())!;
+  const chevronBounds = (await offers
+    .getByRole("button", { name: /^Offers at / })
+    .first()
+    .locator("svg")
+    .boundingBox())!;
+  const priceTextBounds = (await firstLevel
+    .getByText("0.020", { exact: true })
+    .boundingBox())!;
+  expect(
+    chevronBounds.x - priceTextBounds.x - priceTextBounds.width
+  ).toBeLessThanOrEqual(10);
+  expect(priceBounds.height).toBeGreaterThanOrEqual(44);
+  const cells = row.getByRole("cell");
+  await expect(cells.first()).toHaveCSS("border-top-left-radius", "12px");
+  await expect(cells.last()).toHaveCSS("border-top-right-radius", "12px");
+  await expect(cells.first()).toHaveCSS("border-bottom-width", "0px");
+  const originalViewport = page.viewportSize()!;
+  for (const width of [320, 390, 430]) {
+    await page.setViewportSize({ width, height: 844 });
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth)
+    ).toBeLessThanOrEqual(width + 1);
+    const sell = row.getByRole("button", { name: "Sell", exact: true });
+    expect((await sell.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    expect((await showAll.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    await firstLevel.click();
+    await expect(firstLevel).toHaveAttribute("aria-expanded", "true");
+    const actionCell = (await row.getByRole("cell").last().boundingBox())!;
+    const tableBounds = (await offers.boundingBox())!;
+    expect(actionCell.x + actionCell.width).toBeCloseTo(
+      tableBounds.x + tableBounds.width,
+      0
+    );
+    await firstLevel.click();
+    await expect(firstLevel).toHaveAttribute("aria-expanded", "false");
+  }
+  await page.setViewportSize(originalViewport);
   expect(lookups).toContain("memelab");
   expect(lookups).not.toContain("memes");
   const offer = page.getByRole("button", {

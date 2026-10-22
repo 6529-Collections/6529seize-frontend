@@ -29,7 +29,7 @@ import {
 const ACTION_CLASS =
   "tw-font-inherit tw-min-h-11 tw-max-w-full !tw-whitespace-normal tw-px-3 tw-py-2 tw-text-meta tw-leading-5";
 const COMPACT_ACTION_CLASS =
-  "tw-font-inherit tw-my-0.5 tw-min-h-11 tw-min-w-16 tw-max-w-full !tw-whitespace-normal tw-px-2 tw-py-2 tw-text-meta tw-leading-5 focus-visible:tw-outline-offset-[-2px]";
+  "tw-font-inherit tw-min-h-11 tw-min-w-16 tw-max-w-full !tw-whitespace-normal tw-px-4 tw-py-1.5 tw-text-meta tw-leading-5 focus-visible:tw-outline-offset-[-2px] sm:tw-min-h-[34px] sm:touch-only:tw-min-h-11";
 
 export interface RowState {
   readonly busy: boolean;

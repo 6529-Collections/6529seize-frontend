@@ -121,14 +121,11 @@ interface NonEmptyDepthSide {
 
 function MarketDepthSkeleton() {
   return (
-    <div
-      aria-hidden="true"
-      className="tw-grid tw-grid-cols-2 tw-gap-4 tw-border-0 tw-border-b tw-border-solid tw-border-white/10"
-    >
+    <div aria-hidden="true" className="tw-grid tw-grid-cols-2 tw-gap-4">
       {["one", "two"].map((key) => (
         <div
           key={key}
-          className="tw-h-20 tw-animate-pulse tw-rounded-lg tw-bg-white/[0.02] motion-reduce:tw-animate-none"
+          className="tw-h-20 tw-animate-pulse tw-rounded-xl tw-bg-white/[0.025] motion-reduce:tw-animate-none"
         />
       ))}
     </div>
@@ -147,8 +144,8 @@ function AboutPrices({
   );
 
   return (
-    <details className="tw-group tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-py-2">
-      <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-text-meta tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
+    <details className="tw-group tw-min-w-0 sm:tw-col-start-2 sm:tw-row-start-1 sm:open:tw-col-span-full sm:open:tw-col-start-1 sm:open:tw-row-start-3">
+      <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-end tw-gap-2 tw-rounded-lg tw-text-xs tw-font-medium tw-text-iron-400 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 sm:tw-min-h-8 sm:touch-only:tw-min-h-11 [&::-webkit-details-marker]:tw-hidden">
         {t(locale, "marketDepth.about.title")}
         <span
           aria-hidden="true"
@@ -157,7 +154,7 @@ function AboutPrices({
           +
         </span>
       </summary>
-      <div className="tw-max-w-3xl tw-pb-2 tw-pt-2 tw-text-xs tw-leading-5 tw-text-iron-500">
+      <div className="tw-mt-1.5 tw-rounded-xl tw-bg-white/[0.025] tw-px-5 tw-py-4 tw-text-meta tw-leading-5 tw-text-iron-400">
         <p className="tw-m-0">{t(locale, "marketDepth.about.description")}</p>
         {hasUnpricedCollectionOrders && (
           <p className="tw-mb-0 tw-mt-2">
@@ -511,9 +508,9 @@ export default function MarketDepthPanel({
       tabIndex={embedded ? -1 : undefined}
       aria-labelledby={`${id}-heading`}
       aria-busy={effectiveStatus === "loading"}
-      className={`${embedded ? "tw-outline-none" : "tw-mt-8 tw-border-t tw-pt-5"} tw-min-w-0 tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-white/10 tw-text-sm tw-leading-5 before:tw-content-none after:tw-content-none [&_*]:before:tw-content-none [&_*]:after:tw-content-none`}
+      className={`${embedded ? "tw-outline-none" : "tw-mt-8"} tw-min-w-0 tw-border-0 tw-pt-2 tw-text-sm tw-leading-5 before:tw-content-none after:tw-content-none [&_*]:before:tw-content-none [&_*]:after:tw-content-none`}
     >
-      <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-x-4 tw-gap-y-2">
+      <div className="tw-mb-8 tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-x-4 tw-gap-y-2">
         <div className="tw-min-w-0 tw-flex-1">
           <h2
             id={`${id}-heading`}
@@ -543,17 +540,17 @@ export default function MarketDepthPanel({
               </button>
             )}
           </h2>
-          <p
-            hidden={!open}
-            className="tw-mb-0 tw-mt-1 tw-text-meta tw-leading-5 tw-text-iron-400"
-          >
-            {t(resolvedLocale, "marketDepth.description")}
-          </p>
-          {data && (
-            <div className="tw-mt-1">
+          <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2.5 tw-gap-y-0.5">
+            <p
+              hidden={!open}
+              className="tw-m-0 tw-text-meta tw-leading-5 tw-text-iron-400"
+            >
+              {t(resolvedLocale, "marketDepth.description")}
+            </p>
+            {data && (
               <MarketDepthSnapshot data={data} locale={resolvedLocale} />
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
@@ -571,7 +568,7 @@ export default function MarketDepthPanel({
       )}
 
       {(effectiveStatus === "error" || backgroundFailed) && (
-        <div className="tw-mt-5 tw-border-0 tw-border-y tw-border-solid tw-border-white/10 tw-py-5">
+        <div className="tw-mt-5 tw-rounded-xl tw-bg-white/[0.025] tw-px-5 tw-py-5">
           <p role="alert" className="tw-m-0 tw-text-sm tw-text-rose-200">
             {t(resolvedLocale, "marketDepth.error")}
           </p>
@@ -597,10 +594,10 @@ export default function MarketDepthPanel({
           onMarketChange={refresh}
           onInteractionChange={onInteractionChange}
         >
-          <div className="tw-mt-4">
+          <div className="tw-flex tw-flex-col tw-gap-10">
             {data.status === ApiMarketDepthStatusEnum.Unavailable ? (
               <>
-                <div className="tw-border-0 tw-border-y tw-border-solid tw-border-white/10 tw-py-5">
+                <div className="tw-rounded-xl tw-bg-white/[0.025] tw-px-5 tw-py-5">
                   <p className="tw-m-0 tw-text-sm tw-text-iron-300">
                     {t(resolvedLocale, "marketDepth.unavailable.title")}
                   </p>
@@ -611,23 +608,27 @@ export default function MarketDepthPanel({
               </>
             ) : (
               <>
-                <dl className="tw-m-0 tw-grid tw-grid-cols-2 tw-gap-x-4 tw-border-0 tw-border-b tw-border-solid tw-border-white/10">
-                  <div className="tw-min-w-0 tw-py-4">
-                    <dt className="tw-text-xs tw-text-iron-400">
+                <dl className="tw-m-0 tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-5 sm:tw-flex sm:tw-flex-wrap sm:tw-gap-x-16">
+                  <div className="tw-min-w-0 tw-max-w-full">
+                    <dt className="tw-mb-2 tw-text-[11px] tw-font-medium tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-500">
                       {t(resolvedLocale, "marketDepth.bestAsk")}
                     </dt>
-                    <dd className="tw-m-0 tw-mt-1.5 tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100 [overflow-wrap:anywhere] sm:tw-text-base">
+                    <dd
+                      className={`tw-m-0 tw-text-xl tw-font-medium tw-tabular-nums tw-leading-[30px] tw-tracking-[-0.01em] [overflow-wrap:anywhere] sm:tw-text-2xl ${ethBook?.best_ask ? "tw-text-iron-50" : "tw-text-iron-600"}`}
+                    >
                       <DecimalValue
                         locale={resolvedLocale}
                         value={ethBook?.best_ask}
                       />
                     </dd>
                   </div>
-                  <div className="tw-min-w-0 tw-py-4">
-                    <dt className="tw-text-xs tw-text-iron-400">
+                  <div className="tw-min-w-0 tw-max-w-full">
+                    <dt className="tw-mb-2 tw-text-[11px] tw-font-medium tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-500">
                       {t(resolvedLocale, "marketDepth.bestBid")}
                     </dt>
-                    <dd className="tw-m-0 tw-mt-1.5 tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100 [overflow-wrap:anywhere] sm:tw-text-base">
+                    <dd
+                      className={`tw-m-0 tw-text-xl tw-font-medium tw-tabular-nums tw-leading-[30px] tw-tracking-[-0.01em] [overflow-wrap:anywhere] sm:tw-text-2xl ${wethBook?.best_bid ? "tw-text-iron-50" : "tw-text-iron-600"}`}
+                    >
                       <DecimalValue
                         locale={resolvedLocale}
                         value={wethBook?.best_bid}
@@ -666,20 +667,20 @@ export default function MarketDepthPanel({
                       </p>
                     )}
                   {!hasQuotedLevels && (
-                    <p className="tw-mb-0 tw-mt-6 tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-pb-6 tw-text-sm tw-text-iron-400">
+                    <p className="tw-m-0 tw-rounded-xl tw-bg-white/[0.025] tw-px-5 tw-py-5 tw-text-sm tw-text-iron-400">
                       {t(resolvedLocale, "marketDepth.empty")}
                     </p>
                   )}
 
                   {nonEmptySides.length > 0 && (
-                    <div className="tw-mt-6 tw-grid tw-grid-cols-[repeat(auto-fit,minmax(min(100%,20rem),1fr))] tw-gap-x-8 tw-gap-y-6">
+                    <div className="tw-grid tw-grid-cols-[repeat(auto-fit,minmax(min(100%,20rem),1fr))] tw-gap-x-8 tw-gap-y-10">
                       {nonEmptySides.map(({ book, side, levels }) => (
                         <div
                           key={`${book.currency.address}-${side}`}
                           className="tw-min-w-0"
                         >
-                          <div className="tw-mb-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-3 tw-gap-y-1">
-                            <h3 className="tw-m-0 tw-min-w-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-200">
+                          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-3 tw-gap-y-1 tw-pb-2">
+                            <h3 className="tw-m-0 tw-min-w-0 tw-break-words tw-text-[15px] tw-font-medium tw-text-iron-200">
                               {t(
                                 resolvedLocale,
                                 side === "ask"
@@ -688,7 +689,7 @@ export default function MarketDepthPanel({
                               )}{" "}
                               · {currencyName(resolvedLocale, book)}
                             </h3>
-                            <span className="tw-text-xs tw-text-iron-500">
+                            <span className="tw-text-xs tw-tabular-nums tw-text-iron-500">
                               {t(
                                 resolvedLocale,
                                 "marketDepth.sideCount.orders",
@@ -730,21 +731,25 @@ export default function MarketDepthPanel({
                     </div>
                   )}
 
-                  <p className="tw-mb-0 tw-mt-6 tw-max-w-3xl tw-text-xs tw-leading-5 tw-text-iron-500">
-                    {t(resolvedLocale, "marketDepth.sourceCaveat")}
-                  </p>
+                  <div className="tw-mt-7 tw-grid tw-grid-cols-1 tw-items-center tw-gap-x-4 sm:tw-grid-cols-[minmax(0,1fr)_auto]">
+                    <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-500">
+                      {t(resolvedLocale, "marketDepth.sourceCaveat")}
+                    </p>
 
-                  <MarketDepthOtherOrders
-                    data={data}
-                    locale={resolvedLocale}
-                    onRetry={loadOrders}
-                    onRefresh={refresh}
-                    isLoading={isLoadingMore || data.next !== null}
-                    error={currentLoadMoreError}
-                    focusedOrderHash={pendingOrderFocus}
-                    onOrderFocused={finishOrderFocus}
-                  />
-                  <AboutPrices data={data} locale={resolvedLocale} />
+                    <div className="tw-col-span-full tw-row-start-2 empty:tw-hidden">
+                      <MarketDepthOtherOrders
+                        data={data}
+                        locale={resolvedLocale}
+                        onRetry={loadOrders}
+                        onRefresh={refresh}
+                        isLoading={isLoadingMore || data.next !== null}
+                        error={currentLoadMoreError}
+                        focusedOrderHash={pendingOrderFocus}
+                        onOrderFocused={finishOrderFocus}
+                      />
+                    </div>
+                    <AboutPrices data={data} locale={resolvedLocale} />
+                  </div>
                 </div>
               </>
             )}
