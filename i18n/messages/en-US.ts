@@ -2360,6 +2360,19 @@ const WAVE_LOADING_MESSAGES = objectMessages("waves", {
 const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
   "waves.drops.searchModal",
   {
+    "advanced.allWaves": "all waves",
+    "advanced.filters": "Search filters",
+    "advanced.from": "From a specific user",
+    "advanced.in": "In a specific wave",
+    "advanced.removeFrom": "Remove author filter {name}",
+    "advanced.removeIn": "Remove wave filter {name}",
+    "advanced.idleAll":
+      "Type at least {minLength} characters or add an author filter to search all waves.",
+    "advanced.help":
+      "Type from: to choose an author or in: to choose a wave. Use arrow keys and Enter to select. Remove the wave filter to search all waves.",
+    "advanced.empty": "No matches found",
+    "advanced.loading": "Loading suggestions…",
+    "advanced.error": "Couldn't load suggestions. Try again.",
     authorFallback: "unknown author",
     clear: "Clear search",
     clearShort: "Clear",

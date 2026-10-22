@@ -3,13 +3,17 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
-import { fetchWaveDropsSearchV2 } from "@/services/api/wave-drops-v2-api";
+import {
+  fetchWaveDropsSearchV2,
+  fetchGlobalDropsSearchV2,
+} from "@/services/api/wave-drops-v2-api";
 
 jest.mock("@tanstack/react-query", () => ({
   useInfiniteQuery: jest.fn(),
 }));
 jest.mock("@/services/api/wave-drops-v2-api", () => ({
   fetchWaveDropsSearchV2: jest.fn(),
+  fetchGlobalDropsSearchV2: jest.fn(),
 }));
 jest.mock("@/helpers/waves/wave.helpers", () => ({
   normalizeOptionalWaveId: jest.fn((waveId) =>
@@ -123,5 +127,60 @@ describe("useWaveDropsSearch", () => {
       })
     );
     expect(useInfiniteQueryMock.mock.calls.at(-1)?.[0].enabled).toBe(false);
+  });
+  it("uses the cross-wave API after the removable scope is cleared and isolates read contexts", async () => {
+    jest
+      .mocked(fetchGlobalDropsSearchV2)
+      .mockResolvedValue({ data: [], page: 1, next: false });
+    renderHook(() =>
+      useWaveDropsSearch({
+        wave: null,
+        term: "hello",
+        authorId: "alice",
+        enabled: true,
+        allowGlobalSearch: true,
+        readContext: "viewer:proxy",
+      })
+    );
+    const options = useInfiniteQueryMock.mock.calls[0][0];
+    expect(options.enabled).toBe(true);
+    expect(options.queryKey[1]).toEqual(
+      expect.objectContaining({
+        waveId: null,
+        allowGlobalSearch: true,
+        readContext: "viewer:proxy",
+      })
+    );
+    const signal = new AbortController().signal;
+    await options.queryFn({ pageParam: 1, signal });
+    expect(fetchGlobalDropsSearchV2).toHaveBeenCalledWith({
+      term: "hello",
+      authorId: "alice",
+      page: 1,
+      size: 50,
+      signal,
+      cursor: undefined,
+    });
+    expect(
+      options.getNextPageParam({
+        data: [],
+        page: 1,
+        next: true,
+        cursor: "next-cursor",
+      })
+    ).toEqual({ page: 2, cursor: "next-cursor" });
+    await options.queryFn({
+      pageParam: { page: 2, cursor: "next-cursor" },
+      signal,
+    });
+    expect(fetchGlobalDropsSearchV2).toHaveBeenLastCalledWith({
+      term: "hello",
+      authorId: "alice",
+      page: 2,
+      size: 50,
+      signal,
+      cursor: "next-cursor",
+    });
+    expect(fetchWaveDropsSearchV2).not.toHaveBeenCalled();
   });
 });
