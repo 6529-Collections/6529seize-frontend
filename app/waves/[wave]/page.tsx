@@ -22,9 +22,9 @@ export default async function WavePage({
     waveId: wave,
     searchParams: resolvedParams,
     routeContext: "waves",
-    // Client transitions already have an interactive shell. Keep the anonymous
-    // no-JavaScript preview on document loads, off the navigation critical path.
-    includePublicPreview: requestHeaders.get("rsc") !== "1",
+    // Browser fetches already have an interactive shell. Keep the anonymous
+    // preview for document loads and crawlers. Next hides internal RSC headers.
+    includePublicPreview: requestHeaders.get("sec-fetch-dest") !== "empty",
   });
 }
 

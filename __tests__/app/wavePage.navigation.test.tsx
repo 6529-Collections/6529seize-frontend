@@ -7,15 +7,19 @@ jest.mock("@/app/waves/waves-page.shared", () => ({
   renderWavesPageContent: jest.fn(),
 }));
 
-it.each([true, false])(
-  "keeps public previews on document responses and skips them for RSC transitions (RSC=%s)",
-  async (rsc) => {
+it.each([
+  ["empty", false],
+  ["document", true],
+  [null, true],
+] as const)(
+  "keeps public previews on documents and crawler requests, off browser fetches (destination=%s)",
+  async (destination, includePublicPreview) => {
     jest
       .mocked(headers)
       .mockResolvedValue(
-        new Headers(rsc ? { rsc: "1" } : {}) as Awaited<
-          ReturnType<typeof headers>
-        >
+        new Headers(
+          destination ? { "sec-fetch-dest": destination } : {}
+        ) as Awaited<ReturnType<typeof headers>>
       );
     await WavePage({
       params: Promise.resolve({ wave: "wave" }),
@@ -25,7 +29,7 @@ it.each([true, false])(
       waveId: "wave",
       searchParams: { tab: "chat", competition: "selected" },
       routeContext: "waves",
-      includePublicPreview: !rsc,
+      includePublicPreview,
     });
   }
 );

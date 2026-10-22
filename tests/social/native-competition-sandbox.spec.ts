@@ -2134,6 +2134,14 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       if (message.type() === "error") consoleErrors.push(message.text());
     });
     const sandbox = await installCompetitionApi(page);
+    const readPublicPreviewCount = async () => {
+      const origin = getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"]);
+      const response = await page.request.get(
+        `${origin}/__composer-sandbox/public-preview`
+      );
+      expect(response.ok()).toBe(true);
+      return (await response.json()).reads as number;
+    };
     await page.goto(ROOT);
     await dismissNextDevTools(page);
     await expect(
@@ -2281,6 +2289,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("spinbutton", { name: "Your vote" })
     ).toHaveValue("0");
+    expect(await readPublicPreviewCount()).toBe(0);
     await page.getByRole("tab", { name: "Chat", exact: true }).click();
     await expect(page).toHaveURL(
       new RegExp(`/waves/${WAVE}\\?tab=chat&competition=beta$`),
@@ -2291,6 +2300,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("link", { name: "Competition", exact: true })
     ).toHaveCount(0);
+    expect(await readPublicPreviewCount()).toBe(0);
     const competitionsTab = page.getByRole("tab", {
       name: /^Competitions(?:\s+\d+\+?)?$/,
     });
@@ -2316,6 +2326,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         /hydration|hydrated|cannot be a (?:child|descendant)/i.test(error)
       )
     ).toEqual([]);
+    const documentResponse = await page.request.get(
+      `/waves/${WAVE}?tab=chat&competition=beta`
+    );
+    expect(documentResponse.ok()).toBe(true);
+    expect(await readPublicPreviewCount()).toBe(1);
   });
 
   test("shows collaboration actors and named artwork in the standard notification header", async ({

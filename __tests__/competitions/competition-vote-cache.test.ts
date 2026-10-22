@@ -83,7 +83,8 @@ it("refreshes loaded pages after a vote moves across a page boundary", async () 
       queryKey: inactiveKey,
       initialPageParam: 0,
       queryFn: inactiveRead,
-      getNextPageParam: (page) => page.next_cursor,
+      getNextPageParam: (page: { next_cursor: number | null }) =>
+        page.next_cursor,
     });
     inactiveRead.mockClear();
     reads.length = 0;
