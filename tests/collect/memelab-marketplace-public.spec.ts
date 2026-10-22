@@ -347,9 +347,12 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
   ).toBeLessThanOrEqual(10);
   expect(priceBounds.height).toBeGreaterThanOrEqual(44);
   const cells = row.getByRole("cell");
-  await expect(cells.first()).toHaveCSS("border-top-left-radius", "12px");
-  await expect(cells.last()).toHaveCSS("border-top-right-radius", "12px");
-  await expect(cells.first()).toHaveCSS("border-bottom-width", "0px");
+  await expect(cells.first()).toHaveCSS("border-top-left-radius", "0px");
+  await expect(cells.last()).toHaveCSS("border-top-right-radius", "0px");
+  await expect(cells.first()).toHaveCSS("border-bottom-width", "1px");
+  await expect(cells.first()).toHaveCSS("border-top-width", "0px");
+  await expect(cells.first()).toHaveCSS("border-left-width", "0px");
+  await expect(cells.last()).toHaveCSS("border-right-width", "0px");
   const originalViewport = page.viewportSize()!;
   for (const width of [320, 390, 430]) {
     await page.setViewportSize({ width, height: 844 });

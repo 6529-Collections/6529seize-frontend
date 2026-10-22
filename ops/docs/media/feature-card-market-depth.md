@@ -42,9 +42,9 @@ with its matching list. Each price list starts with up to ten levels. Use Show
 all levels to reveal the complete list, and Show fewer levels to return to the
 short view.
 Listings are ordered from lowest price upward and
-offers from highest price downward. Price rows stay unboxed, with the expand
-arrow beside the price. Each level shows its unit price and quantity
-at that price. Total shows the cumulative quoted quantity. On narrow screens,
+offers from highest price downward. Price rows stay unboxed, with subtle
+straight horizontal separators and the expand arrow beside the price. Each level
+shows its unit price and quantity at that price. Total shows the cumulative quoted quantity. On narrow screens,
 quantity and total appear below the exact price, with **Collect** or **Sell** in
 a separate column. Expand a price row to
 inspect the captured orders behind that quote, including quoted remaining

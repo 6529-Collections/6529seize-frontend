@@ -121,7 +121,7 @@ export default function MarketDepthPriceLevels({
           <tbody>
             {visibleLevels.map((level) => {
               const cellClass =
-                "tw-h-[54px] tw-bg-transparent tw-tabular-nums tw-transition-colors tw-duration-200 group-hover:tw-bg-white/[0.02] motion-reduce:tw-transition-none";
+                "tw-h-[54px] tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-bg-transparent tw-tabular-nums tw-transition-colors tw-duration-200 group-hover:tw-bg-white/[0.02] motion-reduce:tw-transition-none";
               const open = openPrice === level.unit_price;
               const panelId = disclosureId + "-" + level.unit_price;
               const levelOrders = getLevelOrders(
@@ -143,7 +143,7 @@ export default function MarketDepthPriceLevels({
                 <Fragment key={level.unit_price}>
                   <tr className="tw-group">
                     <td
-                      className={`${cellClass} tw-rounded-l-xl tw-py-0 tw-pl-4 tw-text-left sm:tw-pl-5 sm:tw-pr-3 ${tradeActionsAvailable ? "" : "tw-rounded-r-xl sm:tw-rounded-r-none"}`}
+                      className={`${cellClass} tw-py-0 tw-pl-4 tw-text-left sm:tw-pl-5 sm:tw-pr-3`}
                     >
                       <button
                         type="button"
@@ -195,13 +195,13 @@ export default function MarketDepthPriceLevels({
                       {formatInteger(locale, level.quantity)}
                     </td>
                     <td
-                      className={`${cellClass} tw-hidden tw-break-words tw-py-2.5 tw-pr-2.5 tw-text-meta tw-text-iron-500 sm:tw-table-cell sm:tw-pl-3 ${tradeActionsAvailable ? "" : "tw-rounded-r-xl"}`}
+                      className={`${cellClass} tw-hidden tw-break-words tw-py-2.5 tw-pr-2.5 tw-text-meta tw-text-iron-500 sm:tw-table-cell sm:tw-pl-3`}
                     >
                       {formatInteger(locale, level.cumulative_quantity)}
                     </td>
                     {tradeActionsAvailable && (
                       <td
-                        className={`${cellClass} tw-break-words tw-rounded-r-xl tw-py-1 tw-pl-2 tw-pr-2.5 tw-align-middle`}
+                        className={`${cellClass} tw-break-words tw-py-1 tw-pl-2 tw-pr-2.5 tw-align-middle`}
                       >
                         <MarketDepthLevelAction
                           order={singleOrder}
