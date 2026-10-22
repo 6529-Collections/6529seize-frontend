@@ -526,13 +526,16 @@ export default function TheMemesComponent({
           initialDataRef.current = undefined;
           setSortDir(direction);
         }}
-        className={`tw-m-0 tw-inline-flex tw-size-7 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none ${
+        className={`tw-m-0 tw-inline-flex tw-size-7 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none lg:[body:not(.capacitor-native)_&]:tw-rounded-lg lg:[body:not(.capacitor-native)_&]:tw-duration-300 ${
           isActive
-            ? "tw-bg-iron-700 tw-text-white"
-            : "tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-text-iron-200"
+            ? "tw-bg-iron-700 tw-text-white lg:[body:not(.capacitor-native)_&]:tw-bg-white/[0.12]"
+            : "tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-text-iron-200 lg:[body:not(.capacitor-native)_&]:tw-text-iron-600 lg:[body:not(.capacitor-native)_&]:desktop-hover:hover:tw-text-iron-300"
         }`}
       >
-        <Icon aria-hidden="true" className="tw-size-[13px]" />
+        <Icon
+          aria-hidden="true"
+          className="tw-size-[13px] lg:[body:not(.capacitor-native)_&]:tw-size-3.5 lg:[body:not(.capacitor-native)_&]:tw-stroke-[1.25]"
+        />
       </button>
     );
   }
@@ -675,10 +678,10 @@ export default function TheMemesComponent({
           >
             <div className="tw-flex tw-items-center tw-gap-2.5">
               <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-2.5">
-                <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500">
+                <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500 max-sm:tw-sr-only">
                   {t(locale, "theMemes.sorting.sortBy")}
                 </span>
-                <fieldset className="tw-m-0 tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-gap-0.5 tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-p-0.5">
+                <fieldset className="tw-m-0 tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-gap-0.5 tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-p-0.5 lg:[body:not(.capacitor-native)_&]:tw-ml-0.5 lg:[body:not(.capacitor-native)_&]:tw-h-7 lg:[body:not(.capacitor-native)_&]:tw-bg-transparent lg:[body:not(.capacitor-native)_&]:tw-p-0">
                   <legend className="tw-sr-only">
                     {t(locale, "theMemes.sorting.directionLegend")}
                   </legend>
