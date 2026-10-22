@@ -84,7 +84,7 @@ export default function MarketDepthPriceLevels({
               currency: currencyLabel,
             })}
           </caption>
-          <thead className="tw-text-[11px] tw-uppercase tw-tracking-[0.08em] tw-text-iron-500 [&_th]:tw-h-0 [&_th]:tw-py-0 [&_th]:tw-font-medium sm:[&_th]:tw-h-6">
+          <thead className="tw-text-xs tw-normal-case tw-tracking-normal tw-text-iron-500 [&_th]:tw-h-0 [&_th]:tw-py-0 [&_th]:tw-font-medium sm:[&_th]:tw-h-6">
             <tr>
               <th
                 scope="col"
@@ -121,9 +121,9 @@ export default function MarketDepthPriceLevels({
             </tr>
           </thead>
           <tbody>
-            {visibleLevels.map((level) => {
-              const cellClass =
-                "tw-h-[60px] sm:tw-h-[54px] tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-bg-transparent tw-tabular-nums tw-transition-colors tw-duration-200 group-hover:tw-bg-white/[0.02] motion-reduce:tw-transition-none";
+            {visibleLevels.map((level, index) => {
+              const best = index === 0;
+              const cellClass = `tw-h-[60px] sm:tw-h-[54px] tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-tabular-nums tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none ${best ? "tw-bg-primary-500/[0.08]" : "tw-bg-transparent group-hover:tw-bg-white/[0.02]"}`;
               const open = openPrice === level.unit_price;
               const panelId = disclosureId + "-" + level.unit_price;
               const levelOrders = getLevelOrders(
@@ -145,7 +145,7 @@ export default function MarketDepthPriceLevels({
                 <Fragment key={level.unit_price}>
                   <tr className="tw-group">
                     <td
-                      className={`${cellClass} tw-py-0 tw-pl-0 tw-text-left sm:tw-pl-5 sm:tw-pr-3`}
+                      className={`${cellClass} ${best ? "tw-rounded-l-xl" : ""} ${best && !tradeActionsAvailable ? "tw-rounded-r-xl sm:tw-rounded-r-none" : ""} tw-py-0 tw-pl-0 tw-text-left sm:tw-pl-5 sm:tw-pr-3`}
                     >
                       <button
                         type="button"
@@ -199,16 +199,17 @@ export default function MarketDepthPriceLevels({
                       {formatInteger(locale, level.quantity)}
                     </td>
                     <td
-                      className={`${cellClass} tw-hidden tw-break-words tw-py-2.5 tw-pr-2.5 tw-text-meta tw-text-iron-500 sm:tw-table-cell sm:tw-pl-3`}
+                      className={`${cellClass} ${best && !tradeActionsAvailable ? "sm:tw-rounded-r-xl" : ""} tw-hidden tw-break-words tw-py-2.5 tw-pr-2.5 tw-text-meta tw-text-iron-500 sm:tw-table-cell sm:tw-pl-3`}
                     >
                       {formatInteger(locale, level.cumulative_quantity)}
                     </td>
                     {tradeActionsAvailable && (
                       <td
-                        className={`${cellClass} tw-break-words tw-py-1 tw-pl-2 tw-pr-0 tw-align-middle sm:tw-pr-2.5`}
+                        className={`${cellClass} ${best ? "tw-rounded-r-xl" : ""} tw-break-words tw-py-1 tw-pl-2 tw-pr-0 tw-align-middle sm:tw-pr-2.5`}
                       >
                         <MarketDepthLevelAction
                           order={singleOrder}
+                          outlined={!best}
                           side={side}
                           locale={locale}
                           open={open}

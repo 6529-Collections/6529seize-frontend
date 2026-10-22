@@ -36,6 +36,9 @@ const COMPACT_ACTION_CLASS =
 const MOBILE_TRADE_ACTION_CLASS =
   "max-sm:tw-w-20 max-sm:tw-flex-wrap max-sm:tw-gap-x-1 max-sm:tw-rounded-[8px/13px] max-sm:tw-border-x-0 max-sm:tw-border-y-[5px] max-sm:!tw-border-transparent max-sm:tw-bg-clip-padding max-sm:tw-px-1 max-sm:tw-py-0 max-sm:tw-text-xs max-sm:tw-leading-4 max-sm:tw-shadow-none max-sm:tw-ring-0";
 
+const OUTLINED_LEVEL_ACTION_CLASS =
+  "!tw-border-white/[0.12] !tw-bg-transparent !tw-text-iron-200 !tw-shadow-none !tw-ring-0 enabled:group-hover:!tw-border-primary-500 enabled:group-hover:!tw-bg-primary-500 enabled:group-hover:!tw-text-white focus-visible:!tw-border-primary-500 focus-visible:!tw-bg-primary-500 focus-visible:!tw-text-white max-sm:!tw-border-transparent max-sm:!tw-shadow-[inset_0_0_0_1px_rgb(255_255_255_/_0.12)] max-sm:enabled:group-hover:!tw-border-transparent max-sm:focus-visible:!tw-border-transparent";
+
 export interface RowState {
   readonly busy: boolean;
   readonly message?: string;
@@ -79,6 +82,7 @@ export function useMarketDepthTradeActionsAvailable(): boolean {
 
 export function MarketDepthLevelAction({
   order,
+  outlined = false,
   side,
   locale,
   open,
@@ -86,6 +90,7 @@ export function MarketDepthLevelAction({
   onClick,
 }: {
   readonly order?: ApiMarketOrder | undefined;
+  readonly outlined?: boolean;
   readonly side: "ask" | "bid";
   readonly locale: SupportedLocale;
   readonly open: boolean;
@@ -116,6 +121,7 @@ export function MarketDepthLevelAction({
         order={order}
         locale={locale}
         compact
+        outlined={outlined}
         actionRef={actionRef}
       />
     );
@@ -126,7 +132,7 @@ export function MarketDepthLevelAction({
         type="button"
         variant="action"
         size={null}
-        className={`${COMPACT_ACTION_CLASS} ${MOBILE_TRADE_ACTION_CLASS}`}
+        className={`${COMPACT_ACTION_CLASS} ${MOBILE_TRADE_ACTION_CLASS} ${outlined ? OUTLINED_LEVEL_ACTION_CLASS : ""}`}
         aria-expanded={open}
         aria-controls={panelId}
         onClick={onClick}
@@ -150,11 +156,13 @@ export function MarketDepthOrderAction({
   order,
   locale,
   compact = false,
+  outlined = false,
   actionRef,
 }: {
   readonly order: ApiMarketOrder;
   readonly locale: SupportedLocale;
   readonly compact?: boolean;
+  readonly outlined?: boolean;
   readonly actionRef?: Ref<HTMLButtonElement> | undefined;
 }) {
   const context = useContext(TradeContext);
@@ -185,7 +193,7 @@ export function MarketDepthOrderAction({
             type="button"
             variant={selected ? "secondary" : "action"}
             size={null}
-            className={`${compact ? COMPACT_ACTION_CLASS : ACTION_CLASS} ${MOBILE_TRADE_ACTION_CLASS}`}
+            className={`${compact ? COMPACT_ACTION_CLASS : ACTION_CLASS} ${MOBILE_TRADE_ACTION_CLASS} ${outlined && !selected ? OUTLINED_LEVEL_ACTION_CLASS : ""}`}
             aria-label={t(
               locale,
               order.side === ApiMarketOrderSideEnum.Ask

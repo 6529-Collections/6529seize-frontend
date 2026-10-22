@@ -37,13 +37,16 @@ rank and the next rank skips those ties. A card without a recorded ranking shows
 ## Read listings and offers
 
 The summaries show the lowest captured listing in ETH and the highest captured
-offer in WETH. When the two lists appear side by side, each summary aligns
-with its matching list. Each price list starts with up to ten levels. Use Show
-all levels to reveal the complete list, and Show fewer levels to return to the
+offer in WETH. Each summary sits above its own list, with the order count
+beside the label. The columns stack on narrow screens, listings before offers.
+A side without quotes retains its summary with an unavailable value and no table.
+Each price list starts with up to ten levels. Use Show all levels to reveal the complete list, and Show fewer levels to return to the
 short view.
 Listings are ordered from lowest price upward and
-offers from highest price downward. Price rows stay unboxed, with subtle
-straight horizontal separators and the expand arrow beside the price. Each level
+offers from highest price downward. The first level has a faint blue background
+and a filled action; other actions are outlined and turn blue on row hover or
+keyboard focus. Subtle horizontal separators distinguish the remaining rows,
+and the expand arrow stays beside the price. Each level
 shows its unit price and quantity at that price. Total shows the cumulative quoted quantity. On narrow screens,
 quantity and total appear below the exact price, with **Collect** or **Sell** in
 a separate column. The price and quantity area opens the details together;
@@ -67,7 +70,8 @@ listing price and **Sell** beside offer prices. A level with one loaded order
 acts on that exact order directly. When several orders share a price, the action
 opens the orders so you can choose one; it does not silently pick a seller or
 offer. The price disclosure remains available for inspecting details.
-The compact and expanded order actions use the same blue action buttons. A busy
+The first price level and expanded orders use filled blue action buttons;
+other price levels use the outlined treatment described above. A busy
 order check disables its action while keeping its accessible name.
 For **Collect**, the site checks that exact listing and adds it to your selection.
 Set **Quantity** for supported editions, or choose

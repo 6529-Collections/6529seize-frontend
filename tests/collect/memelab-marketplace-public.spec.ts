@@ -132,6 +132,7 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
     { name: "essential-cookies-consent", value: "true", url: baseURL! },
     { name: "performance-cookies-consent", value: "false", url: baseURL! },
   ]);
+  let offersOnly = false;
   const writes: string[] = [];
   const lookups: string[] = [];
   await page.route("**/*", async (route) => {
@@ -196,16 +197,17 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
           snapshots: [],
           books: [false, true].map((bid) => ({
             currency: captured(bid).currency,
-            asks: bid
-              ? []
-              : [
-                  {
-                    unit_price: "0.04",
-                    quantity: "3",
-                    cumulative_quantity: "3",
-                    order_count: 1,
-                  },
-                ],
+            asks:
+              bid || offersOnly
+                ? []
+                : [
+                    {
+                      unit_price: "0.04",
+                      quantity: "3",
+                      cumulative_quantity: "3",
+                      order_count: 1,
+                    },
+                  ],
             bids: bid
               ? Array.from({ length: 12 }, (_, index) => ({
                   unit_price: captured(true, index).unit_price,
@@ -216,13 +218,13 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
                   order_count: index === 8 ? 2 : 1,
                 }))
               : [],
-            best_ask: bid ? null : "0.04",
+            best_ask: bid || offersOnly ? null : "0.04",
             best_bid: bid ? captured(true, 0).unit_price : null,
-            ask_order_count: bid ? 0 : 1,
+            ask_order_count: bid || offersOnly ? 0 : 1,
             bid_order_count: bid ? 13 : 0,
           })),
           orders: [
-            captured(false),
+            ...(offersOnly ? [] : [captured(false)]),
             ...Array.from({ length: 12 }, (_, index) => captured(true, index)),
             {
               ...captured(true, 8),
@@ -230,7 +232,7 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
               order_id: "0x" + "e".repeat(64),
             },
           ],
-          order_count: 14,
+          order_count: offersOnly ? 13 : 14,
           next: null,
           criteria_order_count: 0,
           notes: [],
@@ -284,17 +286,23 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
   await expect(market).toHaveAttribute("tabindex", "-1");
   await expect(market).toHaveCSS("border-top-width", "0px");
   if (!isMobile) {
-    for (const [summary, heading] of [
-      ["Lowest listing · ETH", "Listings · ETH"],
-      ["Highest offer · WETH", "Offers · WETH"],
+    for (const [summary, table, heading] of [
+      ["Lowest listing · ETH", "Listings for ETH", "Listings · ETH"],
+      ["Highest offer · WETH", "Offers for WETH", "Offers · WETH"],
     ] as const) {
       const summaryBounds = (await market
         .getByText(summary, { exact: true })
         .boundingBox())!;
-      const headingBounds = (await market
-        .getByRole("heading", { name: heading, exact: true })
+      const tableBounds = (await market
+        .getByRole("table", { name: table, exact: true })
         .boundingBox())!;
-      expect(summaryBounds.x).toBeCloseTo(headingBounds.x, 0);
+      expect(summaryBounds.x).toBeCloseTo(tableBounds.x, 0);
+      const hiddenHeading = market.getByRole("heading", {
+        name: heading,
+        exact: true,
+      });
+      await expect(hiddenHeading).toBeAttached();
+      expect((await hiddenHeading.boundingBox())!.width).toBeLessThanOrEqual(1);
     }
   }
   const offers = market.getByRole("table", { name: "Offers for WETH" });
@@ -354,12 +362,38 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
   ).toBeLessThanOrEqual(10);
   expect(priceBounds.height).toBeGreaterThanOrEqual(44);
   const cells = row.getByRole("cell");
-  await expect(cells.first()).toHaveCSS("border-top-left-radius", "0px");
-  await expect(cells.last()).toHaveCSS("border-top-right-radius", "0px");
+  await expect(cells.first()).toHaveCSS("border-top-left-radius", "12px");
+  await expect(cells.last()).toHaveCSS("border-top-right-radius", "12px");
   await expect(cells.first()).toHaveCSS("border-bottom-width", "1px");
   await expect(cells.first()).toHaveCSS("border-top-width", "0px");
   await expect(cells.first()).toHaveCSS("border-left-width", "0px");
   await expect(cells.last()).toHaveCSS("border-right-width", "0px");
+  await expect(cells.first()).toHaveCSS(
+    "background-color",
+    "rgba(63, 105, 252, 0.08)"
+  );
+  const nextRow = offers.getByRole("row").filter({
+    has: page.getByRole("button", {
+      name: "Offers at 0.019 WETH",
+      exact: true,
+    }),
+  });
+  await expect(nextRow.getByRole("cell").first()).toHaveCSS(
+    "border-top-left-radius",
+    "0px"
+  );
+  const outlined = nextRow.getByRole("button", { name: "Sell", exact: true });
+  await expect(outlined).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  if (!isMobile) {
+    await nextRow.hover();
+    await expect(outlined).toHaveCSS("background-color", "rgb(63, 105, 252)");
+    await outlined.focus();
+    await market.getByText("Highest offer · WETH", { exact: true }).hover();
+    await expect(outlined).toHaveCSS("background-color", "rgb(63, 105, 252)");
+    await expect(outlined).toHaveCSS("outline-style", "solid");
+    await about.focus();
+    await expect(outlined).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  }
   const originalViewport = page.viewportSize()!;
   for (const width of [320, 390, 430]) {
     await page.setViewportSize({ width, height: 844 });
@@ -370,6 +404,16 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
     expect((await sell.boundingBox())!.height).toBeGreaterThanOrEqual(44);
     expect((await showAll.boundingBox())!.height).toBeGreaterThanOrEqual(44);
     const tableBounds = (await offers.boundingBox())!;
+    const listingTable = (await market
+      .getByRole("table", { name: "Listings for ETH" })
+      .boundingBox())!;
+    const offerSummary = (await market
+      .getByText("Highest offer · WETH", { exact: true })
+      .boundingBox())!;
+    expect(offerSummary.y).toBeGreaterThan(
+      listingTable.y + listingTable.height
+    );
+    expect(offerSummary.y).toBeLessThan(tableBounds.y);
     expect((await firstLevel.boundingBox())!.x).toBeCloseTo(tableBounds.x, 0);
     expect((await row.boundingBox())!.height).toBeLessThanOrEqual(65);
     expect((await showAll.boundingBox())!.width).toBeCloseTo(
@@ -445,6 +489,32 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth)
   ).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
+  offersOnly = true;
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(
+    market.getByRole("table", { name: "Offers for WETH" })
+  ).toBeVisible();
+  await expect(
+    market.getByRole("table", { name: "Listings for ETH" })
+  ).toHaveCount(0);
+  const emptyListing = market.getByText("Lowest listing · ETH", {
+    exact: true,
+  });
+  await expect(emptyListing).toBeVisible();
+  const emptySummary = market
+    .getByText("Lowest listing · ETH", { exact: true })
+    .locator("..");
+  await expect(emptySummary).toContainText("—");
+  const leftSummary = (await emptyListing.boundingBox())!;
+  const rightSummary = (await market
+    .getByText("Highest offer · WETH", { exact: true })
+    .boundingBox())!;
+  if (isMobile) {
+    expect(rightSummary.y).toBeGreaterThan(leftSummary.y);
+  } else {
+    expect(rightSummary.y).toBeCloseTo(leftSummary.y, 0);
+    expect(rightSummary.x).toBeGreaterThan(leftSummary.x);
+  }
   await page.screenshot({
     path: info.outputPath("meme-lab-marketplace.png"),
     fullPage: true,

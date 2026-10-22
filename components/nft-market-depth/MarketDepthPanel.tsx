@@ -113,8 +113,9 @@ function DecimalValue({
   );
 }
 
-interface NonEmptyDepthSide {
-  readonly book: ApiMarketCurrencyBook;
+interface DepthSide {
+  readonly book: ApiMarketCurrencyBook | undefined;
+  readonly summary?: "marketDepth.bestAsk" | "marketDepth.bestBid";
   readonly side: "ask" | "bid";
   readonly levels: readonly ApiMarketDepthLevel[];
 }
@@ -488,9 +489,9 @@ export default function MarketDepthPanel({
   const hasQuotedLevels = Boolean(
     data?.books.some((book) => book.asks.length > 0 || book.bids.length > 0)
   );
-  const nonEmptySides: readonly NonEmptyDepthSide[] = data
-    ? data.books.flatMap((book): NonEmptyDepthSide[] => {
-        const sides: NonEmptyDepthSide[] = [];
+  const nonEmptySides: readonly DepthSide[] = data
+    ? data.books.flatMap((book): DepthSide[] => {
+        const sides: DepthSide[] = [];
         if (book.asks.length > 0) {
           sides.push({ book, side: "ask", levels: book.asks });
         }
@@ -500,6 +501,36 @@ export default function MarketDepthPanel({
         return sides;
       })
     : [];
+
+  // Keep both canonical summaries, including an empty side, and retain every
+  // other currency/side in its existing relative order below them.
+  const displayedSides: readonly DepthSide[] = [
+    {
+      book: ethBook,
+      side: "ask",
+      levels: ethBook?.asks ?? [],
+      summary: "marketDepth.bestAsk",
+    },
+    {
+      book: wethBook,
+      side: "bid",
+      levels: wethBook?.bids ?? [],
+      summary: "marketDepth.bestBid",
+    },
+    ...nonEmptySides.filter(
+      ({ book, side }) =>
+        !(book === ethBook && side === "ask") &&
+        !(book === wethBook && side === "bid")
+    ),
+  ];
+  const controlledDetails =
+    data && data.status !== ApiMarketDepthStatusEnum.Unavailable
+      ? [
+          ...displayedSides.map((_, index) => `${id}-side-${index}`),
+          `${id}-details`,
+          `${id}-notice`,
+        ].join(" ")
+      : `${id}-details`;
 
   return (
     <section
@@ -525,7 +556,7 @@ export default function MarketDepthPanel({
                 ref={heading}
                 type="button"
                 aria-expanded={open}
-                aria-controls={`${id}-details`}
+                aria-controls={controlledDetails}
                 onClick={(event) => {
                   event.currentTarget.focus({ preventScroll: true });
                   setDisclosure({ assetKey, open: !open, reveal: false });
@@ -594,7 +625,7 @@ export default function MarketDepthPanel({
           onMarketChange={refresh}
           onInteractionChange={onInteractionChange}
         >
-          <div className="tw-flex tw-flex-col tw-gap-10">
+          <div className="tw-flex tw-flex-col">
             {data.status === ApiMarketDepthStatusEnum.Unavailable ? (
               <>
                 <div className="tw-rounded-xl tw-bg-white/[0.025] tw-px-5 tw-py-5">
@@ -602,46 +633,13 @@ export default function MarketDepthPanel({
                     {t(resolvedLocale, "marketDepth.unavailable.title")}
                   </p>
                 </div>
-                <div id={`${id}-details`} hidden={!open}>
+                <div id={`${id}-details`} hidden={!open} className="tw-mt-10">
                   <AboutPrices data={data} locale={resolvedLocale} />
                 </div>
               </>
             ) : (
               <>
-                <dl className="tw-m-0 tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-5 sm:tw-gap-x-8">
-                  <div className="tw-min-w-0 tw-max-w-full">
-                    <dt className="tw-mb-2 tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-400">
-                      {t(resolvedLocale, "marketDepth.bestAsk")}
-                    </dt>
-                    <dd
-                      className={`tw-m-0 tw-text-xl tw-font-medium tw-tabular-nums tw-leading-[30px] tw-tracking-[-0.01em] [overflow-wrap:anywhere] ${ethBook?.best_ask ? "tw-text-iron-50" : "tw-text-iron-600"}`}
-                    >
-                      <DecimalValue
-                        locale={resolvedLocale}
-                        value={ethBook?.best_ask}
-                      />
-                    </dd>
-                  </div>
-                  <div className="tw-min-w-0 tw-max-w-full">
-                    <dt className="tw-mb-2 tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-400">
-                      {t(resolvedLocale, "marketDepth.bestBid")}
-                    </dt>
-                    <dd
-                      className={`tw-m-0 tw-text-xl tw-font-medium tw-tabular-nums tw-leading-[30px] tw-tracking-[-0.01em] [overflow-wrap:anywhere] ${wethBook?.best_bid ? "tw-text-iron-50" : "tw-text-iron-600"}`}
-                    >
-                      <DecimalValue
-                        locale={resolvedLocale}
-                        value={wethBook?.best_bid}
-                      />
-                    </dd>
-                  </div>
-                </dl>
-
-                <div
-                  id={`${id}-details`}
-                  hidden={!open}
-                  className="[overflow-anchor:none]"
-                >
+                <div id={`${id}-notice`} hidden={!open}>
                   {requestedOrderHash &&
                     !data.next &&
                     !isLoadingMore &&
@@ -666,72 +664,132 @@ export default function MarketDepthPanel({
                         </Link>
                       </p>
                     )}
+                </div>
+                <div className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-x-12 tw-gap-y-10 md:tw-grid-cols-2">
+                  {displayedSides.map(
+                    ({ book, side, levels, summary }, index) => {
+                      const value =
+                        side === "ask" ? book?.best_ask : book?.best_bid;
+                      const orderCount =
+                        book && levels.length > 0 ? (
+                          <span className="tw-text-xs tw-tabular-nums tw-leading-[18px] tw-text-iron-500">
+                            {t(resolvedLocale, "marketDepth.sideCount.orders", {
+                              count: formatLocalizedInteger(
+                                resolvedLocale,
+                                side === "ask"
+                                  ? book.ask_order_count
+                                  : book.bid_order_count
+                              ),
+                            })}
+                          </span>
+                        ) : null;
+                      return (
+                        <div
+                          key={
+                            summary ??
+                            `${book?.currency.address ?? "empty"}-${side}`
+                          }
+                          hidden={!summary && !open}
+                          className={`${!summary && !open ? "tw-hidden" : "tw-flex"} tw-min-w-0 tw-flex-col`}
+                        >
+                          {summary && (
+                            <div className="tw-flex tw-items-start tw-justify-between tw-gap-4 tw-pb-4">
+                              <dl className="tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
+                                <dt className="tw-m-0 tw-text-meta tw-font-medium tw-leading-[18px] tw-text-iron-500">
+                                  {t(resolvedLocale, summary)}
+                                </dt>
+                                <dd
+                                  className={`tw-m-0 tw-text-xl tw-font-medium tw-tabular-nums tw-leading-[26px] tw-tracking-[-0.01em] [overflow-wrap:anywhere] ${value ? "tw-text-iron-50" : "tw-text-iron-600"}`}
+                                >
+                                  <DecimalValue
+                                    locale={resolvedLocale}
+                                    value={value}
+                                  />
+                                </dd>
+                              </dl>
+                              <span hidden={!open} className="tw-shrink-0">
+                                {orderCount}
+                              </span>
+                            </div>
+                          )}
+                          <div
+                            id={`${id}-side-${index}`}
+                            hidden={!open}
+                            className="[overflow-anchor:none]"
+                          >
+                            {book && levels.length > 0 && (
+                              <>
+                                <div
+                                  className={
+                                    summary
+                                      ? ""
+                                      : "tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-3 tw-gap-y-1 tw-pb-2"
+                                  }
+                                >
+                                  <h3
+                                    className={
+                                      summary
+                                        ? "tw-sr-only"
+                                        : "tw-m-0 tw-min-w-0 tw-break-words tw-text-[15px] tw-font-medium tw-text-iron-200"
+                                    }
+                                  >
+                                    {t(
+                                      resolvedLocale,
+                                      side === "ask"
+                                        ? "marketDepth.asks"
+                                        : "marketDepth.bids"
+                                    )}{" "}
+                                    · {currencyName(resolvedLocale, book)}
+                                  </h3>
+                                  {!summary && orderCount}
+                                  {!isCanonicalCurrency(book) && (
+                                    <span
+                                      title={book.currency.address}
+                                      className="tw-w-full tw-break-all tw-text-xs tw-text-iron-500"
+                                    >
+                                      {book.currency.address}
+                                    </span>
+                                  )}
+                                </div>
+                                <MarketDepthPriceLevels
+                                  side={side}
+                                  levels={levels}
+                                  currency={book.currency}
+                                  currencyLabel={currencyName(
+                                    resolvedLocale,
+                                    book
+                                  )}
+                                  orders={data.orders}
+                                  isLoading={
+                                    isLoadingMore || data.next !== null
+                                  }
+                                  error={currentLoadMoreError}
+                                  onLoadOrders={loadOrders}
+                                  onRefresh={refresh}
+                                  locale={resolvedLocale}
+                                  focusedOrderHash={pendingOrderFocus}
+                                  onOrderFocused={finishOrderFocus}
+                                />
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+                <div
+                  id={`${id}-details`}
+                  hidden={!open}
+                  className="[overflow-anchor:none]"
+                >
                   {!hasQuotedLevels && (
                     <p className="tw-m-0 tw-rounded-xl tw-bg-white/[0.025] tw-px-5 tw-py-5 tw-text-sm tw-text-iron-400">
                       {t(resolvedLocale, "marketDepth.empty")}
                     </p>
                   )}
 
-                  {nonEmptySides.length > 0 && (
-                    <div className="tw-grid tw-grid-cols-[repeat(auto-fit,minmax(min(100%,20rem),1fr))] tw-gap-x-8 tw-gap-y-10">
-                      {nonEmptySides.map(({ book, side, levels }) => (
-                        <div
-                          key={`${book.currency.address}-${side}`}
-                          className="tw-min-w-0"
-                        >
-                          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-3 tw-gap-y-1 tw-pb-2">
-                            <h3 className="tw-m-0 tw-min-w-0 tw-break-words tw-text-[15px] tw-font-medium tw-text-iron-200">
-                              {t(
-                                resolvedLocale,
-                                side === "ask"
-                                  ? "marketDepth.asks"
-                                  : "marketDepth.bids"
-                              )}{" "}
-                              · {currencyName(resolvedLocale, book)}
-                            </h3>
-                            <span className="tw-text-xs tw-tabular-nums tw-text-iron-500">
-                              {t(
-                                resolvedLocale,
-                                "marketDepth.sideCount.orders",
-                                {
-                                  count: formatLocalizedInteger(
-                                    resolvedLocale,
-                                    side === "ask"
-                                      ? book.ask_order_count
-                                      : book.bid_order_count
-                                  ),
-                                }
-                              )}
-                            </span>
-                            {!isCanonicalCurrency(book) && (
-                              <span
-                                title={book.currency.address}
-                                className="tw-w-full tw-break-all tw-text-xs tw-text-iron-500"
-                              >
-                                {book.currency.address}
-                              </span>
-                            )}
-                          </div>
-                          <MarketDepthPriceLevels
-                            side={side}
-                            levels={levels}
-                            currency={book.currency}
-                            currencyLabel={currencyName(resolvedLocale, book)}
-                            orders={data.orders}
-                            isLoading={isLoadingMore || data.next !== null}
-                            error={currentLoadMoreError}
-                            onLoadOrders={loadOrders}
-                            onRefresh={refresh}
-                            locale={resolvedLocale}
-                            focusedOrderHash={pendingOrderFocus}
-                            onOrderFocused={finishOrderFocus}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="tw-mt-7 tw-flex tw-flex-col tw-gap-3">
+                  <div className="tw-col-span-full tw-mt-7 tw-flex tw-flex-col tw-gap-3">
                     <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-500">
                       {t(resolvedLocale, "marketDepth.sourceCaveat")}
                     </p>
