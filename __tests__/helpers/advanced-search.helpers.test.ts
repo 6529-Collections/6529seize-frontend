@@ -1,6 +1,7 @@
 import {
   getPendingSearchFilter,
   isAdvancedSearchEnabledForUser,
+  unescapeSearchOperators,
 } from "@/helpers/advanced-search.helpers";
 
 describe("advanced search availability", () => {
@@ -45,5 +46,18 @@ describe("search filter input", () => {
     expect(getPendingSearchFilter("within: test")).toBeNull();
     expect(getPendingSearchFilter("after: yesterday")).toBeNull();
     expect(getPendingSearchFilter("ordinary words")).toBeNull();
+  });
+});
+
+describe("literal search operators", () => {
+  it("keeps escaped operators as searchable text", () => {
+    const query = String.raw`info \in: progress \from: yesterday`;
+    expect(getPendingSearchFilter(query)).toBeNull();
+    expect(unescapeSearchOperators(query)).toBe(
+      "info in: progress from: yesterday"
+    );
+    expect(unescapeSearchOperators("within: progress")).toBe(
+      "within: progress"
+    );
   });
 });

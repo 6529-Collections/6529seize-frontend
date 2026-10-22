@@ -9,10 +9,8 @@ import {
   generateUniqueKeys,
   mapToExtendedDrops,
 } from "@/helpers/waves/wave-drops.helpers";
-import {
-  fetchGlobalDropsSearchV2,
-  fetchWaveDropsSearchV2,
-} from "@/services/api/wave-drops-v2-api";
+import { fetchGlobalDropsSearchV2 } from "@/services/api/global-drops-search-api";
+import { fetchWaveDropsSearchV2 } from "@/services/api/wave-drops-v2-api";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
@@ -97,7 +95,10 @@ export function useWaveDropsSearch({
         ...response,
         data: response.data.map((drop) => ({
           ...drop,
-          wave: toApiWaveMin(wave),
+          wave: {
+            ...toApiWaveMin(wave),
+            is_dm_wave: wave.chat.scope.group?.is_direct_message === true,
+          },
         })),
       };
     },

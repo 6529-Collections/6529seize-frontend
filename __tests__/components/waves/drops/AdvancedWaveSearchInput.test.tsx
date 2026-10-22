@@ -98,3 +98,25 @@ it("replaces the selected wave from autocomplete and Escape dismisses suggestion
   expect(callbacks.onQueryChange).toHaveBeenCalledWith("");
   await waitFor(() => expect(input).toHaveAttribute("aria-expanded", "false"));
 });
+
+it("keeps one combobox tab stop and starts a filter from keyboard hints", () => {
+  const callbacks = mount();
+  const input = screen.getByRole("combobox");
+  input.focus();
+  fireEvent.focus(input);
+  const hints = screen.getAllByRole("option");
+  expect(hints).toHaveLength(2);
+  hints.forEach((hint) => expect(hint).toHaveAttribute("tabindex", "-1"));
+  fireEvent.keyDown(input, { key: "Enter" });
+  expect(callbacks.onQueryChange).toHaveBeenCalledWith("from: ");
+});
+
+it("Backspace on an empty query removes the author first and retains input focus", () => {
+  const callbacks = mount({ author });
+  const input = screen.getByRole("combobox");
+  input.focus();
+  fireEvent.keyDown(input, { key: "Backspace" });
+  expect(callbacks.onAuthorChange).toHaveBeenCalledWith(null);
+  expect(callbacks.onWaveChange).not.toHaveBeenCalled();
+  expect(input).toHaveFocus();
+});

@@ -404,7 +404,9 @@ async function exerciseAdvancedSearch(
     })
   ).toBeVisible();
   await expect(searchInput).toHaveValue("hello ");
-  await expect(page.locator("#wave-drops-search-empty-status")).toBeVisible();
+  await expect(
+    page.getByRole("status").getByText("No messages found", { exact: true })
+  ).toBeVisible();
   await captureSafeScreenshot(
     page,
     testInfo,
@@ -1127,10 +1129,8 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
 
     await page.getByRole("button", { name: "Clear search" }).click();
     await expect(searchInput).toHaveValue("");
-    if (
-      isLocalBaseURL(baseURL) &&
-      (await searchInput.getAttribute("role")) === "combobox"
-    ) {
+    if (isLocalBaseURL(baseURL)) {
+      await expect(searchInput).toHaveAttribute("role", "combobox");
       await exerciseAdvancedSearch(page, searchInput, testInfo);
     }
     await expectNoHorizontalOverflow(page);

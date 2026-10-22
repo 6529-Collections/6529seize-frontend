@@ -17,11 +17,14 @@ current Wave. Remove that chip to search across every Wave you can read,
 including private Waves and conversations you have access to. Results outside
 the selected Wave show their Wave name and open the matching message there.
 
+The `in:` and `from:` keywords are fixed command syntax in every language.
 Type `in:` to choose a Wave or `from:` to choose an author from suggestions.
 Use the arrow keys and Enter, or select a suggestion. The rest of the input is
 the usual message text search: at least three characters, using the existing
 prefix-aware matching. Author-only searches also work. Both filters can be
 combined with text. An unfinished filter waits for a selection before searching.
+To search for literal `from:` or `in:` text, prefix the keyword with a backslash
+(for example, `\in: progress`).
 
 Availability is controlled by the build-time `ADVANCED_SEARCH_ENABLED_FOR_USERS`
 environment variable. Unset or empty enables it for everyone; otherwise it is a

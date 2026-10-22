@@ -3,28 +3,32 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
-import {
-  fetchWaveDropsSearchV2,
-  fetchGlobalDropsSearchV2,
-} from "@/services/api/wave-drops-v2-api";
+import { fetchWaveDropsSearchV2 } from "@/services/api/wave-drops-v2-api";
+import { fetchGlobalDropsSearchV2 } from "@/services/api/global-drops-search-api";
 
 jest.mock("@tanstack/react-query", () => ({
   useInfiniteQuery: jest.fn(),
 }));
 jest.mock("@/services/api/wave-drops-v2-api", () => ({
   fetchWaveDropsSearchV2: jest.fn(),
+}));
+jest.mock("@/services/api/global-drops-search-api", () => ({
   fetchGlobalDropsSearchV2: jest.fn(),
 }));
 jest.mock("@/helpers/waves/wave.helpers", () => ({
   normalizeOptionalWaveId: jest.fn((waveId) =>
     typeof waveId === "string" ? waveId.trim() || null : (waveId ?? null)
   ),
-  toApiWaveMin: jest.fn((wave) => ({ id: wave.id })),
+  toApiWaveMin: jest.fn((wave) => ({ id: wave.id, name: wave.name })),
 }));
 
 const useInfiniteQueryMock = useInfiniteQuery as jest.Mock;
 const fetchWaveDropsSearchV2Mock = fetchWaveDropsSearchV2 as jest.Mock;
-const wave = { id: "wave-1" } as ApiWave;
+const wave = {
+  id: "wave-1",
+  name: "Wave one",
+  chat: { scope: { group: null } },
+} as ApiWave;
 
 describe("useWaveDropsSearch", () => {
   beforeEach(() => {
@@ -85,6 +89,28 @@ describe("useWaveDropsSearch", () => {
       before: undefined,
       page: 2,
       size: 25,
+    });
+  });
+
+  it("preserves the scoped wave name and DM routing metadata", async () => {
+    fetchWaveDropsSearchV2Mock.mockResolvedValue({
+      data: [{ id: "drop-1" }],
+      page: 1,
+      next: false,
+    });
+    const dmWave = {
+      ...wave,
+      chat: { scope: { group: { is_direct_message: true } } },
+    } as ApiWave;
+    renderHook(() =>
+      useWaveDropsSearch({ wave: dmWave, term: "hello", enabled: true })
+    );
+    const options = useInfiniteQueryMock.mock.calls[0][0];
+    const result = await options.queryFn({ pageParam: 1 });
+    expect(result.data[0].wave).toEqual({
+      id: wave.id,
+      name: wave.name,
+      is_dm_wave: true,
     });
   });
 
@@ -183,4 +209,18 @@ describe("useWaveDropsSearch", () => {
     });
     expect(fetchWaveDropsSearchV2).not.toHaveBeenCalled();
   });
+});
+
+it("disables global search below the minimum text length", () => {
+  renderHook(() =>
+    useWaveDropsSearch({
+      wave: null,
+      term: "lo",
+      enabled: true,
+      allowGlobalSearch: true,
+    })
+  );
+  expect(useInfiniteQueryMock).toHaveBeenLastCalledWith(
+    expect.objectContaining({ enabled: false })
+  );
 });

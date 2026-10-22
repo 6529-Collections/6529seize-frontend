@@ -3,7 +3,10 @@
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { getPendingSearchFilter } from "@/helpers/advanced-search.helpers";
+import {
+  getPendingSearchFilter,
+  SEARCH_OPERATOR_LABELS,
+} from "@/helpers/advanced-search.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { t } from "@/i18n/messages";
@@ -134,7 +137,9 @@ export default function AdvancedWaveSearchInput({
     setDismissed(true);
   };
   const startFilter = (kind: "from" | "in") => {
-    onQueryChange(`${query.trim()}${query.trim() ? " " : ""}${kind}: `);
+    onQueryChange(
+      `${query.trim()}${query.trim() ? " " : ""}${SEARCH_OPERATOR_LABELS[kind]} `
+    );
     setDismissed(false);
     setActiveIndex(0);
   };
@@ -175,7 +180,7 @@ export default function AdvancedWaveSearchInput({
               inputRef.current?.focus();
             }}
           >
-            <span>in:</span>
+            <span>{SEARCH_OPERATOR_LABELS.in}</span>
             <span className="tw-max-w-48 tw-truncate">{wave.name}</span>
             <XMarkIcon className="tw-size-3.5 tw-shrink-0" aria-hidden="true" />
           </button>
@@ -194,7 +199,7 @@ export default function AdvancedWaveSearchInput({
               inputRef.current?.focus();
             }}
           >
-            <span>from:</span>
+            <span>{SEARCH_OPERATOR_LABELS.from}</span>
             <span className="tw-max-w-40 tw-truncate">{author.handle}</span>
             <XMarkIcon className="tw-size-3.5 tw-shrink-0" aria-hidden="true" />
           </button>
@@ -233,7 +238,8 @@ export default function AdvancedWaveSearchInput({
               event.stopPropagation();
               setDismissed(true);
             }
-            if (event.key === "Backspace" && !query) {
+            if (event.key === "Backspace" && !query && (author || wave)) {
+              event.preventDefault();
               if (author) onAuthorChange(null);
               else if (wave) onWaveChange(null);
             }
@@ -271,6 +277,13 @@ export default function AdvancedWaveSearchInput({
       <p id="advanced-search-help" className="tw-sr-only">
         {t(locale, "waves.drops.searchModal.advanced.help")}
       </p>
+      <p role="status" className="tw-sr-only">
+        {showSuggestions &&
+        pending &&
+        (suggestions.isFetching || !options.length)
+          ? t(locale, suggestionStatus)
+          : ""}
+      </p>
       {showSuggestions && (
         <div className="tw-absolute tw-left-0 tw-right-0 tw-top-full tw-z-10 tw-mt-2 tw-max-h-64 tw-overflow-y-auto tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-2 tw-shadow-xl">
           <div
@@ -283,6 +296,7 @@ export default function AdvancedWaveSearchInput({
                   <button
                     type="button"
                     role="option"
+                    tabIndex={-1}
                     aria-selected={selectedIndex === index}
                     id={`advanced-search-option-${index}`}
                     key={option.id}
@@ -299,6 +313,7 @@ export default function AdvancedWaveSearchInput({
                   <button
                     type="button"
                     role="option"
+                    tabIndex={-1}
                     aria-selected={selectedIndex === index}
                     id={`advanced-search-hint-${index}`}
                     key={kind}
@@ -309,7 +324,7 @@ export default function AdvancedWaveSearchInput({
                     className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-text-iron-100 hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-300"
                   >
                     <span className="tw-w-10 tw-font-semibold tw-text-iron-400">
-                      {kind}:
+                      {SEARCH_OPERATOR_LABELS[kind]}
                     </span>
                     {t(
                       locale,
@@ -322,7 +337,7 @@ export default function AdvancedWaveSearchInput({
           </div>
           {pending && !options.length && (
             <p
-              role="status"
+              aria-hidden="true"
               className="tw-m-0 tw-p-3 tw-text-sm tw-text-iron-400"
             >
               {t(locale, suggestionStatus)}

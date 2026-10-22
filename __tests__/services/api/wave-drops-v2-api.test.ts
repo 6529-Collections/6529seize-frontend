@@ -1,3 +1,4 @@
+import { fetchGlobalDropsSearchV2 } from "@/services/api/global-drops-search-api";
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
@@ -16,7 +17,6 @@ import {
   fetchDropsV2ByIds,
   fetchDropV2ById,
   fetchGlobalBoostedDropsV2,
-  fetchGlobalDropsSearchV2,
   fetchWaveDropsFeedV2,
   fetchWaveCompetitionDropsV2,
   fetchWaveSearchAuthors,

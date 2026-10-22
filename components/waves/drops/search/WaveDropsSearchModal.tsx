@@ -4,6 +4,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { publicEnv } from "@/config/env";
 import {
   getPendingSearchFilter,
+  unescapeSearchOperators,
   isAdvancedSearchEnabledForUser,
 } from "@/helpers/advanced-search.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
@@ -186,7 +187,9 @@ export default function WaveDropsSearchModal({
   const [afterDate, setAfterDate] = useState("");
   const [beforeDate, setBeforeDate] = useState("");
   const pendingFilter = advancedSearch ? getPendingSearchFilter(query) : null;
-  const searchText = pendingFilter?.text ?? query;
+  const searchText = advancedSearch
+    ? unescapeSearchOperators(pendingFilter?.text ?? query)
+    : query;
   const [debouncedQuery, setDebouncedQuery] = useState("");
   useDebounce(() => setDebouncedQuery(searchText), 250, [searchText]);
 
@@ -659,8 +662,10 @@ export default function WaveDropsSearchModal({
                               : drop.author.primary_address;
                           const resultButtonLabel = t(
                             locale,
-                            "waves.drops.searchModal.result.open",
-                            { serialNo, author }
+                            advancedSearch && !scopeWave
+                              ? "waves.drops.searchModal.result.openInWave"
+                              : "waves.drops.searchModal.result.open",
+                            { serialNo, author, wave: drop.wave.name }
                           );
                           const formattedDate = formatDate(
                             locale,
@@ -679,12 +684,8 @@ export default function WaveDropsSearchModal({
                                 selectDropResult(
                                   serialNo,
                                   drop.wave.id,
-                                  advancedSearch &&
-                                    scopeWave?.id === drop.wave.id
-                                    ? scopeWave.chat.scope.group
-                                        ?.is_direct_message === true
-                                    : "is_dm_wave" in drop.wave &&
-                                        drop.wave.is_dm_wave === true
+                                  "is_dm_wave" in drop.wave &&
+                                    drop.wave.is_dm_wave === true
                                 )
                               }
                               aria-label={resultButtonLabel}
