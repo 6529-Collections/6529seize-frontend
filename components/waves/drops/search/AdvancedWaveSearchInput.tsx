@@ -163,7 +163,7 @@ export default function AdvancedWaveSearchInput({
           setFocused(false);
       }}
     >
-      <div className="tw-flex tw-min-h-11 tw-flex-wrap tw-items-center tw-gap-1.5 tw-rounded-lg tw-bg-iron-900 tw-px-2.5 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus-within:tw-ring-primary-300/90">
+      <div className="tw-flex tw-min-h-11 tw-flex-wrap tw-items-center tw-gap-1.5 tw-rounded-lg tw-bg-iron-900 tw-px-2.5 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus-within:tw-ring-2 focus-within:tw-ring-primary-300/90">
         <MagnifyingGlassIcon
           className="tw-size-5 tw-shrink-0 tw-text-iron-400"
           aria-hidden="true"
