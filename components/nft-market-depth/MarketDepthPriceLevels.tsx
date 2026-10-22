@@ -121,7 +121,8 @@ export default function MarketDepthPriceLevels({
           <tbody>
             {visibleLevels.map((level, index) => {
               const best = index === 0;
-              const cellClass = `tw-h-[54px] tw-tabular-nums tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none ${best ? "tw-bg-primary-500/[0.07] group-hover:tw-bg-primary-500/[0.11]" : "tw-bg-white/[0.025] group-hover:tw-bg-white/[0.045]"}`;
+              const cellClass =
+                "tw-h-[54px] tw-bg-white/[0.025] tw-tabular-nums tw-transition-colors tw-duration-200 group-hover:tw-bg-white/[0.045] motion-reduce:tw-transition-none";
               const open = openPrice === level.unit_price;
               const panelId = disclosureId + "-" + level.unit_price;
               const levelOrders = getLevelOrders(
