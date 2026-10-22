@@ -124,6 +124,17 @@ export function defineCollectorsLeaderboardTests() {
       for (const label of ["Balance", "TDH", "Unweighted TDH"]) {
         await expect(firstRow.getByText(label, { exact: true })).toBeVisible();
       }
+      const statHeights = await list
+        .getByRole("listitem")
+        .first()
+        .locator(":scope > span")
+        .evaluateAll((cells) =>
+          cells.map((cell) => cell.getBoundingClientRect().height)
+        );
+      expect(
+        statHeights.every((height) => height <= 16),
+        `Collector labels and values stay on one line at ${width}px`
+      ).toBe(true);
       const statFontSizes = await list
         .getByRole("listitem")
         .first()
@@ -138,24 +149,36 @@ export function defineCollectorsLeaderboardTests() {
       expect(new Set(statFontSizes)).toEqual(
         new Set([width <= 380 ? "11px" : "12px"])
       );
-      const nameBounds = await firstRow
-        .getByRole("link")
-        .getByText(/^collector-with-/)
+      const identityBounds = await firstRow
+        .getByRole("link", { name: /collector-with-/ })
         .boundingBox();
-      const balanceBounds = await firstRow
-        .getByText("This card balance: 111", { exact: true })
-        .locator("..")
-        .getByText("111", { exact: true })
-        .boundingBox();
-      if (!nameBounds || !balanceBounds) {
-        throw new Error("Collector name and balance must have visible bounds");
+      for (const scope of ["This card", "Total"]) {
+        const scopeBounds = await firstRow
+          .getByText(scope, { exact: true })
+          .boundingBox();
+        if (!identityBounds || !scopeBounds) {
+          throw new Error(
+            "Collector identity and scope must have visible bounds"
+          );
+        }
+        // The avatar starts at the profile link's left edge.
+        expect(Math.abs(identityBounds.x - scopeBounds.x)).toBeLessThan(1);
       }
-      expect(Math.abs(nameBounds.x - balanceBounds.x)).toBeLessThan(1);
       const csvSize = await section
         .getByRole("button", { name: "Download collectors leaderboard as CSV" })
         .boundingBox();
       expect(csvSize?.width).toBe(36);
       expect(csvSize?.height).toBe(36);
+      if (width === 320) {
+        await list.focus();
+        await list.press("ArrowRight");
+        await expect
+          .poll(() => list.evaluate((element) => element.scrollLeft))
+          .toBeGreaterThan(0);
+        await list.evaluate((element) => {
+          element.scrollLeft = 0;
+        });
+      }
     }
     for (const width of [768, 1023, 1024]) {
       await page.setViewportSize({ width, height: 844 });

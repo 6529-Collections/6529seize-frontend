@@ -175,7 +175,9 @@ show the selected section from its top while deferred content loads.
 The Memes card record also describes the mobile Collectors list, with Balance,
 TDH and Unweighted TDH headers over This card and Total rows, its six sort
 metrics and separate direction arrows, identity filtering, 25-row pagination,
-and full-value CSV export. Screens 768 px and wider use the sortable table.
+and full-value CSV export. On narrow screens the list scrolls horizontally by
+swipe or keyboard, keeping labels and values on one line. Screens 768 px and
+wider use the sortable table.
 Compact values are presentation only.
 The Listings and Offers record distinguishes direct **Collect** and **Sell**
 actions for one order from the explicit choice among multiple orders at a price.

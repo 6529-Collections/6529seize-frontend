@@ -149,13 +149,14 @@ export function NFTLeaderboardMobileRows({
 }>) {
   return (
     <ol
-      className="tw-m-0 tw-list-none tw-p-0 md:tw-hidden"
+      className="tw-m-0 tw-list-none tw-overflow-x-auto tw-p-0 [scrollbar-width:none] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 md:tw-hidden [&::-webkit-scrollbar]:tw-hidden"
       aria-label={t(locale, "theMemes.detail.collectors.leaderboardTitle")}
+      tabIndex={0}
     >
       {leaderboard.map((lead) => (
         <li
           key={lead.consolidation_key}
-          className="tw-grid tw-grid-cols-[24px_32px_minmax(0,0.62fr)_minmax(0,0.76fr)_minmax(0,1.24fr)] tw-items-baseline tw-gap-x-2 tw-gap-y-1 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 tw-text-xs tw-font-normal tw-tabular-nums tw-leading-4 max-[380px]:tw-text-[11px]"
+          className="tw-grid tw-min-w-[22rem] tw-grid-cols-[24px_max-content_minmax(0,0.62fr)_minmax(0,0.76fr)_minmax(0,1.24fr)] tw-items-baseline tw-gap-x-2 tw-gap-y-1 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 tw-text-xs tw-font-normal tw-tabular-nums tw-leading-4 max-[380px]:tw-text-[11px]"
         >
           <span className="tw-self-center tw-font-medium tw-text-iron-500">
             <span className="tw-sr-only">
@@ -173,18 +174,27 @@ export function NFTLeaderboardMobileRows({
             />
           </div>
           <span aria-hidden="true" className="tw-col-span-2" />
-          <span aria-hidden="true" className="tw-self-end tw-text-iron-500">
+          <span
+            aria-hidden="true"
+            className="tw-self-end tw-whitespace-nowrap tw-text-iron-500"
+          >
             {t(locale, "theMemes.detail.collectors.balance")}
           </span>
-          <span aria-hidden="true" className="tw-self-end tw-text-iron-500">
+          <span
+            aria-hidden="true"
+            className="tw-self-end tw-whitespace-nowrap tw-text-iron-500"
+          >
             {t(locale, "theMemes.detail.collectors.tdh")}
           </span>
-          <span aria-hidden="true" className="tw-self-end tw-text-iron-500">
+          <span
+            aria-hidden="true"
+            className="tw-self-end tw-whitespace-nowrap tw-text-iron-500"
+          >
             {t(locale, "theMemes.detail.collectors.unweightedTdh")}
           </span>
           <span
             aria-hidden="true"
-            className="tw-col-span-2 tw-whitespace-nowrap tw-text-iron-500"
+            className="tw-col-start-2 tw-whitespace-nowrap tw-pr-3 tw-text-iron-500"
           >
             {t(locale, "theMemes.detail.collectors.thisCard")}
           </span>
@@ -217,7 +227,7 @@ export function NFTLeaderboardMobileRows({
           />
           <span
             aria-hidden="true"
-            className="tw-col-span-2 tw-whitespace-nowrap tw-text-iron-500"
+            className="tw-col-start-2 tw-whitespace-nowrap tw-pr-3 tw-text-iron-500"
           >
             {t(locale, "theMemes.detail.collectors.total")}
           </span>
