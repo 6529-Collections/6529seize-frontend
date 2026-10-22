@@ -37,9 +37,9 @@ rank and the next rank skips those ties. A card without a recorded ranking shows
 ## Read listings and offers
 
 The summaries show the lowest captured listing in ETH and the highest captured
-offer in WETH. On desktop, each summary sits above its own list, with the order
-count beside the label. On narrow screens, both summaries stay together above
-the lists so the highest offer is visible before scrolling through listings.
+offer in WETH. On large screens, each summary sits above its own list, with the
+order count beside the label. On medium and small screens, both summaries stay
+together above the lists so the highest offer is visible before scrolling through listings.
 The lists stack below them, listings before offers, with their own headings.
 A side without quotes retains its summary with an unavailable value and no table.
 Each price list starts with up to ten levels. Use Show all levels to reveal the complete list, and Show fewer levels to return to the

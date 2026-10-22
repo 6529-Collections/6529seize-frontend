@@ -503,6 +503,32 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
     await groupedAction.click();
     await expect(groupedAction).toHaveAttribute("aria-expanded", "false");
   }
+  for (const width of [768, 1023, 1024]) {
+    await page.setViewportSize({ width, height: 1000 });
+    const listingBounds = (await market
+      .getByRole("table", { name: "Listings for ETH", exact: true })
+      .boundingBox())!;
+    const offerBounds = (await offers.boundingBox())!;
+    if (width < 1024) {
+      expect(offerBounds.y).toBeGreaterThan(
+        listingBounds.y + listingBounds.height
+      );
+      expect(offerBounds.x).toBeCloseTo(listingBounds.x, 0);
+      expect(offerBounds.width).toBeCloseTo(listingBounds.width, 0);
+      const highest = (await market
+        .getByText("Highest offer · WETH", { exact: true })
+        .boundingBox())!;
+      expect(highest.y + highest.height).toBeLessThan(listingBounds.y);
+    } else {
+      expect(offerBounds.y).toBeCloseTo(listingBounds.y, 0);
+      expect(offerBounds.x).toBeGreaterThan(
+        listingBounds.x + listingBounds.width
+      );
+    }
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth)
+    ).toBeLessThanOrEqual(width + 1);
+  }
   await page.setViewportSize(originalViewport);
   expect(lookups).toContain("memelab");
   expect(lookups).not.toContain("memes");
