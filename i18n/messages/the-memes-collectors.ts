@@ -46,6 +46,8 @@ export const EN_US_THE_MEMES_COLLECTORS_MESSAGES = {
     "Preparing collectors CSV.",
     "Collectors CSV download ready.",
   ]),
+  "theMemes.detail.collectors.sortAscending": "Sort {label} ascending",
+  "theMemes.detail.collectors.sortDescending": "Sort {label} descending",
   "theMemes.detail.collectors.sortBy": "Sort collectors by",
   "theMemes.detail.collectors.rank": "Rank",
   "theMemes.detail.collectors.balance": "Balance",

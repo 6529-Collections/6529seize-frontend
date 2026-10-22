@@ -42,6 +42,13 @@ import {
   faSquareCaretDown,
 } from "@fortawesome/free-solid-svg-icons";
 
+import {
+  buildNftCollectorsCsv,
+  downloadNftCollectorsCsv,
+} from "./nftCollectorsCsv";
+
+export { buildNftCollectorsCsv } from "./nftCollectorsCsv";
+
 const tableHeaderClassName = `tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-font-semibold tw-text-iron-400 md:tw-px-4 md:tw-py-3 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`;
 
 const tableCellClassName =
@@ -55,18 +62,6 @@ interface Props {
 
 export const PAGE_SIZE = 25;
 const EXPORT_PAGE_SIZE = 100;
-
-const CSV_HEADERS = [
-  "rank",
-  "collector",
-  "primary_wallet",
-  "balance",
-  "card_tdh",
-  "card_unweighted_tdh",
-  "total_balance",
-  "total_tdh",
-  "total_unweighted_tdh",
-] as const;
 
 interface FetchNftTdhResultsParams {
   readonly contract: string;
@@ -170,79 +165,6 @@ export async function fetchAllNftTdhResults({
   return allResults;
 }
 
-function getCollectorCsvName(collector: NftTDH) {
-  const nameCandidates: ReadonlyArray<string | null | undefined> = [
-    collector.handle,
-    collector.consolidation_display,
-    collector.consolidation_key,
-  ];
-  const populatedName = nameCandidates.find(
-    (value): value is string =>
-      typeof value === "string" && value.trim().length > 0
-  );
-
-  return populatedName ?? "";
-}
-
-function escapeCsvValue(value: number | string | null | undefined) {
-  const rawValue = value === null || value === undefined ? "" : `${value}`;
-  const stringValue = /^[=+\-@\t]/.test(rawValue) ? `'${rawValue}` : rawValue;
-
-  if (!/[",\n\r]/.test(stringValue)) {
-    return stringValue;
-  }
-
-  return `"${stringValue.replaceAll('"', '""')}"`;
-}
-
-export function buildNftCollectorsCsv(
-  collectors: readonly NftTDH[],
-  isSearchFiltered: boolean
-) {
-  const rows = collectors.map((collector, index) => {
-    const rank = isSearchFiltered ? collector.tdh_rank : index + 1;
-
-    return [
-      rank,
-      getCollectorCsvName(collector),
-      collector.primary_wallet,
-      collector.balance,
-      collector.boosted_tdh,
-      collector.tdh__raw,
-      collector.total_balance,
-      collector.total_boosted_tdh,
-      collector.total_tdh__raw,
-    ]
-      .map(escapeCsvValue)
-      .join(",");
-  });
-
-  return `${[CSV_HEADERS.join(","), ...rows].join("\n")}\n`;
-}
-
-function downloadNftCollectorsCsv(nftId: number, csv: string) {
-  if (
-    typeof document === "undefined" ||
-    typeof globalThis.URL.createObjectURL !== "function"
-  ) {
-    throw new TypeError("CSV downloads are unavailable in this browser.");
-  }
-
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = globalThis.URL.createObjectURL(blob);
-  const link = document.createElement("a");
-
-  try {
-    link.href = url;
-    link.download = `the-memes-${nftId}-collectors.csv`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  } finally {
-    globalThis.URL.revokeObjectURL(url);
-  }
-}
-
 export function setScrollPosition() {
   const top = document.getElementById("nft-leaderboard")?.offsetTop;
   if (top !== undefined && top > 0 && window.scrollY > 0) {
@@ -264,7 +186,7 @@ export enum Sort {
 
 type CsvDownloadStatus = "idle" | "downloading" | "success" | "error";
 
-interface NftTDH {
+export interface NftTDH {
   id: number;
   contract: string;
   handle: string;
@@ -592,7 +514,9 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
             })
           }
           className="tw-m-0 tw-flex tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0"
-          aria-label={`Sort ${label} ascending`}
+          aria-label={t(locale, "theMemes.detail.collectors.sortAscending", {
+            label,
+          })}
         >
           <FontAwesomeIcon
             icon={faSquareCaretUp}
@@ -608,7 +532,9 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
             })
           }
           className="tw-m-0 tw-flex tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0"
-          aria-label={`Sort ${label} descending`}
+          aria-label={t(locale, "theMemes.detail.collectors.sortDescending", {
+            label,
+          })}
         >
           <FontAwesomeIcon
             icon={faSquareCaretDown}
@@ -663,7 +589,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
           sort={sort.sort}
           sortDirection={sort.sort_direction}
         >
-          <div className="tw-contents max-md:[&>span>button:last-of-type]:tw-size-9 max-md:[&>span>button:last-of-type]:tw-shrink-0 [&>span>button:last-of-type]:tw-rounded-lg max-md:[&>span>button:last-of-type]:tw-border-iron-800 max-md:[&>span>button:last-of-type]:tw-bg-iron-950 max-md:[&>span>button:last-of-type]:tw-p-0 max-md:[&>span>button:last-of-type]:tw-text-iron-300 max-md:[&>span>button:last-of-type_svg]:tw-size-3.5 max-md:[&>span>button:not(:last-of-type)]:tw-order-1 max-md:[&>span>button:not(:last-of-type)]:tw-min-w-0 max-md:[&>span>button:not(:last-of-type)]:tw-max-w-full max-md:[&>span>span>span]:tw-truncate max-md:[&>span>span]:tw-order-1 max-md:[&>span>span]:tw-min-w-0 max-md:[&>span>span]:tw-max-w-full max-md:[&>span]:tw-contents">
+          <div className="tw-contents [&>span>button:last-of-type]:tw-rounded-lg max-md:[&>span>button:last-of-type]:tw-size-9 max-md:[&>span>button:last-of-type]:tw-shrink-0 max-md:[&>span>button:last-of-type]:tw-border-iron-800 max-md:[&>span>button:last-of-type]:tw-bg-iron-950 max-md:[&>span>button:last-of-type]:tw-p-0 max-md:[&>span>button:last-of-type]:tw-text-iron-300 max-md:[&>span>button:last-of-type_svg]:tw-size-3.5 max-md:[&>span>button:not(:last-of-type)]:tw-order-1 max-md:[&>span>button:not(:last-of-type)]:tw-min-w-0 max-md:[&>span>button:not(:last-of-type)]:tw-max-w-full max-md:[&>span>span>span]:tw-truncate max-md:[&>span>span]:tw-order-1 max-md:[&>span>span]:tw-min-w-0 max-md:[&>span>span]:tw-max-w-full max-md:[&>span]:tw-contents">
             <SearchWalletsDisplay
               searchWallets={searchWallets}
               setSearchWallets={setSearchWallets}

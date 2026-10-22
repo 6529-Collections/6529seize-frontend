@@ -139,12 +139,10 @@ describe("NFTLeaderboard component", () => {
       screen.getByRole("group", { name: "Sort collectors by" })
     );
 
-    await userEvent.click(
-      sortGroup.getByRole("button", { name: "TDH", exact: true })
-    );
+    await userEvent.click(sortGroup.getByRole("button", { name: "TDH" }));
     const olderSignal: AbortSignal = commonApiFetch.mock.calls[1][0].signal;
     await userEvent.click(
-      sortGroup.getByRole("button", { name: "Unweighted TDH", exact: true })
+      sortGroup.getByRole("button", { name: "Unweighted TDH" })
     );
     expect(olderSignal.aborted).toBe(true);
     expect(list.getByText("alice")).toBeInTheDocument();
@@ -173,7 +171,7 @@ describe("NFTLeaderboard component", () => {
     expect(commonApiFetch).toHaveBeenCalledTimes(3);
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Sort ascending", exact: true })
+      screen.getByRole("button", { name: "Sort ascending" })
     );
     const activeSignal: AbortSignal = commonApiFetch.mock.calls[3][0].signal;
     expect(activeSignal.aborted).toBe(false);
@@ -243,7 +241,7 @@ describe("NFTLeaderboard component", () => {
 
   it("downloads a collectors CSV for the current leaderboard request", async () => {
     commonApiFetch.mockResolvedValue({ count: 1, data: [collector] });
-    const createObjectURL = jest.fn(() => "blob:collectors");
+    const createObjectURL = jest.fn<string, [Blob]>(() => "blob:collectors");
     const revokeObjectURL = jest.fn();
     const originalCreateObjectURL = URL.createObjectURL;
     const originalRevokeObjectURL = URL.revokeObjectURL;
@@ -287,8 +285,8 @@ describe("NFTLeaderboard component", () => {
       expect(exportRequest.endpoint).toContain("sort=balance");
       expect(exportRequest.endpoint).toContain("sort_direction=DESC");
       expect(createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
-      const blob = createObjectURL.mock.calls[0]?.[0] as Blob;
-      expect(blob.size).toBeGreaterThan(0);
+      const blob = createObjectURL.mock.calls[0]?.[0];
+      expect(blob?.size).toBeGreaterThan(0);
       expect(clickSpy).toHaveBeenCalled();
       expect(revokeObjectURL).toHaveBeenCalledWith("blob:collectors");
     } finally {
@@ -340,13 +338,13 @@ describe("NFTLeaderboard component", () => {
       renderLeaderboard();
       await within(screen.getByRole("list")).findByText("alice");
       await userEvent.click(
-        screen.getByRole("button", { name: "Sort ascending", exact: true })
+        screen.getByRole("button", { name: "Sort ascending" })
       );
       await userEvent.click(screen.getByTestId("next"));
       await userEvent.click(
         within(
           screen.getByRole("group", { name: "Sort collectors by" })
-        ).getByRole("button", { name: label, exact: true })
+        ).getByRole("button", { name: label })
       );
       await waitFor(() =>
         expect(commonApiFetch).toHaveBeenLastCalledWith(
@@ -358,10 +356,10 @@ describe("NFTLeaderboard component", () => {
         )
       );
       expect(
-        screen.getByRole("button", { name: "Sort ascending", exact: true })
+        screen.getByRole("button", { name: "Sort ascending" })
       ).toHaveAttribute("aria-pressed", "true");
       await userEvent.click(
-        screen.getByRole("button", { name: "Sort descending", exact: true })
+        screen.getByRole("button", { name: "Sort descending" })
       );
       await waitFor(() =>
         expect(commonApiFetch).toHaveBeenLastCalledWith(
