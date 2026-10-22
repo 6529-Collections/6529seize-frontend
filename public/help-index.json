@@ -1829,7 +1829,9 @@
         "Search 6529 ranks exact, prefix, and substring profile-handle matches before ENS-only matches, then orders each match group by level from highest to lowest.",
         "Wave results in Search 6529 exclude direct-message conversations.",
         "The search control in an active Wave opens Search messages for that Wave; use Search all 6529 in the dialog to switch to site search.",
-        "In Search messages, open Filters to limit results to one author who has posted in the Wave, an After date, a Before date, or a combination of those filters.",
+        "When advanced message search is available, in: selects a Wave and from: selects an author. Both appear as removable chips alongside the usual text search. Search starts with the current Wave selected; remove its in: chip to search all Waves you can read. Results show their Wave and open the matching message.",
+        "Type in: or from: to choose a suggestion with the mouse, arrow keys and Enter. Combine both filters with message text of at least three characters, or search with just an author. Private Wave and conversation visibility rules still apply. To search literal from: or in: text, prefix the keyword with a backslash.",
+        "Profiles without advanced message search can open Filters to limit results to one author who has posted in the Wave, an After date, a Before date, or a combination of those filters.",
         "Arrow keys move through site results and Enter opens the selected result.",
         "Site search keeps the last query and recently opened queries for the current browser-tab session."
       ],
