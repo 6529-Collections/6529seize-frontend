@@ -134,6 +134,31 @@ it("shows API total beside the Following label and opens the list", async () => 
   expect(commonApiFetch).toHaveBeenCalledTimes(1);
 });
 
+it("loads the next page with the button when intersection loading is unavailable", async () => {
+  jest
+    .mocked(commonApiFetch)
+    .mockResolvedValueOnce({ ...response, count: 2, next: true })
+    .mockResolvedValueOnce({
+      ...response,
+      count: 2,
+      page: 2,
+      data: [{ target: { ...target, id: "second", handle: "second-artist" } }],
+    });
+  setup();
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Open your following list: 2" })
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Load more" }));
+  await screen.findByRole("link", { name: "second-artist" });
+  expect(screen.getAllByRole("listitem")).toHaveLength(2);
+  expect(commonApiFetch).toHaveBeenLastCalledWith(
+    expect.objectContaining({ params: { page: "2", page_size: "100" } })
+  );
+  expect(
+    screen.queryByRole("button", { name: "Load more" })
+  ).not.toBeInTheDocument();
+});
+
 it("shows loading without a fabricated zero", async () => {
   jest.mocked(commonApiFetch).mockImplementation(() => new Promise(() => {}));
   setup();

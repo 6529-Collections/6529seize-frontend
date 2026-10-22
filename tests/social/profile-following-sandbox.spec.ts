@@ -11,11 +11,33 @@ import {
 import type { Page } from "@playwright/test";
 
 async function openOwnProfile(page: Page) {
-  await page.goto("/waves/00000000-0000-4000-8000-000000000529");
-  await page
-    .getByRole("link", { name: "playwright", exact: true })
-    .first()
-    .click();
+  // Enter through the authenticated shell after hydration. Cold profile loads
+  // have a separate profile-tab hydration mismatch.
+  const profileLoaded = page.waitForResponse((response) =>
+    new URL(response.url()).pathname.endsWith(
+      "/identities/0x0000000000000000000000000000000000000529"
+    )
+  );
+  await page.goto("/about");
+  await profileLoaded;
+  if ((page.viewportSize()?.width ?? 0) < 1024) {
+    await page.getByRole("button", { name: "Open menu", exact: true }).click();
+  }
+  const nativeProfileLink = page.getByRole("link", {
+    name: "Open playwright profile",
+    exact: true,
+  });
+  const webAccountMenu = page.getByRole("button", {
+    name: "Open account and profiles menu",
+    exact: true,
+  });
+  await expect(nativeProfileLink.or(webAccountMenu)).toBeVisible();
+  if (await nativeProfileLink.isVisible()) {
+    await nativeProfileLink.click();
+  } else {
+    await webAccountMenu.press("Enter");
+    await page.getByRole("link", { name: "Profile", exact: true }).click();
+  }
   await expect(page).toHaveURL(/\/playwright$/);
 }
 
@@ -35,6 +57,25 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
   );
 
   test.beforeEach(async ({ page, baseURL }) => {
+    const apiOrigin = new URL(getSandboxApiOrigin(baseURL));
+    // Model the local shell socket; this profile test does not need wave events.
+    await page.routeWebSocket(
+      (url) => url.protocol === "ws:" && url.host === apiOrigin.host,
+      (socket) => {
+        socket.onMessage((payload) => {
+          if (typeof payload !== "string") return;
+          const message: unknown = JSON.parse(payload);
+          if (
+            typeof message === "object" &&
+            message !== null &&
+            "type" in message &&
+            message.type === "AUTHENTICATE"
+          ) {
+            socket.send(JSON.stringify({ type: "AUTHENTICATED" }));
+          }
+        });
+      }
+    );
     await page.route(`${baseURL}/api/open-graph**`, (route) =>
       route.fulfill({ json: {} })
     );
@@ -139,9 +180,10 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
     );
     await expectAxeClean(page, { include: ['[role="dialog"]'] });
     await page.screenshot({ path: testInfo.outputPath("following-open.png") });
+    // Scrolling to the footer activates automatic pagination on every surface.
     await dialog
       .getByRole("button", { name: "Load more", exact: true })
-      .click();
+      .scrollIntoViewIfNeeded();
     await expect(list.getByRole("listitem")).toHaveCount(101);
     expect(pages).toEqual([1, 2]);
     const lastRow = list

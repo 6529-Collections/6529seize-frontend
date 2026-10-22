@@ -3,7 +3,7 @@ import type { ApiOutgoingIdentitySubscriptionsPage } from "@/generated/models/Ap
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { commonApiFetch } from "@/services/api/common-api";
 
-export type FollowingIdentity = Pick<
+type FollowingIdentity = Pick<
   ApiProfileMin,
   "id" | "handle" | "pfp" | "level" | "primary_address"
 >;
@@ -30,10 +30,7 @@ const followingPageSchema = z.object({
   ),
 });
 
-export type FollowingPage = Omit<
-  ApiOutgoingIdentitySubscriptionsPage,
-  "data"
-> & {
+type FollowingPage = Omit<ApiOutgoingIdentitySubscriptionsPage, "data"> & {
   data: { identity: FollowingIdentity }[];
 };
 

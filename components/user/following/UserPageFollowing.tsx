@@ -86,9 +86,9 @@ function OwnProfileFollowing({ identityId }: { readonly identityId: string }) {
             ))}
           </ul>
           {query.isFetching && (
-            <p role="status" className="tw-p-4 tw-text-center tw-text-iron-400">
+            <output className="tw-block tw-p-4 tw-text-center tw-text-iron-400">
               {getFollowersMessage("followers.following.loading")}
-            </p>
+            </output>
           )}
           {query.isError && (
             <div className="tw-p-4 tw-text-center">
@@ -100,9 +100,11 @@ function OwnProfileFollowing({ identityId }: { readonly identityId: string }) {
                 size="sm"
                 disabled={query.isFetching}
                 onClick={() => {
-                  void (query.isFetchNextPageError
-                    ? query.fetchNextPage({ cancelRefetch: false })
-                    : query.refetch());
+                  if (query.isFetchNextPageError) {
+                    void query.fetchNextPage({ cancelRefetch: false });
+                  } else {
+                    void query.refetch();
+                  }
                 }}
               >
                 {getFollowersMessage("followers.following.retry")}
