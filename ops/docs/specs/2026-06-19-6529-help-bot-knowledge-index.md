@@ -7,9 +7,27 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
-The `home.overview` record explains the Coming up mobile swipe row, keyboard
-navigation through card links, tablet/desktop grid, and drop, profile and wave
-destinations.
+The `content-moderation.controls` record covers WatchTower's red Deleted pills,
+reasoned and confirmed resolution of open reports for a deleted post, retained
+evidence and history, and the distinction from Mark reviewed. Live originals
+have a dedicated post link; deleted posts hide that action and identify saved
+evidence without claiming expired evidence remains available. Saved previews
+include post titles and textual parts. Needs review is the default queue of
+unique subject-based cases covering user reports and pending checks, with a
+shared sidebar signal and summary/tab count and a compatible older
+open-reports link. Review case opens all outstanding cases on the left with the
+selected case highlighted and its reports, checks and evidence on the right.
+The Needs review only toggle applies review status immediately, preserving other
+applied filters. Filter checks opens advanced controls explicitly; edits remain
+pending until Apply filters synchronizes the results and toggle. Quick toggles
+preserve other drafts and the panel's open/closed state. Additional filters browse
+individual check history. Back to list appears on mobile; desktop uses the
+visible list without a redundant back button. Automated outcome is distinct
+from deletion and manual review status.
+
+The `home.overview` record explains the Coming up full-width vertical card
+list below 768px, keyboard navigation through card links, tablet/desktop grid,
+and drop, profile and wave destinations.
 
 The `waves.drop.editing` record covers author-only editing, the normal edit
 window, and unlimited editing of the wave's current pinned description drop.
@@ -86,6 +104,11 @@ clearing preserves the active status tab without removing a selected grant.
 On mobile, grant search fields and cards share one scroll area, with Load more
 after the last loaded card and sheet navigation and the bottom action accessible. Desktop retains
 the left-side criteria list, and saving still creates and applies a new group.
+
+The `the-memes.list-sorting` record explains the phone's sticky, horizontally
+scrollable sort controls, side-by-side Year and Season filters, bottom sheets,
+and square card previews. Existing sorting, query, and detail-page guidance
+continues to apply.
 
 ## Problem Statement
 
@@ -724,6 +747,16 @@ homepage, Meme detail, and expanded Wave submissions: the shared usable-screen
 height cap, desktop homepage details-height limit, natural-height full-width
 mobile homepage images without reserved gaps, and stable Meme image frame.
 
+## Meme collaborator invitations
+
+The Memes submission record covers multiple profile invitations, final consent,
+private pending names, accepted collaborator profile attribution, and the
+next-mint selection cutoff. The Craft documentation covers accepted collaborators as initial claim
+credits, admin editing of final mint artwork and traits, and Arweave publication
+of the saved claim without invitation checks. The frontend corpus records
+that pending invitations never delay voting or minting, and that attribution
+confers neither editing rights nor payment/airdrop arrangements.
+
 ## Create Wave criteria navigation
 
 Create Wave access editing uses a vertical category list on smaller screens and
@@ -758,3 +791,5 @@ or Find an identity to exclude. The placeholders are Search identities to
 include... and Search identities to exclude..., respectively.
 Create Wave and Network Filter omit empty-selection sentences in both tabs while
 preserving limits, errors, warnings, and the bottom criteria summary.
+
+Competition list corrections: My Votes includes only active nonzero votes; archived winner votes remain retained. Winners paginate by win time newest first.

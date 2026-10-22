@@ -48,6 +48,7 @@ Drop-level `Open` / `Open drop` actions and link-card `Open link` /
 2. Choose `Open` / `Open drop` from drop actions, or tap a leaderboard card in
    the touchscreen native app, when you want focused single-drop view.
 3. The app sets `drop={dropId}` in the current URL and opens single-drop view.
+   The single-drop panel appears immediately with `Loading…` while its data loads, including on direct URL entry and while the wave shell initializes. It covers the underlying wave instead of briefly displaying chat first. The existing submission layout appears when ready. If loading fails, the panel shows `This content could not be loaded.` with `Try again` and `Close`. Choosing `Try again` returns to the loading indicator while the drop or its wave details reload. Escape also closes the pending panel.
 4. For preview or quote cards, open `Link actions`.
 5. The card menu shows `Copy link` and `Open link`.
 6. `Copy link` copies the card's original referenced URL.
@@ -76,6 +77,9 @@ being created do not show the Share action.
 
 ## Common Scenarios
 
+- On a wave drop link, the browser tab keeps the linked drop's title after the
+  wave loads. Submission links show the submission title and author, such as
+  `TestIntern by @phoebeum`. Closing the drop restores the wave tab title.
 - `Open` keeps the current route and keeps existing query params.
 - `Open` is hidden for chat-type drops.
 - Temporary drops (`temp-*`) disable `Copy link`.
@@ -118,6 +122,11 @@ being created do not show the Share action.
   disabled briefly.
 
 ## Failure and Recovery
+
+- Pending drop panels focus `Close`. `Escape` closes the panel while focus is
+  inside it; focus in a separate dialog does not dismiss the pending drop.
+- If the drop's wave details cannot load, the panel offers `Try again` and
+  `Close` instead of continuing to spin.
 
 - If clipboard access is blocked, copy can fail without `Copied!`; restore
   clipboard access and try again.

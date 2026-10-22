@@ -13,6 +13,7 @@ import type { ApiCompetition } from "@/generated/models/ApiCompetition";
 import type { ApiCompetitionDraftInput } from "@/generated/models/ApiCompetitionDraftInput";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { useWaveConfig } from "@/components/waves/create-wave/hooks/useWaveConfig";
 import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
 import { useCompetitionDraftSave } from "@/hooks/competitions/useCompetitionDraftSave";
@@ -89,12 +90,16 @@ function DraftForm({
   competition,
   initial,
   lockedRules = false,
+  preservePublishedRules = false,
+  lockVotingCredits = false,
   onClose,
 }: {
   readonly wave: ApiWave;
   readonly competition?: ApiCompetition;
   readonly initial?: ApiCompetitionDraftInput;
   readonly lockedRules?: boolean;
+  readonly preservePublishedRules?: boolean;
+  readonly lockVotingCredits?: boolean;
   readonly onClose: () => void;
 }) {
   const locale = useBrowserLocale();
@@ -161,11 +166,47 @@ function DraftForm({
         },
         voting: { ...initial.voting, scope: draft.voting.scope },
       };
-    return {
-      ...draft,
-      voting: { ...draft.voting, signature_required: voteSignature },
-    };
-  }, [config, description, voteSignature, lockedRules, initial]);
+    const voting = { ...draft.voting, signature_required: voteSignature };
+    if (preservePublishedRules && initial)
+      return {
+        ...draft,
+        participation: {
+          ...draft.participation,
+          submission_strategy:
+            initial.participation.submission_strategy ?? null,
+        },
+        voting: lockVotingCredits
+          ? {
+              ...voting,
+              credit_type: initial.voting.credit_type,
+              credit_scope:
+                initial.voting.credit_scope ?? ApiWaveCreditScope.Wave,
+              credit_category: initial.voting.credit_category,
+              creditor_id: initial.voting.creditor_id,
+              credit_nfts: initial.voting.credit_nfts ?? [],
+              forbid_negative_votes: initial.voting.forbid_negative_votes,
+            }
+          : voting,
+        rules: {
+          ...draft.rules,
+          type: initial.rules.type,
+          max_winners:
+            config.overview.type === ApiWaveType.Rank
+              ? initial.rules.max_winners
+              : draft.rules.max_winners,
+        },
+        outcomes: initial.outcomes,
+      };
+    return { ...draft, voting };
+  }, [
+    config,
+    description,
+    voteSignature,
+    lockedRules,
+    initial,
+    preservePublishedRules,
+    lockVotingCredits,
+  ]);
   const fingerprint = JSON.stringify(input);
   const [initialFingerprint] = useState(initial ? fingerprint : "");
   const persistence = useCompetitionDraftSave({
@@ -217,14 +258,14 @@ function DraftForm({
     field?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [saveErrorFocusRequest, controller.errorFocusRequest, step]);
 
-  const close = async () => {
+  const close = async (requireSaved = false) => {
     if (inFlight.current) return;
     inFlight.current = true;
     setSubmitting(true);
     try {
       const result = await persistence.save();
       const retained = persistence.retain();
-      if (!result && !retained) {
+      if (!result && (requireSaved || !retained)) {
         setError("failure");
         return;
       }
@@ -429,6 +470,9 @@ function DraftForm({
     content = (
       <CreateWaveStepContent
         isCompetition
+        lockSubmissionStrategy={preservePublishedRules}
+        lockOutcomeDefinitions={preservePublishedRules}
+        lockVotingCredits={lockVotingCredits}
         controller={{ ...controller, errors: visibleErrors }}
         descriptionSnapshot={null}
         onCriteriaReplacementChange={() => undefined}
@@ -570,6 +614,19 @@ function DraftForm({
             {t(locale, "competitions.publish")}
           </Button>
         )}
+        {index === steps.length - 1 && published && (
+          <Button
+            type="button"
+            variant="action"
+            size="md"
+            disabled={busy || displayedError === "conflict"}
+            onClick={() => {
+              if (validateVotingForSave()) void close(true);
+            }}
+          >
+            {t(locale, "competitions.save")}
+          </Button>
+        )}
       </div>
     </section>
   );
@@ -643,9 +700,17 @@ export default function CompetitionDraftEditor({
       wave={wave}
       competition={competition}
       initial={query.data}
-      lockedRules={Boolean(
-        entries.data?.pages.some((page) => page.data.length > 0)
-      )}
+      lockedRules={
+        competition.permissions.edit_rules_after_activity !== true &&
+        Boolean(entries.data?.pages.some((page) => page.data.length > 0))
+      }
+      preservePublishedRules={
+        competition.permissions.edit_rules_after_activity === true
+      }
+      lockVotingCredits={
+        competition.permissions.edit_rules_after_activity === true &&
+        competition.permissions.edit_credit_rules !== true
+      }
       onClose={onClose}
     />
   );

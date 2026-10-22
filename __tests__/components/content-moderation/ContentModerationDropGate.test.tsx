@@ -352,39 +352,51 @@ describe("ContentModerationDropGate", () => {
     expect(unhideDrop).not.toHaveBeenCalled();
   });
 
-  it("shows the resolved no-action outcome before and after reveal", () => {
-    renderGate(
-      <ContentModerationDropGate
-        drop={createDrop({
-          viewer_context: {
-            author_blocked: false,
-            drop_hidden: true,
-            report_status: ApiContentModerationReportStatus.ResolvedAllowed,
-          },
-          moderation: {
-            status: ApiDropModerationStatus.Visible,
-            can_view: true,
-          },
-        })}
-      >
-        <div>
-          <ContentModerationDropStatusControls />
-          <p>Reviewed post</p>
-        </div>
-      </ContentModerationDropGate>
-    );
+  it.each([
+    [
+      ApiContentModerationReportStatus.ResolvedAllowed,
+      "Reviewed · No action taken",
+    ],
+    [
+      ApiContentModerationReportStatus.ResolvedDeleted,
+      "Resolved · Post deleted",
+    ],
+  ])(
+    "shows the resolved %s outcome before and after reveal",
+    (status, label) => {
+      renderGate(
+        <ContentModerationDropGate
+          drop={createDrop({
+            viewer_context: {
+              author_blocked: false,
+              drop_hidden: true,
+              report_status: status,
+            },
+            moderation: {
+              status: ApiDropModerationStatus.Visible,
+              can_view: true,
+            },
+          })}
+        >
+          <div>
+            <ContentModerationDropStatusControls />
+            <p>Reviewed post</p>
+          </div>
+        </ContentModerationDropGate>
+      );
 
-    expect(
-      screen.getByRole("button", { name: "Reviewed · No action taken" })
-    ).toHaveTextContent("Reviewed · No action taken");
+      expect(screen.getByRole("button", { name: label })).toHaveTextContent(
+        label
+      );
 
-    fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
+      fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
 
-    expect(
-      screen.getByRole("button", { name: "Reviewed · No action taken" })
-    ).toHaveTextContent("Reviewed · No action taken");
-    expect(screen.getByRole("button", { name: "Hide again" })).toBeVisible();
-  });
+      expect(screen.getByRole("button", { name: label })).toHaveTextContent(
+        label
+      );
+      expect(screen.getByRole("button", { name: "Hide again" })).toBeVisible();
+    }
+  );
 
   it("does not repeat Hidden when a hidden post already has report status", () => {
     renderGate(

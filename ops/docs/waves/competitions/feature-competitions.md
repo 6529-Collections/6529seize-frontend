@@ -107,7 +107,9 @@ tabs. The collection lets you choose a different competition at any time.
    removes it. Negative votes are available only where the rules permit them.
 4. Competitions open on **Leaderboard**. Use the wave tab row for the selected competition. The leaderboard
    uses the familiar list/grid controls, sorting, rich drop cards and **Drop**
-   action. Rank competitions show the schedule; Approve competitions show
+   action. When entries are closed or your profile cannot submit, the leaderboard
+   omits the generic submission notice; submission forms still show eligibility feedback.
+   Rank competitions show the schedule; Approve competitions show
    approval thresholds, progress and approved counts. Winners use the existing
    podium or timeline for Rank and approved-drop cards for Approve. Outcomes
    use expandable reward cards; My votes shows editable vote rows and reset
@@ -189,6 +191,8 @@ state if the server has not enabled its support.
 The default controls navigation; it grants no participation, voting or Main
 Stage privileges. Main Stage privileges apply only to an explicitly designated
 competition, never automatically to all competitions in its wave.
+
+Original competitions and newer competitions use the same leaderboard, Votes, winners and Settings views. **My Votes** retains vote editing, selected-vote reset and **Explain vote**, which opens a reply in the shared wave chat. Main Stage retains its artwork submission wizard and artwork views; Curation retains supported-URL submissions and price sorting and filters; Quorum retains its proposal wizard. These experiences belong only to the competition with the corresponding designation.
 
 ## Related Pages
 

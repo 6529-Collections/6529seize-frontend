@@ -1,5 +1,7 @@
 "use client";
 
+import { useCompetitionSubmissionWave } from "@/hooks/competitions/useCompetitionSubmissionWave";
+import { CompetitionState } from "@/components/competitions/CompetitionState";
 import {
   Dialog,
   DialogBackdrop,
@@ -32,6 +34,7 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
   sourceDrop,
   onSourceDropDeleted,
 }) => {
+  const target = useCompetitionSubmissionWave(wave, isOpen);
   const dialogTitle = sourceDrop
     ? "Resubmit Work to The Memes"
     : "Submit Work to The Memes";
@@ -78,12 +81,19 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
             >
               <DialogTitle className="tw-sr-only">{dialogTitle}</DialogTitle>
               <div className="tw-flex tw-h-full tw-flex-col tw-overflow-hidden">
-                <MemesArtSubmissionContainer
-                  onClose={onClose}
-                  wave={wave}
-                  sourceDrop={sourceDrop}
-                  onSourceDropDeleted={onSourceDropDeleted}
-                />
+                {target.wave ? (
+                  <MemesArtSubmissionContainer
+                    onClose={onClose}
+                    wave={target.wave}
+                    sourceDrop={sourceDrop}
+                    onSourceDropDeleted={onSourceDropDeleted}
+                  />
+                ) : (
+                  <CompetitionState
+                    error={!target.pending}
+                    retry={target.retry}
+                  />
+                )}
               </div>
             </DialogPanel>
           </TransitionChild>

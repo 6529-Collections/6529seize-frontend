@@ -16,6 +16,17 @@ import {
 } from "@/lib/profile-cms/runtime/page-slugs";
 
 const fixture = minimalPackage as unknown as CmsPackageV1;
+
+function staticProfileSegments(directory: string): string[] {
+  // Only the fixed app/[user] root and local route-group Dirent names reach this call.
+  // eslint-disable-next-line security/detect-non-literal-fs-filename
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    if (!entry.isDirectory()) return [];
+    if (/^\(.+\)$/.test(entry.name))
+      return staticProfileSegments(path.join(directory, entry.name));
+    return /^[a-z]/.test(entry.name) ? [entry.name] : [];
+  });
+}
 const studioPackage: CmsPackageV1 = {
   ...fixture,
   site: { ...fixture.site, base_path: "/punk6529/studio/index.html" },
@@ -152,16 +163,15 @@ describe("readable CMS page addresses", () => {
     ]) {
       expect(isValidCmsPageSlug(slug)).toBe(false);
     }
-    const staticProfileChildren = readdirSync(
-      path.join(process.cwd(), "app", "[user]"),
-      {
-        withFileTypes: true,
-      }
-    )
-      .filter((entry) => entry.isDirectory() && /^[a-z]/.test(entry.name))
-      .map((entry) => entry.name);
-    expect([...CMS_RESERVED_PROFILE_SEGMENTS].sort()).toEqual(
-      staticProfileChildren.sort()
+    const staticProfileChildren = staticProfileSegments(
+      path.join(process.cwd(), "app", "[user]")
+    );
+    expect(
+      [...CMS_RESERVED_PROFILE_SEGMENTS].sort((left, right) =>
+        left.localeCompare(right)
+      )
+    ).toEqual(
+      staticProfileChildren.sort((left, right) => left.localeCompare(right))
     );
   });
 });

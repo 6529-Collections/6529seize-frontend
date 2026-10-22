@@ -18,7 +18,7 @@ export default function NowMintingSection({
 }: NowMintingSectionProps) {
   if (isFetching && !nft) {
     return (
-      <section className="tw-px-4 tw-pb-4 tw-pt-14 md:tw-px-6 md:tw-pb-8 md:tw-pt-10 lg:tw-px-8">
+      <section className="tw-px-4 tw-pb-4 tw-pt-8 md:tw-px-6 md:tw-pb-8 md:tw-pt-10 lg:tw-px-8">
         <span className="tw-mb-5 tw-block tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-[-0.03em] tw-text-iron-50 md:tw-text-[22px] lg:tw-text-2xl">
           Latest Drop
         </span>
@@ -73,7 +73,7 @@ export default function NowMintingSection({
   return (
     <section
       data-home-section="Latest drop"
-      className="tw-relative tw-z-50 tw-px-4 tw-pb-4 tw-pt-14 md:tw-px-6 md:tw-pb-8 md:tw-pt-10 lg:tw-px-8"
+      className="tw-relative tw-z-50 tw-px-4 tw-pb-4 tw-pt-8 md:tw-px-6 md:tw-pb-8 md:tw-pt-10 lg:tw-px-8"
     >
       <span className="tw-mb-5 tw-block tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-[-0.03em] tw-text-iron-50 md:tw-text-[22px] lg:tw-text-2xl">
         Latest Drop

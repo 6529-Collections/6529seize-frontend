@@ -6,6 +6,7 @@ import {
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
 import { expectAxeClean } from "../support/a11yAssertions";
+import { gateSidebarHydration } from "../support/sidebarHydration";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 
 const SOURCE = "00000000-0000-4000-8000-000000000529";
@@ -19,7 +20,60 @@ useLocalSandboxMutationGuard(
   "Requires the local sandbox."
 );
 test.afterEach(async ({ page }) => {
-  await page.unrouteAll({ behavior: "wait" });
+  // Assertions and explicit gates have finished. Let page disposal cancel any
+  // remaining bundle handlers instead of draining background work here.
+  await page.unrouteAll({ behavior: "ignoreErrors" });
+});
+
+test("opens a public wave on a quiet chat frame before hydration", async ({
+  page,
+}, testInfo) => {
+  await page.route("**/api/open-graph**", (route) =>
+    route.fulfill({ json: {} })
+  );
+  const hydration = await gateSidebarHydration(page);
+  const loadingFrames = page
+    .getByTestId("wave-chat-loading")
+    .filter({ visible: true });
+  // The covered interactive chat can have its own loader in the DOM. Select
+  // the exposed frame by its accessible heading rather than document order.
+  const loading = loadingFrames.filter({
+    has: page.getByRole("heading", { name: SOURCE_NAME, exact: true }),
+  });
+  const preview = page.getByRole("region", {
+    name: SOURCE_NAME,
+    includeHidden: true,
+  });
+  try {
+    await page.goto(`/waves/${SOURCE}?tab=chat`, { waitUntil: "commit" });
+    await hydration.waitForDownloads();
+    await expect(loading).toBeVisible();
+    // The same semantic feed is in the server response, but must never be
+    // painted as a temporary alternate chat in a JavaScript-enabled browser.
+    await expect(
+      preview.getByRole("article", { includeHidden: true })
+    ).toHaveCount(1);
+    await expect(
+      preview.getByRole("link", { includeHidden: true })
+    ).toHaveAttribute("href", new RegExp(`/waves/${SOURCE}\\?drop=`));
+    await expect(preview).toBeHidden();
+    await expect(
+      loading.getByRole("heading", { name: SOURCE_NAME })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("wave-before-hydration.png"),
+    });
+  } finally {
+    hydration.release();
+  }
+  await expect(
+    page.getByRole("region", { name: "Wave chat file upload area" })
+  ).toBeVisible({ timeout: 60000 });
+  await expect(loadingFrames).toHaveCount(0);
+  await expect(
+    page.getByText("No waves in this collection yet", { exact: true })
+  ).toBeHidden();
 });
 
 async function installWaveList(page: Page, baseURL: string | undefined) {
@@ -466,3 +520,126 @@ test("keeps the subwave title in place when parent navigation arrives", async ({
     release();
   }
 });
+
+for (const app of [false, true]) {
+  test(`keeps deep-linked drop loading over the wave (${app ? "app" : "web"})`, async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    test.skip(
+      app && testInfo.project.name !== "web-mobile-chromium",
+      "Native simulation uses the mobile viewport."
+    );
+    if (app)
+      await installSurfaceSimulation(
+        page.context(),
+        "capacitor-ios-sim",
+        baseURL
+      );
+    const dropId = "ux-unavailable-drop";
+    await page.route("**/api/open-graph**", (route) =>
+      route.fulfill({ json: {} })
+    );
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await page.route("**/api/v2/drops?**", async (route) => {
+      if (
+        !new URL(route.request().url()).searchParams
+          .get("ids")
+          ?.split(",")
+          .includes(dropId)
+      )
+        return route.fallback();
+      await gate;
+      return route.fulfill({
+        status: 404,
+        json: { error: "Drop unavailable" },
+      });
+    });
+    try {
+      await page.goto(`/waves/${SOURCE}?drop=${dropId}`, {
+        waitUntil: "domcontentloaded",
+      });
+      const pending = page
+        .getByTestId("single-drop-loading")
+        .filter({ visible: true })
+        .first();
+      await expect(pending).toBeVisible({ timeout: 60000 });
+      await expect(
+        pending.getByRole("status", { name: "Loading…" })
+      ).toBeVisible();
+      // The route fallback can paint before the interactive query mounts.
+      // Its Close control identifies the actual pending detail surface.
+      await expect(
+        pending.getByRole("button", { name: "Close panel" })
+      ).toBeVisible();
+      const uncoveredFrames = await page.evaluate(
+        () =>
+          new Promise<string[]>((resolve) => {
+            const started = performance.now();
+            const uncovered: string[] = [];
+            const sample = () => {
+              // Auth restoration can also mount a route loader inside the
+              // inert wave. Measure the foreground panel, not that hidden copy.
+              const pane = Array.from(
+                document.querySelectorAll('[data-testid="single-drop-loading"]')
+              ).find(
+                (candidate) =>
+                  candidate.checkVisibility() &&
+                  !candidate.closest('[inert], [aria-hidden="true"]')
+              );
+              const bounds = pane?.getBoundingClientRect();
+              const top =
+                bounds &&
+                document.elementFromPoint(
+                  bounds.x + bounds.width / 2,
+                  bounds.y + bounds.height / 2
+                );
+              if (!pane || !bounds?.height || !top || !pane.contains(top)) {
+                uncovered.push(
+                  JSON.stringify({
+                    bounds,
+                    hit: top?.outerHTML.slice(0, 300),
+                    viewportHit: document
+                      .elementFromPoint(innerWidth / 2, innerHeight / 2)
+                      ?.outerHTML.slice(0, 300),
+                    panels: Array.from(
+                      document.querySelectorAll(
+                        '[data-testid="single-drop-loading"]'
+                      )
+                    ).map((node) => ({
+                      visible: node.checkVisibility(),
+                      hiddenAncestor: node
+                        .closest('[inert], [aria-hidden="true"]')
+                        ?.outerHTML.slice(0, 300),
+                    })),
+                  })
+                );
+              }
+              if (performance.now() - started < 250)
+                requestAnimationFrame(sample);
+              else resolve(uncovered);
+            };
+            requestAnimationFrame(sample);
+          })
+      );
+      expect(uncoveredFrames).toEqual([]);
+      await expectNoHorizontalOverflow(page);
+      release();
+      // Preserve the application's automatic retry budget (three retries with
+      // exponential backoff) before expecting the terminal recovery state.
+      await expect(pending.getByRole("alert")).toHaveText(
+        "This content could not be loaded.",
+        { timeout: 15000 }
+      );
+      const close = pending.getByRole("button", { name: "Close panel" });
+      await expect(close).toBeFocused();
+      await page.keyboard.press("Escape");
+      await expect(page).not.toHaveURL(/drop=/);
+    } finally {
+      release();
+    }
+  });
+}

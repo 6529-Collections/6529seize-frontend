@@ -1,4 +1,3 @@
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdentitySubscriptionTargetAction";
@@ -338,9 +337,48 @@ const mapDropVoteContext = (context: ApiNotificationAdditionalContextV2) => ({
     : {}),
 });
 
+const mapMemeCollaborationNotification = (
+  notification: ApiNotificationV2
+): TypedNotification[] => {
+  const context = notification.additional_context;
+  if (
+    !context.wave_id ||
+    !context.drop_id ||
+    !context.invitation_id ||
+    !context.event_type
+  )
+    return [];
+  return [
+    {
+      id: notification.id,
+      created_at: notification.created_at,
+      read_at: notification.read_at,
+      cause: ApiNotificationCause.MemeCollaboration,
+      related_identity: notification.related_identity
+        ? mapIdentityOverviewToProfileMin(notification.related_identity)
+        : null,
+      additional_context: {
+        event_type: context.event_type,
+        wave_id: context.wave_id,
+        drop_id: context.drop_id,
+        invitation_id: context.invitation_id,
+        ...(typeof context.actor_id === "string"
+          ? { actor_id: context.actor_id }
+          : {}),
+        ...(typeof context.artwork_name === "string"
+          ? { artwork_name: context.artwork_name }
+          : {}),
+      },
+    },
+  ];
+};
+
 const mapNotificationV2 = (
   notification: ApiNotificationV2
 ): TypedNotification[] => {
+  if (notification.cause === ApiNotificationCause.MemeCollaboration) {
+    return mapMemeCollaborationNotification(notification);
+  }
   if (notification.cause === ApiNotificationCause.SubscriptionCoverage) {
     return mapSubscriptionCoverageNotification(notification);
   }
@@ -530,9 +568,7 @@ const buildNotificationsV2Params = ({
   "limit" | "cause" | "causeExclude" | "pageParam"
 >): Record<string, string> => {
   const params: Record<string, string> = { limit };
-  if (isMultiCompetitionEnabled()) {
-    params["include_competitions"] = "true";
-  }
+  params["include_competitions"] = "true";
 
   if (pageParam !== null && pageParam !== undefined) {
     params["id_less_than"] = String(pageParam);

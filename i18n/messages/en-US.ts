@@ -1,3 +1,4 @@
+import { MEME_COLLABORATION_MESSAGES } from "@/i18n/messages/meme-collaborations";
 import emmaMessages from "@/i18n/messages/emma.en-US.json";
 import { EN_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import waveCreationMessages from "@/i18n/messages/wave-creation.en-US.json";
@@ -2348,6 +2349,7 @@ const WAVE_LOADING_MESSAGES = objectMessages("waves", {
   loadingWave: "Loading {name}…",
   loadingWaveUnknown: "Loading wave…",
   loadingError: "This wave could not be loaded.",
+  threadLoadError: "This thread could not be loaded.",
   loadingRetry: "Try again",
   loadingBack: "Back to wave list",
   loadingBackMessages: "Back to messages",
@@ -3030,6 +3032,7 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  ...MEME_COLLABORATION_MESSAGES,
   "network.prenodes.title": "Prenodes",
   "network.prenodes.pageTitle": "Prenodes | Network",
   "network.prenodes.deprecation":
@@ -3121,7 +3124,8 @@ export const EN_US_MESSAGES = {
   "singleDrop.shared": "Link shared",
   "singleDrop.close": "Close",
   "singleDrop.closeLabel": "Close panel",
-  "singleDrop.loading": "Loading drop",
+  "singleDrop.loading": "Loading…",
+  "singleDrop.loadError": "This content could not be loaded.",
   "singleDrop.showChat": "Show chat",
   "singleDrop.hideChat": "Hide chat",
   "singleDrop.chatLabel": "Drop chat",

@@ -1,4 +1,5 @@
 "use client";
+import { MemeCollaboratorCredits } from "@/components/waves/memes/collaborations/MemeCollaboratorCredits";
 
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
@@ -238,6 +239,8 @@ export default function LatestDropNextMintPanel({
                   profileHandle={author.handle ?? undefined}
                 />
               </div>
+
+              <MemeCollaboratorCredits collaborators={drop.collaborators} />
             </div>
 
             <div className="tw-grid tw-grid-cols-2 tw-gap-x-8 tw-gap-y-5">

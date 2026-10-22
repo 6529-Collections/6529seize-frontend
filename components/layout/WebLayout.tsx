@@ -18,11 +18,6 @@ interface WebLayoutProps {
 }
 
 const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
-  const pathname = usePathname();
-  const isMemeCard = /^\/the-memes\/\d+\/?$/.test(pathname);
-  const smallClassName = isMemeCard
-    ? "tw-overflow-x-clip tw-bg-black"
-    : "tw-overflow-auto tw-bg-black";
   const {
     isSidebarReady,
     isMobile,
@@ -34,6 +29,11 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
     sidebarWidth,
   } = useSidebarController();
   const { isRightSidebarOpen } = useSidebarState();
+  const pathname = usePathname();
+  const smallWebOverflow =
+    pathname === "/the-memes" || /^\/the-memes\/\d+\/?$/.test(pathname)
+      ? "tw-overflow-x-clip"
+      : "tw-overflow-auto";
 
   // Changing responsive chrome must not remount page state or live uploads.
   // Close the old menu just as the previous separate layout did on unmount.
@@ -64,7 +64,7 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
     <div
       className={
         isSmall
-          ? smallClassName
+          ? `${smallWebOverflow} tw-bg-black`
           : "layout-root tw-relative tw-flex tw-w-full tw-justify-between"
       }
       style={isSmall ? undefined : cssVars}

@@ -9,11 +9,11 @@ voting, dates, outcomes and display settings belong to each competition.
 ## Location in the Site
 
 Open **Competitions**, then **+ Competition** beside its filter pills, or use
-`/waves/{waveId}/competitions/new`. For an existing competition, open **Settings**. The overview card shows the competition type, status, name, description and guidelines. Its edit control changes the name and guidelines in place, plus the description for independent competitions. The legacy primary description is disabled here and remains managed by the pinned wave drop. **Appearance and labels** contains its display controls. Drafts also have **Finish draft setup** for their unpublished execution settings. **Pause decisions** and **Resume decisions** are separate controls in the **Pause history** section.
+`/waves/{waveId}/competitions/new`. For an existing competition, open **Settings**. The overview card shows the competition type, status, name, description and guidelines. Its edit control changes the name, description and guidelines for the selected competition. The pinned wave post remains in About. **Appearance and labels** contains its display controls. Drafts also have **Finish draft setup** for their unpublished execution settings. **Pause decisions** and **Resume decisions** are separate controls in the **Pause history** section.
 
 ## Entry Points
 
-Where the competition experience is available, creating a wave opens its shared
+Creating a wave opens its shared
 chat without creating a competition. Wave administrators can add competitions
 afterward; competition setup is separate from wave creation.
 The **Competitions** tab follows the selected competition's **Settings** tab and precedes named curations. Administrators retain it for management; other viewers see it when there is more than one visible competition. Unknown counts or permissions keep it hidden until that access or count is established.
@@ -54,7 +54,8 @@ The **Competitions** tab follows the selected competition's **Settings** tab and
   its criteria with the existing access editor. These controls remain available
   after entries are submitted.
   An access change preserves existing entries, votes, outcomes and decision progress.
-- Edit the name, description and guidelines together inside the overview card, then choose **Save changes** or **Cancel**. Published competitions no longer open a separate editing wizard.
+- Edit the name, description and guidelines together inside the overview card, then choose **Save changes** or **Cancel**.
+- For an original competition in an older wave, **Edit competition rules** opens its existing administration settings. Review entry requirements, dates, voting and winner limits, then choose **Save changes**. **Close editor** saves valid changes and returns to Settings.
 - Expand **Appearance and labels** in Settings to change the submission button, proposal card display, Approve tab labels and outcome visibility. Approve competitions default to **Proposals** and **Approved**; custom labels apply to that competition's tabs. Save or cancel within that section. These changes create a new configuration version without changing execution rules or access.
 - **Pause decisions** stops decision execution without closing otherwise open
   entry or vote windows. **Resume decisions** allows evaluation again. A paused
@@ -68,10 +69,10 @@ The **Competitions** tab follows the selected competition's **Settings** tab and
 ## Edge Cases
 
 - A published competition cannot change between Rank and Approve.
-- For independent competitions, after the first accepted entry, credit, signing, submission, timing, decision
-  and outcome rules are fixed. Participation and voting access, title, description
+- For newer competitions, after the first accepted entry, credit, signing, submission, timing, decision
+  and outcome rules are fixed. Approve threshold and hold duration remain editable in Settings. Participation and voting access, title, description
   and presentation remain editable while the competition is published.
-- For the legacy primary, voting credit rules are fixed after the first recorded vote. Access, dates and Approve thresholds retain the original wave validation. Intervening wave edits also require reloading a legacy Settings form.
+- Original competitions in older waves retain their existing administration permissions after entries arrive. Their type, identity strategy and outcome definitions stay fixed. Voting credit source, scope and negative-vote rules stay fixed after the first vote, including votes later reset or deleted. An existing vote cap may only increase or become unlimited. Schedule changes must leave the next decision in the future and cannot replace an unresolved due decision; winner limits cannot fall below completed decisions.
 - A stale editing form is rejected if another administrator saved a newer
   version. For inline settings, cancel and reopen the section to edit the latest version. The draft setup editor also supports saving a separate draft copy.
 - Terminal competitions cannot reopen. A clone has its own identity, entries,
@@ -90,8 +91,10 @@ losing wave-administrator access also removes management authority.
 ## Limitations / Notes
 
 Main Stage and other privileged designations are controlled by operations.
-Ordinary wave administration cannot grant them. The original competition in an older wave uses the same **Settings** page, including direct `?tab=rules` links. Its settings continue to use the original wave permissions and validation. Original Approve competitions retain their editable approval threshold and hold time in Settings. Changing its name also changes the wave name; appearance and guidelines remain shared wave properties. Its pinned description stays in About, and its original outcome definitions cannot be edited here. Archive and clone controls apply only to independent competitions. Creating another
-competition does not replace that original competition or its links.
+Ordinary wave administration cannot grant them. The original competition in an older wave uses the same competition views, **Settings**, and direct `?tab=rules` links. Its name, description, guidelines, appearance, access and available administration controls belong to that competition. Changing the selected default or creating a sibling does not replace the original competition or its historical links.
+
+For Approve competitions, **Edit approval thresholds** changes the required approvals and hold duration, including after entries and votes exist. Enter the hold in seconds; 0 means immediate approval. A hold cannot exceed the approval window. Cancel and reopen the editor if another administrator has saved newer settings.
+
 
 ## Related Pages
 
