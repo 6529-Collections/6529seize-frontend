@@ -42,6 +42,7 @@ async function installCollectorsFixture(page: Page) {
           ...COLLECTOR,
           consolidation_key: `${COLLECTOR.consolidation_key}-${offset + index}`,
           balance: index === 1 ? 1 : COLLECTOR.balance,
+          tdh__raw: index === 2 ? 99999 : COLLECTOR.tdh__raw,
         })),
       },
     });
@@ -87,7 +88,7 @@ export function defineCollectorsLeaderboardTests() {
     );
     await expect(list.getByRole("listitem").nth(1)).toContainText("1 card");
 
-    for (const width of [320, 360, 390, 430, 640, 1023]) {
+    for (const width of [320, 360, 375, 380, 381, 390, 430, 640, 768, 1023]) {
       await page.setViewportSize({ width, height: 844 });
       await expectNoHorizontalOverflow(page);
       const overflow = await list
@@ -96,6 +97,33 @@ export function defineCollectorsLeaderboardTests() {
           rows.some((row) => row.scrollWidth > row.clientWidth + 1)
         );
       expect(overflow, `Collector rows overflow at ${width}px`).toBe(false);
+      const firstRow = list.getByRole("listitem").first();
+      const statFontSizes = await list
+        .getByRole("listitem")
+        .first()
+        .locator(":scope > span")
+        .evaluateAll((cells) =>
+          cells.flatMap((cell) =>
+            [cell, ...cell.querySelectorAll('span[aria-hidden="true"]')].map(
+              (element) => getComputedStyle(element).fontSize
+            )
+          )
+        );
+      expect(new Set(statFontSizes)).toEqual(
+        new Set([width <= 380 ? "11px" : "12px"])
+      );
+      const nameBounds = await firstRow
+        .getByRole("link")
+        .getByText(/^collector-with-/)
+        .boundingBox();
+      const balanceBounds = await firstRow
+        .getByText("cards", { exact: true })
+        .locator("..")
+        .boundingBox();
+      if (!nameBounds || !balanceBounds) {
+        throw new Error("Collector name and balance must have visible bounds");
+      }
+      expect(Math.abs(nameBounds.x - balanceBounds.x)).toBeLessThan(1);
       const csvSize = await section
         .getByRole("button", { name: "Download collectors leaderboard as CSV" })
         .boundingBox();
