@@ -26656,6 +26656,13 @@ components:
         credit_spent:
           type: integer
           format: int64
+        voter:
+          description: >-
+            Public profile summary of the voter, resolved for the whole page in
+            one batched lookup. Omitted when the profile cannot be resolved;
+            clients can then look up the identity by profile_id.
+          allOf:
+            - $ref: "#/components/schemas/ApiProfileMin"
     ApiCompetitionVoterPage:
       type: object
       additionalProperties: false
