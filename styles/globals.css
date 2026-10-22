@@ -5,6 +5,32 @@
 @tailwind components;
 @tailwind utilities;
 
+@property --fade-l {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --fade-r {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+/* Unsupported browsers keep both edges unfaded. */
+@supports (animation-timeline: scroll(self inline)) {
+  @keyframes scroll-edge-fade {
+    from {
+      --fade-l: 0px;
+      --fade-r: 32px;
+    }
+    to {
+      --fade-l: 32px;
+      --fade-r: 0px;
+    }
+  }
+}
+
 .drop-markdown-ordered-list-paren > li::marker {
   content: counter(list-item) ") ";
 }
