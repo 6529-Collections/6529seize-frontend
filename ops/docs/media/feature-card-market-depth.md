@@ -114,7 +114,8 @@ These are captured OpenSea quotes, not a live promise that an order can be
 executed. Multiple listings can share the same seller's inventory, and
 multiple offers can share a bidder's funds. A collection offer has one shared
 budget across eligible cards, so quoted quantities can overlap. Use the About
-these prices details in the panel when interpreting the snapshot.
+these prices details in the panel when interpreting the snapshot. The disclosure
+sits on its own row below the source text, aligned to the left.
 
 Private, inactive and expired orders are excluded from current public depth.
 Some complex orders have no supported fixed unit price or verified eligibility

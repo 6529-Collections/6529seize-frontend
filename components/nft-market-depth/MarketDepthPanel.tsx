@@ -144,8 +144,8 @@ function AboutPrices({
   );
 
   return (
-    <details className="tw-group tw-min-w-0 sm:tw-col-start-2 sm:tw-row-start-1 sm:open:tw-col-span-full sm:open:tw-col-start-1 sm:open:tw-row-start-3">
-      <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-end tw-gap-2 tw-rounded-lg tw-text-xs tw-font-medium tw-text-iron-400 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 sm:tw-min-h-8 sm:touch-only:tw-min-h-11 [&::-webkit-details-marker]:tw-hidden">
+    <details className="tw-group tw-min-w-0">
+      <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-start tw-gap-2 tw-rounded-lg tw-text-xs tw-font-medium tw-text-iron-400 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 sm:tw-min-h-8 sm:touch-only:tw-min-h-11 [&::-webkit-details-marker]:tw-hidden">
         {t(locale, "marketDepth.about.title")}
         <span
           aria-hidden="true"
@@ -731,12 +731,12 @@ export default function MarketDepthPanel({
                     </div>
                   )}
 
-                  <div className="tw-mt-7 tw-grid tw-grid-cols-1 tw-items-center tw-gap-x-4 sm:tw-grid-cols-[minmax(0,1fr)_auto]">
+                  <div className="tw-mt-7 tw-flex tw-flex-col tw-gap-3">
                     <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-500">
                       {t(resolvedLocale, "marketDepth.sourceCaveat")}
                     </p>
 
-                    <div className="tw-col-span-full tw-row-start-2 empty:tw-hidden">
+                    <div className="empty:tw-hidden">
                       <MarketDepthOtherOrders
                         data={data}
                         locale={resolvedLocale}

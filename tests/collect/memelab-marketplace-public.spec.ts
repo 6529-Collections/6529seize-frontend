@@ -294,6 +294,18 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
   await market.getByRole("button", { name: "Show fewer levels" }).click();
   await expect(levels).toHaveCount(10);
   const about = market.getByText("About these prices");
+  const source = market.getByText(/^Source: OpenSea/);
+  const sourceBounds = (await source.boundingBox())!;
+  const aboutBounds = (await about.boundingBox())!;
+  expect(aboutBounds.y).toBeGreaterThanOrEqual(
+    sourceBounds.y + sourceBounds.height
+  );
+  const aboutTextLeft = await about.evaluate((element) => {
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    return range.getBoundingClientRect().left;
+  });
+  expect(aboutTextLeft).toBeCloseTo(sourceBounds.x, 0);
   await about.focus();
   await page.keyboard.press("Enter");
   await expect(
