@@ -1485,7 +1485,7 @@ import { ApiNftOwnerPage } from '../models/ApiNftOwnerPage';
 import { ApiNftsPage } from '../models/ApiNftsPage';
 import { ApiNonceResponse } from '../models/ApiNonceResponse';
 import { ApiNotification        } from '../models/ApiNotification';
-import { ApiNotificationAdditionalContextV2                                         } from '../models/ApiNotificationAdditionalContextV2';
+import { ApiNotificationAdditionalContextV2, ApiNotificationAdditionalContextV2ReasonEnum                                              } from '../models/ApiNotificationAdditionalContextV2';
 import { ApiNotificationCause } from '../models/ApiNotificationCause';
 import { ApiNotificationDropReactedReactor } from '../models/ApiNotificationDropReactedReactor';
 import { ApiNotificationPollVoteOption } from '../models/ApiNotificationPollVoteOption';
@@ -2020,6 +2020,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiNftTokenTypeEnum",
     "ApiNftActivityEventKindEnum",
     "ApiNftLinkMediaPreviewStatusEnum",
+    "ApiNotificationAdditionalContextV2ReasonEnum",
     "ApiNotificationCause",
     "ApiOgMetadataEntityType",
     "ApiPageSortDirection",
