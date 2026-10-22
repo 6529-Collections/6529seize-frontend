@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
-import Button from "@/components/utils/button/Button";
+import FilterButton from "@/components/utils/button/FilterButton";
 import { SortDirection } from "@/entities/ISort";
 import { formatInteger, formatNumber } from "@/i18n/format";
 import { t } from "@/i18n/messages";
@@ -88,17 +88,16 @@ export function NFTLeaderboardMobileSort({
         className="-tw-mr-4 tw-flex tw-min-w-0 tw-flex-1 tw-gap-1.5 tw-overflow-x-auto tw-py-1 tw-pl-3 tw-pr-7 [mask-image:linear-gradient(to_right,transparent,#000_12px,#000_calc(100%-28px),transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:tw-hidden"
       >
         {options.map(({ value, label }) => (
-          <Button
+          <FilterButton
             key={value}
             ref={sort === value ? selected : undefined}
-            variant={sort === value ? "primary" : "tertiary"}
+            selected={sort === value}
             size="xs"
             aria-pressed={sort === value}
             onClick={() => onSort(value)}
-            className="motion-reduce:tw-transition-none"
           >
             {label}
-          </Button>
+          </FilterButton>
         ))}
       </div>
     </div>
