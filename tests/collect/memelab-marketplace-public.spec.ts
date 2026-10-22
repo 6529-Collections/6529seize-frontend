@@ -209,21 +209,28 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
             bids: bid
               ? Array.from({ length: 12 }, (_, index) => ({
                   unit_price: captured(true, index).unit_price,
-                  quantity: "3",
-                  cumulative_quantity: String((index + 1) * 3),
-                  order_count: 1,
+                  quantity: index === 8 ? "6" : "3",
+                  cumulative_quantity: String(
+                    (index + 1 + (index >= 8 ? 1 : 0)) * 3
+                  ),
+                  order_count: index === 8 ? 2 : 1,
                 }))
               : [],
             best_ask: bid ? null : "0.04",
             best_bid: bid ? "0.02" : null,
             ask_order_count: bid ? 0 : 1,
-            bid_order_count: bid ? 12 : 0,
+            bid_order_count: bid ? 13 : 0,
           })),
           orders: [
             captured(false),
             ...Array.from({ length: 12 }, (_, index) => captured(true, index)),
+            {
+              ...captured(true, 8),
+              order_key: "lab-offer-extra",
+              order_id: "0x" + "e".repeat(64),
+            },
           ],
-          order_count: 13,
+          order_count: 14,
           next: null,
           criteria_order_count: 0,
           notes: [],
@@ -362,16 +369,62 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
     const sell = row.getByRole("button", { name: "Sell", exact: true });
     expect((await sell.boundingBox())!.height).toBeGreaterThanOrEqual(44);
     expect((await showAll.boundingBox())!.height).toBeGreaterThanOrEqual(44);
-    await firstLevel.click();
-    await expect(firstLevel).toHaveAttribute("aria-expanded", "true");
-    const actionCell = (await row.getByRole("cell").last().boundingBox())!;
     const tableBounds = (await offers.boundingBox())!;
+    expect((await firstLevel.boundingBox())!.x).toBeCloseTo(tableBounds.x, 0);
+    expect((await row.boundingBox())!.height).toBeLessThanOrEqual(65);
+    expect((await showAll.boundingBox())!.width).toBeCloseTo(
+      tableBounds.width,
+      0
+    );
+    const priceHeader = offers.getByRole("columnheader", {
+      name: "Price",
+      exact: true,
+    });
+    await expect(priceHeader).toBeAttached();
+    expect((await priceHeader.boundingBox())!.height).toBeLessThanOrEqual(1);
+    for (const action of [
+      sell,
+      market.getByRole("button", { name: "Collect", exact: true }),
+    ]) {
+      expect((await action.boundingBox())!.width).toBeCloseTo(80, 0);
+      await expect(action).toHaveCSS("background-clip", "padding-box");
+      await expect(action).toHaveCSS("border-top-width", "5px");
+      await expect(action).toHaveCSS("border-bottom-width", "5px");
+      expect((await action.boundingBox())!.height - 10).toBeCloseTo(34, 0);
+    }
+    await firstLevel.getByText("Qty", { exact: false }).click();
+    await expect(firstLevel).toHaveAttribute("aria-expanded", "true");
+    const orderCard = offers.getByRole("listitem").first();
+    expect((await orderCard.boundingBox())!.x).toBeCloseTo(tableBounds.x, 0);
+    const actionCell = (await row.getByRole("cell").last().boundingBox())!;
     expect(actionCell.x + actionCell.width).toBeCloseTo(
       tableBounds.x + tableBounds.width,
       0
     );
     await firstLevel.click();
     await expect(firstLevel).toHaveAttribute("aria-expanded", "false");
+    const groupedRow = offers.getByRole("row").filter({
+      has: page.getByRole("button", {
+        name: "Offers at 0.012 WETH",
+        exact: true,
+      }),
+    });
+    const groupedAction = groupedRow.getByRole("button", {
+      name: "Sell",
+      exact: true,
+    });
+    expect((await groupedAction.boundingBox())!.width).toBeCloseTo(80, 0);
+    await groupedAction.click();
+    await expect(groupedAction).toHaveAttribute("aria-expanded", "true");
+    const accept = offers.getByRole("button", {
+      name: "Accept offer",
+      exact: true,
+    });
+    await expect(accept).toHaveCount(2);
+    expect((await accept.first().boundingBox())!.width).toBeCloseTo(80, 0);
+    expect((await accept.first().boundingBox())!.height).toBeCloseTo(44, 0);
+    await groupedAction.click();
+    await expect(groupedAction).toHaveAttribute("aria-expanded", "false");
   }
   await page.setViewportSize(originalViewport);
   expect(lookups).toContain("memelab");

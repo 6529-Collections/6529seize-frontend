@@ -46,7 +46,9 @@ offers from highest price downward. Price rows stay unboxed, with subtle
 straight horizontal separators and the expand arrow beside the price. Each level
 shows its unit price and quantity at that price. Total shows the cumulative quoted quantity. On narrow screens,
 quantity and total appear below the exact price, with **Collect** or **Sell** in
-a separate column. Expand a price row to
+a separate column. The price and quantity area opens the details together;
+compact blue actions retain a full touch target, and Show all levels spans the
+list width. Expanded orders align with the list. Expand a price row to
 inspect the captured orders behind that quote, including quoted remaining
 quantity, expiry, scope and applicability. Supported order actions appear before
 the technical disclosure. Open Order information for the wallet,

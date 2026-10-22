@@ -31,6 +31,11 @@ const ACTION_CLASS =
 const COMPACT_ACTION_CLASS =
   "tw-font-inherit tw-min-h-11 tw-min-w-16 tw-max-w-full !tw-whitespace-normal tw-px-4 tw-py-1.5 tw-text-meta tw-leading-5 focus-visible:tw-outline-offset-[-2px] sm:tw-min-h-[34px] sm:touch-only:tw-min-h-11";
 
+// The transparent 5px edges keep a 44px target around the 34px mobile surface.
+// Clipping the background also gives the visible surface an 8px corner radius.
+const MOBILE_TRADE_ACTION_CLASS =
+  "max-sm:tw-w-20 max-sm:tw-flex-wrap max-sm:tw-gap-x-1 max-sm:tw-rounded-[8px/13px] max-sm:tw-border-x-0 max-sm:tw-border-y-[5px] max-sm:!tw-border-transparent max-sm:tw-bg-clip-padding max-sm:tw-px-1 max-sm:tw-py-0 max-sm:tw-text-xs max-sm:tw-leading-4 max-sm:tw-shadow-none max-sm:tw-ring-0";
+
 export interface RowState {
   readonly busy: boolean;
   readonly message?: string;
@@ -121,7 +126,7 @@ export function MarketDepthLevelAction({
         type="button"
         variant="action"
         size={null}
-        className={COMPACT_ACTION_CLASS}
+        className={`${COMPACT_ACTION_CLASS} ${MOBILE_TRADE_ACTION_CLASS}`}
         aria-expanded={open}
         aria-controls={panelId}
         onClick={onClick}
@@ -180,7 +185,7 @@ export function MarketDepthOrderAction({
             type="button"
             variant={selected ? "secondary" : "action"}
             size={null}
-            className={compact ? COMPACT_ACTION_CLASS : ACTION_CLASS}
+            className={`${compact ? COMPACT_ACTION_CLASS : ACTION_CLASS} ${MOBILE_TRADE_ACTION_CLASS}`}
             aria-label={t(
               locale,
               order.side === ApiMarketOrderSideEnum.Ask

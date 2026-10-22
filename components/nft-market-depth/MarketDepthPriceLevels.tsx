@@ -84,13 +84,15 @@ export default function MarketDepthPriceLevels({
               currency: currencyLabel,
             })}
           </caption>
-          <thead className="tw-text-[11px] tw-uppercase tw-tracking-[0.08em] tw-text-iron-500 [&_th]:tw-h-6 [&_th]:tw-py-0 [&_th]:tw-font-medium">
+          <thead className="tw-text-[11px] tw-uppercase tw-tracking-[0.08em] tw-text-iron-500 [&_th]:tw-h-0 [&_th]:tw-py-0 [&_th]:tw-font-medium sm:[&_th]:tw-h-6">
             <tr>
               <th
                 scope="col"
-                className={`${tradeActionsAvailable ? "tw-w-[64%]" : "tw-w-full"} tw-pl-4 tw-text-left sm:tw-w-auto sm:tw-pl-5 sm:tw-pr-3`}
+                className={`${tradeActionsAvailable ? "tw-w-[56%]" : "tw-w-full"} tw-pl-0 tw-text-left sm:tw-w-auto sm:tw-pl-5 sm:tw-pr-3`}
               >
-                {t(locale, "marketDepth.table.price")}
+                <span className="tw-sr-only sm:tw-not-sr-only">
+                  {t(locale, "marketDepth.table.price")}
+                </span>
               </th>
               <th
                 scope="col"
@@ -109,7 +111,7 @@ export default function MarketDepthPriceLevels({
               {tradeActionsAvailable && (
                 <th
                   scope="col"
-                  className="tw-w-[36%] tw-pr-2.5 @2xl:tw-w-[120px] sm:tw-w-28"
+                  className="tw-w-[44%] tw-pr-0 @2xl:tw-w-[120px] sm:tw-w-28 sm:tw-pr-2.5"
                 >
                   <span className="tw-sr-only">
                     {t(locale, "marketDepth.table.action")}
@@ -121,7 +123,7 @@ export default function MarketDepthPriceLevels({
           <tbody>
             {visibleLevels.map((level) => {
               const cellClass =
-                "tw-h-[54px] tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-bg-transparent tw-tabular-nums tw-transition-colors tw-duration-200 group-hover:tw-bg-white/[0.02] motion-reduce:tw-transition-none";
+                "tw-h-[60px] sm:tw-h-[54px] tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-bg-transparent tw-tabular-nums tw-transition-colors tw-duration-200 group-hover:tw-bg-white/[0.02] motion-reduce:tw-transition-none";
               const open = openPrice === level.unit_price;
               const panelId = disclosureId + "-" + level.unit_price;
               const levelOrders = getLevelOrders(
@@ -143,7 +145,7 @@ export default function MarketDepthPriceLevels({
                 <Fragment key={level.unit_price}>
                   <tr className="tw-group">
                     <td
-                      className={`${cellClass} tw-py-0 tw-pl-4 tw-text-left sm:tw-pl-5 sm:tw-pr-3`}
+                      className={`${cellClass} tw-py-0 tw-pl-0 tw-text-left sm:tw-pl-5 sm:tw-pr-3`}
                     >
                       <button
                         type="button"
@@ -161,33 +163,35 @@ export default function MarketDepthPriceLevels({
                         )}
                         title={level.unit_price}
                         onClick={toggleDetails}
-                        className="tw-font-inherit tw-flex tw-min-h-12 tw-w-full tw-items-center tw-justify-start tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-left tw-text-[15px] tw-font-medium tw-tabular-nums tw-text-iron-200 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400"
+                        className="tw-font-inherit tw-flex tw-min-h-[60px] tw-w-full tw-flex-col tw-items-start tw-justify-center tw-gap-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-left tw-text-[15px] tw-font-medium tw-tabular-nums tw-text-iron-200 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 sm:tw-min-h-12 sm:tw-flex-row sm:tw-items-center sm:tw-justify-start sm:tw-gap-2"
                       >
-                        <span className="tw-min-w-0 [overflow-wrap:anywhere]">
-                          {formatDecimal(locale, level.unit_price)}
+                        <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
+                          <span className="tw-min-w-0 [overflow-wrap:anywhere]">
+                            {formatDecimal(locale, level.unit_price)}
+                          </span>
+                          <ChevronDownIcon
+                            aria-hidden="true"
+                            className={
+                              "tw-h-3.5 tw-w-3.5 tw-shrink-0 tw-text-iron-600 tw-transition-transform group-hover:tw-text-iron-300 motion-reduce:tw-transition-none " +
+                              (open ? "tw-rotate-180" : "")
+                            }
+                          />
                         </span>
-                        <ChevronDownIcon
-                          aria-hidden="true"
-                          className={
-                            "tw-h-3.5 tw-w-3.5 tw-shrink-0 tw-text-iron-600 tw-transition-transform group-hover:tw-text-iron-300 motion-reduce:tw-transition-none " +
-                            (open ? "tw-rotate-180" : "")
-                          }
-                        />
+                        <span className="tw-flex tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500 sm:tw-hidden">
+                          <span>
+                            {t(locale, "marketDepth.table.quantityShort")}{" "}
+                            <span className="tw-tabular-nums tw-text-iron-300">
+                              {formatInteger(locale, level.quantity)}
+                            </span>
+                          </span>
+                          <span>
+                            {t(locale, "marketDepth.table.cumulativeShort")}{" "}
+                            <span className="tw-tabular-nums">
+                              {formatInteger(locale, level.cumulative_quantity)}
+                            </span>
+                          </span>
+                        </span>
                       </button>
-                      <div className="tw-mb-3 tw-flex tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-text-xs tw-text-iron-500 sm:tw-hidden">
-                        <span>
-                          {t(locale, "marketDepth.table.quantityShort")}{" "}
-                          <span className="tw-tabular-nums tw-text-iron-300">
-                            {formatInteger(locale, level.quantity)}
-                          </span>
-                        </span>
-                        <span>
-                          {t(locale, "marketDepth.table.cumulativeShort")}{" "}
-                          <span className="tw-tabular-nums">
-                            {formatInteger(locale, level.cumulative_quantity)}
-                          </span>
-                        </span>
-                      </div>
                     </td>
                     <td
                       className={`${cellClass} tw-hidden tw-break-words tw-py-2.5 tw-text-sm tw-text-iron-300 sm:tw-table-cell sm:tw-px-3`}
@@ -201,7 +205,7 @@ export default function MarketDepthPriceLevels({
                     </td>
                     {tradeActionsAvailable && (
                       <td
-                        className={`${cellClass} tw-break-words tw-py-1 tw-pl-2 tw-pr-2.5 tw-align-middle`}
+                        className={`${cellClass} tw-break-words tw-py-1 tw-pl-2 tw-pr-0 tw-align-middle sm:tw-pr-2.5`}
                       >
                         <MarketDepthLevelAction
                           order={singleOrder}
@@ -226,7 +230,7 @@ export default function MarketDepthPriceLevels({
                       colSpan={tradeActionsAvailable ? 4 : 3}
                       className="tw-px-0 tw-py-0 tw-text-left"
                     >
-                      <div id={panelId} className="tw-px-4 sm:tw-px-5">
+                      <div id={panelId} className="tw-px-0 sm:tw-px-5">
                         {open && (
                           <MarketDepthOrderDetails
                             orders={levelOrders}
@@ -259,7 +263,7 @@ export default function MarketDepthPriceLevels({
             if (focusedOrderHash) onOrderFocused?.();
             setShowAll((current) => !current);
           }}
-          className="tw-font-inherit tw-mx-auto tw-mt-3 tw-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-transparent tw-px-[18px] tw-py-2 tw-text-meta tw-font-medium tw-text-iron-400 tw-transition-colors hover:tw-border-white/[0.16] hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none sm:tw-min-h-[38px] sm:touch-only:tw-min-h-11"
+          className="tw-font-inherit tw-mx-auto tw-mt-3 tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-transparent tw-px-[18px] tw-py-2 tw-text-meta tw-font-medium tw-text-iron-400 tw-transition-colors hover:tw-border-white/[0.16] hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none sm:tw-min-h-[38px] sm:tw-w-auto sm:touch-only:tw-min-h-11"
         >
           {showAll
             ? t(locale, "marketDepth.levels.showFewer")
