@@ -25,8 +25,7 @@ jest.mock("@/app/waves/wave-feed-seed.server", () => ({
     mockFetchServerWaveFeedSeed(...args),
 }));
 jest.mock("@/app/waves/public-wave-feed.server", () => ({
-  fetchPublicWaveFeed: (...args: unknown[]) =>
-    mockFetchPublicWaveFeed(...args),
+  fetchPublicWaveFeed: (...args: unknown[]) => mockFetchPublicWaveFeed(...args),
 }));
 jest.mock("@/components/waves/WaveServerFeedSeed", () => ({
   __esModule: true,
@@ -295,5 +294,20 @@ describe("renderWavesPageContent data paths", () => {
     expect(mockFetchServerWaveFeedSeed).toHaveBeenCalledTimes(1);
     resolveFeed?.({ ok: false, waveId: wave.id });
     await Promise.resolve();
+  });
+
+  it("returns interactive Chat while the public preview is still loading", async () => {
+    const publicWave = { ...wave, visibility: { scope: { group: null } } };
+    (commonApiFetch as jest.Mock).mockResolvedValue(publicWave);
+    mockFetchPublicWaveFeed.mockReturnValue(new Promise(() => {}));
+
+    const rendered = await renderWavesPageContent({
+      waveId: publicWave.id,
+      searchParams: { tab: "chat", competition: "selected" },
+    });
+
+    expect(mockFetchPublicWaveFeed).toHaveBeenCalledWith(publicWave.id);
+    render(rendered);
+    expect(screen.getByTestId("waves-page-client")).toBeInTheDocument();
   });
 });

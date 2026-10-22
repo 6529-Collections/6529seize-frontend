@@ -3,7 +3,7 @@ import {
   dehydrate,
   HydrationBoundary,
 } from "@tanstack/react-query";
-import { Suspense, cache } from "react";
+import { Suspense, cache, use } from "react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
@@ -46,6 +46,17 @@ import {
 } from "@/utils/monitoring/serverRouteTelemetry";
 
 export type WavesSearchParams = RouteSearchParams;
+
+function PublicWaveFeedPreview({
+  promise,
+}: {
+  readonly promise: ReturnType<typeof fetchPublicWaveFeed>;
+}) {
+  const feed = use(promise);
+  return feed.ok && feed.items.length > 0 ? (
+    <PublicWaveFeed feed={feed} />
+  ) : null;
+}
 
 type WaveRequestContext = {
   readonly waveId: string | null;
@@ -298,15 +309,15 @@ export async function renderWavesPageContent({
           JSON.stringify(context.headers)
         )
       : null;
-  const publicFeed = publicFeedPromise ? await publicFeedPromise : null;
-  const publicFeedFallback =
-    publicFeed?.ok && publicFeed.items.length > 0 ? (
-      <PublicWaveFeed feed={publicFeed} />
-    ) : null;
+  const publicFeedFallback = publicFeedPromise ? (
+    <Suspense fallback={null}>
+      <PublicWaveFeedPreview promise={publicFeedPromise} />
+    </Suspense>
+  ) : null;
   const wavesPageClient = (
     <WavesPageClient
       publicFeedFallback={publicFeedFallback}
-      publicFeedWaveId={publicFeed?.ok ? publicFeed.waveId : null}
+      publicFeedWaveId={publicFeedPromise ? context.waveId : null}
       waveName={context.wave?.name}
     />
   );

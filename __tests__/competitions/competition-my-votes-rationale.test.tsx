@@ -79,6 +79,9 @@ jest.mock("@/components/competitions/CompetitionVote", () => ({
       <button onClick={() => onExplainVote(4, 1)}>Explain vote</button>
     ) : null,
 }));
+jest.mock("@/hooks/useInView", () => ({
+  useInView: () => [{ current: null }, true],
+}));
 jest.mock("@/components/waves/PrivilegedDropCreator", () => ({
   __esModule: true,
   DropMode: { CHAT: "CHAT" },
@@ -125,7 +128,8 @@ it("omits the reply action when a malformed entry has no replyable part", () => 
 
 it("excludes past winners before loading active My Votes cards", () => {
   render(<CompetitionMyVotes />);
-  expect(useCompetitionEntryDrops).toHaveBeenLastCalledWith([
-    { entryId: "entry", dropId: "drop" },
-  ]);
+  expect(useCompetitionEntryDrops).toHaveBeenLastCalledWith(
+    [{ entryId: "entry", dropId: "drop" }],
+    expect.objectContaining({ contexts: [] })
+  );
 });

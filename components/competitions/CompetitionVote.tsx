@@ -44,7 +44,8 @@ interface CompetitionVoteProps {
 
 export function useCompetitionVoteBudget(
   competition: ApiCompetition,
-  entryId: string
+  entryId: string,
+  enabled = true
 ) {
   const { connectedProfile } = useAuth();
   const viewer = useCompetitionViewer();
@@ -58,7 +59,7 @@ export function useCompetitionVoteBudget(
       { ...competitionScope(identity), viewer, entry_id: entryId },
     ],
     queryFn: ({ signal }) => fetchCompetitionCredits(identity, entryId, signal),
-    enabled: Boolean(connectedProfile),
+    enabled: enabled && Boolean(connectedProfile),
     retry: false,
     staleTime: 0,
   });
@@ -66,6 +67,7 @@ export function useCompetitionVoteBudget(
 
 export function CompetitionVoteForm({
   competition,
+  budgetEnabled = true,
   compact = false,
   voteMode = "numeric",
   size,
@@ -78,6 +80,7 @@ export function CompetitionVoteForm({
   disabled,
 }: CompetitionVoteProps & {
   readonly competition: ApiCompetition;
+  readonly budgetEnabled?: boolean | undefined;
   readonly controlledDraft?:
     | {
         readonly value: string;
@@ -118,7 +121,7 @@ export function CompetitionVoteForm({
     WAVE_VOTING_LABELS[competition.voting.credit_type as ApiWaveCreditType];
   const client = useQueryClient();
   const sign = useCompetitionSignatureFor(competition);
-  const credit = useCompetitionVoteBudget(competition, entryId);
+  const credit = useCompetitionVoteBudget(competition, entryId, budgetEnabled);
   const [draft, setDraft] = useState<{ source: string; value: string } | null>(
     null
   );
@@ -227,7 +230,16 @@ export function CompetitionVoteForm({
         {t(locale, "competitions.signIn")}
       </p>
     );
-  if (credit.isPending) return <CompetitionState />;
+  if (credit.isPending)
+    return compact ? (
+      <div
+        role="status"
+        aria-label={t(locale, "competitions.loading")}
+        className="tw-h-11 tw-w-40 tw-animate-pulse tw-rounded-lg tw-bg-iron-900 motion-reduce:tw-animate-none"
+      />
+    ) : (
+      <CompetitionState />
+    );
   if (
     credit.isError &&
     (!credit.data || isCompetitionAccessError(credit.error))
