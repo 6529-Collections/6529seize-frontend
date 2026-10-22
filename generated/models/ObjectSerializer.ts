@@ -798,6 +798,7 @@ export * from '../models/ApiUploadsPage';
 export * from '../models/ApiValidateProfileCmsAgentCandidateRequest';
 export * from '../models/ApiValidateProfileCmsAgentPatchRequest';
 export * from '../models/ApiValidateProfileCmsPackageRequest';
+export * from '../models/ApiVotingCreditReleaseReason';
 export * from '../models/ApiWallet';
 export * from '../models/ApiWalletDistributionAllocation';
 export * from '../models/ApiWalletDistributionAllocations';
@@ -1577,7 +1578,7 @@ import { ApiNftOwnerPage } from '../models/ApiNftOwnerPage';
 import { ApiNftsPage } from '../models/ApiNftsPage';
 import { ApiNonceResponse } from '../models/ApiNonceResponse';
 import { ApiNotification        } from '../models/ApiNotification';
-import { ApiNotificationAdditionalContextV2                                         } from '../models/ApiNotificationAdditionalContextV2';
+import { ApiNotificationAdditionalContextV2                                             } from '../models/ApiNotificationAdditionalContextV2';
 import { ApiNotificationCause } from '../models/ApiNotificationCause';
 import { ApiNotificationDropReactedReactor } from '../models/ApiNotificationDropReactedReactor';
 import { ApiNotificationPollVoteOption } from '../models/ApiNotificationPollVoteOption';
@@ -1756,6 +1757,7 @@ import { ApiUploadsPage } from '../models/ApiUploadsPage';
 import { ApiValidateProfileCmsAgentCandidateRequest } from '../models/ApiValidateProfileCmsAgentCandidateRequest';
 import { ApiValidateProfileCmsAgentPatchRequest } from '../models/ApiValidateProfileCmsAgentPatchRequest';
 import { ApiValidateProfileCmsPackageRequest } from '../models/ApiValidateProfileCmsPackageRequest';
+import { ApiVotingCreditReleaseReason } from '../models/ApiVotingCreditReleaseReason';
 import { ApiWallet } from '../models/ApiWallet';
 import { ApiWalletDistributionAllocation, ApiWalletDistributionAllocationPhaseEnum     } from '../models/ApiWalletDistributionAllocation';
 import { ApiWalletDistributionAllocations } from '../models/ApiWalletDistributionAllocations';
@@ -2184,6 +2186,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiUpcomingMemeSubscriptionStatusSourceEnum",
     "ApiUpdateProfilePreferencesDirectMessagePolicyEnum",
     "ApiUpdateProfilePreferencesNotificationLevelEnum",
+    "ApiVotingCreditReleaseReason",
     "ApiWalletDistributionAllocationPhaseEnum",
     "ApiWaveCreditScope",
     "ApiWaveCreditType",

@@ -1723,7 +1723,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         await expect(submissionNotice).toHaveCount(0);
         await expectNoHorizontalOverflow(page);
         await page.screenshot({
-          path: testInfo.outputPath("leaderboard-without-submission-notice.png"),
+          path: testInfo.outputPath(
+            "leaderboard-without-submission-notice.png"
+          ),
         });
       }
       expect(sandbox.requests).toHaveLength(0);
@@ -2281,6 +2283,74 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expectNoHorizontalOverflow(page);
     await page.screenshot({
       path: testInfo.outputPath("collaboration-notifications.png"),
+    });
+  });
+
+  test("shows returned voting credits after wins and author deletion without live drop previews", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    const title = "Freedom To Transcend";
+    const longTitle = "SubmissionWithAnUnbrokenName".repeat(8);
+    const notifications = ["WIN", "AUTHOR_DELETED"].map((reason, index) => ({
+      id: 6500 - index,
+      cause: "VOTING_CREDITS_RETURNED",
+      created_at: Date.now(),
+      read_at: null,
+      related_identity: null,
+      related_drops: [],
+      additional_context: {
+        event_id: `release-${index}`,
+        reason,
+        wave_id: WAVE,
+        competition_id: "alpha",
+        competition_title: "The Memes - Main Stage",
+        entry_id: "alpha-entry",
+        drop_id: entryDropId("alpha"),
+        submission_title: index === 0 ? title : longTitle,
+        credit_type: "TDH",
+        amount: 500,
+        released_at: Date.now(),
+      },
+    }));
+    await page.route("**/api/v2/notifications**", (route) => {
+      const params = new URL(route.request().url()).searchParams;
+      const before = params.get("id_less_than");
+      const causes = params.get("cause")?.split(",");
+      return route.fulfill({
+        json: {
+          unread_count: 2,
+          notifications: notifications.filter(
+            (item) =>
+              (before === null || item.id < Number(before)) &&
+              (!causes || causes.includes(item.cause))
+          ),
+        },
+      });
+    });
+    await page.goto("/notifications");
+    await expect(
+      page.getByText("500 voting credits were returned to you.", {
+        exact: false,
+      })
+    ).toHaveCount(2);
+    const winner = page.getByRole("link", { name: title, exact: true });
+    await expect(winner).toHaveAttribute(
+      "href",
+      `${ROOT}/alpha?entry=alpha-entry`
+    );
+    await expect(page.getByText(longTitle, { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: longTitle, exact: true })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("link", { name: "The Memes - Main Stage", exact: true })
+    ).toHaveCount(2);
+    await expectNoHorizontalOverflow(page);
+    await winner.focus();
+    await expect(winner).toBeFocused();
+    await page.screenshot({
+      path: testInfo.outputPath("voting-credit-return-notifications.png"),
     });
   });
 
