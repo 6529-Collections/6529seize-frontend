@@ -4,6 +4,10 @@ import {
   renderWavesPageContent,
 } from "@/app/waves/waves-page.shared";
 
+jest.mock("next/headers", () => ({
+  headers: jest.fn(async () => new Headers({ "sec-fetch-dest": "document" })),
+}));
+
 jest.mock("@/app/waves/waves-page.shared", () => ({
   buildWavesMetadata: jest.fn(),
   renderWavesPageContent: jest.fn(),
@@ -22,6 +26,7 @@ describe("Wave page", () => {
       waveId: "test-wave-123",
       searchParams: { serialNo: "42" },
       routeContext: "waves",
+      includePublicPreview: true,
     });
     expect(result).toBe("wave-content");
   });

@@ -4776,6 +4776,14 @@ paths:
           required: false
           schema:
             type: string
+        - name: include
+          in: query
+          required: false
+          description: Include lightweight entry cards with native voting summaries.
+          schema:
+            type: string
+            enum:
+              - cards
         - name: limit
           in: query
           required: false
@@ -4795,7 +4803,10 @@ paths:
           name: handleListCompetitionMyVotesV3
       responses:
         "200":
-          description: Command result or identical idempotent replay.
+          description: >-
+            Paged active nonzero personal votes, ordered by vote value
+            descending and vote time ascending; include=cards adds authorized
+            lightweight entry content and summaries.
           content:
             application/json:
               schema:
@@ -26464,6 +26475,13 @@ components:
         - next_cursor
         - has_more
       properties:
+        cards:
+          description: >-
+            Authorized card content and native summaries when include=cards. May
+            be sparse or differently ordered; join by entry.id.
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionEntryContext"
         data:
           type: array
           items:
