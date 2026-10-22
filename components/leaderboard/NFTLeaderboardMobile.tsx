@@ -85,7 +85,7 @@ export function NFTLeaderboardMobileSort({
         ref={scroller}
         role="group"
         aria-label={t(locale, "theMemes.detail.collectors.sortBy")}
-        className="-tw-mr-4 tw-flex tw-min-w-0 tw-flex-1 tw-gap-1.5 tw-overflow-x-auto tw-py-1 tw-pl-3 tw-pr-7 [mask-image:linear-gradient(to_right,transparent,#000_12px,#000_calc(100%-28px),transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:tw-hidden"
+        className="-tw-mr-4 tw-flex tw-min-w-0 tw-flex-1 tw-gap-1.5 tw-overflow-x-auto tw-py-1 tw-pl-3 tw-pr-7 [mask-image:linear-gradient(to_right,transparent,#000_12px,#000_calc(100%-28px),transparent)] [scrollbar-width:none] focus-within:[mask-image:none] [&::-webkit-scrollbar]:tw-hidden"
       >
         {options.map(({ value, label }) => (
           <FilterButton

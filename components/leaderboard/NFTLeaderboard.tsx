@@ -650,14 +650,14 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                 scope="colgroup"
                 className={`tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-l tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-font-semibold tw-text-iron-300 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`}
               >
-                This Card
+                {t(locale, "theMemes.detail.collectors.thisCard")}
               </th>
               <th
                 colSpan={3}
                 scope="colgroup"
                 className={`tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-l tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-font-semibold tw-text-iron-300 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`}
               >
-                Total
+                {t(locale, "theMemes.detail.collectors.total")}
               </th>
             </tr>
             <tr>
@@ -665,25 +665,44 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                 scope="col"
                 className={`tw-w-12 tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-font-semibold tw-text-iron-400 md:tw-w-20 md:tw-px-4 md:tw-py-3 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`}
               >
-                Rank
+                {t(locale, "theMemes.detail.collectors.rank")}
               </th>
               <th
                 scope="col"
                 className={`tw-min-w-[11rem] tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-left tw-font-semibold tw-text-iron-400 md:tw-min-w-[18rem] md:tw-px-4 md:tw-py-3 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`}
               >
-                Collector{" "}
-                {totalResults > 0 && `x${formatInteger(locale, totalResults)}`}
+                {totalResults > 0
+                  ? t(locale, "theMemes.detail.collectors.collectorCount", {
+                      count: formatInteger(locale, totalResults),
+                    })
+                  : t(locale, "theMemes.detail.collectors.collector")}
               </th>
-              {printSortableHeader("Balance", Sort.balance, "tw-border-l")}
-              {printSortableHeader("TDH", Sort.boosted_tdh)}
-              {printSortableHeader("Unweighted TDH", Sort.tdh__raw)}
               {printSortableHeader(
-                "Balance",
+                t(locale, "theMemes.detail.collectors.balance"),
+                Sort.balance,
+                "tw-border-l"
+              )}
+              {printSortableHeader(
+                t(locale, "theMemes.detail.collectors.tdh"),
+                Sort.boosted_tdh
+              )}
+              {printSortableHeader(
+                t(locale, "theMemes.detail.collectors.unweightedTdh"),
+                Sort.tdh__raw
+              )}
+              {printSortableHeader(
+                t(locale, "theMemes.detail.collectors.balance"),
                 Sort.total_balance,
                 "tw-border-l"
               )}
-              {printSortableHeader("TDH", Sort.total_boosted_tdh)}
-              {printSortableHeader("Unweighted TDH", Sort.total_tdh__raw)}
+              {printSortableHeader(
+                t(locale, "theMemes.detail.collectors.tdh"),
+                Sort.total_boosted_tdh
+              )}
+              {printSortableHeader(
+                t(locale, "theMemes.detail.collectors.unweightedTdh"),
+                Sort.total_tdh__raw
+              )}
             </tr>
           </thead>
           <tbody>
@@ -716,7 +735,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
       </div>
       {leaderboard.length === 0 && !fetchingLeaderboard && (
         <div className="tw-py-5 tw-text-sm tw-font-medium tw-text-iron-400">
-          No Results found
+          {t(locale, "theMemes.detail.collectors.noResults")}
         </div>
       )}
       {totalResults > 0 && (

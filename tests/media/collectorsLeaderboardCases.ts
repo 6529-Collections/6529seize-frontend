@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import {
   expect,
   expectNoHorizontalOverflow,
@@ -28,7 +28,12 @@ async function installCollectorsFixture(page: Page) {
   await page.route("**/api/tdh/nft/**", async (route) => {
     const params = new URL(route.request().url()).searchParams;
     const search = params.get("search");
-    const count = search === "no-match" ? 0 : search ? 1 : 79;
+    let count = 79;
+    if (search === "no-match") {
+      count = 0;
+    } else if (search) {
+      count = 1;
+    }
     const pageNumber = Number(params.get("page") ?? 1);
     const pageSize = Number(params.get("page_size") ?? 25);
     const offset = (pageNumber - 1) * pageSize;
@@ -47,6 +52,105 @@ async function installCollectorsFixture(page: Page) {
       },
     });
   });
+}
+
+async function expectMobileCollectorLayout(
+  page: Page,
+  section: Locator,
+  list: Locator,
+  width: number
+) {
+  await page.setViewportSize({ width, height: 844 });
+  await expect(list).toBeVisible();
+  await expect(section.getByRole("table")).toBeHidden();
+  await expectNoHorizontalOverflow(page);
+  const overflow = await list
+    .getByRole("listitem")
+    .evaluateAll((rows) =>
+      rows.some((row) => row.scrollWidth > row.clientWidth + 1)
+    );
+  expect(overflow, `Collector rows overflow at ${width}px`).toBe(false);
+  const firstRow = list.getByRole("listitem").first();
+  await expect(firstRow.getByText("Total", { exact: true })).toBeVisible();
+  for (const label of ["Balance", "TDH", "Unweighted TDH"]) {
+    await expect(firstRow.getByText(label, { exact: true })).toBeVisible();
+  }
+  const statHeights = await list
+    .getByRole("listitem")
+    .first()
+    .locator(":scope > span, :scope > div:last-child > span")
+    .evaluateAll((cells) =>
+      cells.map((cell) => cell.getBoundingClientRect().height)
+    );
+  expect(
+    statHeights.every((height) => height <= 16),
+    `Collector labels and values stay on one line at ${width}px`
+  ).toBe(true);
+  const statFontSizes = await list
+    .getByRole("listitem")
+    .first()
+    .locator(":scope > span, :scope > div:last-child > span")
+    .evaluateAll((cells) =>
+      cells.flatMap((cell) =>
+        [cell, ...cell.querySelectorAll('span[aria-hidden="true"]')].map(
+          (element) => getComputedStyle(element).fontSize
+        )
+      )
+    );
+  expect(new Set(statFontSizes)).toEqual(
+    new Set([width <= 380 ? "11px" : "12px"])
+  );
+  const identityBounds = await firstRow
+    .getByRole("link", { name: /collector-with-/ })
+    .boundingBox();
+  for (const scope of ["This card", "Total"]) {
+    const scopeBounds = await firstRow
+      .getByText(scope, { exact: true })
+      .boundingBox();
+    if (!identityBounds || !scopeBounds) {
+      throw new Error("Collector identity and scope must have visible bounds");
+    }
+    // The avatar starts at the profile link's left edge.
+    expect(Math.abs(identityBounds.x - scopeBounds.x)).toBeLessThan(1);
+  }
+  const [scope, balance, tdh, unweighted] = await Promise.all(
+    ["This card", "Balance", "TDH", "Unweighted TDH"].map((label) =>
+      firstRow.getByText(label, { exact: true }).boundingBox()
+    )
+  );
+  const rowBounds = await firstRow.boundingBox();
+  if (!scope || !balance || !tdh || !unweighted || !rowBounds) {
+    throw new Error("Collector stat groups must have visible bounds");
+  }
+  const gaps = [
+    balance.x - scope.x - scope.width,
+    tdh.x - balance.x - balance.width,
+    unweighted.x - tdh.x - tdh.width,
+  ];
+  expect(Math.min(...gaps)).toBeGreaterThanOrEqual(19);
+  expect(Math.max(...gaps) - Math.min(...gaps)).toBeLessThan(1);
+  expect(
+    Math.abs(unweighted.x + unweighted.width - rowBounds.x - rowBounds.width)
+  ).toBeLessThan(1);
+  const csvSize = await section
+    .getByRole("button", { name: "Download collectors leaderboard as CSV" })
+    .boundingBox();
+  expect(csvSize?.width).toBe(36);
+  expect(csvSize?.height).toBe(36);
+  if (width === 320) {
+    await list.focus();
+    await list.press("ArrowRight");
+    await expect
+      .poll(() => list.evaluate((element) => element.scrollLeft))
+      .toBeGreaterThan(0);
+    await list.press("Tab");
+    await expect(
+      firstRow.getByRole("link", { name: /collector-with-/ })
+    ).toBeFocused();
+    await list.evaluate((element) => {
+      element.scrollLeft = 0;
+    });
+  }
 }
 
 export function defineCollectorsLeaderboardTests() {
@@ -106,100 +210,11 @@ export function defineCollectorsLeaderboardTests() {
     await expect(csvTooltip).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(csvTooltip).toBeHidden();
+    await expect(csvButton).toBeFocused();
     await csvButton.blur();
 
     for (const width of [320, 360, 375, 380, 381, 390, 430, 640, 767]) {
-      await page.setViewportSize({ width, height: 844 });
-      await expect(list).toBeVisible();
-      await expect(section.getByRole("table")).toBeHidden();
-      await expectNoHorizontalOverflow(page);
-      const overflow = await list
-        .getByRole("listitem")
-        .evaluateAll((rows) =>
-          rows.some((row) => row.scrollWidth > row.clientWidth + 1)
-        );
-      expect(overflow, `Collector rows overflow at ${width}px`).toBe(false);
-      const firstRow = list.getByRole("listitem").first();
-      await expect(firstRow.getByText("Total", { exact: true })).toBeVisible();
-      for (const label of ["Balance", "TDH", "Unweighted TDH"]) {
-        await expect(firstRow.getByText(label, { exact: true })).toBeVisible();
-      }
-      const statHeights = await list
-        .getByRole("listitem")
-        .first()
-        .locator(":scope > span, :scope > div:last-child > span")
-        .evaluateAll((cells) =>
-          cells.map((cell) => cell.getBoundingClientRect().height)
-        );
-      expect(
-        statHeights.every((height) => height <= 16),
-        `Collector labels and values stay on one line at ${width}px`
-      ).toBe(true);
-      const statFontSizes = await list
-        .getByRole("listitem")
-        .first()
-        .locator(":scope > span, :scope > div:last-child > span")
-        .evaluateAll((cells) =>
-          cells.flatMap((cell) =>
-            [cell, ...cell.querySelectorAll('span[aria-hidden="true"]')].map(
-              (element) => getComputedStyle(element).fontSize
-            )
-          )
-        );
-      expect(new Set(statFontSizes)).toEqual(
-        new Set([width <= 380 ? "11px" : "12px"])
-      );
-      const identityBounds = await firstRow
-        .getByRole("link", { name: /collector-with-/ })
-        .boundingBox();
-      for (const scope of ["This card", "Total"]) {
-        const scopeBounds = await firstRow
-          .getByText(scope, { exact: true })
-          .boundingBox();
-        if (!identityBounds || !scopeBounds) {
-          throw new Error(
-            "Collector identity and scope must have visible bounds"
-          );
-        }
-        // The avatar starts at the profile link's left edge.
-        expect(Math.abs(identityBounds.x - scopeBounds.x)).toBeLessThan(1);
-      }
-      const [scope, balance, tdh, unweighted] = await Promise.all(
-        ["This card", "Balance", "TDH", "Unweighted TDH"].map((label) =>
-          firstRow.getByText(label, { exact: true }).boundingBox()
-        )
-      );
-      const rowBounds = await firstRow.boundingBox();
-      if (!scope || !balance || !tdh || !unweighted || !rowBounds) {
-        throw new Error("Collector stat groups must have visible bounds");
-      }
-      const gaps = [
-        balance.x - scope.x - scope.width,
-        tdh.x - balance.x - balance.width,
-        unweighted.x - tdh.x - tdh.width,
-      ];
-      expect(Math.min(...gaps)).toBeGreaterThanOrEqual(19);
-      expect(Math.max(...gaps) - Math.min(...gaps)).toBeLessThan(1);
-      expect(
-        Math.abs(
-          unweighted.x + unweighted.width - rowBounds.x - rowBounds.width
-        )
-      ).toBeLessThan(1);
-      const csvSize = await section
-        .getByRole("button", { name: "Download collectors leaderboard as CSV" })
-        .boundingBox();
-      expect(csvSize?.width).toBe(36);
-      expect(csvSize?.height).toBe(36);
-      if (width === 320) {
-        await list.focus();
-        await list.press("ArrowRight");
-        await expect
-          .poll(() => list.evaluate((element) => element.scrollLeft))
-          .toBeGreaterThan(0);
-        await list.evaluate((element) => {
-          element.scrollLeft = 0;
-        });
-      }
+      await expectMobileCollectorLayout(page, section, list, width);
     }
     for (const width of [768, 1023, 1024]) {
       await page.setViewportSize({ width, height: 844 });
@@ -220,6 +235,22 @@ export function defineCollectorsLeaderboardTests() {
       name: "Total unweighted TDH",
       exact: true,
     });
+    await sortGroup
+      .getByRole("button", { name: "Balance", exact: true })
+      .focus();
+    for (const name of [
+      "TDH",
+      "Unweighted TDH",
+      "Total balance",
+      "Total TDH",
+      "Total unweighted TDH",
+    ]) {
+      await page.keyboard.press("Tab");
+      const chip = sortGroup.getByRole("button", { name, exact: true });
+      await expect(chip).toBeFocused();
+      await expect(chip).toBeInViewport({ ratio: 1 });
+      await expect(sortGroup).toHaveCSS("mask-image", "none");
+    }
     await farSort.click();
     await expect(farSort).toHaveAttribute("aria-pressed", "true");
     await expect(

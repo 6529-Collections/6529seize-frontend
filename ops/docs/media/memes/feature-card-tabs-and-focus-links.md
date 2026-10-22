@@ -244,8 +244,8 @@
 ## Collectors Translation Follow-up
 
 - Collectors mobile labels use the `theMemes.detail.collectors.*` message keys.
-  New metric, count and sort labels currently fall back to English in French,
-  Spanish and German; values use the selected locale's number formatting.
+  New metric and sort labels currently use the `en-US` fallback in `en-GB`,
+  `fr-FR`, `es-ES` and `de-DE`; values use the selected locale's number formatting.
   Frontend localization maintainers should add reviewed translations and check
   longer labels at phone widths.
 

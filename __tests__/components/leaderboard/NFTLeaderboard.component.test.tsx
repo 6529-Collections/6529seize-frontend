@@ -236,6 +236,7 @@ describe("NFTLeaderboard component", () => {
     await waitFor(() =>
       expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
     );
+    expect(downloadButton).toHaveFocus();
     expect(commonApiFetch).not.toHaveBeenCalled();
   });
 
