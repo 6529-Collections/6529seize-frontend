@@ -158,6 +158,26 @@ export type INotificationSubscriptionCoverage = {
   };
 };
 
+export type INotificationVotingCreditsReturned = Omit<
+  NotificationBase,
+  "related_identity"
+> & {
+  readonly cause: ApiNotificationCause.VotingCreditsReturned;
+  readonly additional_context: {
+    readonly event_id: string;
+    readonly reason: "WIN" | "AUTHOR_DELETED";
+    readonly wave_id: string;
+    readonly competition_id: string;
+    readonly competition_title: string;
+    readonly entry_id: string;
+    readonly drop_id: string;
+    readonly submission_title: string;
+    readonly credit_type: string;
+    readonly amount: number;
+    readonly released_at: number;
+  };
+};
+
 export type INotificationCompetitionLifecycle = Omit<
   NotificationBase,
   "related_identity"
@@ -190,6 +210,7 @@ export type INotificationMemeCollaboration = Omit<
 };
 
 export type TypedNotification =
+  | INotificationVotingCreditsReturned
   | INotificationMemeCollaboration
   | INotificationCompetitionLifecycle
   | INotificationIdentitySubscribed
