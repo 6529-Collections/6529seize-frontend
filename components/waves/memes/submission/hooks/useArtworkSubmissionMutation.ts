@@ -1,6 +1,9 @@
 "use client";
-import type { ApiMemeCollaboratorProfile } from "@/generated/models/ApiMemeCollaboratorProfile";
 
+import type { ApiCompetition } from "@/generated/models/ApiCompetition";
+import type { ApiMemeCollaboratorProfile } from "@/generated/models/ApiMemeCollaboratorProfile";
+import { useOptionalCompetition } from "@/contexts/CompetitionContext";
+import { useCompetitionEntrySubmit } from "@/hooks/competitions/useCompetitionEntrySubmit";
 import { useAuth } from "@/components/auth/Auth";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
@@ -9,8 +12,7 @@ import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { useDropSignature } from "@/hooks/drops/useDropSignature";
-import { commonApiPost } from "@/services/api/common-api";
+import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
 import { getAuthStateFingerprint } from "@/services/auth/auth-token-fingerprint";
 import { getAuthJwt, getWalletAddress } from "@/services/auth/auth.utils";
 import { useMutation } from "@tanstack/react-query";
@@ -94,41 +96,20 @@ const isSubmissionWalletCurrent = ({
   );
 };
 
-/**
- * Hook for submitting artwork with enhanced UX
- */
-export function useArtworkSubmissionMutation() {
-  const locale = useBrowserLocale();
-  const { setToast, requestAuth } = useAuth();
-  const { signDrop, isLoading: isSigningDrop } = useDropSignature();
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [submissionPhase, setSubmissionPhase] =
-    useState<SubmissionPhase>("idle");
-  const [submissionError, setSubmissionError] = useState<string | undefined>(
-    undefined
-  );
-  const submissionInFlightRef = useRef(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Update submission phase with callbacks
-  const updatePhase = useCallback(
-    (
-      phase: SubmissionPhase,
-      callbacks?: PhaseChangeCallbacks,
-      error?: string
-    ) => {
-      setSubmissionPhase(phase);
-      setSubmissionError(error);
-
-      if (callbacks?.onPhaseChange) {
-        callbacks.onPhaseChange(phase, error);
-      }
-    },
-    []
-  );
-
-  // File upload mutation
-  const uploadMutation = useMutation<
+function useArtworkUpload({
+  updatePhase,
+  setUploadProgress,
+  setToast,
+}: {
+  readonly updatePhase: (
+    phase: SubmissionPhase,
+    callbacks?: PhaseChangeCallbacks,
+    error?: string
+  ) => void;
+  readonly setUploadProgress: (progress: number) => void;
+  readonly setToast: ReturnType<typeof useAuth>["setToast"];
+}) {
+  return useMutation<
     ApiDropMedia, // Response type
     Error, // Error type
     {
@@ -148,7 +129,7 @@ export function useArtworkSubmissionMutation() {
     onError: (error, variables) => {
       console.error("Upload error:", error);
       const errorMsg = `Error uploading file: ${
-        error?.message || error?.toString() || "Unknown error"
+        error.message || error.toString() || "Unknown error"
       }`;
       updatePhase("error", variables.callbacks, errorMsg);
 
@@ -158,9 +139,40 @@ export function useArtworkSubmissionMutation() {
       });
     },
   });
+}
 
-  // Submission mutation
-  const submissionMutation = useMutation<
+function getArtworkValidationError(data: ArtworkSubmissionData): string | null {
+  const hasExisting = Boolean(data.existingMedia?.url.trim());
+  const hasExternal = Boolean(data.externalMedia?.url.trim());
+  if (!data.imageFile && !hasExisting && !hasExternal)
+    return "Upload a file or provide valid media.";
+  if (hasExisting && !data.existingMedia?.mimeType)
+    return "Select the media type for this media.";
+  if (hasExternal && !data.externalMedia?.mimeType)
+    return "Select the media type for your URL.";
+  if (!data.traits.title) return "Add a title for your artwork.";
+  const validation = getSubmissionMetadataLengthValidation({
+    traits: data.traits,
+    operationalData: data.operationalData,
+  });
+  if (!validation.hasErrors) return null;
+  const fields = validation.errors
+    .map((item) => `${item.dataKey} (${item.length}/${item.maxLength})`)
+    .join(", ");
+  return `Metadata exceeds character limits for: ${fields}`;
+}
+
+function useArtworkSubmissionPost(
+  competition: ApiCompetition | null,
+  updatePhase: (
+    phase: SubmissionPhase,
+    callbacks?: PhaseChangeCallbacks,
+    error?: string
+  ) => void
+) {
+  const { setToast, requestAuth } = useAuth();
+  const submitCompetitionEntry = useCompetitionEntrySubmit(competition);
+  return useMutation<
     ApiDrop, // Response type
     Error, // Error type
     {
@@ -193,11 +205,7 @@ export function useArtworkSubmissionMutation() {
         throw new Error(ACTIVE_WALLET_CHANGED_ERROR);
       }
 
-      // Submit to API
-      return commonApiPost<ApiCreateDropRequest, ApiDrop>({
-        endpoint: "drops/",
-        body: data,
-      });
+      return submitCompetitionEntry(data);
     },
     onSuccess: (_, variables) => {
       updatePhase("success", variables.callbacks);
@@ -209,6 +217,10 @@ export function useArtworkSubmissionMutation() {
       });
     },
     onError: (error, variables) => {
+      if (isUserRejectedSigningError(error)) {
+        updatePhase("idle", variables.callbacks);
+        return;
+      }
       console.error("Submission error:", error);
       if (error.message === ACTIVE_WALLET_CHANGED_ERROR) {
         updatePhase("error", variables.callbacks, error.message);
@@ -227,6 +239,175 @@ export function useArtworkSubmissionMutation() {
       });
     },
   });
+}
+
+async function prepareArtworkRequest({
+  data,
+  signerAddress,
+  isSafeSignature,
+  expectedAuthStateFingerprint,
+  identityChangedMessage,
+  callbacks,
+  locale,
+  upload,
+  updatePhase,
+  setToast,
+}: {
+  readonly data: ArtworkSubmissionData;
+  readonly signerAddress: string;
+  readonly isSafeSignature: boolean;
+  readonly expectedAuthStateFingerprint: string;
+  readonly identityChangedMessage: string;
+  readonly callbacks: PhaseChangeCallbacks;
+  readonly locale: ReturnType<typeof useBrowserLocale>;
+  readonly upload: ReturnType<typeof useArtworkUpload>["mutateAsync"];
+  readonly updatePhase: (
+    phase: SubmissionPhase,
+    callbacks?: PhaseChangeCallbacks,
+    error?: string
+  ) => void;
+  readonly setToast: ReturnType<typeof useAuth>["setToast"];
+}) {
+  const existingUrl = data.existingMedia?.url.trim() ?? "";
+  const externalUrl = data.externalMedia?.url.trim() ?? "";
+  let media: ApiDropMedia;
+
+  if (data.imageFile) {
+    media = await upload({
+      file: data.imageFile,
+      callbacks,
+    });
+  } else if (existingUrl && data.existingMedia) {
+    media = {
+      url: existingUrl,
+      mime_type: data.existingMedia.mimeType,
+    };
+  } else if (externalUrl && data.externalMedia) {
+    media = {
+      url: externalUrl,
+      mime_type: data.externalMedia.mimeType,
+    };
+  } else {
+    throw new Error("Upload a file or provide valid media.");
+  }
+
+  let operationalData = data.operationalData;
+  let proposalFrameMetadata: ProposalFrameMetadata | null = null;
+  if (data.proposalFrame) {
+    updatePhase("processing", callbacks);
+    const framed = await prepareProposalCard({
+      media,
+      layout: data.proposalFrame,
+      title: data.traits.title,
+      locale,
+      operationalData,
+      uploadThumbnail: async (file) => {
+        const uploaded = await upload({
+          file,
+          callbacks,
+        });
+        updatePhase("processing", callbacks);
+        return uploaded;
+      },
+      assertIdentity: () => {
+        if (
+          !isSubmissionWalletCurrent({
+            signerAddress,
+            expectedAuthStateFingerprint: expectedAuthStateFingerprint,
+          })
+        ) {
+          throw new Error(ACTIVE_WALLET_CHANGED_ERROR);
+        }
+      },
+    }).catch((error: unknown) => {
+      setToast({
+        type: "error",
+        message:
+          getToastErrorDetails(error) ??
+          t(locale, "memes.proposalFrame.publishError"),
+      });
+      throw error;
+    });
+    media = framed.media;
+    operationalData = framed.operationalData;
+    proposalFrameMetadata = framed.metadata;
+  }
+
+  if (!isSubmissionSignerCurrent(signerAddress)) {
+    setToast({ message: identityChangedMessage, type: "error" });
+    throw new Error(ACTIVE_WALLET_CHANGED_ERROR);
+  }
+  const signingAuthStateFingerprint = getAuthStateFingerprint({
+    walletAddress: getWalletAddress(),
+    jwt: getAuthJwt(),
+  });
+
+  // Step 2: Transform data to API format
+  const transformedRequest = transformToApiRequest({
+    collaboratorIds: data.collaborators?.map((profile) => profile.id) ?? [],
+    waveId: data.waveId,
+    traits: data.traits,
+    operationalData,
+    isAdditionalActionPromised: data.isAdditionalActionPromised,
+    media,
+    signerAddress,
+    isSafeSignature,
+  });
+
+  if (proposalFrameMetadata) {
+    transformedRequest.metadata.push({
+      data_key: PROPOSAL_FRAME_METADATA_KEY,
+      data_value: JSON.stringify(proposalFrameMetadata),
+    });
+  }
+
+  return { transformedRequest, signingAuthStateFingerprint };
+}
+
+/**
+ * Hook for submitting artwork with enhanced UX
+ */
+export function useArtworkSubmissionMutation(
+  explicitCompetition?: ApiCompetition | null
+) {
+  const context = useOptionalCompetition();
+  const competition =
+    explicitCompetition === undefined
+      ? (context?.competition ?? null)
+      : explicitCompetition;
+  const locale = useBrowserLocale();
+  const { setToast } = useAuth();
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [submissionPhase, setSubmissionPhase] =
+    useState<SubmissionPhase>("idle");
+  const [submissionError, setSubmissionError] = useState<string | undefined>(
+    undefined
+  );
+  const submissionInFlightRef = useRef(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Update submission phase with callbacks
+  const updatePhase = useCallback(
+    (
+      phase: SubmissionPhase,
+      callbacks?: PhaseChangeCallbacks,
+      error?: string
+    ) => {
+      setSubmissionPhase(phase);
+      setSubmissionError(error);
+
+      callbacks?.onPhaseChange?.(phase, error);
+    },
+    []
+  );
+
+  const uploadMutation = useArtworkUpload({
+    updatePhase,
+    setUploadProgress,
+    setToast,
+  });
+
+  const submissionMutation = useArtworkSubmissionPost(competition, updatePhase);
 
   /**
    * Submit the artwork with media upload
@@ -246,58 +427,9 @@ export function useArtworkSubmissionMutation() {
       setUploadProgress(0);
       setSubmissionError(undefined);
 
-      // Validate required fields
-      const hasFile = Boolean(data.imageFile);
-      const existingUrl = data.existingMedia?.url.trim() ?? "";
-      const hasExisting = existingUrl.length > 0;
-      const externalUrl = data.externalMedia?.url?.trim() ?? "";
-      const hasExternal = externalUrl.length > 0;
-
-      if (!hasFile && !hasExisting && !hasExternal) {
-        setToast({
-          message: "Upload a file or provide valid media.",
-          type: "error",
-        });
-        return null;
-      }
-
-      if (hasExisting && !data.existingMedia?.mimeType) {
-        setToast({
-          message: "Select the media type for this media.",
-          type: "error",
-        });
-        return null;
-      }
-
-      if (hasExternal && !data.externalMedia?.mimeType) {
-        setToast({
-          message: "Select the media type for your URL.",
-          type: "error",
-        });
-        return null;
-      }
-
-      if (!data.traits.title) {
-        setToast({
-          message: "Add a title for your artwork.",
-          type: "error",
-        });
-        return null;
-      }
-
-      const metadataLengthValidation = getSubmissionMetadataLengthValidation({
-        traits: data.traits,
-        operationalData: data.operationalData,
-      });
-      if (metadataLengthValidation.hasErrors) {
-        const fields = metadataLengthValidation.errors
-          .map((item) => `${item.dataKey} (${item.length}/${item.maxLength})`)
-          .join(", ");
-
-        setToast({
-          message: `Metadata exceeds character limits for: ${fields}`,
-          type: "error",
-        });
+      const validationError = getArtworkValidationError(data);
+      if (validationError) {
+        setToast({ message: validationError, type: "error" });
         return null;
       }
 
@@ -320,118 +452,22 @@ export function useArtworkSubmissionMutation() {
       // Create callbacks object
       const callbacks = { onPhaseChange: options?.onPhaseChange };
 
-      // Step 1: Resolve the media payload (upload when necessary)
-      let media: ApiDropMedia;
-
-      if (hasFile && data.imageFile) {
-        media = await uploadMutation.mutateAsync({
-          file: data.imageFile,
+      const { transformedRequest, signingAuthStateFingerprint } =
+        await prepareArtworkRequest({
+          data,
+          signerAddress,
+          isSafeSignature,
           callbacks,
-        });
-      } else if (hasExisting && data.existingMedia) {
-        media = {
-          url: existingUrl,
-          mime_type: data.existingMedia.mimeType,
-        };
-      } else if (hasExternal && data.externalMedia) {
-        media = {
-          url: externalUrl,
-          mime_type: data.externalMedia.mimeType,
-        };
-      } else {
-        return null;
-      }
-
-      let operationalData = data.operationalData;
-      let proposalFrameMetadata: ProposalFrameMetadata | null = null;
-      if (data.proposalFrame) {
-        updatePhase("processing", callbacks);
-        const framed = await prepareProposalCard({
-          media,
-          layout: data.proposalFrame,
-          title: data.traits.title,
           locale,
-          operationalData,
-          uploadThumbnail: async (file) => {
-            const uploaded = await uploadMutation.mutateAsync({
-              file,
-              callbacks,
-            });
-            updatePhase("processing", callbacks);
-            return uploaded;
-          },
-          assertIdentity: () => {
-            if (
-              !isSubmissionWalletCurrent({
-                signerAddress,
-                expectedAuthStateFingerprint:
-                  options.expectedAuthStateFingerprint,
-              })
-            ) {
-              throw new Error(ACTIVE_WALLET_CHANGED_ERROR);
-            }
-          },
-        }).catch((error: unknown) => {
-          setToast({
-            type: "error",
-            message:
-              getToastErrorDetails(error) ??
-              t(locale, "memes.proposalFrame.publishError"),
-          });
-          throw error;
+          expectedAuthStateFingerprint: options.expectedAuthStateFingerprint,
+          identityChangedMessage: options.identityChangedMessage,
+          upload: uploadMutation.mutateAsync,
+          updatePhase,
+          setToast,
         });
-        media = framed.media;
-        operationalData = framed.operationalData;
-        proposalFrameMetadata = framed.metadata;
-      }
-
-      if (!isSubmissionSignerCurrent(signerAddress)) {
-        setToast({ message: options.identityChangedMessage, type: "error" });
-        throw new Error(ACTIVE_WALLET_CHANGED_ERROR);
-      }
-      const signingAuthStateFingerprint = getAuthStateFingerprint({
-        walletAddress: getWalletAddress(),
-        jwt: getAuthJwt(),
-      });
-
-      // Step 2: Transform data to API format
-      const transformedRequest = transformToApiRequest({
-        collaboratorIds: data.collaborators?.map((profile) => profile.id) ?? [],
-        waveId: data.waveId,
-        traits: data.traits,
-        operationalData,
-        isAdditionalActionPromised: data.isAdditionalActionPromised,
-        media,
-        signerAddress,
-        isSafeSignature,
-      });
-
-      if (proposalFrameMetadata) {
-        transformedRequest.metadata.push({
-          data_key: PROPOSAL_FRAME_METADATA_KEY,
-          data_value: JSON.stringify(proposalFrameMetadata),
-        });
-      }
 
       // Step 3: Sign the drop
       updatePhase("signing", callbacks);
-      const signatureResult = await signDrop({
-        drop: transformedRequest,
-        termsOfService: data.termsOfService,
-        memesWave: { id: data.waveId, name: data.waveName },
-      });
-
-      if (!signatureResult.success) {
-        updatePhase("idle", callbacks);
-        return null;
-      }
-
-      // Add signature to the request
-      transformedRequest.signature = signatureResult.signature ?? null;
-      if (signatureResult.signatureMessage) {
-        transformedRequest.signature_message = signatureResult.signatureMessage;
-      }
-
       // Step 4: Submit the signed drop
       const result = await submissionMutation.mutateAsync({
         data: transformedRequest,
@@ -442,12 +478,14 @@ export function useArtworkSubmissionMutation() {
       });
 
       // Call success callback if provided
-      if (options?.onSuccess) {
-        options.onSuccess(result);
-      }
+      options.onSuccess?.(result);
 
       return result;
     } catch (error) {
+      if (isUserRejectedSigningError(error)) {
+        updatePhase("idle", { onPhaseChange: options.onPhaseChange });
+        return null;
+      }
       const errorMessage =
         error instanceof Error
           ? error.message
@@ -459,9 +497,7 @@ export function useArtworkSubmissionMutation() {
       );
 
       // Call error callback if provided
-      if (options?.onError && error instanceof Error) {
-        options.onError(error);
-      }
+      if (error instanceof Error) options.onError?.(error);
 
       return null;
     } finally {
@@ -474,7 +510,7 @@ export function useArtworkSubmissionMutation() {
     submitArtwork,
     isSubmitting,
     isUploading: uploadMutation.isPending,
-    isSigning: isSigningDrop,
+    isSigning: submissionPhase === "signing",
     isProcessing: submissionMutation.isPending,
     uploadProgress,
     submissionPhase,

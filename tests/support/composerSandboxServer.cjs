@@ -1851,6 +1851,19 @@ function isExpectedCreateWaveConfig(wave) {
   );
 }
 
+function isExpectedCreateWaveHubBody(body) {
+  if (!isPlainObject(body) || !hasOnlyAllowedKeys(body, ["idempotency_key", "name", "picture", "description_drop", "visibility", "chat", "admin_group", "admin_drop_deletion_enabled"], ["parent_wave_id"])) return false;
+  const description = body.description_drop?.parts?.[0]?.content;
+  return typeof body.idempotency_key === "string" && /^[0-9a-f-]{36}$/i.test(body.idempotency_key) &&
+    typeof body.name === "string" && body.name.startsWith("Sandbox ") && body.name.length <= 250 &&
+    body.picture === null && typeof description === "string" && description.length <= 100000 &&
+    isExpectedDescriptionDrop(body.description_drop, description) &&
+    hasKnownSandboxGroupScope(body.visibility) && isExpectedCreateWaveChatConfig(body.chat) &&
+    hasOnlyKeys(body.admin_group, ["group_id"]) && isKnownSandboxGroupId(body.admin_group.group_id) &&
+    typeof body.admin_drop_deletion_enabled === "boolean" &&
+    (body.parent_wave_id === undefined || body.parent_wave_id === SANDBOX_WAVE_ID);
+}
+
 function isExpectedResumedDraftChatWaveBody(body) {
   if (
     !hasOnlyKeys(body, [
@@ -2244,6 +2257,8 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
     return isExpectedPublishAdminGroupBody(body);
   }
 
+  if (pathname === "/api/v3/waves") return isExpectedCreateWaveHubBody(body);
+
   if (pathname === "/api/waves") {
     return (
       isExpectedCreateWaveBody(body) ||
@@ -2430,15 +2445,16 @@ function loggedRequestBody(pathname, body) {
     };
   }
 
-  if (pathname === "/api/waves") {
+  if (pathname === "/api/waves" || pathname === "/api/v3/waves") {
+    const nativeHub = pathname === "/api/v3/waves";
     const firstPart = Array.isArray(body.description_drop?.parts)
       ? body.description_drop.parts[0]
       : null;
     return {
       name: typeof body.name === "string" ? body.name : null,
-      admin_group_id: body.wave?.admin_group?.group_id ?? null,
+      admin_group_id: body.admin_group?.group_id ?? body.wave?.admin_group?.group_id ?? null,
       description: isPlainObject(firstPart) ? firstPart.content : null,
-      wave_type: body.wave?.type ?? null,
+      wave_type: nativeHub ? "CHAT" : body.wave?.type ?? null,
       decisions_strategy: body.wave?.decisions_strategy ?? null,
       voting_period_max: body.voting?.period?.max ?? null,
       participation_period_max: body.participation?.period?.max ?? null,
@@ -2780,6 +2796,13 @@ const mockApiKnownPostRoutes = [
     },
   },
   {
+    matches: (pathname) => pathname === "/api/v3/waves",
+    respond: (res, body) => {
+      sandboxCreatedWaveType = "CHAT";
+      return writeJsonResponse(res, { id: SANDBOX_CREATED_WAVE_ID, name: body.name, picture: body.picture, legacy_primary_competition_id: null, permissions: { view: true, administer: true, create_competition: true } });
+    },
+  },
+  {
     matches: (pathname) => pathname === "/api/waves",
     respond: (res, body) => {
       sandboxCreatedWaveType = body.wave.type;
@@ -3056,8 +3079,6 @@ function buildPublicRuntime() {
       process.env.IPFS_GATEWAY_ENDPOINT || "https://ipfs.6529.io/ipfs/",
     MEDIA_RESOLVER_ENDPOINT:
       process.env.MEDIA_RESOLVER_ENDPOINT || "https://media.6529.io",
-    NEXT_PUBLIC_FEATURE_MULTI_COMPETITION:
-      process.env.NEXT_PUBLIC_FEATURE_MULTI_COMPETITION || "false",
     NODE_ENV: "development",
     PORT: String(frontendPort),
     WS_ENDPOINT: mockWsOrigin,

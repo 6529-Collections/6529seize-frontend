@@ -1,8 +1,8 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { useArtworkSubmissionMutation } from "@/components/waves/memes/submission/hooks/useArtworkSubmissionMutation";
+import type { ApiCompetition } from "@/generated/models/ApiCompetition";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { TraitsData } from "@/components/waves/memes/submission/types/TraitsData";
-import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { commonApiPost } from "@/services/api/common-api";
 import { getAuthStateFingerprint } from "@/services/auth/auth-token-fingerprint";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -17,7 +17,6 @@ jest.mock(
   () => ({ prepareProposalCard: jest.fn() })
 );
 
-jest.mock("@/hooks/drops/useDropSignature");
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
 }));
@@ -26,9 +25,6 @@ jest.mock("@/services/auth/auth.utils", () => ({
   getWalletAddress: jest.fn(() => "0xabc"),
 }));
 
-const mockUseDropSignature = useDropSignature as jest.MockedFunction<
-  typeof useDropSignature
->;
 const mockCommonApiPost = commonApiPost as jest.MockedFunction<
   typeof commonApiPost
 >;
@@ -63,7 +59,12 @@ const createDeferred = <T,>() => {
   return { promise, resolve };
 };
 
-const setupHook = () => {
+const defaultCompetition = {
+  id: "original-primary",
+  wave_id: "wave-1",
+  config_version: 3,
+} as ApiCompetition;
+const setupHook = (competition: ApiCompetition | null = defaultCompetition) => {
   const requestAuth = jest.fn(async () => ({ success: true }));
   const setToast = jest.fn();
   const queryClient = new QueryClient({
@@ -76,7 +77,9 @@ const setupHook = () => {
       </AuthContext.Provider>
     </QueryClientProvider>
   );
-  const hook = renderHook(() => useArtworkSubmissionMutation(), { wrapper });
+  const hook = renderHook(() => useArtworkSubmissionMutation(competition), {
+    wrapper,
+  });
   return { ...hook, requestAuth, setToast };
 };
 
@@ -88,19 +91,12 @@ const submitOptions = {
 describe("useArtworkSubmissionMutation", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockNativeEntry.mockReset().mockResolvedValue({ id: "native-artwork" });
   });
 
-  it("locks duplicate attempts and stays loading through signing and processing", async () => {
-    const signature = createDeferred<{
-      success: boolean;
-      signature?: string;
-    }>();
+  it("locks duplicate attempts and stays loading through the native signed command", async () => {
     const post = createDeferred<ApiDrop>();
-    mockUseDropSignature.mockReturnValue({
-      signDrop: jest.fn(() => signature.promise),
-      isLoading: false,
-    });
-    mockCommonApiPost.mockReturnValue(post.promise);
+    mockNativeEntry.mockReturnValue(post.promise);
     const { result, requestAuth } = setupHook();
 
     let firstSubmission!: Promise<ApiDrop | null>;
@@ -122,17 +118,10 @@ describe("useArtworkSubmissionMutation", () => {
 
     await waitFor(() => {
       expect(result.current.isSubmitting).toBe(true);
-      expect(result.current.submissionPhase).toBe("signing");
+      expect(result.current.submissionPhase).toBe("processing");
     });
     await expect(duplicateSubmission).resolves.toBeNull();
 
-    await act(async () => {
-      signature.resolve({ success: true, signature: "0xsigned" });
-    });
-    await waitFor(() => {
-      expect(result.current.submissionPhase).toBe("processing");
-      expect(result.current.isSubmitting).toBe(true);
-    });
     expect(requestAuth).toHaveBeenCalledWith({
       expectedAuthStateFingerprint,
     });
@@ -143,17 +132,12 @@ describe("useArtworkSubmissionMutation", () => {
     });
     expect(result.current.submissionPhase).toBe("success");
     expect(result.current.isSubmitting).toBe(false);
-    expect(mockCommonApiPost).toHaveBeenCalledTimes(1);
+    expect(mockNativeEntry).toHaveBeenCalledTimes(1);
+    expect(mockCommonApiPost).not.toHaveBeenCalled();
     expect(prepareProposalCard).not.toHaveBeenCalled();
   });
 
-  it("keeps initial collaborators in the signed and posted submission payload", async () => {
-    const signDrop = jest.fn(async () => ({
-      success: true,
-      signature: "signed",
-    }));
-    mockUseDropSignature.mockReturnValue({ signDrop, isLoading: false });
-    mockCommonApiPost.mockResolvedValue({ id: "created" } as ApiDrop);
+  it("passes initial collaborators to the native signed submission command", async () => {
     const { result } = setupHook();
     await act(async () => {
       await result.current.submitArtwork(
@@ -168,23 +152,16 @@ describe("useArtworkSubmissionMutation", () => {
         submitOptions
       );
     });
-    expect(signDrop).toHaveBeenCalledWith(
-      expect.objectContaining({
-        drop: expect.objectContaining({ collaborator_ids: ["B"] }),
-      })
+    expect(mockNativeEntry).toHaveBeenCalledWith(
+      expect.objectContaining({ collaborator_ids: ["B"] })
     );
-    expect(mockCommonApiPost).toHaveBeenCalledWith({
-      endpoint: "drops/",
-      body: expect.objectContaining({
-        collaborator_ids: ["B"],
-        signature: "signed",
-      }),
-    });
+    expect(mockCommonApiPost).not.toHaveBeenCalled();
   });
 
   it("unlocks retry and returns to idle when signing is canceled", async () => {
-    const signDrop = jest.fn(async () => ({ success: false }));
-    mockUseDropSignature.mockReturnValue({ signDrop, isLoading: false });
+    mockNativeEntry.mockRejectedValue(
+      Object.assign(new Error("Canceled"), { code: 4001 })
+    );
     const { result } = setupHook();
 
     await act(async () => {
@@ -207,21 +184,12 @@ describe("useArtworkSubmissionMutation", () => {
         submitOptions
       );
     });
-    expect(signDrop).toHaveBeenCalledTimes(2);
-    expect(signDrop).toHaveBeenLastCalledWith({
-      drop: expect.objectContaining({ title: "Artwork", wave_id: "wave-1" }),
-      termsOfService: "Terms",
-      memesWave: { id: "wave-1", name: "The Memes Main Stage" },
-    });
+    expect(mockNativeEntry).toHaveBeenCalledTimes(2);
     expect(mockCommonApiPost).not.toHaveBeenCalled();
   });
 
   it("signs and submits the published HTML, framed still, and original editing metadata", async () => {
-    const signDrop = jest.fn(async () => ({
-      success: true,
-      signature: "0xsigned",
-    }));
-    mockUseDropSignature.mockReturnValue({ signDrop, isLoading: false });
+    mockNativeEntry.mockResolvedValue({ id: "drop-framed" });
     const operationalData = createInitialState({}).operationalData;
     operationalData.additional_media.preview_image =
       "https://example.com/framed.png";
@@ -240,7 +208,6 @@ describe("useArtworkSubmissionMutation", () => {
       operationalData,
       metadata,
     });
-    mockCommonApiPost.mockResolvedValue({ id: "drop-framed" });
     const { result } = setupHook();
     await act(async () => {
       await result.current.submitArtwork(
@@ -250,36 +217,27 @@ describe("useArtworkSubmissionMutation", () => {
         submitOptions
       );
     });
-    expect(signDrop).toHaveBeenCalledWith(
+    expect(mockNativeEntry).toHaveBeenCalledWith(
       expect.objectContaining({
-        drop: expect.objectContaining({
-          parts: expect.arrayContaining([
-            expect.objectContaining({
-              media: [
-                { url: "ipfs://bafyframe/index.html", mime_type: "text/html" },
-              ],
-            }),
-          ]),
-          metadata: expect.arrayContaining([
-            {
-              data_key: "proposal_frame",
-              data_value: JSON.stringify(metadata),
-            },
-          ]),
-        }),
+        parts: expect.arrayContaining([
+          expect.objectContaining({
+            media: [
+              { url: "ipfs://bafyframe/index.html", mime_type: "text/html" },
+            ],
+          }),
+        ]),
+        metadata: expect.arrayContaining([
+          {
+            data_key: "proposal_frame",
+            data_value: JSON.stringify(metadata),
+          },
+        ]),
       })
     );
-    expect(mockCommonApiPost).toHaveBeenCalledWith(
-      expect.objectContaining({
-        endpoint: "drops/",
-        body: expect.objectContaining({ signature: "0xsigned" }),
-      })
-    );
+    expect(mockCommonApiPost).not.toHaveBeenCalled();
   });
 
   it("does not request a signature or submit a drop if frame publication fails", async () => {
-    const signDrop = jest.fn();
-    mockUseDropSignature.mockReturnValue({ signDrop, isLoading: false });
     jest
       .mocked(prepareProposalCard)
       .mockRejectedValue(new Error("Frame publication failed"));
@@ -292,7 +250,7 @@ describe("useArtworkSubmissionMutation", () => {
         submitOptions
       );
     });
-    expect(signDrop).not.toHaveBeenCalled();
+    expect(mockNativeEntry).not.toHaveBeenCalled();
     expect(mockCommonApiPost).not.toHaveBeenCalled();
     expect(result.current.submissionError).toBe("Frame publication failed");
     expect(setToast).toHaveBeenCalledWith({
@@ -300,4 +258,32 @@ describe("useArtworkSubmissionMutation", () => {
       message: "Frame publication failed.",
     });
   });
+});
+
+const mockNativeEntry = jest.fn();
+jest.mock("@/hooks/competitions/useCompetitionEntrySubmit", () => ({
+  useCompetitionEntrySubmit: (competition: ApiCompetition | null) =>
+    competition
+      ? mockNativeEntry
+      : () => {
+          throw new Error("Competition entry scope is required");
+        },
+}));
+
+it("rejects an explicit missing scope without posting a legacy drop", async () => {
+  mockNativeEntry.mockClear();
+  const { result } = setupHook(null);
+  await act(async () => {
+    await result.current.submitArtwork(
+      submissionData,
+      "0xabc",
+      false,
+      submitOptions
+    );
+  });
+  expect(mockNativeEntry).not.toHaveBeenCalled();
+  expect(mockCommonApiPost).not.toHaveBeenCalled();
+  expect(result.current.submissionError).toBe(
+    "Competition entry scope is required"
+  );
 });

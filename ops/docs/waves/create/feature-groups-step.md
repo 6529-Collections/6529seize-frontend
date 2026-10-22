@@ -3,9 +3,10 @@
 ## Overview
 
 Use `Access` to choose who can open a wave and, when needed, give different
-groups permission to chat, submit, vote, or administer it. Standalone `Chat`
+groups permission to chat or administer it. Standalone `Chat`
 waves show these controls inside `Optional settings` on the first screen.
-`Rank`, `Approve`, and Chat subwaves use a separate `Access` step.
+Subwaves use a separate `Access` step. Competition submission and voting groups
+are configured separately in [competition setup](../competitions/feature-manage-competitions.md).
 
 ## Location in the Site
 
@@ -18,10 +19,6 @@ waves show these controls inside `Optional settings` on the first screen.
 
 - Standalone `Chat`: `Start a chat wave` -> `Review`
 - Chat subwave: `Setup` -> `Access` -> `Guidelines` -> `Description` -> `Overview`
-- `Rank`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
-  `Guidelines` -> `Description` -> `Overview`
-- `Approve`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
-  `Guidelines` -> `Description` -> `Overview`
 
 ## Entry Points
 
@@ -37,24 +34,16 @@ waves show these controls inside `Optional settings` on the first screen.
 - The step initially shows only `Who can access this wave`.
 - Helper copy explains that everyone with access can participate by default and
   only the creator can administer the wave.
-- Selecting an access group also applies it to chat and, for `Rank` and
-  `Approve`, submission and voting.
-- `Customize other permissions` expands the less common controls:
-  - `Chat`: `Who can chat`, `Admins`
-  - `Rank` and `Approve`: `Who can drop`, `Who can vote`, `Who can chat`,
-    `Admins`
+- Selecting an access group also applies it to chat.
+- `Customize other permissions` expands `Who can chat` and `Admins`.
 - The expanded section shows `Customized` and reopens automatically after
   navigating away and back when Admins was changed, a participation group
   differs from access, chat is disabled, or admin deletion is disabled.
-- `Enable chat` controls whether `Who can chat` is active on `Rank` and
-  `Approve` waves.
 - `Allow admins to delete posts` is enabled by default.
-- Top-level waves default to `Everyone` for access, drop, vote, and chat, and
+- Top-level waves default to `Everyone` for access and chat, and
   `Only me` for administration.
 - A new subwave starts with the parent wave's exact access group and admin
-  group. Chat and, for `Rank` and `Approve`, submission and voting start with
-  that same access group. A public parent's subwaves start with `Everyone`.
-- Changing the wave type resets access and participation to these defaults.
+  group. Chat starts with that same access group. A public parent's subwaves start with `Everyone`.
 - The inherited subwave groups are editable. Subwave access does not have to
   match the parent's group.
 - Before creating a subwave, the app checks whether its access group includes
@@ -187,7 +176,7 @@ waves show these controls inside `Optional settings` on the first screen.
 
 ## Validation, Failure, and Recovery
 
-- When wave access is restricted, every active Drop, Vote, Chat, and Admins
+- When wave access is restricted, every active Chat and Admins
   group must contain only people who can also access the wave.
 - The app validates active groups together, exposes and highlights incompatible
   rows, and keeps `Next` or `Review wave` unavailable while validation runs or
@@ -206,7 +195,6 @@ waves show these controls inside `Optional settings` on the first screen.
 
 ## Limitations / Notes
 
-- `Approve` uses the same access rows as `Rank`.
 - Group membership is live: profile, reputation, and ownership changes can
   change who matches criteria over time.
 
@@ -215,8 +203,8 @@ waves show these controls inside `Optional settings` on the first screen.
 - [Wave Creation Index](README.md)
 - [Waves Index](../README.md)
 - [Wave Creation Setup Step](feature-overview-step.md)
-- [Wave Creation Schedule](feature-dates-step.md)
-- [Wave Creation Drop Settings](feature-drops-step.md)
+- [Wave Creation Schedule](../competitions/setup/feature-dates-step.md)
+- [Wave Creation Drop Settings](../competitions/setup/feature-drops-step.md)
 - [Wave Creation Guidelines Step](feature-rules-step.md)
 - [Wave Creation Description Step](feature-description-step.md)
 - [Wave Right Sidebar Group and Curation Management](../sidebars/feature-right-sidebar-group-management.md)

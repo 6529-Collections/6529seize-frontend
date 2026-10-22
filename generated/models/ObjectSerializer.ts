@@ -240,6 +240,8 @@ export * from '../models/ApiCompetitionDistributionItemPage';
 export * from '../models/ApiCompetitionDraftInput';
 export * from '../models/ApiCompetitionDropVoteSummary';
 export * from '../models/ApiCompetitionEntry';
+export * from '../models/ApiCompetitionEntryContext';
+export * from '../models/ApiCompetitionEntryContextPage';
 export * from '../models/ApiCompetitionEntryPage';
 export * from '../models/ApiCompetitionEntryStatus';
 export * from '../models/ApiCompetitionEntryVote';
@@ -1166,6 +1168,8 @@ import { ApiCompetitionDistributionItemPage } from '../models/ApiCompetitionDist
 import { ApiCompetitionDraftInput } from '../models/ApiCompetitionDraftInput';
 import { ApiCompetitionDropVoteSummary } from '../models/ApiCompetitionDropVoteSummary';
 import { ApiCompetitionEntry             } from '../models/ApiCompetitionEntry';
+import { ApiCompetitionEntryContext } from '../models/ApiCompetitionEntryContext';
+import { ApiCompetitionEntryContextPage } from '../models/ApiCompetitionEntryContextPage';
 import { ApiCompetitionEntryPage } from '../models/ApiCompetitionEntryPage';
 import { ApiCompetitionEntryStatus } from '../models/ApiCompetitionEntryStatus';
 import { ApiCompetitionEntryVote } from '../models/ApiCompetitionEntryVote';
@@ -2382,6 +2386,8 @@ let typeMap: {[index: string]: any} = {
     "ApiCompetitionDraftInput": ApiCompetitionDraftInput,
     "ApiCompetitionDropVoteSummary": ApiCompetitionDropVoteSummary,
     "ApiCompetitionEntry": ApiCompetitionEntry,
+    "ApiCompetitionEntryContext": ApiCompetitionEntryContext,
+    "ApiCompetitionEntryContextPage": ApiCompetitionEntryContextPage,
     "ApiCompetitionEntryPage": ApiCompetitionEntryPage,
     "ApiCompetitionEntryVote": ApiCompetitionEntryVote,
     "ApiCompetitionEntryVotePage": ApiCompetitionEntryVotePage,

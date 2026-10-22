@@ -4,10 +4,8 @@ import type { ApiCompetitionCreditBudget } from "@/generated/models/ApiCompetiti
 import type { ApiDropCompetitionContext } from "@/generated/models/ApiDropCompetitionContext";
 import type { ApiCompetitionEntry } from "@/generated/models/ApiCompetitionEntry";
 import type { ApiCompetitionMyVotePage } from "@/generated/models/ApiCompetitionMyVotePage";
-import type { ApiDropsLeaderboardPage } from "@/generated/models/ApiDropsLeaderboardPage";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiDropWithoutWaveV2View } from "@/services/api/drop-v2-view.types";
-import type { ApiWaveV3 } from "@/generated/models/ApiWaveV3";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 
 interface VoteResult {
@@ -71,21 +69,11 @@ export async function updateCompetitionVoteInCache(
     { wave_id: waveId, drop_id: dropId, viewer },
   ];
   const resourceKey = [QueryKey.COMPETITION_RESOURCE, scope];
-  const isLegacyPrimary =
-    client.getQueryData<ApiWaveV3>([
-      QueryKey.COMPETITION_HUB,
-      { wave_id: waveId, viewer },
-    ])?.legacy_primary_competition_id === competitionId;
   // A read started before the save must not overwrite the confirmed result.
   await Promise.all(
-    [
-      creditKey,
-      contextKey,
-      resourceKey,
-      ...(isLegacyPrimary && result.isCurrentViewer()
-        ? [[QueryKey.DROPS_LEADERBOARD, { waveId }]]
-        : []),
-    ].map((queryKey) => client.cancelQueries({ queryKey }))
+    [creditKey, contextKey, resourceKey].map((queryKey) =>
+      client.cancelQueries({ queryKey })
+    )
   );
   client.setQueryData(
     [QueryKey.COMPETITION_CREDITS, { ...scope, entry_id: entryId }],
@@ -114,27 +102,28 @@ export async function updateCompetitionVoteInCache(
     { queryKey: contextKey },
     (old) => (old ? updateContext(old) : old)
   );
-  client.setQueriesData<{ entry: ApiCompetitionEntry; drop: ExtendedDrop }>(
-    { queryKey: [...resourceKey, "drop", entryId, dropId] },
-    (old) => {
-      if (!old) return old;
-      const known = old.drop.competition_context;
-      return {
-        ...old,
-        drop: {
-          ...updateOwnVote(old.drop, budget, currentVote),
-          ...(known?.viewer === viewer
-            ? {
-                competition_context: {
-                  ...known,
-                  data: updateContext(known.data),
-                },
-              }
-            : {}),
-        },
-      };
-    }
-  );
+  for (const projection of ["drop", "card"])
+    client.setQueriesData<{ entry: ApiCompetitionEntry; drop: ExtendedDrop }>(
+      { queryKey: [...resourceKey, projection, entryId, dropId] },
+      (old) => {
+        if (!old) return old;
+        const known = old.drop.competition_context;
+        return {
+          ...old,
+          drop: {
+            ...updateOwnVote(old.drop, budget, currentVote),
+            ...(known?.viewer === viewer
+              ? {
+                  competition_context: {
+                    ...known,
+                    data: updateContext(known.data),
+                  },
+                }
+              : {}),
+          },
+        };
+      }
+    );
   client.setQueriesData<InfiniteData<ApiCompetitionMyVotePage>>(
     { queryKey: [...resourceKey, "votes/me"] },
     (old) =>
@@ -155,22 +144,4 @@ export async function updateCompetitionVoteInCache(
         })),
       }
   );
-  // Cancellation can outlive the viewer; this shared cache has no viewer key.
-  if (isLegacyPrimary && result.isCurrentViewer()) {
-    client.setQueriesData<InfiniteData<ApiDropsLeaderboardPage>>(
-      { queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId }] },
-      (old) =>
-        old && {
-          ...old,
-          pages: old.pages.map((page) => ({
-            ...page,
-            drops: page.drops.map((drop) =>
-              drop.id === dropId
-                ? updateOwnVote(drop, budget, currentVote)
-                : drop
-            ),
-          })),
-        }
-    );
-  }
 }

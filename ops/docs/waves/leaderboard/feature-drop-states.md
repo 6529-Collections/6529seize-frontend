@@ -35,6 +35,8 @@ This page covers:
 
 - Completed submission cards retain their score and voter summary. Select the
   voter count to inspect voters or the vote log; voting remains closed.
+- Cards appear with each competition leaderboard page. Background score
+  refreshes keep loaded artwork visible; opening a card loads its full drop.
 - List first load shows `Loading drops...`.
 - Grid first load shows skeleton cards.
 - Memes gallery first load shows `Loading drops...` while first media results

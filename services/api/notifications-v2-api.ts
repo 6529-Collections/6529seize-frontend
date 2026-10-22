@@ -1,4 +1,3 @@
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdentitySubscriptionTargetAction";
@@ -569,9 +568,7 @@ const buildNotificationsV2Params = ({
   "limit" | "cause" | "causeExclude" | "pageParam"
 >): Record<string, string> => {
   const params: Record<string, string> = { limit };
-  if (isMultiCompetitionEnabled()) {
-    params["include_competitions"] = "true";
-  }
+  params["include_competitions"] = "true";
 
   if (pageParam !== null && pageParam !== undefined) {
     params["id_less_than"] = String(pageParam);

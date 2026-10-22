@@ -7,6 +7,11 @@ import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2Page
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { expectCompetitionScroll } from "../support/competitionScroll";
 import {
+  expectNativeLeaderboardArtwork,
+  expectNativeLeaderboardReady,
+  observeNativeLeaderboard,
+} from "../support/nativeLeaderboard";
+import {
   monitorRememberedLeaderboard,
   retainDesktopWaveSidebar,
 } from "../support/waveNavigationContinuity";
@@ -204,13 +209,11 @@ async function expectLegacySectionContent(page: Page, tab: string) {
     ).toBeVisible();
   } else if (tab === "outcomes") {
     await expect(
-      page.getByText("No outcomes to show.", { exact: true })
+      page.getByText("Nothing to show yet.", { exact: true })
     ).toBeVisible();
   } else if (tab === "votes") {
     await expect(
-      page.getByText("You haven't voted on any submissions in this wave yet.", {
-        exact: true,
-      })
+      page.getByRole("article", { name: "Recorded alpha entry", exact: true })
     ).toBeVisible();
   } else if (tab === "rules") {
     await expect(
@@ -250,11 +253,19 @@ const pageResult = (data: unknown[]) => ({
   has_more: false,
 });
 
+const collaborationFixtures = new WeakMap<
+  Page,
+  Map<string, () => ApiDropAndWave>
+>();
+
 async function installCollaborationDropFixture(
   page: Page,
   getFixture: () => ApiDropAndWave
 ) {
   const dropId = getFixture().drop.id;
+  const fixtures = collaborationFixtures.get(page) ?? new Map();
+  fixtures.set(dropId, getFixture);
+  collaborationFixtures.set(page, fixtures);
   // Competition cards fetch one drop; the detail overlay batches its read.
   // Keep both views on the same fixture, including post-acceptance refreshes.
   await page.route(`**/v2/drops/${dropId}`, (route) =>
@@ -336,8 +347,15 @@ const competition = (id: string, title: string) => ({
           },
         ]
       : [],
-  capabilities: [],
-  permissions: { view: true, submit: true, vote: true, administer: true },
+  capabilities: [] as string[],
+  permissions: {
+    view: true,
+    submit: true,
+    vote: true,
+    administer: true,
+    edit_rules_after_activity: false,
+    edit_credit_rules: false,
+  },
   created_at: 1,
   updated_at: 1,
   published_at: 1,
@@ -345,6 +363,208 @@ const competition = (id: string, title: string) => ({
   cancelled_at: null,
   archived_at: null,
 });
+
+function competitionConfiguration(selected: ReturnType<typeof competition>) {
+  return {
+    title: selected.title,
+    description: selected.description,
+    participation: {
+      scope: { group_id: selected.participation.group_id },
+      signature_required: selected.participation.signature_required,
+      no_of_applications_allowed_per_participant:
+        selected.participation.max_entries_per_participant,
+      required_metadata: selected.participation.required_metadata,
+      required_media: selected.participation.required_media,
+      submission_strategy: null,
+      period: {
+        min: selected.participation.starts_at,
+        max: selected.participation.ends_at,
+      },
+      terms: selected.participation.terms,
+    },
+    voting: {
+      scope: { group_id: selected.voting.group_id },
+      credit_type: selected.voting.credit_type,
+      credit_scope: selected.voting.credit_scope,
+      credit_category: selected.voting.credit_category,
+      creditor_id: selected.voting.credit_creditor,
+      credit_nfts: selected.voting.credit_nfts,
+      signature_required: selected.voting.signature_required,
+      period: { min: selected.voting.starts_at, max: selected.voting.ends_at },
+      forbid_negative_votes: selected.voting.forbid_negative_votes,
+    },
+    rules: {
+      type: selected.type,
+      winning_threshold: selected.winners.winning_min_threshold,
+      winning_threshold_min_duration_ms:
+        selected.winners.winning_threshold_min_duration_ms,
+      max_winners: selected.winners.max_winners,
+      max_votes_per_identity_to_drop:
+        selected.voting.max_votes_per_identity_to_entry,
+      time_lock_ms: selected.decisions.time_lock_ms,
+      decisions_strategy: selected.decisions.strategy,
+    },
+    outcomes: selected.outcome_config,
+    presentation: selected.presentation,
+  };
+}
+
+interface SandboxArtwork {
+  readonly id: string;
+  readonly [key: string]: unknown;
+}
+
+async function installArtworkCompetitionResources(
+  page: Page,
+  waveId: string,
+  fixtureWave: unknown,
+  getDrops: () => SandboxArtwork[],
+  onRead?: (url: URL) => void
+) {
+  const entry = (dropId: string) => ({
+    id: dropId === entryDropId("alpha") ? "entry-alpha" : `entry-${dropId}`,
+    wave_id: waveId,
+    competition_id: "alpha",
+    drop_id: dropId,
+    submitter: { id: PROFILE, handle: "playwright", pfp: null },
+    status: "ACTIVE",
+    config_version: 1,
+    submitted_at: 1,
+    rank: null,
+    won_at: null,
+    decision_id: null,
+  });
+  const summary = (drop: SandboxArtwork) => {
+    const voting = (
+      drop["submission_context"] as
+        | {
+            voting?: {
+              total_votes_given?: number;
+              current_calculated_vote?: number;
+              predicted_final_vote?: number;
+              voters_count?: number;
+              context_profile_context?: { current?: number };
+            };
+          }
+        | undefined
+    )?.voting;
+    return {
+      rating: voting?.total_votes_given ?? 0,
+      realtime_rating: voting?.current_calculated_vote ?? 0,
+      rating_prediction: voting?.predicted_final_vote ?? 0,
+      user_vote: voting?.context_profile_context?.current ?? 0,
+      rank: getDrops().findIndex((item) => item.id === drop.id) + 1,
+      raters_count: voting?.voters_count ?? 0,
+      top_raters: [],
+      over_threshold_since_ms: null,
+    };
+  };
+  const card = (drop: SandboxArtwork) => ({
+    entry: entry(drop.id),
+    vote_summary: summary(drop),
+    awards: [],
+    drop: { ...drop, wave: fixtureWave },
+    metadata: drop["priority_metadata"] ?? [],
+  });
+  await page.route(
+    `**/api/v3/waves/${waveId}/competitions/alpha/leaderboard*`,
+    (route) => {
+      const url = new URL(route.request().url());
+      onRead?.(url);
+      const start = Number(url.searchParams.get("cursor") ?? 0);
+      const drops = getDrops();
+      const end = start + Number(url.searchParams.get("limit") ?? 50);
+      return route.fulfill({
+        json: {
+          data: drops.slice(start, end).map((drop, index) => ({
+            competition_id: "alpha",
+            entry_id: entry(drop.id).id,
+            drop_id: drop.id,
+            rating: summary(drop).rating,
+            real_time_rating: summary(drop).realtime_rating,
+            rank: start + index + 1,
+            submitted_at: 1,
+          })),
+          ...(url.searchParams.get("include") === "cards"
+            ? { cards: drops.slice(start, end).map(card) }
+            : {}),
+          has_more: end < drops.length,
+          next_cursor: end < drops.length ? String(end) : null,
+        },
+      });
+    }
+  );
+  await page.route(
+    `**/api/v3/waves/${waveId}/competitions/alpha/entry-contexts*`,
+    (route) => {
+      const ids =
+        new URL(route.request().url()).searchParams
+          .get("entry_ids")
+          ?.split(",") ?? [];
+      return route.fulfill({
+        json: {
+          competition: {
+            ...competition("alpha", "Parallel Alpha"),
+            wave_id: waveId,
+            capabilities: ["MAIN_STAGE"],
+          },
+          data: getDrops()
+            .filter((drop) => ids.includes(entry(drop.id).id))
+            .map((drop) => ({
+              entry: entry(drop.id),
+              vote_summary: summary(drop),
+              awards: [],
+              ...(new URL(route.request().url()).searchParams.get("include") ===
+              "cards"
+                ? {
+                    drop: { ...drop, wave: fixtureWave },
+                    metadata: drop["priority_metadata"] ?? [],
+                  }
+                : {}),
+            })),
+        },
+      });
+    }
+  );
+  await page.route("**/api/v2/drops?**", (route) => {
+    const ids =
+      new URL(route.request().url()).searchParams.get("ids")?.split(",") ?? [];
+    const drops = getDrops().filter((drop) => ids.includes(drop.id));
+    if (!drops.length) return route.fallback();
+    return route.fulfill({
+      json: {
+        data: drops.map((drop) => ({ ...drop, wave: fixtureWave })),
+        page: 1,
+        next: false,
+      },
+    });
+  });
+  await page.route(
+    `**/api/v3/waves/${waveId}/drops/*/competition-context`,
+    async (route) => {
+      const id = new URL(route.request().url()).pathname.split("/").at(-2);
+      const drop = getDrops().find((item) => item.id === id);
+      if (!drop) return route.fallback();
+      return route.fulfill({
+        json: {
+          competition: {
+            ...competition("alpha", "Parallel Alpha"),
+            wave_id: waveId,
+            capabilities: ["MAIN_STAGE"],
+          },
+          entry: entry(drop.id),
+          vote_summary: summary(drop),
+        },
+      });
+    }
+  );
+  await page.route("**/api/v2/drops/*", (route) => {
+    const id = new URL(route.request().url()).pathname.split("/").at(-1);
+    const drop = getDrops().find((item) => item.id === id);
+    if (!drop) return route.fallback();
+    return route.fulfill({ json: { wave: fixtureWave, drop } });
+  });
+}
 
 async function installCompetitionApi(
   page: Page,
@@ -371,6 +591,8 @@ async function installCompetitionApi(
   competitions.forEach((item) => {
     item.permissions.administer = administer;
     item.wave_id = waveId;
+    if (waveId === MEMES_WAVE && item.id === "alpha")
+      item.capabilities = ["MAIN_STAGE"];
   });
   if (selfNomination) {
     Object.assign(competitions[0]!.participation, {
@@ -413,6 +635,22 @@ async function installCompetitionApi(
     rank: null,
     won_at: null,
     decision_id: null,
+  });
+  const card = (id: string) => ({
+    entry: entry(id),
+    awards: [],
+    drop: recordedDrop(id),
+    metadata: [],
+    vote_summary: {
+      rating: votes[id] ?? 0,
+      realtime_rating: votes[id] ?? 0,
+      rating_prediction: votes[id] ?? 0,
+      user_vote: votes[id] ?? 0,
+      rank: 1,
+      raters_count: votes[id] ? 1 : 0,
+      top_raters: [],
+      over_threshold_since_ms: null,
+    },
   });
   await page.route("**/v3/waves/**", async (route) => {
     const url = new URL(route.request().url());
@@ -501,8 +739,12 @@ async function installCompetitionApi(
       };
       requests.push({ path: url.pathname, body: request });
       configurations.set(id, request.config);
-      selected.title = String(request.config["title"]);
-      selected.config_version += 1;
+      Object.assign(selected, {
+        title: request.config["title"],
+        description: request.config["description"],
+        presentation: request.config["presentation"],
+        config_version: selected.config_version + 1,
+      });
       body = selected;
     } else if (method === "POST" && resource === "entries") {
       const request = route.request().postDataJSON() as Record<string, unknown>;
@@ -530,8 +772,32 @@ async function installCompetitionApi(
     } else if (!selected)
       return route.fulfill({ status: 404, json: { message: "Not found" } });
     else if (!resource) body = selected;
+    else if (resource === "entry-contexts")
+      body = {
+        competition: selected,
+        data: (url.searchParams.get("entry_ids")?.split(",") ?? [])
+          .filter((entryId) => entryId === entry(id).id)
+          .map(() => ({
+            entry: entry(id),
+            awards: [],
+            ...(url.searchParams.get("include") === "cards"
+              ? { drop: recordedDrop(id), metadata: [] }
+              : {}),
+            vote_summary: {
+              rating: votes[id] ?? 0,
+              realtime_rating: votes[id] ?? 0,
+              rating_prediction: votes[id] ?? 0,
+              user_vote: votes[id] ?? 0,
+              rank: 1,
+              raters_count: votes[id] ? 1 : 0,
+              top_raters: [],
+              over_threshold_since_ms: null,
+            },
+          })),
+      };
     else if (resource === "activity") body = [];
-    else if (resource === "configuration") body = configurations.get(id);
+    else if (resource === "configuration")
+      body = configurations.get(id) ?? competitionConfiguration(selected);
     else if (resource === "entries" || resource === "winners")
       body = pageResult(resource === "entries" ? [entry(id)] : []);
     else if (resource === "leaderboard")
@@ -570,6 +836,11 @@ async function installCompetitionApi(
       };
     else if (resource === `entries/entry-${id}`) body = entry(id);
     else body = pageResult([]);
+    if (
+      resource === "leaderboard" &&
+      url.searchParams.get("include") === "cards"
+    )
+      body = { ...(body as Record<string, unknown>), cards: [card(id)] };
     return route.fulfill({ json: body });
   });
   const recordedDrop = (id: string) => ({
@@ -578,6 +849,7 @@ async function installCompetitionApi(
     drop_type: "CHAT",
     title: `Recorded ${id} entry`,
     content: `Immutable ${id} entry content`,
+    ...collaborationFixtures.get(page)?.get(entryDropId(id))?.().drop,
   });
   // The detail overlay reads the batch endpoint; keep it consistent with the
   // single-drop fixture rather than accidentally asserting the covered card.
@@ -610,33 +882,7 @@ async function installCompetitionApi(
       },
     });
   });
-  await page.route("**/v2/drops?**", async (route) => {
-    const ids =
-      new URL(route.request().url()).searchParams.get("ids")?.split(",") ?? [];
-    const owners = competitions.filter((item) =>
-      ids.includes(entryDropId(item.id))
-    );
-    if (!owners.length) return route.fallback();
-    const response = await route.fetch();
-    const body = await response.json();
-    return route.fulfill({
-      response,
-      json: {
-        ...body,
-        data: [
-          ...body.data,
-          ...owners.map((owner) => ({
-            ...entryFixture.drops[0],
-            id: entryDropId(owner.id),
-            wave: entryFixture.wave,
-            drop_type: "CHAT",
-            title: `Recorded ${owner.id} entry`,
-            content: `Immutable ${owner.id} entry content`,
-          })),
-        ],
-      },
-    });
-  });
+
   return {
     requests,
     setPhase: (id: string, phase: string) => {
@@ -657,8 +903,30 @@ async function installCompetitionApi(
       competitions.splice(0, competitions.length, selected!);
       defaultId = id;
     },
+    setCompetition: (
+      id: string,
+      changes: Partial<ReturnType<typeof competition>>
+    ) => {
+      const selected = competitions.find((item) => item.id === id);
+      expect(selected).toBeDefined();
+      Object.assign(selected!, changes);
+    },
     legacyPrimary: async (id: string, ended = false) => {
       legacyPrimaryId = id;
+      const selected = competitions.find((item) => item.id === id)!;
+      Object.assign(selected.decisions, {
+        strategy: {
+          first_decision_time: 1,
+          subsequent_decisions: ended ? [] : [86_400_000],
+          is_rolling: !ended,
+        },
+      });
+      if (ended)
+        Object.assign(selected, {
+          lifecycle: "ENDED",
+          computed_phase: "COMPLETED",
+          permissions: { ...selected.permissions, vote: false, submit: false },
+        });
       const response = await page.request.get(
         `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/waves/${waveId}`
       );
@@ -706,6 +974,111 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  test("uses competition resources for the original primary across navigation, votes and settings", async ({
+    page,
+  }) => {
+    const sandbox = await installCompetitionApi(page);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    sandbox.setCompetition("alpha", {
+      permissions: {
+        ...competition("alpha", "Alpha").permissions,
+        edit_rules_after_activity: true,
+        edit_credit_rules: false,
+      },
+    });
+    const obsoleteReads: string[] = [];
+    page.on("request", (request) => {
+      const path = new URL(request.url()).pathname;
+      if (
+        request.method() === "GET" &&
+        (path === `/api/v2/waves/${WAVE}/leaderboard` ||
+          path === `/api/waves/${WAVE}/decisions` ||
+          path === `/api/waves/${WAVE}/voters`)
+      )
+        obsoleteReads.push(path);
+    });
+    await page.goto(`/waves/${WAVE}?tab=leaderboard`);
+    await expect(page).toHaveURL(
+      new RegExp(`/competitions/alpha\\?tab=leaderboard`),
+      { timeout: 30000 }
+    );
+    await expect(
+      page.getByText("Immutable alpha entry content", { exact: true })
+    ).toBeVisible();
+    await page.getByRole("tab", { name: "Votes", exact: true }).click();
+    await expect(
+      page.getByRole("tabpanel", { name: "My Votes", exact: true })
+    ).toBeVisible();
+    const vote = page.getByRole("spinbutton", {
+      name: "Your vote",
+      exact: true,
+    });
+    await vote.fill("3");
+    await page.getByRole("button", { name: "Save vote", exact: true }).click();
+    await expect
+      .poll(
+        () =>
+          sandbox.requests.filter((request) =>
+            request.path.endsWith("/votes/me")
+          ).length
+      )
+      .toBe(1);
+    const explainVote = page.getByRole("button", {
+      name: "Explain",
+      exact: true,
+    });
+    await expect(explainVote).toBeEnabled();
+    await explainVote.click();
+    const cancelRationale = page.getByRole("button", {
+      name: "Cancel reply",
+      exact: true,
+    });
+    await expect(cancelRationale).toBeVisible();
+    await cancelRationale.click();
+    await expect(explainVote).toBeFocused();
+    await page.getByRole("tab", { name: "Settings", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Edit competition details", exact: true })
+      .click();
+    const description = page.getByLabel("Description", { exact: true });
+    await expect(description).toBeEditable();
+    await description.fill("Original competition description");
+    await page
+      .getByRole("button", { name: "Save changes", exact: true })
+      .click();
+    await expect
+      .poll(
+        () =>
+          sandbox.requests.filter((request) =>
+            request.path.endsWith("/competitions/alpha")
+          ).length
+      )
+      .toBe(1);
+    expect(sandbox.requests.at(-1)?.body["config"]).toMatchObject({
+      description: "Original competition description",
+    });
+    await page
+      .getByRole("button", { name: "Edit competition rules", exact: true })
+      .click();
+    await expect(
+      page.getByRole("combobox", { name: "Competition type", exact: true })
+    ).toBeDisabled();
+    await page.getByRole("button", { name: "Next", exact: true }).click();
+    await page.getByRole("button", { name: "Next", exact: true }).click();
+    await expect(
+      page.getByRole("heading", { name: "Schedule", exact: true })
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Close editor", exact: true })
+      .click();
+    await expect(
+      page.getByRole("button", { name: "Edit competition rules", exact: true })
+    ).toBeVisible();
+    expect(obsoleteReads).toEqual([]);
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("repairs live state after a refresh marker and a server normal close", async ({
     page,
   }) => {
@@ -1166,40 +1539,36 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         );
         expect(response.ok()).toBe(true);
         const fixture = await response.json();
-        await page.route(`**/api/v2/waves/${WAVE}/leaderboard?**`, (route) =>
-          route.fulfill({
-            json: {
-              wave: fixture.wave,
-              drops: [
-                {
-                  ...fixture.drops[0],
-                  drop_type: "SUBMISSION",
-                  title: "My voted artwork",
-                  submission_context: {
-                    status: "ACTIVE",
-                    has_metadata: false,
-                    voting: {
-                      is_open: true,
-                      total_votes_given: 100,
-                      current_calculated_vote: 100,
-                      predicted_final_vote: 120,
-                      voters_count: 1,
-                      place: 1,
-                      context_profile_context: {
-                        can_vote: true,
-                        min: -1000,
-                        max: 1000,
-                        current: 100,
-                      },
-                    },
+        await installArtworkCompetitionResources(
+          page,
+          WAVE,
+          fixture.wave,
+          () => [
+            {
+              ...fixture.drops[0],
+              id: entryDropId("alpha"),
+              drop_type: "SUBMISSION",
+              title: "My voted artwork",
+              submission_context: {
+                status: "ACTIVE",
+                has_metadata: false,
+                voting: {
+                  is_open: true,
+                  total_votes_given: 100,
+                  current_calculated_vote: 100,
+                  predicted_final_vote: 120,
+                  voters_count: 1,
+                  place: 1,
+                  context_profile_context: {
+                    can_vote: true,
+                    min: -1000,
+                    max: 1000,
+                    current: 100,
                   },
                 },
-              ],
-              count: 1,
-              page: 1,
-              next: false,
+              },
             },
-          })
+          ]
         );
       }
       const selected = competition("alpha", "Parallel Alpha");
@@ -1343,8 +1712,15 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         await expect(submissionNotice).toHaveCount(0);
       }
       if (!legacy) {
+        if (testInfo.project.name === "web-desktop-chromium")
+          await page.setViewportSize({ width: 1920, height: 1080 });
         await page.goto(`${ROOT}/alpha?tab=leaderboard`);
-        await expect(submissionNotice).toBeVisible();
+        await expectNativeLeaderboardReady(page);
+        await expect(submissionNotice).toHaveCount(0);
+        await expectNoHorizontalOverflow(page);
+        await page.screenshot({
+          path: testInfo.outputPath("leaderboard-without-submission-notice.png"),
+        });
       }
       expect(sandbox.requests).toHaveLength(0);
     });
@@ -2520,6 +2896,69 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
   });
 
+  test("restores Vote with reply in the competition vote dialog", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page);
+    const replies: Record<string, unknown>[] = [];
+    await page.route("**/api/drops", async (route) => {
+      if (route.request().method() !== "POST") return route.fallback();
+      const body = route.request().postDataJSON() as Record<string, unknown>;
+      replies.push(body);
+      return route.fulfill({
+        json: {
+          ...body,
+          id: "00000000-0000-4000-8000-000000000590",
+          wave: { id: WAVE },
+          author: { id: PROFILE },
+          created_at: Date.now(),
+          parts: [
+            { part_id: 1, content: "My competition rationale", media: [] },
+          ],
+        },
+      });
+    });
+    await page.goto(`${ROOT}/alpha?drop=${entryDropId("alpha")}`);
+    await dismissNextDevTools(page);
+    const detail = page
+      .getByRole("main")
+      .locator("[data-video-viewport]")
+      .filter({
+        has: page.getByRole("button", { name: "Close panel", exact: true }),
+      });
+    await expect(
+      detail.getByText("Recorded alpha entry", { exact: true })
+    ).toBeVisible({ timeout: 30000 });
+    await detail.getByRole("button", { name: "Vote", exact: true }).click();
+    const dialog = page.getByRole("dialog", { name: "Vote for this artwork" });
+    const toggle = dialog.getByRole("switch", { name: "Vote with reply" });
+    await expect(toggle).not.toBeChecked();
+    await dialog.getByRole("button", { name: "Numeric", exact: true }).click();
+    await dialog.getByRole("spinbutton", { name: "Your vote" }).fill("25");
+    await dialog.getByText("Vote with reply", { exact: true }).click();
+    await expect(toggle).toBeChecked();
+    const rationale = dialog.getByLabel("Optional rationale reply");
+    await expect(rationale).toHaveValue(
+      "Vote rationale (+25 at time of posting):\n\n"
+    );
+    await rationale.fill("My competition rationale");
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("competition-vote-with-reply.png"),
+    });
+    await dialog
+      .getByRole("button", { name: "Save vote", exact: true })
+      .click();
+    await expect.poll(() => replies.length).toBe(1);
+    expect(sandbox.requests[0]?.body).toMatchObject({ value: 25 });
+    expect(replies[0]).toMatchObject({
+      wave_id: WAVE,
+      reply_to: { drop_id: entryDropId("alpha"), drop_part_id: 1 },
+      parts: [expect.objectContaining({ content: "My competition rationale" })],
+    });
+    await expect(dialog).toHaveCount(0);
+  });
+
   test("renders frozen CHAT deep links with submission voting controls", async ({
     page,
   }, testInfo) => {
@@ -2548,63 +2987,77 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         .getByRole("main", { includeHidden: true })
         .locator('[data-competition-entry="entry-alpha"]')
     ).toBeAttached({ timeout: 30000 });
-    let contextLookups = 0;
-    await page.route(
-      `**/v3/waves/${WAVE}/drops/${entryDropId("alpha")}/competition-context`,
-      (route) => {
-        contextLookups++;
-        return route.fulfill({ status: 503, json: { message: "Unavailable" } });
-      }
-    );
-    await detail.getByRole("button", { name: "Vote", exact: true }).click();
-    const dialog = page.getByRole("dialog", { name: "Vote for this artwork" });
-    const save = dialog.getByRole("button", { name: "Save vote", exact: true });
-    await expect(save).toBeVisible();
-    expect(contextLookups).toBe(0);
-    await expect(dialog.getByText(/Enter a whole number between/)).toHaveCount(
-      0
-    );
-    for (const limit of ["-100", "+100"]) {
-      const label = dialog.getByText(limit, { exact: true });
-      await expect(label).toBeVisible();
-      await expect
-        .poll(async () => {
-          const labelBox = await label.boundingBox();
-          const saveBox = await save.boundingBox();
-          return labelBox && saveBox
-            ? saveBox.y - labelBox.y - labelBox.height
-            : Number.NEGATIVE_INFINITY;
-        })
-        .toBeGreaterThanOrEqual(12);
-    }
-    await page.screenshot({
-      path: testInfo.outputPath("competition-vote-slider.png"),
+    let releaseContext!: () => void;
+    const contextGate = new Promise<void>((resolve) => {
+      releaseContext = resolve;
     });
-    await save.click({ trial: true });
-    await expectNoHorizontalOverflow(page);
-    await dialog.getByRole("button", { name: "Numeric", exact: true }).click();
-    const input = dialog.getByRole("spinbutton", { name: "Your vote" });
-    await expect(input).toHaveAttribute("min", "-100");
-    await expect(input).toHaveAttribute("max", "100");
-    await expect(dialog.getByText(/Enter a whole number between/)).toHaveCount(
-      0
-    );
-    await input.fill("-25");
-    let holdRefresh = false;
     let releaseRefresh!: () => void;
     const refreshGate = new Promise<void>((resolve) => {
       releaseRefresh = resolve;
     });
-    await page.route("**/api/**", async (route) => {
-      const request = route.request();
-      if (request.method() === "PUT" && request.url().endsWith("/votes/me")) {
-        holdRefresh = true;
-      } else if (holdRefresh && request.method() === "GET") {
-        await refreshGate;
-      }
-      return route.fallback();
-    });
     try {
+      // The detail polls context independently. Opening the known entry must
+      // remain usable while that endpoint is unavailable, even during a poll.
+      await page.route(
+        `**/v3/waves/${WAVE}/drops/${entryDropId("alpha")}/competition-context`,
+        async (route) => {
+          await contextGate;
+          return route.fulfill({
+            status: 503,
+            json: { message: "Unavailable" },
+          });
+        }
+      );
+      await detail.getByRole("button", { name: "Vote", exact: true }).click();
+      const dialog = page.getByRole("dialog", {
+        name: "Vote for this artwork",
+      });
+      const save = dialog.getByRole("button", {
+        name: "Save vote",
+        exact: true,
+      });
+      await expect(save).toBeVisible();
+      await expect(
+        dialog.getByText(/Enter a whole number between/)
+      ).toHaveCount(0);
+      for (const limit of ["-100", "+100"]) {
+        const label = dialog.getByText(limit, { exact: true });
+        await expect(label).toBeVisible();
+        await expect
+          .poll(async () => {
+            const labelBox = await label.boundingBox();
+            const saveBox = await save.boundingBox();
+            return labelBox && saveBox
+              ? saveBox.y - labelBox.y - labelBox.height
+              : Number.NEGATIVE_INFINITY;
+          })
+          .toBeGreaterThanOrEqual(12);
+      }
+      await page.screenshot({
+        path: testInfo.outputPath("competition-vote-slider.png"),
+      });
+      await save.click({ trial: true });
+      await expectNoHorizontalOverflow(page);
+      await dialog
+        .getByRole("button", { name: "Numeric", exact: true })
+        .click();
+      const input = dialog.getByRole("spinbutton", { name: "Your vote" });
+      await expect(input).toHaveAttribute("min", "-100");
+      await expect(input).toHaveAttribute("max", "100");
+      await expect(
+        dialog.getByText(/Enter a whole number between/)
+      ).toHaveCount(0);
+      await input.fill("-25");
+      let holdRefresh = false;
+      await page.route("**/api/**", async (route) => {
+        const request = route.request();
+        if (request.method() === "PUT" && request.url().endsWith("/votes/me")) {
+          holdRefresh = true;
+        } else if (holdRefresh && request.method() === "GET") {
+          await refreshGate;
+        }
+        return route.fallback();
+      });
       await save.click();
       await expect(dialog).toHaveCount(0);
       expect(sandbox.requests).toHaveLength(1);
@@ -2628,6 +3081,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(input).toHaveValue("-25");
       await expect(dialog.getByText("75", { exact: true })).toBeVisible();
     } finally {
+      releaseContext();
       releaseRefresh();
     }
   });
@@ -4136,13 +4590,16 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     sandbox.onlyCompetition("alpha");
     await sandbox.legacyPrimary("alpha");
     let failLeaderboard = true;
-    await page.route(`**/v2/waves/${WAVE}/leaderboard*`, async (route) => {
-      if (!failLeaderboard) return route.fallback();
-      return route.fulfill({
-        status: 503,
-        json: { message: "Temporary leaderboard failure" },
-      });
-    });
+    await page.route(
+      `**/v3/waves/${WAVE}/competitions/alpha/leaderboard*`,
+      async (route) => {
+        if (!failLeaderboard) return route.fallback();
+        return route.fulfill({
+          status: 503,
+          json: { message: "Temporary leaderboard failure" },
+        });
+      }
+    );
     await page.goto(`${ROOT}/alpha`);
     const error = page
       .getByRole("alert")
@@ -4217,54 +4674,44 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         let order = Array.from({ length: 80 }, (_, index) => index);
         let refreshed = false;
         let leaderboardReads = 0;
-        await page.route(
-          `**/api/v2/waves/${MEMES_WAVE}/leaderboard*`,
-          (route) => {
-            leaderboardReads++;
-            const pageNumber = Number(
-              new URL(route.request().url()).searchParams.get("page") ?? 1
-            );
-            return route.fulfill({
-              json: {
-                wave: fixture.wave,
-                drops: order
-                  .slice((pageNumber - 1) * 50, pageNumber * 50)
-                  .map((index) => ({
-                    ...fixture.drops[0],
-                    id: `00000000-0000-4000-8000-${String(index + 9000).padStart(12, "0")}`,
-                    serial_no: index + 9000,
-                    title: `Live artwork ${index}`,
-                    media: [
-                      {
-                        url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aS5cAAAAASUVORK5CYII=",
-                        mime_type: "image/png",
-                      },
-                    ],
-                    drop_type: "SUBMISSION",
-                    submission_context: {
-                      status: "ACTIVE",
-                      has_metadata: false,
-                      voting: {
-                        is_open: true,
-                        total_votes_given: refreshed ? 900000 : 1000,
-                        current_calculated_vote: refreshed ? 900000 : 1000,
-                        predicted_final_vote: refreshed ? 900000 : 1000,
-                        voters_count: 1,
-                        place: order.indexOf(index) + 1,
-                        context_profile_context: {
-                          can_vote: true,
-                          min: -1000,
-                          max: 1000,
-                          current: 0,
-                        },
-                      },
-                    },
-                  })),
-                count: 80,
-                page: pageNumber,
-                next: pageNumber === 1,
+        await installArtworkCompetitionResources(
+          page,
+          MEMES_WAVE,
+          fixture.wave,
+          () =>
+            order.map((index) => ({
+              ...fixture.drops[0],
+              id: `00000000-0000-4000-8000-${String(index + 9000).padStart(12, "0")}`,
+              serial_no: index + 9000,
+              title: `Live artwork ${index}`,
+              media: [
+                {
+                  url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aS5cAAAAASUVORK5CYII=",
+                  mime_type: "image/png",
+                },
+              ],
+              drop_type: "SUBMISSION",
+              submission_context: {
+                status: "ACTIVE",
+                has_metadata: false,
+                voting: {
+                  is_open: true,
+                  total_votes_given: refreshed ? 900000 : 1000,
+                  current_calculated_vote: refreshed ? 900000 : 1000,
+                  predicted_final_vote: refreshed ? 900000 : 1000,
+                  voters_count: 1,
+                  place: order.indexOf(index) + 1,
+                  context_profile_context: {
+                    can_vote: true,
+                    min: -1000,
+                    max: 1000,
+                    current: 0,
+                  },
+                },
               },
-            });
+            })),
+          () => {
+            leaderboardReads++;
           }
         );
         await page.goto(
@@ -4303,6 +4750,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect
           .poll(() => scroller.evaluate((element) => element.scrollTop))
           .toBeGreaterThan(1000);
+        await expect(
+          page
+            .getByRole("list", { name: "Leaderboard drops", exact: true })
+            .locator('[aria-busy="true"]')
+        ).toHaveCount(0);
         const readAnchor = () =>
           list.evaluate((element) => {
             const container = element.closest(".tw-overflow-y-auto")!;
@@ -4321,6 +4773,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             return card
               ? {
                   id: card.dataset["leaderboardDropId"]!,
+                  logicalIndex: Number(card.dataset["leaderboardLogicalIndex"]),
                   offset: card.getBoundingClientRect().top - viewport.top,
                 }
               : null;
@@ -4340,6 +4793,14 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         const anchorCard = page
           .getByRole("list", { name: "Leaderboard drops", exact: true })
           .locator(`[data-leaderboard-drop-id="${anchor.id}"]`);
+        await expect(anchorCard).toContainText("1,000");
+        anchor.offset = await anchorCard.evaluate((element) => {
+          const container = element.closest(".tw-overflow-y-auto")!;
+          return (
+            element.getBoundingClientRect().top -
+            container.getBoundingClientRect().top
+          );
+        });
         const originalPosition = await anchorCard.getAttribute(
           "data-leaderboard-logical-index"
         );
@@ -4414,6 +4875,50 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           )
           .toBeCloseTo(anchor.offset, 0);
         await expect(scroller).toHaveAttribute("data-scroll-visit", "original");
+        const currentIndex = Number(
+          await anchorCard.getAttribute("data-leaderboard-logical-index")
+        );
+        const distance = Math.ceil(
+          Math.max(600, (await anchorCard.boundingBox())!.height + 100)
+        );
+        const move = async (direction: -1 | 1) => {
+          if (app) {
+            for (let remaining = distance; remaining > 0; remaining -= 500)
+              await swipeVertically(
+                page,
+                scroller,
+                -direction * Math.min(500, remaining)
+              );
+          } else {
+            await scroller.hover();
+            await page.mouse.wheel(0, direction * distance);
+          }
+        };
+        await move(-1);
+        await expect
+          .poll(
+            async () =>
+              (await readAnchor())?.logicalIndex ?? Number.POSITIVE_INFINITY
+          )
+          .toBeLessThan(currentIndex);
+        await expect(
+          page
+            .getByRole("list", { name: "Leaderboard drops", exact: true })
+            .locator('[aria-busy="true"]')
+        ).toHaveCount(0);
+        const reverseIndex = (await readAnchor())!.logicalIndex;
+        await move(1);
+        await expect
+          .poll(
+            async () =>
+              (await readAnchor())?.logicalIndex ?? Number.NEGATIVE_INFINITY
+          )
+          .toBeGreaterThan(reverseIndex);
+        await expect(
+          page
+            .getByRole("list", { name: "Leaderboard drops", exact: true })
+            .locator('[aria-busy="true"]')
+        ).toHaveCount(0);
         await page.screenshot({
           path: testInfo.outputPath(
             `live-scroll-${app ? "app" : "web"}-${view.split(" ")[0]}.png`
@@ -5057,10 +5562,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           name: /^Outcomes?$/,
           exact: true,
         });
-        const outcomeContent = page.getByText(
-          mode === "native" ? "Nothing to show yet." : "No outcomes to show.",
-          { exact: true }
-        );
+        const outcomeContent = page.getByText("Nothing to show yet.", {
+          exact: true,
+        });
         const winnersContent = page.getByText(
           mode === "native" ? "No Winners to Display" : "No Winners Yet",
           { exact: true }
@@ -6858,6 +7362,15 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     const sandbox = await installCompetitionApi(page);
     sandbox.onlyCompetition("alpha");
     await sandbox.legacyPrimary("alpha", true);
+    sandbox.setCompetition("alpha", {
+      presentation: [
+        { data_key: "wave_display.outcomes.visible", data_value: "false" },
+      ],
+    });
+    await page.route(
+      `**/api/v3/waves/${WAVE}/competitions/alpha/leaderboard*`,
+      (route) => route.fulfill({ json: pageResult([]) })
+    );
     await page.route(`**/api/v2/waves/${WAVE}/metadata`, (route) =>
       route.fulfill({
         json: [
@@ -6903,7 +7416,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       navigation.getByRole("button", { name: "Outcome", exact: true })
     ).toHaveCount(0);
     await expect(
-      page.getByText("No outcomes to show.", { exact: true })
+      page.getByText("Nothing to show yet.", { exact: true })
     ).toHaveCount(0);
   });
 
@@ -6977,6 +7490,239 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       releaseNavigation();
     }
   });
+
+  test("renders winners without legacy drop or metadata loading", async ({
+    page,
+  }) => {
+    const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${MEMES_WAVE}/drops`
+    );
+    const fixture = await response.json();
+    const winner = {
+      id: "entry-alpha",
+      wave_id: MEMES_WAVE,
+      competition_id: "alpha",
+      drop_id: entryDropId("alpha"),
+      submitter: { id: PROFILE, handle: "playwright", pfp: null },
+      status: "WINNER",
+      config_version: 1,
+      submitted_at: 1,
+      won_at: 2000,
+      decision_id: "winner-decision",
+      rank: 1,
+    };
+    await page.route(
+      `**/v3/waves/${MEMES_WAVE}/competitions/alpha/winners*`,
+      (route) => {
+        expect(new URL(route.request().url()).searchParams.get("include")).toBe(
+          "cards"
+        );
+        return route.fulfill({
+          json: {
+            ...pageResult([winner]),
+            cards: [
+              {
+                entry: winner,
+                awards: [],
+                metadata: [{ data_key: "Artist", data_value: "Direct artist" }],
+                vote_summary: {
+                  rating: 123,
+                  realtime_rating: 123,
+                  rating_prediction: 123,
+                  user_vote: 0,
+                  rank: 1,
+                  raters_count: 2,
+                  top_raters: [],
+                },
+                drop: {
+                  ...fixture.drops[0],
+                  id: winner.drop_id,
+                  title: "Direct native winner",
+                  media: [],
+                  submission_context: {
+                    status: "WINNER",
+                    voting: {
+                      is_open: false,
+                      total_votes_given: 123,
+                      current_calculated_vote: 123,
+                      predicted_final_vote: 123,
+                      voters_count: 2,
+                      place: 1,
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        });
+      }
+    );
+    let legacyReads = 0;
+    let release = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await page.route(
+      (url) =>
+        url.pathname === "/api/v2/drops" ||
+        /^\/api\/v2\/drops\/[^/]+(?:\/metadata)?$/.test(url.pathname),
+      async (route) => {
+        legacyReads += 1;
+        await gate;
+        return route.fallback();
+      }
+    );
+    try {
+      await page.goto(`/waves/${MEMES_WAVE}/competitions/alpha?tab=decisions`);
+      await expect(
+        page
+          .getByRole("heading", { name: "Direct native winner", exact: true })
+          .first()
+      ).toBeVisible();
+      expect(legacyReads).toBe(0);
+      await expectNoHorizontalOverflow(page);
+      expect(sandbox.requests).toEqual([]);
+    } finally {
+      release();
+    }
+  });
+
+  for (const variant of ["empty", "populated", "text-only"] as const) {
+    test(`validates the live native leaderboard contract with ${variant} data`, async ({
+      page,
+    }, testInfo) => {
+      const sandbox = await installCompetitionApi(
+        page,
+        false,
+        true,
+        MEMES_WAVE
+      );
+      sandbox.onlyCompetition("alpha");
+      await sandbox.legacyPrimary("alpha");
+      if (testInfo.project.name === "web-mobile-chromium")
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      const response = await page.request.get(
+        `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${MEMES_WAVE}/drops`
+      );
+      expect(response.ok()).toBe(true);
+      const fixture = await response.json();
+      fixture.wave.id = MEMES_WAVE;
+      const artworkId = "00000000-0000-4000-8000-000000009529";
+      const drops =
+        variant !== "empty"
+          ? [
+              {
+                ...fixture.drops[0],
+                id: entryDropId("alpha"),
+                title: "Text entry before artwork",
+                drop_type: "SUBMISSION",
+                media: [],
+              },
+              {
+                ...fixture.drops[0],
+                id: artworkId,
+                title:
+                  variant === "populated"
+                    ? "Native response artwork"
+                    : "Another native text entry",
+                drop_type: "SUBMISSION",
+                media:
+                  variant === "populated"
+                    ? [
+                        {
+                          url: "https://d3lqz0a4bldqgf.cloudfront.net/drops/live-native-contract.png",
+                          mime_type: "image/png",
+                        },
+                      ]
+                    : [],
+              },
+            ]
+          : [];
+      await page.route(
+        /https:\/\/d3lqz0a4bldqgf\.cloudfront\.net\/drops\/(?:[^?]*\/)?live-native-contract\.png(?:\?.*)?$/,
+        (route) =>
+          route.fulfill({
+            contentType: "image/png",
+            path: "public/test-wave-icon.png",
+          })
+      );
+      await installArtworkCompetitionResources(
+        page,
+        MEMES_WAVE,
+        fixture.wave,
+        () => drops
+      );
+      let releaseHydration = () => {};
+      let heldDrops = 0;
+      if (variant === "text-only") {
+        const hydrationReady = new Promise<void>((resolve) => {
+          releaseHydration = resolve;
+        });
+        await page.route(
+          (url) =>
+            url.pathname === "/api/v2/drops" ||
+            /^\/api\/v2\/drops\/[^/]+$/.test(url.pathname),
+          async (route) => {
+            heldDrops += 1;
+            await hydrationReady;
+            return route.fallback();
+          }
+        );
+      }
+      const observed = observeNativeLeaderboard(page, MEMES_WAVE);
+      try {
+        await page.goto(`/waves/${MEMES_WAVE}?tab=leaderboard`);
+        const { competition: selected, data } =
+          await observed.originalLeaderboard();
+        expect(data.data).toHaveLength(variant === "empty" ? 0 : 2);
+        await expectNativeLeaderboardReady(page, variant === "empty");
+        await expectNativeLeaderboardArtwork(
+          page,
+          selected,
+          data,
+          observed.reads
+        );
+        if (variant === "text-only") {
+          // Native list cards must render while the legacy readers remain stalled.
+          expect(heldDrops).toBe(0);
+        }
+        if (variant !== "empty") {
+          const card = page
+            .getByRole("list", { name: "Leaderboard drops", exact: true })
+            .locator(`[data-leaderboard-drop-id="${artworkId}"]`)
+            .locator(`[data-competition-entry="entry-${artworkId}"]`);
+          await expect(card).toContainText(
+            variant === "populated"
+              ? "Native response artwork"
+              : "Another native text entry"
+          );
+          if (variant === "populated")
+            await expect(
+              page
+                .getByRole("list", {
+                  name: "Leaderboard drops",
+                  exact: true,
+                })
+                .locator(`[data-leaderboard-drop-id="${artworkId}"]`)
+                .locator(`[data-competition-entry="entry-${artworkId}"]`)
+                .locator('img[alt="Media content"]')
+            ).toBeVisible();
+        }
+        expect(sandbox.requests).toEqual([]);
+        await expectNoHorizontalOverflow(page);
+      } finally {
+        releaseHydration();
+        observed.dispose();
+      }
+    });
+  }
 
   for (const surface of ["web", "app"] as const) {
     test(`preserves populated legacy Main Stage artwork in ${surface} views`, async ({
@@ -7054,21 +7800,13 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             path: "public/test-wave-icon.png",
           })
       );
-      await page.route(
-        `**/api/v2/waves/${MEMES_WAVE}/leaderboard?**`,
-        (route) => {
-          sorts.push(
-            new URL(route.request().url()).searchParams.get("sort") ?? ""
-          );
-          return route.fulfill({
-            json: {
-              wave: fixture.wave,
-              drops: [artwork],
-              count: 1,
-              page: 1,
-              next: false,
-            },
-          });
+      await installArtworkCompetitionResources(
+        page,
+        MEMES_WAVE,
+        fixture.wave,
+        () => [artwork],
+        (url) => {
+          sorts.push(url.searchParams.get("sort") ?? "");
         }
       );
       const root = `/waves/${MEMES_WAVE}/competitions/alpha`;
@@ -7138,8 +7876,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(selectedSort).toHaveAttribute("aria-selected", "true");
       }
       await expectArtwork();
-      expect(sorts).toContain("RANK");
-      expect(sorts).toContain("CREATED_AT");
+      expect(sorts).toContain("rating");
+      expect(sorts).toContain("submitted_at");
       expect(sandbox.requests).toEqual([]);
       await expectNoHorizontalOverflow(page);
       const screenshotPath = testInfo.outputPath(

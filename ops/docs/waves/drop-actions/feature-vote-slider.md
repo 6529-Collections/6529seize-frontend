@@ -112,3 +112,7 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
 - [Wave Drop Artist Preview Modal](feature-artist-preview-modal.md)
 - [Wave Leaderboard Drop States](../leaderboard/feature-drop-states.md)
 - [Docs Home](../../README.md)
+
+Competition vote dialogs include **Vote with reply** when the acting profile can
+chat in the wave. This also applies to authorized proxy voting. The reply posts
+only after the vote succeeds; a reply failure does not undo the saved vote.
