@@ -135,6 +135,7 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
     { name: "performance-cookies-consent", value: "false", url: baseURL! },
   ]);
   let offersOnly = false;
+  let additionalCurrency = false;
   const writes: string[] = [];
   const lookups: string[] = [];
   await page.route("**/*", async (route) => {
@@ -211,34 +212,60 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
           status: "fresh",
           as_of: new Date().toISOString(),
           snapshots: [],
-          books: [false, true].map((bid) => ({
-            currency: captured(bid).currency,
-            asks:
-              bid || offersOnly
-                ? []
-                : [
-                    {
-                      unit_price: "0.04",
-                      quantity: "3",
-                      cumulative_quantity: "3",
-                      order_count: 1,
+          books: [
+            ...[false, true].map((bid) => ({
+              currency: captured(bid).currency,
+              asks:
+                bid || offersOnly
+                  ? []
+                  : [
+                      {
+                        unit_price: "0.04",
+                        quantity: "3",
+                        cumulative_quantity: "3",
+                        order_count: 1,
+                      },
+                    ],
+              bids: bid
+                ? Array.from({ length: 12 }, (_, index) => ({
+                    unit_price: captured(true, index).unit_price,
+                    quantity: index === 8 ? "6" : "3",
+                    cumulative_quantity: String(
+                      (index + 1 + (index >= 8 ? 1 : 0)) * 3
+                    ),
+                    order_count: index === 8 ? 2 : 1,
+                  }))
+                : [],
+              best_ask: bid || offersOnly ? null : "0.04",
+              best_bid: bid ? captured(true, 0).unit_price : null,
+              ask_order_count: bid || offersOnly ? 0 : 1,
+              bid_order_count: bid ? 13 : 0,
+            })),
+            ...(additionalCurrency
+              ? [
+                  {
+                    currency: {
+                      address: "0x" + "9".repeat(40),
+                      symbol: "USDC",
+                      decimals: 6,
                     },
-                  ],
-            bids: bid
-              ? Array.from({ length: 12 }, (_, index) => ({
-                  unit_price: captured(true, index).unit_price,
-                  quantity: index === 8 ? "6" : "3",
-                  cumulative_quantity: String(
-                    (index + 1 + (index >= 8 ? 1 : 0)) * 3
-                  ),
-                  order_count: index === 8 ? 2 : 1,
-                }))
-              : [],
-            best_ask: bid || offersOnly ? null : "0.04",
-            best_bid: bid ? captured(true, 0).unit_price : null,
-            ask_order_count: bid || offersOnly ? 0 : 1,
-            bid_order_count: bid ? 13 : 0,
-          })),
+                    asks: [
+                      {
+                        unit_price: "2",
+                        quantity: "1",
+                        cumulative_quantity: "1",
+                        order_count: 1,
+                      },
+                    ],
+                    bids: [],
+                    best_ask: "2",
+                    best_bid: null,
+                    ask_order_count: 1,
+                    bid_order_count: 0,
+                  },
+                ]
+              : []),
+          ],
           orders: [
             ...(offersOnly ? [] : [captured(false)]),
             ...Array.from({ length: 12 }, (_, index) => captured(true, index)),
@@ -702,6 +729,27 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
     .boundingBox())!;
   expect(rightSummary.y).toBeCloseTo(leftSummary.y, 0);
   expect(rightSummary.x).toBeGreaterThan(leftSummary.x);
+  additionalCurrency = true;
+  await page.reload({ waitUntil: "domcontentloaded" });
+  const additionalTable = market.getByRole("table", {
+    name: "Listings for USDC",
+    exact: true,
+  });
+  await expect(additionalTable).toBeVisible();
+  for (const width of [390, 900]) {
+    await page.setViewportSize({ width, height: 1000 });
+    const extraBounds = (await additionalTable.boundingBox())!;
+    const canonicalBounds = (await offers.boundingBox())!;
+    expect(extraBounds.width).toBeCloseTo(canonicalBounds.width, 0);
+    expect(extraBounds.x).toBeCloseTo(canonicalBounds.x, 0);
+    expect(extraBounds.y).toBeGreaterThan(
+      canonicalBounds.y + canonicalBounds.height
+    );
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth)
+    ).toBeLessThanOrEqual(width + 1);
+  }
+  await page.setViewportSize(originalViewport);
   await page.screenshot({
     path: info.outputPath("meme-lab-marketplace.png"),
     fullPage: true,

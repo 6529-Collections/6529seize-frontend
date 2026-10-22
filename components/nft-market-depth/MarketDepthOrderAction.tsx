@@ -311,6 +311,7 @@ export function MarketDepthOrderFeedback({
     <NftPurchasingGate>
       {tableRow ? (
         <tr>
+          {/* Bridge MarketDepthPriceLevels' border-spacing-y-1 (4px). */}
           <td
             colSpan={4}
             className={
