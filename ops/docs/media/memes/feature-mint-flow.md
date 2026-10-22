@@ -265,3 +265,10 @@
 - [Memes Minting Calendar](feature-minting-calendar.md)
 - [The Memes Card Tabs and Focus Links](feature-card-tabs-and-focus-links.md)
 - [Docs Home](../../README.md)
+
+## Standard phase windows
+
+The default calendar uses Europe/Athens local time with daylight saving: Phase 0
+17:40–18:20, Phase 1 18:30–18:50, Phase 2 19:00–19:20, and Public 19:20–17:00
+the next day. Use the card's live phase and eligibility to see the current mint.
+Internal distribution and launch operation setup is maintained separately.
