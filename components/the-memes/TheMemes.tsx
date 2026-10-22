@@ -36,12 +36,7 @@ import { t } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 import { MEMES_EXTENDED_SORT, MemesSort } from "@/types/enums";
-import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
-import {
-  faChevronCircleDown,
-  faChevronCircleUp,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   useCallback,
@@ -517,7 +512,7 @@ export default function TheMemesComponent({
 
   function printSortDirectionButton(
     direction: SortDirection,
-    icon: IconDefinition,
+    Icon: typeof ArrowUpIcon,
     label: string
   ) {
     const isActive = sortDir === direction;
@@ -531,17 +526,13 @@ export default function TheMemesComponent({
           initialDataRef.current = undefined;
           setSortDir(direction);
         }}
-        className={`tw-m-0 tw-inline-flex tw-size-[26px] tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none ${
+        className={`tw-m-0 tw-inline-flex tw-size-7 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none ${
           isActive
             ? "tw-bg-iron-700 tw-text-white"
-            : "tw-bg-transparent tw-text-iron-500 hover:tw-bg-white/[0.04] hover:tw-text-iron-200"
+            : "tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-text-iron-200"
         }`}
       >
-        <FontAwesomeIcon
-          aria-hidden="true"
-          icon={icon}
-          className="tw-size-[13px]"
-        />
+        <Icon aria-hidden="true" className="tw-size-[13px]" />
       </button>
     );
   }
@@ -687,18 +678,18 @@ export default function TheMemesComponent({
                 <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500">
                   {t(locale, "theMemes.sorting.sortBy")}
                 </span>
-                <fieldset className="tw-m-0 tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0.5">
+                <fieldset className="tw-m-0 tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-gap-0.5 tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-p-0.5">
                   <legend className="tw-sr-only">
                     {t(locale, "theMemes.sorting.directionLegend")}
                   </legend>
                   {printSortDirectionButton(
                     SortDirection.ASC,
-                    faChevronCircleUp,
+                    ArrowUpIcon,
                     t(locale, "theMemes.sorting.ascendingLabel")
                   )}
                   {printSortDirectionButton(
                     SortDirection.DESC,
-                    faChevronCircleDown,
+                    ArrowDownIcon,
                     t(locale, "theMemes.sorting.descendingLabel")
                   )}
                 </fieldset>
@@ -706,7 +697,7 @@ export default function TheMemesComponent({
               {/* A 1px timeline extension lets Chromium clear the fade when overflow disappears. */}
               <div
                 ref={sortOptionsRef}
-                className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-items-center tw-gap-1.5 tw-overflow-x-auto tw-overflow-y-hidden tw-py-1 tw-pl-3 tw-pr-4 [-ms-overflow-style:none] [scrollbar-width:none] max-sm:[mask-image:linear-gradient(to_right,transparent,#000_12px,#000_calc(100%-28px),transparent)] sm:tw-pr-0 sm:[animation-fill-mode:both] sm:[animation-name:scroll-edge-fade] sm:[animation-range-end:calc(100%_+_1px)] sm:[animation-timeline:scroll(self_inline)] sm:[animation-timing-function:linear] sm:[mask-image:linear-gradient(to_right,transparent,#000_var(--fade-l),#000_calc(100%_-_var(--fade-r)),transparent)] [&::-webkit-scrollbar]:tw-hidden lg:[body:not(.capacitor-native)_&]:tw-justify-between"
+                className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-items-center tw-gap-1.5 tw-overflow-x-auto tw-overflow-y-hidden tw-py-1 tw-pl-3 tw-pr-4 [-ms-overflow-style:none] [scrollbar-width:none] max-sm:[mask-image:linear-gradient(to_right,transparent,#000_12px,#000_calc(100%-28px),transparent)] sm:tw-pr-0 sm:[animation-fill-mode:both] sm:[animation-name:scroll-edge-fade] sm:[animation-range-end:calc(100%_+_1px)] sm:[animation-timeline:scroll(self_inline)] sm:[animation-timing-function:linear] sm:[mask-image:linear-gradient(to_right,transparent,#000_var(--fade-l),#000_calc(100%_-_var(--fade-r)),transparent)] [&::-webkit-scrollbar]:tw-hidden lg:[body:not(.capacitor-native)_&]:tw-justify-between lg:[body:not(.capacitor-native)_&]:tw-gap-4"
               >
                 {Object.values(MemesSort)
                   .filter((v) => v !== MemesSort.VOLUME)

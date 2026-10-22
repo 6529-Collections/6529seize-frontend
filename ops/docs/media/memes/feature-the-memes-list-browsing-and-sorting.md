@@ -47,10 +47,11 @@
   and their triggers use equal widths and the same compact styling as a profile’s
   Collected view at every screen size.
 - At 1024px and wider on the web, the sort options, including Volume, use the
-  original editorial text style: white text and a blue underline for the selected option, with gray
-  inactive text. Smaller screens and the native app keep the shared soft gray
-  pills and light selected pill. Year and Season keep their framed dropdown
-  triggers.
+  editorial text style: white text and a white underline for the selected
+  option, with gray inactive text. The options spread across the available row
+  width. Sort direction uses up/down arrows in a soft gray control. Smaller
+  screens and the native app keep the shared soft gray pills and light selected
+  pill. Year and Season keep their framed dropdown triggers.
 
 ## URL Query Model
 
