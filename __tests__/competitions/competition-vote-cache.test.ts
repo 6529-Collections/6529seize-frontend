@@ -53,11 +53,16 @@ afterEach(() => client.clear());
 it("refreshes loaded pages after a vote moves across a page boundary", async () => {
   let order = ["other", "entry", "last"];
   const reads: number[] = [];
+  let releaseRefresh!: () => void;
+  const refreshGate = new Promise<void>((resolve) => {
+    releaseRefresh = resolve;
+  });
   const observer = new InfiniteQueryObserver(client, {
     queryKey: [...resourceKey, "votes/me", { include: "cards" }],
     initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
       reads.push(pageParam);
+      if (order[0] === "entry") await refreshGate;
       return {
         data: [{ entry_id: order[pageParam]!, value: 10, credit_spent: 10 }],
         has_more: pageParam < order.length - 1,
@@ -73,17 +78,17 @@ it("refreshes loaded pages after a vote moves across a page boundary", async () 
     reads.length = 0;
     order = ["entry", "other", "last"];
     await updateCompetitionVoteInCache(client, result);
-    // An explicit next-page request waits for the list refresh, as the UI's
-    // isFetching pagination guard does.
-    await client.refetchQueries(
-      {
-        queryKey: [...resourceKey, "votes/me"],
-        type: "active",
-      },
-      { cancelRefetch: false }
-    );
+    expect(observer.getCurrentResult().isFetching).toBe(true);
+    // Exercise a request from a stale UI snapshot while the production
+    // fire-and-forget invalidation is still refreshing the first page.
+    const overlappingNextPage = observer.fetchNextPage({
+      cancelRefetch: false,
+    });
+    expect(reads).toEqual([0]);
+    releaseRefresh();
+    await overlappingNextPage;
     expect(reads).toEqual([0, 1]);
-    await observer.fetchNextPage();
+    await observer.fetchNextPage({ cancelRefetch: false });
     expect(
       observer
         .getCurrentResult()

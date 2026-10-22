@@ -125,7 +125,7 @@ function MyVotesLoadMore({
       !isFetchNextPageError &&
       !paused
     )
-      void fetchNextPage();
+      void fetchNextPage({ cancelRefetch: false });
   }, [
     visible,
     hasNextPage,
@@ -136,7 +136,13 @@ function MyVotesLoadMore({
   ]);
   return (
     <div ref={ref}>
-      <CompetitionLoadMore query={query} />
+      <CompetitionLoadMore
+        query={{
+          hasNextPage,
+          isFetchingNextPage: isFetching,
+          fetchNextPage: () => fetchNextPage({ cancelRefetch: false }),
+        }}
+      />
     </div>
   );
 }
