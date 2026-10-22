@@ -874,7 +874,7 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       await expect(filter).toHaveCSS("font-size", "12px");
       await expect(filter).toHaveCSS("white-space", "nowrap");
       const bounds = await filter.boundingBox();
-      expect(bounds?.height).toBeGreaterThanOrEqual(40);
+      expect(bounds?.height).toBe(32);
       expect(bounds?.width).toBeGreaterThanOrEqual(40);
     }
     await sort.focus();
@@ -905,7 +905,8 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     }
     await sortPanel.press("Escape");
     await expect(sort).toBeFocused();
-    await expect(sort).toHaveCSS("box-shadow", /rgba?\(82[, ]+139[, ]+255/);
+    await expect(sort).toHaveCSS("outline-color", "rgb(82, 139, 255)");
+    await expect(sort).toHaveCSS("outline-width", "2px");
     await expectAxeClean(page, { include: ["main button[aria-haspopup]"] });
     await sort.click();
     await page.getByRole("menuitem", { name: "Token ID", exact: true }).click();

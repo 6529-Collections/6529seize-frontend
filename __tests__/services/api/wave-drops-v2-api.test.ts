@@ -1,3 +1,4 @@
+import { fetchGlobalDropsSearchV2 } from "@/services/api/global-drops-search-api";
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
@@ -460,6 +461,40 @@ describe("fetchWaveDropsFeedV2", () => {
     });
 
     expect(result.drops[0]?.poll).toEqual(poll);
+  });
+
+  it("preserves a reply author without a profile picture", async () => {
+    commonApiFetchMock.mockResolvedValueOnce({
+      wave,
+      drops: [
+        {
+          ...createDrop(1),
+          reply_to_drop: {
+            id: "parent-1",
+            serial_no: 42,
+            content: "parent text",
+            author: { handle: "parent-author" },
+            moderation: {
+              status: ApiDropModerationStatus.Visible,
+              can_view: true,
+            },
+          },
+        },
+      ],
+    });
+
+    const result = await fetchWaveDropsFeedV2({
+      waveId: "wave-1",
+      limit: 20,
+    });
+
+    expect(result.drops[0]?.reply_to?.drop).toMatchObject({
+      id: "parent-1",
+      serial_no: 42,
+      author: { handle: "parent-author", pfp: null },
+      parts: [{ part_id: 1, content: "parent text" }],
+      moderation: { status: ApiDropModerationStatus.Visible, can_view: true },
+    });
   });
 
   it("carries collapsed-thread reply counts onto hydrated drops", async () => {
@@ -1155,4 +1190,38 @@ it("preserves an empty original artist on managed leaderboard submissions", () =
     wave: waveMin,
   });
   expect(mapped).toHaveProperty("submission_artist", "");
+});
+
+describe("fetchGlobalDropsSearchV2", () => {
+  it("forwards continuation cursors and preserves wave and DM navigation context", async () => {
+    commonApiFetchMock.mockReset();
+    commonApiFetchMock.mockResolvedValue({
+      data: [{ ...createDrop(1), wave: { ...wave, is_dm_wave: true } }],
+      page: 2,
+      next: true,
+      cursor: "next-cursor",
+    });
+    const result = await fetchGlobalDropsSearchV2({
+      term: "hello",
+      authorId: "author-id",
+      page: 2,
+      size: 50,
+      cursor: "previous-cursor",
+    });
+    expect(commonApiFetchMock).toHaveBeenCalledWith({
+      endpoint: "v2/drops/search",
+      params: {
+        term: "hello",
+        author_id: "author-id",
+        page: "2",
+        size: "50",
+        cursor: "previous-cursor",
+      },
+      signal: undefined,
+    });
+    expect(result.cursor).toBe("next-cursor");
+    expect(result.data[0]?.wave).toEqual(
+      expect.objectContaining({ id: "wave-1", is_dm_wave: true })
+    );
+  });
 });

@@ -1,4 +1,4 @@
-import type { Locator, Page, Route } from "@playwright/test";
+import type { Locator, Page, Route, TestInfo } from "@playwright/test";
 
 import {
   expect,
@@ -248,6 +248,178 @@ async function installLocalActiveWaveSearchFixture(page: Page) {
         status: 200,
       });
     }
+  );
+}
+
+const OTHER_SEARCH_WAVE_ID = "00000000-0000-4000-8000-000000000530";
+const OTHER_SEARCH_WAVE_NAME = "Another Search Wave";
+
+async function installAdvancedSearchFixture(page: Page) {
+  const overview = {
+    ...localFixtureWaveOverview,
+    id: OTHER_SEARCH_WAVE_ID,
+    name: OTHER_SEARCH_WAVE_NAME,
+    is_dm_wave: false,
+  };
+  await page.route(
+    `**/api/v2/waves/${LOCAL_ACTIVE_WAVE_ID}/search-authors**`,
+    (route) =>
+      fulfillLocalReadOnlyFixture(route, {
+        json: [{ id: "search-author", handle: "alice", pfp: null }],
+      })
+  );
+  await page.route("**/api/waves?**", (route) => {
+    const url = new URL(route.request().url());
+    if (!url.searchParams.has("name")) return route.fallback();
+    return fulfillLocalReadOnlyFixture(route, {
+      json: [
+        {
+          ...localFixtureWave,
+          id: OTHER_SEARCH_WAVE_ID,
+          name: OTHER_SEARCH_WAVE_NAME,
+        },
+      ],
+    });
+  });
+  await page.route(`**/api/waves/${OTHER_SEARCH_WAVE_ID}**`, (route) =>
+    fulfillLocalReadOnlyFixture(route, {
+      json: {
+        ...localFixtureWave,
+        id: OTHER_SEARCH_WAVE_ID,
+        name: OTHER_SEARCH_WAVE_NAME,
+      },
+    })
+  );
+  await page.route(`**/api/v2/waves/${OTHER_SEARCH_WAVE_ID}/drops**`, (route) =>
+    fulfillLocalReadOnlyFixture(route, { json: { wave: overview, drops: [] } })
+  );
+  await page.route(
+    `**/api/v2/waves/${OTHER_SEARCH_WAVE_ID}/search**`,
+    (route) =>
+      fulfillLocalReadOnlyFixture(route, {
+        json: { data: [], next: false, page: 1 },
+      })
+  );
+  await page.route("**/api/v2/drops/search**", (route) => {
+    const pageNumber = Number(
+      new URL(route.request().url()).searchParams.get("page")
+    );
+    return fulfillLocalReadOnlyFixture(route, {
+      json: {
+        data: [
+          {
+            id: `advanced-search-drop-${pageNumber}`,
+            serial_no: 42 + pageNumber,
+            wave: overview,
+            author: { ...localFixtureProfile, handle: "alice", badges: {} },
+            created_at: 1713744000000,
+            content: "hello from another wave",
+            parts_count: 1,
+            media: [],
+            attachments: [],
+            metadata: [],
+            mentioned_users: [],
+            mentioned_waves: [],
+            reactions: [],
+            referenced_nfts: [],
+            context_profile_context: {},
+            type: "CHAT",
+            drop_type: "CHAT",
+            main_type: "CHAT",
+          },
+        ],
+        page: pageNumber,
+        cursor: `fixture-cursor-${pageNumber}`,
+        next: pageNumber === 1,
+      },
+    });
+  });
+}
+
+async function exerciseAdvancedSearch(
+  page: Page,
+  searchInput: Locator,
+  testInfo: TestInfo
+) {
+  await installAdvancedSearchFixture(page);
+  const waveChip = page.getByRole("button", {
+    name: `Remove wave filter ${localFixtureWave.name}`,
+  });
+  await expect(waveChip).toBeVisible();
+  await searchInput.fill("from: ali");
+  await expect(page.getByRole("option", { name: "@ alice" })).toBeVisible();
+  await searchInput.press("ArrowDown");
+  const authorOnly = page.waitForRequest((request) => {
+    const url = new URL(request.url());
+    return (
+      url.pathname.endsWith(`/${LOCAL_ACTIVE_WAVE_ID}/search`) &&
+      url.searchParams.get("author_id") === "search-author" &&
+      !url.searchParams.has("term")
+    );
+  });
+  await searchInput.press("Enter");
+  await authorOnly;
+  await expect(
+    page.getByRole("button", { name: "Remove author filter alice" })
+  ).toBeVisible();
+  await searchInput.fill("hello");
+  const globalSearch = page.waitForRequest((request) => {
+    const url = new URL(request.url());
+    return (
+      url.pathname.endsWith("/v2/drops/search") &&
+      url.searchParams.get("author_id") === "search-author" &&
+      url.searchParams.get("term") === "hello"
+    );
+  });
+  await waveChip.click();
+  await globalSearch;
+  await expect(
+    page.getByRole("button", { name: "Open message 43 by alice" })
+  ).toContainText(OTHER_SEARCH_WAVE_NAME);
+  const continuation = page.waitForRequest((request) => {
+    const url = new URL(request.url());
+    return (
+      url.pathname.endsWith("/v2/drops/search") &&
+      url.searchParams.get("cursor") === "fixture-cursor-1"
+    );
+  });
+  await page.getByRole("button", { name: "Load more", exact: true }).click();
+  await continuation;
+  await expect(
+    page.getByRole("button", { name: "Open message 44 by alice" })
+  ).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+  await captureSafeScreenshot(
+    page,
+    testInfo,
+    "advanced-message-search-cross-wave"
+  );
+  await searchInput.fill("hello in: Another");
+  await page
+    .getByRole("option", { name: `# ${OTHER_SEARCH_WAVE_NAME}` })
+    .click();
+  await expect(
+    page.getByRole("button", {
+      name: `Remove wave filter ${OTHER_SEARCH_WAVE_NAME}`,
+    })
+  ).toBeVisible();
+  await expect(searchInput).toHaveValue("hello ");
+  await expect(
+    page.getByRole("status").getByText("No messages found", { exact: true })
+  ).toBeVisible();
+  await captureSafeScreenshot(
+    page,
+    testInfo,
+    "advanced-message-search-both-chips"
+  );
+  await page
+    .getByRole("button", {
+      name: `Remove wave filter ${OTHER_SEARCH_WAVE_NAME}`,
+    })
+    .click();
+  await page.getByRole("button", { name: "Open message 43 by alice" }).click();
+  await expect(page).toHaveURL(
+    new RegExp(`/waves/${OTHER_SEARCH_WAVE_ID}\\?serialNo=43`)
   );
 }
 
@@ -907,7 +1079,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
   test("wave search exposes read-only message search safely", async ({
     baseURL,
     page,
-  }) => {
+  }, testInfo) => {
     const { expectedPath, expectedQueryWaveId, searchInput } = isLocalBaseURL(
       baseURL
     )
@@ -957,6 +1129,10 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
 
     await page.getByRole("button", { name: "Clear search" }).click();
     await expect(searchInput).toHaveValue("");
+    if (isLocalBaseURL(baseURL)) {
+      await expect(searchInput).toHaveAttribute("role", "combobox");
+      await exerciseAdvancedSearch(page, searchInput, testInfo);
+    }
     await expectNoHorizontalOverflow(page);
   });
 });

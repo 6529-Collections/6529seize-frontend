@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CompetitionMyVotes from "@/components/competitions/CompetitionMyVotes";
+import { useCompetitionEntryDrops } from "@/hooks/competitions/useCompetitionEntryDrops";
 
 let mockParts: { part_id: number }[] = [{ part_id: 1 }];
 jest.mock("@/contexts/CompetitionContext", () => ({
@@ -29,11 +30,22 @@ jest.mock("@/hooks/competitions/useCompetitionSignature", () => ({
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useCompetitionViewer: () => "viewer",
   useCompetitionResource: () => ({
+    refetch: jest.fn(),
     data: {
       pages: [
         {
           data: [
-            { entry_id: "entry", drop_id: "drop", entry_status: "ACTIVE" },
+            {
+              entry_id: "entry",
+              drop_id: "drop",
+              entry_status: "ACTIVE",
+              value: 7,
+            },
+            {
+              entry_id: "winner",
+              drop_id: "winner-drop",
+              entry_status: "WINNER",
+            },
           ],
         },
       ],
@@ -41,14 +53,14 @@ jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   }),
 }));
 jest.mock("@/hooks/competitions/useCompetitionEntryDrops", () => ({
-  useCompetitionEntryDrops: () => [
+  useCompetitionEntryDrops: jest.fn(() => [
     {
       data: {
         entry: { status: "ACTIVE" },
         drop: { id: "drop", parts: mockParts },
       },
     },
-  ],
+  ]),
 }));
 jest.mock("@/hooks/competitions/useCompetitionDropNavigation", () => ({
   useCompetitionDropNavigation: () => jest.fn(),
@@ -72,6 +84,9 @@ jest.mock("@/components/competitions/CompetitionVote", () => ({
     onExplainVote ? (
       <button onClick={() => onExplainVote(4, 1)}>Explain vote</button>
     ) : null,
+}));
+jest.mock("@/hooks/useInView", () => ({
+  useInView: () => [{ current: null }, true],
 }));
 jest.mock("@/components/waves/PrivilegedDropCreator", () => ({
   __esModule: true,
@@ -115,4 +130,39 @@ it("omits the reply action when a malformed entry has no replyable part", () => 
   mockParts = [];
   render(<CompetitionMyVotes />);
   expect(screen.queryByRole("button", { name: "Explain vote" })).toBeNull();
+});
+
+it("excludes past winners before loading active My Votes cards", () => {
+  render(<CompetitionMyVotes />);
+  expect(useCompetitionEntryDrops).toHaveBeenLastCalledWith(
+    [{ entryId: "entry", dropId: "drop" }],
+    expect.objectContaining({ contexts: [] })
+  );
+});
+
+it("retains the personal vote and a retry when its card is omitted", async () => {
+  const retry = jest.fn();
+  jest
+    .mocked(useCompetitionEntryDrops)
+    .mockReturnValueOnce([{ data: null, refetch: retry }] as never);
+  render(<CompetitionMyVotes />);
+  expect(screen.getByText("Preview unavailable")).toBeInTheDocument();
+  expect(screen.getByText("Your vote: 7")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Try again" }));
+  expect(retry).toHaveBeenCalledTimes(1);
+});
+
+it("offers recovery instead of a perpetual loader for a pending row with no fetch", () => {
+  jest.mocked(useCompetitionEntryDrops).mockReturnValueOnce([
+    {
+      data: undefined,
+      isPending: true,
+      isFetching: false,
+      refetch: jest.fn(),
+    },
+  ] as never);
+  render(<CompetitionMyVotes />);
+  expect(screen.getByText("Your vote: 7")).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
+  expect(screen.queryByText("Loading competition…")).toBeNull();
 });

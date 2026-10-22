@@ -102,27 +102,28 @@ export async function updateCompetitionVoteInCache(
     { queryKey: contextKey },
     (old) => (old ? updateContext(old) : old)
   );
-  client.setQueriesData<{ entry: ApiCompetitionEntry; drop: ExtendedDrop }>(
-    { queryKey: [...resourceKey, "drop", entryId, dropId] },
-    (old) => {
-      if (!old) return old;
-      const known = old.drop.competition_context;
-      return {
-        ...old,
-        drop: {
-          ...updateOwnVote(old.drop, budget, currentVote),
-          ...(known?.viewer === viewer
-            ? {
-                competition_context: {
-                  ...known,
-                  data: updateContext(known.data),
-                },
-              }
-            : {}),
-        },
-      };
-    }
-  );
+  for (const projection of ["drop", "card"])
+    client.setQueriesData<{ entry: ApiCompetitionEntry; drop: ExtendedDrop }>(
+      { queryKey: [...resourceKey, projection, entryId, dropId] },
+      (old) => {
+        if (!old) return old;
+        const known = old.drop.competition_context;
+        return {
+          ...old,
+          drop: {
+            ...updateOwnVote(old.drop, budget, currentVote),
+            ...(known?.viewer === viewer
+              ? {
+                  competition_context: {
+                    ...known,
+                    data: updateContext(known.data),
+                  },
+                }
+              : {}),
+          },
+        };
+      }
+    );
   client.setQueriesData<InfiniteData<ApiCompetitionMyVotePage>>(
     { queryKey: [...resourceKey, "votes/me"] },
     (old) =>
@@ -143,4 +144,12 @@ export async function updateCompetitionVoteInCache(
         })),
       }
   );
+  // Vote value controls list order. Active lists need one read per loaded page
+  // to rebuild offset boundaries; refreshing only page one can skip entries.
+  // Keep confirmed controls responsive while those reads run in the background.
+  // Inactive variants are only marked stale and fetch when opened again.
+  void client.invalidateQueries({
+    queryKey: [...resourceKey, "votes/me"],
+    refetchType: "active",
+  });
 }

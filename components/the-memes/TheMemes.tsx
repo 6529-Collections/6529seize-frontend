@@ -7,7 +7,8 @@ import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import TheMemesCard from "@/components/the-memes/TheMemesCard";
-import { getMemesSortLabel } from "@/components/the-memes/theMemesI18n";
+import TheMemesSortButton from "@/components/the-memes/TheMemesSortButton";
+import useMemesSortVisibility from "@/components/the-memes/useMemesSortVisibility";
 import {
   getAllSeasonsLabel,
   getMemeApiSeasonIds,
@@ -18,6 +19,7 @@ import {
 import { getTheMemesBrowseHref } from "@/components/the-memes/theMemesRouteParams";
 import type { TheMemesInitialData } from "@/app/the-memes/theMemesInitialData";
 import VolumeTypeDropdown from "@/components/the-memes/VolumeTypeDropdown";
+import DropdownToolbar from "@/components/utils/select/dropdown/DropdownToolbar";
 import FilterGridDropdown from "@/components/utils/select/dropdown/FilterGridDropdown";
 import MemeSeasonGridDropdown from "@/components/utils/select/dropdown/MemeSeasonGridDropdown";
 import { publicEnv } from "@/config/env";
@@ -34,12 +36,7 @@ import { t } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 import { MEMES_EXTENDED_SORT, MemesSort } from "@/types/enums";
-import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
-import {
-  faChevronCircleDown,
-  faChevronCircleUp,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   useCallback,
@@ -210,6 +207,7 @@ export default function TheMemesComponent({
   const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);
   const [sort, setSort] = useState<MemesSort>(MemesSort.AGE);
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.ALL_TIME);
+  const sortOptionsRef = useMemesSortVisibility(sort, volumeType);
 
   useSetTitle(t(locale, "theMemes.documentTitle"));
 
@@ -514,7 +512,7 @@ export default function TheMemesComponent({
 
   function printSortDirectionButton(
     direction: SortDirection,
-    icon: IconDefinition,
+    Icon: typeof ArrowUpIcon,
     label: string
   ) {
     const isActive = sortDir === direction;
@@ -528,13 +526,16 @@ export default function TheMemesComponent({
           initialDataRef.current = undefined;
           setSortDir(direction);
         }}
-        className={`tw-m-0 tw-inline-flex tw-h-7 tw-w-6 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-transition tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${
+        className={`tw-m-0 tw-inline-flex tw-size-7 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none lg:[body:not(.capacitor-native)_&]:tw-rounded-lg lg:[body:not(.capacitor-native)_&]:tw-duration-300 ${
           isActive
-            ? "tw-bg-white/[0.06] tw-text-white"
-            : "tw-text-iron-500 hover:tw-bg-white/[0.04] hover:tw-text-iron-200"
+            ? "tw-bg-iron-700 tw-text-white lg:[body:not(.capacitor-native)_&]:tw-bg-white/[0.12]"
+            : "tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-text-iron-200 lg:[body:not(.capacitor-native)_&]:tw-text-iron-600 lg:[body:not(.capacitor-native)_&]:desktop-hover:hover:tw-text-iron-300"
         }`}
       >
-        <FontAwesomeIcon aria-hidden="true" icon={icon} className="tw-size-4" />
+        <Icon
+          aria-hidden="true"
+          className="tw-size-[13px] lg:[body:not(.capacitor-native)_&]:tw-size-3.5 lg:[body:not(.capacitor-native)_&]:tw-stroke-[1.25]"
+        />
       </button>
     );
   }
@@ -558,7 +559,7 @@ export default function TheMemesComponent({
     }
 
     return (
-      <div className="tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] xl:tw-gap-5">
+      <div className="tw-grid tw-grid-cols-2 tw-gap-2.5 sm:tw-grid-cols-3 sm:tw-gap-4 sm:tw-pt-2 lg:tw-grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] xl:tw-gap-5">
         {nfts.map((nft) => printNft(nft))}
       </div>
     );
@@ -593,7 +594,7 @@ export default function TheMemesComponent({
           <h2 className="tw-mb-4 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
             {formatInteger(locale, meme.meme)} - {meme.meme_name}
           </h2>
-          <div className="tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] xl:tw-gap-5">
+          <div className="tw-grid tw-grid-cols-2 tw-gap-2.5 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] xl:tw-gap-5">
             {memeNfts.map((nft) => printNft(nft))}
           </div>
         </section>
@@ -609,30 +610,36 @@ export default function TheMemesComponent({
       enabled={connectedProfile !== null}
     >
       <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
-        <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
-          <header className="tw-pb-5">
+        <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-pb-8 tw-pt-4 sm:tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
+          <header className="tw-pb-5 max-sm:tw-pb-2">
             <div className="tw-flex tw-flex-col tw-gap-4">
               <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-                <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 sm:tw-w-auto sm:tw-justify-start">
-                  <div className="tw-min-w-0 min-[1200px]:tw-hidden">
-                    <CollectionsDropdown activePage="memes" variant="title" />
+                <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 max-sm:tw-gap-x-2 max-sm:tw-gap-y-1 sm:tw-w-auto sm:tw-justify-start">
+                  <div className="tw-min-w-0 max-sm:tw-flex max-sm:tw-max-w-full max-sm:tw-flex-col max-sm:tw-items-start sm:tw-contents">
+                    <div className="tw-min-w-0 min-[1200px]:tw-hidden">
+                      <CollectionsDropdown activePage="memes" variant="title" />
+                    </div>
+                    <h1 className="tw-m-0 tw-hidden tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl min-[1200px]:tw-block">
+                      {t(locale, "theMemes.title")}
+                    </h1>
+                    <CollectEntryLink
+                      collection="memes"
+                      intent={activeSeason ? "season" : "full_set"}
+                      definitionId={
+                        activeSeason ? String(activeSeason.id) : "memes"
+                      }
+                      locale={locale}
+                      complete
+                      className="max-sm:tw-min-h-10 max-sm:tw-px-0 max-sm:tw-text-[13px] max-sm:tw-text-iron-400 sm:tw-order-2 max-sm:[&>svg]:tw-size-3"
+                    />
                   </div>
-                  <h1 className="tw-m-0 tw-hidden tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl min-[1200px]:tw-block">
-                    {t(locale, "theMemes.title")}
-                  </h1>
-                  <LFGButton contract={MEMES_CONTRACT} />
-                  <CollectEntryLink
-                    collection="memes"
-                    intent={activeSeason ? "season" : "full_set"}
-                    definitionId={
-                      activeSeason ? String(activeSeason.id) : "memes"
-                    }
-                    locale={locale}
-                    complete
+                  <LFGButton
+                    contract={MEMES_CONTRACT}
+                    className="max-sm:tw-h-9 max-sm:tw-text-[13px] sm:tw-order-1"
                   />
                 </div>
-                <div
-                  className="tw-grid tw-w-full tw-shrink-0 tw-grid-cols-1 tw-gap-2 sm:tw-w-auto sm:tw-grid-cols-[9rem_13rem]"
+                <DropdownToolbar
+                  className="tw-grid tw-w-fit tw-max-w-full tw-shrink-0 tw-grid-cols-2 tw-gap-2 max-sm:tw-mt-1"
                   data-dropdown-menu-align="end"
                 >
                   <FilterGridDropdown
@@ -661,40 +668,44 @@ export default function TheMemesComponent({
                     allSeasonsLabel={allSeasonsLabel}
                     locale={locale}
                   />
-                </div>
+                </DropdownToolbar>
               </div>
             </div>
           </header>
           <section
             aria-label={t(locale, "theMemes.sorting.regionLabel")}
-            className="tw-mb-5 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800/80 tw-pb-4"
+            className="tw-mb-5 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800/80 tw-pb-4 max-sm:tw-sticky max-sm:tw-top-0 max-sm:tw-z-30 max-sm:-tw-mx-4 max-sm:tw-mb-3.5 max-sm:tw-border-iron-800/90 max-sm:tw-bg-[#0D0D0F] max-sm:tw-py-2.5 max-sm:tw-pl-4"
           >
-            <div className="tw-flex tw-flex-col tw-gap-x-6 tw-gap-y-2 md:tw-flex-row md:tw-items-start">
-              <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-1">
-                <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500">
+            <div className="tw-flex tw-items-center tw-gap-2.5">
+              <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-2.5">
+                <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500">
                   {t(locale, "theMemes.sorting.sortBy")}
                 </span>
-                <fieldset className="tw-m-0 tw-flex tw-shrink-0 tw-items-center tw-border-0 tw-p-0">
+                <fieldset className="tw-m-0 tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-gap-0.5 tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-p-0.5 lg:[body:not(.capacitor-native)_&]:tw-ml-0.5 lg:[body:not(.capacitor-native)_&]:tw-h-7 lg:[body:not(.capacitor-native)_&]:tw-bg-transparent lg:[body:not(.capacitor-native)_&]:tw-p-0">
                   <legend className="tw-sr-only">
                     {t(locale, "theMemes.sorting.directionLegend")}
                   </legend>
                   {printSortDirectionButton(
                     SortDirection.ASC,
-                    faChevronCircleUp,
+                    ArrowUpIcon,
                     t(locale, "theMemes.sorting.ascendingLabel")
                   )}
                   {printSortDirectionButton(
                     SortDirection.DESC,
-                    faChevronCircleDown,
+                    ArrowDownIcon,
                     t(locale, "theMemes.sorting.descendingLabel")
                   )}
                 </fieldset>
               </div>
-              <div className="tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-overflow-x-auto tw-overflow-y-hidden tw-pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:tw-flex-wrap sm:tw-overflow-visible sm:tw-pb-0 [&::-webkit-scrollbar]:tw-hidden">
+              {/* A 1px timeline extension lets Chromium clear the fade when overflow disappears. */}
+              <div
+                ref={sortOptionsRef}
+                className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-items-center tw-gap-1.5 tw-overflow-x-auto tw-overflow-y-hidden tw-py-1 tw-pl-3 tw-pr-4 [-ms-overflow-style:none] [scrollbar-width:none] max-sm:[mask-image:linear-gradient(to_right,transparent,#000_12px,#000_calc(100%-28px),transparent)] sm:tw-pr-0 sm:[animation-fill-mode:both] sm:[animation-name:scroll-edge-fade] sm:[animation-range-end:calc(100%_+_1px)] sm:[animation-timeline:scroll(self_inline)] sm:[animation-timing-function:linear] sm:[mask-image:linear-gradient(to_right,transparent,#000_var(--fade-l),#000_calc(100%_-_var(--fade-r)),transparent)] [&::-webkit-scrollbar]:tw-hidden lg:[body:not(.capacitor-native)_&]:tw-justify-between lg:[body:not(.capacitor-native)_&]:tw-gap-4 lg:[body:not(.capacitor-native)_&]:tw-pl-0"
+              >
                 {Object.values(MemesSort)
                   .filter((v) => v !== MemesSort.VOLUME)
                   .map((v) => (
-                    <SortButton
+                    <TheMemesSortButton
                       key={v}
                       currentSort={sort}
                       sort={v}
@@ -739,36 +750,6 @@ export default function TheMemesComponent({
         </div>
       </div>
     </NftBalancesProvider>
-  );
-}
-
-function SortButton(
-  props: Readonly<{
-    currentSort: MemesSort;
-    sort: MemesSort;
-    locale: SupportedLocale;
-    select: () => void;
-  }>
-) {
-  const isActive = props.currentSort === props.sort;
-  const label = getMemesSortLabel(props.sort, props.locale);
-
-  return (
-    <button
-      type="button"
-      aria-pressed={isActive}
-      aria-label={t(props.locale, "theMemes.sorting.sortButtonLabel", {
-        sort: label,
-      })}
-      onClick={() => props.select()}
-      className={`tw-relative tw-m-0 tw-shrink-0 tw-cursor-pointer tw-whitespace-nowrap tw-border-0 tw-bg-transparent tw-px-0.5 tw-py-1 tw-text-sm tw-font-medium tw-leading-5 tw-no-underline tw-transition-colors tw-duration-200 after:tw-absolute after:-tw-bottom-0.5 after:tw-left-0 after:tw-h-px after:tw-w-full after:tw-origin-left after:tw-transition-transform after:tw-duration-200 after:tw-content-[''] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 sm:tw-shrink ${
-        isActive
-          ? "tw-text-white after:tw-scale-x-100 after:tw-bg-primary-400"
-          : "tw-text-iron-500 after:tw-scale-x-0 after:tw-bg-iron-700 hover:tw-text-iron-200 hover:after:tw-scale-x-100"
-      }`}
-    >
-      {label}
-    </button>
   );
 }
 

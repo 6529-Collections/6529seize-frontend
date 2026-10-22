@@ -49,6 +49,8 @@
 
 - Missing or invalid `focus` opens `Overview`.
 - The primary tabs are `Overview`, `Listings & offers`, `Collectors`, and `History`.
+  They keep the blue underline. History sub-tabs use compact round pills, and
+  the activity-type dropdown is a compact framed button aligned to the right.
 - `Your Transactions` appears only when the connected wallet has transactions
   for the card; otherwise the route falls back to `Card Activity`.
 
@@ -99,6 +101,27 @@
 
 ## Common Scenarios
 
+- In `Collectors`, screens narrower than 768 px show a collector list with this
+  card's metrics in a `This card` row, with a `Total` row aligned underneath.
+  Each collector has one header row labelling the Balance, TDH and Unweighted TDH
+  columns above both rows of values. The stat block starts under the avatar. On very narrow
+  screens, the list scrolls horizontally so labels and values stay on one line.
+  Swipe sideways, or focus the list and use the arrow keys, to see all columns.
+  The collector's name has its own row above the values. Choose
+  Balance, TDH, Unweighted TDH, Total balance, Total TDH or Total unweighted TDH
+  in the scrolling sort bar; the separate arrows set ascending or descending
+  order. Choosing a metric keeps the current direction and highlights its values.
+- Use the search icon to filter by one or several identities; remove chips to
+  broaden the results.
+  Filtered results retain each collector's TDH rank. Pages contain 25 collectors.
+- Large mobile values use compact notation from 100,000, with exact displayed
+  values available to assistive technology. Download CSV exports all matching
+  collectors with full numeric values in the selected order. Its icon shows
+  a tooltip on hover or keyboard focus when the text label is hidden. The button
+  shows progress, announces completion, and reports a download failure for retry.
+- At 768 px and wider, the Collectors table shows the same information in
+  columns. Sorting and paging keep the previous rows visible while the next
+  results load.
 - In Overview, explore `More by {artist}` for up to four other published Meme
   Cards per credited artist directly after the description, before detailed metadata.
   Cards are ordered by newest card number first. Each preview
@@ -217,6 +240,14 @@
 - Remediation: add reviewed entries to the four locale dictionaries, then check
   visible and accessible names, long-label wrapping, and expansion controls in
   each locale.
+
+## Collectors Translation Follow-up
+
+- Collectors mobile labels use the `theMemes.detail.collectors.*` message keys.
+  New metric and sort labels currently use the `en-US` fallback in `en-GB`,
+  `fr-FR`, `es-ES` and `de-DE`; values use the selected locale's number formatting.
+  Frontend localization maintainers should add reviewed translations and check
+  longer labels at phone widths.
 
 ## Related Pages
 

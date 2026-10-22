@@ -19,12 +19,12 @@ WebView on a real device.
 
 ## Budgets (reported, not enforced)
 
-| Budget | Limit |
-| --- | --- |
-| JavaScript requested before first paint | under 300 KB |
-| First-load transfer on the start routes (`home`, `waves`) | under 1.5 MB |
-| Largest content | under 2.5 s |
-| Idle requests | under one a minute |
+| Budget                                                    | Limit              |
+| --------------------------------------------------------- | ------------------ |
+| JavaScript requested before first paint                   | under 300 KB       |
+| First-load transfer on the start routes (`home`, `waves`) | under 1.5 MB       |
+| Largest content                                           | under 2.5 s        |
+| Idle requests                                             | under one a minute |
 
 ## Running it
 
@@ -49,3 +49,23 @@ every successful `Web Deploy - STAGING` and `Web Deploy - PROD` run and on
 dispatch, and writes the summary to the job summary with the results as an
 artifact. A hosted runner's CPU differs from a developer machine, so compare
 numbers from the same kind of machine.
+
+Automatic routing uses the deployment workflow's file path, so a production
+run title such as `Production deploy <sha>` does not affect site selection.
+Automatic and manual measurements share a concurrency group per target
+(`staging` or `production`); an active measurement is never cancelled.
+
+To take a fresh production measurement without redeploying, open **Actions →
+Mobile lab → Run workflow**, select `main`, set `target` to `production`, and
+leave `pages` at `home,waves,meme,museum` (or choose a subset). Once the trigger
+fix is on `main`, this dispatch uses the corrected workflow and measures the
+currently deployed site. The equivalent CLI command is:
+
+```bash
+gh workflow run mobile-lab.yml --repo 6529-Collections/6529seize-frontend \
+  --ref main -f target=production -f pages=home,waves,meme,museum
+```
+
+Use a new dispatch to pick up workflow changes; rerunning an old failed run
+uses its original workflow revision. Dispatching Mobile lab only measures and
+reports; it does not deploy the site or enforce the budgets.

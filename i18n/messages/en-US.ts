@@ -1,3 +1,4 @@
+import { VOTING_CREDIT_RETURN_MESSAGES } from "@/i18n/messages/voting-credit-returns";
 import { MEME_COLLABORATION_MESSAGES } from "@/i18n/messages/meme-collaborations";
 import emmaMessages from "@/i18n/messages/emma.en-US.json";
 import { EN_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
@@ -2361,6 +2362,19 @@ const WAVE_LOADING_MESSAGES = objectMessages("waves", {
 const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
   "waves.drops.searchModal",
   {
+    "advanced.allWaves": "all waves",
+    "advanced.filters": "Search filters",
+    "advanced.from": "From a specific user",
+    "advanced.in": "In a specific wave",
+    "advanced.removeFrom": "Remove author filter {name}",
+    "advanced.removeIn": "Remove wave filter {name}",
+    "advanced.idleAll":
+      "Type at least {minLength} characters or add an author filter to search all waves.",
+    "advanced.help":
+      "Type from: to choose an author or in: to choose a wave. Use arrow keys and Enter to select. Remove the wave filter to search all waves. Prefix from: or in: with a backslash to search for that text literally.",
+    "advanced.empty": "No matches found",
+    "advanced.loading": "Loading suggestions…",
+    "advanced.error": "Couldn't load suggestions. Try again.",
     authorFallback: "unknown author",
     clear: "Clear search",
     clearShort: "Clear",
@@ -2383,6 +2397,7 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
     "loading.description": "Looking through {waveName}.",
     "loading.title": "Searching messages",
     placeholder: "Search messages",
+    "result.openInWave": "Open message {serialNo} by {author} in {wave}",
     "result.open": "Open message {serialNo} by {author}",
     "result.checked": "Checked task",
     "result.imageFallback": "image",
@@ -3034,6 +3049,7 @@ const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
   ...MEME_COLLABORATION_MESSAGES,
+  ...VOTING_CREDIT_RETURN_MESSAGES,
   "network.prenodes.title": "Prenodes",
   "network.prenodes.pageTitle": "Prenodes | Network",
   "network.prenodes.deprecation":

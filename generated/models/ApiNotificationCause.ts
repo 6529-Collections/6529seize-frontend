@@ -29,5 +29,6 @@ export enum ApiNotificationCause {
     PriorityAlert = 'PRIORITY_ALERT',
     SubscriptionCoverage = 'SUBSCRIPTION_COVERAGE',
     CompetitionLifecycle = 'COMPETITION_LIFECYCLE',
-    MemeCollaboration = 'MEME_COLLABORATION'
+    MemeCollaboration = 'MEME_COLLABORATION',
+    VotingCreditsReturned = 'VOTING_CREDITS_RETURNED'
 }

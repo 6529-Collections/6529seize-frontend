@@ -16,12 +16,26 @@ import { ApiNotificationPollVoteOption } from '../models/ApiNotificationPollVote
 import { ApiSubscriptionCoverageNotificationRisk } from '../models/ApiSubscriptionCoverageNotificationRisk';
 import { ApiSubscriptionCoveragePoint } from '../models/ApiSubscriptionCoveragePoint';
 import { ApiSubscriptionCoverageStatus } from '../models/ApiSubscriptionCoverageStatus';
+import { ApiVotingCreditReleaseReason } from '../models/ApiVotingCreditReleaseReason';
 import { HttpFile } from '../http/http';
 
 /**
-* Notification-specific additional context. For DROP_REACTED notifications this includes reaction and reactors, where each reactor only has handle, pfp, and subscribed. COMPETITION_LIFECYCLE always includes event_id, event_type, wave_id, competition_id and competition_title; winner events also include entry_id and drop_id. These identify the native competition destination independently of the shared drop\'s legacy projection.
+* Notification-specific additional context. For DROP_REACTED notifications this includes reaction and reactors, where each reactor only has handle, pfp, and subscribed. COMPETITION_LIFECYCLE always includes event_id, event_type, wave_id, competition_id and competition_title; winner events also include entry_id and drop_id. These identify the native competition destination independently of the shared drop\'s legacy projection. VOTING_CREDITS_RETURNED includes event_id, reason, wave_id, competition_id, competition_title, entry_id, drop_id, submission_title, credit_type, amount and released_at. Amount is the positive released allocation, independent of time-weighted winning scores. Related drops are not required.
 */
 export class ApiNotificationAdditionalContextV2 {
+    'reason'?: ApiVotingCreditReleaseReason;
+    /**
+    * Submission title saved before winning or deletion.
+    */
+    'submission_title'?: string;
+    /**
+    * Credit type at the time of release.
+    */
+    'credit_type'?: string;
+    /**
+    * Release timestamp in Unix milliseconds.
+    */
+    'released_at'?: number;
     /**
     * Artwork name saved when a MEME_COLLABORATION invitation is sent or accepted. Absent for older notifications.
     */
@@ -74,6 +88,30 @@ export class ApiNotificationAdditionalContextV2 {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "reason",
+            "baseName": "reason",
+            "type": "ApiVotingCreditReleaseReason",
+            "format": ""
+        },
+        {
+            "name": "submission_title",
+            "baseName": "submission_title",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "credit_type",
+            "baseName": "credit_type",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "released_at",
+            "baseName": "released_at",
+            "type": "number",
+            "format": "int64"
+        },
         {
             "name": "artwork_name",
             "baseName": "artwork_name",

@@ -1,6 +1,7 @@
 import type { Page, Response } from "@playwright/test";
 import type { ApiCompetition } from "../../generated/models/ApiCompetition";
 import type { ApiCompetitionLeaderboardPage } from "../../generated/models/ApiCompetitionLeaderboardPage";
+import type { ApiDropV2PageWithoutCount } from "../../generated/models/ApiDropV2PageWithoutCount";
 import type { ApiDropAndWave } from "../../generated/models/ApiDropAndWave";
 import type { ApiWaveV3 } from "../../generated/models/ApiWaveV3";
 import { EN_US_MESSAGES } from "../../i18n/messages/en-US";
@@ -58,6 +59,8 @@ export function observeNativeLeaderboard(page: Page, waveId: string) {
       response.request().method() === "GET" &&
       (path === wavePath ||
         path.startsWith(`${wavePath}/competitions/`) ||
+        (path === "/api/v2/drops" &&
+          new URL(response.url()).searchParams.has("ids")) ||
         /^\/api\/v2\/drops\/[^/]+$/.test(path))
     )
       reads.push(response);
@@ -156,14 +159,62 @@ export async function expectNativeLeaderboardArtwork(
             "Rendered drop must belong to the native page"
           ).toBeDefined();
           if (!entry) throw new Error("Rendered native entry missing");
-          const response = reads.find(
-            (item) => new URL(item.url()).pathname === `/api/v2/drops/${dropId}`
+          const embedded = data.cards?.find(
+            (item) => item.entry.id === entry.entry_id
           );
+          if (embedded?.drop) {
+            expect(embedded.entry.competition_id).toBe(competition.id);
+            expect(embedded.entry.wave_id).toBe(competition.wave_id);
+            expect(embedded.drop.id).toBe(entry.drop_id);
+            if (embedded.drop.wave)
+              expect(embedded.drop.wave.id).toBe(competition.wave_id);
+            completed.push({
+              entryId: entry.entry_id,
+              drop: {
+                drop: embedded.drop,
+                wave:
+                  embedded.drop.wave ??
+                  ({ id: competition.wave_id } as ApiDropAndWave["wave"]),
+              },
+            });
+            const renderedCard = leaderboardRegion(page)
+              .getByRole("list", { name: "Leaderboard drops", exact: true })
+              .locator(`[data-leaderboard-drop-id="${dropId}"]`)
+              .locator(`[data-competition-entry="${entry.entry_id}"]`);
+            if (!(await renderedCard.isVisible())) return false;
+            continue;
+          }
+          const response =
+            reads.find(
+              (item) =>
+                new URL(item.url()).pathname === `/api/v2/drops/${dropId}`
+            ) ??
+            reads.find((item) => {
+              const url = new URL(item.url());
+              return (
+                url.pathname === "/api/v2/drops" &&
+                url.searchParams.get("ids")?.split(",").includes(dropId)
+              );
+            });
           if (!response) return false;
           expect(response.ok(), "Rendered rich drop read must succeed").toBe(
             true
           );
-          const drop: ApiDropAndWave = await response.json();
+          let drop: ApiDropAndWave;
+          if (new URL(response.url()).pathname === "/api/v2/drops") {
+            const batch: ApiDropV2PageWithoutCount = await response.json();
+            const rich = batch.data.find((item) => item.id === dropId);
+            expect(
+              rich,
+              "Bulk read must include its rendered drop"
+            ).toBeDefined();
+            // The production hydrator can fall back to an individual read
+            // when a bulk row omits its embedded wave. Await that read above.
+            if (!rich?.wave) return false;
+            drop = { drop: rich, wave: rich.wave };
+          } else {
+            drop = await response.json();
+          }
           expect(drop.wave.id).toBe(competition.wave_id);
           expect(drop.drop.id).toBe(entry.drop_id);
           // This marker appears only after context validation AND rich content
