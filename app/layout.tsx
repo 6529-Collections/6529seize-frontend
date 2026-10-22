@@ -65,11 +65,18 @@ export default async function RootLayout({
   readonly children: React.ReactNode;
 }) {
   const isUsingStaticAssets = publicEnv.ASSETS_FROM_S3 === "true";
+  // Routes render per request by default. A page that exports
+  // `dynamic = "force-static"` is prerendered and sees empty cookies and
+  // headers here; the shell then resolves native iOS EULA state in the
+  // browser and uses the configured origin for the environment badge.
   const [cookieStore, requestHeaders] = await Promise.all([
     cookies(),
     headers(),
   ]);
-  const initialOrigin = getRequestOrigin(requestHeaders);
+  const initialOrigin = getRequestOrigin(
+    requestHeaders,
+    publicEnv.BASE_ENDPOINT
+  );
   const initialIsIos = cookieStore.get(NATIVE_IOS_COOKIE)?.value === "true";
   const initialEulaConsentVersion = cookieStore.get(CONSENT_EULA_COOKIE)?.value;
 
