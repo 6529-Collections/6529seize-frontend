@@ -3854,6 +3854,7 @@
         "With `Collapse replies under each drop` on, replies stay out of the main chat. A drop with replies shows `Show N replies`; selecting it opens the thread under the drop, oldest first, and `Hide replies` closes it.",
         "The reply count includes replies to replies throughout the thread. Direct and nested replies refresh the original drop's count live; duplicate updates do not add extra replies.",
         "Sending a reply opens its thread for the sender. The pending reply remains visible while saving and loading, then becomes the saved reply; unsuccessful sends are removed or show the existing moderation rejection state.",
+        "Reply previews show the original author's handle and a placeholder avatar when the author has no profile picture. A missing profile picture does not mean the drop is missing. Removed content still follows moderation visibility rules.",
         "If loading a collapsed reply thread fails, it shows `Couldn't load replies.` and a Retry button. Already-loaded replies stay visible; Retry loads the thread again.",
         "Slow mode and disabled links still apply to replies from non-admins. Emoji reactions stay open to everyone who can see the wave.",
         "Collapsed replies do not count as unread and do not notify followers subscribed to every drop; the replied-to author and mentioned profiles are still notified.",
@@ -3866,6 +3867,7 @@
       "source_refs": [
         "components/waves/specs/WaveChatReplies.tsx",
         "components/waves/drops/reply-threads/WaveDropReplyThread.tsx",
+        "ops/docs/waves/drop-actions/feature-reply-preview-rows.md",
         "components/waves/PrivilegedDropCreator.tsx",
         "generated/models/ApiWaveChatRepliesConfig.ts"
       ]
