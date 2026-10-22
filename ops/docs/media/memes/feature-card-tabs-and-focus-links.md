@@ -105,8 +105,8 @@
   Balance, TDH, Unweighted TDH, Total balance, Total TDH or Total unweighted TDH
   in the scrolling sort bar; the separate arrows set ascending or descending
   order. Choosing a metric keeps the current direction and highlights its values.
-- The collector count reflects the current identity filters. Use the search icon
-  to filter by one or several identities; remove chips to broaden the results.
+- Use the search icon to filter by one or several identities; remove chips to
+  broaden the results.
   Filtered results retain each collector's TDH rank. Pages contain 25 collectors.
 - Large mobile values use compact notation from 100,000, with exact displayed
   values available to assistive technology. Download CSV exports all matching

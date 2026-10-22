@@ -183,7 +183,7 @@ export function defineCollectorsLeaderboardTests() {
     ).toBeHidden();
     await expect(
       section.getByText("1 collector", { exact: true })
-    ).toBeVisible();
+    ).toHaveCount(0);
 
     const download = page.waitForEvent("download");
     await section

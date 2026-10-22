@@ -46,8 +46,6 @@ export const EN_US_THE_MEMES_COLLECTORS_MESSAGES = {
     "Preparing collectors CSV.",
     "Collectors CSV download ready.",
   ]),
-  "theMemes.detail.collectors.countOne": "{count} collector",
-  "theMemes.detail.collectors.countOther": "{count} collectors",
   "theMemes.detail.collectors.cardOne": "card",
   "theMemes.detail.collectors.cardOther": "cards",
   "theMemes.detail.collectors.sortBy": "Sort collectors by",

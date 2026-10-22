@@ -13,7 +13,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { cicToType, numberWithCommas } from "@/helpers/Helpers";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { formatInteger, selectPluralCategory } from "@/i18n/format";
+import { formatInteger } from "@/i18n/format";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
 import { DATA_TABLE_HEADER_TEXT_CLASS_NAME } from "@/components/utils/table/tableStyles";
@@ -634,7 +634,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
       className="tw-scroll-mt-24 tw-pt-8"
       id="nft-leaderboard"
     >
-      <div className="tw-mb-0.5 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 max-md:tw-gap-x-2 max-md:tw-gap-y-1 md:tw-mb-4">
+      <div className="tw-mb-3 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 max-md:tw-gap-x-2 max-md:tw-gap-y-1 md:tw-mb-4">
         <h3 className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-[17px] tw-font-semibold tw-leading-[22px] tw-text-iron-50 md:tw-flex-none md:tw-text-lg md:tw-leading-7 md:tw-text-iron-100">
           {t(locale, "theMemes.detail.collectors.leaderboardTitle")}
         </h3>
@@ -655,15 +655,6 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
           </div>
         </CollectorsCsvDownloadControls>
       </div>
-      <p className="tw-mb-3.5 tw-mt-0.5 tw-text-[13px] tw-leading-[18px] tw-text-iron-500 md:tw-hidden">
-        {t(
-          locale,
-          selectPluralCategory(locale, totalResults) === "one"
-            ? "theMemes.detail.collectors.countOne"
-            : "theMemes.detail.collectors.countOther",
-          { count: formatInteger(locale, totalResults) }
-        )}
-      </p>
       <NFTLeaderboardMobileSort
         locale={locale}
         sort={sort.sort}

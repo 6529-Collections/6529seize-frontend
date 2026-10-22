@@ -257,7 +257,10 @@ describe("NFTLeaderboard component", () => {
       data: [{ ...collector, tdh_rank: 87 }],
     });
     await waitFor(() => expect(list.getByText("87")).toBeInTheDocument());
-    expect(screen.getByText("1 collector")).toBeInTheDocument();
+    expect(screen.queryByText("1 collector")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "Collector x1" })
+    ).toBeInTheDocument();
   });
 
   it("shows compact totals with exact accessible values and preserves zero", async () => {
