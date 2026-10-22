@@ -33,6 +33,7 @@ export default function CollectEntryLink({
   locale = DEFAULT_LOCALE,
   complete = false,
   profileActivityKey,
+  className = "",
 }: {
   readonly collection?: CollectCollection | undefined;
   readonly intent?: CollectIntent | undefined;
@@ -41,11 +42,11 @@ export default function CollectEntryLink({
   readonly locale?: SupportedLocale | undefined;
   readonly complete?: boolean | undefined;
   readonly profileActivityKey?: string | undefined;
+  readonly className?: string | undefined;
 }) {
   const props = {
     href: getCollectHref({ collection, intent, tokenId, definitionId }),
-    className:
-      "tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-px-2 tw-text-sm tw-font-medium tw-text-iron-300 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white",
+    className: `${className} tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-px-2 tw-text-sm tw-font-medium tw-text-iron-300 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white`,
     children: (
       <>
         {t(
