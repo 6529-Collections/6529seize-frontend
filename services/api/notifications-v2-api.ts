@@ -1,10 +1,8 @@
+import { ApiVotingCreditReleaseReason } from "@/generated/models/ApiVotingCreditReleaseReason";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdentitySubscriptionTargetAction";
-import {
-  ApiNotificationAdditionalContextV2ReasonEnum,
-  type ApiNotificationAdditionalContextV2,
-} from "@/generated/models/ApiNotificationAdditionalContextV2";
+import type { ApiNotificationAdditionalContextV2 } from "@/generated/models/ApiNotificationAdditionalContextV2";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ApiNotificationDropReactedReactor } from "@/generated/models/ApiNotificationDropReactedReactor";
 import type { ApiNotificationV2 } from "@/generated/models/ApiNotificationV2";
@@ -321,9 +319,8 @@ const mapVotingCreditsReturnedNotification = (
     !context.drop_id ||
     !context.submission_title ||
     !context.credit_type ||
-    (context.reason !== ApiNotificationAdditionalContextV2ReasonEnum.Win &&
-      context.reason !==
-        ApiNotificationAdditionalContextV2ReasonEnum.AuthorDeleted) ||
+    (context.reason !== ApiVotingCreditReleaseReason.Win &&
+      context.reason !== ApiVotingCreditReleaseReason.AuthorDeleted) ||
     typeof context.amount !== "number" ||
     !Number.isSafeInteger(context.amount) ||
     context.amount <= 0 ||

@@ -16,16 +16,14 @@ import { ApiNotificationPollVoteOption } from '../models/ApiNotificationPollVote
 import { ApiSubscriptionCoverageNotificationRisk } from '../models/ApiSubscriptionCoverageNotificationRisk';
 import { ApiSubscriptionCoveragePoint } from '../models/ApiSubscriptionCoveragePoint';
 import { ApiSubscriptionCoverageStatus } from '../models/ApiSubscriptionCoverageStatus';
+import { ApiVotingCreditReleaseReason } from '../models/ApiVotingCreditReleaseReason';
 import { HttpFile } from '../http/http';
 
 /**
 * Notification-specific additional context. For DROP_REACTED notifications this includes reaction and reactors, where each reactor only has handle, pfp, and subscribed. COMPETITION_LIFECYCLE always includes event_id, event_type, wave_id, competition_id and competition_title; winner events also include entry_id and drop_id. These identify the native competition destination independently of the shared drop\'s legacy projection. VOTING_CREDITS_RETURNED includes event_id, reason, wave_id, competition_id, competition_title, entry_id, drop_id, submission_title, credit_type, amount and released_at. Amount is the positive released allocation, independent of time-weighted winning scores. Related drops are not required.
 */
 export class ApiNotificationAdditionalContextV2 {
-    /**
-    * Why active WAVE-scoped voting credit was released.
-    */
-    'reason'?: ApiNotificationAdditionalContextV2ReasonEnum;
+    'reason'?: ApiVotingCreditReleaseReason;
     /**
     * Submission title saved before winning or deletion.
     */
@@ -93,7 +91,7 @@ export class ApiNotificationAdditionalContextV2 {
         {
             "name": "reason",
             "baseName": "reason",
-            "type": "ApiNotificationAdditionalContextV2ReasonEnum",
+            "type": "ApiVotingCreditReleaseReason",
             "format": ""
         },
         {
@@ -362,9 +360,3 @@ export class ApiNotificationAdditionalContextV2 {
     public constructor() {
     }
 }
-
-export enum ApiNotificationAdditionalContextV2ReasonEnum {
-    Win = 'WIN',
-    AuthorDeleted = 'AUTHOR_DELETED'
-}
-

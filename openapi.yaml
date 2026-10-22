@@ -34264,11 +34264,7 @@ components:
       type: object
       properties:
         reason:
-          type: string
-          enum:
-            - WIN
-            - AUTHOR_DELETED
-          description: Why active WAVE-scoped voting credit was released.
+          $ref: "#/components/schemas/ApiVotingCreditReleaseReason"
         submission_title:
           type: string
           description: Submission title saved before winning or deletion.
@@ -38450,6 +38446,12 @@ components:
           type: boolean
         enforce_hashes:
           type: boolean
+    ApiVotingCreditReleaseReason:
+      type: string
+      description: Why an active WAVE-scoped voting allocation was released.
+      enum:
+        - WIN
+        - AUTHOR_DELETED
     ApiWallet:
       type: object
       required:
