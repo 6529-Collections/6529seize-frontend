@@ -202,6 +202,9 @@ export function defineCollectorsLeaderboardTests() {
       "This card balance: 1"
     );
 
+    // Settle the intentional page scroll before testing hover; scrolling closes tooltips.
+    await csvButton.scrollIntoViewIfNeeded();
+    await expect(csvButton).toBeInViewport({ ratio: 1 });
     await csvButton.hover();
     await expect(csvTooltip).toBeVisible();
     await page.keyboard.press("Escape");

@@ -93,7 +93,7 @@ export function NFTLeaderboardMobileSort({
             ref={sort === value ? selected : undefined}
             selected={sort === value}
             size="xs"
-            className="tw-snap-center"
+            className="focus-visible:tw-snap-center"
             aria-pressed={sort === value}
             onClick={() => onSort(value)}
           >
