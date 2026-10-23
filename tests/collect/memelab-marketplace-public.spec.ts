@@ -135,6 +135,7 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
     { name: "performance-cookies-consent", value: "false", url: baseURL! },
   ]);
   let offersOnly = false;
+  let listingsOnly = false;
   let additionalCurrency = false;
   const writes: string[] = [];
   const lookups: string[] = [];
@@ -226,20 +227,22 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
                         order_count: 1,
                       },
                     ],
-              bids: bid
-                ? Array.from({ length: 12 }, (_, index) => ({
-                    unit_price: captured(true, index).unit_price,
-                    quantity: index === 8 ? "6" : "3",
-                    cumulative_quantity: String(
-                      (index + 1 + (index >= 8 ? 1 : 0)) * 3
-                    ),
-                    order_count: index === 8 ? 2 : 1,
-                  }))
-                : [],
+              bids:
+                bid && !listingsOnly
+                  ? Array.from({ length: 12 }, (_, index) => ({
+                      unit_price: captured(true, index).unit_price,
+                      quantity: index === 8 ? "6" : "3",
+                      cumulative_quantity: String(
+                        (index + 1 + (index >= 8 ? 1 : 0)) * 3
+                      ),
+                      order_count: index === 8 ? 2 : 1,
+                    }))
+                  : [],
               best_ask: bid || offersOnly ? null : "0.04",
-              best_bid: bid ? captured(true, 0).unit_price : null,
+              best_bid:
+                bid && !listingsOnly ? captured(true, 0).unit_price : null,
               ask_order_count: bid || offersOnly ? 0 : 1,
-              bid_order_count: bid ? 13 : 0,
+              bid_order_count: bid && !listingsOnly ? 13 : 0,
             })),
             ...(additionalCurrency
               ? [
@@ -268,14 +271,20 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
           ],
           orders: [
             ...(offersOnly ? [] : [captured(false)]),
-            ...Array.from({ length: 12 }, (_, index) => captured(true, index)),
-            {
-              ...captured(true, 8),
-              order_key: "lab-offer-extra",
-              order_id: "0x" + "e".repeat(64),
-            },
+            ...(listingsOnly
+              ? []
+              : [
+                  ...Array.from({ length: 12 }, (_, index) =>
+                    captured(true, index)
+                  ),
+                  {
+                    ...captured(true, 8),
+                    order_key: "lab-offer-extra",
+                    order_id: "0x" + "e".repeat(64),
+                  },
+                ]),
           ],
-          order_count: offersOnly ? 13 : 14,
+          order_count: (offersOnly ? 0 : 1) + (listingsOnly ? 0 : 13),
           next: null,
           criteria_order_count: 0,
           notes: [],
@@ -710,28 +719,53 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth)
   ).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
+  // A single quoted side fills the panel, with both summaries still above it.
+  for (const side of ["offers", "listings"] as const) {
+    offersOnly = side === "offers";
+    listingsOnly = side === "listings";
+    await page.reload({ waitUntil: "domcontentloaded" });
+    const loneTable = market.getByRole("table", {
+      name: offersOnly ? "Offers for WETH" : "Listings for ETH",
+      exact: true,
+    });
+    await expect(loneTable).toBeVisible();
+    await expect(market.getByRole("table")).toHaveCount(1);
+    const lowest = market.getByText("Lowest listing · ETH", { exact: true });
+    const highest = market.getByText("Highest offer · WETH", { exact: true });
+    await expect(
+      market
+        .getByText(offersOnly ? "Lowest listing · ETH" : "Highest offer · WETH", {
+          exact: true,
+        })
+        .locator("..")
+    ).toContainText("—");
+    for (const width of [390, 900, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 1000 });
+      const panelBounds = (await market.boundingBox())!;
+      const tableBounds = (await loneTable.boundingBox())!;
+      const leftSummary = (await lowest.boundingBox())!;
+      const rightSummary = (await highest.boundingBox())!;
+      expect(tableBounds.x).toBeCloseTo(panelBounds.x, 0);
+      expect(tableBounds.width).toBeCloseTo(panelBounds.width, 0);
+      expect(rightSummary.y).toBeCloseTo(leftSummary.y, 0);
+      expect(rightSummary.x).toBeGreaterThan(leftSummary.x);
+      for (const summary of [leftSummary, rightSummary]) {
+        expect(summary.y + summary.height).toBeLessThan(tableBounds.y);
+      }
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth)
+      ).toBeLessThanOrEqual(width + 1);
+      if (width === 390 || width === 1440) {
+        await market.scrollIntoViewIfNeeded();
+        await page.screenshot({
+          path: info.outputPath(`market-depth-${side}-only-${width}.png`),
+          fullPage: true,
+        });
+      }
+    }
+  }
   offersOnly = true;
-  await page.reload({ waitUntil: "domcontentloaded" });
-  await expect(
-    market.getByRole("table", { name: "Offers for WETH" })
-  ).toBeVisible();
-  await expect(
-    market.getByRole("table", { name: "Listings for ETH" })
-  ).toHaveCount(0);
-  const emptyListing = market.getByText("Lowest listing · ETH", {
-    exact: true,
-  });
-  await expect(emptyListing).toBeVisible();
-  const emptySummary = market
-    .getByText("Lowest listing · ETH", { exact: true })
-    .locator("..");
-  await expect(emptySummary).toContainText("—");
-  const leftSummary = (await emptyListing.boundingBox())!;
-  const rightSummary = (await market
-    .getByText("Highest offer · WETH", { exact: true })
-    .boundingBox())!;
-  expect(rightSummary.y).toBeCloseTo(leftSummary.y, 0);
-  expect(rightSummary.x).toBeGreaterThan(leftSummary.x);
+  listingsOnly = false;
   additionalCurrency = true;
   await page.reload({ waitUntil: "domcontentloaded" });
   const additionalTable = market.getByRole("table", {
