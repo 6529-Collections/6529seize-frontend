@@ -324,14 +324,14 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   return (
     <div
       data-vote-controls
-      className="tw-col-span-3 tw-row-start-4 tw-flex tw-w-full tw-min-w-0 tw-cursor-default tw-flex-col sm:@[16rem]/my-vote:tw-row-start-3 sm:@[36rem]/my-vote:tw-col-span-1 sm:@[36rem]/my-vote:tw-col-start-3 sm:@[36rem]/my-vote:tw-max-w-72 @[46rem]/my-vote:tw-contents"
+      className="tw-col-span-3 tw-row-start-4 tw-flex tw-w-full tw-min-w-0 tw-cursor-default tw-flex-col @[46rem]/my-vote:tw-contents sm:@[16rem]/my-vote:tw-row-start-3 sm:@[36rem]/my-vote:tw-col-span-1 sm:@[36rem]/my-vote:tw-col-start-3 sm:@[36rem]/my-vote:tw-max-w-72"
     >
       <label htmlFor={voteInputId} className="tw-sr-only">
         {t(locale, "waves.myVotes.yourVotes")}{" "}
         {t(locale, "waves.myVotes.inCredit", { credit: voteLabel })}
       </label>
       <div
-        className={`tw-flex tw-min-w-0 tw-items-center tw-gap-3 tw-rounded-lg tw-bg-iron-900 tw-pr-1 tw-ring-1 tw-ring-inset tw-transition-colors tw-duration-200 focus-within:tw-ring-2 motion-reduce:tw-transition-none @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-1 @[46rem]/my-vote:tw-self-end ${
+        className={`tw-flex tw-min-w-0 tw-items-center tw-gap-3 tw-rounded-lg tw-bg-iron-900 tw-pr-1 tw-ring-1 tw-ring-inset tw-transition-colors tw-duration-200 focus-within:tw-ring-2 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-1 @[46rem]/my-vote:tw-self-end motion-reduce:tw-transition-none ${
           isVoteValueOutOfRange
             ? "tw-ring-rose-400 focus-within:!tw-ring-rose-400"
             : "tw-ring-iron-700 focus-within:!tw-ring-primary-400"
@@ -396,6 +396,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
             variant="tertiary"
             size="xs"
             aria-label={t(locale, "waves.voteRationale.explainAriaLabel")}
+            title={t(locale, "waves.voteRationale.savedDescription")}
           >
             {t(locale, "waves.voteRationale.explain")}
           </Button>

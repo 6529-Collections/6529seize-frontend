@@ -17,6 +17,7 @@ export default function CompetitionVoteWithReply({
   const locale = useBrowserLocale();
   const fieldId = useId();
   const descriptionId = useId();
+  const publicReplyDescriptionId = useId();
   const credit = useCompetitionVoteBudget(props.competition, props.entryId);
   const [draft, setDraft] = useState<string | null>(null);
   const previous = credit.data?.current_vote ?? 0;
@@ -32,7 +33,7 @@ export default function CompetitionVoteWithReply({
     rationale.shouldPostRationale && !rationale.rationaleText.trim();
   const content = (
     <div className="tw-space-y-3">
-      <label className="tw-flex tw-w-fit tw-cursor-pointer tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-200">
+      <label className="tw-flex tw-min-h-11 tw-w-fit tw-cursor-pointer tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-200">
         <span className="tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-items-center">
           <input
             type="checkbox"
@@ -42,6 +43,11 @@ export default function CompetitionVoteWithReply({
               rationale.handlePostRationaleChange(event.target.checked)
             }
             aria-controls={rationale.shouldPostRationale ? fieldId : undefined}
+            aria-describedby={
+              rationale.shouldPostRationale
+                ? publicReplyDescriptionId
+                : undefined
+            }
             className="tw-peer tw-sr-only"
           />
           <span
@@ -55,6 +61,14 @@ export default function CompetitionVoteWithReply({
         </span>
         {t(locale, "waves.voteRationale.switchLabel")}
       </label>
+      {rationale.shouldPostRationale && (
+        <p
+          id={publicReplyDescriptionId}
+          className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400"
+        >
+          {t(locale, "waves.voteRationale.publicReplyDescription")}
+        </p>
+      )}
       {rationale.shouldPostRationale && (
         <div className="tw-space-y-2">
           <label
