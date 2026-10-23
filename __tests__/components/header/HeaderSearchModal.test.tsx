@@ -450,6 +450,10 @@ describe("HeaderSearchModal", () => {
     setup();
     const input = getSearchInput();
     fireEvent.change(input, { target: { value: "abc" } });
+    expect(mockUseWaveDropsSearch.mock.calls.at(-1)?.[0]).toMatchObject({
+      term: "abc",
+      enabled: false,
+    });
     expect(
       screen.getByRole("heading", { name: "Profiles" })
     ).toBeInTheDocument();
