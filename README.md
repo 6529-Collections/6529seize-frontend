@@ -244,3 +244,7 @@ post-mint Research and artist payment. The backend setup guide covers the one-ti
 goes only to the dedicated operations wave, leaving existing mint announcements unchanged.
 
 Shared Memes calendar maintenance: [guide](shared/memes-calendar/README.md).
+
+Launch automation uses saved UTC phase windows from its backend launch ledger.
+Environment/contract policy and the reduced operator setup are documented in the
+[backend setup guide](https://github.com/6529-Collections/6529seize-backend/blob/agent-prxt/drop-forge-auto-launch-requirements/docs/drop-forge-auto-launch-setup.md).

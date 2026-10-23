@@ -231,3 +231,15 @@ skips. Funding/permission failures retry automatically within the action window;
 earlier failed groups do not require Resume before later groups become eligible.
 Explicit Pause, manual leases and uncertain signed nonce recovery retain their
 safety boundaries. The wave reports execution, failed attempts and detected skips.
+
+## Calendar and runtime policy
+
+The canonical shared calendar is bundled in both repositories, with no frontend
+uptime dependency for launch planning. Managed launches freeze calendar version,
+Athens timezone and UTC timestamps at acceptance. Manual controls use those saved
+windows; current calendar defaults apply only when no saved launch exists.
+Stable chain/contract/receiver/gas/confirmation settings are reviewed source policy,
+selected by deployment. Wallet/reporting values and the artist payment cap remain
+operator supplied. Launch/preparation switches remain independent and default Off.
+Receipt/replacement/cancellation recovery remains active while execution is Off.
+On-chain receiver mismatches stop execution and alert the operations wave.

@@ -306,3 +306,7 @@ operational nonce until its winner is proved; explicit Pause still stops new
 work. Research waits for outstanding fixed allocations to be reconciled.
 Manual airdrop completion requires actual confirmed mint events matching the
 recipient addresses and quantities; toggles or total supply alone are not proof.
+
+For an accepted automated launch, manual phase controls display its saved UTC
+windows. Calendar updates do not move an active launch. Before any saved launch
+exists, defaults follow the bundled Athens calendar, including DST.
