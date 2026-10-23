@@ -30,7 +30,7 @@ const hashes = () =>
         .digest("hex"),
     ])
   );
-const [command = "check", target] = process.argv.slice(2);
+const [command = "check", target] = process.argv.slice(2).filter((arg) => arg !== "--");
 
 if (command === "refresh") {
   if (directory !== canonical)
