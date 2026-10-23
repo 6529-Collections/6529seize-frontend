@@ -130,8 +130,8 @@ plan; Launch exposes progress and transaction recovery controls.
     when live on-chain `totalMax` exists, that value becomes the active cap.
   - Entering a target above the active claim max snaps the field back to that
     cap and shows a toast explaining the limit.
-  - Automatic Research becomes eligible at `17:15 Europe/Athens` the following
-    day, fifteen minutes after Public minting closes. Its target is
+  - Automatic Research becomes eligible at `18:00 Europe/Athens` the following
+    day, one hour after Public minting closes. Its target is
     `min(310, Craft edition size)`, and the quantity subtracts the fresh on-chain
     total minted, including paid mints and earlier/manual airdrops. Edition 305
     with 287 minted sends 18 tokens. Craft and the on-chain maximum must match;
@@ -141,7 +141,7 @@ plan; Launch exposes progress and transaction recovery controls.
     Completion updates the Research toggle and action timeline; transaction
     links and failures are reported to the dedicated wave. The manual target
     input remains available for manual work; automation uses the fixed capped
-    target above. Pay Artist remains manual.
+    target above. Pay Artist can be opted into the same 18:00 group through Launch Automation; manual payment remains available and records transaction evidence.
 - On-chain actions:
   - If the authorized wallet is not currently connected, selecting an on-chain
     action opens wallet connection and continues that action after connection.
@@ -194,7 +194,7 @@ plan; Launch exposes progress and transaction recovery controls.
 - If tracked-action toggles fail to load or update, the page stays usable; retry
   once launch authorization and API access are available again. On-chain-only
   permissions are checked fresh by the mainnet API; RPC failure returns 503
-  rather than retaining stale access. Sepolia tracking remains unsupported.
+  rather than retaining stale access. Launch tracking uses the backend-configured chain, including Sepolia.
 - If on-chain roots or phase-airdrop data fail to load, their error messages stay
   visible above the rest of the launch content.
 - Failed write operations leave the claim open so the user can adjust values and

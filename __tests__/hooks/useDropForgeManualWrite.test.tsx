@@ -243,3 +243,23 @@ it("keeps a submitted hash in memory and retries the same proof if browser persi
   expect(localStorage.getItem(key)).toBeNull();
   hook.unmount();
 });
+
+it("keeps payment evidence separate from an existing contract-write proof", async () => {
+  const otherProof = JSON.stringify({
+    hash: "airdrop-hash",
+    lease: "airdrop-lease",
+  });
+  localStorage.setItem(key, otherProof);
+  const hook = renderHook(() =>
+    useDropForgeManualWrite("creator", 123, undefined, null, {
+      fingerprint: "payment",
+      storageSuffix: "pay-artist",
+    })
+  );
+  await act(() => hook.result.current(jest.fn(), "PAY_ARTIST"));
+  expect(localStorage.getItem(key)).toBe(otherProof);
+  expect(JSON.parse(localStorage.getItem(key + ":pay-artist")!)).toMatchObject({
+    lease: "lease",
+    action: "PAY_ARTIST",
+  });
+});

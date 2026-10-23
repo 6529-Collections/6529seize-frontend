@@ -1,6 +1,7 @@
 import { VOTING_CREDIT_RETURN_MESSAGES } from "@/i18n/messages/voting-credit-returns";
 import { MEME_COLLABORATION_MESSAGES } from "@/i18n/messages/meme-collaborations";
 import emmaMessages from "@/i18n/messages/emma.en-US.json";
+import dropForgeSettingsMessages from "@/i18n/messages/drop-forge-settings.en-US.json";
 import { EN_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import waveCreationMessages from "@/i18n/messages/wave-creation.en-US.json";
 import { COMPETITION_MESSAGES } from "@/i18n/messages/competitions";
@@ -3047,6 +3048,7 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  ...dropForgeSettingsMessages,
   "dropForge.actionDone": "Completed",
   "dropForge.actionFailed": "Failed",
   "dropForge.actionSubmitted": "Submitted",

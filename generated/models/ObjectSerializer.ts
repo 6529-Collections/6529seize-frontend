@@ -372,6 +372,8 @@ export * from '../models/ApiDropCuration';
 export * from '../models/ApiDropCurationRequest';
 export * from '../models/ApiDropForgeAction';
 export * from '../models/ApiDropForgeControlRequest';
+export * from '../models/ApiDropForgeFundingRequest';
+export * from '../models/ApiDropForgeFundingResponse';
 export * from '../models/ApiDropForgeJob';
 export * from '../models/ApiDropForgeJobRequest';
 export * from '../models/ApiDropForgeLaunch';
@@ -386,6 +388,8 @@ export * from '../models/ApiDropForgeRecovery';
 export * from '../models/ApiDropForgeRecoveryAllocation';
 export * from '../models/ApiDropForgeRecoveryAttempt';
 export * from '../models/ApiDropForgeRecoveryRequest';
+export * from '../models/ApiDropForgeSettings';
+export * from '../models/ApiDropForgeSettingsRequest';
 export * from '../models/ApiDropGroupMention';
 export * from '../models/ApiDropHiddenState';
 export * from '../models/ApiDropId';
@@ -1300,8 +1304,10 @@ import { ApiDropCompetitionContext } from '../models/ApiDropCompetitionContext';
 import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileContext';
 import { ApiDropCuration } from '../models/ApiDropCuration';
 import { ApiDropCurationRequest } from '../models/ApiDropCurationRequest';
-import { ApiDropForgeAction        , ApiDropForgeActionKindEnum  , ApiDropForgeActionStateEnum         } from '../models/ApiDropForgeAction';
+import { ApiDropForgeAction           , ApiDropForgeActionKindEnum  , ApiDropForgeActionStateEnum         } from '../models/ApiDropForgeAction';
 import { ApiDropForgeControlRequest , ApiDropForgeControlRequestOperationEnum   } from '../models/ApiDropForgeControlRequest';
+import { ApiDropForgeFundingRequest } from '../models/ApiDropForgeFundingRequest';
+import { ApiDropForgeFundingResponse } from '../models/ApiDropForgeFundingResponse';
 import { ApiDropForgeJob     , ApiDropForgeJobKindEnum  , ApiDropForgeJobStatusEnum      } from '../models/ApiDropForgeJob';
 import { ApiDropForgeJobRequest  , ApiDropForgeJobRequestKindEnum     } from '../models/ApiDropForgeJobRequest';
 import { ApiDropForgeLaunch    , ApiDropForgeLaunchStateEnum             } from '../models/ApiDropForgeLaunch';
@@ -1316,6 +1322,8 @@ import { ApiDropForgeRecovery    , ApiDropForgeRecoveryOutcomeEnum      } from '
 import { ApiDropForgeRecoveryAllocation } from '../models/ApiDropForgeRecoveryAllocation';
 import { ApiDropForgeRecoveryAttempt , ApiDropForgeRecoveryAttemptOperationEnum      } from '../models/ApiDropForgeRecoveryAttempt';
 import { ApiDropForgeRecoveryRequest     , ApiDropForgeRecoveryRequestOperationEnum   } from '../models/ApiDropForgeRecoveryRequest';
+import { ApiDropForgeSettings } from '../models/ApiDropForgeSettings';
+import { ApiDropForgeSettingsRequest } from '../models/ApiDropForgeSettingsRequest';
 import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
 import { ApiDropHiddenState } from '../models/ApiDropHiddenState';
 import { ApiDropId } from '../models/ApiDropId';
@@ -2511,6 +2519,8 @@ let typeMap: {[index: string]: any} = {
     "ApiDropCurationRequest": ApiDropCurationRequest,
     "ApiDropForgeAction": ApiDropForgeAction,
     "ApiDropForgeControlRequest": ApiDropForgeControlRequest,
+    "ApiDropForgeFundingRequest": ApiDropForgeFundingRequest,
+    "ApiDropForgeFundingResponse": ApiDropForgeFundingResponse,
     "ApiDropForgeJob": ApiDropForgeJob,
     "ApiDropForgeJobRequest": ApiDropForgeJobRequest,
     "ApiDropForgeLaunch": ApiDropForgeLaunch,
@@ -2525,6 +2535,8 @@ let typeMap: {[index: string]: any} = {
     "ApiDropForgeRecoveryAllocation": ApiDropForgeRecoveryAllocation,
     "ApiDropForgeRecoveryAttempt": ApiDropForgeRecoveryAttempt,
     "ApiDropForgeRecoveryRequest": ApiDropForgeRecoveryRequest,
+    "ApiDropForgeSettings": ApiDropForgeSettings,
+    "ApiDropForgeSettingsRequest": ApiDropForgeSettingsRequest,
     "ApiDropHiddenState": ApiDropHiddenState,
     "ApiDropId": ApiDropId,
     "ApiDropMedia": ApiDropMedia,

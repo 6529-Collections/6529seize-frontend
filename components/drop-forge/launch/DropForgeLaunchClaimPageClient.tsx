@@ -216,6 +216,13 @@ export default function DropForgeLaunchClaimPageClient({
     claimWrite.error,
     connectedActionContextFingerprint
   );
+  const executePayment = useDropForgeManualWrite(
+    forgeMintingContract,
+    claimId,
+    payArtistWrite.data,
+    payArtistWrite.error,
+    { fingerprint: connectedActionContextFingerprint, storageSuffix: "payment" }
+  );
   const runConnectedAction = useConnectedAction({
     contextFingerprint: connectedActionContextFingerprint,
     onContextChanged: () =>
@@ -294,6 +301,7 @@ export default function DropForgeLaunchClaimPageClient({
     payArtistAddressValid,
     runConnectedAction,
     executeManual,
+    executePayment,
   });
 
   if (shouldShowPermissionFallback) {

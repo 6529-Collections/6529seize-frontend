@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from "react";
-import { isAddress, parseEther } from "viem";
+import { getAddress, isAddress, parseEther } from "viem";
 import type {
   useSendTransaction,
   useWaitForTransactionReceipt,
@@ -68,6 +68,7 @@ interface UseLaunchClaimWritesParams {
   payArtistResolvedAddressTrimmed: string;
   payArtistAddressValid: boolean;
   executeManual: (write: () => void, label?: string) => Promise<void>;
+  executePayment: (write: () => void, label?: string) => Promise<void>;
   runConnectedAction: RunConnectedAction;
 }
 
@@ -92,6 +93,7 @@ export function useLaunchClaimWrites({
   payArtistResolvedAddressTrimmed,
   payArtistAddressValid,
   executeManual,
+  executePayment,
   runConnectedAction,
 }: Readonly<UseLaunchClaimWritesParams>) {
   const {
@@ -467,20 +469,28 @@ export function useLaunchClaimWrites({
           mintingClaimAction ?? null;
         payArtistWrite.reset();
 
-        try {
-          payArtistWrite.sendTransaction({
-            chainId: forgeMintingChain.id,
-            to: resolvedAddress,
-            value: amountWei,
-          });
-        } catch (error) {
-          pendingPayArtistMintingClaimActionRef.current = null;
-          setPayArtistTxModal({
-            status: "error",
-            message: getErrorMessage(error, FAILED_SUBMIT_TRANSACTION_MESSAGE),
-            actionLabel: "Pay Artist",
-          });
+        async function submitPayment() {
+          try {
+            await executePayment(() => {
+              payArtistWrite.sendTransaction({
+                chainId: forgeMintingChain.id,
+                to: getAddress(resolvedAddress),
+                value: amountWei,
+              });
+            }, "PAY_ARTIST");
+          } catch (error) {
+            pendingPayArtistMintingClaimActionRef.current = null;
+            setPayArtistTxModal({
+              status: "error",
+              message: getErrorMessage(
+                error,
+                FAILED_SUBMIT_TRANSACTION_MESSAGE
+              ),
+              actionLabel: "Pay Artist",
+            });
+          }
         }
+        void submitPayment();
       });
     },
     [
@@ -494,6 +504,7 @@ export function useLaunchClaimWrites({
       payArtistWrite,
       forgeMintingChain.id,
       runConnectedAction,
+      executePayment,
     ]
   );
 

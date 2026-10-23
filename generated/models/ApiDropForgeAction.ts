@@ -15,6 +15,9 @@ import { ApiDropForgeRecovery } from '../models/ApiDropForgeRecovery';
 import { HttpFile } from '../http/http';
 
 export class ApiDropForgeAction {
+    'payment_recipient'?: string | null;
+    'payment_amount_wei'?: string | null;
+    'disabled_reason'?: string | null;
     /**
     * Scheduled phase group, metadata, or research; completion remains per action
     */
@@ -46,6 +49,24 @@ export class ApiDropForgeAction {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "payment_recipient",
+            "baseName": "payment_recipient",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "payment_amount_wei",
+            "baseName": "payment_amount_wei",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "disabled_reason",
+            "baseName": "disabled_reason",
+            "type": "string",
+            "format": ""
+        },
         {
             "name": "group",
             "baseName": "group",
@@ -155,7 +176,8 @@ export enum ApiDropForgeActionKindEnum {
     Initialize = 'INITIALIZE',
     Airdrop = 'AIRDROP',
     Update = 'UPDATE',
-    Metadata = 'METADATA'
+    Metadata = 'METADATA',
+    PayArtist = 'PAY_ARTIST'
 }
 export enum ApiDropForgeActionStateEnum {
     Pending = 'PENDING',

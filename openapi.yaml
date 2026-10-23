@@ -7997,6 +7997,101 @@ paths:
           description: Invalid request
         "403":
           description: Forbidden - not a Subscription Admin
+  /drop-forge/automation-settings:
+    get:
+      tags:
+        - Drop Forge
+      operationId: getDropForgeSettings
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge-settings.handlers"
+          name: getDropForgeSettings
+      responses:
+        "200":
+          description: Authorized Drop Forge operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeSettings"
+        "400":
+          description: Invalid input or incomplete configuration
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator permission required
+        "409":
+          description: Settings revision changed
+    put:
+      tags:
+        - Drop Forge
+      operationId: putDropForgeSettings
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge-settings.handlers"
+          name: putDropForgeSettings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDropForgeSettingsRequest"
+      responses:
+        "200":
+          description: Authorized Drop Forge operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeSettings"
+        "400":
+          description: Invalid input or incomplete configuration
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator permission required
+        "409":
+          description: Settings revision changed
+  /drop-forge/funding:
+    post:
+      tags:
+        - Drop Forge
+      operationId: postDropForgeFunding
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge-settings.handlers"
+          name: postDropForgeFunding
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDropForgeFundingRequest"
+      responses:
+        "200":
+          description: Authorized Drop Forge operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeFundingResponse"
+        "400":
+          description: Invalid input or incomplete configuration
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator permission required
+        "409":
+          description: Settings revision changed
   /drop-forge/launches/{contract}/{claim_id}/ready:
     post:
       tags:
@@ -29752,6 +29847,15 @@ components:
         - deadline
         - recipients
       properties:
+        payment_recipient:
+          type: string
+          nullable: true
+        payment_amount_wei:
+          type: string
+          nullable: true
+        disabled_reason:
+          type: string
+          nullable: true
         group:
           type: string
           description: >-
@@ -29784,6 +29888,7 @@ components:
             - AIRDROP
             - UPDATE
             - METADATA
+            - PAY_ARTIST
         state:
           type: string
           enum:
@@ -29827,6 +29932,20 @@ components:
             - PAUSE
             - RESUME
             - CANCEL
+    ApiDropForgeFundingRequest:
+      type: object
+      required:
+        - hash
+      properties:
+        hash:
+          type: string
+    ApiDropForgeFundingResponse:
+      type: object
+      required:
+        - accepted
+      properties:
+        accepted:
+          type: boolean
     ApiDropForgeJob:
       type: object
       required:
@@ -30002,6 +30121,7 @@ components:
             - PHASE2_AIRDROP
             - PUBLIC_PHASE_AIRDROP
             - RESEARCH_AIRDROP
+            - PAY_ARTIST
         operation:
           type: string
           enum:
@@ -30199,6 +30319,68 @@ components:
             - RETRY
             - DELIVER_REMAINING
             - RECORD_WINNER
+    ApiDropForgeSettings:
+      type: object
+      required:
+        - revision
+        - automation_enabled
+        - pay_artist_enabled
+        - updated_by
+        - updated_at
+        - can_edit
+        - can_top_up
+        - chain_id
+        - contract
+        - signer_address
+        - ens_name
+        - balance_wei
+        - execution_available
+        - artist_payment_available
+      properties:
+        revision:
+          type: integer
+        automation_enabled:
+          type: boolean
+        pay_artist_enabled:
+          type: boolean
+        updated_by:
+          type: string
+          nullable: true
+        updated_at:
+          type: integer
+        can_edit:
+          type: boolean
+        can_top_up:
+          type: boolean
+        chain_id:
+          type: integer
+        contract:
+          type: string
+        signer_address:
+          type: string
+        ens_name:
+          type: string
+          nullable: true
+        balance_wei:
+          type: string
+          nullable: true
+        execution_available:
+          type: boolean
+        artist_payment_available:
+          type: boolean
+    ApiDropForgeSettingsRequest:
+      type: object
+      required:
+        - revision
+        - automation_enabled
+        - pay_artist_enabled
+      properties:
+        revision:
+          type: integer
+        automation_enabled:
+          type: boolean
+        pay_artist_enabled:
+          type: boolean
     ApiDropGroupMention:
       type: string
       enum:

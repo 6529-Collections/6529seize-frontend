@@ -37,10 +37,10 @@ wallet outcome remains paused until its hash or safe cancellation is reconciled.
 The dedicated operations wave records actions and errors; errors tag the
 configured `@drops6529` group.
 
-Craft and contract-admin access remain distinct. Owner-only admin management
-and Pay Artist remain manual. If automation is disabled, coordinated controls
-retain the legacy manual flow; Launch/Update requests explain their unavailable
-configuration rather than pretend execution succeeded.
+Craft and contract-admin access remain distinct. Admin grants/revocations remain owner-only on chain. Automatic artist payment is
+separately opt-in and defaults Off. The hub's Automatic launch switch defaults Off; accepted plans keep their timed
+reports while execution is disabled. Environment configuration must enable tracking
+before Launch requests can be accepted. Coordinated manual controls remain available.
 
 Related: [Craft](feature-craft-claims-list-and-detail.md),
 [Launch](feature-launch-claims-list-and-detail.md),

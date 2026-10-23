@@ -64,7 +64,8 @@ export enum ApiDropForgeManualRequestActionEnum {
     Phase1Airdrop = 'PHASE1_AIRDROP',
     Phase2Airdrop = 'PHASE2_AIRDROP',
     PublicPhaseAirdrop = 'PUBLIC_PHASE_AIRDROP',
-    ResearchAirdrop = 'RESEARCH_AIRDROP'
+    ResearchAirdrop = 'RESEARCH_AIRDROP',
+    PayArtist = 'PAY_ARTIST'
 }
 export enum ApiDropForgeManualRequestOperationEnum {
     Begin = 'BEGIN',

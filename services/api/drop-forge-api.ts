@@ -126,6 +126,8 @@ export function finishForgeManual(
 
 function manualHint(label: string | undefined): ManualAction | undefined {
   const text = label?.toLowerCase() ?? "";
+  if (text === "pay_artist" || text === "pay artist")
+    return ManualAction.PayArtist;
   if (text.includes("artist")) return ManualAction.ArtistAirdrop;
   if (text.includes("team")) return ManualAction.TeamAirdrop;
   if (text.includes("research")) return ManualAction.ResearchAirdrop;

@@ -37,6 +37,8 @@ it("declares the subscription phase for wallets that appear in multiple lists", 
 
 it.each([
   ["phase0", "PHASE0_AIRDROP"],
+  ["PAY_ARTIST", "PAY_ARTIST"],
+  ["Pay Artist", "PAY_ARTIST"],
   ["phase1", "PHASE1_AIRDROP"],
   ["phase2", "PHASE2_AIRDROP"],
   ["publicphase", "PUBLIC_PHASE_AIRDROP"],

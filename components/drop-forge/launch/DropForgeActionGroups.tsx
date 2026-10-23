@@ -1,4 +1,6 @@
 "use client";
+import { formatEther } from "viem";
+import { getAddressEtherscanLink } from "@/helpers/Helpers";
 import type { ApiDropForgeLaunch } from "@/generated/models/ApiDropForgeLaunch";
 import {
   ApiDropForgeActionKindEnum as Kind,
@@ -70,6 +72,28 @@ function ActionRow({
           </a>
         )}
       </div>
+      {action.payment_amount_wei && action.payment_recipient && (
+        <p className="tw-my-1 tw-break-all tw-text-iron-300">
+          {t(locale, "dropForge.settings.paymentDetails", {
+            amount: formatEther(BigInt(action.payment_amount_wei)),
+          })}
+          {" · "}
+          <a
+            href={getAddressEtherscanLink(
+              launch.chain_id,
+              action.payment_recipient
+            )}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="tw-text-primary-300"
+          >
+            {action.payment_recipient}
+          </a>
+        </p>
+      )}
+      {action.disabled_reason && (
+        <p className="tw-my-1 tw-text-iron-400">{action.disabled_reason}</p>
+      )}
       {action.attempt_error && (
         <p role="alert" className="tw-my-1 tw-text-error">
           {action.attempt_error}

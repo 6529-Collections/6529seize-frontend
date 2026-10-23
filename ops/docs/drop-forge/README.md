@@ -49,6 +49,8 @@ This area covers:
 
 ## Features
 
+- [Launch Automation and Wallet Funding](feature-launch-automation-settings.md)
+
 - [Drop Forge Hub and Section Navigation](feature-drop-forge-hub-and-navigation.md)
 - [Craft Claims List and Detail](feature-craft-claims-list-and-detail.md)
 - [Launch Claims List and Detail](feature-launch-claims-list-and-detail.md)

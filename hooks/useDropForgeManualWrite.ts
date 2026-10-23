@@ -49,17 +49,21 @@ export function useDropForgeManualWrite(
   claim: number,
   hash: string | undefined,
   error: unknown,
-  fingerprint: string = ""
+  options: string | { fingerprint: string; storageSuffix: string } = ""
 ) {
   const { requestAuth, setToast } = useAuth();
   const locale = useBrowserLocale();
   const attempt = useRef<ManualAttempt | null>(null);
   const volatileProof = useRef<VolatileProof | null>(null);
+  const fingerprint =
+    typeof options === "string" ? options : options.fingerprint;
+  const storageSuffix =
+    typeof options === "string" ? "" : options.storageSuffix;
   const context = useRef({ fingerprint, hash });
   useEffect(() => {
     context.current = { fingerprint, hash };
   }, [fingerprint, hash]);
-  const key = `drop-forge-manual:${contract.toLowerCase()}:${claim}`;
+  const key = `drop-forge-manual:${contract.toLowerCase()}:${claim}${storageSuffix ? ":" + storageSuffix : ""}`;
   const cancel = useCallback(
     async (current: ManualAttempt) => {
       await finishForgeManual(contract, claim, current.lease);
