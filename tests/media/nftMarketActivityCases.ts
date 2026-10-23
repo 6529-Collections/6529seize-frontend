@@ -78,6 +78,7 @@ export function defineNftMarketActivityTests() {
           positions: cells.map((cell) => ({
             x: cell.getBoundingClientRect().x,
             y: cell.getBoundingClientRect().y,
+            height: cell.getBoundingClientRect().height,
           })),
         };
       });
@@ -93,7 +94,9 @@ export function defineNftMarketActivityTests() {
           new Set(layout.positions.map((position) => position.y)).size
         ).toBe(1);
       } else {
-        expect(Math.abs(action.y - total.y)).toBeLessThan(50);
+        expect(
+          Math.abs(action.y + action.height / 2 - (total.y + total.height / 2))
+        ).toBeLessThan(1);
         expect(item.y).toBeGreaterThan(action.y);
         expect(maker.y).toBeGreaterThan(item.y);
         expect(recipient.y).toBe(maker.y);

@@ -580,6 +580,7 @@ export default function NftMarketActivity({
             tabIndex={0}
             className="tw-relative before:tw-content-none after:tw-content-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&_*]:before:tw-content-none [&_*]:after:tw-content-none"
           >
+            {/* Explicit roles preserve table semantics when narrow layouts use block/grid display. */}
             <table
               role="table"
               className="tw-block tw-w-full tw-table-fixed tw-border-collapse @4xl:tw-table"
