@@ -111,9 +111,9 @@ export default function WalletFunding({
         </p>
       )}
       {funding.pending && (
-        <p role="status" className="tw-text-xs tw-text-amber-300">
+        <output className="tw-block tw-text-xs tw-text-amber-300">
           {t(locale, "dropForge.funding.reportPending")}
-        </p>
+        </output>
       )}
       {funding.transaction && (
         <OnchainTransactionModal

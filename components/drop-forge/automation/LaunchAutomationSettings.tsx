@@ -104,137 +104,135 @@ export default function LaunchAutomationSettings() {
         </p>
       )}
       {settings && (
-        <>
-          <div className="tw-mt-5 tw-grid tw-gap-4 lg:tw-grid-cols-2">
-            <div className="tw-space-y-4">
-              {[false, true].map((artist) => {
-                const checked = artist
-                  ? settings.pay_artist_enabled
-                  : settings.automation_enabled;
-                const unavailable = artist
-                  ? !settings.artist_payment_available
-                  : !settings.execution_available;
-                return (
-                  <label
-                    key={String(artist)}
-                    className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-bg-iron-900 tw-p-4"
-                  >
-                    <span className="tw-text-sm tw-font-medium tw-text-iron-100">
-                      {t(
-                        locale,
-                        artist
-                          ? "dropForge.settings.artist"
-                          : "dropForge.settings.launch"
-                      )}
-                    </span>
-                    <span className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-text-iron-300">
-                      {t(
-                        locale,
-                        checked
-                          ? "dropForge.settings.on"
-                          : "dropForge.settings.off"
-                      )}
-                      <input
-                        type="checkbox"
-                        role="switch"
-                        checked={checked}
-                        disabled={
-                          !settings.can_edit ||
-                          saving ||
-                          (unavailable && !checked)
-                        }
-                        onChange={(event) =>
-                          void change(artist, event.target.checked)
-                        }
-                        className="tw-size-5 tw-accent-primary-400"
-                      />
-                    </span>
-                  </label>
-                );
-              })}
-              {!settings.can_edit && (
-                <p className="tw-text-sm tw-text-iron-400">
-                  {t(locale, "dropForge.settings.readOnly")}
-                </p>
-              )}
-              {!settings.execution_available && (
-                <p className="tw-text-sm tw-text-amber-300">
-                  {t(locale, "dropForge.settings.unavailable")}
-                </p>
-              )}
-              {!settings.artist_payment_available && (
-                <p className="tw-text-sm tw-text-iron-400">
-                  {t(locale, "dropForge.settings.paymentUnavailable")}
-                </p>
-              )}
+        <div className="tw-mt-5 tw-grid tw-gap-4 lg:tw-grid-cols-2">
+          <div className="tw-space-y-4">
+            {[false, true].map((artist) => {
+              const checked = artist
+                ? settings.pay_artist_enabled
+                : settings.automation_enabled;
+              const unavailable = artist
+                ? !settings.artist_payment_available
+                : !settings.execution_available;
+              return (
+                <label
+                  key={String(artist)}
+                  className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-bg-iron-900 tw-p-4"
+                >
+                  <span className="tw-text-sm tw-font-medium tw-text-iron-100">
+                    {t(
+                      locale,
+                      artist
+                        ? "dropForge.settings.artist"
+                        : "dropForge.settings.launch"
+                    )}
+                  </span>
+                  <span className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-text-iron-300">
+                    {t(
+                      locale,
+                      checked
+                        ? "dropForge.settings.on"
+                        : "dropForge.settings.off"
+                    )}
+                    <input
+                      type="checkbox"
+                      role="switch"
+                      checked={checked}
+                      disabled={
+                        !settings.can_edit ||
+                        saving ||
+                        (unavailable && !checked)
+                      }
+                      onChange={(event) =>
+                        void change(artist, event.target.checked)
+                      }
+                      className="tw-size-5 tw-accent-primary-400"
+                    />
+                  </span>
+                </label>
+              );
+            })}
+            {!settings.can_edit && (
               <p className="tw-text-sm tw-text-iron-400">
-                {t(locale, "dropForge.settings.paused")}
+                {t(locale, "dropForge.settings.readOnly")}
               </p>
+            )}
+            {!settings.execution_available && (
+              <p className="tw-text-sm tw-text-amber-300">
+                {t(locale, "dropForge.settings.unavailable")}
+              </p>
+            )}
+            {!settings.artist_payment_available && (
               <p className="tw-text-sm tw-text-iron-400">
-                {t(locale, "dropForge.settings.postMint")}
+                {t(locale, "dropForge.settings.paymentUnavailable")}
               </p>
-              {settings.updated_by && (
-                <p className="tw-break-all tw-text-xs tw-text-iron-500">
-                  {t(locale, "dropForge.settings.updated", {
-                    wallet: settings.updated_by,
-                  })}
-                </p>
-              )}
-              {saving && (
-                <output>{t(locale, "dropForge.settings.saving")}</output>
-              )}
-            </div>
-            <div className="tw-min-w-0 tw-rounded-lg tw-bg-iron-900 tw-p-4">
-              <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
-                {t(locale, "dropForge.settings.wallet")}
-              </h3>
-              <p className="tw-mt-3 tw-text-sm tw-text-iron-400">
-                {t(locale, "dropForge.funding.network", {
-                  network: settings.chain_id === 1 ? "Ethereum" : "Sepolia",
+            )}
+            <p className="tw-text-sm tw-text-iron-400">
+              {t(locale, "dropForge.settings.paused")}
+            </p>
+            <p className="tw-text-sm tw-text-iron-400">
+              {t(locale, "dropForge.settings.postMint")}
+            </p>
+            {settings.updated_by && (
+              <p className="tw-break-all tw-text-xs tw-text-iron-500">
+                {t(locale, "dropForge.settings.updated", {
+                  wallet: settings.updated_by,
                 })}
               </p>
-              {settings.ens_name && (
-                <p className="tw-mt-3 tw-break-words tw-text-iron-100">
-                  {settings.ens_name}
-                </p>
-              )}
-              <a
-                href={getAddressEtherscanLink(
-                  settings.chain_id,
-                  settings.signer_address
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="tw-mt-3 tw-block tw-break-all tw-text-sm tw-text-primary-300"
-              >
-                {settings.signer_address}
-              </a>
-              <Button
-                variant="secondary"
-                size="sm"
-                className="tw-mt-3"
-                onClick={() => void copyAddress()}
-              >
-                {t(locale, "dropForge.settings.copy")}
-              </Button>
-              <p className="tw-mt-4 tw-text-sm tw-text-iron-300">
-                {t(locale, "dropForge.settings.balance")}:{" "}
-                <strong>
-                  {settings.balance_wei === null
-                    ? t(locale, "dropForge.settings.unavailableBalance")
-                    : formatEther(BigInt(settings.balance_wei))}
-                </strong>
-              </p>
-              <WalletFunding
-                key={`${address ?? ""}:${settings.chain_id}:${settings.signer_address}`}
-                settings={settings}
-                onConfirmed={() => {
-                  void query.refetch();
-                }}
-              />
-            </div>
+            )}
+            {saving && (
+              <output>{t(locale, "dropForge.settings.saving")}</output>
+            )}
           </div>
-        </>
+          <div className="tw-min-w-0 tw-rounded-lg tw-bg-iron-900 tw-p-4">
+            <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
+              {t(locale, "dropForge.settings.wallet")}
+            </h3>
+            <p className="tw-mt-3 tw-text-sm tw-text-iron-400">
+              {t(locale, "dropForge.funding.network", {
+                network: settings.chain_id === 1 ? "Ethereum" : "Sepolia",
+              })}
+            </p>
+            {settings.ens_name && (
+              <p className="tw-mt-3 tw-break-words tw-text-iron-100">
+                {settings.ens_name}
+              </p>
+            )}
+            <a
+              href={getAddressEtherscanLink(
+                settings.chain_id,
+                settings.signer_address
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="tw-mt-3 tw-block tw-break-all tw-text-sm tw-text-primary-300"
+            >
+              {settings.signer_address}
+            </a>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="tw-mt-3"
+              onClick={() => void copyAddress()}
+            >
+              {t(locale, "dropForge.settings.copy")}
+            </Button>
+            <p className="tw-mt-4 tw-text-sm tw-text-iron-300">
+              {t(locale, "dropForge.settings.balance")}:{" "}
+              <strong>
+                {settings.balance_wei === null
+                  ? t(locale, "dropForge.settings.unavailableBalance")
+                  : formatEther(BigInt(settings.balance_wei))}
+              </strong>
+            </p>
+            <WalletFunding
+              key={`${address ?? ""}:${settings.chain_id}:${settings.signer_address}`}
+              settings={settings}
+              onConfirmed={() => {
+                void query.refetch();
+              }}
+            />
+          </div>
+        </div>
       )}
     </section>
   );

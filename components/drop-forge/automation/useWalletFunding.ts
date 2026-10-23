@@ -26,7 +26,7 @@ function validFundingAmount(amount: string): boolean {
   const parts = amount.split(".");
   return (
     parts.length <= 2 &&
-    parts.every((part) => part.length > 0 && !/[^0-9]/.test(part)) &&
+    parts.every((part) => part.length > 0 && !/\D/.test(part)) &&
     (parts[1]?.length ?? 0) <= 18 &&
     parseEther(amount) > 0n
   );

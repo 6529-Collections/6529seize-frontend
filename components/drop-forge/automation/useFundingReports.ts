@@ -36,20 +36,24 @@ export function useFundingReports(prefix: string) {
       }
       return values;
     }
+    async function reportHash(key: string, hash: string) {
+      if (!isActive()) return;
+      await recordForgeFunding(hash);
+      volatile.current.delete(key);
+      try {
+        localStorage.removeItem(key);
+      } catch {
+        // The server has acknowledged this immutable hash.
+      }
+    }
     async function report() {
       if (busy || !isActive()) return;
       busy = true;
       try {
-        for (const [key, hash] of hashes()) {
-          if (!isActive()) return;
-          await recordForgeFunding(hash);
-          volatile.current.delete(key);
-          try {
-            localStorage.removeItem(key);
-          } catch {
-            /* The server has acknowledged this immutable hash. */
-          }
-        }
+        await Array.from(hashes()).reduce(
+          (previous, [key, hash]) => previous.then(() => reportHash(key, hash)),
+          Promise.resolve()
+        );
         if (isActive()) setPending(false);
         if (timer) clearInterval(timer);
       } catch {
