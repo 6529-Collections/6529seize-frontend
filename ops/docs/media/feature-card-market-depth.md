@@ -42,6 +42,8 @@ order count beside the label. On medium and small screens, both summaries stay
 together above the lists so the highest offer is visible before scrolling through listings.
 The lists stack below them, listings before offers, with their own headings.
 A side without quotes retains its summary with an unavailable value and no table.
+When only one list has quotes, it fills the available width on every screen size,
+with both summaries together above it.
 Each price list starts with up to ten levels. Use Show all levels to reveal the complete list, and Show fewer levels to return to the
 short view.
 Listings are ordered from lowest price upward and
