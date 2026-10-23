@@ -13,10 +13,10 @@ export default async function CompetitionPage({
 }: {
   readonly params: Promise<{ wave: string; competition: string }>;
 }) {
-  const { wave, competition } = await params;
+  const { wave } = await params;
   return (
     <Suspense fallback={null}>
-      <CompetitionRoute waveId={wave} competitionId={competition} />
+      <CompetitionRoute waveId={wave} />
     </Suspense>
   );
 }
