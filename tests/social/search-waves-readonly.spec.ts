@@ -374,7 +374,9 @@ async function exerciseAdvancedSearch(
   await waveChip.click();
   await globalSearch;
   await expect(
-    page.getByRole("button", { name: "Open message 43 by alice" })
+    page.getByRole("button", {
+      name: `Open message 43 by alice in ${OTHER_SEARCH_WAVE_NAME}`,
+    })
   ).toContainText(OTHER_SEARCH_WAVE_NAME);
   const continuation = page.waitForRequest((request) => {
     const url = new URL(request.url());
@@ -386,7 +388,9 @@ async function exerciseAdvancedSearch(
   await page.getByRole("button", { name: "Load more", exact: true }).click();
   await continuation;
   await expect(
-    page.getByRole("button", { name: "Open message 44 by alice" })
+    page.getByRole("button", {
+      name: `Open message 44 by alice in ${OTHER_SEARCH_WAVE_NAME}`,
+    })
   ).toBeVisible();
   await expectNoHorizontalOverflow(page);
   await captureSafeScreenshot(
@@ -417,7 +421,11 @@ async function exerciseAdvancedSearch(
       name: `Remove wave filter ${OTHER_SEARCH_WAVE_NAME}`,
     })
     .click();
-  await page.getByRole("button", { name: "Open message 43 by alice" }).click();
+  await page
+    .getByRole("button", {
+      name: `Open message 43 by alice in ${OTHER_SEARCH_WAVE_NAME}`,
+    })
+    .click();
   await expect(page).toHaveURL(
     new RegExp(`/waves/${OTHER_SEARCH_WAVE_ID}\\?serialNo=43`)
   );
@@ -1076,6 +1084,125 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     await expectNoHorizontalOverflow(page);
   });
 
+  test("global Messages search supports filters and keeps matches out of All", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    const local = isLocalBaseURL(baseURL);
+    if (local) {
+      await installLocalActiveWaveSearchFixture(page);
+      await installAdvancedSearchFixture(page);
+      await page.route("**/api/community-members?**", (route) =>
+        fulfillLocalReadOnlyFixture(route, {
+          json: [
+            {
+              profile_id: "search-author",
+              handle: "alice",
+              wallet: localFixtureProfile.primary_address,
+              display: "alice",
+              level: 0,
+              pfp: null,
+            },
+          ],
+        })
+      );
+    }
+    await gotoReady(page, "/waves");
+    await openHeaderSearch(page);
+    await page.getByRole("tab", { name: /^Messages/ }).click();
+    const messagesTab = page.getByRole("tab", { name: /^Messages/ });
+    await messagesTab.focus();
+    await messagesTab.press(
+      testInfo.project.use.isMobile ? "ArrowLeft" : "ArrowUp"
+    );
+    const wavesTab = page.getByRole("tab", { name: /^Waves/ });
+    await expect(wavesTab).toBeFocused();
+    await wavesTab.press(
+      testInfo.project.use.isMobile ? "ArrowRight" : "ArrowDown"
+    );
+    await expect(messagesTab).toBeFocused();
+    await expect(messagesTab).toHaveAttribute("aria-selected", "true");
+    const input = page.getByRole("combobox", {
+      name: "Search messages",
+      exact: true,
+    });
+    await expect(input).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /^Remove wave filter/ })
+    ).toHaveCount(0);
+    await input.fill(local ? "hello" : "6529");
+    const results = page.getByRole("tabpanel", { name: "Messages results" });
+    const firstResult = results
+      .getByRole("button", { name: /^Open message / })
+      .first();
+    await expect(firstResult).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+    await expect(firstResult).toContainText("#");
+    await expect(page.getByRole("tab", { name: /^Messages/ })).toBeInViewport({
+      ratio: 0.99,
+    });
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(
+      page,
+      testInfo,
+      "global-messages-search-results"
+    );
+    await input.fill(local ? "hello from: ali" : "6529 from: 6529");
+    const author = page.getByRole("option").first();
+    await expect(author).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+    await input.press("Enter");
+    await expect(
+      page.getByRole("button", { name: /^Remove author filter/ })
+    ).toBeVisible();
+    await input.fill(local ? "hello in: Another" : "6529 in: Memes");
+    await page.getByRole("option").first().click();
+    const wave = page.getByRole("button", { name: /^Remove wave filter/ });
+    await expect(wave).toBeVisible();
+    await expect(input).toBeFocused();
+    await expect(results).toHaveAttribute("aria-busy", "false", {
+      timeout: NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(page.getByRole("tab", { name: /^Messages/ })).toBeInViewport({
+      ratio: 0.99,
+    });
+    await captureSafeScreenshot(
+      page,
+      testInfo,
+      "global-messages-search-filters"
+    );
+    await wave.click();
+    await page.getByRole("button", { name: /^Remove author filter/ }).click();
+    await expect(firstResult).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+    await page.getByRole("tab", { name: /^All / }).click();
+    await expect(
+      page.getByRole("button", { name: /^Open message / })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("combobox", { name: "Search 6529", exact: true })
+    ).toHaveValue(local ? "hello " : "6529 ");
+    await page.getByRole("tab", { name: /^Messages/ }).click();
+    const serialNo = /^Open message (\d+)/.exec(
+      (await firstResult.getAttribute("aria-label")) ?? ""
+    )?.[1];
+    const targetWaveId = await firstResult.getAttribute("data-wave-id");
+    expect(serialNo).toBeTruthy();
+    expect(targetWaveId).toBeTruthy();
+    const jumpRequest = page.waitForRequest((request) => {
+      const url = new URL(request.url());
+      return (
+        url.pathname.endsWith(`/v2/waves/${targetWaveId}/drops`) &&
+        url.searchParams.get("serial_no_limit") === serialNo &&
+        url.searchParams.get("search_strategy") === "FIND_BOTH"
+      );
+    });
+    await firstResult.click();
+    await jumpRequest;
+    await expect
+      .poll(() => new URL(page.url()).pathname, {
+        timeout: NAVIGATION_TIMEOUT_MS,
+      })
+      .toMatch(new RegExp(`/(waves|messages)/${targetWaveId}$`));
+  });
+
   test("wave search exposes read-only message search safely", async ({
     baseURL,
     page,
@@ -1108,6 +1235,10 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       )
       .toBe(true);
     await expect(searchInput).toHaveAttribute("placeholder", "Search messages");
+    await expect(searchInput).toHaveAttribute("role", "combobox");
+    await expect(
+      page.getByRole("button", { name: /^Remove wave filter/ })
+    ).toBeVisible();
     const minimumQueryMessage = page
       .locator("#wave-drops-search-idle-status")
       .getByText(
