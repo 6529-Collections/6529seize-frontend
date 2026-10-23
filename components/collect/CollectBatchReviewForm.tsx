@@ -263,7 +263,7 @@ function BatchReviewDraft({
               {estimatedTotal}
             </p>
           )}
-          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+          <p className="tw-m-0 tw-text-pretty tw-text-xs tw-leading-5 tw-text-iron-400">
             {t(locale, "collect.batchReview.nextStep")}
           </p>
         </div>
