@@ -53,7 +53,12 @@ the card has an explicit mapping, a `Main Stage Submission` action.
   - Timer updates continuously
 - Home latest-drop details:
   - The countdown appears below drop metadata and the stats grid in the same
-    panel.
+    panel. Its compact layout keeps the existing phase text, information icon,
+    and status on the left, the original-size timer on the right, and the `Mint`
+    button directly below the bordered row.
+    Other countdown surfaces retain their existing layout.
+  - The desktop countdown keeps its previous space in the details column so
+    compacting the visible box does not resize the adjacent artwork.
   - `Edition`, `Status`, `Mint price`, and `Floor` row behavior is documented
     in [Latest Drop Stats Grid](feature-latest-drop-stats-grid.md).
   - The `Edition Details` accordion always includes `Mint date`,

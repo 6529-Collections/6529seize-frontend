@@ -1230,7 +1230,7 @@ test.describe("Home Page @smoke @medium @large", () => {
     await expectNoHorizontalOverflow(page);
   });
 
-  test("keeps a countdown with days inside the original timer height", async ({
+  test("keeps long countdowns readable in standard and compact homepage layouts", async ({
     page,
   }, testInfo) => {
     if (isMobileWebProject(testInfo.project.name)) {
@@ -1270,7 +1270,7 @@ test.describe("Home Page @smoke @medium @large", () => {
               title: 'Phase 0 (Allowlist) Starts In',
               targetDate: Math.floor(Date.now() / 1000) + 12 * 86400 + 23 * 3600 + 59 * 60 + 59,
               showAllowlistInfo: true,
-              showMintBtn: false,
+              showMintBtn: true,
               isActive: false
             } })
           );
@@ -1301,6 +1301,60 @@ test.describe("Home Page @smoke @medium @large", () => {
     expect(bounds.timer.right).toBeLessThanOrEqual(bounds.box.right);
     expect(bounds.timer.top).toBeGreaterThanOrEqual(bounds.box.top);
     expect(bounds.timer.bottom).toBeLessThanOrEqual(bounds.box.bottom);
+    await expectNoHorizontalOverflow(page);
+    const standardCardHeight = await timer.evaluate(
+      (element) =>
+        element.parentElement!.parentElement!.parentElement!.parentElement!.getBoundingClientRect()
+          .height
+    );
+    await page.getByRole("main").evaluate((element) => {
+      element.setAttribute("data-home-drop", "");
+      element.classList.add("tw-group/home-drop");
+    });
+    const phase = page.getByText("Phase 0 (Allowlist) Starts In", {
+      exact: true,
+    });
+    const mint = page.getByRole("link", { name: "Mint", exact: true });
+    await expect(phase).toBeVisible();
+    await expect(page.getByText("Upcoming", { exact: true })).toBeVisible();
+    await expect(
+      page.locator('[data-tooltip-id="allowlist-info"]')
+    ).toBeVisible();
+    await expect(mint).toHaveAttribute("href", "/the-memes/mint");
+    await expect(timer).toHaveCSS(
+      "font-size",
+      (await page.evaluate(() => innerWidth < 768)) ? "20px" : "24px"
+    );
+    await expect(timer).toHaveCSS("font-weight", "700");
+    const phaseBounds = await phase.boundingBox();
+    const mintBounds = await mint.boundingBox();
+    const compact = await timer.evaluate((element) => {
+      const cell = element.parentElement!.parentElement!;
+      const row = cell.parentElement!;
+      const card = row.parentElement!;
+      return {
+        timer: element.getBoundingClientRect().toJSON(),
+        cell: cell.getBoundingClientRect().toJSON(),
+        row: row.getBoundingClientRect().toJSON(),
+        card: card.getBoundingClientRect().toJSON(),
+        space: card.parentElement!.getBoundingClientRect().toJSON(),
+      };
+    });
+    if (!phaseBounds || !mintBounds)
+      throw new Error("Countdown controls must be visible");
+    expect(phaseBounds.x + phaseBounds.width).toBeLessThanOrEqual(
+      compact.cell.left
+    );
+    expect(compact.timer.left).toBeGreaterThanOrEqual(compact.cell.left);
+    expect(compact.timer.right).toBeLessThanOrEqual(compact.cell.right);
+    expect(compact.timer.top).toBeGreaterThanOrEqual(compact.cell.top);
+    expect(compact.timer.bottom).toBeLessThanOrEqual(compact.cell.bottom);
+    expect(mintBounds.y).toBeGreaterThanOrEqual(compact.row.bottom + 12);
+    expect(mintBounds.height).toBe(44);
+    expect(compact.card.height).toBeLessThan(standardCardHeight);
+    if ((await page.evaluate(() => innerWidth)) >= 1024) {
+      expect(compact.space.height).toBe(standardCardHeight);
+    }
     await expectNoHorizontalOverflow(page);
     await page.screenshot({ path: testInfo.outputPath("countdown-days.png") });
   });
