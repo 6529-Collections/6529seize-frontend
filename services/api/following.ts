@@ -8,6 +8,11 @@ type FollowingIdentity = Pick<
   "id" | "handle" | "pfp" | "level" | "primary_address"
 >;
 
+const profileRouteSchema = z
+  .string()
+  .regex(/^[a-zA-Z0-9._-]+$/)
+  .refine((route) => route !== "." && route !== "..");
+
 // IDENTITY targets are profile overviews. Validate only the fields the shared
 // row consumes; the generated target is `any` because other target types differ.
 const followingPageSchema = z.object({
@@ -16,16 +21,23 @@ const followingPageSchema = z.object({
   next: z.boolean(),
   data: z.array(
     z.object({
-      target: z.object({
-        id: z.string().min(1),
-        handle: z
-          .string()
-          .regex(/^[a-zA-Z0-9._-]+$/)
-          .nullable(),
-        pfp: z.string().nullable(),
-        level: z.number().finite(),
-        primary_address: z.string().min(1),
-      }),
+      target: z
+        .object({
+          id: z.string().min(1),
+          handle: profileRouteSchema.nullable(),
+          pfp: z.string().nullable(),
+          level: z.number().finite(),
+          primary_address: z.string().min(1),
+        })
+        .refine(
+          ({ handle, primary_address }) =>
+            handle !== null ||
+            profileRouteSchema.safeParse(primary_address).success,
+          {
+            path: ["primary_address"],
+            message: "A handleless identity must have a valid profile route",
+          }
+        ),
     })
   ),
 });
