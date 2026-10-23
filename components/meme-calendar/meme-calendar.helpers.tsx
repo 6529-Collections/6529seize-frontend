@@ -219,9 +219,7 @@ function printDivision(
 }
 
 export { wallTimeToUtcInstantInZone } from "./meme-calendar.zone";
-// eslint-disable-next-line import/no-cycle -- Keep the established helper barrel API while the invite module consumes date helpers from this file.
 export { printCalendarInvites } from "./meme-calendar.invites";
-// eslint-disable-next-line import/no-cycle -- Keep the established helper barrel API while the upcoming module consumes schedule helpers from this file.
 export {
   getCanonicalNextMintNumber,
   getUpcomingMintsAcrossSeasons,

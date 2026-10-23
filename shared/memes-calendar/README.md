@@ -11,7 +11,7 @@ Other existing calendar API consumers are unchanged by this foundation.
 1. Edit the canonical frontend module, including skips/reschedules there.
 2. Bump `MEMES_CALENDAR_VERSION` for any behavior change.
 3. From that checkout run `./bin/6529 run calendar:refresh`, then
-   `./bin/6529 run calendar:sync -- <backend-checkout>`.
+   `./bin/6529 run calendar:sync <backend-checkout>`.
 4. Run focused calendar tests in both repositories and commit both copies together.
 
 `./bin/6529 run calendar:check` verifies the pinned SHA-256 manifest. Frontend build preparation and backend build/test preparation also run it. Do not edit the vendored source directly.
