@@ -25,6 +25,9 @@ individual check history. Back to list appears on mobile; desktop uses the
 visible list without a redundant back button. Automated outcome is distinct
 from deletion and manual review status.
 
+The `home.overview` record also describes the shared hero artwork and copy, with
+Connect wallet followed by Start here for logged-out visitors.
+
 The `home.overview` record explains the Coming up full-width vertical card
 list below 768px, keyboard navigation through card links, tablet/desktop grid,
 and drop, profile and wave destinations.

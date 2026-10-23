@@ -683,10 +683,10 @@
       ],
       "facts": [
         "The home page is the main 6529.io entry point.",
-        "Logged-out visitors see a prominent Start here link to /join-6529 and a visible Connect wallet action before home activity.",
+        "Logged-out visitors see Connect wallet as the primary hero action, followed by Start here linking to /join-6529.",
         "Visitors can browse the public home activity without connecting a wallet.",
         "Coming up and the homepage waves section each have a View all link in their header: a text link beside the title on mobile and an outlined button on the right from tablet sizes. The waves View all opens /waves; there is no second button below the cards.",
-        "Authenticated visitors keep the dashboard-first home experience.",
+        "Authenticated and logged-out visitors share the hero headline, public-goods subtitle, and decorative Meme artwork fan. Authenticated visitors do not see the hero onboarding buttons. The artwork fan sits beside the copy on desktop and below it on mobile.",
         "It highlights the current or upcoming Meme Card mint, discovery sections, and 6529 mission content.",
         "Coming up shows the next mint when available and current vote leaders. Below 768px, cards stack vertically at full width with space between them. Scroll the page to see the remaining cards. Keyboard users can tab through their links. Tablet and desktop show a grid. Status and mint date or TDH have their own row above uncropped artwork. Card titles open the drop, artist names open profiles, and View all opens the wave.",
         "Coming up cards with collaborators show overlapping avatars beside the artist, with up to two collaborator names on a quieter line below. Up to four avatars are shown including the artist; extra avatars use a +N chip. The +N more link opens the drop to see all collaborators. Visible names open their profiles.",

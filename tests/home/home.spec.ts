@@ -87,6 +87,17 @@ const comingUpLeaderboardPattern = (url: URL) =>
 
 async function installComingUpFixture(page: Page) {
   await installLoadingTestArtwork(page);
+  await page.route("**/api/memes_lite", (route) =>
+    route.fulfill({
+      json: {
+        data: Array.from({ length: 5 }, (_, index) => ({
+          ...loadingTestArtwork,
+          id: loadingTestArtwork.id - index,
+          name: `Recent Meme ${index}`,
+        })),
+      },
+    })
+  );
   await page.route("**/api/settings", (route) =>
     route.fulfill({ json: comingUpSettings })
   );
@@ -931,6 +942,90 @@ test.describe("Home Page @smoke @medium @large", () => {
     await waitForRouteReady(page);
   });
 
+  test("hero keeps the approved copy, action order and responsive artwork @smoke", async ({
+    page,
+  }, testInfo) => {
+    const claimResult = encodeFunctionResult({
+      abi: MEMES_MANIFOLD_PROXY_ABI,
+      functionName: "getClaimForToken",
+      result: [
+        1n,
+        {
+          total: 328,
+          totalMax: 328,
+          walletMax: 0,
+          startDate: 1,
+          endDate: 2,
+          storageProtocol: 0,
+          merkleRoot: zeroHash,
+          location: "",
+          tokenId: 536n,
+          cost: 0n,
+          paymentReceiver: zeroAddress,
+          erc20: zeroAddress,
+          signingAddress: zeroAddress,
+        },
+      ],
+    });
+    const selector = toFunctionSelector("getClaimForToken(address,uint256)");
+    await page.route("https://rpc.walletconnect.org/**", async (route) => {
+      const rpc = route.request().postDataJSON();
+      if (rpc.method !== "eth_call") return route.abort();
+      let result = claimResult;
+      if (!rpc.params[0].data.startsWith(selector)) {
+        const { args, functionName } = decodeFunctionData({
+          abi: multicall3Abi,
+          data: rpc.params[0].data,
+        });
+        if (functionName !== "aggregate3")
+          throw new Error("Unexpected fixture RPC call");
+        result = encodeFunctionResult({
+          abi: multicall3Abi,
+          functionName,
+          result: args[0].map((call) => ({
+            success: call.callData.startsWith(selector),
+            returnData: call.callData.startsWith(selector) ? claimResult : "0x",
+          })),
+        });
+      }
+      return route.fulfill({ json: { jsonrpc: "2.0", id: rpc.id, result } });
+    });
+    await page.reload({ waitUntil: "domcontentloaded" });
+    const hero = page.locator('[data-home-section="Introduction"]');
+    const heading = hero.getByRole("heading", { level: 1 });
+    const fan = hero.locator("[data-home-artwork-fan]");
+    await expect(heading).toHaveText("Building a decentralized network state");
+    await expect(
+      hero.getByText(
+        "A global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology."
+      )
+    ).toBeVisible();
+    const actions = hero.locator(
+      '[data-home-section="Get started"] button, [data-home-section="Get started"] a'
+    );
+    await expect(actions).toHaveText(["Connect wallet", "Start here"]);
+    await expect(actions.last()).toHaveAttribute("href", "/join-6529");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    for (const width of [390, 1440]) {
+      await page.setViewportSize({ width, height: 1000 });
+      const textBox = await heading.boundingBox();
+      const fanBox = await fan.boundingBox();
+      expect(textBox).not.toBeNull();
+      expect(fanBox).not.toBeNull();
+      if (width < 1024)
+        expect(fanBox!.y).toBeGreaterThan(textBox!.y + textBox!.height);
+      else expect(fanBox!.x).toBeGreaterThan(textBox!.x + textBox!.width);
+      await expect(fan.locator("figure")).toHaveCount(5);
+      await expect(fan.locator("figure").first()).toHaveCSS(
+        "animation-name",
+        "none"
+      );
+      await expect(fan.locator("img")).toHaveCount(5);
+      await hero.screenshot({ path: testInfo.outputPath(`hero-${width}.png`) });
+      await expectNoHorizontalOverflow(page);
+    }
+  });
+
   test("should display the home landing content", async ({ page }) => {
     // Prod serves "6529.io"; staging serves "6529 Staging".
     await expect(page).toHaveTitle(/^6529(\.io| Staging)$/);
@@ -1238,7 +1333,7 @@ test.describe("Home Page @smoke @medium @large", () => {
       .getByRole("link", { name: "View all", exact: true })
       .locator("svg");
     const secondaryActions = page
-      .getByRole("button", { name: "Connect wallet", exact: true })
+      .getByRole("link", { name: "Start here", exact: true })
       .or(page.getByRole("link", { name: "View all", exact: true }));
     await expect(secondaryActions).toHaveCount(3);
     const isNarrowViewport = await page.evaluate(() => innerWidth < 768);
@@ -1246,7 +1341,7 @@ test.describe("Home Page @smoke @medium @large", () => {
       const isViewAll =
         (await action.getAttribute("data-home-action")) === "View all";
       const isMobileViewAllLink = isNarrowViewport && isViewAll;
-      const borderOpacity = isViewAll ? 0.15 : 0.2;
+      const borderOpacity = isViewAll ? 0.15 : 0.1;
       if (isMobileViewAllLink) {
         await expect(action).toHaveCSS("border-width", "0px");
         await expect(action).toHaveCSS("height", "28px");
@@ -1259,7 +1354,9 @@ test.describe("Home Page @smoke @medium @large", () => {
       }
       await expect(action).toHaveCSS(
         "background-color",
-        isMobileViewAllLink ? "rgba(0, 0, 0, 0)" : "rgba(255, 255, 255, 0.04)"
+        isMobileViewAllLink
+          ? "rgba(0, 0, 0, 0)"
+          : `rgba(255, 255, 255, ${isViewAll ? 0.04 : 0.07})`
       );
     }
 
@@ -1295,14 +1392,16 @@ test.describe("Home Page @smoke @medium @large", () => {
       await expect(arrow).toHaveCSS("transform", "matrix(1, 0, 0, 1, 2, 0)");
 
       for (const action of await secondaryActions.all()) {
+        const isStartHere =
+          (await action.getAttribute("data-home-action")) === "Get started";
         await action.hover();
         await expect(action).toHaveCSS(
           "border-color",
-          "rgba(255, 255, 255, 0.3)"
+          `rgba(255, 255, 255, ${isStartHere ? 0.2 : 0.3})`
         );
         await expect(action).toHaveCSS(
           "background-color",
-          "rgba(255, 255, 255, 0.08)"
+          `rgba(255, 255, 255, ${isStartHere ? 0.1 : 0.08})`
         );
       }
     }

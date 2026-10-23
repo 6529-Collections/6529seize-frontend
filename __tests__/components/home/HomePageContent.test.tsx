@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import HomePageContent from "@/components/home/HomePageContent";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { render, screen } from "@testing-library/react";
@@ -14,7 +15,9 @@ jest.mock("@/components/home/useHomepageTracking", () => ({
 }));
 
 jest.mock("@/components/home/hero", () => ({
-  HeroHeader: () => <div>Hero</div>,
+  HeroHeader: ({ children }: { children: ReactNode }) => (
+    <div>Hero{children}</div>
+  ),
 }));
 
 jest.mock("@/components/home/newcomer/HomeNewcomerIntro", () => ({

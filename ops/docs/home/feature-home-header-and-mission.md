@@ -26,18 +26,22 @@ sections:
 ## User Journey
 
 1. Open `/`.
-2. The header shows:
-   - Brand label: `6529`, at 12px with medium weight and subtle letter spacing
-   - Left-aligned headline: `Building a decentralized network state`, with
-     `network state` on a separate line in the same color
-3. Logged-out visitors see two actions beneath the main headline, aligned with
-   its left edge:
-   - `Start here`, which opens `/join-6529`
-   - `Connect wallet`, which opens the wallet connection flow
-   - Both actions keep the same rounded corners at every breakpoint. Below the
-     medium breakpoint, they share an equal-width row with 48px touch targets;
-     larger layouts use 44px buttons at the left edge.
-4. The latest-drop slot follows the newcomer actions directly.
+2. The Montserrat hero shows a `6529` pill, the headline
+   `Building a decentralized network state`, and the subtitle
+   `A global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology.`
+   The copy sits beside a decorative fan of five Meme artworks on desktop and
+   above it on mobile. The front artwork follows the existing latest/next-drop
+   selection; the other cards show recent published Memes. Artwork keeps its
+   proportions. Missing images leave a neutral frame. Reduced motion disables
+   the fan entrance and hover spread.
+3. Logged-out visitors see two actions beneath the subtitle, in this order:
+   - `Connect wallet`, the primary action, opens the existing wallet connection flow.
+   - `Start here`, the secondary action, opens `/join-6529`.
+   - Mobile uses two equal-width buttons with 48px touch targets; larger layouts
+     keep the actions together beneath the copy.
+4. The latest-drop slot follows the hero. Native iOS purchasing restrictions
+   also apply to the fan: restricted users see published collection artwork
+   instead of the upcoming mint promotion.
 5. A heart shortcut is visible on `/`:
    - Larger layouts: fixed near the top-right of the hero area
    - Mobile/app small-screen layouts: in the top header actions
@@ -62,16 +66,15 @@ sections:
 - Mobile/app small-screen: health shortcut is visible in the header action row.
 - Logged-out or unauthenticated: the compact newcomer actions appear before
   the dashboard-style activity sections.
-- Authenticated: the current dashboard-first layout remains unchanged and the
-  newcomer actions are not shown.
+- Authenticated: the same hero copy and artwork remain visible; the newcomer
+  actions are not shown.
 - Latest-drop data unavailable: mission block still renders below the slot.
 
 ## Edge Cases
 
 - The desktop homepage health shortcut stays still, with a subtle colour change
   on hover and a visible keyboard-focus ring.
-- Action arrows move slightly on hover or keyboard focus. Reduced-motion
-  settings keep arrows still and make colour changes immediate.
+- Reduced-motion settings keep the fan still and make button colour changes immediate.
 - While wallet state is initializing or connecting, the page does not assume
   the visitor is logged out. The newcomer actions appear once that state
   resolves.
@@ -105,3 +108,9 @@ sections:
 - [Home Route and Section Visibility Troubleshooting](troubleshooting-home-route-and-section-visibility.md)
 - [Network Health Dashboard](../network/feature-health-dashboard.md)
 - [Docs Home](../README.md)
+
+## Localization
+
+Hero copy and accessible names use the message dictionary. The approved English
+copy currently falls back unchanged for en-GB, fr-FR, es-ES, and de-DE. Translation
+review remains part of the homepage localization follow-up.

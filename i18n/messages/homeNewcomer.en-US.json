@@ -2,5 +2,9 @@
   "home.newcomer.title": "New to 6529",
   "home.newcomer.startAction": "Start here",
   "home.newcomer.connectAction": "Connect wallet",
-  "home.newcomer.connectFailed": "Failed to open wallet connection. Please try again."
+  "home.newcomer.connectFailed": "Failed to open wallet connection. Please try again.",
+  "home.hero.title": "Building a decentralized network state",
+  "home.hero.description": "A global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology.",
+  "home.hero.healthLabel": "Open network health dashboard",
+  "home.hero.healthTitle": "Network health"
 }

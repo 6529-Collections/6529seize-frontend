@@ -25,8 +25,7 @@ export default function HomePageContent() {
       onAuxClickCapture={onClickCapture}
       className="tw-overflow-x-hidden tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800"
     >
-      <HeroHeader />
-      {showNewcomerIntro && <HomeNewcomerIntro />}
+      <HeroHeader>{showNewcomerIntro && <HomeNewcomerIntro />}</HeroHeader>
       <LatestDropSection />
       <HomePageTextSection />
       <div className="tw-h-px tw-w-full tw-bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.08)_15%,rgba(255,255,255,0.08)_85%,transparent_100%)]" />
