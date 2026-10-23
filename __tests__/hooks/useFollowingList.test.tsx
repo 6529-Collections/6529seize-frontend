@@ -23,7 +23,7 @@ const page = (ids: string[], count: number, number = 1, next = false) => ({
   next,
 });
 
-function setup(id = "owner-a") {
+function setup(id = "owner-a", enabled = true) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -32,10 +32,13 @@ function setup(id = "owner-a") {
   );
   return {
     client,
-    ...renderHook(({ identityId }) => useFollowingList(identityId), {
-      initialProps: { identityId: id },
-      wrapper,
-    }),
+    ...renderHook(
+      ({ identityId, isOpen }) => useFollowingList(identityId, isOpen),
+      {
+        initialProps: { identityId: id, isOpen: enabled },
+        wrapper,
+      }
+    ),
   };
 }
 
@@ -175,12 +178,12 @@ it("does not expose another identity's cached rows during an account change", as
     .mockImplementationOnce(() => new Promise(() => {}));
   const { result, rerender, client, unmount } = setup();
   await waitFor(() => expect(result.current.count).toBe(1));
-  rerender({ identityId: "owner-b" });
+  rerender({ identityId: "owner-b", isOpen: true });
   expect(result.current.following).toEqual([]);
   expect(result.current.count).toBeUndefined();
   await waitFor(() =>
     expect(
-      client.getQueryData([QueryKey.IDENTITY_FOLLOWING, "owner-a"])
+      client.getQueryData([QueryKey.IDENTITY_FOLLOWING, "owner-a", "list"])
     ).toBeUndefined()
   );
   unmount();
@@ -200,7 +203,7 @@ it("cancels an old account request and ignores its late response", async () => {
     .mockResolvedValueOnce(page(["private-b"], 1));
   const { result, rerender } = setup();
   const oldSignal = jest.mocked(commonApiFetch).mock.calls[0]?.[0].signal;
-  rerender({ identityId: "owner-b" });
+  rerender({ identityId: "owner-b", isOpen: true });
   expect(oldSignal?.aborted).toBe(true);
   await waitFor(() =>
     expect(result.current.following[0]?.identity.id).toBe("private-b")
@@ -209,4 +212,16 @@ it("cancels an old account request and ignores its late response", async () => {
     resolveOld(page(["private-a"], 1));
   });
   expect(result.current.following[0]?.identity.id).toBe("private-b");
+});
+
+it("does not load a closed list, including on intersection callbacks", async () => {
+  jest.mocked(commonApiFetch).mockResolvedValue(page(["a"], 2, 1, true));
+  const { result, rerender } = setup("owner-a", false);
+  act(() => result.current.onBottomIntersection(true));
+  expect(commonApiFetch).not.toHaveBeenCalled();
+  rerender({ identityId: "owner-a", isOpen: true });
+  await waitFor(() => expect(result.current.count).toBe(2));
+  rerender({ identityId: "owner-a", isOpen: false });
+  act(() => result.current.onBottomIntersection(true));
+  expect(commonApiFetch).toHaveBeenCalledTimes(1);
 });

@@ -119,21 +119,21 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
   }, testInfo) => {
     const api = getSandboxApiOrigin(baseURL);
     let following = Array.from({ length: 101 }, (_, index) => identity(index));
-    const pages: number[] = [];
+    const requests: { page: number; pageSize: number }[] = [];
     await page.route(
       `${api}/api/identity-subscriptions/outgoing/IDENTITY?*`,
       (route) => {
-        const number = Number(
-          new URL(route.request().url()).searchParams.get("page")
-        );
-        pages.push(number);
+        const params = new URL(route.request().url()).searchParams;
+        const number = Number(params.get("page"));
+        const pageSize = Number(params.get("page_size"));
+        requests.push({ page: number, pageSize });
         return route.fulfill({
           json: {
             count: following.length,
             page: number,
-            next: number * 100 < following.length,
+            next: number * pageSize < following.length,
             data: following
-              .slice((number - 1) * 100, number * 100)
+              .slice((number - 1) * pageSize, number * pageSize)
               .map((target) => ({ target, actions: ["DROP_CREATED"] })),
           },
         });
@@ -192,6 +192,7 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
     await page.screenshot({
       path: testInfo.outputPath("following-header.png"),
     });
+    expect(requests).toEqual([{ page: 1, pageSize: 1 }]);
     await opener.press("Enter");
     const dialog = page.getByRole("dialog", { name: "Following", exact: true });
     const list = dialog.getByRole("list", { name: "Following", exact: true });
@@ -207,7 +208,11 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
       .getByRole("button", { name: "Load more", exact: true })
       .scrollIntoViewIfNeeded();
     await expect(list.getByRole("listitem")).toHaveCount(101);
-    expect(pages).toEqual([1, 2]);
+    expect(requests).toEqual([
+      { page: 1, pageSize: 1 },
+      { page: 1, pageSize: 100 },
+      { page: 2, pageSize: 100 },
+    ]);
     const lastRow = list
       .getByRole("listitem")
       .filter({ hasText: "following-artist-100" });
@@ -222,7 +227,7 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
     });
     await expect(updatedOpener).toBeFocused();
     await updatedOpener.click();
-    const countBeforeNavigation = pages.length;
+    const countBeforeNavigation = requests.length;
     await dialog
       .getByRole("link", { name: "View following-artist-0's profile" })
       .click();
@@ -236,7 +241,7 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("button", { name: /Open following-artist-0's followers:/ })
     ).toBeVisible();
-    expect(pages).toHaveLength(countBeforeNavigation);
+    expect(requests).toHaveLength(countBeforeNavigation);
     await expectNoHorizontalOverflow(page);
   });
 
@@ -259,8 +264,14 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
       .getByRole("button", { name: "Open your following list: Unavailable" })
       .click();
     const dialog = page.getByRole("dialog", { name: "Following", exact: true });
+    await expect(dialog.getByRole("status")).toContainText(
+      "Loading following list"
+    );
+    // Lazy loading starts the request on open. Allow the app's existing three
+    // retries (1 + 2 + 4 seconds) before expecting the terminal error state.
     await expect(dialog.getByRole("alert")).toContainText(
-      "Couldn't load your following list"
+      "Couldn't load your following list",
+      { timeout: 15_000 }
     );
     await expect(
       dialog.getByText("You aren't following anyone yet.")

@@ -13,6 +13,8 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import UserPageFollowing from "@/components/user/following/UserPageFollowing";
 import { commonApiFetch } from "@/services/api/common-api";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
+import { createWaveQueryHandlers } from "@/components/react-query-wrapper/ReactQueryWrapper.waveHandlers";
 
 jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
 jest.mock("@/components/auth/Auth", () => ({
@@ -89,13 +91,14 @@ function setup(
   const rendered = render(view(initial, initialProfileId));
   return {
     ...rendered,
+    client,
     change: (value: Partial<AuthContextType>, profileId = "owner") =>
       rendered.rerender(view(value, profileId)),
   };
 }
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  jest.resetAllMocks();
   jest.mocked(commonApiFetch).mockResolvedValue(response);
 });
 
@@ -118,25 +121,38 @@ it.each([
   }
 );
 
-it("shows API total beside the Following label and opens the list", async () => {
+it("loads only the count until opening the list, then requests its first full page", async () => {
   setup();
   const button = await screen.findByRole("button", {
     name: "Open your following list: 105",
   });
   expect(button).toHaveTextContent("105 Following");
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  expect(commonApiFetch).toHaveBeenCalledTimes(1);
+  expect(commonApiFetch).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      params: { page: "1", page_size: "1" },
+    })
+  );
   fireEvent.click(button);
+  await screen.findByRole("link", { name: "artist" });
   expect(screen.getByRole("list", { name: "Following" })).toBeVisible();
   expect(screen.getByRole("link", { name: "artist" })).toHaveAttribute(
     "href",
     "/artist"
   );
-  expect(commonApiFetch).toHaveBeenCalledTimes(1);
+  expect(commonApiFetch).toHaveBeenCalledTimes(2);
+  expect(commonApiFetch).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      params: { page: "1", page_size: "100" },
+    })
+  );
 });
 
 it("loads the next page with the button when intersection loading is unavailable", async () => {
   jest
     .mocked(commonApiFetch)
+    .mockResolvedValueOnce({ ...response, count: 2, next: true })
     .mockResolvedValueOnce({ ...response, count: 2, next: true })
     .mockResolvedValueOnce({
       ...response,
@@ -148,7 +164,7 @@ it("loads the next page with the button when intersection loading is unavailable
   fireEvent.click(
     await screen.findByRole("button", { name: "Open your following list: 2" })
   );
-  fireEvent.click(screen.getByRole("button", { name: "Load more" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Load more" }));
   await screen.findByRole("link", { name: "second-artist" });
   expect(screen.getAllByRole("listitem")).toHaveLength(2);
   expect(commonApiFetch).toHaveBeenLastCalledWith(
@@ -174,20 +190,20 @@ it("shows loading without a fabricated zero", async () => {
 });
 
 it("shows an error and retries instead of showing an empty list", async () => {
-  jest
-    .mocked(commonApiFetch)
-    .mockRejectedValueOnce(new Error("Offline"))
-    .mockResolvedValueOnce({ ...response, data: [], count: 0 });
+  jest.mocked(commonApiFetch).mockRejectedValue(new Error("Offline"));
   setup();
   fireEvent.click(
     await screen.findByRole("button", {
       name: "Open your following list: Unavailable",
     })
   );
-  expect(screen.getByRole("alert")).toHaveTextContent("Couldn't load");
+  expect(await screen.findByRole("alert")).toHaveTextContent("Couldn't load");
   expect(
     screen.queryByText("You aren't following anyone yet.")
   ).not.toBeInTheDocument();
+  jest
+    .mocked(commonApiFetch)
+    .mockResolvedValue({ ...response, data: [], count: 0 });
   fireEvent.click(screen.getByRole("button", { name: "Retry" }));
   await screen.findByText("You aren't following anyone yet.");
   expect(
@@ -222,6 +238,126 @@ it.each(["account", "signout", "proxy", "token-role", "route"])(
     expect(
       screen.queryByRole("button", { name: /Open your following/ })
     ).not.toBeInTheDocument();
-    await waitFor(() => expect(commonApiFetch).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(commonApiFetch).toHaveBeenCalledTimes(2));
   }
 );
+
+it("reuses a fresh list on reopen without fetching another full page", async () => {
+  setup();
+  const opener = await screen.findByRole("button", {
+    name: "Open your following list: 105",
+  });
+  fireEvent.click(opener);
+  await screen.findByRole("link", { name: "artist" });
+  fireEvent.click(screen.getByRole("button", { name: "Close" }));
+  fireEvent.click(opener);
+  expect(screen.getByRole("link", { name: "artist" })).toBeVisible();
+  expect(commonApiFetch).toHaveBeenCalledTimes(2);
+});
+
+it("refreshes the count after mutations while fetching list pages only when open", async () => {
+  let targets = [target, { ...target, id: "second", handle: "second" }];
+  jest.mocked(commonApiFetch).mockImplementation(async ({ params }) => {
+    const size = Number(params?.["page_size"]);
+    return {
+      data: targets.slice(0, size).map((entry) => ({ target: entry })),
+      count: targets.length,
+      page: 1,
+      next: targets.length > size,
+    };
+  });
+  const { client } = setup();
+  await screen.findByRole("button", { name: "Open your following list: 2" });
+  targets = [...targets, { ...target, id: "third", handle: "third" }];
+  act(() => createWaveQueryHandlers(client).onIdentityFollowChange());
+  const opener = await screen.findByRole("button", {
+    name: "Open your following list: 3",
+  });
+  expect(
+    jest
+      .mocked(commonApiFetch)
+      .mock.calls.map(([args]) => args.params?.["page_size"])
+  ).toEqual(["1", "1"]);
+  fireEvent.click(opener);
+  await screen.findByRole("link", { name: "third" });
+  targets = targets.slice(1);
+  act(() => createWaveQueryHandlers(client).onIdentityFollowChange());
+  await screen.findByRole("button", { name: "Open your following list: 2" });
+  await waitFor(() => expect(screen.getAllByRole("listitem")).toHaveLength(2));
+  expect(
+    screen.queryByRole("link", { name: "artist" })
+  ).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Close" }));
+  jest.mocked(commonApiFetch).mockClear();
+  targets = targets.slice(1);
+  act(() => createWaveQueryHandlers(client).onIdentityFollowChange());
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Open your following list: 1" })
+  );
+  await waitFor(() => expect(screen.getAllByRole("listitem")).toHaveLength(1));
+  expect(
+    jest
+      .mocked(commonApiFetch)
+      .mock.calls.map(([args]) => args.params?.["page_size"])
+  ).toEqual(["1", "100"]);
+  expect(screen.getByRole("link", { name: "third" })).toBeVisible();
+});
+
+it("does not mistake a successful zero count for a successful list request", async () => {
+  jest.mocked(commonApiFetch).mockImplementation(async ({ params }) => {
+    if (params?.["page_size"] === "100") throw new Error("List unavailable");
+    return { ...response, data: [], count: 0 };
+  });
+  setup();
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Open your following list: 0" })
+  );
+  await screen.findByRole("alert");
+  expect(
+    screen.queryByText("You aren't following anyone yet.")
+  ).not.toBeInTheDocument();
+  jest
+    .mocked(commonApiFetch)
+    .mockResolvedValue({ ...response, data: [], count: 0 });
+  fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+  await screen.findByText("You aren't following anyone yet.");
+});
+
+it("cancels both private requests on account change and ignores their late responses", async () => {
+  const pending: ((value: unknown) => void)[] = [];
+  jest
+    .mocked(commonApiFetch)
+    .mockImplementation(() => new Promise((resolve) => pending.push(resolve)));
+  const { change, client, unmount } = setup();
+  fireEvent.click(
+    screen.getByRole("button", { name: "Open your following list: …" })
+  );
+  const oldSignals = jest
+    .mocked(commonApiFetch)
+    .mock.calls.map(([args]) => args.signal);
+  expect(oldSignals).toHaveLength(2);
+  change({ ...auth, connectedProfile: { ...owner, id: "other" } }, "other");
+  expect(oldSignals.every((signal) => signal?.aborted)).toBe(true);
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  await act(async () => {
+    pending[0]?.(response);
+    pending[1]?.(response);
+  });
+  expect(
+    screen.getByRole("button", { name: "Open your following list: …" })
+  ).toBeVisible();
+  await waitFor(() =>
+    expect(
+      client.getQueriesData({
+        queryKey: [QueryKey.IDENTITY_FOLLOWING, "owner"],
+      })
+    ).toEqual([])
+  );
+  await act(async () => {
+    pending[2]?.({ ...response, count: 7 });
+  });
+  await screen.findByRole("button", { name: "Open your following list: 7" });
+  expect(commonApiFetch).toHaveBeenCalledTimes(3);
+  unmount();
+  await waitFor(() => expect(client.getQueryCache().getAll()).toHaveLength(0));
+});

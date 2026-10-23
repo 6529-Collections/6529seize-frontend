@@ -7,7 +7,7 @@ import CommonIntersectionElement from "@/components/utils/CommonIntersectionElem
 import Follower from "@/components/utils/followers/Follower";
 import { getFollowersMessage } from "@/components/utils/followers/followers.messages";
 import Button from "@/components/utils/button/Button";
-import useFollowingList from "@/hooks/useFollowingList";
+import useFollowingList, { useFollowingCount } from "@/hooks/useFollowingList";
 import { formatUserStatsRowInteger } from "../utils/stats/user-stats-row.messages";
 
 export default function UserPageFollowing({
@@ -37,20 +37,24 @@ export default function UserPageFollowing({
 
 function OwnProfileFollowing({ identityId }: { readonly identityId: string }) {
   const [isOpen, setIsOpen] = useState(false);
-  const query = useFollowingList(identityId);
+  const countQuery = useFollowingCount(identityId);
+  const query = useFollowingList(identityId, isOpen);
   const title = getFollowersMessage("followers.following.title");
   let countLabel = getFollowersMessage("followers.following.loadingCount");
-  if (query.count !== undefined) {
-    countLabel = formatUserStatsRowInteger(query.count);
-  } else if (query.isError) {
+  if (countQuery.isError) {
     countLabel = getFollowersMessage("followers.following.unavailableCount");
+  } else if (countQuery.data !== undefined) {
+    countLabel = formatUserStatsRowInteger(countQuery.data);
   }
 
   return (
     <>
       <button
         type="button"
-        onClick={() => setIsOpen(true)}
+        onClick={() => {
+          setIsOpen(true);
+          if (countQuery.isError) void countQuery.refetch();
+        }}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
         aria-label={getFollowersMessage("followers.following.open", {
@@ -100,6 +104,7 @@ function OwnProfileFollowing({ identityId }: { readonly identityId: string }) {
                 size="sm"
                 disabled={query.isFetching}
                 onClick={() => {
+                  if (countQuery.isError) void countQuery.refetch();
                   if (query.isFetchNextPageError) {
                     void query.fetchNextPage({ cancelRefetch: false });
                   } else {

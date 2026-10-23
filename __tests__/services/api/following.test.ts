@@ -69,6 +69,22 @@ describe("outgoing IDENTITY response boundary", () => {
     expect(() => parseFollowingPage({ ...response, ...invalid })).toThrow();
   });
 
+  it.each([1, 100])(
+    "requests page size %i with the same authoritative total",
+    async (pageSize) => {
+      jest.mocked(commonApiFetch).mockResolvedValue(response);
+      const { signal } = new AbortController();
+      await expect(
+        fetchFollowingPage(1, signal, pageSize)
+      ).resolves.toMatchObject({ count: 105 });
+      expect(commonApiFetch).toHaveBeenLastCalledWith({
+        endpoint: "identity-subscriptions/outgoing/IDENTITY",
+        params: { page: "1", page_size: String(pageSize) },
+        signal,
+      });
+    }
+  );
+
   it("uses the shared authenticated fetch and forwards cancellation", async () => {
     jest.mocked(commonApiFetch).mockResolvedValue(response);
     const { signal } = new AbortController();

@@ -100,8 +100,9 @@ at `/{user}`. To create or edit a website, open `/{user}/cms/builder`.
   retain the field-level editing controls.
 - `Followers` opens a modal list; it does not navigate to a followers tab.
 - `Following` shows the total number of identities you follow, including rows
-  not yet loaded. Open it to see profile images, handles, levels, profile links,
-  and follow/unfollow controls. Scroll down or choose `Load more` for more rows.
+  not yet loaded. The list loads when you open it and shows profile images,
+  handles, levels, profile links, and follow/unfollow controls. Scroll down or
+  choose `Load more` for more rows.
 - Both lists use a dialog on desktop and a sheet on phones and in the app.
 - Unfollowing from the Following list removes that row and refreshes the total.
 - On non-touch desktop devices, the artist badge shows a tooltip with activity
@@ -124,7 +125,8 @@ at `/{user}`. To create or edit a website, open `/{user}/cms/builder`.
   successful request confirms zero followers. Loading or failed list requests
   do not show this empty-state message.
 - Following shows a loading indicator while its first request runs. A failed
-  request shows `Unavailable`, not `0`. Open the list and choose `Retry`.
+  count request shows `Unavailable`, not `0`. Opening the list retries the count.
+  If the list fails to load, choose `Retry`.
 - If a later page fails, already loaded identities remain visible with `Retry`.
   An empty Following list says `You aren't following anyone yet.` only after a
   successful request.

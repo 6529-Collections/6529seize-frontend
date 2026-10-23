@@ -42,10 +42,14 @@ export function parseFollowingPage(response: unknown): FollowingPage {
   };
 }
 
-export async function fetchFollowingPage(page: number, signal: AbortSignal) {
+export async function fetchFollowingPage(
+  page: number,
+  signal: AbortSignal,
+  pageSize = 100
+) {
   const response = await commonApiFetch<ApiOutgoingIdentitySubscriptionsPage>({
     endpoint: "identity-subscriptions/outgoing/IDENTITY",
-    params: { page: String(page), page_size: "100" },
+    params: { page: String(page), page_size: String(pageSize) },
     signal,
   });
   return parseFollowingPage(response);
