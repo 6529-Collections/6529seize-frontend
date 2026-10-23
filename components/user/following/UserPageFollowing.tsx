@@ -69,13 +69,12 @@ function OwnProfileFollowing({ identityId }: { readonly identityId: string }) {
         title={title}
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        tall
-        fixedHeight
         tabletModal
         maxWidthClass="md:tw-max-w-md"
+        surfaceClassName="[--mobile-wrapper-dialog-resting-height:32rem] tw-bg-iron-950"
         showScrollbar
       >
-        <div aria-busy={query.isFetching}>
+        <div className="tw-min-h-48" aria-busy={query.isFetching}>
           <ul
             aria-label={title}
             className="tw-mb-0 tw-mt-4 tw-flex tw-list-none tw-flex-col tw-p-0"

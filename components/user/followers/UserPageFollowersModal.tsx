@@ -23,13 +23,12 @@ export default function UserPageFollowersModal({
       title={getFollowersMessage("followers.modal.title")}
       isOpen={isOpen}
       onClose={onClose}
-      tall
-      fixedHeight
       tabletModal
       maxWidthClass="md:tw-max-w-md"
+      surfaceClassName="[--mobile-wrapper-dialog-resting-height:32rem] tw-bg-iron-950"
       showScrollbar
     >
-      <div>
+      <div className="tw-min-h-48">
         <FollowersListWrapper
           followers={followers}
           loading={isFetching}

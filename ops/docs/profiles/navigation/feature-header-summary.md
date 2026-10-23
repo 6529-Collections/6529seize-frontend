@@ -104,6 +104,8 @@ at `/{user}`. To create or edit a website, open `/{user}/cms/builder`.
   handles, levels, profile links, and follow/unfollow controls. Scroll down or
   choose `Load more` for more rows.
 - Both lists use a dialog on desktop and a sheet on phones and in the app.
+  Short lists fit their content with a modest minimum height; longer lists
+  scroll inside a bounded panel.
 - Unfollowing from the Following list removes that row and refreshes the total.
 - On non-touch desktop devices, the artist badge shows a tooltip with activity
   counts.

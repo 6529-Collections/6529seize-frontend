@@ -201,6 +201,11 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
       "href",
       "/following-artist-0"
     );
+    const longPanel = dialog.locator('[id^="headlessui-dialog-panel-"]');
+    await expect
+      .poll(async () => (await longPanel.boundingBox())?.height)
+      .toBeLessThanOrEqual(512);
+    await expect(longPanel).toBeInViewport();
     await expectAxeClean(page, { include: ['[role="dialog"]'] });
     await page.screenshot({ path: testInfo.outputPath("following-open.png") });
     // Scrolling to the footer activates automatic pagination on every surface.
@@ -243,6 +248,120 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
     ).toBeVisible();
     expect(requests).toHaveLength(countBeforeNavigation);
     await expectNoHorizontalOverflow(page);
+  });
+
+  test("keeps short follower and following lists compact", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    const api = getSandboxApiOrigin(baseURL);
+    const people = [identity(0), identity(1)];
+    let followers = people;
+    await page.route(
+      `${api}/api/identity-subscriptions/outgoing/IDENTITY?*`,
+      (route) => {
+        const pageSize = Number(
+          new URL(route.request().url()).searchParams.get("page_size")
+        );
+        return route.fulfill({
+          json: {
+            count: 2,
+            page: 1,
+            next: pageSize < 2,
+            data: people
+              .slice(0, pageSize)
+              .map((target) => ({ target, actions: ["DROP_CREATED"] })),
+          },
+        });
+      }
+    );
+    await page.route(
+      `${api}/api/**identity-subscriptions/incoming/IDENTITY/**`,
+      (route) => {
+        const params = new URL(route.request().url()).searchParams;
+        const page = Number(params.get("page") ?? 1);
+        const pageSize = Number(params.get("page_size"));
+        return route.fulfill({
+          json: {
+            count: followers.length,
+            page,
+            next: page * pageSize < followers.length,
+            data: followers
+              .slice((page - 1) * pageSize, page * pageSize)
+              .map((identity) => ({
+                identity,
+                actions: ["DROP_CREATED"],
+              })),
+          },
+        });
+      }
+    );
+    await page.route(
+      `${api}/api/**identities/following-artist-*/subscriptions`,
+      (route) => route.fulfill({ json: { actions: ["DROP_CREATED"] } })
+    );
+    await openOwnProfile(page);
+    for (const name of ["Followers", "Following"]) {
+      const opener = page.getByRole("button", {
+        name:
+          name === "Followers"
+            ? /Open playwright's followers:/
+            : "Open your following list: 2",
+      });
+      await opener.click();
+      const dialog = page.getByRole("dialog", { name, exact: true });
+      await expect(dialog.getByRole("listitem")).toHaveCount(2);
+      const panel = dialog.locator('[id^="headlessui-dialog-panel-"]');
+      await expect
+        .poll(async () => (await panel.boundingBox())?.height)
+        .toBeGreaterThanOrEqual(240);
+      await expect
+        .poll(async () => (await panel.boundingBox())?.height)
+        .toBeLessThanOrEqual(360);
+      await expect(panel).toBeInViewport();
+      const button = dialog.getByRole("listitem").first().getByRole("button", {
+        name: "Unfollow",
+        exact: true,
+      });
+      await expect(button).toBeEnabled();
+      await button.focus();
+      await expect(button).toBeFocused();
+      await expectNoHorizontalOverflow(page);
+      await expectAxeClean(page, { include: ['[role="dialog"]'] });
+      await page.screenshot({
+        path: testInfo.outputPath(`${name.toLowerCase()}-short.png`),
+      });
+      await dialog.press("Escape");
+      await expect(opener).toBeFocused();
+    }
+    // The existing Followers wrapper must also keep its pagination sentinel
+    // reachable when its dialog uses intrinsic height instead of fixed height.
+    followers = Array.from({ length: 101 }, (_, index) => identity(index));
+    // Start a new page session so the short-list cache remains untouched.
+    await openOwnProfile(page);
+    await page
+      .getByRole("button", { name: /Open playwright's followers:/ })
+      .click();
+    const followersDialog = page.getByRole("dialog", {
+      name: "Followers",
+      exact: true,
+    });
+    await expect(followersDialog.getByRole("listitem")).toHaveCount(100);
+    const followersPanel = followersDialog.locator(
+      '[id^="headlessui-dialog-panel-"]'
+    );
+    await expect
+      .poll(async () => (await followersPanel.boundingBox())?.height)
+      .toBeLessThanOrEqual(512);
+    await followersDialog
+      .getByRole("link", { name: "View following-artist-99's profile" })
+      .scrollIntoViewIfNeeded();
+    await expect(followersDialog.getByRole("listitem")).toHaveCount(101);
+    await expect(
+      followersDialog.getByRole("link", {
+        name: "View following-artist-100's profile",
+      })
+    ).toBeVisible();
   });
 
   test("reports a failed request and recovers to an honest empty state", async ({
