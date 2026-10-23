@@ -8155,7 +8155,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       page,
     }, testInfo) => {
       test.skip(
-        surface === "app" && testInfo.project.name !== "web-mobile-chromium"
+        surface === "app" && testInfo.project.name !== "web-mobile-chromium",
+        "The app simulation uses the mobile viewport."
       );
       const sandbox = await installCompetitionApi(
         page,

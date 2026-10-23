@@ -125,6 +125,10 @@ describe("useWaveDraftPersistence", () => {
       WAVE_ID,
       JSON.stringify({ root: { text: "latest unsaved draft" } })
     );
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+    expect(writeWaveDraftMock).toHaveBeenCalledTimes(1);
   });
 
   it("does not flush a previous profile's editor on teardown", () => {

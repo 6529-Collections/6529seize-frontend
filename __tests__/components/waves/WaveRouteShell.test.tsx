@@ -83,3 +83,15 @@ it.each(["profile-b:self", "profile-a:proxy", null])(
     expect(mockCleanup).toHaveBeenCalledTimes(1);
   }
 );
+
+it("registers current-viewer Chat again after a profile/proxy change", () => {
+  mockPathname = "/waves/wave";
+  mockTab = MyStreamWaveTab.CHAT;
+  const { rerender } = render(<WaveRouteShell waveId="wave" />);
+  expect(mockRegister).toHaveBeenCalledWith("wave", true);
+  mockRegister.mockClear();
+  mockViewer = "profile-a:new-proxy";
+  rerender(<WaveRouteShell waveId="wave" />);
+  expect(mockRegister).toHaveBeenCalledTimes(1);
+  expect(mockRegister).toHaveBeenCalledWith("wave", true);
+});

@@ -123,6 +123,9 @@ describe("useWaveTabNavigation", () => {
     "/waves/wave?tab=chat&competition=rank&drop=drop",
     "/waves/wave?tab=chat&competition=rank&restore=1",
     "/waves/wave/competitions/new?tab=chat",
+    "/waves/wave/?tab=chat&competition=rank",
+    "/waves/wave/competitions/rank/entries/entry?tab=chat",
+    "/waves/wave/competitions/rank?tab=chat&competition=rank",
     "/waves/wave?tab=chat&competition=rank#target",
     "https://example.org/waves/wave?tab=chat&competition=rank",
   ])(

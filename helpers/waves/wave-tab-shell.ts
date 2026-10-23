@@ -21,6 +21,7 @@ function getTabRoute(url: URL) {
   if (section !== "waves" || !waveId || (!isWave && !isCompetition))
     return null;
   const competitionId = selectedId ?? url.searchParams.get("competition");
+  // Mixed path/query selections need the router to resolve their ambiguity.
   if (!competitionId || (selectedId && url.searchParams.has("competition")))
     return null;
   return { waveId, competitionId };
