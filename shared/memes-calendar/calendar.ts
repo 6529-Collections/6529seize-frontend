@@ -186,6 +186,24 @@ function countMintDaysWithin(startUtcDay: Date, endUtcDay: Date): number {
   return c;
 }
 
+function tailOverrideAdjustment(start: number, end: number): number {
+  let adjustment = 0;
+  for (const day of Array.from(SKIPPED_MINT_UTC_DAYS)) {
+    if (day >= start && day <= end && isMintDow(new Date(day).getUTCDay()))
+      adjustment--;
+  }
+  for (const day of Array.from(EXTRA_MINT_UTC_DAYS)) {
+    if (
+      day >= start &&
+      day <= end &&
+      !SKIPPED_MINT_UTC_DAYS.has(day) &&
+      !isMintDow(new Date(day).getUTCDay())
+    )
+      adjustment++;
+  }
+  return adjustment;
+}
+
 /**
  * Count ordinal (Mon/Wed/Fri only) across:
  *  - Historic SZN phases in 2023-2025 (with breaks removed)
@@ -229,7 +247,7 @@ export function getMintNumberForMintDate(date: Date): number {
     for (let i = 0; i <= remainder; i++) {
       if (isMintDow((baseDow + i) % 7)) partial++;
     }
-    total += fullWeeks * 3 + partial;
+    total += fullWeeks * 3 + partial + tailOverrideAdjustment(+tailStart, +day);
   }
 
   return total;

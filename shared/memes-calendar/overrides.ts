@@ -4,14 +4,14 @@ import { CUSTOM_SKIPPED_MINT_DAYS } from './overrides.skipped';
 
 export interface MintDayOverride {
   readonly isoDate: string;
-  readonly note?: string | undefined;
+  readonly note?: string;
 }
 
 export interface MintRescheduleOverride {
   readonly mintNumber: number;
   readonly from: string;
   readonly to: string;
-  readonly note?: string | undefined;
+  readonly note?: string;
 }
 
 const BASE_SKIPPED_MINT_DAYS: readonly MintDayOverride[] = [
