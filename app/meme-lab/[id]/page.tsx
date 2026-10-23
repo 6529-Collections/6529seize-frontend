@@ -81,7 +81,7 @@ export default async function MemeLabPage({
   }
 
   return (
-    <main className={styles["main"]}>
+    <main className={styles["main"]} lang={locale}>
       {resolution.kind === "published" ? (
         <JsonLdScript
           data={buildNftPageJsonLd({
