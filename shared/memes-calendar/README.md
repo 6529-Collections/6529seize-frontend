@@ -35,6 +35,10 @@ and their content still matches that manifest. It preserves unrelated files and
 refuses to discard local edits or accept paths outside the managed directory.
 Calendar numbering applies future skips, extras and reschedules consistently in
 both lookup directions; skips take precedence if both overrides name a day.
+The existing date-based model counts each eligible UTC day once. Moving a mint
+onto an already eligible date removes the source day without adding a second mint
+on the destination day. Scheduling two distinct mints on one day would require a
+different event model; an extra-day override does not provide that behavior.
 
 ## Core renderer compatibility
 
