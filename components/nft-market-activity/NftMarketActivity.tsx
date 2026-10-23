@@ -382,7 +382,7 @@ function EventRow({
   return (
     <tr
       role="row"
-      className="tw-grid tw-grid-cols-2 tw-gap-x-3 tw-gap-y-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-py-4 last:tw-border-b-0 @xs:tw-grid-cols-[3fr_2fr_2fr_3fr] @4xl:tw-table-row @4xl:tw-py-0"
+      className="tw-grid tw-grid-cols-2 tw-gap-x-2 tw-gap-y-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-py-4 last:tw-border-b-0 @xs:tw-grid-cols-[6rem_minmax(0,1fr)_minmax(0,1fr)_6rem] @4xl:tw-table-row @4xl:tw-py-0"
     >
       <td
         role="cell"

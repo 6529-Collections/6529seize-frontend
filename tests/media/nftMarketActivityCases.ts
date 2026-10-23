@@ -14,12 +14,12 @@ export function defineNftMarketActivityTests() {
           data: [
             {
               event_id: "activity-responsive-fixture",
-              kind: "transaction",
-              action: "sale",
+              kind: "market",
+              action: "revalidation",
               occurred_at: "2026-09-10T12:00:00Z",
               observed_at: "2026-09-10T12:00:00Z",
               source: "ethereum",
-              evidence: "chain",
+              evidence: "provider_order_status",
               contract: "0x33FD426905F149f8376e227d0C9D3340AaD17aF1",
               token_id: null,
               collection_slug: "the-memes-by-6529",
@@ -68,6 +68,15 @@ export function defineNftMarketActivityTests() {
     for (const width of [1440, 1280, 900, 390, 360]) {
       await page.setViewportSize({ width, height: 1000 });
       await expectNoHorizontalOverflow(page);
+      expect(
+        await row
+          .getByText("Revalidated", { exact: true })
+          .evaluate((element) => {
+            const range = document.createRange();
+            range.selectNodeContents(element);
+            return range.getClientRects().length;
+          })
+      ).toBe(1);
       expect(
         await row
           .getByRole("cell")
