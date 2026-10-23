@@ -258,7 +258,7 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
   }, testInfo) => {
     const api = getSandboxApiOrigin(baseURL);
     const people = [identity(0), identity(1)];
-    let followers = people;
+    let followers = [identity(0), identity(2)];
     await page.route(
       `${api}/api/identity-subscriptions/outgoing/IDENTITY?*`,
       (route) => {
@@ -300,7 +300,16 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
     );
     await page.route(
       `${api}/api/**identities/following-artist-*/subscriptions`,
-      (route) => route.fulfill({ json: { actions: ["DROP_CREATED"] } })
+      (route) =>
+        route.fulfill({
+          json: {
+            actions: new URL(route.request().url()).pathname.includes(
+              "following-artist-2/"
+            )
+              ? []
+              : ["DROP_CREATED"],
+          },
+        })
     );
     await openOwnProfile(page);
     for (const name of ["Followers", "Following"]) {
@@ -328,6 +337,16 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
         exact: true,
       });
       await expect(button).toBeEnabled();
+      const actions = [button];
+      if (name === "Followers") {
+        actions.push(
+          dialog.getByRole("button", { name: "Follow", exact: true })
+        );
+      }
+      for (const action of actions) {
+        await expect(action).toHaveCSS("font-size", "12px");
+        await expect(action).toHaveCSS("height", "32px");
+      }
       await button.focus();
       await expect(button).toBeFocused();
       await expectNoHorizontalOverflow(page);
