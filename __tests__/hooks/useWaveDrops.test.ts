@@ -232,4 +232,21 @@ describe("useWaveDrops", () => {
 
     expect(refetch).not.toHaveBeenCalled();
   });
+
+  it("leaves ATTACHMENT_STATUS_UPDATE to the app-wide realtime updater", () => {
+    const {
+      useWebSocketMessage,
+    } = require("@/services/websocket/useWebSocketMessage");
+    const subscribedTypes: WsMessageType[] = [];
+    (useWebSocketMessage as jest.Mock).mockImplementation((type) => {
+      subscribedTypes.push(type);
+    });
+
+    renderHook(() => useWaveDrops({ waveId: "wave-1" }));
+
+    expect(subscribedTypes).toContain(WsMessageType.DROP_UPDATE);
+    expect(subscribedTypes).not.toContain(
+      WsMessageType.ATTACHMENT_STATUS_UPDATE
+    );
+  });
 });
