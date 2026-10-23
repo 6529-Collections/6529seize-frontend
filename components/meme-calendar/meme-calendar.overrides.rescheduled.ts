@@ -1,1 +1,1 @@
-export * from "@/shared/memes-calendar/overrides.rescheduled";
+export * from "../../shared/memes-calendar/overrides.rescheduled";

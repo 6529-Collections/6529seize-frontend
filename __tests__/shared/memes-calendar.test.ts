@@ -1,13 +1,13 @@
 import {
   SKIPPED_MINT_UTC_DAYS,
   EXTRA_MINT_UTC_DAYS,
-} from "@/shared/memes-calendar/overrides";
+} from "../../shared/memes-calendar/overrides";
 import {
   dateFromMintNumber,
   getMintNumberForMintDate,
   getMintSchedule,
   mintPhaseWindowsForDay,
-} from "@/shared/memes-calendar";
+} from "../../shared/memes-calendar";
 
 const wallTime = (date: Date) =>
   new Intl.DateTimeFormat("en-GB", {

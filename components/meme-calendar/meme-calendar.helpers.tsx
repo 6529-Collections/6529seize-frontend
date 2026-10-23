@@ -13,8 +13,8 @@ import {
   displayedYearNumberFromIndex,
   displayedSeasonNumberFromIndex,
   getRangeDatesByZoom,
-} from "@/shared/memes-calendar/calendar";
-export * from "@/shared/memes-calendar/calendar";
+} from "../../shared/memes-calendar/calendar";
+export * from "../../shared/memes-calendar/calendar";
 
 // Build a matrix of weeks for a given month (numbers or nulls). Align by UTC weekday.
 export function getMonthWeeks(
