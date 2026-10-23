@@ -1216,7 +1216,7 @@ describe("HeaderSearchModal", () => {
         )
         .every(([options]) => !options.enabled)
     ).toBe(true);
-    let result = await screen.findByRole("button", {
+    await screen.findByRole("button", {
       name: "Open message 42 by alice in Target Wave",
     });
     const resultStatus = document.getElementById(
@@ -1231,7 +1231,7 @@ describe("HeaderSearchModal", () => {
       .getAllByRole("tab", { name: /^Messages/ })
       .forEach((tab) => expect(tab).toHaveAttribute("aria-selected", "true"));
     fireEvent.change(input, { target: { value: "hello" } });
-    result = await screen.findByRole("button", {
+    const result = await screen.findByRole("button", {
       name: "Open message 42 by alice in Target Wave",
     });
     expect(screen.getAllByRole("tab", { name: /^All 0$/ })).toHaveLength(2);
