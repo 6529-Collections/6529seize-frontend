@@ -1212,7 +1212,22 @@ describe("HeaderSearchModal", () => {
         )
         .every(([options]) => !options.enabled)
     ).toBe(true);
-    const result = await screen.findByRole("button", {
+    let result = await screen.findByRole("button", {
+      name: "Open message 42 by alice in Target Wave",
+    });
+    const resultStatus = document.getElementById(
+      "wave-drops-search-results-status"
+    );
+    expect(resultStatus).toHaveAttribute("role", "status");
+    expect(resultStatus).toHaveAttribute("aria-live", "polite");
+    expect(resultStatus).toHaveTextContent("hello");
+    fireEvent.click(screen.getByRole("button", { name: "Clear search" }));
+    expect(input).toHaveValue("");
+    screen
+      .getAllByRole("tab", { name: /^Messages/ })
+      .forEach((tab) => expect(tab).toHaveAttribute("aria-selected", "true"));
+    fireEvent.change(input, { target: { value: "hello" } });
+    result = await screen.findByRole("button", {
       name: "Open message 42 by alice in Target Wave",
     });
     expect(screen.getAllByRole("tab", { name: /^All 0$/ })).toHaveLength(2);

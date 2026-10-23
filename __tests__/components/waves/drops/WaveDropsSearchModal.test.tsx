@@ -191,6 +191,20 @@ describe("WaveDropsSearchModal", () => {
     fireEvent.change(input, { target: { value: "from: ali" } });
     fireEvent.keyDown(input, { key: "Enter" });
     expect(input).toHaveFocus();
+    fireEvent.change(input, { target: { value: "modern" } });
+    fireEvent.click(screen.getByRole("button", { name: "Clear search" }));
+    expect(input).toHaveValue("");
+    expect(
+      screen.getByRole("button", { name: "Remove wave filter Design Wave" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Remove author filter alice" })
+    ).toBeInTheDocument();
+    expect(useWaveDropsSearch.mock.calls.at(-1)?.[0]).toMatchObject({
+      term: "",
+      authorId: "author-1",
+      enabled: true,
+    });
     fireEvent.click(
       screen.getByRole("button", { name: "Remove author filter alice" })
     );
