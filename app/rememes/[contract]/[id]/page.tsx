@@ -32,62 +32,11 @@ const getNonEmptyText = (
   return normalized.length > 0 ? normalized : undefined;
 };
 
-const getRememeCollectionName = (rememe?: Rememe): string =>
-  getNonEmptyText(rememe?.contract_opensea_data?.collectionName) ?? "ReMemes";
-
 const getRememeName = (rememe: Rememe): string | undefined => {
   const metadata = rememe.metadata as { name?: unknown };
   return typeof metadata.name === "string"
     ? getNonEmptyText(metadata.name)
     : undefined;
-};
-
-const getNonEmptyRecordText = (
-  record: Record<string, unknown>,
-  key: string
-): string | undefined => {
-  const value = record[key];
-  return typeof value === "string" ? getNonEmptyText(value) : undefined;
-};
-
-const getRememeMediaImage = (media: unknown): string | undefined => {
-  if (Array.isArray(media)) {
-    return media.find((item): item is { gateway: string } => {
-      if (item === null || item === undefined || typeof item !== "object") {
-        return false;
-      }
-      const gateway = (item as Record<string, unknown>)["gateway"];
-      return typeof gateway === "string" && gateway.trim().length > 0;
-    })?.gateway;
-  }
-
-  if (media === null || media === undefined || typeof media !== "object") {
-    return undefined;
-  }
-
-  const mediaRecord = media as Record<string, unknown>;
-  return (
-    getNonEmptyRecordText(mediaRecord, "thumbnailUrl") ??
-    getNonEmptyRecordText(mediaRecord, "cachedUrl") ??
-    getNonEmptyRecordText(mediaRecord, "pngUrl") ??
-    getNonEmptyRecordText(mediaRecord, "originalUrl")
-  );
-};
-
-const getRememeImage = (rememe?: Rememe): string | undefined => {
-  if (!rememe) {
-    return undefined;
-  }
-
-  const mediaImage = getRememeMediaImage(rememe.media);
-
-  return (
-    getNonEmptyText(rememe.s3_image_scaled) ??
-    getNonEmptyText(rememe.s3_image_original) ??
-    getNonEmptyText(rememe.image) ??
-    mediaImage ??
-    getNonEmptyText(rememe.contract_opensea_data?.imageUrl)
-  );
 };
 
 async function getRouteLocale(searchParams: RememeRouteProps["searchParams"]) {
@@ -116,7 +65,6 @@ export async function generateMetadata({
   const locale = await getRouteLocale(searchParams);
   const rememesTitle = t(locale, "rememes.title");
   let name = `${formatAddress(contract)} #${id}`;
-  let rememe: Rememe | undefined;
 
   try {
     const headers = await getAppCommonHeaders();
@@ -131,8 +79,7 @@ export async function generateMetadata({
 
     const firstRememe = response?.data?.[0];
     if (firstRememe !== undefined) {
-      rememe = firstRememe;
-      const rememeName = getRememeName(rememe);
+      const rememeName = getRememeName(firstRememe);
       if (rememeName !== undefined) {
         name = rememeName;
       }
@@ -144,21 +91,11 @@ export async function generateMetadata({
     );
   }
 
-  const collectionName = getRememeCollectionName(rememe);
-
   return getAppMetadata(
     getLargeSocialCardMetadata({
       title: t(locale, "rememes.detail.documentTitle", { name }),
       description: rememesTitle,
-      ogImage: getNftSocialCardImagePath({
-        badge: "ReMemes",
-        collection: collectionName,
-        contract,
-        id,
-        image: getRememeImage(rememe),
-        subtitle: `${collectionName} #${id} | ${rememesTitle}`,
-        title: name,
-      }),
+      ogImage: getNftSocialCardImagePath({ contract, id }),
       ogImageAlt: `${name} ReMeme social card`,
     }),
     { canonicalPath: getRememeDetailCanonicalPath({ contract, id, locale }) }
